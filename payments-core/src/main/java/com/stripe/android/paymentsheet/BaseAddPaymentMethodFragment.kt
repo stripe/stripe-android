@@ -24,6 +24,7 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
 import com.stripe.android.paymentsheet.paymentdatacollection.CardDataCollectionFragment
 import com.stripe.android.paymentsheet.paymentdatacollection.ComposeFormDataCollectionFragment
+import com.stripe.android.paymentsheet.paymentdatacollection.ComposeFragmentArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.TransformToPaymentMethodCreateParams
 import com.stripe.android.paymentsheet.ui.AddPaymentMethodsFragmentFactory
 import com.stripe.android.paymentsheet.ui.AnimationConstants
@@ -151,24 +152,20 @@ internal abstract class BaseAddPaymentMethodFragment(
         selectedPaymentMethod = paymentMethod
 
         val args = requireArguments()
-        args.putString(
-            ComposeFormDataCollectionFragment.EXTRA_PAYMENT_METHOD,
-            paymentMethod.name
-        )
-        args.putString(
-            ComposeFormDataCollectionFragment.EXTRA_MERCHANT_NAME,
-            sheetViewModel.merchantName
-        )
-        addSaveForFutureUseArguments(
-            args,
-            isCustomer = sheetViewModel.customerConfig != null,
-            saveForFutureUse = (
-                sheetViewModel.stripeIntent.value is SetupIntent ||
-                    (
-                        (sheetViewModel.stripeIntent.value as? PaymentIntent)
-                            ?.setupFutureUsage == StripeIntent.Usage.OffSession
-                        )
-                )
+        args.putParcelable(
+            ComposeFormDataCollectionFragment.EXTRA_CONFIG,
+            getSaveForFutureUseArguments(
+                supportedPaymentMethodName = paymentMethod.name,
+                merchantName = sheetViewModel.merchantName,
+                isCustomer = sheetViewModel.customerConfig != null,
+                saveForFutureUse = (
+                    sheetViewModel.stripeIntent.value is SetupIntent ||
+                        (
+                            (sheetViewModel.stripeIntent.value as? PaymentIntent)
+                                ?.setupFutureUsage == StripeIntent.Usage.OffSession
+                            )
+                    )
+            )
         )
 
         childFragmentManager.commit {
@@ -216,11 +213,12 @@ internal abstract class BaseAddPaymentMethodFragment(
         }
 
         @VisibleForTesting
-        internal fun addSaveForFutureUseArguments(
-            args: Bundle,
+        internal fun getSaveForFutureUseArguments(
             isCustomer: Boolean,
-            saveForFutureUse: Boolean
-        ) {
+            saveForFutureUse: Boolean,
+            supportedPaymentMethodName: String,
+            merchantName: String
+        ): ComposeFragmentArguments {
             var saveForFutureUseValue = true
             var saveForFutureUseVisible = true
             if (!isCustomer) {
@@ -234,13 +232,11 @@ internal abstract class BaseAddPaymentMethodFragment(
                 saveForFutureUseVisible = false
                 saveForFutureUseValue = true
             }
-            args.putBoolean(
-                ComposeFormDataCollectionFragment.EXTRA_SAVE_FOR_FUTURE_USE_VISIBILITY,
-                saveForFutureUseVisible
-            )
-            args.putBoolean(
-                ComposeFormDataCollectionFragment.EXTRA_SAVE_FOR_FUTURE_USE_VALUE,
-                saveForFutureUseValue
+            return ComposeFragmentArguments(
+                supportedPaymentMethodName = supportedPaymentMethodName,
+                merchantName = merchantName,
+                saveForFutureUseInitialVisibility = saveForFutureUseVisible,
+                saveForFutureUseInitialValue = saveForFutureUseValue
             )
         }
     }

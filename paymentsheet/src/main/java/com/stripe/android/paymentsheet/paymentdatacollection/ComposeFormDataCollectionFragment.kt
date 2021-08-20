@@ -26,8 +26,8 @@ import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
 class ComposeFormDataCollectionFragment : Fragment() {
     val formSpec by lazy {
         requireNotNull(
-            requireArguments().getString(EXTRA_PAYMENT_METHOD)?.let {
-                SupportedPaymentMethod.valueOf(it).formSpec
+            requireArguments().getParcelable<ComposeFragmentArguments>(EXTRA_CONFIG)?.let {
+                SupportedPaymentMethod.valueOf(it.supportedPaymentMethodName).formSpec
             }
         )
     }
@@ -36,13 +36,11 @@ class ComposeFormDataCollectionFragment : Fragment() {
         FormViewModel.Factory(
             resources,
             formSpec.layout,
-            requireArguments().getBoolean(
-                EXTRA_SAVE_FOR_FUTURE_USE_VALUE
-            ),
-            requireArguments().getBoolean(
-                EXTRA_SAVE_FOR_FUTURE_USE_VISIBILITY
-            ),
-            requireNotNull(requireArguments().getString(EXTRA_MERCHANT_NAME)),
+            requireNotNull(
+                requireArguments().getParcelable(
+                    EXTRA_CONFIG
+                )
+            )
         )
     }
 
@@ -76,11 +74,6 @@ class ComposeFormDataCollectionFragment : Fragment() {
     }
 
     companion object {
-        const val EXTRA_PAYMENT_METHOD = "com.stripe.android.paymentsheet.extra_payment_method"
-        const val EXTRA_SAVE_FOR_FUTURE_USE_VISIBILITY =
-            "com.stripe.android.paymentsheet.extra_save_for_future_use_visibility"
-        const val EXTRA_SAVE_FOR_FUTURE_USE_VALUE =
-            "com.stripe.android.paymentsheet.extra_save_for_future_use_value"
-        const val EXTRA_MERCHANT_NAME = "com.stripe.android.paymentsheet.extra_merchant_name"
+        const val EXTRA_CONFIG = "com.stripe.android.paymentsheet.extra_config"
     }
 }

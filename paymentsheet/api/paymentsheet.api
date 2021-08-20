@@ -42,11 +42,11 @@ public final class com/stripe/android/paymentsheet/forms/FormViewModel : android
 }
 
 public final class com/stripe/android/paymentsheet/forms/FormViewModel_Factory : dagger/internal/Factory {
-	public fun <init> (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)V
-	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/paymentsheet/forms/FormViewModel_Factory;
+	public fun <init> (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)V
+	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/paymentsheet/forms/FormViewModel_Factory;
 	public fun get ()Lcom/stripe/android/paymentsheet/forms/FormViewModel;
 	public synthetic fun get ()Ljava/lang/Object;
-	public static fun newInstance (Lcom/stripe/android/paymentsheet/specifications/LayoutSpec;ZZLjava/lang/String;Lcom/stripe/android/paymentsheet/specifications/ResourceRepository;)Lcom/stripe/android/paymentsheet/forms/FormViewModel;
+	public static fun newInstance (Lcom/stripe/android/paymentsheet/specifications/LayoutSpec;Lcom/stripe/android/paymentsheet/paymentdatacollection/ComposeFragmentArguments;Lcom/stripe/android/paymentsheet/specifications/ResourceRepository;)Lcom/stripe/android/paymentsheet/forms/FormViewModel;
 }
 
 public final class com/stripe/android/paymentsheet/injection/DaggerFormViewModelComponent : com/stripe/android/paymentsheet/injection/FormViewModelComponent {
@@ -81,10 +81,7 @@ public final class com/stripe/android/paymentsheet/model/SupportedPaymentMethod$
 public final class com/stripe/android/paymentsheet/paymentdatacollection/ComposeFormDataCollectionFragment : androidx/fragment/app/Fragment {
 	public static final field $stable I
 	public static final field Companion Lcom/stripe/android/paymentsheet/paymentdatacollection/ComposeFormDataCollectionFragment$Companion;
-	public static final field EXTRA_MERCHANT_NAME Ljava/lang/String;
-	public static final field EXTRA_PAYMENT_METHOD Ljava/lang/String;
-	public static final field EXTRA_SAVE_FOR_FUTURE_USE_VALUE Ljava/lang/String;
-	public static final field EXTRA_SAVE_FOR_FUTURE_USE_VISIBILITY Ljava/lang/String;
+	public static final field EXTRA_CONFIG Ljava/lang/String;
 	public fun <init> ()V
 	public final fun getFormSpec ()Lcom/stripe/android/paymentsheet/specifications/FormSpec;
 	public final fun getFormViewModel ()Lcom/stripe/android/paymentsheet/forms/FormViewModel;
@@ -93,6 +90,31 @@ public final class com/stripe/android/paymentsheet/paymentdatacollection/Compose
 }
 
 public final class com/stripe/android/paymentsheet/paymentdatacollection/ComposeFormDataCollectionFragment$Companion {
+}
+
+public final class com/stripe/android/paymentsheet/paymentdatacollection/ComposeFragmentArguments : android/os/Parcelable {
+	public static final field $stable I
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public fun <init> (Ljava/lang/String;ZZLjava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Z
+	public final fun component3 ()Z
+	public final fun component4 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;ZZLjava/lang/String;)Lcom/stripe/android/paymentsheet/paymentdatacollection/ComposeFragmentArguments;
+	public static synthetic fun copy$default (Lcom/stripe/android/paymentsheet/paymentdatacollection/ComposeFragmentArguments;Ljava/lang/String;ZZLjava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/paymentsheet/paymentdatacollection/ComposeFragmentArguments;
+	public fun describeContents ()I
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getMerchantName ()Ljava/lang/String;
+	public final fun getSaveForFutureUseInitialValue ()Z
+	public final fun getSaveForFutureUseInitialVisibility ()Z
+	public final fun getSupportedPaymentMethodName ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+	public fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public final class com/stripe/android/paymentsheet/paymentdatacollection/ComposeFragmentArgumentsKt {
+	public static final fun toFormFieldValues (Lcom/stripe/android/paymentsheet/paymentdatacollection/ComposeFragmentArguments;)Lcom/stripe/android/paymentsheet/forms/FormFieldValues;
 }
 
 public final class com/stripe/android/paymentsheet/specifications/BankRepository_Factory : dagger/internal/Factory {
