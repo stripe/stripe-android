@@ -18,12 +18,12 @@ internal val idealParamKey: MutableMap<String, Any?> = mutableMapOf(
 )
 
 internal val idealNameSection = SectionSpec(
-    IdentifierSpec.Generic("name section"),
+    IdentifierSpec.Generic("name_section"),
     SectionFieldSpec.NAME
 )
 internal val idealEmailSection = SectionSpec(IdentifierSpec.Email, Email)
 internal val idealBankSection = SectionSpec(
-    IdentifierSpec.Generic("bank section"),
+    IdentifierSpec.Generic("bank_section"),
     SectionFieldSpec.BankDropdown(
         IdentifierSpec.Generic("bank"),
         R.string.stripe_paymentsheet_ideal_bank,

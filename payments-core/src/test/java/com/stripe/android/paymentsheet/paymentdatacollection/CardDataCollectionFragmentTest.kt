@@ -360,29 +360,6 @@ class CardDataCollectionFragmentTest {
     }
 
     @Test
-    fun `when Canada postal code is invalid and losing focus then billing error is visible with correct error message`() {
-        createFragment { _, viewBinding ->
-            assertThat(viewBinding.cardErrors.isVisible)
-                .isFalse()
-
-            viewBinding.billingAddress.countryLayout.selectedCountryCode = CountryCode.CA
-            viewBinding.billingAddress.postalCodeView.setText("!@#")
-            requireNotNull(
-                viewBinding.billingAddress.postalCodeView.getParentOnFocusChangeListener()
-            ).onFocusChange(
-                viewBinding.billingAddress.postalCodeView,
-                false
-            )
-            idleLooper()
-
-            assertThat(viewBinding.billingErrors.text.toString())
-                .isEqualTo(context.getString(R.string.address_postal_code_invalid))
-            assertThat(viewBinding.billingErrors.isVisible)
-                .isTrue()
-        }
-    }
-
-    @Test
     fun `when Canada postal code is valid and losing focus then billing error is invisible`() {
         createFragment { _, viewBinding ->
             assertThat(viewBinding.cardErrors.isVisible)

@@ -19,13 +19,13 @@ internal val sofortParamKey: MutableMap<String, Any?> = mutableMapOf(
 )
 
 internal val sofortNameSection = SectionSpec(
-    IdentifierSpec.Generic("name section"),
+    IdentifierSpec.Generic("name_section"),
     SectionFieldSpec.NAME
 )
-internal val sofortEmailSection = SectionSpec(IdentifierSpec.Generic("email section"), Email)
+internal val sofortEmailSection = SectionSpec(IdentifierSpec.Generic("email_section"), Email)
 internal val sofortCountrySection =
     SectionSpec(
-        IdentifierSpec.Generic("country section"),
+        IdentifierSpec.Generic("country_section"),
         Country(setOf("AT", "BE", "DE", "ES", "IT", "NL"))
     )
 internal val sofortMandate = MandateTextSpec(

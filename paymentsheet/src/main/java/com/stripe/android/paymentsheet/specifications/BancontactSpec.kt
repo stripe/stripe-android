@@ -10,11 +10,11 @@ internal val bancontactParamKey: MutableMap<String, Any?> = mutableMapOf(
 )
 
 internal val bancontactNameSection = FormItemSpec.SectionSpec(
-    IdentifierSpec.Generic("name section"),
+    IdentifierSpec.Generic("name_section"),
     SectionFieldSpec.NAME
 )
 internal val bancontactEmailSection =
-    FormItemSpec.SectionSpec(IdentifierSpec.Generic("email section"), SectionFieldSpec.Email)
+    FormItemSpec.SectionSpec(IdentifierSpec.Generic("email_section"), SectionFieldSpec.Email)
 internal val bancontactMandate = FormItemSpec.MandateTextSpec(
     IdentifierSpec.Generic("mandate"),
     R.string.stripe_paymentsheet_sepa_mandate,

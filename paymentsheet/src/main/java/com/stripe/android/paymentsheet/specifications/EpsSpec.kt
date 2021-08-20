@@ -13,12 +13,12 @@ internal val epsParamKey: MutableMap<String, Any?> = mutableMapOf(
 )
 
 internal val epsNameSection = FormItemSpec.SectionSpec(
-    IdentifierSpec.Name,
+    IdentifierSpec.Generic("name_section"),
     SectionFieldSpec.NAME
 )
 internal val epsBankSection =
     FormItemSpec.SectionSpec(
-        IdentifierSpec.Generic("bank section"),
+        IdentifierSpec.Generic("bank_section"),
         SectionFieldSpec.BankDropdown(
             IdentifierSpec.Generic("bank"),
             R.string.stripe_paymentsheet_eps_bank,

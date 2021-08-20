@@ -18,15 +18,15 @@ internal val sepaDebitParamKey: MutableMap<String, Any?> = mutableMapOf(
 )
 
 internal val sepaDebitNameSection = SectionSpec(
-    IdentifierSpec.Generic("name section"),
+    IdentifierSpec.Generic("name _ection"),
     SectionFieldSpec.NAME
 )
 internal val sepaDebitEmailSection = SectionSpec(
-    IdentifierSpec.Generic("email section"),
+    IdentifierSpec.Generic("email_section"),
     Email
 )
 internal val sepaDebitIbanSection = SectionSpec(
-    IdentifierSpec.Generic("iban section"),
+    IdentifierSpec.Generic("iban_section"),
     Iban
 )
 internal val sepaDebitMandate = MandateTextSpec(

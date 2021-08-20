@@ -33,9 +33,9 @@ import org.robolectric.shadows.ShadowLooper
 @RunWith(RobolectricTestRunner::class)
 internal class FormViewModelTest {
     private val emailSection =
-        FormItemSpec.SectionSpec(IdentifierSpec.Generic("emailSection"), Email)
+        FormItemSpec.SectionSpec(IdentifierSpec.Generic("email_section"), Email)
     private val countrySection = FormItemSpec.SectionSpec(
-        IdentifierSpec.Generic("countrySection"),
+        IdentifierSpec.Generic("country_section"),
         Country()
     )
 
@@ -143,7 +143,7 @@ internal class FormViewModelTest {
 
         ShadowLooper.runUiThreadTasksIncludingDelayedTasks()
 
-        assertThat(values[1][0]).isEqualTo(IdentifierSpec.Generic("emailSection"))
+        assertThat(values[1][0]).isEqualTo(IdentifierSpec.Generic("email_section"))
         assertThat(values[1][1]).isEqualTo(IdentifierSpec.Email)
     }
 
