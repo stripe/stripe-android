@@ -14,7 +14,7 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.shadows.ShadowLooper
 
 @RunWith(RobolectricTestRunner::class)
-class AddresControllerTest {
+class AddressControllerTest {
     private val emailController = TextFieldController(
         EmailConfig()
     )
