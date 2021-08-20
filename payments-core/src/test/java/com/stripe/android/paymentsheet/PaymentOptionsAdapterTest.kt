@@ -22,6 +22,8 @@ class PaymentOptionsAdapterTest {
     )
 
     private val paymentSelections = mutableSetOf<PaymentSelection>()
+    private val paymentMethodsDeleted =
+        mutableListOf<PaymentOptionsAdapter.Item.SavedPaymentMethod>()
     private var addCardClicks = 0
 
     @Test
@@ -156,6 +158,45 @@ class PaymentOptionsAdapterTest {
     }
 
     @Test
+    fun `when adapter is editing then non-deletable items should be disabled`() {
+        val adapter = createConfiguredAdapter(
+            CONFIG.copy(
+                isGooglePayReady = true,
+                savedSelection = SavedSelection.PaymentMethod(CONFIG.paymentMethods[1].id!!)
+            )
+        )
+        adapter.toggleEditing()
+
+        val googlePayViewHolder = adapter.onCreateViewHolder(
+            FrameLayout(context),
+            adapter.getItemViewType(1)
+        )
+        adapter.onBindViewHolder(googlePayViewHolder, 1)
+
+        assertThat(googlePayViewHolder.itemView.isEnabled)
+            .isFalse()
+
+        val addCardViewHolder = adapter.onCreateViewHolder(
+            FrameLayout(context),
+            adapter.getItemViewType(0)
+        )
+        adapter.onBindViewHolder(addCardViewHolder, 0)
+
+        assertThat(addCardViewHolder.itemView.isEnabled)
+            .isFalse()
+
+        val cardViewHolder = adapter.createViewHolder(
+            FrameLayout(context),
+            adapter.getItemViewType(3)
+        )
+        adapter.onBindViewHolder(cardViewHolder, 3)
+
+        // Saved payment methods should still look enabled
+        assertThat(cardViewHolder.itemView.isEnabled)
+            .isTrue()
+    }
+
+    @Test
     fun `initial selected item should be Google Pay`() {
         val adapter = createConfiguredAdapter(
             CONFIG.copy(
@@ -251,6 +292,9 @@ class PaymentOptionsAdapterTest {
             canClickSelectedItem = false,
             paymentOptionSelectedListener = { paymentSelection, _ ->
                 paymentSelections.add(paymentSelection)
+            },
+            paymentMethodDeleteListener = {
+                paymentMethodsDeleted.add(it)
             },
             addCardClickListener = {
                 addCardClicks++

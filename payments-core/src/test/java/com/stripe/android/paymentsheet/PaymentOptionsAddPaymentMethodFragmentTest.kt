@@ -12,7 +12,7 @@ import com.stripe.android.databinding.FragmentPaymentsheetAddPaymentMethodBindin
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.payments.core.injection.Injectable
 import com.stripe.android.payments.core.injection.Injector
-import com.stripe.android.payments.core.injection.WeakSetInjectorRegistry
+import com.stripe.android.payments.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.FragmentConfigFixtures
@@ -32,19 +32,12 @@ class PaymentOptionsAddPaymentMethodFragmentTest {
     private val eventReporter = mock<EventReporter>()
 
     private val testInjector: Injector = object : Injector {
-        private var injectorKey: Int? = null
-
         override fun inject(injectable: Injectable) {
             val factory = (injectable as PaymentOptionsViewModel.Factory)
             factory.eventReporter = eventReporter
+            factory.customerRepository = FakeCustomerRepository()
             factory.workContext = TestCoroutineDispatcher()
             factory.prefsRepositoryFactory = { mock() }
-        }
-
-        override fun getInjectorKey() = injectorKey
-
-        override fun setInjectorKey(injectorKey: Int) {
-            this.injectorKey = injectorKey
         }
     }
 
@@ -54,12 +47,12 @@ class PaymentOptionsAddPaymentMethodFragmentTest {
             ApplicationProvider.getApplicationContext(),
             ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
         )
-        WeakSetInjectorRegistry.register(testInjector, MOCK_INJECTOR_KEY)
+        WeakMapInjectorRegistry.register(testInjector, MOCK_INJECTOR_KEY)
     }
 
     @After
     fun cleanUp() {
-        WeakSetInjectorRegistry.staticCacheSet.clear()
+        WeakMapInjectorRegistry.staticCacheMap.clear()
     }
 
     @Test

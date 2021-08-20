@@ -28,7 +28,6 @@ import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodFixtures
-import com.stripe.android.networking.ApiRequest
 import com.stripe.android.payments.DefaultReturnUrl
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.payments.PaymentFlowResultProcessor
@@ -38,6 +37,7 @@ import com.stripe.android.paymentsheet.model.FragmentConfigFixtures
 import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
+import com.stripe.android.paymentsheet.model.StripeIntentValidator
 import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
 import com.stripe.android.paymentsheet.ui.PrimaryButtonAnimator
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
@@ -154,6 +154,27 @@ internal class PaymentSheetActivityTest {
             assertThat(activity.viewBinding.buyButton.isVisible).isTrue()
             assertThat(activity.viewBinding.buyButton.isEnabled).isFalse()
             assertThat(activity.viewBinding.googlePayButton.isVisible).isFalse()
+        }
+    }
+
+    @Test
+    fun `disables primary button when editing`() {
+        val scenario = activityScenario(viewModel)
+        scenario.launch(intent).onActivity { activity ->
+            // wait for bottom sheet to animate in
+            idleLooper()
+
+            assertThat(activity.viewBinding.buyButton.isEnabled)
+                .isTrue()
+            assertThat(activity.viewBinding.googlePayButton.isEnabled)
+                .isTrue()
+
+            viewModel.setEditing(true)
+
+            assertThat(activity.viewBinding.buyButton.isEnabled)
+                .isFalse()
+            assertThat(activity.viewBinding.googlePayButton.isEnabled)
+                .isFalse()
         }
     }
 
@@ -638,8 +659,8 @@ internal class PaymentSheetActivityTest {
                 scenario.getResult().resultCode,
                 scenario.getResult().resultData
             )
-        ).isEqualTo(
-            PaymentSheetResult.Completed
+        ).isInstanceOf(
+            PaymentSheetResult.Failed::class.java
         )
     }
 
@@ -717,21 +738,20 @@ internal class PaymentSheetActivityTest {
             ApplicationProvider.getApplicationContext(),
             PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY,
             eventReporter,
-            ApiRequest.Options(
-                apiKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
-            ),
+            { PaymentConfiguration(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY) },
             StripeIntentRepository.Static(paymentIntent),
+            StripeIntentValidator(),
             FakeCustomerRepository(paymentMethods),
             { paymentFlowResultProcessor },
             FakePrefsRepository(),
-            Logger.noop(),
-            testDispatcher,
             StripePaymentController(
                 ApplicationProvider.getApplicationContext(),
                 { ApiKeyFixtures.FAKE_PUBLISHABLE_KEY },
                 mock()
             ),
-            googlePayPaymentMethodLauncherFactory
+            googlePayPaymentMethodLauncherFactory,
+            Logger.noop(),
+            testDispatcher
         )
     }
 

@@ -38,6 +38,7 @@ internal class PaymentOptionsViewModelTest {
 
     private val eventReporter = mock<EventReporter>()
     private val prefsRepository = FakePrefsRepository()
+    private val customerRepository = FakeCustomerRepository()
     private val paymentMethodRepository =
         FakeCustomerRepository(PAYMENT_METHOD_REPOSITORY_PARAMS)
 
@@ -45,6 +46,7 @@ internal class PaymentOptionsViewModelTest {
         args = PAYMENT_OPTION_CONTRACT_ARGS,
         prefsRepository = prefsRepository,
         eventReporter = eventReporter,
+        customerRepository = customerRepository,
         workContext = testDispatcher,
         application = ApplicationProvider.getApplicationContext()
     )
@@ -128,6 +130,7 @@ internal class PaymentOptionsViewModelTest {
             args = PAYMENT_OPTION_CONTRACT_ARGS.copy(newCard = null),
             prefsRepository = FakePrefsRepository(),
             eventReporter = eventReporter,
+            customerRepository = customerRepository,
             workContext = testDispatcher,
             application = ApplicationProvider.getApplicationContext()
         )
@@ -154,6 +157,7 @@ internal class PaymentOptionsViewModelTest {
             ),
             prefsRepository = FakePrefsRepository(),
             eventReporter = eventReporter,
+            customerRepository = customerRepository,
             workContext = testDispatcher,
             application = ApplicationProvider.getApplicationContext()
         )
@@ -180,6 +184,7 @@ internal class PaymentOptionsViewModelTest {
             ),
             prefsRepository = FakePrefsRepository(),
             eventReporter = eventReporter,
+            customerRepository = customerRepository,
             workContext = testDispatcher,
             application = ApplicationProvider.getApplicationContext()
         )

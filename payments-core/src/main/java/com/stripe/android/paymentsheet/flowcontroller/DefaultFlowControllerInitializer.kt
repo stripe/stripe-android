@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.flowcontroller
 
+import com.stripe.android.Logger
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.model.PaymentMethod
@@ -8,7 +9,6 @@ import com.stripe.android.payments.core.injection.IOContext
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.model.ClientSecret
-import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.StripeIntentValidator
@@ -25,23 +25,18 @@ import kotlin.coroutines.CoroutineContext
 internal class DefaultFlowControllerInitializer @Inject constructor(
     private val prefsRepositoryFactory: @JvmSuppressWildcards (PaymentSheet.CustomerConfiguration?) -> PrefsRepository,
     private val googlePayRepositoryFactory: @JvmSuppressWildcards (GooglePayEnvironment) -> GooglePayRepository,
+    private val stripeIntentRepository: StripeIntentRepository,
+    private val stripeIntentValidator: StripeIntentValidator,
+    private val customerRepository: CustomerRepository,
+    private val logger: Logger,
     @IOContext private val workContext: CoroutineContext
 ) : FlowControllerInitializer {
-    private val stripeIntentValidator = StripeIntentValidator()
-
-    private lateinit var stripeIntentRepository: StripeIntentRepository
-    private lateinit var customerRepository: CustomerRepository
 
     override suspend fun init(
         clientSecret: ClientSecret,
-        stripeIntentRepository: StripeIntentRepository,
-        customerRepository: CustomerRepository,
         paymentSheetConfiguration: PaymentSheet.Configuration?
     ) = withContext(workContext) {
-        this@DefaultFlowControllerInitializer.stripeIntentRepository = stripeIntentRepository
-        this@DefaultFlowControllerInitializer.customerRepository = customerRepository
-
-        val isGooglePayReady = isGooglePayReady(clientSecret, paymentSheetConfiguration)
+        val isGooglePayReady = isGooglePayReady(paymentSheetConfiguration)
         paymentSheetConfiguration?.customer?.let { customerConfig ->
             createWithCustomer(
                 clientSecret,
@@ -57,20 +52,18 @@ internal class DefaultFlowControllerInitializer @Inject constructor(
     }
 
     private suspend fun isGooglePayReady(
-        clientSecret: ClientSecret,
         paymentSheetConfiguration: PaymentSheet.Configuration?
     ): Boolean {
-        return clientSecret is PaymentIntentClientSecret &&
-            paymentSheetConfiguration?.googlePay?.environment?.let { environment ->
-                googlePayRepositoryFactory(
-                    when (environment) {
-                        PaymentSheet.GooglePayConfiguration.Environment.Production ->
-                            GooglePayEnvironment.Production
-                        PaymentSheet.GooglePayConfiguration.Environment.Test ->
-                            GooglePayEnvironment.Test
-                    }
-                )
-            }?.isReady()?.first() ?: false
+        return paymentSheetConfiguration?.googlePay?.environment?.let { environment ->
+            googlePayRepositoryFactory(
+                when (environment) {
+                    PaymentSheet.GooglePayConfiguration.Environment.Production ->
+                        GooglePayEnvironment.Production
+                    PaymentSheet.GooglePayConfiguration.Environment.Test ->
+                        GooglePayEnvironment.Test
+                }
+            )
+        }?.isReady()?.first() ?: false
     }
 
     private suspend fun createWithCustomer(
@@ -113,6 +106,7 @@ internal class DefaultFlowControllerInitializer @Inject constructor(
                 }
             },
             onFailure = {
+                logger.error("Failure initializing FlowController", it)
                 FlowControllerInitializer.InitResult.Failure(it)
             }
         )
@@ -151,6 +145,7 @@ internal class DefaultFlowControllerInitializer @Inject constructor(
                 )
             },
             onFailure = {
+                logger.error("Failure initializing FlowController", it)
                 FlowControllerInitializer.InitResult.Failure(it)
             }
         )

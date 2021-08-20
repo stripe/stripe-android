@@ -13,6 +13,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.distinctUntilChanged
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.Logger
+import com.stripe.android.PaymentConfiguration
 import com.stripe.android.PaymentController
 import com.stripe.android.R
 import com.stripe.android.StripeIntentResult
@@ -44,6 +45,7 @@ import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.view.AuthActivityStarterHost
+import dagger.Lazy
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -74,20 +76,22 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     internal val args: PaymentSheetContract.Args,
     eventReporter: EventReporter,
     // Properties provided through injection
-    private val apiRequestOptions: ApiRequest.Options,
+    private val lazyPaymentConfig: Lazy<PaymentConfiguration>,
     private val stripeIntentRepository: StripeIntentRepository,
-    private val customerRepository: CustomerRepository,
+    private val stripeIntentValidator: StripeIntentValidator,
+    customerRepository: CustomerRepository,
     private val paymentFlowResultProcessorProvider:
         Provider<PaymentFlowResultProcessor<out StripeIntent, StripeIntentResult<StripeIntent>>>,
     prefsRepository: PrefsRepository,
-    private val logger: Logger,
-    @IOContext workContext: CoroutineContext,
     private val paymentController: PaymentController,
-    private val googlePayPaymentMethodLauncherFactory: GooglePayPaymentMethodLauncherFactory
+    private val googlePayPaymentMethodLauncherFactory: GooglePayPaymentMethodLauncherFactory,
+    private val logger: Logger,
+    @IOContext workContext: CoroutineContext
 ) : BaseSheetViewModel<PaymentSheetViewModel.TransitionTarget>(
     application = application,
     config = args.config,
     eventReporter = eventReporter,
+    customerRepository = customerRepository,
     prefsRepository = prefsRepository,
     workContext = workContext
 ) {
@@ -128,8 +132,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         get() = args.clientSecret is PaymentIntentClientSecret
 
     override var newCard: PaymentSelection.New.Card? = null
-
-    private val stripeIntentValidator = StripeIntentValidator()
 
     @VisibleForTesting
     internal var googlePayPaymentMethodLauncher: GooglePayPaymentMethodLauncher? = null
@@ -213,19 +215,15 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     }
 
     private fun onStripeIntentFetchResponse(stripeIntent: StripeIntent) {
-        if (stripeIntent.isConfirmed) {
-            onConfirmedStripeIntent(stripeIntent)
-        } else {
-            runCatching {
-                stripeIntentValidator.requireValid(stripeIntent)
-            }.fold(
-                onSuccess = {
-                    updatePaymentMethods(stripeIntent)
-                    resetViewState(stripeIntent)
-                },
-                onFailure = ::onFatal
-            )
-        }
+        runCatching {
+            stripeIntentValidator.requireValid(stripeIntent)
+        }.fold(
+            onSuccess = {
+                updatePaymentMethods(stripeIntent)
+                resetViewState(stripeIntent)
+            },
+            onFailure = ::onFatal
+        )
     }
 
     /**
@@ -266,22 +264,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                 },
                 onFailure = ::onFatal
             )
-        }
-    }
-
-    /**
-     * There's nothing left to be done in payment sheet if the [StripeIntent] is confirmed.
-     *
-     * See [How intents work](https://stripe.com/docs/payments/intents) for more details.
-     */
-    private fun onConfirmedStripeIntent(stripeIntent: StripeIntent) {
-        logger.info(
-            """
-            ${stripeIntent.javaClass.simpleName} with id=${stripeIntent.id} has already been confirmed.
-            """.trimIndent()
-        )
-        _viewState.value = PaymentSheetViewState.FinishProcessing {
-            _paymentSheetResult.value = PaymentSheetResult.Completed
         }
     }
 
@@ -348,7 +330,10 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         paymentController.startConfirmAndAuth(
             authActivityStarterHost,
             confirmStripeIntentParams,
-            apiRequestOptions
+            ApiRequest.Options(
+                lazyPaymentConfig.get().publishableKey,
+                lazyPaymentConfig.get().stripeAccountId
+            )
         )
     }
 
@@ -465,6 +450,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     }
 
     override fun onFatal(throwable: Throwable) {
+        logger.error("Payment Sheet error", throwable)
         _fatal.value = throwable
         _paymentSheetResult.value = PaymentSheetResult.Failed(throwable)
     }
@@ -492,10 +478,12 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         ) : TransitionTarget()
     }
 
+    @Suppress("UNCHECKED_CAST")
     internal class Factory(
         private val applicationSupplier: () -> Application,
         private val starterArgsSupplier: () -> PaymentSheetContract.Args
     ) : ViewModelProvider.Factory {
+        @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
             return DaggerPaymentSheetViewModelComponent.builder()
                 .application(applicationSupplier())

@@ -3,8 +3,8 @@ package com.stripe.android.paymentsheet.repositories
 import androidx.core.os.LocaleListCompat
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
+import com.stripe.android.PaymentConfiguration
 import com.stripe.android.model.PaymentIntentFixtures
-import com.stripe.android.networking.ApiRequest
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -100,7 +100,7 @@ internal class StripeIntentRepositoryTest {
 
             val paymentIntent = StripeIntentRepository.Api(
                 stripeRepository,
-                ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY),
+                { PaymentConfiguration(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY) },
                 testDispatcher
             ).get(PaymentIntentClientSecret("client_secret"))
 
@@ -119,7 +119,7 @@ internal class StripeIntentRepositoryTest {
 
     private fun createRepository(locale: Locale? = null) = StripeIntentRepository.Api(
         stripeRepository,
-        ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY),
+        { PaymentConfiguration(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY) },
         testDispatcher,
         locale
     )

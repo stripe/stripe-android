@@ -11,25 +11,21 @@ import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.OnLifecycleEvent
 import androidx.lifecycle.ViewModelStoreOwner
-import com.google.android.gms.common.api.Status
-import com.stripe.android.Logger
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.PaymentController
 import com.stripe.android.StripeIntentResult
-import com.stripe.android.googlepaylauncher.GooglePayConfig
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
-import com.stripe.android.googlepaylauncher.GooglePayLauncherResult
-import com.stripe.android.googlepaylauncher.StripeGooglePayContract
+import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
+import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContract
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.ApiRequest
-import com.stripe.android.networking.StripeApiRepository
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.payments.PaymentFlowResultProcessor
 import com.stripe.android.payments.core.injection.Injectable
 import com.stripe.android.payments.core.injection.Injector
 import com.stripe.android.payments.core.injection.InjectorKey
-import com.stripe.android.payments.core.injection.WeakSetInjectorRegistry
+import com.stripe.android.payments.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.paymentsheet.PaymentOptionCallback
 import com.stripe.android.paymentsheet.PaymentOptionContract
 import com.stripe.android.paymentsheet.PaymentOptionResult
@@ -48,8 +44,6 @@ import com.stripe.android.paymentsheet.model.PaymentOptionFactory
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.SetupIntentClientSecret
-import com.stripe.android.paymentsheet.repositories.CustomerApiRepository
-import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
 import com.stripe.android.view.AuthActivityStarterHost
 import dagger.Lazy
 import kotlinx.coroutines.CoroutineScope
@@ -73,11 +67,11 @@ internal class DefaultFlowController @Inject internal constructor(
     private val paymentOptionCallback: PaymentOptionCallback,
     private val paymentResultCallback: PaymentSheetResultCallback,
     activityResultCaller: ActivityResultCaller,
+    @InjectorKey private val injectorKey: Int,
     // Properties provided through injection
     private val flowControllerInitializer: FlowControllerInitializer,
     private val eventReporter: EventReporter,
     private val viewModel: FlowControllerViewModel,
-    private val stripeApiRepository: StripeApiRepository,
     private val paymentController: PaymentController,
     /**
      * [PaymentConfiguration] is [Lazy] because the client might set publishableKey and
@@ -96,7 +90,8 @@ internal class DefaultFlowController @Inject internal constructor(
         Provider<PaymentFlowResultProcessor<out StripeIntent, StripeIntentResult<StripeIntent>>>
 ) : PaymentSheet.FlowController, Injector {
     private val paymentOptionActivityLauncher: ActivityResultLauncher<PaymentOptionContract.Args>
-    private var googlePayActivityLauncher: ActivityResultLauncher<StripeGooglePayContract.Args>
+    private var googlePayActivityLauncher:
+        ActivityResultLauncher<GooglePayPaymentMethodLauncherContract.Args>
 
     /**
      * [FlowControllerComponent] is hold to inject into [Activity]s and created
@@ -104,23 +99,12 @@ internal class DefaultFlowController @Inject internal constructor(
      */
     lateinit var flowControllerComponent: FlowControllerComponent
 
-    @InjectorKey
-    private var injectorKey: Int? = null
-
     override fun inject(injectable: Injectable) {
         when (injectable) {
             is PaymentOptionsViewModel.Factory -> {
                 flowControllerComponent.inject(injectable)
             }
         }
-    }
-
-    override fun getInjectorKey(): Int? {
-        return injectorKey
-    }
-
-    override fun setInjectorKey(injectorKey: Int) {
-        this.injectorKey = injectorKey
     }
 
     init {
@@ -148,7 +132,7 @@ internal class DefaultFlowController @Inject internal constructor(
             )
         googlePayActivityLauncher =
             activityResultCaller.registerForActivityResult(
-                StripeGooglePayContract(),
+                GooglePayPaymentMethodLauncherContract(),
                 ::onGooglePayResult
             )
     }
@@ -185,21 +169,6 @@ internal class DefaultFlowController @Inject internal constructor(
         lifecycleScope.launch {
             val result = flowControllerInitializer.init(
                 clientSecret,
-                StripeIntentRepository.Api(
-                    stripeRepository = stripeApiRepository,
-                    requestOptions = ApiRequest.Options(
-                        lazyPaymentConfiguration.get().publishableKey,
-                        lazyPaymentConfiguration.get().stripeAccountId
-                    ),
-                    workContext = Dispatchers.IO
-                ),
-                CustomerApiRepository(
-                    stripeRepository = stripeApiRepository,
-                    lazyPaymentConfiguration.get().publishableKey,
-                    lazyPaymentConfiguration.get().stripeAccountId,
-                    Logger.getInstance(false),
-                    workContext = Dispatchers.IO
-                ),
                 configuration
             )
 
@@ -236,7 +205,7 @@ internal class DefaultFlowController @Inject internal constructor(
                 isGooglePayReady = initData.isGooglePayReady,
                 newCard = viewModel.paymentSelection as? PaymentSelection.New.Card,
                 statusBarColor = statusBarColor(),
-                injectorKey = requireNotNull(injectorKey)
+                injectorKey = injectorKey
             )
         )
     }
@@ -252,28 +221,28 @@ internal class DefaultFlowController @Inject internal constructor(
             )
         }
 
-        val config = initData.config
         val paymentSelection = viewModel.paymentSelection
         if (paymentSelection == PaymentSelection.GooglePay) {
-            if (initData.stripeIntent !is PaymentIntent) {
-                error("Google Pay is currently supported only for PaymentIntents")
-            }
+            // initData.config.googlePay is guaranteed not to be null or GooglePay would be disabled
+            val config = requireNotNull(initData.config)
+            val googlePayConfig = requireNotNull(config.googlePay)
+
             googlePayActivityLauncher.launch(
-                StripeGooglePayContract.Args(
-                    config = GooglePayConfig(
-                        environment = when (config?.googlePay?.environment) {
+                GooglePayPaymentMethodLauncherContract.Args(
+                    config = GooglePayPaymentMethodLauncher.Config(
+                        environment = when (googlePayConfig.environment) {
                             PaymentSheet.GooglePayConfiguration.Environment.Production ->
                                 GooglePayEnvironment.Production
                             else ->
                                 GooglePayEnvironment.Test
                         },
-                        amount = initData.stripeIntent.amount?.toInt(),
-                        countryCode = config?.googlePay?.countryCode.orEmpty(),
-                        currencyCode = initData.stripeIntent.currency.orEmpty(),
-                        merchantName = config?.merchantDisplayName,
-                        transactionId = initData.stripeIntent.id
+                        merchantCountryCode = googlePayConfig.countryCode,
+                        merchantName = config.merchantDisplayName
                     ),
-                    statusBarColor = statusBarColor()
+                    currencyCode = (initData.stripeIntent as? PaymentIntent)?.currency
+                        ?: googlePayConfig.currencyCode.orEmpty(),
+                    amount = (initData.stripeIntent as? PaymentIntent)?.amount?.toInt() ?: 0,
+                    transactionId = initData.stripeIntent.id
                 )
             )
         } else {
@@ -312,10 +281,10 @@ internal class DefaultFlowController @Inject internal constructor(
     }
 
     internal fun onGooglePayResult(
-        googlePayResult: GooglePayLauncherResult
+        googlePayResult: GooglePayPaymentMethodLauncher.Result
     ) {
         when (googlePayResult) {
-            is GooglePayLauncherResult.PaymentData -> {
+            is GooglePayPaymentMethodLauncher.Result.Completed -> {
                 runCatching {
                     viewModel.initData
                 }.fold(
@@ -337,24 +306,19 @@ internal class DefaultFlowController @Inject internal constructor(
                     }
                 )
             }
-            is GooglePayLauncherResult.Error -> {
+            is GooglePayPaymentMethodLauncher.Result.Failed -> {
                 eventReporter.onPaymentFailure(PaymentSelection.GooglePay)
                 paymentResultCallback.onPaymentSheetResult(
                     PaymentSheetResult.Failed(
                         GooglePayException(
-                            googlePayResult.exception,
-                            googlePayResult.googlePayStatus
+                            googlePayResult.error
                         )
                     )
                 )
             }
-            is GooglePayLauncherResult.Canceled -> {
+            is GooglePayPaymentMethodLauncher.Result.Canceled -> {
                 // don't log cancellations as failures
                 paymentResultCallback.onPaymentSheetResult(PaymentSheetResult.Canceled)
-            }
-            else -> {
-                eventReporter.onPaymentFailure(PaymentSelection.GooglePay)
-                // TODO(mshafrir-stripe): handle other outcomes; for now, treat these as payment failures
             }
         }
     }
@@ -476,9 +440,8 @@ internal class DefaultFlowController @Inject internal constructor(
     }
 
     class GooglePayException(
-        val throwable: Throwable,
-        val googleStatus: Status?
-    ) : Exception()
+        val throwable: Throwable
+    ) : Exception(throwable)
 
     @Parcelize
     data class Args(
@@ -499,7 +462,7 @@ internal class DefaultFlowController @Inject internal constructor(
             paymentOptionCallback: PaymentOptionCallback,
             paymentResultCallback: PaymentSheetResultCallback
         ): PaymentSheet.FlowController {
-            val injectorKey = WeakSetInjectorRegistry.nextKey()
+            val injectorKey = WeakMapInjectorRegistry.nextKey()
             val flowControllerComponent = DaggerFlowControllerComponent.builder()
                 .appContext(appContext)
                 .viewModelStoreOwner(viewModelStoreOwner)
@@ -515,7 +478,7 @@ internal class DefaultFlowController @Inject internal constructor(
                 .build()
             val flowController = flowControllerComponent.flowController
             flowController.flowControllerComponent = flowControllerComponent
-            WeakSetInjectorRegistry.register(flowController, injectorKey)
+            WeakMapInjectorRegistry.register(flowController, injectorKey)
             return flowController
         }
     }
