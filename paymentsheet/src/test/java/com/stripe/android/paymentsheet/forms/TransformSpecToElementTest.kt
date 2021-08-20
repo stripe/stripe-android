@@ -100,7 +100,7 @@ class TransformSpecToElementTest {
         // Verify the correct config is setup for the controller
         assertThat(countryElement.controller.label).isEqualTo(CountryConfig().label)
 
-        assertThat(countrySectionElement.identifier.value).isEqualTo("countrySection")
+        assertThat(countrySectionElement.identifier.value).isEqualTo("country_section")
 
         assertThat(countryElement.identifier.value).isEqualTo("country")
     }
@@ -122,7 +122,7 @@ class TransformSpecToElementTest {
         // Verify the correct config is setup for the controller
         assertThat(idealElement.controller.label).isEqualTo(R.string.stripe_paymentsheet_ideal_bank)
 
-        assertThat(idealSectionElement.identifier.value).isEqualTo("idealSection")
+        assertThat(idealSectionElement.identifier.value).isEqualTo("ideal_section")
 
         assertThat(idealElement.identifier.value).isEqualTo("bank")
     }
