@@ -17,7 +17,8 @@ import kotlinx.coroutines.flow.map
  */
 internal class TextFieldController constructor(
     private val textFieldConfig: TextFieldConfig,
-    override val showOptionalLabel: Boolean = false
+    override val showOptionalLabel: Boolean = false,
+    initialValue: String? = null
 ) : InputController, SectionFieldErrorController {
     val capitalization: KeyboardCapitalization = textFieldConfig.capitalization
     val keyboardType: KeyboardType = textFieldConfig.keyboard
@@ -54,8 +55,9 @@ internal class TextFieldController constructor(
         it.isValid() || (!it.isValid() && showOptionalLabel && it.isBlank())
     }
 
+
     init {
-        onValueChange("")
+        initialValue?.let { onRawValueChange(it) }
     }
 
     /**

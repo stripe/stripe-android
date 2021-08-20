@@ -13,5 +13,5 @@ class FormFieldValues(
 
 data class FormFieldEntry(
     val value: String?,
-    val isComplete: Boolean
+    val isComplete: Boolean = false
 )

@@ -161,16 +161,16 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
             googlePay = googlePayConfig,
             billingDetails = PaymentSheet.BillingDetails(
                 address = PaymentSheet.Address(
-                    line1 = "line1",
-                    line2 = "line2",
-                    city = "city",
-                    state = "state",
-                    postalCode = "postal code",
-                    country = "country",
+                    line1 = "123 Main Street",
+                    line2 = null,
+                    city = "San Francisco",
+                    state = "CA",
+                    postalCode = "94111",
+                    country = "US",
                 ),
-                email = "email@email.com",
-                name = "John Smithh",
-                phone = "555-555-5555"
+                email = "email",
+                name = "Jenny Rosen",
+                phone = "+18008675309"
             )
         )
     }

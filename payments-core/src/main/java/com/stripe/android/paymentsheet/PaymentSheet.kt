@@ -123,7 +123,7 @@ class PaymentSheet internal constructor(
 
     @Parcelize
     data class BillingDetails(
-        val address: Address,
+        val address: Address? = null,
         val email: String? = null,
         val name: String? = null,
         val phone: String? = null

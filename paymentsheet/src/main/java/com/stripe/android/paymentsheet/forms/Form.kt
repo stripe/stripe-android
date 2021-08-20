@@ -265,13 +265,12 @@ class FormViewModel @Inject internal constructor(
         }
     }
 
-    private val transformSpecToElement = TransformSpecToElement(resourceRepository)
+    private val transformSpecToElement = TransformSpecToElement(resourceRepository, config)
 
     init {
         viewModelScope.launch {
             resourceRepository.init()
-            elements = transformSpecToElement.transform(layout.items, config.merchantName)
-            populateFormViewValues(config.toFormFieldValues())
+            elements = transformSpecToElement.transform(layout.items)
         }
     }
 
@@ -371,8 +370,4 @@ class FormViewModel @Inject internal constructor(
                 saveForFutureUse
             ).transformFlow()
         }
-
-    internal fun populateFormViewValues(formFieldValues: FormFieldValues) {
-        populateWith(elements, formFieldValues)
-    }
 }

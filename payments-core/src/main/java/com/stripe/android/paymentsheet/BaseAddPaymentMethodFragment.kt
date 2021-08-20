@@ -22,6 +22,8 @@ import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
+import com.stripe.android.paymentsheet.paymentdatacollection.Address
+import com.stripe.android.paymentsheet.paymentdatacollection.BillingDetails
 import com.stripe.android.paymentsheet.paymentdatacollection.CardDataCollectionFragment
 import com.stripe.android.paymentsheet.paymentdatacollection.ComposeFormDataCollectionFragment
 import com.stripe.android.paymentsheet.paymentdatacollection.ComposeFragmentArguments
@@ -154,7 +156,7 @@ internal abstract class BaseAddPaymentMethodFragment(
         val args = requireArguments()
         args.putParcelable(
             ComposeFormDataCollectionFragment.EXTRA_CONFIG,
-            getSaveForFutureUseArguments(
+            getArguments(
                 supportedPaymentMethodName = paymentMethod.name,
                 merchantName = sheetViewModel.merchantName,
                 isCustomer = sheetViewModel.customerConfig != null,
@@ -164,7 +166,8 @@ internal abstract class BaseAddPaymentMethodFragment(
                             (sheetViewModel.stripeIntent.value as? PaymentIntent)
                                 ?.setupFutureUsage == StripeIntent.Usage.OffSession
                             )
-                    )
+                    ),
+                billingAddress = sheetViewModel.config?.billingDetails
             )
         )
 
@@ -213,11 +216,12 @@ internal abstract class BaseAddPaymentMethodFragment(
         }
 
         @VisibleForTesting
-        internal fun getSaveForFutureUseArguments(
+        internal fun getArguments(
             isCustomer: Boolean,
             saveForFutureUse: Boolean,
             supportedPaymentMethodName: String,
-            merchantName: String
+            merchantName: String,
+            billingAddress: PaymentSheet.BillingDetails?
         ): ComposeFragmentArguments {
             var saveForFutureUseValue = true
             var saveForFutureUseVisible = true
@@ -232,11 +236,29 @@ internal abstract class BaseAddPaymentMethodFragment(
                 saveForFutureUseVisible = false
                 saveForFutureUseValue = true
             }
+
             return ComposeFragmentArguments(
                 supportedPaymentMethodName = supportedPaymentMethodName,
                 merchantName = merchantName,
                 saveForFutureUseInitialVisibility = saveForFutureUseVisible,
-                saveForFutureUseInitialValue = saveForFutureUseValue
+                saveForFutureUseInitialValue = saveForFutureUseValue,
+                billingDetails = billingAddress?.let {
+                    BillingDetails(
+                        name = billingAddress.name,
+                        email = billingAddress.email,
+                        phone = billingAddress.phone,
+                        address = billingAddress.address?.let {
+                            Address(
+                                city = it.city,
+                                state = it.state,
+                                country = it.country,
+                                line1 = it.line1,
+                                line2 = it.line2,
+                                postalCode = it.postalCode
+                            )
+                        }
+                    )
+                }
             )
         }
     }
