@@ -20,9 +20,7 @@ import org.json.JSONObject
  * See [PaymentMethod] for API object.
  */
 @Parcelize
-data class PaymentMethodCreateParams
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
-constructor(
+data class PaymentMethodCreateParams internal constructor(
     internal val type: PaymentMethod.Type,
     val card: Card? = null,
     private val ideal: Ideal? = null,
@@ -734,6 +732,19 @@ constructor(
                 type = PaymentMethod.Type.WeChatPay,
                 billingDetails = billingDetails,
                 metadata = metadata
+            )
+        }
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
+        fun createWithOverride(
+            type: PaymentMethod.Type,
+            overrideParamMap: Map<String, @RawValue Any>?,
+            productUsage: Set<String>
+        ): PaymentMethodCreateParams {
+            return PaymentMethodCreateParams(
+                type = type,
+                overrideParamMap = overrideParamMap,
+                productUsage = productUsage
             )
         }
     }

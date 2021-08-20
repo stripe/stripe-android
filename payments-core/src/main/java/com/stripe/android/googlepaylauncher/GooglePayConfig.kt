@@ -1,13 +1,11 @@
 package com.stripe.android.googlepaylauncher
 
 import android.os.Parcelable
-import androidx.annotation.RestrictTo
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
-data class GooglePayConfig(
-    internal var environment: GooglePayEnvironment,
+internal data class GooglePayConfig(
+    var environment: GooglePayEnvironment,
 
     /**
      * Total monetary value of the transaction.

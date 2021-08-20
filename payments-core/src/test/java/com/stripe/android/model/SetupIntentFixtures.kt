@@ -3,10 +3,10 @@ package com.stripe.android.model
 import com.stripe.android.model.parsers.SetupIntentJsonParser
 import org.json.JSONObject
 
-object SetupIntentFixtures {
+internal object SetupIntentFixtures {
     private val PARSER = SetupIntentJsonParser()
 
-    val SI_NEXT_ACTION_REDIRECT_JSON = JSONObject(
+    internal val SI_NEXT_ACTION_REDIRECT_JSON = JSONObject(
         """
         {
             "id": "seti_1EqTSZGMT9dGPIDGVzCUs6dV",
@@ -253,7 +253,7 @@ object SetupIntentFixtures {
         )
     )
 
-    val SI_REQUIRES_PAYMENT_METHOD = requireNotNull(
+    internal val SI_REQUIRES_PAYMENT_METHOD = requireNotNull(
         PARSER.parse(
             JSONObject(
                 """

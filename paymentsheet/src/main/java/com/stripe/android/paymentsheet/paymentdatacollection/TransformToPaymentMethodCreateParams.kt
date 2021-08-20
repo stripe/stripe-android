@@ -23,7 +23,7 @@ internal class TransformToPaymentMethodCreateParams {
         .run {
             PaymentMethod.Type.fromCode(this["type"] as String)
                 ?.let {
-                    PaymentMethodCreateParams(
+                    PaymentMethodCreateParams.createWithOverride(
                         it,
                         overrideParamMap = this,
                         productUsage = setOf("PaymentSheet")

@@ -1,6 +1,6 @@
 package com.stripe.android.model
 
-object PaymentIntentFixtures {
+internal object PaymentIntentFixtures {
     private val PARSER = com.stripe.android.model.parsers.PaymentIntentJsonParser()
 
     const val KEY_ID = "7c4debe3f4af7f9d1569a2ffea4343c2566826ee"

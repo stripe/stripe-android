@@ -3,7 +3,6 @@ package com.stripe.android.googlepaylauncher
 import android.content.Intent
 import android.os.Bundle
 import android.os.Parcel
-import androidx.annotation.RestrictTo
 import androidx.core.os.bundleOf
 import com.google.android.gms.common.api.Status
 import com.stripe.android.model.PaymentMethod
@@ -12,8 +11,7 @@ import com.stripe.android.view.ActivityStarter
 import kotlinx.parcelize.Parceler
 import kotlinx.parcelize.Parcelize
 
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
-sealed class GooglePayLauncherResult : ActivityStarter.Result {
+internal sealed class GooglePayLauncherResult : ActivityStarter.Result {
     override fun toBundle(): Bundle {
         return bundleOf(ActivityStarter.Result.EXTRA to this)
     }

@@ -25,6 +25,7 @@ internal class PaymentOptionFactory(
                 )
             }
             is PaymentSelection.New.Card -> {
+                // TODO: Should use labelResource paymentMethodCreateParams or extension function
                 PaymentOption(
                     drawableResourceId = selection.brand.getCardBrandIcon(),
                     label = createCardLabel(
