@@ -248,7 +248,7 @@ internal class PaymentSheetViewModelTest {
         }
 
         val paymentSelection =
-            PaymentSelection.Saved(PaymentMethodFixtures.AU_BECS_DEBIT_PAYMENT_METHOD)
+            PaymentSelection.Saved(PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD)
         viewModel.updateSelection(paymentSelection)
         viewModel.checkout(CheckoutIdentifier.None)
 

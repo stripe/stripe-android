@@ -819,9 +819,7 @@ internal class DefaultFlowControllerTest {
         private val GENERIC_PAYMENT_SELECTION = PaymentSelection.New.GenericPaymentMethod(
             iconResource = R.drawable.stripe_ic_paymentsheet_card_visa,
             labelResource = R.drawable.stripe_ic_paymentsheet_pm_bancontact,
-            paymentMethodCreateParams = PaymentMethodCreateParams(
-                PaymentMethod.Type.Bancontact
-            ),
+            paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.BANCONTACT,
             shouldSavePaymentMethod = false
         )
         private val VISA_PAYMENT_OPTION = PaymentOption(

@@ -10,7 +10,7 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.R
 import com.stripe.android.model.PaymentMethod
 
-class ActivityScenarioFactory(
+internal class ActivityScenarioFactory(
     private val context: Context
 ) {
     internal inline fun <reified T : Activity> create(

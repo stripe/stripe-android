@@ -253,8 +253,8 @@ class PaymentSheetListFragmentTest {
 
     private companion object {
         private val PAYMENT_METHODS = listOf(
-            PaymentMethod("one", 0, false, PaymentMethod.Type.Card),
-            PaymentMethod("two", 0, false, PaymentMethod.Type.Card)
+            PaymentMethodFixtures.CARD_PAYMENT_METHOD,
+            PaymentMethodFixtures.CARD_PAYMENT_METHOD,
         )
 
         private val FRAGMENT_CONFIG = FragmentConfigFixtures.DEFAULT.copy(

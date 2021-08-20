@@ -69,9 +69,7 @@ class StripeIntentValidatorTest {
     @Test
     fun `SetupIntent requireValid() allows status = RequiresAction`() {
         validator.requireValid(
-            SetupIntentJsonParser().parse(
-                SetupIntentFixtures.SI_NEXT_ACTION_REDIRECT_JSON
-            )!!
+            SetupIntentFixtures.SI_NEXT_ACTION_REDIRECT
         )
     }
 }

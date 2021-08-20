@@ -15,9 +15,7 @@ import java.util.regex.Pattern
  * - [PaymentIntents API Reference](https://stripe.com/docs/api/payment_intents)
  */
 @Parcelize
-data class PaymentIntent
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-constructor(
+data class PaymentIntent internal constructor(
     /**
      * Unique identifier for the object.
      */

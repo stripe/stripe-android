@@ -8,9 +8,7 @@ import androidx.annotation.VisibleForTesting
  * The SDK's "default" `return_url`. When a PaymentIntent or SetupIntent is confirmed without
  * a custom `return_url` via the SDK, [value] will be used instead.
  */
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-@VisibleForTesting
-data class DefaultReturnUrl(
+internal data class DefaultReturnUrl(
     private val packageName: String
 ) {
     /**

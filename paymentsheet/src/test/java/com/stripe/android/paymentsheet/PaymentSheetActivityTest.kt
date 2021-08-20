@@ -18,10 +18,12 @@ import com.stripe.android.StripeIntentResult
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContract
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherFactory
+import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.payments.PaymentFlowResultProcessor
@@ -209,8 +211,13 @@ internal class PaymentSheetActivityTest {
             assertThat(activity.viewBinding.buyButton.isEnabled).isFalse()
 
             // New valid card
-            val paymentSelection: PaymentSelection = mock()
-            viewModel.updateSelection(paymentSelection)
+            viewModel.updateSelection(
+                PaymentSelection.New.Card(
+                    PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+                    CardBrand.Visa,
+                    shouldSavePaymentMethod = false
+                )
+            )
             assertThat(activity.viewBinding.buyButton.isVisible).isTrue()
             assertThat(activity.viewBinding.buyButton.isEnabled).isTrue()
         }

@@ -29,7 +29,7 @@ internal class PaymentOptionContract :
     }
 
     @Parcelize
-    data class Args(
+    internal data class Args(
         val stripeIntent: StripeIntent,
         val paymentMethods: List<PaymentMethod>,
         val config: PaymentSheet.Configuration?,

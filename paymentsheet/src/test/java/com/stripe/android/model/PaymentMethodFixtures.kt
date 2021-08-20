@@ -48,23 +48,23 @@ internal object PaymentMethodFixtures {
         billingDetails = BILLING_DETAILS,
         card = CARD
     )
-
-    val AU_BECS_DEBIT_PAYMENT_METHOD = PaymentMethod(
-        id = "pm_1GJ4cUABjb",
-        created = 1583356750L,
-        liveMode = false,
-        type = PaymentMethod.Type.AuBecsDebit,
-        billingDetails = PaymentMethod.BillingDetails(
-            name = "Jenny Rosen",
-            email = "jenny.rosen@example.com",
-            address = Address()
-        ),
-        auBecsDebit = PaymentMethod.AuBecsDebit(
-            bsbNumber = "000000",
-            fingerprint = "lm7qI5V7PUkWUM7E",
-            last4 = "3456"
-        )
-    )
+//
+//    val AU_BECS_DEBIT_PAYMENT_METHOD = PaymentMethod(
+//        id = "pm_1GJ4cUABjb",
+//        created = 1583356750L,
+//        liveMode = false,
+//        type = PaymentMethod.Type.AuBecsDebit,
+//        billingDetails = PaymentMethod.BillingDetails(
+//            name = "Jenny Rosen",
+//            email = "jenny.rosen@example.com",
+//            address = Address()
+//        ),
+//        auBecsDebit = PaymentMethod.AuBecsDebit(
+//            bsbNumber = "000000",
+//            fingerprint = "lm7qI5V7PUkWUM7E",
+//            last4 = "3456"
+//        )
+//    )
 
     val SEPA_DEBIT_JSON = JSONObject(
         """

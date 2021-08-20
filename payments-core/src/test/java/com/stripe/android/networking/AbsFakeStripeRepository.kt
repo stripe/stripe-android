@@ -29,9 +29,7 @@ import com.stripe.android.model.TokenParams
 import org.json.JSONObject
 import java.util.Locale
 
-@VisibleForTesting
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
-abstract class AbsFakeStripeRepository : StripeRepository() {
+internal abstract class AbsFakeStripeRepository : StripeRepository() {
 
     override suspend fun retrieveStripeIntent(
         clientSecret: String,

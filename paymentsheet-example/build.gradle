@@ -46,7 +46,6 @@ dependencies {
     implementation "androidx.lifecycle:lifecycle-viewmodel-compose:1.0.0-alpha07"
     // Integration with observables
     implementation "androidx.compose.runtime:runtime-livedata:$composeVersion"
-    implementation project(path: ':payments-core')
 
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'
