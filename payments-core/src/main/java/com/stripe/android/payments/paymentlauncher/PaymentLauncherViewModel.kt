@@ -1,6 +1,7 @@
 package com.stripe.android.payments.paymentlauncher
 
 import androidx.activity.result.ActivityResultCaller
+import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -178,6 +179,18 @@ internal class PaymentLauncherViewModel(
                 }
             )
         }
+    }
+
+    /**
+     * Cleans up the [PaymentAuthenticatorRegistry] by invalidating [ActivityResultLauncher]s
+     * registered within.
+     *
+     * Because the same [PaymentAuthenticatorRegistry] is used for multiple
+     * [PaymentLauncherConfirmationActivity]s. The [ActivityResultLauncher]s registered in the old
+     * [PaymentLauncherConfirmationActivity] needs to be unregistered to prevent leaking.
+     */
+    internal fun cleanUp() {
+        authenticatorRegistry.onLauncherInvalidated()
     }
 
     /**

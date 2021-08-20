@@ -71,6 +71,10 @@ internal class PaymentLauncherConfirmationActivity : AppCompatActivity() {
         }
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        viewModel.cleanUp()
+    }
     override fun finish() {
         super.finish()
         disableAnimations()
