@@ -5,9 +5,11 @@ import android.view.View
 import androidx.core.view.isVisible
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.ViewModelProvider
+import com.stripe.android.paymentsheet.PaymentSheetViewModel.CheckoutIdentifier
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.databinding.FragmentPaymentsheetAddPaymentMethodBinding
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 
@@ -54,13 +56,13 @@ internal class PaymentSheetAddPaymentMethodFragment(
         sheetViewModel.selection.observe(viewLifecycleOwner) { paymentSelection ->
             updateErrorMessage(null)
             if (paymentSelection == PaymentSelection.GooglePay) {
-                sheetViewModel.checkout(PaymentSheetViewModel.CheckoutIdentifier.AddFragmentTopGooglePay)
+                sheetViewModel.checkout(CheckoutIdentifier.AddFragmentTopGooglePay)
             }
         }
 
-        sheetViewModel.getButtonStateObservable(PaymentSheetViewModel.CheckoutIdentifier.AddFragmentTopGooglePay)
+        sheetViewModel.getButtonStateObservable(CheckoutIdentifier.AddFragmentTopGooglePay)
             .observe(viewLifecycleOwner) { viewState ->
-                if (viewState is com.stripe.android.paymentsheet.model.PaymentSheetViewState.Reset) {
+                if (viewState is PaymentSheetViewState.Reset) {
                     // If Google Pay was cancelled or failed, re-select the form payment method
                     sheetViewModel.updateSelection(sheetViewModel.lastSelectedPaymentMethod)
                 }

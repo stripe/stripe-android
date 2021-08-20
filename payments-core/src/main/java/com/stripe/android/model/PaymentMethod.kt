@@ -504,8 +504,7 @@ constructor(
         @Parcelize
         data class Checks
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        constructor
-            (
+        constructor(
             /**
              * If a address line1 was provided, results of the check, one of `pass`, `fail`, `unavailable`, or `unchecked`.
              *

@@ -23,6 +23,7 @@ import com.stripe.android.paymentsheet.PaymentSheetViewModel.Amount
 import com.stripe.android.paymentsheet.PaymentSheetViewModel.CheckoutIdentifier
 import com.stripe.android.paymentsheet.databinding.ActivityPaymentSheetBinding
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.ui.AnimationConstants
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
@@ -69,12 +70,12 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
 
     private val currencyFormatter = CurrencyFormatter()
 
-    private val buyButtonStateObserver = { viewState: com.stripe.android.paymentsheet.model.PaymentSheetViewState? ->
+    private val buyButtonStateObserver = { viewState: PaymentSheetViewState? ->
         updateErrorMessage(viewState?.errorMessage)
         viewBinding.buyButton.updateState(viewState?.convert())
     }
 
-    private val googlePayButtonStateObserver = { viewState: com.stripe.android.paymentsheet.model.PaymentSheetViewState? ->
+    private val googlePayButtonStateObserver = { viewState: PaymentSheetViewState? ->
         updateErrorMessage(viewState?.errorMessage)
         viewBinding.googlePayButton.updateState(viewState?.convert())
     }
@@ -249,7 +250,8 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
             updateErrorMessage()
 
             val shouldShowGooglePay =
-                paymentSelection == PaymentSelection.GooglePay && supportFragmentManager.findFragmentById(
+                paymentSelection ==
+                    PaymentSelection.GooglePay && supportFragmentManager.findFragmentById(
                     fragmentContainerId
                 ) is PaymentSheetListFragment
 

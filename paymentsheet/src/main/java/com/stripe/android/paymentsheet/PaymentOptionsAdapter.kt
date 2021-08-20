@@ -25,8 +25,10 @@ import kotlin.properties.Delegates
 @SuppressLint("NotifyDataSetChanged")
 internal class PaymentOptionsAdapter(
     private val canClickSelectedItem: Boolean,
-    val paymentOptionSelectedListener: (paymentSelection: PaymentSelection, isClick: Boolean) -> Unit,
-    val paymentMethodDeleteListener: (paymentMethod: Item.SavedPaymentMethod) -> Unit,
+    val paymentOptionSelectedListener:
+        (paymentSelection: PaymentSelection, isClick: Boolean) -> Unit,
+    val paymentMethodDeleteListener:
+        (paymentMethod: Item.SavedPaymentMethod) -> Unit,
     val addCardClickListener: View.OnClickListener
 ) : RecyclerView.Adapter<PaymentOptionsAdapter.PaymentOptionViewHolder>() {
     @VisibleForTesting
@@ -88,14 +90,14 @@ internal class PaymentOptionsAdapter(
      * 4. None (-1)
      */
     private fun findInitialSelectedPosition(
-        savedSelection: com.stripe.android.paymentsheet.model.SavedSelection
+        savedSelection: SavedSelection
     ): Int {
         return listOfNotNull(
             // saved selection
             items.indexOfFirst { item ->
-                when (savedSelection) {
-                    com.stripe.android.paymentsheet.model.SavedSelection.GooglePay -> item is Item.GooglePay
-                    is com.stripe.android.paymentsheet.model.SavedSelection.PaymentMethod -> {
+                val b = when (savedSelection) {
+                    SavedSelection.GooglePay -> item is Item.GooglePay
+                    is SavedSelection.PaymentMethod -> {
                         when (item) {
                             is Item.SavedPaymentMethod -> {
                                 savedSelection.id == item.paymentMethod.id
@@ -103,8 +105,9 @@ internal class PaymentOptionsAdapter(
                             else -> false
                         }
                     }
-                    com.stripe.android.paymentsheet.model.SavedSelection.None -> false
+                    SavedSelection.None -> false
                 }
+                b
             }.takeIf { it != -1 },
 
             // Google Pay

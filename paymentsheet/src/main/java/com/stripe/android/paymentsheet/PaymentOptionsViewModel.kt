@@ -11,6 +11,7 @@ import com.stripe.android.payments.core.injection.Injectable
 import com.stripe.android.payments.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
@@ -19,7 +20,7 @@ internal class PaymentOptionsViewModel(
     args: PaymentOptionContract.Args,
     prefsRepository: PrefsRepository,
     eventReporter: EventReporter,
-    customerRepository: com.stripe.android.paymentsheet.repositories.CustomerRepository,
+    customerRepository: CustomerRepository,
     workContext: CoroutineContext,
     application: Application
 ) : BaseSheetViewModel<PaymentOptionsViewModel.TransitionTarget>(
@@ -127,7 +128,7 @@ internal class PaymentOptionsViewModel(
         lateinit var eventReporter: EventReporter
 
         @Inject
-        lateinit var customerRepository: com.stripe.android.paymentsheet.repositories.CustomerRepository
+        lateinit var customerRepository: CustomerRepository
 
         @Inject
         @IOContext
@@ -135,7 +136,8 @@ internal class PaymentOptionsViewModel(
 
         @Inject
         @JvmSuppressWildcards
-        lateinit var prefsRepositoryFactory: (PaymentSheet.CustomerConfiguration?) -> PrefsRepository
+        lateinit var prefsRepositoryFactory:
+            (PaymentSheet.CustomerConfiguration?) -> PrefsRepository
 
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {

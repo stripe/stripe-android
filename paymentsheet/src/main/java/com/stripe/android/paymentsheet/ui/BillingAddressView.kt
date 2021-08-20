@@ -19,6 +19,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.stripe.android.model.Address
 import com.stripe.android.model.CountryCode
+import com.stripe.android.model.CountryCode.Companion.isUS
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.databinding.StripeBillingAddressLayoutBinding
 import com.stripe.android.view.Country
@@ -99,7 +100,7 @@ internal class BillingAddressView @JvmOverloads constructor(
     @VisibleForTesting
     internal var postalCodeViewListener: PostalCodeViewListener? = null
 
-    private val isUnitedStates: Boolean get() = CountryCode.isUS(countryLayout.getSelectedCountryCode())
+    private val isUnitedStates: Boolean get() = isUS(countryLayout.getSelectedCountryCode())
 
     private var postalCodeConfig: PostalCodeConfig by Delegates.observable(
         PostalCodeConfig.Global
@@ -270,7 +271,7 @@ internal class BillingAddressView @JvmOverloads constructor(
 
     private fun updateStateView(countryCode: CountryCode?) {
         when {
-            CountryCode.isUS(countryCode) -> {
+            isUS(countryCode) -> {
                 R.string.address_label_state
             }
             CountryCode.isCA(countryCode) -> {
@@ -297,14 +298,14 @@ internal class BillingAddressView @JvmOverloads constructor(
         viewBinding.cityPostalDivider.isVisible = shouldShowPostalCodeContainer
         viewBinding.cityPostalContainer.isVisible = shouldShowPostalCodeContainer
 
-        postalCodeConfig = if (CountryCode.isUS(countryCode)) {
+        postalCodeConfig = if (isUS(countryCode)) {
             PostalCodeConfig.UnitedStates
         } else {
             PostalCodeConfig.Global
         }
 
         viewBinding.postalCodeLayout.hint = resources.getString(
-            if (CountryCode.isUS(countryCode)) {
+            if (isUS(countryCode)) {
                 R.string.acc_label_zip_short
             } else {
                 R.string.address_label_postal_code

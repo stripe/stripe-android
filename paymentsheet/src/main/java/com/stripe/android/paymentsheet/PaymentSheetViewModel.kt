@@ -32,6 +32,7 @@ import com.stripe.android.payments.PaymentFlowResultProcessor
 import com.stripe.android.payments.core.injection.IOContext
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.injection.DaggerPaymentSheetViewModelComponent
+import com.stripe.android.paymentsheet.model.ConfirmStripeIntentParamsFactory
 import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
@@ -89,8 +90,9 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     prefsRepository = prefsRepository,
     workContext = workContext
 ) {
-    private val confirmParamsFactory =
-        com.stripe.android.paymentsheet.model.ConfirmStripeIntentParamsFactory.createFactory(args.clientSecret)
+    private val confirmParamsFactory = ConfirmStripeIntentParamsFactory.createFactory(
+        args.clientSecret
+    )
 
     @VisibleForTesting
     internal val _paymentSheetResult = MutableLiveData<PaymentSheetResult>()
@@ -108,7 +110,9 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     internal val viewState: LiveData<PaymentSheetViewState> = _viewState.distinctUntilChanged()
 
     internal var checkoutIdentifier: CheckoutIdentifier = CheckoutIdentifier.SheetBottomBuy
-    internal fun getButtonStateObservable(checkoutIdentifier: CheckoutIdentifier): MediatorLiveData<PaymentSheetViewState?> {
+    internal fun getButtonStateObservable(
+        checkoutIdentifier: CheckoutIdentifier
+    ): MediatorLiveData<PaymentSheetViewState?> {
         val outputLiveData = MediatorLiveData<PaymentSheetViewState?>()
         outputLiveData.addSource(_viewState) { currentValue ->
             if (this.checkoutIdentifier == checkoutIdentifier) {

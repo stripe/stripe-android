@@ -10,6 +10,7 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.databinding.FragmentPaymentsheetPaymentMethodsListBinding
+import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
@@ -23,13 +24,13 @@ internal abstract class BasePaymentMethodsListFragment(
 ) {
     abstract val sheetViewModel: BaseSheetViewModel<*>
 
-    protected lateinit var config: com.stripe.android.paymentsheet.model.FragmentConfig
+    protected lateinit var config: FragmentConfig
     private lateinit var adapter: PaymentOptionsAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val nullableConfig = arguments?.getParcelable<com.stripe.android.paymentsheet.model.FragmentConfig>(
+        val nullableConfig = arguments?.getParcelable<FragmentConfig>(
             BaseSheetActivity.EXTRA_FRAGMENT_CONFIG
         )
         if (nullableConfig == null) {

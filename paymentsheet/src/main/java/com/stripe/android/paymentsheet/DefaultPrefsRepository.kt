@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet
 import android.content.Context
 import android.content.SharedPreferences
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.model.SavedSelection
 import kotlinx.coroutines.withContext
 import kotlin.coroutines.CoroutineContext
 
@@ -15,20 +16,20 @@ internal class DefaultPrefsRepository(
         context.getSharedPreferences(PREF_FILE, Context.MODE_PRIVATE)
     }
 
-    override suspend fun getSavedSelection(isGooglePayAvailable: Boolean): com.stripe.android.paymentsheet.model.SavedSelection =
+    override suspend fun getSavedSelection(isGooglePayAvailable: Boolean): SavedSelection =
         withContext(workContext) {
             val prefData = prefs.getString(getKey(), null).orEmpty().split(":")
             when (prefData.firstOrNull()) {
                 "google_pay" -> {
-                    com.stripe.android.paymentsheet.model.SavedSelection.GooglePay.takeIf { isGooglePayAvailable }
+                    SavedSelection.GooglePay.takeIf { isGooglePayAvailable }
                 }
                 "payment_method" -> {
                     prefData.getOrNull(1)?.let {
-                        com.stripe.android.paymentsheet.model.SavedSelection.PaymentMethod(id = it)
+                        SavedSelection.PaymentMethod(id = it)
                     }
                 }
                 else -> null
-            } ?: com.stripe.android.paymentsheet.model.SavedSelection.None
+            } ?: SavedSelection.None
         }
 
     override fun savePaymentSelection(paymentSelection: PaymentSelection?) {

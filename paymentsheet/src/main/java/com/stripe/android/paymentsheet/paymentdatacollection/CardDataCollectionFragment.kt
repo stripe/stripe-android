@@ -209,8 +209,9 @@ internal class CardDataCollectionFragment<ViewModelType : BaseSheetViewModel<*>>
             1
         )
 
-        val layoutMarginHorizontal =
-            resources.getDimensionPixelSize(R.dimen.stripe_paymentsheet_cardwidget_margin_horizontal)
+        val layoutMarginHorizontal = resources.getDimensionPixelSize(
+            R.dimen.stripe_paymentsheet_cardwidget_margin_horizontal
+        )
         val layoutMarginVertical =
             resources.getDimensionPixelSize(R.dimen.stripe_paymentsheet_cardwidget_margin_vertical)
         setOf(
