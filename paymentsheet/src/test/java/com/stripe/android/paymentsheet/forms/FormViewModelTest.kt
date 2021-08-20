@@ -6,6 +6,7 @@ import androidx.lifecycle.asLiveData
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.paymentsheet.FormElement.SectionElement
+import com.stripe.android.paymentsheet.Identifier
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.SectionFieldElement
 import com.stripe.android.paymentsheet.address.AddressFieldElementRepository
@@ -17,7 +18,6 @@ import com.stripe.android.paymentsheet.specifications.FormItemSpec
 import com.stripe.android.paymentsheet.specifications.IdentifierSpec
 import com.stripe.android.paymentsheet.specifications.LayoutSpec
 import com.stripe.android.paymentsheet.specifications.ResourceRepository
-import com.stripe.android.paymentsheet.specifications.SectionFieldSpec.Companion.NAME
 import com.stripe.android.paymentsheet.specifications.SectionFieldSpec.Country
 import com.stripe.android.paymentsheet.specifications.SectionFieldSpec.Email
 import com.stripe.android.paymentsheet.specifications.sepaDebit
@@ -98,7 +98,7 @@ internal class FormViewModelTest {
             resourceRepository = resourceRepository
         )
 
-        val values = mutableListOf<List<IdentifierSpec>>()
+        val values = mutableListOf<List<Identifier>>()
         formViewModel.hiddenIdentifiers.asLiveData()
             .observeForever {
                 values.add(it)
@@ -109,7 +109,7 @@ internal class FormViewModelTest {
 
         ShadowLooper.runUiThreadTasksIncludingDelayedTasks()
 
-        assertThat(values[1][0]).isEqualTo(IdentifierSpec("save_for_future_use"))
+        assertThat(values[1][0]).isEqualTo(Identifier.SaveForFutureUse)
     }
 
     @Test
@@ -131,7 +131,7 @@ internal class FormViewModelTest {
             resourceRepository = resourceRepository
         )
 
-        val values = mutableListOf<List<IdentifierSpec>>()
+        val values = mutableListOf<List<Identifier>>()
         formViewModel.hiddenIdentifiers.asLiveData()
             .observeForever {
                 values.add(it)
@@ -142,8 +142,8 @@ internal class FormViewModelTest {
 
         ShadowLooper.runUiThreadTasksIncludingDelayedTasks()
 
-        assertThat(values[1][0]).isEqualTo(IdentifierSpec("emailSection"))
-        assertThat(values[1][1]).isEqualTo(IdentifierSpec("email"))
+        assertThat(values[1][0]).isEqualTo(Identifier.Generic("emailSection"))
+        assertThat(values[1][1]).isEqualTo(Identifier.Email)
     }
 
     @ExperimentalCoroutinesApi
@@ -186,7 +186,7 @@ internal class FormViewModelTest {
             assertThat(
                 formViewModel.completeFormValues.first()?.fieldValuePairs
             ).containsKey(
-                emailSection.fields[0].identifier
+                Identifier.fromSpec(emailSection.fields[0].identifier)
             )
 
             saveForFutureUseController.onValueChange(false)
@@ -277,23 +277,23 @@ internal class FormViewModelTest {
 
             nameElement.onValueChange("joe")
             assertThat(
-                formViewModel.completeFormValues.first()?.fieldValuePairs?.get(NAME.identifier)
+                formViewModel.completeFormValues.first()?.fieldValuePairs?.get(Identifier.Name)
             ).isNull()
 
             emailElement.onValueChange("joe@gmail.com")
             assertThat(
-                formViewModel.completeFormValues.first()?.fieldValuePairs?.get(Email.identifier)
+                formViewModel.completeFormValues.first()?.fieldValuePairs?.get(Identifier.Email)
                     ?.value
             ).isEqualTo("joe@gmail.com")
             assertThat(
-                formViewModel.completeFormValues.first()?.fieldValuePairs?.get(NAME.identifier)
+                formViewModel.completeFormValues.first()?.fieldValuePairs?.get(Identifier.Name)
                     ?.value
             ).isEqualTo("joe")
 
             emailElement.onValueChange("invalid.email@IncompleteDomain")
 
             assertThat(
-                formViewModel.completeFormValues.first()?.fieldValuePairs?.get(NAME.identifier)
+                formViewModel.completeFormValues.first()?.fieldValuePairs?.get(Identifier.Name)
             ).isNull()
         }
     }
@@ -321,7 +321,7 @@ internal class FormViewModelTest {
                 R.string.address_label_name
             )?.onValueChange("joe")
             assertThat(
-                formViewModel.completeFormValues.first()?.fieldValuePairs?.get(Email.identifier)
+                formViewModel.completeFormValues.first()?.fieldValuePairs?.get(Identifier.Email)
                     ?.value
             ).isNull()
 
@@ -330,7 +330,7 @@ internal class FormViewModelTest {
                 R.string.email
             )?.onValueChange("joe@gmail.com")
             assertThat(
-                formViewModel.completeFormValues.first()?.fieldValuePairs?.get(Email.identifier)
+                formViewModel.completeFormValues.first()?.fieldValuePairs?.get(Identifier.Email)
                     ?.value
             ).isNull()
 
@@ -339,7 +339,7 @@ internal class FormViewModelTest {
                 R.string.iban
             )?.onValueChange("DE89370400440532013000")
             assertThat(
-                formViewModel.completeFormValues.first()?.fieldValuePairs?.get(Email.identifier)
+                formViewModel.completeFormValues.first()?.fieldValuePairs?.get(Identifier.Email)
                     ?.value
             ).isNull()
 
@@ -352,7 +352,7 @@ internal class FormViewModelTest {
                             .completeFormValues
                             .first()
                             ?.fieldValuePairs
-                            ?.get(Email.identifier)
+                            ?.get(Identifier.Email)
                             ?.value
                     ).isNotNull()
                 } else {
@@ -361,7 +361,7 @@ internal class FormViewModelTest {
                             .completeFormValues
                             .first()
                             ?.fieldValuePairs
-                            ?.get(Email.identifier)
+                            ?.get(Identifier.Email)
                             ?.value
                     ).isNull()
                 }
@@ -392,7 +392,7 @@ internal class FormViewModelTest {
                 R.string.address_label_name
             )?.onValueChange("joe")
             assertThat(
-                formViewModel.completeFormValues.first()?.fieldValuePairs?.get(Email.identifier)
+                formViewModel.completeFormValues.first()?.fieldValuePairs?.get(Identifier.Email)
                     ?.value
             ).isNull()
 
@@ -401,7 +401,7 @@ internal class FormViewModelTest {
                 R.string.email
             )?.onValueChange("joe@gmail.com")
             assertThat(
-                formViewModel.completeFormValues.first()?.fieldValuePairs?.get(Email.identifier)
+                formViewModel.completeFormValues.first()?.fieldValuePairs?.get(Identifier.Email)
                     ?.value
             ).isNull()
 
@@ -410,7 +410,7 @@ internal class FormViewModelTest {
                 R.string.iban
             )?.onValueChange("DE89370400440532013000")
             assertThat(
-                formViewModel.completeFormValues.first()?.fieldValuePairs?.get(Email.identifier)
+                formViewModel.completeFormValues.first()?.fieldValuePairs?.get(Identifier.Email)
                     ?.value
             ).isNull()
 
@@ -428,7 +428,7 @@ internal class FormViewModelTest {
                                 .completeFormValues
                                 .first()
                                 ?.fieldValuePairs
-                                ?.get(Email.identifier)
+                                ?.get(Identifier.Email)
                                 ?.value
                         ).isNotNull()
                     } else {
@@ -437,7 +437,7 @@ internal class FormViewModelTest {
                                 .completeFormValues
                                 .first()
                                 ?.fieldValuePairs
-                                ?.get(Email.identifier)
+                                ?.get(Identifier.Email)
                                 ?.value
                         ).isNull()
                     }

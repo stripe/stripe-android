@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.elements
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.paymentsheet.Identifier
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.SectionFieldElement
 import com.stripe.android.paymentsheet.address.AddressFieldElementRepository
@@ -27,7 +28,7 @@ class AddressElementTest {
             "US",
             listOf(
                 SectionFieldElement.Email(
-                    IdentifierSpec("email"),
+                    Identifier.Email,
                     TextFieldController(EmailConfig())
                 )
             )
@@ -36,7 +37,7 @@ class AddressElementTest {
             "JP",
             listOf(
                 SectionFieldElement.Iban(
-                    IdentifierSpec("iban"),
+                    Identifier.Generic("iban"),
                     TextFieldController(IbanConfig())
                 )
             )
@@ -49,7 +50,7 @@ class AddressElementTest {
         runBlocking {
             // ZZ does not have state and US does
             val addressElement = SectionFieldElement.AddressElement(
-                IdentifierSpec("address"),
+                Identifier.Generic("address"),
                 addressFieldElementRepository,
                 countryDropdownFieldController = countryDropdownFieldController
             )

@@ -17,11 +17,47 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 
 /**
+ * The items listed here are needed to fill in form field values, or for referencing in other
+ * classes in the case of SaveForFutureUse.  This is not a comprehensive list of identifiers
+ */
+sealed class Identifier(val value: String) {
+    object Name : Identifier("name")
+    object Email : Identifier("email")
+    object Country : Identifier("country")
+    object Line1 : Identifier("line1")
+    object Line2 : Identifier("line2")
+    object City : Identifier("city")
+    object State : Identifier("state")
+    object PostalCode : Identifier("postal_code")
+    object Phone : Identifier("phone")
+    object SaveForFutureUse : Identifier("save_for_future_use")
+    data class Generic(val _key: String) : Identifier(_key)
+    companion object {
+        fun fromSpec(id: IdentifierSpec) =
+            when (id.value) {
+                "name" -> Name
+                "email" -> Email
+                "country" -> Country
+                "line1" -> Line1
+                "line2" -> Line2
+                "city" -> City
+                "state" -> State
+                "postal_code" -> PostalCode
+                "phone" -> Phone
+                "save_for_future_use" -> SaveForFutureUse
+                else -> {
+                    Generic(id.value)
+                }
+            }
+    }
+}
+
+/**
  * This is used to define each section in the visual form layout.
  * Each item in the layout has an identifier and a controller associated with it.
  */
 internal sealed class FormElement {
-    abstract val identifier: IdentifierSpec
+    abstract val identifier: Identifier
     abstract val controller: Controller?
 
     /**
@@ -30,7 +66,7 @@ internal sealed class FormElement {
      * one will be populated in the form with the merchantName parameter.
      */
     internal data class MandateTextElement(
-        override val identifier: IdentifierSpec,
+        override val identifier: Identifier,
         val stringResId: Int,
         val color: Color,
         val merchantName: String?,
@@ -42,18 +78,18 @@ internal sealed class FormElement {
      * when "save for future" use is unchecked
      */
     data class SaveForFutureUseElement(
-        override val identifier: IdentifierSpec,
+        override val identifier: Identifier,
         override val controller: SaveForFutureUseController,
         val merchantName: String?
     ) : FormElement()
 
     data class SectionElement(
-        override val identifier: IdentifierSpec,
+        override val identifier: Identifier,
         val fields: List<SectionFieldElement>,
         override val controller: SectionController
     ) : FormElement() {
         internal constructor(
-            identifier: IdentifierSpec,
+            identifier: Identifier,
             field: SectionFieldElement,
             controller: SectionController
         ) : this(identifier, listOf(field), controller)
@@ -79,7 +115,7 @@ internal fun List<FormElement>.getIdInputControllerMap() = this
  * This is an element that is in a section and accepts user input.
  */
 internal sealed class SectionFieldElement {
-    abstract val identifier: IdentifierSpec
+    abstract val identifier: Identifier
 
     /**
      * Every item in a section must have a controller that can provide an error
@@ -93,32 +129,32 @@ internal sealed class SectionFieldElement {
     fun sectionFieldErrorController(): SectionFieldErrorController = controller
 
     data class Email(
-        override val identifier: IdentifierSpec,
+        override val identifier: Identifier,
         override val controller: TextFieldController
     ) : SectionFieldElement()
 
     data class Iban(
-        override val identifier: IdentifierSpec,
+        override val identifier: Identifier,
         override val controller: TextFieldController,
     ) : SectionFieldElement()
 
     data class Country(
-        override val identifier: IdentifierSpec,
+        override val identifier: Identifier,
         override val controller: DropdownFieldController
     ) : SectionFieldElement()
 
     data class SimpleText(
-        override val identifier: IdentifierSpec,
+        override val identifier: Identifier,
         override val controller: TextFieldController
     ) : SectionFieldElement()
 
     data class SimpleDropdown(
-        override val identifier: IdentifierSpec,
+        override val identifier: Identifier,
         override val controller: DropdownFieldController,
     ) : SectionFieldElement()
 
     internal class AddressElement constructor(
-        override val identifier: IdentifierSpec,
+        override val identifier: Identifier,
         private val addressFieldRepository: AddressFieldElementRepository,
         countryCodes: Set<String> = emptySet(),
         countryDropdownFieldController: DropdownFieldController = DropdownFieldController(
@@ -128,7 +164,7 @@ internal sealed class SectionFieldElement {
 
         @VisibleForTesting
         val countryElement = Country(
-            IdentifierSpec("country"),
+            Identifier.Country,
             countryDropdownFieldController
         )
 

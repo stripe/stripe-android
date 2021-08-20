@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.forms
 
 import android.content.res.Resources
 import androidx.annotation.RestrictTo
+import androidx.annotation.VisibleForTesting
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Column
@@ -28,6 +29,7 @@ import com.stripe.android.paymentsheet.FormElement
 import com.stripe.android.paymentsheet.FormElement.MandateTextElement
 import com.stripe.android.paymentsheet.FormElement.SaveForFutureUseElement
 import com.stripe.android.paymentsheet.FormElement.SectionElement
+import com.stripe.android.paymentsheet.Identifier
 import com.stripe.android.paymentsheet.SectionFieldElement
 import com.stripe.android.paymentsheet.elements.AddressController
 import com.stripe.android.paymentsheet.elements.CardStyle
@@ -40,13 +42,11 @@ import com.stripe.android.paymentsheet.elements.TextFieldController
 import com.stripe.android.paymentsheet.getIdInputControllerMap
 import com.stripe.android.paymentsheet.injection.DaggerFormViewModelComponent
 import com.stripe.android.paymentsheet.paymentdatacollection.ComposeFragmentArguments
-import com.stripe.android.paymentsheet.paymentdatacollection.toFormFieldValues
 import com.stripe.android.paymentsheet.specifications.FormItemSpec
-import com.stripe.android.paymentsheet.specifications.IdentifierSpec
 import com.stripe.android.paymentsheet.specifications.LayoutSpec
 import com.stripe.android.paymentsheet.specifications.ResourceRepository
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
@@ -66,7 +66,7 @@ internal fun Form(formViewModel: FormViewModel) {
 
 @Composable
 internal fun FormInternal(
-    hiddenIdentifiersFlow: Flow<List<IdentifierSpec>>,
+    hiddenIdentifiersFlow: Flow<List<Identifier>>,
     enabledFlow: Flow<Boolean>,
     elements: List<FormElement>
 ) {
@@ -101,7 +101,7 @@ internal fun FormInternal(
 internal fun SectionElementUI(
     enabled: Boolean,
     element: SectionElement,
-    hiddenIdentifiers: List<IdentifierSpec>?,
+    hiddenIdentifiers: List<Identifier>?,
 ) {
     if (hiddenIdentifiers?.contains(element.identifier) == false) {
         val controller = element.controller
@@ -271,7 +271,6 @@ class FormViewModel @Inject internal constructor(
         viewModelScope.launch {
             resourceRepository.init()
             elements = transformSpecToElement.transform(layout.items, config.merchantName)
-            populateFormViewValues(config.toFormFieldValues())
         }
     }
 
@@ -284,6 +283,7 @@ class FormViewModel @Inject internal constructor(
 
     private val saveForFutureUseVisible = MutableStateFlow(config.saveForFutureUseInitialVisibility)
 
+    @VisibleForTesting
     internal fun setSaveForFutureUseVisibility(isVisible: Boolean) {
         saveForFutureUseVisible.value = isVisible
     }
@@ -294,18 +294,20 @@ class FormViewModel @Inject internal constructor(
             .firstOrNull()?.controller?.onValueChange(value)
     }
 
+    @VisibleForTesting
     private val saveForFutureUseElement = elements
         .filterIsInstance<SaveForFutureUseElement>()
         .firstOrNull()
 
+    @VisibleForTesting
     internal val saveForFutureUse = saveForFutureUseElement?.controller?.saveForFutureUse
         ?: MutableStateFlow(config.saveForFutureUseInitialValue)
 
     private val sectionToFieldIdentifierMap = layout.items
         .filterIsInstance<FormItemSpec.SectionSpec>()
         .associate { sectionSpec ->
-            sectionSpec.identifier to sectionSpec.fields.map {
-                it.identifier
+            Identifier.fromSpec(sectionSpec.identifier) to sectionSpec.fields.map {
+                Identifier.fromSpec(it.identifier)
             }
         }
 
@@ -367,12 +369,7 @@ class FormViewModel @Inject internal constructor(
             TransformElementToFormFieldValueFlow(
                 value,
                 hiddenIdentifiers,
-                showingMandate,
-                saveForFutureUse
+                showingMandate
             ).transformFlow()
         }
-
-    internal fun populateFormViewValues(formFieldValues: FormFieldValues) {
-        populateWith(elements, formFieldValues)
-    }
 }
