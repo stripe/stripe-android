@@ -48,7 +48,7 @@ internal class TransformToPaymentMethodCreateParams {
 
         val formKeyValueMap = formFieldValues.fieldValuePairs
             .mapValues { entry -> entry.value.value }
-            .mapKeys { it.key.value }
+            .mapKeys { it.key.key }
 
         createMap(mapStructure, destMap, formKeyValueMap)
         return destMap
