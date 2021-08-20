@@ -24,7 +24,10 @@ internal val sofortNameSection = SectionSpec(
 )
 internal val sofortEmailSection = SectionSpec(IdentifierSpec("email_section"), Email)
 internal val sofortCountrySection =
-    SectionSpec(IdentifierSpec("country_section"), Country(setOf("AT", "BE", "DE", "ES", "IT", "NL")))
+    SectionSpec(
+        IdentifierSpec("country_section"),
+        Country(setOf("AT", "BE", "DE", "ES", "IT", "NL"))
+    )
 internal val sofortMandate = MandateTextSpec(
     IdentifierSpec("mandate"),
     R.string.stripe_paymentsheet_sepa_mandate,
