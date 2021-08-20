@@ -271,7 +271,6 @@ class FormViewModel @Inject internal constructor(
         viewModelScope.launch {
             resourceRepository.init()
             elements = transformSpecToElement.transform(layout.items, config.merchantName)
-            populateFormViewValues(config.toFormFieldValues())
         }
     }
 

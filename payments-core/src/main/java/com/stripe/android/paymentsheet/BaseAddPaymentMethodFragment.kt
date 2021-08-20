@@ -26,6 +26,7 @@ import com.stripe.android.paymentsheet.paymentdatacollection.CardDataCollectionF
 import com.stripe.android.paymentsheet.paymentdatacollection.ComposeFormDataCollectionFragment
 import com.stripe.android.paymentsheet.paymentdatacollection.ComposeFragmentArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.TransformToPaymentMethodCreateParams
+import com.stripe.android.paymentsheet.specifications.IdentifierSpec
 import com.stripe.android.paymentsheet.ui.AddPaymentMethodsFragmentFactory
 import com.stripe.android.paymentsheet.ui.AnimationConstants
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
@@ -207,7 +208,10 @@ internal abstract class BaseAddPaymentMethodFragment(
                         selectedPaymentMethodResources.displayNameResource,
                         selectedPaymentMethodResources.iconResource,
                         this,
-                        formFieldValues.saveForFutureUse
+                        formFieldValues
+                            .fieldValuePairs[IdentifierSpec.SaveForFutureUse]
+                            ?.value
+                            .toBoolean()
                     )
                 }
         }

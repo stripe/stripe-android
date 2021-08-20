@@ -49,8 +49,7 @@ internal class TransformElementToFormFieldValueFlow(
 
         return FormFieldValues(
             hiddenFilteredFieldSnapshotMap,
-            showingMandate,
-            saveForFutureUse
+            showingMandate
         ).takeIf {
             hiddenFilteredFieldSnapshotMap.values.map { it.isComplete }
                 .none { complete -> !complete }

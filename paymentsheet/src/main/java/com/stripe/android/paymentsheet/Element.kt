@@ -128,7 +128,7 @@ internal sealed class SectionFieldElement {
 
         @VisibleForTesting
         val countryElement = Country(
-            IdentifierSpec("country"),
+            IdentifierSpec.Country,
             countryDropdownFieldController
         )
 

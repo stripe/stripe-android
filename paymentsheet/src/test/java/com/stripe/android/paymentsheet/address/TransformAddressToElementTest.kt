@@ -21,7 +21,7 @@ class TransformAddressToElementTest {
         val simpleTextList = addressSchema.transformToElementList()
 
         val addressLine1 = SectionFieldSpec.SimpleText(
-            IdentifierSpec("line1"),
+            IdentifierSpec.Line1,
             R.string.address_label_address_line1,
             KeyboardCapitalization.Words,
             KeyboardType.Text,
@@ -29,7 +29,7 @@ class TransformAddressToElementTest {
         )
 
         val addressLine2 = SectionFieldSpec.SimpleText(
-            IdentifierSpec("line2"),
+            IdentifierSpec.Line2,
             R.string.address_label_address_line2,
             KeyboardCapitalization.Words,
             KeyboardType.Text,
@@ -37,7 +37,7 @@ class TransformAddressToElementTest {
         )
 
         val city = SectionFieldSpec.SimpleText(
-            IdentifierSpec("city"),
+            IdentifierSpec.City,
             R.string.address_label_city,
             KeyboardCapitalization.Words,
             KeyboardType.Text,
@@ -45,7 +45,7 @@ class TransformAddressToElementTest {
         )
 
         val state = SectionFieldSpec.SimpleText(
-            IdentifierSpec("state"),
+            IdentifierSpec.State,
             R.string.address_label_state,
             KeyboardCapitalization.Words,
             KeyboardType.Text,
@@ -53,7 +53,7 @@ class TransformAddressToElementTest {
         )
 
         val zip = SectionFieldSpec.SimpleText(
-            IdentifierSpec("postal_code"),
+            IdentifierSpec.PostalCode,
             R.string.address_label_zip_code,
             KeyboardCapitalization.None,
             KeyboardType.Number,

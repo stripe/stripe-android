@@ -67,7 +67,7 @@ internal class TransformSpecToElement(
     }
 
     private fun transformAddress() = SectionFieldElement.AddressElement(
-        IdentifierSpec("billing"),
+        IdentifierSpec.Generic("billing"),
         resourceRepository.addressRepository
     )
 

@@ -14,11 +14,11 @@ import org.junit.Test
 class PopulateFormFromFormFieldValuesTest {
     private val emailController = TextFieldController(EmailConfig())
     private val emailFieldElement = SectionFieldElement.Email(
-        IdentifierSpec("email"),
+        IdentifierSpec.Email,
         emailController
     )
     private val emailSection = FormElement.SectionElement(
-        identifier = IdentifierSpec("emailSection"),
+        identifier = IdentifierSpec.Generic("emailSection"),
         emailFieldElement,
         SectionController(emailController.label, listOf(emailController))
     )
@@ -33,8 +33,7 @@ class PopulateFormFromFormFieldValuesTest {
                         true
                     )
                 ),
-                showsMandate = true,
-                saveForFutureUse = false
+                showsMandate = true
             )
 
             populateWith(listOf(emailSection), formFieldValues)
@@ -49,13 +48,12 @@ class PopulateFormFromFormFieldValuesTest {
         runBlocking {
             val formFieldValues = FormFieldValues(
                 mapOf(
-                    IdentifierSpec("not in list form elements") to FormFieldEntry(
+                    IdentifierSpec.Generic("not in list form elements") to FormFieldEntry(
                         "valid@email.com",
                         true
                     )
                 ),
-                showsMandate = true,
-                saveForFutureUse = false
+                showsMandate = true
             )
 
             populateWith(listOf(emailSection), formFieldValues)
@@ -70,8 +68,7 @@ class PopulateFormFromFormFieldValuesTest {
         runBlocking {
             val formFieldValues = FormFieldValues(
                 mapOf(),
-                showsMandate = true,
-                saveForFutureUse = false
+                showsMandate = true
             )
 
             populateWith(listOf(emailSection), formFieldValues)

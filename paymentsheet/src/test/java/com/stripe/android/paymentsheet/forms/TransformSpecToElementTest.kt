@@ -32,12 +32,12 @@ import java.io.File
 class TransformSpecToElementTest {
 
     private val nameSection = FormItemSpec.SectionSpec(
-        IdentifierSpec("nameSection"),
+        IdentifierSpec.Generic("nameSection"),
         SectionFieldSpec.NAME
     )
 
     private val emailSection = FormItemSpec.SectionSpec(
-        IdentifierSpec("emailSection"),
+        IdentifierSpec.Generic("emailSection"),
         SectionFieldSpec.Email
     )
 
@@ -64,7 +64,7 @@ class TransformSpecToElementTest {
         val formElement = transformSpecToElement.transform(
             listOf(
                 FormItemSpec.SectionSpec(
-                    IdentifierSpec("multifieldSection"),
+                    IdentifierSpec.Generic("multifieldSection"),
                     listOf(
                         SectionFieldSpec.Country(),
                         IDEAL_BANK_CONFIG
@@ -83,7 +83,7 @@ class TransformSpecToElementTest {
     @Test
     fun `Adding a country section sets up the section and country elements correctly`() {
         val countrySection = FormItemSpec.SectionSpec(
-            IdentifierSpec("countrySection"),
+            IdentifierSpec.Generic("countrySection"),
             SectionFieldSpec.Country(onlyShowCountryCodes = setOf("AT"))
         )
         val formElement = transformSpecToElement.transform(
@@ -108,7 +108,7 @@ class TransformSpecToElementTest {
     @Test
     fun `Adding a ideal bank section sets up the section and country elements correctly`() {
         val idealSection = FormItemSpec.SectionSpec(
-            IdentifierSpec("idealSection"),
+            IdentifierSpec.Generic("idealSection"),
             IDEAL_BANK_CONFIG
         )
         val formElement = transformSpecToElement.transform(
@@ -150,9 +150,9 @@ class TransformSpecToElementTest {
         val formElement = transformSpecToElement.transform(
             listOf(
                 FormItemSpec.SectionSpec(
-                    IdentifierSpec("simple_section"),
+                    IdentifierSpec.Generic("simple_section"),
                     SectionFieldSpec.SimpleText(
-                        IdentifierSpec("simple"),
+                        IdentifierSpec.Generic("simple"),
                         R.string.address_label_name,
                         showOptionalLabel = true,
                         keyboardType = KeyboardType.Text,
@@ -190,7 +190,7 @@ class TransformSpecToElementTest {
     @Test
     fun `Add a mandate section spec setup of the mandate element correctly`() {
         val mandate = FormItemSpec.MandateTextSpec(
-            IdentifierSpec("mandate"),
+            IdentifierSpec.Generic("mandate"),
             R.string.stripe_paymentsheet_sepa_mandate,
             Color.Gray
         )
@@ -211,7 +211,7 @@ class TransformSpecToElementTest {
     fun `Add a save for future use section spec sets the mandate element correctly`() =
         runBlocking {
             val mandate = FormItemSpec.MandateTextSpec(
-                IdentifierSpec("mandate"),
+                IdentifierSpec.Generic("mandate"),
                 R.string.stripe_paymentsheet_sepa_mandate,
                 Color.Gray
             )
@@ -240,7 +240,7 @@ class TransformSpecToElementTest {
 
     companion object {
         val IDEAL_BANK_CONFIG = SectionFieldSpec.BankDropdown(
-            IdentifierSpec("bank"),
+            IdentifierSpec.Generic("bank"),
             R.string.stripe_paymentsheet_ideal_bank,
             SupportedBankType.Ideal
         )
