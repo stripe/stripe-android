@@ -19,9 +19,9 @@ class TransformElementToFormViewValueFlowTest {
 
     private val emailController = TextFieldController(EmailConfig())
     private val emailSection = FormElement.SectionElement(
-        identifier = IdentifierSpec("emailSection"),
+        identifier = IdentifierSpec.Generic("emailSection"),
         SectionFieldElement.Email(
-            IdentifierSpec("email"),
+            IdentifierSpec.Email,
             emailController
         ),
         SectionController(emailController.label, listOf(emailController))
@@ -29,9 +29,9 @@ class TransformElementToFormViewValueFlowTest {
 
     private val countryController = DropdownFieldController(CountryConfig())
     private val countrySection = FormElement.SectionElement(
-        identifier = IdentifierSpec("countrySection"),
+        identifier = IdentifierSpec.Generic("countrySection"),
         SectionFieldElement.Country(
-            IdentifierSpec("country"),
+            IdentifierSpec.Country,
             countryController
         ),
         SectionController(countryController.label, listOf(countryController))
@@ -62,9 +62,9 @@ class TransformElementToFormViewValueFlowTest {
 
             assertThat(formFieldValue).isNotNull()
             assertThat(formFieldValue?.fieldValuePairs)
-                .containsKey(IdentifierSpec("email"))
+                .containsKey(IdentifierSpec.Email)
             assertThat(formFieldValue?.fieldValuePairs)
-                .containsKey(IdentifierSpec("country"))
+                .containsKey(IdentifierSpec.Country)
         }
     }
 
@@ -72,16 +72,16 @@ class TransformElementToFormViewValueFlowTest {
     fun `If an hidden field is incomplete field pairs have the non-hidden values`() {
         runBlocking {
             emailController.onValueChange("email is invalid")
-            hiddenIdentifersFlow.value = listOf(IdentifierSpec("email"))
+            hiddenIdentifersFlow.value = listOf(IdentifierSpec.Email)
 
             val formFieldValues = transformElementToFormFieldValueFlow.transformFlow()
 
             val formFieldValue = formFieldValues.first()
             assertThat(formFieldValue).isNotNull()
             assertThat(formFieldValue?.fieldValuePairs)
-                .doesNotContainKey(IdentifierSpec("email"))
+                .doesNotContainKey(IdentifierSpec.Email)
             assertThat(formFieldValue?.fieldValuePairs)
-                .containsKey(IdentifierSpec("country"))
+                .containsKey(IdentifierSpec.Country)
         }
     }
 
@@ -95,9 +95,9 @@ class TransformElementToFormViewValueFlowTest {
 
             assertThat(formFieldValue).isNotNull()
             assertThat(formFieldValue?.fieldValuePairs)
-                .doesNotContainKey(IdentifierSpec("email"))
+                .doesNotContainKey(IdentifierSpec.Email)
             assertThat(formFieldValue?.fieldValuePairs)
-                .containsKey(IdentifierSpec("country"))
+                .containsKey(IdentifierSpec.Country)
         }
     }
 }

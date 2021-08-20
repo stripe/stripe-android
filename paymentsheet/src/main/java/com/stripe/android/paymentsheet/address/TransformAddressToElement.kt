@@ -3,7 +3,6 @@ package com.stripe.android.paymentsheet.address
 import androidx.annotation.StringRes
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
-import com.stripe.android.paymentsheet.Identifier
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.forms.transform
 import com.stripe.android.paymentsheet.specifications.IdentifierSpec
@@ -114,7 +113,7 @@ internal fun List<CountryAddressSchema>.transformToElementList() =
         when (it.type) {
             FieldType.AddressLine1 -> {
                 SectionFieldSpec.SimpleText(
-                    IdentifierSpec(Identifier.Line1.key),
+                    IdentifierSpec.Line1,
                     it.schema?.nameType?.stringResId ?: R.string.address_label_address_line1,
                     capitalization = KeyboardCapitalization.Words,
                     keyboardType = getKeyboard(it.schema),
@@ -123,7 +122,7 @@ internal fun List<CountryAddressSchema>.transformToElementList() =
             }
             FieldType.AddressLine2 -> {
                 SectionFieldSpec.SimpleText(
-                    IdentifierSpec(Identifier.Line2.key),
+                    IdentifierSpec.Line2,
                     it.schema?.nameType?.stringResId ?: R.string.address_label_address_line2,
                     capitalization = KeyboardCapitalization.Words,
                     keyboardType = getKeyboard(it.schema),
@@ -132,7 +131,7 @@ internal fun List<CountryAddressSchema>.transformToElementList() =
             }
             FieldType.Locality -> {
                 SectionFieldSpec.SimpleText(
-                    IdentifierSpec(Identifier.City.key),
+                    IdentifierSpec.City,
                     it.schema?.nameType?.stringResId ?: R.string.address_label_city,
                     capitalization = KeyboardCapitalization.Words,
                     keyboardType = getKeyboard(it.schema),
@@ -141,7 +140,7 @@ internal fun List<CountryAddressSchema>.transformToElementList() =
             }
             FieldType.AdministrativeArea -> {
                 SectionFieldSpec.SimpleText(
-                    IdentifierSpec(Identifier.State.key),
+                    IdentifierSpec.State,
                     it.schema?.nameType?.stringResId ?: NameType.state.stringResId,
                     capitalization = KeyboardCapitalization.Words,
                     keyboardType = getKeyboard(it.schema),
@@ -150,7 +149,7 @@ internal fun List<CountryAddressSchema>.transformToElementList() =
             }
             FieldType.PostalCode -> {
                 SectionFieldSpec.SimpleText(
-                    IdentifierSpec(Identifier.PostalCode.key),
+                    IdentifierSpec.PostalCode,
                     it.schema?.nameType?.stringResId ?: R.string.address_label_postal_code,
                     capitalization = KeyboardCapitalization.None,
                     keyboardType = getKeyboard(it.schema),

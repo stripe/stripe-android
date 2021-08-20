@@ -55,7 +55,6 @@ internal class TextFieldController constructor(
         it.isValid() || (!it.isValid() && showOptionalLabel && it.isBlank())
     }
 
-
     init {
         initialValue?.let { onRawValueChange(it) }
     }
