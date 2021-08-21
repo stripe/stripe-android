@@ -225,7 +225,7 @@ internal abstract class BaseAddPaymentMethodFragment(
             saveForFutureUse: Boolean,
             supportedPaymentMethodName: String,
             merchantName: String,
-            billingAddress: PaymentSheet.BillingDetails?
+            billingAddress: PaymentSheet.BillingDetails? = null
         ): ComposeFragmentArguments {
             var saveForFutureUseValue = true
             var saveForFutureUseVisible = true
