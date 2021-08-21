@@ -442,25 +442,7 @@ class CardDataCollectionFragmentTest {
         fragmentConfig: FragmentConfig? = FragmentConfigFixtures.DEFAULT,
         stripeIntent: StripeIntent? = PaymentIntentFixtures.PI_WITH_SHIPPING,
         newCard: PaymentSelection.New.Card? = null,
-        fragmentArgs: ComposeFragmentArguments? = ComposeFragmentArguments(
-            SupportedPaymentMethod.Bancontact.name,
-            saveForFutureUseInitialVisibility = true,
-            saveForFutureUseInitialValue = true,
-            merchantName = "Merchant, Inc.",
-            billingDetails = BillingDetails(
-                address = Address(
-                    line1 = "123 Main Street",
-                    line2 = null,
-                    city = "San Francisco",
-                    state = "CA",
-                    postalCode = "94111",
-                    country = "DE",
-                ),
-                email = "email",
-                name = "Jenny Rosen",
-                phone = "+18008675309"
-            )
-        ),
+        fragmentArgs: ComposeFragmentArguments? = PaymentSheetFixtures.COMPOSE_FRAGMENT_ARGS,
         onReady: (CardDataCollectionFragment<PaymentSheetViewModel>, FragmentPaymentsheetAddCardBinding) -> Unit
     ) {
         val factory = AddPaymentMethodsFragmentFactory(

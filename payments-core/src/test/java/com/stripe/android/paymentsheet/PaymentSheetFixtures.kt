@@ -3,6 +3,10 @@ package com.stripe.android.paymentsheet
 import androidx.core.graphics.toColorInt
 import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.SetupIntentClientSecret
+import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
+import com.stripe.android.paymentsheet.paymentdatacollection.Address
+import com.stripe.android.paymentsheet.paymentdatacollection.BillingDetails
+import com.stripe.android.paymentsheet.paymentdatacollection.ComposeFragmentArguments
 
 internal object PaymentSheetFixtures {
     internal val STATUS_BAR_COLOR = "#121212".toColorInt()
@@ -57,5 +61,25 @@ internal object PaymentSheetFixtures {
         PAYMENT_INTENT_CLIENT_SECRET,
         config = null,
         STATUS_BAR_COLOR,
+    )
+
+    internal val COMPOSE_FRAGMENT_ARGS = ComposeFragmentArguments(
+        SupportedPaymentMethod.Bancontact.name,
+        saveForFutureUseInitialVisibility = true,
+        saveForFutureUseInitialValue = true,
+        merchantName = "Merchant, Inc.",
+        billingDetails = BillingDetails(
+            address = Address(
+                line1 = "123 Main Street",
+                line2 = null,
+                city = "San Francisco",
+                state = "CA",
+                postalCode = "94111",
+                country = "DE",
+            ),
+            email = "email",
+            name = "Jenny Rosen",
+            phone = "+18008675309"
+        )
     )
 }
