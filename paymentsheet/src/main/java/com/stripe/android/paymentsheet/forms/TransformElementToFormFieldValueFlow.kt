@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet.forms
 
-import com.stripe.android.paymentsheet.elements.InputController
 import com.stripe.android.paymentsheet.specifications.IdentifierSpec
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
@@ -11,16 +10,11 @@ import kotlinx.coroutines.flow.combine
  * the list of form elements into a [FormFieldValues].
  */
 internal class TransformElementToFormFieldValueFlow(
-    idControllerMap: Map<IdentifierSpec, InputController>,
+    private val currentFieldValueMap: Flow<Map<IdentifierSpec, FormFieldEntry>>,
     private val hiddenIdentifiers: Flow<List<IdentifierSpec>>,
     val showingMandate: Flow<Boolean>,
     val saveForFutureUse: Flow<Boolean>
 ) {
-    private val currentFieldValueMap = combine(
-        getCurrentFieldValuePairs(idControllerMap)
-    ) {
-        it.toMap()
-    }
 
     /**
      * This will return null if any form field values are incomplete, otherwise it is an object
@@ -55,23 +49,5 @@ internal class TransformElementToFormFieldValueFlow(
             hiddenFilteredFieldSnapshotMap.values.map { it.isComplete }
                 .none { complete -> !complete }
         }
-    }
-
-    private fun getCurrentFieldValuePairs(idControllerMap: Map<IdentifierSpec, InputController>) =
-        idControllerMap.map { fieldControllerEntry ->
-            getCurrentFieldValuePair(fieldControllerEntry.key, fieldControllerEntry.value)
-        }
-
-    private fun getCurrentFieldValuePair(
-        identifier: IdentifierSpec,
-        controller: InputController
-    ) = combine(controller.rawFieldValue, controller.isComplete) { rawFieldValue, isComplete ->
-        Pair(
-            identifier,
-            FormFieldEntry(
-                value = rawFieldValue,
-                isComplete = isComplete,
-            )
-        )
     }
 }

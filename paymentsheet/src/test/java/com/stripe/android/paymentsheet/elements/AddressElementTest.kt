@@ -4,10 +4,12 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.SectionFieldElement
 import com.stripe.android.paymentsheet.address.AddressFieldElementRepository
+import com.stripe.android.paymentsheet.forms.FormFieldEntry
 import com.stripe.android.paymentsheet.specifications.IdentifierSpec
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.runBlockingTest
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
@@ -76,5 +78,45 @@ class AddressElementTest {
             assertThat(addressElement.controller.error.first()?.errorMessage)
                 .isEqualTo(R.string.iban_invalid_start)
         }
+    }
+
+    @ExperimentalCoroutinesApi
+    @Test
+    fun `verify flow of form field values`() = runBlockingTest {
+        val addressElement = SectionFieldElement.AddressElement(
+            IdentifierSpec("address"),
+            addressFieldElementRepository,
+            countryDropdownFieldController = countryDropdownFieldController
+        )
+        val formFieldValueFlow = addressElement.getFormFieldValueFlow()
+
+        countryDropdownFieldController.onValueChange(0)
+
+        // Add values to the fields
+        (addressElement.fields.first()[1].controller as TextFieldController)
+            .onValueChange("email")
+
+        ShadowLooper.runUiThreadTasksIncludingDelayedTasks()
+
+        // Verify
+        var firstForFieldValues = formFieldValueFlow.first()
+        assertThat(firstForFieldValues.toMap()[IdentifierSpec("email")])
+            .isEqualTo(
+                FormFieldEntry("email", false)
+            )
+
+        countryDropdownFieldController.onValueChange(1)
+
+        // Add values to the fields
+        (addressElement.fields.first()[1].controller as TextFieldController)
+            .onValueChange("DE89370400440532013000")
+
+        ShadowLooper.runUiThreadTasksIncludingDelayedTasks()
+
+        firstForFieldValues = formFieldValueFlow.first()
+        assertThat(firstForFieldValues.toMap()[IdentifierSpec("iban")])
+            .isEqualTo(
+                FormFieldEntry("DE89370400440532013000", true)
+            )
     }
 }

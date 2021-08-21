@@ -12,8 +12,14 @@ import com.stripe.android.paymentsheet.elements.SaveForFutureUseController
 import com.stripe.android.paymentsheet.elements.SectionController
 import com.stripe.android.paymentsheet.elements.SectionFieldErrorController
 import com.stripe.android.paymentsheet.elements.TextFieldController
+import com.stripe.android.paymentsheet.forms.FormFieldEntry
 import com.stripe.android.paymentsheet.specifications.IdentifierSpec
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 
 /**
@@ -23,6 +29,8 @@ import kotlinx.coroutines.flow.map
 internal sealed class FormElement {
     abstract val identifier: IdentifierSpec
     abstract val controller: Controller?
+
+    abstract fun getFormFieldValueFlow(): Flow<List<Pair<IdentifierSpec, FormFieldEntry>>>
 
     /**
      * This is an element that has static text because it takes no user input, it is not
@@ -35,7 +43,10 @@ internal sealed class FormElement {
         val color: Color,
         val merchantName: String?,
         override val controller: InputController? = null,
-    ) : FormElement()
+    ) : FormElement() {
+        override fun getFormFieldValueFlow(): Flow<List<Pair<IdentifierSpec, FormFieldEntry>>> =
+            MutableStateFlow(emptyList())
+    }
 
     /**
      * This is an element that will make elements (as specified by identifier) hidden
@@ -45,7 +56,14 @@ internal sealed class FormElement {
         override val identifier: IdentifierSpec,
         override val controller: SaveForFutureUseController,
         val merchantName: String?
-    ) : FormElement()
+    ) : FormElement() {
+        override fun getFormFieldValueFlow(): Flow<List<Pair<IdentifierSpec, FormFieldEntry>>> =
+            controller.formFieldValue.map {
+                listOf(
+                    identifier to it
+                )
+            }
+    }
 
     data class SectionElement(
         override val identifier: IdentifierSpec,
@@ -57,6 +75,11 @@ internal sealed class FormElement {
             field: SectionFieldElement,
             controller: SectionController
         ) : this(identifier, listOf(field), controller)
+
+        override fun getFormFieldValueFlow(): Flow<List<Pair<IdentifierSpec, FormFieldEntry>>> =
+            combine(fields.map { it.getFormFieldValueFlow() }) {
+                it.toList().flatten()
+            }
     }
 }
 
@@ -78,7 +101,9 @@ internal fun List<FormElement>.getIdInputControllerMap() = this
 /**
  * This is an element that is in a section and accepts user input.
  */
-internal sealed class SectionFieldElement {
+internal sealed class SectionFieldElement(
+    private val formFieldEntryFlow: Flow<FormFieldEntry>? = null
+) {
     abstract val identifier: IdentifierSpec
 
     /**
@@ -92,25 +117,31 @@ internal sealed class SectionFieldElement {
      */
     fun sectionFieldErrorController(): SectionFieldErrorController = controller
 
+    open fun getFormFieldValueFlow(): Flow<List<Pair<IdentifierSpec, FormFieldEntry>>> {
+        return formFieldEntryFlow?.map { formFieldEntry ->
+            listOf(Pair(identifier, formFieldEntry))
+        } ?: MutableStateFlow(emptyList())
+    }
+
     data class Email(
         override val identifier: IdentifierSpec,
         override val controller: TextFieldController
-    ) : SectionFieldElement()
+    ) : SectionFieldElement(controller.formFieldValue)
 
     data class Iban(
         override val identifier: IdentifierSpec,
-        override val controller: TextFieldController,
-    ) : SectionFieldElement()
+        override val controller: TextFieldController
+    ) : SectionFieldElement(controller.formFieldValue)
 
     data class Country(
         override val identifier: IdentifierSpec,
         override val controller: DropdownFieldController
-    ) : SectionFieldElement()
+    ) : SectionFieldElement(controller.formFieldValue)
 
     data class SimpleText(
         override val identifier: IdentifierSpec,
         override val controller: TextFieldController
-    ) : SectionFieldElement()
+    ) : SectionFieldElement(controller.formFieldValue)
 
     data class SimpleDropdown(
         override val identifier: IdentifierSpec,
@@ -142,5 +173,38 @@ internal sealed class SectionFieldElement {
         val fields = otherFields.map { listOf(countryElement).plus(it) }
 
         override val controller = AddressController(fields)
+
+        @ExperimentalCoroutinesApi
+        override fun getFormFieldValueFlow() = fields.flatMapLatest { fieldElements ->
+            combine(
+                fieldElements
+                    .filter { it.controller is InputController }
+                    .associate { sectionFieldElement ->
+                        sectionFieldElement.identifier to
+                            sectionFieldElement.controller as InputController
+                    }
+                    .map {
+                        getCurrentFieldValuePair(it.key, it.value)
+                    }
+            ) {
+                it.toList()
+            }
+        }
+
+        private fun getCurrentFieldValuePair(
+            identifier: IdentifierSpec,
+            controller: InputController
+        ) = combine(
+            controller.rawFieldValue,
+            controller.isComplete
+        ) { rawFieldValue, isComplete ->
+            Pair(
+                identifier,
+                FormFieldEntry(
+                    value = rawFieldValue,
+                    isComplete = isComplete,
+                )
+            )
+        }
     }
 }
