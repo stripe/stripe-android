@@ -110,9 +110,8 @@ class AddPaymentMethodActivityStarter : ActivityStarter<AddPaymentMethodActivity
                 this.isPaymentSessionActive = isPaymentSessionActive
             }
 
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // for paymentsheet
             @JvmSynthetic
-            fun setPaymentConfiguration(
+            internal fun setPaymentConfiguration(
                 paymentConfiguration: PaymentConfiguration?
             ): Builder = apply {
                 this.paymentConfiguration = paymentConfiguration
