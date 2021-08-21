@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet
 
 import android.content.Context
-import android.os.Bundle
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.fragment.app.testing.launchFragmentInContainer
@@ -476,7 +475,7 @@ class PaymentSheetAddPaymentMethodFragmentTest {
                 supportedPaymentMethodName = SupportedPaymentMethod.Bancontact.name,
                 merchantName = "Example, Inc",
 
-                )
+            )
         ).isEqualTo(
             ComposeFragmentArguments(
                 SupportedPaymentMethod.Bancontact.name,
@@ -497,7 +496,7 @@ class PaymentSheetAddPaymentMethodFragmentTest {
                 supportedPaymentMethodName = SupportedPaymentMethod.Bancontact.name,
                 merchantName = "Example, Inc",
 
-                )
+            )
         ).isEqualTo(
             ComposeFragmentArguments(
                 SupportedPaymentMethod.Bancontact.name,

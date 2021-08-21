@@ -166,7 +166,7 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
                     city = "San Francisco",
                     state = "CA",
                     postalCode = "94111",
-                    country = "US",
+                    country = "DE",
                 ),
                 email = "email",
                 name = "Jenny Rosen",
