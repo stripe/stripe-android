@@ -333,7 +333,6 @@ internal class CardDataCollectionFragment<ViewModelType : BaseSheetViewModel<*>>
             if (saveCardCheckbox.isVisible) {
                 saveCardCheckbox.isChecked = it
             }
-
         }
 
         bottomSpace.isVisible = !saveCardCheckbox.isVisible
