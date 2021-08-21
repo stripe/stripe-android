@@ -17,7 +17,6 @@ import com.stripe.android.model.CountryCode
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
-import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.PaymentSheetActivity
 import com.stripe.android.paymentsheet.PaymentSheetContract
@@ -32,7 +31,6 @@ import com.stripe.android.utils.TestUtils.idleLooper
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.kotlin.mock
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
