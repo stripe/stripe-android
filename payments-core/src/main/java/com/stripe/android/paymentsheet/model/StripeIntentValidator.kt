@@ -3,11 +3,12 @@ package com.stripe.android.paymentsheet.model
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
+import javax.inject.Inject
 
 /**
  * Validator for [PaymentIntent] or [SetupIntent] instances used in PaymentSheet.
  */
-internal class StripeIntentValidator {
+internal class StripeIntentValidator @Inject constructor() {
     @JvmSynthetic
     fun requireValid(
         stripeIntent: StripeIntent
@@ -18,7 +19,7 @@ internal class StripeIntentValidator {
                 error(
                     """
                         PaymentIntent with confirmation_method='automatic' is required.
-                        The current PaymentIntent has confirmation_method ${stripeIntent.confirmationMethod}.
+                        The current PaymentIntent has confirmation_method '${stripeIntent.confirmationMethod}'.
                         See https://stripe.com/docs/api/payment_intents/object#payment_intent_object-confirmation_method.
                     """.trimIndent()
                 )
@@ -31,7 +32,7 @@ internal class StripeIntentValidator {
                 error(
                     """
                         A PaymentIntent with status='requires_payment_method' or 'requires_action` is required.
-                        The current PaymentIntent has status ${stripeIntent.status}.
+                        The current PaymentIntent has status '${stripeIntent.status}'.
                         See https://stripe.com/docs/api/payment_intents/object#payment_intent_object-status.
                     """.trimIndent()
                 )
@@ -44,7 +45,7 @@ internal class StripeIntentValidator {
                 error(
                     """
                         A SetupIntent with status='requires_payment_method' or 'requires_action` is required.
-                        The current SetupIntent has status ${stripeIntent.status}.
+                        The current SetupIntent has status '${stripeIntent.status}'.
                         See https://stripe.com/docs/api/setup_intents/object#setup_intent_object-status
                     """.trimIndent()
                 )

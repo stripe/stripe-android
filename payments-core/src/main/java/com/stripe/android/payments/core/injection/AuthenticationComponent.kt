@@ -1,14 +1,11 @@
 package com.stripe.android.payments.core.injection
 
 import android.content.Context
-import com.stripe.android.PaymentBrowserAuthStarter
-import com.stripe.android.PaymentRelayStarter
 import com.stripe.android.networking.AnalyticsRequestExecutor
 import com.stripe.android.networking.AnalyticsRequestFactory
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.core.authentication.DefaultPaymentAuthenticatorRegistry
 import com.stripe.android.payments.core.authentication.threeds2.Stripe3ds2TransactionViewModelFactory
-import com.stripe.android.view.AuthActivityStarterHost
 import dagger.BindsInstance
 import dagger.Component
 import javax.inject.Named
@@ -42,16 +39,6 @@ internal interface AuthenticationComponent {
 
         @BindsInstance
         fun stripeRepository(stripeRepository: StripeRepository): Builder
-
-        @BindsInstance
-        fun paymentRelayStarterFactory(
-            paymentRelayStarterFactory: (AuthActivityStarterHost) -> PaymentRelayStarter
-        ): Builder
-
-        @BindsInstance
-        fun paymentBrowserAuthStarterFactory(
-            paymentBrowserAuthStarterFactory: (AuthActivityStarterHost) -> PaymentBrowserAuthStarter
-        ): Builder
 
         @BindsInstance
         fun analyticsRequestExecutor(analyticsRequestExecutor: AnalyticsRequestExecutor): Builder

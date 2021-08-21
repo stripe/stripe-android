@@ -16,10 +16,9 @@ import com.stripe.android.PaymentController
 import com.stripe.android.PaymentIntentResult
 import com.stripe.android.R
 import com.stripe.android.StripeIntentResult
-import com.stripe.android.googlepaylauncher.GooglePayConfig
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
-import com.stripe.android.googlepaylauncher.GooglePayLauncherResult
-import com.stripe.android.googlepaylauncher.StripeGooglePayContract
+import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
+import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContract
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentIntentFixtures
@@ -44,8 +43,6 @@ import com.stripe.android.paymentsheet.model.PaymentOption
 import com.stripe.android.paymentsheet.model.PaymentOptionFactory
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
-import com.stripe.android.paymentsheet.repositories.PaymentMethodsRepository
-import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
 import com.stripe.android.view.ActivityScenarioFactory
 import com.stripe.android.view.AuthActivityStarterHost
 import kotlinx.coroutines.Dispatchers
@@ -89,7 +86,7 @@ internal class DefaultFlowControllerTest {
         mock<ActivityResultLauncher<PaymentOptionContract.Args>>()
 
     private val googlePayActivityLauncher =
-        mock<ActivityResultLauncher<StripeGooglePayContract.Args>>()
+        mock<ActivityResultLauncher<GooglePayPaymentMethodLauncherContract.Args>>()
 
     private val flowController: DefaultFlowController by lazy {
         createFlowController()
@@ -127,7 +124,7 @@ internal class DefaultFlowControllerTest {
 
         whenever(
             activityResultCaller.registerForActivityResult(
-                any<StripeGooglePayContract>(),
+                any<GooglePayPaymentMethodLauncherContract>(),
                 any()
             )
         ).thenReturn(googlePayActivityLauncher)
@@ -500,19 +497,15 @@ internal class DefaultFlowControllerTest {
 
         verify(googlePayActivityLauncher).launch(
             argWhere {
-                it == StripeGooglePayContract.Args(
-                    config = GooglePayConfig(
+                it == GooglePayPaymentMethodLauncherContract.Args(
+                    config = GooglePayPaymentMethodLauncher.Config(
                         environment = GooglePayEnvironment.Test,
-                        amount = 1099,
-                        countryCode = "US",
-                        currencyCode = "usd",
-                        merchantName = "Widget Store",
-                        transactionId = "pi_1F7J1aCRMbs6FrXfaJcvbxF6"
+                        merchantCountryCode = "US",
+                        merchantName = "Widget Store"
                     ),
-                    statusBarColor = ContextCompat.getColor(
-                        activity,
-                        R.color.stripe_toolbar_color_default_dark
-                    )
+                    currencyCode = "usd",
+                    amount = 1099,
+                    transactionId = "pi_1F7J1aCRMbs6FrXfaJcvbxF6"
                 )
             }
         )
@@ -529,7 +522,7 @@ internal class DefaultFlowControllerTest {
         }
 
         flowController.onGooglePayResult(
-            GooglePayLauncherResult.Canceled
+            GooglePayPaymentMethodLauncher.Result.Canceled
         )
 
         verify(paymentResultCallback).onPaymentSheetResult(
@@ -547,9 +540,8 @@ internal class DefaultFlowControllerTest {
             }
 
             flowController.onGooglePayResult(
-                GooglePayLauncherResult.PaymentData(
-                    paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
-                    shippingInformation = null
+                GooglePayPaymentMethodLauncher.Result.Completed(
+                    paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
                 )
             )
 
@@ -769,16 +761,14 @@ internal class DefaultFlowControllerTest {
         paymentOptionCallback,
         paymentResultCallback,
         activityResultCaller,
+        0,
         flowControllerInitializer,
         eventReporter,
         ViewModelProvider(activity)[FlowControllerViewModel::class.java],
-        mock(),
         paymentController,
         { PaymentConfiguration.getInstance(activity) },
         { flowResultProcessor }
-    ).also {
-        it.setInjectorKey(0)
-    }
+    )
 
     private class FakeFlowControllerInitializer(
         var paymentMethods: List<PaymentMethod>,
@@ -788,8 +778,6 @@ internal class DefaultFlowControllerTest {
     ) : FlowControllerInitializer {
         override suspend fun init(
             clientSecret: ClientSecret,
-            stripeIntentRepository: StripeIntentRepository,
-            paymentMethodsRepository: PaymentMethodsRepository,
             paymentSheetConfiguration: PaymentSheet.Configuration?
         ): FlowControllerInitializer.InitResult {
             delay(delayMillis)
@@ -810,8 +798,6 @@ internal class DefaultFlowControllerTest {
     private class FailingFlowControllerInitializer : FlowControllerInitializer {
         override suspend fun init(
             clientSecret: ClientSecret,
-            stripeIntentRepository: StripeIntentRepository,
-            paymentMethodsRepository: PaymentMethodsRepository,
             paymentSheetConfiguration: PaymentSheet.Configuration?
         ): FlowControllerInitializer.InitResult {
             return FlowControllerInitializer.InitResult.Failure(

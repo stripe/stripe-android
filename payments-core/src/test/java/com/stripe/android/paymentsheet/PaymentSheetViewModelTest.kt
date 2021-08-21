@@ -7,6 +7,7 @@ import com.google.android.gms.common.api.Status
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.Logger
+import com.stripe.android.PaymentConfiguration
 import com.stripe.android.PaymentIntentResult
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
@@ -28,15 +29,16 @@ import com.stripe.android.payments.PaymentIntentFlowResultProcessor
 import com.stripe.android.paymentsheet.PaymentSheetViewModel.CheckoutIdentifier
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.FragmentConfig
-import com.stripe.android.paymentsheet.model.FragmentConfigFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.model.SavedSelection
-import com.stripe.android.paymentsheet.repositories.PaymentMethodsApiRepository
-import com.stripe.android.paymentsheet.repositories.PaymentMethodsRepository
+import com.stripe.android.paymentsheet.model.StripeIntentValidator
+import com.stripe.android.paymentsheet.repositories.CustomerApiRepository
+import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.UserErrorMessage
+import com.stripe.android.utils.TestUtils.idleLooper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestCoroutineDispatcher
@@ -49,7 +51,9 @@ import org.mockito.Captor
 import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.any
 import org.mockito.kotlin.capture
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.spy
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
@@ -72,7 +76,7 @@ internal class PaymentSheetViewModelTest {
     private val application = ApplicationProvider.getApplicationContext<Application>()
 
     @Captor
-    private lateinit var paymentMethodTypeCaptor: ArgumentCaptor<PaymentMethod.Type>
+    private lateinit var paymentMethodTypeCaptor: ArgumentCaptor<List<PaymentMethod.Type>>
 
     @BeforeTest
     fun setup() {
@@ -106,10 +110,10 @@ internal class PaymentSheetViewModelTest {
     @Test
     fun `updatePaymentMethods() with customer config and failing request should emit empty list`() {
         val viewModel = createViewModel(
-            paymentMethodsRepository = PaymentMethodsApiRepository(
+            customerRepository = CustomerApiRepository(
                 stripeRepository = FailingStripeRepository(),
-                publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
-                stripeAccountId = null,
+                lazyPaymentConfig = { PaymentConfiguration(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY) },
+                logger = Logger.getInstance(false),
                 workContext = testDispatcher
             )
         )
@@ -118,8 +122,25 @@ internal class PaymentSheetViewModelTest {
             paymentMethods = it
         }
         viewModel.updatePaymentMethods(PAYMENT_INTENT)
+        idleLooper()
         assertThat(requireNotNull(paymentMethods))
             .isEmpty()
+    }
+
+    @Test
+    fun `removePaymentMethod triggers async removal`() = runBlockingTest {
+        val customerRepository = spy(FakeCustomerRepository())
+        val viewModel = createViewModel(
+            customerRepository = customerRepository
+        )
+
+        viewModel.removePaymentMethod(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+        idleLooper()
+
+        verify(customerRepository).detachPaymentMethod(
+            any(),
+            eq(PaymentMethodFixtures.CARD_PAYMENT_METHOD.id!!)
+        )
     }
 
     @Test
@@ -137,9 +158,9 @@ internal class PaymentSheetViewModelTest {
     @Test
     fun `updatePaymentMethods() should fetch only supported payment method types`() =
         testDispatcher.runBlockingTest {
-            val paymentMethodsRepository = mock<PaymentMethodsRepository>()
+            val paymentMethodsRepository = mock<CustomerRepository>()
             val viewModel = createViewModel(
-                paymentMethodsRepository = paymentMethodsRepository
+                customerRepository = paymentMethodsRepository
             )
             val stripeIntent = PAYMENT_INTENT.copy(
                 paymentMethodTypes = listOf(
@@ -150,15 +171,18 @@ internal class PaymentSheetViewModelTest {
             )
 
             viewModel.updatePaymentMethods(stripeIntent)
-            verify(paymentMethodsRepository).get(any(), capture(paymentMethodTypeCaptor))
-            assertThat(paymentMethodTypeCaptor.allValues)
+            verify(paymentMethodsRepository).getPaymentMethods(
+                any(),
+                capture(paymentMethodTypeCaptor)
+            )
+            assertThat(paymentMethodTypeCaptor.value)
                 .containsExactly(PaymentMethod.Type.Card)
         }
 
     @Test
     fun `updatePaymentMethods() should filter out invalid payment method types`() {
         val viewModel = createViewModel(
-            paymentMethodsRepository = FakePaymentMethodsRepository(
+            customerRepository = FakeCustomerRepository(
                 listOf(
                     PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(card = null), // invalid
                     PaymentMethodFixtures.CARD_PAYMENT_METHOD
@@ -559,9 +583,7 @@ internal class PaymentSheetViewModelTest {
         val viewModel = createViewModel(
             stripeIntentRepository = StripeIntentRepository.Api(
                 stripeRepository = FailingStripeRepository(),
-                requestOptions = ApiRequest.Options(
-                    apiKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
-                ),
+                lazyPaymentConfig = { PaymentConfiguration(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY) },
                 workContext = testDispatcher
             )
         )
@@ -591,7 +613,7 @@ internal class PaymentSheetViewModelTest {
         assertThat((result as? PaymentSheetResult.Failed)?.error?.message)
             .isEqualTo(
                 "PaymentIntent with confirmation_method='automatic' is required.\n" +
-                    "The current PaymentIntent has confirmation_method Manual.\n" +
+                    "The current PaymentIntent has confirmation_method 'Manual'.\n" +
                     "See https://stripe.com/docs/api/payment_intents/object#payment_intent_object-confirmation_method."
             )
     }
@@ -600,7 +622,7 @@ internal class PaymentSheetViewModelTest {
     fun `fetchPaymentIntent() should fail if status != requires_payment_method`() {
         val viewModel = createViewModel(
             stripeIntentRepository = StripeIntentRepository.Static(
-                PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2
+                PaymentIntentFixtures.PI_SUCCEEDED
             )
         )
         var result: PaymentSheetResult? = null
@@ -610,9 +632,9 @@ internal class PaymentSheetViewModelTest {
         viewModel.fetchStripeIntent()
         assertThat((result as? PaymentSheetResult.Failed)?.error?.message)
             .isEqualTo(
-                "PaymentIntent with confirmation_method='automatic' is required.\n" +
-                    "The current PaymentIntent has confirmation_method Manual.\n" +
-                    "See https://stripe.com/docs/api/payment_intents/object#payment_intent_object-confirmation_method."
+                "A PaymentIntent with status='requires_payment_method' or 'requires_action` is required.\n" +
+                    "The current PaymentIntent has status 'succeeded'.\n" +
+                    "See https://stripe.com/docs/api/payment_intents/object#payment_intent_object-status."
             )
     }
 
@@ -689,20 +711,12 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    fun `buyButton is only enabled when not processing, transition target, and a selection has been made`() {
+    fun `buyButton is only enabled when not processing, not editing, and a selection has been made`() {
         var isEnabled = false
         viewModel.ctaEnabled.observeForever {
             isEnabled = it
         }
 
-        assertThat(isEnabled)
-            .isFalse()
-
-        viewModel.transitionTo(
-            PaymentSheetViewModel.TransitionTarget.SelectSavedPaymentMethod(
-                FragmentConfigFixtures.DEFAULT
-            )
-        )
         assertThat(isEnabled)
             .isFalse()
 
@@ -713,6 +727,10 @@ internal class PaymentSheetViewModelTest {
         viewModel.fetchStripeIntent()
         assertThat(isEnabled)
             .isTrue()
+
+        viewModel.setEditing(true)
+        assertThat(isEnabled)
+            .isFalse()
     }
 
     @Test
@@ -734,39 +752,6 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    fun `viewState should emit FinishProcessing and ProcessResult if PaymentIntent is confirmed`() {
-        val viewModel = createViewModel(
-            stripeIntentRepository = StripeIntentRepository.Static(
-                PaymentIntentFixtures.PI_SUCCEEDED
-            )
-        )
-
-        val viewStates = mutableListOf<PaymentSheetViewState>()
-        viewModel.viewState.observeForever { viewState ->
-            if (viewState is PaymentSheetViewState.FinishProcessing) {
-                // force `onComplete` to be called
-                viewState.onComplete()
-            }
-            viewState?.let {
-                viewStates.add(it)
-            }
-        }
-
-        var paymentSheetResult: PaymentSheetResult? = null
-        viewModel.paymentSheetResult.observeForever {
-            paymentSheetResult = it
-        }
-
-        viewModel.fetchStripeIntent()
-
-        assertThat(viewStates)
-            .hasSize(1)
-        assertThat(viewStates[0])
-            .isInstanceOf(PaymentSheetViewState.FinishProcessing::class.java)
-        assertThat(paymentSheetResult).isEqualTo(PaymentSheetResult.Completed)
-    }
-
-    @Test
     fun `When configuration is empty, merchant name should reflect the app name`() {
         val viewModel = createViewModel(
             args = ARGS_WITHOUT_CUSTOMER
@@ -782,7 +767,7 @@ internal class PaymentSheetViewModelTest {
         stripeIntentRepository: StripeIntentRepository = StripeIntentRepository.Static(
             PAYMENT_INTENT
         ),
-        paymentMethodsRepository: PaymentMethodsRepository = FakePaymentMethodsRepository(
+        customerRepository: CustomerRepository = FakeCustomerRepository(
             PAYMENT_METHODS
         )
     ): PaymentSheetViewModel {
@@ -790,17 +775,16 @@ internal class PaymentSheetViewModelTest {
             application,
             args,
             eventReporter,
-            ApiRequest.Options(
-                apiKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
-            ),
+            { PaymentConfiguration(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY) },
             stripeIntentRepository,
-            paymentMethodsRepository,
+            StripeIntentValidator(),
+            customerRepository,
             { paymentFlowResultProcessor },
             prefsRepository,
-            Logger.noop(),
-            testDispatcher,
             mock(),
-            mock()
+            mock(),
+            Logger.noop(),
+            testDispatcher
         )
     }
 

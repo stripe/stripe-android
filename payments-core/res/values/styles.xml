@@ -25,11 +25,11 @@
 
     <style name="Stripe.CardInputWidget.EditText" parent="Stripe.Base.CardInputWidget.EditText" />
 
-    <style name="Stripe.Base.CardInputWidget.TextInputLayout" parent="Widget.Design.TextInputLayout"></style>
+    <style name="Stripe.Base.CardInputWidget.TextInputLayout" parent="Widget.Design.TextInputLayout" />
 
     <style name="Stripe.CardInputWidget.TextInputLayout" parent="Stripe.Base.CardInputWidget.TextInputLayout" />
 
-    <style name="Stripe.Base.CardMultilineWidget.TextInputLayout" parent="Widget.Design.TextInputLayout"></style>
+    <style name="Stripe.Base.CardMultilineWidget.TextInputLayout" parent="Widget.Design.TextInputLayout" />
 
     <style name="Stripe.CardMultilineWidget.TextInputLayout" parent="Stripe.Base.CardMultilineWidget.TextInputLayout" />
 
@@ -81,13 +81,21 @@
         <item name="android:layout_gravity">center</item>
     </style>
 
-    <style name="StripePaymentOptionItemCardCheck">
+    <style name="StripePaymentOptionItemCheckIcon">
         <item name="android:visibility">gone</item>
         <item name="android:src">@drawable/stripe_ic_check_circle</item>
-
         <!-- modify the bottom and end layout to correctly position the check -->
         <item name="android:layout_marginBottom">11dp</item>
         <item name="android:paddingEnd">-2dp</item>
+    </style>
+
+    <style name="StripePaymentOptionItemDeleteIcon">
+        <item name="android:visibility">gone</item>
+        <item name="android:src">@drawable/stripe_ic_delete_symbol</item>
+        <!-- modify the bottom and end layout to correctly position the icon -->
+        <item name="android:paddingBottom">24dp</item>
+        <item name="android:paddingEnd">-24dp</item>
+        <item name="android:scaleType">center</item>
     </style>
 
     <style name="StripeAddPaymentMethodItemCard">
@@ -211,13 +219,6 @@
         <item name="strokeColor">@color/stripe_paymentsheet_add_payment_method_form_stroke</item>
         <item name="strokeWidth">@dimen/stripe_paymentsheet_add_payment_method_form_stroke_width
         </item>
-    </style>
-
-    <style name="StripePaymentSheetToolbar">
-        <item name="android:paddingTop">16dp</item>
-        <item name="android:paddingStart">@dimen/stripe_paymentsheet_outer_spacing_horizontal</item>
-        <item name="android:paddingEnd">@dimen/stripe_paymentsheet_outer_spacing_horizontal</item>
-        <item name="android:layout_marginBottom">12dp</item>
     </style>
 
     <style name="StripeCardFormView">

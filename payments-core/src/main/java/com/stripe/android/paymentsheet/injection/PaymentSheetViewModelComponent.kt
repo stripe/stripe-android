@@ -13,6 +13,7 @@ import javax.inject.Singleton
 @Component(
     modules = [
         PaymentCommonModule::class,
+        PaymentSheetCommonModule::class,
         PaymentSheetViewModelModule::class,
         GooglePayLauncherModule::class
     ]

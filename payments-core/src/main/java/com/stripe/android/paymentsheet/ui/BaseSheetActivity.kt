@@ -75,6 +75,10 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
             toolbar.isEnabled = !isProcessing
         }
 
+        // Set Toolbar to act as the ActionBar so it displays the menu items.
+        setSupportActionBar(toolbar)
+        supportActionBar?.setDisplayShowTitleEnabled(false)
+
         toolbar.setNavigationOnClickListener {
             if (toolbar.isEnabled) {
                 if (supportFragmentManager.backStackEntryCount == 0) {

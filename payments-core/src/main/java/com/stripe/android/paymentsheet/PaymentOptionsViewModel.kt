@@ -8,10 +8,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.stripe.android.payments.core.injection.IOContext
 import com.stripe.android.payments.core.injection.Injectable
-import com.stripe.android.payments.core.injection.WeakSetInjectorRegistry
+import com.stripe.android.payments.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
@@ -20,12 +21,14 @@ internal class PaymentOptionsViewModel(
     args: PaymentOptionContract.Args,
     prefsRepository: PrefsRepository,
     eventReporter: EventReporter,
+    customerRepository: CustomerRepository,
     workContext: CoroutineContext,
     application: Application
 ) : BaseSheetViewModel<PaymentOptionsViewModel.TransitionTarget>(
     config = args.config,
     prefsRepository = prefsRepository,
     eventReporter = eventReporter,
+    customerRepository = customerRepository,
     workContext = workContext,
     application = application
 ) {
@@ -126,6 +129,9 @@ internal class PaymentOptionsViewModel(
         lateinit var eventReporter: EventReporter
 
         @Inject
+        lateinit var customerRepository: CustomerRepository
+
+        @Inject
         @IOContext
         lateinit var workContext: CoroutineContext
 
@@ -135,15 +141,19 @@ internal class PaymentOptionsViewModel(
 
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-            WeakSetInjectorRegistry.retrieve(starterArgsSupplier().injectorKey)?.inject(this) ?: run {
-                throw IllegalArgumentException("Failed to initialize PaymentOptionsViewModel.Factory")
-            }
+            WeakMapInjectorRegistry.retrieve(starterArgsSupplier().injectorKey)?.inject(this)
+                ?: run {
+                    throw IllegalArgumentException(
+                        "Failed to initialize PaymentOptionsViewModel.Factory"
+                    )
+                }
 
             val starterArgs = starterArgsSupplier()
             return PaymentOptionsViewModel(
                 starterArgs,
                 prefsRepositoryFactory(starterArgs.config?.customer),
                 eventReporter,
+                customerRepository,
                 workContext,
                 applicationSupplier()
             ) as T

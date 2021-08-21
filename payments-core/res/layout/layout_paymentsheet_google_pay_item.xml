@@ -34,7 +34,7 @@
 
     <ImageView
         android:id="@+id/check_icon"
-        style="@style/StripePaymentOptionItemCardCheck"
+        style="@style/StripePaymentOptionItemCheckIcon"
         android:duplicateParentState="true"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
