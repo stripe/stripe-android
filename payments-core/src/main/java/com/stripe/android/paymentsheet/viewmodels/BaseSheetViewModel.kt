@@ -112,9 +112,6 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
         }
     }.distinctUntilChanged()
 
-    val userCanChooseToSaveCard: Boolean
-        get() = customerConfig != null && stripeIntent.value is PaymentIntent
-
     init {
         viewModelScope.launch {
             val savedSelection = withContext(workContext) {

@@ -19,10 +19,10 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.stripe.android.R
-import com.stripe.android.model.Address
 import com.stripe.android.databinding.FragmentPaymentsheetAddCardBinding
 import com.stripe.android.databinding.StripeHorizontalDividerBinding
 import com.stripe.android.databinding.StripeVerticalDividerBinding
+import com.stripe.android.model.Address
 import com.stripe.android.model.CountryCode
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -321,8 +321,21 @@ internal class CardDataCollectionFragment<ViewModelType : BaseSheetViewModel<*>>
             R.string.stripe_paymentsheet_save_this_card_with_merchant_name,
             sheetViewModel.merchantName
         )
+        val args = requireArguments().getParcelable<ComposeFragmentArguments>(
+            ComposeFormDataCollectionFragment.EXTRA_CONFIG
+        )
 
-        saveCardCheckbox.isVisible = sheetViewModel.userCanChooseToSaveCard
+        if (null != args) {
+            saveCardCheckbox.isChecked = args.saveForFutureUseInitialValue
+            saveCardCheckbox.isVisible = args.saveForFutureUseInitialVisibility
+        }
+        sheetViewModel.newCard?.shouldSavePaymentMethod?.also {
+            if (saveCardCheckbox.isVisible) {
+                saveCardCheckbox.isChecked = it
+            }
+
+        }
+
         bottomSpace.isVisible = !saveCardCheckbox.isVisible
 
         saveCardCheckbox.setOnCheckedChangeListener { _, _ ->
@@ -339,7 +352,7 @@ internal class CardDataCollectionFragment<ViewModelType : BaseSheetViewModel<*>>
         }
     }
 
-    private fun shouldSaveCard() = saveCardCheckbox.isShown && saveCardCheckbox.isChecked
+    private fun shouldSaveCard() = saveCardCheckbox.isChecked
 
     internal class AddCardViewModel : ViewModel() {
         var isCardValid: Boolean = false

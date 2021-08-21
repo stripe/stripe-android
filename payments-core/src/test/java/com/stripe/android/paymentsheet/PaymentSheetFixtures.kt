@@ -58,25 +58,4 @@ internal object PaymentSheetFixtures {
         config = null,
         STATUS_BAR_COLOR,
     )
-
-    internal val ARGS_WITH_BILLING = PaymentSheetContract.Args(
-        PAYMENT_INTENT_CLIENT_SECRET,
-        config = PaymentSheet.Configuration(
-            merchantDisplayName = "Example, Inc",
-            billingDetails = PaymentSheet.BillingDetails(
-                address = PaymentSheet.Address(
-                    line1 = "123 Main Street",
-                    line2 = null,
-                    city = "San Francisco",
-                    state = "CA",
-                    postalCode = "94111",
-                    country = "DE",
-                ),
-                email = "email",
-                name = "Jenny Rosen",
-                phone = "+18008675309"
-            )
-        ),
-        STATUS_BAR_COLOR,
-    )
 }
