@@ -6,7 +6,6 @@ import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.parsers.PaymentIntentJsonParser
-import com.stripe.android.model.parsers.SetupIntentJsonParser
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test

@@ -31,7 +31,7 @@ import kotlin.test.AfterTest
 internal class CustomerRepositoryTest {
     private val testDispatcher = TestCoroutineDispatcher()
     private val stripeRepository = mock<StripeRepository>() {
-        onBlocking { getPaymentMethods(any(), anyString(), any(), any())}.doReturn(emptyList())
+        onBlocking { getPaymentMethods(any(), anyString(), any(), any()) }.doReturn(emptyList())
         onBlocking { detachPaymentMethod(anyString(), any(), anyString(), any()) }.doThrow(InvalidParameterException("error"))
     }
     private val repository = CustomerApiRepository(
@@ -123,5 +123,4 @@ internal class CustomerRepositoryTest {
             .doReturn(listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD))
         return repository
     }
-
 }
