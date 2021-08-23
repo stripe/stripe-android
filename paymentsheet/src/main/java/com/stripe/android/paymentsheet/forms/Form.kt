@@ -249,7 +249,7 @@ class FormViewModel @Inject internal constructor(
     internal class Factory(
         private val resources: Resources,
         private val layout: LayoutSpec,
-        private val config: FormFragmentArguments
+        private val formArguments: FormFragmentArguments
     ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
@@ -258,7 +258,7 @@ class FormViewModel @Inject internal constructor(
             return DaggerFormViewModelComponent.builder()
                 .resources(resources)
                 .layout(layout)
-                .config(config)
+                .formFragmentArguments(formArguments)
                 .build()
                 .viewModel as T
         }

@@ -19,7 +19,7 @@ internal interface FormViewModelComponent {
         fun layout(layoutSpec: LayoutSpec): Builder
 
         @BindsInstance
-        fun config(
+        fun formFragmentArguments(
             config: FormFragmentArguments
         ): Builder
 
