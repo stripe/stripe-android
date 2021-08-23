@@ -2,7 +2,7 @@ package com.stripe.android.paymentsheet.forms
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.paymentsheet.FormElement
-import com.stripe.android.paymentsheet.SectionFieldElement
+import com.stripe.android.paymentsheet.SectionSingleFieldElement
 import com.stripe.android.paymentsheet.elements.EmailConfig
 import com.stripe.android.paymentsheet.elements.SectionController
 import com.stripe.android.paymentsheet.elements.TextFieldController
@@ -14,12 +14,12 @@ import kotlinx.coroutines.test.runBlockingTest
 import org.junit.Test
 
 @ExperimentalCoroutinesApi
-class TransformElementToFormViewValueFlowTest {
+class CompleteFormFieldValueFilterTest {
 
     private val emailController = TextFieldController(EmailConfig())
     private val emailSection = FormElement.SectionElement(
         identifier = IdentifierSpec("email_section"),
-        SectionFieldElement.Email(
+        SectionSingleFieldElement.Email(
             IdentifierSpec("email"),
             emailController
         ),
@@ -45,7 +45,7 @@ class TransformElementToFormViewValueFlowTest {
     @Test
     fun `With only some complete controllers and no hidden values the flow value is null`() {
         runBlockingTest {
-            assertThat(transformElementToFormFieldValueFlow.transformFlow().first()).isNull()
+            assertThat(transformElementToFormFieldValueFlow.filterFlow().first()).isNull()
         }
     }
 
@@ -58,7 +58,7 @@ class TransformElementToFormViewValueFlowTest {
                     IdentifierSpec("email") to FormFieldEntry("email@email.com", true),
                 )
 
-            val formFieldValue = transformElementToFormFieldValueFlow.transformFlow().first()
+            val formFieldValue = transformElementToFormFieldValueFlow.filterFlow().first()
 
             assertThat(formFieldValue).isNotNull()
             assertThat(formFieldValue?.fieldValuePairs)
@@ -73,7 +73,7 @@ class TransformElementToFormViewValueFlowTest {
         runBlockingTest {
             hiddenIdentifersFlow.value = listOf(IdentifierSpec("email"))
 
-            val formFieldValues = transformElementToFormFieldValueFlow.transformFlow()
+            val formFieldValues = transformElementToFormFieldValueFlow.filterFlow()
 
             val formFieldValue = formFieldValues.first()
             assertThat(formFieldValue).isNotNull()
@@ -95,7 +95,7 @@ class TransformElementToFormViewValueFlowTest {
 
             hiddenIdentifersFlow.value = listOf(emailSection.fields[0].identifier)
 
-            val formFieldValue = transformElementToFormFieldValueFlow.transformFlow().first()
+            val formFieldValue = transformElementToFormFieldValueFlow.filterFlow().first()
 
             assertThat(formFieldValue).isNotNull()
             assertThat(formFieldValue?.fieldValuePairs)

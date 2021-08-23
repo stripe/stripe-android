@@ -8,11 +8,11 @@ import com.stripe.android.paymentsheet.FormElement
 import com.stripe.android.paymentsheet.FormElement.MandateTextElement
 import com.stripe.android.paymentsheet.FormElement.SectionElement
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.SectionFieldElement
-import com.stripe.android.paymentsheet.SectionFieldElement.Country
-import com.stripe.android.paymentsheet.SectionFieldElement.Email
+import com.stripe.android.paymentsheet.SectionSingleFieldElement
+import com.stripe.android.paymentsheet.SectionSingleFieldElement.Country
+import com.stripe.android.paymentsheet.SectionSingleFieldElement.Email
 import com.stripe.android.paymentsheet.address.AddressFieldElementRepository
-import com.stripe.android.paymentsheet.SectionFieldElement.SimpleDropdown
+import com.stripe.android.paymentsheet.SectionSingleFieldElement.SimpleDropdown
 import com.stripe.android.paymentsheet.elements.CountryConfig
 import com.stripe.android.paymentsheet.elements.EmailConfig
 import com.stripe.android.paymentsheet.elements.NameConfig
@@ -134,8 +134,8 @@ class TransformSpecToElementTest {
             "Example, Inc."
         )
 
-        val nameElement =
-            (formElement.first() as SectionElement).fields[0] as SectionFieldElement.SimpleText
+        val nameElement = (formElement.first() as SectionElement)
+            .fields[0] as SectionSingleFieldElement.SimpleText
 
         // Verify the correct config is setup for the controller
         assertThat(nameElement.controller.label).isEqualTo(NameConfig().label)
@@ -164,7 +164,7 @@ class TransformSpecToElementTest {
         )
 
         val nameElement = (formElement.first() as SectionElement).fields[0]
-            as SectionFieldElement.SimpleText
+            as SectionSingleFieldElement.SimpleText
 
         // Verify the correct config is setup for the controller
         assertThat(nameElement.controller.label).isEqualTo(R.string.address_label_name)

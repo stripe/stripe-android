@@ -83,82 +83,76 @@ internal sealed class FormElement {
     }
 }
 
-/**
- * This will get a map of all pairs of identifier to inputControllers, including the section
- * fields, but not the sections themselves.
- */
-internal fun List<FormElement>.getIdInputControllerMap() = this
-    .filter { it.controller is InputController }
-    .associate { it.identifier to (it.controller as InputController) }
-    .plus(
-        this
-            .filterIsInstance<FormElement.SectionElement>()
-            .flatMap { it.fields }
-            .filter { it.controller is InputController }
-            .associate { it.identifier to it.controller as InputController }
-    )
+internal sealed interface SectionFieldElement {
+    val identifier: IdentifierSpec
+
+    fun getFormFieldValueFlow(): Flow<List<Pair<IdentifierSpec, FormFieldEntry>>>
+    fun sectionFieldErrorController(): SectionFieldErrorController
+}
 
 /**
  * This is an element that is in a section and accepts user input.
  */
-internal sealed class SectionFieldElement(
-    private val formFieldEntryFlow: Flow<FormFieldEntry>? = null
-) {
-    abstract val identifier: IdentifierSpec
+internal sealed class SectionSingleFieldElement(
+    override val identifier: IdentifierSpec,
+) : SectionFieldElement {
+    /**
+     * Some fields in the section will have a single input controller.
+     */
+    abstract val controller: InputController
 
     /**
      * Every item in a section must have a controller that can provide an error
      * message, for the section controller to reduce it to a single error message.
      */
-    abstract val controller: SectionFieldErrorController
+    override fun sectionFieldErrorController(): SectionFieldErrorController = controller
 
-    /**
-     * This will return a controller that abides by the SectionFieldErrorController interface.
-     */
-    fun sectionFieldErrorController(): SectionFieldErrorController = controller
-
-    open fun getFormFieldValueFlow(): Flow<List<Pair<IdentifierSpec, FormFieldEntry>>> {
-        return formFieldEntryFlow?.map { formFieldEntry ->
-            listOf(Pair(identifier, formFieldEntry))
-        } ?: MutableStateFlow(emptyList())
+    override fun getFormFieldValueFlow(): Flow<List<Pair<IdentifierSpec, FormFieldEntry>>> {
+        return controller.formFieldValue.map { formFieldEntry ->
+            listOf(identifier to formFieldEntry)
+        }
     }
 
     data class Email(
-        override val identifier: IdentifierSpec,
+        val _identifier: IdentifierSpec,
         override val controller: TextFieldController
-    ) : SectionFieldElement(controller.formFieldValue)
+    ) : SectionSingleFieldElement(_identifier)
 
     data class Iban(
-        override val identifier: IdentifierSpec,
+        val _identifier: IdentifierSpec,
         override val controller: TextFieldController
-    ) : SectionFieldElement(controller.formFieldValue)
+    ) : SectionSingleFieldElement(_identifier)
 
     data class Country(
-        override val identifier: IdentifierSpec,
+        val _identifier: IdentifierSpec,
         override val controller: DropdownFieldController
-    ) : SectionFieldElement(controller.formFieldValue)
+    ) : SectionSingleFieldElement(_identifier)
 
     data class SimpleText(
-        override val identifier: IdentifierSpec,
+        val _identifier: IdentifierSpec,
         override val controller: TextFieldController
-    ) : SectionFieldElement(controller.formFieldValue)
+    ) : SectionSingleFieldElement(_identifier)
 
     data class SimpleDropdown(
-        override val identifier: IdentifierSpec,
-        override val controller: DropdownFieldController,
-    ) : SectionFieldElement()
+        val _identifier: IdentifierSpec,
+        override val controller: DropdownFieldController
+    ) : SectionSingleFieldElement(_identifier)
+}
 
+internal sealed class SectionMultiFieldElement(
+    override val identifier: IdentifierSpec,
+) : SectionFieldElement {
     internal class AddressElement constructor(
-        override val identifier: IdentifierSpec,
+        _identifier: IdentifierSpec,
         private val addressFieldRepository: AddressFieldElementRepository,
         countryCodes: Set<String> = emptySet(),
         countryDropdownFieldController: DropdownFieldController = DropdownFieldController(
             CountryConfig(countryCodes)
         ),
-    ) : SectionFieldElement() {
+    ) : SectionMultiFieldElement(_identifier) {
 
         @VisibleForTesting
-        val countryElement = Country(
+        val countryElement = SectionSingleFieldElement.Country(
             IdentifierSpec("country"),
             countryDropdownFieldController
         )
@@ -172,16 +166,21 @@ internal sealed class SectionFieldElement(
 
         val fields = otherFields.map { listOf(countryElement).plus(it) }
 
-        override val controller = AddressController(fields)
+        val controller = AddressController(fields)
+
+        /**
+         * This will return a controller that abides by the SectionFieldErrorController interface.
+         */
+        override fun sectionFieldErrorController(): SectionFieldErrorController =
+            controller
 
         @ExperimentalCoroutinesApi
         override fun getFormFieldValueFlow() = fields.flatMapLatest { fieldElements ->
             combine(
                 fieldElements
-                    .filter { it.controller is InputController }
                     .associate { sectionFieldElement ->
                         sectionFieldElement.identifier to
-                            sectionFieldElement.controller as InputController
+                            sectionFieldElement.controller
                     }
                     .map {
                         getCurrentFieldValuePair(it.key, it.value)

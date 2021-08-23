@@ -2,7 +2,8 @@ package com.stripe.android.paymentsheet.elements
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.SectionFieldElement
+import com.stripe.android.paymentsheet.SectionMultiFieldElement
+import com.stripe.android.paymentsheet.SectionSingleFieldElement
 import com.stripe.android.paymentsheet.address.AddressFieldElementRepository
 import com.stripe.android.paymentsheet.forms.FormFieldEntry
 import com.stripe.android.paymentsheet.specifications.IdentifierSpec
@@ -28,7 +29,7 @@ class AddressElementTest {
         addressFieldElementRepository.add(
             "US",
             listOf(
-                SectionFieldElement.Email(
+                SectionSingleFieldElement.Email(
                     IdentifierSpec("email"),
                     TextFieldController(EmailConfig())
                 )
@@ -37,7 +38,7 @@ class AddressElementTest {
         addressFieldElementRepository.add(
             "JP",
             listOf(
-                SectionFieldElement.Iban(
+                SectionSingleFieldElement.Iban(
                     IdentifierSpec("iban"),
                     TextFieldController(IbanConfig())
                 )
@@ -50,7 +51,7 @@ class AddressElementTest {
     fun `Verify controller error is updated as the fields change based on country`() {
         runBlocking {
             // ZZ does not have state and US does
-            val addressElement = SectionFieldElement.AddressElement(
+            val addressElement = SectionMultiFieldElement.AddressElement(
                 IdentifierSpec("address"),
                 addressFieldElementRepository,
                 countryDropdownFieldController = countryDropdownFieldController
@@ -83,7 +84,7 @@ class AddressElementTest {
     @ExperimentalCoroutinesApi
     @Test
     fun `verify flow of form field values`() = runBlockingTest {
-        val addressElement = SectionFieldElement.AddressElement(
+        val addressElement = SectionMultiFieldElement.AddressElement(
             IdentifierSpec("address"),
             addressFieldElementRepository,
             countryDropdownFieldController = countryDropdownFieldController

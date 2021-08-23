@@ -1,7 +1,8 @@
 package com.stripe.android.paymentsheet.forms
 
 import com.stripe.android.paymentsheet.FormElement
-import com.stripe.android.paymentsheet.SectionFieldElement
+import com.stripe.android.paymentsheet.SectionSingleFieldElement
+import com.stripe.android.paymentsheet.SectionMultiFieldElement
 import com.stripe.android.paymentsheet.elements.CountryConfig
 import com.stripe.android.paymentsheet.elements.DropdownFieldController
 import com.stripe.android.paymentsheet.elements.EmailConfig
@@ -47,7 +48,7 @@ internal class TransformSpecToElement(
             fieldElements,
             SectionController(
                 this.title,
-                fieldElements.map { it.controller }
+                fieldElements.map { it.sectionFieldErrorController() }
             )
         )
     }
@@ -66,7 +67,7 @@ internal class TransformSpecToElement(
         }
     }
 
-    private fun transformAddress() = SectionFieldElement.AddressElement(
+    private fun transformAddress() = SectionMultiFieldElement.AddressElement(
         IdentifierSpec("billing"),
         resourceRepository.addressRepository
     )
@@ -82,25 +83,25 @@ internal class TransformSpecToElement(
         )
 
     private fun SectionFieldSpec.Email.transform() =
-        SectionFieldElement.Email(
+        SectionSingleFieldElement.Email(
             this.identifier,
             TextFieldController(EmailConfig()),
         )
 
     private fun SectionFieldSpec.Iban.transform() =
-        SectionFieldElement.Iban(
+        SectionSingleFieldElement.Iban(
             this.identifier,
             TextFieldController(IbanConfig())
         )
 
     private fun SectionFieldSpec.Country.transform() =
-        SectionFieldElement.Country(
+        SectionSingleFieldElement.Country(
             this.identifier,
             DropdownFieldController(CountryConfig(this.onlyShowCountryCodes))
         )
 
     private fun SectionFieldSpec.BankDropdown.transform() =
-        SectionFieldElement.SimpleDropdown(
+        SectionSingleFieldElement.SimpleDropdown(
             this.identifier,
             DropdownFieldController(
                 SimpleDropdownConfig(
@@ -122,8 +123,8 @@ internal class TransformSpecToElement(
         )
 }
 
-internal fun SectionFieldSpec.SimpleText.transform(): SectionFieldElement =
-    SectionFieldElement.SimpleText(
+internal fun SectionFieldSpec.SimpleText.transform(): SectionSingleFieldElement =
+    SectionSingleFieldElement.SimpleText(
         this.identifier,
         TextFieldController(
             SimpleTextFieldConfig(

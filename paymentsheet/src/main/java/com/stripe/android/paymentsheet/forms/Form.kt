@@ -357,9 +357,5 @@ class FormViewModel @Inject internal constructor(
             hiddenIdentifiers,
             showingMandate,
             saveForFutureUse
-        ).transformFlow()
-
-    internal fun populateFormViewValues(formFieldValues: FormFieldValues) {
-        populateWith(elements, formFieldValues)
-    }
+        ).filterFlow()
 }
