@@ -18,11 +18,11 @@ internal val sepaDebitParamKey: MutableMap<String, Any?> = mutableMapOf(
 )
 
 internal val sepaDebitNameSection = SectionSpec(
-    IdentifierSpec("name section"),
+    IdentifierSpec("name_section"),
     SectionFieldSpec.NAME
 )
-internal val sepaDebitEmailSection = SectionSpec(IdentifierSpec("email"), Email)
-internal val sepaDebitIbanSection = SectionSpec(IdentifierSpec("iban"), Iban)
+internal val sepaDebitEmailSection = SectionSpec(IdentifierSpec("email_section"), Email)
+internal val sepaDebitIbanSection = SectionSpec(IdentifierSpec("iban_section"), Iban)
 internal val sepaDebitMandate = MandateTextSpec(
     IdentifierSpec("mandate"),
     R.string.stripe_paymentsheet_sepa_mandate,

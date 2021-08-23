@@ -30,6 +30,6 @@ internal class CountryConfig(
         CountryUtils.getCountryByCode(CountryCode.create(rawValue), Locale.getDefault())?.name
             ?: getDisplayItems()[0]
 
-    override fun convertToRaw(it: String) =
-        CountryUtils.getCountryCodeByName(it, Locale.getDefault())?.value
+    override fun convertToRaw(displayName: String) =
+        CountryUtils.getCountryCodeByName(displayName, Locale.getDefault())?.value
 }

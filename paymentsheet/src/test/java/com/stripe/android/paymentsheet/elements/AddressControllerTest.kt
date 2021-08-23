@@ -2,7 +2,7 @@ package com.stripe.android.paymentsheet.elements
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.SectionFieldElement
+import com.stripe.android.paymentsheet.SectionSingleFieldElement
 import com.stripe.android.paymentsheet.specifications.IdentifierSpec
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -14,7 +14,7 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.shadows.ShadowLooper
 
 @RunWith(RobolectricTestRunner::class)
-class AddresControllerTest {
+class AddressControllerTest {
     private val emailController = SimpleTextFieldController(
         EmailConfig()
     )
@@ -24,11 +24,11 @@ class AddresControllerTest {
         )
     private val sectionFieldElementFlow = MutableStateFlow(
         listOf(
-            SectionFieldElement.Email(
+            SectionSingleFieldElement.Email(
                 IdentifierSpec("email"),
                 emailController
             ),
-            SectionFieldElement.Iban(
+            SectionSingleFieldElement.Iban(
                 IdentifierSpec("iban"),
                 ibanController
             )

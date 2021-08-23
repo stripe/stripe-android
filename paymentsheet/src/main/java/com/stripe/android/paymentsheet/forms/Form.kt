@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet.forms
 
 import android.content.res.Resources
-import android.text.method.LinkMovementMethod
 import androidx.annotation.RestrictTo
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -21,7 +20,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.asLiveData
@@ -31,6 +29,7 @@ import com.stripe.android.paymentsheet.FormElement.MandateTextElement
 import com.stripe.android.paymentsheet.FormElement.SaveForFutureUseElement
 import com.stripe.android.paymentsheet.FormElement.SectionElement
 import com.stripe.android.paymentsheet.SectionFieldElement
+import com.stripe.android.paymentsheet.SectionMultiFieldElement
 import com.stripe.android.paymentsheet.elements.AddressController
 import com.stripe.android.paymentsheet.elements.CardStyle
 import com.stripe.android.paymentsheet.elements.CreditElementController
@@ -342,7 +341,7 @@ class FormViewModel @Inject internal constructor(
     private val creditBillingElement = elements
         .filterIsInstance<SectionElement>()
         .flatMap { it.fields }
-        .filterIsInstance<SectionFieldElement.CreditBillingElement>()
+        .filterIsInstance<SectionMultiFieldElement.CreditBillingElement>()
         .firstOrNull()
 
     internal val saveForFutureUse = saveForFutureUseElement?.controller?.saveForFutureUse
@@ -394,7 +393,7 @@ class FormViewModel @Inject internal constructor(
     }
 
     val completeFormValues =
-        TransformElementToFormFieldValueFlow(
+        CompleteFormFieldValueFilter(
             combine(
                 elements.map { it.getFormFieldValueFlow() }
             ) {
@@ -403,10 +402,5 @@ class FormViewModel @Inject internal constructor(
             hiddenIdentifiers,
             showingMandate,
             saveForFutureUse
-        ).transformFlow()
-
-
-    internal fun populateFormViewValues(formFieldValues: FormFieldValues) {
-        populateWith(elements, formFieldValues)
-    }
+        ).filterFlow()
 }

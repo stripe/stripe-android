@@ -4,7 +4,7 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.SectionFieldElement
+import com.stripe.android.paymentsheet.SectionSingleFieldElement
 import com.stripe.android.paymentsheet.address.AddressFieldElementRepository.Companion.supportedCountries
 import com.stripe.android.paymentsheet.elements.SimpleTextFieldController
 import com.stripe.android.paymentsheet.specifications.IdentifierSpec
@@ -69,7 +69,7 @@ class TransformAddressToElementTest {
     }
 
     private fun verifySimpleTextSpecInTextFieldController(
-        textElement: SectionFieldElement,
+        textElement: SectionSingleFieldElement,
         simpleTextSpec: SectionFieldSpec.SimpleText
     ) {
         val actualController = textElement.controller as SimpleTextFieldController

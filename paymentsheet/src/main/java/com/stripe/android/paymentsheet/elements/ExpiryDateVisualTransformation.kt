@@ -5,17 +5,17 @@ import androidx.compose.ui.text.input.OffsetMapping
 import androidx.compose.ui.text.input.TransformedText
 import androidx.compose.ui.text.input.VisualTransformation
 
-
 class ExpiryDateVisualTransformation() : VisualTransformation {
     private val separator = " / "
 
     override fun filter(text: AnnotatedString): TransformedText {
 
         var separatorAfterIndex = 1
-        if(text.isNotBlank() && !(text[0] == '0' || text[0] == '1')){
+        if (text.isNotBlank() && !(text[0] == '0' || text[0] == '1')) {
             separatorAfterIndex = 0
-        }
-        else if (text.length > 1 && (text[0] == '1' && requireNotNull(text[1].digitToInt()) > 2)){
+        } else if (text.length > 1 &&
+            (text[0] == '1' && requireNotNull(text[1].digitToInt()) > 2)
+        ) {
             separatorAfterIndex = 0
         }
 
@@ -26,7 +26,6 @@ class ExpiryDateVisualTransformation() : VisualTransformation {
                 out += separator
             }
         }
-
 
         /**
          * The offset translator should ignore the hyphen characters, so conversion from

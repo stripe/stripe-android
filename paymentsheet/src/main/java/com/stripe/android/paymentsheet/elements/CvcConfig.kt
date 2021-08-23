@@ -5,7 +5,6 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.elements.CardBrand
-import com.stripe.android.paymentsheet.elements.CardNumberVisualTransformation
 import com.stripe.android.paymentsheet.elements.CreditTextFieldConfig
 import com.stripe.android.paymentsheet.elements.TextFieldState
 import com.stripe.android.paymentsheet.elements.TextFieldStateConstants
@@ -36,7 +35,8 @@ internal class CvcConfig : CreditTextFieldConfig {
         } else if (isDigitLimit && number.length == numberAllowedDigits) {
             TextFieldStateConstants.Valid.Full
         } else {
-            TextFieldStateConstants.Error.Invalid(R.string.credit_cvc_invalid) // TODO: Double check this case
+            // TODO: Double check this case
+            TextFieldStateConstants.Error.Invalid(R.string.credit_cvc_invalid)
         }
     }
 

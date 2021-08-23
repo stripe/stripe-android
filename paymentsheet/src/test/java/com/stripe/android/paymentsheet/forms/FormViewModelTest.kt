@@ -7,7 +7,8 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.paymentsheet.FormElement.SectionElement
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.SectionFieldElement
+import com.stripe.android.paymentsheet.SectionMultiFieldElement
+import com.stripe.android.paymentsheet.SectionSingleFieldElement
 import com.stripe.android.paymentsheet.address.AddressFieldElementRepository
 import com.stripe.android.paymentsheet.elements.SaveForFutureUseController
 import com.stripe.android.paymentsheet.elements.SimpleTextFieldController
@@ -31,9 +32,9 @@ import org.robolectric.shadows.ShadowLooper
 
 @RunWith(RobolectricTestRunner::class)
 internal class FormViewModelTest {
-    private val emailSection = FormItemSpec.SectionSpec(IdentifierSpec("emailSection"), Email)
+    private val emailSection = FormItemSpec.SectionSpec(IdentifierSpec("email_section"), Email)
     private val countrySection = FormItemSpec.SectionSpec(
-        IdentifierSpec("countrySection"),
+        IdentifierSpec("country_section"),
         Country()
     )
 
@@ -132,7 +133,7 @@ internal class FormViewModelTest {
 
         ShadowLooper.runUiThreadTasksIncludingDelayedTasks()
 
-        assertThat(values[1][0]).isEqualTo(IdentifierSpec("emailSection"))
+        assertThat(values[1][0]).isEqualTo(IdentifierSpec("email_section"))
         assertThat(values[1][1]).isEqualTo(IdentifierSpec("email"))
     }
 
@@ -158,16 +159,11 @@ internal class FormViewModelTest {
 
             val saveForFutureUseController = formViewModel.elements.map { it.controller }
                 .filterIsInstance(SaveForFutureUseController::class.java).first()
-            val emailController = formViewModel.elements
-                .asSequence()
-                .filterIsInstance<SectionElement>()
-                .flatMap { it.fields }
-                .map { it.controller }
-                .filterIsInstance(SimpleTextFieldController::class.java)
-                .first()
+            val emailController =
+                getSectionFieldTextControllerWithLabel(formViewModel, R.string.email)
 
             // Add text to the name to make it valid
-            emailController.onValueChange("email@valid.com")
+            emailController?.onValueChange("email@valid.com")
 
             // Verify formFieldValues contains email
             assertThat(
@@ -206,15 +202,11 @@ internal class FormViewModelTest {
 
             val saveForFutureUseController = formViewModel.elements.map { it.controller }
                 .filterIsInstance(SaveForFutureUseController::class.java).first()
-            val emailController = formViewModel.elements
-                .asSequence()
-                .filterIsInstance<SectionElement>()
-                .flatMap { it.fields }
-                .map { it.controller }
-                .filterIsInstance(SimpleTextFieldController::class.java).first()
+            val emailController =
+                getSectionFieldTextControllerWithLabel(formViewModel, R.string.email)
 
             // Add text to the email to make it invalid
-            emailController.onValueChange("email is invalid")
+            emailController?.onValueChange("email is invalid")
 
             // Verify formFieldValues is null because the email is required and invalid
             assertThat(formViewModel.completeFormValues.first()).isNull()
@@ -251,17 +243,17 @@ internal class FormViewModelTest {
                 resourceRepository = resourceRepository
             )
 
-            val nameElement = (formViewModel.elements[0] as SectionElement)
-                .fields[0].controller as SimpleTextFieldController
-            val emailElement = (formViewModel.elements[1] as SectionElement)
-                .fields[0].controller as SimpleTextFieldController
+            val nameElement =
+                getSectionFieldTextControllerWithLabel(formViewModel, R.string.address_label_name)
+            val emailElement =
+                getSectionFieldTextControllerWithLabel(formViewModel, R.string.email)
 
-            nameElement.onValueChange("joe")
+            nameElement?.onValueChange("joe")
             assertThat(
                 formViewModel.completeFormValues.first()?.fieldValuePairs?.get(NAME.identifier)
             ).isNull()
 
-            emailElement.onValueChange("joe@gmail.com")
+            emailElement?.onValueChange("joe@gmail.com")
             assertThat(
                 formViewModel.completeFormValues.first()?.fieldValuePairs?.get(Email.identifier)
                     ?.value
@@ -271,7 +263,7 @@ internal class FormViewModelTest {
                     ?.value
             ).isEqualTo("joe")
 
-            emailElement.onValueChange("invalid.email@IncompleteDomain")
+            emailElement?.onValueChange("invalid.email@IncompleteDomain")
 
             assertThat(
                 formViewModel.completeFormValues.first()?.fieldValuePairs?.get(NAME.identifier)
@@ -424,16 +416,13 @@ internal class FormViewModelTest {
         formViewModel: FormViewModel,
         @StringRes label: Int
     ) =
-        formViewModel.elements.map {
-            (
-                (it as? SectionElement)
-                    ?.fields
-                    ?.get(0)
-                    ?.controller as? SimpleTextFieldController
-                )
-        }.firstOrNull {
-            it?.label == label
-        }
+        formViewModel.elements
+            .filterIsInstance<SectionElement>()
+            .flatMap { it.fields }
+            .filterIsInstance<SectionSingleFieldElement>()
+            .map { it.controller }
+            .filterIsInstance<SimpleTextFieldController>()
+            .firstOrNull { it.label == label }
 
     private data class AddressControllers(
         val controllers: List<SimpleTextFieldController>
@@ -475,7 +464,7 @@ internal class FormViewModelTest {
             formViewModel.elements
                 .filterIsInstance<SectionElement>()
                 .flatMap { it.fields }
-                .filterIsInstance<SectionFieldElement.AddressElement>()
+                .filterIsInstance<SectionMultiFieldElement.AddressElement>()
                 .firstOrNull()
                 ?.fields
                 ?.first()

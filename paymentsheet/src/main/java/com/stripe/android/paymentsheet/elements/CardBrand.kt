@@ -101,6 +101,7 @@ enum class CardBrand(
         ),
     ),
 
+    /* ktlint-disable max-line-length */
     MasterCard(
         "mastercard",
         "Mastercard",
@@ -110,6 +111,7 @@ enum class CardBrand(
             2 to Pattern.compile("^(22|23|24|25|26|27|50|51|52|53|54|55|56|57|58|59|67)$")
         )
     ),
+    /* ktlint-enable max-line-length */
 
     UnionPay(
         "unionpay",
@@ -212,7 +214,6 @@ enum class CardBrand(
         fun fromCode(code: String?): CardBrand {
             return values().firstOrNull { it.code.equals(code, ignoreCase = true) } ?: Unknown
         }
-
 
         private const val CVC_COMMON_LENGTH: Int = 3
     }

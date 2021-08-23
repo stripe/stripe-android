@@ -15,7 +15,7 @@ import com.stripe.android.paymentsheet.elements.InputController
 import com.stripe.android.paymentsheet.elements.SaveForFutureUseController
 import com.stripe.android.paymentsheet.elements.SectionController
 import com.stripe.android.paymentsheet.elements.SectionFieldErrorController
-import com.stripe.android.paymentsheet.elements.SimpleTextFieldController
+import com.stripe.android.paymentsheet.elements.TextFieldController
 import com.stripe.android.paymentsheet.forms.FormFieldEntry
 import com.stripe.android.paymentsheet.specifications.IdentifierSpec
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -67,7 +67,6 @@ internal sealed class FormElement {
                     identifier to it
                 )
             }
-
     }
 
     data class SectionElement(
@@ -88,116 +87,86 @@ internal sealed class FormElement {
     }
 }
 
-/**
- * This will get a map of all pairs of identifier to inputControllers, including the section
- * fields, but not the sections themselves.
- */
-internal fun List<FormElement>.getIdInputControllerMap() = this
-    .filter { it.controller is InputController }
-    .associate { it.identifier to (it.controller as InputController) }
-    .plus(
-        this
-            .filterIsInstance<FormElement.SectionElement>()
-            .flatMap { it.fields }
-            .filter { it.controller is InputController }
-            .associate { it.identifier to it.controller as InputController }
-    )
+internal sealed interface SectionFieldElement {
+    val identifier: IdentifierSpec
+
+    fun getFormFieldValueFlow(): Flow<List<Pair<IdentifierSpec, FormFieldEntry>>>
+    fun sectionFieldErrorController(): SectionFieldErrorController
+}
 
 /**
  * This is an element that is in a section and accepts user input.
  */
-internal sealed class SectionFieldElement(
-    private val formFieldEntryFlow: Flow<FormFieldEntry>? = null
-) {
-    abstract val identifier: IdentifierSpec
+internal sealed class SectionSingleFieldElement(
+    override val identifier: IdentifierSpec,
+) : SectionFieldElement {
+    /**
+     * Some fields in the section will have a single input controller.
+     */
+    abstract val controller: InputController
 
     /**
      * Every item in a section must have a controller that can provide an error
      * message, for the section controller to reduce it to a single error message.
      */
-    abstract val controller: SectionFieldErrorController
+    override fun sectionFieldErrorController(): SectionFieldErrorController = controller
 
-
-    /**
-     * This will return a controller that abides by the SectionFieldErrorController interface.
-     */
-    fun sectionFieldErrorController(): SectionFieldErrorController = controller
-
-    open fun getFormFieldValueFlow(): Flow<List<Pair<IdentifierSpec, FormFieldEntry>>> {
-        return formFieldEntryFlow?.map { formFieldEntry ->
-            listOf(Pair(identifier, formFieldEntry))
-        } ?: MutableStateFlow(emptyList())
-    }
-
-    data class Email(
-        override val identifier: IdentifierSpec,
-        override val controller: SimpleTextFieldController
-    ) : SectionFieldElement(controller.formFieldValue)
-
-    data class Iban(
-        override val identifier: IdentifierSpec,
-        override val controller: SimpleTextFieldController,
-    ) : SectionFieldElement(controller.formFieldValue)
-
-    data class Country(
-        override val identifier: IdentifierSpec,
-        override val controller: DropdownFieldController
-    ) : SectionFieldElement(controller.formFieldValue)
-
-    data class SimpleText(
-        override val identifier: IdentifierSpec,
-        override val controller: SimpleTextFieldController
-    ) : SectionFieldElement(controller.formFieldValue)
-
-    data class SimpleDropdown(
-        override val identifier: IdentifierSpec,
-        override val controller: DropdownFieldController,
-    ) : SectionFieldElement(controller.formFieldValue)
-
-    data class CvcText(
-        override val identifier: IdentifierSpec,
-        override val controller: CvcTextFieldController,
-    ) : SectionFieldElement(controller.formFieldValue)
-
-    data class CardNumberText(
-        override val identifier: IdentifierSpec,
-        override val controller: CreditNumberTextFieldController,
-    ) : SectionFieldElement(controller.formFieldValue)
-
-    internal class CreditDetailElement(
-        override val identifier: IdentifierSpec,
-        override val controller: CreditElementController = CreditElementController(),
-    ) : SectionFieldElement() {
-
-        override fun getFormFieldValueFlow() = combine(
-            controller.numberElement.controller.formFieldValue,
-            controller.cvcElement.controller.formFieldValue,
-            controller.expirationDateElement.controller.formFieldValue
-        ) { number, cvc, expirationDate ->
-            listOf(
-                controller.numberElement.identifier to number,
-                controller.cvcElement.identifier to cvc,
-                IdentifierSpec("month") to expirationDate.copy(
-                    value = expirationDate.value?.take(2)
-                ),
-                IdentifierSpec("year") to expirationDate.copy(
-                    value = expirationDate.value?.takeLast(2)
-                )
-            )
+    override fun getFormFieldValueFlow(): Flow<List<Pair<IdentifierSpec, FormFieldEntry>>> {
+        return controller.formFieldValue.map { formFieldEntry ->
+            listOf(identifier to formFieldEntry)
         }
     }
 
+    data class Email(
+        val _identifier: IdentifierSpec,
+        override val controller: TextFieldController
+    ) : SectionSingleFieldElement(_identifier)
+
+    data class Iban(
+        val _identifier: IdentifierSpec,
+        override val controller: TextFieldController
+    ) : SectionSingleFieldElement(_identifier)
+
+    data class Country(
+        val _identifier: IdentifierSpec,
+        override val controller: DropdownFieldController
+    ) : SectionSingleFieldElement(_identifier)
+
+    data class SimpleText(
+        val _identifier: IdentifierSpec,
+        override val controller: TextFieldController
+    ) : SectionSingleFieldElement(_identifier)
+
+    data class SimpleDropdown(
+        val _identifier: IdentifierSpec,
+        override val controller: DropdownFieldController
+    ) : SectionSingleFieldElement(_identifier)
+
+    data class CvcText(
+        val _identifier: IdentifierSpec,
+        override val controller: CvcTextFieldController,
+    ) : SectionSingleFieldElement(_identifier)
+
+    data class CardNumberText(
+        val _identifier: IdentifierSpec,
+        override val controller: CreditNumberTextFieldController,
+    ) : SectionSingleFieldElement(_identifier)
+}
+
+internal sealed class SectionMultiFieldElement(
+    override val identifier: IdentifierSpec,
+) : SectionFieldElement {
     internal open class AddressElement constructor(
-        override val identifier: IdentifierSpec,
+        _identifier: IdentifierSpec,
         private val addressFieldRepository: AddressFieldElementRepository,
         countryCodes: Set<String> = emptySet(),
         countryDropdownFieldController: DropdownFieldController = DropdownFieldController(
             CountryConfig(countryCodes)
         ),
-    ) : SectionFieldElement() {
+    ) : SectionMultiFieldElement(_identifier) {
 
         @VisibleForTesting
-        val countryElement = Country(
+        val countryElement = SectionSingleFieldElement.Country(
             IdentifierSpec("country"),
             countryDropdownFieldController
         )
@@ -211,15 +180,21 @@ internal sealed class SectionFieldElement(
 
         val fields = otherFields.map { listOf(countryElement).plus(it) }
 
-        override val controller = AddressController(fields)
+        val controller = AddressController(fields)
+
+        /**
+         * This will return a controller that abides by the SectionFieldErrorController interface.
+         */
+        override fun sectionFieldErrorController(): SectionFieldErrorController =
+            controller
 
         @ExperimentalCoroutinesApi
         override fun getFormFieldValueFlow() = fields.flatMapLatest { fieldElements ->
             combine(
                 fieldElements
-                    .filter { it.controller is InputController }
                     .associate { sectionFieldElement ->
-                        sectionFieldElement.identifier to sectionFieldElement.controller as InputController
+                        sectionFieldElement.identifier to
+                            sectionFieldElement.controller
                     }
                     .map {
                         getCurrentFieldValuePair(it.key, it.value)
@@ -241,6 +216,35 @@ internal sealed class SectionFieldElement(
                 FormFieldEntry(
                     value = rawFieldValue,
                     isComplete = isComplete,
+                )
+            )
+        }
+    }
+
+    internal class CreditDetailElement(
+        identifier: IdentifierSpec,
+        val controller: CreditElementController = CreditElementController(),
+    ) : SectionMultiFieldElement(identifier) {
+
+        /**
+         * This will return a controller that abides by the SectionFieldErrorController interface.
+         */
+        override fun sectionFieldErrorController(): SectionFieldErrorController =
+            controller
+
+        override fun getFormFieldValueFlow() = combine(
+            controller.numberElement.controller.formFieldValue,
+            controller.cvcElement.controller.formFieldValue,
+            controller.expirationDateElement.controller.formFieldValue
+        ) { number, cvc, expirationDate ->
+            listOf(
+                controller.numberElement.identifier to number,
+                controller.cvcElement.identifier to cvc,
+                IdentifierSpec("month") to expirationDate.copy(
+                    value = expirationDate.value?.take(2)
+                ),
+                IdentifierSpec("year") to expirationDate.copy(
+                    value = expirationDate.value?.takeLast(2)
                 )
             )
         }
@@ -279,6 +283,5 @@ internal sealed class SectionFieldElement(
                     }
                 }
             }
-
     }
 }

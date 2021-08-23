@@ -14,7 +14,6 @@ internal sealed class CardNumber {
 
         val isMaxLength = length == MAX_PAN_LENGTH
 
-
         /**
          * Format a number based on its expected length
          *

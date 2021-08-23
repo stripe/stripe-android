@@ -33,12 +33,16 @@ internal class DateConfig : TextFieldConfig {
             Error.Blank
         } else {
             val newString =
-                if ((input.isNotBlank()
-                        && !(input[0] == '0' || input[0] == '1'))
-                    || ((input.length > 1)
-                        && (input[0] == '1' && requireNotNull(input[1].digitToInt()) > 2))
+                if ((
+                    input.isNotBlank() &&
+                        !(input[0] == '0' || input[0] == '1')
+                    ) ||
+                    (
+                        (input.length > 1) &&
+                            (input[0] == '1' && requireNotNull(input[1].digitToInt()) > 2)
+                        )
                 ) {
-                    "0${input}"
+                    "0$input"
                 } else {
                     input
                 }
@@ -69,7 +73,6 @@ internal class DateConfig : TextFieldConfig {
                 }
             }
         }
-
 
         // eslint-disable-next-line rulesdir/monotonic-time
 //        const current = new Date(Date.now());
@@ -109,7 +112,6 @@ internal class DateConfig : TextFieldConfig {
 //        }
 //    },
     }
-
 
     private fun containsNameAndDomain(str: String) = str.contains("@") && str.matches(
         Regex(".*@.*\\..+")

@@ -21,14 +21,46 @@ import java.io.InputStream
 @Serializable(with = FieldTypeAsStringSerializer::class)
 internal enum class FieldType(
     val serializedValue: String,
-    val identifierSpec: IdentifierSpec
+    val identifierSpec: IdentifierSpec,
+    @StringRes val defaultLabel: Int,
+    val capitalization: KeyboardCapitalization
 ) {
-    AddressLine1("addressLine1", IdentifierSpec("line1")),
-    AddressLine2("addressLine2", IdentifierSpec("line2")),
-    Locality("locality", IdentifierSpec("city")),
-    PostalCode("postalCode", IdentifierSpec("postal_code")),
-    AdministrativeArea("administrativeArea", IdentifierSpec("state")),
-    Name("name", IdentifierSpec("name"));
+    AddressLine1(
+        "addressLine1",
+        IdentifierSpec("line1"),
+        R.string.address_label_address_line1,
+        KeyboardCapitalization.Words
+    ),
+    AddressLine2(
+        "addressLine2",
+        IdentifierSpec("line2"),
+        R.string.address_label_address_line2,
+        KeyboardCapitalization.Words
+    ),
+    Locality(
+        "locality",
+        IdentifierSpec("city"),
+        R.string.address_label_city,
+        KeyboardCapitalization.Words
+    ),
+    PostalCode(
+        "postalCode",
+        IdentifierSpec("postal_code"),
+        R.string.address_label_postal_code,
+        KeyboardCapitalization.None
+    ),
+    AdministrativeArea(
+        "administrativeArea",
+        IdentifierSpec("state"),
+        NameType.state.stringResId,
+        KeyboardCapitalization.Words
+    ),
+    Name(
+        "name",
+        IdentifierSpec("name"),
+        R.string.address_label_name,
+        KeyboardCapitalization.Words
+    );
 
     companion object {
         fun from(value: String) = values().firstOrNull {
@@ -112,55 +144,15 @@ private fun getJsonStringFromInputStream(inputStream: InputStream?) =
     inputStream?.bufferedReader().use { it?.readText() }
 
 internal fun List<CountryAddressSchema>.transformToElementList() =
-    this.mapNotNull {
-        when (it.type) {
-            // TODO: Add label to the FieldType and this switch goes away!
-            FieldType.AddressLine1 -> {
-                SectionFieldSpec.SimpleText(
-                    it.type.identifierSpec,
-                    it.schema?.nameType?.stringResId ?: R.string.address_label_address_line1,
-                    capitalization = KeyboardCapitalization.Words,
-                    keyboardType = getKeyboard(it.schema),
-                    showOptionalLabel = !it.required
-                )
-            }
-            FieldType.AddressLine2 -> {
-                SectionFieldSpec.SimpleText(
-                    it.type.identifierSpec,
-                    it.schema?.nameType?.stringResId ?: R.string.address_label_address_line2,
-                    capitalization = KeyboardCapitalization.Words,
-                    keyboardType = getKeyboard(it.schema),
-                    showOptionalLabel = !it.required
-                )
-            }
-            FieldType.Locality -> {
-                SectionFieldSpec.SimpleText(
-                    it.type.identifierSpec,
-                    it.schema?.nameType?.stringResId ?: R.string.address_label_city,
-                    capitalization = KeyboardCapitalization.Words,
-                    keyboardType = getKeyboard(it.schema),
-                    showOptionalLabel = !it.required
-                )
-            }
-            FieldType.AdministrativeArea -> {
-                SectionFieldSpec.SimpleText(
-                    it.type.identifierSpec,
-                    it.schema?.nameType?.stringResId ?: NameType.state.stringResId,
-                    capitalization = KeyboardCapitalization.Words,
-                    keyboardType = getKeyboard(it.schema),
-                    showOptionalLabel = !it.required
-                )
-            }
-            FieldType.PostalCode -> {
-                SectionFieldSpec.SimpleText(
-                    it.type.identifierSpec,
-                    it.schema?.nameType?.stringResId ?: R.string.address_label_postal_code,
-                    capitalization = KeyboardCapitalization.None,
-                    keyboardType = getKeyboard(it.schema),
-                    showOptionalLabel = !it.required
-                )
-            }
-            else -> null
+    this.mapNotNull { addressField ->
+        addressField.type?.let {
+            SectionFieldSpec.SimpleText(
+                addressField.type.identifierSpec,
+                addressField.schema?.nameType?.stringResId ?: it.defaultLabel,
+                capitalization = it.capitalization,
+                keyboardType = getKeyboard(addressField.schema),
+                showOptionalLabel = !addressField.required
+            )
         }
     }.map {
         it.transform()
