@@ -30,7 +30,8 @@ object CountryUtils {
             ?: Locale("", countryCode.value).getDisplayCountry(currentLocale)
 
     @JvmSynthetic
-    internal fun getCountryCodeByName(countryName: String, currentLocale: Locale): CountryCode? {
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    fun getCountryCodeByName(countryName: String, currentLocale: Locale): CountryCode? {
         return localizedCountries(currentLocale).firstOrNull { it.name == countryName }?.code
     }
 
@@ -42,7 +43,8 @@ object CountryUtils {
     }
 
     @JvmSynthetic
-    internal fun getOrderedCountries(currentLocale: Locale): List<Country> {
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    fun getOrderedCountries(currentLocale: Locale): List<Country> {
         // Show user's current locale first, followed by countries alphabetized by display name
         return listOfNotNull(getCountryByCode(currentLocale.getCountryCode(), currentLocale))
             .plus(
