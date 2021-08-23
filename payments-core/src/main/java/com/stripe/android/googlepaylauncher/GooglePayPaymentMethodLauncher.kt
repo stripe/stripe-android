@@ -282,7 +282,7 @@ open class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
        const val INTERNAL_ERROR = 1
 
         // The application is misconfigured
-        internal const val DEVELOPER_ERROR = 2
+       const val DEVELOPER_ERROR = 2
 
         // Error executing a network call
         const val NETWORK_ERROR = 3
