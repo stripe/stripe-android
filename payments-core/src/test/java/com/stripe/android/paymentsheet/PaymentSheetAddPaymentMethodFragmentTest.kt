@@ -29,7 +29,7 @@ import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
 import com.stripe.android.paymentsheet.paymentdatacollection.CardDataCollectionFragment
 import com.stripe.android.paymentsheet.paymentdatacollection.ComposeFormDataCollectionFragment
-import com.stripe.android.paymentsheet.paymentdatacollection.ComposeFragmentArguments
+import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
 import com.stripe.android.paymentsheet.specifications.IdentifierSpec
 import com.stripe.android.paymentsheet.ui.PaymentSheetFragmentFactory
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
@@ -300,12 +300,12 @@ class PaymentSheetAddPaymentMethodFragmentTest {
 
             assertThat(addedFragment).isInstanceOf(ComposeFormDataCollectionFragment::class.java)
             assertThat(
-                addedFragment?.arguments?.getParcelable<ComposeFragmentArguments>(
+                addedFragment?.arguments?.getParcelable<FormFragmentArguments>(
                     ComposeFormDataCollectionFragment.EXTRA_CONFIG
                 )
             )
                 .isEqualTo(
-                    ComposeFragmentArguments(
+                    FormFragmentArguments(
                         SupportedPaymentMethod.Bancontact.name,
                         saveForFutureUseInitialVisibility = true,
                         saveForFutureUseInitialValue = true,
@@ -329,12 +329,12 @@ class PaymentSheetAddPaymentMethodFragmentTest {
             assertThat(addedFragment).isInstanceOf(ComposeFormDataCollectionFragment::class.java)
 
             assertThat(
-                addedFragment?.arguments?.getParcelable<ComposeFragmentArguments>(
+                addedFragment?.arguments?.getParcelable<FormFragmentArguments>(
                     ComposeFormDataCollectionFragment.EXTRA_CONFIG
                 )
             )
                 .isEqualTo(
-                    ComposeFragmentArguments(
+                    FormFragmentArguments(
                         SupportedPaymentMethod.Bancontact.name,
                         saveForFutureUseInitialVisibility = true,
                         saveForFutureUseInitialValue = true,
@@ -388,12 +388,12 @@ class PaymentSheetAddPaymentMethodFragmentTest {
 
             assertThat(addedFragment).isInstanceOf(ComposeFormDataCollectionFragment::class.java)
             assertThat(
-                addedFragment?.arguments?.getParcelable<ComposeFragmentArguments>(
+                addedFragment?.arguments?.getParcelable<FormFragmentArguments>(
                     ComposeFormDataCollectionFragment.EXTRA_CONFIG
                 )
             )
                 .isEqualTo(
-                    ComposeFragmentArguments(
+                    FormFragmentArguments(
                         SupportedPaymentMethod.Bancontact.name,
                         saveForFutureUseInitialVisibility = false,
                         saveForFutureUseInitialValue = true,
@@ -438,7 +438,7 @@ class PaymentSheetAddPaymentMethodFragmentTest {
                 billingAddress = null
             )
         ).isEqualTo(
-            ComposeFragmentArguments(
+            FormFragmentArguments(
                 SupportedPaymentMethod.Bancontact.name,
                 saveForFutureUseInitialVisibility = false,
                 saveForFutureUseInitialValue = true,
@@ -457,7 +457,7 @@ class PaymentSheetAddPaymentMethodFragmentTest {
                 merchantName = "Example, Inc",
             )
         ).isEqualTo(
-            ComposeFragmentArguments(
+            FormFragmentArguments(
                 SupportedPaymentMethod.Bancontact.name,
                 saveForFutureUseInitialVisibility = false,
                 saveForFutureUseInitialValue = false,
@@ -477,7 +477,7 @@ class PaymentSheetAddPaymentMethodFragmentTest {
 
             )
         ).isEqualTo(
-            ComposeFragmentArguments(
+            FormFragmentArguments(
                 SupportedPaymentMethod.Bancontact.name,
                 saveForFutureUseInitialVisibility = false,
                 saveForFutureUseInitialValue = true,
@@ -498,7 +498,7 @@ class PaymentSheetAddPaymentMethodFragmentTest {
 
             )
         ).isEqualTo(
-            ComposeFragmentArguments(
+            FormFragmentArguments(
                 SupportedPaymentMethod.Bancontact.name,
                 saveForFutureUseInitialVisibility = true,
                 saveForFutureUseInitialValue = true,

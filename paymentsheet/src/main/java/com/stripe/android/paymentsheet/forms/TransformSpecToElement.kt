@@ -11,7 +11,7 @@ import com.stripe.android.paymentsheet.elements.SectionController
 import com.stripe.android.paymentsheet.elements.SimpleDropdownConfig
 import com.stripe.android.paymentsheet.elements.SimpleTextFieldConfig
 import com.stripe.android.paymentsheet.elements.TextFieldController
-import com.stripe.android.paymentsheet.paymentdatacollection.ComposeFragmentArguments
+import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.getValue
 import com.stripe.android.paymentsheet.specifications.FormItemSpec
 import com.stripe.android.paymentsheet.specifications.IdentifierSpec
@@ -26,7 +26,7 @@ import com.stripe.android.paymentsheet.specifications.SectionFieldSpec
  */
 internal class TransformSpecToElement(
     private val resourceRepository: ResourceRepository,
-    private val initialValues: ComposeFragmentArguments
+    private val initialValues: FormFragmentArguments
 ) {
     internal fun transform(
         list: List<FormItemSpec>
@@ -40,7 +40,7 @@ internal class TransformSpecToElement(
         }
 
     private fun FormItemSpec.SectionSpec.transform(
-        initialValues: ComposeFragmentArguments
+        initialValues: FormFragmentArguments
     ): FormElement.SectionElement {
         val fieldElements = this.fields.transform(initialValues)
 
@@ -59,7 +59,7 @@ internal class TransformSpecToElement(
     /**
      * This function will transform a list of specs into a list of elements
      */
-    private fun List<SectionFieldSpec>.transform(initialValues: ComposeFragmentArguments) =
+    private fun List<SectionFieldSpec>.transform(initialValues: FormFragmentArguments) =
         this.map {
             when (it) {
                 is SectionFieldSpec.Email -> it.transform(initialValues.billingDetails?.email)
@@ -73,7 +73,7 @@ internal class TransformSpecToElement(
             }
         }
 
-    private fun transformAddress(initialValues: ComposeFragmentArguments) =
+    private fun transformAddress(initialValues: FormFragmentArguments) =
         SectionFieldElement.AddressElement(
             IdentifierSpec.Generic("billing"),
             resourceRepository.addressRepository,
@@ -132,7 +132,7 @@ internal class TransformSpecToElement(
 }
 
 internal fun SectionFieldSpec.SimpleText.transform(
-    initialValues: ComposeFragmentArguments? = null
+    initialValues: FormFragmentArguments? = null
 ): SectionFieldElement =
     SectionFieldElement.SimpleText(
         this.identifier,

@@ -293,7 +293,7 @@ internal class CardDataCollectionFragment<ViewModelType : BaseSheetViewModel<*>>
     }
 
     private fun populateFieldsFromArguments() {
-        requireArguments().getParcelable<ComposeFragmentArguments>(
+        requireArguments().getParcelable<FormFragmentArguments>(
             ComposeFormDataCollectionFragment.EXTRA_CONFIG
         )?.billingDetails?.address?.also {
             billingAddressView.populate(

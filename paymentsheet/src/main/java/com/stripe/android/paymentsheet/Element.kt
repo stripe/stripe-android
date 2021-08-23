@@ -12,7 +12,7 @@ import com.stripe.android.paymentsheet.elements.SaveForFutureUseController
 import com.stripe.android.paymentsheet.elements.SectionController
 import com.stripe.android.paymentsheet.elements.SectionFieldErrorController
 import com.stripe.android.paymentsheet.elements.TextFieldController
-import com.stripe.android.paymentsheet.paymentdatacollection.ComposeFragmentArguments
+import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.getValue
 import com.stripe.android.paymentsheet.specifications.IdentifierSpec
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -89,7 +89,7 @@ internal sealed class SectionFieldElement {
      */
     abstract val controller: SectionFieldErrorController
 
-    abstract fun setRawValue(composeFragmentArguments: ComposeFragmentArguments)
+    abstract fun setRawValue(formFragmentArguments: FormFragmentArguments)
 
     /**
      * This will return a controller that abides by the SectionFieldErrorController interface.
@@ -100,8 +100,8 @@ internal sealed class SectionFieldElement {
         override val identifier: IdentifierSpec,
         override val controller: TextFieldController
     ) : SectionFieldElement() {
-        override fun setRawValue(composeFragmentArguments: ComposeFragmentArguments) {
-            composeFragmentArguments.getValue(identifier)?.let { controller.onRawValueChange(it) }
+        override fun setRawValue(formFragmentArguments: FormFragmentArguments) {
+            formFragmentArguments.getValue(identifier)?.let { controller.onRawValueChange(it) }
         }
     }
 
@@ -109,8 +109,8 @@ internal sealed class SectionFieldElement {
         override val identifier: IdentifierSpec,
         override val controller: TextFieldController,
     ) : SectionFieldElement() {
-        override fun setRawValue(composeFragmentArguments: ComposeFragmentArguments) {
-            composeFragmentArguments.getValue(identifier)?.let { controller.onRawValueChange(it) }
+        override fun setRawValue(formFragmentArguments: FormFragmentArguments) {
+            formFragmentArguments.getValue(identifier)?.let { controller.onRawValueChange(it) }
         }
     }
 
@@ -118,8 +118,8 @@ internal sealed class SectionFieldElement {
         override val identifier: IdentifierSpec,
         override val controller: DropdownFieldController
     ) : SectionFieldElement() {
-        override fun setRawValue(composeFragmentArguments: ComposeFragmentArguments) {
-            composeFragmentArguments.getValue(identifier)?.let { controller.onRawValueChange(it) }
+        override fun setRawValue(formFragmentArguments: FormFragmentArguments) {
+            formFragmentArguments.getValue(identifier)?.let { controller.onRawValueChange(it) }
         }
     }
 
@@ -127,8 +127,8 @@ internal sealed class SectionFieldElement {
         override val identifier: IdentifierSpec,
         override val controller: TextFieldController
     ) : SectionFieldElement() {
-        override fun setRawValue(composeFragmentArguments: ComposeFragmentArguments) {
-            composeFragmentArguments.getValue(identifier)?.let { controller.onRawValueChange(it) }
+        override fun setRawValue(formFragmentArguments: FormFragmentArguments) {
+            formFragmentArguments.getValue(identifier)?.let { controller.onRawValueChange(it) }
         }
     }
 
@@ -136,15 +136,15 @@ internal sealed class SectionFieldElement {
         override val identifier: IdentifierSpec,
         override val controller: DropdownFieldController,
     ) : SectionFieldElement() {
-        override fun setRawValue(composeFragmentArguments: ComposeFragmentArguments) {
-            composeFragmentArguments.getValue(identifier)?.let { controller.onRawValueChange(it) }
+        override fun setRawValue(formFragmentArguments: FormFragmentArguments) {
+            formFragmentArguments.getValue(identifier)?.let { controller.onRawValueChange(it) }
         }
     }
 
     internal class AddressElement constructor(
         override val identifier: IdentifierSpec,
         private val addressFieldRepository: AddressFieldElementRepository,
-        private var args: ComposeFragmentArguments? = null,
+        private var args: FormFragmentArguments? = null,
         countryCodes: Set<String> = emptySet(),
         countryDropdownFieldController: DropdownFieldController = DropdownFieldController(
             CountryConfig(countryCodes),
@@ -177,8 +177,8 @@ internal sealed class SectionFieldElement {
 
         override val controller = AddressController(fields)
 
-        override fun setRawValue(composeFragmentArguments: ComposeFragmentArguments) {
-            args = composeFragmentArguments
+        override fun setRawValue(formFragmentArguments: FormFragmentArguments) {
+            args = formFragmentArguments
         }
     }
 }

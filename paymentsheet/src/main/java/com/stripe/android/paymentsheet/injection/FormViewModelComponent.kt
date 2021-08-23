@@ -2,7 +2,7 @@ package com.stripe.android.paymentsheet.injection
 
 import android.content.res.Resources
 import com.stripe.android.paymentsheet.forms.FormViewModel
-import com.stripe.android.paymentsheet.paymentdatacollection.ComposeFragmentArguments
+import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
 import com.stripe.android.paymentsheet.specifications.LayoutSpec
 import dagger.BindsInstance
 import dagger.Component
@@ -20,7 +20,7 @@ internal interface FormViewModelComponent {
 
         @BindsInstance
         fun config(
-            config: ComposeFragmentArguments
+            config: FormFragmentArguments
         ): Builder
 
         @BindsInstance

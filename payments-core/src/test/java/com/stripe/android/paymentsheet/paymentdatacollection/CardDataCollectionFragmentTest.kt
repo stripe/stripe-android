@@ -451,7 +451,7 @@ class CardDataCollectionFragmentTest {
         args: PaymentSheetContract.Args = PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY,
         fragmentConfig: FragmentConfig? = FragmentConfigFixtures.DEFAULT,
         stripeIntent: StripeIntent? = PaymentIntentFixtures.PI_WITH_SHIPPING,
-        fragmentArgs: ComposeFragmentArguments? = ComposeFragmentArguments(
+        fragmentArgs: FormFragmentArguments? = FormFragmentArguments(
             SupportedPaymentMethod.Bancontact.name,
             true,
             true,

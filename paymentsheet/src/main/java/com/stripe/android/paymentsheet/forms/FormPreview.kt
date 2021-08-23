@@ -6,7 +6,7 @@ import com.stripe.android.paymentsheet.address.AddressFieldElementRepository
 import com.stripe.android.paymentsheet.address.parseAddressesSchema
 import com.stripe.android.paymentsheet.paymentdatacollection.Address
 import com.stripe.android.paymentsheet.paymentdatacollection.BillingDetails
-import com.stripe.android.paymentsheet.paymentdatacollection.ComposeFragmentArguments
+import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
 import com.stripe.android.paymentsheet.specifications.BankRepository
 import com.stripe.android.paymentsheet.specifications.ResourceRepository
 import com.stripe.android.paymentsheet.specifications.SupportedBankType
@@ -47,7 +47,7 @@ internal fun FormInternalPreview() {
                 bankRepository,
                 addressFieldElementRepository
             ),
-            ComposeFragmentArguments(
+            FormFragmentArguments(
                 "Card",
                 saveForFutureUseInitialVisibility = true,
                 saveForFutureUseInitialValue = true,

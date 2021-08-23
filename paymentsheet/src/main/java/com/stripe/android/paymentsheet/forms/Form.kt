@@ -39,7 +39,7 @@ import com.stripe.android.paymentsheet.elements.TextField
 import com.stripe.android.paymentsheet.elements.TextFieldController
 import com.stripe.android.paymentsheet.getIdInputControllerMap
 import com.stripe.android.paymentsheet.injection.DaggerFormViewModelComponent
-import com.stripe.android.paymentsheet.paymentdatacollection.ComposeFragmentArguments
+import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
 import com.stripe.android.paymentsheet.specifications.FormItemSpec
 import com.stripe.android.paymentsheet.specifications.IdentifierSpec
 import com.stripe.android.paymentsheet.specifications.LayoutSpec
@@ -243,13 +243,13 @@ internal fun SaveForFutureUseElementUI(
 @Singleton
 class FormViewModel @Inject internal constructor(
     layout: LayoutSpec,
-    config: ComposeFragmentArguments,
+    config: FormFragmentArguments,
     private val resourceRepository: ResourceRepository
 ) : ViewModel() {
     internal class Factory(
         private val resources: Resources,
         private val layout: LayoutSpec,
-        private val config: ComposeFragmentArguments
+        private val config: FormFragmentArguments
     ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
