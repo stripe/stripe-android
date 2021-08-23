@@ -34,6 +34,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.shadows.ShadowLooper
 
 @RunWith(RobolectricTestRunner::class)
 class CardDataCollectionFragmentTest {
@@ -74,7 +75,7 @@ class CardDataCollectionFragmentTest {
             viewBinding.cardMultilineWidget.setCardNumber("4242424242424242")
             viewBinding.cardMultilineWidget.setExpiryDate(1, 2030)
             viewBinding.cardMultilineWidget.setCvcCode("123")
-            viewBinding.billingAddress.countryView.setText("United States")
+            viewBinding.billingAddress.countryLayout.selectedCountryCode = CountryCode.US
             viewBinding.billingAddress.postalCodeView.setText("94107")
 
             val paymentSelections = mutableListOf<PaymentSelection>()

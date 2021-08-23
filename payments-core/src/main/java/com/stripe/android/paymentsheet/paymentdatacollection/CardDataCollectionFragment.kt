@@ -19,10 +19,10 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.stripe.android.R
-import com.stripe.android.model.Address
 import com.stripe.android.databinding.FragmentPaymentsheetAddCardBinding
 import com.stripe.android.databinding.StripeHorizontalDividerBinding
 import com.stripe.android.databinding.StripeVerticalDividerBinding
+import com.stripe.android.model.Address
 import com.stripe.android.model.CountryCode
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.paymentsheet.model.PaymentSelection
