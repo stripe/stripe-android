@@ -13,16 +13,16 @@ internal val p24ParamKey: MutableMap<String, Any?> = mutableMapOf(
 )
 
 internal val p24NameSection = FormItemSpec.SectionSpec(
-    IdentifierSpec("name section"),
+    IdentifierSpec("name_section"),
     SectionFieldSpec.NAME
 )
 internal val p24EmailSection = FormItemSpec.SectionSpec(
-    IdentifierSpec("email"),
+    IdentifierSpec("email_section"),
     SectionFieldSpec.Email
 )
 internal val p24BankSection =
     FormItemSpec.SectionSpec(
-        IdentifierSpec("bank section"),
+        IdentifierSpec("bank_section"),
         SectionFieldSpec.BankDropdown(
             IdentifierSpec("bank"),
             R.string.stripe_paymentsheet_p24_bank,

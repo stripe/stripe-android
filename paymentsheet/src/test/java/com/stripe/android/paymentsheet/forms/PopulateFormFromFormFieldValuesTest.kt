@@ -18,7 +18,7 @@ class PopulateFormFromFormFieldValuesTest {
         emailController
     )
     private val emailSection = FormElement.SectionElement(
-        identifier = IdentifierSpec("emailSection"),
+        identifier = IdentifierSpec("email_section"),
         emailFieldElement,
         SectionController(emailController.label, listOf(emailController))
     )
@@ -49,7 +49,7 @@ class PopulateFormFromFormFieldValuesTest {
         runBlocking {
             val formFieldValues = FormFieldValues(
                 mapOf(
-                    IdentifierSpec("not in list form elements") to FormFieldEntry(
+                    IdentifierSpec("not_in_list_form_elements") to FormFieldEntry(
                         "valid@email.com",
                         true
                     )

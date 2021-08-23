@@ -32,12 +32,12 @@ import java.io.File
 class TransformSpecToElementTest {
 
     private val nameSection = FormItemSpec.SectionSpec(
-        IdentifierSpec("nameSection"),
+        IdentifierSpec("name_section"),
         SectionFieldSpec.NAME
     )
 
     private val emailSection = FormItemSpec.SectionSpec(
-        IdentifierSpec("emailSection"),
+        IdentifierSpec("email_section"),
         SectionFieldSpec.Email
     )
 
@@ -64,7 +64,7 @@ class TransformSpecToElementTest {
         val formElement = transformSpecToElement.transform(
             listOf(
                 FormItemSpec.SectionSpec(
-                    IdentifierSpec("multifieldSection"),
+                    IdentifierSpec("multifield_section"),
                     listOf(
                         SectionFieldSpec.Country(),
                         IDEAL_BANK_CONFIG
@@ -83,7 +83,7 @@ class TransformSpecToElementTest {
     @Test
     fun `Adding a country section sets up the section and country elements correctly`() {
         val countrySection = FormItemSpec.SectionSpec(
-            IdentifierSpec("countrySection"),
+            IdentifierSpec("country_section"),
             SectionFieldSpec.Country(onlyShowCountryCodes = setOf("AT"))
         )
         val formElement = transformSpecToElement.transform(
@@ -100,7 +100,7 @@ class TransformSpecToElementTest {
         // Verify the correct config is setup for the controller
         assertThat(countryElement.controller.label).isEqualTo(CountryConfig().label)
 
-        assertThat(countrySectionElement.identifier.value).isEqualTo("countrySection")
+        assertThat(countrySectionElement.identifier.value).isEqualTo("country_section")
 
         assertThat(countryElement.identifier.value).isEqualTo("country")
     }
@@ -108,7 +108,7 @@ class TransformSpecToElementTest {
     @Test
     fun `Adding a ideal bank section sets up the section and country elements correctly`() {
         val idealSection = FormItemSpec.SectionSpec(
-            IdentifierSpec("idealSection"),
+            IdentifierSpec("ideal_section"),
             IDEAL_BANK_CONFIG
         )
         val formElement = transformSpecToElement.transform(
@@ -122,7 +122,7 @@ class TransformSpecToElementTest {
         // Verify the correct config is setup for the controller
         assertThat(idealElement.controller.label).isEqualTo(R.string.stripe_paymentsheet_ideal_bank)
 
-        assertThat(idealSectionElement.identifier.value).isEqualTo("idealSection")
+        assertThat(idealSectionElement.identifier.value).isEqualTo("ideal_section")
 
         assertThat(idealElement.identifier.value).isEqualTo("bank")
     }

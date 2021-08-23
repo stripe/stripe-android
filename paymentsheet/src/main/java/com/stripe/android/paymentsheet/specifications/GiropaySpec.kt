@@ -6,7 +6,7 @@ internal val giropayParamKey: MutableMap<String, Any?> = mutableMapOf(
 )
 
 internal val giropayNameSection = FormItemSpec.SectionSpec(
-    IdentifierSpec("name section"),
+    IdentifierSpec("name_section"),
     SectionFieldSpec.NAME
 )
 
