@@ -5,20 +5,6 @@ public final class com/stripe/android/paymentsheet/BuildConfig {
 	public fun <init> ()V
 }
 
-public class com/stripe/android/paymentsheet/FakeCustomerRepository : com/stripe/android/paymentsheet/repositories/CustomerRepository {
-	public static final field $stable I
-	public field savedPaymentMethod Lcom/stripe/android/model/PaymentMethod;
-	public fun <init> ()V
-	public fun <init> (Ljava/util/List;)V
-	public synthetic fun <init> (Ljava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public fun detachPaymentMethod (Lcom/stripe/android/paymentsheet/PaymentSheet$CustomerConfiguration;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public final fun getError ()Ljava/lang/Throwable;
-	public fun getPaymentMethods (Lcom/stripe/android/paymentsheet/PaymentSheet$CustomerConfiguration;Ljava/util/List;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public final fun getSavedPaymentMethod ()Lcom/stripe/android/model/PaymentMethod;
-	public final fun setError (Ljava/lang/Throwable;)V
-	public final fun setSavedPaymentMethod (Lcom/stripe/android/model/PaymentMethod;)V
-}
-
 public abstract interface class com/stripe/android/paymentsheet/PaymentOptionCallback {
 	public abstract fun onPaymentOption (Lcom/stripe/android/paymentsheet/model/PaymentOption;)V
 }
