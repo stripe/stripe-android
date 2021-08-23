@@ -1,8 +1,6 @@
 package com.stripe.android.payments
 
 import android.content.Context
-import androidx.annotation.RestrictTo
-import androidx.annotation.VisibleForTesting
 
 /**
  * The SDK's "default" `return_url`. When a PaymentIntent or SetupIntent is confirmed without

@@ -1,7 +1,5 @@
 package com.stripe.android.networking
 
-import androidx.annotation.RestrictTo
-import androidx.annotation.VisibleForTesting
 import com.stripe.android.cards.Bin
 import com.stripe.android.exception.APIException
 import com.stripe.android.model.BankStatuses
