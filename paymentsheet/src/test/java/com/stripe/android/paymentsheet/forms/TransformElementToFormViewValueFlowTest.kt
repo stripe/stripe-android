@@ -35,7 +35,7 @@ class TransformElementToFormViewValueFlowTest {
         )
     )
 
-    private val transformElementToFormFieldValueFlow = TransformElementToFormFieldValueFlow(
+    private val transformElementToFormFieldValueFlow = CompleteFormFieldValueFilter(
         fieldFlow,
         hiddenIdentifersFlow,
         showingMandate = MutableStateFlow(true),

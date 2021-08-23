@@ -9,13 +9,12 @@ import kotlinx.coroutines.flow.combine
  * [transformFlow] is the only public method and it will transform
  * the list of form elements into a [FormFieldValues].
  */
-internal class TransformElementToFormFieldValueFlow(
+internal class CompleteFormFieldValueFilter(
     private val currentFieldValueMap: Flow<Map<IdentifierSpec, FormFieldEntry>>,
     private val hiddenIdentifiers: Flow<List<IdentifierSpec>>,
     val showingMandate: Flow<Boolean>,
     val saveForFutureUse: Flow<Boolean>
 ) {
-
     /**
      * This will return null if any form field values are incomplete, otherwise it is an object
      * representing all the complete, non-hidden fields.

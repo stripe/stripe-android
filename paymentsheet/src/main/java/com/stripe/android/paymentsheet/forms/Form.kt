@@ -348,7 +348,7 @@ class FormViewModel @Inject internal constructor(
     }
 
     val completeFormValues =
-        TransformElementToFormFieldValueFlow(
+        CompleteFormFieldValueFilter(
             combine(
                 elements.map { it.getFormFieldValueFlow() }
             ) {
