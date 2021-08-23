@@ -60,7 +60,7 @@ ext {
     androidTestVersion = '1.4.0'
     junitVersion = '4.13.2'
     robolectricVersion = '4.6'
-    mockitoCoreVersion = '3.11.2'
+    mockitoCoreVersion = '3.12.1'
     mockitoKotlinVersion = '3.2.0'
 
     group_name = GROUP
