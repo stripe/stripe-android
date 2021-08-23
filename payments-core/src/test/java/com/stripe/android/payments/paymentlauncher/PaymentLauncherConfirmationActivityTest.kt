@@ -1,9 +1,7 @@
 package com.stripe.android.payments.paymentlauncher
 
 import android.content.Intent
-import android.os.Bundle
 import androidx.lifecycle.Lifecycle
-import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth
 import com.stripe.android.model.ConfirmStripeIntentParams
@@ -95,13 +93,16 @@ class PaymentLauncherConfirmationActivityTest {
 
     @Test
     fun `start without args should finish with Error result`() {
-        ActivityScenario.launch(
-            PaymentLauncherConfirmationActivity::class.java, Bundle.EMPTY
+        mockViewModelActivityScenario().launch(
+            Intent(
+                ApplicationProvider.getApplicationContext(),
+                PaymentLauncherConfirmationActivity::class.java
+            )
         ).use { activityScenario ->
             Truth.assertThat(activityScenario.state)
                 .isEqualTo(Lifecycle.State.DESTROYED)
             val result =
-                PaymentResult.fromIntent(activityScenario.result.resultData) as PaymentResult.Failed
+                PaymentResult.fromIntent(activityScenario.getResult().resultData) as PaymentResult.Failed
             Truth.assertThat(result.throwable.message)
                 .isEqualTo(
                     PaymentLauncherConfirmationActivity.EMPTY_ARG_ERROR
