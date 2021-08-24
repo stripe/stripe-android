@@ -159,7 +159,7 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
             merchantDisplayName = merchantName,
             customer = viewModel.customerConfig.value,
             googlePay = googlePayConfig,
-            billingDetails = PaymentSheet.BillingDetails(
+            defaultBillingDetails = PaymentSheet.BillingDetails(
                 address = PaymentSheet.Address(
                     line1 = "123 Main Street",
                     line2 = null,

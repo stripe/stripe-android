@@ -13,6 +13,7 @@ data class FormFragmentArguments(
     val billingDetails: BillingDetails? = null,
 ) : Parcelable
 
+// TODO: Use the PaymentSheet.Address and billing details when in a single module.
 @Parcelize
 data class Address(
     val city: String? = null,

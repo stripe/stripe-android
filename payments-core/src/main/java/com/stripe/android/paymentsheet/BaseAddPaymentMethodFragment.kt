@@ -160,7 +160,7 @@ internal abstract class BaseAddPaymentMethodFragment(
             getArguments(
                 supportedPaymentMethodName = paymentMethod.name,
                 merchantName = sheetViewModel.merchantName,
-                isCustomer = sheetViewModel.customerConfig != null,
+                hasCustomer = sheetViewModel.customerConfig != null,
                 saveForFutureUse = (
                     sheetViewModel.stripeIntent.value is SetupIntent ||
                         (
@@ -168,7 +168,7 @@ internal abstract class BaseAddPaymentMethodFragment(
                                 ?.setupFutureUsage == StripeIntent.Usage.OffSession
                             )
                     ),
-                billingAddress = sheetViewModel.config?.billingDetails
+                billingAddress = sheetViewModel.config?.defaultBillingDetails
             )
         )
 
@@ -221,7 +221,7 @@ internal abstract class BaseAddPaymentMethodFragment(
 
         @VisibleForTesting
         internal fun getArguments(
-            isCustomer: Boolean,
+            hasCustomer: Boolean,
             saveForFutureUse: Boolean,
             supportedPaymentMethodName: String,
             merchantName: String,
@@ -229,7 +229,7 @@ internal abstract class BaseAddPaymentMethodFragment(
         ): FormFragmentArguments {
             var saveForFutureUseValue = true
             var saveForFutureUseVisible = true
-            if (!isCustomer) {
+            if (!hasCustomer) {
                 saveForFutureUseValue = false
                 saveForFutureUseVisible = false
             }

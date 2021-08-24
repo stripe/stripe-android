@@ -431,7 +431,7 @@ class PaymentSheetAddPaymentMethodFragmentTest {
     fun `Verify Compose argument in guest setup intent`() {
         assertThat(
             BaseAddPaymentMethodFragment.getArguments(
-                isCustomer = false,
+                hasCustomer = false,
                 saveForFutureUse = true,
                 supportedPaymentMethodName = SupportedPaymentMethod.Bancontact.name,
                 merchantName = "Example, Inc",
@@ -451,7 +451,7 @@ class PaymentSheetAddPaymentMethodFragmentTest {
     fun `Verify Compose argument in guest payment intent`() {
         assertThat(
             BaseAddPaymentMethodFragment.getArguments(
-                isCustomer = false,
+                hasCustomer = false,
                 saveForFutureUse = false,
                 supportedPaymentMethodName = SupportedPaymentMethod.Bancontact.name,
                 merchantName = "Example, Inc",
@@ -470,7 +470,7 @@ class PaymentSheetAddPaymentMethodFragmentTest {
     fun `Verify Compose argument in new or returning user setup intent`() {
         assertThat(
             BaseAddPaymentMethodFragment.getArguments(
-                isCustomer = true,
+                hasCustomer = true,
                 saveForFutureUse = true,
                 supportedPaymentMethodName = SupportedPaymentMethod.Bancontact.name,
                 merchantName = "Example, Inc",
@@ -491,7 +491,7 @@ class PaymentSheetAddPaymentMethodFragmentTest {
 
         assertThat(
             BaseAddPaymentMethodFragment.getArguments(
-                isCustomer = true,
+                hasCustomer = true,
                 saveForFutureUse = false,
                 supportedPaymentMethodName = SupportedPaymentMethod.Bancontact.name,
                 merchantName = "Example, Inc",

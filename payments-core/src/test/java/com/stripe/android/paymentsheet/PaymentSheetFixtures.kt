@@ -63,7 +63,7 @@ internal object PaymentSheetFixtures {
         PAYMENT_INTENT_CLIENT_SECRET,
         config = PaymentSheet.Configuration(
             merchantDisplayName = "Example, Inc",
-            billingDetails = PaymentSheet.BillingDetails(
+            defaultBillingDetails = PaymentSheet.BillingDetails(
                 address = PaymentSheet.Address(
                     line1 = "123 Main Street",
                     line2 = null,
