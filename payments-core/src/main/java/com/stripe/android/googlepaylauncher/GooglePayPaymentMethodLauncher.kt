@@ -275,15 +275,14 @@ open class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
     @IntDef(INTERNAL_ERROR, DEVELOPER_ERROR, NETWORK_ERROR)
     annotation class ErrorCode
 
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
     companion object {
         internal const val PRODUCT_USAGE = "GooglePayPaymentMethodLauncher"
 
         // Generic internal error
-        internal const val INTERNAL_ERROR = 1
+       const val INTERNAL_ERROR = 1
 
         // The application is misconfigured
-        internal const val DEVELOPER_ERROR = 2
+       const val DEVELOPER_ERROR = 2
 
         // Error executing a network call
         const val NETWORK_ERROR = 3
