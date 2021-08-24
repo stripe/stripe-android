@@ -22,6 +22,7 @@ import com.stripe.android.paymentsheet.PaymentSheetViewModel.CheckoutIdentifier
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.forms.FormFieldEntry
 import com.stripe.android.paymentsheet.forms.FormFieldValues
+import com.stripe.android.paymentsheet.model.Amount
 import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.FragmentConfigFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -309,7 +310,8 @@ class PaymentSheetAddPaymentMethodFragmentTest {
                         SupportedPaymentMethod.Bancontact.name,
                         saveForFutureUseInitialVisibility = true,
                         saveForFutureUseInitialValue = true,
-                        merchantName = PaymentSheetFixtures.MERCHANT_DISPLAY_NAME
+                        merchantName = PaymentSheetFixtures.MERCHANT_DISPLAY_NAME,
+                        amount = createAmount()
                     )
                 )
         }
@@ -338,7 +340,8 @@ class PaymentSheetAddPaymentMethodFragmentTest {
                         SupportedPaymentMethod.Bancontact.name,
                         saveForFutureUseInitialVisibility = true,
                         saveForFutureUseInitialValue = true,
-                        merchantName = PaymentSheetFixtures.MERCHANT_DISPLAY_NAME
+                        merchantName = PaymentSheetFixtures.MERCHANT_DISPLAY_NAME,
+                        amount = createAmount()
                     )
                 )
         }
@@ -397,7 +400,8 @@ class PaymentSheetAddPaymentMethodFragmentTest {
                         SupportedPaymentMethod.Bancontact.name,
                         saveForFutureUseInitialVisibility = false,
                         saveForFutureUseInitialValue = true,
-                        merchantName = "Widget Store"
+                        merchantName = "Widget Store",
+                        amount = createAmount(PI_OFF_SESSION)
                     )
                 )
         }
@@ -430,7 +434,7 @@ class PaymentSheetAddPaymentMethodFragmentTest {
     @Test
     fun `Verify Compose argument in guest setup intent`() {
         assertThat(
-            BaseAddPaymentMethodFragment.getArguments(
+            BaseAddPaymentMethodFragment.getFormArguments(
                 hasCustomer = false,
                 saveForFutureUse = true,
                 supportedPaymentMethodName = SupportedPaymentMethod.Bancontact.name,
@@ -450,7 +454,7 @@ class PaymentSheetAddPaymentMethodFragmentTest {
     @Test
     fun `Verify Compose argument in guest payment intent`() {
         assertThat(
-            BaseAddPaymentMethodFragment.getArguments(
+            BaseAddPaymentMethodFragment.getFormArguments(
                 hasCustomer = false,
                 saveForFutureUse = false,
                 supportedPaymentMethodName = SupportedPaymentMethod.Bancontact.name,
@@ -469,12 +473,11 @@ class PaymentSheetAddPaymentMethodFragmentTest {
     @Test
     fun `Verify Compose argument in new or returning user setup intent`() {
         assertThat(
-            BaseAddPaymentMethodFragment.getArguments(
+            BaseAddPaymentMethodFragment.getFormArguments(
                 hasCustomer = true,
                 saveForFutureUse = true,
                 supportedPaymentMethodName = SupportedPaymentMethod.Bancontact.name,
-                merchantName = "Example, Inc",
-
+                merchantName = "Example, Inc"
             )
         ).isEqualTo(
             FormFragmentArguments(
@@ -490,13 +493,12 @@ class PaymentSheetAddPaymentMethodFragmentTest {
     fun `Verify Compose argument in new or returning user payment intent`() {
 
         assertThat(
-            BaseAddPaymentMethodFragment.getArguments(
+            BaseAddPaymentMethodFragment.getFormArguments(
                 hasCustomer = true,
                 saveForFutureUse = false,
                 supportedPaymentMethodName = SupportedPaymentMethod.Bancontact.name,
-                merchantName = "Example, Inc",
-
-            )
+                merchantName = "Example, Inc"
+                )
         ).isEqualTo(
             FormFragmentArguments(
                 SupportedPaymentMethod.Bancontact.name,
@@ -506,6 +508,9 @@ class PaymentSheetAddPaymentMethodFragmentTest {
             )
         )
     }
+
+    private fun createAmount(paymentIntent: PaymentIntent = PaymentIntentFixtures.PI_WITH_SHIPPING) =
+        Amount(paymentIntent.amount!!, paymentIntent.currency!!)
 
     private fun createFragment(
         args: PaymentSheetContract.Args = PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY,

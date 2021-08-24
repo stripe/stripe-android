@@ -74,7 +74,7 @@
   <string name="stripe_paymentsheet_ideal_bank">iDEAL Bank</string>
   <!-- Title for credit card number entry field -->
   <string name="stripe_paymentsheet_payment_method_card">Card</string>
-  <!-- Payment method brand name -->
+  <!-- Payment method brand name for SEPA Debit (EU direct bank debit) -->
   <string name="stripe_paymentsheet_payment_method_sepa_debit">SEPA Debit</string>
   <!-- The label of a switch indicating whether to save the payment method for future payments. -->
   <string name="stripe_paymentsheet_save_for_future_payments">Save for future payments</string>

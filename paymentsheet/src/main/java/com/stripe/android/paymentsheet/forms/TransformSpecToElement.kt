@@ -11,6 +11,7 @@ import com.stripe.android.paymentsheet.elements.SectionController
 import com.stripe.android.paymentsheet.elements.SimpleDropdownConfig
 import com.stripe.android.paymentsheet.elements.SimpleTextFieldConfig
 import com.stripe.android.paymentsheet.elements.TextFieldController
+import com.stripe.android.paymentsheet.model.Amount
 import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.getValue
 import com.stripe.android.paymentsheet.specifications.FormItemSpec
@@ -36,6 +37,7 @@ internal class TransformSpecToElement(
                 is FormItemSpec.SaveForFutureUseSpec -> it.transform(initialValues.merchantName)
                 is FormItemSpec.SectionSpec -> it.transform(initialValues)
                 is FormItemSpec.MandateTextSpec -> it.transform(initialValues.merchantName)
+                is FormItemSpec.AfterpayClearpayTextSpec -> it.transform(requireNotNull(initialValues.amount))
             }
         }
 
@@ -129,6 +131,9 @@ internal class TransformSpecToElement(
             ),
             merchantName
         )
+
+    private fun FormItemSpec.AfterpayClearpayTextSpec.transform(amount: Amount) =
+        FormElement.AfterpayClearpayHeaderElement(this.identifier, amount)
 }
 
 internal fun SectionFieldSpec.SimpleText.transform(

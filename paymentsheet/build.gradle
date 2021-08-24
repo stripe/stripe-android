@@ -99,6 +99,7 @@ dependencies {
     implementation "androidx.lifecycle:lifecycle-viewmodel-compose:1.0.0-alpha07"
     // Integration with observables
     implementation "androidx.compose.runtime:runtime-livedata:$composeVersion"
+    implementation "com.google.accompanist:accompanist-flowlayout:0.17.0"
     // Tooling support (Previews, etc.)
     debugImplementation "androidx.compose.ui:ui-tooling:$composeVersion"
 
@@ -132,7 +133,6 @@ dependencies {
 
 task ktlint(type: JavaExec, group: "verification") {
     description = "Check Kotlin code style."
-    main = "com.pinterest.ktlint.Main"
     classpath = configurations.ktlint
     args "src/**/*.kt"
     // to generate report in checkstyle format prepend following args:
@@ -143,7 +143,6 @@ check.dependsOn ktlint
 
 task ktlintFormat(type: JavaExec, group: "formatting") {
     description = "Fix Kotlin code style deviations."
-    main = "com.pinterest.ktlint.Main"
     classpath = configurations.ktlint
     args "-F", "src/**/*.kt"
 }

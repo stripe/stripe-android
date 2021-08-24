@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import androidx.compose.runtime.Composable
 import com.stripe.android.paymentsheet.address.AddressFieldElementRepository
 import com.stripe.android.paymentsheet.address.parseAddressesSchema
+import com.stripe.android.paymentsheet.model.Amount
 import com.stripe.android.paymentsheet.paymentdatacollection.Address
 import com.stripe.android.paymentsheet.paymentdatacollection.BillingDetails
 import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
@@ -52,6 +53,7 @@ internal fun FormInternalPreview() {
                 saveForFutureUseInitialVisibility = true,
                 saveForFutureUseInitialValue = true,
                 "Merchant, Inc.",
+                Amount(10, "USD"),
                 BillingDetails(
                     Address(
                         "San Fransciso",

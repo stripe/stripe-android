@@ -1,7 +1,9 @@
 package com.stripe.android.paymentsheet
 
+import android.content.res.Resources
 import androidx.annotation.VisibleForTesting
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.intl.Locale
 import com.stripe.android.paymentsheet.address.AddressFieldElementRepository
 import com.stripe.android.paymentsheet.elements.AddressController
 import com.stripe.android.paymentsheet.elements.Controller
@@ -12,6 +14,7 @@ import com.stripe.android.paymentsheet.elements.SaveForFutureUseController
 import com.stripe.android.paymentsheet.elements.SectionController
 import com.stripe.android.paymentsheet.elements.SectionFieldErrorController
 import com.stripe.android.paymentsheet.elements.TextFieldController
+import com.stripe.android.paymentsheet.model.Amount
 import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.getValue
 import com.stripe.android.paymentsheet.specifications.IdentifierSpec
@@ -48,6 +51,24 @@ internal sealed class FormElement {
         override val controller: SaveForFutureUseController,
         val merchantName: String?
     ) : FormElement()
+
+    internal data class AfterpayClearpayHeaderElement(
+        override val identifier: IdentifierSpec,
+        private val amount: Amount,
+        override val controller: Controller? = null
+    ) : FormElement() {
+        val infoUrl =
+            "https://static-us.afterpay.com/javascript/modal/${Locale.current.region.lowercase()}_rebrand_modal.html"
+
+        fun getLabel(resources: Resources) =
+            resources.getString(
+                R.string.stripe_paymentsheet_afterpay_clearpay_message,
+                CurrencyFormatter().format(
+                    amount.value / 4,
+                    amount.currencyCode
+                )
+            )
+    }
 
     data class SectionElement(
         override val identifier: IdentifierSpec,

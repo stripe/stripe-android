@@ -25,7 +25,6 @@ import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherFactor
 import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.ApiRequest
 import com.stripe.android.payments.PaymentFlowResult
@@ -104,10 +103,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
     private val _startConfirm = MutableLiveData<Event<ConfirmStripeIntentParams>>()
     internal val startConfirm: LiveData<Event<ConfirmStripeIntentParams>> = _startConfirm
-
-    @VisibleForTesting
-    internal val _amount = MutableLiveData<Amount>()
-    internal val amount: LiveData<Amount> = _amount
 
     @VisibleForTesting
     internal val _viewState = MutableLiveData<PaymentSheetViewState>(null)
@@ -220,7 +215,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         }.fold(
             onSuccess = {
                 updatePaymentMethods(stripeIntent)
-                resetViewState(stripeIntent)
+                resetViewState()
             },
             onFailure = ::onFatal
         )
@@ -260,40 +255,22 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                 onSuccess = {
                     _paymentMethods.value = it
                     setStripeIntent(stripeIntent)
-                    resetViewState(stripeIntent)
+                    resetViewState()
                 },
                 onFailure = ::onFatal
             )
         }
     }
 
-    private fun resetViewState(stripeIntent: StripeIntent, @IntegerRes stringResId: Int?) {
+    private fun resetViewState(@IntegerRes stringResId: Int?) {
         resetViewState(
-            stripeIntent,
             stringResId?.let { getApplication<Application>().resources.getString(it) }
         )
     }
 
-    private fun resetViewState(stripeIntent: StripeIntent, userErrorMessage: String? = null) {
-        when (stripeIntent) {
-            is PaymentIntent -> {
-                val amount = stripeIntent.amount
-                val currencyCode = stripeIntent.currency
-                if (amount != null && currencyCode != null) {
-                    _amount.value = Amount(amount, currencyCode)
-                    _viewState.value =
-                        PaymentSheetViewState.Reset(userErrorMessage?.let { UserErrorMessage(it) })
-                } else {
-                    onFatal(
-                        IllegalStateException("PaymentIntent could not be parsed correctly.")
-                    )
-                }
-            }
-            is SetupIntent ->
-                _viewState.value =
-                    PaymentSheetViewState.Reset(userErrorMessage?.let { UserErrorMessage(it) })
-        }
-
+    private fun resetViewState(userErrorMessage: String? = null) {
+        _viewState.value =
+            PaymentSheetViewState.Reset(userErrorMessage?.let { UserErrorMessage(it) })
         _processing.value = false
     }
 
@@ -393,7 +370,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                 }.fold(
                     onSuccess = {
                         resetViewState(
-                            it,
                             stripeIntentResult.failureMessage
                         )
                     },
@@ -410,19 +386,15 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             is GooglePayPaymentMethodLauncher.Result.Failed -> {
                 logger.error("Error processing Google Pay payment", result.error)
                 eventReporter.onPaymentFailure(PaymentSelection.GooglePay)
-                stripeIntent.value?.let { it ->
-                    resetViewState(
-                        it,
-                        when (result.errorCode) {
-                            GooglePayPaymentMethodLauncher.NETWORK_ERROR ->
-                                R.string.stripe_failure_connection_error
-                            else -> R.string.stripe_google_pay_error_internal
-                        }
-                    )
-                }
+                resetViewState(
+                    when (result.errorCode) {
+                        GooglePayPaymentMethodLauncher.NETWORK_ERROR ->
+                            R.string.stripe_failure_connection_error
+                        else -> R.string.stripe_google_pay_error_internal
+                    }
+                )
             }
-            is GooglePayPaymentMethodLauncher.Result.Canceled ->
-                stripeIntent.value?.let { resetViewState(it) }
+            is GooglePayPaymentMethodLauncher.Result.Canceled -> resetViewState()
         }
     }
 
@@ -443,7 +415,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                         eventReporter.onPaymentFailure(it)
                     }
 
-                    stripeIntent.value?.let { resetViewState(it, apiThrowableToString(error)) }
+                    resetViewState(apiThrowableToString(error))
                 }
             )
         }
@@ -492,11 +464,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                 .viewModel as T
         }
     }
-
-    /**
-     * This class represents the long value amount to charge and the currency code of the amount.
-     */
-    data class Amount(val value: Long, val currencyCode: String)
 
     /**
      * This is the identifier of the caller of the [checkout] function.  It is used in

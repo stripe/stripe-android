@@ -86,6 +86,13 @@ sealed class FormItemSpec {
     ) : FormItemSpec(), RequiredItemSpec {
         override val identifier = IdentifierSpec.SaveForFutureUse
     }
+
+    /**
+     * This is for elements that do not receive user input
+     */
+    data class AfterpayClearpayTextSpec(
+        override val identifier: IdentifierSpec
+    ) : FormItemSpec(), RequiredItemSpec
 }
 
 /**

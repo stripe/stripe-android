@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.paymentdatacollection
 
 import android.os.Parcelable
+import com.stripe.android.paymentsheet.model.Amount
 import com.stripe.android.paymentsheet.specifications.IdentifierSpec
 import kotlinx.parcelize.Parcelize
 
@@ -10,6 +11,7 @@ data class FormFragmentArguments(
     val saveForFutureUseInitialVisibility: Boolean,
     val saveForFutureUseInitialValue: Boolean,
     val merchantName: String,
+    val amount: Amount? = null,
     val billingDetails: BillingDetails? = null,
 ) : Parcelable
 
