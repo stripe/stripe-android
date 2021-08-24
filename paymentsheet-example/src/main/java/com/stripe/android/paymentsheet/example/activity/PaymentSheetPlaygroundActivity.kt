@@ -164,7 +164,7 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
                 postalCode = "T37 F8HK",
                 country = "IE",
             ),
-            email = "email",
+            email = "email@email.com",
             name = "Jenny Rosen",
             phone = "+18008675309"
         ).takeIf { viewBinding.defaultBillingOnButton.isChecked }
