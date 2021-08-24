@@ -5,7 +5,7 @@ This release includes several bug fixes, adds the capability to remove cards sav
 * [4107](https://github.com/stripe/stripe-android/pull/4107) Dokka updates for 17.1.1
 * [4108](https://github.com/stripe/stripe-android/pull/4108) Support deleting saved payment methods
 * [4113](https://github.com/stripe/stripe-android/pull/4113) Adds support for Google Pay with Setup Intents on Payment Sheet multi-step UI
-* [4115](https://github.com/stripe/stripe-android/pull/4115) Fix StripeIntent status check
+* [4115](https://github.com/stripe/stripe-android/pull/4115) Fix infinite loading when StripeIntent is already confirmed
 * [4117](https://github.com/stripe/stripe-android/pull/4117) Fix crash on `GooglePayLauncher` when confirmation fails
 * [4118](https://github.com/stripe/stripe-android/pull/4118) Bump binary-compatibility-validator from 0.6.0 to 0.7.0
 * [4119](https://github.com/stripe/stripe-android/pull/4119) Bump gradle from 7.0.0 to 7.0.1
