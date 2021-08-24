@@ -1114,6 +1114,8 @@ public final class com/stripe/android/googlepaylauncher/GooglePayLauncherModule_
 
 public class com/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncher {
 	public static final field Companion Lcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncher$Companion;
+	public static final field DEVELOPER_ERROR I
+	public static final field INTERNAL_ERROR I
 	public static final field NETWORK_ERROR I
 	public fun <init> (Landroidx/activity/ComponentActivity;Lcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncher$Config;Lcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncher$ReadyCallback;Lcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncher$ResultCallback;)V
 	public fun <init> (Landroidx/fragment/app/Fragment;Lcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncher$Config;Lcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncher$ReadyCallback;Lcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncher$ResultCallback;)V
@@ -5514,7 +5516,9 @@ public final class com/stripe/android/view/CountryUtils {
 	public static final field INSTANCE Lcom/stripe/android/view/CountryUtils;
 	public final synthetic fun doesCountryUsePostalCode (Lcom/stripe/android/model/CountryCode;)Z
 	public final synthetic fun getCountryByCode (Lcom/stripe/android/model/CountryCode;Ljava/util/Locale;)Lcom/stripe/android/view/Country;
+	public final synthetic fun getCountryCodeByName (Ljava/lang/String;Ljava/util/Locale;)Lcom/stripe/android/model/CountryCode;
 	public final synthetic fun getDisplayCountry (Lcom/stripe/android/model/CountryCode;Ljava/util/Locale;)Ljava/lang/String;
+	public final synthetic fun getOrderedCountries (Ljava/util/Locale;)Ljava/util/List;
 }
 
 public final class com/stripe/android/view/CvcEditText : com/stripe/android/view/StripeEditText {
