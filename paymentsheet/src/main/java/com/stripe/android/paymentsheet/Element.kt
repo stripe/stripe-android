@@ -57,8 +57,7 @@ internal sealed class FormElement {
         private val amount: Amount,
         override val controller: Controller? = null
     ) : FormElement() {
-        val infoUrl =
-            "https://static-us.afterpay.com/javascript/modal/${Locale.current.region.lowercase()}_rebrand_modal.html"
+        val infoUrl = url.format(Locale.current.region.lowercase())
 
         fun getLabel(resources: Resources) =
             resources.getString(
@@ -68,6 +67,10 @@ internal sealed class FormElement {
                     amount.currencyCode
                 )
             )
+
+        companion object {
+            const val url = "https://static-us.afterpay.com/javascript/modal/%s_rebrand_modal.html"
+        }
     }
 
     data class SectionElement(

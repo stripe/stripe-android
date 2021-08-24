@@ -37,7 +37,8 @@ internal class TransformSpecToElement(
                 is FormItemSpec.SaveForFutureUseSpec -> it.transform(initialValues.merchantName)
                 is FormItemSpec.SectionSpec -> it.transform(initialValues)
                 is FormItemSpec.MandateTextSpec -> it.transform(initialValues.merchantName)
-                is FormItemSpec.AfterpayClearpayTextSpec -> it.transform(requireNotNull(initialValues.amount))
+                is FormItemSpec.AfterpayClearpayTextSpec ->
+                    it.transform(requireNotNull(initialValues.amount))
             }
         }
 
