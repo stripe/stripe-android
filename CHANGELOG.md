@@ -13,7 +13,6 @@ This release includes several bug fixes, adds the capability to remove cards sav
 * [4124](https://github.com/stripe/stripe-android/pull/4124) Add default billing detail configuration to PaymentSheet
 * [4127](https://github.com/stripe/stripe-android/pull/4127) Bump gson from 2.8.7 to 2.8.8
 * [4128](https://github.com/stripe/stripe-android/pull/4128) Bump mockitoCoreVersion from 3.11.2 to 3.12.1
-#4113 should also be added, it a
 
 ## 17.1.1 - 2020-08-13
 This release includes several bug fixes and temporarily disabled [WeChat Pay module](https://github.com/stripe/stripe-android/blob/master/wechatpay/README.md) due to a backend bug, For WeChat Pay integration now, please use `Stripe.confirmWeChatPayPayment`.
