@@ -113,7 +113,7 @@ internal fun List<CountryAddressSchema>.transformToElementList() =
         when (it.type) {
             FieldType.AddressLine1 -> {
                 SectionFieldSpec.SimpleText(
-                    IdentifierSpec("line1"),
+                    IdentifierSpec.Line1,
                     it.schema?.nameType?.stringResId ?: R.string.address_label_address_line1,
                     capitalization = KeyboardCapitalization.Words,
                     keyboardType = getKeyboard(it.schema),
@@ -122,7 +122,7 @@ internal fun List<CountryAddressSchema>.transformToElementList() =
             }
             FieldType.AddressLine2 -> {
                 SectionFieldSpec.SimpleText(
-                    IdentifierSpec("line2"),
+                    IdentifierSpec.Line2,
                     it.schema?.nameType?.stringResId ?: R.string.address_label_address_line2,
                     capitalization = KeyboardCapitalization.Words,
                     keyboardType = getKeyboard(it.schema),
@@ -131,7 +131,7 @@ internal fun List<CountryAddressSchema>.transformToElementList() =
             }
             FieldType.Locality -> {
                 SectionFieldSpec.SimpleText(
-                    IdentifierSpec("city"),
+                    IdentifierSpec.City,
                     it.schema?.nameType?.stringResId ?: R.string.address_label_city,
                     capitalization = KeyboardCapitalization.Words,
                     keyboardType = getKeyboard(it.schema),
@@ -140,7 +140,7 @@ internal fun List<CountryAddressSchema>.transformToElementList() =
             }
             FieldType.AdministrativeArea -> {
                 SectionFieldSpec.SimpleText(
-                    IdentifierSpec("state"),
+                    IdentifierSpec.State,
                     it.schema?.nameType?.stringResId ?: NameType.state.stringResId,
                     capitalization = KeyboardCapitalization.Words,
                     keyboardType = getKeyboard(it.schema),
@@ -149,7 +149,7 @@ internal fun List<CountryAddressSchema>.transformToElementList() =
             }
             FieldType.PostalCode -> {
                 SectionFieldSpec.SimpleText(
-                    IdentifierSpec("postal_code"),
+                    IdentifierSpec.PostalCode,
                     it.schema?.nameType?.stringResId ?: R.string.address_label_postal_code,
                     capitalization = KeyboardCapitalization.None,
                     keyboardType = getKeyboard(it.schema),

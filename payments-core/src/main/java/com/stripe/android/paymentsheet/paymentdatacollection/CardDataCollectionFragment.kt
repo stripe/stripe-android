@@ -22,6 +22,7 @@ import com.stripe.android.R
 import com.stripe.android.databinding.FragmentPaymentsheetAddCardBinding
 import com.stripe.android.databinding.StripeHorizontalDividerBinding
 import com.stripe.android.databinding.StripeVerticalDividerBinding
+import com.stripe.android.model.Address
 import com.stripe.android.model.CountryCode
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -100,6 +101,7 @@ internal class CardDataCollectionFragment<ViewModelType : BaseSheetViewModel<*>>
 
         // This must be done prior to setting up the card widget or the save card checkbox won't
         // populate correctly.
+        populateFieldsFromArguments()
         populateFieldsFromNewCard()
         setupCardWidget()
 
@@ -288,6 +290,16 @@ internal class CardDataCollectionFragment<ViewModelType : BaseSheetViewModel<*>>
         saveCardCheckbox.isChecked = sheetViewModel.newCard?.shouldSavePaymentMethod ?: true
         cardMultilineWidget.populate(paymentMethodCreateParams?.card)
         billingAddressView.populate(paymentMethodCreateParams?.billingDetails?.address)
+    }
+
+    private fun populateFieldsFromArguments() {
+        requireArguments().getParcelable<FormFragmentArguments>(
+            ComposeFormDataCollectionFragment.EXTRA_CONFIG
+        )?.billingDetails?.address?.also {
+            billingAddressView.populate(
+                Address(it.city, it.country, it.line1, it.line2, it.postalCode, it.state)
+            )
+        }
     }
 
     private fun onCardError(

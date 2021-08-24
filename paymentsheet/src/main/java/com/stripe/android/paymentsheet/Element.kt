@@ -12,6 +12,8 @@ import com.stripe.android.paymentsheet.elements.SaveForFutureUseController
 import com.stripe.android.paymentsheet.elements.SectionController
 import com.stripe.android.paymentsheet.elements.SectionFieldErrorController
 import com.stripe.android.paymentsheet.elements.TextFieldController
+import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
+import com.stripe.android.paymentsheet.paymentdatacollection.getValue
 import com.stripe.android.paymentsheet.specifications.IdentifierSpec
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
@@ -87,6 +89,8 @@ internal sealed class SectionFieldElement {
      */
     abstract val controller: SectionFieldErrorController
 
+    abstract fun setRawValue(formFragmentArguments: FormFragmentArguments)
+
     /**
      * This will return a controller that abides by the SectionFieldErrorController interface.
      */
@@ -95,40 +99,62 @@ internal sealed class SectionFieldElement {
     data class Email(
         override val identifier: IdentifierSpec,
         override val controller: TextFieldController
-    ) : SectionFieldElement()
+    ) : SectionFieldElement() {
+        override fun setRawValue(formFragmentArguments: FormFragmentArguments) {
+            formFragmentArguments.getValue(identifier)?.let { controller.onRawValueChange(it) }
+        }
+    }
 
     data class Iban(
         override val identifier: IdentifierSpec,
         override val controller: TextFieldController,
-    ) : SectionFieldElement()
+    ) : SectionFieldElement() {
+        override fun setRawValue(formFragmentArguments: FormFragmentArguments) {
+            formFragmentArguments.getValue(identifier)?.let { controller.onRawValueChange(it) }
+        }
+    }
 
     data class Country(
         override val identifier: IdentifierSpec,
         override val controller: DropdownFieldController
-    ) : SectionFieldElement()
+    ) : SectionFieldElement() {
+        override fun setRawValue(formFragmentArguments: FormFragmentArguments) {
+            formFragmentArguments.getValue(identifier)?.let { controller.onRawValueChange(it) }
+        }
+    }
 
     data class SimpleText(
         override val identifier: IdentifierSpec,
         override val controller: TextFieldController
-    ) : SectionFieldElement()
+    ) : SectionFieldElement() {
+        override fun setRawValue(formFragmentArguments: FormFragmentArguments) {
+            formFragmentArguments.getValue(identifier)?.let { controller.onRawValueChange(it) }
+        }
+    }
 
     data class SimpleDropdown(
         override val identifier: IdentifierSpec,
         override val controller: DropdownFieldController,
-    ) : SectionFieldElement()
+    ) : SectionFieldElement() {
+        override fun setRawValue(formFragmentArguments: FormFragmentArguments) {
+            formFragmentArguments.getValue(identifier)?.let { controller.onRawValueChange(it) }
+        }
+    }
 
     internal class AddressElement constructor(
         override val identifier: IdentifierSpec,
         private val addressFieldRepository: AddressFieldElementRepository,
+        private var args: FormFragmentArguments? = null,
         countryCodes: Set<String> = emptySet(),
         countryDropdownFieldController: DropdownFieldController = DropdownFieldController(
-            CountryConfig(countryCodes)
+            CountryConfig(countryCodes),
+            args?.billingDetails?.address?.country
         ),
     ) : SectionFieldElement() {
 
         @VisibleForTesting
         val countryElement = Country(
-            IdentifierSpec("country"),
+            IdentifierSpec.Country,
             countryDropdownFieldController
         )
 
@@ -138,9 +164,21 @@ internal sealed class SectionFieldElement {
                 addressFieldRepository.get(countryCode)
                     ?: emptyList()
             }
+            .map { fields ->
+                args?.let {
+                    fields.forEach { field ->
+                        field.setRawValue(it)
+                    }
+                }
+                fields
+            }
 
         val fields = otherFields.map { listOf(countryElement).plus(it) }
 
         override val controller = AddressController(fields)
+
+        override fun setRawValue(formFragmentArguments: FormFragmentArguments) {
+            args = formFragmentArguments
+        }
     }
 }

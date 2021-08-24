@@ -155,10 +155,25 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
     }
 
     private fun makeConfiguration(): PaymentSheet.Configuration {
+        val defaultBilling = PaymentSheet.BillingDetails(
+            address = PaymentSheet.Address(
+                line1 = "123 Main Street",
+                line2 = null,
+                city = "Blackrock",
+                state = "Co. Dublin",
+                postalCode = "T37 F8HK",
+                country = "IE",
+            ),
+            email = "email",
+            name = "Jenny Rosen",
+            phone = "+18008675309"
+        ).takeIf { viewBinding.defaultBillingOnButton.isChecked }
+
         return PaymentSheet.Configuration(
             merchantDisplayName = merchantName,
             customer = viewModel.customerConfig.value,
-            googlePay = googlePayConfig
+            googlePay = googlePayConfig,
+            defaultBillingDetails = defaultBilling
         )
     }
 

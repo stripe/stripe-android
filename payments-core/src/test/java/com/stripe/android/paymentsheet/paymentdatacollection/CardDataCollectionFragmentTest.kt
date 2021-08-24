@@ -12,7 +12,6 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.R
 import com.stripe.android.databinding.FragmentPaymentsheetAddCardBinding
 import com.stripe.android.databinding.StripeBillingAddressLayoutBinding
-import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CountryCode
 import com.stripe.android.model.PaymentIntentFixtures
@@ -27,6 +26,7 @@ import com.stripe.android.paymentsheet.PaymentSheetViewModel
 import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.FragmentConfigFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
 import com.stripe.android.paymentsheet.ui.AddPaymentMethodsFragmentFactory
 import com.stripe.android.utils.TestUtils.idleLooper
 import org.junit.Before
@@ -74,7 +74,7 @@ class CardDataCollectionFragmentTest {
             viewBinding.cardMultilineWidget.setCardNumber("4242424242424242")
             viewBinding.cardMultilineWidget.setExpiryDate(1, 2030)
             viewBinding.cardMultilineWidget.setCvcCode("123")
-            viewBinding.billingAddress.countryView.setText("United States")
+            viewBinding.billingAddress.countryLayout.selectedCountryCode = CountryCode.US
             viewBinding.billingAddress.postalCodeView.setText("94107")
 
             val paymentSelections = mutableListOf<PaymentSelection>()
@@ -88,7 +88,7 @@ class CardDataCollectionFragmentTest {
             assertThat(newCard.paymentMethodCreateParams.billingDetails)
                 .isEqualTo(
                     PaymentMethod.BillingDetails(
-                        Address(
+                        com.stripe.android.model.Address(
                             country = "US",
                             postalCode = "94107"
                         )
@@ -171,6 +171,24 @@ class CardDataCollectionFragmentTest {
             val newPaymentSelection = paymentSelection as PaymentSelection.New.Card
             assertThat(newPaymentSelection.shouldSavePaymentMethod)
                 .isFalse()
+        }
+    }
+
+    @Test
+    fun `launching with billing details populates the fields`() {
+        createFragment(PaymentSheetFixtures.ARGS_WITH_BILLING) { _, viewBinding ->
+            assertThat(viewBinding.billingAddress.postalCodeView.text.toString())
+                .isEqualTo("94111")
+            assertThat(viewBinding.billingAddress.address1View.text.toString())
+                .isEqualTo("123 Main Street")
+            assertThat(viewBinding.billingAddress.address2View.text.toString())
+                .isEqualTo("")
+            assertThat(viewBinding.billingAddress.cityView.text.toString())
+                .isEqualTo("San Francisco")
+            assertThat(viewBinding.billingAddress.stateView.text.toString())
+                .isEqualTo("CA")
+            assertThat(viewBinding.billingAddress.countryView.text.toString())
+                .isEqualTo("Germany")
         }
     }
 
@@ -360,29 +378,6 @@ class CardDataCollectionFragmentTest {
     }
 
     @Test
-    fun `when Canada postal code is invalid and losing focus then billing error is visible with correct error message`() {
-        createFragment { _, viewBinding ->
-            assertThat(viewBinding.cardErrors.isVisible)
-                .isFalse()
-
-            viewBinding.billingAddress.countryLayout.selectedCountryCode = CountryCode.CA
-            viewBinding.billingAddress.postalCodeView.setText("!@#")
-            requireNotNull(
-                viewBinding.billingAddress.postalCodeView.getParentOnFocusChangeListener()
-            ).onFocusChange(
-                viewBinding.billingAddress.postalCodeView,
-                false
-            )
-            idleLooper()
-
-            assertThat(viewBinding.billingErrors.text.toString())
-                .isEqualTo(context.getString(R.string.address_postal_code_invalid))
-            assertThat(viewBinding.billingErrors.isVisible)
-                .isTrue()
-        }
-    }
-
-    @Test
     fun `when Canada postal code is valid and losing focus then billing error is invisible`() {
         createFragment { _, viewBinding ->
             assertThat(viewBinding.cardErrors.isVisible)
@@ -456,6 +451,25 @@ class CardDataCollectionFragmentTest {
         args: PaymentSheetContract.Args = PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY,
         fragmentConfig: FragmentConfig? = FragmentConfigFixtures.DEFAULT,
         stripeIntent: StripeIntent? = PaymentIntentFixtures.PI_WITH_SHIPPING,
+        fragmentArgs: FormFragmentArguments? = FormFragmentArguments(
+            SupportedPaymentMethod.Bancontact.name,
+            true,
+            true,
+            "Merchant, Inc.",
+            billingDetails = BillingDetails(
+                address = Address(
+                    line1 = "123 Main Street",
+                    line2 = null,
+                    city = "San Francisco",
+                    state = "CA",
+                    postalCode = "94111",
+                    country = "DE",
+                ),
+                email = "email",
+                name = "Jenny Rosen",
+                phone = "+18008675309"
+            )
+        ),
         onReady: (CardDataCollectionFragment<PaymentSheetViewModel>, FragmentPaymentsheetAddCardBinding) -> Unit
     ) {
         val factory = AddPaymentMethodsFragmentFactory(
@@ -468,7 +482,8 @@ class CardDataCollectionFragmentTest {
         launchFragmentInContainer<CardDataCollectionFragment<PaymentSheetViewModel>>(
             bundleOf(
                 PaymentSheetActivity.EXTRA_FRAGMENT_CONFIG to fragmentConfig,
-                PaymentSheetActivity.EXTRA_STARTER_ARGS to args
+                PaymentSheetActivity.EXTRA_STARTER_ARGS to args,
+                ComposeFormDataCollectionFragment.EXTRA_CONFIG to fragmentArgs,
             ),
             R.style.StripePaymentSheetDefaultTheme,
             factory = factory,

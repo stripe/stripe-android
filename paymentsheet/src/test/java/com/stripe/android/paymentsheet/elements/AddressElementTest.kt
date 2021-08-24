@@ -27,7 +27,7 @@ class AddressElementTest {
             "US",
             listOf(
                 SectionFieldElement.Email(
-                    IdentifierSpec("email"),
+                    IdentifierSpec.Email,
                     TextFieldController(EmailConfig())
                 )
             )
@@ -36,7 +36,7 @@ class AddressElementTest {
             "JP",
             listOf(
                 SectionFieldElement.Iban(
-                    IdentifierSpec("iban"),
+                    IdentifierSpec.Generic("iban"),
                     TextFieldController(IbanConfig())
                 )
             )
@@ -49,7 +49,7 @@ class AddressElementTest {
         runBlocking {
             // ZZ does not have state and US does
             val addressElement = SectionFieldElement.AddressElement(
-                IdentifierSpec("address"),
+                IdentifierSpec.Generic("address"),
                 addressFieldElementRepository,
                 countryDropdownFieldController = countryDropdownFieldController
             )
