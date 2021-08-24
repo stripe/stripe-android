@@ -498,7 +498,7 @@ class PaymentSheetAddPaymentMethodFragmentTest {
                 saveForFutureUse = false,
                 supportedPaymentMethodName = SupportedPaymentMethod.Bancontact.name,
                 merchantName = "Example, Inc"
-                )
+            )
         ).isEqualTo(
             FormFragmentArguments(
                 SupportedPaymentMethod.Bancontact.name,
