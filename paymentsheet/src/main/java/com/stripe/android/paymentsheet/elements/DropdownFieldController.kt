@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.map
  */
 internal class DropdownFieldController(
     private val config: DropdownConfig,
+    initialValue: String? = null
 ) : InputController, SectionFieldErrorController {
     val displayItems: List<String> = config.getDisplayItems()
     private val _selectedIndex = MutableStateFlow(0)
@@ -21,6 +22,10 @@ internal class DropdownFieldController(
     override val error: Flow<FieldError?> = MutableStateFlow(null)
     override val showOptionalLabel: Boolean = false // not supported yet
     override val isComplete: Flow<Boolean> = MutableStateFlow(true)
+
+    init {
+        initialValue?.let { onRawValueChange(it) }
+    }
 
     /**
      * This is called when the value changed to is a display value.

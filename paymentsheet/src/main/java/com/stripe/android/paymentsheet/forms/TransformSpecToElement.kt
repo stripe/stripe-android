@@ -11,6 +11,8 @@ import com.stripe.android.paymentsheet.elements.SectionController
 import com.stripe.android.paymentsheet.elements.SimpleDropdownConfig
 import com.stripe.android.paymentsheet.elements.SimpleTextFieldConfig
 import com.stripe.android.paymentsheet.elements.TextFieldController
+import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
+import com.stripe.android.paymentsheet.paymentdatacollection.getValue
 import com.stripe.android.paymentsheet.specifications.FormItemSpec
 import com.stripe.android.paymentsheet.specifications.IdentifierSpec
 import com.stripe.android.paymentsheet.specifications.LayoutSpec
@@ -23,27 +25,29 @@ import com.stripe.android.paymentsheet.specifications.SectionFieldSpec
  * controller will be a pass through the field controller.
  */
 internal class TransformSpecToElement(
-    private val resourceRepository: ResourceRepository
+    private val resourceRepository: ResourceRepository,
+    private val initialValues: FormFragmentArguments
 ) {
     internal fun transform(
-        list: List<FormItemSpec>,
-        merchantName: String
+        list: List<FormItemSpec>
     ): List<FormElement> =
         list.map {
             when (it) {
-                is FormItemSpec.SaveForFutureUseSpec -> it.transform(merchantName)
-                is FormItemSpec.SectionSpec -> it.transform()
-                is FormItemSpec.MandateTextSpec -> it.transform(merchantName)
+                is FormItemSpec.SaveForFutureUseSpec -> it.transform(initialValues.merchantName)
+                is FormItemSpec.SectionSpec -> it.transform(initialValues)
+                is FormItemSpec.MandateTextSpec -> it.transform(initialValues.merchantName)
             }
         }
 
-    private fun FormItemSpec.SectionSpec.transform(): FormElement.SectionElement {
-        val fieldElements = this.fields.transform()
+    private fun FormItemSpec.SectionSpec.transform(
+        initialValues: FormFragmentArguments
+    ): FormElement.SectionElement {
+        val fieldElements = this.fields.transform(initialValues)
 
         // The controller of the section element will be the same as the field element
         // as there is only a single field in a section
         return FormElement.SectionElement(
-            identifier = this.identifier,
+            this.identifier,
             fieldElements,
             SectionController(
                 this.title,
@@ -55,21 +59,26 @@ internal class TransformSpecToElement(
     /**
      * This function will transform a list of specs into a list of elements
      */
-    private fun List<SectionFieldSpec>.transform() = this.map {
-        when (it) {
-            is SectionFieldSpec.Email -> it.transform()
-            is SectionFieldSpec.Iban -> it.transform()
-            is SectionFieldSpec.Country -> it.transform()
-            is SectionFieldSpec.BankDropdown -> it.transform()
-            is SectionFieldSpec.SimpleText -> it.transform()
-            is SectionFieldSpec.AddressSpec -> transformAddress()
+    private fun List<SectionFieldSpec>.transform(initialValues: FormFragmentArguments) =
+        this.map {
+            when (it) {
+                is SectionFieldSpec.Email -> it.transform(initialValues.billingDetails?.email)
+                is SectionFieldSpec.Iban -> it.transform()
+                is SectionFieldSpec.BankDropdown -> it.transform()
+                is SectionFieldSpec.SimpleText -> it.transform(initialValues)
+                is SectionFieldSpec.AddressSpec -> transformAddress(initialValues)
+                is SectionFieldSpec.Country -> it.transform(
+                    initialValues.billingDetails?.address?.country
+                )
+            }
         }
-    }
 
-    private fun transformAddress() = SectionFieldElement.AddressElement(
-        IdentifierSpec("billing"),
-        resourceRepository.addressRepository
-    )
+    private fun transformAddress(initialValues: FormFragmentArguments) =
+        SectionFieldElement.AddressElement(
+            IdentifierSpec.Generic("billing"),
+            resourceRepository.addressRepository,
+            initialValues
+        )
 
     private fun FormItemSpec.MandateTextSpec.transform(merchantName: String) =
 // It could be argued that the static text should have a controller, but
@@ -81,10 +90,10 @@ internal class TransformSpecToElement(
             merchantName
         )
 
-    private fun SectionFieldSpec.Email.transform() =
+    private fun SectionFieldSpec.Email.transform(email: String?) =
         SectionFieldElement.Email(
             this.identifier,
-            TextFieldController(EmailConfig()),
+            TextFieldController(EmailConfig(), initialValue = email),
         )
 
     private fun SectionFieldSpec.Iban.transform() =
@@ -93,10 +102,10 @@ internal class TransformSpecToElement(
             TextFieldController(IbanConfig())
         )
 
-    private fun SectionFieldSpec.Country.transform() =
+    private fun SectionFieldSpec.Country.transform(country: String?) =
         SectionFieldElement.Country(
             this.identifier,
-            DropdownFieldController(CountryConfig(this.onlyShowCountryCodes))
+            DropdownFieldController(CountryConfig(this.onlyShowCountryCodes), country)
         )
 
     private fun SectionFieldSpec.BankDropdown.transform() =
@@ -114,15 +123,17 @@ internal class TransformSpecToElement(
         FormElement.SaveForFutureUseElement(
             this.identifier,
             SaveForFutureUseController(
-                this.identifierRequiredForFutureUse.map { element ->
-                    element.identifier
+                this.identifierRequiredForFutureUse.map { requiredItemSpec ->
+                    requiredItemSpec.identifier
                 }
             ),
             merchantName
         )
 }
 
-internal fun SectionFieldSpec.SimpleText.transform(): SectionFieldElement =
+internal fun SectionFieldSpec.SimpleText.transform(
+    initialValues: FormFragmentArguments? = null
+): SectionFieldElement =
     SectionFieldElement.SimpleText(
         this.identifier,
         TextFieldController(
@@ -131,6 +142,7 @@ internal fun SectionFieldSpec.SimpleText.transform(): SectionFieldElement =
                 capitalization = this.capitalization,
                 keyboard = this.keyboardType
             ),
+            initialValue = initialValues?.getValue(this.identifier),
             showOptionalLabel = this.showOptionalLabel
         )
     )

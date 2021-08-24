@@ -39,8 +39,7 @@ import com.stripe.android.paymentsheet.elements.TextField
 import com.stripe.android.paymentsheet.elements.TextFieldController
 import com.stripe.android.paymentsheet.getIdInputControllerMap
 import com.stripe.android.paymentsheet.injection.DaggerFormViewModelComponent
-import com.stripe.android.paymentsheet.injection.SAVE_FOR_FUTURE_USE_INITIAL_VALUE
-import com.stripe.android.paymentsheet.injection.SAVE_FOR_FUTURE_USE_INITIAL_VISIBILITY
+import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
 import com.stripe.android.paymentsheet.specifications.FormItemSpec
 import com.stripe.android.paymentsheet.specifications.IdentifierSpec
 import com.stripe.android.paymentsheet.specifications.LayoutSpec
@@ -53,7 +52,6 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import javax.inject.Named
 import javax.inject.Singleton
 
 @Composable
@@ -245,17 +243,13 @@ internal fun SaveForFutureUseElementUI(
 @Singleton
 class FormViewModel @Inject internal constructor(
     layout: LayoutSpec,
-    @Named(SAVE_FOR_FUTURE_USE_INITIAL_VALUE) saveForFutureUseInitialValue: Boolean,
-    @Named(SAVE_FOR_FUTURE_USE_INITIAL_VISIBILITY) saveForFutureUseInitialVisibility: Boolean,
-    merchantName: String,
+    config: FormFragmentArguments,
     private val resourceRepository: ResourceRepository
 ) : ViewModel() {
     internal class Factory(
         private val resources: Resources,
         private val layout: LayoutSpec,
-        private val saveForFutureUseValue: Boolean,
-        private val saveForFutureUseVisibility: Boolean,
-        private val merchantName: String
+        private val formArguments: FormFragmentArguments
     ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
@@ -264,21 +258,18 @@ class FormViewModel @Inject internal constructor(
             return DaggerFormViewModelComponent.builder()
                 .resources(resources)
                 .layout(layout)
-                .saveForFutureUseValue(saveForFutureUseValue)
-                .saveForFutureUseVisibility(saveForFutureUseVisibility)
-                .merchantName(merchantName)
+                .formFragmentArguments(formArguments)
                 .build()
                 .viewModel as T
         }
     }
 
-    private val transformSpecToElement = TransformSpecToElement(resourceRepository)
+    private val transformSpecToElement = TransformSpecToElement(resourceRepository, config)
 
     init {
         viewModelScope.launch {
             resourceRepository.init()
-            elements = transformSpecToElement.transform(layout.items, merchantName)
-            setSaveForFutureUse(saveForFutureUseInitialValue)
+            elements = transformSpecToElement.transform(layout.items)
         }
     }
 
@@ -289,7 +280,7 @@ class FormViewModel @Inject internal constructor(
 
     internal lateinit var elements: List<FormElement>
 
-    private val saveForFutureUseVisible = MutableStateFlow(saveForFutureUseInitialVisibility)
+    private val saveForFutureUseVisible = MutableStateFlow(config.saveForFutureUseInitialVisibility)
 
     internal fun setSaveForFutureUseVisibility(isVisible: Boolean) {
         saveForFutureUseVisible.value = isVisible
@@ -306,7 +297,7 @@ class FormViewModel @Inject internal constructor(
         .firstOrNull()
 
     internal val saveForFutureUse = saveForFutureUseElement?.controller?.saveForFutureUse
-        ?: MutableStateFlow(saveForFutureUseInitialValue)
+        ?: MutableStateFlow(config.saveForFutureUseInitialValue)
 
     private val sectionToFieldIdentifierMap = layout.items
         .filterIsInstance<FormItemSpec.SectionSpec>()
@@ -378,8 +369,4 @@ class FormViewModel @Inject internal constructor(
                 saveForFutureUse
             ).transformFlow()
         }
-
-    internal fun populateFormViewValues(formFieldValues: FormFieldValues) {
-        populateWith(elements, formFieldValues)
-    }
 }
