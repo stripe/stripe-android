@@ -119,6 +119,10 @@ class LauncherActivity : AppCompatActivity() {
             Item(
                 activity.getString(R.string.connect_example),
                 ConnectExampleActivity::class.java
+            ),
+            Item(
+                activity.getString(R.string.compose_example),
+                ComposeExampleActivity::class.java
             )
         )
 
