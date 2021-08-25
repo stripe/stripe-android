@@ -11,6 +11,7 @@ import com.stripe.android.paymentsheet.SectionFieldElement
 import com.stripe.android.paymentsheet.address.AddressFieldElementRepository
 import com.stripe.android.paymentsheet.elements.SaveForFutureUseController
 import com.stripe.android.paymentsheet.elements.TextFieldController
+import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
 import com.stripe.android.paymentsheet.specifications.BankRepository
 import com.stripe.android.paymentsheet.specifications.FormItemSpec
 import com.stripe.android.paymentsheet.specifications.IdentifierSpec
@@ -31,9 +32,10 @@ import org.robolectric.shadows.ShadowLooper
 
 @RunWith(RobolectricTestRunner::class)
 internal class FormViewModelTest {
-    private val emailSection = FormItemSpec.SectionSpec(IdentifierSpec("email_section"), Email)
+    private val emailSection =
+        FormItemSpec.SectionSpec(IdentifierSpec.Generic("email_section"), Email)
     private val countrySection = FormItemSpec.SectionSpec(
-        IdentifierSpec("country_section"),
+        IdentifierSpec.Generic("country_section"),
         Country()
     )
 
@@ -57,9 +59,12 @@ internal class FormViewModelTest {
                     FormItemSpec.SaveForFutureUseSpec(listOf(emailSection))
                 )
             ),
-            saveForFutureUseInitialValue = true,
-            saveForFutureUseInitialVisibility = true,
-            merchantName = "Example, Inc.",
+            FormFragmentArguments(
+                supportedPaymentMethodName = "Card",
+                saveForFutureUseInitialValue = true,
+                saveForFutureUseInitialVisibility = true,
+                merchantName = "Example, Inc."
+            ),
             resourceRepository = resourceRepository
         )
 
@@ -85,9 +90,12 @@ internal class FormViewModelTest {
                     FormItemSpec.SaveForFutureUseSpec(listOf(emailSection))
                 )
             ),
-            saveForFutureUseInitialValue = true,
-            saveForFutureUseInitialVisibility = true,
-            merchantName = "Example, Inc.",
+            FormFragmentArguments(
+                supportedPaymentMethodName = "Card",
+                saveForFutureUseInitialValue = true,
+                saveForFutureUseInitialVisibility = true,
+                merchantName = "Example, Inc."
+            ),
             resourceRepository = resourceRepository
         )
 
@@ -102,7 +110,7 @@ internal class FormViewModelTest {
 
         ShadowLooper.runUiThreadTasksIncludingDelayedTasks()
 
-        assertThat(values[1][0]).isEqualTo(IdentifierSpec("save_for_future_use"))
+        assertThat(values[1][0]).isEqualTo(IdentifierSpec.SaveForFutureUse)
     }
 
     @Test
@@ -115,9 +123,12 @@ internal class FormViewModelTest {
                     FormItemSpec.SaveForFutureUseSpec(listOf(emailSection))
                 )
             ),
-            saveForFutureUseInitialValue = true,
-            saveForFutureUseInitialVisibility = true,
-            merchantName = "Example, Inc.",
+            FormFragmentArguments(
+                supportedPaymentMethodName = "Card",
+                saveForFutureUseInitialValue = true,
+                saveForFutureUseInitialVisibility = true,
+                merchantName = "Example, Inc."
+            ),
             resourceRepository = resourceRepository
         )
 
@@ -132,8 +143,8 @@ internal class FormViewModelTest {
 
         ShadowLooper.runUiThreadTasksIncludingDelayedTasks()
 
-        assertThat(values[1][0]).isEqualTo(IdentifierSpec("email_section"))
-        assertThat(values[1][1]).isEqualTo(IdentifierSpec("email"))
+        assertThat(values[1][0]).isEqualTo(IdentifierSpec.Generic("email_section"))
+        assertThat(values[1][1]).isEqualTo(IdentifierSpec.Email)
     }
 
     @ExperimentalCoroutinesApi
@@ -150,9 +161,12 @@ internal class FormViewModelTest {
                         FormItemSpec.SaveForFutureUseSpec(listOf(emailSection))
                     )
                 ),
-                saveForFutureUseInitialValue = true,
-                saveForFutureUseInitialVisibility = true,
-                merchantName = "Example, Inc.",
+                FormFragmentArguments(
+                    supportedPaymentMethodName = "Card",
+                    saveForFutureUseInitialValue = true,
+                    saveForFutureUseInitialVisibility = true,
+                    merchantName = "Example, Inc."
+                ),
                 resourceRepository = resourceRepository
             )
 
@@ -198,9 +212,12 @@ internal class FormViewModelTest {
                         FormItemSpec.SaveForFutureUseSpec(listOf(emailSection))
                     )
                 ),
-                saveForFutureUseInitialValue = true,
-                saveForFutureUseInitialVisibility = true,
-                merchantName = "Example, Inc.",
+                FormFragmentArguments(
+                    supportedPaymentMethodName = "Card",
+                    saveForFutureUseInitialValue = true,
+                    saveForFutureUseInitialVisibility = true,
+                    merchantName = "Example, Inc."
+                ),
                 resourceRepository = resourceRepository
             )
 
@@ -245,9 +262,12 @@ internal class FormViewModelTest {
              */
             val formViewModel = FormViewModel(
                 sofort.layout,
-                saveForFutureUseInitialValue = true,
-                saveForFutureUseInitialVisibility = true,
-                merchantName = "Example, Inc.",
+                FormFragmentArguments(
+                    supportedPaymentMethodName = "Card",
+                    saveForFutureUseInitialValue = true,
+                    saveForFutureUseInitialVisibility = true,
+                    merchantName = "Example, Inc."
+                ),
                 resourceRepository = resourceRepository
             )
 
@@ -288,9 +308,12 @@ internal class FormViewModelTest {
              */
             val formViewModel = FormViewModel(
                 sepaDebit.layout,
-                saveForFutureUseInitialValue = true,
-                saveForFutureUseInitialVisibility = true,
-                merchantName = "Example, Inc.",
+                FormFragmentArguments(
+                    supportedPaymentMethodName = "Card",
+                    saveForFutureUseInitialValue = true,
+                    saveForFutureUseInitialVisibility = true,
+                    merchantName = "Example, Inc."
+                ),
                 resourceRepository = resourceRepository
             )
 
@@ -356,9 +379,12 @@ internal class FormViewModelTest {
              */
             val formViewModel = FormViewModel(
                 sepaDebit.layout,
-                saveForFutureUseInitialValue = true,
-                saveForFutureUseInitialVisibility = true,
-                merchantName = "Example, Inc.",
+                FormFragmentArguments(
+                    supportedPaymentMethodName = "Card",
+                    saveForFutureUseInitialValue = true,
+                    saveForFutureUseInitialVisibility = true,
+                    merchantName = "Example, Inc."
+                ),
                 resourceRepository = resourceRepository
             )
 

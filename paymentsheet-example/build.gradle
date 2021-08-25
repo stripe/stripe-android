@@ -1,7 +1,7 @@
 plugins {
     id 'com.android.application'
     id 'kotlin-android'
-    id 'org.jetbrains.kotlin.plugin.serialization' version '1.5.21'
+    id 'org.jetbrains.kotlin.plugin.serialization' version '1.5.30'
 }
 
 // Read values from gradle.properties or system environment variable
@@ -89,7 +89,6 @@ android {
         compose true
     }
     composeOptions {
-        kotlinCompilerVersion = "$kotlinVersion"
         kotlinCompilerExtensionVersion "$composeVersion"
     }
 }

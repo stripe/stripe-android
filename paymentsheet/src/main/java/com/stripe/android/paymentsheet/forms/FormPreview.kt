@@ -4,6 +4,9 @@ import android.annotation.SuppressLint
 import androidx.compose.runtime.Composable
 import com.stripe.android.paymentsheet.address.AddressFieldElementRepository
 import com.stripe.android.paymentsheet.address.parseAddressesSchema
+import com.stripe.android.paymentsheet.paymentdatacollection.Address
+import com.stripe.android.paymentsheet.paymentdatacollection.BillingDetails
+import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
 import com.stripe.android.paymentsheet.specifications.BankRepository
 import com.stripe.android.paymentsheet.specifications.ResourceRepository
 import com.stripe.android.paymentsheet.specifications.SupportedBankType
@@ -39,8 +42,29 @@ internal fun FormInternalPreview() {
     FormInternal(
         MutableStateFlow(emptyList()),
         MutableStateFlow(true),
-        TransformSpecToElement(ResourceRepository(bankRepository, addressFieldElementRepository))
-            .transform(formElements, "Merchant, Inc.")
+        TransformSpecToElement(
+            ResourceRepository(
+                bankRepository,
+                addressFieldElementRepository
+            ),
+            FormFragmentArguments(
+                "Card",
+                saveForFutureUseInitialVisibility = true,
+                saveForFutureUseInitialValue = true,
+                "Merchant, Inc.",
+                BillingDetails(
+                    Address(
+                        "San Fransciso",
+                        "US",
+                        "123 Main Street",
+                        null,
+                        "94111",
+                        "CA",
+                    )
+                )
+
+            )
+        ).transform(formElements)
     )
 }
 

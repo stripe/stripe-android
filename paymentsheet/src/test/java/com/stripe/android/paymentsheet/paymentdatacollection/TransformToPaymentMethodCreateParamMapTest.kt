@@ -14,12 +14,11 @@ class TransformToPaymentMethodCreateParamMapTest {
             .transform(
                 FormFieldValues(
                     mapOf(
-                        IdentifierSpec("bank") to FormFieldEntry(
+                        IdentifierSpec.Generic("bank") to FormFieldEntry(
                             "abn_amro",
                             true
                         )
                     ),
-                    saveForFutureUse = true,
                     showsMandate = false
                 ),
                 mapOf(
@@ -43,20 +42,19 @@ class TransformToPaymentMethodCreateParamMapTest {
             .transform(
                 FormFieldValues(
                     mapOf(
-                        IdentifierSpec("name") to FormFieldEntry(
+                        IdentifierSpec.Name to FormFieldEntry(
                             "joe",
                             true
                         ),
-                        Email.identifier to FormFieldEntry(
+                        IdentifierSpec.Email to FormFieldEntry(
                             "joe@gmail.com",
                             true
                         ),
-                        IdentifierSpec("country") to FormFieldEntry(
+                        IdentifierSpec.Generic("country") to FormFieldEntry(
                             "US",
                             true
                         ),
                     ),
-                    saveForFutureUse = true,
                     showsMandate = false
                 ),
                 mapOf(

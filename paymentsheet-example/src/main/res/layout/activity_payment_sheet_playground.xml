@@ -188,6 +188,48 @@
                 android:layout_height="wrap_content" />
         </RadioGroup>
 
+
+        <TextView
+            android:id="@+id/default_billing_address"
+            android:text="@string/default_billing_address"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="8dp"
+            app:layout_constraintBottom_toBottomOf="@+id/default_billing_radio_group"
+            app:layout_constraintEnd_toStartOf="@+id/default_billing_radio_group"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintHorizontal_chainStyle="packed"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/default_billing_radio_group" />
+
+        <RadioGroup
+            android:id="@+id/default_billing_radio_group"
+            android:layout_width="wrap_content"
+            android:layout_height="48dp"
+            android:orientation="horizontal"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginStart="8dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintTop_toBottomOf="@+id/mode_radio_group">
+
+            <RadioButton
+                android:id="@+id/default_billing_on_button"
+                android:text="@string/on"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:checked="false" />
+
+            <RadioButton
+                android:id="@+id/default_billing_off_button"
+                android:text="@string/off"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:checked="true" />
+        </RadioGroup>
+
         <Button
             android:id="@+id/reload_button"
             android:text="@string/reload_paymentsheet"
@@ -196,7 +238,7 @@
             android:layout_marginTop="8dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/mode_radio_group" />
+            app:layout_constraintTop_toBottomOf="@+id/default_billing_radio_group" />
 
         <View
             android:id="@+id/divider"

@@ -7,8 +7,8 @@ import kotlinx.coroutines.runBlocking
 import org.junit.Test
 
 class SaveForFutureUseControllerTest {
-    private val mandateIdentifier = IdentifierSpec("mandate")
-    private val nameSectionIdentifier = IdentifierSpec("name")
+    private val mandateIdentifier = IdentifierSpec.Generic("mandate")
+    private val nameSectionIdentifier = IdentifierSpec.Name
     private val hiddenIdentifiers = listOf(nameSectionIdentifier, mandateIdentifier)
     private val saveForFutureUseController = SaveForFutureUseController(hiddenIdentifiers)
 

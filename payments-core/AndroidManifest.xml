@@ -70,7 +70,7 @@
             android:exported="false" />
 
         <activity android:name=".payments.paymentlauncher.PaymentLauncherConfirmationActivity"
-            android:theme="@style/StripeDefaultTheme"
+            android:theme="@style/PayLauncherDefaultTheme"
             android:exported="false"/>
     </application>
 

@@ -7,11 +7,10 @@ import com.stripe.android.paymentsheet.specifications.IdentifierSpec
  */
 class FormFieldValues(
     val fieldValuePairs: Map<IdentifierSpec, FormFieldEntry> = mapOf(),
-    val saveForFutureUse: Boolean,
     val showsMandate: Boolean
 )
 
 data class FormFieldEntry(
     val value: String?,
-    val isComplete: Boolean
+    val isComplete: Boolean = false
 )
