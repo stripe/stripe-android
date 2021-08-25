@@ -40,6 +40,8 @@
 
     <style name="StripeGooglePayDefaultTheme" parent="StripePaymentSheetBaseTheme" />
 
+    <style name="PayLauncherDefaultTheme" parent="StripePaymentSheetBaseTheme" />
+
     <style name="StripePaymentSheetAddPaymentMethodTheme">
         <item name="colorOnSurface">@color/stripe_paymentsheet_form</item>
         <item name="colorPrimary">@color/stripe_paymentsheet_form</item>

@@ -191,6 +191,24 @@ class CardDataCollectionFragmentTest {
     }
 
     @Test
+    fun `launching with billing details populates the fields`() {
+        createFragment(fragmentArgs = PaymentSheetFixtures.COMPOSE_FRAGMENT_ARGS) { _, viewBinding ->
+            assertThat(viewBinding.billingAddress.postalCodeView.text.toString())
+                .isEqualTo("94111")
+            assertThat(viewBinding.billingAddress.address1View.text.toString())
+                .isEqualTo("123 Main Street")
+            assertThat(viewBinding.billingAddress.address2View.text.toString())
+                .isEqualTo("")
+            assertThat(viewBinding.billingAddress.cityView.text.toString())
+                .isEqualTo("San Francisco")
+            assertThat(viewBinding.billingAddress.stateView.text.toString())
+                .isEqualTo("CA")
+            assertThat(viewBinding.billingAddress.countryView.text.toString())
+                .isEqualTo("Germany")
+        }
+    }
+
+    @Test
     fun `selection when save card checkbox enabled and then valid card entered should create expected PaymentSelection`() {
         createFragment { fragment, viewBinding ->
             assertThat(viewBinding.saveCardCheckbox.isVisible)

@@ -8,7 +8,7 @@ import kotlinx.parcelize.Parcelize
 /**
  * Result to be passed to the callback of [PaymentLauncher]
  */
-internal sealed class PaymentResult : Parcelable {
+sealed class PaymentResult : Parcelable {
     @Parcelize
     object Completed : PaymentResult()
 

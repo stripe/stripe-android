@@ -6,6 +6,7 @@ import android.os.Parcelable
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.core.os.bundleOf
 import com.stripe.android.model.ConfirmStripeIntentParams
+import com.stripe.android.payments.core.injection.InjectorKey
 import kotlinx.parcelize.Parcelize
 
 /**
@@ -25,31 +26,27 @@ internal class PaymentLauncherContract :
     }
 
     sealed class Args(
-        open val publishableKey: String,
-        open val stripeAccountId: String? = null
+        @InjectorKey open val injectorKey: Int,
     ) : Parcelable {
         fun toBundle() = bundleOf(EXTRA_ARGS to this)
 
         @Parcelize
         data class IntentConfirmationArgs(
-            override val publishableKey: String,
-            override val stripeAccountId: String? = null,
+            override val injectorKey: Int,
             val confirmStripeIntentParams: ConfirmStripeIntentParams
-        ) : Args(publishableKey, stripeAccountId)
+        ) : Args(injectorKey)
 
         @Parcelize
         data class PaymentIntentNextActionArgs(
-            override val publishableKey: String,
-            override val stripeAccountId: String? = null,
+            override val injectorKey: Int,
             val paymentIntentClientSecret: String
-        ) : Args(publishableKey, stripeAccountId)
+        ) : Args(injectorKey)
 
         @Parcelize
         data class SetupIntentNextActionArgs(
-            override val publishableKey: String,
-            override val stripeAccountId: String? = null,
+            override val injectorKey: Int,
             val setupIntentClientSecret: String
-        ) : Args(publishableKey, stripeAccountId)
+        ) : Args(injectorKey)
 
         internal companion object {
             private const val EXTRA_ARGS = "extra_args"
