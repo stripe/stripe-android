@@ -168,7 +168,7 @@ internal sealed class SectionMultiFieldElement(
 
     internal class RowElement constructor(
         _identifier: IdentifierSpec,
-        val fields: List<SectionFieldElement>,
+        val fields: List<SectionSingleFieldElement>,
         val controller: RowController
     ) : SectionMultiFieldElement(_identifier) {
         override fun getFormFieldValueFlow(): Flow<List<Pair<IdentifierSpec, FormFieldEntry>>> =

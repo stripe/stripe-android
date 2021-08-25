@@ -486,15 +486,24 @@ internal class FormViewModelTest {
         private suspend fun getAddressSectionTextControllerWithLabel(
             formViewModel: FormViewModel,
             @StringRes label: Int
-        ) =
-            formViewModel.elements
+        ): TextFieldController? {
+            val addressElementFields = formViewModel.elements
                 .filterIsInstance<SectionElement>()
                 .flatMap { it.fields }
                 .filterIsInstance<SectionMultiFieldElement.AddressElement>()
                 .firstOrNull()
                 ?.fields
                 ?.first()
+            return addressElementFields
+                ?.filterIsInstance<SectionSingleFieldElement>()
                 ?.map { (it.controller as? TextFieldController) }
                 ?.firstOrNull { it?.label == label }
+                ?: addressElementFields
+                    ?.filterIsInstance<SectionMultiFieldElement.RowElement>()
+                    ?.map { it.fields }
+                    ?.flatten()
+                    ?.map { (it.controller as? TextFieldController) }
+                    ?.firstOrNull { it?.label == label }
+        }
     }
 }

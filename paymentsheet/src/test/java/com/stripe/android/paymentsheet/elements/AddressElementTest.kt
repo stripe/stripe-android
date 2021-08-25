@@ -56,12 +56,14 @@ class AddressElementTest {
                 addressFieldElementRepository,
                 countryDropdownFieldController = countryDropdownFieldController
             )
+            var emailController =
+                ((addressElement.fields.first()[1] as SectionSingleFieldElement)
+                    .controller as TextFieldController)
 
             countryDropdownFieldController.onValueChange(0)
             ShadowLooper.runUiThreadTasksIncludingDelayedTasks()
 
-            (addressElement.fields.first()[1].controller as TextFieldController)
-                .onValueChange(";;invalidchars@email.com")
+            emailController.onValueChange(";;invalidchars@email.com")
             ShadowLooper.runUiThreadTasksIncludingDelayedTasks()
 
             assertThat(addressElement.controller.error.first())
@@ -72,8 +74,10 @@ class AddressElementTest {
             countryDropdownFieldController.onValueChange(1)
             ShadowLooper.runUiThreadTasksIncludingDelayedTasks()
 
-            ((addressElement.fields.first())[1].controller as TextFieldController)
-                .onValueChange("12invalidiban")
+            emailController =
+                ((addressElement.fields.first()[1] as SectionSingleFieldElement)
+                    .controller as TextFieldController)
+            emailController.onValueChange("12invalidiban")
             ShadowLooper.runUiThreadTasksIncludingDelayedTasks()
 
             assertThat(addressElement.controller.error.first()?.errorMessage)
@@ -90,12 +94,14 @@ class AddressElementTest {
             countryDropdownFieldController = countryDropdownFieldController
         )
         val formFieldValueFlow = addressElement.getFormFieldValueFlow()
+        var emailController =
+            ((addressElement.fields.first()[1] as SectionSingleFieldElement)
+                .controller as TextFieldController)
 
         countryDropdownFieldController.onValueChange(0)
 
         // Add values to the fields
-        (addressElement.fields.first()[1].controller as TextFieldController)
-            .onValueChange("email")
+        emailController.onValueChange("email")
 
         ShadowLooper.runUiThreadTasksIncludingDelayedTasks()
 
@@ -109,8 +115,10 @@ class AddressElementTest {
         countryDropdownFieldController.onValueChange(1)
 
         // Add values to the fields
-        (addressElement.fields.first()[1].controller as TextFieldController)
-            .onValueChange("DE89370400440532013000")
+        emailController =
+            ((addressElement.fields.first()[1] as SectionSingleFieldElement)
+                .controller as TextFieldController)
+        emailController.onValueChange("DE89370400440532013000")
 
         ShadowLooper.runUiThreadTasksIncludingDelayedTasks()
 

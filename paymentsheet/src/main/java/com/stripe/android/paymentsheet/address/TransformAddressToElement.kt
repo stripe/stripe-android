@@ -168,7 +168,9 @@ internal fun List<CountryAddressSchema>.transformToElementList(): List<SectionFi
 }
 
 private fun combineCityAndPostal(countryAddressElements: List<SectionSingleFieldElement>) =
-    countryAddressElements.foldIndexed(listOf<SectionFieldElement>()) { index, acc, sectionSingleFieldElement ->
+    countryAddressElements.foldIndexed(
+        listOf<SectionFieldElement?>()
+    ) { index, acc, sectionSingleFieldElement ->
         if (index + 1 < countryAddressElements.size && isPostalNextToCity(
                 countryAddressElements[index],
                 countryAddressElements[index + 1]
@@ -184,11 +186,11 @@ private fun combineCityAndPostal(countryAddressElements: List<SectionSingleField
             )
         } else if (acc.lastOrNull() is SectionMultiFieldElement.RowElement) {
             // skip this it is in a row
-            acc
+            acc.plus(null)
         } else {
             acc.plus(sectionSingleFieldElement)
         }
-    }
+    }.filterNotNull()
 
 private fun isPostalNextToCity(
     elements: List<SectionSingleFieldElement>

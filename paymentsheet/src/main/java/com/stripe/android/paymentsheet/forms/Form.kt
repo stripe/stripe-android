@@ -167,16 +167,20 @@ internal fun RowElementUI(
 ) {
     val fields = controller.fields
     Row(
-        Modifier.height(IntrinsicSize.Min),
+        Modifier
+            .height(IntrinsicSize.Min)
+            .fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
     ) {
         fields.forEachIndexed { index, field ->
+            val lastItem = index != fields.size - 1
             SectionFieldElementUI(
                 enabled,
                 field,
-                Modifier.fillMaxWidth(1f / fields.size.toFloat())
+                Modifier.fillMaxWidth(
+                    (1f / fields.size.toFloat()).takeIf { lastItem } ?: 1f)
             )
-            if (index != fields.size - 1) {
+            if (!lastItem) {
                 val cardStyle = CardStyle(isSystemInDarkTheme())
                 VeriticalDivider(
                     color = cardStyle.cardBorderColor,
