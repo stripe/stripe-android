@@ -40,6 +40,8 @@ dependencies {
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinCoroutinesVersion"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$kotlinCoroutinesVersion"
 
+    implementation "androidx.activity:activity-compose:1.3.1"
+
     javadocDeps libraries.androidx.annotation
     javadocDeps libraries.androidx.appcompat
     javadocDeps "com.google.android.material:material:$materialVersion"
@@ -119,6 +121,7 @@ android {
     }
 
     buildFeatures {
+        compose = true
         viewBinding true
     }
 
@@ -128,6 +131,10 @@ android {
     }
     kotlinOptions {
         jvmTarget = "1.8"
+    }
+
+    composeOptions {
+        kotlinCompilerExtensionVersion "$composeVersion"
     }
 }
 

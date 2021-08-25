@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet
 
 import android.content.Context
-import android.os.Bundle
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.fragment.app.testing.launchFragmentInContainer
@@ -21,6 +20,7 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.PaymentSheetViewModel.CheckoutIdentifier
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.forms.FormFieldEntry
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.FragmentConfigFixtures
@@ -29,6 +29,8 @@ import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
 import com.stripe.android.paymentsheet.paymentdatacollection.CardDataCollectionFragment
 import com.stripe.android.paymentsheet.paymentdatacollection.ComposeFormDataCollectionFragment
+import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
+import com.stripe.android.paymentsheet.specifications.IdentifierSpec
 import com.stripe.android.paymentsheet.ui.PaymentSheetFragmentFactory
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.utils.TestUtils.idleLooper
@@ -298,10 +300,18 @@ class PaymentSheetAddPaymentMethodFragmentTest {
 
             assertThat(addedFragment).isInstanceOf(ComposeFormDataCollectionFragment::class.java)
             assertThat(
-                addedFragment?.arguments?.getString(
-                    ComposeFormDataCollectionFragment.EXTRA_PAYMENT_METHOD
+                addedFragment?.arguments?.getParcelable<FormFragmentArguments>(
+                    ComposeFormDataCollectionFragment.EXTRA_CONFIG
                 )
-            ).isEqualTo(SupportedPaymentMethod.Bancontact.name)
+            )
+                .isEqualTo(
+                    FormFragmentArguments(
+                        SupportedPaymentMethod.Bancontact.name,
+                        saveForFutureUseInitialVisibility = true,
+                        saveForFutureUseInitialValue = true,
+                        merchantName = PaymentSheetFixtures.MERCHANT_DISPLAY_NAME
+                    )
+                )
         }
     }
 
@@ -317,11 +327,20 @@ class PaymentSheetAddPaymentMethodFragmentTest {
             )
 
             assertThat(addedFragment).isInstanceOf(ComposeFormDataCollectionFragment::class.java)
+
             assertThat(
-                addedFragment?.arguments?.getString(
-                    ComposeFormDataCollectionFragment.EXTRA_MERCHANT_NAME
+                addedFragment?.arguments?.getParcelable<FormFragmentArguments>(
+                    ComposeFormDataCollectionFragment.EXTRA_CONFIG
                 )
-            ).isEqualTo(PaymentSheetFixtures.MERCHANT_DISPLAY_NAME)
+            )
+                .isEqualTo(
+                    FormFragmentArguments(
+                        SupportedPaymentMethod.Bancontact.name,
+                        saveForFutureUseInitialVisibility = true,
+                        saveForFutureUseInitialValue = true,
+                        merchantName = PaymentSheetFixtures.MERCHANT_DISPLAY_NAME
+                    )
+                )
         }
     }
 
@@ -369,28 +388,27 @@ class PaymentSheetAddPaymentMethodFragmentTest {
 
             assertThat(addedFragment).isInstanceOf(ComposeFormDataCollectionFragment::class.java)
             assertThat(
-                addedFragment?.arguments?.getString(
-                    ComposeFormDataCollectionFragment.EXTRA_PAYMENT_METHOD
+                addedFragment?.arguments?.getParcelable<FormFragmentArguments>(
+                    ComposeFormDataCollectionFragment.EXTRA_CONFIG
                 )
-            ).isEqualTo(SupportedPaymentMethod.Bancontact.name)
-            assertThat(
-                addedFragment?.arguments?.getBoolean(
-                    ComposeFormDataCollectionFragment.EXTRA_SAVE_FOR_FUTURE_USE_VALUE
+            )
+                .isEqualTo(
+                    FormFragmentArguments(
+                        SupportedPaymentMethod.Bancontact.name,
+                        saveForFutureUseInitialVisibility = false,
+                        saveForFutureUseInitialValue = true,
+                        merchantName = "Widget Store"
+                    )
                 )
-            ).isEqualTo(true)
-            assertThat(
-                addedFragment?.arguments?.getBoolean(
-                    ComposeFormDataCollectionFragment.EXTRA_SAVE_FOR_FUTURE_USE_VISIBILITY
-                )
-            ).isEqualTo(false)
         }
     }
 
     @Test
     fun `payment method selection has the fields from formFieldValues`() {
         val formFieldValues = FormFieldValues(
-            fieldValuePairs = emptyMap(),
-            saveForFutureUse = true,
+            fieldValuePairs = mapOf(
+                IdentifierSpec.SaveForFutureUse to FormFieldEntry("true", true)
+            ),
             showsMandate = false
         )
         val selection = BaseAddPaymentMethodFragment.transformToPaymentSelection(
@@ -411,62 +429,82 @@ class PaymentSheetAddPaymentMethodFragmentTest {
 
     @Test
     fun `Verify Compose argument in guest setup intent`() {
-        val args = Bundle()
-        BaseAddPaymentMethodFragment.addSaveForFutureUseArguments(
-            args,
-            isCustomer = false,
-            saveForFutureUse = true
+        assertThat(
+            BaseAddPaymentMethodFragment.getArguments(
+                hasCustomer = false,
+                saveForFutureUse = true,
+                supportedPaymentMethodName = SupportedPaymentMethod.Bancontact.name,
+                merchantName = "Example, Inc",
+                billingAddress = null
+            )
+        ).isEqualTo(
+            FormFragmentArguments(
+                SupportedPaymentMethod.Bancontact.name,
+                saveForFutureUseInitialVisibility = false,
+                saveForFutureUseInitialValue = true,
+                merchantName = "Example, Inc",
+            )
         )
-
-        assertThat(args.getBoolean(ComposeFormDataCollectionFragment.EXTRA_SAVE_FOR_FUTURE_USE_VISIBILITY))
-            .isFalse()
-        assertThat(args.getBoolean(ComposeFormDataCollectionFragment.EXTRA_SAVE_FOR_FUTURE_USE_VALUE))
-            .isTrue()
     }
 
     @Test
     fun `Verify Compose argument in guest payment intent`() {
-        val args = Bundle()
-        BaseAddPaymentMethodFragment.addSaveForFutureUseArguments(
-            args,
-            isCustomer = false,
-            saveForFutureUse = false
+        assertThat(
+            BaseAddPaymentMethodFragment.getArguments(
+                hasCustomer = false,
+                saveForFutureUse = false,
+                supportedPaymentMethodName = SupportedPaymentMethod.Bancontact.name,
+                merchantName = "Example, Inc",
+            )
+        ).isEqualTo(
+            FormFragmentArguments(
+                SupportedPaymentMethod.Bancontact.name,
+                saveForFutureUseInitialVisibility = false,
+                saveForFutureUseInitialValue = false,
+                merchantName = "Example, Inc",
+            )
         )
-
-        assertThat(args.getBoolean(ComposeFormDataCollectionFragment.EXTRA_SAVE_FOR_FUTURE_USE_VISIBILITY))
-            .isFalse()
-        assertThat(args.getBoolean(ComposeFormDataCollectionFragment.EXTRA_SAVE_FOR_FUTURE_USE_VALUE))
-            .isFalse()
     }
 
     @Test
     fun `Verify Compose argument in new or returning user setup intent`() {
-        val args = Bundle()
-        BaseAddPaymentMethodFragment.addSaveForFutureUseArguments(
-            args,
-            isCustomer = true,
-            saveForFutureUse = true
-        )
+        assertThat(
+            BaseAddPaymentMethodFragment.getArguments(
+                hasCustomer = true,
+                saveForFutureUse = true,
+                supportedPaymentMethodName = SupportedPaymentMethod.Bancontact.name,
+                merchantName = "Example, Inc",
 
-        assertThat(args.getBoolean(ComposeFormDataCollectionFragment.EXTRA_SAVE_FOR_FUTURE_USE_VISIBILITY))
-            .isFalse()
-        assertThat(args.getBoolean(ComposeFormDataCollectionFragment.EXTRA_SAVE_FOR_FUTURE_USE_VALUE))
-            .isTrue()
+            )
+        ).isEqualTo(
+            FormFragmentArguments(
+                SupportedPaymentMethod.Bancontact.name,
+                saveForFutureUseInitialVisibility = false,
+                saveForFutureUseInitialValue = true,
+                merchantName = "Example, Inc",
+            )
+        )
     }
 
     @Test
     fun `Verify Compose argument in new or returning user payment intent`() {
-        val args = Bundle()
-        BaseAddPaymentMethodFragment.addSaveForFutureUseArguments(
-            args,
-            isCustomer = true,
-            saveForFutureUse = false
-        )
 
-        assertThat(args.getBoolean(ComposeFormDataCollectionFragment.EXTRA_SAVE_FOR_FUTURE_USE_VISIBILITY))
-            .isTrue()
-        assertThat(args.getBoolean(ComposeFormDataCollectionFragment.EXTRA_SAVE_FOR_FUTURE_USE_VALUE))
-            .isTrue()
+        assertThat(
+            BaseAddPaymentMethodFragment.getArguments(
+                hasCustomer = true,
+                saveForFutureUse = false,
+                supportedPaymentMethodName = SupportedPaymentMethod.Bancontact.name,
+                merchantName = "Example, Inc",
+
+            )
+        ).isEqualTo(
+            FormFragmentArguments(
+                SupportedPaymentMethod.Bancontact.name,
+                saveForFutureUseInitialVisibility = true,
+                saveForFutureUseInitialValue = true,
+                merchantName = "Example, Inc",
+            )
+        )
     }
 
     private fun createFragment(

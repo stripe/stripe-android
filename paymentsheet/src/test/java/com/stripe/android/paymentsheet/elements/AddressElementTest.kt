@@ -30,7 +30,7 @@ class AddressElementTest {
             "US",
             listOf(
                 SectionSingleFieldElement.Email(
-                    IdentifierSpec("email"),
+                    IdentifierSpec.Email,
                     TextFieldController(EmailConfig())
                 )
             )
@@ -39,7 +39,7 @@ class AddressElementTest {
             "JP",
             listOf(
                 SectionSingleFieldElement.Iban(
-                    IdentifierSpec("iban"),
+                    IdentifierSpec.Generic("iban"),
                     TextFieldController(IbanConfig())
                 )
             )
@@ -52,7 +52,7 @@ class AddressElementTest {
         runBlocking {
             // ZZ does not have state and US does
             val addressElement = SectionMultiFieldElement.AddressElement(
-                IdentifierSpec("address"),
+                IdentifierSpec.Generic("address"),
                 addressFieldElementRepository,
                 countryDropdownFieldController = countryDropdownFieldController
             )
@@ -85,7 +85,7 @@ class AddressElementTest {
     @Test
     fun `verify flow of form field values`() = runBlockingTest {
         val addressElement = SectionMultiFieldElement.AddressElement(
-            IdentifierSpec("address"),
+            IdentifierSpec.Generic("address"),
             addressFieldElementRepository,
             countryDropdownFieldController = countryDropdownFieldController
         )
@@ -101,7 +101,7 @@ class AddressElementTest {
 
         // Verify
         var firstForFieldValues = formFieldValueFlow.first()
-        assertThat(firstForFieldValues.toMap()[IdentifierSpec("email")])
+        assertThat(firstForFieldValues.toMap()[IdentifierSpec.Email])
             .isEqualTo(
                 FormFieldEntry("email", false)
             )
@@ -115,7 +115,7 @@ class AddressElementTest {
         ShadowLooper.runUiThreadTasksIncludingDelayedTasks()
 
         firstForFieldValues = formFieldValueFlow.first()
-        assertThat(firstForFieldValues.toMap()[IdentifierSpec("iban")])
+        assertThat(firstForFieldValues.toMap()[IdentifierSpec.Generic("iban")])
             .isEqualTo(
                 FormFieldEntry("DE89370400440532013000", true)
             )

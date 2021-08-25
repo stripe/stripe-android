@@ -27,37 +27,37 @@ internal enum class FieldType(
 ) {
     AddressLine1(
         "addressLine1",
-        IdentifierSpec("line1"),
+        IdentifierSpec.Line1,
         R.string.address_label_address_line1,
         KeyboardCapitalization.Words
     ),
     AddressLine2(
         "addressLine2",
-        IdentifierSpec("line2"),
+        IdentifierSpec.Line2,
         R.string.address_label_address_line2,
         KeyboardCapitalization.Words
     ),
     Locality(
         "locality",
-        IdentifierSpec("city"),
+        IdentifierSpec.City,
         R.string.address_label_city,
         KeyboardCapitalization.Words
     ),
     PostalCode(
         "postalCode",
-        IdentifierSpec("postal_code"),
+        IdentifierSpec.PostalCode,
         R.string.address_label_postal_code,
         KeyboardCapitalization.None
     ),
     AdministrativeArea(
         "administrativeArea",
-        IdentifierSpec("state"),
+        IdentifierSpec.State,
         NameType.state.stringResId,
         KeyboardCapitalization.Words
     ),
     Name(
         "name",
-        IdentifierSpec("name"),
+        IdentifierSpec.Name,
         R.string.address_label_name,
         KeyboardCapitalization.Words
     );

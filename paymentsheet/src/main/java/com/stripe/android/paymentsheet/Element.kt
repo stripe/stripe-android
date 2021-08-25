@@ -12,6 +12,8 @@ import com.stripe.android.paymentsheet.elements.SaveForFutureUseController
 import com.stripe.android.paymentsheet.elements.SectionController
 import com.stripe.android.paymentsheet.elements.SectionFieldErrorController
 import com.stripe.android.paymentsheet.elements.TextFieldController
+import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
+import com.stripe.android.paymentsheet.paymentdatacollection.getValue
 import com.stripe.android.paymentsheet.forms.FormFieldEntry
 import com.stripe.android.paymentsheet.specifications.IdentifierSpec
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -101,9 +103,10 @@ internal sealed class SectionSingleFieldElement(
      */
     abstract val controller: InputController
 
+    abstract fun setRawValue(formFragmentArguments: FormFragmentArguments)
+
     /**
-     * Every item in a section must have a controller that can provide an error
-     * message, for the section controller to reduce it to a single error message.
+     * This will return a controller that abides by the SectionFieldErrorController interface.
      */
     override fun sectionFieldErrorController(): SectionFieldErrorController = controller
 
@@ -114,29 +117,49 @@ internal sealed class SectionSingleFieldElement(
     }
 
     data class Email(
-        val _identifier: IdentifierSpec,
+        override val identifier: IdentifierSpec,
         override val controller: TextFieldController
-    ) : SectionSingleFieldElement(_identifier)
+    ) : SectionSingleFieldElement(identifier) {
+        override fun setRawValue(formFragmentArguments: FormFragmentArguments) {
+            formFragmentArguments.getValue(identifier)?.let { controller.onRawValueChange(it) }
+        }
+    }
 
     data class Iban(
-        val _identifier: IdentifierSpec,
+        override val identifier: IdentifierSpec,
         override val controller: TextFieldController
-    ) : SectionSingleFieldElement(_identifier)
+    ) : SectionSingleFieldElement(identifier) {
+        override fun setRawValue(formFragmentArguments: FormFragmentArguments) {
+            formFragmentArguments.getValue(identifier)?.let { controller.onRawValueChange(it) }
+        }
+    }
 
     data class Country(
-        val _identifier: IdentifierSpec,
+        override val identifier: IdentifierSpec,
         override val controller: DropdownFieldController
-    ) : SectionSingleFieldElement(_identifier)
+    ) : SectionSingleFieldElement(identifier) {
+        override fun setRawValue(formFragmentArguments: FormFragmentArguments) {
+            formFragmentArguments.getValue(identifier)?.let { controller.onRawValueChange(it) }
+        }
+    }
 
     data class SimpleText(
-        val _identifier: IdentifierSpec,
+        override val identifier: IdentifierSpec,
         override val controller: TextFieldController
-    ) : SectionSingleFieldElement(_identifier)
+    ) : SectionSingleFieldElement(identifier) {
+        override fun setRawValue(formFragmentArguments: FormFragmentArguments) {
+            formFragmentArguments.getValue(identifier)?.let { controller.onRawValueChange(it) }
+        }
+    }
 
     data class SimpleDropdown(
-        val _identifier: IdentifierSpec,
+        override val identifier: IdentifierSpec,
         override val controller: DropdownFieldController
-    ) : SectionSingleFieldElement(_identifier)
+    ) : SectionSingleFieldElement(identifier) {
+        override fun setRawValue(formFragmentArguments: FormFragmentArguments) {
+            formFragmentArguments.getValue(identifier)?.let { controller.onRawValueChange(it) }
+        }
+    }
 }
 
 internal sealed class SectionMultiFieldElement(
@@ -145,15 +168,17 @@ internal sealed class SectionMultiFieldElement(
     internal class AddressElement constructor(
         _identifier: IdentifierSpec,
         private val addressFieldRepository: AddressFieldElementRepository,
+        private var args: FormFragmentArguments? = null,
         countryCodes: Set<String> = emptySet(),
         countryDropdownFieldController: DropdownFieldController = DropdownFieldController(
-            CountryConfig(countryCodes)
+            CountryConfig(countryCodes),
+            args?.billingDetails?.address?.country
         ),
     ) : SectionMultiFieldElement(_identifier) {
 
         @VisibleForTesting
         val countryElement = SectionSingleFieldElement.Country(
-            IdentifierSpec("country"),
+            IdentifierSpec.Country,
             countryDropdownFieldController
         )
 
@@ -162,6 +187,14 @@ internal sealed class SectionMultiFieldElement(
             .map { countryCode ->
                 addressFieldRepository.get(countryCode)
                     ?: emptyList()
+            }
+            .map { fields ->
+                args?.let {
+                    fields.forEach { field ->
+                        field.setRawValue(it)
+                    }
+                }
+                fields
             }
 
         val fields = otherFields.map { listOf(countryElement).plus(it) }

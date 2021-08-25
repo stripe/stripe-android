@@ -18,20 +18,20 @@ internal val idealParamKey: MutableMap<String, Any?> = mutableMapOf(
 )
 
 internal val idealNameSection = SectionSpec(
-    IdentifierSpec("name_section"),
+    IdentifierSpec.Generic("name_section"),
     SectionFieldSpec.NAME
 )
-internal val idealEmailSection = SectionSpec(IdentifierSpec("email_section"), Email)
+internal val idealEmailSection = SectionSpec(IdentifierSpec.Email, Email)
 internal val idealBankSection = SectionSpec(
-    IdentifierSpec("bank_section"),
+    IdentifierSpec.Generic("bank_section"),
     SectionFieldSpec.BankDropdown(
-        IdentifierSpec("bank"),
+        IdentifierSpec.Generic("bank"),
         R.string.stripe_paymentsheet_ideal_bank,
         SupportedBankType.Ideal
     )
 )
 internal val idealMandate = MandateTextSpec(
-    IdentifierSpec("mandate"),
+    IdentifierSpec.Generic("mandate"),
     R.string.stripe_paymentsheet_sepa_mandate,
     Color.Gray
 )

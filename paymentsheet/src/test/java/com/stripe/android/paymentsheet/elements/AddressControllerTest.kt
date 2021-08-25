@@ -25,11 +25,11 @@ class AddressControllerTest {
     private val sectionFieldElementFlow = MutableStateFlow(
         listOf(
             SectionSingleFieldElement.Email(
-                IdentifierSpec("email"),
+                IdentifierSpec.Email,
                 emailController
             ),
             SectionSingleFieldElement.Iban(
-                IdentifierSpec("iban"),
+                IdentifierSpec.Generic("iban"),
                 ibanController
             )
         )
