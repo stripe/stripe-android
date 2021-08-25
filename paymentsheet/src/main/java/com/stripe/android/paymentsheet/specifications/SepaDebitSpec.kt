@@ -45,9 +45,9 @@ internal val sepaDebit = FormSpec(
             sepaDebitNameSection,
             sepaDebitEmailSection,
             sepaDebitIbanSection,
+            sepaBillingSection,
             FormItemSpec.SaveForFutureUseSpec(listOf(sepaDebitMandate)),
             sepaDebitMandate,
-            sepaBillingSection
         )
     ),
     sepaDebitParamKey

@@ -8,6 +8,7 @@ import com.stripe.android.paymentsheet.elements.Controller
 import com.stripe.android.paymentsheet.elements.CountryConfig
 import com.stripe.android.paymentsheet.elements.DropdownFieldController
 import com.stripe.android.paymentsheet.elements.InputController
+import com.stripe.android.paymentsheet.elements.RowController
 import com.stripe.android.paymentsheet.elements.SaveForFutureUseController
 import com.stripe.android.paymentsheet.elements.SectionController
 import com.stripe.android.paymentsheet.elements.SectionFieldErrorController
@@ -90,6 +91,7 @@ internal sealed interface SectionFieldElement {
 
     fun getFormFieldValueFlow(): Flow<List<Pair<IdentifierSpec, FormFieldEntry>>>
     fun sectionFieldErrorController(): SectionFieldErrorController
+    fun setRawValue(formFragmentArguments: FormFragmentArguments)
 }
 
 /**
@@ -102,8 +104,6 @@ internal sealed class SectionSingleFieldElement(
      * Some fields in the section will have a single input controller.
      */
     abstract val controller: InputController
-
-    abstract fun setRawValue(formFragmentArguments: FormFragmentArguments)
 
     /**
      * This will return a controller that abides by the SectionFieldErrorController interface.
@@ -165,6 +165,26 @@ internal sealed class SectionSingleFieldElement(
 internal sealed class SectionMultiFieldElement(
     override val identifier: IdentifierSpec,
 ) : SectionFieldElement {
+
+    internal class RowElement constructor(
+        _identifier: IdentifierSpec,
+        val fields: List<SectionFieldElement>,
+        val controller: RowController
+    ) : SectionMultiFieldElement(_identifier) {
+        override fun getFormFieldValueFlow(): Flow<List<Pair<IdentifierSpec, FormFieldEntry>>> =
+            combine(fields.map { it.getFormFieldValueFlow() }) {
+                it.toList().flatten()
+            }
+
+        override fun sectionFieldErrorController() = controller
+
+        override fun setRawValue(formFragmentArguments: FormFragmentArguments) {
+            fields.forEach {
+                it.setRawValue(formFragmentArguments)
+            }
+        }
+    }
+
     internal class AddressElement constructor(
         _identifier: IdentifierSpec,
         private val addressFieldRepository: AddressFieldElementRepository,
@@ -211,32 +231,16 @@ internal sealed class SectionMultiFieldElement(
         override fun getFormFieldValueFlow() = fields.flatMapLatest { fieldElements ->
             combine(
                 fieldElements
-                    .associate { sectionFieldElement ->
-                        sectionFieldElement.identifier to
-                            sectionFieldElement.controller
-                    }
                     .map {
-                        getCurrentFieldValuePair(it.key, it.value)
+                        it.getFormFieldValueFlow()
                     }
             ) {
-                it.toList()
+                it.toList().flatten()
             }
         }
 
-        private fun getCurrentFieldValuePair(
-            identifier: IdentifierSpec,
-            controller: InputController
-        ) = combine(
-            controller.rawFieldValue,
-            controller.isComplete
-        ) { rawFieldValue, isComplete ->
-            Pair(
-                identifier,
-                FormFieldEntry(
-                    value = rawFieldValue,
-                    isComplete = isComplete,
-                )
-            )
+        override fun setRawValue(formFragmentArguments: FormFragmentArguments) {
+            args = formFragmentArguments
         }
     }
 }

@@ -1,7 +1,7 @@
 package com.stripe.android.paymentsheet.elements
 
 import androidx.annotation.StringRes
-import com.stripe.android.paymentsheet.SectionSingleFieldElement
+import com.stripe.android.paymentsheet.SectionFieldElement
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
@@ -13,7 +13,7 @@ import kotlinx.coroutines.flow.flatMapLatest
  * in it do not change.
  */
 internal class AddressController(
-    val fieldsFlowable: Flow<List<SectionSingleFieldElement>>
+    val fieldsFlowable: Flow<List<SectionFieldElement>>
 ) : SectionFieldErrorController {
     @StringRes
     val label: Int? = null

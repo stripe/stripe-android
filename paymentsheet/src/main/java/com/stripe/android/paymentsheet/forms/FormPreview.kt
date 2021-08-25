@@ -1,7 +1,11 @@
 package com.stripe.android.paymentsheet.forms
 
 import android.annotation.SuppressLint
+import androidx.compose.foundation.layout.Row
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.tooling.preview.Preview
 import com.stripe.android.paymentsheet.address.AddressFieldElementRepository
 import com.stripe.android.paymentsheet.address.parseAddressesSchema
 import com.stripe.android.paymentsheet.paymentdatacollection.Address
@@ -17,7 +21,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
  * This will render a preview of the form in IntelliJ.  It can't access resources, and
  * it must exist in src/main, not src/test.
  */
-// @Preview AGP: 7.0.0 will not cause a lint error, until then it is commented out
+@Preview
 @SuppressLint("VisibleForTests")
 @Composable
 internal fun FormInternalPreview() {
