@@ -42,6 +42,8 @@
 
     <style name="Stripe.BecsDebitWidget.MandateAcceptanceTextView" parent="Stripe.Base.BecsDebitWidget.MandateAcceptanceTextView" />
 
+    <style name="StripeDefault3DS2Theme" parent="BaseStripe3DS2Theme" />
+
     <style name="StripeCardFormView">
         <item name="cardFormStyle">standard</item>
     </style>
