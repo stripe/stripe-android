@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 17.1.2 - 2020-08-25
+## 17.1.2 - 2021-08-25
 This release includes several bug fixes, adds the capability to remove cards saved in `PaymentSheet` and to set default billing address fields in the `PaymentSheet.Configuration`.  It is now also possible to use Setup Intents with Google Pay on the multi-step Payment Sheet UI.
 * [4107](https://github.com/stripe/stripe-android/pull/4107) Dokka updates for 17.1.1
 * [4108](https://github.com/stripe/stripe-android/pull/4108) Support deleting saved payment methods
@@ -14,7 +14,7 @@ This release includes several bug fixes, adds the capability to remove cards sav
 * [4127](https://github.com/stripe/stripe-android/pull/4127) Bump gson from 2.8.7 to 2.8.8
 * [4128](https://github.com/stripe/stripe-android/pull/4128) Bump mockitoCoreVersion from 3.11.2 to 3.12.1
 
-## 17.1.1 - 2020-08-13
+## 17.1.1 - 2021-08-13
 This release includes several bug fixes and temporarily disabled [WeChat Pay module](https://github.com/stripe/stripe-android/blob/master/wechatpay/README.md) due to a backend bug, For WeChat Pay integration now, please use `Stripe.confirmWeChatPayPayment`.
 * [4057](https://github.com/stripe/stripe-android/pull/4057) Bump daggerVersion from 2.38 to 2.38.1
 * [4065](https://github.com/stripe/stripe-android/pull/4065) Bump activity-compose from 1.3.0-rc02 to 1.3.0
@@ -25,7 +25,7 @@ This release includes several bug fixes and temporarily disabled [WeChat Pay mod
 * [4092](https://github.com/stripe/stripe-android/pull/4092) Bump ktlint from 0.41.0 to 0.42.1
 * [4098](https://github.com/stripe/stripe-android/pull/4098) Disable WeChat Pay module
 
-## 17.1.0 - 2020-07-27
+## 17.1.0 - 2021-07-27
 This release includes several bug fixes and introduces [WeChat Pay module](https://github.com/stripe/stripe-android/blob/master/wechatpay/README.md)
 
 * [3978](https://github.com/stripe/stripe-android/pull/3978) Fix bug when cancelling Payment Sheet payment with Google Pay
