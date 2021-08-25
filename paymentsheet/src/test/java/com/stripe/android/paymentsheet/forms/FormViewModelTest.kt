@@ -11,7 +11,7 @@ import com.stripe.android.paymentsheet.SectionFieldElement
 import com.stripe.android.paymentsheet.address.AddressFieldElementRepository
 import com.stripe.android.paymentsheet.elements.SaveForFutureUseController
 import com.stripe.android.paymentsheet.elements.TextFieldController
-import com.stripe.android.paymentsheet.paymentdatacollection.ComposeFragmentArguments
+import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
 import com.stripe.android.paymentsheet.specifications.BankRepository
 import com.stripe.android.paymentsheet.specifications.FormItemSpec
 import com.stripe.android.paymentsheet.specifications.IdentifierSpec
@@ -59,7 +59,7 @@ internal class FormViewModelTest {
                     FormItemSpec.SaveForFutureUseSpec(listOf(emailSection))
                 )
             ),
-            ComposeFragmentArguments(
+            FormFragmentArguments(
                 supportedPaymentMethodName = "Card",
                 saveForFutureUseInitialValue = true,
                 saveForFutureUseInitialVisibility = true,
@@ -90,7 +90,7 @@ internal class FormViewModelTest {
                     FormItemSpec.SaveForFutureUseSpec(listOf(emailSection))
                 )
             ),
-            ComposeFragmentArguments(
+            FormFragmentArguments(
                 supportedPaymentMethodName = "Card",
                 saveForFutureUseInitialValue = true,
                 saveForFutureUseInitialVisibility = true,
@@ -123,7 +123,7 @@ internal class FormViewModelTest {
                     FormItemSpec.SaveForFutureUseSpec(listOf(emailSection))
                 )
             ),
-            ComposeFragmentArguments(
+            FormFragmentArguments(
                 supportedPaymentMethodName = "Card",
                 saveForFutureUseInitialValue = true,
                 saveForFutureUseInitialVisibility = true,
@@ -161,7 +161,7 @@ internal class FormViewModelTest {
                         FormItemSpec.SaveForFutureUseSpec(listOf(emailSection))
                     )
                 ),
-                ComposeFragmentArguments(
+                FormFragmentArguments(
                     supportedPaymentMethodName = "Card",
                     saveForFutureUseInitialValue = true,
                     saveForFutureUseInitialVisibility = true,
@@ -212,7 +212,7 @@ internal class FormViewModelTest {
                         FormItemSpec.SaveForFutureUseSpec(listOf(emailSection))
                     )
                 ),
-                ComposeFragmentArguments(
+                FormFragmentArguments(
                     supportedPaymentMethodName = "Card",
                     saveForFutureUseInitialValue = true,
                     saveForFutureUseInitialVisibility = true,
@@ -262,7 +262,7 @@ internal class FormViewModelTest {
              */
             val formViewModel = FormViewModel(
                 sofort.layout,
-                ComposeFragmentArguments(
+                FormFragmentArguments(
                     supportedPaymentMethodName = "Card",
                     saveForFutureUseInitialValue = true,
                     saveForFutureUseInitialVisibility = true,
@@ -308,7 +308,7 @@ internal class FormViewModelTest {
              */
             val formViewModel = FormViewModel(
                 sepaDebit.layout,
-                ComposeFragmentArguments(
+                FormFragmentArguments(
                     supportedPaymentMethodName = "Card",
                     saveForFutureUseInitialValue = true,
                     saveForFutureUseInitialVisibility = true,
@@ -379,7 +379,7 @@ internal class FormViewModelTest {
              */
             val formViewModel = FormViewModel(
                 sepaDebit.layout,
-                ComposeFragmentArguments(
+                FormFragmentArguments(
                     supportedPaymentMethodName = "Card",
                     saveForFutureUseInitialValue = true,
                     saveForFutureUseInitialVisibility = true,

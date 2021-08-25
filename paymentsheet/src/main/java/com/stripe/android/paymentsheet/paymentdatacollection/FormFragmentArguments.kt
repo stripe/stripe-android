@@ -5,7 +5,7 @@ import com.stripe.android.paymentsheet.specifications.IdentifierSpec
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
-data class ComposeFragmentArguments(
+data class FormFragmentArguments(
     val supportedPaymentMethodName: String,
     val saveForFutureUseInitialVisibility: Boolean,
     val saveForFutureUseInitialValue: Boolean,
@@ -13,6 +13,7 @@ data class ComposeFragmentArguments(
     val billingDetails: BillingDetails? = null,
 ) : Parcelable
 
+// TODO: Use the PaymentSheet.Address and billing details when in a single module.
 @Parcelize
 data class Address(
     val city: String? = null,
@@ -31,7 +32,7 @@ data class BillingDetails(
     val phone: String? = null
 ) : Parcelable
 
-fun ComposeFragmentArguments.getValue(id: IdentifierSpec) =
+fun FormFragmentArguments.getValue(id: IdentifierSpec) =
     when (id) {
         IdentifierSpec.Name -> this.billingDetails?.name
         IdentifierSpec.Email -> this.billingDetails?.email

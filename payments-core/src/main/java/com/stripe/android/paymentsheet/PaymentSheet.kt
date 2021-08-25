@@ -106,9 +106,9 @@ class PaymentSheet internal constructor(
         /**
          * The billing information for the user.
          *
-         * If set, PaymentSheet will pre-populate the form fiels with the values provided.
+         * If set, PaymentSheet will pre-populate the form fields with the values provided.
          */
-        var billingDetails: BillingDetails? = null
+        var defaultBillingDetails: BillingDetails? = null
     ) : Parcelable
 
     @Parcelize

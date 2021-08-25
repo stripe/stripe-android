@@ -293,7 +293,7 @@ internal class CardDataCollectionFragment<ViewModelType : BaseSheetViewModel<*>>
     }
 
     private fun populateFieldsFromArguments() {
-        requireArguments().getParcelable<ComposeFragmentArguments>(
+        requireArguments().getParcelable<FormFragmentArguments>(
             ComposeFormDataCollectionFragment.EXTRA_CONFIG
         )?.billingDetails?.address?.also {
             billingAddressView.populate(
@@ -321,7 +321,7 @@ internal class CardDataCollectionFragment<ViewModelType : BaseSheetViewModel<*>>
             R.string.stripe_paymentsheet_save_this_card_with_merchant_name,
             sheetViewModel.merchantName
         )
-        val args = requireArguments().getParcelable<ComposeFragmentArguments>(
+        val args = requireArguments().getParcelable<FormFragmentArguments>(
             ComposeFormDataCollectionFragment.EXTRA_CONFIG
         )
 

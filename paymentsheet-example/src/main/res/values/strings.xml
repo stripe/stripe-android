@@ -30,4 +30,5 @@
     <string name="checkout_custom">Checkout (Custom)</string>
     <string name="checkout_complete">Checkout (Complete)</string>
     <string name="currency">Currency</string>
+    <string name="default_billing_address">Default Billing Address</string>
 </resources>

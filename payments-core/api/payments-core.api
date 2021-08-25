@@ -5068,14 +5068,14 @@ public final class com/stripe/android/paymentsheet/PaymentSheet$Configuration : 
 	public static synthetic fun copy$default (Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration;Ljava/lang/String;Lcom/stripe/android/paymentsheet/PaymentSheet$CustomerConfiguration;Lcom/stripe/android/paymentsheet/PaymentSheet$GooglePayConfiguration;Landroid/content/res/ColorStateList;Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetails;ILjava/lang/Object;)Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration;
 	public fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
-	public final fun getBillingDetails ()Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetails;
 	public final fun getCustomer ()Lcom/stripe/android/paymentsheet/PaymentSheet$CustomerConfiguration;
+	public final fun getDefaultBillingDetails ()Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetails;
 	public final fun getGooglePay ()Lcom/stripe/android/paymentsheet/PaymentSheet$GooglePayConfiguration;
 	public final fun getMerchantDisplayName ()Ljava/lang/String;
 	public final fun getPrimaryButtonColor ()Landroid/content/res/ColorStateList;
 	public fun hashCode ()I
-	public final fun setBillingDetails (Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetails;)V
 	public final fun setCustomer (Lcom/stripe/android/paymentsheet/PaymentSheet$CustomerConfiguration;)V
+	public final fun setDefaultBillingDetails (Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetails;)V
 	public final fun setGooglePay (Lcom/stripe/android/paymentsheet/PaymentSheet$GooglePayConfiguration;)V
 	public final fun setMerchantDisplayName (Ljava/lang/String;)V
 	public final fun setPrimaryButtonColor (Landroid/content/res/ColorStateList;)V

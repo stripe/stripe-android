@@ -26,7 +26,7 @@ import com.stripe.android.paymentsheet.paymentdatacollection.Address
 import com.stripe.android.paymentsheet.paymentdatacollection.BillingDetails
 import com.stripe.android.paymentsheet.paymentdatacollection.CardDataCollectionFragment
 import com.stripe.android.paymentsheet.paymentdatacollection.ComposeFormDataCollectionFragment
-import com.stripe.android.paymentsheet.paymentdatacollection.ComposeFragmentArguments
+import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.TransformToPaymentMethodCreateParams
 import com.stripe.android.paymentsheet.specifications.IdentifierSpec
 import com.stripe.android.paymentsheet.ui.AddPaymentMethodsFragmentFactory
@@ -160,7 +160,7 @@ internal abstract class BaseAddPaymentMethodFragment(
             getArguments(
                 supportedPaymentMethodName = paymentMethod.name,
                 merchantName = sheetViewModel.merchantName,
-                isCustomer = sheetViewModel.customerConfig != null,
+                hasCustomer = sheetViewModel.customerConfig != null,
                 saveForFutureUse = (
                     sheetViewModel.stripeIntent.value is SetupIntent ||
                         (
@@ -168,7 +168,7 @@ internal abstract class BaseAddPaymentMethodFragment(
                                 ?.setupFutureUsage == StripeIntent.Usage.OffSession
                             )
                     ),
-                billingAddress = sheetViewModel.config?.billingDetails
+                billingAddress = sheetViewModel.config?.defaultBillingDetails
             )
         )
 
@@ -221,15 +221,15 @@ internal abstract class BaseAddPaymentMethodFragment(
 
         @VisibleForTesting
         internal fun getArguments(
-            isCustomer: Boolean,
+            hasCustomer: Boolean,
             saveForFutureUse: Boolean,
             supportedPaymentMethodName: String,
             merchantName: String,
             billingAddress: PaymentSheet.BillingDetails? = null
-        ): ComposeFragmentArguments {
+        ): FormFragmentArguments {
             var saveForFutureUseValue = true
             var saveForFutureUseVisible = true
-            if (!isCustomer) {
+            if (!hasCustomer) {
                 saveForFutureUseValue = false
                 saveForFutureUseVisible = false
             }
@@ -241,7 +241,7 @@ internal abstract class BaseAddPaymentMethodFragment(
                 saveForFutureUseValue = true
             }
 
-            return ComposeFragmentArguments(
+            return FormFragmentArguments(
                 supportedPaymentMethodName = supportedPaymentMethodName,
                 merchantName = merchantName,
                 saveForFutureUseInitialVisibility = saveForFutureUseVisible,

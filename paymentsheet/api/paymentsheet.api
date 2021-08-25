@@ -46,7 +46,7 @@ public final class com/stripe/android/paymentsheet/forms/FormViewModel_Factory :
 	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/paymentsheet/forms/FormViewModel_Factory;
 	public fun get ()Lcom/stripe/android/paymentsheet/forms/FormViewModel;
 	public synthetic fun get ()Ljava/lang/Object;
-	public static fun newInstance (Lcom/stripe/android/paymentsheet/specifications/LayoutSpec;Lcom/stripe/android/paymentsheet/paymentdatacollection/ComposeFragmentArguments;Lcom/stripe/android/paymentsheet/specifications/ResourceRepository;)Lcom/stripe/android/paymentsheet/forms/FormViewModel;
+	public static fun newInstance (Lcom/stripe/android/paymentsheet/specifications/LayoutSpec;Lcom/stripe/android/paymentsheet/paymentdatacollection/FormFragmentArguments;Lcom/stripe/android/paymentsheet/specifications/ResourceRepository;)Lcom/stripe/android/paymentsheet/forms/FormViewModel;
 }
 
 public final class com/stripe/android/paymentsheet/injection/DaggerFormViewModelComponent : com/stripe/android/paymentsheet/injection/FormViewModelComponent {
@@ -141,7 +141,7 @@ public final class com/stripe/android/paymentsheet/paymentdatacollection/Compose
 public final class com/stripe/android/paymentsheet/paymentdatacollection/ComposeFormDataCollectionFragment$Companion {
 }
 
-public final class com/stripe/android/paymentsheet/paymentdatacollection/ComposeFragmentArguments : android/os/Parcelable {
+public final class com/stripe/android/paymentsheet/paymentdatacollection/FormFragmentArguments : android/os/Parcelable {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public fun <init> (Ljava/lang/String;ZZLjava/lang/String;Lcom/stripe/android/paymentsheet/paymentdatacollection/BillingDetails;)V
@@ -151,8 +151,8 @@ public final class com/stripe/android/paymentsheet/paymentdatacollection/Compose
 	public final fun component3 ()Z
 	public final fun component4 ()Ljava/lang/String;
 	public final fun component5 ()Lcom/stripe/android/paymentsheet/paymentdatacollection/BillingDetails;
-	public final fun copy (Ljava/lang/String;ZZLjava/lang/String;Lcom/stripe/android/paymentsheet/paymentdatacollection/BillingDetails;)Lcom/stripe/android/paymentsheet/paymentdatacollection/ComposeFragmentArguments;
-	public static synthetic fun copy$default (Lcom/stripe/android/paymentsheet/paymentdatacollection/ComposeFragmentArguments;Ljava/lang/String;ZZLjava/lang/String;Lcom/stripe/android/paymentsheet/paymentdatacollection/BillingDetails;ILjava/lang/Object;)Lcom/stripe/android/paymentsheet/paymentdatacollection/ComposeFragmentArguments;
+	public final fun copy (Ljava/lang/String;ZZLjava/lang/String;Lcom/stripe/android/paymentsheet/paymentdatacollection/BillingDetails;)Lcom/stripe/android/paymentsheet/paymentdatacollection/FormFragmentArguments;
+	public static synthetic fun copy$default (Lcom/stripe/android/paymentsheet/paymentdatacollection/FormFragmentArguments;Ljava/lang/String;ZZLjava/lang/String;Lcom/stripe/android/paymentsheet/paymentdatacollection/BillingDetails;ILjava/lang/Object;)Lcom/stripe/android/paymentsheet/paymentdatacollection/FormFragmentArguments;
 	public fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getBillingDetails ()Lcom/stripe/android/paymentsheet/paymentdatacollection/BillingDetails;
@@ -165,8 +165,8 @@ public final class com/stripe/android/paymentsheet/paymentdatacollection/Compose
 	public fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
-public final class com/stripe/android/paymentsheet/paymentdatacollection/ComposeFragmentArgumentsKt {
-	public static final fun getValue (Lcom/stripe/android/paymentsheet/paymentdatacollection/ComposeFragmentArguments;Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec;)Ljava/lang/String;
+public final class com/stripe/android/paymentsheet/paymentdatacollection/FormFragmentArgumentsKt {
+	public static final fun getValue (Lcom/stripe/android/paymentsheet/paymentdatacollection/FormFragmentArguments;Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec;)Ljava/lang/String;
 }
 
 public final class com/stripe/android/paymentsheet/specifications/BankRepository_Factory : dagger/internal/Factory {

@@ -6,7 +6,7 @@ import com.stripe.android.paymentsheet.model.SetupIntentClientSecret
 import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
 import com.stripe.android.paymentsheet.paymentdatacollection.Address
 import com.stripe.android.paymentsheet.paymentdatacollection.BillingDetails
-import com.stripe.android.paymentsheet.paymentdatacollection.ComposeFragmentArguments
+import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
 
 internal object PaymentSheetFixtures {
     internal val STATUS_BAR_COLOR = "#121212".toColorInt()
@@ -63,7 +63,7 @@ internal object PaymentSheetFixtures {
         STATUS_BAR_COLOR,
     )
 
-    internal val COMPOSE_FRAGMENT_ARGS = ComposeFragmentArguments(
+    internal val COMPOSE_FRAGMENT_ARGS = FormFragmentArguments(
         SupportedPaymentMethod.Bancontact.name,
         saveForFutureUseInitialVisibility = true,
         saveForFutureUseInitialValue = true,

@@ -16,7 +16,7 @@ import com.stripe.android.paymentsheet.SectionFieldElement.SimpleDropdown
 import com.stripe.android.paymentsheet.elements.CountryConfig
 import com.stripe.android.paymentsheet.elements.EmailConfig
 import com.stripe.android.paymentsheet.elements.NameConfig
-import com.stripe.android.paymentsheet.paymentdatacollection.ComposeFragmentArguments
+import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
 import com.stripe.android.paymentsheet.specifications.BankRepository
 import com.stripe.android.paymentsheet.specifications.FormItemSpec
 import com.stripe.android.paymentsheet.specifications.IdentifierSpec
@@ -57,7 +57,7 @@ class TransformSpecToElementTest {
                     bankRepository,
                     AddressFieldElementRepository(mock())
                 ),
-                ComposeFragmentArguments(
+                FormFragmentArguments(
                     supportedPaymentMethodName = "Card",
                     saveForFutureUseInitialValue = true,
                     saveForFutureUseInitialVisibility = true,

@@ -72,7 +72,7 @@ class CardDataCollectionFragmentTest {
             viewBinding.cardMultilineWidget.setCardNumber("4242424242424242")
             viewBinding.cardMultilineWidget.setExpiryDate(1, 2030)
             viewBinding.cardMultilineWidget.setCvcCode("123")
-            viewBinding.billingAddress.countryView.setText("United States")
+            viewBinding.billingAddress.countryLayout.selectedCountryCode = CountryCode.US
             viewBinding.billingAddress.postalCodeView.setText("94107")
 
             val paymentSelections = mutableListOf<PaymentSelection>()
@@ -87,7 +87,7 @@ class CardDataCollectionFragmentTest {
                 .isEqualTo(
                     PaymentMethod.BillingDetails(
                         com.stripe.android.model.Address(
-                            country = "DE",
+                            country = "US",
                             postalCode = "94107"
                         )
                     )
@@ -153,7 +153,7 @@ class CardDataCollectionFragmentTest {
     @Test
     fun `launching with arguments populates the fields`() {
         createFragment(
-            fragmentArgs = ComposeFragmentArguments(
+            fragmentArgs = FormFragmentArguments(
                 SupportedPaymentMethod.Bancontact.name,
                 saveForFutureUseInitialVisibility = false,
                 saveForFutureUseInitialValue = false,
@@ -442,7 +442,7 @@ class CardDataCollectionFragmentTest {
         fragmentConfig: FragmentConfig? = FragmentConfigFixtures.DEFAULT,
         stripeIntent: StripeIntent? = PaymentIntentFixtures.PI_WITH_SHIPPING,
         newCard: PaymentSelection.New.Card? = null,
-        fragmentArgs: ComposeFragmentArguments? = PaymentSheetFixtures.COMPOSE_FRAGMENT_ARGS,
+        fragmentArgs: FormFragmentArguments? = PaymentSheetFixtures.COMPOSE_FRAGMENT_ARGS,
         onReady: (CardDataCollectionFragment<PaymentSheetViewModel>, FragmentPaymentsheetAddCardBinding) -> Unit
     ) {
         val factory = AddPaymentMethodsFragmentFactory(
