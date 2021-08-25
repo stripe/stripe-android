@@ -7,12 +7,10 @@
     <string name="cvc_multiline_helper_amex" translatable="false">1234</string>
     <string name="stripe_expiration_date_allowlist" translatable="false">0123456789/</string>
     <string name="stripe_postalcode_placeholder" translatable="false">12345</string>
-    <string name="paymentsheet_payment_method_item_card_number" translatable="false">····%1$s</string>
 
     <!--
     Google Pay brand guidelines specify that the text should not be translated
     https://developers.google.com/pay/api/android/guides/brand-guidelines#using-pay-in-text
     -->
     <string name="google_pay" translatable="false">Google Pay</string>
-    <string name="stripe_buy_with_googlepay_button_content_description">Buy with Google Pay</string>
 </resources>

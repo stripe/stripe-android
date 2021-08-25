@@ -11,6 +11,7 @@ import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputConnection
 import android.view.inputmethod.InputConnectionWrapper
 import androidx.annotation.ColorInt
+import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import androidx.core.content.ContextCompat
 import androidx.core.widget.doAfterTextChanged
@@ -108,7 +109,8 @@ open class StripeEditText @JvmOverloads constructor(
         onFocusChangeListener = null
     }
 
-    internal val internalFocusChangeListeners = mutableListOf<OnFocusChangeListener>()
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
+    val internalFocusChangeListeners = mutableListOf<OnFocusChangeListener>()
     private var externalFocusChangeListener: OnFocusChangeListener? = null
 
     protected open val accessibilityText: String? = null
@@ -262,8 +264,9 @@ open class StripeEditText @JvmOverloads constructor(
 
     override fun getOnFocusChangeListener() = externalFocusChangeListener
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
     @VisibleForTesting
-    internal fun getParentOnFocusChangeListener() = super.getOnFocusChangeListener()
+    fun getParentOnFocusChangeListener() = super.getOnFocusChangeListener()
 
     /**
      * Note: [addTextChangedListener] will potentially be called by a superclass constructor

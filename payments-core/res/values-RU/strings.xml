@@ -7,12 +7,10 @@
   <string name="acc_label_expiry_date">Окончание срока действия</string>
   <string name="acc_label_expiry_date_node">%s, дата истечения срока действия</string>
   <!-- Caption for Zip Code field on address form (only shown when country is United States only) -->
-  <string name="acc_label_zip">Почтовый индекс</string>
-  <!-- Short string for zip code (United States only) Please keep to 5 characters or less if possible. -->
+    <!-- Short string for zip code (United States only) Please keep to 5 characters or less if possible. -->
   <string name="acc_label_zip_short">Почтовый индекс</string>
   <!-- Text informing user they should add a debit or credit card. Shown when there are no existing payment methods in the application -->
-  <string name="add_card">Добавьте новую дебетную или кредитную карту, чтобы совершать покупки в этом приложении.</string>
-  <!-- Message displayed when a payment method is removed, stating its name. -->
+    <!-- Message displayed when a payment method is removed, stating its name. -->
   <string name="added">Добавлено: %s</string>
   <!-- Error text indicating that city is required, used for all locations -->
   <string name="address_city_required">Введите город</string>
@@ -75,8 +73,7 @@
   <!-- Error text indicating that address is required, used for all locations -->
   <string name="address_required">Введите адрес</string>
   <!-- Title for shipping address entry section -->
-  <string name="address_shipping_address">Адрес доставки</string>
-  <!-- Error text indicating that state is required, used for US addresses -->
+    <!-- Error text indicating that state is required, used for US addresses -->
   <string name="address_state_required">Введите штат</string>
   <!-- Error text indicating zip code is invalid, used for US addresses -->
   <string name="address_zip_invalid">Введенный почтовый индекс неверен.</string>
@@ -132,8 +129,7 @@
   <!-- Error message for when postal code in form is incomplete -->
   <string name="invalid_zip">Введенный почтовый индекс неполон.</string>
   <!-- Text informing user there are no existing payment methods in the application -->
-  <string name="no_payment_methods">Нет методов оплаты.</string>
-  <string name="payment_method_add_new_card">Добавить новую карту...</string>
+    <string name="payment_method_add_new_card">Добавить новую карту...</string>
   <string name="payment_method_add_new_fpx">Выберите банковский счет (FPX)…</string>
   <!-- Label for free shipping method -->
   <string name="price_free">Бесплатно</string>
@@ -141,44 +137,27 @@
   <string name="removed">Удалено: %s</string>
   <string name="secure_checkout">Безопасное оформление и оплата заказа</string>
   <!-- Generic error message shown when payment cannot be processed. -->
-  <string name="stripe_failure_connection_error">Возникли проблемы с подключением к системе обработки платежей. Проверьте подключение к Интернету и попробуйте еще раз.</string>
-  <!-- Error when 3DS2 authentication failed (e.g. customer entered the wrong code) -->
+    <!-- Error when 3DS2 authentication failed (e.g. customer entered the wrong code) -->
   <string name="stripe_failure_reason_authentication">Не удалось верифицировать метод оплаты. Выберите другой метод оплаты и повторите попытку.</string>
   <!-- Error when 3DS2 authentication timed out. -->
   <string name="stripe_failure_reason_timed_out">Лимит времени для аутентификации метода оплаты истек. Попробуйте еще раз</string>
   <!-- When an internal error is reported when a google pay payment is started. -->
-  <string name="stripe_google_pay_error_internal">Произошла внутренняя ошибка.</string>
-  <string name="stripe_paymentsheet_add_button_label">Добавить</string>
-  <!-- Text for a button that, when tapped, displays another screen where the customer can add payment method details -->
-  <string name="stripe_paymentsheet_add_payment_method_button_label">+ Добавить</string>
-  <!-- Card details entry form header title -->
-  <string name="stripe_paymentsheet_add_payment_method_card_information">Данные платежной карты</string>
-  <!-- Country selector and postal code entry form header title -->
-  <string name="stripe_paymentsheet_add_payment_method_country_or_region">Страна или регион</string>
-  <!-- Title shown above a form where the customer can enter payment information like credit card details, email, billing address, etc. -->
-  <string name="stripe_paymentsheet_add_payment_method_title">Укажите платежные данные</string>
-  <!-- Text for back button -->
-  <string name="stripe_paymentsheet_back">Назад</string>
-  <string name="stripe_paymentsheet_close">Закрыть</string>
-  <!-- label for text field to enter card expiry -->
+    <!-- Text for a button that, when tapped, displays another screen where the customer can add payment method details -->
+    <!-- Card details entry form header title -->
+    <!-- Country selector and postal code entry form header title -->
+    <!-- Title shown above a form where the customer can enter payment information like credit card details, email, billing address, etc. -->
+    <!-- Text for back button -->
+    <!-- label for text field to enter card expiry -->
   <string name="stripe_paymentsheet_expiration_date_hint">ММ / ГГ</string>
   <!-- Title of a section containing multiple payment methods that can selected and will collect the payment information from the user. -->
-  <string name="stripe_paymentsheet_or_pay_using">Или оплатить с помощью</string>
-  <!-- Title of a section containing a card form that will collect the payment information from the user. -->
-  <string name="stripe_paymentsheet_or_pay_with_card">Или оплатить картой</string>
-  <!-- Label of a button that initiates payment when tapped -->
-  <string name="stripe_paymentsheet_pay_button_amount">Оплатить %s</string>
-  <!-- Label for a button that starts processing the payment. -->
-  <string name="stripe_paymentsheet_pay_button_label">Оплатить</string>
-  <!-- Label of a button that, when tapped, initiates payment, becomes disabled, and displays this text -->
-  <string name="stripe_paymentsheet_primary_button_processing">Идет обработка...</string>
-  <!-- The label of a switch indicating whether to save the user&apos;s card for future payments to this merchant -->
-  <string name="stripe_paymentsheet_save_this_card_with_merchant_name">Сохранить данные этой карты для будущих платежей %s</string>
-  <!-- Title shown above a carousel containing the customer&apos;s payment methods -->
-  <string name="stripe_paymentsheet_select_payment_method">Выберите способ оплаты</string>
-  <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->
-  <string name="stripe_paymentsheet_setup_button_label">Настроить</string>
-  <!-- When there are multiple browsers and web authentication is required, this will show in a window asking which browser they want to use to "Verify your payment" -->
+    <!-- Title of a section containing a card form that will collect the payment information from the user. -->
+    <!-- Label of a button that initiates payment when tapped -->
+    <!-- Label for a button that starts processing the payment. -->
+    <!-- Label of a button that, when tapped, initiates payment, becomes disabled, and displays this text -->
+    <!-- The label of a switch indicating whether to save the user&apos;s card for future payments to this merchant -->
+    <!-- Title shown above a carousel containing the customer&apos;s payment methods -->
+    <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->
+    <!-- When there are multiple browsers and web authentication is required, this will show in a window asking which browser they want to use to "Verify your payment" -->
   <string name="stripe_verify_your_payment">Подтвердите платеж</string>
   <string name="title_add_a_card">Добавить карту</string>
   <!-- Screen title telling users they should add an address -->

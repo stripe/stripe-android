@@ -1,11 +1,15 @@
 package com.stripe.android.model.parsers
 
+import androidx.annotation.RestrictTo
+import androidx.annotation.VisibleForTesting
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeJsonUtils
 import org.json.JSONObject
 
-internal class PaymentMethodJsonParser : ModelJsonParser<PaymentMethod> {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+@VisibleForTesting(otherwise = VisibleForTesting.PACKAGE_PRIVATE)
+class PaymentMethodJsonParser : ModelJsonParser<PaymentMethod> {
     override fun parse(json: JSONObject): PaymentMethod {
         val type =
             PaymentMethod.Type.fromCode(StripeJsonUtils.optString(json, FIELD_TYPE))

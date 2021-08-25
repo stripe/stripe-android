@@ -7,12 +7,10 @@
   <string name="acc_label_expiry_date">有効期限</string>
   <string name="acc_label_expiry_date_node">%s、有効期限</string>
   <!-- Caption for Zip Code field on address form (only shown when country is United States only) -->
-  <string name="acc_label_zip">郵便番号</string>
-  <!-- Short string for zip code (United States only) Please keep to 5 characters or less if possible. -->
+    <!-- Short string for zip code (United States only) Please keep to 5 characters or less if possible. -->
   <string name="acc_label_zip_short">郵便番号</string>
   <!-- Text informing user they should add a debit or credit card. Shown when there are no existing payment methods in the application -->
-  <string name="add_card">このアプリで購入するには、別のデビットカードまたはクレジットカードの登録が必要です。</string>
-  <!-- Message displayed when a payment method is removed, stating its name. -->
+    <!-- Message displayed when a payment method is removed, stating its name. -->
   <string name="added">%s が追加されました</string>
   <!-- Error text indicating that city is required, used for all locations -->
   <string name="address_city_required">市区町村を入力してください</string>
@@ -75,8 +73,7 @@
   <!-- Error text indicating that address is required, used for all locations -->
   <string name="address_required">住所を入力してください</string>
   <!-- Title for shipping address entry section -->
-  <string name="address_shipping_address">配送先住所</string>
-  <!-- Error text indicating that state is required, used for US addresses -->
+    <!-- Error text indicating that state is required, used for US addresses -->
   <string name="address_state_required">都道府県を入力してください</string>
   <!-- Error text indicating zip code is invalid, used for US addresses -->
   <string name="address_zip_invalid">郵便番号が無効です。</string>
@@ -132,8 +129,7 @@
   <!-- Error message for when postal code in form is incomplete -->
   <string name="invalid_zip">郵便番号の入力に不備があります。</string>
   <!-- Text informing user there are no existing payment methods in the application -->
-  <string name="no_payment_methods">支払い方法が指定されていません。</string>
-  <string name="payment_method_add_new_card">新しいカードを追加...</string>
+    <string name="payment_method_add_new_card">新しいカードを追加...</string>
   <string name="payment_method_add_new_fpx">銀行口座を選択 (FPX)...</string>
   <!-- Label for free shipping method -->
   <string name="price_free">無料</string>
@@ -141,44 +137,27 @@
   <string name="removed">%s が削除されました</string>
   <string name="secure_checkout">安全なチェックアウト</string>
   <!-- Generic error message shown when payment cannot be processed. -->
-  <string name="stripe_failure_connection_error">決済代行会社への接続中に問題が発生しました。インターネット接続をご確認の上、もう一度お試しください。</string>
-  <!-- Error when 3DS2 authentication failed (e.g. customer entered the wrong code) -->
+    <!-- Error when 3DS2 authentication failed (e.g. customer entered the wrong code) -->
   <string name="stripe_failure_reason_authentication">お客様の支払い方法を認証できませんでした。別の支払い方法を選択してもう一度お試しください。</string>
   <!-- Error when 3DS2 authentication timed out. -->
   <string name="stripe_failure_reason_timed_out">支払い方法の認証がタイムアウトしました。もう一度お試しください</string>
   <!-- When an internal error is reported when a google pay payment is started. -->
-  <string name="stripe_google_pay_error_internal">内部エラーが発生しました。</string>
-  <string name="stripe_paymentsheet_add_button_label">追加する</string>
-  <!-- Text for a button that, when tapped, displays another screen where the customer can add payment method details -->
-  <string name="stripe_paymentsheet_add_payment_method_button_label">+ 追加</string>
-  <!-- Card details entry form header title -->
-  <string name="stripe_paymentsheet_add_payment_method_card_information">カード情報</string>
-  <!-- Country selector and postal code entry form header title -->
-  <string name="stripe_paymentsheet_add_payment_method_country_or_region">国または地域</string>
-  <!-- Title shown above a form where the customer can enter payment information like credit card details, email, billing address, etc. -->
-  <string name="stripe_paymentsheet_add_payment_method_title">支払い情報を追加</string>
-  <!-- Text for back button -->
-  <string name="stripe_paymentsheet_back">戻る</string>
-  <string name="stripe_paymentsheet_close">閉じる</string>
-  <!-- label for text field to enter card expiry -->
+    <!-- Text for a button that, when tapped, displays another screen where the customer can add payment method details -->
+    <!-- Card details entry form header title -->
+    <!-- Country selector and postal code entry form header title -->
+    <!-- Title shown above a form where the customer can enter payment information like credit card details, email, billing address, etc. -->
+    <!-- Text for back button -->
+    <!-- label for text field to enter card expiry -->
   <string name="stripe_paymentsheet_expiration_date_hint">月 / 年</string>
   <!-- Title of a section containing multiple payment methods that can selected and will collect the payment information from the user. -->
-  <string name="stripe_paymentsheet_or_pay_using">または別の方法で支払う</string>
-  <!-- Title of a section containing a card form that will collect the payment information from the user. -->
-  <string name="stripe_paymentsheet_or_pay_with_card">または、カードで支払う</string>
-  <!-- Label of a button that initiates payment when tapped -->
-  <string name="stripe_paymentsheet_pay_button_amount">%s を支払う</string>
-  <!-- Label for a button that starts processing the payment. -->
-  <string name="stripe_paymentsheet_pay_button_label">支払う: </string>
-  <!-- Label of a button that, when tapped, initiates payment, becomes disabled, and displays this text -->
-  <string name="stripe_paymentsheet_primary_button_processing">処理中...</string>
-  <!-- The label of a switch indicating whether to save the user&apos;s card for future payments to this merchant -->
-  <string name="stripe_paymentsheet_save_this_card_with_merchant_name">今後の %s の支払いのためにこのカードを保存する</string>
-  <!-- Title shown above a carousel containing the customer&apos;s payment methods -->
-  <string name="stripe_paymentsheet_select_payment_method">支払い方法を選択してください</string>
-  <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->
-  <string name="stripe_paymentsheet_setup_button_label">設定</string>
-  <!-- When there are multiple browsers and web authentication is required, this will show in a window asking which browser they want to use to "Verify your payment" -->
+    <!-- Title of a section containing a card form that will collect the payment information from the user. -->
+    <!-- Label of a button that initiates payment when tapped -->
+    <!-- Label for a button that starts processing the payment. -->
+    <!-- Label of a button that, when tapped, initiates payment, becomes disabled, and displays this text -->
+    <!-- The label of a switch indicating whether to save the user&apos;s card for future payments to this merchant -->
+    <!-- Title shown above a carousel containing the customer&apos;s payment methods -->
+    <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->
+    <!-- When there are multiple browsers and web authentication is required, this will show in a window asking which browser they want to use to "Verify your payment" -->
   <string name="stripe_verify_your_payment">支払いの確認</string>
   <string name="title_add_a_card">カードを追加</string>
   <!-- Screen title telling users they should add an address -->
