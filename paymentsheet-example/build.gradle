@@ -10,7 +10,8 @@ def getBackendUrl() {
 }
 
 dependencies {
-    implementation project(':payments')
+    implementation project(':payments-core')
+    implementation project(':paymentsheet')
 
     implementation libraries.androidx.lifecycle.livedata.ktx
     implementation libraries.androidx.lifecycle.viewmodel.ktx
