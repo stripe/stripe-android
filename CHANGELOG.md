@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 17.1.2 - 2020-08-24
+## 17.1.2 - 2020-08-25
 This release includes several bug fixes, adds the capability to remove cards saved in `PaymentSheet` and to set default billing address fields in the `PaymentSheet.Configuration`.  It is now also possible to use Setup Intents with Google Pay on the multi-step Payment Sheet UI.
 * [4107](https://github.com/stripe/stripe-android/pull/4107) Dokka updates for 17.1.1
 * [4108](https://github.com/stripe/stripe-android/pull/4108) Support deleting saved payment methods
