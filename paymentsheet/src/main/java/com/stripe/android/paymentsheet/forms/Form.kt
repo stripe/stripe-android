@@ -256,11 +256,7 @@ internal fun AfterpayClearpayElementUI(
             element.getLabel(context.resources),
             Modifier
                 .padding(end = 4.dp),
-            color = if (isSystemInDarkTheme()) {
-                Color.LightGray
-            } else {
-                Color.Black
-            }
+            color = element.getTextColor()
         )
         Image(
             painter = painterResource(R.drawable.stripe_ic_afterpay_clearpay_logo),
@@ -287,11 +283,7 @@ internal fun AfterpayClearpayElementUI(
                 text = "ⓘ",
                 modifier = Modifier.padding(0.dp),
                 style = TextStyle(fontWeight = FontWeight.Bold),
-                color = if (isSystemInDarkTheme()) {
-                    Color.LightGray
-                } else {
-                    Color.Black
-                }
+                color = element.getTextColor()
             )
         }
     }

@@ -8,7 +8,6 @@ import com.stripe.android.paymentsheet.specifications.IdentifierSpec
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
-import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
@@ -22,8 +21,7 @@ class AddressElementTest {
         CountryConfig(setOf("US", "JP"))
     )
 
-    @Before
-    fun setup() {
+    init {
         // We want to use fields that are easy to set in error
         addressFieldElementRepository.add(
             "US",

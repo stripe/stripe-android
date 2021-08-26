@@ -2,6 +2,8 @@ package com.stripe.android.paymentsheet
 
 import android.content.res.Resources
 import androidx.annotation.VisibleForTesting
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.intl.Locale
 import com.stripe.android.paymentsheet.address.AddressFieldElementRepository
@@ -67,6 +69,13 @@ internal sealed class FormElement {
                     amount.currencyCode
                 )
             )
+
+        @Composable
+        fun getTextColor() = if (isSystemInDarkTheme()) {
+            Color.LightGray
+        } else {
+            Color.Black
+        }
 
         companion object {
             const val url = "https://static-us.afterpay.com/javascript/modal/%s_rebrand_modal.html"

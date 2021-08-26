@@ -201,6 +201,10 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
         stripeIntent.value?.let { stripeIntent ->
             return stripeIntent.paymentMethodTypes.mapNotNull {
                 SupportedPaymentMethod.fromCode(it)
+            }.filterNot {
+                // AfterpayClearpay requires a shipping address, filter it out if not provided
+                it == SupportedPaymentMethod.AfterpayClearpay
+                    && (stripeIntent as? PaymentIntent)?.shipping == null
             }.filter { it == SupportedPaymentMethod.Card }
         }
 
