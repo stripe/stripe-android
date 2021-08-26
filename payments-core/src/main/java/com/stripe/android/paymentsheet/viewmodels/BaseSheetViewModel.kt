@@ -185,11 +185,10 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
         }
 
         if (stripeIntent is PaymentIntent) {
-            val amount = stripeIntent.amount
-            val currencyCode = stripeIntent.currency
-            if (amount != null && currencyCode != null) {
-                _amount.value = Amount(amount, currencyCode)
-            } else {
+            runCatching {
+                _amount.value =
+                    Amount(requireNotNull(stripeIntent.amount), requireNotNull(stripeIntent.currency))
+            }.onFailure {
                 onFatal(
                     IllegalStateException("PaymentIntent must contain amount and currency.")
                 )
