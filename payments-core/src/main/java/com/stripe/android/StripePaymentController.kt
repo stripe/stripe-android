@@ -5,6 +5,7 @@ import android.content.Intent
 import androidx.activity.result.ActivityResultCallback
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
+import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.exception.APIConnectionException
 import com.stripe.android.exception.APIException
@@ -46,7 +47,10 @@ import kotlin.coroutines.CoroutineContext
  * any required customer action). The payment authentication mechanism (e.g. 3DS) will be determined
  * by the [PaymentIntent] or [SetupIntent] object.
  */
-internal class StripePaymentController internal constructor(
+internal class StripePaymentController
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
+@VisibleForTesting
+constructor(
     context: Context,
     private val publishableKeyProvider: Provider<String>,
     private val stripeRepository: StripeRepository,

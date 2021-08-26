@@ -7,12 +7,10 @@
   <string name="acc_label_expiry_date">Utløpsdato</string>
   <string name="acc_label_expiry_date_node">%s, utløpsdato</string>
   <!-- Caption for Zip Code field on address form (only shown when country is United States only) -->
-  <string name="acc_label_zip">Postnummer</string>
-  <!-- Short string for zip code (United States only) Please keep to 5 characters or less if possible. -->
+    <!-- Short string for zip code (United States only) Please keep to 5 characters or less if possible. -->
   <string name="acc_label_zip_short">POSTNR.</string>
   <!-- Text informing user they should add a debit or credit card. Shown when there are no existing payment methods in the application -->
-  <string name="add_card">Legg til nytt debet- eller kredittkort for gjennomføre kjøp i denne appen.</string>
-  <!-- Message displayed when a payment method is removed, stating its name. -->
+    <!-- Message displayed when a payment method is removed, stating its name. -->
   <string name="added">Lagt til %s</string>
   <!-- Error text indicating that city is required, used for all locations -->
   <string name="address_city_required">Skriv inn staden din</string>
@@ -75,8 +73,7 @@
   <!-- Error text indicating that address is required, used for all locations -->
   <string name="address_required">Skriv inn adressen din</string>
   <!-- Title for shipping address entry section -->
-  <string name="address_shipping_address">Sendingsadresse</string>
-  <!-- Error text indicating that state is required, used for US addresses -->
+    <!-- Error text indicating that state is required, used for US addresses -->
   <string name="address_state_required">Skriv inn staten</string>
   <!-- Error text indicating zip code is invalid, used for US addresses -->
   <string name="address_zip_invalid">Postnummeret ditt er ugyldig.</string>
@@ -132,8 +129,7 @@
   <!-- Error message for when postal code in form is incomplete -->
   <string name="invalid_zip">Postnummeret er ufullstendig.</string>
   <!-- Text informing user there are no existing payment methods in the application -->
-  <string name="no_payment_methods">Ingen betalingsmetodar.</string>
-  <string name="payment_method_add_new_card">Legg til nytt kort...</string>
+    <string name="payment_method_add_new_card">Legg til nytt kort...</string>
   <string name="payment_method_add_new_fpx">Vel bankkonto (FPX)...</string>
   <!-- Label for free shipping method -->
   <string name="price_free">Gratis</string>
@@ -141,44 +137,27 @@
   <string name="removed">Fjerna %s</string>
   <string name="secure_checkout">Sikker utsjekking</string>
   <!-- Generic error message shown when payment cannot be processed. -->
-  <string name="stripe_failure_connection_error">Vi har problem med å kople til betalingsleverandøren vår. Sjekk tilkoplinga til internett og prøv på nytt.</string>
-  <!-- Error when 3DS2 authentication failed (e.g. customer entered the wrong code) -->
+    <!-- Error when 3DS2 authentication failed (e.g. customer entered the wrong code) -->
   <string name="stripe_failure_reason_authentication">Vi kan ikkje godkjenne betalingsmåten. Ver vennleg å velje ein annan betalingsmetode og prøv på nytt.</string>
   <!-- Error when 3DS2 authentication timed out. -->
   <string name="stripe_failure_reason_timed_out">Tidsavbrot ved godkjenning av betalingsmåten - prøv på nytt</string>
   <!-- When an internal error is reported when a google pay payment is started. -->
-  <string name="stripe_google_pay_error_internal">Ein intern feil oppstod.</string>
-  <string name="stripe_paymentsheet_add_button_label">Legg til</string>
-  <!-- Text for a button that, when tapped, displays another screen where the customer can add payment method details -->
-  <string name="stripe_paymentsheet_add_payment_method_button_label">+ Legg til</string>
-  <!-- Card details entry form header title -->
-  <string name="stripe_paymentsheet_add_payment_method_card_information">Kortinformasjon</string>
-  <!-- Country selector and postal code entry form header title -->
-  <string name="stripe_paymentsheet_add_payment_method_country_or_region">Land eller region</string>
-  <!-- Title shown above a form where the customer can enter payment information like credit card details, email, billing address, etc. -->
-  <string name="stripe_paymentsheet_add_payment_method_title">Legg til betalingsinformasjonen din</string>
-  <!-- Text for back button -->
-  <string name="stripe_paymentsheet_back">Tilbake</string>
-  <string name="stripe_paymentsheet_close">Lukk</string>
-  <!-- label for text field to enter card expiry -->
+    <!-- Text for a button that, when tapped, displays another screen where the customer can add payment method details -->
+    <!-- Card details entry form header title -->
+    <!-- Country selector and postal code entry form header title -->
+    <!-- Title shown above a form where the customer can enter payment information like credit card details, email, billing address, etc. -->
+    <!-- Text for back button -->
+    <!-- label for text field to enter card expiry -->
   <string name="stripe_paymentsheet_expiration_date_hint">MM / ÅÅ</string>
   <!-- Title of a section containing multiple payment methods that can selected and will collect the payment information from the user. -->
-  <string name="stripe_paymentsheet_or_pay_using">Eller betal ved å bruke</string>
-  <!-- Title of a section containing a card form that will collect the payment information from the user. -->
-  <string name="stripe_paymentsheet_or_pay_with_card">Eller betal med eit kort</string>
-  <!-- Label of a button that initiates payment when tapped -->
-  <string name="stripe_paymentsheet_pay_button_amount">Betal %s</string>
-  <!-- Label for a button that starts processing the payment. -->
-  <string name="stripe_paymentsheet_pay_button_label">Betal</string>
-  <!-- Label of a button that, when tapped, initiates payment, becomes disabled, and displays this text -->
-  <string name="stripe_paymentsheet_primary_button_processing">Behandlar …</string>
-  <!-- The label of a switch indicating whether to save the user&apos;s card for future payments to this merchant -->
-  <string name="stripe_paymentsheet_save_this_card_with_merchant_name">Lagre dette kortet for framtidige %s betalingar</string>
-  <!-- Title shown above a carousel containing the customer&apos;s payment methods -->
-  <string name="stripe_paymentsheet_select_payment_method">Vel betalingsmåte</string>
-  <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->
-  <string name="stripe_paymentsheet_setup_button_label">Opprett</string>
-  <!-- When there are multiple browsers and web authentication is required, this will show in a window asking which browser they want to use to "Verify your payment" -->
+    <!-- Title of a section containing a card form that will collect the payment information from the user. -->
+    <!-- Label of a button that initiates payment when tapped -->
+    <!-- Label for a button that starts processing the payment. -->
+    <!-- Label of a button that, when tapped, initiates payment, becomes disabled, and displays this text -->
+    <!-- The label of a switch indicating whether to save the user&apos;s card for future payments to this merchant -->
+    <!-- Title shown above a carousel containing the customer&apos;s payment methods -->
+    <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->
+    <!-- When there are multiple browsers and web authentication is required, this will show in a window asking which browser they want to use to "Verify your payment" -->
   <string name="stripe_verify_your_payment">Verifiser betalinga di</string>
   <string name="title_add_a_card">Legg til kort</string>
   <!-- Screen title telling users they should add an address -->

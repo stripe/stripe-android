@@ -1,6 +1,7 @@
 package com.stripe.android.model
 
 import android.os.Parcelable
+import androidx.annotation.RestrictTo
 import com.stripe.android.ObjectBuilder
 import com.stripe.android.model.parsers.PaymentMethodJsonParser
 import com.stripe.android.model.wallets.Wallet
@@ -19,7 +20,9 @@ import org.json.JSONObject
  * See [PaymentMethodCreateParams] for PaymentMethod creation
  */
 @Parcelize
-data class PaymentMethod internal constructor(
+data class PaymentMethod
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+constructor(
     /**
      * Unique identifier for the object.
      *
@@ -124,7 +127,8 @@ data class PaymentMethod internal constructor(
     @JvmField val netbanking: Netbanking? = null
 ) : StripeModel {
 
-    internal fun hasExpectedDetails(): Boolean =
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
+    fun hasExpectedDetails(): Boolean =
         when (type) {
             Type.Card -> card != null
             Type.CardPresent -> cardPresent != null
@@ -161,7 +165,12 @@ data class PaymentMethod internal constructor(
         Alipay("alipay", isReusable = false, isVoucher = false, requiresMandate = false),
         GrabPay("grabpay", isReusable = false, isVoucher = false, requiresMandate = false),
         PayPal("paypal", isReusable = false, isVoucher = false, requiresMandate = false),
-        AfterpayClearpay("afterpay_clearpay", isReusable = false, isVoucher = false, requiresMandate = false),
+        AfterpayClearpay(
+            "afterpay_clearpay",
+            isReusable = false,
+            isVoucher = false,
+            requiresMandate = false
+        ),
         Netbanking("netbanking", isReusable = false, isVoucher = false, requiresMandate = false),
         Blik("blik", isReusable = false, isVoucher = false, requiresMandate = false),
         WeChatPay("wechat_pay", isReusable = false, isVoucher = false, requiresMandate = false);
@@ -171,8 +180,9 @@ data class PaymentMethod internal constructor(
         }
 
         companion object {
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
             @JvmSynthetic
-            internal fun fromCode(code: String?): Type? {
+            fun fromCode(code: String?): Type? {
                 return values().firstOrNull { it.code == code }
             }
         }
@@ -407,7 +417,9 @@ data class PaymentMethod internal constructor(
      * [card](https://stripe.com/docs/api/payment_methods/object#payment_method_object-card)
      */
     @Parcelize
-    data class Card internal constructor(
+    data class Card
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    constructor(
         /**
          * Card brand. Can be `amex`, `diners`, `discover`, `jcb`, `mastercard`, `unionpay`,
          * `visa`, or `unknown`.
@@ -490,7 +502,9 @@ data class PaymentMethod internal constructor(
          * [card.checks](https://stripe.com/docs/api/payment_methods/object#payment_method_object-card-checks)
          */
         @Parcelize
-        data class Checks internal constructor(
+        data class Checks
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        constructor(
             /**
              * If a address line1 was provided, results of the check, one of `pass`, `fail`, `unavailable`, or `unchecked`.
              *
@@ -519,7 +533,9 @@ data class PaymentMethod internal constructor(
          * [card.three_d_secure_usage](https://stripe.com/docs/api/payment_methods/object#payment_method_object-card-three_d_secure_usage)
          */
         @Parcelize
-        data class ThreeDSecureUsage internal constructor(
+        data class ThreeDSecureUsage
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        constructor(
             /**
              * Whether 3D Secure is supported on this card.
              *
@@ -639,7 +655,9 @@ data class PaymentMethod internal constructor(
     }
 
     @Parcelize
-    data class AuBecsDebit internal constructor(
+    data class AuBecsDebit
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    constructor(
         @JvmField val bsbNumber: String?,
         @JvmField val fingerprint: String?,
         @JvmField val last4: String?

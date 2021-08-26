@@ -1,7 +1,9 @@
 package com.stripe.android.paymentsheet.elements
 
 import androidx.annotation.StringRes
+import com.stripe.android.model.CountryCode
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.view.CountryUtils
 import java.util.Locale
 
 /**

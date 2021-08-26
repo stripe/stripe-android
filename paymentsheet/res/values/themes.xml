@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="StripeBaseTheme" parent="@style/Theme.AppCompat.DayNight.NoActionBar">
+        <item name="colorAccent">@color/stripe_accent_color_default</item>
+        <item name="colorControlNormal">@color/stripe_control_normal_color_default</item>
+        <item name="colorPrimary">@color/stripe_toolbar_color_default</item>
+        <item name="colorPrimaryDark">@color/stripe_toolbar_color_default_dark</item>
+        <item name="titleTextColor">@color/stripe_title_text_color</item>
+        <item name="android:textColorSecondary">@color/stripe_text_color_secondary</item>
+    </style>
+
+    <style name="StripeDefaultTheme" parent="StripeBaseTheme" />
+
+    <!-- Theme used by Activities that do not show any UI, so the activity underneath them is still fully visible -->
+
+    <style name="StripePaymentSheetBaseTheme" parent="@style/Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:backgroundDimEnabled">true</item>
+        <item name="windowNoTitle">true</item>
+        <item name="android:windowAnimationStyle">@null</item>
+        <item name="colorSurface">@color/stripe_paymentsheet_background</item>
+        <item name="actionMenuTextColor">@color/stripe_paymentsheet_toolbar_items_color</item>
+    </style>
+
+    <style name="StripePaymentSheetDefaultTheme" parent="StripePaymentSheetBaseTheme" />
+
+    <style name="StripePaymentSheetAddPaymentMethodTheme">
+        <item name="colorOnSurface">@color/stripe_paymentsheet_form</item>
+        <item name="colorPrimary">@color/stripe_paymentsheet_form</item>
+        <item name="colorAccent">@color/stripe_paymentsheet_form</item>
+    </style>
+</resources>

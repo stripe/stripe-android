@@ -7,12 +7,10 @@
   <string name="acc_label_expiry_date">Дата на валидност</string>
   <string name="acc_label_expiry_date_node">%s, Дата на валидност</string>
   <!-- Caption for Zip Code field on address form (only shown when country is United States only) -->
-  <string name="acc_label_zip">Пощенски код</string>
-  <!-- Short string for zip code (United States only) Please keep to 5 characters or less if possible. -->
+    <!-- Short string for zip code (United States only) Please keep to 5 characters or less if possible. -->
   <string name="acc_label_zip_short">п.к.</string>
   <!-- Text informing user they should add a debit or credit card. Shown when there are no existing payment methods in the application -->
-  <string name="add_card">Добавяне на нова дебитна или кредитна карта за извършване на покупки в това приложение.</string>
-  <!-- Message displayed when a payment method is removed, stating its name. -->
+    <!-- Message displayed when a payment method is removed, stating its name. -->
   <string name="added">%s е добавено</string>
   <!-- Error text indicating that city is required, used for all locations -->
   <string name="address_city_required">Моля, въведете Вашия град</string>
@@ -75,8 +73,7 @@
   <!-- Error text indicating that address is required, used for all locations -->
   <string name="address_required">Моля, въведете адреса си</string>
   <!-- Title for shipping address entry section -->
-  <string name="address_shipping_address">Адрес за доставка</string>
-  <!-- Error text indicating that state is required, used for US addresses -->
+    <!-- Error text indicating that state is required, used for US addresses -->
   <string name="address_state_required">Моля, въведете Вашия щат.</string>
   <!-- Error text indicating zip code is invalid, used for US addresses -->
   <string name="address_zip_invalid">Вашият пощенски код е невалиден.</string>
@@ -132,8 +129,7 @@
   <!-- Error message for when postal code in form is incomplete -->
   <string name="invalid_zip">Вашият пощенски код е непълен.</string>
   <!-- Text informing user there are no existing payment methods in the application -->
-  <string name="no_payment_methods">Няма методи на плащане.</string>
-  <string name="payment_method_add_new_card">Добавяне на нова карта...</string>
+    <string name="payment_method_add_new_card">Добавяне на нова карта...</string>
   <string name="payment_method_add_new_fpx">Избор на банкова сметка (FPX)…</string>
   <!-- Label for free shipping method -->
   <string name="price_free">Безплатно</string>
@@ -141,44 +137,27 @@
   <string name="removed">%s е премахнато</string>
   <string name="secure_checkout">Защитено финализиране</string>
   <!-- Generic error message shown when payment cannot be processed. -->
-  <string name="stripe_failure_connection_error">Възникна проблем при свързването с нашия доставчик на платежни услуги. Моля, проверете Вашата интернет връзка и опитайте отново.</string>
-  <!-- Error when 3DS2 authentication failed (e.g. customer entered the wrong code) -->
+    <!-- Error when 3DS2 authentication failed (e.g. customer entered the wrong code) -->
   <string name="stripe_failure_reason_authentication">Не можем да удостоверим Вашия метод на плащане. Моля, изберете различен метод на плащане и опитайте отново.</string>
   <!-- Error when 3DS2 authentication timed out. -->
   <string name="stripe_failure_reason_timed_out">Времето на изчакване на удостоверяването на Вашия метод на плащане изтече -- опитайте отново</string>
   <!-- When an internal error is reported when a google pay payment is started. -->
-  <string name="stripe_google_pay_error_internal">Възникна вътрешна грешка.</string>
-  <string name="stripe_paymentsheet_add_button_label">Добавяне</string>
-  <!-- Text for a button that, when tapped, displays another screen where the customer can add payment method details -->
-  <string name="stripe_paymentsheet_add_payment_method_button_label">+ Добавяне</string>
-  <!-- Card details entry form header title -->
-  <string name="stripe_paymentsheet_add_payment_method_card_information">Информация за картата</string>
-  <!-- Country selector and postal code entry form header title -->
-  <string name="stripe_paymentsheet_add_payment_method_country_or_region">Държава или регион</string>
-  <!-- Title shown above a form where the customer can enter payment information like credit card details, email, billing address, etc. -->
-  <string name="stripe_paymentsheet_add_payment_method_title">Добавете своята информация за плащането</string>
-  <!-- Text for back button -->
-  <string name="stripe_paymentsheet_back">Назад</string>
-  <string name="stripe_paymentsheet_close">Затваряне</string>
-  <!-- label for text field to enter card expiry -->
+    <!-- Text for a button that, when tapped, displays another screen where the customer can add payment method details -->
+    <!-- Card details entry form header title -->
+    <!-- Country selector and postal code entry form header title -->
+    <!-- Title shown above a form where the customer can enter payment information like credit card details, email, billing address, etc. -->
+    <!-- Text for back button -->
+    <!-- label for text field to enter card expiry -->
   <string name="stripe_paymentsheet_expiration_date_hint">ММ / ГГ</string>
   <!-- Title of a section containing multiple payment methods that can selected and will collect the payment information from the user. -->
-  <string name="stripe_paymentsheet_or_pay_using">Или платете чрез</string>
-  <!-- Title of a section containing a card form that will collect the payment information from the user. -->
-  <string name="stripe_paymentsheet_or_pay_with_card">Или платете с карта</string>
-  <!-- Label of a button that initiates payment when tapped -->
-  <string name="stripe_paymentsheet_pay_button_amount">Плащане %s</string>
-  <!-- Label for a button that starts processing the payment. -->
-  <string name="stripe_paymentsheet_pay_button_label">Плащане</string>
-  <!-- Label of a button that, when tapped, initiates payment, becomes disabled, and displays this text -->
-  <string name="stripe_paymentsheet_primary_button_processing">Обработване...</string>
-  <!-- The label of a switch indicating whether to save the user&apos;s card for future payments to this merchant -->
-  <string name="stripe_paymentsheet_save_this_card_with_merchant_name">Запазете тази карта за следващи %s плащания</string>
-  <!-- Title shown above a carousel containing the customer&apos;s payment methods -->
-  <string name="stripe_paymentsheet_select_payment_method">Изберете метод на плащане</string>
-  <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->
-  <string name="stripe_paymentsheet_setup_button_label">Създаване</string>
-  <!-- When there are multiple browsers and web authentication is required, this will show in a window asking which browser they want to use to "Verify your payment" -->
+    <!-- Title of a section containing a card form that will collect the payment information from the user. -->
+    <!-- Label of a button that initiates payment when tapped -->
+    <!-- Label for a button that starts processing the payment. -->
+    <!-- Label of a button that, when tapped, initiates payment, becomes disabled, and displays this text -->
+    <!-- The label of a switch indicating whether to save the user&apos;s card for future payments to this merchant -->
+    <!-- Title shown above a carousel containing the customer&apos;s payment methods -->
+    <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->
+    <!-- When there are multiple browsers and web authentication is required, this will show in a window asking which browser they want to use to "Verify your payment" -->
   <string name="stripe_verify_your_payment">Потвърдете Вашето плащане</string>
   <string name="title_add_a_card">Добавяне на карта</string>
   <!-- Screen title telling users they should add an address -->

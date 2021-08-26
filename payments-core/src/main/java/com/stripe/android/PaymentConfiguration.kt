@@ -3,10 +3,13 @@ package com.stripe.android
 import android.content.Context
 import android.content.SharedPreferences
 import android.os.Parcelable
+import androidx.annotation.RestrictTo
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
-data class PaymentConfiguration internal constructor(
+data class PaymentConfiguration
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+constructor(
     val publishableKey: String,
     val stripeAccountId: String? = null
 ) : Parcelable {
@@ -99,8 +102,9 @@ data class PaymentConfiguration internal constructor(
             DefaultFraudDetectionDataRepository(context).refresh()
         }
 
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // for paymentsheet
         @JvmSynthetic
-        internal fun clearInstance() {
+        fun clearInstance() {
             instance = null
         }
     }
