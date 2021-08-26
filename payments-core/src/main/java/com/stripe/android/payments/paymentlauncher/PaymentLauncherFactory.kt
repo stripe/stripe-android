@@ -4,10 +4,15 @@ import android.content.Context
 import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultLauncher
 import androidx.fragment.app.Fragment
-import com.stripe.android.payments.core.injection.WeakMapInjectorRegistry
+import com.stripe.android.BuildConfig
+import com.stripe.android.networking.AnalyticsRequestFactory
+import com.stripe.android.networking.StripeApiRepository
+import kotlinx.coroutines.Dispatchers
 
 /**
- * Factory to create a [PaymentLauncher].
+ * Factory to create a [PaymentLauncher], initialize all required dependencies.
+ *
+ * Used when [PaymentLauncher] is used as a standalone API.
  */
 internal class PaymentLauncherFactory(
     private val context: Context,
@@ -39,17 +44,21 @@ internal class PaymentLauncherFactory(
     fun create(
         publishableKey: String,
         stripeAccountId: String? = null
-    ): PaymentLauncher {
-        val injectorKey = WeakMapInjectorRegistry.nextKey()
-        val paymentLauncher =
-            StripePaymentLauncher(
-                hostActivityLauncher,
-                context,
-                publishableKey,
-                stripeAccountId,
-                injectorKey
-            )
-        WeakMapInjectorRegistry.register(paymentLauncher, injectorKey)
-        return paymentLauncher
-    }
+    ): PaymentLauncher = StripePaymentLauncher(
+        { publishableKey },
+        { stripeAccountId },
+        hostActivityLauncher,
+        context,
+        BuildConfig.DEBUG,
+        Dispatchers.IO,
+        Dispatchers.Main,
+        StripeApiRepository(
+            context,
+            { publishableKey }
+        ),
+        AnalyticsRequestFactory(
+            context,
+            { publishableKey }
+        )
+    )
 }

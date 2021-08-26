@@ -1,12 +1,14 @@
 package com.stripe.android.payments.core.injection
 
 import android.content.Context
-import androidx.annotation.Nullable
+import com.stripe.android.networking.AnalyticsRequestFactory
+import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.paymentlauncher.PaymentLauncherViewModel
 import dagger.BindsInstance
 import dagger.Component
 import javax.inject.Named
 import javax.inject.Singleton
+import kotlin.coroutines.CoroutineContext
 
 @Singleton
 @Component(
@@ -23,10 +25,21 @@ internal interface PaymentLauncherComponent {
         fun context(context: Context): Builder
 
         @BindsInstance
-        fun publishableKey(@Named(PUBLISHABLE_KEY) publishableKey: String): Builder
+        fun enableLogging(@Named(ENABLE_LOGGING) enableLogging: Boolean): Builder
 
         @BindsInstance
-        fun stripeAccountId(@Nullable @Named(STRIPE_ACCOUNT_ID) stripeAccountId: String?): Builder
+        fun ioContext(@IOContext workContext: CoroutineContext): Builder
+
+        @BindsInstance
+        fun uiContext(@UIContext uiContext: CoroutineContext): Builder
+
+        @BindsInstance
+        fun stripeRepository(stripeRepository: StripeRepository): Builder
+
+        @BindsInstance
+        fun analyticsRequestFactory(analyticsRequestFactory: AnalyticsRequestFactory): Builder
+
+        fun paymentLauncherModule(paymentLauncherModule: PaymentLauncherModule): Builder
 
         fun build(): PaymentLauncherComponent
     }

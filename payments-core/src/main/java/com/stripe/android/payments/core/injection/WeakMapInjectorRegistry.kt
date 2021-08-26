@@ -22,7 +22,8 @@ object WeakMapInjectorRegistry : InjectorRegistry {
     /**
      * Global unique monotonically increasing key to be assigned to [Injector]s registered.
      */
-    private var CURRENT_REGISTER_KEY = AtomicInteger(0)
+    @VisibleForTesting
+    internal val CURRENT_REGISTER_KEY = AtomicInteger(0)
 
     override fun register(injector: Injector, @InjectorKey key: Int) {
         staticCacheMap[injector] = key
