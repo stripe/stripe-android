@@ -5,10 +5,6 @@
     <string name="billing_details">Billing Details</string>
     <string name="stripe_paymentsheet_eps_bank">EPS Bank</string>
     <string name="stripe_paymentsheet_p24_bank">P24 Bank</string>
-    <!-- Message shown for Afterpay/Clearpay payments. Placeholder will be replaced with the installment amount,
-    and the Afterpay/Clearpay logo will be added at the end of the message, so the translation must make sense
-    when reading as: "Pay in 4 interest-free payments of $100 with <Afterpay> ⓘ" -->
-    <string name="stripe_paymentsheet_afterpay_clearpay_message">Pay in 4 interest-free payments of %s with</string>
 
     <string name="edit">Edit</string>
     <string name="done">Done</string>
