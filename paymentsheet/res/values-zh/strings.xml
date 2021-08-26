@@ -1,21 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
-  <!-- Caption for City field on address form -->
-  <string name="address_label_city">城市</string>
-  <!-- Caption for Country field on address form -->
-  <string name="address_label_country">国家</string>
-  <!-- Caption for County field on address form (only countries that use county, like United Kingdom) -->
-  <string name="address_label_county">县</string>
-  <!-- Caption for Name field on address form -->
-  <string name="address_label_name">姓名</string>
-  <!-- Short string for postal code (text used in non-US countries) -->
-  <string name="address_label_postal_code">邮政编码</string>
-  <!-- Caption for Province field on address form (only countries that use province, like Canada) -->
-  <string name="address_label_province">省</string>
-  <!-- Caption for State field on address form (only countries that use state , like United States) -->
-  <string name="address_label_state">州</string>
-  <!-- Label for input requesting zip code, used for US based addreses -->
-  <string name="address_label_zip_code">邮政编码</string>
+  <!-- Address line 1 placeholder for billing address form. -->
+  <string name="address_label_address_line1">地址行 1</string>
+  <!-- Button title to cancel action in an alert -->
+  <string name="cancel">取消</string>
+  <!-- Done button title -->
+  <string name="done">完成</string>
+  <!-- Button title to enter editing mode -->
+  <string name="edit">编辑</string>
   <!-- Caption for Email field on address form -->
   <string name="email">电子邮件</string>
   <!-- Error message when email is invalid -->
@@ -28,16 +20,50 @@
   <string name="iban_invalid_country">您输入的 IBAN 无效，\"%s\" 是不支持的国家代码。</string>
   <!-- An error message displayed when the IBAN does not start with a two-letter country code. -->
   <string name="iban_invalid_start">您的 IBAN 应以一个两字母国家代码开头。</string>
+  <!-- Generic error message shown when payment cannot be processed. -->
+  <string name="stripe_failure_connection_error">连接我们的支付提供商时出现了问题。请检查网络连接，然后重试。</string>
+  <!-- When an internal error is reported when a google pay payment is started. -->
+  <string name="stripe_google_pay_error_internal">发生了内部错误。</string>
+  <string name="stripe_paymentsheet_add_button_label">添加</string>
+  <!-- Text for a button that, when tapped, displays another screen where the customer can add payment method details -->
+  <string name="stripe_paymentsheet_add_payment_method_button_label">+ 添加</string>
+  <!-- Card details entry form header title -->
+  <string name="stripe_paymentsheet_add_payment_method_card_information">银行卡信息</string>
+  <!-- Country selector and postal code entry form header title -->
+  <string name="stripe_paymentsheet_add_payment_method_country_or_region">国家或地区</string>
+  <!-- Title shown above a form where the customer can enter payment information like credit card details, email, billing address, etc. -->
+  <string name="stripe_paymentsheet_add_payment_method_title">添加您的支付信息</string>
+  <!-- Text for back button -->
+  <string name="stripe_paymentsheet_back">返回</string>
+  <string name="stripe_paymentsheet_close">关闭</string>
   <!-- The label of a text field that is optional. For example, 'Email (optional)' or 'Name (optional) -->
   <string name="stripe_paymentsheet_form_label_optional">%s（可选）</string>
   <!-- iDEAL bank section title for iDEAL form entry. -->
   <string name="stripe_paymentsheet_ideal_bank">iDEAL 银行</string>
+  <!-- Title of a section containing multiple payment methods that can selected and will collect the payment information from the user. -->
+  <string name="stripe_paymentsheet_or_pay_using">或用以下方式支付</string>
+  <!-- Title of a section containing a card form that will collect the payment information from the user. -->
+  <string name="stripe_paymentsheet_or_pay_with_card">或用银行卡支付</string>
+  <!-- Label of a button that initiates payment when tapped -->
+  <string name="stripe_paymentsheet_pay_button_amount">支付%s</string>
+  <!-- Label for a button that starts processing the payment. -->
+  <string name="stripe_paymentsheet_pay_button_label">支付</string>
   <!-- Title for credit card number entry field -->
   <string name="stripe_paymentsheet_payment_method_card">银行卡</string>
   <!-- Payment method brand name -->
   <string name="stripe_paymentsheet_payment_method_sepa_debit">SEPA 借记</string>
+  <!-- Label of a button that, when tapped, initiates payment, becomes disabled, and displays this text -->
+  <string name="stripe_paymentsheet_primary_button_processing">正在处理...</string>
+  <!-- Content for alert popup prompting to confirm removing saved payment method. -->
+  <string name="stripe_paymentsheet_remove_pm">移除 %s</string>
   <!-- The label of a switch indicating whether to save the payment method for future payments. -->
   <string name="stripe_paymentsheet_save_for_future_payments">保存以用于未来的付款</string>
+  <!-- The label of a switch indicating whether to save the user&apos;s card for future payments to this merchant -->
+  <string name="stripe_paymentsheet_save_this_card_with_merchant_name">保存该卡，用于未来在 %s 付款</string>
+  <!-- Title shown above a carousel containing the customer&apos;s payment methods -->
+  <string name="stripe_paymentsheet_select_payment_method">选择您的支付方式</string>
   <!-- SEPA mandate text -->
   <string name="stripe_paymentsheet_sepa_mandate">提供您的支付方式并确认该付款即表示您授权 (A) %s 与我们的支付服务商 Stripe 向您的银行发送对您的账户进行借记的指令以及 (B) 您的银行按照这些指令对您的账户进行借记。根据您与您的银行协议的条款和条件，您有权从您的银行得到退款。退款必须在 8 周内提出，从您的帐户被扣款之日起算。您的权利在对账单上有解释，可从您的银行获取。您同意提前 2 天接收后续借记的通知。</string>
+  <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->
+  <string name="stripe_paymentsheet_setup_button_label">设置</string>
 </resources>

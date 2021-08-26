@@ -20,8 +20,6 @@
   <string name="address_county_required">国を入力してください</string>
   <!-- Caption for Address field on address form -->
   <string name="address_label_address">住所</string>
-  <!-- Address line 1 placeholder for billing address form. -->
-  <string name="address_label_address_line1">住所 (1 行目)</string>
   <!-- Label for input requesting the first line of an address where , used for international addresses -->
   <string name="address_label_address_line1_optional">住所 (1 行目、省略可)</string>
   <!-- Address line 2 placeholder for billing address form. -->
@@ -30,28 +28,44 @@
   <string name="address_label_address_optional">住所 (省略可)</string>
   <!-- Label for input requesting apartment number (address line 2) where input is optional, used for US based addresses -->
   <string name="address_label_apt_optional">アパート / マンション名など (省略可)</string>
+  <!-- Caption for City field on address form -->
+  <string name="address_label_city">市</string>
   <!-- Label for input requesting city where input is optional, used for all locations -->
   <string name="address_label_city_optional">市区町村 (省略可)</string>
+  <!-- Caption for Country field on address form -->
+  <string name="address_label_country">国</string>
+  <!-- Caption for County field on address form (only countries that use county, like United Kingdom) -->
+  <string name="address_label_county">群</string>
   <!-- Label for input requesting county where input is optional , used for UK based addresses -->
   <string name="address_label_county_optional">群 (省略可)</string>
+  <!-- Caption for Name field on address form -->
+  <string name="address_label_name">名前</string>
   <!-- Label for input requesting phone number, used for all locations -->
   <string name="address_label_phone_number">電話番号</string>
   <!-- Label for input requesting phone number where input is optional, used for all locations -->
   <string name="address_label_phone_number_optional">電話番号 (省略可)</string>
+  <!-- Short string for postal code (text used in non-US countries) -->
+  <string name="address_label_postal_code">郵便番号</string>
   <!-- Label for input requesting postal code where input is optional, used for Canada based addresses -->
   <string name="address_label_postal_code_optional">郵便番号 (省略可)</string>
   <!-- Label for input requesting postcode, used for UK based addresses -->
   <string name="address_label_postcode">郵便番号</string>
   <!-- Label for input requesting postcode where input is optional, used for UK based addresses -->
   <string name="address_label_postcode_optional">郵便番号 (省略可)</string>
+  <!-- Caption for Province field on address form (only countries that use province, like Canada) -->
+  <string name="address_label_province">都道府県</string>
   <!-- Label for input requesting province where province is optional, used for canadian addresses -->
   <string name="address_label_province_optional">都道府県 (省略可)</string>
   <!-- Label for input requesting the region, used for international addresses -->
   <string name="address_label_region_generic">州 / 省 / 地域</string>
   <!-- Label for input requesting the region where input is optional, used for international addresses -->
   <string name="address_label_region_generic_optional">都道府県 (省略可)</string>
+  <!-- Caption for State field on address form (only countries that use state , like United States) -->
+  <string name="address_label_state">都道府県</string>
   <!-- Label for input requesting state where input is optional, used for US based addresses -->
   <string name="address_label_state_optional">都道府県 (省略可)</string>
+  <!-- Label for input requesting zip code, used for US based addreses -->
+  <string name="address_label_zip_code">郵便番号</string>
   <!-- Label for input requesting zip code where input is optional, used for US based addresses -->
   <string name="address_label_zip_code_optional">郵便番号 (省略可)</string>
   <!-- Label for input requesting postal code, used for international addresses -->
@@ -136,28 +150,13 @@
   <!-- Message displayed when a payment method is removed, stating its name. -->
   <string name="removed">%s が削除されました</string>
   <string name="secure_checkout">安全なチェックアウト</string>
-  <!-- Generic error message shown when payment cannot be processed. -->
-    <!-- Error when 3DS2 authentication failed (e.g. customer entered the wrong code) -->
+  <!-- Error when 3DS2 authentication failed (e.g. customer entered the wrong code) -->
   <string name="stripe_failure_reason_authentication">お客様の支払い方法を認証できませんでした。別の支払い方法を選択してもう一度お試しください。</string>
   <!-- Error when 3DS2 authentication timed out. -->
   <string name="stripe_failure_reason_timed_out">支払い方法の認証がタイムアウトしました。もう一度お試しください</string>
-  <!-- When an internal error is reported when a google pay payment is started. -->
-    <!-- Text for a button that, when tapped, displays another screen where the customer can add payment method details -->
-    <!-- Card details entry form header title -->
-    <!-- Country selector and postal code entry form header title -->
-    <!-- Title shown above a form where the customer can enter payment information like credit card details, email, billing address, etc. -->
-    <!-- Text for back button -->
-    <!-- label for text field to enter card expiry -->
+  <!-- label for text field to enter card expiry -->
   <string name="stripe_paymentsheet_expiration_date_hint">月 / 年</string>
-  <!-- Title of a section containing multiple payment methods that can selected and will collect the payment information from the user. -->
-    <!-- Title of a section containing a card form that will collect the payment information from the user. -->
-    <!-- Label of a button that initiates payment when tapped -->
-    <!-- Label for a button that starts processing the payment. -->
-    <!-- Label of a button that, when tapped, initiates payment, becomes disabled, and displays this text -->
-    <!-- The label of a switch indicating whether to save the user&apos;s card for future payments to this merchant -->
-    <!-- Title shown above a carousel containing the customer&apos;s payment methods -->
-    <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->
-    <!-- When there are multiple browsers and web authentication is required, this will show in a window asking which browser they want to use to "Verify your payment" -->
+  <!-- When there are multiple browsers and web authentication is required, this will show in a window asking which browser they want to use to "Verify your payment" -->
   <string name="stripe_verify_your_payment">支払いの確認</string>
   <string name="title_add_a_card">カードを追加</string>
   <!-- Screen title telling users they should add an address -->

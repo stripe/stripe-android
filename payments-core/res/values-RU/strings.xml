@@ -20,8 +20,6 @@
   <string name="address_county_required">Введите страну</string>
   <!-- Caption for Address field on address form -->
   <string name="address_label_address">Адрес</string>
-  <!-- Address line 1 placeholder for billing address form. -->
-  <string name="address_label_address_line1">Адрес (строка 1)</string>
   <!-- Label for input requesting the first line of an address where , used for international addresses -->
   <string name="address_label_address_line1_optional">Адрес (строка 1) (необязательно)</string>
   <!-- Address line 2 placeholder for billing address form. -->
@@ -30,28 +28,44 @@
   <string name="address_label_address_optional">Адрес (необязательно)</string>
   <!-- Label for input requesting apartment number (address line 2) where input is optional, used for US based addresses -->
   <string name="address_label_apt_optional">Кв. (необязательно)</string>
+  <!-- Caption for City field on address form -->
+  <string name="address_label_city">Город</string>
   <!-- Label for input requesting city where input is optional, used for all locations -->
   <string name="address_label_city_optional">Город (необязательно)</string>
+  <!-- Caption for Country field on address form -->
+  <string name="address_label_country">Страна</string>
+  <!-- Caption for County field on address form (only countries that use county, like United Kingdom) -->
+  <string name="address_label_county">Графство</string>
   <!-- Label for input requesting county where input is optional , used for UK based addresses -->
   <string name="address_label_county_optional">Графство (необязательно)</string>
+  <!-- Caption for Name field on address form -->
+  <string name="address_label_name">Имя</string>
   <!-- Label for input requesting phone number, used for all locations -->
   <string name="address_label_phone_number">Номер телефона</string>
   <!-- Label for input requesting phone number where input is optional, used for all locations -->
   <string name="address_label_phone_number_optional">Номер телефона (необязательно)</string>
+  <!-- Short string for postal code (text used in non-US countries) -->
+  <string name="address_label_postal_code">Почтовый индекс</string>
   <!-- Label for input requesting postal code where input is optional, used for Canada based addresses -->
   <string name="address_label_postal_code_optional">Почтовый индекс (необязательно)</string>
   <!-- Label for input requesting postcode, used for UK based addresses -->
   <string name="address_label_postcode">Почтовый индекс</string>
   <!-- Label for input requesting postcode where input is optional, used for UK based addresses -->
   <string name="address_label_postcode_optional">Почтовый индекс (необязательно)</string>
+  <!-- Caption for Province field on address form (only countries that use province, like Canada) -->
+  <string name="address_label_province">Провинция</string>
   <!-- Label for input requesting province where province is optional, used for canadian addresses -->
   <string name="address_label_province_optional">Провинция (необязательно)</string>
   <!-- Label for input requesting the region, used for international addresses -->
   <string name="address_label_region_generic">Штат / провинция / регион</string>
   <!-- Label for input requesting the region where input is optional, used for international addresses -->
   <string name="address_label_region_generic_optional">Штат / провинция / регион (необязательно)</string>
+  <!-- Caption for State field on address form (only countries that use state , like United States) -->
+  <string name="address_label_state">Штат</string>
   <!-- Label for input requesting state where input is optional, used for US based addresses -->
   <string name="address_label_state_optional">Штат (необязательно)</string>
+  <!-- Label for input requesting zip code, used for US based addreses -->
+  <string name="address_label_zip_code">Почтовый индекс</string>
   <!-- Label for input requesting zip code where input is optional, used for US based addresses -->
   <string name="address_label_zip_code_optional">Почтовый индекс (необязательно)</string>
   <!-- Label for input requesting postal code, used for international addresses -->
@@ -136,28 +150,13 @@
   <!-- Message displayed when a payment method is removed, stating its name. -->
   <string name="removed">Удалено: %s</string>
   <string name="secure_checkout">Безопасное оформление и оплата заказа</string>
-  <!-- Generic error message shown when payment cannot be processed. -->
-    <!-- Error when 3DS2 authentication failed (e.g. customer entered the wrong code) -->
+  <!-- Error when 3DS2 authentication failed (e.g. customer entered the wrong code) -->
   <string name="stripe_failure_reason_authentication">Не удалось верифицировать метод оплаты. Выберите другой метод оплаты и повторите попытку.</string>
   <!-- Error when 3DS2 authentication timed out. -->
   <string name="stripe_failure_reason_timed_out">Лимит времени для аутентификации метода оплаты истек. Попробуйте еще раз</string>
-  <!-- When an internal error is reported when a google pay payment is started. -->
-    <!-- Text for a button that, when tapped, displays another screen where the customer can add payment method details -->
-    <!-- Card details entry form header title -->
-    <!-- Country selector and postal code entry form header title -->
-    <!-- Title shown above a form where the customer can enter payment information like credit card details, email, billing address, etc. -->
-    <!-- Text for back button -->
-    <!-- label for text field to enter card expiry -->
+  <!-- label for text field to enter card expiry -->
   <string name="stripe_paymentsheet_expiration_date_hint">ММ / ГГ</string>
-  <!-- Title of a section containing multiple payment methods that can selected and will collect the payment information from the user. -->
-    <!-- Title of a section containing a card form that will collect the payment information from the user. -->
-    <!-- Label of a button that initiates payment when tapped -->
-    <!-- Label for a button that starts processing the payment. -->
-    <!-- Label of a button that, when tapped, initiates payment, becomes disabled, and displays this text -->
-    <!-- The label of a switch indicating whether to save the user&apos;s card for future payments to this merchant -->
-    <!-- Title shown above a carousel containing the customer&apos;s payment methods -->
-    <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->
-    <!-- When there are multiple browsers and web authentication is required, this will show in a window asking which browser they want to use to "Verify your payment" -->
+  <!-- When there are multiple browsers and web authentication is required, this will show in a window asking which browser they want to use to "Verify your payment" -->
   <string name="stripe_verify_your_payment">Подтвердите платеж</string>
   <string name="title_add_a_card">Добавить карту</string>
   <!-- Screen title telling users they should add an address -->
