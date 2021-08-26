@@ -30,7 +30,7 @@ import org.junit.Test
 import org.mockito.kotlin.mock
 import java.io.File
 
-class TransformSpecToElementTest {
+internal class TransformSpecToElementTest {
 
     private val nameSection = FormItemSpec.SectionSpec(
         IdentifierSpec.Generic("name_section"),

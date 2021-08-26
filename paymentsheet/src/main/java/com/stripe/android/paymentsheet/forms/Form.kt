@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet.forms
 
 import android.content.res.Resources
-import androidx.annotation.RestrictTo
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Column
@@ -235,9 +234,8 @@ internal fun SaveForFutureUseElementUI(
  * @param: layout - this contains the visual layout of the fields on the screen used by [Form]
  * to display the UI fields on screen.  It also informs us of the backing fields to be created.
  */
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Singleton
-class FormViewModel @Inject internal constructor(
+internal class FormViewModel @Inject internal constructor(
     layout: LayoutSpec,
     config: FormFragmentArguments,
     private val resourceRepository: ResourceRepository
