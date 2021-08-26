@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet.forms
 
 import android.content.res.Resources
-import androidx.annotation.RestrictTo
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Column

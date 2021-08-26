@@ -14,7 +14,6 @@ internal data class FormFragmentArguments(
     val billingDetails: PaymentSheet.BillingDetails? = null,
 ) : Parcelable
 
-
 internal fun FormFragmentArguments.getValue(id: IdentifierSpec) =
     when (id) {
         IdentifierSpec.Name -> this.billingDetails?.name
