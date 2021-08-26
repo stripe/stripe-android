@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
-  <!-- Address line 1 placeholder for billing address form. -->
-  <string name="address_label_address_line1">Adressrad 1</string>
   <!-- Button title to cancel action in an alert -->
   <string name="cancel">Avbryt</string>
   <!-- Done button title -->
@@ -20,6 +18,9 @@
   <string name="iban_invalid_country">Angivet IBAN är ogiltigt, \"%s\" är inte en giltig landskod.</string>
   <!-- An error message displayed when the IBAN does not start with a two-letter country code. -->
   <string name="iban_invalid_start">Ditt IBAN ska börja med en landskod (två bokstäver).</string>
+  <!-- Button title for confirmation alert to remove a saved payment method
+   Text for remove button -->
+  <string name="remove">Ta bort</string>
   <!-- Generic error message shown when payment cannot be processed. -->
   <string name="stripe_failure_connection_error">Vi har problem med anslutningen till vår leverantör av betalningstjänster. Kontrollera internetanslutningen och försök igen.</string>
   <!-- When an internal error is reported when a google pay payment is started. -->

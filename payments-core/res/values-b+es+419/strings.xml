@@ -7,9 +7,9 @@
   <string name="acc_label_expiry_date">Fecha de vencimiento</string>
   <string name="acc_label_expiry_date_node">%s, fecha de vencimiento</string>
   <!-- Caption for Zip Code field on address form (only shown when country is United States only) -->
+  <string name="acc_label_zip">Código ZIP</string>
   <!-- Short string for zip code (United States only) Please keep to 5 characters or less if possible. -->
   <string name="acc_label_zip_short">ZIP</string>
-  <!-- Text informing user they should add a debit or credit card. Shown when there are no existing payment methods in the application -->
   <!-- Message displayed when a payment method is removed, stating its name. -->
   <string name="added">Se agregó %s</string>
   <!-- Error text indicating that city is required, used for all locations -->
@@ -20,6 +20,8 @@
   <string name="address_county_required">Ingresa el nombre de tu condado.</string>
   <!-- Caption for Address field on address form -->
   <string name="address_label_address">Dirección</string>
+  <!-- Address line 1 placeholder for billing address form. -->
+  <string name="address_label_address_line1">Primera línea de la dirección</string>
   <!-- Label for input requesting the first line of an address where , used for international addresses -->
   <string name="address_label_address_line1_optional">Primera línea de la dirección (opcional)</string>
   <!-- Address line 2 placeholder for billing address form. -->
@@ -86,7 +88,6 @@
   <string name="address_region_generic_required">Ingresa el nombre de tu estado/provincia/región.</string>
   <!-- Error text indicating that address is required, used for all locations -->
   <string name="address_required">Ingresa tu dirección.</string>
-  <!-- Title for shipping address entry section -->
   <!-- Error text indicating that state is required, used for US addresses -->
   <string name="address_state_required">Ingresa el nombre de tu estado.</string>
   <!-- Error text indicating zip code is invalid, used for US addresses -->
@@ -142,7 +143,6 @@
   <string name="invalid_shipping_information">Dirección de envío inválida</string>
   <!-- Error message for when postal code in form is incomplete -->
   <string name="invalid_zip">El código postal está incompleto.</string>
-  <!-- Text informing user there are no existing payment methods in the application -->
   <string name="payment_method_add_new_card">Agregar nueva tarjeta…</string>
   <string name="payment_method_add_new_fpx">Seleccionar cuenta bancaria (FPX)…</string>
   <!-- Label for free shipping method -->

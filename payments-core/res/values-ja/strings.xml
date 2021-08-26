@@ -7,10 +7,10 @@
   <string name="acc_label_expiry_date">有効期限</string>
   <string name="acc_label_expiry_date_node">%s、有効期限</string>
   <!-- Caption for Zip Code field on address form (only shown when country is United States only) -->
-    <!-- Short string for zip code (United States only) Please keep to 5 characters or less if possible. -->
+  <string name="acc_label_zip">郵便番号</string>
+  <!-- Short string for zip code (United States only) Please keep to 5 characters or less if possible. -->
   <string name="acc_label_zip_short">郵便番号</string>
-  <!-- Text informing user they should add a debit or credit card. Shown when there are no existing payment methods in the application -->
-    <!-- Message displayed when a payment method is removed, stating its name. -->
+  <!-- Message displayed when a payment method is removed, stating its name. -->
   <string name="added">%s が追加されました</string>
   <!-- Error text indicating that city is required, used for all locations -->
   <string name="address_city_required">市区町村を入力してください</string>
@@ -20,6 +20,8 @@
   <string name="address_county_required">国を入力してください</string>
   <!-- Caption for Address field on address form -->
   <string name="address_label_address">住所</string>
+  <!-- Address line 1 placeholder for billing address form. -->
+  <string name="address_label_address_line1">住所 (1 行目)</string>
   <!-- Label for input requesting the first line of an address where , used for international addresses -->
   <string name="address_label_address_line1_optional">住所 (1 行目、省略可)</string>
   <!-- Address line 2 placeholder for billing address form. -->
@@ -86,8 +88,7 @@
   <string name="address_region_generic_required">都道府県を入力してください</string>
   <!-- Error text indicating that address is required, used for all locations -->
   <string name="address_required">住所を入力してください</string>
-  <!-- Title for shipping address entry section -->
-    <!-- Error text indicating that state is required, used for US addresses -->
+  <!-- Error text indicating that state is required, used for US addresses -->
   <string name="address_state_required">都道府県を入力してください</string>
   <!-- Error text indicating zip code is invalid, used for US addresses -->
   <string name="address_zip_invalid">郵便番号が無効です。</string>
@@ -142,8 +143,7 @@
   <string name="invalid_shipping_information">配送先住所が無効です</string>
   <!-- Error message for when postal code in form is incomplete -->
   <string name="invalid_zip">郵便番号の入力に不備があります。</string>
-  <!-- Text informing user there are no existing payment methods in the application -->
-    <string name="payment_method_add_new_card">新しいカードを追加...</string>
+  <string name="payment_method_add_new_card">新しいカードを追加...</string>
   <string name="payment_method_add_new_fpx">銀行口座を選択 (FPX)...</string>
   <!-- Label for free shipping method -->
   <string name="price_free">無料</string>

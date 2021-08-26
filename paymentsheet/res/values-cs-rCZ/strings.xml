@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
-  <!-- Address line 1 placeholder for billing address form. -->
-  <string name="address_label_address_line1">1. řádek adresy</string>
   <!-- Button title to cancel action in an alert -->
   <string name="cancel">Zrušit</string>
   <!-- Done button title -->
@@ -20,6 +18,9 @@
   <string name="iban_invalid_country">Zadané číslo IBAN je neplatné, \"%s\" není podporovaný kód země.</string>
   <!-- An error message displayed when the IBAN does not start with a two-letter country code. -->
   <string name="iban_invalid_start">Číslo IBAN by mělo začínat dvěma písmeny kódu země.</string>
+  <!-- Button title for confirmation alert to remove a saved payment method
+   Text for remove button -->
+  <string name="remove">Odebrat</string>
   <!-- Generic error message shown when payment cannot be processed. -->
   <string name="stripe_failure_connection_error">Vyskytly se problémy s připojením k našemu poskytovateli plateb. Zkontrolujte prosím připojení k internetu a zkuste to znovu.</string>
   <!-- When an internal error is reported when a google pay payment is started. -->

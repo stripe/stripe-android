@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
-  <!-- Address line 1 placeholder for billing address form. -->
-  <string name="address_label_address_line1">Indirizz linja 1</string>
   <!-- Button title to cancel action in an alert -->
   <string name="cancel">Ikkanċella</string>
   <!-- Done button title -->
@@ -20,6 +18,9 @@
   <string name="iban_invalid_country">L-IBAN li daħħalt mhux tajjeb, \"%s\" mhux pajjiż li jista\' jintuża.</string>
   <!-- An error message displayed when the IBAN does not start with a two-letter country code. -->
   <string name="iban_invalid_start">L-IBAN tiegħek għandu jibda b\'kodiċi tal-pajjiż magħmul minn żewġ ittri.</string>
+  <!-- Button title for confirmation alert to remove a saved payment method
+   Text for remove button -->
+  <string name="remove">Neħħi</string>
   <!-- Generic error message shown when payment cannot be processed. -->
   <string name="stripe_failure_connection_error">Qed nesperjenzaw problemi fil-konnessjoni mal-fornitur tal-pagamenti tagħna. Jekk jogħġbok iċċekkja l-konnessjoni tal-internet tiegħek u erġa\' pprova.</string>
   <!-- When an internal error is reported when a google pay payment is started. -->

@@ -7,10 +7,10 @@
   <string name="acc_label_expiry_date">만료 날짜</string>
   <string name="acc_label_expiry_date_node">%s, 만료 날짜</string>
   <!-- Caption for Zip Code field on address form (only shown when country is United States only) -->
-    <!-- Short string for zip code (United States only) Please keep to 5 characters or less if possible. -->
+  <string name="acc_label_zip">우편번호</string>
+  <!-- Short string for zip code (United States only) Please keep to 5 characters or less if possible. -->
   <string name="acc_label_zip_short">우편번호</string>
-  <!-- Text informing user they should add a debit or credit card. Shown when there are no existing payment methods in the application -->
-    <!-- Message displayed when a payment method is removed, stating its name. -->
+  <!-- Message displayed when a payment method is removed, stating its name. -->
   <string name="added">%s 추가됨</string>
   <!-- Error text indicating that city is required, used for all locations -->
   <string name="address_city_required">도시를 입력하십시오</string>
@@ -20,6 +20,8 @@
   <string name="address_county_required">국가를 입력하십시오</string>
   <!-- Caption for Address field on address form -->
   <string name="address_label_address">주소</string>
+  <!-- Address line 1 placeholder for billing address form. -->
+  <string name="address_label_address_line1">주소란 1</string>
   <!-- Label for input requesting the first line of an address where , used for international addresses -->
   <string name="address_label_address_line1_optional">주소란 1(선택 사항)</string>
   <!-- Address line 2 placeholder for billing address form. -->
@@ -86,8 +88,7 @@
   <string name="address_region_generic_required">주/지방/지역을 입력하십시오</string>
   <!-- Error text indicating that address is required, used for all locations -->
   <string name="address_required">주소를 입력하십시오</string>
-  <!-- Title for shipping address entry section -->
-    <!-- Error text indicating that state is required, used for US addresses -->
+  <!-- Error text indicating that state is required, used for US addresses -->
   <string name="address_state_required">주를 입력하십시오</string>
   <!-- Error text indicating zip code is invalid, used for US addresses -->
   <string name="address_zip_invalid">우편번호가 유효하지 않습니다.</string>
@@ -142,8 +143,7 @@
   <string name="invalid_shipping_information">잘못된 배송 주소</string>
   <!-- Error message for when postal code in form is incomplete -->
   <string name="invalid_zip">우편번호가 불완전합니다.</string>
-  <!-- Text informing user there are no existing payment methods in the application -->
-    <string name="payment_method_add_new_card">새 카드 추가…</string>
+  <string name="payment_method_add_new_card">새 카드 추가…</string>
   <string name="payment_method_add_new_fpx">은행 계좌 선택(FPX)…</string>
   <!-- Label for free shipping method -->
   <string name="price_free">무료</string>

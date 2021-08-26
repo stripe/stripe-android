@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
-  <!-- Address line 1 placeholder for billing address form. -->
-  <string name="address_label_address_line1">주소란 1</string>
   <!-- Button title to cancel action in an alert -->
   <string name="cancel">취소</string>
   <!-- Done button title -->
@@ -20,6 +18,9 @@
   <string name="iban_invalid_country">입력한 IBAN이 잘못되었습니다. \"%s\"은(는) 지원되는 국가 코드가 아닙니다.</string>
   <!-- An error message displayed when the IBAN does not start with a two-letter country code. -->
   <string name="iban_invalid_start">IBAN은 두 글자의 국가 코드로 시작해야 합니다.</string>
+  <!-- Button title for confirmation alert to remove a saved payment method
+   Text for remove button -->
+  <string name="remove">제거</string>
   <!-- Generic error message shown when payment cannot be processed. -->
   <string name="stripe_failure_connection_error">결제 제공자에게 연결하는 과정에서 문제가 발생했습니다. 인터넷 연결을 확인하시고 다시 시도하십시오.</string>
   <!-- When an internal error is reported when a google pay payment is started. -->

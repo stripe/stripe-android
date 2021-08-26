@@ -7,9 +7,9 @@
   <string name="acc_label_expiry_date">Sista giltighetsdag</string>
   <string name="acc_label_expiry_date_node">%s, sista giltighetsdag</string>
   <!-- Caption for Zip Code field on address form (only shown when country is United States only) -->
+  <string name="acc_label_zip">Postkod</string>
   <!-- Short string for zip code (United States only) Please keep to 5 characters or less if possible. -->
   <string name="acc_label_zip_short">Postkod</string>
-  <!-- Text informing user they should add a debit or credit card. Shown when there are no existing payment methods in the application -->
   <!-- Message displayed when a payment method is removed, stating its name. -->
   <string name="added">Tillagt %s</string>
   <!-- Error text indicating that city is required, used for all locations -->
@@ -20,6 +20,8 @@
   <string name="address_county_required">Ange land</string>
   <!-- Caption for Address field on address form -->
   <string name="address_label_address">Adress</string>
+  <!-- Address line 1 placeholder for billing address form. -->
+  <string name="address_label_address_line1">Adressrad 1</string>
   <!-- Label for input requesting the first line of an address where , used for international addresses -->
   <string name="address_label_address_line1_optional">Adressrad 1 (valfritt)</string>
   <!-- Address line 2 placeholder for billing address form. -->
@@ -86,7 +88,6 @@
   <string name="address_region_generic_required">Ange delstat/region/provins</string>
   <!-- Error text indicating that address is required, used for all locations -->
   <string name="address_required">Ange adress</string>
-  <!-- Title for shipping address entry section -->
   <!-- Error text indicating that state is required, used for US addresses -->
   <string name="address_state_required">Ange delstat</string>
   <!-- Error text indicating zip code is invalid, used for US addresses -->
@@ -142,7 +143,6 @@
   <string name="invalid_shipping_information">Ogiltig leveransadress</string>
   <!-- Error message for when postal code in form is incomplete -->
   <string name="invalid_zip">Ditt postnummer är ofullständigt.</string>
-  <!-- Text informing user there are no existing payment methods in the application -->
   <string name="payment_method_add_new_card">Lägg till nytt kort ...</string>
   <string name="payment_method_add_new_fpx">Välj bankkonto (FPX) ...</string>
   <!-- Label for free shipping method -->

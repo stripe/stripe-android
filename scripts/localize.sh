@@ -12,6 +12,7 @@
 # This script can be run with no arguments:
 #  ./localize.sh
 
+API_TOKEN=7a35104e1c0804a5b12ae1a2a83a221d07fce67d
 if [ -z "$API_TOKEN" ]; then
   echo "You need to add the API_TOKEN to: localization_vars.sh"
   exit

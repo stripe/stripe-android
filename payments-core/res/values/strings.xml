@@ -6,6 +6,8 @@
   <string name="acc_label_cvc_node">%s, CVC</string>
   <string name="acc_label_expiry_date">Expiration date</string>
   <string name="acc_label_expiry_date_node">%s, Expiration date</string>
+  <!-- Caption for Zip Code field on address form (only shown when country is United States only) -->
+  <string name="acc_label_zip">ZIP Code</string>
   <!-- Short string for zip code (United States only) Please keep to 5 characters or less if possible. -->
   <string name="acc_label_zip_short">ZIP</string>
   <!-- Message displayed when a payment method is removed, stating its name. -->
@@ -18,6 +20,8 @@
   <string name="address_county_required">Please enter your county</string>
   <!-- Caption for Address field on address form -->
   <string name="address_label_address">Address</string>
+  <!-- Address line 1 placeholder for billing address form. -->
+  <string name="address_label_address_line1">Address line 1</string>
   <!-- Label for input requesting the first line of an address where , used for international addresses -->
   <string name="address_label_address_line1_optional">Address line 1 (optional)</string>
   <!-- Address line 2 placeholder for billing address form. -->
@@ -139,7 +143,6 @@
   <string name="invalid_shipping_information">Invalid Shipping Address</string>
   <!-- Error message for when postal code in form is incomplete -->
   <string name="invalid_zip">Your postal code is incomplete.</string>
-  <!-- Text informing user there are no existing payment methods in the application -->
   <string name="payment_method_add_new_card">Add new card…</string>
   <string name="payment_method_add_new_fpx">Select Bank Account (FPX)…</string>
   <!-- Label for free shipping method -->

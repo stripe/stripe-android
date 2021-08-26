@@ -7,10 +7,10 @@
   <string name="acc_label_expiry_date">Aegumiskuupäev</string>
   <string name="acc_label_expiry_date_node">%s, aegumiskuupäev</string>
   <!-- Caption for Zip Code field on address form (only shown when country is United States only) -->
-    <!-- Short string for zip code (United States only) Please keep to 5 characters or less if possible. -->
+  <string name="acc_label_zip">Sihtnumber</string>
+  <!-- Short string for zip code (United States only) Please keep to 5 characters or less if possible. -->
   <string name="acc_label_zip_short">Sihtnr</string>
-  <!-- Text informing user they should add a debit or credit card. Shown when there are no existing payment methods in the application -->
-    <!-- Message displayed when a payment method is removed, stating its name. -->
+  <!-- Message displayed when a payment method is removed, stating its name. -->
   <string name="added">Lisati %s</string>
   <!-- Error text indicating that city is required, used for all locations -->
   <string name="address_city_required">Sisestage linn</string>
@@ -20,6 +20,8 @@
   <string name="address_county_required">Sisestage riik</string>
   <!-- Caption for Address field on address form -->
   <string name="address_label_address">Aadress</string>
+  <!-- Address line 1 placeholder for billing address form. -->
+  <string name="address_label_address_line1">Aadressirida 1</string>
   <!-- Label for input requesting the first line of an address where , used for international addresses -->
   <string name="address_label_address_line1_optional">Aadressirida 1 (valikuline)</string>
   <!-- Address line 2 placeholder for billing address form. -->
@@ -86,8 +88,7 @@
   <string name="address_region_generic_required">Sisestage osariik/maakond/regioon</string>
   <!-- Error text indicating that address is required, used for all locations -->
   <string name="address_required">Sisestage aadress</string>
-  <!-- Title for shipping address entry section -->
-    <!-- Error text indicating that state is required, used for US addresses -->
+  <!-- Error text indicating that state is required, used for US addresses -->
   <string name="address_state_required">Sisestage osariik</string>
   <!-- Error text indicating zip code is invalid, used for US addresses -->
   <string name="address_zip_invalid">Sihtnumber on kehtetu.</string>
@@ -142,8 +143,7 @@
   <string name="invalid_shipping_information">Kehtetu tarneaadress</string>
   <!-- Error message for when postal code in form is incomplete -->
   <string name="invalid_zip">Sihtnumber on puudulik.</string>
-  <!-- Text informing user there are no existing payment methods in the application -->
-    <string name="payment_method_add_new_card">Lisage uus kaart ...</string>
+  <string name="payment_method_add_new_card">Lisage uus kaart ...</string>
   <string name="payment_method_add_new_fpx">Valige pangakonto (FPX) ...</string>
   <!-- Label for free shipping method -->
   <string name="price_free">Tasuta</string>

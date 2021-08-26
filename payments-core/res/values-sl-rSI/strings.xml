@@ -7,10 +7,10 @@
   <string name="acc_label_expiry_date">Datum poteka</string>
   <string name="acc_label_expiry_date_node">%s, datum poteka</string>
   <!-- Caption for Zip Code field on address form (only shown when country is United States only) -->
-    <!-- Short string for zip code (United States only) Please keep to 5 characters or less if possible. -->
+  <string name="acc_label_zip">Poštna številka</string>
+  <!-- Short string for zip code (United States only) Please keep to 5 characters or less if possible. -->
   <string name="acc_label_zip_short">Poštna številka</string>
-  <!-- Text informing user they should add a debit or credit card. Shown when there are no existing payment methods in the application -->
-    <!-- Message displayed when a payment method is removed, stating its name. -->
+  <!-- Message displayed when a payment method is removed, stating its name. -->
   <string name="added">Način plačila %s je dodan</string>
   <!-- Error text indicating that city is required, used for all locations -->
   <string name="address_city_required">Vnesite mesto</string>
@@ -20,6 +20,8 @@
   <string name="address_county_required">Vnesite državo</string>
   <!-- Caption for Address field on address form -->
   <string name="address_label_address">Naslov</string>
+  <!-- Address line 1 placeholder for billing address form. -->
+  <string name="address_label_address_line1">Naslov 1</string>
   <!-- Label for input requesting the first line of an address where , used for international addresses -->
   <string name="address_label_address_line1_optional">Naslov 1 (izbirno)</string>
   <!-- Address line 2 placeholder for billing address form. -->
@@ -86,8 +88,7 @@
   <string name="address_region_generic_required">Vnesite zvezno državo/provinco/regijo</string>
   <!-- Error text indicating that address is required, used for all locations -->
   <string name="address_required">Vnesite svoj naslov</string>
-  <!-- Title for shipping address entry section -->
-    <!-- Error text indicating that state is required, used for US addresses -->
+  <!-- Error text indicating that state is required, used for US addresses -->
   <string name="address_state_required">Vnesite zvezno državo</string>
   <!-- Error text indicating zip code is invalid, used for US addresses -->
   <string name="address_zip_invalid">Vaša poštna številka ni veljavna.</string>
@@ -142,8 +143,7 @@
   <string name="invalid_shipping_information">Neveljaven dostavni naslov</string>
   <!-- Error message for when postal code in form is incomplete -->
   <string name="invalid_zip">Vaša poštna številka ni popolna.</string>
-  <!-- Text informing user there are no existing payment methods in the application -->
-    <string name="payment_method_add_new_card">Dodajte novo kartico ...</string>
+  <string name="payment_method_add_new_card">Dodajte novo kartico ...</string>
   <string name="payment_method_add_new_fpx">Izberite bančni račun (FPX) …</string>
   <!-- Label for free shipping method -->
   <string name="price_free">Brezplačno</string>

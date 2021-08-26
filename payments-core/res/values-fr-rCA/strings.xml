@@ -7,10 +7,10 @@
   <string name="acc_label_expiry_date">Date d\'expiration</string>
   <string name="acc_label_expiry_date_node">%s, date d\'expiration</string>
   <!-- Caption for Zip Code field on address form (only shown when country is United States only) -->
-    <!-- Short string for zip code (United States only) Please keep to 5 characters or less if possible. -->
+  <string name="acc_label_zip">Code postal</string>
+  <!-- Short string for zip code (United States only) Please keep to 5 characters or less if possible. -->
   <string name="acc_label_zip_short">Code postal</string>
-  <!-- Text informing user they should add a debit or credit card. Shown when there are no existing payment methods in the application -->
-    <!-- Message displayed when a payment method is removed, stating its name. -->
+  <!-- Message displayed when a payment method is removed, stating its name. -->
   <string name="added">%s ajouté</string>
   <!-- Error text indicating that city is required, used for all locations -->
   <string name="address_city_required">Veuillez entrer votre ville</string>
@@ -20,6 +20,8 @@
   <string name="address_county_required">Veuillez entrer votre comté</string>
   <!-- Caption for Address field on address form -->
   <string name="address_label_address">Adresse</string>
+  <!-- Address line 1 placeholder for billing address form. -->
+  <string name="address_label_address_line1">Ligne d\'adresse 1</string>
   <!-- Label for input requesting the first line of an address where , used for international addresses -->
   <string name="address_label_address_line1_optional">Ligne d\'adresse 1 (facultatif)</string>
   <!-- Address line 2 placeholder for billing address form. -->
@@ -86,8 +88,7 @@
   <string name="address_region_generic_required">Veuillez entrer votre État/province/région</string>
   <!-- Error text indicating that address is required, used for all locations -->
   <string name="address_required">Veuillez entrer votre adresse</string>
-  <!-- Title for shipping address entry section -->
-    <!-- Error text indicating that state is required, used for US addresses -->
+  <!-- Error text indicating that state is required, used for US addresses -->
   <string name="address_state_required">Veuillez entrer votre adresse</string>
   <!-- Error text indicating zip code is invalid, used for US addresses -->
   <string name="address_zip_invalid">Votre code postal n\'est pas valide.</string>
@@ -142,8 +143,7 @@
   <string name="invalid_shipping_information">Adresse de livraison non valide</string>
   <!-- Error message for when postal code in form is incomplete -->
   <string name="invalid_zip">Votre code postal est incomplet.</string>
-  <!-- Text informing user there are no existing payment methods in the application -->
-    <string name="payment_method_add_new_card">Ajouter une carte…</string>
+  <string name="payment_method_add_new_card">Ajouter une carte…</string>
   <string name="payment_method_add_new_fpx">Sélectionner un compte bancaire (FPX)…</string>
   <!-- Label for free shipping method -->
   <string name="price_free">Gratuit</string>

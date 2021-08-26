@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
-  <!-- Address line 1 placeholder for billing address form. -->
-  <string name="address_label_address_line1">住所 (1 行目)</string>
   <!-- Button title to cancel action in an alert -->
   <string name="cancel">キャンセル</string>
   <!-- Done button title -->
@@ -20,6 +18,9 @@
   <string name="iban_invalid_country">入力した IBAN が無効です。\"%s\" はサポートされている国コードではありません。</string>
   <!-- An error message displayed when the IBAN does not start with a two-letter country code. -->
   <string name="iban_invalid_start">IBANコードの先頭には 2 文字の国コードを入力してください。</string>
+  <!-- Button title for confirmation alert to remove a saved payment method
+   Text for remove button -->
+  <string name="remove">削除</string>
   <!-- Generic error message shown when payment cannot be processed. -->
   <string name="stripe_failure_connection_error">決済代行会社への接続中に問題が発生しました。インターネット接続をご確認の上、もう一度お試しください。</string>
   <!-- When an internal error is reported when a google pay payment is started. -->

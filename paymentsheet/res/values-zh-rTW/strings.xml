@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
-  <!-- Address line 1 placeholder for billing address form. -->
-  <string name="address_label_address_line1">地址行 1</string>
   <!-- Button title to cancel action in an alert -->
   <string name="cancel">取消</string>
   <!-- Done button title -->
@@ -20,6 +18,9 @@
   <string name="iban_invalid_country">您輸入的 IBAN 無效，\"%s\" 是不支援的國家代碼。</string>
   <!-- An error message displayed when the IBAN does not start with a two-letter country code. -->
   <string name="iban_invalid_start">您的 IBAN 應以一個兩字母國家代碼開頭。</string>
+  <!-- Button title for confirmation alert to remove a saved payment method
+   Text for remove button -->
+  <string name="remove">移除</string>
   <!-- Generic error message shown when payment cannot be processed. -->
   <string name="stripe_failure_connection_error">連接我們的支付提供者時出現了問題。請檢查網路連接，然後重試。</string>
   <!-- When an internal error is reported when a google pay payment is started. -->

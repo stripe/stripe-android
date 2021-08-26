@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
-  <!-- Address line 1 placeholder for billing address form. -->
-  <string name="address_label_address_line1">Ред 1 на адреса</string>
   <!-- Button title to cancel action in an alert -->
   <string name="cancel">Отмяна</string>
   <!-- Done button title -->
@@ -20,6 +18,9 @@
   <string name="iban_invalid_country">Въведеният IBAN е невалиден, „%s“ не е поддържан код на държава.</string>
   <!-- An error message displayed when the IBAN does not start with a two-letter country code. -->
   <string name="iban_invalid_start">Вашият IBAN трябва да започва с двубуквен код на държава.</string>
+  <!-- Button title for confirmation alert to remove a saved payment method
+   Text for remove button -->
+  <string name="remove">Премахване</string>
   <!-- Generic error message shown when payment cannot be processed. -->
   <string name="stripe_failure_connection_error">Възникна проблем при свързването с нашия доставчик на платежни услуги. Моля, проверете Вашата интернет връзка и опитайте отново.</string>
   <!-- When an internal error is reported when a google pay payment is started. -->
