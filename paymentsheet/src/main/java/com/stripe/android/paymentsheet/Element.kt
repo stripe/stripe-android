@@ -77,6 +77,9 @@ internal sealed class FormElement {
         private val amount: Amount,
         override val controller: Controller? = null
     ) : FormElement() {
+        override fun getFormFieldValueFlow(): Flow<List<Pair<IdentifierSpec, FormFieldEntry>>> =
+            MutableStateFlow(emptyList())
+
         val infoUrl = url.format(Locale.current.region.lowercase())
 
         fun getLabel(resources: Resources) =
