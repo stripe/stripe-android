@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.forms
 import android.content.Intent
 import android.content.res.Resources
 import android.net.Uri
+import androidx.annotation.RestrictTo
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -296,8 +297,9 @@ internal fun AfterpayClearpayElementUI(
  * @param: layout - this contains the visual layout of the fields on the screen used by [Form]
  * to display the UI fields on screen.  It also informs us of the backing fields to be created.
  */
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Singleton
-internal class FormViewModel @Inject internal constructor(
+class FormViewModel @Inject internal constructor(
     layout: LayoutSpec,
     config: FormFragmentArguments,
     private val resourceRepository: ResourceRepository

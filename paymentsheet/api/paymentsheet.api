@@ -521,6 +521,34 @@ public final class com/stripe/android/paymentsheet/flowcontroller/DefaultFlowCon
 	public static fun newInstance (Lkotlinx/coroutines/CoroutineScope;Landroidx/lifecycle/LifecycleOwner;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lcom/stripe/android/paymentsheet/model/PaymentOptionFactory;Lcom/stripe/android/paymentsheet/PaymentOptionCallback;Lcom/stripe/android/paymentsheet/PaymentSheetResultCallback;Landroidx/activity/result/ActivityResultCaller;ILcom/stripe/android/paymentsheet/flowcontroller/FlowControllerInitializer;Lcom/stripe/android/paymentsheet/analytics/EventReporter;Lcom/stripe/android/paymentsheet/flowcontroller/FlowControllerViewModel;Lcom/stripe/android/PaymentController;Ldagger/Lazy;Ljavax/inject/Provider;)Lcom/stripe/android/paymentsheet/flowcontroller/DefaultFlowController;
 }
 
+public final class com/stripe/android/paymentsheet/forms/FormFieldEntry {
+	public static final field $stable I
+	public fun <init> (Ljava/lang/String;Z)V
+	public synthetic fun <init> (Ljava/lang/String;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Z
+	public final fun copy (Ljava/lang/String;Z)Lcom/stripe/android/paymentsheet/forms/FormFieldEntry;
+	public static synthetic fun copy$default (Lcom/stripe/android/paymentsheet/forms/FormFieldEntry;Ljava/lang/String;ZILjava/lang/Object;)Lcom/stripe/android/paymentsheet/forms/FormFieldEntry;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getValue ()Ljava/lang/String;
+	public fun hashCode ()I
+	public final fun isComplete ()Z
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/paymentsheet/forms/FormFieldValues {
+	public static final field $stable I
+	public fun <init> (Ljava/util/Map;Z)V
+	public synthetic fun <init> (Ljava/util/Map;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun getFieldValuePairs ()Ljava/util/Map;
+	public final fun getShowsMandate ()Z
+}
+
+public final class com/stripe/android/paymentsheet/forms/FormViewModel : androidx/lifecycle/ViewModel {
+	public static final field $stable I
+	public final fun getCompleteFormValues ()Lkotlinx/coroutines/flow/Flow;
+}
+
 public final class com/stripe/android/paymentsheet/forms/FormViewModel_Factory : dagger/internal/Factory {
 	public fun <init> (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)V
 	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/paymentsheet/forms/FormViewModel_Factory;
@@ -671,6 +699,31 @@ public final class com/stripe/android/paymentsheet/model/StripeIntentValidator_F
 	public static fun newInstance ()Lcom/stripe/android/paymentsheet/model/StripeIntentValidator;
 }
 
+public final class com/stripe/android/paymentsheet/model/SupportedPaymentMethod : java/lang/Enum {
+	public static final field AfterpayClearpay Lcom/stripe/android/paymentsheet/model/SupportedPaymentMethod;
+	public static final field Bancontact Lcom/stripe/android/paymentsheet/model/SupportedPaymentMethod;
+	public static final field Card Lcom/stripe/android/paymentsheet/model/SupportedPaymentMethod;
+	public static final field Companion Lcom/stripe/android/paymentsheet/model/SupportedPaymentMethod$Companion;
+	public static final field Eps Lcom/stripe/android/paymentsheet/model/SupportedPaymentMethod;
+	public static final field Giropay Lcom/stripe/android/paymentsheet/model/SupportedPaymentMethod;
+	public static final field Ideal Lcom/stripe/android/paymentsheet/model/SupportedPaymentMethod;
+	public static final field P24 Lcom/stripe/android/paymentsheet/model/SupportedPaymentMethod;
+	public static final field SepaDebit Lcom/stripe/android/paymentsheet/model/SupportedPaymentMethod;
+	public static final field Sofort Lcom/stripe/android/paymentsheet/model/SupportedPaymentMethod;
+	public final fun getCode ()Ljava/lang/String;
+	public final fun getDisplayNameResource ()I
+	public final fun getFormSpec ()Lcom/stripe/android/paymentsheet/specifications/FormSpec;
+	public final fun getIconResource ()I
+	public fun toString ()Ljava/lang/String;
+	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/paymentsheet/model/SupportedPaymentMethod;
+	public static fun values ()[Lcom/stripe/android/paymentsheet/model/SupportedPaymentMethod;
+}
+
+public final class com/stripe/android/paymentsheet/model/SupportedPaymentMethod$Companion {
+	public final fun fromCode (Ljava/lang/String;)Lcom/stripe/android/paymentsheet/model/SupportedPaymentMethod;
+	public final fun getSupportedSavedPaymentMethods ()Ljava/util/Set;
+}
+
 public final class com/stripe/android/paymentsheet/paymentdatacollection/Address : android/os/Parcelable {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
@@ -720,6 +773,20 @@ public final class com/stripe/android/paymentsheet/paymentdatacollection/Billing
 	public fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
+public final class com/stripe/android/paymentsheet/paymentdatacollection/ComposeFormDataCollectionFragment : androidx/fragment/app/Fragment {
+	public static final field $stable I
+	public static final field Companion Lcom/stripe/android/paymentsheet/paymentdatacollection/ComposeFormDataCollectionFragment$Companion;
+	public static final field EXTRA_CONFIG Ljava/lang/String;
+	public fun <init> ()V
+	public final fun getFormSpec ()Lcom/stripe/android/paymentsheet/specifications/FormSpec;
+	public final fun getFormViewModel ()Lcom/stripe/android/paymentsheet/forms/FormViewModel;
+	public fun onCreateView (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Landroid/os/Bundle;)Landroid/view/View;
+	public final fun setProcessing (Z)V
+}
+
+public final class com/stripe/android/paymentsheet/paymentdatacollection/ComposeFormDataCollectionFragment$Companion {
+}
+
 public final class com/stripe/android/paymentsheet/repositories/CustomerApiRepository_Factory : dagger/internal/Factory {
 	public fun <init> (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)V
 	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/paymentsheet/repositories/CustomerApiRepository_Factory;
@@ -744,11 +811,294 @@ public final class com/stripe/android/paymentsheet/specifications/BankRepository
 	public static fun newInstance (Landroid/content/res/Resources;)Lcom/stripe/android/paymentsheet/specifications/BankRepository;
 }
 
+public final class com/stripe/android/paymentsheet/specifications/DropdownItem {
+	public static final field $stable I
+	public static final field Companion Lcom/stripe/android/paymentsheet/specifications/DropdownItem$Companion;
+	public synthetic fun <init> (ILjava/lang/String;Ljava/lang/String;Lkotlinx/serialization/internal/SerializationConstructorMarker;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/paymentsheet/specifications/DropdownItem;
+	public static synthetic fun copy$default (Lcom/stripe/android/paymentsheet/specifications/DropdownItem;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/paymentsheet/specifications/DropdownItem;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getText ()Ljava/lang/String;
+	public final fun getValue ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+	public static final fun write$Self (Lcom/stripe/android/paymentsheet/specifications/DropdownItem;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V
+}
+
+public final class com/stripe/android/paymentsheet/specifications/DropdownItem$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/stripe/android/paymentsheet/specifications/DropdownItem$$serializer;
+	public static final synthetic field descriptor Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcom/stripe/android/paymentsheet/specifications/DropdownItem;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/stripe/android/paymentsheet/specifications/DropdownItem;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class com/stripe/android/paymentsheet/specifications/DropdownItem$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public abstract class com/stripe/android/paymentsheet/specifications/FormItemSpec {
+	public static final field $stable I
+}
+
+public final class com/stripe/android/paymentsheet/specifications/FormItemSpec$AfterpayClearpayTextSpec : com/stripe/android/paymentsheet/specifications/FormItemSpec, com/stripe/android/paymentsheet/specifications/RequiredItemSpec {
+	public static final field $stable I
+	public fun <init> (Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec;)V
+	public final fun component1 ()Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec;
+	public final fun copy (Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec;)Lcom/stripe/android/paymentsheet/specifications/FormItemSpec$AfterpayClearpayTextSpec;
+	public static synthetic fun copy$default (Lcom/stripe/android/paymentsheet/specifications/FormItemSpec$AfterpayClearpayTextSpec;Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec;ILjava/lang/Object;)Lcom/stripe/android/paymentsheet/specifications/FormItemSpec$AfterpayClearpayTextSpec;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun getIdentifier ()Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/paymentsheet/specifications/FormItemSpec$MandateTextSpec : com/stripe/android/paymentsheet/specifications/FormItemSpec, com/stripe/android/paymentsheet/specifications/RequiredItemSpec {
+	public static final field $stable I
+	public synthetic fun <init> (Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec;IJLkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec;
+	public final fun component2 ()I
+	public final fun component3-0d7_KjU ()J
+	public final fun copy-mxwnekA (Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec;IJ)Lcom/stripe/android/paymentsheet/specifications/FormItemSpec$MandateTextSpec;
+	public static synthetic fun copy-mxwnekA$default (Lcom/stripe/android/paymentsheet/specifications/FormItemSpec$MandateTextSpec;Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec;IJILjava/lang/Object;)Lcom/stripe/android/paymentsheet/specifications/FormItemSpec$MandateTextSpec;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getColor-0d7_KjU ()J
+	public fun getIdentifier ()Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec;
+	public final fun getStringResId ()I
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/paymentsheet/specifications/FormItemSpec$SaveForFutureUseSpec : com/stripe/android/paymentsheet/specifications/FormItemSpec, com/stripe/android/paymentsheet/specifications/RequiredItemSpec {
+	public static final field $stable I
+	public fun <init> (Ljava/util/List;)V
+	public final fun component1 ()Ljava/util/List;
+	public final fun copy (Ljava/util/List;)Lcom/stripe/android/paymentsheet/specifications/FormItemSpec$SaveForFutureUseSpec;
+	public static synthetic fun copy$default (Lcom/stripe/android/paymentsheet/specifications/FormItemSpec$SaveForFutureUseSpec;Ljava/util/List;ILjava/lang/Object;)Lcom/stripe/android/paymentsheet/specifications/FormItemSpec$SaveForFutureUseSpec;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun getIdentifier ()Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec$SaveForFutureUse;
+	public synthetic fun getIdentifier ()Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec;
+	public final fun getIdentifierRequiredForFutureUse ()Ljava/util/List;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/paymentsheet/specifications/FormItemSpec$SectionSpec : com/stripe/android/paymentsheet/specifications/FormItemSpec, com/stripe/android/paymentsheet/specifications/RequiredItemSpec {
+	public static final field $stable I
+	public fun <init> (Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec;Lcom/stripe/android/paymentsheet/specifications/SectionFieldSpec;Ljava/lang/Integer;)V
+	public synthetic fun <init> (Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec;Lcom/stripe/android/paymentsheet/specifications/SectionFieldSpec;Ljava/lang/Integer;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec;Ljava/util/List;Ljava/lang/Integer;)V
+	public synthetic fun <init> (Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec;Ljava/util/List;Ljava/lang/Integer;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec;
+	public final fun component2 ()Ljava/util/List;
+	public final fun component3 ()Ljava/lang/Integer;
+	public final fun copy (Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec;Ljava/util/List;Ljava/lang/Integer;)Lcom/stripe/android/paymentsheet/specifications/FormItemSpec$SectionSpec;
+	public static synthetic fun copy$default (Lcom/stripe/android/paymentsheet/specifications/FormItemSpec$SectionSpec;Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec;Ljava/util/List;Ljava/lang/Integer;ILjava/lang/Object;)Lcom/stripe/android/paymentsheet/specifications/FormItemSpec$SectionSpec;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getFields ()Ljava/util/List;
+	public fun getIdentifier ()Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec;
+	public final fun getTitle ()Ljava/lang/Integer;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/paymentsheet/specifications/FormSpec {
+	public static final field $stable I
+	public fun <init> (Lcom/stripe/android/paymentsheet/specifications/LayoutSpec;Ljava/util/Map;)V
+	public final fun component1 ()Lcom/stripe/android/paymentsheet/specifications/LayoutSpec;
+	public final fun component2 ()Ljava/util/Map;
+	public final fun copy (Lcom/stripe/android/paymentsheet/specifications/LayoutSpec;Ljava/util/Map;)Lcom/stripe/android/paymentsheet/specifications/FormSpec;
+	public static synthetic fun copy$default (Lcom/stripe/android/paymentsheet/specifications/FormSpec;Lcom/stripe/android/paymentsheet/specifications/LayoutSpec;Ljava/util/Map;ILjava/lang/Object;)Lcom/stripe/android/paymentsheet/specifications/FormSpec;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getLayout ()Lcom/stripe/android/paymentsheet/specifications/LayoutSpec;
+	public final fun getParamKey ()Ljava/util/Map;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract class com/stripe/android/paymentsheet/specifications/IdentifierSpec {
+	public static final field $stable I
+	public synthetic fun <init> (Ljava/lang/String;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun getValue ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/paymentsheet/specifications/IdentifierSpec$City : com/stripe/android/paymentsheet/specifications/IdentifierSpec {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec$City;
+}
+
+public final class com/stripe/android/paymentsheet/specifications/IdentifierSpec$Country : com/stripe/android/paymentsheet/specifications/IdentifierSpec {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec$Country;
+}
+
+public final class com/stripe/android/paymentsheet/specifications/IdentifierSpec$Email : com/stripe/android/paymentsheet/specifications/IdentifierSpec {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec$Email;
+}
+
+public final class com/stripe/android/paymentsheet/specifications/IdentifierSpec$Generic : com/stripe/android/paymentsheet/specifications/IdentifierSpec {
+	public static final field $stable I
+	public fun <init> (Ljava/lang/String;)V
+	public final fun copy (Ljava/lang/String;)Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec$Generic;
+	public static synthetic fun copy$default (Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec$Generic;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec$Generic;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/paymentsheet/specifications/IdentifierSpec$Line1 : com/stripe/android/paymentsheet/specifications/IdentifierSpec {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec$Line1;
+}
+
+public final class com/stripe/android/paymentsheet/specifications/IdentifierSpec$Line2 : com/stripe/android/paymentsheet/specifications/IdentifierSpec {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec$Line2;
+}
+
+public final class com/stripe/android/paymentsheet/specifications/IdentifierSpec$Name : com/stripe/android/paymentsheet/specifications/IdentifierSpec {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec$Name;
+}
+
+public final class com/stripe/android/paymentsheet/specifications/IdentifierSpec$Phone : com/stripe/android/paymentsheet/specifications/IdentifierSpec {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec$Phone;
+}
+
+public final class com/stripe/android/paymentsheet/specifications/IdentifierSpec$PostalCode : com/stripe/android/paymentsheet/specifications/IdentifierSpec {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec$PostalCode;
+}
+
+public final class com/stripe/android/paymentsheet/specifications/IdentifierSpec$SaveForFutureUse : com/stripe/android/paymentsheet/specifications/IdentifierSpec {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec$SaveForFutureUse;
+}
+
+public final class com/stripe/android/paymentsheet/specifications/IdentifierSpec$State : com/stripe/android/paymentsheet/specifications/IdentifierSpec {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec$State;
+}
+
+public final class com/stripe/android/paymentsheet/specifications/LayoutSpec {
+	public static final field $stable I
+	public fun <init> (Ljava/util/List;)V
+	public final fun component1 ()Ljava/util/List;
+	public final fun copy (Ljava/util/List;)Lcom/stripe/android/paymentsheet/specifications/LayoutSpec;
+	public static synthetic fun copy$default (Lcom/stripe/android/paymentsheet/specifications/LayoutSpec;Ljava/util/List;ILjava/lang/Object;)Lcom/stripe/android/paymentsheet/specifications/LayoutSpec;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getItems ()Ljava/util/List;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface class com/stripe/android/paymentsheet/specifications/RequiredItemSpec {
+	public abstract fun getIdentifier ()Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec;
+}
+
 public final class com/stripe/android/paymentsheet/specifications/ResourceRepository_Factory : dagger/internal/Factory {
 	public fun <init> (Ljavax/inject/Provider;Ljavax/inject/Provider;)V
 	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/paymentsheet/specifications/ResourceRepository_Factory;
 	public fun get ()Lcom/stripe/android/paymentsheet/specifications/ResourceRepository;
 	public synthetic fun get ()Ljava/lang/Object;
 	public static fun newInstance (Lcom/stripe/android/paymentsheet/specifications/BankRepository;Lcom/stripe/android/paymentsheet/address/AddressFieldElementRepository;)Lcom/stripe/android/paymentsheet/specifications/ResourceRepository;
+}
+
+public abstract class com/stripe/android/paymentsheet/specifications/SectionFieldSpec {
+	public static final field $stable I
+	public synthetic fun <init> (Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun getIdentifier ()Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec;
+}
+
+public final class com/stripe/android/paymentsheet/specifications/SectionFieldSpec$AddressSpec : com/stripe/android/paymentsheet/specifications/SectionFieldSpec {
+	public static final field $stable I
+	public fun <init> (Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec;)V
+	public final fun component1 ()Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec;
+	public final fun copy (Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec;)Lcom/stripe/android/paymentsheet/specifications/SectionFieldSpec$AddressSpec;
+	public static synthetic fun copy$default (Lcom/stripe/android/paymentsheet/specifications/SectionFieldSpec$AddressSpec;Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec;ILjava/lang/Object;)Lcom/stripe/android/paymentsheet/specifications/SectionFieldSpec$AddressSpec;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun getIdentifier ()Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/paymentsheet/specifications/SectionFieldSpec$BankDropdown : com/stripe/android/paymentsheet/specifications/SectionFieldSpec {
+	public static final field $stable I
+	public fun <init> (Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec;ILcom/stripe/android/paymentsheet/specifications/SupportedBankType;)V
+	public final fun component1 ()Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec;
+	public final fun component2 ()I
+	public final fun component3 ()Lcom/stripe/android/paymentsheet/specifications/SupportedBankType;
+	public final fun copy (Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec;ILcom/stripe/android/paymentsheet/specifications/SupportedBankType;)Lcom/stripe/android/paymentsheet/specifications/SectionFieldSpec$BankDropdown;
+	public static synthetic fun copy$default (Lcom/stripe/android/paymentsheet/specifications/SectionFieldSpec$BankDropdown;Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec;ILcom/stripe/android/paymentsheet/specifications/SupportedBankType;ILjava/lang/Object;)Lcom/stripe/android/paymentsheet/specifications/SectionFieldSpec$BankDropdown;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBankType ()Lcom/stripe/android/paymentsheet/specifications/SupportedBankType;
+	public fun getIdentifier ()Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec;
+	public final fun getLabel ()I
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/paymentsheet/specifications/SectionFieldSpec$Country : com/stripe/android/paymentsheet/specifications/SectionFieldSpec {
+	public static final field $stable I
+	public fun <init> ()V
+	public fun <init> (Ljava/util/Set;)V
+	public synthetic fun <init> (Ljava/util/Set;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/util/Set;
+	public final fun copy (Ljava/util/Set;)Lcom/stripe/android/paymentsheet/specifications/SectionFieldSpec$Country;
+	public static synthetic fun copy$default (Lcom/stripe/android/paymentsheet/specifications/SectionFieldSpec$Country;Ljava/util/Set;ILjava/lang/Object;)Lcom/stripe/android/paymentsheet/specifications/SectionFieldSpec$Country;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getOnlyShowCountryCodes ()Ljava/util/Set;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/paymentsheet/specifications/SectionFieldSpec$Email : com/stripe/android/paymentsheet/specifications/SectionFieldSpec {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/stripe/android/paymentsheet/specifications/SectionFieldSpec$Email;
+}
+
+public final class com/stripe/android/paymentsheet/specifications/SectionFieldSpec$Iban : com/stripe/android/paymentsheet/specifications/SectionFieldSpec {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/stripe/android/paymentsheet/specifications/SectionFieldSpec$Iban;
+}
+
+public final class com/stripe/android/paymentsheet/specifications/SectionFieldSpec$SimpleText : com/stripe/android/paymentsheet/specifications/SectionFieldSpec {
+	public static final field $stable I
+	public synthetic fun <init> (Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec;IIIZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec;IIIZLkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec;
+	public final fun component2 ()I
+	public final fun component3-IUNYP9k ()I
+	public final fun component4-PjHm6EE ()I
+	public final fun component5 ()Z
+	public final fun copy-25FCGzQ (Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec;IIIZ)Lcom/stripe/android/paymentsheet/specifications/SectionFieldSpec$SimpleText;
+	public static synthetic fun copy-25FCGzQ$default (Lcom/stripe/android/paymentsheet/specifications/SectionFieldSpec$SimpleText;Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec;IIIZILjava/lang/Object;)Lcom/stripe/android/paymentsheet/specifications/SectionFieldSpec$SimpleText;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCapitalization-IUNYP9k ()I
+	public fun getIdentifier ()Lcom/stripe/android/paymentsheet/specifications/IdentifierSpec;
+	public final fun getKeyboardType-PjHm6EE ()I
+	public final fun getLabel ()I
+	public final fun getShowOptionalLabel ()Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/paymentsheet/specifications/SupportedBankType : java/lang/Enum {
+	public static final field Eps Lcom/stripe/android/paymentsheet/specifications/SupportedBankType;
+	public static final field Ideal Lcom/stripe/android/paymentsheet/specifications/SupportedBankType;
+	public static final field P24 Lcom/stripe/android/paymentsheet/specifications/SupportedBankType;
+	public final fun getAssetFileName ()Ljava/lang/String;
+	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/paymentsheet/specifications/SupportedBankType;
+	public static fun values ()[Lcom/stripe/android/paymentsheet/specifications/SupportedBankType;
 }
 

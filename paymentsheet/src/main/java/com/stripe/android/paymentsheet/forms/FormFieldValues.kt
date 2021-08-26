@@ -5,12 +5,12 @@ import com.stripe.android.paymentsheet.specifications.IdentifierSpec
 /**
  * The identifier here comes from the form element (section, static text, etc)
  */
-internal class FormFieldValues(
+class FormFieldValues(
     val fieldValuePairs: Map<IdentifierSpec, FormFieldEntry> = mapOf(),
     val showsMandate: Boolean
 )
 
-internal data class FormFieldEntry(
+data class FormFieldEntry(
     val value: String?,
     val isComplete: Boolean = false
 )
