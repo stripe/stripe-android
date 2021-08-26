@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import androidx.annotation.LayoutRes
+import androidx.annotation.RestrictTo
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import com.stripe.android.ObjectBuilder
@@ -109,8 +110,9 @@ class AddPaymentMethodActivityStarter : ActivityStarter<AddPaymentMethodActivity
                 this.isPaymentSessionActive = isPaymentSessionActive
             }
 
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             @JvmSynthetic
-            internal fun setPaymentConfiguration(
+            fun setPaymentConfiguration(
                 paymentConfiguration: PaymentConfiguration?
             ): Builder = apply {
                 this.paymentConfiguration = paymentConfiguration

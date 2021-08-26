@@ -13,6 +13,7 @@ import androidx.annotation.ColorInt
 import androidx.annotation.DrawableRes
 import androidx.annotation.IdRes
 import androidx.annotation.IntRange
+import androidx.annotation.RestrictTo
 import androidx.annotation.StringRes
 import androidx.annotation.VisibleForTesting
 import androidx.core.content.ContextCompat
@@ -53,15 +54,30 @@ class CardMultilineWidget @JvmOverloads constructor(
         LayoutInflater.from(context),
         this
     )
-    internal val cardNumberEditText = viewBinding.etCardNumber
-    internal val expiryDateEditText = viewBinding.etExpiry
-    internal val cvcEditText = viewBinding.etCvc
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
+    val cardNumberEditText = viewBinding.etCardNumber
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
+    val expiryDateEditText = viewBinding.etExpiry
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
+    val cvcEditText = viewBinding.etCvc
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
     internal val postalCodeEditText = viewBinding.etPostalCode
 
-    internal val secondRowLayout = viewBinding.secondRowLayout
-    internal val cardNumberTextInputLayout = viewBinding.tlCardNumber
-    internal val expiryTextInputLayout = viewBinding.tlExpiry
-    internal val cvcInputLayout = viewBinding.tlCvc
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
+    val secondRowLayout = viewBinding.secondRowLayout
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
+    val cardNumberTextInputLayout = viewBinding.tlCardNumber
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
+    val expiryTextInputLayout = viewBinding.tlExpiry
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
+    val cvcInputLayout = viewBinding.tlCvc
     internal val postalInputLayout = viewBinding.tlPostalCode
 
     private val textInputLayouts = listOf(
@@ -103,6 +119,9 @@ class CardMultilineWidget @JvmOverloads constructor(
     internal val brand: CardBrand
         @JvmSynthetic
         get() = cardBrand
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
+    fun getBrand() = brand
 
     @ColorInt
     private val tintColorInt: Int
@@ -255,6 +274,11 @@ class CardMultilineWidget @JvmOverloads constructor(
         }.orEmpty()
     }
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
+    fun setExpirationDatePlaceholderRes(@StringRes resId: Int?) {
+        expirationDatePlaceholderRes = resId
+    }
+
     private var showCvcIconInCvcField: Boolean = false
 
     internal var cardBrandIconSupplier: CardBrandIconSupplier by Delegates.observable(
@@ -268,20 +292,43 @@ class CardMultilineWidget @JvmOverloads constructor(
     ) { _, _, newValue ->
         cardNumberEditText.setErrorMessageListener(newValue)
     }
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
+    fun setCardNumberErrorListener(listener: StripeEditText.ErrorMessageListener) {
+        cardNumberErrorListener = listener
+    }
+
     internal var expirationDateErrorListener: StripeEditText.ErrorMessageListener by Delegates.observable(
         ErrorListener(expiryTextInputLayout)
     ) { _, _, newValue ->
         expiryDateEditText.setErrorMessageListener(newValue)
     }
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
+    fun setExpirationDateErrorListener(listener: StripeEditText.ErrorMessageListener) {
+        expirationDateErrorListener = listener
+    }
+
     internal var cvcErrorListener: StripeEditText.ErrorMessageListener by Delegates.observable(
         ErrorListener(cvcInputLayout)
     ) { _, _, newValue ->
         cvcEditText.setErrorMessageListener(newValue)
     }
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
+    fun setCvcErrorListener(listener: StripeEditText.ErrorMessageListener) {
+        cvcErrorListener = listener
+    }
+
     internal var postalCodeErrorListener: StripeEditText.ErrorMessageListener? by Delegates.observable(
         ErrorListener(postalInputLayout)
     ) { _, _, newValue ->
         postalCodeEditText.setErrorMessageListener(newValue)
+    }
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
+    fun setPostalCodeErrorListener(listener: StripeEditText.ErrorMessageListener?) {
+        postalCodeErrorListener = listener
     }
 
     init {
@@ -396,7 +443,8 @@ class CardMultilineWidget @JvmOverloads constructor(
         cardNumberTextInputLayout.placeholderText = cardHint
     }
 
-    internal fun populate(card: PaymentMethodCreateParams.Card?) {
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
+    fun populate(card: PaymentMethodCreateParams.Card?) {
         card?.let { createParamsCard ->
             // Keep track of currently focused view to return focus to it after populating
             val focusedView = findFocus()
@@ -438,7 +486,8 @@ class CardMultilineWidget @JvmOverloads constructor(
     /**
      * Set an optional CVC placeholder text to override defaults, or `null` to use defaults.
      */
-    internal fun setCvcPlaceholderText(cvcPlaceholderText: String?) {
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
+    fun setCvcPlaceholderText(cvcPlaceholderText: String?) {
         customCvcPlaceholderText = cvcPlaceholderText
         updateCvc()
     }
@@ -451,8 +500,9 @@ class CardMultilineWidget @JvmOverloads constructor(
         updateCvc()
     }
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
     @JvmSynthetic
-    internal fun setCvcIcon(resId: Int?) {
+    fun setCvcIcon(resId: Int?) {
         if (resId != null) {
             cvcInputLayout.setEndIconDrawable(resId)
             cvcInputLayout.endIconMode = TextInputLayout.END_ICON_CUSTOM

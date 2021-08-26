@@ -1,6 +1,7 @@
 package com.stripe.android.payments
 
 import android.content.Context
+import androidx.annotation.RestrictTo
 import com.stripe.android.Logger
 import com.stripe.android.PaymentController
 import com.stripe.android.PaymentIntentResult
@@ -19,7 +20,8 @@ import kotlin.coroutines.CoroutineContext
 /**
  * Class responsible for processing the result of a [PaymentController] confirm operation.
  */
-internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : StripeIntentResult<T>>(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
+sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : StripeIntentResult<T>>(
     context: Context,
     private val publishableKeyProvider: Provider<String>,
     protected val stripeRepository: StripeRepository,
@@ -29,7 +31,7 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
     private val logger = Logger.getInstance(enableLogging)
     private val failureMessageFactory = PaymentFlowFailureMessageFactory(context)
 
-    suspend fun processResult(
+    open suspend fun processResult(
         unvalidatedResult: PaymentFlowResult.Unvalidated
     ): S = withContext(workContext) {
         val result = unvalidatedResult.validate()
@@ -108,7 +110,8 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
 /**
  * Processes the result of a [PaymentIntent] confirmation.
  */
-internal class PaymentIntentFlowResultProcessor(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
+open class PaymentIntentFlowResultProcessor(
     context: Context,
     publishableKeyProvider: Provider<String>,
     stripeRepository: StripeRepository,
