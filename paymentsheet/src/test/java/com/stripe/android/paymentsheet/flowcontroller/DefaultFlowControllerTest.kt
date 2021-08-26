@@ -770,7 +770,8 @@ internal class DefaultFlowControllerTest {
         ViewModelProvider(activity)[FlowControllerViewModel::class.java],
         paymentController,
         { PaymentConfiguration.getInstance(activity) },
-        { flowResultProcessor }
+        { flowResultProcessor },
+        testDispatcher
     )
 
     private class FakeFlowControllerInitializer(

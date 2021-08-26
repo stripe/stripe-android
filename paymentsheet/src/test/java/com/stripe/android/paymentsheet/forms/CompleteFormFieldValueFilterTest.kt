@@ -2,45 +2,41 @@ package com.stripe.android.paymentsheet.forms
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.paymentsheet.FormElement
-import com.stripe.android.paymentsheet.SectionFieldElement
-import com.stripe.android.paymentsheet.elements.CountryConfig
-import com.stripe.android.paymentsheet.elements.DropdownFieldController
+import com.stripe.android.paymentsheet.SectionSingleFieldElement
 import com.stripe.android.paymentsheet.elements.EmailConfig
 import com.stripe.android.paymentsheet.elements.SectionController
 import com.stripe.android.paymentsheet.elements.TextFieldController
-import com.stripe.android.paymentsheet.getIdInputControllerMap
 import com.stripe.android.paymentsheet.specifications.IdentifierSpec
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.runBlockingTest
 import org.junit.Test
 
-class TransformElementToFormViewValueFlowTest {
+@ExperimentalCoroutinesApi
+class CompleteFormFieldValueFilterTest {
 
     private val emailController = TextFieldController(EmailConfig())
     private val emailSection = FormElement.SectionElement(
         identifier = IdentifierSpec.Generic("email_section"),
-        SectionFieldElement.Email(
+        SectionSingleFieldElement.Email(
             IdentifierSpec.Email,
             emailController
         ),
         SectionController(emailController.label, listOf(emailController))
     )
 
-    private val countryController = DropdownFieldController(CountryConfig())
-    private val countrySection = FormElement.SectionElement(
-        identifier = IdentifierSpec.Generic("country_section"),
-        SectionFieldElement.Country(
-            IdentifierSpec.Country,
-            countryController
-        ),
-        SectionController(countryController.label, listOf(countryController))
-    )
-
     private val hiddenIdentifersFlow = MutableStateFlow<List<IdentifierSpec>>(emptyList())
 
-    private val transformElementToFormFieldValueFlow = TransformElementToFormFieldValueFlow(
-        listOf(countrySection, emailSection).getIdInputControllerMap(),
+    private val fieldFlow = MutableStateFlow(
+        mapOf(
+            IdentifierSpec.Country to FormFieldEntry("US", true),
+            IdentifierSpec.Email to FormFieldEntry("email@email.com", false),
+        )
+    )
+
+    private val transformElementToFormFieldValueFlow = CompleteFormFieldValueFilter(
+        fieldFlow,
         hiddenIdentifersFlow,
         showingMandate = MutableStateFlow(true),
         saveForFutureUse = MutableStateFlow(false)
@@ -48,17 +44,21 @@ class TransformElementToFormViewValueFlowTest {
 
     @Test
     fun `With only some complete controllers and no hidden values the flow value is null`() {
-        runBlocking {
-            assertThat(transformElementToFormFieldValueFlow.transformFlow().first()).isNull()
+        runBlockingTest {
+            assertThat(transformElementToFormFieldValueFlow.filterFlow().first()).isNull()
         }
     }
 
     @Test
     fun `If all controllers are complete and no hidden values the flow value has all values`() {
-        runBlocking {
-            emailController.onValueChange("email@valid.com")
+        runBlockingTest {
+            fieldFlow.value =
+                mapOf(
+                    IdentifierSpec.Country to FormFieldEntry("US", true),
+                    IdentifierSpec.Email to FormFieldEntry("email@email.com", true),
+                )
 
-            val formFieldValue = transformElementToFormFieldValueFlow.transformFlow().first()
+            val formFieldValue = transformElementToFormFieldValueFlow.filterFlow().first()
 
             assertThat(formFieldValue).isNotNull()
             assertThat(formFieldValue?.fieldValuePairs)
@@ -70,11 +70,10 @@ class TransformElementToFormViewValueFlowTest {
 
     @Test
     fun `If an hidden field is incomplete field pairs have the non-hidden values`() {
-        runBlocking {
-            emailController.onValueChange("email is invalid")
+        runBlockingTest {
             hiddenIdentifersFlow.value = listOf(IdentifierSpec.Email)
 
-            val formFieldValues = transformElementToFormFieldValueFlow.transformFlow()
+            val formFieldValues = transformElementToFormFieldValueFlow.filterFlow()
 
             val formFieldValue = formFieldValues.first()
             assertThat(formFieldValue).isNotNull()
@@ -87,11 +86,16 @@ class TransformElementToFormViewValueFlowTest {
 
     @Test
     fun `If an hidden field is complete field pairs contain only the non-hidden values`() {
-        runBlocking {
-            emailController.onValueChange("email@valid.com")
+        runBlockingTest {
+            fieldFlow.value =
+                mapOf(
+                    IdentifierSpec.Country to FormFieldEntry("US", true),
+                    IdentifierSpec.Email to FormFieldEntry("email@email.com", true),
+                )
+
             hiddenIdentifersFlow.value = listOf(emailSection.fields[0].identifier)
 
-            val formFieldValue = transformElementToFormFieldValueFlow.transformFlow().first()
+            val formFieldValue = transformElementToFormFieldValueFlow.filterFlow().first()
 
             assertThat(formFieldValue).isNotNull()
             assertThat(formFieldValue?.fieldValuePairs)
