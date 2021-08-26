@@ -114,5 +114,5 @@
     <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->
     <string name="stripe_paymentsheet_setup_button_label">Set up</string>
     <!-- Label indicating the total amount that the user is authorizing (e.g. "Total: $25.00") -->
-    <string name="stripe_paymentsheet_total_amount">Total: %s</string>
+    <string name="stripe_paymentsheet_total_amount" tools:ignore="MissingTranslation">Total: %s</string>
 </resources>
