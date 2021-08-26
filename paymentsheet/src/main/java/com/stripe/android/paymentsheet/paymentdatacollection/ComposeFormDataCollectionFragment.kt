@@ -22,8 +22,7 @@ import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
  * Fragment that displays a form for payment data collection based on the [SupportedPaymentMethod]
  * received in the arguments bundle.
  */
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class ComposeFormDataCollectionFragment : Fragment() {
+internal class ComposeFormDataCollectionFragment : Fragment() {
     val formSpec by lazy {
         requireNotNull(
             requireArguments().getParcelable<FormFragmentArguments>(EXTRA_CONFIG)?.let {
@@ -73,7 +72,7 @@ class ComposeFormDataCollectionFragment : Fragment() {
         formViewModel.setEnabled(!processing)
     }
 
-    companion object {
+    internal companion object {
         const val EXTRA_CONFIG = "com.stripe.android.paymentsheet.extra_config"
     }
 }
