@@ -637,6 +637,14 @@ public final class com/stripe/android/paymentsheet/injection/PaymentSheetCommonM
 	public static fun provideLogger (Z)Lcom/stripe/android/Logger;
 }
 
+public final class com/stripe/android/paymentsheet/injection/PaymentSheetCommonModule_Companion_ProvideUIContextFactory : dagger/internal/Factory {
+	public fun <init> ()V
+	public static fun create ()Lcom/stripe/android/paymentsheet/injection/PaymentSheetCommonModule_Companion_ProvideUIContextFactory;
+	public synthetic fun get ()Ljava/lang/Object;
+	public fun get ()Lkotlin/coroutines/CoroutineContext;
+	public static fun provideUIContext ()Lkotlin/coroutines/CoroutineContext;
+}
+
 public final class com/stripe/android/paymentsheet/injection/PaymentSheetCommonModule_Companion_ProvideWorkContextFactory : dagger/internal/Factory {
 	public fun <init> ()V
 	public static fun create ()Lcom/stripe/android/paymentsheet/injection/PaymentSheetCommonModule_Companion_ProvideWorkContextFactory;
