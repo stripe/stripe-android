@@ -70,13 +70,6 @@ internal sealed class FormElement {
                 )
             )
 
-        @Composable
-        fun getTextColor() = if (isSystemInDarkTheme()) {
-            Color.LightGray
-        } else {
-            Color.Black
-        }
-
         companion object {
             const val url = "https://static-us.afterpay.com/javascript/modal/%s_rebrand_modal.html"
         }
