@@ -3,16 +3,18 @@ package com.stripe.example.activity
 import android.content.Intent
 import android.os.Bundle
 import androidx.lifecycle.Observer
-import com.stripe.android.PaymentIntentResult
 import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.example.databinding.UpiPaymentActivityBinding
 
 class UpiPaymentActivity : StripeIntentActivity() {
     private val viewBinding: UpiPaymentActivityBinding by lazy {
         UpiPaymentActivityBinding.inflate(layoutInflater)
     }
+
+    private lateinit var paymentIntentSecret: String
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,20 +41,22 @@ class UpiPaymentActivity : StripeIntentActivity() {
                 )
             )
 
-            createAndConfirmPaymentIntent("in", params)
+            createAndConfirmPaymentIntent("in", params) { secret ->
+                paymentIntentSecret = secret
+            }
         }
     }
 
-    override fun onConfirmSuccess(result: PaymentIntentResult) {
-        val paymentIntent = result.intent
+    override fun onConfirmSuccess() {
         startActivity(
             Intent(this@UpiPaymentActivity, UpiWaitingActivity::class.java)
-                .putExtra(EXTRA_CLIENT_SECRET, paymentIntent.clientSecret)
+                .putExtra(EXTRA_CLIENT_SECRET, paymentIntentSecret)
         )
     }
 
-    override fun onConfirmError(throwable: Throwable) {
-        viewModel.status.value += "\n\nException: " + throwable.message
+    override fun onConfirmError(failedResult: PaymentResult.Failed) {
+        viewModel.status.value += "\n\nPaymentIntent confirmation failed with throwable " +
+            "${failedResult.throwable} \n\n"
     }
 
     internal companion object {
