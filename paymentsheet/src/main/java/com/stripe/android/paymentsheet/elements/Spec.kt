@@ -1,4 +1,4 @@
-package com.stripe.android.paymentsheet.specifications
+package com.stripe.android.paymentsheet.elements
 
 import androidx.annotation.StringRes
 import androidx.compose.ui.graphics.Color

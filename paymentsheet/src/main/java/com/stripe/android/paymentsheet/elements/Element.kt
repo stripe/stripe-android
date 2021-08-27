@@ -1,23 +1,9 @@
-package com.stripe.android.paymentsheet
+package com.stripe.android.paymentsheet.elements
 
 import androidx.annotation.VisibleForTesting
 import androidx.compose.ui.graphics.Color
 import com.stripe.android.paymentsheet.address.AddressFieldElementRepository
-import com.stripe.android.paymentsheet.address.FieldType
-import com.stripe.android.paymentsheet.elements.AddressController
-import com.stripe.android.paymentsheet.elements.Controller
-import com.stripe.android.paymentsheet.elements.CountryConfig
-import com.stripe.android.paymentsheet.elements.CreditElementController
-import com.stripe.android.paymentsheet.elements.CreditNumberTextFieldController
-import com.stripe.android.paymentsheet.elements.CvcTextFieldController
-import com.stripe.android.paymentsheet.elements.DropdownFieldController
-import com.stripe.android.paymentsheet.elements.InputController
-import com.stripe.android.paymentsheet.elements.SaveForFutureUseController
-import com.stripe.android.paymentsheet.elements.SectionController
-import com.stripe.android.paymentsheet.elements.SectionFieldErrorController
-import com.stripe.android.paymentsheet.elements.TextFieldController
 import com.stripe.android.paymentsheet.forms.FormFieldEntry
-import com.stripe.android.paymentsheet.specifications.IdentifierSpec
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -142,15 +128,7 @@ internal sealed class SectionSingleFieldElement(
         override val controller: DropdownFieldController
     ) : SectionSingleFieldElement(_identifier)
 
-    data class CvcText(
-        val _identifier: IdentifierSpec,
-        override val controller: CvcTextFieldController,
-    ) : SectionSingleFieldElement(_identifier)
 
-    data class CardNumberText(
-        val _identifier: IdentifierSpec,
-        override val controller: CreditNumberTextFieldController,
-    ) : SectionSingleFieldElement(_identifier)
 }
 
 internal sealed class SectionMultiFieldElement(
@@ -219,69 +197,5 @@ internal sealed class SectionMultiFieldElement(
                 )
             )
         }
-    }
-
-    internal class CreditDetailElement(
-        identifier: IdentifierSpec,
-        val controller: CreditElementController = CreditElementController(),
-    ) : SectionMultiFieldElement(identifier) {
-
-        /**
-         * This will return a controller that abides by the SectionFieldErrorController interface.
-         */
-        override fun sectionFieldErrorController(): SectionFieldErrorController =
-            controller
-
-        override fun getFormFieldValueFlow() = combine(
-            controller.numberElement.controller.formFieldValue,
-            controller.cvcElement.controller.formFieldValue,
-            controller.expirationDateElement.controller.formFieldValue
-        ) { number, cvc, expirationDate ->
-            listOf(
-                controller.numberElement.identifier to number,
-                controller.cvcElement.identifier to cvc,
-                IdentifierSpec("month") to expirationDate.copy(
-                    value = expirationDate.value?.take(2)
-                ),
-                IdentifierSpec("year") to expirationDate.copy(
-                    value = expirationDate.value?.takeLast(2)
-                )
-            )
-        }
-    }
-
-    /**
-     * This is a special type of AddressElement that
-     * removes fields from the address based on the country.  It
-     * is only intended to be used with the credit payment method.
-     */
-    internal class CreditBillingElement(
-        identifier: IdentifierSpec,
-        addressFieldRepository: AddressFieldElementRepository,
-        countryCodes: Set<String> = emptySet(),
-        countryDropdownFieldController: DropdownFieldController = DropdownFieldController(
-            CountryConfig(countryCodes)
-        ),
-    ) : AddressElement(
-        identifier,
-        addressFieldRepository,
-        countryCodes,
-        countryDropdownFieldController
-    ) {
-        // Save for future use puts this in the controller rather than element
-        val hiddenIdentifiers: Flow<List<IdentifierSpec>> =
-            countryDropdownFieldController.rawFieldValue.map { countryCode ->
-                when (countryCode) {
-                    "US", "GB", "CA" -> {
-                        FieldType.values()
-                            .filterNot { it == FieldType.PostalCode }
-                            .map { it.identifierSpec }
-                    }
-                    else -> {
-                        FieldType.values()
-                            .map { it.identifierSpec }
-                    }
-                }
-            }
     }
 }
