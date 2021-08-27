@@ -4,14 +4,15 @@ import android.content.Intent
 import android.content.res.Resources
 import android.net.Uri
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material.Checkbox
 import androidx.compose.material.Divider
 import androidx.compose.material.Text
@@ -26,6 +27,9 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -197,7 +201,9 @@ internal fun MandateElementUI(
         stringResource(element.stringResId, element.merchantName ?: ""),
         fontSize = 10.sp,
         letterSpacing = .7.sp,
-        modifier = Modifier.padding(vertical = 8.dp),
+        modifier = Modifier
+            .padding(vertical = 8.dp)
+            .semantics(mergeDescendants = true) {}, // makes it a separate accessibile item
         color = element.color
     )
 }
@@ -208,25 +214,45 @@ internal fun SaveForFutureUseElementUI(
     element: SaveForFutureUseElement
 ) {
     val controller = element.controller
-    val checked by controller.saveForFutureUse.asLiveData()
-        .observeAsState(true)
-    Row(modifier = Modifier.padding(vertical = 8.dp)) {
+    val checked by controller.saveForFutureUse.asLiveData().observeAsState(true)
+
+    val description = stringResource(
+        if (checked) {
+            R.string.selected
+        } else {
+            R.string.not_selected
+        }
+    )
+
+    Row(
+        modifier = Modifier
+            .padding(vertical = 2.dp)
+            .semantics {
+                stateDescription = description
+            }
+            .toggleable(
+                value = checked,
+                role = Role.Checkbox,
+                onValueChange = {
+                    controller.onValueChange(!checked)
+                    true
+                },
+                enabled = enabled
+            )
+            .fillMaxWidth()
+            .requiredHeight(48.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
         Checkbox(
             checked = checked,
-            onCheckedChange = { controller.onValueChange(it) },
+            onCheckedChange = null, // needs to be null for accessibility on row click to work
             enabled = enabled
         )
         Text(
-            stringResource(controller.label, element.merchantName ?: ""),
+            stringResource(controller.label),
             Modifier
                 .padding(start = 4.dp)
-                .align(Alignment.CenterVertically)
-                .clickable(
-                    enabled, null,
-                    null
-                ) {
-                    controller.toggleValue()
-                },
+                .align(Alignment.CenterVertically),
             color = if (isSystemInDarkTheme()) {
                 Color.LightGray
             } else {

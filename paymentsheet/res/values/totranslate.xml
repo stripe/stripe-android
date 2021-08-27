@@ -51,4 +51,7 @@
     <string name="stripe_paymentsheet_back">Back</string>
     <string name="stripe_paymentsheet_close">Close</string>
     <string name="stripe_paymentsheet_add_button_label">Add</string>
+
+    <!-- Used for accessibility it indicate that when you double tag the dropdown it will bring up the menu to choose !-->
+    <string name="change">Change</string>
 </resources>

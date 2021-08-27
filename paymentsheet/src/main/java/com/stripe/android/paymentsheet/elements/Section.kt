@@ -12,6 +12,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
@@ -85,7 +87,11 @@ internal fun SectionTitle(@StringRes titleText: Int?) {
                 fontWeight = sectionTitle.fontWeight,
                 letterSpacing = sectionTitle.letterSpacing,
             ),
-            modifier = Modifier.padding(vertical = 4.dp)
+            modifier = Modifier
+                .padding(vertical = 4.dp)
+                .semantics(mergeDescendants = true) { // Need to prevent form as focusable accessibility
+                    heading()
+                }
         )
     }
 }
