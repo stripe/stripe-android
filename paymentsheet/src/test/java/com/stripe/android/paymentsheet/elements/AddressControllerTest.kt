@@ -2,8 +2,6 @@ package com.stripe.android.paymentsheet.elements
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.SectionFieldElement
-import com.stripe.android.paymentsheet.specifications.IdentifierSpec
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
@@ -24,11 +22,11 @@ class AddressControllerTest {
         )
     private val sectionFieldElementFlow = MutableStateFlow(
         listOf(
-            SectionFieldElement.Email(
+            EmailElement(
                 IdentifierSpec.Email,
                 emailController
             ),
-            SectionFieldElement.Iban(
+            IbanElement(
                 IdentifierSpec.Generic("iban"),
                 ibanController
             )

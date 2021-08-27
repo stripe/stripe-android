@@ -2,7 +2,7 @@ package com.stripe.android.paymentsheet.address
 
 import android.content.res.Resources
 import androidx.annotation.VisibleForTesting
-import com.stripe.android.paymentsheet.SectionFieldElement
+import com.stripe.android.paymentsheet.elements.SectionSingleFieldElement
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -13,7 +13,7 @@ internal class AddressFieldElementRepository @Inject internal constructor(
     // This is needed for @Preview and inject does not support a constructor with default parameters.
     internal constructor() : this(null)
 
-    private val countryFieldMap = mutableMapOf<String, List<SectionFieldElement>?>()
+    private val countryFieldMap = mutableMapOf<String, List<SectionSingleFieldElement>?>()
 
     internal fun get(countryCode: String?) = countryCode?.let {
         countryFieldMap[it]
@@ -46,7 +46,7 @@ internal class AddressFieldElementRepository @Inject internal constructor(
     }
 
     @VisibleForTesting
-    internal fun add(countryCode: String, listElements: List<SectionFieldElement>) {
+    internal fun add(countryCode: String, listElements: List<SectionSingleFieldElement>) {
         countryFieldMap[countryCode] = listElements
     }
 

@@ -78,8 +78,6 @@
     <string name="stripe_paymentsheet_add_payment_method_country_or_region">Country or region</string>
     <!-- Title shown above a form where the customer can enter payment information like credit card details, email, billing address, etc. -->
     <string name="stripe_paymentsheet_add_payment_method_title">Add your payment information</string>
-    <!-- This is used when typing data in the form for afterpay -->
-    <string name="stripe_paymentsheet_afterpay_clearpay_message" tools:ignore="MissingTranslation">Pay in 4 interest-free payments of %s with</string>
     <!-- Text for back button -->
     <string name="stripe_paymentsheet_back">Back</string>
     <string name="stripe_paymentsheet_close">Close</string>
@@ -115,4 +113,5 @@
     <string name="stripe_paymentsheet_setup_button_label">Set up</string>
     <!-- Label indicating the total amount that the user is authorizing (e.g. "Total: $25.00") -->
     <string name="stripe_paymentsheet_total_amount" tools:ignore="MissingTranslation">Total: %s</string>
+    <string name="stripe_paymentsheet_payment_method_afterpay_clearpay" tools:ignore="MissingTranslation">Afterpay</string>
 </resources>

@@ -25,6 +25,7 @@ import com.stripe.android.payments.PaymentFlowResultProcessor
 import com.stripe.android.payments.core.injection.Injectable
 import com.stripe.android.payments.core.injection.Injector
 import com.stripe.android.payments.core.injection.InjectorKey
+import com.stripe.android.payments.core.injection.UIContext
 import com.stripe.android.payments.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.paymentsheet.PaymentOptionCallback
 import com.stripe.android.paymentsheet.PaymentOptionContract
@@ -47,7 +48,6 @@ import com.stripe.android.paymentsheet.model.SetupIntentClientSecret
 import com.stripe.android.view.AuthActivityStarterHost
 import dagger.Lazy
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -55,6 +55,7 @@ import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
 import javax.inject.Provider
 import javax.inject.Singleton
+import kotlin.coroutines.CoroutineContext
 
 @Singleton
 internal class DefaultFlowController @Inject internal constructor(
@@ -87,7 +88,8 @@ internal class DefaultFlowController @Inject internal constructor(
      *   paymentFlowResultProcessor afterwards.
      */
     private val paymentFlowResultProcessorProvider:
-        Provider<PaymentFlowResultProcessor<out StripeIntent, StripeIntentResult<StripeIntent>>>
+        Provider<PaymentFlowResultProcessor<out StripeIntent, StripeIntentResult<StripeIntent>>>,
+    @UIContext private val uiContext: CoroutineContext
 ) : PaymentSheet.FlowController, Injector {
     private val paymentOptionActivityLauncher: ActivityResultLauncher<PaymentOptionContract.Args>
     private var googlePayActivityLauncher:
@@ -326,7 +328,7 @@ internal class DefaultFlowController @Inject internal constructor(
     private suspend fun dispatchResult(
         result: FlowControllerInitializer.InitResult,
         callback: PaymentSheet.FlowController.ConfigCallback
-    ) = withContext(Dispatchers.Main) {
+    ) = withContext(uiContext) {
         when (result) {
             is FlowControllerInitializer.InitResult.Success -> {
                 onInitSuccess(result.initData, callback)
@@ -402,14 +404,14 @@ internal class DefaultFlowController @Inject internal constructor(
                 )
             }.fold(
                 onSuccess = {
-                    withContext(Dispatchers.Main) {
+                    withContext(uiContext) {
                         paymentResultCallback.onPaymentSheetResult(
                             createPaymentSheetResult(it)
                         )
                     }
                 },
                 onFailure = {
-                    withContext(Dispatchers.Main) {
+                    withContext(uiContext) {
                         paymentResultCallback.onPaymentSheetResult(
                             PaymentSheetResult.Failed(it)
                         )

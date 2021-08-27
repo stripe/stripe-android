@@ -3,21 +3,22 @@ package com.stripe.android.paymentsheet.model
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.specifications.FormSpec
-import com.stripe.android.paymentsheet.specifications.bancontact
-import com.stripe.android.paymentsheet.specifications.eps
-import com.stripe.android.paymentsheet.specifications.giropay
-import com.stripe.android.paymentsheet.specifications.ideal
-import com.stripe.android.paymentsheet.specifications.p24
-import com.stripe.android.paymentsheet.specifications.sepaDebit
-import com.stripe.android.paymentsheet.specifications.sofort
+import com.stripe.android.paymentsheet.elements.FormSpec
+import com.stripe.android.paymentsheet.elements.afterpayClearpay
+import com.stripe.android.paymentsheet.forms.bancontact
+import com.stripe.android.paymentsheet.forms.eps
+import com.stripe.android.paymentsheet.forms.giropay
+import com.stripe.android.paymentsheet.forms.ideal
+import com.stripe.android.paymentsheet.forms.p24
+import com.stripe.android.paymentsheet.forms.sepaDebit
+import com.stripe.android.paymentsheet.forms.sofort
 
 /**
  * Enum defining all payment method types for which Payment Sheet can collect payment data.
  *
  * FormSpec is optionally null only because Card is not converted to the compose model.
  */
-enum class SupportedPaymentMethod(
+internal enum class SupportedPaymentMethod(
     val code: String,
     @StringRes val displayNameResource: Int,
     @DrawableRes val iconResource: Int,
@@ -70,6 +71,12 @@ enum class SupportedPaymentMethod(
         R.string.stripe_paymentsheet_payment_method_giropay,
         R.drawable.stripe_ic_paymentsheet_pm_giropay,
         giropay
+    ),
+    AfterpayClearpay(
+        "afterpay_clearpay",
+        R.string.stripe_paymentsheet_payment_method_afterpay_clearpay,
+        R.drawable.stripe_ic_paymentsheet_pm_afterpay_clearpay,
+        afterpayClearpay
     );
 
     override fun toString(): String {

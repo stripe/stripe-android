@@ -2,12 +2,12 @@ package com.stripe.android.paymentsheet.elements
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.SectionFieldElement
 import com.stripe.android.paymentsheet.address.AddressFieldElementRepository
-import com.stripe.android.paymentsheet.specifications.IdentifierSpec
+import com.stripe.android.paymentsheet.forms.FormFieldEntry
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.runBlockingTest
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
@@ -26,7 +26,7 @@ class AddressElementTest {
         addressFieldElementRepository.add(
             "US",
             listOf(
-                SectionFieldElement.Email(
+                EmailElement(
                     IdentifierSpec.Email,
                     TextFieldController(EmailConfig())
                 )
@@ -35,7 +35,7 @@ class AddressElementTest {
         addressFieldElementRepository.add(
             "JP",
             listOf(
-                SectionFieldElement.Iban(
+                IbanElement(
                     IdentifierSpec.Generic("iban"),
                     TextFieldController(IbanConfig())
                 )
@@ -48,7 +48,7 @@ class AddressElementTest {
     fun `Verify controller error is updated as the fields change based on country`() {
         runBlocking {
             // ZZ does not have state and US does
-            val addressElement = SectionFieldElement.AddressElement(
+            val addressElement = AddressElement(
                 IdentifierSpec.Generic("address"),
                 addressFieldElementRepository,
                 countryDropdownFieldController = countryDropdownFieldController
@@ -76,5 +76,45 @@ class AddressElementTest {
             assertThat(addressElement.controller.error.first()?.errorMessage)
                 .isEqualTo(R.string.iban_invalid_start)
         }
+    }
+
+    @ExperimentalCoroutinesApi
+    @Test
+    fun `verify flow of form field values`() = runBlockingTest {
+        val addressElement = AddressElement(
+            IdentifierSpec.Generic("address"),
+            addressFieldElementRepository,
+            countryDropdownFieldController = countryDropdownFieldController
+        )
+        val formFieldValueFlow = addressElement.getFormFieldValueFlow()
+
+        countryDropdownFieldController.onValueChange(0)
+
+        // Add values to the fields
+        (addressElement.fields.first()[1].controller as TextFieldController)
+            .onValueChange("email")
+
+        ShadowLooper.runUiThreadTasksIncludingDelayedTasks()
+
+        // Verify
+        var firstForFieldValues = formFieldValueFlow.first()
+        assertThat(firstForFieldValues.toMap()[IdentifierSpec.Email])
+            .isEqualTo(
+                FormFieldEntry("email", false)
+            )
+
+        countryDropdownFieldController.onValueChange(1)
+
+        // Add values to the fields
+        (addressElement.fields.first()[1].controller as TextFieldController)
+            .onValueChange("DE89370400440532013000")
+
+        ShadowLooper.runUiThreadTasksIncludingDelayedTasks()
+
+        firstForFieldValues = formFieldValueFlow.first()
+        assertThat(firstForFieldValues.toMap()[IdentifierSpec.Generic("iban")])
+            .isEqualTo(
+                FormFieldEntry("DE89370400440532013000", true)
+            )
     }
 }

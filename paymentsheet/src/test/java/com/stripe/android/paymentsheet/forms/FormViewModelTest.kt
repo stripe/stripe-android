@@ -5,23 +5,23 @@ import androidx.annotation.StringRes
 import androidx.lifecycle.asLiveData
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.paymentsheet.FormElement.SectionElement
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.SectionFieldElement
 import com.stripe.android.paymentsheet.address.AddressFieldElementRepository
+import com.stripe.android.paymentsheet.elements.AddressElement
 import com.stripe.android.paymentsheet.elements.SaveForFutureUseController
+import com.stripe.android.paymentsheet.elements.SectionElement
+import com.stripe.android.paymentsheet.elements.SectionSingleFieldElement
 import com.stripe.android.paymentsheet.elements.TextFieldController
 import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
-import com.stripe.android.paymentsheet.specifications.BankRepository
-import com.stripe.android.paymentsheet.specifications.FormItemSpec
-import com.stripe.android.paymentsheet.specifications.IdentifierSpec
-import com.stripe.android.paymentsheet.specifications.LayoutSpec
-import com.stripe.android.paymentsheet.specifications.ResourceRepository
-import com.stripe.android.paymentsheet.specifications.SectionFieldSpec.Companion.NAME
-import com.stripe.android.paymentsheet.specifications.SectionFieldSpec.Country
-import com.stripe.android.paymentsheet.specifications.SectionFieldSpec.Email
-import com.stripe.android.paymentsheet.specifications.sepaDebit
-import com.stripe.android.paymentsheet.specifications.sofort
+import com.stripe.android.paymentsheet.elements.BankRepository
+import com.stripe.android.paymentsheet.elements.IdentifierSpec
+import com.stripe.android.paymentsheet.elements.LayoutSpec
+import com.stripe.android.paymentsheet.elements.ResourceRepository
+import com.stripe.android.paymentsheet.elements.CountrySpec
+import com.stripe.android.paymentsheet.elements.EmailSpec
+import com.stripe.android.paymentsheet.elements.SaveForFutureUseSpec
+import com.stripe.android.paymentsheet.elements.SectionSpec
+import com.stripe.android.paymentsheet.elements.SimpleTextSpec.Companion.NAME
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
@@ -33,10 +33,10 @@ import org.robolectric.shadows.ShadowLooper
 @RunWith(RobolectricTestRunner::class)
 internal class FormViewModelTest {
     private val emailSection =
-        FormItemSpec.SectionSpec(IdentifierSpec.Generic("email_section"), Email)
-    private val countrySection = FormItemSpec.SectionSpec(
+        SectionSpec(IdentifierSpec.Generic("email_section"), EmailSpec)
+    private val countrySection = SectionSpec(
         IdentifierSpec.Generic("country_section"),
-        Country()
+        CountrySpec()
     )
 
     private val resourceRepository =
@@ -56,7 +56,7 @@ internal class FormViewModelTest {
                 listOf(
                     emailSection,
                     countrySection,
-                    FormItemSpec.SaveForFutureUseSpec(listOf(emailSection))
+                    SaveForFutureUseSpec(listOf(emailSection))
                 )
             ),
             FormFragmentArguments(
@@ -87,7 +87,7 @@ internal class FormViewModelTest {
                 listOf(
                     emailSection,
                     countrySection,
-                    FormItemSpec.SaveForFutureUseSpec(listOf(emailSection))
+                    SaveForFutureUseSpec(listOf(emailSection))
                 )
             ),
             FormFragmentArguments(
@@ -120,7 +120,7 @@ internal class FormViewModelTest {
                 listOf(
                     emailSection,
                     countrySection,
-                    FormItemSpec.SaveForFutureUseSpec(listOf(emailSection))
+                    SaveForFutureUseSpec(listOf(emailSection))
                 )
             ),
             FormFragmentArguments(
@@ -158,7 +158,7 @@ internal class FormViewModelTest {
                     listOf(
                         emailSection,
                         countrySection,
-                        FormItemSpec.SaveForFutureUseSpec(listOf(emailSection))
+                        SaveForFutureUseSpec(listOf(emailSection))
                     )
                 ),
                 FormFragmentArguments(
@@ -172,16 +172,11 @@ internal class FormViewModelTest {
 
             val saveForFutureUseController = formViewModel.elements.map { it.controller }
                 .filterIsInstance(SaveForFutureUseController::class.java).first()
-            val emailController = formViewModel.elements
-                .asSequence()
-                .filterIsInstance<SectionElement>()
-                .flatMap { it.fields }
-                .map { it.controller }
-                .filterIsInstance(TextFieldController::class.java)
-                .first()
+            val emailController =
+                getSectionFieldTextControllerWithLabel(formViewModel, R.string.email)
 
             // Add text to the name to make it valid
-            emailController.onValueChange("email@valid.com")
+            emailController?.onValueChange("email@valid.com")
 
             // Verify formFieldValues contains email
             assertThat(
@@ -209,7 +204,7 @@ internal class FormViewModelTest {
                     listOf(
                         emailSection,
                         countrySection,
-                        FormItemSpec.SaveForFutureUseSpec(listOf(emailSection))
+                        SaveForFutureUseSpec(listOf(emailSection))
                     )
                 ),
                 FormFragmentArguments(
@@ -223,15 +218,11 @@ internal class FormViewModelTest {
 
             val saveForFutureUseController = formViewModel.elements.map { it.controller }
                 .filterIsInstance(SaveForFutureUseController::class.java).first()
-            val emailController = formViewModel.elements
-                .asSequence()
-                .filterIsInstance<SectionElement>()
-                .flatMap { it.fields }
-                .map { it.controller }
-                .filterIsInstance(TextFieldController::class.java).first()
+            val emailController =
+                getSectionFieldTextControllerWithLabel(formViewModel, R.string.email)
 
             // Add text to the email to make it invalid
-            emailController.onValueChange("email is invalid")
+            emailController?.onValueChange("email is invalid")
 
             // Verify formFieldValues is null because the email is required and invalid
             assertThat(formViewModel.completeFormValues.first()).isNull()
@@ -271,19 +262,19 @@ internal class FormViewModelTest {
                 resourceRepository = resourceRepository
             )
 
-            val nameElement = (formViewModel.elements[0] as SectionElement)
-                .fields[0].controller as TextFieldController
-            val emailElement = (formViewModel.elements[1] as SectionElement)
-                .fields[0].controller as TextFieldController
+            val nameElement =
+                getSectionFieldTextControllerWithLabel(formViewModel, R.string.address_label_name)
+            val emailElement =
+                getSectionFieldTextControllerWithLabel(formViewModel, R.string.email)
 
-            nameElement.onValueChange("joe")
+            nameElement?.onValueChange("joe")
             assertThat(
                 formViewModel.completeFormValues.first()?.fieldValuePairs?.get(NAME.identifier)
             ).isNull()
 
-            emailElement.onValueChange("joe@gmail.com")
+            emailElement?.onValueChange("joe@gmail.com")
             assertThat(
-                formViewModel.completeFormValues.first()?.fieldValuePairs?.get(Email.identifier)
+                formViewModel.completeFormValues.first()?.fieldValuePairs?.get(EmailSpec.identifier)
                     ?.value
             ).isEqualTo("joe@gmail.com")
             assertThat(
@@ -291,7 +282,7 @@ internal class FormViewModelTest {
                     ?.value
             ).isEqualTo("joe")
 
-            emailElement.onValueChange("invalid.email@IncompleteDomain")
+            emailElement?.onValueChange("invalid.email@IncompleteDomain")
 
             assertThat(
                 formViewModel.completeFormValues.first()?.fieldValuePairs?.get(NAME.identifier)
@@ -322,7 +313,7 @@ internal class FormViewModelTest {
                 R.string.address_label_name
             )?.onValueChange("joe")
             assertThat(
-                formViewModel.completeFormValues.first()?.fieldValuePairs?.get(Email.identifier)
+                formViewModel.completeFormValues.first()?.fieldValuePairs?.get(EmailSpec.identifier)
                     ?.value
             ).isNull()
 
@@ -331,7 +322,7 @@ internal class FormViewModelTest {
                 R.string.email
             )?.onValueChange("joe@gmail.com")
             assertThat(
-                formViewModel.completeFormValues.first()?.fieldValuePairs?.get(Email.identifier)
+                formViewModel.completeFormValues.first()?.fieldValuePairs?.get(EmailSpec.identifier)
                     ?.value
             ).isNull()
 
@@ -340,7 +331,7 @@ internal class FormViewModelTest {
                 R.string.iban
             )?.onValueChange("DE89370400440532013000")
             assertThat(
-                formViewModel.completeFormValues.first()?.fieldValuePairs?.get(Email.identifier)
+                formViewModel.completeFormValues.first()?.fieldValuePairs?.get(EmailSpec.identifier)
                     ?.value
             ).isNull()
 
@@ -353,7 +344,7 @@ internal class FormViewModelTest {
                             .completeFormValues
                             .first()
                             ?.fieldValuePairs
-                            ?.get(Email.identifier)
+                            ?.get(EmailSpec.identifier)
                             ?.value
                     ).isNotNull()
                 } else {
@@ -362,7 +353,7 @@ internal class FormViewModelTest {
                             .completeFormValues
                             .first()
                             ?.fieldValuePairs
-                            ?.get(Email.identifier)
+                            ?.get(EmailSpec.identifier)
                             ?.value
                     ).isNull()
                 }
@@ -393,7 +384,7 @@ internal class FormViewModelTest {
                 R.string.address_label_name
             )?.onValueChange("joe")
             assertThat(
-                formViewModel.completeFormValues.first()?.fieldValuePairs?.get(Email.identifier)
+                formViewModel.completeFormValues.first()?.fieldValuePairs?.get(EmailSpec.identifier)
                     ?.value
             ).isNull()
 
@@ -402,7 +393,7 @@ internal class FormViewModelTest {
                 R.string.email
             )?.onValueChange("joe@gmail.com")
             assertThat(
-                formViewModel.completeFormValues.first()?.fieldValuePairs?.get(Email.identifier)
+                formViewModel.completeFormValues.first()?.fieldValuePairs?.get(EmailSpec.identifier)
                     ?.value
             ).isNull()
 
@@ -411,7 +402,7 @@ internal class FormViewModelTest {
                 R.string.iban
             )?.onValueChange("DE89370400440532013000")
             assertThat(
-                formViewModel.completeFormValues.first()?.fieldValuePairs?.get(Email.identifier)
+                formViewModel.completeFormValues.first()?.fieldValuePairs?.get(EmailSpec.identifier)
                     ?.value
             ).isNull()
 
@@ -429,7 +420,7 @@ internal class FormViewModelTest {
                                 .completeFormValues
                                 .first()
                                 ?.fieldValuePairs
-                                ?.get(Email.identifier)
+                                ?.get(EmailSpec.identifier)
                                 ?.value
                         ).isNotNull()
                     } else {
@@ -438,7 +429,7 @@ internal class FormViewModelTest {
                                 .completeFormValues
                                 .first()
                                 ?.fieldValuePairs
-                                ?.get(Email.identifier)
+                                ?.get(EmailSpec.identifier)
                                 ?.value
                         ).isNull()
                     }
@@ -450,16 +441,13 @@ internal class FormViewModelTest {
         formViewModel: FormViewModel,
         @StringRes label: Int
     ) =
-        formViewModel.elements.map {
-            (
-                (it as? SectionElement)
-                    ?.fields
-                    ?.get(0)
-                    ?.controller as? TextFieldController
-                )
-        }.firstOrNull {
-            it?.label == label
-        }
+        formViewModel.elements
+            .filterIsInstance<SectionElement>()
+            .flatMap { it.fields }
+            .filterIsInstance<SectionSingleFieldElement>()
+            .map { it.controller }
+            .filterIsInstance<TextFieldController>()
+            .firstOrNull { it.label == label }
 
     private data class AddressControllers(
         val controllers: List<TextFieldController>
@@ -501,7 +489,7 @@ internal class FormViewModelTest {
             formViewModel.elements
                 .filterIsInstance<SectionElement>()
                 .flatMap { it.fields }
-                .filterIsInstance<SectionFieldElement.AddressElement>()
+                .filterIsInstance<AddressElement>()
                 .firstOrNull()
                 ?.fields
                 ?.first()

@@ -18,6 +18,7 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetActivity
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.model.Amount
 import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
@@ -59,6 +60,10 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
 
     protected val _paymentMethods = MutableLiveData<List<PaymentMethod>>()
     internal val paymentMethods: LiveData<List<PaymentMethod>> = _paymentMethods
+
+    @VisibleForTesting
+    internal val _amount = MutableLiveData<Amount>()
+    internal val amount: LiveData<Amount> = _amount
 
     /**
      * Request to retrieve the value from the repository happens when initialize any fragment
@@ -178,12 +183,30 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
                 )
             )
         }
+
+        if (stripeIntent is PaymentIntent) {
+            runCatching {
+                _amount.value =
+                    Amount(
+                        requireNotNull(stripeIntent.amount),
+                        requireNotNull(stripeIntent.currency)
+                    )
+            }.onFailure {
+                onFatal(
+                    IllegalStateException("PaymentIntent must contain amount and currency.")
+                )
+            }
+        }
     }
 
     fun getSupportedPaymentMethods(): List<SupportedPaymentMethod> {
         stripeIntent.value?.let { stripeIntent ->
             return stripeIntent.paymentMethodTypes.mapNotNull {
                 SupportedPaymentMethod.fromCode(it)
+            }.filterNot {
+                // AfterpayClearpay requires a shipping address, filter it out if not provided
+                it == SupportedPaymentMethod.AfterpayClearpay &&
+                    (stripeIntent as? PaymentIntent)?.shipping == null
             }.filter { it == SupportedPaymentMethod.Card }
         }
 

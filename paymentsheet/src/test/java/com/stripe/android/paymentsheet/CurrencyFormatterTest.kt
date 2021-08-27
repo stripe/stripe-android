@@ -147,7 +147,7 @@ class CurrencyFormatterTest {
     }
 
     @Test
-    fun `locale with unique thousands of dollar and decimal separator, currency symbol at the end`() {
+    fun `locale with unique thousands and decimal separator, currency symbol at the end`() {
         assertThat(
             currencyFormatter.format(
                 123412L,
