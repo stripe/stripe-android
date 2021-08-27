@@ -22,8 +22,6 @@ import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.Amount
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
-import com.stripe.android.paymentsheet.paymentdatacollection.Address
-import com.stripe.android.paymentsheet.paymentdatacollection.BillingDetails
 import com.stripe.android.paymentsheet.paymentdatacollection.CardDataCollectionFragment
 import com.stripe.android.paymentsheet.paymentdatacollection.ComposeFormDataCollectionFragment
 import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
@@ -136,7 +134,7 @@ internal abstract class BaseAddPaymentMethodFragment(
             viewBinding.paymentMethodsRecycler.layoutManager = it
         }
 
-        val adapter = com.stripe.android.paymentsheet.AddPaymentMethodsAdapter(
+        val adapter = AddPaymentMethodsAdapter(
             paymentMethods,
             ::onPaymentMethodSelected
         ).also {
@@ -253,12 +251,12 @@ internal abstract class BaseAddPaymentMethodFragment(
                 merchantName = merchantName,
                 amount = amount,
                 billingDetails = billingAddress?.let {
-                    BillingDetails(
+                    PaymentSheet.BillingDetails(
                         name = billingAddress.name,
                         email = billingAddress.email,
                         phone = billingAddress.phone,
                         address = billingAddress.address?.let {
-                            Address(
+                            PaymentSheet.Address(
                                 city = it.city,
                                 state = it.state,
                                 country = it.country,

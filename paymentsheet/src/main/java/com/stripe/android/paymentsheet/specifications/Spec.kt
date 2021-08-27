@@ -10,7 +10,7 @@ import kotlinx.serialization.Serializable
 /**
  * This class is used to define different forms full of fields.
  */
-data class FormSpec(
+internal data class FormSpec(
     val layout: LayoutSpec,
     val paramKey: MutableMap<String, Any?>,
 )
@@ -18,13 +18,13 @@ data class FormSpec(
 /**
  * This is a data representation of the layout of UI fields on the screen.
  */
-data class LayoutSpec(val items: List<FormItemSpec>)
+internal data class LayoutSpec(val items: List<FormItemSpec>)
 
 /**
  * This uniquely identifies a element in the form.  The objects here are for identifier
  * specs that need to be found when pre-populating fields, or when extracting data.
  */
-sealed class IdentifierSpec(val value: String) {
+internal sealed class IdentifierSpec(val value: String) {
     data class Generic(private val _value: String) : IdentifierSpec(_value)
 
     // Needed to pre-populate forms
@@ -45,14 +45,14 @@ sealed class IdentifierSpec(val value: String) {
 /**
  * Identifies a field that can be made hidden.
  */
-interface RequiredItemSpec {
+internal interface RequiredItemSpec {
     val identifier: IdentifierSpec
 }
 
 /**
  * This is used to define each section in the visual form layout specification
  */
-sealed class FormItemSpec {
+internal sealed class FormItemSpec {
     /**
      * This represents a section in a form that contains other elements
      */
@@ -98,7 +98,7 @@ sealed class FormItemSpec {
 /**
  * This represents a field in a section.
  */
-sealed class SectionFieldSpec(open val identifier: IdentifierSpec) {
+internal sealed class SectionFieldSpec(open val identifier: IdentifierSpec) {
 
     object Email : SectionFieldSpec(IdentifierSpec.Email)
 
@@ -140,14 +140,14 @@ sealed class SectionFieldSpec(open val identifier: IdentifierSpec) {
     }
 }
 
-enum class SupportedBankType(val assetFileName: String) {
+internal enum class SupportedBankType(val assetFileName: String) {
     Eps("epsBanks.json"),
     Ideal("idealBanks.json"),
     P24("p24Banks.json")
 }
 
 @Serializable
-data class DropdownItem(
+internal data class DropdownItem(
     val value: String,
     val text: String
 )

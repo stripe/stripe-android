@@ -16,6 +16,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetActivity
 import com.stripe.android.paymentsheet.PaymentSheetContract
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
@@ -452,11 +453,11 @@ class CardDataCollectionFragmentTest {
         stripeIntent: StripeIntent? = PaymentIntentFixtures.PI_WITH_SHIPPING,
         fragmentArgs: FormFragmentArguments? = FormFragmentArguments(
             SupportedPaymentMethod.Bancontact.name,
-            true,
-            true,
-            "Merchant, Inc.",
-            billingDetails = BillingDetails(
-                address = Address(
+            saveForFutureUseInitialVisibility = true,
+            saveForFutureUseInitialValue = true,
+            merchantName = "Merchant, Inc.",
+            billingDetails = PaymentSheet.BillingDetails(
+                address = PaymentSheet.Address(
                     line1 = "123 Main Street",
                     line2 = null,
                     city = "San Francisco",

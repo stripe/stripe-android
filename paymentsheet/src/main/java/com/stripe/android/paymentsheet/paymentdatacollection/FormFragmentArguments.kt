@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.paymentdatacollection
 
 import android.os.Parcelable
 import com.stripe.android.paymentsheet.model.Amount
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.specifications.IdentifierSpec
 import kotlinx.parcelize.Parcelize
 
@@ -12,26 +13,7 @@ internal data class FormFragmentArguments(
     val saveForFutureUseInitialValue: Boolean,
     val merchantName: String,
     val amount: Amount? = null,
-    val billingDetails: BillingDetails? = null,
-) : Parcelable
-
-// TODO: Use the PaymentSheet.Address and billing details when in a single module.
-@Parcelize
-data class Address(
-    val city: String? = null,
-    val country: String? = null,
-    val line1: String? = null,
-    val line2: String? = null,
-    val postalCode: String? = null,
-    val state: String? = null
-) : Parcelable
-
-@Parcelize
-data class BillingDetails(
-    val address: Address?,
-    val email: String? = null,
-    val name: String? = null,
-    val phone: String? = null
+    val billingDetails: PaymentSheet.BillingDetails? = null,
 ) : Parcelable
 
 internal fun FormFragmentArguments.getValue(id: IdentifierSpec) =
