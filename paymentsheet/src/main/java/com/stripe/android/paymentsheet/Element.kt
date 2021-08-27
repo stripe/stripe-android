@@ -1,7 +1,9 @@
 package com.stripe.android.paymentsheet
 
+import android.content.res.Resources
 import androidx.annotation.VisibleForTesting
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.intl.Locale
 import com.stripe.android.paymentsheet.address.AddressFieldElementRepository
 import com.stripe.android.paymentsheet.elements.AddressController
 import com.stripe.android.paymentsheet.elements.Controller
@@ -12,10 +14,17 @@ import com.stripe.android.paymentsheet.elements.SaveForFutureUseController
 import com.stripe.android.paymentsheet.elements.SectionController
 import com.stripe.android.paymentsheet.elements.SectionFieldErrorController
 import com.stripe.android.paymentsheet.elements.TextFieldController
+import com.stripe.android.paymentsheet.forms.FormFieldEntry
+import com.stripe.android.paymentsheet.model.Amount
 import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.getValue
 import com.stripe.android.paymentsheet.specifications.IdentifierSpec
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 
 /**
@@ -25,6 +34,8 @@ import kotlinx.coroutines.flow.map
 internal sealed class FormElement {
     abstract val identifier: IdentifierSpec
     abstract val controller: Controller?
+
+    abstract fun getFormFieldValueFlow(): Flow<List<Pair<IdentifierSpec, FormFieldEntry>>>
 
     /**
      * This is an element that has static text because it takes no user input, it is not
@@ -37,7 +48,10 @@ internal sealed class FormElement {
         val color: Color,
         val merchantName: String?,
         override val controller: InputController? = null,
-    ) : FormElement()
+    ) : FormElement() {
+        override fun getFormFieldValueFlow(): Flow<List<Pair<IdentifierSpec, FormFieldEntry>>> =
+            MutableStateFlow(emptyList())
+    }
 
     /**
      * This is an element that will make elements (as specified by identifier) hidden
@@ -47,7 +61,38 @@ internal sealed class FormElement {
         override val identifier: IdentifierSpec,
         override val controller: SaveForFutureUseController,
         val merchantName: String?
-    ) : FormElement()
+    ) : FormElement() {
+        override fun getFormFieldValueFlow(): Flow<List<Pair<IdentifierSpec, FormFieldEntry>>> =
+            controller.formFieldValue.map {
+                listOf(
+                    identifier to it
+                )
+            }
+    }
+
+    internal data class AfterpayClearpayHeaderElement(
+        override val identifier: IdentifierSpec,
+        private val amount: Amount,
+        override val controller: Controller? = null
+    ) : FormElement() {
+        override fun getFormFieldValueFlow(): Flow<List<Pair<IdentifierSpec, FormFieldEntry>>> =
+            MutableStateFlow(emptyList())
+
+        val infoUrl = url.format(Locale.current.region.lowercase())
+
+        fun getLabel(resources: Resources) =
+            resources.getString(
+                R.string.stripe_paymentsheet_afterpay_clearpay_message,
+                CurrencyFormatter().format(
+                    amount.value / 4,
+                    amount.currencyCode
+                )
+            )
+
+        companion object {
+            const val url = "https://static-us.afterpay.com/javascript/modal/%s_rebrand_modal.html"
+        }
+    }
 
     data class SectionElement(
         override val identifier: IdentifierSpec,
@@ -59,47 +104,49 @@ internal sealed class FormElement {
             field: SectionFieldElement,
             controller: SectionController
         ) : this(identifier, listOf(field), controller)
+
+        override fun getFormFieldValueFlow(): Flow<List<Pair<IdentifierSpec, FormFieldEntry>>> =
+            combine(fields.map { it.getFormFieldValueFlow() }) {
+                it.toList().flatten()
+            }
     }
 }
 
-/**
- * This will get a map of all pairs of identifier to inputControllers, including the section
- * fields, but not the sections themselves.
- */
-internal fun List<FormElement>.getIdInputControllerMap() = this
-    .filter { it.controller is InputController }
-    .associate { it.identifier to (it.controller as InputController) }
-    .plus(
-        this
-            .filterIsInstance<FormElement.SectionElement>()
-            .flatMap { it.fields }
-            .filter { it.controller is InputController }
-            .associate { it.identifier to it.controller as InputController }
-    )
+internal sealed interface SectionFieldElement {
+    val identifier: IdentifierSpec
+
+    fun getFormFieldValueFlow(): Flow<List<Pair<IdentifierSpec, FormFieldEntry>>>
+    fun sectionFieldErrorController(): SectionFieldErrorController
+}
 
 /**
  * This is an element that is in a section and accepts user input.
  */
-internal sealed class SectionFieldElement {
-    abstract val identifier: IdentifierSpec
-
+internal sealed class SectionSingleFieldElement(
+    override val identifier: IdentifierSpec,
+) : SectionFieldElement {
     /**
-     * Every item in a section must have a controller that can provide an error
-     * message, for the section controller to reduce it to a single error message.
+     * Some fields in the section will have a single input controller.
      */
-    abstract val controller: SectionFieldErrorController
+    abstract val controller: InputController
 
     abstract fun setRawValue(formFragmentArguments: FormFragmentArguments)
 
     /**
      * This will return a controller that abides by the SectionFieldErrorController interface.
      */
-    fun sectionFieldErrorController(): SectionFieldErrorController = controller
+    override fun sectionFieldErrorController(): SectionFieldErrorController = controller
+
+    override fun getFormFieldValueFlow(): Flow<List<Pair<IdentifierSpec, FormFieldEntry>>> {
+        return controller.formFieldValue.map { formFieldEntry ->
+            listOf(identifier to formFieldEntry)
+        }
+    }
 
     data class Email(
         override val identifier: IdentifierSpec,
         override val controller: TextFieldController
-    ) : SectionFieldElement() {
+    ) : SectionSingleFieldElement(identifier) {
         override fun setRawValue(formFragmentArguments: FormFragmentArguments) {
             formFragmentArguments.getValue(identifier)?.let { controller.onRawValueChange(it) }
         }
@@ -107,8 +154,8 @@ internal sealed class SectionFieldElement {
 
     data class Iban(
         override val identifier: IdentifierSpec,
-        override val controller: TextFieldController,
-    ) : SectionFieldElement() {
+        override val controller: TextFieldController
+    ) : SectionSingleFieldElement(identifier) {
         override fun setRawValue(formFragmentArguments: FormFragmentArguments) {
             formFragmentArguments.getValue(identifier)?.let { controller.onRawValueChange(it) }
         }
@@ -117,7 +164,7 @@ internal sealed class SectionFieldElement {
     data class Country(
         override val identifier: IdentifierSpec,
         override val controller: DropdownFieldController
-    ) : SectionFieldElement() {
+    ) : SectionSingleFieldElement(identifier) {
         override fun setRawValue(formFragmentArguments: FormFragmentArguments) {
             formFragmentArguments.getValue(identifier)?.let { controller.onRawValueChange(it) }
         }
@@ -126,7 +173,7 @@ internal sealed class SectionFieldElement {
     data class SimpleText(
         override val identifier: IdentifierSpec,
         override val controller: TextFieldController
-    ) : SectionFieldElement() {
+    ) : SectionSingleFieldElement(identifier) {
         override fun setRawValue(formFragmentArguments: FormFragmentArguments) {
             formFragmentArguments.getValue(identifier)?.let { controller.onRawValueChange(it) }
         }
@@ -134,15 +181,19 @@ internal sealed class SectionFieldElement {
 
     data class SimpleDropdown(
         override val identifier: IdentifierSpec,
-        override val controller: DropdownFieldController,
-    ) : SectionFieldElement() {
+        override val controller: DropdownFieldController
+    ) : SectionSingleFieldElement(identifier) {
         override fun setRawValue(formFragmentArguments: FormFragmentArguments) {
             formFragmentArguments.getValue(identifier)?.let { controller.onRawValueChange(it) }
         }
     }
+}
 
+internal sealed class SectionMultiFieldElement(
+    override val identifier: IdentifierSpec,
+) : SectionFieldElement {
     internal class AddressElement constructor(
-        override val identifier: IdentifierSpec,
+        _identifier: IdentifierSpec,
         private val addressFieldRepository: AddressFieldElementRepository,
         private var args: FormFragmentArguments? = null,
         countryCodes: Set<String> = emptySet(),
@@ -150,10 +201,10 @@ internal sealed class SectionFieldElement {
             CountryConfig(countryCodes),
             args?.billingDetails?.address?.country
         ),
-    ) : SectionFieldElement() {
+    ) : SectionMultiFieldElement(_identifier) {
 
         @VisibleForTesting
-        val countryElement = Country(
+        val countryElement = SectionSingleFieldElement.Country(
             IdentifierSpec.Country,
             countryDropdownFieldController
         )
@@ -175,10 +226,44 @@ internal sealed class SectionFieldElement {
 
         val fields = otherFields.map { listOf(countryElement).plus(it) }
 
-        override val controller = AddressController(fields)
+        val controller = AddressController(fields)
 
-        override fun setRawValue(formFragmentArguments: FormFragmentArguments) {
-            args = formFragmentArguments
+        /**
+         * This will return a controller that abides by the SectionFieldErrorController interface.
+         */
+        override fun sectionFieldErrorController(): SectionFieldErrorController =
+            controller
+
+        @ExperimentalCoroutinesApi
+        override fun getFormFieldValueFlow() = fields.flatMapLatest { fieldElements ->
+            combine(
+                fieldElements
+                    .associate { sectionFieldElement ->
+                        sectionFieldElement.identifier to
+                            sectionFieldElement.controller
+                    }
+                    .map {
+                        getCurrentFieldValuePair(it.key, it.value)
+                    }
+            ) {
+                it.toList()
+            }
+        }
+
+        private fun getCurrentFieldValuePair(
+            identifier: IdentifierSpec,
+            controller: InputController
+        ) = combine(
+            controller.rawFieldValue,
+            controller.isComplete
+        ) { rawFieldValue, isComplete ->
+            Pair(
+                identifier,
+                FormFieldEntry(
+                    value = rawFieldValue,
+                    isComplete = isComplete,
+                )
+            )
         }
     }
 }

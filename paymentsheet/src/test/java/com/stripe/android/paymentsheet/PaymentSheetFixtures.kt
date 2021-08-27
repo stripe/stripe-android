@@ -4,8 +4,6 @@ import androidx.core.graphics.toColorInt
 import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.SetupIntentClientSecret
 import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
-import com.stripe.android.paymentsheet.paymentdatacollection.Address
-import com.stripe.android.paymentsheet.paymentdatacollection.BillingDetails
 import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
 
 internal object PaymentSheetFixtures {
@@ -68,8 +66,8 @@ internal object PaymentSheetFixtures {
         saveForFutureUseInitialVisibility = true,
         saveForFutureUseInitialValue = true,
         merchantName = "Merchant, Inc.",
-        billingDetails = BillingDetails(
-            address = Address(
+        billingDetails = PaymentSheet.BillingDetails(
+            address = PaymentSheet.Address(
                 line1 = "123 Main Street",
                 line2 = null,
                 city = "San Francisco",

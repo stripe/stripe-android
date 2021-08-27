@@ -65,6 +65,7 @@
         <activity android:name=".activity.NetbankingPaymentActivity" />
         <activity android:name=".activity.SimpleConfirmationActivity" />
         <activity android:name=".activity.ConnectExampleActivity" />
+        <activity android:name=".activity.ComposeExampleActivity" />
     </application>
 
 </manifest>

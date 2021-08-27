@@ -15,7 +15,7 @@ buildscript {
         classpath 'com.android.tools.build:gradle:7.0.1'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
         classpath "org.jetbrains.dokka:dokka-gradle-plugin:$dokkaVersion"
-        classpath "org.jetbrains.kotlinx:binary-compatibility-validator:0.7.0"
+        classpath "org.jetbrains.kotlinx:binary-compatibility-validator:0.7.1"
     }
 }
 
@@ -61,7 +61,7 @@ ext {
     androidTestVersion = '1.4.0'
     junitVersion = '4.13.2'
     robolectricVersion = '4.6'
-    mockitoCoreVersion = '3.12.3'
+    mockitoCoreVersion = '3.12.4'
     mockitoKotlinVersion = '3.2.0'
 
     group_name = GROUP

@@ -1,43 +1,55 @@
 package com.stripe.android.paymentsheet.forms
 
+import android.content.Intent
 import android.content.res.Resources
-import androidx.annotation.RestrictTo
+import android.net.Uri
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.Checkbox
 import androidx.compose.material.Divider
 import androidx.compose.material.Text
+import androidx.compose.material.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
+import com.google.accompanist.flowlayout.FlowCrossAxisAlignment
+import com.google.accompanist.flowlayout.FlowRow
 import com.stripe.android.paymentsheet.FormElement
+import com.stripe.android.paymentsheet.FormElement.AfterpayClearpayHeaderElement
 import com.stripe.android.paymentsheet.FormElement.MandateTextElement
 import com.stripe.android.paymentsheet.FormElement.SaveForFutureUseElement
 import com.stripe.android.paymentsheet.FormElement.SectionElement
+import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.SectionFieldElement
 import com.stripe.android.paymentsheet.elements.AddressController
 import com.stripe.android.paymentsheet.elements.CardStyle
 import com.stripe.android.paymentsheet.elements.DropDown
 import com.stripe.android.paymentsheet.elements.DropdownFieldController
-import com.stripe.android.paymentsheet.elements.InputController
 import com.stripe.android.paymentsheet.elements.Section
 import com.stripe.android.paymentsheet.elements.TextField
 import com.stripe.android.paymentsheet.elements.TextFieldController
-import com.stripe.android.paymentsheet.getIdInputControllerMap
 import com.stripe.android.paymentsheet.injection.DaggerFormViewModelComponent
 import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
 import com.stripe.android.paymentsheet.specifications.FormItemSpec
@@ -45,10 +57,8 @@ import com.stripe.android.paymentsheet.specifications.IdentifierSpec
 import com.stripe.android.paymentsheet.specifications.LayoutSpec
 import com.stripe.android.paymentsheet.specifications.ResourceRepository
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -81,15 +91,10 @@ internal fun FormInternal(
         elements.forEach { element ->
             if (!hiddenIdentifiers.contains(element.identifier)) {
                 when (element) {
-                    is SectionElement -> {
-                        SectionElementUI(enabled, element, hiddenIdentifiers)
-                    }
-                    is MandateTextElement -> {
-                        MandateElementUI(element)
-                    }
-                    is SaveForFutureUseElement -> {
-                        SaveForFutureUseElementUI(enabled, element)
-                    }
+                    is SectionElement -> SectionElementUI(enabled, element, hiddenIdentifiers)
+                    is MandateTextElement -> MandateElementUI(element)
+                    is SaveForFutureUseElement -> SaveForFutureUseElementUI(enabled, element)
+                    is AfterpayClearpayHeaderElement -> AfterpayClearpayElementUI(enabled, element)
                 }
             }
         }
@@ -231,6 +236,62 @@ internal fun SaveForFutureUseElementUI(
     }
 }
 
+@Composable
+internal fun AfterpayClearpayElementUI(
+    enabled: Boolean,
+    element: AfterpayClearpayHeaderElement
+) {
+    val context = LocalContext.current
+
+    FlowRow(
+        modifier = Modifier.padding(4.dp, 8.dp, 4.dp, 4.dp),
+        crossAxisAlignment = FlowCrossAxisAlignment.Center
+    ) {
+        Text(
+            element.getLabel(context.resources),
+            Modifier
+                .padding(end = 4.dp),
+            color = if (isSystemInDarkTheme()) {
+                Color.LightGray
+            } else {
+                Color.Black
+            }
+        )
+        Image(
+            painter = painterResource(R.drawable.stripe_ic_afterpay_clearpay_logo),
+            contentDescription = stringResource(
+                R.string.stripe_paymentsheet_payment_method_afterpay_clearpay
+            ),
+            colorFilter = if (isSystemInDarkTheme()) {
+                ColorFilter.tint(Color.White)
+            } else {
+                null
+            }
+        )
+        TextButton(
+            onClick = {
+                context.startActivity(
+                    Intent(Intent.ACTION_VIEW, Uri.parse(element.infoUrl))
+                )
+            },
+            modifier = Modifier.size(32.dp),
+            enabled = enabled,
+            contentPadding = PaddingValues(4.dp)
+        ) {
+            Text(
+                text = "ⓘ",
+                modifier = Modifier.padding(0.dp),
+                style = TextStyle(fontWeight = FontWeight.Bold),
+                color = if (isSystemInDarkTheme()) {
+                    Color.LightGray
+                } else {
+                    Color.Black
+                }
+            )
+        }
+    }
+}
+
 /**
  * This class stores the visual field layout for the [Form] and then sets up the controller
  * for all the fields on screen.  When all fields are reported as complete, the completedFieldValues
@@ -239,9 +300,8 @@ internal fun SaveForFutureUseElementUI(
  * @param: layout - this contains the visual layout of the fields on the screen used by [Form]
  * to display the UI fields on screen.  It also informs us of the backing fields to be created.
  */
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Singleton
-class FormViewModel @Inject internal constructor(
+internal class FormViewModel @Inject internal constructor(
     layout: LayoutSpec,
     config: FormFragmentArguments,
     private val resourceRepository: ResourceRepository
@@ -342,31 +402,15 @@ class FormViewModel @Inject internal constructor(
             } ?: false
     }
 
-    private val addressSectionFields = elements
-        .filterIsInstance<SectionElement>()
-        .flatMap { it.fields }
-        .filterIsInstance<SectionFieldElement.AddressElement>()
-        .firstOrNull()
-        ?.fields
-        ?: MutableStateFlow(null)
-
-    @ExperimentalCoroutinesApi
-    val completeFormValues = addressSectionFields.map { addressSectionFields ->
-        addressSectionFields
-            ?.filter { it.controller is InputController }
-            ?.associate { sectionFieldElement ->
-                sectionFieldElement.identifier to sectionFieldElement.controller as InputController
-            }
-            ?.plus(
-                elements.getIdInputControllerMap()
-            ) ?: elements.getIdInputControllerMap()
-    }
-        .flatMapLatest { value ->
-            TransformElementToFormFieldValueFlow(
-                value,
-                hiddenIdentifiers,
-                showingMandate,
-                saveForFutureUse
-            ).transformFlow()
-        }
+    val completeFormValues =
+        CompleteFormFieldValueFilter(
+            combine(
+                elements.map { it.getFormFieldValueFlow() }
+            ) {
+                it.toList().flatten().toMap()
+            },
+            hiddenIdentifiers,
+            showingMandate,
+            saveForFutureUse
+        ).filterFlow()
 }

@@ -15,6 +15,7 @@ import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetActivity
 import com.stripe.android.paymentsheet.PaymentSheetContract
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
@@ -158,8 +159,8 @@ class CardDataCollectionFragmentTest {
                 saveForFutureUseInitialVisibility = false,
                 saveForFutureUseInitialValue = false,
                 merchantName = "Merchant, Inc.",
-                billingDetails = BillingDetails(
-                    address = Address(
+                billingDetails = PaymentSheet.BillingDetails(
+                    address = PaymentSheet.Address(
                         line1 = "123 Main Street",
                         line2 = null,
                         city = "San Francisco",

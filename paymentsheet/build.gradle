@@ -104,6 +104,7 @@ dependencies {
     implementation "androidx.activity:activity-compose:$composeActivityVersion"
     // Integration with observables
     implementation "androidx.compose.runtime:runtime-livedata:$composeVersion"
+    implementation "com.google.accompanist:accompanist-flowlayout:0.17.0"
     // Tooling support (Previews, etc.)
     debugImplementation "androidx.compose.ui:ui-tooling:$composeVersion"
 
