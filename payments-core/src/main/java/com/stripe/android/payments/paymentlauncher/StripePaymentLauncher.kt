@@ -2,6 +2,7 @@ package com.stripe.android.payments.paymentlauncher
 
 import android.content.Context
 import androidx.activity.result.ActivityResultLauncher
+import androidx.annotation.RestrictTo
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.networking.AnalyticsRequestFactory
@@ -26,7 +27,8 @@ import kotlin.coroutines.CoroutineContext
  * Implementation of [PaymentLauncher], start an [PaymentLauncherConfirmationActivity] to confirm and
  * handle next actions for intents.
  */
-internal class StripePaymentLauncher @AssistedInject internal constructor(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+class StripePaymentLauncher @AssistedInject internal constructor(
     @Assisted(PUBLISHABLE_KEY) publishableKeyProvider: () -> String,
     @Assisted(STRIPE_ACCOUNT_ID) stripeAccountIdProvider: () -> String?,
     @Assisted private val hostActivityLauncher: ActivityResultLauncher<PaymentLauncherContract.Args>,

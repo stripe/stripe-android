@@ -3,6 +3,7 @@ package com.stripe.android.payments.paymentlauncher
 import android.content.Context
 import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultLauncher
+import androidx.annotation.RestrictTo
 import androidx.fragment.app.Fragment
 import com.stripe.android.BuildConfig
 import com.stripe.android.networking.AnalyticsRequestFactory
@@ -14,7 +15,8 @@ import kotlinx.coroutines.Dispatchers
  *
  * Used when [PaymentLauncher] is used as a standalone API.
  */
-internal class PaymentLauncherFactory(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+class PaymentLauncherFactory(
     private val context: Context,
     private val hostActivityLauncher: ActivityResultLauncher<PaymentLauncherContract.Args>
 ) {
