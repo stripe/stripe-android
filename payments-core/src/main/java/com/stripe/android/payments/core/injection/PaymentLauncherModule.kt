@@ -2,7 +2,6 @@ package com.stripe.android.payments.core.injection
 
 import android.content.Context
 import com.stripe.android.Logger
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.networking.AnalyticsRequestFactory
 import com.stripe.android.networking.ApiRequest
 import com.stripe.android.networking.DefaultAnalyticsRequestExecutor
@@ -12,8 +11,6 @@ import com.stripe.android.payments.PaymentIntentFlowResultProcessor
 import com.stripe.android.payments.SetupIntentFlowResultProcessor
 import com.stripe.android.payments.core.authentication.DefaultPaymentAuthenticatorRegistry
 import com.stripe.android.payments.core.authentication.PaymentAuthenticatorRegistry
-import com.stripe.android.payments.paymentlauncher.PaymentLauncher
-import com.stripe.android.payments.paymentlauncher.PaymentLauncherFactory
 import dagger.Module
 import dagger.Provides
 import javax.inject.Named
@@ -21,20 +18,6 @@ import javax.inject.Provider
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
-/**
- * [Module] to provide dependencies for [PaymentLauncher].
- *
- * Notes for the constructor parameters [publishableKeyProvider] and [stripeAccountIdProvider]:
- * 1. When [PaymentLauncher] is used as a public API, [PUBLISHABLE_KEY] and [STRIPE_ACCOUNT_ID] are
- * passed through [PaymentLauncherFactory.create] and are determined during initialization.
- *
- * 2. When [PaymentLauncher] is used by PaymentSheet, [PUBLISHABLE_KEY] and [STRIPE_ACCOUNT_ID]
- * might not be available during initialization, as the client might use
- * [PaymentConfiguration.init] to initialize them after [PaymentLauncher] is initialized.
- *
- * To accommodate both scenarios, two [Provider]s are passed to the [Module], they return the direct
- * value in case 1 and use the [Provider]s created by PaymentSheet's dagger graph in case 2.
- */
 @Module
 internal class PaymentLauncherModule {
 
