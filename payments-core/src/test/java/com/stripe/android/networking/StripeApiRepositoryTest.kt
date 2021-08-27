@@ -421,7 +421,7 @@ internal class StripeApiRepositoryTest {
             verify(stripeApiRequestExecutor).execute(apiRequestArgumentCaptor.capture())
             val apiRequest = apiRequestArgumentCaptor.firstValue
             val paymentMethodDataParams =
-                apiRequest.params?.get("payment_method_data") as Map<String, *>
+                apiRequest.params?.get("payment_method_data") as Map<*, *>
             assertTrue(paymentMethodDataParams["muid"] is String)
             assertTrue(paymentMethodDataParams["guid"] is String)
             assertEquals("card", paymentMethodDataParams["type"])
@@ -1086,7 +1086,7 @@ internal class StripeApiRepositoryTest {
             verify(stripeApiRequestExecutor).execute(apiRequestArgumentCaptor.capture())
             val apiRequest = apiRequestArgumentCaptor.firstValue
             val paymentMethodDataParams = apiRequest.params?.get("expand") as Collection<*>
-            assertTrue(paymentMethodDataParams.contains("payment_intent"))
+            assertTrue(paymentMethodDataParams.contains("payment_method_preference.payment_intent.payment_method"))
             assertEquals(apiRequest.params?.get("locale"), locale.toLanguageTag())
             assertEquals(apiRequest.params?.get("type"), "payment_intent")
             assertEquals(apiRequest.params?.get("client_secret"), clientSecret)
@@ -1116,7 +1116,7 @@ internal class StripeApiRepositoryTest {
             verify(stripeApiRequestExecutor).execute(apiRequestArgumentCaptor.capture())
             val apiRequest = apiRequestArgumentCaptor.firstValue
             val paymentMethodDataParams = apiRequest.params?.get("expand") as Collection<*>
-            assertTrue(paymentMethodDataParams.contains("setup_intent"))
+            assertTrue(paymentMethodDataParams.contains("payment_method_preference.setup_intent.payment_method"))
             assertEquals(apiRequest.params?.get("locale"), locale.toLanguageTag())
             assertEquals(apiRequest.params?.get("type"), "setup_intent")
             assertEquals(apiRequest.params?.get("client_secret"), clientSecret)

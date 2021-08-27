@@ -1065,7 +1065,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
 
         val params = createClientSecretParam(
             clientSecret,
-            listOf(parser.stripeIntentFieldName)
+            listOf("payment_method_preference.${parser.stripeIntentFieldName}.payment_method")
         ).plus(
             mapOf(
                 "type" to parser.stripeIntentFieldName,
@@ -1074,8 +1074,8 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         )
 
         return fetchStripeModel(
-            apiRequestFactory.createPost(
-                getApiUrl("payment_method_preferences"),
+            apiRequestFactory.createGet(
+                getApiUrl("elements/sessions"),
                 options,
                 params
             ),
