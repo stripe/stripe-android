@@ -123,6 +123,6 @@ internal fun SectionError(error: String) {
     Text(
         text = error,
         color = MaterialTheme.colors.error,
-        modifier = Modifier.semantics(mergeDescendants = true) {  }
+        modifier = Modifier.semantics(mergeDescendants = true) { }
     )
 }
