@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
+  <!-- Billing address section title for card form entry. -->
+  <string name="billing_details">Billing address</string>
   <!-- Button title to cancel action in an alert -->
   <string name="cancel">Cancel</string>
   <!-- Done button title -->
@@ -53,8 +55,6 @@
   <string name="stripe_paymentsheet_payment_method_card">Card</string>
   <!-- Payment method brand name -->
   <string name="stripe_paymentsheet_payment_method_sepa_debit">SEPA Debit</string>
-  <!-- Payment method brand name for Afterpay/Clearpay -->
-  <string name="stripe_paymentsheet_payment_method_afterpay_clearpay">Clearpay</string>
   <!-- Label of a button that, when tapped, initiates payment, becomes disabled, and displays this text -->
   <string name="stripe_paymentsheet_primary_button_processing">Processing…</string>
   <!-- Content for alert popup prompting to confirm removing saved payment method. -->

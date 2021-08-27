@@ -78,8 +78,8 @@
   <string name="address_name_required">이름을 입력하십시오</string>
   <!-- Error text indicating that phone number is required, used for all addresses -->
   <string name="address_phone_number_required">전화번호를 입력하십시오</string>
-  <!-- Error text indicating postal code is invalid, used for Canada addresses -->
-  <string name="address_postal_code_invalid">우편번호가 유효하지 않습니다</string>
+  <!-- Error message for when postal code in form is invalid -->
+  <string name="address_postal_code_invalid">우편번호가 유효하지 않습니다.</string>
   <!-- Error text indicating postcode is invalid, used for UK addresses -->
   <string name="address_postcode_invalid">우편번호가 유효하지 않습니다</string>
   <!-- Error text indicating that province is required, used for Canada addresses -->

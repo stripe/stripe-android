@@ -78,7 +78,7 @@
   <string name="address_name_required">Introduza o seu nome</string>
   <!-- Error text indicating that phone number is required, used for all addresses -->
   <string name="address_phone_number_required">Introduza o seu número de telefone</string>
-  <!-- Error text indicating postal code is invalid, used for Canada addresses -->
+  <!-- Error message for when postal code in form is invalid -->
   <string name="address_postal_code_invalid">O seu código postal é inválido.</string>
   <!-- Error text indicating postcode is invalid, used for UK addresses -->
   <string name="address_postcode_invalid">O seu código postal é inválido</string>
