@@ -36,10 +36,7 @@ import kotlin.coroutines.CoroutineContext
  * value in case 1 and use the [Provider]s created by PaymentSheet's dagger graph in case 2.
  */
 @Module
-internal class PaymentLauncherModule(
-    private val publishableKeyProvider: Provider<String>,
-    private val stripeAccountIdProvider: Provider<String?>
-) {
+internal class PaymentLauncherModule {
 
     /**
      * Because [PUBLISHABLE_KEY] and [STRIPE_ACCOUNT_ID] might change, each time a new [ApiRequest]
@@ -49,9 +46,12 @@ internal class PaymentLauncherModule(
      * Should always be used with [Provider] or [Lazy].
      */
     @Provides
-    fun provideApiRequestOptions() = ApiRequest.Options(
-        apiKey = publishableKeyProvider.get(),
-        stripeAccount = stripeAccountIdProvider.get()
+    fun provideApiRequestOptions(
+        @Named(PUBLISHABLE_KEY) publishableKeyProvider: () -> String,
+        @Named(STRIPE_ACCOUNT_ID) stripeAccountIdProvider: () -> String?
+    ) = ApiRequest.Options(
+        apiKey = publishableKeyProvider(),
+        stripeAccount = stripeAccountIdProvider()
     )
 
     @Provides
@@ -73,7 +73,8 @@ internal class PaymentLauncherModule(
         context: Context,
         stripeApiRepository: StripeRepository,
         @Named(ENABLE_LOGGING) enableLogging: Boolean,
-        @IOContext ioContext: CoroutineContext
+        @IOContext ioContext: CoroutineContext,
+        @Named(PUBLISHABLE_KEY) publishableKeyProvider: () -> String,
     ): PaymentIntentFlowResultProcessor {
         return PaymentIntentFlowResultProcessor(
             context,
@@ -90,7 +91,8 @@ internal class PaymentLauncherModule(
         context: Context,
         stripeApiRepository: StripeRepository,
         @Named(ENABLE_LOGGING) enableLogging: Boolean,
-        @IOContext ioContext: CoroutineContext
+        @IOContext ioContext: CoroutineContext,
+        @Named(PUBLISHABLE_KEY) publishableKeyProvider: () -> String,
     ): SetupIntentFlowResultProcessor {
         return SetupIntentFlowResultProcessor(
             context,

@@ -39,6 +39,12 @@ internal interface PaymentLauncherComponent {
         @BindsInstance
         fun analyticsRequestFactory(analyticsRequestFactory: AnalyticsRequestFactory): Builder
 
+        @BindsInstance
+        fun publishableKeyProvider(@Named(PUBLISHABLE_KEY) publishableKeyProvider: () -> String): Builder
+
+        @BindsInstance
+        fun stripeAccountIdProvider(@Named(STRIPE_ACCOUNT_ID) stripeAccountIdProvider: () -> String?): Builder
+
         fun paymentLauncherModule(paymentLauncherModule: PaymentLauncherModule): Builder
 
         fun build(): PaymentLauncherComponent

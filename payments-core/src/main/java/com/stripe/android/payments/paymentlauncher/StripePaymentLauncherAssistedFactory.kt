@@ -5,7 +5,6 @@ import com.stripe.android.payments.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.payments.core.injection.STRIPE_ACCOUNT_ID
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
-import javax.inject.Provider
 
 /**
  * [AssistedFactory] to create a [StripePaymentLauncher] with shared dependencies already created
@@ -17,8 +16,8 @@ import javax.inject.Provider
 @AssistedFactory
 internal interface StripePaymentLauncherAssistedFactory {
     fun create(
-        @Assisted(PUBLISHABLE_KEY) publishableKey: Provider<String>,
-        @Assisted(STRIPE_ACCOUNT_ID) stripeAccountId: Provider<String?>,
+        @Assisted(PUBLISHABLE_KEY) publishableKey: () -> String,
+        @Assisted(STRIPE_ACCOUNT_ID) stripeAccountId: () -> String?,
         hostActivityLauncher: ActivityResultLauncher<PaymentLauncherContract.Args>
     ): StripePaymentLauncher
 }

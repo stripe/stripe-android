@@ -14,14 +14,12 @@ import com.stripe.android.payments.core.injection.Injector
 import com.stripe.android.payments.core.injection.InjectorKey
 import com.stripe.android.payments.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.payments.core.injection.PaymentLauncherComponent
-import com.stripe.android.payments.core.injection.PaymentLauncherModule
 import com.stripe.android.payments.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.payments.core.injection.UIContext
 import com.stripe.android.payments.core.injection.WeakMapInjectorRegistry
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import javax.inject.Named
-import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
 
 /**
@@ -29,8 +27,8 @@ import kotlin.coroutines.CoroutineContext
  * handle next actions for intents.
  */
 internal class StripePaymentLauncher @AssistedInject internal constructor(
-    @Assisted(PUBLISHABLE_KEY) publishableKeyProvider: Provider<String>,
-    @Assisted(STRIPE_ACCOUNT_ID) stripeAccountIdProvider: Provider<String?>,
+    @Assisted(PUBLISHABLE_KEY) publishableKeyProvider: () -> String,
+    @Assisted(STRIPE_ACCOUNT_ID) stripeAccountIdProvider: () -> String?,
     @Assisted private val hostActivityLauncher: ActivityResultLauncher<PaymentLauncherContract.Args>,
     context: Context,
     @Named(ENABLE_LOGGING) enableLogging: Boolean,
@@ -47,12 +45,8 @@ internal class StripePaymentLauncher @AssistedInject internal constructor(
             .uiContext(uiContext)
             .stripeRepository(stripeRepository)
             .analyticsRequestFactory(analyticsRequestFactory)
-            .paymentLauncherModule(
-                PaymentLauncherModule(
-                    publishableKeyProvider,
-                    stripeAccountIdProvider
-                )
-            )
+            .publishableKeyProvider(publishableKeyProvider)
+            .stripeAccountIdProvider(stripeAccountIdProvider)
             .build()
 
     @InjectorKey
