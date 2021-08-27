@@ -56,6 +56,7 @@ import com.stripe.android.paymentsheet.elements.DropDown
 import com.stripe.android.paymentsheet.elements.DropdownFieldController
 import com.stripe.android.paymentsheet.elements.RowController
 import com.stripe.android.paymentsheet.elements.Section
+import com.stripe.android.paymentsheet.elements.SectionFieldElementUI
 import com.stripe.android.paymentsheet.elements.TextField
 import com.stripe.android.paymentsheet.elements.TextFieldController
 import com.stripe.android.paymentsheet.injection.DaggerFormViewModelComponent
@@ -165,92 +166,6 @@ internal fun AddressElementUI(
                     )
                 )
             }
-        }
-    }
-}
-
-@Composable
-internal fun RowElementUI(
-    enabled: Boolean,
-    controller: RowController
-) {
-    val fields = controller.fields
-    Row(
-        Modifier
-            .height(IntrinsicSize.Min)
-            .fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        fields.forEachIndexed { index, field ->
-            val lastItem = index != fields.size - 1
-            SectionFieldElementUI(
-                enabled,
-                field,
-                Modifier.fillMaxWidth(
-                    (1f / fields.size.toFloat()).takeIf { lastItem } ?: 1f
-                )
-            )
-            if (!lastItem) {
-                val cardStyle = CardStyle(isSystemInDarkTheme())
-                VeriticalDivider(
-                    color = cardStyle.cardBorderColor,
-                    thickness = cardStyle.cardBorderWidth,
-                    modifier = Modifier
-                        .padding(
-                            horizontal = cardStyle.cardBorderWidth
-                        )
-                )
-            }
-        }
-    }
-}
-
-@Composable
-fun VeriticalDivider(
-    color: Color,
-    modifier: Modifier = Modifier,
-    thickness: Dp = 1.dp,
-) {
-    Box(
-        modifier = Modifier
-            .fillMaxHeight()
-            .width(thickness)
-            .background(color)
-    )
-}
-
-@Composable
-internal fun SectionFieldElementUI(
-    enabled: Boolean,
-    field: SectionFieldElement,
-    modifier: Modifier = Modifier
-) {
-    when (val controller = field.sectionFieldErrorController()) {
-        is TextFieldController -> {
-            TextField(
-                textFieldController = controller,
-                enabled = enabled,
-                modifier = modifier
-            )
-        }
-        is DropdownFieldController -> {
-            DropDown(
-                controller.label,
-                controller,
-                enabled
-            )
-        }
-        is AddressController -> {
-            AddressElementUI(
-                enabled,
-                controller
-            )
-        }
-        is RowController -> {
-            RowElementUI(
-                enabled,
-                controller
-            )
         }
     }
 }

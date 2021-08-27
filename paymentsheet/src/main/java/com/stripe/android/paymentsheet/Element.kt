@@ -193,25 +193,6 @@ internal sealed class SectionMultiFieldElement(
     override val identifier: IdentifierSpec,
 ) : SectionFieldElement {
 
-    internal class RowElement constructor(
-        _identifier: IdentifierSpec,
-        val fields: List<SectionSingleFieldElement>,
-        val controller: RowController
-    ) : SectionMultiFieldElement(_identifier) {
-        override fun getFormFieldValueFlow(): Flow<List<Pair<IdentifierSpec, FormFieldEntry>>> =
-            combine(fields.map { it.getFormFieldValueFlow() }) {
-                it.toList().flatten()
-            }
-
-        override fun sectionFieldErrorController() = controller
-
-        override fun setRawValue(formFragmentArguments: FormFragmentArguments) {
-            fields.forEach {
-                it.setRawValue(formFragmentArguments)
-            }
-        }
-    }
-
     internal class AddressElement constructor(
         _identifier: IdentifierSpec,
         private val addressFieldRepository: AddressFieldElementRepository,
