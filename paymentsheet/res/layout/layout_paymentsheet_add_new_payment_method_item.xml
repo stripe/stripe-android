@@ -18,7 +18,7 @@
             android:id="@+id/plus_icon"
             style="@style/StripePaymentOptionItemCardImage"
             android:src="@drawable/stripe_ic_paymentsheet_add"
-            android:contentDescription="@null" />
+            android:contentDescription="@string/title_add_a_card" />
     </com.google.android.material.card.MaterialCardView>
 
     <TextView
