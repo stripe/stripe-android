@@ -318,11 +318,9 @@ internal class CardDataCollectionFragment<ViewModelType : BaseSheetViewModel<*>>
             R.string.stripe_paymentsheet_save_this_card_with_merchant_name,
             sheetViewModel.merchantName
         )
-        val args = requireArguments().getParcelable<FormFragmentArguments>(
+        requireArguments().getParcelable<FormFragmentArguments>(
             ComposeFormDataCollectionFragment.EXTRA_CONFIG
-        )
-
-        if (null != args) {
+        )?.let { args ->
             saveCardCheckbox.isChecked = args.saveForFutureUseInitialValue
             saveCardCheckbox.isVisible = args.saveForFutureUseInitialVisibility
         }
