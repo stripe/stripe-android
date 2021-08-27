@@ -9,4 +9,7 @@
     <string name="stripe_paymentsheet_payment_method_giropay">Giropay</string>
 
     <string name="paymentsheet_payment_method_item_card_number" translatable="false">····%1$s</string>
+
+    <!-- This is used when typing data in the form for afterpay -->
+    <string name="stripe_paymentsheet_afterpay_clearpay_message">Pay in 4 interest-free payments of %s with</string>
 </resources>

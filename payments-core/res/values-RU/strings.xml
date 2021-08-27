@@ -78,8 +78,8 @@
   <string name="address_name_required">Введите свое имя</string>
   <!-- Error text indicating that phone number is required, used for all addresses -->
   <string name="address_phone_number_required">Введите свой номер телефона</string>
-  <!-- Error text indicating postal code is invalid, used for Canada addresses -->
-  <string name="address_postal_code_invalid">Введенный почтовый индекс неверен</string>
+  <!-- Error message for when postal code in form is invalid -->
+  <string name="address_postal_code_invalid">Введенный почтовый индекс недействителен.</string>
   <!-- Error text indicating postcode is invalid, used for UK addresses -->
   <string name="address_postcode_invalid">Введенный почтовый индекс неверен</string>
   <!-- Error text indicating that province is required, used for Canada addresses -->

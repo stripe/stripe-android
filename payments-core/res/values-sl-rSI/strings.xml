@@ -78,8 +78,8 @@
   <string name="address_name_required">Vnesite svoje ime</string>
   <!-- Error text indicating that phone number is required, used for all addresses -->
   <string name="address_phone_number_required">Vnesite svojo telefonsko številko</string>
-  <!-- Error text indicating postal code is invalid, used for Canada addresses -->
-  <string name="address_postal_code_invalid">Vaša poštna številka ni veljavna</string>
+  <!-- Error message for when postal code in form is invalid -->
+  <string name="address_postal_code_invalid">Vaša poštna številka ni veljavna.</string>
   <!-- Error text indicating postcode is invalid, used for UK addresses -->
   <string name="address_postcode_invalid">Vaša poštna številka ni veljavna</string>
   <!-- Error text indicating that province is required, used for Canada addresses -->

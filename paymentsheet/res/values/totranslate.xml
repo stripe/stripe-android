@@ -1,13 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
-
     <!--
     Items here need to be entered in our translation tool
     -->
-
-    <string name="billing_details">Billing Details</string>
-    <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
-    <string name="bank_account_ending_in">Bank account ending in %s</string>
-    <string name="stripe_paymentsheet_eps_bank">EPS Bank</string>
-    <string name="stripe_paymentsheet_p24_bank">P24 Bank</string>
 </resources>

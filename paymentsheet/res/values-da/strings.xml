@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
+  <!-- Billing address section title for card form entry. -->
+  <string name="billing_details">Faktureringsadresse</string>
   <!-- Button title to cancel action in an alert -->
   <string name="cancel">Annuller</string>
   <!-- Done button title -->

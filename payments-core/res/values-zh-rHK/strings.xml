@@ -78,8 +78,8 @@
   <string name="address_name_required">請輸入您的姓名</string>
   <!-- Error text indicating that phone number is required, used for all addresses -->
   <string name="address_phone_number_required">請輸入您的電話號碼</string>
-  <!-- Error text indicating postal code is invalid, used for Canada addresses -->
-  <string name="address_postal_code_invalid">您的郵區編號無效</string>
+  <!-- Error message for when postal code in form is invalid -->
+  <string name="address_postal_code_invalid">您的郵區編號無效。</string>
   <!-- Error text indicating postcode is invalid, used for UK addresses -->
   <string name="address_postcode_invalid">您的郵區編號無效</string>
   <!-- Error text indicating that province is required, used for Canada addresses -->
