@@ -1,4 +1,4 @@
-package com.stripe.android.paymentsheet.specifications
+package com.stripe.android.paymentsheet.elements
 
 import com.stripe.android.paymentsheet.address.AddressFieldElementRepository
 import javax.inject.Inject

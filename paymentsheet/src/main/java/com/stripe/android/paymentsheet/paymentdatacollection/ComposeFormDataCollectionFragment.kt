@@ -13,7 +13,7 @@ import androidx.compose.ui.unit.ExperimentalUnitApi
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.stripe.android.paymentsheet.StripeTheme
-import com.stripe.android.paymentsheet.forms.Form
+import com.stripe.android.paymentsheet.elements.Form
 import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
 

@@ -1,12 +1,17 @@
-package com.stripe.android.paymentsheet.specifications
+package com.stripe.android.paymentsheet.forms
 
 import androidx.compose.ui.graphics.Color
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.specifications.FormItemSpec.MandateTextSpec
-import com.stripe.android.paymentsheet.specifications.FormItemSpec.SaveForFutureUseSpec
-import com.stripe.android.paymentsheet.specifications.FormItemSpec.SectionSpec
-import com.stripe.android.paymentsheet.specifications.SectionFieldSpec.Country
-import com.stripe.android.paymentsheet.specifications.SectionFieldSpec.Email
+import com.stripe.android.paymentsheet.elements.CountrySpec
+import com.stripe.android.paymentsheet.elements.EmailSpec
+import com.stripe.android.paymentsheet.elements.FormSpec
+import com.stripe.android.paymentsheet.elements.IdentifierSpec
+import com.stripe.android.paymentsheet.elements.LayoutSpec
+import com.stripe.android.paymentsheet.elements.MandateTextSpec
+import com.stripe.android.paymentsheet.elements.SaveForFutureUseSpec
+import com.stripe.android.paymentsheet.elements.SectionSpec
+import com.stripe.android.paymentsheet.elements.SimpleTextSpec
+import com.stripe.android.paymentsheet.elements.billingParams
 
 internal val sofortParams: MutableMap<String, Any?> = mutableMapOf(
     "country" to null,
@@ -20,13 +25,13 @@ internal val sofortParamKey: MutableMap<String, Any?> = mutableMapOf(
 
 internal val sofortNameSection = SectionSpec(
     IdentifierSpec.Generic("name_section"),
-    SectionFieldSpec.NAME
+    SimpleTextSpec.NAME
 )
-internal val sofortEmailSection = SectionSpec(IdentifierSpec.Generic("email_section"), Email)
+internal val sofortEmailSection = SectionSpec(IdentifierSpec.Generic("email_section"), EmailSpec)
 internal val sofortCountrySection =
     SectionSpec(
         IdentifierSpec.Generic("country_section"),
-        Country(setOf("AT", "BE", "DE", "ES", "IT", "NL"))
+        CountrySpec(setOf("AT", "BE", "DE", "ES", "IT", "NL"))
     )
 internal val sofortMandate = MandateTextSpec(
     IdentifierSpec.Generic("mandate"),

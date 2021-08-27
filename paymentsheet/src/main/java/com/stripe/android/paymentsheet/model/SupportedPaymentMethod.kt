@@ -3,15 +3,15 @@ package com.stripe.android.paymentsheet.model
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.specifications.FormSpec
-import com.stripe.android.paymentsheet.specifications.afterpayClearpay
-import com.stripe.android.paymentsheet.specifications.bancontact
-import com.stripe.android.paymentsheet.specifications.eps
-import com.stripe.android.paymentsheet.specifications.giropay
-import com.stripe.android.paymentsheet.specifications.ideal
-import com.stripe.android.paymentsheet.specifications.p24
-import com.stripe.android.paymentsheet.specifications.sepaDebit
-import com.stripe.android.paymentsheet.specifications.sofort
+import com.stripe.android.paymentsheet.elements.FormSpec
+import com.stripe.android.paymentsheet.elements.afterpayClearpay
+import com.stripe.android.paymentsheet.forms.bancontact
+import com.stripe.android.paymentsheet.forms.eps
+import com.stripe.android.paymentsheet.forms.giropay
+import com.stripe.android.paymentsheet.forms.ideal
+import com.stripe.android.paymentsheet.forms.p24
+import com.stripe.android.paymentsheet.forms.sepaDebit
+import com.stripe.android.paymentsheet.forms.sofort
 
 /**
  * Enum defining all payment method types for which Payment Sheet can collect payment data.

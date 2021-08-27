@@ -1,11 +1,10 @@
 package com.stripe.android.paymentsheet.elements
 
 import androidx.annotation.StringRes
-import com.stripe.android.paymentsheet.specifications.DropdownItem
 
 internal class SimpleDropdownConfig(
     @StringRes override val label: Int,
-    private val items: List<DropdownItem>
+    private val items: List<DropdownItemSpec>
 ) : DropdownConfig {
     override val debugLabel = "simple_dropdown"
 
