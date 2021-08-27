@@ -4,6 +4,7 @@ import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.specifications.FormSpec
+import com.stripe.android.paymentsheet.specifications.afterpayClearpay
 import com.stripe.android.paymentsheet.specifications.bancontact
 import com.stripe.android.paymentsheet.specifications.eps
 import com.stripe.android.paymentsheet.specifications.giropay
@@ -70,6 +71,12 @@ internal enum class SupportedPaymentMethod(
         R.string.stripe_paymentsheet_payment_method_giropay,
         R.drawable.stripe_ic_paymentsheet_pm_giropay,
         giropay
+    ),
+    AfterpayClearpay(
+        "afterpay_clearpay",
+        R.string.stripe_paymentsheet_payment_method_afterpay_clearpay,
+        R.drawable.stripe_ic_paymentsheet_pm_afterpay_clearpay,
+        afterpayClearpay
     );
 
     override fun toString(): String {

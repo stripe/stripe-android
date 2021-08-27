@@ -19,6 +19,7 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.databinding.FragmentPaymentsheetAddPaymentMethodBinding
 import com.stripe.android.paymentsheet.forms.FormFieldValues
+import com.stripe.android.paymentsheet.model.Amount
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
 import com.stripe.android.paymentsheet.paymentdatacollection.CardDataCollectionFragment
@@ -157,9 +158,7 @@ internal abstract class BaseAddPaymentMethodFragment(
         val args = requireArguments()
         args.putParcelable(
             ComposeFormDataCollectionFragment.EXTRA_CONFIG,
-            getArguments(
-                supportedPaymentMethodName = paymentMethod.name,
-                merchantName = sheetViewModel.merchantName,
+            getFormArguments(
                 hasCustomer = sheetViewModel.customerConfig != null,
                 saveForFutureUse = (
                     sheetViewModel.stripeIntent.value is SetupIntent ||
@@ -168,6 +167,9 @@ internal abstract class BaseAddPaymentMethodFragment(
                                 ?.setupFutureUsage == StripeIntent.Usage.OffSession
                             )
                     ),
+                supportedPaymentMethodName = paymentMethod.name,
+                merchantName = sheetViewModel.merchantName,
+                amount = sheetViewModel.amount.value,
                 billingAddress = sheetViewModel.config?.defaultBillingDetails
             )
         )
@@ -220,11 +222,12 @@ internal abstract class BaseAddPaymentMethodFragment(
         }
 
         @VisibleForTesting
-        internal fun getArguments(
+        internal fun getFormArguments(
             hasCustomer: Boolean,
             saveForFutureUse: Boolean,
             supportedPaymentMethodName: String,
             merchantName: String,
+            amount: Amount? = null,
             billingAddress: PaymentSheet.BillingDetails? = null
         ): FormFragmentArguments {
             var saveForFutureUseValue = true
@@ -243,9 +246,10 @@ internal abstract class BaseAddPaymentMethodFragment(
 
             return FormFragmentArguments(
                 supportedPaymentMethodName = supportedPaymentMethodName,
-                merchantName = merchantName,
                 saveForFutureUseInitialVisibility = saveForFutureUseVisible,
                 saveForFutureUseInitialValue = saveForFutureUseValue,
+                merchantName = merchantName,
+                amount = amount,
                 billingDetails = billingAddress?.let {
                     PaymentSheet.BillingDetails(
                         name = billingAddress.name,

@@ -78,14 +78,21 @@ internal sealed class FormItemSpec {
     ) : FormItemSpec(), RequiredItemSpec
 
     /**
-     * This is an element that will make elements (as specified by identifier hidden
-     * when save for future use is unchecked)
+     * This is an element that will make elements (as specified by identifier) hidden
+     * when save for future use is unchecked
      */
     data class SaveForFutureUseSpec(
         val identifierRequiredForFutureUse: List<RequiredItemSpec>
     ) : FormItemSpec(), RequiredItemSpec {
         override val identifier = IdentifierSpec.SaveForFutureUse
     }
+
+    /**
+     * Header that displays information about installments for Afterpay
+     */
+    data class AfterpayClearpayTextSpec(
+        override val identifier: IdentifierSpec
+    ) : FormItemSpec(), RequiredItemSpec
 }
 
 /**
