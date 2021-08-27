@@ -20,13 +20,12 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.asLiveData
-import com.stripe.android.paymentsheet.FormElement
 import com.stripe.android.paymentsheet.R
 
 @Composable
 internal fun SaveForFutureUseElementUI(
     enabled: Boolean,
-    element: FormElement.SaveForFutureUseElement
+    element: SaveForFutureUseElement
 ) {
     val controller = element.controller
     val checked by controller.saveForFutureUse.asLiveData().observeAsState(true)

@@ -1,11 +1,18 @@
-package com.stripe.android.paymentsheet.specifications
+package com.stripe.android.paymentsheet.forms
 
 import androidx.compose.ui.graphics.Color
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.specifications.FormItemSpec.MandateTextSpec
-import com.stripe.android.paymentsheet.specifications.FormItemSpec.SectionSpec
-import com.stripe.android.paymentsheet.specifications.SectionFieldSpec.Email
-import com.stripe.android.paymentsheet.specifications.SectionFieldSpec.Iban
+import com.stripe.android.paymentsheet.elements.AddressSpec
+import com.stripe.android.paymentsheet.elements.EmailSpec
+import com.stripe.android.paymentsheet.elements.FormSpec
+import com.stripe.android.paymentsheet.elements.IbanSpec
+import com.stripe.android.paymentsheet.elements.IdentifierSpec
+import com.stripe.android.paymentsheet.elements.LayoutSpec
+import com.stripe.android.paymentsheet.elements.MandateTextSpec
+import com.stripe.android.paymentsheet.elements.SaveForFutureUseSpec
+import com.stripe.android.paymentsheet.elements.SectionSpec
+import com.stripe.android.paymentsheet.elements.SimpleTextSpec
+import com.stripe.android.paymentsheet.elements.billingParams
 
 internal val sepaDebitParams: MutableMap<String, Any?> = mutableMapOf(
     "iban" to null
@@ -19,15 +26,15 @@ internal val sepaDebitParamKey: MutableMap<String, Any?> = mutableMapOf(
 
 internal val sepaDebitNameSection = SectionSpec(
     IdentifierSpec.Generic("name _ection"),
-    SectionFieldSpec.NAME
+    SimpleTextSpec.NAME
 )
 internal val sepaDebitEmailSection = SectionSpec(
     IdentifierSpec.Generic("email_section"),
-    Email
+    EmailSpec
 )
 internal val sepaDebitIbanSection = SectionSpec(
     IdentifierSpec.Generic("iban_section"),
-    Iban
+    IbanSpec
 )
 internal val sepaDebitMandate = MandateTextSpec(
     IdentifierSpec.Generic("mandate"),
@@ -36,7 +43,7 @@ internal val sepaDebitMandate = MandateTextSpec(
 )
 internal val sepaBillingSection = SectionSpec(
     IdentifierSpec.Generic("billing_section"),
-    SectionFieldSpec.AddressSpec(IdentifierSpec.Generic("address")),
+    AddressSpec(IdentifierSpec.Generic("address")),
     R.string.billing_details
 )
 internal val sepaDebit = FormSpec(
@@ -45,7 +52,7 @@ internal val sepaDebit = FormSpec(
             sepaDebitNameSection,
             sepaDebitEmailSection,
             sepaDebitIbanSection,
-            FormItemSpec.SaveForFutureUseSpec(listOf(sepaDebitMandate)),
+            SaveForFutureUseSpec(listOf(sepaDebitMandate)),
             sepaDebitMandate,
             sepaBillingSection
         )

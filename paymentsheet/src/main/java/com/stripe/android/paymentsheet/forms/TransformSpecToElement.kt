@@ -1,25 +1,44 @@
 package com.stripe.android.paymentsheet.forms
 
-import com.stripe.android.paymentsheet.FormElement
-import com.stripe.android.paymentsheet.SectionSingleFieldElement
-import com.stripe.android.paymentsheet.SectionMultiFieldElement
+import com.stripe.android.paymentsheet.elements.AddressElement
+import com.stripe.android.paymentsheet.elements.AddressSpec
+import com.stripe.android.paymentsheet.elements.AfterpayClearpayHeaderElement
+import com.stripe.android.paymentsheet.elements.AfterpayClearpayTextSpec
+import com.stripe.android.paymentsheet.elements.BankDropdownSpec
+import com.stripe.android.paymentsheet.elements.CountryElement
 import com.stripe.android.paymentsheet.elements.CountryConfig
+import com.stripe.android.paymentsheet.elements.CountrySpec
 import com.stripe.android.paymentsheet.elements.DropdownFieldController
+import com.stripe.android.paymentsheet.elements.EmailElement
 import com.stripe.android.paymentsheet.elements.EmailConfig
-import com.stripe.android.paymentsheet.elements.IbanConfig
-import com.stripe.android.paymentsheet.elements.SaveForFutureUseController
-import com.stripe.android.paymentsheet.elements.SectionController
-import com.stripe.android.paymentsheet.elements.SimpleDropdownConfig
-import com.stripe.android.paymentsheet.elements.SimpleTextFieldConfig
-import com.stripe.android.paymentsheet.elements.TextFieldController
+import com.stripe.android.paymentsheet.elements.EmailSpec
+import com.stripe.android.paymentsheet.elements.FormElement
+import com.stripe.android.paymentsheet.elements.SectionElement
+import com.stripe.android.paymentsheet.elements.SectionSingleFieldElement
 import com.stripe.android.paymentsheet.model.Amount
 import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.getValue
-import com.stripe.android.paymentsheet.specifications.FormItemSpec
-import com.stripe.android.paymentsheet.specifications.IdentifierSpec
-import com.stripe.android.paymentsheet.specifications.LayoutSpec
-import com.stripe.android.paymentsheet.specifications.ResourceRepository
-import com.stripe.android.paymentsheet.specifications.SectionFieldSpec
+import com.stripe.android.paymentsheet.elements.FormItemSpec
+import com.stripe.android.paymentsheet.elements.IbanElement
+import com.stripe.android.paymentsheet.elements.IbanConfig
+import com.stripe.android.paymentsheet.elements.IbanSpec
+import com.stripe.android.paymentsheet.elements.IdentifierSpec
+import com.stripe.android.paymentsheet.elements.LayoutSpec
+import com.stripe.android.paymentsheet.elements.MandateTextElement
+import com.stripe.android.paymentsheet.elements.MandateTextSpec
+import com.stripe.android.paymentsheet.elements.ResourceRepository
+import com.stripe.android.paymentsheet.elements.SaveForFutureUseController
+import com.stripe.android.paymentsheet.elements.SaveForFutureUseElement
+import com.stripe.android.paymentsheet.elements.SaveForFutureUseSpec
+import com.stripe.android.paymentsheet.elements.SectionController
+import com.stripe.android.paymentsheet.elements.SectionFieldSpec
+import com.stripe.android.paymentsheet.elements.SectionSpec
+import com.stripe.android.paymentsheet.elements.SimpleDropdownElement
+import com.stripe.android.paymentsheet.elements.SimpleDropdownConfig
+import com.stripe.android.paymentsheet.elements.SimpleTextElement
+import com.stripe.android.paymentsheet.elements.SimpleTextFieldConfig
+import com.stripe.android.paymentsheet.elements.SimpleTextSpec
+import com.stripe.android.paymentsheet.elements.TextFieldController
 
 /**
  * Transform a [LayoutSpec] data object into an Element, which
@@ -35,22 +54,22 @@ internal class TransformSpecToElement(
     ): List<FormElement> =
         list.map {
             when (it) {
-                is FormItemSpec.SaveForFutureUseSpec -> it.transform(initialValues.merchantName)
-                is FormItemSpec.SectionSpec -> it.transform(initialValues)
-                is FormItemSpec.MandateTextSpec -> it.transform(initialValues.merchantName)
-                is FormItemSpec.AfterpayClearpayTextSpec ->
+                is SaveForFutureUseSpec -> it.transform(initialValues.merchantName)
+                is SectionSpec -> it.transform(initialValues)
+                is MandateTextSpec -> it.transform(initialValues.merchantName)
+                is AfterpayClearpayTextSpec ->
                     it.transform(requireNotNull(initialValues.amount))
             }
         }
 
-    private fun FormItemSpec.SectionSpec.transform(
+    private fun SectionSpec.transform(
         initialValues: FormFragmentArguments
-    ): FormElement.SectionElement {
+    ): SectionElement {
         val fieldElements = this.fields.transform(initialValues)
 
         // The controller of the section element will be the same as the field element
         // as there is only a single field in a section
-        return FormElement.SectionElement(
+        return SectionElement(
             this.identifier,
             fieldElements,
             SectionController(
@@ -66,54 +85,54 @@ internal class TransformSpecToElement(
     private fun List<SectionFieldSpec>.transform(initialValues: FormFragmentArguments) =
         this.map {
             when (it) {
-                is SectionFieldSpec.Email -> it.transform(initialValues.billingDetails?.email)
-                is SectionFieldSpec.Iban -> it.transform()
-                is SectionFieldSpec.BankDropdown -> it.transform()
-                is SectionFieldSpec.SimpleText -> it.transform(initialValues)
-                is SectionFieldSpec.AddressSpec -> transformAddress(initialValues)
-                is SectionFieldSpec.Country -> it.transform(
+                is EmailSpec -> it.transform(initialValues.billingDetails?.email)
+                is IbanSpec -> it.transform()
+                is BankDropdownSpec -> it.transform()
+                is SimpleTextSpec -> it.transform(initialValues)
+                is AddressSpec -> transformAddress(initialValues)
+                is CountrySpec -> it.transform(
                     initialValues.billingDetails?.address?.country
                 )
             }
         }
 
     private fun transformAddress(initialValues: FormFragmentArguments) =
-        SectionMultiFieldElement.AddressElement(
+        AddressElement(
             IdentifierSpec.Generic("billing"),
             resourceRepository.addressRepository,
             initialValues
         )
 
-    private fun FormItemSpec.MandateTextSpec.transform(merchantName: String) =
+    private fun MandateTextSpec.transform(merchantName: String) =
 // It could be argued that the static text should have a controller, but
         // since it doesn't provide a form field we leave it out for now
-        FormElement.MandateTextElement(
+        MandateTextElement(
             this.identifier,
             this.stringResId,
             this.color,
             merchantName
         )
 
-    private fun SectionFieldSpec.Email.transform(email: String?) =
-        SectionSingleFieldElement.Email(
+    private fun EmailSpec.transform(email: String?) =
+        EmailElement(
             this.identifier,
             TextFieldController(EmailConfig(), initialValue = email),
         )
 
-    private fun SectionFieldSpec.Iban.transform() =
-        SectionSingleFieldElement.Iban(
+    private fun IbanSpec.transform() =
+        IbanElement(
             this.identifier,
             TextFieldController(IbanConfig())
         )
 
-    private fun SectionFieldSpec.Country.transform(country: String?) =
-        SectionSingleFieldElement.Country(
+    private fun CountrySpec.transform(country: String?) =
+        CountryElement(
             this.identifier,
             DropdownFieldController(CountryConfig(this.onlyShowCountryCodes), country)
         )
 
-    private fun SectionFieldSpec.BankDropdown.transform() =
-        SectionSingleFieldElement.SimpleDropdown(
+    private fun BankDropdownSpec.transform() =
+        SimpleDropdownElement(
             this.identifier,
             DropdownFieldController(
                 SimpleDropdownConfig(
@@ -123,8 +142,8 @@ internal class TransformSpecToElement(
             )
         )
 
-    private fun FormItemSpec.SaveForFutureUseSpec.transform(merchantName: String) =
-        FormElement.SaveForFutureUseElement(
+    private fun SaveForFutureUseSpec.transform(merchantName: String) =
+        SaveForFutureUseElement(
             this.identifier,
             SaveForFutureUseController(
                 this.identifierRequiredForFutureUse.map { requiredItemSpec ->
@@ -134,14 +153,14 @@ internal class TransformSpecToElement(
             merchantName
         )
 
-    private fun FormItemSpec.AfterpayClearpayTextSpec.transform(amount: Amount) =
-        FormElement.AfterpayClearpayHeaderElement(this.identifier, amount)
+    private fun AfterpayClearpayTextSpec.transform(amount: Amount) =
+        AfterpayClearpayHeaderElement(this.identifier, amount)
 }
 
-internal fun SectionFieldSpec.SimpleText.transform(
+internal fun SimpleTextSpec.transform(
     initialValues: FormFragmentArguments? = null
 ): SectionSingleFieldElement =
-    SectionSingleFieldElement.SimpleText(
+    SimpleTextElement(
         this.identifier,
         TextFieldController(
             SimpleTextFieldConfig(

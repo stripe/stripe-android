@@ -30,7 +30,7 @@ import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
 import com.stripe.android.paymentsheet.paymentdatacollection.CardDataCollectionFragment
 import com.stripe.android.paymentsheet.paymentdatacollection.ComposeFormDataCollectionFragment
 import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
-import com.stripe.android.paymentsheet.specifications.IdentifierSpec
+import com.stripe.android.paymentsheet.elements.IdentifierSpec
 import com.stripe.android.paymentsheet.ui.PaymentSheetFragmentFactory
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.utils.TestUtils.idleLooper
@@ -73,7 +73,7 @@ class PaymentSheetAddPaymentMethodFragmentTest {
         createFragment(stripeIntent = paymentIntent) { fragment, viewBinding ->
             fragment.sheetViewModel._processing.value = true
             val adapter =
-                viewBinding.paymentMethodsRecycler.adapter as com.stripe.android.paymentsheet.AddPaymentMethodsAdapter
+                viewBinding.paymentMethodsRecycler.adapter as AddPaymentMethodsAdapter
             assertThat(adapter.isEnabled).isFalse()
         }
     }
@@ -416,7 +416,7 @@ class PaymentSheetAddPaymentMethodFragmentTest {
             showsMandate = false
         )
         val selection =
-            com.stripe.android.paymentsheet.BaseAddPaymentMethodFragment.transformToPaymentSelection(
+            BaseAddPaymentMethodFragment.transformToPaymentSelection(
                 formFieldValues,
                 mapOf(
                     "type" to "sofort"
@@ -425,10 +425,10 @@ class PaymentSheetAddPaymentMethodFragmentTest {
             )
         assertThat(selection?.shouldSavePaymentMethod).isTrue()
         assertThat(selection?.labelResource).isEqualTo(
-            com.stripe.android.paymentsheet.R.string.stripe_paymentsheet_payment_method_sofort
+            R.string.stripe_paymentsheet_payment_method_sofort
         )
         assertThat(selection?.iconResource).isEqualTo(
-            com.stripe.android.paymentsheet.R.drawable.stripe_ic_paymentsheet_pm_klarna
+            R.drawable.stripe_ic_paymentsheet_pm_klarna
         )
     }
 

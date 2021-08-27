@@ -8,11 +8,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.stripe.android.paymentsheet.FormElement
 
 @Composable
 internal fun MandateElementUI(
-    element: FormElement.MandateTextElement
+    element: MandateTextElement
 ) {
     Text(
         stringResource(element.stringResId, element.merchantName ?: ""),

@@ -1,4 +1,4 @@
-package com.stripe.android.paymentsheet.specifications
+package com.stripe.android.paymentsheet.elements
 
 import android.content.res.Resources
 import androidx.annotation.VisibleForTesting
@@ -15,7 +15,7 @@ internal data class BankRepository @Inject internal constructor(
     // This is needed for @Preview and inject does not support a constructor with default parameters.
     internal constructor() : this(null)
 
-    private val bankItemMap = mutableMapOf<SupportedBankType, List<DropdownItem>?>()
+    private val bankItemMap = mutableMapOf<SupportedBankType, List<DropdownItemSpec>?>()
 
     internal fun get(bankType: SupportedBankType) = requireNotNull(bankItemMap[bankType])
 
@@ -38,7 +38,7 @@ internal data class BankRepository @Inject internal constructor(
 
     private fun parseBank(inputStream: InputStream?) =
         getJsonStringFromInputStream(inputStream)?.let {
-            format.decodeFromString<List<DropdownItem>>(
+            format.decodeFromString<List<DropdownItemSpec>>(
                 it
             )
         }

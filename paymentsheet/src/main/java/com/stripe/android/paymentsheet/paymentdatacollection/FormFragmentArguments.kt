@@ -3,7 +3,7 @@ package com.stripe.android.paymentsheet.paymentdatacollection
 import android.os.Parcelable
 import com.stripe.android.paymentsheet.model.Amount
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.specifications.IdentifierSpec
+import com.stripe.android.paymentsheet.elements.IdentifierSpec
 import kotlinx.parcelize.Parcelize
 
 @Parcelize

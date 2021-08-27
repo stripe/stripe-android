@@ -2,25 +2,24 @@ package com.stripe.android.paymentsheet.elements
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.specifications.DropdownItem
 import org.junit.Test
 
 class SimpleDropdownConfigTest {
     private val config: DropdownConfig = SimpleDropdownConfig(
         R.string.stripe_paymentsheet_ideal_bank,
         listOf(
-            DropdownItem(text = "ABN AMRO", value = "abn_amro"),
-            DropdownItem(text = "ASN Bank", value = "asn_bank"),
-            DropdownItem(text = "Bunq", value = "bunq"),
-            DropdownItem(text = "Handelsbanken", value = "handelsbanken"),
-            DropdownItem(text = "ING", value = "ing"),
-            DropdownItem(text = "Knab", value = "knab"),
-            DropdownItem(text = "Rabobank", value = "rabobank"),
-            DropdownItem(text = "Revolut", value = "revolut"),
-            DropdownItem(text = "RegioBank", value = "regiobank"),
-            DropdownItem(text = "SNS Bank (De Volksbank)", value = "sns_bank"),
-            DropdownItem(text = "Triodos Bank", value = "triodos_bank"),
-            DropdownItem(text = "Van Lanschot", value = "van_lanschot"),
+            DropdownItemSpec(text = "ABN AMRO", value = "abn_amro"),
+            DropdownItemSpec(text = "ASN Bank", value = "asn_bank"),
+            DropdownItemSpec(text = "Bunq", value = "bunq"),
+            DropdownItemSpec(text = "Handelsbanken", value = "handelsbanken"),
+            DropdownItemSpec(text = "ING", value = "ing"),
+            DropdownItemSpec(text = "Knab", value = "knab"),
+            DropdownItemSpec(text = "Rabobank", value = "rabobank"),
+            DropdownItemSpec(text = "Revolut", value = "revolut"),
+            DropdownItemSpec(text = "RegioBank", value = "regiobank"),
+            DropdownItemSpec(text = "SNS Bank (De Volksbank)", value = "sns_bank"),
+            DropdownItemSpec(text = "Triodos Bank", value = "triodos_bank"),
+            DropdownItemSpec(text = "Van Lanschot", value = "van_lanschot"),
         )
     )
 

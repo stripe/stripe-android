@@ -1,12 +1,12 @@
 package com.stripe.android.paymentsheet.forms
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.paymentsheet.FormElement
-import com.stripe.android.paymentsheet.SectionSingleFieldElement
+import com.stripe.android.paymentsheet.elements.EmailElement
 import com.stripe.android.paymentsheet.elements.EmailConfig
 import com.stripe.android.paymentsheet.elements.SectionController
+import com.stripe.android.paymentsheet.elements.SectionElement
 import com.stripe.android.paymentsheet.elements.TextFieldController
-import com.stripe.android.paymentsheet.specifications.IdentifierSpec
+import com.stripe.android.paymentsheet.elements.IdentifierSpec
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
@@ -17,9 +17,9 @@ import org.junit.Test
 class CompleteFormFieldValueFilterTest {
 
     private val emailController = TextFieldController(EmailConfig())
-    private val emailSection = FormElement.SectionElement(
+    private val emailSection = SectionElement(
         identifier = IdentifierSpec.Generic("email_section"),
-        SectionSingleFieldElement.Email(
+        EmailElement(
             IdentifierSpec.Email,
             emailController
         ),
