@@ -57,8 +57,10 @@ class AddressElementTest {
                 countryDropdownFieldController = countryDropdownFieldController
             )
             var emailController =
-                ((addressElement.fields.first()[1] as SectionSingleFieldElement)
-                    .controller as TextFieldController)
+                (
+                    (addressElement.fields.first()[1] as SectionSingleFieldElement)
+                        .controller as TextFieldController
+                    )
 
             countryDropdownFieldController.onValueChange(0)
             ShadowLooper.runUiThreadTasksIncludingDelayedTasks()
@@ -75,8 +77,10 @@ class AddressElementTest {
             ShadowLooper.runUiThreadTasksIncludingDelayedTasks()
 
             emailController =
-                ((addressElement.fields.first()[1] as SectionSingleFieldElement)
-                    .controller as TextFieldController)
+                (
+                    (addressElement.fields.first()[1] as SectionSingleFieldElement)
+                        .controller as TextFieldController
+                    )
             emailController.onValueChange("12invalidiban")
             ShadowLooper.runUiThreadTasksIncludingDelayedTasks()
 
@@ -95,8 +99,10 @@ class AddressElementTest {
         )
         val formFieldValueFlow = addressElement.getFormFieldValueFlow()
         var emailController =
-            ((addressElement.fields.first()[1] as SectionSingleFieldElement)
-                .controller as TextFieldController)
+            (
+                (addressElement.fields.first()[1] as SectionSingleFieldElement)
+                    .controller as TextFieldController
+                )
 
         countryDropdownFieldController.onValueChange(0)
 
@@ -116,8 +122,10 @@ class AddressElementTest {
 
         // Add values to the fields
         emailController =
-            ((addressElement.fields.first()[1] as SectionSingleFieldElement)
-                .controller as TextFieldController)
+            (
+                (addressElement.fields.first()[1] as SectionSingleFieldElement)
+                    .controller as TextFieldController
+                )
         emailController.onValueChange("DE89370400440532013000")
 
         ShadowLooper.runUiThreadTasksIncludingDelayedTasks()

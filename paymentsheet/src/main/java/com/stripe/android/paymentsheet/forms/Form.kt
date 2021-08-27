@@ -187,7 +187,8 @@ internal fun RowElementUI(
                 enabled,
                 field,
                 Modifier.fillMaxWidth(
-                    (1f / fields.size.toFloat()).takeIf { lastItem } ?: 1f)
+                    (1f / fields.size.toFloat()).takeIf { lastItem } ?: 1f
+                )
             )
             if (!lastItem) {
                 val cardStyle = CardStyle(isSystemInDarkTheme())

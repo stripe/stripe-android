@@ -212,8 +212,8 @@ private fun isPostalNextToCity(
 ) = isCityOrPostal(element1.identifier) && isCityOrPostal(element2.identifier)
 
 private fun isCityOrPostal(identifierSpec: IdentifierSpec) =
-    identifierSpec == IdentifierSpec.PostalCode
-        || identifierSpec == IdentifierSpec.City
+    identifierSpec == IdentifierSpec.PostalCode ||
+        identifierSpec == IdentifierSpec.City
 
 private fun getKeyboard(fieldSchema: FieldSchema?) = if (fieldSchema?.isNumeric == true) {
     KeyboardType.Number
