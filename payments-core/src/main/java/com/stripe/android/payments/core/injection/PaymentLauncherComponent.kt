@@ -45,8 +45,6 @@ internal interface PaymentLauncherComponent {
         @BindsInstance
         fun stripeAccountIdProvider(@Named(STRIPE_ACCOUNT_ID) stripeAccountIdProvider: () -> String?): Builder
 
-        fun paymentLauncherModule(paymentLauncherModule: PaymentLauncherModule): Builder
-
         fun build(): PaymentLauncherComponent
     }
 }
