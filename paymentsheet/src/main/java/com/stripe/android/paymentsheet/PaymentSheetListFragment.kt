@@ -6,6 +6,7 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.activityViewModels
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.databinding.FragmentPaymentsheetPaymentMethodsListBinding
+import com.stripe.android.paymentsheet.model.Amount
 
 internal class PaymentSheetListFragment(
     eventReporter: EventReporter
@@ -47,7 +48,7 @@ internal class PaymentSheetListFragment(
         }
     }
 
-    private fun getTotalText(amount: PaymentSheetViewModel.Amount): String {
+    private fun getTotalText(amount: Amount): String {
         return resources.getString(
             R.string.stripe_paymentsheet_total_amount,
             currencyFormatter.format(amount.value, amount.currencyCode)
