@@ -47,7 +47,7 @@ internal fun AfterpayClearpayElementUI(
         Image(
             painter = painterResource(R.drawable.stripe_ic_afterpay_clearpay_logo),
             contentDescription = stringResource(
-                R.string.stripe_paymentsheet_payment_method_afterpay_clearpay
+                R.string.stripe_paymentsheet_afterpay_clearpay_message
             ),
             colorFilter = if (isSystemInDarkTheme()) {
                 ColorFilter.tint(Color.White)
