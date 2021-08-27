@@ -1,10 +1,7 @@
 package com.stripe.android.paymentsheet.elements
 
-import com.stripe.android.paymentsheet.SectionMultiFieldElement
-import com.stripe.android.paymentsheet.SectionSingleFieldElement
 import com.stripe.android.paymentsheet.forms.FormFieldEntry
 import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
-import com.stripe.android.paymentsheet.specifications.IdentifierSpec
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 

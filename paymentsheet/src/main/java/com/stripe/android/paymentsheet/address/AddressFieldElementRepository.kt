@@ -2,7 +2,7 @@ package com.stripe.android.paymentsheet.address
 
 import android.content.res.Resources
 import androidx.annotation.VisibleForTesting
-import com.stripe.android.paymentsheet.SectionFieldElement
+import com.stripe.android.paymentsheet.elements.SectionFieldElement
 import javax.inject.Inject
 import javax.inject.Singleton
 

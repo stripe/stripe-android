@@ -4,12 +4,12 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.SectionMultiFieldElement
-import com.stripe.android.paymentsheet.SectionSingleFieldElement
 import com.stripe.android.paymentsheet.address.AddressFieldElementRepository.Companion.supportedCountries
 import com.stripe.android.paymentsheet.elements.TextFieldController
-import com.stripe.android.paymentsheet.specifications.IdentifierSpec
-import com.stripe.android.paymentsheet.specifications.SectionFieldSpec
+import com.stripe.android.paymentsheet.elements.IdentifierSpec
+import com.stripe.android.paymentsheet.elements.RowElement
+import com.stripe.android.paymentsheet.elements.SectionSingleFieldElement
+import com.stripe.android.paymentsheet.elements.SimpleTextSpec
 import org.junit.Test
 import java.io.File
 import java.security.InvalidParameterException
@@ -21,7 +21,7 @@ class TransformAddressToElementTest {
         val addressSchema = readFile("src/main/assets/addressinfo/US.json")!!
         val simpleTextList = addressSchema.transformToElementList()
 
-        val addressLine1 = SectionFieldSpec.SimpleText(
+        val addressLine1 = SimpleTextSpec(
             IdentifierSpec.Line1,
             R.string.address_label_address_line1,
             KeyboardCapitalization.Words,
@@ -29,7 +29,7 @@ class TransformAddressToElementTest {
             showOptionalLabel = false
         )
 
-        val addressLine2 = SectionFieldSpec.SimpleText(
+        val addressLine2 = SimpleTextSpec(
             IdentifierSpec.Line2,
             R.string.address_label_address_line2,
             KeyboardCapitalization.Words,
@@ -37,7 +37,7 @@ class TransformAddressToElementTest {
             showOptionalLabel = true
         )
 
-        val city = SectionFieldSpec.SimpleText(
+        val city = SimpleTextSpec(
             IdentifierSpec.City,
             R.string.address_label_city,
             KeyboardCapitalization.Words,
@@ -45,7 +45,7 @@ class TransformAddressToElementTest {
             showOptionalLabel = false
         )
 
-        val state = SectionFieldSpec.SimpleText(
+        val state = SimpleTextSpec(
             IdentifierSpec.State,
             R.string.address_label_state,
             KeyboardCapitalization.Words,
@@ -53,7 +53,7 @@ class TransformAddressToElementTest {
             showOptionalLabel = false
         )
 
-        val zip = SectionFieldSpec.SimpleText(
+        val zip = SimpleTextSpec(
             IdentifierSpec.PostalCode,
             R.string.address_label_zip_code,
             KeyboardCapitalization.None,
@@ -70,7 +70,7 @@ class TransformAddressToElementTest {
             simpleTextList[1] as SectionSingleFieldElement,
             addressLine2
         )
-        val cityZipRow = simpleTextList[2] as SectionMultiFieldElement.RowElement
+        val cityZipRow = simpleTextList[2] as RowElement
         verifySimpleTextSpecInTextFieldController(
             cityZipRow.fields[0],
             city
@@ -87,7 +87,7 @@ class TransformAddressToElementTest {
 
     private fun verifySimpleTextSpecInTextFieldController(
         textElement: SectionSingleFieldElement,
-        simpleTextSpec: SectionFieldSpec.SimpleText
+        simpleTextSpec: SimpleTextSpec
     ) {
         val actualController = textElement.controller as TextFieldController
         assertThat(actualController.capitalization).isEqualTo(

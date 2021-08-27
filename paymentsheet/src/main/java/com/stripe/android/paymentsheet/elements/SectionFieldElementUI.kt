@@ -2,8 +2,6 @@ package com.stripe.android.paymentsheet.elements
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import com.stripe.android.paymentsheet.SectionFieldElement
-import com.stripe.android.paymentsheet.forms.AddressElementUI
 
 @Composable
 internal fun SectionFieldElementUI(

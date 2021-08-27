@@ -4,13 +4,13 @@ import androidx.annotation.StringRes
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.SectionFieldElement
-import com.stripe.android.paymentsheet.SectionMultiFieldElement
-import com.stripe.android.paymentsheet.SectionSingleFieldElement
+import com.stripe.android.paymentsheet.elements.IdentifierSpec
 import com.stripe.android.paymentsheet.elements.RowController
+import com.stripe.android.paymentsheet.elements.RowElement
+import com.stripe.android.paymentsheet.elements.SectionFieldElement
+import com.stripe.android.paymentsheet.elements.SectionSingleFieldElement
+import com.stripe.android.paymentsheet.elements.SimpleTextSpec
 import com.stripe.android.paymentsheet.forms.transform
-import com.stripe.android.paymentsheet.specifications.IdentifierSpec
-import com.stripe.android.paymentsheet.specifications.SectionFieldSpec
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
@@ -151,7 +151,7 @@ private fun getJsonStringFromInputStream(inputStream: InputStream?) =
 internal fun List<CountryAddressSchema>.transformToElementList(): List<SectionFieldElement> {
     val countryAddressElements = this.mapNotNull { addressField ->
         addressField.type?.let {
-            SectionFieldSpec.SimpleText(
+            SimpleTextSpec(
                 addressField.type.identifierSpec,
                 addressField.schema?.nameType?.stringResId ?: it.defaultLabel,
                 capitalization = it.capitalization,
@@ -178,33 +178,19 @@ private fun combineCityAndPostal(countryAddressElements: List<SectionSingleField
         ) {
             val rowFields = listOf(countryAddressElements[index], countryAddressElements[index + 1])
             acc.plus(
-                SectionMultiFieldElement.RowElement(
+                RowElement(
                     IdentifierSpec.Generic("row_" + UUID.randomUUID().leastSignificantBits),
                     rowFields,
                     RowController(rowFields)
                 )
             )
-        } else if (acc.lastOrNull() is SectionMultiFieldElement.RowElement) {
+        } else if (acc.lastOrNull() is RowElement) {
             // skip this it is in a row
             acc.plus(null)
         } else {
             acc.plus(sectionSingleFieldElement)
         }
     }.filterNotNull()
-
-private fun isPostalNextToCity(
-    elements: List<SectionSingleFieldElement>
-): Boolean {
-    elements.forEachIndexed { index, sectionSingleFieldElement ->
-        if (index + 1 < elements.size && isCityOrPostal(elements[index].identifier) && isCityOrPostal(
-                elements[index + 1].identifier
-            )
-        ) {
-            return true
-        }
-    }
-    return false
-}
 
 private fun isPostalNextToCity(
     element1: SectionSingleFieldElement,

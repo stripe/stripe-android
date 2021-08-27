@@ -54,7 +54,7 @@ internal fun RowElementUI(
 }
 
 @Composable
-fun VeriticalDivider(
+internal fun VeriticalDivider(
     color: Color,
     modifier: Modifier = Modifier,
     thickness: Dp = 1.dp,

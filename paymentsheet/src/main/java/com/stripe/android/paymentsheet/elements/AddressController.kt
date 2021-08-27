@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet.elements
 
 import androidx.annotation.StringRes
-import com.stripe.android.paymentsheet.SectionFieldElement
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine

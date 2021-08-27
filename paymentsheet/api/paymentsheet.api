@@ -505,6 +505,33 @@ public final class com/stripe/android/paymentsheet/databinding/StripeVerticalDiv
 	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Z)Lcom/stripe/android/paymentsheet/databinding/StripeVerticalDividerBinding;
 }
 
+public final class com/stripe/android/paymentsheet/elements/BankRepository_Factory : dagger/internal/Factory {
+	public fun <init> (Ljavax/inject/Provider;)V
+	public static fun create (Ljavax/inject/Provider;)Lcom/stripe/android/paymentsheet/elements/BankRepository_Factory;
+	public fun get ()Lcom/stripe/android/paymentsheet/elements/BankRepository;
+	public synthetic fun get ()Ljava/lang/Object;
+	public static fun newInstance (Landroid/content/res/Resources;)Lcom/stripe/android/paymentsheet/elements/BankRepository;
+}
+
+public final class com/stripe/android/paymentsheet/elements/ComposableSingletons$AfterpayClearpayElementUIKt {
+	public static final field INSTANCE Lcom/stripe/android/paymentsheet/elements/ComposableSingletons$AfterpayClearpayElementUIKt;
+	public static field lambda-1 Lkotlin/jvm/functions/Function3;
+	public fun <init> ()V
+	public final fun getLambda-1$paymentsheet_release ()Lkotlin/jvm/functions/Function3;
+}
+
+public final class com/stripe/android/paymentsheet/elements/ResourceRepository_Factory : dagger/internal/Factory {
+	public fun <init> (Ljavax/inject/Provider;Ljavax/inject/Provider;)V
+	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/paymentsheet/elements/ResourceRepository_Factory;
+	public fun get ()Lcom/stripe/android/paymentsheet/elements/ResourceRepository;
+	public synthetic fun get ()Ljava/lang/Object;
+	public static fun newInstance (Lcom/stripe/android/paymentsheet/elements/BankRepository;Lcom/stripe/android/paymentsheet/address/AddressFieldElementRepository;)Lcom/stripe/android/paymentsheet/elements/ResourceRepository;
+}
+
+public final class com/stripe/android/paymentsheet/elements/RowElementUIKt {
+	public static final fun VeriticalDivider-DxzAY5Q (JLandroidx/compose/ui/Modifier;FLandroidx/compose/runtime/Composer;II)V
+}
+
 public final class com/stripe/android/paymentsheet/flowcontroller/DefaultFlowControllerInitializer_Factory : dagger/internal/Factory {
 	public fun <init> (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)V
 	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/paymentsheet/flowcontroller/DefaultFlowControllerInitializer_Factory;
@@ -521,19 +548,12 @@ public final class com/stripe/android/paymentsheet/flowcontroller/DefaultFlowCon
 	public static fun newInstance (Lkotlinx/coroutines/CoroutineScope;Landroidx/lifecycle/LifecycleOwner;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lcom/stripe/android/paymentsheet/model/PaymentOptionFactory;Lcom/stripe/android/paymentsheet/PaymentOptionCallback;Lcom/stripe/android/paymentsheet/PaymentSheetResultCallback;Landroidx/activity/result/ActivityResultCaller;ILcom/stripe/android/paymentsheet/flowcontroller/FlowControllerInitializer;Lcom/stripe/android/paymentsheet/analytics/EventReporter;Lcom/stripe/android/paymentsheet/flowcontroller/FlowControllerViewModel;Lcom/stripe/android/PaymentController;Ldagger/Lazy;Ljavax/inject/Provider;Lkotlin/coroutines/CoroutineContext;)Lcom/stripe/android/paymentsheet/flowcontroller/DefaultFlowController;
 }
 
-public final class com/stripe/android/paymentsheet/forms/ComposableSingletons$FormKt {
-	public static final field INSTANCE Lcom/stripe/android/paymentsheet/forms/ComposableSingletons$FormKt;
-	public static field lambda-1 Lkotlin/jvm/functions/Function3;
-	public fun <init> ()V
-	public final fun getLambda-1$paymentsheet_release ()Lkotlin/jvm/functions/Function3;
-}
-
 public final class com/stripe/android/paymentsheet/forms/FormViewModel_Factory : dagger/internal/Factory {
 	public fun <init> (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)V
 	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/paymentsheet/forms/FormViewModel_Factory;
 	public fun get ()Lcom/stripe/android/paymentsheet/forms/FormViewModel;
 	public synthetic fun get ()Ljava/lang/Object;
-	public static fun newInstance (Lcom/stripe/android/paymentsheet/specifications/LayoutSpec;Lcom/stripe/android/paymentsheet/paymentdatacollection/FormFragmentArguments;Lcom/stripe/android/paymentsheet/specifications/ResourceRepository;)Lcom/stripe/android/paymentsheet/forms/FormViewModel;
+	public static fun newInstance (Lcom/stripe/android/paymentsheet/elements/LayoutSpec;Lcom/stripe/android/paymentsheet/paymentdatacollection/FormFragmentArguments;Lcom/stripe/android/paymentsheet/elements/ResourceRepository;)Lcom/stripe/android/paymentsheet/forms/FormViewModel;
 }
 
 public final class com/stripe/android/paymentsheet/injection/DaggerFlowControllerComponent : com/stripe/android/paymentsheet/injection/FlowControllerComponent {
@@ -700,21 +720,5 @@ public final class com/stripe/android/paymentsheet/repositories/StripeIntentRepo
 	public fun get ()Lcom/stripe/android/paymentsheet/repositories/StripeIntentRepository$Api;
 	public synthetic fun get ()Ljava/lang/Object;
 	public static fun newInstance (Lcom/stripe/android/networking/StripeRepository;Ldagger/Lazy;Lkotlin/coroutines/CoroutineContext;Ljava/util/Locale;)Lcom/stripe/android/paymentsheet/repositories/StripeIntentRepository$Api;
-}
-
-public final class com/stripe/android/paymentsheet/specifications/BankRepository_Factory : dagger/internal/Factory {
-	public fun <init> (Ljavax/inject/Provider;)V
-	public static fun create (Ljavax/inject/Provider;)Lcom/stripe/android/paymentsheet/specifications/BankRepository_Factory;
-	public fun get ()Lcom/stripe/android/paymentsheet/specifications/BankRepository;
-	public synthetic fun get ()Ljava/lang/Object;
-	public static fun newInstance (Landroid/content/res/Resources;)Lcom/stripe/android/paymentsheet/specifications/BankRepository;
-}
-
-public final class com/stripe/android/paymentsheet/specifications/ResourceRepository_Factory : dagger/internal/Factory {
-	public fun <init> (Ljavax/inject/Provider;Ljavax/inject/Provider;)V
-	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/paymentsheet/specifications/ResourceRepository_Factory;
-	public fun get ()Lcom/stripe/android/paymentsheet/specifications/ResourceRepository;
-	public synthetic fun get ()Ljava/lang/Object;
-	public static fun newInstance (Lcom/stripe/android/paymentsheet/specifications/BankRepository;Lcom/stripe/android/paymentsheet/address/AddressFieldElementRepository;)Lcom/stripe/android/paymentsheet/specifications/ResourceRepository;
 }
 

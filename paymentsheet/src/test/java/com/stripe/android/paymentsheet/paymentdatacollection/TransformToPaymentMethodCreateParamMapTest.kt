@@ -3,8 +3,7 @@ package com.stripe.android.paymentsheet.paymentdatacollection
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.paymentsheet.forms.FormFieldEntry
 import com.stripe.android.paymentsheet.forms.FormFieldValues
-import com.stripe.android.paymentsheet.specifications.IdentifierSpec
-import com.stripe.android.paymentsheet.specifications.SectionFieldSpec.Email
+import com.stripe.android.paymentsheet.elements.IdentifierSpec
 import org.junit.Test
 
 class TransformToPaymentMethodCreateParamMapTest {

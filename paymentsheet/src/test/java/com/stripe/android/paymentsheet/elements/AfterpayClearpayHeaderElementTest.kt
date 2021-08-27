@@ -3,9 +3,7 @@ package com.stripe.android.paymentsheet.elements
 import android.app.Application
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.paymentsheet.FormElement
 import com.stripe.android.paymentsheet.model.Amount
-import com.stripe.android.paymentsheet.specifications.IdentifierSpec
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -16,7 +14,7 @@ class AfterpayClearpayHeaderElementTest {
 
     @Test
     fun `Verify label is correct`() {
-        val element = FormElement.AfterpayClearpayHeaderElement(
+        val element = AfterpayClearpayHeaderElement(
             IdentifierSpec.Generic("test"),
             Amount(20000, "USD")
         )
@@ -29,7 +27,7 @@ class AfterpayClearpayHeaderElementTest {
     @Test
     fun `Verify label amount is localized`() {
         Locale.setDefault(Locale.CANADA)
-        val element = FormElement.AfterpayClearpayHeaderElement(
+        val element = AfterpayClearpayHeaderElement(
             IdentifierSpec.Generic("test"),
             Amount(20000, "USD")
         )
@@ -41,7 +39,7 @@ class AfterpayClearpayHeaderElementTest {
 
     @Test
     fun `Verify infoUrl is correct`() {
-        val element = FormElement.AfterpayClearpayHeaderElement(
+        val element = AfterpayClearpayHeaderElement(
             IdentifierSpec.Generic("test"),
             Amount(123, "USD")
         )
@@ -53,7 +51,7 @@ class AfterpayClearpayHeaderElementTest {
     @Test
     fun `Verify infoUrl is localized`() {
         Locale.setDefault(Locale.UK)
-        val element = FormElement.AfterpayClearpayHeaderElement(
+        val element = AfterpayClearpayHeaderElement(
             IdentifierSpec.Generic("test"),
             Amount(123, "USD")
         )
