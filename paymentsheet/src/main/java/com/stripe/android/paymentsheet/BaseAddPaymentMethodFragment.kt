@@ -26,7 +26,7 @@ import com.stripe.android.paymentsheet.paymentdatacollection.CardDataCollectionF
 import com.stripe.android.paymentsheet.paymentdatacollection.ComposeFormDataCollectionFragment
 import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.TransformToPaymentMethodCreateParams
-import com.stripe.android.paymentsheet.specifications.IdentifierSpec
+import com.stripe.android.paymentsheet.elements.IdentifierSpec
 import com.stripe.android.paymentsheet.ui.AddPaymentMethodsFragmentFactory
 import com.stripe.android.paymentsheet.ui.AnimationConstants
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel

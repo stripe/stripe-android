@@ -1,6 +1,9 @@
 package com.stripe.android.paymentsheet.specifications
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.paymentsheet.elements.BankRepository
+import com.stripe.android.paymentsheet.elements.DropdownItemSpec
+import com.stripe.android.paymentsheet.elements.SupportedBankType
 import org.junit.Test
 import org.mockito.kotlin.mock
 import java.io.File
@@ -30,7 +33,7 @@ class BankRepositoryTest {
 
         assertThat(listOfBanks[0])
             .isEqualTo(
-                DropdownItem(
+                DropdownItemSpec(
                     value = "arzte_und_apotheker_bank",
                     text = "Ärzte- und Apothekerbank",
                 )

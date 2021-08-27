@@ -1,6 +1,15 @@
-package com.stripe.android.paymentsheet.specifications
+package com.stripe.android.paymentsheet.forms
 
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.elements.BankDropdownSpec
+import com.stripe.android.paymentsheet.elements.EmailSpec
+import com.stripe.android.paymentsheet.elements.FormSpec
+import com.stripe.android.paymentsheet.elements.IdentifierSpec
+import com.stripe.android.paymentsheet.elements.LayoutSpec
+import com.stripe.android.paymentsheet.elements.SectionSpec
+import com.stripe.android.paymentsheet.elements.SimpleTextSpec
+import com.stripe.android.paymentsheet.elements.SupportedBankType
+import com.stripe.android.paymentsheet.elements.billingParams
 
 internal val p24Params: MutableMap<String, Any?> = mutableMapOf(
     "bank" to null,
@@ -12,18 +21,18 @@ internal val p24ParamKey: MutableMap<String, Any?> = mutableMapOf(
     "p24" to p24Params
 )
 
-internal val p24NameSection = FormItemSpec.SectionSpec(
+internal val p24NameSection = SectionSpec(
     IdentifierSpec.Generic("name_section"),
-    SectionFieldSpec.NAME
+    SimpleTextSpec.NAME
 )
-internal val p24EmailSection = FormItemSpec.SectionSpec(
+internal val p24EmailSection = SectionSpec(
     IdentifierSpec.Generic("email_section"),
-    SectionFieldSpec.Email
+    EmailSpec
 )
 internal val p24BankSection =
-    FormItemSpec.SectionSpec(
+    SectionSpec(
         IdentifierSpec.Generic("bank_section"),
-        SectionFieldSpec.BankDropdown(
+        BankDropdownSpec(
             IdentifierSpec.Generic("bank"),
             R.string.stripe_paymentsheet_p24_bank,
             SupportedBankType.P24

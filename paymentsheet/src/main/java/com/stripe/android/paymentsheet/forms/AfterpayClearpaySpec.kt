@@ -1,4 +1,4 @@
-package com.stripe.android.paymentsheet.specifications
+package com.stripe.android.paymentsheet.elements
 
 import com.stripe.android.paymentsheet.R
 
@@ -7,19 +7,19 @@ internal val afterpayClearpayParamKey: MutableMap<String, Any?> = mutableMapOf(
     "billing_details" to billingParams
 )
 
-internal val afterpayClearpayHeader = FormItemSpec.AfterpayClearpayTextSpec(
+internal val afterpayClearpayHeader = AfterpayClearpayTextSpec(
     IdentifierSpec.Generic("afterpay_clearpay_header")
 )
-internal val afterpayClearpayNameSection = FormItemSpec.SectionSpec(
+internal val afterpayClearpayNameSection = SectionSpec(
     IdentifierSpec.Generic("name_section"),
-    SectionFieldSpec.NAME
+    SimpleTextSpec.NAME
 )
 internal val afterpayClearpayEmailSection =
-    FormItemSpec.SectionSpec(IdentifierSpec.Generic("email_section"), SectionFieldSpec.Email)
+    SectionSpec(IdentifierSpec.Generic("email_section"), EmailSpec)
 
-internal val afterpayClearpayBillingSection = FormItemSpec.SectionSpec(
+internal val afterpayClearpayBillingSection = SectionSpec(
     IdentifierSpec.Generic("address_section"),
-    SectionFieldSpec.AddressSpec(IdentifierSpec.Generic("address")),
+    AddressSpec(IdentifierSpec.Generic("address")),
     R.string.billing_details
 )
 
