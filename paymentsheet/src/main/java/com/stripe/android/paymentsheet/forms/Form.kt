@@ -51,6 +51,8 @@ import com.stripe.android.paymentsheet.elements.AddressController
 import com.stripe.android.paymentsheet.elements.CardStyle
 import com.stripe.android.paymentsheet.elements.DropDown
 import com.stripe.android.paymentsheet.elements.DropdownFieldController
+import com.stripe.android.paymentsheet.elements.MandateElementUI
+import com.stripe.android.paymentsheet.elements.SaveForFutureUseElementUI
 import com.stripe.android.paymentsheet.elements.Section
 import com.stripe.android.paymentsheet.elements.TextField
 import com.stripe.android.paymentsheet.elements.TextFieldController
@@ -190,75 +192,6 @@ internal fun SectionFieldElementUI(
                 controller
             )
         }
-    }
-}
-
-@Composable
-internal fun MandateElementUI(
-    element: MandateTextElement
-) {
-    Text(
-        stringResource(element.stringResId, element.merchantName ?: ""),
-        fontSize = 10.sp,
-        letterSpacing = .7.sp,
-        modifier = Modifier
-            .padding(vertical = 8.dp)
-            .semantics(mergeDescendants = true) {}, // makes it a separate accessibile item
-        color = element.color
-    )
-}
-
-@Composable
-internal fun SaveForFutureUseElementUI(
-    enabled: Boolean,
-    element: SaveForFutureUseElement
-) {
-    val controller = element.controller
-    val checked by controller.saveForFutureUse.asLiveData().observeAsState(true)
-
-    val description = stringResource(
-        if (checked) {
-            R.string.selected
-        } else {
-            R.string.not_selected
-        }
-    )
-
-    Row(
-        modifier = Modifier
-            .padding(vertical = 2.dp)
-            .semantics {
-                stateDescription = description
-            }
-            .toggleable(
-                value = checked,
-                role = Role.Checkbox,
-                onValueChange = {
-                    controller.onValueChange(!checked)
-                    true
-                },
-                enabled = enabled
-            )
-            .fillMaxWidth()
-            .requiredHeight(48.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Checkbox(
-            checked = checked,
-            onCheckedChange = null, // needs to be null for accessibility on row click to work
-            enabled = enabled
-        )
-        Text(
-            stringResource(controller.label),
-            Modifier
-                .padding(start = 4.dp)
-                .align(Alignment.CenterVertically),
-            color = if (isSystemInDarkTheme()) {
-                Color.LightGray
-            } else {
-                Color.Black
-            }
-        )
     }
 }
 
