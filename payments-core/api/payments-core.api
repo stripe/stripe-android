@@ -5501,7 +5501,7 @@ public final class com/stripe/android/payments/paymentlauncher/PaymentResult$Fai
 
 public final class com/stripe/android/payments/paymentlauncher/StripePaymentLauncherAssistedFactory_Impl : com/stripe/android/payments/paymentlauncher/StripePaymentLauncherAssistedFactory {
 	public static fun create (Lcom/stripe/android/payments/paymentlauncher/StripePaymentLauncher_Factory;)Ljavax/inject/Provider;
-	public fun createStripePaymentLauncher (Ljavax/inject/Provider;Ljavax/inject/Provider;Landroidx/activity/result/ActivityResultLauncher;)Lcom/stripe/android/payments/paymentlauncher/StripePaymentLauncher;
+	public fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;Landroidx/activity/result/ActivityResultLauncher;)Lcom/stripe/android/payments/paymentlauncher/StripePaymentLauncher;
 }
 
 public final class com/stripe/android/payments/paymentlauncher/StripePaymentLauncher_Factory {

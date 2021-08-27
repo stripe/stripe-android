@@ -16,7 +16,7 @@ import javax.inject.Provider
  */
 @AssistedFactory
 internal interface StripePaymentLauncherAssistedFactory {
-    fun createStripePaymentLauncher(
+    fun create(
         @Assisted(PUBLISHABLE_KEY) publishableKey: Provider<String>,
         @Assisted(STRIPE_ACCOUNT_ID) stripeAccountId: Provider<String?>,
         hostActivityLauncher: ActivityResultLauncher<PaymentLauncherContract.Args>
