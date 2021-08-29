@@ -1,6 +1,7 @@
 package com.stripe.android.model
 
 import android.os.Parcelable
+import androidx.annotation.RestrictTo
 import kotlinx.parcelize.Parcelize
 
 /**
@@ -80,12 +81,13 @@ data class MandateDataParams constructor(
                 }
             }
 
-            internal companion object {
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
+            companion object {
                 private const val PARAM_IP_ADDRESS = "ip_address"
                 private const val PARAM_USER_AGENT = "user_agent"
                 private const val PARAM_INFER_FROM_CLIENT = "infer_from_client"
 
-                internal val DEFAULT = Online(inferFromClient = true)
+                val DEFAULT = Online(inferFromClient = true)
             }
         }
     }

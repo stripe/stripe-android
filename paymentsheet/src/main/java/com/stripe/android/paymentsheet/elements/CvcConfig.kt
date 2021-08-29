@@ -3,14 +3,14 @@ package com.stripe.android.viewmodel.credit.cvc
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
+import com.stripe.android.model.CardBrand
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.elements.CardBrand
-import com.stripe.android.paymentsheet.elements.CreditTextFieldConfig
+import com.stripe.android.paymentsheet.elements.CardDetailsTextFieldConfig
 import com.stripe.android.paymentsheet.elements.TextFieldState
 import com.stripe.android.paymentsheet.elements.TextFieldStateConstants
 
 @Suppress("DEPRECATION")
-internal class CvcConfig : CreditTextFieldConfig {
+internal class CvcConfig : CardDetailsTextFieldConfig {
     // TODO: Neecd to support CVV
     override val capitalization: KeyboardCapitalization = KeyboardCapitalization.None
     override val debugLabel: String = "cvc"

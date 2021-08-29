@@ -1,8 +1,12 @@
 package com.stripe.android.paymentsheet.elements
 
-internal data class CvcTextElement(
+import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
+
+internal data class CvcElement(
     val _identifier: IdentifierSpec,
-    override val controller: CvcTextFieldController,
-) : SectionSingleFieldElement(_identifier)
-
-
+    override val controller: CvcController,
+) : SectionSingleFieldElement(_identifier){
+    override fun setRawValue(formFragmentArguments: FormFragmentArguments) {
+        // Nothing from formFragmentArguments to populate
+    }
+}

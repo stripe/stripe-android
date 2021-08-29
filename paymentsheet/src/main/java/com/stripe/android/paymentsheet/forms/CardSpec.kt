@@ -1,6 +1,13 @@
 package com.stripe.android.paymentsheet.forms
 
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.elements.CardBillingSpec
+import com.stripe.android.paymentsheet.elements.CardDetailsSpec
+import com.stripe.android.paymentsheet.elements.FormSpec
+import com.stripe.android.paymentsheet.elements.IdentifierSpec
+import com.stripe.android.paymentsheet.elements.LayoutSpec
+import com.stripe.android.paymentsheet.elements.SectionSpec
+import com.stripe.android.paymentsheet.elements.billingParams
 
 internal val cardParams: MutableMap<String, Any?> = mutableMapOf(
     "number" to null,
@@ -17,13 +24,13 @@ internal val cardParamKey: MutableMap<String, Any?> = mutableMapOf(
 )
 
 internal val creditDetailsSection = SectionSpec(
-    IdentifierSpec("credit"),
-    CreditDetailSpec
+    IdentifierSpec.Generic("credit_details_section"),
+    CardDetailsSpec
 )
 
 internal val creditBillingSection = SectionSpec(
-    IdentifierSpec("credit_billing"),
-    CreditBillingSpec,
+    IdentifierSpec.Generic("credit_billing_section"),
+    CardBillingSpec,
     R.string.billing_details
 )
 

@@ -92,7 +92,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
     betas: Set<StripeApiBeta> = emptySet(),
     apiVersion: String = ApiVersion(betas = betas).code,
     sdkVersion: String = Stripe.VERSION
-) : StripeRepository {
+) : StripeRepository() {
     private val apiRequestFactory = ApiRequest.Factory(
         appInfo = appInfo,
         apiVersion = apiVersion,

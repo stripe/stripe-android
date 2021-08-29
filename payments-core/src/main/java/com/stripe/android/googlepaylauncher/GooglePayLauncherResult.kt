@@ -17,7 +17,7 @@ internal sealed class GooglePayLauncherResult : ActivityStarter.Result {
     }
 
     @Parcelize
-    data class Error(
+    internal data class Error(
         val exception: Throwable,
         val googlePayStatus: Status? = null,
         val paymentMethod: PaymentMethod? = null,
@@ -42,18 +42,18 @@ internal sealed class GooglePayLauncherResult : ActivityStarter.Result {
      * See [StripeGooglePayContract.Args]
      */
     @Parcelize
-    data class PaymentData(
+    internal data class PaymentData(
         val paymentMethod: PaymentMethod,
         val shippingInformation: ShippingInformation?
     ) : GooglePayLauncherResult()
 
     @Parcelize
-    object Canceled : GooglePayLauncherResult()
+    internal object Canceled : GooglePayLauncherResult()
 
     @Parcelize
-    object Unavailable : GooglePayLauncherResult()
+    internal object Unavailable : GooglePayLauncherResult()
 
-    companion object {
+    internal companion object {
         /**
          * @return the [Result] object from the given `Intent`
          */

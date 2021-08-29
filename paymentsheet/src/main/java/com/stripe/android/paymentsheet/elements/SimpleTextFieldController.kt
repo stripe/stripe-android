@@ -32,7 +32,8 @@ internal interface TextFieldController : InputController {
  */
 internal class SimpleTextFieldController constructor(
     private val textFieldConfig: TextFieldConfig,
-    override val showOptionalLabel: Boolean = false
+    override val showOptionalLabel: Boolean = false,
+    initialValue: String? = null
 ) : TextFieldController, SectionFieldErrorController {
     override val capitalization: KeyboardCapitalization = textFieldConfig.capitalization
     override val keyboardType: KeyboardType = textFieldConfig.keyboard
@@ -77,7 +78,7 @@ internal class SimpleTextFieldController constructor(
         }
 
     init {
-        onValueChange("")
+        initialValue?.let { onRawValueChange(it) }
     }
 
     /**

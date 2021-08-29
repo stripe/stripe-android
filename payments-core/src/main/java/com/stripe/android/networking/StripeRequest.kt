@@ -1,6 +1,7 @@
 package com.stripe.android.networking
 
 import androidx.annotation.RestrictTo
+import androidx.annotation.VisibleForTesting
 import com.stripe.android.exception.InvalidRequestException
 import java.io.OutputStream
 import java.io.UnsupportedEncodingException
@@ -23,6 +24,10 @@ abstract class StripeRequest {
         get() {
             return params?.let { compactParams(it) }
         }
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @VisibleForTesting
+    fun getCompactParams() = compactParams
 
     /**
      * If the HTTP method is [Method.GET], this is the URL with query string;

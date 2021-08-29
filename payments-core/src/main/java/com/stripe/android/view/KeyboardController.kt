@@ -3,8 +3,10 @@ package com.stripe.android.view
 import android.app.Activity
 import android.content.Context
 import android.view.inputmethod.InputMethodManager
+import androidx.annotation.RestrictTo
 
-internal class KeyboardController(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
+class KeyboardController(
     private val activity: Activity
 ) {
     private val inputMethodManager: InputMethodManager =
@@ -13,8 +15,9 @@ internal class KeyboardController(
     /**
      * Hide virtual keyboard
      */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
     @JvmSynthetic
-    internal fun hide() {
+    fun hide() {
         if (inputMethodManager.isAcceptingText) {
             inputMethodManager.hideSoftInputFromWindow(
                 activity.currentFocus?.windowToken,

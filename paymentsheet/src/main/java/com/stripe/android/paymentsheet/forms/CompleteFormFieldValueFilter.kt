@@ -1,6 +1,6 @@
 package com.stripe.android.paymentsheet.forms
 
-import com.stripe.android.paymentsheet.specifications.IdentifierSpec
+import com.stripe.android.paymentsheet.elements.IdentifierSpec
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 
@@ -22,17 +22,15 @@ internal class CompleteFormFieldValueFilter(
     fun filterFlow() = combine(
         currentFieldValueMap,
         hiddenIdentifiers,
-        showingMandate,
-        saveForFutureUse
-    ) { idFieldSnapshotMap, hiddenIdentifiers, showingMandate, saveForFutureUse ->
-        filterFlow(idFieldSnapshotMap, hiddenIdentifiers, showingMandate, saveForFutureUse)
+        showingMandate
+    ) { idFieldSnapshotMap, hiddenIdentifiers, showingMandate ->
+        filterFlow(idFieldSnapshotMap, hiddenIdentifiers, showingMandate)
     }
 
     private fun filterFlow(
         idFieldSnapshotMap: Map<IdentifierSpec, FormFieldEntry>,
         hiddenIdentifiers: List<IdentifierSpec>,
-        showingMandate: Boolean,
-        saveForFutureUse: Boolean
+        showingMandate: Boolean
     ): FormFieldValues? {
         // This will run twice in a row when the save for future use state changes: once for the
         // saveController changing and once for the the hidden fields changing
@@ -42,8 +40,7 @@ internal class CompleteFormFieldValueFilter(
 
         return FormFieldValues(
             hiddenFilteredFieldSnapshotMap,
-            showingMandate,
-            saveForFutureUse
+            showingMandate
         ).takeIf {
             hiddenFilteredFieldSnapshotMap.values.map { it.isComplete }
                 .none { complete -> !complete }

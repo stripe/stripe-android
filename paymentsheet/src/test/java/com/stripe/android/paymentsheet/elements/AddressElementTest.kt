@@ -2,10 +2,8 @@ package com.stripe.android.paymentsheet.elements
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.SectionMultiFieldElement
-import com.stripe.android.paymentsheet.SectionSingleFieldElement
+import com.stripe.android.paymentsheet.SectionFieldElement
 import com.stripe.android.paymentsheet.address.AddressFieldElementRepository
-import com.stripe.android.paymentsheet.forms.FormFieldEntry
 import com.stripe.android.paymentsheet.specifications.IdentifierSpec
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
@@ -29,18 +27,18 @@ class AddressElementTest {
         addressFieldElementRepository.add(
             "US",
             listOf(
-                SectionSingleFieldElement.Email(
-                    IdentifierSpec("email"),
-                    SimpleTextFieldController(EmailConfig())
+                EmailElement(
+                    IdentifierSpec.Email,
+                    TextFieldController(EmailConfig())
                 )
             )
         )
         addressFieldElementRepository.add(
             "JP",
             listOf(
-                SectionSingleFieldElement.Iban(
-                    IdentifierSpec("iban"),
-                    SimpleTextFieldController(IbanConfig())
+                IbanElement(
+                    IdentifierSpec.Generic("iban"),
+                    TextFieldController(IbanConfig())
                 )
             )
         )
@@ -51,8 +49,8 @@ class AddressElementTest {
     fun `Verify controller error is updated as the fields change based on country`() {
         runBlocking {
             // ZZ does not have state and US does
-            val addressElement = SectionMultiFieldElement.AddressElement(
-                IdentifierSpec("address"),
+            val addressElement = AddressElement(
+                IdentifierSpec.Generic("address"),
                 addressFieldElementRepository,
                 countryDropdownFieldController = countryDropdownFieldController
             )
@@ -84,8 +82,8 @@ class AddressElementTest {
     @ExperimentalCoroutinesApi
     @Test
     fun `verify flow of form field values`() = runBlockingTest {
-        val addressElement = SectionMultiFieldElement.AddressElement(
-            IdentifierSpec("address"),
+        val addressElement = AddressElement(
+            IdentifierSpec.Generic("address"),
             addressFieldElementRepository,
             countryDropdownFieldController = countryDropdownFieldController
         )
@@ -101,7 +99,7 @@ class AddressElementTest {
 
         // Verify
         var firstForFieldValues = formFieldValueFlow.first()
-        assertThat(firstForFieldValues.toMap()[IdentifierSpec("email")])
+        assertThat(firstForFieldValues.toMap()[IdentifierSpec.Email])
             .isEqualTo(
                 FormFieldEntry("email", false)
             )
@@ -115,7 +113,7 @@ class AddressElementTest {
         ShadowLooper.runUiThreadTasksIncludingDelayedTasks()
 
         firstForFieldValues = formFieldValueFlow.first()
-        assertThat(firstForFieldValues.toMap()[IdentifierSpec("iban")])
+        assertThat(firstForFieldValues.toMap()[IdentifierSpec.Generic("iban")])
             .isEqualTo(
                 FormFieldEntry("DE89370400440532013000", true)
             )

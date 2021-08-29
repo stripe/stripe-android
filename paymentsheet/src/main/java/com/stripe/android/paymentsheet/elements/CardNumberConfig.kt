@@ -3,9 +3,10 @@ package com.stripe.android.paymentsheet.elements
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
+import com.stripe.android.model.CardBrand
 import com.stripe.android.paymentsheet.R
 
-internal class CardNumberConfig : CreditTextFieldConfig {
+internal class CardNumberConfig : CardDetailsTextFieldConfig {
     override val capitalization: KeyboardCapitalization = KeyboardCapitalization.None
     override val debugLabel: String = "Card number"
     override val label: Int = R.string.card_number_label

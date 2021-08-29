@@ -1,8 +1,56 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
-    <string name="billing_details">Billing Details</string>
     <!-- Address line 1 placeholder for billing address form. -->
     <string name="address_label_address_line1">Address line 1</string>
+    <string name="billing_details">Billing Details</string>
+    <string name="stripe_paymentsheet_eps_bank">EPS Bank</string>
+    <string name="stripe_paymentsheet_p24_bank">P24 Bank</string>
+
+    <string name="edit">Edit</string>
+    <string name="done">Done</string>
+    <string name="remove">Remove</string>
+    <string name="cancel">Cancel</string>
+
+    <!-- Description of button that deletes a saved payment method.
+    E.g. 'Remove Visa ending in 4242', or 'Remove bank account ending in 1234' -->
+    <string name="stripe_paymentsheet_remove_pm">Remove %s</string>
+    <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
+    <string name="bank_account_ending_in">Bank account ending in %s</string>
+
+    <!-- Generic error message shown when payment cannot be processed. -->
+    <string name="stripe_failure_connection_error">We are experiencing issues connecting to our payments provider. Please check your internet connection and try again.</string>
+    <!-- Label for a button that starts processing the payment. -->
+    <string name="stripe_paymentsheet_pay_button_label">Pay</string>
+    <!-- Card details entry form header title -->
+    <string name="stripe_paymentsheet_add_payment_method_card_information">Card information</string>
+    <!-- Country selector and postal code entry form header title -->
+    <string name="stripe_paymentsheet_add_payment_method_country_or_region">Country or region</string>
+    <!-- Title shown above a form where the customer can enter payment information like credit card details, email, billing address, etc. -->
+    <string name="stripe_paymentsheet_add_payment_method_title">Add your payment information</string>
+    <!-- Title shown above a carousel containing the customer&apos;s payment methods -->
+    <string name="stripe_paymentsheet_select_payment_method">Select your payment method</string>
+    <!-- Text for a button that, when tapped, displays another screen where the customer can add payment method details -->
+    <string name="stripe_paymentsheet_add_payment_method_button_label">+ Add</string>
+    <!-- Label indicating the total amount that the user is authorizing (e.g. "Total: $25.00") -->
+    <string name="stripe_paymentsheet_total_amount" tools:ignore="MissingTranslation">Total: %s</string>
+    <!-- Title of a section containing a card form that will collect the payment information from the user. -->
+    <string name="stripe_paymentsheet_or_pay_with_card">Or pay with a card</string>
+    <!-- Title of a section containing multiple payment methods that can selected and will collect the payment information from the user. -->
+    <string name="stripe_paymentsheet_or_pay_using">Or pay using</string>
+    <!-- The label of a switch indicating whether to save the user&apos;s card for future payments to this merchant -->
+    <string name="stripe_paymentsheet_save_this_card_with_merchant_name">Save this card for future %s payments</string>
+    <!-- When an internal error is reported when a google pay payment is started. -->
+    <string name="stripe_google_pay_error_internal">An internal error occurred.</string>
+    <!-- Label of a button that, when tapped, initiates payment, becomes disabled, and displays this text -->
+    <string name="stripe_paymentsheet_primary_button_processing">Processing…</string>
+    <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->
+    <string name="stripe_paymentsheet_setup_button_label">Set up</string>
+    <!-- Label of a button that initiates payment when tapped -->
+    <string name="stripe_paymentsheet_pay_button_amount">Pay %s</string>
+    <!-- Text for back button -->
+    <string name="stripe_paymentsheet_back">Back</string>
+    <string name="stripe_paymentsheet_close">Close</string>
+    <string name="stripe_paymentsheet_add_button_label">Add</string>
 
     <string name="card_number_label">Card number</string>
     <string name="card_number_invalid_brand">The card number brand is invalid.</string>
@@ -22,7 +70,4 @@
     <string name="invalid_expiry_year">Invalid expiration year</string> <!-- TODO: What is correct title -->
     <string name="acc_label_expiry_date_node">%s, Expiration Date</string> <!-- TODO: What is correct title -->
     <string name="invalid_expiry_year_past">Expiration date is in the past.</string> <!-- TODO: What is correct title -->
-
-    <string name="stripe_paymentsheet_eps_bank">EPS Bank</string>
-    <string name="stripe_paymentsheet_p24_bank">P24 Bank</string>
 </resources>

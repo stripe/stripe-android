@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Public Styles -->
+    <public name="StripeDefaultTheme" type="style" />
+    <public name="StripeToolBarStyle" type="style" />
+
+    <!-- Styleable Attributes should all be public -->
+    <public name="cardTextErrorColor" type="attr" />
+    <public name="cardHintText" type="attr" />
+    <public name="cardTint" type="attr" />
+    <public name="shouldShowPostalCode" type="attr" />
+    <public name="shouldRequirePostalCode" type="attr" />
+
+    <public name="becs_mandate_acceptance" type="string" />
+
+</resources>

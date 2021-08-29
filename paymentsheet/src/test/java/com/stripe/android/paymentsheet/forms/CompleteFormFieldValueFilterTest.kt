@@ -2,12 +2,14 @@ package com.stripe.android.paymentsheet.forms
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.paymentsheet.FormElement
-import com.stripe.android.paymentsheet.SectionSingleFieldElement
+import com.stripe.android.paymentsheet.SectionFieldElement
+import com.stripe.android.paymentsheet.elements.CountryConfig
+import com.stripe.android.paymentsheet.elements.DropdownFieldController
 import com.stripe.android.paymentsheet.elements.EmailConfig
 import com.stripe.android.paymentsheet.elements.SectionController
-import com.stripe.android.paymentsheet.elements.SimpleTextFieldController
+import com.stripe.android.paymentsheet.elements.TextFieldController
+import com.stripe.android.paymentsheet.getIdInputControllerMap
 import com.stripe.android.paymentsheet.specifications.IdentifierSpec
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runBlockingTest
@@ -17,10 +19,10 @@ import org.junit.Test
 class CompleteFormFieldValueFilterTest {
 
     private val emailController = SimpleTextFieldController(EmailConfig())
-    private val emailSection = FormElement.SectionElement(
-        identifier = IdentifierSpec("email_section"),
-        SectionSingleFieldElement.Email(
-            IdentifierSpec("email"),
+    private val emailSection = SectionElement(
+        identifier = IdentifierSpec.Generic("email_section"),
+        EmailElement(
+            IdentifierSpec.Email,
             emailController
         ),
         SectionController(emailController.label, listOf(emailController))
@@ -30,8 +32,8 @@ class CompleteFormFieldValueFilterTest {
 
     private val fieldFlow = MutableStateFlow(
         mapOf(
-            IdentifierSpec("country") to FormFieldEntry("US", true),
-            IdentifierSpec("email") to FormFieldEntry("email@email.com", false),
+            IdentifierSpec.Country to FormFieldEntry("US", true),
+            IdentifierSpec.Email to FormFieldEntry("email@email.com", false),
         )
     )
 
@@ -54,33 +56,33 @@ class CompleteFormFieldValueFilterTest {
         runBlockingTest {
             fieldFlow.value =
                 mapOf(
-                    IdentifierSpec("country") to FormFieldEntry("US", true),
-                    IdentifierSpec("email") to FormFieldEntry("email@email.com", true),
+                    IdentifierSpec.Country to FormFieldEntry("US", true),
+                    IdentifierSpec.Email to FormFieldEntry("email@email.com", true),
                 )
 
             val formFieldValue = transformElementToFormFieldValueFlow.filterFlow().first()
 
             assertThat(formFieldValue).isNotNull()
             assertThat(formFieldValue?.fieldValuePairs)
-                .containsKey(IdentifierSpec("email"))
+                .containsKey(IdentifierSpec.Email)
             assertThat(formFieldValue?.fieldValuePairs)
-                .containsKey(IdentifierSpec("country"))
+                .containsKey(IdentifierSpec.Country)
         }
     }
 
     @Test
     fun `If an hidden field is incomplete field pairs have the non-hidden values`() {
         runBlockingTest {
-            hiddenIdentifersFlow.value = listOf(IdentifierSpec("email"))
+            hiddenIdentifersFlow.value = listOf(IdentifierSpec.Email)
 
             val formFieldValues = transformElementToFormFieldValueFlow.filterFlow()
 
             val formFieldValue = formFieldValues.first()
             assertThat(formFieldValue).isNotNull()
             assertThat(formFieldValue?.fieldValuePairs)
-                .doesNotContainKey(IdentifierSpec("email"))
+                .doesNotContainKey(IdentifierSpec.Email)
             assertThat(formFieldValue?.fieldValuePairs)
-                .containsKey(IdentifierSpec("country"))
+                .containsKey(IdentifierSpec.Country)
         }
     }
 
@@ -89,8 +91,8 @@ class CompleteFormFieldValueFilterTest {
         runBlockingTest {
             fieldFlow.value =
                 mapOf(
-                    IdentifierSpec("country") to FormFieldEntry("US", true),
-                    IdentifierSpec("email") to FormFieldEntry("email@email.com", true),
+                    IdentifierSpec.Country to FormFieldEntry("US", true),
+                    IdentifierSpec.Email to FormFieldEntry("email@email.com", true),
                 )
 
             hiddenIdentifersFlow.value = listOf(emailSection.fields[0].identifier)
@@ -99,9 +101,9 @@ class CompleteFormFieldValueFilterTest {
 
             assertThat(formFieldValue).isNotNull()
             assertThat(formFieldValue?.fieldValuePairs)
-                .doesNotContainKey(IdentifierSpec("email"))
+                .doesNotContainKey(IdentifierSpec.Email)
             assertThat(formFieldValue?.fieldValuePairs)
-                .containsKey(IdentifierSpec("country"))
+                .containsKey(IdentifierSpec.Country)
         }
     }
 }
