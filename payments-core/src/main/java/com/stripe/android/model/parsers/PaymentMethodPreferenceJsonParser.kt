@@ -11,14 +11,18 @@ internal sealed class PaymentMethodPreferenceJsonParser<out StripeIntentType : S
     abstract val stripeIntentFieldName: String
 
     override fun parse(json: JSONObject): StripeIntentType? {
-        val objectType = StripeJsonUtils.optString(json, FIELD_OBJECT)
-        if (OBJECT_TYPE != objectType) {
+        val paymentMethodPreference =
+            StripeJsonUtils.mapToJsonObject(StripeJsonUtils.optMap(json, OBJECT_TYPE))
+
+        val objectType = StripeJsonUtils.optString(paymentMethodPreference, FIELD_OBJECT)
+        if (paymentMethodPreference == null || OBJECT_TYPE != objectType) {
             return null
         }
 
-        val orderedPaymentMethodTypes = json.optJSONArray(FIELD_ORDERED_PAYMENT_METHOD_TYPES)
+        val orderedPaymentMethodTypes =
+            paymentMethodPreference.optJSONArray(FIELD_ORDERED_PAYMENT_METHOD_TYPES)
 
-        return json.optJSONObject(stripeIntentFieldName)?.let {
+        return paymentMethodPreference.optJSONObject(stripeIntentFieldName)?.let {
             it.put(FIELD_PAYMENT_METHOD_TYPES, orderedPaymentMethodTypes)
             parseStripeIntent(it)
         }
