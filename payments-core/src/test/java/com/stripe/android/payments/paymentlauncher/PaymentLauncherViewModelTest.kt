@@ -64,7 +64,7 @@ class PaymentLauncherViewModelTest {
         stripeApiRepository,
         authenticatorRegistry,
         defaultReturnUrl,
-        apiRequestOptions,
+        { apiRequestOptions },
         threeDs1IntentReturnUrlMap,
         { paymentIntentFlowResultProcessor },
         { setupIntentFlowResultProcessor },

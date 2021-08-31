@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Parcelable
 import androidx.activity.result.contract.ActivityResultContract
+import androidx.annotation.RestrictTo
 import androidx.core.os.bundleOf
 import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.payments.core.injection.InjectorKey
@@ -12,7 +13,8 @@ import kotlinx.parcelize.Parcelize
 /**
  * [ActivityResultContract] to start [PaymentLauncherConfirmationActivity] and return a [PaymentResult].
  */
-internal class PaymentLauncherContract :
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+class PaymentLauncherContract :
     ActivityResultContract<PaymentLauncherContract.Args, PaymentResult>() {
     override fun createIntent(context: Context, input: Args): Intent {
         return Intent(

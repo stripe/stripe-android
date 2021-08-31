@@ -1,12 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
-    <string name="address_label_country">Country</string>
-    <string name="address_label_city">City</string>
-    <string name="address_label_state">State</string>
-    <string name="address_label_postal_code">Postal code</string>
+    <!--
+    Items here need to be entered in our translation tool
+    -->
 
-    <string name="address_label_zip_code">ZIP Code</string>
-    <string name="address_label_county">County</string>
-    <string name="address_label_province">Province</string>
-    <string name="address_label_name">Name</string>
 </resources>

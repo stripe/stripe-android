@@ -318,8 +318,18 @@ internal class CardDataCollectionFragment<ViewModelType : BaseSheetViewModel<*>>
             R.string.stripe_paymentsheet_save_this_card_with_merchant_name,
             sheetViewModel.merchantName
         )
+        requireArguments().getParcelable<FormFragmentArguments>(
+            ComposeFormDataCollectionFragment.EXTRA_CONFIG
+        )?.let { args ->
+            saveCardCheckbox.isChecked = args.saveForFutureUseInitialValue
+            saveCardCheckbox.isVisible = args.saveForFutureUseInitialVisibility
+        }
+        sheetViewModel.newCard?.shouldSavePaymentMethod?.also {
+            if (saveCardCheckbox.isVisible) {
+                saveCardCheckbox.isChecked = it
+            }
+        }
 
-        saveCardCheckbox.isVisible = sheetViewModel.userCanChooseToSaveCard
         bottomSpace.isVisible = !saveCardCheckbox.isVisible
 
         saveCardCheckbox.setOnCheckedChangeListener { _, _ ->
@@ -336,7 +346,7 @@ internal class CardDataCollectionFragment<ViewModelType : BaseSheetViewModel<*>>
         }
     }
 
-    private fun shouldSaveCard() = saveCardCheckbox.isShown && saveCardCheckbox.isChecked
+    private fun shouldSaveCard() = saveCardCheckbox.isChecked
 
     internal class AddCardViewModel : ViewModel() {
         var isCardValid: Boolean = false

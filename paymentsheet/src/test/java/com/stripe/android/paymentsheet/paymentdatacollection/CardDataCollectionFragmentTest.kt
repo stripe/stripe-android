@@ -14,7 +14,6 @@ import com.stripe.android.model.CountryCode
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
-import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetActivity
@@ -107,7 +106,8 @@ class CardDataCollectionFragmentTest {
                 paymentSelection = it
             }
 
-            viewBinding.saveCardCheckbox.isChecked = true
+            // If no customer config checked must be false
+            viewBinding.saveCardCheckbox.isChecked = false
 
             viewBinding.cardMultilineWidget.setCardNumber("4242424242424242")
             viewBinding.cardMultilineWidget.setExpiryDate(1, 2030)
@@ -124,43 +124,20 @@ class CardDataCollectionFragmentTest {
     }
 
     @Test
-    fun `relaunching the fragment populates the fields`() {
-        createFragment(PaymentSheetFixtures.ARGS_WITHOUT_CUSTOMER) { fragment, viewBinding ->
-            fragment.sheetViewModel.newCard = PaymentSelection.New.Card(
+    fun `relaunching the fragment populates the fields with saved card`() {
+        createFragment(
+            PaymentSheetFixtures.ARGS_WITHOUT_CUSTOMER,
+            newCard = PaymentSelection.New.Card(
                 PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
                 CardBrand.Discover,
                 false
             )
-
-            viewBinding.saveCardCheckbox.isChecked = false
-
-            var paymentSelection: PaymentSelection? = null
-            fragment.sheetViewModel.selection.observeForever {
-                paymentSelection = it
-            }
-
-            viewBinding.saveCardCheckbox.isChecked = true
-
-            viewBinding.cardMultilineWidget.setCardNumber("4242424242424242")
-            viewBinding.cardMultilineWidget.setExpiryDate(1, 2030)
-            viewBinding.cardMultilineWidget.setCvcCode("123")
-            viewBinding.billingAddress.countryView.setText("United States")
-            viewBinding.billingAddress.postalCodeView.setText("94107")
-
-            val newPaymentSelection = paymentSelection as PaymentSelection.New.Card
-            assertThat(newPaymentSelection.shouldSavePaymentMethod)
-                .isFalse()
-        }
-
-        createFragment(PaymentSheetFixtures.ARGS_WITHOUT_CUSTOMER) { fragment, viewBinding ->
-            viewBinding.saveCardCheckbox.isChecked = false
+        ) { fragment, viewBinding ->
 
             var paymentSelection: PaymentSelection? = null
             fragment.sheetViewModel.selection.observeForever {
                 paymentSelection = it
             }
-
-            viewBinding.saveCardCheckbox.isChecked = true
 
             viewBinding.cardMultilineWidget.setCardNumber("4242424242424242")
             viewBinding.cardMultilineWidget.setExpiryDate(1, 2030)
@@ -175,8 +152,48 @@ class CardDataCollectionFragmentTest {
     }
 
     @Test
+    fun `launching with arguments populates the fields`() {
+        createFragment(
+            fragmentArgs = FormFragmentArguments(
+                SupportedPaymentMethod.Bancontact.name,
+                saveForFutureUseInitialVisibility = false,
+                saveForFutureUseInitialValue = false,
+                merchantName = "Merchant, Inc.",
+                billingDetails = PaymentSheet.BillingDetails(
+                    address = PaymentSheet.Address(
+                        line1 = "123 Main Street",
+                        line2 = null,
+                        city = "San Francisco",
+                        state = "CA",
+                        postalCode = "94111",
+                        country = "DE",
+                    ),
+                    email = "email",
+                    name = "Jenny Rosen",
+                    phone = "+18008675309"
+                )
+            )
+        ) { _, viewBinding ->
+            assertThat(viewBinding.billingAddress.postalCodeView.text.toString())
+                .isEqualTo("94111")
+            assertThat(viewBinding.billingAddress.address1View.text.toString())
+                .isEqualTo("123 Main Street")
+            assertThat(viewBinding.billingAddress.address2View.text.toString())
+                .isEqualTo("")
+            assertThat(viewBinding.billingAddress.cityView.text.toString())
+                .isEqualTo("San Francisco")
+            assertThat(viewBinding.billingAddress.stateView.text.toString())
+                .isEqualTo("CA")
+            assertThat(viewBinding.billingAddress.countryView.text.toString())
+                .isEqualTo("Germany")
+            assertThat(viewBinding.saveCardCheckbox.isVisible).isFalse()
+            assertThat(viewBinding.saveCardCheckbox.isChecked).isFalse()
+        }
+    }
+
+    @Test
     fun `launching with billing details populates the fields`() {
-        createFragment(PaymentSheetFixtures.ARGS_WITH_BILLING) { _, viewBinding ->
+        createFragment(fragmentArgs = PaymentSheetFixtures.COMPOSE_FRAGMENT_ARGS) { _, viewBinding ->
             assertThat(viewBinding.billingAddress.postalCodeView.text.toString())
                 .isEqualTo("94111")
             assertThat(viewBinding.billingAddress.address1View.text.toString())
@@ -246,14 +263,6 @@ class CardDataCollectionFragmentTest {
 
             assertThat(fragment.sheetViewModel.newCard?.brand)
                 .isEqualTo(CardBrand.Visa)
-        }
-    }
-
-    @Test
-    fun `when processing SetupIntent should hide saveCardCheckbox`() {
-        createFragment(stripeIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD) { _, viewBinding ->
-            assertThat(viewBinding.saveCardCheckbox.isVisible)
-                .isFalse()
         }
     }
 
@@ -451,25 +460,8 @@ class CardDataCollectionFragmentTest {
         args: PaymentSheetContract.Args = PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY,
         fragmentConfig: FragmentConfig? = FragmentConfigFixtures.DEFAULT,
         stripeIntent: StripeIntent? = PaymentIntentFixtures.PI_WITH_SHIPPING,
-        fragmentArgs: FormFragmentArguments? = FormFragmentArguments(
-            SupportedPaymentMethod.Bancontact.name,
-            saveForFutureUseInitialVisibility = true,
-            saveForFutureUseInitialValue = true,
-            merchantName = "Merchant, Inc.",
-            billingDetails = PaymentSheet.BillingDetails(
-                address = PaymentSheet.Address(
-                    line1 = "123 Main Street",
-                    line2 = null,
-                    city = "San Francisco",
-                    state = "CA",
-                    postalCode = "94111",
-                    country = "DE",
-                ),
-                email = "email",
-                name = "Jenny Rosen",
-                phone = "+18008675309"
-            )
-        ),
+        newCard: PaymentSelection.New.Card? = null,
+        fragmentArgs: FormFragmentArguments? = PaymentSheetFixtures.COMPOSE_FRAGMENT_ARGS,
         onReady: (CardDataCollectionFragment<PaymentSheetViewModel>, FragmentPaymentsheetAddCardBinding) -> Unit
     ) {
         val factory = AddPaymentMethodsFragmentFactory(
@@ -491,6 +483,7 @@ class CardDataCollectionFragmentTest {
         ).onFragment { fragment ->
             // Mock sheetViewModel loading the StripeIntent before the Fragment is created
             fragment.sheetViewModel.setStripeIntent(stripeIntent)
+            fragment.sheetViewModel.newCard = newCard
         }.moveToState(Lifecycle.State.STARTED)
             .onFragment { fragment ->
                 onReady(
