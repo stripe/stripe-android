@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet
 
 import android.app.Application
+import android.util.Log
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.IntegerRes
@@ -21,14 +22,19 @@ import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContract
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherFactory
+import com.stripe.android.model.ConfirmPaymentIntentParams
+import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.networking.ApiRequest
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.payments.PaymentFlowResultProcessor
 import com.stripe.android.payments.core.injection.IOContext
+import com.stripe.android.payments.paymentlauncher.PaymentLauncher
+import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
+import com.stripe.android.payments.paymentlauncher.PaymentResult
+import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.injection.DaggerPaymentSheetViewModelComponent
 import com.stripe.android.paymentsheet.model.ConfirmStripeIntentParamsFactory
@@ -83,7 +89,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     private val paymentController: PaymentController,
     private val googlePayPaymentMethodLauncherFactory: GooglePayPaymentMethodLauncherFactory,
     private val logger: Logger,
-    @IOContext workContext: CoroutineContext
+    @IOContext workContext: CoroutineContext,
+    private val paymentLauncherFactory: StripePaymentLauncherAssistedFactory
 ) : BaseSheetViewModel<PaymentSheetViewModel.TransitionTarget>(
     application = application,
     config = args.config,
@@ -154,6 +161,9 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                 )
             }
         }
+
+    @VisibleForTesting
+    internal var paymentLauncher: PaymentLauncher? = null
 
     init {
         eventReporter.onInit(config)
@@ -305,24 +315,47 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         authActivityStarterHost: AuthActivityStarterHost,
         confirmStripeIntentParams: ConfirmStripeIntentParams
     ) {
-        paymentController.startConfirmAndAuth(
-            authActivityStarterHost,
-            confirmStripeIntentParams,
-            ApiRequest.Options(
-                lazyPaymentConfig.get().publishableKey,
-                lazyPaymentConfig.get().stripeAccountId
-            )
-        )
+        when (confirmStripeIntentParams) {
+            is ConfirmPaymentIntentParams -> {
+                paymentLauncher?.confirm(confirmStripeIntentParams)
+            }
+            is ConfirmSetupIntentParams -> {
+                paymentLauncher?.confirm(confirmStripeIntentParams)
+            }
+        }
+//        paymentController.startConfirmAndAuth(
+//            authActivityStarterHost,
+//            confirmStripeIntentParams,
+//            ApiRequest.Options(
+//                lazyPaymentConfig.get().publishableKey,
+//                lazyPaymentConfig.get().stripeAccountId
+//            )
+//        )
+    }
+
+    fun onPaymentResult(paymentResult: PaymentResult) {
+        Log.d("TEST", "result: $paymentResult")
     }
 
     fun registerFromActivity(activityResultCaller: ActivityResultCaller) {
-        paymentController.registerLaunchersWithActivityResultCaller(
-            activityResultCaller,
-            ::onPaymentFlowResult
+        paymentLauncher = paymentLauncherFactory.create(
+            { lazyPaymentConfig.get().publishableKey },
+            { lazyPaymentConfig.get().stripeAccountId },
+            activityResultCaller.registerForActivityResult(
+                PaymentLauncherContract(),
+                ::onPaymentResult
+            )
         )
+
+
+//        paymentController.registerLaunchersWithActivityResultCaller(
+//            activityResultCaller,
+//            ::onPaymentFlowResult
+//        )
     }
 
     fun unregisterFromActivity() {
+        paymentLauncher = null
         paymentController.unregisterLaunchers()
     }
 
