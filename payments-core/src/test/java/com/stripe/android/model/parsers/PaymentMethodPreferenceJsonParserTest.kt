@@ -13,8 +13,8 @@ class PaymentMethodPreferenceJsonParserTest {
         val orderedPaymentMethods =
             ModelJsonParser.jsonArrayToList(
                 PaymentMethodPreferenceFixtures.EXPANDED_PAYMENT_INTENT_JSON
-                    .optJSONObject("payment_method_preference")
-                    ?.optJSONArray("ordered_payment_method_types")
+                    .optJSONObject("payment_method_preference")!!
+                    .optJSONArray("ordered_payment_method_types")
             )
 
         Truth.assertThat(paymentIntent?.id)
@@ -32,8 +32,8 @@ class PaymentMethodPreferenceJsonParserTest {
         val orderedPaymentMethods =
             ModelJsonParser.jsonArrayToList(
                 PaymentMethodPreferenceFixtures.EXPANDED_SETUP_INTENT_JSON
-                    .optJSONObject("payment_method_preference")
-                    ?.optJSONArray("ordered_payment_method_types")
+                    .optJSONObject("payment_method_preference")!!
+                    .optJSONArray("ordered_payment_method_types")
             )
 
         Truth.assertThat(setupIntent?.id)
