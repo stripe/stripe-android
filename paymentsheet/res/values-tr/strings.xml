@@ -1,21 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
-  <!-- Caption for City field on address form -->
-  <string name="address_label_city">Şehir</string>
-  <!-- Caption for Country field on address form -->
-  <string name="address_label_country">Ülke</string>
-  <!-- Caption for County field on address form (only countries that use county, like United Kingdom) -->
-  <string name="address_label_county">Ülke</string>
-  <!-- Caption for Name field on address form -->
-  <string name="address_label_name">Ad</string>
-  <!-- Short string for postal code (text used in non-US countries) -->
-  <string name="address_label_postal_code">Posta kodu</string>
-  <!-- Caption for Province field on address form (only countries that use province, like Canada) -->
-  <string name="address_label_province">İlçe</string>
-  <!-- Caption for State field on address form (only countries that use state , like United States) -->
-  <string name="address_label_state">Eyalet</string>
-  <!-- Label for input requesting zip code, used for US based addreses -->
-  <string name="address_label_zip_code">Posta kodu</string>
+  <!-- Billing address section title for card form entry. -->
+  <string name="billing_details">Fatura adresi</string>
+  <!-- Button title to cancel action in an alert -->
+  <string name="cancel">İptal</string>
+  <!-- Done button title -->
+  <string name="done">Tamam</string>
+  <!-- Button title to enter editing mode -->
+  <string name="edit">Düzenle</string>
   <!-- Caption for Email field on address form -->
   <string name="email">E-posta</string>
   <!-- Error message when email is invalid -->
@@ -28,16 +20,53 @@
   <string name="iban_invalid_country">Girdiğiniz IBAN geçersiz. \"%s\" desteklenen bir ülke kodu değil.</string>
   <!-- An error message displayed when the IBAN does not start with a two-letter country code. -->
   <string name="iban_invalid_start">IBAN numaranız iki harfli bir ülke koduyla başlamalıdır.</string>
+  <!-- Button title for confirmation alert to remove a saved payment method
+   Text for remove button -->
+  <string name="remove">Kaldır</string>
+  <!-- Generic error message shown when payment cannot be processed. -->
+  <string name="stripe_failure_connection_error">Ödeme sağlayıcımıza bağlanmayla ilgili sorun yaşıyoruz. Lütfen internet bağlantınızı kontrol edip tekrar deneyin.</string>
+  <!-- When an internal error is reported when a google pay payment is started. -->
+  <string name="stripe_google_pay_error_internal">Dâhili bir hata oluştu.</string>
+  <string name="stripe_paymentsheet_add_button_label">Ekle</string>
+  <!-- Text for a button that, when tapped, displays another screen where the customer can add payment method details -->
+  <string name="stripe_paymentsheet_add_payment_method_button_label">+ Ekle</string>
+  <!-- Card details entry form header title -->
+  <string name="stripe_paymentsheet_add_payment_method_card_information">Kart bilgileri</string>
+  <!-- Country selector and postal code entry form header title -->
+  <string name="stripe_paymentsheet_add_payment_method_country_or_region">Ülke veya bölge</string>
+  <!-- Title shown above a form where the customer can enter payment information like credit card details, email, billing address, etc. -->
+  <string name="stripe_paymentsheet_add_payment_method_title">Ödeme bilgilerinizi ekleyin</string>
+  <!-- Text for back button -->
+  <string name="stripe_paymentsheet_back">Geri</string>
+  <string name="stripe_paymentsheet_close">Kapat</string>
   <!-- The label of a text field that is optional. For example, 'Email (optional)' or 'Name (optional) -->
   <string name="stripe_paymentsheet_form_label_optional">%s (isteğe bağlı)</string>
   <!-- iDEAL bank section title for iDEAL form entry. -->
   <string name="stripe_paymentsheet_ideal_bank">iDEAL Bank</string>
+  <!-- Title of a section containing multiple payment methods that can selected and will collect the payment information from the user. -->
+  <string name="stripe_paymentsheet_or_pay_using">Veya şununla ödeyin:</string>
+  <!-- Title of a section containing a card form that will collect the payment information from the user. -->
+  <string name="stripe_paymentsheet_or_pay_with_card">Ya da kartla ödeyin</string>
+  <!-- Label of a button that initiates payment when tapped -->
+  <string name="stripe_paymentsheet_pay_button_amount">%s öde</string>
+  <!-- Label for a button that starts processing the payment. -->
+  <string name="stripe_paymentsheet_pay_button_label">Öde</string>
   <!-- Title for credit card number entry field -->
   <string name="stripe_paymentsheet_payment_method_card">Kart</string>
   <!-- Payment method brand name -->
   <string name="stripe_paymentsheet_payment_method_sepa_debit">SEPA Bankamatik</string>
+  <!-- Label of a button that, when tapped, initiates payment, becomes disabled, and displays this text -->
+  <string name="stripe_paymentsheet_primary_button_processing">İşleniyor...</string>
+  <!-- Content for alert popup prompting to confirm removing saved payment method. -->
+  <string name="stripe_paymentsheet_remove_pm">%s yöntemini kaldırın</string>
   <!-- The label of a switch indicating whether to save the payment method for future payments. -->
   <string name="stripe_paymentsheet_save_for_future_payments">Gelecekteki ödemeler için kaydedilsin</string>
+  <!-- The label of a switch indicating whether to save the user&apos;s card for future payments to this merchant -->
+  <string name="stripe_paymentsheet_save_this_card_with_merchant_name">Bu kartı gelecekteki %s ödemeleri için kaydedin</string>
+  <!-- Title shown above a carousel containing the customer&apos;s payment methods -->
+  <string name="stripe_paymentsheet_select_payment_method">Ödeme yönteminizi seçin</string>
   <!-- SEPA mandate text -->
   <string name="stripe_paymentsheet_sepa_mandate">Ödeme bilgilerinizi sağlayarak ve bu ödemeyi onaylayarak, (A) %s ve ödeme hizmeti sağlayıcımız Stripe\'a hesabınızdan ödeme tahsilatı yapması için bankanıza talimatlar göndermesi ve (B) bankanıza bu talimatlara uygun olarak hesabınızdan ödeme tahsilatı yapması için yetki verirsiniz. Haklarınızın bir parçası olarak, bankanızla yaptığınız sözleşmenin hüküm ve koşulları uyarınca bankanızdan geri ödeme alma hakkına sahipsiniz. Geri ödeme, hesabınızdan ödeme tahsilatı yapıldığı tarihten itibaren 8 hafta içinde talep edilmelidir. Haklarınız, bankanızdan alabileceğiniz bir hesap özetinde açıklanmaktadır. Tahakkuk etmeden 2 gün öncesine kadar gelecekteki ödeme tahsilatları için bildirim almayı da kabul edersiniz.</string>
+  <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->
+  <string name="stripe_paymentsheet_setup_button_label">Ayarla</string>
 </resources>

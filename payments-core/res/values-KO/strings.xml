@@ -7,10 +7,10 @@
   <string name="acc_label_expiry_date">만료 날짜</string>
   <string name="acc_label_expiry_date_node">%s, 만료 날짜</string>
   <!-- Caption for Zip Code field on address form (only shown when country is United States only) -->
-    <!-- Short string for zip code (United States only) Please keep to 5 characters or less if possible. -->
+  <string name="acc_label_zip">우편번호</string>
+  <!-- Short string for zip code (United States only) Please keep to 5 characters or less if possible. -->
   <string name="acc_label_zip_short">우편번호</string>
-  <!-- Text informing user they should add a debit or credit card. Shown when there are no existing payment methods in the application -->
-    <!-- Message displayed when a payment method is removed, stating its name. -->
+  <!-- Message displayed when a payment method is removed, stating its name. -->
   <string name="added">%s 추가됨</string>
   <!-- Error text indicating that city is required, used for all locations -->
   <string name="address_city_required">도시를 입력하십시오</string>
@@ -30,28 +30,44 @@
   <string name="address_label_address_optional">주소(선택 사항)</string>
   <!-- Label for input requesting apartment number (address line 2) where input is optional, used for US based addresses -->
   <string name="address_label_apt_optional">아파트(선택 사항)</string>
+  <!-- Caption for City field on address form -->
+  <string name="address_label_city">시</string>
   <!-- Label for input requesting city where input is optional, used for all locations -->
   <string name="address_label_city_optional">도시(선택 사항)</string>
+  <!-- Caption for Country field on address form -->
+  <string name="address_label_country">국가</string>
+  <!-- Caption for County field on address form (only countries that use county, like United Kingdom) -->
+  <string name="address_label_county">구/군</string>
   <!-- Label for input requesting county where input is optional , used for UK based addresses -->
   <string name="address_label_county_optional">구/군(선택 사항)</string>
+  <!-- Caption for Name field on address form -->
+  <string name="address_label_name">이름</string>
   <!-- Label for input requesting phone number, used for all locations -->
   <string name="address_label_phone_number">전화번호</string>
   <!-- Label for input requesting phone number where input is optional, used for all locations -->
   <string name="address_label_phone_number_optional">전화번호(선택 사항)</string>
+  <!-- Short string for postal code (text used in non-US countries) -->
+  <string name="address_label_postal_code">우편번호</string>
   <!-- Label for input requesting postal code where input is optional, used for Canada based addresses -->
   <string name="address_label_postal_code_optional">우편번호(선택 사항)</string>
   <!-- Label for input requesting postcode, used for UK based addresses -->
   <string name="address_label_postcode">우편번호</string>
   <!-- Label for input requesting postcode where input is optional, used for UK based addresses -->
   <string name="address_label_postcode_optional">우편번호(선택 사항)</string>
+  <!-- Caption for Province field on address form (only countries that use province, like Canada) -->
+  <string name="address_label_province">도</string>
   <!-- Label for input requesting province where province is optional, used for canadian addresses -->
   <string name="address_label_province_optional">도(선택 사항)</string>
   <!-- Label for input requesting the region, used for international addresses -->
   <string name="address_label_region_generic">주/도/지역</string>
   <!-- Label for input requesting the region where input is optional, used for international addresses -->
   <string name="address_label_region_generic_optional">주 / 도 / 지역(선택 사항)</string>
+  <!-- Caption for State field on address form (only countries that use state , like United States) -->
+  <string name="address_label_state">주</string>
   <!-- Label for input requesting state where input is optional, used for US based addresses -->
   <string name="address_label_state_optional">주(선택 사항)</string>
+  <!-- Label for input requesting zip code, used for US based addreses -->
+  <string name="address_label_zip_code">우편번호</string>
   <!-- Label for input requesting zip code where input is optional, used for US based addresses -->
   <string name="address_label_zip_code_optional">우편번호(선택 사항)</string>
   <!-- Label for input requesting postal code, used for international addresses -->
@@ -62,8 +78,8 @@
   <string name="address_name_required">이름을 입력하십시오</string>
   <!-- Error text indicating that phone number is required, used for all addresses -->
   <string name="address_phone_number_required">전화번호를 입력하십시오</string>
-  <!-- Error text indicating postal code is invalid, used for Canada addresses -->
-  <string name="address_postal_code_invalid">우편번호가 유효하지 않습니다</string>
+  <!-- Error message for when postal code in form is invalid -->
+  <string name="address_postal_code_invalid">우편번호가 유효하지 않습니다.</string>
   <!-- Error text indicating postcode is invalid, used for UK addresses -->
   <string name="address_postcode_invalid">우편번호가 유효하지 않습니다</string>
   <!-- Error text indicating that province is required, used for Canada addresses -->
@@ -72,8 +88,7 @@
   <string name="address_region_generic_required">주/지방/지역을 입력하십시오</string>
   <!-- Error text indicating that address is required, used for all locations -->
   <string name="address_required">주소를 입력하십시오</string>
-  <!-- Title for shipping address entry section -->
-    <!-- Error text indicating that state is required, used for US addresses -->
+  <!-- Error text indicating that state is required, used for US addresses -->
   <string name="address_state_required">주를 입력하십시오</string>
   <!-- Error text indicating zip code is invalid, used for US addresses -->
   <string name="address_zip_invalid">우편번호가 유효하지 않습니다.</string>
@@ -128,36 +143,20 @@
   <string name="invalid_shipping_information">잘못된 배송 주소</string>
   <!-- Error message for when postal code in form is incomplete -->
   <string name="invalid_zip">우편번호가 불완전합니다.</string>
-  <!-- Text informing user there are no existing payment methods in the application -->
-    <string name="payment_method_add_new_card">새 카드 추가…</string>
+  <string name="payment_method_add_new_card">새 카드 추가…</string>
   <string name="payment_method_add_new_fpx">은행 계좌 선택(FPX)…</string>
   <!-- Label for free shipping method -->
   <string name="price_free">무료</string>
   <!-- Message displayed when a payment method is removed, stating its name. -->
   <string name="removed">%s 제거됨</string>
   <string name="secure_checkout">보안 체크 아웃</string>
-  <!-- Generic error message shown when payment cannot be processed. -->
-    <!-- Error when 3DS2 authentication failed (e.g. customer entered the wrong code) -->
+  <!-- Error when 3DS2 authentication failed (e.g. customer entered the wrong code) -->
   <string name="stripe_failure_reason_authentication">결제 수단을 인증할 수 없습니다. 다른 결제 수단을 선택하고 다시 시도하십시오.</string>
   <!-- Error when 3DS2 authentication timed out. -->
   <string name="stripe_failure_reason_timed_out">결제 수단 인증 시간이 초과되었습니다. 다시 시도하십시오.</string>
-  <!-- When an internal error is reported when a google pay payment is started. -->
-    <!-- Text for a button that, when tapped, displays another screen where the customer can add payment method details -->
-    <!-- Card details entry form header title -->
-    <!-- Country selector and postal code entry form header title -->
-    <!-- Title shown above a form where the customer can enter payment information like credit card details, email, billing address, etc. -->
-    <!-- Text for back button -->
-    <!-- label for text field to enter card expiry -->
+  <!-- label for text field to enter card expiry -->
   <string name="stripe_paymentsheet_expiration_date_hint">MM/YY</string>
-  <!-- Title of a section containing multiple payment methods that can selected and will collect the payment information from the user. -->
-    <!-- Title of a section containing a card form that will collect the payment information from the user. -->
-    <!-- Label of a button that initiates payment when tapped -->
-    <!-- Label for a button that starts processing the payment. -->
-    <!-- Label of a button that, when tapped, initiates payment, becomes disabled, and displays this text -->
-    <!-- The label of a switch indicating whether to save the user&apos;s card for future payments to this merchant -->
-    <!-- Title shown above a carousel containing the customer&apos;s payment methods -->
-    <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->
-    <!-- When there are multiple browsers and web authentication is required, this will show in a window asking which browser they want to use to "Verify your payment" -->
+  <!-- When there are multiple browsers and web authentication is required, this will show in a window asking which browser they want to use to "Verify your payment" -->
   <string name="stripe_verify_your_payment">결제 확인</string>
   <string name="title_add_a_card">카드 추가</string>
   <!-- Screen title telling users they should add an address -->
