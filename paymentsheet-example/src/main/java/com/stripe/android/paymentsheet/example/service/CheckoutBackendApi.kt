@@ -10,7 +10,8 @@ import retrofit2.http.POST
 data class CheckoutRequest(
     val customer: String,
     val currency: String,
-    val mode: String
+    val mode: String,
+    val set_shipping_address: Boolean
 )
 
 @Serializable

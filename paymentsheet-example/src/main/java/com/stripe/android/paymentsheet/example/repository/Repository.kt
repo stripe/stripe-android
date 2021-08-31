@@ -24,6 +24,7 @@ internal interface Repository {
     suspend fun checkout(
         customer: CheckoutCustomer,
         currency: CheckoutCurrency,
-        mode: CheckoutMode
+        mode: CheckoutMode,
+        setShippingAddress: Boolean
     ): CheckoutResponse
 }

@@ -37,7 +37,8 @@ internal class PaymentSheetPlaygroundViewModel(
     suspend fun prepareCheckout(
         customer: Repository.CheckoutCustomer,
         currency: Repository.CheckoutCurrency,
-        mode: Repository.CheckoutMode
+        mode: Repository.CheckoutMode,
+        setShippingAddress: Boolean = false
     ) {
         customerConfig.value = null
         clientSecret.value = null
@@ -45,7 +46,7 @@ internal class PaymentSheetPlaygroundViewModel(
         inProgress.postValue(true)
 
         runCatching {
-            repository.checkout(customer, currency, mode)
+            repository.checkout(customer, currency, mode, setShippingAddress)
         }.fold(
             onSuccess = {
                 checkoutMode = mode
@@ -75,6 +76,8 @@ internal class PaymentSheetPlaygroundViewModel(
     internal class Factory(
         private val application: Application
     ) : ViewModelProvider.Factory {
+
+        @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
             val checkoutBackendApi = BackendApiFactory(application).createCheckout()
 
