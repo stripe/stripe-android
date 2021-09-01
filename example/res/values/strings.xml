@@ -13,6 +13,7 @@
     <string name="customer_payment_data_example">Customer Payment Selection</string>
     <string name="launch_customer_session">Customer Session</string>
     <string name="googlepaylauncher_example">Confirm payment with GooglePayLauncher</string>
+    <string name="googlepayplayground_example">Test GooglePayLauncher Configurations</string>
     <string name="googlepaypaymentmethodlauncher_example">Create payment method with GooglePayPaymentMethodLauncher</string>
     <string name="launch_payment_session">Payment Session</string>
     <string name="launch_payment_session_from_fragment">Fragment Examples</string>
@@ -96,5 +97,24 @@
     <!-- <UPI> -->
     <string name="vpa_layout_hint">Virtual Payment Address (VPA)</string>
     <string name="vpa_input_hint">something@stripeupi</string>
+    <string name="google_pay_environment_test">Test</string>
+    <string name="google_pay_environment_production">Production *charges apply</string>
+    <string name="google_pay_environment">Environment</string>
+    <string name="google_pay_billing">Billing</string>
+    <string name="google_pay_billing_min">Min</string>
+    <string name="google_pay_billing_full">Full</string>
+    <string name="google_pay_existing_payment_method">Existing Payment Method</string>
+    <string name="google_pay_existing_payment_method_true">True</string>
+    <string name="google_pay_existing_payment_method_false">False</string>
+    <string name="google_pay_phone_required">Phone Required</string>
+    <string name="google_pay_phone_required_true">True</string>
+    <string name="google_pay_phone_required_false">False</string>
+    <string name="google_pay_billing_required">Billing Required</string>
+    <string name="google_pay_billing_required_true">True</string>
+    <string name="google_pay_billing_required_false">False</string>
+    <string name="google_pay_merchant_name">Merchant Name</string>
+    <string name="google_pay_merchant_name_default">Widget Store</string>
+    <string name="google_pay_merchant_country_code">Merchant Country Code</string>
+    <string name="google_pay_merchant_country_code_default">US</string>
 
 </resources>

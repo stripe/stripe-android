@@ -68,6 +68,11 @@ class LauncherActivity : AppCompatActivity() {
                 activity.getString(R.string.googlepaylauncher_example),
                 GooglePayLauncherIntegrationActivity::class.java
             ),
+            // This is for internal use so as not to confuse the user.
+//            Item(
+//                activity.getString(R.string.googlepayplayground_example),
+//                GooglePayLauncherPlaygroundActivity::class.java
+//            ),
             Item(
                 activity.getString(R.string.googlepaypaymentmethodlauncher_example),
                 GooglePayPaymentMethodLauncherIntegrationActivity::class.java
