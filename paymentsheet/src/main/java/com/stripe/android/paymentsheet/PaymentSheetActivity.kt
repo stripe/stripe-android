@@ -145,10 +145,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
             val confirmParams = event.getContentIfNotHandled()
             if (confirmParams != null) {
                 lifecycleScope.launch {
-                    viewModel.confirmStripeIntent(
-                        AuthActivityStarterHost.create(this@PaymentSheetActivity),
-                        confirmParams
-                    )
+                    viewModel.confirmStripeIntent(confirmParams)
                 }
             }
         }
