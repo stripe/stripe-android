@@ -25,7 +25,6 @@ class AnalyticsRequestFactory @VisibleForTesting internal constructor(
     private val defaultProductUsageTokens: Set<String> = emptySet()
 ) {
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    @VisibleForTesting
     constructor(
         context: Context,
         publishableKey: String,
