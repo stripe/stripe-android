@@ -27,7 +27,7 @@ internal class PaymentSheetViewModel(
 
             val checkoutResponse = runCatching {
                 repository.checkout(
-                    customer, Repository.CheckoutCurrency.USD, mode
+                    customer, Repository.CheckoutCurrency.USD, mode, false
                 )
             }
 
@@ -47,6 +47,8 @@ internal class PaymentSheetViewModel(
     internal class Factory(
         private val application: Application
     ) : ViewModelProvider.Factory {
+
+        @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
             val checkoutBackendApi = BackendApiFactory(application).createCheckout()
 
