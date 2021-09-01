@@ -1,6 +1,10 @@
 package com.stripe.android.paymentsheet.example.service
 
 import android.content.Context
+import androidx.test.espresso.Espresso
+import androidx.test.espresso.IdlingRegistry
+import androidx.test.espresso.IdlingResource
+import com.jakewharton.espresso.OkHttp3IdlingResource
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import com.stripe.android.paymentsheet.example.Settings
 import kotlinx.serialization.ExperimentalSerializationApi

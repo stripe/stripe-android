@@ -3,17 +3,19 @@ package com.stripe.android.paymentsheet.ui
 import android.content.Context
 import android.content.res.ColorStateList
 import android.util.AttributeSet
+import android.util.Log
 import android.view.LayoutInflater
 import android.widget.FrameLayout
 import androidx.core.content.withStyledAttributes
 import androidx.core.view.isVisible
+import androidx.test.espresso.idling.CountingIdlingResource
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.databinding.PrimaryButtonBinding
 
 /**
  * The primary call-to-action for a payment sheet screen.
  */
-internal class PrimaryButton @JvmOverloads constructor(
+class PrimaryButton @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0
@@ -102,20 +104,26 @@ internal class PrimaryButton @JvmOverloads constructor(
         super.setEnabled(enabled)
         viewBinding.lockIcon.isVisible = enabled
         updateAlpha()
+
     }
 
-    fun updateState(state: State?) {
+    internal fun updateState(state: State?) {
         this.state = state
         updateAlpha()
 
         when (state) {
             is State.Ready -> {
+                Log.e("STRIPE", "Ready (processing)")
                 onReadyState()
             }
             State.StartProcessing -> {
+                buyButtonIdleResource.increment()
+                Log.e("STRIPE", "Start processing")
                 onStartProcessing()
             }
             is State.FinishProcessing -> {
+                buyButtonIdleResource.decrement()
+                Log.e("STRIPE", "Finish processing")
                 onFinishProcessing(state.onComplete)
             }
         }
@@ -137,4 +145,9 @@ internal class PrimaryButton @JvmOverloads constructor(
         object StartProcessing : State()
         data class FinishProcessing(val onComplete: () -> Unit) : State()
     }
+
+    companion object {
+        val buyButtonIdleResource = CountingIdlingResource("primary_button")
+    }
+
 }

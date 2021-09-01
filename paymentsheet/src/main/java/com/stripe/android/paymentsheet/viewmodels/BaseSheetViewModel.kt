@@ -207,7 +207,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
                 // AfterpayClearpay requires a shipping address, filter it out if not provided
                 it == SupportedPaymentMethod.AfterpayClearpay &&
                     (stripeIntent as? PaymentIntent)?.shipping == null
-            }.filter { it == SupportedPaymentMethod.Card }
+            }//.filter { it == SupportedPaymentMethod.Card }
         }
 
         return emptyList()

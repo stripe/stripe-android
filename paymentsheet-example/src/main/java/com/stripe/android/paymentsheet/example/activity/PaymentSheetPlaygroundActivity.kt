@@ -1,11 +1,13 @@
 package com.stripe.android.paymentsheet.example.activity
 
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isInvisible
 import androidx.lifecycle.lifecycleScope
+import androidx.test.espresso.idling.CountingIdlingResource
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetResult
 import com.stripe.android.paymentsheet.example.R
@@ -15,12 +17,12 @@ import com.stripe.android.paymentsheet.example.viewmodel.PaymentSheetPlaygroundV
 import com.stripe.android.paymentsheet.model.PaymentOption
 import kotlinx.coroutines.launch
 
-internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
+internal open class PaymentSheetPlaygroundActivity : AppCompatActivity() {
     private val viewBinding by lazy {
         ActivityPaymentSheetPlaygroundBinding.inflate(layoutInflater)
     }
 
-    private val viewModel: PaymentSheetPlaygroundViewModel by viewModels {
+    val viewModel: PaymentSheetPlaygroundViewModel by viewModels {
         PaymentSheetPlaygroundViewModel.Factory(
             application
         )
@@ -95,11 +97,22 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
         }
 
         viewModel.status.observe(this) {
+            viewBinding.result.text = it
+            Log.e("STRIPE", viewBinding.result.text.toString())
+//            paymentSheetResponse.decrement()
             Toast.makeText(this, it, Toast.LENGTH_LONG).show()
         }
 
         viewModel.inProgress.observe(this) {
             viewBinding.progressBar.isInvisible = !it
+
+            if (it) {
+                singleStepUIIdlingResource.increment()
+                multiStepUIIdlingResource.increment()
+            } else {
+                singleStepUIIdlingResource.decrement()
+                multiStepUIIdlingResource.decrement()
+            }
         }
 
         viewModel.readyToCheckout.observe(this) { isReady ->
@@ -204,15 +217,22 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
         }
     }
 
-    private fun onPaymentSheetResult(paymentResult: PaymentSheetResult) {
+    internal open fun onPaymentSheetResult(paymentResult: PaymentSheetResult) {
         if (paymentResult !is PaymentSheetResult.Canceled) {
             disableViews()
         }
 
-        viewModel.status.value = paymentResult.toString()
+        viewModel.status.value = when (paymentResult) {
+            PaymentSheetResult.Canceled -> "Cancelled"
+            PaymentSheetResult.Completed -> "Completed"
+            is PaymentSheetResult.Failed -> paymentResult.error.toString()
+        }
     }
 
     companion object {
         private const val merchantName = "Example, Inc."
+        val singleStepUIIdlingResource = CountingIdlingResource("singleStepUI")
+        val multiStepUIIdlingResource = CountingIdlingResource("multiStepUI")
+//        val paymentSheetResponse = CountingIdlingResource("response")
     }
 }

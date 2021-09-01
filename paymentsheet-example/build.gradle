@@ -46,10 +46,49 @@ dependencies {
     implementation "androidx.lifecycle:lifecycle-viewmodel-compose:1.0.0-alpha07"
     // Integration with observables
     implementation "androidx.compose.runtime:runtime-livedata:$composeVersion"
+    implementation 'androidx.appcompat:appcompat:1.3.1'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.0'
 
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'
     androidTestImplementation "androidx.test.espresso:espresso-core:$espressoVersion"
+
+// Copied from web
+    // Core library
+    androidTestImplementation 'androidx.test:core:1.4.0'
+
+    // AndroidJUnitRunner and JUnit Rules
+    androidTestImplementation 'androidx.test:runner:1.4.0'
+    androidTestImplementation 'androidx.test:rules:1.4.0'
+
+    // Assertions
+    androidTestImplementation 'androidx.test.ext:junit:1.1.3'
+    androidTestImplementation 'androidx.test.ext:truth:1.4.0'
+    androidTestImplementation 'com.google.truth:truth:1.0.1'
+
+    // Espresso dependencies
+    implementation 'androidx.test.espresso:espresso-core:3.4.0'
+    implementation 'androidx.test.espresso:espresso-contrib:3.4.0'
+    implementation 'androidx.test.espresso:espresso-intents:3.4.0'
+    implementation 'androidx.test.espresso:espresso-accessibility:3.4.0'
+    implementation 'androidx.test.espresso:espresso-web:3.4.0'
+    implementation 'androidx.test.espresso.idling:idling-concurrent:3.4.0'
+
+    // The following Espresso dependency can be either "implementation"
+    // or "androidTestImplementation", depending on whether you want the
+    // dependency to appear on your APK's compile classpath or the test APK
+    // classpath.
+    implementation 'androidx.test.espresso:espresso-idling-resource:3.4.0'
+
+    implementation 'com.jakewharton.espresso:okhttp3-idling-resource:1.0.0'
+
+// Test rules and transitive dependencies:
+    androidTestImplementation("androidx.compose.ui:ui-test-junit4:$composeVersion")
+// Needed for createComposeRule, but not createAndroidComposeRule:
+    debugImplementation("androidx.compose.ui:ui-test-manifest:$composeVersion")
+    androidTestImplementation "com.android.support.test.espresso:espresso-intents:3.0.2"
+
+
 }
 
 android {
@@ -90,5 +129,10 @@ android {
     }
     composeOptions {
         kotlinCompilerExtensionVersion "$composeVersion"
+    }
+
+    packagingOptions {
+        exclude 'META-INF/AL2.0'
+        exclude 'META-INF/LGPL2.1'
     }
 }

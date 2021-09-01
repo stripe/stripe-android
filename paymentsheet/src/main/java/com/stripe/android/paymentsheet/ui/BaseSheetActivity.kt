@@ -18,9 +18,9 @@ import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.view.KeyboardController
 
-internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
-    abstract val viewModel: BaseSheetViewModel<*>
-    abstract val bottomSheetController: BottomSheetController
+abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
+    internal abstract val viewModel: BaseSheetViewModel<*>
+    internal abstract val bottomSheetController: BottomSheetController
 
     abstract val rootView: ViewGroup
     abstract val bottomSheet: ViewGroup

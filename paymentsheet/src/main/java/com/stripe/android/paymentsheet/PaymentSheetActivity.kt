@@ -15,6 +15,7 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.commit
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import androidx.test.espresso.idling.CountingIdlingResource
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.bottomsheet.BottomSheetBehavior
@@ -30,7 +31,7 @@ import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.view.AuthActivityStarterHost
 import kotlinx.coroutines.launch
 
-internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
+class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
     @VisibleForTesting
     internal var viewModelFactory: ViewModelProvider.Factory =
         PaymentSheetViewModel.Factory(
@@ -132,6 +133,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
 
         viewModel.fragmentConfig.observe(this) { config ->
             if (config != null) {
+//                transitionFragmentResource.decrement()
                 val target = if (config.paymentMethods.isEmpty()) {
                     PaymentSheetViewModel.TransitionTarget.AddPaymentMethodSheet(config)
                 } else {
@@ -301,8 +303,9 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
         )
     }
 
-    internal companion object {
+    companion object {
         internal const val EXTRA_FRAGMENT_CONFIG = BaseSheetActivity.EXTRA_FRAGMENT_CONFIG
         internal const val EXTRA_STARTER_ARGS = BaseSheetActivity.EXTRA_STARTER_ARGS
+        val transitionFragmentResource = CountingIdlingResource("transition")
     }
 }

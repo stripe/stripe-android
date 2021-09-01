@@ -217,8 +217,8 @@ internal class PaymentOptionsAdapter(
         }
     }
 
-    private class SavedPaymentMethodViewHolder(
-        private val binding: LayoutPaymentsheetPaymentMethodItemBinding,
+    internal class SavedPaymentMethodViewHolder(
+        internal val binding: LayoutPaymentsheetPaymentMethodItemBinding,
         private val onRemoveListener: (Int) -> Unit
     ) : PaymentOptionViewHolder(binding.root) {
         constructor(parent: ViewGroup, onRemoveListener: (Int) -> Unit) : this(

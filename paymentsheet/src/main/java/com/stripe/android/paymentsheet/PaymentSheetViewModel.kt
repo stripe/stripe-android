@@ -197,6 +197,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
      * continues through validation and fetching the saved payment methods for the customer.
      */
     fun fetchStripeIntent() {
+        PaymentSheetActivity.transitionFragmentResource.increment()
         viewModelScope.launch {
             runCatching {
                 stripeIntentRepository.get(args.clientSecret)
@@ -256,6 +257,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                 onSuccess = {
                     _paymentMethods.value = it
                     setStripeIntent(stripeIntent)
+                    PaymentSheetActivity.transitionFragmentResource.decrement()
                     resetViewState()
                 },
                 onFailure = ::onFatal
