@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet.elements
 
 import com.stripe.android.paymentsheet.forms.FormFieldEntry
-import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
@@ -15,8 +14,6 @@ internal sealed class SectionSingleFieldElement(
      * Some fields in the section will have a single input controller.
      */
     abstract val controller: InputController
-
-    abstract fun setRawValue(formFragmentArguments: FormFragmentArguments)
 
     /**
      * This will return a controller that abides by the SectionFieldErrorController interface.

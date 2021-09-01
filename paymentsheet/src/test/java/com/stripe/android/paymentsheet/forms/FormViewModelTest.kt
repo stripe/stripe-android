@@ -19,6 +19,7 @@ import com.stripe.android.paymentsheet.elements.LayoutSpec
 import com.stripe.android.paymentsheet.elements.ResourceRepository
 import com.stripe.android.paymentsheet.elements.CountrySpec
 import com.stripe.android.paymentsheet.elements.EmailSpec
+import com.stripe.android.paymentsheet.elements.RowElement
 import com.stripe.android.paymentsheet.elements.SaveForFutureUseSpec
 import com.stripe.android.paymentsheet.elements.SectionSpec
 import com.stripe.android.paymentsheet.elements.SimpleTextSpec.Companion.NAME
@@ -485,15 +486,24 @@ internal class FormViewModelTest {
         private suspend fun getAddressSectionTextControllerWithLabel(
             formViewModel: FormViewModel,
             @StringRes label: Int
-        ) =
-            formViewModel.elements
+        ): TextFieldController? {
+            val addressElementFields = formViewModel.elements
                 .filterIsInstance<SectionElement>()
                 .flatMap { it.fields }
                 .filterIsInstance<AddressElement>()
                 .firstOrNull()
                 ?.fields
                 ?.first()
+            return addressElementFields
+                ?.filterIsInstance<SectionSingleFieldElement>()
                 ?.map { (it.controller as? TextFieldController) }
                 ?.firstOrNull { it?.label == label }
+                ?: addressElementFields
+                    ?.filterIsInstance<RowElement>()
+                    ?.map { it.fields }
+                    ?.flatten()
+                    ?.map { (it.controller as? TextFieldController) }
+                    ?.firstOrNull { it?.label == label }
+        }
     }
 }

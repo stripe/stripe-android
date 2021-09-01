@@ -52,9 +52,9 @@ internal val sepaDebit = FormSpec(
             sepaDebitNameSection,
             sepaDebitEmailSection,
             sepaDebitIbanSection,
+            sepaBillingSection,
             SaveForFutureUseSpec(listOf(sepaDebitMandate)),
             sepaDebitMandate,
-            sepaBillingSection
         )
     ),
     sepaDebitParamKey
