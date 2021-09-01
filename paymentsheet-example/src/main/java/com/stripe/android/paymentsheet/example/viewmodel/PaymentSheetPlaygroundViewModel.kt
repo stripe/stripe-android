@@ -38,7 +38,7 @@ internal class PaymentSheetPlaygroundViewModel(
         customer: Repository.CheckoutCustomer,
         currency: Repository.CheckoutCurrency,
         mode: Repository.CheckoutMode,
-        setShippingAddress: Boolean = false
+        setShippingAddress: Boolean
     ) {
         customerConfig.value = null
         clientSecret.value = null
