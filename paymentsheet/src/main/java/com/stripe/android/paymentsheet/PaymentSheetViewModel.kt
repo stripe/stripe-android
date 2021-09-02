@@ -329,7 +329,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     fun onPaymentResult(paymentResult: PaymentResult) {
         viewModelScope.launch {
             runCatching {
-                stripeIntentRepository.get(args.clientSecret)
+                stripeIntentValidator.requireValid(stripeIntent.value!!)
             }.fold(
                 onSuccess = {
                     processPayment(it, paymentResult)
