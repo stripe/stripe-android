@@ -24,7 +24,6 @@ import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.payments.PaymentFlowFailureMessageFactory
 import com.stripe.android.payments.core.injection.IOContext
 import com.stripe.android.payments.paymentlauncher.PaymentLauncher
 import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
@@ -369,7 +368,10 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                 }.fold(
                     onSuccess = {
                         resetViewState(
-                            PaymentFlowFailureMessageFactory(getApplication()).create(stripeIntent)
+                            when (paymentResult) {
+                                is PaymentResult.Failed -> paymentResult.throwable.message
+                                else -> "" //indicates canceled payment
+                            }
                         )
                     },
                     onFailure = ::onFatal

@@ -1,30 +1,22 @@
 package com.stripe.android.payments
 
 import android.content.Context
-import androidx.annotation.RestrictTo
 import com.stripe.android.R
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class PaymentFlowFailureMessageFactory(
+internal class PaymentFlowFailureMessageFactory(
     private val context: Context
 ) {
     fun create(
         intent: StripeIntent,
         @StripeIntentResult.Outcome outcome: Int
-    ) = when (outcome) {
-        StripeIntentResult.Outcome.TIMEDOUT -> {
+    ) = when {
+        outcome == StripeIntentResult.Outcome.TIMEDOUT -> {
             context.resources.getString(R.string.stripe_failure_reason_timed_out)
         }
-        else -> create(intent)
-    }
-
-    fun create(
-        intent: StripeIntent,
-    ) = when {
         (intent.status == StripeIntent.Status.RequiresPaymentMethod) ||
             (intent.status == StripeIntent.Status.RequiresAction) -> {
             when (intent) {
