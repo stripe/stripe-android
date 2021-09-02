@@ -763,8 +763,7 @@ internal class PaymentSheetActivityTest {
                 @Assisted(STRIPE_ACCOUNT_ID) stripeAccountId: () -> String?,
                 hostActivityLauncher: ActivityResultLauncher<PaymentLauncherContract.Args>
             ): StripePaymentLauncher {
-                val stripePaymentLauncher = mock<StripePaymentLauncher>()
-                return stripePaymentLauncher
+                return mock()
             }
         }
 

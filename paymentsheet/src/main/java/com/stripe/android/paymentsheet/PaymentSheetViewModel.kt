@@ -151,7 +151,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             }
         }
 
-    @VisibleForTesting
     internal var paymentLauncher: PaymentLauncher? = null
 
     init {

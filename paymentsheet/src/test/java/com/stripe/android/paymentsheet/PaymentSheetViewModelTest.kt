@@ -382,6 +382,10 @@ internal class PaymentSheetViewModelTest {
     @Test
     fun `onPaymentResult() should update ViewState and save preferences`() =
         testDispatcher.runBlockingTest {
+            val viewModel = createViewModel(
+                stripeIntentRepository = StripeIntentRepository.Static(PAYMENT_INTENT),
+            )
+
             val selection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
             viewModel.updateSelection(selection)
 
@@ -419,9 +423,7 @@ internal class PaymentSheetViewModelTest {
     fun `onPaymentResult() should update ViewState and save new payment method`() =
         testDispatcher.runBlockingTest {
             val viewModel = createViewModel(
-                ARGS_CUSTOMER_WITH_GOOGLEPAY,
-                StripeIntentRepository.Static(PAYMENT_INTENT_WITH_PM),
-                FakeCustomerRepository(PAYMENT_METHODS)
+                stripeIntentRepository = StripeIntentRepository.Static(PAYMENT_INTENT_WITH_PM)
             )
 
             val selection = PaymentSelection.New.Card(
