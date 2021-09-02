@@ -25,11 +25,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.payments.PaymentFlowResultProcessor
-import com.stripe.android.payments.core.injection.PUBLISHABLE_KEY
-import com.stripe.android.payments.core.injection.STRIPE_ACCOUNT_ID
-import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
 import com.stripe.android.payments.paymentlauncher.PaymentResult
-import com.stripe.android.payments.paymentlauncher.StripePaymentLauncher
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
 import com.stripe.android.paymentsheet.PaymentSheetViewModel.CheckoutIdentifier
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -48,7 +44,6 @@ import com.stripe.android.utils.TestUtils.idleLooper
 import com.stripe.android.utils.TestUtils.viewModelFactoryFor
 import com.stripe.android.utils.injectableActivityScenario
 import com.stripe.android.view.ActivityScenarioFactory
-import dagger.assisted.Assisted
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -79,7 +74,7 @@ internal class PaymentSheetActivityTest {
     private val googlePayPaymentMethodLauncherFactory =
         createGooglePayPaymentMethodLauncherFactory()
     private val stripePaymentLauncherAssistedFactory =
-        stripePaymentLauncherAssistedFactory()
+        mock<StripePaymentLauncherAssistedFactory>()
 
     private val viewModel = createViewModel()
 
@@ -753,17 +748,6 @@ internal class PaymentSheetActivityTest {
                 val googlePayPaymentMethodLauncher = mock<GooglePayPaymentMethodLauncher>()
                 readyCallback.onReady(true)
                 return googlePayPaymentMethodLauncher
-            }
-        }
-
-    private fun stripePaymentLauncherAssistedFactory() =
-        object : StripePaymentLauncherAssistedFactory {
-            override fun create(
-                @Assisted(PUBLISHABLE_KEY) publishableKey: () -> String,
-                @Assisted(STRIPE_ACCOUNT_ID) stripeAccountId: () -> String?,
-                hostActivityLauncher: ActivityResultLauncher<PaymentLauncherContract.Args>
-            ): StripePaymentLauncher {
-                return mock()
             }
         }
 
