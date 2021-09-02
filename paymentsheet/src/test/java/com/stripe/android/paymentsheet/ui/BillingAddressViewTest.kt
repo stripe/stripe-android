@@ -73,7 +73,7 @@ class BillingAddressViewTest {
 
     @Test
     fun `changing selectedCountry to France should show postal code view`() {
-        setupPostalCode(FRANCE)
+        setupPostalCode(CountryCode.CA)
         assertThat(billingAddressView.postalCodeLayout.isVisible)
             .isTrue()
     }
@@ -200,7 +200,7 @@ class BillingAddressViewTest {
 
     @Test
     fun `address with unvalidated postal code country and null postal code should return null`() {
-        setupPostalCode(MEXICO, "    ")
+        setupPostalCode(CountryCode.GB)
         assertThat(billingAddressView.address.value)
             .isNull()
     }

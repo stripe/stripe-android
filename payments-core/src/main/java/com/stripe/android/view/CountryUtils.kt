@@ -16,6 +16,10 @@ object CountryUtils {
         "TV", "TZ", "UG", "VU", "YE", "ZA", "ZW"
     )
 
+    internal val CARD_POSTAL_CODE_COUNTRIES = setOf(
+        "US", "GB", "CA"
+    )
+
     private fun localizedCountries(currentLocale: Locale) =
         Locale.getISOCountries().map { code ->
             Country(
@@ -63,11 +67,11 @@ object CountryUtils {
     )
     @JvmSynthetic
     internal fun doesCountryUsePostalCode(countryCode: String): Boolean {
-        return !NO_POSTAL_CODE_COUNTRIES.contains(countryCode.uppercase())
+        return CARD_POSTAL_CODE_COUNTRIES.contains(countryCode.uppercase())
     }
 
     @JvmSynthetic
     fun doesCountryUsePostalCode(countryCode: CountryCode): Boolean {
-        return !NO_POSTAL_CODE_COUNTRIES.contains(countryCode.value)
+        return CARD_POSTAL_CODE_COUNTRIES.contains(countryCode.value)
     }
 }
