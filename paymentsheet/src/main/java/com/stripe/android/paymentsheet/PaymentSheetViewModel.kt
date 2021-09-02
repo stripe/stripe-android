@@ -370,7 +370,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                         resetViewState(
                             when (paymentResult) {
                                 is PaymentResult.Failed -> paymentResult.throwable.message
-                                else -> "" //indicates canceled payment
+                                else -> "" // indicates canceled payment
                             }
                         )
                     },
