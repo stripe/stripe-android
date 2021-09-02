@@ -6,6 +6,7 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.IntDef
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher.Result
 import com.stripe.android.model.PaymentMethod
@@ -69,7 +70,16 @@ open class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
         googlePayRepositoryFactory = {
             DefaultGooglePayRepository(
                 activity.application,
-                it
+                it,
+                GooglePayJsonFactory.BillingAddressParameters(
+                    isPhoneNumberRequired = config.billingAddressConfig.isPhoneNumberRequired,
+                    isRequired = config.billingAddressConfig.isRequired,
+                    format = when (config.billingAddressConfig.format) {
+                        BillingAddressConfig.Format.Min -> GooglePayJsonFactory.BillingAddressParameters.Format.Min
+                        BillingAddressConfig.Format.Full -> GooglePayJsonFactory.BillingAddressParameters.Format.Full
+                    },
+                ),
+                existingPaymentMethodRequired = config.existingPaymentMethodRequired
             )
         },
         AnalyticsRequestFactory(

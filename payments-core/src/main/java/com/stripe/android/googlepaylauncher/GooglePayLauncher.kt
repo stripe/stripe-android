@@ -75,7 +75,7 @@ class GooglePayLauncher internal constructor(
                         BillingAddressConfig.Format.Full -> GooglePayJsonFactory.BillingAddressParameters.Format.Full
                     } ,
                 ),
-                existingPaymentMethodRequired = config.existingPaymentMethodRequired,
+                existingPaymentMethodRequired = config.existingPaymentMethodRequired
             )
         },
         AnalyticsRequestFactory(
@@ -112,6 +112,7 @@ class GooglePayLauncher internal constructor(
             resultCallback.onResult(it)
         },
         googlePayRepositoryFactory = {
+            // TODO: why does this not pass the arguments?
             DefaultGooglePayRepository(
                 fragment.requireActivity().application,
                 it
