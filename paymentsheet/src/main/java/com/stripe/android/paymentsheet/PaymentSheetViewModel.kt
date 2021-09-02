@@ -327,7 +327,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         }
     }
 
-    private fun onPaymentResult(paymentResult: PaymentResult) {
+    @VisibleForTesting
+    fun onPaymentResult(paymentResult: PaymentResult) {
         viewModelScope.launch {
             runCatching {
                 stripeIntentRepository.get(args.clientSecret)

@@ -28,7 +28,7 @@ import kotlin.coroutines.CoroutineContext
  * handle next actions for intents.
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class StripePaymentLauncher @AssistedInject internal constructor(
+open class StripePaymentLauncher @AssistedInject internal constructor(
     @Assisted(PUBLISHABLE_KEY) publishableKeyProvider: () -> String,
     @Assisted(STRIPE_ACCOUNT_ID) stripeAccountIdProvider: () -> String?,
     @Assisted private val hostActivityLauncher: ActivityResultLauncher<PaymentLauncherContract.Args>,

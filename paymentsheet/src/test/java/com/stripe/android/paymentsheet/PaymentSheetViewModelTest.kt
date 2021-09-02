@@ -22,8 +22,7 @@ import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.StripeRepository
-import com.stripe.android.payments.PaymentFlowResult
-import com.stripe.android.payments.PaymentIntentFlowResultProcessor
+import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.paymentsheet.PaymentSheetViewModel.CheckoutIdentifier
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.FragmentConfig
@@ -75,7 +74,6 @@ internal class PaymentSheetViewModelTest {
     private val prefsRepository = FakePrefsRepository()
     private val eventReporter = mock<EventReporter>()
     private val viewModel: PaymentSheetViewModel by lazy { createViewModel() }
-    private val paymentFlowResultProcessor = mock<PaymentIntentFlowResultProcessor>()
     private val application = ApplicationProvider.getApplicationContext<Application>()
 
     @Captor
@@ -382,12 +380,8 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    fun `onPaymentFlowResult() should update ViewState and save preferences`() =
+    fun `onPaymentResult() should update ViewState and save preferences`() =
         testDispatcher.runBlockingTest {
-            whenever(paymentFlowResultProcessor.processResult(any())).thenReturn(
-                PAYMENT_INTENT_RESULT
-            )
-
             val selection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
             viewModel.updateSelection(selection)
 
@@ -401,12 +395,8 @@ internal class PaymentSheetViewModelTest {
                 paymentSheetResult = it
             }
 
-            viewModel.onPaymentFlowResult(
-                PaymentFlowResult.Unvalidated(
-                    "client_secret",
-                    StripeIntentResult.Outcome.SUCCEEDED
-                )
-            )
+            viewModel.onPaymentResult(PaymentResult.Completed)
+
             assertThat(viewState[1])
                 .isInstanceOf(PaymentSheetViewState.FinishProcessing::class.java)
 
@@ -426,10 +416,12 @@ internal class PaymentSheetViewModelTest {
         }
 
     @Test
-    fun `onPaymentFlowResult() should update ViewState and save new payment method`() =
+    fun `onPaymentResult() should update ViewState and save new payment method`() =
         testDispatcher.runBlockingTest {
-            whenever(paymentFlowResultProcessor.processResult(any())).thenReturn(
-                PAYMENT_INTENT_RESULT_WITH_PM
+            val viewModel = createViewModel(
+                ARGS_CUSTOMER_WITH_GOOGLEPAY,
+                StripeIntentRepository.Static(PAYMENT_INTENT_WITH_PM),
+                FakeCustomerRepository(PAYMENT_METHODS)
             )
 
             val selection = PaymentSelection.New.Card(
@@ -449,12 +441,8 @@ internal class PaymentSheetViewModelTest {
                 paymentSheetResult = it
             }
 
-            viewModel.onPaymentFlowResult(
-                PaymentFlowResult.Unvalidated(
-                    "client_secret",
-                    StripeIntentResult.Outcome.SUCCEEDED
-                )
-            )
+            viewModel.onPaymentResult(PaymentResult.Completed)
+
             assertThat(viewState[1])
                 .isInstanceOf(PaymentSheetViewState.FinishProcessing::class.java)
 
@@ -480,14 +468,8 @@ internal class PaymentSheetViewModelTest {
         }
 
     @Test
-    fun `onPaymentFlowResult() with non-success outcome should report failure event`() =
+    fun `onPaymentResult() with non-success outcome should report failure event`() =
         testDispatcher.runBlockingTest {
-            whenever(paymentFlowResultProcessor.processResult(any())).thenReturn(
-                PAYMENT_INTENT_RESULT.copy(
-                    outcomeFromFlow = StripeIntentResult.Outcome.FAILED
-                )
-            )
-
             val selection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
             viewModel.updateSelection(selection)
 
@@ -496,9 +478,7 @@ internal class PaymentSheetViewModelTest {
                 stripeIntent = it
             }
 
-            viewModel.onPaymentFlowResult(
-                PaymentFlowResult.Unvalidated()
-            )
+            viewModel.onPaymentResult(PaymentResult.Failed(Throwable()))
             verify(eventReporter)
                 .onPaymentFailure(selection)
 
@@ -506,56 +486,52 @@ internal class PaymentSheetViewModelTest {
         }
 
     @Test
-    fun `onPaymentFlowResult() with processing status for payment method which has delay should report success event`() =
+    fun `onPaymentResult() with processing status for payment method which has delay should report success event`() =
         testDispatcher.runBlockingTest {
-            whenever(paymentFlowResultProcessor.processResult(any())).thenReturn(
-                PaymentIntentResult(
-                    PaymentIntentFixtures.PI_WITH_SHIPPING.copy(
-                        paymentMethod = PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD,
-                        status = StripeIntent.Status.Processing
-                    ),
-                    StripeIntentResult.Outcome.UNKNOWN
-                )
+            val paymentIntent = PaymentIntentFixtures.PI_WITH_SHIPPING.copy(
+                paymentMethod = PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD,
+                status = StripeIntent.Status.Processing
+            )
+
+            val viewModel = createViewModel(
+                stripeIntentRepository = StripeIntentRepository.Static(paymentIntent),
             )
 
             val selection = PaymentSelection.Saved(PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD)
             viewModel.updateSelection(selection)
 
-            viewModel.onPaymentFlowResult(
-                PaymentFlowResult.Unvalidated()
-            )
+            viewModel.onPaymentResult(PaymentResult.Completed)
+
             verify(eventReporter)
                 .onPaymentSuccess(selection)
         }
 
     @Test
-    fun `onPaymentFlowResult() with processing status for payment method which does not have delay should report failure event`() =
+    fun `onPaymentResult() with processing status for payment method which does not have delay should report failure event`() =
         testDispatcher.runBlockingTest {
-            whenever(paymentFlowResultProcessor.processResult(any())).thenReturn(
-                PaymentIntentResult(
-                    PaymentIntentFixtures.PI_WITH_SHIPPING.copy(
-                        paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
-                        status = StripeIntent.Status.Processing
-                    ),
-                    StripeIntentResult.Outcome.UNKNOWN
-                )
+            val paymentIntent = PaymentIntentFixtures.PI_WITH_SHIPPING.copy(
+                paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
+                status = StripeIntent.Status.Processing
+            )
+
+            val viewModel = createViewModel(
+                stripeIntentRepository = StripeIntentRepository.Static(paymentIntent),
             )
 
             val selection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
             viewModel.updateSelection(selection)
 
-            viewModel.onPaymentFlowResult(
-                PaymentFlowResult.Unvalidated()
-            )
+            viewModel.onPaymentResult(PaymentResult.Failed(Throwable()))
             verify(eventReporter)
                 .onPaymentFailure(selection)
         }
 
     @Test
-    fun `onPaymentFlowResult() should update emit API errors`() =
+    fun `onPaymentResult() should update emit API errors`() =
         testDispatcher.runBlockingTest {
-            whenever(paymentFlowResultProcessor.processResult(any())).thenThrow(
-                RuntimeException("Your card was declined.")
+            val paymentIntent = PaymentIntentFixtures.PI_WITH_LAST_PAYMENT_ERROR
+            val viewModel = createViewModel(
+                stripeIntentRepository = StripeIntentRepository.Static(paymentIntent),
             )
 
             viewModel.fetchStripeIntent()
@@ -564,9 +540,8 @@ internal class PaymentSheetViewModelTest {
             viewModel.viewState.observeForever {
                 viewStateList.add(it)
             }
-            viewModel.onPaymentFlowResult(
-                PaymentFlowResult.Unvalidated()
-            )
+
+            viewModel.onPaymentResult(PaymentResult.Failed(Throwable()))
 
             assertThat(viewStateList[0])
                 .isEqualTo(
@@ -575,7 +550,7 @@ internal class PaymentSheetViewModelTest {
             assertThat(viewStateList[1])
                 .isEqualTo(
                     PaymentSheetViewState.Reset(
-                        UserErrorMessage("Your card was declined.")
+                        UserErrorMessage(application.resources.getString(R.string.stripe_failure_reason_authentication))
                     )
                 )
         }
@@ -807,7 +782,6 @@ internal class PaymentSheetViewModelTest {
             stripeIntentRepository,
             StripeIntentValidator(),
             customerRepository,
-            { paymentFlowResultProcessor },
             prefsRepository,
             mock(),
             mock(),
@@ -826,10 +800,6 @@ internal class PaymentSheetViewModelTest {
         private val PAYMENT_METHODS = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
 
         val PAYMENT_INTENT = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
-        val PAYMENT_INTENT_RESULT = PaymentIntentResult(
-            intent = PAYMENT_INTENT,
-            outcomeFromFlow = StripeIntentResult.Outcome.SUCCEEDED
-        )
 
         val PAYMENT_INTENT_WITH_PM = PaymentIntentFixtures.PI_SUCCEEDED.copy(
             paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
