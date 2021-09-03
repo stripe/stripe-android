@@ -5047,13 +5047,6 @@ public abstract class com/stripe/android/networking/StripeRequest {
 	protected final fun getQuery ()Ljava/lang/String;
 }
 
-public final class com/stripe/android/payments/PaymentFlowFailureMessageFactory {
-	public static final field $stable I
-	public fun <init> (Landroid/content/Context;)V
-	public final fun create (Lcom/stripe/android/model/StripeIntent;)Ljava/lang/String;
-	public final fun create (Lcom/stripe/android/model/StripeIntent;I)Ljava/lang/String;
-}
-
 public abstract class com/stripe/android/payments/PaymentFlowResult {
 	public static final field $stable I
 }
@@ -5582,7 +5575,7 @@ public final class com/stripe/android/payments/paymentlauncher/PaymentResult$Fai
 	public fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
-public class com/stripe/android/payments/paymentlauncher/StripePaymentLauncher : com/stripe/android/payments/core/injection/Injector, com/stripe/android/payments/paymentlauncher/PaymentLauncher {
+public final class com/stripe/android/payments/paymentlauncher/StripePaymentLauncher : com/stripe/android/payments/core/injection/Injector, com/stripe/android/payments/paymentlauncher/PaymentLauncher {
 	public static final field $stable I
 	public fun confirm (Lcom/stripe/android/model/ConfirmPaymentIntentParams;)V
 	public fun confirm (Lcom/stripe/android/model/ConfirmSetupIntentParams;)V
