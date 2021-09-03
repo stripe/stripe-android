@@ -65,7 +65,8 @@ class GooglePayLauncher internal constructor(
         googlePayRepositoryFactory = {
             DefaultGooglePayRepository(
                 activity.application,
-                it
+                it,
+                existingPaymentMethodRequired = config.existingPaymentMethodRequired
             )
         },
         AnalyticsRequestFactory(
@@ -104,7 +105,8 @@ class GooglePayLauncher internal constructor(
         googlePayRepositoryFactory = {
             DefaultGooglePayRepository(
                 fragment.requireActivity().application,
-                it
+                it,
+                existingPaymentMethodRequired = config.existingPaymentMethodRequired
             )
         },
         AnalyticsRequestFactory(
