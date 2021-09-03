@@ -286,14 +286,21 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     }
 
     fun confirmStripeIntent(confirmStripeIntentParams: ConfirmStripeIntentParams) {
-        when (confirmStripeIntentParams) {
-            is ConfirmPaymentIntentParams -> {
-                paymentLauncher?.confirm(confirmStripeIntentParams)
-            }
-            is ConfirmSetupIntentParams -> {
-                paymentLauncher?.confirm(confirmStripeIntentParams)
-            }
-        }
+        runCatching {
+            requireNotNull(paymentLauncher)
+        }.fold(
+            onSuccess = {
+                when (confirmStripeIntentParams) {
+                    is ConfirmPaymentIntentParams -> {
+                        it.confirm(confirmStripeIntentParams)
+                    }
+                    is ConfirmSetupIntentParams -> {
+                        it.confirm(confirmStripeIntentParams)
+                    }
+                }
+            },
+            onFailure = ::onFatal
+        )
     }
 
     fun registerFromActivity(activityResultCaller: ActivityResultCaller) {
@@ -370,7 +377,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                         resetViewState(
                             when (paymentResult) {
                                 is PaymentResult.Failed -> paymentResult.throwable.message
-                                else -> "" // indicates canceled payment
+                                else -> null // indicates canceled payment
                             }
                         )
                     },
