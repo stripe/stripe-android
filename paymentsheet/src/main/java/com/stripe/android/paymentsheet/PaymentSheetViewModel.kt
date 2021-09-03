@@ -82,7 +82,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     prefsRepository: PrefsRepository,
     private val paymentController: PaymentController,
     private val googlePayPaymentMethodLauncherFactory: GooglePayPaymentMethodLauncherFactory,
-    private val logger: Logger,
+    logger: Logger,
     @IOContext workContext: CoroutineContext
 ) : BaseSheetViewModel<PaymentSheetViewModel.TransitionTarget>(
     application = application,
@@ -90,7 +90,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     eventReporter = eventReporter,
     customerRepository = customerRepository,
     prefsRepository = prefsRepository,
-    workContext = workContext
+    workContext = workContext,
+    logger = logger
 ) {
     private val confirmParamsFactory = ConfirmStripeIntentParamsFactory.createFactory(
         args.clientSecret

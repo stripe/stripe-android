@@ -15,6 +15,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -164,7 +165,9 @@ class PaymentSheetListFragmentTest {
     fun `total amount label correctly displays amount`() {
         createScenario().onFragment { fragment ->
             shadowOf(getMainLooper()).idle()
-            fragment.sheetViewModel._amount.value = Amount(399, "USD")
+            fragment.sheetViewModel.setStripeIntent(PaymentIntentFixtures.PI_OFF_SESSION.copy(
+                amount = 399
+            ))
             val viewBinding = FragmentPaymentsheetPaymentMethodsListBinding.bind(fragment.view!!)
 
             assertThat(viewBinding.total.text)
