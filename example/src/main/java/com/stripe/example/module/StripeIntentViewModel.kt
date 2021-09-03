@@ -4,7 +4,8 @@ import android.app.Application
 import androidx.annotation.StringRes
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.liveData
-import com.stripe.android.payments.paymentlauncher.PaymentResult
+import com.stripe.android.PaymentIntentResult
+import com.stripe.android.SetupIntentResult
 import com.stripe.example.R
 import com.stripe.example.activity.BaseViewModel
 import kotlinx.coroutines.withContext
@@ -18,7 +19,8 @@ internal class StripeIntentViewModel(
     val inProgress = MutableLiveData<Boolean>()
     val status = MutableLiveData<String>()
 
-    val paymentResultLiveData = MutableLiveData<PaymentResult>()
+    val paymentIntentResultLiveData = MutableLiveData<Result<PaymentIntentResult>>()
+    val setupIntentResultLiveData = MutableLiveData<Result<SetupIntentResult>>()
 
     fun createPaymentIntent(
         country: String,

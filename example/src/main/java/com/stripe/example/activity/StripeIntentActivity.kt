@@ -1,17 +1,24 @@
 package com.stripe.example.activity
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import com.stripe.android.PaymentConfiguration
+import androidx.lifecycle.lifecycleScope
+import com.stripe.android.PaymentIntentResult
+import com.stripe.android.SetupIntentResult
+import com.stripe.android.Stripe
+import com.stripe.android.getPaymentIntentResult
+import com.stripe.android.getSetupIntentResult
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.MandateDataParams
 import com.stripe.android.model.PaymentMethodCreateParams
-import com.stripe.android.payments.paymentlauncher.PaymentLauncher
-import com.stripe.android.payments.paymentlauncher.PaymentResult
+import com.stripe.example.R
 import com.stripe.example.Settings
+import com.stripe.example.StripeFactory
 import com.stripe.example.module.StripeIntentViewModel
+import kotlinx.coroutines.launch
 import org.json.JSONObject
 
 /**
@@ -24,40 +31,35 @@ abstract class StripeIntentActivity : AppCompatActivity() {
     private val stripeAccountId: String? by lazy {
         Settings(this).stripeAccountId
     }
-
-    private lateinit var paymentLauncher: PaymentLauncher
-
+    protected val stripe: Stripe by lazy {
+        StripeFactory(this, stripeAccountId).create()
+    }
     private val keyboardController: KeyboardController by lazy {
         KeyboardController(this)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        paymentLauncher =
-            PaymentLauncher.create(
-                this,
-                PaymentConfiguration.getInstance(this).publishableKey,
-                stripeAccountId
-            ) { paymentResult ->
-                viewModel.status.value += "\n\nPayment authentication completed, getting result"
-                viewModel.paymentResultLiveData.postValue(paymentResult)
-            }
 
-        viewModel.paymentResultLiveData
+        viewModel.paymentIntentResultLiveData
             .observe(
                 this,
                 {
-                    when (it) {
-                        is PaymentResult.Completed -> {
-                            onConfirmSuccess()
-                        }
-                        is PaymentResult.Canceled -> {
-                            onConfirmCanceled()
-                        }
-                        is PaymentResult.Failed -> {
-                            onConfirmError(it)
-                        }
-                    }
+                    it.fold(
+                        onSuccess = ::onConfirmSuccess,
+                        onFailure = ::onConfirmError
+                    )
+                }
+            )
+
+        viewModel.setupIntentResultLiveData
+            .observe(
+                this,
+                {
+                    it.fold(
+                        onSuccess = ::onConfirmSuccess,
+                        onFailure = ::onConfirmError
+                    )
                 }
             )
     }
@@ -68,8 +70,7 @@ abstract class StripeIntentActivity : AppCompatActivity() {
         shippingDetails: ConfirmPaymentIntentParams.Shipping? = null,
         stripeAccountId: String? = null,
         existingPaymentMethodId: String? = null,
-        mandateDataParams: MandateDataParams? = null,
-        onPaymentIntentCreated: (String) -> Unit = {}
+        mandateDataParams: MandateDataParams? = null
     ) {
         requireNotNull(paymentMethodCreateParams ?: existingPaymentMethodId)
 
@@ -85,8 +86,7 @@ abstract class StripeIntentActivity : AppCompatActivity() {
                         shippingDetails,
                         stripeAccountId,
                         existingPaymentMethodId,
-                        mandateDataParams,
-                        onPaymentIntentCreated
+                        mandateDataParams
                     )
                 }
             }
@@ -116,11 +116,9 @@ abstract class StripeIntentActivity : AppCompatActivity() {
         shippingDetails: ConfirmPaymentIntentParams.Shipping?,
         stripeAccountId: String?,
         existingPaymentMethodId: String?,
-        mandateDataParams: MandateDataParams?,
-        onPaymentIntentCreated: (String) -> Unit = {}
+        mandateDataParams: MandateDataParams?
     ) {
         val secret = responseData.getString("secret")
-        onPaymentIntentCreated(secret)
         viewModel.status.postValue(
             viewModel.status.value +
                 "\n\nStarting PaymentIntent confirmation" + (
@@ -142,7 +140,7 @@ abstract class StripeIntentActivity : AppCompatActivity() {
                 mandateData = mandateDataParams
             )
         }
-        paymentLauncher.confirm(confirmPaymentIntentParams)
+        stripe.confirmPayment(this, confirmPaymentIntentParams, stripeAccountId)
     }
 
     private fun handleCreateSetupIntentResponse(
@@ -159,27 +157,57 @@ abstract class StripeIntentActivity : AppCompatActivity() {
                 } ?: ""
                 )
         )
-        paymentLauncher.confirm(
+        stripe.confirmSetupIntent(
+            this,
             ConfirmSetupIntentParams.create(
                 paymentMethodCreateParams = params,
                 clientSecret = secret
-            )
+            ),
+            stripeAccountId
         )
     }
 
-    protected open fun onConfirmSuccess() {
-        viewModel.status.value += "\n\nPaymentIntent confirmation succeeded\n\n"
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        keyboardController.hide()
+
+        viewModel.status.value += "\n\nPayment authentication completed, getting result"
+        if (stripe.isPaymentResult(requestCode, data)) {
+            lifecycleScope.launch {
+                viewModel.paymentIntentResultLiveData.value = runCatching {
+                    // stripe.isPaymentResult already verifies data is not null
+                    stripe.getPaymentIntentResult(requestCode, data!!)
+                }
+            }
+        } else if (stripe.isSetupResult(requestCode, data)) {
+            lifecycleScope.launch {
+                viewModel.setupIntentResultLiveData.value = runCatching {
+                    // stripe.isSetupResult already verifies data is not null
+                    stripe.getSetupIntentResult(requestCode, data!!)
+                }
+            }
+        }
+    }
+
+    protected open fun onConfirmSuccess(result: PaymentIntentResult) {
+        val paymentIntent = result.intent
+        viewModel.status.value += "\n\n" +
+            "PaymentIntent confirmation outcome: ${result.outcome}\n\n" +
+            getString(R.string.payment_intent_status, paymentIntent.status)
         viewModel.inProgress.value = false
     }
 
-    protected open fun onConfirmCanceled() {
-        viewModel.status.value += "\n\nPaymentIntent confirmation cancelled\n\n"
+    protected open fun onConfirmSuccess(result: SetupIntentResult) {
+        val setupIntentResult = result.intent
+        viewModel.status.value += "\n\n" +
+            "SetupIntent confirmation outcome: ${result.outcome}\n\n" +
+            getString(R.string.setup_intent_status, setupIntentResult.status)
         viewModel.inProgress.value = false
     }
 
-    protected open fun onConfirmError(failedResult: PaymentResult.Failed) {
-        viewModel.status.value += "\n\nPaymentIntent confirmation failed with throwable " +
-            "${failedResult.throwable} \n\n"
+    protected open fun onConfirmError(throwable: Throwable) {
+        viewModel.status.value += "\n\nException: " + throwable.message
         viewModel.inProgress.value = false
     }
 }
