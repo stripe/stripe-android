@@ -488,54 +488,8 @@ internal class PaymentSheetViewModelTest {
         }
 
     @Test
-    fun `onPaymentResult() with processing status for payment method which has delay should report success event`() =
-        testDispatcher.runBlockingTest {
-            val paymentIntent = PaymentIntentFixtures.PI_WITH_SHIPPING.copy(
-                paymentMethod = PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD,
-                status = StripeIntent.Status.Processing
-            )
-
-            val viewModel = createViewModel(
-                stripeIntentRepository = StripeIntentRepository.Static(paymentIntent),
-            )
-
-            val selection = PaymentSelection.Saved(PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD)
-            viewModel.updateSelection(selection)
-
-            viewModel.onPaymentResult(PaymentResult.Completed)
-
-            verify(eventReporter)
-                .onPaymentSuccess(selection)
-        }
-
-    @Test
-    fun `onPaymentResult() with processing status for payment method which does not have delay should report failure event`() =
-        testDispatcher.runBlockingTest {
-            val paymentIntent = PaymentIntentFixtures.PI_WITH_SHIPPING.copy(
-                paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
-                status = StripeIntent.Status.Processing
-            )
-
-            val viewModel = createViewModel(
-                stripeIntentRepository = StripeIntentRepository.Static(paymentIntent),
-            )
-
-            val selection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
-            viewModel.updateSelection(selection)
-
-            viewModel.onPaymentResult(PaymentResult.Failed(Throwable()))
-            verify(eventReporter)
-                .onPaymentFailure(selection)
-        }
-
-    @Test
     fun `onPaymentResult() should update emit API errors`() =
         testDispatcher.runBlockingTest {
-            val paymentIntent = PaymentIntentFixtures.PI_WITH_LAST_PAYMENT_ERROR
-            val viewModel = createViewModel(
-                stripeIntentRepository = StripeIntentRepository.Static(paymentIntent),
-            )
-
             viewModel.fetchStripeIntent()
 
             val viewStateList = mutableListOf<PaymentSheetViewState>()
@@ -543,7 +497,8 @@ internal class PaymentSheetViewModelTest {
                 viewStateList.add(it)
             }
 
-            viewModel.onPaymentResult(PaymentResult.Failed(Throwable()))
+            val errorMessage = "very helpful error message"
+            viewModel.onPaymentResult(PaymentResult.Failed(Throwable(errorMessage)))
 
             assertThat(viewStateList[0])
                 .isEqualTo(
@@ -552,7 +507,7 @@ internal class PaymentSheetViewModelTest {
             assertThat(viewStateList[1])
                 .isEqualTo(
                     PaymentSheetViewState.Reset(
-                        UserErrorMessage(application.resources.getString(R.string.stripe_failure_reason_authentication))
+                        UserErrorMessage(errorMessage)
                     )
                 )
         }
