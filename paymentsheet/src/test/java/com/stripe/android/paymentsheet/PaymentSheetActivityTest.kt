@@ -14,7 +14,6 @@ import com.stripe.android.Logger
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.PaymentController
 import com.stripe.android.PaymentIntentResult
-import com.stripe.android.StripeIntentResult
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContract
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherFactory
@@ -25,8 +24,9 @@ import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
-import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.payments.PaymentFlowResultProcessor
+import com.stripe.android.payments.paymentlauncher.PaymentResult
+import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
 import com.stripe.android.paymentsheet.PaymentSheetViewModel.CheckoutIdentifier
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.databinding.PrimaryButtonBinding
@@ -73,6 +73,8 @@ internal class PaymentSheetActivityTest {
     private val eventReporter = mock<EventReporter>()
     private val googlePayPaymentMethodLauncherFactory =
         createGooglePayPaymentMethodLauncherFactory()
+    private val stripePaymentLauncherAssistedFactory =
+        mock<StripePaymentLauncherAssistedFactory>()
 
     private val viewModel = createViewModel()
 
@@ -508,13 +510,8 @@ internal class PaymentSheetActivityTest {
             idleLooper()
 
             viewModel.checkoutIdentifier = CheckoutIdentifier.SheetBottomBuy
+            viewModel.onPaymentResult(PaymentResult.Completed)
 
-            viewModel.onPaymentFlowResult(
-                PaymentFlowResult.Unvalidated(
-                    "client_secret",
-                    StripeIntentResult.Outcome.SUCCEEDED
-                )
-            )
             idleLooper()
 
             assertThat(activity.bottomSheetBehavior.state)
@@ -723,7 +720,7 @@ internal class PaymentSheetActivityTest {
             mock<PaymentFlowResultProcessor<PaymentIntent, PaymentIntentResult>>()
         whenever(paymentFlowResultProcessor.processResult(any())).thenReturn(paymentIntentResult)
 
-        val mockPaymentController: PaymentController = mock()
+        val mockPaymentLauncher: PaymentController = mock()
         PaymentSheetViewModel(
             ApplicationProvider.getApplicationContext(),
             PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY,
@@ -732,9 +729,8 @@ internal class PaymentSheetActivityTest {
             StripeIntentRepository.Static(paymentIntent),
             StripeIntentValidator(),
             FakeCustomerRepository(paymentMethods),
-            { paymentFlowResultProcessor },
             FakePrefsRepository(),
-            mockPaymentController,
+            stripePaymentLauncherAssistedFactory,
             googlePayPaymentMethodLauncherFactory,
             Logger.noop(),
             testDispatcher
