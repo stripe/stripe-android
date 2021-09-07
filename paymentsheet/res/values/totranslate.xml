@@ -3,6 +3,4 @@
     <!--
     Items here need to be entered in our translation tool
     -->
-    <!-- Used for accessibility to indicate that when you double tap the dropdown it will bring up the menu for selection !-->
-    <string name="change">Change</string>
 </resources>

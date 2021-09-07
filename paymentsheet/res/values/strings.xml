@@ -118,4 +118,10 @@
     <!-- Label indicating the total amount that the user is authorizing (e.g. "Total: $25.00") -->
     <string name="stripe_paymentsheet_total_amount" tools:ignore="MissingTranslation">Total: %s</string>
     <string name="stripe_paymentsheet_payment_method_afterpay_clearpay" tools:ignore="MissingTranslation">Afterpay</string>
+
+
+    <!-- Used for accessibility to indicate that when you double tap the dropdown it will bring up the menu for selection !-->
+    <string name="change" tools:ignore="MissingTranslation">Change</string>
+    <!-- Used for accessibility to indicate that pressing the button will allow you to add a new payment method.  !-->
+    <string name="add_new_payment_method" tools:ignore="MissingTranslation">Add a new payment method</string>
 </resources>
