@@ -224,6 +224,94 @@ internal class DefaultFlowControllerTest {
     }
 
     @Test
+    fun `configure() with invalid paymentIntent`() {
+        var result = Pair<Boolean, Throwable?>(true, null)
+        val flowController = createFlowController()
+        flowController.configureWithPaymentIntent(
+            " ",
+            PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
+        ) { success, error ->
+            result = success to error
+        }
+
+        assertThat(result.first).isFalse()
+        assertThat(result.second?.message)
+            .isEqualTo("The `paymentIntentClientSecret` passed to `configureWithPaymentIntent` cannot be an empty string.")
+    }
+
+    @Test
+    fun `configure() with invalid merchant`() {
+        var result = Pair<Boolean, Throwable?>(true, null)
+        val flowController = createFlowController()
+        flowController.configureWithPaymentIntent(
+            PaymentSheetFixtures.CLIENT_SECRET,
+            PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.copy(merchantDisplayName = "")
+        ) { success, error ->
+            result = success to error
+        }
+
+        assertThat(result.first).isFalse()
+        assertThat(result.second?.message)
+            .isEqualTo("When a Configuration is passed to PaymentSheet, the Merchant display name cannot be an empty string.")
+    }
+
+    @Test
+    fun `configure() with invalid customer id`() {
+        var result = Pair<Boolean, Throwable?>(true, null)
+        val flowController = createFlowController()
+        flowController.configureWithPaymentIntent(
+            PaymentSheetFixtures.CLIENT_SECRET,
+            PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.copy(
+                customer = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.customer?.copy(
+                    id = " "
+                )
+            )
+        ) { success, error ->
+            result = success to error
+        }
+
+        assertThat(result.first).isFalse()
+        assertThat(result.second?.message)
+            .isEqualTo("When a CustomerConfiguration is passed to PaymentSheet, the id cannot be an empty string.")
+    }
+
+    @Test
+    fun `configure() with invalid customer ephemeral key`() {
+        var result = Pair<Boolean, Throwable?>(true, null)
+        val flowController = createFlowController()
+        flowController.configureWithPaymentIntent(
+            PaymentSheetFixtures.CLIENT_SECRET,
+            PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.copy(
+                customer = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.customer?.copy(
+                    ephemeralKeySecret = " "
+                )
+            )
+        ) { success, error ->
+            result = success to error
+        }
+
+        assertThat(result.first).isFalse()
+        assertThat(result.second?.message)
+            .isEqualTo("When a CustomerConfiguration is passed to PaymentSheet, the ephemeralKeySecret cannot be an empty string.")
+    }
+
+    @Test
+    fun `configure() with invalid setupIntent`() {
+        var result = Pair<Boolean, Throwable?>(true, null)
+        val flowController = createFlowController()
+        flowController.configureWithSetupIntent(
+            " ",
+            PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
+        ) { success, error ->
+            result = success to error
+        }
+
+        assertThat(result.first).isFalse()
+        assertThat(result.second?.message)
+            .isEqualTo("The `setupIntentClientSecret` passed to` configureWithSetupIntent` cannot be an empty string.")
+    }
+
+    @Test
     fun `init with failure should return expected value`() {
         var result = Pair<Boolean, Throwable?>(false, null)
         createFlowController(
