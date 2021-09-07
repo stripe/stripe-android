@@ -5,8 +5,8 @@ import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultLauncher
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
-import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.googlepaylauncher.GooglePayLauncher.Result
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.networking.AnalyticsEvent
@@ -66,16 +66,9 @@ class GooglePayLauncher internal constructor(
         googlePayRepositoryFactory = {
             DefaultGooglePayRepository(
                 activity.application,
-                it,
-                GooglePayJsonFactory.BillingAddressParameters(
-                    isPhoneNumberRequired = config.billingAddressConfig.isPhoneNumberRequired,
-                    isRequired = config.billingAddressConfig.isRequired,
-                    format = when(config.billingAddressConfig.format){
-                        BillingAddressConfig.Format.Min -> GooglePayJsonFactory.BillingAddressParameters.Format.Min
-                        BillingAddressConfig.Format.Full -> GooglePayJsonFactory.BillingAddressParameters.Format.Full
-                    } ,
-                ),
-                existingPaymentMethodRequired = config.existingPaymentMethodRequired
+                config.environment,
+                config.billingAddressConfig.convert(),
+                config.existingPaymentMethodRequired
             )
         },
         AnalyticsRequestFactory(
@@ -112,10 +105,11 @@ class GooglePayLauncher internal constructor(
             resultCallback.onResult(it)
         },
         googlePayRepositoryFactory = {
-            // TODO: why does this not pass the arguments?
             DefaultGooglePayRepository(
                 fragment.requireActivity().application,
-                it
+                config.environment,
+                config.billingAddressConfig.convert(),
+                config.existingPaymentMethodRequired
             )
         },
         AnalyticsRequestFactory(
