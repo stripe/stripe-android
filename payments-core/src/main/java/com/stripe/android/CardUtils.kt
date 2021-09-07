@@ -13,7 +13,9 @@ internal object CardUtils {
      * @return the [CardBrand] that matches the card number based on prefixes,
      * or [CardBrand.Unknown] if it can't be determined
      */
-    internal fun getPossibleCardBrand(cardNumber: String?): CardBrand {
+    @Deprecated("CardInputWidget and CardMultilineWidget handle card brand lookup. This method should not be relied on for determining CardBrand.")
+    @JvmStatic
+    fun getPossibleCardBrand(cardNumber: String?): CardBrand {
         return if (cardNumber.isNullOrBlank()) {
             CardBrand.Unknown
         } else {
