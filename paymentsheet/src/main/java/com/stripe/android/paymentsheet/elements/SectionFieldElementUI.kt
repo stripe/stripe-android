@@ -1,17 +1,20 @@
 package com.stripe.android.paymentsheet.elements
 
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 
 @Composable
 internal fun SectionFieldElementUI(
     enabled: Boolean,
-    field: SectionFieldElement
+    field: SectionFieldElement,
+    modifier: Modifier = Modifier
 ) {
     when (val controller = field.sectionFieldErrorController()) {
         is TextFieldController -> {
             TextField(
                 textFieldController = controller,
-                enabled = enabled
+                enabled = enabled,
+                modifier = modifier
             )
         }
         is DropdownFieldController -> {
@@ -23,6 +26,12 @@ internal fun SectionFieldElementUI(
         }
         is AddressController -> {
             AddressElementUI(
+                enabled,
+                controller
+            )
+        }
+        is RowController -> {
+            RowElementUI(
                 enabled,
                 controller
             )

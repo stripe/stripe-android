@@ -5,6 +5,10 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.elements.IdentifierSpec
+import com.stripe.android.paymentsheet.elements.RowController
+import com.stripe.android.paymentsheet.elements.RowElement
+import com.stripe.android.paymentsheet.elements.SectionFieldElement
+import com.stripe.android.paymentsheet.elements.SectionSingleFieldElement
 import com.stripe.android.paymentsheet.elements.SimpleTextSpec
 import com.stripe.android.paymentsheet.forms.transform
 import kotlinx.serialization.KSerializer
@@ -17,6 +21,7 @@ import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 import kotlinx.serialization.json.Json
 import java.io.InputStream
+import java.util.UUID
 
 @Serializable(with = FieldTypeAsStringSerializer::class)
 internal enum class FieldType(
@@ -143,8 +148,8 @@ private object FieldTypeAsStringSerializer : KSerializer<FieldType?> {
 private fun getJsonStringFromInputStream(inputStream: InputStream?) =
     inputStream?.bufferedReader().use { it?.readText() }
 
-internal fun List<CountryAddressSchema>.transformToElementList() =
-    this.mapNotNull { addressField ->
+internal fun List<CountryAddressSchema>.transformToElementList(): List<SectionFieldElement> {
+    val countryAddressElements = this.mapNotNull { addressField ->
         addressField.type?.let {
             SimpleTextSpec(
                 addressField.type.identifierSpec,
@@ -157,6 +162,44 @@ internal fun List<CountryAddressSchema>.transformToElementList() =
     }.map {
         it.transform()
     }
+
+    // Put it in a single row
+    return combineCityAndPostal(countryAddressElements)
+}
+
+private fun combineCityAndPostal(countryAddressElements: List<SectionSingleFieldElement>) =
+    countryAddressElements.foldIndexed(
+        listOf<SectionFieldElement?>()
+    ) { index, acc, sectionSingleFieldElement ->
+        if (index + 1 < countryAddressElements.size && isPostalNextToCity(
+                countryAddressElements[index],
+                countryAddressElements[index + 1]
+            )
+        ) {
+            val rowFields = listOf(countryAddressElements[index], countryAddressElements[index + 1])
+            acc.plus(
+                RowElement(
+                    IdentifierSpec.Generic("row_" + UUID.randomUUID().leastSignificantBits),
+                    rowFields,
+                    RowController(rowFields)
+                )
+            )
+        } else if (acc.lastOrNull() is RowElement) {
+            // skip this it is in a row
+            acc.plus(null)
+        } else {
+            acc.plus(sectionSingleFieldElement)
+        }
+    }.filterNotNull()
+
+private fun isPostalNextToCity(
+    element1: SectionSingleFieldElement,
+    element2: SectionSingleFieldElement
+) = isCityOrPostal(element1.identifier) && isCityOrPostal(element2.identifier)
+
+private fun isCityOrPostal(identifierSpec: IdentifierSpec) =
+    identifierSpec == IdentifierSpec.PostalCode ||
+        identifierSpec == IdentifierSpec.City
 
 private fun getKeyboard(fieldSchema: FieldSchema?) = if (fieldSchema?.isNumeric == true) {
     KeyboardType.Number

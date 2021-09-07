@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.flatMapLatest
  * in it do not change.
  */
 internal class AddressController(
-    val fieldsFlowable: Flow<List<SectionSingleFieldElement>>
+    val fieldsFlowable: Flow<List<SectionFieldElement>>
 ) : SectionFieldErrorController {
     @StringRes
     val label: Int? = null
