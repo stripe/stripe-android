@@ -92,8 +92,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
             )
             finish()
             return
-        }
-        else {
+        } else {
             try {
                 starterArgs.config?.validate()
                 if (starterArgs.clientSecret.value.isBlank()) {

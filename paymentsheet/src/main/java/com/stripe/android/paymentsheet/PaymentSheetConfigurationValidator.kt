@@ -12,9 +12,10 @@ internal fun PaymentSheet.Configuration.validate() {
             throw InvalidParameterException("Customer id when specified cannot be blank.")
         }
         customer?.ephemeralKeySecret?.isBlank() == true -> {
-            throw InvalidParameterException("When the customer is specified the ephemeral" +
-                " key cannot be blank.")
+            throw InvalidParameterException(
+                "When the customer is specified the ephemeral" +
+                    " key cannot be blank."
+            )
         }
     }
 }
-
