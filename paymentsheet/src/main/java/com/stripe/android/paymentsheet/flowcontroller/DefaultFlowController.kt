@@ -45,6 +45,7 @@ import com.stripe.android.paymentsheet.model.PaymentOptionFactory
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.SetupIntentClientSecret
+import com.stripe.android.paymentsheet.validate
 import com.stripe.android.view.AuthActivityStarterHost
 import dagger.Lazy
 import kotlinx.coroutines.CoroutineScope
@@ -52,6 +53,7 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.parcelize.Parcelize
+import java.security.InvalidParameterException
 import javax.inject.Inject
 import javax.inject.Provider
 import javax.inject.Singleton
@@ -88,7 +90,7 @@ internal class DefaultFlowController @Inject internal constructor(
      *   paymentFlowResultProcessor afterwards.
      */
     private val paymentFlowResultProcessorProvider:
-        Provider<PaymentFlowResultProcessor<out StripeIntent, StripeIntentResult<StripeIntent>>>,
+    Provider<PaymentFlowResultProcessor<out StripeIntent, StripeIntentResult<StripeIntent>>>,
     @UIContext private val uiContext: CoroutineContext
 ) : PaymentSheet.FlowController, Injector {
     private val paymentOptionActivityLauncher: ActivityResultLauncher<PaymentOptionContract.Args>
@@ -168,6 +170,20 @@ internal class DefaultFlowController @Inject internal constructor(
         configuration: PaymentSheet.Configuration?,
         callback: PaymentSheet.FlowController.ConfigCallback
     ) {
+        try{
+            configuration?.validate()
+            if (clientSecret.value.isBlank()) {
+                throw InvalidParameterException("Client secret cannot be blank.")
+            }
+        }
+        catch (e: InvalidParameterException){
+            callback.onConfigured(
+                success = false,
+                e
+            )
+            return
+        }
+
         lifecycleScope.launch {
             val result = flowControllerInitializer.init(
                 clientSecret,
