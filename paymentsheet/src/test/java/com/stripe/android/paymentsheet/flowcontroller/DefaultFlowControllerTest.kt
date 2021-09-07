@@ -29,6 +29,9 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.ApiRequest
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.payments.PaymentFlowResultProcessor
+import com.stripe.android.payments.paymentlauncher.PaymentLauncher
+import com.stripe.android.payments.paymentlauncher.PaymentResult
+import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
 import com.stripe.android.paymentsheet.PaymentOptionCallback
 import com.stripe.android.paymentsheet.PaymentOptionContract
 import com.stripe.android.paymentsheet.PaymentOptionResult
@@ -76,7 +79,8 @@ internal class DefaultFlowControllerTest {
     private val paymentOptionCallback = mock<PaymentOptionCallback>()
     private val paymentResultCallback = mock<PaymentSheetResultCallback>()
 
-    private val paymentController = mock<PaymentController>()
+    private val paymentLauncherAssistedFactory = mock<StripePaymentLauncherAssistedFactory>()
+    private val paymentLauncher = mock<PaymentLauncher>()
     private val eventReporter = mock<EventReporter>()
 
     private val flowResultProcessor =
@@ -403,8 +407,9 @@ internal class DefaultFlowControllerTest {
     }
 
     @Test
-    fun `confirmPayment() without paymentSelection should not call paymentController`() {
-        verifyNoMoreInteractions(paymentController)
+    fun `confirmPayment() without paymentSelection should not call paymentLauncher`() {
+        flowController.paymentLauncher = paymentLauncher
+        verifyNoMoreInteractions(paymentLauncher)
         flowController.configureWithPaymentIntent(
             PaymentSheetFixtures.CLIENT_SECRET,
             PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
@@ -414,8 +419,9 @@ internal class DefaultFlowControllerTest {
     }
 
     @Test
-    fun `confirmPaymentSelection() with new card payment method should start paymentController`() =
+    fun `confirmPaymentSelection() with new card payment method should start paymentlauncher`() =
         runBlockingTest {
+            flowController.paymentLauncher = paymentLauncher
             flowController.confirmPaymentSelection(
                 NEW_CARD_PAYMENT_SELECTION,
                 InitData(
@@ -438,7 +444,8 @@ internal class DefaultFlowControllerTest {
         }
 
     @Test
-    fun `confirmPaymentSelection() with generic payment method should start paymentController`() {
+    fun `confirmPaymentSelection() with generic payment method should start paymentLauncher`() {
+        flowController.paymentLauncher = paymentLauncher
         flowController.confirmPaymentSelection(
             GENERIC_PAYMENT_SELECTION,
             InitData(
@@ -479,10 +486,8 @@ internal class DefaultFlowControllerTest {
             stripeAccount = null
         )
 
-        verify(paymentController).startConfirmAndAuth(
-            any(),
+        verify(paymentLauncher).confirm(
             eq(confirmPaymentIntentParams),
-            eq(apiOptions)
         )
     }
 
@@ -534,7 +539,7 @@ internal class DefaultFlowControllerTest {
     }
 
     @Test
-    fun `onGooglePayResult() when PaymentData result should invoke startConfirmAndAuth() with expected params`() =
+    fun `onGooglePayResult() when PaymentData result should invoke confirm() with expected params`() =
         testDispatcher.runBlockingTest {
             flowController.configureWithPaymentIntent(
                 PaymentSheetFixtures.CLIENT_SECRET,
@@ -542,20 +547,15 @@ internal class DefaultFlowControllerTest {
             ) { _, _ ->
             }
 
+            flowController.paymentLauncher = paymentLauncher
+
             flowController.onGooglePayResult(
                 GooglePayPaymentMethodLauncher.Result.Completed(
                     paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
                 )
             )
 
-            verify(paymentController).startConfirmAndAuth(
-                any(),
-                argWhere {
-                    val params = (it as ConfirmPaymentIntentParams)
-                    params.paymentMethodId == "pm_123456789"
-                },
-                any()
-            )
+            verify(paymentLauncher).confirm(any() as ConfirmPaymentIntentParams)
         }
 
     @Test
@@ -580,15 +580,8 @@ internal class DefaultFlowControllerTest {
     }
 
     @Test
-    fun `onPaymentFlowResult when succeeded should invoke callback with Completed`() =
+    fun `onPaymentResult when succeeded should invoke callback with Completed`() =
         testDispatcher.runBlockingTest {
-            whenever(flowResultProcessor.processResult(any())).thenReturn(
-                PaymentIntentResult(
-                    PaymentIntentFixtures.PI_WITH_SHIPPING,
-                    StripeIntentResult.Outcome.SUCCEEDED
-                )
-            )
-
             var isReadyState = false
             flowController.configureWithPaymentIntent(
                 PaymentSheetFixtures.CLIENT_SECRET
@@ -598,12 +591,7 @@ internal class DefaultFlowControllerTest {
             assertThat(isReadyState)
                 .isTrue()
 
-            flowController.onPaymentFlowResult(
-                PaymentFlowResult.Unvalidated(
-                    clientSecret = PaymentSheetFixtures.CLIENT_SECRET,
-                    flowOutcome = StripeIntentResult.Outcome.CANCELED
-                )
-            )
+            flowController.onPaymentResult(PaymentResult.Completed)
 
             verify(paymentResultCallback).onPaymentSheetResult(
                 argWhere { paymentResult ->
@@ -613,79 +601,7 @@ internal class DefaultFlowControllerTest {
         }
 
     @Test
-    fun `onPaymentFlowResult when processing payment method which has delay should invoke callback with Completed`() =
-        testDispatcher.runBlockingTest {
-            whenever(flowResultProcessor.processResult(any())).thenReturn(
-                PaymentIntentResult(
-                    PaymentIntentFixtures.PI_WITH_SHIPPING.copy(
-                        paymentMethod = PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD,
-                        status = StripeIntent.Status.Processing
-                    ),
-                    StripeIntentResult.Outcome.UNKNOWN
-                )
-            )
-
-            var isReadyState = false
-            flowController.configureWithPaymentIntent(
-                PaymentSheetFixtures.CLIENT_SECRET
-            ) { isReady, _ ->
-                isReadyState = isReady
-            }
-            assertThat(isReadyState)
-                .isTrue()
-
-            flowController.onPaymentFlowResult(
-                PaymentFlowResult.Unvalidated(
-                    clientSecret = PaymentSheetFixtures.CLIENT_SECRET,
-                    flowOutcome = StripeIntentResult.Outcome.UNKNOWN
-                )
-            )
-
-            verify(paymentResultCallback).onPaymentSheetResult(
-                argWhere { paymentResult ->
-                    paymentResult is PaymentSheetResult.Completed
-                }
-            )
-        }
-
-    @Test
-    fun `onPaymentFlowResult when processing payment method which does not have delay should invoke callback with Failed`() =
-        testDispatcher.runBlockingTest {
-            whenever(flowResultProcessor.processResult(any())).thenReturn(
-                PaymentIntentResult(
-                    PaymentIntentFixtures.PI_WITH_SHIPPING.copy(
-                        paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
-                        status = StripeIntent.Status.Processing
-                    ),
-                    StripeIntentResult.Outcome.UNKNOWN
-                )
-            )
-
-            var isReadyState = false
-            flowController.configureWithPaymentIntent(
-                PaymentSheetFixtures.CLIENT_SECRET
-            ) { isReady, _ ->
-                isReadyState = isReady
-            }
-            assertThat(isReadyState)
-                .isTrue()
-
-            flowController.onPaymentFlowResult(
-                PaymentFlowResult.Unvalidated(
-                    clientSecret = PaymentSheetFixtures.CLIENT_SECRET,
-                    flowOutcome = StripeIntentResult.Outcome.UNKNOWN
-                )
-            )
-
-            verify(paymentResultCallback).onPaymentSheetResult(
-                argWhere { paymentResult ->
-                    paymentResult is PaymentSheetResult.Failed
-                }
-            )
-        }
-
-    @Test
-    fun `onPaymentFlowResult when canceled should invoke callback with Cancelled`() =
+    fun `onPaymentResult when canceled should invoke callback with Cancelled`() =
         testDispatcher.runBlockingTest {
             whenever(flowResultProcessor.processResult(any())).thenReturn(
                 PaymentIntentResult(
@@ -703,12 +619,7 @@ internal class DefaultFlowControllerTest {
             assertThat(isReadyState)
                 .isTrue()
 
-            flowController.onPaymentFlowResult(
-                PaymentFlowResult.Unvalidated(
-                    clientSecret = PaymentSheetFixtures.CLIENT_SECRET,
-                    flowOutcome = StripeIntentResult.Outcome.CANCELED
-                )
-            )
+            flowController.onPaymentResult(PaymentResult.Canceled)
 
             verify(paymentResultCallback).onPaymentSheetResult(
                 argWhere { paymentResult ->
@@ -718,21 +629,9 @@ internal class DefaultFlowControllerTest {
         }
 
     @Test
-    fun `onPaymentFlowResult when error should invoke callback with Failed`() =
+    fun `onPaymentResult when error should invoke callback with Failed`() =
         testDispatcher.runBlockingTest {
-            whenever(flowResultProcessor.processResult(any())).thenReturn(
-                PaymentIntentResult(
-                    PaymentIntentFixtures.PI_WITH_LAST_PAYMENT_ERROR,
-                    StripeIntentResult.Outcome.FAILED
-                )
-            )
-
-            flowController.onPaymentFlowResult(
-                PaymentFlowResult.Unvalidated(
-                    clientSecret = PaymentSheetFixtures.CLIENT_SECRET,
-                    flowOutcome = StripeIntentResult.Outcome.CANCELED
-                )
-            )
+            flowController.onPaymentResult(PaymentResult.Failed(Throwable("error")))
 
             verify(paymentResultCallback).onPaymentSheetResult(
                 argWhere { paymentResult ->
@@ -759,7 +658,6 @@ internal class DefaultFlowControllerTest {
         testScope,
         lifeCycleOwner,
         { activity.window.statusBarColor },
-        { AuthActivityStarterHost.create(activity) },
         PaymentOptionFactory(activity.resources),
         paymentOptionCallback,
         paymentResultCallback,
@@ -768,9 +666,8 @@ internal class DefaultFlowControllerTest {
         flowControllerInitializer,
         eventReporter,
         ViewModelProvider(activity)[FlowControllerViewModel::class.java],
-        paymentController,
+        paymentLauncherAssistedFactory,
         { PaymentConfiguration.getInstance(activity) },
-        { flowResultProcessor },
         testDispatcher
     )
 
