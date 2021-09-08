@@ -101,7 +101,7 @@ internal class DefaultFlowController @Inject internal constructor(
      */
     lateinit var flowControllerComponent: FlowControllerComponent
 
-    override fun inject(injectable: Injectable) {
+    override fun inject(injectable: Injectable<*>) {
         when (injectable) {
             is PaymentOptionsViewModel.Factory -> {
                 flowControllerComponent.inject(injectable)

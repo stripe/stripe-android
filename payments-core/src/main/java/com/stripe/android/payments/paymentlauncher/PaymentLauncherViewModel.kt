@@ -242,7 +242,15 @@ internal class PaymentLauncherViewModel(
         @InjectorKey private val injectorKeyProvider: () -> Int,
         private val authActivityStarterHostProvider: () -> AuthActivityStarterHost,
         private val activityResultCaller: ActivityResultCaller
-    ) : ViewModelProvider.Factory, Injectable {
+    ) : ViewModelProvider.Factory, Injectable<Factory.FallbackInitializeParam> {
+        internal data class FallbackInitializeParam(
+            val enableLogging: Boolean
+        )
+
+        override fun fallbackInitialize(arg: FallbackInitializeParam) {
+            // TODO(ccen) to implement
+        }
+
         @Inject
         lateinit var stripeApiRepository: StripeRepository
 
