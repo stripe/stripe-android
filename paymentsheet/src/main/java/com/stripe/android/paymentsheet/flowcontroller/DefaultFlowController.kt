@@ -400,8 +400,8 @@ internal class DefaultFlowController @Inject internal constructor(
     }
 
     private fun createPaymentSheetResult(
-        paymentResult: PaymentResult)
-    : PaymentSheetResult = when (paymentResult) {
+        paymentResult: PaymentResult
+    ): PaymentSheetResult = when (paymentResult) {
         is PaymentResult.Completed -> {
             PaymentSheetResult.Completed
         }
@@ -410,7 +410,9 @@ internal class DefaultFlowController @Inject internal constructor(
         }
         is PaymentResult.Failed -> {
             PaymentSheetResult.Failed(
-                IllegalArgumentException("Failed to confirm intent: ${paymentResult.throwable.message}")
+                IllegalArgumentException(
+                    "Failed to confirm intent: ${paymentResult.throwable.message}"
+                )
             )
         }
         else -> {
