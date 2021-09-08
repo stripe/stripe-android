@@ -16,26 +16,21 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
-            android:layout_marginEnd="8dp"
-            app:layout_constraintBottom_toBottomOf="@+id/customer_radio_group"
-            app:layout_constraintEnd_toStartOf="@+id/customer_radio_group"
-            app:layout_constraintHorizontal_bias="0.5"
+            android:layout_marginTop="16dp"
             app:layout_constraintHorizontal_chainStyle="packed"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/customer_radio_group" />
+            app:layout_constraintTop_toTopOf="parent" />
 
         <RadioGroup
             android:id="@+id/customer_radio_group"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:layout_marginTop="16dp"
-            android:layout_marginEnd="16dp"
-            android:layout_marginStart="8dp"
+            android:layout_marginStart="16dp"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toEndOf="@+id/customer_text_view"
-            app:layout_constraintTop_toTopOf="parent">
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/customer_text_view">
 
             <RadioButton
                 android:id="@+id/guest_customer_button"
@@ -58,115 +53,26 @@
         </RadioGroup>
 
         <TextView
-            android:id="@+id/google_pay_text_view"
-            android:text="@string/google_pay"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginEnd="8dp"
-            app:layout_constraintBottom_toBottomOf="@+id/google_pay_radio_group"
-            app:layout_constraintEnd_toStartOf="@+id/google_pay_radio_group"
-            app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintHorizontal_chainStyle="packed"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/google_pay_radio_group" />
-
-        <RadioGroup
-            android:id="@+id/google_pay_radio_group"
-            android:layout_width="wrap_content"
-            android:layout_height="48dp"
-            android:orientation="horizontal"
-            android:layout_marginTop="8dp"
-            android:layout_marginEnd="16dp"
-            android:layout_marginStart="8dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toEndOf="@+id/google_pay_text_view"
-            app:layout_constraintTop_toBottomOf="@+id/customer_radio_group">
-
-            <RadioButton
-                android:id="@+id/google_pay_on_button"
-                android:text="@string/on"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:checked="true" />
-
-            <RadioButton
-                android:id="@+id/google_pay_off_button"
-                android:text="@string/off"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
-        </RadioGroup>
-
-        <TextView
-            android:id="@+id/currency_text_view"
-            android:text="@string/currency"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginEnd="8dp"
-            app:layout_constraintBottom_toBottomOf="@+id/currency_radio_group"
-            app:layout_constraintEnd_toStartOf="@+id/currency_radio_group"
-            app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintHorizontal_chainStyle="packed"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/currency_radio_group" />
-
-        <RadioGroup
-            android:id="@+id/currency_radio_group"
-            android:layout_width="wrap_content"
-            android:layout_height="48dp"
-            android:orientation="horizontal"
-            android:layout_marginTop="8dp"
-            android:layout_marginEnd="16dp"
-            android:layout_marginStart="8dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toEndOf="@+id/currency_text_view"
-            app:layout_constraintTop_toBottomOf="@+id/google_pay_radio_group">
-
-            <RadioButton
-                android:id="@+id/currency_usd_button"
-                android:text="@string/currency_usd"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:checked="true"
-                tools:ignore="HardcodedText" />
-
-            <RadioButton
-                android:id="@+id/currency_eur_button"
-                android:text="@string/currency_eur"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                tools:ignore="HardcodedText" />
-        </RadioGroup>
-
-        <TextView
             android:id="@+id/mode_text_view"
             android:text="@string/checkout_mode"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
-            android:layout_marginEnd="8dp"
-            app:layout_constraintBottom_toBottomOf="@+id/mode_radio_group"
-            app:layout_constraintEnd_toStartOf="@+id/mode_radio_group"
-            app:layout_constraintHorizontal_bias="0.5"
+            android:layout_marginTop="8dp"
             app:layout_constraintHorizontal_chainStyle="packed"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/mode_radio_group" />
+            app:layout_constraintTop_toBottomOf="@+id/customer_radio_group" />
 
         <RadioGroup
             android:id="@+id/mode_radio_group"
             android:layout_width="wrap_content"
             android:layout_height="48dp"
             android:orientation="horizontal"
-            android:layout_marginTop="8dp"
-            android:layout_marginEnd="16dp"
-            android:layout_marginStart="8dp"
+            android:layout_marginStart="16dp"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toEndOf="@+id/mode_text_view"
-            app:layout_constraintTop_toBottomOf="@+id/currency_radio_group">
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/mode_text_view">
 
             <RadioButton
                 android:id="@+id/mode_payment_button"
@@ -189,6 +95,75 @@
                 android:layout_height="wrap_content" />
         </RadioGroup>
 
+        <TextView
+            android:id="@+id/currency_text_view"
+            android:text="@string/currency"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp"
+            app:layout_constraintHorizontal_chainStyle="packed"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/mode_radio_group" />
+
+        <RadioGroup
+            android:id="@+id/currency_radio_group"
+            android:layout_width="wrap_content"
+            android:layout_height="48dp"
+            android:orientation="horizontal"
+            android:layout_marginStart="16dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/currency_text_view">
+
+            <RadioButton
+                android:id="@+id/currency_usd_button"
+                android:text="@string/currency_usd"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:checked="true"
+                tools:ignore="HardcodedText" />
+
+            <RadioButton
+                android:id="@+id/currency_eur_button"
+                android:text="@string/currency_eur"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                tools:ignore="HardcodedText" />
+        </RadioGroup>
+
+        <TextView
+            android:id="@+id/google_pay_text_view"
+            android:text="@string/google_pay"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="16dp"
+            android:layout_marginTop="8dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_chainStyle="packed"
+            app:layout_constraintTop_toBottomOf="@+id/mode_radio_group" />
+
+        <RadioGroup
+            android:id="@+id/google_pay_radio_group"
+            android:layout_width="wrap_content"
+            android:layout_height="48dp"
+            android:orientation="horizontal"
+            android:layout_marginEnd="16dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/google_pay_text_view">
+
+            <RadioButton
+                android:id="@+id/google_pay_on_button"
+                android:text="@string/on"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:checked="true" />
+
+            <RadioButton
+                android:id="@+id/google_pay_off_button"
+                android:text="@string/off"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+        </RadioGroup>
 
         <TextView
             android:id="@+id/default_billing_address"
@@ -196,25 +171,19 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
-            android:layout_marginEnd="8dp"
-            app:layout_constraintBottom_toBottomOf="@+id/default_billing_radio_group"
-            app:layout_constraintEnd_toStartOf="@+id/default_billing_radio_group"
-            app:layout_constraintHorizontal_bias="0.5"
+            android:layout_marginTop="8dp"
             app:layout_constraintHorizontal_chainStyle="packed"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/default_billing_radio_group" />
+            app:layout_constraintTop_toBottomOf="@+id/currency_radio_group" />
 
         <RadioGroup
             android:id="@+id/default_billing_radio_group"
             android:layout_width="wrap_content"
-            android:layout_height="48dp"
+            android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:layout_marginTop="8dp"
-            android:layout_marginEnd="16dp"
-            android:layout_marginStart="8dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintTop_toBottomOf="@+id/mode_radio_group">
+            android:layout_marginStart="16dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/default_billing_address">
 
             <RadioButton
                 android:id="@+id/default_billing_on_button"
@@ -229,6 +198,42 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:checked="true" />
+        </RadioGroup>
+
+
+        <TextView
+            android:id="@+id/shipping_address"
+            android:text="@string/shipping_address"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="16dp"
+            android:layout_marginTop="8dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_chainStyle="packed"
+            app:layout_constraintTop_toBottomOf="@+id/google_pay_radio_group" />
+
+        <RadioGroup
+            android:id="@+id/shipping_radio_group"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginEnd="16dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/shipping_address">
+
+            <RadioButton
+                android:id="@+id/shipping_on_button"
+                android:text="@string/on"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:checked="true" />
+
+            <RadioButton
+                android:id="@+id/shipping_off_button"
+                android:text="@string/off"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:checked="false" />
         </RadioGroup>
 
         <Button

@@ -9,6 +9,7 @@ internal class DefaultRepository(
     override suspend fun checkout(
         customer: Repository.CheckoutCustomer,
         currency: Repository.CheckoutCurrency,
-        mode: Repository.CheckoutMode
-    ) = checkoutBackendApi.checkout(CheckoutRequest(customer.value, currency.value, mode.value))
+        mode: Repository.CheckoutMode,
+        setShippingAddress: Boolean
+    ) = checkoutBackendApi.checkout(CheckoutRequest(customer.value, currency.value, mode.value, setShippingAddress))
 }

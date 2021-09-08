@@ -64,6 +64,9 @@ internal open class PaymentSheetPlaygroundActivity : AppCompatActivity() {
             else -> Repository.CheckoutMode.Setup
         }
 
+    private val setShippingAddress: Boolean
+        get() = viewBinding.shippingRadioGroup.checkedRadioButtonId == R.id.shipping_on_button
+
     private lateinit var paymentSheet: PaymentSheet
     private lateinit var flowController: PaymentSheet.FlowController
 
@@ -80,7 +83,7 @@ internal open class PaymentSheetPlaygroundActivity : AppCompatActivity() {
 
         viewBinding.reloadButton.setOnClickListener {
             lifecycleScope.launch {
-                viewModel.prepareCheckout(customer, currency, mode)
+                viewModel.prepareCheckout(customer, currency, mode, setShippingAddress)
             }
         }
 

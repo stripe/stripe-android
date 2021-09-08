@@ -1,14 +1,12 @@
 package com.stripe.android.model.parsers
 
 import androidx.annotation.RestrictTo
-import androidx.annotation.VisibleForTesting
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.StripeJsonUtils.optString
 import org.json.JSONObject
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
-@VisibleForTesting
 class SetupIntentJsonParser : ModelJsonParser<SetupIntent> {
     override fun parse(json: JSONObject): SetupIntent? {
         val objectType = optString(json, FIELD_OBJECT)

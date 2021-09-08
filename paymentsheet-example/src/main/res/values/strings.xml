@@ -31,6 +31,7 @@
     <string name="checkout_complete">Checkout (Complete)</string>
     <string name="currency">Currency</string>
     <string name="default_billing_address">Default Billing Address</string>
+    <string name="shipping_address">Shipping Address</string>
     <string name="currency_usd">USD</string>
     <string name="currency_eur">EUR</string>
 </resources>

@@ -33,6 +33,7 @@ import com.stripe.android.view.AuthActivityStarterHost
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
+import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
 
 /**
@@ -43,7 +44,7 @@ internal class PaymentLauncherViewModel(
     private val stripeApiRepository: StripeRepository,
     private val authenticatorRegistry: PaymentAuthenticatorRegistry,
     private val defaultReturnUrl: DefaultReturnUrl,
-    private val apiRequestOptions: ApiRequest.Options,
+    private val apiRequestOptionsProvider: Provider<ApiRequest.Options>,
     private val threeDs1IntentReturnUrlMap: MutableMap<String, String>,
     private val lazyPaymentIntentFlowResultProcessor: dagger.Lazy<PaymentIntentFlowResultProcessor>,
     private val lazySetupIntentFlowResultProcessor: dagger.Lazy<SetupIntentFlowResultProcessor>,
@@ -89,7 +90,7 @@ internal class PaymentLauncherViewModel(
                 authenticatorRegistry.getAuthenticator(intent).authenticate(
                     authActivityStarterHost,
                     intent,
-                    apiRequestOptions
+                    apiRequestOptionsProvider.get()
                 )
             },
             onFailure = {
@@ -110,14 +111,14 @@ internal class PaymentLauncherViewModel(
                     is ConfirmPaymentIntentParams -> {
                         stripeApiRepository.confirmPaymentIntent(
                             decoratedParams,
-                            apiRequestOptions,
+                            apiRequestOptionsProvider.get(),
                             expandFields = EXPAND_PAYMENT_METHOD
                         )
                     }
                     is ConfirmSetupIntentParams -> {
                         stripeApiRepository.confirmSetupIntent(
                             decoratedParams,
-                            apiRequestOptions,
+                            apiRequestOptionsProvider.get(),
                             expandFields = EXPAND_PAYMENT_METHOD
                         )
                     }
@@ -135,7 +136,7 @@ internal class PaymentLauncherViewModel(
             requireNotNull(
                 stripeApiRepository.retrieveStripeIntent(
                     clientSecret,
-                    apiRequestOptions
+                    apiRequestOptionsProvider.get()
                 )
             )
         }.fold(
@@ -145,7 +146,7 @@ internal class PaymentLauncherViewModel(
                     .authenticate(
                         authActivityStarterHost,
                         intent,
-                        apiRequestOptions
+                        apiRequestOptionsProvider.get()
                     )
             },
             onFailure = {
@@ -252,7 +253,7 @@ internal class PaymentLauncherViewModel(
         lateinit var defaultReturnUrl: DefaultReturnUrl
 
         @Inject
-        lateinit var apiRequestOptions: ApiRequest.Options
+        lateinit var apiRequestOptionsProvider: Provider<ApiRequest.Options>
 
         @Inject
         lateinit var threeDs1IntentReturnUrlMap: MutableMap<String, String>
@@ -283,7 +284,7 @@ internal class PaymentLauncherViewModel(
                 stripeApiRepository,
                 authenticatorRegistry,
                 defaultReturnUrl,
-                apiRequestOptions,
+                apiRequestOptionsProvider,
                 threeDs1IntentReturnUrlMap,
                 lazyPaymentIntentFlowResultProcessor,
                 lazySetupIntentFlowResultProcessor,

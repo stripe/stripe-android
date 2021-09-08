@@ -6,45 +6,66 @@ internal object PaymentMethodPreferenceFixtures {
     val EXPANDED_PAYMENT_INTENT_JSON = JSONObject(
         """
         {
-          "object": "payment_method_preference",
-          "country_code": "US",
-          "ordered_payment_method_types": [
-            "card",
-            "sepa_debit",
-            "sofort",
-            "ideal",
-            "bancontact"
-          ],
-          "payment_intent": {
-            "id": "pi_1JGB5bIyGgrkZxL74Uk2VygL",
-            "object": "payment_intent",
-            "amount": 973,
-            "canceled_at": null,
-            "cancellation_reason": null,
-            "capture_method": "automatic",
-            "client_secret": "pi_1JGB5bIyGgrkZxL74Uk2VygL_secret_v5JtXY8PPJ9YicEKRyqSVKfHd",
-            "confirmation_method": "automatic",
-            "created": 1626995643,
-            "currency": "eur",
-            "description": null,
-            "last_payment_error": null,
-            "livemode": false,
-            "next_action": null,
-            "payment_method": null,
-            "payment_method_types": [
+          "business_name": "Mybusiness",
+          "link_settings": {
+            "link_bank_enabled": false,
+            "link_bank_onboarding_enabled": false
+          },
+          "merchant_country": "US",
+          "payment_method_preference": {
+            "object": "payment_method_preference",
+            "country_code": "US",
+            "ordered_payment_method_types": [
               "card",
               "ideal",
               "sepa_debit",
               "bancontact",
               "sofort"
             ],
-            "receipt_email": null,
-            "setup_future_usage": null,
-            "shipping": null,
-            "source": null,
-            "status": "requires_payment_method"
-          },
-          "type": "payment_intent"
+            "payment_intent": {
+              "id": "pi_3JTDhYIyGgrkZxL71IDUGKps",
+              "object": "payment_intent",
+              "amount": 973,
+              "canceled_at": null,
+              "cancellation_reason": null,
+              "capture_method": "automatic",
+              "client_secret": "pi_3JTDhYIyGgrkZxL71IDUGKps_secret_aWuzwD4JvF1HM8XJTdUsXG6Za",
+              "confirmation_method": "automatic",
+              "created": 1630103948,
+              "currency": "eur",
+              "description": null,
+              "last_payment_error": null,
+              "livemode": false,
+              "next_action": null,
+              "payment_method": null,
+              "payment_method_types": [
+                "bancontact",
+                "card",
+                "sepa_debit",
+                "sofort",
+                "ideal"
+              ],
+              "receipt_email": null,
+              "setup_future_usage": null,
+              "shipping": {
+                "address": {
+                  "city": "San Francisco",
+                  "country": "US",
+                  "line1": "510 Townsend St",
+                  "line2": null,
+                  "postal_code": "94102",
+                  "state": "California"
+                },
+                "carrier": null,
+                "name": "Bruno",
+                "phone": null,
+                "tracking_number": null
+              },
+              "source": null,
+              "status": "requires_payment_method"
+            },
+            "type": "payment_intent"
+          }
         }
         """.trimIndent()
     )
@@ -52,37 +73,45 @@ internal object PaymentMethodPreferenceFixtures {
     val EXPANDED_SETUP_INTENT_JSON = JSONObject(
         """
         {
-          "object": "payment_method_preference",
-          "country_code": "US",
-          "ordered_payment_method_types": [
-            "bancontact",
-            "ideal",
-            "sofort",
-            "sepa_debit",
-            "card"
-          ],
-          "setup_intent": {
-            "id": "seti_1JGC8AIyGgrkZxL7QR3c4lWN",
-            "object": "setup_intent",
-            "cancellation_reason": null,
-            "client_secret": "seti_1JGC8AIyGgrkZxL7QR3c4lWN_secret_Ju08uANFNpVJmZdKsfK5COMf921xCzg",
-            "created": 1626999646,
-            "description": null,
-            "last_setup_error": null,
-            "livemode": false,
-            "next_action": null,
-            "payment_method": null,
-            "payment_method_types": [
+          "business_name": "Mybusiness",
+          "link_settings": {
+            "link_bank_enabled": false,
+            "link_bank_onboarding_enabled": false
+          },
+          "merchant_country": "US",
+          "payment_method_preference": {
+            "object": "payment_method_preference",
+            "country_code": "US",
+            "ordered_payment_method_types": [
               "card",
               "ideal",
               "sepa_debit",
               "bancontact",
               "sofort"
             ],
-            "status": "requires_payment_method",
-            "usage": "off_session"
-          },
-          "type": "setup_intent"
+            "setup_intent": {
+              "id": "seti_1JTDqGIyGgrkZxL7reCXkpr5",
+              "object": "setup_intent",
+              "cancellation_reason": null,
+              "client_secret": "seti_1JTDqGIyGgrkZxL7reCXkpr5_secret_K7SlVPncyaU4cdiDyyHfyqNjvCDvYxG",
+              "created": 1630104488,
+              "description": null,
+              "last_setup_error": null,
+              "livemode": false,
+              "next_action": null,
+              "payment_method": null,
+              "payment_method_types": [
+                "sepa_debit",
+                "ideal",
+                "bancontact",
+                "card",
+                "sofort"
+              ],
+              "status": "requires_payment_method",
+              "usage": "off_session"
+            },
+            "type": "setup_intent"
+          }
         }
         """.trimIndent()
     )
