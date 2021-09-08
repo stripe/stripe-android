@@ -7,7 +7,7 @@ plugins {
 }
 
 dependencies {
-    api project(':payments-core')
+    implementation project(':payments-core')
 }
 
 android {
