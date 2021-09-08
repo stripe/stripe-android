@@ -13,6 +13,7 @@ import com.stripe.android.payments.core.injection.IOContext
 import com.stripe.android.payments.core.injection.Injectable
 import com.stripe.android.payments.core.injection.Injector
 import com.stripe.android.payments.core.injection.InjectorKey
+import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.payments.core.injection.PaymentLauncherComponent
 import com.stripe.android.payments.core.injection.STRIPE_ACCOUNT_ID
@@ -37,7 +38,8 @@ class StripePaymentLauncher @AssistedInject internal constructor(
     @IOContext ioContext: CoroutineContext,
     @UIContext uiContext: CoroutineContext,
     stripeRepository: StripeRepository,
-    analyticsRequestFactory: AnalyticsRequestFactory
+    analyticsRequestFactory: AnalyticsRequestFactory,
+    @Named(PRODUCT_USAGE) productUsage: Set<String>
 ) : PaymentLauncher, Injector {
     private val paymentLauncherComponent: PaymentLauncherComponent =
         DaggerPaymentLauncherComponent.builder()
@@ -49,6 +51,7 @@ class StripePaymentLauncher @AssistedInject internal constructor(
             .analyticsRequestFactory(analyticsRequestFactory)
             .publishableKeyProvider(publishableKeyProvider)
             .stripeAccountIdProvider(stripeAccountIdProvider)
+            .productUsage(productUsage)
             .build()
 
     @InjectorKey
@@ -58,7 +61,7 @@ class StripePaymentLauncher @AssistedInject internal constructor(
         WeakMapInjectorRegistry.register(this, injectorKey)
     }
 
-    override fun inject(injectable: Injectable) {
+    override fun inject(injectable: Injectable<*>) {
         when (injectable) {
             is PaymentLauncherViewModel.Factory -> {
                 paymentLauncherComponent.inject(injectable)

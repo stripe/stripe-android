@@ -96,7 +96,9 @@ internal class PaymentLauncherModule {
         @UIContext uiContext: CoroutineContext,
         threeDs1IntentReturnUrlMap: MutableMap<String, String>,
         defaultAnalyticsRequestExecutor: DefaultAnalyticsRequestExecutor,
-        analyticsRequestFactory: AnalyticsRequestFactory
+        analyticsRequestFactory: AnalyticsRequestFactory,
+        @Named(PUBLISHABLE_KEY) publishableKeyProvider: () -> String,
+        @Named(PRODUCT_USAGE) productUsage: Set<String>
     ): PaymentAuthenticatorRegistry = DefaultPaymentAuthenticatorRegistry.createInstance(
         context,
         stripeRepository,
@@ -106,5 +108,7 @@ internal class PaymentLauncherModule {
         workContext,
         uiContext,
         threeDs1IntentReturnUrlMap,
+        publishableKeyProvider,
+        productUsage
     )
 }

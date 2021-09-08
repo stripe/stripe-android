@@ -109,6 +109,8 @@ constructor(
             workContext,
             uiContext,
             threeDs1IntentReturnUrlMap,
+            { publishableKeyProvider.get() },
+            analyticsRequestFactory.defaultProductUsageTokens
         )
 
     override fun registerLaunchersWithActivityResultCaller(

@@ -45,6 +45,9 @@ internal interface PaymentLauncherComponent {
         @BindsInstance
         fun stripeAccountIdProvider(@Named(STRIPE_ACCOUNT_ID) stripeAccountIdProvider: () -> String?): Builder
 
+        @BindsInstance
+        fun productUsage(@Named(PRODUCT_USAGE) productUsage: Set<String>): Builder
+
         fun build(): PaymentLauncherComponent
     }
 }

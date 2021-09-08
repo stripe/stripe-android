@@ -122,7 +122,14 @@ internal class PaymentOptionsViewModel(
     internal class Factory(
         private val applicationSupplier: () -> Application,
         private val starterArgsSupplier: () -> PaymentOptionContract.Args
-    ) : ViewModelProvider.Factory, Injectable {
+    ) : ViewModelProvider.Factory, Injectable<Factory.FallbackInitializeParam> {
+        internal data class FallbackInitializeParam(
+            val enableLogging: Boolean
+        )
+
+        override fun fallbackInitialize(arg: FallbackInitializeParam) {
+            // TODO(ccen) to implement
+        }
 
         @Inject
         lateinit var eventReporter: EventReporter
@@ -137,7 +144,7 @@ internal class PaymentOptionsViewModel(
         @Inject
         @JvmSuppressWildcards
         lateinit var prefsRepositoryFactory:
-            (PaymentSheet.CustomerConfiguration?) -> PrefsRepository
+                (PaymentSheet.CustomerConfiguration?) -> PrefsRepository
 
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
