@@ -144,7 +144,7 @@ internal class PaymentOptionsViewModel(
         @Inject
         @JvmSuppressWildcards
         lateinit var prefsRepositoryFactory:
-                (PaymentSheet.CustomerConfiguration?) -> PrefsRepository
+            (PaymentSheet.CustomerConfiguration?) -> PrefsRepository
 
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
