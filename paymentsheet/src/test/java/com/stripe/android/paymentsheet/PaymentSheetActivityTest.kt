@@ -12,7 +12,6 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.Logger
 import com.stripe.android.PaymentConfiguration
-import com.stripe.android.PaymentController
 import com.stripe.android.PaymentIntentResult
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContract
@@ -720,7 +719,6 @@ internal class PaymentSheetActivityTest {
             mock<PaymentFlowResultProcessor<PaymentIntent, PaymentIntentResult>>()
         whenever(paymentFlowResultProcessor.processResult(any())).thenReturn(paymentIntentResult)
 
-        val mockPaymentLauncher: PaymentController = mock()
         PaymentSheetViewModel(
             ApplicationProvider.getApplicationContext(),
             PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY,
