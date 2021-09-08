@@ -11,6 +11,8 @@ import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.payments.core.authentication.PaymentAuthenticator
 import com.stripe.android.payments.core.injection.ENABLE_LOGGING
 import com.stripe.android.payments.core.injection.InjectorKey
+import com.stripe.android.payments.core.injection.PRODUCT_USAGE
+import com.stripe.android.payments.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.stripe3ds2.transaction.SdkTransactionId
 import com.stripe.android.view.AuthActivityStarterHost
 import javax.inject.Inject
@@ -25,6 +27,8 @@ internal class Stripe3DS2Authenticator @Inject constructor(
     private val config: PaymentAuthConfig,
     @Named(ENABLE_LOGGING) private val enableLogging: Boolean,
     @InjectorKey private val injectorKey: Int,
+    @Named(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String,
+    @Named(PRODUCT_USAGE) private val productUsage: Set<String>
 ) : PaymentAuthenticator<StripeIntent> {
 
     /**
@@ -70,7 +74,9 @@ internal class Stripe3DS2Authenticator @Inject constructor(
                 requestOptions,
                 enableLogging = enableLogging,
                 host.statusBarColor,
-                injectorKey
+                injectorKey,
+                publishableKeyProvider(),
+                productUsage
             )
         )
     }
