@@ -89,8 +89,7 @@ internal class DefaultFlowController @Inject internal constructor(
      */
     lateinit var flowControllerComponent: FlowControllerComponent
 
-    @VisibleForTesting
-    internal var paymentLauncher: PaymentLauncher? = null
+    private var paymentLauncher: PaymentLauncher? = null
 
     override fun inject(injectable: Injectable) {
         when (injectable) {

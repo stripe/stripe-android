@@ -7,6 +7,7 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.LifecycleRegistry
 import androidx.lifecycle.ViewModelProvider
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
@@ -27,8 +28,9 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.ApiRequest
 import com.stripe.android.payments.PaymentFlowResultProcessor
-import com.stripe.android.payments.paymentlauncher.PaymentLauncher
+import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
 import com.stripe.android.payments.paymentlauncher.PaymentResult
+import com.stripe.android.payments.paymentlauncher.StripePaymentLauncher
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
 import com.stripe.android.paymentsheet.PaymentOptionCallback
 import com.stripe.android.paymentsheet.PaymentOptionContract
@@ -77,7 +79,7 @@ internal class DefaultFlowControllerTest {
     private val paymentResultCallback = mock<PaymentSheetResultCallback>()
 
     private val paymentLauncherAssistedFactory = mock<StripePaymentLauncherAssistedFactory>()
-    private val paymentLauncher = mock<PaymentLauncher>()
+    private val paymentLauncher = mock<StripePaymentLauncher>()
     private val eventReporter = mock<EventReporter>()
 
     private val flowResultProcessor =
@@ -130,7 +132,21 @@ internal class DefaultFlowControllerTest {
             )
         ).thenReturn(googlePayActivityLauncher)
 
-        whenever(lifeCycleOwner.lifecycle).thenReturn(mock())
+        val hostActivityLauncher = mock<ActivityResultLauncher<PaymentLauncherContract.Args>>()
+        whenever(
+            activityResultCaller.registerForActivityResult(
+                any<PaymentLauncherContract>(),
+                any()
+            )
+        ).thenReturn(hostActivityLauncher)
+
+        whenever(paymentLauncherAssistedFactory.create(any(), any(), any()))
+            .thenReturn(paymentLauncher)
+
+        // set lifecycle to CREATED to trigger creation of payment launcher object within flowcontroller.
+        val lifecycle = LifecycleRegistry(lifeCycleOwner)
+        lifecycle.currentState = Lifecycle.State.CREATED
+        whenever(lifeCycleOwner.lifecycle).thenReturn(lifecycle)
     }
 
     @AfterTest
@@ -405,7 +421,6 @@ internal class DefaultFlowControllerTest {
 
     @Test
     fun `confirmPayment() without paymentSelection should not call paymentLauncher`() {
-        flowController.paymentLauncher = paymentLauncher
         verifyNoMoreInteractions(paymentLauncher)
         flowController.configureWithPaymentIntent(
             PaymentSheetFixtures.CLIENT_SECRET,
@@ -418,7 +433,6 @@ internal class DefaultFlowControllerTest {
     @Test
     fun `confirmPaymentSelection() with new card payment method should start paymentlauncher`() =
         runBlockingTest {
-            flowController.paymentLauncher = paymentLauncher
             flowController.confirmPaymentSelection(
                 NEW_CARD_PAYMENT_SELECTION,
                 InitData(
@@ -442,7 +456,6 @@ internal class DefaultFlowControllerTest {
 
     @Test
     fun `confirmPaymentSelection() with generic payment method should start paymentLauncher`() {
-        flowController.paymentLauncher = paymentLauncher
         flowController.confirmPaymentSelection(
             GENERIC_PAYMENT_SELECTION,
             InitData(
@@ -543,8 +556,6 @@ internal class DefaultFlowControllerTest {
                 PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
             ) { _, _ ->
             }
-
-            flowController.paymentLauncher = paymentLauncher
 
             flowController.onGooglePayResult(
                 GooglePayPaymentMethodLauncher.Result.Completed(
