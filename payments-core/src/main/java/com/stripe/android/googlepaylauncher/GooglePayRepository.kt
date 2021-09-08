@@ -44,7 +44,7 @@ internal class DefaultGooglePayRepository(
         context: Context,
         environment: GooglePayEnvironment,
         logger: Logger = Logger.noop(),
-        existingPaymentMethodRequired : Boolean = true
+        existingPaymentMethodRequired: Boolean = true
     ) : this(
         context,
         environment,
