@@ -12,7 +12,6 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.Logger
 import com.stripe.android.PaymentConfiguration
-import com.stripe.android.PaymentIntentResult
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContract
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherFactory
@@ -23,7 +22,6 @@ import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
-import com.stripe.android.payments.PaymentFlowResultProcessor
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
 import com.stripe.android.paymentsheet.PaymentSheetViewModel.CheckoutIdentifier
@@ -53,9 +51,7 @@ import kotlinx.coroutines.test.setMain
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
-import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
@@ -498,10 +494,6 @@ internal class PaymentSheetActivityTest {
 
     @Test
     fun `successful payment should dismiss bottom sheet`() {
-        val viewModel = createViewModel(
-            paymentIntentResult = PaymentIntentResult(PaymentIntentFixtures.PI_SUCCEEDED)
-        )
-
         val scenario = activityScenario(viewModel)
         scenario.launch(intent).onActivity { activity ->
             // wait for bottom sheet to animate in
@@ -712,13 +704,8 @@ internal class PaymentSheetActivityTest {
 
     private fun createViewModel(
         paymentIntent: PaymentIntent = PAYMENT_INTENT,
-        paymentMethods: List<PaymentMethod> = PAYMENT_METHODS,
-        paymentIntentResult: PaymentIntentResult = PaymentIntentResult(paymentIntent)
+        paymentMethods: List<PaymentMethod> = PAYMENT_METHODS
     ): PaymentSheetViewModel = runBlocking {
-        val paymentFlowResultProcessor =
-            mock<PaymentFlowResultProcessor<PaymentIntent, PaymentIntentResult>>()
-        whenever(paymentFlowResultProcessor.processResult(any())).thenReturn(paymentIntentResult)
-
         PaymentSheetViewModel(
             ApplicationProvider.getApplicationContext(),
             PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY,

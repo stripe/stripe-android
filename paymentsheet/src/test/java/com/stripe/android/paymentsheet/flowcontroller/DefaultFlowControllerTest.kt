@@ -13,8 +13,6 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
-import com.stripe.android.PaymentIntentResult
-import com.stripe.android.StripeIntentResult
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContract
@@ -26,8 +24,6 @@ import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.networking.ApiRequest
-import com.stripe.android.payments.PaymentFlowResultProcessor
 import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncher
@@ -82,9 +78,6 @@ internal class DefaultFlowControllerTest {
     private val paymentLauncher = mock<StripePaymentLauncher>()
     private val eventReporter = mock<EventReporter>()
 
-    private val flowResultProcessor =
-        mock<PaymentFlowResultProcessor<StripeIntent, StripeIntentResult<StripeIntent>>>()
-
     private val paymentOptionActivityLauncher =
         mock<ActivityResultLauncher<PaymentOptionContract.Args>>()
 
@@ -132,18 +125,17 @@ internal class DefaultFlowControllerTest {
             )
         ).thenReturn(googlePayActivityLauncher)
 
-        val hostActivityLauncher = mock<ActivityResultLauncher<PaymentLauncherContract.Args>>()
         whenever(
             activityResultCaller.registerForActivityResult(
                 any<PaymentLauncherContract>(),
                 any()
             )
-        ).thenReturn(hostActivityLauncher)
+        ).thenReturn(mock())
 
         whenever(paymentLauncherAssistedFactory.create(any(), any(), any()))
             .thenReturn(paymentLauncher)
 
-        // set lifecycle to CREATED to trigger creation of payment launcher object within flowcontroller.
+        // set lifecycle to CREATED to trigger creation of payment launcher object within flowController.
         val lifecycle = LifecycleRegistry(lifeCycleOwner)
         lifecycle.currentState = Lifecycle.State.CREATED
         whenever(lifeCycleOwner.lifecycle).thenReturn(lifecycle)
@@ -491,10 +483,6 @@ internal class DefaultFlowControllerTest {
                 mandateId = null,
                 mandateData = null,
             )
-        val apiOptions = ApiRequest.Options(
-            apiKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
-            stripeAccount = null
-        )
 
         verify(paymentLauncher).confirm(
             eq(confirmPaymentIntentParams),
@@ -563,7 +551,11 @@ internal class DefaultFlowControllerTest {
                 )
             )
 
-            verify(paymentLauncher).confirm(any() as ConfirmPaymentIntentParams)
+            verify(paymentLauncher).confirm(
+                argWhere { params: ConfirmPaymentIntentParams ->
+                    params.paymentMethodId == "pm_123456789"
+                }
+            )
         }
 
     @Test
@@ -611,13 +603,6 @@ internal class DefaultFlowControllerTest {
     @Test
     fun `onPaymentResult when canceled should invoke callback with Cancelled`() =
         testDispatcher.runBlockingTest {
-            whenever(flowResultProcessor.processResult(any())).thenReturn(
-                PaymentIntentResult(
-                    PaymentIntentFixtures.CANCELLED,
-                    StripeIntentResult.Outcome.CANCELED
-                )
-            )
-
             var isReadyState = false
             flowController.configureWithPaymentIntent(
                 PaymentSheetFixtures.CLIENT_SECRET

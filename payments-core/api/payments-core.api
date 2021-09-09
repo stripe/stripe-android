@@ -5060,17 +5060,6 @@ public final class com/stripe/android/payments/PaymentFlowResult$Unvalidated$Com
 	public synthetic fun write (Ljava/lang/Object;Landroid/os/Parcel;I)V
 }
 
-public abstract class com/stripe/android/payments/PaymentFlowResultProcessor {
-	public static final field $stable I
-	public synthetic fun <init> (Landroid/content/Context;Ljavax/inject/Provider;Lcom/stripe/android/networking/StripeRepository;ZLkotlin/coroutines/CoroutineContext;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public synthetic fun <init> (Landroid/content/Context;Ljavax/inject/Provider;Lcom/stripe/android/networking/StripeRepository;ZLkotlin/coroutines/CoroutineContext;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
-	protected abstract fun cancelStripeIntent (Lcom/stripe/android/model/StripeIntent;Lcom/stripe/android/networking/ApiRequest$Options;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	protected abstract fun createStripeIntentResult (Lcom/stripe/android/model/StripeIntent;ILjava/lang/String;)Lcom/stripe/android/StripeIntentResult;
-	protected final fun getStripeRepository ()Lcom/stripe/android/networking/StripeRepository;
-	public fun processResult (Lcom/stripe/android/payments/PaymentFlowResult$Unvalidated;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	protected abstract fun retrieveStripeIntent (Ljava/lang/String;Lcom/stripe/android/networking/ApiRequest$Options;Ljava/util/List;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-}
-
 public abstract interface class com/stripe/android/payments/core/ActivityResultLauncherHost {
 	public abstract fun onLauncherInvalidated ()V
 	public abstract fun onNewActivityResultCaller (Landroidx/activity/result/ActivityResultCaller;Landroidx/activity/result/ActivityResultCallback;)V
