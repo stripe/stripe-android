@@ -48,7 +48,6 @@ import kotlin.coroutines.CoroutineContext
  * by the [PaymentIntent] or [SetupIntent] object.
  */
 internal class StripePaymentController
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
 @VisibleForTesting
 constructor(
     context: Context,
