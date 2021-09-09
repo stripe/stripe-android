@@ -116,6 +116,7 @@ dependencies {
 
     testImplementation "junit:junit:$junitVersion"
     testImplementation "org.mockito:mockito-core:$mockitoCoreVersion"
+    testImplementation "org.mockito:mockito-inline:$mockitoCoreVersion"
     testImplementation 'org.robolectric:robolectric:4.6.1'
     testImplementation "androidx.test:core:$androidTestVersion"
     testImplementation 'org.json:json:20210307'
