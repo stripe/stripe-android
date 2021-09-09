@@ -22,10 +22,8 @@ import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContra
 import com.stripe.android.paymentsheet.PaymentSheetViewModel.CheckoutIdentifier
 import com.stripe.android.paymentsheet.databinding.ActivityPaymentSheetBinding
 import com.stripe.android.paymentsheet.model.Amount
-import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
-import com.stripe.android.paymentsheet.model.SetupIntentClientSecret
 import com.stripe.android.paymentsheet.ui.AnimationConstants
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
@@ -97,20 +95,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
         } else {
             try {
                 starterArgs.config?.validate()
-                if (starterArgs.clientSecret.value.isBlank()) {
-                    if (starterArgs.clientSecret is PaymentIntentClientSecret) {
-                        throw InvalidParameterException(
-                            "The `paymentIntentClientSecret` passed to " +
-                                "`presentWithPaymentIntent` cannot be an empty string."
-                        )
-                    } else if (starterArgs.clientSecret is SetupIntentClientSecret) {
-                        throw InvalidParameterException(
-                            "The `setupIntentClientSecret` passed to` " +
-                                "presentWithSetupIntent` cannot be an empty string."
-                        )
-                    }
-                    throw InvalidParameterException("Client secret cannot be blank.")
-                }
+                starterArgs.clientSecret.validate()
             } catch (e: InvalidParameterException) {
                 setActivityResult(PaymentSheetResult.Failed(e))
                 finish()

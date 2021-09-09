@@ -236,7 +236,7 @@ internal class DefaultFlowControllerTest {
 
         assertThat(result.first).isFalse()
         assertThat(result.second?.message)
-            .isEqualTo("The `paymentIntentClientSecret` passed to `configureWithPaymentIntent` cannot be an empty string.")
+            .isEqualTo("The PaymentIntent client_secret cannot be an empty string.")
     }
 
     @Test
@@ -272,7 +272,7 @@ internal class DefaultFlowControllerTest {
 
         assertThat(result.first).isFalse()
         assertThat(result.second?.message)
-            .isEqualTo("When a CustomerConfiguration is passed to PaymentSheet, the id cannot be an empty string.")
+            .isEqualTo("When a CustomerConfiguration is passed to PaymentSheet, the Customer ID cannot be an empty string.")
     }
 
     @Test
@@ -308,7 +308,7 @@ internal class DefaultFlowControllerTest {
 
         assertThat(result.first).isFalse()
         assertThat(result.second?.message)
-            .isEqualTo("The `setupIntentClientSecret` passed to` configureWithSetupIntent` cannot be an empty string.")
+            .isEqualTo("The SetupIntent client_secret cannot be an empty string.")
     }
 
     @Test

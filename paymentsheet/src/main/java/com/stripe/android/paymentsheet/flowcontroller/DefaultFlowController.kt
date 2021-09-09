@@ -172,24 +172,9 @@ internal class DefaultFlowController @Inject internal constructor(
     ) {
         try {
             configuration?.validate()
-            if (clientSecret.value.isBlank()) {
-                if (clientSecret is PaymentIntentClientSecret) {
-                    throw InvalidParameterException(
-                        "The `paymentIntentClientSecret` passed to `configureWithPaymentIntent` " +
-                            "cannot be an empty string."
-                    )
-                } else if (clientSecret is SetupIntentClientSecret) {
-                    throw InvalidParameterException(
-                        "The `setupIntentClientSecret` passed to` configureWithSetupIntent` " +
-                            "cannot be an empty string."
-                    )
-                }
-            }
+            clientSecret.validate()
         } catch (e: InvalidParameterException) {
-            callback.onConfigured(
-                success = false,
-                e
-            )
+            callback.onConfigured(success = false, e)
             return
         }
 

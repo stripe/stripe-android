@@ -14,7 +14,7 @@ internal fun PaymentSheet.Configuration.validate() {
         customer?.id?.isBlank() == true -> {
             throw InvalidParameterException(
                 "When a CustomerConfiguration is passed to PaymentSheet," +
-                    " the id cannot be an empty string."
+                    " the Customer ID cannot be an empty string."
             )
         }
         customer?.ephemeralKeySecret?.isBlank() == true -> {

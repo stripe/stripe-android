@@ -5603,6 +5603,7 @@ public final class com/stripe/android/payments/paymentlauncher/StripePaymentLaun
 public abstract class com/stripe/android/paymentsheet/model/ClientSecret : android/os/Parcelable {
 	public static final field $stable I
 	public abstract fun getValue ()Ljava/lang/String;
+	public abstract fun validate ()V
 }
 
 public final class com/stripe/android/paymentsheet/model/PaymentIntentClientSecret : com/stripe/android/paymentsheet/model/ClientSecret {
@@ -5617,6 +5618,7 @@ public final class com/stripe/android/paymentsheet/model/PaymentIntentClientSecr
 	public fun getValue ()Ljava/lang/String;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
+	public fun validate ()V
 	public fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
@@ -5632,6 +5634,7 @@ public final class com/stripe/android/paymentsheet/model/SetupIntentClientSecret
 	public fun getValue ()Ljava/lang/String;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
+	public fun validate ()V
 	public fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
