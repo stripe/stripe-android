@@ -5192,6 +5192,11 @@ public final class com/stripe/android/payments/core/injection/DaggerPaymentLaunc
 	public fun inject (Lcom/stripe/android/payments/paymentlauncher/PaymentLauncherViewModel$Factory;)V
 }
 
+public final class com/stripe/android/payments/core/injection/DaggerPaymentLauncherViewModelFactoryComponent : com/stripe/android/payments/core/injection/PaymentLauncherViewModelFactoryComponent {
+	public static fun builder ()Lcom/stripe/android/payments/core/injection/PaymentLauncherViewModelFactoryComponent$Builder;
+	public fun inject (Lcom/stripe/android/payments/paymentlauncher/PaymentLauncherViewModel$Factory;)V
+}
+
 public final class com/stripe/android/payments/core/injection/DaggerStripe3ds2TransactionViewModelFactoryComponent : com/stripe/android/payments/core/injection/Stripe3ds2TransactionViewModelFactoryComponent {
 	public static fun builder ()Lcom/stripe/android/payments/core/injection/Stripe3ds2TransactionViewModelFactoryComponent$Builder;
 	public fun inject (Lcom/stripe/android/payments/core/authentication/threeds2/Stripe3ds2TransactionViewModelFactory;)V
@@ -5420,23 +5425,35 @@ public final class com/stripe/android/payments/paymentlauncher/PaymentLauncherCo
 
 public abstract class com/stripe/android/payments/paymentlauncher/PaymentLauncherContract$Args : android/os/Parcelable {
 	public static final field $stable I
-	public synthetic fun <init> (ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (ILjava/lang/String;Ljava/lang/String;ZLjava/util/Set;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun getEnableLogging ()Z
 	public fun getInjectorKey ()I
+	public fun getProductUsage ()Ljava/util/Set;
+	public fun getPublishableKey ()Ljava/lang/String;
+	public fun getStripeAccountId ()Ljava/lang/String;
 	public final fun toBundle ()Landroid/os/Bundle;
 }
 
 public final class com/stripe/android/payments/paymentlauncher/PaymentLauncherContract$Args$IntentConfirmationArgs : com/stripe/android/payments/paymentlauncher/PaymentLauncherContract$Args {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
-	public fun <init> (ILcom/stripe/android/model/ConfirmStripeIntentParams;)V
+	public fun <init> (ILjava/lang/String;Ljava/lang/String;ZLjava/util/Set;Lcom/stripe/android/model/ConfirmStripeIntentParams;)V
 	public final fun component1 ()I
-	public final fun component2 ()Lcom/stripe/android/model/ConfirmStripeIntentParams;
-	public final fun copy (ILcom/stripe/android/model/ConfirmStripeIntentParams;)Lcom/stripe/android/payments/paymentlauncher/PaymentLauncherContract$Args$IntentConfirmationArgs;
-	public static synthetic fun copy$default (Lcom/stripe/android/payments/paymentlauncher/PaymentLauncherContract$Args$IntentConfirmationArgs;ILcom/stripe/android/model/ConfirmStripeIntentParams;ILjava/lang/Object;)Lcom/stripe/android/payments/paymentlauncher/PaymentLauncherContract$Args$IntentConfirmationArgs;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Z
+	public final fun component5 ()Ljava/util/Set;
+	public final fun component6 ()Lcom/stripe/android/model/ConfirmStripeIntentParams;
+	public final fun copy (ILjava/lang/String;Ljava/lang/String;ZLjava/util/Set;Lcom/stripe/android/model/ConfirmStripeIntentParams;)Lcom/stripe/android/payments/paymentlauncher/PaymentLauncherContract$Args$IntentConfirmationArgs;
+	public static synthetic fun copy$default (Lcom/stripe/android/payments/paymentlauncher/PaymentLauncherContract$Args$IntentConfirmationArgs;ILjava/lang/String;Ljava/lang/String;ZLjava/util/Set;Lcom/stripe/android/model/ConfirmStripeIntentParams;ILjava/lang/Object;)Lcom/stripe/android/payments/paymentlauncher/PaymentLauncherContract$Args$IntentConfirmationArgs;
 	public fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getConfirmStripeIntentParams ()Lcom/stripe/android/model/ConfirmStripeIntentParams;
+	public fun getEnableLogging ()Z
 	public fun getInjectorKey ()I
+	public fun getProductUsage ()Ljava/util/Set;
+	public fun getPublishableKey ()Ljava/lang/String;
+	public fun getStripeAccountId ()Ljava/lang/String;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 	public fun writeToParcel (Landroid/os/Parcel;I)V
@@ -5445,15 +5462,23 @@ public final class com/stripe/android/payments/paymentlauncher/PaymentLauncherCo
 public final class com/stripe/android/payments/paymentlauncher/PaymentLauncherContract$Args$PaymentIntentNextActionArgs : com/stripe/android/payments/paymentlauncher/PaymentLauncherContract$Args {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
-	public fun <init> (ILjava/lang/String;)V
+	public fun <init> (ILjava/lang/String;Ljava/lang/String;ZLjava/util/Set;Ljava/lang/String;)V
 	public final fun component1 ()I
 	public final fun component2 ()Ljava/lang/String;
-	public final fun copy (ILjava/lang/String;)Lcom/stripe/android/payments/paymentlauncher/PaymentLauncherContract$Args$PaymentIntentNextActionArgs;
-	public static synthetic fun copy$default (Lcom/stripe/android/payments/paymentlauncher/PaymentLauncherContract$Args$PaymentIntentNextActionArgs;ILjava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/payments/paymentlauncher/PaymentLauncherContract$Args$PaymentIntentNextActionArgs;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Z
+	public final fun component5 ()Ljava/util/Set;
+	public final fun component6 ()Ljava/lang/String;
+	public final fun copy (ILjava/lang/String;Ljava/lang/String;ZLjava/util/Set;Ljava/lang/String;)Lcom/stripe/android/payments/paymentlauncher/PaymentLauncherContract$Args$PaymentIntentNextActionArgs;
+	public static synthetic fun copy$default (Lcom/stripe/android/payments/paymentlauncher/PaymentLauncherContract$Args$PaymentIntentNextActionArgs;ILjava/lang/String;Ljava/lang/String;ZLjava/util/Set;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/payments/paymentlauncher/PaymentLauncherContract$Args$PaymentIntentNextActionArgs;
 	public fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
+	public fun getEnableLogging ()Z
 	public fun getInjectorKey ()I
 	public final fun getPaymentIntentClientSecret ()Ljava/lang/String;
+	public fun getProductUsage ()Ljava/util/Set;
+	public fun getPublishableKey ()Ljava/lang/String;
+	public fun getStripeAccountId ()Ljava/lang/String;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 	public fun writeToParcel (Landroid/os/Parcel;I)V
@@ -5462,15 +5487,23 @@ public final class com/stripe/android/payments/paymentlauncher/PaymentLauncherCo
 public final class com/stripe/android/payments/paymentlauncher/PaymentLauncherContract$Args$SetupIntentNextActionArgs : com/stripe/android/payments/paymentlauncher/PaymentLauncherContract$Args {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
-	public fun <init> (ILjava/lang/String;)V
+	public fun <init> (ILjava/lang/String;Ljava/lang/String;ZLjava/util/Set;Ljava/lang/String;)V
 	public final fun component1 ()I
 	public final fun component2 ()Ljava/lang/String;
-	public final fun copy (ILjava/lang/String;)Lcom/stripe/android/payments/paymentlauncher/PaymentLauncherContract$Args$SetupIntentNextActionArgs;
-	public static synthetic fun copy$default (Lcom/stripe/android/payments/paymentlauncher/PaymentLauncherContract$Args$SetupIntentNextActionArgs;ILjava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/payments/paymentlauncher/PaymentLauncherContract$Args$SetupIntentNextActionArgs;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Z
+	public final fun component5 ()Ljava/util/Set;
+	public final fun component6 ()Ljava/lang/String;
+	public final fun copy (ILjava/lang/String;Ljava/lang/String;ZLjava/util/Set;Ljava/lang/String;)Lcom/stripe/android/payments/paymentlauncher/PaymentLauncherContract$Args$SetupIntentNextActionArgs;
+	public static synthetic fun copy$default (Lcom/stripe/android/payments/paymentlauncher/PaymentLauncherContract$Args$SetupIntentNextActionArgs;ILjava/lang/String;Ljava/lang/String;ZLjava/util/Set;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/payments/paymentlauncher/PaymentLauncherContract$Args$SetupIntentNextActionArgs;
 	public fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
+	public fun getEnableLogging ()Z
 	public fun getInjectorKey ()I
+	public fun getProductUsage ()Ljava/util/Set;
+	public fun getPublishableKey ()Ljava/lang/String;
 	public final fun getSetupIntentClientSecret ()Ljava/lang/String;
+	public fun getStripeAccountId ()Ljava/lang/String;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 	public fun writeToParcel (Landroid/os/Parcel;I)V
