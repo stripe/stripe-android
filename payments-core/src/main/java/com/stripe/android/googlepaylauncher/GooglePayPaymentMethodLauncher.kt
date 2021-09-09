@@ -69,7 +69,9 @@ open class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
         googlePayRepositoryFactory = {
             DefaultGooglePayRepository(
                 activity.application,
-                it
+                config.environment,
+                config.billingAddressConfig.convert(),
+                config.existingPaymentMethodRequired
             )
         },
         AnalyticsRequestFactory(
@@ -108,7 +110,9 @@ open class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
         googlePayRepositoryFactory = {
             DefaultGooglePayRepository(
                 fragment.requireActivity().application,
-                it
+                config.environment,
+                config.billingAddressConfig.convert(),
+                config.existingPaymentMethodRequired
             )
         },
         AnalyticsRequestFactory(
