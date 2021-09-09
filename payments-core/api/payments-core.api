@@ -499,30 +499,6 @@ public final class com/stripe/android/PaymentConfiguration$Companion {
 	public static synthetic fun init$default (Lcom/stripe/android/PaymentConfiguration$Companion;Landroid/content/Context;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)V
 }
 
-public abstract interface class com/stripe/android/PaymentController {
-	public abstract fun confirmAndAuthenticateAlipay (Lcom/stripe/android/model/ConfirmPaymentIntentParams;Lcom/stripe/android/AlipayAuthenticator;Lcom/stripe/android/networking/ApiRequest$Options;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public abstract fun confirmWeChatPay (Lcom/stripe/android/model/ConfirmPaymentIntentParams;Lcom/stripe/android/networking/ApiRequest$Options;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public abstract fun getAuthenticateSourceResult (Landroid/content/Intent;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public abstract fun getPaymentIntentResult (Landroid/content/Intent;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public abstract fun getSetupIntentResult (Landroid/content/Intent;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public abstract fun handleNextAction (Lcom/stripe/android/view/AuthActivityStarterHost;Lcom/stripe/android/model/StripeIntent;Lcom/stripe/android/networking/ApiRequest$Options;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public abstract fun registerLaunchersWithActivityResultCaller (Landroidx/activity/result/ActivityResultCaller;Landroidx/activity/result/ActivityResultCallback;)V
-	public abstract fun shouldHandlePaymentResult (ILandroid/content/Intent;)Z
-	public abstract fun shouldHandleSetupResult (ILandroid/content/Intent;)Z
-	public abstract fun shouldHandleSourceResult (ILandroid/content/Intent;)Z
-	public abstract fun startAuth (Lcom/stripe/android/view/AuthActivityStarterHost;Ljava/lang/String;Lcom/stripe/android/networking/ApiRequest$Options;Lcom/stripe/android/PaymentController$StripeIntentType;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public abstract fun startAuthenticateSource (Lcom/stripe/android/view/AuthActivityStarterHost;Lcom/stripe/android/model/Source;Lcom/stripe/android/networking/ApiRequest$Options;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public abstract fun startConfirmAndAuth (Lcom/stripe/android/view/AuthActivityStarterHost;Lcom/stripe/android/model/ConfirmStripeIntentParams;Lcom/stripe/android/networking/ApiRequest$Options;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public abstract fun unregisterLaunchers ()V
-}
-
-public final class com/stripe/android/PaymentController$StripeIntentType : java/lang/Enum {
-	public static final field PaymentIntent Lcom/stripe/android/PaymentController$StripeIntentType;
-	public static final field SetupIntent Lcom/stripe/android/PaymentController$StripeIntentType;
-	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/PaymentController$StripeIntentType;
-	public static fun values ()[Lcom/stripe/android/PaymentController$StripeIntentType;
-}
-
 public final class com/stripe/android/PaymentIntentResult : com/stripe/android/StripeIntentResult {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
@@ -5084,28 +5060,6 @@ public final class com/stripe/android/payments/PaymentFlowResult$Unvalidated$Com
 	public synthetic fun write (Ljava/lang/Object;Landroid/os/Parcel;I)V
 }
 
-public abstract class com/stripe/android/payments/PaymentFlowResultProcessor {
-	public static final field $stable I
-	public synthetic fun <init> (Landroid/content/Context;Ljavax/inject/Provider;Lcom/stripe/android/networking/StripeRepository;ZLkotlin/coroutines/CoroutineContext;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public synthetic fun <init> (Landroid/content/Context;Ljavax/inject/Provider;Lcom/stripe/android/networking/StripeRepository;ZLkotlin/coroutines/CoroutineContext;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
-	protected abstract fun cancelStripeIntent (Lcom/stripe/android/model/StripeIntent;Lcom/stripe/android/networking/ApiRequest$Options;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	protected abstract fun createStripeIntentResult (Lcom/stripe/android/model/StripeIntent;ILjava/lang/String;)Lcom/stripe/android/StripeIntentResult;
-	protected final fun getStripeRepository ()Lcom/stripe/android/networking/StripeRepository;
-	public fun processResult (Lcom/stripe/android/payments/PaymentFlowResult$Unvalidated;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	protected abstract fun retrieveStripeIntent (Ljava/lang/String;Lcom/stripe/android/networking/ApiRequest$Options;Ljava/util/List;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-}
-
-public class com/stripe/android/payments/PaymentIntentFlowResultProcessor : com/stripe/android/payments/PaymentFlowResultProcessor {
-	public static final field $stable I
-	public fun <init> (Landroid/content/Context;Ljavax/inject/Provider;Lcom/stripe/android/networking/StripeRepository;ZLkotlin/coroutines/CoroutineContext;)V
-	public synthetic fun <init> (Landroid/content/Context;Ljavax/inject/Provider;Lcom/stripe/android/networking/StripeRepository;ZLkotlin/coroutines/CoroutineContext;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	protected fun cancelStripeIntent (Lcom/stripe/android/model/PaymentIntent;Lcom/stripe/android/networking/ApiRequest$Options;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public synthetic fun cancelStripeIntent (Lcom/stripe/android/model/StripeIntent;Lcom/stripe/android/networking/ApiRequest$Options;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	protected fun createStripeIntentResult (Lcom/stripe/android/model/PaymentIntent;ILjava/lang/String;)Lcom/stripe/android/PaymentIntentResult;
-	public synthetic fun createStripeIntentResult (Lcom/stripe/android/model/StripeIntent;ILjava/lang/String;)Lcom/stripe/android/StripeIntentResult;
-	protected fun retrieveStripeIntent (Ljava/lang/String;Lcom/stripe/android/networking/ApiRequest$Options;Ljava/util/List;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-}
-
 public abstract interface class com/stripe/android/payments/core/ActivityResultLauncherHost {
 	public abstract fun onLauncherInvalidated ()V
 	public abstract fun onNewActivityResultCaller (Landroidx/activity/result/ActivityResultCaller;Landroidx/activity/result/ActivityResultCallback;)V
@@ -5298,44 +5252,12 @@ public final class com/stripe/android/payments/core/injection/PaymentCommonModul
 	public static fun providePaymentConfiguration (Landroid/content/Context;)Lcom/stripe/android/PaymentConfiguration;
 }
 
-public final class com/stripe/android/payments/core/injection/PaymentCommonModule_Companion_ProvidePaymentFlowResultProcessor$payments_core_releaseFactory : dagger/internal/Factory {
-	public fun <init> (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)V
-	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/payments/core/injection/PaymentCommonModule_Companion_ProvidePaymentFlowResultProcessor$payments_core_releaseFactory;
-	public fun get ()Lcom/stripe/android/payments/PaymentFlowResultProcessor;
-	public synthetic fun get ()Ljava/lang/Object;
-	public static fun providePaymentFlowResultProcessor$payments_core_release (Lcom/stripe/android/paymentsheet/model/ClientSecret;Lcom/stripe/android/payments/PaymentIntentFlowResultProcessor;Lcom/stripe/android/payments/SetupIntentFlowResultProcessor;)Lcom/stripe/android/payments/PaymentFlowResultProcessor;
-}
-
-public final class com/stripe/android/payments/core/injection/PaymentCommonModule_Companion_ProvidePaymentIntentFlowResultProcessor$payments_core_releaseFactory : dagger/internal/Factory {
-	public fun <init> (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)V
-	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/payments/core/injection/PaymentCommonModule_Companion_ProvidePaymentIntentFlowResultProcessor$payments_core_releaseFactory;
-	public fun get ()Lcom/stripe/android/payments/PaymentIntentFlowResultProcessor;
-	public synthetic fun get ()Ljava/lang/Object;
-	public static fun providePaymentIntentFlowResultProcessor$payments_core_release (Landroid/content/Context;Ldagger/Lazy;Lcom/stripe/android/networking/StripeApiRepository;ZLkotlin/coroutines/CoroutineContext;)Lcom/stripe/android/payments/PaymentIntentFlowResultProcessor;
-}
-
-public final class com/stripe/android/payments/core/injection/PaymentCommonModule_Companion_ProvideSetupIntentFlowResultProcessor$payments_core_releaseFactory : dagger/internal/Factory {
-	public fun <init> (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)V
-	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/payments/core/injection/PaymentCommonModule_Companion_ProvideSetupIntentFlowResultProcessor$payments_core_releaseFactory;
-	public fun get ()Lcom/stripe/android/payments/SetupIntentFlowResultProcessor;
-	public synthetic fun get ()Ljava/lang/Object;
-	public static fun provideSetupIntentFlowResultProcessor$payments_core_release (Landroid/content/Context;Ldagger/Lazy;Lcom/stripe/android/networking/StripeApiRepository;ZLkotlin/coroutines/CoroutineContext;)Lcom/stripe/android/payments/SetupIntentFlowResultProcessor;
-}
-
 public final class com/stripe/android/payments/core/injection/PaymentCommonModule_Companion_ProvideStripeApiRepository$payments_core_releaseFactory : dagger/internal/Factory {
 	public fun <init> (Ljavax/inject/Provider;Ljavax/inject/Provider;)V
 	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/payments/core/injection/PaymentCommonModule_Companion_ProvideStripeApiRepository$payments_core_releaseFactory;
 	public fun get ()Lcom/stripe/android/networking/StripeApiRepository;
 	public synthetic fun get ()Ljava/lang/Object;
 	public static fun provideStripeApiRepository$payments_core_release (Landroid/content/Context;Ldagger/Lazy;)Lcom/stripe/android/networking/StripeApiRepository;
-}
-
-public final class com/stripe/android/payments/core/injection/PaymentCommonModule_Companion_ProvideStripePaymentController$payments_core_releaseFactory : dagger/internal/Factory {
-	public fun <init> (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)V
-	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/payments/core/injection/PaymentCommonModule_Companion_ProvideStripePaymentController$payments_core_releaseFactory;
-	public fun get ()Lcom/stripe/android/PaymentController;
-	public synthetic fun get ()Ljava/lang/Object;
-	public static fun provideStripePaymentController$payments_core_release (Landroid/content/Context;Lcom/stripe/android/networking/StripeApiRepository;Ldagger/Lazy;Z)Lcom/stripe/android/PaymentController;
 }
 
 public final class com/stripe/android/payments/core/injection/PaymentLauncherModule_ProvideApiRequestOptionsFactory : dagger/internal/Factory {

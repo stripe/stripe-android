@@ -1,7 +1,6 @@
 package com.stripe.android.payments
 
 import android.content.Context
-import androidx.annotation.RestrictTo
 import com.stripe.android.Logger
 import com.stripe.android.PaymentController
 import com.stripe.android.PaymentIntentResult
@@ -20,8 +19,7 @@ import kotlin.coroutines.CoroutineContext
 /**
  * Class responsible for processing the result of a [PaymentController] confirm operation.
  */
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
-sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : StripeIntentResult<T>>(
+internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : StripeIntentResult<T>>(
     context: Context,
     private val publishableKeyProvider: Provider<String>,
     protected val stripeRepository: StripeRepository,
@@ -110,8 +108,7 @@ sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : StripeIntentRe
 /**
  * Processes the result of a [PaymentIntent] confirmation.
  */
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
-open class PaymentIntentFlowResultProcessor(
+internal class PaymentIntentFlowResultProcessor(
     context: Context,
     publishableKeyProvider: Provider<String>,
     stripeRepository: StripeRepository,
