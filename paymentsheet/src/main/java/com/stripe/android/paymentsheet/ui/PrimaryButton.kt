@@ -8,7 +8,6 @@ import android.view.LayoutInflater
 import android.widget.FrameLayout
 import androidx.core.content.withStyledAttributes
 import androidx.core.view.isVisible
-import androidx.test.espresso.idling.CountingIdlingResource
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.databinding.PrimaryButtonBinding
 
@@ -117,12 +116,10 @@ class PrimaryButton @JvmOverloads constructor(
                 onReadyState()
             }
             State.StartProcessing -> {
-                buyButtonIdleResource.increment()
                 Log.e("STRIPE", "Start processing")
                 onStartProcessing()
             }
             is State.FinishProcessing -> {
-                buyButtonIdleResource.decrement()
                 Log.e("STRIPE", "Finish processing")
                 onFinishProcessing(state.onComplete)
             }
@@ -144,10 +141,6 @@ class PrimaryButton @JvmOverloads constructor(
         object Ready : State()
         object StartProcessing : State()
         data class FinishProcessing(val onComplete: () -> Unit) : State()
-    }
-
-    companion object {
-        val buyButtonIdleResource = CountingIdlingResource("primary_button")
     }
 
 }

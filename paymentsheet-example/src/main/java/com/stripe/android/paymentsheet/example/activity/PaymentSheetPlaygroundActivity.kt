@@ -236,6 +236,5 @@ internal open class PaymentSheetPlaygroundActivity : AppCompatActivity() {
         private const val merchantName = "Example, Inc."
         val singleStepUIIdlingResource = CountingIdlingResource("singleStepUI")
         val multiStepUIIdlingResource = CountingIdlingResource("multiStepUI")
-//        val paymentSheetResponse = CountingIdlingResource("response")
     }
 }

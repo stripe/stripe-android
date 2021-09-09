@@ -30,7 +30,7 @@ import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import kotlinx.coroutines.launch
 
-class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
+internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
     @VisibleForTesting
     internal var viewModelFactory: ViewModelProvider.Factory =
         PaymentSheetViewModel.Factory(
@@ -132,7 +132,6 @@ class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
 
         viewModel.fragmentConfig.observe(this) { config ->
             if (config != null) {
-//                transitionFragmentResource.decrement()
                 val target = if (config.paymentMethods.isEmpty()) {
                     PaymentSheetViewModel.TransitionTarget.AddPaymentMethodSheet(config)
                 } else {
@@ -302,6 +301,5 @@ class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
     companion object {
         internal const val EXTRA_FRAGMENT_CONFIG = BaseSheetActivity.EXTRA_FRAGMENT_CONFIG
         internal const val EXTRA_STARTER_ARGS = BaseSheetActivity.EXTRA_STARTER_ARGS
-        val transitionFragmentResource = CountingIdlingResource("transition")
     }
 }

@@ -12,6 +12,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.distinctUntilChanged
 import androidx.lifecycle.viewModelScope
+import androidx.test.espresso.idling.CountingIdlingResource
 import com.stripe.android.Logger
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
@@ -47,6 +48,9 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
+
+@VisibleForTesting
+val transitionFragmentResource = CountingIdlingResource("transition")
 
 /**
  * This is used by both the [PaymentSheetActivity] and the [PaymentSheetAddPaymentMethodFragment]
@@ -181,7 +185,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
      * continues through validation and fetching the saved payment methods for the customer.
      */
     fun fetchStripeIntent() {
-        PaymentSheetActivity.transitionFragmentResource.increment()
+        transitionFragmentResource.increment()
         viewModelScope.launch {
             runCatching {
                 stripeIntentRepository.get(args.clientSecret)
@@ -241,7 +245,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                 onSuccess = {
                     _paymentMethods.value = it
                     setStripeIntent(stripeIntent)
-                    PaymentSheetActivity.transitionFragmentResource.decrement()
+                    transitionFragmentResource.decrement()
                     resetViewState()
                 },
                 onFailure = ::onFatal
