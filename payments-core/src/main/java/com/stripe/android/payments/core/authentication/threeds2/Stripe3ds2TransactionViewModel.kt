@@ -32,7 +32,6 @@ import com.stripe.android.stripe3ds2.transaction.InitChallengeRepositoryFactory
 import com.stripe.android.stripe3ds2.transaction.IntentData
 import com.stripe.android.stripe3ds2.transaction.MessageVersionRegistry
 import com.stripe.android.stripe3ds2.transaction.Transaction
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -332,7 +331,6 @@ internal class Stripe3ds2TransactionViewModelFactory(
         DaggerStripe3ds2TransactionViewModelFactoryComponent.builder()
             .context(arg.application)
             .enableLogging(arg.enableLogging)
-            .workContext(Dispatchers.IO)
             .publishableKeyProvider { arg.publishableKey }
             .productUsage(arg.productUsage)
             .build()

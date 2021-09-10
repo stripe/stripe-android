@@ -6,7 +6,6 @@ import dagger.BindsInstance
 import dagger.Component
 import javax.inject.Named
 import javax.inject.Singleton
-import kotlin.coroutines.CoroutineContext
 
 /**
  * Component to inject [PaymentLauncherViewModel.Factory] when the app process is killed and
@@ -16,7 +15,8 @@ import kotlin.coroutines.CoroutineContext
 @Component(
     modules = [
         PaymentLauncherModule::class,
-        StripeRepositoryModule::class
+        StripeRepositoryModule::class,
+        CoroutineContextModule::class
     ]
 )
 internal interface PaymentLauncherViewModelFactoryComponent {
@@ -29,12 +29,6 @@ internal interface PaymentLauncherViewModelFactoryComponent {
 
         @BindsInstance
         fun enableLogging(@Named(ENABLE_LOGGING) enableLogging: Boolean): Builder
-
-        @BindsInstance
-        fun ioContext(@IOContext workContext: CoroutineContext): Builder
-
-        @BindsInstance
-        fun uiContext(@UIContext uiContext: CoroutineContext): Builder
 
         @BindsInstance
         fun publishableKeyProvider(@Named(PUBLISHABLE_KEY) publishableKeyProvider: () -> String): Builder

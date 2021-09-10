@@ -5181,6 +5181,29 @@ public final class com/stripe/android/payments/core/injection/AuthenticationModu
 	public static fun providePaymentRelayStarterFactory (Ldagger/Lazy;)Lkotlin/jvm/functions/Function1;
 }
 
+public final class com/stripe/android/payments/core/injection/CoroutineContextModule {
+	public static final field $stable I
+	public fun <init> ()V
+	public final fun provideUIContext ()Lkotlin/coroutines/CoroutineContext;
+	public final fun provideWorkContext ()Lkotlin/coroutines/CoroutineContext;
+}
+
+public final class com/stripe/android/payments/core/injection/CoroutineContextModule_ProvideUIContextFactory : dagger/internal/Factory {
+	public fun <init> (Lcom/stripe/android/payments/core/injection/CoroutineContextModule;)V
+	public static fun create (Lcom/stripe/android/payments/core/injection/CoroutineContextModule;)Lcom/stripe/android/payments/core/injection/CoroutineContextModule_ProvideUIContextFactory;
+	public synthetic fun get ()Ljava/lang/Object;
+	public fun get ()Lkotlin/coroutines/CoroutineContext;
+	public static fun provideUIContext (Lcom/stripe/android/payments/core/injection/CoroutineContextModule;)Lkotlin/coroutines/CoroutineContext;
+}
+
+public final class com/stripe/android/payments/core/injection/CoroutineContextModule_ProvideWorkContextFactory : dagger/internal/Factory {
+	public fun <init> (Lcom/stripe/android/payments/core/injection/CoroutineContextModule;)V
+	public static fun create (Lcom/stripe/android/payments/core/injection/CoroutineContextModule;)Lcom/stripe/android/payments/core/injection/CoroutineContextModule_ProvideWorkContextFactory;
+	public synthetic fun get ()Ljava/lang/Object;
+	public fun get ()Lkotlin/coroutines/CoroutineContext;
+	public static fun provideWorkContext (Lcom/stripe/android/payments/core/injection/CoroutineContextModule;)Lkotlin/coroutines/CoroutineContext;
+}
+
 public final class com/stripe/android/payments/core/injection/DaggerAuthenticationComponent : com/stripe/android/payments/core/injection/AuthenticationComponent {
 	public static fun builder ()Lcom/stripe/android/payments/core/injection/AuthenticationComponent$Builder;
 	public fun getRegistry ()Lcom/stripe/android/payments/core/authentication/DefaultPaymentAuthenticatorRegistry;
