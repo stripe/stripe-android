@@ -49,7 +49,6 @@ import kotlin.coroutines.CoroutineContext
  */
 internal class StripePaymentController
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
-@VisibleForTesting
 constructor(
     context: Context,
     private val publishableKeyProvider: Provider<String>,

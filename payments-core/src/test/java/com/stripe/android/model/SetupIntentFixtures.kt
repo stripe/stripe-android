@@ -253,10 +253,9 @@ internal object SetupIntentFixtures {
         )
     )
 
-    internal val SI_REQUIRES_PAYMENT_METHOD = requireNotNull(
-        PARSER.parse(
-            JSONObject(
-                """
+    internal val SI_REQUIRES_PAYMENT_METHOD_JSON =
+        JSONObject(
+            """
         {
             "id": "seti_1GSmaFCRMbs",
             "object": "setup_intent",
@@ -274,9 +273,10 @@ internal object SetupIntentFixtures {
             "usage": "off_session"
         }
                 """.trimIndent()
-            )
         )
-    )
+
+    internal val SI_REQUIRES_PAYMENT_METHOD =
+        requireNotNull(PARSER.parse(SI_REQUIRES_PAYMENT_METHOD_JSON))
 
     internal val EXPANDED_PAYMENT_METHOD = JSONObject(
         """
