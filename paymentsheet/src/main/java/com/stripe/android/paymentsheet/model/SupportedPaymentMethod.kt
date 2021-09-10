@@ -18,7 +18,7 @@ import com.stripe.android.paymentsheet.forms.sofort
  *
  * FormSpec is optionally null only because Card is not converted to the compose model.
  */
-internal enum class SupportedPaymentMethod(
+enum class SupportedPaymentMethod(
     val code: String,
     @StringRes val displayNameResource: Int,
     @DrawableRes val iconResource: Int,
@@ -95,5 +95,7 @@ internal enum class SupportedPaymentMethod(
          * returning customers.
          */
         val supportedSavedPaymentMethods = setOf("card", "sepa_debit")
+
+        fun pmLabelResId() = values().map{ it.displayNameResource }
     }
 }

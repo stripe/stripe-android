@@ -15,7 +15,7 @@ import java.util.Locale
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 
-internal sealed class StripeIntentRepository {
+sealed class StripeIntentRepository {
     abstract suspend fun get(
         clientSecret: ClientSecret
     ): StripeIntent

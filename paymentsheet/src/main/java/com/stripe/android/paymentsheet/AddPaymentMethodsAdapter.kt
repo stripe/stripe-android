@@ -8,7 +8,7 @@ import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
 import kotlin.math.roundToInt
 import kotlin.properties.Delegates
 
-internal class AddPaymentMethodsAdapter(
+class AddPaymentMethodsAdapter(
     private val paymentMethods: List<SupportedPaymentMethod>,
     val paymentMethodSelectedListener: (paymentMethod: SupportedPaymentMethod) -> Unit
 ) : RecyclerView.Adapter<AddPaymentMethodsAdapter.AddPaymentMethodViewHolder>() {
@@ -51,7 +51,7 @@ internal class AddPaymentMethodsAdapter(
         }
     }
 
-    internal class AddPaymentMethodViewHolder(
+    class AddPaymentMethodViewHolder(
         private val binding: LayoutPaymentsheetAddPaymentMethodCardViewBinding
     ) : RecyclerView.ViewHolder(binding.root) {
         constructor(parent: ViewGroup) : this(
