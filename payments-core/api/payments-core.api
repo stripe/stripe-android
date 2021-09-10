@@ -1143,7 +1143,7 @@ public final class com/stripe/android/googlepaylauncher/GooglePayLauncherModule_
 	public static fun provideGooglePayRepositoryFactory (Lcom/stripe/android/googlepaylauncher/GooglePayLauncherModule;Landroid/content/Context;Lcom/stripe/android/Logger;)Lkotlin/jvm/functions/Function1;
 }
 
-public class com/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncher {
+public final class com/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncher {
 	public static final field $stable I
 	public static final field Companion Lcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncher$Companion;
 	public static final field DEVELOPER_ERROR I
@@ -1153,7 +1153,7 @@ public class com/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncher
 	public fun <init> (Landroidx/fragment/app/Fragment;Lcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncher$Config;Lcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncher$ReadyCallback;Lcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncher$ResultCallback;)V
 	public final fun present (Ljava/lang/String;)V
 	public final fun present (Ljava/lang/String;I)V
-	public fun present (Ljava/lang/String;ILjava/lang/String;)V
+	public final fun present (Ljava/lang/String;ILjava/lang/String;)V
 	public static synthetic fun present$default (Lcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncher;Ljava/lang/String;ILjava/lang/String;ILjava/lang/Object;)V
 }
 
