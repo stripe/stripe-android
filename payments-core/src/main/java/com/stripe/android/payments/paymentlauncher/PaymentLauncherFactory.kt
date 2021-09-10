@@ -46,21 +46,28 @@ class PaymentLauncherFactory(
     fun create(
         publishableKey: String,
         stripeAccountId: String? = null
-    ): PaymentLauncher = StripePaymentLauncher(
-        { publishableKey },
-        { stripeAccountId },
-        hostActivityLauncher,
-        context,
-        BuildConfig.DEBUG,
-        Dispatchers.IO,
-        Dispatchers.Main,
-        StripeApiRepository(
+    ): PaymentLauncher {
+        val productUsage = setOf("PaymentLauncher")
+        val analyticsRequestFactory = AnalyticsRequestFactory(
             context,
-            { publishableKey }
-        ),
-        AnalyticsRequestFactory(
-            context,
-            { publishableKey }
+            { publishableKey },
+            productUsage
         )
-    )
+        return StripePaymentLauncher(
+            { publishableKey },
+            { stripeAccountId },
+            hostActivityLauncher,
+            context,
+            BuildConfig.DEBUG,
+            Dispatchers.IO,
+            Dispatchers.Main,
+            StripeApiRepository(
+                context,
+                { publishableKey },
+                analyticsRequestFactory = analyticsRequestFactory
+            ),
+            analyticsRequestFactory,
+            productUsage = productUsage
+        )
+    }
 }

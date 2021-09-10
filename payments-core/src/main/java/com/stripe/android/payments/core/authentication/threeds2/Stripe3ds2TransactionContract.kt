@@ -40,7 +40,9 @@ internal class Stripe3ds2TransactionContract :
         val requestOptions: ApiRequest.Options,
         val enableLogging: Boolean,
         val statusBarColor: Int?,
-        @InjectorKey val injectorKey: Int
+        @InjectorKey val injectorKey: Int,
+        val publishableKey: String,
+        val productUsage: Set<String>
     ) : Parcelable {
         val fingerprint: Stripe3ds2Fingerprint get() = Stripe3ds2Fingerprint(nextActionData)
 

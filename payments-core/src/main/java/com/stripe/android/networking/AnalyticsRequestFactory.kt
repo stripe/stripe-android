@@ -22,10 +22,9 @@ class AnalyticsRequestFactory @VisibleForTesting internal constructor(
     private val packageInfo: PackageInfo?,
     private val packageName: String,
     private val publishableKeyProvider: Provider<String>,
-    private val defaultProductUsageTokens: Set<String> = emptySet()
+    internal val defaultProductUsageTokens: Set<String> = emptySet()
 ) {
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    @VisibleForTesting
     constructor(
         context: Context,
         publishableKey: String,

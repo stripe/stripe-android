@@ -36,8 +36,4 @@ internal class SaveForFutureUseController(
     override fun onRawValueChange(rawValue: String) {
         onValueChange(rawValue.toBooleanStrictOrNull() ?: true)
     }
-
-    fun toggleValue() {
-        _saveForFutureUse.value = !_saveForFutureUse.value
-    }
 }

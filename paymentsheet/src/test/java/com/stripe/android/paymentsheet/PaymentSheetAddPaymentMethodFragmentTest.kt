@@ -75,7 +75,7 @@ class PaymentSheetAddPaymentMethodFragmentTest {
         createFragment(stripeIntent = paymentIntent) { fragment, viewBinding ->
             fragment.sheetViewModel._processing.value = true
             val adapter =
-                viewBinding.paymentMethodsRecycler.adapter as com.stripe.android.paymentsheet.AddPaymentMethodsAdapter
+                viewBinding.paymentMethodsRecycler.adapter as AddPaymentMethodsAdapter
             assertThat(adapter.isEnabled).isFalse()
         }
     }
@@ -427,10 +427,10 @@ class PaymentSheetAddPaymentMethodFragmentTest {
             )
         assertThat(selection?.shouldSavePaymentMethod).isTrue()
         assertThat(selection?.labelResource).isEqualTo(
-            com.stripe.android.paymentsheet.R.string.stripe_paymentsheet_payment_method_sofort
+            R.string.stripe_paymentsheet_payment_method_sofort
         )
         assertThat(selection?.iconResource).isEqualTo(
-            com.stripe.android.paymentsheet.R.drawable.stripe_ic_paymentsheet_pm_klarna
+            R.drawable.stripe_ic_paymentsheet_pm_klarna
         )
     }
 

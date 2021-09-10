@@ -13,6 +13,7 @@ import com.stripe.android.payments.core.injection.IOContext
 import com.stripe.android.payments.core.injection.Injectable
 import com.stripe.android.payments.core.injection.Injector
 import com.stripe.android.payments.core.injection.InjectorKey
+import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.payments.core.injection.PaymentLauncherComponent
 import com.stripe.android.payments.core.injection.STRIPE_ACCOUNT_ID
@@ -29,15 +30,16 @@ import kotlin.coroutines.CoroutineContext
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class StripePaymentLauncher @AssistedInject internal constructor(
-    @Assisted(PUBLISHABLE_KEY) publishableKeyProvider: () -> String,
-    @Assisted(STRIPE_ACCOUNT_ID) stripeAccountIdProvider: () -> String?,
+    @Assisted(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String,
+    @Assisted(STRIPE_ACCOUNT_ID) private val stripeAccountIdProvider: () -> String?,
     @Assisted private val hostActivityLauncher: ActivityResultLauncher<PaymentLauncherContract.Args>,
     context: Context,
-    @Named(ENABLE_LOGGING) enableLogging: Boolean,
+    @Named(ENABLE_LOGGING) private val enableLogging: Boolean,
     @IOContext ioContext: CoroutineContext,
     @UIContext uiContext: CoroutineContext,
     stripeRepository: StripeRepository,
-    analyticsRequestFactory: AnalyticsRequestFactory
+    analyticsRequestFactory: AnalyticsRequestFactory,
+    @Named(PRODUCT_USAGE) private val productUsage: Set<String>
 ) : PaymentLauncher, Injector {
     private val paymentLauncherComponent: PaymentLauncherComponent =
         DaggerPaymentLauncherComponent.builder()
@@ -49,6 +51,7 @@ class StripePaymentLauncher @AssistedInject internal constructor(
             .analyticsRequestFactory(analyticsRequestFactory)
             .publishableKeyProvider(publishableKeyProvider)
             .stripeAccountIdProvider(stripeAccountIdProvider)
+            .productUsage(productUsage)
             .build()
 
     @InjectorKey
@@ -58,7 +61,7 @@ class StripePaymentLauncher @AssistedInject internal constructor(
         WeakMapInjectorRegistry.register(this, injectorKey)
     }
 
-    override fun inject(injectable: Injectable) {
+    override fun inject(injectable: Injectable<*>) {
         when (injectable) {
             is PaymentLauncherViewModel.Factory -> {
                 paymentLauncherComponent.inject(injectable)
@@ -73,6 +76,10 @@ class StripePaymentLauncher @AssistedInject internal constructor(
         hostActivityLauncher.launch(
             PaymentLauncherContract.Args.IntentConfirmationArgs(
                 injectorKey = injectorKey,
+                publishableKey = publishableKeyProvider(),
+                stripeAccountId = stripeAccountIdProvider(),
+                enableLogging = enableLogging,
+                productUsage = productUsage,
                 confirmStripeIntentParams = params
             )
         )
@@ -82,6 +89,10 @@ class StripePaymentLauncher @AssistedInject internal constructor(
         hostActivityLauncher.launch(
             PaymentLauncherContract.Args.IntentConfirmationArgs(
                 injectorKey = injectorKey,
+                publishableKey = publishableKeyProvider(),
+                stripeAccountId = stripeAccountIdProvider(),
+                enableLogging = enableLogging,
+                productUsage = productUsage,
                 confirmStripeIntentParams = params
             )
         )
@@ -91,6 +102,10 @@ class StripePaymentLauncher @AssistedInject internal constructor(
         hostActivityLauncher.launch(
             PaymentLauncherContract.Args.PaymentIntentNextActionArgs(
                 injectorKey = injectorKey,
+                publishableKey = publishableKeyProvider(),
+                stripeAccountId = stripeAccountIdProvider(),
+                enableLogging = enableLogging,
+                productUsage = productUsage,
                 paymentIntentClientSecret = clientSecret
             )
         )
@@ -100,6 +115,10 @@ class StripePaymentLauncher @AssistedInject internal constructor(
         hostActivityLauncher.launch(
             PaymentLauncherContract.Args.SetupIntentNextActionArgs(
                 injectorKey = injectorKey,
+                publishableKey = publishableKeyProvider(),
+                stripeAccountId = stripeAccountIdProvider(),
+                enableLogging = enableLogging,
+                productUsage = productUsage,
                 setupIntentClientSecret = clientSecret
             )
         )

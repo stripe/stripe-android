@@ -31,7 +31,7 @@ class PaymentOptionsAddPaymentMethodFragmentTest {
     private val eventReporter = mock<EventReporter>()
 
     private val testInjector: Injector = object : Injector {
-        override fun inject(injectable: Injectable) {
+        override fun inject(injectable: Injectable<*>) {
             val factory = (injectable as PaymentOptionsViewModel.Factory)
             factory.eventReporter = eventReporter
             factory.customerRepository = com.stripe.android.paymentsheet.FakeCustomerRepository()

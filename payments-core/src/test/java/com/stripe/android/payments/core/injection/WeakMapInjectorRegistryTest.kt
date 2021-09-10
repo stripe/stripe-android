@@ -65,7 +65,7 @@ class WeakMapInjectorRegistryTest {
     // calling whenever() on a mock will end up holding the mock instance, therefore a real
     // Injector instance is needed to ensure System.gc() works correctly.
     internal class TestInjector : Injector {
-        override fun inject(injectable: Injectable) {
+        override fun inject(injectable: Injectable<*>) {
             // no - op
         }
     }
