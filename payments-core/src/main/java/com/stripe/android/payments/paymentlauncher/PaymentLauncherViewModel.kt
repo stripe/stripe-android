@@ -33,7 +33,6 @@ import com.stripe.android.payments.core.injection.UIContext
 import com.stripe.android.payments.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.view.AuthActivityStarterHost
 import dagger.Lazy
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -357,8 +356,6 @@ internal class PaymentLauncherViewModel(
             DaggerPaymentLauncherViewModelFactoryComponent.builder()
                 .context(arg.application)
                 .enableLogging(arg.enableLogging)
-                .ioContext(Dispatchers.IO)
-                .uiContext(Dispatchers.Main)
                 .publishableKeyProvider { arg.publishableKey }
                 .stripeAccountIdProvider { arg.stripeAccountId }
                 .productUsage(arg.productUsage)

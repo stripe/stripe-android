@@ -6,7 +6,6 @@ import dagger.BindsInstance
 import dagger.Component
 import javax.inject.Named
 import javax.inject.Singleton
-import kotlin.coroutines.CoroutineContext
 
 /**
  * Component to inject [Stripe3ds2TransactionViewModelFactory] when the app process is killed and
@@ -16,7 +15,8 @@ import kotlin.coroutines.CoroutineContext
 @Component(
     modules = [
         StripeRepositoryModule::class,
-        Stripe3ds2TransactionViewModelModule::class
+        Stripe3ds2TransactionViewModelModule::class,
+        CoroutineContextModule::class
     ]
 )
 internal interface Stripe3ds2TransactionViewModelFactoryComponent {
@@ -29,9 +29,6 @@ internal interface Stripe3ds2TransactionViewModelFactoryComponent {
 
         @BindsInstance
         fun enableLogging(@Named(ENABLE_LOGGING) enableLogging: Boolean): Builder
-
-        @BindsInstance
-        fun workContext(@IOContext workContext: CoroutineContext): Builder
 
         @BindsInstance
         fun publishableKeyProvider(
