@@ -70,7 +70,9 @@ class PaymentOptionsAddPaymentMethodFragmentTest {
             isGooglePayReady = false,
             newCard = null,
             statusBarColor = PaymentSheetFixtures.STATUS_BAR_COLOR,
-            injectorKey = MOCK_INJECTOR_KEY
+            injectorKey = MOCK_INJECTOR_KEY,
+            enableLogging = false,
+            productUsage = mock()
         ),
         fragmentConfig: FragmentConfig? = FragmentConfigFixtures.DEFAULT,
         onReady: (PaymentOptionsAddPaymentMethodFragment, FragmentPaymentsheetAddPaymentMethodBinding) -> Unit

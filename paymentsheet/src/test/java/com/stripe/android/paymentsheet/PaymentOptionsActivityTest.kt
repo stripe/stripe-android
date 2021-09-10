@@ -305,7 +305,9 @@ class PaymentOptionsActivityTest {
             isGooglePayReady = false,
             newCard = null,
             statusBarColor = PaymentSheetFixtures.STATUS_BAR_COLOR,
-            injectorKey = 0
+            injectorKey = 0,
+            enableLogging = false,
+            productUsage = mock()
         )
     }
 }

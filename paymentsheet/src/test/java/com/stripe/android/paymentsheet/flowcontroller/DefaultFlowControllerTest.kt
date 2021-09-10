@@ -271,7 +271,9 @@ internal class DefaultFlowControllerTest {
                         activity,
                         R.color.stripe_toolbar_color_default_dark
                     ),
-                    injectorKey = INJECTOR_KEY
+                    injectorKey = INJECTOR_KEY,
+                    enableLogging = ENABLE_LOGGING,
+                    productUsage = PRODUCT_USAGE
                 )
             }
 
@@ -661,7 +663,9 @@ internal class DefaultFlowControllerTest {
         ViewModelProvider(activity)[FlowControllerViewModel::class.java],
         paymentLauncherAssistedFactory,
         { PaymentConfiguration.getInstance(activity) },
-        testDispatcher
+        testDispatcher,
+        ENABLE_LOGGING,
+        PRODUCT_USAGE
     )
 
     private class FakeFlowControllerInitializer(
@@ -726,6 +730,8 @@ internal class DefaultFlowControllerTest {
         private val PAYMENT_METHODS =
             listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD) + PaymentMethodFixtures.createCards(5)
 
-        private val INJECTOR_KEY = 0
+        private const val INJECTOR_KEY = 0
+        private const val ENABLE_LOGGING = false
+        private val PRODUCT_USAGE = setOf("TestProductUsage")
     }
 }
