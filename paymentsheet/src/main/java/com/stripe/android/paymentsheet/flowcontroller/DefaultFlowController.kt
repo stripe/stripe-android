@@ -12,21 +12,21 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.OnLifecycleEvent
 import androidx.lifecycle.ViewModelStoreOwner
 import com.stripe.android.PaymentConfiguration
-import com.stripe.android.PaymentController
-import com.stripe.android.StripeIntentResult
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContract
+import com.stripe.android.model.ConfirmPaymentIntentParams
+import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.PaymentIntent
-import com.stripe.android.model.StripeIntent
-import com.stripe.android.networking.ApiRequest
-import com.stripe.android.payments.PaymentFlowResult
-import com.stripe.android.payments.PaymentFlowResultProcessor
 import com.stripe.android.payments.core.injection.Injectable
 import com.stripe.android.payments.core.injection.Injector
 import com.stripe.android.payments.core.injection.InjectorKey
 import com.stripe.android.payments.core.injection.UIContext
 import com.stripe.android.payments.core.injection.WeakMapInjectorRegistry
+import com.stripe.android.payments.paymentlauncher.PaymentLauncher
+import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
+import com.stripe.android.payments.paymentlauncher.PaymentResult
+import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
 import com.stripe.android.paymentsheet.PaymentOptionCallback
 import com.stripe.android.paymentsheet.PaymentOptionContract
 import com.stripe.android.paymentsheet.PaymentOptionResult
@@ -46,7 +46,6 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.SetupIntentClientSecret
 import com.stripe.android.paymentsheet.validate
-import com.stripe.android.view.AuthActivityStarterHost
 import dagger.Lazy
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.isActive
@@ -55,7 +54,6 @@ import kotlinx.coroutines.withContext
 import kotlinx.parcelize.Parcelize
 import java.security.InvalidParameterException
 import javax.inject.Inject
-import javax.inject.Provider
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
@@ -65,7 +63,6 @@ internal class DefaultFlowController @Inject internal constructor(
     private val lifecycleScope: CoroutineScope,
     lifecycleOwner: LifecycleOwner,
     private val statusBarColor: () -> Int?,
-    private val authHostSupplier: () -> AuthActivityStarterHost,
     private val paymentOptionFactory: PaymentOptionFactory,
     private val paymentOptionCallback: PaymentOptionCallback,
     private val paymentResultCallback: PaymentSheetResultCallback,
@@ -75,22 +72,12 @@ internal class DefaultFlowController @Inject internal constructor(
     private val flowControllerInitializer: FlowControllerInitializer,
     private val eventReporter: EventReporter,
     private val viewModel: FlowControllerViewModel,
-    private val paymentController: PaymentController,
+    private val paymentLauncherFactory: StripePaymentLauncherAssistedFactory,
     /**
      * [PaymentConfiguration] is [Lazy] because the client might set publishableKey and
      * stripeAccountId after creating a [DefaultFlowController].
      */
     private val lazyPaymentConfiguration: Lazy<PaymentConfiguration>,
-    /**
-     * [PaymentFlowResultProcessor] is wrapped with [Provider] because it needs
-     * [FlowControllerViewModel.initData] to be set, which might happen multiple times post
-     * [DefaultFlowController] creation and after [configureWithPaymentIntent] or
-     * [configureWithPaymentIntent] is called.
-     * TODO: Observe on [FlowControllerViewModel.initData] change and initialize
-     *   paymentFlowResultProcessor afterwards.
-     */
-    private val paymentFlowResultProcessorProvider:
-        Provider<PaymentFlowResultProcessor<out StripeIntent, StripeIntentResult<StripeIntent>>>,
     @UIContext private val uiContext: CoroutineContext
 ) : PaymentSheet.FlowController, Injector {
     private val paymentOptionActivityLauncher: ActivityResultLauncher<PaymentOptionContract.Args>
@@ -103,7 +90,9 @@ internal class DefaultFlowController @Inject internal constructor(
      */
     lateinit var flowControllerComponent: FlowControllerComponent
 
-    override fun inject(injectable: Injectable) {
+    private var paymentLauncher: PaymentLauncher? = null
+
+    override fun inject(injectable: Injectable<*>) {
         when (injectable) {
             is PaymentOptionsViewModel.Factory -> {
                 flowControllerComponent.inject(injectable)
@@ -116,15 +105,19 @@ internal class DefaultFlowController @Inject internal constructor(
             object : LifecycleObserver {
                 @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
                 fun onCreate() {
-                    paymentController.registerLaunchersWithActivityResultCaller(
-                        activityResultCaller,
-                        ::onPaymentFlowResult
+                    paymentLauncher = paymentLauncherFactory.create(
+                        { lazyPaymentConfiguration.get().publishableKey },
+                        { lazyPaymentConfiguration.get().stripeAccountId },
+                        activityResultCaller.registerForActivityResult(
+                            PaymentLauncherContract(),
+                            ::onPaymentResult
+                        )
                     )
                 }
 
                 @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
                 fun onDestroy() {
-                    paymentController.unregisterLaunchers()
+                    paymentLauncher = null
                 }
             }
         )
@@ -280,14 +273,14 @@ internal class DefaultFlowController @Inject internal constructor(
             else -> null
         }?.let { confirmParams ->
             lifecycleScope.launch {
-                paymentController.startConfirmAndAuth(
-                    authHostSupplier(),
-                    confirmParams,
-                    ApiRequest.Options(
-                        apiKey = lazyPaymentConfiguration.get().publishableKey,
-                        stripeAccount = lazyPaymentConfiguration.get().stripeAccountId
-                    )
-                )
+                when (confirmParams) {
+                    is ConfirmPaymentIntentParams -> {
+                        paymentLauncher?.confirm(confirmParams)
+                    }
+                    is ConfirmSetupIntentParams -> {
+                        paymentLauncher?.confirm(confirmParams)
+                    }
+                }
             }
         }
     }
@@ -404,49 +397,35 @@ internal class DefaultFlowController @Inject internal constructor(
         }
     }
 
-    internal fun onPaymentFlowResult(
-        paymentFlowResult: PaymentFlowResult.Unvalidated
-    ) {
+    internal fun onPaymentResult(paymentResult: PaymentResult) {
         lifecycleScope.launch {
-            runCatching {
-                paymentFlowResultProcessorProvider.get().processResult(
-                    paymentFlowResult
-                )
-            }.fold(
-                onSuccess = {
-                    withContext(uiContext) {
-                        paymentResultCallback.onPaymentSheetResult(
-                            createPaymentSheetResult(it)
-                        )
-                    }
-                },
-                onFailure = {
-                    withContext(uiContext) {
-                        paymentResultCallback.onPaymentSheetResult(
-                            PaymentSheetResult.Failed(it)
-                        )
-                    }
+            paymentResultCallback.onPaymentSheetResult(
+                withContext(uiContext) {
+                    createPaymentSheetResult(paymentResult)
                 }
             )
         }
     }
 
     private fun createPaymentSheetResult(
-        stripeIntentResult: StripeIntentResult<StripeIntent>
-    ) = when (stripeIntentResult.outcome) {
-        StripeIntentResult.Outcome.SUCCEEDED -> {
+        paymentResult: PaymentResult
+    ): PaymentSheetResult = when (paymentResult) {
+        is PaymentResult.Completed -> {
             PaymentSheetResult.Completed
         }
-        StripeIntentResult.Outcome.CANCELED -> {
+        is PaymentResult.Canceled -> {
             PaymentSheetResult.Canceled
+        }
+        is PaymentResult.Failed -> {
+            PaymentSheetResult.Failed(
+                IllegalArgumentException(
+                    "Failed to confirm intent: ${paymentResult.throwable.message}"
+                )
+            )
         }
         else -> {
             PaymentSheetResult.Failed(
-                error = stripeIntentResult.intent.lastErrorMessage?.let {
-                    IllegalArgumentException(
-                        "Failed to confirm ${stripeIntentResult.intent.javaClass.simpleName}: $it"
-                    )
-                } ?: RuntimeException("Failed to complete payment.")
+                RuntimeException("Failed to complete payment.")
             )
         }
     }
@@ -469,7 +448,6 @@ internal class DefaultFlowController @Inject internal constructor(
             lifecycleOwner: LifecycleOwner,
             activityResultCaller: ActivityResultCaller,
             statusBarColor: () -> Int?,
-            authHostSupplier: () -> AuthActivityStarterHost,
             paymentOptionFactory: PaymentOptionFactory,
             paymentOptionCallback: PaymentOptionCallback,
             paymentResultCallback: PaymentSheetResultCallback
@@ -482,7 +460,6 @@ internal class DefaultFlowController @Inject internal constructor(
                 .lifeCycleOwner(lifecycleOwner)
                 .activityResultCaller(activityResultCaller)
                 .statusBarColor(statusBarColor)
-                .authHostSupplier(authHostSupplier)
                 .paymentOptionFactory(paymentOptionFactory)
                 .paymentOptionCallback(paymentOptionCallback)
                 .paymentResultCallback(paymentResultCallback)

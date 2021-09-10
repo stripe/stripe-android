@@ -118,7 +118,7 @@ internal class DefaultPaymentAuthenticatorRegistry @Inject internal constructor(
         paymentBrowserAuthLauncher = null
     }
 
-    override fun inject(injectable: Injectable) {
+    override fun inject(injectable: Injectable<*>) {
         when (injectable) {
             is Stripe3ds2TransactionViewModelFactory -> authenticationComponent.inject(injectable)
         }
@@ -133,7 +133,9 @@ internal class DefaultPaymentAuthenticatorRegistry @Inject internal constructor(
             enableLogging: Boolean,
             workContext: CoroutineContext,
             uiContext: CoroutineContext,
-            threeDs1IntentReturnUrlMap: MutableMap<String, String>
+            threeDs1IntentReturnUrlMap: MutableMap<String, String>,
+            publishableKeyProvider: () -> String,
+            productUsage: Set<String>
         ): PaymentAuthenticatorRegistry {
             val injectorKey = WeakMapInjectorRegistry.nextKey()
             val component = DaggerAuthenticationComponent.builder()
@@ -146,6 +148,8 @@ internal class DefaultPaymentAuthenticatorRegistry @Inject internal constructor(
                 .uiContext(uiContext)
                 .threeDs1IntentReturnUrlMap(threeDs1IntentReturnUrlMap)
                 .injectorKey(injectorKey)
+                .publishableKeyProvider(publishableKeyProvider)
+                .productUsage(productUsage)
                 .build()
             val registry = component.registry
             registry.authenticationComponent = component

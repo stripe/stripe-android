@@ -17,5 +17,5 @@ interface Injector {
     /**
      * Injects into a [Injectable] instance.
      */
-    fun inject(injectable: Injectable)
+    fun inject(injectable: Injectable<*>)
 }

@@ -12,7 +12,6 @@ import com.stripe.android.paymentsheet.PaymentOptionsViewModel
 import com.stripe.android.paymentsheet.PaymentSheetResultCallback
 import com.stripe.android.paymentsheet.flowcontroller.DefaultFlowController
 import com.stripe.android.paymentsheet.model.PaymentOptionFactory
-import com.stripe.android.view.AuthActivityStarterHost
 import dagger.BindsInstance
 import dagger.Component
 import kotlinx.coroutines.CoroutineScope
@@ -51,9 +50,6 @@ internal interface FlowControllerComponent {
 
         @BindsInstance
         fun statusBarColor(statusBarColor: () -> Int?): Builder
-
-        @BindsInstance
-        fun authHostSupplier(authHostSupplier: () -> AuthActivityStarterHost): Builder
 
         @BindsInstance
         fun paymentOptionFactory(paymentOptionFactory: PaymentOptionFactory): Builder

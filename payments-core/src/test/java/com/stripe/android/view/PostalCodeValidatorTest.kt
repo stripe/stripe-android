@@ -57,8 +57,8 @@ class PostalCodeValidatorTest {
 
     @Test
     fun testCountryWithoutPostalCode() {
-        assertTrue(isValid("", CountryUtils.NO_POSTAL_CODE_COUNTRIES.first()))
-        assertTrue(isValid("ABC123", CountryUtils.NO_POSTAL_CODE_COUNTRIES.first()))
+        assertTrue(isValid("", "DE"))
+        assertTrue(isValid("ABC123", "DE"))
     }
 
     private fun isValid(postalCode: String, countryCode: String): Boolean {
