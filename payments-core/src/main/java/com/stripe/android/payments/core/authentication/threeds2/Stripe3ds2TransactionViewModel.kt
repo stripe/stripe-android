@@ -217,7 +217,8 @@ internal class Stripe3ds2TransactionViewModel(
                 enableLogging = args.enableLogging,
                 stripeAccountId = args.requestOptions.stripeAccount,
                 // 3D-Secure requires cancelling the source when the user cancels auth (AUTHN-47)
-                shouldCancelSource = true
+                shouldCancelSource = true,
+                publishableKey = args.publishableKey
             )
         )
     }

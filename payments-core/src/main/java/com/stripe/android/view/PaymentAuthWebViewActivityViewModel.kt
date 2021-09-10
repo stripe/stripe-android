@@ -6,7 +6,6 @@ import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.stripe.android.Logger
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.Stripe
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.auth.PaymentBrowserAuthContract
@@ -119,14 +118,13 @@ internal class PaymentAuthWebViewActivityViewModel(
         private val args: PaymentBrowserAuthContract.Args
     ) : ViewModelProvider.Factory {
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-            val publishableKey = PaymentConfiguration.getInstance(application).publishableKey
 
             return PaymentAuthWebViewActivityViewModel(
                 args,
                 DefaultAnalyticsRequestExecutor(logger, Dispatchers.IO),
                 AnalyticsRequestFactory(
                     application,
-                    publishableKey,
+                    args.publishableKey,
                     defaultProductUsageTokens = setOf("PaymentAuthWebViewActivity")
                 )
             ) as T
