@@ -29,7 +29,7 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
     private val logger = Logger.getInstance(enableLogging)
     private val failureMessageFactory = PaymentFlowFailureMessageFactory(context)
 
-    open suspend fun processResult(
+    suspend fun processResult(
         unvalidatedResult: PaymentFlowResult.Unvalidated
     ): S = withContext(workContext) {
         val result = unvalidatedResult.validate()
