@@ -272,7 +272,7 @@ internal object SetupIntentFixtures {
             "status": "requires_payment_method",
             "usage": "off_session"
         }
-                """.trimIndent()
+            """.trimIndent()
         )
 
     internal val SI_REQUIRES_PAYMENT_METHOD =
