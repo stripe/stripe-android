@@ -5258,11 +5258,11 @@ public final class com/stripe/android/payments/core/injection/PaymentCommonModul
 }
 
 public final class com/stripe/android/payments/core/injection/PaymentCommonModule_Companion_ProvideStripeApiRepository$payments_core_releaseFactory : dagger/internal/Factory {
-	public fun <init> (Ljavax/inject/Provider;Ljavax/inject/Provider;)V
-	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/payments/core/injection/PaymentCommonModule_Companion_ProvideStripeApiRepository$payments_core_releaseFactory;
+	public fun <init> (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)V
+	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/payments/core/injection/PaymentCommonModule_Companion_ProvideStripeApiRepository$payments_core_releaseFactory;
 	public fun get ()Lcom/stripe/android/networking/StripeApiRepository;
 	public synthetic fun get ()Ljava/lang/Object;
-	public static fun provideStripeApiRepository$payments_core_release (Landroid/content/Context;Ldagger/Lazy;)Lcom/stripe/android/networking/StripeApiRepository;
+	public static fun provideStripeApiRepository$payments_core_release (Landroid/content/Context;Ldagger/Lazy;Lcom/stripe/android/Logger;Lkotlin/coroutines/CoroutineContext;Lcom/stripe/android/networking/AnalyticsRequestExecutor;Lcom/stripe/android/networking/AnalyticsRequestFactory;Ljava/util/Set;)Lcom/stripe/android/networking/StripeApiRepository;
 }
 
 public final class com/stripe/android/payments/core/injection/PaymentLauncherModule_ProvideApiRequestOptionsFactory : dagger/internal/Factory {
