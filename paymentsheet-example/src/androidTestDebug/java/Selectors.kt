@@ -21,6 +21,19 @@ open class EspressoLabelIdButton(@StringRes val label: Int) {
     fun click() {
         Espresso.onView(ViewMatchers.withText(label)).perform(ViewActions.click())
     }
+
+    fun exists(): Boolean {
+        return try {
+            Espresso.onView(ViewMatchers.withText(label))
+                .withFailureHandler { _, _ ->
+                    throw InvalidParameterException("No payment selector found")
+                }
+                .check(ViewAssertions.matches(ViewMatchers.isDisplayed()))
+            true
+        } catch (e: InvalidParameterException) {
+            false
+        }
+    }
 }
 
 abstract class EspressoIdButton(@IntegerRes val id: Int) {
@@ -47,6 +60,9 @@ open class UiAutomatorText(
         device.findObject(selector).exists()
 }
 
+object SaveForFutureCheckbox :
+    EspressoLabelIdButton(R.string.stripe_paymentsheet_save_this_card_with_merchant_name)
+
 sealed class PaymentSelection(@StringRes val label: Int) {
     //: EspressoLabelIdButton(id) {
     object Card : PaymentSelection(R.string.stripe_paymentsheet_payment_method_card)
@@ -60,13 +76,27 @@ sealed class PaymentSelection(@StringRes val label: Int) {
     object AfterpayClearPay :
         PaymentSelection(R.string.stripe_paymentsheet_payment_method_afterpay_clearpay)
 
+    fun exists(): Boolean {
+        return try {
+            Espresso.onView(ViewMatchers.withId(com.stripe.android.paymentsheet.R.id.payment_methods_recycler))
+                .withFailureHandler { _, _ ->
+                    throw InvalidParameterException("No payment selector found")
+                }
+                .check(ViewAssertions.matches(ViewMatchers.isDisplayed()))
+            true
+
+        } catch (e: InvalidParameterException) {
+            false
+        }
+    }
+
     fun click(resource: Resources) {
         try {
             Espresso.onView(ViewMatchers.withId(com.stripe.android.paymentsheet.R.id.payment_methods_recycler))
                 .check(ViewAssertions.matches(ViewMatchers.isDisplayed()))
                 .perform(
                     RecyclerViewActions.actionOnHolderItem(
-                        matchPaymentMethodHolder(resource.getString(paymentSelection.label)),
+                        matchPaymentMethodHolder(resource.getString(label)),
                         ViewActions.click()
                     )
                 )

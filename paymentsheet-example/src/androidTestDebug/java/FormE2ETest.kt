@@ -8,6 +8,7 @@ import androidx.test.espresso.Espresso.closeSoftKeyboard
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.IdlingRegistry
 import androidx.test.espresso.PerformException
+import androidx.test.espresso.action.ViewActions
 import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.contrib.RecyclerViewActions
@@ -40,6 +41,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import java.io.File
+import java.security.InvalidParameterException
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.concurrent.Semaphore
@@ -68,34 +70,36 @@ internal class FormE2ETest {
 
     @ExperimentalCoroutinesApi
     @Test
-    fun testSingleScenario() = runBlocking {
-        generateTestParameters { testParameters, paymentSelection ->
-            confirmComplete(testParameters) {
-                // Fill in form values (SEPA needs IBAN and all card fields)
-                if(paymentSelection is PaymentSelection.SepaDebit){
-                    composeTestRule.onNodeWithText("IBAN").performTextInput("DE89370400440532013000")
-                }
-
-                // Validate the state of the save checkbox
-            }
-        }
-    }
-
-
-    @ExperimentalCoroutinesApi
-    @Test
     fun testAllCurrencyAndModesAccepted() = runBlocking {
         generateTestParameters { testParameters, paymentSelection ->
-            confirmComplete(testParameters) {
-                // Fill in form values (SEPA needs IBAN and all card fields)
+            try {
+                confirmComplete(testParameters) {
+                    print("Testing: $testParameters, paymentSelection: $paymentSelection")
+                    if (paymentSelection.exists()) {
+                        paymentSelection.click(getInstrumentation().targetContext.resources)
+                        // Fill in form values (SEPA needs IBAN and all card fields)
+                        if (paymentSelection is PaymentSelection.SepaDebit) {
+                            composeTestRule.onNodeWithText("IBAN")
+                                .performTextInput("DE89370400440532013000")
+                        }
 
-                if(paymentSelection is PaymentSelection.SepaDebit){
-                    composeTestRule.onNodeWithText("IBAN").performTextInput("My name")
+                        if (SaveForFutureCheckbox.exists()) {
+                            print("... save for future use not visible")
+                        } else if (SaveForFutureCheckbox.exists() && !testParameters.saveCheckboxValue) {
+                            SaveForFutureCheckbox.click()
+                        }
+
+                        // Validate the state of the save checkbox
+                    } else {
+                        throw InvalidParameterException("... paymentSelection: $paymentSelection is not a valid test setup")
+                    }
 
                 }
-
-                // Validate the state of the save checkbox
+            } catch (e: InvalidParameterException) {
+                print(e)
             }
+
+            println("")
         }
     }
 
@@ -123,7 +127,8 @@ internal class FormE2ETest {
                 GooglePayState.Off,
                 Currency.EUR,
                 Checkout.Pay,
-                Billing.On
+                Billing.On,
+                false
             ),
         ) {
             try {
@@ -189,6 +194,8 @@ internal class FormE2ETest {
 
         logic()
 
+        onView(withId(R.id.buy_button))
+            .perform(ViewActions.scrollTo())
         onView(withId(R.id.buy_button)).perform(click())
 
         // TODO: Need to rid of this sleep
@@ -226,24 +233,29 @@ internal class FormE2ETest {
                     Checkout.PayWithSetup,
                     Checkout.Setup
                 ).forEach { checkout ->
-                    val testParameters = TestParameters(
-                        Customer.New,
-                        GooglePayState.Off,
-                        currency,
-                        checkout,
-                        Billing.On
-                    )
+                    listOf(Customer.New, Customer.Guest).forEach { customer ->
 
-                    retrievePaymentIntent(testParameters)?.let { intent ->
-                        intent.paymentMethodTypes
-                            .filterNot { it == "acss_debit" }
-                            .map { lpmStr ->
-                                PaymentSelection.fromString(lpmStr)
-                            }.forEach {
-                                // Check form spec for save checkbox
+                        listOf(true, false).forEach { saveCheckboxValue ->
+                            val testParameters = TestParameters(
+                                customer,
+                                GooglePayState.Off,
+                                currency,
+                                checkout,
+                                Billing.On,
+                                saveCheckboxValue
+                            )
 
-                                yield(testParameters, it)
+                            retrievePaymentIntent(testParameters)?.let { intent ->
+                                intent.paymentMethodTypes
+                                    // acss_debit not supported, not able to fill in card fields
+                                    .filterNot { it == "acss_debit" || it == "card" || it == "sepa_debit" }
+                                    .map { lpmStr ->
+                                        PaymentSelection.fromString(lpmStr)
+                                    }.forEach {
+                                        yield(testParameters, it)
+                                    }
                             }
+                        }
                     }
                 }
             }
@@ -321,6 +333,7 @@ internal class FormE2ETest {
         val currency: Currency,
         val checkout: Checkout,
         val billing: Billing,
+        val saveCheckboxValue: Boolean,
     )
 
     data class AuthorizationParameters(
