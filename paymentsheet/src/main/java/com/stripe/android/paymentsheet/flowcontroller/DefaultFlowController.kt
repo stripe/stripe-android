@@ -18,9 +18,11 @@ import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContra
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.PaymentIntent
+import com.stripe.android.payments.core.injection.ENABLE_LOGGING
 import com.stripe.android.payments.core.injection.Injectable
 import com.stripe.android.payments.core.injection.Injector
 import com.stripe.android.payments.core.injection.InjectorKey
+import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.core.injection.UIContext
 import com.stripe.android.payments.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.payments.paymentlauncher.PaymentLauncher
@@ -52,6 +54,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
+import javax.inject.Named
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
@@ -76,7 +79,9 @@ internal class DefaultFlowController @Inject internal constructor(
      * stripeAccountId after creating a [DefaultFlowController].
      */
     private val lazyPaymentConfiguration: Lazy<PaymentConfiguration>,
-    @UIContext private val uiContext: CoroutineContext
+    @UIContext private val uiContext: CoroutineContext,
+    @Named(ENABLE_LOGGING) private val enableLogging: Boolean,
+    @Named(PRODUCT_USAGE) private val productUsage: Set<String>
 ) : PaymentSheet.FlowController, Injector {
     private val paymentOptionActivityLauncher: ActivityResultLauncher<PaymentOptionContract.Args>
     private var googlePayActivityLauncher:
@@ -200,7 +205,9 @@ internal class DefaultFlowController @Inject internal constructor(
                 isGooglePayReady = initData.isGooglePayReady,
                 newCard = viewModel.paymentSelection as? PaymentSelection.New.Card,
                 statusBarColor = statusBarColor(),
-                injectorKey = injectorKey
+                injectorKey = injectorKey,
+                enableLogging = enableLogging,
+                productUsage = productUsage
             )
         )
     }

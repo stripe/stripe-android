@@ -98,7 +98,8 @@ class PaymentBrowserAuthContractTest {
             objectId = "pi_12345",
             requestCode = 5000,
             url = "https://mybank.com/auth",
-            returnUrl = "myapp://custom"
+            returnUrl = "myapp://custom",
+            publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
         )
     }
 }

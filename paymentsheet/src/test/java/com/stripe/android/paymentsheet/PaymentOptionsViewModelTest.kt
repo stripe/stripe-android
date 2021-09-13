@@ -1,14 +1,19 @@
 package com.stripe.android.paymentsheet
 
+import android.app.Application
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.PaymentConfiguration
 import com.stripe.android.Logger
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures.DEFAULT_CARD
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.payments.core.injection.Injectable
+import com.stripe.android.payments.core.injection.Injector
+import com.stripe.android.payments.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.paymentsheet.PaymentOptionsViewModel.TransitionTarget
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.FragmentConfigFixtures
@@ -23,7 +28,11 @@ import kotlinx.coroutines.test.runBlockingTest
 import kotlinx.coroutines.test.setMain
 import org.junit.Rule
 import org.junit.runner.RunWith
+import org.mockito.kotlin.any
+import org.mockito.kotlin.argWhere
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.spy
+import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.AfterTest
@@ -208,6 +217,72 @@ internal class PaymentOptionsViewModelTest {
         assertThat(transitionTarget).hasSize(2)
     }
 
+    @Test
+    fun `Factory gets initialized by Injector when Injector is available`() {
+        val injector = object : Injector {
+            override fun inject(injectable: Injectable<*>) {
+                val factory = injectable as PaymentOptionsViewModel.Factory
+                factory.eventReporter = mock()
+                factory.customerRepository = mock()
+                factory.workContext = TestCoroutineDispatcher()
+                factory.prefsRepositoryFactory = { mock() }
+            }
+        }
+        val injectorKey = 1
+        WeakMapInjectorRegistry.register(injector, injectorKey)
+        val factory = PaymentOptionsViewModel.Factory(
+            { ApplicationProvider.getApplicationContext() },
+            {
+                PaymentOptionContract.Args(
+                    mock(),
+                    mock(),
+                    null,
+                    false,
+                    null,
+                    null,
+                    injectorKey,
+                    false,
+                    mock()
+                )
+            }
+        )
+        val factorySpy = spy(factory)
+        factorySpy.create(PaymentOptionsViewModel::class.java)
+        verify(factorySpy, times(0)).fallbackInitialize(any())
+
+        WeakMapInjectorRegistry.staticCacheMap.clear()
+    }
+
+    @Test
+    fun `Factory gets initialized with fallback when no Injector is available`() = runBlockingTest {
+        val context = ApplicationProvider.getApplicationContext<Application>()
+        val productUsage = setOf("TestProductUsage")
+        PaymentConfiguration.init(context, "testKey")
+        val factory = PaymentOptionsViewModel.Factory(
+            { context },
+            {
+                PaymentOptionContract.Args(
+                    mock(),
+                    mock(),
+                    null,
+                    false,
+                    null,
+                    null,
+                    1,
+                    false,
+                    productUsage
+                )
+            }
+        )
+        val factorySpy = spy(factory)
+        factorySpy.create(PaymentOptionsViewModel::class.java)
+        verify(factorySpy).fallbackInitialize(
+            argWhere {
+                it.application == context && it.productUsage == productUsage
+            }
+        )
+    }
+
     private companion object {
         private val SELECTION_SAVED_PAYMENT_METHOD = PaymentSelection.Saved(
             PaymentMethodFixtures.CARD_PAYMENT_METHOD
@@ -237,7 +312,9 @@ internal class PaymentOptionsViewModelTest {
             isGooglePayReady = true,
             newCard = null,
             statusBarColor = PaymentSheetFixtures.STATUS_BAR_COLOR,
-            injectorKey = 0
+            injectorKey = 0,
+            enableLogging = false,
+            productUsage = mock()
         )
         private val PAYMENT_METHOD_REPOSITORY_PARAMS =
             listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD)

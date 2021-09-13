@@ -81,7 +81,8 @@ internal class PaymentBrowserAuthContract :
          */
         val shouldCancelIntentOnUserNavigation: Boolean = true,
 
-        val statusBarColor: Int? = null
+        val statusBarColor: Int? = null,
+        val publishableKey: String
     ) : Parcelable {
         /**
          * Pre-requisite for using [StripeBrowserLauncherActivity].

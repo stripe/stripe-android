@@ -11,6 +11,7 @@ import com.stripe.android.payments.core.injection.IOContext
 import com.stripe.android.payments.core.injection.Injectable
 import com.stripe.android.payments.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.injection.DaggerPaymentOptionsViewModelFactoryComponent
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
@@ -127,11 +128,15 @@ internal class PaymentOptionsViewModel(
         private val starterArgsSupplier: () -> PaymentOptionContract.Args
     ) : ViewModelProvider.Factory, Injectable<Factory.FallbackInitializeParam> {
         internal data class FallbackInitializeParam(
-            val enableLogging: Boolean
+            val application: Application,
+            val productUsage: Set<String>
         )
 
         override fun fallbackInitialize(arg: FallbackInitializeParam) {
-            // TODO(ccen) to implement
+            DaggerPaymentOptionsViewModelFactoryComponent.builder()
+                .context(arg.application)
+                .productUsage(arg.productUsage)
+                .build().inject(this)
         }
 
         @Inject
@@ -154,14 +159,26 @@ internal class PaymentOptionsViewModel(
 
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-            WeakMapInjectorRegistry.retrieve(starterArgsSupplier().injectorKey)?.inject(this)
-                ?: run {
-                    throw IllegalArgumentException(
-                        "Failed to initialize PaymentOptionsViewModel.Factory"
-                    )
-                }
-
+            val application = applicationSupplier()
             val starterArgs = starterArgsSupplier()
+
+            val logger = Logger.getInstance(starterArgs.enableLogging)
+            WeakMapInjectorRegistry.retrieve(starterArgsSupplier().injectorKey)?.let {
+                logger.info(
+                    "Injector available, " +
+                        "injecting dependencies into PaymentOptionsViewModel.Factory"
+                )
+                it.inject(this)
+            } ?: run {
+                logger.info(
+                    "Injector unavailable, " +
+                        "initializing dependencies of PaymentOptionsViewModel.Factory"
+                )
+                fallbackInitialize(
+                    FallbackInitializeParam(application, starterArgs.productUsage)
+                )
+            }
+
             return PaymentOptionsViewModel(
                 starterArgs,
                 prefsRepositoryFactory(starterArgs.config?.customer),

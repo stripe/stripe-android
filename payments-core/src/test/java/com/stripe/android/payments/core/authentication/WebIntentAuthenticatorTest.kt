@@ -60,7 +60,8 @@ class WebIntentAuthenticatorTest {
         analyticsRequestFactory,
         enableLogging = false,
         testDispatcher,
-        threeDs1IntentReturnUrlMap
+        threeDs1IntentReturnUrlMap,
+        { ApiKeyFixtures.FAKE_PUBLISHABLE_KEY }
     )
 
     @Before

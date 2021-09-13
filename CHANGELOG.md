@@ -1,4 +1,12 @@
 # CHANGELOG
+## 17.2.0 - 2021-09-10
+This release includes several bug fixes, introduces [PaymentLauncher](https://github.com/stripe/stripe-android/blob/master/payments-core/src/main/java/com/stripe/android/payments/paymentlauncher/PaymentLauncher.kt) as a replacement of [https://github.com/stripe/stripe-android/blob/master/payments-core/src/main/java/com/stripe/android/Stripe.kt](https://github.com/stripe/stripe-android/blob/master/payments-core/src/main/java/com/stripe/android/Stripe.kt) see example in [StripeIntentActivity](https://github.com/stripe/stripe-android/blob/master/example/src/main/java/com/stripe/example/activity/StripeIntentActivity.kt) on [line 28](https://github.com/stripe/stripe-android/blob/master/example/src/main/java/com/stripe/example/activity/StripeIntentActivity.kt#L28)
+* [4157](https://github.com/stripe/stripe-android/pull/4157) Pass GooglePayLauncher arguments to DefaultGooglePayRepository
+* [4165](https://github.com/stripe/stripe-android/pull/4165) Require credit postal for only US, CA, and GB
+* [4173](https://github.com/stripe/stripe-android/pull/4173) Re-expose CardUtils.getPossibleCardBrand
+* [4183](https://github.com/stripe/stripe-android/pull/4183) Fix address pre-populate on line 1
+* [4159](https://github.com/stripe/stripe-android/pull/4159) Migrate PaymentController to PaymentLauncher within PaymentSheet components. 
+* [4175](https://github.com/stripe/stripe-android/pull/4175) Migrate Custom Payment Sheet Example to PaymentLauncher
 
 ## 17.1.2 - 2021-08-25
 This release includes several bug fixes, adds the capability to remove cards saved in `PaymentSheet` and to set default billing address fields in the `PaymentSheet.Configuration`.  It is now also possible to use Setup Intents with Google Pay on the multi-step Payment Sheet UI.
