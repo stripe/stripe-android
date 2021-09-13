@@ -11,10 +11,6 @@ object CountryUtils {
         "US", "GB", "CA"
     )
 
-    internal val CARD_POSTAL_CODE_COUNTRIES = setOf(
-        "US", "GB", "CA"
-    )
-
     private fun localizedCountries(currentLocale: Locale) =
         Locale.getISOCountries().map { code ->
             Country(

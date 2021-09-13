@@ -226,41 +226,36 @@ internal abstract class BaseAddPaymentMethodFragment(
             amount: Amount? = null,
             billingAddress: PaymentSheet.BillingDetails? = null
         ): FormFragmentArguments {
-            // Has effect of setting off session on PIs (not SIs) and also impacts reopening the card
+            // Has effect of setting off session on PIs (not SIs) and also impacts reopening
+            // the card
             var saveForFutureUseValue = true
             // This will impact the setting of the off_session on confirm
             var saveForFutureUseVisible = true
 
-            // The order is important here, even if there is a customer the save for future
-            // use value should be true to show required fields
+            val supportedPaymentMethod =
+                SupportedPaymentMethod.fromCode(supportedPaymentMethodName)
+
             val isSetupIntent = stripeIntent is SetupIntent
             val isPaymentIntentOffSession = (stripeIntent as? PaymentIntent)
                 ?.setupFutureUsage == StripeIntent.Usage.OffSession
             if (isSetupIntent || isPaymentIntentOffSession) {
                 saveForFutureUseVisible = false
                 saveForFutureUseValue = true
+            } else if (stripeIntent is PaymentIntent &&
+                (!hasCustomer || (supportedPaymentMethod?.requiresMandate == true))
+            ) {
+                // If paymentMethodTypes contains payment method that does not support
+                // save for future should be false and unselected until future fix
+                saveForFutureUseValue = false
+                saveForFutureUseVisible = false
             } else if (stripeIntent is PaymentIntent) {
-                if (!hasCustomer) {
-                    saveForFutureUseValue = false
-                    saveForFutureUseVisible = false
-                }
-
                 // If the intent includes any payment method types that don't support save remove
-                // checkbox regardless of the payment method
+                // checkbox regardless of the payment method until future fix
                 stripeIntent.paymentMethodTypes.forEach {
                     if (SupportedPaymentMethod.fromCode(it)?.userRequestedConfirmSaveForFutureSupported == false) {
                         saveForFutureUseValue = false
                         saveForFutureUseVisible = false
                     }
-                }
-
-                // If paymentMethodTypes contains payment method that does not support
-                // save for future should be false and unselected.
-                val supportedPaymentMethod =
-                    SupportedPaymentMethod.fromCode(supportedPaymentMethodName)
-                if (supportedPaymentMethod?.requiresMandate == true) {
-                    saveForFutureUseValue = false
-                    saveForFutureUseVisible = false
                 }
             }
 
