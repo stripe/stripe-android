@@ -17,8 +17,6 @@ import kotlin.coroutines.CoroutineContext
  * A [Module] to provide [StripeRepository] and its corresponding dependencies.
  * [Context], [ENABLE_LOGGING], [PUBLISHABLE_KEY], [PRODUCT_USAGE] and [IOContext] need to be
  * provided elsewhere to use this module.
- *
- * TODO: Let [PaymentCommonModule] include this module.
  */
 @Module
 class StripeRepositoryModule {
@@ -26,16 +24,18 @@ class StripeRepositoryModule {
     @Singleton
     internal fun provideStripeRepository(
         appContext: Context,
-        analyticsRequestFactory: AnalyticsRequestFactory,
-        analyticsRequestExecutor: AnalyticsRequestExecutor,
-        @IOContext workContext: CoroutineContext,
-        @Named(ENABLE_LOGGING) enableLogging: Boolean,
         @Named(PUBLISHABLE_KEY) publishableKeyProvider: () -> String,
+        @Named(ENABLE_LOGGING) enableLogging: Boolean,
+        @IOContext workContext: CoroutineContext,
+        @Named(PRODUCT_USAGE) productUsageTokens: Set<String>,
+        analyticsRequestFactory: AnalyticsRequestFactory,
+        analyticsRequestExecutor: AnalyticsRequestExecutor
     ): StripeRepository = StripeApiRepository(
         appContext,
         publishableKeyProvider,
         logger = Logger.getInstance(enableLogging),
         workContext = workContext,
+        productUsageTokens = productUsageTokens,
         analyticsRequestFactory = analyticsRequestFactory,
         analyticsRequestExecutor = analyticsRequestExecutor
     )

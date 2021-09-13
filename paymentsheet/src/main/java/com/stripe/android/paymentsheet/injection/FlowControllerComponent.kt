@@ -6,7 +6,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModelStoreOwner
 import com.stripe.android.googlepaylauncher.GooglePayLauncherModule
 import com.stripe.android.payments.core.injection.InjectorKey
-import com.stripe.android.payments.core.injection.PaymentCommonModule
+import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import com.stripe.android.paymentsheet.PaymentOptionCallback
 import com.stripe.android.paymentsheet.PaymentOptionsViewModel
 import com.stripe.android.paymentsheet.PaymentSheetResultCallback
@@ -20,7 +20,7 @@ import javax.inject.Singleton
 @Singleton
 @Component(
     modules = [
-        PaymentCommonModule::class,
+        StripeRepositoryModule::class,
         PaymentSheetCommonModule::class,
         FlowControllerModule::class,
         GooglePayLauncherModule::class
