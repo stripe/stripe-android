@@ -10,6 +10,7 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.FlowController
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.elements.ResourceRepository
 import com.stripe.android.paymentsheet.flowcontroller.DefaultFlowControllerInitializer
 import com.stripe.android.paymentsheet.flowcontroller.FlowControllerInitializer
 import com.stripe.android.paymentsheet.flowcontroller.FlowControllerViewModel
@@ -30,6 +31,12 @@ internal abstract class FlowControllerModule {
     ): FlowControllerInitializer
 
     companion object {
+        @Provides
+        @Singleton
+        fun provideResourceRepositoryFactory(
+            appContext: Context,
+        ) = ResourceRepository.getInstance(appContext.resources)
+
         /**
          * [FlowController]'s clientSecret might be updated multiple times through
          * [FlowController.configureWithSetupIntent] or [FlowController.configureWithPaymentIntent].

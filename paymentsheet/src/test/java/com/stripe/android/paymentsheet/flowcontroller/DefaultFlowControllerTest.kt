@@ -664,6 +664,7 @@ internal class DefaultFlowControllerTest {
         paymentLauncherAssistedFactory,
         { PaymentConfiguration.getInstance(activity) },
         testDispatcher,
+        mock(),
         ENABLE_LOGGING,
         PRODUCT_USAGE
     )

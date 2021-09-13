@@ -30,6 +30,7 @@ import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.elements.ResourceRepository
 import com.stripe.android.paymentsheet.injection.DaggerPaymentSheetViewModelComponent
 import com.stripe.android.paymentsheet.model.ConfirmStripeIntentParamsFactory
 import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
@@ -77,6 +78,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     prefsRepository: PrefsRepository,
     private val paymentLauncherFactory: StripePaymentLauncherAssistedFactory,
     private val googlePayPaymentMethodLauncherFactory: GooglePayPaymentMethodLauncherFactory,
+    private val resourceRepository: ResourceRepository,
     private val logger: Logger,
     @IOContext workContext: CoroutineContext
 ) : BaseSheetViewModel<PaymentSheetViewModel.TransitionTarget>(
@@ -173,6 +175,12 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                     },
                     activityResultLauncher = activityResultLauncher
                 )
+        }
+    }
+
+    fun initializeResourceRepository(){
+        viewModelScope.launch {
+            resourceRepository.init()
         }
     }
 

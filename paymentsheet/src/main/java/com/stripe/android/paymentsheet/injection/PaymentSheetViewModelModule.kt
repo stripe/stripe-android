@@ -8,6 +8,7 @@ import com.stripe.android.paymentsheet.DefaultPrefsRepository
 import com.stripe.android.paymentsheet.PaymentSheetContract
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.elements.ResourceRepository
 import com.stripe.android.paymentsheet.model.ClientSecret
 import dagger.Binds
 import dagger.Module
@@ -23,6 +24,13 @@ internal abstract class PaymentSheetViewModelModule {
     abstract fun bindsApplicationForContext(application: Application): Context
 
     companion object {
+
+        @Provides
+        @Singleton
+        fun provideResourceRepositoryFactory(
+            appContext: Context,
+        ) = ResourceRepository.getInstance(appContext.resources)
+
         @Provides
         @Singleton
         fun provideClientSecret(

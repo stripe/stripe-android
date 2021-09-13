@@ -717,6 +717,7 @@ internal class PaymentSheetActivityTest {
             FakePrefsRepository(),
             stripePaymentLauncherAssistedFactory,
             googlePayPaymentMethodLauncherFactory,
+            mock(),
             Logger.noop(),
             testDispatcher
         )

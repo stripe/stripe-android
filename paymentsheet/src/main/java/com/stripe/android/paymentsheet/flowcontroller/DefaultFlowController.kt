@@ -37,6 +37,7 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetResult
 import com.stripe.android.paymentsheet.PaymentSheetResultCallback
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.elements.ResourceRepository
 import com.stripe.android.paymentsheet.injection.DaggerFlowControllerComponent
 import com.stripe.android.paymentsheet.injection.FlowControllerComponent
 import com.stripe.android.paymentsheet.model.ClientSecret
@@ -80,6 +81,7 @@ internal class DefaultFlowController @Inject internal constructor(
      */
     private val lazyPaymentConfiguration: Lazy<PaymentConfiguration>,
     @UIContext private val uiContext: CoroutineContext,
+    private val resourceRepository: ResourceRepository,
     @Named(ENABLE_LOGGING) private val enableLogging: Boolean,
     @Named(PRODUCT_USAGE) private val productUsage: Set<String>
 ) : PaymentSheet.FlowController, Injector {
@@ -167,6 +169,7 @@ internal class DefaultFlowController @Inject internal constructor(
         callback: PaymentSheet.FlowController.ConfigCallback
     ) {
         lifecycleScope.launch {
+            resourceRepository.init()
             val result = flowControllerInitializer.init(
                 clientSecret,
                 configuration

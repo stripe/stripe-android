@@ -632,7 +632,7 @@ internal class PaymentSheetViewModelTest {
         val viewModel = createViewModel(
             ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP.copy(
                 config = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.copy(
-                    googlePay = com.stripe.android.paymentsheet.ConfigFixtures.GOOGLE_PAY.copy(
+                    googlePay = ConfigFixtures.GOOGLE_PAY.copy(
                         currencyCode = null
                     )
                 )
@@ -740,6 +740,7 @@ internal class PaymentSheetViewModelTest {
             StripeIntentValidator(),
             customerRepository,
             prefsRepository,
+            mock(),
             mock(),
             mock(),
             Logger.noop(),
