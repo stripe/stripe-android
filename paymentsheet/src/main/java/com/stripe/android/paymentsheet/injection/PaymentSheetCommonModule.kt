@@ -3,8 +3,6 @@ package com.stripe.android.paymentsheet.injection
 import androidx.core.os.LocaleListCompat
 import com.stripe.android.Logger
 import com.stripe.android.payments.core.injection.ENABLE_LOGGING
-import com.stripe.android.payments.core.injection.IOContext
-import com.stripe.android.payments.core.injection.UIContext
 import com.stripe.android.paymentsheet.BuildConfig
 import com.stripe.android.paymentsheet.analytics.DefaultDeviceIdRepository
 import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
@@ -16,10 +14,8 @@ import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
-import kotlinx.coroutines.Dispatchers
 import javax.inject.Named
 import javax.inject.Singleton
-import kotlin.coroutines.CoroutineContext
 
 @Module
 internal abstract class PaymentSheetCommonModule {
@@ -48,16 +44,6 @@ internal abstract class PaymentSheetCommonModule {
         @Singleton
         fun provideLogger(@Named(ENABLE_LOGGING) enableLogging: Boolean) =
             Logger.getInstance(enableLogging)
-
-        @Provides
-        @Singleton
-        @IOContext
-        fun provideWorkContext(): CoroutineContext = Dispatchers.IO
-
-        @Provides
-        @Singleton
-        @UIContext
-        fun provideUIContext(): CoroutineContext = Dispatchers.Main
 
         @Provides
         @Singleton

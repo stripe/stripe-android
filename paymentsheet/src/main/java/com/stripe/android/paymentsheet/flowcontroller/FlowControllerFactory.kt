@@ -11,7 +11,6 @@ import com.stripe.android.paymentsheet.PaymentOptionCallback
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetResultCallback
 import com.stripe.android.paymentsheet.model.PaymentOptionFactory
-import com.stripe.android.view.AuthActivityStarterHost
 import kotlinx.coroutines.CoroutineScope
 
 internal class FlowControllerFactory(
@@ -21,7 +20,6 @@ internal class FlowControllerFactory(
     private val appContext: Context,
     private val activityResultCaller: ActivityResultCaller,
     private val statusBarColor: () -> Int?,
-    private val authHostSupplier: () -> AuthActivityStarterHost,
     private val paymentOptionFactory: PaymentOptionFactory,
     private val paymentOptionCallback: PaymentOptionCallback,
     private val paymentResultCallback: PaymentSheetResultCallback
@@ -37,7 +35,6 @@ internal class FlowControllerFactory(
         activity.applicationContext,
         activity,
         { activity.window.statusBarColor },
-        { AuthActivityStarterHost.create(activity) },
         PaymentOptionFactory(activity.resources),
         paymentOptionCallback,
         paymentResultCallback
@@ -54,7 +51,6 @@ internal class FlowControllerFactory(
         fragment.requireContext(),
         fragment,
         { fragment.activity?.window?.statusBarColor },
-        { AuthActivityStarterHost.create(fragment) },
         PaymentOptionFactory(fragment.resources),
         paymentOptionCallback,
         paymentResultCallback
@@ -68,7 +64,6 @@ internal class FlowControllerFactory(
             lifecycleOwner = lifecycleOwner,
             activityResultCaller = activityResultCaller,
             statusBarColor = statusBarColor,
-            authHostSupplier = authHostSupplier,
             paymentOptionFactory = paymentOptionFactory,
             paymentOptionCallback = paymentOptionCallback,
             paymentResultCallback = paymentResultCallback

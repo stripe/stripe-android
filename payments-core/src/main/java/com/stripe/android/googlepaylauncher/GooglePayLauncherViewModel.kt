@@ -234,22 +234,10 @@ internal class GooglePayLauncherViewModel(
                 analyticsRequestFactory = analyticsRequestFactory
             )
 
-            val billingAddressConfig = args.config.billingAddressConfig
             val googlePayRepository = DefaultGooglePayRepository(
                 application,
-                googlePayEnvironment,
-                GooglePayJsonFactory.BillingAddressParameters(
-                    billingAddressConfig.isRequired,
-                    when (billingAddressConfig.format) {
-                        GooglePayLauncher.BillingAddressConfig.Format.Min -> {
-                            GooglePayJsonFactory.BillingAddressParameters.Format.Min
-                        }
-                        GooglePayLauncher.BillingAddressConfig.Format.Full -> {
-                            GooglePayJsonFactory.BillingAddressParameters.Format.Full
-                        }
-                    },
-                    billingAddressConfig.isPhoneNumberRequired
-                ),
+                args.config.environment,
+                args.config.billingAddressConfig.convert(),
                 args.config.existingPaymentMethodRequired,
                 logger
             )

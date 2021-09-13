@@ -1,22 +1,25 @@
 package com.stripe.android.payments.core.injection
 
 import android.content.Context
-import com.stripe.android.networking.AnalyticsRequestFactory
-import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.paymentlauncher.PaymentLauncherViewModel
 import dagger.BindsInstance
 import dagger.Component
 import javax.inject.Named
 import javax.inject.Singleton
-import kotlin.coroutines.CoroutineContext
 
+/**
+ * Component to inject [PaymentLauncherViewModel.Factory] when the app process is killed and
+ * there is no [Injector] available.
+ */
 @Singleton
 @Component(
     modules = [
-        PaymentLauncherModule::class
+        PaymentLauncherModule::class,
+        StripeRepositoryModule::class,
+        CoroutineContextModule::class
     ]
 )
-internal interface PaymentLauncherComponent {
+internal interface PaymentLauncherViewModelFactoryComponent {
     fun inject(factory: PaymentLauncherViewModel.Factory)
 
     @Component.Builder
@@ -28,18 +31,6 @@ internal interface PaymentLauncherComponent {
         fun enableLogging(@Named(ENABLE_LOGGING) enableLogging: Boolean): Builder
 
         @BindsInstance
-        fun ioContext(@IOContext workContext: CoroutineContext): Builder
-
-        @BindsInstance
-        fun uiContext(@UIContext uiContext: CoroutineContext): Builder
-
-        @BindsInstance
-        fun stripeRepository(stripeRepository: StripeRepository): Builder
-
-        @BindsInstance
-        fun analyticsRequestFactory(analyticsRequestFactory: AnalyticsRequestFactory): Builder
-
-        @BindsInstance
         fun publishableKeyProvider(@Named(PUBLISHABLE_KEY) publishableKeyProvider: () -> String): Builder
 
         @BindsInstance
@@ -48,6 +39,6 @@ internal interface PaymentLauncherComponent {
         @BindsInstance
         fun productUsage(@Named(PRODUCT_USAGE) productUsage: Set<String>): Builder
 
-        fun build(): PaymentLauncherComponent
+        fun build(): PaymentLauncherViewModelFactoryComponent
     }
 }

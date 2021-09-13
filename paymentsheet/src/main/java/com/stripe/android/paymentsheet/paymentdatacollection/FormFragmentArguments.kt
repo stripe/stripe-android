@@ -21,8 +21,8 @@ internal fun FormFragmentArguments.getValue(id: IdentifierSpec) =
         IdentifierSpec.Name -> this.billingDetails?.name
         IdentifierSpec.Email -> this.billingDetails?.email
         IdentifierSpec.Phone -> this.billingDetails?.phone
-        IdentifierSpec.Line2 -> this.billingDetails?.address?.line2
         IdentifierSpec.Line1 -> this.billingDetails?.address?.line1
+        IdentifierSpec.Line2 -> this.billingDetails?.address?.line2
         IdentifierSpec.City -> this.billingDetails?.address?.city
         IdentifierSpec.State -> this.billingDetails?.address?.state
         IdentifierSpec.Country -> this.billingDetails?.address?.country
