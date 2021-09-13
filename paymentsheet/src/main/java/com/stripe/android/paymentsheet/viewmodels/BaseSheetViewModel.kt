@@ -233,7 +233,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
                     logger.debug("${supportedPaymentMethod.name} will not be shown.  It requires a mandate which is incompatible with off_session PaymentIntents")
                 }
                 excludeRequiresMandate
-            } // .filter { it == SupportedPaymentMethod.Card }
+            }.filter { it == SupportedPaymentMethod.Card }
         }
 
         return emptyList()
