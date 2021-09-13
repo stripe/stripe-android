@@ -432,7 +432,6 @@ class PaymentSheetAddPaymentMethodFragmentTest {
         )
     }
 
-
     private fun createAmount(paymentIntent: PaymentIntent = PaymentIntentFixtures.PI_WITH_SHIPPING) =
         Amount(paymentIntent.amount!!, paymentIntent.currency!!)
 

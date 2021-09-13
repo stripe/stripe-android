@@ -20,7 +20,6 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.databinding.FragmentPaymentsheetPaymentMethodsListBinding
-import com.stripe.android.paymentsheet.model.Amount
 import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.FragmentConfigFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -165,9 +164,11 @@ class PaymentSheetListFragmentTest {
     fun `total amount label correctly displays amount`() {
         createScenario().onFragment { fragment ->
             shadowOf(getMainLooper()).idle()
-            fragment.sheetViewModel.setStripeIntent(PaymentIntentFixtures.PI_OFF_SESSION.copy(
-                amount = 399
-            ))
+            fragment.sheetViewModel.setStripeIntent(
+                PaymentIntentFixtures.PI_OFF_SESSION.copy(
+                    amount = 399
+                )
+            )
             val viewBinding = FragmentPaymentsheetPaymentMethodsListBinding.bind(fragment.view!!)
 
             assertThat(viewBinding.total.text)

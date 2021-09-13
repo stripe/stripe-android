@@ -75,7 +75,9 @@ internal abstract class BaseAddPaymentMethodFragment(
 
         sheetViewModel.supportedPaymentMethods.observe(viewLifecycleOwner) { paymentMethods ->
             viewBinding.googlePayDivider.setText(
-                if (paymentMethods.contains(SupportedPaymentMethod.Card) && paymentMethods.size == 1) {
+                if (paymentMethods.contains(SupportedPaymentMethod.Card) &&
+                    paymentMethods.size == 1
+                ) {
                     R.string.stripe_paymentsheet_or_pay_with_card
                 } else {
                     R.string.stripe_paymentsheet_or_pay_using
@@ -252,7 +254,9 @@ internal abstract class BaseAddPaymentMethodFragment(
                 // If the intent includes any payment method types that don't support save remove
                 // checkbox regardless of the payment method until future fix
                 stripeIntent.paymentMethodTypes.forEach {
-                    if (SupportedPaymentMethod.fromCode(it)?.userRequestedConfirmSaveForFutureSupported == false) {
+                    if (SupportedPaymentMethod.fromCode(it)
+                        ?.userRequestedConfirmSaveForFutureSupported == false
+                    ) {
                         saveForFutureUseValue = false
                         saveForFutureUseVisible = false
                     }

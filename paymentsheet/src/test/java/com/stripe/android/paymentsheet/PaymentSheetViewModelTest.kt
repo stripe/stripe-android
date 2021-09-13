@@ -601,7 +601,7 @@ internal class PaymentSheetViewModelTest {
 
     @Test
     fun `when StripeIntent does not accept any of the supported payment methods should return error`() {
-        val supportedPaymentMethods= mutableListOf<List<SupportedPaymentMethod>>()
+        val supportedPaymentMethods = mutableListOf<List<SupportedPaymentMethod>>()
         viewModel.supportedPaymentMethods.observeForever {
             supportedPaymentMethods.add(it)
         }
@@ -620,8 +620,8 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    fun `Verify supported payment methods exclude afterpay if no shipping`(){
-        val supportedPaymentMethods= mutableListOf<List<SupportedPaymentMethod>>()
+    fun `Verify supported payment methods exclude afterpay if no shipping`() {
+        val supportedPaymentMethods = mutableListOf<List<SupportedPaymentMethod>>()
         viewModel.supportedPaymentMethods.observeForever {
             supportedPaymentMethods.add(it)
         }

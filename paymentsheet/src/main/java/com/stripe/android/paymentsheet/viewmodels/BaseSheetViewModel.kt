@@ -207,7 +207,9 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
         _stripeIntent.value = stripeIntent
     }
 
-    private fun getSupportedPaymentMethods(stripeIntentParameter: StripeIntent?): List<SupportedPaymentMethod> {
+    private fun getSupportedPaymentMethods(
+        stripeIntentParameter: StripeIntent?
+    ): List<SupportedPaymentMethod> {
         stripeIntentParameter?.let { stripeIntent ->
             return stripeIntent.paymentMethodTypes.asSequence().mapNotNull {
                 SupportedPaymentMethod.fromCode(it)
@@ -216,14 +218,20 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
                 val excludeAfterPay = it == SupportedPaymentMethod.AfterpayClearpay &&
                     (stripeIntent as? PaymentIntent)?.shipping == null
                 if (excludeAfterPay && BuildConfig.DEBUG) {
-                    logger.debug("AfterPay will not be shown. It requires that Shipping is included in the Payment or Setup Intent")
+                    logger.debug(
+                        "AfterPay will not be shown. It requires that Shipping is " +
+                            "included in the Payment or Setup Intent"
+                    )
                 }
                 excludeAfterPay
             }.filterNot { supportedPaymentMethod ->
                 val excludeRequiresMandate =
                     (stripeIntent is SetupIntent) && supportedPaymentMethod.requiresMandate
                 if (excludeRequiresMandate && BuildConfig.DEBUG) {
-                    logger.debug("${supportedPaymentMethod.name} will not be shown. It requires a mandate which is incompatible with SetupIntents")
+                    logger.debug(
+                        "${supportedPaymentMethod.name} will not be shown. It " +
+                            "requires a mandate which is incompatible with SetupIntents"
+                    )
                 }
                 excludeRequiresMandate
             }.filterNot { supportedPaymentMethod ->
@@ -231,10 +239,14 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
                     supportedPaymentMethod.requiresMandate &&
                     stripeIntent.setupFutureUsage == StripeIntent.Usage.OffSession
                 if (excludeRequiresMandate && BuildConfig.DEBUG) {
-                    logger.debug("${supportedPaymentMethod.name} will not be shown.  It requires a mandate which is incompatible with off_session PaymentIntents")
+                    logger.debug(
+                        "${supportedPaymentMethod.name} will not be shown.  It " +
+                            "requires a mandate which is incompatible with off_session " +
+                            "PaymentIntents"
+                    )
                 }
                 excludeRequiresMandate
-            }//.filter { it == SupportedPaymentMethod.Card }
+            }.filter { it == SupportedPaymentMethod.Card }
                 .toList()
         }
 
