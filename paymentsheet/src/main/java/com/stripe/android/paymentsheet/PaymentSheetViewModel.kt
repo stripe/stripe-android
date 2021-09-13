@@ -178,7 +178,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         }
     }
 
-    fun initializeResourceRepository(){
+    fun initializeResourceRepository() {
         viewModelScope.launch {
             resourceRepository.init()
         }
