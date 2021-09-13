@@ -39,6 +39,12 @@ public final class com/stripe/android/BuildConfig {
 	public fun <init> ()V
 }
 
+public final class com/stripe/android/CardUtils {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/stripe/android/CardUtils;
+	public static final fun getPossibleCardBrand (Ljava/lang/String;)Lcom/stripe/android/model/CardBrand;
+}
+
 public final class com/stripe/android/CustomerSession {
 	public static final field $stable I
 	public static final field Companion Lcom/stripe/android/CustomerSession$Companion;
