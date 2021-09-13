@@ -632,6 +632,22 @@ public final class com/stripe/android/paymentsheet/injection/PaymentSheetCommonM
 	public static fun provideLogger (Z)Lcom/stripe/android/Logger;
 }
 
+public final class com/stripe/android/paymentsheet/injection/PaymentSheetCommonModule_Companion_ProvidePaymentConfigurationFactory : dagger/internal/Factory {
+	public fun <init> (Ljavax/inject/Provider;)V
+	public static fun create (Ljavax/inject/Provider;)Lcom/stripe/android/paymentsheet/injection/PaymentSheetCommonModule_Companion_ProvidePaymentConfigurationFactory;
+	public fun get ()Lcom/stripe/android/PaymentConfiguration;
+	public synthetic fun get ()Ljava/lang/Object;
+	public static fun providePaymentConfiguration (Landroid/content/Context;)Lcom/stripe/android/PaymentConfiguration;
+}
+
+public final class com/stripe/android/paymentsheet/injection/PaymentSheetCommonModule_Companion_ProvidePublishableKeyProviderFactory : dagger/internal/Factory {
+	public fun <init> (Ljavax/inject/Provider;)V
+	public static fun create (Ljavax/inject/Provider;)Lcom/stripe/android/paymentsheet/injection/PaymentSheetCommonModule_Companion_ProvidePublishableKeyProviderFactory;
+	public synthetic fun get ()Ljava/lang/Object;
+	public fun get ()Lkotlin/jvm/functions/Function0;
+	public static fun providePublishableKeyProvider (Ldagger/Lazy;)Lkotlin/jvm/functions/Function0;
+}
+
 public final class com/stripe/android/paymentsheet/injection/PaymentSheetCommonModule_Companion_ProvideUIContextFactory : dagger/internal/Factory {
 	public fun <init> ()V
 	public static fun create ()Lcom/stripe/android/paymentsheet/injection/PaymentSheetCommonModule_Companion_ProvideUIContextFactory;
