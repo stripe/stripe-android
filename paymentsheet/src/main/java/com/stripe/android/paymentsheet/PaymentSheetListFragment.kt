@@ -41,7 +41,7 @@ internal class PaymentSheetListFragment(
 
         if (sheetViewModel.isProcessingPaymentIntent) {
             sheetViewModel.amount.observe(viewLifecycleOwner) {
-                viewBinding.total.text = getTotalText(it)
+                viewBinding.total.text = getTotalText(requireNotNull(it))
             }
         } else {
             viewBinding.total.isVisible = false

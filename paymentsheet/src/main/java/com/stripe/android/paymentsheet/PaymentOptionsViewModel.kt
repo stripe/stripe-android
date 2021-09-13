@@ -24,14 +24,16 @@ internal class PaymentOptionsViewModel(
     eventReporter: EventReporter,
     customerRepository: CustomerRepository,
     workContext: CoroutineContext,
-    application: Application
+    application: Application,
+    logger: Logger
 ) : BaseSheetViewModel<PaymentOptionsViewModel.TransitionTarget>(
     config = args.config,
     prefsRepository = prefsRepository,
     eventReporter = eventReporter,
     customerRepository = customerRepository,
     workContext = workContext,
-    application = application
+    application = application,
+    logger = logger
 ) {
     @VisibleForTesting
     internal val _paymentOptionResult = MutableLiveData<PaymentOptionResult>()
@@ -144,6 +146,9 @@ internal class PaymentOptionsViewModel(
         lateinit var customerRepository: CustomerRepository
 
         @Inject
+        lateinit var logger: Logger
+
+        @Inject
         @IOContext
         lateinit var workContext: CoroutineContext
 
@@ -180,7 +185,8 @@ internal class PaymentOptionsViewModel(
                 eventReporter,
                 customerRepository,
                 workContext,
-                applicationSupplier()
+                applicationSupplier(),
+                logger
             ) as T
         }
     }

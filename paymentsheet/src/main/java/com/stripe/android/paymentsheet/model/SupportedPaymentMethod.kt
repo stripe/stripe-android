@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.model
 
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.elements.FormSpec
 import com.stripe.android.paymentsheet.elements.afterpayClearpay
@@ -22,61 +23,81 @@ enum class SupportedPaymentMethod(
     val code: String,
     @StringRes val displayNameResource: Int,
     @DrawableRes val iconResource: Int,
-    val formSpec: FormSpec?
+    val formSpec: FormSpec?,
+    val requiresMandate: Boolean,
+    val userRequestedConfirmSaveForFutureSupported: Boolean
 ) {
     Card(
         "card",
         R.string.stripe_paymentsheet_payment_method_card,
         R.drawable.stripe_ic_paymentsheet_pm_card,
-        null
+        null,
+        requiresMandate = PaymentMethod.Type.Card.requiresMandate,
+        userRequestedConfirmSaveForFutureSupported = true
     ),
     Bancontact(
         "bancontact",
         R.string.stripe_paymentsheet_payment_method_bancontact,
         R.drawable.stripe_ic_paymentsheet_pm_bancontact,
-        bancontact
+        bancontact,
+        requiresMandate = PaymentMethod.Type.Bancontact.requiresMandate,
+        userRequestedConfirmSaveForFutureSupported = true
     ),
     Sofort(
         "sofort",
         R.string.stripe_paymentsheet_payment_method_sofort,
         R.drawable.stripe_ic_paymentsheet_pm_klarna,
-        sofort
+        sofort,
+        requiresMandate = PaymentMethod.Type.Sofort.requiresMandate,
+        userRequestedConfirmSaveForFutureSupported = true
     ),
     Ideal(
         "ideal",
         R.string.stripe_paymentsheet_payment_method_ideal,
         R.drawable.stripe_ic_paymentsheet_pm_ideal,
-        ideal
+        ideal,
+        requiresMandate = PaymentMethod.Type.Ideal.requiresMandate,
+        userRequestedConfirmSaveForFutureSupported = true
     ),
     SepaDebit(
         "sepa_debit",
         R.string.stripe_paymentsheet_payment_method_sepa_debit,
         R.drawable.stripe_ic_paymentsheet_pm_sepa_debit,
-        sepaDebit
+        sepaDebit,
+        requiresMandate = PaymentMethod.Type.SepaDebit.requiresMandate,
+        userRequestedConfirmSaveForFutureSupported = true
     ),
     Eps(
         "eps",
         R.string.stripe_paymentsheet_payment_method_eps,
         R.drawable.stripe_ic_paymentsheet_pm_eps,
-        eps
+        eps,
+        requiresMandate = PaymentMethod.Type.Eps.requiresMandate,
+        userRequestedConfirmSaveForFutureSupported = false
     ),
     P24(
         "p24",
         R.string.stripe_paymentsheet_payment_method_p24,
         R.drawable.stripe_ic_paymentsheet_pm_p24,
-        p24
+        p24,
+        requiresMandate = PaymentMethod.Type.P24.requiresMandate,
+        userRequestedConfirmSaveForFutureSupported = false
     ),
     Giropay(
         "giropay",
         R.string.stripe_paymentsheet_payment_method_giropay,
         R.drawable.stripe_ic_paymentsheet_pm_giropay,
-        giropay
+        giropay,
+        requiresMandate = PaymentMethod.Type.Giropay.requiresMandate,
+        userRequestedConfirmSaveForFutureSupported = false
     ),
     AfterpayClearpay(
         "afterpay_clearpay",
         R.string.stripe_paymentsheet_payment_method_afterpay_clearpay,
         R.drawable.stripe_ic_paymentsheet_pm_afterpay_clearpay,
-        afterpayClearpay
+        afterpayClearpay,
+        requiresMandate = PaymentMethod.Type.AfterpayClearpay.requiresMandate,
+        userRequestedConfirmSaveForFutureSupported = true
     );
 
     override fun toString(): String {
@@ -94,7 +115,7 @@ enum class SupportedPaymentMethod(
          * [PaymentMethods API endpoint](https://stripe.com/docs/api/payment_methods/list) for
          * returning customers.
          */
-        val supportedSavedPaymentMethods = setOf("card", "sepa_debit")
+        val supportedSavedPaymentMethods = setOf("card")
 
         fun pmLabelResId() = values().map{ it.displayNameResource }
     }

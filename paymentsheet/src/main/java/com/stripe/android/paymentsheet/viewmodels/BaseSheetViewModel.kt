@@ -8,11 +8,15 @@ import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.asFlow
 import androidx.lifecycle.distinctUntilChanged
+import androidx.lifecycle.map
 import androidx.lifecycle.viewModelScope
+import com.stripe.android.Logger
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.BasePaymentMethodsListFragment
+import com.stripe.android.paymentsheet.BuildConfig
 import com.stripe.android.paymentsheet.PaymentOptionsActivity
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetActivity
@@ -42,7 +46,8 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     internal val eventReporter: EventReporter,
     protected val customerRepository: CustomerRepository,
     protected val prefsRepository: PrefsRepository,
-    protected val workContext: CoroutineContext = Dispatchers.IO
+    protected val workContext: CoroutineContext = Dispatchers.IO,
+    protected val logger: Logger
 ) : AndroidViewModel(application) {
     internal val customerConfig = config?.customer
     internal val merchantName = config?.merchantDisplayName
@@ -58,12 +63,43 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     private val _stripeIntent = MutableLiveData<StripeIntent?>()
     internal val stripeIntent: LiveData<StripeIntent?> = _stripeIntent
 
+    internal val supportedPaymentMethods = _stripeIntent.map {
+        val newSupportedPaymentMethods = getSupportedPaymentMethods(it)
+
+        if (it != null && newSupportedPaymentMethods.isEmpty()) {
+            onFatal(
+                IllegalArgumentException(
+                    "None of the requested payment methods" +
+                        " (${it.paymentMethodTypes})" +
+                        " match the supported payment types" +
+                        " (${SupportedPaymentMethod.values().toList()})"
+                )
+            )
+        }
+
+        newSupportedPaymentMethods
+    }
+
     protected val _paymentMethods = MutableLiveData<List<PaymentMethod>>()
     internal val paymentMethods: LiveData<List<PaymentMethod>> = _paymentMethods
 
     @VisibleForTesting
-    internal val _amount = MutableLiveData<Amount>()
-    internal val amount: LiveData<Amount> = _amount
+    internal val amount = _stripeIntent.map { stripeIntent ->
+        if (stripeIntent is PaymentIntent) {
+            runCatching {
+                Amount(
+                    requireNotNull(stripeIntent.amount),
+                    requireNotNull(stripeIntent.currency)
+                )
+            }.onFailure {
+                onFatal(
+                    IllegalStateException("PaymentIntent must contain amount and currency.")
+                )
+            }.getOrNull()
+        } else {
+            null
+        }
+    }
 
     /**
      * Request to retrieve the value from the repository happens when initialize any fragment
@@ -169,42 +205,35 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
     fun setStripeIntent(stripeIntent: StripeIntent?) {
         _stripeIntent.value = stripeIntent
-
-        if (stripeIntent != null && getSupportedPaymentMethods().isEmpty()) {
-            onFatal(
-                IllegalArgumentException(
-                    "None of the requested payment methods" +
-                        " (${stripeIntent.paymentMethodTypes})" +
-                        " match the supported payment types" +
-                        " (${SupportedPaymentMethod.values().toList()})"
-                )
-            )
-        }
-
-        if (stripeIntent is PaymentIntent) {
-            runCatching {
-                _amount.value =
-                    Amount(
-                        requireNotNull(stripeIntent.amount),
-                        requireNotNull(stripeIntent.currency)
-                    )
-            }.onFailure {
-                onFatal(
-                    IllegalStateException("PaymentIntent must contain amount and currency.")
-                )
-            }
-        }
     }
 
-    fun getSupportedPaymentMethods(): List<SupportedPaymentMethod> {
-        stripeIntent.value?.let { stripeIntent ->
-            return stripeIntent.paymentMethodTypes.mapNotNull {
+    private fun getSupportedPaymentMethods(stripeIntent: StripeIntent?): List<SupportedPaymentMethod> {
+        stripeIntent?.let { it ->
+            return it.paymentMethodTypes.mapNotNull {
                 SupportedPaymentMethod.fromCode(it)
             }.filterNot {
                 // AfterpayClearpay requires a shipping address, filter it out if not provided
-                it == SupportedPaymentMethod.AfterpayClearpay &&
-                    (stripeIntent as? PaymentIntent)?.shipping == null
-            }//.filter { it == SupportedPaymentMethod.Card }
+                val excludeAfterPay = it == SupportedPaymentMethod.AfterpayClearpay &&
+                    (it as? PaymentIntent)?.shipping == null
+                if (excludeAfterPay && BuildConfig.DEBUG) {
+                    logger.debug("AfterPay will not be shown. It requires that Shipping is included in the Payment or Setup Intent")
+                }
+                excludeAfterPay
+            }.filterNot { supportedPaymentMethod ->
+                val excludeRequiresMandate = (it is SetupIntent) && supportedPaymentMethod.requiresMandate
+                if (excludeRequiresMandate && BuildConfig.DEBUG) {
+                    logger.debug("${supportedPaymentMethod.name} will not be shown. It requires a mandate which is incompatible with SetupIntents")
+                }
+                excludeRequiresMandate
+            }.filterNot { supportedPaymentMethod ->
+                val excludeRequiresMandate = (it is PaymentIntent) &&
+                    supportedPaymentMethod.requiresMandate &&
+                    it.setupFutureUsage == StripeIntent.Usage.OffSession
+                if (excludeRequiresMandate && BuildConfig.DEBUG) {
+                    logger.debug("${supportedPaymentMethod.name} will not be shown.  It requires a mandate which is incompatible with off_session PaymentIntents")
+                }
+                excludeRequiresMandate
+            } // .filter { it == SupportedPaymentMethod.Card }
         }
 
         return emptyList()

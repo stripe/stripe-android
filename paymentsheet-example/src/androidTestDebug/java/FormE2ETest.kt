@@ -1,6 +1,8 @@
 import android.os.Environment.DIRECTORY_PICTURES
 import android.util.Log
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performTextInput
 import androidx.test.core.app.ActivityScenario.launch
 import androidx.test.espresso.Espresso.closeSoftKeyboard
 import androidx.test.espresso.Espresso.onView
@@ -66,11 +68,31 @@ internal class FormE2ETest {
 
     @ExperimentalCoroutinesApi
     @Test
+    fun testSingleScenario() = runBlocking {
+        generateTestParameters { testParameters, paymentSelection ->
+            confirmComplete(testParameters) {
+                // Fill in form values (SEPA needs IBAN and all card fields)
+                if(paymentSelection is PaymentSelection.SepaDebit){
+                    composeTestRule.onNodeWithText("IBAN").performTextInput("DE89370400440532013000")
+                }
+
+                // Validate the state of the save checkbox
+            }
+        }
+    }
+
+
+    @ExperimentalCoroutinesApi
+    @Test
     fun testAllCurrencyAndModesAccepted() = runBlocking {
         generateTestParameters { testParameters, paymentSelection ->
             confirmComplete(testParameters) {
                 // Fill in form values (SEPA needs IBAN and all card fields)
-                // TODO: Address is filling line2 instead of 1
+
+                if(paymentSelection is PaymentSelection.SepaDebit){
+                    composeTestRule.onNodeWithText("IBAN").performTextInput("My name")
+
+                }
 
                 // Validate the state of the save checkbox
             }
