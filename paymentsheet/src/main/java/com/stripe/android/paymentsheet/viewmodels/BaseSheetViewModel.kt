@@ -63,43 +63,14 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     private val _stripeIntent = MutableLiveData<StripeIntent?>()
     internal val stripeIntent: LiveData<StripeIntent?> = _stripeIntent
 
-    internal val supportedPaymentMethods = _stripeIntent.map {
-        val newSupportedPaymentMethods = getSupportedPaymentMethods(it)
-
-        if (it != null && newSupportedPaymentMethods.isEmpty()) {
-            onFatal(
-                IllegalArgumentException(
-                    "None of the requested payment methods" +
-                        " (${it.paymentMethodTypes})" +
-                        " match the supported payment types" +
-                        " (${SupportedPaymentMethod.values().toList()})"
-                )
-            )
-        }
-
-        newSupportedPaymentMethods
-    }
+    internal var supportedPaymentMethods = emptyList<SupportedPaymentMethod>()
 
     protected val _paymentMethods = MutableLiveData<List<PaymentMethod>>()
     internal val paymentMethods: LiveData<List<PaymentMethod>> = _paymentMethods
 
     @VisibleForTesting
-    internal val amount = _stripeIntent.map { stripeIntent ->
-        if (stripeIntent is PaymentIntent) {
-            runCatching {
-                Amount(
-                    requireNotNull(stripeIntent.amount),
-                    requireNotNull(stripeIntent.currency)
-                )
-            }.onFailure {
-                onFatal(
-                    IllegalStateException("PaymentIntent must contain amount and currency.")
-                )
-            }.getOrNull()
-        } else {
-            null
-        }
-    }
+    internal val _amount = MutableLiveData<Amount>()
+    internal val amount: LiveData<Amount> = _amount
 
     /**
      * Request to retrieve the value from the repository happens when initialize any fragment
@@ -205,6 +176,32 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
     fun setStripeIntent(stripeIntent: StripeIntent?) {
         _stripeIntent.value = stripeIntent
+        supportedPaymentMethods = getSupportedPaymentMethods(stripeIntent)
+
+        if (stripeIntent != null && supportedPaymentMethods.isEmpty()) {
+            onFatal(
+                IllegalArgumentException(
+                    "None of the requested payment methods" +
+                        " (${stripeIntent.paymentMethodTypes})" +
+                        " match the supported payment types" +
+                        " (${SupportedPaymentMethod.values().toList()})"
+                )
+            )
+        }
+
+        if (stripeIntent is PaymentIntent) {
+            runCatching {
+                _amount.value =
+                    Amount(
+                        requireNotNull(stripeIntent.amount),
+                        requireNotNull(stripeIntent.currency)
+                    )
+            }.onFailure {
+                onFatal(
+                    IllegalStateException("PaymentIntent must contain amount and currency.")
+                )
+            }
+        }
     }
 
     private fun getSupportedPaymentMethods(

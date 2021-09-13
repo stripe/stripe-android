@@ -73,24 +73,23 @@ internal abstract class BaseAddPaymentMethodFragment(
         val viewBinding = FragmentPaymentsheetAddPaymentMethodBinding.bind(view)
         addPaymentMethodHeader = viewBinding.addPaymentMethodHeader
 
-        sheetViewModel.supportedPaymentMethods.observe(viewLifecycleOwner) { paymentMethods ->
-            viewBinding.googlePayDivider.setText(
-                if (paymentMethods.contains(SupportedPaymentMethod.Card) &&
-                    paymentMethods.size == 1
-                ) {
-                    R.string.stripe_paymentsheet_or_pay_with_card
-                } else {
-                    R.string.stripe_paymentsheet_or_pay_using
-                }
-            )
-
-            if (paymentMethods.size > 1) {
-                setupRecyclerView(viewBinding, paymentMethods)
+        val paymentMethods  = sheetViewModel.supportedPaymentMethods
+        viewBinding.googlePayDivider.setText(
+            if (paymentMethods.contains(SupportedPaymentMethod.Card) &&
+                paymentMethods.size == 1
+            ) {
+                R.string.stripe_paymentsheet_or_pay_with_card
+            } else {
+                R.string.stripe_paymentsheet_or_pay_using
             }
+        )
 
-            if (paymentMethods.isNotEmpty()) {
-                replacePaymentMethodFragment(paymentMethods[0])
-            }
+        if (paymentMethods.size > 1) {
+            setupRecyclerView(viewBinding, paymentMethods)
+        }
+
+        if (paymentMethods.isNotEmpty()) {
+            replacePaymentMethodFragment(paymentMethods[0])
         }
 
         sheetViewModel.processing.observe(viewLifecycleOwner) { isProcessing ->
@@ -238,9 +237,11 @@ internal abstract class BaseAddPaymentMethodFragment(
                 SupportedPaymentMethod.fromCode(supportedPaymentMethodName)
 
             val isSetupIntent = stripeIntent is SetupIntent
-            val isPaymentIntentOffSession = (stripeIntent as? PaymentIntent)
-                ?.setupFutureUsage == StripeIntent.Usage.OffSession
-            if (isSetupIntent || isPaymentIntentOffSession) {
+            val isPaymentIntentSetupFutureUsage = (stripeIntent as? PaymentIntent)?.setupFutureUsage
+            if (isSetupIntent ||
+                (isPaymentIntentSetupFutureUsage == StripeIntent.Usage.OnSession) ||
+                (isPaymentIntentSetupFutureUsage == StripeIntent.Usage.OffSession)
+            ) {
                 saveForFutureUseVisible = false
                 saveForFutureUseValue = true
             } else if (stripeIntent is PaymentIntent &&
@@ -255,7 +256,7 @@ internal abstract class BaseAddPaymentMethodFragment(
                 // checkbox regardless of the payment method until future fix
                 stripeIntent.paymentMethodTypes.forEach {
                     if (SupportedPaymentMethod.fromCode(it)
-                        ?.userRequestedConfirmSaveForFutureSupported == false
+                            ?.userRequestedConfirmSaveForFutureSupported == false
                     ) {
                         saveForFutureUseValue = false
                         saveForFutureUseVisible = false
