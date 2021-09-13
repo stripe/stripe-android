@@ -207,33 +207,35 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
         _stripeIntent.value = stripeIntent
     }
 
-    private fun getSupportedPaymentMethods(stripeIntent: StripeIntent?): List<SupportedPaymentMethod> {
-        stripeIntent?.let { it ->
-            return it.paymentMethodTypes.mapNotNull {
+    private fun getSupportedPaymentMethods(stripeIntentParameter: StripeIntent?): List<SupportedPaymentMethod> {
+        stripeIntentParameter?.let { stripeIntent ->
+            return stripeIntent.paymentMethodTypes.asSequence().mapNotNull {
                 SupportedPaymentMethod.fromCode(it)
             }.filterNot {
                 // AfterpayClearpay requires a shipping address, filter it out if not provided
                 val excludeAfterPay = it == SupportedPaymentMethod.AfterpayClearpay &&
-                    (it as? PaymentIntent)?.shipping == null
+                    (stripeIntent as? PaymentIntent)?.shipping == null
                 if (excludeAfterPay && BuildConfig.DEBUG) {
                     logger.debug("AfterPay will not be shown. It requires that Shipping is included in the Payment or Setup Intent")
                 }
                 excludeAfterPay
             }.filterNot { supportedPaymentMethod ->
-                val excludeRequiresMandate = (it is SetupIntent) && supportedPaymentMethod.requiresMandate
+                val excludeRequiresMandate =
+                    (stripeIntent is SetupIntent) && supportedPaymentMethod.requiresMandate
                 if (excludeRequiresMandate && BuildConfig.DEBUG) {
                     logger.debug("${supportedPaymentMethod.name} will not be shown. It requires a mandate which is incompatible with SetupIntents")
                 }
                 excludeRequiresMandate
             }.filterNot { supportedPaymentMethod ->
-                val excludeRequiresMandate = (it is PaymentIntent) &&
+                val excludeRequiresMandate = (stripeIntent is PaymentIntent) &&
                     supportedPaymentMethod.requiresMandate &&
-                    it.setupFutureUsage == StripeIntent.Usage.OffSession
+                    stripeIntent.setupFutureUsage == StripeIntent.Usage.OffSession
                 if (excludeRequiresMandate && BuildConfig.DEBUG) {
                     logger.debug("${supportedPaymentMethod.name} will not be shown.  It requires a mandate which is incompatible with off_session PaymentIntents")
                 }
                 excludeRequiresMandate
-            }.filter { it == SupportedPaymentMethod.Card }
+            }//.filter { it == SupportedPaymentMethod.Card }
+                .toList()
         }
 
         return emptyList()
