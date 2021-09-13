@@ -73,7 +73,7 @@ internal abstract class BaseAddPaymentMethodFragment(
         val viewBinding = FragmentPaymentsheetAddPaymentMethodBinding.bind(view)
         addPaymentMethodHeader = viewBinding.addPaymentMethodHeader
 
-        val paymentMethods  = sheetViewModel.supportedPaymentMethods
+        val paymentMethods = sheetViewModel.supportedPaymentMethods
         viewBinding.googlePayDivider.setText(
             if (paymentMethods.contains(SupportedPaymentMethod.Card) &&
                 paymentMethods.size == 1
@@ -256,7 +256,7 @@ internal abstract class BaseAddPaymentMethodFragment(
                 // checkbox regardless of the payment method until future fix
                 stripeIntent.paymentMethodTypes.forEach {
                     if (SupportedPaymentMethod.fromCode(it)
-                            ?.userRequestedConfirmSaveForFutureSupported == false
+                        ?.userRequestedConfirmSaveForFutureSupported == false
                     ) {
                         saveForFutureUseValue = false
                         saveForFutureUseVisible = false

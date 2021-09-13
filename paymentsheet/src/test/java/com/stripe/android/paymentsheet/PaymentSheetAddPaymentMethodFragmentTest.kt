@@ -49,7 +49,7 @@ import org.robolectric.RobolectricTestRunner
 class PaymentSheetAddPaymentMethodFragmentTest {
     @get:Rule
     val rule = InstantTaskExecutorRule()
-    
+
     private val eventReporter = mock<EventReporter>()
     private val context: Context = ApplicationProvider.getApplicationContext()
 
