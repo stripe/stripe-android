@@ -520,12 +520,6 @@ public final class com/stripe/android/paymentsheet/elements/ComposableSingletons
 	public final fun getLambda-1$paymentsheet_release ()Lkotlin/jvm/functions/Function3;
 }
 
-public class com/stripe/android/paymentsheet/elements/SingletonHolder {
-	public static final field $stable I
-	public fun <init> (Lkotlin/jvm/functions/Function1;)V
-	public final fun getInstance (Ljava/lang/Object;)Ljava/lang/Object;
-}
-
 public final class com/stripe/android/paymentsheet/flowcontroller/DefaultFlowControllerInitializer_Factory : dagger/internal/Factory {
 	public fun <init> (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)V
 	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/paymentsheet/flowcontroller/DefaultFlowControllerInitializer_Factory;
