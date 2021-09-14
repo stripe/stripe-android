@@ -3,7 +3,7 @@ package com.stripe.android.paymentsheet.injection
 import android.app.Application
 import com.stripe.android.googlepaylauncher.GooglePayLauncherModule
 import com.stripe.android.payments.core.injection.CoroutineContextModule
-import com.stripe.android.payments.core.injection.PaymentCommonModule
+import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import com.stripe.android.paymentsheet.PaymentSheetContract
 import com.stripe.android.paymentsheet.PaymentSheetViewModel
 import dagger.BindsInstance
@@ -13,7 +13,7 @@ import javax.inject.Singleton
 @Singleton
 @Component(
     modules = [
-        PaymentCommonModule::class,
+        StripeRepositoryModule::class,
         PaymentSheetCommonModule::class,
         PaymentSheetViewModelModule::class,
         GooglePayLauncherModule::class,
