@@ -10,14 +10,19 @@ internal class ResourceRepository(
     internal val bankRepository: BankRepository,
     internal val addressRepository: AddressFieldElementRepository
 ) {
+    private var initialized: Boolean = false
+
     internal constructor(resources: Resources) : this(
         BankRepository(resources),
         AddressFieldElementRepository(resources)
     )
 
     internal fun init() {
-        bankRepository.init()
-        addressRepository.init()
+        if (!initialized) {
+            bankRepository.init()
+            addressRepository.init()
+            initialized = true
+        }
     }
 
     companion object : SingletonHolder<ResourceRepository, Resources>(::ResourceRepository)

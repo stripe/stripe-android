@@ -8,9 +8,7 @@ import javax.inject.Singleton
 
 @Module
 internal abstract class FormViewModelModule {
-
     companion object {
-
         @Provides
         @Singleton
         fun provideResourceRepositoryFactory(

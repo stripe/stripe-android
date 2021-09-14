@@ -24,7 +24,6 @@ internal abstract class PaymentSheetViewModelModule {
     abstract fun bindsApplicationForContext(application: Application): Context
 
     companion object {
-
         @Provides
         @Singleton
         fun provideResourceRepositoryFactory(

@@ -1,6 +1,6 @@
 package com.stripe.android.paymentsheet.elements
 
-open class SingletonHolder<out T, in A>(private val constructor: (A) -> T) {
+internal open class SingletonHolder<out T, in A>(private val constructor: (A) -> T) {
 
     @Volatile
     private var instance: T? = null
