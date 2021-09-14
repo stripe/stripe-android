@@ -56,8 +56,9 @@ internal abstract class PaymentSheetCommonModule {
 
         @Provides
         @Named(PUBLISHABLE_KEY)
-        fun providePublishableKeyProvider(paymentConfiguration: Lazy<PaymentConfiguration>):
-            () -> String = { paymentConfiguration.get().publishableKey }
+        fun providePublishableKey(paymentConfiguration: PaymentConfiguration): () -> String {
+            return { paymentConfiguration.publishableKey }
+        }
 
         @Provides
         @Singleton

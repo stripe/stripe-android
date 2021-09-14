@@ -621,28 +621,12 @@ public final class com/stripe/android/paymentsheet/injection/PaymentOptionsViewM
 	public static fun provideEventReporterMode (Lcom/stripe/android/paymentsheet/injection/PaymentOptionsViewModelModule;)Lcom/stripe/android/paymentsheet/analytics/EventReporter$Mode;
 }
 
-public final class com/stripe/android/paymentsheet/injection/PaymentOptionsViewModelModule_ProvidePaymentConfigurationFactory : dagger/internal/Factory {
-	public fun <init> (Lcom/stripe/android/paymentsheet/injection/PaymentOptionsViewModelModule;Ljavax/inject/Provider;)V
-	public static fun create (Lcom/stripe/android/paymentsheet/injection/PaymentOptionsViewModelModule;Ljavax/inject/Provider;)Lcom/stripe/android/paymentsheet/injection/PaymentOptionsViewModelModule_ProvidePaymentConfigurationFactory;
-	public fun get ()Lcom/stripe/android/PaymentConfiguration;
-	public synthetic fun get ()Ljava/lang/Object;
-	public static fun providePaymentConfiguration (Lcom/stripe/android/paymentsheet/injection/PaymentOptionsViewModelModule;Landroid/content/Context;)Lcom/stripe/android/PaymentConfiguration;
-}
-
 public final class com/stripe/android/paymentsheet/injection/PaymentOptionsViewModelModule_ProvidePrefsRepositoryFactoryFactory : dagger/internal/Factory {
 	public fun <init> (Lcom/stripe/android/paymentsheet/injection/PaymentOptionsViewModelModule;Ljavax/inject/Provider;Ljavax/inject/Provider;)V
 	public static fun create (Lcom/stripe/android/paymentsheet/injection/PaymentOptionsViewModelModule;Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/paymentsheet/injection/PaymentOptionsViewModelModule_ProvidePrefsRepositoryFactoryFactory;
 	public synthetic fun get ()Ljava/lang/Object;
 	public fun get ()Lkotlin/jvm/functions/Function1;
 	public static fun providePrefsRepositoryFactory (Lcom/stripe/android/paymentsheet/injection/PaymentOptionsViewModelModule;Landroid/content/Context;Lkotlin/coroutines/CoroutineContext;)Lkotlin/jvm/functions/Function1;
-}
-
-public final class com/stripe/android/paymentsheet/injection/PaymentOptionsViewModelModule_ProvidePublishableKeyFactory : dagger/internal/Factory {
-	public fun <init> (Lcom/stripe/android/paymentsheet/injection/PaymentOptionsViewModelModule;Ljavax/inject/Provider;)V
-	public static fun create (Lcom/stripe/android/paymentsheet/injection/PaymentOptionsViewModelModule;Ljavax/inject/Provider;)Lcom/stripe/android/paymentsheet/injection/PaymentOptionsViewModelModule_ProvidePublishableKeyFactory;
-	public synthetic fun get ()Ljava/lang/Object;
-	public fun get ()Lkotlin/jvm/functions/Function0;
-	public static fun providePublishableKey (Lcom/stripe/android/paymentsheet/injection/PaymentOptionsViewModelModule;Lcom/stripe/android/PaymentConfiguration;)Lkotlin/jvm/functions/Function0;
 }
 
 public final class com/stripe/android/paymentsheet/injection/PaymentSheetCommonModule_Companion_ProvideEnabledLoggingFactory : dagger/internal/Factory {
@@ -667,6 +651,22 @@ public final class com/stripe/android/paymentsheet/injection/PaymentSheetCommonM
 	public fun get ()Lcom/stripe/android/Logger;
 	public synthetic fun get ()Ljava/lang/Object;
 	public static fun provideLogger (Z)Lcom/stripe/android/Logger;
+}
+
+public final class com/stripe/android/paymentsheet/injection/PaymentSheetCommonModule_Companion_ProvidePaymentConfigurationFactory : dagger/internal/Factory {
+	public fun <init> (Ljavax/inject/Provider;)V
+	public static fun create (Ljavax/inject/Provider;)Lcom/stripe/android/paymentsheet/injection/PaymentSheetCommonModule_Companion_ProvidePaymentConfigurationFactory;
+	public fun get ()Lcom/stripe/android/PaymentConfiguration;
+	public synthetic fun get ()Ljava/lang/Object;
+	public static fun providePaymentConfiguration (Landroid/content/Context;)Lcom/stripe/android/PaymentConfiguration;
+}
+
+public final class com/stripe/android/paymentsheet/injection/PaymentSheetCommonModule_Companion_ProvidePublishableKeyFactory : dagger/internal/Factory {
+	public fun <init> (Ljavax/inject/Provider;)V
+	public static fun create (Ljavax/inject/Provider;)Lcom/stripe/android/paymentsheet/injection/PaymentSheetCommonModule_Companion_ProvidePublishableKeyFactory;
+	public synthetic fun get ()Ljava/lang/Object;
+	public fun get ()Lkotlin/jvm/functions/Function0;
+	public static fun providePublishableKey (Lcom/stripe/android/PaymentConfiguration;)Lkotlin/jvm/functions/Function0;
 }
 
 public final class com/stripe/android/paymentsheet/injection/PaymentSheetViewModelModule_Companion_ProvideClientSecretFactory : dagger/internal/Factory {
