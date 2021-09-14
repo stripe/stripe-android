@@ -227,11 +227,11 @@ internal abstract class BaseAddPaymentMethodFragment(
             amount: Amount? = null,
             billingAddress: PaymentSheet.BillingDetails? = null
         ): FormFragmentArguments {
-            // Has effect of setting off session on PIs (not SIs) and also impacts reopening
-            // the card
-            var saveForFutureUseValue = true
+            // It impacts reopening the card and together with allowUserInitiatedReuse
+            // will determine if off_session is set on confirm.
+            var isReusable = true
             // This will impact the setting of the off_session on confirm
-            var saveForFutureUseVisible = true
+            var allowUserInitiatedReuse = true
 
             val supportedPaymentMethod =
                 SupportedPaymentMethod.fromCode(supportedPaymentMethodName)
@@ -242,15 +242,15 @@ internal abstract class BaseAddPaymentMethodFragment(
                 (isPaymentIntentSetupFutureUsage == StripeIntent.Usage.OnSession) ||
                 (isPaymentIntentSetupFutureUsage == StripeIntent.Usage.OffSession)
             ) {
-                saveForFutureUseVisible = false
-                saveForFutureUseValue = true
+                allowUserInitiatedReuse = false
+                isReusable = true
             } else if (stripeIntent is PaymentIntent &&
                 (!hasCustomer || (supportedPaymentMethod?.requiresMandate == true))
             ) {
                 // If paymentMethodTypes contains payment method that does not support
                 // save for future should be false and unselected until future fix
-                saveForFutureUseValue = false
-                saveForFutureUseVisible = false
+                isReusable = false
+                allowUserInitiatedReuse = false
             } else if (stripeIntent is PaymentIntent) {
                 // If the intent includes any payment method types that don't support save remove
                 // checkbox regardless of the payment method until future fix
@@ -258,16 +258,16 @@ internal abstract class BaseAddPaymentMethodFragment(
                     if (SupportedPaymentMethod.fromCode(it)
                         ?.userRequestedConfirmSaveForFutureSupported == false
                     ) {
-                        saveForFutureUseValue = false
-                        saveForFutureUseVisible = false
+                        isReusable = false
+                        allowUserInitiatedReuse = false
                     }
                 }
             }
 
             return FormFragmentArguments(
                 supportedPaymentMethodName = supportedPaymentMethodName,
-                saveForFutureUseInitialVisibility = saveForFutureUseVisible,
-                saveForFutureUseInitialValue = saveForFutureUseValue,
+                allowUserInitiatedReuse = allowUserInitiatedReuse,
+                saveForFutureUseInitialValue = isReusable,
                 merchantName = merchantName,
                 amount = amount,
                 billingDetails = billingAddress?.let {

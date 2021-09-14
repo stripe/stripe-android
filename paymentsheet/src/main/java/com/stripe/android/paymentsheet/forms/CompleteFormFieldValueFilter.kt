@@ -12,8 +12,7 @@ import kotlinx.coroutines.flow.combine
 internal class CompleteFormFieldValueFilter(
     private val currentFieldValueMap: Flow<Map<IdentifierSpec, FormFieldEntry>>,
     private val hiddenIdentifiers: Flow<List<IdentifierSpec>>,
-    val showingMandate: Flow<Boolean>,
-    val saveForFutureUse: Flow<Boolean>
+    val showingMandate: Flow<Boolean>
 ) {
     /**
      * This will return null if any form field values are incomplete, otherwise it is an object

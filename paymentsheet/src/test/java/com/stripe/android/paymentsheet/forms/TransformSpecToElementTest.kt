@@ -65,7 +65,7 @@ internal class TransformSpecToElementTest {
                 FormFragmentArguments(
                     supportedPaymentMethodName = "Card",
                     saveForFutureUseInitialValue = true,
-                    saveForFutureUseInitialVisibility = true,
+                    allowUserInitiatedReuse = true,
                     merchantName = "Example, Inc."
                 )
             )

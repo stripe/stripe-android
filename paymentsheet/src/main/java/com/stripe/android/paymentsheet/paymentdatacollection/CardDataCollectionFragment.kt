@@ -322,7 +322,7 @@ internal class CardDataCollectionFragment<ViewModelType : BaseSheetViewModel<*>>
             ComposeFormDataCollectionFragment.EXTRA_CONFIG
         )?.let { args ->
             saveCardCheckbox.isChecked = args.saveForFutureUseInitialValue
-            saveCardCheckbox.isVisible = args.saveForFutureUseInitialVisibility
+            saveCardCheckbox.isVisible = args.allowUserInitiatedReuse
         }
         sheetViewModel.newCard?.shouldSavePaymentMethod?.also {
             if (saveCardCheckbox.isVisible) {

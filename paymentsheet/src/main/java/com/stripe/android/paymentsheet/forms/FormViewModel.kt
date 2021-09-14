@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.forms
 
 import android.content.res.Resources
+import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -68,24 +69,22 @@ internal class FormViewModel @Inject internal constructor(
 
     internal lateinit var elements: List<FormElement>
 
-    private val saveForFutureUseVisible = MutableStateFlow(config.saveForFutureUseInitialVisibility)
+    private val allowUserInitiatedReuse = MutableStateFlow(config.allowUserInitiatedReuse)
 
-    internal fun setSaveForFutureUseVisibility(isVisible: Boolean) {
-        saveForFutureUseVisible.value = isVisible
+    internal fun setUserInitiatedReuseVisibility(isVisible: Boolean) {
+        allowUserInitiatedReuse.value = isVisible
     }
 
-    internal fun setSaveForFutureUse(value: Boolean) {
+    internal fun setUserInitiatedReuseValue(value: Boolean) {
         elements
             .filterIsInstance<SaveForFutureUseElement>()
             .firstOrNull()?.controller?.onValueChange(value)
     }
 
-    private val saveForFutureUseElement = elements
+    @VisibleForTesting
+    internal val saveForFutureUseElement = elements
         .filterIsInstance<SaveForFutureUseElement>()
         .firstOrNull()
-
-    internal val saveForFutureUse = saveForFutureUseElement?.controller?.saveForFutureUse
-        ?: MutableStateFlow(config.saveForFutureUseInitialValue)
 
     private val sectionToFieldIdentifierMap = layout.items
         .filterIsInstance<SectionSpec>()
@@ -97,10 +96,12 @@ internal class FormViewModel @Inject internal constructor(
 
     internal val hiddenIdentifiers =
         combine(
-            saveForFutureUseVisible,
+            allowUserInitiatedReuse,
+            // Regardless of checkbox visibility it's state will define if
+            // reusable fields are displayed
             saveForFutureUseElement?.controller?.hiddenIdentifiers
                 ?: MutableStateFlow(emptyList())
-        ) { showFutureUse, hiddenIdentifiers ->
+        ) { allowUserInitiatedReuse, hiddenIdentifiers ->
 
             // For hidden *section* identifiers, list of identifiers of elements in the section
             val identifiers = sectionToFieldIdentifierMap
@@ -111,7 +112,7 @@ internal class FormViewModel @Inject internal constructor(
                     sectionToSectionFieldEntry.value
                 }
 
-            if (!showFutureUse && saveForFutureUseElement != null) {
+            if (!allowUserInitiatedReuse && saveForFutureUseElement != null) {
                 hiddenIdentifiers
                     .plus(identifiers)
                     .plus(saveForFutureUseElement.identifier)
@@ -138,7 +139,6 @@ internal class FormViewModel @Inject internal constructor(
                 it.toList().flatten().toMap()
             },
             hiddenIdentifiers,
-            showingMandate,
-            saveForFutureUse
+            showingMandate
         ).filterFlow()
 }

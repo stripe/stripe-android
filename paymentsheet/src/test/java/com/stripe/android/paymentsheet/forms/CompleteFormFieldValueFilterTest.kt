@@ -38,8 +38,7 @@ class CompleteFormFieldValueFilterTest {
     private val transformElementToFormFieldValueFlow = CompleteFormFieldValueFilter(
         fieldFlow,
         hiddenIdentifersFlow,
-        showingMandate = MutableStateFlow(true),
-        saveForFutureUse = MutableStateFlow(false)
+        showingMandate = MutableStateFlow(true)
     )
 
     @Test

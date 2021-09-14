@@ -156,7 +156,7 @@ class CardDataCollectionFragmentTest {
         createFragment(
             fragmentArgs = FormFragmentArguments(
                 SupportedPaymentMethod.Bancontact.name,
-                saveForFutureUseInitialVisibility = false,
+                allowUserInitiatedReuse = false,
                 saveForFutureUseInitialValue = false,
                 merchantName = "Merchant, Inc.",
                 billingDetails = PaymentSheet.BillingDetails(

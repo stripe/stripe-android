@@ -34,7 +34,7 @@ internal object PaymentSheetFixtures {
     )
 
     internal val CONFIG_CUSTOMER_WITH_GOOGLEPAY = CONFIG_CUSTOMER.copy(
-        googlePay = com.stripe.android.paymentsheet.ConfigFixtures.GOOGLE_PAY
+        googlePay = ConfigFixtures.GOOGLE_PAY
     )
 
     internal val ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP = PaymentSheetContract.Args(
@@ -63,7 +63,7 @@ internal object PaymentSheetFixtures {
 
     internal val COMPOSE_FRAGMENT_ARGS = FormFragmentArguments(
         SupportedPaymentMethod.Bancontact.name,
-        saveForFutureUseInitialVisibility = true,
+        allowUserInitiatedReuse = true,
         saveForFutureUseInitialValue = true,
         merchantName = "Merchant, Inc.",
         billingDetails = PaymentSheet.BillingDetails(

@@ -63,20 +63,20 @@ internal class FormViewModelTest {
             FormFragmentArguments(
                 supportedPaymentMethodName = "Card",
                 saveForFutureUseInitialValue = true,
-                saveForFutureUseInitialVisibility = true,
+                allowUserInitiatedReuse = true,
                 merchantName = "Example, Inc."
             ),
             resourceRepository = resourceRepository
         )
 
         val values = mutableListOf<Boolean>()
-        formViewModel.saveForFutureUse.asLiveData()
-            .observeForever {
+        formViewModel.saveForFutureUseElement?.controller?.saveForFutureUse?.asLiveData()
+            ?.observeForever {
                 values.add(it)
             }
         assertThat(values[0]).isTrue()
 
-        formViewModel.setSaveForFutureUse(false)
+        formViewModel.setUserInitiatedReuseValue(false)
 
         assertThat(values[1]).isFalse()
     }
@@ -94,7 +94,7 @@ internal class FormViewModelTest {
             FormFragmentArguments(
                 supportedPaymentMethodName = "Card",
                 saveForFutureUseInitialValue = true,
-                saveForFutureUseInitialVisibility = true,
+                allowUserInitiatedReuse = true,
                 merchantName = "Example, Inc."
             ),
             resourceRepository = resourceRepository
@@ -107,7 +107,7 @@ internal class FormViewModelTest {
             }
         assertThat(values[0]).isEmpty()
 
-        formViewModel.setSaveForFutureUseVisibility(false)
+        formViewModel.setUserInitiatedReuseVisibility(false)
 
         ShadowLooper.runUiThreadTasksIncludingDelayedTasks()
 
@@ -127,7 +127,7 @@ internal class FormViewModelTest {
             FormFragmentArguments(
                 supportedPaymentMethodName = "Card",
                 saveForFutureUseInitialValue = true,
-                saveForFutureUseInitialVisibility = true,
+                allowUserInitiatedReuse = true,
                 merchantName = "Example, Inc."
             ),
             resourceRepository = resourceRepository
@@ -140,7 +140,7 @@ internal class FormViewModelTest {
             }
         assertThat(values[0]).isEmpty()
 
-        formViewModel.setSaveForFutureUse(false)
+        formViewModel.setUserInitiatedReuseValue(false)
 
         ShadowLooper.runUiThreadTasksIncludingDelayedTasks()
 
@@ -165,7 +165,7 @@ internal class FormViewModelTest {
                 FormFragmentArguments(
                     supportedPaymentMethodName = "Card",
                     saveForFutureUseInitialValue = true,
-                    saveForFutureUseInitialVisibility = true,
+                    allowUserInitiatedReuse = true,
                     merchantName = "Example, Inc."
                 ),
                 resourceRepository = resourceRepository
@@ -211,7 +211,7 @@ internal class FormViewModelTest {
                 FormFragmentArguments(
                     supportedPaymentMethodName = "Card",
                     saveForFutureUseInitialValue = true,
-                    saveForFutureUseInitialVisibility = true,
+                    allowUserInitiatedReuse = true,
                     merchantName = "Example, Inc."
                 ),
                 resourceRepository = resourceRepository
@@ -257,7 +257,7 @@ internal class FormViewModelTest {
                 FormFragmentArguments(
                     supportedPaymentMethodName = "Card",
                     saveForFutureUseInitialValue = true,
-                    saveForFutureUseInitialVisibility = true,
+                    allowUserInitiatedReuse = true,
                     merchantName = "Example, Inc."
                 ),
                 resourceRepository = resourceRepository
@@ -303,7 +303,7 @@ internal class FormViewModelTest {
                 FormFragmentArguments(
                     supportedPaymentMethodName = "Card",
                     saveForFutureUseInitialValue = true,
-                    saveForFutureUseInitialVisibility = true,
+                    allowUserInitiatedReuse = true,
                     merchantName = "Example, Inc."
                 ),
                 resourceRepository = resourceRepository
@@ -374,7 +374,7 @@ internal class FormViewModelTest {
                 FormFragmentArguments(
                     supportedPaymentMethodName = "Card",
                     saveForFutureUseInitialValue = true,
-                    saveForFutureUseInitialVisibility = true,
+                    allowUserInitiatedReuse = true,
                     merchantName = "Example, Inc."
                 ),
                 resourceRepository = resourceRepository

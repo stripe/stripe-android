@@ -68,7 +68,7 @@ class FormSaveCheckboxTest {
                             it,
                             TestOutput(
                                 formArgumentFromPaymentIntentTestInput(it).saveForFutureUseInitialValue,
-                                formArgumentFromPaymentIntentTestInput(it).saveForFutureUseInitialVisibility
+                                formArgumentFromPaymentIntentTestInput(it).allowUserInitiatedReuse
                             )
                         )
                     }
@@ -89,7 +89,7 @@ class FormSaveCheckboxTest {
                         it,
                         TestOutput(
                             formArgumentFromSetupIntentTestInput(it).saveForFutureUseInitialValue,
-                            formArgumentFromSetupIntentTestInput(it).saveForFutureUseInitialVisibility
+                            formArgumentFromSetupIntentTestInput(it).allowUserInitiatedReuse
                         )
                     )
                 }
@@ -126,7 +126,7 @@ class FormSaveCheckboxTest {
             ).isEqualTo(
                 FormFragmentArguments(
                     SupportedPaymentMethod.fromCode(it.testInput.lpmTypeFormCode)!!.name,
-                    saveForFutureUseInitialVisibility = it.testOutput.expectedSaveCheckboxVisible,
+                    allowUserInitiatedReuse = it.testOutput.expectedSaveCheckboxVisible,
                     saveForFutureUseInitialValue = it.testOutput.expectedSaveCheckboxValue,
                     merchantName = "Example, Inc",
                 )
@@ -144,7 +144,7 @@ class FormSaveCheckboxTest {
             ).isEqualTo(
                 FormFragmentArguments(
                     SupportedPaymentMethod.fromCode(it.testInput.lpmTypeFormCode)!!.name,
-                    saveForFutureUseInitialVisibility = it.testOutput.expectedSaveCheckboxVisible,
+                    allowUserInitiatedReuse = it.testOutput.expectedSaveCheckboxVisible,
                     saveForFutureUseInitialValue = it.testOutput.expectedSaveCheckboxValue,
                     merchantName = "Example, Inc",
                 )

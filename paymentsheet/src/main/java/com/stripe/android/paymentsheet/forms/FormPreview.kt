@@ -49,7 +49,7 @@ internal fun FormInternalPreview() {
             ),
             FormFragmentArguments(
                 "Card",
-                saveForFutureUseInitialVisibility = true,
+                allowUserInitiatedReuse = true,
                 saveForFutureUseInitialValue = true,
                 "Merchant, Inc.",
                 Amount(10, "USD"),
