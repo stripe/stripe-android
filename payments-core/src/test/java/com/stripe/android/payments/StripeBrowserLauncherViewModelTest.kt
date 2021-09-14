@@ -111,7 +111,8 @@ class StripeBrowserLauncherViewModelTest {
             objectId = "pi_1F7J1aCRMbs6FrXfaJcvbxF6",
             requestCode = 50000,
             clientSecret = "pi_1F7J1aCRMbs6FrXfaJcvbxF6_secret_mIuDLsSfoo1m6s",
-            url = "https://bank.com"
+            url = "https://bank.com",
+            publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
         )
     }
 }

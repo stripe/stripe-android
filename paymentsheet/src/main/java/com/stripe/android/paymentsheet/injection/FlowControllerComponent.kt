@@ -5,6 +5,7 @@ import androidx.activity.result.ActivityResultCaller
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModelStoreOwner
 import com.stripe.android.googlepaylauncher.GooglePayLauncherModule
+import com.stripe.android.payments.core.injection.CoroutineContextModule
 import com.stripe.android.payments.core.injection.InjectorKey
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import com.stripe.android.paymentsheet.PaymentOptionCallback
@@ -23,7 +24,8 @@ import javax.inject.Singleton
         StripeRepositoryModule::class,
         PaymentSheetCommonModule::class,
         FlowControllerModule::class,
-        GooglePayLauncherModule::class
+        GooglePayLauncherModule::class,
+        CoroutineContextModule::class
     ]
 )
 internal interface FlowControllerComponent {

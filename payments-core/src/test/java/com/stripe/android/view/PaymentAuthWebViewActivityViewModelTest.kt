@@ -150,7 +150,8 @@ class PaymentAuthWebViewActivityViewModelTest {
             objectId = "pi_1EceMnCRMbs6FrXfCXdF8dnx",
             requestCode = 100,
             clientSecret = "client_secret",
-            url = "https://example.com"
+            url = "https://example.com",
+            publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
         )
     }
 }
