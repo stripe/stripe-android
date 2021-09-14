@@ -35,6 +35,7 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import org.jetbrains.annotations.TestOnly
 import kotlin.coroutines.CoroutineContext
+import com.stripe.android.paymentsheet.BaseAddPaymentMethodFragment
 
 /**
  * Base `ViewModel` for activities that use `BottomSheet`.
@@ -175,6 +176,13 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
     fun setStripeIntent(stripeIntent: StripeIntent?) {
         _stripeIntent.value = stripeIntent
+
+        /**
+         * The settings of values in this function is so that
+         * they will be ready in the onViewCreated method of
+         * the [BaseAddPaymentMethodFragment]
+         */
+
         supportedPaymentMethods = getSupportedPaymentMethods(stripeIntent)
 
         if (stripeIntent != null && supportedPaymentMethods.isEmpty()) {
