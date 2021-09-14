@@ -2,6 +2,7 @@ package com.stripe.android.payments.core.injection
 
 import android.content.Context
 import androidx.annotation.RestrictTo
+import com.stripe.android.Logger
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.networking.AnalyticsRequestExecutor
 import com.stripe.android.networking.AnalyticsRequestFactory
@@ -16,6 +17,7 @@ import dagger.Provides
 import javax.inject.Named
 import javax.inject.Provider
 import javax.inject.Singleton
+import kotlin.coroutines.CoroutineContext
 
 /**
  * Common module providing payment related dependencies.
@@ -55,10 +57,20 @@ abstract class PaymentCommonModule {
         @Singleton
         internal fun provideStripeApiRepository(
             appContext: Context,
-            lazyPaymentConfiguration: Lazy<PaymentConfiguration>
+            lazyPaymentConfiguration: Lazy<PaymentConfiguration>,
+            logger: Logger,
+            @IOContext workContext: CoroutineContext,
+            analyticsRequestExecutor: AnalyticsRequestExecutor,
+            analyticsRequestFactory: AnalyticsRequestFactory,
+            @Named(PRODUCT_USAGE) productUsageTokens: Set<String>
         ) = StripeApiRepository(
             appContext,
-            { lazyPaymentConfiguration.get().publishableKey }
+            { lazyPaymentConfiguration.get().publishableKey },
+            logger = logger,
+            workContext = workContext,
+            productUsageTokens = productUsageTokens,
+            analyticsRequestExecutor = analyticsRequestExecutor,
+            analyticsRequestFactory = analyticsRequestFactory
         )
 
         @Provides

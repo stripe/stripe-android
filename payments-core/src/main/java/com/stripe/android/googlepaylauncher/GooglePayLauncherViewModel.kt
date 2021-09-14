@@ -219,11 +219,12 @@ internal class GooglePayLauncherViewModel(
             val config = PaymentConfiguration.getInstance(application)
             val publishableKey = config.publishableKey
             val stripeAccountId = config.stripeAccountId
+            val productUsageTokens = setOf(GooglePayLauncher.PRODUCT_USAGE)
 
             val analyticsRequestFactory = AnalyticsRequestFactory(
                 application,
                 publishableKey,
-                setOf(GooglePayLauncher.PRODUCT_USAGE)
+                productUsageTokens
             )
 
             val stripeRepository = StripeApiRepository(
@@ -231,6 +232,7 @@ internal class GooglePayLauncherViewModel(
                 { publishableKey },
                 logger = logger,
                 workContext = workContext,
+                productUsageTokens = productUsageTokens,
                 analyticsRequestFactory = analyticsRequestFactory
             )
 
