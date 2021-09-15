@@ -13,7 +13,7 @@ import com.stripe.android.paymentsheet.example.repository.DefaultRepository
 import com.stripe.android.paymentsheet.example.repository.Repository
 import com.stripe.android.paymentsheet.example.service.BackendApiFactory
 
-internal class PaymentSheetPlaygroundViewModel(
+internal class LpmPlaygroundViewModel(
     application: Application,
     private val repository: Repository
 ) : AndroidViewModel(application) {
@@ -22,7 +22,6 @@ internal class PaymentSheetPlaygroundViewModel(
 
     val customerConfig = MutableLiveData<PaymentSheet.CustomerConfiguration?>()
     val clientSecret = MutableLiveData<String?>()
-    val paymentMethods = MutableLiveData<List<String>?>()
 
     val readyToCheckout: LiveData<Boolean> = clientSecret.map {
         it != null
@@ -57,13 +56,8 @@ internal class PaymentSheetPlaygroundViewModel(
                     null
                 }
 
-                // Init PaymentConfiguration with the publishable key returned from the backend,
-                // which will be used on all Stripe API calls
-                PaymentConfiguration.init(getApplication(), it.publishableKey)
-
                 customerConfig.value = it.makeCustomerConfig()
                 clientSecret.value = it.intentClientSecret
-                paymentMethods.value = it.paymentMethods
             },
             onFailure = {
                 status.postValue(
@@ -87,7 +81,7 @@ internal class PaymentSheetPlaygroundViewModel(
                 checkoutBackendApi
             )
 
-            return PaymentSheetPlaygroundViewModel(
+            return LpmPlaygroundViewModel(
                 application,
                 repository
             ) as T

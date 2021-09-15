@@ -19,7 +19,8 @@ data class CheckoutResponse(
     val publishableKey: String,
     val intentClientSecret: String,
     val customerId: String? = null,
-    val customerEphemeralKeySecret: String? = null
+    val customerEphemeralKeySecret: String? = null,
+    val paymentMethods: List<String>
 ) {
     internal fun makeCustomerConfig() =
         if (customerId != null && customerEphemeralKeySecret != null) {

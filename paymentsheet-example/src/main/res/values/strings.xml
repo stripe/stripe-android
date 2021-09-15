@@ -34,4 +34,5 @@
     <string name="shipping_address">Shipping Address</string>
     <string name="currency_usd">USD</string>
     <string name="currency_eur">EUR</string>
+    <string name="confirm">Confirm</string>
 </resources>

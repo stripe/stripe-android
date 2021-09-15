@@ -35,7 +35,7 @@
             android:name=".activity.PaymentSheetPlaygroundActivity"
             android:label="@string/playground" />
         <activity
-            android:name=".activity.PlaygroundActivity"
+            android:name=".activity.LpmPlaygroundActivity"
             android:label="@string/playground" />
     </application>
 

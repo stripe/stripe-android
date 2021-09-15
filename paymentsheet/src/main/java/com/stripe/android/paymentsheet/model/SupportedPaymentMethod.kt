@@ -8,6 +8,7 @@ import com.stripe.android.paymentsheet.elements.FormSpec
 import com.stripe.android.paymentsheet.elements.afterpayClearpay
 import com.stripe.android.paymentsheet.forms.bancontact
 import com.stripe.android.paymentsheet.forms.eps
+import com.stripe.android.paymentsheet.forms.generic
 import com.stripe.android.paymentsheet.forms.giropay
 import com.stripe.android.paymentsheet.forms.ideal
 import com.stripe.android.paymentsheet.forms.p24
@@ -87,9 +88,9 @@ enum class SupportedPaymentMethod(
         "giropay",
         R.string.stripe_paymentsheet_payment_method_giropay,
         R.drawable.stripe_ic_paymentsheet_pm_giropay,
-        giropay,
-        requiresMandate = PaymentMethod.Type.Giropay.requiresMandate,
-        userRequestedConfirmSaveForFutureSupported = false
+        generic,
+        requiresMandate = false,
+        userRequestedConfirmSaveForFutureSupported = true
     ),
     AfterpayClearpay(
         "afterpay_clearpay",
@@ -98,7 +99,15 @@ enum class SupportedPaymentMethod(
         afterpayClearpay,
         requiresMandate = PaymentMethod.Type.AfterpayClearpay.requiresMandate,
         userRequestedConfirmSaveForFutureSupported = true
-    );
+    ),
+    Paypal(
+        "paypal",
+        R.string.stripe_paymentsheet_payment_method_paypal,
+        R.drawable.stripe_ic_paymentsheet_pm_afterpay_clearpay,
+        generic,
+        requiresMandate = false,
+        userRequestedConfirmSaveForFutureSupported = true
+    ),;
 
     override fun toString(): String {
         return code

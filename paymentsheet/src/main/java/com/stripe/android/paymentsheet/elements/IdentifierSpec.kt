@@ -20,4 +20,6 @@ internal sealed class IdentifierSpec(val value: String) {
 
     // Unique extracting functionality
     object SaveForFutureUse : IdentifierSpec("save_for_future_use")
+
+    object PreFilledParameterMap : IdentifierSpec("save_for_future_use")
 }

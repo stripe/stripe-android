@@ -124,4 +124,6 @@
     <string name="change" tools:ignore="MissingTranslation">Change</string>
     <!-- Used for accessibility to indicate that pressing the button will allow you to add a new payment method.  !-->
     <string name="add_new_payment_method" tools:ignore="MissingTranslation">Add a new payment method</string>
+    <string name="playground_generic">PaymentMethod Create Params</string>
+    <string name="stripe_paymentsheet_payment_method_paypal">PayPal</string>
 </resources>

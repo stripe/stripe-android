@@ -1,14 +1,12 @@
 package com.stripe.android.paymentsheet.example.activity
 
 import android.os.Bundle
-import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isInvisible
 import androidx.lifecycle.lifecycleScope
-import androidx.test.espresso.idling.CountingIdlingResource
 import com.stripe.android.model.Address
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
@@ -16,22 +14,19 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.payments.paymentlauncher.PaymentLauncher
 import com.stripe.android.payments.paymentlauncher.PaymentResult
-import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.PaymentSheetResult
 import com.stripe.android.paymentsheet.example.R
-import com.stripe.android.paymentsheet.example.databinding.ActivityPaymentSheetPlaygroundBinding
+import com.stripe.android.paymentsheet.example.databinding.ActivityLpmPlaygroundBinding
 import com.stripe.android.paymentsheet.example.repository.Repository
-import com.stripe.android.paymentsheet.example.viewmodel.PaymentSheetPlaygroundViewModel
-import com.stripe.android.paymentsheet.model.PaymentOption
+import com.stripe.android.paymentsheet.example.viewmodel.LpmPlaygroundViewModel
 import kotlinx.coroutines.launch
 
-internal open class PaymentSheetPlaygroundActivity : AppCompatActivity() {
+internal open class LpmPlaygroundActivity : AppCompatActivity() {
     private val viewBinding by lazy {
-        ActivityPaymentSheetPlaygroundBinding.inflate(layoutInflater)
+        ActivityLpmPlaygroundBinding.inflate(layoutInflater)
     }
 
-    val viewModel: PaymentSheetPlaygroundViewModel by viewModels {
-        PaymentSheetPlaygroundViewModel.Factory(
+    val viewModel: LpmPlaygroundViewModel by viewModels {
+        LpmPlaygroundViewModel.Factory(
             application
         )
     }
@@ -45,18 +40,6 @@ internal open class PaymentSheetPlaygroundActivity : AppCompatActivity() {
                 } ?: Repository.CheckoutCustomer.New
             }
             else -> Repository.CheckoutCustomer.Returning
-        }
-
-    private val googlePayConfig: PaymentSheet.GooglePayConfiguration?
-        get() = when (viewBinding.googlePayRadioGroup.checkedRadioButtonId) {
-            R.id.google_pay_on_button -> {
-                PaymentSheet.GooglePayConfiguration(
-                    environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
-                    countryCode = "US",
-                    currencyCode = currency.value
-                )
-            }
-            else -> null
         }
 
     private val currency: Repository.CheckoutCurrency
@@ -75,38 +58,31 @@ internal open class PaymentSheetPlaygroundActivity : AppCompatActivity() {
     private val setShippingAddress: Boolean
         get() = viewBinding.shippingRadioGroup.checkedRadioButtonId == R.id.shipping_on_button
 
-    private lateinit var paymentSheet: PaymentSheet
-    private lateinit var flowController: PaymentSheet.FlowController
     private lateinit var paymentLauncher: PaymentLauncher
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(viewBinding.root)
 
-        paymentSheet = PaymentSheet(this, ::onPaymentSheetResult)
-        flowController = PaymentSheet.FlowController.create(
-            this,
-            ::onPaymentOption,
-            ::onPaymentSheetResult
-        )
-
         val publishableKey =
             "pk_test_51HvTI7Lu5o3P18Zp6t5AgBSkMvWoTtA0nyA7pVYDqpfLkRtWun7qZTYCOHCReprfLM464yaBeF72UFfB7cY9WG4a00ZnDtiC2C"
-        paymentLauncher = PaymentLauncher.create(
-            this as ComponentActivity,
-            publishableKey,
-            null,
-            ::onPaymentResult
-        )
 
-        ArrayAdapter(
-            this, android.R.layout.simple_spinner_item,
-            items
-        ).also { adapter ->
-            // Specify the layout to use when the list of choices appears
-            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-            // Apply the adapter to the spinner
-            viewBinding.confirmLpmSelector.adapter = adapter
+        paymentLauncher = PaymentLauncher.create(this as ComponentActivity, publishableKey, null) {
+            when (it) {
+                is PaymentResult.Completed -> {
+                    viewModel.status.value += "\n\nPaymentIntent confirmation succeeded\n\n"
+                    viewModel.inProgress.value = false
+                }
+                is PaymentResult.Canceled -> {
+                    viewModel.status.value += "\n\nPaymentIntent confirmation cancelled\n\n"
+                    viewModel.inProgress.value = false
+                }
+                is PaymentResult.Failed -> {
+                    viewModel.status.value += "\n\nPaymentIntent confirmation failed with " +
+                        "throwable ${it.throwable} \n\n"
+                    viewModel.inProgress.value = false
+                }
+            }
         }
 
         viewBinding.reloadButton.setOnClickListener {
@@ -115,21 +91,9 @@ internal open class PaymentSheetPlaygroundActivity : AppCompatActivity() {
             }
         }
 
-        viewBinding.completeCheckoutButton.setOnClickListener {
-            startCompleteCheckout()
-        }
-
-        viewBinding.customCheckoutButton.setOnClickListener {
-            flowController.confirm()
-        }
-
-        viewBinding.paymentMethod.setOnClickListener {
-            flowController.presentPaymentOptions()
-        }
-
         viewBinding.confirmButton.setOnClickListener {
             startConfirm(
-                viewBinding.confirmLpmSelector.selectedItem as String,
+                items.indexOf("afterPayClearPay"),
                 paymentLauncher
             )
         }
@@ -141,103 +105,28 @@ internal open class PaymentSheetPlaygroundActivity : AppCompatActivity() {
 
         viewModel.inProgress.observe(this) {
             viewBinding.progressBar.isInvisible = !it
-
-            if (it) {
-                singleStepUIIdlingResource.increment()
-                multiStepUIIdlingResource.increment()
-            } else {
-                singleStepUIIdlingResource.decrement()
-                multiStepUIIdlingResource.decrement()
-            }
         }
 
         viewModel.readyToCheckout.observe(this) { isReady ->
             if (isReady) {
-                viewBinding.completeCheckoutButton.isEnabled = true
                 viewBinding.confirmButton.isEnabled = true
-                configureCustomCheckout()
             } else {
                 disableViews()
             }
-        }
-
-        viewModel.paymentMethods.observe(this) { paymentMethods ->
-
         }
 
         disableViews()
     }
 
     private fun disableViews() {
-        viewBinding.completeCheckoutButton.isEnabled = false
-        viewBinding.customCheckoutButton.isEnabled = false
         viewBinding.confirmButton.isEnabled = false
-        viewBinding.paymentMethod.isClickable = false
-    }
-
-    private fun startCompleteCheckout() {
-        val clientSecret = viewModel.clientSecret.value ?: return
-
-        if (viewModel.checkoutMode == Repository.CheckoutMode.Setup) {
-            paymentSheet.presentWithSetupIntent(
-                clientSecret,
-                makeConfiguration()
-            )
-        } else {
-            paymentSheet.presentWithPaymentIntent(
-                clientSecret,
-                makeConfiguration()
-            )
-        }
-    }
-
-    private fun configureCustomCheckout() {
-        val clientSecret = viewModel.clientSecret.value ?: return
-
-        if (viewModel.checkoutMode == Repository.CheckoutMode.Setup) {
-            flowController.configureWithSetupIntent(
-                clientSecret,
-                makeConfiguration(),
-                ::onConfigured
-            )
-        } else {
-            flowController.configureWithPaymentIntent(
-                clientSecret,
-                makeConfiguration(),
-                ::onConfigured
-            )
-        }
-    }
-
-    private fun makeConfiguration(): PaymentSheet.Configuration {
-        val defaultBilling = PaymentSheet.BillingDetails(
-            address = PaymentSheet.Address(
-                line1 = "123 Main Street",
-                line2 = null,
-                city = "Blackrock",
-                state = "Co. Dublin",
-                postalCode = "T37 F8HK",
-                country = "IE",
-            ),
-            email = "email@email.com",
-            name = "Jenny Rosen",
-            phone = "+18008675309"
-        ).takeIf { viewBinding.defaultBillingOnButton.isChecked }
-
-        return PaymentSheet.Configuration(
-            merchantDisplayName = merchantName,
-            customer = viewModel.customerConfig.value,
-            googlePay = googlePayConfig,
-            defaultBillingDetails = defaultBilling
-        )
     }
 
     private fun startConfirm(
-        selectedLpm: String,
+        selectedIndex: Int,
         paymentLauncher: PaymentLauncher
     ) {
-        val paramMap =
-            params[selectedLpm]?.toParamMap()
+        val paramMap = params[items[selectedIndex]]?.toParamMap()
         PaymentMethod.Type.fromCode(paramMap?.get("type") as String)?.let {
             createAndConfirmPaymentIntent(
                 PaymentMethodCreateParams.createWithOverride(it, paramMap, setOf("test")),
@@ -267,65 +156,7 @@ internal open class PaymentSheetPlaygroundActivity : AppCompatActivity() {
         }
     }
 
-    private fun onPaymentResult(paymentResult: PaymentResult) {
-        when (paymentResult) {
-            is PaymentResult.Completed -> {
-                viewModel.status.value = "PaymentIntent confirmation succeeded"
-            }
-            is PaymentResult.Canceled -> {
-                viewModel.status.value = "PaymentIntent confirmation cancelled"
-            }
-            is PaymentResult.Failed -> {
-                viewModel.status.value = "PaymentIntent confirmation failed with " +
-                    "throwable ${paymentResult.throwable}"
-            }
-        }
-    }
-
-    private fun onConfigured(success: Boolean, error: Throwable?) {
-        if (success) {
-            viewBinding.paymentMethod.isClickable = true
-            onPaymentOption(flowController.getPaymentOption())
-        } else {
-            viewModel.status.value =
-                "Failed to configure PaymentSheetFlowController: ${error?.message}"
-        }
-    }
-
-    private fun onPaymentOption(paymentOption: PaymentOption?) {
-        if (paymentOption != null) {
-            viewBinding.paymentMethod.text = paymentOption.label
-            viewBinding.paymentMethod.setCompoundDrawablesRelativeWithIntrinsicBounds(
-                paymentOption.drawableResourceId,
-                0,
-                0,
-                0
-            )
-            viewBinding.customCheckoutButton.isEnabled = true
-        } else {
-            viewBinding.paymentMethod.setText(R.string.select)
-            viewBinding.paymentMethod.setCompoundDrawables(null, null, null, null)
-            viewBinding.customCheckoutButton.isEnabled = false
-        }
-    }
-
-    internal open fun onPaymentSheetResult(paymentResult: PaymentSheetResult) {
-        if (paymentResult !is PaymentSheetResult.Canceled) {
-            disableViews()
-        }
-
-        viewModel.status.value = when (paymentResult) {
-            PaymentSheetResult.Canceled -> "Cancelled"
-            PaymentSheetResult.Completed -> "Completed"
-            is PaymentSheetResult.Failed -> paymentResult.error.toString()
-        }
-    }
-
     companion object {
-        private const val merchantName = "Example, Inc."
-        val singleStepUIIdlingResource = CountingIdlingResource("singleStepUI")
-        val multiStepUIIdlingResource = CountingIdlingResource("multiStepUI")
-
         /**
          * See https://stripe.com/docs/payments/3d-secure#three-ds-cards for more options.
          */

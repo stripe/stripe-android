@@ -166,42 +166,6 @@
         </RadioGroup>
 
         <TextView
-            android:id="@+id/default_billing_address"
-            android:text="@string/default_billing_address"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="8dp"
-            app:layout_constraintHorizontal_chainStyle="packed"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/currency_radio_group" />
-
-        <RadioGroup
-            android:id="@+id/default_billing_radio_group"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginStart="16dp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/default_billing_address">
-
-            <RadioButton
-                android:id="@+id/default_billing_on_button"
-                android:text="@string/on"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:checked="false" />
-
-            <RadioButton
-                android:id="@+id/default_billing_off_button"
-                android:text="@string/off"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:checked="true" />
-        </RadioGroup>
-
-
-        <TextView
             android:id="@+id/shipping_address"
             android:text="@string/shipping_address"
             android:layout_width="wrap_content"
@@ -244,7 +208,7 @@
             android:layout_marginTop="8dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/default_billing_radio_group" />
+            app:layout_constraintTop_toBottomOf="@+id/shipping_radio_group" />
 
         <View
             android:id="@+id/divider"
@@ -255,94 +219,18 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/progress_bar" />
 
-        <TextView
-            android:id="@+id/payment_method_text_view"
-            android:text="@string/payment_method"
-            android:layout_width="wrap_content"
-            android:layout_height="19dp"
-            android:layout_marginTop="16dp"
-            android:layout_marginStart="16dp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/divider" />
-
-        <TextView
-            android:id="@+id/payment_method"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="16dp"
-            android:layout_marginTop="16dp"
-            android:hint="@string/loading"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/divider" />
-
-        <Button
-            android:id="@+id/custom_checkout_button"
-            android:text="@string/checkout_custom"
-            android:layout_width="wrap_content"
-            android:layout_height="48dp"
-            android:layout_marginTop="16dp"
-            android:enabled="false"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/payment_method_text_view" />
-
-        <View
-            android:id="@+id/divider2"
-            android:layout_width="409dp"
-            android:layout_height="1dp"
-            android:background="?android:attr/listDivider"
-            android:layout_marginTop="16dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/custom_checkout_button" />
-
-        <Button
-            android:id="@+id/complete_checkout_button"
-            android:text="@string/checkout_complete"
-            android:layout_width="wrap_content"
-            android:layout_height="48dp"
-            android:layout_marginTop="16dp"
-            android:enabled="false"
-            android:layout_marginBottom="16dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/divider2" />
-
-        <View
-            android:id="@+id/divider3"
-            android:layout_width="409dp"
-            android:layout_height="1dp"
-            android:background="?android:attr/listDivider"
-            android:layout_marginTop="16dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/complete_checkout_button" />
-
-
-        <Spinner
-            android:id="@+id/confirm_lpm_selector"
-            android:text="@string/confirm"
-            android:layout_width="wrap_content"
-            android:layout_height="48dp"
-            android:layout_marginTop="16dp"
-            android:enabled="false"
-            android:layout_marginBottom="16dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/divider3" />
-
         <Button
             android:id="@+id/confirm_button"
-            android:text="@string/confirm"
+            android:text="Confirm"
             android:layout_width="wrap_content"
             android:layout_height="48dp"
             android:layout_marginTop="16dp"
             android:enabled="false"
             android:layout_marginBottom="16dp"
-            app:layout_constraintBottom_toBottomOf="@+id/confirm_lpm_selector"
             app:layout_constraintBottom_toTopOf="@+id/result"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/confirm_lpm_selector" />
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/divider" />
 
         <TextView
             android:id="@+id/result"
@@ -353,7 +241,7 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/confirm_lpm_selector" />
+            app:layout_constraintTop_toBottomOf="@+id/confirm_button" />
 
         <com.google.android.material.progressindicator.LinearProgressIndicator
             android:id="@+id/progress_bar"
@@ -365,5 +253,6 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/reload_button" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 </ScrollView>
