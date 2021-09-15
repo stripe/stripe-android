@@ -10,11 +10,10 @@ public abstract interface class com/stripe/android/paymentsheet/PaymentOptionCal
 }
 
 public final class com/stripe/android/paymentsheet/PaymentOptionsViewModel_Factory_MembersInjector : dagger/MembersInjector {
-	public fun <init> (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)V
-	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)Ldagger/MembersInjector;
+	public fun <init> (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)V
+	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)Ldagger/MembersInjector;
 	public static fun injectCustomerRepository (Lcom/stripe/android/paymentsheet/PaymentOptionsViewModel$Factory;Lcom/stripe/android/paymentsheet/repositories/CustomerRepository;)V
 	public static fun injectEventReporter (Lcom/stripe/android/paymentsheet/PaymentOptionsViewModel$Factory;Lcom/stripe/android/paymentsheet/analytics/EventReporter;)V
-	public static fun injectLogger (Lcom/stripe/android/paymentsheet/PaymentOptionsViewModel$Factory;Lcom/stripe/android/Logger;)V
 	public fun injectMembers (Lcom/stripe/android/paymentsheet/PaymentOptionsViewModel$Factory;)V
 	public synthetic fun injectMembers (Ljava/lang/Object;)V
 	public static fun injectPrefsRepositoryFactory (Lcom/stripe/android/paymentsheet/PaymentOptionsViewModel$Factory;Lkotlin/jvm/functions/Function1;)V
