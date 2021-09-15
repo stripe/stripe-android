@@ -221,7 +221,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
                 // AfterpayClearpay requires a shipping address, filter it out if not provided
                 val excludeAfterPay = it == SupportedPaymentMethod.AfterpayClearpay &&
                     (stripeIntent as? PaymentIntent)?.shipping == null
-                if (excludeAfterPay && BuildConfig.DEBUG) {
+                if (excludeAfterPay) {
                     logger.debug(
                         "AfterPay will not be shown. It requires that Shipping is " +
                             "included in the Payment or Setup Intent"
@@ -231,7 +231,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
             }.filterNot { supportedPaymentMethod ->
                 val excludeRequiresMandate =
                     (stripeIntent is SetupIntent) && supportedPaymentMethod.requiresMandate
-                if (excludeRequiresMandate && BuildConfig.DEBUG) {
+                if (excludeRequiresMandate) {
                     logger.debug(
                         "${supportedPaymentMethod.name} will not be shown. It " +
                             "requires a mandate which is incompatible with SetupIntents"
@@ -242,7 +242,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
                 val excludeRequiresMandate = (stripeIntent is PaymentIntent) &&
                     supportedPaymentMethod.requiresMandate &&
                     stripeIntent.setupFutureUsage == StripeIntent.Usage.OffSession
-                if (excludeRequiresMandate && BuildConfig.DEBUG) {
+                if (excludeRequiresMandate) {
                     logger.debug(
                         "${supportedPaymentMethod.name} will not be shown.  It " +
                             "requires a mandate which is incompatible with off_session " +
