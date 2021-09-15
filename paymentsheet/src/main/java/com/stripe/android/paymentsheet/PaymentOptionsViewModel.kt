@@ -146,9 +146,6 @@ internal class PaymentOptionsViewModel(
         lateinit var customerRepository: CustomerRepository
 
         @Inject
-        lateinit var logger: Logger
-
-        @Inject
         @IOContext
         lateinit var workContext: CoroutineContext
 
