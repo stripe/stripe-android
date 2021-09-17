@@ -2,6 +2,7 @@ package com.stripe.example.activity
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
@@ -10,11 +11,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.stripe.android.ApiResultCallback
 import com.stripe.android.Stripe
-import com.stripe.android.model.CardBrand
-import com.stripe.android.model.CardParams
-import com.stripe.android.model.Source
-import com.stripe.android.model.SourceParams
-import com.stripe.android.model.SourceTypeModel
+import com.stripe.android.model.*
 import com.stripe.example.R
 import com.stripe.example.StripeFactory
 import com.stripe.example.adapter.SourcesAdapter
@@ -50,9 +47,19 @@ class CreateCardSourceActivity : AppCompatActivity() {
         setContentView(viewBinding.root)
 
         viewBinding.createButton.setOnClickListener {
+            // If a field is invalid this will shift focus to that field
             viewBinding.cardWidget.cardParams?.let {
                 createCardSource(it)
             } ?: showSnackbar("Enter a valid card.")
+        }
+
+        viewBinding.cardWidget.setCardValidCallback { isValid, invalidFields -> // We will not call cardParams unless it is valid because
+            // this will cause the inFocus field to change.
+            if (isValid) {
+                Log.e("STRIPE", "Validity: $isValid, ${viewBinding.cardWidget.cardParams}")
+            } else {
+                Log.e("STRIPE", "Validity: $isValid, invalidField: ${invalidFields}")
+            }
         }
 
         viewBinding.recyclerView.setHasFixedSize(true)

@@ -106,6 +106,10 @@ class CardInputWidget @JvmOverloads constructor(
                 },
                 CardValidCallback.Fields.Cvc.takeIf {
                     this.cvc == null
+                },
+                CardValidCallback.Fields.Postal.takeIf {
+                    (postalCodeRequired || usZipCodeRequired) &&
+                            postalCodeEditText.postalCode.isNullOrBlank()
                 }
             ).toSet()
         }
@@ -152,8 +156,8 @@ class CardInputWidget @JvmOverloads constructor(
 
     @VisibleForTesting
     @JvmSynthetic
-    internal val requiredFields: List<StripeEditText>
-    private val allFields: List<StripeEditText>
+    internal val requiredFields: MutableSet<StripeEditText> = mutableSetOf()
+    private val allFields: Set<StripeEditText>
 
     /**
      * The [StripeEditText] fields that are currently enabled and active in the UI.
@@ -169,7 +173,7 @@ class CardInputWidget @JvmOverloads constructor(
 
     /**
      * A [PaymentMethodCreateParams.Card] representing the card details if all fields are valid;
-     * otherwise `null`
+     * otherwise `null`. If a field is invalid focus will shift to the invalid field.
      */
     override val paymentMethodCard: PaymentMethodCreateParams.Card?
         get() {
@@ -197,7 +201,7 @@ class CardInputWidget @JvmOverloads constructor(
 
     /**
      * A [PaymentMethodCreateParams] representing the card details and postal code if all fields
-     * are valid; otherwise `null`
+     * are valid; otherwise `null`. If a field is invalid focus will shift to the invalid field
      */
     override val paymentMethodCreateParams: PaymentMethodCreateParams?
         get() {
@@ -208,7 +212,7 @@ class CardInputWidget @JvmOverloads constructor(
 
     /**
      * A [CardParams] representing the card details and postal code if all fields are valid;
-     * otherwise `null`
+     * otherwise `null`. If a field is invalid focus will shift to the invalid field.
      */
     override val cardParams: CardParams?
         get() {
@@ -221,7 +225,7 @@ class CardInputWidget @JvmOverloads constructor(
             cvcEditText.shouldShowError = cvc == null
             postalCodeEditText.shouldShowError =
                 (postalCodeRequired || usZipCodeRequired) &&
-                postalCodeEditText.postalCode.isNullOrBlank()
+                        postalCodeEditText.postalCode.isNullOrBlank()
 
             // Announce error messages for accessibility
             currentFields
@@ -275,7 +279,7 @@ class CardInputWidget @JvmOverloads constructor(
     /**
      * The postal code field is enabled by default. Disabling the postal code field may impact
      * auth success rates, so it is discouraged to disable it unless you are collecting the postal
-     * code outside of this form.
+     * code outside of this form.  If the postal code is disabled it will not be shown in the view.
      */
     var postalCodeEnabled: Boolean by Delegates.observable(
         CardWidget.DEFAULT_POSTAL_CODE_ENABLED
@@ -291,6 +295,7 @@ class CardInputWidget @JvmOverloads constructor(
 
             cvcEditText.imeOptions = EditorInfo.IME_ACTION_DONE
         }
+        updatePostalRequired()
     }
 
     /**
@@ -302,7 +307,11 @@ class CardInputWidget @JvmOverloads constructor(
      * Note that some countries do not have postal codes, so requiring postal code will prevent
      * those users from submitting this form successfully.
      */
-    var postalCodeRequired: Boolean = CardWidget.DEFAULT_POSTAL_CODE_REQUIRED
+    var postalCodeRequired: Boolean by Delegates.observable(
+        CardWidget.DEFAULT_POSTAL_CODE_REQUIRED
+    ) { _, _, _ ->
+        updatePostalRequired()
+    }
 
     /**
      * If [postalCodeEnabled] is true and [usZipCodeRequired] is true, then postal code is a
@@ -317,6 +326,17 @@ class CardInputWidget @JvmOverloads constructor(
             postalCodeEditText.config = PostalCodeEditText.Config.US
         } else {
             postalCodeEditText.config = PostalCodeEditText.Config.Global
+        }
+
+        updatePostalRequired()
+    }
+
+    private fun updatePostalRequired() {
+        val isPostalCodeCurrentlyRequired = requiredFields.contains(postalCodeEditText)
+        if ((postalCodeRequired || usZipCodeRequired) && postalCodeEnabled) {
+            requiredFields.add(postalCodeEditText)
+        } else {
+            requiredFields.remove(postalCodeEditText)
         }
     }
 
@@ -342,10 +362,12 @@ class CardInputWidget @JvmOverloads constructor(
 
         frameWidthSupplier = { containerLayout.width }
 
-        requiredFields = listOf(
-            cardNumberEditText,
-            cvcEditText,
-            expiryDateEditText
+        requiredFields.addAll(
+            setOf(
+                cardNumberEditText,
+                cvcEditText,
+                expiryDateEditText
+            )
         )
         allFields = requiredFields.plus(postalCodeEditText)
 
@@ -481,8 +503,8 @@ class CardInputWidget @JvmOverloads constructor(
      * Override of [View.isEnabled] that returns `true` only
      * if all three sub-controls are enabled.
      *
-     * @return `true` if the card number field, expiry field, and cvc field are enabled,
-     * `false` otherwise
+     * @return `true` if the card number field, expiry field, cvc field, and postal (if required)
+     * are enabled, `false` otherwise
      */
     override fun isEnabled(): Boolean {
         return requiredFields.all { it.isEnabled }
