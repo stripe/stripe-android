@@ -111,11 +111,10 @@ class PaymentSheet internal constructor(
         var defaultBillingDetails: BillingDetails? = null,
 
         /**
-         * Whether or not your app can handle a delay between when the customer finishes paying and
-         * when your business receives money. Setting this to `true` allows your app to accept
-         * additional payment methods that may take time to move money (e.g. bank debits like SEPA).
+         * Whether or not to allow payment methods that have a delay before payment or setup
+         * completes, like most bank debits (e.g SEPA) and vouchers (e.g. OXXO, Konbini, Boleto).
          */
-        var supportsDelayedSettlement: Boolean = false
+        var allowsDelayedPaymentMethods: Boolean = false
     ) : Parcelable
 
     @Parcelize
