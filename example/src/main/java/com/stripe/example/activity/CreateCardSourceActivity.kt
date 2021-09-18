@@ -11,7 +11,11 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.stripe.android.ApiResultCallback
 import com.stripe.android.Stripe
-import com.stripe.android.model.*
+import com.stripe.android.model.CardBrand
+import com.stripe.android.model.CardParams
+import com.stripe.android.model.Source
+import com.stripe.android.model.SourceParams
+import com.stripe.android.model.SourceTypeModel
 import com.stripe.example.R
 import com.stripe.example.StripeFactory
 import com.stripe.example.adapter.SourcesAdapter
@@ -58,7 +62,7 @@ class CreateCardSourceActivity : AppCompatActivity() {
             if (isValid) {
                 Log.e("STRIPE", "Validity: $isValid, ${viewBinding.cardWidget.cardParams}")
             } else {
-                Log.e("STRIPE", "Validity: $isValid, invalidField: ${invalidFields}")
+                Log.e("STRIPE", "Validity: $isValid, invalidField: $invalidFields")
             }
         }
 

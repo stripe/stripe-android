@@ -17,7 +17,12 @@ import com.stripe.android.CardNumberFixtures.VISA_WITH_SPACES
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.cards.AccountRangeFixtures
 import com.stripe.android.cards.DefaultCardAccountRangeStore
-import com.stripe.android.model.*
+import com.stripe.android.model.Address
+import com.stripe.android.model.BinFixtures
+import com.stripe.android.model.CardBrand
+import com.stripe.android.model.CardParams
+import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.testharness.ViewTestUtils
 import com.stripe.android.utils.TestUtils.idleLooper
 import com.stripe.android.view.CardInputWidget.Companion.LOGGING_TOKEN
@@ -28,7 +33,7 @@ import kotlinx.coroutines.test.TestCoroutineDispatcher
 import kotlinx.coroutines.test.resetMain
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import java.util.*
+import java.util.Calendar
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -1310,6 +1315,7 @@ internal class CardInputWidgetTest {
             currentIsValid = isValid
             currentInvalidFields = invalidFields
         }
+
         assertThat(currentIsValid)
             .isFalse()
         assertThat(currentInvalidFields)

@@ -108,8 +108,7 @@ class CardInputWidget @JvmOverloads constructor(
                     this.cvc == null
                 },
                 CardValidCallback.Fields.Postal.takeIf {
-                    (postalCodeRequired || usZipCodeRequired) &&
-                            postalCodeEditText.postalCode.isNullOrBlank()
+                    isPostalRequired() && postalCodeEditText.postalCode.isNullOrBlank()
                 }
             ).toSet()
         }
@@ -156,7 +155,7 @@ class CardInputWidget @JvmOverloads constructor(
 
     @VisibleForTesting
     @JvmSynthetic
-    internal val requiredFields: MutableSet<StripeEditText> = mutableSetOf()
+    internal val requiredFields: MutableSet<StripeEditText>
     private val allFields: Set<StripeEditText>
 
     /**
@@ -332,13 +331,14 @@ class CardInputWidget @JvmOverloads constructor(
     }
 
     private fun updatePostalRequired() {
-        val isPostalCodeCurrentlyRequired = requiredFields.contains(postalCodeEditText)
-        if ((postalCodeRequired || usZipCodeRequired) && postalCodeEnabled) {
+        if (isPostalRequired()) {
             requiredFields.add(postalCodeEditText)
         } else {
             requiredFields.remove(postalCodeEditText)
         }
     }
+
+    private fun isPostalRequired() = (postalCodeRequired || usZipCodeRequired) && postalCodeEnabled
 
     private val frameStart: Int
         get() {
@@ -362,13 +362,11 @@ class CardInputWidget @JvmOverloads constructor(
 
         frameWidthSupplier = { containerLayout.width }
 
-        requiredFields.addAll(
-            setOf(
+        requiredFields = mutableSetOf(
                 cardNumberEditText,
                 cvcEditText,
                 expiryDateEditText
             )
-        )
         allFields = requiredFields.plus(postalCodeEditText)
 
         initView(attrs)
