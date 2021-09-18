@@ -224,7 +224,7 @@ class CardInputWidget @JvmOverloads constructor(
             cvcEditText.shouldShowError = cvc == null
             postalCodeEditText.shouldShowError =
                 (postalCodeRequired || usZipCodeRequired) &&
-                        postalCodeEditText.postalCode.isNullOrBlank()
+                postalCodeEditText.postalCode.isNullOrBlank()
 
             // Announce error messages for accessibility
             currentFields
@@ -363,10 +363,10 @@ class CardInputWidget @JvmOverloads constructor(
         frameWidthSupplier = { containerLayout.width }
 
         requiredFields = mutableSetOf(
-                cardNumberEditText,
-                cvcEditText,
-                expiryDateEditText
-            )
+            cardNumberEditText,
+            cvcEditText,
+            expiryDateEditText
+        )
         allFields = requiredFields.plus(postalCodeEditText)
 
         initView(attrs)
