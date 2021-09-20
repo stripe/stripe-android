@@ -1,7 +1,7 @@
 plugins {
     id 'com.android.application'
     id 'kotlin-android'
-    id 'org.jetbrains.kotlin.plugin.serialization' version '1.5.30'
+    id 'org.jetbrains.kotlin.plugin.serialization' version '1.5.31'
 }
 
 // Read values from gradle.properties or system environment variable
