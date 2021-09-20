@@ -39,7 +39,16 @@ abstract class StripeIntentActivity : AppCompatActivity() {
                 PaymentConfiguration.getInstance(this).publishableKey,
                 stripeAccountId
             ) { paymentResult ->
-                viewModel.status.value += "\n\nPayment authentication completed, getting result"
+                if (viewModel.status.value.isNullOrEmpty()) {
+                    viewModel.status.value =
+                        """
+                        Restored from a killed process...
+                        
+                        Payment authentication completed, getting result
+                        """.trimIndent()
+                } else {
+                    viewModel.status.value += "\n\nPayment authentication completed, getting result"
+                }
                 viewModel.paymentResultLiveData.postValue(paymentResult)
             }
 

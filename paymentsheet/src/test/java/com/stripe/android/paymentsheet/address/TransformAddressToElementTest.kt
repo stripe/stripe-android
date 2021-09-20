@@ -5,9 +5,10 @@ import androidx.compose.ui.text.input.KeyboardType
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.address.AddressFieldElementRepository.Companion.supportedCountries
-import com.stripe.android.paymentsheet.elements.SectionSingleFieldElement
 import com.stripe.android.paymentsheet.elements.TextFieldController
 import com.stripe.android.paymentsheet.elements.IdentifierSpec
+import com.stripe.android.paymentsheet.elements.RowElement
+import com.stripe.android.paymentsheet.elements.SectionSingleFieldElement
 import com.stripe.android.paymentsheet.elements.SimpleTextSpec
 import org.junit.Test
 import java.io.File
@@ -60,12 +61,28 @@ class TransformAddressToElementTest {
             showOptionalLabel = false
         )
 
-        assertThat(simpleTextList.size).isEqualTo(5)
-        verifySimpleTextSpecInTextFieldController(simpleTextList[0], addressLine1)
-        verifySimpleTextSpecInTextFieldController(simpleTextList[1], addressLine2)
-        verifySimpleTextSpecInTextFieldController(simpleTextList[2], city)
-        verifySimpleTextSpecInTextFieldController(simpleTextList[3], zip)
-        verifySimpleTextSpecInTextFieldController(simpleTextList[4], state)
+        assertThat(simpleTextList.size).isEqualTo(4)
+        verifySimpleTextSpecInTextFieldController(
+            simpleTextList[0] as SectionSingleFieldElement,
+            addressLine1
+        )
+        verifySimpleTextSpecInTextFieldController(
+            simpleTextList[1] as SectionSingleFieldElement,
+            addressLine2
+        )
+        val cityZipRow = simpleTextList[2] as RowElement
+        verifySimpleTextSpecInTextFieldController(
+            cityZipRow.fields[0],
+            city
+        )
+        verifySimpleTextSpecInTextFieldController(
+            cityZipRow.fields[1],
+            zip
+        )
+        verifySimpleTextSpecInTextFieldController(
+            simpleTextList[3] as SectionSingleFieldElement,
+            state
+        )
     }
 
     private fun verifySimpleTextSpecInTextFieldController(

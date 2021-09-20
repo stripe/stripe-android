@@ -22,6 +22,7 @@ import com.stripe.android.model.BankStatuses
 import com.stripe.android.model.CardMetadata
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
+import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.Customer
 import com.stripe.android.model.ListPaymentMethodsParams
 import com.stripe.android.model.PaymentIntent
@@ -78,6 +79,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
     private val appInfo: AppInfo? = null,
     private val logger: Logger = Logger.noop(),
     private val workContext: CoroutineContext = Dispatchers.IO,
+    private val productUsageTokens: Set<String> = emptySet(),
     private val stripeApiRequestExecutor: ApiRequestExecutor = DefaultApiRequestExecutor(
         workContext = workContext,
         logger = logger
@@ -87,7 +89,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
     private val fraudDetectionDataRepository: FraudDetectionDataRepository =
         DefaultFraudDetectionDataRepository(context, workContext),
     private val analyticsRequestFactory: AnalyticsRequestFactory =
-        AnalyticsRequestFactory(context, publishableKeyProvider),
+        AnalyticsRequestFactory(context, publishableKeyProvider, productUsageTokens),
     private val fraudDetectionDataParamsUtils: FraudDetectionDataParamsUtils = FraudDetectionDataParamsUtils(),
     betas: Set<StripeApiBeta> = emptySet(),
     apiVersion: String = ApiVersion(betas = betas).code,
@@ -153,8 +155,12 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         expandFields: List<String>
     ): PaymentIntent? {
         val params = fraudDetectionDataParamsUtils.addFraudDetectionData(
-            confirmPaymentIntentParams.toParamMap()
-                .plus(createExpandParam(expandFields)),
+            // Add payment_user_agent if the Payment Method is being created on this call
+            maybeAddPaymentUserAgent(
+                confirmPaymentIntentParams.toParamMap(),
+                confirmPaymentIntentParams.paymentMethodCreateParams,
+                confirmPaymentIntentParams.sourceParams
+            ).plus(createExpandParam(expandFields)),
             fraudDetectionData
         )
         val apiUrl = getConfirmPaymentIntentUrl(
@@ -299,8 +305,11 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
                 getConfirmSetupIntentUrl(setupIntentId),
                 options,
                 fraudDetectionDataParamsUtils.addFraudDetectionData(
-                    confirmSetupIntentParams.toParamMap()
-                        .plus(createExpandParam(expandFields)),
+                    // Add payment_user_agent if the Payment Method is being created on this call
+                    maybeAddPaymentUserAgent(
+                        confirmSetupIntentParams.toParamMap(),
+                        confirmSetupIntentParams.paymentMethodCreateParams
+                    ).plus(createExpandParam(expandFields)),
                     fraudDetectionData
                 )
             ),
@@ -429,6 +438,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
                 sourcesUrl,
                 options,
                 sourceParams.toParamMap()
+                    .plus(buildPaymentUserAgentPair(sourceParams.attribution))
                     .plus(fraudDetectionData?.params.orEmpty())
             ),
             SourceJsonParser()
@@ -495,6 +505,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
                 paymentMethodsUrl,
                 options,
                 paymentMethodCreateParams.toParamMap()
+                    .plus(buildPaymentUserAgentPair(paymentMethodCreateParams.attribution))
                     .plus(fraudDetectionData?.params.orEmpty())
             ),
             PaymentMethodJsonParser()
@@ -537,6 +548,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
                 tokensUrl,
                 options,
                 tokenParams.toParamMap()
+                    .plus(buildPaymentUserAgentPair(tokenParams.attribution))
                     .plus(fraudDetectionData?.params.orEmpty())
             ),
             TokenJsonParser()
@@ -1024,11 +1036,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
                 "Could not obtain fraud data required to create a Radar Session."
             }
         }.map {
-            val params = it.params.plus(
-                mapOf(
-                    "payment_user_agent" to "stripe-android/${Stripe.VERSION_NAME}"
-                )
-            )
+            val params = it.params.plus(buildPaymentUserAgentPair())
             fetchStripeModel(
                 apiRequestFactory.createPost(
                     getApiUrl("radar/session"),
@@ -1065,7 +1073,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
 
         val params = createClientSecretParam(
             clientSecret,
-            listOf(parser.stripeIntentFieldName)
+            listOf("payment_method_preference.${parser.stripeIntentFieldName}.payment_method")
         ).plus(
             mapOf(
                 "type" to parser.stripeIntentFieldName,
@@ -1074,8 +1082,8 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         )
 
         return fetchStripeModel(
-            apiRequestFactory.createPost(
-                getApiUrl("payment_method_preferences"),
+            apiRequestFactory.createGet(
+                getApiUrl("elements/sessions"),
                 options,
                 params
             ),
@@ -1246,6 +1254,36 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
             .plus(createExpandParam(expandFields))
     }
 
+    private fun buildPaymentUserAgentPair(attribution: Set<String> = emptySet()) =
+        PAYMENT_USER_AGENT to
+            setOf("stripe-android/${Stripe.VERSION_NAME}")
+                .plus(productUsageTokens)
+                .plus(attribution)
+                .joinToString(";")
+
+    /**
+     *  Add payment_user_agent to the map if it contains Payment Method data,
+     *  including attribution from [paymentMethodCreateParams] or [sourceParams].
+     */
+    private fun maybeAddPaymentUserAgent(
+        params: Map<String, Any>,
+        paymentMethodCreateParams: PaymentMethodCreateParams?,
+        sourceParams: SourceParams? = null
+    ): Map<String, Any> =
+        (params[ConfirmStripeIntentParams.PARAM_PAYMENT_METHOD_DATA] as? Map<*, *>)?.let {
+            params.plus(
+                ConfirmStripeIntentParams.PARAM_PAYMENT_METHOD_DATA to it.plus(
+                    buildPaymentUserAgentPair(paymentMethodCreateParams?.attribution ?: emptySet())
+                )
+            )
+        } ?: (params[ConfirmPaymentIntentParams.PARAM_SOURCE_DATA] as? Map<*, *>)?.let {
+            params.plus(
+                ConfirmPaymentIntentParams.PARAM_SOURCE_DATA to it.plus(
+                    buildPaymentUserAgentPair(sourceParams?.attribution ?: emptySet())
+                )
+            )
+        } ?: params
+
     private sealed class DnsCacheData {
         data class Success(
             val originalDnsCacheTtl: String?
@@ -1256,6 +1294,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
 
     internal companion object {
         private const val DNS_CACHE_TTL_PROPERTY_NAME = "networkaddress.cache.ttl"
+        private const val PAYMENT_USER_AGENT = "payment_user_agent"
 
         private fun createVerificationParam(
             verificationId: String,

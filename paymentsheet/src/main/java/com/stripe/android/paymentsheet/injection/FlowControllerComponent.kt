@@ -5,14 +5,14 @@ import androidx.activity.result.ActivityResultCaller
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModelStoreOwner
 import com.stripe.android.googlepaylauncher.GooglePayLauncherModule
+import com.stripe.android.payments.core.injection.CoroutineContextModule
 import com.stripe.android.payments.core.injection.InjectorKey
-import com.stripe.android.payments.core.injection.PaymentCommonModule
+import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import com.stripe.android.paymentsheet.PaymentOptionCallback
 import com.stripe.android.paymentsheet.PaymentOptionsViewModel
 import com.stripe.android.paymentsheet.PaymentSheetResultCallback
 import com.stripe.android.paymentsheet.flowcontroller.DefaultFlowController
 import com.stripe.android.paymentsheet.model.PaymentOptionFactory
-import com.stripe.android.view.AuthActivityStarterHost
 import dagger.BindsInstance
 import dagger.Component
 import kotlinx.coroutines.CoroutineScope
@@ -21,10 +21,11 @@ import javax.inject.Singleton
 @Singleton
 @Component(
     modules = [
-        PaymentCommonModule::class,
+        StripeRepositoryModule::class,
         PaymentSheetCommonModule::class,
         FlowControllerModule::class,
-        GooglePayLauncherModule::class
+        GooglePayLauncherModule::class,
+        CoroutineContextModule::class
     ]
 )
 internal interface FlowControllerComponent {
@@ -51,9 +52,6 @@ internal interface FlowControllerComponent {
 
         @BindsInstance
         fun statusBarColor(statusBarColor: () -> Int?): Builder
-
-        @BindsInstance
-        fun authHostSupplier(authHostSupplier: () -> AuthActivityStarterHost): Builder
 
         @BindsInstance
         fun paymentOptionFactory(paymentOptionFactory: PaymentOptionFactory): Builder

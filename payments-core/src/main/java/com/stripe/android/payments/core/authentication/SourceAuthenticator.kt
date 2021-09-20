@@ -10,6 +10,7 @@ import com.stripe.android.networking.AnalyticsRequestExecutor
 import com.stripe.android.networking.AnalyticsRequestFactory
 import com.stripe.android.networking.ApiRequest
 import com.stripe.android.payments.core.injection.ENABLE_LOGGING
+import com.stripe.android.payments.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.payments.core.injection.UIContext
 import com.stripe.android.view.AuthActivityStarterHost
 import kotlinx.coroutines.withContext
@@ -29,7 +30,8 @@ internal class SourceAuthenticator @Inject constructor(
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
     private val analyticsRequestFactory: AnalyticsRequestFactory,
     @Named(ENABLE_LOGGING) private val enableLogging: Boolean,
-    @UIContext private val uiContext: CoroutineContext
+    @UIContext private val uiContext: CoroutineContext,
+    @Named(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String
 ) : PaymentAuthenticator<Source> {
 
     override suspend fun authenticate(
@@ -65,7 +67,8 @@ internal class SourceAuthenticator @Inject constructor(
                 url = source.redirect?.url.orEmpty(),
                 returnUrl = source.redirect?.returnUrl,
                 enableLogging = enableLogging,
-                stripeAccountId = requestOptions.stripeAccount
+                stripeAccountId = requestOptions.stripeAccount,
+                publishableKey = publishableKeyProvider()
             )
         )
     }

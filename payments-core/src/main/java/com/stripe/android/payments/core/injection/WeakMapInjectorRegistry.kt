@@ -8,6 +8,10 @@ import java.util.concurrent.atomic.AtomicInteger
 /**
  * A [InjectorRegistry] implemented with a weak map. An entry from the map will be  will be garbage
  * collected once the [Injector] instance is no longer held elsewhere.
+ *
+ * Note: the weak map will be cleared when app process is killed by system.
+ * [Injectable] implementations are responsible for detecting this and call
+ * [Injectable.fallbackInitialize] accordingly.
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
 object WeakMapInjectorRegistry : InjectorRegistry {
@@ -22,7 +26,8 @@ object WeakMapInjectorRegistry : InjectorRegistry {
     /**
      * Global unique monotonically increasing key to be assigned to [Injector]s registered.
      */
-    private var CURRENT_REGISTER_KEY = AtomicInteger(0)
+    @VisibleForTesting
+    internal val CURRENT_REGISTER_KEY = AtomicInteger(0)
 
     override fun register(injector: Injector, @InjectorKey key: Int) {
         staticCacheMap[injector] = key

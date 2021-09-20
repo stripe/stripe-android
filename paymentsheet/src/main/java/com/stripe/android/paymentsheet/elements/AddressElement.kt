@@ -2,7 +2,6 @@ package com.stripe.android.paymentsheet.elements
 
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.paymentsheet.address.AddressFieldElementRepository
-import com.stripe.android.paymentsheet.forms.FormFieldEntry
 import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.combine
@@ -56,31 +55,15 @@ internal open class AddressElement constructor(
     override fun getFormFieldValueFlow() = fields.flatMapLatest { fieldElements ->
         combine(
             fieldElements
-                .associate { sectionFieldElement ->
-                    sectionFieldElement.identifier to
-                        sectionFieldElement.controller
-                }
                 .map {
-                    getCurrentFieldValuePair(it.key, it.value)
+                    it.getFormFieldValueFlow()
                 }
         ) {
-            it.toList()
+            it.toList().flatten()
         }
     }
 
-    private fun getCurrentFieldValuePair(
-        identifier: IdentifierSpec,
-        controller: InputController
-    ) = combine(
-        controller.rawFieldValue,
-        controller.isComplete
-    ) { rawFieldValue, isComplete ->
-        Pair(
-            identifier,
-            FormFieldEntry(
-                value = rawFieldValue,
-                isComplete = isComplete,
-            )
-        )
+    override fun setRawValue(formFragmentArguments: FormFragmentArguments) {
+        args = formFragmentArguments
     }
 }

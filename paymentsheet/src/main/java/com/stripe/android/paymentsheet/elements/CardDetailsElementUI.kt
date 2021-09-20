@@ -13,7 +13,7 @@ internal fun CardDetailsElementUI(
     hiddenIdentifiers: List<IdentifierSpec>?
 ) {
     controller.fields.forEachIndexed { index, field ->
-        SectionFieldElementUI(enabled, field, hiddenIdentifiers)
+        SectionFieldElementUI(enabled, field, hiddenIdentifiers = hiddenIdentifiers)
         if (index != controller.fields.size - 1) {
             val cardStyle = CardStyle(isSystemInDarkTheme())
             Divider(

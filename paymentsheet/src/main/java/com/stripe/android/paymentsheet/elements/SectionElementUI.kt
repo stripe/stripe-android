@@ -31,7 +31,7 @@ internal fun SectionElementUI(
 
         Section(controller.label, sectionErrorString) {
             element.fields.forEachIndexed { index, field ->
-                SectionFieldElementUI(enabled, field, hiddenIdentifiers)
+                SectionFieldElementUI(enabled, field, hiddenIdentifiers = hiddenIdentifiers)
                 if (index != element.fields.size - 1) {
                     val cardStyle = CardStyle(isSystemInDarkTheme())
                     Divider(

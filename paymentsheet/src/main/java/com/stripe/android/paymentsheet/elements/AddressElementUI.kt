@@ -19,7 +19,7 @@ internal fun AddressElementUI(
     val fields by controller.fieldsFlowable.asLiveData().observeAsState(emptyList())
     Column {
         fields.forEachIndexed { index, field ->
-            SectionFieldElementUI(enabled, field, hiddenIdentifiers)
+            SectionFieldElementUI(enabled, field, hiddenIdentifiers = hiddenIdentifiers)
             if ((hiddenIdentifiers?.contains(field.identifier) == false) &&
                 (index != fields.size - 1)
             ) {

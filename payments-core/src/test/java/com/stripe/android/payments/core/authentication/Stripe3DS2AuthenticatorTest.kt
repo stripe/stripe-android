@@ -36,7 +36,9 @@ class Stripe3DS2AuthenticatorTest {
     private val authenticator = Stripe3DS2Authenticator(
         paymentAuthConfig,
         enableLogging = false,
-        injectorKey = 1
+        injectorKey = 1,
+        publishableKeyProvider = { ApiKeyFixtures.FAKE_PUBLISHABLE_KEY },
+        productUsage = setOf()
     )
 
     @Test

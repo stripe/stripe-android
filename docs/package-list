@@ -13,12 +13,10 @@ com.stripe.android.payments
 com.stripe.android.payments.core
 com.stripe.android.payments.core.authentication
 com.stripe.android.payments.core.injection
-com.stripe.android.paymentsheet
+com.stripe.android.payments.paymentlauncher
 com.stripe.android.paymentsheet.model
 com.stripe.android.view
 com.stripe.android.view.i18n
 module:paymentsheet
-com.stripe.android.paymentsheet.forms
+com.stripe.android.paymentsheet
 com.stripe.android.paymentsheet.model
-com.stripe.android.paymentsheet.paymentdatacollection
-com.stripe.android.paymentsheet.specifications

@@ -7,13 +7,8 @@ import java.util.Locale
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet -- this still auto-completes
 object CountryUtils {
-
-    internal val NO_POSTAL_CODE_COUNTRIES = setOf(
-        "AE", "AG", "AN", "AO", "AW", "BF", "BI", "BJ", "BO", "BS", "BW", "BZ", "CD", "CF", "CG",
-        "CI", "CK", "CM", "DJ", "DM", "ER", "FJ", "GD", "GH", "GM", "GN", "GQ", "GY", "HK", "IE",
-        "JM", "KE", "KI", "KM", "KN", "KP", "LC", "ML", "MO", "MR", "MS", "MU", "MW", "NR", "NU",
-        "PA", "QA", "RW", "SB", "SC", "SL", "SO", "SR", "ST", "SY", "TF", "TK", "TL", "TO", "TT",
-        "TV", "TZ", "UG", "VU", "YE", "ZA", "ZW"
+    internal val CARD_POSTAL_CODE_COUNTRIES = setOf(
+        "US", "GB", "CA"
     )
 
     private fun localizedCountries(currentLocale: Locale) =
@@ -63,11 +58,11 @@ object CountryUtils {
     )
     @JvmSynthetic
     internal fun doesCountryUsePostalCode(countryCode: String): Boolean {
-        return !NO_POSTAL_CODE_COUNTRIES.contains(countryCode.uppercase())
+        return CARD_POSTAL_CODE_COUNTRIES.contains(countryCode.uppercase())
     }
 
     @JvmSynthetic
     fun doesCountryUsePostalCode(countryCode: CountryCode): Boolean {
-        return !NO_POSTAL_CODE_COUNTRIES.contains(countryCode.value)
+        return CARD_POSTAL_CODE_COUNTRIES.contains(countryCode.value)
     }
 }

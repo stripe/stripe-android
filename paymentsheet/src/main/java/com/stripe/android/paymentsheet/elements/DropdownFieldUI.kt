@@ -32,6 +32,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.asLiveData
+import com.stripe.android.paymentsheet.R
 
 @Composable
 internal fun DropDown(
@@ -50,16 +51,27 @@ internal fun DropDown(
             Color.Unspecified
         }
     } else {
-        TextFieldDefaults.textFieldColors().indicatorColor(enabled, false, interactionSource).value
+        TextFieldDefaults
+            .textFieldColors()
+            .indicatorColor(enabled, false, interactionSource)
+            .value
     }
 
     Box(
         modifier = Modifier
             .wrapContentSize(Alignment.TopStart)
             .background(Color.Transparent)
-
     ) {
-        Box {
+        // Click handling happens on the box, so that it is a single accessible item
+        Box(
+            modifier = Modifier
+                .clickable(
+                    enabled = enabled,
+                    onClickLabel = stringResource(R.string.change),
+                ) {
+                    expanded = true
+                }
+        ) {
             Column(
                 modifier = Modifier.padding(
                     start = 16.dp,
@@ -74,20 +86,13 @@ internal fun DropDown(
                 ) {
                     Text(
                         items[selectedIndex],
-                        modifier = Modifier
-                            .fillMaxWidth(.9f)
-                            .clickable(
-                                enabled = enabled,
-                                onClick = { expanded = true }
-                            ),
+                        modifier = Modifier.fillMaxWidth(.9f),
                         color = currentTextColor
                     )
                     Icon(
                         Icons.Filled.ArrowDropDown,
-                        contentDescription = "Dropdown arrow",
-                        modifier = Modifier
-                            .height(24.dp)
-                            .clickable(onClick = { expanded = true }),
+                        contentDescription = null,
+                        modifier = Modifier.height(24.dp),
                         tint = currentTextColor
                     )
                 }

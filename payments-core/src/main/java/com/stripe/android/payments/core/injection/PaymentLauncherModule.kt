@@ -1,12 +1,10 @@
 package com.stripe.android.payments.core.injection
 
 import android.content.Context
-import com.stripe.android.BuildConfig
 import com.stripe.android.Logger
 import com.stripe.android.networking.AnalyticsRequestFactory
 import com.stripe.android.networking.ApiRequest
 import com.stripe.android.networking.DefaultAnalyticsRequestExecutor
-import com.stripe.android.networking.StripeApiRepository
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.DefaultReturnUrl
 import com.stripe.android.payments.PaymentIntentFlowResultProcessor
@@ -15,41 +13,33 @@ import com.stripe.android.payments.core.authentication.DefaultPaymentAuthenticat
 import com.stripe.android.payments.core.authentication.PaymentAuthenticatorRegistry
 import dagger.Module
 import dagger.Provides
-import kotlinx.coroutines.Dispatchers
 import javax.inject.Named
+import javax.inject.Provider
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
 @Module
 internal class PaymentLauncherModule {
-    @Provides
-    @Singleton
-    @Named(ENABLE_LOGGING)
-    fun provideEnabledLogging(): Boolean = BuildConfig.DEBUG
 
+    /**
+     * Because [PUBLISHABLE_KEY] and [STRIPE_ACCOUNT_ID] might change, each time a new [ApiRequest]
+     * is to be send through [StripeRepository], a new [ApiRequest.Options]
+     * instance is created with the latest values.
+     *
+     * Should always be used with [Provider] or [Lazy].
+     */
     @Provides
-    @Singleton
     fun provideApiRequestOptions(
-        @Named(PUBLISHABLE_KEY) publishableKey: String,
-        @Named(STRIPE_ACCOUNT_ID) stripeAccountId: String?,
+        @Named(PUBLISHABLE_KEY) publishableKeyProvider: () -> String,
+        @Named(STRIPE_ACCOUNT_ID) stripeAccountIdProvider: () -> String?
     ) = ApiRequest.Options(
-        apiKey = publishableKey,
-        stripeAccount = stripeAccountId
+        apiKey = publishableKeyProvider(),
+        stripeAccount = stripeAccountIdProvider()
     )
 
     @Provides
     @Singleton
     fun provideThreeDs1IntentReturnUrlMap() = mutableMapOf<String, String>()
-
-    @Provides
-    @Singleton
-    @IOContext
-    fun provideIOContext(): CoroutineContext = Dispatchers.IO
-
-    @Provides
-    @Singleton
-    @UIContext
-    fun provideUIContext(): CoroutineContext = Dispatchers.Main
 
     @Provides
     @Singleton
@@ -62,26 +52,16 @@ internal class PaymentLauncherModule {
 
     @Provides
     @Singleton
-    fun provideStripeApiRepository(
-        context: Context,
-        @Named(PUBLISHABLE_KEY) publishableKey: String,
-    ): StripeRepository = StripeApiRepository(
-        context,
-        { publishableKey }
-    )
-
-    @Provides
-    @Singleton
     fun providePaymentIntentFlowResultProcessor(
         context: Context,
         stripeApiRepository: StripeRepository,
-        @Named(PUBLISHABLE_KEY) publishableKey: String,
         @Named(ENABLE_LOGGING) enableLogging: Boolean,
-        @IOContext ioContext: CoroutineContext
+        @IOContext ioContext: CoroutineContext,
+        @Named(PUBLISHABLE_KEY) publishableKeyProvider: () -> String,
     ): PaymentIntentFlowResultProcessor {
         return PaymentIntentFlowResultProcessor(
             context,
-            { publishableKey },
+            publishableKeyProvider,
             stripeApiRepository,
             enableLogging = enableLogging,
             ioContext
@@ -93,28 +73,18 @@ internal class PaymentLauncherModule {
     fun provideSetupIntentFlowResultProcessor(
         context: Context,
         stripeApiRepository: StripeRepository,
-        @Named(PUBLISHABLE_KEY) publishableKey: String,
         @Named(ENABLE_LOGGING) enableLogging: Boolean,
-        @IOContext ioContext: CoroutineContext
+        @IOContext ioContext: CoroutineContext,
+        @Named(PUBLISHABLE_KEY) publishableKeyProvider: () -> String,
     ): SetupIntentFlowResultProcessor {
         return SetupIntentFlowResultProcessor(
             context,
-            { publishableKey },
+            publishableKeyProvider,
             stripeApiRepository,
             enableLogging = enableLogging,
             ioContext
         )
     }
-
-    @Provides
-    @Singleton
-    fun provideAnalyticsRequestFactory(
-        context: Context,
-        @Named(PUBLISHABLE_KEY) publishableKey: String
-    ) = AnalyticsRequestFactory(
-        context,
-        { publishableKey }
-    )
 
     @Provides
     @Singleton
@@ -126,7 +96,9 @@ internal class PaymentLauncherModule {
         @UIContext uiContext: CoroutineContext,
         threeDs1IntentReturnUrlMap: MutableMap<String, String>,
         defaultAnalyticsRequestExecutor: DefaultAnalyticsRequestExecutor,
-        analyticsRequestFactory: AnalyticsRequestFactory
+        analyticsRequestFactory: AnalyticsRequestFactory,
+        @Named(PUBLISHABLE_KEY) publishableKeyProvider: () -> String,
+        @Named(PRODUCT_USAGE) productUsage: Set<String>
     ): PaymentAuthenticatorRegistry = DefaultPaymentAuthenticatorRegistry.createInstance(
         context,
         stripeRepository,
@@ -136,5 +108,7 @@ internal class PaymentLauncherModule {
         workContext,
         uiContext,
         threeDs1IntentReturnUrlMap,
+        publishableKeyProvider,
+        productUsage
     )
 }

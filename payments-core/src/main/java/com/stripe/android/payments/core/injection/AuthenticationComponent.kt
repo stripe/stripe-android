@@ -63,6 +63,14 @@ internal interface AuthenticationComponent {
         @BindsInstance
         fun injectorKey(@InjectorKey id: Int): Builder
 
+        @BindsInstance
+        fun publishableKeyProvider(
+            @Named(PUBLISHABLE_KEY) publishableKeyProvider: () -> String
+        ): Builder
+
+        @BindsInstance
+        fun productUsage(@Named(PRODUCT_USAGE) productUsage: Set<String>): Builder
+
         fun build(): AuthenticationComponent
     }
 }

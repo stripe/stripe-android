@@ -7,10 +7,10 @@
   <string name="acc_label_expiry_date">到期日</string>
   <string name="acc_label_expiry_date_node">%s，到期日</string>
   <!-- Caption for Zip Code field on address form (only shown when country is United States only) -->
-    <!-- Short string for zip code (United States only) Please keep to 5 characters or less if possible. -->
+  <string name="acc_label_zip">郵遞區號</string>
+  <!-- Short string for zip code (United States only) Please keep to 5 characters or less if possible. -->
   <string name="acc_label_zip_short">郵遞區號</string>
-  <!-- Text informing user they should add a debit or credit card. Shown when there are no existing payment methods in the application -->
-    <!-- Message displayed when a payment method is removed, stating its name. -->
+  <!-- Message displayed when a payment method is removed, stating its name. -->
   <string name="added">已添加 %s</string>
   <!-- Error text indicating that city is required, used for all locations -->
   <string name="address_city_required">請輸入您的城市</string>
@@ -30,28 +30,44 @@
   <string name="address_label_address_optional">地址（可選）</string>
   <!-- Label for input requesting apartment number (address line 2) where input is optional, used for US based addresses -->
   <string name="address_label_apt_optional">公寓（可選）</string>
+  <!-- Caption for City field on address form -->
+  <string name="address_label_city">城市</string>
   <!-- Label for input requesting city where input is optional, used for all locations -->
   <string name="address_label_city_optional">城市（可選）</string>
+  <!-- Caption for Country field on address form -->
+  <string name="address_label_country">國家</string>
+  <!-- Caption for County field on address form (only countries that use county, like United Kingdom) -->
+  <string name="address_label_county">縣</string>
   <!-- Label for input requesting county where input is optional , used for UK based addresses -->
   <string name="address_label_county_optional">縣（可選）</string>
+  <!-- Caption for Name field on address form -->
+  <string name="address_label_name">姓名</string>
   <!-- Label for input requesting phone number, used for all locations -->
   <string name="address_label_phone_number">電話號碼</string>
   <!-- Label for input requesting phone number where input is optional, used for all locations -->
   <string name="address_label_phone_number_optional">電話號碼（可選）</string>
+  <!-- Short string for postal code (text used in non-US countries) -->
+  <string name="address_label_postal_code">郵遞區號</string>
   <!-- Label for input requesting postal code where input is optional, used for Canada based addresses -->
   <string name="address_label_postal_code_optional">郵遞區號（可選）</string>
   <!-- Label for input requesting postcode, used for UK based addresses -->
   <string name="address_label_postcode">郵遞區號</string>
   <!-- Label for input requesting postcode where input is optional, used for UK based addresses -->
   <string name="address_label_postcode_optional">郵遞區號（可選）</string>
+  <!-- Caption for Province field on address form (only countries that use province, like Canada) -->
+  <string name="address_label_province">省</string>
   <!-- Label for input requesting province where province is optional, used for canadian addresses -->
   <string name="address_label_province_optional">省（可選）</string>
   <!-- Label for input requesting the region, used for international addresses -->
   <string name="address_label_region_generic">州 / 省 / 地區</string>
   <!-- Label for input requesting the region where input is optional, used for international addresses -->
   <string name="address_label_region_generic_optional">州 / 省 / 地區（可選）</string>
+  <!-- Caption for State field on address form (only countries that use state , like United States) -->
+  <string name="address_label_state">州</string>
   <!-- Label for input requesting state where input is optional, used for US based addresses -->
   <string name="address_label_state_optional">州（可選）</string>
+  <!-- Label for input requesting zip code, used for US based addreses -->
+  <string name="address_label_zip_code">郵遞區號</string>
   <!-- Label for input requesting zip code where input is optional, used for US based addresses -->
   <string name="address_label_zip_code_optional">郵遞區號（可選）</string>
   <!-- Label for input requesting postal code, used for international addresses -->
@@ -62,8 +78,8 @@
   <string name="address_name_required">請輸入您的姓名</string>
   <!-- Error text indicating that phone number is required, used for all addresses -->
   <string name="address_phone_number_required">請輸入您的電話號碼</string>
-  <!-- Error text indicating postal code is invalid, used for Canada addresses -->
-  <string name="address_postal_code_invalid">您的郵遞區號無效</string>
+  <!-- Error message for when postal code in form is invalid -->
+  <string name="address_postal_code_invalid">您的郵編無效。</string>
   <!-- Error text indicating postcode is invalid, used for UK addresses -->
   <string name="address_postcode_invalid">您的郵遞區號無效</string>
   <!-- Error text indicating that province is required, used for Canada addresses -->
@@ -72,8 +88,7 @@
   <string name="address_region_generic_required">請輸入您的州 /省 / 地區</string>
   <!-- Error text indicating that address is required, used for all locations -->
   <string name="address_required">請輸入您的地址</string>
-  <!-- Title for shipping address entry section -->
-    <!-- Error text indicating that state is required, used for US addresses -->
+  <!-- Error text indicating that state is required, used for US addresses -->
   <string name="address_state_required">請輸入您所屬的州</string>
   <!-- Error text indicating zip code is invalid, used for US addresses -->
   <string name="address_zip_invalid">您的郵遞區號無效。</string>
@@ -104,14 +119,14 @@
   <!-- BECS Debit Widget - name field - required error message -->
   <string name="becs_widget_name_required">您需要填寫姓名。</string>
   <!-- Details of a saved card. &apos;{card brand} ending in {last 4}&apos; e.g. &apos;VISA ending in 4242&apos; -->
-  <string name="card_ending_in">%1$s 尾號 %2$s</string>
+  <string name="card_ending_in">%1$s - 尾號：%2$s</string>
   <!-- Text for close button -->
   <string name="close">關閉</string>
   <!-- Accessibility action for deleting a payment method -->
   <string name="delete_payment_method">刪除付款方式</string>
   <string name="delete_payment_method_prompt_title">刪除支付方式</string>
   <!-- label for text field to enter card expiry -->
-  <string name="expiry_date_hint">月月/年年</string>
+  <string name="expiry_date_hint">月份/年份</string>
   <string name="expiry_label_short">有效期</string>
   <!-- Label that will show that an FPX bank is offline. For example, &quot;AmBank - Offline&quot; -->
   <string name="fpx_bank_offline">%s - 線下</string>
@@ -128,38 +143,22 @@
   <string name="invalid_shipping_information">送貨地址無效</string>
   <!-- Error message for when postal code in form is incomplete -->
   <string name="invalid_zip">您的郵遞區號不完整。</string>
-  <!-- Text informing user there are no existing payment methods in the application -->
-    <string name="payment_method_add_new_card">添加新卡...</string>
+  <string name="payment_method_add_new_card">添加新卡...</string>
   <string name="payment_method_add_new_fpx">選擇銀行帳戶 (FPX)… </string>
   <!-- Label for free shipping method -->
   <string name="price_free">免費</string>
   <!-- Message displayed when a payment method is removed, stating its name. -->
   <string name="removed">已移除 %s</string>
   <string name="secure_checkout">安全結帳</string>
-  <!-- Generic error message shown when payment cannot be processed. -->
-    <!-- Error when 3DS2 authentication failed (e.g. customer entered the wrong code) -->
+  <!-- Error when 3DS2 authentication failed (e.g. customer entered the wrong code) -->
   <string name="stripe_failure_reason_authentication">我們無法驗證您的付款方式。請選擇其他付款方式，然後再試一次。</string>
   <!-- Error when 3DS2 authentication timed out. -->
   <string name="stripe_failure_reason_timed_out">驗證您的付款方式時逾時 -- 請重試</string>
-  <!-- When an internal error is reported when a google pay payment is started. -->
-    <!-- Text for a button that, when tapped, displays another screen where the customer can add payment method details -->
-    <!-- Card details entry form header title -->
-    <!-- Country selector and postal code entry form header title -->
-    <!-- Title shown above a form where the customer can enter payment information like credit card details, email, billing address, etc. -->
-    <!-- Text for back button -->
-    <!-- label for text field to enter card expiry -->
-  <string name="stripe_paymentsheet_expiration_date_hint">年年/月月</string>
-  <!-- Title of a section containing multiple payment methods that can selected and will collect the payment information from the user. -->
-    <!-- Title of a section containing a card form that will collect the payment information from the user. -->
-    <!-- Label of a button that initiates payment when tapped -->
-    <!-- Label for a button that starts processing the payment. -->
-    <!-- Label of a button that, when tapped, initiates payment, becomes disabled, and displays this text -->
-    <!-- The label of a switch indicating whether to save the user&apos;s card for future payments to this merchant -->
-    <!-- Title shown above a carousel containing the customer&apos;s payment methods -->
-    <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->
-    <!-- When there are multiple browsers and web authentication is required, this will show in a window asking which browser they want to use to "Verify your payment" -->
+  <!-- label for text field to enter card expiry -->
+  <string name="stripe_paymentsheet_expiration_date_hint">月份/年份</string>
+  <!-- When there are multiple browsers and web authentication is required, this will show in a window asking which browser they want to use to "Verify your payment" -->
   <string name="stripe_verify_your_payment">驗證您的付款</string>
-  <string name="title_add_a_card">新增一張卡</string>
+  <string name="title_add_a_card">新增卡</string>
   <!-- Screen title telling users they should add an address -->
   <string name="title_add_an_address">設置地址</string>
   <!-- Label for Bank Account selection or detail entry form -->

@@ -36,7 +36,9 @@ internal class PaymentOptionContract :
         val isGooglePayReady: Boolean,
         val newCard: PaymentSelection.New.Card?,
         @ColorInt val statusBarColor: Int?,
-        @InjectorKey val injectorKey: Int
+        @InjectorKey val injectorKey: Int,
+        val enableLogging: Boolean,
+        val productUsage: Set<String>
     ) : ActivityStarter.Args {
         internal companion object {
             internal fun fromIntent(intent: Intent): Args? {

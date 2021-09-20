@@ -2,9 +2,7 @@ package com.stripe.android.paymentsheet.elements
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.SectionFieldElement
 import com.stripe.android.paymentsheet.address.AddressFieldElementRepository
-import com.stripe.android.paymentsheet.specifications.IdentifierSpec
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
@@ -54,12 +52,16 @@ class AddressElementTest {
                 addressFieldElementRepository,
                 countryDropdownFieldController = countryDropdownFieldController
             )
+            var emailController =
+                (
+                    (addressElement.fields.first()[1] as SectionSingleFieldElement)
+                        .controller as TextFieldController
+                    )
 
             countryDropdownFieldController.onValueChange(0)
             ShadowLooper.runUiThreadTasksIncludingDelayedTasks()
 
-            (addressElement.fields.first()[1].controller as SimpleTextFieldController)
-                .onValueChange(";;invalidchars@email.com")
+            emailController.onValueChange(";;invalidchars@email.com")
             ShadowLooper.runUiThreadTasksIncludingDelayedTasks()
 
             assertThat(addressElement.controller.error.first())
@@ -70,8 +72,12 @@ class AddressElementTest {
             countryDropdownFieldController.onValueChange(1)
             ShadowLooper.runUiThreadTasksIncludingDelayedTasks()
 
-            ((addressElement.fields.first())[1].controller as SimpleTextFieldController)
-                .onValueChange("12invalidiban")
+            emailController =
+                (
+                    (addressElement.fields.first()[1] as SectionSingleFieldElement)
+                        .controller as SimpleTextFieldController
+                    )
+            emailController.onValueChange("12invalidiban")
             ShadowLooper.runUiThreadTasksIncludingDelayedTasks()
 
             assertThat(addressElement.controller.error.first()?.errorMessage)
@@ -88,12 +94,16 @@ class AddressElementTest {
             countryDropdownFieldController = countryDropdownFieldController
         )
         val formFieldValueFlow = addressElement.getFormFieldValueFlow()
+        var emailController =
+            (
+                (addressElement.fields.first()[1] as SectionSingleFieldElement)
+                    .controller as TextFieldController
+                )
 
         countryDropdownFieldController.onValueChange(0)
 
         // Add values to the fields
-        (addressElement.fields.first()[1].controller as TextFieldController)
-            .onValueChange("email")
+        emailController.onValueChange("email")
 
         ShadowLooper.runUiThreadTasksIncludingDelayedTasks()
 
@@ -107,8 +117,12 @@ class AddressElementTest {
         countryDropdownFieldController.onValueChange(1)
 
         // Add values to the fields
-        (addressElement.fields.first()[1].controller as TextFieldController)
-            .onValueChange("DE89370400440532013000")
+        emailController =
+            (
+                (addressElement.fields.first()[1] as SectionSingleFieldElement)
+                    .controller as TextFieldController
+                )
+        emailController.onValueChange("DE89370400440532013000")
 
         ShadowLooper.runUiThreadTasksIncludingDelayedTasks()
 

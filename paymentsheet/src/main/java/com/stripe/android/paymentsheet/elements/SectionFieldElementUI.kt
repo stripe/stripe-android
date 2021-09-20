@@ -1,11 +1,13 @@
 package com.stripe.android.paymentsheet.elements
 
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 
 @Composable
 internal fun SectionFieldElementUI(
     enabled: Boolean,
     field: SectionFieldElement,
+    modifier: Modifier = Modifier,
     hiddenIdentifiers: List<IdentifierSpec>? = null
 ) {
     if (hiddenIdentifiers?.contains(field.identifier) == false) {
@@ -13,7 +15,8 @@ internal fun SectionFieldElementUI(
             is TextFieldController -> {
                 TextField(
                     textFieldController = controller,
-                    enabled = enabled
+                    enabled = enabled,
+                    modifier = modifier
                 )
             }
             is DropdownFieldController -> {
@@ -28,6 +31,12 @@ internal fun SectionFieldElementUI(
                     enabled,
                     controller,
                     hiddenIdentifiers
+                )
+            }
+            is RowController -> {
+                RowElementUI(
+                    enabled,
+                    controller
                 )
             }
             is CardController -> {

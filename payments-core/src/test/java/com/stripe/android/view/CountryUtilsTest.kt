@@ -21,7 +21,7 @@ class CountryUtilsTest {
     fun `doesCountryUsePostalCode() should return expected result`() {
         assertThat(CountryUtils.doesCountryUsePostalCode(CountryCode.create("US")))
             .isTrue()
-        assertThat(CountryUtils.doesCountryUsePostalCode(CountryCode.create("UK")))
+        assertThat(CountryUtils.doesCountryUsePostalCode(CountryCode.create("GB")))
             .isTrue()
         assertThat(CountryUtils.doesCountryUsePostalCode(CountryCode.create("CA")))
             .isTrue()

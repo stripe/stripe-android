@@ -6,21 +6,10 @@ import androidx.lifecycle.asLiveData
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.SectionFieldElement
 import com.stripe.android.paymentsheet.address.AddressFieldElementRepository
-import com.stripe.android.paymentsheet.elements.AddressElement
-import com.stripe.android.paymentsheet.elements.SaveForFutureUseController
-import com.stripe.android.paymentsheet.elements.TextFieldController
-import com.stripe.android.paymentsheet.specifications.BankRepository
-import com.stripe.android.paymentsheet.specifications.FormItemSpec
-import com.stripe.android.paymentsheet.specifications.IdentifierSpec
-import com.stripe.android.paymentsheet.specifications.LayoutSpec
-import com.stripe.android.paymentsheet.specifications.ResourceRepository
-import com.stripe.android.paymentsheet.specifications.SectionFieldSpec.Companion.NAME
-import com.stripe.android.paymentsheet.specifications.SectionFieldSpec.Country
-import com.stripe.android.paymentsheet.specifications.SectionFieldSpec.Email
-import com.stripe.android.paymentsheet.specifications.sepaDebit
-import com.stripe.android.paymentsheet.specifications.sofort
+import com.stripe.android.paymentsheet.elements.*
+import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
+import com.stripe.android.paymentsheet.elements.SimpleTextSpec.Companion.NAME
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
@@ -484,15 +473,24 @@ internal class FormViewModelTest {
         private suspend fun getAddressSectionTextControllerWithLabel(
             formViewModel: FormViewModel,
             @StringRes label: Int
-        ) =
-            formViewModel.elements
+        ): TextFieldController? {
+            val addressElementFields = formViewModel.elements
                 .filterIsInstance<SectionElement>()
                 .flatMap { it.fields }
                 .filterIsInstance<AddressElement>()
                 .firstOrNull()
                 ?.fields
                 ?.first()
+            return addressElementFields
+                ?.filterIsInstance<SectionSingleFieldElement>()
                 ?.map { (it.controller as? SimpleTextFieldController) }
                 ?.firstOrNull { it?.label == label }
+                ?: addressElementFields
+                    ?.filterIsInstance<RowElement>()
+                    ?.map { it.fields }
+                    ?.flatten()
+                    ?.map { (it.controller as? SimpleTextFieldController) }
+                    ?.firstOrNull { it?.label == label }
+        }
     }
 }
