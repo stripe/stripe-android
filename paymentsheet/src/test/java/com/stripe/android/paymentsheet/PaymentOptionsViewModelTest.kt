@@ -5,6 +5,7 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.Logger
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethodCreateParams
@@ -56,7 +57,8 @@ internal class PaymentOptionsViewModelTest {
         eventReporter = eventReporter,
         customerRepository = customerRepository,
         workContext = testDispatcher,
-        application = ApplicationProvider.getApplicationContext()
+        application = ApplicationProvider.getApplicationContext(),
+        logger = Logger.noop()
     )
 
     @BeforeTest
@@ -140,7 +142,8 @@ internal class PaymentOptionsViewModelTest {
             eventReporter = eventReporter,
             customerRepository = customerRepository,
             workContext = testDispatcher,
-            application = ApplicationProvider.getApplicationContext()
+            application = ApplicationProvider.getApplicationContext(),
+            logger = Logger.noop()
         )
 
         var transitionTarget: BaseSheetViewModel.Event<TransitionTarget?>? = null
@@ -167,7 +170,8 @@ internal class PaymentOptionsViewModelTest {
             eventReporter = eventReporter,
             customerRepository = customerRepository,
             workContext = testDispatcher,
-            application = ApplicationProvider.getApplicationContext()
+            application = ApplicationProvider.getApplicationContext(),
+            logger = Logger.noop()
         )
 
         val transitionTarget = mutableListOf<BaseSheetViewModel.Event<TransitionTarget?>>()
@@ -194,7 +198,8 @@ internal class PaymentOptionsViewModelTest {
             eventReporter = eventReporter,
             customerRepository = customerRepository,
             workContext = testDispatcher,
-            application = ApplicationProvider.getApplicationContext()
+            application = ApplicationProvider.getApplicationContext(),
+            logger = Logger.noop()
         )
 
         val transitionTarget = mutableListOf<BaseSheetViewModel.Event<TransitionTarget?>>()
