@@ -28,7 +28,9 @@ import com.stripe.android.payments.PaymentIntentFlowResultProcessor
 import com.stripe.android.payments.SetupIntentFlowResultProcessor
 import com.stripe.android.payments.core.authentication.PaymentAuthenticatorRegistry
 import com.stripe.android.payments.core.injection.DaggerPaymentLauncherViewModelFactoryComponent
+import com.stripe.android.payments.core.injection.IS_PAYMENT_INTENT
 import com.stripe.android.payments.core.injection.Injectable
+import com.stripe.android.payments.core.injection.PaymentLauncherViewModelSubcomponent
 import com.stripe.android.payments.core.injection.UIContext
 import com.stripe.android.payments.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.view.AuthActivityStarterHost
@@ -36,15 +38,15 @@ import dagger.Lazy
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
+import javax.inject.Named
 import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
 
 /**
  * [ViewModel] for [PaymentLauncherConfirmationActivity].
  */
-
-internal class PaymentLauncherViewModel(
-    private val isPaymentIntent: Boolean,
+internal class PaymentLauncherViewModel @Inject constructor(
+    @Named(IS_PAYMENT_INTENT) private val isPaymentIntent: Boolean,
     private val stripeApiRepository: StripeRepository,
     private val authenticatorRegistry: PaymentAuthenticatorRegistry,
     private val defaultReturnUrl: DefaultReturnUrl,
@@ -54,7 +56,7 @@ internal class PaymentLauncherViewModel(
     private val lazySetupIntentFlowResultProcessor: Lazy<SetupIntentFlowResultProcessor>,
     private val analyticsRequestExecutor: DefaultAnalyticsRequestExecutor,
     private val analyticsRequestFactory: AnalyticsRequestFactory,
-    private val uiContext: CoroutineContext,
+    @UIContext private val uiContext: CoroutineContext,
     private val authActivityStarterHost: AuthActivityStarterHost,
     activityResultCaller: ActivityResultCaller,
     private val savedStateHandle: SavedStateHandle
@@ -265,35 +267,7 @@ internal class PaymentLauncherViewModel(
         )
 
         @Inject
-        lateinit var stripeApiRepository: StripeRepository
-
-        @Inject
-        lateinit var authenticatorRegistry: PaymentAuthenticatorRegistry
-
-        @Inject
-        lateinit var defaultReturnUrl: DefaultReturnUrl
-
-        @Inject
-        lateinit var apiRequestOptionsProvider: Provider<ApiRequest.Options>
-
-        @Inject
-        lateinit var threeDs1IntentReturnUrlMap: MutableMap<String, String>
-
-        @Inject
-        lateinit var lazyPaymentIntentFlowResultProcessor: Lazy<PaymentIntentFlowResultProcessor>
-
-        @Inject
-        lateinit var lazySetupIntentFlowResultProcessor: Lazy<SetupIntentFlowResultProcessor>
-
-        @Inject
-        lateinit var analyticsRequestExecutor: DefaultAnalyticsRequestExecutor
-
-        @Inject
-        lateinit var analyticsRequestFactory: AnalyticsRequestFactory
-
-        @Inject
-        @UIContext
-        lateinit var uiContext: CoroutineContext
+        lateinit var subComponentBuilderProvider: Provider<PaymentLauncherViewModelSubcomponent.Builder>
 
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel?> create(
@@ -319,33 +293,23 @@ internal class PaymentLauncherViewModel(
                 )
             }
 
-            val isPaymentIntent = when (arg) {
-                is PaymentLauncherContract.Args.IntentConfirmationArgs -> {
-                    when (arg.confirmStripeIntentParams) {
-                        is ConfirmPaymentIntentParams -> true
-                        is ConfirmSetupIntentParams -> false
+            return subComponentBuilderProvider.get()
+                .isPaymentIntent(
+                    when (arg) {
+                        is PaymentLauncherContract.Args.IntentConfirmationArgs -> {
+                            when (arg.confirmStripeIntentParams) {
+                                is ConfirmPaymentIntentParams -> true
+                                is ConfirmSetupIntentParams -> false
+                            }
+                        }
+                        is PaymentLauncherContract.Args.PaymentIntentNextActionArgs -> true
+                        is PaymentLauncherContract.Args.SetupIntentNextActionArgs -> false
                     }
-                }
-                is PaymentLauncherContract.Args.PaymentIntentNextActionArgs -> true
-                is PaymentLauncherContract.Args.SetupIntentNextActionArgs -> false
-            }
-
-            return PaymentLauncherViewModel(
-                isPaymentIntent,
-                stripeApiRepository,
-                authenticatorRegistry,
-                defaultReturnUrl,
-                apiRequestOptionsProvider,
-                threeDs1IntentReturnUrlMap,
-                lazyPaymentIntentFlowResultProcessor,
-                lazySetupIntentFlowResultProcessor,
-                analyticsRequestExecutor,
-                analyticsRequestFactory,
-                uiContext,
-                authActivityStarterHostProvider(),
-                activityResultCaller,
-                handle
-            ) as T
+                )
+                .savedStateHandle(handle)
+                .authActivityStarterHost(authActivityStarterHostProvider())
+                .activityResultCaller(activityResultCaller)
+                .build().viewModel as T
         }
 
         /**
