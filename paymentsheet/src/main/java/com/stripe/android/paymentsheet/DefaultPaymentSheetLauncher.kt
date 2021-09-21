@@ -1,9 +1,16 @@
 package com.stripe.android.paymentsheet
 
+import android.app.Application
 import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.ActivityResultRegistry
 import androidx.fragment.app.Fragment
+import com.stripe.android.payments.core.injection.Injectable
+import com.stripe.android.payments.core.injection.Injector
+import com.stripe.android.payments.core.injection.InjectorKey
+import com.stripe.android.payments.core.injection.WeakMapInjectorRegistry
+import com.stripe.android.paymentsheet.injection.DaggerPaymentSheetLauncherComponent
+import com.stripe.android.paymentsheet.injection.PaymentSheetLauncherComponent
 import org.jetbrains.annotations.TestOnly
 
 /**
@@ -12,7 +19,17 @@ import org.jetbrains.annotations.TestOnly
  */
 internal class DefaultPaymentSheetLauncher(
     private val activityResultLauncher: ActivityResultLauncher<PaymentSheetContract.Args>,
-) : PaymentSheetLauncher {
+    application: Application
+) : PaymentSheetLauncher, Injector {
+    private val paymentSheetLauncherComponent: PaymentSheetLauncherComponent =
+        DaggerPaymentSheetLauncherComponent.builder().application(application).build()
+
+    @InjectorKey
+    private val injectorKey: Int = WeakMapInjectorRegistry.nextKey()
+
+    init {
+        WeakMapInjectorRegistry.register(this, injectorKey)
+    }
 
     constructor(
         activity: ComponentActivity,
@@ -22,7 +39,8 @@ internal class DefaultPaymentSheetLauncher(
             PaymentSheetContract()
         ) {
             callback.onPaymentSheetResult(it)
-        }
+        },
+        activity.application
     )
 
     constructor(
@@ -33,7 +51,8 @@ internal class DefaultPaymentSheetLauncher(
             PaymentSheetContract()
         ) {
             callback.onPaymentSheetResult(it)
-        }
+        },
+        fragment.requireActivity().application
     )
 
     @TestOnly
@@ -47,16 +66,18 @@ internal class DefaultPaymentSheetLauncher(
             registry
         ) {
             callback.onPaymentSheetResult(it)
-        }
+        },
+        fragment.requireActivity().application
     )
 
     override fun presentWithPaymentIntent(
         paymentIntentClientSecret: String,
         configuration: PaymentSheet.Configuration?
     ) = present(
-        PaymentSheetContract.Args.createPaymentIntentArgs(
+        PaymentSheetContract.Args.createPaymentIntentArgsWithInjectorKey(
             paymentIntentClientSecret,
-            configuration
+            configuration,
+            injectorKey
         )
     )
 
@@ -64,13 +85,22 @@ internal class DefaultPaymentSheetLauncher(
         setupIntentClientSecret: String,
         configuration: PaymentSheet.Configuration?
     ) = present(
-        PaymentSheetContract.Args.createSetupIntentArgs(
+        PaymentSheetContract.Args.createSetupIntentArgsWithInjectorKey(
             setupIntentClientSecret,
-            configuration
+            configuration,
+            injectorKey
         )
     )
 
     private fun present(args: PaymentSheetContract.Args) {
         activityResultLauncher.launch(args)
+    }
+
+    override fun inject(injectable: Injectable<*>) {
+        when (injectable) {
+            is PaymentSheetViewModel.Factory -> {
+                paymentSheetLauncherComponent.inject(injectable)
+            }
+        }
     }
 }

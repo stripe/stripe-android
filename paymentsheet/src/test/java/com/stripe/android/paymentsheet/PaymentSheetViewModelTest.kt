@@ -22,9 +22,13 @@ import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.StripeRepository
+import com.stripe.android.payments.core.injection.Injectable
+import com.stripe.android.payments.core.injection.Injector
+import com.stripe.android.payments.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.paymentsheet.PaymentSheetViewModel.CheckoutIdentifier
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.injection.PaymentSheetViewModelSubcomponent
 import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
@@ -52,17 +56,21 @@ import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Captor
 import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.any
+import org.mockito.kotlin.argWhere
 import org.mockito.kotlin.capture
 import org.mockito.kotlin.doThrow
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.spy
+import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
+import javax.inject.Provider
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
+import kotlin.test.assertNotNull
 
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
@@ -744,6 +752,63 @@ internal class PaymentSheetViewModelTest {
         // In a real app, the app name will be used. In tests the package name is returned.
         assertThat(viewModel.merchantName)
             .isEqualTo("com.stripe.android.paymentsheet.test")
+    }
+
+    @Test
+    fun `Factory gets initialized by Injector when Injector is available`() {
+        val mockBuilder = mock<PaymentSheetViewModelSubcomponent.Builder>()
+        val mockSubComponent = mock<PaymentSheetViewModelSubcomponent>()
+        val mockViewModel = mock<PaymentSheetViewModel>()
+
+        whenever(mockBuilder.build()).thenReturn(mockSubComponent)
+        whenever(mockBuilder.paymentSheetViewModelModule(any())).thenReturn(mockBuilder)
+        whenever((mockSubComponent.viewModel)).thenReturn(mockViewModel)
+
+        val injector = object : Injector {
+            override fun inject(injectable: Injectable<*>) {
+                val factory = injectable as PaymentSheetViewModel.Factory
+                factory.subComponentBuilderProvider = Provider { mockBuilder }
+            }
+        }
+        val injectorKey = 1
+        WeakMapInjectorRegistry.register(injector, injectorKey)
+        val factory = PaymentSheetViewModel.Factory(
+            { ApplicationProvider.getApplicationContext() },
+            {
+                PaymentSheetContract.Args.createPaymentIntentArgsWithInjectorKey(
+                    "testSecret",
+                    injectorKey = injectorKey
+                )
+            }
+        )
+        val factorySpy = spy(factory)
+        val createdViewModel = factorySpy.create(PaymentSheetViewModel::class.java)
+        verify(factorySpy, times(0)).fallbackInitialize(any())
+        assertThat(createdViewModel).isEqualTo(mockViewModel)
+
+        WeakMapInjectorRegistry.staticCacheMap.clear()
+    }
+
+    @Test
+    fun `Factory gets initialized with fallback when no Injector is available`() = runBlockingTest {
+        val context = ApplicationProvider.getApplicationContext<Application>()
+        PaymentConfiguration.init(context, ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
+        val factory = PaymentSheetViewModel.Factory(
+            { context },
+            {
+                PaymentSheetContract.Args.createPaymentIntentArgs(
+                    "testSecret",
+                )
+            }
+        )
+        val factorySpy = spy(factory)
+
+        assertNotNull(factorySpy.create(PaymentSheetViewModel::class.java))
+        verify(factorySpy).fallbackInitialize(
+            argWhere {
+                it.application == context
+            }
+        )
     }
 
     @Ignore("Disabled until more payment methods are supported")

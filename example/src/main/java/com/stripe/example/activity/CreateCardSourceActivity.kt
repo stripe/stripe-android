@@ -2,6 +2,7 @@ package com.stripe.example.activity
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
@@ -50,9 +51,19 @@ class CreateCardSourceActivity : AppCompatActivity() {
         setContentView(viewBinding.root)
 
         viewBinding.createButton.setOnClickListener {
+            // If a field is invalid this will shift focus to that field
             viewBinding.cardWidget.cardParams?.let {
                 createCardSource(it)
             } ?: showSnackbar("Enter a valid card.")
+        }
+
+        viewBinding.cardWidget.setCardValidCallback { isValid, invalidFields -> // We will not call cardParams unless it is valid because
+            // this will cause the inFocus field to change.
+            if (isValid) {
+                Log.e("STRIPE", "Validity: $isValid, ${viewBinding.cardWidget.cardParams}")
+            } else {
+                Log.e("STRIPE", "Validity: $isValid, invalidField: $invalidFields")
+            }
         }
 
         viewBinding.recyclerView.setHasFixedSize(true)

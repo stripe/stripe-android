@@ -4,7 +4,6 @@ import android.app.Application
 import com.stripe.android.googlepaylauncher.GooglePayLauncherModule
 import com.stripe.android.payments.core.injection.CoroutineContextModule
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
-import com.stripe.android.paymentsheet.PaymentSheetContract
 import com.stripe.android.paymentsheet.PaymentSheetViewModel
 import dagger.BindsInstance
 import dagger.Component
@@ -15,22 +14,19 @@ import javax.inject.Singleton
     modules = [
         StripeRepositoryModule::class,
         PaymentSheetCommonModule::class,
-        PaymentSheetViewModelModule::class,
+        PaymentSheetLauncherModule::class,
         GooglePayLauncherModule::class,
         CoroutineContextModule::class
     ]
 )
-internal interface PaymentSheetViewModelComponent {
-    val viewModel: PaymentSheetViewModel
+internal interface PaymentSheetLauncherComponent {
+    fun inject(factory: PaymentSheetViewModel.Factory)
 
     @Component.Builder
     interface Builder {
         @BindsInstance
         fun application(application: Application): Builder
 
-        @BindsInstance
-        fun starterArgs(starterArgs: PaymentSheetContract.Args): Builder
-
-        fun build(): PaymentSheetViewModelComponent
+        fun build(): PaymentSheetLauncherComponent
     }
 }

@@ -1297,18 +1297,18 @@ internal class CardInputWidgetTest {
         idleLooper()
 
         assertThat(cardInputWidget.requiredFields)
-            .isEqualTo(cardInputWidget.currentFields)
+            .isEqualTo(cardInputWidget.currentFields.toHashSet())
     }
 
     @Test
     fun currentFields_notEquals_requiredFields_withPostalCodeEnabled() {
         cardInputWidget.postalCodeEnabled = true
         assertThat(cardInputWidget.requiredFields)
-            .isNotEqualTo(cardInputWidget.currentFields)
+            .isNotEqualTo(cardInputWidget.currentFields.toHashSet())
     }
 
     @Test
-    fun testCardValidCallback() {
+    fun testCardValidCallback_withPostalCodeDefaultDisabled() {
         var currentIsValid = false
         var currentInvalidFields = emptySet<CardValidCallback.Fields>()
         cardInputWidget.setCardValidCallback { isValid, invalidFields ->
@@ -1360,6 +1360,60 @@ internal class CardInputWidgetTest {
             .isFalse()
         assertThat(currentInvalidFields)
             .containsExactly(CardValidCallback.Fields.Cvc)
+    }
+
+    @Test
+    fun testCardValidCallback_withPostalCodeEnabledNotRequired() {
+        var currentIsValid = false
+        var currentInvalidFields = emptySet<CardValidCallback.Fields>()
+        cardInputWidget.postalCodeEnabled = true
+        cardInputWidget.setCardValidCallback { isValid, invalidFields ->
+            currentIsValid = isValid
+            currentInvalidFields = invalidFields
+        }
+        assertThat(currentIsValid)
+            .isFalse()
+        assertThat(currentInvalidFields)
+            .containsExactly(
+                CardValidCallback.Fields.Number,
+                CardValidCallback.Fields.Expiry,
+                CardValidCallback.Fields.Cvc
+            )
+    }
+
+    @Test
+    fun testCardValidCallback_withPostalCodeEnabledAndRequired() {
+        var currentIsValid = false
+        var currentInvalidFields = emptySet<CardValidCallback.Fields>()
+        cardInputWidget.postalCodeEnabled = true
+        cardInputWidget.usZipCodeRequired = true
+        cardInputWidget.setCardValidCallback { isValid, invalidFields ->
+            currentIsValid = isValid
+            currentInvalidFields = invalidFields
+        }
+        assertThat(currentIsValid)
+            .isFalse()
+        assertThat(currentInvalidFields)
+            .containsExactly(
+                CardValidCallback.Fields.Number,
+                CardValidCallback.Fields.Expiry,
+                CardValidCallback.Fields.Cvc,
+                CardValidCallback.Fields.Postal
+            )
+
+        cardInputWidget.setCardNumber(VISA_NO_SPACES)
+        expiryEditText.setText("1250")
+        cvcEditText.setText("123")
+        assertThat(currentIsValid).isFalse()
+        assertThat(currentInvalidFields).containsExactly(CardValidCallback.Fields.Postal)
+
+        postalCodeEditText.setText("12345")
+        assertThat(currentIsValid).isTrue()
+        assertThat(currentInvalidFields).isEmpty()
+
+        postalCodeEditText.setText("123")
+        assertThat(currentIsValid).isFalse()
+        assertThat(currentInvalidFields).containsExactly(CardValidCallback.Fields.Postal)
     }
 
     @Test
@@ -1480,7 +1534,8 @@ internal class CardInputWidgetTest {
 
     @Test
     fun `Verify on postal code focus change listeners trigger the callback`() {
-        cardInputWidget.postalCodeEditText.getParentOnFocusChangeListener().onFocusChange(cardInputWidget.postalCodeEditText, true)
+        cardInputWidget.postalCodeEditText.getParentOnFocusChangeListener()
+            .onFocusChange(cardInputWidget.postalCodeEditText, true)
 
         assertThat(cardInputListener.focusedFields)
             .contains(CardInputListener.FocusField.PostalCode)
@@ -1488,7 +1543,8 @@ internal class CardInputWidgetTest {
 
     @Test
     fun `Verify on cvc focus change listeners trigger the callback`() {
-        cardInputWidget.cvcEditText.getParentOnFocusChangeListener().onFocusChange(cardInputWidget.cvcEditText, true)
+        cardInputWidget.cvcEditText.getParentOnFocusChangeListener()
+            .onFocusChange(cardInputWidget.cvcEditText, true)
 
         assertThat(cardInputListener.focusedFields)
             .contains(CardInputListener.FocusField.Cvc)
@@ -1496,7 +1552,8 @@ internal class CardInputWidgetTest {
 
     @Test
     fun `Verify on expiration date focus change listeners trigger the callback`() {
-        cardInputWidget.expiryDateEditText.getParentOnFocusChangeListener().onFocusChange(cardInputWidget.expiryDateEditText, true)
+        cardInputWidget.expiryDateEditText.getParentOnFocusChangeListener()
+            .onFocusChange(cardInputWidget.expiryDateEditText, true)
 
         assertThat(cardInputListener.focusedFields)
             .contains(CardInputListener.FocusField.ExpiryDate)
@@ -1504,7 +1561,8 @@ internal class CardInputWidgetTest {
 
     @Test
     fun `Verify on card number focus change listeners trigger the callback`() {
-        cardInputWidget.cardNumberEditText.getParentOnFocusChangeListener().onFocusChange(cardInputWidget.cardNumberEditText, true)
+        cardInputWidget.cardNumberEditText.getParentOnFocusChangeListener()
+            .onFocusChange(cardInputWidget.cardNumberEditText, true)
 
         assertThat(cardInputListener.focusedFields)
             .contains(CardInputListener.FocusField.CardNumber)
