@@ -15,7 +15,6 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.BasePaymentMethodsListFragment
-import com.stripe.android.paymentsheet.BuildConfig
 import com.stripe.android.paymentsheet.PaymentOptionsActivity
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetActivity
@@ -221,7 +220,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
                 // AfterpayClearpay requires a shipping address, filter it out if not provided
                 val excludeAfterPay = it == SupportedPaymentMethod.AfterpayClearpay &&
                     (stripeIntent as? PaymentIntent)?.shipping == null
-                if (excludeAfterPay && BuildConfig.DEBUG) {
+                if (excludeAfterPay) {
                     logger.debug(
                         "AfterPay will not be shown. It requires that Shipping is " +
                             "included in the Payment or Setup Intent"
@@ -232,7 +231,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
                 val excludeRequiresMandate =
                     (stripeIntent is SetupIntent)
                             && supportedPaymentMethod.type.requiresMandate
-                if (excludeRequiresMandate && BuildConfig.DEBUG) {
+                if (excludeRequiresMandate) {
                     logger.debug(
                         "${supportedPaymentMethod.name} will not be shown. It " +
                             "requires a mandate which is incompatible with SetupIntents"
@@ -243,7 +242,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
                 val excludeRequiresMandate = (stripeIntent is PaymentIntent) &&
                     supportedPaymentMethod.type.requiresMandate &&
                     stripeIntent.setupFutureUsage == StripeIntent.Usage.OffSession
-                if (excludeRequiresMandate && BuildConfig.DEBUG) {
+                if (excludeRequiresMandate) {
                     logger.debug(
                         "${supportedPaymentMethod.name} will not be shown.  It " +
                             "requires a mandate which is incompatible with off_session " +
