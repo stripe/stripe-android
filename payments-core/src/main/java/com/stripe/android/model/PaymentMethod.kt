@@ -147,7 +147,7 @@ constructor(
         @JvmField val isReusable: Boolean,
         @JvmField val isVoucher: Boolean,
         @JvmField val requiresMandate: Boolean,
-        @JvmField @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) val hasDelayedSettlement: Boolean
+        private val hasDelayedSettlement: Boolean
     ) : Parcelable {
         Card(
             "card",
@@ -296,6 +296,9 @@ constructor(
             requiresMandate = false,
             hasDelayedSettlement = false
         );
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
+        fun hasDelayedSettlement(): Boolean = hasDelayedSettlement
 
         override fun toString(): String {
             return code

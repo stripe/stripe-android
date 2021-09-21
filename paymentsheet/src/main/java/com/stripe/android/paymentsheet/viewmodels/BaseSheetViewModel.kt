@@ -64,7 +64,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
         Transformations.map(_paymentMethods) { paymentMethodsList ->
             paymentMethodsList.filter {
                 config?.allowsDelayedPaymentMethods == true ||
-                    it.type?.hasDelayedSettlement == false
+                    it.type?.hasDelayedSettlement() == false
             }
         }
 
@@ -207,7 +207,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
         stripeIntent.value?.let { stripeIntent ->
             return stripeIntent.paymentMethodTypes.filter {
                 config?.allowsDelayedPaymentMethods == true ||
-                    PaymentMethod.Type.fromCode(it)?.hasDelayedSettlement == false
+                    PaymentMethod.Type.fromCode(it)?.hasDelayedSettlement() == false
             }.mapNotNull {
                 SupportedPaymentMethod.fromCode(it)
             }.filterNot {
