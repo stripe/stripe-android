@@ -1,23 +1,23 @@
 package com.stripe.android.paymentsheet.forms
 
-import android.content.res.Resources
+import android.app.Application
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.stripe.android.paymentsheet.elements.Form
-import com.stripe.android.paymentsheet.elements.FormElement
-import com.stripe.android.paymentsheet.elements.LayoutSpec
-import com.stripe.android.paymentsheet.elements.MandateTextElement
-import com.stripe.android.paymentsheet.elements.ResourceRepository
-import com.stripe.android.paymentsheet.elements.SaveForFutureUseElement
-import com.stripe.android.paymentsheet.elements.SectionSpec
+import com.stripe.android.Logger
+import com.stripe.android.payments.core.injection.Injectable
+import com.stripe.android.payments.core.injection.WeakMapInjectorRegistry
+import com.stripe.android.paymentsheet.elements.*
 import com.stripe.android.paymentsheet.injection.DaggerFormViewModelComponent
+import com.stripe.android.paymentsheet.injection.FormViewModelModule
+import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
 import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import javax.inject.Provider
 import javax.inject.Singleton
 
 /**
@@ -35,20 +35,63 @@ internal class FormViewModel @Inject internal constructor(
     private val resourceRepository: ResourceRepository
 ) : ViewModel() {
     internal class Factory(
-        private val resources: Resources,
-        private val layout: LayoutSpec,
-        private val formArguments: FormFragmentArguments
-    ) : ViewModelProvider.Factory {
+        val enableLogging: Boolean,
+        val config: FormFragmentArguments,
+        val application: Application,
+    ) : ViewModelProvider.Factory, Injectable<Factory.FallbackInitializeParam> {
+        internal data class FallbackInitializeParam(
+            val enableLogging: Boolean,
+            val config: FormFragmentArguments,
+            val application: Application,
+            var layout: LayoutSpec
+        )
+
+        @Inject
+        lateinit var subComponentBuilderProvider:
+                Provider<FormViewModelSubcomponent.Builder>
+
+        @Inject
+        lateinit var resourceRepository: ResourceRepository
+        @Inject
+        lateinit var layout: LayoutSpec
+        @Inject
+        lateinit var formArguments: FormFragmentArguments
+
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
 
-            // This is where we will call Dagger:
-            return DaggerFormViewModelComponent.builder()
-                .resources(resources)
+            val logger = Logger.getInstance(enableLogging)
+            WeakMapInjectorRegistry.retrieve(config.injectorKey)?.let {
+                logger.info(
+                    "Injector available, " +
+                            "injecting dependencies into PaymentOptionsViewModel.Factory"
+                )
+                it.inject(this)
+            } ?: run {
+                logger.info(
+                    "Injector unavailable, " +
+                            "initializing dependencies of PaymentOptionsViewModel.Factory"
+                )
+                fallbackInitialize(
+                    FallbackInitializeParam(
+                        enableLogging, config, application, layout
+                    )
+                )
+            }
+            return subComponentBuilderProvider.get()
+                .formFragmentArguments(config)
                 .layout(layout)
-                .formFragmentArguments(formArguments)
+                .resources(application.resources)
+                .build().viewModel as T
+        }
+
+        override fun fallbackInitialize(arg: FallbackInitializeParam) {
+            DaggerFormViewModelComponent.builder()
+                .layout(arg.layout)
+                .resources(arg.application.resources)
+                .formFragmentArguments(arg.config)
                 .build()
-                .viewModel as T
+                .inject(this)
         }
     }
 

@@ -16,7 +16,8 @@ import javax.inject.Singleton
         PaymentSheetCommonModule::class,
         PaymentSheetLauncherModule::class,
         GooglePayLauncherModule::class,
-        CoroutineContextModule::class
+        CoroutineContextModule::class,
+        FormViewModelModule::class
     ]
 )
 internal interface PaymentSheetLauncherComponent {

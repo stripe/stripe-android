@@ -266,7 +266,7 @@ internal abstract class BaseAddPaymentMethodFragment(
                             )
                         }
                     )
-                }
+                },
             )
         }
     }

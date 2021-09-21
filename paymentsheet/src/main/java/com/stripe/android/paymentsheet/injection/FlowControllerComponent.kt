@@ -12,6 +12,7 @@ import com.stripe.android.paymentsheet.PaymentOptionCallback
 import com.stripe.android.paymentsheet.PaymentOptionsViewModel
 import com.stripe.android.paymentsheet.PaymentSheetResultCallback
 import com.stripe.android.paymentsheet.flowcontroller.DefaultFlowController
+import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.model.PaymentOptionFactory
 import dagger.BindsInstance
 import dagger.Component
@@ -25,13 +26,15 @@ import javax.inject.Singleton
         PaymentSheetCommonModule::class,
         FlowControllerModule::class,
         GooglePayLauncherModule::class,
-        CoroutineContextModule::class
+        CoroutineContextModule::class,
+        FormViewModelModule::class
     ]
 )
 internal interface FlowControllerComponent {
     val flowController: DefaultFlowController
 
     fun inject(paymentOptionsViewModel: PaymentOptionsViewModel.Factory)
+    fun inject(factory: FormViewModel.Factory)
 
     @Component.Builder
     interface Builder {

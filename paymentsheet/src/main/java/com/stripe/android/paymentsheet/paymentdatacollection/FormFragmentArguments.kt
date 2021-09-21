@@ -14,6 +14,7 @@ internal data class FormFragmentArguments(
     val merchantName: String,
     val amount: Amount? = null,
     val billingDetails: PaymentSheet.BillingDetails? = null,
+    val injectorKey: Int,
 ) : Parcelable
 
 internal fun FormFragmentArguments.getValue(id: IdentifierSpec) =

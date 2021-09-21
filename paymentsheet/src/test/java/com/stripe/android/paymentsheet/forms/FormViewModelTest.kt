@@ -62,9 +62,9 @@ internal class FormViewModelTest {
             ),
             FormFragmentArguments(
                 supportedPaymentMethodName = "Card",
-                saveForFutureUseInitialValue = true,
                 saveForFutureUseInitialVisibility = true,
-                merchantName = "Example, Inc."
+                saveForFutureUseInitialValue = true,
+                merchantName = "Example, Inc.",
             ),
             resourceRepository = resourceRepository
         )
@@ -93,9 +93,9 @@ internal class FormViewModelTest {
             ),
             FormFragmentArguments(
                 supportedPaymentMethodName = "Card",
-                saveForFutureUseInitialValue = true,
                 saveForFutureUseInitialVisibility = true,
-                merchantName = "Example, Inc."
+                saveForFutureUseInitialValue = true,
+                merchantName = "Example, Inc.",
             ),
             resourceRepository = resourceRepository
         )
@@ -126,9 +126,9 @@ internal class FormViewModelTest {
             ),
             FormFragmentArguments(
                 supportedPaymentMethodName = "Card",
-                saveForFutureUseInitialValue = true,
                 saveForFutureUseInitialVisibility = true,
-                merchantName = "Example, Inc."
+                saveForFutureUseInitialValue = true,
+                merchantName = "Example, Inc.",
             ),
             resourceRepository = resourceRepository
         )
@@ -164,9 +164,9 @@ internal class FormViewModelTest {
                 ),
                 FormFragmentArguments(
                     supportedPaymentMethodName = "Card",
-                    saveForFutureUseInitialValue = true,
                     saveForFutureUseInitialVisibility = true,
-                    merchantName = "Example, Inc."
+                    saveForFutureUseInitialValue = true,
+                    merchantName = "Example, Inc.",
                 ),
                 resourceRepository = resourceRepository
             )
@@ -210,9 +210,9 @@ internal class FormViewModelTest {
                 ),
                 FormFragmentArguments(
                     supportedPaymentMethodName = "Card",
-                    saveForFutureUseInitialValue = true,
                     saveForFutureUseInitialVisibility = true,
-                    merchantName = "Example, Inc."
+                    saveForFutureUseInitialValue = true,
+                    merchantName = "Example, Inc.",
                 ),
                 resourceRepository = resourceRepository
             )
@@ -256,9 +256,9 @@ internal class FormViewModelTest {
                 sofort.layout,
                 FormFragmentArguments(
                     supportedPaymentMethodName = "Card",
-                    saveForFutureUseInitialValue = true,
                     saveForFutureUseInitialVisibility = true,
-                    merchantName = "Example, Inc."
+                    saveForFutureUseInitialValue = true,
+                    merchantName = "Example, Inc.",
                 ),
                 resourceRepository = resourceRepository
             )
@@ -302,9 +302,9 @@ internal class FormViewModelTest {
                 sepaDebit.layout,
                 FormFragmentArguments(
                     supportedPaymentMethodName = "Card",
-                    saveForFutureUseInitialValue = true,
                     saveForFutureUseInitialVisibility = true,
-                    merchantName = "Example, Inc."
+                    saveForFutureUseInitialValue = true,
+                    merchantName = "Example, Inc.",
                 ),
                 resourceRepository = resourceRepository
             )
@@ -373,9 +373,9 @@ internal class FormViewModelTest {
                 sepaDebit.layout,
                 FormFragmentArguments(
                     supportedPaymentMethodName = "Card",
-                    saveForFutureUseInitialValue = true,
                     saveForFutureUseInitialVisibility = true,
-                    merchantName = "Example, Inc."
+                    saveForFutureUseInitialValue = true,
+                    merchantName = "Example, Inc.",
                 ),
                 resourceRepository = resourceRepository
             )

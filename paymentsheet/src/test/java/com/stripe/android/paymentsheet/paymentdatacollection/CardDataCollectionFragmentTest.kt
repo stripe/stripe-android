@@ -171,7 +171,7 @@ class CardDataCollectionFragmentTest {
                     email = "email",
                     name = "Jenny Rosen",
                     phone = "+18008675309"
-                )
+                ),
             )
         ) { _, viewBinding ->
             assertThat(viewBinding.billingAddress.postalCodeView.text.toString())

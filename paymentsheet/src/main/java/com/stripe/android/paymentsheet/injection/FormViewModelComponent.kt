@@ -11,21 +11,5 @@ import javax.inject.Singleton
 @Singleton
 @Component
 internal interface FormViewModelComponent {
-    val viewModel: FormViewModel
-
-    @Component.Builder
-    interface Builder {
-        @BindsInstance
-        fun layout(layoutSpec: LayoutSpec): Builder
-
-        @BindsInstance
-        fun formFragmentArguments(
-            config: FormFragmentArguments
-        ): Builder
-
-        @BindsInstance
-        fun resources(resources: Resources): Builder
-
-        fun build(): FormViewModelComponent
-    }
+    fun inject(factory: FormViewModel.Factory)
 }

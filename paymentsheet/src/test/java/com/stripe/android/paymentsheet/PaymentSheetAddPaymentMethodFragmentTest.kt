@@ -311,7 +311,7 @@ class PaymentSheetAddPaymentMethodFragmentTest {
                         saveForFutureUseInitialVisibility = true,
                         saveForFutureUseInitialValue = true,
                         merchantName = PaymentSheetFixtures.MERCHANT_DISPLAY_NAME,
-                        amount = createAmount()
+                        amount = createAmount(),
                     )
                 )
         }
@@ -341,7 +341,7 @@ class PaymentSheetAddPaymentMethodFragmentTest {
                         saveForFutureUseInitialVisibility = true,
                         saveForFutureUseInitialValue = true,
                         merchantName = PaymentSheetFixtures.MERCHANT_DISPLAY_NAME,
-                        amount = createAmount()
+                        amount = createAmount(),
                     )
                 )
         }
@@ -401,7 +401,7 @@ class PaymentSheetAddPaymentMethodFragmentTest {
                         saveForFutureUseInitialVisibility = false,
                         saveForFutureUseInitialValue = true,
                         merchantName = "Widget Store",
-                        amount = createAmount(PI_OFF_SESSION)
+                        amount = createAmount(PI_OFF_SESSION),
                     )
                 )
         }
@@ -447,7 +447,7 @@ class PaymentSheetAddPaymentMethodFragmentTest {
                 SupportedPaymentMethod.Bancontact.name,
                 saveForFutureUseInitialVisibility = false,
                 saveForFutureUseInitialValue = true,
-                merchantName = "Example, Inc",
+                merchantName = "Example, Inc",,
             )
         )
     }
@@ -466,7 +466,7 @@ class PaymentSheetAddPaymentMethodFragmentTest {
                 SupportedPaymentMethod.Bancontact.name,
                 saveForFutureUseInitialVisibility = false,
                 saveForFutureUseInitialValue = false,
-                merchantName = "Example, Inc",
+                merchantName = "Example, Inc",,
             )
         )
     }
@@ -485,7 +485,7 @@ class PaymentSheetAddPaymentMethodFragmentTest {
                 SupportedPaymentMethod.Bancontact.name,
                 saveForFutureUseInitialVisibility = false,
                 saveForFutureUseInitialValue = true,
-                merchantName = "Example, Inc",
+                merchantName = "Example, Inc",,
             )
         )
     }
@@ -505,7 +505,7 @@ class PaymentSheetAddPaymentMethodFragmentTest {
                 SupportedPaymentMethod.Bancontact.name,
                 saveForFutureUseInitialVisibility = true,
                 saveForFutureUseInitialValue = true,
-                merchantName = "Example, Inc",
+                merchantName = "Example, Inc",,
             )
         )
     }

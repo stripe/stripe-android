@@ -51,9 +51,9 @@ internal fun FormInternalPreview() {
                 "Card",
                 saveForFutureUseInitialVisibility = true,
                 saveForFutureUseInitialValue = true,
-                "Merchant, Inc.",
-                Amount(10, "USD"),
-                PaymentSheet.BillingDetails(
+                merchantName = "Merchant, Inc.",
+                amount = Amount(10, "USD"),
+                billingDetails = PaymentSheet.BillingDetails(
                     PaymentSheet.Address(
                         "San Fransciso",
                         "US",
@@ -62,9 +62,9 @@ internal fun FormInternalPreview() {
                         "94111",
                         "CA",
                     )
-                )
+                ),
 
-            )
+                )
         ).transform(formElements)
     )
 }
