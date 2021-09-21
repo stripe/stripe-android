@@ -230,7 +230,8 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
                 excludeAfterPay
             }.filterNot { supportedPaymentMethod ->
                 val excludeRequiresMandate =
-                    (stripeIntent is SetupIntent) && supportedPaymentMethod.requiresMandate
+                    (stripeIntent is SetupIntent)
+                            && supportedPaymentMethod.type.requiresMandate
                 if (excludeRequiresMandate && BuildConfig.DEBUG) {
                     logger.debug(
                         "${supportedPaymentMethod.name} will not be shown. It " +
@@ -240,7 +241,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
                 excludeRequiresMandate
             }.filterNot { supportedPaymentMethod ->
                 val excludeRequiresMandate = (stripeIntent is PaymentIntent) &&
-                    supportedPaymentMethod.requiresMandate &&
+                    supportedPaymentMethod.type.requiresMandate &&
                     stripeIntent.setupFutureUsage == StripeIntent.Usage.OffSession
                 if (excludeRequiresMandate && BuildConfig.DEBUG) {
                     logger.debug(

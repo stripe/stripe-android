@@ -62,7 +62,7 @@ internal object PaymentSheetFixtures {
     )
 
     internal val COMPOSE_FRAGMENT_ARGS = FormFragmentArguments(
-        SupportedPaymentMethod.Bancontact.name,
+        SupportedPaymentMethod.Bancontact,
         allowUserInitiatedReuse = true,
         saveForFutureUseInitialValue = true,
         merchantName = "Merchant, Inc.",

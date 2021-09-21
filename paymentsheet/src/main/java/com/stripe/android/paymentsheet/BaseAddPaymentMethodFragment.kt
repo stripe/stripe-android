@@ -164,7 +164,7 @@ internal abstract class BaseAddPaymentMethodFragment(
             getFormArguments(
                 hasCustomer = sheetViewModel.customerConfig != null,
                 stripeIntent = requireNotNull(sheetViewModel.stripeIntent.value),
-                supportedPaymentMethodName = paymentMethod.name,
+                supportedPaymentMethod = paymentMethod,
                 merchantName = sheetViewModel.merchantName,
                 amount = sheetViewModel.amount.value,
                 billingAddress = sheetViewModel.config?.defaultBillingDetails
@@ -221,7 +221,7 @@ internal abstract class BaseAddPaymentMethodFragment(
         @VisibleForTesting
         internal fun getFormArguments(
             hasCustomer: Boolean,
-            supportedPaymentMethodName: String,
+            supportedPaymentMethod: SupportedPaymentMethod,
             stripeIntent: StripeIntent,
             merchantName: String,
             amount: Amount? = null,
@@ -233,9 +233,6 @@ internal abstract class BaseAddPaymentMethodFragment(
             // This will impact the setting of the off_session on confirm
             var allowUserInitiatedReuse = true
 
-            val supportedPaymentMethod =
-                SupportedPaymentMethod.fromCode(supportedPaymentMethodName)
-
             val isSetupIntent = stripeIntent is SetupIntent
             val isPaymentIntentSetupFutureUsage = (stripeIntent as? PaymentIntent)?.setupFutureUsage
             if (isSetupIntent ||
@@ -244,8 +241,8 @@ internal abstract class BaseAddPaymentMethodFragment(
             ) {
                 allowUserInitiatedReuse = false
                 isReusable = true
-            } else if (stripeIntent is PaymentIntent &&
-                (!hasCustomer || (supportedPaymentMethod?.requiresMandate == true))
+            } else if (stripeIntent is PaymentIntent
+                && (!hasCustomer || supportedPaymentMethod.type.requiresMandate)
             ) {
                 // If paymentMethodTypes contains payment method that does not support
                 // save for future should be false and unselected until future fix
@@ -256,7 +253,7 @@ internal abstract class BaseAddPaymentMethodFragment(
                 // checkbox regardless of the payment method until future fix
                 stripeIntent.paymentMethodTypes.forEach {
                     if (SupportedPaymentMethod.fromCode(it)
-                        ?.userRequestedConfirmSaveForFutureSupported == false
+                            ?.userRequestedConfirmSaveForFutureSupported == false
                     ) {
                         isReusable = false
                         allowUserInitiatedReuse = false
@@ -265,7 +262,7 @@ internal abstract class BaseAddPaymentMethodFragment(
             }
 
             return FormFragmentArguments(
-                supportedPaymentMethodName = supportedPaymentMethodName,
+                supportedPaymentMethod = supportedPaymentMethod,
                 allowUserInitiatedReuse = allowUserInitiatedReuse,
                 saveForFutureUseInitialValue = isReusable,
                 merchantName = merchantName,

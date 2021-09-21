@@ -28,14 +28,14 @@ class FormSaveCheckboxTest {
     @Test
     fun `Verify correct list of pms requiring a mandate`() {
         SupportedPaymentMethod.values().filter {
-            it.requiresMandate
+            it.type.requiresMandate
         }.forEach {
-            Truth.assertThat(expectedMandateRequiredLPMs).contains(it.code)
+            Truth.assertThat(expectedMandateRequiredLPMs).contains(it.type.code)
         }
         SupportedPaymentMethod.values().filter {
-            !it.requiresMandate
+            !it.type.requiresMandate
         }.forEach {
-            Truth.assertThat(expectedMandateRequiredLPMs).doesNotContain(it.code)
+            Truth.assertThat(expectedMandateRequiredLPMs).doesNotContain(it.type.code)
         }
     }
 
@@ -44,13 +44,13 @@ class FormSaveCheckboxTest {
         SupportedPaymentMethod.values().filter {
             it.userRequestedConfirmSaveForFutureSupported
         }.forEach {
-            Truth.assertThat(paymentMethodSupportsUserRequestedSaveForFutureUsage).contains(it.code)
+            Truth.assertThat(paymentMethodSupportsUserRequestedSaveForFutureUsage).contains(it.type.code)
         }
 
         SupportedPaymentMethod.values().filter {
             !it.userRequestedConfirmSaveForFutureSupported
         }.forEach {
-            Truth.assertThat(paymentMethodSupportsUserRequestedSaveForFutureUsage).doesNotContain(it.code)
+            Truth.assertThat(paymentMethodSupportsUserRequestedSaveForFutureUsage).doesNotContain(it.type.code)
         }
     }
 
@@ -125,8 +125,8 @@ class FormSaveCheckboxTest {
                 formArgumentFromSetupIntentTestInput(it.testInput)
             ).isEqualTo(
                 FormFragmentArguments(
-                    SupportedPaymentMethod.fromCode(it.testInput.lpmTypeFormCode)!!.name,
-                    allowUserInitiatedReuse = it.testOutput.expectedSaveCheckboxVisible,
+                    SupportedPaymentMethod.fromCode(it.testInput.lpmTypeFormCode)!!,
+                    allowUserInitiatedReuse = it.testOutput.expectedAllowUserInitiatedReuse,
                     saveForFutureUseInitialValue = it.testOutput.expectedSaveCheckboxValue,
                     merchantName = "Example, Inc",
                 )
@@ -139,12 +139,13 @@ class FormSaveCheckboxTest {
         format.decodeFromString<List<PaymentIntentTestCase>>(
             javaClass.classLoader!!.getResource("FormSaveCheckboxPaymentIntent.json").readText(Charset.defaultCharset())
         ).forEach {
+            println(it.testInput)
             Truth.assertThat(
                 formArgumentFromPaymentIntentTestInput(it.testInput)
             ).isEqualTo(
                 FormFragmentArguments(
-                    SupportedPaymentMethod.fromCode(it.testInput.lpmTypeFormCode)!!.name,
-                    allowUserInitiatedReuse = it.testOutput.expectedSaveCheckboxVisible,
+                    SupportedPaymentMethod.fromCode(it.testInput.lpmTypeFormCode)!!,
+                    allowUserInitiatedReuse = it.testOutput.expectedAllowUserInitiatedReuse,
                     saveForFutureUseInitialValue = it.testOutput.expectedSaveCheckboxValue,
                     merchantName = "Example, Inc",
                 )
@@ -166,8 +167,8 @@ class FormSaveCheckboxTest {
                          */
                         PaymentIntentTestInput(
                             hasCustomer = customer,
-                            lpmTypeFormCode = SupportedPaymentMethod.Card.code,
-                            intentLpms = listOf(SupportedPaymentMethod.Card.code),
+                            lpmTypeFormCode = SupportedPaymentMethod.Card.type.code,
+                            intentLpms = listOf(SupportedPaymentMethod.Card.type.code),
                             intentSetupFutureUsage = usage,
                         ),
                         /**
@@ -175,8 +176,8 @@ class FormSaveCheckboxTest {
                          */
                         PaymentIntentTestInput(
                             hasCustomer = customer,
-                            lpmTypeFormCode = SupportedPaymentMethod.Card.code,
-                            intentLpms = listOf(SupportedPaymentMethod.Card.code, SupportedPaymentMethod.Eps.code),
+                            lpmTypeFormCode = SupportedPaymentMethod.Card.type.code,
+                            intentLpms = listOf(SupportedPaymentMethod.Card.type.code, SupportedPaymentMethod.Eps.type.code),
                             intentSetupFutureUsage = usage,
                         ),
                         /**
@@ -184,8 +185,8 @@ class FormSaveCheckboxTest {
                          */
                         PaymentIntentTestInput(
                             hasCustomer = customer,
-                            lpmTypeFormCode = SupportedPaymentMethod.SepaDebit.code,
-                            intentLpms = listOf(SupportedPaymentMethod.Card.code, SupportedPaymentMethod.SepaDebit.code),
+                            lpmTypeFormCode = SupportedPaymentMethod.SepaDebit.type.code,
+                            intentLpms = listOf(SupportedPaymentMethod.Card.type.code, SupportedPaymentMethod.SepaDebit.type.code),
                             intentSetupFutureUsage = usage,
                         ),
                     )
@@ -200,7 +201,7 @@ class FormSaveCheckboxTest {
         stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
             paymentMethodTypes = testInput.intentLpms
         ),
-        supportedPaymentMethodName = SupportedPaymentMethod.fromCode(testInput.lpmTypeFormCode)!!.name,
+        supportedPaymentMethod = SupportedPaymentMethod.fromCode(testInput.lpmTypeFormCode)!!,
         merchantName = "Example, Inc"
     )
 
@@ -209,7 +210,7 @@ class FormSaveCheckboxTest {
         stripeIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD.copy(
             paymentMethodTypes = testInput.intentLpms
         ),
-        supportedPaymentMethodName = SupportedPaymentMethod.fromCode(testInput.lpmTypeFormCode)!!.name,
+        supportedPaymentMethod = SupportedPaymentMethod.fromCode(testInput.lpmTypeFormCode)!!,
         merchantName = "Example, Inc"
     )
 
@@ -243,6 +244,6 @@ class FormSaveCheckboxTest {
     @Serializable
     internal data class TestOutput(
         val expectedSaveCheckboxValue: Boolean,
-        val expectedSaveCheckboxVisible: Boolean
+        val expectedAllowUserInitiatedReuse: Boolean
     )
 }

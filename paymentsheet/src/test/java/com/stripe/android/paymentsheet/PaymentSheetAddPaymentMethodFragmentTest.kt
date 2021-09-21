@@ -312,9 +312,9 @@ class PaymentSheetAddPaymentMethodFragmentTest {
             )
                 .isEqualTo(
                     FormFragmentArguments(
-                        SupportedPaymentMethod.Bancontact.name,
-                        allowUserInitiatedReuse = true,
-                        saveForFutureUseInitialValue = true,
+                        SupportedPaymentMethod.Bancontact,
+                        allowUserInitiatedReuse = false,
+                        saveForFutureUseInitialValue = false,
                         merchantName = PaymentSheetFixtures.MERCHANT_DISPLAY_NAME,
                         amount = createAmount()
                     )
@@ -342,9 +342,9 @@ class PaymentSheetAddPaymentMethodFragmentTest {
             )
                 .isEqualTo(
                     FormFragmentArguments(
-                        SupportedPaymentMethod.Bancontact.name,
-                        allowUserInitiatedReuse = true,
-                        saveForFutureUseInitialValue = true,
+                        SupportedPaymentMethod.Bancontact,
+                        allowUserInitiatedReuse = false,
+                        saveForFutureUseInitialValue = false,
                         merchantName = PaymentSheetFixtures.MERCHANT_DISPLAY_NAME,
                         amount = createAmount()
                     )
@@ -402,7 +402,7 @@ class PaymentSheetAddPaymentMethodFragmentTest {
             )
                 .isEqualTo(
                     FormFragmentArguments(
-                        SupportedPaymentMethod.Bancontact.name,
+                        SupportedPaymentMethod.Bancontact,
                         allowUserInitiatedReuse = false,
                         saveForFutureUseInitialValue = true,
                         merchantName = "Widget Store",

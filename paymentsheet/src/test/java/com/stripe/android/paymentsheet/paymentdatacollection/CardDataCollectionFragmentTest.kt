@@ -155,7 +155,7 @@ class CardDataCollectionFragmentTest {
     fun `launching with arguments populates the fields`() {
         createFragment(
             fragmentArgs = FormFragmentArguments(
-                SupportedPaymentMethod.Bancontact.name,
+                SupportedPaymentMethod.Bancontact,
                 allowUserInitiatedReuse = false,
                 saveForFutureUseInitialValue = false,
                 merchantName = "Merchant, Inc.",

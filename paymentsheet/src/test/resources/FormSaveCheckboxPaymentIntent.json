@@ -10,7 +10,7 @@
     },
     "testOutput": {
       "expectedSaveCheckboxValue": true,
-      "expectedSaveCheckboxVisible": true
+      "expectedAllowUserInitiatedReuse": true
     }
   },
   {
@@ -25,7 +25,7 @@
     },
     "testOutput": {
       "expectedSaveCheckboxValue": false,
-      "expectedSaveCheckboxVisible": false
+      "expectedAllowUserInitiatedReuse": false
     }
   },
   {
@@ -39,8 +39,8 @@
       ]
     },
     "testOutput": {
-      "expectedSaveCheckboxValue": true,
-      "expectedSaveCheckboxVisible": true
+      "expectedSaveCheckboxValue": false,
+      "expectedAllowUserInitiatedReuse": false
     }
   },
   {
@@ -54,7 +54,7 @@
     },
     "testOutput": {
       "expectedSaveCheckboxValue": true,
-      "expectedSaveCheckboxVisible": true
+      "expectedAllowUserInitiatedReuse": true
     }
   },
   {
@@ -69,7 +69,7 @@
     },
     "testOutput": {
       "expectedSaveCheckboxValue": false,
-      "expectedSaveCheckboxVisible": false
+      "expectedAllowUserInitiatedReuse": false
     }
   },
   {
@@ -83,8 +83,8 @@
       ]
     },
     "testOutput": {
-      "expectedSaveCheckboxValue": true,
-      "expectedSaveCheckboxVisible": true
+      "expectedSaveCheckboxValue": false,
+      "expectedAllowUserInitiatedReuse": false
     }
   },
   {
@@ -98,7 +98,7 @@
     },
     "testOutput": {
       "expectedSaveCheckboxValue": false,
-      "expectedSaveCheckboxVisible": false
+      "expectedAllowUserInitiatedReuse": false
     }
   },
   {
@@ -113,7 +113,7 @@
     },
     "testOutput": {
       "expectedSaveCheckboxValue": false,
-      "expectedSaveCheckboxVisible": false
+      "expectedAllowUserInitiatedReuse": false
     }
   },
   {
@@ -128,7 +128,7 @@
     },
     "testOutput": {
       "expectedSaveCheckboxValue": false,
-      "expectedSaveCheckboxVisible": false
+      "expectedAllowUserInitiatedReuse": false
     }
   },
   {
@@ -142,7 +142,7 @@
     },
     "testOutput": {
       "expectedSaveCheckboxValue": false,
-      "expectedSaveCheckboxVisible": false
+      "expectedAllowUserInitiatedReuse": false
     }
   },
   {
@@ -157,7 +157,7 @@
     },
     "testOutput": {
       "expectedSaveCheckboxValue": false,
-      "expectedSaveCheckboxVisible": false
+      "expectedAllowUserInitiatedReuse": false
     }
   },
   {
@@ -172,7 +172,7 @@
     },
     "testOutput": {
       "expectedSaveCheckboxValue": false,
-      "expectedSaveCheckboxVisible": false
+      "expectedAllowUserInitiatedReuse": false
     }
   }
 ]

@@ -28,6 +28,7 @@ import com.stripe.android.paymentsheet.elements.SaveForFutureUseSpec
 import com.stripe.android.paymentsheet.elements.SectionSpec
 import com.stripe.android.paymentsheet.elements.SimpleTextSpec
 import com.stripe.android.paymentsheet.elements.SupportedBankType
+import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.Before
@@ -63,7 +64,7 @@ internal class TransformSpecToElementTest {
                     AddressFieldElementRepository(mock())
                 ),
                 FormFragmentArguments(
-                    supportedPaymentMethodName = "Card",
+                    supportedPaymentMethod = SupportedPaymentMethod.Card,
                     saveForFutureUseInitialValue = true,
                     allowUserInitiatedReuse = true,
                     merchantName = "Example, Inc."

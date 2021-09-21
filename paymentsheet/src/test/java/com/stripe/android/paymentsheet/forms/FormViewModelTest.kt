@@ -23,6 +23,7 @@ import com.stripe.android.paymentsheet.elements.RowElement
 import com.stripe.android.paymentsheet.elements.SaveForFutureUseSpec
 import com.stripe.android.paymentsheet.elements.SectionSpec
 import com.stripe.android.paymentsheet.elements.SimpleTextSpec.Companion.NAME
+import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
@@ -61,7 +62,7 @@ internal class FormViewModelTest {
                 )
             ),
             FormFragmentArguments(
-                supportedPaymentMethodName = "Card",
+                supportedPaymentMethod = SupportedPaymentMethod.Card,
                 saveForFutureUseInitialValue = true,
                 allowUserInitiatedReuse = true,
                 merchantName = "Example, Inc."
@@ -92,7 +93,7 @@ internal class FormViewModelTest {
                 )
             ),
             FormFragmentArguments(
-                supportedPaymentMethodName = "Card",
+                supportedPaymentMethod = SupportedPaymentMethod.Card,
                 saveForFutureUseInitialValue = true,
                 allowUserInitiatedReuse = true,
                 merchantName = "Example, Inc."
@@ -125,7 +126,7 @@ internal class FormViewModelTest {
                 )
             ),
             FormFragmentArguments(
-                supportedPaymentMethodName = "Card",
+                supportedPaymentMethod = SupportedPaymentMethod.Card,
                 saveForFutureUseInitialValue = true,
                 allowUserInitiatedReuse = true,
                 merchantName = "Example, Inc."
@@ -163,7 +164,7 @@ internal class FormViewModelTest {
                     )
                 ),
                 FormFragmentArguments(
-                    supportedPaymentMethodName = "Card",
+                    supportedPaymentMethod = SupportedPaymentMethod.Card,
                     saveForFutureUseInitialValue = true,
                     allowUserInitiatedReuse = true,
                     merchantName = "Example, Inc."
@@ -209,7 +210,7 @@ internal class FormViewModelTest {
                     )
                 ),
                 FormFragmentArguments(
-                    supportedPaymentMethodName = "Card",
+                    supportedPaymentMethod = SupportedPaymentMethod.Card,
                     saveForFutureUseInitialValue = true,
                     allowUserInitiatedReuse = true,
                     merchantName = "Example, Inc."
@@ -255,7 +256,7 @@ internal class FormViewModelTest {
             val formViewModel = FormViewModel(
                 sofort.layout,
                 FormFragmentArguments(
-                    supportedPaymentMethodName = "Card",
+                    supportedPaymentMethod = SupportedPaymentMethod.Card,
                     saveForFutureUseInitialValue = true,
                     allowUserInitiatedReuse = true,
                     merchantName = "Example, Inc."
@@ -301,7 +302,7 @@ internal class FormViewModelTest {
             val formViewModel = FormViewModel(
                 sepaDebit.layout,
                 FormFragmentArguments(
-                    supportedPaymentMethodName = "Card",
+                    supportedPaymentMethod = SupportedPaymentMethod.Card,
                     saveForFutureUseInitialValue = true,
                     allowUserInitiatedReuse = true,
                     merchantName = "Example, Inc."
@@ -372,7 +373,7 @@ internal class FormViewModelTest {
             val formViewModel = FormViewModel(
                 sepaDebit.layout,
                 FormFragmentArguments(
-                    supportedPaymentMethodName = "Card",
+                    supportedPaymentMethod = SupportedPaymentMethod.Card,
                     saveForFutureUseInitialValue = true,
                     allowUserInitiatedReuse = true,
                     merchantName = "Example, Inc."

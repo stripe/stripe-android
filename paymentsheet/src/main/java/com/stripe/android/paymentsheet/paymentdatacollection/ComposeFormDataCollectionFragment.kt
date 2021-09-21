@@ -24,9 +24,9 @@ import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
 internal class ComposeFormDataCollectionFragment : Fragment() {
     val formSpec by lazy {
         requireNotNull(
-            requireArguments().getParcelable<FormFragmentArguments>(EXTRA_CONFIG)?.let {
-                SupportedPaymentMethod.valueOf(it.supportedPaymentMethodName).formSpec
-            }
+            requireArguments().getParcelable<FormFragmentArguments>(EXTRA_CONFIG)
+                ?.supportedPaymentMethod
+                ?.formSpec
         )
     }
 

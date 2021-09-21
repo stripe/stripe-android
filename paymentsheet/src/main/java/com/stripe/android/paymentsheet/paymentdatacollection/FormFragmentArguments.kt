@@ -4,11 +4,12 @@ import android.os.Parcelable
 import com.stripe.android.paymentsheet.model.Amount
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.elements.IdentifierSpec
+import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
 internal data class FormFragmentArguments(
-    val supportedPaymentMethodName: String,
+    val supportedPaymentMethod: SupportedPaymentMethod,
     val allowUserInitiatedReuse: Boolean,
     val saveForFutureUseInitialValue: Boolean,
     val merchantName: String,

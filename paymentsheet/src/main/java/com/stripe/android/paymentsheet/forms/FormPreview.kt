@@ -11,6 +11,7 @@ import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArgumen
 import com.stripe.android.paymentsheet.elements.BankRepository
 import com.stripe.android.paymentsheet.elements.ResourceRepository
 import com.stripe.android.paymentsheet.elements.SupportedBankType
+import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
 import kotlinx.coroutines.flow.MutableStateFlow
 
 /**
@@ -48,7 +49,7 @@ internal fun FormInternalPreview() {
                 addressFieldElementRepository
             ),
             FormFragmentArguments(
-                "Card",
+                SupportedPaymentMethod.Card,
                 allowUserInitiatedReuse = true,
                 saveForFutureUseInitialValue = true,
                 "Merchant, Inc.",
