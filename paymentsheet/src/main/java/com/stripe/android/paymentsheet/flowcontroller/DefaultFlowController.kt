@@ -47,12 +47,14 @@ import com.stripe.android.paymentsheet.model.PaymentOptionFactory
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.SetupIntentClientSecret
+import com.stripe.android.paymentsheet.validate
 import dagger.Lazy
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.parcelize.Parcelize
+import java.security.InvalidParameterException
 import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Singleton
@@ -166,6 +168,14 @@ internal class DefaultFlowController @Inject internal constructor(
         configuration: PaymentSheet.Configuration?,
         callback: PaymentSheet.FlowController.ConfigCallback
     ) {
+        try {
+            configuration?.validate()
+            clientSecret.validate()
+        } catch (e: InvalidParameterException) {
+            callback.onConfigured(success = false, e)
+            return
+        }
+
         lifecycleScope.launch {
             val result = flowControllerInitializer.init(
                 clientSecret,

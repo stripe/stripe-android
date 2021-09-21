@@ -12,6 +12,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.distinctUntilChanged
 import androidx.lifecycle.viewModelScope
+import com.stripe.android.BuildConfig
 import com.stripe.android.Logger
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
@@ -25,12 +26,16 @@ import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.core.injection.IOContext
+import com.stripe.android.payments.core.injection.Injectable
+import com.stripe.android.payments.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.payments.paymentlauncher.PaymentLauncher
 import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
 import com.stripe.android.paymentsheet.analytics.EventReporter
-import com.stripe.android.paymentsheet.injection.DaggerPaymentSheetViewModelComponent
+import com.stripe.android.paymentsheet.injection.DaggerPaymentSheetLauncherComponent
+import com.stripe.android.paymentsheet.injection.PaymentSheetViewModelModule
+import com.stripe.android.paymentsheet.injection.PaymentSheetViewModelSubcomponent
 import com.stripe.android.paymentsheet.model.ConfirmStripeIntentParamsFactory
 import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -45,7 +50,7 @@ import dagger.Lazy
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import javax.inject.Singleton
+import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
 
 /**
@@ -63,7 +68,6 @@ internal fun PaymentSheetViewState.convert(): PrimaryButton.State {
     }
 }
 
-@Singleton
 internal class PaymentSheetViewModel @Inject internal constructor(
     // Properties provided through PaymentSheetViewModelComponent.Builder
     application: Application,
@@ -436,18 +440,46 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         ) : TransitionTarget()
     }
 
-    @Suppress("UNCHECKED_CAST")
     internal class Factory(
         private val applicationSupplier: () -> Application,
         private val starterArgsSupplier: () -> PaymentSheetContract.Args
-    ) : ViewModelProvider.Factory {
+    ) : ViewModelProvider.Factory, Injectable<Factory.FallbackInitializeParam> {
+        internal data class FallbackInitializeParam(
+            val application: Application,
+        )
+
+        @Inject
+        lateinit var subComponentBuilderProvider:
+            Provider<PaymentSheetViewModelSubcomponent.Builder>
+
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-            return DaggerPaymentSheetViewModelComponent.builder()
-                .application(applicationSupplier())
-                .starterArgs(starterArgsSupplier())
-                .build()
-                .viewModel as T
+            val application = applicationSupplier()
+            val args = starterArgsSupplier()
+
+            val logger = Logger.getInstance(BuildConfig.DEBUG)
+
+            WeakMapInjectorRegistry.retrieve(args.injectorKey)?.let {
+                logger.info(
+                    "Injector available, injecting dependencies into " +
+                        "PaymentSheetViewModel.Factory"
+                )
+                it.inject(this)
+            } ?: run {
+                logger.info(
+                    "Injector unavailable, initializing dependencies of " +
+                        "PaymentSheetViewModel.Factory by rebuilding the entire dagger graph"
+                )
+                fallbackInitialize(FallbackInitializeParam(application))
+            }
+            return subComponentBuilderProvider.get().paymentSheetViewModelModule(
+                PaymentSheetViewModelModule(args)
+            ).build().viewModel as T
+        }
+
+        override fun fallbackInitialize(arg: FallbackInitializeParam) {
+            DaggerPaymentSheetLauncherComponent.builder().application(arg.application).build()
+                .inject(this)
         }
     }
 

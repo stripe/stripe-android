@@ -47,7 +47,6 @@ import kotlin.coroutines.CoroutineContext
  * by the [PaymentIntent] or [SetupIntent] object.
  */
 internal class StripePaymentController
-@VisibleForTesting
 constructor(
     context: Context,
     private val publishableKeyProvider: Provider<String>,
