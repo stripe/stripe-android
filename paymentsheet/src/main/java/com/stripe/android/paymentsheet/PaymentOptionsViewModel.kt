@@ -12,23 +12,27 @@ import com.stripe.android.payments.core.injection.Injectable
 import com.stripe.android.payments.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.injection.DaggerPaymentOptionsViewModelFactoryComponent
+import com.stripe.android.paymentsheet.injection.PaymentOptionsViewModelSubcomponent
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import javax.inject.Inject
+import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
 
-internal class PaymentOptionsViewModel(
+@JvmSuppressWildcards
+internal class PaymentOptionsViewModel @Inject constructor(
     args: PaymentOptionContract.Args,
-    prefsRepository: PrefsRepository,
+    prefsRepositoryFactory:
+        (PaymentSheet.CustomerConfiguration?) -> PrefsRepository,
     eventReporter: EventReporter,
     customerRepository: CustomerRepository,
-    workContext: CoroutineContext,
+    @IOContext workContext: CoroutineContext,
     application: Application,
     logger: Logger
 ) : BaseSheetViewModel<PaymentOptionsViewModel.TransitionTarget>(
     config = args.config,
-    prefsRepository = prefsRepository,
+    prefsRepository = prefsRepositoryFactory(args.config?.customer),
     eventReporter = eventReporter,
     customerRepository = customerRepository,
     workContext = workContext,
@@ -140,19 +144,8 @@ internal class PaymentOptionsViewModel(
         }
 
         @Inject
-        lateinit var eventReporter: EventReporter
-
-        @Inject
-        lateinit var customerRepository: CustomerRepository
-
-        @Inject
-        @IOContext
-        lateinit var workContext: CoroutineContext
-
-        @Inject
-        @JvmSuppressWildcards
-        lateinit var prefsRepositoryFactory:
-            (PaymentSheet.CustomerConfiguration?) -> PrefsRepository
+        lateinit var subComponentBuilderProvider:
+            Provider<PaymentOptionsViewModelSubcomponent.Builder>
 
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
@@ -176,15 +169,8 @@ internal class PaymentOptionsViewModel(
                 )
             }
 
-            return PaymentOptionsViewModel(
-                starterArgs,
-                prefsRepositoryFactory(starterArgs.config?.customer),
-                eventReporter,
-                customerRepository,
-                workContext,
-                applicationSupplier(),
-                logger
-            ) as T
+            return subComponentBuilderProvider.get().application(application).args(starterArgs)
+                .build().viewModel as T
         }
     }
 }

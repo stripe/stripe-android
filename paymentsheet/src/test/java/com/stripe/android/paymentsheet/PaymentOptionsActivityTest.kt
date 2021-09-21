@@ -290,7 +290,7 @@ class PaymentOptionsActivityTest {
     ): PaymentOptionsViewModel {
         return PaymentOptionsViewModel(
             args = args,
-            prefsRepository = FakePrefsRepository(),
+            prefsRepositoryFactory = { FakePrefsRepository() },
             eventReporter = eventReporter,
             customerRepository = FakeCustomerRepository(),
             workContext = testDispatcher,
