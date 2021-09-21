@@ -3027,11 +3027,11 @@ public final class com/stripe/android/model/PaymentMethod$Type : java/lang/Enum,
 	public static final field Upi Lcom/stripe/android/model/PaymentMethod$Type;
 	public static final field WeChatPay Lcom/stripe/android/model/PaymentMethod$Type;
 	public final field code Ljava/lang/String;
+	public final field hasDelayedSettlement Z
 	public final field isReusable Z
 	public final field isVoucher Z
 	public final field requiresMandate Z
 	public fun describeContents ()I
-	public final fun hasDelayedSettlement ()Z
 	public fun toString ()Ljava/lang/String;
 	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/model/PaymentMethod$Type;
 	public static fun values ()[Lcom/stripe/android/model/PaymentMethod$Type;
