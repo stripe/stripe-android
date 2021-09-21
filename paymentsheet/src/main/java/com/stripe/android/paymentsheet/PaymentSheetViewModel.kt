@@ -225,6 +225,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                         PaymentMethod.Type.fromCode(it)
                     }.filter {
                         SupportedPaymentMethod.supportedSavedPaymentMethods.contains(it.code)
+                    }.filter {
+                        config?.allowsDelayedPaymentMethods == true || !it.hasDelayedSettlement()
                     }.let {
                         customerRepository.getPaymentMethods(
                             customerConfig,

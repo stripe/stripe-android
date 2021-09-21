@@ -60,13 +60,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     internal val stripeIntent: LiveData<StripeIntent?> = _stripeIntent
 
     protected val _paymentMethods = MutableLiveData<List<PaymentMethod>>()
-    internal val paymentMethods: LiveData<List<PaymentMethod>> =
-        Transformations.map(_paymentMethods) { paymentMethodsList ->
-            paymentMethodsList.filter {
-                config?.allowsDelayedPaymentMethods == true ||
-                    it.type?.hasDelayedSettlement() == false
-            }
-        }
+    internal val paymentMethods: LiveData<List<PaymentMethod>> = _paymentMethods
 
     @VisibleForTesting
     internal val _amount = MutableLiveData<Amount>()

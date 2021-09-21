@@ -118,28 +118,28 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    fun `when allowsDelayedPaymentMethods is false then delayed payment methods are filtered out`() {
-        var paymentMethods: List<PaymentMethod>? = null
-        val viewModel = createViewModel(
-            customerRepository = FakeCustomerRepository(
-                PAYMENT_METHODS.plus(PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD).plus(PaymentMethodFixtures.AU_BECS_DEBIT)
+    fun `when allowsDelayedPaymentMethods is false then delayed payment methods are filtered out`() =
+        runBlockingTest {
+            val customerRepository = mock<CustomerRepository>()
+            val viewModel = createViewModel(
+                customerRepository = customerRepository
             )
-        )
-        viewModel.paymentMethods.observeForever {
-            paymentMethods = it
-        }
-        viewModel.updatePaymentMethods(
-            PAYMENT_INTENT.copy(
-                paymentMethodTypes = listOf(
-                    PaymentMethod.Type.Card.code,
-                    PaymentMethod.Type.SepaDebit.code,
-                    PaymentMethod.Type.AuBecsDebit.code
+            viewModel.updatePaymentMethods(
+                PAYMENT_INTENT.copy(
+                    paymentMethodTypes = listOf(
+                        PaymentMethod.Type.Card.code,
+                        PaymentMethod.Type.SepaDebit.code,
+                        PaymentMethod.Type.AuBecsDebit.code
+                    )
                 )
             )
-        )
-        assertThat(paymentMethods)
-            .containsExactly(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
-    }
+            verify(customerRepository).getPaymentMethods(
+                any(),
+                capture(paymentMethodTypeCaptor)
+            )
+            assertThat(paymentMethodTypeCaptor.value)
+                .containsExactly(PaymentMethod.Type.Card)
+        }
 
     @Test
     fun `updatePaymentMethods() with customer config and failing request should emit empty list`() =
