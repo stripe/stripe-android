@@ -111,8 +111,16 @@ class PaymentSheet internal constructor(
         var defaultBillingDetails: BillingDetails? = null,
 
         /**
-         * Whether or not to allow payment methods that have a delay before payment or setup
-         * completes, like most bank debits (e.g SEPA) and vouchers (e.g. OXXO, Konbini, Boleto).
+         * If true, allows payment methods that do not move money at the end of the checkout.
+         * Defaults to false.
+         *
+         * Some payment methods can't guarantee you will receive funds from your customer at the end
+         * of the checkout because they take time to settle (eg. most bank debits, like SEPA or ACH)
+         * or require customer action to complete (e.g. OXXO, Konbini, Boleto). If this is set to
+         * true, make sure your integration listens to webhooks for notifications on whether a
+         * payment has succeeded or not.
+         *
+         * See [payment-notification](https://stripe.com/docs/payments/payment-methods#payment-notification).
          */
         var allowsDelayedPaymentMethods: Boolean = false
     ) : Parcelable

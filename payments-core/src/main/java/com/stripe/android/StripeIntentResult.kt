@@ -43,7 +43,7 @@ abstract class StripeIntentResult<out T : StripeIntent> internal constructor(
                 return Outcome.SUCCEEDED
             }
             StripeIntent.Status.Processing -> {
-                return if (intent.paymentMethod?.type?.hasDelayedSettlement() == true) {
+                return if (intent.paymentMethod?.type?.hasDelayedSettlement == true) {
                     Outcome.SUCCEEDED
                 } else {
                     Outcome.UNKNOWN

@@ -43,6 +43,7 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.TestCoroutineDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runBlockingTest
+import org.junit.Ignore
 import org.junit.Rule
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
@@ -59,7 +60,6 @@ import org.mockito.kotlin.spy
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
-import java.lang.IllegalStateException
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -105,6 +105,30 @@ internal class PaymentSheetViewModelTest {
             paymentMethods = it
         }
         viewModel.updatePaymentMethods(PAYMENT_INTENT)
+        assertThat(paymentMethods)
+            .containsExactly(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+    }
+
+    @Test
+    fun `when allowsDelayedPaymentMethods is false then delayed payment methods are filtered out`() {
+        var paymentMethods: List<PaymentMethod>? = null
+        val viewModel = createViewModel(
+            customerRepository = FakeCustomerRepository(
+                PAYMENT_METHODS.plus(PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD).plus(PaymentMethodFixtures.AU_BECS_DEBIT)
+            )
+        )
+        viewModel.paymentMethods.observeForever {
+            paymentMethods = it
+        }
+        viewModel.updatePaymentMethods(
+            PAYMENT_INTENT.copy(
+                paymentMethodTypes = listOf(
+                    PaymentMethod.Type.Card.code,
+                    PaymentMethod.Type.SepaDebit.code,
+                    PaymentMethod.Type.AuBecsDebit.code
+                )
+            )
+        )
         assertThat(paymentMethods)
             .containsExactly(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
     }
@@ -722,6 +746,7 @@ internal class PaymentSheetViewModelTest {
             .isEqualTo("com.stripe.android.paymentsheet.test")
     }
 
+    @Ignore("Disabled until more payment methods are supported")
     @Test
     fun `getSupportedPaymentMethods() filters payment methods with delayed settlement`() {
         val viewModel = createViewModel()
@@ -745,6 +770,7 @@ internal class PaymentSheetViewModelTest {
             )
     }
 
+    @Ignore("Disabled until more payment methods are supported")
     @Test
     fun `getSupportedPaymentMethods() does not filter payment methods when supportsDelayedSettlement = true`() {
         val viewModel = createViewModel(

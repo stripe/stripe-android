@@ -6,6 +6,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Transformations
 import androidx.lifecycle.asFlow
 import androidx.lifecycle.distinctUntilChanged
 import androidx.lifecycle.viewModelScope
@@ -59,7 +60,13 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     internal val stripeIntent: LiveData<StripeIntent?> = _stripeIntent
 
     protected val _paymentMethods = MutableLiveData<List<PaymentMethod>>()
-    internal val paymentMethods: LiveData<List<PaymentMethod>> = _paymentMethods
+    internal val paymentMethods: LiveData<List<PaymentMethod>> =
+        Transformations.map(_paymentMethods) { paymentMethodsList ->
+            paymentMethodsList.filter {
+                config?.allowsDelayedPaymentMethods == true ||
+                    it.type?.hasDelayedSettlement == false
+            }
+        }
 
     @VisibleForTesting
     internal val _amount = MutableLiveData<Amount>()
@@ -200,7 +207,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
         stripeIntent.value?.let { stripeIntent ->
             return stripeIntent.paymentMethodTypes.filter {
                 config?.allowsDelayedPaymentMethods == true ||
-                    PaymentMethod.Type.fromCode(it)?.hasDelayedSettlement() == false
+                    PaymentMethod.Type.fromCode(it)?.hasDelayedSettlement == false
             }.mapNotNull {
                 SupportedPaymentMethod.fromCode(it)
             }.filterNot {
