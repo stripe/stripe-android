@@ -64,7 +64,7 @@ internal fun FormInternalPreview() {
                     )
                 ),
 
-                )
+            )
         ).transform(formElements)
     )
 }

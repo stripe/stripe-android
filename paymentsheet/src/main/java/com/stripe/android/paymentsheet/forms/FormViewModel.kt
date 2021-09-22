@@ -9,7 +9,6 @@ import com.stripe.android.payments.core.injection.Injectable
 import com.stripe.android.payments.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.paymentsheet.elements.*
 import com.stripe.android.paymentsheet.injection.DaggerFormViewModelComponent
-import com.stripe.android.paymentsheet.injection.FormViewModelModule
 import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
 import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -18,7 +17,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Provider
-import javax.inject.Singleton
 
 /**
  * This class stores the visual field layout for the [Form] and then sets up the controller
@@ -47,7 +45,7 @@ internal class FormViewModel @Inject internal constructor(
 
         @Inject
         lateinit var subComponentBuilderProvider:
-                Provider<FormViewModelSubcomponent.Builder>
+            Provider<FormViewModelSubcomponent.Builder>
 
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
@@ -56,13 +54,13 @@ internal class FormViewModel @Inject internal constructor(
             WeakMapInjectorRegistry.retrieve(config.injectorKey)?.let {
                 logger.info(
                     "Injector available, " +
-                            "injecting dependencies into PaymentOptionsViewModel.Factory"
+                        "injecting dependencies into PaymentOptionsViewModel.Factory"
                 )
                 it.inject(this)
             } ?: run {
                 logger.info(
                     "Injector unavailable, " +
-                            "initializing dependencies of PaymentOptionsViewModel.Factory"
+                        "initializing dependencies of PaymentOptionsViewModel.Factory"
                 )
                 fallbackInitialize(
                     FallbackInitializeParam(

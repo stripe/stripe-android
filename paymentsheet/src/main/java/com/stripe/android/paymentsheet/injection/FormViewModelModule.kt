@@ -5,5 +5,4 @@ import dagger.Module
 @Module(
     subcomponents = [FormViewModelSubcomponent::class]
 )
-class FormViewModelModule {
-}
+class FormViewModelModule
