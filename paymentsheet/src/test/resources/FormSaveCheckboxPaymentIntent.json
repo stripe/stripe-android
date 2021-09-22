@@ -10,7 +10,7 @@
     },
     "testOutput": {
       "expectedSaveCheckboxValue": true,
-      "expectedAllowUserInitiatedReuse": true
+      "expectedAllowUserInitiatedReuse": false
     }
   },
   {
@@ -54,7 +54,7 @@
     },
     "testOutput": {
       "expectedSaveCheckboxValue": true,
-      "expectedAllowUserInitiatedReuse": true
+      "expectedAllowUserInitiatedReuse": false
     }
   },
   {
