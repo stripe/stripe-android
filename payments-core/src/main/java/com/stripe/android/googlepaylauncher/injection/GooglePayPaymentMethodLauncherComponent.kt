@@ -1,6 +1,7 @@
 package com.stripe.android.googlepaylauncher.injection
 
 import android.content.Context
+import androidx.annotation.RestrictTo
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherViewModel
 import com.stripe.android.networking.AnalyticsRequestFactory
@@ -25,6 +26,7 @@ import kotlin.coroutines.CoroutineContext
         GooglePayPaymentMethodLauncherModule::class
     ]
 )
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 abstract class GooglePayPaymentMethodLauncherComponent {
     internal abstract fun inject(factory: GooglePayPaymentMethodLauncherViewModel.Factory)
 

@@ -1,5 +1,6 @@
 package com.stripe.android.googlepaylauncher.injection
 
+import androidx.annotation.RestrictTo
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherViewModel
 import com.stripe.android.payments.core.injection.Injectable
 import com.stripe.android.payments.core.injection.Injector
@@ -7,6 +8,7 @@ import com.stripe.android.payments.core.injection.Injector
 /**
  * [Injector] for [GooglePayPaymentMethodLauncherViewModel.Factory].
  */
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class GooglePayPaymentMethodLauncherViewModelInjector(
     private val component: GooglePayPaymentMethodLauncherComponent
 ) : Injector {

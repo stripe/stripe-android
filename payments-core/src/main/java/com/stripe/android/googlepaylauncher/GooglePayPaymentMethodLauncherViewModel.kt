@@ -2,6 +2,7 @@ package com.stripe.android.googlepaylauncher
 
 import android.app.Application
 import android.os.Bundle
+import android.os.Debug
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.AbstractSavedStateViewModelFactory
 import androidx.lifecycle.MutableLiveData
@@ -19,19 +20,17 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.exception.APIConnectionException
 import com.stripe.android.exception.InvalidRequestException
 import com.stripe.android.googlepaylauncher.injection.DaggerGooglePayPaymentMethodLauncherViewModelFactoryComponent
+import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLauncherViewModelSubcomponent
 import com.stripe.android.model.PaymentMethodCreateParams
-import com.stripe.android.networking.AnalyticsRequestFactory
 import com.stripe.android.networking.ApiRequest
 import com.stripe.android.networking.StripeRepository
-import com.stripe.android.payments.core.injection.IOContext
 import com.stripe.android.payments.core.injection.Injectable
 import com.stripe.android.payments.core.injection.WeakMapInjectorRegistry
 import kotlinx.coroutines.flow.first
 import org.json.JSONObject
 import javax.inject.Inject
-import kotlin.coroutines.CoroutineContext
 
-internal class GooglePayPaymentMethodLauncherViewModel(
+internal class GooglePayPaymentMethodLauncherViewModel @Inject constructor(
     private val paymentsClient: PaymentsClient,
     private val requestOptions: ApiRequest.Options,
     private val args: GooglePayPaymentMethodLauncherContract.Args,
@@ -141,36 +140,17 @@ internal class GooglePayPaymentMethodLauncherViewModel(
         )
 
         @Inject
-        @IOContext
-        lateinit var workContext: CoroutineContext
-
-        @Inject
-        lateinit var stripeApiRepository: StripeRepository
-
-        @Inject
-        lateinit var analyticsRequestFactory: AnalyticsRequestFactory
-
-        @Inject
-        lateinit var googlePayRepository: GooglePayRepository
-
-        @Inject
-        lateinit var stripeRepository: StripeRepository
-
-        @Inject
-        lateinit var apiRequestOptions: ApiRequest.Options
-
-        @Inject
-        lateinit var googlePayJsonFactory: GooglePayJsonFactory
-
-        @Inject
-        lateinit var paymentsClient: PaymentsClient
+        lateinit var subComponentBuilder:
+            GooglePayPaymentMethodLauncherViewModelSubcomponent.Builder
 
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel?> create(
             key: String,
             modelClass: Class<T>,
-            handle: SavedStateHandle
+            savedStateHandle: SavedStateHandle
         ): T {
+            Debug.waitForDebugger()
+
             val enableLogging = args.injectionParams?.enableLogging ?: false
             val logger = Logger.getInstance(enableLogging)
             val config = PaymentConfiguration.getInstance(application)
@@ -203,15 +183,10 @@ internal class GooglePayPaymentMethodLauncherViewModel(
                 )
             }
 
-            return GooglePayPaymentMethodLauncherViewModel(
-                paymentsClient,
-                apiRequestOptions,
-                args,
-                stripeRepository,
-                googlePayJsonFactory,
-                googlePayRepository,
-                handle
-            ) as T
+            return subComponentBuilder
+                .args(args)
+                .savedStateHandle(savedStateHandle)
+                .build().viewModel as T
         }
 
         override fun fallbackInitialize(arg: FallbackInjectionParams) {

@@ -74,8 +74,8 @@ internal class GooglePayPaymentMethodLauncherActivity : AppCompatActivity() {
                     viewModel.createLoadPaymentDataTask()
                 }.fold(
                     onSuccess = {
-                        viewModel.hasLaunched = true
                         launchGooglePay(it)
+                        viewModel.hasLaunched = true
                     },
                     onFailure = {
                         updateResult(

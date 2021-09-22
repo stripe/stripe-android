@@ -20,7 +20,9 @@ import javax.inject.Named
 import javax.inject.Provider
 import javax.inject.Singleton
 
-@Module
+@Module(
+    subcomponents = [GooglePayPaymentMethodLauncherViewModelSubcomponent::class]
+)
 internal class GooglePayPaymentMethodLauncherModule {
     /**
      * Because [PUBLISHABLE_KEY] and [STRIPE_ACCOUNT_ID] might change, each time a new [ApiRequest]
