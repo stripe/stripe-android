@@ -31,7 +31,6 @@ import javax.inject.Singleton
 internal interface GooglePayPaymentMethodLauncherViewModelFactoryComponent {
     fun inject(factory: GooglePayPaymentMethodLauncherViewModel.Factory)
 
-
     @Component.Builder
     interface Builder {
         @BindsInstance

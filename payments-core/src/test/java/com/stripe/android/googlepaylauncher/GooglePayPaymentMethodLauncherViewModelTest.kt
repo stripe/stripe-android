@@ -1,5 +1,6 @@
 package com.stripe.android.googlepaylauncher
 
+import androidx.lifecycle.SavedStateHandle
 import com.google.android.gms.tasks.Task
 import com.google.android.gms.wallet.PaymentData
 import com.google.android.gms.wallet.PaymentsClient
@@ -51,7 +52,8 @@ class GooglePayPaymentMethodLauncherViewModelTest {
         ARGS,
         stripeRepository,
         googlePayJsonFactory,
-        googlePayRepository
+        googlePayRepository,
+        SavedStateHandle()
     )
 
     @AfterTest
