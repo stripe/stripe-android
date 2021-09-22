@@ -119,6 +119,30 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
+    fun `when allowsDelayedPaymentMethods is false then delayed payment methods are filtered out`() =
+        runBlockingTest {
+            val customerRepository = mock<CustomerRepository>()
+            val viewModel = createViewModel(
+                customerRepository = customerRepository
+            )
+            viewModel.updatePaymentMethods(
+                PAYMENT_INTENT.copy(
+                    paymentMethodTypes = listOf(
+                        PaymentMethod.Type.Card.code,
+                        PaymentMethod.Type.SepaDebit.code,
+                        PaymentMethod.Type.AuBecsDebit.code
+                    )
+                )
+            )
+            verify(customerRepository).getPaymentMethods(
+                any(),
+                capture(paymentMethodTypeCaptor)
+            )
+            assertThat(paymentMethodTypeCaptor.value)
+                .containsExactly(PaymentMethod.Type.Card)
+        }
+
+    @Test
     fun `updatePaymentMethods() with customer config and failing request should emit empty list`() =
         runBlockingTest {
             val paymentConfiguration = PaymentConfiguration(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
@@ -853,6 +877,62 @@ internal class PaymentSheetViewModelTest {
             argWhere {
                 it.application == context
             }
+        )
+    }
+
+    @Ignore("Disabled until more payment methods are supported")
+    @Test
+    fun `getSupportedPaymentMethods() filters payment methods with delayed settlement`() {
+        val viewModel = createViewModel()
+
+        assertThat(
+            viewModel.getSupportedPaymentMethods(
+                PAYMENT_INTENT.copy(
+                    paymentMethodTypes = listOf(
+                        PaymentMethod.Type.Card.code,
+                        PaymentMethod.Type.Ideal.code,
+                        PaymentMethod.Type.SepaDebit.code,
+                        PaymentMethod.Type.Eps.code,
+                        PaymentMethod.Type.Sofort.code
+                    )
+                )
+            )
+        ).containsExactly(
+            SupportedPaymentMethod.Card,
+            SupportedPaymentMethod.Ideal,
+            SupportedPaymentMethod.Eps
+        )
+    }
+
+    @Ignore("Disabled until more payment methods are supported")
+    @Test
+    fun `getSupportedPaymentMethods() does not filter payment methods when supportsDelayedSettlement = true`() {
+        val viewModel = createViewModel(
+            args = ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
+                config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config?.copy(
+                    allowsDelayedPaymentMethods = true
+                )
+            )
+        )
+
+        assertThat(
+            viewModel.getSupportedPaymentMethods(
+                PAYMENT_INTENT.copy(
+                    paymentMethodTypes = listOf(
+                        PaymentMethod.Type.Card.code,
+                        PaymentMethod.Type.Ideal.code,
+                        PaymentMethod.Type.SepaDebit.code,
+                        PaymentMethod.Type.Eps.code,
+                        PaymentMethod.Type.Sofort.code
+                    )
+                )
+            )
+        ).containsExactly(
+            SupportedPaymentMethod.Card,
+            SupportedPaymentMethod.Ideal,
+            SupportedPaymentMethod.SepaDebit,
+            SupportedPaymentMethod.Eps,
+            SupportedPaymentMethod.Sofort
         )
     }
 

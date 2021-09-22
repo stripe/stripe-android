@@ -210,12 +210,16 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
         }
     }
 
-    private fun getSupportedPaymentMethods(
+    @VisibleForTesting
+    internal fun getSupportedPaymentMethods(
         stripeIntentParameter: StripeIntent?
     ): List<SupportedPaymentMethod> {
         stripeIntentParameter?.let { stripeIntent ->
             return stripeIntent.paymentMethodTypes.asSequence().mapNotNull {
                 SupportedPaymentMethod.fromCode(it)
+            }.filter {
+                config?.allowsDelayedPaymentMethods == true ||
+                    PaymentMethod.Type.fromCode(it.code)?.hasDelayedSettlement() == false
             }.filterNot {
                 // AfterpayClearpay requires a shipping address, filter it out if not provided
                 val excludeAfterPay = it == SupportedPaymentMethod.AfterpayClearpay &&

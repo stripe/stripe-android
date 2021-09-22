@@ -3031,6 +3031,7 @@ public final class com/stripe/android/model/PaymentMethod$Type : java/lang/Enum,
 	public final field isVoucher Z
 	public final field requiresMandate Z
 	public fun describeContents ()I
+	public final fun hasDelayedSettlement ()Z
 	public fun toString ()Ljava/lang/String;
 	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/model/PaymentMethod$Type;
 	public static fun values ()[Lcom/stripe/android/model/PaymentMethod$Type;
