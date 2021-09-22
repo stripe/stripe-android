@@ -13,9 +13,9 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
-import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContract
+import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLauncherFactory
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentIntentFixtures
@@ -24,7 +24,6 @@ import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.payments.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncher
@@ -44,6 +43,7 @@ import com.stripe.android.paymentsheet.model.PaymentOptionFactory
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.view.ActivityScenarioFactory
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
@@ -84,6 +84,7 @@ internal class DefaultFlowControllerTest {
 
     private val googlePayActivityLauncher =
         mock<ActivityResultLauncher<GooglePayPaymentMethodLauncherContract.Args>>()
+    val googlePayPaymentMethodLauncher = mock<GooglePayPaymentMethodLauncher>()
 
     private val flowController: DefaultFlowController by lazy {
         createFlowController()
@@ -581,7 +582,7 @@ internal class DefaultFlowControllerTest {
     }
 
     @Test
-    fun `confirmPayment() with GooglePay should start StripeGooglePayLauncher`() {
+    fun `confirmPayment() with GooglePay should launch GooglePayPaymentMethodLauncher`() {
         flowController.configureWithPaymentIntent(
             PaymentSheetFixtures.CLIENT_SECRET,
             PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
@@ -590,28 +591,9 @@ internal class DefaultFlowControllerTest {
         flowController.onPaymentOptionResult(
             PaymentOptionResult.Succeeded(PaymentSelection.GooglePay)
         )
-        val injectorKey = WeakMapInjectorRegistry.nextKey() + 1
         flowController.confirm()
 
-        verify(googlePayActivityLauncher).launch(
-            argWhere {
-                it == GooglePayPaymentMethodLauncherContract.Args(
-                    config = GooglePayPaymentMethodLauncher.Config(
-                        environment = GooglePayEnvironment.Test,
-                        merchantCountryCode = "US",
-                        merchantName = "Widget Store"
-                    ),
-                    currencyCode = "usd",
-                    amount = 1099,
-                    transactionId = "pi_1F7J1aCRMbs6FrXfaJcvbxF6",
-                    injectionParams = GooglePayPaymentMethodLauncherContract.Args.InjectionParams(
-                        injectorKey,
-                        setOf("TestProductUsage"),
-                        ENABLE_LOGGING
-                    )
-                )
-            }
-        )
+        verify(googlePayPaymentMethodLauncher).present("usd", 1099, "pi_1F7J1aCRMbs6FrXfaJcvbxF6")
     }
 
     @Test
@@ -761,8 +743,21 @@ internal class DefaultFlowControllerTest {
         testDispatcher,
         ENABLE_LOGGING,
         PRODUCT_USAGE,
-        { mock() }
+        createGooglePayPaymentMethodLauncherFactory()
     )
+
+    private fun createGooglePayPaymentMethodLauncherFactory() =
+        object : GooglePayPaymentMethodLauncherFactory {
+            override fun create(
+                lifecycleScope: CoroutineScope,
+                config: GooglePayPaymentMethodLauncher.Config,
+                readyCallback: GooglePayPaymentMethodLauncher.ReadyCallback,
+                activityResultLauncher: ActivityResultLauncher<GooglePayPaymentMethodLauncherContract.Args>,
+                skipReadyCheck: Boolean
+            ): GooglePayPaymentMethodLauncher {
+                return googlePayPaymentMethodLauncher
+            }
+        }
 
     private class FakeFlowControllerInitializer(
         var paymentMethods: List<PaymentMethod>,

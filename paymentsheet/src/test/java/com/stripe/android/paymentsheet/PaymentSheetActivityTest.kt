@@ -728,7 +728,8 @@ internal class PaymentSheetActivityTest {
                 lifecycleScope: CoroutineScope,
                 config: GooglePayPaymentMethodLauncher.Config,
                 readyCallback: GooglePayPaymentMethodLauncher.ReadyCallback,
-                activityResultLauncher: ActivityResultLauncher<GooglePayPaymentMethodLauncherContract.Args>
+                activityResultLauncher: ActivityResultLauncher<GooglePayPaymentMethodLauncherContract.Args>,
+                skipReadyCheck: Boolean
             ): GooglePayPaymentMethodLauncher {
                 val googlePayPaymentMethodLauncher = mock<GooglePayPaymentMethodLauncher>()
                 readyCallback.onReady(true)

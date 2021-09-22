@@ -1326,9 +1326,9 @@ public final class com/stripe/android/googlepaylauncher/GooglePayRepository$Disa
 	public fun isReady ()Lkotlinx/coroutines/flow/Flow;
 }
 
-public final class com/stripe/android/googlepaylauncher/injection/DaggerGooglePayPaymentMethodLauncherComponent : com/stripe/android/googlepaylauncher/injection/GooglePayPaymentMethodLauncherComponent {
+public final class com/stripe/android/googlepaylauncher/injection/DaggerGooglePayPaymentMethodLauncherComponent {
 	public static fun builder ()Lcom/stripe/android/googlepaylauncher/injection/GooglePayPaymentMethodLauncherComponent$Builder;
-	public fun inject$payments_core_release (Lcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncherViewModel$Factory;)V
+	public fun inject (Lcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncherViewModel$Factory;)V
 }
 
 public final class com/stripe/android/googlepaylauncher/injection/DaggerGooglePayPaymentMethodLauncherViewModelFactoryComponent : com/stripe/android/googlepaylauncher/injection/GooglePayPaymentMethodLauncherViewModelFactoryComponent {
@@ -1348,23 +1348,6 @@ public final class com/stripe/android/googlepaylauncher/injection/GooglePayLaunc
 	public synthetic fun get ()Ljava/lang/Object;
 	public fun get ()Lkotlin/jvm/functions/Function1;
 	public static fun provideGooglePayRepositoryFactory (Lcom/stripe/android/googlepaylauncher/injection/GooglePayLauncherModule;Landroid/content/Context;Lcom/stripe/android/Logger;)Lkotlin/jvm/functions/Function1;
-}
-
-public abstract class com/stripe/android/googlepaylauncher/injection/GooglePayPaymentMethodLauncherComponent {
-	public static final field $stable I
-	public fun <init> ()V
-}
-
-public abstract interface class com/stripe/android/googlepaylauncher/injection/GooglePayPaymentMethodLauncherComponent$Builder {
-	public abstract fun analyticsRequestFactory (Lcom/stripe/android/networking/AnalyticsRequestFactory;)Lcom/stripe/android/googlepaylauncher/injection/GooglePayPaymentMethodLauncherComponent$Builder;
-	public abstract fun build ()Lcom/stripe/android/googlepaylauncher/injection/GooglePayPaymentMethodLauncherComponent;
-	public abstract fun context (Landroid/content/Context;)Lcom/stripe/android/googlepaylauncher/injection/GooglePayPaymentMethodLauncherComponent$Builder;
-	public abstract fun enableLogging (Z)Lcom/stripe/android/googlepaylauncher/injection/GooglePayPaymentMethodLauncherComponent$Builder;
-	public abstract fun googlePayConfig (Lcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncher$Config;)Lcom/stripe/android/googlepaylauncher/injection/GooglePayPaymentMethodLauncherComponent$Builder;
-	public abstract fun ioContext (Lkotlin/coroutines/CoroutineContext;)Lcom/stripe/android/googlepaylauncher/injection/GooglePayPaymentMethodLauncherComponent$Builder;
-	public abstract fun publishableKeyProvider (Lkotlin/jvm/functions/Function0;)Lcom/stripe/android/googlepaylauncher/injection/GooglePayPaymentMethodLauncherComponent$Builder;
-	public abstract fun stripeAccountIdProvider (Lkotlin/jvm/functions/Function0;)Lcom/stripe/android/googlepaylauncher/injection/GooglePayPaymentMethodLauncherComponent$Builder;
-	public abstract fun stripeRepository (Lcom/stripe/android/networking/StripeRepository;)Lcom/stripe/android/googlepaylauncher/injection/GooglePayPaymentMethodLauncherComponent$Builder;
 }
 
 public abstract interface class com/stripe/android/googlepaylauncher/injection/GooglePayPaymentMethodLauncherFactory {
