@@ -19,6 +19,7 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.core.injection.InjectorKey
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.databinding.FragmentPaymentsheetAddPaymentMethodBinding
+import com.stripe.android.paymentsheet.elements.IdentifierSpec
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.Amount
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -27,7 +28,6 @@ import com.stripe.android.paymentsheet.paymentdatacollection.CardDataCollectionF
 import com.stripe.android.paymentsheet.paymentdatacollection.ComposeFormDataCollectionFragment
 import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.TransformToPaymentMethodCreateParams
-import com.stripe.android.paymentsheet.elements.IdentifierSpec
 import com.stripe.android.paymentsheet.ui.AddPaymentMethodsFragmentFactory
 import com.stripe.android.paymentsheet.ui.AnimationConstants
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
@@ -77,10 +77,11 @@ internal abstract class BaseAddPaymentMethodFragment(
         val viewBinding = FragmentPaymentsheetAddPaymentMethodBinding.bind(view)
         addPaymentMethodHeader = viewBinding.addPaymentMethodHeader
 
-        val paymentMethods = sheetViewModel.getSupportedPaymentMethods()
-
+        val paymentMethods = sheetViewModel.supportedPaymentMethods
         viewBinding.googlePayDivider.setText(
-            if (paymentMethods.contains(SupportedPaymentMethod.Card) && paymentMethods.size == 1) {
+            if (paymentMethods.contains(SupportedPaymentMethod.Card) &&
+                paymentMethods.size == 1
+            ) {
                 R.string.stripe_paymentsheet_or_pay_with_card
             } else {
                 R.string.stripe_paymentsheet_or_pay_using
@@ -91,7 +92,9 @@ internal abstract class BaseAddPaymentMethodFragment(
             setupRecyclerView(viewBinding, paymentMethods)
         }
 
-        replacePaymentMethodFragment(paymentMethods[0])
+        if (paymentMethods.isNotEmpty()) {
+            replacePaymentMethodFragment(paymentMethods[0])
+        }
 
         sheetViewModel.processing.observe(viewLifecycleOwner) { isProcessing ->
             (getFragment() as? ComposeFormDataCollectionFragment)?.setProcessing(isProcessing)
@@ -164,13 +167,7 @@ internal abstract class BaseAddPaymentMethodFragment(
             ComposeFormDataCollectionFragment.EXTRA_CONFIG,
             getFormArguments(
                 hasCustomer = sheetViewModel.customerConfig != null,
-                saveForFutureUse = (
-                    sheetViewModel.stripeIntent.value is SetupIntent ||
-                        (
-                            (sheetViewModel.stripeIntent.value as? PaymentIntent)
-                                ?.setupFutureUsage == StripeIntent.Usage.OffSession
-                            )
-                    ),
+                stripeIntent = requireNotNull(sheetViewModel.stripeIntent.value),
                 supportedPaymentMethodName = paymentMethod.name,
                 merchantName = sheetViewModel.merchantName,
                 amount = sheetViewModel.amount.value,
@@ -228,24 +225,47 @@ internal abstract class BaseAddPaymentMethodFragment(
         @VisibleForTesting
         internal fun getFormArguments(
             hasCustomer: Boolean,
-            saveForFutureUse: Boolean,
             supportedPaymentMethodName: String,
+            stripeIntent: StripeIntent,
             merchantName: String,
             amount: Amount? = null,
             billingAddress: PaymentSheet.BillingDetails? = null
         ): FormFragmentArguments {
+            // Has effect of setting off session on PIs (not SIs) and also impacts reopening
+            // the card
             var saveForFutureUseValue = true
+            // This will impact the setting of the off_session on confirm
             var saveForFutureUseVisible = true
-            if (!hasCustomer) {
-                saveForFutureUseValue = false
-                saveForFutureUseVisible = false
-            }
 
-            // The order is important here, even if there is a customer the save for future
-            // use value should be true to collect all the details
-            if (saveForFutureUse) {
+            val supportedPaymentMethod =
+                SupportedPaymentMethod.fromCode(supportedPaymentMethodName)
+
+            val isSetupIntent = stripeIntent is SetupIntent
+            val isPaymentIntentSetupFutureUsage = (stripeIntent as? PaymentIntent)?.setupFutureUsage
+            if (isSetupIntent ||
+                (isPaymentIntentSetupFutureUsage == StripeIntent.Usage.OnSession) ||
+                (isPaymentIntentSetupFutureUsage == StripeIntent.Usage.OffSession)
+            ) {
                 saveForFutureUseVisible = false
                 saveForFutureUseValue = true
+            } else if (stripeIntent is PaymentIntent &&
+                (!hasCustomer || (supportedPaymentMethod?.requiresMandate == true))
+            ) {
+                // If paymentMethodTypes contains payment method that does not support
+                // save for future should be false and unselected until future fix
+                saveForFutureUseValue = false
+                saveForFutureUseVisible = false
+            } else if (stripeIntent is PaymentIntent) {
+                // If the intent includes any payment method types that don't support save remove
+                // checkbox regardless of the payment method until future fix
+                stripeIntent.paymentMethodTypes.forEach {
+                    if (SupportedPaymentMethod.fromCode(it)
+                        ?.userRequestedConfirmSaveForFutureSupported == false
+                    ) {
+                        saveForFutureUseValue = false
+                        saveForFutureUseVisible = false
+                    }
+                }
             }
 
             return FormFragmentArguments(

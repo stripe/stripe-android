@@ -25,6 +25,7 @@ import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.payments.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.payments.core.injection.IOContext
 import com.stripe.android.payments.core.injection.Injectable
 import com.stripe.android.payments.core.injection.InjectorKey
@@ -82,15 +83,18 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     prefsRepository: PrefsRepository,
     private val paymentLauncherFactory: StripePaymentLauncherAssistedFactory,
     private val googlePayPaymentMethodLauncherFactory: GooglePayPaymentMethodLauncherFactory,
-    private val logger: Logger,
-    @IOContext workContext: CoroutineContext
+    logger: Logger,
+    @IOContext workContext: CoroutineContext,
+    @InjectorKey injectorKey: Int
 ) : BaseSheetViewModel<PaymentSheetViewModel.TransitionTarget>(
     application = application,
     config = args.config,
     eventReporter = eventReporter,
     customerRepository = customerRepository,
     prefsRepository = prefsRepository,
-    workContext = workContext
+    workContext = workContext,
+    logger = logger,
+    injectorKey = injectorKey
 ) {
     private val confirmParamsFactory = ConfirmStripeIntentParamsFactory.createFactory(
         args.clientSecret
@@ -226,6 +230,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                         PaymentMethod.Type.fromCode(it)
                     }.filter {
                         SupportedPaymentMethod.supportedSavedPaymentMethods.contains(it.code)
+                    }.filter {
+                        config?.allowsDelayedPaymentMethods == true || !it.hasDelayedSettlement()
                     }.let {
                         customerRepository.getPaymentMethods(
                             customerConfig,
@@ -478,8 +484,11 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         }
 
         override fun fallbackInitialize(arg: FallbackInitializeParam) {
-            DaggerPaymentSheetLauncherComponent.builder().application(arg.application).build()
-                .inject(this)
+            DaggerPaymentSheetLauncherComponent
+                .builder()
+                .application(arg.application)
+                .injectorKey(DUMMY_INJECTOR_KEY)
+                .build().inject(this)
         }
     }
 
