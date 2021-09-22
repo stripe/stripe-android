@@ -23,4 +23,5 @@ interface Injector {
 /**
  * Dummy key when an [Injector] is not available.
  */
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
 const val DUMMY_INJECTOR_KEY = -1
