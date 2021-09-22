@@ -87,7 +87,7 @@ internal class DefaultFlowController @Inject internal constructor(
     @Named(PRODUCT_USAGE) private val productUsage: Set<String>,
     private val googlePayInjectorProvider:
         @JvmSuppressWildcards (GooglePayPaymentMethodLauncher.Config) ->
-            GooglePayPaymentMethodLauncherViewModelInjector,
+        GooglePayPaymentMethodLauncherViewModelInjector,
 ) : PaymentSheet.FlowController, Injector {
     private val paymentOptionActivityLauncher: ActivityResultLauncher<PaymentOptionContract.Args>
     private var googlePayActivityLauncher:

@@ -90,7 +90,8 @@ internal abstract class FlowControllerModule {
             @Named(ENABLE_LOGGING) enableLogging: Boolean,
             @Named(PUBLISHABLE_KEY) publishableKeyProvider: () -> String,
             @Named(STRIPE_ACCOUNT_ID) stripeAccountIdProvider: () -> String?
-        ): (GooglePayPaymentMethodLauncher.Config) -> GooglePayPaymentMethodLauncherViewModelInjector =
+        ): (GooglePayPaymentMethodLauncher.Config)
+        -> GooglePayPaymentMethodLauncherViewModelInjector =
             { googlePayPaymentLauncherConfig ->
                 GooglePayPaymentMethodLauncherViewModelInjector(
                     DaggerGooglePayPaymentMethodLauncherComponent.builder()

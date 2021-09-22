@@ -601,7 +601,12 @@ internal class DefaultFlowControllerTest {
                     ),
                     currencyCode = "usd",
                     amount = 1099,
-                    transactionId = "pi_1F7J1aCRMbs6FrXfaJcvbxF6"
+                    transactionId = "pi_1F7J1aCRMbs6FrXfaJcvbxF6",
+                    injectionParams = GooglePayPaymentMethodLauncherContract.Args.InjectionParams(
+                        1,
+                        setOf("TestProductUsage"),
+                        false
+                    )
                 )
             }
         )
@@ -753,7 +758,8 @@ internal class DefaultFlowControllerTest {
         { PaymentConfiguration.getInstance(activity) },
         testDispatcher,
         ENABLE_LOGGING,
-        PRODUCT_USAGE
+        PRODUCT_USAGE,
+        { mock() }
     )
 
     private class FakeFlowControllerInitializer(
