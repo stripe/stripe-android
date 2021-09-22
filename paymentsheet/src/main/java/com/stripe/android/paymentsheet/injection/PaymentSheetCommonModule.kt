@@ -58,12 +58,12 @@ internal abstract class PaymentSheetCommonModule {
         @Provides
         @Named(PUBLISHABLE_KEY)
         fun providePublishableKey(paymentConfiguration: Lazy<PaymentConfiguration>):
-                () -> String = { paymentConfiguration.get().publishableKey }
+            () -> String = { paymentConfiguration.get().publishableKey }
 
         @Provides
         @Named(STRIPE_ACCOUNT_ID)
         fun provideStripeAccountId(paymentConfiguration: Lazy<PaymentConfiguration>):
-                () -> String? = { paymentConfiguration.get().stripeAccountId }
+            () -> String? = { paymentConfiguration.get().stripeAccountId }
 
         @Provides
         @Singleton
