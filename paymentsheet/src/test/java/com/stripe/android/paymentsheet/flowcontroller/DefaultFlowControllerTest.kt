@@ -24,6 +24,7 @@ import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.payments.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncher
@@ -589,6 +590,7 @@ internal class DefaultFlowControllerTest {
         flowController.onPaymentOptionResult(
             PaymentOptionResult.Succeeded(PaymentSelection.GooglePay)
         )
+        val injectorKey = WeakMapInjectorRegistry.nextKey() + 1
         flowController.confirm()
 
         verify(googlePayActivityLauncher).launch(
@@ -603,9 +605,9 @@ internal class DefaultFlowControllerTest {
                     amount = 1099,
                     transactionId = "pi_1F7J1aCRMbs6FrXfaJcvbxF6",
                     injectionParams = GooglePayPaymentMethodLauncherContract.Args.InjectionParams(
-                        1,
+                        injectorKey,
                         setOf("TestProductUsage"),
-                        false
+                        ENABLE_LOGGING
                     )
                 )
             }
