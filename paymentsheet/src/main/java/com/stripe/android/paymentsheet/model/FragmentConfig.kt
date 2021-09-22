@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.model
 import android.os.Parcelable
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.payments.core.injection.InjectorKey
 import com.stripe.android.paymentsheet.BaseAddPaymentMethodFragment
 import com.stripe.android.paymentsheet.BasePaymentMethodsListFragment
 import kotlinx.parcelize.Parcelize

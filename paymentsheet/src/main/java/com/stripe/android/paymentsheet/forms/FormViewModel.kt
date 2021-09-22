@@ -28,7 +28,6 @@ import javax.inject.Singleton
  * @param: layout - this contains the visual layout of the fields on the screen used by [Form]
  * to display the UI fields on screen.  It also informs us of the backing fields to be created.
  */
-@Singleton
 internal class FormViewModel @Inject internal constructor(
     layout: LayoutSpec,
     config: FormFragmentArguments,
@@ -49,13 +48,6 @@ internal class FormViewModel @Inject internal constructor(
         @Inject
         lateinit var subComponentBuilderProvider:
                 Provider<FormViewModelSubcomponent.Builder>
-
-        @Inject
-        lateinit var resourceRepository: ResourceRepository
-        @Inject
-        lateinit var layout: LayoutSpec
-        @Inject
-        lateinit var formArguments: FormFragmentArguments
 
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
@@ -81,7 +73,6 @@ internal class FormViewModel @Inject internal constructor(
             return subComponentBuilderProvider.get()
                 .formFragmentArguments(config)
                 .layout(layout)
-                .resources(application.resources)
                 .build().viewModel as T
         }
 

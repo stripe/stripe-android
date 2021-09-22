@@ -16,6 +16,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.payments.core.injection.InjectorKey
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.databinding.FragmentPaymentsheetAddPaymentMethodBinding
 import com.stripe.android.paymentsheet.forms.FormFieldValues
@@ -41,6 +42,9 @@ internal abstract class BaseAddPaymentMethodFragment(
     protected lateinit var addPaymentMethodHeader: TextView
 
     private lateinit var selectedPaymentMethod: SupportedPaymentMethod
+
+    @InjectorKey
+    private var injectorKey: Int = -1
 
     override fun onCreate(savedInstanceState: Bundle?) {
         // When the fragment is destroyed and recreated, the child fragment is re-instantiated

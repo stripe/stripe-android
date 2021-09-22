@@ -26,8 +26,7 @@ import javax.inject.Singleton
         PaymentSheetCommonModule::class,
         FlowControllerModule::class,
         GooglePayLauncherModule::class,
-        CoroutineContextModule::class,
-        FormViewModelModule::class
+        CoroutineContextModule::class
     ]
 )
 internal interface FlowControllerComponent {

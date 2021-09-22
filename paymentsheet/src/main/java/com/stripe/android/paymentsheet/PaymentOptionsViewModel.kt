@@ -9,6 +9,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.stripe.android.Logger
 import com.stripe.android.payments.core.injection.IOContext
 import com.stripe.android.payments.core.injection.Injectable
+import com.stripe.android.payments.core.injection.InjectorKey
 import com.stripe.android.payments.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.injection.DaggerPaymentOptionsViewModelFactoryComponent
