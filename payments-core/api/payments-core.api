@@ -5246,6 +5246,10 @@ public abstract interface class com/stripe/android/payments/core/injection/Injec
 public abstract interface annotation class com/stripe/android/payments/core/injection/InjectorKey : java/lang/annotation/Annotation {
 }
 
+public final class com/stripe/android/payments/core/injection/InjectorKt {
+	public static final field DUMMY_INJECTOR_KEY I
+}
+
 public abstract interface annotation class com/stripe/android/payments/core/injection/IntentAuthenticatorKey : java/lang/annotation/Annotation {
 	public abstract fun value ()Ljava/lang/Class;
 }

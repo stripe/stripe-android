@@ -19,3 +19,8 @@ interface Injector {
      */
     fun inject(injectable: Injectable<*>)
 }
+
+/**
+ * Dummy key when an [Injector] is not available.
+ */
+const val DUMMY_INJECTOR_KEY = -1

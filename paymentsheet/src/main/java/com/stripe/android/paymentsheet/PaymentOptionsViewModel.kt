@@ -9,6 +9,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.stripe.android.Logger
 import com.stripe.android.payments.core.injection.IOContext
 import com.stripe.android.payments.core.injection.Injectable
+import com.stripe.android.payments.core.injection.InjectorKey
 import com.stripe.android.payments.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.injection.DaggerPaymentOptionsViewModelFactoryComponent
@@ -29,7 +30,8 @@ internal class PaymentOptionsViewModel @Inject constructor(
     customerRepository: CustomerRepository,
     @IOContext workContext: CoroutineContext,
     application: Application,
-    logger: Logger
+    logger: Logger,
+    @InjectorKey injectorKey: Int
 ) : BaseSheetViewModel<PaymentOptionsViewModel.TransitionTarget>(
     config = args.config,
     prefsRepository = prefsRepositoryFactory(args.config?.customer),
@@ -37,7 +39,8 @@ internal class PaymentOptionsViewModel @Inject constructor(
     customerRepository = customerRepository,
     workContext = workContext,
     application = application,
-    logger = logger
+    logger = logger,
+    injectorKey = injectorKey
 ) {
     @VisibleForTesting
     internal val _paymentOptionResult = MutableLiveData<PaymentOptionResult>()

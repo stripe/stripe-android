@@ -25,8 +25,10 @@ import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.payments.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.payments.core.injection.IOContext
 import com.stripe.android.payments.core.injection.Injectable
+import com.stripe.android.payments.core.injection.InjectorKey
 import com.stripe.android.payments.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.payments.paymentlauncher.PaymentLauncher
 import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
@@ -82,7 +84,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     private val paymentLauncherFactory: StripePaymentLauncherAssistedFactory,
     private val googlePayPaymentMethodLauncherFactory: GooglePayPaymentMethodLauncherFactory,
     logger: Logger,
-    @IOContext workContext: CoroutineContext
+    @IOContext workContext: CoroutineContext,
+    @InjectorKey injectorKey: Int
 ) : BaseSheetViewModel<PaymentSheetViewModel.TransitionTarget>(
     application = application,
     config = args.config,
@@ -90,7 +93,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     customerRepository = customerRepository,
     prefsRepository = prefsRepository,
     workContext = workContext,
-    logger = logger
+    logger = logger,
+    injectorKey = injectorKey
 ) {
     private val confirmParamsFactory = ConfirmStripeIntentParamsFactory.createFactory(
         args.clientSecret
@@ -480,8 +484,11 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         }
 
         override fun fallbackInitialize(arg: FallbackInitializeParam) {
-            DaggerPaymentSheetLauncherComponent.builder().application(arg.application).build()
-                .inject(this)
+            DaggerPaymentSheetLauncherComponent
+                .builder()
+                .application(arg.application)
+                .injectorKey(DUMMY_INJECTOR_KEY)
+                .build().inject(this)
         }
     }
 
