@@ -4,7 +4,7 @@ import android.content.Context
 import androidx.activity.result.ActivityResultCaller
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModelStoreOwner
-import com.stripe.android.googlepaylauncher.GooglePayLauncherModule
+import com.stripe.android.googlepaylauncher.injection.GooglePayLauncherModule
 import com.stripe.android.payments.core.injection.CoroutineContextModule
 import com.stripe.android.payments.core.injection.InjectorKey
 import com.stripe.android.payments.core.injection.StripeRepositoryModule

@@ -1,25 +1,43 @@
 package com.stripe.android.googlepaylauncher
 
+import android.content.Context
 import android.os.Parcelable
 import androidx.activity.ComponentActivity
+import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.IntDef
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import com.stripe.android.BuildConfig
+import com.stripe.android.Logger
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher.Result
+import com.stripe.android.googlepaylauncher.injection.DaggerGooglePayPaymentMethodLauncherComponent
+import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLauncherViewModelInjector
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networking.AnalyticsEvent
 import com.stripe.android.networking.AnalyticsRequestExecutor
 import com.stripe.android.networking.AnalyticsRequestFactory
 import com.stripe.android.networking.DefaultAnalyticsRequestExecutor
+import com.stripe.android.networking.StripeApiRepository
+import com.stripe.android.networking.StripeRepository
+import com.stripe.android.payments.core.injection.ENABLE_LOGGING
+import com.stripe.android.payments.core.injection.IOContext
+import com.stripe.android.payments.core.injection.InjectorKey
+import com.stripe.android.payments.core.injection.PRODUCT_USAGE
+import com.stripe.android.payments.core.injection.PUBLISHABLE_KEY
+import com.stripe.android.payments.core.injection.STRIPE_ACCOUNT_ID
+import com.stripe.android.payments.core.injection.WeakMapInjectorRegistry
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
 import java.util.Locale
+import javax.inject.Named
+import kotlin.coroutines.CoroutineContext
 
 /**
  * A drop-in class that presents a Google Pay sheet to collect a customer's payment details.
@@ -35,11 +53,32 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
     @Assisted private val config: Config,
     @Assisted private val readyCallback: ReadyCallback,
     @Assisted private val activityResultLauncher: ActivityResultLauncher<GooglePayPaymentMethodLauncherContract.Args>,
+    private val context: Context,
     private val googlePayRepositoryFactory: (GooglePayEnvironment) -> GooglePayRepository,
-    analyticsRequestFactory: AnalyticsRequestFactory,
-    analyticsRequestExecutor: AnalyticsRequestExecutor
+    @Named(PRODUCT_USAGE) private val productUsage: Set<String>,
+    @Named(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String,
+    @Named(STRIPE_ACCOUNT_ID) private val stripeAccountIdProvider: () -> String?,
+    @Named(ENABLE_LOGGING) private val enableLogging: Boolean = BuildConfig.DEBUG,
+    @IOContext private val ioContext: CoroutineContext = Dispatchers.IO,
+    private val analyticsRequestFactory: AnalyticsRequestFactory = AnalyticsRequestFactory(
+        context,
+        PaymentConfiguration.getInstance(context).publishableKey,
+        setOf(PRODUCT_USAGE_TOKEN)
+    ),
+    analyticsRequestExecutor: AnalyticsRequestExecutor = DefaultAnalyticsRequestExecutor(),
+    private val stripeRepository: StripeRepository = StripeApiRepository(
+        context,
+        publishableKeyProvider,
+        logger = Logger.getInstance(enableLogging),
+        workContext = ioContext,
+        productUsageTokens = setOf(PRODUCT_USAGE_TOKEN),
+        analyticsRequestFactory = analyticsRequestFactory
+    )
 ) {
     private var isReady = false
+
+    @InjectorKey
+    private val injectorKey: Int = WeakMapInjectorRegistry.nextKey()
 
     /**
      * Constructor to be used when launching [GooglePayPaymentMethodLauncher] from an Activity.
@@ -58,28 +97,12 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
         readyCallback: ReadyCallback,
         resultCallback: ResultCallback
     ) : this(
+        activity,
         activity.lifecycleScope,
+        activity,
         config,
         readyCallback,
-        activity.registerForActivityResult(
-            GooglePayPaymentMethodLauncherContract()
-        ) {
-            resultCallback.onResult(it)
-        },
-        googlePayRepositoryFactory = {
-            DefaultGooglePayRepository(
-                activity.application,
-                config.environment,
-                config.billingAddressConfig.convert(),
-                config.existingPaymentMethodRequired
-            )
-        },
-        AnalyticsRequestFactory(
-            activity,
-            PaymentConfiguration.getInstance(activity).publishableKey,
-            setOf(PRODUCT_USAGE)
-        ),
-        DefaultAnalyticsRequestExecutor()
+        resultCallback
     )
 
     /**
@@ -99,28 +122,42 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
         readyCallback: ReadyCallback,
         resultCallback: ResultCallback
     ) : this(
+        fragment.requireContext(),
         fragment.viewLifecycleOwner.lifecycleScope,
+        fragment,
         config,
         readyCallback,
-        fragment.registerForActivityResult(
+        resultCallback
+    )
+
+    private constructor (
+        context: Context,
+        lifecycleScope: CoroutineScope,
+        activityResultCaller: ActivityResultCaller,
+        config: Config,
+        readyCallback: ReadyCallback,
+        resultCallback: ResultCallback
+    ) : this(
+        lifecycleScope,
+        config,
+        readyCallback,
+        activityResultCaller.registerForActivityResult(
             GooglePayPaymentMethodLauncherContract()
         ) {
             resultCallback.onResult(it)
         },
+        context,
         googlePayRepositoryFactory = {
             DefaultGooglePayRepository(
-                fragment.requireActivity().application,
+                context,
                 config.environment,
                 config.billingAddressConfig.convert(),
                 config.existingPaymentMethodRequired
             )
         },
-        AnalyticsRequestFactory(
-            fragment.requireContext(),
-            PaymentConfiguration.getInstance(fragment.requireContext()).publishableKey,
-            setOf(PRODUCT_USAGE)
-        ),
-        DefaultAnalyticsRequestExecutor()
+        productUsage = setOf(PRODUCT_USAGE_TOKEN),
+        publishableKeyProvider = { PaymentConfiguration.getInstance(context).publishableKey },
+        stripeAccountIdProvider = { PaymentConfiguration.getInstance(context).stripeAccountId }
     )
 
     init {
@@ -161,12 +198,33 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
             "present() may only be called when Google Pay is available on this device."
         }
 
+        WeakMapInjectorRegistry.register(
+            GooglePayPaymentMethodLauncherViewModelInjector(
+                DaggerGooglePayPaymentMethodLauncherComponent.builder()
+                    .context(context)
+                    .ioContext(ioContext)
+                    .analyticsRequestFactory(analyticsRequestFactory)
+                    .stripeRepository(stripeRepository)
+                    .googlePayConfig(config)
+                    .enableLogging(enableLogging)
+                    .publishableKeyProvider(publishableKeyProvider)
+                    .stripeAccountIdProvider(stripeAccountIdProvider)
+                    .build()
+            ),
+            injectorKey
+        )
+
         activityResultLauncher.launch(
             GooglePayPaymentMethodLauncherContract.Args(
                 config = config,
                 currencyCode = currencyCode,
                 amount = amount,
-                transactionId = transactionId
+                transactionId = transactionId,
+                injectionParams = GooglePayPaymentMethodLauncherContract.Args.InjectionParams(
+                    injectorKey,
+                    productUsage,
+                    enableLogging
+                )
             )
         )
     }
@@ -279,7 +337,7 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
     annotation class ErrorCode
 
     companion object {
-        internal const val PRODUCT_USAGE = "GooglePayPaymentMethodLauncher"
+        internal const val PRODUCT_USAGE_TOKEN = "GooglePayPaymentMethodLauncher"
 
         // Generic internal error
         const val INTERNAL_ERROR = 1

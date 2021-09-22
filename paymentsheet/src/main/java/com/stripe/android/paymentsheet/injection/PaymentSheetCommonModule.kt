@@ -6,6 +6,7 @@ import com.stripe.android.Logger
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.payments.core.injection.ENABLE_LOGGING
 import com.stripe.android.payments.core.injection.PUBLISHABLE_KEY
+import com.stripe.android.payments.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.paymentsheet.BuildConfig
 import com.stripe.android.paymentsheet.analytics.DefaultDeviceIdRepository
 import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
@@ -56,8 +57,14 @@ internal abstract class PaymentSheetCommonModule {
 
         @Provides
         @Named(PUBLISHABLE_KEY)
-        fun providePublishableKey(paymentConfiguration: PaymentConfiguration): () -> String {
-            return { paymentConfiguration.publishableKey }
+        fun providePublishableKey(paymentConfiguration: Lazy<PaymentConfiguration>): () -> String {
+            return { paymentConfiguration.get().publishableKey }
+        }
+
+        @Provides
+        @Named(STRIPE_ACCOUNT_ID)
+        fun provideStripeAccountId(paymentConfiguration: Lazy<PaymentConfiguration>): () -> String? {
+            return { paymentConfiguration.get().stripeAccountId }
         }
 
         @Provides

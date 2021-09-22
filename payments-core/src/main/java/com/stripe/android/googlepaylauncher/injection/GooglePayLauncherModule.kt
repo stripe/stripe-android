@@ -1,8 +1,11 @@
-package com.stripe.android.googlepaylauncher
+package com.stripe.android.googlepaylauncher.injection
 
 import android.content.Context
 import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.Logger
+import com.stripe.android.googlepaylauncher.DefaultGooglePayRepository
+import com.stripe.android.googlepaylauncher.GooglePayEnvironment
+import com.stripe.android.googlepaylauncher.GooglePayRepository
 import dagger.Module
 import dagger.Provides
 import javax.inject.Singleton

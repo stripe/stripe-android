@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Parcelable
 import androidx.activity.result.contract.ActivityResultContract
+import androidx.annotation.RestrictTo
 import androidx.core.os.bundleOf
 import com.stripe.android.model.PaymentMethod
 import kotlinx.parcelize.Parcelize
@@ -50,17 +51,20 @@ class GooglePayPaymentMethodLauncherContract :
      *     This field is required when you send callbacks to the Google Transaction Events API.
      */
     @Parcelize
-    data class Args(
+    data class Args @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) constructor(
         internal val config: GooglePayPaymentMethodLauncher.Config,
         internal val currencyCode: String,
         internal val amount: Int,
         internal val transactionId: String? = null,
+        internal val injectionParams: InjectionParams? = null
     ) : Parcelable {
+        @JvmOverloads
         constructor(
             config: GooglePayPaymentMethodLauncher.Config,
             currencyCode: String,
-            amount: Int
-        ) : this(config, currencyCode, amount, null)
+            amount: Int,
+            transactionId: String? = null
+        ) : this(config, currencyCode, amount, transactionId, null)
 
         internal fun toBundle() = bundleOf(EXTRA_ARGS to this)
 
@@ -71,6 +75,14 @@ class GooglePayPaymentMethodLauncherContract :
                 return intent.getParcelableExtra(EXTRA_ARGS)
             }
         }
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @Parcelize
+        data class InjectionParams(
+            val injectorKey: Int,
+            val productUsage: Set<String>,
+            val enableLogging: Boolean
+        ) : Parcelable
     }
 
     internal companion object {
