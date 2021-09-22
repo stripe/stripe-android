@@ -172,8 +172,6 @@ internal class GooglePayPaymentMethodLauncherViewModel(
             modelClass: Class<T>,
             handle: SavedStateHandle
         ): T {
-            Debug.waitForDebugger()
-
             val enableLogging = args.injectionParams?.enableLogging ?: false
             val logger = Logger.getInstance(enableLogging)
             val config = PaymentConfiguration.getInstance(application)
