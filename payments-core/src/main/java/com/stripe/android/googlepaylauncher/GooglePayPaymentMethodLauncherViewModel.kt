@@ -2,7 +2,6 @@ package com.stripe.android.googlepaylauncher
 
 import android.app.Application
 import android.os.Bundle
-import android.os.Debug
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.AbstractSavedStateViewModelFactory
 import androidx.lifecycle.MutableLiveData
@@ -172,8 +171,6 @@ internal class GooglePayPaymentMethodLauncherViewModel(
             modelClass: Class<T>,
             handle: SavedStateHandle
         ): T {
-            Debug.waitForDebugger()
-
             val enableLogging = args.injectionParams?.enableLogging ?: false
             val logger = Logger.getInstance(enableLogging)
             val config = PaymentConfiguration.getInstance(application)
