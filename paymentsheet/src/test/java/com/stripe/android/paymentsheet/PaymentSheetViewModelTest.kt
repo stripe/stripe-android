@@ -884,24 +884,24 @@ internal class PaymentSheetViewModelTest {
     @Test
     fun `getSupportedPaymentMethods() filters payment methods with delayed settlement`() {
         val viewModel = createViewModel()
-        viewModel.setStripeIntent(
-            PAYMENT_INTENT.copy(
-                paymentMethodTypes = listOf(
-                    PaymentMethod.Type.Card.code,
-                    PaymentMethod.Type.Ideal.code,
-                    PaymentMethod.Type.SepaDebit.code,
-                    PaymentMethod.Type.Eps.code,
-                    PaymentMethod.Type.Sofort.code
+
+        assertThat(
+            viewModel.getSupportedPaymentMethods(
+                PAYMENT_INTENT.copy(
+                    paymentMethodTypes = listOf(
+                        PaymentMethod.Type.Card.code,
+                        PaymentMethod.Type.Ideal.code,
+                        PaymentMethod.Type.SepaDebit.code,
+                        PaymentMethod.Type.Eps.code,
+                        PaymentMethod.Type.Sofort.code
+                    )
                 )
             )
+        ).containsExactly(
+            SupportedPaymentMethod.Card,
+            SupportedPaymentMethod.Ideal,
+            SupportedPaymentMethod.Eps
         )
-
-        assertThat(viewModel.getSupportedPaymentMethods())
-            .containsExactly(
-                SupportedPaymentMethod.Card,
-                SupportedPaymentMethod.Ideal,
-                SupportedPaymentMethod.Eps
-            )
     }
 
     @Ignore("Disabled until more payment methods are supported")
@@ -914,26 +914,26 @@ internal class PaymentSheetViewModelTest {
                 )
             )
         )
-        viewModel.setStripeIntent(
-            PAYMENT_INTENT.copy(
-                paymentMethodTypes = listOf(
-                    PaymentMethod.Type.Card.code,
-                    PaymentMethod.Type.Ideal.code,
-                    PaymentMethod.Type.SepaDebit.code,
-                    PaymentMethod.Type.Eps.code,
-                    PaymentMethod.Type.Sofort.code
+
+        assertThat(
+            viewModel.getSupportedPaymentMethods(
+                PAYMENT_INTENT.copy(
+                    paymentMethodTypes = listOf(
+                        PaymentMethod.Type.Card.code,
+                        PaymentMethod.Type.Ideal.code,
+                        PaymentMethod.Type.SepaDebit.code,
+                        PaymentMethod.Type.Eps.code,
+                        PaymentMethod.Type.Sofort.code
+                    )
                 )
             )
+        ).containsExactly(
+            SupportedPaymentMethod.Card,
+            SupportedPaymentMethod.Ideal,
+            SupportedPaymentMethod.SepaDebit,
+            SupportedPaymentMethod.Eps,
+            SupportedPaymentMethod.Sofort
         )
-
-        assertThat(viewModel.getSupportedPaymentMethods())
-            .containsExactly(
-                SupportedPaymentMethod.Card,
-                SupportedPaymentMethod.Ideal,
-                SupportedPaymentMethod.SepaDebit,
-                SupportedPaymentMethod.Eps,
-                SupportedPaymentMethod.Sofort
-            )
     }
 
     private fun createViewModel(

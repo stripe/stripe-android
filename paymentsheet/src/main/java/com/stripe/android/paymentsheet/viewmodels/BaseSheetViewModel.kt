@@ -210,7 +210,8 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
         }
     }
 
-    private fun getSupportedPaymentMethods(
+    @VisibleForTesting
+    internal fun getSupportedPaymentMethods(
         stripeIntentParameter: StripeIntent?
     ): List<SupportedPaymentMethod> {
         stripeIntentParameter?.let { stripeIntent ->
