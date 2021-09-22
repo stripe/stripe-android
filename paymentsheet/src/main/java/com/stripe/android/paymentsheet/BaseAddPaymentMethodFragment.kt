@@ -241,8 +241,8 @@ internal abstract class BaseAddPaymentMethodFragment(
             ) {
                 allowUserInitiatedReuse = false
                 isReusable = true
-            } else if (stripeIntent is PaymentIntent
-                && (!hasCustomer || supportedPaymentMethod.type.requiresMandate)
+            } else if (stripeIntent is PaymentIntent &&
+                (!hasCustomer || supportedPaymentMethod.type.requiresMandate)
             ) {
                 // If paymentMethodTypes contains payment method that does not support
                 // save for future should be false and unselected until future fix
@@ -253,7 +253,7 @@ internal abstract class BaseAddPaymentMethodFragment(
                 // checkbox regardless of the payment method until future fix
                 stripeIntent.paymentMethodTypes.forEach {
                     if (SupportedPaymentMethod.fromCode(it)
-                            ?.userRequestedConfirmSaveForFutureSupported == false
+                        ?.userRequestedConfirmSaveForFutureSupported == false
                     ) {
                         isReusable = false
                         allowUserInitiatedReuse = false
