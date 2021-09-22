@@ -15,7 +15,7 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContract
-import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLauncherViewModelInjector
+import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLauncherFactory
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.PaymentIntent
@@ -85,9 +85,7 @@ internal class DefaultFlowController @Inject internal constructor(
     @UIContext private val uiContext: CoroutineContext,
     @Named(ENABLE_LOGGING) private val enableLogging: Boolean,
     @Named(PRODUCT_USAGE) private val productUsage: Set<String>,
-    private val googlePayInjectorProvider:
-        @JvmSuppressWildcards (GooglePayPaymentMethodLauncher.Config) ->
-        GooglePayPaymentMethodLauncherViewModelInjector,
+    private val googlePayPaymentMethodLauncherFactory: GooglePayPaymentMethodLauncherFactory,
 ) : PaymentSheet.FlowController, Injector {
     private val paymentOptionActivityLauncher: ActivityResultLauncher<PaymentOptionContract.Args>
     private var googlePayActivityLauncher:
@@ -412,25 +410,17 @@ internal class DefaultFlowController @Inject internal constructor(
             merchantName = config.merchantDisplayName
         )
 
-        val injectorKey = WeakMapInjectorRegistry.nextKey()
-        WeakMapInjectorRegistry.register(
-            googlePayInjectorProvider(googlePayPaymentLauncherConfig),
-            injectorKey
-        )
-
-        googlePayActivityLauncher.launch(
-            GooglePayPaymentMethodLauncherContract.Args(
-                config = googlePayPaymentLauncherConfig,
-                currencyCode = (initData.stripeIntent as? PaymentIntent)?.currency
-                    ?: googlePayConfig.currencyCode.orEmpty(),
-                amount = (initData.stripeIntent as? PaymentIntent)?.amount?.toInt() ?: 0,
-                transactionId = initData.stripeIntent.id,
-                injectionParams = GooglePayPaymentMethodLauncherContract.Args.InjectionParams(
-                    injectorKey,
-                    productUsage,
-                    enableLogging
-                )
-            )
+        googlePayPaymentMethodLauncherFactory.create(
+            lifecycleScope = lifecycleScope,
+            config = googlePayPaymentLauncherConfig,
+            readyCallback = {},
+            activityResultLauncher = googlePayActivityLauncher,
+            skipReadyCheck = true
+        ).present(
+            currencyCode = (initData.stripeIntent as? PaymentIntent)?.currency
+                ?: googlePayConfig.currencyCode.orEmpty(),
+            amount = (initData.stripeIntent as? PaymentIntent)?.amount?.toInt() ?: 0,
+            transactionId = initData.stripeIntent.id
         )
     }
 

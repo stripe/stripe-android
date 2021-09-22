@@ -14,6 +14,7 @@ interface GooglePayPaymentMethodLauncherFactory {
         lifecycleScope: CoroutineScope,
         config: GooglePayPaymentMethodLauncher.Config,
         readyCallback: GooglePayPaymentMethodLauncher.ReadyCallback,
-        activityResultLauncher: ActivityResultLauncher<GooglePayPaymentMethodLauncherContract.Args>
+        activityResultLauncher: ActivityResultLauncher<GooglePayPaymentMethodLauncherContract.Args>,
+        skipReadyCheck: Boolean = false
     ): GooglePayPaymentMethodLauncher
 }

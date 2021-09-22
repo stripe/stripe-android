@@ -13,7 +13,6 @@ import com.stripe.android.Logger
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher.Result
 import com.stripe.android.googlepaylauncher.injection.DaggerGooglePayPaymentMethodLauncherComponent
-import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLauncherViewModelInjector
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networking.AnalyticsEvent
 import com.stripe.android.networking.AnalyticsRequestExecutor
@@ -23,6 +22,8 @@ import com.stripe.android.networking.StripeApiRepository
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.core.injection.ENABLE_LOGGING
 import com.stripe.android.payments.core.injection.IOContext
+import com.stripe.android.payments.core.injection.Injectable
+import com.stripe.android.payments.core.injection.Injector
 import com.stripe.android.payments.core.injection.InjectorKey
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.core.injection.PUBLISHABLE_KEY
@@ -53,6 +54,7 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
     @Assisted private val config: Config,
     @Assisted private val readyCallback: ReadyCallback,
     @Assisted private val activityResultLauncher: ActivityResultLauncher<GooglePayPaymentMethodLauncherContract.Args>,
+    @Assisted private val skipReadyCheck: Boolean,
     private val context: Context,
     private val googlePayRepositoryFactory: (GooglePayEnvironment) -> GooglePayRepository,
     @Named(PRODUCT_USAGE) private val productUsage: Set<String>,
@@ -66,7 +68,7 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
         setOf(PRODUCT_USAGE_TOKEN)
     ),
     analyticsRequestExecutor: AnalyticsRequestExecutor = DefaultAnalyticsRequestExecutor(),
-    private val stripeRepository: StripeRepository = StripeApiRepository(
+    stripeRepository: StripeRepository = StripeApiRepository(
         context,
         publishableKeyProvider,
         logger = Logger.getInstance(enableLogging),
@@ -77,8 +79,32 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
 ) {
     private var isReady = false
 
+    private val launcherComponent = DaggerGooglePayPaymentMethodLauncherComponent.builder()
+        .context(context)
+        .ioContext(ioContext)
+        .analyticsRequestFactory(analyticsRequestFactory)
+        .stripeRepository(stripeRepository)
+        .googlePayConfig(config)
+        .enableLogging(enableLogging)
+        .publishableKeyProvider(publishableKeyProvider)
+        .stripeAccountIdProvider(stripeAccountIdProvider)
+        .build()
+
     @InjectorKey
     private val injectorKey: Int = WeakMapInjectorRegistry.nextKey()
+
+    private val injector = object : Injector {
+        override fun inject(injectable: Injectable<*>) {
+            when (injectable) {
+                is GooglePayPaymentMethodLauncherViewModel.Factory -> {
+                    launcherComponent.inject(injectable)
+                }
+                else -> {
+                    throw IllegalArgumentException("invalid Injectable $injectable requested in $this")
+                }
+            }
+        }
+    }
 
     /**
      * Constructor to be used when launching [GooglePayPaymentMethodLauncher] from an Activity.
@@ -146,6 +172,7 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
         ) {
             resultCallback.onResult(it)
         },
+        false,
         context,
         googlePayRepositoryFactory = {
             DefaultGooglePayRepository(
@@ -161,17 +188,21 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
     )
 
     init {
+        WeakMapInjectorRegistry.register(injector, injectorKey)
+
         analyticsRequestExecutor.executeAsync(
             analyticsRequestFactory.createRequest(AnalyticsEvent.GooglePayPaymentMethodLauncherInit)
         )
 
-        lifecycleScope.launch {
-            val repository = googlePayRepositoryFactory(config.environment)
-            readyCallback.onReady(
-                repository.isReady().first().also {
-                    isReady = it
-                }
-            )
+        if (!skipReadyCheck) {
+            lifecycleScope.launch {
+                val repository = googlePayRepositoryFactory(config.environment)
+                readyCallback.onReady(
+                    repository.isReady().first().also {
+                        isReady = it
+                    }
+                )
+            }
         }
     }
 
@@ -194,25 +225,9 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
         amount: Int = 0,
         transactionId: String? = null
     ) {
-        check(isReady) {
+        check(skipReadyCheck || isReady) {
             "present() may only be called when Google Pay is available on this device."
         }
-
-        WeakMapInjectorRegistry.register(
-            GooglePayPaymentMethodLauncherViewModelInjector(
-                DaggerGooglePayPaymentMethodLauncherComponent.builder()
-                    .context(context)
-                    .ioContext(ioContext)
-                    .analyticsRequestFactory(analyticsRequestFactory)
-                    .stripeRepository(stripeRepository)
-                    .googlePayConfig(config)
-                    .enableLogging(enableLogging)
-                    .publishableKeyProvider(publishableKeyProvider)
-                    .stripeAccountIdProvider(stripeAccountIdProvider)
-                    .build()
-            ),
-            injectorKey
-        )
 
         activityResultLauncher.launch(
             GooglePayPaymentMethodLauncherContract.Args(
@@ -223,7 +238,9 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
                 injectionParams = GooglePayPaymentMethodLauncherContract.Args.InjectionParams(
                     injectorKey,
                     productUsage,
-                    enableLogging
+                    enableLogging,
+                    publishableKeyProvider(),
+                    stripeAccountIdProvider()
                 )
             )
         )

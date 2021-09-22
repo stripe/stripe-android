@@ -2,7 +2,6 @@ package com.stripe.android.googlepaylauncher
 
 import android.app.Application
 import android.os.Bundle
-import android.os.Debug
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.AbstractSavedStateViewModelFactory
 import androidx.lifecycle.MutableLiveData
@@ -149,13 +148,8 @@ internal class GooglePayPaymentMethodLauncherViewModel @Inject constructor(
             modelClass: Class<T>,
             savedStateHandle: SavedStateHandle
         ): T {
-            Debug.waitForDebugger()
-
             val enableLogging = args.injectionParams?.enableLogging ?: false
             val logger = Logger.getInstance(enableLogging)
-            val config = PaymentConfiguration.getInstance(application)
-            val publishableKey = config.publishableKey
-            val stripeAccountId = config.stripeAccountId
 
             args.injectionParams?.let { injectionParams ->
                 WeakMapInjectorRegistry.retrieve(injectionParams.injectorKey)?.let { injector ->
@@ -175,8 +169,13 @@ internal class GooglePayPaymentMethodLauncherViewModel @Inject constructor(
                     FallbackInjectionParams(
                         application,
                         enableLogging,
-                        publishableKey,
-                        stripeAccountId,
+                        args.injectionParams?.publishableKey
+                            ?: PaymentConfiguration.getInstance(application).publishableKey,
+                        if (args.injectionParams != null) {
+                            args.injectionParams.stripeAccountId
+                        } else {
+                            PaymentConfiguration.getInstance(application).stripeAccountId
+                        },
                         args.injectionParams?.productUsage
                             ?: setOf(GooglePayPaymentMethodLauncher.PRODUCT_USAGE_TOKEN)
                     )

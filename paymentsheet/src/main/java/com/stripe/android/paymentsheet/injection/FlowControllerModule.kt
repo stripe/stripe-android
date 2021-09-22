@@ -3,16 +3,8 @@ package com.stripe.android.paymentsheet.injection
 import android.content.Context
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
-import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
-import com.stripe.android.googlepaylauncher.injection.DaggerGooglePayPaymentMethodLauncherComponent
-import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLauncherViewModelInjector
-import com.stripe.android.networking.AnalyticsRequestFactory
-import com.stripe.android.networking.StripeRepository
-import com.stripe.android.payments.core.injection.ENABLE_LOGGING
 import com.stripe.android.payments.core.injection.IOContext
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
-import com.stripe.android.payments.core.injection.PUBLISHABLE_KEY
-import com.stripe.android.payments.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.FlowController
@@ -79,32 +71,5 @@ internal abstract class FlowControllerModule {
         @Singleton
         fun provideViewModel(viewModelStoreOwner: ViewModelStoreOwner): FlowControllerViewModel =
             ViewModelProvider(viewModelStoreOwner)[FlowControllerViewModel::class.java]
-
-        @Provides
-        @Singleton
-        fun provideGooglePayPaymentMethodLauncherViewModelInjectorProvider(
-            context: Context,
-            @IOContext ioContext: CoroutineContext,
-            analyticsRequestFactory: AnalyticsRequestFactory,
-            stripeRepository: StripeRepository,
-            @Named(ENABLE_LOGGING) enableLogging: Boolean,
-            @Named(PUBLISHABLE_KEY) publishableKeyProvider: () -> String,
-            @Named(STRIPE_ACCOUNT_ID) stripeAccountIdProvider: () -> String?
-        ): (GooglePayPaymentMethodLauncher.Config)
-        -> GooglePayPaymentMethodLauncherViewModelInjector =
-            { googlePayPaymentLauncherConfig ->
-                GooglePayPaymentMethodLauncherViewModelInjector(
-                    DaggerGooglePayPaymentMethodLauncherComponent.builder()
-                        .context(context)
-                        .ioContext(ioContext)
-                        .analyticsRequestFactory(analyticsRequestFactory)
-                        .stripeRepository(stripeRepository)
-                        .googlePayConfig(googlePayPaymentLauncherConfig)
-                        .enableLogging(enableLogging)
-                        .publishableKeyProvider(publishableKeyProvider)
-                        .stripeAccountIdProvider(stripeAccountIdProvider)
-                        .build()
-                )
-            }
     }
 }
