@@ -63,6 +63,7 @@ import kotlinx.coroutines.test.TestCoroutineDispatcher;
 import static android.os.Looper.getMainLooper;
 import static com.google.common.truth.Truth.assertThat;
 import static com.stripe.android.utils.TestUtils.idleLooper;
+import static java.util.Collections.emptySet;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
@@ -1366,6 +1367,7 @@ public class StripeTest {
                 null,
                 new FakeLogger(),
                 workDispatcher,
+                emptySet(),
                 new DefaultApiRequestExecutor(workDispatcher),
                 analyticsRequestExecutor,
                 fraudDetectionDataRepository

@@ -28,6 +28,7 @@ import com.stripe.android.paymentsheet.ui.AnimationConstants
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import kotlinx.coroutines.launch
+import java.security.InvalidParameterException
 
 internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
     @VisibleForTesting
@@ -91,6 +92,15 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
             )
             finish()
             return
+        } else {
+            try {
+                starterArgs.config?.validate()
+                starterArgs.clientSecret.validate()
+            } catch (e: InvalidParameterException) {
+                setActivityResult(PaymentSheetResult.Failed(e))
+                finish()
+                return
+            }
         }
 
         viewModel.registerFromActivity(this)
