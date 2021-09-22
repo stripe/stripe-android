@@ -23,6 +23,7 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.StripeRepository
+import com.stripe.android.payments.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.payments.core.injection.Injectable
 import com.stripe.android.payments.core.injection.Injector
 import com.stripe.android.payments.core.injection.WeakMapInjectorRegistry
@@ -958,7 +959,8 @@ internal class PaymentSheetViewModelTest {
             mock(),
             mock(),
             Logger.noop(),
-            testDispatcher
+            testDispatcher,
+            DUMMY_INJECTOR_KEY
         )
     }
 

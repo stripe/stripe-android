@@ -14,6 +14,7 @@ import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.payments.core.injection.InjectorKey
 import com.stripe.android.paymentsheet.BasePaymentMethodsListFragment
 import com.stripe.android.paymentsheet.PaymentOptionsActivity
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -46,7 +47,8 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     protected val customerRepository: CustomerRepository,
     protected val prefsRepository: PrefsRepository,
     protected val workContext: CoroutineContext = Dispatchers.IO,
-    protected val logger: Logger
+    protected val logger: Logger,
+    @InjectorKey private val injectorKey: Int
 ) : AndroidViewModel(application) {
     internal val customerConfig = config?.customer
     internal val merchantName = config?.merchantDisplayName

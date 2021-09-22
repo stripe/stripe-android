@@ -11,6 +11,7 @@ import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures.DEFAULT_CARD
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.payments.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.payments.core.injection.Injectable
 import com.stripe.android.payments.core.injection.Injector
 import com.stripe.android.payments.core.injection.WeakMapInjectorRegistry
@@ -62,7 +63,8 @@ internal class PaymentOptionsViewModelTest {
         customerRepository = customerRepository,
         workContext = testDispatcher,
         application = ApplicationProvider.getApplicationContext(),
-        logger = Logger.noop()
+        logger = Logger.noop(),
+        injectorKey = DUMMY_INJECTOR_KEY
     )
 
     @BeforeTest
@@ -147,7 +149,8 @@ internal class PaymentOptionsViewModelTest {
             customerRepository = customerRepository,
             workContext = testDispatcher,
             application = ApplicationProvider.getApplicationContext(),
-            logger = Logger.noop()
+            logger = Logger.noop(),
+            injectorKey = DUMMY_INJECTOR_KEY
         )
 
         var transitionTarget: BaseSheetViewModel.Event<TransitionTarget?>? = null
@@ -175,7 +178,8 @@ internal class PaymentOptionsViewModelTest {
             customerRepository = customerRepository,
             workContext = testDispatcher,
             application = ApplicationProvider.getApplicationContext(),
-            logger = Logger.noop()
+            logger = Logger.noop(),
+            injectorKey = DUMMY_INJECTOR_KEY
         )
 
         val transitionTarget = mutableListOf<BaseSheetViewModel.Event<TransitionTarget?>>()
@@ -203,7 +207,8 @@ internal class PaymentOptionsViewModelTest {
             customerRepository = customerRepository,
             workContext = testDispatcher,
             application = ApplicationProvider.getApplicationContext(),
-            logger = Logger.noop()
+            logger = Logger.noop(),
+            injectorKey = DUMMY_INJECTOR_KEY
         )
 
         val transitionTarget = mutableListOf<BaseSheetViewModel.Event<TransitionTarget?>>()
