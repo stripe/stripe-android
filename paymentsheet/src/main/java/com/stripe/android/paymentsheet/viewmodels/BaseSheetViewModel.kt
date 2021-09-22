@@ -14,6 +14,7 @@ import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.payments.core.injection.InjectorKey
 import com.stripe.android.paymentsheet.BasePaymentMethodsListFragment
 import com.stripe.android.paymentsheet.PaymentOptionsActivity
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -46,7 +47,8 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     protected val customerRepository: CustomerRepository,
     protected val prefsRepository: PrefsRepository,
     protected val workContext: CoroutineContext = Dispatchers.IO,
-    protected val logger: Logger
+    protected val logger: Logger,
+    @InjectorKey private val injectorKey: Int
 ) : AndroidViewModel(application) {
     internal val customerConfig = config?.customer
     internal val merchantName = config?.merchantDisplayName
@@ -210,12 +212,16 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
         }
     }
 
-    private fun getSupportedPaymentMethods(
+    @VisibleForTesting
+    internal fun getSupportedPaymentMethods(
         stripeIntentParameter: StripeIntent?
     ): List<SupportedPaymentMethod> {
         stripeIntentParameter?.let { stripeIntent ->
             return stripeIntent.paymentMethodTypes.asSequence().mapNotNull {
                 SupportedPaymentMethod.fromCode(it)
+            }.filter {
+                config?.allowsDelayedPaymentMethods == true ||
+                    PaymentMethod.Type.fromCode(it.code)?.hasDelayedSettlement() == false
             }.filterNot {
                 // AfterpayClearpay requires a shipping address, filter it out if not provided
                 val excludeAfterPay = it == SupportedPaymentMethod.AfterpayClearpay &&

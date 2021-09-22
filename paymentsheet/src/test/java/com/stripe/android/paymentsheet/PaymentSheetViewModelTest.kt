@@ -23,6 +23,7 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.StripeRepository
+import com.stripe.android.payments.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.payments.core.injection.Injectable
 import com.stripe.android.payments.core.injection.Injector
 import com.stripe.android.payments.core.injection.WeakMapInjectorRegistry
@@ -117,6 +118,30 @@ internal class PaymentSheetViewModelTest {
         assertThat(paymentMethods)
             .containsExactly(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
     }
+
+    @Test
+    fun `when allowsDelayedPaymentMethods is false then delayed payment methods are filtered out`() =
+        runBlockingTest {
+            val customerRepository = mock<CustomerRepository>()
+            val viewModel = createViewModel(
+                customerRepository = customerRepository
+            )
+            viewModel.updatePaymentMethods(
+                PAYMENT_INTENT.copy(
+                    paymentMethodTypes = listOf(
+                        PaymentMethod.Type.Card.code,
+                        PaymentMethod.Type.SepaDebit.code,
+                        PaymentMethod.Type.AuBecsDebit.code
+                    )
+                )
+            )
+            verify(customerRepository).getPaymentMethods(
+                any(),
+                capture(paymentMethodTypeCaptor)
+            )
+            assertThat(paymentMethodTypeCaptor.value)
+                .containsExactly(PaymentMethod.Type.Card)
+        }
 
     @Test
     fun `updatePaymentMethods() with customer config and failing request should emit empty list`() =
@@ -856,6 +881,62 @@ internal class PaymentSheetViewModelTest {
         )
     }
 
+    @Ignore("Disabled until more payment methods are supported")
+    @Test
+    fun `getSupportedPaymentMethods() filters payment methods with delayed settlement`() {
+        val viewModel = createViewModel()
+
+        assertThat(
+            viewModel.getSupportedPaymentMethods(
+                PAYMENT_INTENT.copy(
+                    paymentMethodTypes = listOf(
+                        PaymentMethod.Type.Card.code,
+                        PaymentMethod.Type.Ideal.code,
+                        PaymentMethod.Type.SepaDebit.code,
+                        PaymentMethod.Type.Eps.code,
+                        PaymentMethod.Type.Sofort.code
+                    )
+                )
+            )
+        ).containsExactly(
+            SupportedPaymentMethod.Card,
+            SupportedPaymentMethod.Ideal,
+            SupportedPaymentMethod.Eps
+        )
+    }
+
+    @Ignore("Disabled until more payment methods are supported")
+    @Test
+    fun `getSupportedPaymentMethods() does not filter payment methods when supportsDelayedSettlement = true`() {
+        val viewModel = createViewModel(
+            args = ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
+                config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config?.copy(
+                    allowsDelayedPaymentMethods = true
+                )
+            )
+        )
+
+        assertThat(
+            viewModel.getSupportedPaymentMethods(
+                PAYMENT_INTENT.copy(
+                    paymentMethodTypes = listOf(
+                        PaymentMethod.Type.Card.code,
+                        PaymentMethod.Type.Ideal.code,
+                        PaymentMethod.Type.SepaDebit.code,
+                        PaymentMethod.Type.Eps.code,
+                        PaymentMethod.Type.Sofort.code
+                    )
+                )
+            )
+        ).containsExactly(
+            SupportedPaymentMethod.Card,
+            SupportedPaymentMethod.Ideal,
+            SupportedPaymentMethod.SepaDebit,
+            SupportedPaymentMethod.Eps,
+            SupportedPaymentMethod.Sofort
+        )
+    }
+
     private fun createViewModel(
         args: PaymentSheetContract.Args = ARGS_CUSTOMER_WITH_GOOGLEPAY,
         stripeIntentRepository: StripeIntentRepository = StripeIntentRepository.Static(
@@ -878,7 +959,8 @@ internal class PaymentSheetViewModelTest {
             mock(),
             mock(),
             Logger.noop(),
-            testDispatcher
+            testDispatcher,
+            DUMMY_INJECTOR_KEY
         )
     }
 
