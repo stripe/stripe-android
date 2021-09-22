@@ -27,7 +27,19 @@
                 android:id="@+id/toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="?colorSurface" />
+                android:background="?colorSurface">
+
+                <TextView
+                    android:id="@+id/livemode"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:padding="5dp"
+                    android:background="@drawable/stripe_paymentsheet_testmode_background"
+                    android:textColor="@color/stripe_paymentsheet_testmode_text"
+                    android:textStyle="bold"
+                    android:text="@string/stripe_paymentsheet_test_mode_indicator"/>
+
+            </com.google.android.material.appbar.MaterialToolbar>
 
         </com.google.android.material.appbar.AppBarLayout>
 

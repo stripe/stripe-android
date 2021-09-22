@@ -67,6 +67,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
     override val scrollView: ScrollView by lazy { viewBinding.scrollView }
     override val messageView: TextView by lazy { viewBinding.message }
     override val fragmentContainerParent: ViewGroup by lazy { viewBinding.fragmentContainerParent }
+    override val liveModeIndicator: TextView by lazy { viewBinding.livemode }
 
     private val currencyFormatter = CurrencyFormatter()
 

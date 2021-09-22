@@ -42,6 +42,9 @@
     <color name="stripe_paymentsheet_googlepay_divider_background">@android:color/white</color>
     <color name="stripe_paymentsheet_googlepay_divider_text">#99000000</color>
 
+    <color name="stripe_paymentsheet_testmode_background">#FFDE94</color>
+    <color name="stripe_paymentsheet_testmode_text">#A66912</color>
+
     <!-- CardFormView -->
 
 </resources>

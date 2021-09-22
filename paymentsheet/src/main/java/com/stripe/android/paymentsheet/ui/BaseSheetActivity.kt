@@ -4,6 +4,7 @@ import android.animation.LayoutTransition
 import android.content.pm.ActivityInfo
 import android.os.Build
 import android.os.Bundle
+import android.view.View
 import android.view.ViewGroup
 import android.widget.ScrollView
 import android.widget.TextView
@@ -29,6 +30,7 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
     abstract val toolbar: MaterialToolbar
     abstract val messageView: TextView
     abstract val fragmentContainerParent: ViewGroup
+    abstract val liveModeIndicator: TextView
 
     abstract fun setActivityResult(result: ResultType)
 
@@ -94,6 +96,10 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
         // Make `bottomSheet` clickable to prevent clicks on the bottom sheet from triggering
         // `rootView`'s click listener
         bottomSheet.isClickable = true
+
+        viewModel.liveMode.observe(this) { isLiveMode ->
+            liveModeIndicator.visibility = if (isLiveMode) View.GONE else View.VISIBLE
+        }
     }
 
     override fun finish() {
