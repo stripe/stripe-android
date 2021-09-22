@@ -20,6 +20,7 @@ import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.core.injection.Injectable
@@ -632,21 +633,89 @@ internal class PaymentSheetViewModelTest {
 
     @Test
     fun `when StripeIntent does not accept any of the supported payment methods should return error`() {
-        val viewModel = createViewModel(
-            stripeIntentRepository = StripeIntentRepository.Static(
-                PAYMENT_INTENT.copy(paymentMethodTypes = listOf("unsupported_payment_type"))
-            )
-        )
+
         var result: PaymentSheetResult? = null
         viewModel.paymentSheetResult.observeForever {
             result = it
         }
-        viewModel.fetchStripeIntent()
+        viewModel.setStripeIntent(
+            PAYMENT_INTENT.copy(paymentMethodTypes = listOf("unsupported_payment_type"))
+        )
         assertThat((result as? PaymentSheetResult.Failed)?.error?.message)
             .startsWith(
                 "None of the requested payment methods ([unsupported_payment_type]) " +
                     "match the supported payment types "
             )
+    }
+
+    @Ignore("Until card filter removed.")
+    fun `Verify supported payment methods exclude afterpay if no shipping`() {
+        viewModel.setStripeIntent(
+            PaymentIntentFixtures.PI_WITH_SHIPPING.copy(
+                paymentMethodTypes = listOf("afterpay_clearpay"),
+                shipping = null
+            )
+        )
+
+        assertThat(viewModel.supportedPaymentMethods.size).isEqualTo(0)
+
+        viewModel.setStripeIntent(
+            PaymentIntentFixtures.PI_WITH_SHIPPING.copy(
+                paymentMethodTypes = listOf("afterpay_clearpay")
+            )
+        )
+
+        assertThat(viewModel.supportedPaymentMethods.size).isEqualTo(1)
+        assertThat(viewModel.supportedPaymentMethods.first()).isEqualTo(
+            SupportedPaymentMethod.AfterpayClearpay
+        )
+    }
+
+    @Ignore("Until card filter removed.")
+    fun `Verify PI off_session excludes LPMs requiring mandate`() {
+
+        viewModel.setStripeIntent(
+            PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                setupFutureUsage = StripeIntent.Usage.OffSession,
+                paymentMethodTypes = listOf("sepa_debit"),
+            )
+        )
+
+        assertThat(viewModel.supportedPaymentMethods.size).isEqualTo(0)
+
+        viewModel.setStripeIntent(
+            PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                setupFutureUsage = StripeIntent.Usage.OneTime,
+                paymentMethodTypes = listOf("sepa_debit"),
+            )
+        )
+
+        assertThat(viewModel.supportedPaymentMethods.size).isEqualTo(1)
+        assertThat(viewModel.supportedPaymentMethods.first()).isEqualTo(
+            SupportedPaymentMethod.SepaDebit
+        )
+    }
+
+    @Ignore("Until card filter removed.")
+    fun `Verify SetupIntent excludes LPMs requiring mandate`() {
+        viewModel.setStripeIntent(
+            SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("sepa_debit"),
+            )
+        )
+
+        assertThat(viewModel.supportedPaymentMethods.size).isEqualTo(0)
+
+        viewModel.setStripeIntent(
+            PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("sepa_debit"),
+            )
+        )
+
+        assertThat(viewModel.supportedPaymentMethods.size).isEqualTo(1)
+        assertThat(viewModel.supportedPaymentMethods.first()).isEqualTo(
+            SupportedPaymentMethod.SepaDebit
+        )
     }
 
     @Test
