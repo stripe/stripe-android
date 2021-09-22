@@ -11,7 +11,9 @@ import dagger.Provides
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
-@Module
+@Module(
+    subcomponents = [PaymentOptionsViewModelSubcomponent::class]
+)
 internal class PaymentOptionsViewModelModule {
 
     @Provides
