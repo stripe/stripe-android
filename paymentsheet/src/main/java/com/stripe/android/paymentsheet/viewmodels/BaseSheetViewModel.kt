@@ -221,7 +221,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
                 SupportedPaymentMethod.fromCode(it)
             }.filter {
                 config?.allowsDelayedPaymentMethods == true ||
-                    PaymentMethod.Type.fromCode(it.code)?.hasDelayedSettlement() == false
+                    !it.type.hasDelayedSettlement()
             }.filterNot {
                 // AfterpayClearpay requires a shipping address, filter it out if not provided
                 val excludeAfterPay = it == SupportedPaymentMethod.AfterpayClearpay &&
