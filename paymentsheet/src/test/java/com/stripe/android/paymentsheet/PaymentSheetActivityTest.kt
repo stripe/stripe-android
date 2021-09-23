@@ -697,7 +697,7 @@ internal class PaymentSheetActivityTest {
             idleLooper()
 
             viewModel._liveMode.value = true
-            assertThat(activity.viewBinding.livemode.isVisible).isFalse()
+            assertThat(activity.viewBinding.testmode.isVisible).isFalse()
         }
     }
 
@@ -709,7 +709,7 @@ internal class PaymentSheetActivityTest {
             idleLooper()
 
             viewModel._liveMode.value = false
-            assertThat(activity.viewBinding.livemode.isVisible).isTrue()
+            assertThat(activity.viewBinding.testmode.isVisible).isTrue()
         }
     }
 

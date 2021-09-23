@@ -63,7 +63,7 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
     override val scrollView: ScrollView by lazy { viewBinding.scrollView }
     override val messageView: TextView by lazy { viewBinding.message }
     override val fragmentContainerParent: ViewGroup by lazy { viewBinding.fragmentContainerParent }
-    override val liveModeIndicator: TextView by lazy { viewBinding.livemode }
+    override val testModeIndicator: TextView by lazy { viewBinding.testmode }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

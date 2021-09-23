@@ -30,7 +30,7 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
     abstract val toolbar: MaterialToolbar
     abstract val messageView: TextView
     abstract val fragmentContainerParent: ViewGroup
-    abstract val liveModeIndicator: TextView
+    abstract val testModeIndicator: TextView
 
     abstract fun setActivityResult(result: ResultType)
 
@@ -98,7 +98,7 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
         bottomSheet.isClickable = true
 
         viewModel.liveMode.observe(this) { isLiveMode ->
-            liveModeIndicator.visibility = if (isLiveMode) View.GONE else View.VISIBLE
+            testModeIndicator.visibility = if (isLiveMode) View.GONE else View.VISIBLE
         }
     }
 
