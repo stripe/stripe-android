@@ -22,7 +22,9 @@ import javax.inject.Provider
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
-@Module
+@Module(
+    subcomponents = [PaymentOptionsViewModelSubcomponent::class]
+)
 internal abstract class FlowControllerModule {
     @Binds
     abstract fun bindsFlowControllerInitializer(

@@ -146,34 +146,159 @@ constructor(
         @JvmField val code: String,
         @JvmField val isReusable: Boolean,
         @JvmField val isVoucher: Boolean,
-        @JvmField val requiresMandate: Boolean
+        @JvmField val requiresMandate: Boolean,
+        private val hasDelayedSettlement: Boolean
     ) : Parcelable {
-        Card("card", isReusable = true, isVoucher = false, requiresMandate = false),
-        CardPresent("card_present", isReusable = false, isVoucher = false, requiresMandate = false),
-        Fpx("fpx", isReusable = false, isVoucher = false, requiresMandate = false),
-        Ideal("ideal", isReusable = false, isVoucher = false, requiresMandate = true),
-        SepaDebit("sepa_debit", isReusable = false, isVoucher = false, requiresMandate = true),
-        AuBecsDebit("au_becs_debit", isReusable = true, isVoucher = false, requiresMandate = true),
-        BacsDebit("bacs_debit", isReusable = true, isVoucher = false, requiresMandate = true),
-        Sofort("sofort", isReusable = false, isVoucher = false, requiresMandate = true),
-        Upi("upi", isReusable = false, isVoucher = false, requiresMandate = false),
-        P24("p24", isReusable = false, isVoucher = false, requiresMandate = false),
-        Bancontact("bancontact", isReusable = false, isVoucher = false, requiresMandate = true),
-        Giropay("giropay", isReusable = false, isVoucher = false, requiresMandate = false),
-        Eps("eps", isReusable = false, isVoucher = false, requiresMandate = true),
-        Oxxo("oxxo", isReusable = false, isVoucher = true, requiresMandate = false),
-        Alipay("alipay", isReusable = false, isVoucher = false, requiresMandate = false),
-        GrabPay("grabpay", isReusable = false, isVoucher = false, requiresMandate = false),
-        PayPal("paypal", isReusable = false, isVoucher = false, requiresMandate = false),
+        Card(
+            "card",
+            isReusable = true,
+            isVoucher = false,
+            requiresMandate = false,
+            hasDelayedSettlement = false
+        ),
+        CardPresent(
+            "card_present",
+            isReusable = false,
+            isVoucher = false,
+            requiresMandate = false,
+            hasDelayedSettlement = false
+        ),
+        Fpx(
+            "fpx",
+            isReusable = false,
+            isVoucher = false,
+            requiresMandate = false,
+            hasDelayedSettlement = false
+        ),
+        Ideal(
+            "ideal",
+            isReusable = false,
+            isVoucher = false,
+            requiresMandate = true,
+            hasDelayedSettlement = false
+        ),
+        SepaDebit(
+            "sepa_debit",
+            isReusable = false,
+            isVoucher = false,
+            requiresMandate = true,
+            hasDelayedSettlement = true
+        ),
+        AuBecsDebit(
+            "au_becs_debit",
+            isReusable = true,
+            isVoucher = false,
+            requiresMandate = true,
+            hasDelayedSettlement = true
+        ),
+        BacsDebit(
+            "bacs_debit",
+            isReusable = true,
+            isVoucher = false,
+            requiresMandate = true,
+            hasDelayedSettlement = true
+        ),
+        Sofort(
+            "sofort",
+            isReusable = false,
+            isVoucher = false,
+            requiresMandate = true,
+            hasDelayedSettlement = true
+        ),
+        Upi(
+            "upi",
+            isReusable = false,
+            isVoucher = false,
+            requiresMandate = false,
+            hasDelayedSettlement = false
+        ),
+        P24(
+            "p24",
+            isReusable = false,
+            isVoucher = false,
+            requiresMandate = false,
+            hasDelayedSettlement = false
+        ),
+        Bancontact(
+            "bancontact",
+            isReusable = false,
+            isVoucher = false,
+            requiresMandate = true,
+            hasDelayedSettlement = false
+        ),
+        Giropay(
+            "giropay",
+            isReusable = false,
+            isVoucher = false,
+            requiresMandate = false,
+            hasDelayedSettlement = false
+        ),
+        Eps(
+            "eps",
+            isReusable = false,
+            isVoucher = false,
+            requiresMandate = true,
+            hasDelayedSettlement = false
+        ),
+        Oxxo(
+            "oxxo",
+            isReusable = false,
+            isVoucher = true,
+            requiresMandate = false,
+            hasDelayedSettlement = false
+        ),
+        Alipay(
+            "alipay",
+            isReusable = false,
+            isVoucher = false,
+            requiresMandate = false,
+            hasDelayedSettlement = false
+        ),
+        GrabPay(
+            "grabpay",
+            isReusable = false,
+            isVoucher = false,
+            requiresMandate = false,
+            hasDelayedSettlement = false
+        ),
+        PayPal(
+            "paypal",
+            isReusable = false,
+            isVoucher = false,
+            requiresMandate = false,
+            hasDelayedSettlement = false
+        ),
         AfterpayClearpay(
             "afterpay_clearpay",
             isReusable = false,
             isVoucher = false,
-            requiresMandate = false
+            requiresMandate = false,
+            hasDelayedSettlement = false
         ),
-        Netbanking("netbanking", isReusable = false, isVoucher = false, requiresMandate = false),
-        Blik("blik", isReusable = false, isVoucher = false, requiresMandate = false),
-        WeChatPay("wechat_pay", isReusable = false, isVoucher = false, requiresMandate = false);
+        Netbanking(
+            "netbanking",
+            isReusable = false,
+            isVoucher = false,
+            requiresMandate = false,
+            hasDelayedSettlement = false
+        ),
+        Blik(
+            "blik",
+            isReusable = false,
+            isVoucher = false,
+            requiresMandate = false,
+            hasDelayedSettlement = false
+        ),
+        WeChatPay(
+            "wechat_pay",
+            isReusable = false,
+            isVoucher = false,
+            requiresMandate = false,
+            hasDelayedSettlement = false
+        );
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
+        fun hasDelayedSettlement(): Boolean = hasDelayedSettlement
 
         override fun toString(): String {
             return code

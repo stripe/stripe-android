@@ -21,11 +21,15 @@ internal class DefaultPaymentSheetLauncher(
     private val activityResultLauncher: ActivityResultLauncher<PaymentSheetContract.Args>,
     application: Application
 ) : PaymentSheetLauncher, Injector {
-    private val paymentSheetLauncherComponent: PaymentSheetLauncherComponent =
-        DaggerPaymentSheetLauncherComponent.builder().application(application).build()
-
     @InjectorKey
     private val injectorKey: Int = WeakMapInjectorRegistry.nextKey()
+
+    private val paymentSheetLauncherComponent: PaymentSheetLauncherComponent =
+        DaggerPaymentSheetLauncherComponent
+            .builder()
+            .application(application)
+            .injectorKey(injectorKey)
+            .build()
 
     init {
         WeakMapInjectorRegistry.register(this, injectorKey)
