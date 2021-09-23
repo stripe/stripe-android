@@ -111,6 +111,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
                 viewModel::onGooglePayResult
             )
         )
+        viewModel.initializeResourceRepository()
         viewModel.fetchStripeIntent()
 
         starterArgs.statusBarColor?.let {

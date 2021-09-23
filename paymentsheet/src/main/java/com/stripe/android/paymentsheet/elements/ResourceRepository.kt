@@ -12,8 +12,12 @@ internal class ResourceRepository @Inject internal constructor(
     internal val bankRepository: BankRepository,
     internal val addressRepository: AddressFieldElementRepository
 ) {
+    private var initialized = false
     internal fun init() {
-        bankRepository.init()
-        addressRepository.init()
+        if (!initialized) {
+            initialized = true
+            bankRepository.init()
+            addressRepository.init()
+        }
     }
 }

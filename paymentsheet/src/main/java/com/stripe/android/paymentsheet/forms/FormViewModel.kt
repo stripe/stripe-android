@@ -36,7 +36,7 @@ import javax.inject.Provider
 internal class FormViewModel @Inject internal constructor(
     layout: LayoutSpec,
     config: FormFragmentArguments,
-    private val resourceRepository: ResourceRepository
+    resourceRepository: ResourceRepository
 ) : ViewModel() {
     internal class Factory(
         val config: FormFragmentArguments,
@@ -89,7 +89,6 @@ internal class FormViewModel @Inject internal constructor(
 
     init {
         viewModelScope.launch {
-            resourceRepository.init()
             elements = transformSpecToElement.transform(layout.items)
         }
     }
