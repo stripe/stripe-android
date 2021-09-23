@@ -1,13 +1,20 @@
 package com.stripe.android.paymentsheet.forms
 
-import android.app.Application
+import android.content.res.Resources
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.Logger
 import com.stripe.android.payments.core.injection.Injectable
 import com.stripe.android.payments.core.injection.WeakMapInjectorRegistry
-import com.stripe.android.paymentsheet.elements.*
+import com.stripe.android.paymentsheet.BuildConfig
+import com.stripe.android.paymentsheet.elements.Form
+import com.stripe.android.paymentsheet.elements.FormElement
+import com.stripe.android.paymentsheet.elements.LayoutSpec
+import com.stripe.android.paymentsheet.elements.MandateTextElement
+import com.stripe.android.paymentsheet.elements.ResourceRepository
+import com.stripe.android.paymentsheet.elements.SaveForFutureUseElement
+import com.stripe.android.paymentsheet.elements.SectionSpec
 import com.stripe.android.paymentsheet.injection.DaggerFormViewModelComponent
 import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
 import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
@@ -32,15 +39,12 @@ internal class FormViewModel @Inject internal constructor(
     private val resourceRepository: ResourceRepository
 ) : ViewModel() {
     internal class Factory(
-        val enableLogging: Boolean,
         val config: FormFragmentArguments,
-        val application: Application,
+        val resource: Resources,
+        var layout: LayoutSpec
     ) : ViewModelProvider.Factory, Injectable<Factory.FallbackInitializeParam> {
         internal data class FallbackInitializeParam(
-            val enableLogging: Boolean,
-            val config: FormFragmentArguments,
-            val application: Application,
-            var layout: LayoutSpec
+            val resource: Resources
         )
 
         @Inject
@@ -50,21 +54,21 @@ internal class FormViewModel @Inject internal constructor(
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
 
-            val logger = Logger.getInstance(enableLogging)
+            val logger = Logger.getInstance(BuildConfig.DEBUG)
             WeakMapInjectorRegistry.retrieve(config.injectorKey)?.let {
                 logger.info(
                     "Injector available, " +
-                        "injecting dependencies into PaymentOptionsViewModel.Factory"
+                        "injecting dependencies into FormViewModel.Factory ${config.injectorKey}"
                 )
                 it.inject(this)
             } ?: run {
                 logger.info(
                     "Injector unavailable, " +
-                        "initializing dependencies of PaymentOptionsViewModel.Factory"
+                        "initializing dependencies of FormViewModel.Factory"
                 )
                 fallbackInitialize(
                     FallbackInitializeParam(
-                        enableLogging, config, application, layout
+                        resource
                     )
                 )
             }
@@ -76,9 +80,7 @@ internal class FormViewModel @Inject internal constructor(
 
         override fun fallbackInitialize(arg: FallbackInitializeParam) {
             DaggerFormViewModelComponent.builder()
-                .layout(arg.layout)
-                .resources(arg.application.resources)
-                .formFragmentArguments(arg.config)
+                .resources(arg.resource)
                 .build()
                 .inject(this)
         }
