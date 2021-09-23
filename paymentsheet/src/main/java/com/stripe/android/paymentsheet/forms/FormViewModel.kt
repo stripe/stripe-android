@@ -48,8 +48,7 @@ internal class FormViewModel @Inject internal constructor(
         )
 
         @Inject
-        lateinit var subComponentBuilderProvider:
-            Provider<FormViewModelSubcomponent.Builder>
+        lateinit var subComponentBuilderProvider: Provider<FormViewModelSubcomponent.Builder>
 
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
@@ -58,7 +57,7 @@ internal class FormViewModel @Inject internal constructor(
             WeakMapInjectorRegistry.retrieve(config.injectorKey)?.let {
                 logger.info(
                     "Injector available, " +
-                        "injecting dependencies into FormViewModel.Factory ${config.injectorKey}"
+                        "injecting dependencies into FormViewModel.Factory"
                 )
                 it.inject(this)
             } ?: run {
