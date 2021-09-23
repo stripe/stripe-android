@@ -231,11 +231,11 @@ internal abstract class BaseAddPaymentMethodFragment(
             val isSetupIntent = stripeIntent is SetupIntent
             val isPaymentIntentSetupFutureUsage = (stripeIntent as? PaymentIntent)?.setupFutureUsage
 
-
             // It impacts reopening the card and together with allowUserInitiatedReuse
             // will determine if off_session is set on confirm.
             var isReusable =
-                isSetupIntent || (isPaymentIntentSetupFutureUsage == StripeIntent.Usage.OnSession) ||
+                isSetupIntent ||
+                    (isPaymentIntentSetupFutureUsage == StripeIntent.Usage.OnSession) ||
                     (isPaymentIntentSetupFutureUsage == StripeIntent.Usage.OffSession)
             // This will impact the setting of the off_session on confirm
             var allowUserInitiatedReuse = true
@@ -253,7 +253,7 @@ internal abstract class BaseAddPaymentMethodFragment(
                     // checkbox regardless of the payment method until future fix
                     stripeIntent.paymentMethodTypes.forEach {
                         if (SupportedPaymentMethod.fromCode(it)
-                                ?.userRequestedConfirmSaveForFutureSupported == false
+                            ?.userRequestedConfirmSaveForFutureSupported == false
                         ) {
                             allowUserInitiatedReuse = false
                         }
