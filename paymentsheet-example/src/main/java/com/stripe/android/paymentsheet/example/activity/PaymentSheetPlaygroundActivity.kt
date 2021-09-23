@@ -176,7 +176,8 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
             merchantDisplayName = merchantName,
             customer = viewModel.customerConfig.value,
             googlePay = googlePayConfig,
-            defaultBillingDetails = defaultBilling
+            defaultBillingDetails = defaultBilling,
+            allowsDelayedPaymentMethods = viewBinding.allowsDelayedPaymentMethodsOnButton.isChecked
         )
     }
 

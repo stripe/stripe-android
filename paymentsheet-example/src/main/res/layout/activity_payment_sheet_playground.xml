@@ -235,6 +235,41 @@
                 android:checked="false" />
         </RadioGroup>
 
+        <TextView
+            android:id="@+id/allowsDelayedPaymentMethods"
+            android:text="@string/allowsDelayedPaymentMethods"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp"
+            app:layout_constraintHorizontal_chainStyle="packed"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/default_billing_radio_group" />
+
+        <RadioGroup
+            android:id="@+id/allowsDelayedPaymentMethods_radio_group"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginStart="16dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/allowsDelayedPaymentMethods">
+
+            <RadioButton
+                android:id="@+id/allowsDelayedPaymentMethods_on_button"
+                android:text="@string/on"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:checked="false" />
+
+            <RadioButton
+                android:id="@+id/allowsDelayedPaymentMethods_off_button"
+                android:text="@string/off"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:checked="true" />
+        </RadioGroup>
+
         <Button
             android:id="@+id/reload_button"
             android:text="@string/reload_paymentsheet"
@@ -243,7 +278,7 @@
             android:layout_marginTop="8dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/default_billing_radio_group" />
+            app:layout_constraintTop_toBottomOf="@+id/allowsDelayedPaymentMethods_radio_group" />
 
         <View
             android:id="@+id/divider"
