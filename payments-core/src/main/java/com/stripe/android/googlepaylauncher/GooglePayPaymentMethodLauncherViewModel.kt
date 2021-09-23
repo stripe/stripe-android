@@ -43,7 +43,7 @@ internal class GooglePayPaymentMethodLauncherViewModel @Inject constructor(
      * across process death in case the Activity and ViewModel are destroyed while the user is
      * interacting with Google Pay.
      */
-    var hasLaunched: Boolean
+    internal var hasLaunched: Boolean
         get() = savedStateHandle.get<Boolean>(HAS_LAUNCHED_KEY) == true
         set(value) = savedStateHandle.set(HAS_LAUNCHED_KEY, value)
 

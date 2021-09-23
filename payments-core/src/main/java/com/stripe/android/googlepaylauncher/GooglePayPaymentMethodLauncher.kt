@@ -55,14 +55,16 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
     @Assisted private val readyCallback: ReadyCallback,
     @Assisted private val activityResultLauncher: ActivityResultLauncher<GooglePayPaymentMethodLauncherContract.Args>,
     @Assisted private val skipReadyCheck: Boolean,
-    private val context: Context,
+    context: Context,
     private val googlePayRepositoryFactory: (GooglePayEnvironment) -> GooglePayRepository,
     @Named(PRODUCT_USAGE) private val productUsage: Set<String>,
     @Named(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String,
     @Named(STRIPE_ACCOUNT_ID) private val stripeAccountIdProvider: () -> String?,
+    // Default value for the following parameters is used only when instantiating from the public
+    // constructors instead of dependency injection.
     @Named(ENABLE_LOGGING) private val enableLogging: Boolean = BuildConfig.DEBUG,
     @IOContext private val ioContext: CoroutineContext = Dispatchers.IO,
-    private val analyticsRequestFactory: AnalyticsRequestFactory = AnalyticsRequestFactory(
+    analyticsRequestFactory: AnalyticsRequestFactory = AnalyticsRequestFactory(
         context,
         PaymentConfiguration.getInstance(context).publishableKey,
         setOf(PRODUCT_USAGE_TOKEN)
