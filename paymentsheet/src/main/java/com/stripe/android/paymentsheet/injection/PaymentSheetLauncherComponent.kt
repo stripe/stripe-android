@@ -29,7 +29,7 @@ internal interface PaymentSheetLauncherComponent {
         fun application(application: Application): Builder
 
         @BindsInstance
-        fun injectorKey(@InjectorKey injectorKey: Int): Builder
+        fun injectorKey(@InjectorKey injectorKey: String): Builder
 
         fun build(): PaymentSheetLauncherComponent
     }

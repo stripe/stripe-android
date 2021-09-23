@@ -71,7 +71,7 @@ internal class DefaultFlowController @Inject internal constructor(
     private val paymentOptionCallback: PaymentOptionCallback,
     private val paymentResultCallback: PaymentSheetResultCallback,
     activityResultCaller: ActivityResultCaller,
-    @InjectorKey private val injectorKey: Int,
+    @InjectorKey private val injectorKey: String,
     // Properties provided through injection
     private val flowControllerInitializer: FlowControllerInitializer,
     private val eventReporter: EventReporter,
@@ -103,6 +103,9 @@ internal class DefaultFlowController @Inject internal constructor(
         when (injectable) {
             is PaymentOptionsViewModel.Factory -> {
                 flowControllerComponent.inject(injectable)
+            }
+            else -> {
+                throw IllegalArgumentException("invalid Injectable $injectable requested in $this")
             }
         }
     }
@@ -469,7 +472,10 @@ internal class DefaultFlowController @Inject internal constructor(
             paymentOptionCallback: PaymentOptionCallback,
             paymentResultCallback: PaymentSheetResultCallback
         ): PaymentSheet.FlowController {
-            val injectorKey = WeakMapInjectorRegistry.nextKey()
+            val injectorKey =
+                WeakMapInjectorRegistry.nextKey(
+                    requireNotNull(PaymentSheet.FlowController::class.simpleName)
+                )
             val flowControllerComponent = DaggerFlowControllerComponent.builder()
                 .appContext(appContext)
                 .viewModelStoreOwner(viewModelStoreOwner)
