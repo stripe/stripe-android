@@ -1,5 +1,6 @@
 package com.stripe.android.googlepaylauncher
 
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -43,8 +44,9 @@ class GooglePayPaymentMethodLauncherTest {
         GooglePayPaymentMethodLauncher.ReadyCallback(readyCallbackInvocations::add)
     private val resultCallback = GooglePayPaymentMethodLauncher.ResultCallback(results::add)
 
+    val context: Context = ApplicationProvider.getApplicationContext()
     private val analyticsRequestFactory = AnalyticsRequestFactory(
-        ApplicationProvider.getApplicationContext(),
+        context,
         ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
     )
     private val firedEvents = mutableListOf<String>()
@@ -74,9 +76,14 @@ class GooglePayPaymentMethodLauncherTest {
                 ) {
                     resultCallback.onResult(it)
                 },
+                false,
+                context,
                 { FakeGooglePayRepository(true) },
-                analyticsRequestFactory,
-                analyticsRequestExecutor
+                emptySet(),
+                { ApiKeyFixtures.FAKE_PUBLISHABLE_KEY },
+                { null },
+                analyticsRequestFactory = analyticsRequestFactory,
+                analyticsRequestExecutor = analyticsRequestExecutor
             )
             scenario.moveToState(Lifecycle.State.RESUMED)
 
@@ -108,9 +115,14 @@ class GooglePayPaymentMethodLauncherTest {
                 ) {
                     resultCallback.onResult(it)
                 },
+                false,
+                context,
                 { FakeGooglePayRepository(true) },
-                analyticsRequestFactory,
-                analyticsRequestExecutor
+                emptySet(),
+                { ApiKeyFixtures.FAKE_PUBLISHABLE_KEY },
+                { null },
+                analyticsRequestFactory = analyticsRequestFactory,
+                analyticsRequestExecutor = analyticsRequestExecutor
             )
 
             assertThat(firedEvents)
@@ -135,9 +147,14 @@ class GooglePayPaymentMethodLauncherTest {
                 ) {
                     resultCallback.onResult(it)
                 },
+                false,
+                context,
                 { FakeGooglePayRepository(false) },
-                analyticsRequestFactory,
-                analyticsRequestExecutor
+                emptySet(),
+                { ApiKeyFixtures.FAKE_PUBLISHABLE_KEY },
+                { null },
+                analyticsRequestFactory = analyticsRequestFactory,
+                analyticsRequestExecutor = analyticsRequestExecutor
             )
             scenario.moveToState(Lifecycle.State.RESUMED)
 
@@ -149,6 +166,42 @@ class GooglePayPaymentMethodLauncherTest {
                     currencyCode = "usd"
                 )
             }
+        }
+    }
+
+    @Test
+    fun `when skipReadyCheck should not check if Google Pay is ready`() {
+        scenario.onFragment { fragment ->
+            val launcher = GooglePayPaymentMethodLauncher(
+                testScope,
+                CONFIG,
+                readyCallback,
+                fragment.registerForActivityResult(
+                    GooglePayPaymentMethodLauncherContract(),
+                    FakeActivityResultRegistry(
+                        GooglePayPaymentMethodLauncher.Result.Completed(
+                            PaymentMethodFixtures.CARD_PAYMENT_METHOD
+                        )
+                    )
+                ) {
+                    resultCallback.onResult(it)
+                },
+                true,
+                context,
+                { FakeGooglePayRepository(false) },
+                emptySet(),
+                { ApiKeyFixtures.FAKE_PUBLISHABLE_KEY },
+                { null },
+                analyticsRequestFactory = analyticsRequestFactory,
+                analyticsRequestExecutor = analyticsRequestExecutor
+            )
+            scenario.moveToState(Lifecycle.State.RESUMED)
+
+            assertThat(readyCallbackInvocations)
+                .isEmpty()
+
+            // Should not throw error
+            launcher.present(currencyCode = "usd")
         }
     }
 
