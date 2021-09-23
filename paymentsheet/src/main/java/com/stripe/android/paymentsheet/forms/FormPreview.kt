@@ -51,7 +51,7 @@ internal fun FormInternalPreview() {
             FormFragmentArguments(
                 SupportedPaymentMethod.Card,
                 allowUserInitiatedReuse = true,
-                saveForFutureUseInitialValue = true,
+                displayUIRequiredForSaving = true,
                 "Merchant, Inc.",
                 Amount(10, "USD"),
                 PaymentSheet.BillingDetails(

@@ -321,10 +321,11 @@ internal class CardDataCollectionFragment<ViewModelType : BaseSheetViewModel<*>>
         requireArguments().getParcelable<FormFragmentArguments>(
             ComposeFormDataCollectionFragment.EXTRA_CONFIG
         )?.let { args ->
-            saveCardCheckbox.isChecked = args.saveForFutureUseInitialValue
+            saveCardCheckbox.isChecked = args.displayUIRequiredForSaving
             saveCardCheckbox.isVisible = args.allowUserInitiatedReuse
         }
         sheetViewModel.newCard?.shouldSavePaymentMethod?.also {
+            // Only if the save card checkbox is visible could it be user requested
             if (saveCardCheckbox.isVisible) {
                 saveCardCheckbox.isChecked = it
             }

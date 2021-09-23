@@ -71,10 +71,12 @@ internal class FormViewModel @Inject internal constructor(
 
     private val allowUserInitiatedReuse = MutableStateFlow(config.allowUserInitiatedReuse)
 
+    @VisibleForTesting
     internal fun setUserInitiatedReuseVisibility(isVisible: Boolean) {
         allowUserInitiatedReuse.value = isVisible
     }
 
+    @VisibleForTesting
     internal fun setUserInitiatedReuseValue(value: Boolean) {
         elements
             .filterIsInstance<SaveForFutureUseElement>()
@@ -97,7 +99,7 @@ internal class FormViewModel @Inject internal constructor(
     internal val hiddenIdentifiers =
         combine(
             allowUserInitiatedReuse,
-            // Regardless of checkbox visibility it's state will define if
+            // Regardless of checkbox visibility it's state will defi¬-ne if
             // reusable fields are displayed
             saveForFutureUseElement?.controller?.hiddenIdentifiers
                 ?: MutableStateFlow(emptyList())

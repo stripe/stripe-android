@@ -9,7 +9,7 @@
       ]
     },
     "testOutput": {
-      "expectedReusable": true,
+      "expectedDisplayUIForSaving": true,
       "expectedAllowUserInitiatedReuse": false
     }
   },
@@ -24,7 +24,7 @@
       ]
     },
     "testOutput": {
-      "expectedReusable": true,
+      "expectedDisplayUIForSaving": true,
       "expectedAllowUserInitiatedReuse": false
     }
   },
@@ -39,7 +39,7 @@
       ]
     },
     "testOutput": {
-      "expectedReusable": true,
+      "expectedDisplayUIForSaving": true,
       "expectedAllowUserInitiatedReuse": false
     }
   },
@@ -53,7 +53,7 @@
       ]
     },
     "testOutput": {
-      "expectedReusable": true,
+      "expectedDisplayUIForSaving": true,
       "expectedAllowUserInitiatedReuse": false
     }
   },
@@ -68,7 +68,7 @@
       ]
     },
     "testOutput": {
-      "expectedReusable": true,
+      "expectedDisplayUIForSaving": true,
       "expectedAllowUserInitiatedReuse": false
     }
   },
@@ -83,7 +83,7 @@
       ]
     },
     "testOutput": {
-      "expectedReusable": true,
+      "expectedDisplayUIForSaving": true,
       "expectedAllowUserInitiatedReuse": false
     }
   },
@@ -97,7 +97,7 @@
       ]
     },
     "testOutput": {
-      "expectedReusable": false,
+      "expectedDisplayUIForSaving": true,
       "expectedAllowUserInitiatedReuse": true
     }
   },
@@ -112,7 +112,7 @@
       ]
     },
     "testOutput": {
-      "expectedReusable": false,
+      "expectedDisplayUIForSaving": false,
       "expectedAllowUserInitiatedReuse": false
     }
   },
@@ -127,7 +127,7 @@
       ]
     },
     "testOutput": {
-      "expectedReusable": false,
+      "expectedDisplayUIForSaving": false,
       "expectedAllowUserInitiatedReuse": false
     }
   },
@@ -141,7 +141,7 @@
       ]
     },
     "testOutput": {
-      "expectedReusable": true,
+      "expectedDisplayUIForSaving": true,
       "expectedAllowUserInitiatedReuse": false
     }
   },
@@ -156,7 +156,7 @@
       ]
     },
     "testOutput": {
-      "expectedReusable": true,
+      "expectedDisplayUIForSaving": true,
       "expectedAllowUserInitiatedReuse": false
     }
   },
@@ -171,7 +171,7 @@
       ]
     },
     "testOutput": {
-      "expectedReusable": true,
+      "expectedDisplayUIForSaving": true,
       "expectedAllowUserInitiatedReuse": false
     }
   },
@@ -185,7 +185,7 @@
       ]
     },
     "testOutput": {
-      "expectedReusable": true,
+      "expectedDisplayUIForSaving": true,
       "expectedAllowUserInitiatedReuse": false
     }
   },
@@ -200,7 +200,7 @@
       ]
     },
     "testOutput": {
-      "expectedReusable": true,
+      "expectedDisplayUIForSaving": true,
       "expectedAllowUserInitiatedReuse": false
     }
   },
@@ -215,7 +215,7 @@
       ]
     },
     "testOutput": {
-      "expectedReusable": true,
+      "expectedDisplayUIForSaving": true,
       "expectedAllowUserInitiatedReuse": false
     }
   },
@@ -229,7 +229,7 @@
       ]
     },
     "testOutput": {
-      "expectedReusable": false,
+      "expectedDisplayUIForSaving": false,
       "expectedAllowUserInitiatedReuse": false
     }
   },
@@ -244,7 +244,7 @@
       ]
     },
     "testOutput": {
-      "expectedReusable": false,
+      "expectedDisplayUIForSaving": false,
       "expectedAllowUserInitiatedReuse": false
     }
   },
@@ -259,7 +259,7 @@
       ]
     },
     "testOutput": {
-      "expectedReusable": false,
+      "expectedDisplayUIForSaving": false,
       "expectedAllowUserInitiatedReuse": false
     }
   }

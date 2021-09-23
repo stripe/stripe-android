@@ -63,7 +63,7 @@ internal class FormViewModelTest {
             ),
             FormFragmentArguments(
                 supportedPaymentMethod = SupportedPaymentMethod.Card,
-                saveForFutureUseInitialValue = true,
+                displayUIRequiredForSaving = true,
                 allowUserInitiatedReuse = true,
                 merchantName = "Example, Inc."
             ),
@@ -94,7 +94,7 @@ internal class FormViewModelTest {
             ),
             FormFragmentArguments(
                 supportedPaymentMethod = SupportedPaymentMethod.Card,
-                saveForFutureUseInitialValue = true,
+                displayUIRequiredForSaving = true,
                 allowUserInitiatedReuse = true,
                 merchantName = "Example, Inc."
             ),
@@ -127,7 +127,7 @@ internal class FormViewModelTest {
             ),
             FormFragmentArguments(
                 supportedPaymentMethod = SupportedPaymentMethod.Card,
-                saveForFutureUseInitialValue = true,
+                displayUIRequiredForSaving = true,
                 allowUserInitiatedReuse = true,
                 merchantName = "Example, Inc."
             ),
@@ -165,7 +165,7 @@ internal class FormViewModelTest {
                 ),
                 FormFragmentArguments(
                     supportedPaymentMethod = SupportedPaymentMethod.Card,
-                    saveForFutureUseInitialValue = true,
+                    displayUIRequiredForSaving = true,
                     allowUserInitiatedReuse = true,
                     merchantName = "Example, Inc."
                 ),
@@ -211,7 +211,7 @@ internal class FormViewModelTest {
                 ),
                 FormFragmentArguments(
                     supportedPaymentMethod = SupportedPaymentMethod.Card,
-                    saveForFutureUseInitialValue = true,
+                    displayUIRequiredForSaving = true,
                     allowUserInitiatedReuse = true,
                     merchantName = "Example, Inc."
                 ),
@@ -257,7 +257,7 @@ internal class FormViewModelTest {
                 sofort.layout,
                 FormFragmentArguments(
                     supportedPaymentMethod = SupportedPaymentMethod.Card,
-                    saveForFutureUseInitialValue = true,
+                    displayUIRequiredForSaving = true,
                     allowUserInitiatedReuse = true,
                     merchantName = "Example, Inc."
                 ),
@@ -303,7 +303,7 @@ internal class FormViewModelTest {
                 sepaDebit.layout,
                 FormFragmentArguments(
                     supportedPaymentMethod = SupportedPaymentMethod.Card,
-                    saveForFutureUseInitialValue = true,
+                    displayUIRequiredForSaving = true,
                     allowUserInitiatedReuse = true,
                     merchantName = "Example, Inc."
                 ),
@@ -374,7 +374,7 @@ internal class FormViewModelTest {
                 sepaDebit.layout,
                 FormFragmentArguments(
                     supportedPaymentMethod = SupportedPaymentMethod.Card,
-                    saveForFutureUseInitialValue = true,
+                    displayUIRequiredForSaving = true,
                     allowUserInitiatedReuse = true,
                     merchantName = "Example, Inc."
                 ),

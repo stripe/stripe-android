@@ -230,6 +230,7 @@ internal abstract class BaseAddPaymentMethodFragment(
 
             val isSetupIntent = stripeIntent is SetupIntent
             val isPaymentIntentSetupFutureUsage = (stripeIntent as? PaymentIntent)?.setupFutureUsage
+            var displayUIRequiredForSaving = false
 
             // It impacts reopening the card and together with allowUserInitiatedReuse
             // will determine if off_session is set on confirm.
@@ -242,9 +243,10 @@ internal abstract class BaseAddPaymentMethodFragment(
 
             if (isReusable) {
                 allowUserInitiatedReuse = false
+                displayUIRequiredForSaving = true
             } else {
                 requireNotNull(stripeIntent as? PaymentIntent)
-                if (!hasCustomer || supportedPaymentMethod.type.requiresMandate) {
+                if (!hasCustomer){// || supportedPaymentMethod.type.requiresMandate) {
                     // If paymentMethodTypes contains payment method that does not support
                     // save for future should be false and unselected until future fix
                     allowUserInitiatedReuse = false
@@ -264,7 +266,7 @@ internal abstract class BaseAddPaymentMethodFragment(
             return FormFragmentArguments(
                 supportedPaymentMethod = supportedPaymentMethod,
                 allowUserInitiatedReuse = allowUserInitiatedReuse,
-                saveForFutureUseInitialValue = isReusable,
+                displayUIRequiredForSaving = displayUIRequiredForSaving,
                 merchantName = merchantName,
                 amount = amount,
                 billingDetails = billingAddress?.let {

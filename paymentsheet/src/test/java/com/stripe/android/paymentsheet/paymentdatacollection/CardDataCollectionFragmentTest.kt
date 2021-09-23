@@ -157,7 +157,7 @@ class CardDataCollectionFragmentTest {
             fragmentArgs = FormFragmentArguments(
                 SupportedPaymentMethod.Bancontact,
                 allowUserInitiatedReuse = false,
-                saveForFutureUseInitialValue = false,
+                displayUIRequiredForSaving = false,
                 merchantName = "Merchant, Inc.",
                 billingDetails = PaymentSheet.BillingDetails(
                     address = PaymentSheet.Address(

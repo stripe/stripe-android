@@ -70,7 +70,7 @@ class FormSaveCheckboxTest {
                 PaymentIntentTestCase(
                     it,
                     TestOutput(
-                        formArgumentFromPaymentIntentTestInput(it).saveForFutureUseInitialValue,
+                        formArgumentFromPaymentIntentTestInput(it).displayUIRequiredForSaving,
                         formArgumentFromPaymentIntentTestInput(it).allowUserInitiatedReuse
                     )
                 )
@@ -95,7 +95,7 @@ class FormSaveCheckboxTest {
                     SetupIntentTestCase(
                         it,
                         TestOutput(
-                            formArgumentFromSetupIntentTestInput(it).saveForFutureUseInitialValue,
+                            formArgumentFromSetupIntentTestInput(it).displayUIRequiredForSaving,
                             formArgumentFromSetupIntentTestInput(it).allowUserInitiatedReuse
                         )
                     )
@@ -134,7 +134,7 @@ class FormSaveCheckboxTest {
                 FormFragmentArguments(
                     SupportedPaymentMethod.fromCode(it.testInput.lpmTypeFormCode)!!,
                     allowUserInitiatedReuse = it.testOutput.expectedAllowUserInitiatedReuse,
-                    saveForFutureUseInitialValue = it.testOutput.expectedReusable,
+                    displayUIRequiredForSaving = it.testOutput.expectedDisplayUIForSaving,
                     merchantName = "Example, Inc",
                 )
             )
@@ -153,7 +153,7 @@ class FormSaveCheckboxTest {
                 FormFragmentArguments(
                     SupportedPaymentMethod.fromCode(it.testInput.lpmTypeFormCode)!!,
                     allowUserInitiatedReuse = it.testOutput.expectedAllowUserInitiatedReuse,
-                    saveForFutureUseInitialValue = it.testOutput.expectedReusable,
+                    displayUIRequiredForSaving = it.testOutput.expectedDisplayUIForSaving,
                     merchantName = "Example, Inc",
                 )
             )
@@ -251,7 +251,7 @@ class FormSaveCheckboxTest {
 
     @Serializable
     internal data class TestOutput(
-        val expectedReusable: Boolean,
+        val expectedDisplayUIForSaving: Boolean,
         val expectedAllowUserInitiatedReuse: Boolean
     )
 }
