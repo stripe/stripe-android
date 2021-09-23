@@ -76,6 +76,7 @@ class GooglePayPaymentMethodLauncherTest {
                 ) {
                     resultCallback.onResult(it)
                 },
+                false,
                 context,
                 { FakeGooglePayRepository(true) },
                 emptySet(),
@@ -114,6 +115,7 @@ class GooglePayPaymentMethodLauncherTest {
                 ) {
                     resultCallback.onResult(it)
                 },
+                false,
                 context,
                 { FakeGooglePayRepository(true) },
                 emptySet(),
@@ -145,6 +147,7 @@ class GooglePayPaymentMethodLauncherTest {
                 ) {
                     resultCallback.onResult(it)
                 },
+                false,
                 context,
                 { FakeGooglePayRepository(false) },
                 emptySet(),
@@ -163,6 +166,42 @@ class GooglePayPaymentMethodLauncherTest {
                     currencyCode = "usd"
                 )
             }
+        }
+    }
+
+    @Test
+    fun `when skipReadyCheck should not check if Google Pay is ready`() {
+        scenario.onFragment { fragment ->
+            val launcher = GooglePayPaymentMethodLauncher(
+                testScope,
+                CONFIG,
+                readyCallback,
+                fragment.registerForActivityResult(
+                    GooglePayPaymentMethodLauncherContract(),
+                    FakeActivityResultRegistry(
+                        GooglePayPaymentMethodLauncher.Result.Completed(
+                            PaymentMethodFixtures.CARD_PAYMENT_METHOD
+                        )
+                    )
+                ) {
+                    resultCallback.onResult(it)
+                },
+                true,
+                context,
+                { FakeGooglePayRepository(false) },
+                emptySet(),
+                { ApiKeyFixtures.FAKE_PUBLISHABLE_KEY },
+                { null },
+                analyticsRequestFactory = analyticsRequestFactory,
+                analyticsRequestExecutor = analyticsRequestExecutor
+            )
+            scenario.moveToState(Lifecycle.State.RESUMED)
+
+            assertThat(readyCallbackInvocations)
+                .isEmpty()
+
+            // Should not throw error
+            launcher.present(currencyCode = "usd")
         }
     }
 
