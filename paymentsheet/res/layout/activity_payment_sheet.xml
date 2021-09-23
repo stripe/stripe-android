@@ -27,14 +27,18 @@
                 android:id="@+id/toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="?colorSurface">
+                android:background="?colorSurface"
+                app:contentInsetStartWithNavigation="0dp">
 
                 <TextView
                     android:id="@+id/testmode"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:visibility="gone"
-                    android:padding="5dp"
+                    android:paddingTop="2dp"
+                    android:paddingBottom="2dp"
+                    android:paddingEnd="6dp"
+                    android:paddingStart="6dp"
                     android:background="@drawable/stripe_paymentsheet_testmode_background"
                     android:textColor="@color/stripe_paymentsheet_testmode_text"
                     android:textStyle="bold"
