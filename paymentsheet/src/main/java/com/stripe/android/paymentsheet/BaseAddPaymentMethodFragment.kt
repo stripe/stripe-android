@@ -227,36 +227,36 @@ internal abstract class BaseAddPaymentMethodFragment(
             amount: Amount? = null,
             billingAddress: PaymentSheet.BillingDetails? = null
         ): FormFragmentArguments {
-            // It impacts reopening the card and together with allowUserInitiatedReuse
-            // will determine if off_session is set on confirm.
-            var isReusable = true
-            // This will impact the setting of the off_session on confirm
-            var allowUserInitiatedReuse = true
 
             val isSetupIntent = stripeIntent is SetupIntent
             val isPaymentIntentSetupFutureUsage = (stripeIntent as? PaymentIntent)?.setupFutureUsage
-            if (isSetupIntent ||
-                (isPaymentIntentSetupFutureUsage == StripeIntent.Usage.OnSession) ||
-                (isPaymentIntentSetupFutureUsage == StripeIntent.Usage.OffSession)
-            ) {
+
+
+            // It impacts reopening the card and together with allowUserInitiatedReuse
+            // will determine if off_session is set on confirm.
+            var isReusable =
+                isSetupIntent || (isPaymentIntentSetupFutureUsage == StripeIntent.Usage.OnSession) ||
+                    (isPaymentIntentSetupFutureUsage == StripeIntent.Usage.OffSession)
+            // This will impact the setting of the off_session on confirm
+            var allowUserInitiatedReuse = true
+
+            if (isReusable) {
                 allowUserInitiatedReuse = false
-                isReusable = true
-            } else if (stripeIntent is PaymentIntent &&
-                (!hasCustomer || supportedPaymentMethod.type.requiresMandate)
-            ) {
-                // If paymentMethodTypes contains payment method that does not support
-                // save for future should be false and unselected until future fix
-                isReusable = false
-                allowUserInitiatedReuse = false
-            } else if (stripeIntent is PaymentIntent) {
-                // If the intent includes any payment method types that don't support save remove
-                // checkbox regardless of the payment method until future fix
-                stripeIntent.paymentMethodTypes.forEach {
-                    if (SupportedPaymentMethod.fromCode(it)
-                        ?.userRequestedConfirmSaveForFutureSupported == false
-                    ) {
-                        isReusable = false
-                        allowUserInitiatedReuse = false
+            } else {
+                requireNotNull(stripeIntent as? PaymentIntent)
+                if (!hasCustomer || supportedPaymentMethod.type.requiresMandate) {
+                    // If paymentMethodTypes contains payment method that does not support
+                    // save for future should be false and unselected until future fix
+                    allowUserInitiatedReuse = false
+                } else {
+                    // If the intent includes any payment method types that don't support save remove
+                    // checkbox regardless of the payment method until future fix
+                    stripeIntent.paymentMethodTypes.forEach {
+                        if (SupportedPaymentMethod.fromCode(it)
+                                ?.userRequestedConfirmSaveForFutureSupported == false
+                        ) {
+                            allowUserInitiatedReuse = false
+                        }
                     }
                 }
             }

@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet
 
 import com.google.common.truth.Truth
+import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.StripeIntent
@@ -14,12 +15,14 @@ import kotlinx.serialization.json.Json
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import java.io.File
 import java.nio.charset.Charset
 
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
 class FormSaveCheckboxTest {
-    private val format = Json { prettyPrint = true }
+    private val formatPretty = Json { prettyPrint = true }
+    private val format = Json { prettyPrint = false }
 
     private val expectedMandateRequiredLPMs = listOf("bancontact", "sofort", "ideal", "sepa_debit", "eps", "future_unknown")
     private val paymentMethodSupportsUserRequestedSaveForFutureUsage =
@@ -60,20 +63,24 @@ class FormSaveCheckboxTest {
      */
     @Test
     fun `Output baseline payment intent test inputs`() {
-        println(
-            format.encodeToString(
-                generatePaymentIntentScenarios()
-                    .map {
-                        PaymentIntentTestCase(
-                            it,
-                            TestOutput(
-                                formArgumentFromPaymentIntentTestInput(it).saveForFutureUseInitialValue,
-                                formArgumentFromPaymentIntentTestInput(it).allowUserInitiatedReuse
-                            )
-                        )
-                    }
-            )
-        )
+        val resource = File(javaClass.classLoader.getResource("FormSaveCheckboxPaymentIntent.json").file)
+        val baseline = resource.readText().replace(" ", "").replace("\n", "")
+        val newScenariosList = generatePaymentIntentScenarios()
+            .map {
+                PaymentIntentTestCase(
+                    it,
+                    TestOutput(
+                        formArgumentFromPaymentIntentTestInput(it).saveForFutureUseInitialValue,
+                        formArgumentFromPaymentIntentTestInput(it).allowUserInitiatedReuse
+                    )
+                )
+            }
+        val newScenarios = format.encodeToString(newScenariosList).replace(" ", "").replace("\n", "")
+
+        if (baseline != newScenarios) {
+            println(formatPretty.encodeToString(newScenariosList))
+        }
+        assertThat(baseline).isEqualTo(newScenarios)
     }
 
     /**
@@ -127,7 +134,7 @@ class FormSaveCheckboxTest {
                 FormFragmentArguments(
                     SupportedPaymentMethod.fromCode(it.testInput.lpmTypeFormCode)!!,
                     allowUserInitiatedReuse = it.testOutput.expectedAllowUserInitiatedReuse,
-                    saveForFutureUseInitialValue = it.testOutput.expectedSaveCheckboxValue,
+                    saveForFutureUseInitialValue = it.testOutput.expectedReusable,
                     merchantName = "Example, Inc",
                 )
             )
@@ -146,7 +153,7 @@ class FormSaveCheckboxTest {
                 FormFragmentArguments(
                     SupportedPaymentMethod.fromCode(it.testInput.lpmTypeFormCode)!!,
                     allowUserInitiatedReuse = it.testOutput.expectedAllowUserInitiatedReuse,
-                    saveForFutureUseInitialValue = it.testOutput.expectedSaveCheckboxValue,
+                    saveForFutureUseInitialValue = it.testOutput.expectedReusable,
                     merchantName = "Example, Inc",
                 )
             )
@@ -155,8 +162,8 @@ class FormSaveCheckboxTest {
 
     private fun generatePaymentIntentScenarios(): List<PaymentIntentTestInput> {
         val scenarios = mutableListOf<PaymentIntentTestInput>()
-        val customerStates = listOf(true, false)
-        val setupFutureUsage = listOf(StripeIntent.Usage.OffSession, StripeIntent.Usage.OnSession)
+        val customerStates = setOf(true, false)
+        val setupFutureUsage = setOf(StripeIntent.Usage.OffSession, StripeIntent.Usage.OnSession, StripeIntent.Usage.OneTime)
 
         customerStates.forEach { customer ->
             setupFutureUsage.forEach { usage ->
@@ -199,7 +206,8 @@ class FormSaveCheckboxTest {
     private fun formArgumentFromPaymentIntentTestInput(testInput: PaymentIntentTestInput) = BaseAddPaymentMethodFragment.getFormArguments(
         hasCustomer = testInput.hasCustomer,
         stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
-            paymentMethodTypes = testInput.intentLpms
+            paymentMethodTypes = testInput.intentLpms,
+            setupFutureUsage = testInput.intentSetupFutureUsage
         ),
         supportedPaymentMethod = SupportedPaymentMethod.fromCode(testInput.lpmTypeFormCode)!!,
         merchantName = "Example, Inc"
@@ -243,7 +251,7 @@ class FormSaveCheckboxTest {
 
     @Serializable
     internal data class TestOutput(
-        val expectedSaveCheckboxValue: Boolean,
+        val expectedReusable: Boolean,
         val expectedAllowUserInitiatedReuse: Boolean
     )
 }
