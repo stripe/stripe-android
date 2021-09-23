@@ -65,6 +65,7 @@ internal class FormViewModelTest {
                 saveForFutureUseInitialVisibility = true,
                 saveForFutureUseInitialValue = true,
                 merchantName = "Example, Inc.",
+                injectorKey = -1
             ),
             resourceRepository = resourceRepository
         )
@@ -96,6 +97,7 @@ internal class FormViewModelTest {
                 saveForFutureUseInitialVisibility = true,
                 saveForFutureUseInitialValue = true,
                 merchantName = "Example, Inc.",
+                injectorKey = -1
             ),
             resourceRepository = resourceRepository
         )
@@ -129,6 +131,7 @@ internal class FormViewModelTest {
                 saveForFutureUseInitialVisibility = true,
                 saveForFutureUseInitialValue = true,
                 merchantName = "Example, Inc.",
+                injectorKey = -1
             ),
             resourceRepository = resourceRepository
         )
@@ -167,6 +170,7 @@ internal class FormViewModelTest {
                     saveForFutureUseInitialVisibility = true,
                     saveForFutureUseInitialValue = true,
                     merchantName = "Example, Inc.",
+                    injectorKey = -1
                 ),
                 resourceRepository = resourceRepository
             )
@@ -213,6 +217,7 @@ internal class FormViewModelTest {
                     saveForFutureUseInitialVisibility = true,
                     saveForFutureUseInitialValue = true,
                     merchantName = "Example, Inc.",
+                    injectorKey = -1
                 ),
                 resourceRepository = resourceRepository
             )
@@ -259,6 +264,7 @@ internal class FormViewModelTest {
                     saveForFutureUseInitialVisibility = true,
                     saveForFutureUseInitialValue = true,
                     merchantName = "Example, Inc.",
+                    injectorKey = -1
                 ),
                 resourceRepository = resourceRepository
             )
@@ -305,6 +311,7 @@ internal class FormViewModelTest {
                     saveForFutureUseInitialVisibility = true,
                     saveForFutureUseInitialValue = true,
                     merchantName = "Example, Inc.",
+                    injectorKey = -1
                 ),
                 resourceRepository = resourceRepository
             )
@@ -376,6 +383,7 @@ internal class FormViewModelTest {
                     saveForFutureUseInitialVisibility = true,
                     saveForFutureUseInitialValue = true,
                     merchantName = "Example, Inc.",
+                    injectorKey = -1
                 ),
                 resourceRepository = resourceRepository
             )

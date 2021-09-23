@@ -317,6 +317,7 @@ class PaymentSheetAddPaymentMethodFragmentTest {
                         saveForFutureUseInitialValue = true,
                         merchantName = PaymentSheetFixtures.MERCHANT_DISPLAY_NAME,
                         amount = createAmount(),
+                        injectorKey = -1
                     )
                 )
         }
@@ -347,6 +348,7 @@ class PaymentSheetAddPaymentMethodFragmentTest {
                         saveForFutureUseInitialValue = true,
                         merchantName = PaymentSheetFixtures.MERCHANT_DISPLAY_NAME,
                         amount = createAmount(),
+                        injectorKey = -1
                     )
                 )
         }
@@ -407,6 +409,7 @@ class PaymentSheetAddPaymentMethodFragmentTest {
                         saveForFutureUseInitialValue = true,
                         merchantName = "Widget Store",
                         amount = createAmount(PI_OFF_SESSION),
+                        injectorKey = -1
                     )
                 )
         }

@@ -67,6 +67,7 @@ internal class TransformSpecToElementTest {
                     saveForFutureUseInitialVisibility = true,
                     saveForFutureUseInitialValue = true,
                     merchantName = "Example, Inc.",
+                    injectorKey = -1
                 )
             )
     }

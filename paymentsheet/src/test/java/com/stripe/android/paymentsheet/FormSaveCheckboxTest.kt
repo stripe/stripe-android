@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet
 
 import com.google.common.truth.Truth
+import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.StripeIntent
@@ -121,7 +122,7 @@ class FormSaveCheckboxTest {
         format.decodeFromString<List<SetupIntentTestCase>>(
             javaClass.classLoader!!.getResource("FormSaveCheckboxSetupIntent.json").readText(Charset.defaultCharset())
         ).forEach {
-            Truth.assertThat(
+            assertThat(
                 formArgumentFromSetupIntentTestInput(it.testInput)
             ).isEqualTo(
                 FormFragmentArguments(
@@ -129,6 +130,7 @@ class FormSaveCheckboxTest {
                     saveForFutureUseInitialVisibility = it.testOutput.expectedSaveCheckboxVisible,
                     saveForFutureUseInitialValue = it.testOutput.expectedSaveCheckboxValue,
                     merchantName = "Example, Inc",
+                    injectorKey = -1
                 )
             )
         }
@@ -139,7 +141,7 @@ class FormSaveCheckboxTest {
         format.decodeFromString<List<PaymentIntentTestCase>>(
             javaClass.classLoader!!.getResource("FormSaveCheckboxPaymentIntent.json").readText(Charset.defaultCharset())
         ).forEach {
-            Truth.assertThat(
+            assertThat(
                 formArgumentFromPaymentIntentTestInput(it.testInput)
             ).isEqualTo(
                 FormFragmentArguments(
@@ -147,6 +149,7 @@ class FormSaveCheckboxTest {
                     saveForFutureUseInitialVisibility = it.testOutput.expectedSaveCheckboxVisible,
                     saveForFutureUseInitialValue = it.testOutput.expectedSaveCheckboxValue,
                     merchantName = "Example, Inc",
+                    injectorKey = -1
                 )
             )
         }
@@ -201,7 +204,8 @@ class FormSaveCheckboxTest {
             paymentMethodTypes = testInput.intentLpms
         ),
         supportedPaymentMethodName = SupportedPaymentMethod.fromCode(testInput.lpmTypeFormCode)!!.name,
-        merchantName = "Example, Inc"
+        merchantName = "Example, Inc",
+        injectorKey = -1
     )
 
     private fun formArgumentFromSetupIntentTestInput(testInput: SetupIntentTestInput) = BaseAddPaymentMethodFragment.getFormArguments(
@@ -210,7 +214,8 @@ class FormSaveCheckboxTest {
             paymentMethodTypes = testInput.intentLpms
         ),
         supportedPaymentMethodName = SupportedPaymentMethod.fromCode(testInput.lpmTypeFormCode)!!.name,
-        merchantName = "Example, Inc"
+        merchantName = "Example, Inc",
+        injectorKey = -1
     )
 
     @Serializable

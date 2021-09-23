@@ -79,5 +79,6 @@ internal object PaymentSheetFixtures {
             name = "Jenny Rosen",
             phone = "+18008675309"
         ),
+        injectorKey = -1
     )
 }
