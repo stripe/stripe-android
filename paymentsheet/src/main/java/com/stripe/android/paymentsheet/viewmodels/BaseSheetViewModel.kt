@@ -200,7 +200,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
         }
 
         if (stripeIntent != null) {
-            _liveMode.value = stripeIntent.isLiveMode
+            _liveMode.postValue(stripeIntent.isLiveMode)
         }
     }
 
