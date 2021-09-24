@@ -93,7 +93,9 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
         .build()
 
     @InjectorKey
-    private val injectorKey: Int = WeakMapInjectorRegistry.nextKey()
+    private val injectorKey: String = WeakMapInjectorRegistry.nextKey(
+        requireNotNull(GooglePayPaymentMethodLauncher::class.simpleName)
+    )
 
     private val injector = object : Injector {
         override fun inject(injectable: Injectable<*>) {

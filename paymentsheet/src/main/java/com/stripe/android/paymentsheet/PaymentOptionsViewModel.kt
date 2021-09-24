@@ -31,7 +31,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
     @IOContext workContext: CoroutineContext,
     application: Application,
     logger: Logger,
-    @InjectorKey injectorKey: Int
+    @InjectorKey injectorKey: String
 ) : BaseSheetViewModel<PaymentOptionsViewModel.TransitionTarget>(
     config = args.config,
     prefsRepository = prefsRepositoryFactory(args.config?.customer),

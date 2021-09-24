@@ -7,6 +7,7 @@ import android.os.Parcelable
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.core.os.bundleOf
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.payments.core.injection.InjectorKey
 import kotlinx.parcelize.Parcelize
 
 class GooglePayPaymentMethodLauncherContract :
@@ -77,7 +78,7 @@ class GooglePayPaymentMethodLauncherContract :
 
         @Parcelize
         internal data class InjectionParams(
-            val injectorKey: Int,
+            @InjectorKey val injectorKey: String,
             val productUsage: Set<String>,
             val enableLogging: Boolean,
             val publishableKey: String,
