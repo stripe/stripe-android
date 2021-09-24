@@ -84,8 +84,8 @@ internal class FormViewModelTest {
                 factory.subComponentBuilderProvider = Provider { mockBuilder }
             }
         }
-        val injectorKey = 1
-        val config = COMPOSE_FRAGMENT_ARGS.copy(injectorKey = 1)
+        val injectorKey = WeakMapInjectorRegistry.nextKey("testKey")
+        val config = COMPOSE_FRAGMENT_ARGS.copy(injectorKey = injectorKey)
         WeakMapInjectorRegistry.register(injector, injectorKey)
         val factory = FormViewModel.Factory(
             config,
