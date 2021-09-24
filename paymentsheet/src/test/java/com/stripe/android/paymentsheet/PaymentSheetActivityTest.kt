@@ -690,6 +690,30 @@ internal class PaymentSheetActivityTest {
         }
     }
 
+    @Test
+    fun `when intent is in live mode show no indicator`() {
+        val scenario = activityScenario(viewModel)
+        scenario.launch(intent).onActivity { activity ->
+            // wait for bottom sheet to animate in
+            idleLooper()
+
+            viewModel._liveMode.value = true
+            assertThat(activity.viewBinding.testmode.isVisible).isFalse()
+        }
+    }
+
+    @Test
+    fun `when intent is not in live mode show indicator`() {
+        val scenario = activityScenario(viewModel)
+        scenario.launch(intent).onActivity { activity ->
+            // wait for bottom sheet to animate in
+            idleLooper()
+
+            viewModel._liveMode.value = false
+            assertThat(activity.viewBinding.testmode.isVisible).isTrue()
+        }
+    }
+
     private fun currentFragment(activity: PaymentSheetActivity) =
         activity.supportFragmentManager.findFragmentById(activity.viewBinding.fragmentContainer.id)
 

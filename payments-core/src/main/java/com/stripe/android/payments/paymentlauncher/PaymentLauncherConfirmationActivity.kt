@@ -34,7 +34,8 @@ internal class PaymentLauncherConfirmationActivity : AppCompatActivity() {
             this
         )
 
-    private val viewModel: PaymentLauncherViewModel by viewModels { viewModelFactory }
+    @VisibleForTesting
+    internal val viewModel: PaymentLauncherViewModel by viewModels { viewModelFactory }
 
     @SuppressLint("SourceLockedOrientationActivity")
     override fun onCreate(savedInstanceState: Bundle?) {

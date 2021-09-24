@@ -330,6 +330,7 @@ public final class com/stripe/android/paymentsheet/databinding/ActivityPaymentSh
 	public final field googlePayButton Lcom/stripe/android/paymentsheet/ui/GooglePayButton;
 	public final field message Landroid/widget/TextView;
 	public final field scrollView Landroid/widget/ScrollView;
+	public final field testmode Landroid/widget/TextView;
 	public final field toolbar Lcom/google/android/material/appbar/MaterialToolbar;
 	public static fun bind (Landroid/view/View;)Lcom/stripe/android/paymentsheet/databinding/ActivityPaymentSheetBinding;
 	public synthetic fun getRoot ()Landroid/view/View;
@@ -454,6 +455,7 @@ public final class com/stripe/android/paymentsheet/databinding/StripeActivityPay
 	public final field fragmentContainerParent Landroid/widget/LinearLayout;
 	public final field message Landroid/widget/TextView;
 	public final field scrollView Landroid/widget/ScrollView;
+	public final field testmode Landroid/widget/TextView;
 	public final field toolbar Lcom/google/android/material/appbar/MaterialToolbar;
 	public static fun bind (Landroid/view/View;)Lcom/stripe/android/paymentsheet/databinding/StripeActivityPaymentOptionsBinding;
 	public synthetic fun getRoot ()Landroid/view/View;
@@ -707,6 +709,14 @@ public final class com/stripe/android/paymentsheet/injection/PaymentSheetCommonM
 	public synthetic fun get ()Ljava/lang/Object;
 	public fun get ()Lkotlin/jvm/functions/Function0;
 	public static fun providePublishableKey (Ldagger/Lazy;)Lkotlin/jvm/functions/Function0;
+}
+
+public final class com/stripe/android/paymentsheet/injection/PaymentSheetCommonModule_Companion_ProvideResourcesFactory : dagger/internal/Factory {
+	public fun <init> (Ljavax/inject/Provider;)V
+	public static fun create (Ljavax/inject/Provider;)Lcom/stripe/android/paymentsheet/injection/PaymentSheetCommonModule_Companion_ProvideResourcesFactory;
+	public fun get ()Landroid/content/res/Resources;
+	public synthetic fun get ()Ljava/lang/Object;
+	public static fun provideResources (Landroid/content/Context;)Landroid/content/res/Resources;
 }
 
 public final class com/stripe/android/paymentsheet/injection/PaymentSheetCommonModule_Companion_ProvideStripeAccountIdFactory : dagger/internal/Factory {

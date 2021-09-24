@@ -17,7 +17,7 @@ import javax.inject.Singleton
  */
 @Module(
     includes = [
-        Stripe3ds2TransactionViewModelModule::class
+        Stripe3ds2TransactionModule::class
     ]
 )
 internal abstract class Stripe3DSAuthenticatorModule {
