@@ -1,35 +1,52 @@
 package com.stripe.android.paymentsheet.forms
 
+import android.app.Application
 import android.content.Context
 import androidx.annotation.StringRes
 import androidx.lifecycle.asLiveData
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.payments.core.injection.DUMMY_INJECTOR_KEY
+import com.stripe.android.payments.core.injection.Injectable
+import com.stripe.android.payments.core.injection.Injector
+import com.stripe.android.payments.core.injection.WeakMapInjectorRegistry
+import com.stripe.android.paymentsheet.PaymentSheetFixtures.COMPOSE_FRAGMENT_ARGS
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.address.AddressFieldElementRepository
 import com.stripe.android.paymentsheet.elements.AddressElement
-import com.stripe.android.paymentsheet.elements.SaveForFutureUseController
-import com.stripe.android.paymentsheet.elements.SectionElement
-import com.stripe.android.paymentsheet.elements.SectionSingleFieldElement
-import com.stripe.android.paymentsheet.elements.TextFieldController
-import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
 import com.stripe.android.paymentsheet.elements.BankRepository
+import com.stripe.android.paymentsheet.elements.CountrySpec
+import com.stripe.android.paymentsheet.elements.EmailSpec
 import com.stripe.android.paymentsheet.elements.IdentifierSpec
 import com.stripe.android.paymentsheet.elements.LayoutSpec
 import com.stripe.android.paymentsheet.elements.ResourceRepository
-import com.stripe.android.paymentsheet.elements.CountrySpec
-import com.stripe.android.paymentsheet.elements.EmailSpec
 import com.stripe.android.paymentsheet.elements.RowElement
+import com.stripe.android.paymentsheet.elements.SaveForFutureUseController
 import com.stripe.android.paymentsheet.elements.SaveForFutureUseSpec
+import com.stripe.android.paymentsheet.elements.SectionElement
+import com.stripe.android.paymentsheet.elements.SectionSingleFieldElement
 import com.stripe.android.paymentsheet.elements.SectionSpec
 import com.stripe.android.paymentsheet.elements.SimpleTextSpec.Companion.NAME
+import com.stripe.android.paymentsheet.elements.TextFieldController
+import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
+import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.runBlockingTest
+import org.junit.Assert.assertNotNull
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.any
+import org.mockito.kotlin.argWhere
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.spy
+import org.mockito.kotlin.times
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.shadows.ShadowLooper
+import javax.inject.Provider
 
 @RunWith(RobolectricTestRunner::class)
 internal class FormViewModelTest {
@@ -51,6 +68,56 @@ internal class FormViewModelTest {
         )
 
     @Test
+    fun `Factory gets initialized by Injector when Injector is available`() {
+        val mockBuilder = mock<FormViewModelSubcomponent.Builder>()
+        val mockSubcomponent = mock<FormViewModelSubcomponent>()
+        val mockViewModel = mock<FormViewModel>()
+
+        whenever(mockBuilder.build()).thenReturn(mockSubcomponent)
+        whenever(mockBuilder.layout(any())).thenReturn(mockBuilder)
+        whenever(mockBuilder.formFragmentArguments(any())).thenReturn(mockBuilder)
+        whenever(mockSubcomponent.viewModel).thenReturn(mockViewModel)
+
+        val injector = object : Injector {
+            override fun inject(injectable: Injectable<*>) {
+                val factory = injectable as FormViewModel.Factory
+                factory.subComponentBuilderProvider = Provider { mockBuilder }
+            }
+        }
+        val injectorKey = 1
+        val config = COMPOSE_FRAGMENT_ARGS.copy(injectorKey = 1)
+        WeakMapInjectorRegistry.register(injector, injectorKey)
+        val factory = FormViewModel.Factory(
+            config,
+            ApplicationProvider.getApplicationContext<Application>().resources,
+            sofort.layout
+        )
+        val factorySpy = spy(factory)
+        val createdViewModel = factorySpy.create(FormViewModel::class.java)
+        verify(factorySpy, times(0)).fallbackInitialize(any())
+        assertThat(createdViewModel).isEqualTo(mockViewModel)
+
+        WeakMapInjectorRegistry.staticCacheMap.clear()
+    }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    @Test
+    fun `Factory gets initialized with fallback when no Injector is available`() = runBlockingTest {
+        val factory = FormViewModel.Factory(
+            mock(),
+            ApplicationProvider.getApplicationContext<Application>().resources,
+            sofort.layout
+        )
+        val factorySpy = spy(factory)
+        assertNotNull(factorySpy.create(FormViewModel::class.java))
+        verify(factorySpy).fallbackInitialize(
+            argWhere {
+                it.resource == ApplicationProvider.getApplicationContext<Application>().resources
+            }
+        )
+    }
+
+    @Test
     fun `Verify setting save for future use`() {
         val formViewModel = FormViewModel(
             LayoutSpec(
@@ -65,7 +132,7 @@ internal class FormViewModelTest {
                 saveForFutureUseInitialVisibility = true,
                 saveForFutureUseInitialValue = true,
                 merchantName = "Example, Inc.",
-                injectorKey = -1
+                injectorKey = DUMMY_INJECTOR_KEY
             ),
             resourceRepository = resourceRepository
         )
@@ -97,7 +164,7 @@ internal class FormViewModelTest {
                 saveForFutureUseInitialVisibility = true,
                 saveForFutureUseInitialValue = true,
                 merchantName = "Example, Inc.",
-                injectorKey = -1
+                injectorKey = DUMMY_INJECTOR_KEY
             ),
             resourceRepository = resourceRepository
         )
@@ -131,7 +198,7 @@ internal class FormViewModelTest {
                 saveForFutureUseInitialVisibility = true,
                 saveForFutureUseInitialValue = true,
                 merchantName = "Example, Inc.",
-                injectorKey = -1
+                injectorKey = DUMMY_INJECTOR_KEY
             ),
             resourceRepository = resourceRepository
         )
@@ -170,7 +237,7 @@ internal class FormViewModelTest {
                     saveForFutureUseInitialVisibility = true,
                     saveForFutureUseInitialValue = true,
                     merchantName = "Example, Inc.",
-                    injectorKey = -1
+                    injectorKey = DUMMY_INJECTOR_KEY
                 ),
                 resourceRepository = resourceRepository
             )
@@ -217,7 +284,7 @@ internal class FormViewModelTest {
                     saveForFutureUseInitialVisibility = true,
                     saveForFutureUseInitialValue = true,
                     merchantName = "Example, Inc.",
-                    injectorKey = -1
+                    injectorKey = DUMMY_INJECTOR_KEY
                 ),
                 resourceRepository = resourceRepository
             )
@@ -264,7 +331,7 @@ internal class FormViewModelTest {
                     saveForFutureUseInitialVisibility = true,
                     saveForFutureUseInitialValue = true,
                     merchantName = "Example, Inc.",
-                    injectorKey = -1
+                    injectorKey = DUMMY_INJECTOR_KEY
                 ),
                 resourceRepository = resourceRepository
             )
@@ -311,7 +378,7 @@ internal class FormViewModelTest {
                     saveForFutureUseInitialVisibility = true,
                     saveForFutureUseInitialValue = true,
                     merchantName = "Example, Inc.",
-                    injectorKey = -1
+                    injectorKey = DUMMY_INJECTOR_KEY
                 ),
                 resourceRepository = resourceRepository
             )
@@ -383,7 +450,7 @@ internal class FormViewModelTest {
                     saveForFutureUseInitialVisibility = true,
                     saveForFutureUseInitialValue = true,
                     merchantName = "Example, Inc.",
-                    injectorKey = -1
+                    injectorKey = DUMMY_INJECTOR_KEY
                 ),
                 resourceRepository = resourceRepository
             )
