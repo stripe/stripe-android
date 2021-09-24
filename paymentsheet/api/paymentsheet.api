@@ -709,20 +709,20 @@ public final class com/stripe/android/paymentsheet/injection/PaymentSheetCommonM
 	public static fun providePublishableKey (Ldagger/Lazy;)Lkotlin/jvm/functions/Function0;
 }
 
-public final class com/stripe/android/paymentsheet/injection/PaymentSheetCommonModule_Companion_ProvideStripeAccountIdFactory : dagger/internal/Factory {
-	public fun <init> (Ljavax/inject/Provider;)V
-	public static fun create (Ljavax/inject/Provider;)Lcom/stripe/android/paymentsheet/injection/PaymentSheetCommonModule_Companion_ProvideStripeAccountIdFactory;
-	public synthetic fun get ()Ljava/lang/Object;
-	public fun get ()Lkotlin/jvm/functions/Function0;
-	public static fun provideStripeAccountId (Ldagger/Lazy;)Lkotlin/jvm/functions/Function0;
-}
-
 public final class com/stripe/android/paymentsheet/injection/PaymentSheetCommonModule_Companion_ProvideResourcesFactory : dagger/internal/Factory {
 	public fun <init> (Ljavax/inject/Provider;)V
 	public static fun create (Ljavax/inject/Provider;)Lcom/stripe/android/paymentsheet/injection/PaymentSheetCommonModule_Companion_ProvideResourcesFactory;
 	public fun get ()Landroid/content/res/Resources;
 	public synthetic fun get ()Ljava/lang/Object;
 	public static fun provideResources (Landroid/content/Context;)Landroid/content/res/Resources;
+}
+
+public final class com/stripe/android/paymentsheet/injection/PaymentSheetCommonModule_Companion_ProvideStripeAccountIdFactory : dagger/internal/Factory {
+	public fun <init> (Ljavax/inject/Provider;)V
+	public static fun create (Ljavax/inject/Provider;)Lcom/stripe/android/paymentsheet/injection/PaymentSheetCommonModule_Companion_ProvideStripeAccountIdFactory;
+	public synthetic fun get ()Ljava/lang/Object;
+	public fun get ()Lkotlin/jvm/functions/Function0;
+	public static fun provideStripeAccountId (Ldagger/Lazy;)Lkotlin/jvm/functions/Function0;
 }
 
 public final class com/stripe/android/paymentsheet/injection/PaymentSheetLauncherModule_Companion_ProvideEventReporterModeFactory : dagger/internal/Factory {
