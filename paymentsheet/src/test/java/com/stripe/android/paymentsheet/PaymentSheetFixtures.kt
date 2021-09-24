@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet
 
 import androidx.core.graphics.toColorInt
+import com.stripe.android.payments.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.SetupIntentClientSecret
 import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
@@ -78,6 +79,7 @@ internal object PaymentSheetFixtures {
             email = "email",
             name = "Jenny Rosen",
             phone = "+18008675309"
-        )
+        ),
+        injectorKey = DUMMY_INJECTOR_KEY
     )
 }

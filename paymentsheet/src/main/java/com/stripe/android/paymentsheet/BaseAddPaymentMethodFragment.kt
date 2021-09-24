@@ -16,6 +16,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.payments.core.injection.InjectorKey
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.databinding.FragmentPaymentsheetAddPaymentMethodBinding
 import com.stripe.android.paymentsheet.elements.IdentifierSpec
@@ -167,7 +168,8 @@ internal abstract class BaseAddPaymentMethodFragment(
                 supportedPaymentMethodName = paymentMethod.name,
                 merchantName = sheetViewModel.merchantName,
                 amount = sheetViewModel.amount.value,
-                billingAddress = sheetViewModel.config?.defaultBillingDetails
+                billingAddress = sheetViewModel.config?.defaultBillingDetails,
+                injectorKey = sheetViewModel.injectorKey
             )
         )
 
@@ -225,7 +227,8 @@ internal abstract class BaseAddPaymentMethodFragment(
             stripeIntent: StripeIntent,
             merchantName: String,
             amount: Amount? = null,
-            billingAddress: PaymentSheet.BillingDetails? = null
+            billingAddress: PaymentSheet.BillingDetails? = null,
+            @InjectorKey injectorKey: String
         ): FormFragmentArguments {
             // Has effect of setting off session on PIs (not SIs) and also impacts reopening
             // the card
@@ -286,7 +289,8 @@ internal abstract class BaseAddPaymentMethodFragment(
                             )
                         }
                     )
-                }
+                },
+                injectorKey = injectorKey
             )
         }
     }

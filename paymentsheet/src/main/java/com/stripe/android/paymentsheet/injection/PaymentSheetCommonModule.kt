@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.injection
 
 import android.content.Context
+import android.content.res.Resources
 import androidx.core.os.LocaleListCompat
 import com.stripe.android.Logger
 import com.stripe.android.PaymentConfiguration
@@ -53,6 +54,12 @@ internal abstract class PaymentSheetCommonModule {
         @Provides
         fun providePaymentConfiguration(appContext: Context): PaymentConfiguration {
             return PaymentConfiguration.getInstance(appContext)
+        }
+
+        @Provides
+        @Singleton
+        fun provideResources(context: Context): Resources {
+            return context.resources
         }
 
         @Provides

@@ -569,15 +569,24 @@ public final class com/stripe/android/paymentsheet/forms/FormViewModel_Factory :
 	public static fun newInstance (Lcom/stripe/android/paymentsheet/elements/LayoutSpec;Lcom/stripe/android/paymentsheet/paymentdatacollection/FormFragmentArguments;Lcom/stripe/android/paymentsheet/elements/ResourceRepository;)Lcom/stripe/android/paymentsheet/forms/FormViewModel;
 }
 
+public final class com/stripe/android/paymentsheet/forms/FormViewModel_Factory_MembersInjector : dagger/MembersInjector {
+	public fun <init> (Ljavax/inject/Provider;)V
+	public static fun create (Ljavax/inject/Provider;)Ldagger/MembersInjector;
+	public fun injectMembers (Lcom/stripe/android/paymentsheet/forms/FormViewModel$Factory;)V
+	public synthetic fun injectMembers (Ljava/lang/Object;)V
+	public static fun injectSubComponentBuilderProvider (Lcom/stripe/android/paymentsheet/forms/FormViewModel$Factory;Ljavax/inject/Provider;)V
+}
+
 public final class com/stripe/android/paymentsheet/injection/DaggerFlowControllerComponent : com/stripe/android/paymentsheet/injection/FlowControllerComponent {
 	public static fun builder ()Lcom/stripe/android/paymentsheet/injection/FlowControllerComponent$Builder;
 	public fun getFlowController ()Lcom/stripe/android/paymentsheet/flowcontroller/DefaultFlowController;
 	public fun inject (Lcom/stripe/android/paymentsheet/PaymentOptionsViewModel$Factory;)V
+	public fun inject (Lcom/stripe/android/paymentsheet/forms/FormViewModel$Factory;)V
 }
 
 public final class com/stripe/android/paymentsheet/injection/DaggerFormViewModelComponent : com/stripe/android/paymentsheet/injection/FormViewModelComponent {
 	public static fun builder ()Lcom/stripe/android/paymentsheet/injection/FormViewModelComponent$Builder;
-	public fun getViewModel ()Lcom/stripe/android/paymentsheet/forms/FormViewModel;
+	public fun inject (Lcom/stripe/android/paymentsheet/forms/FormViewModel$Factory;)V
 }
 
 public final class com/stripe/android/paymentsheet/injection/DaggerPaymentOptionsViewModelFactoryComponent : com/stripe/android/paymentsheet/injection/PaymentOptionsViewModelFactoryComponent {
@@ -588,6 +597,7 @@ public final class com/stripe/android/paymentsheet/injection/DaggerPaymentOption
 public final class com/stripe/android/paymentsheet/injection/DaggerPaymentSheetLauncherComponent : com/stripe/android/paymentsheet/injection/PaymentSheetLauncherComponent {
 	public static fun builder ()Lcom/stripe/android/paymentsheet/injection/PaymentSheetLauncherComponent$Builder;
 	public fun inject (Lcom/stripe/android/paymentsheet/PaymentSheetViewModel$Factory;)V
+	public fun inject (Lcom/stripe/android/paymentsheet/forms/FormViewModel$Factory;)V
 }
 
 public final class com/stripe/android/paymentsheet/injection/FlowControllerModule_Companion_ProvideClientSecretFactory : dagger/internal/Factory {
@@ -628,6 +638,11 @@ public final class com/stripe/android/paymentsheet/injection/FlowControllerModul
 	public fun get ()Lcom/stripe/android/paymentsheet/flowcontroller/FlowControllerViewModel;
 	public synthetic fun get ()Ljava/lang/Object;
 	public static fun provideViewModel (Landroidx/lifecycle/ViewModelStoreOwner;)Lcom/stripe/android/paymentsheet/flowcontroller/FlowControllerViewModel;
+}
+
+public final class com/stripe/android/paymentsheet/injection/FormViewModelModule {
+	public static final field $stable I
+	public fun <init> ()V
 }
 
 public final class com/stripe/android/paymentsheet/injection/PaymentOptionsViewModelModule_ProvideDummyInjectorKeyFactory : dagger/internal/Factory {
@@ -692,6 +707,14 @@ public final class com/stripe/android/paymentsheet/injection/PaymentSheetCommonM
 	public synthetic fun get ()Ljava/lang/Object;
 	public fun get ()Lkotlin/jvm/functions/Function0;
 	public static fun providePublishableKey (Ldagger/Lazy;)Lkotlin/jvm/functions/Function0;
+}
+
+public final class com/stripe/android/paymentsheet/injection/PaymentSheetCommonModule_Companion_ProvideResourcesFactory : dagger/internal/Factory {
+	public fun <init> (Ljavax/inject/Provider;)V
+	public static fun create (Ljavax/inject/Provider;)Lcom/stripe/android/paymentsheet/injection/PaymentSheetCommonModule_Companion_ProvideResourcesFactory;
+	public fun get ()Landroid/content/res/Resources;
+	public synthetic fun get ()Ljava/lang/Object;
+	public static fun provideResources (Landroid/content/Context;)Landroid/content/res/Resources;
 }
 
 public final class com/stripe/android/paymentsheet/injection/PaymentSheetCommonModule_Companion_ProvideStripeAccountIdFactory : dagger/internal/Factory {

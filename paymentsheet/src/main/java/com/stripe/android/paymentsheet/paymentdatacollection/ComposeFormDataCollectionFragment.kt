@@ -32,9 +32,9 @@ internal class ComposeFormDataCollectionFragment : Fragment() {
 
     val formViewModel: FormViewModel by viewModels {
         FormViewModel.Factory(
-            resources,
-            formSpec.layout,
-            requireNotNull(
+            resource = resources,
+            layout = formSpec.layout,
+            config = requireNotNull(
                 requireArguments().getParcelable(
                     EXTRA_CONFIG
                 )

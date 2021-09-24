@@ -11,7 +11,10 @@ import javax.inject.Named
 import javax.inject.Singleton
 
 @Module(
-    subcomponents = [PaymentSheetViewModelSubcomponent::class]
+    subcomponents = [
+        PaymentSheetViewModelSubcomponent::class,
+        FormViewModelSubcomponent::class
+    ]
 )
 internal abstract class PaymentSheetLauncherModule {
     @Binds

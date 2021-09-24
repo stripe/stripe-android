@@ -15,6 +15,7 @@ import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentIntentFixtures.PI_OFF_SESSION
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.payments.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.paymentsheet.PaymentSheetViewModel.CheckoutIdentifier
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.databinding.FragmentPaymentsheetAddPaymentMethodBinding
@@ -316,7 +317,8 @@ class PaymentSheetAddPaymentMethodFragmentTest {
                         saveForFutureUseInitialVisibility = true,
                         saveForFutureUseInitialValue = true,
                         merchantName = PaymentSheetFixtures.MERCHANT_DISPLAY_NAME,
-                        amount = createAmount()
+                        amount = createAmount(),
+                        injectorKey = DUMMY_INJECTOR_KEY
                     )
                 )
         }
@@ -346,7 +348,8 @@ class PaymentSheetAddPaymentMethodFragmentTest {
                         saveForFutureUseInitialVisibility = true,
                         saveForFutureUseInitialValue = true,
                         merchantName = PaymentSheetFixtures.MERCHANT_DISPLAY_NAME,
-                        amount = createAmount()
+                        amount = createAmount(),
+                        injectorKey = DUMMY_INJECTOR_KEY
                     )
                 )
         }
@@ -406,7 +409,8 @@ class PaymentSheetAddPaymentMethodFragmentTest {
                         saveForFutureUseInitialVisibility = false,
                         saveForFutureUseInitialValue = true,
                         merchantName = "Widget Store",
-                        amount = createAmount(PI_OFF_SESSION)
+                        amount = createAmount(PI_OFF_SESSION),
+                        injectorKey = DUMMY_INJECTOR_KEY
                     )
                 )
         }

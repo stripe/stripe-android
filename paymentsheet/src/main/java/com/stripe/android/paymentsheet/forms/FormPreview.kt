@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.forms
 
 import android.annotation.SuppressLint
 import androidx.compose.runtime.Composable
+import com.stripe.android.payments.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.address.AddressFieldElementRepository
 import com.stripe.android.paymentsheet.address.parseAddressesSchema
@@ -51,9 +52,9 @@ internal fun FormInternalPreview() {
                 "Card",
                 saveForFutureUseInitialVisibility = true,
                 saveForFutureUseInitialValue = true,
-                "Merchant, Inc.",
-                Amount(10, "USD"),
-                PaymentSheet.BillingDetails(
+                merchantName = "Merchant, Inc.",
+                amount = Amount(10, "USD"),
+                billingDetails = PaymentSheet.BillingDetails(
                     PaymentSheet.Address(
                         "San Fransciso",
                         "US",
@@ -62,8 +63,8 @@ internal fun FormInternalPreview() {
                         "94111",
                         "CA",
                     )
-                )
-
+                ),
+                injectorKey = DUMMY_INJECTOR_KEY
             )
         ).transform(formElements)
     )
