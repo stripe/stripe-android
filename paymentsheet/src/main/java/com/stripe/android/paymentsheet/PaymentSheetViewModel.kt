@@ -18,7 +18,7 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContract
-import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherFactory
+import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLauncherFactory
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
@@ -85,7 +85,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     private val googlePayPaymentMethodLauncherFactory: GooglePayPaymentMethodLauncherFactory,
     logger: Logger,
     @IOContext workContext: CoroutineContext,
-    @InjectorKey injectorKey: Int
+    @InjectorKey injectorKey: String
 ) : BaseSheetViewModel<PaymentSheetViewModel.TransitionTarget>(
     application = application,
     config = args.config,

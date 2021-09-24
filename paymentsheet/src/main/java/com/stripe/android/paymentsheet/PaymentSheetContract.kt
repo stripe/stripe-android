@@ -8,6 +8,7 @@ import androidx.activity.result.contract.ActivityResultContract
 import androidx.annotation.ColorInt
 import androidx.annotation.VisibleForTesting
 import androidx.core.os.bundleOf
+import com.stripe.android.payments.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.payments.core.injection.InjectorKey
 import com.stripe.android.paymentsheet.model.ClientSecret
 import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
@@ -41,7 +42,7 @@ class PaymentSheetContract :
         internal val clientSecret: ClientSecret,
         internal val config: PaymentSheet.Configuration?,
         @ColorInt internal val statusBarColor: Int? = null,
-        @InjectorKey internal val injectorKey: Int = NON_INJECTOR_KEY
+        @InjectorKey internal val injectorKey: String = DUMMY_INJECTOR_KEY
     ) : ActivityStarter.Args {
         val googlePayConfig: PaymentSheet.GooglePayConfiguration? get() = config?.googlePay
 
@@ -69,7 +70,7 @@ class PaymentSheetContract :
             internal fun createPaymentIntentArgsWithInjectorKey(
                 clientSecret: String,
                 config: PaymentSheet.Configuration? = null,
-                @InjectorKey injectorKey: Int
+                @InjectorKey injectorKey: String
             ) = Args(
                 PaymentIntentClientSecret(clientSecret),
                 config,
@@ -79,7 +80,7 @@ class PaymentSheetContract :
             internal fun createSetupIntentArgsWithInjectorKey(
                 clientSecret: String,
                 config: PaymentSheet.Configuration? = null,
-                @InjectorKey injectorKey: Int
+                @InjectorKey injectorKey: String
             ) = Args(
                 SetupIntentClientSecret(clientSecret),
                 config,
@@ -104,9 +105,5 @@ class PaymentSheetContract :
             "com.stripe.android.paymentsheet.PaymentSheetContract.extra_args"
         private const val EXTRA_RESULT =
             "com.stripe.android.paymentsheet.PaymentSheetContract.extra_result"
-
-        // Indicates no corresponding injector is registered, should only happen when
-        // PaymentSheetContract.Args is created by clients directly
-        private const val NON_INJECTOR_KEY = -1
     }
 }

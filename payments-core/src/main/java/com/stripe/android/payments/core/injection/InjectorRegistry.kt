@@ -13,18 +13,18 @@ import dagger.Component
  */
 internal interface InjectorRegistry {
     /**
-     * Registers an [Injector] instance with corresponding [InjectorKey]
+     * Registers an [Injector] instance with corresponding [InjectorKey].
      */
-    fun register(injector: Injector, @InjectorKey key: Int)
+    fun register(injector: Injector, @InjectorKey key: String)
 
     /**
      * Retrieves an [Injector] instance from [InjectorKey].
      */
-    fun retrieve(@InjectorKey injectorKey: Int): Injector?
+    fun retrieve(@InjectorKey injectorKey: String): Injector?
 
     /**
-     * Returns the next key to identify an [Injector]
+     * Returns the next key to identify an [Injector].
      */
     @InjectorKey
-    fun nextKey(): Int
+    fun nextKey(prefix: String): String
 }

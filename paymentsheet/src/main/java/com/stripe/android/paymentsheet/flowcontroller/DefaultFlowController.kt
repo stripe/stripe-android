@@ -15,6 +15,7 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContract
+import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLauncherFactory
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.PaymentIntent
@@ -71,7 +72,7 @@ internal class DefaultFlowController @Inject internal constructor(
     private val paymentOptionCallback: PaymentOptionCallback,
     private val paymentResultCallback: PaymentSheetResultCallback,
     activityResultCaller: ActivityResultCaller,
-    @InjectorKey private val injectorKey: Int,
+    @InjectorKey private val injectorKey: String,
     // Properties provided through injection
     private val flowControllerInitializer: FlowControllerInitializer,
     private val eventReporter: EventReporter,
@@ -84,7 +85,8 @@ internal class DefaultFlowController @Inject internal constructor(
     private val lazyPaymentConfiguration: Lazy<PaymentConfiguration>,
     @UIContext private val uiContext: CoroutineContext,
     @Named(ENABLE_LOGGING) private val enableLogging: Boolean,
-    @Named(PRODUCT_USAGE) private val productUsage: Set<String>
+    @Named(PRODUCT_USAGE) private val productUsage: Set<String>,
+    private val googlePayPaymentMethodLauncherFactory: GooglePayPaymentMethodLauncherFactory,
 ) : PaymentSheet.FlowController, Injector {
     private val paymentOptionActivityLauncher: ActivityResultLauncher<PaymentOptionContract.Args>
     private var googlePayActivityLauncher:
@@ -105,6 +107,9 @@ internal class DefaultFlowController @Inject internal constructor(
             }
             is FormViewModel.Factory -> {
                 flowControllerComponent.inject(injectable)
+            }
+            else -> {
+                throw IllegalArgumentException("invalid Injectable $injectable requested in $this")
             }
         }
     }
@@ -239,28 +244,7 @@ internal class DefaultFlowController @Inject internal constructor(
 
         val paymentSelection = viewModel.paymentSelection
         if (paymentSelection == PaymentSelection.GooglePay) {
-            // initData.config.googlePay is guaranteed not to be null or GooglePay would be disabled
-            val config = requireNotNull(initData.config)
-            val googlePayConfig = requireNotNull(config.googlePay)
-
-            googlePayActivityLauncher.launch(
-                GooglePayPaymentMethodLauncherContract.Args(
-                    config = GooglePayPaymentMethodLauncher.Config(
-                        environment = when (googlePayConfig.environment) {
-                            PaymentSheet.GooglePayConfiguration.Environment.Production ->
-                                GooglePayEnvironment.Production
-                            else ->
-                                GooglePayEnvironment.Test
-                        },
-                        merchantCountryCode = googlePayConfig.countryCode,
-                        merchantName = config.merchantDisplayName
-                    ),
-                    currencyCode = (initData.stripeIntent as? PaymentIntent)?.currency
-                        ?: googlePayConfig.currencyCode.orEmpty(),
-                    amount = (initData.stripeIntent as? PaymentIntent)?.amount?.toInt() ?: 0,
-                    transactionId = initData.stripeIntent.id
-                )
-            )
+            launchGooglePay(initData)
         } else {
             confirmPaymentSelection(paymentSelection, initData)
         }
@@ -375,7 +359,7 @@ internal class DefaultFlowController @Inject internal constructor(
             viewModel.paymentSelection = it
         }
 
-        viewModel.setInitData(initData)
+        viewModel.initData = initData
         callback.onConfigured(true, null)
     }
 
@@ -416,6 +400,35 @@ internal class DefaultFlowController @Inject internal constructor(
                 }
             )
         }
+    }
+
+    private fun launchGooglePay(initData: InitData) {
+        // initData.config.googlePay is guaranteed not to be null or GooglePay would be disabled
+        val config = requireNotNull(initData.config)
+        val googlePayConfig = requireNotNull(config.googlePay)
+        val googlePayPaymentLauncherConfig = GooglePayPaymentMethodLauncher.Config(
+            environment = when (googlePayConfig.environment) {
+                PaymentSheet.GooglePayConfiguration.Environment.Production ->
+                    GooglePayEnvironment.Production
+                else ->
+                    GooglePayEnvironment.Test
+            },
+            merchantCountryCode = googlePayConfig.countryCode,
+            merchantName = config.merchantDisplayName
+        )
+
+        googlePayPaymentMethodLauncherFactory.create(
+            lifecycleScope = lifecycleScope,
+            config = googlePayPaymentLauncherConfig,
+            readyCallback = {},
+            activityResultLauncher = googlePayActivityLauncher,
+            skipReadyCheck = true
+        ).present(
+            currencyCode = (initData.stripeIntent as? PaymentIntent)?.currency
+                ?: googlePayConfig.currencyCode.orEmpty(),
+            amount = (initData.stripeIntent as? PaymentIntent)?.amount?.toInt() ?: 0,
+            transactionId = initData.stripeIntent.id
+        )
     }
 
     private fun createPaymentSheetResult(
@@ -463,7 +476,10 @@ internal class DefaultFlowController @Inject internal constructor(
             paymentOptionCallback: PaymentOptionCallback,
             paymentResultCallback: PaymentSheetResultCallback
         ): PaymentSheet.FlowController {
-            val injectorKey = WeakMapInjectorRegistry.nextKey()
+            val injectorKey =
+                WeakMapInjectorRegistry.nextKey(
+                    requireNotNull(PaymentSheet.FlowController::class.simpleName)
+                )
             val flowControllerComponent = DaggerFlowControllerComponent.builder()
                 .appContext(appContext)
                 .viewModelStoreOwner(viewModelStoreOwner)

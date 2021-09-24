@@ -44,5 +44,5 @@ internal class PaymentOptionsViewModelModule {
      */
     @Provides
     @InjectorKey
-    fun provideDummyInjectorKey(): Int = DUMMY_INJECTOR_KEY
+    fun provideDummyInjectorKey(): String = DUMMY_INJECTOR_KEY
 }
