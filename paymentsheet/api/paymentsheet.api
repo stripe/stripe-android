@@ -330,6 +330,7 @@ public final class com/stripe/android/paymentsheet/databinding/ActivityPaymentSh
 	public final field googlePayButton Lcom/stripe/android/paymentsheet/ui/GooglePayButton;
 	public final field message Landroid/widget/TextView;
 	public final field scrollView Landroid/widget/ScrollView;
+	public final field testmode Landroid/widget/TextView;
 	public final field toolbar Lcom/google/android/material/appbar/MaterialToolbar;
 	public static fun bind (Landroid/view/View;)Lcom/stripe/android/paymentsheet/databinding/ActivityPaymentSheetBinding;
 	public synthetic fun getRoot ()Landroid/view/View;
@@ -454,6 +455,7 @@ public final class com/stripe/android/paymentsheet/databinding/StripeActivityPay
 	public final field fragmentContainerParent Landroid/widget/LinearLayout;
 	public final field message Landroid/widget/TextView;
 	public final field scrollView Landroid/widget/ScrollView;
+	public final field testmode Landroid/widget/TextView;
 	public final field toolbar Lcom/google/android/material/appbar/MaterialToolbar;
 	public static fun bind (Landroid/view/View;)Lcom/stripe/android/paymentsheet/databinding/StripeActivityPaymentOptionsBinding;
 	public synthetic fun getRoot ()Landroid/view/View;

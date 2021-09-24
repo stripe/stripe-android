@@ -85,6 +85,10 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     private val _transition = MutableLiveData<Event<TransitionTargetType?>>(Event(null))
     internal val transition: LiveData<Event<TransitionTargetType?>> = _transition
 
+    @VisibleForTesting
+    internal val _liveMode = MutableLiveData<Boolean>()
+    internal val liveMode: LiveData<Boolean> = _liveMode
+
     /**
      * On [CardDataCollectionFragment] this is set every time the details in the add
      * card fragment is determined to be valid (not necessarily selected)
@@ -209,6 +213,10 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
                     IllegalStateException("PaymentIntent must contain amount and currency.")
                 )
             }
+        }
+
+        if (stripeIntent != null) {
+            _liveMode.postValue(stripeIntent.isLiveMode)
         }
     }
 

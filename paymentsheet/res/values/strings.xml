@@ -121,6 +121,8 @@
   <string name="stripe_paymentsheet_setup_button_label">Set up</string>
   <!-- Label indicating the total amount that the user is authorizing (e.g. "Total: $25.00") -->
   <string name="stripe_paymentsheet_total_amount">Total: %s</string>
+  <!-- Label indicating the payment intent is in testmode -->
+  <string name="stripe_paymentsheet_test_mode_indicator" tools:ignore="MissingTranslation">TEST MODE</string>
 
   <string name="stripe_paymentsheet_payment_method_afterpay_clearpay" tools:ignore="MissingTranslation">Afterpay</string>
 
