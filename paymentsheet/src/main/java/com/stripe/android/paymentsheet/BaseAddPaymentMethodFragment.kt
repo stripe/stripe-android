@@ -228,7 +228,7 @@ internal abstract class BaseAddPaymentMethodFragment(
             merchantName: String,
             amount: Amount? = null,
             billingAddress: PaymentSheet.BillingDetails? = null,
-            @InjectorKey injectorKey: Int
+            @InjectorKey injectorKey: String
         ): FormFragmentArguments {
             // Has effect of setting off session on PIs (not SIs) and also impacts reopening
             // the card
