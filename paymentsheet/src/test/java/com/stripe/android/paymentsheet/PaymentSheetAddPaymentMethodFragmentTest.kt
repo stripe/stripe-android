@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet
 
 import android.content.Context
+import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.fragment.app.testing.launchFragmentInContainer
@@ -14,11 +15,13 @@ import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentIntentFixtures.PI_OFF_SESSION
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.payments.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.paymentsheet.PaymentSheetViewModel.CheckoutIdentifier
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.databinding.FragmentPaymentsheetAddPaymentMethodBinding
 import com.stripe.android.paymentsheet.databinding.PrimaryButtonBinding
 import com.stripe.android.paymentsheet.databinding.StripeGooglePayButtonBinding
+import com.stripe.android.paymentsheet.elements.IdentifierSpec
 import com.stripe.android.paymentsheet.forms.FormFieldEntry
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.Amount
@@ -30,12 +33,12 @@ import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
 import com.stripe.android.paymentsheet.paymentdatacollection.CardDataCollectionFragment
 import com.stripe.android.paymentsheet.paymentdatacollection.ComposeFormDataCollectionFragment
 import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
-import com.stripe.android.paymentsheet.elements.IdentifierSpec
 import com.stripe.android.paymentsheet.ui.PaymentSheetFragmentFactory
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.utils.TestUtils.idleLooper
 import org.junit.Before
 import org.junit.Ignore
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
@@ -45,6 +48,9 @@ import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
 class PaymentSheetAddPaymentMethodFragmentTest {
+    @get:Rule
+    val rule = InstantTaskExecutorRule()
+
     private val eventReporter = mock<EventReporter>()
     private val context: Context = ApplicationProvider.getApplicationContext()
 
@@ -262,7 +268,7 @@ class PaymentSheetAddPaymentMethodFragmentTest {
         val paymentIntent = PaymentIntentFixtures.PI_SUCCEEDED.copy(
             paymentMethodTypes = listOf("card")
         )
-        createFragment(stripeIntent = paymentIntent) { fragment, viewBinding ->
+        createFragment(stripeIntent = paymentIntent) { _, viewBinding ->
             assertThat(viewBinding.paymentMethodsRecycler.isVisible).isFalse()
             assertThat(viewBinding.googlePayDivider.viewBinding.dividerText.text)
                 .isEqualTo("Or pay with a card")
@@ -275,7 +281,7 @@ class PaymentSheetAddPaymentMethodFragmentTest {
         val paymentIntent = PaymentIntentFixtures.PI_SUCCEEDED.copy(
             paymentMethodTypes = listOf("card", "sofort")
         )
-        createFragment(stripeIntent = paymentIntent) { fragment, viewBinding ->
+        createFragment(stripeIntent = paymentIntent) { _, viewBinding ->
             assertThat(viewBinding.paymentMethodsRecycler.isVisible).isTrue()
             assertThat(viewBinding.googlePayDivider.viewBinding.dividerText.text)
                 .isEqualTo("Or pay using")
@@ -311,7 +317,8 @@ class PaymentSheetAddPaymentMethodFragmentTest {
                         saveForFutureUseInitialVisibility = true,
                         saveForFutureUseInitialValue = true,
                         merchantName = PaymentSheetFixtures.MERCHANT_DISPLAY_NAME,
-                        amount = createAmount()
+                        amount = createAmount(),
+                        injectorKey = DUMMY_INJECTOR_KEY
                     )
                 )
         }
@@ -341,7 +348,8 @@ class PaymentSheetAddPaymentMethodFragmentTest {
                         saveForFutureUseInitialVisibility = true,
                         saveForFutureUseInitialValue = true,
                         merchantName = PaymentSheetFixtures.MERCHANT_DISPLAY_NAME,
-                        amount = createAmount()
+                        amount = createAmount(),
+                        injectorKey = DUMMY_INJECTOR_KEY
                     )
                 )
         }
@@ -401,7 +409,8 @@ class PaymentSheetAddPaymentMethodFragmentTest {
                         saveForFutureUseInitialVisibility = false,
                         saveForFutureUseInitialValue = true,
                         merchantName = "Widget Store",
-                        amount = createAmount(PI_OFF_SESSION)
+                        amount = createAmount(PI_OFF_SESSION),
+                        injectorKey = DUMMY_INJECTOR_KEY
                     )
                 )
         }
@@ -429,84 +438,6 @@ class PaymentSheetAddPaymentMethodFragmentTest {
         )
         assertThat(selection?.iconResource).isEqualTo(
             R.drawable.stripe_ic_paymentsheet_pm_klarna
-        )
-    }
-
-    @Test
-    fun `Verify Compose argument in guest setup intent`() {
-        assertThat(
-            BaseAddPaymentMethodFragment.getFormArguments(
-                hasCustomer = false,
-                saveForFutureUse = true,
-                supportedPaymentMethodName = SupportedPaymentMethod.Bancontact.name,
-                merchantName = "Example, Inc",
-                billingAddress = null
-            )
-        ).isEqualTo(
-            FormFragmentArguments(
-                SupportedPaymentMethod.Bancontact.name,
-                saveForFutureUseInitialVisibility = false,
-                saveForFutureUseInitialValue = true,
-                merchantName = "Example, Inc",
-            )
-        )
-    }
-
-    @Test
-    fun `Verify Compose argument in guest payment intent`() {
-        assertThat(
-            BaseAddPaymentMethodFragment.getFormArguments(
-                hasCustomer = false,
-                saveForFutureUse = false,
-                supportedPaymentMethodName = SupportedPaymentMethod.Bancontact.name,
-                merchantName = "Example, Inc",
-            )
-        ).isEqualTo(
-            FormFragmentArguments(
-                SupportedPaymentMethod.Bancontact.name,
-                saveForFutureUseInitialVisibility = false,
-                saveForFutureUseInitialValue = false,
-                merchantName = "Example, Inc",
-            )
-        )
-    }
-
-    @Test
-    fun `Verify Compose argument in new or returning user setup intent`() {
-        assertThat(
-            BaseAddPaymentMethodFragment.getFormArguments(
-                hasCustomer = true,
-                saveForFutureUse = true,
-                supportedPaymentMethodName = SupportedPaymentMethod.Bancontact.name,
-                merchantName = "Example, Inc"
-            )
-        ).isEqualTo(
-            FormFragmentArguments(
-                SupportedPaymentMethod.Bancontact.name,
-                saveForFutureUseInitialVisibility = false,
-                saveForFutureUseInitialValue = true,
-                merchantName = "Example, Inc",
-            )
-        )
-    }
-
-    @Test
-    fun `Verify Compose argument in new or returning user payment intent`() {
-
-        assertThat(
-            BaseAddPaymentMethodFragment.getFormArguments(
-                hasCustomer = true,
-                saveForFutureUse = false,
-                supportedPaymentMethodName = SupportedPaymentMethod.Bancontact.name,
-                merchantName = "Example, Inc"
-            )
-        ).isEqualTo(
-            FormFragmentArguments(
-                SupportedPaymentMethod.Bancontact.name,
-                saveForFutureUseInitialVisibility = true,
-                saveForFutureUseInitialValue = true,
-                merchantName = "Example, Inc",
-            )
         )
     }
 

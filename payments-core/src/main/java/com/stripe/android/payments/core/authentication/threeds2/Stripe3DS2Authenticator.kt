@@ -26,7 +26,7 @@ import javax.inject.Singleton
 internal class Stripe3DS2Authenticator @Inject constructor(
     private val config: PaymentAuthConfig,
     @Named(ENABLE_LOGGING) private val enableLogging: Boolean,
-    @InjectorKey private val injectorKey: Int,
+    @InjectorKey private val injectorKey: String,
     @Named(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String,
     @Named(PRODUCT_USAGE) private val productUsage: Set<String>
 ) : PaymentAuthenticator<StripeIntent> {

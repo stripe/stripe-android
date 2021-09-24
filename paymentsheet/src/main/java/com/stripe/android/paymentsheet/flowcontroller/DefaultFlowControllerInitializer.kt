@@ -84,6 +84,8 @@ internal class DefaultFlowControllerInitializer @Inject constructor(
                     PaymentMethod.Type.fromCode(it)
                 }.filter {
                     SupportedPaymentMethod.supportedSavedPaymentMethods.contains(it.code)
+                }.filter {
+                    config?.allowsDelayedPaymentMethods == true || !it.hasDelayedSettlement()
                 }
                 customerRepository.getPaymentMethods(
                     customerConfig,

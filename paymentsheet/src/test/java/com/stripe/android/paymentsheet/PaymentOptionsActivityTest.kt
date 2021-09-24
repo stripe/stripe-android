@@ -8,10 +8,12 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
+import com.stripe.android.Logger
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.R
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.payments.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.paymentsheet.PaymentOptionsViewModel.TransitionTarget
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.databinding.PrimaryButtonBinding
@@ -289,11 +291,13 @@ class PaymentOptionsActivityTest {
     ): PaymentOptionsViewModel {
         return PaymentOptionsViewModel(
             args = args,
-            prefsRepository = FakePrefsRepository(),
+            prefsRepositoryFactory = { FakePrefsRepository() },
             eventReporter = eventReporter,
             customerRepository = FakeCustomerRepository(),
             workContext = testDispatcher,
-            application = ApplicationProvider.getApplicationContext()
+            application = ApplicationProvider.getApplicationContext(),
+            logger = Logger.noop(),
+            injectorKey = DUMMY_INJECTOR_KEY
         )
     }
 
@@ -305,7 +309,7 @@ class PaymentOptionsActivityTest {
             isGooglePayReady = false,
             newCard = null,
             statusBarColor = PaymentSheetFixtures.STATUS_BAR_COLOR,
-            injectorKey = 0,
+            injectorKey = DUMMY_INJECTOR_KEY,
             enableLogging = false,
             productUsage = mock()
         )

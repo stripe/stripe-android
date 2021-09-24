@@ -36,7 +36,7 @@ class StripePaymentLauncherTest {
         verify(mockHostActivityLauncher).launch(
             argWhere { arg ->
                 arg is PaymentLauncherContract.Args.IntentConfirmationArgs &&
-                    arg.injectorKey == WeakMapInjectorRegistry.CURRENT_REGISTER_KEY.get() &&
+                    arg.injectorKey == (PaymentLauncher::class.simpleName + WeakMapInjectorRegistry.CURRENT_REGISTER_KEY.get()) &&
                     arg.confirmStripeIntentParams == params
             }
         )
@@ -51,7 +51,7 @@ class StripePaymentLauncherTest {
         verify(mockHostActivityLauncher).launch(
             argWhere { arg ->
                 arg is PaymentLauncherContract.Args.IntentConfirmationArgs &&
-                    arg.injectorKey == WeakMapInjectorRegistry.CURRENT_REGISTER_KEY.get() &&
+                    arg.injectorKey == (PaymentLauncher::class.simpleName + WeakMapInjectorRegistry.CURRENT_REGISTER_KEY.get()) &&
                     arg.confirmStripeIntentParams == params
             }
         )
@@ -64,7 +64,7 @@ class StripePaymentLauncherTest {
         verify(mockHostActivityLauncher).launch(
             argWhere { arg ->
                 arg is PaymentLauncherContract.Args.PaymentIntentNextActionArgs &&
-                    arg.injectorKey == WeakMapInjectorRegistry.CURRENT_REGISTER_KEY.get() &&
+                    arg.injectorKey == (PaymentLauncher::class.simpleName + WeakMapInjectorRegistry.CURRENT_REGISTER_KEY.get()) &&
                     arg.paymentIntentClientSecret == CLIENT_SECRET
             }
         )
@@ -77,7 +77,7 @@ class StripePaymentLauncherTest {
         verify(mockHostActivityLauncher).launch(
             argWhere { arg ->
                 arg is PaymentLauncherContract.Args.SetupIntentNextActionArgs &&
-                    arg.injectorKey == WeakMapInjectorRegistry.CURRENT_REGISTER_KEY.get() &&
+                    arg.injectorKey == (PaymentLauncher::class.simpleName + WeakMapInjectorRegistry.CURRENT_REGISTER_KEY.get()) &&
                     arg.setupIntentClientSecret == CLIENT_SECRET
             }
         )

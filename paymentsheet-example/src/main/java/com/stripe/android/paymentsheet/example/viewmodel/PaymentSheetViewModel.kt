@@ -27,7 +27,11 @@ internal class PaymentSheetViewModel(
 
             val checkoutResponse = runCatching {
                 repository.checkout(
-                    customer, Repository.CheckoutCurrency.USD, mode, false
+                    customer,
+                    Repository.CheckoutCurrency.USD,
+                    mode,
+                    setShippingAddress = false,
+                    setAutomaticPaymentMethods = false // need to verify this default
                 )
             }
 

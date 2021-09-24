@@ -176,7 +176,7 @@ class PaymentLauncherConfirmationActivityTest {
     }
 
     private companion object {
-        const val INJECTOR_KEY = 1
+        val INJECTOR_KEY = WeakMapInjectorRegistry.nextKey("testKey")
         const val CLIENT_SECRET = "clientSecret"
         const val TEST_STRIPE_ACCOUNT_ID = "accountId"
         val PRODUCT_USAGE = setOf("TestProductUsage")

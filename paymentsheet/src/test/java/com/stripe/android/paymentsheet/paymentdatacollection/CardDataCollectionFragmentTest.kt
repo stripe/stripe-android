@@ -15,6 +15,7 @@ import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.payments.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetActivity
 import com.stripe.android.paymentsheet.PaymentSheetContract
@@ -171,7 +172,8 @@ class CardDataCollectionFragmentTest {
                     email = "email",
                     name = "Jenny Rosen",
                     phone = "+18008675309"
-                )
+                ),
+                injectorKey = DUMMY_INJECTOR_KEY
             )
         ) { _, viewBinding ->
             assertThat(viewBinding.billingAddress.postalCodeView.text.toString())

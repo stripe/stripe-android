@@ -4,6 +4,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.payments.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.address.AddressFieldElementRepository
 import com.stripe.android.paymentsheet.elements.BankDropdownSpec
@@ -64,9 +65,10 @@ internal class TransformSpecToElementTest {
                 ),
                 FormFragmentArguments(
                     supportedPaymentMethodName = "Card",
-                    saveForFutureUseInitialValue = true,
                     saveForFutureUseInitialVisibility = true,
-                    merchantName = "Example, Inc."
+                    saveForFutureUseInitialValue = true,
+                    merchantName = "Example, Inc.",
+                    injectorKey = DUMMY_INJECTOR_KEY
                 )
             )
     }

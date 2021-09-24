@@ -9,9 +9,12 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.asFlow
 import androidx.lifecycle.distinctUntilChanged
 import androidx.lifecycle.viewModelScope
+import com.stripe.android.Logger
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.payments.core.injection.InjectorKey
 import com.stripe.android.paymentsheet.BasePaymentMethodsListFragment
 import com.stripe.android.paymentsheet.PaymentOptionsActivity
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -32,6 +35,7 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import org.jetbrains.annotations.TestOnly
 import kotlin.coroutines.CoroutineContext
+import com.stripe.android.paymentsheet.BaseAddPaymentMethodFragment
 
 /**
  * Base `ViewModel` for activities that use `BottomSheet`.
@@ -42,7 +46,9 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     internal val eventReporter: EventReporter,
     protected val customerRepository: CustomerRepository,
     protected val prefsRepository: PrefsRepository,
-    protected val workContext: CoroutineContext = Dispatchers.IO
+    protected val workContext: CoroutineContext = Dispatchers.IO,
+    protected val logger: Logger,
+    @InjectorKey val injectorKey: String
 ) : AndroidViewModel(application) {
     internal val customerConfig = config?.customer
     internal val merchantName = config?.merchantDisplayName
@@ -57,6 +63,8 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
 
     private val _stripeIntent = MutableLiveData<StripeIntent?>()
     internal val stripeIntent: LiveData<StripeIntent?> = _stripeIntent
+
+    internal var supportedPaymentMethods = emptyList<SupportedPaymentMethod>()
 
     protected val _paymentMethods = MutableLiveData<List<PaymentMethod>>()
     internal val paymentMethods: LiveData<List<PaymentMethod>> = _paymentMethods
@@ -174,7 +182,15 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     fun setStripeIntent(stripeIntent: StripeIntent?) {
         _stripeIntent.value = stripeIntent
 
-        if (stripeIntent != null && getSupportedPaymentMethods().isEmpty()) {
+        /**
+         * The settings of values in this function is so that
+         * they will be ready in the onViewCreated method of
+         * the [BaseAddPaymentMethodFragment]
+         */
+
+        supportedPaymentMethods = getSupportedPaymentMethods(stripeIntent)
+
+        if (stripeIntent != null && supportedPaymentMethods.isEmpty()) {
             onFatal(
                 IllegalArgumentException(
                     "None of the requested payment methods" +
@@ -204,15 +220,51 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
         }
     }
 
-    fun getSupportedPaymentMethods(): List<SupportedPaymentMethod> {
-        stripeIntent.value?.let { stripeIntent ->
-            return stripeIntent.paymentMethodTypes.mapNotNull {
+    @VisibleForTesting
+    internal fun getSupportedPaymentMethods(
+        stripeIntentParameter: StripeIntent?
+    ): List<SupportedPaymentMethod> {
+        stripeIntentParameter?.let { stripeIntent ->
+            return stripeIntent.paymentMethodTypes.asSequence().mapNotNull {
                 SupportedPaymentMethod.fromCode(it)
+            }.filter {
+                config?.allowsDelayedPaymentMethods == true ||
+                    PaymentMethod.Type.fromCode(it.code)?.hasDelayedSettlement() == false
             }.filterNot {
                 // AfterpayClearpay requires a shipping address, filter it out if not provided
-                it == SupportedPaymentMethod.AfterpayClearpay &&
+                val excludeAfterPay = it == SupportedPaymentMethod.AfterpayClearpay &&
                     (stripeIntent as? PaymentIntent)?.shipping == null
+                if (excludeAfterPay) {
+                    logger.debug(
+                        "AfterPay will not be shown. It requires that Shipping is " +
+                            "included in the Payment or Setup Intent"
+                    )
+                }
+                excludeAfterPay
+            }.filterNot { supportedPaymentMethod ->
+                val excludeRequiresMandate =
+                    (stripeIntent is SetupIntent) && supportedPaymentMethod.requiresMandate
+                if (excludeRequiresMandate) {
+                    logger.debug(
+                        "${supportedPaymentMethod.name} will not be shown. It " +
+                            "requires a mandate which is incompatible with SetupIntents"
+                    )
+                }
+                excludeRequiresMandate
+            }.filterNot { supportedPaymentMethod ->
+                val excludeRequiresMandate = (stripeIntent is PaymentIntent) &&
+                    supportedPaymentMethod.requiresMandate &&
+                    stripeIntent.setupFutureUsage == StripeIntent.Usage.OffSession
+                if (excludeRequiresMandate) {
+                    logger.debug(
+                        "${supportedPaymentMethod.name} will not be shown.  It " +
+                            "requires a mandate which is incompatible with off_session " +
+                            "PaymentIntents"
+                    )
+                }
+                excludeRequiresMandate
             }.filter { it == SupportedPaymentMethod.Card }
+                .toList()
         }
 
         return emptyList()

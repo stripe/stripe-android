@@ -1,40 +1,51 @@
 package com.stripe.android.googlepaylauncher
 
 import android.app.Application
+import android.os.Bundle
 import androidx.annotation.VisibleForTesting
+import androidx.lifecycle.AbstractSavedStateViewModelFactory
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.distinctUntilChanged
+import androidx.savedstate.SavedStateRegistryOwner
 import com.google.android.gms.tasks.Task
 import com.google.android.gms.wallet.PaymentData
 import com.google.android.gms.wallet.PaymentDataRequest
 import com.google.android.gms.wallet.PaymentsClient
-import com.stripe.android.GooglePayConfig
 import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.Logger
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.exception.APIConnectionException
 import com.stripe.android.exception.InvalidRequestException
+import com.stripe.android.googlepaylauncher.injection.DaggerGooglePayPaymentMethodLauncherViewModelFactoryComponent
+import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLauncherViewModelSubcomponent
 import com.stripe.android.model.PaymentMethodCreateParams
-import com.stripe.android.networking.AnalyticsRequestFactory
 import com.stripe.android.networking.ApiRequest
-import com.stripe.android.networking.StripeApiRepository
 import com.stripe.android.networking.StripeRepository
-import kotlinx.coroutines.Dispatchers
+import com.stripe.android.payments.core.injection.Injectable
+import com.stripe.android.payments.core.injection.WeakMapInjectorRegistry
 import kotlinx.coroutines.flow.first
 import org.json.JSONObject
-import kotlin.coroutines.CoroutineContext
+import javax.inject.Inject
 
-internal class GooglePayPaymentMethodLauncherViewModel(
+internal class GooglePayPaymentMethodLauncherViewModel @Inject constructor(
     private val paymentsClient: PaymentsClient,
     private val requestOptions: ApiRequest.Options,
     private val args: GooglePayPaymentMethodLauncherContract.Args,
     private val stripeRepository: StripeRepository,
     private val googlePayJsonFactory: GooglePayJsonFactory,
-    private val googlePayRepository: GooglePayRepository
+    private val googlePayRepository: GooglePayRepository,
+    private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
-    var hasLaunched: Boolean = false
+    /**
+     * [hasLaunched] indicates whether Google Pay has already been launched, and must be persisted
+     * across process death in case the Activity and ViewModel are destroyed while the user is
+     * interacting with Google Pay.
+     */
+    internal var hasLaunched: Boolean
+        get() = savedStateHandle.get<Boolean>(HAS_LAUNCHED_KEY) == true
+        set(value) = savedStateHandle.set(HAS_LAUNCHED_KEY, value)
 
     private val _googleResult = MutableLiveData<GooglePayPaymentMethodLauncher.Result>()
     internal val googlePayResult = _googleResult.distinctUntilChanged()
@@ -55,16 +66,7 @@ internal class GooglePayPaymentMethodLauncherViewModel(
             merchantInfo = GooglePayJsonFactory.MerchantInfo(
                 merchantName = args.config.merchantName
             ),
-            billingAddressParameters = GooglePayJsonFactory.BillingAddressParameters(
-                isRequired = args.config.billingAddressConfig.isRequired,
-                format = when (args.config.billingAddressConfig.format) {
-                    GooglePayPaymentMethodLauncher.BillingAddressConfig.Format.Min ->
-                        GooglePayJsonFactory.BillingAddressParameters.Format.Min
-                    GooglePayPaymentMethodLauncher.BillingAddressConfig.Format.Full ->
-                        GooglePayJsonFactory.BillingAddressParameters.Format.Full
-                },
-                isPhoneNumberRequired = args.config.billingAddressConfig.isPhoneNumberRequired
-            ),
+            billingAddressParameters = args.config.billingAddressConfig.convert(),
             isEmailRequired = args.config.isEmailRequired
         )
     }
@@ -123,68 +125,82 @@ internal class GooglePayPaymentMethodLauncherViewModel(
     internal class Factory(
         private val application: Application,
         private val args: GooglePayPaymentMethodLauncherContract.Args,
-        private val enableLogging: Boolean = false,
-        private val workContext: CoroutineContext = Dispatchers.IO
-    ) : ViewModelProvider.Factory {
+        owner: SavedStateRegistryOwner,
+        defaultArgs: Bundle? = null
+    ) : AbstractSavedStateViewModelFactory(owner, defaultArgs),
+        Injectable<Factory.FallbackInjectionParams> {
+
+        internal data class FallbackInjectionParams(
+            val application: Application,
+            val enableLogging: Boolean,
+            val publishableKey: String,
+            val stripeAccountId: String?,
+            val productUsage: Set<String>
+        )
+
+        @Inject
+        lateinit var subComponentBuilder:
+            GooglePayPaymentMethodLauncherViewModelSubcomponent.Builder
+
         @Suppress("UNCHECKED_CAST")
-        override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-            val googlePayEnvironment = args.config.environment
+        override fun <T : ViewModel?> create(
+            key: String,
+            modelClass: Class<T>,
+            savedStateHandle: SavedStateHandle
+        ): T {
+            val enableLogging = args.injectionParams?.enableLogging ?: false
             val logger = Logger.getInstance(enableLogging)
 
-            val config = PaymentConfiguration.getInstance(application)
-            val publishableKey = config.publishableKey
-            val stripeAccountId = config.stripeAccountId
-            val productUsageTokens = setOf(GooglePayLauncher.PRODUCT_USAGE)
+            args.injectionParams?.let { injectionParams ->
+                WeakMapInjectorRegistry.retrieve(injectionParams.injectorKey)?.let { injector ->
+                    logger.info(
+                        "Injector available, injecting dependencies into " +
+                            "GooglePayPaymentMethodLauncherViewModel.Factory"
+                    )
+                    injector.inject(this)
+                    true
+                }
+            } ?: run {
+                logger.info(
+                    "Injector unavailable, initializing dependencies of " +
+                        "GooglePayPaymentMethodLauncherViewModel.Factory"
+                )
+                fallbackInitialize(
+                    FallbackInjectionParams(
+                        application,
+                        enableLogging,
+                        args.injectionParams?.publishableKey
+                            ?: PaymentConfiguration.getInstance(application).publishableKey,
+                        if (args.injectionParams != null) {
+                            args.injectionParams.stripeAccountId
+                        } else {
+                            PaymentConfiguration.getInstance(application).stripeAccountId
+                        },
+                        args.injectionParams?.productUsage
+                            ?: setOf(GooglePayPaymentMethodLauncher.PRODUCT_USAGE_TOKEN)
+                    )
+                )
+            }
 
-            val analyticsRequestFactory = AnalyticsRequestFactory(
-                application,
-                publishableKey,
-                productUsageTokens
-            )
-
-            val stripeRepository = StripeApiRepository(
-                application,
-                { publishableKey },
-                logger = logger,
-                workContext = workContext,
-                productUsageTokens = productUsageTokens,
-                analyticsRequestFactory = analyticsRequestFactory
-            )
-
-            val billingAddressConfig = args.config.billingAddressConfig
-            val googlePayRepository = DefaultGooglePayRepository(
-                application,
-                googlePayEnvironment,
-                GooglePayJsonFactory.BillingAddressParameters(
-                    billingAddressConfig.isRequired,
-                    when (billingAddressConfig.format) {
-                        GooglePayPaymentMethodLauncher.BillingAddressConfig.Format.Min -> {
-                            GooglePayJsonFactory.BillingAddressParameters.Format.Min
-                        }
-                        GooglePayPaymentMethodLauncher.BillingAddressConfig.Format.Full -> {
-                            GooglePayJsonFactory.BillingAddressParameters.Format.Full
-                        }
-                    },
-                    billingAddressConfig.isPhoneNumberRequired
-                ),
-                args.config.existingPaymentMethodRequired,
-                logger
-            )
-
-            return GooglePayPaymentMethodLauncherViewModel(
-                PaymentsClientFactory(application).create(googlePayEnvironment),
-                ApiRequest.Options(
-                    publishableKey,
-                    stripeAccountId
-                ),
-                args,
-                stripeRepository,
-                GooglePayJsonFactory(
-                    googlePayConfig = GooglePayConfig(publishableKey, stripeAccountId),
-                    isJcbEnabled = args.config.isJcbEnabled
-                ),
-                googlePayRepository
-            ) as T
+            return subComponentBuilder
+                .args(args)
+                .savedStateHandle(savedStateHandle)
+                .build().viewModel as T
         }
+
+        override fun fallbackInitialize(arg: FallbackInjectionParams) {
+            DaggerGooglePayPaymentMethodLauncherViewModelFactoryComponent.builder()
+                .context(arg.application)
+                .enableLogging(arg.enableLogging)
+                .publishableKeyProvider { arg.publishableKey }
+                .stripeAccountIdProvider { arg.stripeAccountId }
+                .productUsage(arg.productUsage)
+                .googlePayConfig(args.config)
+                .build().inject(this)
+        }
+    }
+
+    private companion object {
+        private const val HAS_LAUNCHED_KEY = "has_launched"
     }
 }
