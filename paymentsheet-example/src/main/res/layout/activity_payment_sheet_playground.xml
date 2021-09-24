@@ -199,7 +199,6 @@
                 android:checked="true" />
         </RadioGroup>
 
-
         <TextView
             android:id="@+id/shipping_address"
             android:text="@string/shipping_address"
@@ -268,6 +267,41 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:checked="true" />
+        </RadioGroup>
+
+        <TextView
+            android:id="@+id/automatic_pm_address"
+            android:text="@string/automatic_pm"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="16dp"
+            android:layout_marginTop="8dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_chainStyle="packed"
+            app:layout_constraintTop_toBottomOf="@+id/shipping_radio_group" />
+
+        <RadioGroup
+            android:id="@+id/automatic_pm_group"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginEnd="16dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/automatic_pm_address">
+
+            <RadioButton
+                android:id="@+id/automatic_pm_on_button"
+                android:text="@string/on"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:checked="true" />
+
+            <RadioButton
+                android:id="@+id/automatic_pm_off_button"
+                android:text="@string/off"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:checked="false" />
         </RadioGroup>
 
         <Button

@@ -10,6 +10,15 @@ internal class DefaultRepository(
         customer: Repository.CheckoutCustomer,
         currency: Repository.CheckoutCurrency,
         mode: Repository.CheckoutMode,
-        setShippingAddress: Boolean
-    ) = checkoutBackendApi.checkout(CheckoutRequest(customer.value, currency.value, mode.value, setShippingAddress))
+        setShippingAddress: Boolean,
+        setAutomaticPaymentMethods: Boolean
+    ) = checkoutBackendApi.checkout(
+        CheckoutRequest(
+            customer.value,
+            currency.value,
+            mode.value,
+            setShippingAddress,
+            setAutomaticPaymentMethods
+        )
+    )
 }
