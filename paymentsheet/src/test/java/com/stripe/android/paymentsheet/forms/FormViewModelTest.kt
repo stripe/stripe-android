@@ -369,6 +369,8 @@ internal class FormViewModelTest {
     @Test
     fun `Verify params are set when element address fields are complete`() {
         runBlocking {
+            resourceRepository.init()
+
             /**
              * Using sepa debit as a complex enough example to test the address portion.
              */
@@ -441,6 +443,7 @@ internal class FormViewModelTest {
     @Test
     fun `Verify params are set when required address fields are complete`() {
         runBlocking {
+            resourceRepository.init()
             /**
              * Using sepa debit as a complex enough example to test the address portion.
              */
