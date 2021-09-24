@@ -6,30 +6,33 @@ import kotlinx.coroutines.flow.combine
 
 /**
  * This class will take a list of form elements and hidden identifiers.
- * [filterFlow] is the only public method and it will transform
+ * [transform] is the only public method and it will transform
  * the list of form elements into a [FormFieldValues].
  */
-internal class CompleteFormFieldValueFilter(
+internal class TransformFormFieldValues(
     private val currentFieldValueMap: Flow<Map<IdentifierSpec, FormFieldEntry>>,
     private val hiddenIdentifiers: Flow<List<IdentifierSpec>>,
-    val showingMandate: Flow<Boolean>
+    val showingMandate: Flow<Boolean>,
+    val userRequestedReuse: Flow<Boolean>
 ) {
     /**
      * This will return null if any form field values are incomplete, otherwise it is an object
      * representing all the complete, non-hidden fields.
      */
-    fun filterFlow() = combine(
+    fun transform() = combine(
         currentFieldValueMap,
         hiddenIdentifiers,
-        showingMandate
-    ) { idFieldSnapshotMap, hiddenIdentifiers, showingMandate ->
-        filterFlow(idFieldSnapshotMap, hiddenIdentifiers, showingMandate)
+        showingMandate,
+        userRequestedReuse
+    ) { idFieldSnapshotMap, hiddenIdentifiers, showingMandate, userRequestedReuse ->
+        transform(idFieldSnapshotMap, hiddenIdentifiers, showingMandate, userRequestedReuse)
     }
 
-    private fun filterFlow(
+    private fun transform(
         idFieldSnapshotMap: Map<IdentifierSpec, FormFieldEntry>,
         hiddenIdentifiers: List<IdentifierSpec>,
         showingMandate: Boolean,
+        userRequestedReuse: Boolean
     ): FormFieldValues? {
         // This will run twice in a row when the save for future use state changes: once for the
         // saveController changing and once for the the hidden fields changing
@@ -39,7 +42,8 @@ internal class CompleteFormFieldValueFilter(
 
         return FormFieldValues(
             hiddenFilteredFieldSnapshotMap,
-            showingMandate
+            showingMandate,
+            userRequestedReuse
         ).takeIf {
             hiddenFilteredFieldSnapshotMap.values.map { it.isComplete }
                 .none { complete -> !complete }

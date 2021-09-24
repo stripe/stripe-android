@@ -18,7 +18,7 @@
         <!-- Enables the Google Payment API -->
         <meta-data
             android:name="com.google.android.gms.wallet.api.enabled"
-            android:value="true"/>
+            android:value="true" />
 
         <activity
             android:name=".MainActivity"
@@ -33,6 +33,7 @@
 
         <activity android:name=".activity.LaunchPaymentSheetCompleteActivity" />
         <activity android:name=".activity.LaunchPaymentSheetCustomActivity" />
+        <activity android:name=".activity.LaunchMultiStepWithCompose" />
         <activity android:name=".activity.PaymentSheetPlaygroundActivity" />
     </application>
 

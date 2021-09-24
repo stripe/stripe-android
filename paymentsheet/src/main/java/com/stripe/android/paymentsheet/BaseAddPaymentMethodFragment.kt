@@ -18,7 +18,6 @@ import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.databinding.FragmentPaymentsheetAddPaymentMethodBinding
-import com.stripe.android.paymentsheet.elements.IdentifierSpec
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.Amount
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -162,9 +161,9 @@ internal abstract class BaseAddPaymentMethodFragment(
         args.putParcelable(
             ComposeFormDataCollectionFragment.EXTRA_CONFIG,
             getFormArguments(
-                hasCustomer = sheetViewModel.customerConfig != null,
+                isCustomer = sheetViewModel.customerConfig != null,
                 stripeIntent = requireNotNull(sheetViewModel.stripeIntent.value),
-                supportedPaymentMethod = paymentMethod,
+                showPaymentMethod = paymentMethod,
                 merchantName = sheetViewModel.merchantName,
                 amount = sheetViewModel.amount.value,
                 billingAddress = sheetViewModel.config?.defaultBillingDetails
@@ -209,64 +208,69 @@ internal abstract class BaseAddPaymentMethodFragment(
                     PaymentSelection.New.GenericPaymentMethod(
                         selectedPaymentMethodResources.displayNameResource,
                         selectedPaymentMethodResources.iconResource,
-                        this,
-                        formFieldValues
-                            .fieldValuePairs[IdentifierSpec.SaveForFutureUse]
-                            ?.value
-                            .toBoolean()
+                        paymentMethodCreateParams = this,
+                        userReuseRequest = formFieldValues.userRequestedReuse
                     )
                 }
         }
 
+        private fun intentRequiresReusable(stripeIntent: StripeIntent): Boolean {
+            val isPaymentIntentSetupFutureUsage = (stripeIntent as? PaymentIntent)?.setupFutureUsage
+            return stripeIntent is SetupIntent ||
+                (isPaymentIntentSetupFutureUsage == StripeIntent.Usage.OnSession) ||
+                (isPaymentIntentSetupFutureUsage == StripeIntent.Usage.OffSession)
+
+        }
+
         @VisibleForTesting
         internal fun getFormArguments(
-            hasCustomer: Boolean,
-            supportedPaymentMethod: SupportedPaymentMethod,
+            isCustomer: Boolean,
+            showPaymentMethod: SupportedPaymentMethod,
             stripeIntent: StripeIntent,
             merchantName: String,
             amount: Amount? = null,
             billingAddress: PaymentSheet.BillingDetails? = null
         ): FormFragmentArguments {
+            var intentRequiresReusable = intentRequiresReusable(stripeIntent)
 
-            val isSetupIntent = stripeIntent is SetupIntent
-            val isPaymentIntentSetupFutureUsage = (stripeIntent as? PaymentIntent)?.setupFutureUsage
-            var displayUIRequiredForSaving = false
+            // The following configuration impacts if the user can request reuse:
+            //   - presence of a customer
+            //   - if the requested PM user requested reuse
+            //   - If the requested PM request a mandate
+            //   - If the intent has a payment methd that does not support save for future usage
+            var configuredForUserRequestedReuse =
+                (isCustomer && showPaymentMethod.type.requiresMandate)
 
-            // It impacts reopening the card and together with allowUserInitiatedReuse
-            // will determine if off_session is set on confirm.
-            var isReusable =
-                isSetupIntent ||
-                    (isPaymentIntentSetupFutureUsage == StripeIntent.Usage.OnSession) ||
-                    (isPaymentIntentSetupFutureUsage == StripeIntent.Usage.OffSession)
-            // This will impact the setting of the off_session on confirm
-            var allowUserInitiatedReuse = true
+            stripeIntent.paymentMethodTypes.mapNotNull {
+                SupportedPaymentMethod.fromCode(it)?.userRequestedConfirmSaveForFutureSupported
+            }
 
-            if (isReusable) {
-                allowUserInitiatedReuse = false
-                displayUIRequiredForSaving = true
+            if (intentRequiresReusable(stripeIntent)) {
+                configuredForUserRequestedReuse = false
             } else {
                 requireNotNull(stripeIntent as? PaymentIntent)
-                if (!hasCustomer){// || supportedPaymentMethod.type.requiresMandate) {
+                if (!isCustomer) {// || supportedPaymentMethod.type.requiresMandate) {
                     // If paymentMethodTypes contains payment method that does not support
                     // save for future should be false and unselected until future fix
-                    allowUserInitiatedReuse = false
+                    configuredForUserRequestedReuse = false
                 } else {
                     // If the intent includes any payment method types that don't support save remove
                     // checkbox regardless of the payment method until future fix
                     stripeIntent.paymentMethodTypes.forEach {
+                        // Needs to be checking PaymentMethod.TYpe isReusable, and if unknown assume it is not reusable.
                         if (SupportedPaymentMethod.fromCode(it)
-                            ?.userRequestedConfirmSaveForFutureSupported == false
+                                ?.userRequestedConfirmSaveForFutureSupported == false
                         ) {
-                            allowUserInitiatedReuse = false
+                            configuredForUserRequestedReuse = false
                         }
                     }
                 }
             }
 
             return FormFragmentArguments(
-                supportedPaymentMethod = supportedPaymentMethod,
-                allowUserInitiatedReuse = allowUserInitiatedReuse,
-                displayUIRequiredForSaving = displayUIRequiredForSaving,
+                supportedPaymentMethod = showPaymentMethod,
+                intentAndPmAllowUserInitiatedReuse = configuredForUserRequestedReuse,
+                displayUIRequiredForSaving = intentRequiresReusable,
                 merchantName = merchantName,
                 amount = amount,
                 billingDetails = billingAddress?.let {

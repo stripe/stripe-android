@@ -1,7 +1,6 @@
 package com.stripe.android.model
 
 import androidx.annotation.RestrictTo
-import androidx.annotation.VisibleForTesting
 import com.stripe.android.ObjectBuilder
 import com.stripe.android.model.parsers.AddressJsonParser
 import kotlinx.parcelize.Parcelize
@@ -12,7 +11,7 @@ import org.json.JSONObject
  * object in the Source api.
  */
 @Parcelize
-data class Address @VisibleForTesting constructor(
+data class Address constructor(
     val city: String? = null,
     val country: String? = null, // two-character country code
     val line1: String? = null,

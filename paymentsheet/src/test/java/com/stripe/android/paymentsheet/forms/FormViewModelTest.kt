@@ -64,7 +64,7 @@ internal class FormViewModelTest {
             FormFragmentArguments(
                 supportedPaymentMethod = SupportedPaymentMethod.Card,
                 displayUIRequiredForSaving = true,
-                allowUserInitiatedReuse = true,
+                intentAndPmAllowUserInitiatedReuse = true,
                 merchantName = "Example, Inc."
             ),
             resourceRepository = resourceRepository
@@ -77,7 +77,7 @@ internal class FormViewModelTest {
             }
         assertThat(values[0]).isTrue()
 
-        formViewModel.setUserInitiatedReuseValue(false)
+        formViewModel.setUserRequestedReuse(false)
 
         assertThat(values[1]).isFalse()
     }
@@ -95,7 +95,7 @@ internal class FormViewModelTest {
             FormFragmentArguments(
                 supportedPaymentMethod = SupportedPaymentMethod.Card,
                 displayUIRequiredForSaving = true,
-                allowUserInitiatedReuse = true,
+                intentAndPmAllowUserInitiatedReuse = true,
                 merchantName = "Example, Inc."
             ),
             resourceRepository = resourceRepository
@@ -108,7 +108,7 @@ internal class FormViewModelTest {
             }
         assertThat(values[0]).isEmpty()
 
-        formViewModel.setUserInitiatedReuseVisibility(false)
+        formViewModel.setIntentAndPmSupportUserRequestedReuse(false)
 
         ShadowLooper.runUiThreadTasksIncludingDelayedTasks()
 
@@ -128,7 +128,7 @@ internal class FormViewModelTest {
             FormFragmentArguments(
                 supportedPaymentMethod = SupportedPaymentMethod.Card,
                 displayUIRequiredForSaving = true,
-                allowUserInitiatedReuse = true,
+                intentAndPmAllowUserInitiatedReuse = true,
                 merchantName = "Example, Inc."
             ),
             resourceRepository = resourceRepository
@@ -141,7 +141,7 @@ internal class FormViewModelTest {
             }
         assertThat(values[0]).isEmpty()
 
-        formViewModel.setUserInitiatedReuseValue(false)
+        formViewModel.setUserRequestedReuse(false)
 
         ShadowLooper.runUiThreadTasksIncludingDelayedTasks()
 
@@ -166,7 +166,7 @@ internal class FormViewModelTest {
                 FormFragmentArguments(
                     supportedPaymentMethod = SupportedPaymentMethod.Card,
                     displayUIRequiredForSaving = true,
-                    allowUserInitiatedReuse = true,
+                    intentAndPmAllowUserInitiatedReuse = true,
                     merchantName = "Example, Inc."
                 ),
                 resourceRepository = resourceRepository
@@ -212,7 +212,7 @@ internal class FormViewModelTest {
                 FormFragmentArguments(
                     supportedPaymentMethod = SupportedPaymentMethod.Card,
                     displayUIRequiredForSaving = true,
-                    allowUserInitiatedReuse = true,
+                    intentAndPmAllowUserInitiatedReuse = true,
                     merchantName = "Example, Inc."
                 ),
                 resourceRepository = resourceRepository
@@ -258,7 +258,7 @@ internal class FormViewModelTest {
                 FormFragmentArguments(
                     supportedPaymentMethod = SupportedPaymentMethod.Card,
                     displayUIRequiredForSaving = true,
-                    allowUserInitiatedReuse = true,
+                    intentAndPmAllowUserInitiatedReuse = true,
                     merchantName = "Example, Inc."
                 ),
                 resourceRepository = resourceRepository
@@ -304,7 +304,7 @@ internal class FormViewModelTest {
                 FormFragmentArguments(
                     supportedPaymentMethod = SupportedPaymentMethod.Card,
                     displayUIRequiredForSaving = true,
-                    allowUserInitiatedReuse = true,
+                    intentAndPmAllowUserInitiatedReuse = true,
                     merchantName = "Example, Inc."
                 ),
                 resourceRepository = resourceRepository
@@ -375,7 +375,7 @@ internal class FormViewModelTest {
                 FormFragmentArguments(
                     supportedPaymentMethod = SupportedPaymentMethod.Card,
                     displayUIRequiredForSaving = true,
-                    allowUserInitiatedReuse = true,
+                    intentAndPmAllowUserInitiatedReuse = true,
                     merchantName = "Example, Inc."
                 ),
                 resourceRepository = resourceRepository

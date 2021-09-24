@@ -143,7 +143,7 @@ internal class CardDataCollectionFragment<ViewModelType : BaseSheetViewModel<*>>
                 PaymentSelection.New.Card(
                     params,
                     cardMultilineWidget.getBrand(),
-                    shouldSavePaymentMethod = shouldSaveCard()
+                    userReuseRequest = userReuseRequest()
                 )
             }
         } else {
@@ -284,7 +284,8 @@ internal class CardDataCollectionFragment<ViewModelType : BaseSheetViewModel<*>>
 
     private fun populateFieldsFromNewCard() {
         val paymentMethodCreateParams = sheetViewModel.newCard?.paymentMethodCreateParams
-        saveCardCheckbox.isChecked = sheetViewModel.newCard?.shouldSavePaymentMethod ?: true
+        saveCardCheckbox.isChecked =
+            sheetViewModel.newCard?.userReuseRequest == PaymentSelection.UserReuseRequest.RequestReuse
         cardMultilineWidget.populate(paymentMethodCreateParams?.card)
         billingAddressView.populate(paymentMethodCreateParams?.billingDetails?.address)
     }
@@ -321,13 +322,13 @@ internal class CardDataCollectionFragment<ViewModelType : BaseSheetViewModel<*>>
         requireArguments().getParcelable<FormFragmentArguments>(
             ComposeFormDataCollectionFragment.EXTRA_CONFIG
         )?.let { args ->
-            saveCardCheckbox.isChecked = args.displayUIRequiredForSaving
-            saveCardCheckbox.isVisible = args.allowUserInitiatedReuse
+            saveCardCheckbox.isChecked = true
+            saveCardCheckbox.isVisible = args.intentAndPmAllowUserInitiatedReuse
         }
-        sheetViewModel.newCard?.shouldSavePaymentMethod?.also {
+        sheetViewModel.newCard?.userReuseRequest?.also {
             // Only if the save card checkbox is visible could it be user requested
             if (saveCardCheckbox.isVisible) {
-                saveCardCheckbox.isChecked = it
+                saveCardCheckbox.isChecked = it == PaymentSelection.UserReuseRequest.RequestReuse
             }
         }
 
@@ -341,13 +342,25 @@ internal class CardDataCollectionFragment<ViewModelType : BaseSheetViewModel<*>>
     private fun onSaveCardCheckboxChanged() {
         val selection = sheetViewModel.selection.value
         if (selection is PaymentSelection.New.Card) {
-            val newCardSelection = selection.copy(shouldSavePaymentMethod = shouldSaveCard())
+            val newCardSelection = selection.copy(userReuseRequest = userReuseRequest())
             sheetViewModel.updateSelection(newCardSelection)
             sheetViewModel.newCard = newCardSelection
         }
     }
 
-    private fun shouldSaveCard() = saveCardCheckbox.isChecked
+    // Only do a user requested save if the checkbox is checked AND visible, if it is not
+    // visible then it is not user selected.
+    private fun userReuseRequest(): PaymentSelection.UserReuseRequest {
+        return if (!saveCardCheckbox.isVisible) {
+            PaymentSelection.UserReuseRequest.NoRequest
+        } else {
+            if (saveCardCheckbox.isChecked) {
+                PaymentSelection.UserReuseRequest.RequestReuse
+            } else {
+                PaymentSelection.UserReuseRequest.RequestNoReuse
+            }
+        }
+    }
 
     internal class AddCardViewModel : ViewModel() {
         var isCardValid: Boolean = false

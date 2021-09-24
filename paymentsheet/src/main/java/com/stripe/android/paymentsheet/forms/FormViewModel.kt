@@ -69,15 +69,10 @@ internal class FormViewModel @Inject internal constructor(
 
     internal lateinit var elements: List<FormElement>
 
-    private val allowUserInitiatedReuse = MutableStateFlow(config.allowUserInitiatedReuse)
+    private val intentSupportsUserRequestedReuse = MutableStateFlow(config.intentAndPmAllowUserInitiatedReuse)
 
     @VisibleForTesting
-    internal fun setUserInitiatedReuseVisibility(isVisible: Boolean) {
-        allowUserInitiatedReuse.value = isVisible
-    }
-
-    @VisibleForTesting
-    internal fun setUserInitiatedReuseValue(value: Boolean) {
+    internal fun setUserRequestedReuse(value: Boolean) {
         elements
             .filterIsInstance<SaveForFutureUseElement>()
             .firstOrNull()?.controller?.onValueChange(value)
@@ -98,7 +93,7 @@ internal class FormViewModel @Inject internal constructor(
 
     internal val hiddenIdentifiers =
         combine(
-            allowUserInitiatedReuse,
+            intentSupportsUserRequestedReuse,
             // Regardless of checkbox visibility it's state will defi¬-ne if
             // reusable fields are displayed
             saveForFutureUseElement?.controller?.hiddenIdentifiers
@@ -114,6 +109,8 @@ internal class FormViewModel @Inject internal constructor(
                     sectionToSectionFieldEntry.value
                 }
 
+            // If we don't allow userInitiated reuse then the save for future use identifier
+            // won't be in the map, and wont set the value in the PaymentSelection.
             if (!allowUserInitiatedReuse && saveForFutureUseElement != null) {
                 hiddenIdentifiers
                     .plus(identifiers)
@@ -133,14 +130,22 @@ internal class FormViewModel @Inject internal constructor(
             } ?: false
     }
 
+    internal val userRequestedReuse = combine(
+        intentSupportsUserRequestedReuse,
+        saveForFutureUseElement?.controller?.saveForFutureUse ?: MutableStateFlow(false)
+    ) { allowUserInitiatedReuse, userCheckedReuse ->
+        allowUserInitiatedReuse && userCheckedReuse
+    }
+
     val completeFormValues =
-        CompleteFormFieldValueFilter(
+        TransformFormFieldValues(
             combine(
                 elements.map { it.getFormFieldValueFlow() }
             ) {
                 it.toList().flatten().toMap()
             },
             hiddenIdentifiers,
-            showingMandate
-        ).filterFlow()
+            showingMandate,
+            userRequestedReuse
+        ).transform()
 }

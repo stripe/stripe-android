@@ -14,7 +14,7 @@ import kotlinx.coroutines.test.runBlockingTest
 import org.junit.Test
 
 @ExperimentalCoroutinesApi
-class CompleteFormFieldValueFilterTest {
+class TransformFormFieldValuesTest {
 
     private val emailController = TextFieldController(EmailConfig())
     private val emailSection = SectionElement(
@@ -35,7 +35,7 @@ class CompleteFormFieldValueFilterTest {
         )
     )
 
-    private val transformElementToFormFieldValueFlow = CompleteFormFieldValueFilter(
+    private val transformElementToFormFieldValueFlow = TransformFormFieldValues(
         fieldFlow,
         hiddenIdentifersFlow,
         showingMandate = MutableStateFlow(true)
@@ -44,7 +44,7 @@ class CompleteFormFieldValueFilterTest {
     @Test
     fun `With only some complete controllers and no hidden values the flow value is null`() {
         runBlockingTest {
-            assertThat(transformElementToFormFieldValueFlow.filterFlow().first()).isNull()
+            assertThat(transformElementToFormFieldValueFlow.transform().first()).isNull()
         }
     }
 
@@ -57,7 +57,7 @@ class CompleteFormFieldValueFilterTest {
                     IdentifierSpec.Email to FormFieldEntry("email@email.com", true),
                 )
 
-            val formFieldValue = transformElementToFormFieldValueFlow.filterFlow().first()
+            val formFieldValue = transformElementToFormFieldValueFlow.transform().first()
 
             assertThat(formFieldValue).isNotNull()
             assertThat(formFieldValue?.fieldValuePairs)
@@ -72,7 +72,7 @@ class CompleteFormFieldValueFilterTest {
         runBlockingTest {
             hiddenIdentifersFlow.value = listOf(IdentifierSpec.Email)
 
-            val formFieldValues = transformElementToFormFieldValueFlow.filterFlow()
+            val formFieldValues = transformElementToFormFieldValueFlow.transform()
 
             val formFieldValue = formFieldValues.first()
             assertThat(formFieldValue).isNotNull()
@@ -94,7 +94,7 @@ class CompleteFormFieldValueFilterTest {
 
             hiddenIdentifersFlow.value = listOf(emailSection.fields[0].identifier)
 
-            val formFieldValue = transformElementToFormFieldValueFlow.filterFlow().first()
+            val formFieldValue = transformElementToFormFieldValueFlow.transform().first()
 
             assertThat(formFieldValue).isNotNull()
             assertThat(formFieldValue?.fieldValuePairs)

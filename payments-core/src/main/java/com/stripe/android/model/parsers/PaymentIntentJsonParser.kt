@@ -1,5 +1,6 @@
 package com.stripe.android.model.parsers
 
+import android.util.Log
 import androidx.annotation.RestrictTo
 import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentIntent
@@ -51,6 +52,7 @@ class PaymentIntentJsonParser : ModelJsonParser<PaymentIntent> {
         val setupFutureUsage = StripeIntent.Usage.fromCode(
             optString(json, FIELD_SETUP_FUTURE_USAGE)
         )
+        Log.d("StripeSdk", "Setup future usage: ${setupFutureUsage}")
         val lastPaymentError =
             json.optJSONObject(FIELD_LAST_PAYMENT_ERROR)?.let {
                 ErrorJsonParser().parse(it)

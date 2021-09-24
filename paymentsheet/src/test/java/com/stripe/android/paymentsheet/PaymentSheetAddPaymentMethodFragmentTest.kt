@@ -313,7 +313,7 @@ class PaymentSheetAddPaymentMethodFragmentTest {
                 .isEqualTo(
                     FormFragmentArguments(
                         SupportedPaymentMethod.Bancontact,
-                        allowUserInitiatedReuse = false,
+                        intentAndPmAllowUserInitiatedReuse = false,
                         displayUIRequiredForSaving = false,
                         merchantName = PaymentSheetFixtures.MERCHANT_DISPLAY_NAME,
                         amount = createAmount()
@@ -343,7 +343,7 @@ class PaymentSheetAddPaymentMethodFragmentTest {
                 .isEqualTo(
                     FormFragmentArguments(
                         SupportedPaymentMethod.Bancontact,
-                        allowUserInitiatedReuse = false,
+                        intentAndPmAllowUserInitiatedReuse = false,
                         displayUIRequiredForSaving = false,
                         merchantName = PaymentSheetFixtures.MERCHANT_DISPLAY_NAME,
                         amount = createAmount()
@@ -403,7 +403,7 @@ class PaymentSheetAddPaymentMethodFragmentTest {
                 .isEqualTo(
                     FormFragmentArguments(
                         SupportedPaymentMethod.Bancontact,
-                        allowUserInitiatedReuse = false,
+                        intentAndPmAllowUserInitiatedReuse = false,
                         displayUIRequiredForSaving = true,
                         merchantName = "Widget Store",
                         amount = createAmount(PI_OFF_SESSION)
@@ -428,7 +428,7 @@ class PaymentSheetAddPaymentMethodFragmentTest {
                 ),
                 SupportedPaymentMethod.Sofort
             )
-        assertThat(selection?.shouldSavePaymentMethod).isTrue()
+        assertThat(selection?.userReuseRequest).isTrue()
         assertThat(selection?.labelResource).isEqualTo(
             R.string.stripe_paymentsheet_payment_method_sofort
         )

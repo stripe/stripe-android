@@ -36,9 +36,11 @@ internal class ConfirmPaymentIntentParamsFactory(
         ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
             paymentMethodCreateParams = paymentSelection.paymentMethodCreateParams,
             clientSecret = clientSecret.value,
-            setupFutureUsage = when (paymentSelection.shouldSavePaymentMethod) {
+            // The server will only allow a change of setupFutureUsage from
+            // onSession to OffSession, or null to OffSession?  Passing in null has no effect?
+            setupFutureUsage = when (paymentSelection.userReuseRequest) {
                 true -> ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
-                false -> null
+                false -> ConfirmPaymentIntentParams.SetupFutureUsage.Blank
             }
         )
 }

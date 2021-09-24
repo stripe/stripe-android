@@ -169,6 +169,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
 
         fireFraudDetectionDataRequest()
 
+        logger.debug("$apiUrl setupFutureUsage: ${confirmPaymentIntentParams.setupFutureUsage}")
         return fetchStripeModel(
             apiRequestFactory.createPost(apiUrl, options, params),
             PaymentIntentJsonParser()

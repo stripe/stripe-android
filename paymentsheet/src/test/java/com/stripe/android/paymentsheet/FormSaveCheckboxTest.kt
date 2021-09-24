@@ -71,7 +71,7 @@ class FormSaveCheckboxTest {
                     it,
                     TestOutput(
                         formArgumentFromPaymentIntentTestInput(it).displayUIRequiredForSaving,
-                        formArgumentFromPaymentIntentTestInput(it).allowUserInitiatedReuse
+                        formArgumentFromPaymentIntentTestInput(it).intentAndPmAllowUserInitiatedReuse
                     )
                 )
             }
@@ -96,7 +96,7 @@ class FormSaveCheckboxTest {
                         it,
                         TestOutput(
                             formArgumentFromSetupIntentTestInput(it).displayUIRequiredForSaving,
-                            formArgumentFromSetupIntentTestInput(it).allowUserInitiatedReuse
+                            formArgumentFromSetupIntentTestInput(it).intentAndPmAllowUserInitiatedReuse
                         )
                     )
                 }
@@ -133,7 +133,7 @@ class FormSaveCheckboxTest {
             ).isEqualTo(
                 FormFragmentArguments(
                     SupportedPaymentMethod.fromCode(it.testInput.lpmTypeFormCode)!!,
-                    allowUserInitiatedReuse = it.testOutput.expectedAllowUserInitiatedReuse,
+                    intentAndPmAllowUserInitiatedReuse = it.testOutput.expectedAllowUserInitiatedReuse,
                     displayUIRequiredForSaving = it.testOutput.expectedDisplayUIForSaving,
                     merchantName = "Example, Inc",
                 )
@@ -152,7 +152,7 @@ class FormSaveCheckboxTest {
             ).isEqualTo(
                 FormFragmentArguments(
                     SupportedPaymentMethod.fromCode(it.testInput.lpmTypeFormCode)!!,
-                    allowUserInitiatedReuse = it.testOutput.expectedAllowUserInitiatedReuse,
+                    intentAndPmAllowUserInitiatedReuse = it.testOutput.expectedAllowUserInitiatedReuse,
                     displayUIRequiredForSaving = it.testOutput.expectedDisplayUIForSaving,
                     merchantName = "Example, Inc",
                 )
@@ -204,21 +204,21 @@ class FormSaveCheckboxTest {
     }
 
     private fun formArgumentFromPaymentIntentTestInput(testInput: PaymentIntentTestInput) = BaseAddPaymentMethodFragment.getFormArguments(
-        hasCustomer = testInput.hasCustomer,
+        isCustomer = testInput.hasCustomer,
         stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
             paymentMethodTypes = testInput.intentLpms,
             setupFutureUsage = testInput.intentSetupFutureUsage
         ),
-        supportedPaymentMethod = SupportedPaymentMethod.fromCode(testInput.lpmTypeFormCode)!!,
+        showPaymentMethod = SupportedPaymentMethod.fromCode(testInput.lpmTypeFormCode)!!,
         merchantName = "Example, Inc"
     )
 
     private fun formArgumentFromSetupIntentTestInput(testInput: SetupIntentTestInput) = BaseAddPaymentMethodFragment.getFormArguments(
-        hasCustomer = testInput.hasCustomer,
+        isCustomer = testInput.hasCustomer,
         stripeIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD.copy(
             paymentMethodTypes = testInput.intentLpms
         ),
-        supportedPaymentMethod = SupportedPaymentMethod.fromCode(testInput.lpmTypeFormCode)!!,
+        showPaymentMethod = SupportedPaymentMethod.fromCode(testInput.lpmTypeFormCode)!!,
         merchantName = "Example, Inc"
     )
 

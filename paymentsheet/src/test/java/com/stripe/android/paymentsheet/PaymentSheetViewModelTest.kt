@@ -301,7 +301,7 @@ internal class PaymentSheetViewModelTest {
         val paymentSelection = PaymentSelection.New.Card(
             PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
             CardBrand.Visa,
-            shouldSavePaymentMethod = true
+            userReuseRequest = true
         )
         viewModel.updateSelection(paymentSelection)
         viewModel.checkout(CheckoutIdentifier.None)
@@ -464,7 +464,7 @@ internal class PaymentSheetViewModelTest {
             val selection = PaymentSelection.New.Card(
                 PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
                 CardBrand.Visa,
-                shouldSavePaymentMethod = true
+                userReuseRequest = true
             )
             viewModel.updateSelection(selection)
 

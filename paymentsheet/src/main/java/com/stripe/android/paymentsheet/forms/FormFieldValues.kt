@@ -7,7 +7,8 @@ import com.stripe.android.paymentsheet.elements.IdentifierSpec
  */
 internal class FormFieldValues(
     val fieldValuePairs: Map<IdentifierSpec, FormFieldEntry> = mapOf(),
-    val showsMandate: Boolean
+    val showsMandate: Boolean,
+    val userRequestedReuse: Boolean
 )
 
 internal data class FormFieldEntry(

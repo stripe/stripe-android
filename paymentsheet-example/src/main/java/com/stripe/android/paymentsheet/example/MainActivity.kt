@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.example
 import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import com.stripe.android.paymentsheet.example.activity.LaunchMultiStepWithCompose
 import com.stripe.android.paymentsheet.example.activity.LaunchPaymentSheetCompleteActivity
 import com.stripe.android.paymentsheet.example.activity.LaunchPaymentSheetCustomActivity
 import com.stripe.android.paymentsheet.example.activity.PaymentSheetPlaygroundActivity
@@ -23,7 +24,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         viewBinding.launchCustomButton.setOnClickListener {
-            startActivity(Intent(this, LaunchPaymentSheetCustomActivity::class.java))
+            startActivity(Intent(this, LaunchMultiStepWithCompose::class.java))
         }
 
         viewBinding.launchPlaygroundButton.setOnClickListener {

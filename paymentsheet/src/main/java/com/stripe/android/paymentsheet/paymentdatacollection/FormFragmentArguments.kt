@@ -10,7 +10,7 @@ import kotlinx.parcelize.Parcelize
 @Parcelize
 internal data class FormFragmentArguments(
     val supportedPaymentMethod: SupportedPaymentMethod,
-    val allowUserInitiatedReuse: Boolean,
+    val intentAndPmAllowUserInitiatedReuse: Boolean,
     val displayUIRequiredForSaving: Boolean,
     val merchantName: String,
     val amount: Amount? = null,
