@@ -28,7 +28,7 @@ class PaymentLauncherContract :
     }
 
     sealed class Args(
-        @InjectorKey open val injectorKey: Int,
+        @InjectorKey open val injectorKey: String,
         open val publishableKey: String,
         open val stripeAccountId: String?,
         open val enableLogging: Boolean,
@@ -38,7 +38,7 @@ class PaymentLauncherContract :
 
         @Parcelize
         data class IntentConfirmationArgs(
-            override val injectorKey: Int,
+            @InjectorKey override val injectorKey: String,
             override val publishableKey: String,
             override val stripeAccountId: String?,
             override val enableLogging: Boolean,
@@ -48,7 +48,7 @@ class PaymentLauncherContract :
 
         @Parcelize
         data class PaymentIntentNextActionArgs(
-            override val injectorKey: Int,
+            @InjectorKey override val injectorKey: String,
             override val publishableKey: String,
             override val stripeAccountId: String?,
             override val enableLogging: Boolean,
@@ -58,7 +58,7 @@ class PaymentLauncherContract :
 
         @Parcelize
         data class SetupIntentNextActionArgs(
-            override val injectorKey: Int,
+            @InjectorKey override val injectorKey: String,
             override val publishableKey: String,
             override val stripeAccountId: String?,
             override val enableLogging: Boolean,

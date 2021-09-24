@@ -1,16 +1,19 @@
 package com.stripe.android.paymentsheet.flowcontroller
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import com.stripe.android.paymentsheet.model.PaymentSelection
 
-internal class FlowControllerViewModel : ViewModel() {
-    private var _initData: InitData? = null
-
+internal class FlowControllerViewModel(
+    private val handle: SavedStateHandle
+) : ViewModel() {
     var paymentSelection: PaymentSelection? = null
 
-    fun setInitData(initData: InitData) {
-        _initData = initData
-    }
+    var initData: InitData
+        get() = requireNotNull(handle.get(INIT_DATA_KEY))
+        set(value) = handle.set(INIT_DATA_KEY, value)
 
-    val initData: InitData get() = requireNotNull(_initData)
+    private companion object {
+        private const val INIT_DATA_KEY = "init_data"
+    }
 }

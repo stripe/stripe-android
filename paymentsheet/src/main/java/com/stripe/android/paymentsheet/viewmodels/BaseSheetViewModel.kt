@@ -48,7 +48,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     protected val prefsRepository: PrefsRepository,
     protected val workContext: CoroutineContext = Dispatchers.IO,
     protected val logger: Logger,
-    @InjectorKey val injectorKey: Int
+    @InjectorKey val injectorKey: String
 ) : AndroidViewModel(application) {
     internal val customerConfig = config?.customer
     internal val merchantName = config?.merchantDisplayName

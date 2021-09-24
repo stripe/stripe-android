@@ -55,7 +55,8 @@ class StripePaymentLauncher @AssistedInject internal constructor(
             .build()
 
     @InjectorKey
-    private val injectorKey: Int = WeakMapInjectorRegistry.nextKey()
+    private val injectorKey: String =
+        WeakMapInjectorRegistry.nextKey(requireNotNull(PaymentLauncher::class.simpleName))
 
     init {
         WeakMapInjectorRegistry.register(this, injectorKey)

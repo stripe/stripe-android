@@ -840,7 +840,7 @@ internal class PaymentSheetViewModelTest {
                 factory.subComponentBuilderProvider = Provider { mockBuilder }
             }
         }
-        val injectorKey = 1
+        val injectorKey = WeakMapInjectorRegistry.nextKey("testKey")
         WeakMapInjectorRegistry.register(injector, injectorKey)
         val factory = PaymentSheetViewModel.Factory(
             { ApplicationProvider.getApplicationContext() },
