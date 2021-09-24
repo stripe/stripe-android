@@ -2,13 +2,10 @@ package com.stripe.android.payments.paymentlauncher
 
 import android.content.Intent
 import androidx.lifecycle.Lifecycle
-import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.model.ConfirmStripeIntentParams
-import com.stripe.android.payments.core.injection.Injectable
-import com.stripe.android.payments.core.injection.Injector
 import com.stripe.android.payments.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.utils.InjectableActivityScenario
 import com.stripe.android.utils.TestUtils
@@ -117,52 +114,6 @@ class PaymentLauncherConfirmationActivityTest {
                 .isEqualTo(
                     PaymentLauncherConfirmationActivity.EMPTY_ARG_ERROR
                 )
-        }
-    }
-
-    @Test
-    fun `viewModelFactory gets initialized by Injector when Injector is available`() {
-        val injector = object : Injector {
-            override fun inject(injectable: Injectable<*>) {
-                val factory = injectable as PaymentLauncherViewModel.Factory
-                factory.stripeApiRepository = mock()
-                factory.authenticatorRegistry = mock()
-                factory.defaultReturnUrl = mock()
-                factory.apiRequestOptionsProvider = mock()
-                factory.threeDs1IntentReturnUrlMap = mock()
-                factory.lazyPaymentIntentFlowResultProcessor = mock()
-                factory.lazySetupIntentFlowResultProcessor = mock()
-                factory.analyticsRequestExecutor = mock()
-                factory.analyticsRequestFactory = mock()
-                factory.uiContext = mock()
-            }
-        }
-        WeakMapInjectorRegistry.register(injector, INJECTOR_KEY)
-
-        ActivityScenario.launch<PaymentLauncherConfirmationActivity>(
-            Intent(
-                ApplicationProvider.getApplicationContext(),
-                PaymentLauncherConfirmationActivity::class.java
-            ).putExtras(
-                PAYMENT_INTENT_NEXT_ACTION_ARGS.toBundle()
-            )
-        ).use { activityScenario ->
-            assertThat(activityScenario.state).isEqualTo(Lifecycle.State.RESUMED)
-        }
-        WeakMapInjectorRegistry.staticCacheMap.clear()
-    }
-
-    @Test
-    fun `viewModelFactory gets initialized with fallback when no Injector is available`() {
-        ActivityScenario.launch<PaymentLauncherConfirmationActivity>(
-            Intent(
-                ApplicationProvider.getApplicationContext(),
-                PaymentLauncherConfirmationActivity::class.java
-            ).putExtras(
-                PAYMENT_INTENT_NEXT_ACTION_ARGS.toBundle()
-            )
-        ).use { activityScenario ->
-            assertThat(activityScenario.state).isEqualTo(Lifecycle.State.RESUMED)
         }
     }
 
