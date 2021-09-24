@@ -26,6 +26,7 @@ import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.networking.AbsFakeStripeRepository
 import com.stripe.android.networking.ApiRequest
+import com.stripe.android.payments.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.payments.core.injection.Injectable
 import com.stripe.android.payments.core.injection.Injector
 import com.stripe.android.payments.core.injection.WeakMapInjectorRegistry
@@ -167,7 +168,7 @@ class GooglePayPaymentMethodLauncherViewModelTest {
                     factory.subComponentBuilder = mockBuilder
                 }
             }
-            val injectorKey = 1
+            val injectorKey = "testInjectorKey"
             WeakMapInjectorRegistry.register(injector, injectorKey)
             val factory = GooglePayPaymentMethodLauncherViewModel.Factory(
                 ApplicationProvider.getApplicationContext(),
@@ -216,7 +217,7 @@ class GooglePayPaymentMethodLauncherViewModelTest {
                     1099,
                     null,
                     GooglePayPaymentMethodLauncherContract.Args.InjectionParams(
-                        -1,
+                        DUMMY_INJECTOR_KEY,
                         productUsage,
                         false,
                         publishableKey,

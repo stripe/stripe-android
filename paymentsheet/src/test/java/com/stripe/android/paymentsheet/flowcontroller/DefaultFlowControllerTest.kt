@@ -734,7 +734,7 @@ internal class DefaultFlowControllerTest {
         paymentOptionCallback,
         paymentResultCallback,
         activityResultCaller,
-        0,
+        INJECTOR_KEY,
         flowControllerInitializer,
         eventReporter,
         ViewModelProvider(activity)[FlowControllerViewModel::class.java],
@@ -821,7 +821,7 @@ internal class DefaultFlowControllerTest {
         private val PAYMENT_METHODS =
             listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD) + PaymentMethodFixtures.createCards(5)
 
-        private const val INJECTOR_KEY = 0
+        private const val INJECTOR_KEY = "TestInjectorKey"
         private const val ENABLE_LOGGING = false
         private val PRODUCT_USAGE = setOf("TestProductUsage")
     }

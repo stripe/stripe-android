@@ -22,7 +22,8 @@ internal class DefaultPaymentSheetLauncher(
     application: Application
 ) : PaymentSheetLauncher, Injector {
     @InjectorKey
-    private val injectorKey: Int = WeakMapInjectorRegistry.nextKey()
+    private val injectorKey: String =
+        WeakMapInjectorRegistry.nextKey(requireNotNull(PaymentSheetLauncher::class.simpleName))
 
     private val paymentSheetLauncherComponent: PaymentSheetLauncherComponent =
         DaggerPaymentSheetLauncherComponent
@@ -104,6 +105,9 @@ internal class DefaultPaymentSheetLauncher(
         when (injectable) {
             is PaymentSheetViewModel.Factory -> {
                 paymentSheetLauncherComponent.inject(injectable)
+            }
+            else -> {
+                throw IllegalArgumentException("invalid Injectable $injectable requested in $this")
             }
         }
     }

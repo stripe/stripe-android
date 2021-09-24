@@ -61,7 +61,7 @@ internal interface AuthenticationComponent {
         ): Builder
 
         @BindsInstance
-        fun injectorKey(@InjectorKey id: Int): Builder
+        fun injectorKey(@InjectorKey id: String): Builder
 
         @BindsInstance
         fun publishableKeyProvider(

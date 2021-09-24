@@ -85,7 +85,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     private val googlePayPaymentMethodLauncherFactory: GooglePayPaymentMethodLauncherFactory,
     logger: Logger,
     @IOContext workContext: CoroutineContext,
-    @InjectorKey injectorKey: Int
+    @InjectorKey injectorKey: String
 ) : BaseSheetViewModel<PaymentSheetViewModel.TransitionTarget>(
     application = application,
     config = args.config,

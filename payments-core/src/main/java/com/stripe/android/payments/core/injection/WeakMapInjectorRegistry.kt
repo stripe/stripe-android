@@ -21,26 +21,27 @@ object WeakMapInjectorRegistry : InjectorRegistry {
      */
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @VisibleForTesting
-    val staticCacheMap = WeakHashMap<Injector, @InjectorKey Int>()
+    val staticCacheMap = WeakHashMap<Injector, @InjectorKey String>()
 
     /**
-     * Global unique monotonically increasing key to be assigned to [Injector]s registered.
+     * Global unique monotonically increasing key to be assigned as a suffixes to
+     * registered [Injector]s.
      */
     @VisibleForTesting
     internal val CURRENT_REGISTER_KEY = AtomicInteger(0)
 
-    override fun register(injector: Injector, @InjectorKey key: Int) {
+    override fun register(injector: Injector, @InjectorKey key: String) {
         staticCacheMap[injector] = key
     }
 
-    override fun retrieve(@InjectorKey injectorKey: Int): Injector? {
+    override fun retrieve(@InjectorKey injectorKey: String): Injector? {
         return staticCacheMap.entries.firstOrNull {
             it.value == injectorKey
         }?.key
     }
 
     @InjectorKey
-    override fun nextKey(): Int {
-        return CURRENT_REGISTER_KEY.incrementAndGet()
+    override fun nextKey(prefix: String): String {
+        return prefix + CURRENT_REGISTER_KEY.incrementAndGet()
     }
 }

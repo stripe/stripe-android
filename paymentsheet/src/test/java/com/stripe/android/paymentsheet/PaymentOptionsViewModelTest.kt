@@ -243,7 +243,7 @@ internal class PaymentOptionsViewModelTest {
                 factory.subComponentBuilderProvider = Provider { mockBuilder }
             }
         }
-        val injectorKey = 1
+        val injectorKey = WeakMapInjectorRegistry.nextKey("testKey")
         WeakMapInjectorRegistry.register(injector, injectorKey)
         val factory = PaymentOptionsViewModel.Factory(
             { ApplicationProvider.getApplicationContext() },
@@ -284,7 +284,7 @@ internal class PaymentOptionsViewModelTest {
                     false,
                     null,
                     null,
-                    1,
+                    DUMMY_INJECTOR_KEY,
                     false,
                     productUsage
                 )
@@ -328,7 +328,7 @@ internal class PaymentOptionsViewModelTest {
             isGooglePayReady = true,
             newCard = null,
             statusBarColor = PaymentSheetFixtures.STATUS_BAR_COLOR,
-            injectorKey = 0,
+            injectorKey = DUMMY_INJECTOR_KEY,
             enableLogging = false,
             productUsage = mock()
         )

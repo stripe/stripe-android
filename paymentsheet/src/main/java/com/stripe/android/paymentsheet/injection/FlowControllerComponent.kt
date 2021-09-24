@@ -63,7 +63,7 @@ internal interface FlowControllerComponent {
         fun paymentResultCallback(paymentResultCallback: PaymentSheetResultCallback): Builder
 
         @BindsInstance
-        fun injectorKey(@InjectorKey injectorKey: Int): Builder
+        fun injectorKey(@InjectorKey injectorKey: String): Builder
 
         fun build(): FlowControllerComponent
     }

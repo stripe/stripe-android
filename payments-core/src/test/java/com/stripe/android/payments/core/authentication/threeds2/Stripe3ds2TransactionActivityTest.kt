@@ -125,7 +125,7 @@ class Stripe3ds2TransactionActivityTest {
     }
 
     private companion object {
-        var INJECTOR_KEY = WeakMapInjectorRegistry.nextKey()
+        var INJECTOR_KEY = WeakMapInjectorRegistry.nextKey("TestPrefix")
         val ARGS = Stripe3ds2TransactionContract.Args(
             SdkTransactionId.create(),
             PaymentAuthConfig.Stripe3ds2Config(

@@ -8,6 +8,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.model.PaymentIntentFixtures
+import com.stripe.android.payments.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.payments.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.databinding.FragmentPaymentsheetAddPaymentMethodBinding
@@ -56,7 +57,7 @@ class PaymentOptionsAddPaymentMethodFragmentTest {
             isGooglePayReady = false,
             newCard = null,
             statusBarColor = PaymentSheetFixtures.STATUS_BAR_COLOR,
-            injectorKey = 0,
+            injectorKey = DUMMY_INJECTOR_KEY,
             enableLogging = false,
             productUsage = mock()
         ),
