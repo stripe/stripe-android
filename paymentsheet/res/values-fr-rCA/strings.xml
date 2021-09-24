@@ -1,9 +1,55 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
+  <!-- Used for accessibility to describe the button on the payment sheet list of options to add a new payment method. -->
+  <string name="add_new_payment_method">Ajouter un moyen de paiement</string>
+  <!-- Label for input requesting address line 2, used for international addresses -->
+  <string name="address_label_address_line2">Ligne d\'adresse 2</string>
+  <!-- Used to describe address in United Arab Emirates -->
+  <string name="address_label_ae_emirate">Émirat</string>
+  <!-- Label of an address field -->
+  <string name="address_label_au_suburb_or_city">Banlieue ou ville</string>
+  <!-- Label of an address field -->
+  <string name="address_label_bb_jm_parish">Paroisse</string>
+  <!-- Used to describe a field of an address -->
+  <string name="address_label_cedex">Cedex</string>
+  <!-- Label of an address field -->
+  <string name="address_label_department">Département</string>
+  <!-- Label for the district field on an address form -->
+  <string name="address_label_district">Arrondissement</string>
+  <!-- Label of an address field in hk -->
+  <string name="address_label_hk_area">Région</string>
+  <!-- Label of an address field -->
+  <string name="address_label_ie_eircode">Eircode</string>
+  <!-- Used to describe an address field in Ireland -->
+  <string name="address_label_ie_townland">Townland</string>
+  <!-- Used to describe postal code in India -->
+  <string name="address_label_in_pin">Pin</string>
+  <!-- Used to describe part of an address -->
+  <string name="address_label_island">Île</string>
+  <!-- Label of an address field -->
+  <string name="address_label_jp_prefecture">Préfecture</string>
+  <!-- Label of an address field -->
+  <string name="address_label_kr_do_si">Do Si</string>
+  <!-- Used to describe a field of an address -->
+  <string name="address_label_neighborhood">Quartier</string>
+  <!-- Label of an address field -->
+  <string name="address_label_oblast">Oblast</string>
+  <!-- Used to describe a field of an address -->
+  <string name="address_label_post_town">Ville</string>
+  <!-- Label of an address field -->
+  <string name="address_label_suburb">Banlieue</string>
+  <!-- Used to describe an address field. -->
+  <string name="address_label_village_township">Village ou canton</string>
+  <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
+  <string name="bank_account_ending_in">Supprimer le compte bancaire se terminant par %s</string>
   <!-- Billing address section title for card form entry. -->
   <string name="billing_details">Adresse de facturation</string>
+  <!-- Used when a required field is blank and submit is clicked. -->
+  <string name="blank_and_required">Ce champ ne peut être vide.</string>
   <!-- Button title to cancel action in an alert -->
   <string name="cancel">Annuler</string>
+  <!-- Used for accessibility to indicate that when you press the dropdown arrow on a form (such as a country or bank), it will bring up a menu to allow you to change the value. -->
+  <string name="change">Modifier</string>
   <!-- Done button title -->
   <string name="done">Terminé</string>
   <!-- Button title to enter editing mode -->
@@ -39,6 +85,8 @@
   <!-- Text for back button -->
   <string name="stripe_paymentsheet_back">Retour</string>
   <string name="stripe_paymentsheet_close">Fermer</string>
+  <!-- Label for the field containing the dropdown of EPS Banks -->
+  <string name="stripe_paymentsheet_eps_bank">Banque EPS</string>
   <!-- The label of a text field that is optional. For example, 'Email (optional)' or 'Name (optional) -->
   <string name="stripe_paymentsheet_form_label_optional">%s (facultatif)</string>
   <!-- iDEAL bank section title for iDEAL form entry. -->
@@ -47,6 +95,8 @@
   <string name="stripe_paymentsheet_or_pay_using">Ou payer avec</string>
   <!-- Title of a section containing a card form that will collect the payment information from the user. -->
   <string name="stripe_paymentsheet_or_pay_with_card">Ou payez par carte</string>
+  <!-- Label on the dropdown to select the Przelewy24 Bank -->
+  <string name="stripe_paymentsheet_p24_bank">Banque Przelewy24</string>
   <!-- Label of a button that initiates payment when tapped -->
   <string name="stripe_paymentsheet_pay_button_amount">Payer %s</string>
   <!-- Label for a button that starts processing the payment. -->
@@ -69,4 +119,6 @@
   <string name="stripe_paymentsheet_sepa_mandate">En fournissant vos informations de paiement et en confirmant ce paiement, vous autorisez (A) %s et Stripe, notre prestataire de services de paiement, à donner à votre institution financière l\'instruction de débiter votre compte, et (B) votre institution financièire à débiter votre compte conformément à ces instructions. Vous bénéficiez d\'un droit de remboursement par votre institution financière selon les conditions décrites dans la convention que vous avez passée avec elle. Toute demande de remboursement doit être présentée dans les 8 semaines suivant la date de débit de votre compte. Vos droits sont précisés dans une déclaration que vous pouvez obtenir auprès de votre institution financière. Vous acceptez de recevoir des notifications concernant les débits futurs jusqu\'à 2 jours avant leur réalisation.</string>
   <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->
   <string name="stripe_paymentsheet_setup_button_label">Configurer</string>
+  <!-- Label indicating the total amount that the user is authorizing (e.g. "Total: $25.00") -->
+  <string name="stripe_paymentsheet_total_amount">Total : %s</string>
 </resources>
