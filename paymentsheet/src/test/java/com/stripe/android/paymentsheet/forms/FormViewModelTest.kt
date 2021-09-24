@@ -103,8 +103,9 @@ internal class FormViewModelTest {
     @OptIn(ExperimentalCoroutinesApi::class)
     @Test
     fun `Factory gets initialized with fallback when no Injector is available`() = runBlockingTest {
+        val config = COMPOSE_FRAGMENT_ARGS.copy(injectorKey = DUMMY_INJECTOR_KEY)
         val factory = FormViewModel.Factory(
-            mock(),
+            config,
             ApplicationProvider.getApplicationContext<Application>().resources,
             sofort.layout
         )
