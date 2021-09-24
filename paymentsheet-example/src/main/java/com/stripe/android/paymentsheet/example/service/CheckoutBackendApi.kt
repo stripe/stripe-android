@@ -11,7 +11,8 @@ data class CheckoutRequest(
     val customer: String,
     val currency: String,
     val mode: String,
-    val set_shipping_address: Boolean
+    val set_shipping_address: Boolean,
+    val automatic_payment_methods: Boolean
 )
 
 @Serializable

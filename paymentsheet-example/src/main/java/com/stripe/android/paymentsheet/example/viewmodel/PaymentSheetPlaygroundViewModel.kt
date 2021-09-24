@@ -38,7 +38,8 @@ internal class PaymentSheetPlaygroundViewModel(
         customer: Repository.CheckoutCustomer,
         currency: Repository.CheckoutCurrency,
         mode: Repository.CheckoutMode,
-        setShippingAddress: Boolean
+        setShippingAddress: Boolean,
+        setAutomaticPaymentMethod: Boolean
     ) {
         customerConfig.value = null
         clientSecret.value = null
@@ -46,7 +47,13 @@ internal class PaymentSheetPlaygroundViewModel(
         inProgress.postValue(true)
 
         runCatching {
-            repository.checkout(customer, currency, mode, setShippingAddress)
+            repository.checkout(
+                customer,
+                currency,
+                mode,
+                setShippingAddress,
+                setAutomaticPaymentMethod
+            )
         }.fold(
             onSuccess = {
                 checkoutMode = mode
