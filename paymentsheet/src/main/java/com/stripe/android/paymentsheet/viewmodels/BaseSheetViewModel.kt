@@ -66,7 +66,8 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
 
     internal var supportedPaymentMethods = emptyList<SupportedPaymentMethod>()
 
-    protected val _paymentMethods = MutableLiveData<List<PaymentMethod>>()
+    @VisibleForTesting
+    internal val _paymentMethods = MutableLiveData<List<PaymentMethod>>()
     internal val paymentMethods: LiveData<List<PaymentMethod>> = _paymentMethods
 
     @VisibleForTesting
@@ -153,9 +154,11 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
 
     private fun createFragmentConfig(): FragmentConfig? {
         val stripeIntentValue = stripeIntent.value
-        val paymentMethodsValue = paymentMethods.value
         val isGooglePayReadyValue = isGooglePayReady.value
         val savedSelectionValue = savedSelection.value
+        // List of Payment Methods is not passed in the config but we still wait for it to be loaded
+        // before adding the Fragment.
+        val paymentMethodsValue = paymentMethods.value
 
         return if (
             stripeIntentValue != null &&
@@ -165,7 +168,6 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
         ) {
             FragmentConfig(
                 stripeIntent = stripeIntentValue,
-                paymentMethods = paymentMethodsValue,
                 isGooglePayReady = isGooglePayReadyValue,
                 savedSelection = savedSelectionValue
             )
@@ -280,11 +282,17 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
 
     fun removePaymentMethod(paymentMethod: PaymentMethod) = runBlocking {
         launch {
-            if (customerConfig != null && paymentMethod.id != null) {
-                customerRepository.detachPaymentMethod(
-                    customerConfig,
-                    requireNotNull(paymentMethod.id)
-                )
+            paymentMethod.id?.let { paymentMethodId ->
+                _paymentMethods.value = _paymentMethods.value?.filter {
+                    it.id != paymentMethodId
+                }
+
+                customerConfig?.let {
+                    customerRepository.detachPaymentMethod(
+                        it,
+                        paymentMethodId
+                    )
+                }
             }
         }
     }

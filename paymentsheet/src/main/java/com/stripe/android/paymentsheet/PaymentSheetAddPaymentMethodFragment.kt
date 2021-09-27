@@ -37,7 +37,7 @@ internal class PaymentSheetAddPaymentMethodFragment(
             BaseSheetActivity.EXTRA_FRAGMENT_CONFIG
         )
         val shouldShowGooglePayButton = config?.let {
-            config.isGooglePayReady && config.paymentMethods.isEmpty()
+            config.isGooglePayReady && sheetViewModel.paymentMethods.value.isNullOrEmpty()
         } ?: false
 
         viewBinding = FragmentPaymentsheetAddPaymentMethodBinding.bind(view)
