@@ -6,7 +6,6 @@ import androidx.lifecycle.AbstractSavedStateViewModelFactory
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.savedstate.SavedStateRegistryOwner
-import com.stripe.android.Logger
 import com.stripe.android.StripePaymentController
 import com.stripe.android.auth.PaymentBrowserAuthContract
 import com.stripe.android.exception.StripeException
@@ -24,6 +23,7 @@ import com.stripe.android.payments.core.injection.IOContext
 import com.stripe.android.payments.core.injection.Injectable
 import com.stripe.android.payments.core.injection.Stripe3ds2TransactionViewModelSubcomponent
 import com.stripe.android.payments.core.injection.WeakMapInjectorRegistry
+import com.stripe.android.payments.core.injection.maybeInject
 import com.stripe.android.stripe3ds2.service.StripeThreeDs2Service
 import com.stripe.android.stripe3ds2.transaction.ChallengeParameters
 import com.stripe.android.stripe3ds2.transaction.ChallengeResult
@@ -326,25 +326,16 @@ internal class Stripe3ds2TransactionViewModelFactory(
         handle: SavedStateHandle
     ): T {
         val args = argsSupplier()
-
         val application = applicationSupplier()
-
-        val logger = Logger.getInstance(args.enableLogging)
-
-        WeakMapInjectorRegistry.retrieve(args.injectorKey)?.let {
-            logger.info("Injector available, injecting dependencies into Stripe3ds2TransactionViewModelFactory")
-            it.inject(this)
-        } ?: run {
-            logger.info("Injector unavailable, initializing dependencies of Stripe3ds2TransactionViewModelFactory")
-            fallbackInitialize(
-                FallbackInitializeParam(
-                    application,
-                    args.enableLogging,
-                    args.publishableKey,
-                    args.productUsage
-                )
+        maybeInject(
+            args.injectorKey,
+            FallbackInitializeParam(
+                application,
+                args.enableLogging,
+                args.publishableKey,
+                args.productUsage
             )
-        }
+        )
 
         return subComponentBuilder
             .args(args)
