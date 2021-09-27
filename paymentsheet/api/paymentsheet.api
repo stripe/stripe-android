@@ -727,14 +727,6 @@ public final class com/stripe/android/paymentsheet/injection/PaymentSheetCommonM
 	public static fun provideStripeAccountId (Ldagger/Lazy;)Lkotlin/jvm/functions/Function0;
 }
 
-public final class com/stripe/android/paymentsheet/injection/PaymentSheetCommonModule_Companion_ProvidesResourcesFactory : dagger/internal/Factory {
-	public fun <init> (Ljavax/inject/Provider;)V
-	public static fun create (Ljavax/inject/Provider;)Lcom/stripe/android/paymentsheet/injection/PaymentSheetCommonModule_Companion_ProvidesResourcesFactory;
-	public fun get ()Landroid/content/res/Resources;
-	public synthetic fun get ()Ljava/lang/Object;
-	public static fun providesResources (Landroid/content/Context;)Landroid/content/res/Resources;
-}
-
 public final class com/stripe/android/paymentsheet/injection/PaymentSheetLauncherModule_Companion_ProvideEventReporterModeFactory : dagger/internal/Factory {
 	public fun <init> ()V
 	public static fun create ()Lcom/stripe/android/paymentsheet/injection/PaymentSheetLauncherModule_Companion_ProvideEventReporterModeFactory;

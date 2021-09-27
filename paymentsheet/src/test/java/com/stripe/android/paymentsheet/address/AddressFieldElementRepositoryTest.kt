@@ -57,8 +57,10 @@ class AddressFieldElementRepositoryTest {
     @Test
     fun `Verify all supported countries deserialize`() {
         supportedCountries.forEach {
-            assertThat(addressFieldElementRepository.get(it))
-                .isNotEqualTo(addressFieldElementRepository.get(DEFAULT_COUNTRY_CODE))
+            if (it != "ZZ") {
+                assertThat(addressFieldElementRepository.get(it))
+                    .isNotEqualTo(addressFieldElementRepository.get(DEFAULT_COUNTRY_CODE))
+            }
             assertThat(addressFieldElementRepository.get(it))
                 .isNotNull()
         }
