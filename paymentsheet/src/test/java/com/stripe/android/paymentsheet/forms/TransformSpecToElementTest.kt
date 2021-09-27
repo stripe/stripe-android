@@ -61,7 +61,7 @@ internal class TransformSpecToElementTest {
             TransformSpecToElement(
                 ResourceRepository(
                     bankRepository,
-                    AddressFieldElementRepository(mock())
+                    mock()
                 ),
                 FormFragmentArguments(
                     supportedPaymentMethodName = "Card",

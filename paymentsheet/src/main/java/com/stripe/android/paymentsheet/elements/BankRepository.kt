@@ -17,6 +17,8 @@ internal data class BankRepository @Inject internal constructor(
 
     private val bankItemMap = mutableMapOf<SupportedBankType, List<DropdownItemSpec>?>()
 
+    private val format = Json { ignoreUnknownKeys = true }
+
     internal fun get(bankType: SupportedBankType) = requireNotNull(bankItemMap[bankType])
 
     init {
@@ -33,8 +35,6 @@ internal data class BankRepository @Inject internal constructor(
             bankItemMap[bankType] = parseBank(banksOfType)
         }
     }
-
-    private val format = Json { ignoreUnknownKeys = true }
 
     private fun parseBank(inputStream: InputStream?) =
         getJsonStringFromInputStream(inputStream)?.let {

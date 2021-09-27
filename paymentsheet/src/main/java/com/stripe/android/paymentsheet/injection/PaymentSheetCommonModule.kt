@@ -56,12 +56,6 @@ internal abstract class PaymentSheetCommonModule {
             return PaymentConfiguration.getInstance(appContext)
         }
 
-        @Singleton
-        @Provides
-        fun providesResources(appContext: Context): Resources {
-            return appContext.resources
-        }
-
         @Provides
         @Singleton
         fun provideResources(context: Context): Resources {
