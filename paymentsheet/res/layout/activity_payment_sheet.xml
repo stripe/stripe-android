@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/coordinator"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
@@ -29,7 +30,9 @@
                 android:layout_height="wrap_content"
                 android:background="?colorSurface"
                 app:contentInsetStart="0dp"
-                app:contentInsetStartWithNavigation="0dp">
+                app:contentInsetStartWithNavigation="0dp"
+                android:paddingEnd="12dp"
+                tools:ignore="RtlSymmetry">
 
                 <TextView
                     android:id="@+id/testmode"
