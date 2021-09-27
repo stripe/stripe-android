@@ -257,7 +257,7 @@ internal abstract class BaseAddPaymentMethodFragment(
                 // checkbox regardless of the payment method until future fix
                 stripeIntent.paymentMethodTypes.forEach {
                     if (SupportedPaymentMethod.fromCode(it)
-                            ?.userRequestedConfirmSaveForFutureSupported == false
+                        ?.userRequestedConfirmSaveForFutureSupported == false
                     ) {
                         saveForFutureUseValue = false
                         saveForFutureUseVisible = false

@@ -227,7 +227,6 @@ internal class PaymentOptionsViewModelTest {
         assertThat(transitionTarget).hasSize(2)
     }
 
-
     @Test
     fun `removePaymentMethod removes it from payment methods list`() = runBlockingTest {
         val cards = PaymentMethodFixtures.createCards(3)
