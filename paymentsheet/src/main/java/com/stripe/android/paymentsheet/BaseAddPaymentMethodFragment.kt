@@ -31,7 +31,6 @@ import com.stripe.android.paymentsheet.paymentdatacollection.TransformToPaymentM
 import com.stripe.android.paymentsheet.ui.AddPaymentMethodsFragmentFactory
 import com.stripe.android.paymentsheet.ui.AnimationConstants
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 internal abstract class BaseAddPaymentMethodFragment(
     private val eventReporter: EventReporter
@@ -67,7 +66,6 @@ internal abstract class BaseAddPaymentMethodFragment(
         )
     }
 
-    @ExperimentalCoroutinesApi
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 

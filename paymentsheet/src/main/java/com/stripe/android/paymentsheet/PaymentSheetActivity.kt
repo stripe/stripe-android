@@ -142,7 +142,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
 
         viewModel.fragmentConfig.observe(this) { config ->
             if (config != null) {
-                val target = if (config.paymentMethods.isEmpty()) {
+                val target = if (viewModel.paymentMethods.value.isNullOrEmpty()) {
                     PaymentSheetViewModel.TransitionTarget.AddPaymentMethodSheet(config)
                 } else {
                     PaymentSheetViewModel.TransitionTarget.SelectSavedPaymentMethod(config)

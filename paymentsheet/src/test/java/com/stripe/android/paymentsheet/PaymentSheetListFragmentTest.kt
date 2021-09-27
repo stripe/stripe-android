@@ -16,7 +16,6 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.model.PaymentIntentFixtures
-import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.databinding.FragmentPaymentsheetPaymentMethodsListBinding
@@ -59,11 +58,12 @@ class PaymentSheetListFragmentTest {
         val scenario = createScenario(
             fragmentConfig = FRAGMENT_CONFIG.copy(
                 isGooglePayReady = true,
-                paymentMethods = listOf(paymentMethod),
                 savedSelection = SavedSelection.PaymentMethod(paymentMethod.id.orEmpty())
-            )
-        )
-        scenario.onFragment {
+            ),
+            initialState = Lifecycle.State.INITIALIZED
+        ).onFragment { fragment ->
+            fragment.sheetViewModel._paymentMethods.value = listOf(paymentMethod)
+        }.moveToState(Lifecycle.State.STARTED).onFragment {
             assertThat(activityViewModel(it).selection.value)
                 .isEqualTo(paymentSelection)
         }
@@ -77,7 +77,11 @@ class PaymentSheetListFragmentTest {
 
     @Test
     fun `sets up adapter`() {
-        createScenario().onFragment {
+        createScenario(
+            initialState = Lifecycle.State.INITIALIZED
+        ).onFragment { fragment ->
+            fragment.sheetViewModel._paymentMethods.value = PAYMENT_METHODS
+        }.moveToState(Lifecycle.State.STARTED).onFragment {
             idleLooper()
 
             val adapter = recyclerView(it).adapter as PaymentOptionsAdapter
@@ -118,9 +122,7 @@ class PaymentSheetListFragmentTest {
             assertThat(activityViewModel.transition.value?.peekContent())
                 .isEqualTo(
                     PaymentSheetViewModel.TransitionTarget.AddPaymentMethodFull(
-                        FragmentConfigFixtures.DEFAULT.copy(
-                            paymentMethods = PAYMENT_METHODS
-                        )
+                        FragmentConfigFixtures.DEFAULT
                     )
                 )
         }
@@ -192,7 +194,11 @@ class PaymentSheetListFragmentTest {
 
     @Test
     fun `when config has saved payment methods then show options menu`() {
-        createScenario().onFragment { fragment ->
+        createScenario(
+            initialState = Lifecycle.State.INITIALIZED
+        ).onFragment { fragment ->
+            fragment.sheetViewModel._paymentMethods.value = PAYMENT_METHODS
+        }.moveToState(Lifecycle.State.STARTED).onFragment { fragment ->
             idleLooper()
             assertThat(fragment.hasOptionsMenu()).isTrue()
         }
@@ -200,7 +206,11 @@ class PaymentSheetListFragmentTest {
 
     @Test
     fun `when config does not have saved payment methods then show no options menu`() {
-        createScenario(FragmentConfigFixtures.DEFAULT).onFragment { fragment ->
+        createScenario(
+            initialState = Lifecycle.State.INITIALIZED
+        ).onFragment { fragment ->
+            fragment.sheetViewModel._paymentMethods.value = emptyList()
+        }.moveToState(Lifecycle.State.STARTED).onFragment { fragment ->
             idleLooper()
             assertThat(fragment.hasOptionsMenu()).isFalse()
         }
@@ -208,7 +218,11 @@ class PaymentSheetListFragmentTest {
 
     @Test
     fun `deletePaymentMethod() removes item from adapter`() {
-        createScenario().onFragment { fragment ->
+        createScenario(
+            initialState = Lifecycle.State.INITIALIZED
+        ).onFragment { fragment ->
+            fragment.sheetViewModel._paymentMethods.value = PAYMENT_METHODS
+        }.moveToState(Lifecycle.State.STARTED).onFragment { fragment ->
             idleLooper()
 
             val adapter = recyclerView(fragment).adapter as PaymentOptionsAdapter
@@ -262,8 +276,6 @@ class PaymentSheetListFragmentTest {
             PaymentMethodFixtures.CARD_PAYMENT_METHOD,
         )
 
-        private val FRAGMENT_CONFIG = FragmentConfigFixtures.DEFAULT.copy(
-            paymentMethods = PAYMENT_METHODS
-        )
+        private val FRAGMENT_CONFIG = FragmentConfigFixtures.DEFAULT
     }
 }
