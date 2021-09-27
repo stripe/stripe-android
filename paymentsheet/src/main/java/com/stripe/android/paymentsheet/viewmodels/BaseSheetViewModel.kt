@@ -15,6 +15,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.core.injection.InjectorKey
+import com.stripe.android.paymentsheet.BaseAddPaymentMethodFragment
 import com.stripe.android.paymentsheet.BasePaymentMethodsListFragment
 import com.stripe.android.paymentsheet.PaymentOptionsActivity
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -35,7 +36,6 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import org.jetbrains.annotations.TestOnly
 import kotlin.coroutines.CoroutineContext
-import com.stripe.android.paymentsheet.BaseAddPaymentMethodFragment
 
 /**
  * Base `ViewModel` for activities that use `BottomSheet`.
@@ -68,6 +68,11 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
 
     @VisibleForTesting
     internal val _paymentMethods = MutableLiveData<List<PaymentMethod>>()
+
+    /**
+     * The list of saved payment methods for the current customer.
+     * Value is null until it's loaded, and non-null (could be empty) after that.
+     */
     internal val paymentMethods: LiveData<List<PaymentMethod>> = _paymentMethods
 
     @VisibleForTesting
