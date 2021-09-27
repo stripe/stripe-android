@@ -19,8 +19,8 @@ internal data class BankRepository @Inject internal constructor(
 
     internal fun get(bankType: SupportedBankType) = requireNotNull(bankItemMap[bankType])
 
-    fun init() {
-        init(
+    init {
+        initialize(
             SupportedBankType.values().associateWith { bank ->
                 resources?.assets?.open(bank.assetFileName)
             }
@@ -28,7 +28,7 @@ internal data class BankRepository @Inject internal constructor(
     }
 
     @VisibleForTesting
-    internal fun init(supportedBankTypeInputStreamMap: Map<SupportedBankType, InputStream?>) {
+    internal fun initialize(supportedBankTypeInputStreamMap: Map<SupportedBankType, InputStream?>) {
         supportedBankTypeInputStreamMap.forEach { (bankType, banksOfType) ->
             bankItemMap[bankType] = parseBank(banksOfType)
         }

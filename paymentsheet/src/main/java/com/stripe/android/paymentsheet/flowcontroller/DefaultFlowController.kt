@@ -79,7 +79,7 @@ internal class DefaultFlowController @Inject internal constructor(
     private val eventReporter: EventReporter,
     private val viewModel: FlowControllerViewModel,
     private val paymentLauncherFactory: StripePaymentLauncherAssistedFactory,
-    private val resourceRepository: ResourceRepository,
+    resourceRepository: ResourceRepository,
     /**
      * [PaymentConfiguration] is [Lazy] because the client might set publishableKey and
      * stripeAccountId after creating a [DefaultFlowController].
@@ -105,9 +105,6 @@ internal class DefaultFlowController @Inject internal constructor(
     override fun inject(injectable: Injectable<*>) {
         when (injectable) {
             is PaymentOptionsViewModel.Factory -> {
-                flowControllerComponent.inject(injectable)
-            }
-            is FormViewModel.Factory -> {
                 flowControllerComponent.inject(injectable)
             }
             is FormViewModel.Factory -> {
@@ -191,7 +188,6 @@ internal class DefaultFlowController @Inject internal constructor(
         }
 
         lifecycleScope.launch {
-            resourceRepository.init()
             val result = flowControllerInitializer.init(
                 clientSecret,
                 configuration

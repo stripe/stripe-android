@@ -82,7 +82,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     private val stripeIntentValidator: StripeIntentValidator,
     customerRepository: CustomerRepository,
     prefsRepository: PrefsRepository,
-    private val resourceRepository: ResourceRepository,
+    resourceRepository: ResourceRepository,
     private val paymentLauncherFactory: StripePaymentLauncherAssistedFactory,
     private val googlePayPaymentMethodLauncherFactory: GooglePayPaymentMethodLauncherFactory,
     logger: Logger,
@@ -427,11 +427,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
     override fun onUserCancel() {
         _paymentSheetResult.value = PaymentSheetResult.Canceled
-    }
-
-    fun initializeResourceRepository() {
-        // TODO(michelleb) Move to the DefaultPaymentLauncher when injected
-        resourceRepository.init()
     }
 
     internal sealed class TransitionTarget {

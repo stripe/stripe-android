@@ -53,7 +53,7 @@ internal class TransformSpecToElementTest {
     @Before
     fun beforeTest() {
         val bankRepository = BankRepository(mock())
-        bankRepository.init(
+        bankRepository.initialize(
             mapOf(SupportedBankType.Ideal to IDEAL_BANKS_JSON.byteInputStream())
         )
 

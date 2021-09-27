@@ -18,7 +18,7 @@ class AddressFieldElementRepositoryTest {
 
     @Test
     fun `Country that doesn't exist return the default country`() {
-        addressFieldElementRepository.init(
+        addressFieldElementRepository.initialize(
             listOf("ZZ").associateWith { countryCode ->
                 "src/main/assets/addressinfo/$countryCode.json"
             }
@@ -37,7 +37,7 @@ class AddressFieldElementRepositoryTest {
 
     @Test
     fun `Correct supported country is returned`() {
-        addressFieldElementRepository.init(
+        addressFieldElementRepository.initialize(
             supportedCountries.associateWith { countryCode ->
                 "src/main/assets/addressinfo/$countryCode.json"
             }
@@ -69,7 +69,7 @@ class AddressFieldElementRepositoryTest {
 
     @Test
     fun `Verify all supported countries deserialize`() {
-        addressFieldElementRepository.init(
+        addressFieldElementRepository.initialize(
             supportedCountries.associateWith { countryCode ->
                 "src/main/assets/addressinfo/$countryCode.json"
             }
