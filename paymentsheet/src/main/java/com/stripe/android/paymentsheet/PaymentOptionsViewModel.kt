@@ -10,7 +10,7 @@ import com.stripe.android.Logger
 import com.stripe.android.payments.core.injection.IOContext
 import com.stripe.android.payments.core.injection.Injectable
 import com.stripe.android.payments.core.injection.InjectorKey
-import com.stripe.android.payments.core.injection.maybeInject
+import com.stripe.android.payments.core.injection.injectWithFallback
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.injection.DaggerPaymentOptionsViewModelFactoryComponent
 import com.stripe.android.paymentsheet.injection.PaymentOptionsViewModelSubcomponent
@@ -154,7 +154,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
             val application = applicationSupplier()
             val starterArgs = starterArgsSupplier()
-            maybeInject(
+            injectWithFallback(
                 starterArgsSupplier().injectorKey,
                 FallbackInitializeParam(application, starterArgs.productUsage)
             )

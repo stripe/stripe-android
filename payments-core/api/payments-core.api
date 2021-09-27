@@ -5312,7 +5312,7 @@ public abstract interface class com/stripe/android/payments/core/injection/Injec
 }
 
 public final class com/stripe/android/payments/core/injection/InjectableKtxKt {
-	public static final fun maybeInject (Lcom/stripe/android/payments/core/injection/Injectable;Ljava/lang/String;Ljava/lang/Object;)V
+	public static final fun injectWithFallback (Lcom/stripe/android/payments/core/injection/Injectable;Ljava/lang/String;Ljava/lang/Object;)V
 }
 
 public abstract interface class com/stripe/android/payments/core/injection/Injector {

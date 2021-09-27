@@ -23,7 +23,7 @@ import com.stripe.android.payments.core.injection.IOContext
 import com.stripe.android.payments.core.injection.Injectable
 import com.stripe.android.payments.core.injection.Stripe3ds2TransactionViewModelSubcomponent
 import com.stripe.android.payments.core.injection.WeakMapInjectorRegistry
-import com.stripe.android.payments.core.injection.maybeInject
+import com.stripe.android.payments.core.injection.injectWithFallback
 import com.stripe.android.stripe3ds2.service.StripeThreeDs2Service
 import com.stripe.android.stripe3ds2.transaction.ChallengeParameters
 import com.stripe.android.stripe3ds2.transaction.ChallengeResult
@@ -327,7 +327,7 @@ internal class Stripe3ds2TransactionViewModelFactory(
     ): T {
         val args = argsSupplier()
         val application = applicationSupplier()
-        maybeInject(
+        injectWithFallback(
             args.injectorKey,
             FallbackInitializeParam(
                 application,

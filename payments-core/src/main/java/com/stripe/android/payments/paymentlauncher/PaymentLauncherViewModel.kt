@@ -32,7 +32,7 @@ import com.stripe.android.payments.core.injection.Injectable
 import com.stripe.android.payments.core.injection.PaymentLauncherViewModelSubcomponent
 import com.stripe.android.payments.core.injection.UIContext
 import com.stripe.android.payments.core.injection.WeakMapInjectorRegistry
-import com.stripe.android.payments.core.injection.maybeInject
+import com.stripe.android.payments.core.injection.injectWithFallback
 import com.stripe.android.view.AuthActivityStarterHost
 import dagger.Lazy
 import kotlinx.coroutines.launch
@@ -276,7 +276,7 @@ internal class PaymentLauncherViewModel @Inject constructor(
             handle: SavedStateHandle
         ): T {
             val arg = argsSupplier()
-            maybeInject(
+            injectWithFallback(
                 arg.injectorKey,
                 FallbackInitializeParam(
                     applicationSupplier(),

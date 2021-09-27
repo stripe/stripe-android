@@ -9,7 +9,7 @@ import com.stripe.android.Logger
  * invoke [Injectable.fallbackInitialize] with [fallbackInitializeParam].
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-fun <FallbackInitializeParam> Injectable<FallbackInitializeParam>.maybeInject(
+fun <FallbackInitializeParam> Injectable<FallbackInitializeParam>.injectWithFallback(
     @InjectorKey injectorKey: String?,
     fallbackInitializeParam: FallbackInitializeParam
 ) {

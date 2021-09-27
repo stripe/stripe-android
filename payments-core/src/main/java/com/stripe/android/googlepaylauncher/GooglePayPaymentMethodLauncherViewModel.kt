@@ -23,7 +23,7 @@ import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.networking.ApiRequest
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.core.injection.Injectable
-import com.stripe.android.payments.core.injection.maybeInject
+import com.stripe.android.payments.core.injection.injectWithFallback
 import kotlinx.coroutines.flow.first
 import org.json.JSONObject
 import javax.inject.Inject
@@ -147,7 +147,7 @@ internal class GooglePayPaymentMethodLauncherViewModel @Inject constructor(
             modelClass: Class<T>,
             savedStateHandle: SavedStateHandle
         ): T {
-            maybeInject(
+            injectWithFallback(
                 args.injectionParams?.injectorKey,
                 FallbackInjectionParams(
                     application,

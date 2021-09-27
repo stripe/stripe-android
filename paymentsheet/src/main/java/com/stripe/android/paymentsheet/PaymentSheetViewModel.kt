@@ -28,7 +28,7 @@ import com.stripe.android.payments.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.payments.core.injection.IOContext
 import com.stripe.android.payments.core.injection.Injectable
 import com.stripe.android.payments.core.injection.InjectorKey
-import com.stripe.android.payments.core.injection.maybeInject
+import com.stripe.android.payments.core.injection.injectWithFallback
 import com.stripe.android.payments.paymentlauncher.PaymentLauncher
 import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
 import com.stripe.android.payments.paymentlauncher.PaymentResult
@@ -460,7 +460,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
             val args = starterArgsSupplier()
-            maybeInject(args.injectorKey, FallbackInitializeParam(applicationSupplier()))
+            injectWithFallback(args.injectorKey, FallbackInitializeParam(applicationSupplier()))
             return subComponentBuilderProvider.get().paymentSheetViewModelModule(
                 PaymentSheetViewModelModule(args)
             ).build().viewModel as T
