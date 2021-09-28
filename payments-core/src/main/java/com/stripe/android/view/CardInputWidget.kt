@@ -681,6 +681,7 @@ class CardInputWidget @JvmOverloads constructor(
         cardBrandView.tintColorInt = cardNumberEditText.hintTextColors.defaultColor
         var cardHintText: String? = null
         var shouldRequestFocus = true
+        var imeLandscapeFullScreen = true
 
         context.withStyledAttributes(
             attrs,
@@ -699,6 +700,10 @@ class CardInputWidget @JvmOverloads constructor(
                 R.styleable.CardInputView_android_focusedByDefault,
                 true
             )
+            imeLandscapeFullScreen = getBoolean(
+                R.styleable.CardInputView_imeLandscapeFullScreen,
+                true
+            )
         }
 
         cardHintText?.let {
@@ -706,6 +711,13 @@ class CardInputWidget @JvmOverloads constructor(
         }
 
         currentFields.forEach { it.setErrorColor(errorColorInt) }
+
+        if (!imeLandscapeFullScreen) {
+            cardNumberEditText.imeOptions = EditorInfo.IME_FLAG_NO_FULLSCREEN
+            expiryDateEditText.imeOptions = EditorInfo.IME_FLAG_NO_FULLSCREEN
+            cvcEditText.imeOptions = EditorInfo.IME_FLAG_NO_FULLSCREEN
+            postalCodeEditText.imeOptions = EditorInfo.IME_FLAG_NO_FULLSCREEN
+        }
 
         cardNumberEditText.internalFocusChangeListeners.add { _, hasFocus ->
             if (hasFocus) {
