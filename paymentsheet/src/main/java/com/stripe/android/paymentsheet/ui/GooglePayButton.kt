@@ -50,11 +50,12 @@ internal class GooglePayButton @JvmOverloads constructor(
     }
 
     private fun updateAlpha() {
-        viewBinding.googlePayButtonIcon.alpha = if ((state == null || state is PrimaryButton.State.Ready) && !isEnabled) {
-            0.5f
-        } else {
-            1.0f
-        }
+        viewBinding.googlePayButtonIcon.alpha =
+            if ((state == null || state is PrimaryButton.State.Ready) && !isEnabled) {
+                0.5f
+            } else {
+                1.0f
+            }
     }
 
     fun updateState(state: PrimaryButton.State?) {
