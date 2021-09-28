@@ -10,7 +10,7 @@ import com.stripe.android.Logger
 import com.stripe.android.payments.core.injection.IOContext
 import com.stripe.android.payments.core.injection.Injectable
 import com.stripe.android.payments.core.injection.InjectorKey
-import com.stripe.android.payments.core.injection.WeakMapInjectorRegistry
+import com.stripe.android.payments.core.injection.injectWithFallback
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.injection.DaggerPaymentOptionsViewModelFactoryComponent
 import com.stripe.android.paymentsheet.injection.PaymentOptionsViewModelSubcomponent
@@ -154,24 +154,10 @@ internal class PaymentOptionsViewModel @Inject constructor(
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
             val application = applicationSupplier()
             val starterArgs = starterArgsSupplier()
-
-            val logger = Logger.getInstance(starterArgs.enableLogging)
-            WeakMapInjectorRegistry.retrieve(starterArgsSupplier().injectorKey)?.let {
-                logger.info(
-                    "Injector available, " +
-                        "injecting dependencies into PaymentOptionsViewModel.Factory"
-                )
-                it.inject(this)
-            } ?: run {
-                logger.info(
-                    "Injector unavailable, " +
-                        "initializing dependencies of PaymentOptionsViewModel.Factory"
-                )
-                fallbackInitialize(
-                    FallbackInitializeParam(application, starterArgs.productUsage)
-                )
-            }
-
+            injectWithFallback(
+                starterArgsSupplier().injectorKey,
+                FallbackInitializeParam(application, starterArgs.productUsage)
+            )
             return subComponentBuilderProvider.get().application(application).args(starterArgs)
                 .build().viewModel as T
         }

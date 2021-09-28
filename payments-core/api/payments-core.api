@@ -5311,6 +5311,10 @@ public abstract interface class com/stripe/android/payments/core/injection/Injec
 	public abstract fun fallbackInitialize (Ljava/lang/Object;)V
 }
 
+public final class com/stripe/android/payments/core/injection/InjectableKtxKt {
+	public static final fun injectWithFallback (Lcom/stripe/android/payments/core/injection/Injectable;Ljava/lang/String;Ljava/lang/Object;)V
+}
+
 public abstract interface class com/stripe/android/payments/core/injection/Injector {
 	public abstract fun inject (Lcom/stripe/android/payments/core/injection/Injectable;)V
 }

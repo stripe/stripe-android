@@ -12,7 +12,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.distinctUntilChanged
 import androidx.lifecycle.viewModelScope
-import com.stripe.android.BuildConfig
 import com.stripe.android.Logger
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
@@ -29,7 +28,7 @@ import com.stripe.android.payments.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.payments.core.injection.IOContext
 import com.stripe.android.payments.core.injection.Injectable
 import com.stripe.android.payments.core.injection.InjectorKey
-import com.stripe.android.payments.core.injection.WeakMapInjectorRegistry
+import com.stripe.android.payments.core.injection.injectWithFallback
 import com.stripe.android.payments.paymentlauncher.PaymentLauncher
 import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
 import com.stripe.android.payments.paymentlauncher.PaymentResult
@@ -460,24 +459,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-            val application = applicationSupplier()
             val args = starterArgsSupplier()
-
-            val logger = Logger.getInstance(BuildConfig.DEBUG)
-
-            WeakMapInjectorRegistry.retrieve(args.injectorKey)?.let {
-                logger.info(
-                    "Injector available, injecting dependencies into " +
-                        "PaymentSheetViewModel.Factory"
-                )
-                it.inject(this)
-            } ?: run {
-                logger.info(
-                    "Injector unavailable, initializing dependencies of " +
-                        "PaymentSheetViewModel.Factory by rebuilding the entire dagger graph"
-                )
-                fallbackInitialize(FallbackInitializeParam(application))
-            }
+            injectWithFallback(args.injectorKey, FallbackInitializeParam(applicationSupplier()))
             return subComponentBuilderProvider.get().paymentSheetViewModelModule(
                 PaymentSheetViewModelModule(args)
             ).build().viewModel as T

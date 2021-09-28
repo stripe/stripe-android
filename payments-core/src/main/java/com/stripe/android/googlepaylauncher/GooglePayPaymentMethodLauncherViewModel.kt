@@ -14,7 +14,6 @@ import com.google.android.gms.wallet.PaymentData
 import com.google.android.gms.wallet.PaymentDataRequest
 import com.google.android.gms.wallet.PaymentsClient
 import com.stripe.android.GooglePayJsonFactory
-import com.stripe.android.Logger
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.exception.APIConnectionException
 import com.stripe.android.exception.InvalidRequestException
@@ -24,7 +23,7 @@ import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.networking.ApiRequest
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.core.injection.Injectable
-import com.stripe.android.payments.core.injection.WeakMapInjectorRegistry
+import com.stripe.android.payments.core.injection.injectWithFallback
 import kotlinx.coroutines.flow.first
 import org.json.JSONObject
 import javax.inject.Inject
@@ -148,39 +147,22 @@ internal class GooglePayPaymentMethodLauncherViewModel @Inject constructor(
             modelClass: Class<T>,
             savedStateHandle: SavedStateHandle
         ): T {
-            val enableLogging = args.injectionParams?.enableLogging ?: false
-            val logger = Logger.getInstance(enableLogging)
-
-            args.injectionParams?.let { injectionParams ->
-                WeakMapInjectorRegistry.retrieve(injectionParams.injectorKey)?.let { injector ->
-                    logger.info(
-                        "Injector available, injecting dependencies into " +
-                            "GooglePayPaymentMethodLauncherViewModel.Factory"
-                    )
-                    injector.inject(this)
-                    true
-                }
-            } ?: run {
-                logger.info(
-                    "Injector unavailable, initializing dependencies of " +
-                        "GooglePayPaymentMethodLauncherViewModel.Factory"
+            injectWithFallback(
+                args.injectionParams?.injectorKey,
+                FallbackInjectionParams(
+                    application,
+                    args.injectionParams?.enableLogging ?: false,
+                    args.injectionParams?.publishableKey
+                        ?: PaymentConfiguration.getInstance(application).publishableKey,
+                    if (args.injectionParams != null) {
+                        args.injectionParams.stripeAccountId
+                    } else {
+                        PaymentConfiguration.getInstance(application).stripeAccountId
+                    },
+                    args.injectionParams?.productUsage
+                        ?: setOf(GooglePayPaymentMethodLauncher.PRODUCT_USAGE_TOKEN)
                 )
-                fallbackInitialize(
-                    FallbackInjectionParams(
-                        application,
-                        enableLogging,
-                        args.injectionParams?.publishableKey
-                            ?: PaymentConfiguration.getInstance(application).publishableKey,
-                        if (args.injectionParams != null) {
-                            args.injectionParams.stripeAccountId
-                        } else {
-                            PaymentConfiguration.getInstance(application).stripeAccountId
-                        },
-                        args.injectionParams?.productUsage
-                            ?: setOf(GooglePayPaymentMethodLauncher.PRODUCT_USAGE_TOKEN)
-                    )
-                )
-            }
+            )
 
             return subComponentBuilder
                 .args(args)
