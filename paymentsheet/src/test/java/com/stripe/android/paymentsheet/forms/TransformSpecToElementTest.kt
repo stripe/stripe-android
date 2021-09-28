@@ -6,7 +6,6 @@ import androidx.compose.ui.text.input.KeyboardType
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.payments.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.address.AddressFieldElementRepository
 import com.stripe.android.paymentsheet.elements.BankDropdownSpec
 import com.stripe.android.paymentsheet.elements.CountryElement
 import com.stripe.android.paymentsheet.elements.CountryConfig
@@ -53,7 +52,7 @@ internal class TransformSpecToElementTest {
     @Before
     fun beforeTest() {
         val bankRepository = BankRepository(mock())
-        bankRepository.init(
+        bankRepository.initialize(
             mapOf(SupportedBankType.Ideal to IDEAL_BANKS_JSON.byteInputStream())
         )
 
@@ -61,7 +60,7 @@ internal class TransformSpecToElementTest {
             TransformSpecToElement(
                 ResourceRepository(
                     bankRepository,
-                    AddressFieldElementRepository(mock())
+                    mock()
                 ),
                 FormFragmentArguments(
                     supportedPaymentMethodName = "Card",

@@ -1,5 +1,7 @@
 package com.stripe.android.paymentsheet.elements
 
+import android.app.Application
+import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.address.AddressFieldElementRepository
@@ -10,13 +12,14 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runBlockingTest
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.kotlin.mock
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.shadows.ShadowLooper
 
 @RunWith(RobolectricTestRunner::class)
 class AddressElementTest {
-    private val addressFieldElementRepository = AddressFieldElementRepository(mock())
+    private val addressFieldElementRepository = AddressFieldElementRepository(
+        ApplicationProvider.getApplicationContext<Application>().resources
+    )
     private val countryDropdownFieldController = DropdownFieldController(
         CountryConfig(setOf("US", "JP"))
     )
