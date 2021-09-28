@@ -88,23 +88,25 @@ class GooglePayButtonTest {
     }
 
     @Test
-    fun `label alpha is initially 50%`() {
-        assertThat(primaryButton.viewBinding.label.alpha)
+    fun `not setting view state and not enabled should be 50% alpha`() {
+        googlePayButton.isEnabled = false
+        assertThat(googlePayButton.viewBinding.googlePayButtonIcon.alpha)
             .isEqualTo(0.5f)
     }
 
     @Test
-    fun `after viewState ready and disabled, label alpha is 50%`() {
+    fun `ready view state and not enabled should be 50% alpha`() {
         googlePayButton.updateState(PrimaryButton.State.Ready)
-        assertThat(primaryButton.viewBinding.label.alpha)
+        googlePayButton.isEnabled = false
+        assertThat(googlePayButton.viewBinding.googlePayButtonIcon.alpha)
             .isEqualTo(0.5f)
     }
 
     @Test
-    fun `after viewState ready and enabled, label alpha is 100%`() {
+    fun `ready view state and enabled should be 100% alpha`() {
         googlePayButton.updateState(PrimaryButton.State.Ready)
         googlePayButton.isEnabled = true
-        assertThat(primaryButton.viewBinding.label.alpha)
+        assertThat(googlePayButton.viewBinding.googlePayButtonIcon.alpha)
             .isEqualTo(1.0f)
     }
 }
