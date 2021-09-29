@@ -7,8 +7,13 @@ import com.stripe.android.ApiVersion
 import com.stripe.android.AppInfo
 import com.stripe.android.Stripe
 import com.stripe.android.exception.InvalidRequestException
+import com.stripe.android.payments.core.injection.PUBLISHABLE_KEY
+import com.stripe.android.payments.core.injection.STRIPE_ACCOUNT_ID
 import kotlinx.parcelize.Parcelize
 import java.io.UnsupportedEncodingException
+import javax.inject.Inject
+import javax.inject.Named
+import javax.inject.Provider
 
 /**
  * A class representing a Stripe API or Analytics request.
@@ -53,6 +58,23 @@ data class ApiRequest internal constructor(
         internal val stripeAccount: String? = null,
         internal val idempotencyKey: String? = null
     ) : Parcelable {
+
+        /**
+         * Dedicated constructor for injection.
+         *
+         * Because [PUBLISHABLE_KEY] and [STRIPE_ACCOUNT_ID] might change, whenever required, a new
+         * [ApiRequest.Options] instance is created with the latest values.
+         * Should always be used with [Provider] or [Lazy].
+         */
+        @Inject
+        constructor(
+            @Named(PUBLISHABLE_KEY) publishableKeyProvider: () -> String,
+            @Named(STRIPE_ACCOUNT_ID) stripeAccountIdProvider: () -> String?
+        ) : this(
+            apiKey = publishableKeyProvider(),
+            stripeAccount = stripeAccountIdProvider()
+        )
+
         init {
             ApiKeyValidator().requireValid(apiKey)
         }

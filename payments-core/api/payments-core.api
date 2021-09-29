@@ -1363,14 +1363,6 @@ public final class com/stripe/android/googlepaylauncher/injection/GooglePayPayme
 	public fun create (Lkotlinx/coroutines/CoroutineScope;Lcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncher$Config;Lcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncher$ReadyCallback;Landroidx/activity/result/ActivityResultLauncher;Z)Lcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncher;
 }
 
-public final class com/stripe/android/googlepaylauncher/injection/GooglePayPaymentMethodLauncherModule_ProvideApiRequestOptionsFactory : dagger/internal/Factory {
-	public fun <init> (Lcom/stripe/android/googlepaylauncher/injection/GooglePayPaymentMethodLauncherModule;Ljavax/inject/Provider;Ljavax/inject/Provider;)V
-	public static fun create (Lcom/stripe/android/googlepaylauncher/injection/GooglePayPaymentMethodLauncherModule;Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/googlepaylauncher/injection/GooglePayPaymentMethodLauncherModule_ProvideApiRequestOptionsFactory;
-	public fun get ()Lcom/stripe/android/networking/ApiRequest$Options;
-	public synthetic fun get ()Ljava/lang/Object;
-	public static fun provideApiRequestOptions (Lcom/stripe/android/googlepaylauncher/injection/GooglePayPaymentMethodLauncherModule;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;)Lcom/stripe/android/networking/ApiRequest$Options;
-}
-
 public final class com/stripe/android/googlepaylauncher/injection/GooglePayPaymentMethodLauncherModule_ProvideGooglePayJsonFactoryFactory : dagger/internal/Factory {
 	public fun <init> (Lcom/stripe/android/googlepaylauncher/injection/GooglePayPaymentMethodLauncherModule;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)V
 	public static fun create (Lcom/stripe/android/googlepaylauncher/injection/GooglePayPaymentMethodLauncherModule;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/googlepaylauncher/injection/GooglePayPaymentMethodLauncherModule_ProvideGooglePayJsonFactoryFactory;
@@ -5047,6 +5039,7 @@ public final class com/stripe/android/networking/ApiRequest$Options : android/os
 	public static final field UNDEFINED_PUBLISHABLE_KEY Ljava/lang/String;
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
 	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;)V
 	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/networking/ApiRequest$Options;
 	public static synthetic fun copy$default (Lcom/stripe/android/networking/ApiRequest$Options;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/networking/ApiRequest$Options;
 	public fun describeContents ()I
@@ -5057,6 +5050,14 @@ public final class com/stripe/android/networking/ApiRequest$Options : android/os
 }
 
 public final class com/stripe/android/networking/ApiRequest$Options$Companion {
+}
+
+public final class com/stripe/android/networking/ApiRequest_Options_Factory : dagger/internal/Factory {
+	public fun <init> (Ljavax/inject/Provider;Ljavax/inject/Provider;)V
+	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/networking/ApiRequest_Options_Factory;
+	public fun get ()Lcom/stripe/android/networking/ApiRequest$Options;
+	public synthetic fun get ()Ljava/lang/Object;
+	public static fun newInstance (Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;)Lcom/stripe/android/networking/ApiRequest$Options;
 }
 
 public final class com/stripe/android/networking/DefaultAnalyticsRequestExecutor_Factory : dagger/internal/Factory {
@@ -5377,14 +5378,6 @@ public final class com/stripe/android/payments/core/injection/NamedConstantsKt {
 	public static final field PRODUCT_USAGE Ljava/lang/String;
 	public static final field PUBLISHABLE_KEY Ljava/lang/String;
 	public static final field STRIPE_ACCOUNT_ID Ljava/lang/String;
-}
-
-public final class com/stripe/android/payments/core/injection/PaymentLauncherModule_ProvideApiRequestOptionsFactory : dagger/internal/Factory {
-	public fun <init> (Lcom/stripe/android/payments/core/injection/PaymentLauncherModule;Ljavax/inject/Provider;Ljavax/inject/Provider;)V
-	public static fun create (Lcom/stripe/android/payments/core/injection/PaymentLauncherModule;Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/payments/core/injection/PaymentLauncherModule_ProvideApiRequestOptionsFactory;
-	public fun get ()Lcom/stripe/android/networking/ApiRequest$Options;
-	public synthetic fun get ()Ljava/lang/Object;
-	public static fun provideApiRequestOptions (Lcom/stripe/android/payments/core/injection/PaymentLauncherModule;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;)Lcom/stripe/android/networking/ApiRequest$Options;
 }
 
 public final class com/stripe/android/payments/core/injection/PaymentLauncherModule_ProvideDefaultReturnUrlFactory : dagger/internal/Factory {
