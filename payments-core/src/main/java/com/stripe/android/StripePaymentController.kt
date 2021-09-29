@@ -38,7 +38,6 @@ import com.stripe.android.view.AuthActivityStarterHost
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.util.concurrent.TimeUnit
-import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
 
 /**
@@ -49,7 +48,7 @@ import kotlin.coroutines.CoroutineContext
 internal class StripePaymentController
 constructor(
     context: Context,
-    private val publishableKeyProvider: Provider<String>,
+    private val publishableKeyProvider: () -> String,
     private val stripeRepository: StripeRepository,
     private val enableLogging: Boolean = false,
     workContext: CoroutineContext = Dispatchers.IO,
@@ -66,14 +65,14 @@ constructor(
         context,
         publishableKeyProvider,
         stripeRepository,
-        enableLogging,
+        Logger.getInstance(enableLogging),
         workContext
     )
     private val setupIntentFlowResultProcessor = SetupIntentFlowResultProcessor(
         context,
         publishableKeyProvider,
         stripeRepository,
-        enableLogging,
+        Logger.getInstance(enableLogging),
         workContext
     )
 
@@ -106,7 +105,7 @@ constructor(
             workContext,
             uiContext,
             threeDs1IntentReturnUrlMap,
-            { publishableKeyProvider.get() },
+            publishableKeyProvider,
             analyticsRequestFactory.defaultProductUsageTokens
         )
 
@@ -439,7 +438,7 @@ constructor(
         val clientSecret = result.clientSecret.orEmpty()
 
         val requestOptions = ApiRequest.Options(
-            apiKey = publishableKeyProvider.get(),
+            apiKey = publishableKeyProvider(),
             stripeAccount = result.stripeAccountId
         )
 

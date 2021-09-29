@@ -11,9 +11,13 @@ import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.ApiRequest
 import com.stripe.android.networking.StripeRepository
-import kotlinx.coroutines.Dispatchers
+import com.stripe.android.payments.core.injection.IOContext
+import com.stripe.android.payments.core.injection.PUBLISHABLE_KEY
 import kotlinx.coroutines.withContext
+import javax.inject.Inject
+import javax.inject.Named
 import javax.inject.Provider
+import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
 /**
@@ -23,10 +27,9 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
     context: Context,
     private val publishableKeyProvider: Provider<String>,
     protected val stripeRepository: StripeRepository,
-    enableLogging: Boolean,
-    private val workContext: CoroutineContext = Dispatchers.IO
+    private val logger: Logger,
+    private val workContext: CoroutineContext
 ) {
-    private val logger = Logger.getInstance(enableLogging)
     private val failureMessageFactory = PaymentFlowFailureMessageFactory(context)
 
     suspend fun processResult(
@@ -108,14 +111,15 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
 /**
  * Processes the result of a [PaymentIntent] confirmation.
  */
-internal class PaymentIntentFlowResultProcessor(
+@Singleton
+internal class PaymentIntentFlowResultProcessor @Inject constructor(
     context: Context,
-    publishableKeyProvider: Provider<String>,
+    @Named(PUBLISHABLE_KEY) publishableKeyProvider: () -> String,
     stripeRepository: StripeRepository,
-    enableLogging: Boolean,
-    workContext: CoroutineContext = Dispatchers.IO
+    logger: Logger,
+    @IOContext workContext: CoroutineContext
 ) : PaymentFlowResultProcessor<PaymentIntent, PaymentIntentResult>(
-    context, publishableKeyProvider, stripeRepository, enableLogging, workContext
+    context, publishableKeyProvider, stripeRepository, logger, workContext
 ) {
     override suspend fun retrieveStripeIntent(
         clientSecret: String,
@@ -154,14 +158,15 @@ internal class PaymentIntentFlowResultProcessor(
 /**
  * Processes the result of a [SetupIntent] confirmation.
  */
-internal class SetupIntentFlowResultProcessor(
+@Singleton
+internal class SetupIntentFlowResultProcessor @Inject constructor(
     context: Context,
-    publishableKeyProvider: Provider<String>,
+    @Named(PUBLISHABLE_KEY) publishableKeyProvider: () -> String,
     stripeRepository: StripeRepository,
-    enableLogging: Boolean,
-    workContext: CoroutineContext = Dispatchers.IO
+    logger: Logger,
+    @IOContext workContext: CoroutineContext
 ) : PaymentFlowResultProcessor<SetupIntent, SetupIntentResult>(
-    context, publishableKeyProvider, stripeRepository, enableLogging, workContext
+    context, publishableKeyProvider, stripeRepository, logger, workContext
 ) {
     override suspend fun retrieveStripeIntent(
         clientSecret: String,
