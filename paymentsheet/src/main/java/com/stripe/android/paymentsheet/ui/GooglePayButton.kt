@@ -19,6 +19,8 @@ internal class GooglePayButton @JvmOverloads constructor(
         this
     )
 
+    private var state: PrimaryButton.State? = null
+
     init {
         // Call super so we don't inadvertently effect the primary button as well.
         super.setClickable(true)
@@ -44,10 +46,22 @@ internal class GooglePayButton @JvmOverloads constructor(
     override fun setEnabled(enabled: Boolean) {
         super.setEnabled(enabled)
         viewBinding.primaryButton.isEnabled = enabled
+        updateAlpha()
+    }
+
+    private fun updateAlpha() {
+        viewBinding.googlePayButtonIcon.alpha =
+            if ((state == null || state is PrimaryButton.State.Ready) && !isEnabled) {
+                0.5f
+            } else {
+                1.0f
+            }
     }
 
     fun updateState(state: PrimaryButton.State?) {
         viewBinding.primaryButton.updateState(state)
+        this.state = state
+        updateAlpha()
 
         when (state) {
             is PrimaryButton.State.Ready -> {
