@@ -2,16 +2,24 @@ package com.stripe.android
 
 import android.content.Context
 import android.os.Parcelable
+import com.stripe.android.GooglePayJsonFactory.TransactionInfo.TotalPriceStatus
+import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
+import com.stripe.android.payments.core.injection.PUBLISHABLE_KEY
+import com.stripe.android.payments.core.injection.STRIPE_ACCOUNT_ID
 import kotlinx.parcelize.Parcelize
 import org.json.JSONArray
 import org.json.JSONObject
 import java.util.Currency
 import java.util.Locale
+import javax.inject.Inject
+import javax.inject.Named
+import javax.inject.Singleton
 
 /**
  * A factory for generating [Google Pay JSON request objects](https://developers.google.com/pay/api/android/reference/request-objects)
  * for Google Pay API version 2.0.
  */
+@Singleton
 class GooglePayJsonFactory constructor(
     private val googlePayConfig: GooglePayConfig,
 
@@ -37,6 +45,16 @@ class GooglePayJsonFactory constructor(
     ) : this(
         googlePayConfig = GooglePayConfig(context),
         isJcbEnabled = isJcbEnabled
+    )
+
+    @Inject
+    constructor(
+        @Named(PUBLISHABLE_KEY) publishableKeyProvider: () -> String,
+        @Named(STRIPE_ACCOUNT_ID) stripeAccountIdProvider: () -> String?,
+        googlePayConfig: GooglePayPaymentMethodLauncher.Config
+    ) : this(
+        googlePayConfig = GooglePayConfig(publishableKeyProvider(), stripeAccountIdProvider()),
+        isJcbEnabled = googlePayConfig.isJcbEnabled
     )
 
     /**

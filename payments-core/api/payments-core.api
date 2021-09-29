@@ -136,6 +136,7 @@ public final class com/stripe/android/GooglePayJsonFactory {
 	public synthetic fun <init> (Landroid/content/Context;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun <init> (Lcom/stripe/android/GooglePayConfig;Z)V
 	public synthetic fun <init> (Lcom/stripe/android/GooglePayConfig;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncher$Config;)V
 	public final fun createIsReadyToPayRequest ()Lorg/json/JSONObject;
 	public final fun createIsReadyToPayRequest (Lcom/stripe/android/GooglePayJsonFactory$BillingAddressParameters;)Lorg/json/JSONObject;
 	public final fun createIsReadyToPayRequest (Lcom/stripe/android/GooglePayJsonFactory$BillingAddressParameters;Ljava/lang/Boolean;)Lorg/json/JSONObject;
@@ -236,6 +237,14 @@ public final class com/stripe/android/GooglePayJsonFactory$TransactionInfo$Total
 	public static final field NotCurrentlyKnown Lcom/stripe/android/GooglePayJsonFactory$TransactionInfo$TotalPriceStatus;
 	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/GooglePayJsonFactory$TransactionInfo$TotalPriceStatus;
 	public static fun values ()[Lcom/stripe/android/GooglePayJsonFactory$TransactionInfo$TotalPriceStatus;
+}
+
+public final class com/stripe/android/GooglePayJsonFactory_Factory : dagger/internal/Factory {
+	public fun <init> (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)V
+	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/GooglePayJsonFactory_Factory;
+	public fun get ()Lcom/stripe/android/GooglePayJsonFactory;
+	public synthetic fun get ()Ljava/lang/Object;
+	public static fun newInstance (Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncher$Config;)Lcom/stripe/android/GooglePayJsonFactory;
 }
 
 public final class com/stripe/android/IssuingCardPinService {
@@ -982,6 +991,14 @@ public final class com/stripe/android/exception/StripeException$Companion {
 	public final fun create (Ljava/lang/Throwable;)Lcom/stripe/android/exception/StripeException;
 }
 
+public final class com/stripe/android/googlepaylauncher/DefaultGooglePayRepository_Factory : dagger/internal/Factory {
+	public fun <init> (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)V
+	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/googlepaylauncher/DefaultGooglePayRepository_Factory;
+	public fun get ()Lcom/stripe/android/googlepaylauncher/DefaultGooglePayRepository;
+	public synthetic fun get ()Ljava/lang/Object;
+	public static fun newInstance (Landroid/content/Context;Lcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncher$Config;Lcom/stripe/android/Logger;)Lcom/stripe/android/googlepaylauncher/DefaultGooglePayRepository;
+}
+
 public final class com/stripe/android/googlepaylauncher/GooglePayEnvironment : java/lang/Enum {
 	public static final field Production Lcom/stripe/android/googlepaylauncher/GooglePayEnvironment;
 	public static final field Test Lcom/stripe/android/googlepaylauncher/GooglePayEnvironment;
@@ -1326,6 +1343,14 @@ public final class com/stripe/android/googlepaylauncher/GooglePayRepository$Disa
 	public fun isReady ()Lkotlinx/coroutines/flow/Flow;
 }
 
+public final class com/stripe/android/googlepaylauncher/PaymentsClientFactory_Factory : dagger/internal/Factory {
+	public fun <init> (Ljavax/inject/Provider;)V
+	public static fun create (Ljavax/inject/Provider;)Lcom/stripe/android/googlepaylauncher/PaymentsClientFactory_Factory;
+	public fun get ()Lcom/stripe/android/googlepaylauncher/PaymentsClientFactory;
+	public synthetic fun get ()Ljava/lang/Object;
+	public static fun newInstance (Landroid/content/Context;)Lcom/stripe/android/googlepaylauncher/PaymentsClientFactory;
+}
+
 public final class com/stripe/android/googlepaylauncher/injection/DaggerGooglePayPaymentMethodLauncherComponent {
 	public static fun builder ()Lcom/stripe/android/googlepaylauncher/injection/GooglePayPaymentMethodLauncherComponent$Builder;
 	public fun inject (Lcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncherViewModel$Factory;)V
@@ -1363,28 +1388,12 @@ public final class com/stripe/android/googlepaylauncher/injection/GooglePayPayme
 	public fun create (Lkotlinx/coroutines/CoroutineScope;Lcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncher$Config;Lcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncher$ReadyCallback;Landroidx/activity/result/ActivityResultLauncher;Z)Lcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncher;
 }
 
-public final class com/stripe/android/googlepaylauncher/injection/GooglePayPaymentMethodLauncherModule_ProvideGooglePayJsonFactoryFactory : dagger/internal/Factory {
-	public fun <init> (Lcom/stripe/android/googlepaylauncher/injection/GooglePayPaymentMethodLauncherModule;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)V
-	public static fun create (Lcom/stripe/android/googlepaylauncher/injection/GooglePayPaymentMethodLauncherModule;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/googlepaylauncher/injection/GooglePayPaymentMethodLauncherModule_ProvideGooglePayJsonFactoryFactory;
-	public fun get ()Lcom/stripe/android/GooglePayJsonFactory;
-	public synthetic fun get ()Ljava/lang/Object;
-	public static fun provideGooglePayJsonFactory (Lcom/stripe/android/googlepaylauncher/injection/GooglePayPaymentMethodLauncherModule;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncher$Config;)Lcom/stripe/android/GooglePayJsonFactory;
-}
-
-public final class com/stripe/android/googlepaylauncher/injection/GooglePayPaymentMethodLauncherModule_ProvideGooglePayRepositoryFactory : dagger/internal/Factory {
-	public fun <init> (Lcom/stripe/android/googlepaylauncher/injection/GooglePayPaymentMethodLauncherModule;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)V
-	public static fun create (Lcom/stripe/android/googlepaylauncher/injection/GooglePayPaymentMethodLauncherModule;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/googlepaylauncher/injection/GooglePayPaymentMethodLauncherModule_ProvideGooglePayRepositoryFactory;
-	public fun get ()Lcom/stripe/android/googlepaylauncher/GooglePayRepository;
-	public synthetic fun get ()Ljava/lang/Object;
-	public static fun provideGooglePayRepository (Lcom/stripe/android/googlepaylauncher/injection/GooglePayPaymentMethodLauncherModule;Landroid/content/Context;Lcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncher$Config;Lcom/stripe/android/Logger;)Lcom/stripe/android/googlepaylauncher/GooglePayRepository;
-}
-
-public final class com/stripe/android/googlepaylauncher/injection/GooglePayPaymentMethodLauncherModule_ProvidePaymentsClientFactory : dagger/internal/Factory {
-	public fun <init> (Lcom/stripe/android/googlepaylauncher/injection/GooglePayPaymentMethodLauncherModule;Ljavax/inject/Provider;Ljavax/inject/Provider;)V
-	public static fun create (Lcom/stripe/android/googlepaylauncher/injection/GooglePayPaymentMethodLauncherModule;Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/googlepaylauncher/injection/GooglePayPaymentMethodLauncherModule_ProvidePaymentsClientFactory;
+public final class com/stripe/android/googlepaylauncher/injection/GooglePayPaymentMethodLauncherModule_Companion_ProvidePaymentsClientFactory : dagger/internal/Factory {
+	public fun <init> (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)V
+	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/googlepaylauncher/injection/GooglePayPaymentMethodLauncherModule_Companion_ProvidePaymentsClientFactory;
 	public fun get ()Lcom/google/android/gms/wallet/PaymentsClient;
 	public synthetic fun get ()Ljava/lang/Object;
-	public static fun providePaymentsClient (Lcom/stripe/android/googlepaylauncher/injection/GooglePayPaymentMethodLauncherModule;Landroid/content/Context;Lcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncher$Config;)Lcom/google/android/gms/wallet/PaymentsClient;
+	public static fun providePaymentsClient (Landroid/content/Context;Lcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncher$Config;Lcom/stripe/android/googlepaylauncher/PaymentsClientFactory;)Lcom/google/android/gms/wallet/PaymentsClient;
 }
 
 public final class com/stripe/android/model/AccountParams : com/stripe/android/model/TokenParams {
