@@ -17,7 +17,7 @@ import kotlin.coroutines.CoroutineContext
 
 /**
  * A [Module] to provide [StripeRepository] and its corresponding dependencies.
- * [Context], [ENABLE_LOGGING], [PUBLISHABLE_KEY], [PRODUCT_USAGE] and [IOContext] need to be
+ * [Context], [Logger], [PUBLISHABLE_KEY], [PRODUCT_USAGE] and [IOContext] need to be
  * provided elsewhere to use this module.
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
