@@ -67,7 +67,6 @@ import java.io.IOException
 import java.net.HttpURLConnection
 import java.security.Security
 import java.util.Locale
-import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
 
 /**
@@ -75,7 +74,7 @@ import kotlin.coroutines.CoroutineContext
  */
 internal class StripeApiRepository @JvmOverloads internal constructor(
     context: Context,
-    publishableKeyProvider: Provider<String>,
+    publishableKeyProvider: () -> String,
     private val appInfo: AppInfo? = null,
     private val logger: Logger = Logger.noop(),
     private val workContext: CoroutineContext = Dispatchers.IO,

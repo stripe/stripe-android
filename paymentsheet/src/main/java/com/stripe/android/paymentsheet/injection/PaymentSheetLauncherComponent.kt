@@ -4,6 +4,7 @@ import android.app.Application
 import com.stripe.android.googlepaylauncher.injection.GooglePayLauncherModule
 import com.stripe.android.payments.core.injection.CoroutineContextModule
 import com.stripe.android.payments.core.injection.InjectorKey
+import com.stripe.android.payments.core.injection.LoggingModule
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import com.stripe.android.paymentsheet.PaymentSheetViewModel
 import com.stripe.android.paymentsheet.forms.FormViewModel
@@ -18,7 +19,8 @@ import javax.inject.Singleton
         PaymentSheetCommonModule::class,
         PaymentSheetLauncherModule::class,
         GooglePayLauncherModule::class,
-        CoroutineContextModule::class
+        CoroutineContextModule::class,
+        LoggingModule::class
     ]
 )
 internal interface PaymentSheetLauncherComponent {

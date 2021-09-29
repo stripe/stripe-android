@@ -687,14 +687,6 @@ public final class com/stripe/android/paymentsheet/injection/PaymentSheetCommonM
 	public static fun provideLocale ()Ljava/util/Locale;
 }
 
-public final class com/stripe/android/paymentsheet/injection/PaymentSheetCommonModule_Companion_ProvideLoggerFactory : dagger/internal/Factory {
-	public fun <init> (Ljavax/inject/Provider;)V
-	public static fun create (Ljavax/inject/Provider;)Lcom/stripe/android/paymentsheet/injection/PaymentSheetCommonModule_Companion_ProvideLoggerFactory;
-	public fun get ()Lcom/stripe/android/Logger;
-	public synthetic fun get ()Ljava/lang/Object;
-	public static fun provideLogger (Z)Lcom/stripe/android/Logger;
-}
-
 public final class com/stripe/android/paymentsheet/injection/PaymentSheetCommonModule_Companion_ProvidePaymentConfigurationFactory : dagger/internal/Factory {
 	public fun <init> (Ljavax/inject/Provider;)V
 	public static fun create (Ljavax/inject/Provider;)Lcom/stripe/android/paymentsheet/injection/PaymentSheetCommonModule_Companion_ProvidePaymentConfigurationFactory;

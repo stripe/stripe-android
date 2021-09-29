@@ -1,6 +1,5 @@
 package com.stripe.android.payments.core.authentication
 
-import com.stripe.android.Logger
 import com.stripe.android.PaymentBrowserAuthStarter
 import com.stripe.android.StripePaymentController
 import com.stripe.android.auth.PaymentBrowserAuthContract
@@ -110,7 +109,6 @@ internal class WebIntentAuthenticator @Inject constructor(
         shouldCancelIntentOnUserNavigation: Boolean = true
     ) = withContext(uiContext) {
         val paymentBrowserWebStarter = paymentBrowserAuthStarterFactory(host)
-        Logger.getInstance(enableLogging).debug("PaymentBrowserAuthStarter#start()")
         paymentBrowserWebStarter.start(
             PaymentBrowserAuthContract.Args(
                 objectId = stripeIntent.id.orEmpty(),

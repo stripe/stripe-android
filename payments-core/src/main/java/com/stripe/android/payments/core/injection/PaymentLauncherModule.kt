@@ -1,7 +1,6 @@
 package com.stripe.android.payments.core.injection
 
 import android.content.Context
-import com.stripe.android.Logger
 import com.stripe.android.networking.AnalyticsRequestFactory
 import com.stripe.android.networking.ApiRequest
 import com.stripe.android.networking.DefaultAnalyticsRequestExecutor
@@ -42,11 +41,6 @@ internal class PaymentLauncherModule {
     @Provides
     @Singleton
     fun provideThreeDs1IntentReturnUrlMap() = mutableMapOf<String, String>()
-
-    @Provides
-    @Singleton
-    fun provideLogger(@Named(ENABLE_LOGGING) enableLogging: Boolean) =
-        Logger.getInstance(enableLogging)
 
     @Provides
     @Singleton

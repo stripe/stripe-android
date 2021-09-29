@@ -16,7 +16,8 @@ import javax.inject.Singleton
     modules = [
         PaymentLauncherModule::class,
         StripeRepositoryModule::class,
-        CoroutineContextModule::class
+        CoroutineContextModule::class,
+        LoggingModule::class
     ]
 )
 internal interface PaymentLauncherViewModelFactoryComponent {

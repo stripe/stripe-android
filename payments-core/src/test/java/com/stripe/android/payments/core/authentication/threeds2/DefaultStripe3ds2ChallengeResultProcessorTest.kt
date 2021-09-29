@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
+import com.stripe.android.Logger
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.exception.APIException
 import com.stripe.android.exception.InvalidRequestException
@@ -50,7 +51,7 @@ class DefaultStripe3ds2ChallengeResultProcessorTest {
         analyticsRequestExecutor,
         analyticsRequestFactory,
         RetryDelaySupplier(),
-        enableLogging = false,
+        Logger.noop(),
         testDispatcher
     )
 
