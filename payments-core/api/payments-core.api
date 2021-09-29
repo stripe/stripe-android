@@ -5656,44 +5656,6 @@ public final class com/stripe/android/payments/paymentlauncher/StripePaymentLaun
 	public static fun newInstance (Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Landroidx/activity/result/ActivityResultLauncher;Landroid/content/Context;ZLkotlin/coroutines/CoroutineContext;Lkotlin/coroutines/CoroutineContext;Lcom/stripe/android/networking/StripeRepository;Lcom/stripe/android/networking/AnalyticsRequestFactory;Ljava/util/Set;)Lcom/stripe/android/payments/paymentlauncher/StripePaymentLauncher;
 }
 
-public abstract class com/stripe/android/paymentsheet/model/ClientSecret : android/os/Parcelable {
-	public static final field $stable I
-	public abstract fun getValue ()Ljava/lang/String;
-	public abstract fun validate ()V
-}
-
-public final class com/stripe/android/paymentsheet/model/PaymentIntentClientSecret : com/stripe/android/paymentsheet/model/ClientSecret {
-	public static final field $stable I
-	public static final field CREATOR Landroid/os/Parcelable$Creator;
-	public fun <init> (Ljava/lang/String;)V
-	public final fun component1 ()Ljava/lang/String;
-	public final fun copy (Ljava/lang/String;)Lcom/stripe/android/paymentsheet/model/PaymentIntentClientSecret;
-	public static synthetic fun copy$default (Lcom/stripe/android/paymentsheet/model/PaymentIntentClientSecret;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/paymentsheet/model/PaymentIntentClientSecret;
-	public fun describeContents ()I
-	public fun equals (Ljava/lang/Object;)Z
-	public fun getValue ()Ljava/lang/String;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-	public fun validate ()V
-	public fun writeToParcel (Landroid/os/Parcel;I)V
-}
-
-public final class com/stripe/android/paymentsheet/model/SetupIntentClientSecret : com/stripe/android/paymentsheet/model/ClientSecret {
-	public static final field $stable I
-	public static final field CREATOR Landroid/os/Parcelable$Creator;
-	public fun <init> (Ljava/lang/String;)V
-	public final fun component1 ()Ljava/lang/String;
-	public final fun copy (Ljava/lang/String;)Lcom/stripe/android/paymentsheet/model/SetupIntentClientSecret;
-	public static synthetic fun copy$default (Lcom/stripe/android/paymentsheet/model/SetupIntentClientSecret;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/paymentsheet/model/SetupIntentClientSecret;
-	public fun describeContents ()I
-	public fun equals (Ljava/lang/Object;)Z
-	public fun getValue ()Ljava/lang/String;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-	public fun validate ()V
-	public fun writeToParcel (Landroid/os/Parcel;I)V
-}
-
 public abstract class com/stripe/android/view/ActivityStarter {
 	public static final field $stable I
 	public fun <init> (Landroid/app/Activity;Ljava/lang/Class;ILjava/lang/Integer;)V
