@@ -1,8 +1,10 @@
 package com.stripe.android.view
 
 import androidx.annotation.RestrictTo
+import androidx.annotation.VisibleForTesting
 import com.stripe.android.model.CountryCode
 import com.stripe.android.model.getCountryCode
+import java.text.Normalizer
 import java.util.Locale
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet -- this still auto-completes
@@ -44,9 +46,18 @@ object CountryUtils {
         return listOfNotNull(getCountryByCode(currentLocale.getCountryCode(), currentLocale))
             .plus(
                 localizedCountries(currentLocale)
-                    .sortedBy { it.name.lowercase() }
+                    .sortedBy { formatNameForSorting(it.name) }
                     .filterNot { it.code == currentLocale.getCountryCode() }
             )
+    }
+
+    @VisibleForTesting
+    internal fun formatNameForSorting(name: String): String {
+        // Before normalization: åland islands
+        // After normalization: aºland islands
+        // After regex: aland islands
+        return Normalizer.normalize(name.lowercase(), Normalizer.Form.NFD)
+            .replace("\\p{Mn}+".toRegex(), "")
     }
 
     @Deprecated(
