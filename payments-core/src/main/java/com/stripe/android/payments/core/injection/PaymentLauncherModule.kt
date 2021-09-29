@@ -6,8 +6,6 @@ import com.stripe.android.networking.ApiRequest
 import com.stripe.android.networking.DefaultAnalyticsRequestExecutor
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.DefaultReturnUrl
-import com.stripe.android.payments.PaymentIntentFlowResultProcessor
-import com.stripe.android.payments.SetupIntentFlowResultProcessor
 import com.stripe.android.payments.core.authentication.DefaultPaymentAuthenticatorRegistry
 import com.stripe.android.payments.core.authentication.PaymentAuthenticatorRegistry
 import dagger.Module
@@ -45,42 +43,6 @@ internal class PaymentLauncherModule {
     @Provides
     @Singleton
     fun provideDefaultReturnUrl(context: Context) = DefaultReturnUrl.create(context)
-
-    @Provides
-    @Singleton
-    fun providePaymentIntentFlowResultProcessor(
-        context: Context,
-        stripeApiRepository: StripeRepository,
-        @Named(ENABLE_LOGGING) enableLogging: Boolean,
-        @IOContext ioContext: CoroutineContext,
-        @Named(PUBLISHABLE_KEY) publishableKeyProvider: () -> String,
-    ): PaymentIntentFlowResultProcessor {
-        return PaymentIntentFlowResultProcessor(
-            context,
-            publishableKeyProvider,
-            stripeApiRepository,
-            enableLogging = enableLogging,
-            ioContext
-        )
-    }
-
-    @Provides
-    @Singleton
-    fun provideSetupIntentFlowResultProcessor(
-        context: Context,
-        stripeApiRepository: StripeRepository,
-        @Named(ENABLE_LOGGING) enableLogging: Boolean,
-        @IOContext ioContext: CoroutineContext,
-        @Named(PUBLISHABLE_KEY) publishableKeyProvider: () -> String,
-    ): SetupIntentFlowResultProcessor {
-        return SetupIntentFlowResultProcessor(
-            context,
-            publishableKeyProvider,
-            stripeApiRepository,
-            enableLogging = enableLogging,
-            ioContext
-        )
-    }
 
     @Provides
     @Singleton
