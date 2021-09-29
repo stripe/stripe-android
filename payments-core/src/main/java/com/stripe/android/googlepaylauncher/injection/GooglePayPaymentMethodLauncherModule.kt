@@ -11,7 +11,6 @@ import com.stripe.android.googlepaylauncher.PaymentsClientFactory
 import com.stripe.android.googlepaylauncher.convert
 import com.stripe.android.networking.ApiRequest
 import com.stripe.android.networking.StripeRepository
-import com.stripe.android.payments.core.injection.ENABLE_LOGGING
 import com.stripe.android.payments.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.payments.core.injection.STRIPE_ACCOUNT_ID
 import dagger.Module
@@ -39,11 +38,6 @@ internal class GooglePayPaymentMethodLauncherModule {
         apiKey = publishableKeyProvider(),
         stripeAccount = stripeAccountIdProvider()
     )
-
-    @Provides
-    @Singleton
-    fun provideLogger(@Named(ENABLE_LOGGING) enableLogging: Boolean) =
-        Logger.getInstance(enableLogging)
 
     @Provides
     @Singleton

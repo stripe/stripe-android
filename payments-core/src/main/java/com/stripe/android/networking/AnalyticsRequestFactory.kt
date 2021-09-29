@@ -11,7 +11,11 @@ import com.stripe.android.Stripe
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.Source
 import com.stripe.android.model.Token
+import com.stripe.android.payments.core.injection.PRODUCT_USAGE
+import com.stripe.android.payments.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.utils.ContextUtils.packageInfo
+import javax.inject.Inject
+import javax.inject.Named
 import javax.inject.Provider
 
 /**
@@ -39,7 +43,19 @@ class AnalyticsRequestFactory @VisibleForTesting internal constructor(
     internal constructor(
         context: Context,
         publishableKeyProvider: Provider<String>,
-        defaultProductUsageTokens: Set<String> = emptySet(),
+    ) : this(
+        context.applicationContext.packageManager,
+        context.applicationContext.packageInfo,
+        context.applicationContext.packageName.orEmpty(),
+        publishableKeyProvider,
+        emptySet()
+    )
+
+    @Inject
+    internal constructor(
+        context: Context,
+        @Named(PUBLISHABLE_KEY) publishableKeyProvider: () -> String,
+        @Named(PRODUCT_USAGE) defaultProductUsageTokens: Set<String>,
     ) : this(
         context.applicationContext.packageManager,
         context.applicationContext.packageInfo,
