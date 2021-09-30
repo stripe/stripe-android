@@ -46,7 +46,7 @@ internal fun getSupportedPaymentMethods(
             SupportedPaymentMethod.fromCode(it)
         }.filter { supportedPaymentMethod ->
             supportedPaymentMethod.spec.satisfiedBy(capabilities)
-        } // .filter { it == SupportedPaymentMethod.Card }
+        }.filter { it == SupportedPaymentMethod.Card }
             .toList()
     }
 
@@ -155,54 +155,5 @@ private fun allHaveKnownReuseSupport(paymentMethodsInIntent: List<String?>): Boo
         PaymentMethod.Type.Ideal.code
     )
     return paymentMethodsInIntent.filterNot { knownReusable.contains(it) }.isEmpty()
-
-    //    // PaymentMethods that do not work when PaymentIntent.setup_future_usage = on/off session
-//    val notReusable = setOf(
-//        "blik",
-//        "weChatPay",
-//        "grabPay",
-//        "FPX",
-//        "giropay",
-//        "przelewy24",
-//        "EPS",
-//        "netBanking",
-//        "OXXO",
-//        "afterpayClearpay",
-//        "payPal",
-//        "UPI",
-//        "boleto"
-//    )
 }
 
-// /**
-// * List of requirements must match all of the requirements in one of the lists
-// */
-// internal fun ModeConfigurationSpec.getRequirements() = setOfNotNull(
-//    oneTimeUseSpec?.requirements?.plus(Requirement.OneTimeUse),
-//    merchantRequiredSpec?.requirements?.plus(Requirement.MerchantSelectedSave),
-//    userSelectedSaveSpec?.requirements?.plus(Requirement.UserSelectableSave)
-// )
-//
-// internal fun ModeConfigurationSpec.getSpecInMode(modeSelector: SaveModeSelector) =
-//    when (modeSelector) {
-//        SaveModeSelector.OneTimeUse -> oneTimeUseSpec
-//        SaveModeSelector.UserSelectableSave -> userSelectedSaveSpec
-//        SaveModeSelector.MerchantSelectableSave -> merchantRequiredSpec
-//        SaveModeSelector.None -> null
-//    }
-
-// internal fun getSupportedPaymentMethods(
-//    stripeIntent: StripeIntent?,
-//    config: PaymentSheet.Configuration?
-// ) {
-//    val supportedPaymentMethod = mutableListOf<SupportedPaymentMethod>()
-//    getPreferredSaveModeSelector(stripeIntent, config).forEach {
-//        supportedPaymentMethod.addAll(
-//            getSupportedPaymentMethods(
-//                stripeIntent,
-//                config,
-//                it
-//            )
-//        )
-//    }
-// }

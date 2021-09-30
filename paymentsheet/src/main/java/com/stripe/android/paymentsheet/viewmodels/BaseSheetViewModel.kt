@@ -67,7 +67,6 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     internal val stripeIntent: LiveData<StripeIntent?> = _stripeIntent
 
     internal var supportedPaymentMethods = emptyList<SupportedPaymentMethod>()
-    internal var capabilities = emptySet<Requirement>()
 
     @VisibleForTesting
     internal val _paymentMethods = MutableLiveData<List<PaymentMethod>>()
@@ -198,8 +197,11 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
          * the [BaseAddPaymentMethodFragment]
          */
 
-        capabilities = getAllCapabilities(stripeIntent, config)
-        supportedPaymentMethods = getSupportedPaymentMethods(stripeIntent, config, capabilities)
+        supportedPaymentMethods = getSupportedPaymentMethods(
+            stripeIntent,
+            config,
+            getAllCapabilities(stripeIntent, config)
+        )
 
         if (stripeIntent != null && supportedPaymentMethods.isEmpty()) {
             onFatal(

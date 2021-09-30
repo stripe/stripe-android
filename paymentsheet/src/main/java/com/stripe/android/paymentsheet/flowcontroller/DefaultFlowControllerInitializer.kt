@@ -80,8 +80,6 @@ internal class DefaultFlowControllerInitializer @Inject constructor(
             retrieveStripeIntent(clientSecret)
         }.fold(
             onSuccess = { stripeIntent ->
-                // TODO: Does this read well? - UserSelectableSave isn't exactly what is meant
-                // and could the returned requirements when compared to MerchantSaveRequired
                 val paymentMethodTypes = getSupportedSavedCustomerCards(
                     stripeIntent,
                     config,

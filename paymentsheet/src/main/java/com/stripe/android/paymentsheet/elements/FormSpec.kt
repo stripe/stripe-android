@@ -3,7 +3,7 @@ package com.stripe.android.paymentsheet.elements
 /**
  * This class defines requirements of the payment method
  */
-enum class Requirement {
+internal enum class Requirement {
     DelayedPaymentMethodSupport,
 
     OneTimeUse,
