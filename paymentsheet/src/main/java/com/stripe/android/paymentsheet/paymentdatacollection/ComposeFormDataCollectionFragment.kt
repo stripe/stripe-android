@@ -15,6 +15,7 @@ import androidx.fragment.app.viewModels
 import com.stripe.android.paymentsheet.StripeTheme
 import com.stripe.android.paymentsheet.elements.Form
 import com.stripe.android.paymentsheet.forms.FormViewModel
+import com.stripe.android.paymentsheet.forms.getForm
 import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
 
 /**
@@ -22,18 +23,24 @@ import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
  * received in the arguments bundle.
  */
 internal class ComposeFormDataCollectionFragment : Fragment() {
-    val formSpec by lazy {
-        requireNotNull(
+    private val formLayout by lazy {
+        val requireNotNull = requireNotNull(
             requireArguments().getParcelable<FormFragmentArguments>(EXTRA_CONFIG)?.let {
-                SupportedPaymentMethod.valueOf(it.supportedPaymentMethodName).formSpec
+                it.supportedPaymentMethod.spec.getForm(it.capabilities)
             }
+        )
+        requireNotNull
+    }
+    val paramKeySpec by lazy {
+        requireNotNull(
+            requireArguments().getParcelable<FormFragmentArguments>(EXTRA_CONFIG)?.supportedPaymentMethod?.spec?.paramKey
         )
     }
 
     val formViewModel: FormViewModel by viewModels {
         FormViewModel.Factory(
             resource = resources,
-            layout = formSpec.layout,
+            layout = formLayout,
             config = requireNotNull(
                 requireArguments().getParcelable(
                     EXTRA_CONFIG

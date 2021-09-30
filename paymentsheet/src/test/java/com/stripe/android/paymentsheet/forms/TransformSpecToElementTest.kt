@@ -4,28 +4,27 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.payments.core.injection.DUMMY_INJECTOR_KEY
+import com.stripe.android.paymentsheet.PaymentSheetFixtures.COMPOSE_FRAGMENT_ARGS
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.elements.BankDropdownSpec
-import com.stripe.android.paymentsheet.elements.CountryElement
-import com.stripe.android.paymentsheet.elements.CountryConfig
-import com.stripe.android.paymentsheet.elements.EmailElement
-import com.stripe.android.paymentsheet.elements.EmailConfig
-import com.stripe.android.paymentsheet.elements.MandateTextElement
-import com.stripe.android.paymentsheet.elements.NameConfig
-import com.stripe.android.paymentsheet.elements.SaveForFutureUseElement
-import com.stripe.android.paymentsheet.elements.SectionElement
-import com.stripe.android.paymentsheet.elements.SimpleDropdownElement
-import com.stripe.android.paymentsheet.elements.SimpleTextElement
-import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
 import com.stripe.android.paymentsheet.elements.BankRepository
+import com.stripe.android.paymentsheet.elements.CountryConfig
+import com.stripe.android.paymentsheet.elements.CountryElement
 import com.stripe.android.paymentsheet.elements.CountrySpec
+import com.stripe.android.paymentsheet.elements.EmailConfig
+import com.stripe.android.paymentsheet.elements.EmailElement
 import com.stripe.android.paymentsheet.elements.EmailSpec
 import com.stripe.android.paymentsheet.elements.IdentifierSpec
+import com.stripe.android.paymentsheet.elements.MandateTextElement
 import com.stripe.android.paymentsheet.elements.MandateTextSpec
+import com.stripe.android.paymentsheet.elements.NameConfig
 import com.stripe.android.paymentsheet.elements.ResourceRepository
+import com.stripe.android.paymentsheet.elements.SaveForFutureUseElement
 import com.stripe.android.paymentsheet.elements.SaveForFutureUseSpec
+import com.stripe.android.paymentsheet.elements.SectionElement
 import com.stripe.android.paymentsheet.elements.SectionSpec
+import com.stripe.android.paymentsheet.elements.SimpleDropdownElement
+import com.stripe.android.paymentsheet.elements.SimpleTextElement
 import com.stripe.android.paymentsheet.elements.SimpleTextSpec
 import com.stripe.android.paymentsheet.elements.SupportedBankType
 import kotlinx.coroutines.flow.first
@@ -62,13 +61,7 @@ internal class TransformSpecToElementTest {
                     bankRepository,
                     mock()
                 ),
-                FormFragmentArguments(
-                    supportedPaymentMethodName = "Card",
-                    saveForFutureUseInitialVisibility = true,
-                    saveForFutureUseInitialValue = true,
-                    merchantName = "Example, Inc.",
-                    injectorKey = DUMMY_INJECTOR_KEY
-                )
+                COMPOSE_FRAGMENT_ARGS
             )
     }
 

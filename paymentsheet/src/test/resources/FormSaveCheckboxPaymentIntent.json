@@ -9,8 +9,8 @@
       ]
     },
     "testOutput": {
-      "expectedSaveCheckboxValue": true,
-      "expectedSaveCheckboxVisible": true
+      "expectedDisplayUIForSaving": true,
+      "expectedAllowUserInitiatedReuse": false
     }
   },
   {
@@ -24,8 +24,8 @@
       ]
     },
     "testOutput": {
-      "expectedSaveCheckboxValue": false,
-      "expectedSaveCheckboxVisible": false
+      "expectedDisplayUIForSaving": true,
+      "expectedAllowUserInitiatedReuse": false
     }
   },
   {
@@ -39,8 +39,8 @@
       ]
     },
     "testOutput": {
-      "expectedSaveCheckboxValue": true,
-      "expectedSaveCheckboxVisible": true
+      "expectedDisplayUIForSaving": true,
+      "expectedAllowUserInitiatedReuse": false
     }
   },
   {
@@ -53,8 +53,8 @@
       ]
     },
     "testOutput": {
-      "expectedSaveCheckboxValue": true,
-      "expectedSaveCheckboxVisible": true
+      "expectedDisplayUIForSaving": true,
+      "expectedAllowUserInitiatedReuse": false
     }
   },
   {
@@ -68,8 +68,8 @@
       ]
     },
     "testOutput": {
-      "expectedSaveCheckboxValue": false,
-      "expectedSaveCheckboxVisible": false
+      "expectedDisplayUIForSaving": true,
+      "expectedAllowUserInitiatedReuse": false
     }
   },
   {
@@ -83,8 +83,52 @@
       ]
     },
     "testOutput": {
-      "expectedSaveCheckboxValue": true,
-      "expectedSaveCheckboxVisible": true
+      "expectedDisplayUIForSaving": true,
+      "expectedAllowUserInitiatedReuse": false
+    }
+  },
+  {
+    "testInput": {
+      "hasCustomer": true,
+      "lpmTypeFormCode": "card",
+      "intentSetupFutureUsage": "OneTime",
+      "intentLpms": [
+        "card"
+      ]
+    },
+    "testOutput": {
+      "expectedDisplayUIForSaving": true,
+      "expectedAllowUserInitiatedReuse": true
+    }
+  },
+  {
+    "testInput": {
+      "hasCustomer": true,
+      "lpmTypeFormCode": "card",
+      "intentSetupFutureUsage": "OneTime",
+      "intentLpms": [
+        "card",
+        "eps"
+      ]
+    },
+    "testOutput": {
+      "expectedDisplayUIForSaving": false,
+      "expectedAllowUserInitiatedReuse": false
+    }
+  },
+  {
+    "testInput": {
+      "hasCustomer": true,
+      "lpmTypeFormCode": "sepa_debit",
+      "intentSetupFutureUsage": "OneTime",
+      "intentLpms": [
+        "card",
+        "sepa_debit"
+      ]
+    },
+    "testOutput": {
+      "expectedDisplayUIForSaving": false,
+      "expectedAllowUserInitiatedReuse": false
     }
   },
   {
@@ -97,8 +141,8 @@
       ]
     },
     "testOutput": {
-      "expectedSaveCheckboxValue": false,
-      "expectedSaveCheckboxVisible": false
+      "expectedDisplayUIForSaving": true,
+      "expectedAllowUserInitiatedReuse": false
     }
   },
   {
@@ -112,8 +156,8 @@
       ]
     },
     "testOutput": {
-      "expectedSaveCheckboxValue": false,
-      "expectedSaveCheckboxVisible": false
+      "expectedDisplayUIForSaving": true,
+      "expectedAllowUserInitiatedReuse": false
     }
   },
   {
@@ -127,8 +171,8 @@
       ]
     },
     "testOutput": {
-      "expectedSaveCheckboxValue": false,
-      "expectedSaveCheckboxVisible": false
+      "expectedDisplayUIForSaving": true,
+      "expectedAllowUserInitiatedReuse": false
     }
   },
   {
@@ -141,8 +185,8 @@
       ]
     },
     "testOutput": {
-      "expectedSaveCheckboxValue": false,
-      "expectedSaveCheckboxVisible": false
+      "expectedDisplayUIForSaving": true,
+      "expectedAllowUserInitiatedReuse": false
     }
   },
   {
@@ -156,8 +200,8 @@
       ]
     },
     "testOutput": {
-      "expectedSaveCheckboxValue": false,
-      "expectedSaveCheckboxVisible": false
+      "expectedDisplayUIForSaving": true,
+      "expectedAllowUserInitiatedReuse": false
     }
   },
   {
@@ -171,8 +215,53 @@
       ]
     },
     "testOutput": {
-      "expectedSaveCheckboxValue": false,
-      "expectedSaveCheckboxVisible": false
+      "expectedDisplayUIForSaving": true,
+      "expectedAllowUserInitiatedReuse": false
+    }
+  },
+  {
+    "testInput": {
+      "hasCustomer": false,
+      "lpmTypeFormCode": "card",
+      "intentSetupFutureUsage": "OneTime",
+      "intentLpms": [
+        "card"
+      ]
+    },
+    "testOutput": {
+      "expectedDisplayUIForSaving": false,
+      "expectedAllowUserInitiatedReuse": false
+    }
+  },
+  {
+    "testInput": {
+      "hasCustomer": false,
+      "lpmTypeFormCode": "card",
+      "intentSetupFutureUsage": "OneTime",
+      "intentLpms": [
+        "card",
+        "eps"
+      ]
+    },
+    "testOutput": {
+      "expectedDisplayUIForSaving": false,
+      "expectedAllowUserInitiatedReuse": false
+    }
+  },
+  {
+    "testInput": {
+      "hasCustomer": false,
+      "lpmTypeFormCode": "sepa_debit",
+      "intentSetupFutureUsage": "OneTime",
+      "intentLpms": [
+        "card",
+        "sepa_debit"
+      ]
+    },
+    "testOutput": {
+      "expectedDisplayUIForSaving": false,
+      "expectedAllowUserInitiatedReuse": false
     }
   }
 ]
+

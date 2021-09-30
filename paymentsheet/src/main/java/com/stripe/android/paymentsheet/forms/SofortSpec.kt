@@ -8,6 +8,8 @@ import com.stripe.android.paymentsheet.elements.FormSpec
 import com.stripe.android.paymentsheet.elements.IdentifierSpec
 import com.stripe.android.paymentsheet.elements.LayoutSpec
 import com.stripe.android.paymentsheet.elements.MandateTextSpec
+import com.stripe.android.paymentsheet.elements.PaymentMethodSpec
+import com.stripe.android.paymentsheet.elements.Requirement
 import com.stripe.android.paymentsheet.elements.SaveForFutureUseSpec
 import com.stripe.android.paymentsheet.elements.SectionSpec
 import com.stripe.android.paymentsheet.elements.SimpleTextSpec
@@ -38,7 +40,8 @@ internal val sofortMandate = MandateTextSpec(
     R.string.stripe_paymentsheet_sepa_mandate,
     Color.Gray
 )
-internal val sofort = FormSpec(
+
+private val sofortUserSelectedSave = FormSpec(
     LayoutSpec(
         listOf(
             sofortNameSection,
@@ -48,5 +51,48 @@ internal val sofort = FormSpec(
             sofortMandate,
         )
     ),
+    // When saved this is a SEPA paymentMethod which requires SEPA requirements
+    requirements = setOf(
+        Requirement.DelayedSettlementSupport,
+        Requirement.UserSelectableSave
+    ).plus(sepaDebitUserSelectedSave.requirements)
+)
+private val sofortMerchantRequiredSave = FormSpec(
+    LayoutSpec(
+        listOf(
+            sofortNameSection,
+            sofortEmailSection,
+            sofortCountrySection,
+            sofortMandate,
+        )
+    ),
+    // When saved this is a SEPA paymentMethod which requires SEPA requirements
+    requirements = setOf(
+        Requirement.DelayedSettlementSupport,
+        Requirement.MerchantSelectedSave
+    ).plus(sepaDebitMerchantRequiredSave.requirements)
+)
+
+private val sofortOneTimeUse = FormSpec(
+    LayoutSpec(
+        listOf(
+            sofortCountrySection,
+        )
+    ),
+    requirements = setOf(
+        Requirement.DelayedSettlementSupport,
+        Requirement.OneTimeUse
+    ),
+)
+
+/**
+ * This payment method is authenticated.
+ */
+internal val sofort = PaymentMethodSpec(
     sofortParamKey,
+    listOf(
+        sofortUserSelectedSave,
+        sofortMerchantRequiredSave,
+        sofortOneTimeUse,
+    )
 )

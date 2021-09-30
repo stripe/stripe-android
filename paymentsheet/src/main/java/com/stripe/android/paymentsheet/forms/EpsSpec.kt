@@ -5,6 +5,8 @@ import com.stripe.android.paymentsheet.elements.BankDropdownSpec
 import com.stripe.android.paymentsheet.elements.FormSpec
 import com.stripe.android.paymentsheet.elements.IdentifierSpec
 import com.stripe.android.paymentsheet.elements.LayoutSpec
+import com.stripe.android.paymentsheet.elements.PaymentMethodSpec
+import com.stripe.android.paymentsheet.elements.Requirement
 import com.stripe.android.paymentsheet.elements.SectionSpec
 import com.stripe.android.paymentsheet.elements.SimpleTextSpec
 import com.stripe.android.paymentsheet.elements.SupportedBankType
@@ -34,12 +36,17 @@ internal val epsBankSection =
         )
     )
 
-internal val eps = FormSpec(
-    LayoutSpec(
-        listOf(
-            epsNameSection,
-            epsBankSection
-        )
-    ),
+internal val eps = PaymentMethodSpec(
     epsParamKey,
+    listOf(
+        FormSpec(
+            LayoutSpec(
+                listOf(
+                    epsNameSection,
+                    epsBankSection
+                )
+            ),
+            requirements = setOf(Requirement.OneTimeUse)
+        )
+    )
 )

@@ -13,14 +13,13 @@ import androidx.fragment.app.commit
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.asLiveData
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.stripe.android.model.PaymentIntent
-import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.core.injection.InjectorKey
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.databinding.FragmentPaymentsheetAddPaymentMethodBinding
 import com.stripe.android.paymentsheet.elements.IdentifierSpec
 import com.stripe.android.paymentsheet.forms.FormFieldValues
+import com.stripe.android.paymentsheet.forms.getAllCapabilities
 import com.stripe.android.paymentsheet.model.Amount
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
@@ -102,7 +101,7 @@ internal abstract class BaseAddPaymentMethodFragment(
                         sheetViewModel.updateSelection(
                             transformToPaymentSelection(
                                 formFieldValues,
-                                formFragment.formSpec.paramKey,
+                                formFragment.paramKeySpec,
                                 selectedPaymentMethod
                             )
                         )
@@ -161,9 +160,9 @@ internal abstract class BaseAddPaymentMethodFragment(
         args.putParcelable(
             ComposeFormDataCollectionFragment.EXTRA_CONFIG,
             getFormArguments(
-                hasCustomer = sheetViewModel.customerConfig != null,
                 stripeIntent = requireNotNull(sheetViewModel.stripeIntent.value),
-                supportedPaymentMethodName = paymentMethod.name,
+                config = sheetViewModel.config,
+                showPaymentMethod = paymentMethod,
                 merchantName = sheetViewModel.merchantName,
                 amount = sheetViewModel.amount.value,
                 billingAddress = sheetViewModel.config?.defaultBillingDetails,
@@ -220,55 +219,18 @@ internal abstract class BaseAddPaymentMethodFragment(
 
         @VisibleForTesting
         internal fun getFormArguments(
-            hasCustomer: Boolean,
-            supportedPaymentMethodName: String,
+            showPaymentMethod: SupportedPaymentMethod,
             stripeIntent: StripeIntent,
+            config: PaymentSheet.Configuration?,
             merchantName: String,
             amount: Amount? = null,
             billingAddress: PaymentSheet.BillingDetails? = null,
             @InjectorKey injectorKey: String
         ): FormFragmentArguments {
-            // Has effect of setting off session on PIs (not SIs) and also impacts reopening
-            // the card
-            var saveForFutureUseValue = true
-            // This will impact the setting of the off_session on confirm
-            var saveForFutureUseVisible = true
-
-            val supportedPaymentMethod =
-                SupportedPaymentMethod.fromCode(supportedPaymentMethodName)
-
-            val isSetupIntent = stripeIntent is SetupIntent
-            val isPaymentIntentSetupFutureUsage = (stripeIntent as? PaymentIntent)?.setupFutureUsage
-            if (isSetupIntent ||
-                (isPaymentIntentSetupFutureUsage == StripeIntent.Usage.OnSession) ||
-                (isPaymentIntentSetupFutureUsage == StripeIntent.Usage.OffSession)
-            ) {
-                saveForFutureUseVisible = false
-                saveForFutureUseValue = true
-            } else if (stripeIntent is PaymentIntent &&
-                (!hasCustomer || (supportedPaymentMethod?.requiresMandate == true))
-            ) {
-                // If paymentMethodTypes contains payment method that does not support
-                // save for future should be false and unselected until future fix
-                saveForFutureUseValue = false
-                saveForFutureUseVisible = false
-            } else if (stripeIntent is PaymentIntent) {
-                // If the intent includes any payment method types that don't support save remove
-                // checkbox regardless of the payment method until future fix
-                stripeIntent.paymentMethodTypes.forEach {
-                    if (SupportedPaymentMethod.fromCode(it)
-                        ?.userRequestedConfirmSaveForFutureSupported == false
-                    ) {
-                        saveForFutureUseValue = false
-                        saveForFutureUseVisible = false
-                    }
-                }
-            }
 
             return FormFragmentArguments(
-                supportedPaymentMethodName = supportedPaymentMethodName,
-                saveForFutureUseInitialVisibility = saveForFutureUseVisible,
-                saveForFutureUseInitialValue = saveForFutureUseValue,
+                supportedPaymentMethod = showPaymentMethod,
+                capabilities = getAllCapabilities(stripeIntent, config),
                 merchantName = merchantName,
                 amount = amount,
                 billingDetails = billingAddress?.let {

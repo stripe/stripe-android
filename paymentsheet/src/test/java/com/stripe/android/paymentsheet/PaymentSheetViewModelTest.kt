@@ -887,17 +887,18 @@ internal class PaymentSheetViewModelTest {
         val viewModel = createViewModel()
 
         assertThat(
-            viewModel.getSupportedPaymentMethods(
-                PAYMENT_INTENT.copy(
-                    paymentMethodTypes = listOf(
-                        PaymentMethod.Type.Card.code,
-                        PaymentMethod.Type.Ideal.code,
-                        PaymentMethod.Type.SepaDebit.code,
-                        PaymentMethod.Type.Eps.code,
-                        PaymentMethod.Type.Sofort.code
-                    )
-                )
-            )
+            viewModel.supportedPaymentMethods
+//                (
+//                PAYMENT_INTENT.copy(
+//                    paymentMethodTypes = listOf(
+//                        PaymentMethod.Type.Card.code,
+//                        PaymentMethod.Type.Ideal.code,
+//                        PaymentMethod.Type.SepaDebit.code,
+//                        PaymentMethod.Type.Eps.code,
+//                        PaymentMethod.Type.Sofort.code
+//                    )
+//                )
+//            )
         ).containsExactly(
             SupportedPaymentMethod.Card,
             SupportedPaymentMethod.Ideal,
@@ -917,17 +918,16 @@ internal class PaymentSheetViewModelTest {
         )
 
         assertThat(
-            viewModel.getSupportedPaymentMethods(
-                PAYMENT_INTENT.copy(
-                    paymentMethodTypes = listOf(
-                        PaymentMethod.Type.Card.code,
-                        PaymentMethod.Type.Ideal.code,
-                        PaymentMethod.Type.SepaDebit.code,
-                        PaymentMethod.Type.Eps.code,
-                        PaymentMethod.Type.Sofort.code
-                    )
-                )
-            )
+            viewModel.supportedPaymentMethods
+//                PAYMENT_INTENT.copy(
+//                    paymentMethodTypes = listOf(
+//                        PaymentMethod.Type.Card.code,
+//                        PaymentMethod.Type.Ideal.code,
+//                        PaymentMethod.Type.SepaDebit.code,
+//                        PaymentMethod.Type.Eps.code,
+//                        PaymentMethod.Type.Sofort.code
+//                    )
+//                )
         ).containsExactly(
             SupportedPaymentMethod.Card,
             SupportedPaymentMethod.Ideal,

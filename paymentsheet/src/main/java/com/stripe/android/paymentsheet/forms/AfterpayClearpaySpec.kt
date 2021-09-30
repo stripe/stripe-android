@@ -1,6 +1,17 @@
-package com.stripe.android.paymentsheet.elements
+package com.stripe.android.paymentsheet.forms
 
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.elements.AddressSpec
+import com.stripe.android.paymentsheet.elements.AfterpayClearpayTextSpec
+import com.stripe.android.paymentsheet.elements.EmailSpec
+import com.stripe.android.paymentsheet.elements.FormSpec
+import com.stripe.android.paymentsheet.elements.IdentifierSpec
+import com.stripe.android.paymentsheet.elements.LayoutSpec
+import com.stripe.android.paymentsheet.elements.PaymentMethodSpec
+import com.stripe.android.paymentsheet.elements.Requirement
+import com.stripe.android.paymentsheet.elements.SectionSpec
+import com.stripe.android.paymentsheet.elements.SimpleTextSpec
+import com.stripe.android.paymentsheet.elements.billingParams
 
 internal val afterpayClearpayParamKey: MutableMap<String, Any?> = mutableMapOf(
     "type" to "afterpay_clearpay",
@@ -23,7 +34,7 @@ internal val afterpayClearpayBillingSection = SectionSpec(
     R.string.billing_details
 )
 
-internal val afterpayClearpay = FormSpec(
+private val afterpayClearpaySpec = FormSpec(
     LayoutSpec(
         listOf(
             afterpayClearpayHeader,
@@ -32,5 +43,19 @@ internal val afterpayClearpay = FormSpec(
             afterpayClearpayBillingSection
         )
     ),
-    afterpayClearpayParamKey
+    // We will only require the country and name in the shipping section of
+    // payment intents
+    requirements = setOf(
+        Requirement.ShippingInIntentName,
+        Requirement.ShippingInIntentAddressLine1,
+        Requirement.ShippingInIntentAddressCountry,
+        Requirement.ShippingInIntentAddressPostal,
+        Requirement.DelayedSettlementSupport, // due to behavior on cancel
+        Requirement.OneTimeUse
+    )
+)
+
+internal val afterpayClearpay = PaymentMethodSpec(
+    afterpayClearpayParamKey,
+    listOf(afterpayClearpaySpec)
 )

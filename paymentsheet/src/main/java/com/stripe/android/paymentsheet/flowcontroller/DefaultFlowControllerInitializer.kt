@@ -8,11 +8,11 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.core.injection.IOContext
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PrefsRepository
+import com.stripe.android.paymentsheet.forms.getSupportedSavedCustomerCards
 import com.stripe.android.paymentsheet.model.ClientSecret
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.StripeIntentValidator
-import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
 import kotlinx.coroutines.flow.first
@@ -24,9 +24,9 @@ import kotlin.coroutines.CoroutineContext
 @Singleton
 internal class DefaultFlowControllerInitializer @Inject constructor(
     private val prefsRepositoryFactory: @JvmSuppressWildcards
-    (PaymentSheet.CustomerConfiguration?) -> PrefsRepository,
+        (PaymentSheet.CustomerConfiguration?) -> PrefsRepository,
     private val googlePayRepositoryFactory: @JvmSuppressWildcards
-    (GooglePayEnvironment) -> GooglePayRepository,
+        (GooglePayEnvironment) -> GooglePayRepository,
     private val stripeIntentRepository: StripeIntentRepository,
     private val stripeIntentValidator: StripeIntentValidator,
     private val customerRepository: CustomerRepository,
@@ -80,12 +80,13 @@ internal class DefaultFlowControllerInitializer @Inject constructor(
             retrieveStripeIntent(clientSecret)
         }.fold(
             onSuccess = { stripeIntent ->
-                val paymentMethodTypes = stripeIntent.paymentMethodTypes.mapNotNull {
-                    PaymentMethod.Type.fromCode(it)
-                }.filter {
-                    SupportedPaymentMethod.supportedSavedPaymentMethods.contains(it.code)
-                }.filter {
-                    config?.allowsDelayedPaymentMethods == true || !it.hasDelayedSettlement()
+                // TODO: Does this read well? - UserSelectableSave isn't exactly what is meant
+                // and could the returned requirements when compared to MerchantSaveRequired
+                val paymentMethodTypes = getSupportedSavedCustomerCards(
+                    stripeIntent,
+                    config,
+                ).map {
+                    it.type
                 }
                 customerRepository.getPaymentMethods(
                     customerConfig,

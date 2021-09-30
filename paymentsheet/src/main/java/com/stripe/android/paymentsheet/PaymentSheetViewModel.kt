@@ -22,7 +22,6 @@ import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.PaymentIntent
-import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.payments.core.injection.IOContext
@@ -34,7 +33,10 @@ import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.forms.getSupportedPaymentMethods
 import com.stripe.android.paymentsheet.elements.ResourceRepository
+import com.stripe.android.paymentsheet.forms.getAllCapabilities
+import com.stripe.android.paymentsheet.forms.getSupportedSavedCustomerCards
 import com.stripe.android.paymentsheet.injection.DaggerPaymentSheetLauncherComponent
 import com.stripe.android.paymentsheet.injection.PaymentSheetViewModelModule
 import com.stripe.android.paymentsheet.injection.PaymentSheetViewModelSubcomponent
@@ -43,7 +45,6 @@ import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.model.StripeIntentValidator
-import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
 import com.stripe.android.paymentsheet.ui.PrimaryButton
@@ -219,34 +220,33 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     /**
      * Fetch the saved payment methods for the customer, if a [PaymentSheet.CustomerConfiguration]
      * was provided.
-     * It will fetch only the payment method types accepted by the [stripeIntent] and defined in
-     * [SupportedPaymentMethod.supportedSavedPaymentMethods].
+     * It will fetch only the payment method types as defined in [getSupportedPaymentMethods].
      */
     @VisibleForTesting
     fun updatePaymentMethods(stripeIntent: StripeIntent) {
         viewModelScope.launch {
             runCatching {
                 customerConfig?.let { customerConfig ->
-                    stripeIntent.paymentMethodTypes.mapNotNull {
-                        PaymentMethod.Type.fromCode(it)
-                    }.filter {
-                        SupportedPaymentMethod.supportedSavedPaymentMethods.contains(it.code)
-                    }.filter {
-                        config?.allowsDelayedPaymentMethods == true || !it.hasDelayedSettlement()
-                    }.let {
-                        customerRepository.getPaymentMethods(
-                            customerConfig,
-                            it
-                        )
-                    }.filter { paymentMethod ->
-                        paymentMethod.hasExpectedDetails().also { valid ->
-                            if (!valid) {
-                                logger.error(
-                                    "Discarding invalid payment method ${paymentMethod.id}"
-                                )
+                    getSupportedSavedCustomerCards(
+                        stripeIntent,
+                        config
+                    ).map {
+                        it.type
+                    }.toList()
+                        .let {
+                            customerRepository.getPaymentMethods(
+                                customerConfig,
+                                it
+                            )
+                        }.filter { paymentMethod ->
+                            paymentMethod.hasExpectedDetails().also { valid ->
+                                if (!valid) {
+                                    logger.error(
+                                        "Discarding invalid payment method ${paymentMethod.id}"
+                                    )
+                                }
                             }
                         }
-                    }
                 }.orEmpty()
             }.fold(
                 onSuccess = {

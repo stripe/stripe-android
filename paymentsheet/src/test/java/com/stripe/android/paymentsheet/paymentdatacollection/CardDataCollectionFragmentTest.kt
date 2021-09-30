@@ -20,10 +20,13 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetActivity
 import com.stripe.android.paymentsheet.PaymentSheetContract
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
+import com.stripe.android.paymentsheet.PaymentSheetFixtures.COMPOSE_FRAGMENT_ARGS
 import com.stripe.android.paymentsheet.PaymentSheetViewModel
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.databinding.FragmentPaymentsheetAddCardBinding
 import com.stripe.android.paymentsheet.databinding.StripeBillingAddressLayoutBinding
+import com.stripe.android.paymentsheet.elements.Requirement
+import com.stripe.android.paymentsheet.forms.getAllCapabilities
 import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.FragmentConfigFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -155,26 +158,7 @@ class CardDataCollectionFragmentTest {
     @Test
     fun `launching with arguments populates the fields`() {
         createFragment(
-            fragmentArgs = FormFragmentArguments(
-                SupportedPaymentMethod.Bancontact.name,
-                saveForFutureUseInitialVisibility = false,
-                saveForFutureUseInitialValue = false,
-                merchantName = "Merchant, Inc.",
-                billingDetails = PaymentSheet.BillingDetails(
-                    address = PaymentSheet.Address(
-                        line1 = "123 Main Street",
-                        line2 = null,
-                        city = "San Francisco",
-                        state = "CA",
-                        postalCode = "94111",
-                        country = "DE",
-                    ),
-                    email = "email",
-                    name = "Jenny Rosen",
-                    phone = "+18008675309"
-                ),
-                injectorKey = DUMMY_INJECTOR_KEY
-            )
+            fragmentArgs = COMPOSE_FRAGMENT_ARGS
         ) { _, viewBinding ->
             assertThat(viewBinding.billingAddress.postalCodeView.text.toString())
                 .isEqualTo("94111")
@@ -189,7 +173,7 @@ class CardDataCollectionFragmentTest {
             assertThat(viewBinding.billingAddress.countryView.text.toString())
                 .isEqualTo("Germany")
             assertThat(viewBinding.saveCardCheckbox.isVisible).isFalse()
-            assertThat(viewBinding.saveCardCheckbox.isChecked).isFalse()
+            assertThat(viewBinding.saveCardCheckbox.isChecked).isTrue()
         }
     }
 
@@ -272,7 +256,7 @@ class CardDataCollectionFragmentTest {
     fun `checkbox text should reflect merchant display name`() {
         createFragment { _, viewBinding ->
             assertThat(viewBinding.saveCardCheckbox.text)
-                .isEqualTo("Save this card for future Widget Store payments")
+                .isEqualTo("Save this card for future Merchant, Inc. payments")
         }
     }
 
@@ -463,7 +447,9 @@ class CardDataCollectionFragmentTest {
         fragmentConfig: FragmentConfig? = FragmentConfigFixtures.DEFAULT,
         stripeIntent: StripeIntent? = PaymentIntentFixtures.PI_WITH_SHIPPING,
         newCard: PaymentSelection.New.Card? = null,
-        fragmentArgs: FormFragmentArguments? = PaymentSheetFixtures.COMPOSE_FRAGMENT_ARGS,
+        fragmentArgs: FormFragmentArguments? = COMPOSE_FRAGMENT_ARGS.copy(
+            capabilities = getAllCapabilities(stripeIntent, args.config).plus(Requirement.UserSelectableSave)
+        ),
         onReady: (CardDataCollectionFragment<PaymentSheetViewModel>, FragmentPaymentsheetAddCardBinding) -> Unit
     ) {
         val factory = AddPaymentMethodsFragmentFactory(

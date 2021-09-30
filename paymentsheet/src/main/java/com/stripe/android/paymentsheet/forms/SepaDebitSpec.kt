@@ -9,6 +9,8 @@ import com.stripe.android.paymentsheet.elements.IbanSpec
 import com.stripe.android.paymentsheet.elements.IdentifierSpec
 import com.stripe.android.paymentsheet.elements.LayoutSpec
 import com.stripe.android.paymentsheet.elements.MandateTextSpec
+import com.stripe.android.paymentsheet.elements.PaymentMethodSpec
+import com.stripe.android.paymentsheet.elements.Requirement
 import com.stripe.android.paymentsheet.elements.SaveForFutureUseSpec
 import com.stripe.android.paymentsheet.elements.SectionSpec
 import com.stripe.android.paymentsheet.elements.SimpleTextSpec
@@ -46,7 +48,8 @@ internal val sepaBillingSection = SectionSpec(
     AddressSpec(IdentifierSpec.Generic("address")),
     R.string.billing_details
 )
-internal val sepaDebit = FormSpec(
+
+internal val sepaDebitUserSelectedSave = FormSpec(
     LayoutSpec(
         listOf(
             sepaDebitNameSection,
@@ -57,5 +60,51 @@ internal val sepaDebit = FormSpec(
             sepaDebitMandate,
         )
     ),
-    sepaDebitParamKey
+    requirements = setOf(
+        Requirement.DelayedSettlementSupport,
+        Requirement.ReusableMandateSupport,
+        Requirement.UserSelectableSave
+    )
 )
+
+internal val sepaDebitMerchantRequiredSave = FormSpec(
+    LayoutSpec(
+        listOf(
+            sepaDebitNameSection,
+            sepaDebitEmailSection,
+            sepaDebitIbanSection,
+            sepaBillingSection,
+            sepaDebitMandate,
+        )
+    ),
+    requirements = setOf(
+        Requirement.DelayedSettlementSupport,
+        Requirement.ReusableMandateSupport,
+        Requirement.MerchantSelectedSave
+    )
+)
+
+internal val sepaDebitOneTimeUse = FormSpec(
+    LayoutSpec(
+        listOf(
+            sepaDebitNameSection,
+            sepaDebitEmailSection,
+            sepaDebitIbanSection,
+            sepaBillingSection,
+        )
+    ),
+    requirements = setOf(
+        Requirement.DelayedSettlementSupport,
+        Requirement.OneTimeUse
+    )
+)
+
+internal val sepaDebit = PaymentMethodSpec(
+    sepaDebitParamKey,
+    listOf(
+        sepaDebitOneTimeUse,
+        sepaDebitMerchantRequiredSave,
+        sepaDebitUserSelectedSave
+    )
+)
+

@@ -12,8 +12,8 @@
       ]
     },
     "testOutput": {
-      "expectedSaveCheckboxValue": true,
-      "expectedSaveCheckboxVisible": false
+      "expectedDisplayUIForSaving": true,
+      "expectedAllowUserInitiatedReuse": false
     }
   },
   {
@@ -29,8 +29,8 @@
       ]
     },
     "testOutput": {
-      "expectedSaveCheckboxValue": true,
-      "expectedSaveCheckboxVisible": false
+      "expectedDisplayUIForSaving": true,
+      "expectedAllowUserInitiatedReuse": false
     }
   },
   {
@@ -46,8 +46,8 @@
       ]
     },
     "testOutput": {
-      "expectedSaveCheckboxValue": true,
-      "expectedSaveCheckboxVisible": false
+      "expectedDisplayUIForSaving": true,
+      "expectedAllowUserInitiatedReuse": false
     }
   },
   {
@@ -63,8 +63,8 @@
       ]
     },
     "testOutput": {
-      "expectedSaveCheckboxValue": true,
-      "expectedSaveCheckboxVisible": false
+      "expectedDisplayUIForSaving": true,
+      "expectedAllowUserInitiatedReuse": false
     }
   },
   {
@@ -80,8 +80,8 @@
       ]
     },
     "testOutput": {
-      "expectedSaveCheckboxValue": true,
-      "expectedSaveCheckboxVisible": false
+      "expectedDisplayUIForSaving": true,
+      "expectedAllowUserInitiatedReuse": false
     }
   },
   {
@@ -97,8 +97,8 @@
       ]
     },
     "testOutput": {
-      "expectedSaveCheckboxValue": true,
-      "expectedSaveCheckboxVisible": false
+      "expectedDisplayUIForSaving": true,
+      "expectedAllowUserInitiatedReuse": false
     }
   },
   {
@@ -114,8 +114,8 @@
       ]
     },
     "testOutput": {
-      "expectedSaveCheckboxValue": true,
-      "expectedSaveCheckboxVisible": false
+      "expectedDisplayUIForSaving": true,
+      "expectedAllowUserInitiatedReuse": false
     }
   },
   {
@@ -131,8 +131,8 @@
       ]
     },
     "testOutput": {
-      "expectedSaveCheckboxValue": true,
-      "expectedSaveCheckboxVisible": false
+      "expectedDisplayUIForSaving": true,
+      "expectedAllowUserInitiatedReuse": false
     }
   },
   {
@@ -148,8 +148,8 @@
       ]
     },
     "testOutput": {
-      "expectedSaveCheckboxValue": true,
-      "expectedSaveCheckboxVisible": false
+      "expectedDisplayUIForSaving": true,
+      "expectedAllowUserInitiatedReuse": false
     }
   },
   {
@@ -165,8 +165,8 @@
       ]
     },
     "testOutput": {
-      "expectedSaveCheckboxValue": true,
-      "expectedSaveCheckboxVisible": false
+      "expectedDisplayUIForSaving": true,
+      "expectedAllowUserInitiatedReuse": false
     }
   }
 ]

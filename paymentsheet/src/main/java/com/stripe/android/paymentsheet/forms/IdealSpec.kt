@@ -8,6 +8,8 @@ import com.stripe.android.paymentsheet.elements.FormSpec
 import com.stripe.android.paymentsheet.elements.IdentifierSpec
 import com.stripe.android.paymentsheet.elements.LayoutSpec
 import com.stripe.android.paymentsheet.elements.MandateTextSpec
+import com.stripe.android.paymentsheet.elements.PaymentMethodSpec
+import com.stripe.android.paymentsheet.elements.Requirement
 import com.stripe.android.paymentsheet.elements.SaveForFutureUseSpec
 import com.stripe.android.paymentsheet.elements.SectionSpec
 import com.stripe.android.paymentsheet.elements.SimpleTextSpec
@@ -42,7 +44,8 @@ internal val idealMandate = MandateTextSpec(
     R.string.stripe_paymentsheet_sepa_mandate,
     Color.Gray
 )
-internal val ideal = FormSpec(
+
+private val idealUserSelectedSave = FormSpec(
     LayoutSpec(
         listOf(
             idealNameSection,
@@ -52,5 +55,40 @@ internal val ideal = FormSpec(
             idealMandate,
         )
     ),
-    idealParamKey,
+    // When saved this is a SEPA paymentMethod which requires SEPA requirements
+    requirements = setOf(Requirement.UserSelectableSave)
+        .plus(sepaDebitUserSelectedSave.requirements)
 )
+private val idealMerchantRequiredSave = FormSpec(
+    LayoutSpec(
+        listOf(
+            idealNameSection,
+            idealEmailSection,
+            idealBankSection,
+            idealMandate,
+        )
+    ),
+    // When saved this is a SEPA paymentMethod which requires SEPA requirements
+    requirements = setOf(Requirement.MerchantSelectedSave)
+        .plus(sepaDebitMerchantRequiredSave.requirements)
+)
+
+private val idealOneTimeUse = FormSpec(
+    LayoutSpec(
+        listOf(
+            idealNameSection,
+            idealBankSection,
+        )
+    ),
+    requirements = setOf(Requirement.OneTimeUse),
+)
+
+internal val ideal = PaymentMethodSpec(
+    idealParamKey,
+    listOf(
+        idealUserSelectedSave,
+        idealMerchantRequiredSave,
+        idealOneTimeUse
+    )
+)
+
