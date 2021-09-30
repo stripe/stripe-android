@@ -104,7 +104,7 @@ class PaymentSheet internal constructor(
         var primaryButtonColor: ColorStateList? = null,
 
         /**
-         * The billing information for the user.
+         * The billing information for the customer.
          *
          * If set, PaymentSheet will pre-populate the form fields with the values provided.
          */
@@ -127,19 +127,49 @@ class PaymentSheet internal constructor(
 
     @Parcelize
     data class Address(
+        /**
+         * City, district, suburb, town, or village.
+         */
         val city: String? = null,
+        /**
+         * Two-letter country code (ISO 3166-1 alpha-2).
+         */
         val country: String? = null,
+        /**
+         * Address line 1 (e.g., street, PO Box, or company name).
+         */
         val line1: String? = null,
+        /**
+         * Address line 2 (e.g., apartment, suite, unit, or building).
+         */
         val line2: String? = null,
+        /**
+         * ZIP or postal code.
+         */
         val postalCode: String? = null,
+        /**
+         * State, county, province, or region.
+         */
         val state: String? = null
     ) : Parcelable
 
     @Parcelize
     data class BillingDetails(
+        /**
+         * The customer's billing address.
+         */
         val address: Address? = null,
+        /**
+         * The customer's email.
+         */
         val email: String? = null,
+        /**
+         * The customer's full name.
+         */
         val name: String? = null,
+        /**
+         * The customer's phone number without formatting e.g. 5551234567
+         */
         val phone: String? = null
     ) : Parcelable
 
