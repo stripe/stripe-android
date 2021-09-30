@@ -61,7 +61,7 @@ internal val sepaDebitUserSelectedSave = FormSpec(
         )
     ),
     requirements = setOf(
-        Requirement.DelayedSettlementSupport,
+        Requirement.DelayedPaymentMethodSupport,
         Requirement.ReusableMandateSupport,
         Requirement.UserSelectableSave
     )
@@ -78,9 +78,9 @@ internal val sepaDebitMerchantRequiredSave = FormSpec(
         )
     ),
     requirements = setOf(
-        Requirement.DelayedSettlementSupport,
+        Requirement.DelayedPaymentMethodSupport,
         Requirement.ReusableMandateSupport,
-        Requirement.MerchantSelectedSave
+        Requirement.MerchantRequiresSave
     )
 )
 
@@ -94,7 +94,7 @@ internal val sepaDebitOneTimeUse = FormSpec(
         )
     ),
     requirements = setOf(
-        Requirement.DelayedSettlementSupport,
+        Requirement.DelayedPaymentMethodSupport,
         Requirement.OneTimeUse
     )
 )
@@ -107,4 +107,3 @@ internal val sepaDebit = PaymentMethodSpec(
         sepaDebitUserSelectedSave
     )
 )
-

@@ -57,7 +57,7 @@ internal val bancontactMerchantRequiredSave = FormSpec(
     ),
     // When saved this is a SEPA paymentMethod which requires SEPA requirements
     requirements = sepaDebitMerchantRequiredSave.requirements
-        .plus(Requirement.MerchantSelectedSave),
+        .plus(Requirement.MerchantRequiresSave),
 )
 internal val bancontactOneTimeUse = FormSpec(
     LayoutSpec(

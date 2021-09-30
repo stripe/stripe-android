@@ -46,7 +46,7 @@ internal fun getSupportedPaymentMethods(
             SupportedPaymentMethod.fromCode(it)
         }.filter { supportedPaymentMethod ->
             supportedPaymentMethod.spec.satisfiedBy(capabilities)
-        }//.filter { it == SupportedPaymentMethod.Card }
+        } // .filter { it == SupportedPaymentMethod.Card }
             .toList()
     }
 
@@ -81,7 +81,7 @@ internal fun getAllCapabilities(
     stripeIntent: StripeIntent?,
     config: PaymentSheet.Configuration?
 ) = setOfNotNull(
-    Requirement.DelayedSettlementSupport.takeIf { config?.allowsDelayedPaymentMethods == true },
+    Requirement.DelayedPaymentMethodSupport.takeIf { config?.allowsDelayedPaymentMethods == true },
 )
     .plus(getReusableCapabilities(stripeIntent, config))
     .plus(intentShippingCapabilities(stripeIntent as? PaymentIntent))
@@ -104,11 +104,11 @@ private fun getReusableCapabilities(
                 listOf(Requirement.OneTimeUse)
             }
         } else {
-            listOf(Requirement.MerchantSelectedSave)
+            listOf(Requirement.MerchantRequiresSave)
         }
     }
     is SetupIntent -> {
-        listOf(Requirement.MerchantSelectedSave)
+        listOf(Requirement.MerchantRequiresSave)
     }
     else -> emptyList()
 }
@@ -119,12 +119,24 @@ private fun getReusableCapabilities(
 private fun intentShippingCapabilities(stripeIntent: PaymentIntent?) =
     stripeIntent?.let { paymentIntent ->
         listOfNotNull(
-            Requirement.ShippingInIntentName.takeIf { paymentIntent.shipping?.name != null },
-            Requirement.ShippingInIntentAddressLine1.takeIf { paymentIntent.shipping?.address?.line1 != null },
-            Requirement.ShippingInIntentAddressLine2.takeIf { paymentIntent.shipping?.address?.line1 != null },
-            Requirement.ShippingInIntentAddressCountry.takeIf { paymentIntent.shipping?.address?.country != null },
-            Requirement.ShippingInIntentAddressState.takeIf { paymentIntent.shipping?.address?.state != null },
-            Requirement.ShippingInIntentAddressPostal.takeIf { paymentIntent.shipping?.address?.postalCode != null },
+            Requirement.ShippingInIntentName.takeIf {
+                paymentIntent.shipping?.name != null
+            },
+            Requirement.ShippingInIntentAddressLine1.takeIf {
+                paymentIntent.shipping?.address?.line1 != null
+            },
+            Requirement.ShippingInIntentAddressLine2.takeIf {
+                paymentIntent.shipping?.address?.line1 != null
+            },
+            Requirement.ShippingInIntentAddressCountry.takeIf {
+                paymentIntent.shipping?.address?.country != null
+            },
+            Requirement.ShippingInIntentAddressState.takeIf {
+                paymentIntent.shipping?.address?.state != null
+            },
+            Requirement.ShippingInIntentAddressPostal.takeIf {
+                paymentIntent.shipping?.address?.postalCode != null
+            },
         )
     } ?: emptyList()
 
@@ -162,17 +174,16 @@ private fun allHaveKnownReuseSupport(paymentMethodsInIntent: List<String?>): Boo
 //    )
 }
 
-
-///**
+// /**
 // * List of requirements must match all of the requirements in one of the lists
 // */
-//internal fun ModeConfigurationSpec.getRequirements() = setOfNotNull(
+// internal fun ModeConfigurationSpec.getRequirements() = setOfNotNull(
 //    oneTimeUseSpec?.requirements?.plus(Requirement.OneTimeUse),
 //    merchantRequiredSpec?.requirements?.plus(Requirement.MerchantSelectedSave),
 //    userSelectedSaveSpec?.requirements?.plus(Requirement.UserSelectableSave)
-//)
+// )
 //
-//internal fun ModeConfigurationSpec.getSpecInMode(modeSelector: SaveModeSelector) =
+// internal fun ModeConfigurationSpec.getSpecInMode(modeSelector: SaveModeSelector) =
 //    when (modeSelector) {
 //        SaveModeSelector.OneTimeUse -> oneTimeUseSpec
 //        SaveModeSelector.UserSelectableSave -> userSelectedSaveSpec
@@ -180,11 +191,10 @@ private fun allHaveKnownReuseSupport(paymentMethodsInIntent: List<String?>): Boo
 //        SaveModeSelector.None -> null
 //    }
 
-
-//internal fun getSupportedPaymentMethods(
+// internal fun getSupportedPaymentMethods(
 //    stripeIntent: StripeIntent?,
 //    config: PaymentSheet.Configuration?
-//) {
+// ) {
 //    val supportedPaymentMethod = mutableListOf<SupportedPaymentMethod>()
 //    getPreferredSaveModeSelector(stripeIntent, config).forEach {
 //        supportedPaymentMethod.addAll(
@@ -195,4 +205,4 @@ private fun allHaveKnownReuseSupport(paymentMethodsInIntent: List<String?>): Boo
 //            )
 //        )
 //    }
-//}
+// }

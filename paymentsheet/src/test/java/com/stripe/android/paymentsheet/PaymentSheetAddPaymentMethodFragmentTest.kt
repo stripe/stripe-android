@@ -22,7 +22,6 @@ import com.stripe.android.paymentsheet.databinding.FragmentPaymentsheetAddPaymen
 import com.stripe.android.paymentsheet.databinding.PrimaryButtonBinding
 import com.stripe.android.paymentsheet.databinding.StripeGooglePayButtonBinding
 import com.stripe.android.paymentsheet.elements.IdentifierSpec
-import com.stripe.android.paymentsheet.elements.Requirement
 import com.stripe.android.paymentsheet.forms.FormFieldEntry
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.forms.getAllCapabilities
@@ -297,7 +296,7 @@ class PaymentSheetAddPaymentMethodFragmentTest {
         createFragment(
             stripeIntent = stripeIntent,
             args = args
-        ){ fragment, viewBinding ->
+        ) { fragment, viewBinding ->
             assertThat(
                 fragment.childFragmentManager.findFragmentById(
                     viewBinding.paymentMethodFragmentContainer.id

@@ -35,7 +35,6 @@ import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssisted
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.forms.getSupportedPaymentMethods
 import com.stripe.android.paymentsheet.elements.ResourceRepository
-import com.stripe.android.paymentsheet.forms.getAllCapabilities
 import com.stripe.android.paymentsheet.forms.getSupportedSavedCustomerCards
 import com.stripe.android.paymentsheet.injection.DaggerPaymentSheetLauncherComponent
 import com.stripe.android.paymentsheet.injection.PaymentSheetViewModelModule

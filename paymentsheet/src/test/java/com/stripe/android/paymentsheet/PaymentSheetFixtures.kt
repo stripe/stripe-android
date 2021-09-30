@@ -75,7 +75,7 @@ internal object PaymentSheetFixtures {
             SupportedPaymentMethod.Bancontact,
             capabilities = setOf(
                 Requirement.OneTimeUse,
-                Requirement.DelayedSettlementSupport,
+                Requirement.DelayedPaymentMethodSupport,
                 Requirement.ShippingInIntentAddressCountry,
                 Requirement.ShippingInIntentAddressLine1,
                 Requirement.ShippingInIntentName

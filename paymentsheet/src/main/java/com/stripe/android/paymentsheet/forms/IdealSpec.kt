@@ -69,7 +69,7 @@ private val idealMerchantRequiredSave = FormSpec(
         )
     ),
     // When saved this is a SEPA paymentMethod which requires SEPA requirements
-    requirements = setOf(Requirement.MerchantSelectedSave)
+    requirements = setOf(Requirement.MerchantRequiresSave)
         .plus(sepaDebitMerchantRequiredSave.requirements)
 )
 
@@ -91,4 +91,3 @@ internal val ideal = PaymentMethodSpec(
         idealOneTimeUse
     )
 )
-

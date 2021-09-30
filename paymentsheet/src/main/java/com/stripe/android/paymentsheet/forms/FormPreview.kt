@@ -53,7 +53,7 @@ internal fun FormInternalPreview() {
                 SupportedPaymentMethod.Bancontact,
                 capabilities = setOf(
                     Requirement.UserSelectableSave,
-                    Requirement.DelayedSettlementSupport,
+                    Requirement.DelayedPaymentMethodSupport,
                 ),
                 merchantName = "Merchant, Inc.",
                 billingDetails = PaymentSheet.BillingDetails(

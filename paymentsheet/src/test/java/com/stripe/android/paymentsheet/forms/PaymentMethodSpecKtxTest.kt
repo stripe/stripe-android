@@ -6,6 +6,5 @@ class PaymentMethodSpecKtxTest {
 
     @Test
     fun `GetAllCapabilities`() {
-        
     }
 }

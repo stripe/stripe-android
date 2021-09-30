@@ -4,11 +4,15 @@ package com.stripe.android.paymentsheet.elements
  * This class defines requirements of the payment method
  */
 enum class Requirement {
-    DelayedSettlementSupport,
+    DelayedPaymentMethodSupport,
 
     OneTimeUse,
-    MerchantSelectedSave, // capability if: SetupIntent or PaymentIntent w/setup_future_usage = on/off
-    UserSelectableSave,   // capability if: PaymentIntent w/setup_future_usage off
+
+    // capability if: SetupIntent or PaymentIntent w/setup_future_usage = on/off
+    MerchantRequiresSave,
+
+    // capability if: PaymentIntent w/setup_future_usage off
+    UserSelectableSave,
 
     /**
      * Different payment method might require some subset of the address

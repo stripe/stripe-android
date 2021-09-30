@@ -33,7 +33,8 @@ internal class ComposeFormDataCollectionFragment : Fragment() {
     }
     val paramKeySpec by lazy {
         requireNotNull(
-            requireArguments().getParcelable<FormFragmentArguments>(EXTRA_CONFIG)?.supportedPaymentMethod?.spec?.paramKey
+            requireArguments().getParcelable<FormFragmentArguments>(EXTRA_CONFIG)
+                ?.supportedPaymentMethod?.spec?.paramKey
         )
     }
 

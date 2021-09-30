@@ -271,7 +271,7 @@ internal class FormViewModelTest {
                 sofort.specs.first().layout,
                 COMPOSE_FRAGMENT_ARGS.copy(
                     billingDetails = null,
-                    capabilities = setOf(Requirement.MerchantSelectedSave)
+                    capabilities = setOf(Requirement.MerchantRequiresSave)
                 ),
                 resourceRepository = resourceRepository
             )
@@ -314,7 +314,7 @@ internal class FormViewModelTest {
             val formViewModel = FormViewModel(
                 sepaDebit.specs.first().layout,
                 COMPOSE_FRAGMENT_ARGS.copy(
-                    capabilities = setOf(Requirement.MerchantSelectedSave),
+                    capabilities = setOf(Requirement.MerchantRequiresSave),
                     billingDetails = null
                 ),
                 resourceRepository = resourceRepository

@@ -53,7 +53,7 @@ private val sofortUserSelectedSave = FormSpec(
     ),
     // When saved this is a SEPA paymentMethod which requires SEPA requirements
     requirements = setOf(
-        Requirement.DelayedSettlementSupport,
+        Requirement.DelayedPaymentMethodSupport,
         Requirement.UserSelectableSave
     ).plus(sepaDebitUserSelectedSave.requirements)
 )
@@ -68,8 +68,8 @@ private val sofortMerchantRequiredSave = FormSpec(
     ),
     // When saved this is a SEPA paymentMethod which requires SEPA requirements
     requirements = setOf(
-        Requirement.DelayedSettlementSupport,
-        Requirement.MerchantSelectedSave
+        Requirement.DelayedPaymentMethodSupport,
+        Requirement.MerchantRequiresSave
     ).plus(sepaDebitMerchantRequiredSave.requirements)
 )
 
@@ -80,7 +80,7 @@ private val sofortOneTimeUse = FormSpec(
         )
     ),
     requirements = setOf(
-        Requirement.DelayedSettlementSupport,
+        Requirement.DelayedPaymentMethodSupport,
         Requirement.OneTimeUse
     ),
 )

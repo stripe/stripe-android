@@ -1,22 +1,11 @@
 package com.stripe.android.paymentsheet
 
-import com.google.common.truth.Truth.assertThat
-import com.stripe.android.model.PaymentIntentFixtures
-import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.payments.core.injection.DUMMY_INJECTOR_KEY
-import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
-import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import java.io.File
-import java.nio.charset.Charset
 
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)

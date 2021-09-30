@@ -15,8 +15,6 @@ import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.payments.core.injection.DUMMY_INJECTOR_KEY
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetActivity
 import com.stripe.android.paymentsheet.PaymentSheetContract
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
@@ -30,7 +28,6 @@ import com.stripe.android.paymentsheet.forms.getAllCapabilities
 import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.FragmentConfigFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
 import com.stripe.android.paymentsheet.ui.AddPaymentMethodsFragmentFactory
 import com.stripe.android.utils.TestUtils.idleLooper
 import org.junit.Before
@@ -179,7 +176,7 @@ class CardDataCollectionFragmentTest {
 
     @Test
     fun `launching with billing details populates the fields`() {
-        createFragment(fragmentArgs = PaymentSheetFixtures.COMPOSE_FRAGMENT_ARGS) { _, viewBinding ->
+        createFragment(fragmentArgs = COMPOSE_FRAGMENT_ARGS) { _, viewBinding ->
             assertThat(viewBinding.billingAddress.postalCodeView.text.toString())
                 .isEqualTo("94111")
             assertThat(viewBinding.billingAddress.address1View.text.toString())

@@ -50,7 +50,7 @@ private val afterpayClearpaySpec = FormSpec(
         Requirement.ShippingInIntentAddressLine1,
         Requirement.ShippingInIntentAddressCountry,
         Requirement.ShippingInIntentAddressPostal,
-        Requirement.DelayedSettlementSupport, // due to behavior on cancel
+        Requirement.DelayedPaymentMethodSupport, // due to behavior on cancel
         Requirement.OneTimeUse
     )
 )
