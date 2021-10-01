@@ -129,6 +129,7 @@ class PaymentSheet internal constructor(
     data class Address(
         /**
          * City, district, suburb, town, or village.
+         * The value set is displayed in the payment sheet as-is. Depending on the payment method, the customer may be required to edit this value.
          */
         val city: String? = null,
         /**
@@ -137,18 +138,22 @@ class PaymentSheet internal constructor(
         val country: String? = null,
         /**
          * Address line 1 (e.g., street, PO Box, or company name).
+         * The value set is displayed in the payment sheet as-is. Depending on the payment method, the customer may be required to edit this value.
          */
         val line1: String? = null,
         /**
          * Address line 2 (e.g., apartment, suite, unit, or building).
+         * The value set is displayed in the payment sheet as-is. Depending on the payment method, the customer may be required to edit this value.
          */
         val line2: String? = null,
         /**
          * ZIP or postal code.
+         * The value set is displayed in the payment sheet as-is. Depending on the payment method, the customer may be required to edit this value.
          */
         val postalCode: String? = null,
         /**
          * State, county, province, or region.
+         * The value set is displayed in the payment sheet as-is. Depending on the payment method, the customer may be required to edit this value.
          */
         val state: String? = null
     ) : Parcelable
@@ -161,10 +166,12 @@ class PaymentSheet internal constructor(
         val address: Address? = null,
         /**
          * The customer's email.
+         * The value set is displayed in the payment sheet as-is. Depending on the payment method, the customer may be required to edit this value.
          */
         val email: String? = null,
         /**
          * The customer's full name.
+         * The value set is displayed in the payment sheet as-is. Depending on the payment method, the customer may be required to edit this value.
          */
         val name: String? = null,
         /**
