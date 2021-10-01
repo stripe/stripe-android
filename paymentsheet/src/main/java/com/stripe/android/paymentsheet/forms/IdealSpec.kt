@@ -4,13 +4,14 @@ import androidx.compose.ui.graphics.Color
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.elements.BankDropdownSpec
 import com.stripe.android.paymentsheet.elements.EmailSpec
-import com.stripe.android.paymentsheet.elements.FormSpec
+import com.stripe.android.paymentsheet.elements.FormRequirement
 import com.stripe.android.paymentsheet.elements.IdentifierSpec
 import com.stripe.android.paymentsheet.elements.LayoutSpec
 import com.stripe.android.paymentsheet.elements.MandateTextSpec
-import com.stripe.android.paymentsheet.elements.PaymentMethodSpec
+import com.stripe.android.paymentsheet.elements.PaymentMethodFormSpec
 import com.stripe.android.paymentsheet.elements.Requirement
 import com.stripe.android.paymentsheet.elements.SaveForFutureUseSpec
+import com.stripe.android.paymentsheet.elements.SaveMode
 import com.stripe.android.paymentsheet.elements.SectionSpec
 import com.stripe.android.paymentsheet.elements.SimpleTextSpec
 import com.stripe.android.paymentsheet.elements.SupportedBankType
@@ -45,49 +46,49 @@ internal val idealMandate = MandateTextSpec(
     Color.Gray
 )
 
-private val idealUserSelectedSave = FormSpec(
-    LayoutSpec(
-        listOf(
-            idealNameSection,
-            idealEmailSection,
-            idealBankSection,
-            SaveForFutureUseSpec(listOf(idealEmailSection, idealMandate)),
-            idealMandate,
-        )
-    ),
-    // When saved this is a SEPA paymentMethod which requires SEPA requirements
-    requirements = setOf(Requirement.UserSelectableSave)
-        .plus(sepaDebitUserSelectedSave.requirements)
-)
-private val idealMerchantRequiredSave = FormSpec(
-    LayoutSpec(
-        listOf(
-            idealNameSection,
-            idealEmailSection,
-            idealBankSection,
-            idealMandate,
-        )
-    ),
-    // When saved this is a SEPA paymentMethod which requires SEPA requirements
-    requirements = setOf(Requirement.MerchantRequiresSave)
-        .plus(sepaDebitMerchantRequiredSave.requirements)
+private val idealUserSelectedSave = LayoutSpec.create(
+    idealNameSection,
+    idealEmailSection,
+    idealBankSection,
+    SaveForFutureUseSpec(listOf(idealEmailSection, idealMandate)),
+    idealMandate,
 )
 
-private val idealOneTimeUse = FormSpec(
-    LayoutSpec(
-        listOf(
-            idealNameSection,
-            idealBankSection,
-        )
-    ),
-    requirements = setOf(Requirement.OneTimeUse),
+private val idealMerchantRequiredSave = LayoutSpec.create(
+    idealNameSection,
+    idealEmailSection,
+    idealBankSection,
+    idealMandate,
 )
 
-internal val ideal = PaymentMethodSpec(
+private val idealOneTimeUse = LayoutSpec.create(
+    idealNameSection,
+    idealBankSection,
+)
+
+internal val ideal = PaymentMethodFormSpec(
     idealParamKey,
-    listOf(
-        idealUserSelectedSave,
-        idealMerchantRequiredSave,
-        idealOneTimeUse
+    mapOf(
+        FormRequirement(
+            SaveMode.PaymentIntentAndSetupFutureUsageNotSet,
+            // When saved this is a SEPA paymentMethod which requires SEPA requirements
+            requirements = setOf(
+                Requirement.DelayedPaymentMethodSupport,
+                Requirement.Customer
+            ).plus(sepaDebitReuseRequirements)
+        ) to idealUserSelectedSave,
+
+        // When saved this is a SEPA paymentMethod which requires SEPA requirements
+        FormRequirement(
+            SaveMode.SetupIntentOrPaymentIntentWithFutureUsageSet,
+            requirements = setOf(
+                Requirement.DelayedPaymentMethodSupport,
+            ).plus(sepaDebitReuseRequirements)
+        ) to idealMerchantRequiredSave,
+
+        FormRequirement(
+            SaveMode.PaymentIntentAndSetupFutureUsageNotSet,
+            requirements = setOf(Requirement.DelayedPaymentMethodSupport)
+        ) to idealOneTimeUse
     )
 )

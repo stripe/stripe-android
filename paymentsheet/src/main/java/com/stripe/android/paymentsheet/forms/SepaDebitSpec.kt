@@ -4,14 +4,15 @@ import androidx.compose.ui.graphics.Color
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.elements.AddressSpec
 import com.stripe.android.paymentsheet.elements.EmailSpec
-import com.stripe.android.paymentsheet.elements.FormSpec
+import com.stripe.android.paymentsheet.elements.FormRequirement
 import com.stripe.android.paymentsheet.elements.IbanSpec
 import com.stripe.android.paymentsheet.elements.IdentifierSpec
 import com.stripe.android.paymentsheet.elements.LayoutSpec
 import com.stripe.android.paymentsheet.elements.MandateTextSpec
-import com.stripe.android.paymentsheet.elements.PaymentMethodSpec
+import com.stripe.android.paymentsheet.elements.PaymentMethodFormSpec
 import com.stripe.android.paymentsheet.elements.Requirement
 import com.stripe.android.paymentsheet.elements.SaveForFutureUseSpec
+import com.stripe.android.paymentsheet.elements.SaveMode
 import com.stripe.android.paymentsheet.elements.SectionSpec
 import com.stripe.android.paymentsheet.elements.SimpleTextSpec
 import com.stripe.android.paymentsheet.elements.billingParams
@@ -49,61 +50,53 @@ internal val sepaBillingSection = SectionSpec(
     R.string.billing_details
 )
 
-internal val sepaDebitUserSelectedSave = FormSpec(
-    LayoutSpec(
-        listOf(
-            sepaDebitNameSection,
-            sepaDebitEmailSection,
-            sepaDebitIbanSection,
-            sepaBillingSection,
-            SaveForFutureUseSpec(listOf(sepaDebitMandate)),
-            sepaDebitMandate,
-        )
-    ),
-    requirements = setOf(
-        Requirement.DelayedPaymentMethodSupport,
-        Requirement.ReusableMandateSupport,
-        Requirement.UserSelectableSave
-    )
+internal val sepaDebitUserSelectedSave = LayoutSpec.create(
+    sepaDebitNameSection,
+    sepaDebitEmailSection,
+    sepaDebitIbanSection,
+    sepaBillingSection,
+    SaveForFutureUseSpec(listOf(sepaDebitMandate)),
+    sepaDebitMandate,
 )
 
-internal val sepaDebitMerchantRequiredSave = FormSpec(
-    LayoutSpec(
-        listOf(
-            sepaDebitNameSection,
-            sepaDebitEmailSection,
-            sepaDebitIbanSection,
-            sepaBillingSection,
-            sepaDebitMandate,
-        )
-    ),
-    requirements = setOf(
-        Requirement.DelayedPaymentMethodSupport,
-        Requirement.ReusableMandateSupport,
-        Requirement.MerchantRequiresSave
-    )
+internal val sepaDebitMerchantRequiredSave = LayoutSpec.create(
+    sepaDebitNameSection,
+    sepaDebitEmailSection,
+    sepaDebitIbanSection,
+    sepaBillingSection,
+    sepaDebitMandate,
 )
 
-internal val sepaDebitOneTimeUse = FormSpec(
-    LayoutSpec(
-        listOf(
-            sepaDebitNameSection,
-            sepaDebitEmailSection,
-            sepaDebitIbanSection,
-            sepaBillingSection,
-        )
-    ),
-    requirements = setOf(
-        Requirement.DelayedPaymentMethodSupport,
-        Requirement.OneTimeUse
-    )
+internal val sepaDebitOneTimeUse = LayoutSpec.create(
+    sepaDebitNameSection,
+    sepaDebitEmailSection,
+    sepaDebitIbanSection,
+    sepaBillingSection,
 )
 
-internal val sepaDebit = PaymentMethodSpec(
+internal val sepaDebitReuseRequirements = setOf(
+    Requirement.DelayedPaymentMethodSupport,
+    Requirement.ReusableMandateSupport
+)
+
+internal val sepaDebit = PaymentMethodFormSpec(
     sepaDebitParamKey,
-    listOf(
-        sepaDebitOneTimeUse,
-        sepaDebitMerchantRequiredSave,
-        sepaDebitUserSelectedSave
+    mapOf(
+        FormRequirement(
+            SaveMode.PaymentIntentAndSetupFutureUsageNotSet,
+            // When saved this is a SEPA paymentMethod which requires SEPA requirements
+            requirements = sepaDebitReuseRequirements.plus(setOf(Requirement.Customer))
+        ) to sepaDebitUserSelectedSave,
+
+        // When saved this is a SEPA paymentMethod which requires SEPA requirements
+        FormRequirement(
+            SaveMode.SetupIntentOrPaymentIntentWithFutureUsageSet,
+            requirements = sepaDebitReuseRequirements
+        ) to sepaDebitMerchantRequiredSave,
+
+        FormRequirement(
+            SaveMode.PaymentIntentAndSetupFutureUsageNotSet,
+            requirements = setOf(Requirement.DelayedPaymentMethodSupport)
+        ) to sepaDebitOneTimeUse
     )
 )

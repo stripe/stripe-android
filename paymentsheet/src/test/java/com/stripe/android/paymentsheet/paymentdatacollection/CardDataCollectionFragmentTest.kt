@@ -24,7 +24,7 @@ import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.databinding.FragmentPaymentsheetAddCardBinding
 import com.stripe.android.paymentsheet.databinding.StripeBillingAddressLayoutBinding
 import com.stripe.android.paymentsheet.elements.Requirement
-import com.stripe.android.paymentsheet.forms.getAllCapabilities
+import com.stripe.android.paymentsheet.elements.SaveMode
 import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.FragmentConfigFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -442,10 +442,13 @@ class CardDataCollectionFragmentTest {
     private fun createFragment(
         args: PaymentSheetContract.Args = PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY,
         fragmentConfig: FragmentConfig? = FragmentConfigFixtures.DEFAULT,
-        stripeIntent: StripeIntent? = PaymentIntentFixtures.PI_WITH_SHIPPING,
+        stripeIntent: StripeIntent = PaymentIntentFixtures.PI_WITH_SHIPPING,
         newCard: PaymentSelection.New.Card? = null,
         fragmentArgs: FormFragmentArguments? = COMPOSE_FRAGMENT_ARGS.copy(
-            capabilities = getAllCapabilities(stripeIntent, args.config).plus(Requirement.UserSelectableSave)
+            capabilities = COMPOSE_FRAGMENT_ARGS.capabilities.copy(
+                SaveMode.PaymentIntentAndSetupFutureUsageNotSet,
+                requirements = COMPOSE_FRAGMENT_ARGS.capabilities.requirements.plus(Requirement.Customer)
+            )
         ),
         onReady: (CardDataCollectionFragment<PaymentSheetViewModel>, FragmentPaymentsheetAddCardBinding) -> Unit
     ) {

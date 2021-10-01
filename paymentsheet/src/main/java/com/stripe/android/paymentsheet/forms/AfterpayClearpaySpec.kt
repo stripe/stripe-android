@@ -4,11 +4,12 @@ import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.elements.AddressSpec
 import com.stripe.android.paymentsheet.elements.AfterpayClearpayTextSpec
 import com.stripe.android.paymentsheet.elements.EmailSpec
-import com.stripe.android.paymentsheet.elements.FormSpec
+import com.stripe.android.paymentsheet.elements.FormRequirement
 import com.stripe.android.paymentsheet.elements.IdentifierSpec
 import com.stripe.android.paymentsheet.elements.LayoutSpec
-import com.stripe.android.paymentsheet.elements.PaymentMethodSpec
+import com.stripe.android.paymentsheet.elements.PaymentMethodFormSpec
 import com.stripe.android.paymentsheet.elements.Requirement
+import com.stripe.android.paymentsheet.elements.SaveMode
 import com.stripe.android.paymentsheet.elements.SectionSpec
 import com.stripe.android.paymentsheet.elements.SimpleTextSpec
 import com.stripe.android.paymentsheet.elements.billingParams
@@ -34,28 +35,28 @@ internal val afterpayClearpayBillingSection = SectionSpec(
     R.string.billing_details
 )
 
-private val afterpayClearpaySpec = FormSpec(
-    LayoutSpec(
-        listOf(
-            afterpayClearpayHeader,
-            afterpayClearpayNameSection,
-            afterpayClearpayEmailSection,
-            afterpayClearpayBillingSection
-        )
-    ),
-    // We will only require the country and name in the shipping section of
-    // payment intents
-    requirements = setOf(
-        Requirement.ShippingInIntentName,
-        Requirement.ShippingInIntentAddressLine1,
-        Requirement.ShippingInIntentAddressCountry,
-        Requirement.ShippingInIntentAddressPostal,
-        Requirement.DelayedPaymentMethodSupport, // due to behavior on cancel
-        Requirement.OneTimeUse
-    )
+private val afterpayClearpaySpec = LayoutSpec.create(
+    afterpayClearpayHeader,
+    afterpayClearpayNameSection,
+    afterpayClearpayEmailSection,
+    afterpayClearpayBillingSection
 )
 
-internal val afterpayClearpay = PaymentMethodSpec(
+// We will only require the country and name in the shipping section of
+// payment intents
+internal val afterpayClearpay = PaymentMethodFormSpec(
     afterpayClearpayParamKey,
-    listOf(afterpayClearpaySpec)
+    mapOf(
+        FormRequirement(
+            SaveMode.PaymentIntentAndSetupFutureUsageNotSet,
+            requirements = setOf(
+                Requirement.ShippingInIntentName,
+                Requirement.ShippingInIntentAddressLine1,
+                Requirement.ShippingInIntentAddressCountry,
+                Requirement.ShippingInIntentAddressPostal,
+                Requirement.AfterpayCancelSupport,
+                Requirement.DelayedPaymentMethodSupport, // due to behavior on cancel
+            )
+        ) to afterpayClearpaySpec,
+    )
 )

@@ -2,7 +2,9 @@ package com.stripe.android.paymentsheet
 
 import androidx.core.graphics.toColorInt
 import com.stripe.android.payments.core.injection.DUMMY_INJECTOR_KEY
+import com.stripe.android.paymentsheet.elements.FormRequirement
 import com.stripe.android.paymentsheet.elements.Requirement
+import com.stripe.android.paymentsheet.elements.SaveMode
 import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.SetupIntentClientSecret
 import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
@@ -73,12 +75,14 @@ internal object PaymentSheetFixtures {
     internal val COMPOSE_FRAGMENT_ARGS
         get() = FormFragmentArguments(
             SupportedPaymentMethod.Bancontact,
-            capabilities = setOf(
-                Requirement.OneTimeUse,
-                Requirement.DelayedPaymentMethodSupport,
-                Requirement.ShippingInIntentAddressCountry,
-                Requirement.ShippingInIntentAddressLine1,
-                Requirement.ShippingInIntentName
+            capabilities = FormRequirement(
+                SaveMode.PaymentIntentAndSetupFutureUsageNotSet,
+                requirements = setOf(
+                    Requirement.DelayedPaymentMethodSupport,
+                    Requirement.ShippingInIntentAddressCountry,
+                    Requirement.ShippingInIntentAddressLine1,
+                    Requirement.ShippingInIntentName
+                )
             ),
             merchantName = "Merchant, Inc.",
             billingDetails = PaymentSheet.BillingDetails(

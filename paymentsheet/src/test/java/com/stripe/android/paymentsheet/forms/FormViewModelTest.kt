@@ -17,13 +17,14 @@ import com.stripe.android.paymentsheet.elements.AddressElement
 import com.stripe.android.paymentsheet.elements.BankRepository
 import com.stripe.android.paymentsheet.elements.CountrySpec
 import com.stripe.android.paymentsheet.elements.EmailSpec
+import com.stripe.android.paymentsheet.elements.FormRequirement
 import com.stripe.android.paymentsheet.elements.IdentifierSpec
 import com.stripe.android.paymentsheet.elements.LayoutSpec
-import com.stripe.android.paymentsheet.elements.Requirement
 import com.stripe.android.paymentsheet.elements.ResourceRepository
 import com.stripe.android.paymentsheet.elements.RowElement
 import com.stripe.android.paymentsheet.elements.SaveForFutureUseController
 import com.stripe.android.paymentsheet.elements.SaveForFutureUseSpec
+import com.stripe.android.paymentsheet.elements.SaveMode
 import com.stripe.android.paymentsheet.elements.SectionElement
 import com.stripe.android.paymentsheet.elements.SectionSingleFieldElement
 import com.stripe.android.paymentsheet.elements.SectionSpec
@@ -90,7 +91,7 @@ internal class FormViewModelTest {
         val factory = FormViewModel.Factory(
             config,
             ApplicationProvider.getApplicationContext<Application>().resources,
-            sofort.specs.first().layout
+            sofort.requirementFormMapping.values.first()
         )
         val factorySpy = spy(factory)
         val createdViewModel = factorySpy.create(FormViewModel::class.java)
@@ -107,7 +108,7 @@ internal class FormViewModelTest {
         val factory = FormViewModel.Factory(
             config,
             ApplicationProvider.getApplicationContext<Application>().resources,
-            sofort.specs.first().layout
+            sofort.requirementFormMapping.values.first()
         )
         val factorySpy = spy(factory)
         assertNotNull(factorySpy.create(FormViewModel::class.java))
@@ -121,12 +122,10 @@ internal class FormViewModelTest {
     @Test
     fun `Verify setting save for future use`() {
         val formViewModel = FormViewModel(
-            LayoutSpec(
-                listOf(
-                    emailSection,
-                    countrySection,
-                    SaveForFutureUseSpec(listOf(emailSection))
-                )
+            LayoutSpec.create(
+                emailSection,
+                countrySection,
+                SaveForFutureUseSpec(listOf(emailSection))
             ),
             COMPOSE_FRAGMENT_ARGS,
             resourceRepository = resourceRepository
@@ -147,12 +146,10 @@ internal class FormViewModelTest {
     @Test
     fun `Verify setting section as hidden sets sub-fields as hidden as well`() {
         val formViewModel = FormViewModel(
-            LayoutSpec(
-                listOf(
-                    emailSection,
-                    countrySection,
-                    SaveForFutureUseSpec(listOf(emailSection))
-                )
+            LayoutSpec.create(
+                emailSection,
+                countrySection,
+                SaveForFutureUseSpec(listOf(emailSection))
             ),
             COMPOSE_FRAGMENT_ARGS,
             resourceRepository = resourceRepository
@@ -180,12 +177,10 @@ internal class FormViewModelTest {
             // Here we have one hidden and one required field, country will always be in the result,
             //  and name only if saveForFutureUse is true
             val formViewModel = FormViewModel(
-                LayoutSpec(
-                    listOf(
-                        emailSection,
-                        countrySection,
-                        SaveForFutureUseSpec(listOf(emailSection))
-                    )
+                LayoutSpec.create(
+                    emailSection,
+                    countrySection,
+                    SaveForFutureUseSpec(listOf(emailSection))
                 ),
                 COMPOSE_FRAGMENT_ARGS,
                 resourceRepository = resourceRepository
@@ -221,12 +216,10 @@ internal class FormViewModelTest {
             // Here we have one hidden and one required field, country will always be in the result,
             //  and name only if saveForFutureUse is true
             val formViewModel = FormViewModel(
-                LayoutSpec(
-                    listOf(
-                        emailSection,
-                        countrySection,
-                        SaveForFutureUseSpec(listOf(emailSection))
-                    )
+                LayoutSpec.create(
+                    emailSection,
+                    countrySection,
+                    SaveForFutureUseSpec(listOf(emailSection))
                 ),
                 COMPOSE_FRAGMENT_ARGS,
                 resourceRepository = resourceRepository
@@ -268,10 +261,13 @@ internal class FormViewModelTest {
              * Using sofort as a complex enough example to test the form view model class.
              */
             val formViewModel = FormViewModel(
-                sofort.specs.first().layout,
+                sofort.requirementFormMapping.values.first(),
                 COMPOSE_FRAGMENT_ARGS.copy(
                     billingDetails = null,
-                    capabilities = setOf(Requirement.MerchantRequiresSave)
+                    capabilities = FormRequirement(
+                        SaveMode.SetupIntentOrPaymentIntentWithFutureUsageSet,
+                        requirements = emptySet()
+                    )
                 ),
                 resourceRepository = resourceRepository
             )
@@ -312,9 +308,12 @@ internal class FormViewModelTest {
              * Using sepa debit as a complex enough example to test the address portion.
              */
             val formViewModel = FormViewModel(
-                sepaDebit.specs.first().layout,
+                sepaDebit.requirementFormMapping.values.first(),
                 COMPOSE_FRAGMENT_ARGS.copy(
-                    capabilities = setOf(Requirement.MerchantRequiresSave),
+                    capabilities = FormRequirement(
+                        SaveMode.SetupIntentOrPaymentIntentWithFutureUsageSet,
+                        requirements = emptySet()
+                    ),
                     billingDetails = null
                 ),
                 resourceRepository = resourceRepository
@@ -381,7 +380,7 @@ internal class FormViewModelTest {
              * Using sepa debit as a complex enough example to test the address portion.
              */
             val formViewModel = FormViewModel(
-                sepaDebit.specs.first().layout,
+                sepaDebit.requirementFormMapping.values.first(),
                 COMPOSE_FRAGMENT_ARGS.copy(
                     billingDetails = null
                 ),

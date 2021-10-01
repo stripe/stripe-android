@@ -3,11 +3,11 @@ package com.stripe.android.paymentsheet.forms
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.elements.BankDropdownSpec
 import com.stripe.android.paymentsheet.elements.EmailSpec
-import com.stripe.android.paymentsheet.elements.FormSpec
+import com.stripe.android.paymentsheet.elements.FormRequirement
 import com.stripe.android.paymentsheet.elements.IdentifierSpec
 import com.stripe.android.paymentsheet.elements.LayoutSpec
-import com.stripe.android.paymentsheet.elements.PaymentMethodSpec
-import com.stripe.android.paymentsheet.elements.Requirement
+import com.stripe.android.paymentsheet.elements.PaymentMethodFormSpec
+import com.stripe.android.paymentsheet.elements.SaveMode
 import com.stripe.android.paymentsheet.elements.SectionSpec
 import com.stripe.android.paymentsheet.elements.SimpleTextSpec
 import com.stripe.android.paymentsheet.elements.SupportedBankType
@@ -41,20 +41,16 @@ internal val p24BankSection =
         )
     )
 
-internal val p24 = PaymentMethodSpec(
+internal val p24 = PaymentMethodFormSpec(
     p24ParamKey,
-    listOf(
-        FormSpec(
-            LayoutSpec(
-                listOf(
-                    p24NameSection,
-                    p24EmailSection,
-                    p24BankSection
-                )
-            ),
-            requirements = setOf(
-                Requirement.OneTimeUse
-            )
+    mapOf(
+        FormRequirement(
+            SaveMode.PaymentIntentAndSetupFutureUsageNotSet,
+            requirements = emptySet()
+        ) to LayoutSpec.create(
+            p24NameSection,
+            p24EmailSection,
+            p24BankSection
         )
     )
 )

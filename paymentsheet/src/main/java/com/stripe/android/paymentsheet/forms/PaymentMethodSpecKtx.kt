@@ -6,8 +6,10 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.elements.PaymentMethodSpec
+import com.stripe.android.paymentsheet.elements.FormRequirement
+import com.stripe.android.paymentsheet.elements.PaymentMethodFormSpec
 import com.stripe.android.paymentsheet.elements.Requirement
+import com.stripe.android.paymentsheet.elements.SaveMode
 import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
 
 /**
@@ -15,62 +17,92 @@ import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
  * should never be cards that are only offered for one time use.
  */
 internal fun getSupportedSavedCustomerCards(
-    stripeIntent: StripeIntent?,
+    stripeIntent: StripeIntent,
     config: PaymentSheet.Configuration?
 ) = getSupportedPaymentMethods(
     stripeIntent,
     config,
-    getAllCapabilities(stripeIntent, config).minus(Requirement.OneTimeUse)
+    getAllCapabilities(
+        stripeIntent,
+        config
+    ) // TODO: what if this returns customer with setup future usage
 )
 
 /**
  * This will get the form layout for the supported method that matches the top pick for the
- * payment method.
+ * payment method.  It should be known that this payment method has a form
+ * that matches the capabilities already.
  */
-internal fun PaymentMethodSpec.getForm(capabilities: Set<Requirement>) =
-    getSpecWithFullfilledRequirements(
-        capabilities
-    )?.layout
+internal fun PaymentMethodFormSpec.getForm(capabilities: FormRequirement) =
+    requirementFormMapping[getSpecWithFullfilledRequirements(capabilities)]
 
 /**
  * This will return a list of payment methods that have a supported form given the capabilities.
  */
 @VisibleForTesting
 internal fun getSupportedPaymentMethods(
-    stripeIntentParameter: StripeIntent?,
+    stripeIntent: StripeIntent,
     config: PaymentSheet.Configuration?,
-    capabilities: Set<Requirement> = getAllCapabilities(stripeIntentParameter, config)
+    capabilities: FormRequirement = getAllCapabilities(stripeIntent, config)
 ): List<SupportedPaymentMethod> {
-    stripeIntentParameter?.let { stripeIntent ->
-        return stripeIntent.paymentMethodTypes.asSequence().mapNotNull {
-            SupportedPaymentMethod.fromCode(it)
-        }.filter { supportedPaymentMethod ->
-            supportedPaymentMethod.spec.satisfiedBy(capabilities)
-        }.filter { it == SupportedPaymentMethod.Card }
-            .toList()
-    }
-
-    return emptyList()
+    return stripeIntent.paymentMethodTypes.asSequence().mapNotNull {
+        SupportedPaymentMethod.fromCode(it)
+    }.filter { supportedPaymentMethod ->
+        supportedPaymentMethod.formSpec.satisfiedBy(capabilities)
+    }//TODO.filter { it == SupportedPaymentMethod.Card }
+        .toList()
 }
 
-internal fun PaymentMethodSpec.satisfiedBy(
-    capabilities: Set<Requirement>
+internal fun PaymentMethodFormSpec.satisfiedBy(
+    capabilities: FormRequirement
 ) = getSpecWithFullfilledRequirements(capabilities) != null
 
-private fun PaymentMethodSpec.getSpecWithFullfilledRequirements(
-    capabilities: Set<Requirement>
-) = this.specs.firstOrNull {
-    fullfilledRequirements(it.requirements, capabilities)
+private fun PaymentMethodFormSpec.getSpecWithFullfilledRequirements(
+    capabilities: FormRequirement
+): FormRequirement? {
+    val supportedForms = this.requirementFormMapping.keys.filter {
+        fullfilledRequirements(it, capabilities)
+    }
+    if (supportedForms.isEmpty()) {
+        return null
+    }
+
+    // TODO: THis is jsut getting hte first accross payment methods?
+    // Prefer requirement with customer support if possible so we can
+    // show user selectable save
+    return supportedForms.firstOrNull {
+        it.saveMode == SaveMode.PaymentIntentAndSetupFutureUsageNotSet &&
+            it.requirements.contains(Requirement.Customer)
+    } ?: supportedForms.first()
 }
 
 /**
  * Capabilities are fulfilled only if all requirements are in the set of capabilities
  */
 private fun fullfilledRequirements(
-    requirements: Set<Requirement>?,
-    capabilities: Set<Requirement>
-) = requirements?.map { capabilities.contains(it) }
-    ?.contains(false) == false
+    formRequirements: FormRequirement?,
+    formCapabilities: FormRequirement
+): Boolean {
+//    // TODO: switch to use the logger
+//    if (formRequirements?.saveMode != formCapabilities.saveMode) {
+//        println(
+//            "Save mode does not match: ${formRequirements?.saveMode} != ${formCapabilities.saveMode}"
+//        )
+//    }
+//    if (formRequirements?.requirements?.map {
+//            formCapabilities.requirements.contains(it)
+//        }?.contains(false) == true) {
+//        println(
+//            "Requirements don't match: ${formRequirements.requirements} != ${formCapabilities.requirements}"
+//        )
+//
+//    }
+
+    return formRequirements?.saveMode == formCapabilities.saveMode &&
+        !formRequirements.requirements.map {
+            formCapabilities.requirements.contains(it)
+        }.contains(false)
+}
 
 /**
  * Capabilities is used to refer to what is supported by the combination of the code base,
@@ -78,39 +110,58 @@ private fun fullfilledRequirements(
  * customer, allowedDelayedSettlement)
  */
 internal fun getAllCapabilities(
-    stripeIntent: StripeIntent?,
+    stripeIntent: StripeIntent,
     config: PaymentSheet.Configuration?
-) = setOfNotNull(
-    Requirement.DelayedPaymentMethodSupport.takeIf { config?.allowsDelayedPaymentMethods == true },
-)
-    .plus(getReusableCapabilities(stripeIntent, config))
-    .plus(intentShippingCapabilities(stripeIntent as? PaymentIntent))
+): FormRequirement {
+    val formRequirement = getSaveMode(stripeIntent, config)
+    return FormRequirement(
+        formRequirement.saveMode,
+        formRequirement.requirements.plus(
+            setOfNotNull(
+                Requirement.DelayedPaymentMethodSupport.takeIf { config?.allowsDelayedPaymentMethods == true },
+            ).plus(
+                intentShippingCapabilities(stripeIntent as? PaymentIntent)
+            )
+        )
+    )
+}
 
 /**
  * These are the capabilities that define if the intent or configuration requires one time use
  * merchant requres save through SetupIntent or PaymentIntent with setup_future_usage = on/off session
  */
-private fun getReusableCapabilities(
-    stripeIntent: StripeIntent?,
+private fun getSaveMode(
+    stripeIntent: StripeIntent,
     config: PaymentSheet.Configuration?,
 ) = when (stripeIntent) {
     is PaymentIntent -> {
-        if (stripeIntent.setupFutureUsage == null) {
+        if (stripeIntent.setupFutureUsage == null || stripeIntent.setupFutureUsage == StripeIntent.Usage.OneTime) {
             if (config?.customer != null &&
                 allHaveKnownReuseSupport(stripeIntent.paymentMethodTypes)
             ) {
-                listOf(Requirement.UserSelectableSave, Requirement.OneTimeUse)
+                FormRequirement(
+                    SaveMode.PaymentIntentAndSetupFutureUsageNotSet,
+                    requirements = setOf(Requirement.Customer)
+                )
             } else {
-                listOf(Requirement.OneTimeUse)
+                FormRequirement(
+                    SaveMode.PaymentIntentAndSetupFutureUsageNotSet,
+                    requirements = emptySet()
+                )
             }
         } else {
-            listOf(Requirement.MerchantRequiresSave)
+            FormRequirement(
+                SaveMode.SetupIntentOrPaymentIntentWithFutureUsageSet,
+                requirements = emptySet()
+            )
         }
     }
     is SetupIntent -> {
-        listOf(Requirement.MerchantRequiresSave)
+        FormRequirement(
+            SaveMode.SetupIntentOrPaymentIntentWithFutureUsageSet,
+            requirements = emptySet()
+        )
     }
-    else -> emptyList()
 }
 
 /**
@@ -141,7 +192,8 @@ private fun intentShippingCapabilities(stripeIntent: PaymentIntent?) =
     } ?: emptyList()
 
 private fun allHaveKnownReuseSupport(paymentMethodsInIntent: List<String?>): Boolean {
-    // The following PaymentMethods are know to work when PaymentIntent.setup_future_usage = on/off session
+    // The following PaymentMethods are know to work when
+    // PaymentIntent.setup_future_usage = on/off session
     // This list is different from the PaymentMethod.Type.isReusable
     // It is expected that this check will be removed soon
     val knownReusable = setOf(

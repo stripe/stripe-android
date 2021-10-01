@@ -3,13 +3,14 @@ package com.stripe.android.paymentsheet.forms
 import androidx.compose.ui.graphics.Color
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.elements.EmailSpec
-import com.stripe.android.paymentsheet.elements.FormSpec
+import com.stripe.android.paymentsheet.elements.FormRequirement
 import com.stripe.android.paymentsheet.elements.IdentifierSpec
 import com.stripe.android.paymentsheet.elements.LayoutSpec
 import com.stripe.android.paymentsheet.elements.MandateTextSpec
-import com.stripe.android.paymentsheet.elements.PaymentMethodSpec
+import com.stripe.android.paymentsheet.elements.PaymentMethodFormSpec
 import com.stripe.android.paymentsheet.elements.Requirement
 import com.stripe.android.paymentsheet.elements.SaveForFutureUseSpec
+import com.stripe.android.paymentsheet.elements.SaveMode
 import com.stripe.android.paymentsheet.elements.SectionSpec
 import com.stripe.android.paymentsheet.elements.SimpleTextSpec
 import com.stripe.android.paymentsheet.elements.billingParams
@@ -30,51 +31,50 @@ internal val bancontactMandate = MandateTextSpec(
     R.string.stripe_paymentsheet_sepa_mandate,
     Color.Gray
 )
-internal val bancontactUserSelectedSave = FormSpec(
-    LayoutSpec(
+internal val bancontactUserSelectedSave = LayoutSpec.create(
+    bancontactNameSection,
+    bancontactEmailSection,
+    SaveForFutureUseSpec(
         listOf(
-            bancontactNameSection,
-            bancontactEmailSection,
-            SaveForFutureUseSpec(
-                listOf(
-                    bancontactEmailSection, bancontactMandate
-                )
-            ),
-            bancontactMandate,
+            bancontactEmailSection, bancontactMandate
         )
     ),
-    // When saved this is a SEPA paymentMethod which requires SEPA requirements
-    requirements = sepaDebitUserSelectedSave.requirements
-        .plus(Requirement.UserSelectableSave),
-)
-internal val bancontactMerchantRequiredSave = FormSpec(
-    LayoutSpec(
-        listOf(
-            bancontactNameSection,
-            bancontactEmailSection,
-            bancontactMandate,
-        )
-    ),
-    // When saved this is a SEPA paymentMethod which requires SEPA requirements
-    requirements = sepaDebitMerchantRequiredSave.requirements
-        .plus(Requirement.MerchantRequiresSave),
-)
-internal val bancontactOneTimeUse = FormSpec(
-    LayoutSpec(
-        listOf(
-            bancontactNameSection,
-        )
-    ),
-    requirements = setOf(
-        Requirement.OneTimeUse
-    )
+    bancontactMandate,
 )
 
-internal val bancontact = PaymentMethodSpec(
+internal val bancontactMerchantRequiredSave = LayoutSpec.create(
+    bancontactNameSection,
+    bancontactEmailSection,
+    bancontactMandate,
+)
+
+internal val bancontactOneTimeUse = LayoutSpec.create(
+    bancontactNameSection,
+)
+
+internal val bancontact = PaymentMethodFormSpec(
     bancontactParamKey,
-    listOf(
-        bancontactUserSelectedSave,
-        bancontactMerchantRequiredSave,
-        bancontactOneTimeUse
+    mapOf(
+        FormRequirement(
+            SaveMode.PaymentIntentAndSetupFutureUsageNotSet,
+            // When saved this is a SEPA paymentMethod which requires SEPA requirements
+            requirements = setOf(
+                Requirement.DelayedPaymentMethodSupport,
+                Requirement.Customer
+            ).plus(sepaDebitReuseRequirements)
+        ) to bancontactUserSelectedSave,
+
+        // When saved this is a SEPA paymentMethod which requires SEPA requirements
+        FormRequirement(
+            SaveMode.SetupIntentOrPaymentIntentWithFutureUsageSet,
+            requirements = setOf(
+                Requirement.DelayedPaymentMethodSupport,
+            ).plus(sepaDebitReuseRequirements)
+        ) to bancontactMerchantRequiredSave,
+
+        FormRequirement(
+            SaveMode.PaymentIntentAndSetupFutureUsageNotSet,
+            requirements = setOf(Requirement.DelayedPaymentMethodSupport)
+        ) to bancontactOneTimeUse
     )
 )

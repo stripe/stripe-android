@@ -26,7 +26,7 @@ internal class ComposeFormDataCollectionFragment : Fragment() {
     private val formLayout by lazy {
         val requireNotNull = requireNotNull(
             requireArguments().getParcelable<FormFragmentArguments>(EXTRA_CONFIG)?.let {
-                it.supportedPaymentMethod.spec.getForm(it.capabilities)
+                it.supportedPaymentMethod.formSpec.getForm(it.capabilities)
             }
         )
         requireNotNull
@@ -34,7 +34,7 @@ internal class ComposeFormDataCollectionFragment : Fragment() {
     val paramKeySpec by lazy {
         requireNotNull(
             requireArguments().getParcelable<FormFragmentArguments>(EXTRA_CONFIG)
-                ?.supportedPaymentMethod?.spec?.paramKey
+                ?.supportedPaymentMethod?.formSpec?.paramKey
         )
     }
 

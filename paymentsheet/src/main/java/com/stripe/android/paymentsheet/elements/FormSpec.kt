@@ -1,10 +1,16 @@
 package com.stripe.android.paymentsheet.elements
 
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
+
 /**
  * This class defines requirements of the payment method
  */
 internal enum class Requirement {
     DelayedPaymentMethodSupport,
+
+    AfterpayCancelSupport,
+    Customer,
 
     OneTimeUse,
 
@@ -33,17 +39,26 @@ internal enum class Requirement {
     ReusableMandateSupport,
 }
 
+enum class SaveMode {
+    PaymentIntentAndSetupFutureUsageNotSet,
+    SetupIntentOrPaymentIntentWithFutureUsageSet,
+}
+
+/**
+ * This is the list of requirements for the form
+ */
+@Parcelize
+internal data class FormRequirement(
+    val saveMode: SaveMode,
+    val requirements: Set<Requirement>
+) : Parcelable
+
 /**
  * This class is used to define different forms full of fields.
  */
-internal data class FormSpec(
-    val layout: LayoutSpec,
-    val requirements: Set<Requirement>,
-)
-
-internal data class PaymentMethodSpec(
+internal data class PaymentMethodFormSpec(
     val paramKey: MutableMap<String, Any?>,
 
-    /** Ordered list of specs in terms of preference **/
-    val specs: List<FormSpec>
+    /** Unordered list of specs **/
+    val requirementFormMapping: Map<FormRequirement, LayoutSpec>
 )

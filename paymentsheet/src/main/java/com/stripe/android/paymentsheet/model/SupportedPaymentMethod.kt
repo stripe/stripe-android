@@ -4,7 +4,7 @@ import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.elements.PaymentMethodSpec
+import com.stripe.android.paymentsheet.elements.PaymentMethodFormSpec
 import com.stripe.android.paymentsheet.forms.afterpayClearpay
 import com.stripe.android.paymentsheet.forms.bancontact
 import com.stripe.android.paymentsheet.forms.card
@@ -25,7 +25,7 @@ internal enum class SupportedPaymentMethod(
     val type: PaymentMethod.Type, // Mandate requirement is hidden in here
     @StringRes val displayNameResource: Int,
     @DrawableRes val iconResource: Int,
-    val spec: PaymentMethodSpec,
+    val formSpec: PaymentMethodFormSpec,
 ) {
     Card(
         PaymentMethod.Type.Card,

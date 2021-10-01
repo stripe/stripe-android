@@ -6,11 +6,14 @@
       "intentSetupFutureUsage": "OffSession",
       "intentLpms": [
         "card"
-      ]
+      ],
+      "intentHasShipping": false
     },
     "testOutput": {
-      "expectedDisplayUIForSaving": true,
-      "expectedAllowUserInitiatedReuse": false
+      "supportCustomerSavedCard": true,
+      "formExists": true,
+      "formHasSaveCheckbox": false,
+      "supportsAdding": true
     }
   },
   {
@@ -21,11 +24,14 @@
       "intentLpms": [
         "card",
         "eps"
-      ]
+      ],
+      "intentHasShipping": false
     },
     "testOutput": {
-      "expectedDisplayUIForSaving": true,
-      "expectedAllowUserInitiatedReuse": false
+      "supportCustomerSavedCard": true,
+      "formExists": true,
+      "formHasSaveCheckbox": false,
+      "supportsAdding": true
     }
   },
   {
@@ -36,11 +42,32 @@
       "intentLpms": [
         "card",
         "sepa_debit"
-      ]
+      ],
+      "intentHasShipping": false
     },
     "testOutput": {
-      "expectedDisplayUIForSaving": true,
-      "expectedAllowUserInitiatedReuse": false
+      "supportCustomerSavedCard": false,
+      "formExists": false,
+      "formHasSaveCheckbox": false,
+      "supportsAdding": false
+    }
+  },
+  {
+    "testInput": {
+      "hasCustomer": true,
+      "lpmTypeFormCode": "afterpay_clearpay",
+      "intentSetupFutureUsage": "OffSession",
+      "intentLpms": [
+        "card",
+        "afterpay_clearpay"
+      ],
+      "intentHasShipping": true
+    },
+    "testOutput": {
+      "supportCustomerSavedCard": false,
+      "formExists": false,
+      "formHasSaveCheckbox": false,
+      "supportsAdding": false
     }
   },
   {
@@ -50,11 +77,14 @@
       "intentSetupFutureUsage": "OnSession",
       "intentLpms": [
         "card"
-      ]
+      ],
+      "intentHasShipping": false
     },
     "testOutput": {
-      "expectedDisplayUIForSaving": true,
-      "expectedAllowUserInitiatedReuse": false
+      "supportCustomerSavedCard": true,
+      "formExists": true,
+      "formHasSaveCheckbox": false,
+      "supportsAdding": true
     }
   },
   {
@@ -65,11 +95,14 @@
       "intentLpms": [
         "card",
         "eps"
-      ]
+      ],
+      "intentHasShipping": false
     },
     "testOutput": {
-      "expectedDisplayUIForSaving": true,
-      "expectedAllowUserInitiatedReuse": false
+      "supportCustomerSavedCard": true,
+      "formExists": true,
+      "formHasSaveCheckbox": false,
+      "supportsAdding": true
     }
   },
   {
@@ -80,11 +113,32 @@
       "intentLpms": [
         "card",
         "sepa_debit"
-      ]
+      ],
+      "intentHasShipping": false
     },
     "testOutput": {
-      "expectedDisplayUIForSaving": true,
-      "expectedAllowUserInitiatedReuse": false
+      "supportCustomerSavedCard": false,
+      "formExists": false,
+      "formHasSaveCheckbox": false,
+      "supportsAdding": false
+    }
+  },
+  {
+    "testInput": {
+      "hasCustomer": true,
+      "lpmTypeFormCode": "afterpay_clearpay",
+      "intentSetupFutureUsage": "OnSession",
+      "intentLpms": [
+        "card",
+        "afterpay_clearpay"
+      ],
+      "intentHasShipping": true
+    },
+    "testOutput": {
+      "supportCustomerSavedCard": false,
+      "formExists": false,
+      "formHasSaveCheckbox": false,
+      "supportsAdding": false
     }
   },
   {
@@ -94,11 +148,14 @@
       "intentSetupFutureUsage": "OneTime",
       "intentLpms": [
         "card"
-      ]
+      ],
+      "intentHasShipping": false
     },
     "testOutput": {
-      "expectedDisplayUIForSaving": true,
-      "expectedAllowUserInitiatedReuse": true
+      "supportCustomerSavedCard": true,
+      "formExists": true,
+      "formHasSaveCheckbox": false,
+      "supportsAdding": true
     }
   },
   {
@@ -109,11 +166,14 @@
       "intentLpms": [
         "card",
         "eps"
-      ]
+      ],
+      "intentHasShipping": false
     },
     "testOutput": {
-      "expectedDisplayUIForSaving": false,
-      "expectedAllowUserInitiatedReuse": false
+      "supportCustomerSavedCard": true,
+      "formExists": true,
+      "formHasSaveCheckbox": false,
+      "supportsAdding": true
     }
   },
   {
@@ -124,11 +184,32 @@
       "intentLpms": [
         "card",
         "sepa_debit"
-      ]
+      ],
+      "intentHasShipping": false
     },
     "testOutput": {
-      "expectedDisplayUIForSaving": false,
-      "expectedAllowUserInitiatedReuse": false
+      "supportCustomerSavedCard": false,
+      "formExists": false,
+      "formHasSaveCheckbox": false,
+      "supportsAdding": false
+    }
+  },
+  {
+    "testInput": {
+      "hasCustomer": true,
+      "lpmTypeFormCode": "afterpay_clearpay",
+      "intentSetupFutureUsage": "OneTime",
+      "intentLpms": [
+        "card",
+        "afterpay_clearpay"
+      ],
+      "intentHasShipping": true
+    },
+    "testOutput": {
+      "supportCustomerSavedCard": false,
+      "formExists": false,
+      "formHasSaveCheckbox": false,
+      "supportsAdding": false
     }
   },
   {
@@ -138,11 +219,14 @@
       "intentSetupFutureUsage": "OffSession",
       "intentLpms": [
         "card"
-      ]
+      ],
+      "intentHasShipping": false
     },
     "testOutput": {
-      "expectedDisplayUIForSaving": true,
-      "expectedAllowUserInitiatedReuse": false
+      "supportCustomerSavedCard": true,
+      "formExists": true,
+      "formHasSaveCheckbox": false,
+      "supportsAdding": true
     }
   },
   {
@@ -153,11 +237,14 @@
       "intentLpms": [
         "card",
         "eps"
-      ]
+      ],
+      "intentHasShipping": false
     },
     "testOutput": {
-      "expectedDisplayUIForSaving": true,
-      "expectedAllowUserInitiatedReuse": false
+      "supportCustomerSavedCard": true,
+      "formExists": true,
+      "formHasSaveCheckbox": false,
+      "supportsAdding": true
     }
   },
   {
@@ -168,11 +255,32 @@
       "intentLpms": [
         "card",
         "sepa_debit"
-      ]
+      ],
+      "intentHasShipping": false
     },
     "testOutput": {
-      "expectedDisplayUIForSaving": true,
-      "expectedAllowUserInitiatedReuse": false
+      "supportCustomerSavedCard": false,
+      "formExists": false,
+      "formHasSaveCheckbox": false,
+      "supportsAdding": false
+    }
+  },
+  {
+    "testInput": {
+      "hasCustomer": false,
+      "lpmTypeFormCode": "afterpay_clearpay",
+      "intentSetupFutureUsage": "OffSession",
+      "intentLpms": [
+        "card",
+        "afterpay_clearpay"
+      ],
+      "intentHasShipping": true
+    },
+    "testOutput": {
+      "supportCustomerSavedCard": false,
+      "formExists": false,
+      "formHasSaveCheckbox": false,
+      "supportsAdding": false
     }
   },
   {
@@ -182,11 +290,14 @@
       "intentSetupFutureUsage": "OnSession",
       "intentLpms": [
         "card"
-      ]
+      ],
+      "intentHasShipping": false
     },
     "testOutput": {
-      "expectedDisplayUIForSaving": true,
-      "expectedAllowUserInitiatedReuse": false
+      "supportCustomerSavedCard": true,
+      "formExists": true,
+      "formHasSaveCheckbox": false,
+      "supportsAdding": true
     }
   },
   {
@@ -197,11 +308,14 @@
       "intentLpms": [
         "card",
         "eps"
-      ]
+      ],
+      "intentHasShipping": false
     },
     "testOutput": {
-      "expectedDisplayUIForSaving": true,
-      "expectedAllowUserInitiatedReuse": false
+      "supportCustomerSavedCard": true,
+      "formExists": true,
+      "formHasSaveCheckbox": false,
+      "supportsAdding": true
     }
   },
   {
@@ -212,11 +326,32 @@
       "intentLpms": [
         "card",
         "sepa_debit"
-      ]
+      ],
+      "intentHasShipping": false
     },
     "testOutput": {
-      "expectedDisplayUIForSaving": true,
-      "expectedAllowUserInitiatedReuse": false
+      "supportCustomerSavedCard": false,
+      "formExists": false,
+      "formHasSaveCheckbox": false,
+      "supportsAdding": false
+    }
+  },
+  {
+    "testInput": {
+      "hasCustomer": false,
+      "lpmTypeFormCode": "afterpay_clearpay",
+      "intentSetupFutureUsage": "OnSession",
+      "intentLpms": [
+        "card",
+        "afterpay_clearpay"
+      ],
+      "intentHasShipping": true
+    },
+    "testOutput": {
+      "supportCustomerSavedCard": false,
+      "formExists": false,
+      "formHasSaveCheckbox": false,
+      "supportsAdding": false
     }
   },
   {
@@ -226,11 +361,14 @@
       "intentSetupFutureUsage": "OneTime",
       "intentLpms": [
         "card"
-      ]
+      ],
+      "intentHasShipping": false
     },
     "testOutput": {
-      "expectedDisplayUIForSaving": false,
-      "expectedAllowUserInitiatedReuse": false
+      "supportCustomerSavedCard": true,
+      "formExists": true,
+      "formHasSaveCheckbox": false,
+      "supportsAdding": true
     }
   },
   {
@@ -241,11 +379,14 @@
       "intentLpms": [
         "card",
         "eps"
-      ]
+      ],
+      "intentHasShipping": false
     },
     "testOutput": {
-      "expectedDisplayUIForSaving": false,
-      "expectedAllowUserInitiatedReuse": false
+      "supportCustomerSavedCard": true,
+      "formExists": true,
+      "formHasSaveCheckbox": false,
+      "supportsAdding": true
     }
   },
   {
@@ -256,12 +397,32 @@
       "intentLpms": [
         "card",
         "sepa_debit"
-      ]
+      ],
+      "intentHasShipping": false
     },
     "testOutput": {
-      "expectedDisplayUIForSaving": false,
-      "expectedAllowUserInitiatedReuse": false
+      "supportCustomerSavedCard": false,
+      "formExists": false,
+      "formHasSaveCheckbox": false,
+      "supportsAdding": false
+    }
+  },
+  {
+    "testInput": {
+      "hasCustomer": false,
+      "lpmTypeFormCode": "afterpay_clearpay",
+      "intentSetupFutureUsage": "OneTime",
+      "intentLpms": [
+        "card",
+        "afterpay_clearpay"
+      ],
+      "intentHasShipping": true
+    },
+    "testOutput": {
+      "supportCustomerSavedCard": false,
+      "formExists": false,
+      "formHasSaveCheckbox": false,
+      "supportsAdding": false
     }
   }
 ]
-

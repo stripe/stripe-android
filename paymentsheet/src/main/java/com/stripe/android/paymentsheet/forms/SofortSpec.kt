@@ -4,13 +4,14 @@ import androidx.compose.ui.graphics.Color
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.elements.CountrySpec
 import com.stripe.android.paymentsheet.elements.EmailSpec
-import com.stripe.android.paymentsheet.elements.FormSpec
+import com.stripe.android.paymentsheet.elements.FormRequirement
 import com.stripe.android.paymentsheet.elements.IdentifierSpec
 import com.stripe.android.paymentsheet.elements.LayoutSpec
 import com.stripe.android.paymentsheet.elements.MandateTextSpec
-import com.stripe.android.paymentsheet.elements.PaymentMethodSpec
+import com.stripe.android.paymentsheet.elements.PaymentMethodFormSpec
 import com.stripe.android.paymentsheet.elements.Requirement
 import com.stripe.android.paymentsheet.elements.SaveForFutureUseSpec
+import com.stripe.android.paymentsheet.elements.SaveMode
 import com.stripe.android.paymentsheet.elements.SectionSpec
 import com.stripe.android.paymentsheet.elements.SimpleTextSpec
 import com.stripe.android.paymentsheet.elements.billingParams
@@ -41,58 +42,51 @@ internal val sofortMandate = MandateTextSpec(
     Color.Gray
 )
 
-private val sofortUserSelectedSave = FormSpec(
-    LayoutSpec(
-        listOf(
-            sofortNameSection,
-            sofortEmailSection,
-            sofortCountrySection,
-            SaveForFutureUseSpec(listOf(sofortNameSection, sofortEmailSection, sofortMandate)),
-            sofortMandate,
-        )
-    ),
-    // When saved this is a SEPA paymentMethod which requires SEPA requirements
-    requirements = setOf(
-        Requirement.DelayedPaymentMethodSupport,
-        Requirement.UserSelectableSave
-    ).plus(sepaDebitUserSelectedSave.requirements)
-)
-private val sofortMerchantRequiredSave = FormSpec(
-    LayoutSpec(
-        listOf(
-            sofortNameSection,
-            sofortEmailSection,
-            sofortCountrySection,
-            sofortMandate,
-        )
-    ),
-    // When saved this is a SEPA paymentMethod which requires SEPA requirements
-    requirements = setOf(
-        Requirement.DelayedPaymentMethodSupport,
-        Requirement.MerchantRequiresSave
-    ).plus(sepaDebitMerchantRequiredSave.requirements)
+private val sofortUserSelectedSave = LayoutSpec.create(
+        sofortNameSection,
+        sofortEmailSection,
+        sofortCountrySection,
+        SaveForFutureUseSpec(listOf(sofortNameSection, sofortEmailSection, sofortMandate)),
+        sofortMandate,
 )
 
-private val sofortOneTimeUse = FormSpec(
-    LayoutSpec(
-        listOf(
-            sofortCountrySection,
-        )
-    ),
-    requirements = setOf(
-        Requirement.DelayedPaymentMethodSupport,
-        Requirement.OneTimeUse
-    ),
+private val sofortMerchantRequiredSave = LayoutSpec.create(
+        sofortNameSection,
+        sofortEmailSection,
+        sofortCountrySection,
+        sofortMandate,
+)
+
+private val sofortOneTimeUse = LayoutSpec.create(
+        sofortCountrySection,
 )
 
 /**
  * This payment method is authenticated.
  */
-internal val sofort = PaymentMethodSpec(
+internal val sofort = PaymentMethodFormSpec(
     sofortParamKey,
-    listOf(
-        sofortUserSelectedSave,
-        sofortMerchantRequiredSave,
-        sofortOneTimeUse,
+    mapOf(
+        FormRequirement(
+            SaveMode.PaymentIntentAndSetupFutureUsageNotSet,
+            // When saved this is a SEPA paymentMethod which requires SEPA requirements
+            requirements = setOf(
+                Requirement.DelayedPaymentMethodSupport,
+                Requirement.Customer
+            ).plus(sepaDebitReuseRequirements)
+        ) to sofortUserSelectedSave,
+
+        // When saved this is a SEPA paymentMethod which requires SEPA requirements
+        FormRequirement(
+            SaveMode.SetupIntentOrPaymentIntentWithFutureUsageSet,
+            requirements = setOf(
+                Requirement.DelayedPaymentMethodSupport,
+            ).plus(sepaDebitReuseRequirements)
+        ) to sofortMerchantRequiredSave,
+
+        FormRequirement(
+            SaveMode.PaymentIntentAndSetupFutureUsageNotSet,
+            requirements = setOf(Requirement.DelayedPaymentMethodSupport)
+        ) to sofortOneTimeUse,
     )
 )

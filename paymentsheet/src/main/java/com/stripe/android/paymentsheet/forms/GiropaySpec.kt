@@ -1,10 +1,10 @@
 package com.stripe.android.paymentsheet.forms
 
-import com.stripe.android.paymentsheet.elements.FormSpec
+import com.stripe.android.paymentsheet.elements.FormRequirement
 import com.stripe.android.paymentsheet.elements.IdentifierSpec
 import com.stripe.android.paymentsheet.elements.LayoutSpec
-import com.stripe.android.paymentsheet.elements.PaymentMethodSpec
-import com.stripe.android.paymentsheet.elements.Requirement
+import com.stripe.android.paymentsheet.elements.PaymentMethodFormSpec
+import com.stripe.android.paymentsheet.elements.SaveMode
 import com.stripe.android.paymentsheet.elements.SectionSpec
 import com.stripe.android.paymentsheet.elements.SimpleTextSpec
 import com.stripe.android.paymentsheet.elements.billingParams
@@ -19,16 +19,12 @@ internal val giropayNameSection = SectionSpec(
     SimpleTextSpec.NAME
 )
 
-internal val giropay = PaymentMethodSpec(
+internal val giropay = PaymentMethodFormSpec(
     giropayParamKey,
-    listOf(
-        FormSpec(
-            LayoutSpec(
-                listOf(
-                    giropayNameSection
-                )
-            ),
-            requirements = setOf(Requirement.OneTimeUse)
-        )
+    mapOf(
+        FormRequirement(
+            SaveMode.PaymentIntentAndSetupFutureUsageNotSet,
+            requirements = emptySet()
+        ) to LayoutSpec.create(giropayNameSection)
     )
 )
