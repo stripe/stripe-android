@@ -48,7 +48,7 @@ class GooglePayJsonFactory constructor(
     )
 
     @Inject
-    constructor(
+    internal constructor(
         @Named(PUBLISHABLE_KEY) publishableKeyProvider: () -> String,
         @Named(STRIPE_ACCOUNT_ID) stripeAccountIdProvider: () -> String?,
         googlePayConfig: GooglePayPaymentMethodLauncher.Config

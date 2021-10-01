@@ -36,7 +36,7 @@ internal class DefaultGooglePayRepository(
 ) : GooglePayRepository {
 
     @Inject
-    constructor(
+    internal constructor(
         context: Context,
         googlePayConfig: GooglePayPaymentMethodLauncher.Config,
         logger: Logger

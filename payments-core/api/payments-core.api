@@ -136,7 +136,6 @@ public final class com/stripe/android/GooglePayJsonFactory {
 	public synthetic fun <init> (Landroid/content/Context;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun <init> (Lcom/stripe/android/GooglePayConfig;Z)V
 	public synthetic fun <init> (Lcom/stripe/android/GooglePayConfig;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public fun <init> (Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncher$Config;)V
 	public final fun createIsReadyToPayRequest ()Lorg/json/JSONObject;
 	public final fun createIsReadyToPayRequest (Lcom/stripe/android/GooglePayJsonFactory$BillingAddressParameters;)Lorg/json/JSONObject;
 	public final fun createIsReadyToPayRequest (Lcom/stripe/android/GooglePayJsonFactory$BillingAddressParameters;Ljava/lang/Boolean;)Lorg/json/JSONObject;
