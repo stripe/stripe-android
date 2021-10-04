@@ -7,9 +7,11 @@ import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.elements.FormRequirement
+import com.stripe.android.paymentsheet.elements.IntentRequirement
 import com.stripe.android.paymentsheet.elements.PaymentMethodFormSpec
-import com.stripe.android.paymentsheet.elements.Requirement
-import com.stripe.android.paymentsheet.elements.SaveMode
+import com.stripe.android.paymentsheet.elements.SdkRequirement
+import com.stripe.android.paymentsheet.elements.SetupFutureUsageRequirement
+import com.stripe.android.paymentsheet.elements.ShippingIntentRequirement
 import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
 
 /**
@@ -63,24 +65,24 @@ private fun PaymentMethodFormSpec.getSpecWithFullfilledRequirements(
     val supportedForms = this.requirementFormMapping.keys.filter {
         fullfilledRequirements(it, capabilities)
     }
-    if (supportedForms.isEmpty()) {
-        return null
-    }
 
-    // TODO: THis is jsut getting hte first accross payment methods?
-    // Prefer requirement with customer support if possible so we can
-    // show user selectable save
-    return supportedForms.firstOrNull {
-        it.saveMode == SaveMode.PaymentIntentAndSetupFutureUsageNotSet &&
-            it.requirements.contains(Requirement.Customer)
-    } ?: supportedForms.first()
+    return if (supportedForms.isEmpty()) {
+        null
+    } else {
+        // Prefer requirement with customer support if possible so we can
+        // show user selectable save
+        return supportedForms.firstOrNull {
+            (it.intentRequirement as? IntentRequirement.PaymentIntentRequirement)
+                ?.setupFutureUsage == SetupFutureUsageRequirement.createNotSet(true)
+        } ?: supportedForms.first()
+    }
 }
 
 /**
  * Capabilities are fulfilled only if all requirements are in the set of capabilities
  */
 private fun fullfilledRequirements(
-    formRequirements: FormRequirement?,
+    formRequirements: FormRequirement,
     formCapabilities: FormRequirement
 ): Boolean {
 //    // TODO: switch to use the logger
@@ -98,10 +100,26 @@ private fun fullfilledRequirements(
 //
 //    }
 
-    return formRequirements?.saveMode == formCapabilities.saveMode &&
-        !formRequirements.requirements.map {
-            formCapabilities.requirements.contains(it)
-        }.contains(false)
+    return when (formCapabilities.intentRequirement) {
+        is IntentRequirement.PaymentIntentRequirement -> {
+            if (formRequirements.intentRequirement !is IntentRequirement.PaymentIntentRequirement) {
+                false
+            } else {
+                return (formCapabilities.intentRequirement.setupFutureUsage ==
+                    formRequirements.intentRequirement.setupFutureUsage) &&
+                    (
+                        formRequirements.intentRequirement.shipping.isEmpty() ||
+                            formCapabilities.intentRequirement.shipping.containsAll(
+                                formRequirements.intentRequirement.shipping
+                            )
+                        ) &&
+                    formCapabilities.sdkRequirements.containsAll(formRequirements.sdkRequirements)
+            }
+        }
+        IntentRequirement.SetupIntentRequirement -> {
+            formCapabilities.sdkRequirements.containsAll(formRequirements.sdkRequirements)
+        }// continue
+    }
 }
 
 /**
@@ -112,55 +130,46 @@ private fun fullfilledRequirements(
 internal fun getAllCapabilities(
     stripeIntent: StripeIntent,
     config: PaymentSheet.Configuration?
-): FormRequirement {
-    val formRequirement = getSaveMode(stripeIntent, config)
-    return FormRequirement(
-        formRequirement.saveMode,
-        formRequirement.requirements.plus(
-            setOfNotNull(
-                Requirement.DelayedPaymentMethodSupport.takeIf { config?.allowsDelayedPaymentMethods == true },
-            ).plus(
-                intentShippingCapabilities(stripeIntent as? PaymentIntent)
-            )
-        )
+) = FormRequirement(
+    getIntentRequirements(stripeIntent, config),
+    setOfNotNull(
+        SdkRequirement.AllowDelayedPaymentMethods.takeIf { config?.allowsDelayedPaymentMethods == true },
     )
-}
+)
 
 /**
  * These are the capabilities that define if the intent or configuration requires one time use
  * merchant requres save through SetupIntent or PaymentIntent with setup_future_usage = on/off session
  */
-private fun getSaveMode(
+private fun getIntentRequirements(
     stripeIntent: StripeIntent,
     config: PaymentSheet.Configuration?,
 ) = when (stripeIntent) {
     is PaymentIntent -> {
+        val shippingRequirement = intentShippingCapabilities(stripeIntent)
         if (stripeIntent.setupFutureUsage == null || stripeIntent.setupFutureUsage == StripeIntent.Usage.OneTime) {
             if (config?.customer != null &&
                 allHaveKnownReuseSupport(stripeIntent.paymentMethodTypes)
             ) {
-                FormRequirement(
-                    SaveMode.PaymentIntentAndSetupFutureUsageNotSet,
-                    requirements = setOf(Requirement.Customer)
+                IntentRequirement.PaymentIntentRequirement(
+                    SetupFutureUsageRequirement.createNotSet(true),
+                    shippingRequirement
                 )
             } else {
-                FormRequirement(
-                    SaveMode.PaymentIntentAndSetupFutureUsageNotSet,
-                    requirements = emptySet()
+                IntentRequirement.PaymentIntentRequirement(
+                    SetupFutureUsageRequirement.createNotSet(false),
+                    shippingRequirement
                 )
             }
         } else {
-            FormRequirement(
-                SaveMode.SetupIntentOrPaymentIntentWithFutureUsageSet,
-                requirements = emptySet()
+            IntentRequirement.PaymentIntentRequirement(
+                SetupFutureUsageRequirement.createSet(),
+                shippingRequirement
             )
         }
     }
     is SetupIntent -> {
-        FormRequirement(
-            SaveMode.SetupIntentOrPaymentIntentWithFutureUsageSet,
-            requirements = emptySet()
-        )
+        IntentRequirement.SetupIntentRequirement
     }
 }
 
@@ -169,27 +178,27 @@ private fun getSaveMode(
  */
 private fun intentShippingCapabilities(stripeIntent: PaymentIntent?) =
     stripeIntent?.let { paymentIntent ->
-        listOfNotNull(
-            Requirement.ShippingInIntentName.takeIf {
+        setOfNotNull(
+            ShippingIntentRequirement.Name.takeIf {
                 paymentIntent.shipping?.name != null
             },
-            Requirement.ShippingInIntentAddressLine1.takeIf {
+            ShippingIntentRequirement.AddressLine1.takeIf {
                 paymentIntent.shipping?.address?.line1 != null
             },
-            Requirement.ShippingInIntentAddressLine2.takeIf {
+            ShippingIntentRequirement.AddressLine2.takeIf {
                 paymentIntent.shipping?.address?.line1 != null
             },
-            Requirement.ShippingInIntentAddressCountry.takeIf {
+            ShippingIntentRequirement.AddressCountry.takeIf {
                 paymentIntent.shipping?.address?.country != null
             },
-            Requirement.ShippingInIntentAddressState.takeIf {
+            ShippingIntentRequirement.AddressState.takeIf {
                 paymentIntent.shipping?.address?.state != null
             },
-            Requirement.ShippingInIntentAddressPostal.takeIf {
+            ShippingIntentRequirement.AddressPostal.takeIf {
                 paymentIntent.shipping?.address?.postalCode != null
             },
         )
-    } ?: emptyList()
+    } ?: emptySet()
 
 private fun allHaveKnownReuseSupport(paymentMethodsInIntent: List<String?>): Boolean {
     // The following PaymentMethods are know to work when

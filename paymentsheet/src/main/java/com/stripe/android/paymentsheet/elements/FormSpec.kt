@@ -1,8 +1,5 @@
 package com.stripe.android.paymentsheet.elements
 
-import android.os.Parcelable
-import kotlinx.parcelize.Parcelize
-
 /**
  * This class defines requirements of the payment method
  */
@@ -44,14 +41,6 @@ enum class SaveMode {
     SetupIntentOrPaymentIntentWithFutureUsageSet,
 }
 
-/**
- * This is the list of requirements for the form
- */
-@Parcelize
-internal data class FormRequirement(
-    val saveMode: SaveMode,
-    val requirements: Set<Requirement>
-) : Parcelable
 
 /**
  * This class is used to define different forms full of fields.
@@ -62,3 +51,51 @@ internal data class PaymentMethodFormSpec(
     /** Unordered list of specs **/
     val requirementFormMapping: Map<FormRequirement, LayoutSpec>
 )
+
+/**
+ * This is the list of requirements for the form
+ */
+internal data class FormRequirement(
+    val intentRequirement: IntentRequirement,
+    val sdkRequirements: Set<SdkRequirement>
+)
+
+sealed class IntentRequirement {
+
+    object SetupIntentRequirement : IntentRequirement()
+
+    internal data class PaymentIntentRequirement(
+        val setupFutureUsage: SetupFutureUsageRequirement,
+        val shipping: Set<ShippingIntentRequirement> = emptySet()
+    ) : IntentRequirement()
+}
+
+internal class SetupFutureUsageRequirement private constructor(
+    val set: Boolean,
+    val modifiable: Boolean
+) {
+    companion object {
+        fun createSet() = SetupFutureUsageRequirement(set = true, modifiable = false)
+        fun createNotSet(modifiable: Boolean) = SetupFutureUsageRequirement(set = false, modifiable)
+    }
+}
+
+internal enum class SdkRequirement {
+    ReuseMandateSupport,
+    AfterpayCancelSupport,
+    AllowDelayedPaymentMethods
+}
+
+internal enum class ShippingIntentRequirement {
+    /**
+     * Different payment method might require some subset of the address
+     * fields, so they must be individually declared
+     */
+    AddressLine1,
+    AddressLine2,
+    AddressCountry,
+    AddressState,
+    AddressPostal,
+    Name,
+
+}
