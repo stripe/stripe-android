@@ -41,6 +41,9 @@ class IbanConfigTest {
 
         assertThat(ibanConfig.determineState("CA3ABC"))
             .isInstanceOf(TextFieldStateConstants.Error.Incomplete::class.java)
+
+        assertThat(ibanConfig.determineState("NL38RABO0300065264"))
+            .isInstanceOf(TextFieldStateConstants.Error.Incomplete::class.java)
     }
 
     @Test
@@ -54,10 +57,12 @@ class IbanConfigTest {
 
     @Test
     fun `invalid IBAN is in invalid state`() {
-        assertThat(ibanConfig.determineState("NL38RABO0300065264"))
+        // invalid country
+        assertThat(ibanConfig.determineState("ABCD61190430023457320"))
             .isInstanceOf(TextFieldStateConstants.Error.Invalid::class.java)
 
-        assertThat(ibanConfig.determineState("ABCD61190430023457320"))
+        // starts with digits
+        assertThat(ibanConfig.determineState("11CD61190430023457320"))
             .isInstanceOf(TextFieldStateConstants.Error.Invalid::class.java)
     }
 }
