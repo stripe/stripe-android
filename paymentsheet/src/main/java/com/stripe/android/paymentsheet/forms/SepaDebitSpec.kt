@@ -13,7 +13,6 @@ import com.stripe.android.paymentsheet.elements.MandateTextSpec
 import com.stripe.android.paymentsheet.elements.PaymentMethodFormSpec
 import com.stripe.android.paymentsheet.elements.Requirement
 import com.stripe.android.paymentsheet.elements.SaveForFutureUseSpec
-import com.stripe.android.paymentsheet.elements.SaveMode
 import com.stripe.android.paymentsheet.elements.SdkRequirement
 import com.stripe.android.paymentsheet.elements.SectionSpec
 import com.stripe.android.paymentsheet.elements.SetupFutureUsageRequirement
@@ -90,7 +89,7 @@ internal val sepaDebit = PaymentMethodFormSpec(
             IntentRequirement.SetupIntentRequirement,
             sdkRequirements = setOf(
                 SdkRequirement.AllowDelayedPaymentMethods,
-                SdkRequirement.ReuseMandateSupport
+                SdkRequirement.MandateSupport
             )
         ) to sepaDebitMerchantRequiredSave,
 
@@ -102,7 +101,7 @@ internal val sepaDebit = PaymentMethodFormSpec(
             ),
             sdkRequirements = setOf(
                 SdkRequirement.AllowDelayedPaymentMethods,
-                SdkRequirement.ReuseMandateSupport
+                SdkRequirement.MandateSupport
             )
         ) to sepaDebitMerchantRequiredSave,
 
@@ -114,7 +113,7 @@ internal val sepaDebit = PaymentMethodFormSpec(
             ),
             sdkRequirements = setOf(
                 SdkRequirement.AllowDelayedPaymentMethods,
-                SdkRequirement.ReuseMandateSupport
+                SdkRequirement.MandateSupport
             )
         ) to sepaDebitUserSelectedSave,
 
