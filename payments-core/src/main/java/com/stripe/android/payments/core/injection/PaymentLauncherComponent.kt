@@ -13,7 +13,8 @@ import kotlin.coroutines.CoroutineContext
 @Singleton
 @Component(
     modules = [
-        PaymentLauncherModule::class
+        PaymentLauncherModule::class,
+        LoggingModule::class
     ]
 )
 internal interface PaymentLauncherComponent {

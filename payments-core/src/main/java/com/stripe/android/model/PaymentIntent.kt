@@ -281,7 +281,7 @@ data class PaymentIntent internal constructor(
 
         init {
             require(isMatch(value)) {
-                "Invalid client secret: $value"
+                "Invalid Payment Intent client secret: $value"
             }
         }
 

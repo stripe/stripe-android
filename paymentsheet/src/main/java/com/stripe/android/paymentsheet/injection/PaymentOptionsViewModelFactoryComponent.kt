@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.injection
 
 import android.content.Context
 import com.stripe.android.payments.core.injection.CoroutineContextModule
+import com.stripe.android.payments.core.injection.LoggingModule
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import com.stripe.android.paymentsheet.PaymentOptionsViewModel
@@ -16,7 +17,8 @@ import javax.inject.Singleton
         StripeRepositoryModule::class,
         PaymentSheetCommonModule::class,
         PaymentOptionsViewModelModule::class,
-        CoroutineContextModule::class
+        CoroutineContextModule::class,
+        LoggingModule::class
     ]
 )
 internal interface PaymentOptionsViewModelFactoryComponent {

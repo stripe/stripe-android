@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet.model
 
 import android.os.Parcelable
-import androidx.annotation.RestrictTo
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
 import kotlinx.parcelize.Parcelize
@@ -10,8 +9,7 @@ import java.security.InvalidParameterException
 /**
  * Represents the client secret for a [SetupIntent] or [PaymentIntent]
  */
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
-sealed class ClientSecret : Parcelable {
+internal sealed class ClientSecret : Parcelable {
     abstract val value: String
     abstract fun validate()
 }
@@ -19,9 +17,8 @@ sealed class ClientSecret : Parcelable {
 /**
  * Represents the client secret for a [PaymentIntent]
  */
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
 @Parcelize
-data class PaymentIntentClientSecret(
+internal data class PaymentIntentClientSecret(
     override val value: String
 ) : ClientSecret() {
     override fun validate() {
@@ -36,9 +33,8 @@ data class PaymentIntentClientSecret(
 /**
  * Represents the client secret for a [SetupIntent]
  */
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
 @Parcelize
-data class SetupIntentClientSecret(
+internal data class SetupIntentClientSecret(
     override val value: String
 ) : ClientSecret() {
     override fun validate() {

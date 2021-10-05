@@ -59,6 +59,9 @@ import com.stripe.android.model.parsers.SourceJsonParser
 import com.stripe.android.model.parsers.Stripe3ds2AuthResultJsonParser
 import com.stripe.android.model.parsers.StripeFileJsonParser
 import com.stripe.android.model.parsers.TokenJsonParser
+import com.stripe.android.payments.core.injection.IOContext
+import com.stripe.android.payments.core.injection.PRODUCT_USAGE
+import com.stripe.android.payments.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.utils.StripeUrlUtils
 import kotlinx.coroutines.Dispatchers
 import org.json.JSONException
@@ -67,7 +70,8 @@ import java.io.IOException
 import java.net.HttpURLConnection
 import java.security.Security
 import java.util.Locale
-import javax.inject.Provider
+import javax.inject.Inject
+import javax.inject.Named
 import kotlin.coroutines.CoroutineContext
 
 /**
@@ -75,7 +79,7 @@ import kotlin.coroutines.CoroutineContext
  */
 internal class StripeApiRepository @JvmOverloads internal constructor(
     context: Context,
-    publishableKeyProvider: Provider<String>,
+    publishableKeyProvider: () -> String,
     private val appInfo: AppInfo? = null,
     private val logger: Logger = Logger.noop(),
     private val workContext: CoroutineContext = Dispatchers.IO,
@@ -95,6 +99,26 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
     apiVersion: String = ApiVersion(betas = betas).code,
     sdkVersion: String = Stripe.VERSION
 ) : StripeRepository() {
+
+    @Inject
+    constructor(
+        appContext: Context,
+        @Named(PUBLISHABLE_KEY) publishableKeyProvider: () -> String,
+        @IOContext workContext: CoroutineContext,
+        @Named(PRODUCT_USAGE) productUsageTokens: Set<String>,
+        analyticsRequestFactory: AnalyticsRequestFactory,
+        analyticsRequestExecutor: AnalyticsRequestExecutor,
+        logger: Logger
+    ) : this(
+        context = appContext,
+        publishableKeyProvider = publishableKeyProvider,
+        logger = logger,
+        workContext = workContext,
+        productUsageTokens = productUsageTokens,
+        analyticsRequestFactory = analyticsRequestFactory,
+        analyticsRequestExecutor = analyticsRequestExecutor
+    )
+
     private val apiRequestFactory = ApiRequest.Factory(
         appInfo = appInfo,
         apiVersion = apiVersion,

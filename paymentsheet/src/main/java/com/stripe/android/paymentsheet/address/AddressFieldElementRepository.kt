@@ -19,8 +19,8 @@ internal class AddressFieldElementRepository @Inject internal constructor(
         countryFieldMap[it]
     } ?: countryFieldMap[DEFAULT_COUNTRY_CODE]
 
-    internal fun init() {
-        init(
+    init {
+        initialize(
             supportedCountries.associateWith { countryCode ->
                 "addressinfo/$countryCode.json"
             }.mapValues { (_, assetFileName) ->
@@ -34,7 +34,7 @@ internal class AddressFieldElementRepository @Inject internal constructor(
     }
 
     @VisibleForTesting
-    internal fun init(
+    internal fun initialize(
         countryAddressSchemaPair: Map<String, List<CountryAddressSchema>>
     ) {
         countryAddressSchemaPair.map { (countryCode, schemaList) ->

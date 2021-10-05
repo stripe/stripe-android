@@ -12,7 +12,7 @@ class BankRepositoryTest {
     private val bankRepository = BankRepository(mock())
     @Test
     fun `Correct supported bank is returned`() {
-        bankRepository.init(
+        bankRepository.initialize(
             mapOf(
                 SupportedBankType.Eps to
                     """
@@ -42,7 +42,7 @@ class BankRepositoryTest {
 
     @Test
     fun `Verify all supported banks are successfully read`() {
-        bankRepository.init(
+        bankRepository.initialize(
             SupportedBankType.values().associateWith { bankType ->
                 getInputStream(bankType)
             }

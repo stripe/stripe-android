@@ -13,7 +13,7 @@ internal class Stripe3dsTransactionViewModelModule {
     fun providesInitChallengeRepository(
         application: Application,
         args: Stripe3ds2TransactionContract.Args,
-        @UIContext workContext: CoroutineContext
+        @IOContext workContext: CoroutineContext
     ) = InitChallengeRepositoryFactory(
         application,
         args.stripeIntent.isLiveMode,
