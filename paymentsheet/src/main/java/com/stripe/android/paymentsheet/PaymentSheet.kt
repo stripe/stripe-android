@@ -125,7 +125,7 @@ class PaymentSheet internal constructor(
         val allowsDelayedPaymentMethods: Boolean = false
     ) : Parcelable {
         /**
-         * [Configuration] builder for easier object creation from Java.
+         * [Configuration] builder for cleaner object creation from Java.
          */
         class Builder(
             private var merchantDisplayName: String
@@ -198,7 +198,7 @@ class PaymentSheet internal constructor(
         val state: String? = null
     ) : Parcelable {
         /**
-         * [Address] builder for easier object creation from Java.
+         * [Address] builder for cleaner object creation from Java.
          */
         class Builder {
             private var city: String? = null
@@ -241,7 +241,7 @@ class PaymentSheet internal constructor(
         val phone: String? = null
     ) : Parcelable {
         /**
-         * [BillingDetails] builder for easier object creation from Java.
+         * [BillingDetails] builder for cleaner object creation from Java.
          */
         class Builder {
             private var address: Address? = null
