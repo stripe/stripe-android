@@ -64,6 +64,18 @@ public final class com/stripe/android/paymentsheet/PaymentSheet$Address : androi
 	public fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
+public final class com/stripe/android/paymentsheet/PaymentSheet$Address$Builder {
+	public static final field $stable I
+	public fun <init> ()V
+	public final fun build ()Lcom/stripe/android/paymentsheet/PaymentSheet$Address;
+	public final fun city (Ljava/lang/String;)Lcom/stripe/android/paymentsheet/PaymentSheet$Address$Builder;
+	public final fun country (Ljava/lang/String;)Lcom/stripe/android/paymentsheet/PaymentSheet$Address$Builder;
+	public final fun line1 (Ljava/lang/String;)Lcom/stripe/android/paymentsheet/PaymentSheet$Address$Builder;
+	public final fun line2 (Ljava/lang/String;)Lcom/stripe/android/paymentsheet/PaymentSheet$Address$Builder;
+	public final fun postalCode (Ljava/lang/String;)Lcom/stripe/android/paymentsheet/PaymentSheet$Address$Builder;
+	public final fun state (Ljava/lang/String;)Lcom/stripe/android/paymentsheet/PaymentSheet$Address$Builder;
+}
+
 public final class com/stripe/android/paymentsheet/PaymentSheet$BillingDetails : android/os/Parcelable {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
@@ -85,6 +97,17 @@ public final class com/stripe/android/paymentsheet/PaymentSheet$BillingDetails :
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 	public fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public final class com/stripe/android/paymentsheet/PaymentSheet$BillingDetails$Builder {
+	public static final field $stable I
+	public fun <init> ()V
+	public final fun address (Lcom/stripe/android/paymentsheet/PaymentSheet$Address$Builder;)Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetails$Builder;
+	public final fun address (Lcom/stripe/android/paymentsheet/PaymentSheet$Address;)Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetails$Builder;
+	public final fun build ()Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetails;
+	public final fun email (Ljava/lang/String;)Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetails$Builder;
+	public final fun name (Ljava/lang/String;)Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetails$Builder;
+	public final fun phone (Ljava/lang/String;)Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetails$Builder;
 }
 
 public final class com/stripe/android/paymentsheet/PaymentSheet$Configuration : android/os/Parcelable {
@@ -114,14 +137,20 @@ public final class com/stripe/android/paymentsheet/PaymentSheet$Configuration : 
 	public final fun getMerchantDisplayName ()Ljava/lang/String;
 	public final fun getPrimaryButtonColor ()Landroid/content/res/ColorStateList;
 	public fun hashCode ()I
-	public final fun setAllowsDelayedPaymentMethods (Z)V
-	public final fun setCustomer (Lcom/stripe/android/paymentsheet/PaymentSheet$CustomerConfiguration;)V
-	public final fun setDefaultBillingDetails (Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetails;)V
-	public final fun setGooglePay (Lcom/stripe/android/paymentsheet/PaymentSheet$GooglePayConfiguration;)V
-	public final fun setMerchantDisplayName (Ljava/lang/String;)V
-	public final fun setPrimaryButtonColor (Landroid/content/res/ColorStateList;)V
 	public fun toString ()Ljava/lang/String;
 	public fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public final class com/stripe/android/paymentsheet/PaymentSheet$Configuration$Builder {
+	public static final field $stable I
+	public fun <init> (Ljava/lang/String;)V
+	public final fun allowsDelayedPaymentMethods (Z)Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration$Builder;
+	public final fun build ()Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration;
+	public final fun customer (Lcom/stripe/android/paymentsheet/PaymentSheet$CustomerConfiguration;)Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration$Builder;
+	public final fun defaultBillingDetails (Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetails;)Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration$Builder;
+	public final fun googlePay (Lcom/stripe/android/paymentsheet/PaymentSheet$GooglePayConfiguration;)Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration$Builder;
+	public final fun merchantDisplayName (Ljava/lang/String;)Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration$Builder;
+	public final fun primaryButtonColor (Landroid/content/res/ColorStateList;)Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration$Builder;
 }
 
 public final class com/stripe/android/paymentsheet/PaymentSheet$CustomerConfiguration : android/os/Parcelable {
