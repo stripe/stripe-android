@@ -15,7 +15,6 @@ import androidx.fragment.app.viewModels
 import com.stripe.android.paymentsheet.StripeTheme
 import com.stripe.android.paymentsheet.elements.Form
 import com.stripe.android.paymentsheet.forms.FormViewModel
-import com.stripe.android.paymentsheet.forms.getForm
 import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
 
 /**
@@ -26,15 +25,35 @@ internal class ComposeFormDataCollectionFragment : Fragment() {
     private val formLayout by lazy {
         val requireNotNull = requireNotNull(
             requireArguments().getParcelable<FormFragmentArguments>(EXTRA_CONFIG)?.let {
-                it.supportedPaymentMethod.formSpec.getForm(it.capabilities)
+                it.paymentMethod.formSpec
             }
         )
         requireNotNull
     }
+
+    private val showCheckbox by lazy {
+        val requireNotNull = requireNotNull(
+            requireArguments().getParcelable<FormFragmentArguments>(EXTRA_CONFIG)?.let {
+                it.showCheckbox
+            }
+        )
+        requireNotNull
+    }
+
+    private val showCheckboxControlledFields by lazy {
+        val requireNotNull = requireNotNull(
+            requireArguments().getParcelable<FormFragmentArguments>(EXTRA_CONFIG)?.let {
+                it.showCheckboxControlledFields
+            }
+        )
+        requireNotNull
+    }
+
     val paramKeySpec by lazy {
         requireNotNull(
-            requireArguments().getParcelable<FormFragmentArguments>(EXTRA_CONFIG)
-                ?.supportedPaymentMethod?.formSpec?.paramKey
+            requireArguments().getParcelable<FormFragmentArguments>(EXTRA_CONFIG)?.let {
+                it.paymentMethod.paramKey
+            }
         )
     }
 

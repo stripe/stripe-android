@@ -33,9 +33,8 @@ import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
 import com.stripe.android.paymentsheet.analytics.EventReporter
-import com.stripe.android.paymentsheet.forms.getSupportedPaymentMethods
 import com.stripe.android.paymentsheet.elements.ResourceRepository
-import com.stripe.android.paymentsheet.forms.getSupportedSavedCustomerCards
+import com.stripe.android.paymentsheet.forms.getSupportedSavedCustomerPMs
 import com.stripe.android.paymentsheet.injection.DaggerPaymentSheetLauncherComponent
 import com.stripe.android.paymentsheet.injection.PaymentSheetViewModelModule
 import com.stripe.android.paymentsheet.injection.PaymentSheetViewModelSubcomponent
@@ -226,7 +225,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         viewModelScope.launch {
             runCatching {
                 customerConfig?.let { customerConfig ->
-                    getSupportedSavedCustomerCards(
+                    getSupportedSavedCustomerPMs(
                         stripeIntent,
                         config
                     ).map {

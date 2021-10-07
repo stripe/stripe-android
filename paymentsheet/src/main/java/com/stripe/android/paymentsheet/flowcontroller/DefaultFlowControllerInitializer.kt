@@ -8,7 +8,7 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.core.injection.IOContext
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PrefsRepository
-import com.stripe.android.paymentsheet.forms.getSupportedSavedCustomerCards
+import com.stripe.android.paymentsheet.forms.getSupportedSavedCustomerPMs
 import com.stripe.android.paymentsheet.model.ClientSecret
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
@@ -24,9 +24,9 @@ import kotlin.coroutines.CoroutineContext
 @Singleton
 internal class DefaultFlowControllerInitializer @Inject constructor(
     private val prefsRepositoryFactory: @JvmSuppressWildcards
-    (PaymentSheet.CustomerConfiguration?) -> PrefsRepository,
+        (PaymentSheet.CustomerConfiguration?) -> PrefsRepository,
     private val googlePayRepositoryFactory: @JvmSuppressWildcards
-    (GooglePayEnvironment) -> GooglePayRepository,
+        (GooglePayEnvironment) -> GooglePayRepository,
     private val stripeIntentRepository: StripeIntentRepository,
     private val stripeIntentValidator: StripeIntentValidator,
     private val customerRepository: CustomerRepository,
@@ -80,7 +80,7 @@ internal class DefaultFlowControllerInitializer @Inject constructor(
             retrieveStripeIntent(clientSecret)
         }.fold(
             onSuccess = { stripeIntent ->
-                val paymentMethodTypes = getSupportedSavedCustomerCards(
+                val paymentMethodTypes = getSupportedSavedCustomerPMs(
                     stripeIntent,
                     config,
                 ).map {

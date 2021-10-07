@@ -4,18 +4,12 @@ import androidx.compose.ui.graphics.Color
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.elements.AddressSpec
 import com.stripe.android.paymentsheet.elements.EmailSpec
-import com.stripe.android.paymentsheet.elements.FormRequirement
 import com.stripe.android.paymentsheet.elements.IbanSpec
 import com.stripe.android.paymentsheet.elements.IdentifierSpec
-import com.stripe.android.paymentsheet.elements.IntentRequirement
 import com.stripe.android.paymentsheet.elements.LayoutSpec
 import com.stripe.android.paymentsheet.elements.MandateTextSpec
-import com.stripe.android.paymentsheet.elements.PaymentMethodFormSpec
-import com.stripe.android.paymentsheet.elements.Requirement
 import com.stripe.android.paymentsheet.elements.SaveForFutureUseSpec
-import com.stripe.android.paymentsheet.elements.SdkRequirement
 import com.stripe.android.paymentsheet.elements.SectionSpec
-import com.stripe.android.paymentsheet.elements.SetupFutureUsageRequirement
 import com.stripe.android.paymentsheet.elements.SimpleTextSpec
 import com.stripe.android.paymentsheet.elements.billingParams
 
@@ -52,80 +46,11 @@ internal val sepaBillingSection = SectionSpec(
     R.string.billing_details
 )
 
-internal val sepaDebitUserSelectedSave = LayoutSpec.create(
+internal val sepaDebitForm = LayoutSpec.create(
     sepaDebitNameSection,
     sepaDebitEmailSection,
     sepaDebitIbanSection,
     sepaBillingSection,
     SaveForFutureUseSpec(listOf(sepaDebitMandate)),
     sepaDebitMandate,
-)
-
-internal val sepaDebitMerchantRequiredSave = LayoutSpec.create(
-    sepaDebitNameSection,
-    sepaDebitEmailSection,
-    sepaDebitIbanSection,
-    sepaBillingSection,
-    sepaDebitMandate,
-)
-
-internal val sepaDebitOneTimeUse = LayoutSpec.create(
-    sepaDebitNameSection,
-    sepaDebitEmailSection,
-    sepaDebitIbanSection,
-    sepaBillingSection,
-)
-
-internal val sepaDebitReuseRequirements = setOf(
-    Requirement.DelayedPaymentMethodSupport,
-    Requirement.ReusableMandateSupport
-)
-
-internal val sepaDebit = PaymentMethodFormSpec(
-    sepaDebitParamKey,
-    mapOf(
-        // SetupIntent
-        FormRequirement(
-            IntentRequirement.SetupIntentRequirement,
-            sdkRequirements = setOf(
-                SdkRequirement.AllowDelayedPaymentMethods,
-                SdkRequirement.MandateSupport
-            )
-        ) to sepaDebitMerchantRequiredSave,
-
-        // PaymentIntent SFU = createSet
-        FormRequirement(
-            IntentRequirement.PaymentIntentRequirement(
-                setupFutureUsage = SetupFutureUsageRequirement.createSet(),
-                shipping = false
-            ),
-            sdkRequirements = setOf(
-                SdkRequirement.AllowDelayedPaymentMethods,
-                SdkRequirement.MandateSupport
-            )
-        ) to sepaDebitMerchantRequiredSave,
-
-        // PaymentIntent SFU = createNotSet(modifiable)
-        FormRequirement(
-            IntentRequirement.PaymentIntentRequirement(
-                setupFutureUsage = SetupFutureUsageRequirement.createNotSet(modifiable = true),
-                shipping = false
-            ),
-            sdkRequirements = setOf(
-                SdkRequirement.AllowDelayedPaymentMethods,
-                SdkRequirement.MandateSupport
-            )
-        ) to sepaDebitUserSelectedSave,
-
-        // PaymentIntent SFU = createNotSet(modifiable)
-        FormRequirement(
-            IntentRequirement.PaymentIntentRequirement(
-                setupFutureUsage = SetupFutureUsageRequirement.createNotSet(modifiable = false),
-                shipping = false
-            ),
-            sdkRequirements = setOf(
-                SdkRequirement.AllowDelayedPaymentMethods
-            )
-        ) to sepaDebitOneTimeUse
-    )
 )

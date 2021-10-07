@@ -3,7 +3,6 @@ package com.stripe.android.paymentsheet.paymentdatacollection
 import android.os.Parcelable
 import com.stripe.android.payments.core.injection.InjectorKey
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.elements.FormRequirement
 import com.stripe.android.paymentsheet.elements.IdentifierSpec
 import com.stripe.android.paymentsheet.model.Amount
 import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
@@ -11,8 +10,9 @@ import kotlinx.parcelize.Parcelize
 
 @Parcelize
 internal data class FormFragmentArguments(
-    val supportedPaymentMethod: SupportedPaymentMethod,
-    val capabilities: FormRequirement,
+    val paymentMethod: SupportedPaymentMethod,
+    val showCheckbox: Boolean,
+    val showCheckboxControlledFields: Boolean,
     val merchantName: String,
     val amount: Amount? = null,
     val billingDetails: PaymentSheet.BillingDetails? = null,

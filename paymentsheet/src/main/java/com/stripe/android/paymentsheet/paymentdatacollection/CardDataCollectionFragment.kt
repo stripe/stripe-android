@@ -25,8 +25,6 @@ import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.databinding.FragmentPaymentsheetAddCardBinding
 import com.stripe.android.paymentsheet.databinding.StripeHorizontalDividerBinding
 import com.stripe.android.paymentsheet.databinding.StripeVerticalDividerBinding
-import com.stripe.android.paymentsheet.elements.Requirement
-import com.stripe.android.paymentsheet.elements.SaveMode
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.ui.BillingAddressView
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
@@ -325,8 +323,7 @@ internal class CardDataCollectionFragment<ViewModelType : BaseSheetViewModel<*>>
         )?.let { args ->
             saveCardCheckbox.isChecked = true
             saveCardCheckbox.isVisible =
-                args.capabilities.requirements.contains(Requirement.Customer) &&
-                    args.capabilities.saveMode == SaveMode.PaymentIntentAndSetupFutureUsageNotSet
+                args.showCheckbox
         }
         sheetViewModel.newCard?.shouldSavePaymentMethod?.also {
             if (saveCardCheckbox.isVisible) {

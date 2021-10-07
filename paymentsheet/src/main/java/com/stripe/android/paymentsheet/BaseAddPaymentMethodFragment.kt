@@ -19,7 +19,7 @@ import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.databinding.FragmentPaymentsheetAddPaymentMethodBinding
 import com.stripe.android.paymentsheet.elements.IdentifierSpec
 import com.stripe.android.paymentsheet.forms.FormFieldValues
-import com.stripe.android.paymentsheet.forms.getAllCapabilities
+import com.stripe.android.paymentsheet.forms.getPMAddForm
 import com.stripe.android.paymentsheet.model.Amount
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
@@ -228,9 +228,12 @@ internal abstract class BaseAddPaymentMethodFragment(
             @InjectorKey injectorKey: String
         ): FormFragmentArguments {
 
+            val layoutFormDescriptor = getPMAddForm(showPaymentMethod, stripeIntent, config)
+
             return FormFragmentArguments(
-                supportedPaymentMethod = showPaymentMethod,
-                capabilities = getAllCapabilities(stripeIntent, config),
+                paymentMethod = showPaymentMethod,
+                showCheckbox = layoutFormDescriptor.showCheckbox,
+                showCheckboxControlledFields = layoutFormDescriptor.showCheckboxControlledFields,
                 merchantName = merchantName,
                 amount = amount,
                 billingDetails = billingAddress?.let {

@@ -412,7 +412,7 @@ class PaymentSheetAddPaymentMethodFragmentTest {
             )
                 .isEqualTo(
                     COMPOSE_FRAGMENT_ARGS.copy(
-                        supportedPaymentMethod = SupportedPaymentMethod.Card,
+                        layoutFormDescriptor = SupportedPaymentMethod.Card,
                         amount = createAmount(PI_OFF_SESSION),
                         capabilities = getAllCapabilities(stripeIntent, args.config),
                         billingDetails = null

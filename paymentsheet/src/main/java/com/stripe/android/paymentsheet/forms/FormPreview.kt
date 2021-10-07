@@ -8,10 +8,7 @@ import com.stripe.android.paymentsheet.address.AddressFieldElementRepository
 import com.stripe.android.paymentsheet.address.parseAddressesSchema
 import com.stripe.android.paymentsheet.elements.BankRepository
 import com.stripe.android.paymentsheet.elements.FormInternal
-import com.stripe.android.paymentsheet.elements.FormRequirement
-import com.stripe.android.paymentsheet.elements.Requirement
 import com.stripe.android.paymentsheet.elements.ResourceRepository
-import com.stripe.android.paymentsheet.elements.SaveMode
 import com.stripe.android.paymentsheet.elements.SupportedBankType
 import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
 import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
@@ -25,7 +22,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 @SuppressLint("VisibleForTests")
 @Composable
 internal fun FormInternalPreview() {
-    val formElements = sofort.requirementFormMapping.values.first().items
+    val formElements = sofortForm.items
     val addressFieldElementRepository = AddressFieldElementRepository()
     val bankRepository = BankRepository()
 
@@ -53,12 +50,8 @@ internal fun FormInternalPreview() {
             ),
             FormFragmentArguments(
                 SupportedPaymentMethod.Bancontact,
-                capabilities = FormRequirement(
-                    SaveMode.PaymentIntentAndSetupFutureUsageNotSet,
-                    requirements = setOf(
-                        Requirement.DelayedPaymentMethodSupport,
-                    )
-                ),
+                showCheckbox = false,
+                showCheckboxControlledFields = true,
                 merchantName = "Merchant, Inc.",
                 billingDetails = PaymentSheet.BillingDetails(
                     address = PaymentSheet.Address(

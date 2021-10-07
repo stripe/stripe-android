@@ -80,6 +80,12 @@ internal class FormViewModel @Inject internal constructor(
 
     internal lateinit var elements: List<FormElement>
 
+    private val saveForFutureUseVisible = MutableStateFlow(config.showCheckbox)
+
+    internal fun setSaveForFutureUseVisibility(isVisible: Boolean) {
+        saveForFutureUseVisible.value = isVisible
+    }
+
     internal fun setSaveForFutureUse(value: Boolean) {
         elements
             .filterIsInstance<SaveForFutureUseElement>()
@@ -91,7 +97,7 @@ internal class FormViewModel @Inject internal constructor(
         .firstOrNull()
 
     internal val saveForFutureUse = saveForFutureUseElement?.controller?.saveForFutureUse
-        ?: MutableStateFlow(false)
+        ?: MutableStateFlow(config.showCheckboxControlledFields)
 
     private val sectionToFieldIdentifierMap = layout.items
         .filterIsInstance<SectionSpec>()
@@ -102,20 +108,30 @@ internal class FormViewModel @Inject internal constructor(
         }
 
     internal val hiddenIdentifiers =
-        (saveForFutureUseElement?.controller?.hiddenIdentifiers ?: MutableStateFlow(emptyList()))
-            .map { hiddenIdentifiers ->
+        combine(
+            saveForFutureUseVisible,
+            saveForFutureUseElement?.controller?.hiddenIdentifiers
+                ?: MutableStateFlow(emptyList())
+        ) { showFutureUse, hiddenIdentifiers ->
 
-                // For hidden *section* identifiers, list of identifiers of elements in the section
-                hiddenIdentifiers.plus(
-                    sectionToFieldIdentifierMap
-                        .filter { idControllerPair ->
-                            hiddenIdentifiers.contains(idControllerPair.key)
-                        }
-                        .flatMap { sectionToSectionFieldEntry ->
-                            sectionToSectionFieldEntry.value
-                        }
-                )
+            // For hidden *section* identifiers, list of identifiers of elements in the section
+            val identifiers = sectionToFieldIdentifierMap
+                .filter { idControllerPair ->
+                    hiddenIdentifiers.contains(idControllerPair.key)
+                }
+                .flatMap { sectionToSectionFieldEntry ->
+                    sectionToSectionFieldEntry.value
+                }
+
+            if (!showFutureUse && saveForFutureUseElement != null) {
+                hiddenIdentifiers
+                    .plus(identifiers)
+                    .plus(saveForFutureUseElement.identifier)
+            } else {
+                hiddenIdentifiers
+                    .plus(identifiers)
             }
+        }
 
     // Mandate is showing if it is an element of the form and it isn't hidden
     internal val showingMandate = hiddenIdentifiers.map {

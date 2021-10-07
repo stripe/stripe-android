@@ -91,7 +91,9 @@ internal class FormViewModelTest {
         val factory = FormViewModel.Factory(
             config,
             ApplicationProvider.getApplicationContext<Application>().resources,
-            sofort.requirementFormMapping.values.first()
+            sofortForm.requirementFormMapping.values.first(),
+            showCheckbox,
+            showCheckboxControlledFields
         )
         val factorySpy = spy(factory)
         val createdViewModel = factorySpy.create(FormViewModel::class.java)
@@ -108,7 +110,9 @@ internal class FormViewModelTest {
         val factory = FormViewModel.Factory(
             config,
             ApplicationProvider.getApplicationContext<Application>().resources,
-            sofort.requirementFormMapping.values.first()
+            sofortForm.requirementFormMapping.values.first(),
+            showCheckbox,
+            showCheckboxControlledFields
         )
         val factorySpy = spy(factory)
         assertNotNull(factorySpy.create(FormViewModel::class.java))
@@ -261,7 +265,7 @@ internal class FormViewModelTest {
              * Using sofort as a complex enough example to test the form view model class.
              */
             val formViewModel = FormViewModel(
-                sofort.requirementFormMapping.values.first(),
+                sofortForm.requirementFormMapping.values.first(),
                 COMPOSE_FRAGMENT_ARGS.copy(
                     billingDetails = null,
                     capabilities = FormRequirement(
@@ -308,7 +312,7 @@ internal class FormViewModelTest {
              * Using sepa debit as a complex enough example to test the address portion.
              */
             val formViewModel = FormViewModel(
-                sepaDebit.requirementFormMapping.values.first(),
+                sepaDebitForm.requirementFormMapping.values.first(),
                 COMPOSE_FRAGMENT_ARGS.copy(
                     capabilities = FormRequirement(
                         SaveMode.SetupIntentOrPaymentIntentWithFutureUsageSet,
@@ -380,7 +384,7 @@ internal class FormViewModelTest {
              * Using sepa debit as a complex enough example to test the address portion.
              */
             val formViewModel = FormViewModel(
-                sepaDebit.requirementFormMapping.values.first(),
+                sepaDebitForm.requirementFormMapping.values.first(),
                 COMPOSE_FRAGMENT_ARGS.copy(
                     billingDetails = null
                 ),
