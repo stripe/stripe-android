@@ -40,8 +40,8 @@ class RequirementMatcherTest {
                             formExists = formDescriptor != null,
                             formShowsSaveCheckbox = formDescriptor?.showCheckbox,
                             formShowsCheckboxControlledFields = formDescriptor?.showCheckboxControlledFields,
-                            supportsAdding =// lpm == SupportedPaymentMethod.Card
-                            //TODO: When add in more PMS
+                            supportsAdding = // lpm == SupportedPaymentMethod.Card
+                            // TODO: When add in more PMS
                             getPMsToAdd(
                                 testInput.getIntent(lpm), testInput.getConfig()
                             ).contains(lpm)
