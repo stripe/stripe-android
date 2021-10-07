@@ -10,10 +10,12 @@ import android.widget.ScrollView
 import android.widget.TextView
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
+import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.appbar.MaterialToolbar
+import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.stripe.android.paymentsheet.BottomSheetController
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
@@ -21,7 +23,13 @@ import com.stripe.android.view.KeyboardController
 
 internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
     abstract val viewModel: BaseSheetViewModel<*>
-    abstract val bottomSheetController: BottomSheetController
+
+    @VisibleForTesting
+    internal val bottomSheetBehavior by lazy { BottomSheetBehavior.from(bottomSheet) }
+
+    protected val bottomSheetController: BottomSheetController by lazy {
+        BottomSheetController(bottomSheetBehavior = bottomSheetBehavior)
+    }
 
     abstract val rootView: ViewGroup
     abstract val bottomSheet: ViewGroup

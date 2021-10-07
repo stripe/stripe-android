@@ -144,7 +144,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
         }
     }
 
-    val fragmentConfig = MediatorLiveData<FragmentConfig?>().apply {
+    val fragmentConfig = MediatorLiveData<Event<FragmentConfig?>>().apply {
         listOf(
             savedSelection,
             stripeIntent,
@@ -152,7 +152,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
             isGooglePayReady
         ).forEach { source ->
             addSource(source) {
-                value = createFragmentConfig()
+                value = Event(createFragmentConfig())
             }
         }
     }.distinctUntilChanged()

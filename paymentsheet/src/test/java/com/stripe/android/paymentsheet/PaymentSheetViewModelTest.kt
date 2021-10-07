@@ -762,7 +762,8 @@ internal class PaymentSheetViewModelTest {
         viewModel._isGooglePayReady.value = true
 
         val configs = mutableListOf<FragmentConfig>()
-        viewModel.fragmentConfig.observeForever { config ->
+        viewModel.fragmentConfig.observeForever { event ->
+            val config = event.getContentIfNotHandled()
             if (config != null) {
                 configs.add(config)
             }

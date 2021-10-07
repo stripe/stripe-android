@@ -17,8 +17,7 @@ import androidx.fragment.app.commit
 import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.appbar.MaterialToolbar
-import com.google.android.material.bottomsheet.BottomSheetBehavior
-import com.stripe.android.paymentsheet.databinding.StripeActivityPaymentOptionsBinding
+import com.stripe.android.paymentsheet.databinding.ActivityPaymentOptionsBinding
 import com.stripe.android.paymentsheet.ui.AnimationConstants
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.ui.PrimaryButton
@@ -29,7 +28,7 @@ import com.stripe.android.paymentsheet.ui.PrimaryButton
 internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>() {
     @VisibleForTesting
     internal val viewBinding by lazy {
-        StripeActivityPaymentOptionsBinding.inflate(layoutInflater)
+        ActivityPaymentOptionsBinding.inflate(layoutInflater)
     }
 
     @VisibleForTesting
@@ -43,13 +42,6 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
 
     private val starterArgs: PaymentOptionContract.Args? by lazy {
         PaymentOptionContract.Args.fromIntent(intent)
-    }
-
-    @VisibleForTesting
-    internal val bottomSheetBehavior by lazy { BottomSheetBehavior.from(bottomSheet) }
-
-    override val bottomSheetController: BottomSheetController by lazy {
-        BottomSheetController(bottomSheetBehavior = bottomSheetBehavior)
     }
 
     private val fragmentContainerId: Int
@@ -98,7 +90,8 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
             }
         }
 
-        viewModel.fragmentConfig.observe(this) { config ->
+        viewModel.fragmentConfig.observe(this) { event ->
+            val config = event.getContentIfNotHandled()
             if (config != null) {
                 viewModel.transitionTo(
                     // It would be nice to see this condition move into the PaymentOptionsListFragment

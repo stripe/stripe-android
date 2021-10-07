@@ -187,20 +187,23 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     }
 
     /**
-     * Fetch the [StripeIntent] for the client secret received as parameter. If successful,
-     * continues through validation and fetching the saved payment methods for the customer.
+     * Fetch the [StripeIntent] for the client secret received in the initialization arguments, if
+     * not fetched yet. If successful, continues through validation and fetching the saved payment
+     * methods for the customer.
      */
-    fun fetchStripeIntent() {
-        viewModelScope.launch {
-            runCatching {
-                stripeIntentRepository.get(args.clientSecret)
-            }.fold(
-                onSuccess = ::onStripeIntentFetchResponse,
-                onFailure = {
-                    setStripeIntent(null)
-                    onFatal(it)
-                }
-            )
+    internal fun fetchStripeIntent() {
+        if (stripeIntent.value == null) {
+            viewModelScope.launch {
+                runCatching {
+                    stripeIntentRepository.get(args.clientSecret)
+                }.fold(
+                    onSuccess = ::onStripeIntentFetchResponse,
+                    onFailure = {
+                        setStripeIntent(null)
+                        onFatal(it)
+                    }
+                )
+            }
         }
     }
 

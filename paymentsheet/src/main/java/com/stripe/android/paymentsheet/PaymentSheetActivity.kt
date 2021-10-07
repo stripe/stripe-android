@@ -32,33 +32,26 @@ import java.security.InvalidParameterException
 
 internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
     @VisibleForTesting
+    internal val viewBinding by lazy {
+        ActivityPaymentSheetBinding.inflate(layoutInflater)
+    }
+
+    @VisibleForTesting
     internal var viewModelFactory: ViewModelProvider.Factory =
         PaymentSheetViewModel.Factory(
             { application },
             { requireNotNull(starterArgs) }
         )
 
-    @VisibleForTesting
-    internal val bottomSheetBehavior by lazy { BottomSheetBehavior.from(bottomSheet) }
-
-    override val bottomSheetController: BottomSheetController by lazy {
-        BottomSheetController(bottomSheetBehavior = bottomSheetBehavior)
-    }
-
-    @VisibleForTesting
-    internal val viewBinding by lazy {
-        ActivityPaymentSheetBinding.inflate(layoutInflater)
-    }
-
     override val viewModel: PaymentSheetViewModel by viewModels { viewModelFactory }
-
-    private val fragmentContainerId: Int
-        @IdRes
-        get() = viewBinding.fragmentContainer.id
 
     private val starterArgs: PaymentSheetContract.Args? by lazy {
         PaymentSheetContract.Args.fromIntent(intent)
     }
+
+    private val fragmentContainerId: Int
+        @IdRes
+        get() = viewBinding.fragmentContainer.id
 
     override val rootView: ViewGroup by lazy { viewBinding.root }
     override val bottomSheet: ViewGroup by lazy { viewBinding.bottomSheet }
@@ -140,7 +133,8 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
             }
         }
 
-        viewModel.fragmentConfig.observe(this) { config ->
+        viewModel.fragmentConfig.observe(this) { event ->
+            val config = event.getContentIfNotHandled()
             if (config != null) {
                 val target = if (viewModel.paymentMethods.value.isNullOrEmpty()) {
                     PaymentSheetViewModel.TransitionTarget.AddPaymentMethodSheet(config)
@@ -229,11 +223,6 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
                     )
                 }
             }
-        }
-
-        fragmentContainerParent.doOnNextLayout {
-            // Update visibility on next layout to avoid a two-step UI update
-            appbar.isVisible = true
         }
     }
 
