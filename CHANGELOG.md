@@ -1,4 +1,11 @@
 # CHANGELOG
+## 18.0.0 - 2021-10-07
+This release includes several bug fixes, introduces a test mode indicator, makes a builder class for [payment sheet configuration](https://github.com/stripe/stripe-android/blob/master/paymentsheet/src/main/java/com/stripe/android/paymentsheet/PaymentSheet.kt#L130) and makes config properties immutable. 
+* [4202](https://github.com/stripe/stripe-android/pull/4202) CardInputWidget.CardValidCallback will consider the postal code in validation
+* [4183](https://github.com/stripe/stripe-android/pull/4183) Fix address pre-populate on line 1
+* [4192](https://github.com/stripe/stripe-android/pull/4192) Remove internal on CardUtils
+* [4214](https://github.com/stripe/stripe-android/pull/4214) Create test mode indicator
+* [4265](https://github.com/stripe/stripe-android/pull/4265) Make config properties immutable, create Builder
 ## 17.2.0 - 2021-09-10
 This release includes several bug fixes, introduces [PaymentLauncher](https://github.com/stripe/stripe-android/blob/master/payments-core/src/main/java/com/stripe/android/payments/paymentlauncher/PaymentLauncher.kt) as a replacement of [https://github.com/stripe/stripe-android/blob/master/payments-core/src/main/java/com/stripe/android/Stripe.kt](https://github.com/stripe/stripe-android/blob/master/payments-core/src/main/java/com/stripe/android/Stripe.kt) see example in [StripeIntentActivity](https://github.com/stripe/stripe-android/blob/master/example/src/main/java/com/stripe/example/activity/StripeIntentActivity.kt) on [line 28](https://github.com/stripe/stripe-android/blob/master/example/src/main/java/com/stripe/example/activity/StripeIntentActivity.kt#L28)
 * [4157](https://github.com/stripe/stripe-android/pull/4157) Pass GooglePayLauncher arguments to DefaultGooglePayRepository
