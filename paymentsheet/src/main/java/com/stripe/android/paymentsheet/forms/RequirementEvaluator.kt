@@ -30,7 +30,6 @@ internal abstract class RequirementEvaluator {
         config: PaymentSheet.Configuration?
     ): Boolean
 
-
     fun allHaveKnownReuseSupport(paymentMethodsInIntent: List<String?>): Boolean {
         // The following PaymentMethods are know to work when
         // PaymentIntent.setup_future_usage = on/off session

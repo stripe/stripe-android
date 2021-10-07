@@ -5,6 +5,3 @@ internal data class LayoutFormDescriptor(
     val showCheckbox: Boolean,
     val showCheckboxControlledFields: Boolean
 )
-
-
-

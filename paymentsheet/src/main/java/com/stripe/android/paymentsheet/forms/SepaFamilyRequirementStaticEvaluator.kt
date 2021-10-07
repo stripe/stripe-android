@@ -40,5 +40,4 @@ internal abstract class SepaFamilyRequirementStaticEvaluator : RequirementEvalua
         stripeIntent: StripeIntent,
         config: PaymentSheet.Configuration?
     ) = false
-
 }

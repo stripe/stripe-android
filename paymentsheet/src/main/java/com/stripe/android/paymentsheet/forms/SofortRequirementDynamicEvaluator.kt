@@ -20,5 +20,5 @@ internal object SofortRequirementDynamicEvaluator : RequirementDynamicEvaluator(
      * So to simplify the description to users, we will not show SI as available.
      */
     siRequirements = null
-        // once supported it should be: setOf(Delayed)
+    // once supported it should be: setOf(Delayed)
 )

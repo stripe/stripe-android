@@ -5,21 +5,21 @@ import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.PaymentSheet
 
-sealed interface Requirement
-sealed interface PIRequirement : Requirement
-sealed interface SIRequirement : Requirement
-sealed interface CustomerSavedPMRequirement : Requirement
+internal sealed interface Requirement
+internal sealed interface PIRequirement : Requirement
+internal sealed interface SIRequirement : Requirement
+internal sealed interface CustomerSavedPMRequirement : Requirement
 
 /**
  * This requirement is dependent on the configuration passed by the app to the SDK.
  */
-object Delayed : PIRequirement, SIRequirement, CustomerSavedPMRequirement
+internal object Delayed : PIRequirement, SIRequirement, CustomerSavedPMRequirement
 
 /**
  * This requirement is dependent on field set in the intent.  Shipping is not present
  * on SetupIntents so this is only a PIRequirement
  */
-sealed class ShippingIntentRequirement : PIRequirement {
+internal sealed class ShippingIntentRequirement : PIRequirement {
     /**
      * Different payment method might require some subset of the address
      * fields, so they must be individually declared
@@ -64,27 +64,6 @@ internal sealed class RequirementDynamicEvaluator(
      *   this must be an emptySet.
      */
     val siRequirements: Set<SIRequirement>?,
-
-    /**
-     * These are the requirements to be able to use an LPM after it has been saved/associated
-     * to/with a customer.  When retrieving saved payment methods for a customer we will
-     * only retrieve and show those that satisfy this requirement and the
-     * [PaymentMethodFormSpec.piRequirement] or [PaymentMethodFormSpec.siRequirement]
-     *    - In cases where the saved payment method is different from
-     * the original PM, these requirements maybe be different from the SI Requirements.
-     * One example is that iDEAL is not a delayed payment method so the SI requirement does not contain
-     * Delayed, but iDEAL is saved as a SEPA payment method, which is delayed.
-     *    - Cannot be null if you want to use setup intent, or sfu set by merchant or
-     * by user.  It can be an empty set if you have no extra requirements.
-     *    - It is possible that there are payment methods saved from another Stripe integration
-     *    with the merchant, so even though it can't be saved by PaymentSheet doesn't mean
-     *    it won't be saved through another mechanism TODO: What does this mean for ideal/sofort
-     */
-
-    // Bancontact, sofort and ideal payments cannot be attached to a customer, it feels
-    // more like this should be
-
-    //val customerSavedPMRequirement: Set<CustomerSavedPMRequirement>?
 ) : RequirementEvaluator() {
 
     override fun supportsCustomerSavedPM(
@@ -125,10 +104,7 @@ internal sealed class RequirementDynamicEvaluator(
                 is ShippingIntentRequirement -> requirement.isRequirementMet(stripeIntent)
             }
         }?.contains(false) != true
-
-
 }
-
 
 internal fun ShippingIntentRequirement.isRequirementMet(
     stripeIntent: StripeIntent

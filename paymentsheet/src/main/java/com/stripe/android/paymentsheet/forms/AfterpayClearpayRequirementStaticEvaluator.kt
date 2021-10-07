@@ -3,7 +3,8 @@ package com.stripe.android.paymentsheet.forms
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.PaymentSheet
 
-internal object AfterpayClearpayRequirementStaticEvaluator : OneTimeUseRequirementStaticEvaluator() {
+internal object AfterpayClearpayRequirementStaticEvaluator :
+    OneTimeUseRequirementStaticEvaluator() {
     override fun supportsPISfuNotSetable(
         stripeIntent: StripeIntent,
         config: PaymentSheet.Configuration?

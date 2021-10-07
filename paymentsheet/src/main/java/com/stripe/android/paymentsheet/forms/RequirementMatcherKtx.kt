@@ -52,7 +52,7 @@ internal fun getPMsToAdd(
         stripeIntent,
         config
     ) != null
-}//TODO.filter { it == SupportedPaymentMethod.Card }
+} // TODO.filter { it == SupportedPaymentMethod.Card }
     .toList()
 
 @VisibleForTesting
@@ -123,4 +123,3 @@ private fun isSetupFutureUsageSet(setupFutureUsage: StripeIntent.Usage?) =
         StripeIntent.Usage.OneTime -> false
         null -> false
     }
-

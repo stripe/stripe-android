@@ -49,7 +49,6 @@ class PaymentMethodFormSpecKtxTest {
                             testInput,
                             testOutput
                         )
-
                     }
 
                 val newScenarios = format.encodeToString(newScenariosList).replace(" ", "").replace("\n", "")
@@ -92,7 +91,6 @@ class PaymentMethodFormSpecKtxTest {
         return scenarios
     }
 
-
     @Serializable
     internal data class SetupIntentTestCase(
         val testInput: SetupIntentTestInput,
@@ -124,7 +122,6 @@ class PaymentMethodFormSpecKtxTest {
         }
 
         fun toCsv() = "$hasCustomer, $allowsDelayedPayment, $intentSetupFutureUsage, $intentHasShipping, ${intentLpms.joinToString("/")}"
-
 
         fun getIntent(lpm: SupportedPaymentMethod) = when (intentHasShipping) {
             false ->

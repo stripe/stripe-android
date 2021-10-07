@@ -539,22 +539,6 @@ public final class com/stripe/android/paymentsheet/elements/ComposableSingletons
 	public final fun getLambda-1$paymentsheet_release ()Lkotlin/jvm/functions/Function3;
 }
 
-public final class com/stripe/android/paymentsheet/elements/Requirement : java/lang/Enum {
-	public static final field DelayedSettlementSupport Lcom/stripe/android/paymentsheet/elements/Requirement;
-	public static final field MerchantSelectedSave Lcom/stripe/android/paymentsheet/elements/Requirement;
-	public static final field OneTimeUse Lcom/stripe/android/paymentsheet/elements/Requirement;
-	public static final field ReusableMandateSupport Lcom/stripe/android/paymentsheet/elements/Requirement;
-	public static final field ShippingInIntentAddressCountry Lcom/stripe/android/paymentsheet/elements/Requirement;
-	public static final field ShippingInIntentAddressLine1 Lcom/stripe/android/paymentsheet/elements/Requirement;
-	public static final field ShippingInIntentAddressLine2 Lcom/stripe/android/paymentsheet/elements/Requirement;
-	public static final field ShippingInIntentAddressPostal Lcom/stripe/android/paymentsheet/elements/Requirement;
-	public static final field ShippingInIntentAddressState Lcom/stripe/android/paymentsheet/elements/Requirement;
-	public static final field ShippingInIntentName Lcom/stripe/android/paymentsheet/elements/Requirement;
-	public static final field UserSelectableSave Lcom/stripe/android/paymentsheet/elements/Requirement;
-	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/paymentsheet/elements/Requirement;
-	public static fun values ()[Lcom/stripe/android/paymentsheet/elements/Requirement;
-}
-
 public final class com/stripe/android/paymentsheet/elements/ResourceRepository_Factory : dagger/internal/Factory {
 	public fun <init> (Ljavax/inject/Provider;Ljavax/inject/Provider;)V
 	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/paymentsheet/elements/ResourceRepository_Factory;

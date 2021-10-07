@@ -33,7 +33,6 @@ import com.stripe.android.paymentsheet.forms.sepaDebitParamKey
 import com.stripe.android.paymentsheet.forms.sofortForm
 import com.stripe.android.paymentsheet.forms.sofortParamKey
 
-
 /**
  * Enum defining all payment method types for which Payment Sheet can collect payment data.
  *
@@ -147,4 +146,3 @@ internal enum class SupportedPaymentMethod(
         val supportedSavedPaymentMethods = setOf("card")
     }
 }
-

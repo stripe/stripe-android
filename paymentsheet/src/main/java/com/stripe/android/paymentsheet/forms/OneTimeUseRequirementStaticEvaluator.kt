@@ -23,5 +23,4 @@ internal abstract class OneTimeUseRequirementStaticEvaluator : RequirementEvalua
         stripeIntent: StripeIntent,
         config: PaymentSheet.Configuration?
     ) = false
-
 }

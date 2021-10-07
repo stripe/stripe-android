@@ -1,7 +1,5 @@
 package com.stripe.android.paymentsheet.elements
 
-import kotlinx.parcelize.Parcelize
-
 /**
  * This is an element that will make elements (as specified by identifier) hidden
  * when save for future use is unchecked

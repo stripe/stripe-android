@@ -9,5 +9,5 @@ internal object AfterpayClearpayRequirementDynamicEvaluator : RequirementDynamic
 //        ShippingIntentRequirement.AddressCountry,
 //        ShippingIntentRequirement.AddressPostal,
 //    ),
-    siRequirements = null  // setup intents are not supported by this payment method
+    siRequirements = null // setup intents are not supported by this payment method
 )
