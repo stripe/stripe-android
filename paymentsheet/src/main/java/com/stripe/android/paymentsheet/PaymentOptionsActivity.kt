@@ -90,7 +90,7 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
             }
         }
 
-        viewModel.fragmentConfig.observe(this) { event ->
+        viewModel.fragmentConfigEvent.observe(this) { event ->
             val config = event.getContentIfNotHandled()
             if (config != null) {
                 viewModel.transitionTo(
