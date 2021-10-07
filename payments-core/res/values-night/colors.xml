@@ -13,6 +13,8 @@
     <color name="stripe_paymentsheet_background">#2e2e2e</color>
     <color name="stripe_paymentsheet_form_border">#3Dffffff</color>
     <color name="stripe_paymentsheet_toolbar_items_color">#FFFFFF</color>
+    <color name="stripe_paymentsheet_country_chevron_color">#ffffff</color>
+    <color name="stripe_paymentsheet_textinput_hint_color">#61FFFFFF</color>
 
     <!-- CardFormView -->
     <color name="stripe_card_form_view_textinput_color">#deffffff</color>
