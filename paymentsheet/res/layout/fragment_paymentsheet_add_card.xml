@@ -95,6 +95,7 @@
         android:id="@+id/save_card_checkbox"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:buttonTint="@color/stripe_paymentsheet_save_checkbox_color"
         android:checked="true"
         android:layout_marginStart="-6dp"
         app:layout_constraintBottom_toBottomOf="parent"
