@@ -2,9 +2,6 @@ package com.stripe.android.paymentsheet
 
 import androidx.core.graphics.toColorInt
 import com.stripe.android.payments.core.injection.DUMMY_INJECTOR_KEY
-import com.stripe.android.paymentsheet.elements.FormRequirement
-import com.stripe.android.paymentsheet.elements.Requirement
-import com.stripe.android.paymentsheet.elements.SaveMode
 import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.SetupIntentClientSecret
 import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
@@ -65,25 +62,25 @@ internal object PaymentSheetFixtures {
             STATUS_BAR_COLOR,
         )
 
-    internal val ARGS_WITHOUT_CUSTOMER
+    internal val ARGS_WITHOUT_CONFIG
         get() = PaymentSheetContract.Args(
             PAYMENT_INTENT_CLIENT_SECRET,
             config = null,
             STATUS_BAR_COLOR,
         )
 
+    internal val ARGS_WITHOUT_CUSTOMER
+        get() = ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
+            config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config?.copy(
+                customer = null
+            )
+        )
+
     internal val COMPOSE_FRAGMENT_ARGS
         get() = FormFragmentArguments(
             SupportedPaymentMethod.Bancontact,
-            capabilities = FormRequirement(
-                SaveMode.PaymentIntentAndSetupFutureUsageNotSet,
-                requirements = setOf(
-                    Requirement.DelayedPaymentMethodSupport,
-                    Requirement.ShippingInIntentAddressCountry,
-                    Requirement.ShippingInIntentAddressLine1,
-                    Requirement.ShippingInIntentName
-                )
-            ),
+            showCheckbox = true,
+            showCheckboxControlledFields = true,
             merchantName = "Merchant, Inc.",
             billingDetails = PaymentSheet.BillingDetails(
                 address = PaymentSheet.Address(

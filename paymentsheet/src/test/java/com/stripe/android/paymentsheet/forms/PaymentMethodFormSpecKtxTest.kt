@@ -3,11 +3,8 @@ package com.stripe.android.paymentsheet.forms
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.PaymentIntentFixtures
-import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
-import com.stripe.android.paymentsheet.elements.Requirement
-import com.stripe.android.paymentsheet.elements.SaveForFutureUseSpec
 import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
@@ -21,129 +18,52 @@ class PaymentMethodFormSpecKtxTest {
     private val formatPretty = Json { prettyPrint = true }
     private val format = Json { prettyPrint = false }
 
-    private val expectedMandateRequiredLPMs = listOf("bancontact", "sofort", "ideal", "sepa_debit", "eps", "future_unknown")
-    private val paymentMethodSupportsUserRequestedSaveForFutureUsage =
-        listOf(
-            PaymentMethod.Type.Alipay.code,
-            PaymentMethod.Type.Card.code,
-            PaymentMethod.Type.SepaDebit.code,
-            PaymentMethod.Type.AuBecsDebit.code,
-            PaymentMethod.Type.Bancontact.code,
-            PaymentMethod.Type.Sofort.code,
-            PaymentMethod.Type.BacsDebit.code,
-            PaymentMethod.Type.Ideal.code,
-        )
-
     @Test
-    fun `Intent that is off session should have merchant requires set to true`() {
-        assertThat(
-            getAllCapabilities(
-                stripeIntent = PaymentIntentFixtures.PI_OFF_SESSION,
-                config = null
-            )
-        ).isEqualTo(
-            setOf(
-                Requirement.MerchantRequiresSave
-            )
+    fun `Test supported payment method baseline`() {
+        println(
+            "lpm, ${PaymentIntentTestInput.toCsvHeader()}, ${TestOutput.toCsvHeader()}"
         )
-    }
+        SupportedPaymentMethod.values()
+            .forEach { lpm ->
+                val resource = File(javaClass.classLoader.getResource("${lpm.type.code}-support.json").file)
+                val baseline = resource.readText().replace(" ", "").replace("\n", "")
 
-    @Test
-    fun `sepa debit`() {
+                val newScenariosList = generatePaymentIntentScenarios()
+                    .map { testInput ->
+                        val formDescriptor = getSpecWithFullfilledRequirements(lpm, testInput.getIntent(lpm), testInput.getConfig())
+                        val testOutput = TestOutput.create(
+                            supportCustomerSavedCard = getSupportedSavedCustomerPMs(
+                                testInput.getIntent(lpm),
+                                testInput.getConfig()
+                            ).contains(lpm),
+                            formExists = formDescriptor != null,
+                            formShowsSaveCheckbox = formDescriptor?.showCheckbox,
+                            formShowsCheckboxControlledFields = formDescriptor?.showCheckboxControlledFields,
+                            supportsAdding = getPMsToAdd(
+                                testInput.getIntent(lpm), testInput.getConfig()
+                            ).contains(lpm)
+                        )
+                        println("${lpm.type.code}, ${testInput.toCsv()}, ${testOutput.toCsv()}")
 
-        val testInput = PaymentIntentTestInput(
-            hasCustomer = true,
-            lpmTypeFormCode = "sepa_debit",
-            intentSetupFutureUsage = StripeIntent.Usage.OneTime,
-            intentLpms = listOf("card", "sepa_debit"),
-            intentHasShipping = false
-        )
-        val requestedPaymentMethod = SupportedPaymentMethod.fromCode(testInput.lpmTypeFormCode)
-//        val form = requestedPaymentMethod?.formSpec?.getForm(
-//            getAllCapabilities(testInput.getIntent(), testInput.getConfig())
-//        )
+                        PaymentIntentTestCase(
+                            testInput,
+                            testOutput
+                        )
 
+                    }
 
-//        val testOutput = TestOutput(
-//            supportCustomerSavedCard = getSupportedSavedCustomerCards(
-//                testInput.getIntent(),
-//                testInput.getConfig()
-//            ).contains(requestedPaymentMethod),
-//            formExists = form != null,
-//            formHasSaveCheckbox = form?.items?.filterIsInstance<SaveForFutureUseSpec>()?.isNotEmpty() == true,
-//            supportsAdding = getSupportedPaymentMethods(
-//                testInput.getIntent(), testInput.getConfig()
-//            ).contains(requestedPaymentMethod)
-//        )
+                val newScenarios = format.encodeToString(newScenariosList).replace(" ", "").replace("\n", "")
 
-        val supported = getSupportedPaymentMethods(
-            testInput.getIntent(), testInput.getConfig()
-        )
-        assertThat(supported).contains(requestedPaymentMethod)
-    }
-
-    @Test
-    fun `test prefer user selectable over not selectable if there is a customer`() {
-
-        val testInput = PaymentIntentTestInput(
-            hasCustomer = true,
-            lpmTypeFormCode = "card",
-            intentSetupFutureUsage = StripeIntent.Usage.OneTime,
-            intentLpms = listOf("card", "eps"),
-            intentHasShipping = false
-        )
-        val requestedPaymentMethod = SupportedPaymentMethod.fromCode(testInput.lpmTypeFormCode)
-        val form = requestedPaymentMethod?.formSpec?.getForm(
-            getAllCapabilities(testInput.getIntent(), testInput.getConfig())
-        )
-        assertThat(
-            form?.items?.filterIsInstance<SaveForFutureUseSpec>()
-        ).isEmpty()
-
+                if (baseline != newScenarios) {
+                    println(formatPretty.encodeToString(newScenariosList))
+                }
+                assertThat(baseline).isEqualTo(newScenarios)
+            }
     }
 
     /**
-     * This "test" will generate test cases with test outputs hard coded
-     * to false, these values will need to be manually set in the json output file.
+     * This will generate payment intent scenarios for all combinations of customers, lpm types in the intent, shipping, and SFU states
      */
-    @Test
-    fun `Output baseline payment intent test inputs`() {
-        val resource = File(javaClass.classLoader.getResource("FormSaveCheckboxPaymentIntent.json").file)
-        val baseline = resource.readText().replace(" ", "").replace("\n", "")
-        val newScenariosList = generatePaymentIntentScenarios()
-            .map { testInput ->
-                val requestedPaymentMethod = SupportedPaymentMethod.fromCode(testInput.lpmTypeFormCode)
-                val form = requestedPaymentMethod?.formSpec?.getForm(
-                    getAllCapabilities(testInput.getIntent(), testInput.getConfig())
-                )
-                val testOutput = TestOutput(
-                    supportCustomerSavedCard = getSupportedSavedCustomerCards(
-                        testInput.getIntent(),
-                        testInput.getConfig()
-                    ).contains(requestedPaymentMethod),
-                    formExists = form != null,
-                    formHasSaveCheckbox = form?.items?.filterIsInstance<SaveForFutureUseSpec>()?.isNotEmpty() == true,
-                    supportsAdding = getSupportedPaymentMethods(
-                        testInput.getIntent(), testInput.getConfig()
-                    ).contains(requestedPaymentMethod)
-                )
-                println("${testOutput.toCsv()}, ${testInput.toCsv()}")
-
-                PaymentIntentTestCase(
-                    testInput,
-                    testOutput
-                )
-
-            }
-        val newScenarios = format.encodeToString(newScenariosList).replace(" ", "").replace("\n", "")
-
-        if (baseline != newScenarios) {
-            println(formatPretty.encodeToString(newScenariosList))
-        }
-//        println(formatPretty.encodeToString(newScenariosList))
-//        assertThat(baseline).isEqualTo(newScenarios)
-    }
-
     private fun generatePaymentIntentScenarios(): List<PaymentIntentTestInput> {
         val scenarios = mutableListOf<PaymentIntentTestInput>()
         val customerStates = setOf(true, false)
@@ -153,46 +73,18 @@ class PaymentMethodFormSpecKtxTest {
             setupFutureUsage.forEach { usage ->
                 scenarios.addAll(
                     listOf(
-                        /**
-                         * Save for future use is allowed when card is shown and only card is in the PI
-                         */
                         PaymentIntentTestInput(
                             hasCustomer = customer,
-                            lpmTypeFormCode = SupportedPaymentMethod.Card.type.code,
-                            intentLpms = listOf(SupportedPaymentMethod.Card.type.code),
+                            intentLpms = setOf(SupportedPaymentMethod.Card.type.code),
                             intentSetupFutureUsage = usage,
                             intentHasShipping = false
                         ),
-                        /**
-                         * Save for future use not allowed if the PI contains an LPM that does not support Save for future use on confirm
-                         */
                         PaymentIntentTestInput(
                             hasCustomer = customer,
-                            lpmTypeFormCode = SupportedPaymentMethod.Card.type.code,
-                            intentLpms = listOf(SupportedPaymentMethod.Card.type.code, SupportedPaymentMethod.Eps.type.code),
+                            intentLpms = setOf(SupportedPaymentMethod.Card.type.code, SupportedPaymentMethod.Eps.type.code),
                             intentSetupFutureUsage = usage,
                             intentHasShipping = false,
-                        ),
-                        /**
-                         * Save for future use not allowed if the form requested requires a mandate
-                         */
-                        PaymentIntentTestInput(
-                            hasCustomer = customer,
-                            lpmTypeFormCode = SupportedPaymentMethod.SepaDebit.type.code,
-                            intentLpms = listOf(SupportedPaymentMethod.Card.type.code, SupportedPaymentMethod.SepaDebit.type.code),
-                            intentSetupFutureUsage = usage,
-                            intentHasShipping = false,
-                        ),
-                        /**
-                         * Afterpay not allowed when no AfterPayCancelSupport offered by SDK
-                         */
-                        PaymentIntentTestInput(
-                            hasCustomer = customer,
-                            lpmTypeFormCode = SupportedPaymentMethod.AfterpayClearpay.type.code,
-                            intentLpms = listOf(SupportedPaymentMethod.Card.type.code, SupportedPaymentMethod.AfterpayClearpay.type.code),
-                            intentSetupFutureUsage = usage,
-                            intentHasShipping = true,
-                        ),
+                        )
                     )
                 )
             }
@@ -222,24 +114,28 @@ class PaymentMethodFormSpecKtxTest {
     @Serializable
     internal data class PaymentIntentTestInput(
         val hasCustomer: Boolean,
-        val lpmTypeFormCode: String,
         val intentSetupFutureUsage: StripeIntent.Usage?,
-        val intentLpms: List<String>,
+        val intentLpms: Set<String>,
         val intentHasShipping: Boolean,
         val allowsDelayedPayment: Boolean = true
     ) {
-        fun toCsv() = "$hasCustomer, $lpmTypeFormCode, $intentSetupFutureUsage, $intentHasShipping, $intentLpms"
+        companion object {
+            fun toCsvHeader() = "hasCustomer, allowsDelayedPayment, intentSetupFutureUsage, intentHasShipping, intentLpms"
+        }
 
-        fun getIntent() = when (intentHasShipping) {
+        fun toCsv() = "$hasCustomer, $allowsDelayedPayment, $intentSetupFutureUsage, $intentHasShipping, ${intentLpms.joinToString("/")}"
+
+
+        fun getIntent(lpm: SupportedPaymentMethod) = when (intentHasShipping) {
             false ->
                 PaymentIntentFixtures.PI_OFF_SESSION.copy(
                     setupFutureUsage = intentSetupFutureUsage,
-                    paymentMethodTypes = intentLpms
+                    paymentMethodTypes = intentLpms.plus(lpm.type.code).toList()
                 )
             true ->
                 PaymentIntentFixtures.PI_WITH_SHIPPING.copy(
                     setupFutureUsage = intentSetupFutureUsage,
-                    paymentMethodTypes = intentLpms
+                    paymentMethodTypes = intentLpms.plus(lpm.type.code).toList()
                 )
         }
 
@@ -258,9 +154,33 @@ class PaymentMethodFormSpecKtxTest {
     internal data class TestOutput(
         val supportCustomerSavedCard: Boolean,
         val formExists: Boolean,
-        val formHasSaveCheckbox: Boolean,
-        val supportsAdding: Boolean
+        val supportsAdding: Boolean,
+        val formType: String
     ) {
-        fun toCsv() = "$supportCustomerSavedCard, $formExists, $formHasSaveCheckbox, $supportsAdding"
+        companion object {
+            fun create(
+                supportCustomerSavedCard: Boolean,
+                formExists: Boolean,
+                formShowsSaveCheckbox: Boolean?, // null if no form
+                formShowsCheckboxControlledFields: Boolean?, // null if let form decide
+                supportsAdding: Boolean,
+            ) = TestOutput(
+                supportCustomerSavedCard = supportCustomerSavedCard,
+                formExists = formExists,
+                supportsAdding = supportsAdding,
+                formType = when {
+                    formShowsSaveCheckbox == false && formShowsCheckboxControlledFields == false -> "oneTimeUse"
+                    formShowsSaveCheckbox == false && formShowsCheckboxControlledFields == true -> "merchantRequiredSave"
+                    formShowsSaveCheckbox == true && formShowsCheckboxControlledFields == true -> "userSelectedSave"
+                    else -> "not available"
+                }
+            )
+
+            fun toCsvHeader() =
+                "supportCustomerSavedCard, formExists, formType, supportsAdding"
+        }
+
+        fun toCsv() =
+            "$supportCustomerSavedCard, $formExists, $formType, $supportsAdding"
     }
 }

@@ -24,7 +24,6 @@ import com.stripe.android.paymentsheet.databinding.StripeGooglePayButtonBinding
 import com.stripe.android.paymentsheet.elements.IdentifierSpec
 import com.stripe.android.paymentsheet.forms.FormFieldEntry
 import com.stripe.android.paymentsheet.forms.FormFieldValues
-import com.stripe.android.paymentsheet.forms.getAllCapabilities
 import com.stripe.android.paymentsheet.model.Amount
 import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.FragmentConfigFixtures
@@ -320,7 +319,8 @@ class PaymentSheetAddPaymentMethodFragmentTest {
                 .isEqualTo(
                     COMPOSE_FRAGMENT_ARGS.copy(
                         amount = createAmount(),
-                        capabilities = getAllCapabilities(stripeIntent, args.config),
+                        showCheckbox = true,
+                        showCheckboxControlledFields = true,
                         billingDetails = null
                     ),
                 )
@@ -353,7 +353,8 @@ class PaymentSheetAddPaymentMethodFragmentTest {
                 .isEqualTo(
                     COMPOSE_FRAGMENT_ARGS.copy(
                         amount = createAmount(),
-                        capabilities = getAllCapabilities(stripeIntent, args.config),
+                        showCheckbox = true,
+                        showCheckboxControlledFields = true,
                         billingDetails = null
                     ),
                 )
@@ -412,9 +413,10 @@ class PaymentSheetAddPaymentMethodFragmentTest {
             )
                 .isEqualTo(
                     COMPOSE_FRAGMENT_ARGS.copy(
-                        layoutFormDescriptor = SupportedPaymentMethod.Card,
+                        paymentMethod = SupportedPaymentMethod.Card,
                         amount = createAmount(PI_OFF_SESSION),
-                        capabilities = getAllCapabilities(stripeIntent, args.config),
+                        showCheckbox = false,
+                        showCheckboxControlledFields = true,
                         billingDetails = null
                     )
                 )

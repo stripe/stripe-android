@@ -1,0 +1,200 @@
+[
+  {
+    "testInput": {
+      "hasCustomer": true,
+      "intentSetupFutureUsage": "OffSession",
+      "intentLpms": [
+        "card"
+      ],
+      "intentHasShipping": false
+    },
+    "testOutput": {
+      "supportCustomerSavedCard": false,
+      "formExists": false,
+      "supportsAdding": false,
+      "formType": "unknown"
+    }
+  },
+  {
+    "testInput": {
+      "hasCustomer": true,
+      "intentSetupFutureUsage": "OffSession",
+      "intentLpms": [
+        "card",
+        "eps"
+      ],
+      "intentHasShipping": false
+    },
+    "testOutput": {
+      "supportCustomerSavedCard": false,
+      "formExists": false,
+      "supportsAdding": false,
+      "formType": "unknown"
+    }
+  },
+  {
+    "testInput": {
+      "hasCustomer": true,
+      "intentSetupFutureUsage": "OnSession",
+      "intentLpms": [
+        "card"
+      ],
+      "intentHasShipping": false
+    },
+    "testOutput": {
+      "supportCustomerSavedCard": false,
+      "formExists": false,
+      "supportsAdding": false,
+      "formType": "unknown"
+    }
+  },
+  {
+    "testInput": {
+      "hasCustomer": true,
+      "intentSetupFutureUsage": "OnSession",
+      "intentLpms": [
+        "card",
+        "eps"
+      ],
+      "intentHasShipping": false
+    },
+    "testOutput": {
+      "supportCustomerSavedCard": false,
+      "formExists": false,
+      "supportsAdding": false,
+      "formType": "unknown"
+    }
+  },
+  {
+    "testInput": {
+      "hasCustomer": true,
+      "intentSetupFutureUsage": "OneTime",
+      "intentLpms": [
+        "card"
+      ],
+      "intentHasShipping": false
+    },
+    "testOutput": {
+      "supportCustomerSavedCard": false,
+      "formExists": false,
+      "supportsAdding": false,
+      "formType": "unknown"
+    }
+  },
+  {
+    "testInput": {
+      "hasCustomer": true,
+      "intentSetupFutureUsage": "OneTime",
+      "intentLpms": [
+        "card",
+        "eps"
+      ],
+      "intentHasShipping": false
+    },
+    "testOutput": {
+      "supportCustomerSavedCard": false,
+      "formExists": false,
+      "supportsAdding": false,
+      "formType": "unknown"
+    }
+  },
+  {
+    "testInput": {
+      "hasCustomer": false,
+      "intentSetupFutureUsage": "OffSession",
+      "intentLpms": [
+        "card"
+      ],
+      "intentHasShipping": false
+    },
+    "testOutput": {
+      "supportCustomerSavedCard": false,
+      "formExists": false,
+      "supportsAdding": false,
+      "formType": "unknown"
+    }
+  },
+  {
+    "testInput": {
+      "hasCustomer": false,
+      "intentSetupFutureUsage": "OffSession",
+      "intentLpms": [
+        "card",
+        "eps"
+      ],
+      "intentHasShipping": false
+    },
+    "testOutput": {
+      "supportCustomerSavedCard": false,
+      "formExists": false,
+      "supportsAdding": false,
+      "formType": "unknown"
+    }
+  },
+  {
+    "testInput": {
+      "hasCustomer": false,
+      "intentSetupFutureUsage": "OnSession",
+      "intentLpms": [
+        "card"
+      ],
+      "intentHasShipping": false
+    },
+    "testOutput": {
+      "supportCustomerSavedCard": false,
+      "formExists": false,
+      "supportsAdding": false,
+      "formType": "unknown"
+    }
+  },
+  {
+    "testInput": {
+      "hasCustomer": false,
+      "intentSetupFutureUsage": "OnSession",
+      "intentLpms": [
+        "card",
+        "eps"
+      ],
+      "intentHasShipping": false
+    },
+    "testOutput": {
+      "supportCustomerSavedCard": false,
+      "formExists": false,
+      "supportsAdding": false,
+      "formType": "unknown"
+    }
+  },
+  {
+    "testInput": {
+      "hasCustomer": false,
+      "intentSetupFutureUsage": "OneTime",
+      "intentLpms": [
+        "card"
+      ],
+      "intentHasShipping": false
+    },
+    "testOutput": {
+      "supportCustomerSavedCard": false,
+      "formExists": false,
+      "supportsAdding": false,
+      "formType": "unknown"
+    }
+  },
+  {
+    "testInput": {
+      "hasCustomer": false,
+      "intentSetupFutureUsage": "OneTime",
+      "intentLpms": [
+        "card",
+        "eps"
+      ],
+      "intentHasShipping": false
+    },
+    "testOutput": {
+      "supportCustomerSavedCard": false,
+      "formExists": false,
+      "supportsAdding": false,
+      "formType": "unknown"
+    }
+  }
+]

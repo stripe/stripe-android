@@ -17,14 +17,12 @@ import com.stripe.android.paymentsheet.elements.AddressElement
 import com.stripe.android.paymentsheet.elements.BankRepository
 import com.stripe.android.paymentsheet.elements.CountrySpec
 import com.stripe.android.paymentsheet.elements.EmailSpec
-import com.stripe.android.paymentsheet.elements.FormRequirement
 import com.stripe.android.paymentsheet.elements.IdentifierSpec
 import com.stripe.android.paymentsheet.elements.LayoutSpec
 import com.stripe.android.paymentsheet.elements.ResourceRepository
 import com.stripe.android.paymentsheet.elements.RowElement
 import com.stripe.android.paymentsheet.elements.SaveForFutureUseController
 import com.stripe.android.paymentsheet.elements.SaveForFutureUseSpec
-import com.stripe.android.paymentsheet.elements.SaveMode
 import com.stripe.android.paymentsheet.elements.SectionElement
 import com.stripe.android.paymentsheet.elements.SectionSingleFieldElement
 import com.stripe.android.paymentsheet.elements.SectionSpec
@@ -91,9 +89,7 @@ internal class FormViewModelTest {
         val factory = FormViewModel.Factory(
             config,
             ApplicationProvider.getApplicationContext<Application>().resources,
-            sofortForm.requirementFormMapping.values.first(),
-            showCheckbox,
-            showCheckboxControlledFields
+            sofortForm,
         )
         val factorySpy = spy(factory)
         val createdViewModel = factorySpy.create(FormViewModel::class.java)
@@ -110,9 +106,7 @@ internal class FormViewModelTest {
         val factory = FormViewModel.Factory(
             config,
             ApplicationProvider.getApplicationContext<Application>().resources,
-            sofortForm.requirementFormMapping.values.first(),
-            showCheckbox,
-            showCheckboxControlledFields
+            sofortForm
         )
         val factorySpy = spy(factory)
         assertNotNull(factorySpy.create(FormViewModel::class.java))
@@ -265,13 +259,11 @@ internal class FormViewModelTest {
              * Using sofort as a complex enough example to test the form view model class.
              */
             val formViewModel = FormViewModel(
-                sofortForm.requirementFormMapping.values.first(),
+                sofortForm,
                 COMPOSE_FRAGMENT_ARGS.copy(
                     billingDetails = null,
-                    capabilities = FormRequirement(
-                        SaveMode.SetupIntentOrPaymentIntentWithFutureUsageSet,
-                        requirements = emptySet()
-                    )
+                    showCheckbox = false,
+                    showCheckboxControlledFields = true
                 ),
                 resourceRepository = resourceRepository
             )
@@ -312,12 +304,10 @@ internal class FormViewModelTest {
              * Using sepa debit as a complex enough example to test the address portion.
              */
             val formViewModel = FormViewModel(
-                sepaDebitForm.requirementFormMapping.values.first(),
+                sepaDebitForm,
                 COMPOSE_FRAGMENT_ARGS.copy(
-                    capabilities = FormRequirement(
-                        SaveMode.SetupIntentOrPaymentIntentWithFutureUsageSet,
-                        requirements = emptySet()
-                    ),
+                    showCheckbox = false,
+                    showCheckboxControlledFields = true,
                     billingDetails = null
                 ),
                 resourceRepository = resourceRepository
@@ -384,7 +374,7 @@ internal class FormViewModelTest {
              * Using sepa debit as a complex enough example to test the address portion.
              */
             val formViewModel = FormViewModel(
-                sepaDebitForm.requirementFormMapping.values.first(),
+                sepaDebitForm,
                 COMPOSE_FRAGMENT_ARGS.copy(
                     billingDetails = null
                 ),

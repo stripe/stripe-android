@@ -4,7 +4,6 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.PaymentSheet
 
 internal object AfterpayClearpayRequirementStaticEvaluator : OneTimeUseRequirementStaticEvaluator() {
-    //TODO: Would like this to use an array of requirements
     override fun supportsPISfuNotSetable(
         stripeIntent: StripeIntent,
         config: PaymentSheet.Configuration?

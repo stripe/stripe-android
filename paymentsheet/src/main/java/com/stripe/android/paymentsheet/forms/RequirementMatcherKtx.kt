@@ -55,7 +55,8 @@ internal fun getPMsToAdd(
 }//TODO.filter { it == SupportedPaymentMethod.Card }
     .toList()
 
-private fun getSpecWithFullfilledRequirements(
+@VisibleForTesting
+internal fun getSpecWithFullfilledRequirements(
     paymentMethod: SupportedPaymentMethod,
     stripeIntent: StripeIntent,
     config: PaymentSheet.Configuration?

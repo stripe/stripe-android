@@ -23,8 +23,6 @@ import com.stripe.android.paymentsheet.PaymentSheetViewModel
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.databinding.FragmentPaymentsheetAddCardBinding
 import com.stripe.android.paymentsheet.databinding.StripeBillingAddressLayoutBinding
-import com.stripe.android.paymentsheet.elements.Requirement
-import com.stripe.android.paymentsheet.elements.SaveMode
 import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.FragmentConfigFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -99,7 +97,7 @@ class CardDataCollectionFragmentTest {
 
     @Test
     fun `selection without customer config and valid card entered should create expected PaymentSelection`() {
-        createFragment(PaymentSheetFixtures.ARGS_WITHOUT_CUSTOMER) { fragment, viewBinding ->
+        createFragment(PaymentSheetFixtures.ARGS_WITHOUT_CONFIG) { fragment, viewBinding ->
             viewBinding.saveCardCheckbox.isChecked = false
 
             var paymentSelection: PaymentSelection? = null
@@ -127,7 +125,7 @@ class CardDataCollectionFragmentTest {
     @Test
     fun `relaunching the fragment populates the fields with saved card`() {
         createFragment(
-            PaymentSheetFixtures.ARGS_WITHOUT_CUSTOMER,
+            PaymentSheetFixtures.ARGS_WITHOUT_CONFIG,
             newCard = PaymentSelection.New.Card(
                 PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
                 CardBrand.Discover,
@@ -415,7 +413,7 @@ class CardDataCollectionFragmentTest {
 
     @Test
     fun `empty merchant display name shows correct message`() {
-        createFragment(PaymentSheetFixtures.ARGS_WITHOUT_CUSTOMER) { _, viewBinding ->
+        createFragment(PaymentSheetFixtures.ARGS_WITHOUT_CONFIG) { _, viewBinding ->
             assertThat(viewBinding.saveCardCheckbox.text)
                 .isEqualTo(
                     context.getString(
@@ -445,10 +443,8 @@ class CardDataCollectionFragmentTest {
         stripeIntent: StripeIntent = PaymentIntentFixtures.PI_WITH_SHIPPING,
         newCard: PaymentSelection.New.Card? = null,
         fragmentArgs: FormFragmentArguments? = COMPOSE_FRAGMENT_ARGS.copy(
-            capabilities = COMPOSE_FRAGMENT_ARGS.capabilities.copy(
-                SaveMode.PaymentIntentAndSetupFutureUsageNotSet,
-                requirements = COMPOSE_FRAGMENT_ARGS.capabilities.requirements.plus(Requirement.Customer)
-            )
+            showCheckbox = true,
+            showCheckboxControlledFields = true
         ),
         onReady: (CardDataCollectionFragment<PaymentSheetViewModel>, FragmentPaymentsheetAddCardBinding) -> Unit
     ) {
