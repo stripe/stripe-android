@@ -132,7 +132,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
             }
         }
 
-        viewModel.fragmentConfigEvent.observe(this) { event ->
+        viewModel.fragmentConfig.observe(this) { event ->
             val config = event.getContentIfNotHandled()
             if (config != null) {
                 val target = if (viewModel.paymentMethods.value.isNullOrEmpty()) {

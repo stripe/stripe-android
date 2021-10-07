@@ -145,7 +145,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
         }
     }
 
-    private val fragmentConfig = MediatorLiveData<FragmentConfig?>().apply {
+    val fragmentConfig = MediatorLiveData<FragmentConfig?>().apply {
         listOf(
             savedSelection,
             stripeIntent,
@@ -156,9 +156,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
                 value = createFragmentConfig()
             }
         }
-    }
-
-    val fragmentConfigEvent = fragmentConfig.distinctUntilChanged().map {
+    }.distinctUntilChanged().map {
         Event(it)
     }
 
