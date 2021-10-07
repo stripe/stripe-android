@@ -5,6 +5,7 @@ module:payments-core
 com.stripe.android
 com.stripe.android.exception
 com.stripe.android.googlepaylauncher
+com.stripe.android.googlepaylauncher.injection
 com.stripe.android.model
 com.stripe.android.model.parsers
 com.stripe.android.model.wallets
@@ -14,9 +15,9 @@ com.stripe.android.payments.core
 com.stripe.android.payments.core.authentication
 com.stripe.android.payments.core.injection
 com.stripe.android.payments.paymentlauncher
-com.stripe.android.paymentsheet.model
 com.stripe.android.view
 com.stripe.android.view.i18n
 module:paymentsheet
 com.stripe.android.paymentsheet
+com.stripe.android.paymentsheet.injection
 com.stripe.android.paymentsheet.model
