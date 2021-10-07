@@ -36,7 +36,12 @@ internal class PaymentOptionsAdapter(
     internal var items: List<Item> = emptyList()
     private var selectedItemPosition: Int = NO_POSITION
     internal var isEditing = false
-        private set
+        set(value) {
+            if (value != field) {
+                field = value
+                notifyDataSetChanged()
+            }
+        }
 
     internal val selectedItem: Item? get() = items.getOrNull(selectedItemPosition)
 
@@ -70,11 +75,6 @@ internal class PaymentOptionsAdapter(
             isClick = false
         )
 
-        notifyDataSetChanged()
-    }
-
-    fun toggleEditing() {
-        isEditing = !isEditing
         notifyDataSetChanged()
     }
 

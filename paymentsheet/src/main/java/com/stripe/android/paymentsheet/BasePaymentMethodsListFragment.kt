@@ -5,6 +5,7 @@ import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
+import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -26,6 +27,7 @@ internal abstract class BasePaymentMethodsListFragment(
 
     protected lateinit var config: FragmentConfig
     private lateinit var adapter: PaymentOptionsAdapter
+    private var editMenuItem: MenuItem? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -52,19 +54,42 @@ internal abstract class BasePaymentMethodsListFragment(
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.paymentsheet_payment_methods_list, menu)
+        // Menu is created after view state is restored, so we need to update the title here
+        editMenuItem = menu.findItem(R.id.edit).apply {
+            setTitle(if (adapter.isEditing) R.string.done else R.string.edit)
+        }
         super.onCreateOptionsMenu(menu, inflater)
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.edit -> {
-                adapter.toggleEditing()
-                item.setTitle(if (adapter.isEditing) R.string.done else R.string.edit)
-                sheetViewModel.setEditing(adapter.isEditing)
+                setEditing(!adapter.isEditing)
                 true
             }
             else -> super.onOptionsItemSelected(item)
         }
+    }
+
+    override fun onViewStateRestored(savedInstanceState: Bundle?) {
+        super.onViewStateRestored(savedInstanceState)
+        savedInstanceState?.let {
+            if (it.getBoolean(IS_EDITING)) {
+                setEditing(true)
+            }
+        }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        outState.putBoolean(IS_EDITING, adapter.isEditing)
+        super.onSaveInstanceState(outState)
+    }
+
+    @VisibleForTesting
+    internal fun setEditing(editing: Boolean) {
+        adapter.isEditing = editing
+        editMenuItem?.setTitle(if (editing) R.string.done else R.string.edit)
+        sheetViewModel.setEditing(editing)
     }
 
     private fun setupRecyclerView(viewBinding: FragmentPaymentsheetPaymentMethodsListBinding) {
@@ -138,4 +163,8 @@ internal abstract class BasePaymentMethodsListFragment(
             }
             .create()
             .show()
+
+    private companion object {
+        private const val IS_EDITING = "is_editing"
+    }
 }
