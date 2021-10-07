@@ -111,9 +111,6 @@ internal fun getSpecWithFullfilledRequirements(
     }
 }
 
-/**
- * TODO: Write this out in more details.
- */
 private fun isSetupFutureUsageSet(setupFutureUsage: StripeIntent.Usage?) =
     when (setupFutureUsage) {
         StripeIntent.Usage.OnSession -> true

@@ -33,7 +33,6 @@ internal sealed class ShippingIntentRequirement : PIRequirement {
 }
 
 /**
- * TODO: No longer accurate
  * This is a requirements matcher that operates off of the pi and si requirements
  * in the supported payment method.  It does not concern itself with deficencies in
  * supporting mandates or Payment Methods that are included in the PI, but don't
@@ -47,6 +46,8 @@ internal sealed class RequirementDynamicEvaluator(
      * These are the requirements for using a PaymentIntent.
      *  - Only [PIRequirement]s are allowed in this set.
      * - If this is null, PaymentIntents (even if SFU is set) are not supported by this LPM.
+     *
+     * TODO: Is this still needed?
      * - It should be noted that if SFU is set then SDK
      * code will verify that the siRequirement is also satisfied in order to use it.
      * This is to give a good experience to our users so that after using this with
