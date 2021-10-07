@@ -39,6 +39,7 @@ import com.stripe.android.paymentsheet.injection.DaggerPaymentSheetLauncherCompo
 import com.stripe.android.paymentsheet.injection.PaymentSheetViewModelModule
 import com.stripe.android.paymentsheet.injection.PaymentSheetViewModelSubcomponent
 import com.stripe.android.paymentsheet.model.ConfirmStripeIntentParamsFactory
+import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
@@ -191,7 +192,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
      * not fetched yet. If successful, continues through validation and fetching the saved payment
      * methods for the customer.
      */
-    internal fun fetchStripeIntent() {
+    internal fun maybeFetchStripeIntent() {
         if (stripeIntent.value == null) {
             viewModelScope.launch {
                 runCatching {
@@ -432,21 +433,21 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     }
 
     internal sealed class TransitionTarget {
-        abstract val fragmentConfig: com.stripe.android.paymentsheet.model.FragmentConfig
+        abstract val fragmentConfig: FragmentConfig
 
         // User has saved PM's and is selected
         data class SelectSavedPaymentMethod(
-            override val fragmentConfig: com.stripe.android.paymentsheet.model.FragmentConfig
+            override val fragmentConfig: FragmentConfig
         ) : TransitionTarget()
 
         // User has saved PM's and is adding a new one
         data class AddPaymentMethodFull(
-            override val fragmentConfig: com.stripe.android.paymentsheet.model.FragmentConfig
+            override val fragmentConfig: FragmentConfig
         ) : TransitionTarget()
 
         // User has no saved PM's
         data class AddPaymentMethodSheet(
-            override val fragmentConfig: com.stripe.android.paymentsheet.model.FragmentConfig
+            override val fragmentConfig: FragmentConfig
         ) : TransitionTarget()
     }
 

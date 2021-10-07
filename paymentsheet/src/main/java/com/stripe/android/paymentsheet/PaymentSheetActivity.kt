@@ -104,7 +104,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
                 viewModel::onGooglePayResult
             )
         )
-        viewModel.fetchStripeIntent()
+        viewModel.maybeFetchStripeIntent()
 
         starterArgs.statusBarColor?.let {
             window.statusBarColor = it
@@ -132,7 +132,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
             }
         }
 
-        viewModel.fragmentConfig.observe(this) { event ->
+        viewModel.fragmentConfigEvent.observe(this) { event ->
             val config = event.getContentIfNotHandled()
             if (config != null) {
                 val target = if (viewModel.paymentMethods.value.isNullOrEmpty()) {
