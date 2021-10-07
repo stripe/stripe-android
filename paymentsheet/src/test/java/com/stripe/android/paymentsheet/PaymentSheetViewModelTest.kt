@@ -561,6 +561,17 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
+    fun `fetchPaymentIntent() should only fetch if intent is null`() {
+        viewModel.setStripeIntent(PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD)
+        var viewState: PaymentSheetViewState? = null
+        viewModel.viewState.observeForever {
+            viewState = it
+        }
+        viewModel.fetchStripeIntent()
+        assertThat(viewState).isNull()
+    }
+
+    @Test
     fun `fetchPaymentIntent() should propagate errors`() = runBlocking {
         val paymentConfiguration = PaymentConfiguration(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
 
