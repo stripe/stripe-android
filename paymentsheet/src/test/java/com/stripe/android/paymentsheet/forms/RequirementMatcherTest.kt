@@ -14,7 +14,7 @@ import org.junit.runner.RunWith
 import java.io.File
 
 @RunWith(AndroidJUnit4::class)
-class PaymentMethodFormSpecKtxTest {
+class RequirementMatcherTest {
     private val formatPretty = Json { prettyPrint = true }
     private val format = Json { prettyPrint = false }
 
