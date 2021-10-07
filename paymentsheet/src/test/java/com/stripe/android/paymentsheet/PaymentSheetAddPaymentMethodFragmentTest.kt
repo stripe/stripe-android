@@ -302,7 +302,7 @@ class PaymentSheetAddPaymentMethodFragmentTest {
                 )
             ).isInstanceOf(CardDataCollectionFragment::class.java)
 
-            fragment.onPaymentMethodSelected(SupportedPaymentMethod.Bancontact)
+            fragment.onPaymentMethodSelected(SupportedPaymentMethod.Card)
 
             idleLooper()
 
@@ -310,7 +310,7 @@ class PaymentSheetAddPaymentMethodFragmentTest {
                 viewBinding.paymentMethodFragmentContainer.id
             )
 
-            assertThat(addedFragment).isInstanceOf(ComposeFormDataCollectionFragment::class.java)
+            assertThat(addedFragment).isInstanceOf(CardDataCollectionFragment::class.java)
             assertThat(
                 addedFragment?.arguments?.getParcelable<FormFragmentArguments>(
                     ComposeFormDataCollectionFragment.EXTRA_CONFIG
@@ -318,6 +318,7 @@ class PaymentSheetAddPaymentMethodFragmentTest {
             )
                 .isEqualTo(
                     COMPOSE_FRAGMENT_ARGS.copy(
+                        paymentMethod = SupportedPaymentMethod.Card,
                         amount = createAmount(),
                         showCheckbox = true,
                         showCheckboxControlledFields = true,
@@ -335,7 +336,7 @@ class PaymentSheetAddPaymentMethodFragmentTest {
             stripeIntent = stripeIntent,
             args = args
         ) { fragment, viewBinding ->
-            fragment.onPaymentMethodSelected(SupportedPaymentMethod.Bancontact)
+            fragment.onPaymentMethodSelected(SupportedPaymentMethod.Card)
 
             idleLooper()
 
@@ -343,7 +344,7 @@ class PaymentSheetAddPaymentMethodFragmentTest {
                 viewBinding.paymentMethodFragmentContainer.id
             )
 
-            assertThat(addedFragment).isInstanceOf(ComposeFormDataCollectionFragment::class.java)
+            assertThat(addedFragment).isInstanceOf(CardDataCollectionFragment::class.java)
 
             assertThat(
                 addedFragment?.arguments?.getParcelable<FormFragmentArguments>(
@@ -352,6 +353,7 @@ class PaymentSheetAddPaymentMethodFragmentTest {
             )
                 .isEqualTo(
                     COMPOSE_FRAGMENT_ARGS.copy(
+                        paymentMethod = SupportedPaymentMethod.Card,
                         amount = createAmount(),
                         showCheckbox = true,
                         showCheckboxControlledFields = true,

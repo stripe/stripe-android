@@ -12,8 +12,6 @@ import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
  * Get the LPMS that are supported when used as a Customer Saved LPM given
  * the intent.
  */
-// What if the SI or PI already has a customer associated do we use the cusomter
-// from the PI or the Customer from the config?
 internal fun getSupportedSavedCustomerPMs(
     stripeIntent: StripeIntent,
     config: PaymentSheet.Configuration?

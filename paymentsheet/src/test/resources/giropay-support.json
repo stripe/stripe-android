@@ -12,7 +12,7 @@
       "supportCustomerSavedCard": false,
       "formExists": false,
       "supportsAdding": false,
-      "formType": "unknown"
+      "formType": "not available"
     }
   },
   {
@@ -29,7 +29,7 @@
       "supportCustomerSavedCard": false,
       "formExists": false,
       "supportsAdding": false,
-      "formType": "unknown"
+      "formType": "not available"
     }
   },
   {
@@ -45,7 +45,7 @@
       "supportCustomerSavedCard": false,
       "formExists": false,
       "supportsAdding": false,
-      "formType": "unknown"
+      "formType": "not available"
     }
   },
   {
@@ -62,7 +62,7 @@
       "supportCustomerSavedCard": false,
       "formExists": false,
       "supportsAdding": false,
-      "formType": "unknown"
+      "formType": "not available"
     }
   },
   {
@@ -76,9 +76,9 @@
     },
     "testOutput": {
       "supportCustomerSavedCard": false,
-      "formExists": true,
-      "supportsAdding": true,
-      "formType": "oneTimeUse"
+      "formExists": false,
+      "supportsAdding": false,
+      "formType": "not available"
     }
   },
   {
@@ -93,9 +93,9 @@
     },
     "testOutput": {
       "supportCustomerSavedCard": false,
-      "formExists": true,
-      "supportsAdding": true,
-      "formType": "oneTimeUse"
+      "formExists": false,
+      "supportsAdding": false,
+      "formType": "not available"
     }
   },
   {
@@ -111,7 +111,7 @@
       "supportCustomerSavedCard": false,
       "formExists": false,
       "supportsAdding": false,
-      "formType": "unknown"
+      "formType": "not available"
     }
   },
   {
@@ -128,7 +128,7 @@
       "supportCustomerSavedCard": false,
       "formExists": false,
       "supportsAdding": false,
-      "formType": "unknown"
+      "formType": "not available"
     }
   },
   {
@@ -144,7 +144,7 @@
       "supportCustomerSavedCard": false,
       "formExists": false,
       "supportsAdding": false,
-      "formType": "unknown"
+      "formType": "not available"
     }
   },
   {
@@ -161,7 +161,7 @@
       "supportCustomerSavedCard": false,
       "formExists": false,
       "supportsAdding": false,
-      "formType": "unknown"
+      "formType": "not available"
     }
   },
   {
@@ -175,9 +175,9 @@
     },
     "testOutput": {
       "supportCustomerSavedCard": false,
-      "formExists": true,
-      "supportsAdding": true,
-      "formType": "oneTimeUse"
+      "formExists": false,
+      "supportsAdding": false,
+      "formType": "not available"
     }
   },
   {
@@ -192,9 +192,9 @@
     },
     "testOutput": {
       "supportCustomerSavedCard": false,
-      "formExists": true,
-      "supportsAdding": true,
-      "formType": "oneTimeUse"
+      "formExists": false,
+      "supportsAdding": false,
+      "formType": "not available"
     }
   }
 ]

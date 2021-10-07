@@ -153,7 +153,10 @@ class CardDataCollectionFragmentTest {
     @Test
     fun `launching with arguments populates the fields`() {
         createFragment(
-            fragmentArgs = COMPOSE_FRAGMENT_ARGS
+            fragmentArgs = COMPOSE_FRAGMENT_ARGS.copy(
+                showCheckboxControlledFields = true,
+                showCheckbox = false
+            )
         ) { _, viewBinding ->
             assertThat(viewBinding.billingAddress.postalCodeView.text.toString())
                 .isEqualTo("94111")
