@@ -19,7 +19,7 @@ internal fun getSupportedSavedCustomerPMs(
     stripeIntent.paymentMethodTypes.mapNotNull {
         SupportedPaymentMethod.fromCode(it)
     }.filter {
-        it.requirements.supportsCustomerSavedPM(stripeIntent, config) &&
+        it.requirementEvaluator.supportsCustomerSavedPM(stripeIntent, config) &&
             getSpecWithFullfilledRequirements(it, stripeIntent, config) != null
     }
 
@@ -50,7 +50,7 @@ internal fun getPMsToAdd(
         stripeIntent,
         config
     ) != null
-} // TODO.filter { it == SupportedPaymentMethod.Card }
+}//.filter { it == SupportedPaymentMethod.Card }
     .toList()
 
 @VisibleForTesting
@@ -79,7 +79,7 @@ internal fun getSpecWithFullfilledRequirements(
     return when (stripeIntent) {
         is PaymentIntent -> {
             if (isSetupFutureUsageSet(stripeIntent.setupFutureUsage)) {
-                if (paymentMethod.requirements.supportsPISfuSet(stripeIntent, config)
+                if (paymentMethod.requirementEvaluator.supportsPISfuSet(stripeIntent, config)
                 ) {
                     merchantRequestedSave
                 } else {
@@ -87,11 +87,12 @@ internal fun getSpecWithFullfilledRequirements(
                 }
             } else {
                 when {
-                    paymentMethod.requirements.supportsPISfuSettable(
+                    paymentMethod.requirementEvaluator.supportsPISfuSettable(
                         stripeIntent,
                         config
-                    ) -> userSelectableSave
-                    paymentMethod.requirements.supportsPISfuNotSetable(
+                    )
+                    -> userSelectableSave
+                    paymentMethod.requirementEvaluator.supportsPISfuNotSetable(
                         stripeIntent,
                         config
                     ) -> oneTimeUse
@@ -101,7 +102,7 @@ internal fun getSpecWithFullfilledRequirements(
         }
         is SetupIntent -> {
             when {
-                paymentMethod.requirements.supportsPISfuSettable(
+                paymentMethod.requirementEvaluator.supportsPISfuSettable(
                     stripeIntent,
                     config
                 ) -> merchantRequestedSave

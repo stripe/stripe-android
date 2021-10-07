@@ -1,7 +1,7 @@
 package com.stripe.android.paymentsheet.forms
 
-internal object SepaDebitRequirementDynamicEvaluator : RequirementDynamicEvaluator(
-    piRequirements = setOf(Delayed),
+internal object IdealRequirementEvaluator : RequirementEvaluator(
+    piRequirements = emptySet(),
 
     /**
      * This check is used in the needed places where we want to enforce a block
@@ -20,5 +20,4 @@ internal object SepaDebitRequirementDynamicEvaluator : RequirementDynamicEvaluat
      * So to simplify the description to users, we will not show SI as available.
      */
     siRequirements = null
-    // once supported it should be: setOf(Delayed)
 )

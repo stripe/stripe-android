@@ -1,6 +1,6 @@
 package com.stripe.android.paymentsheet.forms
 
-internal object SofortRequirementDynamicEvaluator : RequirementDynamicEvaluator(
+internal object SofortRequirementEvaluator : RequirementEvaluator(
     piRequirements = setOf(Delayed),
 
     /**

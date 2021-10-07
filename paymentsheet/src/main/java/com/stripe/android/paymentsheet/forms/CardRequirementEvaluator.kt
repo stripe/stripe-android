@@ -1,6 +1,6 @@
 package com.stripe.android.paymentsheet.forms
 
-internal object CardRequirementDynamicEvaluator : RequirementDynamicEvaluator(
+internal object CardRequirementEvaluator : RequirementEvaluator(
     piRequirements = emptySet(),
     siRequirements = emptySet()
 )

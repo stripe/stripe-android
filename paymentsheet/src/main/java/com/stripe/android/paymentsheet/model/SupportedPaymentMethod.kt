@@ -6,16 +6,16 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.elements.LayoutSpec
 import com.stripe.android.paymentsheet.elements.SaveForFutureUseSpec
-import com.stripe.android.paymentsheet.forms.AfterpayClearpayRequirementStaticEvaluator
-import com.stripe.android.paymentsheet.forms.BancontactRequirementStaticEvaluator
-import com.stripe.android.paymentsheet.forms.CardRequirementStaticEvaluator
-import com.stripe.android.paymentsheet.forms.EpsRequirementStaticEvaluator
-import com.stripe.android.paymentsheet.forms.GiropayRequirementStaticEvaluator
-import com.stripe.android.paymentsheet.forms.IdealRequirementStaticEvaluator
-import com.stripe.android.paymentsheet.forms.P24RequirementStaticEvaluator
+import com.stripe.android.paymentsheet.forms.AfterpayClearpayRequirementEvaluator
+import com.stripe.android.paymentsheet.forms.BancontactRequirementEvaluator
+import com.stripe.android.paymentsheet.forms.CardRequirementEvaluator
+import com.stripe.android.paymentsheet.forms.EpsRequirementEvaluator
+import com.stripe.android.paymentsheet.forms.GiropayRequirementEvaluator
+import com.stripe.android.paymentsheet.forms.IdealRequirementEvaluator
+import com.stripe.android.paymentsheet.forms.P24RequirementEvaluator
 import com.stripe.android.paymentsheet.forms.RequirementEvaluator
-import com.stripe.android.paymentsheet.forms.SepaDebitRequirementStaticEvaluator
-import com.stripe.android.paymentsheet.forms.SofortRequirementStaticEvaluator
+import com.stripe.android.paymentsheet.forms.SepaDebitRequirementEvaluator
+import com.stripe.android.paymentsheet.forms.SofortRequirementEvaluator
 import com.stripe.android.paymentsheet.forms.afterpayClearpayForm
 import com.stripe.android.paymentsheet.forms.afterpayClearpayParamKey
 import com.stripe.android.paymentsheet.forms.bancontactForm
@@ -42,7 +42,7 @@ internal enum class SupportedPaymentMethod(
     val type: PaymentMethod.Type,
     @StringRes val displayNameResource: Int,
     @DrawableRes val iconResource: Int,
-    val requirements: RequirementEvaluator,
+    val requirementEvaluator: RequirementEvaluator,
     val paramKey: MutableMap<String, Any?>,
     val formSpec: LayoutSpec?,
 ) {
@@ -50,7 +50,7 @@ internal enum class SupportedPaymentMethod(
         PaymentMethod.Type.Card,
         R.string.stripe_paymentsheet_payment_method_card,
         R.drawable.stripe_ic_paymentsheet_pm_card,
-        CardRequirementStaticEvaluator,
+        CardRequirementEvaluator,
         mutableMapOf(),
         LayoutSpec.create(
             SaveForFutureUseSpec(emptyList())
@@ -61,7 +61,7 @@ internal enum class SupportedPaymentMethod(
         PaymentMethod.Type.Bancontact,
         R.string.stripe_paymentsheet_payment_method_bancontact,
         R.drawable.stripe_ic_paymentsheet_pm_bancontact,
-        BancontactRequirementStaticEvaluator,
+        BancontactRequirementEvaluator,
         bancontactParamKey,
         bancontactForm
     ),
@@ -70,7 +70,7 @@ internal enum class SupportedPaymentMethod(
         PaymentMethod.Type.Sofort,
         R.string.stripe_paymentsheet_payment_method_sofort,
         R.drawable.stripe_ic_paymentsheet_pm_klarna,
-        SofortRequirementStaticEvaluator,
+        SofortRequirementEvaluator,
         sofortParamKey,
         sofortForm
     ),
@@ -79,7 +79,7 @@ internal enum class SupportedPaymentMethod(
         PaymentMethod.Type.Ideal,
         R.string.stripe_paymentsheet_payment_method_ideal,
         R.drawable.stripe_ic_paymentsheet_pm_ideal,
-        IdealRequirementStaticEvaluator,
+        IdealRequirementEvaluator,
         idealParamKey,
         idealForm
     ),
@@ -88,7 +88,7 @@ internal enum class SupportedPaymentMethod(
         PaymentMethod.Type.SepaDebit,
         R.string.stripe_paymentsheet_payment_method_sepa_debit,
         R.drawable.stripe_ic_paymentsheet_pm_sepa_debit,
-        SepaDebitRequirementStaticEvaluator,
+        SepaDebitRequirementEvaluator,
         sepaDebitParamKey,
         sepaDebitForm
     ),
@@ -97,7 +97,7 @@ internal enum class SupportedPaymentMethod(
         PaymentMethod.Type.Eps,
         R.string.stripe_paymentsheet_payment_method_eps,
         R.drawable.stripe_ic_paymentsheet_pm_eps,
-        EpsRequirementStaticEvaluator,
+        EpsRequirementEvaluator,
         epsParamKey,
         epsForm
     ),
@@ -106,7 +106,7 @@ internal enum class SupportedPaymentMethod(
         PaymentMethod.Type.P24,
         R.string.stripe_paymentsheet_payment_method_p24,
         R.drawable.stripe_ic_paymentsheet_pm_p24,
-        P24RequirementStaticEvaluator,
+        P24RequirementEvaluator,
         p24ParamKey,
         p24Form
     ),
@@ -115,7 +115,7 @@ internal enum class SupportedPaymentMethod(
         PaymentMethod.Type.Giropay,
         R.string.stripe_paymentsheet_payment_method_giropay,
         R.drawable.stripe_ic_paymentsheet_pm_giropay,
-        GiropayRequirementStaticEvaluator,
+        GiropayRequirementEvaluator,
         giropayParamKey,
         giropayForm
     ),
@@ -123,7 +123,7 @@ internal enum class SupportedPaymentMethod(
         PaymentMethod.Type.AfterpayClearpay,
         R.string.stripe_paymentsheet_payment_method_afterpay_clearpay,
         R.drawable.stripe_ic_paymentsheet_pm_afterpay_clearpay,
-        AfterpayClearpayRequirementStaticEvaluator,
+        AfterpayClearpayRequirementEvaluator,
         afterpayClearpayParamKey,
         afterpayClearpayForm
     );
@@ -135,14 +135,5 @@ internal enum class SupportedPaymentMethod(
     companion object {
         fun fromCode(code: String?) =
             values().firstOrNull { it.type.code == code }
-
-        /**
-         * Defines all types of saved payment method supported on Payment Sheet.
-         *
-         * These are fetched from the
-         * [PaymentMethods API endpoint](https://stripe.com/docs/api/payment_methods/list) for
-         * returning customers.
-         */
-        val supportedSavedPaymentMethods = setOf("card")
     }
 }

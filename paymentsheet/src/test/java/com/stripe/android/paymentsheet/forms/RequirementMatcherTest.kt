@@ -30,6 +30,7 @@ class RequirementMatcherTest {
 
                 val newScenariosList = generatePaymentIntentScenarios()
                     .map { testInput ->
+
                         val formDescriptor = getSpecWithFullfilledRequirements(lpm, testInput.getIntent(lpm), testInput.getConfig())
                         val testOutput = TestOutput.create(
                             supportCustomerSavedCard = getSupportedSavedCustomerPMs(
@@ -39,7 +40,9 @@ class RequirementMatcherTest {
                             formExists = formDescriptor != null,
                             formShowsSaveCheckbox = formDescriptor?.showCheckbox,
                             formShowsCheckboxControlledFields = formDescriptor?.showCheckboxControlledFields,
-                            supportsAdding = getPMsToAdd(
+                            supportsAdding =// lpm == SupportedPaymentMethod.Card
+                            //TODO: When add in more PMS
+                            getPMsToAdd(
                                 testInput.getIntent(lpm), testInput.getConfig()
                             ).contains(lpm)
                         )
@@ -67,25 +70,30 @@ class RequirementMatcherTest {
         val scenarios = mutableListOf<PaymentIntentTestInput>()
         val customerStates = setOf(true, false)
         val setupFutureUsage = setOf(StripeIntent.Usage.OffSession, StripeIntent.Usage.OnSession, StripeIntent.Usage.OneTime)
+        val allowsDelayedPayment = setOf(true, false)
 
         customerStates.forEach { customer ->
             setupFutureUsage.forEach { usage ->
-                scenarios.addAll(
-                    listOf(
-                        PaymentIntentTestInput(
-                            hasCustomer = customer,
-                            intentLpms = setOf(SupportedPaymentMethod.Card.type.code),
-                            intentSetupFutureUsage = usage,
-                            intentHasShipping = false
-                        ),
-                        PaymentIntentTestInput(
-                            hasCustomer = customer,
-                            intentLpms = setOf(SupportedPaymentMethod.Card.type.code, SupportedPaymentMethod.Eps.type.code),
-                            intentSetupFutureUsage = usage,
-                            intentHasShipping = false,
+                allowsDelayedPayment.forEach { delayed ->
+                    scenarios.addAll(
+                        listOf(
+                            PaymentIntentTestInput(
+                                hasCustomer = customer,
+                                intentLpms = setOf(SupportedPaymentMethod.Card.type.code),
+                                intentSetupFutureUsage = usage,
+                                intentHasShipping = false,
+                                allowsDelayedPayment = delayed
+                            ),
+                            PaymentIntentTestInput(
+                                hasCustomer = customer,
+                                intentLpms = setOf(SupportedPaymentMethod.Card.type.code, SupportedPaymentMethod.Eps.type.code),
+                                intentSetupFutureUsage = usage,
+                                intentHasShipping = false,
+                                allowsDelayedPayment = delayed
+                            )
                         )
                     )
-                )
+                }
             }
         }
         return scenarios

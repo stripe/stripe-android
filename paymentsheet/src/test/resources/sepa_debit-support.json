@@ -35,6 +35,41 @@
   {
     "testInput": {
       "hasCustomer": true,
+      "intentSetupFutureUsage": "OffSession",
+      "intentLpms": [
+        "card"
+      ],
+      "intentHasShipping": false,
+      "allowsDelayedPayment": false
+    },
+    "testOutput": {
+      "supportCustomerSavedCard": false,
+      "formExists": false,
+      "supportsAdding": false,
+      "formType": "not available"
+    }
+  },
+  {
+    "testInput": {
+      "hasCustomer": true,
+      "intentSetupFutureUsage": "OffSession",
+      "intentLpms": [
+        "card",
+        "eps"
+      ],
+      "intentHasShipping": false,
+      "allowsDelayedPayment": false
+    },
+    "testOutput": {
+      "supportCustomerSavedCard": false,
+      "formExists": false,
+      "supportsAdding": false,
+      "formType": "not available"
+    }
+  },
+  {
+    "testInput": {
+      "hasCustomer": true,
       "intentSetupFutureUsage": "OnSession",
       "intentLpms": [
         "card"
@@ -68,6 +103,41 @@
   {
     "testInput": {
       "hasCustomer": true,
+      "intentSetupFutureUsage": "OnSession",
+      "intentLpms": [
+        "card"
+      ],
+      "intentHasShipping": false,
+      "allowsDelayedPayment": false
+    },
+    "testOutput": {
+      "supportCustomerSavedCard": false,
+      "formExists": false,
+      "supportsAdding": false,
+      "formType": "not available"
+    }
+  },
+  {
+    "testInput": {
+      "hasCustomer": true,
+      "intentSetupFutureUsage": "OnSession",
+      "intentLpms": [
+        "card",
+        "eps"
+      ],
+      "intentHasShipping": false,
+      "allowsDelayedPayment": false
+    },
+    "testOutput": {
+      "supportCustomerSavedCard": false,
+      "formExists": false,
+      "supportsAdding": false,
+      "formType": "not available"
+    }
+  },
+  {
+    "testInput": {
+      "hasCustomer": true,
       "intentSetupFutureUsage": "OneTime",
       "intentLpms": [
         "card"
@@ -75,7 +145,7 @@
       "intentHasShipping": false
     },
     "testOutput": {
-      "supportCustomerSavedCard": false,
+      "supportCustomerSavedCard": true,
       "formExists": true,
       "supportsAdding": true,
       "formType": "oneTimeUse"
@@ -92,10 +162,45 @@
       "intentHasShipping": false
     },
     "testOutput": {
-      "supportCustomerSavedCard": false,
+      "supportCustomerSavedCard": true,
       "formExists": true,
       "supportsAdding": true,
       "formType": "oneTimeUse"
+    }
+  },
+  {
+    "testInput": {
+      "hasCustomer": true,
+      "intentSetupFutureUsage": "OneTime",
+      "intentLpms": [
+        "card"
+      ],
+      "intentHasShipping": false,
+      "allowsDelayedPayment": false
+    },
+    "testOutput": {
+      "supportCustomerSavedCard": false,
+      "formExists": false,
+      "supportsAdding": false,
+      "formType": "not available"
+    }
+  },
+  {
+    "testInput": {
+      "hasCustomer": true,
+      "intentSetupFutureUsage": "OneTime",
+      "intentLpms": [
+        "card",
+        "eps"
+      ],
+      "intentHasShipping": false,
+      "allowsDelayedPayment": false
+    },
+    "testOutput": {
+      "supportCustomerSavedCard": false,
+      "formExists": false,
+      "supportsAdding": false,
+      "formType": "not available"
     }
   },
   {
@@ -134,6 +239,41 @@
   {
     "testInput": {
       "hasCustomer": false,
+      "intentSetupFutureUsage": "OffSession",
+      "intentLpms": [
+        "card"
+      ],
+      "intentHasShipping": false,
+      "allowsDelayedPayment": false
+    },
+    "testOutput": {
+      "supportCustomerSavedCard": false,
+      "formExists": false,
+      "supportsAdding": false,
+      "formType": "not available"
+    }
+  },
+  {
+    "testInput": {
+      "hasCustomer": false,
+      "intentSetupFutureUsage": "OffSession",
+      "intentLpms": [
+        "card",
+        "eps"
+      ],
+      "intentHasShipping": false,
+      "allowsDelayedPayment": false
+    },
+    "testOutput": {
+      "supportCustomerSavedCard": false,
+      "formExists": false,
+      "supportsAdding": false,
+      "formType": "not available"
+    }
+  },
+  {
+    "testInput": {
+      "hasCustomer": false,
       "intentSetupFutureUsage": "OnSession",
       "intentLpms": [
         "card"
@@ -167,6 +307,41 @@
   {
     "testInput": {
       "hasCustomer": false,
+      "intentSetupFutureUsage": "OnSession",
+      "intentLpms": [
+        "card"
+      ],
+      "intentHasShipping": false,
+      "allowsDelayedPayment": false
+    },
+    "testOutput": {
+      "supportCustomerSavedCard": false,
+      "formExists": false,
+      "supportsAdding": false,
+      "formType": "not available"
+    }
+  },
+  {
+    "testInput": {
+      "hasCustomer": false,
+      "intentSetupFutureUsage": "OnSession",
+      "intentLpms": [
+        "card",
+        "eps"
+      ],
+      "intentHasShipping": false,
+      "allowsDelayedPayment": false
+    },
+    "testOutput": {
+      "supportCustomerSavedCard": false,
+      "formExists": false,
+      "supportsAdding": false,
+      "formType": "not available"
+    }
+  },
+  {
+    "testInput": {
+      "hasCustomer": false,
       "intentSetupFutureUsage": "OneTime",
       "intentLpms": [
         "card"
@@ -174,7 +349,7 @@
       "intentHasShipping": false
     },
     "testOutput": {
-      "supportCustomerSavedCard": false,
+      "supportCustomerSavedCard": true,
       "formExists": true,
       "supportsAdding": true,
       "formType": "oneTimeUse"
@@ -191,10 +366,45 @@
       "intentHasShipping": false
     },
     "testOutput": {
-      "supportCustomerSavedCard": false,
+      "supportCustomerSavedCard": true,
       "formExists": true,
       "supportsAdding": true,
       "formType": "oneTimeUse"
+    }
+  },
+  {
+    "testInput": {
+      "hasCustomer": false,
+      "intentSetupFutureUsage": "OneTime",
+      "intentLpms": [
+        "card"
+      ],
+      "intentHasShipping": false,
+      "allowsDelayedPayment": false
+    },
+    "testOutput": {
+      "supportCustomerSavedCard": false,
+      "formExists": false,
+      "supportsAdding": false,
+      "formType": "not available"
+    }
+  },
+  {
+    "testInput": {
+      "hasCustomer": false,
+      "intentSetupFutureUsage": "OneTime",
+      "intentLpms": [
+        "card",
+        "eps"
+      ],
+      "intentHasShipping": false,
+      "allowsDelayedPayment": false
+    },
+    "testOutput": {
+      "supportCustomerSavedCard": false,
+      "formExists": false,
+      "supportsAdding": false,
+      "formType": "not available"
     }
   }
 ]

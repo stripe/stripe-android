@@ -1,6 +1,6 @@
 package com.stripe.android.paymentsheet.forms
 
-internal object AfterpayClearpayRequirementDynamicEvaluator : RequirementDynamicEvaluator(
+internal object AfterpayClearpayRequirementEvaluator : RequirementEvaluator(
     // This is null until we have after cancellation support.
     piRequirements = null,
 //    setOf(
