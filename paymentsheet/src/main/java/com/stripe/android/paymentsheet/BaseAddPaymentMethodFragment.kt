@@ -7,6 +7,8 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.annotation.VisibleForTesting
 import androidx.appcompat.view.ContextThemeWrapper
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.commit
@@ -150,6 +152,10 @@ internal abstract class BaseAddPaymentMethodFragment(
 
     @VisibleForTesting
     internal fun onPaymentMethodSelected(paymentMethod: SupportedPaymentMethod) {
+        // hide the soft keyboard.
+        ViewCompat.getWindowInsetsController(requireView())
+            ?.hide(WindowInsetsCompat.Type.ime())
+
         replacePaymentMethodFragment(paymentMethod)
     }
 
