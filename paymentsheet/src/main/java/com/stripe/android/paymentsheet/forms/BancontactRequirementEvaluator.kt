@@ -2,7 +2,6 @@ package com.stripe.android.paymentsheet.forms
 
 import com.stripe.android.paymentsheet.PaymentSheet
 
-
 internal object BancontactRequirementEvaluator : RequirementEvaluator(
     piRequirements = emptySet(),
 
@@ -38,6 +37,6 @@ internal object BancontactRequirementEvaluator : RequirementEvaluator(
      * [PaymentSheet.Configuration.allowsDelayedPaymentMethods] support as indicated in
      * the configuration.
      */
-    siRequirements = null, //emptySet(Delayed)
+    siRequirements = null, // emptySet(Delayed)
     confirmPMFromCustomer = false
 )
