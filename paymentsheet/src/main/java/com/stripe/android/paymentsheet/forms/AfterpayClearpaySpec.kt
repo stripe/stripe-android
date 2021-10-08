@@ -31,8 +31,6 @@ internal val afterpayClearpayBillingSection = SectionSpec(
     R.string.billing_details
 )
 
-// We will only require the country and name in the shipping section of
-// payment intents
 internal val afterpayClearpayForm = LayoutSpec.create(
     afterpayClearpayHeader,
     afterpayClearpayNameSection,

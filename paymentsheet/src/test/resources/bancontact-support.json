@@ -145,7 +145,7 @@
       "intentHasShipping": false
     },
     "testOutput": {
-      "supportCustomerSavedCard": true,
+      "supportCustomerSavedCard": false,
       "formExists": true,
       "supportsAdding": true,
       "formType": "oneTimeUse"
@@ -162,7 +162,7 @@
       "intentHasShipping": false
     },
     "testOutput": {
-      "supportCustomerSavedCard": true,
+      "supportCustomerSavedCard": false,
       "formExists": true,
       "supportsAdding": true,
       "formType": "oneTimeUse"
@@ -179,7 +179,7 @@
       "allowsDelayedPayment": false
     },
     "testOutput": {
-      "supportCustomerSavedCard": true,
+      "supportCustomerSavedCard": false,
       "formExists": true,
       "supportsAdding": true,
       "formType": "oneTimeUse"
@@ -197,7 +197,7 @@
       "allowsDelayedPayment": false
     },
     "testOutput": {
-      "supportCustomerSavedCard": true,
+      "supportCustomerSavedCard": false,
       "formExists": true,
       "supportsAdding": true,
       "formType": "oneTimeUse"
@@ -349,7 +349,7 @@
       "intentHasShipping": false
     },
     "testOutput": {
-      "supportCustomerSavedCard": true,
+      "supportCustomerSavedCard": false,
       "formExists": true,
       "supportsAdding": true,
       "formType": "oneTimeUse"
@@ -366,7 +366,7 @@
       "intentHasShipping": false
     },
     "testOutput": {
-      "supportCustomerSavedCard": true,
+      "supportCustomerSavedCard": false,
       "formExists": true,
       "supportsAdding": true,
       "formType": "oneTimeUse"
@@ -383,7 +383,7 @@
       "allowsDelayedPayment": false
     },
     "testOutput": {
-      "supportCustomerSavedCard": true,
+      "supportCustomerSavedCard": false,
       "formExists": true,
       "supportsAdding": true,
       "formType": "oneTimeUse"
@@ -401,7 +401,7 @@
       "allowsDelayedPayment": false
     },
     "testOutput": {
-      "supportCustomerSavedCard": true,
+      "supportCustomerSavedCard": false,
       "formExists": true,
       "supportsAdding": true,
       "formType": "oneTimeUse"

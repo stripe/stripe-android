@@ -35,11 +35,7 @@ internal sealed class ShippingIntentRequirement : PIRequirement {
 
 /**
  * This is a requirements matcher that operates off of the pi and si requirements
- * in the supported payment method.  It does not concern itself with deficencies in
- * supporting mandates or Payment Methods that are included in the PI, but don't
- * support userSelected PaymentIntents.
- *
- * Once these deficiencies are removed, these requirements can be used for simpler modeling.
+ * in the supported payment method.
  */
 internal sealed class RequirementEvaluator(
 
@@ -56,31 +52,56 @@ internal sealed class RequirementEvaluator(
      *   - If this is null SetupIntents and PaymentIntents with SFU set are not
      *   supported by this LPM. If SetupIntents are supported, but there are
      *   no additional requirements this must be an emptySet.
+     *   - In order to make sure the PM can be used when attached to a customer it
+     *   must include the requirements of the saved payment method.  For instance,
+     *   Bancontact is not delayed, but when saved it is represented as a SEPA paymnent
+     *   method which is delayed.  So there must be Delay support in order to meet
+     *   the requiremetns of this PM.  (There was a consideration of adding a SaveType
+     *   that in cases where SI or PIw/SFU it would also check the requirements of
+     *   the SaveType - not sure if the SaveType pi and/or si requirements should be checked).
      */
     val siRequirements: Set<SIRequirement>?,
+    val confirmPMFromCustomer: Boolean?,
 ) {
-
-    fun supportsCustomerSavedPM(
-        stripeIntent: StripeIntent,
-        config: PaymentSheet.Configuration?
-    ) = true
+    fun supportsCustomerSavedPM() = confirmPMFromCustomer == true
 
     fun supportsSI(
         stripeIntent: StripeIntent,
         config: PaymentSheet.Configuration?
     ) = checkRequirements(siRequirements, stripeIntent, config)
 
+    /**
+     * This checks if there is support using this payment method
+     * when SFU is already set in the PaymentIntent
+     */
     fun supportsPISfuSet(
         stripeIntent: StripeIntent,
         config: PaymentSheet.Configuration?
     ) = checkRequirements(siRequirements, stripeIntent, config) &&
         checkRequirements(piRequirements, stripeIntent, config)
 
+    /**
+     * This detects if there is support with using this with the PI
+     * even while not allowing the user to set SFU.
+     */
     fun supportsPISfuNotSetable(
         stripeIntent: StripeIntent,
         config: PaymentSheet.Configuration?
     ) = checkRequirements(piRequirements, stripeIntent, config)
 
+    /**
+     * This checks to see if this PM is supported with the given
+     * payment intent and configuration.
+     *
+     * The customer ID is required to be passed in the configuration
+     * (the sdk cannot know if the PI has a customer ID associated with it),
+     * so that we can guarantee to the user that the PM will be associated
+     * with their customer object AND accessible when opening PaymentSheet
+     * and seeing the saved PMs associate with their customer object.
+     *
+     * There is also a requirement here that all PMs in the Intent have support
+     * for reuse, this is due to a bug.
+     */
     fun supportsPISfuSettable(
         stripeIntent: StripeIntent,
         config: PaymentSheet.Configuration?

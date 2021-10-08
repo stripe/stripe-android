@@ -19,7 +19,7 @@ internal fun getSupportedSavedCustomerPMs(
     stripeIntent.paymentMethodTypes.mapNotNull {
         SupportedPaymentMethod.fromCode(it)
     }.filter {
-        it.requirementEvaluator.supportsCustomerSavedPM(stripeIntent, config) &&
+        it.requirementEvaluator.supportsCustomerSavedPM() &&
             getSpecWithFullfilledRequirements(it, stripeIntent, config) != null
     }
 
@@ -75,6 +75,10 @@ internal fun getSpecWithFullfilledRequirements(
         showCheckbox = true,
         showCheckboxControlledFields = true
     )
+
+    if (!stripeIntent.paymentMethodTypes.contains(paymentMethod.type.code)) {
+        return null
+    }
 
     return when (stripeIntent) {
         is PaymentIntent -> {

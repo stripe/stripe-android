@@ -218,7 +218,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     /**
      * Fetch the saved payment methods for the customer, if a [PaymentSheet.CustomerConfiguration]
      * was provided.
-     * It will fetch only the payment method types as defined in [getSupportedPaymentMethods].
+     * It will fetch only the payment method types as defined in [getSupportedSavedCustomerPMs].
      */
     @VisibleForTesting
     fun updatePaymentMethods(stripeIntent: StripeIntent) {
