@@ -155,7 +155,7 @@ class CardDataCollectionFragmentTest {
         createFragment(
             fragmentArgs = COMPOSE_FRAGMENT_ARGS.copy(
                 showCheckboxControlledFields = true,
-                showCheckbox = false
+                showCheckbox = true
             )
         ) { _, viewBinding ->
             assertThat(viewBinding.billingAddress.postalCodeView.text.toString())
@@ -170,7 +170,7 @@ class CardDataCollectionFragmentTest {
                 .isEqualTo("CA")
             assertThat(viewBinding.billingAddress.countryView.text.toString())
                 .isEqualTo("Germany")
-            assertThat(viewBinding.saveCardCheckbox.isVisible).isFalse()
+            assertThat(viewBinding.saveCardCheckbox.isVisible).isTrue()
             assertThat(viewBinding.saveCardCheckbox.isChecked).isTrue()
         }
     }
