@@ -382,7 +382,7 @@ class PaymentSheetAddPaymentMethodFragmentTest {
             )
             assertThat(paymentSelection).isInstanceOf(PaymentSelection.Saved::class.java)
 
-            fragment.onPaymentMethodSelected(SupportedPaymentMethod.Bancontact)
+            fragment.onPaymentMethodSelected(SupportedPaymentMethod.Card)
             idleLooper()
             assertThat(paymentSelection).isNull()
         }
