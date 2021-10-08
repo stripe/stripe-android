@@ -20,6 +20,8 @@
                 app:countryAutoCompleteStyle="@style/StripePaymentSheetCountryItem"
                 app:countryItemLayout="@layout/stripe_country_dropdown_item"
                 app:helperTextEnabled="false"
+                app:endIconDrawable="@drawable/stripe_ic_paymentsheet_ctil_chevron"
+                app:endIconTint="@null"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />

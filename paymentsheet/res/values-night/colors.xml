@@ -12,6 +12,7 @@
     <color name="stripe_paymentsheet_header_text">#99FFFFFF</color>
     <color name="stripe_paymentsheet_textinputlayout_hint">#61FFFFFF</color>
     <color name="stripe_paymentsheet_textinput_color">#DEFFFFFF</color>
+    <color name="stripe_paymentsheet_country_chevron_color">#ffffff</color>
     <color name="stripe_paymentsheet_payment_option_unselected_stroke">#1FFFFFFF</color>
     <color name="stripe_paymentsheet_payment_method_label_text">#DEFFFFFF</color>
     <color name="stripe_paymentsheet_payment_method_label_text_disabled">#61FFFFFF</color>
