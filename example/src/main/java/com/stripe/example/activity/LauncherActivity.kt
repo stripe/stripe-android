@@ -126,8 +126,8 @@ class LauncherActivity : AppCompatActivity() {
                 ConnectExampleActivity::class.java
             ),
             Item(
-                activity.getString(R.string.compose_example),
-                ComposeExampleActivity::class.java
+                "Ideal Example",
+                IDealTestActivity::class.java
             )
         )
 

@@ -92,7 +92,6 @@
     <string name="confirm_with_netbanking">Confirm with NetBanking</string>
     <string name="connect_example">Connect Example</string>
     <string name="simple_payment_method_example">Simple PaymentMethod Confirmation Example</string>
-    <string name="compose_example">Compose Example</string>
 
     <!-- <UPI> -->
     <string name="vpa_layout_hint">Virtual Payment Address (VPA)</string>
