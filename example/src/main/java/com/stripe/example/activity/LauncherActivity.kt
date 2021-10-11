@@ -126,9 +126,9 @@ class LauncherActivity : AppCompatActivity() {
                 ConnectExampleActivity::class.java
             ),
             Item(
-                "Ideal Example",
-                IDealTestActivity::class.java
-            )
+                "Dumy Activity",
+            DumyActivity::class.java
+        )
         )
 
         override fun onCreateViewHolder(viewGroup: ViewGroup, i: Int): ExamplesViewHolder {

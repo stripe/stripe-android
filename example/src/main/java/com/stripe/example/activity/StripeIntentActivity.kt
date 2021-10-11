@@ -167,28 +167,28 @@ abstract class StripeIntentActivity : AppCompatActivity() {
         )
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-
-        keyboardController.hide()
-
-        viewModel.status.value += "\n\nPayment authentication completed, getting result"
-        if (stripe.isPaymentResult(requestCode, data)) {
-            lifecycleScope.launch {
-                viewModel.paymentIntentResultLiveData.value = runCatching {
-                    // stripe.isPaymentResult already verifies data is not null
-                    stripe.getPaymentIntentResult(requestCode, data!!)
-                }
-            }
-        } else if (stripe.isSetupResult(requestCode, data)) {
-            lifecycleScope.launch {
-                viewModel.setupIntentResultLiveData.value = runCatching {
-                    // stripe.isSetupResult already verifies data is not null
-                    stripe.getSetupIntentResult(requestCode, data!!)
-                }
-            }
-        }
-    }
+//    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+//        super.onActivityResult(requestCode, resultCode, data)
+//
+//        keyboardController.hide()
+//
+//        viewModel.status.value += "\n\nPayment authentication completed, getting result"
+//        if (stripe.isPaymentResult(requestCode, data)) {
+//            lifecycleScope.launch {
+//                viewModel.paymentIntentResultLiveData.value = runCatching {
+//                    // stripe.isPaymentResult already verifies data is not null
+//                    stripe.getPaymentIntentResult(requestCode, data!!)
+//                }
+//            }
+//        } else if (stripe.isSetupResult(requestCode, data)) {
+//            lifecycleScope.launch {
+//                viewModel.setupIntentResultLiveData.value = runCatching {
+//                    // stripe.isSetupResult already verifies data is not null
+//                    stripe.getSetupIntentResult(requestCode, data!!)
+//                }
+//            }
+//        }
+//    }
 
     protected open fun onConfirmSuccess(result: PaymentIntentResult) {
         val paymentIntent = result.intent
