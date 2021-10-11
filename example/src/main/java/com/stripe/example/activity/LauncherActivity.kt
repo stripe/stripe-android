@@ -127,8 +127,8 @@ class LauncherActivity : AppCompatActivity() {
             ),
             Item(
                 "Dumy Activity",
-            DumyActivity::class.java
-        )
+                DumyActivity::class.java
+            )
         )
 
         override fun onCreateViewHolder(viewGroup: ViewGroup, i: Int): ExamplesViewHolder {
