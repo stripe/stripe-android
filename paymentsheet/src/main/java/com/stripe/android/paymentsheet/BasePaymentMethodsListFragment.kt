@@ -28,6 +28,7 @@ internal abstract class BasePaymentMethodsListFragment(
     protected lateinit var config: FragmentConfig
     private lateinit var adapter: PaymentOptionsAdapter
     private var editMenuItem: MenuItem? = null
+
     @VisibleForTesting
     internal var isEditing = false
         set(value) {
@@ -58,6 +59,7 @@ internal abstract class BasePaymentMethodsListFragment(
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setupRecyclerView(FragmentPaymentsheetPaymentMethodsListBinding.bind(view))
+        isEditing = savedInstanceState?.getBoolean(IS_EDITING) ?: false
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
@@ -76,15 +78,6 @@ internal abstract class BasePaymentMethodsListFragment(
                 true
             }
             else -> super.onOptionsItemSelected(item)
-        }
-    }
-
-    override fun onViewStateRestored(savedInstanceState: Bundle?) {
-        super.onViewStateRestored(savedInstanceState)
-        savedInstanceState?.let {
-            if (it.getBoolean(IS_EDITING)) {
-                isEditing = true
-            }
         }
     }
 
