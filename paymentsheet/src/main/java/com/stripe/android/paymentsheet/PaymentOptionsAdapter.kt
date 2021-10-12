@@ -35,13 +35,7 @@ internal class PaymentOptionsAdapter(
     @VisibleForTesting
     internal var items: List<Item> = emptyList()
     private var selectedItemPosition: Int = NO_POSITION
-    internal var isEditing = false
-        set(value) {
-            if (value != field) {
-                field = value
-                notifyDataSetChanged()
-            }
-        }
+    private var isEditing = false
 
     internal val selectedItem: Item? get() = items.getOrNull(selectedItemPosition)
 
@@ -53,6 +47,13 @@ internal class PaymentOptionsAdapter(
 
     init {
         setHasStableIds(true)
+    }
+
+    fun setEditing(editing: Boolean) {
+        if (editing != isEditing) {
+            isEditing = editing
+            notifyDataSetChanged()
+        }
     }
 
     fun setItems(

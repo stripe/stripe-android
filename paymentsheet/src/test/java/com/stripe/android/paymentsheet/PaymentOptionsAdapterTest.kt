@@ -166,7 +166,7 @@ class PaymentOptionsAdapterTest {
                 savedSelection = SavedSelection.PaymentMethod(paymentMethods[1].id!!)
             )
         )
-        adapter.isEditing = true
+        adapter.setEditing(true)
 
         val googlePayViewHolder = adapter.onCreateViewHolder(
             FrameLayout(context),
