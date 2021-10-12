@@ -68,6 +68,10 @@ internal class Stripe3ds2TransactionViewModel @Inject constructor(
                 Stripe3ds2Fingerprint(args.nextActionData)
             )
         }.getOrElse {
+            analyticsRequestExecutor.executeAsync(
+                analyticsRequestFactory.createRequest(AnalyticsEvent.Auth3ds2RequestParamsFailed)
+            )
+
             NextStep.Complete(
                 PaymentFlowResult.Unvalidated(
                     exception = StripeException.create(it)
