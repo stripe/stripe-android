@@ -8,7 +8,7 @@
         android:id="@+id/tl_card_number"
         style="@style/Stripe.CardMultilineWidget.TextInputLayout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="@dimen/stripe_cmw_edit_text_minheight"
         android:hint="@string/acc_label_card_number"
         android:layout_marginTop="@dimen/stripe_add_card_element_vertical_margin">
 
@@ -34,7 +34,7 @@
             android:id="@+id/tl_expiry"
             style="@style/Stripe.CardMultilineWidget.TextInputLayout"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="@dimen/stripe_cmw_edit_text_minheight"
             android:layout_marginTop="@dimen/stripe_add_card_element_vertical_margin"
             android:layout_marginEnd="@dimen/stripe_add_card_expiry_middle_margin"
             android:layout_weight="1"
@@ -48,8 +48,7 @@
                 android:imeOptions="actionNext"
                 android:digits="@string/stripe_expiration_date_allowlist"
                 android:nextFocusDown="@+id/et_cvc"
-                android:nextFocusForward="@+id/et_cvc"
-                android:minHeight="@dimen/stripe_cmw_edit_text_minheight" />
+                android:nextFocusForward="@+id/et_cvc"/>
 
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -57,7 +56,7 @@
             android:id="@+id/tl_cvc"
             style="@style/Stripe.CardMultilineWidget.TextInputLayout"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="@dimen/stripe_cmw_edit_text_minheight"
             android:layout_marginTop="@dimen/stripe_add_card_element_vertical_margin"
             android:layout_marginEnd="@dimen/stripe_add_card_expiry_middle_margin"
             android:layout_weight="1"
@@ -69,8 +68,7 @@
                 android:layout_height="wrap_content"
                 android:imeOptions="actionNext"
                 android:nextFocusDown="@+id/et_postal_code"
-                android:nextFocusForward="@+id/et_postal_code"
-                android:minHeight="@dimen/stripe_cmw_edit_text_minheight" />
+                android:nextFocusForward="@+id/et_postal_code"/>
 
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -78,7 +76,7 @@
             android:id="@+id/tl_postal_code"
             style="@style/Stripe.CardMultilineWidget.TextInputLayout"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="@dimen/stripe_cmw_edit_text_minheight"
             android:layout_weight="1"
             android:layout_marginTop="@dimen/stripe_add_card_element_vertical_margin"
             app:placeholderText="@string/stripe_postalcode_placeholder">
@@ -87,8 +85,7 @@
                 android:id="@+id/et_postal_code"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:imeOptions="actionDone"
-                android:minHeight="@dimen/stripe_cmw_edit_text_minheight" />
+                android:imeOptions="actionDone"/>
 
         </com.google.android.material.textfield.TextInputLayout>
     </LinearLayout>

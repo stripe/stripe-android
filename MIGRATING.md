@@ -1,5 +1,7 @@
 # Migration Guide
-
+## Migrating from versions < 18.0.0
+- Changes to `PaymentSheet.Configuration`
+    - If you're modifying values in your `Configuration` class after instantiating it then you won't be able to build your project. You should create the object with the final values or use the new [`Builder`](https://github.com/stripe/stripe-android/blob/master/paymentsheet/src/main/java/com/stripe/android/paymentsheet/PaymentSheet.kt#L130). 
 ## Migrating from versions < 17.0.0
 - Changes to `Stripe`
     - `ComponentActivity` is now required for payment confirmation methods to make operations
