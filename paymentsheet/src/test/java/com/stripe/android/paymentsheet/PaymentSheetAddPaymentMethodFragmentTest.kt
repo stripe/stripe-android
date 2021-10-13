@@ -335,7 +335,6 @@ class PaymentSheetAddPaymentMethodFragmentTest {
         }
     }
 
-    @Ignore("Disabled until more payment methods are supported")
     @Test
     fun `when PaymentIntent allows multiple supported payment methods it should show payment method selector`() {
         val paymentIntent = PaymentIntentFixtures.PI_SUCCEEDED.copy(
