@@ -51,7 +51,7 @@ class PaymentSheetListFragmentTest {
     }
 
     @Test
-    fun `resets payment method selection when shown`() {
+    fun `recovers payment method selection when shown`() {
         val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
         val paymentSelection = PaymentSelection.Saved(paymentMethod)
 
@@ -72,6 +72,26 @@ class PaymentSheetListFragmentTest {
         scenario.onFragment {
             assertThat(activityViewModel(it).selection.value)
                 .isEqualTo(paymentSelection)
+        }
+    }
+
+    @Test
+    fun `recovers edit state when shown`() {
+        val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
+
+        createScenario(
+            fragmentConfig = FRAGMENT_CONFIG.copy(
+                isGooglePayReady = true,
+                savedSelection = SavedSelection.PaymentMethod(paymentMethod.id.orEmpty())
+            ),
+            initialState = Lifecycle.State.INITIALIZED
+        ).onFragment { fragment ->
+            fragment.sheetViewModel._paymentMethods.value = listOf(paymentMethod)
+        }.moveToState(Lifecycle.State.STARTED).onFragment { fragment ->
+            assertThat(fragment.isEditing).isFalse()
+            fragment.isEditing = true
+        }.recreate().onFragment {
+            assertThat(it.isEditing).isTrue()
         }
     }
 
@@ -228,7 +248,7 @@ class PaymentSheetListFragmentTest {
             val adapter = recyclerView(fragment).adapter as PaymentOptionsAdapter
             assertThat(adapter.itemCount).isEqualTo(4)
 
-            adapter.toggleEditing()
+            fragment.isEditing = true
             adapter.paymentMethodDeleteListener(
                 adapter.items[3] as PaymentOptionsAdapter.Item.SavedPaymentMethod
             )

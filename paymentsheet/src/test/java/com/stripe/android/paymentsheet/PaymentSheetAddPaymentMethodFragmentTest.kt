@@ -277,6 +277,69 @@ class PaymentSheetAddPaymentMethodFragmentTest {
 
     @Ignore("Disabled until more payment methods are supported")
     @Test
+    fun `when multiple supported payment methods and configuration changes it should restore selected payment method`() {
+        val paymentIntent = PaymentIntentFixtures.PI_SUCCEEDED.copy(
+            paymentMethodTypes = listOf("card", "bancontact")
+        )
+        createFragment(stripeIntent = paymentIntent) { fragment, viewBinding ->
+            assertThat(
+                fragment.childFragmentManager.findFragmentById(
+                    viewBinding.paymentMethodFragmentContainer.id
+                )
+            ).isInstanceOf(CardDataCollectionFragment::class.java)
+
+            fragment.onPaymentMethodSelected(SupportedPaymentMethod.Bancontact)
+
+            idleLooper()
+
+            val addedFragment = fragment.childFragmentManager.findFragmentById(
+                viewBinding.paymentMethodFragmentContainer.id
+            )
+
+            assertThat(addedFragment).isInstanceOf(ComposeFormDataCollectionFragment::class.java)
+            assertThat(
+                addedFragment?.arguments?.getParcelable<FormFragmentArguments>(
+                    ComposeFormDataCollectionFragment.EXTRA_CONFIG
+                )
+            )
+                .isEqualTo(
+                    FormFragmentArguments(
+                        SupportedPaymentMethod.Bancontact.name,
+                        saveForFutureUseInitialVisibility = true,
+                        saveForFutureUseInitialValue = true,
+                        merchantName = PaymentSheetFixtures.MERCHANT_DISPLAY_NAME,
+                        amount = createAmount(),
+                        injectorKey = DUMMY_INJECTOR_KEY
+                    )
+                )
+        }.recreate().onFragment { fragment ->
+            val addedFragment = fragment.childFragmentManager.findFragmentById(
+                FragmentPaymentsheetAddPaymentMethodBinding.bind(
+                    requireNotNull(fragment.view)
+                ).paymentMethodFragmentContainer.id
+            )
+
+            assertThat(addedFragment).isInstanceOf(ComposeFormDataCollectionFragment::class.java)
+            assertThat(
+                addedFragment?.arguments?.getParcelable<FormFragmentArguments>(
+                    ComposeFormDataCollectionFragment.EXTRA_CONFIG
+                )
+            )
+                .isEqualTo(
+                    FormFragmentArguments(
+                        SupportedPaymentMethod.Bancontact.name,
+                        saveForFutureUseInitialVisibility = true,
+                        saveForFutureUseInitialValue = true,
+                        merchantName = PaymentSheetFixtures.MERCHANT_DISPLAY_NAME,
+                        amount = createAmount(),
+                        injectorKey = DUMMY_INJECTOR_KEY
+                    )
+                )
+        }
+    }
+
+    @Ignore("Disabled until more payment methods are supported")
+    @Test
     fun `when PaymentIntent allows multiple supported payment methods it should show payment method selector`() {
         val paymentIntent = PaymentIntentFixtures.PI_SUCCEEDED.copy(
             paymentMethodTypes = listOf("card", "sofort")
@@ -449,26 +512,24 @@ class PaymentSheetAddPaymentMethodFragmentTest {
         fragmentConfig: FragmentConfig? = FragmentConfigFixtures.DEFAULT,
         stripeIntent: StripeIntent? = PaymentIntentFixtures.PI_WITH_SHIPPING,
         onReady: (PaymentSheetAddPaymentMethodFragment, FragmentPaymentsheetAddPaymentMethodBinding) -> Unit
-    ) {
-        launchFragmentInContainer<PaymentSheetAddPaymentMethodFragment>(
-            bundleOf(
-                PaymentSheetActivity.EXTRA_FRAGMENT_CONFIG to fragmentConfig,
-                PaymentSheetActivity.EXTRA_STARTER_ARGS to args
-            ),
-            R.style.StripePaymentSheetDefaultTheme,
-            factory = PaymentSheetFragmentFactory(eventReporter),
-            initialState = Lifecycle.State.INITIALIZED
-        ).onFragment { fragment ->
-            // Mock sheetViewModel loading the StripeIntent before the Fragment is created
-            fragment.sheetViewModel.setStripeIntent(stripeIntent)
-        }.moveToState(Lifecycle.State.STARTED)
-            .onFragment { fragment ->
-                onReady(
-                    fragment,
-                    FragmentPaymentsheetAddPaymentMethodBinding.bind(
-                        requireNotNull(fragment.view)
-                    )
+    ) = launchFragmentInContainer<PaymentSheetAddPaymentMethodFragment>(
+        bundleOf(
+            PaymentSheetActivity.EXTRA_FRAGMENT_CONFIG to fragmentConfig,
+            PaymentSheetActivity.EXTRA_STARTER_ARGS to args
+        ),
+        R.style.StripePaymentSheetDefaultTheme,
+        factory = PaymentSheetFragmentFactory(eventReporter),
+        initialState = Lifecycle.State.INITIALIZED
+    ).onFragment { fragment ->
+        // Mock sheetViewModel loading the StripeIntent before the Fragment is created
+        fragment.sheetViewModel.setStripeIntent(stripeIntent)
+    }.moveToState(Lifecycle.State.STARTED)
+        .onFragment { fragment ->
+            onReady(
+                fragment,
+                FragmentPaymentsheetAddPaymentMethodBinding.bind(
+                    requireNotNull(fragment.view)
                 )
-            }
-    }
+            )
+        }
 }
