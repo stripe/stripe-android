@@ -7,6 +7,8 @@ plugins {
     id 'org.jetbrains.kotlin.plugin.serialization' version '1.5.31'
 }
 
+group='com.github.stripe.stripe-android'
+
 android {
     compileSdkVersion rootProject.ext.compileSdkVersion
     buildToolsVersion rootProject.ext.buildToolsVersion

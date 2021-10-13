@@ -7,6 +7,8 @@ plugins {
     id 'org.jetbrains.kotlin.plugin.parcelize'
 }
 
+group='com.github.stripe.stripe-android'
+
 assemble.dependsOn('lint')
 check.dependsOn('checkstyle')
 

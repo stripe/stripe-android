@@ -6,6 +6,8 @@ plugins {
     id 'maven-publish'
 }
 
+group='com.github.stripe.stripe-android'
+
 dependencies {
     api project(':payments-core')
     api project(':paymentsheet')
