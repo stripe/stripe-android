@@ -273,8 +273,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
                     )
                 }
                 excludeRequiresMandate
-            }.filter { it == SupportedPaymentMethod.Card }
-                .toList()
+            }.toList()
         }
 
         return emptyList()

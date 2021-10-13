@@ -70,11 +70,10 @@ class PaymentSheetAddPaymentMethodFragmentTest {
         }
     }
 
-    @Ignore("Disabled until more payment methods are supported")
     @Test
     fun `when processing then payment methods UI should be disabled`() {
         val paymentIntent = mock<PaymentIntent>().also {
-            whenever(it.paymentMethodTypes).thenReturn(listOf("card", "sofort"))
+            whenever(it.paymentMethodTypes).thenReturn(listOf("card", "bancontact"))
         }
         createFragment(stripeIntent = paymentIntent) { fragment, viewBinding ->
             fragment.sheetViewModel._processing.value = true
@@ -275,11 +274,10 @@ class PaymentSheetAddPaymentMethodFragmentTest {
         }
     }
 
-    @Ignore("Disabled until more payment methods are supported")
     @Test
     fun `when PaymentIntent allows multiple supported payment methods it should show payment method selector`() {
         val paymentIntent = PaymentIntentFixtures.PI_SUCCEEDED.copy(
-            paymentMethodTypes = listOf("card", "sofort")
+            paymentMethodTypes = listOf("card", "bancontact")
         )
         createFragment(stripeIntent = paymentIntent) { _, viewBinding ->
             assertThat(viewBinding.paymentMethodsRecycler.isVisible).isTrue()

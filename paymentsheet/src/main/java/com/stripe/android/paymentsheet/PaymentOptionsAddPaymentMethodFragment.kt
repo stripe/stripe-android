@@ -6,7 +6,7 @@ import com.stripe.android.paymentsheet.analytics.EventReporter
 
 internal class PaymentOptionsAddPaymentMethodFragment(
     eventReporter: EventReporter
-) : com.stripe.android.paymentsheet.BaseAddPaymentMethodFragment(eventReporter) {
+) : BaseAddPaymentMethodFragment(eventReporter) {
     override val viewModelFactory: ViewModelProvider.Factory = PaymentOptionsViewModel.Factory(
         { requireActivity().application },
         {
