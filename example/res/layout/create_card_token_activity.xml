@@ -29,8 +29,7 @@
             android:id="@+id/card_input_widget"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:cardTextErrorColor="@android:color/holo_red_dark"
-            app:imeLandscapeFullScreen="true" />
+            app:cardTextErrorColor="@android:color/holo_red_dark"/>
 
         <Button
             android:id="@+id/create_token_button"

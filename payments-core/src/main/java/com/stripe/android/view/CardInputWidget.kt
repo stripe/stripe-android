@@ -287,12 +287,12 @@ class CardInputWidget @JvmOverloads constructor(
             postalCodeEditText.isEnabled = true
             postalCodeTextInputLayout.visibility = View.VISIBLE
 
-            cvcEditText.imeOptions = EditorInfo.IME_ACTION_NEXT
+            cvcEditText.imeOptions = EditorInfo.IME_ACTION_NEXT or EditorInfo.IME_FLAG_NO_FULLSCREEN
         } else {
             postalCodeEditText.isEnabled = false
             postalCodeTextInputLayout.visibility = View.GONE
 
-            cvcEditText.imeOptions = EditorInfo.IME_ACTION_DONE
+            cvcEditText.imeOptions = EditorInfo.IME_ACTION_DONE or EditorInfo.IME_FLAG_NO_FULLSCREEN
         }
         updatePostalRequired()
     }
@@ -681,7 +681,6 @@ class CardInputWidget @JvmOverloads constructor(
         cardBrandView.tintColorInt = cardNumberEditText.hintTextColors.defaultColor
         var cardHintText: String? = null
         var shouldRequestFocus = true
-        var imeLandscapeFullScreen = true
 
         context.withStyledAttributes(
             attrs,
@@ -700,10 +699,6 @@ class CardInputWidget @JvmOverloads constructor(
                 R.styleable.CardInputView_android_focusedByDefault,
                 true
             )
-            imeLandscapeFullScreen = getBoolean(
-                R.styleable.CardInputView_imeLandscapeFullScreen,
-                true
-            )
         }
 
         cardHintText?.let {
@@ -711,13 +706,6 @@ class CardInputWidget @JvmOverloads constructor(
         }
 
         currentFields.forEach { it.setErrorColor(errorColorInt) }
-
-        if (!imeLandscapeFullScreen) {
-            cardNumberEditText.imeOptions = EditorInfo.IME_FLAG_NO_FULLSCREEN
-            expiryDateEditText.imeOptions = EditorInfo.IME_FLAG_NO_FULLSCREEN
-            cvcEditText.imeOptions = EditorInfo.IME_FLAG_NO_FULLSCREEN
-            postalCodeEditText.imeOptions = EditorInfo.IME_FLAG_NO_FULLSCREEN
-        }
 
         cardNumberEditText.internalFocusChangeListeners.add { _, hasFocus ->
             if (hasFocus) {

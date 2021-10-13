@@ -43,7 +43,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@android:color/transparent"
-                android:imeOptions="actionNext"
+                android:imeOptions="actionNext|flagNoFullscreen"
                 android:hint="@string/card_number_hint" />
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -75,7 +75,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@android:color/transparent"
-                android:imeOptions="actionNext"
+                android:imeOptions="actionNext|flagNoFullscreen"
                 android:digits="@string/stripe_expiration_date_allowlist"
                 android:hint="@string/expiry_date_hint" />
         </com.google.android.material.textfield.TextInputLayout>
@@ -103,7 +103,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@android:color/transparent"
-                android:imeOptions="actionDone" />
+                android:imeOptions="actionDone|flagNoFullscreen" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
@@ -130,7 +130,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@android:color/transparent"
-                android:imeOptions="actionDone"
+                android:imeOptions="actionDone|flagNoFullscreen"
                 android:enabled="false" />
         </com.google.android.material.textfield.TextInputLayout>
 
