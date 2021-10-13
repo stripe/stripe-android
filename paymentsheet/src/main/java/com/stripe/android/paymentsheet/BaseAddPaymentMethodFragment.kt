@@ -7,6 +7,8 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.annotation.VisibleForTesting
 import androidx.appcompat.view.ContextThemeWrapper
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.commit
@@ -31,7 +33,6 @@ import com.stripe.android.paymentsheet.paymentdatacollection.TransformToPaymentM
 import com.stripe.android.paymentsheet.ui.AddPaymentMethodsFragmentFactory
 import com.stripe.android.paymentsheet.ui.AnimationConstants
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 internal abstract class BaseAddPaymentMethodFragment(
     private val eventReporter: EventReporter
@@ -67,7 +68,6 @@ internal abstract class BaseAddPaymentMethodFragment(
         )
     }
 
-    @ExperimentalCoroutinesApi
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -153,6 +153,10 @@ internal abstract class BaseAddPaymentMethodFragment(
 
     @VisibleForTesting
     internal fun onPaymentMethodSelected(paymentMethod: SupportedPaymentMethod) {
+        // hide the soft keyboard.
+        ViewCompat.getWindowInsetsController(requireView())
+            ?.hide(WindowInsetsCompat.Type.ime())
+
         replacePaymentMethodFragment(paymentMethod)
     }
 

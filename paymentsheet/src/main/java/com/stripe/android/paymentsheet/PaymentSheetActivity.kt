@@ -17,7 +17,6 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.appbar.MaterialToolbar
-import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContract
 import com.stripe.android.paymentsheet.PaymentSheetViewModel.CheckoutIdentifier
 import com.stripe.android.paymentsheet.databinding.ActivityPaymentSheetBinding
@@ -32,33 +31,26 @@ import java.security.InvalidParameterException
 
 internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
     @VisibleForTesting
+    internal val viewBinding by lazy {
+        ActivityPaymentSheetBinding.inflate(layoutInflater)
+    }
+
+    @VisibleForTesting
     internal var viewModelFactory: ViewModelProvider.Factory =
         PaymentSheetViewModel.Factory(
             { application },
             { requireNotNull(starterArgs) }
         )
 
-    @VisibleForTesting
-    internal val bottomSheetBehavior by lazy { BottomSheetBehavior.from(bottomSheet) }
-
-    override val bottomSheetController: BottomSheetController by lazy {
-        BottomSheetController(bottomSheetBehavior = bottomSheetBehavior)
-    }
-
-    @VisibleForTesting
-    internal val viewBinding by lazy {
-        ActivityPaymentSheetBinding.inflate(layoutInflater)
-    }
-
     override val viewModel: PaymentSheetViewModel by viewModels { viewModelFactory }
-
-    private val fragmentContainerId: Int
-        @IdRes
-        get() = viewBinding.fragmentContainer.id
 
     private val starterArgs: PaymentSheetContract.Args? by lazy {
         PaymentSheetContract.Args.fromIntent(intent)
     }
+
+    private val fragmentContainerId: Int
+        @IdRes
+        get() = viewBinding.fragmentContainer.id
 
     override val rootView: ViewGroup by lazy { viewBinding.root }
     override val bottomSheet: ViewGroup by lazy { viewBinding.bottomSheet }
@@ -112,7 +104,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
                 viewModel::onGooglePayResult
             )
         )
-        viewModel.fetchStripeIntent()
+        viewModel.maybeFetchStripeIntent()
 
         starterArgs.statusBarColor?.let {
             window.statusBarColor = it
@@ -140,9 +132,10 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
             }
         }
 
-        viewModel.fragmentConfig.observe(this) { config ->
+        viewModel.fragmentConfigEvent.observe(this) { event ->
+            val config = event.getContentIfNotHandled()
             if (config != null) {
-                val target = if (config.paymentMethods.isEmpty()) {
+                val target = if (viewModel.paymentMethods.value.isNullOrEmpty()) {
                     PaymentSheetViewModel.TransitionTarget.AddPaymentMethodSheet(config)
                 } else {
                     PaymentSheetViewModel.TransitionTarget.SelectSavedPaymentMethod(config)
@@ -229,11 +222,6 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
                     )
                 }
             }
-        }
-
-        fragmentContainerParent.doOnNextLayout {
-            // Update visibility on next layout to avoid a two-step UI update
-            appbar.isVisible = true
         }
     }
 

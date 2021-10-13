@@ -4,8 +4,8 @@ import android.app.Application
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.Logger
+import com.stripe.android.PaymentConfiguration
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethodCreateParams
@@ -22,6 +22,7 @@ import com.stripe.android.paymentsheet.model.FragmentConfigFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
+import com.stripe.android.utils.TestUtils.idleLooper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestCoroutineDispatcher
@@ -224,6 +225,27 @@ internal class PaymentOptionsViewModelTest {
 
         viewModel.resolveTransitionTarget(fragmentConfig)
         assertThat(transitionTarget).hasSize(2)
+    }
+
+    @Test
+    fun `removePaymentMethod removes it from payment methods list`() = runBlockingTest {
+        val cards = PaymentMethodFixtures.createCards(3)
+        val viewModel = PaymentOptionsViewModel(
+            args = PAYMENT_OPTION_CONTRACT_ARGS.copy(paymentMethods = cards),
+            prefsRepositoryFactory = { FakePrefsRepository() },
+            eventReporter = eventReporter,
+            customerRepository = customerRepository,
+            workContext = testDispatcher,
+            application = ApplicationProvider.getApplicationContext(),
+            logger = Logger.noop(),
+            injectorKey = DUMMY_INJECTOR_KEY
+        )
+
+        viewModel.removePaymentMethod(cards[1])
+        idleLooper()
+
+        assertThat(viewModel.paymentMethods.value)
+            .containsExactly(cards[0], cards[2])
     }
 
     @Test

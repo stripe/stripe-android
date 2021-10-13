@@ -8,6 +8,7 @@ import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.asFlow
 import androidx.lifecycle.distinctUntilChanged
+import androidx.lifecycle.map
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.Logger
 import com.stripe.android.model.PaymentIntent
@@ -15,6 +16,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.core.injection.InjectorKey
+import com.stripe.android.paymentsheet.BaseAddPaymentMethodFragment
 import com.stripe.android.paymentsheet.BasePaymentMethodsListFragment
 import com.stripe.android.paymentsheet.PaymentOptionsActivity
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -35,7 +37,6 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import org.jetbrains.annotations.TestOnly
 import kotlin.coroutines.CoroutineContext
-import com.stripe.android.paymentsheet.BaseAddPaymentMethodFragment
 
 /**
  * Base `ViewModel` for activities that use `BottomSheet`.
@@ -66,7 +67,13 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
 
     internal var supportedPaymentMethods = emptyList<SupportedPaymentMethod>()
 
-    protected val _paymentMethods = MutableLiveData<List<PaymentMethod>>()
+    @VisibleForTesting
+    internal val _paymentMethods = MutableLiveData<List<PaymentMethod>>()
+
+    /**
+     * The list of saved payment methods for the current customer.
+     * Value is null until it's loaded, and non-null (could be empty) after that.
+     */
     internal val paymentMethods: LiveData<List<PaymentMethod>> = _paymentMethods
 
     @VisibleForTesting
@@ -138,7 +145,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
         }
     }
 
-    val fragmentConfig = MediatorLiveData<FragmentConfig?>().apply {
+    val fragmentConfigEvent = MediatorLiveData<FragmentConfig?>().apply {
         listOf(
             savedSelection,
             stripeIntent,
@@ -149,13 +156,17 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
                 value = createFragmentConfig()
             }
         }
-    }.distinctUntilChanged()
+    }.distinctUntilChanged().map {
+        Event(it)
+    }
 
     private fun createFragmentConfig(): FragmentConfig? {
         val stripeIntentValue = stripeIntent.value
-        val paymentMethodsValue = paymentMethods.value
         val isGooglePayReadyValue = isGooglePayReady.value
         val savedSelectionValue = savedSelection.value
+        // List of Payment Methods is not passed in the config but we still wait for it to be loaded
+        // before adding the Fragment.
+        val paymentMethodsValue = paymentMethods.value
 
         return if (
             stripeIntentValue != null &&
@@ -165,7 +176,6 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
         ) {
             FragmentConfig(
                 stripeIntent = stripeIntentValue,
-                paymentMethods = paymentMethodsValue,
                 isGooglePayReady = isGooglePayReadyValue,
                 savedSelection = savedSelectionValue
             )
@@ -280,11 +290,17 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
 
     fun removePaymentMethod(paymentMethod: PaymentMethod) = runBlocking {
         launch {
-            if (customerConfig != null && paymentMethod.id != null) {
-                customerRepository.detachPaymentMethod(
-                    customerConfig,
-                    requireNotNull(paymentMethod.id)
-                )
+            paymentMethod.id?.let { paymentMethodId ->
+                _paymentMethods.value = _paymentMethods.value?.filter {
+                    it.id != paymentMethodId
+                }
+
+                customerConfig?.let {
+                    customerRepository.detachPaymentMethod(
+                        it,
+                        paymentMethodId
+                    )
+                }
             }
         }
     }

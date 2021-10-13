@@ -29,6 +29,8 @@
     <color name="stripe_paymentsheet_elements_background_disabled">#F8F8F8</color>
     <color name="stripe_paymentsheet_textinputlayout_hint">#661A1A1A</color>
     <color name="stripe_paymentsheet_textinput_color">#E61A1A1A</color>
+    <color name="stripe_paymentsheet_country_chevron_color">#000000</color>
+    <color name="stripe_paymentsheet_save_checkbox_color">#000000</color>
     <color name="stripe_paymentsheet_toolbar_items_color">#000000</color>
     <color name="stripe_paymentsheet_add_payment_method_form_stroke">@android:color/transparent
     </color>
@@ -43,7 +45,7 @@
     <color name="stripe_paymentsheet_googlepay_divider_text">#99000000</color>
 
     <color name="stripe_paymentsheet_testmode_background">#FFDE94</color>
-    <color name="stripe_paymentsheet_testmode_text">#A66912</color>
+    <color name="stripe_paymentsheet_testmode_text">#8E5710</color>
 
     <!-- CardFormView -->
 

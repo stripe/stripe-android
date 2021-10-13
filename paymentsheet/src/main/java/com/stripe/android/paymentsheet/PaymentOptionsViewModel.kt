@@ -10,10 +10,11 @@ import com.stripe.android.Logger
 import com.stripe.android.payments.core.injection.IOContext
 import com.stripe.android.payments.core.injection.Injectable
 import com.stripe.android.payments.core.injection.InjectorKey
-import com.stripe.android.payments.core.injection.WeakMapInjectorRegistry
+import com.stripe.android.payments.core.injection.injectWithFallback
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.injection.DaggerPaymentOptionsViewModelFactoryComponent
 import com.stripe.android.paymentsheet.injection.PaymentOptionsViewModelSubcomponent
+import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
@@ -100,7 +101,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
         _paymentOptionResult.value = PaymentOptionResult.Succeeded(paymentSelection)
     }
 
-    fun resolveTransitionTarget(config: com.stripe.android.paymentsheet.model.FragmentConfig) {
+    fun resolveTransitionTarget(config: FragmentConfig) {
         if (shouldTransitionToUnsavedCard) {
             hasTransitionToUnsavedCard = true
             transitionTo(
@@ -112,21 +113,21 @@ internal class PaymentOptionsViewModel @Inject constructor(
     }
 
     internal sealed class TransitionTarget {
-        abstract val fragmentConfig: com.stripe.android.paymentsheet.model.FragmentConfig
+        abstract val fragmentConfig: FragmentConfig
 
         // User has saved PM's and is selected
         data class SelectSavedPaymentMethod(
-            override val fragmentConfig: com.stripe.android.paymentsheet.model.FragmentConfig
+            override val fragmentConfig: FragmentConfig
         ) : TransitionTarget()
 
         // User has saved PM's and is adding a new one
         data class AddPaymentMethodFull(
-            override val fragmentConfig: com.stripe.android.paymentsheet.model.FragmentConfig
+            override val fragmentConfig: FragmentConfig
         ) : TransitionTarget()
 
         // User has no saved PM's
         data class AddPaymentMethodSheet(
-            override val fragmentConfig: com.stripe.android.paymentsheet.model.FragmentConfig
+            override val fragmentConfig: FragmentConfig
         ) : TransitionTarget()
     }
 
@@ -154,24 +155,10 @@ internal class PaymentOptionsViewModel @Inject constructor(
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
             val application = applicationSupplier()
             val starterArgs = starterArgsSupplier()
-
-            val logger = Logger.getInstance(starterArgs.enableLogging)
-            WeakMapInjectorRegistry.retrieve(starterArgsSupplier().injectorKey)?.let {
-                logger.info(
-                    "Injector available, " +
-                        "injecting dependencies into PaymentOptionsViewModel.Factory"
-                )
-                it.inject(this)
-            } ?: run {
-                logger.info(
-                    "Injector unavailable, " +
-                        "initializing dependencies of PaymentOptionsViewModel.Factory"
-                )
-                fallbackInitialize(
-                    FallbackInitializeParam(application, starterArgs.productUsage)
-                )
-            }
-
+            injectWithFallback(
+                starterArgsSupplier().injectorKey,
+                FallbackInitializeParam(application, starterArgs.productUsage)
+            )
             return subComponentBuilderProvider.get().application(application).args(starterArgs)
                 .build().viewModel as T
         }

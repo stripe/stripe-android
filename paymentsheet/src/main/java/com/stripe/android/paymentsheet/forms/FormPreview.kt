@@ -26,13 +26,13 @@ internal fun FormInternalPreview() {
     val addressFieldElementRepository = AddressFieldElementRepository()
     val bankRepository = BankRepository()
 
-    addressFieldElementRepository.init(
+    addressFieldElementRepository.initialize(
         mapOf(
             "ZZ" to parseAddressesSchema(ZZ_ADDRESS)!!
         )
     )
 
-    bankRepository.init(
+    bankRepository.initialize(
         mapOf(
             SupportedBankType.Ideal to IDEAL_BANKS,
             SupportedBankType.Eps to EPS_Banks,

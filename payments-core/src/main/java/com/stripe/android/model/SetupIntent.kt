@@ -190,7 +190,7 @@ data class SetupIntent internal constructor(
 
         init {
             require(isMatch(value)) {
-                "Invalid client secret: $value"
+                "Invalid Setup Intent client secret: $value"
             }
         }
 

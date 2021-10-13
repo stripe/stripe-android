@@ -6,7 +6,6 @@ internal object FragmentConfigFixtures {
 
     val DEFAULT = FragmentConfig(
         stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-        paymentMethods = emptyList(),
         isGooglePayReady = true,
         savedSelection = SavedSelection.None
     )

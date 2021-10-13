@@ -10,7 +10,6 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.savedstate.SavedStateRegistryOwner
-import com.stripe.android.Logger
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.exception.APIException
 import com.stripe.android.model.ConfirmPaymentIntentParams
@@ -33,6 +32,7 @@ import com.stripe.android.payments.core.injection.Injectable
 import com.stripe.android.payments.core.injection.PaymentLauncherViewModelSubcomponent
 import com.stripe.android.payments.core.injection.UIContext
 import com.stripe.android.payments.core.injection.WeakMapInjectorRegistry
+import com.stripe.android.payments.core.injection.injectWithFallback
 import com.stripe.android.view.AuthActivityStarterHost
 import dagger.Lazy
 import kotlinx.coroutines.launch
@@ -276,22 +276,16 @@ internal class PaymentLauncherViewModel @Inject constructor(
             handle: SavedStateHandle
         ): T {
             val arg = argsSupplier()
-            val logger = Logger.getInstance(arg.enableLogging)
-            WeakMapInjectorRegistry.retrieve(arg.injectorKey)?.let {
-                logger.info("Injector available, injecting dependencies into PaymentLauncherViewModel.Factory")
-                it.inject(this)
-            } ?: run {
-                logger.info("Injector unavailable, initializing dependencies of PaymentLauncherViewModel.Factory")
-                fallbackInitialize(
-                    FallbackInitializeParam(
-                        applicationSupplier(),
-                        arg.enableLogging,
-                        arg.publishableKey,
-                        arg.stripeAccountId,
-                        arg.productUsage
-                    )
+            injectWithFallback(
+                arg.injectorKey,
+                FallbackInitializeParam(
+                    applicationSupplier(),
+                    arg.enableLogging,
+                    arg.publishableKey,
+                    arg.stripeAccountId,
+                    arg.productUsage
                 )
-            }
+            )
 
             return subComponentBuilderProvider.get()
                 .isPaymentIntent(

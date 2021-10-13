@@ -41,7 +41,7 @@ internal abstract class BasePaymentMethodsListFragment(
         }
         this.config = nullableConfig
 
-        setHasOptionsMenu(config.paymentMethods.isNotEmpty())
+        setHasOptionsMenu(!sheetViewModel.paymentMethods.value.isNullOrEmpty())
         eventReporter.onShowExistingPaymentOptions()
     }
 
@@ -93,7 +93,11 @@ internal abstract class BasePaymentMethodsListFragment(
             viewBinding.recycler.adapter = it
         }
 
-        adapter.update(config, sheetViewModel.selection.value)
+        adapter.setItems(
+            config,
+            sheetViewModel.paymentMethods.value.orEmpty(),
+            sheetViewModel.selection.value
+        )
 
         sheetViewModel.processing.observe(viewLifecycleOwner) { isProcessing ->
             adapter.isEnabled = !isProcessing

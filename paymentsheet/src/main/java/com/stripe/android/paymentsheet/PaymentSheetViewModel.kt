@@ -12,7 +12,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.distinctUntilChanged
 import androidx.lifecycle.viewModelScope
-import com.stripe.android.BuildConfig
 import com.stripe.android.Logger
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
@@ -29,16 +28,18 @@ import com.stripe.android.payments.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.payments.core.injection.IOContext
 import com.stripe.android.payments.core.injection.Injectable
 import com.stripe.android.payments.core.injection.InjectorKey
-import com.stripe.android.payments.core.injection.WeakMapInjectorRegistry
+import com.stripe.android.payments.core.injection.injectWithFallback
 import com.stripe.android.payments.paymentlauncher.PaymentLauncher
 import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.elements.ResourceRepository
 import com.stripe.android.paymentsheet.injection.DaggerPaymentSheetLauncherComponent
 import com.stripe.android.paymentsheet.injection.PaymentSheetViewModelModule
 import com.stripe.android.paymentsheet.injection.PaymentSheetViewModelSubcomponent
 import com.stripe.android.paymentsheet.model.ConfirmStripeIntentParamsFactory
+import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
@@ -81,6 +82,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     private val stripeIntentValidator: StripeIntentValidator,
     customerRepository: CustomerRepository,
     prefsRepository: PrefsRepository,
+    resourceRepository: ResourceRepository,
     private val paymentLauncherFactory: StripePaymentLauncherAssistedFactory,
     private val googlePayPaymentMethodLauncherFactory: GooglePayPaymentMethodLauncherFactory,
     logger: Logger,
@@ -186,20 +188,23 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     }
 
     /**
-     * Fetch the [StripeIntent] for the client secret received as parameter. If successful,
-     * continues through validation and fetching the saved payment methods for the customer.
+     * Fetch the [StripeIntent] for the client secret received in the initialization arguments, if
+     * not fetched yet. If successful, continues through validation and fetching the saved payment
+     * methods for the customer.
      */
-    fun fetchStripeIntent() {
-        viewModelScope.launch {
-            runCatching {
-                stripeIntentRepository.get(args.clientSecret)
-            }.fold(
-                onSuccess = ::onStripeIntentFetchResponse,
-                onFailure = {
-                    setStripeIntent(null)
-                    onFatal(it)
-                }
-            )
+    internal fun maybeFetchStripeIntent() {
+        if (stripeIntent.value == null) {
+            viewModelScope.launch {
+                runCatching {
+                    stripeIntentRepository.get(args.clientSecret)
+                }.fold(
+                    onSuccess = ::onStripeIntentFetchResponse,
+                    onFailure = {
+                        setStripeIntent(null)
+                        onFatal(it)
+                    }
+                )
+            }
         }
     }
 
@@ -428,21 +433,21 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     }
 
     internal sealed class TransitionTarget {
-        abstract val fragmentConfig: com.stripe.android.paymentsheet.model.FragmentConfig
+        abstract val fragmentConfig: FragmentConfig
 
         // User has saved PM's and is selected
         data class SelectSavedPaymentMethod(
-            override val fragmentConfig: com.stripe.android.paymentsheet.model.FragmentConfig
+            override val fragmentConfig: FragmentConfig
         ) : TransitionTarget()
 
         // User has saved PM's and is adding a new one
         data class AddPaymentMethodFull(
-            override val fragmentConfig: com.stripe.android.paymentsheet.model.FragmentConfig
+            override val fragmentConfig: FragmentConfig
         ) : TransitionTarget()
 
         // User has no saved PM's
         data class AddPaymentMethodSheet(
-            override val fragmentConfig: com.stripe.android.paymentsheet.model.FragmentConfig
+            override val fragmentConfig: FragmentConfig
         ) : TransitionTarget()
     }
 
@@ -460,24 +465,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-            val application = applicationSupplier()
             val args = starterArgsSupplier()
-
-            val logger = Logger.getInstance(BuildConfig.DEBUG)
-
-            WeakMapInjectorRegistry.retrieve(args.injectorKey)?.let {
-                logger.info(
-                    "Injector available, injecting dependencies into " +
-                        "PaymentSheetViewModel.Factory"
-                )
-                it.inject(this)
-            } ?: run {
-                logger.info(
-                    "Injector unavailable, initializing dependencies of " +
-                        "PaymentSheetViewModel.Factory by rebuilding the entire dagger graph"
-                )
-                fallbackInitialize(FallbackInitializeParam(application))
-            }
+            injectWithFallback(args.injectorKey, FallbackInitializeParam(applicationSupplier()))
             return subComponentBuilderProvider.get().paymentSheetViewModelModule(
                 PaymentSheetViewModelModule(args)
             ).build().viewModel as T

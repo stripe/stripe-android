@@ -24,7 +24,8 @@ import kotlin.coroutines.CoroutineContext
     modules = [
         AuthenticationModule::class,
         Stripe3DSAuthenticatorModule::class,
-        WeChatPayAuthenticatorModule::class
+        WeChatPayAuthenticatorModule::class,
+        LoggingModule::class
     ]
 )
 internal interface AuthenticationComponent {

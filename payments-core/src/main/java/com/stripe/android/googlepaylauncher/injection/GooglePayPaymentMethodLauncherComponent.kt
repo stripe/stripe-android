@@ -7,6 +7,7 @@ import com.stripe.android.networking.AnalyticsRequestFactory
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.core.injection.ENABLE_LOGGING
 import com.stripe.android.payments.core.injection.IOContext
+import com.stripe.android.payments.core.injection.LoggingModule
 import com.stripe.android.payments.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.payments.core.injection.STRIPE_ACCOUNT_ID
 import dagger.BindsInstance
@@ -22,7 +23,8 @@ import kotlin.coroutines.CoroutineContext
 @Singleton
 @Component(
     modules = [
-        GooglePayPaymentMethodLauncherModule::class
+        GooglePayPaymentMethodLauncherModule::class,
+        LoggingModule::class
     ]
 )
 internal abstract class GooglePayPaymentMethodLauncherComponent {

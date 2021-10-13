@@ -319,7 +319,7 @@ internal class PaymentSheetViewModelTest {
 
     @Test
     fun `Google Pay checkout cancelled returns to Ready state`() {
-        viewModel.fetchStripeIntent()
+        viewModel.maybeFetchStripeIntent()
         viewModel.updateSelection(PaymentSelection.GooglePay)
         viewModel.checkout(CheckoutIdentifier.AddFragmentTopGooglePay)
 
@@ -379,7 +379,7 @@ internal class PaymentSheetViewModelTest {
 
     @Test
     fun `Google Pay checkout failed returns to Ready state and shows error`() {
-        viewModel.fetchStripeIntent()
+        viewModel.maybeFetchStripeIntent()
         viewModel.updateSelection(PaymentSelection.GooglePay)
         viewModel.checkout(CheckoutIdentifier.AddFragmentTopGooglePay)
 
@@ -525,7 +525,7 @@ internal class PaymentSheetViewModelTest {
     @Test
     fun `onPaymentResult() should update emit API errors`() =
         testDispatcher.runBlockingTest {
-            viewModel.fetchStripeIntent()
+            viewModel.maybeFetchStripeIntent()
 
             val viewStateList = mutableListOf<PaymentSheetViewState>()
             viewModel.viewState.observeForever {
@@ -553,11 +553,22 @@ internal class PaymentSheetViewModelTest {
         viewModel.viewState.observeForever {
             viewState = it
         }
-        viewModel.fetchStripeIntent()
+        viewModel.maybeFetchStripeIntent()
         assertThat(viewState)
             .isEqualTo(
                 PaymentSheetViewState.Reset(null)
             )
+    }
+
+    @Test
+    fun `fetchPaymentIntent() should only fetch if intent is null`() {
+        viewModel.setStripeIntent(PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD)
+        var viewState: PaymentSheetViewState? = null
+        viewModel.viewState.observeForever {
+            viewState = it
+        }
+        viewModel.maybeFetchStripeIntent()
+        assertThat(viewState).isNull()
     }
 
     @Test
@@ -585,7 +596,7 @@ internal class PaymentSheetViewModelTest {
         viewModel.paymentSheetResult.observeForever {
             result = it
         }
-        viewModel.fetchStripeIntent()
+        viewModel.maybeFetchStripeIntent()
         assertThat((result as? PaymentSheetResult.Failed)?.error?.message)
             .isEqualTo("Could not parse PaymentIntent.")
     }
@@ -603,7 +614,7 @@ internal class PaymentSheetViewModelTest {
         viewModel.paymentSheetResult.observeForever {
             result = it
         }
-        viewModel.fetchStripeIntent()
+        viewModel.maybeFetchStripeIntent()
         assertThat((result as? PaymentSheetResult.Failed)?.error?.message)
             .isEqualTo(
                 "PaymentIntent with confirmation_method='automatic' is required.\n" +
@@ -623,7 +634,7 @@ internal class PaymentSheetViewModelTest {
         viewModel.paymentSheetResult.observeForever {
             result = it
         }
-        viewModel.fetchStripeIntent()
+        viewModel.maybeFetchStripeIntent()
         assertThat((result as? PaymentSheetResult.Failed)?.error?.message)
             .isEqualTo(
                 "A PaymentIntent with status='requires_payment_method' or 'requires_action` is required.\n" +
@@ -758,11 +769,12 @@ internal class PaymentSheetViewModelTest {
 
     @Test
     fun `fragmentConfig when all data is ready should emit value`() {
-        viewModel.fetchStripeIntent()
+        viewModel.maybeFetchStripeIntent()
         viewModel._isGooglePayReady.value = true
 
         val configs = mutableListOf<FragmentConfig>()
-        viewModel.fragmentConfig.observeForever { config ->
+        viewModel.fragmentConfigEvent.observeForever { event ->
+            val config = event.getContentIfNotHandled()
             if (config != null) {
                 configs.add(config)
             }
@@ -786,7 +798,7 @@ internal class PaymentSheetViewModelTest {
         assertThat(isEnabled)
             .isFalse()
 
-        viewModel.fetchStripeIntent()
+        viewModel.maybeFetchStripeIntent()
         assertThat(isEnabled)
             .isTrue()
 
@@ -797,7 +809,7 @@ internal class PaymentSheetViewModelTest {
 
     @Test
     fun `Should show amount is true for PaymentIntent`() {
-        viewModel.fetchStripeIntent()
+        viewModel.maybeFetchStripeIntent()
 
         assertThat(viewModel.isProcessingPaymentIntent)
             .isTrue()
@@ -956,6 +968,7 @@ internal class PaymentSheetViewModelTest {
             StripeIntentValidator(),
             customerRepository,
             prefsRepository,
+            mock(),
             mock(),
             mock(),
             Logger.noop(),

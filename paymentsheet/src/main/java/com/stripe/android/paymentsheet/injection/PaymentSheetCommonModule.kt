@@ -3,7 +3,6 @@ package com.stripe.android.paymentsheet.injection
 import android.content.Context
 import android.content.res.Resources
 import androidx.core.os.LocaleListCompat
-import com.stripe.android.Logger
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.payments.core.injection.ENABLE_LOGGING
 import com.stripe.android.payments.core.injection.PUBLISHABLE_KEY
@@ -64,8 +63,8 @@ internal abstract class PaymentSheetCommonModule {
 
         @Provides
         @Named(PUBLISHABLE_KEY)
-        fun providePublishableKey(paymentConfiguration: Lazy<PaymentConfiguration>):
-            () -> String = { paymentConfiguration.get().publishableKey }
+        fun providePublishableKey(paymentConfiguration: Lazy<PaymentConfiguration>): () -> String =
+            { paymentConfiguration.get().publishableKey }
 
         @Provides
         @Named(STRIPE_ACCOUNT_ID)
@@ -76,11 +75,6 @@ internal abstract class PaymentSheetCommonModule {
         @Singleton
         @Named(ENABLE_LOGGING)
         fun provideEnabledLogging(): Boolean = BuildConfig.DEBUG
-
-        @Provides
-        @Singleton
-        fun provideLogger(@Named(ENABLE_LOGGING) enableLogging: Boolean) =
-            Logger.getInstance(enableLogging)
 
         @Provides
         @Singleton
