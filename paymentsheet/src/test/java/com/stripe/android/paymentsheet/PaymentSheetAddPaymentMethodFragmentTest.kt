@@ -37,7 +37,6 @@ import com.stripe.android.paymentsheet.ui.PaymentSheetFragmentFactory
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.utils.TestUtils.idleLooper
 import org.junit.Before
-import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
