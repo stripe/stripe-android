@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet
 
+import android.annotation.SuppressLint
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
@@ -8,11 +9,12 @@ import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
 import kotlin.math.roundToInt
 import kotlin.properties.Delegates
 
+@SuppressLint("NotifyDataSetChanged")
 internal class AddPaymentMethodsAdapter(
     private val paymentMethods: List<SupportedPaymentMethod>,
-    val paymentMethodSelectedListener: (paymentMethod: SupportedPaymentMethod) -> Unit
+    private var selectedItemPosition: Int,
+    val paymentMethodSelectedListener: (paymentMethod: SupportedPaymentMethod) -> Unit,
 ) : RecyclerView.Adapter<AddPaymentMethodsAdapter.AddPaymentMethodViewHolder>() {
-    private var selectedItemPosition = 0
 
     internal var isEnabled: Boolean by Delegates.observable(true) { _, oldValue, newValue ->
         if (oldValue != newValue) {

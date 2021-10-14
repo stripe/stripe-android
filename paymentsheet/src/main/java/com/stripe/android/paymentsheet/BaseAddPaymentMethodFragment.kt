@@ -83,12 +83,16 @@ internal abstract class BaseAddPaymentMethodFragment(
             }
         )
 
+        val selectedPaymentMethodIndex = paymentMethods.indexOf(
+            SupportedPaymentMethod.fromCode(savedInstanceState?.getString(SELECTED_PAYMENT_METHOD))
+        ).takeUnless { it == -1 } ?: 0
+
         if (paymentMethods.size > 1) {
-            setupRecyclerView(viewBinding, paymentMethods)
+            setupRecyclerView(viewBinding, paymentMethods, selectedPaymentMethodIndex)
         }
 
         if (paymentMethods.isNotEmpty()) {
-            replacePaymentMethodFragment(paymentMethods[0])
+            replacePaymentMethodFragment(paymentMethods[selectedPaymentMethodIndex])
         }
 
         sheetViewModel.processing.observe(viewLifecycleOwner) { isProcessing ->
@@ -115,7 +119,8 @@ internal abstract class BaseAddPaymentMethodFragment(
 
     private fun setupRecyclerView(
         viewBinding: FragmentPaymentsheetAddPaymentMethodBinding,
-        paymentMethods: List<SupportedPaymentMethod>
+        paymentMethods: List<SupportedPaymentMethod>,
+        selectedItemPosition: Int
     ) {
         viewBinding.paymentMethodsRecycler.isVisible = true
         // The default item animator conflicts with `animateLayoutChanges`, causing a crash when
@@ -138,6 +143,7 @@ internal abstract class BaseAddPaymentMethodFragment(
 
         val adapter = AddPaymentMethodsAdapter(
             paymentMethods,
+            selectedItemPosition,
             ::onPaymentMethodSelected
         ).also {
             viewBinding.paymentMethodsRecycler.adapter = it
@@ -156,6 +162,11 @@ internal abstract class BaseAddPaymentMethodFragment(
             ?.hide(WindowInsetsCompat.Type.ime())
 
         replacePaymentMethodFragment(paymentMethod)
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        outState.putString(SELECTED_PAYMENT_METHOD, selectedPaymentMethod.type.code)
+        super.onSaveInstanceState(outState)
     }
 
     private fun replacePaymentMethodFragment(paymentMethod: SupportedPaymentMethod) {
@@ -194,6 +205,8 @@ internal abstract class BaseAddPaymentMethodFragment(
         childFragmentManager.findFragmentById(R.id.payment_method_fragment_container)
 
     companion object {
+        private const val SELECTED_PAYMENT_METHOD = "selected_pm"
+
         private fun fragmentForPaymentMethod(paymentMethod: SupportedPaymentMethod) =
             when (paymentMethod) {
                 SupportedPaymentMethod.Card -> CardDataCollectionFragment::class.java

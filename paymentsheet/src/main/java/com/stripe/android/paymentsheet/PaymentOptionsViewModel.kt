@@ -14,6 +14,7 @@ import com.stripe.android.payments.core.injection.injectWithFallback
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.injection.DaggerPaymentOptionsViewModelFactoryComponent
 import com.stripe.android.paymentsheet.injection.PaymentOptionsViewModelSubcomponent
+import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
@@ -102,7 +103,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
         _paymentOptionResult.value = PaymentOptionResult.Succeeded(paymentSelection)
     }
 
-    fun resolveTransitionTarget(config: com.stripe.android.paymentsheet.model.FragmentConfig) {
+    fun resolveTransitionTarget(config: FragmentConfig) {
         if (shouldTransitionToUnsavedCard) {
             hasTransitionToUnsavedCard = true
             transitionTo(
@@ -114,21 +115,21 @@ internal class PaymentOptionsViewModel @Inject constructor(
     }
 
     internal sealed class TransitionTarget {
-        abstract val fragmentConfig: com.stripe.android.paymentsheet.model.FragmentConfig
+        abstract val fragmentConfig: FragmentConfig
 
         // User has saved PM's and is selected
         data class SelectSavedPaymentMethod(
-            override val fragmentConfig: com.stripe.android.paymentsheet.model.FragmentConfig
+            override val fragmentConfig: FragmentConfig
         ) : TransitionTarget()
 
         // User has saved PM's and is adding a new one
         data class AddPaymentMethodFull(
-            override val fragmentConfig: com.stripe.android.paymentsheet.model.FragmentConfig
+            override val fragmentConfig: FragmentConfig
         ) : TransitionTarget()
 
         // User has no saved PM's
         data class AddPaymentMethodSheet(
-            override val fragmentConfig: com.stripe.android.paymentsheet.model.FragmentConfig
+            override val fragmentConfig: FragmentConfig
         ) : TransitionTarget()
     }
 

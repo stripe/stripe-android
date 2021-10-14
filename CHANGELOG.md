@@ -1,4 +1,11 @@
 # CHANGELOG
+## 18.0.0 - 2021-10-07
+This release includes several bug fixes, introduces a test mode indicator, makes a builder class for [payment sheet configuration](https://github.com/stripe/stripe-android/blob/master/paymentsheet/src/main/java/com/stripe/android/paymentsheet/PaymentSheet.kt#L130) and makes config properties immutable. 
+* [4202](https://github.com/stripe/stripe-android/pull/4202) CardInputWidget.CardValidCallback will consider the postal code in validation
+* [4183](https://github.com/stripe/stripe-android/pull/4183) Fix address pre-populate on line 1
+* [4192](https://github.com/stripe/stripe-android/pull/4192) Remove internal on CardUtils
+* [4214](https://github.com/stripe/stripe-android/pull/4214) Create test mode indicator
+* [4265](https://github.com/stripe/stripe-android/pull/4265) Make config properties immutable, create Builder
 ## 17.2.0 - 2021-09-10
 This release includes several bug fixes, introduces [PaymentLauncher](https://github.com/stripe/stripe-android/blob/master/payments-core/src/main/java/com/stripe/android/payments/paymentlauncher/PaymentLauncher.kt) as a replacement of [https://github.com/stripe/stripe-android/blob/master/payments-core/src/main/java/com/stripe/android/Stripe.kt](https://github.com/stripe/stripe-android/blob/master/payments-core/src/main/java/com/stripe/android/Stripe.kt) see example in [StripeIntentActivity](https://github.com/stripe/stripe-android/blob/master/example/src/main/java/com/stripe/example/activity/StripeIntentActivity.kt) on [line 28](https://github.com/stripe/stripe-android/blob/master/example/src/main/java/com/stripe/example/activity/StripeIntentActivity.kt#L28)
 * [4157](https://github.com/stripe/stripe-android/pull/4157) Pass GooglePayLauncher arguments to DefaultGooglePayRepository
@@ -428,6 +435,9 @@ See the [migration guide](https://github.com/stripe/stripe-android/blob/master/M
     * See [Advanced fraud detection](https://stripe.com/docs/disputes/prevention/advanced-fraud-detection) for more details
 
 ## 14.3.0 - 2020-04-20
+*This version of the SDK is not compliant with Google Play's Prominent Disclosure & Consent Requirements. The non-compliant code was unused and has been removed.*
+*Please upgrade to version [14.4.0](https://github.com/stripe/stripe-android/blob/master/CHANGELOG.md#1440---2020-04-28) or greater.*
+
 * [#2334](https://github.com/stripe/stripe-android/pull/2334) Add support for BACS Debit in `PaymentMethodCreateParams`
 * [#2335](https://github.com/stripe/stripe-android/pull/2335) Add support for BACS Debit Payment Method
 * [#2336](https://github.com/stripe/stripe-android/pull/2336) Improve `ShippingInfoWidget`
@@ -453,7 +463,7 @@ See the [migration guide](https://github.com/stripe/stripe-android/blob/master/M
 
 ## 14.2.1 - 2020-03-26
 *This version of the SDK is not compliant with Google Play's Prominent Disclosure & Consent Requirements. The non-compliant code was unused and has been removed.*
-*Please upgrade to version [14.3.0](https://github.com/stripe/stripe-android/blob/master/CHANGELOG.md#1430---2020-04-20) or greater.*
+*Please upgrade to version [14.4.0](https://github.com/stripe/stripe-android/blob/master/CHANGELOG.md#1440---2020-04-28) or greater.*
 
 * [#2299](https://github.com/stripe/stripe-android/pull/2299) Make `SourceParams.OwnerParams` constructor public and properties mutable
 * [#2304](https://github.com/stripe/stripe-android/pull/2304) Force Canadian postal codes to be uppercase
@@ -462,7 +472,7 @@ See the [migration guide](https://github.com/stripe/stripe-android/blob/master/M
 
 ## 14.2.0 - 2020-03-18
 *This version of the SDK is not compliant with Google Play's Prominent Disclosure & Consent Requirements. The non-compliant code was unused and has been removed.*
-*Please upgrade to version [14.3.0](https://github.com/stripe/stripe-android/blob/master/CHANGELOG.md#1430---2020-04-20) or greater.*
+*Please upgrade to version [14.4.0](https://github.com/stripe/stripe-android/blob/master/CHANGELOG.md#1440---2020-04-28) or greater.*
 
 * [#2278](https://github.com/stripe/stripe-android/pull/2278) Add ability to require US ZIP code in `CardInputWidget` and `CardMultilineWidget`
 * [#2279](https://github.com/stripe/stripe-android/pull/2279) Default `CardMultilineWidget` to global postal code configuration
@@ -478,7 +488,7 @@ See the [migration guide](https://github.com/stripe/stripe-android/blob/master/M
 
 ## 14.1.1 - 2020-03-09
 *This version of the SDK is not compliant with Google Play's Prominent Disclosure & Consent Requirements. The non-compliant code was unused and has been removed.*
-*Please upgrade to version [14.3.0](https://github.com/stripe/stripe-android/blob/master/CHANGELOG.md#1430---2020-04-20) or greater.*
+*Please upgrade to version [14.4.0](https://github.com/stripe/stripe-android/blob/master/CHANGELOG.md#1440---2020-04-28) or greater.*
 
 * [#2257](https://github.com/stripe/stripe-android/pull/2257) Disable Kotlin Synthetics and migrate to [view binding](https://developer.android.com/topic/libraries/view-binding)
 * [#2260](https://github.com/stripe/stripe-android/pull/2260) Update Kotlin Gradle Plugin to `1.3.70`
@@ -488,7 +498,7 @@ See the [migration guide](https://github.com/stripe/stripe-android/blob/master/M
 
 ## 14.1.0 - 2020-03-02
 *This version of the SDK is not compliant with Google Play's Prominent Disclosure & Consent Requirements. The non-compliant code was unused and has been removed.*
-*Please upgrade to version [14.3.0](https://github.com/stripe/stripe-android/blob/master/CHANGELOG.md#1430---2020-04-20) or greater.*
+*Please upgrade to version [14.4.0](https://github.com/stripe/stripe-android/blob/master/CHANGELOG.md#1440---2020-04-28) or greater.*
 
 * [#2207](https://github.com/stripe/stripe-android/pull/2207) Add `CardInputWidget#setPostalCodeTextWatcher`
 * [#2211](https://github.com/stripe/stripe-android/pull/2211) Add support for 16-digit Diners Club card numbers
@@ -506,7 +516,7 @@ This release includes several breaking changes.
 See the [migration guide](https://github.com/stripe/stripe-android/blob/master/MIGRATING.md) for more details.
 
 *This version of the SDK is not compliant with Google Play's Prominent Disclosure & Consent Requirements. The non-compliant code was unused and has been removed.*
-*Please upgrade to version [14.3.0](https://github.com/stripe/stripe-android/blob/master/CHANGELOG.md#1430---2020-04-20) or greater.*
+*Please upgrade to version [14.4.0](https://github.com/stripe/stripe-android/blob/master/CHANGELOG.md#1440---2020-04-28) or greater.*
 
 * [#2136](https://github.com/stripe/stripe-android/pull/2136) Update `com.google.android.material:material` to `1.1.0`
 * [#2141](https://github.com/stripe/stripe-android/pull/2141) Fix crash when deleting a payment method in `PaymentMethodsActivity`
