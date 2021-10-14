@@ -88,6 +88,8 @@ internal class LaunchPaymentSheetCustomActivity : BasePaymentSheetActivity() {
             merchantDisplayName = merchantName,
             customer = customerConfig,
             googlePay = googlePayConfig,
+            // Set `allowsDelayedPaymentMethods` to true if your business can handle payment
+            // methods that complete payment after a delay, like SEPA Debit and Sofort.
             allowsDelayedPaymentMethods = true
         )
     }
