@@ -247,7 +247,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
     /**
      * Refresh a [PaymentIntent] using its client_secret
      *
-     * This is not a publicly documented API and is only used for WeChat Pay now.
+     * Analytics event: [AnalyticsEvent.PaymentIntentRefresh]
      *
      * @param clientSecret client_secret of the PaymentIntent to retrieve
      */
