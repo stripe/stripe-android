@@ -39,13 +39,14 @@ import com.stripe.android.paymentsheet.elements.SimpleTextElement
 import com.stripe.android.paymentsheet.elements.SimpleTextFieldConfig
 import com.stripe.android.paymentsheet.elements.SimpleTextSpec
 import com.stripe.android.paymentsheet.elements.TextFieldController
+import javax.inject.Inject
 
 /**
  * Transform a [LayoutSpec] data object into an Element, which
  * has a controller and identifier.  With only a single field in a section the section
  * controller will be a pass through the field controller.
  */
-internal class TransformSpecToElement(
+internal class TransformSpecToElement @Inject constructor(
     private val resourceRepository: ResourceRepository,
     private val initialValues: FormFragmentArguments
 ) {

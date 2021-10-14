@@ -8,6 +8,7 @@ import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.asFlow
 import androidx.lifecycle.distinctUntilChanged
+import androidx.lifecycle.map
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.Logger
 import com.stripe.android.model.PaymentIntent
@@ -144,7 +145,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
         }
     }
 
-    val fragmentConfig = MediatorLiveData<FragmentConfig?>().apply {
+    val fragmentConfigEvent = MediatorLiveData<FragmentConfig?>().apply {
         listOf(
             savedSelection,
             stripeIntent,
@@ -155,7 +156,9 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
                 value = createFragmentConfig()
             }
         }
-    }.distinctUntilChanged()
+    }.distinctUntilChanged().map {
+        Event(it)
+    }
 
     private fun createFragmentConfig(): FragmentConfig? {
         val stripeIntentValue = stripeIntent.value

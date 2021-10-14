@@ -25,6 +25,9 @@
     <color name="stripe_paymentsheet_form_border">#33787880</color>
     <color name="stripe_paymentsheet_toolbar_items_color">#000000</color>
 
+    <!-- CardMultiLineWidget -->
+    <color name="stripe_card_multiline_textinput_hint_color">#4D000000</color>
+
     <!-- CardFormView -->
     <color name="stripe_card_form_view_textinput_color">#e61a1a1a</color>
     <color name="stripe_card_form_view_textinput_disabled_color">#61000000</color>

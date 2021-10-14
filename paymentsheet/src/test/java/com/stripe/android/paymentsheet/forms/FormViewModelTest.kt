@@ -119,14 +119,16 @@ internal class FormViewModelTest {
 
     @Test
     fun `Verify setting save for future use`() {
+        val args = COMPOSE_FRAGMENT_ARGS
         val formViewModel = FormViewModel(
             LayoutSpec.create(
                 emailSection,
                 countrySection,
                 SaveForFutureUseSpec(listOf(emailSection))
             ),
-            COMPOSE_FRAGMENT_ARGS,
-            resourceRepository = resourceRepository
+            args,
+            resourceRepository = resourceRepository,
+            transformSpecToElement = TransformSpecToElement(resourceRepository, args)
         )
 
         val values = mutableListOf<Boolean>()
@@ -142,15 +144,45 @@ internal class FormViewModelTest {
     }
 
     @Test
+    fun `Verify setting save for future use visibility`() {
+        val args = COMPOSE_FRAGMENT_ARGS
+        val formViewModel = FormViewModel(
+            LayoutSpec.create(
+                    emailSection,
+                    countrySection,
+                    SaveForFutureUseSpec(listOf(emailSection))
+            ),
+            args,
+            resourceRepository = resourceRepository,
+            transformSpecToElement = TransformSpecToElement(resourceRepository, args)
+        )
+
+        val values = mutableListOf<List<IdentifierSpec>>()
+        formViewModel.hiddenIdentifiers.asLiveData()
+            .observeForever {
+                values.add(it)
+            }
+        assertThat(values[0]).isEmpty()
+
+        formViewModel.setSaveForFutureUseVisibility(false)
+
+        ShadowLooper.runUiThreadTasksIncludingDelayedTasks()
+
+        assertThat(values[1][0]).isEqualTo(IdentifierSpec.SaveForFutureUse)
+    }
+
+    @Test
     fun `Verify setting section as hidden sets sub-fields as hidden as well`() {
+        val args = COMPOSE_FRAGMENT_ARGS
         val formViewModel = FormViewModel(
             LayoutSpec.create(
                 emailSection,
                 countrySection,
                 SaveForFutureUseSpec(listOf(emailSection))
             ),
-            COMPOSE_FRAGMENT_ARGS,
-            resourceRepository = resourceRepository
+            args,
+            resourceRepository = resourceRepository,
+            transformSpecToElement = TransformSpecToElement(resourceRepository, args)
         )
 
         val values = mutableListOf<List<IdentifierSpec>>()
@@ -174,14 +206,16 @@ internal class FormViewModelTest {
         runBlocking {
             // Here we have one hidden and one required field, country will always be in the result,
             //  and name only if saveForFutureUse is true
+            val args = COMPOSE_FRAGMENT_ARGS
             val formViewModel = FormViewModel(
                 LayoutSpec.create(
                     emailSection,
                     countrySection,
                     SaveForFutureUseSpec(listOf(emailSection))
                 ),
-                COMPOSE_FRAGMENT_ARGS,
-                resourceRepository = resourceRepository
+                args,
+                resourceRepository = resourceRepository,
+                transformSpecToElement = TransformSpecToElement(resourceRepository, args)
             )
 
             val saveForFutureUseController = formViewModel.elements.map { it.controller }
@@ -213,14 +247,16 @@ internal class FormViewModelTest {
         runBlocking {
             // Here we have one hidden and one required field, country will always be in the result,
             //  and name only if saveForFutureUse is true
+            val args = COMPOSE_FRAGMENT_ARGS
             val formViewModel = FormViewModel(
                 LayoutSpec.create(
                     emailSection,
                     countrySection,
                     SaveForFutureUseSpec(listOf(emailSection))
                 ),
-                COMPOSE_FRAGMENT_ARGS,
-                resourceRepository = resourceRepository
+                args,
+                resourceRepository = resourceRepository,
+                transformSpecToElement = TransformSpecToElement(resourceRepository, args)
             )
 
             val saveForFutureUseController = formViewModel.elements.map { it.controller }
@@ -258,14 +294,16 @@ internal class FormViewModelTest {
             /**
              * Using sofort as a complex enough example to test the form view model class.
              */
+            val args = COMPOSE_FRAGMENT_ARGS.copy(
+                billingDetails = null,
+                showCheckbox = false,
+                showCheckboxControlledFields = true
+            )
             val formViewModel = FormViewModel(
                 sofortForm,
-                COMPOSE_FRAGMENT_ARGS.copy(
-                    billingDetails = null,
-                    showCheckbox = false,
-                    showCheckboxControlledFields = true
-                ),
-                resourceRepository = resourceRepository
+                args,
+                resourceRepository = resourceRepository,
+                transformSpecToElement = TransformSpecToElement(resourceRepository, args)
             )
 
             val nameElement =
@@ -303,14 +341,16 @@ internal class FormViewModelTest {
             /**
              * Using sepa debit as a complex enough example to test the address portion.
              */
+            val args = COMPOSE_FRAGMENT_ARGS.copy(
+                showCheckbox = false,
+                showCheckboxControlledFields = true,
+                billingDetails = null
+            )
             val formViewModel = FormViewModel(
                 sepaDebitForm,
-                COMPOSE_FRAGMENT_ARGS.copy(
-                    showCheckbox = false,
-                    showCheckboxControlledFields = true,
-                    billingDetails = null
-                ),
-                resourceRepository = resourceRepository
+                args,
+                resourceRepository = resourceRepository,
+                transformSpecToElement = TransformSpecToElement(resourceRepository, args)
             )
 
             getSectionFieldTextControllerWithLabel(
@@ -373,12 +413,14 @@ internal class FormViewModelTest {
             /**
              * Using sepa debit as a complex enough example to test the address portion.
              */
+            val args = COMPOSE_FRAGMENT_ARGS.copy(
+                billingDetails = null
+            )
             val formViewModel = FormViewModel(
                 sepaDebitForm,
-                COMPOSE_FRAGMENT_ARGS.copy(
-                    billingDetails = null
-                ),
-                resourceRepository = resourceRepository
+                args,
+                resourceRepository = resourceRepository,
+                transformSpecToElement = TransformSpecToElement(resourceRepository, args)
             )
 
             getSectionFieldTextControllerWithLabel(
@@ -500,6 +542,7 @@ internal class FormViewModelTest {
                 ?.map { (it.controller as? TextFieldController) }
                 ?.firstOrNull { it?.label == label }
                 ?: addressElementFields
+                    ?.asSequence()
                     ?.filterIsInstance<RowElement>()
                     ?.map { it.fields }
                     ?.flatten()
