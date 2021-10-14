@@ -1,0 +1,25 @@
+lpm, hasCustomer, allowsDelayedPayment, intentSetupFutureUsage, intentHasShipping, intentLpms, supportCustomerSavedCard, formExists, formType, supportsAdding
+giropay, true, true, off_session, false, card/giropay, false, false, not available, false
+giropay, true, true, off_session, false, card/eps/giropay, false, false, not available, false
+giropay, true, false, off_session, false, card/giropay, false, false, not available, false
+giropay, true, false, off_session, false, card/eps/giropay, false, false, not available, false
+giropay, true, true, on_session, false, card/giropay, false, false, not available, false
+giropay, true, true, on_session, false, card/eps/giropay, false, false, not available, false
+giropay, true, false, on_session, false, card/giropay, false, false, not available, false
+giropay, true, false, on_session, false, card/eps/giropay, false, false, not available, false
+giropay, true, true, one_time, false, card/giropay, false, false, not available, false
+giropay, true, true, one_time, false, card/eps/giropay, false, false, not available, false
+giropay, true, false, one_time, false, card/giropay, false, false, not available, false
+giropay, true, false, one_time, false, card/eps/giropay, false, false, not available, false
+giropay, false, true, off_session, false, card/giropay, false, false, not available, false
+giropay, false, true, off_session, false, card/eps/giropay, false, false, not available, false
+giropay, false, false, off_session, false, card/giropay, false, false, not available, false
+giropay, false, false, off_session, false, card/eps/giropay, false, false, not available, false
+giropay, false, true, on_session, false, card/giropay, false, false, not available, false
+giropay, false, true, on_session, false, card/eps/giropay, false, false, not available, false
+giropay, false, false, on_session, false, card/giropay, false, false, not available, false
+giropay, false, false, on_session, false, card/eps/giropay, false, false, not available, false
+giropay, false, true, one_time, false, card/giropay, false, false, not available, false
+giropay, false, true, one_time, false, card/eps/giropay, false, false, not available, false
+giropay, false, false, one_time, false, card/giropay, false, false, not available, false
+giropay, false, false, one_time, false, card/eps/giropay, false, false, not available, false

@@ -1,0 +1,25 @@
+lpm, hasCustomer, allowsDelayedPayment, intentSetupFutureUsage, intentHasShipping, intentLpms, supportCustomerSavedCard, formExists, formType, supportsAdding
+ideal, true, true, off_session, false, card/ideal, false, false, not available, false
+ideal, true, true, off_session, false, card/eps/ideal, false, false, not available, false
+ideal, true, false, off_session, false, card/ideal, false, false, not available, false
+ideal, true, false, off_session, false, card/eps/ideal, false, false, not available, false
+ideal, true, true, on_session, false, card/ideal, false, false, not available, false
+ideal, true, true, on_session, false, card/eps/ideal, false, false, not available, false
+ideal, true, false, on_session, false, card/ideal, false, false, not available, false
+ideal, true, false, on_session, false, card/eps/ideal, false, false, not available, false
+ideal, true, true, one_time, false, card/ideal, false, true, null, true
+ideal, true, true, one_time, false, card/eps/ideal, false, true, null, true
+ideal, true, false, one_time, false, card/ideal, false, true, null, true
+ideal, true, false, one_time, false, card/eps/ideal, false, true, null, true
+ideal, false, true, off_session, false, card/ideal, false, false, not available, false
+ideal, false, true, off_session, false, card/eps/ideal, false, false, not available, false
+ideal, false, false, off_session, false, card/ideal, false, false, not available, false
+ideal, false, false, off_session, false, card/eps/ideal, false, false, not available, false
+ideal, false, true, on_session, false, card/ideal, false, false, not available, false
+ideal, false, true, on_session, false, card/eps/ideal, false, false, not available, false
+ideal, false, false, on_session, false, card/ideal, false, false, not available, false
+ideal, false, false, on_session, false, card/eps/ideal, false, false, not available, false
+ideal, false, true, one_time, false, card/ideal, false, true, null, true
+ideal, false, true, one_time, false, card/eps/ideal, false, true, null, true
+ideal, false, false, one_time, false, card/ideal, false, true, null, true
+ideal, false, false, one_time, false, card/eps/ideal, false, true, null, true
