@@ -120,6 +120,13 @@ internal class FormViewModelTest {
 
     @Test
     fun `Verify setting save for future use`() {
+        val args = FormFragmentArguments(
+            supportedPaymentMethodName = "Card",
+            saveForFutureUseInitialVisibility = true,
+            saveForFutureUseInitialValue = true,
+            merchantName = "Example, Inc.",
+            injectorKey = DUMMY_INJECTOR_KEY
+        )
         val formViewModel = FormViewModel(
             LayoutSpec(
                 listOf(
@@ -128,14 +135,9 @@ internal class FormViewModelTest {
                     SaveForFutureUseSpec(listOf(emailSection))
                 )
             ),
-            FormFragmentArguments(
-                supportedPaymentMethodName = "Card",
-                saveForFutureUseInitialVisibility = true,
-                saveForFutureUseInitialValue = true,
-                merchantName = "Example, Inc.",
-                injectorKey = DUMMY_INJECTOR_KEY
-            ),
-            resourceRepository = resourceRepository
+            args,
+            resourceRepository = resourceRepository,
+            transformSpecToElement = TransformSpecToElement(resourceRepository, args)
         )
 
         val values = mutableListOf<Boolean>()
@@ -152,6 +154,13 @@ internal class FormViewModelTest {
 
     @Test
     fun `Verify setting save for future use visibility`() {
+        val args = FormFragmentArguments(
+            supportedPaymentMethodName = "Card",
+            saveForFutureUseInitialVisibility = true,
+            saveForFutureUseInitialValue = true,
+            merchantName = "Example, Inc.",
+            injectorKey = DUMMY_INJECTOR_KEY
+        )
         val formViewModel = FormViewModel(
             LayoutSpec(
                 listOf(
@@ -160,14 +169,9 @@ internal class FormViewModelTest {
                     SaveForFutureUseSpec(listOf(emailSection))
                 )
             ),
-            FormFragmentArguments(
-                supportedPaymentMethodName = "Card",
-                saveForFutureUseInitialVisibility = true,
-                saveForFutureUseInitialValue = true,
-                merchantName = "Example, Inc.",
-                injectorKey = DUMMY_INJECTOR_KEY
-            ),
-            resourceRepository = resourceRepository
+            args,
+            resourceRepository = resourceRepository,
+            transformSpecToElement = TransformSpecToElement(resourceRepository, args)
         )
 
         val values = mutableListOf<List<IdentifierSpec>>()
@@ -186,6 +190,13 @@ internal class FormViewModelTest {
 
     @Test
     fun `Verify setting section as hidden sets sub-fields as hidden as well`() {
+        val args = FormFragmentArguments(
+            supportedPaymentMethodName = "Card",
+            saveForFutureUseInitialVisibility = true,
+            saveForFutureUseInitialValue = true,
+            merchantName = "Example, Inc.",
+            injectorKey = DUMMY_INJECTOR_KEY
+        )
         val formViewModel = FormViewModel(
             LayoutSpec(
                 listOf(
@@ -194,14 +205,9 @@ internal class FormViewModelTest {
                     SaveForFutureUseSpec(listOf(emailSection))
                 )
             ),
-            FormFragmentArguments(
-                supportedPaymentMethodName = "Card",
-                saveForFutureUseInitialVisibility = true,
-                saveForFutureUseInitialValue = true,
-                merchantName = "Example, Inc.",
-                injectorKey = DUMMY_INJECTOR_KEY
-            ),
-            resourceRepository = resourceRepository
+            args,
+            resourceRepository = resourceRepository,
+            transformSpecToElement = TransformSpecToElement(resourceRepository, args)
         )
 
         val values = mutableListOf<List<IdentifierSpec>>()
@@ -225,6 +231,13 @@ internal class FormViewModelTest {
         runBlocking {
             // Here we have one hidden and one required field, country will always be in the result,
             //  and name only if saveForFutureUse is true
+            val args = FormFragmentArguments(
+                supportedPaymentMethodName = "Card",
+                saveForFutureUseInitialVisibility = true,
+                saveForFutureUseInitialValue = true,
+                merchantName = "Example, Inc.",
+                injectorKey = DUMMY_INJECTOR_KEY
+            )
             val formViewModel = FormViewModel(
                 LayoutSpec(
                     listOf(
@@ -233,14 +246,9 @@ internal class FormViewModelTest {
                         SaveForFutureUseSpec(listOf(emailSection))
                     )
                 ),
-                FormFragmentArguments(
-                    supportedPaymentMethodName = "Card",
-                    saveForFutureUseInitialVisibility = true,
-                    saveForFutureUseInitialValue = true,
-                    merchantName = "Example, Inc.",
-                    injectorKey = DUMMY_INJECTOR_KEY
-                ),
-                resourceRepository = resourceRepository
+                args,
+                resourceRepository = resourceRepository,
+                transformSpecToElement = TransformSpecToElement(resourceRepository, args)
             )
 
             val saveForFutureUseController = formViewModel.elements.map { it.controller }
@@ -272,6 +280,13 @@ internal class FormViewModelTest {
         runBlocking {
             // Here we have one hidden and one required field, country will always be in the result,
             //  and name only if saveForFutureUse is true
+            val args = FormFragmentArguments(
+                supportedPaymentMethodName = "Card",
+                saveForFutureUseInitialVisibility = true,
+                saveForFutureUseInitialValue = true,
+                merchantName = "Example, Inc.",
+                injectorKey = DUMMY_INJECTOR_KEY
+            )
             val formViewModel = FormViewModel(
                 LayoutSpec(
                     listOf(
@@ -280,14 +295,9 @@ internal class FormViewModelTest {
                         SaveForFutureUseSpec(listOf(emailSection))
                     )
                 ),
-                FormFragmentArguments(
-                    supportedPaymentMethodName = "Card",
-                    saveForFutureUseInitialVisibility = true,
-                    saveForFutureUseInitialValue = true,
-                    merchantName = "Example, Inc.",
-                    injectorKey = DUMMY_INJECTOR_KEY
-                ),
-                resourceRepository = resourceRepository
+                args,
+                resourceRepository = resourceRepository,
+                transformSpecToElement = TransformSpecToElement(resourceRepository, args)
             )
 
             val saveForFutureUseController = formViewModel.elements.map { it.controller }
@@ -325,16 +335,18 @@ internal class FormViewModelTest {
             /**
              * Using sofort as a complex enough example to test the form view model class.
              */
+            val args = FormFragmentArguments(
+                supportedPaymentMethodName = "Card",
+                saveForFutureUseInitialVisibility = true,
+                saveForFutureUseInitialValue = true,
+                merchantName = "Example, Inc.",
+                injectorKey = DUMMY_INJECTOR_KEY
+            )
             val formViewModel = FormViewModel(
                 sofort.layout,
-                FormFragmentArguments(
-                    supportedPaymentMethodName = "Card",
-                    saveForFutureUseInitialVisibility = true,
-                    saveForFutureUseInitialValue = true,
-                    merchantName = "Example, Inc.",
-                    injectorKey = DUMMY_INJECTOR_KEY
-                ),
-                resourceRepository = resourceRepository
+                args,
+                resourceRepository = resourceRepository,
+                transformSpecToElement = TransformSpecToElement(resourceRepository, args)
             )
 
             val nameElement =
@@ -372,16 +384,18 @@ internal class FormViewModelTest {
             /**
              * Using sepa debit as a complex enough example to test the address portion.
              */
+            val args = FormFragmentArguments(
+                supportedPaymentMethodName = "Card",
+                saveForFutureUseInitialVisibility = true,
+                saveForFutureUseInitialValue = true,
+                merchantName = "Example, Inc.",
+                injectorKey = DUMMY_INJECTOR_KEY
+            )
             val formViewModel = FormViewModel(
                 sepaDebit.layout,
-                FormFragmentArguments(
-                    supportedPaymentMethodName = "Card",
-                    saveForFutureUseInitialVisibility = true,
-                    saveForFutureUseInitialValue = true,
-                    merchantName = "Example, Inc.",
-                    injectorKey = DUMMY_INJECTOR_KEY
-                ),
-                resourceRepository = resourceRepository
+                args,
+                resourceRepository = resourceRepository,
+                transformSpecToElement = TransformSpecToElement(resourceRepository, args)
             )
 
             getSectionFieldTextControllerWithLabel(
@@ -444,16 +458,18 @@ internal class FormViewModelTest {
             /**
              * Using sepa debit as a complex enough example to test the address portion.
              */
+            val args = FormFragmentArguments(
+                supportedPaymentMethodName = "Card",
+                saveForFutureUseInitialVisibility = true,
+                saveForFutureUseInitialValue = true,
+                merchantName = "Example, Inc.",
+                injectorKey = DUMMY_INJECTOR_KEY
+            )
             val formViewModel = FormViewModel(
                 sepaDebit.layout,
-                FormFragmentArguments(
-                    supportedPaymentMethodName = "Card",
-                    saveForFutureUseInitialVisibility = true,
-                    saveForFutureUseInitialValue = true,
-                    merchantName = "Example, Inc.",
-                    injectorKey = DUMMY_INJECTOR_KEY
-                ),
-                resourceRepository = resourceRepository
+                args,
+                resourceRepository = resourceRepository,
+                transformSpecToElement = TransformSpecToElement(resourceRepository, args)
             )
 
             getSectionFieldTextControllerWithLabel(
@@ -575,6 +591,7 @@ internal class FormViewModelTest {
                 ?.map { (it.controller as? TextFieldController) }
                 ?.firstOrNull { it?.label == label }
                 ?: addressElementFields
+                    ?.asSequence()
                     ?.filterIsInstance<RowElement>()
                     ?.map { it.fields }
                     ?.flatten()
