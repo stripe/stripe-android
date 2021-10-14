@@ -807,7 +807,7 @@ internal class DefaultFlowControllerTest {
             iconResource = R.drawable.stripe_ic_paymentsheet_card_visa,
             labelResource = R.drawable.stripe_ic_paymentsheet_pm_bancontact,
             paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.BANCONTACT,
-            shouldSavePaymentMethod = false
+            userReuseRequest = false
         )
         private val VISA_PAYMENT_OPTION = PaymentOption(
             drawableResourceId = R.drawable.stripe_ic_paymentsheet_card_visa,
@@ -817,7 +817,7 @@ internal class DefaultFlowControllerTest {
         private val SAVE_NEW_CARD_SELECTION = PaymentSelection.New.Card(
             PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
             CardBrand.Visa,
-            shouldSavePaymentMethod = true
+            userReuseRequest = true
         )
         private val PAYMENT_METHODS =
             listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD) + PaymentMethodFixtures.createCards(5)

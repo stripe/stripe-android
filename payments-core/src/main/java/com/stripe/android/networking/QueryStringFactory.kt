@@ -60,13 +60,6 @@ internal class QueryStringFactory {
         return when (value) {
             is Map<*, *> -> flattenParamsMap(value as Map<String, Any>?, keyPrefix)
             is List<*> -> flattenParamsList(value, keyPrefix)
-            "" -> throw InvalidRequestException(
-                message = "You cannot set '$keyPrefix' to an empty string. We interpret empty strings as " +
-                    "null in requests. You may set '$keyPrefix' to null to delete the property.",
-                stripeError = StripeError(
-                    param = keyPrefix
-                )
-            )
             null -> {
                 listOf(Parameter(keyPrefix, ""))
             }

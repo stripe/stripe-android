@@ -53,7 +53,7 @@ class PaymentOptionFactoryTest {
                 PaymentSelection.New.Card(
                     PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
                     brand = CardBrand.Visa,
-                    shouldSavePaymentMethod = true
+                    userReuseRequest = true
                 )
             )
         ).isEqualTo(

@@ -15,6 +15,7 @@ import com.stripe.android.paymentsheet.elements.SaveForFutureUseElement
 import com.stripe.android.paymentsheet.elements.SectionSpec
 import com.stripe.android.paymentsheet.injection.DaggerFormViewModelComponent
 import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
+import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
@@ -142,6 +143,19 @@ internal class FormViewModel @Inject internal constructor(
             } ?: false
     }
 
+    private val userRequestedReuse =
+        saveForFutureUseElement?.controller?.saveForFutureUse?.map { saveForFutureUse ->
+            if (config.showCheckbox) {
+                if (saveForFutureUse) {
+                    PaymentSelection.UserReuseRequest.RequestReuse
+                } else {
+                    PaymentSelection.UserReuseRequest.RequestNoReuse
+                }
+            } else {
+                PaymentSelection.UserReuseRequest.NoRequest
+            }
+        } ?: MutableStateFlow(PaymentSelection.UserReuseRequest.NoRequest)
+
     val completeFormValues =
         CompleteFormFieldValueFilter(
             combine(
@@ -151,6 +165,6 @@ internal class FormViewModel @Inject internal constructor(
             },
             hiddenIdentifiers,
             showingMandate,
-            saveForFutureUse
+            userRequestedReuse
         ).filterFlow()
 }

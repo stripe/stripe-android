@@ -32,7 +32,7 @@ internal class DefaultApiRequestExecutor @JvmOverloads internal constructor(
         request: StripeRequest,
         remainingRetries: Int
     ): StripeResponse = withContext(workContext) {
-        logger.info("Firing request: $request")
+        logger.info("Firing request: $request ${request.params}")
 
         val stripeResponse = makeRequest(request)
 

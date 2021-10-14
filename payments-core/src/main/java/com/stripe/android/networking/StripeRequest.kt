@@ -1,5 +1,6 @@
 package com.stripe.android.networking
 
+import android.util.Log
 import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.exception.InvalidRequestException
@@ -57,6 +58,9 @@ abstract class StripeRequest {
      * Override for complex request body logic (i.e. multipart form requests)
      */
     internal open fun writeBody(outputStream: OutputStream) {
+        bodyBytes?.let {
+            Log.e("StripeSdk-body", String(it))
+        }
         bodyBytes?.let {
             outputStream.write(it)
             outputStream.flush()
@@ -135,11 +139,6 @@ abstract class StripeRequest {
             // Remove all null values; they cause validation errors
             for (key in HashSet(compactParams.keys)) {
                 when (val value = compactParams[key]) {
-                    is CharSequence -> {
-                        if (value.isEmpty()) {
-                            compactParams.remove(key)
-                        }
-                    }
                     is Map<*, *> -> {
                         compactParams[key] = compactParams(value as Map<String, *>)
                     }

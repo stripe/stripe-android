@@ -441,7 +441,7 @@ class PaymentSheetAddPaymentMethodFragmentTest {
                 ),
                 SupportedPaymentMethod.Sofort
             )
-        assertThat(selection?.shouldSavePaymentMethod).isTrue()
+        assertThat(selection?.userReuseRequest).isTrue()
         assertThat(selection?.labelResource).isEqualTo(
             R.string.stripe_paymentsheet_payment_method_sofort
         )

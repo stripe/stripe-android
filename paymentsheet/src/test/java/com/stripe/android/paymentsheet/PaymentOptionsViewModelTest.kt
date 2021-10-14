@@ -171,7 +171,7 @@ internal class PaymentOptionsViewModelTest {
         val viewModel = PaymentOptionsViewModel(
             args = PAYMENT_OPTION_CONTRACT_ARGS.copy(
                 newCard = NEW_CARD_PAYMENT_SELECTION.copy(
-                    shouldSavePaymentMethod = true
+                    userReuseRequest = true
                 )
             ),
             prefsRepositoryFactory = { prefsRepository },
@@ -200,7 +200,7 @@ internal class PaymentOptionsViewModelTest {
         val viewModel = PaymentOptionsViewModel(
             args = PAYMENT_OPTION_CONTRACT_ARGS.copy(
                 newCard = NEW_CARD_PAYMENT_SELECTION.copy(
-                    shouldSavePaymentMethod = false
+                    userReuseRequest = false
                 )
             ),
             prefsRepositoryFactory = { prefsRepository },

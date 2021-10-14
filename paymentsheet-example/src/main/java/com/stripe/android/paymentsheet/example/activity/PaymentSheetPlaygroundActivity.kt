@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.example.activity
 
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -30,6 +31,7 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
         get() = when (viewBinding.customerRadioGroup.checkedRadioButtonId) {
             R.id.guest_customer_button -> Repository.CheckoutCustomer.Guest
             R.id.new_customer_button -> {
+                Log.e("StripeSdk", "Customer: ${viewModel.temporaryCustomerId}")
                 viewModel.temporaryCustomerId?.let {
                     Repository.CheckoutCustomer.WithId(it)
                 } ?: Repository.CheckoutCustomer.New

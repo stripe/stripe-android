@@ -1,6 +1,7 @@
 package com.stripe.android.model
 
 import android.os.Parcelable
+import android.util.Log
 import com.stripe.android.model.ConfirmPaymentIntentParams.SetupFutureUsage
 import com.stripe.android.model.ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
 import com.stripe.android.model.ConfirmPaymentIntentParams.SetupFutureUsage.OnSession
@@ -134,6 +135,7 @@ data class ConfirmPaymentIntentParams internal constructor(
      * Create a Map representing this object that is prepared for the Stripe API.
      */
     override fun toParamMap(): Map<String, Any> {
+        Log.e("STRIPE", "Setup future usage: ${setupFutureUsage?.name}")
         return mapOf(
             PARAM_CLIENT_SECRET to clientSecret,
             PARAM_USE_STRIPE_SDK to useStripeSdk
@@ -235,7 +237,13 @@ data class ConfirmPaymentIntentParams internal constructor(
         /**
          * Use `off_session` if your customer may or may not be in your checkout flow.
          */
-        OffSession("off_session")
+        OffSession("off_session"),
+
+        /**
+         * Use `` if you want to clear reusable from the payment intent.  Note: this
+         * only works if the PaymentIntent was created with no setup_future_usage.
+         */
+        Blank("")
     }
 
     /**
