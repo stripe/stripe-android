@@ -135,7 +135,6 @@ data class ConfirmPaymentIntentParams internal constructor(
      * Create a Map representing this object that is prepared for the Stripe API.
      */
     override fun toParamMap(): Map<String, Any> {
-        Log.e("STRIPE", "Setup future usage: ${setupFutureUsage?.name}")
         return mapOf(
             PARAM_CLIENT_SECRET to clientSecret,
             PARAM_USE_STRIPE_SDK to useStripeSdk

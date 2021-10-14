@@ -171,7 +171,7 @@ internal class PaymentOptionsViewModelTest {
         val viewModel = PaymentOptionsViewModel(
             args = PAYMENT_OPTION_CONTRACT_ARGS.copy(
                 newCard = NEW_CARD_PAYMENT_SELECTION.copy(
-                    userReuseRequest = true
+                    userReuseRequest = PaymentSelection.UserReuseRequest.RequestReuse
                 )
             ),
             prefsRepositoryFactory = { prefsRepository },
@@ -200,7 +200,7 @@ internal class PaymentOptionsViewModelTest {
         val viewModel = PaymentOptionsViewModel(
             args = PAYMENT_OPTION_CONTRACT_ARGS.copy(
                 newCard = NEW_CARD_PAYMENT_SELECTION.copy(
-                    userReuseRequest = false
+                    userReuseRequest = PaymentSelection.UserReuseRequest.RequestNoReuse
                 )
             ),
             prefsRepositoryFactory = { prefsRepository },
@@ -331,17 +331,17 @@ internal class PaymentOptionsViewModelTest {
         private val NEW_REQUEST_SAVE_PAYMENT_SELECTION = PaymentSelection.New.Card(
             DEFAULT_PAYMENT_METHOD_CREATE_PARAMS,
             CardBrand.Visa,
-            true,
+            userReuseRequest = PaymentSelection.UserReuseRequest.RequestReuse,
         )
         private val NEW_REQUEST_DONT_SAVE_PAYMENT_SELECTION = PaymentSelection.New.Card(
             DEFAULT_PAYMENT_METHOD_CREATE_PARAMS,
             CardBrand.Visa,
-            false,
+            userReuseRequest = PaymentSelection.UserReuseRequest.NoRequest,
         )
         private val NEW_CARD_PAYMENT_SELECTION = PaymentSelection.New.Card(
             DEFAULT_CARD,
             CardBrand.Discover,
-            false
+            userReuseRequest = PaymentSelection.UserReuseRequest.NoRequest
         )
         private val PAYMENT_OPTION_CONTRACT_ARGS = PaymentOptionContract.Args(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,

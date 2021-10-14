@@ -1,6 +1,5 @@
 package com.stripe.android.networking
 
-import android.util.Log
 import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.exception.InvalidRequestException
@@ -58,9 +57,6 @@ abstract class StripeRequest {
      * Override for complex request body logic (i.e. multipart form requests)
      */
     internal open fun writeBody(outputStream: OutputStream) {
-        bodyBytes?.let {
-            Log.e("StripeSdk-body", String(it))
-        }
         bodyBytes?.let {
             outputStream.write(it)
             outputStream.flush()

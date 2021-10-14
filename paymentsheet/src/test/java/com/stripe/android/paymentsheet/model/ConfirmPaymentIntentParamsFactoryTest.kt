@@ -18,7 +18,7 @@ class ConfirmPaymentIntentParamsFactoryTest {
                 paymentSelection = PaymentSelection.New.Card(
                     PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
                     CardBrand.Visa,
-                    userReuseRequest = true
+                    userReuseRequest = PaymentSelection.UserReuseRequest.RequestReuse
                 )
             )
         ).isEqualTo(

@@ -116,7 +116,7 @@ class CardDataCollectionFragmentTest {
 
             val newPaymentSelection = paymentSelection as PaymentSelection.New.Card
             assertThat(newPaymentSelection.userReuseRequest)
-                .isFalse()
+                .isEqualTo(PaymentSelection.UserReuseRequest.RequestNoReuse)
             assertThat(fragment.sheetViewModel.newCard)
                 .isEqualTo(paymentSelection)
         }
@@ -129,7 +129,7 @@ class CardDataCollectionFragmentTest {
             newCard = PaymentSelection.New.Card(
                 PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
                 CardBrand.Discover,
-                false
+                PaymentSelection.UserReuseRequest.RequestNoReuse
             )
         ) { fragment, viewBinding ->
 
@@ -146,7 +146,7 @@ class CardDataCollectionFragmentTest {
 
             val newPaymentSelection = paymentSelection as PaymentSelection.New.Card
             assertThat(newPaymentSelection.userReuseRequest)
-                .isFalse()
+                .isEqualTo(PaymentSelection.UserReuseRequest.RequestNoReuse)
         }
     }
 
@@ -215,7 +215,7 @@ class CardDataCollectionFragmentTest {
 
             val newPaymentSelection = paymentSelection as PaymentSelection.New.Card
             assertThat(newPaymentSelection.userReuseRequest)
-                .isTrue()
+                .isEqualTo(PaymentSelection.UserReuseRequest.RequestReuse)
             assertThat(fragment.sheetViewModel.newCard)
                 .isEqualTo(paymentSelection)
         }
@@ -243,7 +243,7 @@ class CardDataCollectionFragmentTest {
 
             val newPaymentSelection = paymentSelection as PaymentSelection.New.Card
             assertThat(newPaymentSelection.userReuseRequest)
-                .isTrue()
+                .isEqualTo(PaymentSelection.UserReuseRequest.RequestReuse)
 
             assertThat(fragment.sheetViewModel.newCard?.brand)
                 .isEqualTo(CardBrand.Visa)
@@ -447,7 +447,7 @@ class CardDataCollectionFragmentTest {
         newCard: PaymentSelection.New.Card? = null,
         fragmentArgs: FormFragmentArguments? = COMPOSE_FRAGMENT_ARGS.copy(
             showCheckbox = true,
-            showCheckboxControlledFields = true
+            showCheckboxControlledFields = true,
         ),
         onReady: (CardDataCollectionFragment<PaymentSheetViewModel>, FragmentPaymentsheetAddCardBinding) -> Unit
     ) {

@@ -1,9 +1,10 @@
 package com.stripe.android.paymentsheet.paymentdatacollection
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.paymentsheet.elements.IdentifierSpec
 import com.stripe.android.paymentsheet.forms.FormFieldEntry
 import com.stripe.android.paymentsheet.forms.FormFieldValues
-import com.stripe.android.paymentsheet.elements.IdentifierSpec
+import com.stripe.android.paymentsheet.model.PaymentSelection
 import org.junit.Test
 
 class TransformToPaymentMethodCreateParamMapTest {
@@ -18,7 +19,8 @@ class TransformToPaymentMethodCreateParamMapTest {
                             true
                         )
                     ),
-                    showsMandate = false
+                    showsMandate = false,
+                    userRequestedReuse = PaymentSelection.UserReuseRequest.RequestReuse
                 ),
                 mapOf(
                     "type" to "ideal",
@@ -54,7 +56,8 @@ class TransformToPaymentMethodCreateParamMapTest {
                             true
                         ),
                     ),
-                    showsMandate = false
+                    showsMandate = false,
+                    userRequestedReuse = PaymentSelection.UserReuseRequest.RequestReuse
                 ),
                 mapOf(
                     "type" to "sofort",
