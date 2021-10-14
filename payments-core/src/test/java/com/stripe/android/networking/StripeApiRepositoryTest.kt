@@ -41,6 +41,7 @@ import org.junit.runner.RunWith
 import org.mockito.kotlin.KArgumentCaptor
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argThat
+import org.mockito.kotlin.argWhere
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
@@ -196,6 +197,14 @@ internal class StripeApiRepositoryTest {
         assertEquals(
             "https://api.stripe.com/v1/payment_intents/pi123",
             StripeApiRepository.getRetrievePaymentIntentUrl("pi123")
+        )
+    }
+
+    @Test
+    fun testGetRefreshPaymentIntentUrl() {
+        assertEquals(
+            "https://api.stripe.com/v1/payment_intents/pi123/refresh",
+            StripeApiRepository.getRefreshPaymentIntentUrl("pi123")
         )
     }
 
@@ -1486,6 +1495,36 @@ internal class StripeApiRepositoryTest {
             assertEquals(apiRequest.params?.get("client_secret"), clientSecret)
 
             verifyFraudDetectionDataAndAnalyticsRequests(AnalyticsEvent.SetupIntentRetrieve)
+        }
+
+    @Test
+    fun verifyRefreshPaymentIntent() =
+        testDispatcher.runBlockingTest {
+            val clientSecret = "pi_3JkCxKBNJ02ErVOj0kNqBMAZ_secret_bC6oXqo976LFM06Z9rlhmzUQq"
+            whenever(stripeApiRequestExecutor.execute(any<ApiRequest>()))
+                .thenReturn(
+                    StripeResponse(
+                        200,
+                        PaymentIntentFixtures.PI_REFRESH_RESPONSE_REQUIRES_WECHAT_PAY_AUTHORIZE.toString(),
+                        emptyMap()
+                    )
+                )
+
+            requireNotNull(
+                create().refreshPaymentIntent(
+                    clientSecret,
+                    ApiRequest.Options(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
+                )
+            )
+
+            verify(stripeApiRequestExecutor).execute(
+                argWhere<ApiRequest> {
+                    it.options.apiKey == ApiKeyFixtures.FAKE_PUBLISHABLE_KEY &&
+                        it.params?.get("client_secret") == clientSecret
+                }
+            )
+
+            verifyFraudDetectionDataAndAnalyticsRequests(AnalyticsEvent.PaymentIntentRefresh)
         }
 
     private fun verifyFraudDetectionDataAndAnalyticsRequests(
