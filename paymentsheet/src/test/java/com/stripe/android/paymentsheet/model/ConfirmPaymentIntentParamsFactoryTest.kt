@@ -30,6 +30,44 @@ class ConfirmPaymentIntentParamsFactoryTest {
         )
     }
 
+    @Test
+    fun `create() with new card when savePaymentMethod is true should create params with setupFutureUsage = blank`() {
+        Truth.assertThat(
+            factory.create(
+                paymentSelection = PaymentSelection.New.Card(
+                    PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+                    CardBrand.Visa,
+                    userReuseRequest = PaymentSelection.UserReuseRequest.RequestNoReuse
+                )
+            )
+        ).isEqualTo(
+            ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
+                paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+                clientSecret = CLIENT_SECRET,
+                setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.Blank
+            )
+        )
+    }
+
+    @Test
+    fun `create() with new card when savePaymentMethod is true should create params with setupFutureUsage = null`() {
+        Truth.assertThat(
+            factory.create(
+                paymentSelection = PaymentSelection.New.Card(
+                    PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+                    CardBrand.Visa,
+                    userReuseRequest = PaymentSelection.UserReuseRequest.NoRequest
+                )
+            )
+        ).isEqualTo(
+            ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
+                paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+                clientSecret = CLIENT_SECRET,
+                setupFutureUsage = null
+            )
+        )
+    }
+
     private companion object {
         private const val CLIENT_SECRET = com.stripe.android.paymentsheet.PaymentSheetFixtures.CLIENT_SECRET
     }
