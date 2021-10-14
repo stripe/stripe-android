@@ -50,7 +50,7 @@ internal fun getPMsToAdd(
         stripeIntent,
         config
     ) != null
-} // .filter { it == SupportedPaymentMethod.Card }
+}//.filter { it == SupportedPaymentMethod.Card }
     .toList()
 
 @VisibleForTesting

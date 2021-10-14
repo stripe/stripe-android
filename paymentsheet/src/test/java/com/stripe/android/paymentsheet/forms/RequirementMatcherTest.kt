@@ -7,28 +7,24 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
 import org.junit.Test
 import org.junit.runner.RunWith
 import java.io.File
 
 @RunWith(AndroidJUnit4::class)
 class RequirementMatcherTest {
-    private val formatPretty = Json { prettyPrint = true }
-    private val format = Json { prettyPrint = false }
-
     @Test
     fun `Test supported payment method baseline`() {
-        println(
-            "lpm, ${PaymentIntentTestInput.toCsvHeader()}, ${TestOutput.toCsvHeader()}"
-        )
         SupportedPaymentMethod.values()
             .forEach { lpm ->
-                val resource = File(javaClass.classLoader.getResource("${lpm.type.code}-support.json").file)
-                val baseline = resource.readText().replace(" ", "").replace("\n", "")
+                val resource = File(javaClass.classLoader.getResource("${lpm.type.code}-support.csv").file)
+                val baseline = resource.readText()
 
-                val newScenariosList = generatePaymentIntentScenarios()
+                val csvOutput = StringBuilder()
+                csvOutput.append(
+                    "lpm, ${PaymentIntentTestInput.toCsvHeader()}, ${TestOutput.toCsvHeader()}\n"
+                )
+                generatePaymentIntentScenarios()
                     .map { testInput ->
 
                         val formDescriptor = getSpecWithFullfilledRequirements(lpm, testInput.getIntent(lpm), testInput.getConfig())
@@ -40,13 +36,19 @@ class RequirementMatcherTest {
                             formExists = formDescriptor != null,
                             formShowsSaveCheckbox = formDescriptor?.showCheckbox,
                             formShowsCheckboxControlledFields = formDescriptor?.showCheckboxControlledFields,
-                            supportsAdding = // lpm == SupportedPaymentMethod.Card
+                            supportsAdding = //lpm == SupportedPaymentMethod.Card
                             // TODO: When add in more PMS
                             getPMsToAdd(
                                 testInput.getIntent(lpm), testInput.getConfig()
                             ).contains(lpm)
                         )
-                        println("${lpm.type.code}, ${testInput.toCsv()}, ${testOutput.toCsv()}")
+                        csvOutput.append(
+                            "${lpm.type.code}, ${
+                                testInput.copy(
+                                    intentPMs = testInput.intentPMs.plus(lpm.type.code)
+                                ).toCsv()
+                            }, ${testOutput.toCsv()}\n"
+                        )
 
                         PaymentIntentTestCase(
                             testInput,
@@ -54,12 +56,10 @@ class RequirementMatcherTest {
                         )
                     }
 
-                val newScenarios = format.encodeToString(newScenariosList).replace(" ", "").replace("\n", "")
-
-                if (baseline != newScenarios) {
-                    println(formatPretty.encodeToString(newScenariosList))
+                if (baseline != csvOutput.toString()) {
+                    println(csvOutput.toString())
                 }
-                assertThat(baseline).isEqualTo(newScenarios)
+                assertThat(baseline).isEqualTo(csvOutput.toString())
             }
     }
 
@@ -79,14 +79,14 @@ class RequirementMatcherTest {
                         listOf(
                             PaymentIntentTestInput(
                                 hasCustomer = customer,
-                                intentLpms = setOf(SupportedPaymentMethod.Card.type.code),
+                                intentPMs = setOf(SupportedPaymentMethod.Card.type.code),
                                 intentSetupFutureUsage = usage,
                                 intentHasShipping = false,
                                 allowsDelayedPayment = delayed
                             ),
                             PaymentIntentTestInput(
                                 hasCustomer = customer,
-                                intentLpms = setOf(SupportedPaymentMethod.Card.type.code, SupportedPaymentMethod.Eps.type.code),
+                                intentPMs = setOf(SupportedPaymentMethod.Card.type.code, SupportedPaymentMethod.Eps.type.code),
                                 intentSetupFutureUsage = usage,
                                 intentHasShipping = false,
                                 allowsDelayedPayment = delayed
@@ -121,7 +121,7 @@ class RequirementMatcherTest {
     internal data class PaymentIntentTestInput(
         val hasCustomer: Boolean,
         val intentSetupFutureUsage: StripeIntent.Usage?,
-        val intentLpms: Set<String>,
+        val intentPMs: Set<String>,
         val intentHasShipping: Boolean,
         val allowsDelayedPayment: Boolean = true
     ) {
@@ -129,18 +129,18 @@ class RequirementMatcherTest {
             fun toCsvHeader() = "hasCustomer, allowsDelayedPayment, intentSetupFutureUsage, intentHasShipping, intentLpms"
         }
 
-        fun toCsv() = "$hasCustomer, $allowsDelayedPayment, $intentSetupFutureUsage, $intentHasShipping, ${intentLpms.joinToString("/")}"
+        fun toCsv() = "$hasCustomer, $allowsDelayedPayment, $intentSetupFutureUsage, $intentHasShipping, ${intentPMs.joinToString("/")}"
 
         fun getIntent(lpm: SupportedPaymentMethod) = when (intentHasShipping) {
             false ->
                 PaymentIntentFixtures.PI_OFF_SESSION.copy(
                     setupFutureUsage = intentSetupFutureUsage,
-                    paymentMethodTypes = intentLpms.plus(lpm.type.code).toList()
+                    paymentMethodTypes = intentPMs.plus(lpm.type.code).toList()
                 )
             true ->
                 PaymentIntentFixtures.PI_WITH_SHIPPING.copy(
                     setupFutureUsage = intentSetupFutureUsage,
-                    paymentMethodTypes = intentLpms.plus(lpm.type.code).toList()
+                    paymentMethodTypes = intentPMs.plus(lpm.type.code).toList()
                 )
         }
 
@@ -174,7 +174,7 @@ class RequirementMatcherTest {
                 formExists = formExists,
                 supportsAdding = supportsAdding,
                 formType = when {
-                    formShowsSaveCheckbox == false && formShowsCheckboxControlledFields == false -> "oneTimeUse"
+                    formShowsSaveCheckbox == false && formShowsCheckboxControlledFields == false -> "null"
                     formShowsSaveCheckbox == false && formShowsCheckboxControlledFields == true -> "merchantRequiredSave"
                     formShowsSaveCheckbox == true && formShowsCheckboxControlledFields == true -> "userSelectedSave"
                     else -> "not available"
