@@ -58,7 +58,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
         get() =
             !hasTransitionToUnsavedCard &&
                 (newCard as? PaymentSelection.New)?.let {
-                    it.userReuseRequest == PaymentSelection.UserReuseRequest.RequestReuse
+                    it.userReuseRequest != PaymentSelection.UserReuseRequest.RequestReuse
                 } ?: false
 
     init {

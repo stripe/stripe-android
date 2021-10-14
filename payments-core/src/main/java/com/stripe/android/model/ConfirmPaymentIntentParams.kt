@@ -1,7 +1,6 @@
 package com.stripe.android.model
 
 import android.os.Parcelable
-import android.util.Log
 import com.stripe.android.model.ConfirmPaymentIntentParams.SetupFutureUsage
 import com.stripe.android.model.ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
 import com.stripe.android.model.ConfirmPaymentIntentParams.SetupFutureUsage.OnSession
