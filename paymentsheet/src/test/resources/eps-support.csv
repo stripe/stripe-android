@@ -7,10 +7,10 @@ eps, true, true, on_session, false, card/eps, false, false, not available, false
 eps, true, true, on_session, false, card/eps, false, false, not available, false
 eps, true, false, on_session, false, card/eps, false, false, not available, false
 eps, true, false, on_session, false, card/eps, false, false, not available, false
-eps, true, true, one_time, false, card/eps, false, false, not available, false
-eps, true, true, one_time, false, card/eps, false, false, not available, false
-eps, true, false, one_time, false, card/eps, false, false, not available, false
-eps, true, false, one_time, false, card/eps, false, false, not available, false
+eps, true, true, null, false, card/eps, false, false, not available, false
+eps, true, true, null, false, card/eps, false, false, not available, false
+eps, true, false, null, false, card/eps, false, false, not available, false
+eps, true, false, null, false, card/eps, false, false, not available, false
 eps, false, true, off_session, false, card/eps, false, false, not available, false
 eps, false, true, off_session, false, card/eps, false, false, not available, false
 eps, false, false, off_session, false, card/eps, false, false, not available, false
@@ -19,7 +19,7 @@ eps, false, true, on_session, false, card/eps, false, false, not available, fals
 eps, false, true, on_session, false, card/eps, false, false, not available, false
 eps, false, false, on_session, false, card/eps, false, false, not available, false
 eps, false, false, on_session, false, card/eps, false, false, not available, false
-eps, false, true, one_time, false, card/eps, false, false, not available, false
-eps, false, true, one_time, false, card/eps, false, false, not available, false
-eps, false, false, one_time, false, card/eps, false, false, not available, false
-eps, false, false, one_time, false, card/eps, false, false, not available, false
+eps, false, true, null, false, card/eps, false, false, not available, false
+eps, false, true, null, false, card/eps, false, false, not available, false
+eps, false, false, null, false, card/eps, false, false, not available, false
+eps, false, false, null, false, card/eps, false, false, not available, false

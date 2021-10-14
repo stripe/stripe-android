@@ -7,10 +7,10 @@ sofort, true, true, on_session, false, card/sofort, false, false, not available,
 sofort, true, true, on_session, false, card/eps/sofort, false, false, not available, false
 sofort, true, false, on_session, false, card/sofort, false, false, not available, false
 sofort, true, false, on_session, false, card/eps/sofort, false, false, not available, false
-sofort, true, true, one_time, false, card/sofort, false, true, null, true
-sofort, true, true, one_time, false, card/eps/sofort, false, true, null, true
-sofort, true, false, one_time, false, card/sofort, false, false, not available, false
-sofort, true, false, one_time, false, card/eps/sofort, false, false, not available, false
+sofort, true, true, null, false, card/sofort, false, true, oneTime, false
+sofort, true, true, null, false, card/eps/sofort, false, true, oneTime, false
+sofort, true, false, null, false, card/sofort, false, false, not available, false
+sofort, true, false, null, false, card/eps/sofort, false, false, not available, false
 sofort, false, true, off_session, false, card/sofort, false, false, not available, false
 sofort, false, true, off_session, false, card/eps/sofort, false, false, not available, false
 sofort, false, false, off_session, false, card/sofort, false, false, not available, false
@@ -19,7 +19,7 @@ sofort, false, true, on_session, false, card/sofort, false, false, not available
 sofort, false, true, on_session, false, card/eps/sofort, false, false, not available, false
 sofort, false, false, on_session, false, card/sofort, false, false, not available, false
 sofort, false, false, on_session, false, card/eps/sofort, false, false, not available, false
-sofort, false, true, one_time, false, card/sofort, false, true, null, true
-sofort, false, true, one_time, false, card/eps/sofort, false, true, null, true
-sofort, false, false, one_time, false, card/sofort, false, false, not available, false
-sofort, false, false, one_time, false, card/eps/sofort, false, false, not available, false
+sofort, false, true, null, false, card/sofort, false, true, oneTime, false
+sofort, false, true, null, false, card/eps/sofort, false, true, oneTime, false
+sofort, false, false, null, false, card/sofort, false, false, not available, false
+sofort, false, false, null, false, card/eps/sofort, false, false, not available, false

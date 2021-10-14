@@ -44,9 +44,9 @@ class RequirementMatcherTest {
                         )
                         csvOutput.append(
                             "${lpm.type.code}, ${
-                                testInput.copy(
-                                    intentPMs = testInput.intentPMs.plus(lpm.type.code)
-                                ).toCsv()
+                            testInput.copy(
+                                intentPMs = testInput.intentPMs.plus(lpm.type.code)
+                            ).toCsv()
                             }, ${testOutput.toCsv()}\n"
                         )
 
@@ -69,7 +69,7 @@ class RequirementMatcherTest {
     private fun generatePaymentIntentScenarios(): List<PaymentIntentTestInput> {
         val scenarios = mutableListOf<PaymentIntentTestInput>()
         val customerStates = setOf(true, false)
-        val setupFutureUsage = setOf(StripeIntent.Usage.OffSession, StripeIntent.Usage.OnSession, StripeIntent.Usage.OneTime)
+        val setupFutureUsage = setOf(StripeIntent.Usage.OffSession, StripeIntent.Usage.OnSession, null)
         val allowsDelayedPayment = setOf(true, false)
 
         customerStates.forEach { customer ->
@@ -174,7 +174,7 @@ class RequirementMatcherTest {
                 formExists = formExists,
                 supportsAdding = supportsAdding,
                 formType = when {
-                    formShowsSaveCheckbox == false && formShowsCheckboxControlledFields == false -> "null"
+                    formShowsSaveCheckbox == false && formShowsCheckboxControlledFields == false -> "oneTime"
                     formShowsSaveCheckbox == false && formShowsCheckboxControlledFields == true -> "merchantRequiredSave"
                     formShowsSaveCheckbox == true && formShowsCheckboxControlledFields == true -> "userSelectedSave"
                     else -> "not available"
