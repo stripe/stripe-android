@@ -29,6 +29,7 @@ import com.stripe.android.paymentsheet.elements.SectionSpec
 import com.stripe.android.paymentsheet.elements.SimpleTextSpec.Companion.NAME
 import com.stripe.android.paymentsheet.elements.TextFieldController
 import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
+import com.stripe.android.paymentsheet.model.PaymentSelection
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
@@ -238,12 +239,17 @@ internal class FormViewModelTest {
 
             // Verify formFieldValues is not null even though the email is invalid
             // (because it is not required)
+            val completeFormFieldValues = formViewModel.completeFormValues.first()
             assertThat(
-                formViewModel.completeFormValues.first()
+                completeFormFieldValues
             ).isNotNull()
             assertThat(formViewModel.completeFormValues.first()?.fieldValuePairs).doesNotContainKey(
                 emailSection.identifier
             )
+            assertThat(formViewModel.completeFormValues.first()?.userRequestedReuse).isEqualTo(
+                PaymentSelection.UserReuseRequest.RequestNoReuse
+            )
+
         }
     }
 
@@ -262,7 +268,7 @@ internal class FormViewModelTest {
                 sofortForm,
                 COMPOSE_FRAGMENT_ARGS.copy(
                     billingDetails = null,
-                    showCheckbox = false,
+                    showCheckbox = true,
                     showCheckboxControlledFields = true
                 ),
                 resourceRepository = resourceRepository
@@ -287,6 +293,9 @@ internal class FormViewModelTest {
                 formViewModel.completeFormValues.first()?.fieldValuePairs?.get(NAME.identifier)
                     ?.value
             ).isEqualTo("joe")
+            assertThat(formViewModel.completeFormValues.first()?.userRequestedReuse).isEqualTo(
+                PaymentSelection.UserReuseRequest.RequestReuse
+            )
 
             emailElement?.onValueChange("invalid.email@IncompleteDomain")
 
@@ -363,6 +372,9 @@ internal class FormViewModelTest {
                     ).isNull()
                 }
             }
+            assertThat(formViewModel.completeFormValues.first()?.userRequestedReuse).isEqualTo(
+                PaymentSelection.UserReuseRequest.NoRequest
+            )
         }
     }
 
