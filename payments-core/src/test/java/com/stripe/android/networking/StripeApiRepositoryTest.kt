@@ -47,7 +47,7 @@ import org.mockito.kotlin.never
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.verifyNoMoreInteractions
-import org.mockito.kotlin.verifyZeroInteractions
+import org.mockito.kotlin.verifyNoInteractions
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 import java.net.HttpURLConnection
@@ -1404,7 +1404,7 @@ internal class StripeApiRepositoryTest {
     @Test
     fun `createRadarSession() with advancedFraudSignalsEnabled set to false should throw an exception`() =
         testDispatcher.runBlockingTest {
-            verifyZeroInteractions(fraudDetectionDataRepository)
+            verifyNoInteractions(fraudDetectionDataRepository)
 
             Stripe.advancedFraudSignalsEnabled = false
             val stripeRepository = create()
