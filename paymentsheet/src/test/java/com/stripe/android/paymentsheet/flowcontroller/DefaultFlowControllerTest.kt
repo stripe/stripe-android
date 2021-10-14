@@ -60,8 +60,8 @@ import org.mockito.kotlin.eq
 import org.mockito.kotlin.isNull
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
+import org.mockito.kotlin.verifyNoInteractions
 import org.mockito.kotlin.verifyNoMoreInteractions
-import org.mockito.kotlin.verifyZeroInteractions
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.AfterTest
@@ -598,7 +598,7 @@ internal class DefaultFlowControllerTest {
 
     @Test
     fun `onGooglePayResult() when canceled should invoke callback with canceled result`() {
-        verifyZeroInteractions(eventReporter)
+        verifyNoInteractions(eventReporter)
 
         flowController.configureWithPaymentIntent(
             PaymentSheetFixtures.CLIENT_SECRET,

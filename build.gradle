@@ -62,7 +62,7 @@ ext {
     junitVersion = '4.13.2'
     robolectricVersion = '4.6'
     mockitoCoreVersion = '3.12.4'
-    mockitoKotlinVersion = '3.2.0'
+    mockitoKotlinVersion = '4.0.0'
 
     group_name = GROUP
     version_name = VERSION_NAME
