@@ -148,9 +148,9 @@ internal class FormViewModelTest {
         val args = COMPOSE_FRAGMENT_ARGS
         val formViewModel = FormViewModel(
             LayoutSpec.create(
-                    emailSection,
-                    countrySection,
-                    SaveForFutureUseSpec(listOf(emailSection))
+                emailSection,
+                countrySection,
+                SaveForFutureUseSpec(listOf(emailSection))
             ),
             args,
             resourceRepository = resourceRepository,
