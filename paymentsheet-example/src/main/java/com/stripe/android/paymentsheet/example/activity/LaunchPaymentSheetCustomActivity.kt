@@ -87,7 +87,8 @@ internal class LaunchPaymentSheetCustomActivity : BasePaymentSheetActivity() {
         return PaymentSheet.Configuration(
             merchantDisplayName = merchantName,
             customer = customerConfig,
-            googlePay = googlePayConfig
+            googlePay = googlePayConfig,
+            allowsDelayedPaymentMethods = true
         )
     }
 

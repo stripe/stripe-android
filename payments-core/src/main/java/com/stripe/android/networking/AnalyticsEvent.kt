@@ -29,6 +29,7 @@ internal enum class AnalyticsEvent(internal val code: String) {
     PaymentIntentConfirm("payment_intent_confirmation"),
     PaymentIntentRetrieve("payment_intent_retrieval"),
     PaymentIntentCancelSource("payment_intent_cancel_source"),
+    PaymentIntentRefresh("payment_intent_refresh"),
 
     // Setup Intents
     SetupIntentConfirm("setup_intent_confirmation"),

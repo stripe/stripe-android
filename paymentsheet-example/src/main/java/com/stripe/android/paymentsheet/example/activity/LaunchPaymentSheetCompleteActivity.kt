@@ -36,6 +36,7 @@ internal class LaunchPaymentSheetCompleteActivity : BasePaymentSheetActivity() {
                                         merchantDisplayName = merchantName,
                                         customer = customerConfig,
                                         googlePay = googlePayConfig,
+                                        allowsDelayedPaymentMethods = true
                                     )
                                 )
                             }
