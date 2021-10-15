@@ -13,8 +13,6 @@ internal data class InitData(
     val config: PaymentSheet.Configuration?,
     val clientSecret: ClientSecret,
     val stripeIntent: StripeIntent,
-    // the allowed payment method types
-    val paymentMethodTypes: List<PaymentMethod.Type>,
     // the customer's existing payment methods
     val paymentMethods: List<PaymentMethod>,
     val savedSelection: SavedSelection,

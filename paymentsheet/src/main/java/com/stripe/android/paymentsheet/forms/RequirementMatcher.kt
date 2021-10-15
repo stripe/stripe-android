@@ -15,13 +15,12 @@ import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
 internal fun getSupportedSavedCustomerPMs(
     stripeIntent: StripeIntent,
     config: PaymentSheet.Configuration?
-) =
-    stripeIntent.paymentMethodTypes.mapNotNull {
-        SupportedPaymentMethod.fromCode(it)
-    }.filter {
-        it.requirementEvaluator.supportsCustomerSavedPM() &&
-            getSpecWithFullfilledRequirements(it, stripeIntent, config) != null
-    }
+) = stripeIntent.paymentMethodTypes.mapNotNull {
+    SupportedPaymentMethod.fromCode(it)
+}.filter {
+    RequirementEvaluator(it.requirement).supportsCustomerSavedPM() &&
+        getSpecWithFullfilledRequirements(it, stripeIntent, config) != null
+}
 
 /**
  * This will get the form layout for the supported method that matches the top pick for the
@@ -32,8 +31,7 @@ internal fun getPMAddForm(
     paymentMethod: SupportedPaymentMethod,
     stripeIntent: StripeIntent,
     config: PaymentSheet.Configuration?
-) =
-    requireNotNull(getSpecWithFullfilledRequirements(paymentMethod, stripeIntent, config))
+) = requireNotNull(getSpecWithFullfilledRequirements(paymentMethod, stripeIntent, config))
 
 /**
  * This will return a list of payment methods that have a supported form given the capabilities.
@@ -59,6 +57,7 @@ internal fun getSpecWithFullfilledRequirements(
     stripeIntent: StripeIntent,
     config: PaymentSheet.Configuration?
 ): LayoutFormDescriptor? {
+    val requirementEvaluator = RequirementEvaluator(paymentMethod.requirement)
     val formSpec = paymentMethod.formSpec
     val oneTimeUse = LayoutFormDescriptor(
         formSpec,
@@ -83,7 +82,7 @@ internal fun getSpecWithFullfilledRequirements(
     return when (stripeIntent) {
         is PaymentIntent -> {
             if (isSetupFutureUsageSet(stripeIntent.setupFutureUsage)) {
-                if (paymentMethod.requirementEvaluator.supportsPISfuSet(stripeIntent, config)
+                if (requirementEvaluator.supportsPISfuSet(stripeIntent, config)
                 ) {
                     merchantRequestedSave
                 } else {
@@ -91,12 +90,12 @@ internal fun getSpecWithFullfilledRequirements(
                 }
             } else {
                 when {
-                    paymentMethod.requirementEvaluator.supportsPISfuSettable(
+                    requirementEvaluator.supportsPISfuSettable(
                         stripeIntent,
                         config
                     )
                     -> userSelectableSave
-                    paymentMethod.requirementEvaluator.supportsPISfuNotSetable(
+                    requirementEvaluator.supportsPISfuNotSettable(
                         stripeIntent,
                         config
                     ) -> oneTimeUse
@@ -106,7 +105,7 @@ internal fun getSpecWithFullfilledRequirements(
         }
         is SetupIntent -> {
             when {
-                paymentMethod.requirementEvaluator.supportsPISfuSettable(
+                requirementEvaluator.supportsSI(
                     stripeIntent,
                     config
                 ) -> merchantRequestedSave

@@ -33,7 +33,6 @@ import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
 import com.stripe.android.paymentsheet.analytics.EventReporter
-import com.stripe.android.paymentsheet.elements.ResourceRepository
 import com.stripe.android.paymentsheet.forms.getSupportedSavedCustomerPMs
 import com.stripe.android.paymentsheet.injection.DaggerPaymentSheetLauncherComponent
 import com.stripe.android.paymentsheet.injection.PaymentSheetViewModelModule
@@ -81,7 +80,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     private val stripeIntentValidator: StripeIntentValidator,
     customerRepository: CustomerRepository,
     prefsRepository: PrefsRepository,
-    resourceRepository: ResourceRepository,
     private val paymentLauncherFactory: StripePaymentLauncherAssistedFactory,
     private val googlePayPaymentMethodLauncherFactory: GooglePayPaymentMethodLauncherFactory,
     logger: Logger,
@@ -234,21 +232,20 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                         config
                     ).map {
                         it.type
-                    }.toList()
-                        .let {
-                            customerRepository.getPaymentMethods(
-                                customerConfig,
-                                it
-                            )
-                        }.filter { paymentMethod ->
-                            paymentMethod.hasExpectedDetails().also { valid ->
-                                if (!valid) {
-                                    logger.error(
-                                        "Discarding invalid payment method ${paymentMethod.id}"
-                                    )
-                                }
+                    }.let {
+                        customerRepository.getPaymentMethods(
+                            customerConfig,
+                            it
+                        )
+                    }.filter { paymentMethod ->
+                        paymentMethod.hasExpectedDetails().also { valid ->
+                            if (!valid) {
+                                logger.error(
+                                    "Discarding invalid payment method ${paymentMethod.id}"
+                                )
                             }
                         }
+                    }
                 }.orEmpty()
             }.fold(
                 onSuccess = {

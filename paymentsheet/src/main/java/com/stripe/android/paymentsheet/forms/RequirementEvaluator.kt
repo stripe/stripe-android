@@ -33,11 +33,7 @@ internal sealed class ShippingIntentRequirement : PIRequirement {
     object Name : ShippingIntentRequirement()
 }
 
-/**
- * This is a requirements matcher that operates off of the pi and si requirements
- * in the supported payment method.
- */
-internal sealed class RequirementEvaluator(
+internal data class PaymentMethodRequirements(
 
     /**
      * These are the requirements for using a PaymentIntent.
@@ -61,33 +57,49 @@ internal sealed class RequirementEvaluator(
      *   the SaveType - not sure if the SaveType pi and/or si requirements should be checked).
      */
     val siRequirements: Set<SIRequirement>?,
+
+    /**
+     * This indicates if the payment method can be confirmed from a payment method.
+     *  - Null means that it is not supported, or that it is attached as a different type
+     *  - false means that it is supported by the payment method, but not currently enabled
+     *  (likely because of a lack of mandate support)
+     *  - true means that a PM of this type attached to a customer can be confirmed
+     */
     val confirmPMFromCustomer: Boolean?,
+)
+
+/**
+ * This is a requirements matcher that operates off of the pi and si requirements
+ * in the supported payment method.
+ */
+internal class RequirementEvaluator(
+    val paymentMethodRequirements: PaymentMethodRequirements
 ) {
-    fun supportsCustomerSavedPM() = confirmPMFromCustomer == true
+    fun supportsCustomerSavedPM() = paymentMethodRequirements.confirmPMFromCustomer == true
 
     fun supportsSI(
-        stripeIntent: StripeIntent,
+        stripeIntent: SetupIntent,
         config: PaymentSheet.Configuration?
-    ) = checkRequirements(siRequirements, stripeIntent, config)
+    ) = checkRequirements(paymentMethodRequirements.siRequirements, stripeIntent, config)
 
     /**
      * This checks if there is support using this payment method
      * when SFU is already set in the PaymentIntent
      */
     fun supportsPISfuSet(
-        stripeIntent: StripeIntent,
+        stripeIntent: PaymentIntent,
         config: PaymentSheet.Configuration?
-    ) = checkRequirements(siRequirements, stripeIntent, config) &&
-        checkRequirements(piRequirements, stripeIntent, config)
+    ) = checkRequirements(paymentMethodRequirements.siRequirements, stripeIntent, config) &&
+        checkRequirements(paymentMethodRequirements.piRequirements, stripeIntent, config)
 
     /**
      * This detects if there is support with using this with the PI
      * even while not allowing the user to set SFU.
      */
-    fun supportsPISfuNotSetable(
-        stripeIntent: StripeIntent,
+    fun supportsPISfuNotSettable(
+        stripeIntent: PaymentIntent,
         config: PaymentSheet.Configuration?
-    ) = checkRequirements(piRequirements, stripeIntent, config)
+    ) = checkRequirements(paymentMethodRequirements.piRequirements, stripeIntent, config)
 
     /**
      * This checks to see if this PM is supported with the given
@@ -98,17 +110,14 @@ internal sealed class RequirementEvaluator(
      * so that we can guarantee to the user that the PM will be associated
      * with their customer object AND accessible when opening PaymentSheet
      * and seeing the saved PMs associate with their customer object.
-     *
-     * There is also a requirement here that all PMs in the Intent have support
-     * for reuse, this is due to a bug.
      */
     fun supportsPISfuSettable(
-        stripeIntent: StripeIntent,
+        stripeIntent: PaymentIntent,
         config: PaymentSheet.Configuration?
     ) = allHaveKnownReuseSupport(stripeIntent.paymentMethodTypes) &&
         config?.customer != null &&
-        checkRequirements(piRequirements, stripeIntent, config) &&
-        checkRequirements(siRequirements, stripeIntent, config)
+        checkRequirements(paymentMethodRequirements.piRequirements, stripeIntent, config) &&
+        checkRequirements(paymentMethodRequirements.siRequirements, stripeIntent, config)
 
     private fun checkRequirements(
         requirements: Set<Requirement>?,
@@ -123,6 +132,19 @@ internal sealed class RequirementEvaluator(
         }?.contains(false) == false
 }
 
+/**
+ * This checks that all PMs in the Intent have support for reuse.
+ *
+ * Currently a PaymentIntent can have multiple PaymentMethods allowed for confirm.
+ * Some of those PaymentMethods may support setup_future_usage = off_session,
+ * some might not. If a merchant creates a PaymentIntent with setup_future_usage
+ * set to null, the user should be able to select if they want to save it (thus
+ * setting setup_future_usage to off_session on confirm).  The problem is that
+ * if all the PaymentMethods in the PaymentIntent do not support off_session
+ * payments, the server will fail the confirmation.
+ *
+ * TODO: Fix when there is support on the server
+ */
 private fun allHaveKnownReuseSupport(paymentMethodsInIntent: List<String?>): Boolean {
     // The following PaymentMethods are know to work when
     // PaymentIntent.setup_future_usage = on/off session

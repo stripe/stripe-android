@@ -950,7 +950,6 @@ internal class PaymentSheetViewModelTest {
             prefsRepository,
             mock(),
             mock(),
-            mock(),
             Logger.noop(),
             testDispatcher,
             DUMMY_INJECTOR_KEY

@@ -523,7 +523,6 @@ internal class DefaultFlowControllerTest {
                     PaymentSheetFixtures.CONFIG_CUSTOMER,
                     PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET,
                     PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-                    listOf(PaymentMethod.Type.Card),
                     PAYMENT_METHODS,
                     SavedSelection.PaymentMethod(
                         id = "pm_123456789"
@@ -546,7 +545,6 @@ internal class DefaultFlowControllerTest {
                 PaymentSheetFixtures.CONFIG_CUSTOMER,
                 PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET,
                 PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-                listOf(PaymentMethod.Type.Card),
                 PAYMENT_METHODS,
                 SavedSelection.PaymentMethod(
                     id = "pm_123456789"
@@ -739,7 +737,6 @@ internal class DefaultFlowControllerTest {
         eventReporter,
         ViewModelProvider(activity)[FlowControllerViewModel::class.java],
         paymentLauncherAssistedFactory,
-        mock(),
         { PaymentConfiguration.getInstance(activity) },
         testDispatcher,
         ENABLE_LOGGING,
@@ -776,7 +773,6 @@ internal class DefaultFlowControllerTest {
                     paymentSheetConfiguration,
                     clientSecret,
                     stripeIntent,
-                    listOf(PaymentMethod.Type.Card),
                     paymentMethods,
                     savedSelection,
                     isGooglePayReady = false

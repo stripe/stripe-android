@@ -38,9 +38,6 @@ internal val sofortMandate = MandateTextSpec(
     Color.Gray
 )
 
-/**
- * This payment method is authenticated.
- */
 internal val sofortForm = LayoutSpec.create(
     sofortNameSection,
     sofortEmailSection,

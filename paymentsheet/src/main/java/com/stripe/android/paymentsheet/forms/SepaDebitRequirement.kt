@@ -2,21 +2,29 @@ package com.stripe.android.paymentsheet.forms
 
 import com.stripe.android.paymentsheet.PaymentSheet
 
-internal object IdealRequirementEvaluator : RequirementEvaluator(
-    piRequirements = emptySet(),
+internal val SepaDebitRequirement = PaymentMethodRequirements(
+    piRequirements = setOf(Delayed),
 
     /**
-     * This PM is blocked for SI or PI w/SFU set until there is a way of retrieving
-     * valid mandates associated with a customer PM. Once mandates are supported it will
-     * still be blocked if the SDK does not support Delayed PM.
+     * Currently we will not support this PaymentMethod for use with PI w/SFU,
+     * or SI until there is a way of retrieving valid mandates associated with a customer PM.
      *
-     * This is just a artificial block we put in to make it easy to explain
-     * that we are not allowing SetupIntent, or PaymentIntent with setupFuture
-     * usage, even though this is technically possible (both with and without a customer in the intent).
+     * The reason we are excluding it is because after PI w/SFU set or PI
+     * is used, the payment method appears as a SEPA payment method attached
+     * to a customer.  Without this block the SEPA payment method would
+     * show in PaymentSheet.  If the user used this save payment method
+     * we would have no way to know if the existing mandate was valid or how
+     * to request the user to re-accept the mandate.
      *
-     * The reason we are excluding it is because if the PM could be saved to the customer object
-     * then it should be possible from PaymentSheet to select and use it to confirm when
-     * retrieved from a customer object.
+     * SEPA Debit does support PI w/SFU and SI (both with and without a customer),
+     * and it is Delayed in this configuration.
+     */
+    siRequirements = null,
+
+    /**
+     * This PM is blocked for use from a customer PM.  Once it is possible to retrieve a
+     * mandate from a customer PM for use on confirm the SDK will be able to support this
+     * scenario.
      *
      * Here we explain the details
      * - if PI w/SFU set or SI with a customer, or
@@ -34,9 +42,8 @@ internal object IdealRequirementEvaluator : RequirementEvaluator(
      *
      * Even with mandate support, in order to make sure that any payment method added can
      * also be used when attached to a customer, this LPM will require
-     * [PaymentSheet.Configuration.allowsDelayedPaymentMethods] support as indicated in
+     * [PaymentSheet.Configuration].allowsDelayedPaymentMethods support as indicated in
      * the configuration.
      */
-    siRequirements = null,
     confirmPMFromCustomer = false
 )

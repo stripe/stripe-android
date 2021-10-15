@@ -51,6 +51,6 @@ internal val sepaDebitForm = LayoutSpec.create(
     sepaDebitEmailSection,
     sepaDebitIbanSection,
     sepaBillingSection,
-    SaveForFutureUseSpec(listOf(sepaDebitMandate)),
+    SaveForFutureUseSpec(emptyList()),
     sepaDebitMandate,
 )
