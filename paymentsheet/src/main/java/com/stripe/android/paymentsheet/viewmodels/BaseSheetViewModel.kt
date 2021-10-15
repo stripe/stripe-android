@@ -226,7 +226,23 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
 
         if (stripeIntent != null) {
             _liveMode.postValue(stripeIntent.isLiveMode)
+            warnUnactivatedIfNeeded(stripeIntent.unactivatedPaymentMethods)
         }
+    }
+
+    private fun warnUnactivatedIfNeeded(unactivatedPaymentMethodTypes: List<String>) {
+        if (unactivatedPaymentMethodTypes.isEmpty()) {
+            return
+        }
+
+        val message = "[Stripe SDK] Warning: Your Intent contains the following payment method " +
+            "types which are activated for test mode but not activated for " +
+            "live mode: $unactivatedPaymentMethodTypes. These payment method types will not be " +
+            "displayed in live mode until they are activated. To activate these payment method " +
+            "types visit your Stripe dashboard." +
+            "More information: https://support.stripe.com/questions/activate-a-new-payment-method"
+
+        logger.warning(message)
     }
 
     fun updateSelection(selection: PaymentSelection?) {
