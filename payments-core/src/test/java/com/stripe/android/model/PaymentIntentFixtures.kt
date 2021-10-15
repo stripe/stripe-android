@@ -1010,7 +1010,29 @@ internal object PaymentIntentFixtures {
             }
           },
           "on_behalf_of": null,
-          "payment_method": "pm_1IlJH7BNJ02ErVOjxKQu1wfH",
+          "payment_method": {
+            "id": "pm_1IlJH7BNJ02ErVOjxKQu1wfH",
+            "object": "payment_method",
+            "billing_details": {
+              "address": {
+                "city": null,
+                "country": null,
+                "line1": null,
+                "line2": null,
+                "postal_code": null,
+                "state": null
+              },
+              "email": null,
+              "name": null,
+              "phone": null
+            },
+            "created": 1634242405,
+            "customer": null,
+            "livemode": false,
+            "type": "wechat_pay",
+            "wechat_pay": {
+            }
+          },
           "payment_method_options": {
             "wechat_pay": {
             }
@@ -1035,9 +1057,9 @@ internal object PaymentIntentFixtures {
     val PI_REQUIRES_WECHAT_PAY_AUTHORIZE = PARSER.parse(PI_REQUIRES_WECHAT_PAY_AUTHORIZE_JSON)!!
 
     /**
-     * A sample response of PI from refresh endpoint
+     * A sample response of PI from refresh endpoint that has status 'requires_action'
      */
-    val PI_REFRESH_RESPONSE_REQUIRES_WECHAT_PAY_AUTHORIZE = JSONObject(
+    val PI_REFRESH_RESPONSE_REQUIRES_WECHAT_PAY_AUTHORIZE_JSON = JSONObject(
         """
         {
           "id": "pi_3JkCxKBNJ02ErVOj0kNqBMAZ",
@@ -1092,4 +1114,69 @@ internal object PaymentIntentFixtures {
         }
         """.trimIndent()
     )
+
+    val PI_REFRESH_RESPONSE_REQUIRES_WECHAT_PAY_AUTHORIZE =
+        PARSER.parse(PI_REFRESH_RESPONSE_REQUIRES_WECHAT_PAY_AUTHORIZE_JSON)!!
+
+    /**
+     * A sample response of PI from refresh endpoint that has status 'succeeded'
+     */
+    val PI_REFRESH_RESPONSE_WECHAT_PAY_SUCCESS_JSON = JSONObject(
+        """
+        {
+          "id": "pi_3JkCxKBNJ02ErVOj0kNqBMAZ",
+          "object": "payment_intent",
+          "allowed_source_types": [
+            "wechat_pay"
+          ],
+          "amount": 50,
+          "canceled_at": null,
+          "cancellation_reason": null,
+          "capture_method": "automatic",
+          "client_secret": "pi_3JkCxKBNJ02ErVOj0kNqBMAZ_secret_bC6oXqo976LFM06Z9rlhmzUQq",
+          "confirmation_method": "automatic",
+          "created": 1634152658,
+          "currency": "usd",
+          "description": "Example PaymentIntent",
+          "last_payment_error": null,
+          "livemode": true,
+          "next_action": {
+            "type": "wechat_pay_redirect_to_android_app",
+            "wechat_pay_redirect_to_android_app": {
+              "app_id": "wx65997d6307c3827d",
+              "nonce_str": "osR3zctjDetBvsBN",
+              "package": "Sign=WXPay",
+              "partner_id": "268716457",
+              "prepay_id": "wx140509412586868522820b12f205690000",
+              "sign": "7A5981D3347941F4F9AECACF36E467EAE4B7734E47CE4B058E8B2299DAF19E8A",
+              "timestamp": "1634159381"
+            }
+          },
+          "next_source_action": {
+            "type": "wechat_pay_redirect_to_android_app",
+            "wechat_pay_redirect_to_android_app": {
+              "app_id": "wx65997d6307c3827d",
+              "nonce_str": "osR3zctjDetBvsBN",
+              "package": "Sign=WXPay",
+              "partner_id": "268716457",
+              "prepay_id": "wx140509412586868522820b12f205690000",
+              "sign": "7A5981D3347941F4F9AECACF36E467EAE4B7734E47CE4B058E8B2299DAF19E8A",
+              "timestamp": "1634159381"
+            }
+          },
+          "payment_method": "pm_1JkEhjBNJ02ErVOjUZ3ekLUL",
+          "payment_method_types": [
+            "wechat_pay"
+          ],
+          "receipt_email": null,
+          "setup_future_usage": null,
+          "shipping": null,
+          "source": null,
+          "status": "succeeded"
+        }
+        """.trimIndent()
+    )
+
+    val PI_REFRESH_RESPONSE_WECHAT_PAY_SUCCESS =
+        PARSER.parse(PI_REFRESH_RESPONSE_WECHAT_PAY_SUCCESS_JSON)!!
 }

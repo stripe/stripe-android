@@ -1505,7 +1505,7 @@ internal class StripeApiRepositoryTest {
                 .thenReturn(
                     StripeResponse(
                         200,
-                        PaymentIntentFixtures.PI_REFRESH_RESPONSE_REQUIRES_WECHAT_PAY_AUTHORIZE.toString(),
+                        PaymentIntentFixtures.PI_REFRESH_RESPONSE_REQUIRES_WECHAT_PAY_AUTHORIZE_JSON.toString(),
                         emptyMap()
                     )
                 )
