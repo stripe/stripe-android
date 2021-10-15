@@ -5,10 +5,10 @@ import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.model.getSupportedSavedCustomerPMs
 import com.stripe.android.payments.core.injection.IOContext
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PrefsRepository
-import com.stripe.android.paymentsheet.forms.getSupportedSavedCustomerPMs
 import com.stripe.android.paymentsheet.model.ClientSecret
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
@@ -80,8 +80,7 @@ internal class DefaultFlowControllerInitializer @Inject constructor(
             retrieveStripeIntent(clientSecret)
         }.fold(
             onSuccess = { stripeIntent ->
-                val paymentMethodTypes = getSupportedSavedCustomerPMs(
-                    stripeIntent,
+                val paymentMethodTypes = stripeIntent.getSupportedSavedCustomerPMs(
                     config,
                 ).map {
                     it.type

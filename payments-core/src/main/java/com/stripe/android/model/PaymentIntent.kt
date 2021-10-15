@@ -1,5 +1,6 @@
 package com.stripe.android.model
 
+import androidx.annotation.RestrictTo
 import com.stripe.android.model.PaymentIntent.CaptureMethod
 import com.stripe.android.model.PaymentIntent.ConfirmationMethod
 import com.stripe.android.model.parsers.PaymentIntentJsonParser
@@ -156,6 +157,18 @@ data class PaymentIntent internal constructor(
     override fun requiresConfirmation(): Boolean {
         return status === StripeIntent.Status.RequiresConfirmation
     }
+
+    /**
+     * SetupFutureUsage is considered to be set if it is on or off session.
+     */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    fun isSetupFutureUsageSet() =
+        when (setupFutureUsage) {
+            StripeIntent.Usage.OnSession -> true
+            StripeIntent.Usage.OffSession -> true
+            StripeIntent.Usage.OneTime -> false
+            null -> false
+        }
 
     /**
      * The payment error encountered in the previous [PaymentIntent] confirmation.

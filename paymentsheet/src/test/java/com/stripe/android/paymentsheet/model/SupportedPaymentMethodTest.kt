@@ -1,23 +1,23 @@
-package com.stripe.android.paymentsheet.forms
+package com.stripe.android.paymentsheet.model
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.model.getSupportedSavedCustomerPMs
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
-import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
 import kotlinx.serialization.Serializable
 import org.junit.Test
 import org.junit.runner.RunWith
 import java.io.File
 
 @RunWith(AndroidJUnit4::class)
-class RequirementMatcherTest {
+class SupportedPaymentMethodTest {
     @Test
     fun `Test supported payment method baseline`() {
-        SupportedPaymentMethod.values()
+        SupportedPaymentMethod.exposedPaymentMethods
             .forEach { lpm ->
-                val resource = File(javaClass.classLoader.getResource("${lpm.type.code}-support.csv").file)
+                val resource = File(requireNotNull(javaClass.classLoader).getResource("${lpm.type.code}-support.csv").file)
                 val baseline = resource.readText()
 
                 val csvOutput = StringBuilder()
@@ -27,10 +27,9 @@ class RequirementMatcherTest {
                 generatePaymentIntentScenarios()
                     .map { testInput ->
 
-                        val formDescriptor = getSpecWithFullfilledRequirements(lpm, testInput.getIntent(lpm), testInput.getConfig())
+                        val formDescriptor = lpm.getSpecWithFullfilledRequirements(testInput.getIntent(lpm), testInput.getConfig())
                         val testOutput = TestOutput.create(
-                            supportCustomerSavedCard = getSupportedSavedCustomerPMs(
-                                testInput.getIntent(lpm),
+                            supportCustomerSavedCard = testInput.getIntent(lpm).getSupportedSavedCustomerPMs(
                                 testInput.getConfig()
                             ).contains(lpm),
                             formExists = formDescriptor != null,
@@ -44,9 +43,9 @@ class RequirementMatcherTest {
                         )
                         csvOutput.append(
                             "${lpm.type.code}, ${
-                            testInput.copy(
-                                intentPMs = testInput.intentPMs.plus(lpm.type.code)
-                            ).toCsv()
+                                testInput.copy(
+                                    intentPMs = testInput.intentPMs.plus(lpm.type.code)
+                                ).toCsv()
                             }, ${testOutput.toCsv()}\n"
                         )
 

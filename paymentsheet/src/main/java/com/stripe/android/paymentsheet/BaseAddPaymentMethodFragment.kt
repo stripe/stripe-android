@@ -21,7 +21,6 @@ import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.databinding.FragmentPaymentsheetAddPaymentMethodBinding
 import com.stripe.android.paymentsheet.elements.IdentifierSpec
 import com.stripe.android.paymentsheet.forms.FormFieldValues
-import com.stripe.android.paymentsheet.forms.getPMAddForm
 import com.stripe.android.paymentsheet.model.Amount
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
@@ -247,7 +246,7 @@ internal abstract class BaseAddPaymentMethodFragment(
             @InjectorKey injectorKey: String
         ): FormFragmentArguments {
 
-            val layoutFormDescriptor = getPMAddForm(showPaymentMethod, stripeIntent, config)
+            val layoutFormDescriptor = showPaymentMethod.getPMAddForm(stripeIntent, config)
 
             return FormFragmentArguments(
                 paymentMethod = showPaymentMethod,
