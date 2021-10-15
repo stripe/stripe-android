@@ -35,7 +35,8 @@ internal data class PaymentMethodRequirements(
     val siRequirements: Set<SIRequirement>?,
 
     /**
-     * This indicates if the payment method can be confirmed from a payment method.
+     * This indicates if the payment method can be confirmed when attached to a customer
+     * and only the Payment Method id is available.
      *  - Null means that it is not supported, or that it is attached as a different type
      *  - false means that it is supported by the payment method, but not currently enabled
      *  (likely because of a lack of mandate support)
