@@ -49,7 +49,6 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.TestCoroutineDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runBlockingTest
-import org.junit.Ignore
 import org.junit.Rule
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
@@ -660,7 +659,6 @@ internal class PaymentSheetViewModelTest {
             )
     }
 
-    @Ignore("Until card filter removed.")
     fun `Verify supported payment methods exclude afterpay if no shipping`() {
         viewModel.setStripeIntent(
             PaymentIntentFixtures.PI_WITH_SHIPPING.copy(
@@ -683,7 +681,6 @@ internal class PaymentSheetViewModelTest {
         )
     }
 
-    @Ignore("Until card filter removed.")
     fun `Verify PI off_session excludes LPMs requiring mandate`() {
 
         viewModel.setStripeIntent(
@@ -708,7 +705,6 @@ internal class PaymentSheetViewModelTest {
         )
     }
 
-    @Ignore("Until card filter removed.")
     fun `Verify SetupIntent excludes LPMs requiring mandate`() {
         viewModel.setStripeIntent(
             SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD.copy(
@@ -893,58 +889,57 @@ internal class PaymentSheetViewModelTest {
         )
     }
 
-    @Ignore("Disabled until more payment methods are supported")
     @Test
     fun `getSupportedPaymentMethods() filters payment methods with delayed settlement`() {
         val viewModel = createViewModel()
-
-        assertThat(
-            viewModel.getSupportedPaymentMethods(
-                PAYMENT_INTENT.copy(
-                    paymentMethodTypes = listOf(
-                        PaymentMethod.Type.Card.code,
-                        PaymentMethod.Type.Ideal.code,
-                        PaymentMethod.Type.SepaDebit.code,
-                        PaymentMethod.Type.Eps.code,
-                        PaymentMethod.Type.Sofort.code
-                    )
+        viewModel.setStripeIntent(
+            PAYMENT_INTENT.copy(
+                paymentMethodTypes = listOf(
+                    PaymentMethod.Type.Card.code,
+                    PaymentMethod.Type.Ideal.code,
+                    PaymentMethod.Type.SepaDebit.code,
+                    PaymentMethod.Type.Eps.code,
+                    PaymentMethod.Type.Sofort.code
                 )
             )
+        )
+
+        assertThat(
+            viewModel.supportedPaymentMethods
         ).containsExactly(
             SupportedPaymentMethod.Card,
-            SupportedPaymentMethod.Ideal,
-            SupportedPaymentMethod.Eps
+            SupportedPaymentMethod.Ideal
         )
     }
 
-    @Ignore("Disabled until more payment methods are supported")
     @Test
     fun `getSupportedPaymentMethods() does not filter payment methods when supportsDelayedSettlement = true`() {
         val viewModel = createViewModel(
             args = ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
-                config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config?.copy(
+                config = PaymentSheet.Configuration(
+                    merchantDisplayName = "Example, Inc.",
                     allowsDelayedPaymentMethods = true
+                )
+            )
+        )
+        viewModel.setStripeIntent(
+            PAYMENT_INTENT.copy(
+                paymentMethodTypes = listOf(
+                    PaymentMethod.Type.Card.code,
+                    PaymentMethod.Type.Ideal.code,
+                    PaymentMethod.Type.SepaDebit.code,
+                    PaymentMethod.Type.Eps.code,
+                    PaymentMethod.Type.Sofort.code
                 )
             )
         )
 
         assertThat(
-            viewModel.getSupportedPaymentMethods(
-                PAYMENT_INTENT.copy(
-                    paymentMethodTypes = listOf(
-                        PaymentMethod.Type.Card.code,
-                        PaymentMethod.Type.Ideal.code,
-                        PaymentMethod.Type.SepaDebit.code,
-                        PaymentMethod.Type.Eps.code,
-                        PaymentMethod.Type.Sofort.code
-                    )
-                )
-            )
+            viewModel.supportedPaymentMethods
         ).containsExactly(
             SupportedPaymentMethod.Card,
             SupportedPaymentMethod.Ideal,
             SupportedPaymentMethod.SepaDebit,
-            SupportedPaymentMethod.Eps,
             SupportedPaymentMethod.Sofort
         )
     }
@@ -970,7 +965,6 @@ internal class PaymentSheetViewModelTest {
             prefsRepository,
             mock(),
             mock(),
-            mock(),
             Logger.noop(),
             testDispatcher,
             DUMMY_INJECTOR_KEY
@@ -982,7 +976,7 @@ internal class PaymentSheetViewModelTest {
         private val ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP =
             PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP
         private val ARGS_CUSTOMER_WITH_GOOGLEPAY = PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY
-        private val ARGS_WITHOUT_CUSTOMER = PaymentSheetFixtures.ARGS_WITHOUT_CUSTOMER
+        private val ARGS_WITHOUT_CUSTOMER = PaymentSheetFixtures.ARGS_WITHOUT_CONFIG
 
         private val PAYMENT_METHODS = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
 

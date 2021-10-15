@@ -137,7 +137,7 @@ internal class CardDataCollectionFragment<ViewModelType : BaseSheetViewModel<*>>
         setupSaveCardCheckbox()
     }
 
-    fun updateSelection() {
+    private fun updateSelection() {
         val validCard = if (addCardViewModel.isCardValid) {
             paymentMethodParams?.let { params ->
                 PaymentSelection.New.Card(
@@ -321,8 +321,8 @@ internal class CardDataCollectionFragment<ViewModelType : BaseSheetViewModel<*>>
         requireArguments().getParcelable<FormFragmentArguments>(
             ComposeFormDataCollectionFragment.EXTRA_CONFIG
         )?.let { args ->
-            saveCardCheckbox.isChecked = args.saveForFutureUseInitialValue
-            saveCardCheckbox.isVisible = args.saveForFutureUseInitialVisibility
+            saveCardCheckbox.isChecked = true
+            saveCardCheckbox.isVisible = args.showCheckbox
         }
         sheetViewModel.newCard?.shouldSavePaymentMethod?.also {
             if (saveCardCheckbox.isVisible) {

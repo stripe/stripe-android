@@ -73,7 +73,6 @@
   <string name="stripe_failure_connection_error">連接我們的支付提供者時出現了問題。請檢查網路連接，然後重試。</string>
   <!-- When an internal error is reported when a google pay payment is started. -->
   <string name="stripe_google_pay_error_internal">發生了內部錯誤。</string>
-  <string name="stripe_paymentsheet_add_button_label">添加</string>
   <!-- Text for a button that, when tapped, displays another screen where the customer can add payment method details -->
   <string name="stripe_paymentsheet_add_payment_method_button_label">+ 添加</string>
   <!-- Card details entry form header title -->
@@ -85,6 +84,8 @@
   <!-- Text for back button -->
   <string name="stripe_paymentsheet_back">上一步</string>
   <string name="stripe_paymentsheet_close">關閉</string>
+  <!-- Text for continue button -->
+  <string name="stripe_paymentsheet_continue_button_label">繼續</string>
   <!-- Label for the field containing the dropdown of EPS Banks -->
   <string name="stripe_paymentsheet_eps_bank">EPS 銀行</string>
   <!-- The label of a text field that is optional. For example, 'Email (optional)' or 'Name (optional) -->
@@ -101,6 +102,8 @@
   <string name="stripe_paymentsheet_pay_button_amount">支付%s</string>
   <!-- Label for a button that starts processing the payment. -->
   <string name="stripe_paymentsheet_pay_button_label">支付</string>
+  <!-- Payment Method type brand name  -->
+  <string name="stripe_paymentsheet_payment_method_afterpay_clearpay">Afterpay</string>
   <!-- Title for credit card number entry field -->
   <string name="stripe_paymentsheet_payment_method_card">卡</string>
   <!-- Payment method brand name -->
@@ -120,5 +123,5 @@
   <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->
   <string name="stripe_paymentsheet_setup_button_label">設置</string>
   <!-- Label indicating the total amount that the user is authorizing (e.g. "Total: $25.00") -->
-  <string name="stripe_paymentsheet_total_amount">總金額：%s</string>
+  <string name="stripe_paymentsheet_total_amount">合計：%s</string>
 </resources>
