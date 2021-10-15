@@ -285,7 +285,6 @@ internal class FormViewModelTest {
             assertThat(formViewModel.completeFormValues.first()?.userRequestedReuse).isEqualTo(
                 PaymentSelection.UserReuseRequest.RequestNoReuse
             )
-
         }
     }
 
