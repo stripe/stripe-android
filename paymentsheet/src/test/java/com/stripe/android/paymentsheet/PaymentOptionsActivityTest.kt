@@ -179,7 +179,7 @@ class PaymentOptionsActivityTest {
                     .isFalse()
 
                 assertThat(addBinding.label.text)
-                    .isEqualTo("Add")
+                    .isEqualTo("Continue")
 
                 activity.finish()
             }
