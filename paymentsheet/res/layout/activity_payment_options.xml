@@ -90,7 +90,7 @@
                         android:layout_marginBottom="@dimen/stripe_paymentsheet_button_container_spacing_bottom"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="@string/stripe_paymentsheet_add_button_label"
+                        android:text="@string/stripe_paymentsheet_continue_button_label"
                         android:visibility="gone" />
 
                 </FrameLayout>

@@ -73,7 +73,6 @@
   <string name="stripe_failure_connection_error">결제 제공자에게 연결하는 과정에서 문제가 발생했습니다. 인터넷 연결을 확인하시고 다시 시도하십시오.</string>
   <!-- When an internal error is reported when a google pay payment is started. -->
   <string name="stripe_google_pay_error_internal">내부 오류가 발생했습니다.</string>
-  <string name="stripe_paymentsheet_add_button_label">추가</string>
   <!-- Text for a button that, when tapped, displays another screen where the customer can add payment method details -->
   <string name="stripe_paymentsheet_add_payment_method_button_label">+ 추가</string>
   <!-- Card details entry form header title -->
@@ -85,6 +84,8 @@
   <!-- Text for back button -->
   <string name="stripe_paymentsheet_back">뒤로</string>
   <string name="stripe_paymentsheet_close">닫기</string>
+  <!-- Text for continue button -->
+  <string name="stripe_paymentsheet_continue_button_label">계속</string>
   <!-- Label for the field containing the dropdown of EPS Banks -->
   <string name="stripe_paymentsheet_eps_bank">EPS 은행</string>
   <!-- The label of a text field that is optional. For example, 'Email (optional)' or 'Name (optional) -->
@@ -101,6 +102,8 @@
   <string name="stripe_paymentsheet_pay_button_amount">%s 결제</string>
   <!-- Label for a button that starts processing the payment. -->
   <string name="stripe_paymentsheet_pay_button_label">결제</string>
+  <!-- Payment Method type brand name  -->
+  <string name="stripe_paymentsheet_payment_method_afterpay_clearpay">Afterpay</string>
   <!-- Title for credit card number entry field -->
   <string name="stripe_paymentsheet_payment_method_card">카드</string>
   <!-- Payment method brand name -->

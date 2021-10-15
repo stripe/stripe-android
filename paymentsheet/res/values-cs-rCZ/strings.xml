@@ -73,7 +73,6 @@
   <string name="stripe_failure_connection_error">Vyskytly se problémy s připojením k našemu poskytovateli plateb. Zkontrolujte prosím připojení k internetu a zkuste to znovu.</string>
   <!-- When an internal error is reported when a google pay payment is started. -->
   <string name="stripe_google_pay_error_internal">Došlo k interní chybě.</string>
-  <string name="stripe_paymentsheet_add_button_label">Přidat</string>
   <!-- Text for a button that, when tapped, displays another screen where the customer can add payment method details -->
   <string name="stripe_paymentsheet_add_payment_method_button_label">+ Přidat</string>
   <!-- Card details entry form header title -->
@@ -85,6 +84,8 @@
   <!-- Text for back button -->
   <string name="stripe_paymentsheet_back">Zpět</string>
   <string name="stripe_paymentsheet_close">Zavřít</string>
+  <!-- Text for continue button -->
+  <string name="stripe_paymentsheet_continue_button_label">Pokračovat</string>
   <!-- Label for the field containing the dropdown of EPS Banks -->
   <string name="stripe_paymentsheet_eps_bank">EPS Bank</string>
   <!-- The label of a text field that is optional. For example, 'Email (optional)' or 'Name (optional) -->
@@ -101,6 +102,8 @@
   <string name="stripe_paymentsheet_pay_button_amount">Zaplatit %s</string>
   <!-- Label for a button that starts processing the payment. -->
   <string name="stripe_paymentsheet_pay_button_label">Zaplatit</string>
+  <!-- Payment Method type brand name  -->
+  <string name="stripe_paymentsheet_payment_method_afterpay_clearpay">Afterpay</string>
   <!-- Title for credit card number entry field -->
   <string name="stripe_paymentsheet_payment_method_card">Karta</string>
   <!-- Payment method brand name -->
