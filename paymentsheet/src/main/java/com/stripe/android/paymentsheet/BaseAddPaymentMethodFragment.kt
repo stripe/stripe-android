@@ -181,7 +181,6 @@ internal abstract class BaseAddPaymentMethodFragment(
                 showPaymentMethod = paymentMethod,
                 merchantName = sheetViewModel.merchantName,
                 amount = sheetViewModel.amount.value,
-                billingAddress = sheetViewModel.config?.defaultBillingDetails,
                 injectorKey = sheetViewModel.injectorKey
             )
         )
@@ -242,7 +241,6 @@ internal abstract class BaseAddPaymentMethodFragment(
             config: PaymentSheet.Configuration?,
             merchantName: String,
             amount: Amount? = null,
-            billingAddress: PaymentSheet.BillingDetails? = null,
             @InjectorKey injectorKey: String
         ): FormFragmentArguments {
 
@@ -254,7 +252,7 @@ internal abstract class BaseAddPaymentMethodFragment(
                 showCheckboxControlledFields = layoutFormDescriptor.showCheckboxControlledFields,
                 merchantName = merchantName,
                 amount = amount,
-                billingDetails = billingAddress?.let {
+                billingDetails = config?.defaultBillingDetails?.let { billingAddress ->
                     PaymentSheet.BillingDetails(
                         name = billingAddress.name,
                         email = billingAddress.email,
