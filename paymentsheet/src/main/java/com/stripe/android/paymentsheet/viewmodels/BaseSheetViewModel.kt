@@ -14,7 +14,6 @@ import com.stripe.android.Logger
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.model.getPMsToAdd
 import com.stripe.android.payments.core.injection.InjectorKey
 import com.stripe.android.paymentsheet.BaseAddPaymentMethodFragment
 import com.stripe.android.paymentsheet.BasePaymentMethodsListFragment
@@ -198,7 +197,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
          * the [BaseAddPaymentMethodFragment]
          */
 
-        supportedPaymentMethods = stripeIntent?.getPMsToAdd(config) ?: emptyList()
+        supportedPaymentMethods = SupportedPaymentMethod.getPMsToAdd(stripeIntent, config)
 
         if (stripeIntent != null && supportedPaymentMethods.isEmpty()) {
             onFatal(

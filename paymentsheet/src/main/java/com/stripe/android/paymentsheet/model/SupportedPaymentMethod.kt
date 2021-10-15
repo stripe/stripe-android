@@ -326,5 +326,35 @@ internal enum class SupportedPaymentMethod(
          */
         fun fromCode(code: String?) =
             exposedPaymentMethods.firstOrNull { it.type.code == code }
+
+        /**
+         * Get the LPMS that are supported when used as a Customer Saved LPM given
+         * the intent.
+         */
+        internal fun getSupportedSavedCustomerPMs(
+            stripeIntent: StripeIntent?,
+            config: PaymentSheet.Configuration?
+        ) = stripeIntent?.paymentMethodTypes?.mapNotNull {
+            fromCode(it)
+        }?.filter { paymentMethod ->
+            paymentMethod.supportsCustomerSavedPM() &&
+                paymentMethod.getSpecWithFullfilledRequirements(stripeIntent, config) != null
+        } ?: emptyList()
+
+        /**
+         * This will return a list of payment methods that have a supported form given
+         * the [PaymentSheet.Configuration] and [StripeIntent].
+         */
+        internal fun getPMsToAdd(
+            stripeIntent: StripeIntent?,
+            config: PaymentSheet.Configuration?
+        ) = stripeIntent?.paymentMethodTypes?.mapNotNull {
+            fromCode(it)
+        }?.filter { supportedPaymentMethod ->
+            supportedPaymentMethod.getSpecWithFullfilledRequirements(
+                stripeIntent,
+                config
+            ) != null
+        } ?: emptyList()
     }
 }

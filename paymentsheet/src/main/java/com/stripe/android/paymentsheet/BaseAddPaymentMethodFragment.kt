@@ -252,23 +252,7 @@ internal abstract class BaseAddPaymentMethodFragment(
                 showCheckboxControlledFields = layoutFormDescriptor.showCheckboxControlledFields,
                 merchantName = merchantName,
                 amount = amount,
-                billingDetails = config?.defaultBillingDetails?.let { billingAddress ->
-                    PaymentSheet.BillingDetails(
-                        name = billingAddress.name,
-                        email = billingAddress.email,
-                        phone = billingAddress.phone,
-                        address = billingAddress.address?.let {
-                            PaymentSheet.Address(
-                                city = it.city,
-                                state = it.state,
-                                country = it.country,
-                                line1 = it.line1,
-                                line2 = it.line2,
-                                postalCode = it.postalCode
-                            )
-                        }
-                    )
-                },
+                billingDetails = config?.defaultBillingDetails,
                 injectorKey = injectorKey
             )
         }

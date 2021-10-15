@@ -4,8 +4,6 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.model.getPMsToAdd
-import com.stripe.android.model.getSupportedSavedCustomerPMs
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import kotlinx.serialization.Serializable
 import org.junit.Test
@@ -30,21 +28,23 @@ class SupportedPaymentMethodTest {
 
                         val formDescriptor = lpm.getSpecWithFullfilledRequirements(testInput.getIntent(lpm), testInput.getConfig())
                         val testOutput = TestOutput.create(
-                            supportCustomerSavedCard = testInput.getIntent(lpm).getSupportedSavedCustomerPMs(
+                            supportCustomerSavedCard = SupportedPaymentMethod.getSupportedSavedCustomerPMs(
+                                testInput.getIntent(lpm),
                                 testInput.getConfig()
                             ).contains(lpm),
                             formExists = formDescriptor != null,
                             formShowsSaveCheckbox = formDescriptor?.showCheckbox,
                             formShowsCheckboxControlledFields = formDescriptor?.showCheckboxControlledFields,
-                            supportsAdding = testInput.getIntent(lpm).getPMsToAdd(
+                            supportsAdding = SupportedPaymentMethod.getPMsToAdd(
+                                testInput.getIntent(lpm),
                                 testInput.getConfig()
                             ).contains(lpm)
                         )
                         csvOutput.append(
                             "${lpm.type.code}, ${
-                            testInput.copy(
-                                intentPMs = testInput.intentPMs.plus(lpm.type.code)
-                            ).toCsv()
+                                testInput.copy(
+                                    intentPMs = testInput.intentPMs.plus(lpm.type.code)
+                                ).toCsv()
                             }, ${testOutput.toCsv()}\n"
                         )
 
