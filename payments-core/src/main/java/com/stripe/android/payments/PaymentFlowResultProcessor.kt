@@ -106,7 +106,7 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
     ): Boolean {
         // For some payment methods, after user confirmation(resulting in flowOutCome == SUCCEEDED),
         // there is a delay when Stripe backend transfers its state out of "requires_action".
-        // The a PaymentIntent with such payment method, we will need to poll the refresh endpoint
+        // For a PaymentIntent with such payment method, we will need to poll the refresh endpoint
         // until the PaymentIntent reaches a deterministic state.
         return flowOutcome == SUCCEEDED && stripeIntent.shouldRefresh()
     }
