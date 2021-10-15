@@ -22,8 +22,12 @@ internal sealed class PaymentMethodPreferenceJsonParser<out StripeIntentType : S
         val orderedPaymentMethodTypes =
             paymentMethodPreference.optJSONArray(FIELD_ORDERED_PAYMENT_METHOD_TYPES)
 
+        val unActivatedPaymentTypes =
+            json.optJSONArray(FIELD_UNACTIVATED_PAYMENT_METHOD_TYPES)
+
         return paymentMethodPreference.optJSONObject(stripeIntentFieldName)?.let {
             it.put(FIELD_PAYMENT_METHOD_TYPES, orderedPaymentMethodTypes)
+            it.put(FIELD_UNACTIVATED_PAYMENT_METHOD_TYPES, unActivatedPaymentTypes)
             parseStripeIntent(it)
         }
     }
@@ -36,6 +40,7 @@ internal sealed class PaymentMethodPreferenceJsonParser<out StripeIntentType : S
         private const val FIELD_OBJECT = "object"
         private const val FIELD_ORDERED_PAYMENT_METHOD_TYPES = "ordered_payment_method_types"
         private const val FIELD_PAYMENT_METHOD_TYPES = "payment_method_types"
+        private const val FIELD_UNACTIVATED_PAYMENT_METHOD_TYPES = "unactivated_payment_method_types"
     }
 }
 
