@@ -15,19 +15,21 @@ internal fun AddressElementUI(
     enabled: Boolean,
     controller: AddressController
 ) {
-    val fields by controller.fieldsFlowable.asLiveData().observeAsState(emptyList())
-    Column {
-        fields.forEachIndexed { index, field ->
-            SectionFieldElementUI(enabled, field)
-            if (index != fields.size - 1) {
-                val cardStyle = CardStyle(isSystemInDarkTheme())
-                Divider(
-                    color = cardStyle.cardBorderColor,
-                    thickness = cardStyle.cardBorderWidth,
-                    modifier = Modifier.padding(
-                        horizontal = cardStyle.cardBorderWidth
+    val fields by controller.fieldsFlowable.asLiveData().observeAsState(null)
+    if(fields != null) {
+        Column {
+            fields!!.forEachIndexed { index, field ->
+                SectionFieldElementUI(enabled, field)
+                if (index != fields!!.size - 1) {
+                    val cardStyle = CardStyle(isSystemInDarkTheme())
+                    Divider(
+                        color = cardStyle.cardBorderColor,
+                        thickness = cardStyle.cardBorderWidth,
+                        modifier = Modifier.padding(
+                            horizontal = cardStyle.cardBorderWidth
+                        )
                     )
-                )
+                }
             }
         }
     }
