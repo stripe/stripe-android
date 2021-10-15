@@ -244,8 +244,7 @@ internal enum class SupportedPaymentMethod(
      */
     private fun supportsPaymentIntentSfuNotSettable(
         config: PaymentSheet.Configuration?
-    ) = requirement.confirmPMFromCustomer == true &&
-        checkRequirements(requirement.piRequirements, config)
+    ) = checkRequirements(requirement.piRequirements, config)
 
     /**
      * This checks to see if this PM is supported with the given
@@ -316,8 +315,17 @@ internal enum class SupportedPaymentMethod(
     }
 
     companion object {
+        /**
+         * This is a list of the payment methods that we are allowing in the release
+         */
         @VisibleForTesting
         internal val exposedPaymentMethods = listOf(Card)
+//         listOf(Card, Bancontact, Sofort, Ideal, SepaDebit)
+
+
+        /**
+         * This will use only those payment methods that are allowed in the release
+         */
         fun fromCode(code: String?) =
             exposedPaymentMethods.firstOrNull { it.type.code == code }
     }

@@ -4,6 +4,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.model.getPMsToAdd
 import com.stripe.android.model.getSupportedSavedCustomerPMs
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import kotlinx.serialization.Serializable
@@ -35,11 +36,9 @@ class SupportedPaymentMethodTest {
                             formExists = formDescriptor != null,
                             formShowsSaveCheckbox = formDescriptor?.showCheckbox,
                             formShowsCheckboxControlledFields = formDescriptor?.showCheckboxControlledFields,
-                            supportsAdding = lpm == SupportedPaymentMethod.Card
-//                            // TODO: When add in more PMS
-//                            getPMsToAdd(
-//                                testInput.getIntent(lpm), testInput.getConfig()
-//                            ).contains(lpm)
+                            supportsAdding = testInput.getIntent(lpm).getPMsToAdd(
+                                testInput.getConfig()
+                            ).contains(lpm)
                         )
                         csvOutput.append(
                             "${lpm.type.code}, ${
