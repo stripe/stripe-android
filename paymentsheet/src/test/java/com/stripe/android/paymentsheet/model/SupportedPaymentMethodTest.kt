@@ -14,7 +14,7 @@ import java.io.File
 class SupportedPaymentMethodTest {
     @Test
     fun `Test supported payment method baseline`() {
-        SupportedPaymentMethod.exposedPaymentMethods
+        SupportedPaymentMethod.values()
             .forEach { lpm ->
                 val resource = File(requireNotNull(javaClass.classLoader).getResource("${lpm.type.code}-support.csv").file)
                 val baseline = resource.readText()
@@ -42,9 +42,9 @@ class SupportedPaymentMethodTest {
                         )
                         csvOutput.append(
                             "${lpm.type.code}, ${
-                            testInput.copy(
-                                intentPMs = testInput.intentPMs.plus(lpm.type.code)
-                            ).toCsv()
+                                testInput.copy(
+                                    intentPMs = testInput.intentPMs.plus(lpm.type.code)
+                                ).toCsv()
                             }, ${testOutput.toCsv()}\n"
                         )
 

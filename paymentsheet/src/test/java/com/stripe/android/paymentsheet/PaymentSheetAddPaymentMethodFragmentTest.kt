@@ -303,8 +303,8 @@ class PaymentSheetAddPaymentMethodFragmentTest {
                 .isEqualTo(
                     FormFragmentArguments(
                         SupportedPaymentMethod.Bancontact,
-                        showCheckbox = true,
-                        showCheckboxControlledFields = true,
+                        showCheckbox = false,
+                        showCheckboxControlledFields = false,
                         merchantName = PaymentSheetFixtures.MERCHANT_DISPLAY_NAME,
                         amount = createAmount(),
                         injectorKey = DUMMY_INJECTOR_KEY
@@ -326,8 +326,8 @@ class PaymentSheetAddPaymentMethodFragmentTest {
                 .isEqualTo(
                     FormFragmentArguments(
                         SupportedPaymentMethod.Bancontact,
-                        showCheckbox = true,
-                        showCheckboxControlledFields = true,
+                        showCheckbox = false,
+                        showCheckboxControlledFields = false,
                         merchantName = PaymentSheetFixtures.MERCHANT_DISPLAY_NAME,
                         amount = createAmount(),
                         injectorKey = DUMMY_INJECTOR_KEY
