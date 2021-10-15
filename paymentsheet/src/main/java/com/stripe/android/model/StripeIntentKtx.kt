@@ -30,6 +30,3 @@ internal fun StripeIntent.getPMsToAdd(
         config
     ) != null
 }
-
-
-

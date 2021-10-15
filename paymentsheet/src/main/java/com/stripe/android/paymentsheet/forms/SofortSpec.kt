@@ -40,7 +40,6 @@ internal val SofortRequirement = PaymentMethodRequirements(
     confirmPMFromCustomer = false
 )
 
-
 internal val sofortParams: MutableMap<String, Any?> = mutableMapOf(
     "country" to null,
 )

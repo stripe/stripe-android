@@ -28,7 +28,6 @@ internal val AfterpayClearpayRequirement = PaymentMethodRequirements(
     confirmPMFromCustomer = null
 )
 
-
 internal val AfterpayClearpayParamKey: MutableMap<String, Any?> = mutableMapOf(
     "type" to "afterpay_clearpay",
     "billing_details" to billingParams

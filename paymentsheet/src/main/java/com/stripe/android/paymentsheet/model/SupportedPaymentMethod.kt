@@ -278,7 +278,6 @@ internal enum class SupportedPaymentMethod(
             }
         }?.contains(false) == false
 
-
     /**
      * This checks that all PMs in the Intent have support for reuse.
      *
@@ -321,7 +320,6 @@ internal enum class SupportedPaymentMethod(
         @VisibleForTesting
         internal val exposedPaymentMethods = listOf(Card)
 //         listOf(Card, Bancontact, Sofort, Ideal, SepaDebit)
-
 
         /**
          * This will use only those payment methods that are allowed in the release
