@@ -15,11 +15,10 @@ import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.payments.core.injection.DUMMY_INJECTOR_KEY
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetActivity
 import com.stripe.android.paymentsheet.PaymentSheetContract
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
+import com.stripe.android.paymentsheet.PaymentSheetFixtures.COMPOSE_FRAGMENT_ARGS
 import com.stripe.android.paymentsheet.PaymentSheetViewModel
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.databinding.FragmentPaymentsheetAddCardBinding
@@ -27,7 +26,6 @@ import com.stripe.android.paymentsheet.databinding.StripeBillingAddressLayoutBin
 import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.FragmentConfigFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
 import com.stripe.android.paymentsheet.ui.AddPaymentMethodsFragmentFactory
 import com.stripe.android.utils.TestUtils.idleLooper
 import org.junit.Before
@@ -99,7 +97,7 @@ class CardDataCollectionFragmentTest {
 
     @Test
     fun `selection without customer config and valid card entered should create expected PaymentSelection`() {
-        createFragment(PaymentSheetFixtures.ARGS_WITHOUT_CUSTOMER) { fragment, viewBinding ->
+        createFragment(PaymentSheetFixtures.ARGS_WITHOUT_CONFIG) { fragment, viewBinding ->
             viewBinding.saveCardCheckbox.isChecked = false
 
             var paymentSelection: PaymentSelection? = null
@@ -127,7 +125,7 @@ class CardDataCollectionFragmentTest {
     @Test
     fun `relaunching the fragment populates the fields with saved card`() {
         createFragment(
-            PaymentSheetFixtures.ARGS_WITHOUT_CUSTOMER,
+            PaymentSheetFixtures.ARGS_WITHOUT_CONFIG,
             newCard = PaymentSelection.New.Card(
                 PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
                 CardBrand.Discover,
@@ -155,25 +153,9 @@ class CardDataCollectionFragmentTest {
     @Test
     fun `launching with arguments populates the fields`() {
         createFragment(
-            fragmentArgs = FormFragmentArguments(
-                SupportedPaymentMethod.Bancontact.name,
-                saveForFutureUseInitialVisibility = false,
-                saveForFutureUseInitialValue = false,
-                merchantName = "Merchant, Inc.",
-                billingDetails = PaymentSheet.BillingDetails(
-                    address = PaymentSheet.Address(
-                        line1 = "123 Main Street",
-                        line2 = null,
-                        city = "San Francisco",
-                        state = "CA",
-                        postalCode = "94111",
-                        country = "DE",
-                    ),
-                    email = "email",
-                    name = "Jenny Rosen",
-                    phone = "+18008675309"
-                ),
-                injectorKey = DUMMY_INJECTOR_KEY
+            fragmentArgs = COMPOSE_FRAGMENT_ARGS.copy(
+                showCheckboxControlledFields = true,
+                showCheckbox = true
             )
         ) { _, viewBinding ->
             assertThat(viewBinding.billingAddress.postalCodeView.text.toString())
@@ -188,14 +170,14 @@ class CardDataCollectionFragmentTest {
                 .isEqualTo("CA")
             assertThat(viewBinding.billingAddress.countryView.text.toString())
                 .isEqualTo("Germany")
-            assertThat(viewBinding.saveCardCheckbox.isVisible).isFalse()
-            assertThat(viewBinding.saveCardCheckbox.isChecked).isFalse()
+            assertThat(viewBinding.saveCardCheckbox.isVisible).isTrue()
+            assertThat(viewBinding.saveCardCheckbox.isChecked).isTrue()
         }
     }
 
     @Test
     fun `launching with billing details populates the fields`() {
-        createFragment(fragmentArgs = PaymentSheetFixtures.COMPOSE_FRAGMENT_ARGS) { _, viewBinding ->
+        createFragment(fragmentArgs = COMPOSE_FRAGMENT_ARGS) { _, viewBinding ->
             assertThat(viewBinding.billingAddress.postalCodeView.text.toString())
                 .isEqualTo("94111")
             assertThat(viewBinding.billingAddress.address1View.text.toString())
@@ -272,7 +254,7 @@ class CardDataCollectionFragmentTest {
     fun `checkbox text should reflect merchant display name`() {
         createFragment { _, viewBinding ->
             assertThat(viewBinding.saveCardCheckbox.text)
-                .isEqualTo("Save this card for future Widget Store payments")
+                .isEqualTo("Save this card for future Merchant, Inc. payments")
         }
     }
 
@@ -434,7 +416,7 @@ class CardDataCollectionFragmentTest {
 
     @Test
     fun `empty merchant display name shows correct message`() {
-        createFragment(PaymentSheetFixtures.ARGS_WITHOUT_CUSTOMER) { _, viewBinding ->
+        createFragment(PaymentSheetFixtures.ARGS_WITHOUT_CONFIG) { _, viewBinding ->
             assertThat(viewBinding.saveCardCheckbox.text)
                 .isEqualTo(
                     context.getString(
@@ -461,9 +443,12 @@ class CardDataCollectionFragmentTest {
     private fun createFragment(
         args: PaymentSheetContract.Args = PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY,
         fragmentConfig: FragmentConfig? = FragmentConfigFixtures.DEFAULT,
-        stripeIntent: StripeIntent? = PaymentIntentFixtures.PI_WITH_SHIPPING,
+        stripeIntent: StripeIntent = PaymentIntentFixtures.PI_WITH_SHIPPING,
         newCard: PaymentSelection.New.Card? = null,
-        fragmentArgs: FormFragmentArguments? = PaymentSheetFixtures.COMPOSE_FRAGMENT_ARGS,
+        fragmentArgs: FormFragmentArguments? = COMPOSE_FRAGMENT_ARGS.copy(
+            showCheckbox = true,
+            showCheckboxControlledFields = true
+        ),
         onReady: (CardDataCollectionFragment<PaymentSheetViewModel>, FragmentPaymentsheetAddCardBinding) -> Unit
     ) {
         val factory = AddPaymentMethodsFragmentFactory(

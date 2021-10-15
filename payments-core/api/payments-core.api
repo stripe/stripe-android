@@ -2616,6 +2616,7 @@ public final class com/stripe/android/model/PaymentIntent : com/stripe/android/m
 	public fun hashCode ()I
 	public fun isConfirmed ()Z
 	public fun isLiveMode ()Z
+	public final fun isSetupFutureUsageSet ()Z
 	public fun requiresAction ()Z
 	public fun requiresConfirmation ()Z
 	public fun toString ()Ljava/lang/String;

@@ -13,7 +13,6 @@ import androidx.lifecycle.viewModelScope
 import com.stripe.android.Logger
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.core.injection.InjectorKey
 import com.stripe.android.paymentsheet.BaseAddPaymentMethodFragment
@@ -198,7 +197,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
          * the [BaseAddPaymentMethodFragment]
          */
 
-        supportedPaymentMethods = getSupportedPaymentMethods(stripeIntent)
+        supportedPaymentMethods = SupportedPaymentMethod.getPMsToAdd(stripeIntent, config)
 
         if (stripeIntent != null && supportedPaymentMethods.isEmpty()) {
             onFatal(
@@ -228,55 +227,6 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
         if (stripeIntent != null) {
             _liveMode.postValue(stripeIntent.isLiveMode)
         }
-    }
-
-    @VisibleForTesting
-    internal fun getSupportedPaymentMethods(
-        stripeIntentParameter: StripeIntent?
-    ): List<SupportedPaymentMethod> {
-        stripeIntentParameter?.let { stripeIntent ->
-            return stripeIntent.paymentMethodTypes.asSequence().mapNotNull {
-                SupportedPaymentMethod.fromCode(it)
-            }.filter {
-                config?.allowsDelayedPaymentMethods == true ||
-                    PaymentMethod.Type.fromCode(it.code)?.hasDelayedSettlement() == false
-            }.filterNot {
-                // AfterpayClearpay requires a shipping address, filter it out if not provided
-                val excludeAfterPay = it == SupportedPaymentMethod.AfterpayClearpay &&
-                    (stripeIntent as? PaymentIntent)?.shipping == null
-                if (excludeAfterPay) {
-                    logger.debug(
-                        "AfterPay will not be shown. It requires that Shipping is " +
-                            "included in the Payment or Setup Intent"
-                    )
-                }
-                excludeAfterPay
-            }.filterNot { supportedPaymentMethod ->
-                val excludeRequiresMandate =
-                    (stripeIntent is SetupIntent) && supportedPaymentMethod.requiresMandate
-                if (excludeRequiresMandate) {
-                    logger.debug(
-                        "${supportedPaymentMethod.name} will not be shown. It " +
-                            "requires a mandate which is incompatible with SetupIntents"
-                    )
-                }
-                excludeRequiresMandate
-            }.filterNot { supportedPaymentMethod ->
-                val excludeRequiresMandate = (stripeIntent is PaymentIntent) &&
-                    supportedPaymentMethod.requiresMandate &&
-                    stripeIntent.setupFutureUsage == StripeIntent.Usage.OffSession
-                if (excludeRequiresMandate) {
-                    logger.debug(
-                        "${supportedPaymentMethod.name} will not be shown.  It " +
-                            "requires a mandate which is incompatible with off_session " +
-                            "PaymentIntents"
-                    )
-                }
-                excludeRequiresMandate
-            }.toList()
-        }
-
-        return emptyList()
     }
 
     fun updateSelection(selection: PaymentSelection?) {
