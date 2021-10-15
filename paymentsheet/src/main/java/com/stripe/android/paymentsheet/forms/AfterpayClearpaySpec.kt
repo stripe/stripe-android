@@ -10,7 +10,25 @@ import com.stripe.android.paymentsheet.elements.SectionSpec
 import com.stripe.android.paymentsheet.elements.SimpleTextSpec
 import com.stripe.android.paymentsheet.elements.billingParams
 
-internal val afterpayClearpayParamKey: MutableMap<String, Any?> = mutableMapOf(
+/**
+ * This defines the requirements for usage as a Payment Method.
+ */
+internal val AfterpayClearpayRequirement = PaymentMethodRequirements(
+    /**
+     * This is null until we have after cancellation support.  When we have cancellation support
+     * this will require Shipping name, address line 1, address country, and postal
+     */
+    piRequirements = null,
+
+    /**
+     * SetupIntents are not supported by this payment method, in addition,
+     * setup intents do not have shipping information
+     */
+    siRequirements = null,
+    confirmPMFromCustomer = null
+)
+
+internal val AfterpayClearpayParamKey: MutableMap<String, Any?> = mutableMapOf(
     "type" to "afterpay_clearpay",
     "billing_details" to billingParams
 )
@@ -31,7 +49,7 @@ internal val afterpayClearpayBillingSection = SectionSpec(
     R.string.billing_details
 )
 
-internal val afterpayClearpayForm = LayoutSpec.create(
+internal val AfterpayClearpayForm = LayoutSpec.create(
     afterpayClearpayHeader,
     afterpayClearpayNameSection,
     afterpayClearpayEmailSection,

@@ -20,7 +20,6 @@ import com.stripe.android.payments.core.injection.InjectorKey
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.databinding.FragmentPaymentsheetAddPaymentMethodBinding
 import com.stripe.android.paymentsheet.forms.FormFieldValues
-import com.stripe.android.paymentsheet.forms.getPMAddForm
 import com.stripe.android.paymentsheet.model.Amount
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
@@ -181,7 +180,6 @@ internal abstract class BaseAddPaymentMethodFragment(
                 showPaymentMethod = paymentMethod,
                 merchantName = sheetViewModel.merchantName,
                 amount = sheetViewModel.amount.value,
-                billingAddress = sheetViewModel.config?.defaultBillingDetails,
                 injectorKey = sheetViewModel.injectorKey
             )
         )
@@ -239,11 +237,10 @@ internal abstract class BaseAddPaymentMethodFragment(
             config: PaymentSheet.Configuration?,
             merchantName: String,
             amount: Amount? = null,
-            billingAddress: PaymentSheet.BillingDetails? = null,
             @InjectorKey injectorKey: String
         ): FormFragmentArguments {
 
-            val layoutFormDescriptor = getPMAddForm(showPaymentMethod, stripeIntent, config)
+            val layoutFormDescriptor = showPaymentMethod.getPMAddForm(stripeIntent, config)
 
             return FormFragmentArguments(
                 paymentMethod = showPaymentMethod,
@@ -251,23 +248,7 @@ internal abstract class BaseAddPaymentMethodFragment(
                 showCheckboxControlledFields = layoutFormDescriptor.showCheckboxControlledFields,
                 merchantName = merchantName,
                 amount = amount,
-                billingDetails = billingAddress?.let {
-                    PaymentSheet.BillingDetails(
-                        name = billingAddress.name,
-                        email = billingAddress.email,
-                        phone = billingAddress.phone,
-                        address = billingAddress.address?.let {
-                            PaymentSheet.Address(
-                                city = it.city,
-                                state = it.state,
-                                country = it.country,
-                                line1 = it.line1,
-                                line2 = it.line2,
-                                postalCode = it.postalCode
-                            )
-                        }
-                    )
-                },
+                billingDetails = config?.defaultBillingDetails,
                 injectorKey = injectorKey
             )
         }

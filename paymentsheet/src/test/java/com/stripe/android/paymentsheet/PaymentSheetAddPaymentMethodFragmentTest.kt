@@ -38,7 +38,6 @@ import com.stripe.android.paymentsheet.ui.PaymentSheetFragmentFactory
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.utils.TestUtils.idleLooper
 import org.junit.Before
-import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -71,11 +70,10 @@ class PaymentSheetAddPaymentMethodFragmentTest {
         }
     }
 
-    @Ignore("Disabled until more payment methods are supported")
     @Test
     fun `when processing then payment methods UI should be disabled`() {
         val paymentIntent = mock<PaymentIntent>().also {
-            whenever(it.paymentMethodTypes).thenReturn(listOf("card", "sofort"))
+            whenever(it.paymentMethodTypes).thenReturn(listOf("card", "bancontact"))
         }
         createFragment(stripeIntent = paymentIntent) { fragment, viewBinding ->
             fragment.sheetViewModel._processing.value = true
@@ -276,7 +274,6 @@ class PaymentSheetAddPaymentMethodFragmentTest {
         }
     }
 
-    @Ignore("Disabled until more payment methods are supported")
     @Test
     fun `when multiple supported payment methods and configuration changes it should restore selected payment method`() {
         val paymentIntent = PaymentIntentFixtures.PI_SUCCEEDED.copy(
@@ -306,8 +303,8 @@ class PaymentSheetAddPaymentMethodFragmentTest {
                 .isEqualTo(
                     FormFragmentArguments(
                         SupportedPaymentMethod.Bancontact,
-                        showCheckbox = true,
-                        showCheckboxControlledFields = true,
+                        showCheckbox = false,
+                        showCheckboxControlledFields = false,
                         merchantName = PaymentSheetFixtures.MERCHANT_DISPLAY_NAME,
                         amount = createAmount(),
                         injectorKey = DUMMY_INJECTOR_KEY
@@ -329,8 +326,8 @@ class PaymentSheetAddPaymentMethodFragmentTest {
                 .isEqualTo(
                     FormFragmentArguments(
                         SupportedPaymentMethod.Bancontact,
-                        showCheckbox = true,
-                        showCheckboxControlledFields = true,
+                        showCheckbox = false,
+                        showCheckboxControlledFields = false,
                         merchantName = PaymentSheetFixtures.MERCHANT_DISPLAY_NAME,
                         amount = createAmount(),
                         injectorKey = DUMMY_INJECTOR_KEY
@@ -339,11 +336,10 @@ class PaymentSheetAddPaymentMethodFragmentTest {
         }
     }
 
-    @Ignore("Disabled until more payment methods are supported")
     @Test
     fun `when PaymentIntent allows multiple supported payment methods it should show payment method selector`() {
         val paymentIntent = PaymentIntentFixtures.PI_SUCCEEDED.copy(
-            paymentMethodTypes = listOf("card", "sofort")
+            paymentMethodTypes = listOf("card", "bancontact")
         )
         createFragment(stripeIntent = paymentIntent) { _, viewBinding ->
             assertThat(viewBinding.paymentMethodsRecycler.isVisible).isTrue()

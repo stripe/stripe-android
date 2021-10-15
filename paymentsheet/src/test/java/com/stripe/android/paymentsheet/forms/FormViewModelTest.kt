@@ -90,7 +90,7 @@ internal class FormViewModelTest {
         val factory = FormViewModel.Factory(
             config,
             ApplicationProvider.getApplicationContext<Application>().resources,
-            sofortForm,
+            SofortForm,
         )
         val factorySpy = spy(factory)
         val createdViewModel = factorySpy.create(FormViewModel::class.java)
@@ -107,7 +107,7 @@ internal class FormViewModelTest {
         val factory = FormViewModel.Factory(
             config,
             ApplicationProvider.getApplicationContext<Application>().resources,
-            sofortForm
+            SofortForm
         )
         val factorySpy = spy(factory)
         assertNotNull(factorySpy.create(FormViewModel::class.java))
@@ -306,7 +306,7 @@ internal class FormViewModelTest {
                 showCheckboxControlledFields = true
             )
             val formViewModel = FormViewModel(
-                sofortForm,
+                SofortForm,
                 args,
                 resourceRepository = resourceRepository,
                 transformSpecToElement = TransformSpecToElement(resourceRepository, args)
@@ -356,7 +356,7 @@ internal class FormViewModelTest {
                 billingDetails = null
             )
             val formViewModel = FormViewModel(
-                sepaDebitForm,
+                SepaDebitForm,
                 args,
                 resourceRepository = resourceRepository,
                 transformSpecToElement = TransformSpecToElement(resourceRepository, args)
@@ -429,7 +429,7 @@ internal class FormViewModelTest {
                 billingDetails = null
             )
             val formViewModel = FormViewModel(
-                sepaDebitForm,
+                SepaDebitForm,
                 args,
                 resourceRepository = resourceRepository,
                 transformSpecToElement = TransformSpecToElement(resourceRepository, args)

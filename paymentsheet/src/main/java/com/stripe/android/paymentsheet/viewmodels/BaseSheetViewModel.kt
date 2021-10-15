@@ -22,7 +22,6 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetActivity
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.analytics.EventReporter
-import com.stripe.android.paymentsheet.forms.getPMsToAdd
 import com.stripe.android.paymentsheet.model.Amount
 import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -198,14 +197,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
          * the [BaseAddPaymentMethodFragment]
          */
 
-        supportedPaymentMethods = if (stripeIntent != null) {
-            getPMsToAdd(
-                stripeIntent,
-                config
-            )
-        } else {
-            emptyList()
-        }
+        supportedPaymentMethods = SupportedPaymentMethod.getPMsToAdd(stripeIntent, config)
 
         if (stripeIntent != null && supportedPaymentMethods.isEmpty()) {
             onFatal(

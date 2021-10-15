@@ -1,23 +1,22 @@
-package com.stripe.android.paymentsheet.forms
+package com.stripe.android.paymentsheet.model
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
-import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
 import kotlinx.serialization.Serializable
 import org.junit.Test
 import org.junit.runner.RunWith
 import java.io.File
 
 @RunWith(AndroidJUnit4::class)
-class RequirementMatcherTest {
+class SupportedPaymentMethodTest {
     @Test
     fun `Test supported payment method baseline`() {
         SupportedPaymentMethod.values()
             .forEach { lpm ->
-                val resource = File(javaClass.classLoader.getResource("${lpm.type.code}-support.csv").file)
+                val resource = File(requireNotNull(javaClass.classLoader).getResource("${lpm.type.code}-support.csv").file)
                 val baseline = resource.readText()
 
                 val csvOutput = StringBuilder()
@@ -27,20 +26,19 @@ class RequirementMatcherTest {
                 generatePaymentIntentScenarios()
                     .map { testInput ->
 
-                        val formDescriptor = getSpecWithFullfilledRequirements(lpm, testInput.getIntent(lpm), testInput.getConfig())
+                        val formDescriptor = lpm.getSpecWithFullfilledRequirements(testInput.getIntent(lpm), testInput.getConfig())
                         val testOutput = TestOutput.create(
-                            supportCustomerSavedCard = getSupportedSavedCustomerPMs(
+                            supportCustomerSavedCard = SupportedPaymentMethod.getSupportedSavedCustomerPMs(
                                 testInput.getIntent(lpm),
                                 testInput.getConfig()
                             ).contains(lpm),
                             formExists = formDescriptor != null,
                             formShowsSaveCheckbox = formDescriptor?.showCheckbox,
                             formShowsCheckboxControlledFields = formDescriptor?.showCheckboxControlledFields,
-                            supportsAdding = lpm == SupportedPaymentMethod.Card
-//                            // TODO: When add in more PMS
-//                            getPMsToAdd(
-//                                testInput.getIntent(lpm), testInput.getConfig()
-//                            ).contains(lpm)
+                            supportsAdding = SupportedPaymentMethod.getPMsToAdd(
+                                testInput.getIntent(lpm),
+                                testInput.getConfig()
+                            ).contains(lpm)
                         )
                         csvOutput.append(
                             "${lpm.type.code}, ${

@@ -87,7 +87,6 @@ internal class DefaultFlowControllerInitializerTest {
                         null,
                         PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET,
                         PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-                        listOf(PaymentMethod.Type.Card),
                         emptyList(),
                         SavedSelection.None,
                         isGooglePayReady = false
@@ -113,7 +112,6 @@ internal class DefaultFlowControllerInitializerTest {
                     PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
                     PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET,
                     PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-                    listOf(PaymentMethod.Type.Card),
                     PAYMENT_METHODS,
                     SavedSelection.PaymentMethod(
                         id = "pm_123456789"
@@ -141,7 +139,6 @@ internal class DefaultFlowControllerInitializerTest {
                         PaymentSheetFixtures.CONFIG_GOOGLEPAY,
                         PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET,
                         PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-                        listOf(PaymentMethod.Type.Card),
                         emptyList(),
                         SavedSelection.GooglePay,
                         isGooglePayReady = true
@@ -167,7 +164,6 @@ internal class DefaultFlowControllerInitializerTest {
                         PaymentSheetFixtures.CONFIG_GOOGLEPAY,
                         PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET,
                         PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-                        listOf(PaymentMethod.Type.Card),
                         emptyList(),
                         SavedSelection.None,
                         isGooglePayReady = false
@@ -193,7 +189,6 @@ internal class DefaultFlowControllerInitializerTest {
                         PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
                         PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET,
                         PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-                        listOf(PaymentMethod.Type.Card),
                         PAYMENT_METHODS,
                         SavedSelection.PaymentMethod("pm_123456789"),
                         isGooglePayReady = true
@@ -229,7 +224,6 @@ internal class DefaultFlowControllerInitializerTest {
                         PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
                         PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET,
                         PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-                        listOf(PaymentMethod.Type.Card),
                         emptyList(),
                         SavedSelection.None,
                         isGooglePayReady = false
@@ -260,7 +254,6 @@ internal class DefaultFlowControllerInitializerTest {
                         PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
                         PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET,
                         PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-                        listOf(PaymentMethod.Type.Card),
                         emptyList(),
                         SavedSelection.GooglePay,
                         isGooglePayReady = true

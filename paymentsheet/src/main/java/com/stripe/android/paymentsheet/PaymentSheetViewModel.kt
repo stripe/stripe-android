@@ -33,8 +33,6 @@ import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
 import com.stripe.android.paymentsheet.analytics.EventReporter
-import com.stripe.android.paymentsheet.elements.ResourceRepository
-import com.stripe.android.paymentsheet.forms.getSupportedSavedCustomerPMs
 import com.stripe.android.paymentsheet.injection.DaggerPaymentSheetLauncherComponent
 import com.stripe.android.paymentsheet.injection.PaymentSheetViewModelModule
 import com.stripe.android.paymentsheet.injection.PaymentSheetViewModelSubcomponent
@@ -44,6 +42,7 @@ import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.model.StripeIntentValidator
+import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
 import com.stripe.android.paymentsheet.ui.PrimaryButton
@@ -81,7 +80,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     private val stripeIntentValidator: StripeIntentValidator,
     customerRepository: CustomerRepository,
     prefsRepository: PrefsRepository,
-    resourceRepository: ResourceRepository,
     private val paymentLauncherFactory: StripePaymentLauncherAssistedFactory,
     private val googlePayPaymentMethodLauncherFactory: GooglePayPaymentMethodLauncherFactory,
     logger: Logger,
@@ -222,33 +220,32 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     /**
      * Fetch the saved payment methods for the customer, if a [PaymentSheet.CustomerConfiguration]
      * was provided.
-     * It will fetch only the payment method types as defined in [getSupportedSavedCustomerPMs].
+     * It will fetch only the payment method types as defined in [SupportedPaymentMethod.getSupportedSavedCustomerPMs].
      */
     @VisibleForTesting
     fun updatePaymentMethods(stripeIntent: StripeIntent) {
         viewModelScope.launch {
             runCatching {
                 customerConfig?.let { customerConfig ->
-                    getSupportedSavedCustomerPMs(
+                    SupportedPaymentMethod.getSupportedSavedCustomerPMs(
                         stripeIntent,
                         config
                     ).map {
                         it.type
-                    }.toList()
-                        .let {
-                            customerRepository.getPaymentMethods(
-                                customerConfig,
-                                it
-                            )
-                        }.filter { paymentMethod ->
-                            paymentMethod.hasExpectedDetails().also { valid ->
-                                if (!valid) {
-                                    logger.error(
-                                        "Discarding invalid payment method ${paymentMethod.id}"
-                                    )
-                                }
+                    }.let {
+                        customerRepository.getPaymentMethods(
+                            customerConfig,
+                            it
+                        )
+                    }.filter { paymentMethod ->
+                        paymentMethod.hasExpectedDetails().also { valid ->
+                            if (!valid) {
+                                logger.error(
+                                    "Discarding invalid payment method ${paymentMethod.id}"
+                                )
                             }
                         }
+                    }
                 }.orEmpty()
             }.fold(
                 onSuccess = {

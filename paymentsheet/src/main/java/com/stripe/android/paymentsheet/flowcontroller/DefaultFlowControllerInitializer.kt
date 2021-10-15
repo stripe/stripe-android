@@ -8,11 +8,11 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.core.injection.IOContext
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PrefsRepository
-import com.stripe.android.paymentsheet.forms.getSupportedSavedCustomerPMs
 import com.stripe.android.paymentsheet.model.ClientSecret
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.StripeIntentValidator
+import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
 import kotlinx.coroutines.flow.first
@@ -80,7 +80,7 @@ internal class DefaultFlowControllerInitializer @Inject constructor(
             retrieveStripeIntent(clientSecret)
         }.fold(
             onSuccess = { stripeIntent ->
-                val paymentMethodTypes = getSupportedSavedCustomerPMs(
+                val paymentMethodTypes = SupportedPaymentMethod.getSupportedSavedCustomerPMs(
                     stripeIntent,
                     config,
                 ).map {
@@ -100,7 +100,6 @@ internal class DefaultFlowControllerInitializer @Inject constructor(
                             config = config,
                             clientSecret = clientSecret,
                             stripeIntent = stripeIntent,
-                            paymentMethodTypes = paymentMethodTypes,
                             paymentMethods = paymentMethods,
                             savedSelection = prefsRepository.getSavedSelection(isGooglePayReady),
                             isGooglePayReady = isGooglePayReady
@@ -124,11 +123,6 @@ internal class DefaultFlowControllerInitializer @Inject constructor(
             retrieveStripeIntent(clientSecret)
         }.fold(
             onSuccess = { stripeIntent ->
-                val paymentMethodTypes = stripeIntent.paymentMethodTypes
-                    .mapNotNull {
-                        PaymentMethod.Type.fromCode(it)
-                    }
-
                 val savedSelection = if (isGooglePayReady) {
                     SavedSelection.GooglePay
                 } else {
@@ -140,7 +134,6 @@ internal class DefaultFlowControllerInitializer @Inject constructor(
                         config = config,
                         clientSecret = clientSecret,
                         stripeIntent = stripeIntent,
-                        paymentMethodTypes = paymentMethodTypes,
                         paymentMethods = emptyList(),
                         savedSelection = savedSelection,
                         isGooglePayReady = isGooglePayReady

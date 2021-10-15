@@ -60,8 +60,8 @@ import org.mockito.kotlin.eq
 import org.mockito.kotlin.isNull
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
+import org.mockito.kotlin.verifyNoInteractions
 import org.mockito.kotlin.verifyNoMoreInteractions
-import org.mockito.kotlin.verifyZeroInteractions
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.AfterTest
@@ -523,7 +523,6 @@ internal class DefaultFlowControllerTest {
                     PaymentSheetFixtures.CONFIG_CUSTOMER,
                     PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET,
                     PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-                    listOf(PaymentMethod.Type.Card),
                     PAYMENT_METHODS,
                     SavedSelection.PaymentMethod(
                         id = "pm_123456789"
@@ -546,7 +545,6 @@ internal class DefaultFlowControllerTest {
                 PaymentSheetFixtures.CONFIG_CUSTOMER,
                 PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET,
                 PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-                listOf(PaymentMethod.Type.Card),
                 PAYMENT_METHODS,
                 SavedSelection.PaymentMethod(
                     id = "pm_123456789"
@@ -598,7 +596,7 @@ internal class DefaultFlowControllerTest {
 
     @Test
     fun `onGooglePayResult() when canceled should invoke callback with canceled result`() {
-        verifyZeroInteractions(eventReporter)
+        verifyNoInteractions(eventReporter)
 
         flowController.configureWithPaymentIntent(
             PaymentSheetFixtures.CLIENT_SECRET,
@@ -739,7 +737,6 @@ internal class DefaultFlowControllerTest {
         eventReporter,
         ViewModelProvider(activity)[FlowControllerViewModel::class.java],
         paymentLauncherAssistedFactory,
-        mock(),
         { PaymentConfiguration.getInstance(activity) },
         testDispatcher,
         ENABLE_LOGGING,
@@ -776,7 +773,6 @@ internal class DefaultFlowControllerTest {
                     paymentSheetConfiguration,
                     clientSecret,
                     stripeIntent,
-                    listOf(PaymentMethod.Type.Card),
                     paymentMethods,
                     savedSelection,
                     isGooglePayReady = false

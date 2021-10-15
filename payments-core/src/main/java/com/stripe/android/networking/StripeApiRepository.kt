@@ -245,6 +245,41 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
     }
 
     /**
+     * Refresh a [PaymentIntent] using its client_secret
+     *
+     * Analytics event: [AnalyticsEvent.PaymentIntentRefresh]
+     *
+     * @param clientSecret client_secret of the PaymentIntent to retrieve
+     */
+    @Throws(
+        AuthenticationException::class,
+        InvalidRequestException::class,
+        APIConnectionException::class,
+        APIException::class
+    )
+    override suspend fun refreshPaymentIntent(
+        clientSecret: String,
+        options: ApiRequest.Options,
+    ): PaymentIntent? {
+        val paymentIntentId = PaymentIntent.ClientSecret(clientSecret).paymentIntentId
+
+        fireFraudDetectionDataRequest()
+
+        return fetchStripeModel(
+            apiRequestFactory.createPost(
+                getRefreshPaymentIntentUrl(paymentIntentId),
+                options,
+                createClientSecretParam(clientSecret, emptyList())
+            ),
+            PaymentIntentJsonParser()
+        ) {
+            fireAnalyticsRequest(
+                analyticsRequestFactory.createRequest(AnalyticsEvent.PaymentIntentRefresh)
+            )
+        }
+    }
+
+    /**
      * Retrieve a [PaymentIntent] using its client_secret, with the accepted payment method types
      * ordered according to the [locale] provided.
      *
@@ -1358,6 +1393,18 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         @JvmSynthetic
         internal fun getRetrievePaymentIntentUrl(paymentIntentId: String): String {
             return getApiUrl("payment_intents/%s", paymentIntentId)
+        }
+
+        /**
+         * This is an undocumented API and is only used for certain PIs which have a delay to
+         * transfer its status out of "requires_action" after user performs the confirmation.
+         *
+         * @return `https://api.stripe.com/v1/payment_intents/:id/refresh`
+         */
+        @VisibleForTesting
+        @JvmSynthetic
+        internal fun getRefreshPaymentIntentUrl(paymentIntentId: String): String {
+            return getApiUrl("payment_intents/%s/refresh", paymentIntentId)
         }
 
         /**

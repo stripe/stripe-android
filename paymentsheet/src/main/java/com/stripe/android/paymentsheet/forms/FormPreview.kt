@@ -22,7 +22,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 @SuppressLint("VisibleForTests")
 @Composable
 internal fun FormInternalPreview() {
-    val formElements = sofortForm.items
+    val formElements = SofortForm.items
     val addressFieldElementRepository = AddressFieldElementRepository()
     val bankRepository = BankRepository()
 

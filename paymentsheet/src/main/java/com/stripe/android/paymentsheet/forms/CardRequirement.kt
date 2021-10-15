@@ -1,6 +1,6 @@
 package com.stripe.android.paymentsheet.forms
 
-internal object CardRequirementEvaluator : RequirementEvaluator(
+internal val CardRequirement = PaymentMethodRequirements(
     piRequirements = emptySet(),
     siRequirements = emptySet(),
     confirmPMFromCustomer = true
