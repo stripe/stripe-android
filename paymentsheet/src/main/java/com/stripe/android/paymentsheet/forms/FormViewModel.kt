@@ -79,7 +79,7 @@ internal class FormViewModel @Inject internal constructor(
 
     internal lateinit var elements: List<FormElement>
 
-    private val saveForFutureUseVisible = MutableStateFlow(config.saveForFutureUseInitialVisibility)
+    private val saveForFutureUseVisible = MutableStateFlow(config.showCheckbox)
 
     internal fun setSaveForFutureUseVisibility(isVisible: Boolean) {
         saveForFutureUseVisible.value = isVisible
@@ -96,7 +96,7 @@ internal class FormViewModel @Inject internal constructor(
         .firstOrNull()
 
     internal val saveForFutureUse = saveForFutureUseElement?.controller?.saveForFutureUse
-        ?: MutableStateFlow(config.saveForFutureUseInitialValue)
+        ?: MutableStateFlow(config.showCheckboxControlledFields)
 
     private val sectionToFieldIdentifierMap = layout.items
         .filterIsInstance<SectionSpec>()

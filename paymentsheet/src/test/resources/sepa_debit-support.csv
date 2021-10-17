@@ -1,0 +1,25 @@
+lpm, hasCustomer, allowsDelayedPayment, intentSetupFutureUsage, intentHasShipping, intentLpms, supportCustomerSavedCard, formExists, formType, supportsAdding
+sepa_debit, true, true, off_session, false, card/sepa_debit, false, false, not available, false
+sepa_debit, true, true, off_session, false, card/eps/sepa_debit, false, false, not available, false
+sepa_debit, true, false, off_session, false, card/sepa_debit, false, false, not available, false
+sepa_debit, true, false, off_session, false, card/eps/sepa_debit, false, false, not available, false
+sepa_debit, true, true, on_session, false, card/sepa_debit, false, false, not available, false
+sepa_debit, true, true, on_session, false, card/eps/sepa_debit, false, false, not available, false
+sepa_debit, true, false, on_session, false, card/sepa_debit, false, false, not available, false
+sepa_debit, true, false, on_session, false, card/eps/sepa_debit, false, false, not available, false
+sepa_debit, true, true, null, false, card/sepa_debit, false, true, oneTime, true
+sepa_debit, true, true, null, false, card/eps/sepa_debit, false, true, oneTime, true
+sepa_debit, true, false, null, false, card/sepa_debit, false, false, not available, false
+sepa_debit, true, false, null, false, card/eps/sepa_debit, false, false, not available, false
+sepa_debit, false, true, off_session, false, card/sepa_debit, false, false, not available, false
+sepa_debit, false, true, off_session, false, card/eps/sepa_debit, false, false, not available, false
+sepa_debit, false, false, off_session, false, card/sepa_debit, false, false, not available, false
+sepa_debit, false, false, off_session, false, card/eps/sepa_debit, false, false, not available, false
+sepa_debit, false, true, on_session, false, card/sepa_debit, false, false, not available, false
+sepa_debit, false, true, on_session, false, card/eps/sepa_debit, false, false, not available, false
+sepa_debit, false, false, on_session, false, card/sepa_debit, false, false, not available, false
+sepa_debit, false, false, on_session, false, card/eps/sepa_debit, false, false, not available, false
+sepa_debit, false, true, null, false, card/sepa_debit, false, true, oneTime, true
+sepa_debit, false, true, null, false, card/eps/sepa_debit, false, true, oneTime, true
+sepa_debit, false, false, null, false, card/sepa_debit, false, false, not available, false
+sepa_debit, false, false, null, false, card/eps/sepa_debit, false, false, not available, false

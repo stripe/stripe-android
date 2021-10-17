@@ -22,7 +22,6 @@ import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.PaymentIntent
-import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.payments.core.injection.IOContext
@@ -34,7 +33,6 @@ import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
 import com.stripe.android.paymentsheet.analytics.EventReporter
-import com.stripe.android.paymentsheet.elements.ResourceRepository
 import com.stripe.android.paymentsheet.injection.DaggerPaymentSheetLauncherComponent
 import com.stripe.android.paymentsheet.injection.PaymentSheetViewModelModule
 import com.stripe.android.paymentsheet.injection.PaymentSheetViewModelSubcomponent
@@ -82,7 +80,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     private val stripeIntentValidator: StripeIntentValidator,
     customerRepository: CustomerRepository,
     prefsRepository: PrefsRepository,
-    resourceRepository: ResourceRepository,
     private val paymentLauncherFactory: StripePaymentLauncherAssistedFactory,
     private val googlePayPaymentMethodLauncherFactory: GooglePayPaymentMethodLauncherFactory,
     logger: Logger,
@@ -223,20 +220,18 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     /**
      * Fetch the saved payment methods for the customer, if a [PaymentSheet.CustomerConfiguration]
      * was provided.
-     * It will fetch only the payment method types accepted by the [stripeIntent] and defined in
-     * [SupportedPaymentMethod.supportedSavedPaymentMethods].
+     * It will fetch only the payment method types as defined in [SupportedPaymentMethod.getSupportedSavedCustomerPMs].
      */
     @VisibleForTesting
     fun updatePaymentMethods(stripeIntent: StripeIntent) {
         viewModelScope.launch {
             runCatching {
                 customerConfig?.let { customerConfig ->
-                    stripeIntent.paymentMethodTypes.mapNotNull {
-                        PaymentMethod.Type.fromCode(it)
-                    }.filter {
-                        SupportedPaymentMethod.supportedSavedPaymentMethods.contains(it.code)
-                    }.filter {
-                        config?.allowsDelayedPaymentMethods == true || !it.hasDelayedSettlement()
+                    SupportedPaymentMethod.getSupportedSavedCustomerPMs(
+                        stripeIntent,
+                        config
+                    ).map {
+                        it.type
                     }.let {
                         customerRepository.getPaymentMethods(
                             customerConfig,
