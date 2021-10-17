@@ -37,7 +37,6 @@ dependencies {
     // https://github.com/stripe/stripe-android/issues/3173#issuecomment-785176608
     implementation "com.stripe:stripe-3ds2-android:6.1.2"
 
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlinVersion"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinCoroutinesVersion"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$kotlinCoroutinesVersion"
 

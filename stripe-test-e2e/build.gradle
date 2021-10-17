@@ -56,8 +56,6 @@ android {
 dependencies {
     implementation project(':payments')
 
-    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
-
     testImplementation 'org.robolectric:robolectric:4.6.1'
     testImplementation 'junit:junit:4.13.2'
     testImplementation 'com.google.truth:truth:1.1.3'
