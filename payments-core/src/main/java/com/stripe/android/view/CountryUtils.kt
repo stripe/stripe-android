@@ -39,8 +39,8 @@ object CountryUtils {
         }
     }
 
-    var cachedCountriesLocale: Locale? = null
-    var cachedOrderedLocalizedCountries: List<Country> = emptyList()
+    private var cachedCountriesLocale: Locale? = null
+    private var cachedOrderedLocalizedCountries: List<Country> = emptyList()
     private fun getSortedLocalizedCountries(currentLocale: Locale): List<Country> {
         return if (currentLocale == cachedCountriesLocale) {
             cachedOrderedLocalizedCountries
