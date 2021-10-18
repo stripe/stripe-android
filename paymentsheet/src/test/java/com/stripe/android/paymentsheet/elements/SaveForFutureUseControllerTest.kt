@@ -12,12 +12,18 @@ class SaveForFutureUseControllerTest {
     private val saveForFutureUseController = SaveForFutureUseController(hiddenIdentifiers, true)
 
     @Test
-    fun `Save for future use is initialized as false and no hidden items`() =
+    fun `Save for future use is initialized as false and mandate becomes hidden`() =
         runBlocking {
             val saveForFutureUseController = SaveForFutureUseController(hiddenIdentifiers, false)
 
             assertThat(saveForFutureUseController.saveForFutureUse.first()).isFalse()
-            assertThat(saveForFutureUseController.hiddenIdentifiers.first()).isEmpty()
+            assertThat(saveForFutureUseController.hiddenIdentifiers.first())
+                .isEqualTo(
+                    listOf(
+                        IdentifierSpec.Name,
+                        IdentifierSpec.Generic("mandate")
+                    )
+                )
         }
 
     @Test
