@@ -8,6 +8,7 @@ This release adds several new features to PaymentSheet, our drop-in UI integrati
 The list of supported payment methods depends on your integration. If you’re using a PaymentIntent, we support:
 - Card
 - SEPA Debit, bancontact, iDEAL, sofort
+- 
 If you’re using a PaymentIntent with setup_future_usage or a SetupIntent, we support:
 - Card
 - GooglePay
