@@ -31,9 +31,8 @@ Initialize PaymentSheet with a SetupIntent to set up cards for future use withou
 ### Smart payment method ordering
 When a customer is adding a new payment method, PaymentSheet uses information like the customers region to show the most relevant payment methods first.
 
-### Other changes
-Postal code collection for cards is now limited to US, CA, UK
-
+## Other changes
+* [4165](https://github.com/stripe/stripe-android/pull/4165) Postal code collection for cards is now limited to US, CA, UK
 * [4274](https://github.com/stripe/stripe-android/pull/4274) Bump mockitoCoreVersion from 3.12.4 to 4.0.0
 * [4279](https://github.com/stripe/stripe-android/pull/4279) Fix dependency incorrectly marked as implementation
 * [4281](https://github.com/stripe/stripe-android/pull/4281) Add analytics event for failure creating 3ds2 params
