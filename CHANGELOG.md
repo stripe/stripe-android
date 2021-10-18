@@ -2,13 +2,14 @@
 
 ## 18.1.0 - 2021-10-18
 This release includes PaymentSheet - a UI for collecting payment. Learn more about it [here](https://stripe.com/docs/payments/accept-a-payment?platform=android).
-[4295](https://github.com/stripe/stripe-android/pull/4295) Fix height on CardMultilineWidget textboxes
-[4297](https://github.com/stripe/stripe-android/pull/4297) Bump accompanist-flowlayout from 0.19.0 to 0.20.0
 [4274](https://github.com/stripe/stripe-android/pull/4274) Bump mockitoCoreVersion from 3.12.4 to 4.0.0
-[4283](https://github.com/stripe/stripe-android/pull/4283) Bump mockito-kotlin from 3.2.0 to 4.0.0
-[4282](https://github.com/stripe/stripe-android/pull/4282) Bump gradle from 7.0.2 to 7.0.3
 [4279](https://github.com/stripe/stripe-android/pull/4279) Fix dependency incorrectly marked as implementation
 [4281](https://github.com/stripe/stripe-android/pull/4281) Add analytics event for failure creating 3ds2 params
+[4282](https://github.com/stripe/stripe-android/pull/4282) Bump gradle from 7.0.2 to 7.0.3
+[4283](https://github.com/stripe/stripe-android/pull/4283) Bump mockito-kotlin from 3.2.0 to 4.0.0
+[4291](https://github.com/stripe/stripe-android/pull/4291) ** Add something about saving empty string **
+[4295](https://github.com/stripe/stripe-android/pull/4295) Fix height on CardMultilineWidget textboxes
+[4297](https://github.com/stripe/stripe-android/pull/4297) Bump accompanist-flowlayout from 0.19.0 to 0.20.0
 
 ## 18.0.0 - 2021-10-07
 This release includes several bug fixes, introduces a test mode indicator, makes a builder class for [payment sheet configuration](https://github.com/stripe/stripe-android/blob/master/paymentsheet/src/main/java/com/stripe/android/paymentsheet/PaymentSheet.kt#L130) and makes config properties immutable. 
