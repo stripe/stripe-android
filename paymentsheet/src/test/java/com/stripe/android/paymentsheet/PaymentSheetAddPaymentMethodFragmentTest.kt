@@ -491,7 +491,8 @@ class PaymentSheetAddPaymentMethodFragmentTest {
             fieldValuePairs = mapOf(
                 IdentifierSpec.SaveForFutureUse to FormFieldEntry("true", true)
             ),
-            showsMandate = false
+            showsMandate = false,
+            userRequestedReuse = PaymentSelection.CustomerRequestedSave.RequestReuse
         )
         val selection =
             BaseAddPaymentMethodFragment.transformToPaymentSelection(
@@ -501,7 +502,9 @@ class PaymentSheetAddPaymentMethodFragmentTest {
                 ),
                 SupportedPaymentMethod.Sofort
             )
-        assertThat(selection?.shouldSavePaymentMethod).isTrue()
+        assertThat(selection?.customerRequestedSave).isEqualTo(
+            PaymentSelection.CustomerRequestedSave.RequestReuse
+        )
         assertThat(selection?.labelResource).isEqualTo(
             R.string.stripe_paymentsheet_payment_method_sofort
         )

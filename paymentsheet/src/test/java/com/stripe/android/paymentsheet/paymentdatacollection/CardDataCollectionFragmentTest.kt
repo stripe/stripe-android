@@ -115,8 +115,8 @@ class CardDataCollectionFragmentTest {
             viewBinding.billingAddress.postalCodeView.setText("94107")
 
             val newPaymentSelection = paymentSelection as PaymentSelection.New.Card
-            assertThat(newPaymentSelection.shouldSavePaymentMethod)
-                .isFalse()
+            assertThat(newPaymentSelection.customerRequestedSave)
+                .isEqualTo(PaymentSelection.CustomerRequestedSave.RequestNoReuse)
             assertThat(fragment.sheetViewModel.newCard)
                 .isEqualTo(paymentSelection)
         }
@@ -129,7 +129,7 @@ class CardDataCollectionFragmentTest {
             newCard = PaymentSelection.New.Card(
                 PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
                 CardBrand.Discover,
-                false
+                PaymentSelection.CustomerRequestedSave.RequestNoReuse
             )
         ) { fragment, viewBinding ->
 
@@ -145,8 +145,8 @@ class CardDataCollectionFragmentTest {
             viewBinding.billingAddress.postalCodeView.setText("94107")
 
             val newPaymentSelection = paymentSelection as PaymentSelection.New.Card
-            assertThat(newPaymentSelection.shouldSavePaymentMethod)
-                .isFalse()
+            assertThat(newPaymentSelection.customerRequestedSave)
+                .isEqualTo(PaymentSelection.CustomerRequestedSave.RequestNoReuse)
         }
     }
 
@@ -214,8 +214,8 @@ class CardDataCollectionFragmentTest {
             viewBinding.billingAddress.postalCodeView.setText("94107")
 
             val newPaymentSelection = paymentSelection as PaymentSelection.New.Card
-            assertThat(newPaymentSelection.shouldSavePaymentMethod)
-                .isTrue()
+            assertThat(newPaymentSelection.customerRequestedSave)
+                .isEqualTo(PaymentSelection.CustomerRequestedSave.RequestReuse)
             assertThat(fragment.sheetViewModel.newCard)
                 .isEqualTo(paymentSelection)
         }
@@ -242,8 +242,8 @@ class CardDataCollectionFragmentTest {
             viewBinding.saveCardCheckbox.isChecked = true
 
             val newPaymentSelection = paymentSelection as PaymentSelection.New.Card
-            assertThat(newPaymentSelection.shouldSavePaymentMethod)
-                .isTrue()
+            assertThat(newPaymentSelection.customerRequestedSave)
+                .isEqualTo(PaymentSelection.CustomerRequestedSave.RequestReuse)
 
             assertThat(fragment.sheetViewModel.newCard?.brand)
                 .isEqualTo(CardBrand.Visa)
@@ -447,7 +447,7 @@ class CardDataCollectionFragmentTest {
         newCard: PaymentSelection.New.Card? = null,
         fragmentArgs: FormFragmentArguments? = COMPOSE_FRAGMENT_ARGS.copy(
             showCheckbox = true,
-            showCheckboxControlledFields = true
+            showCheckboxControlledFields = true,
         ),
         onReady: (CardDataCollectionFragment<PaymentSheetViewModel>, FragmentPaymentsheetAddCardBinding) -> Unit
     ) {

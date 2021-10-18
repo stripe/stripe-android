@@ -19,7 +19,6 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.core.injection.InjectorKey
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.databinding.FragmentPaymentsheetAddPaymentMethodBinding
-import com.stripe.android.paymentsheet.elements.IdentifierSpec
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.Amount
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -226,10 +225,7 @@ internal abstract class BaseAddPaymentMethodFragment(
                         selectedPaymentMethodResources.displayNameResource,
                         selectedPaymentMethodResources.iconResource,
                         this,
-                        formFieldValues
-                            .fieldValuePairs[IdentifierSpec.SaveForFutureUse]
-                            ?.value
-                            .toBoolean()
+                        customerRequestedSave = formFieldValues.userRequestedReuse
                     )
                 }
         }

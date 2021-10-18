@@ -2094,6 +2094,7 @@ public final class com/stripe/android/model/ConfirmPaymentIntentParams$Companion
 }
 
 public final class com/stripe/android/model/ConfirmPaymentIntentParams$SetupFutureUsage : java/lang/Enum {
+	public static final field Blank Lcom/stripe/android/model/ConfirmPaymentIntentParams$SetupFutureUsage;
 	public static final field OffSession Lcom/stripe/android/model/ConfirmPaymentIntentParams$SetupFutureUsage;
 	public static final field OnSession Lcom/stripe/android/model/ConfirmPaymentIntentParams$SetupFutureUsage;
 	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/model/ConfirmPaymentIntentParams$SetupFutureUsage;

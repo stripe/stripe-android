@@ -7,6 +7,7 @@ import com.stripe.android.paymentsheet.elements.SectionController
 import com.stripe.android.paymentsheet.elements.SectionElement
 import com.stripe.android.paymentsheet.elements.TextFieldController
 import com.stripe.android.paymentsheet.elements.IdentifierSpec
+import com.stripe.android.paymentsheet.model.PaymentSelection
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
@@ -39,7 +40,7 @@ class CompleteFormFieldValueFilterTest {
         fieldFlow,
         hiddenIdentifersFlow,
         showingMandate = MutableStateFlow(true),
-        saveForFutureUse = MutableStateFlow(false)
+        userRequestedReuse = MutableStateFlow(PaymentSelection.CustomerRequestedSave.NoRequest)
     )
 
     @Test
