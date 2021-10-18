@@ -327,7 +327,8 @@ internal class CardDataCollectionFragment<ViewModelType : BaseSheetViewModel<*>>
         }
         sheetViewModel.newCard?.customerRequestedSave?.also {
             if (saveCardCheckbox.isVisible) {
-                saveCardCheckbox.isChecked = it == PaymentSelection.CustomerRequestedSave.RequestReuse
+                saveCardCheckbox.isChecked =
+                    it == PaymentSelection.CustomerRequestedSave.RequestReuse
             }
         }
 
