@@ -225,7 +225,7 @@ internal abstract class BaseAddPaymentMethodFragment(
                         selectedPaymentMethodResources.displayNameResource,
                         selectedPaymentMethodResources.iconResource,
                         this,
-                        userReuseRequest = formFieldValues.userRequestedReuse
+                        customerRequestedSave = formFieldValues.userRequestedReuse
                     )
                 }
         }

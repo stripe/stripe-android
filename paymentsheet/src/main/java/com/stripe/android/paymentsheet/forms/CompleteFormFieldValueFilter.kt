@@ -14,7 +14,7 @@ internal class CompleteFormFieldValueFilter(
     private val currentFieldValueMap: Flow<Map<IdentifierSpec, FormFieldEntry>>,
     private val hiddenIdentifiers: Flow<List<IdentifierSpec>>,
     val showingMandate: Flow<Boolean>,
-    private val userRequestedReuse: Flow<PaymentSelection.UserReuseRequest>
+    private val userRequestedReuse: Flow<PaymentSelection.CustomerRequestedSave>
 ) {
     /**
      * This will return null if any form field values are incomplete, otherwise it is an object
@@ -33,7 +33,7 @@ internal class CompleteFormFieldValueFilter(
         idFieldSnapshotMap: Map<IdentifierSpec, FormFieldEntry>,
         hiddenIdentifiers: List<IdentifierSpec>,
         showingMandate: Boolean,
-        userRequestedReuse: PaymentSelection.UserReuseRequest
+        userRequestedReuse: PaymentSelection.CustomerRequestedSave
     ): FormFieldValues? {
         // This will run twice in a row when the save for future use state changes: once for the
         // saveController changing and once for the the hidden fields changing

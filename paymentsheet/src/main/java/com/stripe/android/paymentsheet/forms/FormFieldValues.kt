@@ -9,7 +9,7 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 internal class FormFieldValues(
     val fieldValuePairs: Map<IdentifierSpec, FormFieldEntry> = mapOf(),
     val showsMandate: Boolean,
-    val userRequestedReuse: PaymentSelection.UserReuseRequest
+    val userRequestedReuse: PaymentSelection.CustomerRequestedSave
 )
 
 internal data class FormFieldEntry(

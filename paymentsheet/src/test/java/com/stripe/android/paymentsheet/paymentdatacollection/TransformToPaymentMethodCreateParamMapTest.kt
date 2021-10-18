@@ -20,7 +20,7 @@ class TransformToPaymentMethodCreateParamMapTest {
                         )
                     ),
                     showsMandate = false,
-                    userRequestedReuse = PaymentSelection.UserReuseRequest.RequestReuse
+                    userRequestedReuse = PaymentSelection.CustomerRequestedSave.RequestReuse
                 ),
                 mapOf(
                     "type" to "ideal",
@@ -57,7 +57,7 @@ class TransformToPaymentMethodCreateParamMapTest {
                         ),
                     ),
                     showsMandate = false,
-                    userRequestedReuse = PaymentSelection.UserReuseRequest.RequestReuse
+                    userRequestedReuse = PaymentSelection.CustomerRequestedSave.RequestReuse
                 ),
                 mapOf(
                     "type" to "sofort",

@@ -18,7 +18,7 @@ class ConfirmPaymentIntentParamsFactoryTest {
                 paymentSelection = PaymentSelection.New.Card(
                     PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
                     CardBrand.Visa,
-                    userReuseRequest = PaymentSelection.UserReuseRequest.RequestReuse
+                    customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestReuse
                 )
             )
         ).isEqualTo(
@@ -37,7 +37,7 @@ class ConfirmPaymentIntentParamsFactoryTest {
                 paymentSelection = PaymentSelection.New.Card(
                     PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
                     CardBrand.Visa,
-                    userReuseRequest = PaymentSelection.UserReuseRequest.RequestNoReuse
+                    customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestNoReuse
                 )
             )
         ).isEqualTo(
@@ -56,7 +56,7 @@ class ConfirmPaymentIntentParamsFactoryTest {
                 paymentSelection = PaymentSelection.New.Card(
                     PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
                     CardBrand.Visa,
-                    userReuseRequest = PaymentSelection.UserReuseRequest.NoRequest
+                    customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest
                 )
             )
         ).isEqualTo(

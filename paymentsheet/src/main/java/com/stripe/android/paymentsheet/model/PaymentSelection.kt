@@ -17,7 +17,7 @@ internal sealed class PaymentSelection : Parcelable {
         val paymentMethod: PaymentMethod
     ) : PaymentSelection()
 
-    enum class UserReuseRequest {
+    enum class CustomerRequestedSave {
         RequestReuse,
         RequestNoReuse,
         NoRequest
@@ -25,13 +25,13 @@ internal sealed class PaymentSelection : Parcelable {
 
     sealed class New : PaymentSelection() {
         abstract val paymentMethodCreateParams: PaymentMethodCreateParams
-        abstract val userReuseRequest: UserReuseRequest
+        abstract val customerRequestedSave: CustomerRequestedSave
 
         @Parcelize
         data class Card(
             override val paymentMethodCreateParams: PaymentMethodCreateParams,
             val brand: CardBrand,
-            override val userReuseRequest: UserReuseRequest
+            override val customerRequestedSave: CustomerRequestedSave
         ) : New()
 
         @Parcelize
@@ -39,7 +39,7 @@ internal sealed class PaymentSelection : Parcelable {
             @StringRes val labelResource: Int,
             @DrawableRes val iconResource: Int,
             override val paymentMethodCreateParams: PaymentMethodCreateParams,
-            override val userReuseRequest: UserReuseRequest
+            override val customerRequestedSave: CustomerRequestedSave
         ) : New()
     }
 }

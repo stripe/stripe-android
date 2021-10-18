@@ -213,7 +213,7 @@ internal class PaymentSheetActivityTest {
                 PaymentSelection.New.Card(
                     PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
                     CardBrand.Visa,
-                    userReuseRequest = PaymentSelection.UserReuseRequest.RequestNoReuse
+                    customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestNoReuse
                 )
             )
             assertThat(activity.viewBinding.buyButton.isVisible).isTrue()

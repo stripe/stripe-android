@@ -283,7 +283,7 @@ internal class FormViewModelTest {
                 emailSection.identifier
             )
             assertThat(formViewModel.completeFormValues.first()?.userRequestedReuse).isEqualTo(
-                PaymentSelection.UserReuseRequest.RequestNoReuse
+                PaymentSelection.CustomerRequestedSave.RequestNoReuse
             )
         }
     }
@@ -331,7 +331,7 @@ internal class FormViewModelTest {
                     ?.value
             ).isEqualTo("joe")
             assertThat(formViewModel.completeFormValues.first()?.userRequestedReuse).isEqualTo(
-                PaymentSelection.UserReuseRequest.RequestReuse
+                PaymentSelection.CustomerRequestedSave.RequestReuse
             )
 
             emailElement?.onValueChange("invalid.email@IncompleteDomain")
@@ -412,7 +412,7 @@ internal class FormViewModelTest {
                 }
             }
             assertThat(formViewModel.completeFormValues.first()?.userRequestedReuse).isEqualTo(
-                PaymentSelection.UserReuseRequest.NoRequest
+                PaymentSelection.CustomerRequestedSave.NoRequest
             )
         }
     }

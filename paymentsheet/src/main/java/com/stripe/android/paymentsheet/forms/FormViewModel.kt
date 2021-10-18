@@ -146,14 +146,14 @@ internal class FormViewModel @Inject internal constructor(
         saveForFutureUseElement?.controller?.saveForFutureUse?.map { saveForFutureUse ->
             if (config.showCheckbox) {
                 if (saveForFutureUse) {
-                    PaymentSelection.UserReuseRequest.RequestReuse
+                    PaymentSelection.CustomerRequestedSave.RequestReuse
                 } else {
-                    PaymentSelection.UserReuseRequest.RequestNoReuse
+                    PaymentSelection.CustomerRequestedSave.RequestNoReuse
                 }
             } else {
-                PaymentSelection.UserReuseRequest.NoRequest
+                PaymentSelection.CustomerRequestedSave.NoRequest
             }
-        } ?: MutableStateFlow(PaymentSelection.UserReuseRequest.NoRequest)
+        } ?: MutableStateFlow(PaymentSelection.CustomerRequestedSave.NoRequest)
 
     val completeFormValues =
         CompleteFormFieldValueFilter(

@@ -36,12 +36,12 @@ internal class ConfirmPaymentIntentParamsFactory(
         ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
             paymentMethodCreateParams = paymentSelection.paymentMethodCreateParams,
             clientSecret = clientSecret.value,
-            setupFutureUsage = when (paymentSelection.userReuseRequest) {
-                PaymentSelection.UserReuseRequest.RequestReuse ->
+            setupFutureUsage = when (paymentSelection.customerRequestedSave) {
+                PaymentSelection.CustomerRequestedSave.RequestReuse ->
                     ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
-                PaymentSelection.UserReuseRequest.RequestNoReuse ->
+                PaymentSelection.CustomerRequestedSave.RequestNoReuse ->
                     ConfirmPaymentIntentParams.SetupFutureUsage.Blank
-                PaymentSelection.UserReuseRequest.NoRequest ->
+                PaymentSelection.CustomerRequestedSave.NoRequest ->
                     null
             }
         )
