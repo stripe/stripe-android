@@ -1,4 +1,47 @@
 # CHANGELOG
+
+## 18.1.0 - 2021-10-18
+### PaymentSheet
+This release adds several new features to PaymentSheet, our drop-in UI integration:
+
+#### More supported payment methods
+The list of supported payment methods depends on your integration. If you’re using a PaymentIntent, we support:
+- Card
+- SEPA Debit, bancontact, iDEAL, sofort
+ 
+If you’re using a PaymentIntent with setup_future_usage or a SetupIntent, we support:
+- Card
+- GooglePay
+
+Note: To enable SEPA Debit and sofort, set PaymentSheet.Configuration.allowsDelayedPaymentMethods to true on the client. These payment methods can't guarantee you will receive funds from your customer at the end of the checkout because they take time to settle. Don't enable these if your business requires immediate payment (e.g., an on-demand service). See https://stripe.com/payments/payment-methods-guide
+
+#### Pre-fill billing details
+PaymentSheet collects billing details like name and email for certain payment methods. Pre-fill these fields to save customers time by setting `PaymentSheet.Configuration.defaultBillingDetails`.
+
+#### Save payment methods on payment
+> This is currently only available for cards + Apple/Google Pay.
+
+PaymentSheet supports PaymentIntents with setup_future_usage set. This property tells us to save the payment method for future use (e.g., taking initial payment of a recurring subscription). When set, PaymentSheet hides the 'Save this card for future use' checkbox and always saves.
+
+#### SetupIntent support
+> This is currently only available for cards + Apple/Google Pay.
+
+Initialize PaymentSheet with a SetupIntent to set up cards for future use without charging.
+
+#### Smart payment method ordering
+When a customer is adding a new payment method, PaymentSheet uses information like the customers region to show the most relevant payment methods first.
+
+### Other changes
+* [4165](https://github.com/stripe/stripe-android/pull/4165) Postal code collection for cards is now limited to US, CA, UK
+* [4274](https://github.com/stripe/stripe-android/pull/4274) Bump mockitoCoreVersion from 3.12.4 to 4.0.0
+* [4279](https://github.com/stripe/stripe-android/pull/4279) Fix dependency incorrectly marked as implementation
+* [4281](https://github.com/stripe/stripe-android/pull/4281) Add analytics event for failure creating 3ds2 params
+* [4282](https://github.com/stripe/stripe-android/pull/4282) Bump gradle from 7.0.2 to 7.0.3
+* [4283](https://github.com/stripe/stripe-android/pull/4283) Bump mockito-kotlin from 3.2.0 to 4.0.0
+* [4291](https://github.com/stripe/stripe-android/pull/4291) Fix so empty string parameters are sent to the server
+* [4295](https://github.com/stripe/stripe-android/pull/4295) Fix height on CardMultilineWidget textboxes
+* [4297](https://github.com/stripe/stripe-android/pull/4297) Bump accompanist-flowlayout from 0.19.0 to 0.20.0
+
 ## 18.0.0 - 2021-10-07
 This release includes several bug fixes, introduces a test mode indicator, makes a builder class for [payment sheet configuration](https://github.com/stripe/stripe-android/blob/master/paymentsheet/src/main/java/com/stripe/android/paymentsheet/PaymentSheet.kt#L130) and makes config properties immutable. 
 * [4202](https://github.com/stripe/stripe-android/pull/4202) CardInputWidget.CardValidCallback will consider the postal code in validation
@@ -6,6 +49,7 @@ This release includes several bug fixes, introduces a test mode indicator, makes
 * [4192](https://github.com/stripe/stripe-android/pull/4192) Remove internal on CardUtils
 * [4214](https://github.com/stripe/stripe-android/pull/4214) Create test mode indicator
 * [4265](https://github.com/stripe/stripe-android/pull/4265) Make config properties immutable, create Builder
+
 ## 17.2.0 - 2021-09-10
 This release includes several bug fixes, introduces [PaymentLauncher](https://github.com/stripe/stripe-android/blob/master/payments-core/src/main/java/com/stripe/android/payments/paymentlauncher/PaymentLauncher.kt) as a replacement of [https://github.com/stripe/stripe-android/blob/master/payments-core/src/main/java/com/stripe/android/Stripe.kt](https://github.com/stripe/stripe-android/blob/master/payments-core/src/main/java/com/stripe/android/Stripe.kt) see example in [StripeIntentActivity](https://github.com/stripe/stripe-android/blob/master/example/src/main/java/com/stripe/example/activity/StripeIntentActivity.kt) on [line 28](https://github.com/stripe/stripe-android/blob/master/example/src/main/java/com/stripe/example/activity/StripeIntentActivity.kt#L28)
 * [4157](https://github.com/stripe/stripe-android/pull/4157) Pass GooglePayLauncher arguments to DefaultGooglePayRepository
