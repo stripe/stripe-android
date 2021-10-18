@@ -31,10 +31,19 @@ class CountryUtilsTest {
 
     @Test
     fun getOrderedCountries() {
+        val defaultLocaleSecondCountryName = CountryUtils.getOrderedCountries(Locale.getDefault())[1].name
         assertThat(
             CountryUtils.getOrderedCountries(Locale.getDefault())[0].code
         ).isEqualTo(
             Locale.getDefault().getCountryCode()
+        )
+
+        // Make sure caching updates the localized country list.  We look at index
+        // 1 because the 0 is the country of the current locale.
+        assertThat(
+            CountryUtils.getOrderedCountries(Locale.CHINESE)[1].name
+        ).isNotEqualTo(
+            defaultLocaleSecondCountryName
         )
     }
 

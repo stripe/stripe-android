@@ -39,15 +39,28 @@ object CountryUtils {
         }
     }
 
+    private var cachedCountriesLocale: Locale? = null
+    private var cachedOrderedLocalizedCountries: List<Country> = emptyList()
+    private fun getSortedLocalizedCountries(currentLocale: Locale): List<Country> {
+        return if (currentLocale == cachedCountriesLocale) {
+            cachedOrderedLocalizedCountries
+        } else {
+            cachedCountriesLocale = currentLocale
+            cachedOrderedLocalizedCountries = localizedCountries(currentLocale)
+                .sortedBy { formatNameForSorting(it.name) }
+                .filterNot { it.code == currentLocale.getCountryCode() }
+
+            cachedOrderedLocalizedCountries
+        }
+    }
+
     @JvmSynthetic
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     fun getOrderedCountries(currentLocale: Locale): List<Country> {
         // Show user's current locale first, followed by countries alphabetized by display name
         return listOfNotNull(getCountryByCode(currentLocale.getCountryCode(), currentLocale))
             .plus(
-                localizedCountries(currentLocale)
-                    .sortedBy { formatNameForSorting(it.name) }
-                    .filterNot { it.code == currentLocale.getCountryCode() }
+                getSortedLocalizedCountries(currentLocale)
             )
     }
 

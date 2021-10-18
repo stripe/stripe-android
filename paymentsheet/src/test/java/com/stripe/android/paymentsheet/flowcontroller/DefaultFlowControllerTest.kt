@@ -54,13 +54,13 @@ import kotlinx.coroutines.test.TestCoroutineScope
 import kotlinx.coroutines.test.runBlockingTest
 import kotlinx.coroutines.test.setMain
 import org.junit.runner.RunWith
+import org.mockito.Mockito.verifyNoInteractions
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argWhere
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.isNull
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
-import org.mockito.kotlin.verifyNoInteractions
 import org.mockito.kotlin.verifyNoMoreInteractions
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
@@ -737,6 +737,7 @@ internal class DefaultFlowControllerTest {
         eventReporter,
         ViewModelProvider(activity)[FlowControllerViewModel::class.java],
         paymentLauncherAssistedFactory,
+        mock(),
         { PaymentConfiguration.getInstance(activity) },
         testDispatcher,
         ENABLE_LOGGING,

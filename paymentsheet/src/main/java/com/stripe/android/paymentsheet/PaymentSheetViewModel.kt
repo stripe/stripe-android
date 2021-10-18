@@ -33,6 +33,7 @@ import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.elements.ResourceRepository
 import com.stripe.android.paymentsheet.injection.DaggerPaymentSheetLauncherComponent
 import com.stripe.android.paymentsheet.injection.PaymentSheetViewModelModule
 import com.stripe.android.paymentsheet.injection.PaymentSheetViewModelSubcomponent
@@ -80,6 +81,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     private val stripeIntentValidator: StripeIntentValidator,
     customerRepository: CustomerRepository,
     prefsRepository: PrefsRepository,
+    // even though unused this forces Dagger to initialize it here.
+    resourceRepository: ResourceRepository,
     private val paymentLauncherFactory: StripePaymentLauncherAssistedFactory,
     private val googlePayPaymentMethodLauncherFactory: GooglePayPaymentMethodLauncherFactory,
     logger: Logger,
