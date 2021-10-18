@@ -26,11 +26,11 @@ internal fun FormInternal(
     elements: List<FormElement>
 ) {
     val hiddenIdentifiers by hiddenIdentifiersFlow.asLiveData().observeAsState(
-    null
+        null
     )
     val enabled by enabledFlow.asLiveData().observeAsState(true)
 
-    if(hiddenIdentifiers != null) {
+    if (hiddenIdentifiers != null) {
         Column(
             modifier = Modifier
                 .fillMaxWidth(1f)

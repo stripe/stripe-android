@@ -16,7 +16,7 @@ internal fun AddressElementUI(
     controller: AddressController
 ) {
     val fields by controller.fieldsFlowable.asLiveData().observeAsState(null)
-    if(fields != null) {
+    if (fields != null) {
         Column {
             fields!!.forEachIndexed { index, field ->
                 SectionFieldElementUI(enabled, field)
