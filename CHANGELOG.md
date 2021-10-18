@@ -7,7 +7,7 @@ This release includes PaymentSheet - a UI for collecting payment. Learn more abo
 [4281](https://github.com/stripe/stripe-android/pull/4281) Add analytics event for failure creating 3ds2 params
 [4282](https://github.com/stripe/stripe-android/pull/4282) Bump gradle from 7.0.2 to 7.0.3
 [4283](https://github.com/stripe/stripe-android/pull/4283) Bump mockito-kotlin from 3.2.0 to 4.0.0
-[4291](https://github.com/stripe/stripe-android/pull/4291) ** Add something about saving empty string **
+[4291](https://github.com/stripe/stripe-android/pull/4291) Fix so empty string parameters are sent to the server
 [4295](https://github.com/stripe/stripe-android/pull/4295) Fix height on CardMultilineWidget textboxes
 [4297](https://github.com/stripe/stripe-android/pull/4297) Bump accompanist-flowlayout from 0.19.0 to 0.20.0
 
