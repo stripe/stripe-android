@@ -5,22 +5,17 @@ import com.stripe.android.paymentsheet.elements.AddressSpec
 import com.stripe.android.paymentsheet.elements.AfterpayClearpayHeaderElement
 import com.stripe.android.paymentsheet.elements.AfterpayClearpayTextSpec
 import com.stripe.android.paymentsheet.elements.BankDropdownSpec
-import com.stripe.android.paymentsheet.elements.CountryElement
 import com.stripe.android.paymentsheet.elements.CountryConfig
+import com.stripe.android.paymentsheet.elements.CountryElement
 import com.stripe.android.paymentsheet.elements.CountrySpec
 import com.stripe.android.paymentsheet.elements.DropdownFieldController
-import com.stripe.android.paymentsheet.elements.EmailElement
 import com.stripe.android.paymentsheet.elements.EmailConfig
+import com.stripe.android.paymentsheet.elements.EmailElement
 import com.stripe.android.paymentsheet.elements.EmailSpec
 import com.stripe.android.paymentsheet.elements.FormElement
-import com.stripe.android.paymentsheet.elements.SectionElement
-import com.stripe.android.paymentsheet.elements.SectionSingleFieldElement
-import com.stripe.android.paymentsheet.model.Amount
-import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
-import com.stripe.android.paymentsheet.paymentdatacollection.getValue
 import com.stripe.android.paymentsheet.elements.FormItemSpec
-import com.stripe.android.paymentsheet.elements.IbanElement
 import com.stripe.android.paymentsheet.elements.IbanConfig
+import com.stripe.android.paymentsheet.elements.IbanElement
 import com.stripe.android.paymentsheet.elements.IbanSpec
 import com.stripe.android.paymentsheet.elements.IdentifierSpec
 import com.stripe.android.paymentsheet.elements.LayoutSpec
@@ -31,14 +26,19 @@ import com.stripe.android.paymentsheet.elements.SaveForFutureUseController
 import com.stripe.android.paymentsheet.elements.SaveForFutureUseElement
 import com.stripe.android.paymentsheet.elements.SaveForFutureUseSpec
 import com.stripe.android.paymentsheet.elements.SectionController
+import com.stripe.android.paymentsheet.elements.SectionElement
 import com.stripe.android.paymentsheet.elements.SectionFieldSpec
+import com.stripe.android.paymentsheet.elements.SectionSingleFieldElement
 import com.stripe.android.paymentsheet.elements.SectionSpec
-import com.stripe.android.paymentsheet.elements.SimpleDropdownElement
 import com.stripe.android.paymentsheet.elements.SimpleDropdownConfig
+import com.stripe.android.paymentsheet.elements.SimpleDropdownElement
 import com.stripe.android.paymentsheet.elements.SimpleTextElement
 import com.stripe.android.paymentsheet.elements.SimpleTextFieldConfig
 import com.stripe.android.paymentsheet.elements.SimpleTextSpec
 import com.stripe.android.paymentsheet.elements.TextFieldController
+import com.stripe.android.paymentsheet.model.Amount
+import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
+import com.stripe.android.paymentsheet.paymentdatacollection.getValue
 import javax.inject.Inject
 
 /**
@@ -55,7 +55,7 @@ internal class TransformSpecToElement @Inject constructor(
     ): List<FormElement> =
         list.map {
             when (it) {
-                is SaveForFutureUseSpec -> it.transform(initialValues.merchantName)
+                is SaveForFutureUseSpec -> it.transform(initialValues)
                 is SectionSpec -> it.transform(initialValues)
                 is MandateTextSpec -> it.transform(initialValues.merchantName)
                 is AfterpayClearpayTextSpec ->
@@ -143,15 +143,16 @@ internal class TransformSpecToElement @Inject constructor(
             )
         )
 
-    private fun SaveForFutureUseSpec.transform(merchantName: String) =
+    private fun SaveForFutureUseSpec.transform(initialValues: FormFragmentArguments? = null) =
         SaveForFutureUseElement(
             this.identifier,
             SaveForFutureUseController(
                 this.identifierRequiredForFutureUse.map { requiredItemSpec ->
                     requiredItemSpec.identifier
-                }
+                },
+                initialValues?.showCheckboxControlledFields != false
             ),
-            merchantName
+            initialValues?.merchantName
         )
 
     private fun AfterpayClearpayTextSpec.transform(amount: Amount) =
