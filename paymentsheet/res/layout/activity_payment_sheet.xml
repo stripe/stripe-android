@@ -10,7 +10,7 @@
         android:id="@+id/bottom_sheet"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom"
+        android:layout_gravity="bottom|center_horizontal"
         android:animateLayoutChanges="true"
         android:orientation="vertical"
         android:background="?colorSurface"
