@@ -15,7 +15,7 @@ If you’re using a PaymentIntent with setup_future_usage or a SetupIntent, we s
 
 Note: To enable SEPA Debit and sofort, set PaymentSheet.Configuration.allowsDelayedPaymentMethods to true on the client. These payment methods can't guarantee you will receive funds from your customer at the end of the checkout because they take time to settle. Don't enable these if your business requires immediate payment (e.g., an on-demand service). See https://stripe.com/payments/payment-methods-guide
 
-#### Pre-fill billing details
+### Pre-fill billing details
 PaymentSheet collects billing details like name and email for certain payment methods. Pre-fill these fields to save customers time by setting `PaymentSheet.Configuration.defaultBillingDetails`.
 
 ### Save payment methods on payment
