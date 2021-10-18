@@ -12,6 +12,7 @@ The list of supported payment methods depends on your integration. If you’re u
 If you’re using a PaymentIntent with setup_future_usage or a SetupIntent, we support:
 - Card
 - GooglePay
+
 Note: To enable SEPA Debit and sofort, set PaymentSheet.Configuration.allowsDelayedPaymentMethods to true on the client. These payment methods can't guarantee you will receive funds from your customer at the end of the checkout because they take time to settle. Don't enable these if your business requires immediate payment (e.g., an on-demand service). See https://stripe.com/payments/payment-methods-guide
 
 #### Pre-fill billing details
