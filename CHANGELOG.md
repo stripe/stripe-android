@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## x.x.x - 2021-10-18
+## 18.1.0 - 2021-10-18
 This release includes PaymentSheet - a UI for collecting payment. Learn more about it [here](https://stripe.com/docs/payments/accept-a-payment?platform=android).
 [4295](https://github.com/stripe/stripe-android/pull/4295) Fix height on CardMultilineWidget textboxes
 [4297](https://github.com/stripe/stripe-android/pull/4297) Bump accompanist-flowlayout from 0.19.0 to 0.20.0
