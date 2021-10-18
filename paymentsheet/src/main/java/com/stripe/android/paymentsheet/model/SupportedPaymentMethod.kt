@@ -354,6 +354,9 @@ internal enum class SupportedPaymentMethod(
                 stripeIntent,
                 config
             ) != null
+        }?.filterNot { supportedPaymentMethod ->
+            stripeIntent.isLiveMode &&
+                stripeIntent.unactivatedPaymentMethods.contains(supportedPaymentMethod.type.code)
         } ?: emptyList()
     }
 }

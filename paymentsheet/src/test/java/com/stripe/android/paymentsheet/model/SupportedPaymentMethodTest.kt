@@ -2,12 +2,15 @@ package com.stripe.android.paymentsheet.model
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import kotlinx.serialization.Serializable
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.whenever
 import java.io.File
 
 @RunWith(AndroidJUnit4::class)
@@ -59,6 +62,54 @@ class SupportedPaymentMethodTest {
                 }
                 assertThat(baseline).isEqualTo(csvOutput.toString())
             }
+    }
+
+    @Test
+    fun `Test supported payment method doesn't filter with empty unactivated list in test mode`() {
+        val mockIntent = mock<PaymentIntent>()
+        whenever(mockIntent.paymentMethodTypes).thenReturn(listOf("card"))
+        whenever(mockIntent.isLiveMode).thenReturn(false)
+        whenever(mockIntent.unactivatedPaymentMethods).thenReturn(emptyList())
+
+        val expected = listOf<SupportedPaymentMethod>().plus(SupportedPaymentMethod.Card)
+
+        assertThat(SupportedPaymentMethod.getPMsToAdd(mockIntent, null)).isEqualTo(expected)
+    }
+
+    @Test
+    fun `Test supported payment method doesn't filter with empty unactivated list in live mode`() {
+        val mockIntent = mock<PaymentIntent>()
+        whenever(mockIntent.paymentMethodTypes).thenReturn(listOf("card"))
+        whenever(mockIntent.isLiveMode).thenReturn(true)
+        whenever(mockIntent.unactivatedPaymentMethods).thenReturn(emptyList())
+
+        val expected = listOf<SupportedPaymentMethod>().plus(SupportedPaymentMethod.Card)
+
+        assertThat(SupportedPaymentMethod.getPMsToAdd(mockIntent, null)).isEqualTo(expected)
+    }
+
+    @Test
+    fun `Test supported payment method does filter with unactivated list in live mode`() {
+        val mockIntent = mock<PaymentIntent>()
+        whenever(mockIntent.paymentMethodTypes).thenReturn(listOf("card"))
+        whenever(mockIntent.isLiveMode).thenReturn(true)
+        whenever(mockIntent.unactivatedPaymentMethods).thenReturn(listOf("card"))
+
+        val expected = listOf<SupportedPaymentMethod>()
+
+        assertThat(SupportedPaymentMethod.getPMsToAdd(mockIntent, null)).isEqualTo(expected)
+    }
+
+    @Test
+    fun `Test supported payment method doesn't filter with unactivated list in test mode`() {
+        val mockIntent = mock<PaymentIntent>()
+        whenever(mockIntent.paymentMethodTypes).thenReturn(listOf("card"))
+        whenever(mockIntent.isLiveMode).thenReturn(false)
+        whenever(mockIntent.unactivatedPaymentMethods).thenReturn(listOf("card"))
+
+        val expected = listOf<SupportedPaymentMethod>().plus(SupportedPaymentMethod.Card)
+
+        assertThat(SupportedPaymentMethod.getPMsToAdd(mockIntent, null)).isEqualTo(expected)
     }
 
     /**

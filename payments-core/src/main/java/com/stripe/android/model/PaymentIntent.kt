@@ -130,6 +130,11 @@ data class PaymentIntent internal constructor(
      */
     val shipping: Shipping? = null,
 
+    /**
+     * Payment types that have not been activated in livemode, but have been activated in testmode.
+     */
+    override val unactivatedPaymentMethods: List<String>,
+
     override val nextActionData: StripeIntent.NextActionData? = null
 ) : StripeIntent {
     override val nextActionType: StripeIntent.NextActionType?
