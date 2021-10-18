@@ -38,5 +38,5 @@
 
     <style name="StripeGooglePayDefaultTheme" parent="StripePaymentSheetBaseTheme" />
 
-    <style name="PayLauncherDefaultTheme" parent="StripePaymentSheetBaseTheme" />
+    <style name="PayLauncherDefaultTheme" parent="StripeTransparentTheme" />
 </resources>
