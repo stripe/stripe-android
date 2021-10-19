@@ -287,6 +287,8 @@ internal object PaymentMethodFixtures {
         }
         """.trimIndent()
     )
+
+    val AU_BECS_DEBIT = PaymentMethodJsonParser().parse(AU_BECS_DEBIT_JSON)
 //
 //    val BACS_DEBIT_JSON = JSONObject(
 //        """

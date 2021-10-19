@@ -24,7 +24,8 @@ import kotlin.coroutines.CoroutineContext
     modules = [
         AuthenticationModule::class,
         Stripe3DSAuthenticatorModule::class,
-        WeChatPayAuthenticatorModule::class
+        WeChatPayAuthenticatorModule::class,
+        LoggingModule::class
     ]
 )
 internal interface AuthenticationComponent {
@@ -61,7 +62,7 @@ internal interface AuthenticationComponent {
         ): Builder
 
         @BindsInstance
-        fun injectorKey(@InjectorKey id: Int): Builder
+        fun injectorKey(@InjectorKey id: String): Builder
 
         @BindsInstance
         fun publishableKeyProvider(

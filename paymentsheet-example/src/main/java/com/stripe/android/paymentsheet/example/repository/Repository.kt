@@ -25,6 +25,7 @@ internal interface Repository {
         customer: CheckoutCustomer,
         currency: CheckoutCurrency,
         mode: CheckoutMode,
-        setShippingAddress: Boolean
+        setShippingAddress: Boolean,
+        setAutomaticPaymentMethods: Boolean
     ): CheckoutResponse
 }

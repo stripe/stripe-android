@@ -1,10 +1,15 @@
 package com.stripe.android.payments.paymentlauncher
 
+import android.app.Application
 import androidx.activity.result.ActivityResultCaller
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.SavedStateHandle
+import androidx.savedstate.SavedStateRegistry
+import androidx.savedstate.SavedStateRegistryOwner
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentIntentResult
 import com.stripe.android.SetupIntentResult
 import com.stripe.android.StripeIntentResult
@@ -25,6 +30,11 @@ import com.stripe.android.payments.PaymentIntentFlowResultProcessor
 import com.stripe.android.payments.SetupIntentFlowResultProcessor
 import com.stripe.android.payments.core.authentication.PaymentAuthenticator
 import com.stripe.android.payments.core.authentication.PaymentAuthenticatorRegistry
+import com.stripe.android.payments.core.injection.DUMMY_INJECTOR_KEY
+import com.stripe.android.payments.core.injection.Injectable
+import com.stripe.android.payments.core.injection.Injector
+import com.stripe.android.payments.core.injection.PaymentLauncherViewModelSubcomponent
+import com.stripe.android.payments.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.view.AuthActivityStarterHost
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestCoroutineDispatcher
@@ -37,10 +47,14 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.argWhere
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.spy
+import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.verifyNoMoreInteractions
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
+import javax.inject.Provider
+import kotlin.test.assertNotNull
 
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
@@ -401,9 +415,105 @@ class PaymentLauncherViewModelTest {
                 .isInstanceOf(PaymentResult.Failed::class.java)
         }
 
+    @Test
+    fun `Factory gets initialized by Injector when Injector is available`() {
+        val mockBuilder = mock<PaymentLauncherViewModelSubcomponent.Builder>()
+        val mockSubComponent = mock<PaymentLauncherViewModelSubcomponent>()
+        // The reason the ViewModel cannot be mocked here is because
+        // AbstractSavedStateViewModelFactory will call viewmodel.setTagIfAbsent, which accesses
+        // ViewModel.mBagOfTags that's initialized in base class.
+        // Mocking it would leave this field null, causing an NPE.
+        val vmToBeReturned = createViewModel(true)
+
+        whenever(mockBuilder.build()).thenReturn(mockSubComponent)
+        whenever(mockBuilder.isPaymentIntent(any())).thenReturn(mockBuilder)
+        whenever(mockBuilder.savedStateHandle(any())).thenReturn(mockBuilder)
+        whenever(mockBuilder.authActivityStarterHost(any())).thenReturn(mockBuilder)
+        whenever(mockBuilder.activityResultCaller(any())).thenReturn(mockBuilder)
+        whenever((mockSubComponent.viewModel)).thenReturn(vmToBeReturned)
+
+        val mockSavedStateRegistryOwner = mock<SavedStateRegistryOwner>()
+        val mockSavedStateRegistry = mock<SavedStateRegistry>()
+        val mockLifeCycle = mock<Lifecycle>()
+
+        whenever(mockSavedStateRegistryOwner.savedStateRegistry).thenReturn(mockSavedStateRegistry)
+        whenever(mockSavedStateRegistryOwner.lifecycle).thenReturn(mockLifeCycle)
+        whenever(mockLifeCycle.currentState).thenReturn(Lifecycle.State.CREATED)
+
+        val injector = object : Injector {
+            override fun inject(injectable: Injectable<*>) {
+                val factory = injectable as PaymentLauncherViewModel.Factory
+                factory.subComponentBuilderProvider = Provider { mockBuilder }
+            }
+        }
+        val injectorKey = WeakMapInjectorRegistry.nextKey("testKey")
+        WeakMapInjectorRegistry.register(injector, injectorKey)
+        val factory = PaymentLauncherViewModel.Factory(
+            {
+                PaymentLauncherContract.Args.IntentConfirmationArgs(
+                    injectorKey,
+                    ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+                    TEST_STRIPE_ACCOUNT_ID,
+                    false,
+                    PRODUCT_USAGE,
+                    mock<ConfirmPaymentIntentParams>()
+                )
+            },
+            { ApplicationProvider.getApplicationContext() },
+            { mock() },
+            mock(),
+            mockSavedStateRegistryOwner
+        )
+        val factorySpy = spy(factory)
+        val createdViewModel = factorySpy.create(PaymentLauncherViewModel::class.java)
+        verify(factorySpy, times(0)).fallbackInitialize(any())
+        assertThat(createdViewModel).isEqualTo(vmToBeReturned)
+
+        WeakMapInjectorRegistry.staticCacheMap.clear()
+    }
+
+    @Test
+    fun `Factory gets initialized with fallback when no Injector is available`() = runBlockingTest {
+        val mockSavedStateRegistryOwner = mock<SavedStateRegistryOwner>()
+        val mockSavedStateRegistry = mock<SavedStateRegistry>()
+        val mockLifeCycle = mock<Lifecycle>()
+
+        whenever(mockSavedStateRegistryOwner.savedStateRegistry).thenReturn(mockSavedStateRegistry)
+        whenever(mockSavedStateRegistryOwner.lifecycle).thenReturn(mockLifeCycle)
+        whenever(mockLifeCycle.currentState).thenReturn(Lifecycle.State.CREATED)
+
+        val context = ApplicationProvider.getApplicationContext<Application>()
+        val factory = PaymentLauncherViewModel.Factory(
+            {
+                PaymentLauncherContract.Args.IntentConfirmationArgs(
+                    DUMMY_INJECTOR_KEY,
+                    ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+                    TEST_STRIPE_ACCOUNT_ID,
+                    false,
+                    PRODUCT_USAGE,
+                    mock<ConfirmPaymentIntentParams>()
+                )
+            },
+            { ApplicationProvider.getApplicationContext() },
+            { mock() },
+            mock(),
+            mockSavedStateRegistryOwner
+        )
+        val factorySpy = spy(factory)
+
+        assertNotNull(factorySpy.create(PaymentLauncherViewModel::class.java))
+        verify(factorySpy).fallbackInitialize(
+            argWhere {
+                it.application == context
+            }
+        )
+    }
+
     companion object {
         const val CLIENT_SECRET = "clientSecret"
         const val PM_ID = "12345"
         const val RETURN_URL = "return://to.me"
+        const val TEST_STRIPE_ACCOUNT_ID = "accountId"
+        val PRODUCT_USAGE = setOf("TestProductUsage")
     }
 }

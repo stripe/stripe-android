@@ -4,6 +4,8 @@ import android.content.res.Resources
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.stripe.android.payments.core.injection.Injectable
+import com.stripe.android.payments.core.injection.injectWithFallback
 import com.stripe.android.paymentsheet.elements.Form
 import com.stripe.android.paymentsheet.elements.FormElement
 import com.stripe.android.paymentsheet.elements.LayoutSpec
@@ -12,13 +14,15 @@ import com.stripe.android.paymentsheet.elements.ResourceRepository
 import com.stripe.android.paymentsheet.elements.SaveForFutureUseElement
 import com.stripe.android.paymentsheet.elements.SectionSpec
 import com.stripe.android.paymentsheet.injection.DaggerFormViewModelComponent
+import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
+import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import javax.inject.Singleton
+import javax.inject.Provider
 
 /**
  * This class stores the visual field layout for the [Form] and then sets up the controller
@@ -28,35 +32,43 @@ import javax.inject.Singleton
  * @param: layout - this contains the visual layout of the fields on the screen used by [Form]
  * to display the UI fields on screen.  It also informs us of the backing fields to be created.
  */
-@Singleton
 internal class FormViewModel @Inject internal constructor(
     layout: LayoutSpec,
     config: FormFragmentArguments,
-    private val resourceRepository: ResourceRepository
+    resourceRepository: ResourceRepository,
+    private val transformSpecToElement: TransformSpecToElement
 ) : ViewModel() {
     internal class Factory(
-        private val resources: Resources,
-        private val layout: LayoutSpec,
-        private val formArguments: FormFragmentArguments
-    ) : ViewModelProvider.Factory {
+        val config: FormFragmentArguments,
+        val resource: Resources,
+        var layout: LayoutSpec
+    ) : ViewModelProvider.Factory, Injectable<Factory.FallbackInitializeParam> {
+        internal data class FallbackInitializeParam(
+            val resource: Resources
+        )
+
+        @Inject
+        lateinit var subComponentBuilderProvider: Provider<FormViewModelSubcomponent.Builder>
+
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-
-            // This is where we will call Dagger:
-            return DaggerFormViewModelComponent.builder()
-                .resources(resources)
+            injectWithFallback(config.injectorKey, FallbackInitializeParam(resource))
+            return subComponentBuilderProvider.get()
+                .formFragmentArguments(config)
                 .layout(layout)
-                .formFragmentArguments(formArguments)
+                .build().viewModel as T
+        }
+
+        override fun fallbackInitialize(arg: FallbackInitializeParam) {
+            DaggerFormViewModelComponent.builder()
+                .resources(arg.resource)
                 .build()
-                .viewModel as T
+                .inject(this)
         }
     }
 
-    private val transformSpecToElement = TransformSpecToElement(resourceRepository, config)
-
     init {
         viewModelScope.launch {
-            resourceRepository.init()
             elements = transformSpecToElement.transform(layout.items)
         }
     }
@@ -68,7 +80,7 @@ internal class FormViewModel @Inject internal constructor(
 
     internal lateinit var elements: List<FormElement>
 
-    private val saveForFutureUseVisible = MutableStateFlow(config.saveForFutureUseInitialVisibility)
+    private val saveForFutureUseVisible = MutableStateFlow(config.showCheckbox)
 
     internal fun setSaveForFutureUseVisibility(isVisible: Boolean) {
         saveForFutureUseVisible.value = isVisible
@@ -85,7 +97,7 @@ internal class FormViewModel @Inject internal constructor(
         .firstOrNull()
 
     internal val saveForFutureUse = saveForFutureUseElement?.controller?.saveForFutureUse
-        ?: MutableStateFlow(config.saveForFutureUseInitialValue)
+        ?: MutableStateFlow(config.showCheckboxControlledFields)
 
     private val sectionToFieldIdentifierMap = layout.items
         .filterIsInstance<SectionSpec>()
@@ -130,6 +142,19 @@ internal class FormViewModel @Inject internal constructor(
             } ?: false
     }
 
+    private val userRequestedReuse =
+        saveForFutureUseElement?.controller?.saveForFutureUse?.map { saveForFutureUse ->
+            if (config.showCheckbox) {
+                if (saveForFutureUse) {
+                    PaymentSelection.CustomerRequestedSave.RequestReuse
+                } else {
+                    PaymentSelection.CustomerRequestedSave.RequestNoReuse
+                }
+            } else {
+                PaymentSelection.CustomerRequestedSave.NoRequest
+            }
+        } ?: MutableStateFlow(PaymentSelection.CustomerRequestedSave.NoRequest)
+
     val completeFormValues =
         CompleteFormFieldValueFilter(
             combine(
@@ -139,6 +164,6 @@ internal class FormViewModel @Inject internal constructor(
             },
             hiddenIdentifiers,
             showingMandate,
-            saveForFutureUse
+            userRequestedReuse
         ).filterFlow()
 }

@@ -8,10 +8,14 @@ import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.asFlow
 import androidx.lifecycle.distinctUntilChanged
+import androidx.lifecycle.map
 import androidx.lifecycle.viewModelScope
+import com.stripe.android.Logger
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.payments.core.injection.InjectorKey
+import com.stripe.android.paymentsheet.BaseAddPaymentMethodFragment
 import com.stripe.android.paymentsheet.BasePaymentMethodsListFragment
 import com.stripe.android.paymentsheet.PaymentOptionsActivity
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -42,7 +46,9 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     internal val eventReporter: EventReporter,
     protected val customerRepository: CustomerRepository,
     protected val prefsRepository: PrefsRepository,
-    protected val workContext: CoroutineContext = Dispatchers.IO
+    protected val workContext: CoroutineContext = Dispatchers.IO,
+    protected val logger: Logger,
+    @InjectorKey val injectorKey: String
 ) : AndroidViewModel(application) {
     internal val customerConfig = config?.customer
     internal val merchantName = config?.merchantDisplayName
@@ -58,7 +64,15 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     private val _stripeIntent = MutableLiveData<StripeIntent?>()
     internal val stripeIntent: LiveData<StripeIntent?> = _stripeIntent
 
-    protected val _paymentMethods = MutableLiveData<List<PaymentMethod>>()
+    internal var supportedPaymentMethods = emptyList<SupportedPaymentMethod>()
+
+    @VisibleForTesting
+    internal val _paymentMethods = MutableLiveData<List<PaymentMethod>>()
+
+    /**
+     * The list of saved payment methods for the current customer.
+     * Value is null until it's loaded, and non-null (could be empty) after that.
+     */
     internal val paymentMethods: LiveData<List<PaymentMethod>> = _paymentMethods
 
     @VisibleForTesting
@@ -76,6 +90,10 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
 
     private val _transition = MutableLiveData<Event<TransitionTargetType?>>(Event(null))
     internal val transition: LiveData<Event<TransitionTargetType?>> = _transition
+
+    @VisibleForTesting
+    internal val _liveMode = MutableLiveData<Boolean>()
+    internal val liveMode: LiveData<Boolean> = _liveMode
 
     /**
      * On [CardDataCollectionFragment] this is set every time the details in the add
@@ -126,7 +144,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
         }
     }
 
-    val fragmentConfig = MediatorLiveData<FragmentConfig?>().apply {
+    val fragmentConfigEvent = MediatorLiveData<FragmentConfig?>().apply {
         listOf(
             savedSelection,
             stripeIntent,
@@ -137,13 +155,17 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
                 value = createFragmentConfig()
             }
         }
-    }.distinctUntilChanged()
+    }.distinctUntilChanged().map {
+        Event(it)
+    }
 
     private fun createFragmentConfig(): FragmentConfig? {
         val stripeIntentValue = stripeIntent.value
-        val paymentMethodsValue = paymentMethods.value
         val isGooglePayReadyValue = isGooglePayReady.value
         val savedSelectionValue = savedSelection.value
+        // List of Payment Methods is not passed in the config but we still wait for it to be loaded
+        // before adding the Fragment.
+        val paymentMethodsValue = paymentMethods.value
 
         return if (
             stripeIntentValue != null &&
@@ -153,7 +175,6 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
         ) {
             FragmentConfig(
                 stripeIntent = stripeIntentValue,
-                paymentMethods = paymentMethodsValue,
                 isGooglePayReady = isGooglePayReadyValue,
                 savedSelection = savedSelectionValue
             )
@@ -170,7 +191,15 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     fun setStripeIntent(stripeIntent: StripeIntent?) {
         _stripeIntent.value = stripeIntent
 
-        if (stripeIntent != null && getSupportedPaymentMethods().isEmpty()) {
+        /**
+         * The settings of values in this function is so that
+         * they will be ready in the onViewCreated method of
+         * the [BaseAddPaymentMethodFragment]
+         */
+
+        supportedPaymentMethods = SupportedPaymentMethod.getPMsToAdd(stripeIntent, config)
+
+        if (stripeIntent != null && supportedPaymentMethods.isEmpty()) {
             onFatal(
                 IllegalArgumentException(
                     "None of the requested payment methods" +
@@ -194,20 +223,26 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
                 )
             }
         }
+
+        if (stripeIntent != null) {
+            _liveMode.postValue(stripeIntent.isLiveMode)
+            warnUnactivatedIfNeeded(stripeIntent.unactivatedPaymentMethods)
+        }
     }
 
-    fun getSupportedPaymentMethods(): List<SupportedPaymentMethod> {
-        stripeIntent.value?.let { stripeIntent ->
-            return stripeIntent.paymentMethodTypes.mapNotNull {
-                SupportedPaymentMethod.fromCode(it)
-            }.filterNot {
-                // AfterpayClearpay requires a shipping address, filter it out if not provided
-                it == SupportedPaymentMethod.AfterpayClearpay &&
-                    (stripeIntent as? PaymentIntent)?.shipping == null
-            }.filter { it == SupportedPaymentMethod.Card }
+    private fun warnUnactivatedIfNeeded(unactivatedPaymentMethodTypes: List<String>) {
+        if (unactivatedPaymentMethodTypes.isEmpty()) {
+            return
         }
 
-        return emptyList()
+        val message = "[Stripe SDK] Warning: Your Intent contains the following payment method " +
+            "types which are activated for test mode but not activated for " +
+            "live mode: $unactivatedPaymentMethodTypes. These payment method types will not be " +
+            "displayed in live mode until they are activated. To activate these payment method " +
+            "types visit your Stripe dashboard." +
+            "More information: https://support.stripe.com/questions/activate-a-new-payment-method"
+
+        logger.warning(message)
     }
 
     fun updateSelection(selection: PaymentSelection?) {
@@ -220,11 +255,17 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
 
     fun removePaymentMethod(paymentMethod: PaymentMethod) = runBlocking {
         launch {
-            if (customerConfig != null && paymentMethod.id != null) {
-                customerRepository.detachPaymentMethod(
-                    customerConfig,
-                    requireNotNull(paymentMethod.id)
-                )
+            paymentMethod.id?.let { paymentMethodId ->
+                _paymentMethods.value = _paymentMethods.value?.filter {
+                    it.id != paymentMethodId
+                }
+
+                customerConfig?.let {
+                    customerRepository.detachPaymentMethod(
+                        it,
+                        paymentMethodId
+                    )
+                }
             }
         }
     }

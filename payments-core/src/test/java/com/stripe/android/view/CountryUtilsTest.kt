@@ -31,10 +31,19 @@ class CountryUtilsTest {
 
     @Test
     fun getOrderedCountries() {
+        val defaultLocaleSecondCountryName = CountryUtils.getOrderedCountries(Locale.getDefault())[1].name
         assertThat(
             CountryUtils.getOrderedCountries(Locale.getDefault())[0].code
         ).isEqualTo(
             Locale.getDefault().getCountryCode()
+        )
+
+        // Make sure caching updates the localized country list.  We look at index
+        // 1 because the 0 is the country of the current locale.
+        assertThat(
+            CountryUtils.getOrderedCountries(Locale.CHINESE)[1].name
+        ).isNotEqualTo(
+            defaultLocaleSecondCountryName
         )
     }
 
@@ -67,5 +76,37 @@ class CountryUtilsTest {
         // word for germany
         assertThat(germany?.name)
             .isEqualTo("Deutschland")
+    }
+
+    @Test
+    fun `formatNameForSorting does nothing to already formatted strings`() {
+        val input = "aland"
+        val expectedOutput = "aland"
+
+        assertThat(CountryUtils.formatNameForSorting(input) == expectedOutput)
+    }
+
+    @Test
+    fun `formatNameForSorting removes accents and diacritics`() {
+        val input = "Dziękuję Åland"
+        val expectedOutput = "dziekuje aland"
+
+        assertThat(CountryUtils.formatNameForSorting(input) == expectedOutput)
+    }
+
+    @Test
+    fun `formatNameForSorting removes capitalization`() {
+        val input = "Aland"
+        val expectedOutput = "aland"
+
+        assertThat(CountryUtils.formatNameForSorting(input) == expectedOutput)
+    }
+
+    @Test
+    fun `formatNameForSorting removes non alphanumeric characters`() {
+        val input = "aºland1!!!"
+        val expectedOutput = "aland"
+
+        assertThat(CountryUtils.formatNameForSorting(input) == expectedOutput)
     }
 }

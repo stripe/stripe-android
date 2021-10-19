@@ -15,4 +15,7 @@
     when reading as: "Pay in 4 interest-free payments of $100 with <Afterpay> ⓘ"
         This will not be translated initially as it must have specific values per language -->
     <string name="stripe_paymentsheet_afterpay_clearpay_message">Pay in 4 interest-free payments of %s with</string>
+
+    <!-- Label indicating the payment intent is in testmode -->
+    <string name="stripe_paymentsheet_test_mode_indicator">TEST MODE</string>
 </resources>

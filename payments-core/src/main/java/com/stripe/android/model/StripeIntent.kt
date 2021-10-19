@@ -58,6 +58,11 @@ sealed interface StripeIntent : StripeModel {
 
     val lastErrorMessage: String?
 
+    /**
+     * Payment types that have not been activated in livemode, but have been activated in testmode.
+     */
+    val unactivatedPaymentMethods: List<String>
+
     fun requiresAction(): Boolean
 
     fun requiresConfirmation(): Boolean

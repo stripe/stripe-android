@@ -2,15 +2,16 @@ package com.stripe.android.paymentsheet.forms
 
 import android.annotation.SuppressLint
 import androidx.compose.runtime.Composable
+import com.stripe.android.payments.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.address.AddressFieldElementRepository
 import com.stripe.android.paymentsheet.address.parseAddressesSchema
-import com.stripe.android.paymentsheet.elements.FormInternal
-import com.stripe.android.paymentsheet.model.Amount
-import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
 import com.stripe.android.paymentsheet.elements.BankRepository
+import com.stripe.android.paymentsheet.elements.FormInternal
 import com.stripe.android.paymentsheet.elements.ResourceRepository
 import com.stripe.android.paymentsheet.elements.SupportedBankType
+import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
+import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
 import kotlinx.coroutines.flow.MutableStateFlow
 
 /**
@@ -21,17 +22,17 @@ import kotlinx.coroutines.flow.MutableStateFlow
 @SuppressLint("VisibleForTests")
 @Composable
 internal fun FormInternalPreview() {
-    val formElements = sofort.layout.items
+    val formElements = SofortForm.items
     val addressFieldElementRepository = AddressFieldElementRepository()
     val bankRepository = BankRepository()
 
-    addressFieldElementRepository.init(
+    addressFieldElementRepository.initialize(
         mapOf(
             "ZZ" to parseAddressesSchema(ZZ_ADDRESS)!!
         )
     )
 
-    bankRepository.init(
+    bankRepository.initialize(
         mapOf(
             SupportedBankType.Ideal to IDEAL_BANKS,
             SupportedBankType.Eps to EPS_Banks,
@@ -48,22 +49,24 @@ internal fun FormInternalPreview() {
                 addressFieldElementRepository
             ),
             FormFragmentArguments(
-                "Card",
-                saveForFutureUseInitialVisibility = true,
-                saveForFutureUseInitialValue = true,
-                "Merchant, Inc.",
-                Amount(10, "USD"),
-                PaymentSheet.BillingDetails(
-                    PaymentSheet.Address(
-                        "San Fransciso",
-                        "US",
-                        "123 Main Street",
-                        null,
-                        "94111",
-                        "CA",
-                    )
-                )
-
+                SupportedPaymentMethod.Bancontact,
+                showCheckbox = false,
+                showCheckboxControlledFields = true,
+                merchantName = "Merchant, Inc.",
+                billingDetails = PaymentSheet.BillingDetails(
+                    address = PaymentSheet.Address(
+                        line1 = "123 Main Street",
+                        line2 = null,
+                        city = "San Francisco",
+                        state = "CA",
+                        postalCode = "94111",
+                        country = "DE",
+                    ),
+                    email = "email",
+                    name = "Jenny Rosen",
+                    phone = "+18008675309"
+                ),
+                injectorKey = DUMMY_INJECTOR_KEY
             )
         ).transform(formElements)
     )

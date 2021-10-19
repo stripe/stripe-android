@@ -9,6 +9,7 @@ import androidx.lifecycle.liveData
 import com.stripe.android.paymentsheet.example.repository.DefaultRepository
 import com.stripe.android.paymentsheet.example.repository.Repository
 import com.stripe.android.paymentsheet.example.service.BackendApiFactory
+import com.stripe.android.paymentsheet.example.service.CheckoutResponse
 
 internal class PaymentSheetViewModel(
     application: Application,
@@ -22,12 +23,16 @@ internal class PaymentSheetViewModel(
     }
 
     fun prepareCheckout(customer: Repository.CheckoutCustomer, mode: Repository.CheckoutMode) =
-        liveData {
+        liveData<CheckoutResponse?> {
             inProgress.postValue(true)
 
             val checkoutResponse = runCatching {
                 repository.checkout(
-                    customer, Repository.CheckoutCurrency.USD, mode, false
+                    customer,
+                    Repository.CheckoutCurrency.USD,
+                    mode,
+                    setShippingAddress = false,
+                    setAutomaticPaymentMethods = false // need to verify this default
                 )
             }
 

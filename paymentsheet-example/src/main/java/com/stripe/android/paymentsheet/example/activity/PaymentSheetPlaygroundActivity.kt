@@ -65,6 +65,9 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
     private val setShippingAddress: Boolean
         get() = viewBinding.shippingRadioGroup.checkedRadioButtonId == R.id.shipping_on_button
 
+    private val setAutomaticPaymentMethods: Boolean
+        get() = viewBinding.automaticPmGroup.checkedRadioButtonId == R.id.automatic_pm_on_button
+
     private lateinit var paymentSheet: PaymentSheet
     private lateinit var flowController: PaymentSheet.FlowController
 
@@ -81,7 +84,13 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
 
         viewBinding.reloadButton.setOnClickListener {
             lifecycleScope.launch {
-                viewModel.prepareCheckout(customer, currency, mode, setShippingAddress)
+                viewModel.prepareCheckout(
+                    customer,
+                    currency,
+                    mode,
+                    setShippingAddress,
+                    setAutomaticPaymentMethods
+                )
             }
         }
 
@@ -176,7 +185,8 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
             merchantDisplayName = merchantName,
             customer = viewModel.customerConfig.value,
             googlePay = googlePayConfig,
-            defaultBillingDetails = defaultBilling
+            defaultBillingDetails = defaultBilling,
+            allowsDelayedPaymentMethods = viewBinding.allowsDelayedPaymentMethodsOnButton.isChecked
         )
     }
 

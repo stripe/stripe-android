@@ -18,7 +18,7 @@ class ConfirmPaymentIntentParamsFactoryTest {
                 paymentSelection = PaymentSelection.New.Card(
                     PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
                     CardBrand.Visa,
-                    shouldSavePaymentMethod = true
+                    customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestReuse
                 )
             )
         ).isEqualTo(
@@ -26,6 +26,44 @@ class ConfirmPaymentIntentParamsFactoryTest {
                 paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
                 clientSecret = CLIENT_SECRET,
                 setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
+            )
+        )
+    }
+
+    @Test
+    fun `create() with new card when savePaymentMethod is true should create params with setupFutureUsage = blank`() {
+        Truth.assertThat(
+            factory.create(
+                paymentSelection = PaymentSelection.New.Card(
+                    PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+                    CardBrand.Visa,
+                    customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestNoReuse
+                )
+            )
+        ).isEqualTo(
+            ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
+                paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+                clientSecret = CLIENT_SECRET,
+                setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.Blank
+            )
+        )
+    }
+
+    @Test
+    fun `create() with new card when savePaymentMethod is true should create params with setupFutureUsage = null`() {
+        Truth.assertThat(
+            factory.create(
+                paymentSelection = PaymentSelection.New.Card(
+                    PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+                    CardBrand.Visa,
+                    customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest
+                )
+            )
+        ).isEqualTo(
+            ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
+                paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+                clientSecret = CLIENT_SECRET,
+                setupFutureUsage = null
             )
         )
     }

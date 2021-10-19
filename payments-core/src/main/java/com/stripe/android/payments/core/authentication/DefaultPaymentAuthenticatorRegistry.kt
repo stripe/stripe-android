@@ -121,6 +121,9 @@ internal class DefaultPaymentAuthenticatorRegistry @Inject internal constructor(
     override fun inject(injectable: Injectable<*>) {
         when (injectable) {
             is Stripe3ds2TransactionViewModelFactory -> authenticationComponent.inject(injectable)
+            else -> {
+                throw IllegalArgumentException("invalid Injectable $injectable requested in $this")
+            }
         }
     }
 
@@ -137,7 +140,8 @@ internal class DefaultPaymentAuthenticatorRegistry @Inject internal constructor(
             publishableKeyProvider: () -> String,
             productUsage: Set<String>
         ): PaymentAuthenticatorRegistry {
-            val injectorKey = WeakMapInjectorRegistry.nextKey()
+            val injectorKey =
+                WeakMapInjectorRegistry.nextKey(requireNotNull(PaymentAuthenticatorRegistry::class.simpleName))
             val component = DaggerAuthenticationComponent.builder()
                 .context(context)
                 .stripeRepository(stripeRepository)

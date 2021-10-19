@@ -89,6 +89,18 @@ abstract class StripeRepository {
         APIConnectionException::class,
         APIException::class
     )
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    internal abstract suspend fun refreshPaymentIntent(
+        clientSecret: String,
+        options: ApiRequest.Options
+    ): PaymentIntent?
+
+    @Throws(
+        AuthenticationException::class,
+        InvalidRequestException::class,
+        APIConnectionException::class,
+        APIException::class
+    )
     internal abstract suspend fun cancelPaymentIntentSource(
         paymentIntentId: String,
         sourceId: String,

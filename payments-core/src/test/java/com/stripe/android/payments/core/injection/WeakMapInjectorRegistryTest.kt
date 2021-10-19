@@ -21,11 +21,14 @@ class WeakMapInjectorRegistryTest {
 
     @Test
     fun verifyRegistryRetrievesCorrectObject() {
+
         val injector1 = TestInjector()
-        val keyForInjector1 = WeakMapInjectorRegistry.nextKey()
+        val keyForInjector1 =
+            WeakMapInjectorRegistry.nextKey(requireNotNull(TestInjector::class.simpleName))
 
         val injector2 = TestInjector()
-        val keyForInjector2 = WeakMapInjectorRegistry.nextKey()
+        val keyForInjector2 =
+            WeakMapInjectorRegistry.nextKey(requireNotNull(TestInjector::class.simpleName))
 
         WeakMapInjectorRegistry.register(injector1, keyForInjector1)
         WeakMapInjectorRegistry.register(injector2, keyForInjector2)
@@ -42,7 +45,8 @@ class WeakMapInjectorRegistryTest {
     @Test
     fun verifyCacheIsClearedOnceWeakReferenceIsDeReferenced() {
         var injector1: Injector? = TestInjector()
-        val keyForInjector1 = WeakMapInjectorRegistry.nextKey()
+        val keyForInjector1 =
+            WeakMapInjectorRegistry.nextKey(requireNotNull(TestInjector::class.simpleName))
         WeakMapInjectorRegistry.register(injector1!!, keyForInjector1)
 
         assertNotNull(WeakMapInjectorRegistry.retrieve(keyForInjector1))

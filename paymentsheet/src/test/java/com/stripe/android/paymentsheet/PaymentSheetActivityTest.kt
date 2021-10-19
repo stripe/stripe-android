@@ -14,7 +14,7 @@ import com.stripe.android.Logger
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContract
-import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherFactory
+import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLauncherFactory
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentIntent
@@ -22,6 +22,7 @@ import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.payments.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
 import com.stripe.android.paymentsheet.PaymentSheetViewModel.CheckoutIdentifier
@@ -212,7 +213,7 @@ internal class PaymentSheetActivityTest {
                 PaymentSelection.New.Card(
                     PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
                     CardBrand.Visa,
-                    shouldSavePaymentMethod = false
+                    customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestNoReuse
                 )
             )
             assertThat(activity.viewBinding.buyButton.isVisible).isTrue()
@@ -689,6 +690,30 @@ internal class PaymentSheetActivityTest {
         }
     }
 
+    @Test
+    fun `when intent is in live mode show no indicator`() {
+        val scenario = activityScenario(viewModel)
+        scenario.launch(intent).onActivity { activity ->
+            // wait for bottom sheet to animate in
+            idleLooper()
+
+            viewModel._liveMode.value = true
+            assertThat(activity.viewBinding.testmode.isVisible).isFalse()
+        }
+    }
+
+    @Test
+    fun `when intent is not in live mode show indicator`() {
+        val scenario = activityScenario(viewModel)
+        scenario.launch(intent).onActivity { activity ->
+            // wait for bottom sheet to animate in
+            idleLooper()
+
+            viewModel._liveMode.value = false
+            assertThat(activity.viewBinding.testmode.isVisible).isTrue()
+        }
+    }
+
     private fun currentFragment(activity: PaymentSheetActivity) =
         activity.supportFragmentManager.findFragmentById(activity.viewBinding.fragmentContainer.id)
 
@@ -715,10 +740,12 @@ internal class PaymentSheetActivityTest {
             StripeIntentValidator(),
             FakeCustomerRepository(paymentMethods),
             FakePrefsRepository(),
+            mock(),
             stripePaymentLauncherAssistedFactory,
             googlePayPaymentMethodLauncherFactory,
             Logger.noop(),
-            testDispatcher
+            testDispatcher,
+            DUMMY_INJECTOR_KEY
         )
     }
 
@@ -728,7 +755,8 @@ internal class PaymentSheetActivityTest {
                 lifecycleScope: CoroutineScope,
                 config: GooglePayPaymentMethodLauncher.Config,
                 readyCallback: GooglePayPaymentMethodLauncher.ReadyCallback,
-                activityResultLauncher: ActivityResultLauncher<GooglePayPaymentMethodLauncherContract.Args>
+                activityResultLauncher: ActivityResultLauncher<GooglePayPaymentMethodLauncherContract.Args>,
+                skipReadyCheck: Boolean
             ): GooglePayPaymentMethodLauncher {
                 val googlePayPaymentMethodLauncher = mock<GooglePayPaymentMethodLauncher>()
                 readyCallback.onReady(true)

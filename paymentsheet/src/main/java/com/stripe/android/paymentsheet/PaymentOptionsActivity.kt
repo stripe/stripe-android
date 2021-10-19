@@ -17,8 +17,7 @@ import androidx.fragment.app.commit
 import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.appbar.MaterialToolbar
-import com.google.android.material.bottomsheet.BottomSheetBehavior
-import com.stripe.android.paymentsheet.databinding.StripeActivityPaymentOptionsBinding
+import com.stripe.android.paymentsheet.databinding.ActivityPaymentOptionsBinding
 import com.stripe.android.paymentsheet.ui.AnimationConstants
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.ui.PrimaryButton
@@ -29,7 +28,7 @@ import com.stripe.android.paymentsheet.ui.PrimaryButton
 internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>() {
     @VisibleForTesting
     internal val viewBinding by lazy {
-        StripeActivityPaymentOptionsBinding.inflate(layoutInflater)
+        ActivityPaymentOptionsBinding.inflate(layoutInflater)
     }
 
     @VisibleForTesting
@@ -45,13 +44,6 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
         PaymentOptionContract.Args.fromIntent(intent)
     }
 
-    @VisibleForTesting
-    internal val bottomSheetBehavior by lazy { BottomSheetBehavior.from(bottomSheet) }
-
-    override val bottomSheetController: BottomSheetController by lazy {
-        BottomSheetController(bottomSheetBehavior = bottomSheetBehavior)
-    }
-
     private val fragmentContainerId: Int
         @IdRes
         get() = viewBinding.fragmentContainer.id
@@ -63,6 +55,7 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
     override val scrollView: ScrollView by lazy { viewBinding.scrollView }
     override val messageView: TextView by lazy { viewBinding.message }
     override val fragmentContainerParent: ViewGroup by lazy { viewBinding.fragmentContainerParent }
+    override val testModeIndicator: TextView by lazy { viewBinding.testmode }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -97,7 +90,8 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
             }
         }
 
-        viewModel.fragmentConfig.observe(this) { config ->
+        viewModel.fragmentConfigEvent.observe(this) { event ->
+            val config = event.getContentIfNotHandled()
             if (config != null) {
                 viewModel.transitionTo(
                     // It would be nice to see this condition move into the PaymentOptionsListFragment

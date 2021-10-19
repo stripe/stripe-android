@@ -1,7 +1,7 @@
 plugins {
     id 'com.android.application'
     id 'kotlin-android'
-    id 'org.jetbrains.kotlin.plugin.serialization' version '1.5.30'
+    id 'org.jetbrains.kotlin.plugin.serialization' version '1.5.31'
 }
 
 // Read values from gradle.properties or system environment variable
@@ -24,10 +24,9 @@ dependencies {
     implementation libraries.androidx.activity.ktx
     implementation 'com.google.android.material:material:1.4.0'
 
-    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
-    implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.2.2"
+    implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.0"
 
-    implementation 'com.squareup.okhttp3:logging-interceptor:4.9.1'
+    implementation 'com.squareup.okhttp3:logging-interceptor:4.9.2'
     implementation "com.jakewharton.retrofit:retrofit2-kotlinx-serialization-converter:0.8.0"
 
     implementation "androidx.compose.ui:ui:$composeVersion"

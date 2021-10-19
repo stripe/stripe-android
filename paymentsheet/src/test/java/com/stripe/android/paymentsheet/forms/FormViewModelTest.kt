@@ -1,35 +1,52 @@
 package com.stripe.android.paymentsheet.forms
 
+import android.app.Application
 import android.content.Context
 import androidx.annotation.StringRes
 import androidx.lifecycle.asLiveData
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.payments.core.injection.DUMMY_INJECTOR_KEY
+import com.stripe.android.payments.core.injection.Injectable
+import com.stripe.android.payments.core.injection.Injector
+import com.stripe.android.payments.core.injection.WeakMapInjectorRegistry
+import com.stripe.android.paymentsheet.PaymentSheetFixtures.COMPOSE_FRAGMENT_ARGS
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.address.AddressFieldElementRepository
 import com.stripe.android.paymentsheet.elements.AddressElement
-import com.stripe.android.paymentsheet.elements.SaveForFutureUseController
-import com.stripe.android.paymentsheet.elements.SectionElement
-import com.stripe.android.paymentsheet.elements.SectionSingleFieldElement
-import com.stripe.android.paymentsheet.elements.TextFieldController
-import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
 import com.stripe.android.paymentsheet.elements.BankRepository
+import com.stripe.android.paymentsheet.elements.CountrySpec
+import com.stripe.android.paymentsheet.elements.EmailSpec
 import com.stripe.android.paymentsheet.elements.IdentifierSpec
 import com.stripe.android.paymentsheet.elements.LayoutSpec
 import com.stripe.android.paymentsheet.elements.ResourceRepository
-import com.stripe.android.paymentsheet.elements.CountrySpec
-import com.stripe.android.paymentsheet.elements.EmailSpec
 import com.stripe.android.paymentsheet.elements.RowElement
+import com.stripe.android.paymentsheet.elements.SaveForFutureUseController
 import com.stripe.android.paymentsheet.elements.SaveForFutureUseSpec
+import com.stripe.android.paymentsheet.elements.SectionElement
+import com.stripe.android.paymentsheet.elements.SectionSingleFieldElement
 import com.stripe.android.paymentsheet.elements.SectionSpec
 import com.stripe.android.paymentsheet.elements.SimpleTextSpec.Companion.NAME
+import com.stripe.android.paymentsheet.elements.TextFieldController
+import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
+import com.stripe.android.paymentsheet.model.PaymentSelection
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.runBlockingTest
+import org.junit.Assert.assertNotNull
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.any
+import org.mockito.kotlin.argWhere
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.spy
+import org.mockito.kotlin.times
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.shadows.ShadowLooper
+import javax.inject.Provider
 
 @RunWith(RobolectricTestRunner::class)
 internal class FormViewModelTest {
@@ -51,22 +68,68 @@ internal class FormViewModelTest {
         )
 
     @Test
+    fun `Factory gets initialized by Injector when Injector is available`() {
+        val mockBuilder = mock<FormViewModelSubcomponent.Builder>()
+        val mockSubcomponent = mock<FormViewModelSubcomponent>()
+        val mockViewModel = mock<FormViewModel>()
+
+        whenever(mockBuilder.build()).thenReturn(mockSubcomponent)
+        whenever(mockBuilder.layout(any())).thenReturn(mockBuilder)
+        whenever(mockBuilder.formFragmentArguments(any())).thenReturn(mockBuilder)
+        whenever(mockSubcomponent.viewModel).thenReturn(mockViewModel)
+
+        val injector = object : Injector {
+            override fun inject(injectable: Injectable<*>) {
+                val factory = injectable as FormViewModel.Factory
+                factory.subComponentBuilderProvider = Provider { mockBuilder }
+            }
+        }
+        val injectorKey = WeakMapInjectorRegistry.nextKey("testKey")
+        val config = COMPOSE_FRAGMENT_ARGS.copy(injectorKey = injectorKey)
+        WeakMapInjectorRegistry.register(injector, injectorKey)
+        val factory = FormViewModel.Factory(
+            config,
+            ApplicationProvider.getApplicationContext<Application>().resources,
+            SofortForm,
+        )
+        val factorySpy = spy(factory)
+        val createdViewModel = factorySpy.create(FormViewModel::class.java)
+        verify(factorySpy, times(0)).fallbackInitialize(any())
+        assertThat(createdViewModel).isEqualTo(mockViewModel)
+
+        WeakMapInjectorRegistry.staticCacheMap.clear()
+    }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    @Test
+    fun `Factory gets initialized with fallback when no Injector is available`() = runBlockingTest {
+        val config = COMPOSE_FRAGMENT_ARGS.copy(injectorKey = DUMMY_INJECTOR_KEY)
+        val factory = FormViewModel.Factory(
+            config,
+            ApplicationProvider.getApplicationContext<Application>().resources,
+            SofortForm
+        )
+        val factorySpy = spy(factory)
+        assertNotNull(factorySpy.create(FormViewModel::class.java))
+        verify(factorySpy).fallbackInitialize(
+            argWhere {
+                it.resource == ApplicationProvider.getApplicationContext<Application>().resources
+            }
+        )
+    }
+
+    @Test
     fun `Verify setting save for future use`() {
+        val args = COMPOSE_FRAGMENT_ARGS
         val formViewModel = FormViewModel(
-            LayoutSpec(
-                listOf(
-                    emailSection,
-                    countrySection,
-                    SaveForFutureUseSpec(listOf(emailSection))
-                )
+            LayoutSpec.create(
+                emailSection,
+                countrySection,
+                SaveForFutureUseSpec(listOf(emailSection))
             ),
-            FormFragmentArguments(
-                supportedPaymentMethodName = "Card",
-                saveForFutureUseInitialValue = true,
-                saveForFutureUseInitialVisibility = true,
-                merchantName = "Example, Inc."
-            ),
-            resourceRepository = resourceRepository
+            args,
+            resourceRepository = resourceRepository,
+            transformSpecToElement = TransformSpecToElement(resourceRepository, args)
         )
 
         val values = mutableListOf<Boolean>()
@@ -83,21 +146,16 @@ internal class FormViewModelTest {
 
     @Test
     fun `Verify setting save for future use visibility`() {
+        val args = COMPOSE_FRAGMENT_ARGS
         val formViewModel = FormViewModel(
-            LayoutSpec(
-                listOf(
-                    emailSection,
-                    countrySection,
-                    SaveForFutureUseSpec(listOf(emailSection))
-                )
+            LayoutSpec.create(
+                emailSection,
+                countrySection,
+                SaveForFutureUseSpec(listOf(emailSection))
             ),
-            FormFragmentArguments(
-                supportedPaymentMethodName = "Card",
-                saveForFutureUseInitialValue = true,
-                saveForFutureUseInitialVisibility = true,
-                merchantName = "Example, Inc."
-            ),
-            resourceRepository = resourceRepository
+            args,
+            resourceRepository = resourceRepository,
+            transformSpecToElement = TransformSpecToElement(resourceRepository, args)
         )
 
         val values = mutableListOf<List<IdentifierSpec>>()
@@ -116,21 +174,16 @@ internal class FormViewModelTest {
 
     @Test
     fun `Verify setting section as hidden sets sub-fields as hidden as well`() {
+        val args = COMPOSE_FRAGMENT_ARGS
         val formViewModel = FormViewModel(
-            LayoutSpec(
-                listOf(
-                    emailSection,
-                    countrySection,
-                    SaveForFutureUseSpec(listOf(emailSection))
-                )
+            LayoutSpec.create(
+                emailSection,
+                countrySection,
+                SaveForFutureUseSpec(listOf(emailSection))
             ),
-            FormFragmentArguments(
-                supportedPaymentMethodName = "Card",
-                saveForFutureUseInitialValue = true,
-                saveForFutureUseInitialVisibility = true,
-                merchantName = "Example, Inc."
-            ),
-            resourceRepository = resourceRepository
+            args,
+            resourceRepository = resourceRepository,
+            transformSpecToElement = TransformSpecToElement(resourceRepository, args)
         )
 
         val values = mutableListOf<List<IdentifierSpec>>()
@@ -154,21 +207,16 @@ internal class FormViewModelTest {
         runBlocking {
             // Here we have one hidden and one required field, country will always be in the result,
             //  and name only if saveForFutureUse is true
+            val args = COMPOSE_FRAGMENT_ARGS
             val formViewModel = FormViewModel(
-                LayoutSpec(
-                    listOf(
-                        emailSection,
-                        countrySection,
-                        SaveForFutureUseSpec(listOf(emailSection))
-                    )
+                LayoutSpec.create(
+                    emailSection,
+                    countrySection,
+                    SaveForFutureUseSpec(listOf(emailSection))
                 ),
-                FormFragmentArguments(
-                    supportedPaymentMethodName = "Card",
-                    saveForFutureUseInitialValue = true,
-                    saveForFutureUseInitialVisibility = true,
-                    merchantName = "Example, Inc."
-                ),
-                resourceRepository = resourceRepository
+                args,
+                resourceRepository = resourceRepository,
+                transformSpecToElement = TransformSpecToElement(resourceRepository, args)
             )
 
             val saveForFutureUseController = formViewModel.elements.map { it.controller }
@@ -200,21 +248,16 @@ internal class FormViewModelTest {
         runBlocking {
             // Here we have one hidden and one required field, country will always be in the result,
             //  and name only if saveForFutureUse is true
+            val args = COMPOSE_FRAGMENT_ARGS
             val formViewModel = FormViewModel(
-                LayoutSpec(
-                    listOf(
-                        emailSection,
-                        countrySection,
-                        SaveForFutureUseSpec(listOf(emailSection))
-                    )
+                LayoutSpec.create(
+                    emailSection,
+                    countrySection,
+                    SaveForFutureUseSpec(listOf(emailSection))
                 ),
-                FormFragmentArguments(
-                    supportedPaymentMethodName = "Card",
-                    saveForFutureUseInitialValue = true,
-                    saveForFutureUseInitialVisibility = true,
-                    merchantName = "Example, Inc."
-                ),
-                resourceRepository = resourceRepository
+                args,
+                resourceRepository = resourceRepository,
+                transformSpecToElement = TransformSpecToElement(resourceRepository, args)
             )
 
             val saveForFutureUseController = formViewModel.elements.map { it.controller }
@@ -232,11 +275,15 @@ internal class FormViewModelTest {
 
             // Verify formFieldValues is not null even though the email is invalid
             // (because it is not required)
+            val completeFormFieldValues = formViewModel.completeFormValues.first()
             assertThat(
-                formViewModel.completeFormValues.first()
+                completeFormFieldValues
             ).isNotNull()
             assertThat(formViewModel.completeFormValues.first()?.fieldValuePairs).doesNotContainKey(
                 emailSection.identifier
+            )
+            assertThat(formViewModel.completeFormValues.first()?.userRequestedReuse).isEqualTo(
+                PaymentSelection.CustomerRequestedSave.RequestNoReuse
             )
         }
     }
@@ -252,15 +299,16 @@ internal class FormViewModelTest {
             /**
              * Using sofort as a complex enough example to test the form view model class.
              */
+            val args = COMPOSE_FRAGMENT_ARGS.copy(
+                billingDetails = null,
+                showCheckbox = true,
+                showCheckboxControlledFields = true
+            )
             val formViewModel = FormViewModel(
-                sofort.layout,
-                FormFragmentArguments(
-                    supportedPaymentMethodName = "Card",
-                    saveForFutureUseInitialValue = true,
-                    saveForFutureUseInitialVisibility = true,
-                    merchantName = "Example, Inc."
-                ),
-                resourceRepository = resourceRepository
+                SofortForm,
+                args,
+                resourceRepository = resourceRepository,
+                transformSpecToElement = TransformSpecToElement(resourceRepository, args)
             )
 
             val nameElement =
@@ -270,18 +318,21 @@ internal class FormViewModelTest {
 
             nameElement?.onValueChange("joe")
             assertThat(
-                formViewModel.completeFormValues.first()?.fieldValuePairs?.get(NAME.identifier)
+                formViewModel.completeFormValues.first()?.fieldValuePairs?.get(IdentifierSpec.Name)
             ).isNull()
 
             emailElement?.onValueChange("joe@gmail.com")
             assertThat(
-                formViewModel.completeFormValues.first()?.fieldValuePairs?.get(EmailSpec.identifier)
+                formViewModel.completeFormValues.first()?.fieldValuePairs?.get(IdentifierSpec.Email)
                     ?.value
             ).isEqualTo("joe@gmail.com")
             assertThat(
                 formViewModel.completeFormValues.first()?.fieldValuePairs?.get(NAME.identifier)
                     ?.value
             ).isEqualTo("joe")
+            assertThat(formViewModel.completeFormValues.first()?.userRequestedReuse).isEqualTo(
+                PaymentSelection.CustomerRequestedSave.RequestReuse
+            )
 
             emailElement?.onValueChange("invalid.email@IncompleteDomain")
 
@@ -298,15 +349,16 @@ internal class FormViewModelTest {
             /**
              * Using sepa debit as a complex enough example to test the address portion.
              */
+            val args = COMPOSE_FRAGMENT_ARGS.copy(
+                showCheckbox = false,
+                showCheckboxControlledFields = true,
+                billingDetails = null
+            )
             val formViewModel = FormViewModel(
-                sepaDebit.layout,
-                FormFragmentArguments(
-                    supportedPaymentMethodName = "Card",
-                    saveForFutureUseInitialValue = true,
-                    saveForFutureUseInitialVisibility = true,
-                    merchantName = "Example, Inc."
-                ),
-                resourceRepository = resourceRepository
+                SepaDebitForm,
+                args,
+                resourceRepository = resourceRepository,
+                transformSpecToElement = TransformSpecToElement(resourceRepository, args)
             )
 
             getSectionFieldTextControllerWithLabel(
@@ -314,7 +366,7 @@ internal class FormViewModelTest {
                 R.string.address_label_name
             )?.onValueChange("joe")
             assertThat(
-                formViewModel.completeFormValues.first()?.fieldValuePairs?.get(EmailSpec.identifier)
+                formViewModel.completeFormValues.first()?.fieldValuePairs?.get(IdentifierSpec.Name)
                     ?.value
             ).isNull()
 
@@ -323,7 +375,7 @@ internal class FormViewModelTest {
                 R.string.email
             )?.onValueChange("joe@gmail.com")
             assertThat(
-                formViewModel.completeFormValues.first()?.fieldValuePairs?.get(EmailSpec.identifier)
+                formViewModel.completeFormValues.first()?.fieldValuePairs?.get(IdentifierSpec.Email)
                     ?.value
             ).isNull()
 
@@ -332,7 +384,7 @@ internal class FormViewModelTest {
                 R.string.iban
             )?.onValueChange("DE89370400440532013000")
             assertThat(
-                formViewModel.completeFormValues.first()?.fieldValuePairs?.get(EmailSpec.identifier)
+                formViewModel.completeFormValues.first()?.fieldValuePairs?.get(IdentifierSpec.Generic("iban"))
                     ?.value
             ).isNull()
 
@@ -359,6 +411,9 @@ internal class FormViewModelTest {
                     ).isNull()
                 }
             }
+            assertThat(formViewModel.completeFormValues.first()?.userRequestedReuse).isEqualTo(
+                PaymentSelection.CustomerRequestedSave.NoRequest
+            )
         }
     }
 
@@ -369,15 +424,14 @@ internal class FormViewModelTest {
             /**
              * Using sepa debit as a complex enough example to test the address portion.
              */
+            val args = COMPOSE_FRAGMENT_ARGS.copy(
+                billingDetails = null
+            )
             val formViewModel = FormViewModel(
-                sepaDebit.layout,
-                FormFragmentArguments(
-                    supportedPaymentMethodName = "Card",
-                    saveForFutureUseInitialValue = true,
-                    saveForFutureUseInitialVisibility = true,
-                    merchantName = "Example, Inc."
-                ),
-                resourceRepository = resourceRepository
+                SepaDebitForm,
+                args,
+                resourceRepository = resourceRepository,
+                transformSpecToElement = TransformSpecToElement(resourceRepository, args)
             )
 
             getSectionFieldTextControllerWithLabel(
@@ -499,6 +553,7 @@ internal class FormViewModelTest {
                 ?.map { (it.controller as? TextFieldController) }
                 ?.firstOrNull { it?.label == label }
                 ?: addressElementFields
+                    ?.asSequence()
                     ?.filterIsInstance<RowElement>()
                     ?.map { it.fields }
                     ?.flatten()

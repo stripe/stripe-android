@@ -33,7 +33,8 @@ internal class GooglePayPaymentMethodLauncherActivity : AppCompatActivity() {
     private val viewModel: GooglePayPaymentMethodLauncherViewModel by viewModels {
         GooglePayPaymentMethodLauncherViewModel.Factory(
             application,
-            args
+            args,
+            this
         )
     }
 
@@ -68,14 +69,13 @@ internal class GooglePayPaymentMethodLauncherActivity : AppCompatActivity() {
         }
 
         if (!viewModel.hasLaunched) {
-            viewModel.hasLaunched = true
-
             lifecycleScope.launch {
                 runCatching {
                     viewModel.createLoadPaymentDataTask()
                 }.fold(
                     onSuccess = {
                         launchGooglePay(it)
+                        viewModel.hasLaunched = true
                     },
                     onFailure = {
                         updateResult(

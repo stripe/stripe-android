@@ -17,21 +17,28 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContract
-import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherFactory
+import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLauncherFactory
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.PaymentIntent
-import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.payments.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.payments.core.injection.IOContext
+import com.stripe.android.payments.core.injection.Injectable
+import com.stripe.android.payments.core.injection.InjectorKey
+import com.stripe.android.payments.core.injection.injectWithFallback
 import com.stripe.android.payments.paymentlauncher.PaymentLauncher
 import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
 import com.stripe.android.paymentsheet.analytics.EventReporter
-import com.stripe.android.paymentsheet.injection.DaggerPaymentSheetViewModelComponent
+import com.stripe.android.paymentsheet.elements.ResourceRepository
+import com.stripe.android.paymentsheet.injection.DaggerPaymentSheetLauncherComponent
+import com.stripe.android.paymentsheet.injection.PaymentSheetViewModelModule
+import com.stripe.android.paymentsheet.injection.PaymentSheetViewModelSubcomponent
 import com.stripe.android.paymentsheet.model.ConfirmStripeIntentParamsFactory
+import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
@@ -45,7 +52,7 @@ import dagger.Lazy
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import javax.inject.Singleton
+import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
 
 /**
@@ -63,7 +70,6 @@ internal fun PaymentSheetViewState.convert(): PrimaryButton.State {
     }
 }
 
-@Singleton
 internal class PaymentSheetViewModel @Inject internal constructor(
     // Properties provided through PaymentSheetViewModelComponent.Builder
     application: Application,
@@ -75,17 +81,22 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     private val stripeIntentValidator: StripeIntentValidator,
     customerRepository: CustomerRepository,
     prefsRepository: PrefsRepository,
+    // even though unused this forces Dagger to initialize it here.
+    resourceRepository: ResourceRepository,
     private val paymentLauncherFactory: StripePaymentLauncherAssistedFactory,
     private val googlePayPaymentMethodLauncherFactory: GooglePayPaymentMethodLauncherFactory,
-    private val logger: Logger,
-    @IOContext workContext: CoroutineContext
+    logger: Logger,
+    @IOContext workContext: CoroutineContext,
+    @InjectorKey injectorKey: String
 ) : BaseSheetViewModel<PaymentSheetViewModel.TransitionTarget>(
     application = application,
     config = args.config,
     eventReporter = eventReporter,
     customerRepository = customerRepository,
     prefsRepository = prefsRepository,
-    workContext = workContext
+    workContext = workContext,
+    logger = logger,
+    injectorKey = injectorKey
 ) {
     private val confirmParamsFactory = ConfirmStripeIntentParamsFactory.createFactory(
         args.clientSecret
@@ -177,20 +188,23 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     }
 
     /**
-     * Fetch the [StripeIntent] for the client secret received as parameter. If successful,
-     * continues through validation and fetching the saved payment methods for the customer.
+     * Fetch the [StripeIntent] for the client secret received in the initialization arguments, if
+     * not fetched yet. If successful, continues through validation and fetching the saved payment
+     * methods for the customer.
      */
-    fun fetchStripeIntent() {
-        viewModelScope.launch {
-            runCatching {
-                stripeIntentRepository.get(args.clientSecret)
-            }.fold(
-                onSuccess = ::onStripeIntentFetchResponse,
-                onFailure = {
-                    setStripeIntent(null)
-                    onFatal(it)
-                }
-            )
+    internal fun maybeFetchStripeIntent() {
+        if (stripeIntent.value == null) {
+            viewModelScope.launch {
+                runCatching {
+                    stripeIntentRepository.get(args.clientSecret)
+                }.fold(
+                    onSuccess = ::onStripeIntentFetchResponse,
+                    onFailure = {
+                        setStripeIntent(null)
+                        onFatal(it)
+                    }
+                )
+            }
         }
     }
 
@@ -209,18 +223,18 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     /**
      * Fetch the saved payment methods for the customer, if a [PaymentSheet.CustomerConfiguration]
      * was provided.
-     * It will fetch only the payment method types accepted by the [stripeIntent] and defined in
-     * [SupportedPaymentMethod.supportedSavedPaymentMethods].
+     * It will fetch only the payment method types as defined in [SupportedPaymentMethod.getSupportedSavedCustomerPMs].
      */
     @VisibleForTesting
     fun updatePaymentMethods(stripeIntent: StripeIntent) {
         viewModelScope.launch {
             runCatching {
                 customerConfig?.let { customerConfig ->
-                    stripeIntent.paymentMethodTypes.mapNotNull {
-                        PaymentMethod.Type.fromCode(it)
-                    }.filter {
-                        SupportedPaymentMethod.supportedSavedPaymentMethods.contains(it.code)
+                    SupportedPaymentMethod.getSupportedSavedCustomerPMs(
+                        stripeIntent,
+                        config
+                    ).map {
+                        it.type
                     }.let {
                         customerRepository.getPaymentMethods(
                             customerConfig,
@@ -417,36 +431,51 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     }
 
     internal sealed class TransitionTarget {
-        abstract val fragmentConfig: com.stripe.android.paymentsheet.model.FragmentConfig
+        abstract val fragmentConfig: FragmentConfig
 
         // User has saved PM's and is selected
         data class SelectSavedPaymentMethod(
-            override val fragmentConfig: com.stripe.android.paymentsheet.model.FragmentConfig
+            override val fragmentConfig: FragmentConfig
         ) : TransitionTarget()
 
         // User has saved PM's and is adding a new one
         data class AddPaymentMethodFull(
-            override val fragmentConfig: com.stripe.android.paymentsheet.model.FragmentConfig
+            override val fragmentConfig: FragmentConfig
         ) : TransitionTarget()
 
         // User has no saved PM's
         data class AddPaymentMethodSheet(
-            override val fragmentConfig: com.stripe.android.paymentsheet.model.FragmentConfig
+            override val fragmentConfig: FragmentConfig
         ) : TransitionTarget()
     }
 
-    @Suppress("UNCHECKED_CAST")
     internal class Factory(
         private val applicationSupplier: () -> Application,
         private val starterArgsSupplier: () -> PaymentSheetContract.Args
-    ) : ViewModelProvider.Factory {
+    ) : ViewModelProvider.Factory, Injectable<Factory.FallbackInitializeParam> {
+        internal data class FallbackInitializeParam(
+            val application: Application,
+        )
+
+        @Inject
+        lateinit var subComponentBuilderProvider:
+            Provider<PaymentSheetViewModelSubcomponent.Builder>
+
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-            return DaggerPaymentSheetViewModelComponent.builder()
-                .application(applicationSupplier())
-                .starterArgs(starterArgsSupplier())
-                .build()
-                .viewModel as T
+            val args = starterArgsSupplier()
+            injectWithFallback(args.injectorKey, FallbackInitializeParam(applicationSupplier()))
+            return subComponentBuilderProvider.get().paymentSheetViewModelModule(
+                PaymentSheetViewModelModule(args)
+            ).build().viewModel as T
+        }
+
+        override fun fallbackInitialize(arg: FallbackInitializeParam) {
+            DaggerPaymentSheetLauncherComponent
+                .builder()
+                .application(arg.application)
+                .injectorKey(DUMMY_INJECTOR_KEY)
+                .build().inject(this)
         }
     }
 

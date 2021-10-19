@@ -135,11 +135,6 @@ abstract class StripeRequest {
             // Remove all null values; they cause validation errors
             for (key in HashSet(compactParams.keys)) {
                 when (val value = compactParams[key]) {
-                    is CharSequence -> {
-                        if (value.isEmpty()) {
-                            compactParams.remove(key)
-                        }
-                    }
                     is Map<*, *> -> {
                         compactParams[key] = compactParams(value as Map<String, *>)
                     }

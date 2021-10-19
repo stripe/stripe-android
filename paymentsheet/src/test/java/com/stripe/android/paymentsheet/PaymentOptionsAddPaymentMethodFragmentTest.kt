@@ -8,8 +8,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.model.PaymentIntentFixtures
-import com.stripe.android.payments.core.injection.Injectable
-import com.stripe.android.payments.core.injection.Injector
+import com.stripe.android.payments.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.payments.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.databinding.FragmentPaymentsheetAddPaymentMethodBinding
@@ -17,7 +16,6 @@ import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.FragmentConfigFixtures
 import com.stripe.android.paymentsheet.ui.PaymentSheetFragmentFactory
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.TestCoroutineDispatcher
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -30,23 +28,12 @@ import org.robolectric.RobolectricTestRunner
 class PaymentOptionsAddPaymentMethodFragmentTest {
     private val eventReporter = mock<EventReporter>()
 
-    private val testInjector: Injector = object : Injector {
-        override fun inject(injectable: Injectable<*>) {
-            val factory = (injectable as PaymentOptionsViewModel.Factory)
-            factory.eventReporter = eventReporter
-            factory.customerRepository = com.stripe.android.paymentsheet.FakeCustomerRepository()
-            factory.workContext = TestCoroutineDispatcher()
-            factory.prefsRepositoryFactory = { mock() }
-        }
-    }
-
     @Before
     fun setup() {
         PaymentConfiguration.init(
             ApplicationProvider.getApplicationContext(),
             ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
         )
-        WeakMapInjectorRegistry.register(testInjector, MOCK_INJECTOR_KEY)
     }
 
     @After
@@ -70,7 +57,7 @@ class PaymentOptionsAddPaymentMethodFragmentTest {
             isGooglePayReady = false,
             newCard = null,
             statusBarColor = PaymentSheetFixtures.STATUS_BAR_COLOR,
-            injectorKey = MOCK_INJECTOR_KEY,
+            injectorKey = DUMMY_INJECTOR_KEY,
             enableLogging = false,
             productUsage = mock()
         ),
@@ -92,9 +79,5 @@ class PaymentOptionsAddPaymentMethodFragmentTest {
                 )
             )
         }
-    }
-
-    companion object {
-        private const val MOCK_INJECTOR_KEY = 0
     }
 }

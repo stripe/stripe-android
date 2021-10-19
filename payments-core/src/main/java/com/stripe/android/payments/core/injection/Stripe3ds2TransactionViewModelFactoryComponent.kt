@@ -15,8 +15,9 @@ import javax.inject.Singleton
 @Component(
     modules = [
         StripeRepositoryModule::class,
-        Stripe3ds2TransactionViewModelModule::class,
-        CoroutineContextModule::class
+        Stripe3ds2TransactionModule::class,
+        CoroutineContextModule::class,
+        LoggingModule::class
     ]
 )
 internal interface Stripe3ds2TransactionViewModelFactoryComponent {

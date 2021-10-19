@@ -1033,4 +1033,63 @@ internal object PaymentIntentFixtures {
     )
 
     val PI_REQUIRES_WECHAT_PAY_AUTHORIZE = PARSER.parse(PI_REQUIRES_WECHAT_PAY_AUTHORIZE_JSON)!!
+
+    /**
+     * A sample response of PI from refresh endpoint
+     */
+    val PI_REFRESH_RESPONSE_REQUIRES_WECHAT_PAY_AUTHORIZE = JSONObject(
+        """
+        {
+          "id": "pi_3JkCxKBNJ02ErVOj0kNqBMAZ",
+          "object": "payment_intent",
+          "allowed_source_types": [
+            "wechat_pay"
+          ],
+          "amount": 50,
+          "canceled_at": null,
+          "cancellation_reason": null,
+          "capture_method": "automatic",
+          "client_secret": "pi_3JkCxKBNJ02ErVOj0kNqBMAZ_secret_bC6oXqo976LFM06Z9rlhmzUQq",
+          "confirmation_method": "automatic",
+          "created": 1634152658,
+          "currency": "usd",
+          "description": "Example PaymentIntent",
+          "last_payment_error": null,
+          "livemode": true,
+          "next_action": {
+            "type": "wechat_pay_redirect_to_android_app",
+            "wechat_pay_redirect_to_android_app": {
+              "app_id": "wx65997d6307c3827d",
+              "nonce_str": "osR3zctjDetBvsBN",
+              "package": "Sign=WXPay",
+              "partner_id": "268716457",
+              "prepay_id": "wx140509412586868522820b12f205690000",
+              "sign": "7A5981D3347941F4F9AECACF36E467EAE4B7734E47CE4B058E8B2299DAF19E8A",
+              "timestamp": "1634159381"
+            }
+          },
+          "next_source_action": {
+            "type": "wechat_pay_redirect_to_android_app",
+            "wechat_pay_redirect_to_android_app": {
+              "app_id": "wx65997d6307c3827d",
+              "nonce_str": "osR3zctjDetBvsBN",
+              "package": "Sign=WXPay",
+              "partner_id": "268716457",
+              "prepay_id": "wx140509412586868522820b12f205690000",
+              "sign": "7A5981D3347941F4F9AECACF36E467EAE4B7734E47CE4B058E8B2299DAF19E8A",
+              "timestamp": "1634159381"
+            }
+          },
+          "payment_method": "pm_1JkEhjBNJ02ErVOjUZ3ekLUL",
+          "payment_method_types": [
+            "wechat_pay"
+          ],
+          "receipt_email": null,
+          "setup_future_usage": null,
+          "shipping": null,
+          "source": null,
+          "status": "requires_action"
+        }
+        """.trimIndent()
+    )
 }
