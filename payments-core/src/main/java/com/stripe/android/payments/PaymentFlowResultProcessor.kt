@@ -57,7 +57,7 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
         ).let { stripeIntent ->
             when {
                 shouldRefreshIntent(stripeIntent, result.flowOutcome) -> {
-                    refreshStripeIntentTillTerminalState(
+                    refreshStripeIntentUntilTerminalState(
                         result.clientSecret,
                         requestOptions
                     )
@@ -135,7 +135,7 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
         MaxRetryReachedException::class,
         InvalidRequestException::class
     )
-    protected abstract suspend fun refreshStripeIntentTillTerminalState(
+    protected abstract suspend fun refreshStripeIntentUntilTerminalState(
         clientSecret: String,
         requestOptions: ApiRequest.Options
     ): T
@@ -182,11 +182,11 @@ internal class PaymentIntentFlowResultProcessor @Inject constructor(
             expandFields
         )
 
-    override suspend fun refreshStripeIntentTillTerminalState(
+    override suspend fun refreshStripeIntentUntilTerminalState(
         clientSecret: String,
         requestOptions: ApiRequest.Options,
     ): PaymentIntent {
-        var remainingRetries = MAX_RETRIES - 1
+        var remainingRetries = MAX_RETRIES
 
         var stripeIntent = requireNotNull(
             stripeRepository.refreshPaymentIntent(
@@ -194,7 +194,7 @@ internal class PaymentIntentFlowResultProcessor @Inject constructor(
                 requestOptions
             )
         )
-        while (stripeIntent.requiresAction() && remainingRetries > 0) {
+        while (stripeIntent.requiresAction() && remainingRetries > 1) {
             val delayMs = retryDelaySupplier.getDelayMillis(
                 3,
                 remainingRetries
@@ -267,7 +267,7 @@ internal class SetupIntentFlowResultProcessor @Inject constructor(
             expandFields
         )
 
-    override suspend fun refreshStripeIntentTillTerminalState(
+    override suspend fun refreshStripeIntentUntilTerminalState(
         clientSecret: String,
         requestOptions: ApiRequest.Options
     ): SetupIntent {
