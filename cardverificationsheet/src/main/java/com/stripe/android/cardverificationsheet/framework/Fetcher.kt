@@ -2,6 +2,7 @@ package com.stripe.android.cardverificationsheet.framework
 
 import android.content.Context
 import android.util.Log
+import androidx.annotation.VisibleForTesting
 import com.stripe.android.cardverificationsheet.framework.api.downloadFileWithRetries
 import com.stripe.android.cardverificationsheet.framework.time.days
 import com.stripe.android.cardverificationsheet.framework.util.HashMismatchException
@@ -119,6 +120,12 @@ interface Fetcher {
     suspend fun fetchData(forImmediateUse: Boolean, isOptional: Boolean): FetchedData
 
     suspend fun isCached(): Boolean
+
+    /**
+     * Clear the cache for this loader. This will force new downloads.
+     */
+    @VisibleForTesting(otherwise = VisibleForTesting.NONE)
+    suspend fun clearCache()
 }
 
 /**
@@ -141,6 +148,8 @@ abstract class ResourceFetcher : Fetcher {
         )
 
     override suspend fun isCached(): Boolean = true
+
+    override suspend fun clearCache() { /* no op */ }
 }
 
 /**
@@ -374,11 +383,6 @@ abstract class WebFetcher(protected val context: Context) : Fetcher {
      * After download, clean up.
      */
     protected abstract suspend fun cleanUpPostDownload(downloadedFile: File)
-
-    /**
-     * Clear the cache for this loader. This will force new downloads.
-     */
-    abstract suspend fun clearCache()
 }
 
 /**

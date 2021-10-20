@@ -30,7 +30,7 @@ import kotlin.experimental.inv
 /**
  * Get the RenderScript instance.
  */
-private val getRenderScript = cacheFirstResult { context: Context -> RenderScript.create(context) }
+internal val getRenderScript = cacheFirstResult { context: Context -> RenderScript.create(context) }
 
 /**
  * An image made of data in the NV21 format.

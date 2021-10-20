@@ -3,22 +3,10 @@ package com.stripe.android.cardverificationsheet.framework
 import androidx.test.filters.SmallTest
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runBlockingTest
-import org.junit.After
-import org.junit.Before
 import org.junit.Test
 import kotlin.test.assertEquals
 
 class FetcherTest {
-
-    @Before
-    fun before() {
-        Config.apiKey = "qOJ_fF-WLDMbG05iBq5wvwiTNTmM2qIn"
-    }
-
-    @After
-    fun after() {
-        Config.apiKey = null
-    }
 
     @Test
     @SmallTest

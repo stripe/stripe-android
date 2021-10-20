@@ -130,6 +130,7 @@ public final class com/stripe/android/cardverificationsheet/framework/FetchedRes
 }
 
 public abstract interface class com/stripe/android/cardverificationsheet/framework/Fetcher {
+	public abstract fun clearCache (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun fetchData (ZZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun getModelClass ()Ljava/lang/String;
 	public abstract fun getModelFrameworkVersion ()I
@@ -174,6 +175,7 @@ public final class com/stripe/android/cardverificationsheet/framework/ProcessBou
 public abstract class com/stripe/android/cardverificationsheet/framework/ResourceFetcher : com/stripe/android/cardverificationsheet/framework/Fetcher {
 	public static final field $stable I
 	public fun <init> ()V
+	public fun clearCache (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun fetchData (ZZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	protected abstract fun getAssetFileName ()Ljava/lang/String;
 	protected abstract fun getHash ()Ljava/lang/String;
@@ -215,7 +217,6 @@ public abstract class com/stripe/android/cardverificationsheet/framework/WebFetc
 	public static final field $stable I
 	public fun <init> (Landroid/content/Context;)V
 	protected abstract fun cleanUpPostDownload (Ljava/io/File;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public abstract fun clearCache (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun fetchData (ZZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	protected final fun getContext ()Landroid/content/Context;
 	protected abstract fun getDownloadDetails (Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
@@ -500,5 +501,93 @@ public final class com/stripe/android/cardverificationsheet/framework/util/Retry
 	public static synthetic fun retry$default (Lcom/stripe/android/cardverificationsheet/framework/time/Duration;ILjava/util/List;Lkotlin/jvm/functions/Function1;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public static final fun retrySync (ILjava/util/List;Lkotlin/jvm/functions/Function0;)Ljava/lang/Object;
 	public static synthetic fun retrySync$default (ILjava/util/List;Lkotlin/jvm/functions/Function0;ILjava/lang/Object;)Ljava/lang/Object;
+}
+
+public abstract class com/stripe/android/cardverificationsheet/payment/card/CardIssuer {
+	public static final field $stable I
+	public synthetic fun <init> (Ljava/lang/String;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun getDisplayName ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/cardverificationsheet/payment/card/CardIssuer$AmericanExpress : com/stripe/android/cardverificationsheet/payment/card/CardIssuer {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/stripe/android/cardverificationsheet/payment/card/CardIssuer$AmericanExpress;
+}
+
+public final class com/stripe/android/cardverificationsheet/payment/card/CardIssuer$Custom : com/stripe/android/cardverificationsheet/payment/card/CardIssuer {
+	public static final field $stable I
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lcom/stripe/android/cardverificationsheet/payment/card/CardIssuer$Custom;
+	public static synthetic fun copy$default (Lcom/stripe/android/cardverificationsheet/payment/card/CardIssuer$Custom;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/cardverificationsheet/payment/card/CardIssuer$Custom;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun getDisplayName ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/cardverificationsheet/payment/card/CardIssuer$DinersClub : com/stripe/android/cardverificationsheet/payment/card/CardIssuer {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/stripe/android/cardverificationsheet/payment/card/CardIssuer$DinersClub;
+}
+
+public final class com/stripe/android/cardverificationsheet/payment/card/CardIssuer$Discover : com/stripe/android/cardverificationsheet/payment/card/CardIssuer {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/stripe/android/cardverificationsheet/payment/card/CardIssuer$Discover;
+}
+
+public final class com/stripe/android/cardverificationsheet/payment/card/CardIssuer$JCB : com/stripe/android/cardverificationsheet/payment/card/CardIssuer {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/stripe/android/cardverificationsheet/payment/card/CardIssuer$JCB;
+}
+
+public final class com/stripe/android/cardverificationsheet/payment/card/CardIssuer$MasterCard : com/stripe/android/cardverificationsheet/payment/card/CardIssuer {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/stripe/android/cardverificationsheet/payment/card/CardIssuer$MasterCard;
+}
+
+public final class com/stripe/android/cardverificationsheet/payment/card/CardIssuer$UnionPay : com/stripe/android/cardverificationsheet/payment/card/CardIssuer {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/stripe/android/cardverificationsheet/payment/card/CardIssuer$UnionPay;
+}
+
+public final class com/stripe/android/cardverificationsheet/payment/card/CardIssuer$Unknown : com/stripe/android/cardverificationsheet/payment/card/CardIssuer {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/stripe/android/cardverificationsheet/payment/card/CardIssuer$Unknown;
+}
+
+public final class com/stripe/android/cardverificationsheet/payment/card/CardIssuer$Visa : com/stripe/android/cardverificationsheet/payment/card/CardIssuer {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/stripe/android/cardverificationsheet/payment/card/CardIssuer$Visa;
+}
+
+public final class com/stripe/android/cardverificationsheet/payment/card/LengthPanValidator : com/stripe/android/cardverificationsheet/payment/card/PanValidator {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/stripe/android/cardverificationsheet/payment/card/LengthPanValidator;
+	public fun isValidPan (Ljava/lang/String;)Z
+	public fun plus (Lcom/stripe/android/cardverificationsheet/payment/card/PanValidator;)Lcom/stripe/android/cardverificationsheet/payment/card/PanValidator;
+}
+
+public final class com/stripe/android/cardverificationsheet/payment/card/LuhnPanValidator : com/stripe/android/cardverificationsheet/payment/card/PanValidator {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/stripe/android/cardverificationsheet/payment/card/LuhnPanValidator;
+	public fun isValidPan (Ljava/lang/String;)Z
+	public fun plus (Lcom/stripe/android/cardverificationsheet/payment/card/PanValidator;)Lcom/stripe/android/cardverificationsheet/payment/card/PanValidator;
+}
+
+public abstract interface class com/stripe/android/cardverificationsheet/payment/card/PanValidator {
+	public abstract fun isValidPan (Ljava/lang/String;)Z
+	public abstract fun plus (Lcom/stripe/android/cardverificationsheet/payment/card/PanValidator;)Lcom/stripe/android/cardverificationsheet/payment/card/PanValidator;
+}
+
+public final class com/stripe/android/cardverificationsheet/payment/card/PanValidator$DefaultImpls {
+	public static fun plus (Lcom/stripe/android/cardverificationsheet/payment/card/PanValidator;Lcom/stripe/android/cardverificationsheet/payment/card/PanValidator;)Lcom/stripe/android/cardverificationsheet/payment/card/PanValidator;
+}
+
+public final class com/stripe/android/cardverificationsheet/payment/card/PaymentCardUtils {
+	public static final field QUICK_READ_GROUP_LENGTH I
+	public static final field QUICK_READ_LENGTH I
+	public static final fun supportCardIssuer (Lkotlin/ranges/IntRange;Lcom/stripe/android/cardverificationsheet/payment/card/CardIssuer;Ljava/util/List;Ljava/util/List;Lcom/stripe/android/cardverificationsheet/payment/card/PanValidator;)Z
+	public static synthetic fun supportCardIssuer$default (Lkotlin/ranges/IntRange;Lcom/stripe/android/cardverificationsheet/payment/card/CardIssuer;Ljava/util/List;Ljava/util/List;Lcom/stripe/android/cardverificationsheet/payment/card/PanValidator;ILjava/lang/Object;)Z
 }
 
