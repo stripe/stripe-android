@@ -38,7 +38,8 @@ internal abstract class PaymentSheetCommonModule {
     abstract fun bindsCustomerRepository(repository: CustomerApiRepository): CustomerRepository
 
     @Binds
-    abstract fun provideResourceRepository(asyncResourceRepository: AsyncResourceRepository): ResourceRepository
+    abstract fun provideResourceRepository(asyncResourceRepository: AsyncResourceRepository):
+        ResourceRepository
 
     @Binds
     abstract fun bindsStripeIntentRepository(
@@ -74,7 +75,7 @@ internal abstract class PaymentSheetCommonModule {
         @Provides
         @Named(STRIPE_ACCOUNT_ID)
         fun provideStripeAccountId(paymentConfiguration: Lazy<PaymentConfiguration>):
-            () -> String? = { paymentConfiguration.get().stripeAccountId }
+                () -> String? = { paymentConfiguration.get().stripeAccountId }
 
         @Provides
         @Singleton

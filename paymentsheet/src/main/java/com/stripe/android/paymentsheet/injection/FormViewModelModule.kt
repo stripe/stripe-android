@@ -14,7 +14,8 @@ import javax.inject.Singleton
 internal abstract class FormViewModelModule {
 
     @Binds
-    abstract fun provideResourceRepository(asyncResourceRepository: AsyncResourceRepository): ResourceRepository
+    abstract fun provideResourceRepository(asyncResourceRepository: AsyncResourceRepository):
+        ResourceRepository
 
     companion object {
         @Provides
