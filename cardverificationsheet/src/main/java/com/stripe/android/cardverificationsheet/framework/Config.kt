@@ -2,6 +2,7 @@ package com.stripe.android.cardverificationsheet.framework
 
 import com.stripe.android.cardverificationsheet.framework.time.Duration
 import com.stripe.android.cardverificationsheet.framework.time.seconds
+import kotlinx.serialization.json.Json
 
 object Config {
 
@@ -55,4 +56,14 @@ object NetworkConfig {
      */
     @JvmStatic
     var retryStatusCodes: Iterable<Int> = 500..599
+
+    /**
+     * The JSON configuration to use throughout this SDK.
+     */
+    @JvmStatic
+    var json: Json = Json {
+        ignoreUnknownKeys = true
+        isLenient = true
+        encodeDefaults = true
+    }
 }

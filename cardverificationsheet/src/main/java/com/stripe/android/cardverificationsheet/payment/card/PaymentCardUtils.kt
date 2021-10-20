@@ -340,12 +340,6 @@ internal fun iinFromPan(pan: String): String =
     }
 
 /**
- * Format a string as an IIN.
- */
-@CheckResult
-internal fun String.iin(): String = iinFromPan(this)
-
-/**
  * Get the last four digits from a given PAN.
  */
 @CheckResult
@@ -391,56 +385,18 @@ fun supportCardIssuer(
 )
 
 /**
+ * Get an issuer by display name
+ */
+internal fun getIssuerByDisplayName(displayName: String) =
+    (CUSTOM_ISSUER_TABLE + ISSUER_TABLE)
+        .firstOrNull { it.issuer.displayName.lowercase() == displayName }
+        ?.issuer
+
+/**
  * Normalize a PAN by removing all non-numeric characters.
  */
 @CheckResult
 internal fun normalizeCardNumber(cardNumber: String?) = cardNumber?.filter { it.isDigit() } ?: ""
-
-/**
- * Determine if the pan is valid or close to valid.
- */
-@CheckResult
-internal fun isPossiblyValidPan(pan: String?): Boolean {
-    // contract { returns(true) implies (pan != null) }
-    return pan != null && pan.isDigitsOnly() && pan.length >= 7
-}
-
-/**
- * Determine if the pan is not close to being valid.
- */
-@CheckResult
-internal fun isNotPossiblyValidPan(pan: String?): Boolean {
-    // contract { returns(false) implies (pan != null) }
-    return pan == null || !pan.isDigitsOnly() || pan.length < 10
-}
-
-/**
- * Determine if a card number (PAN, IIN, last four) possibly matches a required number (PAN, IIN,
- * last four). This method is designed to compare the same kinds of numbers. for example, a PAN
- * compared to another PAN, or an IIN compared to another IIN. This method will not correctly
- * compare different values, such as an IIN to a PAN.
- */
-@CheckResult
-internal fun numberPossiblyMatches(scanned: String?, required: String?): Boolean =
-    scanned == required || (
-        scanned != null && scanned.isDigitsOnly() &&
-            (required == null || jaccardIndex(scanned, required) > JACCARD_SIMILARITY_THRESHOLD)
-        )
-
-/**
- * Determine if a given [pan] matches a required IIN and Last4
- */
-@CheckResult
-internal fun panMatches(
-    requiredIin: String?,
-    requiredLastFour: String?,
-    pan: String
-): Boolean {
-    val matchesIin = requiredIin == null || requiredIin == pan.take(requiredIin.length)
-    val matchesLastFour = requiredLastFour == null ||
-        requiredLastFour == pan.takeLast(requiredLastFour.length)
-    return matchesIin && matchesLastFour
-}
 
 /**
  * Calculate the jaccard index (similarity) between two strings. Values can range from 0 (no

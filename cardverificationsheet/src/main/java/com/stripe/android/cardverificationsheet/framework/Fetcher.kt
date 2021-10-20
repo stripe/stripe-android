@@ -1,6 +1,5 @@
 package com.stripe.android.cardverificationsheet.framework
 
-import android.content.Context
 import android.util.Log
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.cardverificationsheet.framework.api.downloadFileWithRetries
@@ -155,7 +154,7 @@ abstract class ResourceFetcher : Fetcher {
 /**
  * A [Fetcher] that downloads data from the web.
  */
-abstract class WebFetcher(protected val context: Context) : Fetcher {
+abstract class WebFetcher : Fetcher {
     protected data class DownloadDetails(
         val url: URL,
         val hash: String,
@@ -180,7 +179,7 @@ abstract class WebFetcher(protected val context: Context) : Fetcher {
 
         // attempt to fetch the data from local cache if it's needed immediately or downloading is
         // not allowed
-        if (forImmediateUse || !Config.downloadModels) {
+        if (forImmediateUse) {
             tryFetchLatestCachedData().run {
                 val data =
                     FetchedData.fromFetchedModelMeta(modelClass, modelFrameworkVersion, this)
@@ -194,24 +193,6 @@ abstract class WebFetcher(protected val context: Context) : Fetcher {
                     return@fetchData data
                 }
             }
-        }
-
-        // if downloading models is not allowed, return an empty fetched data
-        if (!Config.downloadModels) {
-            Log.d(
-                Config.logTag,
-                "Fetcher: $modelClass cannot be downloaded since downloads are turned off",
-            )
-            stat.trackResult("downloads_disabled")
-            return FetchedData.fromFetchedModelMeta(
-                modelClass = modelClass,
-                modelFrameworkVersion = modelFrameworkVersion,
-                meta = FetchedModelFileMeta(
-                    modelVersion = cachedData.modelVersion,
-                    hashAlgorithm = cachedData.modelHashAlgorithm ?: "",
-                    modelFile = null,
-                ),
-            )
         }
 
         // get details for downloading the data. If download details cannot be retrieved, use the
@@ -326,7 +307,6 @@ abstract class WebFetcher(protected val context: Context) : Fetcher {
 
         try {
             downloadAndVerify(
-                context = context,
                 url = downloadDetails.url,
                 outputFile = downloadOutputFile,
                 hash = downloadDetails.hash,
@@ -390,13 +370,12 @@ abstract class WebFetcher(protected val context: Context) : Fetcher {
  */
 @Throws(IOException::class, NoSuchAlgorithmException::class, HashMismatchException::class)
 private suspend fun downloadAndVerify(
-    context: Context,
     url: URL,
     outputFile: File,
     hash: String,
     hashAlgorithm: String
 ) {
-    downloadFile(context, url, outputFile)
+    downloadFile(url, outputFile)
     val calculatedHash = calculateHash(outputFile, hashAlgorithm)
 
     if (hash != calculatedHash) {
@@ -410,12 +389,11 @@ private suspend fun downloadAndVerify(
  */
 @Throws(IOException::class, FileAlreadyExistsException::class, NoSuchFileException::class)
 private suspend fun downloadFile(
-    context: Context,
     url: URL,
     outputFile: File,
 ) = withContext(Dispatchers.IO) {
     if (outputFile.exists()) {
         outputFile.delete()
     }
-    downloadFileWithRetries(context, url, outputFile)
+    downloadFileWithRetries(url, outputFile)
 }

@@ -13,15 +13,25 @@ import androidx.annotation.Keep
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import com.stripe.android.cardverificationsheet.R
-import com.stripe.android.cardverificationsheet.cardverifyui.analyzer.CompletionLoopAnalyzer
+import com.stripe.android.cardverificationsheet.cardverifyui.exception.InvalidCivException
 import com.stripe.android.cardverificationsheet.cardverifyui.exception.InvalidRequiredCardException
+import com.stripe.android.cardverificationsheet.cardverifyui.exception.InvalidStripePublishableKeyException
+import com.stripe.android.cardverificationsheet.cardverifyui.exception.StripeNetworkException
 import com.stripe.android.cardverificationsheet.cardverifyui.result.MainLoopAggregator
 import com.stripe.android.cardverificationsheet.cardverifyui.result.MainLoopState
 import com.stripe.android.cardverificationsheet.framework.AggregateResultListener
 import com.stripe.android.cardverificationsheet.framework.AnalyzerLoopErrorListener
 import com.stripe.android.cardverificationsheet.framework.Config
+import com.stripe.android.cardverificationsheet.framework.Stats
+import com.stripe.android.cardverificationsheet.framework.api.NetworkResult
+import com.stripe.android.cardverificationsheet.framework.api.dto.ScanStatistics
+import com.stripe.android.cardverificationsheet.framework.api.getCardImageVerificationIntentDetails
+import com.stripe.android.cardverificationsheet.framework.api.uploadSavedFrames
+import com.stripe.android.cardverificationsheet.framework.api.uploadScanStats
+import com.stripe.android.cardverificationsheet.framework.util.AppDetails
+import com.stripe.android.cardverificationsheet.framework.util.Device
 import com.stripe.android.cardverificationsheet.payment.card.CardIssuer
-import com.stripe.android.cardverificationsheet.payment.card.getCardIssuer
+import com.stripe.android.cardverificationsheet.payment.card.getIssuerByDisplayName
 import com.stripe.android.cardverificationsheet.scanui.CardVerificationSheetCancelationReason
 import com.stripe.android.cardverificationsheet.scanui.ScanResultListener
 import com.stripe.android.cardverificationsheet.scanui.SimpleScanActivity
@@ -34,9 +44,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.util.concurrent.atomic.AtomicBoolean
 
-const val PARAM_CARD_ISSUER = "cardIssuer"
-const val PARAM_CARD_LAST_FOUR = "lastFour"
-const val PARAM_ENABLE_MISSING_CARD = "missingCard"
+const val PARAM_STRIPE_PUBLISHABLE_KEY = "stripePublishableKey"
+const val PARAM_CIV_ID = "civId"
+const val PARAM_CIV_SECRET = "civSecret"
+const val PARAM_ENABLE_CANNOT_SCAN_CARD = "cannotScanCard"
 
 const val RESULT_CANCELED_REASON = "canceledReason"
 const val RESULT_FAILED_CAUSE = "failureCause"
@@ -71,26 +82,41 @@ open class CardVerifyActivity : SimpleScanActivity() {
     protected open val cardDescriptionTextView: TextView by lazy { TextView(this) }
 
     /**
-     * If specified, the user will only be able to scan a card that matches this IIN.
+     * The ID of the CIV used for this scan
      */
-    private val cardIssuer: CardIssuer? by lazy {
-        intent.getStringExtra(PARAM_CARD_ISSUER)?.let { getCardIssuer(it) }
+    private val cardImageVerificationIntentId: String by lazy {
+        intent.getStringExtra(PARAM_CIV_ID) ?: "".also {
+            scanFailure(InvalidCivException("Missing CIV ID"))
+        }
+    }
+
+    private val cardImageVerificationIntentSecret: String by lazy {
+        intent.getStringExtra(PARAM_CIV_SECRET) ?: "".also {
+            scanFailure(InvalidCivException("Missing CIV secret"))
+        }
+    }
+
+    private val stripePublishableKey: String by lazy {
+        intent.getStringExtra(PARAM_STRIPE_PUBLISHABLE_KEY) ?: "".also {
+            scanFailure(InvalidStripePublishableKeyException("Missing publishable key"))
+        }
     }
 
     /**
-     * The user will only be able to scan a card that matches these last four.
+     * The card issuer that must be scanned
      */
-    private val cardLastFour: String by lazy {
-        intent.getStringExtra(PARAM_CARD_LAST_FOUR)?.also {
-            resultListener.failed(InvalidRequiredCardException("Missing last four digits"))
-        } ?: ""
-    }
+    private var requiredCardIssuer: CardIssuer? = null
+
+    /**
+     * The last four digits of the required card
+     */
+    private var requiredCardLastFour: String? = null
 
     /**
      * If true and a card is required, an "I don't have this card" button will be shown to the user.
      */
-    private val enableMissingCard: Boolean by lazy {
-        intent.getBooleanExtra(PARAM_ENABLE_MISSING_CARD, true)
+    private val enableCannotScanCard: Boolean by lazy {
+        intent.getBooleanExtra(PARAM_ENABLE_CANNOT_SCAN_CARD, true)
     }
 
     /**
@@ -102,9 +128,23 @@ open class CardVerifyActivity : SimpleScanActivity() {
         }
 
         override fun cardScanned(frames: Collection<SavedFrame>) {
-            launch(Dispatchers.Default) {
-                CompletionLoopAnalyzer.Factory().newInstance().analyze(frames, Unit)
-            }
+//            launch {
+//                when (
+//                    val result = uploadSavedFrames(
+//                        stripePublishableKey = stripePublishableKey,
+//                        civId = cardImageVerificationIntentId,
+//                        civSecret = cardImageVerificationIntentSecret,
+//                        savedFrames = frames,
+//                    )
+//                ) {
+//                    is NetworkResult.Success ->
+//                        cardVerificationComplete()
+//                    is NetworkResult.Error ->
+//                        scanFailure(StripeNetworkException(result.error.error.message))
+//                    is NetworkResult.Exception ->
+//                        scanFailure(result.exception)
+//                }
+//            }
         }
 
         override fun userCanceled(reason: CardVerificationSheetCancelationReason) {
@@ -124,7 +164,12 @@ open class CardVerifyActivity : SimpleScanActivity() {
      * The flow used to scan an item.
      */
     override val scanFlow: CardVerifyFlow by lazy {
-        CardVerifyFlow(cardIssuer, cardLastFour, scanResultListener, scanErrorListener)
+        CardVerifyFlow(
+            requiredCardIssuer,
+            requiredCardLastFour ?: "",
+            scanResultListener,
+            scanErrorListener,
+        )
     }
 
     private val hasPreviousValidResult = AtomicBoolean(false)
@@ -137,8 +182,47 @@ open class CardVerifyActivity : SimpleScanActivity() {
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        launch {
+            when(
+                val result = getCardImageVerificationIntentDetails(
+                    stripePublishableKey = stripePublishableKey,
+                    civId = cardImageVerificationIntentId,
+                    civSecret = cardImageVerificationIntentSecret,
+                )
+            ) {
+                is NetworkResult.Success ->
+                    onScanDetailsAvailable(
+                        getIssuerByDisplayName(result.body.expectedCard?.issuer ?: ""),
+                        result.body.expectedCard?.lastFour,
+                    )
+                is NetworkResult.Error ->
+                    scanFailure(StripeNetworkException("Unable to get CIV details"))
+                is NetworkResult.Exception ->
+                    scanFailure(result.exception)
+            }
+        }
         
         cannotScanTextView.setOnClickListener { userCannotScan() }
+    }
+
+    private fun onScanDetailsAvailable(
+        requiredCardIssuer: CardIssuer?,
+        requiredCardLastFour: String?,
+    ) {
+        if (requiredCardLastFour.isNullOrEmpty()) {
+            scanFailure(InvalidRequiredCardException("Missing last four"))
+            return
+        }
+
+        this.requiredCardIssuer = requiredCardIssuer
+        this.requiredCardLastFour = requiredCardLastFour
+
+        cardDescriptionTextView.text = getString(
+            R.string.stripe_card_description,
+            requiredCardIssuer?.displayName ?: "",
+            requiredCardLastFour
+        )
     }
 
     override fun addUiComponents() {
@@ -165,7 +249,7 @@ open class CardVerifyActivity : SimpleScanActivity() {
             resources.getDimensionPixelSize(R.dimen.stripeButtonPadding),
         )
 
-        cannotScanTextView.setVisible(enableMissingCard)
+        cannotScanTextView.setVisible(enableCannotScanCard)
 
         if (isBackgroundDark()) {
             cannotScanTextView.setTextColor(getColorByRes(R.color.stripeButtonDarkText))
@@ -182,11 +266,6 @@ open class CardVerifyActivity : SimpleScanActivity() {
         cardDescriptionTextView.setTextSizeByRes(R.dimen.stripeCardDescriptionTextSize)
         cardDescriptionTextView.typeface = Typeface.DEFAULT_BOLD
         cardDescriptionTextView.gravity = Gravity.CENTER
-        cardDescriptionTextView.text = getString(
-            R.string.stripe_card_description,
-            cardIssuer ?: "",
-            cardLastFour
-        )
 
         if (isBackgroundDark()) {
             cardDescriptionTextView.setTextColor(
@@ -250,13 +329,29 @@ open class CardVerifyActivity : SimpleScanActivity() {
         }
     }
 
+    override fun closeScanner() {
+        uploadScanStats(
+            stripePublishableKey = stripePublishableKey,
+            civId = cardImageVerificationIntentId,
+            civSecret = cardImageVerificationIntentSecret,
+            instanceId = Stats.instanceId,
+            scanId = Stats.scanId,
+            device = Device.fromContext(this),
+            appDetails = AppDetails.fromContext(this),
+            scanStatistics = ScanStatistics.fromStats()
+        )
+        super.closeScanner()
+    }
+
     private val scanResultListener = object :
         AggregateResultListener<MainLoopAggregator.InterimResult, MainLoopAggregator.FinalResult> {
 
         /**
          * A final result was received from the aggregator. Set the result from this activity.
          */
-        override suspend fun onResult(result: MainLoopAggregator.FinalResult) = launch(Dispatchers.Main) {
+        override suspend fun onResult(
+            result: MainLoopAggregator.FinalResult,
+        ) = launch(Dispatchers.Main) {
             changeScanState(ScanState.Correct)
             cameraAdapter.unbindFromLifecycle(this@CardVerifyActivity)
             resultListener.cardScanned(scanFlow.selectCompletionLoopFrames(result.savedFrames))
@@ -265,8 +360,13 @@ open class CardVerifyActivity : SimpleScanActivity() {
         /**
          * An interim result was received from the result aggregator.
          */
-        override suspend fun onInterimResult(result: MainLoopAggregator.InterimResult) = launch(Dispatchers.Main) {
-            if (result.state is MainLoopState.PanFound && !hasPreviousValidResult.getAndSet(true)) {
+        override suspend fun onInterimResult(
+            result: MainLoopAggregator.InterimResult,
+        ) = launch(Dispatchers.Main) {
+            if (
+                result.state is MainLoopState.PanFound &&
+                !hasPreviousValidResult.getAndSet(true)
+            ) {
                 scanStat.trackResult("ocr_pan_observed")
             }
 

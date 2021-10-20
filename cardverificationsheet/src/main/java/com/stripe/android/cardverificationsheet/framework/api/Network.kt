@@ -1,22 +1,11 @@
 package com.stripe.android.cardverificationsheet.framework.api
 
-import android.content.Context
-import android.util.Base64
 import android.util.Log
 import com.stripe.android.cardverificationsheet.framework.Config
 import com.stripe.android.cardverificationsheet.framework.NetworkConfig
 import com.stripe.android.cardverificationsheet.framework.time.Timer
-import com.stripe.android.cardverificationsheet.framework.util.DeviceIds
-import com.stripe.android.cardverificationsheet.framework.util.cacheFirstResult
-import com.stripe.android.cardverificationsheet.framework.util.getAppPackageName
-import com.stripe.android.cardverificationsheet.framework.util.getDeviceName
-import com.stripe.android.cardverificationsheet.framework.util.getOsVersion
-import com.stripe.android.cardverificationsheet.framework.util.getPlatform
-import com.stripe.android.cardverificationsheet.framework.util.getSdkFlavor
-import com.stripe.android.cardverificationsheet.framework.util.getSdkVersion
 import com.stripe.android.cardverificationsheet.framework.util.retry
 import kotlinx.serialization.KSerializer
-import kotlinx.serialization.Serializable
 import java.io.File
 import java.io.FileNotFoundException
 import java.io.FileOutputStream
@@ -32,8 +21,6 @@ private const val REQUEST_METHOD_GET = "GET"
 private const val REQUEST_METHOD_POST = "POST"
 
 private const val REQUEST_PROPERTY_AUTHENTICATION = "x-stripe-auth"
-private const val REQUEST_PROPERTY_DEVICE_ID = "x-stripe-device-id"
-private const val REQUEST_PROPERTY_USER_AGENT = "User-Agent"
 private const val REQUEST_PROPERTY_CONTENT_TYPE = "Content-Type"
 private const val REQUEST_PROPERTY_CONTENT_ENCODING = "Content-Encoding"
 
@@ -51,7 +38,7 @@ private val networkTimer by lazy { Timer.newInstance(Config.logTag, "network") }
  * Send a post request to a Stripe endpoint.
  */
 internal suspend fun <Request, Response, Error> postForResult(
-    context: Context,
+    stripePublishableKey: String,
     path: String,
     data: Request,
     requestSerializer: KSerializer<Request>,
@@ -60,9 +47,9 @@ internal suspend fun <Request, Response, Error> postForResult(
 ): NetworkResult<out Response, out Error> =
     translateNetworkResult(
         networkResult = postJsonWithRetries(
-            context = context,
+            stripePublishableKey = stripePublishableKey,
             path = path,
-            jsonData = Config.json.encodeToString(requestSerializer, data)
+            jsonData = NetworkConfig.json.encodeToString(requestSerializer, data)
         ),
         responseSerializer = responseSerializer,
         errorSerializer = errorSerializer
@@ -72,15 +59,15 @@ internal suspend fun <Request, Response, Error> postForResult(
  * Send a post request to a Stripe endpoint and ignore the response.
  */
 internal suspend fun <Request> postData(
-    context: Context,
+    stripePublishableKey: String,
     path: String,
     data: Request,
     requestSerializer: KSerializer<Request>
 ) {
     postJsonWithRetries(
-        context = context,
+        stripePublishableKey = stripePublishableKey,
         path = path,
-        jsonData = Config.json.encodeToString(requestSerializer, data)
+        jsonData = NetworkConfig.json.encodeToString(requestSerializer, data)
     )
 }
 
@@ -88,12 +75,16 @@ internal suspend fun <Request> postData(
  * Send a get request to a Stripe endpoint and parse the response.
  */
 internal suspend fun <Response, Error> getForResult(
-    context: Context,
+    stripePublishableKey: String,
     path: String,
     responseSerializer: KSerializer<Response>,
     errorSerializer: KSerializer<Error>
 ): NetworkResult<out Response, out Error> =
-    translateNetworkResult(getWithRetries(context, path), responseSerializer, errorSerializer)
+    translateNetworkResult(
+        getWithRetries(stripePublishableKey, path),
+        responseSerializer,
+        errorSerializer,
+    )
 
 /**
  * Translate a string network result to a response or error.
@@ -107,13 +98,13 @@ private fun <Response, Error> translateNetworkResult(
         try {
             NetworkResult.Success(
                 responseCode = networkResult.responseCode,
-                body = Config.json.decodeFromString(responseSerializer, networkResult.body)
+                body = NetworkConfig.json.decodeFromString(responseSerializer, networkResult.body)
             )
         } catch (t: Throwable) {
             try {
                 NetworkResult.Error(
                     responseCode = networkResult.responseCode,
-                    error = Config.json.decodeFromString(errorSerializer, networkResult.body)
+                    error = NetworkConfig.json.decodeFromString(errorSerializer, networkResult.body)
                 )
             } catch (et: Throwable) {
                 NetworkResult.Exception(networkResult.responseCode, t)
@@ -123,7 +114,7 @@ private fun <Response, Error> translateNetworkResult(
         try {
             NetworkResult.Error(
                 responseCode = networkResult.responseCode,
-                error = Config.json.decodeFromString(errorSerializer, networkResult.error)
+                error = NetworkConfig.json.decodeFromString(errorSerializer, networkResult.error)
             )
         } catch (t: Throwable) {
             NetworkResult.Exception(networkResult.responseCode, t)
@@ -139,7 +130,7 @@ private fun <Response, Error> translateNetworkResult(
  * Send a post request to a Stripe endpoint with retries.
  */
 private suspend fun postJsonWithRetries(
-    context: Context,
+    stripePublishableKey: String,
     path: String,
     jsonData: String
 ): NetworkResult<out String, out String> =
@@ -148,7 +139,7 @@ private suspend fun postJsonWithRetries(
             retryDelay = NetworkConfig.retryDelay,
             times = NetworkConfig.retryTotalAttempts
         ) {
-            val result = postJson(context, path, jsonData)
+            val result = postJson(stripePublishableKey, path, jsonData)
             if (result.responseCode in NetworkConfig.retryStatusCodes) {
                 throw RetryNetworkRequestException(result)
             } else {
@@ -163,7 +154,7 @@ private suspend fun postJsonWithRetries(
  * Send a get request to a Stripe endpoint with retries.
  */
 private suspend fun getWithRetries(
-    context: Context,
+    stripePublishableKey: String,
     path: String,
 ): NetworkResult<out String, out String> =
     try {
@@ -171,7 +162,7 @@ private suspend fun getWithRetries(
             retryDelay = NetworkConfig.retryDelay,
             times = NetworkConfig.retryTotalAttempts
         ) {
-            val result = get(context, path)
+            val result = get(stripePublishableKey, path)
             if (result.responseCode in NetworkConfig.retryStatusCodes) {
                 throw RetryNetworkRequestException(result)
             } else {
@@ -186,7 +177,7 @@ private suspend fun getWithRetries(
  * Send a post request to a Stripe endpoint.
  */
 private fun postJson(
-    context: Context,
+    stripePublishableKey: String,
     path: String,
     jsonData: String
 ): NetworkResult<out String, out String> = networkTimer.measure(path) {
@@ -203,7 +194,7 @@ private fun postJson(
             doInput = true
 
             // Set headers
-            setRequestHeaders(context)
+            setRequestHeaders(stripePublishableKey)
             setRequestProperty(REQUEST_PROPERTY_CONTENT_TYPE, CONTENT_TYPE_JSON)
 
             // Write the data
@@ -247,7 +238,7 @@ private fun postJson(
  * Send a get request to a Stripe endpoint.
  */
 private fun get(
-    context: Context,
+    stripePublishableKey: String,
     path: String,
 ): NetworkResult<out String, out String> = networkTimer.measure(path) {
     val fullPath = if (path.startsWith("/")) path else "/$path"
@@ -263,7 +254,7 @@ private fun get(
             doInput = true
 
             // Set headers
-            setRequestHeaders(context)
+            setRequestHeaders(stripePublishableKey)
 
             // Read the response code. This will block until the response has been received.
             responseCode = this.responseCode
@@ -287,11 +278,11 @@ private fun get(
 }
 
 @Throws(IOException::class)
-internal suspend fun downloadFileWithRetries(context: Context, url: URL, outputFile: File) = retry(
+internal suspend fun downloadFileWithRetries(url: URL, outputFile: File) = retry(
     NetworkConfig.retryDelay,
     excluding = listOf(FileNotFoundException::class.java)
 ) {
-    downloadFile(context, url, outputFile)
+    downloadFile(url, outputFile)
 }
 
 /**
@@ -299,7 +290,6 @@ internal suspend fun downloadFileWithRetries(context: Context, url: URL, outputF
  */
 @Throws(IOException::class)
 private fun downloadFile(
-    context: Context,
     url: URL,
     outputFile: File,
 ) = networkTimer.measure(url.toString()) {
@@ -310,9 +300,6 @@ private fun downloadFile(
             // Set the connection to only receive data
             doOutput = false
             doInput = true
-
-            // set headers
-            setRequestHeaders(context)
 
             // Read the response code. This will block until the response has been received.
             val responseCode = this.responseCode
@@ -332,45 +319,8 @@ private fun downloadFile(
 /**
  * Set the required request headers on an HttpURLConnection
  */
-private fun HttpURLConnection.setRequestHeaders(context: Context) {
-    setRequestProperty(REQUEST_PROPERTY_AUTHENTICATION, Config.apiKey)
-    setRequestProperty(REQUEST_PROPERTY_USER_AGENT, buildUserAgent(context))
-    setRequestProperty(REQUEST_PROPERTY_DEVICE_ID, buildDeviceId(context))
-}
-
-@Serializable
-private data class DeviceIdStructure(
-    /**
-     * android_id
-     */
-    val a: String,
-
-    /**
-     * vendor_id
-     */
-    val v: String,
-
-    /**
-     * advertising_id
-     */
-    val d: String
-)
-
-private val buildDeviceId = cacheFirstResult { context: Context ->
-    DeviceIds.fromContext(context).run {
-        Base64.encodeToString(
-            Config.json.encodeToString(
-                DeviceIdStructure.serializer(),
-                DeviceIdStructure(a = androidId ?: "", v = "", d = "")
-            ).toByteArray(Charsets.UTF_8),
-            Base64.URL_SAFE
-        )
-    }
-}
-
-private val buildUserAgent = cacheFirstResult { context: Context ->
-    "cardverificationsheet/${getPlatform()}/${getAppPackageName(context)}/${getDeviceName()}/" +
-        "${getOsVersion()}/${getSdkVersion()}/${getSdkFlavor()}"
+private fun HttpURLConnection.setRequestHeaders(stripePublishableKey: String) {
+    setRequestProperty(REQUEST_PROPERTY_AUTHENTICATION, stripePublishableKey)
 }
 
 private fun writeGzipData(outputStream: OutputStream, data: String) {

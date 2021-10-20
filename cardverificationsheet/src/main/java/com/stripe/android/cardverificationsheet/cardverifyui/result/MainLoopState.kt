@@ -28,7 +28,8 @@ internal sealed class MainLoopState(
             doesNotMatchRequiredCard(transition.ocr?.cardIssuer, transition.ocr?.lastFour) ->
                 WrongPanFound(
                     cardIssuer = transition.ocr?.cardIssuer,
-                    lastFour = transition.ocr?.lastFour!!, // doesNotMatchRequiredCard guarantees this is non-null
+                    // doesNotMatchRequiredCard guarantees this is non-null
+                    lastFour = transition.ocr?.lastFour!!,
                     requiredCardIssuer = requiredCardIssuer,
                     requiredLastFour = requiredLastFour,
                 )
@@ -47,7 +48,9 @@ internal sealed class MainLoopState(
 
         private fun getMostLikelyResult() = resultCounter.getHighestCountItem()?.second
         fun getMostLikelyCardIssuer() = getMostLikelyResult()?.cardIssuer
-        fun getMostLikelyLastFour() = getMostLikelyResult()?.lastFour!! // guaranteed to be non-null since the item total counter is primed
+
+        // guaranteed to be non-null since the item total counter is primed
+        fun getMostLikelyLastFour() = getMostLikelyResult()?.lastFour!!
 
         private fun isCardSatisfied() = visibleCardCount >= VerifyConfig.DESIRED_SIDE_COUNT
         private fun isPanSatisfied() =
@@ -111,9 +114,12 @@ internal sealed class MainLoopState(
             }
 
             return when {
-                reachedStateAt.elapsedSince() > VerifyConfig.PAN_SEARCH_DURATION -> Finished(cardIssuer, lastFour)
-                isCardSatisfied() -> Finished(cardIssuer, lastFour)
-                else -> this
+                reachedStateAt.elapsedSince() > VerifyConfig.PAN_SEARCH_DURATION ->
+                    Finished(cardIssuer, lastFour)
+                isCardSatisfied() ->
+                    Finished(cardIssuer, lastFour)
+                else ->
+                    this
             }
         }
     }
@@ -123,7 +129,9 @@ internal sealed class MainLoopState(
     ) : MainLoopState(runOcr = true, runCardDetect = false) {
         private fun getMostLikelyResult() = resultCounter.getHighestCountItem()?.second
         fun getMostLikelyCardIssuer() = getMostLikelyResult()?.cardIssuer
-        fun getMostLikelyLastFour() = getMostLikelyResult()?.lastFour!! // guaranteed to be non-null since the item total counter is primed
+
+        // guaranteed to be non-null since the item total counter is primed
+        fun getMostLikelyLastFour() = getMostLikelyResult()?.lastFour!!
 
         private fun isPanSatisfied() =
             resultCounter.getHighestCountItem()?.first ?: 0 >= VerifyConfig.DESIRED_OCR_AGREEMENT
@@ -137,7 +145,8 @@ internal sealed class MainLoopState(
 
             val mostLikelyResult = getMostLikelyResult()
             val mostLikelyCardIssuer = mostLikelyResult?.cardIssuer
-            val mostLikelyLastFour = mostLikelyResult?.lastFour!! // guaranteed to be non-null since the item total counter is primed
+            // guaranteed to be non-null since the item total counter is primed
+            val mostLikelyLastFour = mostLikelyResult?.lastFour!!
             return when {
                 isPanSatisfied() -> Finished(mostLikelyCardIssuer, mostLikelyLastFour)
                 reachedStateAt.elapsedSince() >= VerifyConfig.PAN_SEARCH_DURATION ->
@@ -159,7 +168,8 @@ internal sealed class MainLoopState(
             doesNotMatchRequiredCard(transition.ocr?.cardIssuer, transition.ocr?.lastFour) ->
                 WrongPanFound(
                     cardIssuer = transition.ocr?.cardIssuer,
-                    lastFour = transition.ocr?.lastFour!!, // doesNotMatchRequiredCard guarantees this is non-null
+                    // doesNotMatchRequiredCard guarantees this is non-null
+                    lastFour = transition.ocr?.lastFour!!,
                     requiredCardIssuer = requiredCardIssuer,
                     requiredLastFour = requiredLastFour,
                 )

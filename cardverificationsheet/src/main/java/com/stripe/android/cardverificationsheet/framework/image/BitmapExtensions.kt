@@ -5,16 +5,32 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Matrix
 import android.graphics.Rect
+import android.os.Build
 import android.util.Size
 import androidx.annotation.CheckResult
 import com.stripe.android.cardverificationsheet.framework.util.centerOn
 import com.stripe.android.cardverificationsheet.framework.util.intersectionWith
 import com.stripe.android.cardverificationsheet.framework.util.move
 import com.stripe.android.cardverificationsheet.framework.util.resizeRegion
+import com.stripe.android.cardverificationsheet.framework.util.scaleAndCenterWithin
 import com.stripe.android.cardverificationsheet.framework.util.size
 import com.stripe.android.cardverificationsheet.framework.util.toRect
+import java.io.ByteArrayOutputStream
 import kotlin.math.max
 import kotlin.math.min
+
+@CheckResult
+internal fun Bitmap.toWebP(): ByteArray {
+    ByteArrayOutputStream().use {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            this.compress(Bitmap.CompressFormat.WEBP_LOSSY, 92, it)
+        } else {
+            @Suppress("deprecation")
+            this.compress(Bitmap.CompressFormat.WEBP, 92, it)
+        }
+        return@toWebP it.toByteArray()
+    }
+}
 
 /**
  * Crop a [Bitmap] to a given [Rect]. The crop must have a positive area and must be contained
@@ -33,6 +49,15 @@ internal fun Bitmap.crop(crop: Rect): Bitmap {
     }
     return Bitmap.createBitmap(this, crop.left, crop.top, crop.width(), crop.height())
 }
+
+@CheckResult
+internal fun Bitmap.cropCenter(size: Size): Bitmap =
+    if (size.width > width || size.height > height) {
+        val cropRegion = size.scaleAndCenterWithin(Size(width, height))
+        crop(cropRegion).scale(size)
+    } else {
+        crop(size.centerOn(size().toRect()))
+    }
 
 /**
  * Rotate a [Bitmap] by the given [rotationDegrees].

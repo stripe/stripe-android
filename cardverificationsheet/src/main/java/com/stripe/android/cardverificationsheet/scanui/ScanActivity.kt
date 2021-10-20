@@ -29,10 +29,6 @@ import com.stripe.android.cardverificationsheet.camera.getCameraAdapter
 import com.stripe.android.cardverificationsheet.framework.Config
 import com.stripe.android.cardverificationsheet.framework.Stats
 import com.stripe.android.cardverificationsheet.framework.StorageFactory
-import com.stripe.android.cardverificationsheet.framework.api.dto.ScanStatistics
-import com.stripe.android.cardverificationsheet.framework.api.uploadScanStats
-import com.stripe.android.cardverificationsheet.framework.util.AppDetails
-import com.stripe.android.cardverificationsheet.framework.util.Device
 import com.stripe.android.cardverificationsheet.framework.util.getAppPackageName
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -119,7 +115,7 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
 
     protected val cameraAdapter by lazy { buildCameraAdapter() }
     private val cameraErrorListener by lazy {
-        CameraErrorListenerImpl(this) { t -> cameraErrorCancelScan(t) }
+        CameraErrorListenerImpl(this) { t -> scanFailure(t) }
     }
 
     /**
@@ -241,7 +237,7 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
             .setTitle(R.string.stripe_error_camera_title)
             .setMessage(R.string.stripe_error_camera_unsupported)
             .setPositiveButton(R.string.stripe_error_camera_acknowledge_button) { _, _ ->
-                cameraErrorCancelScan()
+                scanFailure()
             }
             .show()
     }
@@ -337,10 +333,19 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
     /**
      * Cancel scanning due to a camera error.
      */
-    protected open fun cameraErrorCancelScan(cause: Throwable? = null) {
+    protected open fun scanFailure(cause: Throwable? = null) {
         Log.e(Config.logTag, "Canceling scan due to camera error", cause)
-        launch { scanStat.trackResult("camera_error") }
+        launch { scanStat.trackResult("scan_failure") }
         resultListener.failed(cause)
+        closeScanner()
+    }
+
+    /**
+     * Cancel the scan when the user presses back.
+     */
+    override fun onBackPressed() {
+        launch { scanStat.trackResult("user_pressed_back") }
+        resultListener.userCanceled(CardVerificationSheetCancelationReason.Back)
         closeScanner()
     }
 
@@ -354,19 +359,10 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
     }
 
     /**
-     * The user pressed the back button.
-     */
-    protected open fun userPressedBack() {
-        launch { scanStat.trackResult("user_pressed_back") }
-        resultListener.userCanceled(CardVerificationSheetCancelationReason.Back)
-        closeScanner()
-    }
-
-    /**
      * The camera permission was denied.
      */
     protected open fun userDeniedCameraPermission() {
-        launch { scanStat.trackResult("permissoin_denied") }
+        launch { scanStat.trackResult("permission_denied") }
         resultListener.userCanceled(CardVerificationSheetCancelationReason.CameraPermissionDenied)
         closeScanner()
     }
@@ -381,28 +377,10 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
     }
 
     /**
-     * Cancel scanning due to analyzer failure
-     */
-    protected open fun analyzerFailureCancelScan(cause: Throwable? = null) {
-        Log.e(Config.logTag, "Canceling scan due to analyzer error", cause)
-        launch { scanStat.trackResult("analyzer_failure") }
-        resultListener.failed(cause)
-        closeScanner()
-    }
-
-    /**
      * Close the scanner.
      */
     protected open fun closeScanner() {
         setFlashlightState(false)
-        uploadScanStats(
-            context = this,
-            instanceId = Stats.instanceId,
-            scanId = Stats.scanId,
-            device = Device.fromContext(this),
-            appDetails = AppDetails.fromContext(this),
-            scanStatistics = ScanStatistics.fromStats()
-        )
         finish()
     }
 
@@ -442,13 +420,6 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
 
     protected open fun setFocus(point: PointF) {
         cameraAdapter.setFocus(point)
-    }
-
-    /**
-     * Cancel the scan when the user presses back.
-     */
-    override fun onBackPressed() {
-        userPressedBack()
     }
 
     /**

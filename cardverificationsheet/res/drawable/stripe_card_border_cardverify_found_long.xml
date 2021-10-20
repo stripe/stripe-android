@@ -21,10 +21,10 @@
                     L 7.5,123.5
                     a 5,5,0,0,1,-5,-5
                     Z"
-                android:strokeColor="@color/bouncerFoundOutline"
+                android:strokeColor="@color/stripeFoundOutline"
                 android:trimPathEnd="0"
                 android:strokeLineCap="round"
-                android:strokeWidth="@integer/bouncerFoundOutlineWidth"/>
+                android:strokeWidth="@integer/stripeFoundOutlineWidth"/>
         </vector>
     </aapt:attr>
     <target android:name="card_border">

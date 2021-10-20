@@ -24,12 +24,37 @@ internal class MainLoopAnalyzer(
         val ocr: SSDOcr.Prediction?,
         val card: CardDetect.Prediction?,
     ) {
-        val isCardVisible = card?.side?.let { it == CardDetect.Prediction.Side.NO_PAN || it == CardDetect.Prediction.Side.PAN }
+        val isCardVisible = card?.side?.let {
+            it == CardDetect.Prediction.Side.NO_PAN || it == CardDetect.Prediction.Side.PAN
+        }
     }
 
     override suspend fun analyze(data: Input, state: MainLoopState): Prediction = supervisorScope {
-        val cardResult = if (state.runCardDetect) cardDetect?.analyze(CardDetect.cameraPreviewToInput(data.cameraPreviewImage.image, data.cameraPreviewImage.viewBounds, data.cardFinder), Unit) else null
-        val ocrResult = if (state.runOcr) ssdOcr?.analyze(SSDOcr.cameraPreviewToInput(data.cameraPreviewImage.image, data.cameraPreviewImage.viewBounds, data.cardFinder), Unit) else null
+        val cardResult = if (state.runCardDetect) {
+            cardDetect?.analyze(
+                CardDetect.cameraPreviewToInput(
+                    data.cameraPreviewImage.image,
+                    data.cameraPreviewImage.viewBounds,
+                    data.cardFinder,
+                ),
+                Unit,
+            )
+        } else {
+            null
+        }
+
+        val ocrResult = if (state.runOcr) {
+            ssdOcr?.analyze(
+                SSDOcr.cameraPreviewToInput(
+                    data.cameraPreviewImage.image,
+                    data.cameraPreviewImage.viewBounds,
+                    data.cardFinder,
+                ),
+                Unit,
+            )
+        } else {
+            null
+        }
 
         Prediction(
             ocr = ocrResult,
@@ -38,8 +63,16 @@ internal class MainLoopAnalyzer(
     }
 
     class Factory(
-        private val ssdOcrFactory: AnalyzerFactory<SSDOcr.Input, Any, SSDOcr.Prediction, out Analyzer<SSDOcr.Input, Any, SSDOcr.Prediction>>,
-        private val cardDetectFactory: AnalyzerFactory<CardDetect.Input, Any, CardDetect.Prediction, out Analyzer<CardDetect.Input, Any, CardDetect.Prediction>>,
+        private val ssdOcrFactory: AnalyzerFactory<
+            SSDOcr.Input,
+            Any,
+            SSDOcr.Prediction,
+            out Analyzer<SSDOcr.Input, Any, SSDOcr.Prediction>>,
+        private val cardDetectFactory: AnalyzerFactory<
+            CardDetect.Input,
+            Any,
+            CardDetect.Prediction,
+            out Analyzer<CardDetect.Input, Any, CardDetect.Prediction>>,
     ) : AnalyzerFactory<Input, MainLoopState, Prediction, MainLoopAnalyzer> {
         override suspend fun newInstance(): MainLoopAnalyzer? = MainLoopAnalyzer(
             ssdOcr = ssdOcrFactory.newInstance(),

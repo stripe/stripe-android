@@ -20,7 +20,7 @@
     <string name="stripe_error_camera_unsupported" description="Message of the dialog shown to the user when the camera is not supported">This device does not support the required camera features</string>
     <string name="stripe_error_camera_acknowledge_button" description="Affirmative button shown as part of the camera error dialog">Close</string>
 
-    <string name="stripe_cardscan_logo" description="Accessibility description of the CardScan.io logo">cardscan.io logo</string>
+    <string name="stripe_logo" description="Accessibility description of the Stripe logo">Stripe logo</string>
     <string name="stripe_security_description" description="Accessibility description of the security notification lock icon">lock icon</string>
     <string name="stripe_preview_description" description="Accessibility description of the camera preview window">card scanning window</string>
     <string name="stripe_debug_description" description="Accessibility description of the debug preview window">card debug window</string>

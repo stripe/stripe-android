@@ -47,7 +47,9 @@ internal data class SavedFrameType(
 internal class CardVerifyFlow(
     private val requiredCardIssuer: CardIssuer?,
     private val requiredLastFour: String,
-    private val scanResultListener: AggregateResultListener<MainLoopAggregator.InterimResult, MainLoopAggregator.FinalResult>,
+    private val scanResultListener: AggregateResultListener<
+        MainLoopAggregator.InterimResult,
+        MainLoopAggregator.FinalResult>,
     private val scanErrorListener: AnalyzerLoopErrorListener,
 ) : ScanFlow {
 
@@ -67,10 +69,16 @@ internal class CardVerifyFlow(
         ) = withContext(Dispatchers.IO) {
             val deferredFetchers = mutableListOf<Deferred<FetchedData>>()
 
-            deferredFetchers.add(async { SSDOcrModelManager.fetchModel(context, forImmediateUse) })
-            deferredFetchers.add(async { CardDetectModelManager.fetchModel(context, forImmediateUse) })
+            deferredFetchers.add(
+                async { SSDOcrModelManager.fetchModel(context, forImmediateUse) }
+            )
+            deferredFetchers.add(
+                async { CardDetectModelManager.fetchModel(context, forImmediateUse) }
+            )
 
-            deferredFetchers.fold(true) { acc, deferred -> acc && deferred.await().successfullyFetched }
+            deferredFetchers.fold(true) { acc, deferred ->
+                acc && deferred.await().successfullyFetched
+            }
         }
     }
 
@@ -79,9 +87,15 @@ internal class CardVerifyFlow(
      */
     private var canceled = false
 
-    private var mainLoopAnalyzerPool: AnalyzerPool<MainLoopAnalyzer.Input, MainLoopState, MainLoopAnalyzer.Prediction>? = null
+    private var mainLoopAnalyzerPool: AnalyzerPool<
+        MainLoopAnalyzer.Input,
+        MainLoopState,
+        MainLoopAnalyzer.Prediction>? = null
     private var mainLoopAggregator: MainLoopAggregator? = null
-    private var mainLoop: ProcessBoundAnalyzerLoop<MainLoopAnalyzer.Input, MainLoopState, MainLoopAnalyzer.Prediction>? = null
+    private var mainLoop: ProcessBoundAnalyzerLoop<
+        MainLoopAnalyzer.Input,
+        MainLoopState,
+        MainLoopAnalyzer.Prediction>? = null
 
     private var mainLoopJob: Job? = null
 
@@ -92,31 +106,33 @@ internal class CardVerifyFlow(
         lifecycleOwner: LifecycleOwner,
         coroutineScope: CoroutineScope,
     ) = coroutineScope.launch(Dispatchers.Main) {
-        val listener =
-            object : AggregateResultListener<MainLoopAggregator.InterimResult, MainLoopAggregator.FinalResult> {
-                override suspend fun onResult(result: MainLoopAggregator.FinalResult) {
-                    mainLoop?.unsubscribe()
-                    mainLoop = null
+        val listener = object : AggregateResultListener<
+            MainLoopAggregator.InterimResult,
+            MainLoopAggregator.FinalResult> {
 
-                    mainLoopJob?.apply { if (isActive) { cancel() } }
-                    mainLoopJob = null
+            override suspend fun onResult(result: MainLoopAggregator.FinalResult) {
+                mainLoop?.unsubscribe()
+                mainLoop = null
 
-                    mainLoopAggregator = null
+                mainLoopJob?.apply { if (isActive) { cancel() } }
+                mainLoopJob = null
 
-                    mainLoopAnalyzerPool?.closeAllAnalyzers()
-                    mainLoopAnalyzerPool = null
+                mainLoopAggregator = null
 
-                    scanResultListener.onResult(result)
-                }
+                mainLoopAnalyzerPool?.closeAllAnalyzers()
+                mainLoopAnalyzerPool = null
 
-                override suspend fun onInterimResult(result: MainLoopAggregator.InterimResult) {
-                    scanResultListener.onInterimResult(result)
-                }
-
-                override suspend fun onReset() {
-                    scanResultListener.onReset()
-                }
+                scanResultListener.onResult(result)
             }
+
+            override suspend fun onInterimResult(result: MainLoopAggregator.InterimResult) {
+                scanResultListener.onInterimResult(result)
+            }
+
+            override suspend fun onReset() {
+                scanResultListener.onReset()
+            }
+        }
 
         if (canceled) {
             return@launch
@@ -132,8 +148,22 @@ internal class CardVerifyFlow(
 
             val analyzerPool = AnalyzerPool.of(
                 MainLoopAnalyzer.Factory(
-                    SSDOcr.Factory(context, SSDOcrModelManager.fetchModel(context, forImmediateUse = true, isOptional = false)),
-                    CardDetect.Factory(context, CardDetectModelManager.fetchModel(context, forImmediateUse = true, isOptional = false)),
+                    SSDOcr.Factory(
+                        context,
+                        SSDOcrModelManager.fetchModel(
+                            context,
+                            forImmediateUse = true,
+                            isOptional = false
+                        )
+                    ),
+                    CardDetect.Factory(
+                        context,
+                        CardDetectModelManager.fetchModel(
+                            context,
+                            forImmediateUse = true,
+                            isOptional = false,
+                        )
+                    ),
                 )
             )
             mainLoopAnalyzerPool = analyzerPool

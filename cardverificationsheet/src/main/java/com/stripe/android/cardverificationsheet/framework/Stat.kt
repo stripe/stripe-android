@@ -45,7 +45,7 @@ internal object Stats {
      */
     @CheckResult
     fun trackTask(name: String): StatTracker =
-        if (!Config.trackStats) StatTrackerNoOpImpl else StatTrackerImpl { startedAt, result ->
+        StatTrackerImpl { startedAt, result ->
             taskMutex.withLock {
                 val list = tasks[name]
                 if (list == null) {
@@ -84,7 +84,7 @@ internal object Stats {
      */
     @CheckResult
     fun trackRepeatingTask(name: String): StatTracker =
-        if (!Config.trackStats) StatTrackerNoOpImpl else StatTrackerImpl { startedAt, result ->
+        StatTrackerImpl { startedAt, result ->
             repeatingTaskMutex.withLock {
                 val resultName = result ?: "null"
                 val resultStats = repeatingTasks[name] ?: run {
@@ -128,7 +128,7 @@ internal object Stats {
      */
     @CheckResult
     fun trackPersistentRepeatingTask(name: String): StatTracker =
-        if (!Config.trackStats) StatTrackerNoOpImpl else StatTrackerImpl { startedAt, result ->
+        StatTrackerImpl { startedAt, result ->
             persistentRepeatingTasksMutex.withLock {
                 val resultName = result ?: "null"
                 val resultStats = persistentRepeatingTasks[name] ?: run {
@@ -225,11 +225,6 @@ internal interface StatTracker {
      * Track the result from a stat.
      */
     suspend fun trackResult(result: String? = null)
-}
-
-private object StatTrackerNoOpImpl : StatTracker {
-    override val startedAt = Clock.markNow()
-    override suspend fun trackResult(result: String?) { /* do nothing */ }
 }
 
 private class StatTrackerImpl(
