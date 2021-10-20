@@ -1,5 +1,6 @@
 enableFeaturePreview("VERSION_CATALOGS")
 
+include ':cardverificationsheet'
 include ':paymentsheet-example'
 include ':stripe-test-e2e'
 include ':example'
