@@ -9,6 +9,7 @@ import android.graphics.PointF
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.os.Parcelable
 import android.provider.Settings
 import android.util.Log
 import android.util.Size
@@ -38,26 +39,38 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
+import kotlinx.parcelize.Parcelize
 import kotlin.coroutines.CoroutineContext
 
 const val PERMISSION_RATIONALE_SHOWN = "permission_rationale_shown"
+
+@Parcelize
+open class CardVerificationSheetCancelationReason : Parcelable {
+
+    @Parcelize
+    object Closed : CardVerificationSheetCancelationReason()
+
+    @Parcelize
+    object Back : CardVerificationSheetCancelationReason()
+
+    @Parcelize
+    object UserCannotScan : CardVerificationSheetCancelationReason()
+
+    @Parcelize
+    object CameraPermissionDenied : CardVerificationSheetCancelationReason()
+}
 
 interface ScanResultListener {
 
     /**
      * The user canceled the scan.
      */
-    fun userCanceled()
+    fun userCanceled(reason: CardVerificationSheetCancelationReason)
 
     /**
-     * The scan failed because of a camera error.
+     * The scan failed because of an error.
      */
-    fun cameraError(cause: Throwable?)
-
-    /**
-     * The scan failed to analyze images from the camera.
-     */
-    fun analyzerFailure(cause: Throwable?)
+    fun failed(cause: Throwable?)
 }
 
 /**
@@ -98,7 +111,7 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
 
     override val coroutineContext: CoroutineContext = Dispatchers.Main
 
-    private val scanStat = Stats.trackTask("scan_activity")
+    internal val scanStat = Stats.trackTask("scan_activity")
     private val permissionStat = Stats.trackTask("camera_permission")
 
     protected var isFlashlightOn: Boolean = false
@@ -112,7 +125,7 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
     /**
      * The listener which will handle the results from the scan.
      */
-    protected abstract val resultListener: ScanResultListener
+    internal abstract val resultListener: ScanResultListener
 
     private val storage by lazy {
         StorageFactory.getStorageInstance(this, "scan_camera_permissions")
@@ -214,7 +227,7 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
                 }
                 else -> {
                     launch { permissionStat.trackResult("denied") }
-                    userCancelScan()
+                    userDeniedCameraPermission()
                 }
             }
         }
@@ -258,7 +271,7 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
                 openAppSettings()
             }
             .setNegativeButton(R.string.stripe_camera_permission_denied_cancel) { _, _ ->
-                userCancelScan()
+                userDeniedCameraPermission()
             }
         builder.show()
     }
@@ -327,16 +340,43 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
     protected open fun cameraErrorCancelScan(cause: Throwable? = null) {
         Log.e(Config.logTag, "Canceling scan due to camera error", cause)
         launch { scanStat.trackResult("camera_error") }
-        resultListener.cameraError(cause)
+        resultListener.failed(cause)
         closeScanner()
     }
 
     /**
-     * The scan has been cancelled by the user.
+     * The scan has been closed by the user.
      */
-    protected open fun userCancelScan() {
+    protected open fun userClosedScanner() {
         launch { scanStat.trackResult("user_canceled") }
-        resultListener.userCanceled()
+        resultListener.userCanceled(CardVerificationSheetCancelationReason.Closed)
+        closeScanner()
+    }
+
+    /**
+     * The user pressed the back button.
+     */
+    protected open fun userPressedBack() {
+        launch { scanStat.trackResult("user_pressed_back") }
+        resultListener.userCanceled(CardVerificationSheetCancelationReason.Back)
+        closeScanner()
+    }
+
+    /**
+     * The camera permission was denied.
+     */
+    protected open fun userDeniedCameraPermission() {
+        launch { scanStat.trackResult("permissoin_denied") }
+        resultListener.userCanceled(CardVerificationSheetCancelationReason.CameraPermissionDenied)
+        closeScanner()
+    }
+
+    /**
+     * The user cannot scan the required object.
+     */
+    protected open fun userCannotScan() {
+        launch { scanStat.trackResult("user_cannot_scan") }
+        resultListener.userCanceled(CardVerificationSheetCancelationReason.UserCannotScan)
         closeScanner()
     }
 
@@ -346,7 +386,7 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
     protected open fun analyzerFailureCancelScan(cause: Throwable? = null) {
         Log.e(Config.logTag, "Canceling scan due to analyzer error", cause)
         launch { scanStat.trackResult("analyzer_failure") }
-        resultListener.analyzerFailure(cause)
+        resultListener.failed(cause)
         closeScanner()
     }
 
@@ -408,7 +448,7 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
      * Cancel the scan when the user presses back.
      */
     override fun onBackPressed() {
-        userCancelScan()
+        userPressedBack()
     }
 
     /**

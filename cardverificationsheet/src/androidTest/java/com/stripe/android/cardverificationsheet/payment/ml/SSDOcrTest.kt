@@ -5,7 +5,6 @@ import androidx.test.filters.MediumTest
 import androidx.test.platform.app.InstrumentationRegistry
 import com.stripe.android.cardverificationsheet.framework.ResourceFetcher
 import com.stripe.android.cardverificationsheet.framework.Stats
-import com.stripe.android.cardverificationsheet.framework.TrackedImage
 import com.stripe.android.cardverificationsheet.framework.image.size
 import com.stripe.android.cardverificationsheet.framework.util.toRect
 import com.stripe.android.cardverificationsheet.test.R

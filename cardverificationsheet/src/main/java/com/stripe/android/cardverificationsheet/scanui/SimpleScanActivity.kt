@@ -142,7 +142,7 @@ abstract class SimpleScanActivity : ScanActivity() {
     /**
      * The flow used to scan an item.
      */
-    protected abstract val scanFlow: ScanFlow
+    internal abstract val scanFlow: ScanFlow
 
     /**
      * Determine if the background is dark. This is used to set light background vs dark background
@@ -165,7 +165,7 @@ abstract class SimpleScanActivity : ScanActivity() {
         setupVersionUi()
         setupVersionConstraints()
 
-        closeButtonView.setOnClickListener { userCancelScan() }
+        closeButtonView.setOnClickListener { userClosedScanner() }
         torchButtonView.setOnClickListener { toggleFlashlight() }
         swapCameraButtonView.setOnClickListener { toggleCamera() }
 

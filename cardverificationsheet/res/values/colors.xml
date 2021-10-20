@@ -1,5 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <color name="stripeProcessingBackground">#AA000000</color>
+    <color name="stripeProcessingText">@android:color/white</color>
+
+    <color name="stripeButtonDark">@android:color/white</color>
+    <color name="stripeButtonDarkText">@android:color/black</color>
+
+    <color name="stripeButtonLight">@android:color/black</color>
+    <color name="stripeButtonLightText">@android:color/white</color>
+
+    <color name="stripeCardDescriptionColorDark">@android:color/white</color>
+    <color name="stripeCardDescriptionColorLight">@android:color/black</color>
+
+    <color name="stripeCannotScanCardColorDark" description="The color of the Enter Card Manually text displayed at the bottom of the screen when the background is a dark color">@android:color/white</color>
+    <color name="stripeCannotScanCardColorLight" description="The color of the Enter Card Manually text displayed at the bottom of the screen when the background is a light color">@android:color/black</color>
+
     <color name="stripeCardPanColor" description="The text color of the card number displayed over the scan window">@android:color/white</color>
     <color name="stripeCardPanOutlineColor" description="The outline color of the card number displayed over the scan window">@android:color/black</color>
 

@@ -6,7 +6,6 @@ import android.graphics.Rect
 import android.util.Size
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.cardverificationsheet.framework.FetchedData
-import com.stripe.android.cardverificationsheet.framework.TrackedImage
 import com.stripe.android.cardverificationsheet.framework.image.MLImage
 import com.stripe.android.cardverificationsheet.framework.image.scale
 import com.stripe.android.cardverificationsheet.framework.image.toMLImage
@@ -16,15 +15,17 @@ import com.stripe.android.cardverificationsheet.framework.ml.ssd.adjustLocations
 import com.stripe.android.cardverificationsheet.framework.ml.ssd.softMax
 import com.stripe.android.cardverificationsheet.framework.ml.ssd.toRectForm
 import com.stripe.android.cardverificationsheet.framework.util.reshape
+import com.stripe.android.cardverificationsheet.payment.card.CardIssuer
+import com.stripe.android.cardverificationsheet.payment.card.getCardIssuer
+import com.stripe.android.cardverificationsheet.payment.card.isValidPan
+import com.stripe.android.cardverificationsheet.payment.card.lastFour
 import com.stripe.android.cardverificationsheet.payment.cropCameraPreviewToViewFinder
 import com.stripe.android.cardverificationsheet.payment.hasOpenGl31
-import com.stripe.android.cardverificationsheet.payment.ml.ssd.DetectionBox
 import com.stripe.android.cardverificationsheet.payment.ml.ssd.OcrFeatureMapSizes
 import com.stripe.android.cardverificationsheet.payment.ml.ssd.combinePriors
 import com.stripe.android.cardverificationsheet.payment.ml.ssd.determineLayoutAndFilter
 import com.stripe.android.cardverificationsheet.payment.ml.ssd.extractPredictions
 import com.stripe.android.cardverificationsheet.payment.ml.ssd.rearrangeOCRArray
-import kotlinx.coroutines.runBlocking
 import org.tensorflow.lite.Interpreter
 import java.nio.ByteBuffer
 
@@ -99,9 +100,9 @@ internal class SSDOcr private constructor(interpreter: Interpreter) :
         Map<Int, Array<FloatArray>>
         >(interpreter) {
 
-    data class Input(val ssdOcrImage: TrackedImage<MLImage>)
+    data class Input(val ssdOcrImage: MLImage)
 
-    data class Prediction(val pan: String, val detectedBoxes: List<DetectionBox>) {
+    data class Prediction(val cardIssuer: CardIssuer?, val lastFour: String?) {
 
         /**
          * Force a generic toString method to prevent leaking information about this class'
@@ -118,25 +119,18 @@ internal class SSDOcr private constructor(interpreter: Interpreter) :
          * Convert a camera preview image into a SSDOcr input
          */
         fun cameraPreviewToInput(
-            cameraPreviewImage: TrackedImage<Bitmap>,
+            cameraPreviewImage: Bitmap,
             previewBounds: Rect,
             cardFinder: Rect
         ) = Input(
-            TrackedImage(
-                cropCameraPreviewToViewFinder(cameraPreviewImage.image, previewBounds, cardFinder)
-                    .scale(Factory.TRAINED_IMAGE_SIZE)
-                    .toMLImage(mean = IMAGE_MEAN, std = IMAGE_STD).also {
-                        runBlocking {
-                            cameraPreviewImage.tracker.trackResult("ocr_image_transform")
-                        }
-                    },
-                cameraPreviewImage.tracker
-            )
+            cropCameraPreviewToViewFinder(cameraPreviewImage, previewBounds, cardFinder)
+                .scale(Factory.TRAINED_IMAGE_SIZE)
+                .toMLImage(mean = IMAGE_MEAN, std = IMAGE_STD)
         )
     }
 
     override suspend fun transformData(data: Input): Array<ByteBuffer> =
-        arrayOf(data.ssdOcrImage.image.getData())
+        arrayOf(data.ssdOcrImage.getData())
 
     override suspend fun interpretMLOutput(
         data: Input,
@@ -179,9 +173,11 @@ internal class SSDOcr private constructor(interpreter: Interpreter) :
         )
 
         val predictedNumber = detectedBoxes.map { it.label }.joinToString("")
-
-        data.ssdOcrImage.tracker.trackResult("ocr_prediction_complete")
-        return Prediction(predictedNumber, detectedBoxes)
+        return if (isValidPan(predictedNumber)) {
+            Prediction(getCardIssuer(predictedNumber), predictedNumber.lastFour())
+        } else {
+            Prediction(null, null)
+        }
     }
 
     override suspend fun executeInference(

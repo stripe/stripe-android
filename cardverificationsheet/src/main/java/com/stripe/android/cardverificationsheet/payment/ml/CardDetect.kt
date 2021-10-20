@@ -5,7 +5,6 @@ import android.graphics.Bitmap
 import android.graphics.Rect
 import android.util.Size
 import com.stripe.android.cardverificationsheet.framework.FetchedData
-import com.stripe.android.cardverificationsheet.framework.TrackedImage
 import com.stripe.android.cardverificationsheet.framework.image.MLImage
 import com.stripe.android.cardverificationsheet.framework.image.scale
 import com.stripe.android.cardverificationsheet.framework.image.toMLImage
@@ -14,7 +13,6 @@ import com.stripe.android.cardverificationsheet.framework.ml.TensorFlowLiteAnaly
 import com.stripe.android.cardverificationsheet.framework.util.indexOfMax
 import com.stripe.android.cardverificationsheet.payment.cropCameraPreviewToSquare
 import com.stripe.android.cardverificationsheet.payment.hasOpenGl31
-import kotlinx.coroutines.runBlocking
 import org.tensorflow.lite.Interpreter
 import java.nio.ByteBuffer
 import kotlin.math.max
@@ -37,25 +35,17 @@ internal class CardDetect private constructor(interpreter: Interpreter) :
          * Convert a camera preview image into a CardDetect input
          */
         fun cameraPreviewToInput(
-            cameraPreviewImage: TrackedImage<Bitmap>,
+            cameraPreviewImage: Bitmap,
             previewBounds: Rect,
             cardFinder: Rect,
         ) = Input(
-            TrackedImage(
-                cropCameraPreviewToSquare(cameraPreviewImage.image, previewBounds, cardFinder)
-                    .scale(TRAINED_IMAGE_SIZE)
-                    .toMLImage()
-                    .also {
-                        runBlocking {
-                            cameraPreviewImage.tracker.trackResult("card_detect_image_cropped")
-                        }
-                    },
-                cameraPreviewImage.tracker,
-            )
+            cropCameraPreviewToSquare(cameraPreviewImage, previewBounds, cardFinder)
+                .scale(TRAINED_IMAGE_SIZE)
+                .toMLImage()
         )
     }
 
-    data class Input(val cardDetectImage: TrackedImage<MLImage>)
+    data class Input(val cardDetectImage: MLImage)
 
     /**
      * A prediction returned by this analyzer.
@@ -95,8 +85,6 @@ internal class CardDetect private constructor(interpreter: Interpreter) :
             )
         }
 
-        data.cardDetectImage.tracker.trackResult("card_detect_prediction_complete")
-
         return Prediction(
             side = side,
             noPanProbability = mlOutput[0][0],
@@ -106,7 +94,7 @@ internal class CardDetect private constructor(interpreter: Interpreter) :
     }
 
     override suspend fun transformData(data: Input): ByteBuffer =
-        data.cardDetectImage.image.getData()
+        data.cardDetectImage.getData()
 
     override suspend fun executeInference(
         tfInterpreter: Interpreter,

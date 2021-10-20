@@ -39,7 +39,7 @@ private val MAXIMUM_RESOLUTION = Size(1920, 1080)
 
 data class CameraPreviewImage<ImageType>(
     val image: ImageType,
-    val viewSize: Rect,
+    val viewBounds: Rect,
 )
 
 /**
@@ -129,7 +129,7 @@ internal class Camera1Adapter(
                         image = NV21Image(imageWidth, imageHeight, bytes)
                             .toBitmap(getRenderScript(activity))
                             .rotate(mRotation.toFloat()),
-                        viewSize = Rect(0, 0, previewView.width, previewView.height),
+                        viewBounds = Rect(0, 0, previewView.width, previewView.height),
                     ),
                 )
             } catch (t: Throwable) {
