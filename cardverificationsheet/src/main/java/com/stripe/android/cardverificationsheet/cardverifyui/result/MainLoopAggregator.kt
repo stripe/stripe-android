@@ -11,6 +11,7 @@ import com.stripe.android.cardverificationsheet.framework.util.FrameSaver
 import com.stripe.android.cardverificationsheet.payment.card.CardIssuer
 import com.stripe.android.cardverificationsheet.payment.card.RequiresMatchingCard
 import com.stripe.android.cardverificationsheet.payment.card.isValidPanLastFour
+import com.stripe.android.cardverificationsheet.payment.ml.SSDOcr
 import kotlinx.coroutines.runBlocking
 
 /**
@@ -68,10 +69,7 @@ internal class MainLoopAggregator(
             metaData: InterimResult,
         ): SavedFrameType? {
             val hasCard = metaData.analyzerResult.isCardVisible == true
-            val hasOcr = matchesRequiredCard(
-                metaData.analyzerResult.ocr?.cardIssuer,
-                metaData.analyzerResult.ocr?.lastFour,
-            )
+            val hasOcr = metaData.analyzerResult.ocr?.outcome is SSDOcr.OcrOutcome.Match
             return if (hasCard || hasOcr) {
                 SavedFrameType(hasCard = hasCard, hasOcr = hasOcr)
             } else {
@@ -96,7 +94,7 @@ internal class MainLoopAggregator(
         )
 
         val savedFrame = SavedFrame(
-            hasOcr = result.ocr?.lastFour != null,
+            hasOcr = result.ocr?.outcome is SSDOcr.OcrOutcome.Match,
             frame = frame,
         )
 

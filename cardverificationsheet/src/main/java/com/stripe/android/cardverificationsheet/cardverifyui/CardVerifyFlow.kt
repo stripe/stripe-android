@@ -178,6 +178,8 @@ internal class CardVerifyFlow(
                         MainLoopAnalyzer.Input(
                             cameraPreviewImage = it,
                             cardFinder = viewFinder,
+                            requiredCardIssuer = requiredCardIssuer,
+                            requiredLastFour = requiredLastFour,
                         )
                     },
                     coroutineScope,

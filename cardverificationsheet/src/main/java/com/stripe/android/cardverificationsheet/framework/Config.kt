@@ -1,8 +1,12 @@
 package com.stripe.android.cardverificationsheet.framework
 
+import com.stripe.android.cardverificationsheet.framework.api.Network
+import com.stripe.android.cardverificationsheet.framework.api.StripeNetwork
 import com.stripe.android.cardverificationsheet.framework.time.Duration
 import com.stripe.android.cardverificationsheet.framework.time.seconds
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.properties.Properties
 
 object Config {
 
@@ -26,12 +30,6 @@ object Config {
 }
 
 object NetworkConfig {
-
-    /**
-     * The base URL where all network requests will be sent
-     */
-    @JvmStatic
-    var baseUrl = "https://api.stripe.com"
 
     /**
      * Whether or not to compress network request bodies.
@@ -66,4 +64,19 @@ object NetworkConfig {
         isLenient = true
         encodeDefaults = true
     }
+
+    @JvmStatic
+    @ExperimentalSerializationApi
+    var form: Properties = Properties
+
+    /**
+     * The network interface to use
+     */
+    @JvmStatic
+    var network: Network = StripeNetwork(
+        baseUrl = "https://api.stripe.com",
+        retryDelay = retryDelay,
+        retryTotalAttempts = retryTotalAttempts,
+        retryStatusCodes = retryStatusCodes,
+    )
 }

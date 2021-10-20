@@ -4,7 +4,6 @@ import androidx.core.graphics.drawable.toBitmap
 import androidx.test.filters.MediumTest
 import androidx.test.platform.app.InstrumentationRegistry
 import com.stripe.android.cardverificationsheet.framework.ResourceFetcher
-import com.stripe.android.cardverificationsheet.framework.Stats
 import com.stripe.android.cardverificationsheet.framework.image.size
 import com.stripe.android.cardverificationsheet.framework.util.toRect
 import com.stripe.android.cardverificationsheet.test.R
@@ -44,14 +43,18 @@ class SSDOcrTest {
 
         val prediction = model.analyze(
             SSDOcr.cameraPreviewToInput(
-                TrackedImage(bitmap, Stats.trackTask("no_op")),
+                bitmap,
                 bitmap.size().toRect(),
                 bitmap.size().toRect(),
+                null,
+                "1104",
             ),
             Unit
         )
         assertNotNull(prediction)
-        assertEquals("3023334877861104", prediction.pan)
+
+        // card number is "3023334877861104"
+        assertEquals(SSDOcr.OcrOutcome.Match, prediction.outcome)
     }
 
     /**
@@ -79,14 +82,18 @@ class SSDOcrTest {
 
         val prediction = model.analyze(
             SSDOcr.cameraPreviewToInput(
-                TrackedImage(bitmap, Stats.trackTask("no_op")),
+                bitmap,
                 bitmap.size().toRect(),
                 bitmap.size().toRect(),
+                null,
+                "4242",
             ),
             Unit
         )
         assertNotNull(prediction)
-        assertEquals("4242424242424242", prediction.pan)
+
+        // card number is "4242424242424242"
+        assertEquals(SSDOcr.OcrOutcome.Match, prediction.outcome)
     }
 
     /**
@@ -114,24 +121,31 @@ class SSDOcrTest {
 
         val prediction1 = model.analyze(
             SSDOcr.cameraPreviewToInput(
-                TrackedImage(bitmap, Stats.trackTask("no_op")),
+                bitmap,
                 bitmap.size().toRect(),
                 bitmap.size().toRect(),
+                null,
+                "1104",
             ),
             Unit
         )
         val prediction2 = model.analyze(
             SSDOcr.cameraPreviewToInput(
-                TrackedImage(bitmap, Stats.trackTask("no_op")),
+                bitmap,
                 bitmap.size().toRect(),
                 bitmap.size().toRect(),
+                null,
+                "1234",
             ),
             Unit
         )
+
+        // card number is "3023334877861104"
+
         assertNotNull(prediction1)
-        assertEquals("3023334877861104", prediction1.pan)
+        assertEquals(SSDOcr.OcrOutcome.Match, prediction1.outcome)
 
         assertNotNull(prediction2)
-        assertEquals("3023334877861104", prediction2.pan)
+        assertEquals(SSDOcr.OcrOutcome.Mismatch, prediction2.outcome)
     }
 }

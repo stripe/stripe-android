@@ -289,14 +289,16 @@ public abstract class com/stripe/android/cardverificationsheet/framework/Machine
 public final class com/stripe/android/cardverificationsheet/framework/NetworkConfig {
 	public static final field $stable I
 	public static final field INSTANCE Lcom/stripe/android/cardverificationsheet/framework/NetworkConfig;
-	public static final fun getBaseUrl ()Ljava/lang/String;
+	public static final fun getForm ()Lkotlinx/serialization/properties/Properties;
 	public static final fun getJson ()Lkotlinx/serialization/json/Json;
+	public static final fun getNetwork ()Lcom/stripe/android/cardverificationsheet/framework/api/Network;
 	public static final fun getRetryDelay ()Lcom/stripe/android/cardverificationsheet/framework/time/Duration;
 	public static final fun getRetryStatusCodes ()Ljava/lang/Iterable;
 	public static final fun getRetryTotalAttempts ()I
 	public static final fun getUseCompression ()Z
-	public static final fun setBaseUrl (Ljava/lang/String;)V
+	public static final fun setForm (Lkotlinx/serialization/properties/Properties;)V
 	public static final fun setJson (Lkotlinx/serialization/json/Json;)V
+	public static final fun setNetwork (Lcom/stripe/android/cardverificationsheet/framework/api/Network;)V
 	public static final fun setRetryDelay (Lcom/stripe/android/cardverificationsheet/framework/time/Duration;)V
 	public static final fun setRetryStatusCodes (Ljava/lang/Iterable;)V
 	public static final fun setRetryTotalAttempts (I)V
@@ -383,6 +385,60 @@ protected final class com/stripe/android/cardverificationsheet/framework/WebFetc
 	public final fun getHashAlgorithm ()Ljava/lang/String;
 	public final fun getModelVersion ()Ljava/lang/String;
 	public final fun getUrl ()Ljava/net/URL;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface class com/stripe/android/cardverificationsheet/framework/api/Network {
+	public abstract fun getForResult (Ljava/lang/String;Ljava/lang/String;Lkotlinx/serialization/KSerializer;Lkotlinx/serialization/KSerializer;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun postData (Ljava/lang/String;Ljava/lang/String;Ljava/lang/Object;Lkotlinx/serialization/KSerializer;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun postForResult (Ljava/lang/String;Ljava/lang/String;Ljava/lang/Object;Lkotlinx/serialization/KSerializer;Lkotlinx/serialization/KSerializer;Lkotlinx/serialization/KSerializer;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public abstract class com/stripe/android/cardverificationsheet/framework/api/NetworkResult {
+	public static final field $stable I
+	public synthetic fun <init> (ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun getResponseCode ()I
+}
+
+public final class com/stripe/android/cardverificationsheet/framework/api/NetworkResult$Error : com/stripe/android/cardverificationsheet/framework/api/NetworkResult {
+	public static final field $stable I
+	public fun <init> (ILjava/lang/Object;)V
+	public final fun component1 ()I
+	public final fun component2 ()Ljava/lang/Object;
+	public final fun copy (ILjava/lang/Object;)Lcom/stripe/android/cardverificationsheet/framework/api/NetworkResult$Error;
+	public static synthetic fun copy$default (Lcom/stripe/android/cardverificationsheet/framework/api/NetworkResult$Error;ILjava/lang/Object;ILjava/lang/Object;)Lcom/stripe/android/cardverificationsheet/framework/api/NetworkResult$Error;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getError ()Ljava/lang/Object;
+	public fun getResponseCode ()I
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/cardverificationsheet/framework/api/NetworkResult$Exception : com/stripe/android/cardverificationsheet/framework/api/NetworkResult {
+	public static final field $stable I
+	public fun <init> (ILjava/lang/Throwable;)V
+	public final fun component1 ()I
+	public final fun component2 ()Ljava/lang/Throwable;
+	public final fun copy (ILjava/lang/Throwable;)Lcom/stripe/android/cardverificationsheet/framework/api/NetworkResult$Exception;
+	public static synthetic fun copy$default (Lcom/stripe/android/cardverificationsheet/framework/api/NetworkResult$Exception;ILjava/lang/Throwable;ILjava/lang/Object;)Lcom/stripe/android/cardverificationsheet/framework/api/NetworkResult$Exception;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getException ()Ljava/lang/Throwable;
+	public fun getResponseCode ()I
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/cardverificationsheet/framework/api/NetworkResult$Success : com/stripe/android/cardverificationsheet/framework/api/NetworkResult {
+	public static final field $stable I
+	public fun <init> (ILjava/lang/Object;)V
+	public final fun component1 ()I
+	public final fun component2 ()Ljava/lang/Object;
+	public final fun copy (ILjava/lang/Object;)Lcom/stripe/android/cardverificationsheet/framework/api/NetworkResult$Success;
+	public static synthetic fun copy$default (Lcom/stripe/android/cardverificationsheet/framework/api/NetworkResult$Success;ILjava/lang/Object;ILjava/lang/Object;)Lcom/stripe/android/cardverificationsheet/framework/api/NetworkResult$Success;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBody ()Ljava/lang/Object;
+	public fun getResponseCode ()I
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
@@ -579,9 +635,12 @@ public final class com/stripe/android/cardverificationsheet/framework/util/Array
 	public static final fun updateEach ([Ljava/lang/Object;Lkotlin/jvm/functions/Function1;)V
 }
 
-public final class com/stripe/android/cardverificationsheet/framework/util/Base64Kt {
+public final class com/stripe/android/cardverificationsheet/framework/util/EncodeKt {
 	public static final fun b64Encode (Ljava/lang/String;)Ljava/lang/String;
 	public static final fun b64Encode ([B)Ljava/lang/String;
+	public static final fun decodeFromJson (Lkotlinx/serialization/DeserializationStrategy;Ljava/lang/String;)Ljava/lang/Object;
+	public static final fun encodeToJson (Lkotlinx/serialization/SerializationStrategy;Ljava/lang/Object;)Ljava/lang/String;
+	public static final fun encodeToXWWWFormUrl (Lkotlinx/serialization/SerializationStrategy;Ljava/lang/Object;)Ljava/lang/String;
 }
 
 public final class com/stripe/android/cardverificationsheet/framework/util/FileKt {

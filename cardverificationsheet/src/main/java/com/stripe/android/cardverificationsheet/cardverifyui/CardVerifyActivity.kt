@@ -37,6 +37,7 @@ import com.stripe.android.cardverificationsheet.scanui.ScanResultListener
 import com.stripe.android.cardverificationsheet.scanui.SimpleScanActivity
 import com.stripe.android.cardverificationsheet.scanui.util.getColorByRes
 import com.stripe.android.cardverificationsheet.scanui.util.getDrawableByRes
+import com.stripe.android.cardverificationsheet.scanui.util.hide
 import com.stripe.android.cardverificationsheet.scanui.util.setTextSizeByRes
 import com.stripe.android.cardverificationsheet.scanui.util.setVisible
 import com.stripe.android.cardverificationsheet.scanui.util.show
@@ -370,28 +371,20 @@ open class CardVerifyActivity : SimpleScanActivity() {
                 scanStat.trackResult("ocr_pan_observed")
             }
 
-            val (mostLikelyCardIssuer, mostLikelyLastFour) = when (val state = result.state) {
-                is MainLoopState.Initial ->
-                    null to null
-                is MainLoopState.PanFound ->
-                    state.getMostLikelyCardIssuer() to state.getMostLikelyLastFour()
-                is MainLoopState.PanSatisfied ->
-                    state.cardIssuer to state.lastFour
-                is MainLoopState.CardSatisfied ->
-                    state.getMostLikelyCardIssuer() to state.getMostLikelyLastFour()
-                is MainLoopState.WrongPanFound ->
-                    null to null
-                is MainLoopState.Finished ->
-                    state.cardIssuer to state.lastFour
+            val (cardIssuer, lastFour) = when (result.state) {
+                is MainLoopState.Initial -> null to null
+                is MainLoopState.PanFound -> requiredCardIssuer to requiredCardLastFour
+                is MainLoopState.PanSatisfied -> requiredCardIssuer to requiredCardLastFour
+                is MainLoopState.CardSatisfied -> requiredCardIssuer to requiredCardLastFour
+                is MainLoopState.WrongPanFound -> null to null
+                is MainLoopState.Finished -> requiredCardIssuer to requiredCardLastFour
             }
-            if (mostLikelyLastFour != null) {
+            if (lastFour != null) {
                 cardNumberTextView.text =
-                    getString(
-                        R.string.stripe_card_description,
-                        mostLikelyCardIssuer,
-                        mostLikelyLastFour,
-                    )
+                    getString(R.string.stripe_card_description, cardIssuer, lastFour)
                 cardNumberTextView.show()
+            } else {
+                cardNumberTextView.hide()
             }
 
             when (result.state) {

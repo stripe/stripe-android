@@ -5,7 +5,6 @@ import com.stripe.android.cardverificationsheet.cardverifyui.VerifyConfig
 import com.stripe.android.cardverificationsheet.cardverifyui.analyzer.MainLoopAnalyzer
 import com.stripe.android.cardverificationsheet.framework.time.delay
 import com.stripe.android.cardverificationsheet.framework.time.milliseconds
-import com.stripe.android.cardverificationsheet.framework.util.ItemTotalCounter
 import com.stripe.android.cardverificationsheet.payment.card.CardIssuer
 import com.stripe.android.cardverificationsheet.payment.ml.CardDetect
 import com.stripe.android.cardverificationsheet.payment.ml.SSDOcr
@@ -59,17 +58,12 @@ class MainLoopStateMachineTest {
         )
 
         val prediction = MainLoopAnalyzer.Prediction(
-            ocr = SSDOcr.Prediction(
-                cardIssuer = CardIssuer.Visa,
-                lastFour = "5016",
-            ),
+            ocr = SSDOcr.Prediction(SSDOcr.OcrOutcome.Mismatch),
             card = null,
         )
 
         val newState = state.consumeTransition(prediction)
         assertTrue(newState is MainLoopState.WrongPanFound)
-        assertEquals(CardIssuer.Visa, newState.cardIssuer)
-        assertEquals("5016", newState.lastFour)
         assertEquals("8770", newState.requiredLastFour)
     }
 
@@ -82,29 +76,17 @@ class MainLoopStateMachineTest {
         )
 
         val prediction = MainLoopAnalyzer.Prediction(
-            ocr = SSDOcr.Prediction(
-                cardIssuer = CardIssuer.Visa,
-                lastFour = "8770",
-            ),
+            ocr = SSDOcr.Prediction(SSDOcr.OcrOutcome.Match),
             card = null,
         )
 
         val newState = state.consumeTransition(prediction)
         assertTrue(newState is MainLoopState.PanFound)
-        assertEquals(CardIssuer.Visa, newState.getMostLikelyCardIssuer())
-        assertEquals("8770", newState.getMostLikelyLastFour())
     }
 
     @Test
     fun panFound_runsCardDetectAndOcrOnly() {
-        val state = MainLoopState.PanFound(
-            resultCounter = ItemTotalCounter(
-                SSDOcr.Prediction(
-                    cardIssuer = CardIssuer.Visa,
-                    lastFour = "8770",
-                )
-            ),
-        )
+        val state = MainLoopState.PanFound(1)
 
         assertTrue(state.runOcr)
         assertTrue(state.runCardDetect)
@@ -113,40 +95,21 @@ class MainLoopStateMachineTest {
     @Test
     @ExperimentalCoroutinesApi
     fun panFound_noCard_noTimeout() = runBlockingTest {
-        val state = MainLoopState.PanFound(
-            resultCounter = ItemTotalCounter(
-                SSDOcr.Prediction(
-                    cardIssuer = CardIssuer.Visa,
-                    lastFour = "8770",
-                )
-            ),
-        )
+        val state = MainLoopState.PanFound(1)
 
         val prediction = MainLoopAnalyzer.Prediction(
-            ocr = SSDOcr.Prediction(
-                cardIssuer = CardIssuer.Visa,
-                lastFour = "8770",
-            ),
+            ocr = SSDOcr.Prediction(SSDOcr.OcrOutcome.Match),
             card = null,
         )
 
         val newState = state.consumeTransition(prediction)
         assertTrue(newState is MainLoopState.PanFound)
-        assertEquals(CardIssuer.Visa, newState.getMostLikelyCardIssuer())
-        assertEquals("8770", newState.getMostLikelyLastFour())
     }
 
     @Test
     @ExperimentalCoroutinesApi
     fun panFound_cardSatisfied_noTimeout() = runBlockingTest {
-        var state: MainLoopState = MainLoopState.PanFound(
-            resultCounter = ItemTotalCounter(
-                SSDOcr.Prediction(
-                    cardIssuer = CardIssuer.Visa,
-                    lastFour = "8770",
-                )
-            ),
-        )
+        var state: MainLoopState = MainLoopState.PanFound(1)
 
         val prediction = MainLoopAnalyzer.Prediction(
             ocr = null,
@@ -165,27 +128,15 @@ class MainLoopStateMachineTest {
 
         val newState = state.consumeTransition(prediction)
         assertTrue(newState is MainLoopState.CardSatisfied)
-        assertEquals(CardIssuer.Visa, newState.getMostLikelyCardIssuer())
-        assertEquals("8770", newState.getMostLikelyLastFour())
     }
 
     @Test
     @ExperimentalCoroutinesApi
     fun panFound_panSatisfied_noTimeout() = runBlockingTest {
-        var state: MainLoopState = MainLoopState.PanFound(
-            resultCounter = ItemTotalCounter(
-                SSDOcr.Prediction(
-                    cardIssuer = CardIssuer.Visa,
-                    lastFour = "8770",
-                )
-            ),
-        )
+        var state: MainLoopState = MainLoopState.PanFound(1)
 
         val prediction = MainLoopAnalyzer.Prediction(
-            ocr = SSDOcr.Prediction(
-                cardIssuer = CardIssuer.Visa,
-                lastFour = "8770",
-            ),
+            ocr = SSDOcr.Prediction(SSDOcr.OcrOutcome.Match),
             card = null,
         )
 
@@ -196,8 +147,6 @@ class MainLoopStateMachineTest {
 
         val newState = state.consumeTransition(prediction)
         assertTrue(newState is MainLoopState.PanSatisfied)
-        assertEquals(CardIssuer.Visa, newState.cardIssuer)
-        assertEquals("8770", newState.lastFour)
     }
 
     /**
@@ -208,20 +157,10 @@ class MainLoopStateMachineTest {
     @Test
     @ExperimentalCoroutinesApi
     fun panFound_panSatisfied_timeout() = runBlocking {
-        var state: MainLoopState = MainLoopState.PanFound(
-            resultCounter = ItemTotalCounter(
-                SSDOcr.Prediction(
-                    cardIssuer = CardIssuer.Visa,
-                    lastFour = "8770",
-                )
-            ),
-        )
+        var state: MainLoopState = MainLoopState.PanFound(1)
 
         val prediction = MainLoopAnalyzer.Prediction(
-            ocr = SSDOcr.Prediction(
-                cardIssuer = CardIssuer.Visa,
-                lastFour = "8770",
-            ),
+            ocr = SSDOcr.Prediction(SSDOcr.OcrOutcome.Match),
             card = null,
         )
 
@@ -234,8 +173,6 @@ class MainLoopStateMachineTest {
 
         val newState = state.consumeTransition(prediction)
         assertTrue(newState is MainLoopState.PanSatisfied)
-        assertEquals(CardIssuer.Visa, newState.cardIssuer)
-        assertEquals("8770", newState.lastFour)
     }
 
     /**
@@ -246,14 +183,7 @@ class MainLoopStateMachineTest {
     @Test
     @LargeTest
     fun panFound_timeout() = runBlocking {
-        val state = MainLoopState.PanFound(
-            resultCounter = ItemTotalCounter(
-                SSDOcr.Prediction(
-                    cardIssuer = CardIssuer.Visa,
-                    lastFour = "8770",
-                )
-            ),
-        )
+        val state = MainLoopState.PanFound(1)
 
         delay(VerifyConfig.PAN_AND_CARD_SEARCH_DURATION + 1.milliseconds)
 
@@ -264,15 +194,11 @@ class MainLoopStateMachineTest {
 
         val newState = state.consumeTransition(prediction)
         assertTrue(newState is MainLoopState.Finished, "$newState is not Finished")
-        assertEquals(CardIssuer.Visa, newState.cardIssuer)
-        assertEquals("8770", newState.lastFour)
     }
 
     @Test
     fun panSatisfied_runsCardDetectOnly() {
         val state = MainLoopState.PanSatisfied(
-            cardIssuer = CardIssuer.Visa,
-            lastFour = "8770",
             visibleCardCount = 0,
         )
 
@@ -284,8 +210,6 @@ class MainLoopStateMachineTest {
     @ExperimentalCoroutinesApi
     fun panSatisfied_noCard_noTimeout() = runBlockingTest {
         val state = MainLoopState.PanSatisfied(
-            cardIssuer = CardIssuer.Visa,
-            lastFour = "8770",
             visibleCardCount = 0,
         )
 
@@ -301,16 +225,12 @@ class MainLoopStateMachineTest {
 
         val newState = state.consumeTransition(prediction)
         assertTrue(newState is MainLoopState.PanSatisfied)
-        assertEquals(CardIssuer.Visa, newState.cardIssuer)
-        assertEquals("8770", newState.lastFour)
     }
 
     @Test
     @ExperimentalCoroutinesApi
     fun panSatisfied_enoughSides_noTimeout() = runBlockingTest {
         val state = MainLoopState.PanSatisfied(
-            cardIssuer = CardIssuer.Visa,
-            lastFour = "8770",
             visibleCardCount = VerifyConfig.DESIRED_SIDE_COUNT - 1,
         )
 
@@ -326,8 +246,6 @@ class MainLoopStateMachineTest {
 
         val newState = state.consumeTransition(prediction)
         assertTrue(newState is MainLoopState.Finished)
-        assertEquals(CardIssuer.Visa, newState.cardIssuer)
-        assertEquals("8770", newState.lastFour)
     }
 
     /**
@@ -339,8 +257,6 @@ class MainLoopStateMachineTest {
     @LargeTest
     fun panSatisfied_timeout() = runBlocking {
         val state = MainLoopState.PanSatisfied(
-            cardIssuer = CardIssuer.Visa,
-            lastFour = "8770",
             visibleCardCount = VerifyConfig.DESIRED_SIDE_COUNT - 1,
         )
 
@@ -353,20 +269,11 @@ class MainLoopStateMachineTest {
 
         val newState = state.consumeTransition(prediction)
         assertTrue(newState is MainLoopState.Finished)
-        assertEquals(CardIssuer.Visa, newState.cardIssuer)
-        assertEquals("8770", newState.lastFour)
     }
 
     @Test
     fun cardSatisfied_runsOcrOnly() {
-        val state = MainLoopState.CardSatisfied(
-            resultCounter = ItemTotalCounter(
-                SSDOcr.Prediction(
-                    cardIssuer = CardIssuer.Visa,
-                    lastFour = "8770",
-                )
-            ),
-        )
+        val state = MainLoopState.CardSatisfied(1)
 
         assertTrue(state.runOcr)
         assertFalse(state.runCardDetect)
@@ -375,46 +282,24 @@ class MainLoopStateMachineTest {
     @Test
     @ExperimentalCoroutinesApi
     fun cardSatisfied_noPan_noTimeout() = runBlockingTest {
-        val state = MainLoopState.CardSatisfied(
-            resultCounter = ItemTotalCounter(
-                SSDOcr.Prediction(
-                    cardIssuer = CardIssuer.Visa,
-                    lastFour = "8770",
-                )
-            ),
-        )
+        val state = MainLoopState.CardSatisfied(1)
 
         val prediction = MainLoopAnalyzer.Prediction(
-            ocr = SSDOcr.Prediction(
-                cardIssuer = CardIssuer.Visa,
-                lastFour = "8770",
-            ),
+            ocr = SSDOcr.Prediction(SSDOcr.OcrOutcome.Match),
             card = null,
         )
 
         val newState = state.consumeTransition(prediction)
         assertTrue(newState is MainLoopState.CardSatisfied)
-        assertEquals(CardIssuer.Visa, newState.getMostLikelyCardIssuer())
-        assertEquals("8770", newState.getMostLikelyLastFour())
     }
 
     @Test
     @ExperimentalCoroutinesApi
     fun cardSatisfied_pan_noTimeout() = runBlockingTest {
-        var state: MainLoopState = MainLoopState.CardSatisfied(
-            resultCounter = ItemTotalCounter(
-                SSDOcr.Prediction(
-                    cardIssuer = CardIssuer.Visa,
-                    lastFour = "8770",
-                )
-            ),
-        )
+        var state: MainLoopState = MainLoopState.CardSatisfied(1)
 
         val prediction = MainLoopAnalyzer.Prediction(
-            ocr = SSDOcr.Prediction(
-                cardIssuer = CardIssuer.Visa,
-                lastFour = "8770",
-            ),
+            ocr = SSDOcr.Prediction(SSDOcr.OcrOutcome.Match),
             card = null,
         )
 
@@ -425,8 +310,6 @@ class MainLoopStateMachineTest {
 
         val newState = state.consumeTransition(prediction)
         assertTrue(newState is MainLoopState.Finished)
-        assertEquals(CardIssuer.Visa, newState.cardIssuer)
-        assertEquals("8770", newState.lastFour)
     }
 
     /**
@@ -437,14 +320,7 @@ class MainLoopStateMachineTest {
     @Test
     @LargeTest
     fun cardSatisfied_noPan_timeout() = runBlocking {
-        val state = MainLoopState.CardSatisfied(
-            resultCounter = ItemTotalCounter(
-                SSDOcr.Prediction(
-                    cardIssuer = CardIssuer.Visa,
-                    lastFour = "8770",
-                )
-            ),
-        )
+        val state = MainLoopState.CardSatisfied(1)
 
         val prediction = MainLoopAnalyzer.Prediction(
             ocr = null,
@@ -455,15 +331,11 @@ class MainLoopStateMachineTest {
 
         val newState = state.consumeTransition(prediction)
         assertTrue(newState is MainLoopState.Finished)
-        assertEquals(CardIssuer.Visa, newState.cardIssuer)
-        assertEquals("8770", newState.lastFour)
     }
 
     @Test
     fun wrongPanFound_runsOcrOnly() {
         val state = MainLoopState.WrongPanFound(
-            cardIssuer = CardIssuer.Unknown,
-            lastFour = "5016",
             requiredCardIssuer = CardIssuer.Visa,
             requiredLastFour = "8770",
         )
@@ -476,8 +348,6 @@ class MainLoopStateMachineTest {
     @ExperimentalCoroutinesApi
     fun wrongPanFound_noPan_noTimeout() = runBlockingTest {
         val state = MainLoopState.WrongPanFound(
-            cardIssuer = CardIssuer.Unknown,
-            lastFour = "5016",
             requiredCardIssuer = CardIssuer.Visa,
             requiredLastFour = "8770",
         )
@@ -489,56 +359,40 @@ class MainLoopStateMachineTest {
 
         val newState = state.consumeTransition(prediction)
         assertTrue(newState is MainLoopState.WrongPanFound)
-        assertEquals(CardIssuer.Unknown, newState.cardIssuer)
-        assertEquals("5016", newState.lastFour)
     }
 
     @Test
     @ExperimentalCoroutinesApi
     fun wrongPanFound_wrongPan_noTimeout() = runBlockingTest {
         val state = MainLoopState.WrongPanFound(
-            cardIssuer = CardIssuer.Unknown,
-            lastFour = "5016",
             requiredCardIssuer = CardIssuer.MasterCard,
             requiredLastFour = "8770",
         )
 
         val prediction = MainLoopAnalyzer.Prediction(
-            ocr = SSDOcr.Prediction(
-                cardIssuer = CardIssuer.MasterCard,
-                lastFour = "5024",
-            ),
+            ocr = SSDOcr.Prediction(SSDOcr.OcrOutcome.Mismatch),
             card = null,
         )
 
         val newState = state.consumeTransition(prediction)
         assertTrue(newState is MainLoopState.WrongPanFound)
-        assertEquals(CardIssuer.MasterCard, newState.cardIssuer)
-        assertEquals("5024", newState.lastFour)
     }
 
     @Test
     @ExperimentalCoroutinesApi
     fun wrongPanFound_rightPan_noTimeout() = runBlockingTest {
         val state = MainLoopState.WrongPanFound(
-            cardIssuer = CardIssuer.Unknown,
-            lastFour = "5016",
             requiredCardIssuer = CardIssuer.Visa,
             requiredLastFour = "8770",
         )
 
         val prediction = MainLoopAnalyzer.Prediction(
-            ocr = SSDOcr.Prediction(
-                cardIssuer = CardIssuer.Visa,
-                lastFour = "8770",
-            ),
+            ocr = SSDOcr.Prediction(SSDOcr.OcrOutcome.Match),
             card = null,
         )
 
         val newState = state.consumeTransition(prediction)
         assertTrue(newState is MainLoopState.PanFound, "$newState is not PanFound")
-        assertEquals(CardIssuer.Visa, newState.getMostLikelyCardIssuer())
-        assertEquals("8770", newState.getMostLikelyLastFour())
     }
 
     /**
@@ -550,8 +404,6 @@ class MainLoopStateMachineTest {
     @LargeTest
     fun wrongPanFound_noPan_timeout() = runBlocking {
         val state = MainLoopState.WrongPanFound(
-            cardIssuer = CardIssuer.Unknown,
-            lastFour = "5016",
             requiredCardIssuer = CardIssuer.Visa,
             requiredLastFour = "8770",
         )
@@ -569,10 +421,7 @@ class MainLoopStateMachineTest {
 
     @Test
     fun finished_runsNothing() {
-        val state = MainLoopState.Finished(
-            cardIssuer = CardIssuer.Visa,
-            lastFour = "8770",
-        )
+        val state = MainLoopState.Finished
 
         assertFalse(state.runOcr)
         assertFalse(state.runCardDetect)
@@ -581,16 +430,10 @@ class MainLoopStateMachineTest {
     @Test
     @ExperimentalCoroutinesApi
     fun finished_goesNowhere() = runBlockingTest {
-        val state = MainLoopState.Finished(
-            cardIssuer = CardIssuer.Visa,
-            lastFour = "8770",
-        )
+        val state = MainLoopState.Finished
 
         val prediction = MainLoopAnalyzer.Prediction(
-            ocr = SSDOcr.Prediction(
-                cardIssuer = CardIssuer.Visa,
-                lastFour = "8770",
-            ),
+            ocr = SSDOcr.Prediction(SSDOcr.OcrOutcome.Match),
             card = CardDetect.Prediction(
                 side = CardDetect.Prediction.Side.NO_CARD,
                 panProbability = 0.0F,

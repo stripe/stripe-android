@@ -3,8 +3,12 @@ package com.stripe.android.cardverificationsheet.framework.api
 import android.util.Log
 import com.stripe.android.cardverificationsheet.framework.Config
 import com.stripe.android.cardverificationsheet.framework.NetworkConfig
+import com.stripe.android.cardverificationsheet.framework.time.Duration
 import com.stripe.android.cardverificationsheet.framework.time.Timer
+import com.stripe.android.cardverificationsheet.framework.util.decodeFromJson
+import com.stripe.android.cardverificationsheet.framework.util.encodeToXWWWFormUrl
 import com.stripe.android.cardverificationsheet.framework.util.retry
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.KSerializer
 import java.io.File
 import java.io.FileNotFoundException
@@ -34,57 +38,261 @@ private const val GZIP_MIN_SIZE_BYTES = 1500
 
 private val networkTimer by lazy { Timer.newInstance(Config.logTag, "network") }
 
-/**
- * Send a post request to a Stripe endpoint.
- */
-internal suspend fun <Request, Response, Error> postForResult(
-    stripePublishableKey: String,
-    path: String,
-    data: Request,
-    requestSerializer: KSerializer<Request>,
-    responseSerializer: KSerializer<Response>,
-    errorSerializer: KSerializer<Error>
-): NetworkResult<out Response, out Error> =
-    translateNetworkResult(
-        networkResult = postJsonWithRetries(
-            stripePublishableKey = stripePublishableKey,
-            path = path,
-            jsonData = NetworkConfig.json.encodeToString(requestSerializer, data)
-        ),
-        responseSerializer = responseSerializer,
-        errorSerializer = errorSerializer
+interface Network {
+
+    /**
+     * Send a post request to a Stripe endpoint.
+     */
+    suspend fun <Request, Response, Error> postForResult(
+        stripePublishableKey: String,
+        path: String,
+        data: Request,
+        requestSerializer: KSerializer<Request>,
+        responseSerializer: KSerializer<Response>,
+        errorSerializer: KSerializer<Error>,
+    ): NetworkResult<out Response, out Error>
+
+    /**
+     * Send a post request to a Stripe endpoint and ignore the response.
+     */
+    suspend fun <Request> postData(
+        stripePublishableKey: String,
+        path: String,
+        data: Request,
+        requestSerializer: KSerializer<Request>,
     )
 
-/**
- * Send a post request to a Stripe endpoint and ignore the response.
- */
-internal suspend fun <Request> postData(
-    stripePublishableKey: String,
-    path: String,
-    data: Request,
-    requestSerializer: KSerializer<Request>
-) {
-    postJsonWithRetries(
-        stripePublishableKey = stripePublishableKey,
-        path = path,
-        jsonData = NetworkConfig.json.encodeToString(requestSerializer, data)
-    )
+    /**
+     * Send a get request to a Stripe endpoint and parse the response.
+     */
+    suspend fun <Response, Error> getForResult(
+        stripePublishableKey: String,
+        path: String,
+        responseSerializer: KSerializer<Response>,
+        errorSerializer: KSerializer<Error>
+    ): NetworkResult<out Response, out Error>
 }
 
-/**
- * Send a get request to a Stripe endpoint and parse the response.
- */
-internal suspend fun <Response, Error> getForResult(
-    stripePublishableKey: String,
-    path: String,
-    responseSerializer: KSerializer<Response>,
-    errorSerializer: KSerializer<Error>
-): NetworkResult<out Response, out Error> =
-    translateNetworkResult(
-        getWithRetries(stripePublishableKey, path),
-        responseSerializer,
-        errorSerializer,
-    )
+internal class StripeNetwork(
+    baseUrl: String,
+    private val retryDelay: Duration,
+    private val retryTotalAttempts: Int,
+    private val retryStatusCodes: Iterable<Int>,
+) : Network {
+
+    /**
+     * Get the [baseUrl] with no trailing slashes.
+     */
+    private val baseUrl by lazy {
+        if (baseUrl.endsWith("/")) {
+            baseUrl.substring(0, baseUrl.length - 1)
+        } else {
+            baseUrl
+        }
+    }
+
+    @ExperimentalSerializationApi
+    override suspend fun <Request, Response, Error> postForResult(
+        stripePublishableKey: String,
+        path: String,
+        data: Request,
+        requestSerializer: KSerializer<Request>,
+        responseSerializer: KSerializer<Response>,
+        errorSerializer: KSerializer<Error>
+    ): NetworkResult<out Response, out Error> =
+        translateNetworkResult(
+            networkResult = postDataWithRetries(
+                stripePublishableKey = stripePublishableKey,
+                path = path,
+                encodedData = encodeToXWWWFormUrl(requestSerializer, data),
+            ),
+            responseSerializer = responseSerializer,
+            errorSerializer = errorSerializer
+        )
+
+    /**
+     * Send a post request to a Stripe endpoint and ignore the response.
+     */
+    @ExperimentalSerializationApi
+    override suspend fun <Request> postData(
+        stripePublishableKey: String,
+        path: String,
+        data: Request,
+        requestSerializer: KSerializer<Request>
+    ) {
+        postDataWithRetries(
+            stripePublishableKey = stripePublishableKey,
+            path = path,
+            encodedData = encodeToXWWWFormUrl(requestSerializer, data)
+        )
+    }
+
+    /**
+     * Send a get request to a Stripe endpoint and parse the response.
+     */
+    override suspend fun <Response, Error> getForResult(
+        stripePublishableKey: String,
+        path: String,
+        responseSerializer: KSerializer<Response>,
+        errorSerializer: KSerializer<Error>
+    ): NetworkResult<out Response, out Error> =
+        translateNetworkResult(
+            getWithRetries(stripePublishableKey, path),
+            responseSerializer,
+            errorSerializer,
+        )
+
+    /**
+     * Send a post request to a Stripe endpoint with retries.
+     */
+    private suspend fun postDataWithRetries(
+        stripePublishableKey: String,
+        path: String,
+        encodedData: String,
+    ): NetworkResult<out String, out String> =
+        try {
+            retry(
+                retryDelay = retryDelay,
+                times = retryTotalAttempts
+            ) {
+                val result = postData(stripePublishableKey, path, encodedData)
+                if (result.responseCode in retryStatusCodes) {
+                    throw RetryNetworkRequestException(result)
+                } else {
+                    result
+                }
+            }
+        } catch (e: RetryNetworkRequestException) {
+            e.result
+        }
+
+    /**
+     * Send a get request to a Stripe endpoint with retries.
+     */
+    private suspend fun getWithRetries(
+        stripePublishableKey: String,
+        path: String,
+    ): NetworkResult<out String, out String> =
+        try {
+            retry(
+                retryDelay = retryDelay,
+                times = retryTotalAttempts
+            ) {
+                val result = get(stripePublishableKey, path)
+                if (result.responseCode in retryStatusCodes) {
+                    throw RetryNetworkRequestException(result)
+                } else {
+                    result
+                }
+            }
+        } catch (e: RetryNetworkRequestException) {
+            e.result
+        }
+
+    /**
+     * Send a post request to a Stripe endpoint.
+     */
+    private fun postData(
+        stripePublishableKey: String,
+        path: String,
+        encodedData: String
+    ): NetworkResult<out String, out String> = networkTimer.measure(path) {
+        val fullPath = if (path.startsWith("/")) path else "/$path"
+        val url = URL("$baseUrl$fullPath")
+        var responseCode = -1
+
+        try {
+            with(url.openConnection() as HttpURLConnection) {
+                requestMethod = REQUEST_METHOD_POST
+
+                // Set the connection to both send and receive data
+                doOutput = true
+                doInput = true
+
+                // Set headers
+                setRequestHeaders(stripePublishableKey)
+                setRequestProperty(REQUEST_PROPERTY_CONTENT_TYPE, CONTENT_TYPE_JSON)
+
+                // Write the data
+                if (NetworkConfig.useCompression &&
+                    encodedData.toByteArray().size >= GZIP_MIN_SIZE_BYTES
+                ) {
+                    setRequestProperty(REQUEST_PROPERTY_CONTENT_ENCODING, CONTENT_ENCODING_GZIP)
+                    writeGzipData(
+                        outputStream,
+                        encodedData
+                    )
+                } else {
+                    writeData(
+                        outputStream,
+                        encodedData
+                    )
+                }
+
+                // Read the response code. This will block until the response has been received.
+                responseCode = this.responseCode
+
+                // Read the response
+                when (responseCode) {
+                    in 200 until 300 -> NetworkResult.Success(
+                        responseCode,
+                        readResponse(this)
+                    )
+                    else -> NetworkResult.Error(
+                        responseCode,
+                        readResponse(this)
+                    )
+                }
+            }
+        } catch (t: Throwable) {
+            Log.w(Config.logTag, "Failed network request to endpoint $url", t)
+            NetworkResult.Exception(responseCode, t)
+        }
+    }
+
+    /**
+     * Send a get request to a Stripe endpoint.
+     */
+    private fun get(
+        stripePublishableKey: String,
+        path: String,
+    ): NetworkResult<out String, out String> = networkTimer.measure(path) {
+        val fullPath = if (path.startsWith("/")) path else "/$path"
+        val url = URL("$baseUrl$fullPath")
+        var responseCode = -1
+
+        try {
+            with(url.openConnection() as HttpURLConnection) {
+                requestMethod = REQUEST_METHOD_GET
+
+                // Set the connection to only receive data
+                doOutput = false
+                doInput = true
+
+                // Set headers
+                setRequestHeaders(stripePublishableKey)
+
+                // Read the response code. This will block until the response has been received.
+                responseCode = this.responseCode
+
+                // Read the response
+                when (responseCode) {
+                    in 200 until 300 -> NetworkResult.Success(
+                        responseCode,
+                        readResponse(this)
+                    )
+                    else -> NetworkResult.Error(
+                        responseCode,
+                        readResponse(this)
+                    )
+                }
+            }
+        } catch (t: Throwable) {
+            Log.w(Config.logTag, "Failed network request to endpoint $url", t)
+            NetworkResult.Exception(responseCode, t)
+        }
+    }
+}
 
 /**
  * Translate a string network result to a response or error.
@@ -98,13 +306,13 @@ private fun <Response, Error> translateNetworkResult(
         try {
             NetworkResult.Success(
                 responseCode = networkResult.responseCode,
-                body = NetworkConfig.json.decodeFromString(responseSerializer, networkResult.body)
+                body = decodeFromJson(responseSerializer, networkResult.body)
             )
         } catch (t: Throwable) {
             try {
                 NetworkResult.Error(
                     responseCode = networkResult.responseCode,
-                    error = NetworkConfig.json.decodeFromString(errorSerializer, networkResult.body)
+                    error = decodeFromJson(errorSerializer, networkResult.body)
                 )
             } catch (et: Throwable) {
                 NetworkResult.Exception(networkResult.responseCode, t)
@@ -114,7 +322,7 @@ private fun <Response, Error> translateNetworkResult(
         try {
             NetworkResult.Error(
                 responseCode = networkResult.responseCode,
-                error = NetworkConfig.json.decodeFromString(errorSerializer, networkResult.error)
+                error = decodeFromJson(errorSerializer, networkResult.error)
             )
         } catch (t: Throwable) {
             NetworkResult.Exception(networkResult.responseCode, t)
@@ -124,157 +332,6 @@ private fun <Response, Error> translateNetworkResult(
             responseCode = networkResult.responseCode,
             exception = networkResult.exception
         )
-}
-
-/**
- * Send a post request to a Stripe endpoint with retries.
- */
-private suspend fun postJsonWithRetries(
-    stripePublishableKey: String,
-    path: String,
-    jsonData: String
-): NetworkResult<out String, out String> =
-    try {
-        retry(
-            retryDelay = NetworkConfig.retryDelay,
-            times = NetworkConfig.retryTotalAttempts
-        ) {
-            val result = postJson(stripePublishableKey, path, jsonData)
-            if (result.responseCode in NetworkConfig.retryStatusCodes) {
-                throw RetryNetworkRequestException(result)
-            } else {
-                result
-            }
-        }
-    } catch (e: RetryNetworkRequestException) {
-        e.result
-    }
-
-/**
- * Send a get request to a Stripe endpoint with retries.
- */
-private suspend fun getWithRetries(
-    stripePublishableKey: String,
-    path: String,
-): NetworkResult<out String, out String> =
-    try {
-        retry(
-            retryDelay = NetworkConfig.retryDelay,
-            times = NetworkConfig.retryTotalAttempts
-        ) {
-            val result = get(stripePublishableKey, path)
-            if (result.responseCode in NetworkConfig.retryStatusCodes) {
-                throw RetryNetworkRequestException(result)
-            } else {
-                result
-            }
-        }
-    } catch (e: RetryNetworkRequestException) {
-        e.result
-    }
-
-/**
- * Send a post request to a Stripe endpoint.
- */
-private fun postJson(
-    stripePublishableKey: String,
-    path: String,
-    jsonData: String
-): NetworkResult<out String, out String> = networkTimer.measure(path) {
-    val fullPath = if (path.startsWith("/")) path else "/$path"
-    val url = URL("${getBaseUrl()}$fullPath")
-    var responseCode = -1
-
-    try {
-        with(url.openConnection() as HttpURLConnection) {
-            requestMethod = REQUEST_METHOD_POST
-
-            // Set the connection to both send and receive data
-            doOutput = true
-            doInput = true
-
-            // Set headers
-            setRequestHeaders(stripePublishableKey)
-            setRequestProperty(REQUEST_PROPERTY_CONTENT_TYPE, CONTENT_TYPE_JSON)
-
-            // Write the data
-            if (NetworkConfig.useCompression &&
-                jsonData.toByteArray().size >= GZIP_MIN_SIZE_BYTES
-            ) {
-                setRequestProperty(REQUEST_PROPERTY_CONTENT_ENCODING, CONTENT_ENCODING_GZIP)
-                writeGzipData(
-                    outputStream,
-                    jsonData
-                )
-            } else {
-                writeData(
-                    outputStream,
-                    jsonData
-                )
-            }
-
-            // Read the response code. This will block until the response has been received.
-            responseCode = this.responseCode
-
-            // Read the response
-            when (responseCode) {
-                in 200 until 300 -> NetworkResult.Success(
-                    responseCode,
-                    readResponse(this)
-                )
-                else -> NetworkResult.Error(
-                    responseCode,
-                    readResponse(this)
-                )
-            }
-        }
-    } catch (t: Throwable) {
-        Log.w(Config.logTag, "Failed network request to endpoint $url", t)
-        NetworkResult.Exception(responseCode, t)
-    }
-}
-
-/**
- * Send a get request to a Stripe endpoint.
- */
-private fun get(
-    stripePublishableKey: String,
-    path: String,
-): NetworkResult<out String, out String> = networkTimer.measure(path) {
-    val fullPath = if (path.startsWith("/")) path else "/$path"
-    val url = URL("${getBaseUrl()}$fullPath")
-    var responseCode = -1
-
-    try {
-        with(url.openConnection() as HttpURLConnection) {
-            requestMethod = REQUEST_METHOD_GET
-
-            // Set the connection to only receive data
-            doOutput = false
-            doInput = true
-
-            // Set headers
-            setRequestHeaders(stripePublishableKey)
-
-            // Read the response code. This will block until the response has been received.
-            responseCode = this.responseCode
-
-            // Read the response
-            when (responseCode) {
-                in 200 until 300 -> NetworkResult.Success(
-                    responseCode,
-                    readResponse(this)
-                )
-                else -> NetworkResult.Error(
-                    responseCode,
-                    readResponse(this)
-                )
-            }
-        }
-    } catch (t: Throwable) {
-        Log.w(Config.logTag, "Failed network request to endpoint $url", t)
-        NetworkResult.Exception(responseCode, t)
-    }
 }
 
 @Throws(IOException::class)
@@ -345,15 +402,6 @@ private fun readResponse(connection: HttpURLConnection): String =
     InputStreamReader(connection.inputStream).use {
         it.readLines().joinToString(separator = "\n")
     }
-
-/**
- * Get the [NetworkConfig.baseUrl] with no trailing slashes.
- */
-private fun getBaseUrl() = if (NetworkConfig.baseUrl.endsWith("/")) {
-    NetworkConfig.baseUrl.substring(0, NetworkConfig.baseUrl.length - 1)
-} else {
-    NetworkConfig.baseUrl
-}
 
 /**
  * An exception that should never be thrown, but is required for typing.

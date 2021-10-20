@@ -16,6 +16,7 @@ import com.stripe.android.cardverificationsheet.framework.ml.ssd.softMax
 import com.stripe.android.cardverificationsheet.framework.ml.ssd.toRectForm
 import com.stripe.android.cardverificationsheet.framework.util.reshape
 import com.stripe.android.cardverificationsheet.payment.card.CardIssuer
+import com.stripe.android.cardverificationsheet.payment.card.RequiresMatchingCard
 import com.stripe.android.cardverificationsheet.payment.card.getCardIssuer
 import com.stripe.android.cardverificationsheet.payment.card.isValidPan
 import com.stripe.android.cardverificationsheet.payment.card.lastFour
@@ -100,9 +101,13 @@ internal class SSDOcr private constructor(interpreter: Interpreter) :
         Map<Int, Array<FloatArray>>
         >(interpreter) {
 
-    data class Input(val ssdOcrImage: MLImage)
+    data class Input(
+        val ssdOcrImage: MLImage,
+        override val requiredCardIssuer: CardIssuer?,
+        override val requiredLastFour: String,
+    ) : RequiresMatchingCard
 
-    data class Prediction(val cardIssuer: CardIssuer?, val lastFour: String?) {
+    data class Prediction(val outcome: OcrOutcome) {
 
         /**
          * Force a generic toString method to prevent leaking information about this class'
@@ -114,6 +119,12 @@ internal class SSDOcr private constructor(interpreter: Interpreter) :
         }
     }
 
+    sealed interface OcrOutcome {
+        object Match : OcrOutcome
+        object Mismatch : OcrOutcome
+        object NoPan : OcrOutcome
+    }
+
     companion object {
         /**
          * Convert a camera preview image into a SSDOcr input
@@ -121,11 +132,15 @@ internal class SSDOcr private constructor(interpreter: Interpreter) :
         fun cameraPreviewToInput(
             cameraPreviewImage: Bitmap,
             previewBounds: Rect,
-            cardFinder: Rect
+            cardFinder: Rect,
+            requiredCardIssuer: CardIssuer?,
+            requiredLastFour: String,
         ) = Input(
             cropCameraPreviewToViewFinder(cameraPreviewImage, previewBounds, cardFinder)
                 .scale(Factory.TRAINED_IMAGE_SIZE)
-                .toMLImage(mean = IMAGE_MEAN, std = IMAGE_STD)
+                .toMLImage(mean = IMAGE_MEAN, std = IMAGE_STD),
+            requiredCardIssuer,
+            requiredLastFour,
         )
     }
 
@@ -174,9 +189,18 @@ internal class SSDOcr private constructor(interpreter: Interpreter) :
 
         val predictedNumber = detectedBoxes.map { it.label }.joinToString("")
         return if (isValidPan(predictedNumber)) {
-            Prediction(getCardIssuer(predictedNumber), predictedNumber.lastFour())
+            if (
+                data.matchesRequiredCard(
+                    getCardIssuer(predictedNumber),
+                    predictedNumber.lastFour()
+                )
+            ) {
+                Prediction(OcrOutcome.Match)
+            } else {
+                Prediction(OcrOutcome.Mismatch)
+            }
         } else {
-            Prediction(null, null)
+            Prediction(OcrOutcome.NoPan)
         }
     }
 

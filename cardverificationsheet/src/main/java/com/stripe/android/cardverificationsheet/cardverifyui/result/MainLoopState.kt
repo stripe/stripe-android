@@ -3,7 +3,6 @@ package com.stripe.android.cardverificationsheet.cardverifyui.result
 import com.stripe.android.cardverificationsheet.cardverifyui.VerifyConfig
 import com.stripe.android.cardverificationsheet.cardverifyui.analyzer.MainLoopAnalyzer
 import com.stripe.android.cardverificationsheet.framework.MachineState
-import com.stripe.android.cardverificationsheet.framework.util.ItemTotalCounter
 import com.stripe.android.cardverificationsheet.payment.card.CardIssuer
 import com.stripe.android.cardverificationsheet.payment.card.RequiresMatchingCard
 import com.stripe.android.cardverificationsheet.payment.ml.SSDOcr
@@ -24,48 +23,38 @@ internal sealed class MainLoopState(
         RequiresMatchingCard {
         override suspend fun consumeTransition(
             transition: MainLoopAnalyzer.Prediction,
-        ): MainLoopState = when {
-            doesNotMatchRequiredCard(transition.ocr?.cardIssuer, transition.ocr?.lastFour) ->
+        ): MainLoopState = when (transition.ocr?.outcome) {
+            is SSDOcr.OcrOutcome.Mismatch ->
                 WrongPanFound(
-                    cardIssuer = transition.ocr?.cardIssuer,
-                    // doesNotMatchRequiredCard guarantees this is non-null
-                    lastFour = transition.ocr?.lastFour!!,
                     requiredCardIssuer = requiredCardIssuer,
                     requiredLastFour = requiredLastFour,
                 )
-            transition.ocr?.lastFour != null ->
+            is SSDOcr.OcrOutcome.Match ->
                 PanFound(
-                    resultCounter = ItemTotalCounter(transition.ocr),
+                    matchingPanCount = 1,
                 )
             else -> this
         }
     }
 
     class PanFound(
-        private val resultCounter: ItemTotalCounter<SSDOcr.Prediction>,
+        private var matchingPanCount: Int,
     ) : MainLoopState(runOcr = true, runCardDetect = true) {
         private var visibleCardCount = 0
 
-        private fun getMostLikelyResult() = resultCounter.getHighestCountItem()?.second
-        fun getMostLikelyCardIssuer() = getMostLikelyResult()?.cardIssuer
-
-        // guaranteed to be non-null since the item total counter is primed
-        fun getMostLikelyLastFour() = getMostLikelyResult()?.lastFour!!
-
         private fun isCardSatisfied() = visibleCardCount >= VerifyConfig.DESIRED_SIDE_COUNT
         private fun isPanSatisfied() =
-            resultCounter.getHighestCountItem()?.first ?: 0 >= VerifyConfig.DESIRED_OCR_AGREEMENT ||
+            matchingPanCount >= VerifyConfig.DESIRED_OCR_AGREEMENT ||
                 (
-                    resultCounter.getHighestCountItem()?.first ?: 0 >=
-                        VerifyConfig.MINIMUM_PAN_AGREEMENT &&
+                    matchingPanCount >= VerifyConfig.MINIMUM_PAN_AGREEMENT &&
                         reachedStateAt.elapsedSince() > VerifyConfig.PAN_SEARCH_DURATION
                     )
 
         override suspend fun consumeTransition(
             transition: MainLoopAnalyzer.Prediction,
         ): MainLoopState {
-            if (transition.ocr?.lastFour != null) {
-                resultCounter.countItem(transition.ocr)
+            if (transition.ocr?.outcome is SSDOcr.OcrOutcome.Match) {
+                matchingPanCount++
             }
 
             if (transition.isCardVisible == true) {
@@ -74,23 +63,15 @@ internal sealed class MainLoopState(
 
             return when {
                 reachedStateAt.elapsedSince() > VerifyConfig.PAN_AND_CARD_SEARCH_DURATION ->
-                    Finished(
-                        cardIssuer = getMostLikelyCardIssuer(),
-                        lastFour = getMostLikelyLastFour(),
-                    )
+                    Finished
                 isCardSatisfied() && isPanSatisfied() ->
-                    Finished(
-                        cardIssuer = getMostLikelyCardIssuer(),
-                        lastFour = getMostLikelyLastFour(),
-                    )
+                    Finished
                 isCardSatisfied() ->
                     CardSatisfied(
-                        resultCounter = resultCounter
+                        matchingPanCount = matchingPanCount
                     )
                 isPanSatisfied() ->
                     PanSatisfied(
-                        cardIssuer = getMostLikelyCardIssuer(),
-                        lastFour = getMostLikelyLastFour(),
                         visibleCardCount = visibleCardCount,
                     )
                 else -> this
@@ -99,8 +80,6 @@ internal sealed class MainLoopState(
     }
 
     class PanSatisfied(
-        val cardIssuer: CardIssuer?,
-        val lastFour: String,
         private var visibleCardCount: Int,
     ) : MainLoopState(runOcr = false, runCardDetect = true) {
         private fun isCardSatisfied() =
@@ -114,68 +93,49 @@ internal sealed class MainLoopState(
             }
 
             return when {
-                reachedStateAt.elapsedSince() > VerifyConfig.PAN_SEARCH_DURATION ->
-                    Finished(cardIssuer, lastFour)
-                isCardSatisfied() ->
-                    Finished(cardIssuer, lastFour)
-                else ->
-                    this
+                reachedStateAt.elapsedSince() > VerifyConfig.PAN_SEARCH_DURATION -> Finished
+                isCardSatisfied() -> Finished
+                else -> this
             }
         }
     }
 
     class CardSatisfied(
-        private val resultCounter: ItemTotalCounter<SSDOcr.Prediction>,
+        private var matchingPanCount: Int,
     ) : MainLoopState(runOcr = true, runCardDetect = false) {
-        private fun getMostLikelyResult() = resultCounter.getHighestCountItem()?.second
-        fun getMostLikelyCardIssuer() = getMostLikelyResult()?.cardIssuer
 
-        // guaranteed to be non-null since the item total counter is primed
-        fun getMostLikelyLastFour() = getMostLikelyResult()?.lastFour!!
-
-        private fun isPanSatisfied() =
-            resultCounter.getHighestCountItem()?.first ?: 0 >= VerifyConfig.DESIRED_OCR_AGREEMENT
+        private fun isPanSatisfied() = matchingPanCount >= VerifyConfig.DESIRED_OCR_AGREEMENT
 
         override suspend fun consumeTransition(
             transition: MainLoopAnalyzer.Prediction,
         ): MainLoopState {
-            if (transition.ocr?.lastFour != null) {
-                resultCounter.countItem(transition.ocr)
+            if (transition.ocr?.outcome is SSDOcr.OcrOutcome.Match) {
+                matchingPanCount++
             }
 
-            val mostLikelyResult = getMostLikelyResult()
-            val mostLikelyCardIssuer = mostLikelyResult?.cardIssuer
-            // guaranteed to be non-null since the item total counter is primed
-            val mostLikelyLastFour = mostLikelyResult?.lastFour!!
             return when {
-                isPanSatisfied() -> Finished(mostLikelyCardIssuer, mostLikelyLastFour)
-                reachedStateAt.elapsedSince() >= VerifyConfig.PAN_SEARCH_DURATION ->
-                    Finished(mostLikelyCardIssuer, mostLikelyLastFour)
+                isPanSatisfied() -> Finished
+                reachedStateAt.elapsedSince() >= VerifyConfig.PAN_SEARCH_DURATION -> Finished
                 else -> this
             }
         }
     }
 
     class WrongPanFound(
-        val cardIssuer: CardIssuer?,
-        val lastFour: String,
         override val requiredCardIssuer: CardIssuer?,
         override val requiredLastFour: String,
     ) : MainLoopState(runOcr = true, runCardDetect = false), RequiresMatchingCard {
         override suspend fun consumeTransition(
             transition: MainLoopAnalyzer.Prediction,
         ): MainLoopState = when {
-            doesNotMatchRequiredCard(transition.ocr?.cardIssuer, transition.ocr?.lastFour) ->
+            transition.ocr?.outcome is SSDOcr.OcrOutcome.Mismatch ->
                 WrongPanFound(
-                    cardIssuer = transition.ocr?.cardIssuer,
-                    // doesNotMatchRequiredCard guarantees this is non-null
-                    lastFour = transition.ocr?.lastFour!!,
                     requiredCardIssuer = requiredCardIssuer,
                     requiredLastFour = requiredLastFour,
                 )
-            transition.ocr?.lastFour != null ->
+            transition.ocr?.outcome is SSDOcr.OcrOutcome.Match ->
                 PanFound(
-                    resultCounter = ItemTotalCounter(transition.ocr),
+                    matchingPanCount = 1,
                 )
             reachedStateAt.elapsedSince() >= VerifyConfig.WRONG_CARD_DURATION ->
                 Initial(
@@ -186,10 +146,7 @@ internal sealed class MainLoopState(
         }
     }
 
-    class Finished(
-        val cardIssuer: CardIssuer?,
-        val lastFour: String,
-    ) : MainLoopState(runOcr = false, runCardDetect = false) {
+    object Finished : MainLoopState(runOcr = false, runCardDetect = false) {
         override suspend fun consumeTransition(
             transition: MainLoopAnalyzer.Prediction,
         ): MainLoopState = this

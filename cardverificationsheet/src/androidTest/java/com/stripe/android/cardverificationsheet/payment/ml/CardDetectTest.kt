@@ -4,7 +4,6 @@ import androidx.core.graphics.drawable.toBitmap
 import androidx.test.filters.MediumTest
 import androidx.test.platform.app.InstrumentationRegistry
 import com.stripe.android.cardverificationsheet.framework.ResourceFetcher
-import com.stripe.android.cardverificationsheet.framework.Stats
 import com.stripe.android.cardverificationsheet.framework.image.size
 import com.stripe.android.cardverificationsheet.framework.util.toRect
 import com.stripe.android.cardverificationsheet.test.R
@@ -42,7 +41,7 @@ class CardDetectTest {
 
         val prediction = model.analyze(
             CardDetect.cameraPreviewToInput(
-                TrackedImage(bitmap, Stats.trackTask("no_op")),
+                bitmap,
                 bitmap.size().toRect(),
                 bitmap.size().toRect(),
             ),
@@ -77,7 +76,7 @@ class CardDetectTest {
 
         val prediction = model.analyze(
             CardDetect.cameraPreviewToInput(
-                TrackedImage(bitmap, Stats.trackTask("no_op")),
+                bitmap,
                 bitmap.size().toRect(),
                 bitmap.size().toRect(),
             ),
@@ -112,7 +111,7 @@ class CardDetectTest {
 
         val prediction = model.analyze(
             CardDetect.cameraPreviewToInput(
-                TrackedImage(bitmap, Stats.trackTask("no_op")),
+                bitmap,
                 bitmap.size().toRect(),
                 bitmap.size().toRect(),
             ),

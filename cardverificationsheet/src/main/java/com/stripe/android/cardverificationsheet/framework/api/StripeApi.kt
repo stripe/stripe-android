@@ -54,7 +54,7 @@ internal fun uploadScanStats(
         modelVersions = getLoadedModelVersions().map { ModelVersion.fromModelLoadDetails(it) },
     )
 
-    postData(
+    NetworkConfig.network.postData(
         stripePublishableKey = stripePublishableKey,
         path = "/card_image_verifications/$civId/scan_stats",
         data = ScanStatsRequest(
@@ -73,7 +73,7 @@ internal suspend fun getCardImageVerificationIntentDetails(
     civId: String,
     civSecret: String,
 ) = withContext(Dispatchers.IO) {
-    postForResult(
+    NetworkConfig.network.postForResult(
         stripePublishableKey = stripePublishableKey,
         path = "/card_image_verifications/$civId/initialize_client",
         data = CardImageVerificationDetailsRequest(civSecret),
@@ -120,7 +120,7 @@ internal suspend fun uploadSavedFrames(
         )
     }
 
-    postForResult(
+    NetworkConfig.network.postForResult(
         stripePublishableKey = stripePublishableKey,
         path = "card_image_verifications/$civId/verify_frames",
         data = VerifyFramesRequest(

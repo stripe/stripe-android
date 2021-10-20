@@ -6,6 +6,7 @@ import com.stripe.android.cardverificationsheet.camera.CameraPreviewImage
 import com.stripe.android.cardverificationsheet.cardverifyui.result.MainLoopState
 import com.stripe.android.cardverificationsheet.framework.Analyzer
 import com.stripe.android.cardverificationsheet.framework.AnalyzerFactory
+import com.stripe.android.cardverificationsheet.payment.card.CardIssuer
 import com.stripe.android.cardverificationsheet.payment.ml.CardDetect
 import com.stripe.android.cardverificationsheet.payment.ml.SSDOcr
 import kotlinx.coroutines.supervisorScope
@@ -18,6 +19,8 @@ internal class MainLoopAnalyzer(
     data class Input(
         val cameraPreviewImage: CameraPreviewImage<Bitmap>,
         val cardFinder: Rect,
+        val requiredCardIssuer: CardIssuer?,
+        val requiredLastFour: String,
     )
 
     class Prediction(
@@ -49,6 +52,8 @@ internal class MainLoopAnalyzer(
                     data.cameraPreviewImage.image,
                     data.cameraPreviewImage.viewBounds,
                     data.cardFinder,
+                    data.requiredCardIssuer,
+                    data.requiredLastFour,
                 ),
                 Unit,
             )
