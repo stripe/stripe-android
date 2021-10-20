@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="stripeViewFinderMargin" format="float" type="dimen" description="The minimum distance between the edge of the screen and the view finder window, in percentage of the screen">0.08333333333</item>
+    <item name="stripeViewFinderVerticalBias" format="float" type="dimen" description="The vertical position of the view finder. Lower numbers shift the view finder towards the top of the screen">0.5</item>
+    <item name="stripeViewFinderHorizontalBias" format="float" type="dimen" description="The horizontal position of the view finder. Lower numbers shift the view finder towards the left of the screen">0.5</item>
+
+    <dimen name="stripeCardDetailsMargin" description="The minimum vertical and horizontal distance between the card details (number, expiry, name) and the border of the view finder window">12dp</dimen>
+
+    <dimen name="stripeInstructionsMargin" description="The minimum amount of space surrounding the instructions text above the view finder window">16dp</dimen>
+    <dimen name="stripeSecurityMargin" description="The minimum amount of space surrounding the security notification text below the view finder window">16dp</dimen>
+    <dimen name="stripeSecurityIconMargin" description="The distance between the security notification lock icon and the security notification text">4dp</dimen>
+
+    <item name="stripeNotFoundOutlineWidth" type="integer" description="The width of the border around the view finder window when no card is present">1</item>
+    <item name="stripeFoundOutlineWidth" type="integer" description="The width of the border around the view finder window when a card has been found and the scan has started">5</item>
+    <item name="stripeCorrectOutlineWidth" type="integer" description="The width of the border around the view finder window when the scan completes">10</item>
+    <item name="stripeWrongOutlineWidth" type="integer" description="The width of the border around the view finder window when a card has been found but does not match the required card">10</item>
+
+    <dimen name="stripePanTextSize" description="The size of the card number text displayed in the middle of the view finder window">20sp</dimen>
+    <item name="stripePanStrokeSize" format="float" type="dimen" description="The size of the outline of the card number text displayed in the middle of the view finder window">2.5</item>
+
+    <dimen name="stripeNameTextSize" description="The size of the cardholder name text displayed in the middle of the view finder window">16sp</dimen>
+    <item name="stripeNameStrokeSize" format="float" type="dimen" description="The size of the outline of the cardholder name text displayed in the middle of the view finder window">2.5</item>
+
+    <dimen name="stripeExpiryTextSize" description="The size of the expiry text displayed in the middle of the view finder window">16sp</dimen>
+    <item name="stripeExpiryStrokeSize" format="float" type="dimen" description="The size of the outline of the expiry text displayed in the middle of the view finder window">2.5</item>
+
+    <dimen name="stripeInstructionsTextSize" description="The size of the instructions text above the view finder window">22sp</dimen>
+    <dimen name="stripeSecurityTextSize" description="The size of the security text below the view finder window">14sp</dimen>
+
+    <dimen name="stripeLogoMargin" description="The minimum amount of space surrounding the logo">16dp</dimen>
+    <item name="stripeIconStrokeWidth" type="integer" description="The width of the lines of the close and torch buttons">2</item>
+
+    <dimen name="stripeDebugWindowWidth" description="The width of the debug window">192dp</dimen>
+    <dimen name="stripeButtonMargin" description="The amount of margin to place around the buttons">0dp</dimen>
+</resources>

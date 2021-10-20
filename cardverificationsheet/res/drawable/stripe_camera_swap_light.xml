@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="64dp"
+    android:height="64dp"
+    android:viewportWidth="64.0"
+    android:viewportHeight="64.0">
+
+    <path
+        android:pathData="M41.2,25.4h-4v-1.7c0-1.2-1-2.2-2.2-2.2H29c-1.2,0-2.2,1-2.2,2.2v1.7h-4c-1.2,0-2.2,1-2.2,2.2v12.7c0,1.2,1,2.2,2.2,2.2h18.4c1.2,0,2.2-1,2.2-2.2V27.6C43.4,26.4,42.4,25.4,41.2,25.4z"
+        android:strokeColor="@color/stripeCameraSwapButtonLightColor"
+        android:strokeWidth="@integer/stripeIconStrokeWidth"
+        android:strokeLineJoin="round" />
+
+    <path
+        android:pathData="M38.1,33.8c0-3.4-2.8-6.1-6.1-6.1s-6.1,2.8-6.1,6.1c0,3.4,2.8,6.1,6.1,6.1"
+        android:strokeColor="@color/stripeCameraSwapButtonLightColor"
+        android:strokeWidth="@integer/stripeIconStrokeWidth"
+        android:strokeLineCap="round" />
+
+    <path
+        android:pathData="M40.1,32.4L38.1,33.8L35.8,32.7"
+        android:strokeWidth="@integer/stripeIconStrokeWidth"
+        android:strokeColor="@color/stripeCameraSwapButtonLightColor"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+
+</vector>

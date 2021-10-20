@@ -5,6 +5,53 @@ public final class com/stripe/android/cardverificationsheet/BuildConfig {
 	public fun <init> ()V
 }
 
+public abstract class com/stripe/android/cardverificationsheet/camera/CameraAdapter : androidx/lifecycle/LifecycleObserver {
+	public static final field $stable I
+	public static final field Companion Lcom/stripe/android/cardverificationsheet/camera/CameraAdapter$Companion;
+	public fun <init> ()V
+	public fun bindToLifecycle (Landroidx/lifecycle/LifecycleOwner;)V
+	public abstract fun changeCamera ()V
+	public abstract fun getCurrentCamera ()I
+	public final fun getImageStream ()Lkotlinx/coroutines/flow/Flow;
+	public abstract fun getImplementationName ()Ljava/lang/String;
+	public fun isBoundToLifecycle ()Z
+	public static final fun isCameraSupported (Landroid/content/Context;)Z
+	public abstract fun isTorchOn ()Z
+	public final fun onDestroyed ()V
+	public fun onPause ()V
+	protected final fun sendImageToStream (Ljava/lang/Object;)Ljava/lang/Object;
+	public abstract fun setFocus (Landroid/graphics/PointF;)V
+	public abstract fun setTorchState (Z)V
+	public fun unbindFromLifecycle (Landroidx/lifecycle/LifecycleOwner;)V
+	public abstract fun withFlashSupport (Lkotlin/jvm/functions/Function1;)V
+	public abstract fun withSupportsMultipleCameras (Lkotlin/jvm/functions/Function1;)V
+}
+
+public final class com/stripe/android/cardverificationsheet/camera/CameraAdapter$Companion {
+	public final fun isCameraSupported (Landroid/content/Context;)Z
+	public final fun rotationToDegrees (I)I
+}
+
+public abstract interface class com/stripe/android/cardverificationsheet/camera/CameraErrorListener {
+	public abstract fun onCameraAccessError (Ljava/lang/Throwable;)V
+	public abstract fun onCameraOpenError (Ljava/lang/Throwable;)V
+	public abstract fun onCameraUnsupportedError (Ljava/lang/Throwable;)V
+}
+
+public final class com/stripe/android/cardverificationsheet/camera/CameraPreviewImage {
+	public static final field $stable I
+	public fun <init> (Ljava/lang/Object;Landroid/graphics/Rect;)V
+	public final fun component1 ()Ljava/lang/Object;
+	public final fun component2 ()Landroid/graphics/Rect;
+	public final fun copy (Ljava/lang/Object;Landroid/graphics/Rect;)Lcom/stripe/android/cardverificationsheet/camera/CameraPreviewImage;
+	public static synthetic fun copy$default (Lcom/stripe/android/cardverificationsheet/camera/CameraPreviewImage;Ljava/lang/Object;Landroid/graphics/Rect;ILjava/lang/Object;)Lcom/stripe/android/cardverificationsheet/camera/CameraPreviewImage;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getImage ()Ljava/lang/Object;
+	public final fun getViewSize ()Landroid/graphics/Rect;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
 public abstract interface class com/stripe/android/cardverificationsheet/framework/AggregateResultListener {
 	public abstract fun onInterimResult (Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun onReset (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
@@ -589,5 +636,183 @@ public final class com/stripe/android/cardverificationsheet/payment/card/Payment
 	public static final field QUICK_READ_LENGTH I
 	public static final fun supportCardIssuer (Lkotlin/ranges/IntRange;Lcom/stripe/android/cardverificationsheet/payment/card/CardIssuer;Ljava/util/List;Ljava/util/List;Lcom/stripe/android/cardverificationsheet/payment/card/PanValidator;)Z
 	public static synthetic fun supportCardIssuer$default (Lkotlin/ranges/IntRange;Lcom/stripe/android/cardverificationsheet/payment/card/CardIssuer;Ljava/util/List;Ljava/util/List;Lcom/stripe/android/cardverificationsheet/payment/card/PanValidator;ILjava/lang/Object;)Z
+}
+
+public class com/stripe/android/cardverificationsheet/scanui/CameraErrorListenerImpl : com/stripe/android/cardverificationsheet/camera/CameraErrorListener {
+	public static final field $stable I
+	public fun <init> (Landroid/content/Context;Lkotlin/jvm/functions/Function1;)V
+	protected final fun getCallback ()Lkotlin/jvm/functions/Function1;
+	protected final fun getContext ()Landroid/content/Context;
+	public fun onCameraAccessError (Ljava/lang/Throwable;)V
+	public fun onCameraOpenError (Ljava/lang/Throwable;)V
+	public fun onCameraUnsupportedError (Ljava/lang/Throwable;)V
+}
+
+public abstract class com/stripe/android/cardverificationsheet/scanui/ScanActivity : androidx/appcompat/app/AppCompatActivity, kotlinx/coroutines/CoroutineScope {
+	public static final field $stable I
+	public static final field Companion Lcom/stripe/android/cardverificationsheet/scanui/ScanActivity$Companion;
+	public static final field PERMISSION_REQUEST_CODE I
+	public fun <init> ()V
+	protected fun analyzerFailureCancelScan (Ljava/lang/Throwable;)V
+	public static synthetic fun analyzerFailureCancelScan$default (Lcom/stripe/android/cardverificationsheet/scanui/ScanActivity;Ljava/lang/Throwable;ILjava/lang/Object;)V
+	protected fun buildCameraAdapter ()Lcom/stripe/android/cardverificationsheet/camera/CameraAdapter;
+	protected fun cameraErrorCancelScan (Ljava/lang/Throwable;)V
+	public static synthetic fun cameraErrorCancelScan$default (Lcom/stripe/android/cardverificationsheet/scanui/ScanActivity;Ljava/lang/Throwable;ILjava/lang/Object;)V
+	protected fun closeScanner ()V
+	protected fun ensurePermissionAndStartCamera ()V
+	protected final fun getCameraAdapter ()Lcom/stripe/android/cardverificationsheet/camera/CameraAdapter;
+	public fun getCoroutineContext ()Lkotlin/coroutines/CoroutineContext;
+	protected abstract fun getMinimumAnalysisResolution ()Landroid/util/Size;
+	protected abstract fun getPreviewFrame ()Landroid/view/ViewGroup;
+	protected abstract fun getResultListener ()Lcom/stripe/android/cardverificationsheet/scanui/ScanResultListener;
+	protected fun hideSystemUi ()V
+	protected final fun isFlashlightOn ()Z
+	public fun onBackPressed ()V
+	protected fun onCameraReady ()V
+	protected abstract fun onCameraStreamAvailable (Lkotlinx/coroutines/flow/Flow;)V
+	protected fun onCreate (Landroid/os/Bundle;)V
+	protected abstract fun onFlashSupported (Z)V
+	protected abstract fun onFlashlightStateChanged (Z)V
+	protected fun onPause ()V
+	public fun onRequestPermissionsResult (I[Ljava/lang/String;[I)V
+	protected fun onResume ()V
+	protected abstract fun onSupportsMultipleCameras (Z)V
+	protected fun openAppSettings ()V
+	protected abstract fun prepareCamera (Lkotlin/jvm/functions/Function0;)V
+	protected fun requestCameraPermission ()V
+	protected fun setFocus (Landroid/graphics/PointF;)V
+	protected fun showCameraNotSupportedDialog ()V
+	protected fun showPermissionDeniedDialog ()V
+	protected fun showPermissionRationaleDialog ()V
+	protected fun toggleCamera ()V
+	protected fun toggleFlashlight ()V
+	protected fun userCancelScan ()V
+}
+
+public final class com/stripe/android/cardverificationsheet/scanui/ScanActivity$Companion {
+}
+
+public final class com/stripe/android/cardverificationsheet/scanui/ScanActivityKt {
+	public static final field PERMISSION_RATIONALE_SHOWN Ljava/lang/String;
+}
+
+public abstract interface class com/stripe/android/cardverificationsheet/scanui/ScanFlow {
+	public abstract fun cancelFlow ()V
+	public abstract fun startFlow (Landroid/content/Context;Lkotlinx/coroutines/flow/Flow;Landroid/graphics/Rect;Landroidx/lifecycle/LifecycleOwner;Lkotlinx/coroutines/CoroutineScope;)V
+}
+
+public abstract interface class com/stripe/android/cardverificationsheet/scanui/ScanResultListener {
+	public abstract fun analyzerFailure (Ljava/lang/Throwable;)V
+	public abstract fun cameraError (Ljava/lang/Throwable;)V
+	public abstract fun userCanceled ()V
+}
+
+public abstract class com/stripe/android/cardverificationsheet/scanui/SimpleScanActivity : com/stripe/android/cardverificationsheet/scanui/ScanActivity {
+	public static final field $stable I
+	public static final field Companion Lcom/stripe/android/cardverificationsheet/scanui/SimpleScanActivity$Companion;
+	public fun <init> ()V
+	protected final fun addConstraints (Landroid/view/View;Lkotlin/jvm/functions/Function2;)V
+	protected fun addUiComponents ()V
+	protected final fun appendUiComponents ([Landroid/view/View;)V
+	protected final fun changeScanState (Lcom/stripe/android/cardverificationsheet/scanui/SimpleScanActivity$ScanState;)Z
+	protected final fun constrainToParent (Landroid/view/View;)V
+	protected fun displayState (Lcom/stripe/android/cardverificationsheet/scanui/SimpleScanActivity$ScanState;Lcom/stripe/android/cardverificationsheet/scanui/SimpleScanActivity$ScanState;)V
+	protected fun getCardNameTextView ()Landroid/widget/TextView;
+	protected fun getCardNumberTextView ()Landroid/widget/TextView;
+	protected fun getCloseButtonView ()Landroid/view/View;
+	protected fun getDebugImageView ()Landroid/widget/ImageView;
+	protected final fun getHasMultipleCameras ()Ljava/lang/Boolean;
+	protected fun getInstructionsTextView ()Landroid/widget/TextView;
+	protected fun getLayout ()Landroidx/constraintlayout/widget/ConstraintLayout;
+	protected fun getPreviewFrame ()Landroid/view/ViewGroup;
+	protected abstract fun getScanFlow ()Lcom/stripe/android/cardverificationsheet/scanui/ScanFlow;
+	protected final fun getScanState ()Lcom/stripe/android/cardverificationsheet/scanui/SimpleScanActivity$ScanState;
+	protected fun getSecurityIconView ()Landroid/widget/ImageView;
+	protected fun getSecurityTextView ()Landroid/widget/TextView;
+	protected fun getSwapCameraButtonView ()Landroid/view/View;
+	protected fun getTorchButtonView ()Landroid/view/View;
+	protected fun getVersionTextView ()Landroid/widget/TextView;
+	protected fun getViewFinderAspectRatio ()Ljava/lang/String;
+	protected fun getViewFinderBackgroundView ()Lcom/stripe/android/cardverificationsheet/scanui/ViewFinderBackground;
+	protected fun getViewFinderBorderView ()Landroid/widget/ImageView;
+	protected fun getViewFinderWindowView ()Landroid/view/View;
+	protected fun isBackgroundDark ()Z
+	protected final fun isFlashlightSupported ()Ljava/lang/Boolean;
+	protected fun onCameraStreamAvailable (Lkotlinx/coroutines/flow/Flow;)V
+	protected fun onCreate (Landroid/os/Bundle;)V
+	protected fun onDestroy ()V
+	protected fun onFlashSupported (Z)V
+	protected fun onFlashlightStateChanged (Z)V
+	protected fun onPause ()V
+	protected fun onResume ()V
+	protected fun onSupportsMultipleCameras (Z)V
+	protected fun prepareCamera (Lkotlin/jvm/functions/Function0;)V
+	protected final fun setFlashlightSupported (Ljava/lang/Boolean;)V
+	protected final fun setHasMultipleCameras (Ljava/lang/Boolean;)V
+	protected fun setupCardDetailsConstraints ()V
+	protected fun setupCardDetailsUi ()V
+	protected fun setupCloseButtonViewConstraints ()V
+	protected fun setupCloseButtonViewUi ()V
+	protected fun setupDebugConstraints ()V
+	protected fun setupDebugUi ()V
+	protected fun setupInstructionsViewConstraints ()V
+	protected fun setupInstructionsViewUi ()V
+	protected fun setupPreviewFrameConstraints ()V
+	protected fun setupSecurityNoticeConstraints ()V
+	protected fun setupSecurityNoticeUi ()V
+	protected fun setupSwapCameraButtonViewConstraints ()V
+	protected fun setupSwapCameraButtonViewUi ()V
+	protected fun setupTorchButtonViewConstraints ()V
+	protected fun setupTorchButtonViewUi ()V
+	protected fun setupUiComponents ()V
+	protected fun setupUiConstraints ()V
+	protected fun setupViewFinderConstraints ()V
+	protected fun setupViewFinderViewUI ()V
+}
+
+public final class com/stripe/android/cardverificationsheet/scanui/SimpleScanActivity$Companion {
+}
+
+public abstract class com/stripe/android/cardverificationsheet/scanui/SimpleScanActivity$ScanState {
+	public static final field $stable I
+	public fun <init> (Z)V
+	public final fun isFinal ()Z
+}
+
+public final class com/stripe/android/cardverificationsheet/scanui/SimpleScanActivity$ScanState$Correct : com/stripe/android/cardverificationsheet/scanui/SimpleScanActivity$ScanState {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/stripe/android/cardverificationsheet/scanui/SimpleScanActivity$ScanState$Correct;
+}
+
+public final class com/stripe/android/cardverificationsheet/scanui/SimpleScanActivity$ScanState$FoundLong : com/stripe/android/cardverificationsheet/scanui/SimpleScanActivity$ScanState {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/stripe/android/cardverificationsheet/scanui/SimpleScanActivity$ScanState$FoundLong;
+}
+
+public final class com/stripe/android/cardverificationsheet/scanui/SimpleScanActivity$ScanState$FoundShort : com/stripe/android/cardverificationsheet/scanui/SimpleScanActivity$ScanState {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/stripe/android/cardverificationsheet/scanui/SimpleScanActivity$ScanState$FoundShort;
+}
+
+public final class com/stripe/android/cardverificationsheet/scanui/SimpleScanActivity$ScanState$NotFound : com/stripe/android/cardverificationsheet/scanui/SimpleScanActivity$ScanState {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/stripe/android/cardverificationsheet/scanui/SimpleScanActivity$ScanState$NotFound;
+}
+
+public final class com/stripe/android/cardverificationsheet/scanui/SimpleScanActivity$ScanState$Wrong : com/stripe/android/cardverificationsheet/scanui/SimpleScanActivity$ScanState {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/stripe/android/cardverificationsheet/scanui/SimpleScanActivity$ScanState$Wrong;
+}
+
+public final class com/stripe/android/cardverificationsheet/scanui/ViewFinderBackground : android/view/View {
+	public static final field $stable I
+	public fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;)V
+	public synthetic fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun clearOnDrawListener ()V
+	public final fun clearViewFinderRect ()V
+	public final fun getBackgroundLuminance ()I
+	public fun setBackgroundColor (I)V
+	public final fun setOnDrawListener (Lkotlin/jvm/functions/Function0;)V
+	public final fun setViewFinderRect (Landroid/graphics/Rect;)V
 }
 

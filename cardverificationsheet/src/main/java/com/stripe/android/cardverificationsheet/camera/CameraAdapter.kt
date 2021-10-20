@@ -3,7 +3,6 @@ package com.stripe.android.cardverificationsheet.camera
 import android.content.Context
 import android.content.pm.PackageManager
 import android.graphics.PointF
-import android.graphics.Rect
 import android.util.Log
 import android.view.Surface
 import androidx.annotation.CheckResult
@@ -14,14 +13,10 @@ import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.OnLifecycleEvent
 import com.stripe.android.cardverificationsheet.framework.Config
-import com.stripe.android.cardverificationsheet.framework.TrackedImage
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ClosedSendChannelException
 import kotlinx.coroutines.channels.onClosed
 import kotlinx.coroutines.channels.onFailure
-// TODO: upgrade this when kotlin libs hit 1.5.0
-// import kotlinx.coroutines.channels.onClosed
-// import kotlinx.coroutines.channels.onFailure
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.runBlocking
@@ -38,12 +33,7 @@ import kotlinx.coroutines.runBlocking
 @Retention(AnnotationRetention.SOURCE)
 internal annotation class RotationValue
 
-internal data class CameraPreviewImage<ImageBase>(
-    val image: TrackedImage<ImageBase>,
-    val previewImageBounds: Rect,
-)
-
-internal abstract class CameraAdapter<CameraOutput> : LifecycleObserver {
+abstract class CameraAdapter<CameraOutput> : LifecycleObserver {
 
     // TODO: change this to be a channelFlow once it's no longer experimental, add some capacity and use a backpressure drop strategy
     private val imageChannel = Channel<CameraOutput>(capacity = Channel.RENDEZVOUS)
@@ -161,7 +151,7 @@ internal abstract class CameraAdapter<CameraOutput> : LifecycleObserver {
     fun getImageStream(): Flow<CameraOutput> = imageChannel.receiveAsFlow()
 }
 
-internal interface CameraErrorListener {
+interface CameraErrorListener {
 
     @MainThread
     fun onCameraOpenError(cause: Throwable?)

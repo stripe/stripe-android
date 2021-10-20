@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="stripeCardPanColor" description="The text color of the card number displayed over the scan window">@android:color/white</color>
+    <color name="stripeCardPanOutlineColor" description="The outline color of the card number displayed over the scan window">@android:color/black</color>
+
+    <color name="stripeCardNameColor" description="The text color of the cardholder name displayed over the scan window">@android:color/white</color>
+    <color name="stripeCardNameOutlineColor" description="The outline color of the cardholder name displayed over the scan window">@android:color/black</color>
+
+    <color name="stripeCardExpiryColor" description="The text color of the card expiry displayed over the scan window">@android:color/white</color>
+    <color name="stripeCardExpiryOutlineColor" description="The outline color of the card expiry displayed over the scan window">@android:color/black</color>
+
+    <color name="stripeInstructionsColorDark" description="The color of the instructions text above the scan window when the background is a dark color">@android:color/white</color>
+    <color name="stripeInstructionsColorLight" description="The color of the instructions text above the scan window when the background is a light color">@android:color/black</color>
+    <color name="stripeSecurityColorDark" description="The color of the security notification shown below the scan window when the background is a dark color">@android:color/white</color>
+    <color name="stripeSecurityColorLight" description="The color of the security notification shown below the scan window when the background is a light color">@android:color/black</color>
+
+    <color name="stripeNotFoundBackground" description="The background color of the scan window when no card is visible">#DD222222</color>
+    <color name="stripeFoundBackground" description="The background color of the scan window when a card has been found and the scan is started">#DD222222</color>
+    <color name="stripeCorrectBackground" description="The background color of the scan window when a card has been found and the scan is completed">#DD222222</color>
+    <color name="stripeWrongBackground" description="The background color of the scan window when a card has been found that does not match the required card">#DD222222</color>
+
+    <color name="stripeNotFoundOutline" description="The outline color of the scan window when no card is visible">#FFFFFF</color>
+    <color name="stripeFoundOutline" description="The outline color of the scan window when a card has been found and the scan is started">#1E90FF</color>
+    <color name="stripeCorrectOutline" description="The outline color of the scan window when the scan has completed">#2ED573</color>
+    <color name="stripeWrongOutline" description="The outline color of the scan window when a card has been found that does not match the required card">#FF2222</color>
+
+    <color name="stripeCloseButtonDarkColor" description="The color of the close button when the background is a dark color">#FFFFFF</color>
+    <color name="stripeFlashButtonDarkColor" description="The color of the torch button when the background is a dark color">#FFFFFF</color>
+    <color name="stripeCameraSwapButtonDarkColor" description="The color of the swap camera button when the background is a dark color">#FFFFFF</color>
+    <color name="stripeCloseButtonLightColor" description="The color of the close button when the background is a light color">#000000</color>
+    <color name="stripeFlashButtonLightColor" description="The color of the torch button when the background is a light color">#000000</color>
+    <color name="stripeCameraSwapButtonLightColor" description="The color of the swap camera button when the background is a light color">#000000</color>
+
+    <color name="stripeDebugHighConfidence" description="When using debug mode, the color of boxes to draw around high confidence text">#00FF00</color>
+    <color name="stripeDebugMediumConfidence" description="When using debug mode, the color of boxes to draw around medium confidence text">#DDDD00</color>
+    <color name="stripeDebugLowConfidence" description="When using debug mode, the color of boxes to draw around low confidence text">#FF0000</color>
+</resources>

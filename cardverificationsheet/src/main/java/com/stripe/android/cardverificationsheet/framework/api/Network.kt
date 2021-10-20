@@ -31,8 +31,8 @@ import java.util.zip.GZIPOutputStream
 private const val REQUEST_METHOD_GET = "GET"
 private const val REQUEST_METHOD_POST = "POST"
 
-private const val REQUEST_PROPERTY_AUTHENTICATION = "x-bouncer-auth"
-private const val REQUEST_PROPERTY_DEVICE_ID = "x-bouncer-device-id"
+private const val REQUEST_PROPERTY_AUTHENTICATION = "x-stripe-auth"
+private const val REQUEST_PROPERTY_DEVICE_ID = "x-stripe-device-id"
 private const val REQUEST_PROPERTY_USER_AGENT = "User-Agent"
 private const val REQUEST_PROPERTY_CONTENT_TYPE = "Content-Type"
 private const val REQUEST_PROPERTY_CONTENT_ENCODING = "Content-Encoding"
@@ -48,7 +48,7 @@ private const val GZIP_MIN_SIZE_BYTES = 1500
 private val networkTimer by lazy { Timer.newInstance(Config.logTag, "network") }
 
 /**
- * Send a post request to a bouncer endpoint.
+ * Send a post request to a Stripe endpoint.
  */
 internal suspend fun <Request, Response, Error> postForResult(
     context: Context,
@@ -69,7 +69,7 @@ internal suspend fun <Request, Response, Error> postForResult(
     )
 
 /**
- * Send a post request to a bouncer endpoint and ignore the response.
+ * Send a post request to a Stripe endpoint and ignore the response.
  */
 internal suspend fun <Request> postData(
     context: Context,
@@ -85,7 +85,7 @@ internal suspend fun <Request> postData(
 }
 
 /**
- * Send a get request to a bouncer endpoint and parse the response.
+ * Send a get request to a Stripe endpoint and parse the response.
  */
 internal suspend fun <Response, Error> getForResult(
     context: Context,
@@ -136,7 +136,7 @@ private fun <Response, Error> translateNetworkResult(
 }
 
 /**
- * Send a post request to a bouncer endpoint with retries.
+ * Send a post request to a Stripe endpoint with retries.
  */
 private suspend fun postJsonWithRetries(
     context: Context,
@@ -160,7 +160,7 @@ private suspend fun postJsonWithRetries(
     }
 
 /**
- * Send a get request to a bouncer endpoint with retries.
+ * Send a get request to a Stripe endpoint with retries.
  */
 private suspend fun getWithRetries(
     context: Context,
@@ -183,7 +183,7 @@ private suspend fun getWithRetries(
     }
 
 /**
- * Send a post request to a bouncer endpoint.
+ * Send a post request to a Stripe endpoint.
  */
 private fun postJson(
     context: Context,
@@ -244,7 +244,7 @@ private fun postJson(
 }
 
 /**
- * Send a get request to a bouncer endpoint.
+ * Send a get request to a Stripe endpoint.
  */
 private fun get(
     context: Context,

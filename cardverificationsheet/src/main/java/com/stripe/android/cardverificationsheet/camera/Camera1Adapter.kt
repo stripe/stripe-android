@@ -22,8 +22,6 @@ import android.view.ViewGroup
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.OnLifecycleEvent
 import com.stripe.android.cardverificationsheet.framework.Config
-import com.stripe.android.cardverificationsheet.framework.Stats
-import com.stripe.android.cardverificationsheet.framework.TrackedImage
 import com.stripe.android.cardverificationsheet.framework.image.NV21Image
 import com.stripe.android.cardverificationsheet.framework.image.getRenderScript
 import com.stripe.android.cardverificationsheet.framework.image.rotate
@@ -38,6 +36,11 @@ import kotlin.math.roundToInt
 private const val ASPECT_TOLERANCE = 0.2
 
 private val MAXIMUM_RESOLUTION = Size(1920, 1080)
+
+data class CameraPreviewImage<ImageType>(
+    val image: ImageType,
+    val viewSize: Rect,
+)
 
 /**
  * A [CameraAdapter] that uses android's Camera 1 APIs to show previews and process images.
@@ -123,13 +126,10 @@ internal class Camera1Adapter(
             try {
                 sendImageToStream(
                     CameraPreviewImage(
-                        TrackedImage(
-                            image = NV21Image(imageWidth, imageHeight, bytes)
-                                .toBitmap(getRenderScript(activity))
-                                .rotate(mRotation.toFloat()),
-                            tracker = Stats.trackRepeatingTask("image_processing")
-                        ),
-                        Rect(0, 0, previewView.width, previewView.height),
+                        image = NV21Image(imageWidth, imageHeight, bytes)
+                            .toBitmap(getRenderScript(activity))
+                            .rotate(mRotation.toFloat()),
+                        viewSize = Rect(0, 0, previewView.width, previewView.height),
                     ),
                 )
             } catch (t: Throwable) {

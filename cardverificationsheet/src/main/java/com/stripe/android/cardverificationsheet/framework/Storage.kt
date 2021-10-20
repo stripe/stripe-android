@@ -4,7 +4,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.util.Log
 
-private const val STORAGE_FILE_NAME = "bouncer_shared_prefs"
+private const val STORAGE_FILE_NAME = "stripe_shared_prefs"
 
 internal interface Storage {
 

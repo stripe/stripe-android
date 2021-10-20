@@ -17,7 +17,7 @@ import kotlinx.coroutines.launch
 private const val STATS_PATH = "/scan_stats"
 
 /**
- * Upload stats data to bouncer servers.
+ * Upload stats data to stripe servers.
  */
 internal fun uploadScanStats(
     context: Context,

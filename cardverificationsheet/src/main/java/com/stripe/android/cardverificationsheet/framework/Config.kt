@@ -1,6 +1,6 @@
 package com.stripe.android.cardverificationsheet.framework
 
-import com.stripe.android.cardverificationsheet.framework.exception.InvalidBouncerApiKeyException
+import com.stripe.android.cardverificationsheet.framework.exception.InvalidStripeApiKeyException
 import com.stripe.android.cardverificationsheet.framework.time.Duration
 import com.stripe.android.cardverificationsheet.framework.time.Rate
 import com.stripe.android.cardverificationsheet.framework.time.seconds
@@ -20,16 +20,16 @@ internal object Config {
      * A log tag used by this library.
      */
     @JvmStatic
-    var logTag: String = "Bouncer"
+    var logTag: String = "CardVerificationSheet"
 
     /**
-     * The API key to interface with Bouncer servers
+     * The API key to interface with Stripe servers
      */
     @JvmStatic
     var apiKey: String? = null
         set(value) {
             if (value != null && value.length != REQUIRED_API_KEY_LENGTH) {
-                throw InvalidBouncerApiKeyException
+                throw InvalidStripeApiKeyException
             }
             field = value
         }
@@ -57,7 +57,7 @@ internal object Config {
     var uploadStats: Boolean = true
 
     /**
-     * Whether or not to display the Bouncer logo
+     * Whether or not to display the Stripe logo
      */
     @JvmStatic
     var displayLogo: Boolean = true
@@ -93,7 +93,7 @@ internal object NetworkConfig {
      * The base URL where all network requests will be sent
      */
     @JvmStatic
-    var baseUrl = "https://api.getbouncer.com"
+    var baseUrl = "https://api.stripe.com"
 
     /**
      * Whether or not to compress network request bodies.
@@ -114,7 +114,7 @@ internal object NetworkConfig {
     var retryDelay: Duration = 5.seconds
 
     /**
-     * Status codes that should be retried from bouncer servers.
+     * Status codes that should be retried from Stripe servers.
      */
     @JvmStatic
     var retryStatusCodes: Iterable<Int> = 500..599
