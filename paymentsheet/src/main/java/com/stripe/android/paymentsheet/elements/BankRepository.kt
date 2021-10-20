@@ -5,16 +5,10 @@ import androidx.annotation.VisibleForTesting
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import java.io.InputStream
-import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
-internal data class BankRepository @Inject internal constructor(
-    val resources: Resources?
+internal data class BankRepository(
+    val resources: Resources? = null
 ) {
-    // This is needed for @Preview and inject does not support a constructor with default parameters.
-    internal constructor() : this(null)
-
     private val bankItemMap = mutableMapOf<SupportedBankType, List<DropdownItemSpec>?>()
 
     private val format = Json { ignoreUnknownKeys = true }

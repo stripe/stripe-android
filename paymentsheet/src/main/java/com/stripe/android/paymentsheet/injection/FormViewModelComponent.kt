@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.injection
 
 import android.content.res.Resources
+import com.stripe.android.payments.core.injection.CoroutineContextModule
 import com.stripe.android.paymentsheet.forms.FormViewModel
 import dagger.BindsInstance
 import dagger.Component
@@ -9,7 +10,8 @@ import javax.inject.Singleton
 @Singleton
 @Component(
     modules = [
-        FormViewModelModule::class
+        FormViewModelModule::class,
+        CoroutineContextModule::class
     ]
 )
 

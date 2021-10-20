@@ -21,7 +21,6 @@ import com.stripe.android.paymentsheet.elements.IdentifierSpec
 import com.stripe.android.paymentsheet.elements.LayoutSpec
 import com.stripe.android.paymentsheet.elements.MandateTextElement
 import com.stripe.android.paymentsheet.elements.MandateTextSpec
-import com.stripe.android.paymentsheet.elements.ResourceRepository
 import com.stripe.android.paymentsheet.elements.SaveForFutureUseController
 import com.stripe.android.paymentsheet.elements.SaveForFutureUseElement
 import com.stripe.android.paymentsheet.elements.SaveForFutureUseSpec
@@ -36,6 +35,7 @@ import com.stripe.android.paymentsheet.elements.SimpleTextElement
 import com.stripe.android.paymentsheet.elements.SimpleTextFieldConfig
 import com.stripe.android.paymentsheet.elements.SimpleTextSpec
 import com.stripe.android.paymentsheet.elements.TextFieldController
+import com.stripe.android.paymentsheet.forms.resources.ResourceRepository
 import com.stripe.android.paymentsheet.model.Amount
 import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.getValue
@@ -50,7 +50,7 @@ internal class TransformSpecToElement @Inject constructor(
     private val resourceRepository: ResourceRepository,
     private val initialValues: FormFragmentArguments
 ) {
-    internal fun transform(
+    internal suspend fun transform(
         list: List<FormItemSpec>
     ): List<FormElement> =
         list.map {
@@ -63,7 +63,7 @@ internal class TransformSpecToElement @Inject constructor(
             }
         }
 
-    private fun SectionSpec.transform(
+    private suspend fun SectionSpec.transform(
         initialValues: FormFragmentArguments
     ): SectionElement {
         val fieldElements = this.fields.transform(initialValues)
@@ -83,7 +83,7 @@ internal class TransformSpecToElement @Inject constructor(
     /**
      * This function will transform a list of specs into a list of elements
      */
-    private fun List<SectionFieldSpec>.transform(initialValues: FormFragmentArguments) =
+    private suspend fun List<SectionFieldSpec>.transform(initialValues: FormFragmentArguments) =
         this.map {
             when (it) {
                 is EmailSpec -> it.transform(initialValues.billingDetails?.email)
@@ -97,10 +97,10 @@ internal class TransformSpecToElement @Inject constructor(
             }
         }
 
-    private fun transformAddress(initialValues: FormFragmentArguments) =
+    private suspend fun transformAddress(initialValues: FormFragmentArguments) =
         AddressElement(
             IdentifierSpec.Generic("billing"),
-            resourceRepository.addressRepository,
+            resourceRepository.getAddressRepository(),
             initialValues
         )
 
@@ -132,13 +132,13 @@ internal class TransformSpecToElement @Inject constructor(
             DropdownFieldController(CountryConfig(this.onlyShowCountryCodes), country)
         )
 
-    private fun BankDropdownSpec.transform() =
+    private suspend fun BankDropdownSpec.transform() =
         SimpleDropdownElement(
             this.identifier,
             DropdownFieldController(
                 SimpleDropdownConfig(
                     label,
-                    resourceRepository.bankRepository.get(this.bankType)
+                    resourceRepository.getBankRepository().get(this.bankType)
                 )
             )
         )

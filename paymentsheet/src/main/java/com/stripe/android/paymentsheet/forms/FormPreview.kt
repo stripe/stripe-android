@@ -8,11 +8,12 @@ import com.stripe.android.paymentsheet.address.AddressFieldElementRepository
 import com.stripe.android.paymentsheet.address.parseAddressesSchema
 import com.stripe.android.paymentsheet.elements.BankRepository
 import com.stripe.android.paymentsheet.elements.FormInternal
-import com.stripe.android.paymentsheet.elements.ResourceRepository
 import com.stripe.android.paymentsheet.elements.SupportedBankType
+import com.stripe.android.paymentsheet.forms.resources.StaticResourceRepository
 import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
 import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.runBlocking
 
 /**
  * This will render a preview of the form in IntelliJ.  It can't access resources, and
@@ -43,32 +44,34 @@ internal fun FormInternalPreview() {
     FormInternal(
         MutableStateFlow(emptyList()),
         MutableStateFlow(true),
-        TransformSpecToElement(
-            ResourceRepository(
-                bankRepository,
-                addressFieldElementRepository
-            ),
-            FormFragmentArguments(
-                SupportedPaymentMethod.Bancontact,
-                showCheckbox = false,
-                showCheckboxControlledFields = true,
-                merchantName = "Merchant, Inc.",
-                billingDetails = PaymentSheet.BillingDetails(
-                    address = PaymentSheet.Address(
-                        line1 = "123 Main Street",
-                        line2 = null,
-                        city = "San Francisco",
-                        state = "CA",
-                        postalCode = "94111",
-                        country = "DE",
-                    ),
-                    email = "email",
-                    name = "Jenny Rosen",
-                    phone = "+18008675309"
+        runBlocking {
+            TransformSpecToElement(
+                StaticResourceRepository(
+                    bankRepository,
+                    addressFieldElementRepository
                 ),
-                injectorKey = DUMMY_INJECTOR_KEY
-            )
-        ).transform(formElements)
+                FormFragmentArguments(
+                    SupportedPaymentMethod.Bancontact,
+                    showCheckbox = false,
+                    showCheckboxControlledFields = true,
+                    merchantName = "Merchant, Inc.",
+                    billingDetails = PaymentSheet.BillingDetails(
+                        address = PaymentSheet.Address(
+                            line1 = "123 Main Street",
+                            line2 = null,
+                            city = "San Francisco",
+                            state = "CA",
+                            postalCode = "94111",
+                            country = "DE",
+                        ),
+                        email = "email",
+                        name = "Jenny Rosen",
+                        phone = "+18008675309"
+                    ),
+                    injectorKey = DUMMY_INJECTOR_KEY
+                )
+            ).transform(formElements)
+        }
     )
 }
 

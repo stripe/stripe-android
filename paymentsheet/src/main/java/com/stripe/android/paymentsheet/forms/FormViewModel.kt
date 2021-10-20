@@ -10,7 +10,7 @@ import com.stripe.android.paymentsheet.elements.Form
 import com.stripe.android.paymentsheet.elements.FormElement
 import com.stripe.android.paymentsheet.elements.LayoutSpec
 import com.stripe.android.paymentsheet.elements.MandateTextElement
-import com.stripe.android.paymentsheet.elements.ResourceRepository
+import com.stripe.android.paymentsheet.forms.resources.ResourceRepository
 import com.stripe.android.paymentsheet.elements.SaveForFutureUseElement
 import com.stripe.android.paymentsheet.elements.SectionSpec
 import com.stripe.android.paymentsheet.injection.DaggerFormViewModelComponent

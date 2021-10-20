@@ -19,7 +19,6 @@ import com.stripe.android.paymentsheet.elements.CountrySpec
 import com.stripe.android.paymentsheet.elements.EmailSpec
 import com.stripe.android.paymentsheet.elements.IdentifierSpec
 import com.stripe.android.paymentsheet.elements.LayoutSpec
-import com.stripe.android.paymentsheet.elements.ResourceRepository
 import com.stripe.android.paymentsheet.elements.RowElement
 import com.stripe.android.paymentsheet.elements.SaveForFutureUseController
 import com.stripe.android.paymentsheet.elements.SaveForFutureUseSpec
@@ -28,6 +27,7 @@ import com.stripe.android.paymentsheet.elements.SectionSingleFieldElement
 import com.stripe.android.paymentsheet.elements.SectionSpec
 import com.stripe.android.paymentsheet.elements.SimpleTextSpec.Companion.NAME
 import com.stripe.android.paymentsheet.elements.TextFieldController
+import com.stripe.android.paymentsheet.forms.resources.StaticResourceRepository
 import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -58,7 +58,7 @@ internal class FormViewModelTest {
     )
 
     private val resourceRepository =
-        ResourceRepository(
+        StaticResourceRepository(
             BankRepository(
                 ApplicationProvider.getApplicationContext<Context>().resources
             ),

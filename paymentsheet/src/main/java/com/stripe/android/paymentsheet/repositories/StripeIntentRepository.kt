@@ -36,8 +36,7 @@ internal sealed class StripeIntentRepository {
         private val stripeRepository: StripeRepository,
         private val lazyPaymentConfig: Lazy<PaymentConfiguration>,
         @IOContext private val workContext: CoroutineContext,
-        private val locale: Locale? =
-            LocaleListCompat.getAdjustedDefault().takeUnless { it.isEmpty }?.get(0)
+        private val locale: Locale?
     ) : StripeIntentRepository() {
         private val requestOptions by lazy {
             ApiRequest.Options(

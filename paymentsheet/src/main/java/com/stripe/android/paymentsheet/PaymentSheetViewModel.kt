@@ -33,7 +33,7 @@ import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
 import com.stripe.android.paymentsheet.analytics.EventReporter
-import com.stripe.android.paymentsheet.elements.ResourceRepository
+import com.stripe.android.paymentsheet.forms.resources.ResourceRepository
 import com.stripe.android.paymentsheet.injection.DaggerPaymentSheetLauncherComponent
 import com.stripe.android.paymentsheet.injection.PaymentSheetViewModelModule
 import com.stripe.android.paymentsheet.injection.PaymentSheetViewModelSubcomponent

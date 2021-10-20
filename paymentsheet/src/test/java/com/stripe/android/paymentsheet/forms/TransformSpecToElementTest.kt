@@ -18,7 +18,6 @@ import com.stripe.android.paymentsheet.elements.IdentifierSpec
 import com.stripe.android.paymentsheet.elements.MandateTextElement
 import com.stripe.android.paymentsheet.elements.MandateTextSpec
 import com.stripe.android.paymentsheet.elements.NameConfig
-import com.stripe.android.paymentsheet.elements.ResourceRepository
 import com.stripe.android.paymentsheet.elements.SaveForFutureUseElement
 import com.stripe.android.paymentsheet.elements.SaveForFutureUseSpec
 import com.stripe.android.paymentsheet.elements.SectionElement
@@ -27,6 +26,7 @@ import com.stripe.android.paymentsheet.elements.SimpleDropdownElement
 import com.stripe.android.paymentsheet.elements.SimpleTextElement
 import com.stripe.android.paymentsheet.elements.SimpleTextSpec
 import com.stripe.android.paymentsheet.elements.SupportedBankType
+import com.stripe.android.paymentsheet.forms.resources.StaticResourceRepository
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.Before
@@ -57,7 +57,7 @@ internal class TransformSpecToElementTest {
 
         transformSpecToElement =
             TransformSpecToElement(
-                ResourceRepository(
+                StaticResourceRepository(
                     bankRepository,
                     mock()
                 ),
@@ -66,7 +66,7 @@ internal class TransformSpecToElementTest {
     }
 
     @Test
-    fun `Section with multiple fields contains all fields in the section element`() {
+    fun `Section with multiple fields contains all fields in the section element`() = runBlocking {
         val formElement = transformSpecToElement.transform(
             listOf(
                 SectionSpec(
@@ -86,7 +86,7 @@ internal class TransformSpecToElementTest {
     }
 
     @Test
-    fun `Adding a country section sets up the section and country elements correctly`() {
+    fun `Adding a country section sets up the section and country elements correctly`() = runBlocking {
         val countrySection = SectionSpec(
             IdentifierSpec.Generic("country_section"),
             CountrySpec(onlyShowCountryCodes = setOf("AT"))
@@ -110,7 +110,7 @@ internal class TransformSpecToElementTest {
     }
 
     @Test
-    fun `Adding a ideal bank section sets up the section and country elements correctly`() {
+    fun `Adding a ideal bank section sets up the section and country elements correctly`() = runBlocking {
         val idealSection = SectionSpec(
             IdentifierSpec.Generic("ideal_section"),
             IDEAL_BANK_CONFIG
@@ -131,7 +131,7 @@ internal class TransformSpecToElementTest {
     }
 
     @Test
-    fun `Add a name section spec sets up the name element correctly`() {
+    fun `Add a name section spec sets up the name element correctly`() = runBlocking {
         val formElement = transformSpecToElement.transform(
             listOf(nameSection)
         )
@@ -148,7 +148,7 @@ internal class TransformSpecToElementTest {
     }
 
     @Test
-    fun `Add a simple text section spec sets up the text element correctly`() {
+    fun `Add a simple text section spec sets up the text element correctly`() = runBlocking {
         val formElement = transformSpecToElement.transform(
             listOf(
                 SectionSpec(
@@ -174,7 +174,7 @@ internal class TransformSpecToElementTest {
     }
 
     @Test
-    fun `Add a email section spec sets up the email element correctly`() {
+    fun `Add a email section spec sets up the email element correctly`() = runBlocking {
         val formElement = transformSpecToElement.transform(
             listOf(emailSection)
         )
@@ -188,7 +188,7 @@ internal class TransformSpecToElementTest {
     }
 
     @Test
-    fun `Add a mandate section spec setup of the mandate element correctly`() {
+    fun `Add a mandate section spec setup of the mandate element correctly`() = runBlocking {
         val mandate = MandateTextSpec(
             IdentifierSpec.Generic("mandate"),
             R.string.stripe_paymentsheet_sepa_mandate,
@@ -207,34 +207,33 @@ internal class TransformSpecToElementTest {
     }
 
     @Test
-    fun `Add a save for future use section spec sets the mandate element correctly`() =
-        runBlocking {
-            val mandate = MandateTextSpec(
-                IdentifierSpec.Generic("mandate"),
-                R.string.stripe_paymentsheet_sepa_mandate,
-                Color.Gray
+    fun `Add a save for future use section spec sets the mandate element correctly`() = runBlocking {
+        val mandate = MandateTextSpec(
+            IdentifierSpec.Generic("mandate"),
+            R.string.stripe_paymentsheet_sepa_mandate,
+            Color.Gray
+        )
+        val hiddenIdentifiers = listOf(nameSection, mandate)
+        val saveForFutureUseSpec = SaveForFutureUseSpec(hiddenIdentifiers)
+        val formElement = transformSpecToElement.transform(
+            listOf(saveForFutureUseSpec)
+        )
+
+        val saveForFutureUseElement =
+            formElement.first() as SaveForFutureUseElement
+        val saveForFutureUseController = saveForFutureUseElement.controller
+
+        assertThat(saveForFutureUseElement.identifier)
+            .isEqualTo(saveForFutureUseSpec.identifier)
+
+        assertThat(saveForFutureUseController.hiddenIdentifiers.first()).isEmpty()
+
+        saveForFutureUseController.onValueChange(false)
+        assertThat(saveForFutureUseController.hiddenIdentifiers.first())
+            .isEqualTo(
+                hiddenIdentifiers.map { it.identifier }
             )
-            val hiddenIdentifiers = listOf(nameSection, mandate)
-            val saveForFutureUseSpec = SaveForFutureUseSpec(hiddenIdentifiers)
-            val formElement = transformSpecToElement.transform(
-                listOf(saveForFutureUseSpec)
-            )
-
-            val saveForFutureUseElement =
-                formElement.first() as SaveForFutureUseElement
-            val saveForFutureUseController = saveForFutureUseElement.controller
-
-            assertThat(saveForFutureUseElement.identifier)
-                .isEqualTo(saveForFutureUseSpec.identifier)
-
-            assertThat(saveForFutureUseController.hiddenIdentifiers.first()).isEmpty()
-
-            saveForFutureUseController.onValueChange(false)
-            assertThat(saveForFutureUseController.hiddenIdentifiers.first())
-                .isEqualTo(
-                    hiddenIdentifiers.map { it.identifier }
-                )
-        }
+    }
 
     companion object {
         val IDEAL_BANK_CONFIG = BankDropdownSpec(
