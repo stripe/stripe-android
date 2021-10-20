@@ -6,65 +6,63 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.liveData
+import com.github.kittinunf.fuel.Fuel
+import com.github.kittinunf.fuel.core.extensions.jsonBody
+import com.github.kittinunf.result.Result
+import com.google.gson.Gson
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.repository.DefaultRepository
 import com.stripe.android.paymentsheet.example.repository.Repository
 import com.stripe.android.paymentsheet.example.service.BackendApiFactory
 import com.stripe.android.paymentsheet.example.service.CheckoutResponse
+import kotlinx.serialization.Serializable
 
 internal class PaymentSheetViewModel(
     application: Application,
-    private val repository: Repository
 ) : AndroidViewModel(application) {
     val inProgress = MutableLiveData<Boolean>()
     val status = MutableLiveData<String>()
+    val exampleCheckoutResponse = MutableLiveData<ExampleCheckoutResponse>()
 
     fun statusDisplayed() {
         status.value = ""
     }
 
-    fun prepareCheckout(customer: Repository.CheckoutCustomer, mode: Repository.CheckoutMode) =
-        liveData<CheckoutResponse?> {
-            inProgress.postValue(true)
+    fun prepareCheckout(backendUrl: String) {
+        inProgress.postValue(true)
 
-            val checkoutResponse = runCatching {
-                repository.checkout(
-                    customer,
-                    Repository.CheckoutCurrency.USD,
-                    mode,
-                    setShippingAddress = false,
-                    setAutomaticPaymentMethods = false // need to verify this default
-                )
-            }
-
-            checkoutResponse.fold(
-                onSuccess = { },
-                onFailure = {
-                    status.postValue(
-                        "${status.value}\n\nPreparing checkout failed\n${it.message}"
-                    )
+        Fuel.post(backendUrl)
+            .responseString { _, _, result ->
+                when (result) {
+                    is Result.Failure -> {
+                        status.postValue("${status.value}\n\nPreparing checkout failed\n" +
+                            "${result.getException().message}")
+                    }
+                    is Result.Success -> {
+                        exampleCheckoutResponse.postValue(
+                            Gson().fromJson(result.get(), ExampleCheckoutResponse::class.java)
+                        )
+                    }
                 }
-            )
+                inProgress.postValue(false)
+            }
+    }
 
-            inProgress.postValue(false)
-            emit(checkoutResponse.getOrNull())
-        }
-
-    internal class Factory(
-        private val application: Application
-    ) : ViewModelProvider.Factory {
-
-        @Suppress("UNCHECKED_CAST")
-        override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-            val checkoutBackendApi = BackendApiFactory(application).createCheckout()
-
-            val repository = DefaultRepository(
-                checkoutBackendApi
-            )
-
-            return PaymentSheetViewModel(
-                application,
-                repository
-            ) as T
-        }
+    @Serializable
+    data class ExampleCheckoutResponse(
+        val publishableKey: String,
+        val paymentIntent: String,
+        val customer: String? = null,
+        val ephemeralKey: String? = null
+    ) {
+        internal fun makeCustomerConfig() =
+            if (customer != null && ephemeralKey != null) {
+                PaymentSheet.CustomerConfiguration(
+                    id = customer,
+                    ephemeralKeySecret = ephemeralKey
+                )
+            } else {
+                null
+            }
     }
 }
