@@ -71,6 +71,9 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
     private val googlePayButtonStateObserver = { viewState: PaymentSheetViewState? ->
         updateErrorMessage(viewState?.errorMessage)
         viewBinding.googlePayButton.updateState(viewState?.convert())
+        if(viewState !is PaymentSheetViewState.StartProcessing){
+            setContentVisible(true)
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -156,6 +159,11 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
         viewModel.paymentSheetResult.observe(this) {
             closeSheet(it)
         }
+    }
+
+    fun setContentVisible(visible: Boolean) {
+        viewBinding.appbar.isVisible = visible
+        viewBinding.scrollView.isVisible = visible
     }
 
     override fun onDestroy() {
@@ -262,6 +270,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
         }
 
         viewBinding.googlePayButton.setOnClickListener {
+            setContentVisible(false)
             updateErrorMessage()
             viewModel.checkout(CheckoutIdentifier.SheetBottomGooglePay)
         }

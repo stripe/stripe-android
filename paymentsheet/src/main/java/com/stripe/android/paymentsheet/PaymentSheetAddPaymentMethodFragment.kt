@@ -45,6 +45,7 @@ internal class PaymentSheetAddPaymentMethodFragment(
         val googlePayDivider = viewBinding.googlePayDivider
 
         googlePayButton.setOnClickListener {
+            (activity as PaymentSheetActivity).setContentVisible(false)
             sheetViewModel.lastSelectedPaymentMethod = sheetViewModel.selection.value
             sheetViewModel.updateSelection(PaymentSelection.GooglePay)
         }
@@ -65,6 +66,9 @@ internal class PaymentSheetAddPaymentMethodFragment(
                 if (viewState is PaymentSheetViewState.Reset) {
                     // If Google Pay was cancelled or failed, re-select the form payment method
                     sheetViewModel.updateSelection(sheetViewModel.lastSelectedPaymentMethod)
+                }
+                if (viewState !is PaymentSheetViewState.StartProcessing) {
+                    (activity as PaymentSheetActivity).setContentVisible(true)
                 }
 
                 updateErrorMessage(viewState?.errorMessage)
