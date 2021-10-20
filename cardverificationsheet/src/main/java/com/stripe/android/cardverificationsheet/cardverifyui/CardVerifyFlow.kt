@@ -107,8 +107,8 @@ internal class CardVerifyFlow(
         coroutineScope: CoroutineScope,
     ) = coroutineScope.launch(Dispatchers.Main) {
         val listener = object : AggregateResultListener<
-            MainLoopAggregator.InterimResult,
-            MainLoopAggregator.FinalResult> {
+                MainLoopAggregator.InterimResult,
+                MainLoopAggregator.FinalResult> {
 
             override suspend fun onResult(result: MainLoopAggregator.FinalResult) {
                 mainLoop?.unsubscribe()

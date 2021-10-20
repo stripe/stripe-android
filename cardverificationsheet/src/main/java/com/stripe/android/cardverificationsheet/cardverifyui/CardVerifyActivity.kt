@@ -128,23 +128,23 @@ open class CardVerifyActivity : SimpleScanActivity() {
         }
 
         override fun cardScanned(frames: Collection<SavedFrame>) {
-//            launch {
-//                when (
-//                    val result = uploadSavedFrames(
-//                        stripePublishableKey = stripePublishableKey,
-//                        civId = cardImageVerificationIntentId,
-//                        civSecret = cardImageVerificationIntentSecret,
-//                        savedFrames = frames,
-//                    )
-//                ) {
-//                    is NetworkResult.Success ->
-//                        cardVerificationComplete()
-//                    is NetworkResult.Error ->
-//                        scanFailure(StripeNetworkException(result.error.error.message))
-//                    is NetworkResult.Exception ->
-//                        scanFailure(result.exception)
-//                }
-//            }
+            launch {
+                when (
+                    val result = uploadSavedFrames(
+                        stripePublishableKey = stripePublishableKey,
+                        civId = cardImageVerificationIntentId,
+                        civSecret = cardImageVerificationIntentSecret,
+                        savedFrames = frames,
+                    )
+                ) {
+                    is NetworkResult.Success ->
+                        cardVerificationComplete()
+                    is NetworkResult.Error ->
+                        scanFailure(StripeNetworkException(result.error.error.message))
+                    is NetworkResult.Exception ->
+                        scanFailure(result.exception)
+                }
+            }
         }
 
         override fun userCanceled(reason: CardVerificationSheetCancelationReason) {
@@ -184,7 +184,7 @@ open class CardVerifyActivity : SimpleScanActivity() {
         super.onCreate(savedInstanceState)
 
         launch {
-            when(
+            when (
                 val result = getCardImageVerificationIntentDetails(
                     stripePublishableKey = stripePublishableKey,
                     civId = cardImageVerificationIntentId,
@@ -202,7 +202,7 @@ open class CardVerifyActivity : SimpleScanActivity() {
                     scanFailure(result.exception)
             }
         }
-        
+
         cannotScanTextView.setOnClickListener { userCannotScan() }
     }
 

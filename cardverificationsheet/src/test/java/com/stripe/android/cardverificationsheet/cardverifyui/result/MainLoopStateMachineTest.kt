@@ -489,8 +489,8 @@ class MainLoopStateMachineTest {
 
         val newState = state.consumeTransition(prediction)
         assertTrue(newState is MainLoopState.WrongPanFound)
-        assertEquals(CardIssuer.Visa, newState.cardIssuer)
-        assertEquals("8770", newState.lastFour)
+        assertEquals(CardIssuer.Unknown, newState.cardIssuer)
+        assertEquals("5016", newState.lastFour)
     }
 
     @Test

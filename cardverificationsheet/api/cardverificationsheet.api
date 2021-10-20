@@ -47,9 +47,79 @@ public final class com/stripe/android/cardverificationsheet/camera/CameraPreview
 	public static synthetic fun copy$default (Lcom/stripe/android/cardverificationsheet/camera/CameraPreviewImage;Ljava/lang/Object;Landroid/graphics/Rect;ILjava/lang/Object;)Lcom/stripe/android/cardverificationsheet/camera/CameraPreviewImage;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getImage ()Ljava/lang/Object;
-	public final fun getViewSize ()Landroid/graphics/Rect;
+	public final fun getViewBounds ()Landroid/graphics/Rect;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
+}
+
+public class com/stripe/android/cardverificationsheet/cardverifyui/CardVerifyActivity : com/stripe/android/cardverificationsheet/scanui/SimpleScanActivity {
+	public static final field $stable I
+	public fun <init> ()V
+	protected fun addUiComponents ()V
+	protected fun closeScanner ()V
+	protected fun getCannotScanTextView ()Landroid/widget/TextView;
+	protected fun getCardDescriptionTextView ()Landroid/widget/TextView;
+	protected fun getMinimumAnalysisResolution ()Landroid/util/Size;
+	public synthetic fun getResultListener$cardverificationsheet_release ()Lcom/stripe/android/cardverificationsheet/scanui/ScanResultListener;
+	public synthetic fun getScanFlow$cardverificationsheet_release ()Lcom/stripe/android/cardverificationsheet/scanui/ScanFlow;
+	protected fun onCreate (Landroid/os/Bundle;)V
+	protected fun setupCannotScanTextViewConstraints ()V
+	protected fun setupCannotScanUi ()V
+	protected fun setupCardDescriptionTextViewConstraints ()V
+	protected fun setupCardDescriptionUi ()V
+	protected fun setupInstructionsViewConstraints ()V
+	protected fun setupUiComponents ()V
+	protected fun setupUiConstraints ()V
+}
+
+public final class com/stripe/android/cardverificationsheet/cardverifyui/CardVerifyActivityKt {
+	public static final field PARAM_CIV_ID Ljava/lang/String;
+	public static final field PARAM_CIV_SECRET Ljava/lang/String;
+	public static final field PARAM_ENABLE_CANNOT_SCAN_CARD Ljava/lang/String;
+	public static final field PARAM_STRIPE_PUBLISHABLE_KEY Ljava/lang/String;
+	public static final field RESULT_CANCELED_REASON Ljava/lang/String;
+	public static final field RESULT_FAILED_CAUSE Ljava/lang/String;
+}
+
+public final class com/stripe/android/cardverificationsheet/cardverifyui/VerifyConfig {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/stripe/android/cardverificationsheet/cardverifyui/VerifyConfig;
+	public static final fun getDESIRED_OCR_AGREEMENT ()I
+	public static final fun getDESIRED_SIDE_COUNT ()I
+	public static final fun getMAX_COMPLETION_LOOP_FRAMES ()I
+	public static final fun getMAX_SAVED_FRAMES_PER_TYPE ()I
+	public static final fun getMINIMUM_PAN_AGREEMENT ()I
+	public static final fun getPAN_AND_CARD_SEARCH_DURATION ()Lcom/stripe/android/cardverificationsheet/framework/time/Duration;
+	public static final fun getPAN_SEARCH_DURATION ()Lcom/stripe/android/cardverificationsheet/framework/time/Duration;
+	public static final fun getWRONG_CARD_DURATION ()Lcom/stripe/android/cardverificationsheet/framework/time/Duration;
+	public static final fun setDESIRED_OCR_AGREEMENT (I)V
+	public static final fun setDESIRED_SIDE_COUNT (I)V
+	public static final fun setMAX_COMPLETION_LOOP_FRAMES (I)V
+	public static final fun setMAX_SAVED_FRAMES_PER_TYPE (I)V
+	public static final fun setMINIMUM_PAN_AGREEMENT (I)V
+	public static final fun setPAN_AND_CARD_SEARCH_DURATION (Lcom/stripe/android/cardverificationsheet/framework/time/Duration;)V
+	public static final fun setPAN_SEARCH_DURATION (Lcom/stripe/android/cardverificationsheet/framework/time/Duration;)V
+	public static final fun setWRONG_CARD_DURATION (Lcom/stripe/android/cardverificationsheet/framework/time/Duration;)V
+}
+
+public final class com/stripe/android/cardverificationsheet/cardverifyui/exception/InvalidCivException : java/lang/Exception {
+	public static final field $stable I
+	public fun <init> (Ljava/lang/String;)V
+}
+
+public final class com/stripe/android/cardverificationsheet/cardverifyui/exception/InvalidRequiredCardException : java/lang/Exception {
+	public static final field $stable I
+	public fun <init> (Ljava/lang/String;)V
+}
+
+public final class com/stripe/android/cardverificationsheet/cardverifyui/exception/InvalidStripePublishableKeyException : java/lang/Exception {
+	public static final field $stable I
+	public fun <init> (Ljava/lang/String;)V
+}
+
+public final class com/stripe/android/cardverificationsheet/cardverifyui/exception/StripeNetworkException : java/lang/Exception {
+	public static final field $stable I
+	public fun <init> (Ljava/lang/String;)V
 }
 
 public abstract interface class com/stripe/android/cardverificationsheet/framework/AggregateResultListener {
@@ -105,6 +175,17 @@ public final class com/stripe/android/cardverificationsheet/framework/AnalyzerPo
 public final class com/stripe/android/cardverificationsheet/framework/AnalyzerPool$Companion {
 	public final fun of (Lcom/stripe/android/cardverificationsheet/framework/AnalyzerFactory;ILkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun of$default (Lcom/stripe/android/cardverificationsheet/framework/AnalyzerPool$Companion;Lcom/stripe/android/cardverificationsheet/framework/AnalyzerFactory;ILkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+}
+
+public final class com/stripe/android/cardverificationsheet/framework/Config {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/stripe/android/cardverificationsheet/framework/Config;
+	public static final fun getDisplayLogo ()Z
+	public static final fun getLogTag ()Ljava/lang/String;
+	public static final fun isDebug ()Z
+	public static final fun setDebug (Z)V
+	public static final fun setDisplayLogo (Z)V
+	public static final fun setLogTag (Ljava/lang/String;)V
 }
 
 public abstract class com/stripe/android/cardverificationsheet/framework/FetchedData {
@@ -205,6 +286,23 @@ public abstract class com/stripe/android/cardverificationsheet/framework/Machine
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class com/stripe/android/cardverificationsheet/framework/NetworkConfig {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/stripe/android/cardverificationsheet/framework/NetworkConfig;
+	public static final fun getBaseUrl ()Ljava/lang/String;
+	public static final fun getJson ()Lkotlinx/serialization/json/Json;
+	public static final fun getRetryDelay ()Lcom/stripe/android/cardverificationsheet/framework/time/Duration;
+	public static final fun getRetryStatusCodes ()Ljava/lang/Iterable;
+	public static final fun getRetryTotalAttempts ()I
+	public static final fun getUseCompression ()Z
+	public static final fun setBaseUrl (Ljava/lang/String;)V
+	public static final fun setJson (Lkotlinx/serialization/json/Json;)V
+	public static final fun setRetryDelay (Lcom/stripe/android/cardverificationsheet/framework/time/Duration;)V
+	public static final fun setRetryStatusCodes (Ljava/lang/Iterable;)V
+	public static final fun setRetryTotalAttempts (I)V
+	public static final fun setUseCompression (Z)V
+}
+
 public final class com/stripe/android/cardverificationsheet/framework/NoAnalyzersAvailableException : java/lang/Exception {
 	public static final field $stable I
 	public static final field INSTANCE Lcom/stripe/android/cardverificationsheet/framework/NoAnalyzersAvailableException;
@@ -262,10 +360,9 @@ public abstract class com/stripe/android/cardverificationsheet/framework/Termina
 
 public abstract class com/stripe/android/cardverificationsheet/framework/WebFetcher : com/stripe/android/cardverificationsheet/framework/Fetcher {
 	public static final field $stable I
-	public fun <init> (Landroid/content/Context;)V
+	public fun <init> ()V
 	protected abstract fun cleanUpPostDownload (Ljava/io/File;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun fetchData (ZZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	protected final fun getContext ()Landroid/content/Context;
 	protected abstract fun getDownloadDetails (Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	protected abstract fun getDownloadOutputFile (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun isCached (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
@@ -288,6 +385,40 @@ protected final class com/stripe/android/cardverificationsheet/framework/WebFetc
 	public final fun getUrl ()Ljava/net/URL;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/cardverificationsheet/framework/api/dto/ScanStatsRequest {
+	public static final field $stable I
+	public static final field Companion Lcom/stripe/android/cardverificationsheet/framework/api/dto/ScanStatsRequest$Companion;
+	public synthetic fun <init> (ILjava/lang/String;Ljava/lang/String;Lkotlinx/serialization/internal/SerializationConstructorMarker;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/cardverificationsheet/framework/api/dto/ScanStatsRequest;
+	public static synthetic fun copy$default (Lcom/stripe/android/cardverificationsheet/framework/api/dto/ScanStatsRequest;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/cardverificationsheet/framework/api/dto/ScanStatsRequest;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getClientSecret ()Ljava/lang/String;
+	public final fun getStats ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+	public static final fun write$Self (Lcom/stripe/android/cardverificationsheet/framework/api/dto/ScanStatsRequest;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V
+}
+
+public final class com/stripe/android/cardverificationsheet/framework/api/dto/ScanStatsRequest$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/stripe/android/cardverificationsheet/framework/api/dto/ScanStatsRequest$$serializer;
+	public static final synthetic field descriptor Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcom/stripe/android/cardverificationsheet/framework/api/dto/ScanStatsRequest;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/stripe/android/cardverificationsheet/framework/api/dto/ScanStatsRequest;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class com/stripe/android/cardverificationsheet/framework/api/dto/ScanStatsRequest$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 }
 
 public abstract class com/stripe/android/cardverificationsheet/framework/ml/TFLAnalyzerFactory : com/stripe/android/cardverificationsheet/framework/AnalyzerFactory {
@@ -446,6 +577,11 @@ public final class com/stripe/android/cardverificationsheet/framework/util/Array
 	public static final fun transpose ([[F)[[F
 	public static final fun updateEach ([FLkotlin/jvm/functions/Function1;)V
 	public static final fun updateEach ([Ljava/lang/Object;Lkotlin/jvm/functions/Function1;)V
+}
+
+public final class com/stripe/android/cardverificationsheet/framework/util/Base64Kt {
+	public static final fun b64Encode (Ljava/lang/String;)Ljava/lang/String;
+	public static final fun b64Encode ([B)Ljava/lang/String;
 }
 
 public final class com/stripe/android/cardverificationsheet/framework/util/FileKt {
@@ -648,23 +784,54 @@ public class com/stripe/android/cardverificationsheet/scanui/CameraErrorListener
 	public fun onCameraUnsupportedError (Ljava/lang/Throwable;)V
 }
 
+public class com/stripe/android/cardverificationsheet/scanui/CardVerificationSheetCancelationReason : android/os/Parcelable {
+	public static final field $stable I
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public fun <init> ()V
+	public fun describeContents ()I
+	public fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public final class com/stripe/android/cardverificationsheet/scanui/CardVerificationSheetCancelationReason$Back : com/stripe/android/cardverificationsheet/scanui/CardVerificationSheetCancelationReason {
+	public static final field $stable I
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public static final field INSTANCE Lcom/stripe/android/cardverificationsheet/scanui/CardVerificationSheetCancelationReason$Back;
+	public fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public final class com/stripe/android/cardverificationsheet/scanui/CardVerificationSheetCancelationReason$CameraPermissionDenied : com/stripe/android/cardverificationsheet/scanui/CardVerificationSheetCancelationReason {
+	public static final field $stable I
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public static final field INSTANCE Lcom/stripe/android/cardverificationsheet/scanui/CardVerificationSheetCancelationReason$CameraPermissionDenied;
+	public fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public final class com/stripe/android/cardverificationsheet/scanui/CardVerificationSheetCancelationReason$Closed : com/stripe/android/cardverificationsheet/scanui/CardVerificationSheetCancelationReason {
+	public static final field $stable I
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public static final field INSTANCE Lcom/stripe/android/cardverificationsheet/scanui/CardVerificationSheetCancelationReason$Closed;
+	public fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public final class com/stripe/android/cardverificationsheet/scanui/CardVerificationSheetCancelationReason$UserCannotScan : com/stripe/android/cardverificationsheet/scanui/CardVerificationSheetCancelationReason {
+	public static final field $stable I
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public static final field INSTANCE Lcom/stripe/android/cardverificationsheet/scanui/CardVerificationSheetCancelationReason$UserCannotScan;
+	public fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
 public abstract class com/stripe/android/cardverificationsheet/scanui/ScanActivity : androidx/appcompat/app/AppCompatActivity, kotlinx/coroutines/CoroutineScope {
 	public static final field $stable I
 	public static final field Companion Lcom/stripe/android/cardverificationsheet/scanui/ScanActivity$Companion;
 	public static final field PERMISSION_REQUEST_CODE I
 	public fun <init> ()V
-	protected fun analyzerFailureCancelScan (Ljava/lang/Throwable;)V
-	public static synthetic fun analyzerFailureCancelScan$default (Lcom/stripe/android/cardverificationsheet/scanui/ScanActivity;Ljava/lang/Throwable;ILjava/lang/Object;)V
 	protected fun buildCameraAdapter ()Lcom/stripe/android/cardverificationsheet/camera/CameraAdapter;
-	protected fun cameraErrorCancelScan (Ljava/lang/Throwable;)V
-	public static synthetic fun cameraErrorCancelScan$default (Lcom/stripe/android/cardverificationsheet/scanui/ScanActivity;Ljava/lang/Throwable;ILjava/lang/Object;)V
 	protected fun closeScanner ()V
 	protected fun ensurePermissionAndStartCamera ()V
 	protected final fun getCameraAdapter ()Lcom/stripe/android/cardverificationsheet/camera/CameraAdapter;
 	public fun getCoroutineContext ()Lkotlin/coroutines/CoroutineContext;
 	protected abstract fun getMinimumAnalysisResolution ()Landroid/util/Size;
 	protected abstract fun getPreviewFrame ()Landroid/view/ViewGroup;
-	protected abstract fun getResultListener ()Lcom/stripe/android/cardverificationsheet/scanui/ScanResultListener;
 	protected fun hideSystemUi ()V
 	protected final fun isFlashlightOn ()Z
 	public fun onBackPressed ()V
@@ -680,13 +847,17 @@ public abstract class com/stripe/android/cardverificationsheet/scanui/ScanActivi
 	protected fun openAppSettings ()V
 	protected abstract fun prepareCamera (Lkotlin/jvm/functions/Function0;)V
 	protected fun requestCameraPermission ()V
+	protected fun scanFailure (Ljava/lang/Throwable;)V
+	public static synthetic fun scanFailure$default (Lcom/stripe/android/cardverificationsheet/scanui/ScanActivity;Ljava/lang/Throwable;ILjava/lang/Object;)V
 	protected fun setFocus (Landroid/graphics/PointF;)V
 	protected fun showCameraNotSupportedDialog ()V
 	protected fun showPermissionDeniedDialog ()V
 	protected fun showPermissionRationaleDialog ()V
 	protected fun toggleCamera ()V
 	protected fun toggleFlashlight ()V
-	protected fun userCancelScan ()V
+	protected fun userCannotScan ()V
+	protected fun userClosedScanner ()V
+	protected fun userDeniedCameraPermission ()V
 }
 
 public final class com/stripe/android/cardverificationsheet/scanui/ScanActivity$Companion {
@@ -702,9 +873,8 @@ public abstract interface class com/stripe/android/cardverificationsheet/scanui/
 }
 
 public abstract interface class com/stripe/android/cardverificationsheet/scanui/ScanResultListener {
-	public abstract fun analyzerFailure (Ljava/lang/Throwable;)V
-	public abstract fun cameraError (Ljava/lang/Throwable;)V
-	public abstract fun userCanceled ()V
+	public abstract fun failed (Ljava/lang/Throwable;)V
+	public abstract fun userCanceled (Lcom/stripe/android/cardverificationsheet/scanui/CardVerificationSheetCancelationReason;)V
 }
 
 public abstract class com/stripe/android/cardverificationsheet/scanui/SimpleScanActivity : com/stripe/android/cardverificationsheet/scanui/ScanActivity {
@@ -720,12 +890,10 @@ public abstract class com/stripe/android/cardverificationsheet/scanui/SimpleScan
 	protected fun getCardNameTextView ()Landroid/widget/TextView;
 	protected fun getCardNumberTextView ()Landroid/widget/TextView;
 	protected fun getCloseButtonView ()Landroid/view/View;
-	protected fun getDebugImageView ()Landroid/widget/ImageView;
 	protected final fun getHasMultipleCameras ()Ljava/lang/Boolean;
 	protected fun getInstructionsTextView ()Landroid/widget/TextView;
 	protected fun getLayout ()Landroidx/constraintlayout/widget/ConstraintLayout;
 	protected fun getPreviewFrame ()Landroid/view/ViewGroup;
-	protected abstract fun getScanFlow ()Lcom/stripe/android/cardverificationsheet/scanui/ScanFlow;
 	protected final fun getScanState ()Lcom/stripe/android/cardverificationsheet/scanui/SimpleScanActivity$ScanState;
 	protected fun getSecurityIconView ()Landroid/widget/ImageView;
 	protected fun getSecurityTextView ()Landroid/widget/TextView;
@@ -753,8 +921,6 @@ public abstract class com/stripe/android/cardverificationsheet/scanui/SimpleScan
 	protected fun setupCardDetailsUi ()V
 	protected fun setupCloseButtonViewConstraints ()V
 	protected fun setupCloseButtonViewUi ()V
-	protected fun setupDebugConstraints ()V
-	protected fun setupDebugUi ()V
 	protected fun setupInstructionsViewConstraints ()V
 	protected fun setupInstructionsViewUi ()V
 	protected fun setupPreviewFrameConstraints ()V
