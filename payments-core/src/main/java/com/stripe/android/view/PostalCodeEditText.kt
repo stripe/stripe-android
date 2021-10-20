@@ -5,6 +5,7 @@ import android.os.Build
 import android.text.InputFilter
 import android.text.InputType
 import android.text.method.DigitsKeyListener
+import android.text.method.HideReturnsTransformationMethod
 import android.text.method.TextKeyListener
 import android.util.AttributeSet
 import android.view.View
@@ -66,7 +67,8 @@ class PostalCodeEditText @JvmOverloads constructor(
         updateHint(R.string.address_label_zip_code)
         filters = arrayOf(InputFilter.LengthFilter(MAX_LENGTH_US))
         keyListener = DigitsKeyListener.getInstance(false, true)
-        inputType = InputType.TYPE_CLASS_NUMBER
+        inputType = InputType.TYPE_NUMBER_VARIATION_PASSWORD or InputType.TYPE_CLASS_NUMBER
+        transformationMethod = HideReturnsTransformationMethod.getInstance()
     }
 
     /**
