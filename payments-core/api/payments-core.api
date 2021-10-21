@@ -668,6 +668,7 @@ public final class com/stripe/android/Stripe {
 	public static final field API_VERSION Ljava/lang/String;
 	public static final field Companion Lcom/stripe/android/Stripe$Companion;
 	public static final field VERSION Ljava/lang/String;
+	public static final field VERSION_NAME Ljava/lang/String;
 	public fun <init> (Landroid/content/Context;Ljava/lang/String;)V
 	public fun <init> (Landroid/content/Context;Ljava/lang/String;Ljava/lang/String;)V
 	public fun <init> (Landroid/content/Context;Ljava/lang/String;Ljava/lang/String;Z)V
