@@ -5,7 +5,6 @@ import android.graphics.Bitmap
 import android.graphics.Rect
 import androidx.lifecycle.LifecycleOwner
 import com.stripe.android.cardverificationsheet.camera.CameraPreviewImage
-import com.stripe.android.cardverificationsheet.payment.card.CardIssuer
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 

@@ -14,8 +14,6 @@ class CardVerifyFlowTest {
     fun selectCompletionLoopFrames() {
 
         val flow = CardVerifyFlow(
-            requiredCardIssuer = null,
-            requiredLastFour = "1234",
             scanResultListener = object :
                 AggregateResultListener<
                     MainLoopAggregator.InterimResult,

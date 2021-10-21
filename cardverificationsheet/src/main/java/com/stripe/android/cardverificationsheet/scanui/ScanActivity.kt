@@ -439,5 +439,7 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
     /**
      * A stream of images from the camera is available to be processed.
      */
-    protected abstract suspend fun onCameraStreamAvailable(cameraStream: Flow<CameraPreviewImage<Bitmap>>)
+    protected abstract suspend fun onCameraStreamAvailable(
+        cameraStream: Flow<CameraPreviewImage<Bitmap>>,
+    )
 }

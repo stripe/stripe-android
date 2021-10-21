@@ -263,7 +263,13 @@ open class CardVerifyActivity : SimpleScanActivity<RequiredCardDetails>() {
 
     override fun addUiComponents() {
         super.addUiComponents()
-        appendUiComponents(cannotScanTextView, cardDescriptionTextView, processingOverlayView, processingSpinnerView, processingTextView)
+        appendUiComponents(
+            cannotScanTextView,
+            cardDescriptionTextView,
+            processingOverlayView,
+            processingSpinnerView,
+            processingTextView,
+        )
     }
 
     override fun setupUiComponents() {

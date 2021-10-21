@@ -35,7 +35,6 @@ import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.flow.Flow
 import kotlin.math.min
 import kotlin.math.roundToInt
-import kotlin.properties.Delegates
 
 abstract class SimpleScanActivity<ScanFlowParameters> : ScanActivity() {
 
