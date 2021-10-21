@@ -8,6 +8,8 @@ import android.os.Bundle
 import android.util.Log
 import android.util.Size
 import android.view.Gravity
+import android.view.View
+import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.annotation.Keep
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -33,6 +35,7 @@ import com.stripe.android.cardverificationsheet.framework.util.AppDetails
 import com.stripe.android.cardverificationsheet.framework.util.Device
 import com.stripe.android.cardverificationsheet.payment.card.CardIssuer
 import com.stripe.android.cardverificationsheet.payment.card.getIssuerByDisplayName
+import com.stripe.android.cardverificationsheet.payment.card.isValidPanLastFour
 import com.stripe.android.cardverificationsheet.scanui.CardVerificationSheetCancelationReason
 import com.stripe.android.cardverificationsheet.scanui.ScanResultListener
 import com.stripe.android.cardverificationsheet.scanui.SimpleScanActivity
@@ -43,6 +46,7 @@ import com.stripe.android.cardverificationsheet.scanui.util.setTextSizeByRes
 import com.stripe.android.cardverificationsheet.scanui.util.setVisible
 import com.stripe.android.cardverificationsheet.scanui.util.show
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import java.util.concurrent.atomic.AtomicBoolean
 
@@ -63,10 +67,15 @@ internal interface CardVerifyResultListener : ScanResultListener {
     fun cardScanned(frames: Collection<SavedFrame>)
 }
 
+data class RequiredCardDetails(
+    val cardIssuer: CardIssuer?,
+    val lastFour: String,
+)
+
 private val MINIMUM_RESOLUTION = Size(1067, 600) // minimum size of OCR
 
 @Keep
-open class CardVerifyActivity : SimpleScanActivity() {
+open class CardVerifyActivity : SimpleScanActivity<RequiredCardDetails>() {
 
     /**
      * The text view that lets a user indicate they do not have possession of the required card.
@@ -77,6 +86,21 @@ open class CardVerifyActivity : SimpleScanActivity() {
      * The text view that informs the user which card must be scanned.
      */
     protected open val cardDescriptionTextView: TextView by lazy { TextView(this) }
+
+    /**
+     * And overlay to darken the screen during result processing.
+     */
+    protected open val processingOverlayView by lazy { View(this) }
+
+    /**
+     * The spinner indicating that results are processing.
+     */
+    protected open val processingSpinnerView by lazy { ProgressBar(this) }
+
+    /**
+     * The text indicating that results are processing
+     */
+    protected open val processingTextView by lazy { TextView(this) }
 
     private val params: CardVerificationSheetParams by lazy {
         val params = intent.getParcelableExtra(INTENT_PARAM_REQUEST)
@@ -157,8 +181,6 @@ open class CardVerifyActivity : SimpleScanActivity() {
      */
     override val scanFlow: CardVerifyFlow by lazy {
         CardVerifyFlow(
-            requiredCardIssuer,
-            requiredCardLastFour ?: "",
             scanResultListener,
             scanErrorListener,
         )
@@ -175,40 +197,62 @@ open class CardVerifyActivity : SimpleScanActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        launch {
-            when (
-                val result = getCardImageVerificationIntentDetails(
-                    stripePublishableKey = params.stripePublishableKey,
-                    civId = params.cardImageVerificationIntentId,
-                    civSecret = params.cardImageVerificationIntentSecret,
-                )
-            ) {
-                is NetworkResult.Success ->
-                    onScanDetailsAvailable(
-                        getIssuerByDisplayName(result.body.expectedCard?.issuer ?: ""),
-                        result.body.expectedCard?.lastFour,
-                    )
-                is NetworkResult.Error ->
-                    scanFailure(StripeNetworkException("Unable to get CIV details"))
-                is NetworkResult.Exception ->
-                    scanFailure(result.exception)
-            }
+        deferredScanFlowParameters = async { getCivDetails() }
+
+        launch(Dispatchers.Main) {
+            onScanDetailsAvailable(deferredScanFlowParameters.await())
         }
 
         cannotScanTextView.setOnClickListener { userCannotScan() }
     }
 
-    private fun onScanDetailsAvailable(
-        requiredCardIssuer: CardIssuer?,
-        requiredCardLastFour: String?,
+    private suspend fun getCivDetails(): RequiredCardDetails = when (
+        val result = getCardImageVerificationIntentDetails(
+            stripePublishableKey = params.stripePublishableKey,
+            civId = params.cardImageVerificationIntentId,
+            civSecret = params.cardImageVerificationIntentSecret,
+        )
     ) {
-        if (requiredCardLastFour.isNullOrEmpty()) {
+        is NetworkResult.Success ->
+            result.body.expectedCard?.let { expectedCard ->
+                expectedCard.lastFour?.let { lastFour ->
+                    if (isValidPanLastFour(lastFour)) {
+                        RequiredCardDetails(
+                            getIssuerByDisplayName(expectedCard.issuer),
+                            lastFour,
+                        )
+                    } else {
+                        launch(Dispatchers.Main) {
+                            scanFailure(InvalidCivException("Invalid required card"))
+                        }
+                        null
+                    }
+                }
+            }
+        is NetworkResult.Error -> {
+            launch(Dispatchers.Main) {
+                scanFailure(StripeNetworkException("Unable to get CIV details"))
+            }
+            null
+        }
+        is NetworkResult.Exception -> {
+            launch(Dispatchers.Main) {
+                scanFailure(result.exception)
+            }
+            null
+        }
+    } ?: RequiredCardDetails(null, "1234") // TODO: this is a hack
+
+    private fun onScanDetailsAvailable(
+        requiredCardDetails: RequiredCardDetails?,
+    ) {
+        if (requiredCardDetails == null) {
             scanFailure(InvalidRequiredCardException("Missing last four"))
             return
         }
 
-        this.requiredCardIssuer = requiredCardIssuer
-        this.requiredCardLastFour = requiredCardLastFour
+        this.requiredCardIssuer = requiredCardDetails.cardIssuer
+        this.requiredCardLastFour = requiredCardDetails.lastFour
 
         cardDescriptionTextView.text = getString(
             R.string.stripe_card_description,
@@ -219,7 +263,7 @@ open class CardVerifyActivity : SimpleScanActivity() {
 
     override fun addUiComponents() {
         super.addUiComponents()
-        appendUiComponents(cannotScanTextView, cardDescriptionTextView)
+        appendUiComponents(cannotScanTextView, cardDescriptionTextView, processingOverlayView, processingSpinnerView, processingTextView)
     }
 
     override fun setupUiComponents() {
@@ -227,6 +271,8 @@ open class CardVerifyActivity : SimpleScanActivity() {
 
         setupCannotScanUi()
         setupCardDescriptionUi()
+        setupProcessingOverlayViewUi()
+        setupProcessingTextViewUi()
     }
 
     protected open fun setupCannotScanUi() {
@@ -270,11 +316,25 @@ open class CardVerifyActivity : SimpleScanActivity() {
         }
     }
 
+    protected open fun setupProcessingOverlayViewUi() {
+        processingOverlayView.setBackgroundColor(getColorByRes(R.color.stripeProcessingBackground))
+    }
+
+    protected open fun setupProcessingTextViewUi() {
+        processingTextView.text = getString(R.string.stripe_processing_card)
+        processingTextView.setTextSizeByRes(R.dimen.stripeProcessingTextSize)
+        processingTextView.setTextColor(getColorByRes(R.color.stripeProcessingText))
+        processingTextView.gravity = Gravity.CENTER
+    }
+
     override fun setupUiConstraints() {
         super.setupUiConstraints()
 
         setupCannotScanTextViewConstraints()
         setupCardDescriptionTextViewConstraints()
+        setupProcessingOverlayViewConstraints()
+        setupProcessingSpinnerViewConstraints()
+        setupProcessingTextViewConstraints()
     }
 
     override fun setupInstructionsViewConstraints() {
@@ -318,6 +378,54 @@ open class CardVerifyActivity : SimpleScanActivity() {
             connect(it.id, ConstraintSet.BOTTOM, viewFinderWindowView.id, ConstraintSet.TOP)
             connect(it.id, ConstraintSet.START, ConstraintSet.PARENT_ID, ConstraintSet.START)
             connect(it.id, ConstraintSet.END, ConstraintSet.PARENT_ID, ConstraintSet.END)
+        }
+    }
+
+    protected open fun setupProcessingOverlayViewConstraints() {
+        processingOverlayView.layoutParams = ConstraintLayout.LayoutParams(
+            ConstraintLayout.LayoutParams.MATCH_PARENT, // width
+            ConstraintLayout.LayoutParams.MATCH_PARENT, // height
+        )
+
+        processingOverlayView.constrainToParent()
+    }
+
+    protected open fun setupProcessingSpinnerViewConstraints() {
+        processingSpinnerView.layoutParams = ConstraintLayout.LayoutParams(
+            ConstraintLayout.LayoutParams.WRAP_CONTENT, // width
+            ConstraintLayout.LayoutParams.WRAP_CONTENT, // height
+        )
+
+        processingSpinnerView.constrainToParent()
+    }
+
+    protected open fun setupProcessingTextViewConstraints() {
+        processingTextView.layoutParams = ConstraintLayout.LayoutParams(
+            0, // width
+            ConstraintLayout.LayoutParams.WRAP_CONTENT, // height
+        )
+
+        processingTextView.addConstraints {
+            connect(it.id, ConstraintSet.TOP, processingSpinnerView.id, ConstraintSet.BOTTOM)
+            connect(it.id, ConstraintSet.START, ConstraintSet.PARENT_ID, ConstraintSet.START)
+            connect(it.id, ConstraintSet.END, ConstraintSet.PARENT_ID, ConstraintSet.END)
+        }
+    }
+
+    override fun displayState(newState: ScanState, previousState: ScanState?) {
+        super.displayState(newState, previousState)
+
+        when (newState) {
+            is ScanState.NotFound, ScanState.FoundShort, ScanState.FoundLong, ScanState.Wrong -> {
+                processingOverlayView.hide()
+                processingSpinnerView.hide()
+                processingTextView.hide()
+            }
+            is ScanState.Correct -> {
+                processingOverlayView.show()
+                processingSpinnerView.show()
+                processingTextView.show()
+            }
         }
     }
 
@@ -371,8 +479,11 @@ open class CardVerifyActivity : SimpleScanActivity() {
                 is MainLoopState.Finished -> requiredCardIssuer to requiredCardLastFour
             }
             if (lastFour != null) {
-                cardNumberTextView.text =
-                    getString(R.string.stripe_card_description, cardIssuer, lastFour)
+                cardNumberTextView.text = getString(
+                    R.string.stripe_card_description,
+                    cardIssuer?.displayName ?: "",
+                    lastFour,
+                )
                 cardNumberTextView.show()
             } else {
                 cardNumberTextView.hide()

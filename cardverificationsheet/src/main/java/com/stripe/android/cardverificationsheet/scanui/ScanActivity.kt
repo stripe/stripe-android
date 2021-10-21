@@ -333,7 +333,7 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
      * Cancel scanning due to a camera error.
      */
     protected open fun scanFailure(cause: Throwable? = null) {
-        Log.e(Config.logTag, "Canceling scan due to camera error", cause)
+        Log.e(Config.logTag, "Canceling scan due to error", cause)
         launch { scanStat.trackResult("scan_failure") }
         resultListener.failed(cause)
         closeScanner()
@@ -404,7 +404,7 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
             onSupportsMultipleCameras(it)
         }
 
-        onCameraStreamAvailable(cameraAdapter.getImageStream())
+        launch { onCameraStreamAvailable(cameraAdapter.getImageStream()) }
     }
 
     /**
@@ -439,5 +439,5 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
     /**
      * A stream of images from the camera is available to be processed.
      */
-    protected abstract fun onCameraStreamAvailable(cameraStream: Flow<CameraPreviewImage<Bitmap>>)
+    protected abstract suspend fun onCameraStreamAvailable(cameraStream: Flow<CameraPreviewImage<Bitmap>>)
 }

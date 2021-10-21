@@ -5,7 +5,6 @@ import android.graphics.Bitmap
 import android.graphics.Rect
 import androidx.annotation.Keep
 import androidx.lifecycle.LifecycleOwner
-import com.stripe.android.cardverificationsheet.camera.CameraAdapter
 import com.stripe.android.cardverificationsheet.camera.CameraPreviewImage
 import com.stripe.android.cardverificationsheet.cardverifyui.analyzer.MainLoopAnalyzer
 import com.stripe.android.cardverificationsheet.cardverifyui.result.MainLoopAggregator
@@ -13,23 +12,18 @@ import com.stripe.android.cardverificationsheet.cardverifyui.result.MainLoopStat
 import com.stripe.android.cardverificationsheet.framework.AggregateResultListener
 import com.stripe.android.cardverificationsheet.framework.AnalyzerLoopErrorListener
 import com.stripe.android.cardverificationsheet.framework.AnalyzerPool
-import com.stripe.android.cardverificationsheet.framework.FetchedData
 import com.stripe.android.cardverificationsheet.framework.ProcessBoundAnalyzerLoop
-import com.stripe.android.cardverificationsheet.payment.card.CardIssuer
 import com.stripe.android.cardverificationsheet.payment.ml.CardDetect
 import com.stripe.android.cardverificationsheet.payment.ml.CardDetectModelManager
 import com.stripe.android.cardverificationsheet.payment.ml.SSDOcr
 import com.stripe.android.cardverificationsheet.payment.ml.SSDOcrModelManager
 import com.stripe.android.cardverificationsheet.scanui.ScanFlow
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 @Keep
 internal data class SavedFrame(
@@ -45,42 +39,11 @@ internal data class SavedFrameType(
 
 @Keep
 internal class CardVerifyFlow(
-    private val requiredCardIssuer: CardIssuer?,
-    private val requiredLastFour: String,
     private val scanResultListener: AggregateResultListener<
         MainLoopAggregator.InterimResult,
         MainLoopAggregator.FinalResult>,
     private val scanErrorListener: AnalyzerLoopErrorListener,
-) : ScanFlow {
-
-    @Keep
-    companion object {
-
-        /**
-         * Determine if the scan is supported
-         */
-        @JvmStatic
-        fun isSupported(context: Context) = CameraAdapter.isCameraSupported(context)
-
-        @JvmStatic
-        suspend fun prepareScan(
-            context: Context,
-            forImmediateUse: Boolean,
-        ) = withContext(Dispatchers.IO) {
-            val deferredFetchers = mutableListOf<Deferred<FetchedData>>()
-
-            deferredFetchers.add(
-                async { SSDOcrModelManager.fetchModel(context, forImmediateUse) }
-            )
-            deferredFetchers.add(
-                async { CardDetectModelManager.fetchModel(context, forImmediateUse) }
-            )
-
-            deferredFetchers.fold(true) { acc, deferred ->
-                acc && deferred.await().successfullyFetched
-            }
-        }
-    }
+) : ScanFlow<RequiredCardDetails> {
 
     /**
      * If this is true, do not start the flow.
@@ -105,6 +68,7 @@ internal class CardVerifyFlow(
         viewFinder: Rect,
         lifecycleOwner: LifecycleOwner,
         coroutineScope: CoroutineScope,
+        parameters: RequiredCardDetails,
     ) = coroutineScope.launch(Dispatchers.Main) {
         val listener = object : AggregateResultListener<
                 MainLoopAggregator.InterimResult,
@@ -140,8 +104,8 @@ internal class CardVerifyFlow(
 
         mainLoopAggregator = MainLoopAggregator(
             listener = listener,
-            requiredCardIssuer = requiredCardIssuer,
-            requiredLastFour = requiredLastFour,
+            requiredCardIssuer = parameters.cardIssuer,
+            requiredLastFour = parameters.lastFour,
         ).also { mainLoopOcrAggregator ->
             // make this result aggregator pause and reset when the lifecycle pauses.
             mainLoopOcrAggregator.bindToLifecycle(lifecycleOwner)
@@ -178,8 +142,8 @@ internal class CardVerifyFlow(
                         MainLoopAnalyzer.Input(
                             cameraPreviewImage = it,
                             cardFinder = viewFinder,
-                            requiredCardIssuer = requiredCardIssuer,
-                            requiredLastFour = requiredLastFour,
+                            requiredCardIssuer = parameters.cardIssuer,
+                            requiredLastFour = parameters.lastFour,
                         )
                     },
                     coroutineScope,

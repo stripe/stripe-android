@@ -80,7 +80,7 @@ object NetworkConfig {
      */
     @JvmStatic
     var network: Network = StripeNetwork(
-        baseUrl = "https://api.stripe.com",
+        baseUrl = "https://api.stripe.com/v1",
         retryDelay = retryDelay,
         retryTotalAttempts = retryTotalAttempts,
         retryStatusCodes = retryStatusCodes,

@@ -24,11 +24,11 @@ import java.util.zip.GZIPOutputStream
 private const val REQUEST_METHOD_GET = "GET"
 private const val REQUEST_METHOD_POST = "POST"
 
-private const val REQUEST_PROPERTY_AUTHENTICATION = "x-stripe-auth"
+private const val REQUEST_PROPERTY_AUTHORIZATION = "Authorization"
 private const val REQUEST_PROPERTY_CONTENT_TYPE = "Content-Type"
 private const val REQUEST_PROPERTY_CONTENT_ENCODING = "Content-Encoding"
 
-private const val CONTENT_TYPE_JSON = "application/json; utf-8"
+private const val CONTENT_TYPE_FORM = "application/x-www-form-urlencoded"
 private const val CONTENT_ENCODING_GZIP = "gzip"
 
 /**
@@ -211,7 +211,7 @@ internal class StripeNetwork(
 
                 // Set headers
                 setRequestHeaders(stripePublishableKey)
-                setRequestProperty(REQUEST_PROPERTY_CONTENT_TYPE, CONTENT_TYPE_JSON)
+                setRequestProperty(REQUEST_PROPERTY_CONTENT_TYPE, CONTENT_TYPE_FORM)
 
                 // Write the data
                 if (NetworkConfig.useCompression &&
@@ -377,7 +377,7 @@ private fun downloadFile(
  * Set the required request headers on an HttpURLConnection
  */
 private fun HttpURLConnection.setRequestHeaders(stripePublishableKey: String) {
-    setRequestProperty(REQUEST_PROPERTY_AUTHENTICATION, stripePublishableKey)
+    setRequestProperty(REQUEST_PROPERTY_AUTHORIZATION, "Bearer $stripePublishableKey")
 }
 
 private fun writeGzipData(outputStream: OutputStream, data: String) {

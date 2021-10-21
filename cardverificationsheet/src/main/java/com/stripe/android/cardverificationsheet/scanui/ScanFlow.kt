@@ -5,13 +5,14 @@ import android.graphics.Bitmap
 import android.graphics.Rect
 import androidx.lifecycle.LifecycleOwner
 import com.stripe.android.cardverificationsheet.camera.CameraPreviewImage
+import com.stripe.android.cardverificationsheet.payment.card.CardIssuer
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 
 /**
  * A flow for scanning something. This manages the callbacks and lifecycle of the flow.
  */
-interface ScanFlow {
+interface ScanFlow<Parameters> {
 
     /**
      * Start the image processing flow for scanning a card.
@@ -28,7 +29,8 @@ interface ScanFlow {
         imageStream: Flow<CameraPreviewImage<Bitmap>>,
         viewFinder: Rect,
         lifecycleOwner: LifecycleOwner,
-        coroutineScope: CoroutineScope
+        coroutineScope: CoroutineScope,
+        parameters: Parameters,
     )
 
     /**

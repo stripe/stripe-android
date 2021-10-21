@@ -31,11 +31,13 @@ import com.stripe.android.cardverificationsheet.scanui.util.setTextSizeByRes
 import com.stripe.android.cardverificationsheet.scanui.util.setVisible
 import com.stripe.android.cardverificationsheet.scanui.util.show
 import com.stripe.android.cardverificationsheet.scanui.util.startAnimation
+import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.flow.Flow
 import kotlin.math.min
 import kotlin.math.roundToInt
+import kotlin.properties.Delegates
 
-abstract class SimpleScanActivity : ScanActivity() {
+abstract class SimpleScanActivity<ScanFlowParameters> : ScanActivity() {
 
     /**
      * The state of the scan flow. This can be expanded if [displayState] is overridden to handle
@@ -142,7 +144,12 @@ abstract class SimpleScanActivity : ScanActivity() {
     /**
      * The flow used to scan an item.
      */
-    internal abstract val scanFlow: ScanFlow
+    internal abstract val scanFlow: ScanFlow<ScanFlowParameters>
+
+    /**
+     * The scan flow parameters that will be populated.
+     */
+    protected lateinit var deferredScanFlowParameters: Deferred<ScanFlowParameters>
 
     /**
      * Determine if the background is dark. This is used to set light background vs dark background
@@ -721,13 +728,14 @@ abstract class SimpleScanActivity : ScanActivity() {
     /**
      * Once the camera stream is available, start processing images.
      */
-    override fun onCameraStreamAvailable(cameraStream: Flow<CameraPreviewImage<Bitmap>>) {
+    override suspend fun onCameraStreamAvailable(cameraStream: Flow<CameraPreviewImage<Bitmap>>) {
         scanFlow.startFlow(
             context = this,
             imageStream = cameraStream,
             viewFinder = viewFinderWindowView.asRect(),
             lifecycleOwner = this,
             coroutineScope = this,
+            parameters = deferredScanFlowParameters.await(),
         )
     }
 }

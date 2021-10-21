@@ -387,9 +387,9 @@ fun supportCardIssuer(
 /**
  * Get an issuer by display name
  */
-internal fun getIssuerByDisplayName(displayName: String) =
+internal fun getIssuerByDisplayName(displayName: String?) =
     (CUSTOM_ISSUER_TABLE + ISSUER_TABLE)
-        .firstOrNull { it.issuer.displayName.lowercase() == displayName }
+        .firstOrNull { it.issuer.displayName.lowercase() == displayName?.lowercase() }
         ?.issuer
 
 /**

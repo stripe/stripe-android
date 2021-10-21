@@ -23,10 +23,12 @@ sealed interface CardVerificationSheetResult : Parcelable {
     object Completed : CardVerificationSheetResult
 
     @Parcelize
-    class Canceled(val reason: CardVerificationSheetCancelationReason) : CardVerificationSheetResult
+    data class Canceled(
+        val reason: CardVerificationSheetCancelationReason,
+    ) : CardVerificationSheetResult
 
     @Parcelize
-    class Failed(val error: Throwable) : CardVerificationSheetResult
+    data class Failed(val error: Throwable) : CardVerificationSheetResult
 }
 
 class CardVerificationSheet private constructor(private val stripePublishableKey: String) {
