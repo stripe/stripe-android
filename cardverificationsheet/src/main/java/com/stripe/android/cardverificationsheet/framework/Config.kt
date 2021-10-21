@@ -23,10 +23,16 @@ object Config {
     var logTag: String = "CardVerificationSheet"
 
     /**
-     * Whether or not to display the Stripe logo
+     * Whether or not to display the Stripe logo.
      */
     @JvmStatic
     var displayLogo: Boolean = true
+
+    /**
+     * Whether or not to display the "I cannot scan" button.
+     */
+    @JvmStatic
+    var enableCannotScanButton: Boolean = true
 }
 
 object NetworkConfig {

@@ -40,20 +40,19 @@ import kotlin.coroutines.CoroutineContext
 
 const val PERMISSION_RATIONALE_SHOWN = "permission_rationale_shown"
 
-@Parcelize
-open class CardVerificationSheetCancelationReason : Parcelable {
+sealed interface CardVerificationSheetCancelationReason : Parcelable {
 
     @Parcelize
-    object Closed : CardVerificationSheetCancelationReason()
+    object Closed : CardVerificationSheetCancelationReason
 
     @Parcelize
-    object Back : CardVerificationSheetCancelationReason()
+    object Back : CardVerificationSheetCancelationReason
 
     @Parcelize
-    object UserCannotScan : CardVerificationSheetCancelationReason()
+    object UserCannotScan : CardVerificationSheetCancelationReason
 
     @Parcelize
-    object CameraPermissionDenied : CardVerificationSheetCancelationReason()
+    object CameraPermissionDenied : CardVerificationSheetCancelationReason
 }
 
 interface ScanResultListener {

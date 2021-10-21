@@ -52,6 +52,47 @@ public final class com/stripe/android/cardverificationsheet/camera/CameraPreview
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class com/stripe/android/cardverificationsheet/cardverifyui/CardVerificationSheet {
+	public static final field $stable I
+	public static final field Companion Lcom/stripe/android/cardverificationsheet/cardverifyui/CardVerificationSheet$Companion;
+	public synthetic fun <init> (Ljava/lang/String;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public static final fun create (Landroidx/activity/ComponentActivity;Ljava/lang/String;)Lcom/stripe/android/cardverificationsheet/cardverifyui/CardVerificationSheet;
+	public final fun present (Ljava/lang/String;Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
+}
+
+public final class com/stripe/android/cardverificationsheet/cardverifyui/CardVerificationSheet$Companion {
+	public final fun create (Landroidx/activity/ComponentActivity;Ljava/lang/String;)Lcom/stripe/android/cardverificationsheet/cardverifyui/CardVerificationSheet;
+}
+
+public abstract interface class com/stripe/android/cardverificationsheet/cardverifyui/CardVerificationSheetResult : android/os/Parcelable {
+}
+
+public final class com/stripe/android/cardverificationsheet/cardverifyui/CardVerificationSheetResult$Canceled : com/stripe/android/cardverificationsheet/cardverifyui/CardVerificationSheetResult {
+	public static final field $stable I
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public fun <init> (Lcom/stripe/android/cardverificationsheet/scanui/CardVerificationSheetCancelationReason;)V
+	public fun describeContents ()I
+	public final fun getReason ()Lcom/stripe/android/cardverificationsheet/scanui/CardVerificationSheetCancelationReason;
+	public fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public final class com/stripe/android/cardverificationsheet/cardverifyui/CardVerificationSheetResult$Completed : com/stripe/android/cardverificationsheet/cardverifyui/CardVerificationSheetResult {
+	public static final field $stable I
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public static final field INSTANCE Lcom/stripe/android/cardverificationsheet/cardverifyui/CardVerificationSheetResult$Completed;
+	public fun describeContents ()I
+	public fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public final class com/stripe/android/cardverificationsheet/cardverifyui/CardVerificationSheetResult$Failed : com/stripe/android/cardverificationsheet/cardverifyui/CardVerificationSheetResult {
+	public static final field $stable I
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public fun <init> (Ljava/lang/Throwable;)V
+	public fun describeContents ()I
+	public final fun getError ()Ljava/lang/Throwable;
+	public fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
 public class com/stripe/android/cardverificationsheet/cardverifyui/CardVerifyActivity : com/stripe/android/cardverificationsheet/scanui/SimpleScanActivity {
 	public static final field $stable I
 	public fun <init> ()V
@@ -70,15 +111,6 @@ public class com/stripe/android/cardverificationsheet/cardverifyui/CardVerifyAct
 	protected fun setupInstructionsViewConstraints ()V
 	protected fun setupUiComponents ()V
 	protected fun setupUiConstraints ()V
-}
-
-public final class com/stripe/android/cardverificationsheet/cardverifyui/CardVerifyActivityKt {
-	public static final field PARAM_CIV_ID Ljava/lang/String;
-	public static final field PARAM_CIV_SECRET Ljava/lang/String;
-	public static final field PARAM_ENABLE_CANNOT_SCAN_CARD Ljava/lang/String;
-	public static final field PARAM_STRIPE_PUBLISHABLE_KEY Ljava/lang/String;
-	public static final field RESULT_CANCELED_REASON Ljava/lang/String;
-	public static final field RESULT_FAILED_CAUSE Ljava/lang/String;
 }
 
 public final class com/stripe/android/cardverificationsheet/cardverifyui/VerifyConfig {
@@ -120,6 +152,13 @@ public final class com/stripe/android/cardverificationsheet/cardverifyui/excepti
 public final class com/stripe/android/cardverificationsheet/cardverifyui/exception/StripeNetworkException : java/lang/Exception {
 	public static final field $stable I
 	public fun <init> (Ljava/lang/String;)V
+}
+
+public final class com/stripe/android/cardverificationsheet/cardverifyui/exception/UnknownScanException : java/lang/Exception {
+	public static final field $stable I
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 }
 
 public abstract interface class com/stripe/android/cardverificationsheet/framework/AggregateResultListener {
@@ -181,10 +220,12 @@ public final class com/stripe/android/cardverificationsheet/framework/Config {
 	public static final field $stable I
 	public static final field INSTANCE Lcom/stripe/android/cardverificationsheet/framework/Config;
 	public static final fun getDisplayLogo ()Z
+	public static final fun getEnableCannotScanButton ()Z
 	public static final fun getLogTag ()Ljava/lang/String;
 	public static final fun isDebug ()Z
 	public static final fun setDebug (Z)V
 	public static final fun setDisplayLogo (Z)V
+	public static final fun setEnableCannotScanButton (Z)V
 	public static final fun setLogTag (Ljava/lang/String;)V
 }
 
@@ -843,18 +884,14 @@ public class com/stripe/android/cardverificationsheet/scanui/CameraErrorListener
 	public fun onCameraUnsupportedError (Ljava/lang/Throwable;)V
 }
 
-public class com/stripe/android/cardverificationsheet/scanui/CardVerificationSheetCancelationReason : android/os/Parcelable {
-	public static final field $stable I
-	public static final field CREATOR Landroid/os/Parcelable$Creator;
-	public fun <init> ()V
-	public fun describeContents ()I
-	public fun writeToParcel (Landroid/os/Parcel;I)V
+public abstract interface class com/stripe/android/cardverificationsheet/scanui/CardVerificationSheetCancelationReason : android/os/Parcelable {
 }
 
 public final class com/stripe/android/cardverificationsheet/scanui/CardVerificationSheetCancelationReason$Back : com/stripe/android/cardverificationsheet/scanui/CardVerificationSheetCancelationReason {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public static final field INSTANCE Lcom/stripe/android/cardverificationsheet/scanui/CardVerificationSheetCancelationReason$Back;
+	public fun describeContents ()I
 	public fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
@@ -862,6 +899,7 @@ public final class com/stripe/android/cardverificationsheet/scanui/CardVerificat
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public static final field INSTANCE Lcom/stripe/android/cardverificationsheet/scanui/CardVerificationSheetCancelationReason$CameraPermissionDenied;
+	public fun describeContents ()I
 	public fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
@@ -869,6 +907,7 @@ public final class com/stripe/android/cardverificationsheet/scanui/CardVerificat
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public static final field INSTANCE Lcom/stripe/android/cardverificationsheet/scanui/CardVerificationSheetCancelationReason$Closed;
+	public fun describeContents ()I
 	public fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
@@ -876,6 +915,7 @@ public final class com/stripe/android/cardverificationsheet/scanui/CardVerificat
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public static final field INSTANCE Lcom/stripe/android/cardverificationsheet/scanui/CardVerificationSheetCancelationReason$UserCannotScan;
+	public fun describeContents ()I
 	public fun writeToParcel (Landroid/os/Parcel;I)V
 }
 

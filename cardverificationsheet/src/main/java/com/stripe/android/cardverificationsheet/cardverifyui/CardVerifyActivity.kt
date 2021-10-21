@@ -17,6 +17,7 @@ import com.stripe.android.cardverificationsheet.cardverifyui.exception.InvalidCi
 import com.stripe.android.cardverificationsheet.cardverifyui.exception.InvalidRequiredCardException
 import com.stripe.android.cardverificationsheet.cardverifyui.exception.InvalidStripePublishableKeyException
 import com.stripe.android.cardverificationsheet.cardverifyui.exception.StripeNetworkException
+import com.stripe.android.cardverificationsheet.cardverifyui.exception.UnknownScanException
 import com.stripe.android.cardverificationsheet.cardverifyui.result.MainLoopAggregator
 import com.stripe.android.cardverificationsheet.cardverifyui.result.MainLoopState
 import com.stripe.android.cardverificationsheet.framework.AggregateResultListener
@@ -45,13 +46,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.util.concurrent.atomic.AtomicBoolean
 
-const val PARAM_STRIPE_PUBLISHABLE_KEY = "stripePublishableKey"
-const val PARAM_CIV_ID = "civId"
-const val PARAM_CIV_SECRET = "civSecret"
-const val PARAM_ENABLE_CANNOT_SCAN_CARD = "cannotScanCard"
-
-const val RESULT_CANCELED_REASON = "canceledReason"
-const val RESULT_FAILED_CAUSE = "failureCause"
+internal const val INTENT_PARAM_REQUEST = "request"
+internal const val INTENT_PARAM_RESULT = "result"
 
 @Keep
 internal interface CardVerifyResultListener : ScanResultListener {
@@ -82,25 +78,22 @@ open class CardVerifyActivity : SimpleScanActivity() {
      */
     protected open val cardDescriptionTextView: TextView by lazy { TextView(this) }
 
-    /**
-     * The ID of the CIV used for this scan
-     */
-    private val cardImageVerificationIntentId: String by lazy {
-        intent.getStringExtra(PARAM_CIV_ID) ?: "".also {
-            scanFailure(InvalidCivException("Missing CIV ID"))
+    private val params: CardVerificationSheetParams by lazy {
+        val params = intent.getParcelableExtra(INTENT_PARAM_REQUEST)
+            ?: CardVerificationSheetParams("", "", "")
+                .also {
+                    scanFailure(InvalidCivException("Missing required parameters"))
+                }
+        when {
+            params.stripePublishableKey.isEmpty() ->
+                scanFailure(InvalidStripePublishableKeyException("Missing publishable key"))
+            params.cardImageVerificationIntentId.isEmpty() ->
+                scanFailure(InvalidCivException("Missing card image verification ID"))
+            params.cardImageVerificationIntentSecret.isEmpty() ->
+                scanFailure(InvalidCivException("Missing card image verification client secret"))
         }
-    }
 
-    private val cardImageVerificationIntentSecret: String by lazy {
-        intent.getStringExtra(PARAM_CIV_SECRET) ?: "".also {
-            scanFailure(InvalidCivException("Missing CIV secret"))
-        }
-    }
-
-    private val stripePublishableKey: String by lazy {
-        intent.getStringExtra(PARAM_STRIPE_PUBLISHABLE_KEY) ?: "".also {
-            scanFailure(InvalidStripePublishableKeyException("Missing publishable key"))
-        }
+        params
     }
 
     /**
@@ -114,27 +107,22 @@ open class CardVerifyActivity : SimpleScanActivity() {
     private var requiredCardLastFour: String? = null
 
     /**
-     * If true and a card is required, an "I don't have this card" button will be shown to the user.
-     */
-    private val enableCannotScanCard: Boolean by lazy {
-        intent.getBooleanExtra(PARAM_ENABLE_CANNOT_SCAN_CARD, true)
-    }
-
-    /**
      * The listener which handles results from the scan.
      */
     override val resultListener: CardVerifyResultListener = object : CardVerifyResultListener {
         override fun cardVerificationComplete() {
-            setResult(Activity.RESULT_OK, Intent())
+            val intent = Intent()
+                .putExtra(INTENT_PARAM_RESULT, CardVerificationSheetResult.Completed)
+            setResult(Activity.RESULT_OK, intent)
         }
 
         override fun cardScanned(frames: Collection<SavedFrame>) {
             launch {
                 when (
                     val result = uploadSavedFrames(
-                        stripePublishableKey = stripePublishableKey,
-                        civId = cardImageVerificationIntentId,
-                        civSecret = cardImageVerificationIntentSecret,
+                        stripePublishableKey = params.stripePublishableKey,
+                        civId = params.cardImageVerificationIntentId,
+                        civSecret = params.cardImageVerificationIntentSecret,
                         savedFrames = frames,
                     )
                 ) {
@@ -150,13 +138,16 @@ open class CardVerifyActivity : SimpleScanActivity() {
 
         override fun userCanceled(reason: CardVerificationSheetCancelationReason) {
             val intent = Intent()
-                .putExtra(RESULT_CANCELED_REASON, reason)
+                .putExtra(INTENT_PARAM_RESULT, CardVerificationSheetResult.Canceled(reason))
             setResult(Activity.RESULT_CANCELED, intent)
         }
 
         override fun failed(cause: Throwable?) {
             val intent = Intent()
-                .putExtra(RESULT_FAILED_CAUSE, cause)
+                .putExtra(
+                    INTENT_PARAM_RESULT,
+                    CardVerificationSheetResult.Failed(cause ?: UnknownScanException()),
+                )
             setResult(Activity.RESULT_CANCELED, intent)
         }
     }
@@ -187,9 +178,9 @@ open class CardVerifyActivity : SimpleScanActivity() {
         launch {
             when (
                 val result = getCardImageVerificationIntentDetails(
-                    stripePublishableKey = stripePublishableKey,
-                    civId = cardImageVerificationIntentId,
-                    civSecret = cardImageVerificationIntentSecret,
+                    stripePublishableKey = params.stripePublishableKey,
+                    civId = params.cardImageVerificationIntentId,
+                    civSecret = params.cardImageVerificationIntentSecret,
                 )
             ) {
                 is NetworkResult.Success ->
@@ -250,7 +241,7 @@ open class CardVerifyActivity : SimpleScanActivity() {
             resources.getDimensionPixelSize(R.dimen.stripeButtonPadding),
         )
 
-        cannotScanTextView.setVisible(enableCannotScanCard)
+        cannotScanTextView.setVisible(Config.enableCannotScanButton)
 
         if (isBackgroundDark()) {
             cannotScanTextView.setTextColor(getColorByRes(R.color.stripeButtonDarkText))
@@ -332,9 +323,9 @@ open class CardVerifyActivity : SimpleScanActivity() {
 
     override fun closeScanner() {
         uploadScanStats(
-            stripePublishableKey = stripePublishableKey,
-            civId = cardImageVerificationIntentId,
-            civSecret = cardImageVerificationIntentSecret,
+            stripePublishableKey = params.stripePublishableKey,
+            civId = params.cardImageVerificationIntentId,
+            civSecret = params.cardImageVerificationIntentSecret,
             instanceId = Stats.instanceId,
             scanId = Stats.scanId,
             device = Device.fromContext(this),
