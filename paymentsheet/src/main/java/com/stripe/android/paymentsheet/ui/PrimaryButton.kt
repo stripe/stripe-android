@@ -5,6 +5,7 @@ import android.content.res.ColorStateList
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.widget.FrameLayout
+import androidx.annotation.VisibleForTesting
 import androidx.core.content.withStyledAttributes
 import androidx.core.view.isVisible
 import com.stripe.android.paymentsheet.R
@@ -26,10 +27,13 @@ internal class PrimaryButton @JvmOverloads constructor(
     // in the on ready state and it is temporarily replaced during the processing and finishing states.
     private var externalLabel: String? = null
 
+    @VisibleForTesting
     internal val viewBinding = PrimaryButtonBinding.inflate(
         LayoutInflater.from(context),
         this
     )
+
+    internal var lockVisible = true
 
     private val confirmedIcon = viewBinding.confirmedIcon
 
@@ -72,6 +76,7 @@ internal class PrimaryButton @JvmOverloads constructor(
         defaultTintList?.let {
             backgroundTintList = it
         }
+        viewBinding.lockIcon.isVisible = lockVisible
         viewBinding.confirmingIcon.isVisible = false
     }
 
@@ -100,7 +105,6 @@ internal class PrimaryButton @JvmOverloads constructor(
 
     override fun setEnabled(enabled: Boolean) {
         super.setEnabled(enabled)
-        viewBinding.lockIcon.isVisible = enabled
         updateAlpha()
     }
 
@@ -122,10 +126,15 @@ internal class PrimaryButton @JvmOverloads constructor(
     }
 
     private fun updateAlpha() {
-        viewBinding.label.alpha = if ((state == null || state is State.Ready) && !isEnabled) {
-            0.5f
-        } else {
-            1.0f
+        listOf(
+            viewBinding.label,
+            viewBinding.lockIcon
+        ).forEach { view ->
+            view.alpha = if ((state == null || state is State.Ready) && !isEnabled) {
+                0.5f
+            } else {
+                1.0f
+            }
         }
     }
 
