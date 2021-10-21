@@ -31,7 +31,8 @@ sealed interface CardVerificationSheetResult : Parcelable {
 
 class CardVerificationSheet private constructor(private val stripePublishableKey: String) {
 
-    private var onFinished: ((cardVerificationSheetResult: CardVerificationSheetResult) -> Unit)? = null
+    private var onFinished:
+        ((cardVerificationSheetResult: CardVerificationSheetResult) -> Unit)? = null
     private lateinit var launcher: ActivityResultLauncher<CardVerificationSheetParams>
 
     companion object {
@@ -45,15 +46,14 @@ class CardVerificationSheet private constructor(private val stripePublishableKey
          * see https://github.com/stripe/stripe-android/blob/3e92b79190834dc3aab1c2d9ac2dfb7bc343afd2/payments-core/src/main/java/com/stripe/android/payments/paymentlauncher/PaymentLauncher.kt#L52
          */
         @JvmStatic
-        fun create(
-            from: ComponentActivity,
-            stripePublishableKey: String,
-        ): CardVerificationSheet {
-
+        fun create(from: ComponentActivity, stripePublishableKey: String): CardVerificationSheet {
             val sheet = CardVerificationSheet(stripePublishableKey)
 
             sheet.launcher = from.registerForActivityResult(
-                object : ActivityResultContract<CardVerificationSheetParams, CardVerificationSheetResult>() {
+                object : ActivityResultContract<
+                    CardVerificationSheetParams,
+                    CardVerificationSheetResult
+                    >() {
                     override fun createIntent(
                         context: Context,
                         input: CardVerificationSheetParams,
@@ -74,7 +74,9 @@ class CardVerificationSheet private constructor(private val stripePublishableKey
 
         private fun parseResult(intent: Intent): CardVerificationSheetResult =
             intent.getParcelableExtra(INTENT_PARAM_RESULT)
-                ?: CardVerificationSheetResult.Failed(UnknownScanException("No data in the result intent"))
+                ?: CardVerificationSheetResult.Failed(
+                    UnknownScanException("No data in the result intent")
+                )
     }
 
     /**
