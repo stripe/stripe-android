@@ -6,11 +6,11 @@ import androidx.test.platform.app.InstrumentationRegistry
 import com.stripe.android.cardverificationsheet.framework.ResourceFetcher
 import com.stripe.android.cardverificationsheet.framework.image.size
 import com.stripe.android.cardverificationsheet.framework.util.toRect
+import com.stripe.android.cardverificationsheet.payment.card.CardIssuer
 import com.stripe.android.cardverificationsheet.test.R
 import kotlinx.coroutines.runBlocking
 import org.junit.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
@@ -46,7 +46,7 @@ class SSDOcrTest {
                 bitmap,
                 bitmap.size().toRect(),
                 bitmap.size().toRect(),
-                null,
+                CardIssuer.DinersClub,
                 "1104",
             ),
             Unit
@@ -71,7 +71,7 @@ class SSDOcrTest {
             .toBitmap()
         val fetcher = SSDOcrModelManager.getModelFetcher(appContext)
         assertNotNull(fetcher)
-        assertFalse(fetcher is ResourceFetcher)
+        assertTrue(fetcher is ResourceFetcher)
         fetcher.clearCache()
 
         val model = SSDOcr.Factory(
@@ -85,7 +85,7 @@ class SSDOcrTest {
                 bitmap,
                 bitmap.size().toRect(),
                 bitmap.size().toRect(),
-                null,
+                CardIssuer.Visa,
                 "4242",
             ),
             Unit
@@ -110,7 +110,7 @@ class SSDOcrTest {
             .toBitmap()
         val fetcher = SSDOcrModelManager.getModelFetcher(appContext)
         assertNotNull(fetcher)
-        assertFalse(fetcher is ResourceFetcher)
+        assertTrue(fetcher is ResourceFetcher)
         fetcher.clearCache()
 
         val model = SSDOcr.Factory(
@@ -124,7 +124,7 @@ class SSDOcrTest {
                 bitmap,
                 bitmap.size().toRect(),
                 bitmap.size().toRect(),
-                null,
+                CardIssuer.DinersClub,
                 "1104",
             ),
             Unit
@@ -134,7 +134,7 @@ class SSDOcrTest {
                 bitmap,
                 bitmap.size().toRect(),
                 bitmap.size().toRect(),
-                null,
+                CardIssuer.DinersClub,
                 "1234",
             ),
             Unit

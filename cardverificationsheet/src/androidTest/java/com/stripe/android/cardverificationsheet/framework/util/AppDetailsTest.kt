@@ -13,12 +13,12 @@ class AppDetailsTest {
         val appDetails = AppDetails.fromContext(testContext)
 
         assertEquals(
-            "com.stripe.android.cardverificationsheet.framework.test",
+            "com.stripe.android.cardverificationsheet.test",
             appDetails.appPackageName,
         )
         assertEquals("", appDetails.applicationId)
         assertEquals(
-            "com.stripe.android.cardverificationsheet.framework",
+            "com.stripe.android.cardverificationsheet",
             appDetails.libraryPackageName,
         )
         assertTrue(
