@@ -62,14 +62,14 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
                         requestOptions
                     )
                 }
-                shouldCancelIntent(stripeIntent, result.canCancelSource) -> {
+                shouldCancelIntentSource(stripeIntent, result.canCancelSource) -> {
                     val sourceId = result.sourceId.orEmpty()
                     logger.debug(
                         "Canceling source '$sourceId' for '${stripeIntent.javaClass.simpleName}'"
                     )
 
                     requireNotNull(
-                        cancelStripeIntent(
+                        cancelStripeIntentSource(
                             stripeIntent,
                             requestOptions,
                             sourceId,
@@ -89,7 +89,7 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
         }
     }
 
-    private fun shouldCancelIntent(
+    private fun shouldCancelIntentSource(
         stripeIntent: StripeIntent,
         shouldCancelSource: Boolean
     ): Boolean {
@@ -140,7 +140,11 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
         requestOptions: ApiRequest.Options
     ): T
 
-    protected abstract suspend fun cancelStripeIntent(
+    /**
+     * Cancels the source of this intent so that the payment method attached to it is cleared,
+     * transferring the intent's status from requires_action to requires_payment_method.
+     */
+    protected abstract suspend fun cancelStripeIntentSource(
         stripeIntent: T,
         requestOptions: ApiRequest.Options,
         sourceId: String
@@ -216,7 +220,7 @@ internal class PaymentIntentFlowResultProcessor @Inject constructor(
         }
     }
 
-    override suspend fun cancelStripeIntent(
+    override suspend fun cancelStripeIntentSource(
         stripeIntent: PaymentIntent,
         requestOptions: ApiRequest.Options,
         sourceId: String
@@ -277,7 +281,7 @@ internal class SetupIntentFlowResultProcessor @Inject constructor(
         )
     }
 
-    override suspend fun cancelStripeIntent(
+    override suspend fun cancelStripeIntentSource(
         stripeIntent: SetupIntent,
         requestOptions: ApiRequest.Options,
         sourceId: String

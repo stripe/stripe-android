@@ -25,7 +25,7 @@
     <dimen name="stripe_paymentsheet_toolbar_elevation">4dp</dimen>
     <dimen name="stripe_paymentsheet_cardwidget_margin_vertical">4dp</dimen>
     <dimen name="stripe_paymentsheet_cardwidget_margin_horizontal">12dp</dimen>
-    <dimen name="stripe_paymentsheet_add_payment_method_form_stroke_width">0dp</dimen>
+    <dimen name="stripe_paymentsheet_add_payment_method_form_stroke_width">1dp</dimen>
     <dimen name="stripe_paymentsheet_card_stroke_width">1dp</dimen>
     <dimen name="stripe_paymentsheet_card_stroke_width_selected">2dp</dimen>
 
