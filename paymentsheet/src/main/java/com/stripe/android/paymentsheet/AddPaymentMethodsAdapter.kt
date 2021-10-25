@@ -34,7 +34,8 @@ internal class AddPaymentMethodsAdapter(
                     itemView.marginEnd + itemView.marginStart
                 // numVisibleItems is incremented in steps of 0.5 items (1, 1.5, 2, 2.5, 3, ...)
                 val numVisibleItems = (targetWidth * 2 / minItemWidth).toInt() / 2f
-                val viewWidth = targetWidth / numVisibleItems - itemView.marginEnd - itemView.marginStart
+                val viewWidth =
+                    targetWidth / numVisibleItems - itemView.marginEnd - itemView.marginStart
                 itemView.layoutParams.width = viewWidth.toInt()
                 itemView.setOnClickListener {
                     onItemSelected(bindingAdapterPosition)
