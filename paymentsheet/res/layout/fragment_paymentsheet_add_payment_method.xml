@@ -51,7 +51,7 @@
         android:id="@+id/payment_methods_recycler"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingHorizontal="13dp"
+        android:paddingHorizontal="14dp"
         android:paddingTop="18dp"
         android:paddingBottom="6dp"
         android:visibility="gone"
