@@ -33,6 +33,7 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows.shadowOf
+import org.robolectric.annotation.Config
 import org.robolectric.shadows.ShadowAlertDialog
 
 @RunWith(RobolectricTestRunner::class)
@@ -107,6 +108,45 @@ class PaymentSheetListFragmentTest {
             val adapter = recyclerView(it).adapter as PaymentOptionsAdapter
             assertThat(adapter.itemCount)
                 .isEqualTo(4)
+        }
+    }
+
+    @Test
+    @Config(qualifiers = "w320dp")
+    fun `when screen is 320dp wide, adapter should show 2 and a half items with 114dp width`() {
+        createScenario(
+            initialState = Lifecycle.State.INITIALIZED
+        ).onFragment { fragment ->
+            fragment.sheetViewModel._paymentMethods.value = PAYMENT_METHODS
+        }.moveToState(Lifecycle.State.STARTED).onFragment {
+            val item = recyclerView(it).layoutManager!!.findViewByPosition(0)
+            assertThat(item!!.measuredWidth).isEqualTo(114)
+        }
+    }
+
+    @Test
+    @Config(qualifiers = "w481dp")
+    fun `when screen is 481dp wide, adapter should show 3 and a half items with 127dp width`() {
+        createScenario(
+            initialState = Lifecycle.State.INITIALIZED
+        ).onFragment { fragment ->
+            fragment.sheetViewModel._paymentMethods.value = PAYMENT_METHODS
+        }.moveToState(Lifecycle.State.STARTED).onFragment {
+            val item = recyclerView(it).layoutManager!!.findViewByPosition(0)
+            assertThat(item!!.measuredWidth).isEqualTo(127)
+        }
+    }
+
+    @Test
+    @Config(qualifiers = "w482dp")
+    fun `when screen is 482dp wide, adapter should show 4 items with 112dp width`() {
+        createScenario(
+            initialState = Lifecycle.State.INITIALIZED
+        ).onFragment { fragment ->
+            fragment.sheetViewModel._paymentMethods.value = PAYMENT_METHODS
+        }.moveToState(Lifecycle.State.STARTED).onFragment {
+            val item = recyclerView(it).layoutManager!!.findViewByPosition(0)
+            assertThat(item!!.measuredWidth).isEqualTo(112)
         }
     }
 
