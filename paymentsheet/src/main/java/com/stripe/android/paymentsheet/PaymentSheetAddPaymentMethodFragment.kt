@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet
 
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import androidx.core.view.isVisible
 import androidx.fragment.app.activityViewModels
@@ -30,6 +31,11 @@ internal class PaymentSheetAddPaymentMethodFragment(
     }
 
     private lateinit var viewBinding: FragmentPaymentsheetAddPaymentMethodBinding
+
+    override fun onResume() {
+        super.onResume()
+        Log.e("TAG", "Resume fragment.")
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -63,12 +69,13 @@ internal class PaymentSheetAddPaymentMethodFragment(
 
         sheetViewModel.getButtonStateObservable(CheckoutIdentifier.AddFragmentTopGooglePay)
             .observe(viewLifecycleOwner) { viewState ->
+                if (viewState !is PaymentSheetViewState.StartProcessing) {
+                    Log.e("TAG", "Set content visible from add fragment observable")
+                    (activity as PaymentSheetActivity).setContentVisible(true)
+                }
                 if (viewState is PaymentSheetViewState.Reset) {
                     // If Google Pay was cancelled or failed, re-select the form payment method
                     sheetViewModel.updateSelection(sheetViewModel.lastSelectedPaymentMethod)
-                }
-                if (viewState !is PaymentSheetViewState.StartProcessing) {
-                    (activity as PaymentSheetActivity).setContentVisible(true)
                 }
 
                 updateErrorMessage(viewState?.errorMessage)

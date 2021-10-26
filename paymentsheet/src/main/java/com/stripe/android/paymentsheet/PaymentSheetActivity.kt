@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.ViewGroup
 import android.widget.ScrollView
 import android.widget.TextView
@@ -66,14 +67,12 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
     private val buyButtonStateObserver = { viewState: PaymentSheetViewState? ->
         updateErrorMessage(viewState?.errorMessage)
         viewBinding.buyButton.updateState(viewState?.convert())
+
     }
 
     private val googlePayButtonStateObserver = { viewState: PaymentSheetViewState? ->
         updateErrorMessage(viewState?.errorMessage)
         viewBinding.googlePayButton.updateState(viewState?.convert())
-        if(viewState !is PaymentSheetViewState.StartProcessing){
-            setContentVisible(true)
-        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -148,8 +147,10 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
         }
 
         viewModel.startConfirm.observe(this) { event ->
+            setContentVisible(true)
             val confirmParams = event.getContentIfNotHandled()
             if (confirmParams != null) {
+                Log.e("TAG", "Starting the confirmation")
                 lifecycleScope.launch {
                     viewModel.confirmStripeIntent(confirmParams)
                 }
@@ -161,9 +162,19 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+
+//        Log.e("TAG", "Set content visible from resume")
+//        setContentVisible(true)
+    }
+
     fun setContentVisible(visible: Boolean) {
-        viewBinding.appbar.isVisible = visible
-        viewBinding.scrollView.isVisible = visible
+        if (viewBinding.appbar.isVisible != visible) {
+            Log.e("TAG", "Set content visible")
+            viewBinding.appbar.isVisible = visible
+            viewBinding.scrollView.isVisible = visible
+        }
     }
 
     override fun onDestroy() {
@@ -187,6 +198,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
         transitionTarget: PaymentSheetViewModel.TransitionTarget,
         fragmentArgs: Bundle
     ) {
+        Log.e("TAG", "Setting transition target.")
         supportFragmentManager.commit {
             when (transitionTarget) {
                 is PaymentSheetViewModel.TransitionTarget.AddPaymentMethodFull -> {

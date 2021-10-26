@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet
 
 import android.app.Application
+import android.util.Log
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.IntegerRes
@@ -333,6 +334,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     }
 
     private fun confirmPaymentSelection(paymentSelection: PaymentSelection?) {
+        Log.e("TAG", "before confirm")
         when (paymentSelection) {
             is PaymentSelection.Saved -> {
                 confirmParamsFactory.create(paymentSelection)
@@ -342,6 +344,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             }
             else -> null
         }?.let { confirmParams ->
+            Log.e("TAG", "confirm")
             _startConfirm.value = Event(confirmParams)
         }
     }
@@ -403,8 +406,10 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
     internal fun onGooglePayResult(result: GooglePayPaymentMethodLauncher.Result) {
         when (result) {
-            is GooglePayPaymentMethodLauncher.Result.Completed ->
+            is GooglePayPaymentMethodLauncher.Result.Completed -> {
+                Log.e("TAG", "google pay result")
                 confirmPaymentSelection(PaymentSelection.Saved(result.paymentMethod))
+            }
             is GooglePayPaymentMethodLauncher.Result.Failed -> {
                 logger.error("Error processing Google Pay payment", result.error)
                 eventReporter.onPaymentFailure(PaymentSelection.GooglePay)

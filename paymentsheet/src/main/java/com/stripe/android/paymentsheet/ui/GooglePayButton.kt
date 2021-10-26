@@ -5,6 +5,7 @@ import android.content.res.ColorStateList
 import android.graphics.Color
 import android.util.AttributeSet
 import android.view.LayoutInflater
+import android.view.View
 import android.widget.FrameLayout
 import androidx.core.view.isVisible
 import com.stripe.android.paymentsheet.databinding.StripeGooglePayButtonBinding
@@ -29,8 +30,8 @@ internal class GooglePayButton @JvmOverloads constructor(
     }
 
     private fun onReadyState() {
-        viewBinding.primaryButton.isVisible = false
         viewBinding.googlePayButtonIcon.isVisible = true
+        viewBinding.primaryButton.visibility = View.INVISIBLE
     }
 
     private fun onStartProcessing() {
