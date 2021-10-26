@@ -3,7 +3,6 @@ package com.stripe.android.paymentsheet
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.ViewGroup
 import android.widget.ScrollView
 import android.widget.TextView
@@ -67,7 +66,6 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
     private val buyButtonStateObserver = { viewState: PaymentSheetViewState? ->
         updateErrorMessage(viewState?.errorMessage)
         viewBinding.buyButton.updateState(viewState?.convert())
-
     }
 
     private val googlePayButtonStateObserver = { viewState: PaymentSheetViewState? ->
@@ -150,7 +148,6 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
             setContentVisible(true)
             val confirmParams = event.getContentIfNotHandled()
             if (confirmParams != null) {
-                Log.e("TAG", "Starting the confirmation")
                 lifecycleScope.launch {
                     viewModel.confirmStripeIntent(confirmParams)
                 }
@@ -165,14 +162,12 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
     override fun onResume() {
         super.onResume()
 
-//        Log.e("TAG", "Set content visible from resume")
-//        setContentVisible(true)
+        // Needed for when Returning customer presses google pay, and then cancels.
+        setContentVisible(true)
     }
 
     fun setContentVisible(visible: Boolean) {
-        if (viewBinding.appbar.isVisible != visible) {
-            Log.e("TAG", "Set content visible")
-            viewBinding.appbar.isVisible = visible
+        if (viewBinding.scrollView.isVisible != visible) {
             viewBinding.scrollView.isVisible = visible
         }
     }
@@ -198,7 +193,6 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
         transitionTarget: PaymentSheetViewModel.TransitionTarget,
         fragmentArgs: Bundle
     ) {
-        Log.e("TAG", "Setting transition target.")
         supportFragmentManager.commit {
             when (transitionTarget) {
                 is PaymentSheetViewModel.TransitionTarget.AddPaymentMethodFull -> {
