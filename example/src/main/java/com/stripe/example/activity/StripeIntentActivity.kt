@@ -74,6 +74,7 @@ abstract class StripeIntentActivity : AppCompatActivity() {
     protected fun createAndConfirmPaymentIntent(
         country: String,
         paymentMethodCreateParams: PaymentMethodCreateParams?,
+        supportedPaymentMethods: String? = null,
         shippingDetails: ConfirmPaymentIntentParams.Shipping? = null,
         stripeAccountId: String? = null,
         existingPaymentMethodId: String? = null,
@@ -84,7 +85,10 @@ abstract class StripeIntentActivity : AppCompatActivity() {
 
         keyboardController.hide()
 
-        viewModel.createPaymentIntent(country).observe(
+        viewModel.createPaymentIntent(
+            country = country,
+            supportedPaymentMethods = supportedPaymentMethods
+        ).observe(
             this,
             { result ->
                 result.onSuccess {

@@ -735,6 +735,19 @@ data class PaymentMethodCreateParams internal constructor(
             )
         }
 
+        @JvmStatic
+        @JvmOverloads
+        fun createKlarna(
+            billingDetails: PaymentMethod.BillingDetails? = null,
+            metadata: Map<String, String>? = null
+        ): PaymentMethodCreateParams {
+            return PaymentMethodCreateParams(
+                type = PaymentMethod.Type.Klarna,
+                billingDetails = billingDetails,
+                metadata = metadata
+            )
+        }
+
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
         fun createWithOverride(
             type: PaymentMethod.Type,
