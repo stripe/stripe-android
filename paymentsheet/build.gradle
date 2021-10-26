@@ -7,72 +7,15 @@ plugins {
     id 'org.jetbrains.kotlin.plugin.serialization' version '1.5.31'
 }
 
-android {
-    compileSdkVersion rootProject.ext.compileSdkVersion
-    buildToolsVersion rootProject.ext.buildToolsVersion
-
-    defaultConfig {
-        minSdkVersion 21
-        targetSdkVersion rootProject.ext.compileSdkVersion
-
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-
-        vectorDrawables.useSupportLibrary = true
-
-        // From https://developer.android.com/training/testing/junit-runner:
-        // > To remove all shared state from your device"s CPU and memory after each test,
-        // > use the clearPackageData flag.
-        testInstrumentationRunnerArguments clearPackageData: "true"
-    }
-
-    sourceSets {
-        main {
-            res.srcDirs = ['res']
-        }
-    }
-
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
-    }
-
-    kotlinOptions {
-        jvmTarget = "1.8"
-    }
-
-    buildFeatures {
-        compose = true
-        viewBinding true
-    }
-
-    testOptions {
-        unitTests {
-            // Note: without this, all Robolectric tests using assets will fail.
-            includeAndroidResources = true
-            all {
-                maxHeapSize = "1024m"
-            }
-        }
-    }
-
-    composeOptions {
-        kotlinCompilerExtensionVersion "$composeVersion"
-    }
-
-    lintOptions {
-        disable "UnrememberedMutableState"
-    }
-
-    dokkaHtml {
-        outputDirectory = new File("${project.rootDir}/docs/$project.name")
-    }
-}
-
 assemble.dependsOn('lint')
 check.dependsOn('checkstyle')
 
 configurations {
     ktlint
+}
+
+if (System.getenv("JITPACK")) {
+    group='com.github.stripe.stripe-android'
 }
 
 dependencies {
@@ -135,9 +78,70 @@ dependencies {
     ktlint "com.pinterest:ktlint:$ktlintVersion"
 }
 
+android {
+    compileSdkVersion rootProject.ext.compileSdkVersion
+    buildToolsVersion rootProject.ext.buildToolsVersion
+
+    defaultConfig {
+        minSdkVersion 21
+        targetSdkVersion rootProject.ext.compileSdkVersion
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+
+        vectorDrawables.useSupportLibrary = true
+
+        // From https://developer.android.com/training/testing/junit-runner:
+        // > To remove all shared state from your device"s CPU and memory after each test,
+        // > use the clearPackageData flag.
+        testInstrumentationRunnerArguments clearPackageData: "true"
+    }
+
+    sourceSets {
+        main {
+            res.srcDirs = ['res']
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
+
+    buildFeatures {
+        compose = true
+        viewBinding true
+    }
+
+    testOptions {
+        unitTests {
+            // Note: without this, all Robolectric tests using assets will fail.
+            includeAndroidResources = true
+            all {
+                maxHeapSize = "1024m"
+            }
+        }
+    }
+
+    composeOptions {
+        kotlinCompilerExtensionVersion "$composeVersion"
+    }
+
+    lintOptions {
+        disable "UnrememberedMutableState"
+    }
+
+    dokkaHtml {
+        outputDirectory = new File("${project.rootDir}/docs/$project.name")
+    }
+}
+
 task ktlint(type: JavaExec, group: "verification") {
     description = "Check Kotlin code style."
-    main = "com.pinterest.ktlint.Main"
+    mainClass = "com.pinterest.ktlint.Main"
     classpath = configurations.ktlint
     args "src/**/*.kt"
     // to generate report in checkstyle format prepend following args:
@@ -148,7 +152,7 @@ check.dependsOn ktlint
 
 task ktlintFormat(type: JavaExec, group: "formatting") {
     description = "Fix Kotlin code style deviations."
-    main = "com.pinterest.ktlint.Main"
+    mainClass = "com.pinterest.ktlint.Main"
     classpath = configurations.ktlint
     args "-F", "src/**/*.kt"
 }

@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.example
 import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import com.stripe.android.Stripe
 import com.stripe.android.paymentsheet.example.activity.LaunchPaymentSheetCompleteActivity
 import com.stripe.android.paymentsheet.example.activity.LaunchPaymentSheetCustomActivity
 import com.stripe.android.paymentsheet.example.activity.PaymentSheetPlaygroundActivity
@@ -16,7 +17,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(viewBinding.root)
-        setSupportActionBar(findViewById(R.id.toolbar))
+        setSupportActionBar(viewBinding.toolbar)
 
         viewBinding.launchCompleteButton.setOnClickListener {
             startActivity(Intent(this, LaunchPaymentSheetCompleteActivity::class.java))
@@ -29,5 +30,7 @@ class MainActivity : AppCompatActivity() {
         viewBinding.launchPlaygroundButton.setOnClickListener {
             startActivity(Intent(this, PaymentSheetPlaygroundActivity::class.java))
         }
+
+        viewBinding.version.text = Stripe.VERSION_NAME
     }
 }
