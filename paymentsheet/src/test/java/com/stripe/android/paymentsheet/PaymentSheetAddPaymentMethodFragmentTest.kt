@@ -45,6 +45,7 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 
 @RunWith(RobolectricTestRunner::class)
 class PaymentSheetAddPaymentMethodFragmentTest {
@@ -80,6 +81,39 @@ class PaymentSheetAddPaymentMethodFragmentTest {
             val adapter =
                 viewBinding.paymentMethodsRecycler.adapter as AddPaymentMethodsAdapter
             assertThat(adapter.isEnabled).isFalse()
+        }
+    }
+
+    @Test @Config(qualifiers = "w320dp")
+    fun `when screen is 320dp wide, adapter should show 2 and a half items with 104dp width`() {
+        val paymentIntent = mock<PaymentIntent>().also {
+            whenever(it.paymentMethodTypes).thenReturn(listOf("card", "bancontact", "sofort", "ideal"))
+        }
+        createFragment(stripeIntent = paymentIntent) { fragment, viewBinding ->
+            val item = viewBinding.paymentMethodsRecycler.layoutManager!!.findViewByPosition(0)
+            assertThat(item!!.measuredWidth).isEqualTo(104)
+        }
+    }
+
+    @Test @Config(qualifiers = "w475dp")
+    fun `when screen is 475dp wide, adapter should show 3 and a half items with 115dp width`() {
+        val paymentIntent = mock<PaymentIntent>().also {
+            whenever(it.paymentMethodTypes).thenReturn(listOf("card", "bancontact", "sofort", "ideal"))
+        }
+        createFragment(stripeIntent = paymentIntent) { fragment, viewBinding ->
+            val item = viewBinding.paymentMethodsRecycler.layoutManager!!.findViewByPosition(0)
+            assertThat(item!!.measuredWidth).isEqualTo(115)
+        }
+    }
+
+    @Test @Config(qualifiers = "w476dp")
+    fun `when screen is 476dp wide, adapter should show 4 items with 100dp width`() {
+        val paymentIntent = mock<PaymentIntent>().also {
+            whenever(it.paymentMethodTypes).thenReturn(listOf("card", "bancontact", "sofort", "ideal"))
+        }
+        createFragment(stripeIntent = paymentIntent) { fragment, viewBinding ->
+            val item = viewBinding.paymentMethodsRecycler.layoutManager!!.findViewByPosition(0)
+            assertThat(item!!.measuredWidth).isEqualTo(100)
         }
     }
 
