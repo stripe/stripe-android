@@ -3085,6 +3085,7 @@ public final class com/stripe/android/model/PaymentMethod$Type : java/lang/Enum,
 	public static final field Giropay Lcom/stripe/android/model/PaymentMethod$Type;
 	public static final field GrabPay Lcom/stripe/android/model/PaymentMethod$Type;
 	public static final field Ideal Lcom/stripe/android/model/PaymentMethod$Type;
+	public static final field Klarna Lcom/stripe/android/model/PaymentMethod$Type;
 	public static final field Netbanking Lcom/stripe/android/model/PaymentMethod$Type;
 	public static final field Oxxo Lcom/stripe/android/model/PaymentMethod$Type;
 	public static final field P24 Lcom/stripe/android/model/PaymentMethod$Type;
@@ -3189,6 +3190,9 @@ public final class com/stripe/android/model/PaymentMethodCreateParams : android/
 	public static final fun createGiropay (Lcom/stripe/android/model/PaymentMethod$BillingDetails;Ljava/util/Map;)Lcom/stripe/android/model/PaymentMethodCreateParams;
 	public static final fun createGrabPay (Lcom/stripe/android/model/PaymentMethod$BillingDetails;)Lcom/stripe/android/model/PaymentMethodCreateParams;
 	public static final fun createGrabPay (Lcom/stripe/android/model/PaymentMethod$BillingDetails;Ljava/util/Map;)Lcom/stripe/android/model/PaymentMethodCreateParams;
+	public static final fun createKlarna ()Lcom/stripe/android/model/PaymentMethodCreateParams;
+	public static final fun createKlarna (Lcom/stripe/android/model/PaymentMethod$BillingDetails;)Lcom/stripe/android/model/PaymentMethodCreateParams;
+	public static final fun createKlarna (Lcom/stripe/android/model/PaymentMethod$BillingDetails;Ljava/util/Map;)Lcom/stripe/android/model/PaymentMethodCreateParams;
 	public static final fun createOxxo (Lcom/stripe/android/model/PaymentMethod$BillingDetails;)Lcom/stripe/android/model/PaymentMethodCreateParams;
 	public static final fun createOxxo (Lcom/stripe/android/model/PaymentMethod$BillingDetails;Ljava/util/Map;)Lcom/stripe/android/model/PaymentMethodCreateParams;
 	public static final fun createP24 (Lcom/stripe/android/model/PaymentMethod$BillingDetails;)Lcom/stripe/android/model/PaymentMethodCreateParams;
@@ -3343,6 +3347,10 @@ public final class com/stripe/android/model/PaymentMethodCreateParams$Companion 
 	public final fun createGrabPay (Lcom/stripe/android/model/PaymentMethod$BillingDetails;)Lcom/stripe/android/model/PaymentMethodCreateParams;
 	public final fun createGrabPay (Lcom/stripe/android/model/PaymentMethod$BillingDetails;Ljava/util/Map;)Lcom/stripe/android/model/PaymentMethodCreateParams;
 	public static synthetic fun createGrabPay$default (Lcom/stripe/android/model/PaymentMethodCreateParams$Companion;Lcom/stripe/android/model/PaymentMethod$BillingDetails;Ljava/util/Map;ILjava/lang/Object;)Lcom/stripe/android/model/PaymentMethodCreateParams;
+	public final fun createKlarna ()Lcom/stripe/android/model/PaymentMethodCreateParams;
+	public final fun createKlarna (Lcom/stripe/android/model/PaymentMethod$BillingDetails;)Lcom/stripe/android/model/PaymentMethodCreateParams;
+	public final fun createKlarna (Lcom/stripe/android/model/PaymentMethod$BillingDetails;Ljava/util/Map;)Lcom/stripe/android/model/PaymentMethodCreateParams;
+	public static synthetic fun createKlarna$default (Lcom/stripe/android/model/PaymentMethodCreateParams$Companion;Lcom/stripe/android/model/PaymentMethod$BillingDetails;Ljava/util/Map;ILjava/lang/Object;)Lcom/stripe/android/model/PaymentMethodCreateParams;
 	public final fun createOxxo (Lcom/stripe/android/model/PaymentMethod$BillingDetails;)Lcom/stripe/android/model/PaymentMethodCreateParams;
 	public final fun createOxxo (Lcom/stripe/android/model/PaymentMethod$BillingDetails;Ljava/util/Map;)Lcom/stripe/android/model/PaymentMethodCreateParams;
 	public static synthetic fun createOxxo$default (Lcom/stripe/android/model/PaymentMethodCreateParams$Companion;Lcom/stripe/android/model/PaymentMethod$BillingDetails;Ljava/util/Map;ILjava/lang/Object;)Lcom/stripe/android/model/PaymentMethodCreateParams;
