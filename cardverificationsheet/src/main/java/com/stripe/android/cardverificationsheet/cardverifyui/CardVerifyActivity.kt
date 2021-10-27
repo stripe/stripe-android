@@ -202,7 +202,7 @@ open class CardVerifyActivity : SimpleScanActivity<RequiredCardDetails>() {
             false
         }
         params.cardImageVerificationIntentId.isEmpty() -> {
-            scanFailure(InvalidCivException("Missing card image verification ID"))∂
+            scanFailure(InvalidCivException("Missing card image verification ID"))
             false
         }
         params.cardImageVerificationIntentSecret.isEmpty() -> {
