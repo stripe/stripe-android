@@ -1,7 +1,6 @@
 package com.stripe.android.view
 
 import android.content.Context
-import android.graphics.drawable.Drawable
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.AttributeSet
@@ -9,7 +8,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.widget.LinearLayout
-import androidx.annotation.ColorInt
 import androidx.annotation.DrawableRes
 import androidx.annotation.IdRes
 import androidx.annotation.IntRange
@@ -18,10 +16,8 @@ import androidx.annotation.StringRes
 import androidx.annotation.VisibleForTesting
 import androidx.core.content.ContextCompat
 import androidx.core.content.withStyledAttributes
-import androidx.core.graphics.drawable.DrawableCompat
 import androidx.core.view.updateLayoutParams
 import androidx.core.widget.doAfterTextChanged
-import com.google.android.material.textfield.TextInputLayout
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.R
 import com.stripe.android.cards.CardNumber
@@ -743,7 +739,8 @@ class CardMultilineWidget @JvmOverloads constructor(
                 null,
                 null,
                 icon,
-                null)
+                null
+            )
         }
     }
     internal fun interface CardBrandIconSupplier {
