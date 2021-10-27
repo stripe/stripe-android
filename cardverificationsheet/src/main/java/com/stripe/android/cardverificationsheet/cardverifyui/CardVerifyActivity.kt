@@ -103,21 +103,7 @@ open class CardVerifyActivity : SimpleScanActivity<RequiredCardDetails>() {
     protected open val processingTextView by lazy { TextView(this) }
 
     private val params: CardVerificationSheetParams by lazy {
-        val params = intent.getParcelableExtra(INTENT_PARAM_REQUEST)
-            ?: CardVerificationSheetParams("", "", "")
-                .also {
-                    scanFailure(InvalidCivException("Missing required parameters"))
-                }
-        when {
-            params.stripePublishableKey.isEmpty() ->
-                scanFailure(InvalidStripePublishableKeyException("Missing publishable key"))
-            params.cardImageVerificationIntentId.isEmpty() ->
-                scanFailure(InvalidCivException("Missing card image verification ID"))
-            params.cardImageVerificationIntentSecret.isEmpty() ->
-                scanFailure(InvalidCivException("Missing card image verification client secret"))
-        }
-
-        params
+        intent.getParcelableExtra(INTENT_PARAM_REQUEST) ?: CardVerificationSheetParams("", "", "")
     }
 
     /**
@@ -197,6 +183,10 @@ open class CardVerifyActivity : SimpleScanActivity<RequiredCardDetails>() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        if (!ensureValidParams()) {
+            return
+        }
+
         deferredScanFlowParameters = async { getCivDetails() }
 
         launch(Dispatchers.Main) {
@@ -204,6 +194,22 @@ open class CardVerifyActivity : SimpleScanActivity<RequiredCardDetails>() {
         }
 
         cannotScanTextView.setOnClickListener { userCannotScan() }
+    }
+
+    private fun ensureValidParams() = when {
+        params.stripePublishableKey.isEmpty() -> {
+            scanFailure(InvalidStripePublishableKeyException("Missing publishable key"))
+            false
+        }
+        params.cardImageVerificationIntentId.isEmpty() -> {
+            scanFailure(InvalidCivException("Missing card image verification ID"))∂
+            false
+        }
+        params.cardImageVerificationIntentSecret.isEmpty() -> {
+            scanFailure(InvalidCivException("Missing card image verification client secret"))
+            false
+        }
+        else -> true
     }
 
     private suspend fun getCivDetails(): RequiredCardDetails = when (

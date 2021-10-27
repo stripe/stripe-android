@@ -11,15 +11,6 @@
         android:theme="@style/AppTheme"
         tools:ignore="AllowBackup">
 
-        <meta-data
-            android:name="com.stripe.android.paymentsheet.example.metadata.backend_url"
-            android:value="${BACKEND_URL}" />
-
-        <!-- Enables the Google Payment API -->
-        <meta-data
-            android:name="com.google.android.gms.wallet.api.enabled"
-            android:value="true"/>
-
         <activity
             android:name=".MainActivity"
             android:label="@string/app_name"

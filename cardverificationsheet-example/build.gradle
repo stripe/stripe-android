@@ -4,11 +4,6 @@ plugins {
     id 'org.jetbrains.kotlin.plugin.serialization' version '1.5.31'
 }
 
-// Read values from gradle.properties or system environment variable
-def getBackendUrl() {
-    return findProperty('STRIPE_PAYMENTSHEET_EXAMPLE_BACKEND_URL') ?: ""
-}
-
 dependencies {
     implementation project(':cardverificationsheet')
 
@@ -63,17 +58,13 @@ android {
     }
 
     defaultConfig {
-        applicationId "com.stripe.android.paymentsheet.example"
+        applicationId "com.stripe.android.cardverificationsheet.example"
         minSdkVersion 21
         targetSdkVersion rootProject.ext.compileSdkVersion
         versionCode 1
         versionName "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-
-        manifestPlaceholders = [
-                BACKEND_URL: getBackendUrl()
-        ]
     }
 
     buildTypes {

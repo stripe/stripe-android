@@ -224,6 +224,9 @@ internal class NV21Image(val width: Int, val height: Int, val nv21Data: ByteArra
 
     /**
      * https://github.com/silvaren/easyrs/blob/c8eed0f0b713bbb1eb375aca23d615677e8adb3c/easyrs/src/main/java/io/github/silvaren/easyrs/tools/YuvToRgb.java
+     *
+     * TODO: once the renderscript toolkit is available in maven central, replace this method with
+     * the yuvToRgbBitmap from that https://github.com/android/renderscript-intrinsics-replacement-toolkit/blob/main/renderscript-toolkit/src/main/java/com/google/android/renderscript/Toolkit.kt#L1079
      */
     fun toBitmap(renderScript: RenderScript): Bitmap {
         val yuvTypeBuilder: Type.Builder =
