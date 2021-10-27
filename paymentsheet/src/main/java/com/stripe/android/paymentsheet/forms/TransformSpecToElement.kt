@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.forms
 
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.elements.AddressElement
 import com.stripe.android.paymentsheet.elements.AddressSpec
 import com.stripe.android.paymentsheet.elements.AfterpayClearpayHeaderElement
@@ -18,6 +19,7 @@ import com.stripe.android.paymentsheet.elements.IbanConfig
 import com.stripe.android.paymentsheet.elements.IbanElement
 import com.stripe.android.paymentsheet.elements.IbanSpec
 import com.stripe.android.paymentsheet.elements.IdentifierSpec
+import com.stripe.android.paymentsheet.elements.KlarnaCountrySpec
 import com.stripe.android.paymentsheet.elements.LayoutSpec
 import com.stripe.android.paymentsheet.elements.MandateTextElement
 import com.stripe.android.paymentsheet.elements.MandateTextSpec
@@ -34,6 +36,8 @@ import com.stripe.android.paymentsheet.elements.SimpleDropdownConfig
 import com.stripe.android.paymentsheet.elements.SimpleDropdownElement
 import com.stripe.android.paymentsheet.elements.SimpleTextElement
 import com.stripe.android.paymentsheet.elements.SimpleTextFieldConfig
+import com.stripe.android.paymentsheet.elements.SimpleTextHeaderElement
+import com.stripe.android.paymentsheet.elements.SimpleTextHeaderSpec
 import com.stripe.android.paymentsheet.elements.SimpleTextSpec
 import com.stripe.android.paymentsheet.elements.TextFieldController
 import com.stripe.android.paymentsheet.model.Amount
@@ -58,8 +62,11 @@ internal class TransformSpecToElement @Inject constructor(
                 is SaveForFutureUseSpec -> it.transform(initialValues)
                 is SectionSpec -> it.transform(initialValues)
                 is MandateTextSpec -> it.transform(initialValues.merchantName)
+                // TODO combine these into a single text header spec.
                 is AfterpayClearpayTextSpec ->
                     it.transform(requireNotNull(initialValues.amount))
+                is SimpleTextHeaderSpec ->
+                    it.transform(initialValues.paymentMethod.type)
             }
         }
 
@@ -92,6 +99,10 @@ internal class TransformSpecToElement @Inject constructor(
                 is SimpleTextSpec -> it.transform(initialValues)
                 is AddressSpec -> transformAddress(initialValues)
                 is CountrySpec -> it.transform(
+                    initialValues.billingDetails?.address?.country
+                )
+                is KlarnaCountrySpec -> it.transform(
+                    initialValues.amount?.currencyCode,
                     initialValues.billingDetails?.address?.country
                 )
             }
@@ -132,6 +143,17 @@ internal class TransformSpecToElement @Inject constructor(
             DropdownFieldController(CountryConfig(this.onlyShowCountryCodes), country)
         )
 
+    private fun KlarnaCountrySpec.transform(currencyCode: String?, country: String?) =
+        CountryElement(
+            this.identifier,
+            DropdownFieldController(
+                CountryConfig(
+                    resourceRepository.addressRepository.getCountriesAllowedForKlarna(currencyCode)
+                ),
+                country
+            )
+        )
+
     private fun BankDropdownSpec.transform() =
         SimpleDropdownElement(
             this.identifier,
@@ -157,6 +179,9 @@ internal class TransformSpecToElement @Inject constructor(
 
     private fun AfterpayClearpayTextSpec.transform(amount: Amount) =
         AfterpayClearpayHeaderElement(this.identifier, amount)
+
+    private fun SimpleTextHeaderSpec.transform(paymentMethodType: PaymentMethod.Type) =
+        SimpleTextHeaderElement(this.identifier, paymentMethodType)
 }
 
 internal fun SimpleTextSpec.transform(

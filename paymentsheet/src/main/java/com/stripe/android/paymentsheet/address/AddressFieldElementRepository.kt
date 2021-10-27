@@ -50,6 +50,13 @@ internal class AddressFieldElementRepository @Inject internal constructor(
         countryFieldMap[countryCode] = listElements
     }
 
+    internal fun getCountriesAllowedForKlarna(currencyCode: String?): Set<String> {
+        val currencyMapping =
+            parseKlarnaCurrencyMap(resources?.assets?.open("klarnaCurrencyMap.json"))
+
+        return currencyMapping?.get(currencyCode).orEmpty()
+    }
+
     companion object {
         @VisibleForTesting
         internal const val DEFAULT_COUNTRY_CODE = "ZZ"

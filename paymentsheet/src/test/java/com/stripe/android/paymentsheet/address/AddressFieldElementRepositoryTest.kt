@@ -65,4 +65,23 @@ class AddressFieldElementRepositoryTest {
                 .isNotNull()
         }
     }
+
+    @Test
+    fun `non supported klarna currency returns empty list`() {
+        assertThat(addressFieldElementRepository.getCountriesAllowedForKlarna("")).isEmpty()
+        assertThat(addressFieldElementRepository.getCountriesAllowedForKlarna(null)).isEmpty()
+        assertThat(addressFieldElementRepository.getCountriesAllowedForKlarna("ARS")).isEmpty()
+    }
+
+    @Test
+    fun `supported klarna currency returns correct countries`() {
+        assertThat(addressFieldElementRepository.getCountriesAllowedForKlarna("eur"))
+            .containsExactly("AT", "FI", "DE", "NL", "BE", "ES", "IT", "FR")
+
+        assertThat(addressFieldElementRepository.getCountriesAllowedForKlarna("dkk")).containsExactly("DK")
+        assertThat(addressFieldElementRepository.getCountriesAllowedForKlarna("nok")).containsExactly("NO")
+        assertThat(addressFieldElementRepository.getCountriesAllowedForKlarna("sek")).containsExactly("SE")
+        assertThat(addressFieldElementRepository.getCountriesAllowedForKlarna("gbp")).containsExactly("GB")
+        assertThat(addressFieldElementRepository.getCountriesAllowedForKlarna("usd")).containsExactly("US")
+    }
 }

@@ -1,0 +1,8 @@
+{
+  "eur": ["AT", "FI", "DE", "NL", "BE", "ES", "IT", "FR"],
+  "dkk": ["DK"],
+  "nok": ["NO"],
+  "sek": ["SE"],
+  "gbp": ["GB"],
+  "usd": ["US"]
+}

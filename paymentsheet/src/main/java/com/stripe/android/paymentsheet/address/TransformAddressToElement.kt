@@ -132,6 +132,11 @@ internal fun parseAddressesSchema(inputStream: InputStream?) =
         )
     }
 
+internal fun parseKlarnaCurrencyMap(inputStream: InputStream?) =
+    getJsonStringFromInputStream(inputStream)?.let {
+        format.decodeFromString<Map<String, Set<String>>>(it)
+    }
+
 private object FieldTypeAsStringSerializer : KSerializer<FieldType?> {
     override val descriptor: SerialDescriptor =
         PrimitiveSerialDescriptor("FieldType", PrimitiveKind.STRING)

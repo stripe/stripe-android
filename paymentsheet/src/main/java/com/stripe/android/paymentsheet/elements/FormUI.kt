@@ -45,6 +45,7 @@ internal fun FormInternal(
                             enabled,
                             element
                         )
+                        is SimpleTextHeaderElement -> SimpleTextHeaderElementUI(element)
                     }
                 }
             }
