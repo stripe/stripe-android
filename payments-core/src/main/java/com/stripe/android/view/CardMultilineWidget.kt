@@ -1,7 +1,6 @@
 package com.stripe.android.view
 
 import android.content.Context
-import android.graphics.drawable.Drawable
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.AttributeSet
@@ -9,7 +8,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.widget.LinearLayout
-import androidx.annotation.ColorInt
 import androidx.annotation.DrawableRes
 import androidx.annotation.IdRes
 import androidx.annotation.IntRange
@@ -18,10 +16,8 @@ import androidx.annotation.StringRes
 import androidx.annotation.VisibleForTesting
 import androidx.core.content.ContextCompat
 import androidx.core.content.withStyledAttributes
-import androidx.core.graphics.drawable.DrawableCompat
 import androidx.core.view.updateLayoutParams
 import androidx.core.widget.doAfterTextChanged
-import com.google.android.material.textfield.TextInputLayout
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.R
 import com.stripe.android.cards.CardNumber
@@ -122,9 +118,6 @@ class CardMultilineWidget @JvmOverloads constructor(
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
     fun getBrand() = brand
-
-    @ColorInt
-    private val tintColorInt: Int
 
     /**
      * If [shouldShowPostalCode] is true and [postalCodeRequired] is true, then postal code is a
@@ -334,8 +327,6 @@ class CardMultilineWidget @JvmOverloads constructor(
     init {
         orientation = VERTICAL
 
-        tintColorInt = cardNumberEditText.hintTextColors.defaultColor
-
         textInputLayouts.forEach {
             it.placeholderTextColor = it.editText?.hintTextColors
         }
@@ -504,11 +495,7 @@ class CardMultilineWidget @JvmOverloads constructor(
     @JvmSynthetic
     fun setCvcIcon(resId: Int?) {
         if (resId != null) {
-            cvcInputLayout.setEndIconDrawable(resId)
-            cvcInputLayout.endIconMode = TextInputLayout.END_ICON_CUSTOM
-        } else {
-            cvcInputLayout.setEndIconDrawable(0)
-            cvcInputLayout.endIconMode = TextInputLayout.END_ICON_NONE
+            updateEndIcon(cvcEditText, resId)
         }
         showCvcIconInCvcField = resId != null
     }
@@ -660,14 +647,14 @@ class CardMultilineWidget @JvmOverloads constructor(
         }
 
         if (shouldShowErrorIcon) {
-            updateCardNumberIcon(
+            updateEndIcon(
                 iconResourceId = cardBrand.errorIcon,
-                shouldTint = false
+                editText = cardNumberEditText
             )
         } else {
-            updateCardNumberIcon(
+            updateEndIcon(
                 iconResourceId = cardBrand.cvcIcon,
-                shouldTint = true
+                editText = cardNumberEditText
             )
         }
     }
@@ -729,15 +716,15 @@ class CardMultilineWidget @JvmOverloads constructor(
     private fun updateBrandUi() {
         updateCvc()
         if (shouldShowErrorIcon) {
-            updateCardNumberIcon(
+            updateEndIcon(
                 iconResourceId = cardBrand.errorIcon,
-                shouldTint = false
+                editText = cardNumberEditText
             )
         } else {
             val cardBrandIcon = cardBrandIconSupplier.get(cardBrand)
-            updateCardNumberIcon(
+            updateEndIcon(
                 iconResourceId = cardBrandIcon.iconResourceId,
-                shouldTint = cardBrandIcon.shouldTint
+                editText = cardNumberEditText
             )
         }
     }
@@ -746,39 +733,22 @@ class CardMultilineWidget @JvmOverloads constructor(
         cvcEditText.updateBrand(cardBrand, customCvcLabel, customCvcPlaceholderText, cvcInputLayout)
     }
 
-    private fun updateCardNumberIcon(
-        @DrawableRes iconResourceId: Int,
-        shouldTint: Boolean
-    ) {
+    private fun updateEndIcon(editText: StripeEditText, @DrawableRes iconResourceId: Int) {
         ContextCompat.getDrawable(context, iconResourceId)?.let { icon ->
-            updateCompoundDrawable(
-                if (shouldTint) {
-                    DrawableCompat.wrap(icon).also {
-                        it.setTint(tintColorInt)
-                    }
-                } else {
-                    icon
-                }
+            editText.setCompoundDrawablesRelativeWithIntrinsicBounds(
+                null,
+                null,
+                icon,
+                null
             )
         }
     }
-
-    private fun updateCompoundDrawable(drawable: Drawable) {
-        cardNumberEditText.setCompoundDrawablesRelativeWithIntrinsicBounds(
-            null,
-            null,
-            drawable,
-            null
-        )
-    }
-
     internal fun interface CardBrandIconSupplier {
         fun get(cardBrand: CardBrand): CardBrandIcon
     }
 
     internal data class CardBrandIcon(
-        val iconResourceId: Int,
-        val shouldTint: Boolean = false
+        val iconResourceId: Int
     )
 
     private companion object {
@@ -786,8 +756,7 @@ class CardMultilineWidget @JvmOverloads constructor(
 
         private val DEFAULT_CARD_BRAND_ICON_SUPPLIER = CardBrandIconSupplier { cardBrand ->
             CardBrandIcon(
-                cardBrand.icon,
-                cardBrand == CardBrand.Unknown
+                cardBrand.icon
             )
         }
     }
