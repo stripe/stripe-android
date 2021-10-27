@@ -1179,4 +1179,65 @@ internal object PaymentIntentFixtures {
 
     val PI_REFRESH_RESPONSE_WECHAT_PAY_SUCCESS =
         PARSER.parse(PI_REFRESH_RESPONSE_WECHAT_PAY_SUCCESS_JSON)!!
+
+    val PI_WITH_KLARNA_IN_PAYMENT_METHODS_JSON = JSONObject(
+        """
+        {
+          "id": "pi_3JoznDLu5o3P18Zp0lRzng7p",
+          "object": "payment_intent",
+          "amount": 1099,
+          "amount_capturable": 0,
+          "amount_received": 0,
+          "application": null,
+          "application_fee_amount": null,
+          "canceled_at": null,
+          "cancellation_reason": null,
+          "capture_method": "automatic",
+          "charges": {
+            "object": "list",
+            "data": [
+
+            ],
+            "has_more": false,
+            "total_count": 0,
+            "url": "/v1/charges?payment_intent=pi_3JoznDLu5o3P18Zp0lRzng7p"
+          },
+          "client_secret": "pi_3JoznDLu5o3P18Zp0lRzng7p_secret_2wQkxNRVYQOzBcG6XGbw2tyBv",
+          "confirmation_method": "automatic",
+          "created": 1635293699,
+          "currency": "eur",
+          "customer": null,
+          "description": null,
+          "invoice": null,
+          "last_payment_error": null,
+          "livemode": false,
+          "metadata": {
+          },
+          "next_action": null,
+          "on_behalf_of": null,
+          "payment_method": null,
+          "payment_method_options": {
+            "klarna": {
+              "preferred_locale": null
+            }
+          },
+          "payment_method_types": [
+            "klarna"
+          ],
+          "receipt_email": null,
+          "review": null,
+          "setup_future_usage": null,
+          "shipping": null,
+          "source": null,
+          "statement_descriptor": null,
+          "statement_descriptor_suffix": null,
+          "status": "requires_payment_method",
+          "transfer_data": null,
+          "transfer_group": null
+        }
+        """.trimIndent()
+    )
+
+    val PI_WITH_KLARNA_IN_PAYMENT_METHODS =
+        PARSER.parse(PI_WITH_KLARNA_IN_PAYMENT_METHODS_JSON)!!
 }
