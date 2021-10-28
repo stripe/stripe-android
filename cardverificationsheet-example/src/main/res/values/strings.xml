@@ -1,0 +1,8 @@
+<resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
+    <string name="app_name">CardVerificationSheet Example</string>
+    <string name="cardverificationsheet">CardVerificationSheet</string>
+
+    <string name="stripePublishableKey">Stripe Publishable Key</string>
+    <string name="civId">Card Image Verification ID</string>
+    <string name="civSecret">Client Secret</string>
+</resources>

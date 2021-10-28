@@ -75,7 +75,7 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
             closeSheet(it)
         }
 
-        setupAddButton(viewBinding.addButton)
+        setupContinueButton(viewBinding.continueButton)
 
         viewModel.transition.observe(this) { event ->
             val transitionTarget = event.getContentIfNotHandled()
@@ -110,7 +110,7 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
         supportFragmentManager.registerFragmentLifecycleCallbacks(
             object : FragmentManager.FragmentLifecycleCallbacks() {
                 override fun onFragmentStarted(fm: FragmentManager, fragment: Fragment) {
-                    viewBinding.addButton.isVisible =
+                    viewBinding.continueButton.isVisible =
                         fragment is PaymentOptionsAddPaymentMethodFragment
                 }
             },
@@ -118,11 +118,12 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
         )
     }
 
-    private fun setupAddButton(addButton: PrimaryButton) {
-        viewBinding.addButton.updateState(PrimaryButton.State.Ready)
+    private fun setupContinueButton(addButton: PrimaryButton) {
+        viewBinding.continueButton.lockVisible = false
+        viewBinding.continueButton.updateState(PrimaryButton.State.Ready)
 
         viewModel.config?.primaryButtonColor?.let {
-            viewBinding.addButton.backgroundTintList = it
+            viewBinding.continueButton.backgroundTintList = it
         }
 
         addButton.setOnClickListener {

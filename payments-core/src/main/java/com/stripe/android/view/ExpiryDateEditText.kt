@@ -5,6 +5,7 @@ import android.os.Build
 import android.text.Editable
 import android.text.InputFilter
 import android.text.InputType
+import android.text.method.HideReturnsTransformationMethod
 import android.util.AttributeSet
 import android.view.View
 import android.widget.EditText
@@ -234,7 +235,9 @@ class ExpiryDateEditText @JvmOverloads constructor(
     }
 
     init {
-        inputType = InputType.TYPE_CLASS_NUMBER
+        inputType = InputType.TYPE_NUMBER_VARIATION_PASSWORD or InputType.TYPE_CLASS_NUMBER
+        transformationMethod = HideReturnsTransformationMethod.getInstance()
+
         updateSeparatorUi()
 
         listenForTextChanges()

@@ -26,6 +26,7 @@ import com.stripe.android.networking.AnalyticsRequestFactory
 import com.stripe.android.networking.ApiRequest
 import com.stripe.android.networking.DefaultAlipayRepository
 import com.stripe.android.networking.DefaultAnalyticsRequestExecutor
+import com.stripe.android.networking.RetryDelaySupplier
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.DefaultReturnUrl
 import com.stripe.android.payments.PaymentFlowFailureMessageFactory
@@ -66,7 +67,8 @@ constructor(
         publishableKeyProvider,
         stripeRepository,
         Logger.getInstance(enableLogging),
-        workContext
+        workContext,
+        RetryDelaySupplier()
     )
     private val setupIntentFlowResultProcessor = SetupIntentFlowResultProcessor(
         context,
