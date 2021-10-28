@@ -50,8 +50,8 @@ internal class PaymentBrowserAuthContract :
     override fun parseResult(
         resultCode: Int,
         intent: Intent?
-    ): PaymentFlowResult.Unvalidated? {
-        return intent?.getParcelableExtra(EXTRA_ARGS)
+    ): PaymentFlowResult.Unvalidated {
+        return intent?.getParcelableExtra(EXTRA_ARGS) ?: PaymentFlowResult.Unvalidated()
     }
 
     @Parcelize

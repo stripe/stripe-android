@@ -10,10 +10,7 @@ import kotlinx.parcelize.Parcelize
 internal class StripeGooglePayContract :
     ActivityResultContract<StripeGooglePayContract.Args, GooglePayLauncherResult>() {
 
-    override fun createIntent(
-        context: Context,
-        input: Args?
-    ): Intent {
+    override fun createIntent(context: Context, input: Args): Intent {
         return Intent(context, StripeGooglePayActivity::class.java)
             .putExtra(ActivityStarter.Args.EXTRA, input)
     }
