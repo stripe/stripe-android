@@ -1,4 +1,4 @@
-package com.stripe.android.paymentsheet.example.activity
+package com.stripe.android.paymentsheet.example.samples.activity
 
 import androidx.annotation.DrawableRes
 import androidx.appcompat.app.AppCompatActivity
@@ -36,7 +36,7 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetResult
 import com.stripe.android.paymentsheet.example.R
-import com.stripe.android.paymentsheet.example.viewmodel.PaymentSheetViewModel
+import com.stripe.android.paymentsheet.example.samples.viewmodel.PaymentSheetViewModel
 
 internal abstract class BasePaymentSheetActivity : AppCompatActivity() {
     protected val viewModel: PaymentSheetViewModel by lazy {

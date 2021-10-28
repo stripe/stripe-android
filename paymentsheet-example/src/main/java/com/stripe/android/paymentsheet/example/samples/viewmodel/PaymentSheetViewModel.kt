@@ -1,20 +1,12 @@
-package com.stripe.android.paymentsheet.example.viewmodel
+package com.stripe.android.paymentsheet.example.samples.viewmodel
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.liveData
 import com.github.kittinunf.fuel.Fuel
-import com.github.kittinunf.fuel.core.extensions.jsonBody
 import com.github.kittinunf.result.Result
 import com.google.gson.Gson
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.example.repository.DefaultRepository
-import com.stripe.android.paymentsheet.example.repository.Repository
-import com.stripe.android.paymentsheet.example.service.BackendApiFactory
-import com.stripe.android.paymentsheet.example.service.CheckoutResponse
 import kotlinx.serialization.Serializable
 
 internal class PaymentSheetViewModel(

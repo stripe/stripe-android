@@ -1,4 +1,4 @@
-package com.stripe.android.paymentsheet.example.activity
+package com.stripe.android.paymentsheet.example.samples.activity
 
 import android.os.Bundle
 import android.widget.Toast
