@@ -46,7 +46,7 @@ internal class PaymentSheetAddPaymentMethodFragment(
 
         googlePayButton.setOnClickListener {
             // The scroll will be made visible onResume of the activity
-            sheetViewModel.setScrollVisible(false)
+            sheetViewModel.setContentVisible(false)
             sheetViewModel.lastSelectedPaymentMethod = sheetViewModel.selection.value
             sheetViewModel.updateSelection(PaymentSelection.GooglePay)
         }
