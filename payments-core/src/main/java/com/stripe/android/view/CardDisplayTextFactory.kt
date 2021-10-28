@@ -26,7 +26,7 @@ internal class CardDisplayTextFactory internal constructor(
     ): SpannableString {
         val brandText: String = brand.displayName
         val brandLength = brandText.length
-        if (last4 == null) {
+        if (last4.isNullOrBlank()) {
             val displayString = SpannableString(brandText)
             setSpan(
                 displayString,

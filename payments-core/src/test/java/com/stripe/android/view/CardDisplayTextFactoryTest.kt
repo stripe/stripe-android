@@ -66,6 +66,23 @@ class CardDisplayTextFactoryTest {
     }
 
     @Test
+    fun createStyled_withVisaEmptyLast4() {
+        val context = ApplicationProvider.getApplicationContext<Context>()
+        val cardDisplayTextFactory = CardDisplayTextFactory(
+            context.resources,
+            ThemeConfig(context)
+        )
+        assertEquals(
+            "Visa",
+            cardDisplayTextFactory.createStyled(
+                CardBrand.Visa,
+                "",
+                false
+            ).toString()
+        )
+    }
+
+    @Test
     @Config(qualifiers = "ja")
     fun createStyled_ja_withMasterCard() {
         val context = ApplicationProvider.getApplicationContext<Context>()
