@@ -45,7 +45,8 @@ internal class PaymentSheetAddPaymentMethodFragment(
         val googlePayDivider = viewBinding.googlePayDivider
 
         googlePayButton.setOnClickListener {
-            (activity as PaymentSheetActivity).setContentVisible(false)
+            // The scroll will be made visible onResume of the activity
+            sheetViewModel.setScrollVisible(false)
             sheetViewModel.lastSelectedPaymentMethod = sheetViewModel.selection.value
             sheetViewModel.updateSelection(PaymentSelection.GooglePay)
         }
@@ -63,9 +64,6 @@ internal class PaymentSheetAddPaymentMethodFragment(
 
         sheetViewModel.getButtonStateObservable(CheckoutIdentifier.AddFragmentTopGooglePay)
             .observe(viewLifecycleOwner) { viewState ->
-                if (viewState !is PaymentSheetViewState.StartProcessing) {
-                    (activity as PaymentSheetActivity).setContentVisible(true)
-                }
                 if (viewState is PaymentSheetViewState.Reset) {
                     // If Google Pay was cancelled or failed, re-select the form payment method
                     sheetViewModel.updateSelection(sheetViewModel.lastSelectedPaymentMethod)

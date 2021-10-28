@@ -10,6 +10,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentIntentFixtures.PI_OFF_SESSION
@@ -210,6 +211,19 @@ class PaymentSheetAddPaymentMethodFragmentTest {
             fragment.sheetViewModel._viewState.value = PaymentSheetViewState.Reset(null)
 
             assertThat(viewBinding.message.text.toString()).isEqualTo("")
+        }
+    }
+
+    @Test
+    fun `google pay flow updates the scroll view before and after`() {
+
+        createFragment(PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY) { fragment, viewBinding ->
+
+            viewBinding.googlePayButton.performClick()
+            assertThat(fragment.sheetViewModel._scrollVisible.value).isEqualTo(false)
+
+            fragment.sheetViewModel.onGooglePayResult(GooglePayPaymentMethodLauncher.Result.Canceled)
+            assertThat(fragment.sheetViewModel._scrollVisible.value).isEqualTo(true)
         }
     }
 

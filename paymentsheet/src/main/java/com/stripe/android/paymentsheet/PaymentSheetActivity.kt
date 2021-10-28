@@ -145,7 +145,6 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
         }
 
         viewModel.startConfirm.observe(this) { event ->
-            setContentVisible(true)
             val confirmParams = event.getContentIfNotHandled()
             if (confirmParams != null) {
                 lifecycleScope.launch {
@@ -157,18 +156,9 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
         viewModel.paymentSheetResult.observe(this) {
             closeSheet(it)
         }
-    }
 
-    override fun onResume() {
-        super.onResume()
-
-        // Needed for when Returning customer presses google pay, and then cancels.
-        setContentVisible(true)
-    }
-
-    fun setContentVisible(visible: Boolean) {
-        if (viewBinding.scrollView.isVisible != visible) {
-            viewBinding.scrollView.isVisible = visible
+        viewModel.scrollVisible.observe(this) {
+            viewBinding.scrollView.isVisible = it
         }
     }
 
@@ -276,7 +266,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
         }
 
         viewBinding.googlePayButton.setOnClickListener {
-            setContentVisible(false)
+            viewModel.setScrollVisible(false)
             updateErrorMessage()
             viewModel.checkout(CheckoutIdentifier.SheetBottomGooglePay)
         }
