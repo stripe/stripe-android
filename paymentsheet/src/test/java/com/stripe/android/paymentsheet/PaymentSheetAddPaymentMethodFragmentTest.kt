@@ -220,10 +220,10 @@ class PaymentSheetAddPaymentMethodFragmentTest {
         createFragment(PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY) { fragment, viewBinding ->
 
             viewBinding.googlePayButton.performClick()
-            assertThat(fragment.sheetViewModel._scrollVisible.value).isEqualTo(false)
+            assertThat(fragment.sheetViewModel._contentVisible.value).isEqualTo(false)
 
             fragment.sheetViewModel.onGooglePayResult(GooglePayPaymentMethodLauncher.Result.Canceled)
-            assertThat(fragment.sheetViewModel._scrollVisible.value).isEqualTo(true)
+            assertThat(fragment.sheetViewModel._contentVisible.value).isEqualTo(true)
         }
     }
 
