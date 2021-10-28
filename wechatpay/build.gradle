@@ -75,11 +75,10 @@ task ktlintFormat(type: JavaExec, group: "formatting") {
     args "-F", "src/**/*.kt"
 }
 
-// TODO(ccen) reship wechat pay module after backend refresh endpoint is ready
-//ext {
-//    artifactId = "stripe-wechatpay"
-//    artifactName = "stripe-wechatpay"
-//    artifactDescrption = "The WeChat Pay module of Stripe Android Payments SDK"
-//}
-//
-//apply from: "${rootDir}/deploy/deploy.gradle"
+ext {
+    artifactId = "stripe-wechatpay"
+    artifactName = "stripe-wechatpay"
+    artifactDescrption = "The WeChat Pay module of Stripe Android Payments SDK"
+}
+
+apply from: "${rootDir}/deploy/deploy.gradle"
