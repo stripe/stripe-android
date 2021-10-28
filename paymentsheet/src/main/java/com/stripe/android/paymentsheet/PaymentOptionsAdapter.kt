@@ -8,6 +8,8 @@ import android.view.View.IMPORTANT_FOR_ACCESSIBILITY_YES
 import android.view.ViewGroup
 import androidx.annotation.VisibleForTesting
 import androidx.core.view.isVisible
+import androidx.core.view.marginEnd
+import androidx.core.view.marginStart
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.IMPORTANT_FOR_ACCESSIBILITY_NO
 import androidx.recyclerview.widget.RecyclerView.NO_POSITION
@@ -219,6 +221,16 @@ internal class PaymentOptionsAdapter(
                     onItemSelected(bindingAdapterPosition, isClick = true)
                 }
             }
+        }.apply {
+            val targetWidth = parent.measuredWidth - parent.paddingStart - parent.paddingEnd
+            // minimum width for each item, accounting for the CardView margin so that the CardView
+            // is at least 100dp wide
+            val minItemWidth = 100 * parent.context.resources.displayMetrics.density +
+                cardView.marginEnd + cardView.marginStart
+            // numVisibleItems is incremented in steps of 0.5 items (1, 1.5, 2, 2.5, 3, ...)
+            val numVisibleItems = (targetWidth * 2 / minItemWidth).toInt() / 2f
+            val viewWidth = targetWidth / numVisibleItems
+            itemView.layoutParams.width = viewWidth.toInt()
         }
     }
 
@@ -256,6 +268,9 @@ internal class PaymentOptionsAdapter(
             ),
             onRemoveListener
         )
+
+        override val cardView: View
+            get() = binding.card
 
         init {
             // ensure that the icons are above the card
@@ -313,6 +328,9 @@ internal class PaymentOptionsAdapter(
             )
         )
 
+        override val cardView: View
+            get() = binding.card
+
         override fun setEnabled(enabled: Boolean) {
             binding.card.isEnabled = enabled
             binding.root.isEnabled = enabled
@@ -331,6 +349,9 @@ internal class PaymentOptionsAdapter(
                 LayoutInflater.from(parent.context), parent, false
             )
         )
+
+        override val cardView: View
+            get() = binding.card
 
         init {
             // ensure that the check icon is above the card
@@ -354,6 +375,7 @@ internal class PaymentOptionsAdapter(
     internal abstract class PaymentOptionViewHolder(parent: ViewGroup) :
         RecyclerView.ViewHolder(parent) {
 
+        abstract val cardView: View
         abstract fun setEnabled(enabled: Boolean)
 
         fun cardStrokeWidth(selected: Boolean): Int {
