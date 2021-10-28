@@ -113,7 +113,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     internal val _viewState = MutableLiveData<PaymentSheetViewState>(null)
     internal val viewState: LiveData<PaymentSheetViewState> = _viewState.distinctUntilChanged()
 
-    private val _contentVisible = MutableLiveData(true)
+    @VisibleForTesting
+    internal val _contentVisible = MutableLiveData(true)
     internal val contentVisible: LiveData<Boolean> = _contentVisible.distinctUntilChanged()
 
     internal var checkoutIdentifier: CheckoutIdentifier = CheckoutIdentifier.SheetBottomBuy
