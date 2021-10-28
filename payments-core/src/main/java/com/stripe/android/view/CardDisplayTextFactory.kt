@@ -39,47 +39,49 @@ internal class CardDisplayTextFactory internal constructor(
 
         val cardEndingIn = resources.getString(R.string.card_ending_in, brandText, last4)
         val totalLength = cardEndingIn.length
-        val last4length = last4.length
-        val last4Start = totalLength - last4length
+        val last4Start = cardEndingIn.indexOf(last4)
+        val last4End = last4Start + last4.length
+        val brandStart = cardEndingIn.indexOf(brandText)
+        val brandEnd = brandStart + brandText.length
         @ColorInt val textColor = themeConfig.getTextColor(isSelected)
         @ColorInt val lightTextColor = themeConfig.getTextAlphaColor(isSelected)
 
         val displayString = SpannableString(cardEndingIn)
 
-        // style brand
-        setSpan(
-            displayString,
-            TypefaceSpan("sans-serif-medium"),
-            0,
-            brandLength
-        )
-        setSpan(
-            displayString,
-            ForegroundColorSpan(textColor),
-            0,
-            brandLength
-        )
-
-        // style "ending in"
+        // style full string
         setSpan(
             displayString,
             ForegroundColorSpan(lightTextColor),
-            brandLength,
-            last4Start
+            0,
+            totalLength
         )
 
-        // style last 4
+        // override brand style
+        setSpan(
+            displayString,
+            TypefaceSpan("sans-serif-medium"),
+            brandStart,
+            brandEnd
+        )
+        setSpan(
+            displayString,
+            ForegroundColorSpan(textColor),
+            brandStart,
+            brandEnd
+        )
+
+        // override last 4 style
         setSpan(
             displayString,
             TypefaceSpan("sans-serif-medium"),
             last4Start,
-            totalLength
+            last4End
         )
         setSpan(
             displayString,
             ForegroundColorSpan(textColor),
             last4Start,
-            totalLength
+            last4End
         )
 
         return displayString
