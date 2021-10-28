@@ -58,7 +58,7 @@ ext {
     espressoVersion = '3.4.0'
     ktlintVersion = '0.42.1'
     materialVersion = '1.4.0'
-    daggerVersion = '2.39.1'
+    daggerVersion = '2.40'
 
     androidTestVersion = '1.4.0'
     junitVersion = '4.13.2'
