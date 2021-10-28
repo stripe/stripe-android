@@ -60,7 +60,7 @@ dependencies {
 
     // Jetpack Compose
     // Integration with activities
-    implementation 'androidx.activity:activity-compose:1.3.1'
+    implementation 'androidx.activity:activity-compose:1.4.0'
     // Compose Material Design
     implementation "androidx.compose.material:material:$composeVersion"
     // Integration with observables
