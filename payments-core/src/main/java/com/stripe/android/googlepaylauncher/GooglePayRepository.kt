@@ -18,7 +18,7 @@ fun interface GooglePayRepository {
     fun isReady(): Flow<Boolean>
 
     object Disabled : GooglePayRepository {
-        override fun isReady(): Flow<Boolean> = flowOf(true)
+        override fun isReady(): Flow<Boolean> = flowOf(false)
     }
 }
 
@@ -65,7 +65,7 @@ internal class DefaultGooglePayRepository(
      * for more details.
      */
     override fun isReady(): Flow<Boolean> {
-        val isReadyState = MutableStateFlow<Boolean?>(true)
+        val isReadyState = MutableStateFlow<Boolean?>(null)
 
         val request = IsReadyToPayRequest.fromJson(
             googlePayJsonFactory.createIsReadyToPayRequest(

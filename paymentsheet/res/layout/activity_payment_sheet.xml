@@ -82,7 +82,7 @@
                     android:id="@+id/button_container"
                     android:animateLayoutChanges="true"
                     android:layout_width="match_parent"
-                    android:layout_height="54dp"
+                    android:layout_height="@dimen/stripe_paymentsheet_max_primary_button_height"
                     android:layout_marginTop="@dimen/stripe_paymentsheet_button_container_spacing"
                     android:layout_marginHorizontal="@dimen/stripe_paymentsheet_outer_spacing_horizontal"
                     android:layout_marginBottom="@dimen/stripe_paymentsheet_button_container_spacing_bottom">
