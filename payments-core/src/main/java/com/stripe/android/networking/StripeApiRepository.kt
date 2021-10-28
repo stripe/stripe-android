@@ -1179,7 +1179,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
             HttpURLConnection.HTTP_FORBIDDEN -> {
                 throw PermissionException(stripeError, requestId)
             }
-            429 -> {
+            HTTP_TOO_MANY_REQUESTS -> {
                 throw RateLimitException(stripeError, requestId)
             }
             else -> {
@@ -1250,7 +1250,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
             onResponse(it.getOrNull()?.requestId)
         }.getOrElse {
             throw when (it) {
-                is IOException -> APIConnectionException.create(it, fileUploadRequest.baseUrl)
+                is IOException -> APIConnectionException.create(it, fileUploadRequest.url)
                 else -> it
             }
         }

@@ -2,6 +2,8 @@ package com.stripe.android.networking
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.exception.APIException
+import com.stripe.android.networking.RequestHeadersFactory.Companion.HEADER_CONTENT_TYPE
+import com.stripe.android.networking.StripeResponse.Companion.HEADER_REQUEST_ID
 import kotlin.test.Test
 import kotlin.test.assertFailsWith
 
@@ -12,7 +14,7 @@ class StripeResponseTest {
         val response = StripeResponse(
             code = 200,
             body = "{}",
-            headers = mapOf("request-id" to listOf("req_12345"))
+            headers = mapOf(HEADER_REQUEST_ID to listOf("req_12345"))
         )
 
         assertThat(response.requestId)
@@ -26,7 +28,7 @@ class StripeResponseTest {
         val response = StripeResponse(
             code = 200,
             body = "{}",
-            headers = mapOf("Request-Id" to listOf("req_12345"))
+            headers = mapOf(HEADER_REQUEST_ID to listOf("req_12345"))
         )
 
         assertThat(response.requestId)
@@ -42,8 +44,8 @@ class StripeResponseTest {
                 code = 500,
                 body = "there was an error",
                 headers = mapOf(
-                    "Request-Id" to listOf("req_12345"),
-                    "Content-Type" to listOf("text/plain")
+                    HEADER_REQUEST_ID to listOf("req_12345"),
+                    HEADER_CONTENT_TYPE to listOf("text/plain")
                 )
             ).responseJson
         }
