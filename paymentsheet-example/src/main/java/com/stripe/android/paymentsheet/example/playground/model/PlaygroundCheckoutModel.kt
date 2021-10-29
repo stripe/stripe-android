@@ -1,10 +1,25 @@
-package com.stripe.android.paymentsheet.example.service
+package com.stripe.android.paymentsheet.example.playground.model
 
 import com.stripe.android.paymentsheet.PaymentSheet
 import kotlinx.serialization.Serializable
-import retrofit2.http.Body
-import retrofit2.http.Headers
-import retrofit2.http.POST
+
+enum class CheckoutMode(val value: String) {
+    Setup("setup"),
+    Payment("payment"),
+    PaymentWithSetup("payment_with_setup")
+}
+
+enum class CheckoutCurrency(val value: String) {
+    USD("usd"),
+    EUR("eur")
+}
+
+sealed class CheckoutCustomer(val value: String) {
+    object Guest : CheckoutCustomer("guest")
+    object New : CheckoutCustomer("new")
+    object Returning : CheckoutCustomer("returning")
+    data class WithId(val customerId: String) : CheckoutCustomer(customerId)
+}
 
 @Serializable
 data class CheckoutRequest(
@@ -22,7 +37,7 @@ data class CheckoutResponse(
     val customerId: String? = null,
     val customerEphemeralKeySecret: String? = null
 ) {
-    internal fun makeCustomerConfig() =
+    fun makeCustomerConfig() =
         if (customerId != null && customerEphemeralKeySecret != null) {
             PaymentSheet.CustomerConfiguration(
                 id = customerId,
@@ -31,11 +46,4 @@ data class CheckoutResponse(
         } else {
             null
         }
-}
-
-interface CheckoutBackendApi {
-
-    @Headers("Content-Type: application/json")
-    @POST("checkout")
-    suspend fun checkout(@Body checkoutRequest: CheckoutRequest): CheckoutResponse
 }

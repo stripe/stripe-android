@@ -1,17 +1,19 @@
-package com.stripe.android.paymentsheet.example.activity
+package com.stripe.android.paymentsheet.example.playground.activity
 
 import android.os.Bundle
 import android.widget.Toast
-import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isInvisible
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetResult
 import com.stripe.android.paymentsheet.example.R
+import com.stripe.android.paymentsheet.example.Settings
 import com.stripe.android.paymentsheet.example.databinding.ActivityPaymentSheetPlaygroundBinding
-import com.stripe.android.paymentsheet.example.repository.Repository
-import com.stripe.android.paymentsheet.example.viewmodel.PaymentSheetPlaygroundViewModel
+import com.stripe.android.paymentsheet.example.playground.model.CheckoutCurrency
+import com.stripe.android.paymentsheet.example.playground.model.CheckoutCustomer
+import com.stripe.android.paymentsheet.example.playground.model.CheckoutMode
+import com.stripe.android.paymentsheet.example.playground.viewmodel.PaymentSheetPlaygroundViewModel
 import com.stripe.android.paymentsheet.model.PaymentOption
 import kotlinx.coroutines.launch
 
@@ -20,21 +22,19 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
         ActivityPaymentSheetPlaygroundBinding.inflate(layoutInflater)
     }
 
-    private val viewModel: PaymentSheetPlaygroundViewModel by viewModels {
-        PaymentSheetPlaygroundViewModel.Factory(
-            application
-        )
+    private val viewModel: PaymentSheetPlaygroundViewModel by lazy {
+        PaymentSheetPlaygroundViewModel(application)
     }
 
-    private val customer: Repository.CheckoutCustomer
+    private val customer: CheckoutCustomer
         get() = when (viewBinding.customerRadioGroup.checkedRadioButtonId) {
-            R.id.guest_customer_button -> Repository.CheckoutCustomer.Guest
+            R.id.guest_customer_button -> CheckoutCustomer.Guest
             R.id.new_customer_button -> {
                 viewModel.temporaryCustomerId?.let {
-                    Repository.CheckoutCustomer.WithId(it)
-                } ?: Repository.CheckoutCustomer.New
+                    CheckoutCustomer.WithId(it)
+                } ?: CheckoutCustomer.New
             }
-            else -> Repository.CheckoutCustomer.Returning
+            else -> CheckoutCustomer.Returning
         }
 
     private val googlePayConfig: PaymentSheet.GooglePayConfiguration?
@@ -49,17 +49,17 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
             else -> null
         }
 
-    private val currency: Repository.CheckoutCurrency
+    private val currency: CheckoutCurrency
         get() = when (viewBinding.currencyRadioGroup.checkedRadioButtonId) {
-            R.id.currency_usd_button -> Repository.CheckoutCurrency.USD
-            else -> Repository.CheckoutCurrency.EUR
+            R.id.currency_usd_button -> CheckoutCurrency.USD
+            else -> CheckoutCurrency.EUR
         }
 
-    private val mode: Repository.CheckoutMode
+    private val mode: CheckoutMode
         get() = when (viewBinding.modeRadioGroup.checkedRadioButtonId) {
-            R.id.mode_payment_button -> Repository.CheckoutMode.Payment
-            R.id.mode_payment_with_setup_button -> Repository.CheckoutMode.PaymentWithSetup
-            else -> Repository.CheckoutMode.Setup
+            R.id.mode_payment_button -> CheckoutMode.Payment
+            R.id.mode_payment_with_setup_button -> CheckoutMode.PaymentWithSetup
+            else -> CheckoutMode.Setup
         }
 
     private val setShippingAddress: Boolean
@@ -81,7 +81,7 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
             ::onPaymentOption,
             ::onPaymentSheetResult
         )
-
+        val backendUrl = Settings(this).playgroundBackendUrl
         viewBinding.reloadButton.setOnClickListener {
             lifecycleScope.launch {
                 viewModel.prepareCheckout(
@@ -89,7 +89,8 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
                     currency,
                     mode,
                     setShippingAddress,
-                    setAutomaticPaymentMethods
+                    setAutomaticPaymentMethods,
+                    backendUrl
                 )
             }
         }
@@ -135,7 +136,7 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
     private fun startCompleteCheckout() {
         val clientSecret = viewModel.clientSecret.value ?: return
 
-        if (viewModel.checkoutMode == Repository.CheckoutMode.Setup) {
+        if (viewModel.checkoutMode == CheckoutMode.Setup) {
             paymentSheet.presentWithSetupIntent(
                 clientSecret,
                 makeConfiguration()
@@ -151,7 +152,7 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
     private fun configureCustomCheckout() {
         val clientSecret = viewModel.clientSecret.value ?: return
 
-        if (viewModel.checkoutMode == Repository.CheckoutMode.Setup) {
+        if (viewModel.checkoutMode == CheckoutMode.Setup) {
             flowController.configureWithSetupIntent(
                 clientSecret,
                 makeConfiguration(),
