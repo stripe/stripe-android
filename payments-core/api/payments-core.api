@@ -6282,6 +6282,7 @@ public class com/stripe/android/view/StripeEditText : com/google/android/materia
 	public final fun setErrorMessage (Ljava/lang/String;)V
 	public final fun setErrorMessageListener (Lcom/stripe/android/view/StripeEditText$ErrorMessageListener;)V
 	protected final fun setLastKeyDelete (Z)V
+	public final fun setNumberOnlyInputType ()V
 	public final fun setOnFocusChangeListener (Landroid/view/View$OnFocusChangeListener;)V
 	public final fun setShouldShowError (Z)V
 	public fun setTextColor (I)V
