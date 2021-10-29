@@ -516,6 +516,8 @@ public final class com/stripe/android/PaymentConfiguration$Companion {
 public final class com/stripe/android/PaymentIntentResult : com/stripe/android/StripeIntentResult {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public fun <init> (Lcom/stripe/android/model/PaymentIntent;ILjava/lang/String;)V
+	public synthetic fun <init> (Lcom/stripe/android/model/PaymentIntent;ILjava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Lcom/stripe/android/model/PaymentIntent;
 	public final fun component3 ()Ljava/lang/String;
 	public final fun copy (Lcom/stripe/android/model/PaymentIntent;ILjava/lang/String;)Lcom/stripe/android/PaymentIntentResult;
