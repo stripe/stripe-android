@@ -1,6 +1,19 @@
 $dokka.format:html-v1
 $dokka.linkExtension:html
-
+$dokka.location:com.stripe.android.cardverificationsheet.framework.ml.ssd////PointingToDeclaration/cardverificationsheet/com.stripe.android.cardverificationsheet.framework.ml.ssd.html
+module:cardverificationsheet
+com.stripe.android.cardverificationsheet.camera
+com.stripe.android.cardverificationsheet.cardverifyui
+com.stripe.android.cardverificationsheet.cardverifyui.exception
+com.stripe.android.cardverificationsheet.framework
+com.stripe.android.cardverificationsheet.framework.api
+com.stripe.android.cardverificationsheet.framework.api.dto
+com.stripe.android.cardverificationsheet.framework.ml
+com.stripe.android.cardverificationsheet.framework.ml.ssd
+com.stripe.android.cardverificationsheet.framework.time
+com.stripe.android.cardverificationsheet.framework.util
+com.stripe.android.cardverificationsheet.payment.card
+com.stripe.android.cardverificationsheet.scanui
 module:payments-core
 com.stripe.android
 com.stripe.android.exception
