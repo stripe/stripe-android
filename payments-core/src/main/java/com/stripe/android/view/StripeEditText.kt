@@ -3,7 +3,9 @@ package com.stripe.android.view
 import android.content.Context
 import android.content.res.ColorStateList
 import android.os.Parcelable
+import android.text.InputType
 import android.text.TextWatcher
+import android.text.method.HideReturnsTransformationMethod
 import android.util.AttributeSet
 import android.view.KeyEvent
 import android.view.accessibility.AccessibilityNodeInfo
@@ -298,6 +300,14 @@ open class StripeEditText @JvmOverloads constructor(
         textWatchers?.forEach {
             super.addTextChangedListener(it)
         }
+    }
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    fun setNumberOnlyInputType(){
+        val preTypeface = typeface
+        inputType = InputType.TYPE_NUMBER_VARIATION_PASSWORD or InputType.TYPE_CLASS_NUMBER
+        typeface = preTypeface
+        transformationMethod = HideReturnsTransformationMethod.getInstance()
     }
 
     @Parcelize

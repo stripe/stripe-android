@@ -108,8 +108,14 @@ internal class BillingAddressView @JvmOverloads constructor(
     ) { _, _, config ->
         postalCodeView.filters = arrayOf(InputFilter.LengthFilter(config.maxLength))
         postalCodeView.keyListener = config.getKeyListener()
-        postalCodeView.inputType = config.inputType
-        postalCodeView.transformationMethod = HideReturnsTransformationMethod.getInstance()
+
+        if(config.inputType ==
+            (InputType.TYPE_NUMBER_VARIATION_PASSWORD or InputType.TYPE_CLASS_NUMBER)){
+            postalCodeView.setNumberOnlyInputType()
+        }
+        else {
+            postalCodeView.inputType = config.inputType
+        }
     }
 
     private val newCountryCodeCallback = { newCountryCode: CountryCode ->
