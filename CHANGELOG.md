@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 18.2.0 - 2021-10-29
+This release includes several bug fixes, introduces Klarna as a payment method binding, and renables wechat pay within the SDK
+* [4323](https://github.com/stripe/stripe-android/pull/4323) reship wechat module 
+* [4325](https://github.com/stripe/stripe-android/pull/4325) Add klarna to sdk w/ example
 ## 18.1.0 - 2021-10-18
 ### PaymentSheet
 This release adds several new features to PaymentSheet, our drop-in UI integration:
