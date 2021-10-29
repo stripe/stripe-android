@@ -1,0 +1,41 @@
+public final class com/stripe/android/cardverificationsheet/example/BuildConfig {
+	public static final field APPLICATION_ID Ljava/lang/String;
+	public static final field BUILD_TYPE Ljava/lang/String;
+	public static final field DEBUG Z
+	public static final field VERSION_CODE I
+	public static final field VERSION_NAME Ljava/lang/String;
+	public fun <init> ()V
+}
+
+public final class com/stripe/android/cardverificationsheet/example/MainActivity : androidx/appcompat/app/AppCompatActivity {
+	public static final field $stable I
+	public fun <init> ()V
+}
+
+public final class com/stripe/android/cardverificationsheet/example/databinding/ActivityLaunchCardVerificationSheetCompleteBinding : androidx/viewbinding/ViewBinding {
+	public final field civId Landroid/widget/EditText;
+	public final field civIdLayout Landroid/widget/LinearLayout;
+	public final field civSecret Landroid/widget/EditText;
+	public final field civSecretLayout Landroid/widget/LinearLayout;
+	public final field constraintLayout Landroidx/constraintlayout/widget/ConstraintLayout;
+	public final field launchScanButton Landroid/widget/Button;
+	public static fun bind (Landroid/view/View;)Lcom/stripe/android/cardverificationsheet/example/databinding/ActivityLaunchCardVerificationSheetCompleteBinding;
+	public synthetic fun getRoot ()Landroid/view/View;
+	public fun getRoot ()Landroidx/coordinatorlayout/widget/CoordinatorLayout;
+	public static fun inflate (Landroid/view/LayoutInflater;)Lcom/stripe/android/cardverificationsheet/example/databinding/ActivityLaunchCardVerificationSheetCompleteBinding;
+	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Z)Lcom/stripe/android/cardverificationsheet/example/databinding/ActivityLaunchCardVerificationSheetCompleteBinding;
+}
+
+public final class com/stripe/android/cardverificationsheet/example/databinding/ActivityMainBinding : androidx/viewbinding/ViewBinding {
+	public final field constraintLayout Landroidx/constraintlayout/widget/ConstraintLayout;
+	public final field launchCompleteButton Landroid/widget/Button;
+	public final field publishableKeyLayout Landroid/widget/LinearLayout;
+	public final field stripePublishableKey Landroid/widget/EditText;
+	public final field toolbar Landroidx/appcompat/widget/Toolbar;
+	public static fun bind (Landroid/view/View;)Lcom/stripe/android/cardverificationsheet/example/databinding/ActivityMainBinding;
+	public synthetic fun getRoot ()Landroid/view/View;
+	public fun getRoot ()Landroidx/coordinatorlayout/widget/CoordinatorLayout;
+	public static fun inflate (Landroid/view/LayoutInflater;)Lcom/stripe/android/cardverificationsheet/example/databinding/ActivityMainBinding;
+	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Z)Lcom/stripe/android/cardverificationsheet/example/databinding/ActivityMainBinding;
+}
+

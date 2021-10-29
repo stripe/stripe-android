@@ -4,6 +4,6 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 internal data class DropdownItemSpec(
-    val value: String,
+    val value: String?,
     val text: String
 )
