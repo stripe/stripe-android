@@ -5,7 +5,6 @@ import android.content.res.ColorStateList
 import android.graphics.Color
 import android.util.AttributeSet
 import android.view.LayoutInflater
-import android.view.View
 import android.widget.FrameLayout
 import androidx.core.view.isVisible
 import com.stripe.android.paymentsheet.databinding.StripeGooglePayButtonBinding
