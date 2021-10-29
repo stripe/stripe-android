@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <merge xmlns:android="http://schemas.android.com/apk/res/android">
 
+
+
     <com.stripe.android.paymentsheet.ui.PrimaryButton
         android:id="@+id/primary_button"
         android:layout_width="match_parent"
