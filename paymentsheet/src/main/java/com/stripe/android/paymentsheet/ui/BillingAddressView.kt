@@ -4,7 +4,6 @@ import android.content.Context
 import android.text.InputFilter
 import android.text.InputType
 import android.text.method.DigitsKeyListener
-import android.text.method.HideReturnsTransformationMethod
 import android.text.method.KeyListener
 import android.text.method.TextKeyListener
 import android.util.AttributeSet
@@ -109,11 +108,11 @@ internal class BillingAddressView @JvmOverloads constructor(
         postalCodeView.filters = arrayOf(InputFilter.LengthFilter(config.maxLength))
         postalCodeView.keyListener = config.getKeyListener()
 
-        if(config.inputType ==
-            (InputType.TYPE_NUMBER_VARIATION_PASSWORD or InputType.TYPE_CLASS_NUMBER)){
+        if (config.inputType ==
+            (InputType.TYPE_NUMBER_VARIATION_PASSWORD or InputType.TYPE_CLASS_NUMBER)
+        ) {
             postalCodeView.setNumberOnlyInputType()
-        }
-        else {
+        } else {
             postalCodeView.inputType = config.inputType
         }
     }

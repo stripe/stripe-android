@@ -303,7 +303,7 @@ open class StripeEditText @JvmOverloads constructor(
     }
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    fun setNumberOnlyInputType(){
+    fun setNumberOnlyInputType() {
         val preTypeface = typeface
         inputType = InputType.TYPE_NUMBER_VARIATION_PASSWORD or InputType.TYPE_CLASS_NUMBER
         typeface = preTypeface
