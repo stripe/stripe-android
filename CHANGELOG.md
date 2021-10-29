@@ -1,5 +1,18 @@
 # CHANGELOG
 
+## 18.2.0 - 2021-10-29
+This release includes several bug fixes, introduces Klarna as a payment method binding, and renables [WeChat Pay](https://github.com/stripe/stripe-android/tree/master/wechatpay) within the SDK
+* [4323](https://github.com/stripe/stripe-android/pull/4323) reship wechat module 
+* [4325](https://github.com/stripe/stripe-android/pull/4325) Add klarna to sdk w/ example
+* [4339](https://github.com/stripe/stripe-android/pull/4339) Bump tensorflow-lite from 2.4.0 to 2.6.0
+* [4340](https://github.com/stripe/stripe-android/pull/4340) Bump okio from 2.10.0 to 3.0.0
+* [4334](https://github.com/stripe/stripe-android/pull/4334) Bank value is allowed to be null in the case of "other"
+* [4330](https://github.com/stripe/stripe-android/pull/4330) Bump lifecycle-viewmodel-compose from 2.4.0-rc01 to 2.4.0
+* [4329](https://github.com/stripe/stripe-android/pull/4329) Bump daggerVersion from 2.39.1 to 2.40
+* [4309](https://github.com/stripe/stripe-android/pull/4309) Card number, CVC, postal, and expiration date should only show digits in keypad 
+* [4198](https://github.com/stripe/stripe-android/pull/4198) Bump lifecycle-viewmodel-compose from 1.0.0-alpha07 to 2.4.0-rc01 
+* [4296](https://github.com/stripe/stripe-android/pull/4296) When processing Result for a PI, refresh until reaches deterministic state
+* [4290](https://github.com/stripe/stripe-android/pull/4290) Bump composeVersion from 1.0.2 to 1.0.4 
 ## 18.1.0 - 2021-10-18
 ### PaymentSheet
 This release adds several new features to PaymentSheet, our drop-in UI integration:
