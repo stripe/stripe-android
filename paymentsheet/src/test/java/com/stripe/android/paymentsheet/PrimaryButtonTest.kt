@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet
 import android.content.Context
 import android.content.res.ColorStateList
 import android.graphics.Color
+import android.view.View.GONE
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
@@ -85,27 +86,47 @@ class PrimaryButtonTest {
     }
 
     @Test
-    fun `label alpha is initially 50%`() {
+    fun `label alpha is initially 50pct`() {
         assertThat(primaryButton.viewBinding.label.alpha)
+            .isEqualTo(0.5f)
+        assertThat(primaryButton.viewBinding.lockIcon.alpha)
             .isEqualTo(0.5f)
     }
 
     @Test
-    fun `after viewState ready and disabled, label alpha is 50%`() {
+    fun `after viewState ready and disabled, label alpha is 50pct`() {
         primaryButton.updateState(
             PrimaryButton.State.Ready
         )
         assertThat(primaryButton.viewBinding.label.alpha)
             .isEqualTo(0.5f)
+        assertThat(primaryButton.viewBinding.lockIcon.alpha)
+            .isEqualTo(0.5f)
     }
 
     @Test
-    fun `after viewState ready and enabled, label alpha is 100%`() {
+    fun `after viewState ready and enabled, label alpha is 100pct`() {
         primaryButton.updateState(
             PrimaryButton.State.Ready
         )
         primaryButton.isEnabled = true
         assertThat(primaryButton.viewBinding.label.alpha)
             .isEqualTo(1.0f)
+        assertThat(primaryButton.viewBinding.lockIcon.alpha)
+            .isEqualTo(1.0f)
+    }
+
+    @Test
+    fun `when lockVisible set to false, lock is hidden`() {
+        primaryButton.lockVisible = false
+        primaryButton.isEnabled = true
+
+        primaryButton.updateState(
+            PrimaryButton.State.Ready
+        )
+        assertThat(primaryButton.viewBinding.label.alpha)
+            .isEqualTo(1.0f)
+        assertThat(primaryButton.viewBinding.lockIcon.visibility)
+            .isEqualTo(GONE)
     }
 }

@@ -32,7 +32,7 @@ class PostalCodeEditTextTest {
     fun testConfigureForUs() {
         postalCodeEditText.config = PostalCodeEditText.Config.US
         assertThat(postalCodeEditText.inputType)
-            .isEqualTo(InputType.TYPE_CLASS_NUMBER)
+            .isEqualTo(InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_VARIATION_PASSWORD)
     }
 
     @Test

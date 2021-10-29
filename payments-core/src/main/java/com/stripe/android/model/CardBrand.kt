@@ -48,7 +48,6 @@ enum class CardBrand(
         "American Express",
         R.drawable.stripe_ic_amex,
         cvcIcon = R.drawable.stripe_ic_cvc_amex,
-        errorIcon = R.drawable.stripe_ic_error_amex,
         cvcLength = setOf(3, 4),
         defaultMaxLength = 15,
         pattern = Pattern.compile("^(34|37)[0-9]*$"),

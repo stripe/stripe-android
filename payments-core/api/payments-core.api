@@ -666,6 +666,7 @@ public final class com/stripe/android/Stripe {
 	public static final field API_VERSION Ljava/lang/String;
 	public static final field Companion Lcom/stripe/android/Stripe$Companion;
 	public static final field VERSION Ljava/lang/String;
+	public static final field VERSION_NAME Ljava/lang/String;
 	public fun <init> (Landroid/content/Context;Ljava/lang/String;)V
 	public fun <init> (Landroid/content/Context;Ljava/lang/String;Ljava/lang/String;)V
 	public fun <init> (Landroid/content/Context;Ljava/lang/String;Ljava/lang/String;Z)V
@@ -3082,6 +3083,7 @@ public final class com/stripe/android/model/PaymentMethod$Type : java/lang/Enum,
 	public static final field Giropay Lcom/stripe/android/model/PaymentMethod$Type;
 	public static final field GrabPay Lcom/stripe/android/model/PaymentMethod$Type;
 	public static final field Ideal Lcom/stripe/android/model/PaymentMethod$Type;
+	public static final field Klarna Lcom/stripe/android/model/PaymentMethod$Type;
 	public static final field Netbanking Lcom/stripe/android/model/PaymentMethod$Type;
 	public static final field Oxxo Lcom/stripe/android/model/PaymentMethod$Type;
 	public static final field P24 Lcom/stripe/android/model/PaymentMethod$Type;
@@ -3186,6 +3188,9 @@ public final class com/stripe/android/model/PaymentMethodCreateParams : android/
 	public static final fun createGiropay (Lcom/stripe/android/model/PaymentMethod$BillingDetails;Ljava/util/Map;)Lcom/stripe/android/model/PaymentMethodCreateParams;
 	public static final fun createGrabPay (Lcom/stripe/android/model/PaymentMethod$BillingDetails;)Lcom/stripe/android/model/PaymentMethodCreateParams;
 	public static final fun createGrabPay (Lcom/stripe/android/model/PaymentMethod$BillingDetails;Ljava/util/Map;)Lcom/stripe/android/model/PaymentMethodCreateParams;
+	public static final fun createKlarna ()Lcom/stripe/android/model/PaymentMethodCreateParams;
+	public static final fun createKlarna (Lcom/stripe/android/model/PaymentMethod$BillingDetails;)Lcom/stripe/android/model/PaymentMethodCreateParams;
+	public static final fun createKlarna (Lcom/stripe/android/model/PaymentMethod$BillingDetails;Ljava/util/Map;)Lcom/stripe/android/model/PaymentMethodCreateParams;
 	public static final fun createOxxo (Lcom/stripe/android/model/PaymentMethod$BillingDetails;)Lcom/stripe/android/model/PaymentMethodCreateParams;
 	public static final fun createOxxo (Lcom/stripe/android/model/PaymentMethod$BillingDetails;Ljava/util/Map;)Lcom/stripe/android/model/PaymentMethodCreateParams;
 	public static final fun createP24 (Lcom/stripe/android/model/PaymentMethod$BillingDetails;)Lcom/stripe/android/model/PaymentMethodCreateParams;
@@ -3340,6 +3345,10 @@ public final class com/stripe/android/model/PaymentMethodCreateParams$Companion 
 	public final fun createGrabPay (Lcom/stripe/android/model/PaymentMethod$BillingDetails;)Lcom/stripe/android/model/PaymentMethodCreateParams;
 	public final fun createGrabPay (Lcom/stripe/android/model/PaymentMethod$BillingDetails;Ljava/util/Map;)Lcom/stripe/android/model/PaymentMethodCreateParams;
 	public static synthetic fun createGrabPay$default (Lcom/stripe/android/model/PaymentMethodCreateParams$Companion;Lcom/stripe/android/model/PaymentMethod$BillingDetails;Ljava/util/Map;ILjava/lang/Object;)Lcom/stripe/android/model/PaymentMethodCreateParams;
+	public final fun createKlarna ()Lcom/stripe/android/model/PaymentMethodCreateParams;
+	public final fun createKlarna (Lcom/stripe/android/model/PaymentMethod$BillingDetails;)Lcom/stripe/android/model/PaymentMethodCreateParams;
+	public final fun createKlarna (Lcom/stripe/android/model/PaymentMethod$BillingDetails;Ljava/util/Map;)Lcom/stripe/android/model/PaymentMethodCreateParams;
+	public static synthetic fun createKlarna$default (Lcom/stripe/android/model/PaymentMethodCreateParams$Companion;Lcom/stripe/android/model/PaymentMethod$BillingDetails;Ljava/util/Map;ILjava/lang/Object;)Lcom/stripe/android/model/PaymentMethodCreateParams;
 	public final fun createOxxo (Lcom/stripe/android/model/PaymentMethod$BillingDetails;)Lcom/stripe/android/model/PaymentMethodCreateParams;
 	public final fun createOxxo (Lcom/stripe/android/model/PaymentMethod$BillingDetails;Ljava/util/Map;)Lcom/stripe/android/model/PaymentMethodCreateParams;
 	public static synthetic fun createOxxo$default (Lcom/stripe/android/model/PaymentMethodCreateParams$Companion;Lcom/stripe/android/model/PaymentMethod$BillingDetails;Ljava/util/Map;ILjava/lang/Object;)Lcom/stripe/android/model/PaymentMethodCreateParams;
@@ -5160,11 +5169,11 @@ public final class com/stripe/android/payments/PaymentFlowResult$Unvalidated$Com
 }
 
 public final class com/stripe/android/payments/PaymentIntentFlowResultProcessor_Factory : dagger/internal/Factory {
-	public fun <init> (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)V
-	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/payments/PaymentIntentFlowResultProcessor_Factory;
+	public fun <init> (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)V
+	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/payments/PaymentIntentFlowResultProcessor_Factory;
 	public fun get ()Lcom/stripe/android/payments/PaymentIntentFlowResultProcessor;
 	public synthetic fun get ()Ljava/lang/Object;
-	public static fun newInstance (Landroid/content/Context;Lkotlin/jvm/functions/Function0;Lcom/stripe/android/networking/StripeRepository;Lcom/stripe/android/Logger;Lkotlin/coroutines/CoroutineContext;)Lcom/stripe/android/payments/PaymentIntentFlowResultProcessor;
+	public static fun newInstance (Landroid/content/Context;Lkotlin/jvm/functions/Function0;Lcom/stripe/android/networking/StripeRepository;Lcom/stripe/android/Logger;Lkotlin/coroutines/CoroutineContext;Lcom/stripe/android/networking/RetryDelaySupplier;)Lcom/stripe/android/payments/PaymentIntentFlowResultProcessor;
 }
 
 public final class com/stripe/android/payments/SetupIntentFlowResultProcessor_Factory : dagger/internal/Factory {
