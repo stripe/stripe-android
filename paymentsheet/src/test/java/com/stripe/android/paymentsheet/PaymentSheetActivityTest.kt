@@ -480,10 +480,10 @@ internal class PaymentSheetActivityTest {
 
             activity.viewBinding.googlePayButton.performClick()
 
-            assertThat(viewModel._scrollVisible.value).isEqualTo(false)
+            assertThat(viewModel._contentVisible.value).isEqualTo(false)
 
             viewModel.onGooglePayResult(GooglePayPaymentMethodLauncher.Result.Canceled)
-            assertThat(viewModel._scrollVisible.value).isEqualTo(true)
+            assertThat(viewModel._contentVisible.value).isEqualTo(true)
         }
     }
 
