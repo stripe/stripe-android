@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <merge xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <LinearLayout
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="@dimen/stripe_paymentsheet_max_primary_button_height"
         android:orientation="vertical">
-
+        
         <com.stripe.android.paymentsheet.ui.PrimaryButton
             android:id="@+id/primary_button"
             android:layout_width="match_parent"
             android:layout_height="@dimen/stripe_paymentsheet_primary_button_height"
             android:layout_margin="@dimen/stripe_paymentsheet_primary_button_margin"
             android:text="@string/stripe_paymentsheet_pay_button_label"
-            android:visibility="gone" />
+            android:visibility="invisible" />
 
         <RelativeLayout
             android:id="@+id/google_pay_button_icon"
@@ -46,6 +46,6 @@
                 android:duplicateParentState="true"
                 android:src="@drawable/stripe_googlepay_button_overlay" />
         </RelativeLayout>
-    </LinearLayout>
+    </RelativeLayout>
 </merge>
 
