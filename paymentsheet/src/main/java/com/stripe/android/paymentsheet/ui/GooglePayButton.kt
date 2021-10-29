@@ -30,8 +30,8 @@ internal class GooglePayButton @JvmOverloads constructor(
     }
 
     private fun onReadyState() {
+        viewBinding.primaryButton.isVisible = false
         viewBinding.googlePayButtonIcon.isVisible = true
-        viewBinding.primaryButton.visibility = View.INVISIBLE
     }
 
     private fun onStartProcessing() {
