@@ -15,34 +15,34 @@ This release includes several bug fixes, introduces Klarna as a payment method b
 * [4290](https://github.com/stripe/stripe-android/pull/4290) Bump composeVersion from 1.0.2 to 1.0.4 
 ## 18.1.0 - 2021-10-18
 ### PaymentSheet
-This release adds several new features to PaymentSheet, our drop-in UI integration:
+This release adds several new features to `PaymentSheet`, our drop-in UI integration:
 
 #### More supported payment methods
-The list of supported payment methods depends on your integration. If you’re using a PaymentIntent, we support:
+The list of supported payment methods depends on your integration. If you’re using a `PaymentIntent`, we support:
 - Card
 - SEPA Debit, bancontact, iDEAL, sofort
  
-If you’re using a PaymentIntent with setup_future_usage or a SetupIntent, we support:
+If you’re using a `PaymentIntent` with `setup_future_usage` or a `SetupIntent`, we support:
 - Card
 - GooglePay
 
-Note: To enable SEPA Debit and sofort, set PaymentSheet.Configuration.allowsDelayedPaymentMethods to true on the client. These payment methods can't guarantee you will receive funds from your customer at the end of the checkout because they take time to settle. Don't enable these if your business requires immediate payment (e.g., an on-demand service). See https://stripe.com/payments/payment-methods-guide
+Note: To enable SEPA Debit and sofort, set `PaymentSheet.Configuration.allowsDelayedPaymentMethods` to `true` on the client. These payment methods can't guarantee you will receive funds from your customer at the end of the checkout because they take time to settle. Don't enable these if your business requires immediate payment (e.g., an on-demand service). See https://stripe.com/payments/payment-methods-guide
 
 #### Pre-fill billing details
-PaymentSheet collects billing details like name and email for certain payment methods. Pre-fill these fields to save customers time by setting `PaymentSheet.Configuration.defaultBillingDetails`.
+`PaymentSheet` collects billing details like name and email for certain payment methods. Pre-fill these fields to save customers time by setting `PaymentSheet.Configuration.defaultBillingDetails`.
 
 #### Save payment methods on payment
 > This is currently only available for cards + Apple/Google Pay.
 
-PaymentSheet supports PaymentIntents with setup_future_usage set. This property tells us to save the payment method for future use (e.g., taking initial payment of a recurring subscription). When set, PaymentSheet hides the 'Save this card for future use' checkbox and always saves.
+`PaymentSheet` supports `PaymentIntents` with `setup_future_usage` set. This property tells us to save the payment method for future use (e.g., taking initial payment of a recurring subscription). When set, PaymentSheet hides the 'Save this card for future use' checkbox and always saves.
 
 #### SetupIntent support
 > This is currently only available for cards + Apple/Google Pay.
 
-Initialize PaymentSheet with a SetupIntent to set up cards for future use without charging.
+Initialize `PaymentSheet` with a `SetupIntent` to set up cards for future use without charging.
 
 #### Smart payment method ordering
-When a customer is adding a new payment method, PaymentSheet uses information like the customers region to show the most relevant payment methods first.
+When a customer is adding a new payment method, `PaymentSheet` uses information like the customer's region to show the most relevant payment methods first.
 
 ### Other changes
 * [4165](https://github.com/stripe/stripe-android/pull/4165) Postal code collection for cards is now limited to US, CA, UK
