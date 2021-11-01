@@ -29,7 +29,7 @@ dependencies {
     implementation 'com.squareup.okhttp3:logging-interceptor:4.9.2'
     implementation "com.jakewharton.retrofit:retrofit2-kotlinx-serialization-converter:0.8.0"
     implementation 'com.github.kittinunf.fuel:fuel:2.3.1'
-    implementation 'com.google.code.gson:gson:2.8.8'
+    implementation 'com.google.code.gson:gson:2.8.9'
     implementation "androidx.compose.ui:ui:$composeVersion"
     // Tooling support (Previews, etc.)
     implementation "androidx.compose.ui:ui-tooling:$composeVersion"
