@@ -12,8 +12,8 @@ import androidx.compose.material.Text
 import androidx.compose.material.TextField
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -25,7 +25,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
-import androidx.lifecycle.asLiveData
 import com.stripe.android.paymentsheet.R
 
 /** This is a helpful method for setting the next action based on the nextFocus Requester **/
@@ -63,8 +62,8 @@ internal fun TextField(
     Log.d("Construct", "SimpleTextFieldElement ${textFieldController.debugLabel}")
 
     val focusManager = LocalFocusManager.current
-    val value by textFieldController.fieldValue.asLiveData().observeAsState("")
-    val shouldShowError by textFieldController.visibleError.asLiveData().observeAsState(false)
+    val value by textFieldController.fieldValue.collectAsState("")
+    val shouldShowError by textFieldController.visibleError.collectAsState(false)
 
     var hasFocus by rememberSaveable { mutableStateOf(false) }
     val textFieldColors = TextFieldColors(
