@@ -1,9 +1,55 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
+  <!-- Used for accessibility to describe the button on the payment sheet list of options to add a new payment method. -->
+  <string name="add_new_payment_method">Lisää uusi maksutapa</string>
+  <!-- Label for input requesting address line 2, used for international addresses -->
+  <string name="address_label_address_line2">Osoiterivi 2</string>
+  <!-- Used to describe address in United Arab Emirates -->
+  <string name="address_label_ae_emirate">Emiraatti</string>
+  <!-- Label of an address field -->
+  <string name="address_label_au_suburb_or_city">Esikaupunki tai kaupunki</string>
+  <!-- Label of an address field -->
+  <string name="address_label_bb_jm_parish">Kunta</string>
+  <!-- Used to describe a field of an address -->
+  <string name="address_label_cedex">Cedex</string>
+  <!-- Label of an address field -->
+  <string name="address_label_department">Osasto</string>
+  <!-- Label for the district field on an address form -->
+  <string name="address_label_district">Piirikunta</string>
+  <!-- Label of an address field in hk -->
+  <string name="address_label_hk_area">Alue</string>
+  <!-- Label of an address field -->
+  <string name="address_label_ie_eircode">EIR-koodi</string>
+  <!-- Used to describe an address field in Ireland -->
+  <string name="address_label_ie_townland">Kaupunkikunta</string>
+  <!-- Used to describe postal code in India -->
+  <string name="address_label_in_pin">Pin</string>
+  <!-- Used to describe part of an address -->
+  <string name="address_label_island">Saari</string>
+  <!-- Label of an address field -->
+  <string name="address_label_jp_prefecture">Prefektuuri</string>
+  <!-- Label of an address field -->
+  <string name="address_label_kr_do_si">Do Si</string>
+  <!-- Used to describe a field of an address -->
+  <string name="address_label_neighborhood">Naapurusto</string>
+  <!-- Label of an address field -->
+  <string name="address_label_oblast">Oblasti</string>
+  <!-- Used to describe a field of an address -->
+  <string name="address_label_post_town">Toimipaikka tai kylä</string>
+  <!-- Label of an address field -->
+  <string name="address_label_suburb">Esikaupunki</string>
+  <!-- Used to describe an address field. -->
+  <string name="address_label_village_township">Kylä tai kaupunkikunta</string>
+  <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
+  <string name="bank_account_ending_in">Poista pankkitili, joka päättyy %s</string>
   <!-- Billing address section title for card form entry. -->
   <string name="billing_details">Laskutusosoite</string>
+  <!-- Used when a required field is blank and submit is clicked. -->
+  <string name="blank_and_required">Tämä kenttä ei voi olla tyhjä</string>
   <!-- Button title to cancel action in an alert -->
   <string name="cancel">Peruuta</string>
+  <!-- Used for accessibility to indicate that when you press the dropdown arrow on a form (such as a country or bank), it will bring up a menu to allow you to change the value. -->
+  <string name="change">Vaihda</string>
   <!-- Done button title -->
   <string name="done">Valmis</string>
   <!-- Button title to enter editing mode -->
@@ -27,7 +73,6 @@
   <string name="stripe_failure_connection_error">Yhteydessä maksun käsittelijään esiintyi ongelmia. Tarkista Internet-yhteys ja yritä uudelleen.</string>
   <!-- When an internal error is reported when a google pay payment is started. -->
   <string name="stripe_google_pay_error_internal">Sisäinen virhe on tapahtunut.</string>
-  <string name="stripe_paymentsheet_add_button_label">Lisää</string>
   <!-- Text for a button that, when tapped, displays another screen where the customer can add payment method details -->
   <string name="stripe_paymentsheet_add_payment_method_button_label">+ Lisää</string>
   <!-- Card details entry form header title -->
@@ -39,6 +84,10 @@
   <!-- Text for back button -->
   <string name="stripe_paymentsheet_back">Takaisin</string>
   <string name="stripe_paymentsheet_close">Sulje</string>
+  <!-- Text for continue button -->
+  <string name="stripe_paymentsheet_continue_button_label">Jatka</string>
+  <!-- Label for the field containing the dropdown of EPS Banks -->
+  <string name="stripe_paymentsheet_eps_bank">EPS-pankki</string>
   <!-- The label of a text field that is optional. For example, 'Email (optional)' or 'Name (optional) -->
   <string name="stripe_paymentsheet_form_label_optional">%s (valinnainen)</string>
   <!-- iDEAL bank section title for iDEAL form entry. -->
@@ -47,10 +96,14 @@
   <string name="stripe_paymentsheet_or_pay_using">Tai käytä maksutapaa</string>
   <!-- Title of a section containing a card form that will collect the payment information from the user. -->
   <string name="stripe_paymentsheet_or_pay_with_card">Tai maksa kortilla</string>
+  <!-- Label on the dropdown to select the Przelewy24 Bank -->
+  <string name="stripe_paymentsheet_p24_bank">Przelewy24 Bank</string>
   <!-- Label of a button that initiates payment when tapped -->
   <string name="stripe_paymentsheet_pay_button_amount">Maksa %s</string>
   <!-- Label for a button that starts processing the payment. -->
   <string name="stripe_paymentsheet_pay_button_label">Maksa</string>
+  <!-- Payment Method type brand name  -->
+  <string name="stripe_paymentsheet_payment_method_afterpay_clearpay">Afterpay</string>
   <!-- Title for credit card number entry field -->
   <string name="stripe_paymentsheet_payment_method_card">Kortti</string>
   <!-- Payment method brand name -->
@@ -69,4 +122,6 @@
   <string name="stripe_paymentsheet_sepa_mandate">Antamalla maksutiedot ja vahvistamalla tämän maksun, valtuutat (A) %s ja Stripen, maksupalvelun tarjoajamme, lähettämään ohjeita pankillesi tilisi veloittamiseksi ja (B) pankkisi veloittamaan tiliäsi annettujen ohjeiden mukaisesti. Oikeuksiesi mukaisesti olet oikeutettu maksun palautukseen pankiltasi heidän kanssaan tekemäsi sopimuksen mukaisesti. Maksun palautus on lunastettava kahdeksan viikon kuluessa tilisi veloituksesta. Oikeutesi kerrotaan lausunnossa, jonka voit hankkia pankiltasi. Hyväksyt vastaanottamaan ilmoituksia tulevista veloituksista kaksi päivää ennen niiden tapahtumista.</string>
   <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->
   <string name="stripe_paymentsheet_setup_button_label">Määritä</string>
+  <!-- Label indicating the total amount that the user is authorizing (e.g. "Total: $25.00") -->
+  <string name="stripe_paymentsheet_total_amount">Yhteensä: %s</string>
 </resources>

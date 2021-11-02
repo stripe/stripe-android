@@ -1,11 +1,12 @@
 package com.stripe.android.paymentsheet.injection
 
 import android.content.Context
+import android.content.res.Resources
 import androidx.core.os.LocaleListCompat
-import com.stripe.android.Logger
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.payments.core.injection.ENABLE_LOGGING
 import com.stripe.android.payments.core.injection.PUBLISHABLE_KEY
+import com.stripe.android.payments.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.paymentsheet.BuildConfig
 import com.stripe.android.paymentsheet.analytics.DefaultDeviceIdRepository
 import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
@@ -55,20 +56,25 @@ internal abstract class PaymentSheetCommonModule {
         }
 
         @Provides
-        @Named(PUBLISHABLE_KEY)
-        fun providePublishableKey(paymentConfiguration: PaymentConfiguration): () -> String {
-            return { paymentConfiguration.publishableKey }
+        @Singleton
+        fun provideResources(context: Context): Resources {
+            return context.resources
         }
+
+        @Provides
+        @Named(PUBLISHABLE_KEY)
+        fun providePublishableKey(paymentConfiguration: Lazy<PaymentConfiguration>): () -> String =
+            { paymentConfiguration.get().publishableKey }
+
+        @Provides
+        @Named(STRIPE_ACCOUNT_ID)
+        fun provideStripeAccountId(paymentConfiguration: Lazy<PaymentConfiguration>):
+            () -> String? = { paymentConfiguration.get().stripeAccountId }
 
         @Provides
         @Singleton
         @Named(ENABLE_LOGGING)
         fun provideEnabledLogging(): Boolean = BuildConfig.DEBUG
-
-        @Provides
-        @Singleton
-        fun provideLogger(@Named(ENABLE_LOGGING) enableLogging: Boolean) =
-            Logger.getInstance(enableLogging)
 
         @Provides
         @Singleton

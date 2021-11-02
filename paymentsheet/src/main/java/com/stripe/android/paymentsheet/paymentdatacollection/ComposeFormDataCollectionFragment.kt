@@ -22,19 +22,25 @@ import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
  * received in the arguments bundle.
  */
 internal class ComposeFormDataCollectionFragment : Fragment() {
-    val formSpec by lazy {
+    private val formLayout by lazy {
         requireNotNull(
-            requireArguments().getParcelable<FormFragmentArguments>(EXTRA_CONFIG)?.let {
-                SupportedPaymentMethod.valueOf(it.supportedPaymentMethodName).formSpec
-            }
+            requireArguments().getParcelable<FormFragmentArguments>(EXTRA_CONFIG)
+                ?.paymentMethod?.formSpec
+        )
+    }
+
+    val paramKeySpec by lazy {
+        requireNotNull(
+            requireArguments().getParcelable<FormFragmentArguments>(EXTRA_CONFIG)
+                ?.paymentMethod?.paramKey
         )
     }
 
     val formViewModel: FormViewModel by viewModels {
         FormViewModel.Factory(
-            resources,
-            formSpec.layout,
-            requireNotNull(
+            resource = resources,
+            layout = formLayout,
+            config = requireNotNull(
                 requireArguments().getParcelable(
                     EXTRA_CONFIG
                 )

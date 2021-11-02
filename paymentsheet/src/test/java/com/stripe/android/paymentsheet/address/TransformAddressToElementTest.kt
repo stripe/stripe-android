@@ -9,6 +9,7 @@ import com.stripe.android.paymentsheet.elements.TextFieldController
 import com.stripe.android.paymentsheet.elements.IdentifierSpec
 import com.stripe.android.paymentsheet.elements.RowElement
 import com.stripe.android.paymentsheet.elements.SectionSingleFieldElement
+import com.stripe.android.paymentsheet.elements.SimpleTextFieldController
 import com.stripe.android.paymentsheet.elements.SimpleTextSpec
 import org.junit.Test
 import java.io.File

@@ -80,10 +80,11 @@ internal class DefaultFlowControllerInitializer @Inject constructor(
             retrieveStripeIntent(clientSecret)
         }.fold(
             onSuccess = { stripeIntent ->
-                val paymentMethodTypes = stripeIntent.paymentMethodTypes.mapNotNull {
-                    PaymentMethod.Type.fromCode(it)
-                }.filter {
-                    SupportedPaymentMethod.supportedSavedPaymentMethods.contains(it.code)
+                val paymentMethodTypes = SupportedPaymentMethod.getSupportedSavedCustomerPMs(
+                    stripeIntent,
+                    config,
+                ).map {
+                    it.type
                 }
                 customerRepository.getPaymentMethods(
                     customerConfig,
@@ -99,7 +100,6 @@ internal class DefaultFlowControllerInitializer @Inject constructor(
                             config = config,
                             clientSecret = clientSecret,
                             stripeIntent = stripeIntent,
-                            paymentMethodTypes = paymentMethodTypes,
                             paymentMethods = paymentMethods,
                             savedSelection = prefsRepository.getSavedSelection(isGooglePayReady),
                             isGooglePayReady = isGooglePayReady
@@ -123,11 +123,6 @@ internal class DefaultFlowControllerInitializer @Inject constructor(
             retrieveStripeIntent(clientSecret)
         }.fold(
             onSuccess = { stripeIntent ->
-                val paymentMethodTypes = stripeIntent.paymentMethodTypes
-                    .mapNotNull {
-                        PaymentMethod.Type.fromCode(it)
-                    }
-
                 val savedSelection = if (isGooglePayReady) {
                     SavedSelection.GooglePay
                 } else {
@@ -139,7 +134,6 @@ internal class DefaultFlowControllerInitializer @Inject constructor(
                         config = config,
                         clientSecret = clientSecret,
                         stripeIntent = stripeIntent,
-                        paymentMethodTypes = paymentMethodTypes,
                         paymentMethods = emptyList(),
                         savedSelection = savedSelection,
                         isGooglePayReady = isGooglePayReady

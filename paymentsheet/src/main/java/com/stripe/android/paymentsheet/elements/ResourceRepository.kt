@@ -11,9 +11,4 @@ import javax.inject.Singleton
 internal class ResourceRepository @Inject internal constructor(
     internal val bankRepository: BankRepository,
     internal val addressRepository: AddressFieldElementRepository
-) {
-    internal fun init() {
-        bankRepository.init()
-        addressRepository.init()
-    }
-}
+)

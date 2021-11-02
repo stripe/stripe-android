@@ -2,7 +2,6 @@ package com.stripe.android.paymentsheet.example
 
 import android.content.Context
 import android.content.pm.PackageManager
-import com.stripe.android.paymentsheet.example.service.CheckoutBackendApi
 
 /**
  * Class that provides global app settings.
@@ -11,7 +10,7 @@ class Settings(context: Context) {
     private val appContext = context.applicationContext
     private val backendMetadata = getMetadata(METADATA_KEY_BACKEND_URL_KEY)
 
-    val backendUrl: String
+    val playgroundBackendUrl: String
         get() {
             return backendMetadata ?: BASE_URL
         }
@@ -32,7 +31,7 @@ class Settings(context: Context) {
          * Note: only necessary if not configured via `gradle.properties`.
          */
         private const val BASE_URL =
-            "https://stripe-mobile-payment-sheet-test-playground-v4.glitch.me/"
+            "https://stripe-mobile-payment-sheet-test-playground-v5.glitch.me/"
 
         private const val METADATA_KEY_BACKEND_URL_KEY =
             "com.stripe.android.paymentsheet.example.metadata.backend_url"

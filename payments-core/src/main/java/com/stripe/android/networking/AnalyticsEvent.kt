@@ -29,6 +29,7 @@ internal enum class AnalyticsEvent(internal val code: String) {
     PaymentIntentConfirm("payment_intent_confirmation"),
     PaymentIntentRetrieve("payment_intent_retrieval"),
     PaymentIntentCancelSource("payment_intent_cancel_source"),
+    PaymentIntentRefresh("payment_intent_refresh"),
 
     // Setup Intents
     SetupIntentConfirm("setup_intent_confirmation"),
@@ -61,6 +62,7 @@ internal enum class AnalyticsEvent(internal val code: String) {
     StripeUrlRetrieve("retrieve_stripe_url"),
 
     // 3DS2
+    Auth3ds2RequestParamsFailed("3ds2_authentication_request_params_failed"),
     Auth3ds2Fingerprint("3ds2_fingerprint"),
     Auth3ds2Start("3ds2_authenticate"),
     Auth3ds2Frictionless("3ds2_frictionless_flow"),

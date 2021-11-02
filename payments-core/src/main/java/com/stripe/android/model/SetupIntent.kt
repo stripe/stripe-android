@@ -85,6 +85,11 @@ data class SetupIntent internal constructor(
      */
     val lastSetupError: Error? = null,
 
+    /**
+     * Payment types that have not been activated in livemode, but have been activated in testmode.
+     */
+    override val unactivatedPaymentMethods: List<String>,
+
     override val nextActionData: StripeIntent.NextActionData?
 ) : StripeIntent {
 
@@ -190,7 +195,7 @@ data class SetupIntent internal constructor(
 
         init {
             require(isMatch(value)) {
-                "Invalid client secret: $value"
+                "Invalid Setup Intent client secret: $value"
             }
         }
 

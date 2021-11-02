@@ -16,16 +16,19 @@ class StripeRequestCompactParamsTest {
     }
 
     @Test
-    fun compatParams_removesEmptyStringParams() {
+    fun compatParams_doesNotRemoveEmptyStringParams() {
+        // This was important for setting the future usage on a PI
+
         val params = mapOf(
             "a" to "fun param",
             "b" to "not null",
             "c" to ""
         )
         val compactParams = getCompactedParams(params)
-        assertEquals(2, compactParams.size)
+        assertEquals(3, compactParams.size)
         assertTrue(compactParams.containsKey("a"))
         assertTrue(compactParams.containsKey("b"))
+        assertTrue(compactParams.containsKey("c"))
     }
 
     @Test
@@ -43,7 +46,8 @@ class StripeRequestCompactParamsTest {
         assertTrue(firstNestedMap.containsKey("1c"))
 
         val secondNestedMap = firstNestedMap["1c"] as Map<String, Any>
-        assertEquals(1, secondNestedMap.size)
+        assertEquals(2, secondNestedMap.size)
+        assertTrue(secondNestedMap.containsKey("2a"))
         assertTrue(secondNestedMap.containsKey("2b"))
     }
 

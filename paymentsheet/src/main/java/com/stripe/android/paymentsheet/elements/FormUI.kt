@@ -26,21 +26,26 @@ internal fun FormInternal(
     elements: List<FormElement>
 ) {
     val hiddenIdentifiers by hiddenIdentifiersFlow.asLiveData().observeAsState(
-        emptyList()
+        null
     )
     val enabled by enabledFlow.asLiveData().observeAsState(true)
 
-    Column(
-        modifier = Modifier
-            .fillMaxWidth(1f)
-    ) {
-        elements.forEach { element ->
-            if (!hiddenIdentifiers.contains(element.identifier)) {
-                when (element) {
-                    is SectionElement -> SectionElementUI(enabled, element, hiddenIdentifiers)
-                    is MandateTextElement -> MandateElementUI(element)
-                    is SaveForFutureUseElement -> SaveForFutureUseElementUI(enabled, element)
-                    is AfterpayClearpayHeaderElement -> AfterpayClearpayHeaderElementUI(enabled, element)
+    if (hiddenIdentifiers != null) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth(1f)
+        ) {
+            elements.forEach { element ->
+                if (hiddenIdentifiers?.contains(element.identifier) == false) {
+                    when (element) {
+                        is SectionElement -> SectionElementUI(enabled, element, hiddenIdentifiers)
+                        is MandateTextElement -> MandateElementUI(element)
+                        is SaveForFutureUseElement -> SaveForFutureUseElementUI(enabled, element)
+                        is AfterpayClearpayHeaderElement -> AfterpayClearpayHeaderElementUI(
+                            enabled,
+                            element
+                        )
+                    }
                 }
             }
         }

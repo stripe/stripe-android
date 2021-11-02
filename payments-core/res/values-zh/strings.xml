@@ -131,7 +131,7 @@
   <!-- Label that will show that an FPX bank is offline. For example, &quot;AmBank - Offline&quot; -->
   <string name="fpx_bank_offline">%s - 线下</string>
   <!-- Error message for card details form when expiration date isn&apos;t entered completely -->
-  <string name="incomplete_expiry_date">您的银行卡的到期日期不完整。</string>
+  <string name="incomplete_expiry_date">您的银行卡的不完整。</string>
   <string name="invalid_card_number">您的卡号无效。</string>
   <!-- Error message for card entry form when CVC/CVV is invalid -->
   <string name="invalid_cvc">您的银行卡安全码无效。</string>

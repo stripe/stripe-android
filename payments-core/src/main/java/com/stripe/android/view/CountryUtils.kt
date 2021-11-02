@@ -1,8 +1,10 @@
 package com.stripe.android.view
 
 import androidx.annotation.RestrictTo
+import androidx.annotation.VisibleForTesting
 import com.stripe.android.model.CountryCode
 import com.stripe.android.model.getCountryCode
+import java.text.Normalizer
 import java.util.Locale
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet -- this still auto-completes
@@ -37,16 +39,38 @@ object CountryUtils {
         }
     }
 
+    private var cachedCountriesLocale: Locale? = null
+    private var cachedOrderedLocalizedCountries: List<Country> = emptyList()
+    private fun getSortedLocalizedCountries(currentLocale: Locale): List<Country> {
+        return if (currentLocale == cachedCountriesLocale) {
+            cachedOrderedLocalizedCountries
+        } else {
+            cachedCountriesLocale = currentLocale
+            cachedOrderedLocalizedCountries = localizedCountries(currentLocale)
+                .sortedBy { formatNameForSorting(it.name) }
+                .filterNot { it.code == currentLocale.getCountryCode() }
+
+            cachedOrderedLocalizedCountries
+        }
+    }
+
     @JvmSynthetic
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     fun getOrderedCountries(currentLocale: Locale): List<Country> {
         // Show user's current locale first, followed by countries alphabetized by display name
         return listOfNotNull(getCountryByCode(currentLocale.getCountryCode(), currentLocale))
             .plus(
-                localizedCountries(currentLocale)
-                    .sortedBy { it.name.lowercase() }
-                    .filterNot { it.code == currentLocale.getCountryCode() }
+                getSortedLocalizedCountries(currentLocale)
             )
+    }
+
+    @VisibleForTesting
+    internal fun formatNameForSorting(name: String): String {
+        // Before normalization: åland islands
+        // After normalization: aºland islands
+        // After regex: aland islands
+        return Normalizer.normalize(name.lowercase(), Normalizer.Form.NFD)
+            .replace("\\p{Mn}+".toRegex(), "")
     }
 
     @Deprecated(

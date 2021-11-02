@@ -8,6 +8,8 @@ import androidx.activity.result.contract.ActivityResultContract
 import androidx.annotation.ColorInt
 import androidx.annotation.VisibleForTesting
 import androidx.core.os.bundleOf
+import com.stripe.android.payments.core.injection.DUMMY_INJECTOR_KEY
+import com.stripe.android.payments.core.injection.InjectorKey
 import com.stripe.android.paymentsheet.model.ClientSecret
 import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.SetupIntentClientSecret
@@ -40,6 +42,7 @@ class PaymentSheetContract :
         internal val clientSecret: ClientSecret,
         internal val config: PaymentSheet.Configuration?,
         @ColorInt internal val statusBarColor: Int? = null,
+        @InjectorKey internal val injectorKey: String = DUMMY_INJECTOR_KEY
     ) : ActivityStarter.Args {
         val googlePayConfig: PaymentSheet.GooglePayConfiguration? get() = config?.googlePay
 
@@ -62,6 +65,26 @@ class PaymentSheetContract :
             ) = Args(
                 SetupIntentClientSecret(clientSecret),
                 config
+            )
+
+            internal fun createPaymentIntentArgsWithInjectorKey(
+                clientSecret: String,
+                config: PaymentSheet.Configuration? = null,
+                @InjectorKey injectorKey: String
+            ) = Args(
+                PaymentIntentClientSecret(clientSecret),
+                config,
+                injectorKey = injectorKey
+            )
+
+            internal fun createSetupIntentArgsWithInjectorKey(
+                clientSecret: String,
+                config: PaymentSheet.Configuration? = null,
+                @InjectorKey injectorKey: String
+            ) = Args(
+                SetupIntentClientSecret(clientSecret),
+                config,
+                injectorKey = injectorKey
             )
         }
     }

@@ -8,10 +8,12 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
+import com.stripe.android.Logger
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.R
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.payments.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.paymentsheet.PaymentOptionsViewModel.TransitionTarget
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.databinding.PrimaryButtonBinding
@@ -97,7 +99,7 @@ class PaymentOptionsActivityTest {
     }
 
     @Test
-    fun `AddButton should be hidden when showing payment options`() {
+    fun `ContinueButton should be hidden when showing payment options`() {
         val scenario = activityScenario()
         scenario.launch(
             createIntent(
@@ -107,27 +109,27 @@ class PaymentOptionsActivityTest {
             )
         ).use {
             it.onActivity { activity ->
-                assertThat(activity.viewBinding.addButton.isVisible)
+                assertThat(activity.viewBinding.continueButton.isVisible)
                     .isFalse()
             }
         }
     }
 
     @Test
-    fun `AddButton should be visible when showing add payment method form`() {
+    fun `ContinueButton should be visible when showing add payment method form`() {
         val scenario = activityScenario()
         scenario.launch(
             createIntent()
         ).use {
             it.onActivity { activity ->
-                assertThat(activity.viewBinding.addButton.isVisible)
+                assertThat(activity.viewBinding.continueButton.isVisible)
                     .isTrue()
             }
         }
     }
 
     @Test
-    fun `AddButton should be hidden when returning to payment options`() {
+    fun `ContinueButton should be hidden when returning to payment options`() {
         val scenario = activityScenario()
         scenario.launch(
             createIntent(
@@ -137,7 +139,7 @@ class PaymentOptionsActivityTest {
             )
         ).use {
             it.onActivity { activity ->
-                assertThat(activity.viewBinding.addButton.isVisible)
+                assertThat(activity.viewBinding.continueButton.isVisible)
                     .isFalse()
 
                 // Navigate to "Add Payment Method" fragment
@@ -149,14 +151,14 @@ class PaymentOptionsActivityTest {
                 }
                 idleLooper()
 
-                assertThat(activity.viewBinding.addButton.isVisible)
+                assertThat(activity.viewBinding.continueButton.isVisible)
                     .isTrue()
 
                 // Navigate back to payment options list
                 activity.onBackPressed()
                 idleLooper()
 
-                assertThat(activity.viewBinding.addButton.isVisible)
+                assertThat(activity.viewBinding.continueButton.isVisible)
                     .isFalse()
             }
         }
@@ -171,13 +173,13 @@ class PaymentOptionsActivityTest {
             it.onActivity { activity ->
                 idleLooper()
 
-                val addBinding = PrimaryButtonBinding.bind(activity.viewBinding.addButton)
+                val addBinding = PrimaryButtonBinding.bind(activity.viewBinding.continueButton)
 
                 assertThat(addBinding.confirmedIcon.isVisible)
                     .isFalse()
 
                 assertThat(addBinding.label.text)
-                    .isEqualTo("Add")
+                    .isEqualTo("Continue")
 
                 activity.finish()
             }
@@ -212,7 +214,7 @@ class PaymentOptionsActivityTest {
 
         val viewModel = createViewModel(args)
         val transitionTarget =
-            mutableListOf<BaseSheetViewModel.Event<PaymentOptionsViewModel.TransitionTarget?>>()
+            mutableListOf<BaseSheetViewModel.Event<TransitionTarget?>>()
         viewModel.transition.observeForever {
             transitionTarget.add(it)
         }
@@ -223,7 +225,7 @@ class PaymentOptionsActivityTest {
         ).use {
             idleLooper()
             assertThat(transitionTarget[1].peekContent())
-                .isInstanceOf(PaymentOptionsViewModel.TransitionTarget.SelectSavedPaymentMethod::class.java)
+                .isInstanceOf(TransitionTarget.SelectSavedPaymentMethod::class.java)
         }
     }
 
@@ -289,11 +291,13 @@ class PaymentOptionsActivityTest {
     ): PaymentOptionsViewModel {
         return PaymentOptionsViewModel(
             args = args,
-            prefsRepository = FakePrefsRepository(),
+            prefsRepositoryFactory = { FakePrefsRepository() },
             eventReporter = eventReporter,
             customerRepository = FakeCustomerRepository(),
             workContext = testDispatcher,
-            application = ApplicationProvider.getApplicationContext()
+            application = ApplicationProvider.getApplicationContext(),
+            logger = Logger.noop(),
+            injectorKey = DUMMY_INJECTOR_KEY
         )
     }
 
@@ -305,7 +309,7 @@ class PaymentOptionsActivityTest {
             isGooglePayReady = false,
             newCard = null,
             statusBarColor = PaymentSheetFixtures.STATUS_BAR_COLOR,
-            injectorKey = 0,
+            injectorKey = DUMMY_INJECTOR_KEY,
             enableLogging = false,
             productUsage = mock()
         )

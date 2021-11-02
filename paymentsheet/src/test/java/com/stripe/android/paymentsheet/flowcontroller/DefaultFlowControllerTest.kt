@@ -13,9 +13,9 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
-import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContract
+import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLauncherFactory
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentIntentFixtures
@@ -43,6 +43,7 @@ import com.stripe.android.paymentsheet.model.PaymentOptionFactory
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.view.ActivityScenarioFactory
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
@@ -53,6 +54,7 @@ import kotlinx.coroutines.test.TestCoroutineScope
 import kotlinx.coroutines.test.runBlockingTest
 import kotlinx.coroutines.test.setMain
 import org.junit.runner.RunWith
+import org.mockito.Mockito.verifyNoInteractions
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argWhere
 import org.mockito.kotlin.eq
@@ -60,7 +62,6 @@ import org.mockito.kotlin.isNull
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.verifyNoMoreInteractions
-import org.mockito.kotlin.verifyZeroInteractions
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.AfterTest
@@ -83,6 +84,7 @@ internal class DefaultFlowControllerTest {
 
     private val googlePayActivityLauncher =
         mock<ActivityResultLauncher<GooglePayPaymentMethodLauncherContract.Args>>()
+    val googlePayPaymentMethodLauncher = mock<GooglePayPaymentMethodLauncher>()
 
     private val flowController: DefaultFlowController by lazy {
         createFlowController()
@@ -521,7 +523,6 @@ internal class DefaultFlowControllerTest {
                     PaymentSheetFixtures.CONFIG_CUSTOMER,
                     PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET,
                     PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-                    listOf(PaymentMethod.Type.Card),
                     PAYMENT_METHODS,
                     SavedSelection.PaymentMethod(
                         id = "pm_123456789"
@@ -544,7 +545,6 @@ internal class DefaultFlowControllerTest {
                 PaymentSheetFixtures.CONFIG_CUSTOMER,
                 PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET,
                 PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-                listOf(PaymentMethod.Type.Card),
                 PAYMENT_METHODS,
                 SavedSelection.PaymentMethod(
                     id = "pm_123456789"
@@ -580,7 +580,7 @@ internal class DefaultFlowControllerTest {
     }
 
     @Test
-    fun `confirmPayment() with GooglePay should start StripeGooglePayLauncher`() {
+    fun `confirmPayment() with GooglePay should launch GooglePayPaymentMethodLauncher`() {
         flowController.configureWithPaymentIntent(
             PaymentSheetFixtures.CLIENT_SECRET,
             PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
@@ -591,25 +591,12 @@ internal class DefaultFlowControllerTest {
         )
         flowController.confirm()
 
-        verify(googlePayActivityLauncher).launch(
-            argWhere {
-                it == GooglePayPaymentMethodLauncherContract.Args(
-                    config = GooglePayPaymentMethodLauncher.Config(
-                        environment = GooglePayEnvironment.Test,
-                        merchantCountryCode = "US",
-                        merchantName = "Widget Store"
-                    ),
-                    currencyCode = "usd",
-                    amount = 1099,
-                    transactionId = "pi_1F7J1aCRMbs6FrXfaJcvbxF6"
-                )
-            }
-        )
+        verify(googlePayPaymentMethodLauncher).present("usd", 1099, "pi_1F7J1aCRMbs6FrXfaJcvbxF6")
     }
 
     @Test
     fun `onGooglePayResult() when canceled should invoke callback with canceled result`() {
-        verifyZeroInteractions(eventReporter)
+        verifyNoInteractions(eventReporter)
 
         flowController.configureWithPaymentIntent(
             PaymentSheetFixtures.CLIENT_SECRET,
@@ -745,16 +732,31 @@ internal class DefaultFlowControllerTest {
         paymentOptionCallback,
         paymentResultCallback,
         activityResultCaller,
-        0,
+        INJECTOR_KEY,
         flowControllerInitializer,
         eventReporter,
         ViewModelProvider(activity)[FlowControllerViewModel::class.java],
         paymentLauncherAssistedFactory,
+        mock(),
         { PaymentConfiguration.getInstance(activity) },
         testDispatcher,
         ENABLE_LOGGING,
-        PRODUCT_USAGE
+        PRODUCT_USAGE,
+        createGooglePayPaymentMethodLauncherFactory()
     )
+
+    private fun createGooglePayPaymentMethodLauncherFactory() =
+        object : GooglePayPaymentMethodLauncherFactory {
+            override fun create(
+                lifecycleScope: CoroutineScope,
+                config: GooglePayPaymentMethodLauncher.Config,
+                readyCallback: GooglePayPaymentMethodLauncher.ReadyCallback,
+                activityResultLauncher: ActivityResultLauncher<GooglePayPaymentMethodLauncherContract.Args>,
+                skipReadyCheck: Boolean
+            ): GooglePayPaymentMethodLauncher {
+                return googlePayPaymentMethodLauncher
+            }
+        }
 
     private class FakeFlowControllerInitializer(
         var paymentMethods: List<PaymentMethod>,
@@ -772,7 +774,6 @@ internal class DefaultFlowControllerTest {
                     paymentSheetConfiguration,
                     clientSecret,
                     stripeIntent,
-                    listOf(PaymentMethod.Type.Card),
                     paymentMethods,
                     savedSelection,
                     isGooglePayReady = false
@@ -797,13 +798,13 @@ internal class DefaultFlowControllerTest {
         private val NEW_CARD_PAYMENT_SELECTION = PaymentSelection.New.Card(
             PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
             CardBrand.Discover,
-            false
+            PaymentSelection.CustomerRequestedSave.NoRequest
         )
         private val GENERIC_PAYMENT_SELECTION = PaymentSelection.New.GenericPaymentMethod(
             iconResource = R.drawable.stripe_ic_paymentsheet_card_visa,
             labelResource = R.drawable.stripe_ic_paymentsheet_pm_bancontact,
             paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.BANCONTACT,
-            shouldSavePaymentMethod = false
+            customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest
         )
         private val VISA_PAYMENT_OPTION = PaymentOption(
             drawableResourceId = R.drawable.stripe_ic_paymentsheet_card_visa,
@@ -813,12 +814,12 @@ internal class DefaultFlowControllerTest {
         private val SAVE_NEW_CARD_SELECTION = PaymentSelection.New.Card(
             PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
             CardBrand.Visa,
-            shouldSavePaymentMethod = true
+            customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestReuse
         )
         private val PAYMENT_METHODS =
             listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD) + PaymentMethodFixtures.createCards(5)
 
-        private const val INJECTOR_KEY = 0
+        private const val INJECTOR_KEY = "TestInjectorKey"
         private const val ENABLE_LOGGING = false
         private val PRODUCT_USAGE = setOf("TestProductUsage")
     }

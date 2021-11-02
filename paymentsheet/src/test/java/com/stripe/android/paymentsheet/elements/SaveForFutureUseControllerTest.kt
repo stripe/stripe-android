@@ -9,7 +9,22 @@ class SaveForFutureUseControllerTest {
     private val mandateIdentifier = IdentifierSpec.Generic("mandate")
     private val nameSectionIdentifier = IdentifierSpec.Name
     private val hiddenIdentifiers = listOf(nameSectionIdentifier, mandateIdentifier)
-    private val saveForFutureUseController = SaveForFutureUseController(hiddenIdentifiers)
+    private val saveForFutureUseController = SaveForFutureUseController(hiddenIdentifiers, true)
+
+    @Test
+    fun `Save for future use is initialized as false and mandate becomes hidden`() =
+        runBlocking {
+            val saveForFutureUseController = SaveForFutureUseController(hiddenIdentifiers, false)
+
+            assertThat(saveForFutureUseController.saveForFutureUse.first()).isFalse()
+            assertThat(saveForFutureUseController.hiddenIdentifiers.first())
+                .isEqualTo(
+                    listOf(
+                        IdentifierSpec.Name,
+                        IdentifierSpec.Generic("mandate")
+                    )
+                )
+        }
 
     @Test
     fun `Save for future use is initialized as true and no hidden items`() =

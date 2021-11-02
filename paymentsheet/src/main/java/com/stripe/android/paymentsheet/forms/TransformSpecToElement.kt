@@ -43,13 +43,14 @@ import com.stripe.android.paymentsheet.elements.SimpleTextSpec
 import com.stripe.android.paymentsheet.model.Amount
 import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.getValue
+import javax.inject.Inject
 
 /**
  * Transform a [LayoutSpec] data object into an Element, which
  * has a controller and identifier.  With only a single field in a section the section
  * controller will be a pass through the field controller.
  */
-internal class TransformSpecToElement(
+internal class TransformSpecToElement @Inject constructor(
     private val resourceRepository: ResourceRepository,
     private val initialValues: FormFragmentArguments
 ) {
@@ -58,7 +59,7 @@ internal class TransformSpecToElement(
     ): List<FormElement> =
         list.map {
             when (it) {
-                is SaveForFutureUseSpec -> it.transform(initialValues.merchantName)
+                is SaveForFutureUseSpec -> it.transform(initialValues)
                 is SectionSpec -> it.transform(initialValues)
                 is MandateTextSpec -> it.transform(initialValues.merchantName)
                 is AfterpayClearpayHeaderSpec ->
@@ -157,15 +158,16 @@ internal class TransformSpecToElement(
             )
         )
 
-    private fun SaveForFutureUseSpec.transform(merchantName: String) =
+    private fun SaveForFutureUseSpec.transform(initialValues: FormFragmentArguments? = null) =
         SaveForFutureUseElement(
             this.identifier,
             SaveForFutureUseController(
                 this.identifierRequiredForFutureUse.map { requiredItemSpec ->
                     requiredItemSpec.identifier
-                }
+                },
+                initialValues?.showCheckboxControlledFields != false
             ),
-            merchantName
+            initialValues?.merchantName
         )
 
     private fun AfterpayClearpayHeaderSpec.transform(amount: Amount) =

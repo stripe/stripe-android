@@ -6,7 +6,6 @@ import androidx.lifecycle.AbstractSavedStateViewModelFactory
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.savedstate.SavedStateRegistryOwner
-import com.stripe.android.Logger
 import com.stripe.android.StripePaymentController
 import com.stripe.android.auth.PaymentBrowserAuthContract
 import com.stripe.android.exception.StripeException
@@ -22,13 +21,14 @@ import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.payments.core.injection.DaggerStripe3ds2TransactionViewModelFactoryComponent
 import com.stripe.android.payments.core.injection.IOContext
 import com.stripe.android.payments.core.injection.Injectable
+import com.stripe.android.payments.core.injection.Stripe3ds2TransactionViewModelSubcomponent
 import com.stripe.android.payments.core.injection.WeakMapInjectorRegistry
+import com.stripe.android.payments.core.injection.injectWithFallback
 import com.stripe.android.stripe3ds2.service.StripeThreeDs2Service
 import com.stripe.android.stripe3ds2.transaction.ChallengeParameters
 import com.stripe.android.stripe3ds2.transaction.ChallengeResult
 import com.stripe.android.stripe3ds2.transaction.InitChallengeArgs
 import com.stripe.android.stripe3ds2.transaction.InitChallengeRepository
-import com.stripe.android.stripe3ds2.transaction.InitChallengeRepositoryFactory
 import com.stripe.android.stripe3ds2.transaction.IntentData
 import com.stripe.android.stripe3ds2.transaction.MessageVersionRegistry
 import com.stripe.android.stripe3ds2.transaction.Transaction
@@ -37,7 +37,7 @@ import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 
-internal class Stripe3ds2TransactionViewModel(
+internal class Stripe3ds2TransactionViewModel @Inject constructor(
     private val args: Stripe3ds2TransactionContract.Args,
     private val stripeRepository: StripeRepository,
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
@@ -46,9 +46,10 @@ internal class Stripe3ds2TransactionViewModel(
     private val messageVersionRegistry: MessageVersionRegistry,
     private val challengeResultProcessor: Stripe3ds2ChallengeResultProcessor,
     private val initChallengeRepository: InitChallengeRepository,
-    private val workContext: CoroutineContext,
+    @IOContext private val workContext: CoroutineContext,
     private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
+
     var hasCompleted: Boolean = savedStateHandle.contains(KEY_HAS_COMPLETED)
 
     suspend fun processChallengeResult(
@@ -67,6 +68,10 @@ internal class Stripe3ds2TransactionViewModel(
                 Stripe3ds2Fingerprint(args.nextActionData)
             )
         }.getOrElse {
+            analyticsRequestExecutor.executeAsync(
+                analyticsRequestFactory.createRequest(AnalyticsEvent.Auth3ds2RequestParamsFailed)
+            )
+
             NextStep.Complete(
                 PaymentFlowResult.Unvalidated(
                     exception = StripeException.create(it)
@@ -302,26 +307,7 @@ internal class Stripe3ds2TransactionViewModelFactory(
     )
 
     @Inject
-    lateinit var stripeRepository: StripeRepository
-
-    @Inject
-    lateinit var analyticsRequestExecutor: AnalyticsRequestExecutor
-
-    @Inject
-    lateinit var analyticsRequestFactory: AnalyticsRequestFactory
-
-    @Inject
-    lateinit var messageVersionRegistry: MessageVersionRegistry
-
-    @Inject
-    lateinit var threeDs2Service: StripeThreeDs2Service
-
-    @Inject
-    lateinit var challengeResultProcessor: Stripe3ds2ChallengeResultProcessor
-
-    @Inject
-    @IOContext
-    lateinit var workContext: CoroutineContext
+    lateinit var subComponentBuilder: Stripe3ds2TransactionViewModelSubcomponent.Builder
 
     /**
      * Fallback call to initialize dependencies when injection is not available, this might happen
@@ -344,45 +330,21 @@ internal class Stripe3ds2TransactionViewModelFactory(
         handle: SavedStateHandle
     ): T {
         val args = argsSupplier()
-
         val application = applicationSupplier()
-
-        val logger = Logger.getInstance(args.enableLogging)
-
-        WeakMapInjectorRegistry.retrieve(args.injectorKey)?.let {
-            logger.info("Injector available, injecting dependencies into Stripe3ds2TransactionViewModelFactory")
-            it.inject(this)
-        } ?: run {
-            logger.info("Injector unavailable, initializing dependencies of Stripe3ds2TransactionViewModelFactory")
-            fallbackInitialize(
-                FallbackInitializeParam(
-                    application,
-                    args.enableLogging,
-                    args.publishableKey,
-                    args.productUsage
-                )
-            )
-        }
-
-        return Stripe3ds2TransactionViewModel(
-            args,
-            stripeRepository,
-            analyticsRequestExecutor,
-            analyticsRequestFactory,
-            threeDs2Service,
-            messageVersionRegistry,
-            challengeResultProcessor,
-            InitChallengeRepositoryFactory(
+        injectWithFallback(
+            args.injectorKey,
+            FallbackInitializeParam(
                 application,
-                args.stripeIntent.isLiveMode,
-                args.sdkTransactionId,
-                args.config.uiCustomization.uiCustomization,
-                args.fingerprint.directoryServerEncryption.rootCerts,
                 args.enableLogging,
-                workContext
-            ).create(),
-            workContext,
-            handle
-        ) as T
+                args.publishableKey,
+                args.productUsage
+            )
+        )
+
+        return subComponentBuilder
+            .args(args)
+            .savedStateHandle(handle)
+            .application(application)
+            .build().viewModel as T
     }
 }

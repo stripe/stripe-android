@@ -15,6 +15,10 @@ configurations {
     ktlint
 }
 
+if (System.getenv("JITPACK")) {
+    group='com.github.stripe.stripe-android'
+}
+
 dependencies {
     implementation libraries.androidx.annotation
     implementation libraries.androidx.appcompat
@@ -37,7 +41,6 @@ dependencies {
     // https://github.com/stripe/stripe-android/issues/3173#issuecomment-785176608
     implementation "com.stripe:stripe-3ds2-android:6.1.2"
 
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlinVersion"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinCoroutinesVersion"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$kotlinCoroutinesVersion"
 
@@ -64,7 +67,6 @@ dependencies {
     androidTestUtil "androidx.test:orchestrator:$androidTestVersion"
 
     ktlint "com.pinterest:ktlint:$ktlintVersion"
-
 }
 
 android {
@@ -140,7 +142,7 @@ android {
 
 task ktlint(type: JavaExec, group: "verification") {
     description = "Check Kotlin code style."
-    main = "com.pinterest.ktlint.Main"
+    mainClass = "com.pinterest.ktlint.Main"
     classpath = configurations.ktlint
     args "src/**/*.kt"
     // to generate report in checkstyle format prepend following args:
@@ -151,7 +153,7 @@ check.dependsOn ktlint
 
 task ktlintFormat(type: JavaExec, group: "formatting") {
     description = "Fix Kotlin code style deviations."
-    main = "com.pinterest.ktlint.Main"
+    mainClass = "com.pinterest.ktlint.Main"
     classpath = configurations.ktlint
     args "-F", "src/**/*.kt"
 }

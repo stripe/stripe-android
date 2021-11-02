@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet
 
 import android.content.Context
+import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.fragment.app.testing.launchFragmentInContainer
@@ -9,16 +10,20 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentIntentFixtures.PI_OFF_SESSION
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.payments.core.injection.DUMMY_INJECTOR_KEY
+import com.stripe.android.paymentsheet.PaymentSheetFixtures.COMPOSE_FRAGMENT_ARGS
 import com.stripe.android.paymentsheet.PaymentSheetViewModel.CheckoutIdentifier
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.databinding.FragmentPaymentsheetAddPaymentMethodBinding
 import com.stripe.android.paymentsheet.databinding.PrimaryButtonBinding
 import com.stripe.android.paymentsheet.databinding.StripeGooglePayButtonBinding
+import com.stripe.android.paymentsheet.elements.IdentifierSpec
 import com.stripe.android.paymentsheet.forms.FormFieldEntry
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.Amount
@@ -27,24 +32,26 @@ import com.stripe.android.paymentsheet.model.FragmentConfigFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
-import com.stripe.android.paymentsheet.paymentdatacollection.CardDataCollectionFragment
 import com.stripe.android.paymentsheet.paymentdatacollection.ComposeFormDataCollectionFragment
 import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
-import com.stripe.android.paymentsheet.elements.IdentifierSpec
 import com.stripe.android.paymentsheet.ui.PaymentSheetFragmentFactory
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.utils.TestUtils.idleLooper
 import org.junit.Before
-import org.junit.Ignore
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 
 @RunWith(RobolectricTestRunner::class)
 class PaymentSheetAddPaymentMethodFragmentTest {
+    @get:Rule
+    val rule = InstantTaskExecutorRule()
+
     private val eventReporter = mock<EventReporter>()
     private val context: Context = ApplicationProvider.getApplicationContext()
 
@@ -64,17 +71,49 @@ class PaymentSheetAddPaymentMethodFragmentTest {
         }
     }
 
-    @Ignore("Disabled until more payment methods are supported")
     @Test
     fun `when processing then payment methods UI should be disabled`() {
         val paymentIntent = mock<PaymentIntent>().also {
-            whenever(it.paymentMethodTypes).thenReturn(listOf("card", "sofort"))
+            whenever(it.paymentMethodTypes).thenReturn(listOf("card", "bancontact"))
         }
         createFragment(stripeIntent = paymentIntent) { fragment, viewBinding ->
             fragment.sheetViewModel._processing.value = true
             val adapter =
                 viewBinding.paymentMethodsRecycler.adapter as AddPaymentMethodsAdapter
             assertThat(adapter.isEnabled).isFalse()
+        }
+    }
+
+    @Test @Config(qualifiers = "w320dp")
+    fun `when screen is 320dp wide, adapter should show 2 and a half items with 104dp width`() {
+        val paymentIntent = mock<PaymentIntent>().also {
+            whenever(it.paymentMethodTypes).thenReturn(listOf("card", "bancontact", "sofort", "ideal"))
+        }
+        createFragment(stripeIntent = paymentIntent) { fragment, viewBinding ->
+            val item = viewBinding.paymentMethodsRecycler.layoutManager!!.findViewByPosition(0)
+            assertThat(item!!.measuredWidth).isEqualTo(104)
+        }
+    }
+
+    @Test @Config(qualifiers = "w475dp")
+    fun `when screen is 475dp wide, adapter should show 3 and a half items with 115dp width`() {
+        val paymentIntent = mock<PaymentIntent>().also {
+            whenever(it.paymentMethodTypes).thenReturn(listOf("card", "bancontact", "sofort", "ideal"))
+        }
+        createFragment(stripeIntent = paymentIntent) { fragment, viewBinding ->
+            val item = viewBinding.paymentMethodsRecycler.layoutManager!!.findViewByPosition(0)
+            assertThat(item!!.measuredWidth).isEqualTo(115)
+        }
+    }
+
+    @Test @Config(qualifiers = "w476dp")
+    fun `when screen is 476dp wide, adapter should show 4 items with 100dp width`() {
+        val paymentIntent = mock<PaymentIntent>().also {
+            whenever(it.paymentMethodTypes).thenReturn(listOf("card", "bancontact", "sofort", "ideal"))
+        }
+        createFragment(stripeIntent = paymentIntent) { fragment, viewBinding ->
+            val item = viewBinding.paymentMethodsRecycler.layoutManager!!.findViewByPosition(0)
+            assertThat(item!!.measuredWidth).isEqualTo(100)
         }
     }
 
@@ -175,6 +214,19 @@ class PaymentSheetAddPaymentMethodFragmentTest {
     }
 
     @Test
+    fun `google pay flow updates the scroll view before and after`() {
+
+        createFragment(PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY) { fragment, viewBinding ->
+
+            viewBinding.googlePayButton.performClick()
+            assertThat(fragment.sheetViewModel._contentVisible.value).isEqualTo(false)
+
+            fragment.sheetViewModel.onGooglePayResult(GooglePayPaymentMethodLauncher.Result.Canceled)
+            assertThat(fragment.sheetViewModel._contentVisible.value).isEqualTo(true)
+        }
+    }
+
+    @Test
     fun `google pay button state updated on finish processing`() {
         createFragment(PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY) { fragment, viewBinding ->
             fragment.sheetViewModel.checkoutIdentifier = CheckoutIdentifier.AddFragmentTopGooglePay
@@ -262,20 +314,81 @@ class PaymentSheetAddPaymentMethodFragmentTest {
         val paymentIntent = PaymentIntentFixtures.PI_SUCCEEDED.copy(
             paymentMethodTypes = listOf("card")
         )
-        createFragment(stripeIntent = paymentIntent) { fragment, viewBinding ->
+        createFragment(stripeIntent = paymentIntent) { _, viewBinding ->
             assertThat(viewBinding.paymentMethodsRecycler.isVisible).isFalse()
             assertThat(viewBinding.googlePayDivider.viewBinding.dividerText.text)
                 .isEqualTo("Or pay with a card")
         }
     }
 
-    @Ignore("Disabled until more payment methods are supported")
+    @Test
+    fun `when multiple supported payment methods and configuration changes it should restore selected payment method`() {
+        val paymentIntent = PaymentIntentFixtures.PI_SUCCEEDED.copy(
+            paymentMethodTypes = listOf("card", "bancontact")
+        )
+        createFragment(stripeIntent = paymentIntent) { fragment, viewBinding ->
+            assertThat(
+                fragment.childFragmentManager.findFragmentById(
+                    viewBinding.paymentMethodFragmentContainer.id
+                )
+            ).isInstanceOf(ComposeFormDataCollectionFragment::class.java)
+
+            fragment.onPaymentMethodSelected(SupportedPaymentMethod.Bancontact)
+
+            idleLooper()
+
+            val addedFragment = fragment.childFragmentManager.findFragmentById(
+                viewBinding.paymentMethodFragmentContainer.id
+            )
+
+            assertThat(addedFragment).isInstanceOf(ComposeFormDataCollectionFragment::class.java)
+            assertThat(
+                addedFragment?.arguments?.getParcelable<FormFragmentArguments>(
+                    ComposeFormDataCollectionFragment.EXTRA_CONFIG
+                )
+            )
+                .isEqualTo(
+                    FormFragmentArguments(
+                        SupportedPaymentMethod.Bancontact,
+                        showCheckbox = false,
+                        showCheckboxControlledFields = false,
+                        merchantName = PaymentSheetFixtures.MERCHANT_DISPLAY_NAME,
+                        amount = createAmount(),
+                        injectorKey = DUMMY_INJECTOR_KEY
+                    )
+                )
+        }.recreate().onFragment { fragment ->
+            val addedFragment = fragment.childFragmentManager.findFragmentById(
+                FragmentPaymentsheetAddPaymentMethodBinding.bind(
+                    requireNotNull(fragment.view)
+                ).paymentMethodFragmentContainer.id
+            )
+
+            assertThat(addedFragment).isInstanceOf(ComposeFormDataCollectionFragment::class.java)
+            assertThat(
+                addedFragment?.arguments?.getParcelable<FormFragmentArguments>(
+                    ComposeFormDataCollectionFragment.EXTRA_CONFIG
+                )
+            )
+                .isEqualTo(
+                    FormFragmentArguments(
+                        SupportedPaymentMethod.Bancontact,
+                        showCheckbox = false,
+                        showCheckboxControlledFields = false,
+                        merchantName = PaymentSheetFixtures.MERCHANT_DISPLAY_NAME,
+                        amount = createAmount(),
+                        injectorKey = DUMMY_INJECTOR_KEY
+                    )
+                )
+        }
+    }
+
     @Test
     fun `when PaymentIntent allows multiple supported payment methods it should show payment method selector`() {
         val paymentIntent = PaymentIntentFixtures.PI_SUCCEEDED.copy(
-            paymentMethodTypes = listOf("card", "sofort")
+            paymentMethodTypes = listOf("card", "bancontact")
         )
-        createFragment(stripeIntent = paymentIntent) { fragment, viewBinding ->
+        createFragment(stripeIntent = paymentIntent) { _, viewBinding ->
             assertThat(viewBinding.paymentMethodsRecycler.isVisible).isTrue()
             assertThat(viewBinding.googlePayDivider.viewBinding.dividerText.text)
                 .isEqualTo("Or pay using")
@@ -284,14 +397,19 @@ class PaymentSheetAddPaymentMethodFragmentTest {
 
     @Test
     fun `when payment method is selected then transitions to correct fragment`() {
-        createFragment { fragment, viewBinding ->
+        val args = PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY
+        val stripeIntent = PaymentIntentFixtures.PI_WITH_SHIPPING
+        createFragment(
+            stripeIntent = stripeIntent,
+            args = args
+        ) { fragment, viewBinding ->
             assertThat(
                 fragment.childFragmentManager.findFragmentById(
                     viewBinding.paymentMethodFragmentContainer.id
                 )
-            ).isInstanceOf(CardDataCollectionFragment::class.java)
+            ).isInstanceOf(ComposeFormDataCollectionFragment::class.java)
 
-            fragment.onPaymentMethodSelected(SupportedPaymentMethod.Bancontact)
+            fragment.onPaymentMethodSelected(SupportedPaymentMethod.Card)
 
             idleLooper()
 
@@ -306,21 +424,26 @@ class PaymentSheetAddPaymentMethodFragmentTest {
                 )
             )
                 .isEqualTo(
-                    FormFragmentArguments(
-                        SupportedPaymentMethod.Bancontact.name,
-                        saveForFutureUseInitialVisibility = true,
-                        saveForFutureUseInitialValue = true,
-                        merchantName = PaymentSheetFixtures.MERCHANT_DISPLAY_NAME,
-                        amount = createAmount()
-                    )
+                    COMPOSE_FRAGMENT_ARGS.copy(
+                        paymentMethod = SupportedPaymentMethod.Card,
+                        amount = createAmount(),
+                        showCheckbox = true,
+                        showCheckboxControlledFields = true,
+                        billingDetails = null
+                    ),
                 )
         }
     }
 
     @Test
     fun `when payment method is selected then merchant name is passed in fragment arguments`() {
-        createFragment { fragment, viewBinding ->
-            fragment.onPaymentMethodSelected(SupportedPaymentMethod.Bancontact)
+        val args = PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY
+        val stripeIntent = PaymentIntentFixtures.PI_WITH_SHIPPING
+        createFragment(
+            stripeIntent = stripeIntent,
+            args = args
+        ) { fragment, viewBinding ->
+            fragment.onPaymentMethodSelected(SupportedPaymentMethod.Card)
 
             idleLooper()
 
@@ -336,13 +459,13 @@ class PaymentSheetAddPaymentMethodFragmentTest {
                 )
             )
                 .isEqualTo(
-                    FormFragmentArguments(
-                        SupportedPaymentMethod.Bancontact.name,
-                        saveForFutureUseInitialVisibility = true,
-                        saveForFutureUseInitialValue = true,
-                        merchantName = PaymentSheetFixtures.MERCHANT_DISPLAY_NAME,
-                        amount = createAmount()
-                    )
+                    COMPOSE_FRAGMENT_ARGS.copy(
+                        paymentMethod = SupportedPaymentMethod.Card,
+                        amount = createAmount(),
+                        showCheckbox = true,
+                        showCheckboxControlledFields = true,
+                        billingDetails = null
+                    ),
                 )
         }
     }
@@ -354,7 +477,7 @@ class PaymentSheetAddPaymentMethodFragmentTest {
                 fragment.childFragmentManager.findFragmentById(
                     viewBinding.paymentMethodFragmentContainer.id
                 )
-            ).isInstanceOf(CardDataCollectionFragment::class.java)
+            ).isInstanceOf(ComposeFormDataCollectionFragment::class.java)
 
             var paymentSelection: PaymentSelection? = null
             fragment.sheetViewModel.selection.observeForever {
@@ -366,7 +489,7 @@ class PaymentSheetAddPaymentMethodFragmentTest {
             )
             assertThat(paymentSelection).isInstanceOf(PaymentSelection.Saved::class.java)
 
-            fragment.onPaymentMethodSelected(SupportedPaymentMethod.Bancontact)
+            fragment.onPaymentMethodSelected(SupportedPaymentMethod.Card)
             idleLooper()
             assertThat(paymentSelection).isNull()
         }
@@ -374,14 +497,16 @@ class PaymentSheetAddPaymentMethodFragmentTest {
 
     @Test
     fun `when payment intent off session fragment parameters set correctly`() {
-        createFragment(stripeIntent = PI_OFF_SESSION) { fragment, viewBinding ->
+        val args = PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY
+        val stripeIntent = PI_OFF_SESSION
+        createFragment(stripeIntent = stripeIntent, args = args) { fragment, viewBinding ->
             assertThat(
                 fragment.childFragmentManager.findFragmentById(
                     viewBinding.paymentMethodFragmentContainer.id
                 )
-            ).isInstanceOf(CardDataCollectionFragment::class.java)
+            ).isInstanceOf(ComposeFormDataCollectionFragment::class.java)
 
-            fragment.onPaymentMethodSelected(SupportedPaymentMethod.Bancontact)
+            fragment.onPaymentMethodSelected(SupportedPaymentMethod.Card)
 
             idleLooper()
 
@@ -396,12 +521,12 @@ class PaymentSheetAddPaymentMethodFragmentTest {
                 )
             )
                 .isEqualTo(
-                    FormFragmentArguments(
-                        SupportedPaymentMethod.Bancontact.name,
-                        saveForFutureUseInitialVisibility = false,
-                        saveForFutureUseInitialValue = true,
-                        merchantName = "Widget Store",
-                        amount = createAmount(PI_OFF_SESSION)
+                    COMPOSE_FRAGMENT_ARGS.copy(
+                        paymentMethod = SupportedPaymentMethod.Card,
+                        amount = createAmount(PI_OFF_SESSION),
+                        showCheckbox = false,
+                        showCheckboxControlledFields = true,
+                        billingDetails = null
                     )
                 )
         }
@@ -413,7 +538,8 @@ class PaymentSheetAddPaymentMethodFragmentTest {
             fieldValuePairs = mapOf(
                 IdentifierSpec.SaveForFutureUse to FormFieldEntry("true", true)
             ),
-            showsMandate = false
+            showsMandate = false,
+            userRequestedReuse = PaymentSelection.CustomerRequestedSave.RequestReuse
         )
         val selection =
             BaseAddPaymentMethodFragment.transformToPaymentSelection(
@@ -423,90 +549,14 @@ class PaymentSheetAddPaymentMethodFragmentTest {
                 ),
                 SupportedPaymentMethod.Sofort
             )
-        assertThat(selection?.shouldSavePaymentMethod).isTrue()
+        assertThat(selection?.customerRequestedSave).isEqualTo(
+            PaymentSelection.CustomerRequestedSave.RequestReuse
+        )
         assertThat(selection?.labelResource).isEqualTo(
             R.string.stripe_paymentsheet_payment_method_sofort
         )
         assertThat(selection?.iconResource).isEqualTo(
             R.drawable.stripe_ic_paymentsheet_pm_klarna
-        )
-    }
-
-    @Test
-    fun `Verify Compose argument in guest setup intent`() {
-        assertThat(
-            BaseAddPaymentMethodFragment.getFormArguments(
-                hasCustomer = false,
-                saveForFutureUse = true,
-                supportedPaymentMethodName = SupportedPaymentMethod.Bancontact.name,
-                merchantName = "Example, Inc",
-                billingAddress = null
-            )
-        ).isEqualTo(
-            FormFragmentArguments(
-                SupportedPaymentMethod.Bancontact.name,
-                saveForFutureUseInitialVisibility = false,
-                saveForFutureUseInitialValue = true,
-                merchantName = "Example, Inc",
-            )
-        )
-    }
-
-    @Test
-    fun `Verify Compose argument in guest payment intent`() {
-        assertThat(
-            BaseAddPaymentMethodFragment.getFormArguments(
-                hasCustomer = false,
-                saveForFutureUse = false,
-                supportedPaymentMethodName = SupportedPaymentMethod.Bancontact.name,
-                merchantName = "Example, Inc",
-            )
-        ).isEqualTo(
-            FormFragmentArguments(
-                SupportedPaymentMethod.Bancontact.name,
-                saveForFutureUseInitialVisibility = false,
-                saveForFutureUseInitialValue = false,
-                merchantName = "Example, Inc",
-            )
-        )
-    }
-
-    @Test
-    fun `Verify Compose argument in new or returning user setup intent`() {
-        assertThat(
-            BaseAddPaymentMethodFragment.getFormArguments(
-                hasCustomer = true,
-                saveForFutureUse = true,
-                supportedPaymentMethodName = SupportedPaymentMethod.Bancontact.name,
-                merchantName = "Example, Inc"
-            )
-        ).isEqualTo(
-            FormFragmentArguments(
-                SupportedPaymentMethod.Bancontact.name,
-                saveForFutureUseInitialVisibility = false,
-                saveForFutureUseInitialValue = true,
-                merchantName = "Example, Inc",
-            )
-        )
-    }
-
-    @Test
-    fun `Verify Compose argument in new or returning user payment intent`() {
-
-        assertThat(
-            BaseAddPaymentMethodFragment.getFormArguments(
-                hasCustomer = true,
-                saveForFutureUse = false,
-                supportedPaymentMethodName = SupportedPaymentMethod.Bancontact.name,
-                merchantName = "Example, Inc"
-            )
-        ).isEqualTo(
-            FormFragmentArguments(
-                SupportedPaymentMethod.Bancontact.name,
-                saveForFutureUseInitialVisibility = true,
-                saveForFutureUseInitialValue = true,
-                merchantName = "Example, Inc",
-            )
         )
     }
 
@@ -518,26 +568,24 @@ class PaymentSheetAddPaymentMethodFragmentTest {
         fragmentConfig: FragmentConfig? = FragmentConfigFixtures.DEFAULT,
         stripeIntent: StripeIntent? = PaymentIntentFixtures.PI_WITH_SHIPPING,
         onReady: (PaymentSheetAddPaymentMethodFragment, FragmentPaymentsheetAddPaymentMethodBinding) -> Unit
-    ) {
-        launchFragmentInContainer<PaymentSheetAddPaymentMethodFragment>(
-            bundleOf(
-                PaymentSheetActivity.EXTRA_FRAGMENT_CONFIG to fragmentConfig,
-                PaymentSheetActivity.EXTRA_STARTER_ARGS to args
-            ),
-            R.style.StripePaymentSheetDefaultTheme,
-            factory = PaymentSheetFragmentFactory(eventReporter),
-            initialState = Lifecycle.State.INITIALIZED
-        ).onFragment { fragment ->
-            // Mock sheetViewModel loading the StripeIntent before the Fragment is created
-            fragment.sheetViewModel.setStripeIntent(stripeIntent)
-        }.moveToState(Lifecycle.State.STARTED)
-            .onFragment { fragment ->
-                onReady(
-                    fragment,
-                    FragmentPaymentsheetAddPaymentMethodBinding.bind(
-                        requireNotNull(fragment.view)
-                    )
+    ) = launchFragmentInContainer<PaymentSheetAddPaymentMethodFragment>(
+        bundleOf(
+            PaymentSheetActivity.EXTRA_FRAGMENT_CONFIG to fragmentConfig,
+            PaymentSheetActivity.EXTRA_STARTER_ARGS to args
+        ),
+        R.style.StripePaymentSheetDefaultTheme,
+        factory = PaymentSheetFragmentFactory(eventReporter),
+        initialState = Lifecycle.State.INITIALIZED
+    ).onFragment { fragment ->
+        // Mock sheetViewModel loading the StripeIntent before the Fragment is created
+        fragment.sheetViewModel.setStripeIntent(stripeIntent)
+    }.moveToState(Lifecycle.State.STARTED)
+        .onFragment { fragment ->
+            onReady(
+                fragment,
+                FragmentPaymentsheetAddPaymentMethodBinding.bind(
+                    requireNotNull(fragment.view)
                 )
-            }
-    }
+            )
+        }
 }

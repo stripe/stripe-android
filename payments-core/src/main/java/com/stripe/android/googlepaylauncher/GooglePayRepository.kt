@@ -11,6 +11,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flowOf
+import javax.inject.Inject
+import javax.inject.Singleton
 
 fun interface GooglePayRepository {
     fun isReady(): Flow<Boolean>
@@ -24,6 +26,7 @@ fun interface GooglePayRepository {
  * The default implementation of [GooglePayRepository].  Using the individual values as parameters
  * so it can be shared with [GooglePayLauncher] and [GooglePayPaymentMethodLauncher]
  */
+@Singleton
 internal class DefaultGooglePayRepository(
     private val context: Context,
     private val environment: GooglePayEnvironment,
@@ -31,6 +34,20 @@ internal class DefaultGooglePayRepository(
     private val existingPaymentMethodRequired: Boolean,
     private val logger: Logger = Logger.noop()
 ) : GooglePayRepository {
+
+    @Inject
+    internal constructor(
+        context: Context,
+        googlePayConfig: GooglePayPaymentMethodLauncher.Config,
+        logger: Logger
+    ) : this(
+        context.applicationContext,
+        googlePayConfig.environment,
+        googlePayConfig.billingAddressConfig.convert(),
+        googlePayConfig.existingPaymentMethodRequired,
+        logger
+    )
+
     private val googlePayJsonFactory = GooglePayJsonFactory(context)
 
     private val paymentsClient: PaymentsClient by lazy {

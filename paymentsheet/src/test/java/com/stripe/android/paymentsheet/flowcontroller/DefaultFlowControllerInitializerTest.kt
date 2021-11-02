@@ -87,7 +87,6 @@ internal class DefaultFlowControllerInitializerTest {
                         null,
                         PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET,
                         PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-                        listOf(PaymentMethod.Type.Card),
                         emptyList(),
                         SavedSelection.None,
                         isGooglePayReady = false
@@ -113,7 +112,6 @@ internal class DefaultFlowControllerInitializerTest {
                     PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
                     PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET,
                     PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-                    listOf(PaymentMethod.Type.Card),
                     PAYMENT_METHODS,
                     SavedSelection.PaymentMethod(
                         id = "pm_123456789"
@@ -141,7 +139,6 @@ internal class DefaultFlowControllerInitializerTest {
                         PaymentSheetFixtures.CONFIG_GOOGLEPAY,
                         PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET,
                         PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-                        listOf(PaymentMethod.Type.Card),
                         emptyList(),
                         SavedSelection.GooglePay,
                         isGooglePayReady = true
@@ -167,7 +164,6 @@ internal class DefaultFlowControllerInitializerTest {
                         PaymentSheetFixtures.CONFIG_GOOGLEPAY,
                         PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET,
                         PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-                        listOf(PaymentMethod.Type.Card),
                         emptyList(),
                         SavedSelection.None,
                         isGooglePayReady = false
@@ -193,7 +189,6 @@ internal class DefaultFlowControllerInitializerTest {
                         PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
                         PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET,
                         PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-                        listOf(PaymentMethod.Type.Card),
                         PAYMENT_METHODS,
                         SavedSelection.PaymentMethod("pm_123456789"),
                         isGooglePayReady = true
@@ -229,7 +224,6 @@ internal class DefaultFlowControllerInitializerTest {
                         PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
                         PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET,
                         PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-                        listOf(PaymentMethod.Type.Card),
                         emptyList(),
                         SavedSelection.None,
                         isGooglePayReady = false
@@ -260,7 +254,6 @@ internal class DefaultFlowControllerInitializerTest {
                         PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
                         PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET,
                         PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-                        listOf(PaymentMethod.Type.Card),
                         emptyList(),
                         SavedSelection.GooglePay,
                         isGooglePayReady = true
@@ -303,6 +296,39 @@ internal class DefaultFlowControllerInitializerTest {
                 capture(paymentMethodTypeCaptor)
             )
             assertThat(paymentMethodTypeCaptor.allValues.flatten())
+                .containsExactly(PaymentMethod.Type.Card)
+        }
+
+    @Test
+    fun `when allowsDelayedPaymentMethods is false then delayed payment methods are filtered out`() =
+        runBlockingTest {
+            val customerRepository = mock<CustomerRepository> {
+                whenever(it.getPaymentMethods(any(), any())).thenReturn(emptyList())
+            }
+
+            val initializer = createInitializer(
+                stripeIntentRepo = StripeIntentRepository.Static(
+                    PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                        paymentMethodTypes = listOf(
+                            PaymentMethod.Type.Card.code,
+                            PaymentMethod.Type.SepaDebit.code,
+                            PaymentMethod.Type.AuBecsDebit.code
+                        )
+                    )
+                ),
+                customerRepo = customerRepository
+            )
+
+            initializer.init(
+                PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET,
+                PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
+            )
+
+            verify(customerRepository).getPaymentMethods(
+                any(),
+                capture(paymentMethodTypeCaptor)
+            )
+            assertThat(paymentMethodTypeCaptor.value)
                 .containsExactly(PaymentMethod.Type.Card)
         }
 

@@ -107,7 +107,14 @@ internal class BillingAddressView @JvmOverloads constructor(
     ) { _, _, config ->
         postalCodeView.filters = arrayOf(InputFilter.LengthFilter(config.maxLength))
         postalCodeView.keyListener = config.getKeyListener()
-        postalCodeView.inputType = config.inputType
+
+        if (config.inputType ==
+            (InputType.TYPE_NUMBER_VARIATION_PASSWORD or InputType.TYPE_CLASS_NUMBER)
+        ) {
+            postalCodeView.setNumberOnlyInputType()
+        } else {
+            postalCodeView.inputType = config.inputType
+        }
     }
 
     private val newCountryCodeCallback = { newCountryCode: CountryCode ->
@@ -388,7 +395,9 @@ internal class BillingAddressView @JvmOverloads constructor(
 
         object UnitedStates : PostalCodeConfig() {
             override val maxLength = 5
-            override val inputType = InputType.TYPE_CLASS_NUMBER
+            override val inputType =
+                InputType.TYPE_NUMBER_VARIATION_PASSWORD or InputType.TYPE_CLASS_NUMBER
+
             override fun getKeyListener(): KeyListener {
                 return DigitsKeyListener.getInstance(false, true)
             }

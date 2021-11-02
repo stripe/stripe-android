@@ -15,7 +15,7 @@ import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 
 internal class PaymentSheetAddPaymentMethodFragment(
     eventReporter: EventReporter
-) : com.stripe.android.paymentsheet.BaseAddPaymentMethodFragment(eventReporter) {
+) : BaseAddPaymentMethodFragment(eventReporter) {
     override val viewModelFactory: ViewModelProvider.Factory = PaymentSheetViewModel.Factory(
         { requireActivity().application },
         {
@@ -37,7 +37,7 @@ internal class PaymentSheetAddPaymentMethodFragment(
             BaseSheetActivity.EXTRA_FRAGMENT_CONFIG
         )
         val shouldShowGooglePayButton = config?.let {
-            config.isGooglePayReady && config.paymentMethods.isEmpty()
+            config.isGooglePayReady && sheetViewModel.paymentMethods.value.isNullOrEmpty()
         } ?: false
 
         viewBinding = FragmentPaymentsheetAddPaymentMethodBinding.bind(view)
@@ -45,6 +45,8 @@ internal class PaymentSheetAddPaymentMethodFragment(
         val googlePayDivider = viewBinding.googlePayDivider
 
         googlePayButton.setOnClickListener {
+            // The scroll will be made visible onResume of the activity
+            sheetViewModel.setContentVisible(false)
             sheetViewModel.lastSelectedPaymentMethod = sheetViewModel.selection.value
             sheetViewModel.updateSelection(PaymentSelection.GooglePay)
         }

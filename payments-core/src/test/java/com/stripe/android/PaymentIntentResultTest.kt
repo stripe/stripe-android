@@ -30,7 +30,8 @@ class PaymentIntentResultTest {
             id = "pi_12345",
             currency = "usd",
             paymentMethodTypes = listOf("card"),
-            status = StripeIntent.Status.Processing
+            status = StripeIntent.Status.Processing,
+            unactivatedPaymentMethods = emptyList()
         )
         val result = PaymentIntentResult(
             intent = paymentIntent
@@ -50,7 +51,8 @@ class PaymentIntentResultTest {
             id = "pi_12345",
             currency = "usd",
             paymentMethodTypes = listOf("card"),
-            status = StripeIntent.Status.Processing
+            status = StripeIntent.Status.Processing,
+            unactivatedPaymentMethods = emptyList()
         )
         val result = PaymentIntentResult(
             intent = paymentIntent
