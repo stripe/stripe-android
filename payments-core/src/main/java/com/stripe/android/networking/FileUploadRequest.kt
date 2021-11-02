@@ -18,8 +18,6 @@ internal class FileUploadRequest(
     private val fileParams: StripeFileParams,
     options: ApiRequest.Options,
     appInfo: AppInfo? = null,
-    systemPropertySupplier: (String) -> String = DEFAULT_SYSTEM_PROPERTY_SUPPLIER,
-
     /**
      * Boundary to delineate parts of the message
      *
@@ -27,18 +25,25 @@ internal class FileUploadRequest(
      */
     private val boundary: String = createBoundary()
 ) : StripeRequest() {
-
-    override val method: Method = Method.POST
-    override val baseUrl: String = "https://files.stripe.com/v1/files"
-    override val params: Map<String, *>? = null
-    override val mimeType: MimeType = MimeType.MultipartForm
-    override val headersFactory: RequestHeadersFactory = RequestHeadersFactory.Api(
+    private val headersFactory: RequestHeadersFactory = RequestHeadersFactory.FileUpload(
         options = options,
         appInfo = appInfo,
-        systemPropertySupplier = systemPropertySupplier
+        boundary = boundary
     )
 
-    override fun writeBody(outputStream: OutputStream) {
+    override val method: Method = Method.POST
+
+    override val mimeType: MimeType = MimeType.MultipartForm
+
+    override val url = HOST
+
+    override val retryResponseCodes: Iterable<Int> = PAYMENT_RETRY_CODES
+
+    override val headers: Map<String, String> = headersFactory.create()
+
+    override var postHeaders: Map<String, String>? = headersFactory.createPostHeader()
+
+    override fun writePostBody(outputStream: OutputStream) {
         outputStream.writer().use {
             PrintWriter(it, true).use { writer ->
                 writeString(writer, purposeContents)
@@ -60,11 +65,6 @@ internal class FileUploadRequest(
     private fun writeFile(outputStream: OutputStream) {
         fileParams.file.inputStream().copyTo(outputStream)
     }
-
-    override val contentType: String
-        get() {
-            return "${mimeType.code}; boundary=$boundary"
-        }
 
     @VisibleForTesting
     internal val fileMetadata: String
@@ -95,6 +95,8 @@ internal class FileUploadRequest(
 
     internal companion object {
         private const val LINE_BREAK = "\r\n"
+
+        private const val HOST = "https://files.stripe.com/v1/files"
 
         private fun createBoundary(): String {
             return Random.Default.nextLong(0, Long.MAX_VALUE).toString()

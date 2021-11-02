@@ -1,9 +1,11 @@
 package com.stripe.android.networking
 
 import com.stripe.android.exception.APIException
+import com.stripe.android.networking.RequestHeadersFactory.Companion.HEADER_CONTENT_TYPE
 import org.json.JSONException
 import org.json.JSONObject
 import java.net.HttpURLConnection
+import java.net.HttpURLConnection.HTTP_MULT_CHOICE
 
 /**
  * Represents a response from the Stripe servers.
@@ -27,14 +29,14 @@ internal data class StripeResponse internal constructor(
     internal val headers: Map<String, List<String>> = emptyMap()
 ) {
     internal val isOk: Boolean = code == HttpURLConnection.HTTP_OK
-    internal val isError: Boolean = code < 200 || code >= 300
-    internal val isRateLimited = code == 429
+    internal val isError: Boolean = code < HttpURLConnection.HTTP_OK || code >= HTTP_MULT_CHOICE
+    internal val isRateLimited = code == HTTP_TOO_MANY_REQUESTS
 
     internal val requestId: RequestId? = RequestId.fromString(
-        getHeaderValue(REQUEST_ID_HEADER)?.firstOrNull()
+        getHeaderValue(HEADER_REQUEST_ID)?.firstOrNull()
     )
 
-    private val contentType: String? = getHeaderValue(CONTENT_TYPE_HEADER)?.firstOrNull()
+    private val contentType: String? = getHeaderValue(HEADER_CONTENT_TYPE)?.firstOrNull()
 
     internal val responseJson: JSONObject
         @Throws(APIException::class)
@@ -59,7 +61,7 @@ internal data class StripeResponse internal constructor(
         }
 
     override fun toString(): String {
-        return "Request-Id: $requestId, Status Code: $code"
+        return "$HEADER_REQUEST_ID: $requestId, Status Code: $code"
     }
 
     internal fun getHeaderValue(key: String): List<String>? {
@@ -69,8 +71,7 @@ internal data class StripeResponse internal constructor(
             }?.value
     }
 
-    private companion object {
-        private const val REQUEST_ID_HEADER = "Request-Id"
-        private const val CONTENT_TYPE_HEADER = "Content-Type"
+    internal companion object {
+        internal const val HEADER_REQUEST_ID = "Request-Id"
     }
 }
