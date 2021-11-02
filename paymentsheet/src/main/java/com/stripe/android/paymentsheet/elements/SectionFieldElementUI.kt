@@ -36,7 +36,8 @@ internal fun SectionFieldElementUI(
             is RowController -> {
                 RowElementUI(
                     enabled,
-                    controller
+                    controller,
+                    hiddenIdentifiers
                 )
             }
             is CardController -> {

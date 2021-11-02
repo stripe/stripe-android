@@ -17,10 +17,10 @@ internal val CardRequirement = PaymentMethodRequirements(
 
 internal val cardParams: MutableMap<String, Any?> = mutableMapOf(
     "number" to null,
-    "expiryMonth" to null,
-    "expiryYear" to null,
+    "exp_month" to null,
+    "exp_year" to null,
     "cvc" to null,
-    "attribution" to listOf("PaymentSheet.Form")
+//    "attribution" to listOf("PaymentSheet.Form")
 )
 
 internal val CardParamKey: MutableMap<String, Any?> = mutableMapOf(

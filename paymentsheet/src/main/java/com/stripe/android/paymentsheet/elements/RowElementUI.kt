@@ -20,7 +20,8 @@ import androidx.compose.ui.unit.dp
 @Composable
 internal fun RowElementUI(
     enabled: Boolean,
-    controller: RowController
+    controller: RowController,
+    hiddenIdentifiers: List<IdentifierSpec>
 ) {
     val fields = controller.fields
     Row(
@@ -30,15 +31,15 @@ internal fun RowElementUI(
         verticalAlignment = Alignment.CenterVertically
     ) {
         fields.forEachIndexed { index, field ->
-            val lastItem = index != fields.size - 1
             SectionFieldElementUI(
                 enabled,
                 field,
                 Modifier.fillMaxWidth(
-                    (1f / fields.size.toFloat()).takeIf { lastItem } ?: 1f
-                )
+                    (1f / fields.size.toFloat()).takeIf { index != (fields.size - 1) } ?: 1f
+                ),
+                hiddenIdentifiers
             )
-            if (!lastItem) {
+            if (index != (fields.size - 1)) {
                 val cardStyle = CardStyle(isSystemInDarkTheme())
                 VeriticalDivider(
                     color = cardStyle.cardBorderColor,

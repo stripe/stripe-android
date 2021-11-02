@@ -23,13 +23,19 @@ internal class CardDetailsElement(
         controller.cvcElement.controller.formFieldValue,
         controller.expirationDateElement.controller.formFieldValue
     ) { number, cvc, expirationDate ->
+        val month = ""
+        if (expirationDate.value?.getOrNull(0) == '0' || expirationDate.value?.getOrNull(0) == '1') {
+            value = expirationDate.value?.take(2)
+
+        }
+
         listOf(
             controller.numberElement.identifier to number,
             controller.cvcElement.identifier to cvc,
-            IdentifierSpec.Generic("month") to expirationDate.copy(
+            IdentifierSpec.Generic("exp_month") to expirationDate.copy(
                 value = expirationDate.value?.take(2)
             ),
-            IdentifierSpec.Generic("year") to expirationDate.copy(
+            IdentifierSpec.Generic("exp_year") to expirationDate.copy(
                 value = expirationDate.value?.takeLast(2)
             )
         )

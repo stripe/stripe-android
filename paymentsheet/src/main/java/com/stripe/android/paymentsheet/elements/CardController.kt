@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.elements
 import com.stripe.android.viewmodel.credit.cvc.CvcConfig
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.combine
+import java.util.UUID
 
 internal class CardController : SectionFieldErrorController {
 
@@ -22,11 +23,19 @@ internal class CardController : SectionFieldErrorController {
         SimpleTextFieldController(DateConfig())
     )
 
-    val fields = listOf(numberElement, cvcElement, expirationDateElement)
+    val rowFields = listOf(expirationDateElement, cvcElement)
+    val fields = listOf(
+        numberElement,
+        RowElement(
+            IdentifierSpec.Generic("row_" + UUID.randomUUID().leastSignificantBits),
+            rowFields,
+            RowController(rowFields)
+        )
+    )
 
     @ExperimentalCoroutinesApi
     override val error = combine(
-        fields
+        listOf(numberElement, expirationDateElement, cvcElement)
             .map { it.controller }
             .map { it.error }
     ) {
