@@ -15,7 +15,7 @@ internal class DateConfig : TextFieldConfig {
 
     @StringRes
     override val label = R.string.credit_expiration_date
-    override val keyboard = KeyboardType.Number
+    override val keyboard = KeyboardType.NumberPassword
     override val visualTransformation = ExpiryDateVisualTransformation()
 
     /**

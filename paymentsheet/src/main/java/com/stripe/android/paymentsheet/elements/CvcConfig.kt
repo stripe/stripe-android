@@ -15,7 +15,7 @@ internal class CvcConfig : CardDetailsTextFieldConfig {
     override val capitalization: KeyboardCapitalization = KeyboardCapitalization.None
     override val debugLabel: String = "cvc"
     override val label: Int = R.string.credit_cvc_label
-    override val keyboard: KeyboardType = KeyboardType.Number
+    override val keyboard: KeyboardType = KeyboardType.NumberPassword
     override val visualTransformation: VisualTransformation = VisualTransformation.None
 
     override fun determineState(

@@ -10,7 +10,7 @@ internal class CardNumberConfig : CardDetailsTextFieldConfig {
     override val capitalization: KeyboardCapitalization = KeyboardCapitalization.None
     override val debugLabel: String = "Card number"
     override val label: Int = R.string.card_number_label
-    override val keyboard: KeyboardType = KeyboardType.Number
+    override val keyboard: KeyboardType = KeyboardType.NumberPassword
     override val visualTransformation: VisualTransformation = CardNumberVisualTransformation(' ')
 
     override fun determineState(brand: CardBrand, number: String): TextFieldState {
