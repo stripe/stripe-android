@@ -109,8 +109,10 @@ internal fun TextField(
             },
         keyboardActions = KeyboardActions(
             onNext = {
-                if (!focusManager.moveFocus(FocusDirection.Down)) {
-                    focusManager.clearFocus(true)
+                if (!focusManager.moveFocus(FocusDirection.Right)) {
+                    if (!focusManager.moveFocus(FocusDirection.Down)) {
+                        focusManager.clearFocus(true)
+                    }
                 }
             }
         ),
