@@ -4,11 +4,10 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Divider
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.lifecycle.asLiveData
 
 @Composable
 internal fun SectionElementUI(
@@ -19,7 +18,7 @@ internal fun SectionElementUI(
     if (hiddenIdentifiers?.contains(element.identifier) == false) {
         val controller = element.controller
 
-        val error by controller.error.asLiveData().observeAsState(null)
+        val error by controller.error.collectAsState(null)
         val sectionErrorString = error?.let {
             it.formatArgs?.let { args ->
                 stringResource(
