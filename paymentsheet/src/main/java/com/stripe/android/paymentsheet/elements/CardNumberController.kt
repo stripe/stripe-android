@@ -39,6 +39,7 @@ internal class CardNumberController constructor(
         // This should also take a list of strings based on CVV or CVC
         creditTextFieldConfig.determineState(brand, fieldValue)
     }
+    override val fieldState: Flow<TextFieldState> = _fieldState
 
     private val _hasFocus = MutableStateFlow(false)
 

@@ -38,6 +38,7 @@ internal class CvcController constructor(
         // The CVC label should be in CardBrand
         cvcTextFieldConfig.determineState(brand, fieldValue)
     }
+    override val fieldState: Flow<TextFieldState> = _fieldState
 
     private val _hasFocus = MutableStateFlow(false)
 

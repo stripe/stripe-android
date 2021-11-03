@@ -19,6 +19,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
+import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
@@ -82,6 +83,20 @@ internal fun TextField(
         disabledIndicatorColor = textFieldColors.disabledIndicatorColor,
         unfocusedIndicatorColor = textFieldColors.unfocusedIndicatorColor
     )
+    val fieldState by textFieldController.fieldState.collectAsState(TextFieldStateConstants.Error.Blank)
+    var processedIsFull by rememberSaveable { mutableStateOf(false) }
+    
+    // This is setup so that when a field is full it still allows more characters
+    // to be entered, it just triggers next focus when the event happens.
+    @Suppress("UNUSED_VALUE")
+    processedIsFull = if (fieldState == TextFieldStateConstants.Valid.Full) {
+        if (!processedIsFull) {
+            nextFocus(focusManager)
+        }
+        true
+    } else {
+        false
+    }
 
     TextField(
         value = value,
@@ -109,11 +124,7 @@ internal fun TextField(
             },
         keyboardActions = KeyboardActions(
             onNext = {
-                if (!focusManager.moveFocus(FocusDirection.Right)) {
-                    if (!focusManager.moveFocus(FocusDirection.Down)) {
-                        focusManager.clearFocus(true)
-                    }
-                }
+                nextFocus(focusManager)
             }
         ),
         visualTransformation = textFieldController.visualTransformation,
@@ -127,4 +138,12 @@ internal fun TextField(
         singleLine = true,
         enabled = enabled
     )
+}
+
+fun nextFocus(focusManager: FocusManager) {
+    if (!focusManager.moveFocus(FocusDirection.Right)) {
+        if (!focusManager.moveFocus(FocusDirection.Down)) {
+            focusManager.clearFocus(true)
+        }
+    }
 }

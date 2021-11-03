@@ -4,6 +4,7 @@ import androidx.annotation.StringRes
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.lifecycle.LiveData
 import com.stripe.android.paymentsheet.elements.TextFieldStateConstants.Error.Blank
 import com.stripe.android.paymentsheet.forms.FormFieldEntry
 import kotlinx.coroutines.flow.Flow
@@ -21,6 +22,7 @@ internal interface TextFieldController : InputController {
     override val label: Int
     val visualTransformation: VisualTransformation
     override val showOptionalLabel: Boolean
+    val fieldState: Flow<TextFieldState>
     override val fieldValue: Flow<String>
     val visibleError: Flow<Boolean>
 }
@@ -51,6 +53,7 @@ internal class SimpleTextFieldController constructor(
     override val rawFieldValue: Flow<String> = _fieldValue.map { textFieldConfig.convertToRaw(it) }
 
     private val _fieldState = MutableStateFlow<TextFieldState>(Blank)
+    override val fieldState: Flow<TextFieldState> = _fieldState
 
     private val _hasFocus = MutableStateFlow(false)
 
