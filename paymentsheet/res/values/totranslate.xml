@@ -3,4 +3,5 @@
     <!--
     Items here need to be entered in our translation tool
     -->
+    <string name="stripe_paymentsheet_save_for_future_payments_with_merchant_name">Save for future %s payments</string>
 </resources>
