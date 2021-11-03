@@ -35,6 +35,10 @@ internal class CardNumberController constructor(
         CardBrand.getCardBrands(it).firstOrNull() ?: CardBrand.Unknown
     }
 
+    override val trailingIcon: Flow<TextFieldIcon?> = cardBrandFlow.map {
+        TextFieldIcon(it.icon)
+    }
+
     private val _fieldState = combine(cardBrandFlow, _fieldValue) { brand, fieldValue ->
         // This should also take a list of strings based on CVV or CVC
         creditTextFieldConfig.determineState(brand, fieldValue)
@@ -55,8 +59,6 @@ internal class CardNumberController constructor(
         combine(visibleError, _fieldState) { visibleError, fieldState ->
             fieldState.getError()?.takeIf { visibleError }
         }
-
-    val isFull: Flow<Boolean> = _fieldState.map { it.isFull() }
 
     override val isComplete: Flow<Boolean> = _fieldState.map { it.isValid() }
 

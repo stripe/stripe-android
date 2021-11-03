@@ -34,7 +34,7 @@ data class TextFieldIcon(
     @DrawableRes
     val idRes: Int,
     @StringRes
-    val contentDescription: Int
+    val contentDescription: Int? = null
 )
 /**
  * This class will provide the onValueChanged and onFocusChanged functionality to the field's

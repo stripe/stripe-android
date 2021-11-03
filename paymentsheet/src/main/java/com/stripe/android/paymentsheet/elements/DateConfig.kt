@@ -6,8 +6,9 @@ import androidx.compose.ui.text.input.KeyboardType
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.elements.TextFieldStateConstants.Error
 import com.stripe.android.paymentsheet.elements.TextFieldStateConstants.Valid
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import java.util.Calendar
-import java.util.regex.Pattern
 
 internal class DateConfig : TextFieldConfig {
     override val capitalization: KeyboardCapitalization = KeyboardCapitalization.None
@@ -17,6 +18,7 @@ internal class DateConfig : TextFieldConfig {
     override val label = R.string.credit_expiration_date
     override val keyboard = KeyboardType.NumberPassword
     override val visualTransformation = ExpiryDateVisualTransformation()
+    override val trailingIcon: Flow<TextFieldIcon?> = MutableStateFlow(null)
 
     /**
      * This will allow all characters, but will show as invalid if it doesn't match
@@ -34,9 +36,9 @@ internal class DateConfig : TextFieldConfig {
         } else {
             val newString =
                 if ((
-                    input.isNotBlank() &&
-                        !(input[0] == '0' || input[0] == '1')
-                    ) ||
+                        input.isNotBlank() &&
+                            !(input[0] == '0' || input[0] == '1')
+                        ) ||
                     (
                         (input.length > 1) &&
                             (input[0] == '1' && requireNotNull(input[1].digitToInt()) > 2)

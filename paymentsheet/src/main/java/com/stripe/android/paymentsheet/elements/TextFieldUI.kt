@@ -1,11 +1,11 @@
 package com.stripe.android.paymentsheet.elements
 
 import android.util.Log
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.Icon
 import androidx.compose.material.LocalContentAlpha
 import androidx.compose.material.LocalContentColor
 import androidx.compose.material.MaterialTheme
@@ -15,7 +15,6 @@ import androidx.compose.material.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -29,7 +28,6 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
-import androidx.lifecycle.asLiveData
 import com.stripe.android.paymentsheet.R
 
 /** This is a helpful method for setting the next action based on the nextFocus Requester **/
@@ -90,7 +88,7 @@ internal fun TextField(
     )
     val fieldState by textFieldController.fieldState.collectAsState(TextFieldStateConstants.Error.Blank)
     var processedIsFull by rememberSaveable { mutableStateOf(false) }
-    
+
     // This is setup so that when a field is full it still allows more characters
     // to be entered, it just triggers next focus when the event happens.
     @Suppress("UNUSED_VALUE")
@@ -159,9 +157,9 @@ fun nextFocus(focusManager: FocusManager) {
 @Composable
 fun TrailingIcon(trailingIcon: TextFieldIcon?) {
     trailingIcon?.let {
-        Icon(
+        Image(
             painter = painterResource(id = trailingIcon.idRes),
-            stringResource(trailingIcon.contentDescription)
+            trailingIcon.contentDescription?.let { stringResource(trailingIcon.contentDescription) }
         )
     }
 }

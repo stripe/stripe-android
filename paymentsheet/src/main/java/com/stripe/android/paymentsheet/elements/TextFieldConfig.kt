@@ -3,7 +3,7 @@ package com.stripe.android.paymentsheet.elements
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
-import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.Flow
 
 internal sealed interface TextFieldConfig {
     /** This specifies how the field should be capitalized **/
@@ -21,7 +21,7 @@ internal sealed interface TextFieldConfig {
     /** Transformation for changing visual output of the input field. */
     val visualTransformation: VisualTransformation?
 
-    val trailingIcon: MutableStateFlow<TextFieldIcon?>
+    val trailingIcon: Flow<TextFieldIcon?>
 
     /** This will determine the state of the field based on the text */
     fun determineState(input: String): TextFieldState
