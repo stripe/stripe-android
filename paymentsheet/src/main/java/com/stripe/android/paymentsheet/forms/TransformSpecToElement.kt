@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet.forms
 
-import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.elements.AddressElement
 import com.stripe.android.paymentsheet.elements.AddressSpec
 import com.stripe.android.paymentsheet.elements.AfterpayClearpayHeaderElement
@@ -20,9 +19,8 @@ import com.stripe.android.paymentsheet.elements.IbanElement
 import com.stripe.android.paymentsheet.elements.IbanSpec
 import com.stripe.android.paymentsheet.elements.IdentifierSpec
 import com.stripe.android.paymentsheet.elements.KlarnaCountrySpec
+import com.stripe.android.paymentsheet.elements.KlarnaHelper
 import com.stripe.android.paymentsheet.elements.LayoutSpec
-import com.stripe.android.paymentsheet.elements.MandateTextElement
-import com.stripe.android.paymentsheet.elements.MandateTextSpec
 import com.stripe.android.paymentsheet.elements.ResourceRepository
 import com.stripe.android.paymentsheet.elements.SaveForFutureUseController
 import com.stripe.android.paymentsheet.elements.SaveForFutureUseElement
@@ -36,9 +34,9 @@ import com.stripe.android.paymentsheet.elements.SimpleDropdownConfig
 import com.stripe.android.paymentsheet.elements.SimpleDropdownElement
 import com.stripe.android.paymentsheet.elements.SimpleTextElement
 import com.stripe.android.paymentsheet.elements.SimpleTextFieldConfig
-import com.stripe.android.paymentsheet.elements.SimpleTextHeaderElement
-import com.stripe.android.paymentsheet.elements.SimpleTextHeaderSpec
 import com.stripe.android.paymentsheet.elements.SimpleTextSpec
+import com.stripe.android.paymentsheet.elements.StaticTextElement
+import com.stripe.android.paymentsheet.elements.StaticTextSpec
 import com.stripe.android.paymentsheet.elements.TextFieldController
 import com.stripe.android.paymentsheet.model.Amount
 import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
@@ -61,12 +59,9 @@ internal class TransformSpecToElement @Inject constructor(
             when (it) {
                 is SaveForFutureUseSpec -> it.transform(initialValues)
                 is SectionSpec -> it.transform(initialValues)
-                is MandateTextSpec -> it.transform(initialValues.merchantName)
-                // TODO combine these into a single text header spec.
+                is StaticTextSpec -> it.transform(initialValues.merchantName)
                 is AfterpayClearpayTextSpec ->
                     it.transform(requireNotNull(initialValues.amount))
-                is SimpleTextHeaderSpec ->
-                    it.transform(initialValues.paymentMethod.type)
             }
         }
 
@@ -115,14 +110,16 @@ internal class TransformSpecToElement @Inject constructor(
             initialValues
         )
 
-    private fun MandateTextSpec.transform(merchantName: String) =
-// It could be argued that the static text should have a controller, but
+    private fun StaticTextSpec.transform(merchantName: String) =
+        // It could be argued that the static text should have a controller, but
         // since it doesn't provide a form field we leave it out for now
-        MandateTextElement(
+        StaticTextElement(
             this.identifier,
             this.stringResId,
             this.color,
-            merchantName
+            merchantName,
+            this.fontSizeSp,
+            this.letterSpacingSp
         )
 
     private fun EmailSpec.transform(email: String?) =
@@ -147,10 +144,7 @@ internal class TransformSpecToElement @Inject constructor(
         CountryElement(
             this.identifier,
             DropdownFieldController(
-                CountryConfig(
-                    resourceRepository.addressRepository.getCountriesAllowedForKlarna(currencyCode)
-                ),
-                country
+                CountryConfig(KlarnaHelper.getAllowedCountriesForCurrency(currencyCode)), country
             )
         )
 
@@ -179,9 +173,6 @@ internal class TransformSpecToElement @Inject constructor(
 
     private fun AfterpayClearpayTextSpec.transform(amount: Amount) =
         AfterpayClearpayHeaderElement(this.identifier, amount)
-
-    private fun SimpleTextHeaderSpec.transform(paymentMethodType: PaymentMethod.Type) =
-        SimpleTextHeaderElement(this.identifier, paymentMethodType)
 }
 
 internal fun SimpleTextSpec.transform(

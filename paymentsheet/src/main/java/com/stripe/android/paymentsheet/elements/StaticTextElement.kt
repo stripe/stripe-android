@@ -10,11 +10,13 @@ import kotlinx.coroutines.flow.MutableStateFlow
  * outputted from the list of form field values.  If the stringResId contains a %s, the first
  * one will be populated in the form with the merchantName parameter.
  */
-internal data class MandateTextElement(
+internal data class StaticTextElement(
     override val identifier: IdentifierSpec,
     val stringResId: Int,
-    val color: Color,
+    val color: Color?,
     val merchantName: String?,
+    val fontSizeSp: Int = 10,
+    val letterSpacingSp: Double = .7,
     override val controller: InputController? = null,
 ) : FormElement() {
     override fun getFormFieldValueFlow(): Flow<List<Pair<IdentifierSpec, FormFieldEntry>>> =
