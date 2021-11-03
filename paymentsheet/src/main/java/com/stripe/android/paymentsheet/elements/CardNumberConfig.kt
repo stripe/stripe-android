@@ -3,18 +3,20 @@ package com.stripe.android.paymentsheet.elements
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
+import com.stripe.android.model.CardBrand
 import com.stripe.android.paymentsheet.R
 
-internal class CardNumberConfig : CreditTextFieldConfig {
+internal class CardNumberConfig : CardDetailsTextFieldConfig {
     override val capitalization: KeyboardCapitalization = KeyboardCapitalization.None
     override val debugLabel: String = "Card number"
     override val label: Int = R.string.card_number_label
-    override val keyboard: KeyboardType = KeyboardType.Number
+    override val keyboard: KeyboardType = KeyboardType.NumberPassword
     override val visualTransformation: VisualTransformation = CardNumberVisualTransformation(' ')
 
     override fun determineState(brand: CardBrand, number: String): TextFieldState {
         val luhnValid = isValidLuhnNumber(number)
         val isDigitLimit = brand.getMaxLengthForCardNumber(number) != -1
+        // Accounts for variant max length
         val numberAllowedDigits = brand.getMaxLengthForCardNumber(number)
 
         return if (number.isBlank()) {
@@ -24,13 +26,22 @@ internal class CardNumberConfig : CreditTextFieldConfig {
         } else if (isDigitLimit && number.length < numberAllowedDigits) {
             TextFieldStateConstants.Error.Incomplete(R.string.card_number_incomplete)
         } else if (isDigitLimit && number.length > numberAllowedDigits) {
-            TextFieldStateConstants.Error.Invalid(R.string.card_number_too_long)
+            object : TextFieldState {
+                override fun shouldShowError(hasFocus: Boolean) = true
+                override fun isValid() = true
+                override fun isFull() = true
+                override fun isBlank() = false
+                override fun getError() = FieldError(
+                    R.string.card_number_longer_than_expected
+                )
+            }
         } else if (!luhnValid) {
             TextFieldStateConstants.Error.Invalid(R.string.card_number_invalid_luhn)
         } else if (isDigitLimit && number.length == numberAllowedDigits) {
             TextFieldStateConstants.Valid.Full
         } else {
-            TextFieldStateConstants.Error.Invalid(R.string.card_number_invalid) // TODO: Double check this case
+            // TODO: Double check this case
+            TextFieldStateConstants.Error.Invalid(R.string.card_number_invalid)
         }
     }
 

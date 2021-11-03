@@ -4,8 +4,10 @@ import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.viewModels
+import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.graphics.toColorInt
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.auth.PaymentBrowserAuthContract
@@ -30,6 +32,16 @@ internal class Stripe3ds2TransactionActivity : AppCompatActivity() {
         Stripe3ds2TransactionLayoutBinding.inflate(layoutInflater)
     }
 
+    lateinit var args: Stripe3ds2TransactionContract.Args
+
+    @VisibleForTesting
+    internal var viewModelFactory: ViewModelProvider.Factory =
+        Stripe3ds2TransactionViewModelFactory(
+            { application },
+            this,
+            { args }
+        )
+
     public override fun onCreate(savedInstanceState: Bundle?) {
         val argsResult = runCatching {
             val args = requireNotNull(
@@ -53,7 +65,7 @@ internal class Stripe3ds2TransactionActivity : AppCompatActivity() {
 
         super.onCreate(savedInstanceState)
 
-        val args = argsResult.getOrElse {
+        args = argsResult.getOrElse {
             finishWithResult(
                 PaymentFlowResult.Unvalidated(
                     flowOutcome = StripeIntentResult.Outcome.FAILED,
@@ -69,14 +81,7 @@ internal class Stripe3ds2TransactionActivity : AppCompatActivity() {
             window.statusBarColor = it
         }
 
-        val viewModel by viewModels<Stripe3ds2TransactionViewModel> {
-            Stripe3ds2TransactionViewModelFactory(
-                application,
-                this,
-                args
-            )
-        }
-
+        val viewModel by viewModels<Stripe3ds2TransactionViewModel> { viewModelFactory }
         val onChallengeResult = { challengeResult: ChallengeResult ->
             lifecycleScope.launch {
                 finishWithResult(

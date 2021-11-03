@@ -1,13 +1,11 @@
 package com.stripe.android.payments.core.injection
 
 import android.content.Context
-import com.stripe.android.PaymentBrowserAuthStarter
-import com.stripe.android.PaymentRelayStarter
 import com.stripe.android.networking.AnalyticsRequestExecutor
 import com.stripe.android.networking.AnalyticsRequestFactory
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.core.authentication.DefaultPaymentAuthenticatorRegistry
-import com.stripe.android.view.AuthActivityStarterHost
+import com.stripe.android.payments.core.authentication.threeds2.Stripe3ds2TransactionViewModelFactory
 import dagger.BindsInstance
 import dagger.Component
 import javax.inject.Named
@@ -26,11 +24,14 @@ import kotlin.coroutines.CoroutineContext
     modules = [
         AuthenticationModule::class,
         Stripe3DSAuthenticatorModule::class,
-        WeChatPayAuthenticatorModule::class
+        WeChatPayAuthenticatorModule::class,
+        LoggingModule::class
     ]
 )
 internal interface AuthenticationComponent {
     val registry: DefaultPaymentAuthenticatorRegistry
+
+    fun inject(stripe3ds2TransactionViewModelFactory: Stripe3ds2TransactionViewModelFactory)
 
     @Component.Builder
     interface Builder {
@@ -39,16 +40,6 @@ internal interface AuthenticationComponent {
 
         @BindsInstance
         fun stripeRepository(stripeRepository: StripeRepository): Builder
-
-        @BindsInstance
-        fun paymentRelayStarterFactory(
-            paymentRelayStarterFactory: (AuthActivityStarterHost) -> PaymentRelayStarter
-        ): Builder
-
-        @BindsInstance
-        fun paymentBrowserAuthStarterFactory(
-            paymentBrowserAuthStarterFactory: (AuthActivityStarterHost) -> PaymentBrowserAuthStarter
-        ): Builder
 
         @BindsInstance
         fun analyticsRequestExecutor(analyticsRequestExecutor: AnalyticsRequestExecutor): Builder
@@ -69,6 +60,17 @@ internal interface AuthenticationComponent {
         fun threeDs1IntentReturnUrlMap(
             threeDs1IntentReturnUrlMap: MutableMap<String, String>
         ): Builder
+
+        @BindsInstance
+        fun injectorKey(@InjectorKey id: String): Builder
+
+        @BindsInstance
+        fun publishableKeyProvider(
+            @Named(PUBLISHABLE_KEY) publishableKeyProvider: () -> String
+        ): Builder
+
+        @BindsInstance
+        fun productUsage(@Named(PRODUCT_USAGE) productUsage: Set<String>): Builder
 
         fun build(): AuthenticationComponent
     }

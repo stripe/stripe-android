@@ -63,6 +63,10 @@ class PaymentIntentJsonParser : ModelJsonParser<PaymentIntent> {
             NextActionDataParser().parse(it)
         }
 
+        val unactivatedPaymentMethods = ModelJsonParser.jsonArrayToList(
+            json.optJSONArray(FIELD_UNACTIVATED_PAYMENT_METHOD_TYPES)
+        )
+
         return PaymentIntent(
             id = id,
             paymentMethodTypes = paymentMethodTypes,
@@ -83,7 +87,8 @@ class PaymentIntentJsonParser : ModelJsonParser<PaymentIntent> {
             setupFutureUsage = setupFutureUsage,
             lastPaymentError = lastPaymentError,
             shipping = shipping,
-            nextActionData = nextActionData
+            nextActionData = nextActionData,
+            unactivatedPaymentMethods = unactivatedPaymentMethods
         )
     }
 
@@ -162,5 +167,6 @@ class PaymentIntentJsonParser : ModelJsonParser<PaymentIntent> {
         private const val FIELD_SHIPPING = "shipping"
         private const val FIELD_STATUS = "status"
         private const val FIELD_SETUP_FUTURE_USAGE = "setup_future_usage"
+        private const val FIELD_UNACTIVATED_PAYMENT_METHOD_TYPES = "unactivated_payment_method_types"
     }
 }

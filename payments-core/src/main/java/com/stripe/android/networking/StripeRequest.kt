@@ -1,6 +1,7 @@
 package com.stripe.android.networking
 
 import androidx.annotation.RestrictTo
+import androidx.annotation.VisibleForTesting
 import com.stripe.android.exception.InvalidRequestException
 import java.io.OutputStream
 import java.io.UnsupportedEncodingException
@@ -23,6 +24,10 @@ abstract class StripeRequest {
         get() {
             return params?.let { compactParams(it) }
         }
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @VisibleForTesting
+    fun getCompactParams() = compactParams
 
     /**
      * If the HTTP method is [Method.GET], this is the URL with query string;
@@ -130,11 +135,6 @@ abstract class StripeRequest {
             // Remove all null values; they cause validation errors
             for (key in HashSet(compactParams.keys)) {
                 when (val value = compactParams[key]) {
-                    is CharSequence -> {
-                        if (value.isEmpty()) {
-                            compactParams.remove(key)
-                        }
-                    }
                     is Map<*, *> -> {
                         compactParams[key] = compactParams(value as Map<String, *>)
                     }

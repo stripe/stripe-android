@@ -1,7 +1,6 @@
 package com.stripe.android.view
 
 import android.content.Context
-import android.graphics.drawable.Drawable
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.AttributeSet
@@ -9,18 +8,16 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.widget.LinearLayout
-import androidx.annotation.ColorInt
 import androidx.annotation.DrawableRes
 import androidx.annotation.IdRes
 import androidx.annotation.IntRange
+import androidx.annotation.RestrictTo
 import androidx.annotation.StringRes
 import androidx.annotation.VisibleForTesting
 import androidx.core.content.ContextCompat
 import androidx.core.content.withStyledAttributes
-import androidx.core.graphics.drawable.DrawableCompat
 import androidx.core.view.updateLayoutParams
 import androidx.core.widget.doAfterTextChanged
-import com.google.android.material.textfield.TextInputLayout
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.R
 import com.stripe.android.cards.CardNumber
@@ -53,15 +50,30 @@ class CardMultilineWidget @JvmOverloads constructor(
         LayoutInflater.from(context),
         this
     )
-    internal val cardNumberEditText = viewBinding.etCardNumber
-    internal val expiryDateEditText = viewBinding.etExpiry
-    internal val cvcEditText = viewBinding.etCvc
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
+    val cardNumberEditText = viewBinding.etCardNumber
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
+    val expiryDateEditText = viewBinding.etExpiry
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
+    val cvcEditText = viewBinding.etCvc
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
     internal val postalCodeEditText = viewBinding.etPostalCode
 
-    internal val secondRowLayout = viewBinding.secondRowLayout
-    internal val cardNumberTextInputLayout = viewBinding.tlCardNumber
-    internal val expiryTextInputLayout = viewBinding.tlExpiry
-    internal val cvcInputLayout = viewBinding.tlCvc
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
+    val secondRowLayout = viewBinding.secondRowLayout
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
+    val cardNumberTextInputLayout = viewBinding.tlCardNumber
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
+    val expiryTextInputLayout = viewBinding.tlExpiry
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
+    val cvcInputLayout = viewBinding.tlCvc
     internal val postalInputLayout = viewBinding.tlPostalCode
 
     private val textInputLayouts = listOf(
@@ -104,8 +116,8 @@ class CardMultilineWidget @JvmOverloads constructor(
         @JvmSynthetic
         get() = cardBrand
 
-    @ColorInt
-    private val tintColorInt: Int
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
+    fun getBrand() = brand
 
     /**
      * If [shouldShowPostalCode] is true and [postalCodeRequired] is true, then postal code is a
@@ -255,6 +267,11 @@ class CardMultilineWidget @JvmOverloads constructor(
         }.orEmpty()
     }
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
+    fun setExpirationDatePlaceholderRes(@StringRes resId: Int?) {
+        expirationDatePlaceholderRes = resId
+    }
+
     private var showCvcIconInCvcField: Boolean = false
 
     internal var cardBrandIconSupplier: CardBrandIconSupplier by Delegates.observable(
@@ -268,26 +285,47 @@ class CardMultilineWidget @JvmOverloads constructor(
     ) { _, _, newValue ->
         cardNumberEditText.setErrorMessageListener(newValue)
     }
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
+    fun setCardNumberErrorListener(listener: StripeEditText.ErrorMessageListener) {
+        cardNumberErrorListener = listener
+    }
+
     internal var expirationDateErrorListener: StripeEditText.ErrorMessageListener by Delegates.observable(
         ErrorListener(expiryTextInputLayout)
     ) { _, _, newValue ->
         expiryDateEditText.setErrorMessageListener(newValue)
     }
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
+    fun setExpirationDateErrorListener(listener: StripeEditText.ErrorMessageListener) {
+        expirationDateErrorListener = listener
+    }
+
     internal var cvcErrorListener: StripeEditText.ErrorMessageListener by Delegates.observable(
         ErrorListener(cvcInputLayout)
     ) { _, _, newValue ->
         cvcEditText.setErrorMessageListener(newValue)
     }
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
+    fun setCvcErrorListener(listener: StripeEditText.ErrorMessageListener) {
+        cvcErrorListener = listener
+    }
+
     internal var postalCodeErrorListener: StripeEditText.ErrorMessageListener? by Delegates.observable(
         ErrorListener(postalInputLayout)
     ) { _, _, newValue ->
         postalCodeEditText.setErrorMessageListener(newValue)
     }
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
+    fun setPostalCodeErrorListener(listener: StripeEditText.ErrorMessageListener?) {
+        postalCodeErrorListener = listener
+    }
+
     init {
         orientation = VERTICAL
-
-        tintColorInt = cardNumberEditText.hintTextColors.defaultColor
 
         textInputLayouts.forEach {
             it.placeholderTextColor = it.editText?.hintTextColors
@@ -396,7 +434,8 @@ class CardMultilineWidget @JvmOverloads constructor(
         cardNumberTextInputLayout.placeholderText = cardHint
     }
 
-    internal fun populate(card: PaymentMethodCreateParams.Card?) {
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
+    fun populate(card: PaymentMethodCreateParams.Card?) {
         card?.let { createParamsCard ->
             // Keep track of currently focused view to return focus to it after populating
             val focusedView = findFocus()
@@ -438,7 +477,8 @@ class CardMultilineWidget @JvmOverloads constructor(
     /**
      * Set an optional CVC placeholder text to override defaults, or `null` to use defaults.
      */
-    internal fun setCvcPlaceholderText(cvcPlaceholderText: String?) {
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
+    fun setCvcPlaceholderText(cvcPlaceholderText: String?) {
         customCvcPlaceholderText = cvcPlaceholderText
         updateCvc()
     }
@@ -451,14 +491,11 @@ class CardMultilineWidget @JvmOverloads constructor(
         updateCvc()
     }
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
     @JvmSynthetic
-    internal fun setCvcIcon(resId: Int?) {
+    fun setCvcIcon(resId: Int?) {
         if (resId != null) {
-            cvcInputLayout.setEndIconDrawable(resId)
-            cvcInputLayout.endIconMode = TextInputLayout.END_ICON_CUSTOM
-        } else {
-            cvcInputLayout.setEndIconDrawable(0)
-            cvcInputLayout.endIconMode = TextInputLayout.END_ICON_NONE
+            updateEndIcon(cvcEditText, resId)
         }
         showCvcIconInCvcField = resId != null
     }
@@ -610,14 +647,14 @@ class CardMultilineWidget @JvmOverloads constructor(
         }
 
         if (shouldShowErrorIcon) {
-            updateCardNumberIcon(
+            updateEndIcon(
                 iconResourceId = cardBrand.errorIcon,
-                shouldTint = false
+                editText = cardNumberEditText
             )
         } else {
-            updateCardNumberIcon(
+            updateEndIcon(
                 iconResourceId = cardBrand.cvcIcon,
-                shouldTint = true
+                editText = cardNumberEditText
             )
         }
     }
@@ -679,15 +716,15 @@ class CardMultilineWidget @JvmOverloads constructor(
     private fun updateBrandUi() {
         updateCvc()
         if (shouldShowErrorIcon) {
-            updateCardNumberIcon(
+            updateEndIcon(
                 iconResourceId = cardBrand.errorIcon,
-                shouldTint = false
+                editText = cardNumberEditText
             )
         } else {
             val cardBrandIcon = cardBrandIconSupplier.get(cardBrand)
-            updateCardNumberIcon(
+            updateEndIcon(
                 iconResourceId = cardBrandIcon.iconResourceId,
-                shouldTint = cardBrandIcon.shouldTint
+                editText = cardNumberEditText
             )
         }
     }
@@ -696,39 +733,22 @@ class CardMultilineWidget @JvmOverloads constructor(
         cvcEditText.updateBrand(cardBrand, customCvcLabel, customCvcPlaceholderText, cvcInputLayout)
     }
 
-    private fun updateCardNumberIcon(
-        @DrawableRes iconResourceId: Int,
-        shouldTint: Boolean
-    ) {
+    private fun updateEndIcon(editText: StripeEditText, @DrawableRes iconResourceId: Int) {
         ContextCompat.getDrawable(context, iconResourceId)?.let { icon ->
-            updateCompoundDrawable(
-                if (shouldTint) {
-                    DrawableCompat.wrap(icon).also {
-                        it.setTint(tintColorInt)
-                    }
-                } else {
-                    icon
-                }
+            editText.setCompoundDrawablesRelativeWithIntrinsicBounds(
+                null,
+                null,
+                icon,
+                null
             )
         }
     }
-
-    private fun updateCompoundDrawable(drawable: Drawable) {
-        cardNumberEditText.setCompoundDrawablesRelativeWithIntrinsicBounds(
-            null,
-            null,
-            drawable,
-            null
-        )
-    }
-
     internal fun interface CardBrandIconSupplier {
         fun get(cardBrand: CardBrand): CardBrandIcon
     }
 
     internal data class CardBrandIcon(
-        val iconResourceId: Int,
-        val shouldTint: Boolean = false
+        val iconResourceId: Int
     )
 
     private companion object {
@@ -736,8 +756,7 @@ class CardMultilineWidget @JvmOverloads constructor(
 
         private val DEFAULT_CARD_BRAND_ICON_SUPPLIER = CardBrandIconSupplier { cardBrand ->
             CardBrandIcon(
-                cardBrand.icon,
-                cardBrand == CardBrand.Unknown
+                cardBrand.icon
             )
         }
     }

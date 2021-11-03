@@ -1,6 +1,5 @@
 package com.stripe.android.payments.core.authentication
 
-import com.stripe.android.Logger
 import com.stripe.android.PaymentBrowserAuthStarter
 import com.stripe.android.StripePaymentController
 import com.stripe.android.auth.PaymentBrowserAuthContract
@@ -10,6 +9,7 @@ import com.stripe.android.networking.AnalyticsRequestExecutor
 import com.stripe.android.networking.AnalyticsRequestFactory
 import com.stripe.android.networking.ApiRequest
 import com.stripe.android.payments.core.injection.ENABLE_LOGGING
+import com.stripe.android.payments.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.payments.core.injection.UIContext
 import com.stripe.android.view.AuthActivityStarterHost
 import kotlinx.coroutines.withContext
@@ -22,6 +22,7 @@ import kotlin.coroutines.CoroutineContext
  * [PaymentAuthenticator] implementation to redirect to a URL through [PaymentBrowserAuthStarter].
  */
 @Singleton
+@JvmSuppressWildcards
 internal class WebIntentAuthenticator @Inject constructor(
     private val paymentBrowserAuthStarterFactory: (AuthActivityStarterHost) -> PaymentBrowserAuthStarter,
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
@@ -29,6 +30,7 @@ internal class WebIntentAuthenticator @Inject constructor(
     @Named(ENABLE_LOGGING) private val enableLogging: Boolean,
     @UIContext private val uiContext: CoroutineContext,
     private val threeDs1IntentReturnUrlMap: MutableMap<String, String>,
+    @Named(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String
 ) : PaymentAuthenticator<StripeIntent> {
 
     override suspend fun authenticate(
@@ -95,7 +97,7 @@ internal class WebIntentAuthenticator @Inject constructor(
         )
     }
 
-    internal suspend fun beginWebAuth(
+    private suspend fun beginWebAuth(
         host: AuthActivityStarterHost,
         stripeIntent: StripeIntent,
         requestCode: Int,
@@ -107,7 +109,6 @@ internal class WebIntentAuthenticator @Inject constructor(
         shouldCancelIntentOnUserNavigation: Boolean = true
     ) = withContext(uiContext) {
         val paymentBrowserWebStarter = paymentBrowserAuthStarterFactory(host)
-        Logger.getInstance(enableLogging).debug("PaymentBrowserAuthStarter#start()")
         paymentBrowserWebStarter.start(
             PaymentBrowserAuthContract.Args(
                 objectId = stripeIntent.id.orEmpty(),
@@ -118,7 +119,8 @@ internal class WebIntentAuthenticator @Inject constructor(
                 enableLogging,
                 stripeAccountId = stripeAccount,
                 shouldCancelSource = shouldCancelSource,
-                shouldCancelIntentOnUserNavigation = shouldCancelIntentOnUserNavigation
+                shouldCancelIntentOnUserNavigation = shouldCancelIntentOnUserNavigation,
+                publishableKey = publishableKeyProvider()
             )
         )
     }

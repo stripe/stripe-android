@@ -47,18 +47,6 @@ class PostalCodeValidatorTest {
     }
 
     @Test
-    fun testCanadianPostalCode() {
-        assertTrue(isValid("K1A 0B1", "CA"))
-        assertTrue(isValid("B1Z 0B9", "CA"))
-        assertFalse(isValid("K1A 0D1", "CA"))
-        assertFalse(isValid("94107", "CA"))
-        assertFalse(isValid("94107-1234", "CA"))
-        assertFalse(isValid("W1A 0B1", "CA"))
-        assertFalse(isValid("123", "CA"))
-        assertFalse(isValid("", "CA"))
-    }
-
-    @Test
     fun testUkPostalCode() {
         assertTrue(isValid("L1 8JQ", "GB"))
         assertTrue(isValid("GU16 7HF", "GB"))
@@ -69,8 +57,8 @@ class PostalCodeValidatorTest {
 
     @Test
     fun testCountryWithoutPostalCode() {
-        assertTrue(isValid("", CountryUtils.NO_POSTAL_CODE_COUNTRIES.first()))
-        assertTrue(isValid("ABC123", CountryUtils.NO_POSTAL_CODE_COUNTRIES.first()))
+        assertTrue(isValid("", "DE"))
+        assertTrue(isValid("ABC123", "DE"))
     }
 
     private fun isValid(postalCode: String, countryCode: String): Boolean {

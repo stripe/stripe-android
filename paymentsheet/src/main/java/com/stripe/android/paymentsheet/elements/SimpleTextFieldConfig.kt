@@ -23,9 +23,18 @@ internal class SimpleTextFieldConfig(
         override fun getError(): FieldError? = null
 
         override fun isFull(): Boolean = false
+
+        override fun isBlank(): Boolean = input.isBlank()
     }
 
-    override fun filter(userTyped: String): String = userTyped
+    override fun filter(userTyped: String): String =
+        if (
+            setOf(KeyboardType.Number, KeyboardType.NumberPassword).contains(keyboard)
+        ) {
+            userTyped.filter { it.isDigit() }
+        } else {
+            userTyped
+        }
 
     override fun convertToRaw(displayName: String) = displayName
 

@@ -1,6 +1,9 @@
 package com.stripe.android.paymentsheet.specifications
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.paymentsheet.elements.BankRepository
+import com.stripe.android.paymentsheet.elements.DropdownItemSpec
+import com.stripe.android.paymentsheet.elements.SupportedBankType
 import org.junit.Test
 import org.mockito.kotlin.mock
 import java.io.File
@@ -9,7 +12,7 @@ class BankRepositoryTest {
     private val bankRepository = BankRepository(mock())
     @Test
     fun `Correct supported bank is returned`() {
-        bankRepository.init(
+        bankRepository.initialize(
             mapOf(
                 SupportedBankType.Eps to
                     """
@@ -30,7 +33,7 @@ class BankRepositoryTest {
 
         assertThat(listOfBanks[0])
             .isEqualTo(
-                DropdownItem(
+                DropdownItemSpec(
                     value = "arzte_und_apotheker_bank",
                     text = "Ärzte- und Apothekerbank",
                 )
@@ -39,7 +42,7 @@ class BankRepositoryTest {
 
     @Test
     fun `Verify all supported banks are successfully read`() {
-        bankRepository.init(
+        bankRepository.initialize(
             SupportedBankType.values().associateWith { bankType ->
                 getInputStream(bankType)
             }

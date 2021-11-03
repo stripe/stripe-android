@@ -15,8 +15,11 @@ configurations {
     ktlint
 }
 
+if (System.getenv("JITPACK")) {
+    group='com.github.stripe.stripe-android'
+}
+
 dependencies {
-    implementation project(":paymentsheet")
     implementation libraries.androidx.annotation
     implementation libraries.androidx.appcompat
     implementation libraries.androidx.browser
@@ -32,11 +35,12 @@ dependencies {
     implementation "com.google.dagger:dagger:$daggerVersion"
     kapt "com.google.dagger:dagger-compiler:$daggerVersion"
 
+    implementation "androidx.activity:activity-compose:$composeActivityVersion"
+
     // For instructions on replacing the BouncyCastle dependency used by the 3DS2 SDK, see
     // https://github.com/stripe/stripe-android/issues/3173#issuecomment-785176608
-    implementation "com.stripe:stripe-3ds2-android:6.1.1"
+    implementation "com.stripe:stripe-3ds2-android:6.1.2"
 
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlinVersion"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinCoroutinesVersion"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$kotlinCoroutinesVersion"
 
@@ -63,7 +67,6 @@ dependencies {
     androidTestUtil "androidx.test:orchestrator:$androidTestVersion"
 
     ktlint "com.pinterest:ktlint:$ktlintVersion"
-
 }
 
 android {
@@ -119,6 +122,7 @@ android {
     }
 
     buildFeatures {
+        compose = true
         viewBinding true
     }
 
@@ -126,14 +130,19 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
+
     kotlinOptions {
         jvmTarget = "1.8"
+    }
+
+    composeOptions {
+        kotlinCompilerExtensionVersion "$composeVersion"
     }
 }
 
 task ktlint(type: JavaExec, group: "verification") {
     description = "Check Kotlin code style."
-    main = "com.pinterest.ktlint.Main"
+    mainClass = "com.pinterest.ktlint.Main"
     classpath = configurations.ktlint
     args "src/**/*.kt"
     // to generate report in checkstyle format prepend following args:
@@ -144,7 +153,7 @@ check.dependsOn ktlint
 
 task ktlintFormat(type: JavaExec, group: "formatting") {
     description = "Fix Kotlin code style deviations."
-    main = "com.pinterest.ktlint.Main"
+    mainClass = "com.pinterest.ktlint.Main"
     classpath = configurations.ktlint
     args "-F", "src/**/*.kt"
 }

@@ -190,23 +190,20 @@ internal class GooglePayLauncherViewModel(
     internal suspend fun getResultFromConfirmation(
         requestCode: Int,
         data: Intent
-    ): GooglePayLauncher.Result {
-        return when {
-            paymentController.shouldHandlePaymentResult(requestCode, data) -> {
-                paymentController.getPaymentIntentResult(data)
-                GooglePayLauncher.Result.Completed
+    ): GooglePayLauncher.Result =
+        runCatching {
+            when {
+                paymentController.shouldHandlePaymentResult(requestCode, data) -> {
+                    paymentController.getPaymentIntentResult(data)
+                    GooglePayLauncher.Result.Completed
+                }
+                paymentController.shouldHandleSetupResult(requestCode, data) -> {
+                    paymentController.getSetupIntentResult(data)
+                    GooglePayLauncher.Result.Completed
+                }
+                else -> throw IllegalStateException("Unexpected confirmation result.")
             }
-            paymentController.shouldHandleSetupResult(requestCode, data) -> {
-                paymentController.getSetupIntentResult(data)
-                GooglePayLauncher.Result.Completed
-            }
-            else -> {
-                GooglePayLauncher.Result.Failed(
-                    IllegalStateException("Unexpected result.")
-                )
-            }
-        }
-    }
+        }.getOrElse { GooglePayLauncher.Result.Failed(it) }
 
     internal class Factory(
         private val application: Application,
@@ -222,11 +219,12 @@ internal class GooglePayLauncherViewModel(
             val config = PaymentConfiguration.getInstance(application)
             val publishableKey = config.publishableKey
             val stripeAccountId = config.stripeAccountId
+            val productUsageTokens = setOf(GooglePayLauncher.PRODUCT_USAGE)
 
             val analyticsRequestFactory = AnalyticsRequestFactory(
                 application,
                 publishableKey,
-                setOf(GooglePayLauncher.PRODUCT_USAGE)
+                productUsageTokens
             )
 
             val stripeRepository = StripeApiRepository(
@@ -234,25 +232,14 @@ internal class GooglePayLauncherViewModel(
                 { publishableKey },
                 logger = logger,
                 workContext = workContext,
+                productUsageTokens = productUsageTokens,
                 analyticsRequestFactory = analyticsRequestFactory
             )
 
-            val billingAddressConfig = args.config.billingAddressConfig
             val googlePayRepository = DefaultGooglePayRepository(
                 application,
-                googlePayEnvironment,
-                GooglePayJsonFactory.BillingAddressParameters(
-                    billingAddressConfig.isRequired,
-                    when (billingAddressConfig.format) {
-                        GooglePayLauncher.BillingAddressConfig.Format.Min -> {
-                            GooglePayJsonFactory.BillingAddressParameters.Format.Min
-                        }
-                        GooglePayLauncher.BillingAddressConfig.Format.Full -> {
-                            GooglePayJsonFactory.BillingAddressParameters.Format.Full
-                        }
-                    },
-                    billingAddressConfig.isPhoneNumberRequired
-                ),
+                args.config.environment,
+                args.config.billingAddressConfig.convert(),
                 args.config.existingPaymentMethodRequired,
                 logger
             )

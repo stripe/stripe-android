@@ -9,16 +9,26 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.ApiRequest
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.payments.core.authentication.PaymentAuthenticator
+import com.stripe.android.payments.core.injection.ENABLE_LOGGING
+import com.stripe.android.payments.core.injection.InjectorKey
+import com.stripe.android.payments.core.injection.PRODUCT_USAGE
+import com.stripe.android.payments.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.stripe3ds2.transaction.SdkTransactionId
 import com.stripe.android.view.AuthActivityStarterHost
+import javax.inject.Inject
+import javax.inject.Named
+import javax.inject.Singleton
 
 /**
  * [PaymentAuthenticator] authenticating through Stripe's 3ds2 SDK.
  */
-internal class Stripe3DS2Authenticator(
+@Singleton
+internal class Stripe3DS2Authenticator @Inject constructor(
     private val config: PaymentAuthConfig,
-    private val enableLogging: Boolean,
-    private val threeDs1IntentReturnUrlMap: MutableMap<String, String>
+    @Named(ENABLE_LOGGING) private val enableLogging: Boolean,
+    @InjectorKey private val injectorKey: String,
+    @Named(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String,
+    @Named(PRODUCT_USAGE) private val productUsage: Set<String>
 ) : PaymentAuthenticator<StripeIntent> {
 
     /**
@@ -61,12 +71,12 @@ internal class Stripe3DS2Authenticator(
                 config.stripe3ds2Config,
                 authenticatable,
                 authenticatable.nextActionData as StripeIntent.NextActionData.SdkData.Use3DS2,
-                threeDs1ReturnUrl = authenticatable.id?.let {
-                    threeDs1IntentReturnUrlMap[it]
-                },
                 requestOptions,
                 enableLogging = enableLogging,
-                host.statusBarColor
+                host.statusBarColor,
+                injectorKey,
+                publishableKeyProvider(),
+                productUsage
             )
         )
     }

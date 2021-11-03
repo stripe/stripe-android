@@ -3,7 +3,9 @@ package com.stripe.android.view
 import android.content.Context
 import android.content.res.ColorStateList
 import android.os.Parcelable
+import android.text.InputType
 import android.text.TextWatcher
+import android.text.method.HideReturnsTransformationMethod
 import android.util.AttributeSet
 import android.view.KeyEvent
 import android.view.accessibility.AccessibilityNodeInfo
@@ -11,6 +13,7 @@ import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputConnection
 import android.view.inputmethod.InputConnectionWrapper
 import androidx.annotation.ColorInt
+import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import androidx.core.content.ContextCompat
 import androidx.core.widget.doAfterTextChanged
@@ -108,7 +111,8 @@ open class StripeEditText @JvmOverloads constructor(
         onFocusChangeListener = null
     }
 
-    internal val internalFocusChangeListeners = mutableListOf<OnFocusChangeListener>()
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
+    val internalFocusChangeListeners = mutableListOf<OnFocusChangeListener>()
     private var externalFocusChangeListener: OnFocusChangeListener? = null
 
     protected open val accessibilityText: String? = null
@@ -262,8 +266,9 @@ open class StripeEditText @JvmOverloads constructor(
 
     override fun getOnFocusChangeListener() = externalFocusChangeListener
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
     @VisibleForTesting
-    internal fun getParentOnFocusChangeListener() = super.getOnFocusChangeListener()
+    fun getParentOnFocusChangeListener() = super.getOnFocusChangeListener()
 
     /**
      * Note: [addTextChangedListener] will potentially be called by a superclass constructor
@@ -295,6 +300,14 @@ open class StripeEditText @JvmOverloads constructor(
         textWatchers?.forEach {
             super.addTextChangedListener(it)
         }
+    }
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    fun setNumberOnlyInputType() {
+        val preTypeface = typeface
+        inputType = InputType.TYPE_NUMBER_VARIATION_PASSWORD or InputType.TYPE_CLASS_NUMBER
+        typeface = preTypeface
+        transformationMethod = HideReturnsTransformationMethod.getInstance()
     }
 
     @Parcelize

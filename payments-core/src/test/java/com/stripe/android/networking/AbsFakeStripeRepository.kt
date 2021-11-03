@@ -27,7 +27,7 @@ import com.stripe.android.model.TokenParams
 import org.json.JSONObject
 import java.util.Locale
 
-internal abstract class AbsFakeStripeRepository : StripeRepository {
+internal abstract class AbsFakeStripeRepository : StripeRepository() {
 
     override suspend fun retrieveStripeIntent(
         clientSecret: String,
@@ -49,6 +49,13 @@ internal abstract class AbsFakeStripeRepository : StripeRepository {
         clientSecret: String,
         options: ApiRequest.Options,
         expandFields: List<String>
+    ): PaymentIntent? {
+        return null
+    }
+
+    override suspend fun refreshPaymentIntent(
+        clientSecret: String,
+        options: ApiRequest.Options
     ): PaymentIntent? {
         return null
     }

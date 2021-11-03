@@ -1,21 +1,59 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
-  <!-- Caption for City field on address form -->
-  <string name="address_label_city">Miejscowość</string>
-  <!-- Caption for Country field on address form -->
-  <string name="address_label_country">Kraj</string>
-  <!-- Caption for County field on address form (only countries that use county, like United Kingdom) -->
-  <string name="address_label_county">Hrabstwo</string>
-  <!-- Caption for Name field on address form -->
-  <string name="address_label_name">Imię i nazwisko</string>
-  <!-- Short string for postal code (text used in non-US countries) -->
-  <string name="address_label_postal_code">Kod pocztowy</string>
-  <!-- Caption for Province field on address form (only countries that use province, like Canada) -->
-  <string name="address_label_province">Prowincja</string>
-  <!-- Caption for State field on address form (only countries that use state , like United States) -->
-  <string name="address_label_state">Stan</string>
-  <!-- Label for input requesting zip code, used for US based addreses -->
-  <string name="address_label_zip_code">Kod pocztowy</string>
+  <!-- Used for accessibility to describe the button on the payment sheet list of options to add a new payment method. -->
+  <string name="add_new_payment_method">Dodaj nową metodę płatności</string>
+  <!-- Label for input requesting address line 2, used for international addresses -->
+  <string name="address_label_address_line2">Linia adresu 2</string>
+  <!-- Used to describe address in United Arab Emirates -->
+  <string name="address_label_ae_emirate">Emiraty</string>
+  <!-- Label of an address field -->
+  <string name="address_label_au_suburb_or_city">Przedmieścia lub miasto</string>
+  <!-- Label of an address field -->
+  <string name="address_label_bb_jm_parish">Parafia</string>
+  <!-- Used to describe a field of an address -->
+  <string name="address_label_cedex">Cedex</string>
+  <!-- Label of an address field -->
+  <string name="address_label_department">Departament</string>
+  <!-- Label for the district field on an address form -->
+  <string name="address_label_district">Dystrykt</string>
+  <!-- Label of an address field in hk -->
+  <string name="address_label_hk_area">Obszar</string>
+  <!-- Label of an address field -->
+  <string name="address_label_ie_eircode">Eircode</string>
+  <!-- Used to describe an address field in Ireland -->
+  <string name="address_label_ie_townland">Okręg administracyjny</string>
+  <!-- Used to describe postal code in India -->
+  <string name="address_label_in_pin">PIN</string>
+  <!-- Used to describe part of an address -->
+  <string name="address_label_island">Wyspa</string>
+  <!-- Label of an address field -->
+  <string name="address_label_jp_prefecture">Prefektura</string>
+  <!-- Label of an address field -->
+  <string name="address_label_kr_do_si">Do Si</string>
+  <!-- Used to describe a field of an address -->
+  <string name="address_label_neighborhood">Dzielnica</string>
+  <!-- Label of an address field -->
+  <string name="address_label_oblast">Obwód</string>
+  <!-- Used to describe a field of an address -->
+  <string name="address_label_post_town">Poczta lub miasto</string>
+  <!-- Label of an address field -->
+  <string name="address_label_suburb">Przedmieścia</string>
+  <!-- Used to describe an address field. -->
+  <string name="address_label_village_township">Wieś lub miasto</string>
+  <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
+  <string name="bank_account_ending_in">Usuń konto bankowe kończące się na %s</string>
+  <!-- Billing address section title for card form entry. -->
+  <string name="billing_details">Adres rozliczeniowy</string>
+  <!-- Used when a required field is blank and submit is clicked. -->
+  <string name="blank_and_required">To pole nie może być puste.</string>
+  <!-- Button title to cancel action in an alert -->
+  <string name="cancel">Anuluj</string>
+  <!-- Used for accessibility to indicate that when you press the dropdown arrow on a form (such as a country or bank), it will bring up a menu to allow you to change the value. -->
+  <string name="change">Zmień</string>
+  <!-- Done button title -->
+  <string name="done">Gotowe</string>
+  <!-- Button title to enter editing mode -->
+  <string name="edit">Edytuj</string>
   <!-- Caption for Email field on address form -->
   <string name="email">Adres e-mail</string>
   <!-- Error message when email is invalid -->
@@ -28,16 +66,62 @@
   <string name="iban_invalid_country">Podany IBAN jest nieprawidłowy. „%s” nie jest prawidłowym kodem kraju.</string>
   <!-- An error message displayed when the IBAN does not start with a two-letter country code. -->
   <string name="iban_invalid_start">IBAN powinien się zaczynać od dwuliterowego kodu kraju.</string>
+  <!-- Button title for confirmation alert to remove a saved payment method
+   Text for remove button -->
+  <string name="remove">Usuń</string>
+  <!-- Generic error message shown when payment cannot be processed. -->
+  <string name="stripe_failure_connection_error">Wystąpiły trudności z nawiązaniem połączenia z dostawcą usług płatniczych. Sprawdź połączenie z Internetem i spróbuj ponownie.</string>
+  <!-- When an internal error is reported when a google pay payment is started. -->
+  <string name="stripe_google_pay_error_internal">Wystąpił wewnętrzny błąd.</string>
+  <!-- Text for a button that, when tapped, displays another screen where the customer can add payment method details -->
+  <string name="stripe_paymentsheet_add_payment_method_button_label">+ Dodaj</string>
+  <!-- Card details entry form header title -->
+  <string name="stripe_paymentsheet_add_payment_method_card_information">Dane karty</string>
+  <!-- Country selector and postal code entry form header title -->
+  <string name="stripe_paymentsheet_add_payment_method_country_or_region">Kraj lub region</string>
+  <!-- Title shown above a form where the customer can enter payment information like credit card details, email, billing address, etc. -->
+  <string name="stripe_paymentsheet_add_payment_method_title">Dodaj informacje o płatności</string>
+  <!-- Text for back button -->
+  <string name="stripe_paymentsheet_back">Wstecz</string>
+  <string name="stripe_paymentsheet_close">Zamknij</string>
+  <!-- Text for continue button -->
+  <string name="stripe_paymentsheet_continue_button_label">Kontynuuj</string>
+  <!-- Label for the field containing the dropdown of EPS Banks -->
+  <string name="stripe_paymentsheet_eps_bank">Bank EPS</string>
   <!-- The label of a text field that is optional. For example, 'Email (optional)' or 'Name (optional) -->
   <string name="stripe_paymentsheet_form_label_optional">%s (opcjonalnie)</string>
   <!-- iDEAL bank section title for iDEAL form entry. -->
   <string name="stripe_paymentsheet_ideal_bank">iDEAL Bank</string>
+  <!-- Title of a section containing multiple payment methods that can selected and will collect the payment information from the user. -->
+  <string name="stripe_paymentsheet_or_pay_using">Lub zapłać, korzystając z</string>
+  <!-- Title of a section containing a card form that will collect the payment information from the user. -->
+  <string name="stripe_paymentsheet_or_pay_with_card">Lub zapłać kartą</string>
+  <!-- Label on the dropdown to select the Przelewy24 Bank -->
+  <string name="stripe_paymentsheet_p24_bank">Bank - Przelewy24</string>
+  <!-- Label of a button that initiates payment when tapped -->
+  <string name="stripe_paymentsheet_pay_button_amount">Zapłać %s</string>
+  <!-- Label for a button that starts processing the payment. -->
+  <string name="stripe_paymentsheet_pay_button_label">Zapłać</string>
+  <!-- Payment Method type brand name  -->
+  <string name="stripe_paymentsheet_payment_method_afterpay_clearpay">Afterpay</string>
   <!-- Title for credit card number entry field -->
   <string name="stripe_paymentsheet_payment_method_card">Karta</string>
   <!-- Payment method brand name -->
   <string name="stripe_paymentsheet_payment_method_sepa_debit">Polecenie zapłaty SEPA</string>
+  <!-- Label of a button that, when tapped, initiates payment, becomes disabled, and displays this text -->
+  <string name="stripe_paymentsheet_primary_button_processing">Przetwarzanie…</string>
+  <!-- Content for alert popup prompting to confirm removing saved payment method. -->
+  <string name="stripe_paymentsheet_remove_pm">Usuń: %s</string>
   <!-- The label of a switch indicating whether to save the payment method for future payments. -->
   <string name="stripe_paymentsheet_save_for_future_payments">Zapisz do przyszłych płatności</string>
+  <!-- The label of a switch indicating whether to save the user&apos;s card for future payments to this merchant -->
+  <string name="stripe_paymentsheet_save_this_card_with_merchant_name">Zapisz dane tej karty do przyszłych płatności %s</string>
+  <!-- Title shown above a carousel containing the customer&apos;s payment methods -->
+  <string name="stripe_paymentsheet_select_payment_method">Wybierz metodę płatności</string>
   <!-- SEPA mandate text -->
   <string name="stripe_paymentsheet_sepa_mandate">Podając dane płatności i potwierdzając tę płatność, upoważniasz (A) %s i Stripe, naszego dostawcę usług płatności, do wysłania instrukcji do Twojego banku w celu obciążenia Twojego konta oraz (B) Twój bank do obciążenia Twojego konta zgodnie z tymi instrukcjami. W ramach swoich praw jesteś uprawniony(-a) do otrzymania zwrotu od Twojego banku zgodnie z zasadami i warunkami umowy z bankiem. Zwrot należy odebrać w ciągu 8 tygodni, licząc od daty obciążenia konta. Twoje prawa są wyjaśnione w oświadczeniu, które możesz otrzymać z banku. Wyrażasz zgodę na otrzymywanie powiadomień w przypadku przyszłych obciążeń do 2 dni przed ich wystąpieniem.</string>
+  <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->
+  <string name="stripe_paymentsheet_setup_button_label">Ustaw</string>
+  <!-- Label indicating the total amount that the user is authorizing (e.g. "Total: $25.00") -->
+  <string name="stripe_paymentsheet_total_amount">Razem: %s</string>
 </resources>

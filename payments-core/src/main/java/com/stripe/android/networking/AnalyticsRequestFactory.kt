@@ -6,11 +6,16 @@ import android.content.pm.PackageManager
 import android.os.Build
 import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
+import com.stripe.android.BuildConfig
 import com.stripe.android.Stripe
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.Source
 import com.stripe.android.model.Token
+import com.stripe.android.payments.core.injection.PRODUCT_USAGE
+import com.stripe.android.payments.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.utils.ContextUtils.packageInfo
+import javax.inject.Inject
+import javax.inject.Named
 import javax.inject.Provider
 
 /**
@@ -22,9 +27,10 @@ class AnalyticsRequestFactory @VisibleForTesting internal constructor(
     private val packageInfo: PackageInfo?,
     private val packageName: String,
     private val publishableKeyProvider: Provider<String>,
-    private val defaultProductUsageTokens: Set<String> = emptySet()
+    internal val defaultProductUsageTokens: Set<String> = emptySet()
 ) {
-    internal constructor(
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    constructor(
         context: Context,
         publishableKey: String,
         defaultProductUsageTokens: Set<String> = emptySet(),
@@ -37,7 +43,19 @@ class AnalyticsRequestFactory @VisibleForTesting internal constructor(
     internal constructor(
         context: Context,
         publishableKeyProvider: Provider<String>,
-        defaultProductUsageTokens: Set<String> = emptySet(),
+    ) : this(
+        context.applicationContext.packageManager,
+        context.applicationContext.packageInfo,
+        context.applicationContext.packageName.orEmpty(),
+        publishableKeyProvider,
+        emptySet()
+    )
+
+    @Inject
+    internal constructor(
+        context: Context,
+        @Named(PUBLISHABLE_KEY) publishableKeyProvider: () -> String,
+        @Named(PRODUCT_USAGE) defaultProductUsageTokens: Set<String>,
     ) : this(
         context.applicationContext.packageManager,
         context.applicationContext.packageInfo,
@@ -244,7 +262,8 @@ class AnalyticsRequestFactory @VisibleForTesting internal constructor(
             FIELD_OS_RELEASE to Build.VERSION.RELEASE,
             FIELD_OS_VERSION to Build.VERSION.SDK_INT,
             FIELD_DEVICE_TYPE to DEVICE_TYPE,
-            FIELD_BINDINGS_VERSION to Stripe.VERSION_NAME
+            FIELD_BINDINGS_VERSION to Stripe.VERSION_NAME,
+            FIELD_IS_DEVELOPMENT to BuildConfig.DEBUG
         )
     }
 
@@ -295,6 +314,7 @@ class AnalyticsRequestFactory @VisibleForTesting internal constructor(
         internal const val FIELD_APP_NAME = "app_name"
         internal const val FIELD_APP_VERSION = "app_version"
         internal const val FIELD_BINDINGS_VERSION = "bindings_version"
+        internal const val FIELD_IS_DEVELOPMENT = "is_development"
         internal const val FIELD_DEVICE_ID = "device_id"
         internal const val FIELD_DEVICE_TYPE = "device_type"
         internal const val FIELD_EVENT = "event"
@@ -302,7 +322,6 @@ class AnalyticsRequestFactory @VisibleForTesting internal constructor(
         internal const val FIELD_OS_RELEASE = "os_release"
         internal const val FIELD_OS_VERSION = "os_version"
         internal const val FIELD_PUBLISHABLE_KEY = "publishable_key"
-        internal const val FIELD_SESSION_ID = "session_id"
         internal const val FIELD_SOURCE_TYPE = "source_type"
         internal const val FIELD_3DS2_UI_TYPE = "3ds2_ui_type"
         internal const val FIELD_TOKEN_TYPE = "token_type"
@@ -310,8 +329,9 @@ class AnalyticsRequestFactory @VisibleForTesting internal constructor(
         @JvmSynthetic
         internal val VALID_PARAM_FIELDS: Set<String> = setOf(
             FIELD_ANALYTICS_UA, FIELD_APP_NAME, FIELD_APP_VERSION, FIELD_BINDINGS_VERSION,
-            FIELD_DEVICE_TYPE, FIELD_EVENT, FIELD_OS_VERSION, FIELD_OS_NAME, FIELD_OS_RELEASE,
-            FIELD_PRODUCT_USAGE, FIELD_PUBLISHABLE_KEY, FIELD_SOURCE_TYPE, FIELD_TOKEN_TYPE
+            FIELD_IS_DEVELOPMENT, FIELD_DEVICE_TYPE, FIELD_EVENT, FIELD_OS_VERSION, FIELD_OS_NAME,
+            FIELD_OS_RELEASE, FIELD_PRODUCT_USAGE, FIELD_PUBLISHABLE_KEY, FIELD_SOURCE_TYPE,
+            FIELD_TOKEN_TYPE
         )
 
         private const val ANALYTICS_PREFIX = "analytics"

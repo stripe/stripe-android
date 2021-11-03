@@ -1,5 +1,6 @@
 package com.stripe.android.model
 
+import androidx.annotation.RestrictTo
 import com.stripe.android.model.PaymentIntent.CaptureMethod
 import com.stripe.android.model.PaymentIntent.ConfirmationMethod
 import com.stripe.android.model.parsers.PaymentIntentJsonParser
@@ -117,7 +118,7 @@ data class PaymentIntent internal constructor(
      */
     override val status: StripeIntent.Status? = null,
 
-    private val setupFutureUsage: StripeIntent.Usage? = null,
+    val setupFutureUsage: StripeIntent.Usage? = null,
 
     /**
      * The payment error encountered in the previous [PaymentIntent] confirmation.
@@ -128,6 +129,11 @@ data class PaymentIntent internal constructor(
      * Shipping information for this [PaymentIntent].
      */
     val shipping: Shipping? = null,
+
+    /**
+     * Payment types that have not been activated in livemode, but have been activated in testmode.
+     */
+    override val unactivatedPaymentMethods: List<String>,
 
     override val nextActionData: StripeIntent.NextActionData? = null
 ) : StripeIntent {
@@ -156,6 +162,18 @@ data class PaymentIntent internal constructor(
     override fun requiresConfirmation(): Boolean {
         return status === StripeIntent.Status.RequiresConfirmation
     }
+
+    /**
+     * SetupFutureUsage is considered to be set if it is on or off session.
+     */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    fun isSetupFutureUsageSet() =
+        when (setupFutureUsage) {
+            StripeIntent.Usage.OnSession -> true
+            StripeIntent.Usage.OffSession -> true
+            StripeIntent.Usage.OneTime -> false
+            null -> false
+        }
 
     /**
      * The payment error encountered in the previous [PaymentIntent] confirmation.
@@ -281,7 +299,7 @@ data class PaymentIntent internal constructor(
 
         init {
             require(isMatch(value)) {
-                "Invalid client secret: $value"
+                "Invalid Payment Intent client secret: $value"
             }
         }
 

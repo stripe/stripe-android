@@ -133,5 +133,9 @@
     "value": "vr_bank_braunau",
     "text": "VR-Bank Braunau",
     "icon": "vr_bank_braunau"
+  },
+  {
+    "value": null,
+    "text": "Other"
   }
 ]

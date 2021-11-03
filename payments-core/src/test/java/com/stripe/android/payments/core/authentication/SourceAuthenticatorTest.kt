@@ -49,7 +49,8 @@ class SourceAuthenticatorTest {
         analyticsRequestExecutor,
         analyticsRequestFactory,
         false,
-        testDispatcher
+        testDispatcher,
+        { ApiKeyFixtures.FAKE_PUBLISHABLE_KEY }
     )
 
     @Test

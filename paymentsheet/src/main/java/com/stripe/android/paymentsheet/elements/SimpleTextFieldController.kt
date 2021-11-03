@@ -5,7 +5,9 @@ import androidx.annotation.StringRes
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.lifecycle.LiveData
 import com.stripe.android.paymentsheet.elements.TextFieldStateConstants.Error.Blank
+import com.stripe.android.paymentsheet.forms.FormFieldEntry
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
@@ -21,7 +23,8 @@ internal interface TextFieldController : InputController {
     val capitalization: KeyboardCapitalization
     val keyboardType: KeyboardType
     val visualTransformation: VisualTransformation
-    val showOptionalLabel: Boolean
+    override val showOptionalLabel: Boolean
+    val fieldState: Flow<TextFieldState>
     override val fieldValue: Flow<String>
     val visibleError: Flow<Boolean>
 }
@@ -40,7 +43,8 @@ data class TextFieldIcon(
  */
 internal class SimpleTextFieldController constructor(
     private val textFieldConfig: TextFieldConfig,
-    override val showOptionalLabel: Boolean = false
+    override val showOptionalLabel: Boolean = false,
+    initialValue: String? = null
 ) : TextFieldController, SectionFieldErrorController {
     override val trailingIcon: Flow<TextFieldIcon?> = textFieldConfig.trailingIcon
     override val capitalization: KeyboardCapitalization = textFieldConfig.capitalization
@@ -59,6 +63,7 @@ internal class SimpleTextFieldController constructor(
     override val rawFieldValue: Flow<String> = _fieldValue.map { textFieldConfig.convertToRaw(it) }
 
     private val _fieldState = MutableStateFlow<TextFieldState>(Blank)
+    override val fieldState: Flow<TextFieldState> = _fieldState
 
     private val _hasFocus = MutableStateFlow(false)
 
@@ -80,8 +85,13 @@ internal class SimpleTextFieldController constructor(
         it.isValid() || (!it.isValid() && showOptionalLabel && it.isBlank())
     }
 
+    override val formFieldValue: Flow<FormFieldEntry> =
+        combine(isComplete, rawFieldValue) { complete, value ->
+            FormFieldEntry(value, complete)
+        }
+
     init {
-        onValueChange("")
+        initialValue?.let { onRawValueChange(it) }
     }
 
     /**

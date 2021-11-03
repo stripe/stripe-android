@@ -2,28 +2,31 @@ package com.stripe.android.paymentsheet.address
 
 import android.content.res.Resources
 import androidx.annotation.VisibleForTesting
-import com.stripe.android.paymentsheet.SectionFieldElement
+import com.stripe.android.paymentsheet.elements.SectionFieldElement
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 internal class AddressFieldElementRepository @Inject internal constructor(
-    val resources: Resources
+    val resources: Resources?
 ) {
+    // This is needed for @Preview and inject does not support a constructor with default parameters.
+    internal constructor() : this(null)
+
     private val countryFieldMap = mutableMapOf<String, List<SectionFieldElement>?>()
 
     internal fun get(countryCode: String?) = countryCode?.let {
         countryFieldMap[it]
     } ?: countryFieldMap[DEFAULT_COUNTRY_CODE]
 
-    internal fun init() {
-        init(
+    init {
+        initialize(
             supportedCountries.associateWith { countryCode ->
                 "addressinfo/$countryCode.json"
             }.mapValues { (_, assetFileName) ->
                 requireNotNull(
                     parseAddressesSchema(
-                        resources.assets.open(assetFileName)
+                        resources?.assets?.open(assetFileName)
                     ),
                 )
             }
@@ -31,7 +34,7 @@ internal class AddressFieldElementRepository @Inject internal constructor(
     }
 
     @VisibleForTesting
-    internal fun init(
+    internal fun initialize(
         countryAddressSchemaPair: Map<String, List<CountryAddressSchema>>
     ) {
         countryAddressSchemaPair.map { (countryCode, schemaList) ->

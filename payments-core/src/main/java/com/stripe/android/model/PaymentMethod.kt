@@ -1,6 +1,7 @@
 package com.stripe.android.model
 
 import android.os.Parcelable
+import androidx.annotation.RestrictTo
 import com.stripe.android.ObjectBuilder
 import com.stripe.android.model.parsers.PaymentMethodJsonParser
 import com.stripe.android.model.wallets.Wallet
@@ -19,7 +20,9 @@ import org.json.JSONObject
  * See [PaymentMethodCreateParams] for PaymentMethod creation
  */
 @Parcelize
-data class PaymentMethod internal constructor(
+data class PaymentMethod
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+constructor(
     /**
      * Unique identifier for the object.
      *
@@ -124,7 +127,8 @@ data class PaymentMethod internal constructor(
     @JvmField val netbanking: Netbanking? = null
 ) : StripeModel {
 
-    internal fun hasExpectedDetails(): Boolean =
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
+    fun hasExpectedDetails(): Boolean =
         when (type) {
             Type.Card -> card != null
             Type.CardPresent -> cardPresent != null
@@ -142,37 +146,175 @@ data class PaymentMethod internal constructor(
         @JvmField val code: String,
         @JvmField val isReusable: Boolean,
         @JvmField val isVoucher: Boolean,
-        @JvmField val requiresMandate: Boolean
+        @JvmField val requiresMandate: Boolean,
+        private val hasDelayedSettlement: Boolean
     ) : Parcelable {
-        Card("card", isReusable = true, isVoucher = false, requiresMandate = false),
-        CardPresent("card_present", isReusable = false, isVoucher = false, requiresMandate = false),
-        Fpx("fpx", isReusable = false, isVoucher = false, requiresMandate = false),
-        Ideal("ideal", isReusable = false, isVoucher = false, requiresMandate = true),
-        SepaDebit("sepa_debit", isReusable = false, isVoucher = false, requiresMandate = true),
-        AuBecsDebit("au_becs_debit", isReusable = true, isVoucher = false, requiresMandate = true),
-        BacsDebit("bacs_debit", isReusable = true, isVoucher = false, requiresMandate = true),
-        Sofort("sofort", isReusable = false, isVoucher = false, requiresMandate = true),
-        Upi("upi", isReusable = false, isVoucher = false, requiresMandate = false),
-        P24("p24", isReusable = false, isVoucher = false, requiresMandate = false),
-        Bancontact("bancontact", isReusable = false, isVoucher = false, requiresMandate = true),
-        Giropay("giropay", isReusable = false, isVoucher = false, requiresMandate = false),
-        Eps("eps", isReusable = false, isVoucher = false, requiresMandate = true),
-        Oxxo("oxxo", isReusable = false, isVoucher = true, requiresMandate = false),
-        Alipay("alipay", isReusable = false, isVoucher = false, requiresMandate = false),
-        GrabPay("grabpay", isReusable = false, isVoucher = false, requiresMandate = false),
-        PayPal("paypal", isReusable = false, isVoucher = false, requiresMandate = false),
-        AfterpayClearpay("afterpay_clearpay", isReusable = false, isVoucher = false, requiresMandate = false),
-        Netbanking("netbanking", isReusable = false, isVoucher = false, requiresMandate = false),
-        Blik("blik", isReusable = false, isVoucher = false, requiresMandate = false),
-        WeChatPay("wechat_pay", isReusable = false, isVoucher = false, requiresMandate = false);
+        Card(
+            "card",
+            isReusable = true,
+            isVoucher = false,
+            requiresMandate = false,
+            hasDelayedSettlement = false
+        ),
+        CardPresent(
+            "card_present",
+            isReusable = false,
+            isVoucher = false,
+            requiresMandate = false,
+            hasDelayedSettlement = false
+        ),
+        Fpx(
+            "fpx",
+            isReusable = false,
+            isVoucher = false,
+            requiresMandate = false,
+            hasDelayedSettlement = false
+        ),
+        Ideal(
+            "ideal",
+            isReusable = false,
+            isVoucher = false,
+            requiresMandate = true,
+            hasDelayedSettlement = false
+        ),
+        SepaDebit(
+            "sepa_debit",
+            isReusable = false,
+            isVoucher = false,
+            requiresMandate = true,
+            hasDelayedSettlement = true
+        ),
+        AuBecsDebit(
+            "au_becs_debit",
+            isReusable = true,
+            isVoucher = false,
+            requiresMandate = true,
+            hasDelayedSettlement = true
+        ),
+        BacsDebit(
+            "bacs_debit",
+            isReusable = true,
+            isVoucher = false,
+            requiresMandate = true,
+            hasDelayedSettlement = true
+        ),
+        Sofort(
+            "sofort",
+            isReusable = false,
+            isVoucher = false,
+            requiresMandate = true,
+            hasDelayedSettlement = true
+        ),
+        Upi(
+            "upi",
+            isReusable = false,
+            isVoucher = false,
+            requiresMandate = false,
+            hasDelayedSettlement = false
+        ),
+        P24(
+            "p24",
+            isReusable = false,
+            isVoucher = false,
+            requiresMandate = false,
+            hasDelayedSettlement = false
+        ),
+        Bancontact(
+            "bancontact",
+            isReusable = false,
+            isVoucher = false,
+            requiresMandate = true,
+            hasDelayedSettlement = false
+        ),
+        Giropay(
+            "giropay",
+            isReusable = false,
+            isVoucher = false,
+            requiresMandate = false,
+            hasDelayedSettlement = false
+        ),
+        Eps(
+            "eps",
+            isReusable = false,
+            isVoucher = false,
+            requiresMandate = true,
+            hasDelayedSettlement = false
+        ),
+        Oxxo(
+            "oxxo",
+            isReusable = false,
+            isVoucher = true,
+            requiresMandate = false,
+            hasDelayedSettlement = false
+        ),
+        Alipay(
+            "alipay",
+            isReusable = false,
+            isVoucher = false,
+            requiresMandate = false,
+            hasDelayedSettlement = false
+        ),
+        GrabPay(
+            "grabpay",
+            isReusable = false,
+            isVoucher = false,
+            requiresMandate = false,
+            hasDelayedSettlement = false
+        ),
+        PayPal(
+            "paypal",
+            isReusable = false,
+            isVoucher = false,
+            requiresMandate = false,
+            hasDelayedSettlement = false
+        ),
+        AfterpayClearpay(
+            "afterpay_clearpay",
+            isReusable = false,
+            isVoucher = false,
+            requiresMandate = false,
+            hasDelayedSettlement = false
+        ),
+        Netbanking(
+            "netbanking",
+            isReusable = false,
+            isVoucher = false,
+            requiresMandate = false,
+            hasDelayedSettlement = false
+        ),
+        Blik(
+            "blik",
+            isReusable = false,
+            isVoucher = false,
+            requiresMandate = false,
+            hasDelayedSettlement = false
+        ),
+        WeChatPay(
+            "wechat_pay",
+            isReusable = false,
+            isVoucher = false,
+            requiresMandate = false,
+            hasDelayedSettlement = false
+        ),
+        Klarna(
+            "klarna",
+            isReusable = false,
+            isVoucher = false,
+            requiresMandate = false,
+            hasDelayedSettlement = false
+        );
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
+        fun hasDelayedSettlement(): Boolean = hasDelayedSettlement
 
         override fun toString(): String {
             return code
         }
 
         companion object {
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
             @JvmSynthetic
-            internal fun fromCode(code: String?): Type? {
+            fun fromCode(code: String?): Type? {
                 return values().firstOrNull { it.code == code }
             }
         }
@@ -407,7 +549,9 @@ data class PaymentMethod internal constructor(
      * [card](https://stripe.com/docs/api/payment_methods/object#payment_method_object-card)
      */
     @Parcelize
-    data class Card internal constructor(
+    data class Card
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    constructor(
         /**
          * Card brand. Can be `amex`, `diners`, `discover`, `jcb`, `mastercard`, `unionpay`,
          * `visa`, or `unknown`.
@@ -490,7 +634,9 @@ data class PaymentMethod internal constructor(
          * [card.checks](https://stripe.com/docs/api/payment_methods/object#payment_method_object-card-checks)
          */
         @Parcelize
-        data class Checks internal constructor(
+        data class Checks
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        constructor(
             /**
              * If a address line1 was provided, results of the check, one of `pass`, `fail`, `unavailable`, or `unchecked`.
              *
@@ -519,7 +665,9 @@ data class PaymentMethod internal constructor(
          * [card.three_d_secure_usage](https://stripe.com/docs/api/payment_methods/object#payment_method_object-card-three_d_secure_usage)
          */
         @Parcelize
-        data class ThreeDSecureUsage internal constructor(
+        data class ThreeDSecureUsage
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        constructor(
             /**
              * Whether 3D Secure is supported on this card.
              *
@@ -639,7 +787,9 @@ data class PaymentMethod internal constructor(
     }
 
     @Parcelize
-    data class AuBecsDebit internal constructor(
+    data class AuBecsDebit
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    constructor(
         @JvmField val bsbNumber: String?,
         @JvmField val fingerprint: String?,
         @JvmField val last4: String?

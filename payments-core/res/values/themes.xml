@@ -12,8 +12,6 @@
 
     <style name="StripeDefaultTheme" parent="StripeBaseTheme" />
 
-    <style name="StripeDefault3DS2Theme" parent="BaseStripe3DS2Theme" />
-
     <!-- Theme used by Activities that do not show any UI, so the activity underneath them is still fully visible -->
     <style name="StripeTransparentTheme" parent="Theme.AppCompat">
         <item name="android:windowIsTranslucent">true</item>
@@ -33,15 +31,22 @@
         <item name="windowNoTitle">true</item>
         <item name="android:windowAnimationStyle">@null</item>
         <item name="colorSurface">@color/stripe_paymentsheet_background</item>
+        <item name="actionMenuTextColor">@color/stripe_paymentsheet_toolbar_items_color</item>
     </style>
 
     <style name="StripePaymentSheetDefaultTheme" parent="StripePaymentSheetBaseTheme" />
 
     <style name="StripeGooglePayDefaultTheme" parent="StripePaymentSheetBaseTheme" />
 
-    <style name="StripePaymentSheetAddPaymentMethodTheme">
-        <item name="colorOnSurface">@color/stripe_paymentsheet_form</item>
-        <item name="colorPrimary">@color/stripe_paymentsheet_form</item>
-        <item name="colorAccent">@color/stripe_paymentsheet_form</item>
+    <style name="PayLauncherDefaultTheme" parent="@style/Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:backgroundDimEnabled">false</item>
+        <item name="windowNoTitle">true</item>
+        <item name="android:windowAnimationStyle">@null</item>
+        <item name="colorSurface">@color/stripe_paymentsheet_background</item>
+        <item name="actionMenuTextColor">@color/stripe_paymentsheet_toolbar_items_color</item>
     </style>
 </resources>

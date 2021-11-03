@@ -10,8 +10,6 @@
   <string name="acc_label_zip">邮编</string>
   <!-- Short string for zip code (United States only) Please keep to 5 characters or less if possible. -->
   <string name="acc_label_zip_short">邮编</string>
-  <!-- Text informing user they should add a debit or credit card. Shown when there are no existing payment methods in the application -->
-  <string name="add_card">添加一张新的借记卡或信用卡以便在此应用中进行购买。</string>
   <!-- Message displayed when a payment method is removed, stating its name. -->
   <string name="added">已添加 %s</string>
   <!-- Error text indicating that city is required, used for all locations -->
@@ -32,28 +30,44 @@
   <string name="address_label_address_optional">地址 (可选)</string>
   <!-- Label for input requesting apartment number (address line 2) where input is optional, used for US based addresses -->
   <string name="address_label_apt_optional">公寓号码 (可选)</string>
+  <!-- Caption for City field on address form -->
+  <string name="address_label_city">城市</string>
   <!-- Label for input requesting city where input is optional, used for all locations -->
   <string name="address_label_city_optional">城市 (可选)</string>
+  <!-- Caption for Country field on address form -->
+  <string name="address_label_country">国家</string>
+  <!-- Caption for County field on address form (only countries that use county, like United Kingdom) -->
+  <string name="address_label_county">县</string>
   <!-- Label for input requesting county where input is optional , used for UK based addresses -->
   <string name="address_label_county_optional">县（可选）</string>
+  <!-- Caption for Name field on address form -->
+  <string name="address_label_name">姓名</string>
   <!-- Label for input requesting phone number, used for all locations -->
   <string name="address_label_phone_number">电话号码</string>
   <!-- Label for input requesting phone number where input is optional, used for all locations -->
   <string name="address_label_phone_number_optional">电话号码（可选）</string>
+  <!-- Short string for postal code (text used in non-US countries) -->
+  <string name="address_label_postal_code">邮政编码</string>
   <!-- Label for input requesting postal code where input is optional, used for Canada based addresses -->
   <string name="address_label_postal_code_optional">邮政编码（可选）</string>
   <!-- Label for input requesting postcode, used for UK based addresses -->
   <string name="address_label_postcode">邮政编码</string>
   <!-- Label for input requesting postcode where input is optional, used for UK based addresses -->
   <string name="address_label_postcode_optional">邮政编码（可选）</string>
+  <!-- Caption for Province field on address form (only countries that use province, like Canada) -->
+  <string name="address_label_province">省</string>
   <!-- Label for input requesting province where province is optional, used for canadian addresses -->
   <string name="address_label_province_optional">省 (可选)</string>
   <!-- Label for input requesting the region, used for international addresses -->
   <string name="address_label_region_generic">州/省/地区</string>
   <!-- Label for input requesting the region where input is optional, used for international addresses -->
   <string name="address_label_region_generic_optional">州/省/地区（可选）</string>
+  <!-- Caption for State field on address form (only countries that use state , like United States) -->
+  <string name="address_label_state">州</string>
   <!-- Label for input requesting state where input is optional, used for US based addresses -->
   <string name="address_label_state_optional">州 (可选)</string>
+  <!-- Label for input requesting zip code, used for US based addreses -->
+  <string name="address_label_zip_code">邮政编码</string>
   <!-- Label for input requesting zip code where input is optional, used for US based addresses -->
   <string name="address_label_zip_code_optional">邮政编码（可选）</string>
   <!-- Label for input requesting postal code, used for international addresses -->
@@ -64,8 +78,8 @@
   <string name="address_name_required">请输入您的姓名</string>
   <!-- Error text indicating that phone number is required, used for all addresses -->
   <string name="address_phone_number_required">请输入您的电话号码</string>
-  <!-- Error text indicating postal code is invalid, used for Canada addresses -->
-  <string name="address_postal_code_invalid">您的邮政编码无效</string>
+  <!-- Error message for when postal code in form is invalid -->
+  <string name="address_postal_code_invalid">您的邮编无效。</string>
   <!-- Error text indicating postcode is invalid, used for UK addresses -->
   <string name="address_postcode_invalid">您的邮政编码无效</string>
   <!-- Error text indicating that province is required, used for Canada addresses -->
@@ -74,8 +88,6 @@
   <string name="address_region_generic_required">请输入您所在的州/省/地区</string>
   <!-- Error text indicating that address is required, used for all locations -->
   <string name="address_required">请输入您的地址</string>
-  <!-- Title for shipping address entry section -->
-  <string name="address_shipping_address">送货地址</string>
   <!-- Error text indicating that state is required, used for US addresses -->
   <string name="address_state_required">请输入您所在的州</string>
   <!-- Error text indicating zip code is invalid, used for US addresses -->
@@ -107,19 +119,19 @@
   <!-- BECS Debit Widget - name field - required error message -->
   <string name="becs_widget_name_required">您需要填写姓名。</string>
   <!-- Details of a saved card. &apos;{card brand} ending in {last 4}&apos; e.g. &apos;VISA ending in 4242&apos; -->
-  <string name="card_ending_in">%1$s 尾号 %2$s</string>
+  <string name="card_ending_in">%1$s - 尾号：%2$s</string>
   <!-- Text for close button -->
   <string name="close">关闭</string>
   <!-- Accessibility action for deleting a payment method -->
   <string name="delete_payment_method">删除支付方式</string>
   <string name="delete_payment_method_prompt_title">删除支付方式？</string>
   <!-- label for text field to enter card expiry -->
-  <string name="expiry_date_hint">月月/年年</string>
+  <string name="expiry_date_hint">月份/年份</string>
   <string name="expiry_label_short">有效期</string>
   <!-- Label that will show that an FPX bank is offline. For example, &quot;AmBank - Offline&quot; -->
   <string name="fpx_bank_offline">%s - 线下</string>
   <!-- Error message for card details form when expiration date isn&apos;t entered completely -->
-  <string name="incomplete_expiry_date">您的银行卡的到期日期不完整。</string>
+  <string name="incomplete_expiry_date">您的银行卡的不完整。</string>
   <string name="invalid_card_number">您的卡号无效。</string>
   <!-- Error message for card entry form when CVC/CVV is invalid -->
   <string name="invalid_cvc">您的银行卡安全码无效。</string>
@@ -131,8 +143,6 @@
   <string name="invalid_shipping_information">无效的送货地址</string>
   <!-- Error message for when postal code in form is incomplete -->
   <string name="invalid_zip">您的邮编不完整。</string>
-  <!-- Text informing user there are no existing payment methods in the application -->
-  <string name="no_payment_methods">没有付款方式。</string>
   <string name="payment_method_add_new_card">添加新卡...</string>
   <string name="payment_method_add_new_fpx">选择银行账户 (FPX)…</string>
   <!-- Label for free shipping method -->
@@ -140,47 +150,15 @@
   <!-- Message displayed when a payment method is removed, stating its name. -->
   <string name="removed">已移除 %s</string>
   <string name="secure_checkout">安全结账</string>
-  <!-- Generic error message shown when payment cannot be processed. -->
-  <string name="stripe_failure_connection_error">连接我们的支付提供商时出现了问题。请检查网络连接，然后重试。</string>
   <!-- Error when 3DS2 authentication failed (e.g. customer entered the wrong code) -->
   <string name="stripe_failure_reason_authentication">我们未能验证您的支付方式。请选择另一支付方式并重试。</string>
   <!-- Error when 3DS2 authentication timed out. -->
   <string name="stripe_failure_reason_timed_out">验证您的支付方式时失败——请重试</string>
-  <!-- When an internal error is reported when a google pay payment is started. -->
-  <string name="stripe_google_pay_error_internal">发生了内部错误。</string>
-  <string name="stripe_paymentsheet_add_button_label">添加</string>
-  <!-- Text for a button that, when tapped, displays another screen where the customer can add payment method details -->
-  <string name="stripe_paymentsheet_add_payment_method_button_label">+ 添加</string>
-  <!-- Card details entry form header title -->
-  <string name="stripe_paymentsheet_add_payment_method_card_information">银行卡信息</string>
-  <!-- Country selector and postal code entry form header title -->
-  <string name="stripe_paymentsheet_add_payment_method_country_or_region">国家或地区</string>
-  <!-- Title shown above a form where the customer can enter payment information like credit card details, email, billing address, etc. -->
-  <string name="stripe_paymentsheet_add_payment_method_title">添加您的支付信息</string>
-  <!-- Text for back button -->
-  <string name="stripe_paymentsheet_back">返回</string>
-  <string name="stripe_paymentsheet_close">关闭</string>
   <!-- label for text field to enter card expiry -->
-  <string name="stripe_paymentsheet_expiration_date_hint">月月/年年</string>
-  <!-- Title of a section containing multiple payment methods that can selected and will collect the payment information from the user. -->
-  <string name="stripe_paymentsheet_or_pay_using">或用以下方式支付</string>
-  <!-- Title of a section containing a card form that will collect the payment information from the user. -->
-  <string name="stripe_paymentsheet_or_pay_with_card">或用银行卡支付</string>
-  <!-- Label of a button that initiates payment when tapped -->
-  <string name="stripe_paymentsheet_pay_button_amount">支付%s</string>
-  <!-- Label for a button that starts processing the payment. -->
-  <string name="stripe_paymentsheet_pay_button_label">支付</string>
-  <!-- Label of a button that, when tapped, initiates payment, becomes disabled, and displays this text -->
-  <string name="stripe_paymentsheet_primary_button_processing">正在处理...</string>
-  <!-- The label of a switch indicating whether to save the user&apos;s card for future payments to this merchant -->
-  <string name="stripe_paymentsheet_save_this_card_with_merchant_name">保存该卡，用于未来的 %s 付款</string>
-  <!-- Title shown above a carousel containing the customer&apos;s payment methods -->
-  <string name="stripe_paymentsheet_select_payment_method">选择您的支付方式</string>
-  <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->
-  <string name="stripe_paymentsheet_setup_button_label">设置</string>
+  <string name="stripe_paymentsheet_expiration_date_hint">月份/年份</string>
   <!-- When there are multiple browsers and web authentication is required, this will show in a window asking which browser they want to use to "Verify your payment" -->
   <string name="stripe_verify_your_payment">验证您的付款</string>
-  <string name="title_add_a_card">添加一张卡</string>
+  <string name="title_add_a_card">添加卡</string>
   <!-- Screen title telling users they should add an address -->
   <string name="title_add_an_address">添加一个地址</string>
   <!-- Label for Bank Account selection or detail entry form -->

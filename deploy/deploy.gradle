@@ -19,18 +19,6 @@ def getRepositoryPassword() {
     return findProperty('NEXUS_PASSWORD') ?: ""
 }
 
-task androidJavadocs(type: Javadoc) {
-    excludes = ['**/*.kt']
-    source = android.sourceSets.main.java.srcDirs
-    classpath = configurations.compile
-    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
-}
-
-task androidJavadocsJar(type: Jar, dependsOn: androidJavadocs) {
-    archiveClassifier.set('javadoc')
-    from androidJavadocs.destinationDir
-}
-
 task androidSourcesJar(type: Jar) {
     archiveClassifier.set('sources')
     from android.sourceSets.main.java.srcDirs
@@ -45,7 +33,6 @@ afterEvaluate { project ->
             // Creates a Maven publication called "release".
             release(MavenPublication) {
                 // Adds Javadocs and Sources as separate jars.
-                artifact androidJavadocsJar
                 artifact androidSourcesJar
                 artifact bundleReleaseAar
 
@@ -129,6 +116,5 @@ afterEvaluate { project ->
 
     artifacts {
         archives androidSourcesJar
-        archives androidJavadocsJar
     }
 }

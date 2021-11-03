@@ -58,5 +58,9 @@
     "value": "van_lanschot",
     "icon": "van_lanschot",
     "text": "Van Lanschot"
+  },
+  {
+    "value": null,
+    "text": "Other"
   }
 ]

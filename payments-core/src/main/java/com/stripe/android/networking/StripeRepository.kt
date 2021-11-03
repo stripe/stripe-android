@@ -1,5 +1,7 @@
 package com.stripe.android.networking
 
+import androidx.annotation.RestrictTo
+import androidx.annotation.VisibleForTesting
 import com.stripe.android.cards.Bin
 import com.stripe.android.exception.APIConnectionException
 import com.stripe.android.exception.APIException
@@ -34,9 +36,10 @@ import java.util.Locale
 /**
  * An interface for data operations on Stripe API objects.
  */
-internal interface StripeRepository {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // originally made public for paymentsheet
+abstract class StripeRepository {
 
-    suspend fun retrieveStripeIntent(
+    internal abstract suspend fun retrieveStripeIntent(
         clientSecret: String,
         options: ApiRequest.Options,
         expandFields: List<String> = emptyList()
@@ -48,7 +51,7 @@ internal interface StripeRepository {
         APIConnectionException::class,
         APIException::class
     )
-    suspend fun confirmPaymentIntent(
+    internal abstract suspend fun confirmPaymentIntent(
         confirmPaymentIntentParams: ConfirmPaymentIntentParams,
         options: ApiRequest.Options,
         expandFields: List<String> = emptyList()
@@ -60,7 +63,8 @@ internal interface StripeRepository {
         APIConnectionException::class,
         APIException::class
     )
-    suspend fun retrievePaymentIntent(
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    abstract suspend fun retrievePaymentIntent(
         clientSecret: String,
         options: ApiRequest.Options,
         expandFields: List<String> = emptyList()
@@ -72,7 +76,8 @@ internal interface StripeRepository {
         APIConnectionException::class,
         APIException::class
     )
-    suspend fun retrievePaymentIntentWithOrderedPaymentMethods(
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    abstract suspend fun retrievePaymentIntentWithOrderedPaymentMethods(
         clientSecret: String,
         options: ApiRequest.Options,
         locale: Locale
@@ -84,7 +89,19 @@ internal interface StripeRepository {
         APIConnectionException::class,
         APIException::class
     )
-    suspend fun cancelPaymentIntentSource(
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    internal abstract suspend fun refreshPaymentIntent(
+        clientSecret: String,
+        options: ApiRequest.Options
+    ): PaymentIntent?
+
+    @Throws(
+        AuthenticationException::class,
+        InvalidRequestException::class,
+        APIConnectionException::class,
+        APIException::class
+    )
+    internal abstract suspend fun cancelPaymentIntentSource(
         paymentIntentId: String,
         sourceId: String,
         options: ApiRequest.Options
@@ -96,7 +113,7 @@ internal interface StripeRepository {
         APIConnectionException::class,
         APIException::class
     )
-    suspend fun confirmSetupIntent(
+    internal abstract suspend fun confirmSetupIntent(
         confirmSetupIntentParams: ConfirmSetupIntentParams,
         options: ApiRequest.Options,
         expandFields: List<String> = emptyList()
@@ -108,7 +125,8 @@ internal interface StripeRepository {
         APIConnectionException::class,
         APIException::class
     )
-    suspend fun retrieveSetupIntent(
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    abstract suspend fun retrieveSetupIntent(
         clientSecret: String,
         options: ApiRequest.Options,
         expandFields: List<String> = emptyList()
@@ -120,7 +138,8 @@ internal interface StripeRepository {
         APIConnectionException::class,
         APIException::class
     )
-    suspend fun retrieveSetupIntentWithOrderedPaymentMethods(
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    abstract suspend fun retrieveSetupIntentWithOrderedPaymentMethods(
         clientSecret: String,
         options: ApiRequest.Options,
         locale: Locale
@@ -132,7 +151,7 @@ internal interface StripeRepository {
         APIConnectionException::class,
         APIException::class
     )
-    suspend fun cancelSetupIntentSource(
+    internal abstract suspend fun cancelSetupIntentSource(
         setupIntentId: String,
         sourceId: String,
         options: ApiRequest.Options
@@ -144,7 +163,7 @@ internal interface StripeRepository {
         APIConnectionException::class,
         APIException::class
     )
-    suspend fun createSource(
+    internal abstract suspend fun createSource(
         sourceParams: SourceParams,
         options: ApiRequest.Options
     ): Source?
@@ -155,7 +174,7 @@ internal interface StripeRepository {
         APIConnectionException::class,
         APIException::class
     )
-    suspend fun retrieveSource(
+    internal abstract suspend fun retrieveSource(
         sourceId: String,
         clientSecret: String,
         options: ApiRequest.Options
@@ -167,7 +186,8 @@ internal interface StripeRepository {
         APIConnectionException::class,
         APIException::class
     )
-    suspend fun createPaymentMethod(
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    abstract suspend fun createPaymentMethod(
         paymentMethodCreateParams: PaymentMethodCreateParams,
         options: ApiRequest.Options
     ): PaymentMethod?
@@ -179,7 +199,7 @@ internal interface StripeRepository {
         APIException::class,
         CardException::class
     )
-    suspend fun createToken(
+    internal abstract suspend fun createToken(
         tokenParams: TokenParams,
         options: ApiRequest.Options
     ): Token?
@@ -191,7 +211,7 @@ internal interface StripeRepository {
         APIException::class,
         CardException::class
     )
-    suspend fun addCustomerSource(
+    internal abstract suspend fun addCustomerSource(
         customerId: String,
         publishableKey: String,
         productUsageTokens: Set<String>,
@@ -207,7 +227,7 @@ internal interface StripeRepository {
         APIException::class,
         CardException::class
     )
-    suspend fun deleteCustomerSource(
+    internal abstract suspend fun deleteCustomerSource(
         customerId: String,
         publishableKey: String,
         productUsageTokens: Set<String>,
@@ -222,7 +242,9 @@ internal interface StripeRepository {
         APIException::class,
         CardException::class
     )
-    suspend fun attachPaymentMethod(
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @VisibleForTesting
+    abstract suspend fun attachPaymentMethod(
         customerId: String,
         publishableKey: String,
         productUsageTokens: Set<String>,
@@ -237,7 +259,8 @@ internal interface StripeRepository {
         APIException::class,
         CardException::class
     )
-    suspend fun detachPaymentMethod(
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    abstract suspend fun detachPaymentMethod(
         publishableKey: String,
         productUsageTokens: Set<String>,
         paymentMethodId: String,
@@ -251,7 +274,8 @@ internal interface StripeRepository {
         APIException::class,
         CardException::class
     )
-    suspend fun getPaymentMethods(
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    abstract suspend fun getPaymentMethods(
         listPaymentMethodsParams: ListPaymentMethodsParams,
         publishableKey: String,
         productUsageTokens: Set<String>,
@@ -265,7 +289,7 @@ internal interface StripeRepository {
         APIException::class,
         CardException::class
     )
-    suspend fun setDefaultCustomerSource(
+    internal abstract suspend fun setDefaultCustomerSource(
         customerId: String,
         publishableKey: String,
         productUsageTokens: Set<String>,
@@ -281,7 +305,7 @@ internal interface StripeRepository {
         APIException::class,
         CardException::class
     )
-    suspend fun setCustomerShippingInfo(
+    internal abstract suspend fun setCustomerShippingInfo(
         customerId: String,
         publishableKey: String,
         productUsageTokens: Set<String>,
@@ -296,7 +320,7 @@ internal interface StripeRepository {
         APIException::class,
         CardException::class
     )
-    suspend fun retrieveCustomer(
+    internal abstract suspend fun retrieveCustomer(
         customerId: String,
         productUsageTokens: Set<String>,
         requestOptions: ApiRequest.Options
@@ -310,7 +334,7 @@ internal interface StripeRepository {
         CardException::class,
         JSONException::class
     )
-    suspend fun retrieveIssuingCardPin(
+    internal abstract suspend fun retrieveIssuingCardPin(
         cardId: String,
         verificationId: String,
         userOneTimeCode: String,
@@ -324,7 +348,7 @@ internal interface StripeRepository {
         APIException::class,
         CardException::class
     )
-    suspend fun updateIssuingCardPin(
+    internal abstract suspend fun updateIssuingCardPin(
         cardId: String,
         newPin: String,
         verificationId: String,
@@ -332,31 +356,34 @@ internal interface StripeRepository {
         requestOptions: ApiRequest.Options
     )
 
-    suspend fun getFpxBankStatus(options: ApiRequest.Options): BankStatuses
+    internal abstract suspend fun getFpxBankStatus(options: ApiRequest.Options): BankStatuses
 
-    suspend fun getCardMetadata(bin: Bin, options: ApiRequest.Options): CardMetadata?
+    internal abstract suspend fun getCardMetadata(
+        bin: Bin,
+        options: ApiRequest.Options
+    ): CardMetadata?
 
-    suspend fun start3ds2Auth(
+    internal abstract suspend fun start3ds2Auth(
         authParams: Stripe3ds2AuthParams,
         requestOptions: ApiRequest.Options
     ): Stripe3ds2AuthResult?
 
-    suspend fun complete3ds2Auth(
+    internal abstract suspend fun complete3ds2Auth(
         sourceId: String,
         requestOptions: ApiRequest.Options
     ): Stripe3ds2AuthResult?
 
-    suspend fun createFile(
+    internal abstract suspend fun createFile(
         fileParams: StripeFileParams,
         requestOptions: ApiRequest.Options
     ): StripeFile
 
-    suspend fun retrieveObject(
+    internal abstract suspend fun retrieveObject(
         url: String,
         requestOptions: ApiRequest.Options
     ): JSONObject
 
-    suspend fun createRadarSession(
+    internal abstract suspend fun createRadarSession(
         requestOptions: ApiRequest.Options
     ): RadarSession?
 }

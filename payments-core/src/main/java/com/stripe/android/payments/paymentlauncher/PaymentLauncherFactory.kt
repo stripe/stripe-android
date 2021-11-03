@@ -1,23 +1,34 @@
 package com.stripe.android.payments.paymentlauncher
 
+import android.content.Context
 import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultLauncher
+import androidx.annotation.RestrictTo
 import androidx.fragment.app.Fragment
+import com.stripe.android.BuildConfig
+import com.stripe.android.networking.AnalyticsRequestFactory
+import com.stripe.android.networking.StripeApiRepository
+import kotlinx.coroutines.Dispatchers
 
 /**
- * Factory to create a [PaymentLauncher].
+ * Factory to create a [PaymentLauncher], initialize all required dependencies.
+ *
+ * Used when [PaymentLauncher] is used as a standalone API.
  */
-internal class PaymentLauncherFactory(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+class PaymentLauncherFactory(
+    private val context: Context,
     private val hostActivityLauncher: ActivityResultLauncher<PaymentLauncherContract.Args>
 ) {
 
     constructor(
         activity: ComponentActivity,
-        callback: PaymentLauncher.PaymentResultCallback
+        callback: PaymentLauncher.PaymentResultCallback,
     ) : this(
+        activity.applicationContext,
         activity.registerForActivityResult(
             PaymentLauncherContract(),
-            callback::onPaymentResult
+            callback::onPaymentResult,
         )
     )
 
@@ -25,11 +36,38 @@ internal class PaymentLauncherFactory(
         fragment: Fragment,
         callback: PaymentLauncher.PaymentResultCallback
     ) : this(
+        fragment.requireActivity().applicationContext,
         fragment.registerForActivityResult(
             PaymentLauncherContract(),
             callback::onPaymentResult
         )
     )
 
-    fun create(): PaymentLauncher = StripePaymentLauncher(hostActivityLauncher)
+    fun create(
+        publishableKey: String,
+        stripeAccountId: String? = null
+    ): PaymentLauncher {
+        val productUsage = setOf("PaymentLauncher")
+        val analyticsRequestFactory = AnalyticsRequestFactory(
+            context,
+            { publishableKey },
+            productUsage
+        )
+        return StripePaymentLauncher(
+            { publishableKey },
+            { stripeAccountId },
+            hostActivityLauncher,
+            context,
+            BuildConfig.DEBUG,
+            Dispatchers.IO,
+            Dispatchers.Main,
+            StripeApiRepository(
+                context,
+                { publishableKey },
+                analyticsRequestFactory = analyticsRequestFactory
+            ),
+            analyticsRequestFactory,
+            productUsage = productUsage
+        )
+    }
 }

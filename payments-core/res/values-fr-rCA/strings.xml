@@ -10,8 +10,6 @@
   <string name="acc_label_zip">Code postal</string>
   <!-- Short string for zip code (United States only) Please keep to 5 characters or less if possible. -->
   <string name="acc_label_zip_short">Code postal</string>
-  <!-- Text informing user they should add a debit or credit card. Shown when there are no existing payment methods in the application -->
-  <string name="add_card">Pour effectuer des achats dans cette appli, ajoutez une carte de débit ou de crédit.</string>
   <!-- Message displayed when a payment method is removed, stating its name. -->
   <string name="added">%s ajouté</string>
   <!-- Error text indicating that city is required, used for all locations -->
@@ -32,28 +30,44 @@
   <string name="address_label_address_optional">Adresse (facultatif)</string>
   <!-- Label for input requesting apartment number (address line 2) where input is optional, used for US based addresses -->
   <string name="address_label_apt_optional">App. (facultatif)</string>
+  <!-- Caption for City field on address form -->
+  <string name="address_label_city">Ville</string>
   <!-- Label for input requesting city where input is optional, used for all locations -->
   <string name="address_label_city_optional">Ville (facultatif)</string>
+  <!-- Caption for Country field on address form -->
+  <string name="address_label_country">Pays</string>
+  <!-- Caption for County field on address form (only countries that use county, like United Kingdom) -->
+  <string name="address_label_county">Comté</string>
   <!-- Label for input requesting county where input is optional , used for UK based addresses -->
   <string name="address_label_county_optional">Comté (facultatif)</string>
+  <!-- Caption for Name field on address form -->
+  <string name="address_label_name">Nom</string>
   <!-- Label for input requesting phone number, used for all locations -->
   <string name="address_label_phone_number">Numéro de téléphone</string>
   <!-- Label for input requesting phone number where input is optional, used for all locations -->
   <string name="address_label_phone_number_optional">Numéro de téléphone (facultatif)</string>
+  <!-- Short string for postal code (text used in non-US countries) -->
+  <string name="address_label_postal_code">Code postal</string>
   <!-- Label for input requesting postal code where input is optional, used for Canada based addresses -->
   <string name="address_label_postal_code_optional">Code postal (facultatif)</string>
   <!-- Label for input requesting postcode, used for UK based addresses -->
   <string name="address_label_postcode">Code postal</string>
   <!-- Label for input requesting postcode where input is optional, used for UK based addresses -->
   <string name="address_label_postcode_optional">Code postal (facultatif)</string>
+  <!-- Caption for Province field on address form (only countries that use province, like Canada) -->
+  <string name="address_label_province">Province</string>
   <!-- Label for input requesting province where province is optional, used for canadian addresses -->
   <string name="address_label_province_optional">Province (facultatif)</string>
   <!-- Label for input requesting the region, used for international addresses -->
   <string name="address_label_region_generic">État/province/région</string>
   <!-- Label for input requesting the region where input is optional, used for international addresses -->
   <string name="address_label_region_generic_optional">État/province/région (facultatif)</string>
+  <!-- Caption for State field on address form (only countries that use state , like United States) -->
+  <string name="address_label_state">État</string>
   <!-- Label for input requesting state where input is optional, used for US based addresses -->
   <string name="address_label_state_optional">État (facultatif)</string>
+  <!-- Label for input requesting zip code, used for US based addreses -->
+  <string name="address_label_zip_code">Code postal</string>
   <!-- Label for input requesting zip code where input is optional, used for US based addresses -->
   <string name="address_label_zip_code_optional">Code postal (facultatif)</string>
   <!-- Label for input requesting postal code, used for international addresses -->
@@ -64,8 +78,8 @@
   <string name="address_name_required">Veuillez entrer votre nom</string>
   <!-- Error text indicating that phone number is required, used for all addresses -->
   <string name="address_phone_number_required">Veuillez entrer votre numéro de téléphone</string>
-  <!-- Error text indicating postal code is invalid, used for Canada addresses -->
-  <string name="address_postal_code_invalid">Votre code postal n\'est pas valide</string>
+  <!-- Error message for when postal code in form is invalid -->
+  <string name="address_postal_code_invalid">Votre code postal n\'est pas valide.</string>
   <!-- Error text indicating postcode is invalid, used for UK addresses -->
   <string name="address_postcode_invalid">Votre code postal n\'est pas valide</string>
   <!-- Error text indicating that province is required, used for Canada addresses -->
@@ -74,8 +88,6 @@
   <string name="address_region_generic_required">Veuillez entrer votre État/province/région</string>
   <!-- Error text indicating that address is required, used for all locations -->
   <string name="address_required">Veuillez entrer votre adresse</string>
-  <!-- Title for shipping address entry section -->
-  <string name="address_shipping_address">Adresse de livraison</string>
   <!-- Error text indicating that state is required, used for US addresses -->
   <string name="address_state_required">Veuillez entrer votre adresse</string>
   <!-- Error text indicating zip code is invalid, used for US addresses -->
@@ -131,53 +143,19 @@
   <string name="invalid_shipping_information">Adresse de livraison non valide</string>
   <!-- Error message for when postal code in form is incomplete -->
   <string name="invalid_zip">Votre code postal est incomplet.</string>
-  <!-- Text informing user there are no existing payment methods in the application -->
-  <string name="no_payment_methods">Aucun moyen de paiement.</string>
-  <string name="payment_method_add_new_card">Ajouter une nouvelle carte…</string>
+  <string name="payment_method_add_new_card">Ajouter une carte…</string>
   <string name="payment_method_add_new_fpx">Sélectionner un compte bancaire (FPX)…</string>
   <!-- Label for free shipping method -->
   <string name="price_free">Gratuit</string>
   <!-- Message displayed when a payment method is removed, stating its name. -->
   <string name="removed">%s supprimé</string>
   <string name="secure_checkout">Paiement sécurisé</string>
-  <!-- Generic error message shown when payment cannot be processed. -->
-  <string name="stripe_failure_connection_error">Nous ne parvenons pas à nous connecter à notre prestataire de services de paiement. Veuillez vérifier votre connexion Internet et réessayer.</string>
   <!-- Error when 3DS2 authentication failed (e.g. customer entered the wrong code) -->
   <string name="stripe_failure_reason_authentication">Nous ne sommes pas en mesure d\'identifier votre moyen de paiement. Veuillez sélectionner un autre moyen de paiement et réessayer.</string>
   <!-- Error when 3DS2 authentication timed out. -->
   <string name="stripe_failure_reason_timed_out">Le délai d\'authentification de votre moyen de paiement est dépassé, veuillez réessayer.</string>
-  <!-- When an internal error is reported when a google pay payment is started. -->
-  <string name="stripe_google_pay_error_internal">Une erreur interne s\'est produite.</string>
-  <string name="stripe_paymentsheet_add_button_label">Ajouter</string>
-  <!-- Text for a button that, when tapped, displays another screen where the customer can add payment method details -->
-  <string name="stripe_paymentsheet_add_payment_method_button_label">+ Ajouter</string>
-  <!-- Card details entry form header title -->
-  <string name="stripe_paymentsheet_add_payment_method_card_information">Informations de la carte</string>
-  <!-- Country selector and postal code entry form header title -->
-  <string name="stripe_paymentsheet_add_payment_method_country_or_region">Pays ou région</string>
-  <!-- Title shown above a form where the customer can enter payment information like credit card details, email, billing address, etc. -->
-  <string name="stripe_paymentsheet_add_payment_method_title">Ajoutez vos informations de paiement</string>
-  <!-- Text for back button -->
-  <string name="stripe_paymentsheet_back">Retour</string>
-  <string name="stripe_paymentsheet_close">Fermer</string>
   <!-- label for text field to enter card expiry -->
   <string name="stripe_paymentsheet_expiration_date_hint">MM/AA</string>
-  <!-- Title of a section containing multiple payment methods that can selected and will collect the payment information from the user. -->
-  <string name="stripe_paymentsheet_or_pay_using">Ou payer avec</string>
-  <!-- Title of a section containing a card form that will collect the payment information from the user. -->
-  <string name="stripe_paymentsheet_or_pay_with_card">Ou payez par carte</string>
-  <!-- Label of a button that initiates payment when tapped -->
-  <string name="stripe_paymentsheet_pay_button_amount">Payer %s</string>
-  <!-- Label for a button that starts processing the payment. -->
-  <string name="stripe_paymentsheet_pay_button_label">Payer</string>
-  <!-- Label of a button that, when tapped, initiates payment, becomes disabled, and displays this text -->
-  <string name="stripe_paymentsheet_primary_button_processing">Traitement en cours...</string>
-  <!-- The label of a switch indicating whether to save the user&apos;s card for future payments to this merchant -->
-  <string name="stripe_paymentsheet_save_this_card_with_merchant_name">Enregistrer cette carte pour vos prochains achats chez %s</string>
-  <!-- Title shown above a carousel containing the customer&apos;s payment methods -->
-  <string name="stripe_paymentsheet_select_payment_method">Sélectionnez votre moyen de paiement</string>
-  <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->
-  <string name="stripe_paymentsheet_setup_button_label">Configurer</string>
   <!-- When there are multiple browsers and web authentication is required, this will show in a window asking which browser they want to use to "Verify your payment" -->
   <string name="stripe_verify_your_payment">Vérifiez votre paiement</string>
   <string name="title_add_a_card">Ajouter une carte</string>

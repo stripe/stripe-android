@@ -8,6 +8,7 @@ plugins {
 
 dependencies {
     api project(':payments-core')
+    api project(':paymentsheet')
 }
 
 android {

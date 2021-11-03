@@ -4,9 +4,13 @@ import androidx.annotation.StringRes
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.elements.IdentifierSpec
+import com.stripe.android.paymentsheet.elements.RowController
+import com.stripe.android.paymentsheet.elements.RowElement
+import com.stripe.android.paymentsheet.elements.SectionFieldElement
+import com.stripe.android.paymentsheet.elements.SectionSingleFieldElement
+import com.stripe.android.paymentsheet.elements.SimpleTextSpec
 import com.stripe.android.paymentsheet.forms.transform
-import com.stripe.android.paymentsheet.specifications.IdentifierSpec
-import com.stripe.android.paymentsheet.specifications.SectionFieldSpec
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
@@ -17,15 +21,51 @@ import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 import kotlinx.serialization.json.Json
 import java.io.InputStream
+import java.util.UUID
 
 @Serializable(with = FieldTypeAsStringSerializer::class)
-internal enum class FieldType(val serializedValue: String) {
-    AddressLine1("addressLine1"),
-    AddressLine2("addressLine2"),
-    Locality("locality"),
-    PostalCode("postalCode"),
-    AdministrativeArea("administrativeArea"),
-    Name("name");
+internal enum class FieldType(
+    val serializedValue: String,
+    val identifierSpec: IdentifierSpec,
+    @StringRes val defaultLabel: Int,
+    val capitalization: KeyboardCapitalization
+) {
+    AddressLine1(
+        "addressLine1",
+        IdentifierSpec.Line1,
+        R.string.address_label_address_line1,
+        KeyboardCapitalization.Words
+    ),
+    AddressLine2(
+        "addressLine2",
+        IdentifierSpec.Line2,
+        R.string.address_label_address_line2,
+        KeyboardCapitalization.Words
+    ),
+    Locality(
+        "locality",
+        IdentifierSpec.City,
+        R.string.address_label_city,
+        KeyboardCapitalization.Words
+    ),
+    PostalCode(
+        "postalCode",
+        IdentifierSpec.PostalCode,
+        R.string.address_label_postal_code,
+        KeyboardCapitalization.None
+    ),
+    AdministrativeArea(
+        "administrativeArea",
+        IdentifierSpec.State,
+        NameType.state.stringResId,
+        KeyboardCapitalization.Words
+    ),
+    Name(
+        "name",
+        IdentifierSpec.Name,
+        R.string.address_label_name,
+        KeyboardCapitalization.Words
+    );
 
     companion object {
         fun from(value: String) = values().firstOrNull {
@@ -108,62 +148,61 @@ private object FieldTypeAsStringSerializer : KSerializer<FieldType?> {
 private fun getJsonStringFromInputStream(inputStream: InputStream?) =
     inputStream?.bufferedReader().use { it?.readText() }
 
-internal fun List<CountryAddressSchema>.transformToElementList() =
-    this.mapNotNull {
-        when (it.type) {
-            FieldType.AddressLine1 -> {
-                SectionFieldSpec.SimpleText(
-                    IdentifierSpec("line1"),
-                    it.schema?.nameType?.stringResId ?: R.string.address_label_address_line1,
-                    capitalization = KeyboardCapitalization.Words,
-                    keyboardType = getKeyboard(it.schema),
-                    showOptionalLabel = !it.required
-                )
-            }
-            FieldType.AddressLine2 -> {
-                SectionFieldSpec.SimpleText(
-                    IdentifierSpec("line2"),
-                    it.schema?.nameType?.stringResId ?: R.string.address_label_address_line2,
-                    capitalization = KeyboardCapitalization.Words,
-                    keyboardType = getKeyboard(it.schema),
-                    showOptionalLabel = !it.required
-                )
-            }
-            FieldType.Locality -> {
-                SectionFieldSpec.SimpleText(
-                    IdentifierSpec("city"),
-                    it.schema?.nameType?.stringResId ?: R.string.address_label_city,
-                    capitalization = KeyboardCapitalization.Words,
-                    keyboardType = getKeyboard(it.schema),
-                    showOptionalLabel = !it.required
-                )
-            }
-            FieldType.AdministrativeArea -> {
-                SectionFieldSpec.SimpleText(
-                    IdentifierSpec("state"),
-                    it.schema?.nameType?.stringResId ?: NameType.state.stringResId,
-                    capitalization = KeyboardCapitalization.Words,
-                    keyboardType = getKeyboard(it.schema),
-                    showOptionalLabel = !it.required
-                )
-            }
-            FieldType.PostalCode -> {
-                SectionFieldSpec.SimpleText(
-                    IdentifierSpec("postal_code"),
-                    it.schema?.nameType?.stringResId ?: R.string.address_label_postal_code,
-                    capitalization = KeyboardCapitalization.None,
-                    keyboardType = getKeyboard(it.schema),
-                    showOptionalLabel = !it.required
-                )
-            }
-            else -> null
+internal fun List<CountryAddressSchema>.transformToElementList(): List<SectionFieldElement> {
+    val countryAddressElements = this.mapNotNull { addressField ->
+        addressField.type?.let {
+            SimpleTextSpec(
+                addressField.type.identifierSpec,
+                addressField.schema?.nameType?.stringResId ?: it.defaultLabel,
+                capitalization = it.capitalization,
+                keyboardType = getKeyboard(addressField.schema),
+                showOptionalLabel = !addressField.required
+            )
         }
     }.map {
         it.transform()
     }
 
+    // Put it in a single row
+    return combineCityAndPostal(countryAddressElements)
+}
+
+private fun combineCityAndPostal(countryAddressElements: List<SectionSingleFieldElement>) =
+    countryAddressElements.foldIndexed(
+        listOf<SectionFieldElement?>()
+    ) { index, acc, sectionSingleFieldElement ->
+        if (index + 1 < countryAddressElements.size && isPostalNextToCity(
+                countryAddressElements[index],
+                countryAddressElements[index + 1]
+            )
+        ) {
+            val rowFields = listOf(countryAddressElements[index], countryAddressElements[index + 1])
+            acc.plus(
+                RowElement(
+                    IdentifierSpec.Generic("row_" + UUID.randomUUID().leastSignificantBits),
+                    rowFields,
+                    RowController(rowFields)
+                )
+            )
+        } else if (acc.lastOrNull() is RowElement) {
+            // skip this it is in a row
+            acc.plus(null)
+        } else {
+            acc.plus(sectionSingleFieldElement)
+        }
+    }.filterNotNull()
+
+private fun isPostalNextToCity(
+    element1: SectionSingleFieldElement,
+    element2: SectionSingleFieldElement
+) = isCityOrPostal(element1.identifier) && isCityOrPostal(element2.identifier)
+
+private fun isCityOrPostal(identifierSpec: IdentifierSpec) =
+    identifierSpec == IdentifierSpec.PostalCode ||
+        identifierSpec == IdentifierSpec.City
+
 private fun getKeyboard(fieldSchema: FieldSchema?) = if (fieldSchema?.isNumeric == true) {
-    KeyboardType.Number
+    KeyboardType.NumberPassword
 } else {
     KeyboardType.Text
 }

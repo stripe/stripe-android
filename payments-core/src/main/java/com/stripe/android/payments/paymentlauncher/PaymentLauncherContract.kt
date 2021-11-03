@@ -4,14 +4,17 @@ import android.content.Context
 import android.content.Intent
 import android.os.Parcelable
 import androidx.activity.result.contract.ActivityResultContract
+import androidx.annotation.RestrictTo
 import androidx.core.os.bundleOf
 import com.stripe.android.model.ConfirmStripeIntentParams
+import com.stripe.android.payments.core.injection.InjectorKey
 import kotlinx.parcelize.Parcelize
 
 /**
  * [ActivityResultContract] to start [PaymentLauncherConfirmationActivity] and return a [PaymentResult].
  */
-internal class PaymentLauncherContract :
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+class PaymentLauncherContract :
     ActivityResultContract<PaymentLauncherContract.Args, PaymentResult>() {
     override fun createIntent(context: Context, input: Args): Intent {
         return Intent(
@@ -24,23 +27,44 @@ internal class PaymentLauncherContract :
         return PaymentResult.fromIntent(intent)
     }
 
-    sealed class Args : Parcelable {
+    sealed class Args(
+        @InjectorKey open val injectorKey: String,
+        open val publishableKey: String,
+        open val stripeAccountId: String?,
+        open val enableLogging: Boolean,
+        open val productUsage: Set<String>
+    ) : Parcelable {
         fun toBundle() = bundleOf(EXTRA_ARGS to this)
 
         @Parcelize
         data class IntentConfirmationArgs(
+            @InjectorKey override val injectorKey: String,
+            override val publishableKey: String,
+            override val stripeAccountId: String?,
+            override val enableLogging: Boolean,
+            override val productUsage: Set<String>,
             val confirmStripeIntentParams: ConfirmStripeIntentParams
-        ) : Args()
+        ) : Args(injectorKey, publishableKey, stripeAccountId, enableLogging, productUsage)
 
         @Parcelize
         data class PaymentIntentNextActionArgs(
+            @InjectorKey override val injectorKey: String,
+            override val publishableKey: String,
+            override val stripeAccountId: String?,
+            override val enableLogging: Boolean,
+            override val productUsage: Set<String>,
             val paymentIntentClientSecret: String
-        ) : Args()
+        ) : Args(injectorKey, publishableKey, stripeAccountId, enableLogging, productUsage)
 
         @Parcelize
         data class SetupIntentNextActionArgs(
+            @InjectorKey override val injectorKey: String,
+            override val publishableKey: String,
+            override val stripeAccountId: String?,
+            override val enableLogging: Boolean,
+            override val productUsage: Set<String>,
             val setupIntentClientSecret: String
-        ) : Args()
+        ) : Args(injectorKey, publishableKey, stripeAccountId, enableLogging, productUsage)
 
         internal companion object {
             private const val EXTRA_ARGS = "extra_args"

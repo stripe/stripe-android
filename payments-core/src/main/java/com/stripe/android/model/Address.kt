@@ -1,5 +1,7 @@
 package com.stripe.android.model
 
+import androidx.annotation.RestrictTo
+import androidx.annotation.VisibleForTesting
 import com.stripe.android.ObjectBuilder
 import com.stripe.android.model.parsers.AddressJsonParser
 import kotlinx.parcelize.Parcelize
@@ -10,7 +12,7 @@ import org.json.JSONObject
  * object in the Source api.
  */
 @Parcelize
-data class Address internal constructor(
+data class Address @VisibleForTesting constructor(
     val city: String? = null,
     val country: String? = null, // two-character country code
     val line1: String? = null,
@@ -20,6 +22,9 @@ data class Address internal constructor(
 ) : StripeModel, StripeParamsModel {
     internal val countryCode: CountryCode?
         get() = country?.takeUnless { it.isBlank() }?.let { CountryCode.create(it) }
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
+    fun getCountryCode() = countryCode
 
     override fun toParamMap(): Map<String, Any> {
         return mapOf(
@@ -48,7 +53,8 @@ data class Address internal constructor(
             this.country = country?.uppercase()
         }
 
-        internal fun setCountryCode(countryCode: CountryCode?): Builder = apply {
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
+        fun setCountryCode(countryCode: CountryCode?): Builder = apply {
             this.country = countryCode?.value
         }
 

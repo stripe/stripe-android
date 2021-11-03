@@ -8,11 +8,11 @@ import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.networking.ApiRequest
 import com.stripe.android.payments.core.authentication.threeds2.Stripe3DS2Authenticator
 import com.stripe.android.payments.core.authentication.threeds2.Stripe3ds2TransactionContract
+import com.stripe.android.payments.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.view.AuthActivityStarterHost
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestCoroutineDispatcher
 import kotlinx.coroutines.test.runBlockingTest
-import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.argWhere
@@ -28,24 +28,19 @@ class Stripe3DS2AuthenticatorTest {
     private val activity: ComponentActivity = mock()
     private val host = AuthActivityStarterHost.create(activity)
 
-    private var threeDs1IntentReturnUrlMap = mutableMapOf<String, String>()
-
     private val paymentAuthConfig = PaymentAuthConfig.Builder().set3ds2Config(
         PaymentAuthConfig.Stripe3ds2Config.Builder()
             .setTimeout(5)
             .build()
     ).build()
 
-    private lateinit var authenticator: Stripe3DS2Authenticator
-
-    @Before
-    fun setUpAuthenticator() {
-        authenticator = Stripe3DS2Authenticator(
-            paymentAuthConfig,
-            enableLogging = false,
-            threeDs1IntentReturnUrlMap
-        )
-    }
+    private val authenticator = Stripe3DS2Authenticator(
+        paymentAuthConfig,
+        enableLogging = false,
+        injectorKey = DUMMY_INJECTOR_KEY,
+        publishableKeyProvider = { ApiKeyFixtures.FAKE_PUBLISHABLE_KEY },
+        productUsage = setOf()
+    )
 
     @Test
     fun `authenticate() should invoke startActivityForResult() when stripe3ds2CompletionLauncher is null`() =

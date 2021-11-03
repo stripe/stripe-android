@@ -1,21 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
-    <string name="billing_details">Billing Details</string>
-    <!-- Address line 1 placeholder for billing address form. -->
-    <string name="address_label_address_line1">Address line 1</string>
 
     <string name="card_number_label">Card number</string>
     <string name="card_number_invalid_brand">The card number brand is invalid.</string>
     <string name="card_number_incomplete">The card number is incomplete.</string>
-    <string name="card_number_too_long">The card number is too long.</string>
+    <string name="card_number_longer_than_expected">The card number is longer than expected, but you can still submit it.</string>
     <string name="card_number_invalid_luhn">The card number luhn is invalid.</string>
     <string name="card_number_invalid">The card number is invalid.</string>
     <string name="credit_cvc_label">CVC</string>
     <string name="credit_cvc_incomplete">CVC is incomplete</string>
     <string name="credit_cvc_invalid">CVC is invalid</string>
+    <string name="credit_cvc_too_long">The CVC is too long.</string>
+    <string name="credit_expiration_date">Expiration Date</string> <!-- TODO: What is correct title -->
 
+    <string name="incomplete_expiry_date">Incomplete expiration date</string> <!-- TODO: What is correct title -->
+    <string name="invalid_expiry_date">Invalid expiration date</string> <!-- TODO: What is correct title -->
+    <string name="invalid_expiry_month">Invalid expiration month</string> <!-- TODO: What is correct title -->
+    <string name="invalid_expiry_year">Invalid expiration year</string> <!-- TODO: What is correct title -->
+    <string name="acc_label_expiry_date_node">%s, Expiration Date</string> <!-- TODO: What is correct title -->
+    <string name="invalid_expiry_year_past">Expiration date is in the past.</string> <!-- TODO: What is correct title -->
 
-    <string name="stripe_paymentsheet_eps_bank">EPS Bank</string>
-    <string name="stripe_paymentsheet_p24_bank">P24 Bank</string>
     <string name="bank_icon_content_description">Bank icon</string>
 </resources>

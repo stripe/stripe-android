@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    tools:context=".paymentsheet.PaymentSheetListFragment">
+
+    <TextView
+        android:id="@+id/card_info_label"
+        style="@style/StripePaymentSheetLabel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/stripe_paymentsheet_add_payment_method_card_information"
+        app:layout_constraintBottom_toTopOf="@+id/card_multiline_widget_container"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/card_multiline_widget_container"
+        style="@style/StripePaymentAddPaymentMethodMaterialCard"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toTopOf="@+id/billing_address_label"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/card_info_label">
+
+        <com.stripe.android.view.CardMultilineWidget
+            android:id="@+id/card_multiline_widget"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@android:color/white"
+            android:backgroundTint="@color/stripe_paymentsheet_elements_background_states"
+            app:shouldShowPostalCode="false" />
+    </com.google.android.material.card.MaterialCardView>
+
+    <TextView
+        android:id="@+id/card_errors"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        android:textColor="@color/stripe_paymentsheet_form_error"
+        android:textSize="@dimen/stripe_paymentsheet_error_textsize"
+        android:lineSpacingExtra="5sp"
+        android:layout_marginTop="2dp"
+        android:layout_marginBottom="12dp"
+        android:layout_marginHorizontal="3dp"
+        app:layout_constraintBottom_toTopOf="@+id/billing_address_label"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/card_multiline_widget_container" />
+
+    <TextView
+        android:id="@+id/billing_address_label"
+        style="@style/StripePaymentSheetLabel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/stripe_paymentsheet_add_payment_method_country_or_region"
+        android:layout_marginTop="14dp"
+        app:layout_constraintBottom_toTopOf="@+id/billing_address"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/card_multiline_widget_container" />
+
+    <com.stripe.android.paymentsheet.ui.BillingAddressView
+        android:id="@+id/billing_address"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toTopOf="@+id/billing_errors"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/billing_address_label" />
+
+    <TextView
+        android:id="@+id/billing_errors"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        android:textColor="@color/stripe_paymentsheet_form_error"
+        android:textSize="@dimen/stripe_paymentsheet_error_textsize"
+        android:lineSpacingExtra="5sp"
+        android:layout_marginTop="2dp"
+        android:layout_marginHorizontal="3dp"
+        app:layout_constraintBottom_toTopOf="@+id/bottom_space"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/billing_address" />
+
+    <Space
+        android:id="@+id/bottom_space"
+        android:layout_width="match_parent"
+        android:layout_height="12dp"
+        app:layout_constraintBottom_toTopOf="@+id/save_card_checkbox"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/billing_errors" />
+
+    <com.google.android.material.checkbox.MaterialCheckBox
+        android:id="@+id/save_card_checkbox"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:buttonTint="@color/stripe_paymentsheet_save_checkbox_color"
+        android:checked="true"
+        android:layout_marginStart="-6dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/bottom_space" />
+</androidx.constraintlayout.widget.ConstraintLayout>

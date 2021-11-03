@@ -1,0 +1,12 @@
+package com.stripe.android.paymentsheet.model
+
+import com.stripe.android.model.PaymentIntentFixtures
+
+internal object FragmentConfigFixtures {
+
+    val DEFAULT = FragmentConfig(
+        stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+        isGooglePayReady = true,
+        savedSelection = SavedSelection.None
+    )
+}

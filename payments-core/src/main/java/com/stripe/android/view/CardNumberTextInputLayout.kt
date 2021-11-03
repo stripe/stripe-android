@@ -4,6 +4,7 @@ import android.content.Context
 import android.util.AttributeSet
 import android.view.ViewGroup
 import android.widget.FrameLayout
+import androidx.annotation.RestrictTo
 import androidx.core.view.children
 import androidx.core.view.doOnNextLayout
 import androidx.core.view.updateLayoutParams
@@ -14,7 +15,8 @@ import kotlin.properties.Delegates
 /**
  * An [TextInputLayout] that can show a loading indicator.
  */
-internal class CardNumberTextInputLayout @JvmOverloads constructor(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
+class CardNumberTextInputLayout @JvmOverloads internal constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = R.attr.textInputStyle

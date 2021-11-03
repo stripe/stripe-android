@@ -10,8 +10,6 @@
   <string name="acc_label_zip">Postcode</string>
   <!-- Short string for zip code (United States only) Please keep to 5 characters or less if possible. -->
   <string name="acc_label_zip_short">Postcode</string>
-  <!-- Text informing user they should add a debit or credit card. Shown when there are no existing payment methods in the application -->
-  <string name="add_card">Voeg een nieuwe betaalkaart toe om aankopen te doen in deze app.</string>
   <!-- Message displayed when a payment method is removed, stating its name. -->
   <string name="added">%s toegevoegd</string>
   <!-- Error text indicating that city is required, used for all locations -->
@@ -32,28 +30,44 @@
   <string name="address_label_address_optional">Adres (optioneel) </string>
   <!-- Label for input requesting apartment number (address line 2) where input is optional, used for US based addresses -->
   <string name="address_label_apt_optional">App. (optioneel)</string>
+  <!-- Caption for City field on address form -->
+  <string name="address_label_city">Plaats</string>
   <!-- Label for input requesting city where input is optional, used for all locations -->
   <string name="address_label_city_optional">Plaats (optioneel)</string>
+  <!-- Caption for Country field on address form -->
+  <string name="address_label_country">Land</string>
+  <!-- Caption for County field on address form (only countries that use county, like United Kingdom) -->
+  <string name="address_label_county">Graafschap</string>
   <!-- Label for input requesting county where input is optional , used for UK based addresses -->
   <string name="address_label_county_optional">Graafschap (optioneel)</string>
+  <!-- Caption for Name field on address form -->
+  <string name="address_label_name">Naam</string>
   <!-- Label for input requesting phone number, used for all locations -->
   <string name="address_label_phone_number">Telefoonnummer</string>
   <!-- Label for input requesting phone number where input is optional, used for all locations -->
   <string name="address_label_phone_number_optional">Telefoonnummer (optioneel)</string>
+  <!-- Short string for postal code (text used in non-US countries) -->
+  <string name="address_label_postal_code">Postcode</string>
   <!-- Label for input requesting postal code where input is optional, used for Canada based addresses -->
   <string name="address_label_postal_code_optional">Postcode (optioneel)</string>
   <!-- Label for input requesting postcode, used for UK based addresses -->
   <string name="address_label_postcode">Postcode</string>
   <!-- Label for input requesting postcode where input is optional, used for UK based addresses -->
   <string name="address_label_postcode_optional">Postcode (optioneel)</string>
+  <!-- Caption for Province field on address form (only countries that use province, like Canada) -->
+  <string name="address_label_province">Provincie</string>
   <!-- Label for input requesting province where province is optional, used for canadian addresses -->
   <string name="address_label_province_optional">Provincie (optioneel)</string>
   <!-- Label for input requesting the region, used for international addresses -->
   <string name="address_label_region_generic">Staat/provincie/regio</string>
   <!-- Label for input requesting the region where input is optional, used for international addresses -->
   <string name="address_label_region_generic_optional">Staat/provincie/regio (optioneel)</string>
+  <!-- Caption for State field on address form (only countries that use state , like United States) -->
+  <string name="address_label_state">Staat</string>
   <!-- Label for input requesting state where input is optional, used for US based addresses -->
   <string name="address_label_state_optional">Staat (optioneel)</string>
+  <!-- Label for input requesting zip code, used for US based addreses -->
+  <string name="address_label_zip_code">Postcode</string>
   <!-- Label for input requesting zip code where input is optional, used for US based addresses -->
   <string name="address_label_zip_code_optional">Postcode (optioneel)</string>
   <!-- Label for input requesting postal code, used for international addresses -->
@@ -64,8 +78,8 @@
   <string name="address_name_required">Geef je naam op</string>
   <!-- Error text indicating that phone number is required, used for all addresses -->
   <string name="address_phone_number_required">Geef je telefoonnummer op</string>
-  <!-- Error text indicating postal code is invalid, used for Canada addresses -->
-  <string name="address_postal_code_invalid">Je postcode is ongeldig</string>
+  <!-- Error message for when postal code in form is invalid -->
+  <string name="address_postal_code_invalid">Je postcode is ongeldig.</string>
   <!-- Error text indicating postcode is invalid, used for UK addresses -->
   <string name="address_postcode_invalid">Je postcode is ongeldig</string>
   <!-- Error text indicating that province is required, used for Canada addresses -->
@@ -74,8 +88,6 @@
   <string name="address_region_generic_required">Geef je staat/provincie/regio op</string>
   <!-- Error text indicating that address is required, used for all locations -->
   <string name="address_required">Geef je adres op</string>
-  <!-- Title for shipping address entry section -->
-  <string name="address_shipping_address">Verzendadres</string>
   <!-- Error text indicating that state is required, used for US addresses -->
   <string name="address_state_required">Geef je staat op</string>
   <!-- Error text indicating zip code is invalid, used for US addresses -->
@@ -131,8 +143,6 @@
   <string name="invalid_shipping_information">Ongeldig verzendadres</string>
   <!-- Error message for when postal code in form is incomplete -->
   <string name="invalid_zip">Je postcode is onvolledig.</string>
-  <!-- Text informing user there are no existing payment methods in the application -->
-  <string name="no_payment_methods">Geen betalingsmethoden.</string>
   <string name="payment_method_add_new_card">Nieuwe kaart toevoegen…</string>
   <string name="payment_method_add_new_fpx">Bankrekening selecteren (FPX)...</string>
   <!-- Label for free shipping method -->
@@ -140,44 +150,12 @@
   <!-- Message displayed when a payment method is removed, stating its name. -->
   <string name="removed">%s verwijderd</string>
   <string name="secure_checkout">Beveiligd afrekenproces</string>
-  <!-- Generic error message shown when payment cannot be processed. -->
-  <string name="stripe_failure_connection_error">Er zijn momenteel problemen met de verbinding naar onze betalingsprovider. Controleer je internetverbinding en probeer het opnieuw.</string>
   <!-- Error when 3DS2 authentication failed (e.g. customer entered the wrong code) -->
   <string name="stripe_failure_reason_authentication">We kunnen de betaalmethode niet authenticeren. Kies een andere betaalmethode en probeer het nogmaals.</string>
   <!-- Error when 3DS2 authentication timed out. -->
   <string name="stripe_failure_reason_timed_out">Time-out bij authenticatie van de betaalmethode. Probeer het nogmaals</string>
-  <!-- When an internal error is reported when a google pay payment is started. -->
-  <string name="stripe_google_pay_error_internal">Er is een interne fout opgetreden.</string>
-  <string name="stripe_paymentsheet_add_button_label">Toevoegen</string>
-  <!-- Text for a button that, when tapped, displays another screen where the customer can add payment method details -->
-  <string name="stripe_paymentsheet_add_payment_method_button_label">+ Toevoegen</string>
-  <!-- Card details entry form header title -->
-  <string name="stripe_paymentsheet_add_payment_method_card_information">Kaartgegevens</string>
-  <!-- Country selector and postal code entry form header title -->
-  <string name="stripe_paymentsheet_add_payment_method_country_or_region">Land of regio</string>
-  <!-- Title shown above a form where the customer can enter payment information like credit card details, email, billing address, etc. -->
-  <string name="stripe_paymentsheet_add_payment_method_title">Je betaalgegevens toevoegen</string>
-  <!-- Text for back button -->
-  <string name="stripe_paymentsheet_back">Terug</string>
-  <string name="stripe_paymentsheet_close">Sluiten</string>
   <!-- label for text field to enter card expiry -->
   <string name="stripe_paymentsheet_expiration_date_hint">MM / JJ</string>
-  <!-- Title of a section containing multiple payment methods that can selected and will collect the payment information from the user. -->
-  <string name="stripe_paymentsheet_or_pay_using">Of betalen met</string>
-  <!-- Title of a section containing a card form that will collect the payment information from the user. -->
-  <string name="stripe_paymentsheet_or_pay_with_card">Of met een kaart betalen</string>
-  <!-- Label of a button that initiates payment when tapped -->
-  <string name="stripe_paymentsheet_pay_button_amount">%s betalen</string>
-  <!-- Label for a button that starts processing the payment. -->
-  <string name="stripe_paymentsheet_pay_button_label">Betaal</string>
-  <!-- Label of a button that, when tapped, initiates payment, becomes disabled, and displays this text -->
-  <string name="stripe_paymentsheet_primary_button_processing">Verwerken...</string>
-  <!-- The label of a switch indicating whether to save the user&apos;s card for future payments to this merchant -->
-  <string name="stripe_paymentsheet_save_this_card_with_merchant_name">Deze kaart opslaan voor toekomstige aankopen bij %s</string>
-  <!-- Title shown above a carousel containing the customer&apos;s payment methods -->
-  <string name="stripe_paymentsheet_select_payment_method">Betaalmethode selecteren</string>
-  <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->
-  <string name="stripe_paymentsheet_setup_button_label">Instellen</string>
   <!-- When there are multiple browsers and web authentication is required, this will show in a window asking which browser they want to use to "Verify your payment" -->
   <string name="stripe_verify_your_payment">Je betaling verifiëren</string>
   <string name="title_add_a_card">Een kaart toevoegen</string>

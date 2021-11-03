@@ -1,17 +1,18 @@
 package com.stripe.android.paymentsheet.forms
 
-import com.stripe.android.paymentsheet.specifications.IdentifierSpec
+import com.stripe.android.paymentsheet.elements.IdentifierSpec
+import com.stripe.android.paymentsheet.model.PaymentSelection
 
 /**
  * The identifier here comes from the form element (section, static text, etc)
  */
-class FormFieldValues(
+internal class FormFieldValues(
     val fieldValuePairs: Map<IdentifierSpec, FormFieldEntry> = mapOf(),
-    val saveForFutureUse: Boolean,
-    val showsMandate: Boolean
+    val showsMandate: Boolean,
+    val userRequestedReuse: PaymentSelection.CustomerRequestedSave
 )
 
-data class FormFieldEntry(
+internal data class FormFieldEntry(
     val value: String?,
-    val isComplete: Boolean
+    val isComplete: Boolean = false
 )

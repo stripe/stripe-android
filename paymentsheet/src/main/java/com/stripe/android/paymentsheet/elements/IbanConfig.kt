@@ -96,7 +96,7 @@ internal class IbanConfig : TextFieldConfig {
                 TextFieldStateConstants.Valid.Limitless
             }
         } else {
-            TextFieldStateConstants.Error.Invalid(
+            TextFieldStateConstants.Error.Incomplete(
                 R.string.iban_invalid
             )
         }

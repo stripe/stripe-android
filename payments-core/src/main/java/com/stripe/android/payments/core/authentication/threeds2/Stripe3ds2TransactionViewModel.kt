@@ -6,8 +6,6 @@ import androidx.lifecycle.AbstractSavedStateViewModelFactory
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.savedstate.SavedStateRegistryOwner
-import com.stripe.android.Logger
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.StripePaymentController
 import com.stripe.android.auth.PaymentBrowserAuthContract
 import com.stripe.android.exception.StripeException
@@ -18,26 +16,28 @@ import com.stripe.android.networking.AnalyticsEvent
 import com.stripe.android.networking.AnalyticsRequestExecutor
 import com.stripe.android.networking.AnalyticsRequestFactory
 import com.stripe.android.networking.ApiRequest
-import com.stripe.android.networking.RetryDelaySupplier
-import com.stripe.android.networking.StripeApiRepository
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.PaymentFlowResult
+import com.stripe.android.payments.core.injection.DaggerStripe3ds2TransactionViewModelFactoryComponent
+import com.stripe.android.payments.core.injection.IOContext
+import com.stripe.android.payments.core.injection.Injectable
+import com.stripe.android.payments.core.injection.Stripe3ds2TransactionViewModelSubcomponent
+import com.stripe.android.payments.core.injection.WeakMapInjectorRegistry
+import com.stripe.android.payments.core.injection.injectWithFallback
 import com.stripe.android.stripe3ds2.service.StripeThreeDs2Service
-import com.stripe.android.stripe3ds2.service.StripeThreeDs2ServiceImpl
 import com.stripe.android.stripe3ds2.transaction.ChallengeParameters
 import com.stripe.android.stripe3ds2.transaction.ChallengeResult
 import com.stripe.android.stripe3ds2.transaction.InitChallengeArgs
 import com.stripe.android.stripe3ds2.transaction.InitChallengeRepository
-import com.stripe.android.stripe3ds2.transaction.InitChallengeRepositoryFactory
 import com.stripe.android.stripe3ds2.transaction.IntentData
 import com.stripe.android.stripe3ds2.transaction.MessageVersionRegistry
 import com.stripe.android.stripe3ds2.transaction.Transaction
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
+import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 
-internal class Stripe3ds2TransactionViewModel(
+internal class Stripe3ds2TransactionViewModel @Inject constructor(
     private val args: Stripe3ds2TransactionContract.Args,
     private val stripeRepository: StripeRepository,
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
@@ -46,9 +46,10 @@ internal class Stripe3ds2TransactionViewModel(
     private val messageVersionRegistry: MessageVersionRegistry,
     private val challengeResultProcessor: Stripe3ds2ChallengeResultProcessor,
     private val initChallengeRepository: InitChallengeRepository,
-    private val workContext: CoroutineContext,
+    @IOContext private val workContext: CoroutineContext,
     private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
+
     var hasCompleted: Boolean = savedStateHandle.contains(KEY_HAS_COMPLETED)
 
     suspend fun processChallengeResult(
@@ -67,6 +68,10 @@ internal class Stripe3ds2TransactionViewModel(
                 Stripe3ds2Fingerprint(args.nextActionData)
             )
         }.getOrElse {
+            analyticsRequestExecutor.executeAsync(
+                analyticsRequestFactory.createRequest(AnalyticsEvent.Auth3ds2RequestParamsFailed)
+            )
+
             NextStep.Complete(
                 PaymentFlowResult.Unvalidated(
                     exception = StripeException.create(it)
@@ -216,7 +221,8 @@ internal class Stripe3ds2TransactionViewModel(
                 enableLogging = args.enableLogging,
                 stripeAccountId = args.requestOptions.stripeAccount,
                 // 3D-Secure requires cancelling the source when the user cancels auth (AUTHN-47)
-                shouldCancelSource = true
+                shouldCancelSource = true,
+                publishableKey = args.publishableKey
             )
         )
     }
@@ -287,53 +293,58 @@ internal sealed class NextStep {
 }
 
 internal class Stripe3ds2TransactionViewModelFactory(
-    private val application: Application,
+    private val applicationSupplier: () -> Application,
     owner: SavedStateRegistryOwner,
-    private val args: Stripe3ds2TransactionContract.Args,
-    private val workContext: CoroutineContext = Dispatchers.IO
-) : AbstractSavedStateViewModelFactory(owner, null) {
+    private val argsSupplier: () -> Stripe3ds2TransactionContract.Args,
+) : AbstractSavedStateViewModelFactory(owner, null),
+    Injectable<Stripe3ds2TransactionViewModelFactory.FallbackInitializeParam> {
+
+    internal data class FallbackInitializeParam(
+        val application: Application,
+        val enableLogging: Boolean,
+        val publishableKey: String,
+        val productUsage: Set<String>
+    )
+
+    @Inject
+    lateinit var subComponentBuilder: Stripe3ds2TransactionViewModelSubcomponent.Builder
+
+    /**
+     * Fallback call to initialize dependencies when injection is not available, this might happen
+     * when app process is killed by system and [WeakMapInjectorRegistry] is cleared.
+     */
+    override fun fallbackInitialize(arg: FallbackInitializeParam) {
+        DaggerStripe3ds2TransactionViewModelFactoryComponent.builder()
+            .context(arg.application)
+            .enableLogging(arg.enableLogging)
+            .publishableKeyProvider { arg.publishableKey }
+            .productUsage(arg.productUsage)
+            .build()
+            .inject(this)
+    }
+
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel?> create(
         key: String,
         modelClass: Class<T>,
         handle: SavedStateHandle
     ): T {
-        val publishableKey = PaymentConfiguration.getInstance(application).publishableKey
-        val stripeRepository = StripeApiRepository(application, { publishableKey })
-        val analyticsRequestExecutor = AnalyticsRequestExecutor.Default(
-            Logger.getInstance(args.enableLogging),
-            workContext
-        )
-        val analyticsRequestFactory = AnalyticsRequestFactory(application, publishableKey)
-
-        val initChallengeRepository = InitChallengeRepositoryFactory(
-            application,
-            args.stripeIntent.isLiveMode,
-            args.sdkTransactionId,
-            args.config.uiCustomization.uiCustomization,
-            args.fingerprint.directoryServerEncryption.rootCerts,
-            args.enableLogging,
-            workContext
-        ).create()
-
-        return Stripe3ds2TransactionViewModel(
-            args,
-            stripeRepository,
-            analyticsRequestExecutor,
-            analyticsRequestFactory,
-            StripeThreeDs2ServiceImpl(application, args.enableLogging, workContext),
-            MessageVersionRegistry(),
-            DefaultStripe3ds2ChallengeResultProcessor(
-                stripeRepository,
-                analyticsRequestExecutor,
-                analyticsRequestFactory,
-                RetryDelaySupplier(),
+        val args = argsSupplier()
+        val application = applicationSupplier()
+        injectWithFallback(
+            args.injectorKey,
+            FallbackInitializeParam(
+                application,
                 args.enableLogging,
-                workContext
-            ),
-            initChallengeRepository,
-            workContext,
-            handle
-        ) as T
+                args.publishableKey,
+                args.productUsage
+            )
+        )
+
+        return subComponentBuilder
+            .args(args)
+            .savedStateHandle(handle)
+            .application(application)
+            .build().viewModel as T
     }
 }

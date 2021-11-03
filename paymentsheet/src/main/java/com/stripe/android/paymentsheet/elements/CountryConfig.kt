@@ -1,7 +1,9 @@
 package com.stripe.android.paymentsheet.elements
 
 import androidx.annotation.StringRes
+import com.stripe.android.model.CountryCode
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.view.CountryUtils
 import java.util.Locale
 
 /**
@@ -30,6 +32,6 @@ internal class CountryConfig(
         CountryUtils.getCountryByCode(CountryCode.create(rawValue), Locale.getDefault())?.name
             ?: getDisplayItems()[0]
 
-    override fun convertToRaw(it: String) =
-        CountryUtils.getCountryCodeByName(it, Locale.getDefault())?.value
+    override fun convertToRaw(displayName: String) =
+        CountryUtils.getCountryCodeByName(displayName, Locale.getDefault())?.value
 }
