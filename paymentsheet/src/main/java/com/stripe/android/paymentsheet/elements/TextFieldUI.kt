@@ -4,6 +4,9 @@ import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.LocalContentAlpha
@@ -28,6 +31,7 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.unit.dp
 import com.stripe.android.paymentsheet.R
 
 /** This is a helpful method for setting the next action based on the nextFocus Requester **/
@@ -140,8 +144,8 @@ internal fun TextField(
         maxLines = 1,
         singleLine = true,
         enabled = enabled,
-        trailingIcon = {
-            TrailingIcon(trailingIcon)
+        trailingIcon = trailingIcon?.let {
+            { TrailingIcon(it) }
         }
     )
 }
@@ -155,11 +159,14 @@ fun nextFocus(focusManager: FocusManager) {
 }
 
 @Composable
-fun TrailingIcon(trailingIcon: TextFieldIcon?) {
-    trailingIcon?.let {
-        Image(
-            painter = painterResource(id = trailingIcon.idRes),
-            trailingIcon.contentDescription?.let { stringResource(trailingIcon.contentDescription) }
-        )
-    }
+fun TrailingIcon(trailingIcon: TextFieldIcon) {
+
+    Image(
+        painter = painterResource(id = trailingIcon.idRes),
+        modifier = Modifier
+            .height(24.dp)
+            .width(32.dp)
+            .padding(0.dp),
+        contentDescription = trailingIcon.contentDescription?.let { stringResource(trailingIcon.contentDescription) }
+    )
 }
