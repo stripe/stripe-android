@@ -29,7 +29,7 @@ internal fun FormInternal(
     )
     val enabled by enabledFlow.collectAsState(true)
 
-    hiddenIdentifiers?.let{
+    hiddenIdentifiers?.let {
         Column(
             modifier = Modifier.fillMaxWidth(1f)
         ) {

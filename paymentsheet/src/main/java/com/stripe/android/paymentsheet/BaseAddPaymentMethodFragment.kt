@@ -113,7 +113,6 @@ internal abstract class BaseAddPaymentMethodFragment(
                                 selectedPaymentMethod
                             )
                         )
-
                     }
                 }
             }
