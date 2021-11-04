@@ -198,9 +198,6 @@ internal class StripePaymentAuthTest {
             StripeApiRepository(
                 ApplicationProvider.getApplicationContext(),
                 { ApiKeyFixtures.FAKE_PUBLISHABLE_KEY },
-//                stripeApiRequestExecutor = DefaultApiRequestExecutor(
-//                    workContext = testDispatcher
-//                ),
                 stripeNetworkClient = DefaultStripeNetworkClient(
                     workContext = testDispatcher
                 ),

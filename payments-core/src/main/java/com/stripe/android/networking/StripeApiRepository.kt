@@ -90,11 +90,6 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
     private val logger: Logger = Logger.noop(),
     private val workContext: CoroutineContext = Dispatchers.IO,
     private val productUsageTokens: Set<String> = emptySet(),
-//    private val stripeApiRequestExecutor: ApiRequestExecutor = DefaultApiRequestExecutor(
-//        workContext = workContext,
-//        logger = logger
-//    ),
-
     private val stripeNetworkClient: StripeNetworkClient = DefaultStripeNetworkClient(
         workContext = workContext,
         logger = logger
@@ -1222,7 +1217,6 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         val dnsCacheData = disableDnsCache()
 
         val response = runCatching {
-//            stripeApiRequestExecutor.execute(apiRequest)
             stripeNetworkClient.executeRequest(apiRequest)
         }.also {
             onResponse()
@@ -1257,7 +1251,6 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         val dnsCacheData = disableDnsCache()
 
         val response = runCatching {
-//            stripeApiRequestExecutor.execute(fileUploadRequest)
             stripeNetworkClient.executeRequest(fileUploadRequest)
         }.also {
             onResponse(it.getOrNull()?.requestId)

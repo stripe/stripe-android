@@ -81,7 +81,6 @@ internal class StripeApiRepositoryTest {
     )
     private val fileFactory = FileFactory(context)
 
-    //    private val stripeApiRequestExecutor: ApiRequestExecutor = mock()
     private val stripeNetworkClient: StripeNetworkClient = mock()
     private val analyticsRequestExecutor: AnalyticsRequestExecutor = mock()
     private val fraudDetectionDataRepository: FraudDetectionDataRepository = mock()
@@ -746,9 +745,6 @@ internal class StripeApiRepositoryTest {
             context,
             { DEFAULT_OPTIONS.apiKey },
             workContext = testDispatcher,
-//            stripeApiRequestExecutor = DefaultApiRequestExecutor(
-//                workContext = testDispatcher
-//            ),
             stripeNetworkClient = DefaultStripeNetworkClient(
                 workContext = testDispatcher
             ),
@@ -1571,7 +1567,6 @@ internal class StripeApiRepositoryTest {
             { DEFAULT_OPTIONS.apiKey },
             workContext = testDispatcher,
             productUsageTokens = productUsage,
-//            stripeApiRequestExecutor = stripeApiRequestExecutor,
             stripeNetworkClient = stripeNetworkClient,
             analyticsRequestExecutor = analyticsRequestExecutor,
             fraudDetectionDataRepository = fraudDetectionDataRepository,

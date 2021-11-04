@@ -1366,7 +1366,6 @@ public class StripeTest {
                 new FakeLogger(),
                 workDispatcher,
                 emptySet(),
-//                new DefaultApiRequestExecutor(workDispatcher),
                 new DefaultStripeNetworkClient(workDispatcher),
                 analyticsRequestExecutor,
                 fraudDetectionDataRepository
