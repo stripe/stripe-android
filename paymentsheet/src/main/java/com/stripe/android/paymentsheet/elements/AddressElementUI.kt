@@ -15,7 +15,7 @@ internal fun AddressElementUI(
     controller: AddressController
 ) {
     val fields by controller.fieldsFlowable.collectAsState(null)
-    if (fields != null) {
+    fields?.let {
         Column {
             fields!!.forEachIndexed { index, field ->
                 SectionFieldElementUI(enabled, field)
