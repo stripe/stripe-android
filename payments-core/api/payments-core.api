@@ -925,11 +925,71 @@ public final class com/stripe/android/StripeKtxKt {
 	public static synthetic fun retrieveSource$default (Lcom/stripe/android/Stripe;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 }
 
-public final class com/stripe/android/exception/APIConnectionException : com/stripe/android/exception/StripeException {
+public final class com/stripe/android/core/exception/APIConnectionException : com/stripe/android/exception/StripeException {
 	public static final field $stable I
 	public fun <init> ()V
 	public fun <init> (Ljava/lang/String;Ljava/lang/Throwable;)V
 	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/Throwable;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+}
+
+public final class com/stripe/android/core/exception/InvalidRequestException : com/stripe/android/exception/StripeException {
+	public static final field $stable I
+	public fun <init> ()V
+	public fun <init> (Lcom/stripe/android/StripeError;Ljava/lang/String;ILjava/lang/String;Ljava/lang/Throwable;)V
+	public synthetic fun <init> (Lcom/stripe/android/StripeError;Ljava/lang/String;ILjava/lang/String;Ljava/lang/Throwable;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+}
+
+public final class com/stripe/android/core/networking/RetryDelaySupplier_Factory : dagger/internal/Factory {
+	public fun <init> ()V
+	public static fun create ()Lcom/stripe/android/core/networking/RetryDelaySupplier_Factory;
+	public fun get ()Lcom/stripe/android/core/networking/RetryDelaySupplier;
+	public synthetic fun get ()Ljava/lang/Object;
+	public static fun newInstance ()Lcom/stripe/android/core/networking/RetryDelaySupplier;
+}
+
+public abstract interface class com/stripe/android/core/networking/StripeNetworkClient {
+	public abstract fun executeRequest (Lcom/stripe/android/core/networking/StripeRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun executeRequestForFile (Lcom/stripe/android/core/networking/StripeRequest;Ljava/io/File;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public abstract class com/stripe/android/core/networking/StripeRequest {
+	public static final field $stable I
+	public fun <init> ()V
+	public abstract fun getHeaders ()Ljava/util/Map;
+	public abstract fun getRetryResponseCodes ()Ljava/lang/Iterable;
+	public abstract fun getUrl ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/core/networking/StripeRequest$Method : java/lang/Enum {
+	public static final field DELETE Lcom/stripe/android/core/networking/StripeRequest$Method;
+	public static final field GET Lcom/stripe/android/core/networking/StripeRequest$Method;
+	public static final field POST Lcom/stripe/android/core/networking/StripeRequest$Method;
+	public final fun getCode ()Ljava/lang/String;
+	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/core/networking/StripeRequest$Method;
+	public static fun values ()[Lcom/stripe/android/core/networking/StripeRequest$Method;
+}
+
+public final class com/stripe/android/core/networking/StripeRequest$MimeType : java/lang/Enum {
+	public static final field Form Lcom/stripe/android/core/networking/StripeRequest$MimeType;
+	public static final field Json Lcom/stripe/android/core/networking/StripeRequest$MimeType;
+	public static final field MultipartForm Lcom/stripe/android/core/networking/StripeRequest$MimeType;
+	public final fun getCode ()Ljava/lang/String;
+	public fun toString ()Ljava/lang/String;
+	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/core/networking/StripeRequest$MimeType;
+	public static fun values ()[Lcom/stripe/android/core/networking/StripeRequest$MimeType;
+}
+
+public final class com/stripe/android/core/networking/StripeResponse {
+	public static final field $stable I
+	public final fun copy (ILjava/lang/Object;Ljava/util/Map;)Lcom/stripe/android/core/networking/StripeResponse;
+	public static synthetic fun copy$default (Lcom/stripe/android/core/networking/StripeResponse;ILjava/lang/Object;Ljava/util/Map;ILjava/lang/Object;)Lcom/stripe/android/core/networking/StripeResponse;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/core/networking/StripeResponseKtxKt {
+	public static final fun responseJson (Lcom/stripe/android/core/networking/StripeResponse;)Lorg/json/JSONObject;
 }
 
 public final class com/stripe/android/exception/APIException : com/stripe/android/exception/StripeException {
@@ -951,13 +1011,6 @@ public final class com/stripe/android/exception/CardException : com/stripe/andro
 	public final fun getCode ()Ljava/lang/String;
 	public final fun getDeclineCode ()Ljava/lang/String;
 	public final fun getParam ()Ljava/lang/String;
-}
-
-public final class com/stripe/android/exception/InvalidRequestException : com/stripe/android/exception/StripeException {
-	public static final field $stable I
-	public fun <init> ()V
-	public fun <init> (Lcom/stripe/android/StripeError;Ljava/lang/String;ILjava/lang/String;Ljava/lang/Throwable;)V
-	public synthetic fun <init> (Lcom/stripe/android/StripeError;Ljava/lang/String;ILjava/lang/String;Ljava/lang/Throwable;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 }
 
 public final class com/stripe/android/exception/PermissionException : com/stripe/android/exception/StripeException {
@@ -4998,7 +5051,7 @@ public final class com/stripe/android/model/wallets/Wallet$VisaCheckoutWallet : 
 	public fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
-public final class com/stripe/android/networking/AnalyticsRequest : com/stripe/android/networking/StripeRequest {
+public final class com/stripe/android/networking/AnalyticsRequest : com/stripe/android/core/networking/StripeRequest {
 	public static final field $stable I
 	public fun <init> (Ljava/util/Map;)V
 	public final fun component1 ()Ljava/util/Map;
@@ -5032,10 +5085,10 @@ public final class com/stripe/android/networking/AnalyticsRequestFactory_Factory
 	public static fun newInstance (Landroid/content/Context;Lkotlin/jvm/functions/Function0;Ljava/util/Set;)Lcom/stripe/android/networking/AnalyticsRequestFactory;
 }
 
-public final class com/stripe/android/networking/ApiRequest : com/stripe/android/networking/StripeRequest {
+public final class com/stripe/android/networking/ApiRequest : com/stripe/android/core/networking/StripeRequest {
 	public static final field $stable I
-	public final fun copy (Lcom/stripe/android/networking/StripeRequest$Method;Ljava/lang/String;Ljava/util/Map;Lcom/stripe/android/networking/ApiRequest$Options;Lcom/stripe/android/AppInfo;Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/networking/ApiRequest;
-	public static synthetic fun copy$default (Lcom/stripe/android/networking/ApiRequest;Lcom/stripe/android/networking/StripeRequest$Method;Ljava/lang/String;Ljava/util/Map;Lcom/stripe/android/networking/ApiRequest$Options;Lcom/stripe/android/AppInfo;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/networking/ApiRequest;
+	public final fun copy (Lcom/stripe/android/core/networking/StripeRequest$Method;Ljava/lang/String;Ljava/util/Map;Lcom/stripe/android/networking/ApiRequest$Options;Lcom/stripe/android/AppInfo;Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/networking/ApiRequest;
+	public static synthetic fun copy$default (Lcom/stripe/android/networking/ApiRequest;Lcom/stripe/android/core/networking/StripeRequest$Method;Ljava/lang/String;Ljava/util/Map;Lcom/stripe/android/networking/ApiRequest$Options;Lcom/stripe/android/AppInfo;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/networking/ApiRequest;
 	public fun equals (Ljava/lang/Object;)Z
 	public fun getHeaders ()Ljava/util/Map;
 	public fun getRetryResponseCodes ()Ljava/lang/Iterable;
@@ -5092,14 +5145,6 @@ public final class com/stripe/android/networking/DefaultAnalyticsRequestExecutor
 	public static fun newInstance (Lcom/stripe/android/Logger;Lkotlin/coroutines/CoroutineContext;)Lcom/stripe/android/networking/DefaultAnalyticsRequestExecutor;
 }
 
-public final class com/stripe/android/networking/RetryDelaySupplier_Factory : dagger/internal/Factory {
-	public fun <init> ()V
-	public static fun create ()Lcom/stripe/android/networking/RetryDelaySupplier_Factory;
-	public fun get ()Lcom/stripe/android/networking/RetryDelaySupplier;
-	public synthetic fun get ()Ljava/lang/Object;
-	public static fun newInstance ()Lcom/stripe/android/networking/RetryDelaySupplier;
-}
-
 public final class com/stripe/android/networking/StripeApiRepository_Factory : dagger/internal/Factory {
 	public fun <init> (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)V
 	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/networking/StripeApiRepository_Factory;
@@ -5121,33 +5166,6 @@ public abstract class com/stripe/android/networking/StripeRepository {
 	public abstract fun retrieveSetupIntent (Ljava/lang/String;Lcom/stripe/android/networking/ApiRequest$Options;Ljava/util/List;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun retrieveSetupIntent$default (Lcom/stripe/android/networking/StripeRepository;Ljava/lang/String;Lcom/stripe/android/networking/ApiRequest$Options;Ljava/util/List;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public abstract fun retrieveSetupIntentWithOrderedPaymentMethods (Ljava/lang/String;Lcom/stripe/android/networking/ApiRequest$Options;Ljava/util/Locale;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-}
-
-public abstract class com/stripe/android/networking/StripeRequest {
-	public static final field $stable I
-	public fun <init> ()V
-	public abstract fun getHeaders ()Ljava/util/Map;
-	public abstract fun getRetryResponseCodes ()Ljava/lang/Iterable;
-	public abstract fun getUrl ()Ljava/lang/String;
-}
-
-public final class com/stripe/android/networking/StripeRequest$Method : java/lang/Enum {
-	public static final field DELETE Lcom/stripe/android/networking/StripeRequest$Method;
-	public static final field GET Lcom/stripe/android/networking/StripeRequest$Method;
-	public static final field POST Lcom/stripe/android/networking/StripeRequest$Method;
-	public final fun getCode ()Ljava/lang/String;
-	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/networking/StripeRequest$Method;
-	public static fun values ()[Lcom/stripe/android/networking/StripeRequest$Method;
-}
-
-public final class com/stripe/android/networking/StripeRequest$MimeType : java/lang/Enum {
-	public static final field Form Lcom/stripe/android/networking/StripeRequest$MimeType;
-	public static final field Json Lcom/stripe/android/networking/StripeRequest$MimeType;
-	public static final field MultipartForm Lcom/stripe/android/networking/StripeRequest$MimeType;
-	public final fun getCode ()Ljava/lang/String;
-	public fun toString ()Ljava/lang/String;
-	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/networking/StripeRequest$MimeType;
-	public static fun values ()[Lcom/stripe/android/networking/StripeRequest$MimeType;
 }
 
 public abstract class com/stripe/android/payments/PaymentFlowResult {
@@ -5192,7 +5210,7 @@ public final class com/stripe/android/payments/PaymentIntentFlowResultProcessor_
 	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/payments/PaymentIntentFlowResultProcessor_Factory;
 	public fun get ()Lcom/stripe/android/payments/PaymentIntentFlowResultProcessor;
 	public synthetic fun get ()Ljava/lang/Object;
-	public static fun newInstance (Landroid/content/Context;Lkotlin/jvm/functions/Function0;Lcom/stripe/android/networking/StripeRepository;Lcom/stripe/android/Logger;Lkotlin/coroutines/CoroutineContext;Lcom/stripe/android/networking/RetryDelaySupplier;)Lcom/stripe/android/payments/PaymentIntentFlowResultProcessor;
+	public static fun newInstance (Landroid/content/Context;Lkotlin/jvm/functions/Function0;Lcom/stripe/android/networking/StripeRepository;Lcom/stripe/android/Logger;Lkotlin/coroutines/CoroutineContext;Lcom/stripe/android/core/networking/RetryDelaySupplier;)Lcom/stripe/android/payments/PaymentIntentFlowResultProcessor;
 }
 
 public final class com/stripe/android/payments/SetupIntentFlowResultProcessor_Factory : dagger/internal/Factory {
@@ -5275,7 +5293,7 @@ public final class com/stripe/android/payments/core/authentication/threeds2/Defa
 	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/payments/core/authentication/threeds2/DefaultStripe3ds2ChallengeResultProcessor_Factory;
 	public fun get ()Lcom/stripe/android/payments/core/authentication/threeds2/DefaultStripe3ds2ChallengeResultProcessor;
 	public synthetic fun get ()Ljava/lang/Object;
-	public static fun newInstance (Lcom/stripe/android/networking/StripeRepository;Lcom/stripe/android/networking/AnalyticsRequestExecutor;Lcom/stripe/android/networking/AnalyticsRequestFactory;Lcom/stripe/android/networking/RetryDelaySupplier;Lcom/stripe/android/Logger;Lkotlin/coroutines/CoroutineContext;)Lcom/stripe/android/payments/core/authentication/threeds2/DefaultStripe3ds2ChallengeResultProcessor;
+	public static fun newInstance (Lcom/stripe/android/networking/StripeRepository;Lcom/stripe/android/networking/AnalyticsRequestExecutor;Lcom/stripe/android/networking/AnalyticsRequestFactory;Lcom/stripe/android/core/networking/RetryDelaySupplier;Lcom/stripe/android/Logger;Lkotlin/coroutines/CoroutineContext;)Lcom/stripe/android/payments/core/authentication/threeds2/DefaultStripe3ds2ChallengeResultProcessor;
 }
 
 public final class com/stripe/android/payments/core/authentication/threeds2/Stripe3DS2Authenticator_Factory : dagger/internal/Factory {

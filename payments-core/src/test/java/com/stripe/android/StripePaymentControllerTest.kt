@@ -7,7 +7,7 @@ import androidx.activity.ComponentActivity
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.StripePaymentController.Companion.EXPAND_PAYMENT_METHOD
-import com.stripe.android.exception.InvalidRequestException
+import com.stripe.android.core.exception.InvalidRequestException
 import com.stripe.android.model.AlipayAuthResult
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentIntent

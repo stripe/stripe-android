@@ -1,20 +1,21 @@
-package com.stripe.android.networking
+package com.stripe.android.core.networking
 
-import com.stripe.android.exception.APIException
-import com.stripe.android.networking.RequestHeadersFactory.Companion.HEADER_CONTENT_TYPE
-import org.json.JSONException
-import org.json.JSONObject
+import androidx.annotation.RestrictTo
+import java.io.File
 import java.net.HttpURLConnection
 import java.net.HttpURLConnection.HTTP_MULT_CHOICE
 
 /**
  * Represents a response from the Stripe servers.
+ * Upon receiving the HTTP response, its body is parsed into [ResponseBody], such as a
+ * [String] or a [File].
  *
  * @param code the response code (i.e. 404)
  * @param body the body of the response
  * @param headers any headers associated with the response
  */
-internal data class StripeResponse internal constructor(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+data class StripeResponse<ResponseBody> internal constructor(
     /**
      * the response code
      */
@@ -22,7 +23,7 @@ internal data class StripeResponse internal constructor(
     /**
      * the response body
      */
-    internal val body: String?,
+    internal val body: ResponseBody?,
     /**
      * the response headers
      */
@@ -35,30 +36,6 @@ internal data class StripeResponse internal constructor(
     internal val requestId: RequestId? = RequestId.fromString(
         getHeaderValue(HEADER_REQUEST_ID)?.firstOrNull()
     )
-
-    private val contentType: String? = getHeaderValue(HEADER_CONTENT_TYPE)?.firstOrNull()
-
-    internal val responseJson: JSONObject
-        @Throws(APIException::class)
-        get() {
-            return body?.let {
-                try {
-                    JSONObject(it)
-                } catch (e: JSONException) {
-                    throw APIException(
-                        message =
-                        """
-                            Exception while parsing response body.
-                              Status code: $code
-                              Request-Id: $requestId
-                              Content-Type: $contentType
-                              Body: "$it"
-                        """.trimIndent(),
-                        cause = e
-                    )
-                }
-            } ?: JSONObject()
-        }
 
     override fun toString(): String {
         return "$HEADER_REQUEST_ID: $requestId, Status Code: $code"

@@ -1,6 +1,7 @@
 package com.stripe.android.networking
 
-import com.stripe.android.exception.InvalidRequestException
+import com.stripe.android.core.exception.InvalidRequestException
+import com.stripe.android.core.networking.StripeRequest
 import com.stripe.android.model.StripeJsonUtils
 import java.io.OutputStream
 import java.io.UnsupportedEncodingException

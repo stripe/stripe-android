@@ -1,6 +1,7 @@
 package com.stripe.android.networking
 
 import androidx.annotation.RestrictTo
+import com.stripe.android.core.networking.StripeRequest
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 data class AnalyticsRequest(

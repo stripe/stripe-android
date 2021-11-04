@@ -5,7 +5,7 @@ import android.util.Log
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.EphemeralKeyManager.KeyManagerListener
 import com.stripe.android.Stripe.Companion.appInfo
-import com.stripe.android.exception.InvalidRequestException
+import com.stripe.android.core.exception.InvalidRequestException
 import com.stripe.android.networking.AnalyticsRequestFactory
 import com.stripe.android.networking.ApiRequest
 import com.stripe.android.networking.StripeApiRepository

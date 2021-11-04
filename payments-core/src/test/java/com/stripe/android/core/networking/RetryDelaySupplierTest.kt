@@ -1,4 +1,4 @@
-package com.stripe.android.networking
+package com.stripe.android.core.networking
 
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test

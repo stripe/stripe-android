@@ -1,6 +1,7 @@
-package com.stripe.android.exception
+package com.stripe.android.core.exception
 
 import com.stripe.android.StripeError
+import com.stripe.android.exception.StripeException
 
 /**
  * A [StripeException] indicating that invalid parameters were used in a request.

@@ -1,4 +1,4 @@
-package com.stripe.android.networking
+package com.stripe.android.core.networking
 
 /**
  * The identifier for a Stripe API request.

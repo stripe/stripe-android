@@ -5,9 +5,10 @@ import android.content.Context;
 import androidx.annotation.NonNull;
 import androidx.test.core.app.ApplicationProvider;
 
+import com.stripe.android.core.networking.DefaultStripeNetworkClient;
 import com.stripe.android.exception.AuthenticationException;
 import com.stripe.android.exception.CardException;
-import com.stripe.android.exception.InvalidRequestException;
+import com.stripe.android.core.exception.InvalidRequestException;
 import com.stripe.android.exception.StripeException;
 import com.stripe.android.model.AccountParams;
 import com.stripe.android.model.AddressFixtures;
@@ -34,7 +35,6 @@ import com.stripe.android.model.WeChat;
 import com.stripe.android.networking.AnalyticsRequest;
 import com.stripe.android.networking.AnalyticsRequestExecutor;
 import com.stripe.android.networking.AnalyticsRequestFactory;
-import com.stripe.android.networking.DefaultApiRequestExecutor;
 import com.stripe.android.networking.FakeAnalyticsRequestExecutor;
 import com.stripe.android.networking.StripeApiRepository;
 import com.stripe.android.networking.StripeRepository;
@@ -1366,7 +1366,8 @@ public class StripeTest {
                 new FakeLogger(),
                 workDispatcher,
                 emptySet(),
-                new DefaultApiRequestExecutor(workDispatcher),
+//                new DefaultApiRequestExecutor(workDispatcher),
+                new DefaultStripeNetworkClient(workDispatcher),
                 analyticsRequestExecutor,
                 fraudDetectionDataRepository
         );

@@ -2,7 +2,8 @@ package com.stripe.android.networking
 
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.Logger
-import com.stripe.android.exception.APIConnectionException
+import com.stripe.android.core.exception.APIConnectionException
+import com.stripe.android.core.networking.ConnectionFactory
 import com.stripe.android.payments.core.injection.IOContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -20,7 +21,7 @@ internal class DefaultAnalyticsRequestExecutor @Inject constructor(
         Dispatchers.IO
     )
 
-    private val connectionFactory = ConnectionFactory.Default()
+    private val connectionFactory = ConnectionFactory.Default
 
     /**
      * Make the request and ignore the response

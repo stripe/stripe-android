@@ -2,12 +2,12 @@ package com.stripe.android.payments.core.authentication.threeds2
 
 import com.stripe.android.Logger
 import com.stripe.android.StripeIntentResult
+import com.stripe.android.core.networking.RetryDelaySupplier
 import com.stripe.android.exception.StripeException
 import com.stripe.android.networking.AnalyticsEvent
 import com.stripe.android.networking.AnalyticsRequestExecutor
 import com.stripe.android.networking.AnalyticsRequestFactory
 import com.stripe.android.networking.ApiRequest
-import com.stripe.android.networking.RetryDelaySupplier
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.payments.core.injection.IOContext

@@ -1,7 +1,7 @@
 package com.stripe.android
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.exception.InvalidRequestException
+import com.stripe.android.core.exception.InvalidRequestException
 import com.stripe.android.networking.AbsFakeStripeRepository
 import com.stripe.android.networking.ApiRequest
 import com.stripe.android.testharness.TestEphemeralKeyProvider
