@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
+    <!--
+    Items here need to be entered in our translation tool
+    -->
 
     <string name="card_number_label">Card number</string>
     <string name="card_number_invalid_brand">The card number brand is invalid.</string>
@@ -20,4 +23,5 @@
     <string name="acc_label_expiry_date_node">%s, Expiration Date</string> <!-- TODO: What is correct title -->
     <string name="invalid_expiry_year_past">Expiration date is in the past.</string> <!-- TODO: What is correct title -->
 
+    <string name="stripe_paymentsheet_save_for_future_payments_with_merchant_name">Save for future %s payments</string>
 </resources>

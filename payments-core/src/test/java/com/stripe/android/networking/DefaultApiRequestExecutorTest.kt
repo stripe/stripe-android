@@ -2,14 +2,11 @@ package com.stripe.android.networking
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.exception.APIConnectionException
-import com.stripe.android.exception.InvalidRequestException
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestCoroutineDispatcher
 import kotlinx.coroutines.test.runBlockingTest
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import java.io.ByteArrayOutputStream
-import java.io.UnsupportedEncodingException
 import java.net.UnknownHostException
 import java.util.UUID
 import kotlin.test.AfterTest
@@ -24,30 +21,6 @@ internal class DefaultApiRequestExecutorTest {
     @AfterTest
     fun cleanup() {
         testDispatcher.cleanupTestCoroutines()
-    }
-
-    @Test
-    fun bodyBytes_shouldHandleUnsupportedEncodingException() {
-        val stripeRequest = object : StripeRequest() {
-            override val method: Method = Method.POST
-            override val baseUrl: String = ApiRequest.API_HOST
-            override val params: Map<String, *>? = null
-            override val mimeType: MimeType = MimeType.Form
-            override val headersFactory = RequestHeadersFactory.FraudDetection(
-                UUID.randomUUID().toString()
-            )
-
-            override val body: String
-                get() {
-                    throw UnsupportedEncodingException()
-                }
-        }
-
-        assertFailsWith<InvalidRequestException> {
-            ByteArrayOutputStream().use {
-                stripeRequest.writeBody(it)
-            }
-        }
     }
 
     @Test
@@ -92,7 +65,7 @@ internal class DefaultApiRequestExecutorTest {
     fun `executeInternal when retries exhausted should return rate-limited response`() =
         testDispatcher.runBlockingTest {
             val connectionFactory = FakeConnectionFactory(
-                FakeConnection(429)
+                FakeConnection(HTTP_TOO_MANY_REQUESTS)
             )
             val executor = DefaultApiRequestExecutor(
                 workContext = testDispatcher,
@@ -109,11 +82,11 @@ internal class DefaultApiRequestExecutorTest {
         }
 
     @Test
-    fun `executeInternal when rate-limited once then succeeds should return OK response`() =
+    fun `executeInternal when retry code is returned once then succeeds should return OK response`() =
         testDispatcher.runBlockingTest {
             val connectionFactory = FakeConnectionFactory { count ->
                 if (count <= 1) {
-                    FakeConnection(429)
+                    FakeConnection(TEST_RETRY_CODES_START)
                 } else {
                     FakeConnection(200)
                 }
@@ -132,16 +105,33 @@ internal class DefaultApiRequestExecutorTest {
                 .isTrue()
         }
 
+    @Test
+    fun `executeInternal when non retry code should not retry and return response with the code`() =
+        testDispatcher.runBlockingTest {
+            val connectionFactory = FakeConnectionFactory(
+                FakeConnection(TEST_NON_RETRY_CODES_END)
+            )
+            val executor = DefaultApiRequestExecutor(
+                workContext = testDispatcher,
+                connectionFactory = connectionFactory,
+                retryDelaySupplier = RetryDelaySupplier(0)
+            )
+
+            val response = executor.executeInternal(FakeStripeRequest(), MAX_RETRIES)
+            assertThat(connectionFactory.createInvocations)
+                .isEqualTo(1)
+
+            assertThat(response.code).isEqualTo(TEST_NON_RETRY_CODES_END)
+        }
+
     private class FakeStripeRequest : StripeRequest() {
         override val method: Method = Method.POST
-        override val baseUrl: String = ApiRequest.API_HOST
-        override val params: Map<String, *>? = null
+        override val url: String = ApiRequest.API_HOST
         override val mimeType: MimeType = MimeType.Form
-        override val headersFactory = RequestHeadersFactory.FraudDetection(
+        override val headers = RequestHeadersFactory.FraudDetection(
             UUID.randomUUID().toString()
-        )
-
-        override val body: String = ""
+        ).create()
+        override val retryResponseCodes = TEST_RETRY_CODES
     }
 
     private class FakeConnectionFactory(
@@ -192,5 +182,10 @@ internal class DefaultApiRequestExecutorTest {
 
     private companion object {
         private const val MAX_RETRIES = 3
+        private const val TEST_RETRY_CODES_START = 401
+        private const val TEST_RETRY_CODES_END = 456
+        private const val TEST_NON_RETRY_CODES_END = 457
+        // [HTTP_TOO_MANY_REQUESTS] is included in this range
+        private val TEST_RETRY_CODES: Iterable<Int> = TEST_RETRY_CODES_START..TEST_RETRY_CODES_END
     }
 }
