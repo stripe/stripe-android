@@ -32,6 +32,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.google.android.material.snackbar.Snackbar
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetResult
@@ -42,6 +43,11 @@ internal abstract class BasePaymentSheetActivity : AppCompatActivity() {
     protected val viewModel: PaymentSheetViewModel by lazy {
         PaymentSheetViewModel(application)
     }
+    
+    protected val snackbar = Snackbar.make(
+        findViewById(android.R.id.content),"", Snackbar.LENGTH_SHORT)
+        .setBackgroundTint(resources.getColor(R.color.black))
+        .setTextColor(resources.getColor(R.color.white))
 
     protected fun prepareCheckout(
         onSuccess: (PaymentSheet.CustomerConfiguration?, String) -> Unit
