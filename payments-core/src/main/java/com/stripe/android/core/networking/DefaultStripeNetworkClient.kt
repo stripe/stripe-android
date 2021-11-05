@@ -43,7 +43,7 @@ internal class DefaultStripeNetworkClient @JvmOverloads constructor(
 
         if (retryResponseCodes.contains(stripeResponse.code) && remainingRetries > 0) {
             logger.info(
-                "Request was rate-limited with $remainingRetries remaining retries."
+                "Request failed with code ${stripeResponse.code}. Retrying up to $remainingRetries more time(s)."
             )
 
             delay(
@@ -90,12 +90,8 @@ internal class DefaultStripeNetworkClient @JvmOverloads constructor(
 
     private companion object {
         /**
-         * If the SDK receives a "Too Many Requests" (429) status code from Stripe,
-         * it will automatically retry the request using exponential backoff.
-         *
-         * The default value is 3.
-         *
-         * See https://stripe.com/docs/rate-limits for more information.
+         * Default number of retries if the SDK receives certain range or HTTP codes represented by
+         * [StripeRequest.retryResponseCodes].
          */
         private const val DEFAULT_MAX_RETRIES = 3
     }

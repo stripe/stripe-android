@@ -1,6 +1,7 @@
 package com.stripe.android.core.networking
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.Logger
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.networking.ApiRequest
 import com.stripe.android.networking.RequestHeadersFactory
@@ -9,7 +10,10 @@ import kotlinx.coroutines.test.TestCoroutineDispatcher
 import kotlinx.coroutines.test.runBlockingTest
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.same
+import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 import java.io.File
@@ -34,6 +38,8 @@ internal class DefaultStripeNetworkClientTest {
         StripeResponse(code = HttpURLConnection.HTTP_OK, body = File("response_file"))
 
     private val okConnectionFactory = mock<ConnectionFactory>()
+
+    private val mockLogger = mock<Logger>()
 
     @AfterTest
     fun cleanup() {
@@ -98,20 +104,31 @@ internal class DefaultStripeNetworkClientTest {
     @Test
     fun `executeRequest with IOException should throw an APIConnectionException`() =
         testDispatcher.runBlockingTest {
+            val exception = UnknownHostException("Could not connect to Stripe API")
             val client = DefaultStripeNetworkClient(
                 workContext = testDispatcher,
                 connectionFactory = RetryCountConnectionFactory(
-                    FailingConnection(
-                        UnknownHostException("Could not connect to Stripe API")
-                    )
-                )
+                    FailingConnection(exception)
+                ),
+                logger = mockLogger
             )
 
             val failure = assertFailsWith<APIConnectionException> {
                 client.executeRequest(FakeStripeRequest())
             }
+
+            verify(mockLogger).error(
+                eq("Exception while making Stripe API request"),
+                same(exception)
+            )
             assertThat(failure.message)
-                .isEqualTo("IOException during API request to Stripe (https://api.stripe.com): Could not connect to Stripe API. Please check your internet connection and try again. If this problem persists, you should check Stripe's service status at https://twitter.com/stripestatus, or let us know at support@stripe.com.")
+                .isEqualTo(
+                    "IOException during API request to Stripe " +
+                        "(https://api.stripe.com): Could not connect to Stripe API. Please check " +
+                        "your internet connection and try again. If this problem persists, you " +
+                        "should check Stripe's service status at " +
+                        "https://twitter.com/stripestatus, or let us know at support@stripe.com."
+                )
         }
 
     @Test
@@ -129,7 +146,6 @@ internal class DefaultStripeNetworkClientTest {
             val response = client.executeRequest(FakeStripeRequest())
             assertThat(connectionFactory.createInvocations)
                 .isEqualTo(MAX_RETRIES + 1)
-
             assertThat(response.isRateLimited)
                 .isTrue()
         }
@@ -147,15 +163,16 @@ internal class DefaultStripeNetworkClientTest {
             val client = DefaultStripeNetworkClient(
                 workContext = testDispatcher,
                 connectionFactory = connectionFactory,
-                retryDelaySupplier = RetryDelaySupplier(0)
+                retryDelaySupplier = RetryDelaySupplier(0),
+                logger = mockLogger
             )
 
             val response = client.executeRequest(FakeStripeRequest())
-            assertThat(connectionFactory.createInvocations)
-                .isEqualTo(2)
-
-            assertThat(response.isOk)
-                .isTrue()
+            assertThat(connectionFactory.createInvocations).isEqualTo(2)
+            verify(mockLogger).info(
+                "Request failed with code $TEST_RETRY_CODES_START. Retrying up to 3 more time(s)."
+            )
+            assertThat(response.isOk).isTrue()
         }
 
     @Test
