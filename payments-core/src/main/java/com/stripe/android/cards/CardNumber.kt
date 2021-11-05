@@ -109,6 +109,12 @@ internal sealed class CardNumber {
         internal const val DEFAULT_PAN_LENGTH = 16
         private val DEFAULT_SPACE_POSITIONS = setOf(4, 9, 14)
 
+//        123456789
+//        012345678
+
+//        1234 56789 0123 45678
+//        01234567890123456789
+
         private val SPACE_POSITIONS = mapOf(
             14 to setOf(4, 11),
             15 to setOf(4, 11),

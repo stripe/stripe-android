@@ -24,10 +24,10 @@ internal class CvcConfig : CardDetailsTextFieldConfig {
     ): TextFieldState {
         val numberAllowedDigits = brand.maxCvcLength
         val isDigitLimit = brand.maxCvcLength != -1
-        return if (brand == CardBrand.Unknown) {
-            TextFieldStateConstants.Error.Invalid(R.string.card_number_invalid_brand)
-        } else if (number.isEmpty()) {
+        return if (number.isEmpty()) {
             TextFieldStateConstants.Error.Blank
+        } else if (brand == CardBrand.Unknown) {
+            TextFieldStateConstants.Error.Invalid(R.string.card_number_invalid_brand)
         } else if (isDigitLimit && number.length < numberAllowedDigits) {
             TextFieldStateConstants.Error.Incomplete(R.string.credit_cvc_incomplete)
         } else if (isDigitLimit && number.length > numberAllowedDigits) {
