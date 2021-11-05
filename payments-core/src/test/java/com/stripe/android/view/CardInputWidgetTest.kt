@@ -808,14 +808,14 @@ internal class CardInputWidgetTest {
                     dateWidth = 50,
                     dateCvcSeparation = 82,
                     cvcWidth = 30,
-                    cvcPostalCodeSeparation = 0,
+                    cvcPostalCodeSeparation = 100,
                     postalCodeWidth = 100,
                     cvcStartPosition = 330,
                     dateEndTouchBufferLimit = 110,
                     cardTouchBufferLimit = 66,
                     dateStartPosition = 198,
-                    cvcEndTouchBufferLimit = 120,
-                    postalCodeStartPosition = 360
+                    cvcEndTouchBufferLimit = 153,
+                    postalCodeStartPosition = 460
                 )
             )
     }
@@ -854,7 +854,7 @@ internal class CardInputWidgetTest {
         cardInputWidget.postalCodeEnabled = true
 
         // Moving to the end with an actual Visa number does the same as moving when empty.
-        // |(peek==40)--(space==98)--(date==50)--(space==82)--(cvc==30)--(space==0)--(postal==100)|
+        // |(peek==40)--(space==98)--(date==50)--(space==82)--(cvc==30)--(space==100)--(postal==100)|
         updateCardNumberAndIdle(VISA_WITH_SPACES)
 
         assertThat(cardInputWidget.placement)
@@ -868,14 +868,14 @@ internal class CardInputWidgetTest {
                     dateWidth = 50,
                     dateCvcSeparation = 82,
                     cvcWidth = 30,
-                    cvcPostalCodeSeparation = 0,
+                    cvcPostalCodeSeparation = 100,
                     postalCodeWidth = 100,
                     cvcStartPosition = 330,
-                    cvcEndTouchBufferLimit = 120,
+                    cvcEndTouchBufferLimit = 153,
                     dateEndTouchBufferLimit = 110,
                     cardTouchBufferLimit = 66,
                     dateStartPosition = 198,
-                    postalCodeStartPosition = 360
+                    postalCodeStartPosition = 460
                 )
             )
     }
@@ -914,7 +914,7 @@ internal class CardInputWidgetTest {
         cardInputWidget.postalCodeEnabled = true
 
         // Moving to the end with an AmEx number has a larger peek and cvc size.
-        // |(peek==50)--(space==88)--(date==50)--(space==72)--(cvc==40)--(space==0)--(postal==100)|
+        // |(peek==50)--(space==88)--(date==50)--(space==72)--(cvc==40)--(space==100)--(postal==100)|
         updateCardNumberAndIdle(AMEX_WITH_SPACES)
 
         assertThat(cardInputWidget.placement)
@@ -928,14 +928,14 @@ internal class CardInputWidgetTest {
                     dateWidth = 50,
                     dateCvcSeparation = 72,
                     cvcWidth = 40,
-                    cvcPostalCodeSeparation = 0,
+                    cvcPostalCodeSeparation = 100,
                     postalCodeWidth = 100,
                     cvcStartPosition = 320,
-                    cvcEndTouchBufferLimit = 120,
+                    cvcEndTouchBufferLimit = 153,
                     dateEndTouchBufferLimit = 106,
                     cardTouchBufferLimit = 66,
                     dateStartPosition = 198,
-                    postalCodeStartPosition = 360
+                    postalCodeStartPosition = 460
                 )
             )
     }
@@ -974,7 +974,7 @@ internal class CardInputWidgetTest {
         cardInputWidget.postalCodeEnabled = true
 
         // When we move for a Diner's club card, the peek text is shorter, so we expect:
-        // |(peek==20)--(space==205)--(date==50)--(space==195)--(cvc==30)--(space==0)--(postal==100)|
+        // |(peek==20)--(space==205)--(date==50)--(space==195)--(cvc==30)--(space==100)--(postal==100)|
         updateCardNumberAndIdle(DINERS_CLUB_14_WITH_SPACES)
 
         assertThat(cardInputWidget.placement)
@@ -988,14 +988,14 @@ internal class CardInputWidgetTest {
                     dateWidth = 50,
                     dateCvcSeparation = 82,
                     cvcWidth = 30,
-                    cvcPostalCodeSeparation = 0,
+                    cvcPostalCodeSeparation = 100,
                     postalCodeWidth = 100,
                     cvcStartPosition = 330,
                     dateEndTouchBufferLimit = 110,
                     cardTouchBufferLimit = 66,
                     dateStartPosition = 198,
-                    cvcEndTouchBufferLimit = 120,
-                    postalCodeStartPosition = 360
+                    cvcEndTouchBufferLimit = 153,
+                    postalCodeStartPosition = 460
                 )
             )
     }
