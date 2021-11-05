@@ -15,8 +15,6 @@ import com.stripe.android.paymentsheet.elements.EmailConfig
 import com.stripe.android.paymentsheet.elements.EmailElement
 import com.stripe.android.paymentsheet.elements.EmailSpec
 import com.stripe.android.paymentsheet.elements.IdentifierSpec
-import com.stripe.android.paymentsheet.elements.MandateTextElement
-import com.stripe.android.paymentsheet.elements.MandateTextSpec
 import com.stripe.android.paymentsheet.elements.NameConfig
 import com.stripe.android.paymentsheet.elements.ResourceRepository
 import com.stripe.android.paymentsheet.elements.SaveForFutureUseElement
@@ -26,6 +24,8 @@ import com.stripe.android.paymentsheet.elements.SectionSpec
 import com.stripe.android.paymentsheet.elements.SimpleDropdownElement
 import com.stripe.android.paymentsheet.elements.SimpleTextElement
 import com.stripe.android.paymentsheet.elements.SimpleTextSpec
+import com.stripe.android.paymentsheet.elements.StaticTextElement
+import com.stripe.android.paymentsheet.elements.StaticTextSpec
 import com.stripe.android.paymentsheet.elements.SupportedBankType
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
@@ -188,28 +188,32 @@ internal class TransformSpecToElementTest {
     }
 
     @Test
-    fun `Add a mandate section spec setup of the mandate element correctly`() {
-        val mandate = MandateTextSpec(
+    fun `Add a static text section spec setup of the static element correctly`() {
+        val staticText = StaticTextSpec(
             IdentifierSpec.Generic("mandate"),
-            R.string.stripe_paymentsheet_sepa_mandate,
-            Color.Gray
+            stringResId = R.string.stripe_paymentsheet_sepa_mandate,
+            color = Color.Gray,
+            fontSizeSp = 120,
+            letterSpacingSp = 120.0
         )
         val formElement = transformSpecToElement.transform(
-            listOf(mandate)
+            listOf(staticText)
         )
 
-        val mandateElement = formElement.first() as MandateTextElement
+        val staticTextElement = formElement.first() as StaticTextElement
 
-        assertThat(mandateElement.controller).isNull()
-        assertThat(mandateElement.color).isEqualTo(mandate.color)
-        assertThat(mandateElement.stringResId).isEqualTo(mandate.stringResId)
-        assertThat(mandateElement.identifier).isEqualTo(mandate.identifier)
+        assertThat(staticTextElement.controller).isNull()
+        assertThat(staticTextElement.color).isEqualTo(staticText.color)
+        assertThat(staticTextElement.stringResId).isEqualTo(staticText.stringResId)
+        assertThat(staticTextElement.identifier).isEqualTo(staticText.identifier)
+        assertThat(staticTextElement.fontSizeSp).isEqualTo(staticText.fontSizeSp)
+        assertThat(staticTextElement.letterSpacingSp).isEqualTo(staticText.letterSpacingSp)
     }
 
     @Test
     fun `Add a save for future use section spec sets the mandate element correctly`() =
         runBlocking {
-            val mandate = MandateTextSpec(
+            val mandate = StaticTextSpec(
                 IdentifierSpec.Generic("mandate"),
                 R.string.stripe_paymentsheet_sepa_mandate,
                 Color.Gray
