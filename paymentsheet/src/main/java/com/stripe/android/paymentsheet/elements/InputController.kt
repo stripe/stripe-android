@@ -7,7 +7,7 @@ import kotlinx.coroutines.flow.Flow
  * This class provides the logic behind the fields.
  */
 internal sealed interface InputController : SectionFieldErrorController {
-    val label: Int
+    val label: Flow<Int>
     val fieldValue: Flow<String>
     val rawFieldValue: Flow<String?>
     val isComplete: Flow<Boolean>

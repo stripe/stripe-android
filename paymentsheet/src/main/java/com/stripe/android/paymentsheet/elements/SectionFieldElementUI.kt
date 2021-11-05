@@ -21,7 +21,6 @@ internal fun SectionFieldElementUI(
             }
             is DropdownFieldController -> {
                 DropDown(
-                    controller.label,
                     controller,
                     enabled
                 )

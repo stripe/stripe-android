@@ -1,8 +1,8 @@
 package com.stripe.android.paymentsheet.elements
 
-import androidx.annotation.StringRes
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
+import com.stripe.android.R
 import com.stripe.android.model.CardBrand
 import com.stripe.android.paymentsheet.forms.FormFieldEntry
 import com.stripe.android.viewmodel.credit.cvc.CvcConfig
@@ -20,9 +20,14 @@ internal class CvcController constructor(
     override val keyboardType: KeyboardType = cvcTextFieldConfig.keyboard
     override val visualTransformation = cvcTextFieldConfig.visualTransformation
 
-    @StringRes
-    // TODO: THis should change to a flow and be based in the card brand
-    override val label: Int = cvcTextFieldConfig.label
+    private val _label = cardBrandFlow.map { cardBrand ->
+        if (cardBrand == CardBrand.AmericanExpress) {
+            R.string.cvc_amex_hint
+        } else {
+            R.string.cvc_number_hint
+        }
+    }
+    override val label: Flow<Int> = _label
 
     override val debugLabel = cvcTextFieldConfig.debugLabel
 

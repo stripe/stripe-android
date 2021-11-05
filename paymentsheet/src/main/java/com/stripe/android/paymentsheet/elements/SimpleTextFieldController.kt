@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet.elements
 
-import androidx.annotation.StringRes
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
@@ -18,7 +17,7 @@ internal interface TextFieldController : InputController {
     val debugLabel: String
     val capitalization: KeyboardCapitalization
     val keyboardType: KeyboardType
-    override val label: Int
+    override val label: Flow<Int>
     val visualTransformation: VisualTransformation
     override val showOptionalLabel: Boolean
     val fieldState: Flow<TextFieldState>
@@ -41,8 +40,7 @@ internal class SimpleTextFieldController constructor(
     override val visualTransformation =
         textFieldConfig.visualTransformation ?: VisualTransformation.None
 
-    @StringRes
-    override val label: Int = textFieldConfig.label
+    override val label: Flow<Int> = MutableStateFlow(textFieldConfig.label)
     override val debugLabel = textFieldConfig.debugLabel
 
     /** This is all the information that can be observed on the element */

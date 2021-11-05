@@ -29,6 +29,7 @@ internal fun SaveForFutureUseElementUI(
 ) {
     val controller = element.controller
     val checked by controller.saveForFutureUse.collectAsState(true)
+    val label by controller.label.collectAsState(null)
     val resources = LocalContext.current.resources
 
     val description = stringResource(
@@ -62,16 +63,18 @@ internal fun SaveForFutureUseElementUI(
             onCheckedChange = null, // needs to be null for accessibility on row click to work
             enabled = enabled
         )
-        Text(
-            resources.getString(controller.label, element.merchantName),
-            Modifier
-                .padding(start = 4.dp)
-                .align(Alignment.CenterVertically),
-            color = if (isSystemInDarkTheme()) {
-                Color.LightGray
-            } else {
-                Color.Black
-            }
-        )
+        label?.let {
+            Text(
+                resources.getString(it, element.merchantName),
+                Modifier
+                    .padding(start = 4.dp)
+                    .align(Alignment.CenterVertically),
+                color = if (isSystemInDarkTheme()) {
+                    Color.LightGray
+                } else {
+                    Color.Black
+                }
+            )
+        }
     }
 }

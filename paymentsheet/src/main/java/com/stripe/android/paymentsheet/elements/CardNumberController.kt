@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet.elements
 
-import androidx.annotation.StringRes
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import com.stripe.android.model.CardBrand
@@ -18,9 +17,7 @@ internal class CardNumberController constructor(
     override val keyboardType: KeyboardType = creditTextFieldConfig.keyboard
     override val visualTransformation = creditTextFieldConfig.visualTransformation
 
-    @StringRes
-    // TODO: This should change to a flow and be based in the card brand
-    override val label: Int = creditTextFieldConfig.label
+    override val label: Flow<Int> = MutableStateFlow(creditTextFieldConfig.label)
 
     override val debugLabel = creditTextFieldConfig.debugLabel
 

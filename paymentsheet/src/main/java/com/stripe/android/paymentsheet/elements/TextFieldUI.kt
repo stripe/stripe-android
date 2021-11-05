@@ -20,18 +20,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.FocusManager
-import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import com.stripe.android.paymentsheet.R
-
-/** This is a helpful method for setting the next action based on the nextFocus Requester **/
-internal fun imeAction(nextFocusRequester: FocusRequester?): ImeAction = nextFocusRequester?.let {
-    ImeAction.Next
-} ?: ImeAction.Done
 
 internal data class TextFieldColors(
     private val isDarkMode: Boolean,
@@ -86,10 +80,15 @@ internal fun TextField(
     val fieldState by textFieldController.fieldState.collectAsState(
         TextFieldStateConstants.Error.Blank
     )
+    val label by textFieldController.label.collectAsState(
+        null
+    )
     var processedIsFull by rememberSaveable { mutableStateOf(false) }
 
-// This is setup so that when a field is full it still allows more characters
-    // to be entered, it just triggers next focus when the event happens.
+    /**
+     * This is setup so that when a field is full it still allows more characters
+     * to be entered, it just triggers next focus when the event happens.
+     */
     @Suppress("UNUSED_VALUE")
     processedIsFull = if (fieldState == TextFieldStateConstants.Valid.Full) {
         if (!processedIsFull) {
@@ -109,10 +108,10 @@ internal fun TextField(
                 text = if (textFieldController.showOptionalLabel) {
                     stringResource(
                         R.string.stripe_paymentsheet_form_label_optional,
-                        stringResource(textFieldController.label)
+                        label?.let { stringResource(it) } ?: ""
                     )
                 } else {
-                    stringResource(textFieldController.label)
+                    label?.let { stringResource(it) } ?: ""
                 }
             )
         },

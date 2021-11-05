@@ -35,10 +35,12 @@ import com.stripe.android.paymentsheet.R
 
 @Composable
 internal fun DropDown(
-    @StringRes label: Int,
     controller: DropdownFieldController,
     enabled: Boolean,
 ) {
+    val label by controller.label.collectAsState(
+        null
+    )
     val selectedIndex by controller.selectedIndex.collectAsState(0)
     val items = controller.displayItems
     var expanded by remember { mutableStateOf(false) }
@@ -123,17 +125,19 @@ internal fun DropDown(
  */
 @Composable
 internal fun DropdownLabel(
-    @StringRes label: Int,
+    @StringRes label: Int?,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
-    Text(
-        stringResource(label),
-        color = TextFieldDefaults.textFieldColors()
-            .labelColor(
-                enabled = true,
-                error = false,
-                interactionSource = interactionSource
-            ).value,
-        style = MaterialTheme.typography.caption
-    )
+    label?.let {
+        Text(
+            stringResource(label),
+            color = TextFieldDefaults.textFieldColors()
+                .labelColor(
+                    enabled = true,
+                    error = false,
+                    interactionSource = interactionSource
+                ).value,
+            style = MaterialTheme.typography.caption
+        )
+    }
 }

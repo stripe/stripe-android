@@ -1933,6 +1933,7 @@ public final class com/stripe/android/model/CardBrand : java/lang/Enum {
 	public final fun getErrorIcon ()I
 	public final fun getIcon ()I
 	public final fun getMaxCvcLength ()I
+	public final fun getMaxLengthForCardNumber (Ljava/lang/String;)I
 	public final fun isMaxCvc (Ljava/lang/String;)Z
 	public final fun isValidCardNumberLength (Ljava/lang/String;)Z
 	public final fun isValidCvc (Ljava/lang/String;)Z
@@ -1941,7 +1942,9 @@ public final class com/stripe/android/model/CardBrand : java/lang/Enum {
 }
 
 public final class com/stripe/android/model/CardBrand$Companion {
+	public final fun fromCardNumber (Ljava/lang/String;)Lcom/stripe/android/model/CardBrand;
 	public final fun fromCode (Ljava/lang/String;)Lcom/stripe/android/model/CardBrand;
+	public final fun getCardBrands (Ljava/lang/String;)Ljava/util/List;
 }
 
 public final class com/stripe/android/model/CardFunding : java/lang/Enum {
