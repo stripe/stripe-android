@@ -57,7 +57,7 @@ class TransformAddressToElementTest {
             IdentifierSpec.PostalCode,
             R.string.address_label_zip_code,
             KeyboardCapitalization.None,
-            KeyboardType.Number,
+            KeyboardType.NumberPassword,
             showOptionalLabel = false
         )
 

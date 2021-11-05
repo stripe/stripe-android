@@ -26,21 +26,7 @@ internal class CardDetailsElement(
         var month = -1
         var year = -1
         expirationDate.value?.let { date ->
-            // TODO: Duplicate of DateConfig
-            val newString =
-                if ((
-                    date.isNotBlank() &&
-                        !(date[0] == '0' || date[0] == '1')
-                    ) ||
-                    (
-                        (date.length > 1) &&
-                            (date[0] == '1' && requireNotNull(date[1].digitToInt()) > 2)
-                        )
-                ) {
-                    "0$date"
-                } else {
-                    date
-                }
+            val newString = convertTo4DigitDate(date)
             if (newString.length == 4) {
                 month = requireNotNull(newString.take(2).toIntOrNull())
                 year = requireNotNull(newString.takeLast(2).toIntOrNull())
