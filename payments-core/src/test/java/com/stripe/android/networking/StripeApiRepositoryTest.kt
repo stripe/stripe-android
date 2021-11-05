@@ -1545,7 +1545,7 @@ internal class StripeApiRepositoryTest {
             .executeAsync(analyticsRequestArgumentCaptor.capture())
 
         val analyticsRequest = analyticsRequestArgumentCaptor.firstValue
-        val analyticsParams = analyticsRequest.compactParams.orEmpty()
+        val analyticsParams = analyticsRequest.params
         assertEquals(
             event.toString(),
             analyticsParams["event"]

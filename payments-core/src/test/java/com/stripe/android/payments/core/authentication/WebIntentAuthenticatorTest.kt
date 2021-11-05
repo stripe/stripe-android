@@ -165,7 +165,7 @@ class WebIntentAuthenticatorTest {
             .executeAsync(analyticsRequestArgumentCaptor.capture())
         val analyticsRequest = analyticsRequestArgumentCaptor.firstValue
         assertThat(
-            analyticsRequest.compactParams?.get(AnalyticsRequestFactory.FIELD_EVENT)
+            analyticsRequest.params?.get(AnalyticsRequestFactory.FIELD_EVENT)
         ).isEqualTo(event.toString())
     }
 

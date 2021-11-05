@@ -36,7 +36,7 @@ internal class DefaultApiRequestExecutor @JvmOverloads internal constructor(
 
         val stripeResponse = makeRequest(request)
 
-        if (stripeResponse.isRateLimited && remainingRetries > 0) {
+        if (request.retryResponseCodes.contains(stripeResponse.code) && remainingRetries > 0) {
             logger.info(
                 "Request was rate-limited with $remainingRetries remaining retries."
             )
@@ -65,7 +65,7 @@ internal class DefaultApiRequestExecutor @JvmOverloads internal constructor(
                 logger.error("Exception while making Stripe API request", error)
 
                 throw when (error) {
-                    is IOException -> APIConnectionException.create(error, request.baseUrl)
+                    is IOException -> APIConnectionException.create(error, request.url)
                     else -> error
                 }
             }
@@ -74,7 +74,7 @@ internal class DefaultApiRequestExecutor @JvmOverloads internal constructor(
 
     private companion object {
         /**
-         * If the SDK receives a "Too Many Requests" (429) status code from Stripe,
+         * If the SDK receives a [HTTP_TOO_MANY_REQUESTS] (429) status code from Stripe,
          * it will automatically retry the request using exponential backoff.
          *
          * The default value is 3.
