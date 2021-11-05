@@ -19,7 +19,7 @@ internal class CardNumberController constructor(
     override val visualTransformation = creditTextFieldConfig.visualTransformation
 
     @StringRes
-    // TODO: THis should change to a flow and be based in the card brand
+    // TODO: This should change to a flow and be based in the card brand
     override val label: Int = creditTextFieldConfig.label
 
     override val debugLabel = creditTextFieldConfig.debugLabel

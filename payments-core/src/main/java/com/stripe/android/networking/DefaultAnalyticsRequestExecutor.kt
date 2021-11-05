@@ -34,7 +34,7 @@ internal class DefaultAnalyticsRequestExecutor @Inject constructor(
                 // required to trigger the request
                 return it.responseCode
             } catch (e: IOException) {
-                throw APIConnectionException.create(e, request.baseUrl)
+                throw APIConnectionException.create(e, request.url)
             }
         }
     }

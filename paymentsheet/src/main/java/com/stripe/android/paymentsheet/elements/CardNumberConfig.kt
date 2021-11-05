@@ -28,6 +28,8 @@ internal class CardNumberConfig : CardDetailsTextFieldConfig {
         } else if (isDigitLimit && number.length > numberAllowedDigits) {
             object : TextFieldState {
                 override fun shouldShowError(hasFocus: Boolean) = true
+                // We will assume we don't know the correct number of numbers until we get
+                // the metadata service added back in
                 override fun isValid() = true
                 override fun isFull() = true
                 override fun isBlank() = false
