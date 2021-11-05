@@ -6,10 +6,11 @@ import androidx.activity.result.ActivityResultCallback
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.VisibleForTesting
-import com.stripe.android.exception.APIConnectionException
+import com.stripe.android.core.exception.APIConnectionException
+import com.stripe.android.core.exception.InvalidRequestException
+import com.stripe.android.core.networking.RetryDelaySupplier
 import com.stripe.android.exception.APIException
 import com.stripe.android.exception.AuthenticationException
-import com.stripe.android.exception.InvalidRequestException
 import com.stripe.android.exception.StripeException
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
@@ -26,7 +27,6 @@ import com.stripe.android.networking.AnalyticsRequestFactory
 import com.stripe.android.networking.ApiRequest
 import com.stripe.android.networking.DefaultAlipayRepository
 import com.stripe.android.networking.DefaultAnalyticsRequestExecutor
-import com.stripe.android.networking.RetryDelaySupplier
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.DefaultReturnUrl
 import com.stripe.android.payments.PaymentFlowFailureMessageFactory

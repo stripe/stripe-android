@@ -1,5 +1,6 @@
-package com.stripe.android.exception
+package com.stripe.android.core.exception
 
+import com.stripe.android.exception.StripeException
 import java.io.IOException
 
 /**

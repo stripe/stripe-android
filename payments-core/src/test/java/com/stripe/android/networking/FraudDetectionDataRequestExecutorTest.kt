@@ -3,6 +3,8 @@ package com.stripe.android.networking
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.FraudDetectionDataFixtures
+import com.stripe.android.core.networking.ConnectionFactory
+import com.stripe.android.core.networking.StripeConnection
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestCoroutineDispatcher
 import kotlinx.coroutines.test.runBlockingTest
@@ -49,7 +51,7 @@ class FraudDetectionDataRequestExecutorTest {
     @Test
     fun `execute() when successful should return null`() {
         val request = fraudDetectionDataRequestFactory.create(FRAUD_DETECTION_DATA)
-        val connection = mock<StripeConnection>().also {
+        val connection = mock<StripeConnection<String>>().also {
             whenever(it.responseCode).thenReturn(500)
         }
 
@@ -82,7 +84,7 @@ class FraudDetectionDataRequestExecutorTest {
     }
 
     private fun createFraudDetectionDataRequestExecutor(
-        connectionFactory: ConnectionFactory = ConnectionFactory.Default()
+        connectionFactory: ConnectionFactory = ConnectionFactory.Default
     ) = DefaultFraudDetectionDataRequestExecutor(
         connectionFactory = connectionFactory,
         workContext = testDispatcher

@@ -6,8 +6,9 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.Logger
 import com.stripe.android.StripeIntentResult
+import com.stripe.android.core.exception.InvalidRequestException
+import com.stripe.android.core.networking.RetryDelaySupplier
 import com.stripe.android.exception.APIException
-import com.stripe.android.exception.InvalidRequestException
 import com.stripe.android.model.Stripe3ds2AuthResult
 import com.stripe.android.model.Stripe3ds2AuthResultFixtures
 import com.stripe.android.networking.AbsFakeStripeRepository
@@ -15,7 +16,6 @@ import com.stripe.android.networking.AnalyticsRequest
 import com.stripe.android.networking.AnalyticsRequestExecutor
 import com.stripe.android.networking.AnalyticsRequestFactory
 import com.stripe.android.networking.ApiRequest
-import com.stripe.android.networking.RetryDelaySupplier
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.stripe3ds2.transaction.ChallengeResult
 import com.stripe.android.stripe3ds2.transaction.IntentData

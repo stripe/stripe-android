@@ -1,5 +1,7 @@
 package com.stripe.android.networking
 
+import com.stripe.android.core.networking.ConnectionFactory
+import com.stripe.android.core.networking.responseJson
 import com.stripe.android.model.parsers.FraudDetectionDataJsonParser
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -13,7 +15,7 @@ internal interface FraudDetectionDataRequestExecutor {
 }
 
 internal class DefaultFraudDetectionDataRequestExecutor(
-    private val connectionFactory: ConnectionFactory = ConnectionFactory.Default(),
+    private val connectionFactory: ConnectionFactory = ConnectionFactory.Default,
     private val workContext: CoroutineContext = Dispatchers.IO
 ) : FraudDetectionDataRequestExecutor {
     private val timestampSupplier = {
@@ -34,7 +36,7 @@ internal class DefaultFraudDetectionDataRequestExecutor(
             return runCatching {
                 conn.response.takeIf { it.isOk }?.let {
                     FraudDetectionDataJsonParser(timestampSupplier)
-                        .parse(it.responseJson)
+                        .parse(it.responseJson())
                 }
             }.getOrNull()
         }

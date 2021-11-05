@@ -10,11 +10,17 @@ import com.stripe.android.Logger
 import com.stripe.android.Stripe
 import com.stripe.android.StripeApiBeta
 import com.stripe.android.cards.Bin
-import com.stripe.android.exception.APIConnectionException
+import com.stripe.android.core.exception.APIConnectionException
+import com.stripe.android.core.exception.InvalidRequestException
+import com.stripe.android.core.networking.DefaultStripeNetworkClient
+import com.stripe.android.core.networking.HTTP_TOO_MANY_REQUESTS
+import com.stripe.android.core.networking.RequestId
+import com.stripe.android.core.networking.StripeNetworkClient
+import com.stripe.android.core.networking.StripeResponse
+import com.stripe.android.core.networking.responseJson
 import com.stripe.android.exception.APIException
 import com.stripe.android.exception.AuthenticationException
 import com.stripe.android.exception.CardException
-import com.stripe.android.exception.InvalidRequestException
 import com.stripe.android.exception.PermissionException
 import com.stripe.android.exception.RateLimitException
 import com.stripe.android.exception.StripeException
@@ -84,7 +90,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
     private val logger: Logger = Logger.noop(),
     private val workContext: CoroutineContext = Dispatchers.IO,
     private val productUsageTokens: Set<String> = emptySet(),
-    private val stripeApiRequestExecutor: ApiRequestExecutor = DefaultApiRequestExecutor(
+    private val stripeNetworkClient: StripeNetworkClient = DefaultStripeNetworkClient(
         workContext = workContext,
         logger = logger
     ),
@@ -1050,7 +1056,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         ) {
             fireAnalyticsRequest(AnalyticsEvent.FileCreate)
         }
-        return StripeFileJsonParser().parse(response.responseJson)
+        return StripeFileJsonParser().parse(response.responseJson())
     }
 
     @Throws(
@@ -1077,7 +1083,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
             fireAnalyticsRequest(AnalyticsEvent.StripeUrlRetrieve)
         }
 
-        return response.responseJson
+        return response.responseJson()
     }
 
     /**
@@ -1158,10 +1164,10 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         CardException::class,
         APIException::class
     )
-    private fun handleApiError(response: StripeResponse) {
+    private fun handleApiError(response: StripeResponse<String>) {
         val requestId = response.requestId?.value
         val responseCode = response.code
-        val stripeError = StripeErrorJsonParser().parse(response.responseJson)
+        val stripeError = StripeErrorJsonParser().parse(response.responseJson())
         when (responseCode) {
             HttpURLConnection.HTTP_BAD_REQUEST, HttpURLConnection.HTTP_NOT_FOUND -> {
                 throw InvalidRequestException(
@@ -1193,7 +1199,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         jsonParser: ModelJsonParser<ModelType>,
         onResponse: () -> Unit
     ): ModelType? {
-        return jsonParser.parse(makeApiRequest(apiRequest, onResponse).responseJson)
+        return jsonParser.parse(makeApiRequest(apiRequest, onResponse).responseJson())
     }
 
     @VisibleForTesting
@@ -1207,11 +1213,11 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
     internal suspend fun makeApiRequest(
         apiRequest: ApiRequest,
         onResponse: () -> Unit
-    ): StripeResponse {
+    ): StripeResponse<String> {
         val dnsCacheData = disableDnsCache()
 
         val response = runCatching {
-            stripeApiRequestExecutor.execute(apiRequest)
+            stripeNetworkClient.executeRequest(apiRequest)
         }.also {
             onResponse()
         }.getOrElse {
@@ -1241,11 +1247,11 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
     internal suspend fun makeFileUploadRequest(
         fileUploadRequest: FileUploadRequest,
         onResponse: (RequestId?) -> Unit
-    ): StripeResponse {
+    ): StripeResponse<String> {
         val dnsCacheData = disableDnsCache()
 
         val response = runCatching {
-            stripeApiRequestExecutor.execute(fileUploadRequest)
+            stripeNetworkClient.executeRequest(fileUploadRequest)
         }.also {
             onResponse(it.getOrNull()?.requestId)
         }.getOrElse {

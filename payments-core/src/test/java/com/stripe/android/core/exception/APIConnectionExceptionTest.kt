@@ -1,4 +1,4 @@
-package com.stripe.android.exception
+package com.stripe.android.core.exception
 
 import java.io.IOException
 import kotlin.test.Test

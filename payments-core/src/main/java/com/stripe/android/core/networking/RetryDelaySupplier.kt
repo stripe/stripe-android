@@ -1,4 +1,4 @@
-package com.stripe.android.networking
+package com.stripe.android.core.networking
 
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
