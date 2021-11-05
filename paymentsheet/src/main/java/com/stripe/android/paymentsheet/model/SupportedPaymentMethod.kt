@@ -329,9 +329,7 @@ internal enum class SupportedPaymentMethod(
          * This is a list of the payment methods that we are allowing in the release
          */
         @VisibleForTesting
-        internal val exposedPaymentMethods = listOf(
-            Card, Bancontact, Sofort, Ideal, SepaDebit, Klarna
-        )
+        internal val exposedPaymentMethods = listOf(Card, Bancontact, Sofort, Ideal, SepaDebit)
 
         /**
          * This will use only those payment methods that are allowed in the release
