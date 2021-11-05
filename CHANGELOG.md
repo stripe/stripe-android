@@ -1,35 +1,48 @@
 # CHANGELOG
 
+## 18.2.0 - 2021-10-29
+This release includes several bug fixes, introduces Klarna as a payment method binding, and renables [WeChat Pay](https://github.com/stripe/stripe-android/tree/master/wechatpay) within the SDK
+* [4323](https://github.com/stripe/stripe-android/pull/4323) reship wechat module 
+* [4325](https://github.com/stripe/stripe-android/pull/4325) Add klarna to sdk w/ example
+* [4339](https://github.com/stripe/stripe-android/pull/4339) Bump tensorflow-lite from 2.4.0 to 2.6.0
+* [4340](https://github.com/stripe/stripe-android/pull/4340) Bump okio from 2.10.0 to 3.0.0
+* [4334](https://github.com/stripe/stripe-android/pull/4334) Bank value is allowed to be null in the case of "other"
+* [4330](https://github.com/stripe/stripe-android/pull/4330) Bump lifecycle-viewmodel-compose from 2.4.0-rc01 to 2.4.0
+* [4329](https://github.com/stripe/stripe-android/pull/4329) Bump daggerVersion from 2.39.1 to 2.40
+* [4309](https://github.com/stripe/stripe-android/pull/4309) Card number, CVC, postal, and expiration date should only show digits in keypad 
+* [4198](https://github.com/stripe/stripe-android/pull/4198) Bump lifecycle-viewmodel-compose from 1.0.0-alpha07 to 2.4.0-rc01 
+* [4296](https://github.com/stripe/stripe-android/pull/4296) When processing Result for a PI, refresh until reaches deterministic state
+* [4290](https://github.com/stripe/stripe-android/pull/4290) Bump composeVersion from 1.0.2 to 1.0.4 
 ## 18.1.0 - 2021-10-18
 ### PaymentSheet
-This release adds several new features to PaymentSheet, our drop-in UI integration:
+This release adds several new features to `PaymentSheet`, our drop-in UI integration:
 
 #### More supported payment methods
-The list of supported payment methods depends on your integration. If you’re using a PaymentIntent, we support:
+The list of supported payment methods depends on your integration. If you’re using a `PaymentIntent`, we support:
 - Card
 - SEPA Debit, bancontact, iDEAL, sofort
  
-If you’re using a PaymentIntent with setup_future_usage or a SetupIntent, we support:
+If you’re using a `PaymentIntent` with `setup_future_usage` or a `SetupIntent`, we support:
 - Card
 - GooglePay
 
-Note: To enable SEPA Debit and sofort, set PaymentSheet.Configuration.allowsDelayedPaymentMethods to true on the client. These payment methods can't guarantee you will receive funds from your customer at the end of the checkout because they take time to settle. Don't enable these if your business requires immediate payment (e.g., an on-demand service). See https://stripe.com/payments/payment-methods-guide
+Note: To enable SEPA Debit and sofort, set `PaymentSheet.Configuration.allowsDelayedPaymentMethods` to `true` on the client. These payment methods can't guarantee you will receive funds from your customer at the end of the checkout because they take time to settle. Don't enable these if your business requires immediate payment (e.g., an on-demand service). See https://stripe.com/payments/payment-methods-guide
 
 #### Pre-fill billing details
-PaymentSheet collects billing details like name and email for certain payment methods. Pre-fill these fields to save customers time by setting `PaymentSheet.Configuration.defaultBillingDetails`.
+`PaymentSheet` collects billing details like name and email for certain payment methods. Pre-fill these fields to save customers time by setting `PaymentSheet.Configuration.defaultBillingDetails`.
 
 #### Save payment methods on payment
 > This is currently only available for cards + Apple/Google Pay.
 
-PaymentSheet supports PaymentIntents with setup_future_usage set. This property tells us to save the payment method for future use (e.g., taking initial payment of a recurring subscription). When set, PaymentSheet hides the 'Save this card for future use' checkbox and always saves.
+`PaymentSheet` supports `PaymentIntents` with `setup_future_usage` set. This property tells us to save the payment method for future use (e.g., taking initial payment of a recurring subscription). When set, PaymentSheet hides the 'Save this card for future use' checkbox and always saves.
 
 #### SetupIntent support
 > This is currently only available for cards + Apple/Google Pay.
 
-Initialize PaymentSheet with a SetupIntent to set up cards for future use without charging.
+Initialize `PaymentSheet` with a `SetupIntent` to set up cards for future use without charging.
 
 #### Smart payment method ordering
-When a customer is adding a new payment method, PaymentSheet uses information like the customers region to show the most relevant payment methods first.
+When a customer is adding a new payment method, `PaymentSheet` uses information like the customer's region to show the most relevant payment methods first.
 
 ### Other changes
 * [4165](https://github.com/stripe/stripe-android/pull/4165) Postal code collection for cards is now limited to US, CA, UK

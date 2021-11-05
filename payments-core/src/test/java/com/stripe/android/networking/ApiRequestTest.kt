@@ -5,6 +5,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.FraudDetectionDataFixtures
 import com.stripe.android.model.CardParamsFixtures
+import com.stripe.android.networking.RequestHeadersFactory.Companion.HEADER_CONTENT_TYPE
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import java.io.ByteArrayOutputStream
@@ -34,7 +35,7 @@ internal class ApiRequestTest {
         val contentType = FACTORY.createGet(
             StripeApiRepository.sourcesUrl,
             OPTIONS
-        ).contentType
+        ).postHeaders?.get(HEADER_CONTENT_TYPE)
         assertEquals("application/x-www-form-urlencoded; charset=UTF-8", contentType)
     }
 
@@ -44,7 +45,7 @@ internal class ApiRequestTest {
             FACTORY.createPost(
                 StripeApiRepository.paymentMethodsUrl,
                 OPTIONS
-            ).writeBody(it)
+            ).writePostBody(it)
             assertTrue(it.size() == 0)
         }
     }
@@ -56,7 +57,7 @@ internal class ApiRequestTest {
                 StripeApiRepository.paymentMethodsUrl,
                 OPTIONS,
                 mapOf("customer" to "cus_123")
-            ).writeBody(it)
+            ).writePostBody(it)
             assertEquals(16, it.size())
         }
     }

@@ -295,6 +295,13 @@ constructor(
             isVoucher = false,
             requiresMandate = false,
             hasDelayedSettlement = false
+        ),
+        Klarna(
+            "klarna",
+            isReusable = false,
+            isVoucher = false,
+            requiresMandate = false,
+            hasDelayedSettlement = false
         );
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet

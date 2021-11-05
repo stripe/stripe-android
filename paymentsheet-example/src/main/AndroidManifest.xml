@@ -31,9 +31,9 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".activity.LaunchPaymentSheetCompleteActivity" />
-        <activity android:name=".activity.LaunchPaymentSheetCustomActivity" />
-        <activity android:name=".activity.PaymentSheetPlaygroundActivity" />
+        <activity android:name=".samples.activity.LaunchPaymentSheetCompleteActivity" />
+        <activity android:name=".samples.activity.LaunchPaymentSheetCustomActivity" />
+        <activity android:name=".playground.activity.PaymentSheetPlaygroundActivity" />
     </application>
 
 </manifest>

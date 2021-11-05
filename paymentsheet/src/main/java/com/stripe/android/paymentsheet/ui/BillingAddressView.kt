@@ -4,7 +4,6 @@ import android.content.Context
 import android.text.InputFilter
 import android.text.InputType
 import android.text.method.DigitsKeyListener
-import android.text.method.HideReturnsTransformationMethod
 import android.text.method.KeyListener
 import android.text.method.TextKeyListener
 import android.util.AttributeSet
@@ -108,8 +107,14 @@ internal class BillingAddressView @JvmOverloads constructor(
     ) { _, _, config ->
         postalCodeView.filters = arrayOf(InputFilter.LengthFilter(config.maxLength))
         postalCodeView.keyListener = config.getKeyListener()
-        postalCodeView.inputType = config.inputType
-        postalCodeView.transformationMethod = HideReturnsTransformationMethod.getInstance()
+
+        if (config.inputType ==
+            (InputType.TYPE_NUMBER_VARIATION_PASSWORD or InputType.TYPE_CLASS_NUMBER)
+        ) {
+            postalCodeView.setNumberOnlyInputType()
+        } else {
+            postalCodeView.inputType = config.inputType
+        }
     }
 
     private val newCountryCodeCallback = { newCountryCode: CountryCode ->

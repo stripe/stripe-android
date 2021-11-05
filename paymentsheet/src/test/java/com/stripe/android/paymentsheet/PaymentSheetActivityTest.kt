@@ -473,6 +473,21 @@ internal class PaymentSheetActivityTest {
     }
 
     @Test
+    fun `google pay flow updates the scroll view before and after`() {
+        val scenario = activityScenario()
+        scenario.launch(intent).onActivity { activity ->
+            viewModel.checkoutIdentifier = CheckoutIdentifier.SheetBottomGooglePay
+
+            activity.viewBinding.googlePayButton.performClick()
+
+            assertThat(viewModel._contentVisible.value).isEqualTo(false)
+
+            viewModel.onGooglePayResult(GooglePayPaymentMethodLauncher.Result.Canceled)
+            assertThat(viewModel._contentVisible.value).isEqualTo(true)
+        }
+    }
+
+    @Test
     fun `Verify ProcessResult state closes the sheet`() {
         val scenario = activityScenario()
         scenario.launch(intent).onActivity { activity ->

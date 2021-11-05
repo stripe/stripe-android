@@ -58,6 +58,13 @@ class PaymentIntentTest {
     }
 
     @Test
+    fun parsePaymentIntentWithKlarnaPaymentMethods() {
+        val paymentIntent = PaymentIntentFixtures.PI_WITH_KLARNA_IN_PAYMENT_METHODS
+        assertThat(paymentIntent.paymentMethodTypes)
+            .containsExactly("klarna")
+    }
+
+    @Test
     fun getNextActionData_whenUseStripeSdkWith3ds2() {
         val paymentIntent = PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2
         assertThat(paymentIntent.nextActionData)

@@ -45,6 +45,8 @@ internal class PaymentSheetAddPaymentMethodFragment(
         val googlePayDivider = viewBinding.googlePayDivider
 
         googlePayButton.setOnClickListener {
+            // The scroll will be made visible onResume of the activity
+            sheetViewModel.setContentVisible(false)
             sheetViewModel.lastSelectedPaymentMethod = sheetViewModel.selection.value
             sheetViewModel.updateSelection(PaymentSelection.GooglePay)
         }

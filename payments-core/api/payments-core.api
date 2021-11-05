@@ -3085,6 +3085,7 @@ public final class com/stripe/android/model/PaymentMethod$Type : java/lang/Enum,
 	public static final field Giropay Lcom/stripe/android/model/PaymentMethod$Type;
 	public static final field GrabPay Lcom/stripe/android/model/PaymentMethod$Type;
 	public static final field Ideal Lcom/stripe/android/model/PaymentMethod$Type;
+	public static final field Klarna Lcom/stripe/android/model/PaymentMethod$Type;
 	public static final field Netbanking Lcom/stripe/android/model/PaymentMethod$Type;
 	public static final field Oxxo Lcom/stripe/android/model/PaymentMethod$Type;
 	public static final field P24 Lcom/stripe/android/model/PaymentMethod$Type;
@@ -3189,6 +3190,9 @@ public final class com/stripe/android/model/PaymentMethodCreateParams : android/
 	public static final fun createGiropay (Lcom/stripe/android/model/PaymentMethod$BillingDetails;Ljava/util/Map;)Lcom/stripe/android/model/PaymentMethodCreateParams;
 	public static final fun createGrabPay (Lcom/stripe/android/model/PaymentMethod$BillingDetails;)Lcom/stripe/android/model/PaymentMethodCreateParams;
 	public static final fun createGrabPay (Lcom/stripe/android/model/PaymentMethod$BillingDetails;Ljava/util/Map;)Lcom/stripe/android/model/PaymentMethodCreateParams;
+	public static final fun createKlarna ()Lcom/stripe/android/model/PaymentMethodCreateParams;
+	public static final fun createKlarna (Lcom/stripe/android/model/PaymentMethod$BillingDetails;)Lcom/stripe/android/model/PaymentMethodCreateParams;
+	public static final fun createKlarna (Lcom/stripe/android/model/PaymentMethod$BillingDetails;Ljava/util/Map;)Lcom/stripe/android/model/PaymentMethodCreateParams;
 	public static final fun createOxxo (Lcom/stripe/android/model/PaymentMethod$BillingDetails;)Lcom/stripe/android/model/PaymentMethodCreateParams;
 	public static final fun createOxxo (Lcom/stripe/android/model/PaymentMethod$BillingDetails;Ljava/util/Map;)Lcom/stripe/android/model/PaymentMethodCreateParams;
 	public static final fun createP24 (Lcom/stripe/android/model/PaymentMethod$BillingDetails;)Lcom/stripe/android/model/PaymentMethodCreateParams;
@@ -3343,6 +3347,10 @@ public final class com/stripe/android/model/PaymentMethodCreateParams$Companion 
 	public final fun createGrabPay (Lcom/stripe/android/model/PaymentMethod$BillingDetails;)Lcom/stripe/android/model/PaymentMethodCreateParams;
 	public final fun createGrabPay (Lcom/stripe/android/model/PaymentMethod$BillingDetails;Ljava/util/Map;)Lcom/stripe/android/model/PaymentMethodCreateParams;
 	public static synthetic fun createGrabPay$default (Lcom/stripe/android/model/PaymentMethodCreateParams$Companion;Lcom/stripe/android/model/PaymentMethod$BillingDetails;Ljava/util/Map;ILjava/lang/Object;)Lcom/stripe/android/model/PaymentMethodCreateParams;
+	public final fun createKlarna ()Lcom/stripe/android/model/PaymentMethodCreateParams;
+	public final fun createKlarna (Lcom/stripe/android/model/PaymentMethod$BillingDetails;)Lcom/stripe/android/model/PaymentMethodCreateParams;
+	public final fun createKlarna (Lcom/stripe/android/model/PaymentMethod$BillingDetails;Ljava/util/Map;)Lcom/stripe/android/model/PaymentMethodCreateParams;
+	public static synthetic fun createKlarna$default (Lcom/stripe/android/model/PaymentMethodCreateParams$Companion;Lcom/stripe/android/model/PaymentMethod$BillingDetails;Ljava/util/Map;ILjava/lang/Object;)Lcom/stripe/android/model/PaymentMethodCreateParams;
 	public final fun createOxxo (Lcom/stripe/android/model/PaymentMethod$BillingDetails;)Lcom/stripe/android/model/PaymentMethodCreateParams;
 	public final fun createOxxo (Lcom/stripe/android/model/PaymentMethod$BillingDetails;Ljava/util/Map;)Lcom/stripe/android/model/PaymentMethodCreateParams;
 	public static synthetic fun createOxxo$default (Lcom/stripe/android/model/PaymentMethodCreateParams$Companion;Lcom/stripe/android/model/PaymentMethod$BillingDetails;Ljava/util/Map;ILjava/lang/Object;)Lcom/stripe/android/model/PaymentMethodCreateParams;
@@ -4997,8 +5005,10 @@ public final class com/stripe/android/networking/AnalyticsRequest : com/stripe/a
 	public final fun copy (Ljava/util/Map;)Lcom/stripe/android/networking/AnalyticsRequest;
 	public static synthetic fun copy$default (Lcom/stripe/android/networking/AnalyticsRequest;Ljava/util/Map;ILjava/lang/Object;)Lcom/stripe/android/networking/AnalyticsRequest;
 	public fun equals (Ljava/lang/Object;)Z
-	public fun getBaseUrl ()Ljava/lang/String;
-	public fun getParams ()Ljava/util/Map;
+	public fun getHeaders ()Ljava/util/Map;
+	public final fun getParams ()Ljava/util/Map;
+	public fun getRetryResponseCodes ()Ljava/lang/Iterable;
+	public fun getUrl ()Ljava/lang/String;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
@@ -5024,14 +5034,12 @@ public final class com/stripe/android/networking/AnalyticsRequestFactory_Factory
 
 public final class com/stripe/android/networking/ApiRequest : com/stripe/android/networking/StripeRequest {
 	public static final field $stable I
-	public final fun component2 ()Ljava/lang/String;
-	public final fun component3 ()Ljava/util/Map;
-	public final fun copy (Lcom/stripe/android/networking/StripeRequest$Method;Ljava/lang/String;Ljava/util/Map;Lcom/stripe/android/networking/ApiRequest$Options;Lcom/stripe/android/AppInfo;Lkotlin/jvm/functions/Function1;Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/networking/ApiRequest;
-	public static synthetic fun copy$default (Lcom/stripe/android/networking/ApiRequest;Lcom/stripe/android/networking/StripeRequest$Method;Ljava/lang/String;Ljava/util/Map;Lcom/stripe/android/networking/ApiRequest$Options;Lcom/stripe/android/AppInfo;Lkotlin/jvm/functions/Function1;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/networking/ApiRequest;
+	public final fun copy (Lcom/stripe/android/networking/StripeRequest$Method;Ljava/lang/String;Ljava/util/Map;Lcom/stripe/android/networking/ApiRequest$Options;Lcom/stripe/android/AppInfo;Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/networking/ApiRequest;
+	public static synthetic fun copy$default (Lcom/stripe/android/networking/ApiRequest;Lcom/stripe/android/networking/StripeRequest$Method;Ljava/lang/String;Ljava/util/Map;Lcom/stripe/android/networking/ApiRequest$Options;Lcom/stripe/android/AppInfo;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/networking/ApiRequest;
 	public fun equals (Ljava/lang/Object;)Z
-	public fun getBaseUrl ()Ljava/lang/String;
-	public synthetic fun getHeadersFactory$payments_core_release ()Lcom/stripe/android/networking/RequestHeadersFactory;
-	public fun getParams ()Ljava/util/Map;
+	public fun getHeaders ()Ljava/util/Map;
+	public fun getRetryResponseCodes ()Ljava/lang/Iterable;
+	public fun getUrl ()Ljava/lang/String;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
@@ -5118,11 +5126,28 @@ public abstract class com/stripe/android/networking/StripeRepository {
 public abstract class com/stripe/android/networking/StripeRequest {
 	public static final field $stable I
 	public fun <init> ()V
-	public abstract fun getBaseUrl ()Ljava/lang/String;
-	protected fun getBody ()Ljava/lang/String;
-	public final fun getCompactParams ()Ljava/util/Map;
-	public abstract fun getParams ()Ljava/util/Map;
-	protected final fun getQuery ()Ljava/lang/String;
+	public abstract fun getHeaders ()Ljava/util/Map;
+	public abstract fun getRetryResponseCodes ()Ljava/lang/Iterable;
+	public abstract fun getUrl ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/networking/StripeRequest$Method : java/lang/Enum {
+	public static final field DELETE Lcom/stripe/android/networking/StripeRequest$Method;
+	public static final field GET Lcom/stripe/android/networking/StripeRequest$Method;
+	public static final field POST Lcom/stripe/android/networking/StripeRequest$Method;
+	public final fun getCode ()Ljava/lang/String;
+	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/networking/StripeRequest$Method;
+	public static fun values ()[Lcom/stripe/android/networking/StripeRequest$Method;
+}
+
+public final class com/stripe/android/networking/StripeRequest$MimeType : java/lang/Enum {
+	public static final field Form Lcom/stripe/android/networking/StripeRequest$MimeType;
+	public static final field Json Lcom/stripe/android/networking/StripeRequest$MimeType;
+	public static final field MultipartForm Lcom/stripe/android/networking/StripeRequest$MimeType;
+	public final fun getCode ()Ljava/lang/String;
+	public fun toString ()Ljava/lang/String;
+	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/networking/StripeRequest$MimeType;
+	public static fun values ()[Lcom/stripe/android/networking/StripeRequest$MimeType;
 }
 
 public abstract class com/stripe/android/payments/PaymentFlowResult {
@@ -5793,13 +5818,7 @@ public abstract interface class com/stripe/android/view/AuthActivityStarter {
 
 public abstract class com/stripe/android/view/AuthActivityStarterHost {
 	public static final field $stable I
-	public static final field Companion Lcom/stripe/android/view/AuthActivityStarterHost$Companion;
 	public abstract fun startActivityForResult (Ljava/lang/Class;Landroid/os/Bundle;I)V
-}
-
-public final class com/stripe/android/view/AuthActivityStarterHost$Companion {
-	public final synthetic fun create (Landroidx/activity/ComponentActivity;)Lcom/stripe/android/view/AuthActivityStarterHost;
-	public final synthetic fun create (Landroidx/fragment/app/Fragment;)Lcom/stripe/android/view/AuthActivityStarterHost;
 }
 
 public final class com/stripe/android/view/BecsDebitMandateAcceptanceTextFactory {
@@ -6274,6 +6293,7 @@ public class com/stripe/android/view/StripeEditText : com/google/android/materia
 	public final fun setErrorMessage (Ljava/lang/String;)V
 	public final fun setErrorMessageListener (Lcom/stripe/android/view/StripeEditText$ErrorMessageListener;)V
 	protected final fun setLastKeyDelete (Z)V
+	public final fun setNumberOnlyInputType ()V
 	public final fun setOnFocusChangeListener (Landroid/view/View$OnFocusChangeListener;)V
 	public final fun setShouldShowError (Z)V
 	public fun setTextColor (I)V

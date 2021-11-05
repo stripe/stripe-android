@@ -113,6 +113,10 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     internal val _viewState = MutableLiveData<PaymentSheetViewState>(null)
     internal val viewState: LiveData<PaymentSheetViewState> = _viewState.distinctUntilChanged()
 
+    @VisibleForTesting
+    internal val _contentVisible = MutableLiveData(true)
+    internal val contentVisible: LiveData<Boolean> = _contentVisible.distinctUntilChanged()
+
     internal var checkoutIdentifier: CheckoutIdentifier = CheckoutIdentifier.SheetBottomBuy
     internal fun getButtonStateObservable(
         checkoutIdentifier: CheckoutIdentifier
@@ -332,6 +336,10 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         paymentLauncher = null
     }
 
+    fun setContentVisible(visible: Boolean) {
+        _contentVisible.value = visible
+    }
+
     private fun confirmPaymentSelection(paymentSelection: PaymentSelection?) {
         when (paymentSelection) {
             is PaymentSelection.Saved -> {
@@ -402,6 +410,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     }
 
     internal fun onGooglePayResult(result: GooglePayPaymentMethodLauncher.Result) {
+        setContentVisible(true)
         when (result) {
             is GooglePayPaymentMethodLauncher.Result.Completed ->
                 confirmPaymentSelection(PaymentSelection.Saved(result.paymentMethod))
