@@ -83,10 +83,12 @@ internal fun TextField(
         disabledIndicatorColor = textFieldColors.disabledIndicatorColor,
         unfocusedIndicatorColor = textFieldColors.unfocusedIndicatorColor
     )
-    val fieldState by textFieldController.fieldState.collectAsState(TextFieldStateConstants.Error.Blank)
+    val fieldState by textFieldController.fieldState.collectAsState(
+        TextFieldStateConstants.Error.Blank
+    )
     var processedIsFull by rememberSaveable { mutableStateOf(false) }
-    
-    // This is setup so that when a field is full it still allows more characters
+
+// This is setup so that when a field is full it still allows more characters
     // to be entered, it just triggers next focus when the event happens.
     @Suppress("UNUSED_VALUE")
     processedIsFull = if (fieldState == TextFieldStateConstants.Valid.Full) {

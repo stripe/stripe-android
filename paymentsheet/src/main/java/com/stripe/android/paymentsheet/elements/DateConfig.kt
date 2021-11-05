@@ -7,7 +7,6 @@ import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.elements.TextFieldStateConstants.Error
 import com.stripe.android.paymentsheet.elements.TextFieldStateConstants.Valid
 import java.util.Calendar
-import java.util.regex.Pattern
 
 internal class DateConfig : TextFieldConfig {
     override val capitalization: KeyboardCapitalization = KeyboardCapitalization.None
@@ -74,5 +73,4 @@ internal class DateConfig : TextFieldConfig {
             }
         }
     }
-
 }

@@ -57,7 +57,6 @@ internal class CvcControllerTest {
             .isTrue()
         assertThat(formFieldValuesFlow[formFieldValuesFlow.size - 1]?.value)
             .isEqualTo("123")
-
     }
 
     @Test

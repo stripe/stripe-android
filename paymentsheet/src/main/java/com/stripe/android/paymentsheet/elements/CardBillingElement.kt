@@ -6,7 +6,6 @@ import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArgumen
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
-
 /**
  * This is a special type of AddressElement that
  * removes fields from the address based on the country.  It

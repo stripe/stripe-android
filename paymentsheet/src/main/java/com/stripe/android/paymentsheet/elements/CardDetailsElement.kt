@@ -1,9 +1,7 @@
 package com.stripe.android.paymentsheet.elements
 
-import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
 import kotlinx.coroutines.flow.combine
-import java.util.Calendar
 
 internal class CardDetailsElement(
     identifier: IdentifierSpec,
@@ -31,9 +29,9 @@ internal class CardDetailsElement(
             // TODO: Duplicate of DateConfig
             val newString =
                 if ((
-                        date.isNotBlank() &&
-                            !(date[0] == '0' || date[0] == '1')
-                        ) ||
+                    date.isNotBlank() &&
+                        !(date[0] == '0' || date[0] == '1')
+                    ) ||
                     (
                         (date.length > 1) &&
                             (date[0] == '1' && requireNotNull(date[1].digitToInt()) > 2)
@@ -48,7 +46,6 @@ internal class CardDetailsElement(
                 year = requireNotNull(newString.takeLast(2).toIntOrNull())
             }
         }
-
 
         listOf(
             controller.numberElement.identifier to number,
