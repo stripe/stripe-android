@@ -29,7 +29,7 @@ class FileUploadRequestTest {
         )
 
         ByteArrayOutputStream().use {
-            request.writeBody(it)
+            request.writePostBody(it)
 
             assertThat(it.size()).isEqualTo(1247)
         }

@@ -1131,8 +1131,7 @@ public class StripeTest {
         verify(analyticsRequestExecutor)
                 .executeAsync(analyticsRequestArgumentCaptor.capture());
         final AnalyticsRequest analyticsRequest = analyticsRequestArgumentCaptor.getValue();
-        assertThat(analyticsRequest.getBaseUrl())
-                .isEqualTo(AnalyticsRequest.HOST);
+        assertTrue(analyticsRequest.getUrl().startsWith(AnalyticsRequest.HOST));
         assertThat(
                 Objects.requireNonNull(analyticsRequest.getParams())
                         .get(AnalyticsRequestFactory.FIELD_SOURCE_TYPE)
@@ -1165,8 +1164,7 @@ public class StripeTest {
                 .executeAsync(analyticsRequestArgumentCaptor.capture());
 
         final AnalyticsRequest analyticsRequest = analyticsRequestArgumentCaptor.getValue();
-        assertThat(analyticsRequest.getBaseUrl())
-                .isEqualTo(AnalyticsRequest.HOST);
+        assertTrue(analyticsRequest.getUrl().startsWith(AnalyticsRequest.HOST));
 
         assertThat(
                 Objects.requireNonNull(analyticsRequest.getParams())
@@ -1196,7 +1194,7 @@ public class StripeTest {
         verify(analyticsRequestExecutor)
                 .executeAsync(analyticsRequestArgumentCaptor.capture());
         final AnalyticsRequest analyticsRequest = analyticsRequestArgumentCaptor.getValue();
-        assertEquals(AnalyticsRequest.HOST, analyticsRequest.getBaseUrl());
+        assertTrue(analyticsRequest.getUrl().startsWith(AnalyticsRequest.HOST));
         assertThat(
                 Objects.requireNonNull(analyticsRequest.getParams())
                         .get(AnalyticsRequestFactory.FIELD_SOURCE_TYPE)

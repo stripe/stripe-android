@@ -3,6 +3,7 @@ package com.stripe.android.networking
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.FraudDetectionDataFixtures
+import com.stripe.android.networking.RequestHeadersFactory.Companion.HEADER_CONTENT_TYPE
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import java.io.ByteArrayOutputStream
@@ -22,7 +23,7 @@ class FraudDetectionDataRequestTest {
 
     @Test
     fun contentType_shouldBeApplicationJson() {
-        assertThat(request.contentType)
+        assertThat(request.postHeaders?.get(HEADER_CONTENT_TYPE))
             .isEqualTo("application/json; charset=UTF-8")
     }
 
@@ -41,7 +42,7 @@ class FraudDetectionDataRequestTest {
     @Test
     fun writeBody_shouldWriteNonEmptyBytes() {
         ByteArrayOutputStream().use {
-            request.writeBody(it)
+            request.writePostBody(it)
             assertThat(it.size())
                 .isGreaterThan(0)
         }

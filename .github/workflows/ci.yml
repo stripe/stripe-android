@@ -8,7 +8,7 @@ jobs:
   check:
     name: Check
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v2
       - uses: gradle/wrapper-validation-action@v1

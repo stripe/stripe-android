@@ -14,6 +14,7 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.semantics
@@ -29,6 +30,7 @@ internal fun SaveForFutureUseElementUI(
 ) {
     val controller = element.controller
     val checked by controller.saveForFutureUse.asLiveData().observeAsState(true)
+    val resources = LocalContext.current.resources
 
     val description = stringResource(
         if (checked) {
@@ -62,7 +64,7 @@ internal fun SaveForFutureUseElementUI(
             enabled = enabled
         )
         Text(
-            stringResource(controller.label),
+            resources.getString(controller.label, element.merchantName),
             Modifier
                 .padding(start = 4.dp)
                 .align(Alignment.CenterVertically),

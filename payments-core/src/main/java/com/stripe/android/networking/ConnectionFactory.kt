@@ -27,8 +27,10 @@ internal interface ConnectionFactory {
 
                 if (StripeRequest.Method.POST == request.method) {
                     doOutput = true
-                    setRequestProperty(HEADER_CONTENT_TYPE, request.contentType)
-                    outputStream.use { output -> request.writeBody(output) }
+                    request.postHeaders?.forEach { (key, value) ->
+                        setRequestProperty(key, value)
+                    }
+                    outputStream.use { output -> request.writePostBody(output) }
                 }
             }
 
@@ -42,8 +44,6 @@ internal interface ConnectionFactory {
         private companion object {
             private val CONNECT_TIMEOUT = TimeUnit.SECONDS.toMillis(30).toInt()
             private val READ_TIMEOUT = TimeUnit.SECONDS.toMillis(80).toInt()
-
-            private const val HEADER_CONTENT_TYPE = "Content-Type"
         }
     }
 }
