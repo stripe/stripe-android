@@ -51,7 +51,7 @@ internal class DateConfig : TextFieldConfig {
                     Error.Incomplete(R.string.incomplete_expiry_date)
                 }
                 newString.length > 4 -> {
-                    Error.Incomplete(R.string.invalid_expiry_date)
+                    Error.Invalid(R.string.invalid_expiry_date)
                 }
                 else -> {
                     val month = requireNotNull(newString.take(2).toIntOrNull())

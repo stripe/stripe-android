@@ -46,20 +46,6 @@ internal class CardDetailsElement(
             if (newString.length == 4) {
                 month = requireNotNull(newString.take(2).toIntOrNull())
                 year = requireNotNull(newString.takeLast(2).toIntOrNull())
-                val yearMinus1900 = year + (2000 - 1900)
-                val currentYear = Calendar.getInstance().get(Calendar.YEAR) - 1900
-                val currentMonth = Calendar.getInstance().get(Calendar.MONTH) + 1
-                if ((yearMinus1900 - currentYear) < 0) {
-                    TextFieldStateConstants.Error.Invalid(R.string.invalid_expiry_year_past)
-                } else if ((yearMinus1900 - currentYear) > 50) {
-                    TextFieldStateConstants.Error.Invalid(R.string.invalid_expiry_year)
-                } else if ((yearMinus1900 - currentYear) == 0 && currentMonth > month) {
-                    TextFieldStateConstants.Error.Invalid(R.string.invalid_expiry_year_past)
-                } else if (month !in 1..12) {
-                    TextFieldStateConstants.Error.Incomplete(R.string.invalid_expiry_month)
-                } else {
-                    TextFieldStateConstants.Valid.Full
-                }
             }
         }
 

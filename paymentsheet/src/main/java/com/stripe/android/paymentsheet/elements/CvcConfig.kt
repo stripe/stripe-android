@@ -11,7 +11,7 @@ import com.stripe.android.paymentsheet.elements.TextFieldStateConstants
 
 @Suppress("DEPRECATION")
 internal class CvcConfig : CardDetailsTextFieldConfig {
-    // TODO: Neecd to support CVV
+    // TODO: Neecd to support CVV, does this need to come from metadata service?
     override val capitalization: KeyboardCapitalization = KeyboardCapitalization.None
     override val debugLabel: String = "cvc"
     override val label: Int = R.string.credit_cvc_label
@@ -25,7 +25,7 @@ internal class CvcConfig : CardDetailsTextFieldConfig {
         val numberAllowedDigits = brand.maxCvcLength
         val isDigitLimit = brand.maxCvcLength != -1
         return if (brand == CardBrand.Unknown) {
-            TextFieldStateConstants.Error.Blank // SHould be valid and blank
+            TextFieldStateConstants.Error.Invalid(R.string.card_number_invalid_brand)
         } else if (number.isEmpty()) {
             TextFieldStateConstants.Error.Blank
         } else if (isDigitLimit && number.length < numberAllowedDigits) {
