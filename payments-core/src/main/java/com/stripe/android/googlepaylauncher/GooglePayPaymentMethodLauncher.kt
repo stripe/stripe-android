@@ -11,13 +11,13 @@ import androidx.lifecycle.lifecycleScope
 import com.stripe.android.BuildConfig
 import com.stripe.android.Logger
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.core.networking.AnalyticsRequestExecutor
+import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher.Result
 import com.stripe.android.googlepaylauncher.injection.DaggerGooglePayPaymentMethodLauncherComponent
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.networking.AnalyticsEvent
-import com.stripe.android.networking.AnalyticsRequestExecutor
-import com.stripe.android.networking.AnalyticsRequestFactory
-import com.stripe.android.networking.DefaultAnalyticsRequestExecutor
+import com.stripe.android.networking.PaymentAnalyticsEvent
+import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networking.StripeApiRepository
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.core.injection.ENABLE_LOGGING
@@ -64,7 +64,7 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
     // constructors instead of dependency injection.
     @Named(ENABLE_LOGGING) private val enableLogging: Boolean = BuildConfig.DEBUG,
     @IOContext private val ioContext: CoroutineContext = Dispatchers.IO,
-    analyticsRequestFactory: AnalyticsRequestFactory = AnalyticsRequestFactory(
+    paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
         context,
         PaymentConfiguration.getInstance(context).publishableKey,
         setOf(PRODUCT_USAGE_TOKEN)
@@ -76,7 +76,7 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
         logger = Logger.getInstance(enableLogging),
         workContext = ioContext,
         productUsageTokens = setOf(PRODUCT_USAGE_TOKEN),
-        analyticsRequestFactory = analyticsRequestFactory
+        paymentAnalyticsRequestFactory = paymentAnalyticsRequestFactory
     )
 ) {
     private var isReady = false
@@ -84,7 +84,7 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
     private val launcherComponent = DaggerGooglePayPaymentMethodLauncherComponent.builder()
         .context(context)
         .ioContext(ioContext)
-        .analyticsRequestFactory(analyticsRequestFactory)
+        .analyticsRequestFactory(paymentAnalyticsRequestFactory)
         .stripeRepository(stripeRepository)
         .googlePayConfig(config)
         .enableLogging(enableLogging)
@@ -195,7 +195,7 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
         WeakMapInjectorRegistry.register(injector, injectorKey)
 
         analyticsRequestExecutor.executeAsync(
-            analyticsRequestFactory.createRequest(AnalyticsEvent.GooglePayPaymentMethodLauncherInit)
+            paymentAnalyticsRequestFactory.createRequest(PaymentAnalyticsEvent.GooglePayPaymentMethodLauncherInit)
         )
 
         if (!skipReadyCheck) {

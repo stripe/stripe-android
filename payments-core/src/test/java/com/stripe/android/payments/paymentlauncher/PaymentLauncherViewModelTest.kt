@@ -14,15 +14,15 @@ import com.stripe.android.PaymentIntentResult
 import com.stripe.android.SetupIntentResult
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.StripePaymentController.Companion.EXPAND_PAYMENT_METHOD
+import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.networking.AnalyticsEvent
-import com.stripe.android.networking.AnalyticsRequestFactory
 import com.stripe.android.networking.ApiRequest
-import com.stripe.android.networking.DefaultAnalyticsRequestExecutor
+import com.stripe.android.networking.PaymentAnalyticsEvent
+import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networking.StripeApiRepository
 import com.stripe.android.payments.DefaultReturnUrl
 import com.stripe.android.payments.PaymentFlowResult
@@ -73,7 +73,7 @@ class PaymentLauncherViewModelTest {
     private val setupIntentFlowResultProcessor = mock<SetupIntentFlowResultProcessor>()
 
     private val analyticsRequestExecutor = mock<DefaultAnalyticsRequestExecutor>()
-    private val analyticsRequestFactory = mock<AnalyticsRequestFactory>()
+    private val analyticsRequestFactory = mock<PaymentAnalyticsRequestFactory>()
     private val uiContext = TestCoroutineDispatcher()
     private val activityResultCaller = mock<ActivityResultCaller>()
     private val savedStateHandle = mock<SavedStateHandle>()
@@ -158,7 +158,7 @@ class PaymentLauncherViewModelTest {
             createViewModel().confirmStripeIntent(confirmPaymentIntentParams)
 
             verify(analyticsRequestFactory).createRequest(
-                AnalyticsEvent.ConfirmReturnUrlNull
+                PaymentAnalyticsEvent.ConfirmReturnUrlNull
             )
             verify(stripeApiRepository).confirmPaymentIntent(
                 argWhere {
@@ -188,7 +188,7 @@ class PaymentLauncherViewModelTest {
 
             verify(savedStateHandle).set(PaymentLauncherViewModel.KEY_HAS_STARTED, true)
             verify(analyticsRequestFactory).createRequest(
-                AnalyticsEvent.ConfirmReturnUrlCustom
+                PaymentAnalyticsEvent.ConfirmReturnUrlCustom
             )
             verify(stripeApiRepository).confirmPaymentIntent(
                 argWhere {
@@ -214,7 +214,7 @@ class PaymentLauncherViewModelTest {
 
             verify(savedStateHandle).set(PaymentLauncherViewModel.KEY_HAS_STARTED, true)
             verify(analyticsRequestFactory).createRequest(
-                AnalyticsEvent.ConfirmReturnUrlNull
+                PaymentAnalyticsEvent.ConfirmReturnUrlNull
             )
             verify(stripeApiRepository).confirmSetupIntent(
                 argWhere {
@@ -244,7 +244,7 @@ class PaymentLauncherViewModelTest {
 
             verify(savedStateHandle).set(PaymentLauncherViewModel.KEY_HAS_STARTED, true)
             verify(analyticsRequestFactory).createRequest(
-                AnalyticsEvent.ConfirmReturnUrlCustom
+                PaymentAnalyticsEvent.ConfirmReturnUrlCustom
             )
             verify(stripeApiRepository).confirmSetupIntent(
                 argWhere {

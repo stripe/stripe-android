@@ -11,6 +11,8 @@ import com.stripe.android.FraudDetectionDataRepository
 import com.stripe.android.Stripe
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.exception.InvalidRequestException
+import com.stripe.android.core.networking.AnalyticsRequest
+import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.networking.StripeRequest
@@ -298,7 +300,7 @@ internal class StripeApiRepositoryTest {
             )
 
             verifyFraudDetectionDataAndAnalyticsRequests(
-                AnalyticsEvent.SourceCreate,
+                PaymentAnalyticsEvent.SourceCreate,
                 productUsage = listOf("CardInputView")
             )
         }
@@ -323,7 +325,7 @@ internal class StripeApiRepositoryTest {
             )
 
             verifyFraudDetectionDataAndAnalyticsRequests(
-                AnalyticsEvent.SourceCreate,
+                PaymentAnalyticsEvent.SourceCreate,
                 productUsage = null
             )
         }
@@ -366,7 +368,7 @@ internal class StripeApiRepositoryTest {
         assertThat(source.id)
             .isEqualTo(sourceId)
 
-        verifyAnalyticsRequest(AnalyticsEvent.SourceRetrieve)
+        verifyAnalyticsRequest(PaymentAnalyticsEvent.SourceRetrieve)
     }
 
     @Test
@@ -493,7 +495,7 @@ internal class StripeApiRepositoryTest {
             assertTrue(paymentMethodDataParams["guid"] is String)
             assertEquals("card", paymentMethodDataParams["type"])
 
-            verifyFraudDetectionDataAndAnalyticsRequests(AnalyticsEvent.PaymentIntentConfirm)
+            verifyFraudDetectionDataAndAnalyticsRequests(PaymentAnalyticsEvent.PaymentIntentConfirm)
 
             val analyticsRequest = analyticsRequestArgumentCaptor.firstValue
             assertThat(analyticsRequest.params["source_type"])
@@ -759,7 +761,7 @@ internal class StripeApiRepositoryTest {
             )
         )
 
-        verifyFraudDetectionDataAndAnalyticsRequests(AnalyticsEvent.SourceCreate)
+        verifyFraudDetectionDataAndAnalyticsRequests(PaymentAnalyticsEvent.SourceCreate)
     }
 
     @Test
@@ -947,7 +949,7 @@ internal class StripeApiRepositoryTest {
             )
 
         verifyAnalyticsRequest(
-            AnalyticsEvent.CustomerRetrievePaymentMethods,
+            PaymentAnalyticsEvent.CustomerRetrievePaymentMethods,
             null
         )
     }
@@ -1091,7 +1093,7 @@ internal class StripeApiRepositoryTest {
         assertThat(fileUploadRequestArgumentCaptor.firstValue)
             .isNotNull()
 
-        verifyAnalyticsRequest(AnalyticsEvent.FileCreate)
+        verifyAnalyticsRequest(PaymentAnalyticsEvent.FileCreate)
     }
 
     @Test
@@ -1206,7 +1208,7 @@ internal class StripeApiRepositoryTest {
             )
 
             verifyFraudDetectionDataAndAnalyticsRequests(
-                AnalyticsEvent.TokenCreate,
+                PaymentAnalyticsEvent.TokenCreate,
                 listOf("CardInputView")
             )
         }
@@ -1225,7 +1227,7 @@ internal class StripeApiRepositoryTest {
         )
 
         verifyFraudDetectionDataAndAnalyticsRequests(
-            AnalyticsEvent.TokenCreate,
+            PaymentAnalyticsEvent.TokenCreate,
             productUsage = null
         )
     }
@@ -1303,7 +1305,7 @@ internal class StripeApiRepositoryTest {
             )
 
             verifyFraudDetectionDataAndAnalyticsRequests(
-                AnalyticsEvent.PaymentMethodCreate,
+                PaymentAnalyticsEvent.PaymentMethodCreate,
                 productUsage = listOf("CardInputView")
             )
         }
@@ -1343,7 +1345,7 @@ internal class StripeApiRepositoryTest {
             )
 
             verifyFraudDetectionDataAndAnalyticsRequests(
-                AnalyticsEvent.PaymentMethodCreate,
+                PaymentAnalyticsEvent.PaymentMethodCreate,
                 productUsage = listOf("PaymentSheet")
             )
         }
@@ -1365,7 +1367,7 @@ internal class StripeApiRepositoryTest {
             )
 
             verifyFraudDetectionDataAndAnalyticsRequests(
-                AnalyticsEvent.PaymentMethodCreate,
+                PaymentAnalyticsEvent.PaymentMethodCreate,
                 productUsage = null
             )
         }
@@ -1392,7 +1394,7 @@ internal class StripeApiRepositoryTest {
             assertThat(radarSession.id)
                 .startsWith("rse_")
 
-            verifyAnalyticsRequest(AnalyticsEvent.RadarSessionCreate)
+            verifyAnalyticsRequest(PaymentAnalyticsEvent.RadarSessionCreate)
         }
 
     @Test
@@ -1468,7 +1470,7 @@ internal class StripeApiRepositoryTest {
             assertEquals(apiRequest.params?.get("type"), "payment_intent")
             assertEquals(apiRequest.params?.get("client_secret"), clientSecret)
 
-            verifyFraudDetectionDataAndAnalyticsRequests(AnalyticsEvent.PaymentIntentRetrieve)
+            verifyFraudDetectionDataAndAnalyticsRequests(PaymentAnalyticsEvent.PaymentIntentRetrieve)
         }
 
     @Test
@@ -1498,7 +1500,7 @@ internal class StripeApiRepositoryTest {
             assertEquals(apiRequest.params?.get("type"), "setup_intent")
             assertEquals(apiRequest.params?.get("client_secret"), clientSecret)
 
-            verifyFraudDetectionDataAndAnalyticsRequests(AnalyticsEvent.SetupIntentRetrieve)
+            verifyFraudDetectionDataAndAnalyticsRequests(PaymentAnalyticsEvent.SetupIntentRetrieve)
         }
 
     @Test
@@ -1528,11 +1530,11 @@ internal class StripeApiRepositoryTest {
                 }
             )
 
-            verifyFraudDetectionDataAndAnalyticsRequests(AnalyticsEvent.PaymentIntentRefresh)
+            verifyFraudDetectionDataAndAnalyticsRequests(PaymentAnalyticsEvent.PaymentIntentRefresh)
         }
 
     private fun verifyFraudDetectionDataAndAnalyticsRequests(
-        event: AnalyticsEvent,
+        event: PaymentAnalyticsEvent,
         productUsage: List<String>? = null
     ) {
         verify(fraudDetectionDataRepository, times(2))
@@ -1542,7 +1544,7 @@ internal class StripeApiRepositoryTest {
     }
 
     private fun verifyAnalyticsRequest(
-        event: AnalyticsEvent,
+        event: PaymentAnalyticsEvent,
         productUsage: List<String>? = null
     ) {
         verify(analyticsRequestExecutor)

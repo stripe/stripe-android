@@ -5,7 +5,7 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.RestrictTo
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
-import com.stripe.android.networking.AnalyticsRequestFactory
+import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.core.injection.DaggerPaymentLauncherComponent
 import com.stripe.android.payments.core.injection.ENABLE_LOGGING
@@ -38,7 +38,7 @@ class StripePaymentLauncher @AssistedInject internal constructor(
     @IOContext ioContext: CoroutineContext,
     @UIContext uiContext: CoroutineContext,
     stripeRepository: StripeRepository,
-    analyticsRequestFactory: AnalyticsRequestFactory,
+    paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
     @Named(PRODUCT_USAGE) private val productUsage: Set<String>
 ) : PaymentLauncher, Injector {
     private val paymentLauncherComponent: PaymentLauncherComponent =
@@ -48,7 +48,7 @@ class StripePaymentLauncher @AssistedInject internal constructor(
             .ioContext(ioContext)
             .uiContext(uiContext)
             .stripeRepository(stripeRepository)
-            .analyticsRequestFactory(analyticsRequestFactory)
+            .analyticsRequestFactory(paymentAnalyticsRequestFactory)
             .publishableKeyProvider(publishableKeyProvider)
             .stripeAccountIdProvider(stripeAccountIdProvider)
             .productUsage(productUsage)

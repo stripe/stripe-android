@@ -1,7 +1,7 @@
 package com.stripe.android.paymentsheet.analytics
 
-import com.stripe.android.networking.AnalyticsRequestExecutor
-import com.stripe.android.networking.AnalyticsRequestFactory
+import com.stripe.android.core.networking.AnalyticsRequestExecutor
+import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.payments.core.injection.IOContext
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -16,7 +16,7 @@ internal class DefaultEventReporter @Inject internal constructor(
     private val mode: EventReporter.Mode,
     private val deviceIdRepository: DeviceIdRepository,
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
-    private val analyticsRequestFactory: AnalyticsRequestFactory,
+    private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
     @IOContext private val workContext: CoroutineContext
 ) : EventReporter {
 
@@ -86,7 +86,7 @@ internal class DefaultEventReporter @Inject internal constructor(
         CoroutineScope(workContext).launch {
             val deviceId = deviceIdRepository.get()
             analyticsRequestExecutor.executeAsync(
-                analyticsRequestFactory.createRequest(
+                paymentAnalyticsRequestFactory.createRequest(
                     event.toString(),
                     deviceId.value
                 )

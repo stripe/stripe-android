@@ -6,8 +6,8 @@ import androidx.annotation.VisibleForTesting
 import com.stripe.android.EphemeralKeyManager.KeyManagerListener
 import com.stripe.android.Stripe.Companion.appInfo
 import com.stripe.android.core.exception.InvalidRequestException
-import com.stripe.android.networking.AnalyticsRequestFactory
 import com.stripe.android.networking.ApiRequest
+import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networking.StripeApiRepository
 import com.stripe.android.networking.StripeRepository
 import kotlinx.coroutines.CoroutineScope
@@ -375,7 +375,7 @@ class IssuingCardPinService @VisibleForTesting internal constructor(
                     context,
                     { publishableKey },
                     appInfo,
-                    analyticsRequestFactory = AnalyticsRequestFactory(
+                    paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
                         context,
                         { publishableKey },
                         defaultProductUsageTokens = setOf("IssuingCardPinService")

@@ -8,14 +8,14 @@ import androidx.lifecycle.ViewModel
 import androidx.savedstate.SavedStateRegistryOwner
 import com.stripe.android.StripePaymentController
 import com.stripe.android.auth.PaymentBrowserAuthContract
+import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.exception.StripeException
 import com.stripe.android.model.Stripe3ds2AuthParams
 import com.stripe.android.model.Stripe3ds2AuthResult
 import com.stripe.android.model.Stripe3ds2Fingerprint
-import com.stripe.android.networking.AnalyticsEvent
-import com.stripe.android.networking.AnalyticsRequestExecutor
-import com.stripe.android.networking.AnalyticsRequestFactory
 import com.stripe.android.networking.ApiRequest
+import com.stripe.android.networking.PaymentAnalyticsEvent
+import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.payments.core.injection.DaggerStripe3ds2TransactionViewModelFactoryComponent
@@ -41,7 +41,7 @@ internal class Stripe3ds2TransactionViewModel @Inject constructor(
     private val args: Stripe3ds2TransactionContract.Args,
     private val stripeRepository: StripeRepository,
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
-    private val analyticsRequestFactory: AnalyticsRequestFactory,
+    private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
     private val threeDs2Service: StripeThreeDs2Service,
     private val messageVersionRegistry: MessageVersionRegistry,
     private val challengeResultProcessor: Stripe3ds2ChallengeResultProcessor,
@@ -60,7 +60,7 @@ internal class Stripe3ds2TransactionViewModel @Inject constructor(
 
     suspend fun start3ds2Flow(): NextStep {
         analyticsRequestExecutor.executeAsync(
-            analyticsRequestFactory.createRequest(AnalyticsEvent.Auth3ds2Fingerprint)
+            paymentAnalyticsRequestFactory.createRequest(PaymentAnalyticsEvent.Auth3ds2Fingerprint)
         )
 
         return runCatching {
@@ -69,7 +69,7 @@ internal class Stripe3ds2TransactionViewModel @Inject constructor(
             )
         }.getOrElse {
             analyticsRequestExecutor.executeAsync(
-                analyticsRequestFactory.createRequest(AnalyticsEvent.Auth3ds2RequestParamsFailed)
+                paymentAnalyticsRequestFactory.createRequest(PaymentAnalyticsEvent.Auth3ds2RequestParamsFailed)
             )
 
             NextStep.Complete(
@@ -208,7 +208,7 @@ internal class Stripe3ds2TransactionViewModel @Inject constructor(
         fallbackRedirectUrl: String
     ): NextStep {
         analyticsRequestExecutor.executeAsync(
-            analyticsRequestFactory.createRequest(AnalyticsEvent.Auth3ds2Fallback)
+            paymentAnalyticsRequestFactory.createRequest(PaymentAnalyticsEvent.Auth3ds2Fallback)
         )
 
         return NextStep.StartFallback(
@@ -229,7 +229,7 @@ internal class Stripe3ds2TransactionViewModel @Inject constructor(
 
     private fun startFrictionlessFlow(): NextStep {
         analyticsRequestExecutor.executeAsync(
-            analyticsRequestFactory.createRequest(AnalyticsEvent.Auth3ds2Frictionless)
+            paymentAnalyticsRequestFactory.createRequest(PaymentAnalyticsEvent.Auth3ds2Frictionless)
         )
 
         return NextStep.Complete(

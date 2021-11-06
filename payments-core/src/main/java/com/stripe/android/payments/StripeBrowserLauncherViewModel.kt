@@ -12,15 +12,15 @@ import androidx.savedstate.SavedStateRegistryOwner
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.R
 import com.stripe.android.auth.PaymentBrowserAuthContract
-import com.stripe.android.networking.AnalyticsEvent
-import com.stripe.android.networking.AnalyticsRequestExecutor
-import com.stripe.android.networking.AnalyticsRequestFactory
-import com.stripe.android.networking.DefaultAnalyticsRequestExecutor
+import com.stripe.android.core.networking.AnalyticsRequestExecutor
+import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
+import com.stripe.android.networking.PaymentAnalyticsEvent
+import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import kotlin.properties.Delegates
 
 internal class StripeBrowserLauncherViewModel(
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
-    private val analyticsRequestFactory: AnalyticsRequestFactory,
+    private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
     private val browserCapabilities: BrowserCapabilities,
     private val intentChooserTitle: String,
     private val savedStateHandle: SavedStateHandle
@@ -86,10 +86,10 @@ internal class StripeBrowserLauncherViewModel(
         shouldUseCustomTabs: Boolean
     ) {
         analyticsRequestExecutor.executeAsync(
-            analyticsRequestFactory.createRequest(
+            paymentAnalyticsRequestFactory.createRequest(
                 when (shouldUseCustomTabs) {
-                    true -> AnalyticsEvent.AuthWithCustomTabs
-                    false -> AnalyticsEvent.AuthWithDefaultBrowser
+                    true -> PaymentAnalyticsEvent.AuthWithCustomTabs
+                    false -> PaymentAnalyticsEvent.AuthWithDefaultBrowser
                 }
             )
         )
@@ -111,7 +111,7 @@ internal class StripeBrowserLauncherViewModel(
 
             return StripeBrowserLauncherViewModel(
                 DefaultAnalyticsRequestExecutor(),
-                AnalyticsRequestFactory(
+                PaymentAnalyticsRequestFactory(
                     application,
                     config.publishableKey
                 ),
