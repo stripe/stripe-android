@@ -1,10 +1,13 @@
 package com.stripe.android
 
 import android.content.Context
-import com.stripe.android.networking.DefaultFraudDetectionDataRequestExecutor
+import com.stripe.android.core.networking.DefaultStripeNetworkClient
+import com.stripe.android.core.networking.StripeNetworkClient
+import com.stripe.android.core.networking.StripeResponse
+import com.stripe.android.core.networking.responseJson
+import com.stripe.android.model.parsers.FraudDetectionDataJsonParser
 import com.stripe.android.networking.DefaultFraudDetectionDataRequestFactory
 import com.stripe.android.networking.FraudDetectionData
-import com.stripe.android.networking.FraudDetectionDataRequestExecutor
 import com.stripe.android.networking.FraudDetectionDataRequestFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -32,17 +35,17 @@ internal interface FraudDetectionDataRepository {
     fun save(fraudDetectionData: FraudDetectionData)
 }
 
+private val timestampSupplier: () -> Long = {
+    Calendar.getInstance().timeInMillis
+}
+
 internal class DefaultFraudDetectionDataRepository(
     private val localStore: FraudDetectionDataStore,
     private val fraudDetectionDataRequestFactory: FraudDetectionDataRequestFactory,
-    private val fraudDetectionDataRequestExecutor: FraudDetectionDataRequestExecutor,
+    private val stripeNetworkClient: StripeNetworkClient,
     private val workContext: CoroutineContext
 ) : FraudDetectionDataRepository {
     private var cachedFraudDetectionData: FraudDetectionData? = null
-
-    private val timestampSupplier: () -> Long = {
-        Calendar.getInstance().timeInMillis
-    }
 
     @JvmOverloads
     constructor(
@@ -51,9 +54,7 @@ internal class DefaultFraudDetectionDataRepository(
     ) : this(
         localStore = DefaultFraudDetectionDataStore(context, workContext),
         fraudDetectionDataRequestFactory = DefaultFraudDetectionDataRequestFactory(context),
-        fraudDetectionDataRequestExecutor = DefaultFraudDetectionDataRequestExecutor(
-            workContext = workContext
-        ),
+        stripeNetworkClient = DefaultStripeNetworkClient(workContext = workContext),
         workContext = workContext
     )
 
@@ -70,11 +71,14 @@ internal class DefaultFraudDetectionDataRepository(
             if (localFraudDetectionData == null ||
                 localFraudDetectionData.isExpired(timestampSupplier())
             ) {
-                fraudDetectionDataRequestExecutor.execute(
-                    request = fraudDetectionDataRequestFactory.create(
-                        localFraudDetectionData
-                    )
-                )
+                // fraud detection data request failures should be non-fatal
+                runCatching {
+                    stripeNetworkClient.executeRequest(
+                        fraudDetectionDataRequestFactory.create(
+                            localFraudDetectionData
+                        )
+                    ).fraudDetectionData()
+                }.getOrNull()
             } else {
                 localFraudDetectionData
             }
@@ -98,3 +102,11 @@ internal class DefaultFraudDetectionDataRepository(
         localStore.save(fraudDetectionData)
     }
 }
+
+private val fraudDetectionJsonParser = FraudDetectionDataJsonParser(timestampSupplier)
+
+/**
+ * Internal extension to convert the [String] body of [StripeResponse] to a [FraudDetectionData].
+ */
+private fun StripeResponse<String>.fraudDetectionData(): FraudDetectionData? =
+    takeIf { isOk }?.let { fraudDetectionJsonParser.parse(it.responseJson()) }
