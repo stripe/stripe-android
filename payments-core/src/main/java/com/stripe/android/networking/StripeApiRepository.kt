@@ -12,6 +12,9 @@ import com.stripe.android.StripeApiBeta
 import com.stripe.android.cards.Bin
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.exception.InvalidRequestException
+import com.stripe.android.core.networking.AnalyticsRequest
+import com.stripe.android.core.networking.AnalyticsRequestExecutor
+import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
 import com.stripe.android.core.networking.HTTP_TOO_MANY_REQUESTS
 import com.stripe.android.core.networking.RequestId
@@ -98,8 +101,8 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         DefaultAnalyticsRequestExecutor(logger, workContext),
     private val fraudDetectionDataRepository: FraudDetectionDataRepository =
         DefaultFraudDetectionDataRepository(context, workContext),
-    private val analyticsRequestFactory: AnalyticsRequestFactory =
-        AnalyticsRequestFactory(context, publishableKeyProvider, productUsageTokens),
+    private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory =
+        PaymentAnalyticsRequestFactory(context, publishableKeyProvider, productUsageTokens),
     private val fraudDetectionDataParamsUtils: FraudDetectionDataParamsUtils = FraudDetectionDataParamsUtils(),
     betas: Set<StripeApiBeta> = emptySet(),
     apiVersion: String = ApiVersion(betas = betas).code,
@@ -112,7 +115,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         @Named(PUBLISHABLE_KEY) publishableKeyProvider: () -> String,
         @IOContext workContext: CoroutineContext,
         @Named(PRODUCT_USAGE) productUsageTokens: Set<String>,
-        analyticsRequestFactory: AnalyticsRequestFactory,
+        paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
         analyticsRequestExecutor: AnalyticsRequestExecutor,
         logger: Logger
     ) : this(
@@ -121,7 +124,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         logger = logger,
         workContext = workContext,
         productUsageTokens = productUsageTokens,
-        analyticsRequestFactory = analyticsRequestFactory,
+        paymentAnalyticsRequestFactory = paymentAnalyticsRequestFactory,
         analyticsRequestExecutor = analyticsRequestExecutor
     )
 
@@ -167,7 +170,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
     /**
      * Confirm a [PaymentIntent] using the provided [ConfirmPaymentIntentParams]
      *
-     * Analytics event: [AnalyticsEvent.PaymentIntentConfirm]
+     * Analytics event: [PaymentAnalyticsEvent.PaymentIntentConfirm]
      *
      * @param confirmPaymentIntentParams contains the confirmation params
      * @return a [PaymentIntent] reflecting the updated state after applying the parameter
@@ -207,7 +210,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
                 confirmPaymentIntentParams.paymentMethodCreateParams?.typeCode
                     ?: confirmPaymentIntentParams.sourceParams?.type
             fireAnalyticsRequest(
-                analyticsRequestFactory.createPaymentIntentConfirmation(
+                paymentAnalyticsRequestFactory.createPaymentIntentConfirmation(
                     paymentMethodType
                 )
             )
@@ -217,7 +220,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
     /**
      * Retrieve a [PaymentIntent] using its client_secret
      *
-     * Analytics event: [AnalyticsEvent.PaymentIntentRetrieve]
+     * Analytics event: [PaymentAnalyticsEvent.PaymentIntentRetrieve]
      *
      * @param clientSecret client_secret of the PaymentIntent to retrieve
      */
@@ -245,7 +248,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
             PaymentIntentJsonParser()
         ) {
             fireAnalyticsRequest(
-                analyticsRequestFactory.createRequest(AnalyticsEvent.PaymentIntentRetrieve)
+                paymentAnalyticsRequestFactory.createRequest(PaymentAnalyticsEvent.PaymentIntentRetrieve)
             )
         }
     }
@@ -253,7 +256,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
     /**
      * Refresh a [PaymentIntent] using its client_secret
      *
-     * Analytics event: [AnalyticsEvent.PaymentIntentRefresh]
+     * Analytics event: [PaymentAnalyticsEvent.PaymentIntentRefresh]
      *
      * @param clientSecret client_secret of the PaymentIntent to retrieve
      */
@@ -280,7 +283,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
             PaymentIntentJsonParser()
         ) {
             fireAnalyticsRequest(
-                analyticsRequestFactory.createRequest(AnalyticsEvent.PaymentIntentRefresh)
+                paymentAnalyticsRequestFactory.createRequest(PaymentAnalyticsEvent.PaymentIntentRefresh)
             )
         }
     }
@@ -289,7 +292,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
      * Retrieve a [PaymentIntent] using its client_secret, with the accepted payment method types
      * ordered according to the [locale] provided.
      *
-     * Analytics event: [AnalyticsEvent.PaymentIntentRetrieve]
+     * Analytics event: [PaymentAnalyticsEvent.PaymentIntentRetrieve]
      *
      * @param clientSecret client_secret of the PaymentIntent to retrieve
      * @param locale locale used to determine the order of the payment method types
@@ -309,11 +312,11 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         options,
         locale,
         parser = PaymentMethodPreferenceForPaymentIntentJsonParser(),
-        analyticsEvent = AnalyticsEvent.PaymentIntentRetrieve
+        analyticsEvent = PaymentAnalyticsEvent.PaymentIntentRetrieve
     )
 
     /**
-     * Analytics event: [AnalyticsEvent.PaymentIntentCancelSource]
+     * Analytics event: [PaymentAnalyticsEvent.PaymentIntentCancelSource]
      */
     @Throws(
         AuthenticationException::class,
@@ -336,14 +339,14 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
             ),
             PaymentIntentJsonParser()
         ) {
-            fireAnalyticsRequest(AnalyticsEvent.PaymentIntentCancelSource)
+            fireAnalyticsRequest(PaymentAnalyticsEvent.PaymentIntentCancelSource)
         }
     }
 
     /**
      * Confirm a [SetupIntent] using the provided [ConfirmSetupIntentParams]
      *
-     * Analytics event: [AnalyticsEvent.SetupIntentConfirm]
+     * Analytics event: [PaymentAnalyticsEvent.SetupIntentConfirm]
      *
      * @param confirmSetupIntentParams contains the confirmation params
      * @return a [SetupIntent] reflecting the updated state after applying the parameter
@@ -381,7 +384,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
             SetupIntentJsonParser()
         ) {
             fireAnalyticsRequest(
-                analyticsRequestFactory.createSetupIntentConfirmation(
+                paymentAnalyticsRequestFactory.createSetupIntentConfirmation(
                     confirmSetupIntentParams.paymentMethodCreateParams?.typeCode
                 )
             )
@@ -391,7 +394,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
     /**
      * Retrieve a [SetupIntent] using its client_secret
      *
-     * Analytics event: [AnalyticsEvent.SetupIntentRetrieve]
+     * Analytics event: [PaymentAnalyticsEvent.SetupIntentRetrieve]
      *
      * @param clientSecret client_secret of the SetupIntent to retrieve
      */
@@ -419,7 +422,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
             SetupIntentJsonParser()
         ) {
             fireAnalyticsRequest(
-                analyticsRequestFactory.createRequest(AnalyticsEvent.SetupIntentRetrieve)
+                paymentAnalyticsRequestFactory.createRequest(PaymentAnalyticsEvent.SetupIntentRetrieve)
             )
         }
     }
@@ -428,7 +431,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
      * Retrieve a [SetupIntent] using its client_secret, with the accepted payment method types
      * ordered according to the [locale] provided.
      *
-     * Analytics event: [AnalyticsEvent.SetupIntentRetrieve]
+     * Analytics event: [PaymentAnalyticsEvent.SetupIntentRetrieve]
      *
      * @param clientSecret client_secret of the SetupIntent to retrieve
      * @param locale locale used to determine the order of the payment method types
@@ -448,11 +451,11 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         options,
         locale,
         parser = PaymentMethodPreferenceForSetupIntentJsonParser(),
-        analyticsEvent = AnalyticsEvent.SetupIntentRetrieve
+        analyticsEvent = PaymentAnalyticsEvent.SetupIntentRetrieve
     )
 
     /**
-     * Analytics event: [AnalyticsEvent.SetupIntentCancelSource]
+     * Analytics event: [PaymentAnalyticsEvent.SetupIntentCancelSource]
      */
     @Throws(
         AuthenticationException::class,
@@ -473,14 +476,14 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
             ),
             SetupIntentJsonParser()
         ) {
-            fireAnalyticsRequest(AnalyticsEvent.SetupIntentCancelSource)
+            fireAnalyticsRequest(PaymentAnalyticsEvent.SetupIntentCancelSource)
         }
     }
 
     /**
      * Create a [Source] using the input [SourceParams].
      *
-     * Analytics event: [AnalyticsEvent.SourceCreate]
+     * Analytics event: [PaymentAnalyticsEvent.SourceCreate]
      *
      * @param sourceParams a [SourceParams] object with [Source] creation params
      * @return a [Source] if one could be created from the input params,
@@ -509,7 +512,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
             SourceJsonParser()
         ) {
             fireAnalyticsRequest(
-                analyticsRequestFactory.createSourceCreation(
+                paymentAnalyticsRequestFactory.createSourceCreation(
                     sourceParams.type,
                     sourceParams.attribution
                 )
@@ -545,13 +548,13 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
             SourceJsonParser()
         ) {
             fireAnalyticsRequest(
-                analyticsRequestFactory.createRequest(AnalyticsEvent.SourceRetrieve)
+                paymentAnalyticsRequestFactory.createRequest(PaymentAnalyticsEvent.SourceRetrieve)
             )
         }
     }
 
     /**
-     * Analytics event: [AnalyticsEvent.PaymentMethodCreate]
+     * Analytics event: [PaymentAnalyticsEvent.PaymentMethodCreate]
      */
     @Throws(
         AuthenticationException::class,
@@ -576,7 +579,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
             PaymentMethodJsonParser()
         ) {
             fireAnalyticsRequest(
-                analyticsRequestFactory.createPaymentMethodCreation(
+                paymentAnalyticsRequestFactory.createPaymentMethodCreation(
                     paymentMethodCreateParams.type,
                     productUsageTokens = paymentMethodCreateParams.attribution
                 )
@@ -587,7 +590,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
     /**
      * Create a [Token] using the input token parameters.
      *
-     * Analytics event: [AnalyticsEvent.TokenCreate]
+     * Analytics event: [PaymentAnalyticsEvent.TokenCreate]
      *
      * @param tokenParams a [TokenParams] representing the object for which this token is being created
      * @param options a [ApiRequest.Options] object that contains connection data like the api
@@ -619,7 +622,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
             TokenJsonParser()
         ) {
             fireAnalyticsRequest(
-                analyticsRequestFactory.createTokenCreation(
+                paymentAnalyticsRequestFactory.createTokenCreation(
                     productUsageTokens = tokenParams.attribution,
                     tokenType = tokenParams.tokenType
                 )
@@ -628,7 +631,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
     }
 
     /**
-     * Analytics event: [AnalyticsEvent.CustomerAddSource]
+     * Analytics event: [PaymentAnalyticsEvent.CustomerAddSource]
      */
     @Throws(
         InvalidRequestException::class,
@@ -654,7 +657,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
             SourceJsonParser()
         ) {
             fireAnalyticsRequest(
-                analyticsRequestFactory.createAddSource(
+                paymentAnalyticsRequestFactory.createAddSource(
                     productUsageTokens,
                     sourceType
                 )
@@ -663,7 +666,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
     }
 
     /**
-     * Analytics event: [AnalyticsEvent.CustomerDeleteSource]
+     * Analytics event: [PaymentAnalyticsEvent.CustomerDeleteSource]
      */
     @Throws(
         InvalidRequestException::class,
@@ -687,7 +690,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
             SourceJsonParser()
         ) {
             fireAnalyticsRequest(
-                analyticsRequestFactory.createDeleteSource(
+                paymentAnalyticsRequestFactory.createDeleteSource(
                     productUsageTokens
                 )
             )
@@ -695,7 +698,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
     }
 
     /**
-     * Analytics event: [AnalyticsEvent.CustomerAttachPaymentMethod]
+     * Analytics event: [PaymentAnalyticsEvent.CustomerAttachPaymentMethod]
      */
     @Throws(
         InvalidRequestException::class,
@@ -722,7 +725,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
             PaymentMethodJsonParser()
         ) {
             fireAnalyticsRequest(
-                analyticsRequestFactory
+                paymentAnalyticsRequestFactory
                     .createAttachPaymentMethod(
                         productUsageTokens
                     )
@@ -731,7 +734,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
     }
 
     /**
-     * Analytics event: [AnalyticsEvent.CustomerDetachPaymentMethod]
+     * Analytics event: [PaymentAnalyticsEvent.CustomerDetachPaymentMethod]
      */
     @Throws(
         InvalidRequestException::class,
@@ -754,7 +757,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
             PaymentMethodJsonParser()
         ) {
             fireAnalyticsRequest(
-                analyticsRequestFactory
+                paymentAnalyticsRequestFactory
                     .createDetachPaymentMethod(
                         productUsageTokens
                     )
@@ -765,7 +768,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
     /**
      * Retrieve a Customer's [PaymentMethod]s
      *
-     * Analytics event: [AnalyticsEvent.CustomerRetrievePaymentMethods]
+     * Analytics event: [PaymentAnalyticsEvent.CustomerRetrievePaymentMethods]
      */
     @Throws(
         InvalidRequestException::class,
@@ -789,8 +792,8 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
             PaymentMethodsListJsonParser()
         ) {
             fireAnalyticsRequest(
-                analyticsRequestFactory.createRequest(
-                    AnalyticsEvent.CustomerRetrievePaymentMethods,
+                paymentAnalyticsRequestFactory.createRequest(
+                    PaymentAnalyticsEvent.CustomerRetrievePaymentMethods,
                     productUsageTokens = productUsageTokens
                 )
             )
@@ -800,7 +803,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
     }
 
     /**
-     * Analytics event: [AnalyticsEvent.CustomerSetDefaultSource]
+     * Analytics event: [PaymentAnalyticsEvent.CustomerSetDefaultSource]
      */
     @Throws(
         InvalidRequestException::class,
@@ -826,8 +829,8 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
             CustomerJsonParser()
         ) {
             fireAnalyticsRequest(
-                analyticsRequestFactory.createRequest(
-                    event = AnalyticsEvent.CustomerSetDefaultSource,
+                paymentAnalyticsRequestFactory.createRequest(
+                    event = PaymentAnalyticsEvent.CustomerSetDefaultSource,
                     productUsageTokens = productUsageTokens,
                     sourceType = sourceType
                 )
@@ -836,7 +839,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
     }
 
     /**
-     * Analytics event: [AnalyticsEvent.CustomerSetShippingInfo]
+     * Analytics event: [PaymentAnalyticsEvent.CustomerSetShippingInfo]
      */
     @Throws(
         InvalidRequestException::class,
@@ -861,8 +864,8 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
             CustomerJsonParser()
         ) {
             fireAnalyticsRequest(
-                analyticsRequestFactory.createRequest(
-                    AnalyticsEvent.CustomerSetShippingInfo,
+                paymentAnalyticsRequestFactory.createRequest(
+                    PaymentAnalyticsEvent.CustomerSetShippingInfo,
                     productUsageTokens = productUsageTokens
                 )
             )
@@ -870,7 +873,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
     }
 
     /**
-     * Analytics event: [AnalyticsEvent.CustomerRetrieve]
+     * Analytics event: [PaymentAnalyticsEvent.CustomerRetrieve]
      */
     @Throws(
         InvalidRequestException::class,
@@ -892,8 +895,8 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
             CustomerJsonParser()
         ) {
             fireAnalyticsRequest(
-                analyticsRequestFactory.createRequest(
-                    AnalyticsEvent.CustomerRetrieve,
+                paymentAnalyticsRequestFactory.createRequest(
+                    PaymentAnalyticsEvent.CustomerRetrieve,
                     productUsageTokens = productUsageTokens
                 )
             )
@@ -901,7 +904,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
     }
 
     /**
-     * Analytics event: [AnalyticsEvent.IssuingRetrievePin]
+     * Analytics event: [PaymentAnalyticsEvent.IssuingRetrievePin]
      */
     @Throws(
         InvalidRequestException::class,
@@ -927,14 +930,14 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
             ),
             IssuingCardPinJsonParser()
         ) {
-            fireAnalyticsRequest(AnalyticsEvent.IssuingRetrievePin)
+            fireAnalyticsRequest(PaymentAnalyticsEvent.IssuingRetrievePin)
         }
 
         return issuingCardPin?.pin
     }
 
     /**
-     * Analytics event: [AnalyticsEvent.IssuingUpdatePin]
+     * Analytics event: [PaymentAnalyticsEvent.IssuingUpdatePin]
      */
     @Throws(
         InvalidRequestException::class,
@@ -960,7 +963,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
                 )
             )
         ) {
-            fireAnalyticsRequest(AnalyticsEvent.IssuingUpdatePin)
+            fireAnalyticsRequest(PaymentAnalyticsEvent.IssuingUpdatePin)
         }
     }
 
@@ -979,7 +982,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
                 ),
                 FpxBankStatusesJsonParser()
             ) {
-                fireAnalyticsRequest(AnalyticsEvent.FpxBankStatusesRetrieve)
+                fireAnalyticsRequest(PaymentAnalyticsEvent.FpxBankStatusesRetrieve)
             }
 
             requireNotNull(fpxBankStatuses)
@@ -1002,12 +1005,12 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
                 // no-op
             }
         }.onFailure {
-            fireAnalyticsRequest(AnalyticsEvent.CardMetadataLoadFailure)
+            fireAnalyticsRequest(PaymentAnalyticsEvent.CardMetadataLoadFailure)
         }.getOrNull()
     }
 
     /**
-     * Analytics event: [AnalyticsEvent.Auth3ds2Start]
+     * Analytics event: [PaymentAnalyticsEvent.Auth3ds2Start]
      */
     @VisibleForTesting
     override suspend fun start3ds2Auth(
@@ -1023,7 +1026,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
             Stripe3ds2AuthResultJsonParser()
         ) {
             fireAnalyticsRequest(
-                analyticsRequestFactory.createRequest(AnalyticsEvent.Auth3ds2Start)
+                paymentAnalyticsRequestFactory.createRequest(PaymentAnalyticsEvent.Auth3ds2Start)
             )
         }
     }
@@ -1045,7 +1048,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
     }
 
     /**
-     * Analytics event: [AnalyticsEvent.FileCreate]
+     * Analytics event: [PaymentAnalyticsEvent.FileCreate]
      */
     override suspend fun createFile(
         fileParams: StripeFileParams,
@@ -1054,7 +1057,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         val response = makeFileUploadRequest(
             FileUploadRequest(fileParams, requestOptions, appInfo)
         ) {
-            fireAnalyticsRequest(AnalyticsEvent.FileCreate)
+            fireAnalyticsRequest(PaymentAnalyticsEvent.FileCreate)
         }
         return StripeFileJsonParser().parse(response.responseJson())
     }
@@ -1080,7 +1083,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
                 requestOptions
             )
         ) {
-            fireAnalyticsRequest(AnalyticsEvent.StripeUrlRetrieve)
+            fireAnalyticsRequest(PaymentAnalyticsEvent.StripeUrlRetrieve)
         }
 
         return response.responseJson()
@@ -1111,7 +1114,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
                 RadarSessionJsonParser()
             ) {
                 fireAnalyticsRequest(
-                    analyticsRequestFactory.createRequest(AnalyticsEvent.RadarSessionCreate)
+                    paymentAnalyticsRequestFactory.createRequest(PaymentAnalyticsEvent.RadarSessionCreate)
                 )
             }
         }.getOrElse {
@@ -1132,7 +1135,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         options: ApiRequest.Options,
         locale: Locale,
         parser: PaymentMethodPreferenceJsonParser<T>,
-        analyticsEvent: AnalyticsEvent
+        analyticsEvent: PaymentAnalyticsEvent
     ): T? {
         fireFraudDetectionDataRequest()
 
@@ -1154,7 +1157,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
             ),
             parser
         ) {
-            fireAnalyticsRequest(analyticsRequestFactory.createRequest(analyticsEvent))
+            fireAnalyticsRequest(paymentAnalyticsRequestFactory.createRequest(analyticsEvent))
         }
     }
 
@@ -1297,10 +1300,10 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
     }
 
     private fun fireAnalyticsRequest(
-        event: AnalyticsEvent
+        event: PaymentAnalyticsEvent
     ) {
         fireAnalyticsRequest(
-            analyticsRequestFactory.createRequest(event)
+            paymentAnalyticsRequestFactory.createRequest(event)
         )
     }
 

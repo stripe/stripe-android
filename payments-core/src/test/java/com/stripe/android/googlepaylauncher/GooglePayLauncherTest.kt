@@ -14,8 +14,8 @@ import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
-import com.stripe.android.networking.AnalyticsRequestExecutor
-import com.stripe.android.networking.AnalyticsRequestFactory
+import com.stripe.android.core.networking.AnalyticsRequestExecutor
+import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestCoroutineDispatcher
 import kotlinx.coroutines.test.TestCoroutineScope
@@ -41,7 +41,7 @@ class GooglePayLauncherTest {
     private val readyCallback = GooglePayLauncher.ReadyCallback(readyCallbackInvocations::add)
     private val resultCallback = GooglePayLauncher.ResultCallback(results::add)
 
-    private val analyticsRequestFactory = AnalyticsRequestFactory(
+    private val analyticsRequestFactory = PaymentAnalyticsRequestFactory(
         ApplicationProvider.getApplicationContext(),
         ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
     )

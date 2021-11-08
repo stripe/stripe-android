@@ -8,6 +8,7 @@ import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.BuildConfig
 import com.stripe.android.Stripe
+import com.stripe.android.core.networking.AnalyticsRequest
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.Source
 import com.stripe.android.model.Token
@@ -22,7 +23,7 @@ import javax.inject.Provider
  * Factory for [AnalyticsRequest] objects.
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class AnalyticsRequestFactory @VisibleForTesting internal constructor(
+class PaymentAnalyticsRequestFactory @VisibleForTesting internal constructor(
     private val packageManager: PackageManager?,
     private val packageInfo: PackageInfo?,
     private val packageName: String,
@@ -66,7 +67,7 @@ class AnalyticsRequestFactory @VisibleForTesting internal constructor(
 
     @JvmSynthetic
     internal fun create3ds2Challenge(
-        event: AnalyticsEvent,
+        event: PaymentAnalyticsEvent,
         uiTypeCode: String?
     ): AnalyticsRequest {
         return createRequest(
@@ -81,7 +82,7 @@ class AnalyticsRequestFactory @VisibleForTesting internal constructor(
         tokenType: Token.Type,
     ): AnalyticsRequest {
         return createRequest(
-            AnalyticsEvent.TokenCreate,
+            PaymentAnalyticsEvent.TokenCreate,
             productUsageTokens = productUsageTokens,
             tokenType = tokenType
         )
@@ -93,7 +94,7 @@ class AnalyticsRequestFactory @VisibleForTesting internal constructor(
         productUsageTokens: Set<String>,
     ): AnalyticsRequest {
         return createRequest(
-            AnalyticsEvent.PaymentMethodCreate,
+            PaymentAnalyticsEvent.PaymentMethodCreate,
             sourceType = paymentMethodType?.code,
             productUsageTokens = productUsageTokens
         )
@@ -105,7 +106,7 @@ class AnalyticsRequestFactory @VisibleForTesting internal constructor(
         productUsageTokens: Set<String> = emptySet(),
     ): AnalyticsRequest {
         return createRequest(
-            AnalyticsEvent.SourceCreate,
+            PaymentAnalyticsEvent.SourceCreate,
             productUsageTokens = productUsageTokens,
             sourceType = sourceType
         )
@@ -117,7 +118,7 @@ class AnalyticsRequestFactory @VisibleForTesting internal constructor(
         @Source.SourceType sourceType: String,
     ): AnalyticsRequest {
         return createRequest(
-            AnalyticsEvent.CustomerAddSource,
+            PaymentAnalyticsEvent.CustomerAddSource,
             productUsageTokens = productUsageTokens,
             sourceType = sourceType
         )
@@ -128,7 +129,7 @@ class AnalyticsRequestFactory @VisibleForTesting internal constructor(
         productUsageTokens: Set<String>,
     ): AnalyticsRequest {
         return createRequest(
-            AnalyticsEvent.CustomerDeleteSource,
+            PaymentAnalyticsEvent.CustomerDeleteSource,
             productUsageTokens = productUsageTokens
         )
     }
@@ -138,7 +139,7 @@ class AnalyticsRequestFactory @VisibleForTesting internal constructor(
         productUsageTokens: Set<String>,
     ): AnalyticsRequest {
         return createRequest(
-            AnalyticsEvent.CustomerAttachPaymentMethod,
+            PaymentAnalyticsEvent.CustomerAttachPaymentMethod,
             productUsageTokens = productUsageTokens
         )
     }
@@ -148,7 +149,7 @@ class AnalyticsRequestFactory @VisibleForTesting internal constructor(
         productUsageTokens: Set<String>
     ): AnalyticsRequest {
         return createRequest(
-            AnalyticsEvent.CustomerDetachPaymentMethod,
+            PaymentAnalyticsEvent.CustomerDetachPaymentMethod,
             productUsageTokens = productUsageTokens
         )
     }
@@ -158,7 +159,7 @@ class AnalyticsRequestFactory @VisibleForTesting internal constructor(
         paymentMethodType: String? = null,
     ): AnalyticsRequest {
         return createRequest(
-            AnalyticsEvent.PaymentIntentConfirm,
+            PaymentAnalyticsEvent.PaymentIntentConfirm,
             sourceType = paymentMethodType
         )
     }
@@ -168,7 +169,7 @@ class AnalyticsRequestFactory @VisibleForTesting internal constructor(
         paymentMethodType: String?,
     ): AnalyticsRequest {
         return createRequest(
-            AnalyticsEvent.SetupIntentConfirm,
+            PaymentAnalyticsEvent.SetupIntentConfirm,
             sourceType = paymentMethodType
         )
     }
@@ -189,7 +190,7 @@ class AnalyticsRequestFactory @VisibleForTesting internal constructor(
 
     @JvmSynthetic
     internal fun createRequest(
-        event: AnalyticsEvent,
+        event: PaymentAnalyticsEvent,
         productUsageTokens: Set<String> = emptySet(),
         @Source.SourceType sourceType: String? = null,
         tokenType: Token.Type? = null,

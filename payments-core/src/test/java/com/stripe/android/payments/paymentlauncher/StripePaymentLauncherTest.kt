@@ -23,7 +23,7 @@ class StripePaymentLauncherTest {
         ioContext = mock(),
         uiContext = mock(),
         stripeRepository = mock(),
-        analyticsRequestFactory = mock(),
+        paymentAnalyticsRequestFactory = mock(),
         productUsage = mock()
     )
 

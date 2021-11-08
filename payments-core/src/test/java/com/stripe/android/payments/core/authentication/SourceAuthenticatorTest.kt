@@ -7,10 +7,10 @@ import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentBrowserAuthStarter
 import com.stripe.android.PaymentRelayStarter
 import com.stripe.android.StripePaymentController
+import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.model.Source
 import com.stripe.android.model.SourceFixtures
-import com.stripe.android.networking.AnalyticsRequestExecutor
-import com.stripe.android.networking.AnalyticsRequestFactory
+import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.view.AuthActivityStarterHost
 import com.stripe.android.view.PaymentRelayActivity
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -37,7 +37,7 @@ class SourceAuthenticatorTest {
         }
     private val analyticsRequestExecutor = mock<AnalyticsRequestExecutor>()
     private val context: Context = ApplicationProvider.getApplicationContext()
-    private val analyticsRequestFactory = AnalyticsRequestFactory(
+    private val analyticsRequestFactory = PaymentAnalyticsRequestFactory(
         context,
         ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
     )

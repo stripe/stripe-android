@@ -1,7 +1,9 @@
-package com.stripe.android.networking
+package com.stripe.android.core.networking
 
 import androidx.annotation.RestrictTo
-import com.stripe.android.core.networking.StripeRequest
+import com.stripe.android.networking.PAYMENT_RETRY_CODES
+import com.stripe.android.networking.QueryStringFactory
+import com.stripe.android.networking.RequestHeadersFactory
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 data class AnalyticsRequest(

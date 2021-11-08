@@ -3,7 +3,7 @@ package com.stripe.android.googlepaylauncher.injection
 import android.content.Context
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherViewModel
-import com.stripe.android.networking.AnalyticsRequestFactory
+import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.core.injection.ENABLE_LOGGING
 import com.stripe.android.payments.core.injection.IOContext
@@ -39,7 +39,7 @@ internal abstract class GooglePayPaymentMethodLauncherComponent {
         fun ioContext(@IOContext workContext: CoroutineContext): Builder
 
         @BindsInstance
-        fun analyticsRequestFactory(analyticsRequestFactory: AnalyticsRequestFactory): Builder
+        fun analyticsRequestFactory(paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory): Builder
 
         @BindsInstance
         fun stripeRepository(stripeRepository: StripeRepository): Builder

@@ -4,8 +4,8 @@ import androidx.test.core.app.ApplicationProvider
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.model.PaymentMethodFixtures
-import com.stripe.android.networking.AnalyticsRequestExecutor
-import com.stripe.android.networking.AnalyticsRequestFactory
+import com.stripe.android.core.networking.AnalyticsRequestExecutor
+import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -25,7 +25,7 @@ class DefaultEventReporterTest {
     private val testDispatcher = TestCoroutineDispatcher()
 
     private val analyticsRequestExecutor = mock<AnalyticsRequestExecutor>()
-    private val analyticsRequestFactory = AnalyticsRequestFactory(
+    private val analyticsRequestFactory = PaymentAnalyticsRequestFactory(
         ApplicationProvider.getApplicationContext(),
         ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY
     )

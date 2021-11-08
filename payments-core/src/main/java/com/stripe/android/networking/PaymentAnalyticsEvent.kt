@@ -1,6 +1,6 @@
 package com.stripe.android.networking
 
-internal enum class AnalyticsEvent(internal val code: String) {
+internal enum class PaymentAnalyticsEvent(internal val code: String) {
     // Token
     TokenCreate("token_creation"),
 

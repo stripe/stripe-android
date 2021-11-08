@@ -10,10 +10,10 @@ import androidx.lifecycle.ViewModel
 import com.stripe.android.PaymentRelayContract
 import com.stripe.android.PaymentRelayStarter
 import com.stripe.android.auth.PaymentBrowserAuthContract
+import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.model.Source
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.networking.AnalyticsRequestExecutor
-import com.stripe.android.networking.AnalyticsRequestFactory
+import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.payments.core.authentication.threeds2.Stripe3ds2TransactionViewModelFactory
@@ -132,7 +132,7 @@ internal class DefaultPaymentAuthenticatorRegistry @Inject internal constructor(
             context: Context,
             stripeRepository: StripeRepository,
             analyticsRequestExecutor: AnalyticsRequestExecutor,
-            analyticsRequestFactory: AnalyticsRequestFactory,
+            paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
             enableLogging: Boolean,
             workContext: CoroutineContext,
             uiContext: CoroutineContext,
@@ -146,7 +146,7 @@ internal class DefaultPaymentAuthenticatorRegistry @Inject internal constructor(
                 .context(context)
                 .stripeRepository(stripeRepository)
                 .analyticsRequestExecutor(analyticsRequestExecutor)
-                .analyticsRequestFactory(analyticsRequestFactory)
+                .analyticsRequestFactory(paymentAnalyticsRequestFactory)
                 .enableLogging(enableLogging)
                 .workContext(workContext)
                 .uiContext(uiContext)
