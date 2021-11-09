@@ -24,7 +24,6 @@ internal fun RowElementUI(
     val fields = controller.fields
     Row(
         Modifier
-            .height(IntrinsicSize.Min)
             .fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
     ) {
