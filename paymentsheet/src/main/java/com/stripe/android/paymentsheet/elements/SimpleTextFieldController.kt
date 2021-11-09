@@ -5,7 +5,6 @@ import androidx.annotation.StringRes
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.lifecycle.LiveData
 import com.stripe.android.paymentsheet.elements.TextFieldStateConstants.Error.Blank
 import com.stripe.android.paymentsheet.forms.FormFieldEntry
 import kotlinx.coroutines.flow.Flow
@@ -28,7 +27,6 @@ internal interface TextFieldController : InputController {
     override val fieldValue: Flow<String>
     val visibleError: Flow<Boolean>
 }
-
 
 data class TextFieldIcon(
     @DrawableRes

@@ -167,6 +167,8 @@ fun TrailingIcon(trailingIcon: TextFieldIcon) {
             .height(24.dp)
             .width(32.dp)
             .padding(0.dp),
-        contentDescription = trailingIcon.contentDescription?.let { stringResource(trailingIcon.contentDescription) }
+        contentDescription = trailingIcon.contentDescription?.let {
+            stringResource(trailingIcon.contentDescription)
+        }
     )
 }

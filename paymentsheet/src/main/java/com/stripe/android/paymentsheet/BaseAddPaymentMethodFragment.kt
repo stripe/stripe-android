@@ -41,7 +41,6 @@ internal abstract class BaseAddPaymentMethodFragment(
 
     private lateinit var selectedPaymentMethod: SupportedPaymentMethod
 
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -103,7 +102,6 @@ internal abstract class BaseAddPaymentMethodFragment(
                                 selectedPaymentMethod
                             )
                         )
-
                     }
                 }
             }

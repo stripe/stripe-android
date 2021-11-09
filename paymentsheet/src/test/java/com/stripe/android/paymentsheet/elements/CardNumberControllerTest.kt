@@ -52,7 +52,6 @@ internal class CardNumberControllerTest {
             .isTrue()
         assertThat(formFieldValuesFlow[formFieldValuesFlow.size - 1]?.value)
             .isEqualTo("4242424242424242")
-
     }
 
     @Test

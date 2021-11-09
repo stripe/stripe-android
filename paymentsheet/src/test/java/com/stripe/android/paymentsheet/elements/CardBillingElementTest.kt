@@ -24,7 +24,6 @@ internal class CardBillingElementTest {
         dropdownFieldController
     )
 
-
     init {
         // We want to use fields that are easy to set in error
         addressFieldElementRepository.add(
@@ -95,7 +94,7 @@ internal class CardBillingElementTest {
         verifyPostalHidden(hiddenIdFlowValues[1])
     }
 
-    fun verifyPostalShown(hiddenIdentifiers: List<IdentifierSpec>){
+    fun verifyPostalShown(hiddenIdentifiers: List<IdentifierSpec>) {
         assertThat(hiddenIdentifiers).doesNotContain(IdentifierSpec.PostalCode)
         assertThat(hiddenIdentifiers).doesNotContain(IdentifierSpec.Country)
         assertThat(hiddenIdentifiers).contains(IdentifierSpec.Line1)
@@ -104,7 +103,7 @@ internal class CardBillingElementTest {
         assertThat(hiddenIdentifiers).contains(IdentifierSpec.City)
     }
 
-    fun verifyPostalHidden(hiddenIdentifiers: List<IdentifierSpec>){
+    fun verifyPostalHidden(hiddenIdentifiers: List<IdentifierSpec>) {
         assertThat(hiddenIdentifiers).doesNotContain(IdentifierSpec.Country)
         assertThat(hiddenIdentifiers).contains(IdentifierSpec.PostalCode)
         assertThat(hiddenIdentifiers).contains(IdentifierSpec.Line1)
@@ -112,5 +111,4 @@ internal class CardBillingElementTest {
         assertThat(hiddenIdentifiers).contains(IdentifierSpec.State)
         assertThat(hiddenIdentifiers).contains(IdentifierSpec.City)
     }
-
 }

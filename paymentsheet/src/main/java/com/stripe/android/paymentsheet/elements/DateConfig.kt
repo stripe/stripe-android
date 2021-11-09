@@ -36,9 +36,9 @@ internal class DateConfig : TextFieldConfig {
         } else {
             val newString =
                 if ((
-                        input.isNotBlank() &&
-                            !(input[0] == '0' || input[0] == '1')
-                        ) ||
+                    input.isNotBlank() &&
+                        !(input[0] == '0' || input[0] == '1')
+                    ) ||
                     (
                         (input.length > 1) &&
                             (input[0] == '1' && requireNotNull(input[1].digitToInt()) > 2)
@@ -76,5 +76,4 @@ internal class DateConfig : TextFieldConfig {
             }
         }
     }
-
 }

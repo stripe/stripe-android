@@ -11,7 +11,6 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.elements.LayoutFormDescriptor
 import com.stripe.android.paymentsheet.elements.LayoutSpec
-import com.stripe.android.paymentsheet.elements.SaveForFutureUseSpec
 import com.stripe.android.paymentsheet.forms.AfterpayClearpayForm
 import com.stripe.android.paymentsheet.forms.AfterpayClearpayParamKey
 import com.stripe.android.paymentsheet.forms.AfterpayClearpayRequirement
