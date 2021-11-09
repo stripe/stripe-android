@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.combine
  */
 internal class CardDetailsElement(
     identifier: IdentifierSpec,
-    val controller: CardController = CardController(),
+    val controller: CardDetailsController = CardDetailsController(),
 ) : SectionMultiFieldElement(identifier) {
     override fun sectionFieldErrorController(): SectionFieldErrorController =
         controller

@@ -9,7 +9,7 @@ import androidx.compose.ui.Modifier
 @Composable
 internal fun CardDetailsElementUI(
     enabled: Boolean,
-    controller: CardController,
+    controller: CardDetailsController,
     hiddenIdentifiers: List<IdentifierSpec>?
 ) {
     controller.fields.forEachIndexed { index, field ->

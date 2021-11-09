@@ -39,7 +39,7 @@ internal fun SectionFieldElementUI(
                     hiddenIdentifiers
                 )
             }
-            is CardController -> {
+            is CardDetailsController -> {
                 CardDetailsElementUI(
                     enabled,
                     controller,

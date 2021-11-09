@@ -9,10 +9,10 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
-class CardControllerTest {
+class CardDetailsControllerTest {
     @Test
     fun `Verify the first field in error is returned in error flow`() {
-        val cardController = CardController()
+        val cardController = CardDetailsController()
 
         val flowValues = mutableListOf<FieldError?>()
         cardController.error.asLiveData()

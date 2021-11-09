@@ -4,7 +4,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.combine
 import java.util.UUID
 
-internal class CardController() : SectionFieldErrorController {
+internal class CardDetailsController : SectionFieldErrorController {
 
     val label: Int? = null
     val numberElement = CardNumberElement(

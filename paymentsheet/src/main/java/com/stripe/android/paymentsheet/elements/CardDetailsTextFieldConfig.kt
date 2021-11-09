@@ -6,8 +6,8 @@ import androidx.compose.ui.text.input.VisualTransformation
 import com.stripe.android.model.CardBrand
 
 /**
- * This is a TextFieldConfig interface for card details which has a visual
- * transformation for some fields.
+ * This is similar to the [TextFieldConfig], but in order to determine
+ * the state the card brand is required.
  */
 internal interface CardDetailsTextFieldConfig {
     val capitalization: KeyboardCapitalization
