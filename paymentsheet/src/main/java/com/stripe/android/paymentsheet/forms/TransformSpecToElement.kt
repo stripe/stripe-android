@@ -42,7 +42,6 @@ import com.stripe.android.paymentsheet.elements.SimpleTextFieldController
 import com.stripe.android.paymentsheet.elements.SimpleTextSpec
 import com.stripe.android.paymentsheet.elements.StaticTextElement
 import com.stripe.android.paymentsheet.elements.StaticTextSpec
-import com.stripe.android.paymentsheet.elements.TextFieldController
 import com.stripe.android.paymentsheet.model.Amount
 import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.getValue

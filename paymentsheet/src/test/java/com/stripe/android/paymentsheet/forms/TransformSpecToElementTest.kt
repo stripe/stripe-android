@@ -111,7 +111,7 @@ internal class TransformSpecToElementTest {
     }
 
     @Test
-    fun `Adding a ideal bank section sets up the section and country elements correctly`() = runBlockingTest{
+    fun `Adding a ideal bank section sets up the section and country elements correctly`() = runBlockingTest {
         val idealSection = SectionSpec(
             IdentifierSpec.Generic("ideal_section"),
             IDEAL_BANK_CONFIG
@@ -132,7 +132,7 @@ internal class TransformSpecToElementTest {
     }
 
     @Test
-    fun `Add a name section spec sets up the name element correctly`() = runBlockingTest{
+    fun `Add a name section spec sets up the name element correctly`() = runBlockingTest {
         val formElement = transformSpecToElement.transform(
             listOf(nameSection)
         )
@@ -149,7 +149,7 @@ internal class TransformSpecToElementTest {
     }
 
     @Test
-    fun `Add a simple text section spec sets up the text element correctly`() = runBlockingTest{
+    fun `Add a simple text section spec sets up the text element correctly`() = runBlockingTest {
         val formElement = transformSpecToElement.transform(
             listOf(
                 SectionSpec(
@@ -175,7 +175,7 @@ internal class TransformSpecToElementTest {
     }
 
     @Test
-    fun `Add a email section spec sets up the email element correctly`() = runBlockingTest{
+    fun `Add a email section spec sets up the email element correctly`() = runBlockingTest {
         val formElement = transformSpecToElement.transform(
             listOf(emailSection)
         )

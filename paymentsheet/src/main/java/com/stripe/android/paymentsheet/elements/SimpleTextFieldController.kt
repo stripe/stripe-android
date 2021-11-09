@@ -28,7 +28,7 @@ internal interface TextFieldController : InputController {
     val visibleError: Flow<Boolean>
 }
 
-data class TextFieldIcon(
+internal data class TextFieldIcon(
     @DrawableRes
     val idRes: Int,
     @StringRes
