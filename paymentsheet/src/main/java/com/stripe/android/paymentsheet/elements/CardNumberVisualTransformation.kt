@@ -6,7 +6,7 @@ import androidx.compose.ui.text.input.TransformedText
 import androidx.compose.ui.text.input.VisualTransformation
 import com.stripe.android.model.CardBrand
 
-class CardNumberVisualTransformation(private val separator: Char) :
+internal class CardNumberVisualTransformation(private val separator: Char) :
     VisualTransformation {
     override fun filter(text: AnnotatedString): TransformedText {
         val cardBrand = CardBrand.fromCardNumber(text.text)
