@@ -29,7 +29,7 @@ internal class IbanConfig : TextFieldConfig {
     override val trailingIcon: MutableStateFlow<TextFieldIcon?> = MutableStateFlow(
         TextFieldIcon(
             R.drawable.stripe_ic_bank_generic,
-            R.string.bank_icon_content_description
+            isIcon = true
         )
     )
 

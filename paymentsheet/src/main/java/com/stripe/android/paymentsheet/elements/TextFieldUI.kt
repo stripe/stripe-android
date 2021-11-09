@@ -4,11 +4,10 @@ import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.Icon
 import androidx.compose.material.LocalContentAlpha
 import androidx.compose.material.LocalContentColor
 import androidx.compose.material.MaterialTheme
@@ -26,6 +25,7 @@ import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -146,7 +146,7 @@ internal fun TextField(
         singleLine = true,
         enabled = enabled,
         trailingIcon = trailingIcon?.let {
-            { TrailingIcon(it) }
+            { TrailingIcon(it, colors) }
         }
     )
 }
@@ -160,12 +160,24 @@ internal fun nextFocus(focusManager: FocusManager) {
 }
 
 @Composable
-internal fun TrailingIcon(trailingIcon: TextFieldIcon) {
-    Image(
-        painter = painterResource(id = trailingIcon.idRes),
-        modifier = Modifier.padding(0.dp),
-        contentDescription = trailingIcon.contentDescription?.let {
-            stringResource(trailingIcon.contentDescription)
-        }
-    )
+internal fun TrailingIcon(
+    trailingIcon: TextFieldIcon,
+    colors: androidx.compose.material.TextFieldColors
+) {
+    if(trailingIcon.isIcon){
+        Icon(
+            painter = painterResource(id = trailingIcon.idRes),
+            contentDescription = trailingIcon.contentDescription?.let {
+                stringResource(trailingIcon.contentDescription)
+            }
+        )
+    }
+    else {
+        Image(
+            painter = painterResource(id = trailingIcon.idRes),
+            contentDescription = trailingIcon.contentDescription?.let {
+                stringResource(trailingIcon.contentDescription)
+            }
+        )
+    }
 }

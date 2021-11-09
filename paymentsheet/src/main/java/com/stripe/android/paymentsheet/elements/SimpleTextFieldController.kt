@@ -32,7 +32,10 @@ internal data class TextFieldIcon(
     @DrawableRes
     val idRes: Int,
     @StringRes
-    val contentDescription: Int? = null
+    val contentDescription: Int? = null,
+
+    /** If it is an icon that should be tinted to match the text the value should be true */
+    val isIcon: Boolean
 )
 /**
  * This class will provide the onValueChanged and onFocusChanged functionality to the field's

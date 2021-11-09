@@ -31,7 +31,7 @@ internal class CardNumberController constructor(
     }
 
     override val trailingIcon: Flow<TextFieldIcon?> = cardBrandFlow.map {
-        TextFieldIcon(it.icon)
+        TextFieldIcon(it.icon, isIcon = false)
     }
 
     private val _fieldState = combine(cardBrandFlow, _fieldValue) { brand, fieldValue ->

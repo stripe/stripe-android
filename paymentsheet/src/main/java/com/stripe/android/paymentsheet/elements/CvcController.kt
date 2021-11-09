@@ -64,7 +64,7 @@ internal class CvcController constructor(
         }
 
     override val trailingIcon: Flow<TextFieldIcon?> = cardBrandFlow.map {
-        TextFieldIcon(it.cvcIcon)
+        TextFieldIcon(it.cvcIcon, isIcon = false)
     }
 
     init {
