@@ -13,14 +13,10 @@ internal class DateConfig : TextFieldConfig {
     override val debugLabel = "date"
 
     @StringRes
-    override val label = R.string.credit_expiration_date
+    override val label = R.string.stripe_paymentsheet_expiration_date_hint
     override val keyboard = KeyboardType.NumberPassword
     override val visualTransformation = ExpiryDateVisualTransformation()
 
-    /**
-     * This will allow all characters, but will show as invalid if it doesn't match
-     * the regular expression.
-     */
     override fun filter(userTyped: String) = userTyped.filter { it.isDigit() }
 
     override fun convertToRaw(displayName: String) = displayName
@@ -37,7 +33,7 @@ internal class DateConfig : TextFieldConfig {
                     Error.Incomplete(R.string.incomplete_expiry_date)
                 }
                 newString.length > 4 -> {
-                    Error.Invalid(R.string.invalid_expiry_date)
+                    Error.Invalid(R.string.incomplete_expiry_date)
                 }
                 else -> {
                     val month = requireNotNull(newString.take(2).toIntOrNull())
@@ -46,11 +42,11 @@ internal class DateConfig : TextFieldConfig {
                     val currentYear = Calendar.getInstance().get(Calendar.YEAR) - 1900
                     val currentMonth = Calendar.getInstance().get(Calendar.MONTH) + 1
                     if ((yearMinus1900 - currentYear) < 0) {
-                        Error.Invalid(R.string.invalid_expiry_year_past)
+                        Error.Invalid(R.string.incomplete_expiry_date)
                     } else if ((yearMinus1900 - currentYear) > 50) {
                         Error.Invalid(R.string.invalid_expiry_year)
                     } else if ((yearMinus1900 - currentYear) == 0 && currentMonth > month) {
-                        Error.Invalid(R.string.invalid_expiry_year_past)
+                        Error.Invalid(R.string.incomplete_expiry_date)
                     } else if (month !in 1..12) {
                         Error.Incomplete(R.string.invalid_expiry_month)
                     } else {

@@ -3,31 +3,34 @@ package com.stripe.android.paymentsheet.elements
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
+import com.stripe.android.CardUtils
 import com.stripe.android.model.CardBrand
 import com.stripe.android.paymentsheet.R
 
 internal class CardNumberConfig : CardDetailsTextFieldConfig {
     override val capitalization: KeyboardCapitalization = KeyboardCapitalization.None
     override val debugLabel: String = "Card number"
-    override val label: Int = R.string.card_number_label
+    override val label: Int = R.string.acc_label_card_number
     override val keyboard: KeyboardType = KeyboardType.NumberPassword
     override val visualTransformation: VisualTransformation = CardNumberVisualTransformation(' ')
 
     override fun determineState(brand: CardBrand, number: String): TextFieldState {
-        val luhnValid = isValidLuhnNumber(number)
+        val luhnValid = CardUtils.isValidLuhnNumber(number)
         val isDigitLimit = brand.getMaxLengthForCardNumber(number) != -1
-        // Accounts for variant max length
+        // This only accounts for the hard coded card brand information not the card metadata
+        // service
         val numberAllowedDigits = brand.getMaxLengthForCardNumber(number)
 
         return if (number.isBlank()) {
             TextFieldStateConstants.Error.Blank
         } else if (brand == CardBrand.Unknown) {
-            TextFieldStateConstants.Error.Invalid(R.string.card_number_invalid_brand)
+            TextFieldStateConstants.Error.Invalid(R.string.invalid_card_number)
         } else if (isDigitLimit && number.length < numberAllowedDigits) {
-            TextFieldStateConstants.Error.Incomplete(R.string.card_number_incomplete)
+            TextFieldStateConstants.Error.Incomplete(R.string.invalid_card_number)
         } else if (isDigitLimit && number.length > numberAllowedDigits) {
             object : TextFieldState {
                 override fun shouldShowError(hasFocus: Boolean) = true
+
                 // We will assume we don't know the correct number of numbers until we get
                 // the metadata service added back in
                 override fun isValid() = true
@@ -38,51 +41,12 @@ internal class CardNumberConfig : CardDetailsTextFieldConfig {
                 )
             }
         } else if (!luhnValid) {
-            TextFieldStateConstants.Error.Invalid(R.string.card_number_invalid_luhn)
+            TextFieldStateConstants.Error.Invalid(R.string.invalid_card_number)
         } else if (isDigitLimit && number.length == numberAllowedDigits) {
             TextFieldStateConstants.Valid.Full
         } else {
-            // TODO: Double check this case
-            TextFieldStateConstants.Error.Invalid(R.string.card_number_invalid)
+            TextFieldStateConstants.Error.Invalid(R.string.invalid_card_number)
         }
-    }
-
-    /**
-     * COPIED FROM CARDUTILS.kt
-     * Checks the input string to see whether or not it is a valid Luhn number.
-     *
-     * @param cardNumber a String that may or may not represent a valid Luhn number
-     * @return `true` if and only if the input value is a valid Luhn number
-     */
-    private fun isValidLuhnNumber(cardNumber: String?): Boolean {
-        if (cardNumber == null) {
-            return false
-        }
-
-        var isOdd = true
-        var sum = 0
-
-        for (index in cardNumber.length - 1 downTo 0) {
-            val c = cardNumber[index]
-            if (!c.isDigit()) {
-                return false
-            }
-
-            var digitInteger = Character.getNumericValue(c)
-            isOdd = !isOdd
-
-            if (isOdd) {
-                digitInteger *= 2
-            }
-
-            if (digitInteger > 9) {
-                digitInteger -= 9
-            }
-
-            sum += digitInteger
-        }
-
-        return sum % 10 == 0
     }
 
     override fun filter(userTyped: String): String = userTyped.filter { it.isDigit() }

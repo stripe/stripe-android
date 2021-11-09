@@ -39,7 +39,7 @@ internal fun FormInternal(
                         is SectionElement -> SectionElementUI(enabled, element, hiddenIdentifiers)
                         is MandateTextElement -> MandateElementUI(element)
                         is SaveForFutureUseElement -> SaveForFutureUseElementUI(enabled, element)
-                        is AfterpayClearpayHeaderElement -> AfterpayClearpayHeaderElementUI(
+                        is AfterpayClearpayElement -> AfterpayClearpayElementUI(
                             enabled,
                             element
                         )

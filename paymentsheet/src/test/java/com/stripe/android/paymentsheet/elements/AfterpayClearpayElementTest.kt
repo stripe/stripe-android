@@ -10,11 +10,11 @@ import org.robolectric.RobolectricTestRunner
 import java.util.Locale
 
 @RunWith(RobolectricTestRunner::class)
-class AfterpayClearpayHeaderElementTest {
+class AfterpayClearpayElementTest {
 
     @Test
     fun `Verify label is correct`() {
-        val element = AfterpayClearpayHeaderElement(
+        val element = AfterpayClearpayElement(
             IdentifierSpec.Generic("test"),
             Amount(20000, "USD")
         )
@@ -27,7 +27,7 @@ class AfterpayClearpayHeaderElementTest {
     @Test
     fun `Verify label amount is localized`() {
         Locale.setDefault(Locale.CANADA)
-        val element = AfterpayClearpayHeaderElement(
+        val element = AfterpayClearpayElement(
             IdentifierSpec.Generic("test"),
             Amount(20000, "USD")
         )
@@ -39,7 +39,7 @@ class AfterpayClearpayHeaderElementTest {
 
     @Test
     fun `Verify infoUrl is correct`() {
-        val element = AfterpayClearpayHeaderElement(
+        val element = AfterpayClearpayElement(
             IdentifierSpec.Generic("test"),
             Amount(123, "USD")
         )
@@ -51,7 +51,7 @@ class AfterpayClearpayHeaderElementTest {
     @Test
     fun `Verify infoUrl is localized`() {
         Locale.setDefault(Locale.UK)
-        val element = AfterpayClearpayHeaderElement(
+        val element = AfterpayClearpayElement(
             IdentifierSpec.Generic("test"),
             Amount(123, "USD")
         )

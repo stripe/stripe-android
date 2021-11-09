@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet.elements
 
-import com.stripe.android.viewmodel.credit.cvc.CvcConfig
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.combine
 import java.util.UUID

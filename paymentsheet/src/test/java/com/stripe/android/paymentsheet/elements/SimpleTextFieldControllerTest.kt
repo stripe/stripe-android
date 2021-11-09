@@ -59,9 +59,9 @@ internal class SimpleTextFieldControllerTest {
         val controller = createControllerWithState()
 
         var isFull = false
-        controller.isFull.asLiveData()
+        controller.fieldState.asLiveData()
             .observeForever {
-                isFull = it
+                isFull = it.isFull()
             }
 
         controller.onValueChange("full")
@@ -73,9 +73,9 @@ internal class SimpleTextFieldControllerTest {
         val controller = createControllerWithState()
 
         var isFull = false
-        controller.isFull.asLiveData()
+        controller.fieldState.asLiveData()
             .observeForever {
-                isFull = it
+                isFull = it.isFull()
             }
 
         controller.onValueChange("limitless")

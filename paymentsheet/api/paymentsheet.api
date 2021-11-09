@@ -561,23 +561,11 @@ public final class com/stripe/android/paymentsheet/elements/BankRepository_Facto
 	public static fun newInstance (Landroid/content/res/Resources;)Lcom/stripe/android/paymentsheet/elements/BankRepository;
 }
 
-public final class com/stripe/android/paymentsheet/elements/CardNumberVisualTransformation : androidx/compose/ui/text/input/VisualTransformation {
-	public static final field $stable I
-	public fun <init> (C)V
-	public fun filter (Landroidx/compose/ui/text/AnnotatedString;)Landroidx/compose/ui/text/input/TransformedText;
-}
-
-public final class com/stripe/android/paymentsheet/elements/ComposableSingletons$AfterpayClearpayHeaderElementUIKt {
-	public static final field INSTANCE Lcom/stripe/android/paymentsheet/elements/ComposableSingletons$AfterpayClearpayHeaderElementUIKt;
+public final class com/stripe/android/paymentsheet/elements/ComposableSingletons$AfterpayClearpayElementUIKt {
+	public static final field INSTANCE Lcom/stripe/android/paymentsheet/elements/ComposableSingletons$AfterpayClearpayElementUIKt;
 	public static field lambda-1 Lkotlin/jvm/functions/Function3;
 	public fun <init> ()V
 	public final fun getLambda-1$paymentsheet_release ()Lkotlin/jvm/functions/Function3;
-}
-
-public final class com/stripe/android/paymentsheet/elements/ExpiryDateVisualTransformation : androidx/compose/ui/text/input/VisualTransformation {
-	public static final field $stable I
-	public fun <init> ()V
-	public fun filter (Landroidx/compose/ui/text/AnnotatedString;)Landroidx/compose/ui/text/input/TransformedText;
 }
 
 public final class com/stripe/android/paymentsheet/elements/ResourceRepository_Factory : dagger/internal/Factory {
@@ -586,10 +574,6 @@ public final class com/stripe/android/paymentsheet/elements/ResourceRepository_F
 	public fun get ()Lcom/stripe/android/paymentsheet/elements/ResourceRepository;
 	public synthetic fun get ()Ljava/lang/Object;
 	public static fun newInstance (Lcom/stripe/android/paymentsheet/elements/BankRepository;Lcom/stripe/android/paymentsheet/address/AddressFieldElementRepository;)Lcom/stripe/android/paymentsheet/elements/ResourceRepository;
-}
-
-public final class com/stripe/android/paymentsheet/elements/TextFieldUIKt {
-	public static final fun nextFocus (Landroidx/compose/ui/focus/FocusManager;)V
 }
 
 public final class com/stripe/android/paymentsheet/flowcontroller/DefaultFlowControllerInitializer_Factory : dagger/internal/Factory {

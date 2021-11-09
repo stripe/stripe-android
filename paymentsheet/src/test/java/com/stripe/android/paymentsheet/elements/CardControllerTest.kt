@@ -27,7 +27,7 @@ class CardControllerTest {
         TestUtils.idleLooper()
 
         Truth.assertThat(flowValues[flowValues.size - 1]?.errorMessage).isEqualTo(
-            R.string.card_number_invalid_luhn
+            R.string.invalid_card_number
         )
 
         cardController.numberElement.controller.onValueChange("4242424242424242")

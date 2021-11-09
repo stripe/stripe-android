@@ -16,12 +16,10 @@ internal class CardNumberController constructor(
     override val capitalization: KeyboardCapitalization = creditTextFieldConfig.capitalization
     override val keyboardType: KeyboardType = creditTextFieldConfig.keyboard
     override val visualTransformation = creditTextFieldConfig.visualTransformation
+    override val debugLabel = creditTextFieldConfig.debugLabel
 
     override val label: Flow<Int> = MutableStateFlow(creditTextFieldConfig.label)
 
-    override val debugLabel = creditTextFieldConfig.debugLabel
-
-    /** This is all the information that can be observed on the element */
     private val _fieldValue = MutableStateFlow("")
     override val fieldValue: Flow<String> = _fieldValue
 
@@ -33,7 +31,6 @@ internal class CardNumberController constructor(
     }
 
     private val _fieldState = combine(cardBrandFlow, _fieldValue) { brand, fieldValue ->
-        // This should also take a list of strings based on CVV or CVC
         creditTextFieldConfig.determineState(brand, fieldValue)
     }
     override val fieldState: Flow<TextFieldState> = _fieldState
@@ -52,8 +49,6 @@ internal class CardNumberController constructor(
         combine(visibleError, _fieldState) { visibleError, fieldState ->
             fieldState.getError()?.takeIf { visibleError }
         }
-
-    val isFull: Flow<Boolean> = _fieldState.map { it.isFull() }
 
     override val isComplete: Flow<Boolean> = _fieldState.map { it.isValid() }
 

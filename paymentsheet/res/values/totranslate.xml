@@ -3,25 +3,7 @@
     <!--
     Items here need to be entered in our translation tool
     -->
-
-    <string name="card_number_label">Card number</string>
-    <string name="card_number_invalid_brand">The card number brand is invalid.</string>
-    <string name="card_number_incomplete">The card number is incomplete.</string>
     <string name="card_number_longer_than_expected">The card number is longer than expected, but you can still submit it.</string>
-    <string name="card_number_invalid_luhn">The card number luhn is invalid.</string>
-    <string name="card_number_invalid">The card number is invalid.</string>
-    <string name="credit_cvc_label">CVC</string>
-    <string name="credit_cvc_incomplete">CVC is incomplete</string>
-    <string name="credit_cvc_invalid">CVC is invalid</string>
-    <string name="credit_cvc_too_long">The CVC is too long.</string>
-    <string name="credit_expiration_date">Expiration Date</string> <!-- TODO: What is correct title -->
-
-    <string name="incomplete_expiry_date">Incomplete expiration date</string> <!-- TODO: What is correct title -->
-    <string name="invalid_expiry_date">Invalid expiration date</string> <!-- TODO: What is correct title -->
-    <string name="invalid_expiry_month">Invalid expiration month</string> <!-- TODO: What is correct title -->
-    <string name="invalid_expiry_year">Invalid expiration year</string> <!-- TODO: What is correct title -->
-    <string name="acc_label_expiry_date_node">%s, Expiration Date</string> <!-- TODO: What is correct title -->
-    <string name="invalid_expiry_year_past">Expiration date is in the past.</string> <!-- TODO: What is correct title -->
 
     <string name="stripe_paymentsheet_save_for_future_payments_with_merchant_name">Save for future %s payments</string>
 </resources>

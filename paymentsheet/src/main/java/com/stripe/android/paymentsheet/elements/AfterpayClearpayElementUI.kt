@@ -24,9 +24,9 @@ import com.google.accompanist.flowlayout.FlowRow
 import com.stripe.android.paymentsheet.R
 
 @Composable
-internal fun AfterpayClearpayHeaderElementUI(
+internal fun AfterpayClearpayElementUI(
     enabled: Boolean,
-    element: AfterpayClearpayHeaderElement
+    element: AfterpayClearpayElement
 ) {
     val context = LocalContext.current
 

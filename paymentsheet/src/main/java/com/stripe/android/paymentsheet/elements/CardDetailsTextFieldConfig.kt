@@ -5,6 +5,10 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
 import com.stripe.android.model.CardBrand
 
+/**
+ * This is a TextFieldConfig interface for card details which has a visual
+ * transformation for some fields.
+ */
 internal interface CardDetailsTextFieldConfig {
     val capitalization: KeyboardCapitalization
     val debugLabel: String

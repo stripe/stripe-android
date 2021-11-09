@@ -36,7 +36,7 @@ class DateConfigTest {
             .isInstanceOf(TextFieldStateConstants.Error.Invalid::class.java)
         Truth.assertThat(
             state.getError()?.errorMessage
-        ).isEqualTo(R.string.invalid_expiry_date)
+        ).isEqualTo(R.string.incomplete_expiry_date)
     }
 
     @Test
@@ -46,7 +46,7 @@ class DateConfigTest {
             .isInstanceOf(TextFieldStateConstants.Error.Invalid::class.java)
         Truth.assertThat(
             state.getError()?.errorMessage
-        ).isEqualTo(R.string.invalid_expiry_date)
+        ).isEqualTo(R.string.incomplete_expiry_date)
     }
 
     @Test
@@ -66,7 +66,7 @@ class DateConfigTest {
             .isInstanceOf(TextFieldStateConstants.Error.Invalid::class.java)
         Truth.assertThat(
             state.getError()?.errorMessage
-        ).isEqualTo(R.string.invalid_expiry_year_past)
+        ).isEqualTo(R.string.incomplete_expiry_date)
     }
 
     @Test
@@ -83,7 +83,7 @@ class DateConfigTest {
             .isInstanceOf(TextFieldStateConstants.Error.Invalid::class.java)
         Truth.assertThat(
             state.getError()?.errorMessage
-        ).isEqualTo(R.string.invalid_expiry_date)
+        ).isEqualTo(R.string.incomplete_expiry_date)
     }
 
     @Test

@@ -9,7 +9,7 @@ import com.stripe.android.paymentsheet.model.Amount
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 
-internal data class AfterpayClearpayHeaderElement(
+internal data class AfterpayClearpayElement(
     override val identifier: IdentifierSpec,
     private val amount: Amount,
     override val controller: Controller? = null

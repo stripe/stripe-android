@@ -3,7 +3,6 @@ package com.stripe.android.paymentsheet.elements
 import com.google.common.truth.Truth
 import com.stripe.android.model.CardBrand
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.viewmodel.credit.cvc.CvcConfig
 import org.junit.Test
 
 class CvcConfigTest {
@@ -28,7 +27,7 @@ class CvcConfigTest {
             .isInstanceOf(TextFieldStateConstants.Error.Invalid::class.java)
         Truth.assertThat(
             state.getError()?.errorMessage
-        ).isEqualTo(R.string.card_number_invalid_brand)
+        ).isEqualTo(R.string.invalid_card_number)
     }
 
     @Test
@@ -38,7 +37,7 @@ class CvcConfigTest {
             .isInstanceOf(TextFieldStateConstants.Error.Incomplete::class.java)
         Truth.assertThat(
             state.getError()?.errorMessage
-        ).isEqualTo(R.string.credit_cvc_incomplete)
+        ).isEqualTo(R.string.invalid_cvc)
     }
 
     @Test
@@ -48,7 +47,7 @@ class CvcConfigTest {
             .isInstanceOf(TextFieldStateConstants.Error.Invalid::class.java)
         Truth.assertThat(
             state.getError()?.errorMessage
-        ).isEqualTo(R.string.credit_cvc_too_long)
+        ).isEqualTo(R.string.invalid_cvc)
     }
 
     @Test

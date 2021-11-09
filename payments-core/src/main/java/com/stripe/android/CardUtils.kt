@@ -1,5 +1,6 @@
 package com.stripe.android
 
+import androidx.annotation.RestrictTo
 import com.stripe.android.cards.CardNumber
 import com.stripe.android.model.CardBrand
 
@@ -29,7 +30,8 @@ object CardUtils {
      * @param cardNumber a String that may or may not represent a valid Luhn number
      * @return `true` if and only if the input value is a valid Luhn number
      */
-    internal fun isValidLuhnNumber(cardNumber: String?): Boolean {
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    fun isValidLuhnNumber(cardNumber: String?): Boolean {
         if (cardNumber == null) {
             return false
         }

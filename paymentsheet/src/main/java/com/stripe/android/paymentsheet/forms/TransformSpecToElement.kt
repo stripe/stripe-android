@@ -2,8 +2,8 @@ package com.stripe.android.paymentsheet.forms
 
 import com.stripe.android.paymentsheet.elements.AddressElement
 import com.stripe.android.paymentsheet.elements.AddressSpec
-import com.stripe.android.paymentsheet.elements.AfterpayClearpayHeaderElement
-import com.stripe.android.paymentsheet.elements.AfterpayClearpayHeaderSpec
+import com.stripe.android.paymentsheet.elements.AfterpayClearpayElement
+import com.stripe.android.paymentsheet.elements.AfterpayClearpaySpec
 import com.stripe.android.paymentsheet.elements.BankDropdownSpec
 import com.stripe.android.paymentsheet.elements.CountryConfig
 import com.stripe.android.paymentsheet.elements.CountryElement
@@ -62,7 +62,7 @@ internal class TransformSpecToElement @Inject constructor(
                 is SaveForFutureUseSpec -> it.transform(initialValues)
                 is SectionSpec -> it.transform(initialValues)
                 is MandateTextSpec -> it.transform(initialValues.merchantName)
-                is AfterpayClearpayHeaderSpec ->
+                is AfterpayClearpaySpec ->
                     it.transform(requireNotNull(initialValues.amount))
             }
         }
@@ -111,17 +111,19 @@ internal class TransformSpecToElement @Inject constructor(
         )
 
     private fun transformCreditDetail() = CardDetailsElement(
-        IdentifierSpec.Generic("credit element")
+        IdentifierSpec.Generic("credit_detail")
     )
 
     private fun transformCreditBilling() = CardBillingElement(
-        IdentifierSpec.Generic("credit element billing"),
+        IdentifierSpec.Generic("credit_billing"),
         resourceRepository.addressRepository
     )
 
     private fun MandateTextSpec.transform(merchantName: String) =
-// It could be argued that the static text should have a controller, but
-        // since it doesn't provide a form field we leave it out for now
+        /**
+         * It could be argued that the static text should have a controller, but
+         * since it doesn't provide a form field we leave it out for now
+         */
         MandateTextElement(
             this.identifier,
             this.stringResId,
@@ -170,8 +172,8 @@ internal class TransformSpecToElement @Inject constructor(
             initialValues?.merchantName
         )
 
-    private fun AfterpayClearpayHeaderSpec.transform(amount: Amount) =
-        AfterpayClearpayHeaderElement(this.identifier, amount)
+    private fun AfterpayClearpaySpec.transform(amount: Amount) =
+        AfterpayClearpayElement(this.identifier, amount)
 }
 
 internal fun SimpleTextSpec.transform(

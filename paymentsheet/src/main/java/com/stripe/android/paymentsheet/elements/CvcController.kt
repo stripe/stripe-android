@@ -5,7 +5,6 @@ import androidx.compose.ui.text.input.KeyboardType
 import com.stripe.android.R
 import com.stripe.android.model.CardBrand
 import com.stripe.android.paymentsheet.forms.FormFieldEntry
-import com.stripe.android.viewmodel.credit.cvc.CvcConfig
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
@@ -31,7 +30,6 @@ internal class CvcController constructor(
 
     override val debugLabel = cvcTextFieldConfig.debugLabel
 
-    /** This is all the information that can be observed on the element */
     private val _fieldValue = MutableStateFlow("")
     override val fieldValue: Flow<String> = _fieldValue
 
@@ -39,8 +37,6 @@ internal class CvcController constructor(
         _fieldValue.map { cvcTextFieldConfig.convertToRaw(it) }
 
     private val _fieldState = combine(cardBrandFlow, _fieldValue) { brand, fieldValue ->
-        // This should also take a list of strings based on CVV or CVC
-        // The CVC label should be in CardBrand
         cvcTextFieldConfig.determineState(brand, fieldValue)
     }
     override val fieldState: Flow<TextFieldState> = _fieldState
@@ -59,8 +55,6 @@ internal class CvcController constructor(
         combine(visibleError, _fieldState) { visibleError, fieldState ->
             fieldState.getError()?.takeIf { visibleError }
         }
-
-    val isFull: Flow<Boolean> = _fieldState.map { it.isFull() }
 
     override val isComplete: Flow<Boolean> = _fieldState.map { it.isValid() }
 

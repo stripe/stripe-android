@@ -3,14 +3,14 @@ package com.stripe.android.paymentsheet.elements
 import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
 import kotlinx.coroutines.flow.combine
 
+/**
+ * This is the element that represent the collection of all the card details:
+ * card number, expiration date, and CVC.
+ */
 internal class CardDetailsElement(
     identifier: IdentifierSpec,
     val controller: CardController = CardController(),
 ) : SectionMultiFieldElement(identifier) {
-
-    /**
-     * This will return a controller that abides by the SectionFieldErrorController interface.
-     */
     override fun sectionFieldErrorController(): SectionFieldErrorController =
         controller
 
