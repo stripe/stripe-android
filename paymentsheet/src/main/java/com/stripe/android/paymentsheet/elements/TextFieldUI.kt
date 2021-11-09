@@ -161,13 +161,9 @@ internal fun nextFocus(focusManager: FocusManager) {
 
 @Composable
 internal fun TrailingIcon(trailingIcon: TextFieldIcon) {
-
     Image(
         painter = painterResource(id = trailingIcon.idRes),
-        modifier = Modifier
-            .height(24.dp)
-            .width(32.dp)
-            .padding(0.dp),
+        modifier = Modifier.padding(0.dp),
         contentDescription = trailingIcon.contentDescription?.let {
             stringResource(trailingIcon.contentDescription)
         }
