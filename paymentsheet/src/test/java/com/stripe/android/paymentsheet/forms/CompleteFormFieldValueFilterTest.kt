@@ -3,14 +3,15 @@ package com.stripe.android.paymentsheet.forms
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.paymentsheet.elements.EmailConfig
 import com.stripe.android.paymentsheet.elements.EmailElement
-import com.stripe.android.paymentsheet.elements.SectionController
 import com.stripe.android.paymentsheet.elements.IdentifierSpec
+import com.stripe.android.paymentsheet.elements.SectionController
 import com.stripe.android.paymentsheet.elements.SectionElement
 import com.stripe.android.paymentsheet.elements.SimpleTextFieldController
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runBlockingTest
 import org.junit.Test
 
@@ -18,14 +19,7 @@ import org.junit.Test
 class CompleteFormFieldValueFilterTest {
 
     private val emailController = SimpleTextFieldController(EmailConfig())
-    private val emailSection = SectionElement(
-        identifier = IdentifierSpec.Generic("email_section"),
-        EmailElement(
-            IdentifierSpec.Email,
-            emailController
-        ),
-        SectionController(emailController.label, listOf(emailController))
-    )
+    private var emailSection: SectionElement
 
     private val hiddenIdentifersFlow = MutableStateFlow<List<IdentifierSpec>>(emptyList())
 
@@ -42,6 +36,19 @@ class CompleteFormFieldValueFilterTest {
         showingMandate = MutableStateFlow(true),
         userRequestedReuse = MutableStateFlow(PaymentSelection.CustomerRequestedSave.NoRequest)
     )
+
+    init {
+        runBlocking {
+            emailSection = SectionElement(
+                identifier = IdentifierSpec.Generic("email_section"),
+                EmailElement(
+                    IdentifierSpec.Email,
+                    emailController
+                ),
+                SectionController(emailController.label.first(), listOf(emailController))
+            )
+        }
+    }
 
     @Test
     fun `With only some complete controllers and no hidden values the flow value is null`() {

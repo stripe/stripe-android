@@ -1,6 +1,7 @@
 package com.stripe.android.exception
 
 import com.stripe.android.StripeErrorFixtures
+import com.stripe.android.core.exception.InvalidRequestException
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

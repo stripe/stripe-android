@@ -17,10 +17,10 @@ internal interface TextFieldController : InputController {
     fun onFocusChange(newHasFocus: Boolean)
 
     val debugLabel: String
-    override val label: Int
     val trailingIcon: Flow<TextFieldIcon?>
     val capitalization: KeyboardCapitalization
     val keyboardType: KeyboardType
+    override val label: Flow<Int>
     val visualTransformation: VisualTransformation
     override val showOptionalLabel: Boolean
     val fieldState: Flow<TextFieldState>
@@ -50,8 +50,7 @@ internal class SimpleTextFieldController constructor(
     override val visualTransformation =
         textFieldConfig.visualTransformation ?: VisualTransformation.None
 
-    @StringRes
-    override val label: Int = textFieldConfig.label
+    override val label: Flow<Int> = MutableStateFlow(textFieldConfig.label)
     override val debugLabel = textFieldConfig.debugLabel
 
     /** This is all the information that can be observed on the element */
@@ -76,8 +75,6 @@ internal class SimpleTextFieldController constructor(
     override val error: Flow<FieldError?> = visibleError.map { visibleError ->
         _fieldState.value.getError()?.takeIf { visibleError }
     }
-
-    val isFull: Flow<Boolean> = _fieldState.map { it.isFull() }
 
     override val isComplete: Flow<Boolean> = _fieldState.map {
         it.isValid() || (!it.isValid() && showOptionalLabel && it.isBlank())

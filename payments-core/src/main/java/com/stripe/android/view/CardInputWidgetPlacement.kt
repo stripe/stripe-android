@@ -41,7 +41,7 @@ internal data class CardInputWidgetPlacement(
     private val cardPeekPostalCodeStartMargin: Int
         @JvmSynthetic
         get() {
-            return cardPeekCvcStartMargin + postalCodeWidth + cvcPostalCodeSeparation
+            return cardPeekCvcStartMargin + cvcWidth + cvcPostalCodeSeparation
         }
 
     @JvmSynthetic
@@ -71,6 +71,10 @@ internal data class CardInputWidgetPlacement(
         }
     }
 
+    private fun toMinimalValueIfNegative(value: Int) = if (value >= 0) {
+        value
+    } else MIN_SEPARATION_IN_PX
+
     @JvmSynthetic
     internal fun updateSpacing(
         isShowingFullCard: Boolean,
@@ -80,16 +84,22 @@ internal data class CardInputWidgetPlacement(
     ) {
         when {
             isShowingFullCard -> {
-                cardDateSeparation = frameWidth - cardWidth - dateWidth
+                cardDateSeparation =
+                    toMinimalValueIfNegative(frameWidth - cardWidth - dateWidth)
                 cardTouchBufferLimit = frameStart + cardWidth + cardDateSeparation / 2
                 dateStartPosition = frameStart + cardWidth + cardDateSeparation
             }
             postalCodeEnabled -> {
-                this.cardDateSeparation = (frameWidth * 3 / 10) - peekCardWidth - dateWidth / 4
-                this.dateCvcSeparation = (frameWidth * 3 / 5) - peekCardWidth - cardDateSeparation -
-                    dateWidth - cvcWidth
-                this.cvcPostalCodeSeparation = (frameWidth * 4 / 5) - peekCardWidth - cardDateSeparation -
-                    dateWidth - cvcWidth - dateCvcSeparation - postalCodeWidth
+                this.cardDateSeparation = toMinimalValueIfNegative(
+                    (frameWidth * 3 / 10) - peekCardWidth - dateWidth / 4
+                )
+                this.dateCvcSeparation = toMinimalValueIfNegative(
+                    (frameWidth * 3 / 5) - peekCardWidth - cardDateSeparation - dateWidth - cvcWidth
+                )
+                this.cvcPostalCodeSeparation =
+                    toMinimalValueIfNegative(
+                        frameWidth - peekCardWidth - cardDateSeparation - dateWidth - cvcWidth - dateCvcSeparation - postalCodeWidth
+                    )
 
                 val dateStartPosition = frameStart + peekCardWidth + cardDateSeparation
                 this.cardTouchBufferLimit = dateStartPosition / 3
@@ -104,9 +114,12 @@ internal data class CardInputWidgetPlacement(
                 this.postalCodeStartPosition = postalCodeStartPosition
             }
             else -> {
-                this.cardDateSeparation = frameWidth / 2 - peekCardWidth - dateWidth / 2
-                this.dateCvcSeparation = frameWidth - peekCardWidth - cardDateSeparation -
-                    dateWidth - cvcWidth
+                this.cardDateSeparation = toMinimalValueIfNegative(
+                    frameWidth / 2 - peekCardWidth - dateWidth / 2
+                )
+                this.dateCvcSeparation = toMinimalValueIfNegative(
+                    frameWidth - peekCardWidth - cardDateSeparation - dateWidth - cvcWidth
+                )
 
                 this.cardTouchBufferLimit = frameStart + peekCardWidth + cardDateSeparation / 2
                 this.dateStartPosition = frameStart + peekCardWidth + cardDateSeparation
@@ -224,5 +237,9 @@ internal data class CardInputWidgetPlacement(
             """
 
         return elementSizeData + touchBufferData
+    }
+
+    private companion object {
+        const val MIN_SEPARATION_IN_PX = 10
     }
 }

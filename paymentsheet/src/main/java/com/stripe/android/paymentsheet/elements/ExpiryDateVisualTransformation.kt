@@ -5,11 +5,10 @@ import androidx.compose.ui.text.input.OffsetMapping
 import androidx.compose.ui.text.input.TransformedText
 import androidx.compose.ui.text.input.VisualTransformation
 
-class ExpiryDateVisualTransformation() : VisualTransformation {
+internal class ExpiryDateVisualTransformation() : VisualTransformation {
     private val separator = " / "
 
     override fun filter(text: AnnotatedString): TransformedText {
-
         var separatorAfterIndex = 1
         if (text.isNotBlank() && !(text[0] == '0' || text[0] == '1')) {
             separatorAfterIndex = 0

@@ -30,6 +30,9 @@ import com.stripe.android.paymentsheet.forms.GiropayRequirement
 import com.stripe.android.paymentsheet.forms.IdealForm
 import com.stripe.android.paymentsheet.forms.IdealParamKey
 import com.stripe.android.paymentsheet.forms.IdealRequirement
+import com.stripe.android.paymentsheet.forms.KlarnaForm
+import com.stripe.android.paymentsheet.forms.KlarnaParamKey
+import com.stripe.android.paymentsheet.forms.KlarnaRequirement
 import com.stripe.android.paymentsheet.forms.P24Form
 import com.stripe.android.paymentsheet.forms.P24ParamKey
 import com.stripe.android.paymentsheet.forms.P24Requirement
@@ -135,6 +138,14 @@ internal enum class SupportedPaymentMethod(
         AfterpayClearpayRequirement,
         AfterpayClearpayParamKey,
         AfterpayClearpayForm
+    ),
+    Klarna(
+        PaymentMethod.Type.Klarna,
+        R.string.stripe_paymentsheet_payment_method_klarna,
+        R.drawable.stripe_ic_paymentsheet_pm_klarna,
+        KlarnaRequirement,
+        KlarnaParamKey,
+        KlarnaForm
     );
 
     /**

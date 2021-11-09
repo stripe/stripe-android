@@ -2,12 +2,12 @@ package com.stripe.android
 
 import android.content.Intent
 import androidx.test.core.app.ApplicationProvider
-import com.stripe.android.exception.InvalidRequestException
+import com.stripe.android.core.exception.InvalidRequestException
+import com.stripe.android.core.networking.DefaultStripeNetworkClient
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.Source
 import com.stripe.android.model.SourceFixtures
-import com.stripe.android.networking.DefaultApiRequestExecutor
 import com.stripe.android.networking.StripeApiRepository
 import com.stripe.android.utils.TestUtils.idleLooper
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -198,7 +198,7 @@ internal class StripePaymentAuthTest {
             StripeApiRepository(
                 ApplicationProvider.getApplicationContext(),
                 { ApiKeyFixtures.FAKE_PUBLISHABLE_KEY },
-                stripeApiRequestExecutor = DefaultApiRequestExecutor(
+                stripeNetworkClient = DefaultStripeNetworkClient(
                     workContext = testDispatcher
                 ),
                 analyticsRequestExecutor = {}

@@ -465,7 +465,7 @@ internal class FormViewModelTest {
             // Fill all address values except line2
             val addressControllers = AddressControllers.create(formViewModel)
             val populateAddressControllers = addressControllers.controllers
-                .filter { it.label != R.string.address_label_address_line2 }
+                .filter { it.label.first() != R.string.address_label_address_line2 }
             populateAddressControllers
                 .forEachIndexed { index, textFieldController ->
                     textFieldController.onValueChange("1234")
@@ -493,7 +493,7 @@ internal class FormViewModelTest {
         }
     }
 
-    private fun getSectionFieldTextControllerWithLabel(
+    private suspend fun getSectionFieldTextControllerWithLabel(
         formViewModel: FormViewModel,
         @StringRes label: Int
     ) =
@@ -503,7 +503,7 @@ internal class FormViewModelTest {
             .filterIsInstance<SectionSingleFieldElement>()
             .map { it.controller }
             .filterIsInstance<TextFieldController>()
-            .firstOrNull { it.label == label }
+            .firstOrNull { it.label.first() == label }
 
     private data class AddressControllers(
         val controllers: List<TextFieldController>
@@ -552,14 +552,14 @@ internal class FormViewModelTest {
             return addressElementFields
                 ?.filterIsInstance<SectionSingleFieldElement>()
                 ?.map { (it.controller as? SimpleTextFieldController) }
-                ?.firstOrNull { it?.label == label }
+                ?.firstOrNull { it?.label?.first() == label }
                 ?: addressElementFields
                     ?.asSequence()
                     ?.filterIsInstance<RowElement>()
                     ?.map { it.fields }
                     ?.flatten()
                     ?.map { (it.controller as? SimpleTextFieldController) }
-                    ?.firstOrNull { it?.label == label }
+                    ?.firstOrNull { it?.label?.first() == label }
         }
     }
 }

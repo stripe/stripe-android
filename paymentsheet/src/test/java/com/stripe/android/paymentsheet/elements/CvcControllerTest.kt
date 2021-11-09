@@ -6,7 +6,6 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.forms.FormFieldEntry
 import com.stripe.android.utils.TestUtils.idleLooper
-import com.stripe.android.viewmodel.credit.cvc.CvcConfig
 import kotlinx.coroutines.flow.MutableStateFlow
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -32,7 +31,7 @@ internal class CvcControllerTest {
         idleLooper()
 
         assertThat(errorFlowValues[errorFlowValues.size - 1]?.errorMessage)
-            .isEqualTo(R.string.credit_cvc_incomplete)
+            .isEqualTo(R.string.invalid_cvc)
     }
 
     @Test

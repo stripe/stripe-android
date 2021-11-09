@@ -12,7 +12,7 @@ import org.robolectric.RobolectricTestRunner
 class CardDetailsElementTest {
     @Test
     fun `test form field values returned and expiration date parsing`() {
-        val cardController = CardController()
+        val cardController = CardDetailsController()
         val cardDetailsElement = CardDetailsElement(
             IdentifierSpec.Generic("card_details"),
             cardController

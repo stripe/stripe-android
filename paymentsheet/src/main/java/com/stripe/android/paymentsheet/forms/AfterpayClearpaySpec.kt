@@ -2,7 +2,7 @@ package com.stripe.android.paymentsheet.forms
 
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.elements.AddressSpec
-import com.stripe.android.paymentsheet.elements.AfterpayClearpayHeaderSpec
+import com.stripe.android.paymentsheet.elements.AfterpayClearpaySpec
 import com.stripe.android.paymentsheet.elements.EmailSpec
 import com.stripe.android.paymentsheet.elements.IdentifierSpec
 import com.stripe.android.paymentsheet.elements.LayoutSpec
@@ -33,7 +33,7 @@ internal val AfterpayClearpayParamKey: MutableMap<String, Any?> = mutableMapOf(
     "billing_details" to billingParams
 )
 
-internal val afterpayClearpayHeader = AfterpayClearpayHeaderSpec(
+internal val afterpayClearpayHeader = AfterpayClearpaySpec(
     IdentifierSpec.Generic("afterpay_clearpay_header")
 )
 internal val afterpayClearpayNameSection = SectionSpec(

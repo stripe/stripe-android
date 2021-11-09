@@ -11,15 +11,15 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.savedstate.SavedStateRegistryOwner
 import com.stripe.android.StripeIntentResult
+import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
 import com.stripe.android.exception.APIException
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.networking.AnalyticsEvent
-import com.stripe.android.networking.AnalyticsRequestFactory
 import com.stripe.android.networking.ApiRequest
-import com.stripe.android.networking.DefaultAnalyticsRequestExecutor
+import com.stripe.android.networking.PaymentAnalyticsEvent
+import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.DefaultReturnUrl
 import com.stripe.android.payments.PaymentFlowResult
@@ -55,7 +55,7 @@ internal class PaymentLauncherViewModel @Inject constructor(
     private val lazyPaymentIntentFlowResultProcessor: Lazy<PaymentIntentFlowResultProcessor>,
     private val lazySetupIntentFlowResultProcessor: Lazy<SetupIntentFlowResultProcessor>,
     private val analyticsRequestExecutor: DefaultAnalyticsRequestExecutor,
-    private val analyticsRequestFactory: AnalyticsRequestFactory,
+    private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
     @UIContext private val uiContext: CoroutineContext,
     private val authActivityStarterHost: AuthActivityStarterHost,
     activityResultCaller: ActivityResultCaller,
@@ -235,17 +235,17 @@ internal class PaymentLauncherViewModel @Inject constructor(
     private fun logReturnUrl(returnUrl: String?) {
         when (returnUrl) {
             defaultReturnUrl.value -> {
-                AnalyticsEvent.ConfirmReturnUrlDefault
+                PaymentAnalyticsEvent.ConfirmReturnUrlDefault
             }
             null -> {
-                AnalyticsEvent.ConfirmReturnUrlNull
+                PaymentAnalyticsEvent.ConfirmReturnUrlNull
             }
             else -> {
-                AnalyticsEvent.ConfirmReturnUrlCustom
+                PaymentAnalyticsEvent.ConfirmReturnUrlCustom
             }
         }.let { event ->
             analyticsRequestExecutor.executeAsync(
-                analyticsRequestFactory.createRequest(event)
+                paymentAnalyticsRequestFactory.createRequest(event)
             )
         }
     }

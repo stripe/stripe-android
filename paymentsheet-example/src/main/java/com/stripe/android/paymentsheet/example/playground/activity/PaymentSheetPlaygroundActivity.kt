@@ -1,10 +1,10 @@
 package com.stripe.android.paymentsheet.example.playground.activity
 
 import android.os.Bundle
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isInvisible
 import androidx.lifecycle.lifecycleScope
+import com.google.android.material.snackbar.Snackbar
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetResult
 import com.stripe.android.paymentsheet.example.R
@@ -108,7 +108,11 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
         }
 
         viewModel.status.observe(this) {
-            Toast.makeText(this, it, Toast.LENGTH_LONG).show()
+            Snackbar.make(
+                findViewById(android.R.id.content), it, Snackbar.LENGTH_SHORT)
+                .setBackgroundTint(resources.getColor(R.color.black))
+                .setTextColor(resources.getColor(R.color.white))
+                .show()
         }
 
         viewModel.inProgress.observe(this) {

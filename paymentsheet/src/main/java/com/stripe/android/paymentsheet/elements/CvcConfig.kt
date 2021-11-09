@@ -1,20 +1,15 @@
-package com.stripe.android.viewmodel.credit.cvc
+package com.stripe.android.paymentsheet.elements
 
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
 import com.stripe.android.model.CardBrand
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.elements.CardDetailsTextFieldConfig
-import com.stripe.android.paymentsheet.elements.TextFieldState
-import com.stripe.android.paymentsheet.elements.TextFieldStateConstants
 
-@Suppress("DEPRECATION")
 internal class CvcConfig : CardDetailsTextFieldConfig {
-    // TODO: Neecd to support CVV, does this need to come from metadata service?
     override val capitalization: KeyboardCapitalization = KeyboardCapitalization.None
     override val debugLabel: String = "cvc"
-    override val label: Int = R.string.credit_cvc_label
+    override val label: Int = R.string.cvc_number_hint
     override val keyboard: KeyboardType = KeyboardType.NumberPassword
     override val visualTransformation: VisualTransformation = VisualTransformation.None
 
@@ -24,19 +19,18 @@ internal class CvcConfig : CardDetailsTextFieldConfig {
     ): TextFieldState {
         val numberAllowedDigits = brand.maxCvcLength
         val isDigitLimit = brand.maxCvcLength != -1
-        return if (brand == CardBrand.Unknown) {
-            TextFieldStateConstants.Error.Invalid(R.string.card_number_invalid_brand)
-        } else if (number.isEmpty()) {
+        return if (number.isEmpty()) {
             TextFieldStateConstants.Error.Blank
+        } else if (brand == CardBrand.Unknown) {
+            TextFieldStateConstants.Error.Invalid(R.string.invalid_card_number)
         } else if (isDigitLimit && number.length < numberAllowedDigits) {
-            TextFieldStateConstants.Error.Incomplete(R.string.credit_cvc_incomplete)
+            TextFieldStateConstants.Error.Incomplete(R.string.invalid_cvc)
         } else if (isDigitLimit && number.length > numberAllowedDigits) {
-            TextFieldStateConstants.Error.Invalid(R.string.credit_cvc_too_long)
+            TextFieldStateConstants.Error.Invalid(R.string.invalid_cvc)
         } else if (isDigitLimit && number.length == numberAllowedDigits) {
             TextFieldStateConstants.Valid.Full
         } else {
-            // TODO: Double check this case
-            TextFieldStateConstants.Error.Invalid(R.string.credit_cvc_invalid)
+            TextFieldStateConstants.Error.Invalid(R.string.invalid_cvc)
         }
     }
 

@@ -6,10 +6,10 @@ import com.stripe.android.paymentsheet.elements.BankDropdownSpec
 import com.stripe.android.paymentsheet.elements.EmailSpec
 import com.stripe.android.paymentsheet.elements.IdentifierSpec
 import com.stripe.android.paymentsheet.elements.LayoutSpec
-import com.stripe.android.paymentsheet.elements.MandateTextSpec
 import com.stripe.android.paymentsheet.elements.SaveForFutureUseSpec
 import com.stripe.android.paymentsheet.elements.SectionSpec
 import com.stripe.android.paymentsheet.elements.SimpleTextSpec
+import com.stripe.android.paymentsheet.elements.StaticTextSpec
 import com.stripe.android.paymentsheet.elements.SupportedBankType
 import com.stripe.android.paymentsheet.elements.billingParams
 
@@ -64,7 +64,7 @@ internal val idealBankSection = SectionSpec(
         SupportedBankType.Ideal
     )
 )
-internal val idealMandate = MandateTextSpec(
+internal val idealMandate = StaticTextSpec(
     IdentifierSpec.Generic("mandate"),
     R.string.stripe_paymentsheet_sepa_mandate,
     Color.Gray

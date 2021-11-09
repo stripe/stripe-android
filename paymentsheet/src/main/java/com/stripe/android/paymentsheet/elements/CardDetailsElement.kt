@@ -3,14 +3,14 @@ package com.stripe.android.paymentsheet.elements
 import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
 import kotlinx.coroutines.flow.combine
 
+/**
+ * This is the element that represent the collection of all the card details:
+ * card number, expiration date, and CVC.
+ */
 internal class CardDetailsElement(
     identifier: IdentifierSpec,
-    val controller: CardController = CardController(),
+    val controller: CardDetailsController = CardDetailsController(),
 ) : SectionMultiFieldElement(identifier) {
-
-    /**
-     * This will return a controller that abides by the SectionFieldErrorController interface.
-     */
     override fun sectionFieldErrorController(): SectionFieldErrorController =
         controller
 
@@ -26,21 +26,7 @@ internal class CardDetailsElement(
         var month = -1
         var year = -1
         expirationDate.value?.let { date ->
-            // TODO: Duplicate of DateConfig
-            val newString =
-                if ((
-                    date.isNotBlank() &&
-                        !(date[0] == '0' || date[0] == '1')
-                    ) ||
-                    (
-                        (date.length > 1) &&
-                            (date[0] == '1' && requireNotNull(date[1].digitToInt()) > 2)
-                        )
-                ) {
-                    "0$date"
-                } else {
-                    date
-                }
+            val newString = convertTo4DigitDate(date)
             if (newString.length == 4) {
                 month = requireNotNull(newString.take(2).toIntOrNull())
                 year = requireNotNull(newString.takeLast(2).toIntOrNull())

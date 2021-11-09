@@ -21,7 +21,6 @@ internal fun SectionFieldElementUI(
             }
             is DropdownFieldController -> {
                 DropDown(
-                    controller.label,
                     controller,
                     enabled
                 )
@@ -40,7 +39,7 @@ internal fun SectionFieldElementUI(
                     hiddenIdentifiers
                 )
             }
-            is CardController -> {
+            is CardDetailsController -> {
                 CardDetailsElementUI(
                     enabled,
                     controller,
