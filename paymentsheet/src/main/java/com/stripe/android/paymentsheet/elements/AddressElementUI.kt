@@ -15,11 +15,11 @@ internal fun AddressElementUI(
     controller: AddressController
 ) {
     val fields by controller.fieldsFlowable.collectAsState(null)
-    fields?.let {
+    fields?.let { fieldList ->
         Column {
-            fields!!.forEachIndexed { index, field ->
+            fieldList.forEachIndexed { index, field ->
                 SectionFieldElementUI(enabled, field)
-                if (index != fields!!.size - 1) {
+                if (index != fieldList.size - 1) {
                     val cardStyle = CardStyle(isSystemInDarkTheme())
                     Divider(
                         color = cardStyle.cardBorderColor,
