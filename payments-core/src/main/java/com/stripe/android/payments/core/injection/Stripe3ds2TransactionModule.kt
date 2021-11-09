@@ -1,6 +1,7 @@
 package com.stripe.android.payments.core.injection
 
 import android.content.Context
+import com.stripe.android.core.injection.IOContext
 import com.stripe.android.payments.core.authentication.threeds2.DefaultStripe3ds2ChallengeResultProcessor
 import com.stripe.android.payments.core.authentication.threeds2.Stripe3ds2ChallengeResultProcessor
 import com.stripe.android.stripe3ds2.service.StripeThreeDs2Service

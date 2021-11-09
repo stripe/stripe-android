@@ -1,11 +1,11 @@
 package com.stripe.android.model.parsers
 
 import androidx.annotation.Size
+import com.stripe.android.core.model.StripeModel
 import com.stripe.android.model.Source
 import com.stripe.android.model.SourceTypeModel
 import com.stripe.android.model.StripeJsonUtils
 import com.stripe.android.model.StripeJsonUtils.optString
-import com.stripe.android.model.StripeModel
 import org.json.JSONObject
 
 internal class SourceJsonParser : ModelJsonParser<Source> {

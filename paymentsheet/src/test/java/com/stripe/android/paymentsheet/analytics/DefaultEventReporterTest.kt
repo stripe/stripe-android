@@ -24,7 +24,7 @@ import kotlin.test.Test
 class DefaultEventReporterTest {
     private val testDispatcher = TestCoroutineDispatcher()
 
-    private val analyticsRequestExecutor = mock<AnalyticsRequestExecutor>()
+    private val analyticsRequestExecutor = mock<com.stripe.android.core.networking.AnalyticsRequestExecutor>()
     private val analyticsRequestFactory = PaymentAnalyticsRequestFactory(
         ApplicationProvider.getApplicationContext(),
         ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY

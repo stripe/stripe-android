@@ -184,7 +184,8 @@ class PaymentAnalyticsRequestFactory @VisibleForTesting internal constructor(
                 event
             ).plus(
                 FIELD_DEVICE_ID to deviceId
-            )
+            ),
+            RequestHeadersFactory.Analytics.create()
         )
     }
 
@@ -203,7 +204,8 @@ class PaymentAnalyticsRequestFactory @VisibleForTesting internal constructor(
                 sourceType,
                 tokenType,
                 threeDS2UiType
-            )
+            ),
+            RequestHeadersFactory.Analytics.create()
         )
     }
 

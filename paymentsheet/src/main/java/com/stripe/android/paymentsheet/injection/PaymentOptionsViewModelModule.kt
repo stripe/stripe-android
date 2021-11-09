@@ -2,7 +2,7 @@ package com.stripe.android.paymentsheet.injection
 
 import android.content.Context
 import com.stripe.android.payments.core.injection.DUMMY_INJECTOR_KEY
-import com.stripe.android.payments.core.injection.IOContext
+import com.stripe.android.core.injection.IOContext
 import com.stripe.android.payments.core.injection.Injector
 import com.stripe.android.payments.core.injection.InjectorKey
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
@@ -27,7 +27,7 @@ internal class PaymentOptionsViewModelModule {
     @Singleton
     fun providePrefsRepositoryFactory(
         appContext: Context,
-        @IOContext workContext: CoroutineContext
+        @com.stripe.android.core.injection.IOContext workContext: CoroutineContext
     ): (PaymentSheet.CustomerConfiguration?) -> PrefsRepository = { customerConfig ->
         customerConfig?.let {
             DefaultPrefsRepository(

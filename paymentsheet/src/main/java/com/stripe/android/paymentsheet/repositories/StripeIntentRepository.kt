@@ -5,7 +5,7 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.ApiRequest
 import com.stripe.android.networking.StripeRepository
-import com.stripe.android.payments.core.injection.IOContext
+import com.stripe.android.core.injection.IOContext
 import com.stripe.android.paymentsheet.model.ClientSecret
 import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.SetupIntentClientSecret
@@ -35,7 +35,7 @@ internal sealed class StripeIntentRepository {
     class Api @Inject constructor(
         private val stripeRepository: StripeRepository,
         private val lazyPaymentConfig: Lazy<PaymentConfiguration>,
-        @IOContext private val workContext: CoroutineContext,
+        @com.stripe.android.core.injection.IOContext private val workContext: CoroutineContext,
         private val locale: Locale? =
             LocaleListCompat.getAdjustedDefault().takeUnless { it.isEmpty }?.get(0)
     ) : StripeIntentRepository() {

@@ -4,7 +4,7 @@ import android.app.Application
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.Logger
+import com.stripe.android.core.Logger
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntentFixtures

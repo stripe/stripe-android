@@ -1,5 +1,6 @@
 package com.stripe.android.model
 
+import com.stripe.android.core.model.StripeModel
 import com.stripe.android.model.parsers.SetupIntentJsonParser
 import kotlinx.parcelize.Parcelize
 import org.json.JSONObject

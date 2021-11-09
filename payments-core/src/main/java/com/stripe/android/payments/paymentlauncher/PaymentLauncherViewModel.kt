@@ -11,8 +11,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.savedstate.SavedStateRegistryOwner
 import com.stripe.android.StripeIntentResult
+import com.stripe.android.core.exception.APIException
+import com.stripe.android.core.injection.UIContext
 import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
-import com.stripe.android.exception.APIException
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
@@ -30,7 +31,6 @@ import com.stripe.android.payments.core.injection.DaggerPaymentLauncherViewModel
 import com.stripe.android.payments.core.injection.IS_PAYMENT_INTENT
 import com.stripe.android.payments.core.injection.Injectable
 import com.stripe.android.payments.core.injection.PaymentLauncherViewModelSubcomponent
-import com.stripe.android.payments.core.injection.UIContext
 import com.stripe.android.payments.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.payments.core.injection.injectWithFallback
 import com.stripe.android.view.AuthActivityStarterHost

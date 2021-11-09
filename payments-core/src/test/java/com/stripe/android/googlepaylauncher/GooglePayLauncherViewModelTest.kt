@@ -12,7 +12,7 @@ import com.stripe.android.PaymentController
 import com.stripe.android.PaymentIntentResult
 import com.stripe.android.SetupIntentResult
 import com.stripe.android.StripePaymentController
-import com.stripe.android.exception.StripeException
+import com.stripe.android.core.exception.StripeException
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams

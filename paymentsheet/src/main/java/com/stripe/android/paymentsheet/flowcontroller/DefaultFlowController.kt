@@ -24,7 +24,7 @@ import com.stripe.android.payments.core.injection.Injectable
 import com.stripe.android.payments.core.injection.Injector
 import com.stripe.android.payments.core.injection.InjectorKey
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
-import com.stripe.android.payments.core.injection.UIContext
+import com.stripe.android.core.injection.UIContext
 import com.stripe.android.payments.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.payments.paymentlauncher.PaymentLauncher
 import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
@@ -86,7 +86,7 @@ internal class DefaultFlowController @Inject internal constructor(
      * stripeAccountId after creating a [DefaultFlowController].
      */
     private val lazyPaymentConfiguration: Lazy<PaymentConfiguration>,
-    @UIContext private val uiContext: CoroutineContext,
+    @com.stripe.android.core.injection.UIContext private val uiContext: CoroutineContext,
     @Named(ENABLE_LOGGING) private val enableLogging: Boolean,
     @Named(PRODUCT_USAGE) private val productUsage: Set<String>,
     private val googlePayPaymentMethodLauncherFactory: GooglePayPaymentMethodLauncherFactory,

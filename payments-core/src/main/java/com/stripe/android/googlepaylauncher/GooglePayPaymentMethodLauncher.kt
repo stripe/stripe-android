@@ -9,8 +9,9 @@ import androidx.annotation.IntDef
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.BuildConfig
-import com.stripe.android.Logger
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.core.Logger
+import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher.Result
@@ -21,7 +22,6 @@ import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networking.StripeApiRepository
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.core.injection.ENABLE_LOGGING
-import com.stripe.android.payments.core.injection.IOContext
 import com.stripe.android.payments.core.injection.Injectable
 import com.stripe.android.payments.core.injection.Injector
 import com.stripe.android.payments.core.injection.InjectorKey

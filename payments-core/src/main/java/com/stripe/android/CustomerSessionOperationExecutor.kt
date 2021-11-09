@@ -1,6 +1,6 @@
 package com.stripe.android
 
-import com.stripe.android.exception.StripeException
+import com.stripe.android.core.exception.StripeException
 import com.stripe.android.model.Customer
 import com.stripe.android.model.ListPaymentMethodsParams
 import com.stripe.android.networking.ApiRequest

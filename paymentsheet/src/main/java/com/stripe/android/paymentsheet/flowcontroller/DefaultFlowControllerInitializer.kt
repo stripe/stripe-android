@@ -1,11 +1,11 @@
 package com.stripe.android.paymentsheet.flowcontroller
 
-import com.stripe.android.Logger
+import com.stripe.android.core.Logger
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.payments.core.injection.IOContext
+import com.stripe.android.core.injection.IOContext
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.model.ClientSecret
@@ -31,7 +31,7 @@ internal class DefaultFlowControllerInitializer @Inject constructor(
     private val stripeIntentValidator: StripeIntentValidator,
     private val customerRepository: CustomerRepository,
     private val logger: Logger,
-    @IOContext private val workContext: CoroutineContext
+    @com.stripe.android.core.injection.IOContext private val workContext: CoroutineContext
 ) : FlowControllerInitializer {
 
     override suspend fun init(

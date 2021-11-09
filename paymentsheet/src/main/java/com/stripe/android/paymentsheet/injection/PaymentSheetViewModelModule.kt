@@ -1,7 +1,7 @@
 package com.stripe.android.paymentsheet.injection
 
 import android.content.Context
-import com.stripe.android.payments.core.injection.IOContext
+import com.stripe.android.core.injection.IOContext
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
 import com.stripe.android.paymentsheet.PaymentSheetContract
 import com.stripe.android.paymentsheet.PrefsRepository
@@ -20,7 +20,7 @@ internal class PaymentSheetViewModelModule(private val starterArgs: PaymentSheet
     @Provides
     fun providePrefsRepository(
         appContext: Context,
-        @IOContext workContext: CoroutineContext
+        @com.stripe.android.core.injection.IOContext workContext: CoroutineContext
     ): PrefsRepository {
         return starterArgs.config?.customer?.let { (id) ->
             DefaultPrefsRepository(

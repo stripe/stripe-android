@@ -3,7 +3,7 @@ package com.stripe.android.paymentsheet.injection
 import android.content.Context
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
-import com.stripe.android.payments.core.injection.IOContext
+import com.stripe.android.core.injection.IOContext
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -52,7 +52,7 @@ internal abstract class FlowControllerModule {
         @Singleton
         fun providePrefsRepositoryFactory(
             appContext: Context,
-            @IOContext workContext: CoroutineContext
+            @com.stripe.android.core.injection.IOContext workContext: CoroutineContext
         ): (PaymentSheet.CustomerConfiguration?) -> PrefsRepository = { customerConfig ->
             customerConfig?.let {
                 DefaultPrefsRepository(

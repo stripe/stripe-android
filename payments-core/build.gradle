@@ -20,6 +20,8 @@ if (System.getenv("JITPACK")) {
 }
 
 dependencies {
+    api project(":stripe-core")
+
     implementation libraries.androidx.annotation
     implementation libraries.androidx.appcompat
     implementation libraries.androidx.browser
