@@ -57,7 +57,7 @@ internal class EndToEndTest {
         )
         // Check the PI information using the backend
         assertThat(newPaymentIntent.amount)
-            .isEqualTo(42)
+            .isEqualTo(expectedPaymentIntentData.amount)
         assertThat(newPaymentIntent.accountId)
             .isEqualTo(expectedPaymentIntentData.onBehalfOf)
         assertThat(newPaymentIntent.currency)
