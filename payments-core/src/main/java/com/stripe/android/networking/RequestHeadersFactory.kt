@@ -3,6 +3,7 @@ package com.stripe.android.networking
 import com.stripe.android.ApiVersion
 import com.stripe.android.AppInfo
 import com.stripe.android.Stripe
+import com.stripe.android.core.networking.StripeRequest
 import java.util.Locale
 
 internal sealed class RequestHeadersFactory {

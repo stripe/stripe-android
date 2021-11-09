@@ -6,10 +6,13 @@ import androidx.activity.result.ActivityResultCallback
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.VisibleForTesting
-import com.stripe.android.exception.APIConnectionException
+import com.stripe.android.core.exception.APIConnectionException
+import com.stripe.android.core.exception.InvalidRequestException
+import com.stripe.android.core.networking.AnalyticsRequestExecutor
+import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
+import com.stripe.android.core.networking.RetryDelaySupplier
 import com.stripe.android.exception.APIException
 import com.stripe.android.exception.AuthenticationException
-import com.stripe.android.exception.InvalidRequestException
 import com.stripe.android.exception.StripeException
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
@@ -20,13 +23,10 @@ import com.stripe.android.model.Source
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.WeChatPayNextAction
 import com.stripe.android.networking.AlipayRepository
-import com.stripe.android.networking.AnalyticsEvent
-import com.stripe.android.networking.AnalyticsRequestExecutor
-import com.stripe.android.networking.AnalyticsRequestFactory
 import com.stripe.android.networking.ApiRequest
 import com.stripe.android.networking.DefaultAlipayRepository
-import com.stripe.android.networking.DefaultAnalyticsRequestExecutor
-import com.stripe.android.networking.RetryDelaySupplier
+import com.stripe.android.networking.PaymentAnalyticsEvent
+import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.DefaultReturnUrl
 import com.stripe.android.payments.PaymentFlowFailureMessageFactory
@@ -55,8 +55,8 @@ constructor(
     workContext: CoroutineContext = Dispatchers.IO,
     private val analyticsRequestExecutor: AnalyticsRequestExecutor =
         DefaultAnalyticsRequestExecutor(Logger.getInstance(enableLogging), workContext),
-    private val analyticsRequestFactory: AnalyticsRequestFactory =
-        AnalyticsRequestFactory(context.applicationContext, publishableKeyProvider),
+    private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory =
+        PaymentAnalyticsRequestFactory(context.applicationContext, publishableKeyProvider),
     private val alipayRepository: AlipayRepository = DefaultAlipayRepository(stripeRepository),
     private val uiContext: CoroutineContext = Dispatchers.Main
 ) : PaymentController {
@@ -102,13 +102,13 @@ constructor(
             context,
             stripeRepository,
             analyticsRequestExecutor,
-            analyticsRequestFactory,
+            paymentAnalyticsRequestFactory,
             enableLogging,
             workContext,
             uiContext,
             threeDs1IntentReturnUrlMap,
             publishableKeyProvider,
-            analyticsRequestFactory.defaultProductUsageTokens
+            paymentAnalyticsRequestFactory.defaultProductUsageTokens
         )
 
     override fun registerLaunchersWithActivityResultCaller(
@@ -308,7 +308,7 @@ constructor(
         requestOptions: ApiRequest.Options
     ) {
         analyticsRequestExecutor.executeAsync(
-            analyticsRequestFactory.createRequest(AnalyticsEvent.AuthSourceStart)
+            paymentAnalyticsRequestFactory.createRequest(PaymentAnalyticsEvent.AuthSourceStart)
         )
 
         runCatching {
@@ -445,7 +445,7 @@ constructor(
         )
 
         analyticsRequestExecutor.executeAsync(
-            analyticsRequestFactory.createRequest(AnalyticsEvent.AuthSourceResult)
+            paymentAnalyticsRequestFactory.createRequest(PaymentAnalyticsEvent.AuthSourceResult)
         )
 
         return requireNotNull(
@@ -513,17 +513,17 @@ constructor(
     private fun logReturnUrl(returnUrl: String?) {
         when (returnUrl) {
             defaultReturnUrl.value -> {
-                AnalyticsEvent.ConfirmReturnUrlDefault
+                PaymentAnalyticsEvent.ConfirmReturnUrlDefault
             }
             null -> {
-                AnalyticsEvent.ConfirmReturnUrlNull
+                PaymentAnalyticsEvent.ConfirmReturnUrlNull
             }
             else -> {
-                AnalyticsEvent.ConfirmReturnUrlCustom
+                PaymentAnalyticsEvent.ConfirmReturnUrlCustom
             }
         }.let { event ->
             analyticsRequestExecutor.executeAsync(
-                analyticsRequestFactory.createRequest(event)
+                paymentAnalyticsRequestFactory.createRequest(event)
             )
         }
     }

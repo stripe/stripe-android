@@ -1,5 +1,6 @@
 package com.stripe.android.networking
 
+import com.stripe.android.core.networking.StripeRequest
 import org.mockito.ArgumentMatcher
 
 internal class ApiRequestMatcher @JvmOverloads constructor(

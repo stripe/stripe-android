@@ -9,7 +9,7 @@ import com.stripe.android.payments.core.injection.injectWithFallback
 import com.stripe.android.paymentsheet.elements.Form
 import com.stripe.android.paymentsheet.elements.FormElement
 import com.stripe.android.paymentsheet.elements.LayoutSpec
-import com.stripe.android.paymentsheet.elements.MandateTextElement
+import com.stripe.android.paymentsheet.elements.StaticTextElement
 import com.stripe.android.paymentsheet.forms.resources.ResourceRepository
 import com.stripe.android.paymentsheet.elements.SaveForFutureUseElement
 import com.stripe.android.paymentsheet.elements.SectionSpec
@@ -136,7 +136,7 @@ internal class FormViewModel @Inject internal constructor(
     // Mandate is showing if it is an element of the form and it isn't hidden
     internal val showingMandate = hiddenIdentifiers.map {
         elements
-            .filterIsInstance<MandateTextElement>()
+            .filterIsInstance<StaticTextElement>()
             .firstOrNull()?.let { mandate ->
                 !it.contains(mandate.identifier)
             } ?: false

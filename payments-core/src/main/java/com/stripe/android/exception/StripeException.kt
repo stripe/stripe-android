@@ -2,6 +2,8 @@ package com.stripe.android.exception
 
 import androidx.annotation.RestrictTo
 import com.stripe.android.StripeError
+import com.stripe.android.core.exception.APIConnectionException
+import com.stripe.android.core.exception.InvalidRequestException
 import org.json.JSONException
 import java.io.IOException
 import java.util.Objects
