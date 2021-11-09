@@ -1,5 +1,6 @@
 package com.stripe.android.core
 
+import androidx.annotation.RestrictTo
 import com.stripe.android.core.model.StripeModel
 import kotlinx.parcelize.Parcelize
 import java.io.Serializable
@@ -19,7 +20,7 @@ import java.io.Serializable
  * [error code](https://stripe.com/docs/error-codes) that briefly explains the error reported.
  */
 @Parcelize
-data class StripeError constructor(
+data class StripeError @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) constructor(
     /**
      * The type of error returned. One of `api_connection_error`, `api_error`,
      * `authentication_error`, `card_error`, `idempotency_error`, `invalid_request_error`,

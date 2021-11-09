@@ -1,5 +1,6 @@
 package com.stripe.android.core.exception
 
+import androidx.annotation.RestrictTo
 import java.io.IOException
 
 /**
@@ -13,6 +14,7 @@ class APIConnectionException(
     message = message
 ) {
     companion object {
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         @JvmSynthetic
         fun create(e: IOException, url: String? = null): APIConnectionException {
             val displayUrl = listOfNotNull(

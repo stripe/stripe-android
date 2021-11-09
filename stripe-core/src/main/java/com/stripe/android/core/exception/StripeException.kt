@@ -16,6 +16,7 @@ abstract class StripeException(
     cause: Throwable? = null,
     message: String? = stripeError?.message
 ) : Exception(message, cause) {
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     val isClientError = statusCode in 400..499
 
     override fun toString(): String {

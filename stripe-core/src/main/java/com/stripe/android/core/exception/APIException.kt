@@ -1,5 +1,6 @@
 package com.stripe.android.core.exception
 
+import androidx.annotation.RestrictTo
 import com.stripe.android.core.StripeError
 
 /**
@@ -18,6 +19,7 @@ class APIException(
     cause = cause,
     message = message
 ) {
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     constructor(throwable: Throwable) : this(
         message = throwable.message,
         cause = throwable
