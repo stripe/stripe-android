@@ -24,8 +24,8 @@ import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.networking.AnalyticsRequestFactory
 import com.stripe.android.networking.ApiRequest
+import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networking.StripeApiRepository
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.view.AuthActivityStarterHost
@@ -221,7 +221,7 @@ internal class GooglePayLauncherViewModel(
             val stripeAccountId = config.stripeAccountId
             val productUsageTokens = setOf(GooglePayLauncher.PRODUCT_USAGE)
 
-            val analyticsRequestFactory = AnalyticsRequestFactory(
+            val analyticsRequestFactory = PaymentAnalyticsRequestFactory(
                 application,
                 publishableKey,
                 productUsageTokens
@@ -233,7 +233,7 @@ internal class GooglePayLauncherViewModel(
                 logger = logger,
                 workContext = workContext,
                 productUsageTokens = productUsageTokens,
-                analyticsRequestFactory = analyticsRequestFactory
+                paymentAnalyticsRequestFactory = analyticsRequestFactory
             )
 
             val googlePayRepository = DefaultGooglePayRepository(

@@ -8,8 +8,8 @@ import com.stripe.android.CardNumberFixtures
 import com.stripe.android.model.AccountRange
 import com.stripe.android.model.BinFixtures
 import com.stripe.android.model.BinRange
-import com.stripe.android.networking.AnalyticsRequestFactory
 import com.stripe.android.networking.ApiRequest
+import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networking.StripeApiRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -220,7 +220,7 @@ internal class DefaultCardAccountRangeRepositoryTest {
             ApiRequest.Options(publishableKey),
             store,
             { },
-            AnalyticsRequestFactory(application, publishableKey)
+            PaymentAnalyticsRequestFactory(application, publishableKey)
         )
     }
 

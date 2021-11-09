@@ -37,7 +37,7 @@ internal fun FormInternal(
                 if (!it.contains(element.identifier)) {
                     when (element) {
                         is SectionElement -> SectionElementUI(enabled, element, it)
-                        is MandateTextElement -> MandateElementUI(element)
+                        is StaticTextElement -> StaticElementUI(element)
                         is SaveForFutureUseElement -> SaveForFutureUseElementUI(enabled, element)
                         is AfterpayClearpayHeaderElement -> AfterpayClearpayElementUI(
                             enabled,

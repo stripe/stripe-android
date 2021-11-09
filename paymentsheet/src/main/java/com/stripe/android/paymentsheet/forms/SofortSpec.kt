@@ -6,10 +6,10 @@ import com.stripe.android.paymentsheet.elements.CountrySpec
 import com.stripe.android.paymentsheet.elements.EmailSpec
 import com.stripe.android.paymentsheet.elements.IdentifierSpec
 import com.stripe.android.paymentsheet.elements.LayoutSpec
-import com.stripe.android.paymentsheet.elements.MandateTextSpec
 import com.stripe.android.paymentsheet.elements.SaveForFutureUseSpec
 import com.stripe.android.paymentsheet.elements.SectionSpec
 import com.stripe.android.paymentsheet.elements.SimpleTextSpec
+import com.stripe.android.paymentsheet.elements.StaticTextSpec
 import com.stripe.android.paymentsheet.elements.billingParams
 
 internal val SofortRequirement = PaymentMethodRequirements(
@@ -60,7 +60,7 @@ internal val sofortCountrySection =
         IdentifierSpec.Generic("country_section"),
         CountrySpec(setOf("AT", "BE", "DE", "ES", "IT", "NL"))
     )
-internal val sofortMandate = MandateTextSpec(
+internal val sofortMandate = StaticTextSpec(
     IdentifierSpec.Generic("mandate"),
     R.string.stripe_paymentsheet_sepa_mandate,
     Color.Gray

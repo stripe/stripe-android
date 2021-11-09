@@ -1,6 +1,7 @@
 package com.stripe.android.exception
 
 import com.stripe.android.StripeErrorFixtures
+import com.stripe.android.core.exception.InvalidRequestException
 import java.net.HttpURLConnection
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -33,7 +34,7 @@ class InvalidRequestExceptionTest {
         val expected =
             """
             Request-id: req_123
-            com.stripe.android.exception.InvalidRequestException
+            com.stripe.android.core.exception.InvalidRequestException
             """.trimIndent()
         assertEquals(expected, actual)
     }
@@ -43,7 +44,7 @@ class InvalidRequestExceptionTest {
         val actual = InvalidRequestException(
             cause = IllegalArgumentException()
         ).toString()
-        val expected = "com.stripe.android.exception.InvalidRequestException"
+        val expected = "com.stripe.android.core.exception.InvalidRequestException"
         assertEquals(expected, actual)
     }
 }

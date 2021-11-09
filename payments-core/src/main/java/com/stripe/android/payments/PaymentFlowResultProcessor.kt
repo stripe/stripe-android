@@ -7,14 +7,14 @@ import com.stripe.android.PaymentIntentResult
 import com.stripe.android.SetupIntentResult
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.StripeIntentResult.Outcome.Companion.SUCCEEDED
-import com.stripe.android.exception.InvalidRequestException
+import com.stripe.android.core.exception.InvalidRequestException
+import com.stripe.android.core.networking.RetryDelaySupplier
 import com.stripe.android.exception.MaxRetryReachedException
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.shouldRefresh
 import com.stripe.android.networking.ApiRequest
-import com.stripe.android.networking.RetryDelaySupplier
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.core.injection.IOContext
 import com.stripe.android.payments.core.injection.PUBLISHABLE_KEY

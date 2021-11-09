@@ -15,9 +15,9 @@ import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
+import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.model.PaymentMethodFixtures
-import com.stripe.android.networking.AnalyticsRequestExecutor
-import com.stripe.android.networking.AnalyticsRequestFactory
+import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestCoroutineDispatcher
 import kotlinx.coroutines.test.TestCoroutineScope
@@ -45,7 +45,7 @@ class GooglePayPaymentMethodLauncherTest {
     private val resultCallback = GooglePayPaymentMethodLauncher.ResultCallback(results::add)
 
     val context: Context = ApplicationProvider.getApplicationContext()
-    private val analyticsRequestFactory = AnalyticsRequestFactory(
+    private val analyticsRequestFactory = PaymentAnalyticsRequestFactory(
         context,
         ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
     )
@@ -82,7 +82,7 @@ class GooglePayPaymentMethodLauncherTest {
                 emptySet(),
                 { ApiKeyFixtures.FAKE_PUBLISHABLE_KEY },
                 { null },
-                analyticsRequestFactory = analyticsRequestFactory,
+                paymentAnalyticsRequestFactory = analyticsRequestFactory,
                 analyticsRequestExecutor = analyticsRequestExecutor
             )
             scenario.moveToState(Lifecycle.State.RESUMED)
@@ -121,7 +121,7 @@ class GooglePayPaymentMethodLauncherTest {
                 emptySet(),
                 { ApiKeyFixtures.FAKE_PUBLISHABLE_KEY },
                 { null },
-                analyticsRequestFactory = analyticsRequestFactory,
+                paymentAnalyticsRequestFactory = analyticsRequestFactory,
                 analyticsRequestExecutor = analyticsRequestExecutor
             )
 
@@ -153,7 +153,7 @@ class GooglePayPaymentMethodLauncherTest {
                 emptySet(),
                 { ApiKeyFixtures.FAKE_PUBLISHABLE_KEY },
                 { null },
-                analyticsRequestFactory = analyticsRequestFactory,
+                paymentAnalyticsRequestFactory = analyticsRequestFactory,
                 analyticsRequestExecutor = analyticsRequestExecutor
             )
             scenario.moveToState(Lifecycle.State.RESUMED)
@@ -192,7 +192,7 @@ class GooglePayPaymentMethodLauncherTest {
                 emptySet(),
                 { ApiKeyFixtures.FAKE_PUBLISHABLE_KEY },
                 { null },
-                analyticsRequestFactory = analyticsRequestFactory,
+                paymentAnalyticsRequestFactory = analyticsRequestFactory,
                 analyticsRequestExecutor = analyticsRequestExecutor
             )
             scenario.moveToState(Lifecycle.State.RESUMED)

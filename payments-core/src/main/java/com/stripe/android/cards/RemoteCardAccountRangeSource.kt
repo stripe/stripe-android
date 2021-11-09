@@ -1,10 +1,10 @@
 package com.stripe.android.cards
 
+import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.model.AccountRange
-import com.stripe.android.networking.AnalyticsEvent
-import com.stripe.android.networking.AnalyticsRequestExecutor
-import com.stripe.android.networking.AnalyticsRequestFactory
 import com.stripe.android.networking.ApiRequest
+import com.stripe.android.networking.PaymentAnalyticsEvent
+import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networking.StripeRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -14,7 +14,7 @@ internal class RemoteCardAccountRangeSource(
     private val requestOptions: ApiRequest.Options,
     private val cardAccountRangeStore: CardAccountRangeStore,
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
-    private val analyticsRequestFactory: AnalyticsRequestFactory
+    private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory
 ) : CardAccountRangeSource {
 
     private val _loading = MutableStateFlow(false)
@@ -54,7 +54,7 @@ internal class RemoteCardAccountRangeSource(
 
     private fun onCardMetadataMissingRange() {
         analyticsRequestExecutor.executeAsync(
-            analyticsRequestFactory.createRequest(AnalyticsEvent.CardMetadataMissingRange)
+            paymentAnalyticsRequestFactory.createRequest(PaymentAnalyticsEvent.CardMetadataMissingRange)
         )
     }
 }

@@ -7,6 +7,7 @@ import com.stripe.android.ApiVersion
 import com.stripe.android.AppInfo
 import com.stripe.android.AppInfoFixtures
 import com.stripe.android.Stripe
+import com.stripe.android.core.networking.StripeRequest
 import com.stripe.android.networking.RequestHeadersFactory.Companion.HEADER_ACCEPT
 import com.stripe.android.networking.RequestHeadersFactory.Companion.HEADER_ACCEPT_CHARSET
 import com.stripe.android.networking.RequestHeadersFactory.Companion.HEADER_ACCEPT_LANGUAGE

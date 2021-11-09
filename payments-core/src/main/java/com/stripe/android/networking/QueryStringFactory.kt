@@ -1,6 +1,6 @@
 package com.stripe.android.networking
 
-import com.stripe.android.exception.InvalidRequestException
+import com.stripe.android.core.exception.InvalidRequestException
 import java.io.UnsupportedEncodingException
 import java.net.URLEncoder
 import java.util.HashMap
