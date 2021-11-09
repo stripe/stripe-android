@@ -10,6 +10,8 @@ import com.stripe.android.paymentsheet.elements.RowElement
 import com.stripe.android.paymentsheet.elements.SectionSingleFieldElement
 import com.stripe.android.paymentsheet.elements.SimpleTextFieldController
 import com.stripe.android.paymentsheet.elements.SimpleTextSpec
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.test.runBlockingTest
 import org.junit.Test
 import java.io.File
 import java.security.InvalidParameterException
@@ -17,7 +19,7 @@ import java.security.InvalidParameterException
 class TransformAddressToElementTest {
 
     @Test
-    fun `Read US Json`() {
+    fun `Read US Json`() = runBlockingTest {
         val addressSchema = readFile("src/main/assets/addressinfo/US.json")!!
         val simpleTextList = addressSchema.transformToElementList()
 
@@ -85,7 +87,7 @@ class TransformAddressToElementTest {
         )
     }
 
-    private fun verifySimpleTextSpecInTextFieldController(
+    private suspend fun verifySimpleTextSpecInTextFieldController(
         textElement: SectionSingleFieldElement,
         simpleTextSpec: SimpleTextSpec
     ) {
@@ -96,7 +98,7 @@ class TransformAddressToElementTest {
         assertThat(actualController.keyboardType).isEqualTo(
             simpleTextSpec.keyboardType
         )
-        assertThat(actualController.label).isEqualTo(
+        assertThat(actualController.label.first()).isEqualTo(
             simpleTextSpec.label
         )
     }
