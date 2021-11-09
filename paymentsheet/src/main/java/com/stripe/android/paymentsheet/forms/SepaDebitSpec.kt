@@ -8,10 +8,10 @@ import com.stripe.android.paymentsheet.elements.EmailSpec
 import com.stripe.android.paymentsheet.elements.IbanSpec
 import com.stripe.android.paymentsheet.elements.IdentifierSpec
 import com.stripe.android.paymentsheet.elements.LayoutSpec
-import com.stripe.android.paymentsheet.elements.MandateTextSpec
 import com.stripe.android.paymentsheet.elements.SaveForFutureUseSpec
 import com.stripe.android.paymentsheet.elements.SectionSpec
 import com.stripe.android.paymentsheet.elements.SimpleTextSpec
+import com.stripe.android.paymentsheet.elements.StaticTextSpec
 import com.stripe.android.paymentsheet.elements.billingParams
 
 internal val SepaDebitRequirement = PaymentMethodRequirements(
@@ -82,7 +82,7 @@ internal val sepaDebitIbanSection = SectionSpec(
     IdentifierSpec.Generic("iban_section"),
     IbanSpec
 )
-internal val sepaDebitMandate = MandateTextSpec(
+internal val sepaDebitMandate = StaticTextSpec(
     IdentifierSpec.Generic("mandate"),
     R.string.stripe_paymentsheet_sepa_mandate,
     Color.Gray

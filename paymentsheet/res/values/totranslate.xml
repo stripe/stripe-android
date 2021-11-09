@@ -5,5 +5,8 @@
     -->
     <string name="card_number_longer_than_expected">The card number is longer than expected, but you can still submit it.</string>
 
+    <string name="stripe_paymentsheet_payment_method_klarna">Klarna</string>
+    <string name="stripe_paymentsheet_klarna_buy_now_pay_later">Buy now or pay later with Klarna.</string>
+    <string name="stripe_paymentsheet_klarna_pay_later">Pay later with Klarna.</string>
     <string name="stripe_paymentsheet_save_for_future_payments_with_merchant_name">Save for future %s payments</string>
 </resources>

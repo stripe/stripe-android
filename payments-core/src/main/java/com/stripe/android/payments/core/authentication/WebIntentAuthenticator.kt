@@ -3,11 +3,11 @@ package com.stripe.android.payments.core.authentication
 import com.stripe.android.PaymentBrowserAuthStarter
 import com.stripe.android.StripePaymentController
 import com.stripe.android.auth.PaymentBrowserAuthContract
+import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.networking.AnalyticsEvent
-import com.stripe.android.networking.AnalyticsRequestExecutor
-import com.stripe.android.networking.AnalyticsRequestFactory
 import com.stripe.android.networking.ApiRequest
+import com.stripe.android.networking.PaymentAnalyticsEvent
+import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.payments.core.injection.ENABLE_LOGGING
 import com.stripe.android.payments.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.payments.core.injection.UIContext
@@ -26,7 +26,7 @@ import kotlin.coroutines.CoroutineContext
 internal class WebIntentAuthenticator @Inject constructor(
     private val paymentBrowserAuthStarterFactory: (AuthActivityStarterHost) -> PaymentBrowserAuthStarter,
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
-    private val analyticsRequestFactory: AnalyticsRequestFactory,
+    private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
     @Named(ENABLE_LOGGING) private val enableLogging: Boolean,
     @UIContext private val uiContext: CoroutineContext,
     private val threeDs1IntentReturnUrlMap: MutableMap<String, String>,
@@ -53,22 +53,22 @@ internal class WebIntentAuthenticator @Inject constructor(
                 // 3D-Secure requires cancelling the source when the user cancels auth (AUTHN-47)
                 shouldCancelSource = true
                 analyticsRequestExecutor.executeAsync(
-                    analyticsRequestFactory.createRequest(
-                        AnalyticsEvent.Auth3ds1Sdk
+                    paymentAnalyticsRequestFactory.createRequest(
+                        PaymentAnalyticsEvent.Auth3ds1Sdk
                     )
                 )
             }
             // can only triggered when `use_stripe_sdk=false`
             is StripeIntent.NextActionData.RedirectToUrl -> {
                 analyticsRequestExecutor.executeAsync(
-                    analyticsRequestFactory.createRequest(AnalyticsEvent.AuthRedirect)
+                    paymentAnalyticsRequestFactory.createRequest(PaymentAnalyticsEvent.AuthRedirect)
                 )
                 authUrl = nextActionData.url.toString()
                 returnUrl = nextActionData.returnUrl
             }
             is StripeIntent.NextActionData.AlipayRedirect -> {
                 analyticsRequestExecutor.executeAsync(
-                    analyticsRequestFactory.createRequest(AnalyticsEvent.AuthRedirect)
+                    paymentAnalyticsRequestFactory.createRequest(PaymentAnalyticsEvent.AuthRedirect)
                 )
                 authUrl = nextActionData.webViewUrl.toString()
                 returnUrl = nextActionData.returnUrl

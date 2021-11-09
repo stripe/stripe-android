@@ -1,9 +1,12 @@
 package com.stripe.android.networking
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.networking.RequestId
+import com.stripe.android.core.networking.StripeResponse
+import com.stripe.android.core.networking.StripeResponse.Companion.HEADER_REQUEST_ID
+import com.stripe.android.core.networking.responseJson
 import com.stripe.android.exception.APIException
 import com.stripe.android.networking.RequestHeadersFactory.Companion.HEADER_CONTENT_TYPE
-import com.stripe.android.networking.StripeResponse.Companion.HEADER_REQUEST_ID
 import kotlin.test.Test
 import kotlin.test.assertFailsWith
 
@@ -40,14 +43,14 @@ class StripeResponseTest {
     @Test
     fun responseJson_withNonJsonBody_shouldThrowApiException() {
         val exception = assertFailsWith<APIException> {
-            StripeResponse(
+            StripeResponse<String>(
                 code = 500,
                 body = "there was an error",
                 headers = mapOf(
                     HEADER_REQUEST_ID to listOf("req_12345"),
                     HEADER_CONTENT_TYPE to listOf("text/plain")
                 )
-            ).responseJson
+            ).responseJson()
         }
         val expectedMessage =
             """

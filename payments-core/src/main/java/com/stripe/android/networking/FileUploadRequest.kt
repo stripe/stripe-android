@@ -2,8 +2,9 @@ package com.stripe.android.networking
 
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.AppInfo
+import com.stripe.android.core.networking.StripeRequest
+import com.stripe.android.core.networking.StripeRequest.MimeType
 import com.stripe.android.model.StripeFileParams
-import com.stripe.android.networking.StripeRequest.MimeType
 import java.io.OutputStream
 import java.io.PrintWriter
 import java.net.URLConnection

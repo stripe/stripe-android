@@ -22,9 +22,9 @@ import com.stripe.android.paymentsheet.elements.IbanConfig
 import com.stripe.android.paymentsheet.elements.IbanElement
 import com.stripe.android.paymentsheet.elements.IbanSpec
 import com.stripe.android.paymentsheet.elements.IdentifierSpec
+import com.stripe.android.paymentsheet.elements.KlarnaCountrySpec
+import com.stripe.android.paymentsheet.elements.KlarnaHelper
 import com.stripe.android.paymentsheet.elements.LayoutSpec
-import com.stripe.android.paymentsheet.elements.MandateTextElement
-import com.stripe.android.paymentsheet.elements.MandateTextSpec
 import com.stripe.android.paymentsheet.elements.ResourceRepository
 import com.stripe.android.paymentsheet.elements.SaveForFutureUseController
 import com.stripe.android.paymentsheet.elements.SaveForFutureUseElement
@@ -40,6 +40,9 @@ import com.stripe.android.paymentsheet.elements.SimpleTextElement
 import com.stripe.android.paymentsheet.elements.SimpleTextFieldConfig
 import com.stripe.android.paymentsheet.elements.SimpleTextFieldController
 import com.stripe.android.paymentsheet.elements.SimpleTextSpec
+import com.stripe.android.paymentsheet.elements.StaticTextElement
+import com.stripe.android.paymentsheet.elements.StaticTextSpec
+import com.stripe.android.paymentsheet.elements.TextFieldController
 import com.stripe.android.paymentsheet.model.Amount
 import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.getValue
@@ -61,7 +64,7 @@ internal class TransformSpecToElement @Inject constructor(
             when (it) {
                 is SaveForFutureUseSpec -> it.transform(initialValues)
                 is SectionSpec -> it.transform(initialValues)
-                is MandateTextSpec -> it.transform(initialValues.merchantName)
+                is StaticTextSpec -> it.transform(initialValues.merchantName)
                 is AfterpayClearpaySpec ->
                     it.transform(requireNotNull(initialValues.amount))
             }
@@ -98,6 +101,10 @@ internal class TransformSpecToElement @Inject constructor(
                 is CountrySpec -> it.transform(
                     initialValues.billingDetails?.address?.country
                 )
+                is KlarnaCountrySpec -> it.transform(
+                    initialValues.amount?.currencyCode,
+                    initialValues.billingDetails?.address?.country
+                )
                 is CardDetailsSpec -> transformCreditDetail()
                 is CardBillingSpec -> transformCreditBilling()
             }
@@ -119,16 +126,18 @@ internal class TransformSpecToElement @Inject constructor(
         resourceRepository.addressRepository
     )
 
-    private fun MandateTextSpec.transform(merchantName: String) =
+    private fun StaticTextSpec.transform(merchantName: String) =
         /**
          * It could be argued that the static text should have a controller, but
          * since it doesn't provide a form field we leave it out for now
          */
-        MandateTextElement(
+        StaticTextElement(
             this.identifier,
             this.stringResId,
             this.color,
-            merchantName
+            merchantName,
+            this.fontSizeSp,
+            this.letterSpacingSp
         )
 
     private fun EmailSpec.transform(email: String?) =
@@ -147,6 +156,14 @@ internal class TransformSpecToElement @Inject constructor(
         CountryElement(
             this.identifier,
             DropdownFieldController(CountryConfig(this.onlyShowCountryCodes), country)
+        )
+
+    private fun KlarnaCountrySpec.transform(currencyCode: String?, country: String?) =
+        CountryElement(
+            this.identifier,
+            DropdownFieldController(
+                CountryConfig(KlarnaHelper.getAllowedCountriesForCurrency(currencyCode)), country
+            )
         )
 
     private fun BankDropdownSpec.transform() =

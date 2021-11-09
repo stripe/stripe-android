@@ -7,7 +7,8 @@ import androidx.activity.ComponentActivity
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.StripePaymentController.Companion.EXPAND_PAYMENT_METHOD
-import com.stripe.android.exception.InvalidRequestException
+import com.stripe.android.core.exception.InvalidRequestException
+import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.model.AlipayAuthResult
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentIntent
@@ -18,9 +19,8 @@ import com.stripe.android.model.SourceFixtures
 import com.stripe.android.model.Stripe3ds2Fixtures
 import com.stripe.android.networking.AbsFakeStripeRepository
 import com.stripe.android.networking.AlipayRepository
-import com.stripe.android.networking.AnalyticsRequestExecutor
-import com.stripe.android.networking.AnalyticsRequestFactory
 import com.stripe.android.networking.ApiRequest
+import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.stripe3ds2.transaction.SdkTransactionId
 import com.stripe.android.stripe3ds2.transaction.Transaction
@@ -58,7 +58,7 @@ internal class StripePaymentControllerTest {
     private val stripeRepository = FakeStripeRepository()
 
     private val context: Context = ApplicationProvider.getApplicationContext()
-    private val analyticsRequestFactory = AnalyticsRequestFactory(
+    private val analyticsRequestFactory = PaymentAnalyticsRequestFactory(
         context,
         ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
     )
@@ -229,7 +229,7 @@ internal class StripePaymentControllerTest {
             false,
             workContext = testDispatcher,
             analyticsRequestExecutor = analyticsRequestExecutor,
-            analyticsRequestFactory = analyticsRequestFactory,
+            paymentAnalyticsRequestFactory = analyticsRequestFactory,
             alipayRepository = alipayRepository,
             uiContext = testDispatcher
         )

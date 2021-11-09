@@ -1,6 +1,6 @@
 package com.stripe.android.networking
 
-internal const val HTTP_TOO_MANY_REQUESTS = 429
+import com.stripe.android.core.networking.HTTP_TOO_MANY_REQUESTS
 
 /**
  * Payment will only retry if server responses with [HTTP_TOO_MANY_REQUESTS].
