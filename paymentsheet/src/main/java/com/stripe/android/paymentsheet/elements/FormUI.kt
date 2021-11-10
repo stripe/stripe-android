@@ -3,10 +3,9 @@ package com.stripe.android.paymentsheet.elements
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
-import androidx.lifecycle.asLiveData
 import com.stripe.android.paymentsheet.forms.FormViewModel
 import kotlinx.coroutines.flow.Flow
 
@@ -25,20 +24,19 @@ internal fun FormInternal(
     enabledFlow: Flow<Boolean>,
     elements: List<FormElement>
 ) {
-    val hiddenIdentifiers by hiddenIdentifiersFlow.asLiveData().observeAsState(
+    val hiddenIdentifiers by hiddenIdentifiersFlow.collectAsState(
         null
     )
-    val enabled by enabledFlow.asLiveData().observeAsState(true)
+    val enabled by enabledFlow.collectAsState(true)
 
-    if (hiddenIdentifiers != null) {
+    hiddenIdentifiers?.let {
         Column(
-            modifier = Modifier
-                .fillMaxWidth(1f)
+            modifier = Modifier.fillMaxWidth(1f)
         ) {
             elements.forEach { element ->
-                if (hiddenIdentifiers?.contains(element.identifier) == false) {
+                if (!it.contains(element.identifier)) {
                     when (element) {
-                        is SectionElement -> SectionElementUI(enabled, element, hiddenIdentifiers)
+                        is SectionElement -> SectionElementUI(enabled, element, it)
                         is StaticTextElement -> StaticElementUI(element)
                         is SaveForFutureUseElement -> SaveForFutureUseElementUI(enabled, element)
                         is AfterpayClearpayHeaderElement -> AfterpayClearpayElementUI(
