@@ -44,7 +44,7 @@ Table of contents
 **Localized**: We support the following localizations: Bulgarian, Chinese (Hong Kong), Chinese (Simplified), Chinese (Traditional), Czech, Danish, Dutch, English (US), English (United Kingdom), Estonian, Finnish, French, French (Canada), German, Greek, Hungarian, Italian, Japanese, Korean, Latvian, Lithuanian, Maltese, Norwegian Bokmål, Polish, Portuguese (Brazil), Portuguese, Romanian, Russian, Slovak, Slovenian, Spanish, Spanish (Latin America), Swedish, and Turkish.
 
 **Recommended usage**
-If you're selling digital products or services that will be consumed within your app, (e.g. subscriptions, in-game currencies, game levels, access to premium content, or unlocking a full version), you must use Googles's in-app purchase APIs. See the [Google Play Billing](https://developer.android.com/distribute/play-billing) for more information. For all other scenarios you can use this SDK to process payments via Stripe.
+If you're selling digital products or services that will be consumed within your app, (e.g. subscriptions, in-game currencies, game levels, access to premium content, or unlocking a full version), and you plan to distribute it through the Google Play Store, you must use Googles's in-app purchase APIs. See the [Google Play Billing](https://developer.android.com/distribute/play-billing) for more information. For all other scenarios you can use this SDK to process payments via Stripe.
 
 ## Releases
 * The [changelog](CHANGELOG.md) provides a summary of changes in each release.
