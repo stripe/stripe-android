@@ -29,14 +29,14 @@ internal fun FormInternal(
     )
     val enabled by enabledFlow.collectAsState(true)
 
-    if (hiddenIdentifiers != null) {
+    hiddenIdentifiers?.let {
         Column(
             modifier = Modifier.fillMaxWidth(1f)
         ) {
             elements.forEach { element ->
-                if (hiddenIdentifiers?.contains(element.identifier) == false) {
+                if (!it.contains(element.identifier)) {
                     when (element) {
-                        is SectionElement -> SectionElementUI(enabled, element, hiddenIdentifiers)
+                        is SectionElement -> SectionElementUI(enabled, element, it)
                         is StaticTextElement -> StaticElementUI(element)
                         is SaveForFutureUseElement -> SaveForFutureUseElementUI(enabled, element)
                         is AfterpayClearpayElement -> AfterpayClearpayElementUI(
