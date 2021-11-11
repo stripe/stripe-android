@@ -16,12 +16,12 @@ internal fun AddressElementUI(
     hiddenIdentifiers: List<IdentifierSpec>?
 ) {
     val fields by controller.fieldsFlowable.collectAsState(null)
-    if (fields != null) {
+    fields?.let { fieldList ->
         Column {
-            fields!!.forEachIndexed { index, field ->
+            fieldList.forEachIndexed { index, field ->
                 SectionFieldElementUI(enabled, field, hiddenIdentifiers = hiddenIdentifiers)
                 if ((hiddenIdentifiers?.contains(field.identifier) == false) &&
-                    (index != fields!!.size - 1)
+                    (index != fieldList.size - 1)
                 ) {
                     val cardStyle = CardStyle(isSystemInDarkTheme())
                     Divider(
