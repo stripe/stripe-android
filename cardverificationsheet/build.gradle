@@ -82,7 +82,7 @@ configurations {
 }
 
 dependencies {
-    implementation "org.tensorflow:tensorflow-lite:2.6.0"
+    implementation "org.tensorflow:tensorflow-lite:2.7.0"
 
     implementation libraries.androidx.appcompat
     implementation libraries.androidx.constraintlayout
