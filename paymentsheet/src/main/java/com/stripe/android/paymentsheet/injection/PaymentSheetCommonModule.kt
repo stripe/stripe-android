@@ -38,7 +38,7 @@ internal abstract class PaymentSheetCommonModule {
     abstract fun bindsCustomerRepository(repository: CustomerApiRepository): CustomerRepository
 
     @Binds
-    abstract fun provideResourceRepository(asyncResourceRepository: AsyncResourceRepository):
+    abstract fun bindsResourceRepository(asyncResourceRepository: AsyncResourceRepository):
         ResourceRepository
 
     @Binds

@@ -52,7 +52,7 @@ internal class TransformSpecToElement @Inject constructor(
     private val resourceRepository: ResourceRepository,
     private val initialValues: FormFragmentArguments
 ) {
-    internal suspend fun transform(
+    internal fun transform(
         list: List<FormItemSpec>
     ): List<FormElement> =
         list.map {
@@ -65,7 +65,7 @@ internal class TransformSpecToElement @Inject constructor(
             }
         }
 
-    private suspend fun SectionSpec.transform(
+    private fun SectionSpec.transform(
         initialValues: FormFragmentArguments
     ): SectionElement {
         val fieldElements = this.fields.transform(initialValues)
@@ -85,7 +85,7 @@ internal class TransformSpecToElement @Inject constructor(
     /**
      * This function will transform a list of specs into a list of elements
      */
-    private suspend fun List<SectionFieldSpec>.transform(initialValues: FormFragmentArguments) =
+    private fun List<SectionFieldSpec>.transform(initialValues: FormFragmentArguments) =
         this.map {
             when (it) {
                 is EmailSpec -> it.transform(initialValues.billingDetails?.email)
@@ -103,7 +103,7 @@ internal class TransformSpecToElement @Inject constructor(
             }
         }
 
-    private suspend fun transformAddress(initialValues: FormFragmentArguments) =
+    private fun transformAddress(initialValues: FormFragmentArguments) =
         AddressElement(
             IdentifierSpec.Generic("billing"),
             resourceRepository.getAddressRepository(),
@@ -148,7 +148,7 @@ internal class TransformSpecToElement @Inject constructor(
             )
         )
 
-    private suspend fun BankDropdownSpec.transform() =
+    private fun BankDropdownSpec.transform() =
         SimpleDropdownElement(
             this.identifier,
             DropdownFieldController(

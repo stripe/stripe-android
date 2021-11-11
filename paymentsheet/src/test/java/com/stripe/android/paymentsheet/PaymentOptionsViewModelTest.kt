@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet
 
 import android.app.Application
+import android.content.Context
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
@@ -16,7 +17,10 @@ import com.stripe.android.payments.core.injection.Injectable
 import com.stripe.android.payments.core.injection.Injector
 import com.stripe.android.payments.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.paymentsheet.PaymentOptionsViewModel.TransitionTarget
+import com.stripe.android.paymentsheet.address.AddressFieldElementRepository
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.elements.BankRepository
+import com.stripe.android.paymentsheet.forms.resources.StaticResourceRepository
 import com.stripe.android.paymentsheet.injection.PaymentOptionsViewModelSubcomponent
 import com.stripe.android.paymentsheet.model.FragmentConfigFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -56,6 +60,15 @@ internal class PaymentOptionsViewModelTest {
     private val prefsRepository = FakePrefsRepository()
     private val customerRepository = FakeCustomerRepository()
     private val paymentMethodRepository = FakeCustomerRepository(PAYMENT_METHOD_REPOSITORY_PARAMS)
+    private val resourceRepository =
+        StaticResourceRepository(
+            BankRepository(
+                ApplicationProvider.getApplicationContext<Context>().resources
+            ),
+            AddressFieldElementRepository(
+                ApplicationProvider.getApplicationContext<Context>().resources
+            )
+        )
 
     private val viewModel = PaymentOptionsViewModel(
         args = PAYMENT_OPTION_CONTRACT_ARGS,
@@ -65,7 +78,8 @@ internal class PaymentOptionsViewModelTest {
         workContext = testDispatcher,
         application = ApplicationProvider.getApplicationContext(),
         logger = Logger.noop(),
-        injectorKey = DUMMY_INJECTOR_KEY
+        injectorKey = DUMMY_INJECTOR_KEY,
+        resourceRepository = resourceRepository
     )
 
     @BeforeTest
@@ -151,7 +165,8 @@ internal class PaymentOptionsViewModelTest {
             workContext = testDispatcher,
             application = ApplicationProvider.getApplicationContext(),
             logger = Logger.noop(),
-            injectorKey = DUMMY_INJECTOR_KEY
+            injectorKey = DUMMY_INJECTOR_KEY,
+            resourceRepository = resourceRepository
         )
 
         var transitionTarget: BaseSheetViewModel.Event<TransitionTarget?>? = null
@@ -180,7 +195,8 @@ internal class PaymentOptionsViewModelTest {
             workContext = testDispatcher,
             application = ApplicationProvider.getApplicationContext(),
             logger = Logger.noop(),
-            injectorKey = DUMMY_INJECTOR_KEY
+            injectorKey = DUMMY_INJECTOR_KEY,
+            resourceRepository = resourceRepository
         )
 
         val transitionTarget = mutableListOf<BaseSheetViewModel.Event<TransitionTarget?>>()
@@ -209,7 +225,8 @@ internal class PaymentOptionsViewModelTest {
             workContext = testDispatcher,
             application = ApplicationProvider.getApplicationContext(),
             logger = Logger.noop(),
-            injectorKey = DUMMY_INJECTOR_KEY
+            injectorKey = DUMMY_INJECTOR_KEY,
+            resourceRepository = resourceRepository
         )
 
         val transitionTarget = mutableListOf<BaseSheetViewModel.Event<TransitionTarget?>>()
@@ -238,7 +255,8 @@ internal class PaymentOptionsViewModelTest {
             workContext = testDispatcher,
             application = ApplicationProvider.getApplicationContext(),
             logger = Logger.noop(),
-            injectorKey = DUMMY_INJECTOR_KEY
+            injectorKey = DUMMY_INJECTOR_KEY,
+            resourceRepository = resourceRepository
         )
 
         viewModel.removePaymentMethod(cards[1])

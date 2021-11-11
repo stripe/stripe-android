@@ -7,6 +7,14 @@ import com.stripe.android.paymentsheet.elements.BankRepository
  * Interface that provides all resources needed by the forms.
  */
 internal interface ResourceRepository {
-    suspend fun getBankRepository(): BankRepository
-    suspend fun getAddressRepository(): AddressFieldElementRepository
+    /**
+     * Suspend function that will wait for all resources to be loaded.
+     * Must be called before trying to get any of the repositories.
+     */
+    suspend fun waitUntilLoaded()
+
+    fun isLoaded(): Boolean
+
+    fun getBankRepository(): BankRepository
+    fun getAddressRepository(): AddressFieldElementRepository
 }

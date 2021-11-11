@@ -38,8 +38,8 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetResult
 import com.stripe.android.paymentsheet.PaymentSheetResultCallback
 import com.stripe.android.paymentsheet.analytics.EventReporter
-import com.stripe.android.paymentsheet.forms.resources.ResourceRepository
 import com.stripe.android.paymentsheet.forms.FormViewModel
+import com.stripe.android.paymentsheet.forms.resources.ResourceRepository
 import com.stripe.android.paymentsheet.injection.DaggerFlowControllerComponent
 import com.stripe.android.paymentsheet.injection.FlowControllerComponent
 import com.stripe.android.paymentsheet.model.ClientSecret
@@ -53,6 +53,7 @@ import com.stripe.android.paymentsheet.model.SetupIntentClientSecret
 import com.stripe.android.paymentsheet.validate
 import dagger.Lazy
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -63,6 +64,7 @@ import javax.inject.Named
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
+@FlowPreview
 @Singleton
 internal class DefaultFlowController @Inject internal constructor(
     // Properties provided through FlowControllerComponent.Builder
@@ -80,7 +82,7 @@ internal class DefaultFlowController @Inject internal constructor(
     private val viewModel: FlowControllerViewModel,
     private val paymentLauncherFactory: StripePaymentLauncherAssistedFactory,
     // even though unused this forces Dagger to initialize it here.
-    resourceRepository: ResourceRepository,
+    private val resourceRepository: ResourceRepository,
     /**
      * [PaymentConfiguration] is [Lazy] because the client might set publishableKey and
      * stripeAccountId after creating a [DefaultFlowController].
@@ -193,6 +195,9 @@ internal class DefaultFlowController @Inject internal constructor(
                 clientSecret,
                 configuration
             )
+
+            // Wait until all required resources are loaded before completing initialization.
+            resourceRepository.waitUntilLoaded()
 
             if (isActive) {
                 dispatchResult(result, callback)

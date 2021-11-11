@@ -10,11 +10,17 @@ internal class StaticResourceRepository(
     private val bankRepository: BankRepository,
     private val addressRepository: AddressFieldElementRepository
 ) : ResourceRepository {
-    override suspend fun getBankRepository(): BankRepository {
+    override suspend fun waitUntilLoaded() {
+        // Nothing to do since everything is pre-loaded
+    }
+
+    override fun isLoaded() = true
+
+    override fun getBankRepository(): BankRepository {
         return bankRepository
     }
 
-    override suspend fun getAddressRepository(): AddressFieldElementRepository {
+    override fun getAddressRepository(): AddressFieldElementRepository {
         return addressRepository
     }
 }

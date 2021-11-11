@@ -31,9 +31,9 @@ import com.stripe.android.paymentsheet.forms.resources.StaticResourceRepository
 import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.test.runBlockingTest
 import org.junit.Assert.assertNotNull
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -48,6 +48,7 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.shadows.ShadowLooper
 import javax.inject.Provider
 
+@FlowPreview
 @RunWith(RobolectricTestRunner::class)
 internal class FormViewModelTest {
     private val emailSection =
@@ -102,7 +103,7 @@ internal class FormViewModelTest {
 
     @OptIn(ExperimentalCoroutinesApi::class)
     @Test
-    fun `Factory gets initialized with fallback when no Injector is available`() = runBlockingTest {
+    fun `Factory gets initialized with fallback when no Injector is available`() = runBlocking {
         val config = COMPOSE_FRAGMENT_ARGS.copy(injectorKey = DUMMY_INJECTOR_KEY)
         val factory = FormViewModel.Factory(
             config,
@@ -119,7 +120,7 @@ internal class FormViewModelTest {
     }
 
     @Test
-    fun `Verify setting save for future use`() {
+    fun `Verify setting save for future use`() = runBlocking {
         val args = COMPOSE_FRAGMENT_ARGS
         val formViewModel = FormViewModel(
             LayoutSpec.create(
@@ -132,7 +133,7 @@ internal class FormViewModelTest {
             transformSpecToElement = TransformSpecToElement(resourceRepository, args)
         )
 
-        val values = mutableListOf<Boolean>()
+        val values = mutableListOf<Boolean?>()
         formViewModel.saveForFutureUse.asLiveData()
             .observeForever {
                 values.add(it)
@@ -173,7 +174,7 @@ internal class FormViewModelTest {
     }
 
     @Test
-    fun `Verify setting section as hidden sets sub-fields as hidden as well`() {
+    fun `Verify setting section as hidden sets sub-fields as hidden as well`() = runBlocking {
         val args = COMPOSE_FRAGMENT_ARGS
         val formViewModel = FormViewModel(
             LayoutSpec.create(
@@ -219,7 +220,7 @@ internal class FormViewModelTest {
                 transformSpecToElement = TransformSpecToElement(resourceRepository, args)
             )
 
-            val saveForFutureUseController = formViewModel.elements.map { it.controller }
+            val saveForFutureUseController = formViewModel.elements.first()!!.map { it.controller }
                 .filterIsInstance(SaveForFutureUseController::class.java).first()
             val emailController =
                 getSectionFieldTextControllerWithLabel(formViewModel, R.string.email)
@@ -260,7 +261,7 @@ internal class FormViewModelTest {
                 transformSpecToElement = TransformSpecToElement(resourceRepository, args)
             )
 
-            val saveForFutureUseController = formViewModel.elements.map { it.controller }
+            val saveForFutureUseController = formViewModel.elements.first()!!.map { it.controller }
                 .filterIsInstance(SaveForFutureUseController::class.java).first()
             val emailController =
                 getSectionFieldTextControllerWithLabel(formViewModel, R.string.email)
@@ -492,11 +493,11 @@ internal class FormViewModelTest {
         }
     }
 
-    private fun getSectionFieldTextControllerWithLabel(
+    private suspend fun getSectionFieldTextControllerWithLabel(
         formViewModel: FormViewModel,
         @StringRes label: Int
     ) =
-        formViewModel.elements
+        formViewModel.elements.first()!!
             .filterIsInstance<SectionElement>()
             .flatMap { it.fields }
             .filterIsInstance<SectionSingleFieldElement>()
@@ -541,7 +542,7 @@ internal class FormViewModelTest {
             formViewModel: FormViewModel,
             @StringRes label: Int
         ): TextFieldController? {
-            val addressElementFields = formViewModel.elements
+            val addressElementFields = formViewModel.elements.first()!!
                 .filterIsInstance<SectionElement>()
                 .flatMap { it.fields }
                 .filterIsInstance<AddressElement>()

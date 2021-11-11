@@ -60,6 +60,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
     override val messageView: TextView by lazy { viewBinding.message }
     override val fragmentContainerParent: ViewGroup by lazy { viewBinding.fragmentContainerParent }
     override val testModeIndicator: TextView by lazy { viewBinding.testmode }
+    private val buttonContainer: ViewGroup by lazy { viewBinding.buttonContainer }
 
     private val currencyFormatter = CurrencyFormatter()
 
@@ -227,6 +228,8 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
                 }
             }
         }
+
+        buttonContainer.isVisible = true
     }
 
     private fun setupBuyButton() {

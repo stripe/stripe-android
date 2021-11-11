@@ -66,7 +66,7 @@ internal class TransformSpecToElementTest {
     }
 
     @Test
-    fun `Section with multiple fields contains all fields in the section element`() = runBlocking {
+    fun `Section with multiple fields contains all fields in the section element`() {
         val formElement = transformSpecToElement.transform(
             listOf(
                 SectionSpec(
@@ -86,7 +86,7 @@ internal class TransformSpecToElementTest {
     }
 
     @Test
-    fun `Adding a country section sets up the section and country elements correctly`() = runBlocking {
+    fun `Adding a country section sets up the section and country elements correctly`() {
         val countrySection = SectionSpec(
             IdentifierSpec.Generic("country_section"),
             CountrySpec(onlyShowCountryCodes = setOf("AT"))
@@ -110,7 +110,7 @@ internal class TransformSpecToElementTest {
     }
 
     @Test
-    fun `Adding a ideal bank section sets up the section and country elements correctly`() = runBlocking {
+    fun `Adding a ideal bank section sets up the section and country elements correctly`() {
         val idealSection = SectionSpec(
             IdentifierSpec.Generic("ideal_section"),
             IDEAL_BANK_CONFIG
@@ -131,7 +131,7 @@ internal class TransformSpecToElementTest {
     }
 
     @Test
-    fun `Add a name section spec sets up the name element correctly`() = runBlocking {
+    fun `Add a name section spec sets up the name element correctly`() {
         val formElement = transformSpecToElement.transform(
             listOf(nameSection)
         )
@@ -148,7 +148,7 @@ internal class TransformSpecToElementTest {
     }
 
     @Test
-    fun `Add a simple text section spec sets up the text element correctly`() = runBlocking {
+    fun `Add a simple text section spec sets up the text element correctly`() {
         val formElement = transformSpecToElement.transform(
             listOf(
                 SectionSpec(
@@ -174,7 +174,7 @@ internal class TransformSpecToElementTest {
     }
 
     @Test
-    fun `Add a email section spec sets up the email element correctly`() = runBlocking {
+    fun `Add a email section spec sets up the email element correctly`() {
         val formElement = transformSpecToElement.transform(
             listOf(emailSection)
         )
@@ -188,7 +188,7 @@ internal class TransformSpecToElementTest {
     }
 
     @Test
-    fun `Add a static text section spec setup of the static element correctly`() = runBlocking {
+    fun `Add a static text section spec setup of the static element correctly`() {
         val staticText = StaticTextSpec(
             IdentifierSpec.Generic("mandate"),
             stringResId = R.string.stripe_paymentsheet_sepa_mandate,

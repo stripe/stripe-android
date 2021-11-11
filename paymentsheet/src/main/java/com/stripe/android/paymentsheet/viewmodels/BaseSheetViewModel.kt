@@ -22,6 +22,7 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetActivity
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.forms.resources.ResourceRepository
 import com.stripe.android.paymentsheet.model.Amount
 import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -48,7 +49,8 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     protected val prefsRepository: PrefsRepository,
     protected val workContext: CoroutineContext = Dispatchers.IO,
     protected val logger: Logger,
-    @InjectorKey val injectorKey: String
+    @InjectorKey val injectorKey: String,
+    resourceRepository: ResourceRepository
 ) : AndroidViewModel(application) {
     internal val customerConfig = config?.customer
     internal val merchantName = config?.merchantDisplayName
@@ -60,6 +62,10 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     @VisibleForTesting
     internal val _isGooglePayReady = MutableLiveData<Boolean>()
     internal val isGooglePayReady: LiveData<Boolean> = _isGooglePayReady.distinctUntilChanged()
+
+    internal val _isResourceRepositoryReady = MutableLiveData<Boolean>()
+    internal val isResourceRepositoryReady: LiveData<Boolean> =
+        _isResourceRepositoryReady.distinctUntilChanged()
 
     private val _stripeIntent = MutableLiveData<StripeIntent?>()
     internal val stripeIntent: LiveData<StripeIntent?> = _stripeIntent
@@ -142,6 +148,11 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
             }
             _savedSelection.value = savedSelection
         }
+
+        viewModelScope.launch {
+            resourceRepository.waitUntilLoaded()
+            _isResourceRepositoryReady.value = true
+        }
     }
 
     val fragmentConfigEvent = MediatorLiveData<FragmentConfig?>().apply {
@@ -149,7 +160,8 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
             savedSelection,
             stripeIntent,
             paymentMethods,
-            isGooglePayReady
+            isGooglePayReady,
+            isResourceRepositoryReady
         ).forEach { source ->
             addSource(source) {
                 value = createFragmentConfig()
@@ -162,6 +174,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     private fun createFragmentConfig(): FragmentConfig? {
         val stripeIntentValue = stripeIntent.value
         val isGooglePayReadyValue = isGooglePayReady.value
+        val isResourceRepositoryReadyValue = isResourceRepositoryReady.value
         val savedSelectionValue = savedSelection.value
         // List of Payment Methods is not passed in the config but we still wait for it to be loaded
         // before adding the Fragment.
@@ -171,6 +184,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
             stripeIntentValue != null &&
             paymentMethodsValue != null &&
             isGooglePayReadyValue != null &&
+            isResourceRepositoryReadyValue != null &&
             savedSelectionValue != null
         ) {
             FragmentConfig(

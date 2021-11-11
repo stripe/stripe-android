@@ -38,5 +38,9 @@
     <dimen name="stripe_paymentsheet_add_pm_card_stroke_width">1.5dp</dimen>
     <dimen name="stripe_paymentsheet_add_pm_card_stroke_width_selected">2dp</dimen>
 
+    <dimen name="stripe_paymentsheet_loading_container_height">100dp</dimen>
+    <dimen name="stripe_paymentsheet_loading_indicator_size">24dp</dimen>
+    <dimen name="stripe_paymentsheet_loading_indicator_stroke_width">2dp</dimen>
+
     <!--CardFormView-->
 </resources>

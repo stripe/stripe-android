@@ -81,7 +81,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     private val stripeIntentValidator: StripeIntentValidator,
     customerRepository: CustomerRepository,
     prefsRepository: PrefsRepository,
-    // even though unused this forces Dagger to initialize it here.
     resourceRepository: ResourceRepository,
     private val paymentLauncherFactory: StripePaymentLauncherAssistedFactory,
     private val googlePayPaymentMethodLauncherFactory: GooglePayPaymentMethodLauncherFactory,
@@ -96,7 +95,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     prefsRepository = prefsRepository,
     workContext = workContext,
     logger = logger,
-    injectorKey = injectorKey
+    injectorKey = injectorKey,
+    resourceRepository = resourceRepository
 ) {
     private val confirmParamsFactory = ConfirmStripeIntentParamsFactory.createFactory(
         args.clientSecret
