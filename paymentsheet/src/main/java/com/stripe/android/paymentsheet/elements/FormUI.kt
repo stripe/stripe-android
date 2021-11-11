@@ -83,7 +83,6 @@ internal fun FormInternal(
                     R.dimen.stripe_paymentsheet_loading_indicator_stroke_width
                 )
             )
-
         }
     }
 }

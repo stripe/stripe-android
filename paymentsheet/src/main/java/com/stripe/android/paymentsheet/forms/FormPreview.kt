@@ -43,32 +43,34 @@ internal fun FormInternalPreview() {
     FormInternal(
         MutableStateFlow(emptyList()),
         MutableStateFlow(true),
-        MutableStateFlow(TransformSpecToElement(
-            StaticResourceRepository(
-                bankRepository,
-                addressFieldElementRepository
-            ),
-            FormFragmentArguments(
-                SupportedPaymentMethod.Bancontact,
-                showCheckbox = false,
-                showCheckboxControlledFields = true,
-                merchantName = "Merchant, Inc.",
-                billingDetails = PaymentSheet.BillingDetails(
-                    address = PaymentSheet.Address(
-                        line1 = "123 Main Street",
-                        line2 = null,
-                        city = "San Francisco",
-                        state = "CA",
-                        postalCode = "94111",
-                        country = "DE",
-                    ),
-                    email = "email",
-                    name = "Jenny Rosen",
-                    phone = "+18008675309"
+        MutableStateFlow(
+            TransformSpecToElement(
+                StaticResourceRepository(
+                    bankRepository,
+                    addressFieldElementRepository
                 ),
-                injectorKey = DUMMY_INJECTOR_KEY
-            )
-        ).transform(formElements))
+                FormFragmentArguments(
+                    SupportedPaymentMethod.Bancontact,
+                    showCheckbox = false,
+                    showCheckboxControlledFields = true,
+                    merchantName = "Merchant, Inc.",
+                    billingDetails = PaymentSheet.BillingDetails(
+                        address = PaymentSheet.Address(
+                            line1 = "123 Main Street",
+                            line2 = null,
+                            city = "San Francisco",
+                            state = "CA",
+                            postalCode = "94111",
+                            country = "DE",
+                        ),
+                        email = "email",
+                        name = "Jenny Rosen",
+                        phone = "+18008675309"
+                    ),
+                    injectorKey = DUMMY_INJECTOR_KEY
+                )
+            ).transform(formElements)
+        )
     )
 }
 

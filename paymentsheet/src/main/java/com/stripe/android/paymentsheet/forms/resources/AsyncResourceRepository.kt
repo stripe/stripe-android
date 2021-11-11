@@ -29,17 +29,23 @@ internal class AsyncResourceRepository @Inject constructor(
     private val loadingJobs: MutableList<Job> = mutableListOf()
 
     init {
-        loadingJobs.add(CoroutineScope(workContext).launch {
-            bankRepository = BankRepository(resources)
-        })
-        loadingJobs.add(CoroutineScope(workContext).launch {
-            addressRepository = AddressFieldElementRepository(resources)
-        })
-        loadingJobs.add(CoroutineScope(workContext).launch {
-            // Countries are also used outside of payment sheet.
-            // This will initialize the list, sort it and cache it for the given locale.
-            CountryUtils.getOrderedCountries(locale ?: Locale.US)
-        })
+        loadingJobs.add(
+            CoroutineScope(workContext).launch {
+                bankRepository = BankRepository(resources)
+            }
+        )
+        loadingJobs.add(
+            CoroutineScope(workContext).launch {
+                addressRepository = AddressFieldElementRepository(resources)
+            }
+        )
+        loadingJobs.add(
+            CoroutineScope(workContext).launch {
+                // Countries are also used outside of payment sheet.
+                // This will initialize the list, sort it and cache it for the given locale.
+                CountryUtils.getOrderedCountries(locale ?: Locale.US)
+            }
+        )
     }
 
     override suspend fun waitUntilLoaded() {
