@@ -66,7 +66,7 @@ open class PostalCodeEditText @JvmOverloads constructor(
         updateHint(R.string.address_label_zip_code)
         filters = arrayOf(InputFilter.LengthFilter(MAX_LENGTH_US))
         keyListener = DigitsKeyListener.getInstance(false, true)
-        inputType = InputType.TYPE_CLASS_NUMBER
+        setNumberOnlyInputType()
     }
 
     /**
@@ -74,7 +74,6 @@ open class PostalCodeEditText @JvmOverloads constructor(
      */
     private fun configureForGlobal() {
         updateHint(R.string.address_label_postal_code)
-        filters = arrayOf(InputFilter.LengthFilter(MAX_LENGTH_GLOBAL))
         keyListener = TextKeyListener.getInstance()
         inputType = InputType.TYPE_TEXT_VARIATION_POSTAL_ADDRESS
     }
@@ -114,7 +113,6 @@ open class PostalCodeEditText @JvmOverloads constructor(
 
     private companion object {
         private const val MAX_LENGTH_US = 5
-        private const val MAX_LENGTH_GLOBAL = 13
 
         private val ZIP_CODE_PATTERN = Pattern.compile("^[0-9]{5}$")
     }

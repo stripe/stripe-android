@@ -3,13 +3,14 @@ package com.stripe.android.payments
 import android.app.Application
 import android.content.Intent
 import android.net.Uri
+import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.auth.PaymentBrowserAuthContract
-import com.stripe.android.networking.AnalyticsRequest
-import com.stripe.android.networking.AnalyticsRequestExecutor
-import com.stripe.android.networking.AnalyticsRequestFactory
+import com.stripe.android.core.networking.AnalyticsRequest
+import com.stripe.android.core.networking.AnalyticsRequestExecutor
+import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
@@ -21,16 +22,19 @@ class StripeBrowserLauncherViewModelTest {
     private val analyticsRequestExecutor = AnalyticsRequestExecutor {
         analyticsRequests.add(it)
     }
-    private val analyticsRequestFactory = AnalyticsRequestFactory(
+    private val analyticsRequestFactory = PaymentAnalyticsRequestFactory(
         application,
         ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
     )
+
+    private val savedStateHandle = SavedStateHandle()
 
     private val viewModel = StripeBrowserLauncherViewModel(
         analyticsRequestExecutor,
         analyticsRequestFactory,
         BrowserCapabilities.CustomTabs,
-        "Verify your payment"
+        "Verify your payment",
+        savedStateHandle
     )
 
     @Test
@@ -89,12 +93,26 @@ class StripeBrowserLauncherViewModelTest {
             )
     }
 
+    @Test
+    fun `hasLaunched should set entry on savedStateHandle`() {
+        assertThat(
+            savedStateHandle.contains(StripeBrowserLauncherViewModel.KEY_HAS_LAUNCHED)
+        ).isFalse()
+
+        viewModel.hasLaunched = true
+
+        assertThat(
+            savedStateHandle.contains(StripeBrowserLauncherViewModel.KEY_HAS_LAUNCHED)
+        ).isTrue()
+    }
+
     private companion object {
         private val ARGS = PaymentBrowserAuthContract.Args(
             objectId = "pi_1F7J1aCRMbs6FrXfaJcvbxF6",
             requestCode = 50000,
             clientSecret = "pi_1F7J1aCRMbs6FrXfaJcvbxF6_secret_mIuDLsSfoo1m6s",
-            url = "https://bank.com"
+            url = "https://bank.com",
+            publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
         )
     }
 }

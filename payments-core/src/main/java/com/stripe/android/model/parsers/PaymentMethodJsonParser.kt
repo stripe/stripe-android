@@ -1,11 +1,13 @@
 package com.stripe.android.model.parsers
 
+import androidx.annotation.RestrictTo
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeJsonUtils
 import org.json.JSONObject
 
-internal class PaymentMethodJsonParser : ModelJsonParser<PaymentMethod> {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+class PaymentMethodJsonParser : ModelJsonParser<PaymentMethod> {
     override fun parse(json: JSONObject): PaymentMethod {
         val type =
             PaymentMethod.Type.fromCode(StripeJsonUtils.optString(json, FIELD_TYPE))
@@ -150,7 +152,8 @@ internal class PaymentMethodJsonParser : ModelJsonParser<PaymentMethod> {
             }
         }
 
-        internal class ThreeDSecureUsageJsonParser : ModelJsonParser<PaymentMethod.Card.ThreeDSecureUsage> {
+        internal class ThreeDSecureUsageJsonParser :
+            ModelJsonParser<PaymentMethod.Card.ThreeDSecureUsage> {
             override fun parse(json: JSONObject): PaymentMethod.Card.ThreeDSecureUsage {
                 return PaymentMethod.Card.ThreeDSecureUsage(
                     isSupported = StripeJsonUtils.optBoolean(json, FIELD_IS_SUPPORTED)

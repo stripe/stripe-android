@@ -21,11 +21,21 @@ import com.stripe.android.model.Stripe3ds2AuthParams
 import com.stripe.android.model.Stripe3ds2AuthResultFixtures
 import com.stripe.android.model.StripeFile
 import com.stripe.android.model.StripeFileParams
+import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.Token
 import com.stripe.android.model.TokenParams
 import org.json.JSONObject
+import java.util.Locale
 
-internal abstract class AbsFakeStripeRepository : StripeRepository {
+internal abstract class AbsFakeStripeRepository : StripeRepository() {
+
+    override suspend fun retrieveStripeIntent(
+        clientSecret: String,
+        options: ApiRequest.Options,
+        expandFields: List<String>
+    ): StripeIntent {
+        TODO("Not yet implemented")
+    }
 
     override suspend fun confirmPaymentIntent(
         confirmPaymentIntentParams: ConfirmPaymentIntentParams,
@@ -39,6 +49,21 @@ internal abstract class AbsFakeStripeRepository : StripeRepository {
         clientSecret: String,
         options: ApiRequest.Options,
         expandFields: List<String>
+    ): PaymentIntent? {
+        return null
+    }
+
+    override suspend fun refreshPaymentIntent(
+        clientSecret: String,
+        options: ApiRequest.Options
+    ): PaymentIntent? {
+        return null
+    }
+
+    override suspend fun retrievePaymentIntentWithOrderedPaymentMethods(
+        clientSecret: String,
+        options: ApiRequest.Options,
+        locale: Locale
     ): PaymentIntent? {
         return null
     }
@@ -63,6 +88,14 @@ internal abstract class AbsFakeStripeRepository : StripeRepository {
         clientSecret: String,
         options: ApiRequest.Options,
         expandFields: List<String>
+    ): SetupIntent? {
+        return null
+    }
+
+    override suspend fun retrieveSetupIntentWithOrderedPaymentMethods(
+        clientSecret: String,
+        options: ApiRequest.Options,
+        locale: Locale
     ): SetupIntent? {
         return null
     }

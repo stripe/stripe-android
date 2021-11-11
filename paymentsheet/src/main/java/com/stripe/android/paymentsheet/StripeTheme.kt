@@ -29,15 +29,17 @@ private val TealLight = Color(0xFF56c8d8)
 private val Purple = Color(0xFF4a148c)
 private val PurpleLight = Color(0xFF7c43bd)
 
+internal val GrayLight = Color(0xFFF8F8F8)
+
 private val StripeDarkPalette = darkColors(
     primary = Blue200,
     primaryVariant = Green400,
-    onPrimary = Color.Black,
-    secondary = Yellow400,
-    surface = Color.Black, // card background color
+    onPrimary = Color.Green,
+    secondary = Color.Gray,
+    surface = Color.Black,
     onSecondary = Color.Black,
-    onSurface = Color.White,
-    onBackground = Color.White,
+    onSurface = Color.Gray,
+    onBackground = Color.Green,
     error = Red300,
     onError = Color.Black
 )
@@ -46,9 +48,9 @@ private val StripeLightPalette = lightColors(
     primary = Color(0xFF1A1A1A),
     primaryVariant = TealLight,
     onPrimary = Color.Black,
-    secondary = Purple,
+    secondary = Color.Gray,
     secondaryVariant = PurpleLight,
-    surface = Color.White, // card background color
+    surface = Color.White,
     onSecondary = Color.Black,
     onSurface = Color.Black,
     onBackground = Color.Black,

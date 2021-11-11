@@ -6,6 +6,7 @@ import com.stripe.android.StripeIntentResult
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.model.parsers.PaymentIntentJsonParser
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
@@ -16,6 +17,28 @@ class PaymentFlowFailureMessageFactoryTest {
     private val factory = PaymentFlowFailureMessageFactory(
         ApplicationProvider.getApplicationContext()
     )
+
+    @Test
+    fun `create() with PaymentIntent with requiresAction on a card`() {
+        assertThat(
+            factory.create(
+                PaymentIntentJsonParser().parse(PaymentIntentFixtures.EXPANDED_PAYMENT_METHOD_JSON)!!,
+                StripeIntentResult.Outcome.FAILED
+            )
+        ).isEqualTo(
+            "We are unable to authenticate your payment method. Please choose a different payment method and try again."
+        )
+    }
+
+    @Test
+    fun `create() with PaymentIntent with requiresAction on oxxo`() {
+        assertThat(
+            factory.create(
+                PaymentIntentJsonParser().parse(PaymentIntentFixtures.OXXO_REQUIRES_ACTION_JSON)!!,
+                StripeIntentResult.Outcome.FAILED
+            )
+        ).isNull()
+    }
 
     @Test
     fun `create() with PaymentIntent with lastPaymentError`() {

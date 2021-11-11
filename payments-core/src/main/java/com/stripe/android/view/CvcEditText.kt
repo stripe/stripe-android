@@ -3,7 +3,6 @@ package com.stripe.android.view
 import android.content.Context
 import android.os.Build
 import android.text.InputFilter
-import android.text.InputType
 import android.util.AttributeSet
 import android.view.View
 import androidx.core.widget.doAfterTextChanged
@@ -43,7 +42,7 @@ open class CvcEditText @JvmOverloads constructor(
         maxLines = 1
         filters = createFilters(CardBrand.Unknown)
 
-        inputType = InputType.TYPE_CLASS_NUMBER
+        setNumberOnlyInputType()
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             setAutofillHints(View.AUTOFILL_HINT_CREDIT_CARD_SECURITY_CODE)

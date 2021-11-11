@@ -1,0 +1,232 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/coordinator"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <com.google.android.material.progressindicator.LinearProgressIndicator
+                android:id="@+id/progress_bar"
+                style="@style/Widget.MaterialComponents.LinearProgressIndicator"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:indeterminate="true" />
+
+            <RadioGroup
+                android:id="@+id/google_pay_environment"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginStart="8dp">
+
+                <TextView
+                    android:text="@string/google_pay_environment"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical" />
+
+                <RadioButton
+                    android:id="@+id/google_pay_environment_test"
+                    android:text="@string/google_pay_environment_test"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:checked="true" />
+
+                <RadioButton
+                    android:id="@+id/google_pay_environment_production"
+                    android:text="@string/google_pay_environment_production"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+            </RadioGroup>
+
+
+            <RadioGroup
+                android:id="@+id/google_pay_billing"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginStart="8dp">
+
+                <TextView
+                    android:text="@string/google_pay_billing"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical" />
+
+                <RadioButton
+                    android:id="@+id/google_pay_billing_min"
+                    android:text="@string/google_pay_billing_min"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:checked="true" />
+
+                <RadioButton
+                    android:id="@+id/google_pay_billing_full"
+                    android:text="@string/google_pay_billing_full"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+            </RadioGroup>
+
+            <RadioGroup
+                android:id="@+id/google_pay_existing_pm"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginStart="8dp">
+
+                <TextView
+                    android:text="@string/google_pay_existing_payment_method"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical" />
+
+                <RadioButton
+                    android:id="@+id/google_pay_existing_pm_true"
+                    android:text="@string/google_pay_existing_payment_method_true"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:checked="true" />
+
+                <RadioButton
+                    android:id="@+id/google_pay_existing_pm_false"
+                    android:text="@string/google_pay_existing_payment_method_false"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+            </RadioGroup>
+
+            <RadioGroup
+                android:id="@+id/google_pay_phone_required"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginStart="8dp">
+
+                <TextView
+                    android:text="@string/google_pay_phone_required"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical" />
+
+                <RadioButton
+                    android:id="@+id/google_pay_phone_required_true"
+                    android:text="@string/google_pay_phone_required_true"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:checked="true" />
+
+                <RadioButton
+                    android:id="@+id/google_pay_phone_required_false"
+                    android:text="@string/google_pay_phone_required_false"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+            </RadioGroup>
+
+            <RadioGroup
+                android:id="@+id/google_pay_billing_required"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginStart="8dp">
+
+                <TextView
+                    android:text="@string/google_pay_billing_required"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical" />
+
+                <RadioButton
+                    android:id="@+id/google_pay_billing_required_true"
+                    android:text="@string/google_pay_billing_required_true"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:checked="true" />
+
+                <RadioButton
+                    android:id="@+id/google_pay_billing_required_false"
+                    android:text="@string/google_pay_billing_required_false"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+            </RadioGroup>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:text="@string/google_pay_merchant_name"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:labelFor="@+id/google_pay_merchant_name"
+                    android:layout_weight=".4" />
+
+                <EditText
+                    android:id="@+id/google_pay_merchant_name"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:inputType="text"
+                    android:text="@string/google_pay_merchant_name_default"
+                    android:importantForAutofill="no" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:text="@string/google_pay_merchant_country_code"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:labelFor="@+id/google_pay_merchant_country_code"
+                    android:layout_weight=".4" />
+
+                <EditText
+                    android:id="@+id/google_pay_merchant_country_code"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:inputType="text"
+                    android:text="@string/google_pay_merchant_country_code_default"
+                    android:importantForAutofill="no" />
+            </LinearLayout>
+
+            <com.stripe.example.activity.GooglePayButton
+                android:id="@+id/google_pay_button"
+                android:layout_width="200dp"
+                android:layout_height="48sp"
+                android:layout_gravity="center_horizontal" />
+
+            <TextView
+                android:id="@+id/google_pay_result"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="8dp"
+                android:fontFamily="monospace"
+                android:textSize="12sp" />
+
+        </LinearLayout>
+    </ScrollView>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

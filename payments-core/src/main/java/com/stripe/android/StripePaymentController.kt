@@ -6,11 +6,13 @@ import androidx.activity.result.ActivityResultCallback
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.VisibleForTesting
-import com.stripe.android.auth.PaymentBrowserAuthContract
-import com.stripe.android.exception.APIConnectionException
+import com.stripe.android.core.exception.APIConnectionException
+import com.stripe.android.core.exception.InvalidRequestException
+import com.stripe.android.core.networking.AnalyticsRequestExecutor
+import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
+import com.stripe.android.core.networking.RetryDelaySupplier
 import com.stripe.android.exception.APIException
 import com.stripe.android.exception.AuthenticationException
-import com.stripe.android.exception.InvalidRequestException
 import com.stripe.android.exception.StripeException
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
@@ -21,31 +23,22 @@ import com.stripe.android.model.Source
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.WeChatPayNextAction
 import com.stripe.android.networking.AlipayRepository
-import com.stripe.android.networking.AnalyticsEvent
-import com.stripe.android.networking.AnalyticsRequestExecutor
-import com.stripe.android.networking.AnalyticsRequestFactory
 import com.stripe.android.networking.ApiRequest
 import com.stripe.android.networking.DefaultAlipayRepository
+import com.stripe.android.networking.PaymentAnalyticsEvent
+import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networking.StripeRepository
-import com.stripe.android.payments.BrowserCapabilities
-import com.stripe.android.payments.BrowserCapabilitiesSupplier
 import com.stripe.android.payments.DefaultReturnUrl
 import com.stripe.android.payments.PaymentFlowFailureMessageFactory
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.payments.PaymentIntentFlowResultProcessor
 import com.stripe.android.payments.SetupIntentFlowResultProcessor
-import com.stripe.android.payments.Stripe3ds2CompletionContract
-import com.stripe.android.payments.Stripe3ds2CompletionStarter
-import com.stripe.android.payments.core.authentication.DefaultIntentAuthenticatorRegistry
-import com.stripe.android.payments.core.authentication.IntentAuthenticatorRegistry
-import com.stripe.android.stripe3ds2.service.StripeThreeDs2Service
-import com.stripe.android.stripe3ds2.service.StripeThreeDs2ServiceImpl
-import com.stripe.android.stripe3ds2.transaction.MessageVersionRegistry
+import com.stripe.android.payments.core.authentication.DefaultPaymentAuthenticatorRegistry
+import com.stripe.android.payments.core.authentication.PaymentAuthenticatorRegistry
 import com.stripe.android.view.AuthActivityStarterHost
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.util.concurrent.TimeUnit
-import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
 
 /**
@@ -53,23 +46,18 @@ import kotlin.coroutines.CoroutineContext
  * any required customer action). The payment authentication mechanism (e.g. 3DS) will be determined
  * by the [PaymentIntent] or [SetupIntent] object.
  */
-internal class StripePaymentController internal constructor(
+internal class StripePaymentController
+constructor(
     context: Context,
-    private val publishableKeyProvider: Provider<String>,
+    private val publishableKeyProvider: () -> String,
     private val stripeRepository: StripeRepository,
     private val enableLogging: Boolean = false,
-    messageVersionRegistry: MessageVersionRegistry =
-        MessageVersionRegistry(),
-    config: PaymentAuthConfig =
-        PaymentAuthConfig.get(),
-    threeDs2Service: StripeThreeDs2Service =
-        StripeThreeDs2ServiceImpl(context, enableLogging),
-    private val analyticsRequestExecutor: AnalyticsRequestExecutor =
-        AnalyticsRequestExecutor.Default(Logger.getInstance(enableLogging)),
-    private val analyticsRequestFactory: AnalyticsRequestFactory =
-        AnalyticsRequestFactory(context.applicationContext, publishableKeyProvider),
-    private val alipayRepository: AlipayRepository = DefaultAlipayRepository(stripeRepository),
     workContext: CoroutineContext = Dispatchers.IO,
+    private val analyticsRequestExecutor: AnalyticsRequestExecutor =
+        DefaultAnalyticsRequestExecutor(Logger.getInstance(enableLogging), workContext),
+    private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory =
+        PaymentAnalyticsRequestFactory(context.applicationContext, publishableKeyProvider),
+    private val alipayRepository: AlipayRepository = DefaultAlipayRepository(stripeRepository),
     private val uiContext: CoroutineContext = Dispatchers.Main
 ) : PaymentController {
 
@@ -78,23 +66,19 @@ internal class StripePaymentController internal constructor(
         context,
         publishableKeyProvider,
         stripeRepository,
-        enableLogging,
-        workContext
+        Logger.getInstance(enableLogging),
+        workContext,
+        RetryDelaySupplier()
     )
     private val setupIntentFlowResultProcessor = SetupIntentFlowResultProcessor(
         context,
         publishableKeyProvider,
         stripeRepository,
-        enableLogging,
+        Logger.getInstance(enableLogging),
         workContext
     )
 
-    private val logger = Logger.getInstance(enableLogging)
     private val defaultReturnUrl = DefaultReturnUrl.create(context)
-
-    private val hasCompatibleBrowser: Boolean by lazy {
-        BrowserCapabilitiesSupplier(context).get() != BrowserCapabilities.Unknown
-    }
 
     /**
      * [paymentRelayLauncher] is mutable and might be updated during
@@ -108,56 +92,24 @@ internal class StripePaymentController internal constructor(
     }
 
     /**
-     * [paymentBrowserAuthLauncher] is mutable and might be updated during
-     * through [registerLaunchersWithActivityResultCaller]
+     * A map between 3ds1 [StripeIntent] ids to its corresponding returnUrl.
+     * An entry will be removed once the [StripeIntent] is confirmed.
      */
-    private var paymentBrowserAuthLauncher: ActivityResultLauncher<PaymentBrowserAuthContract.Args>? =
-        null
-    private val paymentBrowserAuthStarterFactory = { host: AuthActivityStarterHost ->
-        paymentBrowserAuthLauncher?.let {
-            PaymentBrowserAuthStarter.Modern(it)
-        } ?: PaymentBrowserAuthStarter.Legacy(
-            host,
-            hasCompatibleBrowser,
-            defaultReturnUrl
-        )
-    }
+    private val threeDs1IntentReturnUrlMap = mutableMapOf<String, String>()
 
-    /**
-     * [stripe3ds2ChallengeLauncher] is mutable and might be updated during
-     * through [registerLaunchersWithActivityResultCaller]
-     */
-    private var stripe3ds2ChallengeLauncher: ActivityResultLauncher<PaymentFlowResult.Unvalidated>? =
-        null
-    private val stripe3ds2CompletionStarterFactory =
-        { host: AuthActivityStarterHost, requestCode: Int ->
-            stripe3ds2ChallengeLauncher?.let {
-                Stripe3ds2CompletionStarter.Modern(it)
-            } ?: Stripe3ds2CompletionStarter.Legacy(host, requestCode)
-        }
-
-    private val authenticatorRegistry: IntentAuthenticatorRegistry =
-        DefaultIntentAuthenticatorRegistry.createInstance(
+    private val authenticatorRegistry: PaymentAuthenticatorRegistry =
+        DefaultPaymentAuthenticatorRegistry.createInstance(
+            context,
             stripeRepository,
-            paymentRelayStarterFactory,
-            paymentBrowserAuthStarterFactory,
             analyticsRequestExecutor,
-            analyticsRequestFactory,
-            logger,
+            paymentAnalyticsRequestFactory,
             enableLogging,
             workContext,
             uiContext,
-            threeDs2Service,
-            messageVersionRegistry,
-            config.stripe3ds2Config,
-            stripe3ds2CompletionStarterFactory
+            threeDs1IntentReturnUrlMap,
+            publishableKeyProvider,
+            paymentAnalyticsRequestFactory.defaultProductUsageTokens
         )
-
-    init {
-        threeDs2Service.initialize(
-            config.stripe3ds2Config.uiCustomization.uiCustomization
-        )
-    }
 
     override fun registerLaunchersWithActivityResultCaller(
         activityResultCaller: ActivityResultCaller,
@@ -167,23 +119,16 @@ internal class StripePaymentController internal constructor(
             PaymentRelayContract(),
             activityResultCallback
         )
-        paymentBrowserAuthLauncher = activityResultCaller.registerForActivityResult(
-            PaymentBrowserAuthContract(defaultReturnUrl),
-            activityResultCallback
-        )
-        stripe3ds2ChallengeLauncher = activityResultCaller.registerForActivityResult(
-            Stripe3ds2CompletionContract(),
+        authenticatorRegistry.onNewActivityResultCaller(
+            activityResultCaller,
             activityResultCallback
         )
     }
 
     override fun unregisterLaunchers() {
         paymentRelayLauncher?.unregister()
-        paymentBrowserAuthLauncher?.unregister()
-        stripe3ds2ChallengeLauncher?.unregister()
         paymentRelayLauncher = null
-        paymentBrowserAuthLauncher = null
-        stripe3ds2ChallengeLauncher = null
+        authenticatorRegistry.onLauncherInvalidated()
     }
 
     /**
@@ -220,10 +165,16 @@ internal class StripePaymentController internal constructor(
             }
         }.fold(
             onSuccess = { intent ->
+                intent.nextActionData?.let {
+                    if (it is StripeIntent.NextActionData.SdkData.Use3DS1) {
+                        intent.id?.let { intentId ->
+                            threeDs1IntentReturnUrlMap[intentId] = returnUrl
+                        }
+                    }
+                }
                 handleNextAction(
                     host,
                     intent,
-                    returnUrl,
                     requestOptions
                 )
             },
@@ -331,7 +282,6 @@ internal class StripePaymentController internal constructor(
                 handleNextAction(
                     host = host,
                     stripeIntent = stripeIntent,
-                    returnUrl = null,
                     requestOptions = requestOptions
                 )
             },
@@ -358,7 +308,7 @@ internal class StripePaymentController internal constructor(
         requestOptions: ApiRequest.Options
     ) {
         analyticsRequestExecutor.executeAsync(
-            analyticsRequestFactory.createRequest(AnalyticsEvent.AuthSourceStart)
+            paymentAnalyticsRequestFactory.createRequest(PaymentAnalyticsEvent.AuthSourceStart)
         )
 
         runCatching {
@@ -388,36 +338,11 @@ internal class StripePaymentController internal constructor(
         source: Source,
         requestOptions: ApiRequest.Options
     ) {
-        if (source.flow == Source.Flow.Redirect) {
-            startSourceAuth(
-                paymentBrowserAuthStarterFactory(host),
-                source,
-                requestOptions
-            )
-        } else {
-            bypassAuth(host, source, requestOptions.stripeAccount)
-        }
-    }
 
-    private suspend fun startSourceAuth(
-        paymentBrowserAuthStarter: PaymentBrowserAuthStarter,
-        source: Source,
-        requestOptions: ApiRequest.Options
-    ) = withContext(uiContext) {
-        analyticsRequestExecutor.executeAsync(
-            analyticsRequestFactory.createRequest(AnalyticsEvent.AuthSourceRedirect)
-        )
-
-        paymentBrowserAuthStarter.start(
-            PaymentBrowserAuthContract.Args(
-                objectId = source.id.orEmpty(),
-                requestCode = SOURCE_REQUEST_CODE,
-                clientSecret = source.clientSecret.orEmpty(),
-                url = source.redirect?.url.orEmpty(),
-                returnUrl = source.redirect?.returnUrl,
-                enableLogging = enableLogging,
-                stripeAccountId = requestOptions.stripeAccount
-            )
+        authenticatorRegistry.getAuthenticator(source).authenticate(
+            host,
+            source,
+            requestOptions
         )
     }
 
@@ -515,12 +440,12 @@ internal class StripePaymentController internal constructor(
         val clientSecret = result.clientSecret.orEmpty()
 
         val requestOptions = ApiRequest.Options(
-            apiKey = publishableKeyProvider.get(),
+            apiKey = publishableKeyProvider(),
             stripeAccount = result.stripeAccountId
         )
 
         analyticsRequestExecutor.executeAsync(
-            analyticsRequestFactory.createRequest(AnalyticsEvent.AuthSourceResult)
+            paymentAnalyticsRequestFactory.createRequest(PaymentAnalyticsEvent.AuthSourceResult)
         )
 
         return requireNotNull(
@@ -571,52 +496,34 @@ internal class StripePaymentController internal constructor(
     /**
      * Determine which authentication mechanism should be used, or bypass authentication
      * if it is not needed.
-     *
-     * @param returnUrl in some cases, the return URL is not provided in
-     * [StripeIntent.NextActionData]. Specifically, it is not available in
-     * [StripeIntent.NextActionData.SdkData.Use3DS1]. Wire it through so that we can correctly
-     * determine how we should handle authentication.
      */
     @VisibleForTesting
     override suspend fun handleNextAction(
         host: AuthActivityStarterHost,
         stripeIntent: StripeIntent,
-        returnUrl: String?,
         requestOptions: ApiRequest.Options
     ) {
         authenticatorRegistry.getAuthenticator(stripeIntent).authenticate(
             host,
             stripeIntent,
-            returnUrl,
             requestOptions
         )
-    }
-
-    private suspend fun bypassAuth(
-        host: AuthActivityStarterHost,
-        source: Source,
-        stripeAccountId: String?
-    ) = withContext(uiContext) {
-        paymentRelayStarterFactory(host)
-            .start(
-                PaymentRelayStarter.Args.SourceArgs(source, stripeAccountId)
-            )
     }
 
     private fun logReturnUrl(returnUrl: String?) {
         when (returnUrl) {
             defaultReturnUrl.value -> {
-                AnalyticsEvent.ConfirmReturnUrlDefault
+                PaymentAnalyticsEvent.ConfirmReturnUrlDefault
             }
             null -> {
-                AnalyticsEvent.ConfirmReturnUrlNull
+                PaymentAnalyticsEvent.ConfirmReturnUrlNull
             }
             else -> {
-                AnalyticsEvent.ConfirmReturnUrlCustom
+                PaymentAnalyticsEvent.ConfirmReturnUrlCustom
             }
         }.let { event ->
             analyticsRequestExecutor.executeAsync(
-                analyticsRequestFactory.createRequest(event)
+                paymentAnalyticsRequestFactory.createRequest(event)
             )
         }
     }

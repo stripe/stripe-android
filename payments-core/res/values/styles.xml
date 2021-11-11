@@ -12,11 +12,6 @@
         <item name="android:paddingEnd">16dp</item>
     </style>
 
-    <style name="StripeErrorTextStyle">
-        <item name="android:textColor">#999999</item>
-        <item name="android:textSize">@dimen/stripe_notification_text_size</item>
-    </style>
-
     <style name="AlertDialogStyle" parent="Theme.AppCompat.DayNight.Dialog" />
 
     <style name="Stripe.Base.CardInputWidget.EditText" parent="Widget.AppCompat.EditText">
@@ -25,13 +20,15 @@
 
     <style name="Stripe.CardInputWidget.EditText" parent="Stripe.Base.CardInputWidget.EditText" />
 
-    <style name="Stripe.Base.CardInputWidget.TextInputLayout" parent="Widget.Design.TextInputLayout"></style>
+    <style name="Stripe.Base.CardInputWidget.TextInputLayout" parent="Widget.Design.TextInputLayout" />
 
     <style name="Stripe.CardInputWidget.TextInputLayout" parent="Stripe.Base.CardInputWidget.TextInputLayout" />
 
-    <style name="Stripe.Base.CardMultilineWidget.TextInputLayout" parent="Widget.Design.TextInputLayout"></style>
+    <style name="Stripe.Base.CardMultilineWidget.TextInputLayout" parent="Widget.Design.TextInputLayout" />
 
-    <style name="Stripe.CardMultilineWidget.TextInputLayout" parent="Stripe.Base.CardMultilineWidget.TextInputLayout" />
+    <style name="Stripe.CardMultilineWidget.TextInputLayout" parent="Stripe.Base.CardMultilineWidget.TextInputLayout">
+        <item name="android:textColorHint">@color/stripe_card_multiline_textinput_hint_color</item>
+    </style>
 
     <style name="Stripe.Base.BecsDebitWidget.EditText" parent="Widget.AppCompat.EditText">
         <item name="android:textSize">@dimen/stripe_becs_debit_widget_edit_text_size</item>
@@ -47,142 +44,13 @@
 
     <style name="Stripe.BecsDebitWidget.MandateAcceptanceTextView" parent="Stripe.Base.BecsDebitWidget.MandateAcceptanceTextView" />
 
-    <style name="StripePaymentOptionItemContainer">
-        <item name="android:paddingStart">0dp</item>
-        <item name="android:paddingEnd">0dp</item>
-        <item name="android:paddingTop">4dp</item>
-        <item name="android:paddingBottom">4dp</item>
+    <style name="StripeDefault3DS2Theme" parent="BaseStripe3DS2Theme" />
+
+    <style name="StripeCardFormView">
+        <item name="cardFormStyle">standard</item>
     </style>
-
-    <style name="StripePaymentOptionItemCard">
-        <item name="android:layout_width">@dimen/stripe_paymentsheet_paymentmethod_icon_width</item>
-        <item name="android:layout_height">@dimen/stripe_paymentsheet_paymentmethod_icon_height
-        </item>
-        <item name="android:layout_marginStart">7dp</item>
-        <item name="android:layout_marginTop">8dp</item>
-        <item name="android:layout_marginEnd">7dp</item>
-        <item name="android:layout_marginBottom">4dp</item>
-        <item name="android:padding">4dp</item>
-        <item name="android:clickable">false</item>
-        <item name="android:focusable">false</item>
-        <item name="rippleColor">@android:color/transparent</item>
-        <item name="cardElevation">@dimen/stripe_paymentsheet_card_elevation</item>
-        <item name="strokeWidth">@dimen/stripe_paymentsheet_card_stroke_width</item>
-        <item name="strokeColor">@color/stripe_paymentsheet_card_stroke</item>
-        <item name="cardBackgroundColor">@color/stripe_paymentsheet_elements_background_states
-        </item>
-        <item name="cardForegroundColor">@android:color/transparent</item>
-        <item name="cardCornerRadius">6dp</item>
-    </style>
-
-    <style name="StripePaymentOptionItemCardImage">
-        <item name="android:layout_width">56dp</item>
-        <item name="android:layout_height">40dp</item>
-        <item name="android:layout_gravity">center</item>
-    </style>
-
-    <style name="StripePaymentOptionItemCardCheck">
-        <item name="android:visibility">gone</item>
-        <item name="android:src">@drawable/stripe_ic_check_circle</item>
-
-        <!-- modify the bottom and end layout to correctly position the check -->
-        <item name="android:layout_marginBottom">11dp</item>
-        <item name="android:paddingEnd">-2dp</item>
-    </style>
-
-    <style name="StripeAddPaymentMethodItemCard">
-        <item name="android:layout_width">@dimen/stripe_paymentsheet_add_pm_card_width</item>
-        <item name="android:layout_height">@dimen/stripe_paymentsheet_add_pm_card_height</item>
-        <item name="android:layout_marginStart">7dp</item>
-        <item name="android:layout_marginEnd">7dp</item>
-        <item name="android:clickable">false</item>
-        <item name="android:focusable">false</item>
-        <item name="rippleColor">@android:color/transparent</item>
-        <item name="cardElevation">@dimen/stripe_paymentsheet_add_pm_card_elevation</item>
-        <item name="strokeWidth">@dimen/stripe_paymentsheet_add_pm_card_stroke_width</item>
-        <item name="strokeColor">@color/stripe_paymentsheet_add_pm_card_stroke</item>
-        <item name="cardBackgroundColor">@color/stripe_paymentsheet_elements_background_states
-        </item>
-        <item name="cardForegroundColor">@android:color/transparent</item>
-        <item name="cardCornerRadius">6dp</item>
-    </style>
-
-    <style name="StripePaymentSheetPaymentMethodsLabel">
-        <item name="android:textColor">@color/stripe_paymentsheet_payment_method_label_text_states
-        </item>
-        <item name="android:textSize">13sp</item>
-        <item name="android:textStyle">bold</item>
-        <item name="android:lineSpacingExtra">1sp</item>
-        <item name="android:layout_marginStart">4dp</item>
-        <item name="android:layout_marginEnd">4dp</item>
-    </style>
-
-    <style name="StripePaymentSheetTitle">
-        <item name="android:textSize">20sp</item>
-        <item name="android:textColor">@color/stripe_paymentsheet_title_text</item>
-        <item name="android:lineSpacingExtra">9sp</item>
-        <item name="android:layout_height">32dp</item>
-        <item name="android:textStyle">bold</item>
-    </style>
-
-    <style name="StripePaymentSheetLabel">
-        <item name="android:textSize">13sp</item>
-        <item name="android:letterSpacing">-0.01</item>
-        <item name="android:textColor">@color/stripe_paymentsheet_header_text</item>
-        <item name="android:lineSpacingExtra">5sp</item>
-        <item name="android:textStyle">bold</item>
-        <item name="android:layout_marginTop">10dp</item>
-        <item name="android:layout_marginStart">1dp</item>
-        <item name="android:layout_marginEnd">1dp</item>
-        <item name="android:layout_marginBottom">4dp</item>
-    </style>
-
-    <style name="StripePaymentSheetTotalLabel">
-        <item name="android:textSize">13sp</item>
-        <item name="android:letterSpacing">-0.01</item>
-        <item name="android:textColor">@color/stripe_paymentsheet_header_text</item>
-        <item name="android:lineSpacingExtra">5sp</item>
-        <item name="android:textStyle">bold</item>
-    </style>
-
-    <style name="StripePaymentSheetTextInputLayout" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense">
-        <item name="boxStrokeColor">@android:color/transparent</item>
-        <item name="boxStrokeWidth">0dp</item>
-        <item name="android:paddingTop">4dp</item>
-        <item name="android:paddingBottom">4dp</item>
-        <item name="android:background">@android:color/white</item>
-        <item name="android:backgroundTint">@color/stripe_paymentsheet_elements_background_states</item>
-        <item name="android:textColorHint">@color/stripe_paymentsheet_textinputlayout_hint</item>
-    </style>
-
-    <style name="StripePaymentSheetAutocompleteTextInputLayout" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu">
-        <item name="boxStrokeColor">@android:color/transparent</item>
-        <item name="boxStrokeWidth">0dp</item>
-        <item name="android:paddingTop">4dp</item>
-        <item name="android:paddingBottom">4dp</item>
-        <item name="android:background">@android:color/white</item>
-        <item name="android:backgroundTint">@color/stripe_paymentsheet_elements_background_states</item>
-    </style>
-
-    <style name="StripePaymentSheetTextInputEditText">
-        <item name="android:inputType">text</item>
-        <item name="android:maxLines">1</item>
-        <item name="android:textSize">14sp</item>
-        <item name="android:letterSpacing">-0.01</item>
-        <item name="android:textColor">@color/stripe_paymentsheet_textinput_color</item>
-    </style>
-
-    <style name="StripePaymentSheetCountryItem">
-        <item name="android:inputType">none</item>
-        <item name="android:editable">false</item>
-        <item name="android:maxLines">1</item>
-        <item name="android:textSize">14sp</item>
-        <item name="android:letterSpacing">-0.01</item>
-        <item name="android:textColor">@color/stripe_paymentsheet_textinput_color</item>
-        <item name="android:paddingTop">13dp</item>
-        <item name="android:paddingBottom">13dp</item>
-        <item name="android:paddingStart">13dp</item>
-        <item name="android:paddingEnd">13dp</item>
+    <style name="StripeCardFormView.Borderless">
+        <item name="cardFormStyle">borderless</item>
     </style>
 
     <style name="StripePaymentSheetFormDivider">
@@ -195,37 +63,6 @@
         <item name="android:layout_width">1dp</item>
         <item name="android:layout_height">match_parent</item>
         <item name="android:background">@color/stripe_paymentsheet_form_border</item>
-    </style>
-
-    <style name="StripePaymentSheetErrorMessage">
-        <item name="android:textColor">@color/stripe_paymentsheet_error_text</item>
-        <item name="android:textSize">13sp</item>
-        <item name="android:letterSpacing">-0.01</item>
-        <item name="android:lineSpacingExtra">5sp</item>
-    </style>
-
-    <style name="StripePaymentAddPaymentMethodMaterialCard">
-        <item name="android:layout_margin">2dp</item>
-        <item name="android:checkable">false</item>
-        <item name="cardElevation">1dp</item>
-        <item name="strokeColor">@color/stripe_paymentsheet_add_payment_method_form_stroke</item>
-        <item name="strokeWidth">@dimen/stripe_paymentsheet_add_payment_method_form_stroke_width
-        </item>
-    </style>
-
-    <style name="StripePaymentSheetToolbar">
-        <item name="android:paddingTop">16dp</item>
-        <item name="android:paddingStart">@dimen/stripe_paymentsheet_outer_spacing_horizontal</item>
-        <item name="android:paddingEnd">@dimen/stripe_paymentsheet_outer_spacing_horizontal</item>
-        <item name="android:layout_marginBottom">12dp</item>
-    </style>
-
-    <style name="StripeCardFormView">
-        <item name="cardFormStyle">standard</item>
-    </style>
-
-    <style name="StripeCardFormView.Borderless">
-        <item name="cardFormStyle">borderless</item>
     </style>
 
     <style name="StripeCardFormCountryTextInputLayout" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu">

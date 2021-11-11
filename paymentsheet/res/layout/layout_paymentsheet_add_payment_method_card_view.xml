@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    style="@style/StripeAddPaymentMethodItemCard">
+
+    <ImageView
+        android:id="@+id/icon"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:maxHeight="16dp"
+        android:layout_marginStart="12dp"
+        android:layout_marginTop="12dp"
+        android:src="@drawable/stripe_ic_paymentsheet_pm_card"
+        android:contentDescription="@null" />
+
+    <TextView
+        android:id="@+id/title"
+        style="@style/StripePaymentSheetPaymentMethodsLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:layout_marginBottom="8dp"
+        android:layout_marginStart="12dp" />
+
+</com.google.android.material.card.MaterialCardView>

@@ -1,0 +1,25 @@
+lpm, hasCustomer, allowsDelayedPayment, intentSetupFutureUsage, intentHasShipping, intentLpms, supportCustomerSavedCard, formExists, formType, supportsAdding
+sofort, true, true, off_session, false, card/sofort, false, false, not available, false
+sofort, true, true, off_session, false, card/eps/sofort, false, false, not available, false
+sofort, true, false, off_session, false, card/sofort, false, false, not available, false
+sofort, true, false, off_session, false, card/eps/sofort, false, false, not available, false
+sofort, true, true, on_session, false, card/sofort, false, false, not available, false
+sofort, true, true, on_session, false, card/eps/sofort, false, false, not available, false
+sofort, true, false, on_session, false, card/sofort, false, false, not available, false
+sofort, true, false, on_session, false, card/eps/sofort, false, false, not available, false
+sofort, true, true, null, false, card/sofort, false, true, oneTime, true
+sofort, true, true, null, false, card/eps/sofort, false, true, oneTime, true
+sofort, true, false, null, false, card/sofort, false, false, not available, false
+sofort, true, false, null, false, card/eps/sofort, false, false, not available, false
+sofort, false, true, off_session, false, card/sofort, false, false, not available, false
+sofort, false, true, off_session, false, card/eps/sofort, false, false, not available, false
+sofort, false, false, off_session, false, card/sofort, false, false, not available, false
+sofort, false, false, off_session, false, card/eps/sofort, false, false, not available, false
+sofort, false, true, on_session, false, card/sofort, false, false, not available, false
+sofort, false, true, on_session, false, card/eps/sofort, false, false, not available, false
+sofort, false, false, on_session, false, card/sofort, false, false, not available, false
+sofort, false, false, on_session, false, card/eps/sofort, false, false, not available, false
+sofort, false, true, null, false, card/sofort, false, true, oneTime, true
+sofort, false, true, null, false, card/eps/sofort, false, true, oneTime, true
+sofort, false, false, null, false, card/sofort, false, false, not available, false
+sofort, false, false, null, false, card/eps/sofort, false, false, not available, false

@@ -1,11 +1,16 @@
 package com.stripe.android.networking
 
-import com.stripe.android.StripeError
-import com.stripe.android.exception.InvalidRequestException
+import com.stripe.android.core.exception.InvalidRequestException
 import java.io.UnsupportedEncodingException
 import java.net.URLEncoder
+import java.util.HashMap
+import java.util.HashSet
 
-internal class QueryStringFactory {
+/**
+ * Factory for HTTP request query strings, converts a [Map] of <param, value> into a query string
+ * like "?p1=v1&p2=v2"
+ */
+internal object QueryStringFactory {
 
     /**
      * Create a query string from a [Map]
@@ -14,6 +19,37 @@ internal class QueryStringFactory {
         return flattenParams(params).joinToString("&") {
             it.toString()
         }
+    }
+
+    /**
+     * Create a query string from a [Map] with possible empty values, remove the empty values first
+     */
+    fun createFromParamsWithEmptyValues(params: Map<String, *>?): String {
+        return params?.let(::compactParams)?.let(::create) ?: ""
+    }
+
+    /**
+     * Copy the {@param params} map and recursively remove null and empty values. The Stripe API
+     * requires that parameters with null values are removed from requests.
+     *
+     * @param params a [Map] from which to remove the keys that have `null` values
+     */
+    fun compactParams(params: Map<String, *>): Map<String, Any> {
+        val compactParams = HashMap<String, Any>(params)
+
+        // Remove all null values; they cause validation errors
+        for (key in HashSet(compactParams.keys)) {
+            when (val value = compactParams[key]) {
+                is Map<*, *> -> {
+                    compactParams[key] = compactParams(value as Map<String, *>)
+                }
+                null -> {
+                    compactParams.remove(key)
+                }
+            }
+        }
+
+        return compactParams
     }
 
     @Throws(InvalidRequestException::class)
@@ -60,13 +96,6 @@ internal class QueryStringFactory {
         return when (value) {
             is Map<*, *> -> flattenParamsMap(value as Map<String, Any>?, keyPrefix)
             is List<*> -> flattenParamsList(value, keyPrefix)
-            "" -> throw InvalidRequestException(
-                message = "You cannot set '$keyPrefix' to an empty string. We interpret empty strings as " +
-                    "null in requests. You may set '$keyPrefix' to null to delete the property.",
-                stripeError = StripeError(
-                    param = keyPrefix
-                )
-            )
             null -> {
                 listOf(Parameter(keyPrefix, ""))
             }

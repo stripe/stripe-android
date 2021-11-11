@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+  <!-- Label for card number entry text field -->
+  <string name="acc_label_card_number">Kortnummer</string>
+  <string name="acc_label_card_number_node">%s, kortnummer</string>
+  <string name="acc_label_cvc_node">%s, CVC</string>
+  <string name="acc_label_expiry_date">Utløpsdato</string>
+  <string name="acc_label_expiry_date_node">%s, utløpsdato</string>
+  <!-- Caption for Zip Code field on address form (only shown when country is United States only) -->
+  <string name="acc_label_zip">Postnummer</string>
+  <!-- Short string for zip code (United States only) Please keep to 5 characters or less if possible. -->
+  <string name="acc_label_zip_short">POSTNR.</string>
+  <!-- Message displayed when a payment method is removed, stating its name. -->
+  <string name="added">Lagt til %s</string>
+  <!-- Error text indicating that city is required, used for all locations -->
+  <string name="address_city_required">Skriv inn staden din</string>
+  <!-- Error text indicating country is invalid -->
+  <string name="address_country_invalid">Landet ditt er ugyldig</string>
+  <!-- Error text indicating that county is required, used for UK addresses -->
+  <string name="address_county_required">Skriv inn fylket ditt</string>
+  <!-- Caption for Address field on address form -->
+  <string name="address_label_address">Adresse</string>
+  <!-- Address line 1 placeholder for billing address form. -->
+  <string name="address_label_address_line1">Adresselinje 1</string>
+  <!-- Label for input requesting the first line of an address where , used for international addresses -->
+  <string name="address_label_address_line1_optional">Adresselinje 1 (valfri)</string>
+  <!-- Address line 2 placeholder for billing address form. -->
+  <string name="address_label_address_line2_optional">Adresselinje 2 (valfritt)</string>
+  <!-- Label for input requesting the first line of an address where input is optional, used for US and Canada addresses -->
+  <string name="address_label_address_optional">Adresse (valfri)</string>
+  <!-- Label for input requesting apartment number (address line 2) where input is optional, used for US based addresses -->
+  <string name="address_label_apt_optional">Leilegheit (valfri)</string>
+  <!-- Caption for City field on address form -->
+  <string name="address_label_city">Stad</string>
+  <!-- Label for input requesting city where input is optional, used for all locations -->
+  <string name="address_label_city_optional">Stad (valfri)</string>
+  <!-- Caption for Country field on address form -->
+  <string name="address_label_country">Land</string>
+  <!-- Caption for County field on address form (only countries that use county, like United Kingdom) -->
+  <string name="address_label_county">Fylke</string>
+  <!-- Label for input requesting county where input is optional , used for UK based addresses -->
+  <string name="address_label_county_optional">Fylke (valfri)</string>
+  <!-- Caption for Name field on address form -->
+  <string name="address_label_name">Namn</string>
+  <!-- Label for input requesting phone number, used for all locations -->
+  <string name="address_label_phone_number">Telefonnummer</string>
+  <!-- Label for input requesting phone number where input is optional, used for all locations -->
+  <string name="address_label_phone_number_optional">Telefonnummer (valfri)</string>
+  <!-- Short string for postal code (text used in non-US countries) -->
+  <string name="address_label_postal_code">Postnummer</string>
+  <!-- Label for input requesting postal code where input is optional, used for Canada based addresses -->
+  <string name="address_label_postal_code_optional">Postnummer (valfri)</string>
+  <!-- Label for input requesting postcode, used for UK based addresses -->
+  <string name="address_label_postcode">Postnummer</string>
+  <!-- Label for input requesting postcode where input is optional, used for UK based addresses -->
+  <string name="address_label_postcode_optional">Postnummer (valfri)</string>
+  <!-- Caption for Province field on address form (only countries that use province, like Canada) -->
+  <string name="address_label_province">Område</string>
+  <!-- Label for input requesting province where province is optional, used for canadian addresses -->
+  <string name="address_label_province_optional">Område (valfri)</string>
+  <!-- Label for input requesting the region, used for international addresses -->
+  <string name="address_label_region_generic">Stat/område/region</string>
+  <!-- Label for input requesting the region where input is optional, used for international addresses -->
+  <string name="address_label_region_generic_optional">Stat/område/region (valfri)</string>
+  <!-- Caption for State field on address form (only countries that use state , like United States) -->
+  <string name="address_label_state">Fylke</string>
+  <!-- Label for input requesting state where input is optional, used for US based addresses -->
+  <string name="address_label_state_optional">Stat (valfri)</string>
+  <!-- Label for input requesting zip code, used for US based addreses -->
+  <string name="address_label_zip_code">Postnummer</string>
+  <!-- Label for input requesting zip code where input is optional, used for US based addresses -->
+  <string name="address_label_zip_code_optional">Postnummer (valfri)</string>
+  <!-- Label for input requesting postal code, used for international addresses -->
+  <string name="address_label_zip_postal_code">Postnummer</string>
+  <!-- Label for input requesting postal code where input is optional, used for international addresses -->
+  <string name="address_label_zip_postal_code_optional">Postnummer (valfri)</string>
+  <!-- Error text indicating name is required -->
+  <string name="address_name_required">Skriv inn namnet ditt</string>
+  <!-- Error text indicating that phone number is required, used for all addresses -->
+  <string name="address_phone_number_required">Skriv inn telefonnummeret ditt</string>
+  <!-- Error message for when postal code in form is invalid -->
+  <string name="address_postal_code_invalid">Postnummeret er ugyldig.</string>
+  <!-- Error text indicating postcode is invalid, used for UK addresses -->
+  <string name="address_postcode_invalid">Postnummeret ditt er ugyldig</string>
+  <!-- Error text indicating that province is required, used for Canada addresses -->
+  <string name="address_province_required">Skriv inn området ditt</string>
+  <!-- Error text indicating that region is required, used for international addresses -->
+  <string name="address_region_generic_required">Skriv inn stat/område/region</string>
+  <!-- Error text indicating that address is required, used for all locations -->
+  <string name="address_required">Skriv inn adressen din</string>
+  <!-- Error text indicating that state is required, used for US addresses -->
+  <string name="address_state_required">Skriv inn staten</string>
+  <!-- Error text indicating zip code is invalid, used for US addresses -->
+  <string name="address_zip_invalid">Postnummeret ditt er ugyldig.</string>
+  <!-- Error text indicating zip/ postal code is invalid, used for international addresses -->
+  <string name="address_zip_postal_invalid">Postnummeret ditt er ugyldig</string>
+  <!-- BECS Debit Widget - mandate acceptance -->
+  <string name="becs_mandate_acceptance">\n    Ved å angje detaljar for bankkonto og stadfeste betalinga, godtek du denne\n    førespurnaden om direktedebitering og tenesteavtalen for førespurnaden om direktedebitering, og gjev\n    Stripe Payments Australia Pty Ltd ACN 160 180 343 brukar-ID-nummer for direktedebitering 507156\n    (“Stripe”) løyve til å debitere kontoen din gjennom Bulk Electronic Clearing System (BECS)\n    på vegner av %1$s (\"forhandlaren\") for eitkvart beløp forhandlaren har\n    kommunisert separat til deg. Du attesterer at du anten er kontoinnehavar\n    eller har signaturrett på den oppgjevne kontoen.\n    </string>
+  <!-- Placeholder text for Account number entry field for BECS Debit. -->
+  <string name="becs_widget_account_number">Kontonummer</string>
+  <!-- BECS Debit Widget - account number field - incomplete error message -->
+  <string name="becs_widget_account_number_incomplete">Kontonummeret ditt er ufullstendig.</string>
+  <!-- BECS Debit Widget - account number field - required error message -->
+  <string name="becs_widget_account_number_required">Kontonummer er påkravd.</string>
+  <!-- Placeholder text for BSB Number entry field for BECS Debit. -->
+  <string name="becs_widget_bsb">BSB-kode</string>
+  <!-- Error string displayed to user when they have entered an incomplete BSB number. BSB refers to an Australian bank account number -->
+  <string name="becs_widget_bsb_incomplete">BSB-koden du skreiv inn er ufullstendig.</string>
+  <!-- Error string displayed to user when they enter in an invalid BSB number. &quot;BSB&quot; refers to an Australian bank account. -->
+  <string name="becs_widget_bsb_invalid">BSB-koden du skreiv inn er ugyldig.</string>
+  <!-- BECS Debit Widget - email address field - label -->
+  <string name="becs_widget_email">E-postadresse</string>
+  <!-- BECS Debit Widget - email address field - invalid error message -->
+  <string name="becs_widget_email_invalid">E-postadressen din er ugyldig</string>
+  <!-- BECS Debit Widget - email address field - required error message -->
+  <string name="becs_widget_email_required">E-postadresse er påkravd.</string>
+  <!-- BECS Debit Widget - name field - label -->
+  <string name="becs_widget_name">Namn</string>
+  <!-- BECS Debit Widget - name field - required error message -->
+  <string name="becs_widget_name_required">Namn er påkravd.</string>
+  <!-- Details of a saved card. &apos;{card brand} ending in {last 4}&apos; e.g. &apos;VISA ending in 4242&apos; -->
+  <string name="card_ending_in">%1$s sluttar på %2$s</string>
+  <!-- Text for close button -->
+  <string name="close">Lukk</string>
+  <!-- Accessibility action for deleting a payment method -->
+  <string name="delete_payment_method">Slett betalingsmåte</string>
+  <string name="delete_payment_method_prompt_title">Slette betalingsmåte?</string>
+  <!-- label for text field to enter card expiry -->
+  <string name="expiry_date_hint">MM/ÅÅ</string>
+  <string name="expiry_label_short">Utløp</string>
+  <!-- Label that will show that an FPX bank is offline. For example, &quot;AmBank - Offline&quot; -->
+  <string name="fpx_bank_offline">%s - fråkopla</string>
+  <!-- Error message for card details form when expiration date isn&apos;t entered completely -->
+  <string name="incomplete_expiry_date">Utløpsdatoen til kortet er ufullstendig.</string>
+  <string name="invalid_card_number">Kortnummeret ditt er ugyldig.</string>
+  <!-- Error message for card entry form when CVC/CVV is invalid -->
+  <string name="invalid_cvc">Sikkerheitskoden til kortet er ugyldig.</string>
+  <!-- String to describe an invalid month in expiry date. -->
+  <string name="invalid_expiry_month">Utløpsdatoen på kortet ditt er ugyldig.</string>
+  <!-- String to describe an invalid year in expiry date. -->
+  <string name="invalid_expiry_year">Utløpsåret på kortet ditt er ugyldig.</string>
+  <!-- Shipping form error message -->
+  <string name="invalid_shipping_information">Ugyldig sendingsadresse</string>
+  <!-- Error message for when postal code in form is incomplete -->
+  <string name="invalid_zip">Postnummeret er ufullstendig.</string>
+  <string name="payment_method_add_new_card">Legg til nytt kort...</string>
+  <string name="payment_method_add_new_fpx">Vel bankkonto (FPX)...</string>
+  <!-- Label for free shipping method -->
+  <string name="price_free">Gratis</string>
+  <!-- Message displayed when a payment method is removed, stating its name. -->
+  <string name="removed">Fjerna %s</string>
+  <string name="secure_checkout">Sikker utsjekking</string>
+  <!-- Error when 3DS2 authentication failed (e.g. customer entered the wrong code) -->
+  <string name="stripe_failure_reason_authentication">Vi kan ikkje godkjenne betalingsmåten. Ver vennleg å velje ein annan betalingsmetode og prøv på nytt.</string>
+  <!-- Error when 3DS2 authentication timed out. -->
+  <string name="stripe_failure_reason_timed_out">Tidsavbrot ved godkjenning av betalingsmåten - prøv på nytt</string>
+  <!-- label for text field to enter card expiry -->
+  <string name="stripe_paymentsheet_expiration_date_hint">MM / ÅÅ</string>
+  <!-- When there are multiple browsers and web authentication is required, this will show in a window asking which browser they want to use to "Verify your payment" -->
+  <string name="stripe_verify_your_payment">Verifiser betalinga di</string>
+  <string name="title_add_a_card">Legg til kort</string>
+  <!-- Screen title telling users they should add an address -->
+  <string name="title_add_an_address">Oppgi adresse</string>
+  <!-- Label for Bank Account selection or detail entry form -->
+  <string name="title_bank_account">Bankkonto</string>
+  <!-- Title for Payment Method screen -->
+  <string name="title_payment_method">Betalingsmetode</string>
+  <!-- Screen title telling users they should select a shipping address -->
+  <string name="title_select_shipping_method">Vel sendingsmåte</string>
+</resources>

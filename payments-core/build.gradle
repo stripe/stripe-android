@@ -15,6 +15,10 @@ configurations {
     ktlint
 }
 
+if (System.getenv("JITPACK")) {
+    group='com.github.stripe.stripe-android'
+}
+
 dependencies {
     implementation libraries.androidx.annotation
     implementation libraries.androidx.appcompat
@@ -23,7 +27,6 @@ dependencies {
     implementation libraries.androidx.lifecycle.livedata.ktx
     implementation libraries.androidx.lifecycle.viewmodel.ktx
     implementation libraries.androidx.lifecycle.viewmodel.savedstate
-    implementation libraries.androidx.localbroadcastmanager
     implementation libraries.androidx.fragment.ktx
     implementation libraries.androidx.constraintlayout
     implementation libraries.androidx.activity.ktx
@@ -32,11 +35,12 @@ dependencies {
     implementation "com.google.dagger:dagger:$daggerVersion"
     kapt "com.google.dagger:dagger-compiler:$daggerVersion"
 
+    implementation "androidx.activity:activity-compose:$composeActivityVersion"
+
     // For instructions on replacing the BouncyCastle dependency used by the 3DS2 SDK, see
     // https://github.com/stripe/stripe-android/issues/3173#issuecomment-785176608
-    implementation "com.stripe:stripe-3ds2-android:5.3.1"
+    implementation "com.stripe:stripe-3ds2-android:6.1.2"
 
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlinVersion"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinCoroutinesVersion"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$kotlinCoroutinesVersion"
 
@@ -44,12 +48,12 @@ dependencies {
     javadocDeps libraries.androidx.appcompat
     javadocDeps "com.google.android.material:material:$materialVersion"
 
-    testImplementation 'junit:junit:4.13.2'
-    testImplementation "org.mockito:mockito-core:3.11.1"
-    testImplementation 'org.robolectric:robolectric:4.5.1'
+    testImplementation "junit:junit:$junitVersion"
+    testImplementation "org.mockito:mockito-core:$mockitoCoreVersion"
+    testImplementation 'org.robolectric:robolectric:4.6.1'
     testImplementation "androidx.test:core:$androidTestVersion"
     testImplementation 'org.json:json:20210307'
-    testImplementation "org.mockito.kotlin:mockito-kotlin:3.2.0"
+    testImplementation "org.mockito.kotlin:mockito-kotlin:$mockitoKotlinVersion"
     testImplementation "org.jetbrains.kotlin:kotlin-test-junit:$kotlinVersion"
     testImplementation "org.jetbrains.kotlin:kotlin-test-annotations-common:$kotlinVersion"
     testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$kotlinCoroutinesVersion"
@@ -63,8 +67,6 @@ dependencies {
     androidTestUtil "androidx.test:orchestrator:$androidTestVersion"
 
     ktlint "com.pinterest:ktlint:$ktlintVersion"
-
-    dokkaHtmlPlugin("org.jetbrains.dokka:dokka-base:$dokkaVersion")
 }
 
 android {
@@ -111,14 +113,16 @@ android {
 
     lintOptions {
         enable "Interoperability"
+        disable "CoroutineCreationDuringComposition"
         lintConfig file("../settings/lint.xml")
     }
 
     dokkaHtml {
-        outputDirectory = new File("${project.rootDir}/docs/")
+        outputDirectory = new File("${project.rootDir}/docs/$project.name")
     }
 
     buildFeatures {
+        compose = true
         viewBinding true
     }
 
@@ -126,14 +130,19 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
+
     kotlinOptions {
         jvmTarget = "1.8"
+    }
+
+    composeOptions {
+        kotlinCompilerExtensionVersion "$composeVersion"
     }
 }
 
 task ktlint(type: JavaExec, group: "verification") {
     description = "Check Kotlin code style."
-    main = "com.pinterest.ktlint.Main"
+    mainClass = "com.pinterest.ktlint.Main"
     classpath = configurations.ktlint
     args "src/**/*.kt"
     // to generate report in checkstyle format prepend following args:
@@ -144,7 +153,7 @@ check.dependsOn ktlint
 
 task ktlintFormat(type: JavaExec, group: "formatting") {
     description = "Fix Kotlin code style deviations."
-    main = "com.pinterest.ktlint.Main"
+    mainClass = "com.pinterest.ktlint.Main"
     classpath = configurations.ktlint
     args "-F", "src/**/*.kt"
 }

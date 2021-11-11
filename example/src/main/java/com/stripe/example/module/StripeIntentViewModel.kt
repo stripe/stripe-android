@@ -4,8 +4,7 @@ import android.app.Application
 import androidx.annotation.StringRes
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.liveData
-import com.stripe.android.PaymentIntentResult
-import com.stripe.android.SetupIntentResult
+import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.example.R
 import com.stripe.example.activity.BaseViewModel
 import kotlinx.coroutines.withContext
@@ -13,18 +12,18 @@ import okhttp3.ResponseBody
 import org.json.JSONObject
 import retrofit2.HttpException
 
-internal open class StripeIntentViewModel(
+internal class StripeIntentViewModel(
     application: Application
 ) : BaseViewModel(application) {
     val inProgress = MutableLiveData<Boolean>()
     val status = MutableLiveData<String>()
 
-    val paymentIntentResultLiveData = MutableLiveData<Result<PaymentIntentResult>>()
-    val setupIntentResultLiveData = MutableLiveData<Result<SetupIntentResult>>()
+    val paymentResultLiveData = MutableLiveData<PaymentResult>()
 
     fun createPaymentIntent(
         country: String,
-        customerId: String? = null
+        customerId: String? = null,
+        supportedPaymentMethods: String? = null
     ) = makeBackendRequest(
         R.string.creating_payment_intent,
         R.string.payment_intent_status
@@ -34,6 +33,10 @@ internal open class StripeIntentViewModel(
                 .plus(
                     customerId?.let {
                         mapOf("customer_id" to it)
+                    }.orEmpty()
+                ).plus(
+                    supportedPaymentMethods?.let {
+                        mapOf("supported_payment_methods" to it)
                     }.orEmpty()
                 )
                 .toMutableMap()

@@ -6,8 +6,6 @@ import android.content.Intent
 import android.os.Parcelable
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.core.os.bundleOf
-import com.stripe.android.payments.BrowserCapabilities
-import com.stripe.android.payments.BrowserCapabilitiesSupplier
 import com.stripe.android.payments.DefaultReturnUrl
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.payments.StripeBrowserLauncherActivity
@@ -19,19 +17,15 @@ import kotlinx.parcelize.Parcelize
  * An [ActivityResultContract] for completing payment authentication in a browser. This will
  * be handled in either [StripeBrowserLauncherActivity] or [PaymentAuthWebViewActivity].
  */
-internal class PaymentBrowserAuthContract(
-    private val defaultReturnUrl: DefaultReturnUrl,
-    private val hasCompatibleBrowser: (Context) -> Boolean = { context ->
-        BrowserCapabilitiesSupplier(context).get() != BrowserCapabilities.Unknown
-    }
-) : ActivityResultContract<PaymentBrowserAuthContract.Args, PaymentFlowResult.Unvalidated>() {
+internal class PaymentBrowserAuthContract :
+    ActivityResultContract<PaymentBrowserAuthContract.Args, PaymentFlowResult.Unvalidated>() {
 
     override fun createIntent(
         context: Context,
         input: Args
     ): Intent {
-        val shouldUseBrowser =
-            hasCompatibleBrowser(context) && input.hasDefaultReturnUrl(defaultReturnUrl)
+        val defaultReturnUrl = DefaultReturnUrl.create(context)
+        val shouldUseBrowser = input.hasDefaultReturnUrl(defaultReturnUrl)
 
         val statusBarColor = when (context) {
             is Activity -> context.window?.statusBarColor
@@ -87,7 +81,8 @@ internal class PaymentBrowserAuthContract(
          */
         val shouldCancelIntentOnUserNavigation: Boolean = true,
 
-        val statusBarColor: Int? = null
+        val statusBarColor: Int? = null,
+        val publishableKey: String
     ) : Parcelable {
         /**
          * Pre-requisite for using [StripeBrowserLauncherActivity].

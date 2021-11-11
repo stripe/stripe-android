@@ -2,11 +2,12 @@ package com.stripe.android.cards
 
 import android.content.Context
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.core.networking.AnalyticsRequestExecutor
+import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
 import com.stripe.android.model.AccountRange
-import com.stripe.android.networking.AnalyticsEvent
-import com.stripe.android.networking.AnalyticsRequestExecutor
-import com.stripe.android.networking.AnalyticsRequestFactory
 import com.stripe.android.networking.ApiRequest
+import com.stripe.android.networking.PaymentAnalyticsEvent
+import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networking.StripeApiRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
@@ -24,7 +25,7 @@ internal class DefaultCardAccountRangeRepositoryFactory(
 
     constructor(context: Context) : this(
         context,
-        AnalyticsRequestExecutor.Default()
+        DefaultAnalyticsRequestExecutor()
     )
 
     @Throws(IllegalStateException::class)
@@ -46,12 +47,12 @@ internal class DefaultCardAccountRangeRepositoryFactory(
         }.onSuccess { publishableKey ->
             fireAnalyticsEvent(
                 publishableKey,
-                AnalyticsEvent.CardMetadataPublishableKeyAvailable
+                PaymentAnalyticsEvent.CardMetadataPublishableKeyAvailable
             )
         }.onFailure {
             fireAnalyticsEvent(
                 ApiRequest.Options.UNDEFINED_PUBLISHABLE_KEY,
-                AnalyticsEvent.CardMetadataPublishableKeyUnavailable
+                PaymentAnalyticsEvent.CardMetadataPublishableKeyUnavailable
             )
         }.fold(
             onSuccess = { publishableKey ->
@@ -64,8 +65,8 @@ internal class DefaultCardAccountRangeRepositoryFactory(
                         publishableKey
                     ),
                     DefaultCardAccountRangeStore(appContext),
-                    AnalyticsRequestExecutor.Default(),
-                    AnalyticsRequestFactory(appContext, publishableKey)
+                    DefaultAnalyticsRequestExecutor(),
+                    PaymentAnalyticsRequestFactory(appContext, publishableKey)
                 )
             },
             onFailure = {
@@ -76,10 +77,10 @@ internal class DefaultCardAccountRangeRepositoryFactory(
 
     private fun fireAnalyticsEvent(
         publishableKey: String,
-        event: AnalyticsEvent
+        event: PaymentAnalyticsEvent
     ) {
         analyticsRequestExecutor.executeAsync(
-            AnalyticsRequestFactory(
+            PaymentAnalyticsRequestFactory(
                 appContext,
                 publishableKey
             ).createRequest(event)

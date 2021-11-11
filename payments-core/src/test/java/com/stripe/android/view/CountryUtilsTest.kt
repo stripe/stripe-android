@@ -1,21 +1,27 @@
 package com.stripe.android.view
 
+import android.os.Build
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.CountryCode
 import com.stripe.android.model.getCountryCode
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 import java.util.Locale
 import kotlin.test.Test
 
 /**
  * Test class for [CountryUtils]
  */
+@RunWith(RobolectricTestRunner::class)
+@Config(sdk = [Build.VERSION_CODES.P])
 class CountryUtilsTest {
 
     @Test
     fun `doesCountryUsePostalCode() should return expected result`() {
         assertThat(CountryUtils.doesCountryUsePostalCode(CountryCode.create("US")))
             .isTrue()
-        assertThat(CountryUtils.doesCountryUsePostalCode(CountryCode.create("UK")))
+        assertThat(CountryUtils.doesCountryUsePostalCode(CountryCode.create("GB")))
             .isTrue()
         assertThat(CountryUtils.doesCountryUsePostalCode(CountryCode.create("CA")))
             .isTrue()
@@ -25,10 +31,19 @@ class CountryUtilsTest {
 
     @Test
     fun getOrderedCountries() {
+        val defaultLocaleSecondCountryName = CountryUtils.getOrderedCountries(Locale.getDefault())[1].name
         assertThat(
             CountryUtils.getOrderedCountries(Locale.getDefault())[0].code
         ).isEqualTo(
             Locale.getDefault().getCountryCode()
+        )
+
+        // Make sure caching updates the localized country list.  We look at index
+        // 1 because the 0 is the country of the current locale.
+        assertThat(
+            CountryUtils.getOrderedCountries(Locale.CHINESE)[1].name
+        ).isNotEqualTo(
+            defaultLocaleSecondCountryName
         )
     }
 
@@ -61,5 +76,37 @@ class CountryUtilsTest {
         // word for germany
         assertThat(germany?.name)
             .isEqualTo("Deutschland")
+    }
+
+    @Test
+    fun `formatNameForSorting does nothing to already formatted strings`() {
+        val input = "aland"
+        val expectedOutput = "aland"
+
+        assertThat(CountryUtils.formatNameForSorting(input) == expectedOutput)
+    }
+
+    @Test
+    fun `formatNameForSorting removes accents and diacritics`() {
+        val input = "Dziękuję Åland"
+        val expectedOutput = "dziekuje aland"
+
+        assertThat(CountryUtils.formatNameForSorting(input) == expectedOutput)
+    }
+
+    @Test
+    fun `formatNameForSorting removes capitalization`() {
+        val input = "Aland"
+        val expectedOutput = "aland"
+
+        assertThat(CountryUtils.formatNameForSorting(input) == expectedOutput)
+    }
+
+    @Test
+    fun `formatNameForSorting removes non alphanumeric characters`() {
+        val input = "aºland1!!!"
+        val expectedOutput = "aland"
+
+        assertThat(CountryUtils.formatNameForSorting(input) == expectedOutput)
     }
 }

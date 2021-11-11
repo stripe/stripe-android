@@ -3,11 +3,11 @@ package com.stripe.example.activity
 import android.os.Bundle
 import android.view.View
 import androidx.lifecycle.Observer
-import com.stripe.android.PaymentIntentResult
 import com.stripe.android.model.Address
 import com.stripe.android.model.MandateDataParams
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.example.R
 import com.stripe.example.databinding.CreateSepaDebitActivityBinding
 
@@ -54,14 +54,19 @@ class ConfirmSepaDebitActivity : StripeIntentActivity() {
         viewBinding.confirmButton.isEnabled = enabled
     }
 
-    override fun onConfirmSuccess(result: PaymentIntentResult) {
-        super.onConfirmSuccess(result)
-        snackbarController.show("Status after confirmation: ${result.intent.status}")
+    override fun onConfirmSuccess() {
+        super.onConfirmSuccess()
+        snackbarController.show("Confirmation succeeded.")
     }
 
-    override fun onConfirmError(throwable: Throwable) {
-        super.onConfirmError(throwable)
-        snackbarController.show("Error during confirmation: ${throwable.message}")
+    override fun onConfirmCanceled() {
+        super.onConfirmCanceled()
+        snackbarController.show("Confirmation canceled.")
+    }
+
+    override fun onConfirmError(failedResult: PaymentResult.Failed) {
+        super.onConfirmError(failedResult)
+        snackbarController.show("Error during confirmation: ${failedResult.throwable.message}")
     }
 
     private fun createPaymentMethodParams(iban: String): PaymentMethodCreateParams {

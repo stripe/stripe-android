@@ -3,6 +3,7 @@ package com.stripe.android.payments
 import android.content.Intent
 import android.os.Parcel
 import android.os.Parcelable
+import androidx.annotation.RestrictTo
 import androidx.core.os.bundleOf
 import com.stripe.android.PaymentController
 import com.stripe.android.StripeIntentResult
@@ -19,12 +20,13 @@ import kotlinx.parcelize.Parcelize
  * [Parcel#writeException()](https://developer.android.com/reference/android/os/Parcel#writeException(java.lang.Exception))
  * for more details.
  */
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 sealed class PaymentFlowResult {
     @Parcelize
-    internal data class Unvalidated internal constructor(
-        internal val clientSecret: String? = null,
-        @StripeIntentResult.Outcome internal val flowOutcome: Int = StripeIntentResult.Outcome.UNKNOWN,
-        internal val exception: StripeException? = null,
+    data class Unvalidated constructor(
+        val clientSecret: String? = null,
+        @StripeIntentResult.Outcome val flowOutcome: Int = StripeIntentResult.Outcome.UNKNOWN,
+        val exception: StripeException? = null,
         internal val canCancelSource: Boolean = false,
         internal val sourceId: String? = null,
         internal val source: Source? = null,
@@ -33,7 +35,7 @@ sealed class PaymentFlowResult {
         @JvmSynthetic
         fun toBundle() = bundleOf(EXTRA to this)
 
-        fun validate(): Validated {
+        internal fun validate(): Validated {
             if (exception is Throwable) {
                 throw exception
             }
@@ -51,7 +53,8 @@ sealed class PaymentFlowResult {
             )
         }
 
-        internal companion object : Parceler<Unvalidated> {
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        companion object : Parceler<Unvalidated> {
             override fun create(parcel: Parcel): Unvalidated {
                 return Unvalidated(
                     clientSecret = parcel.readString(),
@@ -75,7 +78,7 @@ sealed class PaymentFlowResult {
             }
 
             @JvmSynthetic
-            internal fun fromIntent(intent: Intent?): Unvalidated {
+            fun fromIntent(intent: Intent?): Unvalidated {
                 return intent?.getParcelableExtra(EXTRA) ?: Unvalidated()
             }
 

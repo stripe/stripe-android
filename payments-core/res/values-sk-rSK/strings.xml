@@ -1,120 +1,170 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
-    <string name="acc_label_card_number">Číslo karty</string>
-    <string name="acc_label_card_number_node">%s, číslo karty</string>
-    <string name="acc_label_cvc_node">%s, CVC</string>
-    <string name="acc_label_expiry_date">Dátum ukončenia platnosti</string>
-    <string name="acc_label_expiry_date_node">%s, dátum ukončenia platnosti</string>
-    <string name="acc_label_zip">PSČ</string>
-    <string name="acc_label_zip_short">PSČ</string>
-    <string name="add_card">Pridajte novú debetnú alebo kreditnú kartu, aby ste mohli nakupovať v tejto aplikácii.</string>
-    <string name="added">Spôsob platby %s pridaný</string>
-    <string name="address_city_required">Zadajte vaše mesto</string>
-    <string name="address_country_invalid">Vaša krajina je neplatná.</string>
-    <string name="address_county_required">Zadajte váš kraj</string>
-    <string name="address_label_address">Adresa</string>
-    <string name="address_label_address_line1">Riadok adresy 1</string>
-    <string name="address_label_address_line1_optional">Riadok adresy 1 (voliteľne)</string>
-    <string name="address_label_address_line2_optional">Riadok adresy 2 (voliteľne)</string>
-    <string name="address_label_address_optional">Adresa (voliteľne)</string>
-    <string name="address_label_apt">Byt</string>
-    <string name="address_label_apt_optional">Byt (voliteľne)</string>
-    <string name="address_label_city">Mesto</string>
-    <string name="address_label_city_optional">Mesto (voliteľne)</string>
-    <string name="address_label_country">Krajina</string>
-    <string name="address_label_county">Kraj</string>
-    <string name="address_label_county_optional">Kraj (voliteľne)</string>
-    <string name="address_label_name">Meno</string>
-    <string name="address_label_phone_number">Telefónne číslo</string>
-    <string name="address_label_phone_number_optional">Telefónne číslo (voliteľne)</string>
-    <string name="address_label_postal_code">PSČ</string>
-    <string name="address_label_postal_code_optional">PSČ (voliteľne)</string>
-    <string name="address_label_postcode">PSČ</string>
-    <string name="address_label_postcode_optional">PSČ (voliteľne)</string>
-    <string name="address_label_province">Provincia</string>
-    <string name="address_label_province_optional">Provincia (voliteľne)</string>
-    <string name="address_label_region_generic">Štát/provincia/región</string>
-    <string name="address_label_region_generic_optional">Štát/provincia/región (voliteľne)</string>
-    <string name="address_label_state">Štát</string>
-    <string name="address_label_state_optional">Štát (voliteľne)</string>
-    <string name="address_label_zip_code">PSČ</string>
-    <string name="address_label_zip_code_optional">PSČ (voliteľne)</string>
-    <string name="address_label_zip_postal_code">PSČ</string>
-    <string name="address_label_zip_postal_code_optional">PSČ (voliteľne)</string>
-    <string name="address_name_required">Zadajte svoje meno</string>
-    <string name="address_phone_number_required">Zadajte vaše telefónne číslo</string>
-    <string name="address_postal_code_invalid">Vaše PSČ je neplatné</string>
-    <string name="address_postcode_invalid">Vaše PSČ je neplatné</string>
-    <string name="address_province_required">Zadajte provinciu</string>
-    <string name="address_region_generic_required">Zadajte štát/provinciu/región</string>
-    <string name="address_required">Zadajte vašu adresu</string>
-    <string name="address_shipping_address">Dodacia adresa</string>
-    <string name="address_state_required">Zadajte štát</string>
-    <string name="address_zip_invalid">Vaše PSČ je neplatné.</string>
-    <string name="address_zip_postal_invalid">Vaše PSČ je neplatné</string>
-    <string name="becs_mandate_acceptance">
-    Poskytnutím podrobností o svojom bankovom účte a potvrdením tejto platby súhlasíte s touto
-    požiadavkou na inkaso a zmluvou o službách požiadaviek na inkaso a autorizujete spoločnosť
-    Stripe Payments Australia Pty Ltd ACN 160 180 343 ID používateľa inkasa 507156
-    („Stripe“) na inkaso vášho účtu prostredníctvom systému Bulk Electronic Clearing System (BECS)
-    v mene %1$s (ďalej len „obchodník“) pre všetky sumy, ktoré vám boli oznámené
-    osobitne obchodníkom. Potvrdzujete, že ste buď majiteľom účtu alebo
-    autorizovaným signatárom na vyššie uvedenom účte.
-    </string>
-    <string name="becs_widget_account_number">Číslo účtu</string>
-    <string name="becs_widget_account_number_incomplete">Číslo vášho účtu je neúplné.</string>
-    <string name="becs_widget_account_number_required">Vyžaduje sa vaše číslo účtu.</string>
-    <string name="becs_widget_bsb">BSB</string>
-    <string name="becs_widget_bsb_incomplete">Zadané BSB je neúplné.</string>
-    <string name="becs_widget_bsb_invalid">Zadané BSB je neplatné.</string>
-    <string name="becs_widget_email">E-mailová adresa</string>
-    <string name="becs_widget_email_invalid">Vaša e-mailová adresa je neplatná.</string>
-    <string name="becs_widget_email_required">Vyžaduje sa vaša e-mailová adresa.</string>
-    <string name="becs_widget_name">Meno</string>
-    <string name="becs_widget_name_required">Vyžaduje sa vaše meno.</string>
-    <string name="card_ending_in">Karta %1$s s poslednými štyrmi číslami %2$s</string>
-    <string name="close">Zatvoriť</string>
-    <string name="delete_payment_method">Odstrániť spôsob platby</string>
-    <string name="delete_payment_method_prompt_title">Vymazať spôsob platby?</string>
-    <string name="expiry_date_hint">MM/RR</string>
-    <string name="expiry_label_short">Ukončenie platnosti</string>
-    <string name="fpx_bank_offline">%s - Offline</string>
-    <string name="incomplete_expiry_date">Dátum vypršania platnosti vašej karty je neúplný.</string>
-    <string name="invalid_card_number">Číslo vašej karty je neplatné.</string>
-    <string name="invalid_cvc">Bezpečnostný kód vašej karty je neplatný.</string>
-    <string name="invalid_expiry_month">Mesiac vypršania platnosti vašej karty je neplatný.</string>
-    <string name="invalid_expiry_year">Rok ukončenia platnosti vašej karty je neplatný.</string>
-    <string name="invalid_shipping_information">Neplatná dodacia adresa</string>
-    <string name="invalid_zip">Vaše poštové smerovacie číslo je neúplné.</string>
-    <string name="no_payment_methods">Žiadne spôsoby platby.</string>
-    <string name="payment_method_add_new_card">Pridať novú kartu…</string>
-    <string name="payment_method_add_new_fpx">Zvoľte bankový účet (FPX)…</string>
-    <string name="price_free">Zdarma</string>
-    <string name="removed">Spôsob platby %s odstránený</string>
-    <string name="secure_checkout">Bezpečná pokladňa</string>
-    <string name="stripe_failure_connection_error">Vyskytli sa problémy s pripojením k nášmu poskytovateľovi platieb. Skontrolujte pripojenie k internetu a skúste to znova.</string>
-    <string name="stripe_failure_reason_authentication">Nemôžeme overiť váš spôsob platby. Vyberte iný spôsob platby a skúste to znova.</string>
-    <string name="stripe_failure_reason_timed_out">Vypršal čas autentifikácie vášho spôsobu platby -- skúste znova</string>
-    <string name="stripe_paymentsheet_add_button_label">Pridať</string>
-    <string name="stripe_paymentsheet_add_payment_method_card_information">Informácie o karte</string>
-    <string name="stripe_paymentsheet_add_payment_method_country_or_region">Krajina alebo región</string>
-    <string name="stripe_paymentsheet_add_payment_method_title">Pridajte svoje informácie o platbe</string>
-    <string name="stripe_paymentsheet_back">Späť</string>
-    <string name="stripe_paymentsheet_close">Zatvoriť</string>
-    <string name="stripe_paymentsheet_expiration_date_hint">MM / RR</string>
-    <string name="stripe_paymentsheet_new_card_button_label">+ Nová karta</string>
-    <string name="stripe_paymentsheet_or_pay_with_card">Alebo zaplaťte kartou</string>
-    <string name="stripe_paymentsheet_pay_button_amount">Zaplatiť %s</string>
-    <string name="stripe_paymentsheet_pay_button_label">Zaplatiť</string>
-    <string name="stripe_paymentsheet_primary_button_processing">Prebieha spracovanie…</string>
-    <string name="stripe_paymentsheet_save_this_card">Uložiť túto kartu pre budúce platby</string>
-    <string name="stripe_paymentsheet_save_this_card_with_merchant_name">Uložiť túto kartu pre budúce platby obchodníkovi %s</string>
-    <string name="stripe_paymentsheet_select_payment_method">Vyberte svoj spôsob platby</string>
-    <string name="stripe_paymentsheet_setup_button_label">Nastaviť</string>
-    <string name="stripe_paymentsheet_total_amount">Celkovo: %s</string>
-    <string name="title_add_a_card">Pridať kartu</string>
-    <string name="title_add_an_address">Zadajte adresu</string>
-    <string name="title_bank_account">Bankový účet</string>
-    <string name="title_payment_method">Spôsob platby</string>
-    <string name="title_select_shipping_method">Zvoľte spôsob dodania</string>
+  <!-- Label for card number entry text field -->
+  <string name="acc_label_card_number">Číslo karty</string>
+  <string name="acc_label_card_number_node">%s, číslo karty</string>
+  <string name="acc_label_cvc_node">%s, CVC</string>
+  <string name="acc_label_expiry_date">Dátum ukončenia platnosti</string>
+  <string name="acc_label_expiry_date_node">%s, dátum ukončenia platnosti</string>
+  <!-- Caption for Zip Code field on address form (only shown when country is United States only) -->
+  <string name="acc_label_zip">PSČ</string>
+  <!-- Short string for zip code (United States only) Please keep to 5 characters or less if possible. -->
+  <string name="acc_label_zip_short">PSČ</string>
+  <!-- Message displayed when a payment method is removed, stating its name. -->
+  <string name="added">Spôsob platby %s pridaný</string>
+  <!-- Error text indicating that city is required, used for all locations -->
+  <string name="address_city_required">Zadajte vaše mesto</string>
+  <!-- Error text indicating country is invalid -->
+  <string name="address_country_invalid">Vaša krajina je neplatná.</string>
+  <!-- Error text indicating that county is required, used for UK addresses -->
+  <string name="address_county_required">Zadajte váš kraj</string>
+  <!-- Caption for Address field on address form -->
+  <string name="address_label_address">Adresa</string>
+  <!-- Address line 1 placeholder for billing address form. -->
+  <string name="address_label_address_line1">Riadok adresy 1</string>
+  <!-- Label for input requesting the first line of an address where , used for international addresses -->
+  <string name="address_label_address_line1_optional">Riadok adresy 1 (voliteľne)</string>
+  <!-- Address line 2 placeholder for billing address form. -->
+  <string name="address_label_address_line2_optional">Riadok adresy 2 (voliteľne)</string>
+  <!-- Label for input requesting the first line of an address where input is optional, used for US and Canada addresses -->
+  <string name="address_label_address_optional">Adresa (voliteľne)</string>
+  <!-- Label for input requesting apartment number (address line 2) where input is optional, used for US based addresses -->
+  <string name="address_label_apt_optional">Byt (voliteľne)</string>
+  <!-- Caption for City field on address form -->
+  <string name="address_label_city">Mesto</string>
+  <!-- Label for input requesting city where input is optional, used for all locations -->
+  <string name="address_label_city_optional">Mesto (voliteľne)</string>
+  <!-- Caption for Country field on address form -->
+  <string name="address_label_country">Krajina</string>
+  <!-- Caption for County field on address form (only countries that use county, like United Kingdom) -->
+  <string name="address_label_county">Kraj</string>
+  <!-- Label for input requesting county where input is optional , used for UK based addresses -->
+  <string name="address_label_county_optional">Kraj (voliteľne)</string>
+  <!-- Caption for Name field on address form -->
+  <string name="address_label_name">Meno</string>
+  <!-- Label for input requesting phone number, used for all locations -->
+  <string name="address_label_phone_number">Telefónne číslo</string>
+  <!-- Label for input requesting phone number where input is optional, used for all locations -->
+  <string name="address_label_phone_number_optional">Telefónne číslo (voliteľne)</string>
+  <!-- Short string for postal code (text used in non-US countries) -->
+  <string name="address_label_postal_code">PSČ</string>
+  <!-- Label for input requesting postal code where input is optional, used for Canada based addresses -->
+  <string name="address_label_postal_code_optional">PSČ (voliteľne)</string>
+  <!-- Label for input requesting postcode, used for UK based addresses -->
+  <string name="address_label_postcode">PSČ</string>
+  <!-- Label for input requesting postcode where input is optional, used for UK based addresses -->
+  <string name="address_label_postcode_optional">PSČ (voliteľne)</string>
+  <!-- Caption for Province field on address form (only countries that use province, like Canada) -->
+  <string name="address_label_province">Provincia</string>
+  <!-- Label for input requesting province where province is optional, used for canadian addresses -->
+  <string name="address_label_province_optional">Provincia (voliteľne)</string>
+  <!-- Label for input requesting the region, used for international addresses -->
+  <string name="address_label_region_generic">Štát/provincia/región</string>
+  <!-- Label for input requesting the region where input is optional, used for international addresses -->
+  <string name="address_label_region_generic_optional">Štát/provincia/región (voliteľne)</string>
+  <!-- Caption for State field on address form (only countries that use state , like United States) -->
+  <string name="address_label_state">Štát</string>
+  <!-- Label for input requesting state where input is optional, used for US based addresses -->
+  <string name="address_label_state_optional">Štát (voliteľne)</string>
+  <!-- Label for input requesting zip code, used for US based addreses -->
+  <string name="address_label_zip_code">PSČ</string>
+  <!-- Label for input requesting zip code where input is optional, used for US based addresses -->
+  <string name="address_label_zip_code_optional">PSČ (voliteľne)</string>
+  <!-- Label for input requesting postal code, used for international addresses -->
+  <string name="address_label_zip_postal_code">PSČ</string>
+  <!-- Label for input requesting postal code where input is optional, used for international addresses -->
+  <string name="address_label_zip_postal_code_optional">PSČ (voliteľne)</string>
+  <!-- Error text indicating name is required -->
+  <string name="address_name_required">Zadajte svoje meno</string>
+  <!-- Error text indicating that phone number is required, used for all addresses -->
+  <string name="address_phone_number_required">Zadajte vaše telefónne číslo</string>
+  <!-- Error message for when postal code in form is invalid -->
+  <string name="address_postal_code_invalid">Vaše PSČ je neplatné.</string>
+  <!-- Error text indicating postcode is invalid, used for UK addresses -->
+  <string name="address_postcode_invalid">Vaše PSČ je neplatné</string>
+  <!-- Error text indicating that province is required, used for Canada addresses -->
+  <string name="address_province_required">Zadajte provinciu</string>
+  <!-- Error text indicating that region is required, used for international addresses -->
+  <string name="address_region_generic_required">Zadajte štát/provinciu/región</string>
+  <!-- Error text indicating that address is required, used for all locations -->
+  <string name="address_required">Zadajte vašu adresu</string>
+  <!-- Error text indicating that state is required, used for US addresses -->
+  <string name="address_state_required">Zadajte štát</string>
+  <!-- Error text indicating zip code is invalid, used for US addresses -->
+  <string name="address_zip_invalid">Vaše PSČ je neplatné.</string>
+  <!-- Error text indicating zip/ postal code is invalid, used for international addresses -->
+  <string name="address_zip_postal_invalid">Vaše PSČ je neplatné</string>
+  <!-- BECS Debit Widget - mandate acceptance -->
+  <string name="becs_mandate_acceptance">\n    Poskytnutím podrobností o svojom bankovom účte a potvrdením tejto platby súhlasíte s touto\n    požiadavkou na inkaso a zmluvou o službách požiadaviek na inkaso a autorizujete spoločnosť\n    Stripe Payments Australia Pty Ltd ACN 160 180 343 ID používateľa inkasa 507156\n    („Stripe“) na inkaso vášho účtu prostredníctvom systému Bulk Electronic Clearing System (BECS)\n    v mene %1$s (ďalej len „obchodník“) pre všetky sumy, ktoré vám boli oznámené\n    osobitne obchodníkom. Potvrdzujete, že ste buď majiteľom účtu alebo\n    autorizovaným signatárom na vyššie uvedenom účte.\n    </string>
+  <!-- Placeholder text for Account number entry field for BECS Debit. -->
+  <string name="becs_widget_account_number">Číslo účtu</string>
+  <!-- BECS Debit Widget - account number field - incomplete error message -->
+  <string name="becs_widget_account_number_incomplete">Číslo vášho účtu je neúplné.</string>
+  <!-- BECS Debit Widget - account number field - required error message -->
+  <string name="becs_widget_account_number_required">Vyžaduje sa vaše číslo účtu.</string>
+  <!-- Placeholder text for BSB Number entry field for BECS Debit. -->
+  <string name="becs_widget_bsb">BSB</string>
+  <!-- Error string displayed to user when they have entered an incomplete BSB number. BSB refers to an Australian bank account number -->
+  <string name="becs_widget_bsb_incomplete">Zadané BSB je neúplné.</string>
+  <!-- Error string displayed to user when they enter in an invalid BSB number. &quot;BSB&quot; refers to an Australian bank account. -->
+  <string name="becs_widget_bsb_invalid">Zadané BSB je neplatné.</string>
+  <!-- BECS Debit Widget - email address field - label -->
+  <string name="becs_widget_email">E-mailová adresa</string>
+  <!-- BECS Debit Widget - email address field - invalid error message -->
+  <string name="becs_widget_email_invalid">Vaša e-mailová adresa je neplatná.</string>
+  <!-- BECS Debit Widget - email address field - required error message -->
+  <string name="becs_widget_email_required">Vyžaduje sa vaša e-mailová adresa.</string>
+  <!-- BECS Debit Widget - name field - label -->
+  <string name="becs_widget_name">Meno</string>
+  <!-- BECS Debit Widget - name field - required error message -->
+  <string name="becs_widget_name_required">Vyžaduje sa vaše meno.</string>
+  <!-- Details of a saved card. &apos;{card brand} ending in {last 4}&apos; e.g. &apos;VISA ending in 4242&apos; -->
+  <string name="card_ending_in">Karta %1$s s poslednými štyrmi číslami %2$s</string>
+  <!-- Text for close button -->
+  <string name="close">Zatvoriť</string>
+  <!-- Accessibility action for deleting a payment method -->
+  <string name="delete_payment_method">Odstrániť spôsob platby</string>
+  <string name="delete_payment_method_prompt_title">Vymazať spôsob platby?</string>
+  <!-- label for text field to enter card expiry -->
+  <string name="expiry_date_hint">MM/RR</string>
+  <string name="expiry_label_short">Ukončenie platnosti</string>
+  <!-- Label that will show that an FPX bank is offline. For example, &quot;AmBank - Offline&quot; -->
+  <string name="fpx_bank_offline">%s - Offline</string>
+  <!-- Error message for card details form when expiration date isn&apos;t entered completely -->
+  <string name="incomplete_expiry_date">Dátum vypršania platnosti vašej karty je neúplný.</string>
+  <string name="invalid_card_number">Číslo vašej karty je neplatné.</string>
+  <!-- Error message for card entry form when CVC/CVV is invalid -->
+  <string name="invalid_cvc">Bezpečnostný kód vašej karty je neplatný.</string>
+  <!-- String to describe an invalid month in expiry date. -->
+  <string name="invalid_expiry_month">Mesiac vypršania platnosti vašej karty je neplatný.</string>
+  <!-- String to describe an invalid year in expiry date. -->
+  <string name="invalid_expiry_year">Rok ukončenia platnosti vašej karty je neplatný.</string>
+  <!-- Shipping form error message -->
+  <string name="invalid_shipping_information">Neplatná dodacia adresa</string>
+  <!-- Error message for when postal code in form is incomplete -->
+  <string name="invalid_zip">Vaše poštové smerovacie číslo je neúplné.</string>
+  <string name="payment_method_add_new_card">Pridať novú kartu…</string>
+  <string name="payment_method_add_new_fpx">Zvoľte bankový účet (FPX)…</string>
+  <!-- Label for free shipping method -->
+  <string name="price_free">Zdarma</string>
+  <!-- Message displayed when a payment method is removed, stating its name. -->
+  <string name="removed">Spôsob platby %s odstránený</string>
+  <string name="secure_checkout">Bezpečná pokladňa</string>
+  <!-- Error when 3DS2 authentication failed (e.g. customer entered the wrong code) -->
+  <string name="stripe_failure_reason_authentication">Nemôžeme overiť váš spôsob platby. Vyberte iný spôsob platby a skúste to znova.</string>
+  <!-- Error when 3DS2 authentication timed out. -->
+  <string name="stripe_failure_reason_timed_out">Vypršal čas autentifikácie vášho spôsobu platby -- skúste znova</string>
+  <!-- label for text field to enter card expiry -->
+  <string name="stripe_paymentsheet_expiration_date_hint">MM / RR</string>
+  <!-- When there are multiple browsers and web authentication is required, this will show in a window asking which browser they want to use to "Verify your payment" -->
+  <string name="stripe_verify_your_payment">Overenie platby</string>
+  <string name="title_add_a_card">Pridať kartu</string>
+  <!-- Screen title telling users they should add an address -->
+  <string name="title_add_an_address">Zadajte adresu</string>
+  <!-- Label for Bank Account selection or detail entry form -->
+  <string name="title_bank_account">Bankový účet</string>
+  <!-- Title for Payment Method screen -->
+  <string name="title_payment_method">Spôsob platby</string>
+  <!-- Screen title telling users they should select a shipping address -->
+  <string name="title_select_shipping_method">Zvoľte spôsob dodania</string>
 </resources>

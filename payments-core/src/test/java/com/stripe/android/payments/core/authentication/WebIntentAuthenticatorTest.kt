@@ -4,19 +4,18 @@ import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
-import com.stripe.android.Logger
 import com.stripe.android.PaymentBrowserAuthStarter
 import com.stripe.android.StripePaymentController.Companion.PAYMENT_REQUEST_CODE
 import com.stripe.android.StripePaymentController.Companion.SETUP_REQUEST_CODE
 import com.stripe.android.auth.PaymentBrowserAuthContract
+import com.stripe.android.core.networking.AnalyticsRequest
+import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.networking.AnalyticsEvent
-import com.stripe.android.networking.AnalyticsRequest
-import com.stripe.android.networking.AnalyticsRequestExecutor
-import com.stripe.android.networking.AnalyticsRequestFactory
 import com.stripe.android.networking.ApiRequest
+import com.stripe.android.networking.PaymentAnalyticsEvent
+import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.view.AuthActivityStarterHost
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestCoroutineDispatcher
@@ -39,11 +38,10 @@ class WebIntentAuthenticatorTest {
     private val paymentBrowserAuthStarterFactory =
         mock<(AuthActivityStarterHost) -> PaymentBrowserAuthStarter>()
     private val analyticsRequestExecutor = mock<AnalyticsRequestExecutor>()
-    private val analyticsRequestFactory = AnalyticsRequestFactory(
+    private val analyticsRequestFactory = PaymentAnalyticsRequestFactory(
         context,
         ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
     )
-    private val logger = mock<Logger>()
 
     private val testDispatcher = TestCoroutineDispatcher()
     private val host = mock<AuthActivityStarterHost>()
@@ -54,28 +52,33 @@ class WebIntentAuthenticatorTest {
         argumentCaptor()
     private val analyticsRequestArgumentCaptor: KArgumentCaptor<AnalyticsRequest> = argumentCaptor()
 
+    private var threeDs1IntentReturnUrlMap = mutableMapOf<String, String>()
+
     private val authenticator = WebIntentAuthenticator(
         paymentBrowserAuthStarterFactory,
         analyticsRequestExecutor,
         analyticsRequestFactory,
-        logger,
         enableLogging = false,
-        testDispatcher
+        testDispatcher,
+        threeDs1IntentReturnUrlMap,
+        { ApiKeyFixtures.FAKE_PUBLISHABLE_KEY }
     )
 
     @Before
     fun setUp() {
+        threeDs1IntentReturnUrlMap[PAYMENT_INTENT_ID_FOR_3DS1] = RETURN_URL_FOR_3DS1
         whenever(paymentBrowserAuthStarterFactory(any())).thenReturn(paymentBrowserWebStarter)
     }
 
     @Test
     fun authenticate_whenSdk3ds1() {
+        threeDs1IntentReturnUrlMap.remove(PAYMENT_INTENT_ID_FOR_3DS1)
         verifyAuthenticate(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_3DS1,
             expectedUrl = "https://hooks.stripe.com/3d_secure_2_eap/begin_test/src_1Ecve7CRMbs6FrXfm8AxXMIh/src_client_secret_F79yszOBAiuaZTuIhbn3LPUW",
             expectedReturnUrl = null,
             expectedRequestCode = PAYMENT_REQUEST_CODE,
-            expectedAnalyticsEvent = AnalyticsEvent.Auth3ds1Sdk
+            expectedAnalyticsEvent = PaymentAnalyticsEvent.Auth3ds1Sdk
         )
     }
 
@@ -83,12 +86,12 @@ class WebIntentAuthenticatorTest {
     fun authenticate_whenSdk3ds1_withReturnUrl() {
         verifyAuthenticate(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_3DS1,
-            threeDs1ReturnUrl = RETURN_URL_FOR_3DS1,
             expectedUrl = "https://hooks.stripe.com/3d_secure_2_eap/begin_test/src_1Ecve7CRMbs6FrXfm8AxXMIh/src_client_secret_F79yszOBAiuaZTuIhbn3LPUW",
             expectedReturnUrl = RETURN_URL_FOR_3DS1,
             expectedRequestCode = PAYMENT_REQUEST_CODE,
-            expectedAnalyticsEvent = AnalyticsEvent.Auth3ds1Sdk
+            expectedAnalyticsEvent = PaymentAnalyticsEvent.Auth3ds1Sdk
         )
+        assertThat(threeDs1IntentReturnUrlMap).doesNotContainKey(PAYMENT_INTENT_ID_FOR_3DS1)
     }
 
     @Test
@@ -98,7 +101,7 @@ class WebIntentAuthenticatorTest {
             expectedUrl = "https://hooks.stripe.com/3d_secure_2_eap/begin_test/src_1Ecaz6CRMbs6FrXfuYKBRSUG/src_client_secret_F6octeOshkgxT47dr0ZxSZiv",
             expectedReturnUrl = "stripe://deeplink",
             expectedRequestCode = PAYMENT_REQUEST_CODE,
-            expectedAnalyticsEvent = AnalyticsEvent.AuthRedirect
+            expectedAnalyticsEvent = PaymentAnalyticsEvent.AuthRedirect
         )
     }
 
@@ -109,7 +112,7 @@ class WebIntentAuthenticatorTest {
             expectedUrl = "https://hooks.stripe.com/redirect/authenticate/src_1EqTStGMT9dGPIDGJGPkqE6B?client_secret=src_client_secret_FL9m741mmxtHykDlRTC5aQ02",
             expectedReturnUrl = "stripe://setup_intent_return",
             expectedRequestCode = SETUP_REQUEST_CODE,
-            expectedAnalyticsEvent = AnalyticsEvent.AuthRedirect
+            expectedAnalyticsEvent = PaymentAnalyticsEvent.AuthRedirect
         )
     }
 
@@ -127,17 +130,15 @@ class WebIntentAuthenticatorTest {
 
     private fun verifyAuthenticate(
         stripeIntent: StripeIntent,
-        threeDs1ReturnUrl: String? = null,
         expectedUrl: String,
         expectedReturnUrl: String?,
         expectedRequestCode: Int,
         expectedShouldCancelIntentOnUserNavigation: Boolean = true,
-        expectedAnalyticsEvent: AnalyticsEvent?
+        expectedAnalyticsEvent: PaymentAnalyticsEvent?
     ) = testDispatcher.runBlockingTest {
         authenticator.authenticate(
             host,
             stripeIntent,
-            threeDs1ReturnUrl,
             REQUEST_OPTIONS
         )
         verify(paymentBrowserWebStarter).start(
@@ -159,18 +160,19 @@ class WebIntentAuthenticatorTest {
         }
     }
 
-    private fun verifyAnalytics(event: AnalyticsEvent) {
+    private fun verifyAnalytics(event: PaymentAnalyticsEvent) {
         verify(analyticsRequestExecutor)
             .executeAsync(analyticsRequestArgumentCaptor.capture())
         val analyticsRequest = analyticsRequestArgumentCaptor.firstValue
         assertThat(
-            analyticsRequest.compactParams?.get(AnalyticsRequestFactory.FIELD_EVENT)
+            analyticsRequest.params?.get(PaymentAnalyticsRequestFactory.FIELD_EVENT)
         ).isEqualTo(event.toString())
     }
 
     private companion object {
         private const val ACCOUNT_ID = "acct_123"
 
+        private const val PAYMENT_INTENT_ID_FOR_3DS1 = "pi_1EceMnCRMbs6FrXfCXdF8dnx"
         private const val RETURN_URL_FOR_3DS1 = "stripesdk://payment_return_url"
         private val REQUEST_OPTIONS = ApiRequest.Options(
             apiKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,

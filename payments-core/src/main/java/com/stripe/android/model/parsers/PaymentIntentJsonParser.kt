@@ -1,14 +1,15 @@
 package com.stripe.android.model.parsers
 
+import androidx.annotation.RestrictTo
 import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.StripeJsonUtils
-import com.stripe.android.model.StripeJsonUtils.jsonArrayToList
 import com.stripe.android.model.StripeJsonUtils.optString
 import org.json.JSONObject
 
-internal class PaymentIntentJsonParser : ModelJsonParser<PaymentIntent> {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+class PaymentIntentJsonParser : ModelJsonParser<PaymentIntent> {
     override fun parse(json: JSONObject): PaymentIntent? {
         val objectType = optString(json, FIELD_OBJECT)
         if (OBJECT_TYPE != objectType) {
@@ -50,7 +51,6 @@ internal class PaymentIntentJsonParser : ModelJsonParser<PaymentIntent> {
         val setupFutureUsage = StripeIntent.Usage.fromCode(
             optString(json, FIELD_SETUP_FUTURE_USAGE)
         )
-        val nextAction = StripeJsonUtils.optMap(json, FIELD_NEXT_ACTION)
         val lastPaymentError =
             json.optJSONObject(FIELD_LAST_PAYMENT_ERROR)?.let {
                 ErrorJsonParser().parse(it)
@@ -62,6 +62,10 @@ internal class PaymentIntentJsonParser : ModelJsonParser<PaymentIntent> {
         val nextActionData = json.optJSONObject(FIELD_NEXT_ACTION)?.let {
             NextActionDataParser().parse(it)
         }
+
+        val unactivatedPaymentMethods = ModelJsonParser.jsonArrayToList(
+            json.optJSONArray(FIELD_UNACTIVATED_PAYMENT_METHOD_TYPES)
+        )
 
         return PaymentIntent(
             id = id,
@@ -76,7 +80,6 @@ internal class PaymentIntentJsonParser : ModelJsonParser<PaymentIntent> {
             currency = currency,
             description = description,
             isLiveMode = livemode,
-            nextAction = nextAction,
             paymentMethod = paymentMethod,
             paymentMethodId = paymentMethodId,
             receiptEmail = receiptEmail,
@@ -84,7 +87,8 @@ internal class PaymentIntentJsonParser : ModelJsonParser<PaymentIntent> {
             setupFutureUsage = setupFutureUsage,
             lastPaymentError = lastPaymentError,
             shipping = shipping,
-            nextActionData = nextActionData
+            nextActionData = nextActionData,
+            unactivatedPaymentMethods = unactivatedPaymentMethods
         )
     }
 
@@ -119,7 +123,7 @@ internal class PaymentIntentJsonParser : ModelJsonParser<PaymentIntent> {
     }
 
     internal class ShippingJsonParser : ModelJsonParser<PaymentIntent.Shipping> {
-        override fun parse(json: JSONObject): PaymentIntent.Shipping? {
+        override fun parse(json: JSONObject): PaymentIntent.Shipping {
             return PaymentIntent.Shipping(
                 address = json.optJSONObject(FIELD_ADDRESS)?.let {
                     AddressJsonParser().parse(it)
@@ -163,5 +167,6 @@ internal class PaymentIntentJsonParser : ModelJsonParser<PaymentIntent> {
         private const val FIELD_SHIPPING = "shipping"
         private const val FIELD_STATUS = "status"
         private const val FIELD_SETUP_FUTURE_USAGE = "setup_future_usage"
+        private const val FIELD_UNACTIVATED_PAYMENT_METHOD_TYPES = "unactivated_payment_method_types"
     }
 }

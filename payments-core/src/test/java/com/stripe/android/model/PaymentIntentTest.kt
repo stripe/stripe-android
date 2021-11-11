@@ -31,7 +31,7 @@ class PaymentIntentTest {
             .isEqualTo(PaymentIntent.CaptureMethod.Automatic)
         assertThat(paymentIntent.confirmationMethod)
             .isEqualTo(PaymentIntent.ConfirmationMethod.Manual)
-        assertThat(paymentIntent.nextAction)
+        assertThat(paymentIntent.nextActionData)
             .isNotNull()
         assertThat(paymentIntent.receiptEmail)
             .isEqualTo("jenny@example.com")
@@ -55,6 +55,13 @@ class PaymentIntentTest {
             .isTrue()
         assertThat(paymentIntent.paymentMethodTypes)
             .containsExactly("wechat_pay")
+    }
+
+    @Test
+    fun parsePaymentIntentWithKlarnaPaymentMethods() {
+        val paymentIntent = PaymentIntentFixtures.PI_WITH_KLARNA_IN_PAYMENT_METHODS
+        assertThat(paymentIntent.paymentMethodTypes)
+            .containsExactly("klarna")
     }
 
     @Test

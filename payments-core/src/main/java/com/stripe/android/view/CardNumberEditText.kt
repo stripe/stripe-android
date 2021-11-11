@@ -4,7 +4,6 @@ import android.content.Context
 import android.os.Build
 import android.text.Editable
 import android.text.InputFilter
-import android.text.InputType
 import android.util.AttributeSet
 import android.view.View
 import androidx.annotation.VisibleForTesting
@@ -15,11 +14,12 @@ import com.stripe.android.cards.CardNumber
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
 import com.stripe.android.cards.DefaultStaticCardAccountRanges
 import com.stripe.android.cards.StaticCardAccountRanges
+import com.stripe.android.core.networking.AnalyticsRequestExecutor
+import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
 import com.stripe.android.model.AccountRange
 import com.stripe.android.model.CardBrand
-import com.stripe.android.networking.AnalyticsEvent
-import com.stripe.android.networking.AnalyticsRequestExecutor
-import com.stripe.android.networking.AnalyticsRequestFactory
+import com.stripe.android.networking.PaymentAnalyticsEvent
+import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -42,7 +42,7 @@ open class CardNumberEditText internal constructor(
     private val cardAccountRangeRepository: CardAccountRangeRepository,
     private val staticCardAccountRanges: StaticCardAccountRanges = DefaultStaticCardAccountRanges(),
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
-    private val analyticsRequestFactory: AnalyticsRequestFactory
+    private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory
 ) : StripeEditText(context, attrs, defStyleAttr) {
 
     @JvmOverloads
@@ -71,8 +71,8 @@ open class CardNumberEditText internal constructor(
         workContext,
         DefaultCardAccountRangeRepositoryFactory(context).create(),
         DefaultStaticCardAccountRanges(),
-        AnalyticsRequestExecutor.Default(),
-        AnalyticsRequestFactory(
+        DefaultAnalyticsRequestExecutor(),
+        PaymentAnalyticsRequestFactory(
             context,
             publishableKeyProvider = publishableKeySupplier
         )
@@ -141,7 +141,8 @@ open class CardNumberEditText internal constructor(
     private var loadingJob: Job? = null
 
     init {
-        inputType = InputType.TYPE_CLASS_NUMBER
+        setNumberOnlyInputType()
+
         setErrorMessage(resources.getString(R.string.invalid_card_number))
         addTextChangedListener(CardNumberTextWatcher())
 
@@ -278,7 +279,7 @@ open class CardNumberEditText internal constructor(
     @JvmSynthetic
     internal fun onCardMetadataLoadedTooSlow() {
         analyticsRequestExecutor.executeAsync(
-            analyticsRequestFactory.createRequest(AnalyticsEvent.CardMetadataLoadedTooSlow)
+            paymentAnalyticsRequestFactory.createRequest(PaymentAnalyticsEvent.CardMetadataLoadedTooSlow)
         )
     }
 

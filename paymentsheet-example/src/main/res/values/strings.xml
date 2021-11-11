@@ -20,7 +20,8 @@
     <string name="on">On</string>
     <string name="off">Off</string>
     <string name="checkout_mode">Checkout Mode</string>
-    <string name="payment">Payment</string>
+    <string name="payment">Pay</string>
+    <string name="payment_with_setup">Pay w/setup</string>
     <string name="setup">Setup</string>
     <string name="reload_paymentsheet">Reload PaymentSheet</string>
     <string name="payment_method">Payment Method</string>
@@ -29,4 +30,8 @@
     <string name="checkout_custom">Checkout (Custom)</string>
     <string name="checkout_complete">Checkout (Complete)</string>
     <string name="currency">Currency</string>
+    <string name="default_billing_address">Default Billing Address</string>
+    <string name="shipping_address">Shipping Address</string>
+    <string name="allowsDelayedPaymentMethods">Delayed PMs</string>
+    <string name="automatic_pm">Automatic PMs</string>
 </resources>

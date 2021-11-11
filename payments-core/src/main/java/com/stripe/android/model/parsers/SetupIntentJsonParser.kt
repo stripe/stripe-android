@@ -1,11 +1,13 @@
 package com.stripe.android.model.parsers
 
+import androidx.annotation.RestrictTo
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.StripeJsonUtils.optString
 import org.json.JSONObject
 
-internal class SetupIntentJsonParser : ModelJsonParser<SetupIntent> {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
+class SetupIntentJsonParser : ModelJsonParser<SetupIntent> {
     override fun parse(json: JSONObject): SetupIntent? {
         val objectType = optString(json, FIELD_OBJECT)
         if (VALUE_SETUP_INTENT != objectType) {
@@ -18,6 +20,10 @@ internal class SetupIntentJsonParser : ModelJsonParser<SetupIntent> {
         val paymentMethodId = optString(json, FIELD_PAYMENT_METHOD).takeIf {
             paymentMethod == null
         } ?: paymentMethod?.id
+
+        val unactivatedPaymentMethods = ModelJsonParser.jsonArrayToList(
+            json.optJSONArray(FIELD_UNACTIVATED_PAYMENT_METHOD_TYPES)
+        )
 
         return SetupIntent(
             id = optString(json, FIELD_ID),
@@ -40,7 +46,8 @@ internal class SetupIntentJsonParser : ModelJsonParser<SetupIntent> {
             },
             nextActionData = json.optJSONObject(FIELD_NEXT_ACTION)?.let {
                 NextActionDataParser().parse(it)
-            }
+            },
+            unactivatedPaymentMethods = unactivatedPaymentMethods
         )
     }
 
@@ -86,5 +93,6 @@ internal class SetupIntentJsonParser : ModelJsonParser<SetupIntent> {
         private const val FIELD_STATUS = "status"
         private const val FIELD_USAGE = "usage"
         private const val FIELD_PAYMENT_METHOD = "payment_method"
+        private const val FIELD_UNACTIVATED_PAYMENT_METHOD_TYPES = "unactivated_payment_method_types"
     }
 }

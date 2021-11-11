@@ -6,22 +6,23 @@ import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.stripe.android.Logger
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.Stripe
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.auth.PaymentBrowserAuthContract
-import com.stripe.android.networking.AnalyticsEvent
-import com.stripe.android.networking.AnalyticsRequest
-import com.stripe.android.networking.AnalyticsRequestExecutor
-import com.stripe.android.networking.AnalyticsRequestFactory
+import com.stripe.android.core.networking.AnalyticsRequest
+import com.stripe.android.core.networking.AnalyticsRequestExecutor
+import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
+import com.stripe.android.networking.PaymentAnalyticsEvent
+import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networking.StripeClientUserAgentHeaderFactory
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.stripe3ds2.init.ui.StripeToolbarCustomization
+import kotlinx.coroutines.Dispatchers
 
 internal class PaymentAuthWebViewActivityViewModel(
     private val args: PaymentBrowserAuthContract.Args,
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
-    private val analyticsRequestFactory: AnalyticsRequestFactory
+    private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory
 ) : ViewModel() {
     val extraHeaders: Map<String, String> by lazy {
         StripeClientUserAgentHeaderFactory().create(Stripe.appInfo)
@@ -72,12 +73,12 @@ internal class PaymentAuthWebViewActivityViewModel(
      */
     fun logStart() {
         fireAnalytics(
-            analyticsRequestFactory.createRequest(AnalyticsEvent.Auth3ds1ChallengeStart)
+            paymentAnalyticsRequestFactory.createRequest(PaymentAnalyticsEvent.Auth3ds1ChallengeStart)
         )
 
         fireAnalytics(
-            analyticsRequestFactory.createRequest(
-                AnalyticsEvent.AuthWithWebView
+            paymentAnalyticsRequestFactory.createRequest(
+                PaymentAnalyticsEvent.AuthWithWebView
             )
         )
     }
@@ -87,7 +88,7 @@ internal class PaymentAuthWebViewActivityViewModel(
      */
     fun logError() {
         fireAnalytics(
-            analyticsRequestFactory.createRequest(AnalyticsEvent.Auth3ds1ChallengeError)
+            paymentAnalyticsRequestFactory.createRequest(PaymentAnalyticsEvent.Auth3ds1ChallengeError)
         )
     }
 
@@ -96,7 +97,7 @@ internal class PaymentAuthWebViewActivityViewModel(
      */
     fun logComplete() {
         fireAnalytics(
-            analyticsRequestFactory.createRequest(AnalyticsEvent.Auth3ds1ChallengeComplete)
+            paymentAnalyticsRequestFactory.createRequest(PaymentAnalyticsEvent.Auth3ds1ChallengeComplete)
         )
     }
 
@@ -117,12 +118,15 @@ internal class PaymentAuthWebViewActivityViewModel(
         private val args: PaymentBrowserAuthContract.Args
     ) : ViewModelProvider.Factory {
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-            val publishableKey = PaymentConfiguration.getInstance(application).publishableKey
 
             return PaymentAuthWebViewActivityViewModel(
                 args,
-                AnalyticsRequestExecutor.Default(logger),
-                AnalyticsRequestFactory(application, publishableKey)
+                DefaultAnalyticsRequestExecutor(logger, Dispatchers.IO),
+                PaymentAnalyticsRequestFactory(
+                    application,
+                    args.publishableKey,
+                    defaultProductUsageTokens = setOf("PaymentAuthWebViewActivity")
+                )
             ) as T
         }
     }

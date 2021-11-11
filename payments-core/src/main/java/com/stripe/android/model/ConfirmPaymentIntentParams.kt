@@ -196,7 +196,7 @@ data class ConfirmPaymentIntentParams internal constructor(
     private val mandateDataParams: Map<String, Any>?
         get() {
             return mandateData?.toParamMap()
-                ?: if (paymentMethodCreateParams?.type?.hasMandate == true && mandateId == null) {
+                ?: if (paymentMethodCreateParams?.type?.requiresMandate == true && mandateId == null) {
                     // Populate with default "online" MandateData
                     MandateDataParams(MandateDataParams.Type.Online.DEFAULT).toParamMap()
                 } else {
@@ -235,7 +235,13 @@ data class ConfirmPaymentIntentParams internal constructor(
         /**
          * Use `off_session` if your customer may or may not be in your checkout flow.
          */
-        OffSession("off_session")
+        OffSession("off_session"),
+
+        /**
+         * Use `` if you want to clear reusable from the payment intent.  Note: this
+         * only works if the PaymentIntent was created with no setup_future_usage.
+         */
+        Blank("")
     }
 
     /**

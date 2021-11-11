@@ -85,6 +85,11 @@ data class SetupIntent internal constructor(
      */
     val lastSetupError: Error? = null,
 
+    /**
+     * Payment types that have not been activated in livemode, but have been activated in testmode.
+     */
+    override val unactivatedPaymentMethods: List<String>,
+
     override val nextActionData: StripeIntent.NextActionData?
 ) : StripeIntent {
 
@@ -179,7 +184,7 @@ data class SetupIntent internal constructor(
         }
 
         internal companion object {
-            internal const val CODE_AUTHENTICATION_ERROR = "payment_intent_authentication_failure"
+            internal const val CODE_AUTHENTICATION_ERROR = "setup_intent_authentication_failure"
         }
     }
 
@@ -189,13 +194,15 @@ data class SetupIntent internal constructor(
                 .dropLastWhile { it.isEmpty() }.toTypedArray()[0]
 
         init {
-            require(PATTERN.matcher(value).matches()) {
-                "Invalid client secret: $value"
+            require(isMatch(value)) {
+                "Invalid Setup Intent client secret: $value"
             }
         }
 
-        private companion object {
+        internal companion object {
             private val PATTERN = Pattern.compile("^seti_[^_]+_secret_[^_]+$")
+
+            fun isMatch(value: String) = PATTERN.matcher(value).matches()
         }
     }
 

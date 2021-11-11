@@ -1,11 +1,14 @@
 enableFeaturePreview("VERSION_CATALOGS")
 
+include ':cardverificationsheet'
+include ':cardverificationsheet-example'
 include ':paymentsheet-example'
 include ':stripe-test-e2e'
 include ':example'
 include ':payments-core'
 include ':payments'
 include ':paymentsheet'
+include ':wechatpay'
 
 dependencyResolutionManagement {
     versionCatalogs {

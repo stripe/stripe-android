@@ -1,16 +1,22 @@
 package com.stripe.android
 
 import android.util.Log
+import androidx.annotation.RestrictTo
 
-internal interface Logger {
-    fun error(msg: String, t: Throwable? = null)
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+interface Logger {
+    fun debug(msg: String)
 
     fun info(msg: String)
 
-    fun debug(msg: String)
+    fun warning(msg: String)
+
+    fun error(msg: String, t: Throwable? = null)
 
     companion object {
-        internal fun getInstance(enableLogging: Boolean): Logger {
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
+        fun getInstance(enableLogging: Boolean): Logger {
             return if (enableLogging) {
                 real()
             } else {
@@ -21,27 +27,34 @@ internal interface Logger {
         private const val TAG = "StripeSdk"
 
         private val REAL_LOGGER = object : Logger {
+            override fun debug(msg: String) {
+                Log.d(TAG, msg)
+            }
+
             override fun info(msg: String) {
                 Log.i(TAG, msg)
+            }
+
+            override fun warning(msg: String) {
+                Log.w(TAG, msg)
             }
 
             override fun error(msg: String, t: Throwable?) {
                 Log.e(TAG, msg, t)
             }
-
-            override fun debug(msg: String) {
-                Log.d(TAG, msg)
-            }
         }
 
         private val NOOP_LOGGER = object : Logger {
+            override fun debug(msg: String) {
+            }
+
             override fun info(msg: String) {
             }
 
-            override fun error(msg: String, t: Throwable?) {
+            override fun warning(msg: String) {
             }
 
-            override fun debug(msg: String) {
+            override fun error(msg: String, t: Throwable?) {
             }
         }
 
@@ -49,7 +62,7 @@ internal interface Logger {
             return REAL_LOGGER
         }
 
-        internal fun noop(): Logger {
+        fun noop(): Logger {
             return NOOP_LOGGER
         }
     }

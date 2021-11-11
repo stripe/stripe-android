@@ -1,0 +1,73 @@
+name: paymentsheet-example size diff
+on: [pull_request]
+jobs:
+  # Checkout master branch and build the APK
+  build-master:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+        with:
+          ref: master
+      - name: Build in master
+        run: ./gradlew :paymentsheet-example:assembleRelease && mv paymentsheet-example/build/outputs/apk/release/paymentsheet-example-release-unsigned.apk paymentsheet-example/build/outputs/apk/release/paymentsheet-example-release-master.apk
+      - name: Upload APK
+        uses: actions/upload-artifact@v1
+        with:
+          name: apk
+          path: paymentsheet-example/build/outputs/apk/release/paymentsheet-example-release-master.apk
+
+  # Checkout PR branch and build the APK
+  build-pr:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Build from PR
+        run: ./gradlew :paymentsheet-example:assembleRelease && mv paymentsheet-example/build/outputs/apk/release/paymentsheet-example-release-unsigned.apk paymentsheet-example/build/outputs/apk/release/paymentsheet-example-release-pr.apk
+      - name: Upload APK
+        uses: actions/upload-artifact@v1
+        with:
+          name: apk
+          path: paymentsheet-example/build/outputs/apk/release/paymentsheet-example-release-pr.apk
+
+  # Execute Diffuse only when the two APKs are built successfully
+  diffuse:
+    needs: [build-master, build-pr]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Download APKs
+        uses: actions/download-artifact@v1
+        with:
+          name: apk
+      - name: diffuse
+        id: diffuse
+        uses: usefulness/diffuse-action@v1
+        with:
+          old-file-path: apk/paymentsheet-example-release-master.apk
+          new-file-path: apk/paymentsheet-example-release-pr.apk
+
+      # Post comment with output
+
+      - uses: peter-evans/find-comment@v1
+        id: find_comment
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          body-includes: Diffuse output
+
+      - uses: peter-evans/create-or-update-comment@v1
+        if: ${{ steps.diffuse.outputs.diff-raw != null || steps.find_comment.outputs.comment-id != null }}
+        with:
+          body: |
+            Diffuse output:
+
+            ${{ steps.diffuse.outputs.diff-gh-comment }}
+          edit-mode: replace
+          comment-id: ${{ steps.find_comment.outputs.comment-id }}
+          issue-number: ${{ github.event.pull_request.number }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload diffuse output
+        uses: actions/upload-artifact@v2
+        with:
+          name: diffuse-output
+          path: ${{ steps.diffuse.outputs.diff-file }}

@@ -53,4 +53,17 @@ class PayWithGoogleUtilsTest {
         val littlePrice = getPriceString(7, Currency.getInstance("CLP"))
         assertThat(littlePrice).isEqualTo("7")
     }
+
+    @Test
+    fun getPriceString_whenLocaleWithArabicNumerals_returnsExpectedValue() {
+        Locale.setDefault(Locale.Builder().setLanguage("ar").setRegion("AE").build())
+        val priceString = getPriceString(100, Currency.getInstance("USD"))
+        assertThat(priceString).isEqualTo("1.00")
+
+        val littlePrice = getPriceString(8, Currency.getInstance("EUR"))
+        assertThat(littlePrice).isEqualTo("0.08")
+
+        val bigPrice = getPriceString(20000000, Currency.getInstance("GBP"))
+        assertThat(bigPrice).isEqualTo("200000.00")
+    }
 }

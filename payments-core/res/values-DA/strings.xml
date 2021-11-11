@@ -1,120 +1,170 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
-    <string name="acc_label_card_number">Kortnummer</string>
-    <string name="acc_label_card_number_node">%s, Kortnummer</string>
-    <string name="acc_label_cvc_node">%sCVC</string>
-    <string name="acc_label_expiry_date">Udløbsdato</string>
-    <string name="acc_label_expiry_date_node">%sUdløbsdato</string>
-    <string name="acc_label_zip">Postnummer</string>
-    <string name="acc_label_zip_short">ZIP</string>
-    <string name="add_card">Tilføj et nyt hævekort eller kreditkort for at foretage køb i denne app.</string>
-    <string name="added">Tilføjet %s</string>
-    <string name="address_city_required">Indtast din by</string>
-    <string name="address_country_invalid">Dit land er ugyldigt</string>
-    <string name="address_county_required">Indtast dit county</string>
-    <string name="address_label_address">Adresse</string>
-    <string name="address_label_address_line1">Adresselinje 1</string>
-    <string name="address_label_address_line1_optional">Adresselinje 1 (valgfrit)</string>
-    <string name="address_label_address_line2_optional">Adresselinje 2 (valgfrit)</string>
-    <string name="address_label_address_optional">Adresse (valgfrit) </string>
-    <string name="address_label_apt">Lejl.</string>
-    <string name="address_label_apt_optional">Lejl. (valgfrit)</string>
-    <string name="address_label_city">By</string>
-    <string name="address_label_city_optional">By (valgfrit)</string>
-    <string name="address_label_country">Land</string>
-    <string name="address_label_county">Amt</string>
-    <string name="address_label_county_optional">County (valgfrit)</string>
-    <string name="address_label_name">Navn</string>
-    <string name="address_label_phone_number">Telefonnr.</string>
-    <string name="address_label_phone_number_optional">Telefonnr. (valgfrit)</string>
-    <string name="address_label_postal_code">Postnummer</string>
-    <string name="address_label_postal_code_optional">Postnr. (valgfrit)</string>
-    <string name="address_label_postcode">Postnr.</string>
-    <string name="address_label_postcode_optional">Postnr. (valgfrit)</string>
-    <string name="address_label_province">Provins</string>
-    <string name="address_label_province_optional">Provins (valgfrit)</string>
-    <string name="address_label_region_generic">Stat/provins/region</string>
-    <string name="address_label_region_generic_optional">Stat/provins/region (valgfrit)</string>
-    <string name="address_label_state">Stat</string>
-    <string name="address_label_state_optional">Stat (valgfrit)</string>
-    <string name="address_label_zip_code">ZIP-kode</string>
-    <string name="address_label_zip_code_optional">ZIP-kode (valgfrit)</string>
-    <string name="address_label_zip_postal_code">ZIP-kode/Postnr.</string>
-    <string name="address_label_zip_postal_code_optional">ZIP-kode/Postnr. (valgfrit)</string>
-    <string name="address_name_required">Indtast dit navn</string>
-    <string name="address_phone_number_required">Indtast dit telefonnr.</string>
-    <string name="address_postal_code_invalid">Postnummeret er ugyldigt.</string>
-    <string name="address_postcode_invalid">Postnummeret er ugyldigt.</string>
-    <string name="address_province_required">Indtast din provins</string>
-    <string name="address_region_generic_required">Indtast din stat/provins/region</string>
-    <string name="address_required">Indtast din adresse</string>
-    <string name="address_shipping_address">Forsendelsesadresse</string>
-    <string name="address_state_required">Indtast din stat</string>
-    <string name="address_zip_invalid">ZIP-koden er ugyldig.</string>
-    <string name="address_zip_postal_invalid">ZIP-kode/Postnr. er ugyldigt</string>
-    <string name="becs_mandate_acceptance">
-    Ved at angive dine bankoplysninger og bekræfte denne betaling accepterer du denne
-    direkte debiteringsanmodning og debiteringsanmodningens serviceaftale og autoriserer 
-    Stripe Payments Australia Pty Ltd ACN 160 180 343 Direkte debiterings-bruger-ID 507156
-    (“Stripe”) til at debitere din konto via Bulk Electronic Clearing System (BECS) på 
-    vegne af %1$s (“forhandler”) for eventuelle beløb, der separat meddeles dig af
-    forhandleren. Du bekræfter, at du enten er en kontoindehaver eller en
-    autoriseret underskriver på den konto, der er anført ovenfor.
-    </string>
-    <string name="becs_widget_account_number">Kontonummer</string>
-    <string name="becs_widget_account_number_incomplete">Dit kontonummer er ikke komplet.</string>
-    <string name="becs_widget_account_number_required">Dit kontonummer er påkrævet.</string>
-    <string name="becs_widget_bsb">BSB</string>
-    <string name="becs_widget_bsb_incomplete">Den BSB, du angav, er ufuldstændig.</string>
-    <string name="becs_widget_bsb_invalid">Den BSB, du angav, er ugyldig.</string>
-    <string name="becs_widget_email">E-mailadresse.</string>
-    <string name="becs_widget_email_invalid">Din e-mailadresse er ugyldig.</string>
-    <string name="becs_widget_email_required">Din e-mail er påkrævet.</string>
-    <string name="becs_widget_name">Navn</string>
-    <string name="becs_widget_name_required">Dit navn er påkrævet.</string>
-    <string name="card_ending_in">%1$s slutter på %2$s</string>
-    <string name="close">Luk</string>
-    <string name="delete_payment_method">Slet betalingsmetode</string>
-    <string name="delete_payment_method_prompt_title">Slet betalingsmetode?</string>
-    <string name="expiry_date_hint">MM/ÅÅ</string>
-    <string name="expiry_label_short">Udløbsdato</string>
-    <string name="fpx_bank_offline">%s -Offline</string>
-    <string name="incomplete_expiry_date">Dit korts udløbsdato er ikke fuldendt.</string>
-    <string name="invalid_card_number">Nummeret på dit kort er ugyldigt.</string>
-    <string name="invalid_cvc">Dit korts sikkerhedskode er ugyldig.</string>
-    <string name="invalid_expiry_month">Kortets udløbsmåned er ugyldig.</string>
-    <string name="invalid_expiry_year">Dit korts udløbsår er ugyldigt.</string>
-    <string name="invalid_shipping_information">Ugyldig forsendelsesadresse</string>
-    <string name="invalid_zip">Dit postnummer er ikke fuldendt.</string>
-    <string name="no_payment_methods">Ingen betalingsmetoder.</string>
-    <string name="payment_method_add_new_card">Tilføj nyt kort...</string>
-    <string name="payment_method_add_new_fpx">Vælg bankkonto (FPX)...</string>
-    <string name="price_free">Gratis</string>
-    <string name="removed">Slettet %s</string>
-    <string name="secure_checkout">Sikker Checkout</string>
-    <string name="stripe_failure_connection_error">Vi har problemer med at oprette forbindelse til vores betalingsudbyder. Kontroller din internetforbindelse, og prøv igen.</string>
-    <string name="stripe_failure_reason_authentication">Vi kunne ikke bekræfte din betalingsmetode. Vælg venligst en anden betalingsmetode, og prøv igen.</string>
-    <string name="stripe_failure_reason_timed_out">Bekræftelsen af din betalingsmetode udløb -- prøv igen.</string>
-    <string name="stripe_paymentsheet_add_button_label">Tilføj</string>
-    <string name="stripe_paymentsheet_add_payment_method_card_information">Kortoplysninger</string>
-    <string name="stripe_paymentsheet_add_payment_method_country_or_region">Land eller region</string>
-    <string name="stripe_paymentsheet_add_payment_method_title">Tilføj dine betalingsoplysninger</string>
-    <string name="stripe_paymentsheet_back">Tilbage</string>
-    <string name="stripe_paymentsheet_close">Luk</string>
-    <string name="stripe_paymentsheet_expiration_date_hint">MM/ÅÅ</string>
-    <string name="stripe_paymentsheet_new_card_button_label">+ Nyt kort</string>
-    <string name="stripe_paymentsheet_or_pay_with_card">Eller betal med et kort</string>
-    <string name="stripe_paymentsheet_pay_button_amount">Betal %s</string>
-    <string name="stripe_paymentsheet_pay_button_label">Betal</string>
-    <string name="stripe_paymentsheet_primary_button_processing">Behandler...</string>
-    <string name="stripe_paymentsheet_save_this_card">Gem dette kort til fremtidige betalinger</string>
-    <string name="stripe_paymentsheet_save_this_card_with_merchant_name">Gem dette kort til fremtidige %s betalinger</string>
-    <string name="stripe_paymentsheet_select_payment_method">Vælg din betalingsmetode</string>
-    <string name="stripe_paymentsheet_setup_button_label">Opsætning</string>
-    <string name="stripe_paymentsheet_total_amount">I alt: %s</string>
-    <string name="title_add_a_card">Tilføj et kort</string>
-    <string name="title_add_an_address">Tilføj en adresse</string>
-    <string name="title_bank_account">Bankkonto</string>
-    <string name="title_payment_method">Betalingsmetode</string>
-    <string name="title_select_shipping_method">Vælg forsendelsesmetode</string>
+  <!-- Label for card number entry text field -->
+  <string name="acc_label_card_number">Kortnummer</string>
+  <string name="acc_label_card_number_node">%s, Kortnummer</string>
+  <string name="acc_label_cvc_node">%sCVC</string>
+  <string name="acc_label_expiry_date">Udløbsdato</string>
+  <string name="acc_label_expiry_date_node">%sUdløbsdato</string>
+  <!-- Caption for Zip Code field on address form (only shown when country is United States only) -->
+  <string name="acc_label_zip">Postnummer</string>
+  <!-- Short string for zip code (United States only) Please keep to 5 characters or less if possible. -->
+  <string name="acc_label_zip_short">ZIP</string>
+  <!-- Message displayed when a payment method is removed, stating its name. -->
+  <string name="added">Tilføjet %s</string>
+  <!-- Error text indicating that city is required, used for all locations -->
+  <string name="address_city_required">Indtast din by</string>
+  <!-- Error text indicating country is invalid -->
+  <string name="address_country_invalid">Dit land er ugyldigt</string>
+  <!-- Error text indicating that county is required, used for UK addresses -->
+  <string name="address_county_required">Indtast dit county</string>
+  <!-- Caption for Address field on address form -->
+  <string name="address_label_address">Adresse</string>
+  <!-- Address line 1 placeholder for billing address form. -->
+  <string name="address_label_address_line1">Adresselinje 1</string>
+  <!-- Label for input requesting the first line of an address where , used for international addresses -->
+  <string name="address_label_address_line1_optional">Adresselinje 1 (valgfrit)</string>
+  <!-- Address line 2 placeholder for billing address form. -->
+  <string name="address_label_address_line2_optional">Adresselinje 2 (valgfrit)</string>
+  <!-- Label for input requesting the first line of an address where input is optional, used for US and Canada addresses -->
+  <string name="address_label_address_optional">Adresse (valgfrit) </string>
+  <!-- Label for input requesting apartment number (address line 2) where input is optional, used for US based addresses -->
+  <string name="address_label_apt_optional">Lejl. (valgfrit)</string>
+  <!-- Caption for City field on address form -->
+  <string name="address_label_city">By</string>
+  <!-- Label for input requesting city where input is optional, used for all locations -->
+  <string name="address_label_city_optional">By (valgfrit)</string>
+  <!-- Caption for Country field on address form -->
+  <string name="address_label_country">Land</string>
+  <!-- Caption for County field on address form (only countries that use county, like United Kingdom) -->
+  <string name="address_label_county">Amt</string>
+  <!-- Label for input requesting county where input is optional , used for UK based addresses -->
+  <string name="address_label_county_optional">County (valgfrit)</string>
+  <!-- Caption for Name field on address form -->
+  <string name="address_label_name">Navn</string>
+  <!-- Label for input requesting phone number, used for all locations -->
+  <string name="address_label_phone_number">Telefonnr.</string>
+  <!-- Label for input requesting phone number where input is optional, used for all locations -->
+  <string name="address_label_phone_number_optional">Telefonnr. (valgfrit)</string>
+  <!-- Short string for postal code (text used in non-US countries) -->
+  <string name="address_label_postal_code">Postnummer</string>
+  <!-- Label for input requesting postal code where input is optional, used for Canada based addresses -->
+  <string name="address_label_postal_code_optional">Postnr. (valgfrit)</string>
+  <!-- Label for input requesting postcode, used for UK based addresses -->
+  <string name="address_label_postcode">Postnr.</string>
+  <!-- Label for input requesting postcode where input is optional, used for UK based addresses -->
+  <string name="address_label_postcode_optional">Postnr. (valgfrit)</string>
+  <!-- Caption for Province field on address form (only countries that use province, like Canada) -->
+  <string name="address_label_province">Provins</string>
+  <!-- Label for input requesting province where province is optional, used for canadian addresses -->
+  <string name="address_label_province_optional">Provins (valgfrit)</string>
+  <!-- Label for input requesting the region, used for international addresses -->
+  <string name="address_label_region_generic">Stat/provins/region</string>
+  <!-- Label for input requesting the region where input is optional, used for international addresses -->
+  <string name="address_label_region_generic_optional">Stat/provins/region (valgfrit)</string>
+  <!-- Caption for State field on address form (only countries that use state , like United States) -->
+  <string name="address_label_state">Stat</string>
+  <!-- Label for input requesting state where input is optional, used for US based addresses -->
+  <string name="address_label_state_optional">Stat (valgfrit)</string>
+  <!-- Label for input requesting zip code, used for US based addreses -->
+  <string name="address_label_zip_code">ZIP-kode</string>
+  <!-- Label for input requesting zip code where input is optional, used for US based addresses -->
+  <string name="address_label_zip_code_optional">ZIP-kode (valgfrit)</string>
+  <!-- Label for input requesting postal code, used for international addresses -->
+  <string name="address_label_zip_postal_code">ZIP-kode/Postnr.</string>
+  <!-- Label for input requesting postal code where input is optional, used for international addresses -->
+  <string name="address_label_zip_postal_code_optional">ZIP-kode/Postnr. (valgfrit)</string>
+  <!-- Error text indicating name is required -->
+  <string name="address_name_required">Indtast dit navn</string>
+  <!-- Error text indicating that phone number is required, used for all addresses -->
+  <string name="address_phone_number_required">Indtast dit telefonnr.</string>
+  <!-- Error message for when postal code in form is invalid -->
+  <string name="address_postal_code_invalid">Dit postnummer er ikke fuldendt.</string>
+  <!-- Error text indicating postcode is invalid, used for UK addresses -->
+  <string name="address_postcode_invalid">Postnummeret er ugyldigt.</string>
+  <!-- Error text indicating that province is required, used for Canada addresses -->
+  <string name="address_province_required">Indtast din provins</string>
+  <!-- Error text indicating that region is required, used for international addresses -->
+  <string name="address_region_generic_required">Indtast din stat/provins/region</string>
+  <!-- Error text indicating that address is required, used for all locations -->
+  <string name="address_required">Indtast din adresse</string>
+  <!-- Error text indicating that state is required, used for US addresses -->
+  <string name="address_state_required">Indtast din stat</string>
+  <!-- Error text indicating zip code is invalid, used for US addresses -->
+  <string name="address_zip_invalid">ZIP-koden er ugyldig.</string>
+  <!-- Error text indicating zip/ postal code is invalid, used for international addresses -->
+  <string name="address_zip_postal_invalid">ZIP-kode/Postnr. er ugyldigt</string>
+  <!-- BECS Debit Widget - mandate acceptance -->
+  <string name="becs_mandate_acceptance">\n    Ved at angive dine bankoplysninger og bekræfte denne betaling accepterer du denne\n    direkte debiteringsanmodning og debiteringsanmodningens serviceaftale og autoriserer \n    Stripe Payments Australia Pty Ltd ACN 160 180 343 Direkte debiterings-bruger-ID 507156\n    (“Stripe”) til at debitere din konto via Bulk Electronic Clearing System (BECS) på \n    vegne af %1$s (“forhandler”) for eventuelle beløb, der separat meddeles dig af\n    forhandleren. Du bekræfter, at du enten er en kontoindehaver eller en\n    autoriseret underskriver på den konto, der er anført ovenfor.\n    </string>
+  <!-- Placeholder text for Account number entry field for BECS Debit. -->
+  <string name="becs_widget_account_number">Kontonummer</string>
+  <!-- BECS Debit Widget - account number field - incomplete error message -->
+  <string name="becs_widget_account_number_incomplete">Dit kontonummer er ikke komplet.</string>
+  <!-- BECS Debit Widget - account number field - required error message -->
+  <string name="becs_widget_account_number_required">Dit kontonummer er påkrævet.</string>
+  <!-- Placeholder text for BSB Number entry field for BECS Debit. -->
+  <string name="becs_widget_bsb">BSB</string>
+  <!-- Error string displayed to user when they have entered an incomplete BSB number. BSB refers to an Australian bank account number -->
+  <string name="becs_widget_bsb_incomplete">Den BSB, du angav, er ufuldstændig.</string>
+  <!-- Error string displayed to user when they enter in an invalid BSB number. &quot;BSB&quot; refers to an Australian bank account. -->
+  <string name="becs_widget_bsb_invalid">Den BSB, du angav, er ugyldig.</string>
+  <!-- BECS Debit Widget - email address field - label -->
+  <string name="becs_widget_email">E-mailadresse.</string>
+  <!-- BECS Debit Widget - email address field - invalid error message -->
+  <string name="becs_widget_email_invalid">Din e-mailadresse er ugyldig.</string>
+  <!-- BECS Debit Widget - email address field - required error message -->
+  <string name="becs_widget_email_required">Din e-mail er påkrævet.</string>
+  <!-- BECS Debit Widget - name field - label -->
+  <string name="becs_widget_name">Navn</string>
+  <!-- BECS Debit Widget - name field - required error message -->
+  <string name="becs_widget_name_required">Dit navn er påkrævet.</string>
+  <!-- Details of a saved card. &apos;{card brand} ending in {last 4}&apos; e.g. &apos;VISA ending in 4242&apos; -->
+  <string name="card_ending_in">%1$s slutter på %2$s</string>
+  <!-- Text for close button -->
+  <string name="close">Luk</string>
+  <!-- Accessibility action for deleting a payment method -->
+  <string name="delete_payment_method">Slet betalingsmetode</string>
+  <string name="delete_payment_method_prompt_title">Slet betalingsmetode?</string>
+  <!-- label for text field to enter card expiry -->
+  <string name="expiry_date_hint">MM/ÅÅ</string>
+  <string name="expiry_label_short">Udløbsdato</string>
+  <!-- Label that will show that an FPX bank is offline. For example, &quot;AmBank - Offline&quot; -->
+  <string name="fpx_bank_offline">%s -Offline</string>
+  <!-- Error message for card details form when expiration date isn&apos;t entered completely -->
+  <string name="incomplete_expiry_date">Dit korts udløbsdato er ikke fuldendt.</string>
+  <string name="invalid_card_number">Nummeret på dit kort er ugyldigt.</string>
+  <!-- Error message for card entry form when CVC/CVV is invalid -->
+  <string name="invalid_cvc">Dit korts sikkerhedskode er ugyldig.</string>
+  <!-- String to describe an invalid month in expiry date. -->
+  <string name="invalid_expiry_month">Kortets udløbsmåned er ugyldig.</string>
+  <!-- String to describe an invalid year in expiry date. -->
+  <string name="invalid_expiry_year">Dit korts udløbsår er ugyldigt.</string>
+  <!-- Shipping form error message -->
+  <string name="invalid_shipping_information">Ugyldig forsendelsesadresse</string>
+  <!-- Error message for when postal code in form is incomplete -->
+  <string name="invalid_zip">Dit postnummer er ikke fuldendt.</string>
+  <string name="payment_method_add_new_card">Tilføj nyt kort...</string>
+  <string name="payment_method_add_new_fpx">Vælg bankkonto (FPX)...</string>
+  <!-- Label for free shipping method -->
+  <string name="price_free">Gratis</string>
+  <!-- Message displayed when a payment method is removed, stating its name. -->
+  <string name="removed">Slettet %s</string>
+  <string name="secure_checkout">Sikker Checkout</string>
+  <!-- Error when 3DS2 authentication failed (e.g. customer entered the wrong code) -->
+  <string name="stripe_failure_reason_authentication">Vi kunne ikke bekræfte din betalingsmetode. Vælg venligst en anden betalingsmetode, og prøv igen.</string>
+  <!-- Error when 3DS2 authentication timed out. -->
+  <string name="stripe_failure_reason_timed_out">Bekræftelsen af din betalingsmetode udløb -- prøv igen.</string>
+  <!-- label for text field to enter card expiry -->
+  <string name="stripe_paymentsheet_expiration_date_hint">MM/ÅÅ</string>
+  <!-- When there are multiple browsers and web authentication is required, this will show in a window asking which browser they want to use to "Verify your payment" -->
+  <string name="stripe_verify_your_payment">Bekræft din betaling</string>
+  <string name="title_add_a_card">Tilføj et kort</string>
+  <!-- Screen title telling users they should add an address -->
+  <string name="title_add_an_address">Tilføj en adresse</string>
+  <!-- Label for Bank Account selection or detail entry form -->
+  <string name="title_bank_account">Bankkonto</string>
+  <!-- Title for Payment Method screen -->
+  <string name="title_payment_method">Betalingsmetode</string>
+  <!-- Screen title telling users they should select a shipping address -->
+  <string name="title_select_shipping_method">Vælg forsendelsesmetode</string>
 </resources>

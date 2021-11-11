@@ -1,120 +1,170 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
-    <string name="acc_label_card_number">卡號</string>
-    <string name="acc_label_card_number_node">%s，卡號</string>
-    <string name="acc_label_cvc_node">%s，CVC</string>
-    <string name="acc_label_expiry_date">到期日</string>
-    <string name="acc_label_expiry_date_node">%s，到期日</string>
-    <string name="acc_label_zip">郵區編號</string>
-    <string name="acc_label_zip_short">郵區編號</string>
-    <string name="add_card">添加一個新的扣帳卡或信用卡以便在應用程式內購物。</string>
-    <string name="added">已添加 %s</string>
-    <string name="address_city_required">請輸入您的城市</string>
-    <string name="address_country_invalid">您的國家無效</string>
-    <string name="address_county_required">請輸入您所在的縣</string>
-    <string name="address_label_address">地址</string>
-    <string name="address_label_address_line1">地址行 1</string>
-    <string name="address_label_address_line1_optional">地址行 1（可選）</string>
-    <string name="address_label_address_line2_optional">地址行 2（可選）</string>
-    <string name="address_label_address_optional">地址（可選）</string>
-    <string name="address_label_apt">公寓</string>
-    <string name="address_label_apt_optional">公寓（可選）</string>
-    <string name="address_label_city">城市</string>
-    <string name="address_label_city_optional">城市（可選）</string>
-    <string name="address_label_country">國家</string>
-    <string name="address_label_county">縣</string>
-    <string name="address_label_county_optional">縣（可選）</string>
-    <string name="address_label_name">姓名</string>
-    <string name="address_label_phone_number">電話號碼</string>
-    <string name="address_label_phone_number_optional">電話號碼（可選）</string>
-    <string name="address_label_postal_code">郵區編號</string>
-    <string name="address_label_postal_code_optional">郵區編號（可選）</string>
-    <string name="address_label_postcode">郵區編號</string>
-    <string name="address_label_postcode_optional">郵區編號（可選）</string>
-    <string name="address_label_province">省</string>
-    <string name="address_label_province_optional">省（可選）</string>
-    <string name="address_label_region_generic">州/省/區</string>
-    <string name="address_label_region_generic_optional">州/省/區（可選）</string>
-    <string name="address_label_state">州</string>
-    <string name="address_label_state_optional">州（可選）</string>
-    <string name="address_label_zip_code">郵區編號</string>
-    <string name="address_label_zip_code_optional">郵區編號（可選）</string>
-    <string name="address_label_zip_postal_code">郵區編號</string>
-    <string name="address_label_zip_postal_code_optional">郵區編號（可選）</string>
-    <string name="address_name_required">請輸入您的姓名</string>
-    <string name="address_phone_number_required">請輸入您的電話號碼</string>
-    <string name="address_postal_code_invalid">您的郵區編號無效</string>
-    <string name="address_postcode_invalid">您的郵區編號無效</string>
-    <string name="address_province_required">請輸入您的省份</string>
-    <string name="address_region_generic_required">請輸入您的州/省/區</string>
-    <string name="address_required">請輸入您的地址</string>
-    <string name="address_shipping_address">配送地址</string>
-    <string name="address_state_required">請輸入您所屬的州</string>
-    <string name="address_zip_invalid">您的郵區編號無效。</string>
-    <string name="address_zip_postal_invalid">您的郵區編號無效</string>
-    <string name="becs_mandate_acceptance">
-    透過提供您的銀行帳戶資訊並確認該筆付款，
-    表示您同意本「直接扣賬請求」及其服務條款，
-    並授權 Stripe Payments Australia Pty Ltd ACN 160 180 343 Direct Debit User ID
-    number 507156 (「Stripe」) 透過批量電子清算系統 (BECS)
-    代 %1$s（「商家」）向您的帳戶扣取商家單獨告知您的金額。
-    您確認您是帳戶持有人或上述帳戶的授權簽署人。
-    
-    </string>
-    <string name="becs_widget_account_number">帳號</string>
-    <string name="becs_widget_account_number_incomplete">您的帳號不完整。</string>
-    <string name="becs_widget_account_number_required">您需要填寫帳號。</string>
-    <string name="becs_widget_bsb">BSB</string>
-    <string name="becs_widget_bsb_incomplete">您輸入的 BSB 不完整。</string>
-    <string name="becs_widget_bsb_invalid">您輸入的 BSB 無效。</string>
-    <string name="becs_widget_email">電郵地址</string>
-    <string name="becs_widget_email_invalid">您的電郵地址無效。</string>
-    <string name="becs_widget_email_required">您需要填寫電郵地址。</string>
-    <string name="becs_widget_name">姓名</string>
-    <string name="becs_widget_name_required">您需要填寫姓名。</string>
-    <string name="card_ending_in">%1$s尾號%2$s</string>
-    <string name="close">關閉</string>
-    <string name="delete_payment_method">刪除支付方式</string>
-    <string name="delete_payment_method_prompt_title">刪除支付方式</string>
-    <string name="expiry_date_hint">月月/年年</string>
-    <string name="expiry_label_short">有效期</string>
-    <string name="fpx_bank_offline">%s - 線下</string>
-    <string name="incomplete_expiry_date">您的銀行卡的到期日期不完整。</string>
-    <string name="invalid_card_number">您的卡號無效。</string>
-    <string name="invalid_cvc">您的銀行卡安全碼無效。</string>
-    <string name="invalid_expiry_month">您的銀行卡的到期月份無效。</string>
-    <string name="invalid_expiry_year">您的銀行卡的到期年份無效。</string>
-    <string name="invalid_shipping_information">配送地址無效</string>
-    <string name="invalid_zip">您的郵區編號不完整。</string>
-    <string name="no_payment_methods">沒有支付方式。</string>
-    <string name="payment_method_add_new_card">添加新卡…</string>
-    <string name="payment_method_add_new_fpx">選擇銀行帳戶 (FPX)… </string>
-    <string name="price_free">免費</string>
-    <string name="removed">已移除 %s</string>
-    <string name="secure_checkout">安全結帳</string>
-    <string name="stripe_failure_connection_error">連接我們的支付提供者時出現了問題。請檢查網路連接，然後重試。</string>
-    <string name="stripe_failure_reason_authentication">我們無法驗證您的付款方式。請選擇另一付款方式並重試。</string>
-    <string name="stripe_failure_reason_timed_out">驗證您的付款方式時超時 -- 請重試</string>
-    <string name="stripe_paymentsheet_add_button_label">添加</string>
-    <string name="stripe_paymentsheet_add_payment_method_card_information">銀行卡資訊</string>
-    <string name="stripe_paymentsheet_add_payment_method_country_or_region">國家或地區</string>
-    <string name="stripe_paymentsheet_add_payment_method_title">添加您的支付資訊</string>
-    <string name="stripe_paymentsheet_back">上一步</string>
-    <string name="stripe_paymentsheet_close">關閉</string>
-    <string name="stripe_paymentsheet_expiration_date_hint">月月/年年</string>
-    <string name="stripe_paymentsheet_new_card_button_label">+ 新卡</string>
-    <string name="stripe_paymentsheet_or_pay_with_card">或用銀行卡支付</string>
-    <string name="stripe_paymentsheet_pay_button_amount">支付%s</string>
-    <string name="stripe_paymentsheet_pay_button_label">支付</string>
-    <string name="stripe_paymentsheet_primary_button_processing">正在處理...</string>
-    <string name="stripe_paymentsheet_save_this_card">保存該卡，用於未來的付款</string>
-    <string name="stripe_paymentsheet_save_this_card_with_merchant_name">保存該卡，用於未來的 %s 付款</string>
-    <string name="stripe_paymentsheet_select_payment_method">選擇您的支付方式</string>
-    <string name="stripe_paymentsheet_setup_button_label">設置</string>
-    <string name="stripe_paymentsheet_total_amount">總金額：%s</string>
-    <string name="title_add_a_card">添加卡片</string>
-    <string name="title_add_an_address">設置地址</string>
-    <string name="title_bank_account">銀行帳戶</string>
-    <string name="title_payment_method">支付方式</string>
-    <string name="title_select_shipping_method">選擇配送方式</string>
+  <!-- Label for card number entry text field -->
+  <string name="acc_label_card_number">卡號</string>
+  <string name="acc_label_card_number_node">%s，卡號</string>
+  <string name="acc_label_cvc_node">%s，CVC</string>
+  <string name="acc_label_expiry_date">到期日</string>
+  <string name="acc_label_expiry_date_node">%s，到期日</string>
+  <!-- Caption for Zip Code field on address form (only shown when country is United States only) -->
+  <string name="acc_label_zip">郵區編號</string>
+  <!-- Short string for zip code (United States only) Please keep to 5 characters or less if possible. -->
+  <string name="acc_label_zip_short">郵區編號</string>
+  <!-- Message displayed when a payment method is removed, stating its name. -->
+  <string name="added">已添加 %s</string>
+  <!-- Error text indicating that city is required, used for all locations -->
+  <string name="address_city_required">請輸入您的城市</string>
+  <!-- Error text indicating country is invalid -->
+  <string name="address_country_invalid">您的國家無效</string>
+  <!-- Error text indicating that county is required, used for UK addresses -->
+  <string name="address_county_required">請輸入您所在的縣</string>
+  <!-- Caption for Address field on address form -->
+  <string name="address_label_address">地址</string>
+  <!-- Address line 1 placeholder for billing address form. -->
+  <string name="address_label_address_line1">地址行 1</string>
+  <!-- Label for input requesting the first line of an address where , used for international addresses -->
+  <string name="address_label_address_line1_optional">地址行 1（可選）</string>
+  <!-- Address line 2 placeholder for billing address form. -->
+  <string name="address_label_address_line2_optional">地址行 2（可選）</string>
+  <!-- Label for input requesting the first line of an address where input is optional, used for US and Canada addresses -->
+  <string name="address_label_address_optional">地址（可選）</string>
+  <!-- Label for input requesting apartment number (address line 2) where input is optional, used for US based addresses -->
+  <string name="address_label_apt_optional">公寓（可選）</string>
+  <!-- Caption for City field on address form -->
+  <string name="address_label_city">城市</string>
+  <!-- Label for input requesting city where input is optional, used for all locations -->
+  <string name="address_label_city_optional">城市（可選）</string>
+  <!-- Caption for Country field on address form -->
+  <string name="address_label_country">國家</string>
+  <!-- Caption for County field on address form (only countries that use county, like United Kingdom) -->
+  <string name="address_label_county">縣</string>
+  <!-- Label for input requesting county where input is optional , used for UK based addresses -->
+  <string name="address_label_county_optional">縣（可選）</string>
+  <!-- Caption for Name field on address form -->
+  <string name="address_label_name">姓名</string>
+  <!-- Label for input requesting phone number, used for all locations -->
+  <string name="address_label_phone_number">電話號碼</string>
+  <!-- Label for input requesting phone number where input is optional, used for all locations -->
+  <string name="address_label_phone_number_optional">電話號碼（可選）</string>
+  <!-- Short string for postal code (text used in non-US countries) -->
+  <string name="address_label_postal_code">郵區編號</string>
+  <!-- Label for input requesting postal code where input is optional, used for Canada based addresses -->
+  <string name="address_label_postal_code_optional">郵區編號（可選）</string>
+  <!-- Label for input requesting postcode, used for UK based addresses -->
+  <string name="address_label_postcode">郵區編號</string>
+  <!-- Label for input requesting postcode where input is optional, used for UK based addresses -->
+  <string name="address_label_postcode_optional">郵區編號（可選）</string>
+  <!-- Caption for Province field on address form (only countries that use province, like Canada) -->
+  <string name="address_label_province">省</string>
+  <!-- Label for input requesting province where province is optional, used for canadian addresses -->
+  <string name="address_label_province_optional">省（可選）</string>
+  <!-- Label for input requesting the region, used for international addresses -->
+  <string name="address_label_region_generic">州/省/區</string>
+  <!-- Label for input requesting the region where input is optional, used for international addresses -->
+  <string name="address_label_region_generic_optional">州/省/區（可選）</string>
+  <!-- Caption for State field on address form (only countries that use state , like United States) -->
+  <string name="address_label_state">州</string>
+  <!-- Label for input requesting state where input is optional, used for US based addresses -->
+  <string name="address_label_state_optional">州（可選）</string>
+  <!-- Label for input requesting zip code, used for US based addreses -->
+  <string name="address_label_zip_code">郵區編號</string>
+  <!-- Label for input requesting zip code where input is optional, used for US based addresses -->
+  <string name="address_label_zip_code_optional">郵區編號（可選）</string>
+  <!-- Label for input requesting postal code, used for international addresses -->
+  <string name="address_label_zip_postal_code">郵區編號</string>
+  <!-- Label for input requesting postal code where input is optional, used for international addresses -->
+  <string name="address_label_zip_postal_code_optional">郵區編號（可選）</string>
+  <!-- Error text indicating name is required -->
+  <string name="address_name_required">請輸入您的姓名</string>
+  <!-- Error text indicating that phone number is required, used for all addresses -->
+  <string name="address_phone_number_required">請輸入您的電話號碼</string>
+  <!-- Error message for when postal code in form is invalid -->
+  <string name="address_postal_code_invalid">您的郵區編號無效。</string>
+  <!-- Error text indicating postcode is invalid, used for UK addresses -->
+  <string name="address_postcode_invalid">您的郵區編號無效</string>
+  <!-- Error text indicating that province is required, used for Canada addresses -->
+  <string name="address_province_required">請輸入您的省份</string>
+  <!-- Error text indicating that region is required, used for international addresses -->
+  <string name="address_region_generic_required">請輸入您的州/省/區</string>
+  <!-- Error text indicating that address is required, used for all locations -->
+  <string name="address_required">請輸入您的地址</string>
+  <!-- Error text indicating that state is required, used for US addresses -->
+  <string name="address_state_required">請輸入您所屬的州</string>
+  <!-- Error text indicating zip code is invalid, used for US addresses -->
+  <string name="address_zip_invalid">您的郵區編號無效。</string>
+  <!-- Error text indicating zip/ postal code is invalid, used for international addresses -->
+  <string name="address_zip_postal_invalid">您的郵區編號無效</string>
+  <!-- BECS Debit Widget - mandate acceptance -->
+  <string name="becs_mandate_acceptance">\n    透過提供您的銀行帳戶資訊並確認該筆付款，\n    表示您同意本「直接扣帳請求」及其服務條款，\n    並授權 Stripe Payments Australia Pty Ltd ACN 160 180 343 Direct Debit User ID\n    number 507156 (「Stripe」) 透過批量電子清算系統 (BECS)\n    代 %1$s（「商家」）向您的帳戶扣取商家單獨告知您的金額。\n    您確認您是帳戶持有人或上述帳戶的授權簽署人。\n    \n    </string>
+  <!-- Placeholder text for Account number entry field for BECS Debit. -->
+  <string name="becs_widget_account_number">帳號</string>
+  <!-- BECS Debit Widget - account number field - incomplete error message -->
+  <string name="becs_widget_account_number_incomplete">您的帳號不完整。</string>
+  <!-- BECS Debit Widget - account number field - required error message -->
+  <string name="becs_widget_account_number_required">您需要填寫帳號。</string>
+  <!-- Placeholder text for BSB Number entry field for BECS Debit. -->
+  <string name="becs_widget_bsb">BSB</string>
+  <!-- Error string displayed to user when they have entered an incomplete BSB number. BSB refers to an Australian bank account number -->
+  <string name="becs_widget_bsb_incomplete">您輸入的 BSB 不完整。</string>
+  <!-- Error string displayed to user when they enter in an invalid BSB number. &quot;BSB&quot; refers to an Australian bank account. -->
+  <string name="becs_widget_bsb_invalid">您輸入的 BSB 無效。</string>
+  <!-- BECS Debit Widget - email address field - label -->
+  <string name="becs_widget_email">電郵地址</string>
+  <!-- BECS Debit Widget - email address field - invalid error message -->
+  <string name="becs_widget_email_invalid">您的電郵地址無效。</string>
+  <!-- BECS Debit Widget - email address field - required error message -->
+  <string name="becs_widget_email_required">您需要填寫電郵地址。</string>
+  <!-- BECS Debit Widget - name field - label -->
+  <string name="becs_widget_name">姓名</string>
+  <!-- BECS Debit Widget - name field - required error message -->
+  <string name="becs_widget_name_required">您需要填寫姓名。</string>
+  <!-- Details of a saved card. &apos;{card brand} ending in {last 4}&apos; e.g. &apos;VISA ending in 4242&apos; -->
+  <string name="card_ending_in">%1$s - 尾號：%2$s</string>
+  <!-- Text for close button -->
+  <string name="close">關閉</string>
+  <!-- Accessibility action for deleting a payment method -->
+  <string name="delete_payment_method">刪除支付方式</string>
+  <string name="delete_payment_method_prompt_title">刪除支付方式</string>
+  <!-- label for text field to enter card expiry -->
+  <string name="expiry_date_hint">月份/年份</string>
+  <string name="expiry_label_short">有效期</string>
+  <!-- Label that will show that an FPX bank is offline. For example, &quot;AmBank - Offline&quot; -->
+  <string name="fpx_bank_offline">%s - 線下</string>
+  <!-- Error message for card details form when expiration date isn&apos;t entered completely -->
+  <string name="incomplete_expiry_date">您的銀行卡的不完整。</string>
+  <string name="invalid_card_number">您的卡號無效。</string>
+  <!-- Error message for card entry form when CVC/CVV is invalid -->
+  <string name="invalid_cvc">您的銀行卡安全碼無效。</string>
+  <!-- String to describe an invalid month in expiry date. -->
+  <string name="invalid_expiry_month">您的銀行卡的到期月份無效。</string>
+  <!-- String to describe an invalid year in expiry date. -->
+  <string name="invalid_expiry_year">您的銀行卡的到期年份無效。</string>
+  <!-- Shipping form error message -->
+  <string name="invalid_shipping_information">收货地址無效</string>
+  <!-- Error message for when postal code in form is incomplete -->
+  <string name="invalid_zip">您的郵區編號不完整。</string>
+  <string name="payment_method_add_new_card">添加新卡…</string>
+  <string name="payment_method_add_new_fpx">選擇銀行帳戶 (FPX)… </string>
+  <!-- Label for free shipping method -->
+  <string name="price_free">免費</string>
+  <!-- Message displayed when a payment method is removed, stating its name. -->
+  <string name="removed">已移除 %s</string>
+  <string name="secure_checkout">安全結帳</string>
+  <!-- Error when 3DS2 authentication failed (e.g. customer entered the wrong code) -->
+  <string name="stripe_failure_reason_authentication">我們無法驗證您的付款方式。請選擇另一付款方式並重試。</string>
+  <!-- Error when 3DS2 authentication timed out. -->
+  <string name="stripe_failure_reason_timed_out">驗證您的付款方式時超時 -- 請重試</string>
+  <!-- label for text field to enter card expiry -->
+  <string name="stripe_paymentsheet_expiration_date_hint">月份/年份</string>
+  <!-- When there are multiple browsers and web authentication is required, this will show in a window asking which browser they want to use to "Verify your payment" -->
+  <string name="stripe_verify_your_payment">驗證您的付款</string>
+  <string name="title_add_a_card">添加卡</string>
+  <!-- Screen title telling users they should add an address -->
+  <string name="title_add_an_address">設置地址</string>
+  <!-- Label for Bank Account selection or detail entry form -->
+  <string name="title_bank_account">銀行帳戶</string>
+  <!-- Title for Payment Method screen -->
+  <string name="title_payment_method">支付方式</string>
+  <!-- Screen title telling users they should select a shipping address -->
+  <string name="title_select_shipping_method">選擇配送方式</string>
 </resources>

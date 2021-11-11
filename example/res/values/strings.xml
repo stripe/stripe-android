@@ -12,7 +12,9 @@
 
     <string name="customer_payment_data_example">Customer Payment Selection</string>
     <string name="launch_customer_session">Customer Session</string>
-    <string name="launch_pay_with_google">Pay with Google</string>
+    <string name="googlepaylauncher_example">Confirm payment with GooglePayLauncher</string>
+    <string name="googlepayplayground_example">Test GooglePayLauncher Configurations</string>
+    <string name="googlepaypaymentmethodlauncher_example">Create payment method with GooglePayPaymentMethodLauncher</string>
     <string name="launch_payment_session">Payment Session</string>
     <string name="launch_payment_session_from_fragment">Fragment Examples</string>
     <string name="create_payment_method">Create Payment Method</string>
@@ -74,6 +76,10 @@
     <string name="create_klarna_source">Create and Authenticate Klarna Source</string>
     <string name="fetch_klarna_source">Fetch Klarna Source</string>
 
+    <string name="klarna_example_intro">Tapping the button below will create a PaymentIntent and then use Klarna to confirm it</string>
+    <string name="confirm_klarna_button">Confirm with Klarna</string>
+    <string name="confirm_with_klarna">Klarna Payment Intent Example</string>
+
     <!-- SEPA Debit -->
     <string name="sepa_debit_mandate">By providing your IBAN and confirming this payment, you are authorizing EXAMPLE COMPANY NAME and Stripe, our payment service provider, to send instructions to your bank to debit your account and your bank to debit your account in accordance with those instructions. You are entitled to a refund from your bank under the terms and conditions of your agreement with your bank. A refund must be claimed within 8 weeks starting from the date on which your account was debited.</string>
     <string name="iban_hint">IBAN</string>
@@ -90,9 +96,29 @@
     <string name="confirm_with_netbanking">Confirm with NetBanking</string>
     <string name="connect_example">Connect Example</string>
     <string name="simple_payment_method_example">Simple PaymentMethod Confirmation Example</string>
+    <string name="compose_example">Compose Example</string>
 
     <!-- <UPI> -->
     <string name="vpa_layout_hint">Virtual Payment Address (VPA)</string>
     <string name="vpa_input_hint">something@stripeupi</string>
+    <string name="google_pay_environment_test">Test</string>
+    <string name="google_pay_environment_production">Production *charges apply</string>
+    <string name="google_pay_environment">Environment</string>
+    <string name="google_pay_billing">Billing</string>
+    <string name="google_pay_billing_min">Min</string>
+    <string name="google_pay_billing_full">Full</string>
+    <string name="google_pay_existing_payment_method">Existing Payment Method</string>
+    <string name="google_pay_existing_payment_method_true">True</string>
+    <string name="google_pay_existing_payment_method_false">False</string>
+    <string name="google_pay_phone_required">Phone Required</string>
+    <string name="google_pay_phone_required_true">True</string>
+    <string name="google_pay_phone_required_false">False</string>
+    <string name="google_pay_billing_required">Billing Required</string>
+    <string name="google_pay_billing_required_true">True</string>
+    <string name="google_pay_billing_required_false">False</string>
+    <string name="google_pay_merchant_name">Merchant Name</string>
+    <string name="google_pay_merchant_name_default">Widget Store</string>
+    <string name="google_pay_merchant_country_code">Merchant Country Code</string>
+    <string name="google_pay_merchant_country_code_default">US</string>
 
 </resources>

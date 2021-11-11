@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+  <!-- Used for accessibility to describe the button on the payment sheet list of options to add a new payment method. -->
+  <string name="add_new_payment_method">添加新支付方式</string>
+  <!-- Label for input requesting address line 2, used for international addresses -->
+  <string name="address_label_address_line2">地址第 2 行</string>
+  <!-- Used to describe address in United Arab Emirates -->
+  <string name="address_label_ae_emirate">酋长国</string>
+  <!-- Label of an address field -->
+  <string name="address_label_au_suburb_or_city">市郊或城市</string>
+  <!-- Label of an address field -->
+  <string name="address_label_bb_jm_parish">堂区</string>
+  <!-- Used to describe a field of an address -->
+  <string name="address_label_cedex">Cedex</string>
+  <!-- Label of an address field -->
+  <string name="address_label_department">部门</string>
+  <!-- Label for the district field on an address form -->
+  <string name="address_label_district">区</string>
+  <!-- Label of an address field in hk -->
+  <string name="address_label_hk_area">地区</string>
+  <!-- Label of an address field -->
+  <string name="address_label_ie_eircode">爱尔兰邮编</string>
+  <!-- Used to describe an address field in Ireland -->
+  <string name="address_label_ie_townland">镇区</string>
+  <!-- Used to describe postal code in India -->
+  <string name="address_label_in_pin">邮编</string>
+  <!-- Used to describe part of an address -->
+  <string name="address_label_island">岛</string>
+  <!-- Label of an address field -->
+  <string name="address_label_jp_prefecture">辖区</string>
+  <!-- Label of an address field -->
+  <string name="address_label_kr_do_si">道/县</string>
+  <!-- Used to describe a field of an address -->
+  <string name="address_label_neighborhood">社区</string>
+  <!-- Label of an address field -->
+  <string name="address_label_oblast">州/省</string>
+  <!-- Used to describe a field of an address -->
+  <string name="address_label_post_town">邮编或城镇</string>
+  <!-- Label of an address field -->
+  <string name="address_label_suburb">市郊</string>
+  <!-- Used to describe an address field. -->
+  <string name="address_label_village_township">村庄或城镇</string>
+  <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
+  <string name="bank_account_ending_in">移除尾号为 %s 的银行账户</string>
+  <!-- Billing address section title for card form entry. -->
+  <string name="billing_details">账单地址</string>
+  <!-- Used when a required field is blank and submit is clicked. -->
+  <string name="blank_and_required">该字段不能为空。</string>
+  <!-- Button title to cancel action in an alert -->
+  <string name="cancel">取消</string>
+  <!-- Used for accessibility to indicate that when you press the dropdown arrow on a form (such as a country or bank), it will bring up a menu to allow you to change the value. -->
+  <string name="change">更改</string>
+  <!-- Done button title -->
+  <string name="done">完成</string>
+  <!-- Button title to enter editing mode -->
+  <string name="edit">编辑</string>
+  <!-- Caption for Email field on address form -->
+  <string name="email">电子邮件</string>
+  <!-- Error message when email is invalid -->
+  <string name="email_is_invalid">您的邮件地址无效。</string>
+  <!-- An error message displayed when the customer's IBAN is incomplete. -->
+  <string name="iban_incomplete">您输入的 IBAN 不完整。</string>
+  <!-- An error message displayed when the customer's iban is invalid. -->
+  <string name="iban_invalid">您输入的 IBAN 无效。</string>
+  <!-- An error message displayed when the IBAN country code is not supported. -->
+  <string name="iban_invalid_country">您输入的 IBAN 无效，\"%s\" 是不支持的国家代码。</string>
+  <!-- An error message displayed when the IBAN does not start with a two-letter country code. -->
+  <string name="iban_invalid_start">您的 IBAN 应以一个两字母国家代码开头。</string>
+  <!-- Button title for confirmation alert to remove a saved payment method
+   Text for remove button -->
+  <string name="remove">移除</string>
+  <!-- Generic error message shown when payment cannot be processed. -->
+  <string name="stripe_failure_connection_error">连接我们的支付提供商时出现了问题。请检查网络连接，然后重试。</string>
+  <!-- When an internal error is reported when a google pay payment is started. -->
+  <string name="stripe_google_pay_error_internal">发生了内部错误。</string>
+  <!-- Text for a button that, when tapped, displays another screen where the customer can add payment method details -->
+  <string name="stripe_paymentsheet_add_payment_method_button_label">+ 添加</string>
+  <!-- Card details entry form header title -->
+  <string name="stripe_paymentsheet_add_payment_method_card_information">银行卡信息</string>
+  <!-- Country selector and postal code entry form header title -->
+  <string name="stripe_paymentsheet_add_payment_method_country_or_region">国家或地区</string>
+  <!-- Title shown above a form where the customer can enter payment information like credit card details, email, billing address, etc. -->
+  <string name="stripe_paymentsheet_add_payment_method_title">添加您的支付信息</string>
+  <!-- Text for back button -->
+  <string name="stripe_paymentsheet_back">返回</string>
+  <string name="stripe_paymentsheet_close">关闭</string>
+  <!-- Text for continue button -->
+  <string name="stripe_paymentsheet_continue_button_label">继续</string>
+  <!-- Label for the field containing the dropdown of EPS Banks -->
+  <string name="stripe_paymentsheet_eps_bank">EPS 银行</string>
+  <!-- The label of a text field that is optional. For example, 'Email (optional)' or 'Name (optional) -->
+  <string name="stripe_paymentsheet_form_label_optional">%s（可选）</string>
+  <!-- iDEAL bank section title for iDEAL form entry. -->
+  <string name="stripe_paymentsheet_ideal_bank">iDEAL 银行</string>
+  <!-- Title of a section containing multiple payment methods that can selected and will collect the payment information from the user. -->
+  <string name="stripe_paymentsheet_or_pay_using">或用以下方式支付</string>
+  <!-- Title of a section containing a card form that will collect the payment information from the user. -->
+  <string name="stripe_paymentsheet_or_pay_with_card">或用银行卡支付</string>
+  <!-- Label on the dropdown to select the Przelewy24 Bank -->
+  <string name="stripe_paymentsheet_p24_bank">Przelewy24 银行</string>
+  <!-- Label of a button that initiates payment when tapped -->
+  <string name="stripe_paymentsheet_pay_button_amount">支付%s</string>
+  <!-- Label for a button that starts processing the payment. -->
+  <string name="stripe_paymentsheet_pay_button_label">支付</string>
+  <!-- Payment Method type brand name  -->
+  <string name="stripe_paymentsheet_payment_method_afterpay_clearpay">Afterpay</string>
+  <!-- Title for credit card number entry field -->
+  <string name="stripe_paymentsheet_payment_method_card">银行卡</string>
+  <!-- Payment method brand name -->
+  <string name="stripe_paymentsheet_payment_method_sepa_debit">SEPA 借记</string>
+  <!-- Label of a button that, when tapped, initiates payment, becomes disabled, and displays this text -->
+  <string name="stripe_paymentsheet_primary_button_processing">正在处理...</string>
+  <!-- Content for alert popup prompting to confirm removing saved payment method. -->
+  <string name="stripe_paymentsheet_remove_pm">移除 %s</string>
+  <!-- The label of a switch indicating whether to save the payment method for future payments. -->
+  <string name="stripe_paymentsheet_save_for_future_payments">保存以用于未来的付款</string>
+  <!-- The label of a switch indicating whether to save the user&apos;s card for future payments to this merchant -->
+  <string name="stripe_paymentsheet_save_this_card_with_merchant_name">保存该卡，用于未来在 %s 付款</string>
+  <!-- Title shown above a carousel containing the customer&apos;s payment methods -->
+  <string name="stripe_paymentsheet_select_payment_method">选择您的支付方式</string>
+  <!-- SEPA mandate text -->
+  <string name="stripe_paymentsheet_sepa_mandate">提供您的支付方式并确认该付款即表示您授权 (A) %s 与我们的支付服务商 Stripe 向您的银行发送对您的账户进行借记的指令以及 (B) 您的银行按照这些指令对您的账户进行借记。根据您与您的银行协议的条款和条件，您有权从您的银行得到退款。退款必须在 8 周内提出，从您的帐户被扣款之日起算。您的权利在对账单上有解释，可从您的银行获取。您同意提前 2 天接收后续借记的通知。</string>
+  <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->
+  <string name="stripe_paymentsheet_setup_button_label">设置</string>
+  <!-- Label indicating the total amount that the user is authorizing (e.g. "Total: $25.00") -->
+  <string name="stripe_paymentsheet_total_amount">合计：%s</string>
+</resources>

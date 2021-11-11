@@ -65,8 +65,17 @@ class LauncherActivity : AppCompatActivity() {
                 FragmentExamplesActivity::class.java
             ),
             Item(
-                activity.getString(R.string.launch_pay_with_google),
-                PayWithGoogleActivity::class.java
+                activity.getString(R.string.googlepaylauncher_example),
+                GooglePayLauncherIntegrationActivity::class.java
+            ),
+            // This is for internal use so as not to confuse the user.
+//            Item(
+//                activity.getString(R.string.googlepayplayground_example),
+//                GooglePayLauncherPlaygroundActivity::class.java
+//            ),
+            Item(
+                activity.getString(R.string.googlepaypaymentmethodlauncher_example),
+                GooglePayPaymentMethodLauncherIntegrationActivity::class.java
             ),
             Item(
                 activity.getString(R.string.launch_confirm_pm_sepa_debit),
@@ -83,6 +92,10 @@ class LauncherActivity : AppCompatActivity() {
             Item(
                 activity.getString(R.string.klarna_source_example),
                 KlarnaSourceActivity::class.java
+            ),
+            Item(
+                activity.getString(R.string.confirm_with_klarna),
+                KlarnaPaymentActivity::class.java
             ),
             Item(
                 activity.getString(R.string.becs_debit_example),
@@ -115,6 +128,10 @@ class LauncherActivity : AppCompatActivity() {
             Item(
                 activity.getString(R.string.connect_example),
                 ConnectExampleActivity::class.java
+            ),
+            Item(
+                activity.getString(R.string.compose_example),
+                ComposeExampleActivity::class.java
             )
         )
 

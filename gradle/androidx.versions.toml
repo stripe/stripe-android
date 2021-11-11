@@ -24,7 +24,7 @@ version = "2.0.4"
 module = "androidx.constraintlayout:constraintlayout"
 
 [libraries.androidx-core-ktx]
-version = "1.5.0"
+version = "1.6.0"
 module = "androidx.core:core-ktx"
 
 [libraries.androidx-fragment-ktx]
@@ -46,10 +46,6 @@ module = "androidx.lifecycle:lifecycle-viewmodel-savedstate"
 [libraries.androidx-lifecycle-viewmodel-ktx]
 version.ref = "androidx-lifecycle"
 module = "androidx.lifecycle:lifecycle-viewmodel-ktx"
-
-[libraries.androidx-localbroadcastmanager]
-version = "1.0.0"
-module = "androidx.localbroadcastmanager:localbroadcastmanager"
 
 [libraries.androidx-navigation-fragment-ktx]
 version.ref = "androidx-navigation"

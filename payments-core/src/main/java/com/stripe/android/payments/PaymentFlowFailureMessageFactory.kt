@@ -14,7 +14,11 @@ internal class PaymentFlowFailureMessageFactory(
         intent: StripeIntent,
         @StripeIntentResult.Outcome outcome: Int
     ) = when {
-        intent.status == StripeIntent.Status.RequiresPaymentMethod -> {
+        outcome == StripeIntentResult.Outcome.TIMEDOUT -> {
+            context.resources.getString(R.string.stripe_failure_reason_timed_out)
+        }
+        (intent.status == StripeIntent.Status.RequiresPaymentMethod) ||
+            (intent.status == StripeIntent.Status.RequiresAction) -> {
             when (intent) {
                 is PaymentIntent -> {
                     createForPaymentIntent(intent)
@@ -24,9 +28,6 @@ internal class PaymentFlowFailureMessageFactory(
                 }
             }
         }
-        outcome == StripeIntentResult.Outcome.TIMEDOUT -> {
-            context.resources.getString(R.string.stripe_failure_reason_timed_out)
-        }
         else -> {
             null
         }
@@ -35,7 +36,8 @@ internal class PaymentFlowFailureMessageFactory(
     private fun createForPaymentIntent(
         paymentIntent: PaymentIntent
     ) = when {
-        paymentIntent.lastPaymentError?.code == PaymentIntent.Error.CODE_AUTHENTICATION_ERROR -> {
+        (paymentIntent.status == StripeIntent.Status.RequiresAction && paymentIntent.paymentMethod?.type?.isVoucher != true) ||
+            (paymentIntent.lastPaymentError?.code == PaymentIntent.Error.CODE_AUTHENTICATION_ERROR) -> {
             context.resources.getString(R.string.stripe_failure_reason_authentication)
         }
         paymentIntent.lastPaymentError?.type == PaymentIntent.Error.Type.CardError -> {

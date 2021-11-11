@@ -1,5 +1,8 @@
 package com.stripe.android.view
 
-internal fun interface AuthActivityStarter<ArgsType> {
+import androidx.annotation.RestrictTo
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+fun interface AuthActivityStarter<ArgsType> {
     fun start(args: ArgsType)
 }

@@ -1,120 +1,170 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
-    <string name="acc_label_card_number">Kart numarası</string>
-    <string name="acc_label_card_number_node">%s, Kart numarası</string>
-    <string name="acc_label_cvc_node">%s, CVC</string>
-    <string name="acc_label_expiry_date">Son Kullanma Tarihi</string>
-    <string name="acc_label_expiry_date_node">%s, Son kullanma tarihi</string>
-    <string name="acc_label_zip">Posta Kodu</string>
-    <string name="acc_label_zip_short">Posta Kodu</string>
-    <string name="add_card">Bu uygulama içinden satın alma yapmak için yeni banka kartı veya kredi kartı ekleyin.</string>
-    <string name="added">%s eklendi</string>
-    <string name="address_city_required">Lütfen şehrinizi girin</string>
-    <string name="address_country_invalid">Ülkeniz geçersiz</string>
-    <string name="address_county_required">Lütfen ülkenizi girin</string>
-    <string name="address_label_address">Adres</string>
-    <string name="address_label_address_line1">Adres satırı 1</string>
-    <string name="address_label_address_line1_optional">Adres satırı 1</string>
-    <string name="address_label_address_line2_optional">Adres satırı 2 (isteğe bağlı)</string>
-    <string name="address_label_address_optional">Adres (isteğe bağlı)</string>
-    <string name="address_label_apt">Apt.</string>
-    <string name="address_label_apt_optional">Apt. (isteğe bağlı)</string>
-    <string name="address_label_city">Şehir</string>
-    <string name="address_label_city_optional">Şehir (isteğe bağlı)</string>
-    <string name="address_label_country">Ülke</string>
-    <string name="address_label_county">Ülke</string>
-    <string name="address_label_county_optional">Ülke (isteğe bağlı)</string>
-    <string name="address_label_name">Ad</string>
-    <string name="address_label_phone_number">Telefon numarası</string>
-    <string name="address_label_phone_number_optional">Telefon numarası (isteğe bağlı)</string>
-    <string name="address_label_postal_code">Posta kodu</string>
-    <string name="address_label_postal_code_optional">Posta kodu (isteğe bağlı)</string>
-    <string name="address_label_postcode">Posta kodu</string>
-    <string name="address_label_postcode_optional">Posta kodu (isteğe bağlı)</string>
-    <string name="address_label_province">İlçe</string>
-    <string name="address_label_province_optional">İlçe (isteğe bağlı)</string>
-    <string name="address_label_region_generic">İl / İlçe / Bölge</string>
-    <string name="address_label_region_generic_optional">İl / İlçe / Bölge (isteğe bağlı)</string>
-    <string name="address_label_state">Eyalet</string>
-    <string name="address_label_state_optional">Eyalet (isteğe bağlı)</string>
-    <string name="address_label_zip_code">Posta kodu</string>
-    <string name="address_label_zip_code_optional">Posta kodu (isteğe bağlı)</string>
-    <string name="address_label_zip_postal_code">Posta kodu</string>
-    <string name="address_label_zip_postal_code_optional">Posta kodu (isteğe bağlı)</string>
-    <string name="address_name_required">Lütfen adınızı girin</string>
-    <string name="address_phone_number_required">Lütfen telefon numaranızı girin</string>
-    <string name="address_postal_code_invalid">Posta kodunuz geçersiz</string>
-    <string name="address_postcode_invalid">Posta kodunuz geçersiz</string>
-    <string name="address_province_required">Lütfen ilçenizi girin</string>
-    <string name="address_region_generic_required">Lütfen İl/İlçe/Bölgenizi girin</string>
-    <string name="address_required">Lütfen adresinizi girin</string>
-    <string name="address_shipping_address">Gönderi Adresi</string>
-    <string name="address_state_required">Lütfen eyaletinizi girin</string>
-    <string name="address_zip_invalid">Posta kodunuz geçersiz.</string>
-    <string name="address_zip_postal_invalid">Posta kodunuz geçersiz</string>
-    <string name="becs_mandate_acceptance">
-    Banka hesap bilgilerinizi sağlayarak ve bu ödemeyi onaylayarak, bu Otomatik
-    Ödeme Talebini ve Otomatik Ödeme Talebi hizmet sözleşmesini kabul etmiş
-    olursunuz ve Otomatik Ödeme 507156 Kullanıcı Kimlikli Stripe Payments
-    Australia Pty Ltd ACN 160 180 343 (\"Stripe\")
-    şirketine %1$s (\"Satıcı\") adına, Satıcı tarafından size iletilen herhangi bir tutarı
-    Toplu Elektronik Takas Sistemi (BECS) aracılığıyla hesabınızı borçlandırması için
-    yetki verirsiniz. Yukarıda listelenen hesabın sahibi veya yetkili imza sahibi olduğunuzu onaylarsınız.
-    </string>
-    <string name="becs_widget_account_number">Hesap numarası</string>
-    <string name="becs_widget_account_number_incomplete">Hesap numaranız eksik.</string>
-    <string name="becs_widget_account_number_required">Hesap numaranız gereklidir.</string>
-    <string name="becs_widget_bsb">BSB</string>
-    <string name="becs_widget_bsb_incomplete">Girdiğiniz BSB eksik.</string>
-    <string name="becs_widget_bsb_invalid">Girdiğiniz BSB geçersiz.</string>
-    <string name="becs_widget_email">E-posta Adresi</string>
-    <string name="becs_widget_email_invalid">E-posta adresiniz geçersiz.</string>
-    <string name="becs_widget_email_required">E-posta adresiniz gereklidir.</string>
-    <string name="becs_widget_name">Ad</string>
-    <string name="becs_widget_name_required">Adınız gereklidir.</string>
-    <string name="card_ending_in">%2$s İle Biten %1$s</string>
-    <string name="close">Kapat</string>
-    <string name="delete_payment_method">Ödeme Metodu Silinsin mi?</string>
-    <string name="delete_payment_method_prompt_title">Ödeme yöntemi silinsin mi?</string>
-    <string name="expiry_date_hint">AA/YY</string>
-    <string name="expiry_label_short">Son kullanma</string>
-    <string name="fpx_bank_offline">%s - Çevrimdışı</string>
-    <string name="incomplete_expiry_date">Kartınızın son kullanma tarihi eksik.</string>
-    <string name="invalid_card_number">Kart numaranız geçersiz.</string>
-    <string name="invalid_cvc">Kartınızın güvenlik kodu geçersiz.</string>
-    <string name="invalid_expiry_month">Kartınızın son kullanma ayı geçersiz.</string>
-    <string name="invalid_expiry_year">Kartınızın son kullanma yılı geçersiz.</string>
-    <string name="invalid_shipping_information">Geçersiz Gönderi Adresi</string>
-    <string name="invalid_zip">Posta kodunuz eksik.</string>
-    <string name="no_payment_methods">Ödeme metodu yok</string>
-    <string name="payment_method_add_new_card">Yeni kart ekle...</string>
-    <string name="payment_method_add_new_fpx">Banka Hesabı Seçin (FPX)...</string>
-    <string name="price_free">Ücretsiz</string>
-    <string name="removed">%s çıkartıldı</string>
-    <string name="secure_checkout">Güvenli Ödeme</string>
-    <string name="stripe_failure_connection_error">Ödeme sağlayıcımıza bağlanmayla ilgili sorun yaşıyoruz. Lütfen internet bağlantınızı kontrol edip tekrar deneyin.</string>
-    <string name="stripe_failure_reason_authentication">Ödeme metodunuzu doğrulayamadık. Lütfen farklı bir ödeme metodu seçin ve tekrar deneyin.</string>
-    <string name="stripe_failure_reason_timed_out">Ödeme metodunuz doğrulanırken zaman aşımına uğradı -- tekrar deneyin</string>
-    <string name="stripe_paymentsheet_add_button_label">Ekle</string>
-    <string name="stripe_paymentsheet_add_payment_method_card_information">Kart bilgileri</string>
-    <string name="stripe_paymentsheet_add_payment_method_country_or_region">Ülke veya bölge</string>
-    <string name="stripe_paymentsheet_add_payment_method_title">Ödeme bilgilerinizi ekleyin</string>
-    <string name="stripe_paymentsheet_back">Geri</string>
-    <string name="stripe_paymentsheet_close">Kapat</string>
-    <string name="stripe_paymentsheet_expiration_date_hint">AA / YY</string>
-    <string name="stripe_paymentsheet_new_card_button_label">+ Yeni kart</string>
-    <string name="stripe_paymentsheet_or_pay_with_card">Ya da kartla ödeyin</string>
-    <string name="stripe_paymentsheet_pay_button_amount">%s öde</string>
-    <string name="stripe_paymentsheet_pay_button_label">Öde</string>
-    <string name="stripe_paymentsheet_primary_button_processing">İşleniyor...</string>
-    <string name="stripe_paymentsheet_save_this_card">Gelecekteki ödemeler için bu kart kaydedilsin</string>
-    <string name="stripe_paymentsheet_save_this_card_with_merchant_name">Bu kartı gelecekteki %s ödemeleri için kaydedin</string>
-    <string name="stripe_paymentsheet_select_payment_method">Ödeme yönteminizi seçin</string>
-    <string name="stripe_paymentsheet_setup_button_label">Ayarla</string>
-    <string name="stripe_paymentsheet_total_amount">Toplam: %s</string>
-    <string name="title_add_a_card">Kart Ekle</string>
-    <string name="title_add_an_address">Adresi Ayarla</string>
-    <string name="title_bank_account">Banka Hesabı</string>
-    <string name="title_payment_method">Ödeme Metodu</string>
-    <string name="title_select_shipping_method">Gönderi Metodunu Seçin</string>
+  <!-- Label for card number entry text field -->
+  <string name="acc_label_card_number">Kart numarası</string>
+  <string name="acc_label_card_number_node">%s, Kart numarası</string>
+  <string name="acc_label_cvc_node">%s, CVC</string>
+  <string name="acc_label_expiry_date">Son Kullanma Tarihi</string>
+  <string name="acc_label_expiry_date_node">%s, Son kullanma tarihi</string>
+  <!-- Caption for Zip Code field on address form (only shown when country is United States only) -->
+  <string name="acc_label_zip">Posta Kodu</string>
+  <!-- Short string for zip code (United States only) Please keep to 5 characters or less if possible. -->
+  <string name="acc_label_zip_short">Posta Kodu</string>
+  <!-- Message displayed when a payment method is removed, stating its name. -->
+  <string name="added">%s eklendi</string>
+  <!-- Error text indicating that city is required, used for all locations -->
+  <string name="address_city_required">Lütfen şehrinizi girin</string>
+  <!-- Error text indicating country is invalid -->
+  <string name="address_country_invalid">Ülkeniz geçersiz</string>
+  <!-- Error text indicating that county is required, used for UK addresses -->
+  <string name="address_county_required">Lütfen ülkenizi girin</string>
+  <!-- Caption for Address field on address form -->
+  <string name="address_label_address">Adres</string>
+  <!-- Address line 1 placeholder for billing address form. -->
+  <string name="address_label_address_line1">Adres satırı 1</string>
+  <!-- Label for input requesting the first line of an address where , used for international addresses -->
+  <string name="address_label_address_line1_optional">Adres satırı 1</string>
+  <!-- Address line 2 placeholder for billing address form. -->
+  <string name="address_label_address_line2_optional">Adres satırı 2 (isteğe bağlı)</string>
+  <!-- Label for input requesting the first line of an address where input is optional, used for US and Canada addresses -->
+  <string name="address_label_address_optional">Adres (isteğe bağlı)</string>
+  <!-- Label for input requesting apartment number (address line 2) where input is optional, used for US based addresses -->
+  <string name="address_label_apt_optional">Apt. (isteğe bağlı)</string>
+  <!-- Caption for City field on address form -->
+  <string name="address_label_city">Şehir</string>
+  <!-- Label for input requesting city where input is optional, used for all locations -->
+  <string name="address_label_city_optional">Şehir (isteğe bağlı)</string>
+  <!-- Caption for Country field on address form -->
+  <string name="address_label_country">Ülke</string>
+  <!-- Caption for County field on address form (only countries that use county, like United Kingdom) -->
+  <string name="address_label_county">Ülke</string>
+  <!-- Label for input requesting county where input is optional , used for UK based addresses -->
+  <string name="address_label_county_optional">Ülke (isteğe bağlı)</string>
+  <!-- Caption for Name field on address form -->
+  <string name="address_label_name">Ad</string>
+  <!-- Label for input requesting phone number, used for all locations -->
+  <string name="address_label_phone_number">Telefon numarası</string>
+  <!-- Label for input requesting phone number where input is optional, used for all locations -->
+  <string name="address_label_phone_number_optional">Telefon numarası (isteğe bağlı)</string>
+  <!-- Short string for postal code (text used in non-US countries) -->
+  <string name="address_label_postal_code">Posta kodu</string>
+  <!-- Label for input requesting postal code where input is optional, used for Canada based addresses -->
+  <string name="address_label_postal_code_optional">Posta kodu (isteğe bağlı)</string>
+  <!-- Label for input requesting postcode, used for UK based addresses -->
+  <string name="address_label_postcode">Posta kodu</string>
+  <!-- Label for input requesting postcode where input is optional, used for UK based addresses -->
+  <string name="address_label_postcode_optional">Posta kodu (isteğe bağlı)</string>
+  <!-- Caption for Province field on address form (only countries that use province, like Canada) -->
+  <string name="address_label_province">İlçe</string>
+  <!-- Label for input requesting province where province is optional, used for canadian addresses -->
+  <string name="address_label_province_optional">İlçe (isteğe bağlı)</string>
+  <!-- Label for input requesting the region, used for international addresses -->
+  <string name="address_label_region_generic">İl /İlçe/Bölge</string>
+  <!-- Label for input requesting the region where input is optional, used for international addresses -->
+  <string name="address_label_region_generic_optional">İl / İlçe / Bölge (isteğe bağlı)</string>
+  <!-- Caption for State field on address form (only countries that use state , like United States) -->
+  <string name="address_label_state">Eyalet</string>
+  <!-- Label for input requesting state where input is optional, used for US based addresses -->
+  <string name="address_label_state_optional">Eyalet (isteğe bağlı)</string>
+  <!-- Label for input requesting zip code, used for US based addreses -->
+  <string name="address_label_zip_code">Posta kodu</string>
+  <!-- Label for input requesting zip code where input is optional, used for US based addresses -->
+  <string name="address_label_zip_code_optional">Posta kodu (isteğe bağlı)</string>
+  <!-- Label for input requesting postal code, used for international addresses -->
+  <string name="address_label_zip_postal_code">Posta kodu</string>
+  <!-- Label for input requesting postal code where input is optional, used for international addresses -->
+  <string name="address_label_zip_postal_code_optional">Posta kodu (isteğe bağlı)</string>
+  <!-- Error text indicating name is required -->
+  <string name="address_name_required">Lütfen adınızı girin</string>
+  <!-- Error text indicating that phone number is required, used for all addresses -->
+  <string name="address_phone_number_required">Lütfen telefon numaranızı girin</string>
+  <!-- Error message for when postal code in form is invalid -->
+  <string name="address_postal_code_invalid">Posta kodunuz geçersiz.</string>
+  <!-- Error text indicating postcode is invalid, used for UK addresses -->
+  <string name="address_postcode_invalid">Posta kodunuz geçersiz</string>
+  <!-- Error text indicating that province is required, used for Canada addresses -->
+  <string name="address_province_required">Lütfen ilçenizi girin</string>
+  <!-- Error text indicating that region is required, used for international addresses -->
+  <string name="address_region_generic_required">Lütfen İl/İlçe/Bölgenizi girin</string>
+  <!-- Error text indicating that address is required, used for all locations -->
+  <string name="address_required">Lütfen adresinizi girin</string>
+  <!-- Error text indicating that state is required, used for US addresses -->
+  <string name="address_state_required">Lütfen eyaletinizi girin</string>
+  <!-- Error text indicating zip code is invalid, used for US addresses -->
+  <string name="address_zip_invalid">Posta kodunuz geçersiz.</string>
+  <!-- Error text indicating zip/ postal code is invalid, used for international addresses -->
+  <string name="address_zip_postal_invalid">Posta kodunuz geçersiz</string>
+  <!-- BECS Debit Widget - mandate acceptance -->
+  <string name="becs_mandate_acceptance">\n    Banka hesap bilgilerinizi sağlayarak ve bu ödemeyi onaylayarak, bu Otomatik\n    Ödeme Talebini ve Otomatik Ödeme Talebi hizmet sözleşmesini kabul etmiş\n    olursunuz ve Otomatik Ödeme 507156 Kullanıcı Kimlikli Stripe Payments\n    Australia Pty Ltd ACN 160 180 343 (\"Stripe\")\n    şirketine %1$s (\"Satıcı\") adına, Satıcı tarafından size iletilen herhangi bir tutarı\n    Toplu Elektronik Takas Sistemi (BECS) aracılığıyla hesabınızı borçlandırması için\n    yetki verirsiniz. Yukarıda listelenen hesabın sahibi veya yetkili imza sahibi olduğunuzu onaylarsınız.\n    </string>
+  <!-- Placeholder text for Account number entry field for BECS Debit. -->
+  <string name="becs_widget_account_number">Hesap numarası</string>
+  <!-- BECS Debit Widget - account number field - incomplete error message -->
+  <string name="becs_widget_account_number_incomplete">Hesap numaranız eksik.</string>
+  <!-- BECS Debit Widget - account number field - required error message -->
+  <string name="becs_widget_account_number_required">Hesap numaranız gereklidir.</string>
+  <!-- Placeholder text for BSB Number entry field for BECS Debit. -->
+  <string name="becs_widget_bsb">BSB</string>
+  <!-- Error string displayed to user when they have entered an incomplete BSB number. BSB refers to an Australian bank account number -->
+  <string name="becs_widget_bsb_incomplete">Girdiğiniz BSB eksik.</string>
+  <!-- Error string displayed to user when they enter in an invalid BSB number. &quot;BSB&quot; refers to an Australian bank account. -->
+  <string name="becs_widget_bsb_invalid">Girdiğiniz BSB geçersiz.</string>
+  <!-- BECS Debit Widget - email address field - label -->
+  <string name="becs_widget_email">E-posta Adresi</string>
+  <!-- BECS Debit Widget - email address field - invalid error message -->
+  <string name="becs_widget_email_invalid">E-posta adresiniz geçersiz.</string>
+  <!-- BECS Debit Widget - email address field - required error message -->
+  <string name="becs_widget_email_required">E-posta adresiniz gereklidir.</string>
+  <!-- BECS Debit Widget - name field - label -->
+  <string name="becs_widget_name">Ad</string>
+  <!-- BECS Debit Widget - name field - required error message -->
+  <string name="becs_widget_name_required">Adınız gereklidir.</string>
+  <!-- Details of a saved card. &apos;{card brand} ending in {last 4}&apos; e.g. &apos;VISA ending in 4242&apos; -->
+  <string name="card_ending_in">%2$s İle Biten %1$s</string>
+  <!-- Text for close button -->
+  <string name="close">Kapat</string>
+  <!-- Accessibility action for deleting a payment method -->
+  <string name="delete_payment_method">Ödeme Metodu Silinsin mi?</string>
+  <string name="delete_payment_method_prompt_title">Ödeme yöntemi silinsin mi?</string>
+  <!-- label for text field to enter card expiry -->
+  <string name="expiry_date_hint">AA/YY</string>
+  <string name="expiry_label_short">Son kullanma</string>
+  <!-- Label that will show that an FPX bank is offline. For example, &quot;AmBank - Offline&quot; -->
+  <string name="fpx_bank_offline">%s - Çevrimdışı</string>
+  <!-- Error message for card details form when expiration date isn&apos;t entered completely -->
+  <string name="incomplete_expiry_date">Kartınızın son kullanma tarihi eksik.</string>
+  <string name="invalid_card_number">Kart numaranız geçersiz.</string>
+  <!-- Error message for card entry form when CVC/CVV is invalid -->
+  <string name="invalid_cvc">Kartınızın güvenlik kodu geçersiz.</string>
+  <!-- String to describe an invalid month in expiry date. -->
+  <string name="invalid_expiry_month">Kartınızın son kullanma ayı geçersiz.</string>
+  <!-- String to describe an invalid year in expiry date. -->
+  <string name="invalid_expiry_year">Kartınızın son kullanma yılı geçersiz.</string>
+  <!-- Shipping form error message -->
+  <string name="invalid_shipping_information">Geçersiz Gönderi Adresi</string>
+  <!-- Error message for when postal code in form is incomplete -->
+  <string name="invalid_zip">Posta kodunuz eksik.</string>
+  <string name="payment_method_add_new_card">Yeni kart ekle...</string>
+  <string name="payment_method_add_new_fpx">Banka Hesabı Seçin (FPX)...</string>
+  <!-- Label for free shipping method -->
+  <string name="price_free">Ücretsiz</string>
+  <!-- Message displayed when a payment method is removed, stating its name. -->
+  <string name="removed">%s çıkartıldı</string>
+  <string name="secure_checkout">Güvenli Ödeme</string>
+  <!-- Error when 3DS2 authentication failed (e.g. customer entered the wrong code) -->
+  <string name="stripe_failure_reason_authentication">Ödeme metodunuzu doğrulayamadık. Lütfen farklı bir ödeme metodu seçin ve tekrar deneyin.</string>
+  <!-- Error when 3DS2 authentication timed out. -->
+  <string name="stripe_failure_reason_timed_out">Ödeme metodunuz doğrulanırken zaman aşımına uğradı -- tekrar deneyin</string>
+  <!-- label for text field to enter card expiry -->
+  <string name="stripe_paymentsheet_expiration_date_hint">AA / YY</string>
+  <!-- When there are multiple browsers and web authentication is required, this will show in a window asking which browser they want to use to "Verify your payment" -->
+  <string name="stripe_verify_your_payment">Ödemenizi doğrulayın</string>
+  <string name="title_add_a_card">Kart Ekle</string>
+  <!-- Screen title telling users they should add an address -->
+  <string name="title_add_an_address">Adresi Ayarla</string>
+  <!-- Label for Bank Account selection or detail entry form -->
+  <string name="title_bank_account">Banka Hesabı</string>
+  <!-- Title for Payment Method screen -->
+  <string name="title_payment_method">Ödeme Metodu</string>
+  <!-- Screen title telling users they should select a shipping address -->
+  <string name="title_select_shipping_method">Gönderi Metodunu Seçin</string>
 </resources>

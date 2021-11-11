@@ -52,7 +52,7 @@ class SetupIntentTest {
         assertNotNull(lastSetupError)
         assertNotNull(lastSetupError.paymentMethod)
         assertEquals("pm_1F7J1bCRMbs6FrXfQKsYwO3U", lastSetupError.paymentMethod?.id)
-        assertEquals("payment_intent_authentication_failure", lastSetupError.code)
+        assertEquals("setup_intent_authentication_failure", lastSetupError.code)
         assertEquals(SetupIntent.Error.Type.InvalidRequestError, lastSetupError.type)
         assertEquals(
             "https://stripe.com/docs/error-codes/payment-intent-authentication-failure",

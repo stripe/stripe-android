@@ -1,5 +1,7 @@
 # Migration Guide
-
+## Migrating from versions < 18.0.0
+- Changes to `PaymentSheet.Configuration`
+    - If you're modifying values in your `Configuration` class after instantiating it then you won't be able to build your project. You should create the object with the final values or use the new [`Builder`](https://github.com/stripe/stripe-android/blob/master/paymentsheet/src/main/java/com/stripe/android/paymentsheet/PaymentSheet.kt#L130). 
 ## Migrating from versions < 17.0.0
 - Changes to `Stripe`
     - `ComponentActivity` is now required for payment confirmation methods to make operations
@@ -8,7 +10,7 @@
     - `createCardToken()` now requires `CardParams` instead of `Card`
 - Changes to `ConfirmPaymentIntentParams`
     - `returnUrl` has been removed as a parameter on `ConfirmPaymentIntentParams` static creation
-       methods. The SDK manages setting this value internally.
+      methods. The SDK manages setting this value internally.
     - `extraParams` property has been removed. Static creation methods that accept this parameter
       have been removed.
 - Changes to `ConfirmSetupIntentParams`
@@ -26,6 +28,8 @@
      - `metadata` has been removed to reflect that it is no longer returned to clients using a
        publishable key
      - `PaymentMethod.Card.Builder` has been removed
+- Changes to `PaymentIntent`
+    - `nextAction` property has been removed. Use `nextActionData` instead.
 - Changes to `PaymentMethodCreateParams`
      - `Ideal.Builder`, `Fpx.Builder`, and `SepaDebit.Builder` have been removed
 - Changes to `Source`
@@ -56,6 +60,9 @@
     - `GooglePayConfig` now requires instantiated `PaymentConfiguration`
     - `CardUtils` is now `internal`
     - `StripeTextUtils` has been removed
+    - `Stripe.confirmPayment` and `Stripe.confirmSetupIntent` will now use Custom Tabs by default
+      when performing 3DS1 Authentication.  If [Custom Tabs](https://developer.chrome.com/docs/android/custom-tabs/overview/) are not available the SDK will launch
+      the device browser to perform authentication.
 
 ## Migrating from versions < 16.0.0
 - Changes to `CardInputWidget` and `CardMultilineWidget`

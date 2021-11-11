@@ -4,23 +4,29 @@ import com.stripe.android.PaymentRelayStarter
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.ApiRequest
 import com.stripe.android.view.AuthActivityStarterHost
+import javax.inject.Inject
+import javax.inject.Singleton
 
 /**
- * [IntentAuthenticator] implementation to perform no-op, just return to client's host.
+ * [PaymentAuthenticator] implementation to perform no-op, just return to client's host.
  */
-internal class NoOpIntentAuthenticator(
+@Singleton
+@JvmSuppressWildcards
+internal class NoOpIntentAuthenticator @Inject constructor(
     private val paymentRelayStarterFactory: (AuthActivityStarterHost) -> PaymentRelayStarter,
-) : IntentAuthenticator {
+) : PaymentAuthenticator<StripeIntent> {
 
     override suspend fun authenticate(
         host: AuthActivityStarterHost,
-        stripeIntent: StripeIntent,
-        threeDs1ReturnUrl: String?,
+        authenticatable: StripeIntent,
         requestOptions: ApiRequest.Options
     ) {
         paymentRelayStarterFactory(host)
             .start(
-                PaymentRelayStarter.Args.create(stripeIntent, requestOptions.stripeAccount)
+                PaymentRelayStarter.Args.create(
+                    authenticatable,
+                    requestOptions.stripeAccount
+                )
             )
     }
 }

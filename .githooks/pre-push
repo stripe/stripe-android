@@ -11,6 +11,6 @@ if [ "$status" = 0 ] ; then
     exit 0
 else
     echo "Static analysis failed. Formatting with ktlint..."
-    ./gradlew :payments-core:ktlintFormat
+    ./gradlew :payments-core:ktlintFormat :paymentsheet:ktlintFormat
     exit 1
 fi
