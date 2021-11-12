@@ -16,7 +16,6 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import com.stripe.android.cardverificationsheet.R
 import com.stripe.android.cardverificationsheet.cardverifyui.exception.InvalidCivException
-import com.stripe.android.cardverificationsheet.cardverifyui.exception.InvalidRequiredCardException
 import com.stripe.android.cardverificationsheet.cardverifyui.exception.InvalidStripePublishableKeyException
 import com.stripe.android.cardverificationsheet.cardverifyui.exception.StripeNetworkException
 import com.stripe.android.cardverificationsheet.cardverifyui.exception.UnknownScanException
@@ -34,8 +33,10 @@ import com.stripe.android.cardverificationsheet.framework.api.uploadScanStats
 import com.stripe.android.cardverificationsheet.framework.util.AppDetails
 import com.stripe.android.cardverificationsheet.framework.util.Device
 import com.stripe.android.cardverificationsheet.payment.card.CardIssuer
+import com.stripe.android.cardverificationsheet.payment.card.getCardIssuer
 import com.stripe.android.cardverificationsheet.payment.card.getIssuerByDisplayName
 import com.stripe.android.cardverificationsheet.payment.card.isValidPanLastFour
+import com.stripe.android.cardverificationsheet.payment.card.lastFour
 import com.stripe.android.cardverificationsheet.scanui.CardVerificationSheetCancelationReason
 import com.stripe.android.cardverificationsheet.scanui.ScanResultListener
 import com.stripe.android.cardverificationsheet.scanui.SimpleScanActivity
@@ -75,7 +76,7 @@ data class RequiredCardDetails(
 private val MINIMUM_RESOLUTION = Size(1067, 600) // minimum size of OCR
 
 @Keep
-open class CardVerifyActivity : SimpleScanActivity<RequiredCardDetails>() {
+open class CardVerifyActivity : SimpleScanActivity<RequiredCardDetails?>() {
 
     /**
      * The text view that lets a user indicate they do not have possession of the required card.
@@ -212,7 +213,7 @@ open class CardVerifyActivity : SimpleScanActivity<RequiredCardDetails>() {
         else -> true
     }
 
-    private suspend fun getCivDetails(): RequiredCardDetails = when (
+    private suspend fun getCivDetails(): RequiredCardDetails? = when (
         val result = getCardImageVerificationIntentDetails(
             stripePublishableKey = params.stripePublishableKey,
             civId = params.cardImageVerificationIntentId,
@@ -247,24 +248,21 @@ open class CardVerifyActivity : SimpleScanActivity<RequiredCardDetails>() {
             }
             null
         }
-    } ?: RequiredCardDetails(null, "1234") // TODO: this is a hack
+    }?.let { null }
 
     private fun onScanDetailsAvailable(
         requiredCardDetails: RequiredCardDetails?,
     ) {
-        if (requiredCardDetails == null) {
-            scanFailure(InvalidRequiredCardException("Missing last four"))
-            return
+        if (requiredCardDetails != null) {
+            this.requiredCardIssuer = requiredCardDetails.cardIssuer
+            this.requiredCardLastFour = requiredCardDetails.lastFour
+
+            cardDescriptionTextView.text = getString(
+                R.string.stripe_card_description,
+                requiredCardIssuer?.displayName ?: "",
+                requiredCardLastFour
+            )
         }
-
-        this.requiredCardIssuer = requiredCardDetails.cardIssuer
-        this.requiredCardLastFour = requiredCardDetails.lastFour
-
-        cardDescriptionTextView.text = getString(
-            R.string.stripe_card_description,
-            requiredCardIssuer?.displayName ?: "",
-            requiredCardLastFour
-        )
     }
 
     override fun addUiComponents() {
@@ -476,20 +474,24 @@ open class CardVerifyActivity : SimpleScanActivity<RequiredCardDetails>() {
             result: MainLoopAggregator.InterimResult,
         ) = launch(Dispatchers.Main) {
             if (
-                result.state is MainLoopState.PanFound &&
+                result.state is MainLoopState.OcrFound &&
                 !hasPreviousValidResult.getAndSet(true)
             ) {
                 scanStat.trackResult("ocr_pan_observed")
             }
 
-            val (cardIssuer, lastFour) = when (result.state) {
-                is MainLoopState.Initial -> null to null
-                is MainLoopState.PanFound -> requiredCardIssuer to requiredCardLastFour
-                is MainLoopState.PanSatisfied -> requiredCardIssuer to requiredCardLastFour
-                is MainLoopState.CardSatisfied -> requiredCardIssuer to requiredCardLastFour
-                is MainLoopState.WrongPanFound -> null to null
-                is MainLoopState.Finished -> requiredCardIssuer to requiredCardLastFour
+            val pan = when (result.state) {
+                is MainLoopState.Initial -> null
+                is MainLoopState.OcrFound -> result.state.mostLikelyPan
+                is MainLoopState.OcrSatisfied -> result.state.pan
+                is MainLoopState.CardSatisfied -> result.state.mostLikelyPan
+                is MainLoopState.WrongCard -> null
+                is MainLoopState.Finished -> result.state.pan
             }
+
+            val lastFour = pan?.lastFour()
+            val cardIssuer = if (pan.isNullOrEmpty()) null else getCardIssuer(pan)
+
             if (lastFour != null) {
                 cardNumberTextView.text = getString(
                     R.string.stripe_card_description,
@@ -502,12 +504,11 @@ open class CardVerifyActivity : SimpleScanActivity<RequiredCardDetails>() {
             }
 
             when (result.state) {
-                is MainLoopState.Initial ->
-                    if (scanState !is ScanState.FoundLong) changeScanState(ScanState.NotFound)
-                is MainLoopState.PanFound -> changeScanState(ScanState.FoundLong)
-                is MainLoopState.PanSatisfied -> changeScanState(ScanState.FoundLong)
+                is MainLoopState.Initial -> changeScanState(ScanState.NotFound)
+                is MainLoopState.OcrFound -> changeScanState(ScanState.FoundLong)
+                is MainLoopState.OcrSatisfied -> changeScanState(ScanState.FoundLong)
                 is MainLoopState.CardSatisfied -> changeScanState(ScanState.FoundLong)
-                is MainLoopState.WrongPanFound -> changeScanState(ScanState.Wrong)
+                is MainLoopState.WrongCard -> changeScanState(ScanState.Wrong)
                 is MainLoopState.Finished -> changeScanState(ScanState.Correct)
             }
         }.let { }

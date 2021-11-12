@@ -53,6 +53,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="text"
+                android:text="pk_test_51JSmimJ3R6e4jmuYrbL0YDLx2R8Ayj5cjWn21mJkYefAZcJVkHUUvFDKrfDtw5YCc6oTucZLPF6gnzUQcxu5Dd5k00Ark8wZls"
                 android:importantForAutofill="no" />
         </LinearLayout>
 

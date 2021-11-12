@@ -9,9 +9,9 @@ import com.stripe.android.cardverificationsheet.framework.AggregateResultListene
 import com.stripe.android.cardverificationsheet.framework.ResultAggregator
 import com.stripe.android.cardverificationsheet.framework.util.FrameSaver
 import com.stripe.android.cardverificationsheet.payment.card.CardIssuer
+import com.stripe.android.cardverificationsheet.payment.card.CardMatch
 import com.stripe.android.cardverificationsheet.payment.card.RequiresMatchingCard
 import com.stripe.android.cardverificationsheet.payment.card.isValidPanLastFour
-import com.stripe.android.cardverificationsheet.payment.ml.SSDOcr
 import kotlinx.coroutines.runBlocking
 
 /**
@@ -26,7 +26,7 @@ import kotlinx.coroutines.runBlocking
 internal class MainLoopAggregator(
     listener: AggregateResultListener<InterimResult, FinalResult>,
     override val requiredCardIssuer: CardIssuer?,
-    override val requiredLastFour: String,
+    override val requiredLastFour: String?,
 ) : RequiresMatchingCard,
     ResultAggregator<
         MainLoopAnalyzer.Input,
@@ -55,7 +55,9 @@ internal class MainLoopAggregator(
     )
 
     init {
-        require(isValidPanLastFour(requiredLastFour)) { "Invalid last four" }
+        require(requiredLastFour == null || isValidPanLastFour(requiredLastFour)) {
+            "Invalid last four"
+        }
         require(requiredCardIssuer == null || requiredCardIssuer != CardIssuer.Unknown) {
             "Invalid required iin"
         }
@@ -69,11 +71,14 @@ internal class MainLoopAggregator(
             metaData: InterimResult,
         ): SavedFrameType? {
             val hasCard = metaData.analyzerResult.isCardVisible == true
-            val hasOcr = metaData.analyzerResult.ocr?.outcome is SSDOcr.OcrOutcome.Match
-            return if (hasCard || hasOcr) {
-                SavedFrameType(hasCard = hasCard, hasOcr = hasOcr)
-            } else {
-                null
+            val matchesCard = compareToRequiredCard(metaData.analyzerResult.ocr?.pan)
+
+            return when {
+                matchesCard is CardMatch.Match || matchesCard is CardMatch.NoRequiredCard ->
+                    SavedFrameType(hasCard = hasCard, hasOcr = true)
+                matchesCard is CardMatch.NoPan && hasCard ->
+                    SavedFrameType(hasCard = hasCard, hasOcr = false)
+                else -> null
             }
         }
     }
@@ -94,7 +99,7 @@ internal class MainLoopAggregator(
         )
 
         val savedFrame = SavedFrame(
-            hasOcr = result.ocr?.outcome is SSDOcr.OcrOutcome.Match,
+            hasOcr = result.ocr?.pan?.isNotEmpty() == true,
             frame = frame,
         )
 

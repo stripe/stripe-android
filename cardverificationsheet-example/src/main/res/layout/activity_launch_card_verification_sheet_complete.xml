@@ -39,6 +39,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="text"
+                android:text="civ_1JXr8rJ3R6e4jmuYCE9V1ws6"
                 android:importantForAutofill="no" />
         </LinearLayout>
 
@@ -67,6 +68,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="text"
+                android:text="civ_client_secret_MMVy1ZX24SUphtgpk4MNM9OR"
                 android:importantForAutofill="no" />
         </LinearLayout>
 

@@ -6,24 +6,34 @@ package com.stripe.android.cardverificationsheet.payment.card
  */
 internal interface RequiresMatchingCard {
     val requiredCardIssuer: CardIssuer?
-    val requiredLastFour: String
+    val requiredLastFour: String?
 
     /**
-     * Returns true if the card matches the [requiredCardIssuer] and/or [requiredLastFour], or if
-     * the two fields are null.
-     *
-     * TODO: Use contracts once they're supported. True guarantees that lastFour != null
+     * Returns whether the card matches the [requiredCardIssuer] and/or [requiredLastFour], or if
+     * there is no required card.
      */
-    fun matchesRequiredCard(cardIssuer: CardIssuer?, lastFour: String?): Boolean =
-        lastFour == requiredLastFour.lastFour() &&
-            (requiredCardIssuer == null || cardIssuer == requiredCardIssuer)
+    fun compareToRequiredCard(pan: String?): CardMatch {
+        /*
+         * TODO: Use contracts once they're supported. [CardMatch.Match], [CardMatch.Mismatch], and
+         * [CardMatch.NoRequiredCard] guarantees that pan != null
+         */
+        if (pan.isNullOrEmpty()) return CardMatch.NoPan
+        if (requiredLastFour == null && requiredCardIssuer == null) return CardMatch.NoRequiredCard
 
-    /**
-     * Returns true if the card does not match the [requiredCardIssuer] and [requiredLastFour].
-     *
-     * TODO: Use contracts once they're supported. True guarantees that lastFour != null
-     */
-    fun doesNotMatchRequiredCard(cardIssuer: CardIssuer?, lastFour: String?): Boolean =
-        (lastFour != null && lastFour != requiredLastFour) ||
-            (cardIssuer != null && requiredCardIssuer != null && cardIssuer != requiredCardIssuer)
+        val lastFourMatches = requiredLastFour != null && pan.lastFour() == requiredLastFour
+        val cardIssuerMatches =
+            requiredCardIssuer != null && getCardIssuer(pan) == requiredCardIssuer
+
+        return when {
+            lastFourMatches && cardIssuerMatches -> CardMatch.Match
+            else -> CardMatch.Mismatch
+        }
+    }
+}
+
+sealed interface CardMatch {
+    object NoRequiredCard: CardMatch
+    object Match : CardMatch
+    object Mismatch : CardMatch
+    object NoPan: CardMatch
 }

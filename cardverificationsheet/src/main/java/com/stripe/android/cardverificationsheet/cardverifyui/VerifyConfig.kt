@@ -7,17 +7,30 @@ import com.stripe.android.cardverificationsheet.framework.time.seconds
 object VerifyConfig {
 
     /**
-     * The maximum duration for which to search for a card number once sufficient verification
-     * images have been found.
+     * The duration after which the scan will reset if no card is visible.
      */
     @JvmStatic
-    var PAN_SEARCH_DURATION = 5.seconds
+    var NO_CARD_VISIBLE_DURATION = 5.seconds
 
     /**
      * The maximum duration for which to search for both a card number and good verification images.
      */
     @JvmStatic
-    var PAN_AND_CARD_SEARCH_DURATION = 10.seconds
+    var OCR_AND_CARD_SEARCH_DURATION = 10.seconds
+
+    /**
+     * The maximum duration for which to search for a card number after the verification images
+     * have been satisfied.
+     */
+    @JvmStatic
+    var OCR_ONLY_SEARCH_DURATION = 10.seconds
+
+    /**
+     * The maximum duration for which to search for good verification images after the card number
+     * has been found.
+     */
+    @JvmStatic
+    var CARD_ONLY_SEARCH_DURATION = 5.seconds
 
     /**
      * Once this number of frames with matching card numbers are found, stop looking for card
@@ -27,18 +40,11 @@ object VerifyConfig {
     var DESIRED_OCR_AGREEMENT = 3
 
     /**
-     * Once this number of frames with matching card numbers are found, reduce the search time to
-     * PAN_SEARCH_DURATION.
-     */
-    @JvmStatic
-    var MINIMUM_PAN_AGREEMENT = 2
-
-    /**
      * Once this number of frames with a clearly centered card are found, stop looking for images
      * with clearly centered cards.
      */
     @JvmStatic
-    var DESIRED_SIDE_COUNT = 5
+    var DESIRED_CARD_COUNT = 5
 
     /**
      * Display the wrong card notification to the user for this duration.

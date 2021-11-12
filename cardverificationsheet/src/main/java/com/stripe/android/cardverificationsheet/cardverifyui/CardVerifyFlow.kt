@@ -43,7 +43,7 @@ internal class CardVerifyFlow(
         MainLoopAggregator.InterimResult,
         MainLoopAggregator.FinalResult>,
     private val scanErrorListener: AnalyzerLoopErrorListener,
-) : ScanFlow<RequiredCardDetails> {
+) : ScanFlow<RequiredCardDetails?> {
 
     /**
      * If this is true, do not start the flow.
@@ -68,7 +68,7 @@ internal class CardVerifyFlow(
         viewFinder: Rect,
         lifecycleOwner: LifecycleOwner,
         coroutineScope: CoroutineScope,
-        parameters: RequiredCardDetails,
+        parameters: RequiredCardDetails?,
     ) = coroutineScope.launch(Dispatchers.Main) {
         val listener = object : AggregateResultListener<
                 MainLoopAggregator.InterimResult,
@@ -104,8 +104,8 @@ internal class CardVerifyFlow(
 
         mainLoopAggregator = MainLoopAggregator(
             listener = listener,
-            requiredCardIssuer = parameters.cardIssuer,
-            requiredLastFour = parameters.lastFour,
+            requiredCardIssuer = parameters?.cardIssuer,
+            requiredLastFour = parameters?.lastFour,
         ).also { mainLoopOcrAggregator ->
             // make this result aggregator pause and reset when the lifecycle pauses.
             mainLoopOcrAggregator.bindToLifecycle(lifecycleOwner)
@@ -142,8 +142,6 @@ internal class CardVerifyFlow(
                         MainLoopAnalyzer.Input(
                             cameraPreviewImage = it,
                             cardFinder = viewFinder,
-                            requiredCardIssuer = parameters.cardIssuer,
-                            requiredLastFour = parameters.lastFour,
                         )
                     },
                     coroutineScope,
@@ -177,9 +175,9 @@ internal class CardVerifyFlow(
         fun getFrames(frameType: SavedFrameType) = frames[frameType] ?: emptyList()
 
         val cardAndPan = getFrames(SavedFrameType(hasCard = true, hasOcr = true))
-        val card = getFrames(SavedFrameType(hasCard = true, hasOcr = false))
         val pan = getFrames(SavedFrameType(hasCard = false, hasOcr = true))
+        val card = getFrames(SavedFrameType(hasCard = true, hasOcr = false))
 
-        return (cardAndPan + card + pan).take(VerifyConfig.MAX_COMPLETION_LOOP_FRAMES)
+        return (cardAndPan + pan + card).take(VerifyConfig.MAX_COMPLETION_LOOP_FRAMES)
     }
 }
