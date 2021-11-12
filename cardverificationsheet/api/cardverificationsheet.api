@@ -85,15 +85,8 @@ public final class com/stripe/android/cardverificationsheet/cardverifyui/CardVer
 public final class com/stripe/android/cardverificationsheet/cardverifyui/CardVerificationSheetResult$Completed : com/stripe/android/cardverificationsheet/cardverifyui/CardVerificationSheetResult {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
-	public fun <init> (Lcom/stripe/android/cardverificationsheet/payment/card/ScannedCard;)V
-	public final fun component1 ()Lcom/stripe/android/cardverificationsheet/payment/card/ScannedCard;
-	public final fun copy (Lcom/stripe/android/cardverificationsheet/payment/card/ScannedCard;)Lcom/stripe/android/cardverificationsheet/cardverifyui/CardVerificationSheetResult$Completed;
-	public static synthetic fun copy$default (Lcom/stripe/android/cardverificationsheet/cardverifyui/CardVerificationSheetResult$Completed;Lcom/stripe/android/cardverificationsheet/payment/card/ScannedCard;ILjava/lang/Object;)Lcom/stripe/android/cardverificationsheet/cardverifyui/CardVerificationSheetResult$Completed;
+	public static final field INSTANCE Lcom/stripe/android/cardverificationsheet/cardverifyui/CardVerificationSheetResult$Completed;
 	public fun describeContents ()I
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getScannedCard ()Lcom/stripe/android/cardverificationsheet/payment/card/ScannedCard;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
 	public fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
@@ -942,21 +935,6 @@ public final class com/stripe/android/cardverificationsheet/payment/card/Payment
 	public static final field QUICK_READ_LENGTH I
 	public static final fun supportCardIssuer (Lkotlin/ranges/IntRange;Lcom/stripe/android/cardverificationsheet/payment/card/CardIssuer;Ljava/util/List;Ljava/util/List;Lcom/stripe/android/cardverificationsheet/payment/card/PanValidator;)Z
 	public static synthetic fun supportCardIssuer$default (Lkotlin/ranges/IntRange;Lcom/stripe/android/cardverificationsheet/payment/card/CardIssuer;Ljava/util/List;Ljava/util/List;Lcom/stripe/android/cardverificationsheet/payment/card/PanValidator;ILjava/lang/Object;)Z
-}
-
-public final class com/stripe/android/cardverificationsheet/payment/card/ScannedCard : android/os/Parcelable {
-	public static final field $stable I
-	public static final field CREATOR Landroid/os/Parcelable$Creator;
-	public fun <init> (Ljava/lang/String;)V
-	public final fun component1 ()Ljava/lang/String;
-	public final fun copy (Ljava/lang/String;)Lcom/stripe/android/cardverificationsheet/payment/card/ScannedCard;
-	public static synthetic fun copy$default (Lcom/stripe/android/cardverificationsheet/payment/card/ScannedCard;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/cardverificationsheet/payment/card/ScannedCard;
-	public fun describeContents ()I
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getPan ()Ljava/lang/String;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-	public fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
 public class com/stripe/android/cardverificationsheet/scanui/CameraErrorListenerImpl : com/stripe/android/cardverificationsheet/camera/CameraErrorListener {
