@@ -1,3 +1,5 @@
+@file:Suppress("deprecation")
+/* RenderScript is deprecated, but alternatives are not yet well supported */
 package com.stripe.android.cardverificationsheet.framework.image
 
 import android.content.Context

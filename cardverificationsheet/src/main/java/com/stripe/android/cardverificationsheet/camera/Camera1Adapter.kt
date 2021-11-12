@@ -1,4 +1,5 @@
 @file:Suppress("deprecation")
+/* camera1 is deprecated, but still our best option for android 5.0 */
 package com.stripe.android.cardverificationsheet.camera
 
 import android.annotation.SuppressLint

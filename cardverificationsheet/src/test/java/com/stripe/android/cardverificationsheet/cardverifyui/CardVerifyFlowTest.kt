@@ -38,7 +38,7 @@ class CardVerifyFlowTest {
 
         val selectedFrames = flow.selectCompletionLoopFrames(frameMap)
         assertEquals(
-            listOf("A", "B", "C", "D", "E"),
+            listOf("A", "B", "C", "G", "H"),
             selectedFrames,
         )
     }
