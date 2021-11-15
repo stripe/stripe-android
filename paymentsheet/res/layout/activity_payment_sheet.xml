@@ -28,9 +28,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="?colorSurface"
+                android:paddingEnd="12dp"
                 app:contentInsetStart="0dp"
                 app:contentInsetStartWithNavigation="0dp"
-                android:paddingEnd="12dp"
                 tools:ignore="RtlSymmetry">
 
                 <TextView
@@ -45,7 +45,7 @@
                     android:background="@drawable/stripe_paymentsheet_testmode_background"
                     android:textColor="@color/stripe_paymentsheet_testmode_text"
                     android:textStyle="bold"
-                    android:text="@string/stripe_paymentsheet_test_mode_indicator"/>
+                    android:text="@string/stripe_paymentsheet_test_mode_indicator" />
 
             </com.google.android.material.appbar.MaterialToolbar>
 
@@ -82,7 +82,7 @@
                     android:id="@+id/button_container"
                     android:animateLayoutChanges="true"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="@dimen/stripe_paymentsheet_max_primary_button_height"
                     android:layout_marginTop="@dimen/stripe_paymentsheet_button_container_spacing"
                     android:layout_marginHorizontal="@dimen/stripe_paymentsheet_outer_spacing_horizontal"
                     android:layout_marginBottom="@dimen/stripe_paymentsheet_button_container_spacing_bottom">
@@ -92,12 +92,14 @@
                         android:layout_width="match_parent"
                         android:layout_height="@dimen/stripe_paymentsheet_primary_button_height"
                         android:text="@string/stripe_paymentsheet_pay_button_label"
+                        android:layout_marginVertical="2dp"
+                        android:layout_marginHorizontal="2dp"
                         android:visibility="gone" />
 
                     <com.stripe.android.paymentsheet.ui.GooglePayButton
                         android:id="@+id/google_pay_button"
                         android:layout_width="match_parent"
-                        android:layout_height="@dimen/stripe_paymentsheet_primary_button_height"
+                        android:layout_height="wrap_content"
                         android:visibility="gone" />
                 </FrameLayout>
             </LinearLayout>

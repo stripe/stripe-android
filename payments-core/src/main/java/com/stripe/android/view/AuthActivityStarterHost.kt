@@ -56,10 +56,9 @@ sealed class AuthActivityStarterHost {
         }
     }
 
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    companion object {
+    internal companion object {
         @JvmSynthetic
-        fun create(
+        internal fun create(
             fragment: Fragment
         ): AuthActivityStarterHost {
             val activity = fragment.requireActivity()
@@ -70,7 +69,7 @@ sealed class AuthActivityStarterHost {
         }
 
         @JvmSynthetic
-        fun create(
+        internal fun create(
             activity: ComponentActivity
         ): AuthActivityStarterHost {
             return ActivityHost(

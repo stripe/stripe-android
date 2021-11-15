@@ -5,9 +5,12 @@ import android.content.Context;
 import androidx.annotation.NonNull;
 import androidx.test.core.app.ApplicationProvider;
 
+import com.stripe.android.core.networking.AnalyticsRequest;
+import com.stripe.android.core.networking.AnalyticsRequestExecutor;
+import com.stripe.android.core.networking.DefaultStripeNetworkClient;
 import com.stripe.android.exception.AuthenticationException;
 import com.stripe.android.exception.CardException;
-import com.stripe.android.exception.InvalidRequestException;
+import com.stripe.android.core.exception.InvalidRequestException;
 import com.stripe.android.exception.StripeException;
 import com.stripe.android.model.AccountParams;
 import com.stripe.android.model.AddressFixtures;
@@ -31,11 +34,7 @@ import com.stripe.android.model.StripeFileParams;
 import com.stripe.android.model.StripeFilePurpose;
 import com.stripe.android.model.Token;
 import com.stripe.android.model.WeChat;
-import com.stripe.android.networking.AnalyticsRequest;
-import com.stripe.android.networking.AnalyticsRequestExecutor;
-import com.stripe.android.networking.AnalyticsRequestFactory;
-import com.stripe.android.networking.DefaultApiRequestExecutor;
-import com.stripe.android.networking.FakeAnalyticsRequestExecutor;
+import com.stripe.android.networking.PaymentAnalyticsRequestFactory;
 import com.stripe.android.networking.StripeApiRepository;
 import com.stripe.android.networking.StripeRepository;
 
@@ -71,6 +70,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.robolectric.Shadows.shadowOf;
 
@@ -1054,7 +1054,7 @@ public class StripeTest {
             throws StripeException {
         final Stripe stripe = createStripe(
                 ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
-                new FakeAnalyticsRequestExecutor(),
+                mock(AnalyticsRequestExecutor.class),
                 new FakeFraudDetectionDataRepository()
         );
 
@@ -1131,11 +1131,10 @@ public class StripeTest {
         verify(analyticsRequestExecutor)
                 .executeAsync(analyticsRequestArgumentCaptor.capture());
         final AnalyticsRequest analyticsRequest = analyticsRequestArgumentCaptor.getValue();
-        assertThat(analyticsRequest.getBaseUrl())
-                .isEqualTo(AnalyticsRequest.HOST);
+        assertTrue(analyticsRequest.getUrl().startsWith(AnalyticsRequest.HOST));
         assertThat(
                 Objects.requireNonNull(analyticsRequest.getParams())
-                        .get(AnalyticsRequestFactory.FIELD_SOURCE_TYPE)
+                        .get(PaymentAnalyticsRequestFactory.FIELD_SOURCE_TYPE)
         ).isEqualTo("card");
     }
 
@@ -1165,12 +1164,11 @@ public class StripeTest {
                 .executeAsync(analyticsRequestArgumentCaptor.capture());
 
         final AnalyticsRequest analyticsRequest = analyticsRequestArgumentCaptor.getValue();
-        assertThat(analyticsRequest.getBaseUrl())
-                .isEqualTo(AnalyticsRequest.HOST);
+        assertTrue(analyticsRequest.getUrl().startsWith(AnalyticsRequest.HOST));
 
         assertThat(
                 Objects.requireNonNull(analyticsRequest.getParams())
-                        .get(AnalyticsRequestFactory.FIELD_SOURCE_TYPE)
+                        .get(PaymentAnalyticsRequestFactory.FIELD_SOURCE_TYPE)
         ).isEqualTo("ideal");
     }
 
@@ -1196,10 +1194,10 @@ public class StripeTest {
         verify(analyticsRequestExecutor)
                 .executeAsync(analyticsRequestArgumentCaptor.capture());
         final AnalyticsRequest analyticsRequest = analyticsRequestArgumentCaptor.getValue();
-        assertEquals(AnalyticsRequest.HOST, analyticsRequest.getBaseUrl());
+        assertTrue(analyticsRequest.getUrl().startsWith(AnalyticsRequest.HOST));
         assertThat(
                 Objects.requireNonNull(analyticsRequest.getParams())
-                        .get(AnalyticsRequestFactory.FIELD_SOURCE_TYPE)
+                        .get(PaymentAnalyticsRequestFactory.FIELD_SOURCE_TYPE)
         ).isEqualTo("fpx");
     }
 
@@ -1296,7 +1294,7 @@ public class StripeTest {
     private Stripe createStripe(@NonNull String publishableKey) {
         return createStripe(
                 publishableKey,
-                new FakeAnalyticsRequestExecutor(),
+                mock(AnalyticsRequestExecutor.class),
                 defaultFraudDetectionDataRepository
         );
     }
@@ -1338,7 +1336,7 @@ public class StripeTest {
         final StripeRepository stripeRepository = createStripeRepository(
                 ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
                 workDispatcher,
-                new FakeAnalyticsRequestExecutor(),
+                mock(AnalyticsRequestExecutor.class),
                 defaultFraudDetectionDataRepository
         );
         return new Stripe(
@@ -1368,7 +1366,7 @@ public class StripeTest {
                 new FakeLogger(),
                 workDispatcher,
                 emptySet(),
-                new DefaultApiRequestExecutor(workDispatcher),
+                new DefaultStripeNetworkClient(workDispatcher),
                 analyticsRequestExecutor,
                 fraudDetectionDataRepository
         );

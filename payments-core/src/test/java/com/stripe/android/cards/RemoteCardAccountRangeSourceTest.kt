@@ -4,14 +4,14 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.CardNumberFixtures
+import com.stripe.android.core.networking.AnalyticsRequest
 import com.stripe.android.model.AccountRange
 import com.stripe.android.model.BinFixtures
 import com.stripe.android.model.BinRange
 import com.stripe.android.model.CardMetadata
 import com.stripe.android.networking.AbsFakeStripeRepository
-import com.stripe.android.networking.AnalyticsRequest
-import com.stripe.android.networking.AnalyticsRequestFactory
 import com.stripe.android.networking.ApiRequest
+import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networking.StripeRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestCoroutineDispatcher
@@ -44,7 +44,7 @@ internal class RemoteCardAccountRangeSourceTest {
             REQUEST_OPTIONS,
             cardAccountRangeStore,
             { },
-            AnalyticsRequestFactory(
+            PaymentAnalyticsRequestFactory(
                 ApplicationProvider.getApplicationContext(),
                 ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
             )
@@ -79,7 +79,7 @@ internal class RemoteCardAccountRangeSourceTest {
                 REQUEST_OPTIONS,
                 cardAccountRangeStore,
                 { },
-                AnalyticsRequestFactory(
+                PaymentAnalyticsRequestFactory(
                     ApplicationProvider.getApplicationContext(),
                     ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
                 )
@@ -106,7 +106,7 @@ internal class RemoteCardAccountRangeSourceTest {
                 REQUEST_OPTIONS,
                 cardAccountRangeStore,
                 { },
-                AnalyticsRequestFactory(
+                PaymentAnalyticsRequestFactory(
                     ApplicationProvider.getApplicationContext(),
                     ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
                 )
@@ -149,7 +149,7 @@ internal class RemoteCardAccountRangeSourceTest {
                 {
                     analyticsRequests.add(it)
                 },
-                AnalyticsRequestFactory(
+                PaymentAnalyticsRequestFactory(
                     ApplicationProvider.getApplicationContext(),
                     ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
                 )

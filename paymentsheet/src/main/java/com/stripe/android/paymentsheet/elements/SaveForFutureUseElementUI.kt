@@ -9,17 +9,17 @@ import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material.Checkbox
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.asLiveData
 import com.stripe.android.paymentsheet.R
 
 @Composable
@@ -28,7 +28,8 @@ internal fun SaveForFutureUseElementUI(
     element: SaveForFutureUseElement
 ) {
     val controller = element.controller
-    val checked by controller.saveForFutureUse.asLiveData().observeAsState(true)
+    val checked by controller.saveForFutureUse.collectAsState(true)
+    val resources = LocalContext.current.resources
 
     val description = stringResource(
         if (checked) {
@@ -62,7 +63,7 @@ internal fun SaveForFutureUseElementUI(
             enabled = enabled
         )
         Text(
-            stringResource(controller.label),
+            resources.getString(controller.label, element.merchantName),
             Modifier
                 .padding(start = 4.dp)
                 .align(Alignment.CenterVertically),

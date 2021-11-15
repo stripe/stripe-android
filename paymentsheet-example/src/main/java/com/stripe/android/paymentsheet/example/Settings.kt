@@ -2,7 +2,6 @@ package com.stripe.android.paymentsheet.example
 
 import android.content.Context
 import android.content.pm.PackageManager
-import com.stripe.android.paymentsheet.example.service.CheckoutBackendApi
 
 /**
  * Class that provides global app settings.
@@ -11,7 +10,7 @@ class Settings(context: Context) {
     private val appContext = context.applicationContext
     private val backendMetadata = getMetadata(METADATA_KEY_BACKEND_URL_KEY)
 
-    val backendUrl: String
+    val playgroundBackendUrl: String
         get() {
             return backendMetadata ?: BASE_URL
         }

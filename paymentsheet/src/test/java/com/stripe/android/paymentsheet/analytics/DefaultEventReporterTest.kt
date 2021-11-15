@@ -4,8 +4,8 @@ import androidx.test.core.app.ApplicationProvider
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.model.PaymentMethodFixtures
-import com.stripe.android.networking.AnalyticsRequestExecutor
-import com.stripe.android.networking.AnalyticsRequestFactory
+import com.stripe.android.core.networking.AnalyticsRequestExecutor
+import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -25,7 +25,7 @@ class DefaultEventReporterTest {
     private val testDispatcher = TestCoroutineDispatcher()
 
     private val analyticsRequestExecutor = mock<AnalyticsRequestExecutor>()
-    private val analyticsRequestFactory = AnalyticsRequestFactory(
+    private val analyticsRequestFactory = PaymentAnalyticsRequestFactory(
         ApplicationProvider.getApplicationContext(),
         ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY
     )
@@ -53,7 +53,7 @@ class DefaultEventReporterTest {
         completeEventReporter.onInit(PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY)
         verify(analyticsRequestExecutor).executeAsync(
             argWhere { req ->
-                req.getCompactParams()?.get("event") == "mc_complete_init_customer_googlepay"
+                req.params["event"] == "mc_complete_init_customer_googlepay"
             }
         )
     }
@@ -65,7 +65,7 @@ class DefaultEventReporterTest {
         )
         verify(analyticsRequestExecutor).executeAsync(
             argWhere { req ->
-                req.getCompactParams()?.get("event") == "mc_complete_payment_savedpm_success"
+                req.params["event"] == "mc_complete_payment_savedpm_success"
             }
         )
     }
@@ -77,7 +77,7 @@ class DefaultEventReporterTest {
         )
         verify(analyticsRequestExecutor).executeAsync(
             argWhere { req ->
-                req.getCompactParams()?.get("event") == "mc_custom_paymentoption_savedpm_select"
+                req.params["event"] == "mc_custom_paymentoption_savedpm_select"
             }
         )
     }
@@ -89,7 +89,7 @@ class DefaultEventReporterTest {
         )
         verify(analyticsRequestExecutor).executeAsync(
             argWhere { req ->
-                val deviceIdValue = requireNotNull(req.getCompactParams()?.get("device_id")).toString()
+                val deviceIdValue = requireNotNull(req.params["device_id"]).toString()
                 UUID.fromString(deviceIdValue) != null
             }
         )

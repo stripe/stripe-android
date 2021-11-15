@@ -21,8 +21,8 @@ import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -31,7 +31,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.asLiveData
 import com.stripe.android.paymentsheet.R
 
 @Composable
@@ -40,7 +39,7 @@ internal fun DropDown(
     controller: DropdownFieldController,
     enabled: Boolean,
 ) {
-    val selectedIndex by controller.selectedIndex.asLiveData().observeAsState(0)
+    val selectedIndex by controller.selectedIndex.collectAsState(0)
     val items = controller.displayItems
     var expanded by remember { mutableStateOf(false) }
     val interactionSource = remember { MutableInteractionSource() }

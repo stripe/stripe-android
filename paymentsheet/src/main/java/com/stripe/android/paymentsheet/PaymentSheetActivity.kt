@@ -156,6 +156,10 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
         viewModel.paymentSheetResult.observe(this) {
             closeSheet(it)
         }
+
+        viewModel.contentVisible.observe(this) {
+            viewBinding.scrollView.isVisible = it
+        }
     }
 
     override fun onDestroy() {
@@ -262,6 +266,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
         }
 
         viewBinding.googlePayButton.setOnClickListener {
+            viewModel.setContentVisible(false)
             updateErrorMessage()
             viewModel.checkout(CheckoutIdentifier.SheetBottomGooglePay)
         }

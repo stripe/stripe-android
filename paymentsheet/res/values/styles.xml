@@ -20,12 +20,12 @@
     </style>
 
     <style name="StripePaymentOptionItemCard">
-        <item name="android:layout_width">@dimen/stripe_paymentsheet_paymentmethod_icon_width</item>
+        <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">@dimen/stripe_paymentsheet_paymentmethod_icon_height
         </item>
-        <item name="android:layout_marginStart">7dp</item>
+        <item name="android:layout_marginStart">6dp</item>
         <item name="android:layout_marginTop">8dp</item>
-        <item name="android:layout_marginEnd">7dp</item>
+        <item name="android:layout_marginEnd">6dp</item>
         <item name="android:layout_marginBottom">4dp</item>
         <item name="android:padding">4dp</item>
         <item name="android:clickable">false</item>
@@ -59,7 +59,7 @@
         <item name="android:src">@drawable/stripe_ic_delete_symbol</item>
         <!-- modify the bottom and end layout to correctly position the icon -->
         <item name="android:paddingBottom">24dp</item>
-        <item name="android:paddingEnd">-24dp</item>
+        <item name="android:paddingEnd">-25dp</item>
         <item name="android:scaleType">center</item>
     </style>
 
@@ -86,8 +86,8 @@
         <item name="android:textSize">13sp</item>
         <item name="android:textStyle">bold</item>
         <item name="android:lineSpacingExtra">1sp</item>
-        <item name="android:layout_marginStart">4dp</item>
-        <item name="android:layout_marginEnd">4dp</item>
+        <item name="android:layout_marginStart">6dp</item>
+        <item name="android:layout_marginEnd">6dp</item>
     </style>
 
     <style name="StripePaymentSheetTitle">

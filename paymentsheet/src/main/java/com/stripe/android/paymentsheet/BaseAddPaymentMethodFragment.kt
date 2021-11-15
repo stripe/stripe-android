@@ -13,7 +13,7 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.commit
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.asLiveData
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.core.injection.InjectorKey
@@ -30,6 +30,8 @@ import com.stripe.android.paymentsheet.paymentdatacollection.TransformToPaymentM
 import com.stripe.android.paymentsheet.ui.AddPaymentMethodsFragmentFactory
 import com.stripe.android.paymentsheet.ui.AnimationConstants
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 
 internal abstract class BaseAddPaymentMethodFragment(
     private val eventReporter: EventReporter
@@ -100,8 +102,10 @@ internal abstract class BaseAddPaymentMethodFragment(
 
         childFragmentManager.addFragmentOnAttachListener { _, fragment ->
             (fragment as? ComposeFormDataCollectionFragment)?.let { formFragment ->
-                formFragment.formViewModel.completeFormValues.asLiveData()
-                    .observe(viewLifecycleOwner) { formFieldValues ->
+                // Need to access the formViewModel so it is constructed.
+                val formViewModel = formFragment.formViewModel
+                viewLifecycleOwner.lifecycleScope.launch {
+                    formViewModel.completeFormValues.collect { formFieldValues ->
                         sheetViewModel.updateSelection(
                             transformToPaymentSelection(
                                 formFieldValues,
@@ -110,6 +114,7 @@ internal abstract class BaseAddPaymentMethodFragment(
                             )
                         )
                     }
+                }
             }
         }
 

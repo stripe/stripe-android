@@ -3,8 +3,8 @@ package com.stripe.android.payments.core.injection
 import android.content.Context
 import androidx.annotation.RestrictTo
 import com.stripe.android.Logger
-import com.stripe.android.networking.AnalyticsRequestExecutor
-import com.stripe.android.networking.DefaultAnalyticsRequestExecutor
+import com.stripe.android.core.networking.AnalyticsRequestExecutor
+import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
 import com.stripe.android.networking.StripeApiRepository
 import com.stripe.android.networking.StripeRepository
 import dagger.Binds

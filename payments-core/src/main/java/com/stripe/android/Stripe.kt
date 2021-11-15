@@ -9,11 +9,11 @@ import androidx.annotation.UiThread
 import androidx.annotation.WorkerThread
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
-import com.stripe.android.exception.APIConnectionException
+import com.stripe.android.core.exception.APIConnectionException
+import com.stripe.android.core.exception.InvalidRequestException
 import com.stripe.android.exception.APIException
 import com.stripe.android.exception.AuthenticationException
 import com.stripe.android.exception.CardException
-import com.stripe.android.exception.InvalidRequestException
 import com.stripe.android.exception.StripeException
 import com.stripe.android.model.AccountParams
 import com.stripe.android.model.BankAccount
@@ -1669,7 +1669,7 @@ class Stripe internal constructor(
         @JvmField
         val API_VERSION: String = ApiVersion.get().code
 
-        const val VERSION_NAME = "18.1.0"
+        const val VERSION_NAME = "18.2.0"
         const val VERSION: String = "AndroidBindings/$VERSION_NAME"
 
         /**

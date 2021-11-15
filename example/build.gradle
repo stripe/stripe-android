@@ -43,11 +43,11 @@ dependencies {
     implementation 'com.google.android.gms:play-services-wallet:18.1.3'
 
     /* Used for server calls */
-    implementation 'com.squareup.okio:okio:2.10.0'
+    implementation 'com.squareup.okio:okio:3.0.0'
     implementation "com.squareup.retrofit2:retrofit:$retrofitVersion"
 
     /* Used to make Retrofit easier and GSON & Rx-compatible*/
-    implementation 'com.google.code.gson:gson:2.8.8'
+    implementation 'com.google.code.gson:gson:2.8.9'
     implementation "com.squareup.retrofit2:converter-gson:$retrofitVersion"
 
     implementation 'com.squareup.okhttp3:logging-interceptor:4.9.2'

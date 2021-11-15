@@ -43,6 +43,9 @@ Table of contents
 
 **Localized**: We support the following localizations: Bulgarian, Chinese (Hong Kong), Chinese (Simplified), Chinese (Traditional), Czech, Danish, Dutch, English (US), English (United Kingdom), Estonian, Finnish, French, French (Canada), German, Greek, Hungarian, Italian, Japanese, Korean, Latvian, Lithuanian, Maltese, Norwegian Bokmål, Polish, Portuguese (Brazil), Portuguese, Romanian, Russian, Slovak, Slovenian, Spanish, Spanish (Latin America), Swedish, and Turkish.
 
+**Recommended usage**
+If you're selling digital products or services that will be consumed within your app, (e.g. subscriptions, in-game currencies, game levels, access to premium content, or unlocking a full version), and you plan to distribute it through the Google Play Store, you must use Googles's in-app purchase APIs. See the [Google Play Billing](https://developer.android.com/distribute/play-billing) for more information. For all other scenarios you can use this SDK to process payments via Stripe.
+
 ## Releases
 * The [changelog](CHANGELOG.md) provides a summary of changes in each release.
 * The [migration guide](MIGRATING.md) provides instructions on upgrading from older versions.
@@ -62,7 +65,7 @@ Add `stripe-android` to your `build.gradle` dependencies.
 
 ```
 dependencies {
-    implementation 'com.stripe:stripe-android:18.1.0'
+    implementation 'com.stripe:stripe-android:18.2.0'
 }
 ```
 
@@ -79,4 +82,4 @@ Get started with our [📚 integration guides](https://stripe.com/docs/payments/
 - The [PaymentSheet example project](https://github.com/stripe/stripe-android/tree/master/paymentsheet-example) demonstrates how to integrate and use our prebuilt ui (single-step and multi-step).
 - The [example project](https://github.com/stripe/stripe-android/tree/master/example) demonstrates other integrations, that give you more control over the user experience:
     - how to use the Stripe class's synchronous and asynchronous methods
-    - how to use the CardInputWidget.
+    - how to use the CardFormView.
