@@ -55,6 +55,47 @@ class PostalCodeEditTextTest {
     }
 
     @Test
+    fun postalCode_whenConfiguredForCa_shouldValidate() {
+        postalCodeEditText.config = PostalCodeEditText.Config.CA
+        assertThat(postalCodeEditText.postalCode)
+            .isNull()
+
+        postalCodeEditText.setText("h2t-1b8")
+        assertThat(postalCodeEditText.postalCode)
+            .isEqualTo("h2t-1b8")
+
+        postalCodeEditText.setText("h2t 1b8")
+        assertThat(postalCodeEditText.postalCode)
+            .isEqualTo("h2t 1b8")
+
+        postalCodeEditText.setText("H2Z1B8")
+        assertThat(postalCodeEditText.postalCode)
+            .isEqualTo("H2Z1B8")
+
+        postalCodeEditText.setText("h2t1b8")
+        assertThat(postalCodeEditText.postalCode)
+            .isEqualTo("h2t1b8")
+
+        postalCodeEditText.setText("h2t1b")
+        assertThat(postalCodeEditText.postalCode)
+            .isNull()
+
+        postalCodeEditText.setText("hhhhhhhh")
+        assertThat(postalCodeEditText.postalCode)
+            .isNull()
+
+        // leading Z
+        postalCodeEditText.setText("Z2T 1B8")
+        assertThat(postalCodeEditText.postalCode)
+            .isNull()
+
+        // contains O
+        postalCodeEditText.setText("H2T 1O3")
+        assertThat(postalCodeEditText.postalCode)
+            .isNull()
+    }
+
+    @Test
     fun updateHint_whenTextInputLayoutHintEnabled_shouldSetHintOnTextInputLayout() {
         createActivity {
             val textInputLayout = TextInputLayout(it)

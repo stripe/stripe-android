@@ -27,17 +27,26 @@ class PostalCodeEditText @JvmOverloads constructor(
         when (newValue) {
             Config.Global -> configureForGlobal()
             Config.US -> configureForUs()
+            Config.CA -> configureForCanada()
         }
     }
 
     internal val postalCode: String?
         get() {
-            return if (config == Config.US) {
-                fieldText.takeIf {
-                    ZIP_CODE_PATTERN.matcher(fieldText).matches()
+            return when (config) {
+                Config.US -> {
+                    fieldText.takeIf {
+                        ZIP_CODE_PATTERN.matcher(fieldText).matches()
+                    }
                 }
-            } else {
-                fieldText
+                Config.CA -> {
+                    fieldText.takeIf {
+                        CANADA_POSTAL_CODE_PATTERN.matcher(fieldText.uppercase()).matches()
+                    }
+                }
+                else -> {
+                    fieldText
+                }
             }
         }
 
@@ -78,6 +87,11 @@ class PostalCodeEditText @JvmOverloads constructor(
         inputType = InputType.TYPE_TEXT_VARIATION_POSTAL_ADDRESS
     }
 
+    private fun configureForCanada() {
+        configureForGlobal()
+        filters = arrayOf(InputFilter.LengthFilter(MAX_LENGTH_CA))
+    }
+
     /**
      * If a `TextInputLayout` is an ancestor of this view, set the hint on it. Otherwise, set
      * the hint on this view.
@@ -108,12 +122,18 @@ class PostalCodeEditText @JvmOverloads constructor(
 
     internal enum class Config {
         Global,
-        US
+        US,
+        CA
     }
 
     private companion object {
         private const val MAX_LENGTH_US = 5
+        private const val MAX_LENGTH_CA = 7
 
         private val ZIP_CODE_PATTERN = Pattern.compile("^[0-9]{5}$")
+        private val CANADA_POSTAL_CODE_PATTERN =
+            Pattern.compile(
+                "^(?!.*[DFIOQU])[A-VXY][0-9][A-Z][ -]?[0-9][A-Z][0-9]$"
+            )
     }
 }
