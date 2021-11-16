@@ -31,7 +31,7 @@ internal class DefaultFlowControllerInitializer @Inject constructor(
     private val stripeIntentValidator: StripeIntentValidator,
     private val customerRepository: CustomerRepository,
     private val logger: Logger,
-    @com.stripe.android.core.injection.IOContext private val workContext: CoroutineContext
+    @IOContext private val workContext: CoroutineContext
 ) : FlowControllerInitializer {
 
     override suspend fun init(

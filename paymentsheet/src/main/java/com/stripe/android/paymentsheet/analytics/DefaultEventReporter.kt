@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.analytics
 
+import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -16,7 +17,7 @@ internal class DefaultEventReporter @Inject internal constructor(
     private val deviceIdRepository: DeviceIdRepository,
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
     private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
-    @com.stripe.android.core.injection.IOContext private val workContext: CoroutineContext
+    @IOContext private val workContext: CoroutineContext
 ) : EventReporter {
 
     override fun onInit(configuration: PaymentSheet.Configuration?) {

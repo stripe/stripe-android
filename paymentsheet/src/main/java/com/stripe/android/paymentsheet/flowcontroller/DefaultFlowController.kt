@@ -86,7 +86,7 @@ internal class DefaultFlowController @Inject internal constructor(
      * stripeAccountId after creating a [DefaultFlowController].
      */
     private val lazyPaymentConfiguration: Lazy<PaymentConfiguration>,
-    @com.stripe.android.core.injection.UIContext private val uiContext: CoroutineContext,
+    @UIContext private val uiContext: CoroutineContext,
     @Named(ENABLE_LOGGING) private val enableLogging: Boolean,
     @Named(PRODUCT_USAGE) private val productUsage: Set<String>,
     private val googlePayPaymentMethodLauncherFactory: GooglePayPaymentMethodLauncherFactory,

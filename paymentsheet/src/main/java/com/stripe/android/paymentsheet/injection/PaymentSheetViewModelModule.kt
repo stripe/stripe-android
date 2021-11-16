@@ -20,7 +20,7 @@ internal class PaymentSheetViewModelModule(private val starterArgs: PaymentSheet
     @Provides
     fun providePrefsRepository(
         appContext: Context,
-        @com.stripe.android.core.injection.IOContext workContext: CoroutineContext
+        @IOContext workContext: CoroutineContext
     ): PrefsRepository {
         return starterArgs.config?.customer?.let { (id) ->
             DefaultPrefsRepository(

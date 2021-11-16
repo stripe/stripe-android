@@ -26,7 +26,7 @@ internal class CustomerApiRepository @Inject constructor(
     private val stripeRepository: StripeRepository,
     private val lazyPaymentConfig: Lazy<PaymentConfiguration>,
     private val logger: Logger,
-    @com.stripe.android.core.injection.IOContext private val workContext: CoroutineContext,
+    @IOContext private val workContext: CoroutineContext,
     @Named(PRODUCT_USAGE) private val productUsageTokens: Set<String> = emptySet()
 ) : CustomerRepository {
 

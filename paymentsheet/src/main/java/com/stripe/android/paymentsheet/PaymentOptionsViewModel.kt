@@ -29,7 +29,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
         (PaymentSheet.CustomerConfiguration?) -> PrefsRepository,
     eventReporter: EventReporter,
     customerRepository: CustomerRepository,
-    @com.stripe.android.core.injection.IOContext workContext: CoroutineContext,
+    @IOContext workContext: CoroutineContext,
     application: Application,
     logger: Logger,
     @InjectorKey injectorKey: String

@@ -27,7 +27,7 @@ internal class PaymentOptionsViewModelModule {
     @Singleton
     fun providePrefsRepositoryFactory(
         appContext: Context,
-        @com.stripe.android.core.injection.IOContext workContext: CoroutineContext
+        @IOContext workContext: CoroutineContext
     ): (PaymentSheet.CustomerConfiguration?) -> PrefsRepository = { customerConfig ->
         customerConfig?.let {
             DefaultPrefsRepository(

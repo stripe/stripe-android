@@ -86,7 +86,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     private val paymentLauncherFactory: StripePaymentLauncherAssistedFactory,
     private val googlePayPaymentMethodLauncherFactory: GooglePayPaymentMethodLauncherFactory,
     logger: Logger,
-    @com.stripe.android.core.injection.IOContext workContext: CoroutineContext,
+    @IOContext workContext: CoroutineContext,
     @InjectorKey injectorKey: String
 ) : BaseSheetViewModel<PaymentSheetViewModel.TransitionTarget>(
     application = application,

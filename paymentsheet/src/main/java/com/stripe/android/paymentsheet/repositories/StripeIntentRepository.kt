@@ -35,7 +35,7 @@ internal sealed class StripeIntentRepository {
     class Api @Inject constructor(
         private val stripeRepository: StripeRepository,
         private val lazyPaymentConfig: Lazy<PaymentConfiguration>,
-        @com.stripe.android.core.injection.IOContext private val workContext: CoroutineContext,
+        @IOContext private val workContext: CoroutineContext,
         private val locale: Locale? =
             LocaleListCompat.getAdjustedDefault().takeUnless { it.isEmpty }?.get(0)
     ) : StripeIntentRepository() {

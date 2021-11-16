@@ -14,7 +14,7 @@ import kotlin.coroutines.CoroutineContext
 @Singleton
 internal class DefaultDeviceIdRepository @Inject internal constructor(
     private val context: Context,
-    @com.stripe.android.core.injection.IOContext private val workContext: CoroutineContext
+    @IOContext private val workContext: CoroutineContext
 ) : DeviceIdRepository {
     private val prefs: SharedPreferences by lazy {
         context.getSharedPreferences(PREF_FILE, Context.MODE_PRIVATE)
