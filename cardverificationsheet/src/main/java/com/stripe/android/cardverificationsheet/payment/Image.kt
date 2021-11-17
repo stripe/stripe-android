@@ -81,7 +81,9 @@ internal fun cropCameraPreviewToViewFinder(
             viewFinder.bottom <= previewBounds.bottom
     ) { "View finder $viewFinder is outside preview image bounds $previewBounds" }
 
-    return cameraPreviewImage.crop(determineViewFinderCrop(cameraPreviewImage.size(), previewBounds, viewFinder))
+    return cameraPreviewImage.crop(
+        determineViewFinderCrop(cameraPreviewImage.size(), previewBounds, viewFinder)
+    )
 }
 
 /**
