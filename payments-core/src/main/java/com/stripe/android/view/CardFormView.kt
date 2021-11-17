@@ -220,23 +220,12 @@ class CardFormView @JvmOverloads constructor(
     }
 
     private fun updatePostalCodeViewLocale(countryCode: CountryCode?) {
-        when {
-            CountryCode.isUS(countryCode) -> {
-                postalCodeView.config = PostalCodeEditText.Config.US
-                postalCodeView.setErrorMessage(resources.getString(R.string.address_zip_invalid))
-            }
-            CountryCode.isCA(countryCode) -> {
-                postalCodeView.config = PostalCodeEditText.Config.CA
-                postalCodeView.setErrorMessage(
-                    resources.getString(R.string.address_postal_code_invalid)
-                )
-            }
-            else -> {
-                postalCodeView.config = PostalCodeEditText.Config.Global
-                postalCodeView.setErrorMessage(
-                    resources.getString(R.string.address_postal_code_invalid)
-                )
-            }
+        if (CountryCode.isUS(countryCode)) {
+            postalCodeView.config = PostalCodeEditText.Config.US
+            postalCodeView.setErrorMessage(resources.getString(R.string.address_zip_invalid))
+        } else {
+            postalCodeView.config = PostalCodeEditText.Config.Global
+            postalCodeView.setErrorMessage(resources.getString(R.string.address_postal_code_invalid))
         }
     }
 

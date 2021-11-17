@@ -27,26 +27,17 @@ class PostalCodeEditText @JvmOverloads constructor(
         when (newValue) {
             Config.Global -> configureForGlobal()
             Config.US -> configureForUs()
-            Config.CA -> configureForCanada()
         }
     }
 
     internal val postalCode: String?
         get() {
-            return when (config) {
-                Config.US -> {
-                    fieldText.takeIf {
-                        ZIP_CODE_PATTERN.matcher(fieldText).matches()
-                    }
+            return if (config == Config.US) {
+                fieldText.takeIf {
+                    ZIP_CODE_PATTERN.matcher(fieldText).matches()
                 }
-                Config.CA -> {
-                    fieldText.takeIf {
-                        CANADA_POSTAL_CODE_PATTERN.matcher(fieldText.uppercase()).matches()
-                    }
-                }
-                else -> {
-                    fieldText
-                }
+            } else {
+                fieldText
             }
         }
 
@@ -85,11 +76,7 @@ class PostalCodeEditText @JvmOverloads constructor(
         updateHint(R.string.address_label_postal_code)
         keyListener = TextKeyListener.getInstance()
         inputType = InputType.TYPE_TEXT_VARIATION_POSTAL_ADDRESS
-    }
-
-    private fun configureForCanada() {
-        configureForGlobal()
-        filters = arrayOf(InputFilter.LengthFilter(MAX_LENGTH_CA))
+        filters = arrayOf()
     }
 
     /**
@@ -122,18 +109,12 @@ class PostalCodeEditText @JvmOverloads constructor(
 
     internal enum class Config {
         Global,
-        US,
-        CA
+        US
     }
 
     private companion object {
         private const val MAX_LENGTH_US = 5
-        private const val MAX_LENGTH_CA = 7
 
         private val ZIP_CODE_PATTERN = Pattern.compile("^[0-9]{5}$")
-        private val CANADA_POSTAL_CODE_PATTERN =
-            Pattern.compile(
-                "^(?!.*[DFIOQU])[A-VXY][0-9][A-Z][ -]?[0-9][A-Z][0-9]$"
-            )
     }
 }

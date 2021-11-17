@@ -55,44 +55,16 @@ class PostalCodeEditTextTest {
     }
 
     @Test
-    fun postalCode_whenConfiguredForCa_shouldValidate() {
-        postalCodeEditText.config = PostalCodeEditText.Config.CA
+    fun changing_from_Us_to_other_country_should_allow_longer_postal() {
+        postalCodeEditText.config = PostalCodeEditText.Config.US
+        postalCodeEditText.setText("123456")
         assertThat(postalCodeEditText.postalCode)
-            .isNull()
+            .isEqualTo("12345")
 
-        postalCodeEditText.setText("h2t-1b8")
+        postalCodeEditText.config = PostalCodeEditText.Config.Global
+        postalCodeEditText.setText("123456")
         assertThat(postalCodeEditText.postalCode)
-            .isEqualTo("h2t-1b8")
-
-        postalCodeEditText.setText("h2t 1b8")
-        assertThat(postalCodeEditText.postalCode)
-            .isEqualTo("h2t 1b8")
-
-        postalCodeEditText.setText("H2Z1B8")
-        assertThat(postalCodeEditText.postalCode)
-            .isEqualTo("H2Z1B8")
-
-        postalCodeEditText.setText("h2t1b8")
-        assertThat(postalCodeEditText.postalCode)
-            .isEqualTo("h2t1b8")
-
-        postalCodeEditText.setText("h2t1b")
-        assertThat(postalCodeEditText.postalCode)
-            .isNull()
-
-        postalCodeEditText.setText("hhhhhhhh")
-        assertThat(postalCodeEditText.postalCode)
-            .isNull()
-
-        // leading Z
-        postalCodeEditText.setText("Z2T 1B8")
-        assertThat(postalCodeEditText.postalCode)
-            .isNull()
-
-        // contains O
-        postalCodeEditText.setText("H2T 1O3")
-        assertThat(postalCodeEditText.postalCode)
-            .isNull()
+            .isEqualTo("123456")
     }
 
     @Test
