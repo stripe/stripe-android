@@ -230,7 +230,9 @@ open class CardVerifyActivity : SimpleScanActivity<RequiredCardDetails?>() {
     ) {
         is NetworkResult.Success ->
             result.body.expectedCard?.let { expectedCard ->
-                if (expectedCard.lastFour.isNullOrEmpty() || isValidPanLastFour(expectedCard.lastFour)) {
+                if (expectedCard.lastFour.isNullOrEmpty() ||
+                    isValidPanLastFour(expectedCard.lastFour)
+                ) {
                     RequiredCardDetails(
                         getIssuerByDisplayName(expectedCard.issuer),
                         expectedCard.lastFour,
