@@ -248,7 +248,7 @@ open class CardVerifyActivity : SimpleScanActivity<RequiredCardDetails?>() {
             }
             null
         }
-    }?.let { null }
+    }
 
     private fun onScanDetailsAvailable(
         requiredCardDetails: RequiredCardDetails?,
