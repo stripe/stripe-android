@@ -33,6 +33,7 @@ import com.stripe.android.cardverificationsheet.framework.api.uploadScanStats
 import com.stripe.android.cardverificationsheet.framework.util.AppDetails
 import com.stripe.android.cardverificationsheet.framework.util.Device
 import com.stripe.android.cardverificationsheet.payment.card.CardIssuer
+import com.stripe.android.cardverificationsheet.payment.card.ScannedCard
 import com.stripe.android.cardverificationsheet.payment.card.getCardIssuer
 import com.stripe.android.cardverificationsheet.payment.card.getIssuerByDisplayName
 import com.stripe.android.cardverificationsheet.payment.card.isValidPanLastFour
@@ -60,12 +61,12 @@ internal interface CardVerifyResultListener : ScanResultListener {
     /**
      * A payment card was successfully scanned.
      */
-    fun cardVerificationComplete()
+    fun cardVerificationComplete(pan: String)
 
     /**
      * A card was scanned and is ready to be verified.
      */
-    fun cardScanned(frames: Collection<SavedFrame>)
+    fun cardScanned(pan: String, frames: Collection<SavedFrame>)
 }
 
 data class RequiredCardDetails(
@@ -121,13 +122,20 @@ open class CardVerifyActivity : SimpleScanActivity<RequiredCardDetails?>() {
      * The listener which handles results from the scan.
      */
     override val resultListener: CardVerifyResultListener = object : CardVerifyResultListener {
-        override fun cardVerificationComplete() {
+        override fun cardVerificationComplete(pan: String) {
             val intent = Intent()
-                .putExtra(INTENT_PARAM_RESULT, CardVerificationSheetResult.Completed)
+                .putExtra(
+                    INTENT_PARAM_RESULT,
+                    CardVerificationSheetResult.Completed(
+                        ScannedCard(
+                            pan = pan
+                        )
+                    )
+                )
             setResult(Activity.RESULT_OK, intent)
         }
 
-        override fun cardScanned(frames: Collection<SavedFrame>) {
+        override fun cardScanned(pan: String, frames: Collection<SavedFrame>) {
             launch {
                 when (
                     val result = uploadSavedFrames(
@@ -138,7 +146,7 @@ open class CardVerifyActivity : SimpleScanActivity<RequiredCardDetails?>() {
                     )
                 ) {
                     is NetworkResult.Success ->
-                        cardVerificationComplete()
+                        cardVerificationComplete(pan)
                     is NetworkResult.Error ->
                         scanFailure(StripeNetworkException(result.error.error.message))
                     is NetworkResult.Exception ->
@@ -464,7 +472,10 @@ open class CardVerifyActivity : SimpleScanActivity<RequiredCardDetails?>() {
         ) = launch(Dispatchers.Main) {
             changeScanState(ScanState.Correct)
             cameraAdapter.unbindFromLifecycle(this@CardVerifyActivity)
-            resultListener.cardScanned(scanFlow.selectCompletionLoopFrames(result.savedFrames))
+            resultListener.cardScanned(
+                pan = result.pan,
+                frames = scanFlow.selectCompletionLoopFrames(result.savedFrames),
+            )
         }.let { }
 
         /**

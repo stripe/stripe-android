@@ -44,6 +44,7 @@ internal class MainLoopAggregator(
 
     @Keep
     internal data class FinalResult(
+        val pan: String,
         val savedFrames: Map<SavedFrameType, List<SavedFrame>>,
     )
 
@@ -110,7 +111,7 @@ internal class MainLoopAggregator(
         return if (currentState is MainLoopState.Finished) {
             val savedFrames = frameSaver.getSavedFrames()
             frameSaver.reset()
-            interimResult to FinalResult(savedFrames)
+            interimResult to FinalResult(currentState.pan, savedFrames)
         } else {
             interimResult to null
         }
