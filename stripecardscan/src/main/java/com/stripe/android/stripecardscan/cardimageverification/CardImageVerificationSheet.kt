@@ -51,28 +51,30 @@ class CardImageVerificationSheet private constructor(private val stripePublishab
          * see https://github.com/stripe/stripe-android/blob/3e92b79190834dc3aab1c2d9ac2dfb7bc343afd2/payments-core/src/main/java/com/stripe/android/payments/paymentlauncher/PaymentLauncher.kt#L52
          */
         @JvmStatic
-        fun create(from: ComponentActivity, stripePublishableKey: String) =
-            CardImageVerificationSheet(stripePublishableKey).apply {
-                launcher = from.registerForActivityResult(
-                    object : ActivityResultContract<
-                        CardImageVerificationSheetParams,
-                        CardImageVerificationSheetResult
-                        >() {
-                        override fun createIntent(
-                            context: Context,
-                            input: CardImageVerificationSheetParams,
-                        ) = this@Companion.createIntent(context, input)
+        fun create(from: ComponentActivity, stripePublishableKey: String): CardImageVerificationSheet {
+            val sheet = CardImageVerificationSheet(stripePublishableKey)
 
-                        override fun parseResult(
-                            resultCode: Int,
-                            intent: Intent?,
-                        ) = intent?.let { this@Companion.parseResult(it) }
-                    },
-                    ::onResult,
-                )
-            }
+            sheet.launcher = from.registerForActivityResult(
+                object : ActivityResultContract<
+                    CardImageVerificationSheetParams,
+                    CardImageVerificationSheetResult
+                    >() {
+                    override fun createIntent(
+                        context: Context,
+                        input: CardImageVerificationSheetParams,
+                    ) = this@Companion.createIntent(context, input)
 
-        private fun createIntent(context: Context, input: CardImageVerificationSheetParams) =
+                    override fun parseResult(
+                        resultCode: Int,
+                        intent: Intent?,
+                    ) = intent?.let { this@Companion.parseResult(it) }
+                },
+                sheet::onResult,
+            )
+            return sheet
+        }
+
+        private fun createIntent(context: Context, input: CardImageVerificationSheetParams): Intent =
             Intent(context, CardVerifyActivity::class.java).putExtra(INTENT_PARAM_REQUEST, input)
 
         private fun parseResult(intent: Intent): CardImageVerificationSheetResult =
