@@ -1,12 +1,12 @@
 enableFeaturePreview("VERSION_CATALOGS")
 
-include ':cardverificationsheet'
-include ':cardverificationsheet-example'
 include ':example'
 include ':payments'
 include ':payments-core'
 include ':paymentsheet-example'
 include ':paymentsheet'
+include ':stripecardscan'
+include ':stripecardscan-example'
 include ':stripe-core'
 include ':stripe-test-e2e'
 include ':wechatpay'
