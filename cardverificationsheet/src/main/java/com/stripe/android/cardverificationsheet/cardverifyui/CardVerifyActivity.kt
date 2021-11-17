@@ -71,7 +71,7 @@ internal interface CardVerifyResultListener : ScanResultListener {
 
 data class RequiredCardDetails(
     val cardIssuer: CardIssuer?,
-    val lastFour: String,
+    val lastFour: String?,
 )
 
 private val MINIMUM_RESOLUTION = Size(1067, 600) // minimum size of OCR
@@ -230,18 +230,16 @@ open class CardVerifyActivity : SimpleScanActivity<RequiredCardDetails?>() {
     ) {
         is NetworkResult.Success ->
             result.body.expectedCard?.let { expectedCard ->
-                expectedCard.lastFour?.let { lastFour ->
-                    if (isValidPanLastFour(lastFour)) {
-                        RequiredCardDetails(
-                            getIssuerByDisplayName(expectedCard.issuer),
-                            lastFour,
-                        )
-                    } else {
-                        launch(Dispatchers.Main) {
-                            scanFailure(InvalidCivException("Invalid required card"))
-                        }
-                        null
+                if (expectedCard.lastFour.isNullOrEmpty() || isValidPanLastFour(expectedCard.lastFour)) {
+                    RequiredCardDetails(
+                        getIssuerByDisplayName(expectedCard.issuer),
+                        expectedCard.lastFour,
+                    )
+                } else {
+                    launch(Dispatchers.Main) {
+                        scanFailure(InvalidCivException("Invalid required card"))
                     }
+                    null
                 }
             }
         is NetworkResult.Error -> {
