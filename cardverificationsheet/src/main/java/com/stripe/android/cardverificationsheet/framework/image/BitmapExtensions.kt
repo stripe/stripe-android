@@ -197,6 +197,17 @@ internal fun Bitmap.scale(size: Size, filter: Boolean = false): Bitmap =
     }
 
 /**
+ * Constrain a bitmap to a given size, while maintaining its original aspect ratio.
+ */
+internal fun Bitmap.constrainToSize(size: Size, filter: Boolean = false): Bitmap =
+    if (size.width >= width && size.height >= height) {
+        this
+    } else {
+        val newSize = this.size().scaleAndCenterWithin(size).size()
+        Bitmap.createScaledBitmap(this, newSize.width, newSize.height, filter)
+    }
+
+/**
  * Convert a [Bitmap] to an [MLImage] for use in ML models.
  */
 @CheckResult

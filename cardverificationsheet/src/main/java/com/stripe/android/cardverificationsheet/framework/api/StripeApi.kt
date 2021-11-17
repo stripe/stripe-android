@@ -18,18 +18,17 @@ import com.stripe.android.cardverificationsheet.framework.api.dto.VerificationFr
 import com.stripe.android.cardverificationsheet.framework.api.dto.VerifyFramesRequest
 import com.stripe.android.cardverificationsheet.framework.api.dto.VerifyFramesResult
 import com.stripe.android.cardverificationsheet.framework.api.dto.ViewFinderMargins
+import com.stripe.android.cardverificationsheet.framework.image.constrainToSize
 import com.stripe.android.cardverificationsheet.framework.image.crop
-import com.stripe.android.cardverificationsheet.framework.image.scale
 import com.stripe.android.cardverificationsheet.framework.image.size
 import com.stripe.android.cardverificationsheet.framework.image.toWebP
 import com.stripe.android.cardverificationsheet.framework.ml.getLoadedModelVersions
 import com.stripe.android.cardverificationsheet.framework.util.AppDetails
 import com.stripe.android.cardverificationsheet.framework.util.Device
 import com.stripe.android.cardverificationsheet.framework.util.b64Encode
-import com.stripe.android.cardverificationsheet.framework.util.centerScaled
 import com.stripe.android.cardverificationsheet.framework.util.move
 import com.stripe.android.cardverificationsheet.framework.util.scaleAndCenterWithin
-import com.stripe.android.cardverificationsheet.framework.util.toRect
+import com.stripe.android.cardverificationsheet.payment.determineViewFinderCrop
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -94,31 +93,29 @@ internal suspend fun uploadSavedFrames(
     civSecret: String,
     savedFrames: Collection<SavedFrame>,
 ) = withContext(Dispatchers.IO) {
-    val requiredImageWidth = 1080
-    val requiredImageHeight = 1920
+    val maxImageWidth = 1080
+    val maxImageHeight = 1920
 
     val verificationFramesData = savedFrames.map { savedFrame ->
-        val cropRect = Size(requiredImageWidth, requiredImageHeight)
+        val cropRect = Size(maxImageWidth, maxImageHeight)
             .scaleAndCenterWithin(savedFrame.frame.cameraPreviewImage.image.size())
 
-        val base64ImageData = b64Encode(
+        val b64ImageData = b64Encode(
             savedFrame.frame.cameraPreviewImage.image
                 .crop(cropRect)
-                .scale(Size(requiredImageWidth, requiredImageHeight))
+                .constrainToSize(Size(maxImageWidth, maxImageHeight))
                 .toWebP()
         )
 
-        val viewFinderRect = savedFrame.frame.cameraPreviewImage.image
-            .size()
-            .toRect()
+        val viewFinderRect = determineViewFinderCrop(
+            cameraPreviewImageSize = savedFrame.frame.cameraPreviewImage.image.size(),
+            previewBounds = savedFrame.frame.cameraPreviewImage.viewBounds,
+            viewFinder = savedFrame.frame.cardFinder,
+        )
             .move(-cropRect.left, -cropRect.top)
-            .centerScaled(
-                scaleX = requiredImageWidth.toFloat() / cropRect.width(),
-                scaleY = requiredImageHeight.toFloat() / cropRect.height(),
-            )
 
         VerificationFrameData(
-            imageData = base64ImageData,
+            imageData = b64ImageData,
             viewFinderMargins = ViewFinderMargins.fromRect(viewFinderRect)
         )
     }
