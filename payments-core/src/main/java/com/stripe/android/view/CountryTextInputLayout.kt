@@ -132,6 +132,8 @@ class CountryTextInputLayout @JvmOverloads internal constructor(
                 val countryEntered = countryAutocomplete.text.toString()
                 CountryUtils.getCountryCodeByName(countryEntered, getLocale())?.let {
                     updateUiForCountryEntered(it)
+                } ?: CountryUtils.getCountryByCode(CountryCode.create(countryEntered), getLocale())?.let {
+                    updateUiForCountryEntered(CountryCode.create(countryEntered))
                 }
             }
         }

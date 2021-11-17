@@ -4,7 +4,7 @@ plugins {
     id 'kotlin-kapt'
 //    id 'org.jetbrains.dokka'
     id "org.jetbrains.kotlin.plugin.parcelize"
-    id 'org.jetbrains.kotlin.plugin.serialization' version '1.5.31'
+    id 'org.jetbrains.kotlin.plugin.serialization' version '1.6.0'
 }
 
 android {
@@ -82,7 +82,7 @@ configurations {
 }
 
 dependencies {
-    implementation "org.tensorflow:tensorflow-lite:2.6.0"
+    implementation "org.tensorflow:tensorflow-lite:2.7.0"
 
     implementation libraries.androidx.appcompat
     implementation libraries.androidx.constraintlayout
