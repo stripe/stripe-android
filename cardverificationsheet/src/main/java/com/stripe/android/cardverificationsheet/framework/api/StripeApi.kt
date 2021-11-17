@@ -16,16 +16,20 @@ import com.stripe.android.cardverificationsheet.framework.api.dto.StatsPayload
 import com.stripe.android.cardverificationsheet.framework.api.dto.StripeServerErrorResponse
 import com.stripe.android.cardverificationsheet.framework.api.dto.VerificationFrameData
 import com.stripe.android.cardverificationsheet.framework.api.dto.VerifyFramesRequest
-import com.stripe.android.cardverificationsheet.framework.image.cropCenter
+import com.stripe.android.cardverificationsheet.framework.api.dto.VerifyFramesResult
+import com.stripe.android.cardverificationsheet.framework.api.dto.ViewFinderMargins
+import com.stripe.android.cardverificationsheet.framework.image.crop
 import com.stripe.android.cardverificationsheet.framework.image.scale
-import com.stripe.android.cardverificationsheet.framework.image.scaleAndCrop
+import com.stripe.android.cardverificationsheet.framework.image.size
 import com.stripe.android.cardverificationsheet.framework.image.toWebP
 import com.stripe.android.cardverificationsheet.framework.ml.getLoadedModelVersions
 import com.stripe.android.cardverificationsheet.framework.util.AppDetails
 import com.stripe.android.cardverificationsheet.framework.util.Device
 import com.stripe.android.cardverificationsheet.framework.util.b64Encode
-import com.stripe.android.cardverificationsheet.payment.cropCameraPreviewToViewFinder
-import com.stripe.android.cardverificationsheet.payment.ml.SSDOcr
+import com.stripe.android.cardverificationsheet.framework.util.centerScaled
+import com.stripe.android.cardverificationsheet.framework.util.move
+import com.stripe.android.cardverificationsheet.framework.util.scaleAndCenterWithin
+import com.stripe.android.cardverificationsheet.framework.util.toRect
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -90,33 +94,32 @@ internal suspend fun uploadSavedFrames(
     civSecret: String,
     savedFrames: Collection<SavedFrame>,
 ) = withContext(Dispatchers.IO) {
+    val requiredImageWidth = 1080
+    val requiredImageHeight = 1920
+
     val verificationFramesData = savedFrames.map { savedFrame ->
-        val base64FullImageData = b64Encode(
+        val cropRect = Size(requiredImageWidth, requiredImageHeight)
+            .scaleAndCenterWithin(savedFrame.frame.cameraPreviewImage.image.size())
+
+        val base64ImageData = b64Encode(
             savedFrame.frame.cameraPreviewImage.image
-                .scaleAndCrop(Size(360, 720))
-                .toWebP()
-        )
-        val base64CroppedCenterImageData = b64Encode(
-            savedFrame.frame.cameraPreviewImage.image
-                .cropCenter(Size(224, 224))
-                .toWebP()
-        )
-        val base64OcrImageData = b64Encode(
-            cropCameraPreviewToViewFinder(
-                savedFrame.frame.cameraPreviewImage.image,
-                savedFrame.frame.cameraPreviewImage.viewBounds,
-                savedFrame.frame.cardFinder
-            )
-                .scale(SSDOcr.Factory.TRAINED_IMAGE_SIZE)
+                .crop(cropRect)
+                .scale(Size(requiredImageWidth, requiredImageHeight))
                 .toWebP()
         )
 
+        val viewFinderRect = savedFrame.frame.cameraPreviewImage.image
+            .size()
+            .toRect()
+            .move(-cropRect.left, -cropRect.top)
+            .centerScaled(
+                scaleX = requiredImageWidth.toFloat() / cropRect.width(),
+                scaleY = requiredImageHeight.toFloat() / cropRect.height(),
+            )
+
         VerificationFrameData(
-            fullImageData = base64FullImageData,
-            croppedCenterImageData = base64CroppedCenterImageData,
-            ocrImageData = base64OcrImageData,
-            fullImageOriginalWidth = savedFrame.frame.cameraPreviewImage.image.width,
-            fullImageOriginalHeight = savedFrame.frame.cameraPreviewImage.image.height,
+            imageData = base64ImageData,
+            viewFinderMargins = ViewFinderMargins.fromRect(viewFinderRect)
         )
     }
 
@@ -133,7 +136,7 @@ internal suspend fun uploadSavedFrames(
             ),
         ),
         requestSerializer = VerifyFramesRequest.serializer(),
-        responseSerializer = VerifyFramesRequest.serializer(),
+        responseSerializer = VerifyFramesResult.serializer(),
         errorSerializer = StripeServerErrorResponse.serializer(),
     )
 }

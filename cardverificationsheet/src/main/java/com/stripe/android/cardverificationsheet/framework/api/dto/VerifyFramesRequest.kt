@@ -1,16 +1,31 @@
 package com.stripe.android.cardverificationsheet.framework.api.dto
 
+import android.graphics.Rect
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
 internal data class VerificationFrameData(
-    @SerialName("full_image_data") val fullImageData: String,
-    @SerialName("cropped_center_image_data") val croppedCenterImageData: String,
-    @SerialName("ocr_image_data") val ocrImageData: String,
-    @SerialName("full_image_original_width") val fullImageOriginalWidth: Int,
-    @SerialName("full_image_original_height") val fullImageOriginalHeight: Int,
+    @SerialName("image_data") val imageData: String,
+    @SerialName("view_finder_margins") val viewFinderMargins: ViewFinderMargins,
 )
+
+@Serializable
+internal data class ViewFinderMargins(
+    @SerialName("left") val left: Int,
+    @SerialName("top") val top: Int,
+    @SerialName("right") val right: Int,
+    @SerialName("bottom") val bottom: Int,
+) {
+    companion object {
+        fun fromRect(rect: Rect) = ViewFinderMargins(
+            left = rect.left,
+            top = rect.top,
+            right = rect.right,
+            bottom = rect.bottom,
+        )
+    }
+}
 
 @Serializable
 internal data class VerifyFramesRequest(
@@ -19,4 +34,4 @@ internal data class VerifyFramesRequest(
 )
 
 @Serializable
-internal class VerifyFramesResult()
+internal class VerifyFramesResult
