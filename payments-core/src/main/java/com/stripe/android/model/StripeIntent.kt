@@ -3,6 +3,7 @@ package com.stripe.android.model
 import android.net.Uri
 import android.os.Parcelable
 import androidx.annotation.RestrictTo
+import com.stripe.android.core.model.StripeModel
 import com.stripe.android.utils.StripeUrlUtils
 import kotlinx.parcelize.Parcelize
 

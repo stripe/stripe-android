@@ -1,7 +1,7 @@
 package com.stripe.android.view.i18n
 
 import android.app.Application
-import com.stripe.android.StripeError
+import com.stripe.android.core.StripeError
 import com.stripe.android.view.i18n.TranslatorManager.setErrorMessageTranslator
 
 /**

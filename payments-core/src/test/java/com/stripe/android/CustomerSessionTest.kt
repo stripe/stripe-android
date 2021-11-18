@@ -1,7 +1,8 @@
 package com.stripe.android
 
 import androidx.test.core.app.ApplicationProvider
-import com.stripe.android.exception.APIException
+import com.stripe.android.core.StripeError
+import com.stripe.android.core.exception.APIException
 import com.stripe.android.model.Customer
 import com.stripe.android.model.CustomerFixtures
 import com.stripe.android.model.ListPaymentMethodsParams

@@ -1,6 +1,7 @@
 package com.stripe.android.model
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.model.StripeModel
 import com.stripe.android.model.parsers.CardJsonParser
 import org.json.JSONObject
 import kotlin.test.BeforeTest

@@ -1,8 +1,8 @@
 package com.stripe.android.paymentsheet.analytics
 
+import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
-import com.stripe.android.payments.core.injection.IOContext
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import kotlinx.coroutines.CoroutineScope

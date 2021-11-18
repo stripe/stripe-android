@@ -6,7 +6,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.android.gms.common.api.Status
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
-import com.stripe.android.Logger
+import com.stripe.android.core.Logger
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.PaymentIntentResult
 import com.stripe.android.StripeIntentResult

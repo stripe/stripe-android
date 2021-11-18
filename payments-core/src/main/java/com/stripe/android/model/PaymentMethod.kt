@@ -3,6 +3,7 @@ package com.stripe.android.model
 import android.os.Parcelable
 import androidx.annotation.RestrictTo
 import com.stripe.android.ObjectBuilder
+import com.stripe.android.core.model.StripeModel
 import com.stripe.android.model.parsers.PaymentMethodJsonParser
 import com.stripe.android.model.wallets.Wallet
 import kotlinx.parcelize.Parcelize

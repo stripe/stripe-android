@@ -1,6 +1,7 @@
 package com.stripe.android.exception
 
-import com.stripe.android.StripeError
+import com.stripe.android.core.StripeError
+import com.stripe.android.core.exception.StripeException
 import java.net.HttpURLConnection
 
 /**

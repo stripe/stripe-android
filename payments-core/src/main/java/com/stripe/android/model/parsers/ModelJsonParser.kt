@@ -1,6 +1,6 @@
 package com.stripe.android.model.parsers
 
-import com.stripe.android.model.StripeModel
+import com.stripe.android.core.model.StripeModel
 import org.json.JSONArray
 import org.json.JSONObject
 

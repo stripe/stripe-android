@@ -1,7 +1,7 @@
 package com.stripe.android.view.i18n
 
-import com.stripe.android.StripeError
 import com.stripe.android.StripeErrorFixtures
+import com.stripe.android.core.StripeError
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals

@@ -4,13 +4,13 @@ import android.app.Application
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
-import com.stripe.android.Logger
 import com.stripe.android.StripeIntentResult
+import com.stripe.android.core.Logger
+import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.exception.InvalidRequestException
 import com.stripe.android.core.networking.AnalyticsRequest
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.RetryDelaySupplier
-import com.stripe.android.exception.APIException
 import com.stripe.android.model.Stripe3ds2AuthResult
 import com.stripe.android.model.Stripe3ds2AuthResultFixtures
 import com.stripe.android.networking.AbsFakeStripeRepository

@@ -9,7 +9,7 @@ import com.stripe.android.CustomerSession
 import com.stripe.android.PaymentSession
 import com.stripe.android.PaymentSessionConfig
 import com.stripe.android.PaymentSessionData
-import com.stripe.android.StripeError
+import com.stripe.android.core.StripeError
 import com.stripe.android.model.Customer
 import com.stripe.android.model.ShippingInformation
 import com.stripe.android.model.ShippingMethod

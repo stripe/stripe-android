@@ -18,7 +18,7 @@ import com.stripe.android.CustomerSession
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.PaymentSession
 import com.stripe.android.R
-import com.stripe.android.exception.StripeException
+import com.stripe.android.core.exception.StripeException
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
