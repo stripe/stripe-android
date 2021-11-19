@@ -6,7 +6,7 @@ import com.stripe.android.cardverificationsheet.framework.MachineState
 import com.stripe.android.cardverificationsheet.framework.time.Clock
 import com.stripe.android.cardverificationsheet.framework.util.ItemCounter
 import com.stripe.android.cardverificationsheet.payment.card.CardIssuer
-import com.stripe.android.cardverificationsheet.payment.card.CardMatch
+import com.stripe.android.cardverificationsheet.payment.card.CardMatchResult
 import com.stripe.android.cardverificationsheet.payment.card.RequiresMatchingCard
 
 internal sealed class MainLoopState(
@@ -26,21 +26,21 @@ internal sealed class MainLoopState(
         override suspend fun consumeTransition(
             transition: MainLoopAnalyzer.Prediction,
         ): MainLoopState = when (compareToRequiredCard(transition.ocr?.pan)) {
-            is CardMatch.NoPan -> this
-            is CardMatch.Mismatch ->
+            is CardMatchResult.NoPan -> this
+            is CardMatchResult.Mismatch ->
                 WrongCard(
                     pan = transition.ocr?.pan ?: "",
                     requiredCardIssuer = requiredCardIssuer,
                     requiredLastFour = requiredLastFour,
                 )
-            is CardMatch.Match ->
+            is CardMatchResult.Match ->
                 OcrFound(
                     pan = transition.ocr?.pan ?: "",
                     isCardVisible = transition.isCardVisible,
                     requiredCardIssuer = requiredCardIssuer,
                     requiredLastFour = requiredLastFour,
                 )
-            is CardMatch.NoRequiredCard ->
+            is CardMatchResult.NoRequiredCard ->
                 OcrFound(
                     pan = transition.ocr?.pan ?: "",
                     isCardVisible = transition.isCardVisible,
@@ -100,7 +100,7 @@ internal sealed class MainLoopState(
             val cardMatch = compareToRequiredCard(pan)
 
             return when {
-                cardMatch is CardMatch.Mismatch ->
+                cardMatch is CardMatchResult.Mismatch ->
                     WrongCard(
                         pan = pan,
                         requiredCardIssuer = requiredCardIssuer,
@@ -187,7 +187,7 @@ internal sealed class MainLoopState(
             val cardMatch = compareToRequiredCard(pan)
 
             return when {
-                cardMatch is CardMatch.Mismatch ->
+                cardMatch is CardMatchResult.Mismatch ->
                     WrongCard(
                         pan = pan,
                         requiredCardIssuer = requiredCardIssuer,
@@ -222,20 +222,20 @@ internal sealed class MainLoopState(
             val cardMatch = compareToRequiredCard(pan)
 
             return when {
-                cardMatch is CardMatch.Mismatch ->
+                cardMatch is CardMatchResult.Mismatch ->
                     WrongCard(
                         pan = transition.ocr?.pan ?: "",
                         requiredCardIssuer = requiredCardIssuer,
                         requiredLastFour = requiredLastFour,
                     )
-                cardMatch is CardMatch.Match ->
+                cardMatch is CardMatchResult.Match ->
                     OcrFound(
                         pan = transition.ocr?.pan ?: "",
                         isCardVisible = transition.isCardVisible,
                         requiredCardIssuer = requiredCardIssuer,
                         requiredLastFour = requiredLastFour,
                     )
-                cardMatch is CardMatch.NoRequiredCard ->
+                cardMatch is CardMatchResult.NoRequiredCard ->
                     OcrFound(
                         pan = transition.ocr?.pan ?: "",
                         isCardVisible = transition.isCardVisible,

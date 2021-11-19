@@ -12,28 +12,28 @@ internal interface RequiresMatchingCard {
      * Returns whether the card matches the [requiredCardIssuer] and/or [requiredLastFour], or if
      * there is no required card.
      */
-    fun compareToRequiredCard(pan: String?): CardMatch {
+    fun compareToRequiredCard(pan: String?): CardMatchResult {
         /*
          * TODO: Use contracts once they're supported. [CardMatch.Match], [CardMatch.Mismatch], and
          * [CardMatch.NoRequiredCard] guarantees that pan != null
          */
-        if (pan.isNullOrEmpty()) return CardMatch.NoPan
-        if (requiredLastFour == null && requiredCardIssuer == null) return CardMatch.NoRequiredCard
+        if (pan.isNullOrEmpty()) return CardMatchResult.NoPan
+        if (requiredLastFour == null && requiredCardIssuer == null) return CardMatchResult.NoRequiredCard
 
         val lastFourMatches = requiredLastFour != null && pan.lastFour() == requiredLastFour
         val cardIssuerMatches =
             requiredCardIssuer != null && getCardIssuer(pan) == requiredCardIssuer
 
         return when {
-            lastFourMatches && cardIssuerMatches -> CardMatch.Match
-            else -> CardMatch.Mismatch
+            lastFourMatches && cardIssuerMatches -> CardMatchResult.Match
+            else -> CardMatchResult.Mismatch
         }
     }
 }
 
-sealed interface CardMatch {
-    object NoRequiredCard : CardMatch
-    object Match : CardMatch
-    object Mismatch : CardMatch
-    object NoPan : CardMatch
+sealed interface CardMatchResult {
+    object NoRequiredCard : CardMatchResult
+    object Match : CardMatchResult
+    object Mismatch : CardMatchResult
+    object NoPan : CardMatchResult
 }

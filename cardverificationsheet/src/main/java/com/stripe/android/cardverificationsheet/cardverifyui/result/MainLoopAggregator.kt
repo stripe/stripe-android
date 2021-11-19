@@ -9,7 +9,7 @@ import com.stripe.android.cardverificationsheet.framework.AggregateResultListene
 import com.stripe.android.cardverificationsheet.framework.ResultAggregator
 import com.stripe.android.cardverificationsheet.framework.util.FrameSaver
 import com.stripe.android.cardverificationsheet.payment.card.CardIssuer
-import com.stripe.android.cardverificationsheet.payment.card.CardMatch
+import com.stripe.android.cardverificationsheet.payment.card.CardMatchResult
 import com.stripe.android.cardverificationsheet.payment.card.RequiresMatchingCard
 import com.stripe.android.cardverificationsheet.payment.card.isValidPanLastFour
 import kotlinx.coroutines.runBlocking
@@ -74,9 +74,9 @@ internal class MainLoopAggregator(
             val matchesCard = compareToRequiredCard(metaData.analyzerResult.ocr?.pan)
 
             return when {
-                matchesCard is CardMatch.Match || matchesCard is CardMatch.NoRequiredCard ->
+                matchesCard is CardMatchResult.Match || matchesCard is CardMatchResult.NoRequiredCard ->
                     SavedFrameType(hasCard = hasCard, hasOcr = true)
-                matchesCard is CardMatch.NoPan && hasCard ->
+                matchesCard is CardMatchResult.NoPan && hasCard ->
                     SavedFrameType(hasCard = hasCard, hasOcr = false)
                 else -> null
             }

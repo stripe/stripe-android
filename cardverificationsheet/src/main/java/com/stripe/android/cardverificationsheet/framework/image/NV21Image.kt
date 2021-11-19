@@ -1,5 +1,18 @@
 @file:Suppress("deprecation")
-/* RenderScript is deprecated, but alternatives are not yet well supported */
+/*
+ * RenderScript is deprecated, but alternatives are not yet well supported.
+ *
+ * According to the android developer blog, We should be maintaining two code paths going forward to
+ * keep taking advantage of the device GPU for image processing. Native vulkan is only supported on
+ * API 29+.
+ *
+ * https://android-developers.googleblog.com/2021/04/android-gpu-compute-going-forward.html
+ *
+ * More investigation is needed here to determine what the impact of using the CPU only
+ * renderscript-intrinsics-replacement-toolkit vs. native vulkan is.
+ *
+ * https://github.com/android/renderscript-intrinsics-replacement-toolkit/blob/main/renderscript-toolkit/src/main/java/com/google/android/renderscript/Toolkit.kt
+ */
 package com.stripe.android.cardverificationsheet.framework.image
 
 import android.content.Context
