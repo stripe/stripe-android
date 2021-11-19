@@ -21,6 +21,7 @@ import com.stripe.android.cardverificationsheet.framework.api.dto.ViewFinderMarg
 import com.stripe.android.cardverificationsheet.framework.image.constrainToSize
 import com.stripe.android.cardverificationsheet.framework.image.crop
 import com.stripe.android.cardverificationsheet.framework.image.size
+import com.stripe.android.cardverificationsheet.framework.image.toJpeg
 import com.stripe.android.cardverificationsheet.framework.image.toWebP
 import com.stripe.android.cardverificationsheet.framework.ml.getLoadedModelVersions
 import com.stripe.android.cardverificationsheet.framework.util.AppDetails
@@ -104,7 +105,7 @@ internal suspend fun uploadSavedFrames(
             savedFrame.frame.cameraPreviewImage.image
                 .crop(cropRect)
                 .constrainToSize(Size(maxImageWidth, maxImageHeight))
-                .toWebP()
+                .toJpeg()  // ideally, this would be WebP, but python can't decode android WebPs
         )
 
         val viewFinderRect = determineViewFinderCrop(
