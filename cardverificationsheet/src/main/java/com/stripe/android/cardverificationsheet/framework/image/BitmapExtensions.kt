@@ -32,6 +32,14 @@ internal fun Bitmap.toWebP(): ByteArray =
         it.toByteArray()
     }
 
+@CheckResult
+internal fun Bitmap.toJpeg(): ByteArray =
+    ByteArrayOutputStream().use {
+        this.compress(Bitmap.CompressFormat.JPEG, 92, it)
+        it.flush()
+        it.toByteArray()
+    }
+
 /**
  * Crop a [Bitmap] to a given [Rect]. The crop must have a positive area and must be contained
  * within the bounds of the source [Bitmap].
