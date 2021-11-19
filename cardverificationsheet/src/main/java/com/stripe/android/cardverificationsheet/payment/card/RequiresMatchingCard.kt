@@ -18,7 +18,9 @@ internal interface RequiresMatchingCard {
          * [CardMatch.NoRequiredCard] guarantees that pan != null
          */
         if (pan.isNullOrEmpty()) return CardMatchResult.NoPan
-        if (requiredLastFour == null && requiredCardIssuer == null) return CardMatchResult.NoRequiredCard
+        if (requiredLastFour == null && requiredCardIssuer == null) {
+            return CardMatchResult.NoRequiredCard
+        }
 
         val lastFourMatches = requiredLastFour != null && pan.lastFour() == requiredLastFour
         val cardIssuerMatches =

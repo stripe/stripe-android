@@ -884,27 +884,27 @@ public final class com/stripe/android/cardverificationsheet/payment/card/CardIss
 	public static final field INSTANCE Lcom/stripe/android/cardverificationsheet/payment/card/CardIssuer$Visa;
 }
 
-public abstract interface class com/stripe/android/cardverificationsheet/payment/card/CardMatch {
+public abstract interface class com/stripe/android/cardverificationsheet/payment/card/CardMatchResult {
 }
 
-public final class com/stripe/android/cardverificationsheet/payment/card/CardMatch$Match : com/stripe/android/cardverificationsheet/payment/card/CardMatch {
+public final class com/stripe/android/cardverificationsheet/payment/card/CardMatchResult$Match : com/stripe/android/cardverificationsheet/payment/card/CardMatchResult {
 	public static final field $stable I
-	public static final field INSTANCE Lcom/stripe/android/cardverificationsheet/payment/card/CardMatch$Match;
+	public static final field INSTANCE Lcom/stripe/android/cardverificationsheet/payment/card/CardMatchResult$Match;
 }
 
-public final class com/stripe/android/cardverificationsheet/payment/card/CardMatch$Mismatch : com/stripe/android/cardverificationsheet/payment/card/CardMatch {
+public final class com/stripe/android/cardverificationsheet/payment/card/CardMatchResult$Mismatch : com/stripe/android/cardverificationsheet/payment/card/CardMatchResult {
 	public static final field $stable I
-	public static final field INSTANCE Lcom/stripe/android/cardverificationsheet/payment/card/CardMatch$Mismatch;
+	public static final field INSTANCE Lcom/stripe/android/cardverificationsheet/payment/card/CardMatchResult$Mismatch;
 }
 
-public final class com/stripe/android/cardverificationsheet/payment/card/CardMatch$NoPan : com/stripe/android/cardverificationsheet/payment/card/CardMatch {
+public final class com/stripe/android/cardverificationsheet/payment/card/CardMatchResult$NoPan : com/stripe/android/cardverificationsheet/payment/card/CardMatchResult {
 	public static final field $stable I
-	public static final field INSTANCE Lcom/stripe/android/cardverificationsheet/payment/card/CardMatch$NoPan;
+	public static final field INSTANCE Lcom/stripe/android/cardverificationsheet/payment/card/CardMatchResult$NoPan;
 }
 
-public final class com/stripe/android/cardverificationsheet/payment/card/CardMatch$NoRequiredCard : com/stripe/android/cardverificationsheet/payment/card/CardMatch {
+public final class com/stripe/android/cardverificationsheet/payment/card/CardMatchResult$NoRequiredCard : com/stripe/android/cardverificationsheet/payment/card/CardMatchResult {
 	public static final field $stable I
-	public static final field INSTANCE Lcom/stripe/android/cardverificationsheet/payment/card/CardMatch$NoRequiredCard;
+	public static final field INSTANCE Lcom/stripe/android/cardverificationsheet/payment/card/CardMatchResult$NoRequiredCard;
 }
 
 public final class com/stripe/android/cardverificationsheet/payment/card/LengthPanValidator : com/stripe/android/cardverificationsheet/payment/card/PanValidator {

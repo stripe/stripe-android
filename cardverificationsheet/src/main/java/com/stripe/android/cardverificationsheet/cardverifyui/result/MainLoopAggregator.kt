@@ -74,7 +74,9 @@ internal class MainLoopAggregator(
             val matchesCard = compareToRequiredCard(metaData.analyzerResult.ocr?.pan)
 
             return when {
-                matchesCard is CardMatchResult.Match || matchesCard is CardMatchResult.NoRequiredCard ->
+                matchesCard is CardMatchResult.Match ||
+                    matchesCard is CardMatchResult.NoRequiredCard
+                ->
                     SavedFrameType(hasCard = hasCard, hasOcr = true)
                 matchesCard is CardMatchResult.NoPan && hasCard ->
                     SavedFrameType(hasCard = hasCard, hasOcr = false)
