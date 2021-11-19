@@ -6,7 +6,6 @@ import androidx.test.platform.app.InstrumentationRegistry
 import com.stripe.android.cardverificationsheet.framework.ResourceFetcher
 import com.stripe.android.cardverificationsheet.framework.image.size
 import com.stripe.android.cardverificationsheet.framework.util.toRect
-import com.stripe.android.cardverificationsheet.payment.card.CardIssuer
 import com.stripe.android.cardverificationsheet.test.R
 import kotlinx.coroutines.runBlocking
 import org.junit.Test
@@ -46,15 +45,12 @@ class SSDOcrTest {
                 bitmap,
                 bitmap.size().toRect(),
                 bitmap.size().toRect(),
-                CardIssuer.DinersClub,
-                "1104",
             ),
             Unit
         )
         assertNotNull(prediction)
 
-        // card number is "3023334877861104"
-        assertEquals(SSDOcr.OcrOutcome.Match, prediction.outcome)
+        assertEquals("3023334877861104", prediction.pan)
     }
 
     /**
@@ -85,15 +81,12 @@ class SSDOcrTest {
                 bitmap,
                 bitmap.size().toRect(),
                 bitmap.size().toRect(),
-                CardIssuer.Visa,
-                "4242",
             ),
             Unit
         )
         assertNotNull(prediction)
 
-        // card number is "4242424242424242"
-        assertEquals(SSDOcr.OcrOutcome.Match, prediction.outcome)
+        assertEquals("4242424242424242", prediction.pan)
     }
 
     /**
@@ -119,33 +112,15 @@ class SSDOcrTest {
         ).newInstance()
         assertNotNull(model)
 
-        val prediction1 = model.analyze(
+        val prediction = model.analyze(
             SSDOcr.cameraPreviewToInput(
                 bitmap,
                 bitmap.size().toRect(),
                 bitmap.size().toRect(),
-                CardIssuer.DinersClub,
-                "1104",
-            ),
-            Unit
-        )
-        val prediction2 = model.analyze(
-            SSDOcr.cameraPreviewToInput(
-                bitmap,
-                bitmap.size().toRect(),
-                bitmap.size().toRect(),
-                CardIssuer.DinersClub,
-                "1234",
             ),
             Unit
         )
 
-        // card number is "3023334877861104"
-
-        assertNotNull(prediction1)
-        assertEquals(SSDOcr.OcrOutcome.Match, prediction1.outcome)
-
-        assertNotNull(prediction2)
-        assertEquals(SSDOcr.OcrOutcome.Mismatch, prediction2.outcome)
+        assertEquals("3023334877861104", prediction.pan)
     }
 }

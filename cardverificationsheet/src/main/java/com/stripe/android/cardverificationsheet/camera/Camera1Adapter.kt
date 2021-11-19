@@ -1,4 +1,18 @@
 @file:Suppress("deprecation")
+/*
+ * camera1 is deprecated, but still our best option for android 5.0
+ *
+ * Camera2 is broken in android API 21. The YUV image it returns is in an incorrect format, which
+ * affects a very limited number of older devices (visible in manual testing on a Samsung Galaxy
+ * Note 3).
+ *
+ * CameraX (which uses camera2 under the hood) still has alpha dependencies, which merchants have
+ * expressed hesitancy about integrating. Once the alpha dependencies are resolved and CameraX has
+ * been tested on API 21 devices, we may choose to swap to that.
+ *
+ * For an implementation of CameraX, see the legacy bouncer code:
+ * https://github.com/getbouncer/cardscan-android/blob/master/scan-camerax/src/main/java/com/getbouncer/scan/camera/extension/CameraAdapterImpl.kt
+ */
 package com.stripe.android.cardverificationsheet.camera
 
 import android.annotation.SuppressLint

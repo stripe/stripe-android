@@ -151,30 +151,27 @@ public final class com/stripe/android/cardverificationsheet/cardverifyui/Require
 public final class com/stripe/android/cardverificationsheet/cardverifyui/VerifyConfig {
 	public static final field $stable I
 	public static final field INSTANCE Lcom/stripe/android/cardverificationsheet/cardverifyui/VerifyConfig;
+	public static final fun getCARD_ONLY_SEARCH_DURATION ()Lcom/stripe/android/cardverificationsheet/framework/time/Duration;
+	public static final fun getDESIRED_CARD_COUNT ()I
 	public static final fun getDESIRED_OCR_AGREEMENT ()I
-	public static final fun getDESIRED_SIDE_COUNT ()I
 	public static final fun getMAX_COMPLETION_LOOP_FRAMES ()I
 	public static final fun getMAX_SAVED_FRAMES_PER_TYPE ()I
-	public static final fun getMINIMUM_PAN_AGREEMENT ()I
-	public static final fun getPAN_AND_CARD_SEARCH_DURATION ()Lcom/stripe/android/cardverificationsheet/framework/time/Duration;
-	public static final fun getPAN_SEARCH_DURATION ()Lcom/stripe/android/cardverificationsheet/framework/time/Duration;
+	public static final fun getNO_CARD_VISIBLE_DURATION ()Lcom/stripe/android/cardverificationsheet/framework/time/Duration;
+	public static final fun getOCR_AND_CARD_SEARCH_DURATION ()Lcom/stripe/android/cardverificationsheet/framework/time/Duration;
+	public static final fun getOCR_ONLY_SEARCH_DURATION ()Lcom/stripe/android/cardverificationsheet/framework/time/Duration;
 	public static final fun getWRONG_CARD_DURATION ()Lcom/stripe/android/cardverificationsheet/framework/time/Duration;
+	public static final fun setCARD_ONLY_SEARCH_DURATION (Lcom/stripe/android/cardverificationsheet/framework/time/Duration;)V
+	public static final fun setDESIRED_CARD_COUNT (I)V
 	public static final fun setDESIRED_OCR_AGREEMENT (I)V
-	public static final fun setDESIRED_SIDE_COUNT (I)V
 	public static final fun setMAX_COMPLETION_LOOP_FRAMES (I)V
 	public static final fun setMAX_SAVED_FRAMES_PER_TYPE (I)V
-	public static final fun setMINIMUM_PAN_AGREEMENT (I)V
-	public static final fun setPAN_AND_CARD_SEARCH_DURATION (Lcom/stripe/android/cardverificationsheet/framework/time/Duration;)V
-	public static final fun setPAN_SEARCH_DURATION (Lcom/stripe/android/cardverificationsheet/framework/time/Duration;)V
+	public static final fun setNO_CARD_VISIBLE_DURATION (Lcom/stripe/android/cardverificationsheet/framework/time/Duration;)V
+	public static final fun setOCR_AND_CARD_SEARCH_DURATION (Lcom/stripe/android/cardverificationsheet/framework/time/Duration;)V
+	public static final fun setOCR_ONLY_SEARCH_DURATION (Lcom/stripe/android/cardverificationsheet/framework/time/Duration;)V
 	public static final fun setWRONG_CARD_DURATION (Lcom/stripe/android/cardverificationsheet/framework/time/Duration;)V
 }
 
 public final class com/stripe/android/cardverificationsheet/cardverifyui/exception/InvalidCivException : java/lang/Exception {
-	public static final field $stable I
-	public fun <init> (Ljava/lang/String;)V
-}
-
-public final class com/stripe/android/cardverificationsheet/cardverifyui/exception/InvalidRequiredCardException : java/lang/Exception {
 	public static final field $stable I
 	public fun <init> (Ljava/lang/String;)V
 }
@@ -723,6 +720,14 @@ public final class com/stripe/android/cardverificationsheet/framework/util/FileK
 	public static final fun assetFileExists (Landroid/content/Context;Ljava/lang/String;)Z
 }
 
+public final class com/stripe/android/cardverificationsheet/framework/util/ItemCounter {
+	public static final field $stable I
+	public fun <init> (Ljava/lang/Object;)V
+	public final fun countItem (Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun getHighestCountItem ()Lkotlin/Pair;
+	public final fun reset (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
 public final class com/stripe/android/cardverificationsheet/framework/util/LayoutKt {
 	public static final fun adjustSizeToAspectRatio (Landroid/util/Size;F)Landroid/util/Size;
 	public static final fun aspectRatio (Landroid/util/Size;)F
@@ -877,6 +882,29 @@ public final class com/stripe/android/cardverificationsheet/payment/card/CardIss
 public final class com/stripe/android/cardverificationsheet/payment/card/CardIssuer$Visa : com/stripe/android/cardverificationsheet/payment/card/CardIssuer {
 	public static final field $stable I
 	public static final field INSTANCE Lcom/stripe/android/cardverificationsheet/payment/card/CardIssuer$Visa;
+}
+
+public abstract interface class com/stripe/android/cardverificationsheet/payment/card/CardMatchResult {
+}
+
+public final class com/stripe/android/cardverificationsheet/payment/card/CardMatchResult$Match : com/stripe/android/cardverificationsheet/payment/card/CardMatchResult {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/stripe/android/cardverificationsheet/payment/card/CardMatchResult$Match;
+}
+
+public final class com/stripe/android/cardverificationsheet/payment/card/CardMatchResult$Mismatch : com/stripe/android/cardverificationsheet/payment/card/CardMatchResult {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/stripe/android/cardverificationsheet/payment/card/CardMatchResult$Mismatch;
+}
+
+public final class com/stripe/android/cardverificationsheet/payment/card/CardMatchResult$NoPan : com/stripe/android/cardverificationsheet/payment/card/CardMatchResult {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/stripe/android/cardverificationsheet/payment/card/CardMatchResult$NoPan;
+}
+
+public final class com/stripe/android/cardverificationsheet/payment/card/CardMatchResult$NoRequiredCard : com/stripe/android/cardverificationsheet/payment/card/CardMatchResult {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/stripe/android/cardverificationsheet/payment/card/CardMatchResult$NoRequiredCard;
 }
 
 public final class com/stripe/android/cardverificationsheet/payment/card/LengthPanValidator : com/stripe/android/cardverificationsheet/payment/card/PanValidator {
