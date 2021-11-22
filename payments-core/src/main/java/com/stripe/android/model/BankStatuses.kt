@@ -1,5 +1,6 @@
 package com.stripe.android.model
 
+import com.stripe.android.core.model.StripeModel
 import com.stripe.android.view.Bank
 import kotlinx.parcelize.Parcelize
 import org.jetbrains.annotations.TestOnly

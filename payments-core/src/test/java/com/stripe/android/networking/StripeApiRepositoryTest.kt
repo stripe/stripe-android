@@ -428,7 +428,7 @@ internal class StripeApiRepositoryTest {
         // This is the one and only test where we actually log something, because
         // we are testing whether or not we log.
         stripeApiRepository.fireAnalyticsRequest(
-            AnalyticsRequest(emptyMap<String, String>())
+            AnalyticsRequest(emptyMap<String, String>(), emptyMap())
         )
     }
 
@@ -768,7 +768,7 @@ internal class StripeApiRepositoryTest {
     fun fireAnalyticsRequest_whenShouldLogRequestIsFalse_doesNotCreateAConnection() {
         val stripeApiRepository = create()
         stripeApiRepository.fireAnalyticsRequest(
-            AnalyticsRequest(emptyMap<String, String>())
+            AnalyticsRequest(emptyMap<String, String>(), emptyMap())
         )
         verifyNoMoreInteractions(stripeNetworkClient)
     }

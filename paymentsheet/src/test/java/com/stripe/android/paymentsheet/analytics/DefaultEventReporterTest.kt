@@ -3,8 +3,8 @@ package com.stripe.android.paymentsheet.analytics
 import androidx.test.core.app.ApplicationProvider
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
-import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
+import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection

@@ -8,7 +8,7 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.MutableLiveData
-import com.stripe.android.Logger
+import com.stripe.android.core.Logger
 
 internal class PaymentAuthWebViewClient(
     private val logger: Logger,

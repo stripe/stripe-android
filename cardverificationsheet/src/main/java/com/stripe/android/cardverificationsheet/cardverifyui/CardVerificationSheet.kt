@@ -7,6 +7,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContract
 import com.stripe.android.cardverificationsheet.cardverifyui.exception.UnknownScanException
+import com.stripe.android.cardverificationsheet.payment.card.ScannedCard
 import com.stripe.android.cardverificationsheet.scanui.CardVerificationSheetCancelationReason
 import kotlinx.parcelize.Parcelize
 
@@ -20,7 +21,9 @@ internal data class CardVerificationSheetParams(
 sealed interface CardVerificationSheetResult : Parcelable {
 
     @Parcelize
-    object Completed : CardVerificationSheetResult
+    data class Completed(
+        val scannedCard: ScannedCard,
+    ) : CardVerificationSheetResult
 
     @Parcelize
     data class Canceled(

@@ -3,6 +3,7 @@ package com.stripe.android.model
 import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.ObjectBuilder
+import com.stripe.android.core.model.StripeModel
 import com.stripe.android.model.parsers.AddressJsonParser
 import kotlinx.parcelize.Parcelize
 import org.json.JSONObject

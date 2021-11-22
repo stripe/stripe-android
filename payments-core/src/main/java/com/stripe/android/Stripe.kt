@@ -9,12 +9,14 @@ import androidx.annotation.UiThread
 import androidx.annotation.WorkerThread
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.APIConnectionException
+import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.exception.InvalidRequestException
-import com.stripe.android.exception.APIException
+import com.stripe.android.core.exception.StripeException
+import com.stripe.android.core.model.StripeModel
 import com.stripe.android.exception.AuthenticationException
 import com.stripe.android.exception.CardException
-import com.stripe.android.exception.StripeException
 import com.stripe.android.model.AccountParams
 import com.stripe.android.model.BankAccount
 import com.stripe.android.model.BankAccountTokenParams
@@ -34,7 +36,6 @@ import com.stripe.android.model.Source
 import com.stripe.android.model.SourceParams
 import com.stripe.android.model.StripeFile
 import com.stripe.android.model.StripeFileParams
-import com.stripe.android.model.StripeModel
 import com.stripe.android.model.Token
 import com.stripe.android.model.TokenParams
 import com.stripe.android.model.WeChatPayNextAction

@@ -20,7 +20,7 @@ import kotlin.math.max
 import kotlin.math.min
 
 @CheckResult
-internal fun Bitmap.toWebP(): ByteArray {
+internal fun Bitmap.toWebP(): ByteArray =
     ByteArrayOutputStream().use {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             this.compress(Bitmap.CompressFormat.WEBP_LOSSY, 92, it)
@@ -28,9 +28,9 @@ internal fun Bitmap.toWebP(): ByteArray {
             @Suppress("deprecation")
             this.compress(Bitmap.CompressFormat.WEBP, 92, it)
         }
-        return@toWebP it.toByteArray()
+        it.flush()
+        it.toByteArray()
     }
-}
 
 /**
  * Crop a [Bitmap] to a given [Rect]. The crop must have a positive area and must be contained

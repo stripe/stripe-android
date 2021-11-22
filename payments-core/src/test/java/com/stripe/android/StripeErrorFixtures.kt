@@ -1,5 +1,6 @@
 package com.stripe.android
 
+import com.stripe.android.core.StripeError
 import com.stripe.android.model.StripeErrorJsonParser
 import org.json.JSONObject
 

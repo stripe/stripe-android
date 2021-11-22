@@ -7,7 +7,7 @@ import androidx.annotation.RestrictTo
 import androidx.core.os.bundleOf
 import com.stripe.android.PaymentController
 import com.stripe.android.StripeIntentResult
-import com.stripe.android.exception.StripeException
+import com.stripe.android.core.exception.StripeException
 import com.stripe.android.model.Source
 import kotlinx.parcelize.Parceler
 import kotlinx.parcelize.Parcelize

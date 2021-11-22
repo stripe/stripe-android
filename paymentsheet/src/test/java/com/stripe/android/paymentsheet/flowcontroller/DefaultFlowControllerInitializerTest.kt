@@ -1,7 +1,7 @@
 package com.stripe.android.paymentsheet.flowcontroller
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.Logger
+import com.stripe.android.core.Logger
 import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures

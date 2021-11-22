@@ -36,6 +36,9 @@ import com.stripe.android.paymentsheet.forms.P24Form
 import com.stripe.android.paymentsheet.forms.P24ParamKey
 import com.stripe.android.paymentsheet.forms.P24Requirement
 import com.stripe.android.paymentsheet.forms.PaymentMethodRequirements
+import com.stripe.android.paymentsheet.forms.PaypalForm
+import com.stripe.android.paymentsheet.forms.PaypalParamKey
+import com.stripe.android.paymentsheet.forms.PaypalRequirement
 import com.stripe.android.paymentsheet.forms.Requirement
 import com.stripe.android.paymentsheet.forms.SepaDebitForm
 import com.stripe.android.paymentsheet.forms.SepaDebitParamKey
@@ -147,6 +150,14 @@ internal enum class SupportedPaymentMethod(
         KlarnaRequirement,
         KlarnaParamKey,
         KlarnaForm
+    ),
+    PayPal(
+        PaymentMethod.Type.PayPal,
+        R.string.stripe_paymentsheet_payment_method_paypal,
+        R.drawable.stripe_ic_paymentsheet_pm_paypal,
+        PaypalRequirement,
+        PaypalParamKey,
+        PaypalForm
     );
 
     /**

@@ -7,6 +7,7 @@ import com.stripe.android.ApiVersion
 import com.stripe.android.AppInfo
 import com.stripe.android.Stripe
 import com.stripe.android.core.exception.InvalidRequestException
+import com.stripe.android.core.networking.QueryStringFactory
 import com.stripe.android.core.networking.StripeRequest
 import com.stripe.android.payments.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.payments.core.injection.STRIPE_ACCOUNT_ID

@@ -7,6 +7,8 @@
     <string name="stripe_paymentsheet_payment_method_eps">EPS</string>
     <string name="stripe_paymentsheet_payment_method_p24">Przelewy24</string>
     <string name="stripe_paymentsheet_payment_method_giropay">Giropay</string>
+    <string name="stripe_paymentsheet_payment_method_klarna">Klarna</string>
+    <string name="stripe_paymentsheet_payment_method_paypal">PayPal</string>
 
     <string name="paymentsheet_payment_method_item_card_number">····%1$s</string>
 

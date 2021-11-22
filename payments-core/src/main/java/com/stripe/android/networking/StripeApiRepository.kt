@@ -6,12 +6,16 @@ import com.stripe.android.ApiVersion
 import com.stripe.android.AppInfo
 import com.stripe.android.DefaultFraudDetectionDataRepository
 import com.stripe.android.FraudDetectionDataRepository
-import com.stripe.android.Logger
 import com.stripe.android.Stripe
 import com.stripe.android.StripeApiBeta
 import com.stripe.android.cards.Bin
+import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.APIConnectionException
+import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.exception.InvalidRequestException
+import com.stripe.android.core.exception.StripeException
+import com.stripe.android.core.injection.IOContext
+import com.stripe.android.core.model.StripeModel
 import com.stripe.android.core.networking.AnalyticsRequest
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
@@ -21,12 +25,10 @@ import com.stripe.android.core.networking.RequestId
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.networking.StripeResponse
 import com.stripe.android.core.networking.responseJson
-import com.stripe.android.exception.APIException
 import com.stripe.android.exception.AuthenticationException
 import com.stripe.android.exception.CardException
 import com.stripe.android.exception.PermissionException
 import com.stripe.android.exception.RateLimitException
-import com.stripe.android.exception.StripeException
 import com.stripe.android.model.BankStatuses
 import com.stripe.android.model.CardMetadata
 import com.stripe.android.model.ConfirmPaymentIntentParams
@@ -48,7 +50,6 @@ import com.stripe.android.model.StripeErrorJsonParser
 import com.stripe.android.model.StripeFile
 import com.stripe.android.model.StripeFileParams
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.model.StripeModel
 import com.stripe.android.model.Token
 import com.stripe.android.model.TokenParams
 import com.stripe.android.model.parsers.CardMetadataJsonParser
@@ -68,7 +69,6 @@ import com.stripe.android.model.parsers.SourceJsonParser
 import com.stripe.android.model.parsers.Stripe3ds2AuthResultJsonParser
 import com.stripe.android.model.parsers.StripeFileJsonParser
 import com.stripe.android.model.parsers.TokenJsonParser
-import com.stripe.android.payments.core.injection.IOContext
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.utils.StripeUrlUtils

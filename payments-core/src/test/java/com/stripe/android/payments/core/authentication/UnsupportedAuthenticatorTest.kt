@@ -7,7 +7,7 @@ import com.stripe.android.PaymentRelayContract
 import com.stripe.android.PaymentRelayStarter
 import com.stripe.android.Stripe
 import com.stripe.android.StripePaymentController
-import com.stripe.android.exception.StripeException
+import com.stripe.android.core.exception.StripeException
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentIntentFixtures.PI_SUCCEEDED
 import com.stripe.android.model.StripeIntent
