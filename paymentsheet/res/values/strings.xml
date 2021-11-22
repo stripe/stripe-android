@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
   <!-- Used for accessibility to describe the button on the payment sheet list of options to add a new payment method. -->
   <string name="add_new_payment_method">Add a new payment method</string>
   <!-- Label for input requesting address line 2, used for international addresses -->
@@ -93,9 +93,9 @@
   <!-- iDEAL bank section title for iDEAL form entry. -->
   <string name="stripe_paymentsheet_ideal_bank">iDEAL Bank</string>
   <!-- Klarna buy now or pay later copy -->
-  <string name="stripe_paymentsheet_klarna_buy_now_pay_later">Buy now or pay later with Klarna.</string>
+  <string name="stripe_paymentsheet_klarna_buy_now_pay_later" tools:ignore="MissingTranslation">Buy now or pay later with Klarna.</string>
   <!-- Klarna pay later copy -->
-  <string name="stripe_paymentsheet_klarna_pay_later">Pay later with Klarna.</string>
+  <string name="stripe_paymentsheet_klarna_pay_later" tools:ignore="MissingTranslation">Pay later with Klarna.</string>
   <!-- Title of a section containing multiple payment methods that can selected and will collect the payment information from the user. -->
   <string name="stripe_paymentsheet_or_pay_using">Or pay using</string>
   <!-- Title of a section containing a card form that will collect the payment information from the user. -->
@@ -119,7 +119,7 @@
   <!-- The label of a switch indicating whether to save the payment method for future payments. -->
   <string name="stripe_paymentsheet_save_for_future_payments">Save for future payments</string>
   <!-- Next to the save payment method users will see the merchant name: "Save for future Example.inc Payments" -->
-  <string name="stripe_paymentsheet_save_for_future_payments_with_merchant_name">Save for future %s payments</string>
+  <string name="stripe_paymentsheet_save_for_future_payments_with_merchant_name" tools:ignore="MissingTranslation">Save for future %s payments</string>
   <!-- The label of a switch indicating whether to save the user&apos;s card for future payments to this merchant -->
   <string name="stripe_paymentsheet_save_this_card_with_merchant_name">Save this card for future %s payments</string>
   <!-- Title shown above a carousel containing the customer&apos;s payment methods -->
