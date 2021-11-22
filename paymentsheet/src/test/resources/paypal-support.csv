@@ -1,0 +1,25 @@
+lpm, hasCustomer, allowsDelayedPayment, intentSetupFutureUsage, intentHasShipping, intentLpms, supportCustomerSavedCard, formExists, formType, supportsAdding
+paypal, true, true, off_session, false, card/paypal, false, false, not available, false
+paypal, true, true, off_session, false, card/eps/paypal, false, false, not available, false
+paypal, true, false, off_session, false, card/paypal, false, false, not available, false
+paypal, true, false, off_session, false, card/eps/paypal, false, false, not available, false
+paypal, true, true, on_session, false, card/paypal, false, false, not available, false
+paypal, true, true, on_session, false, card/eps/paypal, false, false, not available, false
+paypal, true, false, on_session, false, card/paypal, false, false, not available, false
+paypal, true, false, on_session, false, card/eps/paypal, false, false, not available, false
+paypal, true, true, null, false, card/paypal, false, true, oneTime, false
+paypal, true, true, null, false, card/eps/paypal, false, true, oneTime, false
+paypal, true, false, null, false, card/paypal, false, true, oneTime, false
+paypal, true, false, null, false, card/eps/paypal, false, true, oneTime, false
+paypal, false, true, off_session, false, card/paypal, false, false, not available, false
+paypal, false, true, off_session, false, card/eps/paypal, false, false, not available, false
+paypal, false, false, off_session, false, card/paypal, false, false, not available, false
+paypal, false, false, off_session, false, card/eps/paypal, false, false, not available, false
+paypal, false, true, on_session, false, card/paypal, false, false, not available, false
+paypal, false, true, on_session, false, card/eps/paypal, false, false, not available, false
+paypal, false, false, on_session, false, card/paypal, false, false, not available, false
+paypal, false, false, on_session, false, card/eps/paypal, false, false, not available, false
+paypal, false, true, null, false, card/paypal, false, true, oneTime, false
+paypal, false, true, null, false, card/eps/paypal, false, true, oneTime, false
+paypal, false, false, null, false, card/paypal, false, true, oneTime, false
+paypal, false, false, null, false, card/eps/paypal, false, true, oneTime, false
