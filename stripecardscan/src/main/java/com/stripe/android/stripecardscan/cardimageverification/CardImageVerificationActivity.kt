@@ -21,7 +21,6 @@ import com.stripe.android.stripecardscan.cardimageverification.exception.StripeN
 import com.stripe.android.stripecardscan.cardimageverification.exception.UnknownScanException
 import com.stripe.android.stripecardscan.cardimageverification.result.MainLoopAggregator
 import com.stripe.android.stripecardscan.cardimageverification.result.MainLoopState
-import com.stripe.android.stripecardscan.framework.AggregateResultListener
 import com.stripe.android.stripecardscan.framework.AnalyzerLoopErrorListener
 import com.stripe.android.stripecardscan.framework.Config
 import com.stripe.android.stripecardscan.framework.Stats
@@ -177,10 +176,75 @@ open class CardVerifyActivity : SimpleScanActivity<RequiredCardDetails?>() {
      * The flow used to scan an item.
      */
     override val scanFlow: CardVerifyFlow by lazy {
-        CardVerifyFlow(
-            scanResultListener,
-            scanErrorListener,
-        )
+        object : CardVerifyFlow(scanErrorListener) {
+            /**
+             * A final result was received from the aggregator. Set the result from this activity.
+             */
+            override suspend fun onResult(
+                result: MainLoopAggregator.FinalResult,
+            ) {
+                super.onResult(result)
+
+                launch(Dispatchers.Main) {
+                    changeScanState(ScanState.Correct)
+                    cameraAdapter.unbindFromLifecycle(this@CardVerifyActivity)
+                    resultListener.cardScanned(
+                        pan = result.pan,
+                        frames = scanFlow.selectCompletionLoopFrames(result.savedFrames),
+                    )
+                }.let { }
+            }
+
+            /**
+             * An interim result was received from the result aggregator.
+             */
+            override suspend fun onInterimResult(
+                result: MainLoopAggregator.InterimResult,
+            ) = launch(Dispatchers.Main) {
+                if (
+                    result.state is MainLoopState.OcrFound &&
+                    !hasPreviousValidResult.getAndSet(true)
+                ) {
+                    scanStat.trackResult("ocr_pan_observed")
+                }
+
+                val pan = when (result.state) {
+                    is MainLoopState.Initial -> null
+                    is MainLoopState.OcrFound -> result.state.mostLikelyPan
+                    is MainLoopState.OcrSatisfied -> result.state.pan
+                    is MainLoopState.CardSatisfied -> result.state.mostLikelyPan
+                    is MainLoopState.WrongCard -> null
+                    is MainLoopState.Finished -> result.state.pan
+                }
+
+                val lastFour = pan?.lastFour()
+                val cardIssuer = if (pan.isNullOrEmpty()) null else getCardIssuer(pan)
+
+                if (lastFour != null) {
+                    cardNumberTextView.text = getString(
+                        R.string.stripe_card_description,
+                        cardIssuer?.displayName ?: "",
+                        lastFour,
+                    )
+                    cardNumberTextView.show()
+                } else {
+                    cardNumberTextView.hide()
+                }
+
+                when (result.state) {
+                    is MainLoopState.Initial -> changeScanState(ScanState.NotFound)
+                    is MainLoopState.OcrFound -> changeScanState(ScanState.FoundLong)
+                    is MainLoopState.OcrSatisfied -> changeScanState(ScanState.FoundLong)
+                    is MainLoopState.CardSatisfied -> changeScanState(ScanState.FoundLong)
+                    is MainLoopState.WrongCard -> changeScanState(ScanState.Wrong)
+                    is MainLoopState.Finished -> changeScanState(ScanState.Correct)
+                }
+            }.let { }
+
+            override suspend fun onReset() = launch(Dispatchers.Main) {
+                changeScanState(ScanState.NotFound)
+            }.let { }
+        }
     }
 
     private val hasPreviousValidResult = AtomicBoolean(false)
@@ -461,74 +525,6 @@ open class CardVerifyActivity : SimpleScanActivity<RequiredCardDetails?>() {
             scanStatistics = ScanStatistics.fromStats()
         )
         super.closeScanner()
-    }
-
-    private val scanResultListener = object :
-        AggregateResultListener<MainLoopAggregator.InterimResult, MainLoopAggregator.FinalResult> {
-
-        /**
-         * A final result was received from the aggregator. Set the result from this activity.
-         */
-        override suspend fun onResult(
-            result: MainLoopAggregator.FinalResult,
-        ) = launch(Dispatchers.Main) {
-            changeScanState(ScanState.Correct)
-            cameraAdapter.unbindFromLifecycle(this@CardVerifyActivity)
-            resultListener.cardScanned(
-                pan = result.pan,
-                frames = scanFlow.selectCompletionLoopFrames(result.savedFrames),
-            )
-        }.let { }
-
-        /**
-         * An interim result was received from the result aggregator.
-         */
-        override suspend fun onInterimResult(
-            result: MainLoopAggregator.InterimResult,
-        ) = launch(Dispatchers.Main) {
-            if (
-                result.state is MainLoopState.OcrFound &&
-                !hasPreviousValidResult.getAndSet(true)
-            ) {
-                scanStat.trackResult("ocr_pan_observed")
-            }
-
-            val pan = when (result.state) {
-                is MainLoopState.Initial -> null
-                is MainLoopState.OcrFound -> result.state.mostLikelyPan
-                is MainLoopState.OcrSatisfied -> result.state.pan
-                is MainLoopState.CardSatisfied -> result.state.mostLikelyPan
-                is MainLoopState.WrongCard -> null
-                is MainLoopState.Finished -> result.state.pan
-            }
-
-            val lastFour = pan?.lastFour()
-            val cardIssuer = if (pan.isNullOrEmpty()) null else getCardIssuer(pan)
-
-            if (lastFour != null) {
-                cardNumberTextView.text = getString(
-                    R.string.stripe_card_description,
-                    cardIssuer?.displayName ?: "",
-                    lastFour,
-                )
-                cardNumberTextView.show()
-            } else {
-                cardNumberTextView.hide()
-            }
-
-            when (result.state) {
-                is MainLoopState.Initial -> changeScanState(ScanState.NotFound)
-                is MainLoopState.OcrFound -> changeScanState(ScanState.FoundLong)
-                is MainLoopState.OcrSatisfied -> changeScanState(ScanState.FoundLong)
-                is MainLoopState.CardSatisfied -> changeScanState(ScanState.FoundLong)
-                is MainLoopState.WrongCard -> changeScanState(ScanState.Wrong)
-                is MainLoopState.Finished -> changeScanState(ScanState.Correct)
-            }
-        }.let { }
-
-        override suspend fun onReset() = launch(Dispatchers.Main) {
-            changeScanState(ScanState.NotFound)
-        }.let { }
     }
 
     private val scanErrorListener = object : AnalyzerLoopErrorListener {
