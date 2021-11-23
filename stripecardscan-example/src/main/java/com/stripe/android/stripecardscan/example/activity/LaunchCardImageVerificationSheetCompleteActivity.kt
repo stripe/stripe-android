@@ -25,10 +25,11 @@ internal class LaunchCardImageVerificationSheetCompleteActivity : AppCompatActiv
             return@onCreate
         }
 
-        val cardVerificationSheet = CardImageVerificationSheet.create(this, stripePublishableKey)
+        val cardImageVerificationSheet =
+            CardImageVerificationSheet.create(this, stripePublishableKey)
 
         viewBinding.launchScanButton.setOnClickListener {
-            cardVerificationSheet.present(
+            cardImageVerificationSheet.present(
                 viewBinding.civId.text.toString(),
                 viewBinding.civSecret.text.toString(),
                 this::onScanFinished,

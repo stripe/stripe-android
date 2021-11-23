@@ -58,7 +58,7 @@
 
         <Button
             android:id="@+id/launch_complete_button"
-            android:text="@string/stripecardscan"
+            android:text="@string/cardimageverificationsheet"
             android:layout_width="0dp"
             android:layout_height="48dp"
             android:layout_marginEnd="16dp"
