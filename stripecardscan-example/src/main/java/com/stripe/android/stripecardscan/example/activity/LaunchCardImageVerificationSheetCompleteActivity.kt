@@ -47,13 +47,26 @@ internal class LaunchCardImageVerificationSheetCompleteActivity : AppCompatActiv
                     Request.Method.POST,
                     "https://stripe-card-scan-civ-example-app.glitch.me/card-set/checkout",
                     JSONObject().apply {
-                        put("expected_card[iin]", viewBinding.requiredIin.text.toString())
-                        put("expected_card[last4]", viewBinding.requiredLast4.text.toString())
+                        put(
+                            "expected_card[iin]",
+                            viewBinding.requiredIinText.text.toString(),
+                        )
+                        put(
+                            "expected_card[last4]",
+                            viewBinding.requiredLast4Text.text.toString(),
+                        )
                     },
                     { response ->
-                        viewBinding.civIdText.setText(response.get("id") as String)
-                        viewBinding.civSecretText.setText(response.get("client_secret") as String)
-                        viewBinding.launchScanButton.isEnabled = true
+                        if (!response.has("id")) {
+                            Toast.makeText(this, "No CIV ID returned", Toast.LENGTH_SHORT)
+                                .show()
+                        } else {
+                            viewBinding.civIdText
+                                .setText(response.get("id") as String)
+                            viewBinding.civSecretText
+                                .setText(response.get("client_secret") as String)
+                            viewBinding.launchScanButton.isEnabled = true
+                        }
                     },
                     { error ->
                         Toast.makeText(

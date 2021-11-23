@@ -29,13 +29,13 @@
             >
 
             <TextView
-                android:labelFor="@id/required_iin"
+                android:labelFor="@id/requiredIinText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/requiredIin" />
 
             <EditText
-                android:id="@+id/required_iin"
+                android:id="@+id/requiredIinText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="number"
@@ -49,7 +49,7 @@
             android:layout_height="wrap_content"
             android:layout_marginEnd="16dp"
             android:layout_marginStart="16dp"
-            app:layout_constraintBottom_toTopOf="@id/generate_civ_intent"
+            app:layout_constraintBottom_toTopOf="@id/generateCivIntent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/iinLayout"
@@ -57,13 +57,13 @@
             >
 
             <TextView
-                android:labelFor="@id/required_last4"
+                android:labelFor="@id/requiredLast4Text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/requiredLastFour" />
 
             <EditText
-                android:id="@+id/required_last4"
+                android:id="@+id/requiredLast4Text"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="number"
@@ -71,7 +71,7 @@
         </LinearLayout>
 
         <Button
-            android:id="@+id/generate_civ_intent"
+            android:id="@+id/generateCivIntent"
             android:text="@string/generate_civ"
             android:layout_width="0dp"
             android:layout_height="48dp"
@@ -93,7 +93,7 @@
             app:layout_constraintBottom_toTopOf="@id/civSecretLayout"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/generate_civ_intent"
+            app:layout_constraintTop_toBottomOf="@id/generateCivIntent"
             app:layout_constraintVertical_chainStyle="packed"
             >
 
