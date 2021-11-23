@@ -32,6 +32,14 @@ internal fun Bitmap.toWebP(): ByteArray =
         it.toByteArray()
     }
 
+@CheckResult
+internal fun Bitmap.toJpeg(): ByteArray =
+    ByteArrayOutputStream().use {
+        this.compress(Bitmap.CompressFormat.JPEG, 92, it)
+        it.flush()
+        it.toByteArray()
+    }
+
 /**
  * Crop a [Bitmap] to a given [Rect]. The crop must have a positive area and must be contained
  * within the bounds of the source [Bitmap].
@@ -194,6 +202,17 @@ internal fun Bitmap.scale(size: Size, filter: Boolean = false): Bitmap =
         this
     } else {
         Bitmap.createScaledBitmap(this, size.width, size.height, filter)
+    }
+
+/**
+ * Constrain a bitmap to a given size, while maintaining its original aspect ratio.
+ */
+internal fun Bitmap.constrainToSize(size: Size, filter: Boolean = false): Bitmap =
+    if (size.width >= width && size.height >= height) {
+        this
+    } else {
+        val newSize = this.size().scaleAndCenterWithin(size).size()
+        Bitmap.createScaledBitmap(this, newSize.width, newSize.height, filter)
     }
 
 /**

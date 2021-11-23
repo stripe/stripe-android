@@ -28,13 +28,46 @@ private fun getVisiblePreview(previewBounds: Rect) = Size(
 )
 
 /**
+ * Determine how to crop the preview image from the camera based on the view finder's position in
+ * the preview bounds.
+ *
+ * Note: This algorithm makes some assumptions:
+ * 1. the [previewBounds] and the [cameraPreviewImageSize] are centered relative to each other.
+ * 2. the [previewBounds] circumscribes the [cameraPreviewImageSize]. I.E. they share at least one
+ *    field of view, and the [cameraPreviewImageSize] fields of view are smaller than or the same
+ *    size as the [previewBounds]
+ * 3. the [previewBounds] and the [cameraPreviewImageSize] have the same orientation
+ */
+internal fun determineViewFinderCrop(
+    cameraPreviewImageSize: Size,
+    previewBounds: Rect,
+    viewFinder: Rect,
+): Rect {
+    require(
+        viewFinder.left >= previewBounds.left &&
+            viewFinder.right <= previewBounds.right &&
+            viewFinder.top >= previewBounds.top &&
+            viewFinder.bottom <= previewBounds.bottom
+    ) { "View finder $viewFinder is outside preview image bounds $previewBounds" }
+
+    // Scale the cardFinder to match the full image
+    return previewBounds
+        .projectRegionOfInterest(
+            toSize = cameraPreviewImageSize,
+            regionOfInterest = viewFinder
+        )
+        .intersectionWith(cameraPreviewImageSize.toRect())
+}
+
+/**
  * Crop the preview image from the camera based on the view finder's position in the preview bounds.
  *
  * Note: This algorithm makes some assumptions:
- * 1. the previewBounds and the cameraPreviewImage are centered relative to each other.
- * 2. the previewBounds circumscribes the cameraPreviewImage. I.E. they share at least one field of view, and the
- *    cameraPreviewImage's fields of view are smaller than or the same size as the previewBounds's
- * 3. the previewBounds and the cameraPreviewImage have the same orientation
+ * 1. the [previewBounds] and the [cameraPreviewImage] are centered relative to each other.
+ * 2. the [previewBounds] circumscribes the [cameraPreviewImage]. I.E. they share at least one field
+ *    of view, and the [cameraPreviewImage] fields of view are smaller than or the same size as the
+ *    [previewBounds]
+ * 3. the [previewBounds] and the [cameraPreviewImage] have the same orientation
  */
 internal fun cropCameraPreviewToViewFinder(
     cameraPreviewImage: Bitmap,
@@ -48,15 +81,9 @@ internal fun cropCameraPreviewToViewFinder(
             viewFinder.bottom <= previewBounds.bottom
     ) { "View finder $viewFinder is outside preview image bounds $previewBounds" }
 
-    // Scale the cardFinder to match the full image
-    val projectedViewFinder = previewBounds
-        .projectRegionOfInterest(
-            toSize = cameraPreviewImage.size(),
-            regionOfInterest = viewFinder
-        )
-        .intersectionWith(cameraPreviewImage.size().toRect())
-
-    return cameraPreviewImage.crop(projectedViewFinder)
+    return cameraPreviewImage.crop(
+        determineViewFinderCrop(cameraPreviewImage.size(), previewBounds, viewFinder)
+    )
 }
 
 /**

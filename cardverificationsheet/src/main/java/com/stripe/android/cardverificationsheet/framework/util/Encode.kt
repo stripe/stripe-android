@@ -11,13 +11,10 @@ import java.nio.charset.Charset
 private val queryStringFactory: QueryStringFactory = QueryStringFactory()
 
 fun b64Encode(s: String): String =
-    Base64.encodeToString(
-        s.toByteArray(Charset.defaultCharset()),
-        Base64.URL_SAFE + Base64.NO_WRAP,
-    )
+    Base64.encodeToString(s.toByteArray(Charset.defaultCharset()), Base64.NO_WRAP)
 
 fun b64Encode(b: ByteArray): String =
-    Base64.encodeToString(b, Base64.URL_SAFE + Base64.NO_WRAP)
+    Base64.encodeToString(b, Base64.NO_WRAP)
 
 /**
  * Encode a serializable object to a x-www-url-encoded string

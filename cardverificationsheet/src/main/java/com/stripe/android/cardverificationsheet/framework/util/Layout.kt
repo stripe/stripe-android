@@ -80,11 +80,8 @@ fun adjustSizeToAspectRatio(area: Size, aspectRatio: Float): Size = if (aspectRa
 }
 
 /**
- * Calculate the position of the [Size] within the [containingSize]. This makes a few assumptions:
- * 1. the [Size] and the [containingSize] are centered relative to each other.
- * 2. the [Size] and the [containingSize] have the same orientation
- * 3. the [containingSize] and the [Size] share either a horizontal or vertical field of view
- * 4. the non-shared field of view must be smaller on the [Size] than the [containingSize]
+ * Scale up a [Size] so that it fills a [containingSize] while maintaining its original aspect
+ * ratio.
  *
  * If using this to project a preview image onto a full camera image, This makes a few assumptions:
  * 1. the preview image [Size] and full image [containingSize] are centered relative to each other

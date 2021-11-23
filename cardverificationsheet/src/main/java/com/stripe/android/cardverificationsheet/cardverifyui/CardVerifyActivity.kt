@@ -133,6 +133,7 @@ open class CardVerifyActivity : SimpleScanActivity<RequiredCardDetails?>() {
                     )
                 )
             setResult(Activity.RESULT_OK, intent)
+            closeScanner()
         }
 
         override fun cardScanned(pan: String, frames: Collection<SavedFrame>) {
