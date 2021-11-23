@@ -38,12 +38,10 @@ internal data class SavedFrameType(
 )
 
 @Keep
-internal class CardVerifyFlow(
-    private val scanResultListener: AggregateResultListener<
-        MainLoopAggregator.InterimResult,
-        MainLoopAggregator.FinalResult>,
+internal abstract class CardVerifyFlow(
     private val scanErrorListener: AnalyzerLoopErrorListener,
-) : ScanFlow<RequiredCardDetails?> {
+) : ScanFlow<RequiredCardDetails?>,
+    AggregateResultListener<MainLoopAggregator.InterimResult, MainLoopAggregator.FinalResult> {
 
     /**
      * If this is true, do not start the flow.
@@ -70,40 +68,12 @@ internal class CardVerifyFlow(
         coroutineScope: CoroutineScope,
         parameters: RequiredCardDetails?,
     ) = coroutineScope.launch(Dispatchers.Main) {
-        val listener = object : AggregateResultListener<
-                MainLoopAggregator.InterimResult,
-                MainLoopAggregator.FinalResult> {
-
-            override suspend fun onResult(result: MainLoopAggregator.FinalResult) {
-                mainLoop?.unsubscribe()
-                mainLoop = null
-
-                mainLoopJob?.apply { if (isActive) { cancel() } }
-                mainLoopJob = null
-
-                mainLoopAggregator = null
-
-                mainLoopAnalyzerPool?.closeAllAnalyzers()
-                mainLoopAnalyzerPool = null
-
-                scanResultListener.onResult(result)
-            }
-
-            override suspend fun onInterimResult(result: MainLoopAggregator.InterimResult) {
-                scanResultListener.onInterimResult(result)
-            }
-
-            override suspend fun onReset() {
-                scanResultListener.onReset()
-            }
-        }
-
         if (canceled) {
             return@launch
         }
 
         mainLoopAggregator = MainLoopAggregator(
-            listener = listener,
+            listener = this@CardVerifyFlow,
             requiredCardIssuer = parameters?.cardIssuer,
             requiredLastFour = parameters?.lastFour,
         ).also { mainLoopOcrAggregator ->
@@ -149,6 +119,19 @@ internal class CardVerifyFlow(
             }
         }
     }.let { }
+
+    override suspend fun onResult(result: MainLoopAggregator.FinalResult) {
+        mainLoop?.unsubscribe()
+        mainLoop = null
+
+        mainLoopJob?.apply { if (isActive) { cancel() } }
+        mainLoopJob = null
+
+        mainLoopAggregator = null
+
+        mainLoopAnalyzerPool?.closeAllAnalyzers()
+        mainLoopAnalyzerPool = null
+    }
 
     override fun cancelFlow() {
         canceled = true
