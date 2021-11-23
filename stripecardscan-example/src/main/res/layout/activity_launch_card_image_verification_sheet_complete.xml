@@ -3,6 +3,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/coordinator"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".activity.LaunchCardImageVerificationSheetCompleteActivity">
@@ -15,6 +16,75 @@
         app:layout_anchorGravity="center">
 
         <LinearLayout
+            android:id="@+id/iinLayout"
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="16dp"
+            android:layout_marginStart="16dp"
+            app:layout_constraintBottom_toTopOf="@id/last4Layout"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_chainStyle="packed"
+            >
+
+            <TextView
+                android:labelFor="@id/requiredIinText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/requiredIin" />
+
+            <EditText
+                android:id="@+id/requiredIinText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="number"
+                android:importantForAutofill="no" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/last4Layout"
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="16dp"
+            android:layout_marginStart="16dp"
+            app:layout_constraintBottom_toTopOf="@id/generateCivIntent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/iinLayout"
+            app:layout_constraintVertical_chainStyle="packed"
+            >
+
+            <TextView
+                android:labelFor="@id/requiredLast4Text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/requiredLastFour" />
+
+            <EditText
+                android:id="@+id/requiredLast4Text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="number"
+                android:importantForAutofill="no" />
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/generateCivIntent"
+            android:text="@string/generate_civ"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginStart="16dp"
+            app:layout_constraintBottom_toTopOf="@id/civIdLayout"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/last4Layout"
+            app:layout_constraintVertical_chainStyle="packed" />
+
+        <LinearLayout
             android:id="@+id/civIdLayout"
             android:orientation="vertical"
             android:layout_width="match_parent"
@@ -24,18 +94,18 @@
             app:layout_constraintBottom_toTopOf="@id/civSecretLayout"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/generateCivIntent"
             app:layout_constraintVertical_chainStyle="packed"
             >
 
             <TextView
-                android:labelFor="@id/civ_id"
+                android:labelFor="@id/civIdText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/civId" />
+                android:text="@string/civ_id" />
 
             <EditText
-                android:id="@+id/civ_id"
+                android:id="@+id/civIdText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="text"
@@ -49,7 +119,7 @@
             android:layout_height="wrap_content"
             android:layout_marginEnd="16dp"
             android:layout_marginStart="16dp"
-            app:layout_constraintBottom_toTopOf="@id/launch_scan_button"
+            app:layout_constraintBottom_toTopOf="@id/launchScanButton"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/civIdLayout"
@@ -57,13 +127,13 @@
             >
 
             <TextView
-                android:labelFor="@id/civ_secret"
+                android:labelFor="@id/civSecretText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/civSecret" />
+                android:text="@string/civ_secret" />
 
             <EditText
-                android:id="@+id/civ_secret"
+                android:id="@+id/civSecretText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="text"
@@ -71,17 +141,19 @@
         </LinearLayout>
 
         <Button
-            android:id="@+id/launch_scan_button"
+            android:id="@+id/launchScanButton"
             android:text="@string/cardimageverificationsheet"
             android:layout_width="0dp"
             android:layout_height="48dp"
             android:layout_marginEnd="16dp"
             android:layout_marginStart="16dp"
+            android:enabled="false"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/civSecretLayout"
             app:layout_constraintVertical_chainStyle="packed" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -2,7 +2,14 @@
     <string name="app_name">StripeCardScan Example</string>
     <string name="cardimageverificationsheet">CardImageVerificationSheet</string>
 
+    <string name="getPublishableKey">Uset Test Publishable Key</string>
     <string name="stripePublishableKey">Stripe Publishable Key</string>
-    <string name="civId">Card Image Verification ID</string>
-    <string name="civSecret">Client Secret</string>
+
+    <string name="requiredIin">Required Card IIN (first 6)</string>
+    <string name="requiredLastFour">Required Card Last 4</string>
+
+    <string name="generate_civ">Generate CIV Intent</string>
+
+    <string name="civ_id">CIV Intent ID</string>
+    <string name="civ_secret">CIV Client Secret</string>
 </resources>
