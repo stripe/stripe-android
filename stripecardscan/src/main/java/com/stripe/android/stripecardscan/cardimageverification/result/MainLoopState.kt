@@ -53,9 +53,9 @@ internal sealed class MainLoopState(
     class OcrFound private constructor(
         private val panCounter: ItemCounter<String>,
         private var visibleCardCount: Int,
-        override val requiredCardIssuer: CardIssuer?,
-        override val requiredLastFour: String?,
-    ) : MainLoopState(runOcr = true, runCardDetect = true), RequiresMatchingCard {
+        private val requiredCardIssuer: CardIssuer?,
+        private val requiredLastFour: String?,
+    ) : MainLoopState(runOcr = true, runCardDetect = true) {
 
         internal constructor(
             pan: String,
@@ -99,15 +99,8 @@ internal sealed class MainLoopState(
             }
 
             val pan = mostLikelyPan
-            val cardMatch = compareToRequiredCard(pan)
 
             return when {
-                cardMatch is CardMatchResult.Mismatch ->
-                    WrongCard(
-                        pan = pan,
-                        requiredCardIssuer = requiredCardIssuer,
-                        requiredLastFour = requiredLastFour,
-                    )
                 isCardSatisfied() && isOcrSatisfied() ->
                     Finished(
                         pan = pan,
@@ -162,9 +155,9 @@ internal sealed class MainLoopState(
 
     class CardSatisfied(
         private val panCounter: ItemCounter<String>,
-        override val requiredCardIssuer: CardIssuer?,
-        override val requiredLastFour: String?,
-    ) : MainLoopState(runOcr = true, runCardDetect = false), RequiresMatchingCard {
+        private val requiredCardIssuer: CardIssuer?,
+        private val requiredLastFour: String?,
+    ) : MainLoopState(runOcr = true, runCardDetect = false) {
 
         private var lastCardVisible = Clock.markNow()
 
@@ -188,15 +181,8 @@ internal sealed class MainLoopState(
             }
 
             val pan = mostLikelyPan
-            val cardMatch = compareToRequiredCard(pan)
 
             return when {
-                cardMatch is CardMatchResult.Mismatch ->
-                    WrongCard(
-                        pan = pan,
-                        requiredCardIssuer = requiredCardIssuer,
-                        requiredLastFour = requiredLastFour,
-                    )
                 isOcrSatisfied() || isTimedOut() ->
                     Finished(
                         pan = pan,
