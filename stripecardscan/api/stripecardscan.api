@@ -1,0 +1,1171 @@
+public final class com/stripe/android/stripecardscan/BuildConfig {
+	public static final field BUILD_TYPE Ljava/lang/String;
+	public static final field DEBUG Z
+	public static final field LIBRARY_PACKAGE_NAME Ljava/lang/String;
+	public fun <init> ()V
+}
+
+public abstract class com/stripe/android/stripecardscan/camera/CameraAdapter : androidx/lifecycle/LifecycleObserver {
+	public static final field $stable I
+	public static final field Companion Lcom/stripe/android/stripecardscan/camera/CameraAdapter$Companion;
+	public fun <init> ()V
+	public fun bindToLifecycle (Landroidx/lifecycle/LifecycleOwner;)V
+	public abstract fun changeCamera ()V
+	public abstract fun getCurrentCamera ()I
+	public final fun getImageStream ()Lkotlinx/coroutines/flow/Flow;
+	public abstract fun getImplementationName ()Ljava/lang/String;
+	public fun isBoundToLifecycle ()Z
+	public static final fun isCameraSupported (Landroid/content/Context;)Z
+	public abstract fun isTorchOn ()Z
+	public final fun onDestroyed ()V
+	public fun onPause ()V
+	protected final fun sendImageToStream (Ljava/lang/Object;)Ljava/lang/Object;
+	public abstract fun setFocus (Landroid/graphics/PointF;)V
+	public abstract fun setTorchState (Z)V
+	public fun unbindFromLifecycle (Landroidx/lifecycle/LifecycleOwner;)V
+	public abstract fun withFlashSupport (Lkotlin/jvm/functions/Function1;)V
+	public abstract fun withSupportsMultipleCameras (Lkotlin/jvm/functions/Function1;)V
+}
+
+public final class com/stripe/android/stripecardscan/camera/CameraAdapter$Companion {
+	public final fun isCameraSupported (Landroid/content/Context;)Z
+	public final fun rotationToDegrees (I)I
+}
+
+public abstract interface class com/stripe/android/stripecardscan/camera/CameraErrorListener {
+	public abstract fun onCameraAccessError (Ljava/lang/Throwable;)V
+	public abstract fun onCameraOpenError (Ljava/lang/Throwable;)V
+	public abstract fun onCameraUnsupportedError (Ljava/lang/Throwable;)V
+}
+
+public final class com/stripe/android/stripecardscan/camera/CameraPreviewImage {
+	public static final field $stable I
+	public fun <init> (Ljava/lang/Object;Landroid/graphics/Rect;)V
+	public final fun component1 ()Ljava/lang/Object;
+	public final fun component2 ()Landroid/graphics/Rect;
+	public final fun copy (Ljava/lang/Object;Landroid/graphics/Rect;)Lcom/stripe/android/stripecardscan/camera/CameraPreviewImage;
+	public static synthetic fun copy$default (Lcom/stripe/android/stripecardscan/camera/CameraPreviewImage;Ljava/lang/Object;Landroid/graphics/Rect;ILjava/lang/Object;)Lcom/stripe/android/stripecardscan/camera/CameraPreviewImage;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getImage ()Ljava/lang/Object;
+	public final fun getViewBounds ()Landroid/graphics/Rect;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/stripecardscan/cardimageverification/CardImageVerificationConfig {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/stripe/android/stripecardscan/cardimageverification/CardImageVerificationConfig;
+	public static final fun getCARD_ONLY_SEARCH_DURATION ()Lcom/stripe/android/stripecardscan/framework/time/Duration;
+	public static final fun getDESIRED_CARD_COUNT ()I
+	public static final fun getDESIRED_OCR_AGREEMENT ()I
+	public static final fun getMAX_COMPLETION_LOOP_FRAMES ()I
+	public static final fun getMAX_SAVED_FRAMES_PER_TYPE ()I
+	public static final fun getNO_CARD_VISIBLE_DURATION ()Lcom/stripe/android/stripecardscan/framework/time/Duration;
+	public static final fun getOCR_AND_CARD_SEARCH_DURATION ()Lcom/stripe/android/stripecardscan/framework/time/Duration;
+	public static final fun getOCR_ONLY_SEARCH_DURATION ()Lcom/stripe/android/stripecardscan/framework/time/Duration;
+	public static final fun getWRONG_CARD_DURATION ()Lcom/stripe/android/stripecardscan/framework/time/Duration;
+	public static final fun setCARD_ONLY_SEARCH_DURATION (Lcom/stripe/android/stripecardscan/framework/time/Duration;)V
+	public static final fun setDESIRED_CARD_COUNT (I)V
+	public static final fun setDESIRED_OCR_AGREEMENT (I)V
+	public static final fun setMAX_COMPLETION_LOOP_FRAMES (I)V
+	public static final fun setMAX_SAVED_FRAMES_PER_TYPE (I)V
+	public static final fun setNO_CARD_VISIBLE_DURATION (Lcom/stripe/android/stripecardscan/framework/time/Duration;)V
+	public static final fun setOCR_AND_CARD_SEARCH_DURATION (Lcom/stripe/android/stripecardscan/framework/time/Duration;)V
+	public static final fun setOCR_ONLY_SEARCH_DURATION (Lcom/stripe/android/stripecardscan/framework/time/Duration;)V
+	public static final fun setWRONG_CARD_DURATION (Lcom/stripe/android/stripecardscan/framework/time/Duration;)V
+}
+
+public final class com/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheet {
+	public static final field $stable I
+	public static final field Companion Lcom/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheet$Companion;
+	public synthetic fun <init> (Ljava/lang/String;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public static final fun create (Landroidx/activity/ComponentActivity;Ljava/lang/String;)Lcom/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheet;
+	public final fun present (Ljava/lang/String;Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
+}
+
+public final class com/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheet$Companion {
+	public final fun create (Landroidx/activity/ComponentActivity;Ljava/lang/String;)Lcom/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheet;
+}
+
+public abstract interface class com/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheetResult : android/os/Parcelable {
+}
+
+public final class com/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheetResult$Canceled : com/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheetResult {
+	public static final field $stable I
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public fun <init> (Lcom/stripe/android/stripecardscan/scanui/CancellationReason;)V
+	public final fun component1 ()Lcom/stripe/android/stripecardscan/scanui/CancellationReason;
+	public final fun copy (Lcom/stripe/android/stripecardscan/scanui/CancellationReason;)Lcom/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheetResult$Canceled;
+	public static synthetic fun copy$default (Lcom/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheetResult$Canceled;Lcom/stripe/android/stripecardscan/scanui/CancellationReason;ILjava/lang/Object;)Lcom/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheetResult$Canceled;
+	public fun describeContents ()I
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getReason ()Lcom/stripe/android/stripecardscan/scanui/CancellationReason;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+	public fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public final class com/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheetResult$Completed : com/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheetResult {
+	public static final field $stable I
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public fun <init> (Lcom/stripe/android/stripecardscan/payment/card/ScannedCard;)V
+	public final fun component1 ()Lcom/stripe/android/stripecardscan/payment/card/ScannedCard;
+	public final fun copy (Lcom/stripe/android/stripecardscan/payment/card/ScannedCard;)Lcom/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheetResult$Completed;
+	public static synthetic fun copy$default (Lcom/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheetResult$Completed;Lcom/stripe/android/stripecardscan/payment/card/ScannedCard;ILjava/lang/Object;)Lcom/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheetResult$Completed;
+	public fun describeContents ()I
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getScannedCard ()Lcom/stripe/android/stripecardscan/payment/card/ScannedCard;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+	public fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public final class com/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheetResult$Failed : com/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheetResult {
+	public static final field $stable I
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public fun <init> (Ljava/lang/Throwable;)V
+	public final fun component1 ()Ljava/lang/Throwable;
+	public final fun copy (Ljava/lang/Throwable;)Lcom/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheetResult$Failed;
+	public static synthetic fun copy$default (Lcom/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheetResult$Failed;Ljava/lang/Throwable;ILjava/lang/Object;)Lcom/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheetResult$Failed;
+	public fun describeContents ()I
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getError ()Ljava/lang/Throwable;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+	public fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public class com/stripe/android/stripecardscan/cardimageverification/CardVerifyActivity : com/stripe/android/stripecardscan/scanui/SimpleScanActivity {
+	public static final field $stable I
+	public fun <init> ()V
+	protected fun addUiComponents ()V
+	protected fun closeScanner ()V
+	protected fun displayState (Lcom/stripe/android/stripecardscan/scanui/SimpleScanActivity$ScanState;Lcom/stripe/android/stripecardscan/scanui/SimpleScanActivity$ScanState;)V
+	protected fun getCannotScanTextView ()Landroid/widget/TextView;
+	protected fun getCardDescriptionTextView ()Landroid/widget/TextView;
+	protected fun getMinimumAnalysisResolution ()Landroid/util/Size;
+	protected fun getProcessingOverlayView ()Landroid/view/View;
+	protected fun getProcessingSpinnerView ()Landroid/widget/ProgressBar;
+	protected fun getProcessingTextView ()Landroid/widget/TextView;
+	public synthetic fun getResultListener$stripecardscan_release ()Lcom/stripe/android/stripecardscan/scanui/ScanResultListener;
+	public synthetic fun getScanFlow$stripecardscan_release ()Lcom/stripe/android/stripecardscan/scanui/ScanFlow;
+	protected fun onCreate (Landroid/os/Bundle;)V
+	protected fun setupCannotScanTextViewConstraints ()V
+	protected fun setupCannotScanUi ()V
+	protected fun setupCardDescriptionTextViewConstraints ()V
+	protected fun setupCardDescriptionUi ()V
+	protected fun setupInstructionsViewConstraints ()V
+	protected fun setupProcessingOverlayViewConstraints ()V
+	protected fun setupProcessingOverlayViewUi ()V
+	protected fun setupProcessingSpinnerViewConstraints ()V
+	protected fun setupProcessingTextViewConstraints ()V
+	protected fun setupProcessingTextViewUi ()V
+	protected fun setupUiComponents ()V
+	protected fun setupUiConstraints ()V
+}
+
+public final class com/stripe/android/stripecardscan/cardimageverification/RequiredCardDetails {
+	public static final field $stable I
+	public fun <init> (Lcom/stripe/android/stripecardscan/payment/card/CardIssuer;Ljava/lang/String;)V
+	public final fun component1 ()Lcom/stripe/android/stripecardscan/payment/card/CardIssuer;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun copy (Lcom/stripe/android/stripecardscan/payment/card/CardIssuer;Ljava/lang/String;)Lcom/stripe/android/stripecardscan/cardimageverification/RequiredCardDetails;
+	public static synthetic fun copy$default (Lcom/stripe/android/stripecardscan/cardimageverification/RequiredCardDetails;Lcom/stripe/android/stripecardscan/payment/card/CardIssuer;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/stripecardscan/cardimageverification/RequiredCardDetails;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCardIssuer ()Lcom/stripe/android/stripecardscan/payment/card/CardIssuer;
+	public final fun getLastFour ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/stripecardscan/cardimageverification/exception/InvalidCivException : java/lang/Exception {
+	public static final field $stable I
+	public fun <init> (Ljava/lang/String;)V
+}
+
+public final class com/stripe/android/stripecardscan/cardimageverification/exception/InvalidStripePublishableKeyException : java/lang/Exception {
+	public static final field $stable I
+	public fun <init> (Ljava/lang/String;)V
+}
+
+public final class com/stripe/android/stripecardscan/cardimageverification/exception/StripeNetworkException : java/lang/Exception {
+	public static final field $stable I
+	public fun <init> (Ljava/lang/String;)V
+}
+
+public final class com/stripe/android/stripecardscan/cardimageverification/exception/UnknownScanException : java/lang/Exception {
+	public static final field $stable I
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+}
+
+public abstract interface class com/stripe/android/stripecardscan/framework/AggregateResultListener {
+	public abstract fun onInterimResult (Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun onReset (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun onResult (Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class com/stripe/android/stripecardscan/framework/AlreadySubscribedException : java/lang/Exception {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/stripe/android/stripecardscan/framework/AlreadySubscribedException;
+}
+
+public abstract interface class com/stripe/android/stripecardscan/framework/Analyzer {
+	public abstract fun analyze (Ljava/lang/Object;Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public abstract interface class com/stripe/android/stripecardscan/framework/AnalyzerFactory {
+	public abstract fun newInstance (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public abstract class com/stripe/android/stripecardscan/framework/AnalyzerLoop : com/stripe/android/stripecardscan/framework/ResultHandler {
+	public static final field $stable I
+	public synthetic fun <init> (Lcom/stripe/android/stripecardscan/framework/AnalyzerPool;Lcom/stripe/android/stripecardscan/framework/AnalyzerLoopErrorListener;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	protected final fun getStartedAt ()Lcom/stripe/android/stripecardscan/framework/time/ClockMark;
+	public abstract fun getState ()Ljava/lang/Object;
+	protected final fun setStartedAt (Lcom/stripe/android/stripecardscan/framework/time/ClockMark;)V
+	protected final fun subscribeToFlow (Lkotlinx/coroutines/flow/Flow;Lkotlinx/coroutines/CoroutineScope;)Lkotlinx/coroutines/Job;
+	protected final fun unsubscribeFromFlow (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public abstract interface class com/stripe/android/stripecardscan/framework/AnalyzerLoopErrorListener {
+	public abstract fun onAnalyzerFailure (Ljava/lang/Throwable;)Z
+	public abstract fun onResultFailure (Ljava/lang/Throwable;)Z
+}
+
+public final class com/stripe/android/stripecardscan/framework/AnalyzerPool {
+	public static final field $stable I
+	public static final field Companion Lcom/stripe/android/stripecardscan/framework/AnalyzerPool$Companion;
+	public fun <init> (ILjava/util/List;)V
+	public final fun closeAllAnalyzers ()V
+	public final fun component1 ()I
+	public final fun component2 ()Ljava/util/List;
+	public final fun copy (ILjava/util/List;)Lcom/stripe/android/stripecardscan/framework/AnalyzerPool;
+	public static synthetic fun copy$default (Lcom/stripe/android/stripecardscan/framework/AnalyzerPool;ILjava/util/List;ILjava/lang/Object;)Lcom/stripe/android/stripecardscan/framework/AnalyzerPool;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAnalyzers ()Ljava/util/List;
+	public final fun getDesiredAnalyzerCount ()I
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/stripecardscan/framework/AnalyzerPool$Companion {
+	public final fun of (Lcom/stripe/android/stripecardscan/framework/AnalyzerFactory;ILkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun of$default (Lcom/stripe/android/stripecardscan/framework/AnalyzerPool$Companion;Lcom/stripe/android/stripecardscan/framework/AnalyzerFactory;ILkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+}
+
+public final class com/stripe/android/stripecardscan/framework/Config {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/stripe/android/stripecardscan/framework/Config;
+	public static final fun getDisplayLogo ()Z
+	public static final fun getEnableCannotScanButton ()Z
+	public static final fun getLogTag ()Ljava/lang/String;
+	public static final fun isDebug ()Z
+	public static final fun setDebug (Z)V
+	public static final fun setDisplayLogo (Z)V
+	public static final fun setEnableCannotScanButton (Z)V
+	public static final fun setLogTag (Ljava/lang/String;)V
+}
+
+public abstract class com/stripe/android/stripecardscan/framework/FetchedData {
+	public static final field $stable I
+	public static final field Companion Lcom/stripe/android/stripecardscan/framework/FetchedData$Companion;
+	public synthetic fun <init> (Ljava/lang/String;ILjava/lang/String;Ljava/lang/String;Ljava/lang/String;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun getModelClass ()Ljava/lang/String;
+	public fun getModelFrameworkVersion ()I
+	public fun getModelHash ()Ljava/lang/String;
+	public fun getModelHashAlgorithm ()Ljava/lang/String;
+	public fun getModelVersion ()Ljava/lang/String;
+	public abstract fun getSuccessfullyFetched ()Z
+}
+
+public final class com/stripe/android/stripecardscan/framework/FetchedData$Companion {
+	public final fun fromFetchedModelMeta (Ljava/lang/String;ILcom/stripe/android/stripecardscan/framework/FetchedModelMeta;)Lcom/stripe/android/stripecardscan/framework/FetchedData;
+}
+
+public final class com/stripe/android/stripecardscan/framework/FetchedFile : com/stripe/android/stripecardscan/framework/FetchedData {
+	public static final field $stable I
+	public fun <init> (Ljava/lang/String;ILjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/io/File;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()I
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun component5 ()Ljava/lang/String;
+	public final fun component6 ()Ljava/io/File;
+	public final fun copy (Ljava/lang/String;ILjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/io/File;)Lcom/stripe/android/stripecardscan/framework/FetchedFile;
+	public static synthetic fun copy$default (Lcom/stripe/android/stripecardscan/framework/FetchedFile;Ljava/lang/String;ILjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/io/File;ILjava/lang/Object;)Lcom/stripe/android/stripecardscan/framework/FetchedFile;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getFile ()Ljava/io/File;
+	public fun getModelClass ()Ljava/lang/String;
+	public fun getModelFrameworkVersion ()I
+	public fun getModelHash ()Ljava/lang/String;
+	public fun getModelHashAlgorithm ()Ljava/lang/String;
+	public fun getModelVersion ()Ljava/lang/String;
+	public fun getSuccessfullyFetched ()Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract class com/stripe/android/stripecardscan/framework/FetchedModelMeta {
+	public static final field $stable I
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun getHashAlgorithm ()Ljava/lang/String;
+	public fun getModelVersion ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/stripecardscan/framework/FetchedResource : com/stripe/android/stripecardscan/framework/FetchedData {
+	public static final field $stable I
+	public fun <init> (Ljava/lang/String;ILjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()I
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun component5 ()Ljava/lang/String;
+	public final fun component6 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;ILjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/stripecardscan/framework/FetchedResource;
+	public static synthetic fun copy$default (Lcom/stripe/android/stripecardscan/framework/FetchedResource;Ljava/lang/String;ILjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/stripecardscan/framework/FetchedResource;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAssetFileName ()Ljava/lang/String;
+	public fun getModelClass ()Ljava/lang/String;
+	public fun getModelFrameworkVersion ()I
+	public fun getModelHash ()Ljava/lang/String;
+	public fun getModelHashAlgorithm ()Ljava/lang/String;
+	public fun getModelVersion ()Ljava/lang/String;
+	public fun getSuccessfullyFetched ()Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface class com/stripe/android/stripecardscan/framework/Fetcher {
+	public abstract fun clearCache (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun fetchData (ZZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun getModelClass ()Ljava/lang/String;
+	public abstract fun getModelFrameworkVersion ()I
+	public abstract fun isCached (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class com/stripe/android/stripecardscan/framework/FiniteAnalyzerLoop : com/stripe/android/stripecardscan/framework/AnalyzerLoop {
+	public static final field $stable I
+	public fun <init> (Lcom/stripe/android/stripecardscan/framework/AnalyzerPool;Lcom/stripe/android/stripecardscan/framework/TerminatingResultHandler;Lcom/stripe/android/stripecardscan/framework/AnalyzerLoopErrorListener;Lcom/stripe/android/stripecardscan/framework/time/Duration;)V
+	public synthetic fun <init> (Lcom/stripe/android/stripecardscan/framework/AnalyzerPool;Lcom/stripe/android/stripecardscan/framework/TerminatingResultHandler;Lcom/stripe/android/stripecardscan/framework/AnalyzerLoopErrorListener;Lcom/stripe/android/stripecardscan/framework/time/Duration;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun cancel ()V
+	public fun getState ()Ljava/lang/Object;
+	public fun onResult (Ljava/lang/Object;Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun process (Ljava/util/Collection;Lkotlinx/coroutines/CoroutineScope;)Lkotlinx/coroutines/Job;
+}
+
+public final class com/stripe/android/stripecardscan/framework/LoopKt {
+	public static final fun backPressureDrop (Lkotlinx/coroutines/flow/Flow;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public abstract class com/stripe/android/stripecardscan/framework/MachineState {
+	public static final field $stable I
+	public fun <init> ()V
+	protected fun getReachedStateAt ()Lcom/stripe/android/stripecardscan/framework/time/ClockMark;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/stripecardscan/framework/NetworkConfig {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/stripe/android/stripecardscan/framework/NetworkConfig;
+	public static final fun getForm ()Lkotlinx/serialization/properties/Properties;
+	public static final fun getJson ()Lkotlinx/serialization/json/Json;
+	public static final fun getNetwork ()Lcom/stripe/android/stripecardscan/framework/api/Network;
+	public static final fun getRetryDelay ()Lcom/stripe/android/stripecardscan/framework/time/Duration;
+	public static final fun getRetryStatusCodes ()Ljava/lang/Iterable;
+	public static final fun getRetryTotalAttempts ()I
+	public static final fun getUseCompression ()Z
+	public static final fun setForm (Lkotlinx/serialization/properties/Properties;)V
+	public static final fun setJson (Lkotlinx/serialization/json/Json;)V
+	public static final fun setNetwork (Lcom/stripe/android/stripecardscan/framework/api/Network;)V
+	public static final fun setRetryDelay (Lcom/stripe/android/stripecardscan/framework/time/Duration;)V
+	public static final fun setRetryStatusCodes (Ljava/lang/Iterable;)V
+	public static final fun setRetryTotalAttempts (I)V
+	public static final fun setUseCompression (Z)V
+}
+
+public final class com/stripe/android/stripecardscan/framework/NoAnalyzersAvailableException : java/lang/Exception {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/stripe/android/stripecardscan/framework/NoAnalyzersAvailableException;
+}
+
+public final class com/stripe/android/stripecardscan/framework/ProcessBoundAnalyzerLoop : com/stripe/android/stripecardscan/framework/AnalyzerLoop {
+	public static final field $stable I
+	public fun <init> (Lcom/stripe/android/stripecardscan/framework/AnalyzerPool;Lcom/stripe/android/stripecardscan/framework/StatefulResultHandler;Lcom/stripe/android/stripecardscan/framework/AnalyzerLoopErrorListener;)V
+	public fun getState ()Ljava/lang/Object;
+	public fun onResult (Ljava/lang/Object;Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun subscribeTo (Lkotlinx/coroutines/flow/Flow;Lkotlinx/coroutines/CoroutineScope;)Lkotlinx/coroutines/Job;
+	public final fun unsubscribe ()V
+}
+
+public abstract class com/stripe/android/stripecardscan/framework/ResourceFetcher : com/stripe/android/stripecardscan/framework/Fetcher {
+	public static final field $stable I
+	public fun <init> ()V
+	public fun clearCache (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun fetchData (ZZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	protected abstract fun getAssetFileName ()Ljava/lang/String;
+	protected abstract fun getHash ()Ljava/lang/String;
+	protected abstract fun getHashAlgorithm ()Ljava/lang/String;
+	protected abstract fun getModelVersion ()Ljava/lang/String;
+	public fun isCached (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public abstract class com/stripe/android/stripecardscan/framework/ResultAggregator : com/stripe/android/stripecardscan/framework/StatefulResultHandler, androidx/lifecycle/LifecycleObserver {
+	public static final field $stable I
+	public fun <init> (Lcom/stripe/android/stripecardscan/framework/AggregateResultListener;Ljava/lang/Object;)V
+	public abstract fun aggregateResult (Ljava/lang/Object;Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun bindToLifecycle (Landroidx/lifecycle/LifecycleOwner;)V
+	public final fun cancel ()V
+	public fun onResult (Ljava/lang/Object;Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	protected fun reset ()V
+}
+
+public abstract interface class com/stripe/android/stripecardscan/framework/ResultHandler {
+	public abstract fun onResult (Ljava/lang/Object;Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public abstract class com/stripe/android/stripecardscan/framework/StatefulResultHandler : com/stripe/android/stripecardscan/framework/ResultHandler {
+	public static final field $stable I
+	public fun <init> (Ljava/lang/Object;)V
+	public final fun getState ()Ljava/lang/Object;
+	protected fun reset ()V
+	protected final fun setState (Ljava/lang/Object;)V
+}
+
+public abstract class com/stripe/android/stripecardscan/framework/TerminatingResultHandler : com/stripe/android/stripecardscan/framework/StatefulResultHandler {
+	public static final field $stable I
+	public fun <init> (Ljava/lang/Object;)V
+	public abstract fun onAllDataProcessed (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun onTerminatedEarly (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public abstract class com/stripe/android/stripecardscan/framework/WebFetcher : com/stripe/android/stripecardscan/framework/Fetcher {
+	public static final field $stable I
+	public fun <init> ()V
+	protected abstract fun cleanUpPostDownload (Ljava/io/File;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun fetchData (ZZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	protected abstract fun getDownloadDetails (Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	protected abstract fun getDownloadOutputFile (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun isCached (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	protected abstract fun tryFetchLatestCachedData (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	protected abstract fun tryFetchMatchingCachedFile (Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+protected final class com/stripe/android/stripecardscan/framework/WebFetcher$DownloadDetails {
+	public fun <init> (Ljava/net/URL;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public final fun component1 ()Ljava/net/URL;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun copy (Ljava/net/URL;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/stripecardscan/framework/WebFetcher$DownloadDetails;
+	public static synthetic fun copy$default (Lcom/stripe/android/stripecardscan/framework/WebFetcher$DownloadDetails;Ljava/net/URL;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/stripecardscan/framework/WebFetcher$DownloadDetails;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getHash ()Ljava/lang/String;
+	public final fun getHashAlgorithm ()Ljava/lang/String;
+	public final fun getModelVersion ()Ljava/lang/String;
+	public final fun getUrl ()Ljava/net/URL;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface class com/stripe/android/stripecardscan/framework/api/Network {
+	public abstract fun getForResult (Ljava/lang/String;Ljava/lang/String;Lkotlinx/serialization/KSerializer;Lkotlinx/serialization/KSerializer;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun postData (Ljava/lang/String;Ljava/lang/String;Ljava/lang/Object;Lkotlinx/serialization/KSerializer;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun postForResult (Ljava/lang/String;Ljava/lang/String;Ljava/lang/Object;Lkotlinx/serialization/KSerializer;Lkotlinx/serialization/KSerializer;Lkotlinx/serialization/KSerializer;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public abstract class com/stripe/android/stripecardscan/framework/api/NetworkResult {
+	public static final field $stable I
+	public synthetic fun <init> (ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun getResponseCode ()I
+}
+
+public final class com/stripe/android/stripecardscan/framework/api/NetworkResult$Error : com/stripe/android/stripecardscan/framework/api/NetworkResult {
+	public static final field $stable I
+	public fun <init> (ILjava/lang/Object;)V
+	public final fun component1 ()I
+	public final fun component2 ()Ljava/lang/Object;
+	public final fun copy (ILjava/lang/Object;)Lcom/stripe/android/stripecardscan/framework/api/NetworkResult$Error;
+	public static synthetic fun copy$default (Lcom/stripe/android/stripecardscan/framework/api/NetworkResult$Error;ILjava/lang/Object;ILjava/lang/Object;)Lcom/stripe/android/stripecardscan/framework/api/NetworkResult$Error;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getError ()Ljava/lang/Object;
+	public fun getResponseCode ()I
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/stripecardscan/framework/api/NetworkResult$Exception : com/stripe/android/stripecardscan/framework/api/NetworkResult {
+	public static final field $stable I
+	public fun <init> (ILjava/lang/Throwable;)V
+	public final fun component1 ()I
+	public final fun component2 ()Ljava/lang/Throwable;
+	public final fun copy (ILjava/lang/Throwable;)Lcom/stripe/android/stripecardscan/framework/api/NetworkResult$Exception;
+	public static synthetic fun copy$default (Lcom/stripe/android/stripecardscan/framework/api/NetworkResult$Exception;ILjava/lang/Throwable;ILjava/lang/Object;)Lcom/stripe/android/stripecardscan/framework/api/NetworkResult$Exception;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getException ()Ljava/lang/Throwable;
+	public fun getResponseCode ()I
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/stripecardscan/framework/api/NetworkResult$Success : com/stripe/android/stripecardscan/framework/api/NetworkResult {
+	public static final field $stable I
+	public fun <init> (ILjava/lang/Object;)V
+	public final fun component1 ()I
+	public final fun component2 ()Ljava/lang/Object;
+	public final fun copy (ILjava/lang/Object;)Lcom/stripe/android/stripecardscan/framework/api/NetworkResult$Success;
+	public static synthetic fun copy$default (Lcom/stripe/android/stripecardscan/framework/api/NetworkResult$Success;ILjava/lang/Object;ILjava/lang/Object;)Lcom/stripe/android/stripecardscan/framework/api/NetworkResult$Success;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBody ()Ljava/lang/Object;
+	public fun getResponseCode ()I
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/stripecardscan/framework/api/dto/ScanStatsRequest {
+	public static final field $stable I
+	public static final field Companion Lcom/stripe/android/stripecardscan/framework/api/dto/ScanStatsRequest$Companion;
+	public synthetic fun <init> (ILjava/lang/String;Ljava/lang/String;Lkotlinx/serialization/internal/SerializationConstructorMarker;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/stripecardscan/framework/api/dto/ScanStatsRequest;
+	public static synthetic fun copy$default (Lcom/stripe/android/stripecardscan/framework/api/dto/ScanStatsRequest;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/stripecardscan/framework/api/dto/ScanStatsRequest;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getClientSecret ()Ljava/lang/String;
+	public final fun getStats ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+	public static final fun write$Self (Lcom/stripe/android/stripecardscan/framework/api/dto/ScanStatsRequest;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V
+}
+
+public final class com/stripe/android/stripecardscan/framework/api/dto/ScanStatsRequest$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/stripe/android/stripecardscan/framework/api/dto/ScanStatsRequest$$serializer;
+	public static final synthetic field descriptor Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcom/stripe/android/stripecardscan/framework/api/dto/ScanStatsRequest;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/stripe/android/stripecardscan/framework/api/dto/ScanStatsRequest;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class com/stripe/android/stripecardscan/framework/api/dto/ScanStatsRequest$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public abstract class com/stripe/android/stripecardscan/framework/ml/TFLAnalyzerFactory : com/stripe/android/stripecardscan/framework/AnalyzerFactory {
+	public static final field $stable I
+	public fun <init> (Landroid/content/Context;Lcom/stripe/android/stripecardscan/framework/FetchedData;)V
+	protected final fun createInterpreter (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	protected abstract fun getTfOptions ()Lorg/tensorflow/lite/Interpreter$Options;
+}
+
+public abstract class com/stripe/android/stripecardscan/framework/ml/TensorFlowLiteAnalyzer : com/stripe/android/stripecardscan/framework/Analyzer, java/io/Closeable {
+	public static final field $stable I
+	public fun <init> (Lorg/tensorflow/lite/Interpreter;Lorg/tensorflow/lite/nnapi/NnApiDelegate;)V
+	public synthetic fun <init> (Lorg/tensorflow/lite/Interpreter;Lorg/tensorflow/lite/nnapi/NnApiDelegate;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun analyze (Ljava/lang/Object;Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun close ()V
+	protected abstract fun executeInference (Lorg/tensorflow/lite/Interpreter;Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	protected abstract fun interpretMLOutput (Ljava/lang/Object;Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	protected abstract fun transformData (Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class com/stripe/android/stripecardscan/framework/time/Clock {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/stripe/android/stripecardscan/framework/time/Clock;
+	public static final fun markNow ()Lcom/stripe/android/stripecardscan/framework/time/ClockMark;
+}
+
+public final class com/stripe/android/stripecardscan/framework/time/ClockKt {
+	public static final fun asEpochMillisecondsClockMark (J)Lcom/stripe/android/stripecardscan/framework/time/ClockMark;
+	public static final fun measureTime (Lkotlin/jvm/functions/Function0;)Lkotlin/Pair;
+}
+
+public abstract class com/stripe/android/stripecardscan/framework/time/ClockMark {
+	public static final field $stable I
+	public abstract fun compareTo (Lcom/stripe/android/stripecardscan/framework/time/ClockMark;)I
+	public abstract fun elapsedSince ()Lcom/stripe/android/stripecardscan/framework/time/Duration;
+	public abstract fun hasPassed ()Z
+	public abstract fun isInFuture ()Z
+	public abstract fun minus (Lcom/stripe/android/stripecardscan/framework/time/Duration;)Lcom/stripe/android/stripecardscan/framework/time/ClockMark;
+	public abstract fun plus (Lcom/stripe/android/stripecardscan/framework/time/Duration;)Lcom/stripe/android/stripecardscan/framework/time/ClockMark;
+	public abstract fun toMillisecondsSinceEpoch ()J
+}
+
+public final class com/stripe/android/stripecardscan/framework/time/CoroutineKt {
+	public static final fun delay (Lcom/stripe/android/stripecardscan/framework/time/Duration;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public abstract class com/stripe/android/stripecardscan/framework/time/Duration : java/lang/Comparable {
+	public static final field $stable I
+	public static final field Companion Lcom/stripe/android/stripecardscan/framework/time/Duration$Companion;
+	public fun compareTo (Lcom/stripe/android/stripecardscan/framework/time/Duration;)I
+	public synthetic fun compareTo (Ljava/lang/Object;)I
+	public fun div (D)Lcom/stripe/android/stripecardscan/framework/time/Duration;
+	public fun div (F)Lcom/stripe/android/stripecardscan/framework/time/Duration;
+	public fun div (I)Lcom/stripe/android/stripecardscan/framework/time/Duration;
+	public fun div (J)Lcom/stripe/android/stripecardscan/framework/time/Duration;
+	public fun equals (Ljava/lang/Object;)Z
+	public abstract fun getInDays ()D
+	public abstract fun getInHours ()D
+	public abstract fun getInMicroseconds ()D
+	public abstract fun getInMilliseconds ()D
+	public abstract fun getInMinutes ()D
+	public abstract fun getInMonths ()D
+	public abstract fun getInNanoseconds ()J
+	public abstract fun getInSeconds ()D
+	public abstract fun getInWeeks ()D
+	public abstract fun getInYears ()D
+	public fun hashCode ()I
+	public fun minus (Lcom/stripe/android/stripecardscan/framework/time/Duration;)Lcom/stripe/android/stripecardscan/framework/time/Duration;
+	public fun plus (Lcom/stripe/android/stripecardscan/framework/time/Duration;)Lcom/stripe/android/stripecardscan/framework/time/Duration;
+	public fun times (D)Lcom/stripe/android/stripecardscan/framework/time/Duration;
+	public fun times (F)Lcom/stripe/android/stripecardscan/framework/time/Duration;
+	public fun times (I)Lcom/stripe/android/stripecardscan/framework/time/Duration;
+	public fun times (J)Lcom/stripe/android/stripecardscan/framework/time/Duration;
+	public fun toString ()Ljava/lang/String;
+	public fun unaryMinus ()Lcom/stripe/android/stripecardscan/framework/time/Duration;
+}
+
+public final class com/stripe/android/stripecardscan/framework/time/Duration$Companion {
+	public final fun getINFINITE ()Lcom/stripe/android/stripecardscan/framework/time/Duration;
+	public final fun getNEGATIVE_INFINITE ()Lcom/stripe/android/stripecardscan/framework/time/Duration;
+	public final fun getZERO ()Lcom/stripe/android/stripecardscan/framework/time/Duration;
+}
+
+public final class com/stripe/android/stripecardscan/framework/time/DurationKt {
+	public static final fun getDays (D)Lcom/stripe/android/stripecardscan/framework/time/Duration;
+	public static final fun getDays (F)Lcom/stripe/android/stripecardscan/framework/time/Duration;
+	public static final fun getDays (I)Lcom/stripe/android/stripecardscan/framework/time/Duration;
+	public static final fun getDays (J)Lcom/stripe/android/stripecardscan/framework/time/Duration;
+	public static final fun getHours (D)Lcom/stripe/android/stripecardscan/framework/time/Duration;
+	public static final fun getHours (F)Lcom/stripe/android/stripecardscan/framework/time/Duration;
+	public static final fun getHours (I)Lcom/stripe/android/stripecardscan/framework/time/Duration;
+	public static final fun getHours (J)Lcom/stripe/android/stripecardscan/framework/time/Duration;
+	public static final fun getMicroseconds (D)Lcom/stripe/android/stripecardscan/framework/time/Duration;
+	public static final fun getMicroseconds (F)Lcom/stripe/android/stripecardscan/framework/time/Duration;
+	public static final fun getMicroseconds (I)Lcom/stripe/android/stripecardscan/framework/time/Duration;
+	public static final fun getMicroseconds (J)Lcom/stripe/android/stripecardscan/framework/time/Duration;
+	public static final fun getMilliseconds (D)Lcom/stripe/android/stripecardscan/framework/time/Duration;
+	public static final fun getMilliseconds (F)Lcom/stripe/android/stripecardscan/framework/time/Duration;
+	public static final fun getMilliseconds (I)Lcom/stripe/android/stripecardscan/framework/time/Duration;
+	public static final fun getMilliseconds (J)Lcom/stripe/android/stripecardscan/framework/time/Duration;
+	public static final fun getMinutes (D)Lcom/stripe/android/stripecardscan/framework/time/Duration;
+	public static final fun getMinutes (F)Lcom/stripe/android/stripecardscan/framework/time/Duration;
+	public static final fun getMinutes (I)Lcom/stripe/android/stripecardscan/framework/time/Duration;
+	public static final fun getMinutes (J)Lcom/stripe/android/stripecardscan/framework/time/Duration;
+	public static final fun getMonths (D)Lcom/stripe/android/stripecardscan/framework/time/Duration;
+	public static final fun getMonths (F)Lcom/stripe/android/stripecardscan/framework/time/Duration;
+	public static final fun getMonths (I)Lcom/stripe/android/stripecardscan/framework/time/Duration;
+	public static final fun getMonths (J)Lcom/stripe/android/stripecardscan/framework/time/Duration;
+	public static final fun getNanoseconds (D)Lcom/stripe/android/stripecardscan/framework/time/Duration;
+	public static final fun getNanoseconds (F)Lcom/stripe/android/stripecardscan/framework/time/Duration;
+	public static final fun getNanoseconds (I)Lcom/stripe/android/stripecardscan/framework/time/Duration;
+	public static final fun getNanoseconds (J)Lcom/stripe/android/stripecardscan/framework/time/Duration;
+	public static final fun getSeconds (D)Lcom/stripe/android/stripecardscan/framework/time/Duration;
+	public static final fun getSeconds (F)Lcom/stripe/android/stripecardscan/framework/time/Duration;
+	public static final fun getSeconds (I)Lcom/stripe/android/stripecardscan/framework/time/Duration;
+	public static final fun getSeconds (J)Lcom/stripe/android/stripecardscan/framework/time/Duration;
+	public static final fun getWeeks (D)Lcom/stripe/android/stripecardscan/framework/time/Duration;
+	public static final fun getWeeks (F)Lcom/stripe/android/stripecardscan/framework/time/Duration;
+	public static final fun getWeeks (I)Lcom/stripe/android/stripecardscan/framework/time/Duration;
+	public static final fun getWeeks (J)Lcom/stripe/android/stripecardscan/framework/time/Duration;
+	public static final fun getYears (D)Lcom/stripe/android/stripecardscan/framework/time/Duration;
+	public static final fun getYears (F)Lcom/stripe/android/stripecardscan/framework/time/Duration;
+	public static final fun getYears (I)Lcom/stripe/android/stripecardscan/framework/time/Duration;
+	public static final fun getYears (J)Lcom/stripe/android/stripecardscan/framework/time/Duration;
+	public static final fun max (Lcom/stripe/android/stripecardscan/framework/time/Duration;Lcom/stripe/android/stripecardscan/framework/time/Duration;)Lcom/stripe/android/stripecardscan/framework/time/Duration;
+	public static final fun min (Lcom/stripe/android/stripecardscan/framework/time/Duration;Lcom/stripe/android/stripecardscan/framework/time/Duration;)Lcom/stripe/android/stripecardscan/framework/time/Duration;
+}
+
+public final class com/stripe/android/stripecardscan/framework/time/Rate : java/lang/Comparable {
+	public static final field $stable I
+	public fun <init> (JLcom/stripe/android/stripecardscan/framework/time/Duration;)V
+	public fun compareTo (Lcom/stripe/android/stripecardscan/framework/time/Rate;)I
+	public synthetic fun compareTo (Ljava/lang/Object;)I
+	public final fun component1 ()J
+	public final fun component2 ()Lcom/stripe/android/stripecardscan/framework/time/Duration;
+	public final fun copy (JLcom/stripe/android/stripecardscan/framework/time/Duration;)Lcom/stripe/android/stripecardscan/framework/time/Rate;
+	public static synthetic fun copy$default (Lcom/stripe/android/stripecardscan/framework/time/Rate;JLcom/stripe/android/stripecardscan/framework/time/Duration;ILjava/lang/Object;)Lcom/stripe/android/stripecardscan/framework/time/Rate;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAmount ()J
+	public final fun getDuration ()Lcom/stripe/android/stripecardscan/framework/time/Duration;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/stripecardscan/framework/util/ArrayExtensionsKt {
+	public static final fun chunk ([BI)[[B
+	public static final fun clamp (FFF)F
+	public static final fun filterByIndexes ([F[I)[F
+	public static final fun filteredIndexes ([FLkotlin/jvm/functions/Function1;)[I
+	public static final fun flatten ([[F)[F
+	public static final fun indexOfMax ([F)Ljava/lang/Integer;
+	public static final fun mapToIntArray ([Ljava/lang/Object;Lkotlin/jvm/functions/Function1;)[I
+	public static final fun reshape ([[FI)[[F
+	public static final fun toByteArray (Ljava/nio/ByteBuffer;)[B
+	public static final fun toByteArray (Ljava/util/List;)[B
+	public static final fun transpose ([[F)[[F
+	public static final fun updateEach ([FLkotlin/jvm/functions/Function1;)V
+	public static final fun updateEach ([Ljava/lang/Object;Lkotlin/jvm/functions/Function1;)V
+}
+
+public final class com/stripe/android/stripecardscan/framework/util/EncodeKt {
+	public static final fun b64Encode (Ljava/lang/String;)Ljava/lang/String;
+	public static final fun b64Encode ([B)Ljava/lang/String;
+	public static final fun decodeFromJson (Lkotlinx/serialization/DeserializationStrategy;Ljava/lang/String;)Ljava/lang/Object;
+	public static final fun encodeToJson (Lkotlinx/serialization/SerializationStrategy;Ljava/lang/Object;)Ljava/lang/String;
+	public static final fun encodeToXWWWFormUrl (Lkotlinx/serialization/SerializationStrategy;Ljava/lang/Object;)Ljava/lang/String;
+}
+
+public final class com/stripe/android/stripecardscan/framework/util/FileKt {
+	public static final fun assetFileExists (Landroid/content/Context;Ljava/lang/String;)Z
+}
+
+public final class com/stripe/android/stripecardscan/framework/util/ItemCounter {
+	public static final field $stable I
+	public fun <init> (Ljava/lang/Object;)V
+	public final fun countItem (Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun getHighestCountItem ()Lkotlin/Pair;
+	public final fun reset (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class com/stripe/android/stripecardscan/framework/util/LayoutKt {
+	public static final fun adjustSizeToAspectRatio (Landroid/util/Size;F)Landroid/util/Size;
+	public static final fun aspectRatio (Landroid/util/Size;)F
+	public static final fun aspectRatio (Landroid/util/SizeF;)F
+	public static final fun centerOn (Landroid/util/Size;Landroid/graphics/Rect;)Landroid/graphics/Rect;
+	public static final fun centerScaled (Landroid/graphics/Rect;FF)Landroid/graphics/Rect;
+	public static final fun centerScaled (Landroid/graphics/RectF;FF)Landroid/graphics/RectF;
+	public static final fun intersectionWith (Landroid/graphics/Rect;Landroid/graphics/Rect;)Landroid/graphics/Rect;
+	public static final fun maxAspectRatioInSize (Landroid/util/Size;F)Landroid/util/Size;
+	public static final fun minAspectRatioSurroundingSize (Landroid/util/Size;F)Landroid/util/Size;
+	public static final fun move (Landroid/graphics/Rect;II)Landroid/graphics/Rect;
+	public static final fun move (Landroid/graphics/RectF;FF)Landroid/graphics/RectF;
+	public static final fun projectRegionOfInterest (Landroid/graphics/Rect;Landroid/graphics/Rect;Landroid/graphics/Rect;)Landroid/graphics/Rect;
+	public static final fun projectRegionOfInterest (Landroid/graphics/Rect;Landroid/util/Size;Landroid/graphics/Rect;)Landroid/graphics/Rect;
+	public static final fun projectRegionOfInterest (Landroid/graphics/RectF;Landroid/graphics/RectF;Landroid/graphics/RectF;)Landroid/graphics/RectF;
+	public static final fun projectRegionOfInterest (Landroid/graphics/RectF;Landroid/util/SizeF;Landroid/graphics/RectF;)Landroid/graphics/RectF;
+	public static final fun projectRegionOfInterest (Landroid/util/Size;Landroid/util/Size;Landroid/graphics/Rect;)Landroid/graphics/Rect;
+	public static final fun projectRegionOfInterest (Landroid/util/SizeF;Landroid/util/SizeF;Landroid/graphics/RectF;)Landroid/graphics/RectF;
+	public static final fun resizeRegion (Landroid/util/Size;Landroid/graphics/Rect;Landroid/graphics/Rect;Landroid/util/Size;)Ljava/util/Map;
+	public static final fun scale (Landroid/util/Size;F)Landroid/util/Size;
+	public static final fun scale (Landroid/util/Size;FF)Landroid/util/Size;
+	public static final fun scale (Landroid/util/SizeF;F)Landroid/util/SizeF;
+	public static final fun scale (Landroid/util/SizeF;FF)Landroid/util/SizeF;
+	public static final fun scaleAndCenterSurrounding (Landroid/util/Size;Landroid/util/Size;)Landroid/graphics/Rect;
+	public static final fun scaleAndCenterWithin (Landroid/util/Size;Landroid/graphics/Rect;)Landroid/graphics/Rect;
+	public static final fun scaleAndCenterWithin (Landroid/util/Size;Landroid/util/Size;)Landroid/graphics/Rect;
+	public static final fun scaleCentered (Landroid/util/Size;FF)Landroid/graphics/Rect;
+	public static final fun scaled (Landroid/graphics/RectF;Landroid/util/Size;)Landroid/graphics/RectF;
+	public static final fun size (Landroid/graphics/Rect;)Landroid/util/Size;
+	public static final fun size (Landroid/graphics/RectF;)Landroid/util/SizeF;
+	public static final fun size (Landroid/view/View;)Landroid/util/Size;
+	public static final fun toRect (Landroid/graphics/RectF;)Landroid/graphics/Rect;
+	public static final fun toRect (Landroid/util/Size;)Landroid/graphics/Rect;
+	public static final fun toRectF (Landroid/graphics/Rect;)Landroid/graphics/RectF;
+	public static final fun toRectF (Landroid/util/Size;)Landroid/graphics/RectF;
+	public static final fun toSize (Landroid/util/SizeF;)Landroid/util/Size;
+	public static final fun toSizeF (Landroid/util/Size;)Landroid/util/SizeF;
+	public static final fun transpose (Landroid/util/Size;)Landroid/util/Size;
+}
+
+public final class com/stripe/android/stripecardscan/framework/util/MemoizeKt {
+	public static final fun cacheFirstResult (Lkotlin/jvm/functions/Function0;)Lkotlin/jvm/functions/Function0;
+	public static final fun cacheFirstResult (Lkotlin/jvm/functions/Function1;)Lkotlin/jvm/functions/Function1;
+	public static final fun cacheFirstResult (Lkotlin/jvm/functions/Function2;)Lkotlin/jvm/functions/Function2;
+	public static final fun cacheFirstResult (Lkotlin/jvm/functions/Function3;)Lkotlin/jvm/functions/Function3;
+	public static final fun cacheFirstResultSuspend (Lkotlin/jvm/functions/Function1;)Lkotlin/jvm/functions/Function1;
+	public static final fun cacheFirstResultSuspend (Lkotlin/jvm/functions/Function2;)Lkotlin/jvm/functions/Function2;
+	public static final fun cacheFirstResultSuspend (Lkotlin/jvm/functions/Function3;)Lkotlin/jvm/functions/Function3;
+	public static final fun cacheFirstResultSuspend (Lkotlin/jvm/functions/Function4;)Lkotlin/jvm/functions/Function4;
+	public static final fun cachedFirstResult (Lkotlin/jvm/functions/Function0;)Lkotlin/jvm/functions/Function0;
+	public static final fun cachedFirstResult (Lkotlin/jvm/functions/Function1;)Lkotlin/jvm/functions/Function1;
+	public static final fun cachedFirstResult (Lkotlin/jvm/functions/Function2;)Lkotlin/jvm/functions/Function2;
+	public static final fun cachedFirstResult (Lkotlin/jvm/functions/Function3;)Lkotlin/jvm/functions/Function3;
+	public static final fun cachedFirstResultSuspend (Lkotlin/jvm/functions/Function1;)Lkotlin/jvm/functions/Function1;
+	public static final fun cachedFirstResultSuspend (Lkotlin/jvm/functions/Function2;)Lkotlin/jvm/functions/Function2;
+	public static final fun cachedFirstResultSuspend (Lkotlin/jvm/functions/Function3;)Lkotlin/jvm/functions/Function3;
+	public static final fun cachedFirstResultSuspend (Lkotlin/jvm/functions/Function4;)Lkotlin/jvm/functions/Function4;
+	public static final fun memoize (Lcom/stripe/android/stripecardscan/framework/time/Duration;Lkotlin/jvm/functions/Function0;)Lkotlin/jvm/functions/Function0;
+	public static final fun memoize (Lcom/stripe/android/stripecardscan/framework/time/Duration;Lkotlin/jvm/functions/Function1;)Lkotlin/jvm/functions/Function1;
+	public static final fun memoize (Lcom/stripe/android/stripecardscan/framework/time/Duration;Lkotlin/jvm/functions/Function2;)Lkotlin/jvm/functions/Function2;
+	public static final fun memoize (Lcom/stripe/android/stripecardscan/framework/time/Duration;Lkotlin/jvm/functions/Function3;)Lkotlin/jvm/functions/Function3;
+	public static final fun memoize (Lkotlin/jvm/functions/Function0;)Lkotlin/jvm/functions/Function0;
+	public static final fun memoize (Lkotlin/jvm/functions/Function1;)Lkotlin/jvm/functions/Function1;
+	public static final fun memoize (Lkotlin/jvm/functions/Function2;)Lkotlin/jvm/functions/Function2;
+	public static final fun memoize (Lkotlin/jvm/functions/Function3;)Lkotlin/jvm/functions/Function3;
+	public static final fun memoizeSuspend (Lcom/stripe/android/stripecardscan/framework/time/Duration;Lkotlin/jvm/functions/Function1;)Lkotlin/jvm/functions/Function1;
+	public static final fun memoizeSuspend (Lcom/stripe/android/stripecardscan/framework/time/Duration;Lkotlin/jvm/functions/Function2;)Lkotlin/jvm/functions/Function2;
+	public static final fun memoizeSuspend (Lcom/stripe/android/stripecardscan/framework/time/Duration;Lkotlin/jvm/functions/Function3;)Lkotlin/jvm/functions/Function3;
+	public static final fun memoizeSuspend (Lcom/stripe/android/stripecardscan/framework/time/Duration;Lkotlin/jvm/functions/Function4;)Lkotlin/jvm/functions/Function4;
+	public static final fun memoizeSuspend (Lkotlin/jvm/functions/Function1;)Lkotlin/jvm/functions/Function1;
+	public static final fun memoizeSuspend (Lkotlin/jvm/functions/Function2;)Lkotlin/jvm/functions/Function2;
+	public static final fun memoizeSuspend (Lkotlin/jvm/functions/Function3;)Lkotlin/jvm/functions/Function3;
+	public static final fun memoizeSuspend (Lkotlin/jvm/functions/Function4;)Lkotlin/jvm/functions/Function4;
+	public static final fun memoized (Lkotlin/jvm/functions/Function0;)Lkotlin/jvm/functions/Function0;
+	public static final fun memoized (Lkotlin/jvm/functions/Function0;Lcom/stripe/android/stripecardscan/framework/time/Duration;)Lkotlin/jvm/functions/Function0;
+	public static final fun memoized (Lkotlin/jvm/functions/Function1;)Lkotlin/jvm/functions/Function1;
+	public static final fun memoized (Lkotlin/jvm/functions/Function1;Lcom/stripe/android/stripecardscan/framework/time/Duration;)Lkotlin/jvm/functions/Function1;
+	public static final fun memoized (Lkotlin/jvm/functions/Function2;)Lkotlin/jvm/functions/Function2;
+	public static final fun memoized (Lkotlin/jvm/functions/Function2;Lcom/stripe/android/stripecardscan/framework/time/Duration;)Lkotlin/jvm/functions/Function2;
+	public static final fun memoized (Lkotlin/jvm/functions/Function3;)Lkotlin/jvm/functions/Function3;
+	public static final fun memoized (Lkotlin/jvm/functions/Function3;Lcom/stripe/android/stripecardscan/framework/time/Duration;)Lkotlin/jvm/functions/Function3;
+	public static final fun memoizedSuspend (Lkotlin/jvm/functions/Function1;)Lkotlin/jvm/functions/Function1;
+	public static final fun memoizedSuspend (Lkotlin/jvm/functions/Function1;Lcom/stripe/android/stripecardscan/framework/time/Duration;)Lkotlin/jvm/functions/Function1;
+	public static final fun memoizedSuspend (Lkotlin/jvm/functions/Function2;)Lkotlin/jvm/functions/Function2;
+	public static final fun memoizedSuspend (Lkotlin/jvm/functions/Function2;Lcom/stripe/android/stripecardscan/framework/time/Duration;)Lkotlin/jvm/functions/Function2;
+	public static final fun memoizedSuspend (Lkotlin/jvm/functions/Function3;)Lkotlin/jvm/functions/Function3;
+	public static final fun memoizedSuspend (Lkotlin/jvm/functions/Function3;Lcom/stripe/android/stripecardscan/framework/time/Duration;)Lkotlin/jvm/functions/Function3;
+	public static final fun memoizedSuspend (Lkotlin/jvm/functions/Function4;)Lkotlin/jvm/functions/Function4;
+	public static final fun memoizedSuspend (Lkotlin/jvm/functions/Function4;Lcom/stripe/android/stripecardscan/framework/time/Duration;)Lkotlin/jvm/functions/Function4;
+}
+
+public final class com/stripe/android/stripecardscan/framework/util/RetryKt {
+	public static final fun retry (Lcom/stripe/android/stripecardscan/framework/time/Duration;ILjava/util/List;Lkotlin/jvm/functions/Function1;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun retry$default (Lcom/stripe/android/stripecardscan/framework/time/Duration;ILjava/util/List;Lkotlin/jvm/functions/Function1;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public static final fun retrySync (ILjava/util/List;Lkotlin/jvm/functions/Function0;)Ljava/lang/Object;
+	public static synthetic fun retrySync$default (ILjava/util/List;Lkotlin/jvm/functions/Function0;ILjava/lang/Object;)Ljava/lang/Object;
+}
+
+public abstract class com/stripe/android/stripecardscan/payment/card/CardIssuer {
+	public static final field $stable I
+	public synthetic fun <init> (Ljava/lang/String;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun getDisplayName ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/stripecardscan/payment/card/CardIssuer$AmericanExpress : com/stripe/android/stripecardscan/payment/card/CardIssuer {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/stripe/android/stripecardscan/payment/card/CardIssuer$AmericanExpress;
+}
+
+public final class com/stripe/android/stripecardscan/payment/card/CardIssuer$Custom : com/stripe/android/stripecardscan/payment/card/CardIssuer {
+	public static final field $stable I
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lcom/stripe/android/stripecardscan/payment/card/CardIssuer$Custom;
+	public static synthetic fun copy$default (Lcom/stripe/android/stripecardscan/payment/card/CardIssuer$Custom;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/stripecardscan/payment/card/CardIssuer$Custom;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun getDisplayName ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/stripecardscan/payment/card/CardIssuer$DinersClub : com/stripe/android/stripecardscan/payment/card/CardIssuer {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/stripe/android/stripecardscan/payment/card/CardIssuer$DinersClub;
+}
+
+public final class com/stripe/android/stripecardscan/payment/card/CardIssuer$Discover : com/stripe/android/stripecardscan/payment/card/CardIssuer {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/stripe/android/stripecardscan/payment/card/CardIssuer$Discover;
+}
+
+public final class com/stripe/android/stripecardscan/payment/card/CardIssuer$JCB : com/stripe/android/stripecardscan/payment/card/CardIssuer {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/stripe/android/stripecardscan/payment/card/CardIssuer$JCB;
+}
+
+public final class com/stripe/android/stripecardscan/payment/card/CardIssuer$MasterCard : com/stripe/android/stripecardscan/payment/card/CardIssuer {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/stripe/android/stripecardscan/payment/card/CardIssuer$MasterCard;
+}
+
+public final class com/stripe/android/stripecardscan/payment/card/CardIssuer$UnionPay : com/stripe/android/stripecardscan/payment/card/CardIssuer {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/stripe/android/stripecardscan/payment/card/CardIssuer$UnionPay;
+}
+
+public final class com/stripe/android/stripecardscan/payment/card/CardIssuer$Unknown : com/stripe/android/stripecardscan/payment/card/CardIssuer {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/stripe/android/stripecardscan/payment/card/CardIssuer$Unknown;
+}
+
+public final class com/stripe/android/stripecardscan/payment/card/CardIssuer$Visa : com/stripe/android/stripecardscan/payment/card/CardIssuer {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/stripe/android/stripecardscan/payment/card/CardIssuer$Visa;
+}
+
+public abstract interface class com/stripe/android/stripecardscan/payment/card/CardMatchResult {
+}
+
+public final class com/stripe/android/stripecardscan/payment/card/CardMatchResult$Match : com/stripe/android/stripecardscan/payment/card/CardMatchResult {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/stripe/android/stripecardscan/payment/card/CardMatchResult$Match;
+}
+
+public final class com/stripe/android/stripecardscan/payment/card/CardMatchResult$Mismatch : com/stripe/android/stripecardscan/payment/card/CardMatchResult {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/stripe/android/stripecardscan/payment/card/CardMatchResult$Mismatch;
+}
+
+public final class com/stripe/android/stripecardscan/payment/card/CardMatchResult$NoPan : com/stripe/android/stripecardscan/payment/card/CardMatchResult {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/stripe/android/stripecardscan/payment/card/CardMatchResult$NoPan;
+}
+
+public final class com/stripe/android/stripecardscan/payment/card/CardMatchResult$NoRequiredCard : com/stripe/android/stripecardscan/payment/card/CardMatchResult {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/stripe/android/stripecardscan/payment/card/CardMatchResult$NoRequiredCard;
+}
+
+public final class com/stripe/android/stripecardscan/payment/card/LengthPanValidator : com/stripe/android/stripecardscan/payment/card/PanValidator {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/stripe/android/stripecardscan/payment/card/LengthPanValidator;
+	public fun isValidPan (Ljava/lang/String;)Z
+	public fun plus (Lcom/stripe/android/stripecardscan/payment/card/PanValidator;)Lcom/stripe/android/stripecardscan/payment/card/PanValidator;
+}
+
+public final class com/stripe/android/stripecardscan/payment/card/LuhnPanValidator : com/stripe/android/stripecardscan/payment/card/PanValidator {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/stripe/android/stripecardscan/payment/card/LuhnPanValidator;
+	public fun isValidPan (Ljava/lang/String;)Z
+	public fun plus (Lcom/stripe/android/stripecardscan/payment/card/PanValidator;)Lcom/stripe/android/stripecardscan/payment/card/PanValidator;
+}
+
+public abstract interface class com/stripe/android/stripecardscan/payment/card/PanValidator {
+	public abstract fun isValidPan (Ljava/lang/String;)Z
+	public abstract fun plus (Lcom/stripe/android/stripecardscan/payment/card/PanValidator;)Lcom/stripe/android/stripecardscan/payment/card/PanValidator;
+}
+
+public final class com/stripe/android/stripecardscan/payment/card/PanValidator$DefaultImpls {
+	public static fun plus (Lcom/stripe/android/stripecardscan/payment/card/PanValidator;Lcom/stripe/android/stripecardscan/payment/card/PanValidator;)Lcom/stripe/android/stripecardscan/payment/card/PanValidator;
+}
+
+public final class com/stripe/android/stripecardscan/payment/card/PaymentCardUtils {
+	public static final field QUICK_READ_GROUP_LENGTH I
+	public static final field QUICK_READ_LENGTH I
+	public static final fun supportCardIssuer (Lkotlin/ranges/IntRange;Lcom/stripe/android/stripecardscan/payment/card/CardIssuer;Ljava/util/List;Ljava/util/List;Lcom/stripe/android/stripecardscan/payment/card/PanValidator;)Z
+	public static synthetic fun supportCardIssuer$default (Lkotlin/ranges/IntRange;Lcom/stripe/android/stripecardscan/payment/card/CardIssuer;Ljava/util/List;Ljava/util/List;Lcom/stripe/android/stripecardscan/payment/card/PanValidator;ILjava/lang/Object;)Z
+}
+
+public final class com/stripe/android/stripecardscan/payment/card/ScannedCard : android/os/Parcelable {
+	public static final field $stable I
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lcom/stripe/android/stripecardscan/payment/card/ScannedCard;
+	public static synthetic fun copy$default (Lcom/stripe/android/stripecardscan/payment/card/ScannedCard;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/stripecardscan/payment/card/ScannedCard;
+	public fun describeContents ()I
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getPan ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+	public fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public class com/stripe/android/stripecardscan/scanui/CameraErrorListenerImpl : com/stripe/android/stripecardscan/camera/CameraErrorListener {
+	public static final field $stable I
+	public fun <init> (Landroid/content/Context;Lkotlin/jvm/functions/Function1;)V
+	protected final fun getCallback ()Lkotlin/jvm/functions/Function1;
+	protected final fun getContext ()Landroid/content/Context;
+	public fun onCameraAccessError (Ljava/lang/Throwable;)V
+	public fun onCameraOpenError (Ljava/lang/Throwable;)V
+	public fun onCameraUnsupportedError (Ljava/lang/Throwable;)V
+}
+
+public abstract interface class com/stripe/android/stripecardscan/scanui/CancellationReason : android/os/Parcelable {
+}
+
+public final class com/stripe/android/stripecardscan/scanui/CancellationReason$Back : com/stripe/android/stripecardscan/scanui/CancellationReason {
+	public static final field $stable I
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public static final field INSTANCE Lcom/stripe/android/stripecardscan/scanui/CancellationReason$Back;
+	public fun describeContents ()I
+	public fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public final class com/stripe/android/stripecardscan/scanui/CancellationReason$CameraPermissionDenied : com/stripe/android/stripecardscan/scanui/CancellationReason {
+	public static final field $stable I
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public static final field INSTANCE Lcom/stripe/android/stripecardscan/scanui/CancellationReason$CameraPermissionDenied;
+	public fun describeContents ()I
+	public fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public final class com/stripe/android/stripecardscan/scanui/CancellationReason$Closed : com/stripe/android/stripecardscan/scanui/CancellationReason {
+	public static final field $stable I
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public static final field INSTANCE Lcom/stripe/android/stripecardscan/scanui/CancellationReason$Closed;
+	public fun describeContents ()I
+	public fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public final class com/stripe/android/stripecardscan/scanui/CancellationReason$UserCannotScan : com/stripe/android/stripecardscan/scanui/CancellationReason {
+	public static final field $stable I
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public static final field INSTANCE Lcom/stripe/android/stripecardscan/scanui/CancellationReason$UserCannotScan;
+	public fun describeContents ()I
+	public fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public abstract class com/stripe/android/stripecardscan/scanui/ScanActivity : androidx/appcompat/app/AppCompatActivity, kotlinx/coroutines/CoroutineScope {
+	public static final field $stable I
+	public static final field Companion Lcom/stripe/android/stripecardscan/scanui/ScanActivity$Companion;
+	public static final field PERMISSION_REQUEST_CODE I
+	public fun <init> ()V
+	protected fun buildCameraAdapter ()Lcom/stripe/android/stripecardscan/camera/CameraAdapter;
+	protected fun closeScanner ()V
+	protected fun ensurePermissionAndStartCamera ()V
+	protected final fun getCameraAdapter ()Lcom/stripe/android/stripecardscan/camera/CameraAdapter;
+	public fun getCoroutineContext ()Lkotlin/coroutines/CoroutineContext;
+	protected abstract fun getMinimumAnalysisResolution ()Landroid/util/Size;
+	protected abstract fun getPreviewFrame ()Landroid/view/ViewGroup;
+	protected fun hideSystemUi ()V
+	protected final fun isFlashlightOn ()Z
+	public fun onBackPressed ()V
+	protected fun onCameraReady ()V
+	protected abstract fun onCameraStreamAvailable (Lkotlinx/coroutines/flow/Flow;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	protected fun onCreate (Landroid/os/Bundle;)V
+	protected abstract fun onFlashSupported (Z)V
+	protected abstract fun onFlashlightStateChanged (Z)V
+	protected fun onPause ()V
+	public fun onRequestPermissionsResult (I[Ljava/lang/String;[I)V
+	protected fun onResume ()V
+	protected abstract fun onSupportsMultipleCameras (Z)V
+	protected fun openAppSettings ()V
+	protected abstract fun prepareCamera (Lkotlin/jvm/functions/Function0;)V
+	protected fun requestCameraPermission ()V
+	protected fun scanFailure (Ljava/lang/Throwable;)V
+	public static synthetic fun scanFailure$default (Lcom/stripe/android/stripecardscan/scanui/ScanActivity;Ljava/lang/Throwable;ILjava/lang/Object;)V
+	protected fun setFocus (Landroid/graphics/PointF;)V
+	protected fun showCameraNotSupportedDialog ()V
+	protected fun showPermissionDeniedDialog ()V
+	protected fun showPermissionRationaleDialog ()V
+	protected fun toggleCamera ()V
+	protected fun toggleFlashlight ()V
+	protected fun userCannotScan ()V
+	protected fun userClosedScanner ()V
+	protected fun userDeniedCameraPermission ()V
+}
+
+public final class com/stripe/android/stripecardscan/scanui/ScanActivity$Companion {
+}
+
+public final class com/stripe/android/stripecardscan/scanui/ScanActivityKt {
+	public static final field PERMISSION_RATIONALE_SHOWN Ljava/lang/String;
+}
+
+public abstract interface class com/stripe/android/stripecardscan/scanui/ScanFlow {
+	public abstract fun cancelFlow ()V
+	public abstract fun startFlow (Landroid/content/Context;Lkotlinx/coroutines/flow/Flow;Landroid/graphics/Rect;Landroidx/lifecycle/LifecycleOwner;Lkotlinx/coroutines/CoroutineScope;Ljava/lang/Object;)V
+}
+
+public abstract interface class com/stripe/android/stripecardscan/scanui/ScanResultListener {
+	public abstract fun failed (Ljava/lang/Throwable;)V
+	public abstract fun userCanceled (Lcom/stripe/android/stripecardscan/scanui/CancellationReason;)V
+}
+
+public abstract class com/stripe/android/stripecardscan/scanui/SimpleScanActivity : com/stripe/android/stripecardscan/scanui/ScanActivity {
+	public static final field $stable I
+	public static final field Companion Lcom/stripe/android/stripecardscan/scanui/SimpleScanActivity$Companion;
+	protected field deferredScanFlowParameters Lkotlinx/coroutines/Deferred;
+	public fun <init> ()V
+	protected final fun addConstraints (Landroid/view/View;Lkotlin/jvm/functions/Function2;)V
+	protected fun addUiComponents ()V
+	protected final fun appendUiComponents ([Landroid/view/View;)V
+	protected final fun changeScanState (Lcom/stripe/android/stripecardscan/scanui/SimpleScanActivity$ScanState;)Z
+	protected final fun constrainToParent (Landroid/view/View;)V
+	protected fun displayState (Lcom/stripe/android/stripecardscan/scanui/SimpleScanActivity$ScanState;Lcom/stripe/android/stripecardscan/scanui/SimpleScanActivity$ScanState;)V
+	protected fun getCardNameTextView ()Landroid/widget/TextView;
+	protected fun getCardNumberTextView ()Landroid/widget/TextView;
+	protected fun getCloseButtonView ()Landroid/view/View;
+	protected final fun getDeferredScanFlowParameters ()Lkotlinx/coroutines/Deferred;
+	protected final fun getHasMultipleCameras ()Ljava/lang/Boolean;
+	protected fun getInstructionsTextView ()Landroid/widget/TextView;
+	protected fun getLayout ()Landroidx/constraintlayout/widget/ConstraintLayout;
+	protected fun getPreviewFrame ()Landroid/view/ViewGroup;
+	protected final fun getScanState ()Lcom/stripe/android/stripecardscan/scanui/SimpleScanActivity$ScanState;
+	protected fun getSecurityIconView ()Landroid/widget/ImageView;
+	protected fun getSecurityTextView ()Landroid/widget/TextView;
+	protected fun getSwapCameraButtonView ()Landroid/view/View;
+	protected fun getTorchButtonView ()Landroid/view/View;
+	protected fun getVersionTextView ()Landroid/widget/TextView;
+	protected fun getViewFinderAspectRatio ()Ljava/lang/String;
+	protected fun getViewFinderBackgroundView ()Lcom/stripe/android/stripecardscan/scanui/ViewFinderBackground;
+	protected fun getViewFinderBorderView ()Landroid/widget/ImageView;
+	protected fun getViewFinderWindowView ()Landroid/view/View;
+	protected fun isBackgroundDark ()Z
+	protected final fun isFlashlightSupported ()Ljava/lang/Boolean;
+	protected fun onCameraStreamAvailable (Lkotlinx/coroutines/flow/Flow;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	protected fun onCreate (Landroid/os/Bundle;)V
+	protected fun onDestroy ()V
+	protected fun onFlashSupported (Z)V
+	protected fun onFlashlightStateChanged (Z)V
+	protected fun onPause ()V
+	protected fun onResume ()V
+	protected fun onSupportsMultipleCameras (Z)V
+	protected fun prepareCamera (Lkotlin/jvm/functions/Function0;)V
+	protected final fun setDeferredScanFlowParameters (Lkotlinx/coroutines/Deferred;)V
+	protected final fun setFlashlightSupported (Ljava/lang/Boolean;)V
+	protected final fun setHasMultipleCameras (Ljava/lang/Boolean;)V
+	protected fun setupCardDetailsConstraints ()V
+	protected fun setupCardDetailsUi ()V
+	protected fun setupCloseButtonViewConstraints ()V
+	protected fun setupCloseButtonViewUi ()V
+	protected fun setupInstructionsViewConstraints ()V
+	protected fun setupInstructionsViewUi ()V
+	protected fun setupPreviewFrameConstraints ()V
+	protected fun setupSecurityNoticeConstraints ()V
+	protected fun setupSecurityNoticeUi ()V
+	protected fun setupSwapCameraButtonViewConstraints ()V
+	protected fun setupSwapCameraButtonViewUi ()V
+	protected fun setupTorchButtonViewConstraints ()V
+	protected fun setupTorchButtonViewUi ()V
+	protected fun setupUiComponents ()V
+	protected fun setupUiConstraints ()V
+	protected fun setupViewFinderConstraints ()V
+	protected fun setupViewFinderViewUI ()V
+}
+
+public final class com/stripe/android/stripecardscan/scanui/SimpleScanActivity$Companion {
+}
+
+public abstract class com/stripe/android/stripecardscan/scanui/SimpleScanActivity$ScanState {
+	public static final field $stable I
+	public fun <init> (Z)V
+	public final fun isFinal ()Z
+}
+
+public final class com/stripe/android/stripecardscan/scanui/SimpleScanActivity$ScanState$Correct : com/stripe/android/stripecardscan/scanui/SimpleScanActivity$ScanState {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/stripe/android/stripecardscan/scanui/SimpleScanActivity$ScanState$Correct;
+}
+
+public final class com/stripe/android/stripecardscan/scanui/SimpleScanActivity$ScanState$FoundLong : com/stripe/android/stripecardscan/scanui/SimpleScanActivity$ScanState {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/stripe/android/stripecardscan/scanui/SimpleScanActivity$ScanState$FoundLong;
+}
+
+public final class com/stripe/android/stripecardscan/scanui/SimpleScanActivity$ScanState$FoundShort : com/stripe/android/stripecardscan/scanui/SimpleScanActivity$ScanState {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/stripe/android/stripecardscan/scanui/SimpleScanActivity$ScanState$FoundShort;
+}
+
+public final class com/stripe/android/stripecardscan/scanui/SimpleScanActivity$ScanState$NotFound : com/stripe/android/stripecardscan/scanui/SimpleScanActivity$ScanState {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/stripe/android/stripecardscan/scanui/SimpleScanActivity$ScanState$NotFound;
+}
+
+public final class com/stripe/android/stripecardscan/scanui/SimpleScanActivity$ScanState$Wrong : com/stripe/android/stripecardscan/scanui/SimpleScanActivity$ScanState {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/stripe/android/stripecardscan/scanui/SimpleScanActivity$ScanState$Wrong;
+}
+
+public final class com/stripe/android/stripecardscan/scanui/ViewFinderBackground : android/view/View {
+	public static final field $stable I
+	public fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;)V
+	public synthetic fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun clearOnDrawListener ()V
+	public final fun clearViewFinderRect ()V
+	public final fun getBackgroundLuminance ()I
+	public fun setBackgroundColor (I)V
+	public final fun setOnDrawListener (Lkotlin/jvm/functions/Function0;)V
+	public final fun setViewFinderRect (Landroid/graphics/Rect;)V
+}
+
