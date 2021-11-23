@@ -2,27 +2,38 @@ package com.stripe.android.stripecardscan.example
 
 import android.content.Intent
 import android.os.Bundle
-import android.widget.Toast
-import androidx.activity.result.ActivityResultCallback
-import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.widget.addTextChangedListener
-import com.android.volley.toolbox.JsonObjectRequest
-import com.android.volley.toolbox.Volley
+import com.github.kittinunf.fuel.Fuel
+import com.github.kittinunf.result.Result
 import com.stripe.android.stripecardscan.example.activity.LaunchCardImageVerificationSheetCompleteActivity
 import com.stripe.android.stripecardscan.example.activity.PARAM_PUBLISHABLE_KEY
 import com.stripe.android.stripecardscan.example.activity.PARAM_VERIFICATION_RESULT
+import com.stripe.android.stripecardscan.example.activity.SnackbarController
 import com.stripe.android.stripecardscan.example.databinding.ActivityMainBinding
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
 
 class MainActivity : AppCompatActivity() {
     private val viewBinding by lazy {
         ActivityMainBinding.inflate(layoutInflater)
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        val requestQueue = Volley.newRequestQueue(this)
+    private val snackbarController: SnackbarController by lazy {
+        SnackbarController(viewBinding.coordinator)
+    }
 
+    private val json by lazy {
+        Json {
+            ignoreUnknownKeys = true
+            isLenient = true
+            encodeDefaults = true
+        }
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(viewBinding.root)
         setSupportActionBar(findViewById(R.id.toolbar))
@@ -34,25 +45,22 @@ class MainActivity : AppCompatActivity() {
         }
 
         viewBinding.getPublishableKeyButton.setOnClickListener {
-            requestQueue.add(
-                JsonObjectRequest(
-                    "https://stripe-card-scan-civ-example-app.glitch.me/publishable_key",
-                    { response ->
-                        viewBinding.stripePublishableKey.setText(
-                            response.get("publishable_key") as String
-                        )
-                        viewBinding.launchCompleteButton.isEnabled = true
-                    },
-                    { error ->
-                        Toast.makeText(
-                            this,
-                            "Error getting publishable key: ${error.message}",
-                            Toast.LENGTH_SHORT,
-                        )
-                            .show()
+            Fuel.get("https://stripe-card-scan-civ-example-app.glitch.me/publishable_key")
+                .responseString { _, _, result ->
+                    when (result) {
+                        is Result.Failure -> runOnUiThread {
+                            snackbarController
+                                .show("Error getting key: ${result.getException().message}")
+                        }
+                        is Result.Success -> runOnUiThread {
+                            json.decodeFromString(PubKeyResponse.serializer(), result.get())
+                                .let {
+                                    viewBinding.stripePublishableKey.setText(it.publishableKey)
+                                    viewBinding.launchCompleteButton.isEnabled = true
+                                }
+                        }
                     }
-                )
-            )
+                }
         }
 
         viewBinding.stripePublishableKey.addTextChangedListener(
@@ -73,4 +81,9 @@ class MainActivity : AppCompatActivity() {
             )
         }
     }
+
+    @Serializable
+    data class PubKeyResponse(
+        @SerialName("publishable_key") val publishableKey: String,
+    )
 }

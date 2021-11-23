@@ -4,17 +4,16 @@ import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.widget.addTextChangedListener
-import com.android.volley.Request
-import com.android.volley.RequestQueue
-import com.android.volley.toolbox.JsonObjectRequest
-import com.android.volley.toolbox.Volley
+import com.github.kittinunf.fuel.Fuel
+import com.github.kittinunf.result.Result
 import com.stripe.android.stripecardscan.cardimageverification.CardImageVerificationSheet
 import com.stripe.android.stripecardscan.cardimageverification.CardImageVerificationSheetResult
 import com.stripe.android.stripecardscan.example.databinding.ActivityLaunchCardImageVerificationSheetCompleteBinding
-import org.json.JSONObject
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
 
 internal const val PARAM_PUBLISHABLE_KEY = "stripePublishableKey"
 internal const val PARAM_VERIFICATION_RESULT = "verificationResult"
@@ -24,11 +23,19 @@ internal class LaunchCardImageVerificationSheetCompleteActivity : AppCompatActiv
         ActivityLaunchCardImageVerificationSheetCompleteBinding.inflate(layoutInflater)
     }
 
-    private lateinit var requestQueue: RequestQueue
+    private val snackbarController: SnackbarController by lazy {
+        SnackbarController(viewBinding.coordinator)
+    }
+
+    private val json by lazy {
+        Json {
+            ignoreUnknownKeys = true
+            isLenient = true
+            encodeDefaults = true
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        requestQueue = Volley.newRequestQueue(this)
-
         super.onCreate(savedInstanceState)
         setContentView(viewBinding.root)
 
@@ -42,42 +49,30 @@ internal class LaunchCardImageVerificationSheetCompleteActivity : AppCompatActiv
             CardImageVerificationSheet.create(this, stripePublishableKey)
 
         viewBinding.generateCivIntent.setOnClickListener {
-            requestQueue.add(
-                JsonObjectRequest(
-                    Request.Method.POST,
-                    "https://stripe-card-scan-civ-example-app.glitch.me/card-set/checkout",
-                    JSONObject().apply {
-                        put(
-                            "expected_card[iin]",
-                            viewBinding.requiredIinText.text.toString(),
-                        )
-                        put(
-                            "expected_card[last4]",
-                            viewBinding.requiredLast4Text.text.toString(),
-                        )
-                    },
-                    { response ->
-                        if (!response.has("id")) {
-                            Toast.makeText(this, "No CIV ID returned", Toast.LENGTH_SHORT)
-                                .show()
-                        } else {
-                            viewBinding.civIdText
-                                .setText(response.get("id") as String)
-                            viewBinding.civSecretText
-                                .setText(response.get("client_secret") as String)
-                            viewBinding.launchScanButton.isEnabled = true
-                        }
-                    },
-                    { error ->
-                        Toast.makeText(
-                            this,
-                            "Error generating CIV: ${error.message}",
-                            Toast.LENGTH_SHORT,
-                        )
-                            .show()
-                    },
+            Fuel.post("https://stripe-card-scan-civ-example-app.glitch.me/card-set/checkout")
+                .header("content-type", "application/json")
+                .body(
+                    """
+                    {
+                        "expected_card[iin]": "${viewBinding.requiredIinText.text}",
+                        "expected_card[last4]": "${viewBinding.requiredLast4Text.text}"
+                    }
+                    """.trimIndent()
                 )
-            )
+                .responseString { _, _, result ->
+                    when (result) {
+                        is Result.Failure -> snackbarController
+                            .show("Error generating CIV: ${result.getException().message}")
+                        is Result.Success -> runOnUiThread {
+                            json.decodeFromString(CivCreationResponse.serializer(), result.get())
+                                .let {
+                                    viewBinding.civIdText.setText(it.civId)
+                                    viewBinding.civSecretText.setText(it.civClientSecret)
+                                    viewBinding.launchScanButton.isEnabled = true
+                                }
+                        }
+                    }
+                }
         }
 
         viewBinding.civIdText.addTextChangedListener(
@@ -108,31 +103,36 @@ internal class LaunchCardImageVerificationSheetCompleteActivity : AppCompatActiv
     }
 
     private fun onScanFinished(result: CardImageVerificationSheetResult) {
-        Toast.makeText(this, result.toString(), Toast.LENGTH_LONG).show()
+        snackbarController.show(result.toString())
 
-        requestQueue.add(
-            JsonObjectRequest(
-                Request.Method.POST,
-                "https://stripe-card-scan-civ-example-app.glitch.me/verify",
-                JSONObject().apply {
-                    put("civ_id", viewBinding.civIdText.text.toString())
-                },
-                { response ->
-                    setResult(
-                        Activity.RESULT_OK,
-                        Intent().putExtra(PARAM_VERIFICATION_RESULT, response.toString()),
-                    )
-                    finish()
-                },
-                { error ->
-                    Toast.makeText(
-                        this,
-                        "Error getting validation payload: ${error.message}",
-                        Toast.LENGTH_SHORT,
-                    )
-                        .show()
-                },
+        Fuel.post("https://stripe-card-scan-civ-example-app.glitch.me/verify")
+            .header("content-type", "application/json")
+            .body(
+                """
+                {
+                    "civ_id": "${viewBinding.civIdText.text}"
+                }
+                """.trimIndent()
             )
-        )
+            .responseString { _, _, result ->
+                when (result) {
+                    is Result.Failure -> snackbarController
+                        .show("Error getting validation payload: ${result.getException().message}")
+                    is Result.Success -> {
+                        setResult(
+                            Activity.RESULT_OK,
+                            Intent().putExtra(PARAM_VERIFICATION_RESULT, result.get()),
+                        )
+                        finish()
+                    }
+                }
+            }
     }
+
+    @Serializable
+    data class CivCreationResponse(
+        @SerialName("publishable_key") val publishableKey: String,
+        @SerialName("id") val civId: String,
+        @SerialName("client_secret") val civClientSecret: String,
+    )
 }
