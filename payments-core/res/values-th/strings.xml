@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+    <string name="acc_label_card_number">หมายเลขบัตร</string>
+    <string name="acc_label_card_number_node">%s, หมายเลขบัตร</string>
+    <string name="acc_label_cvc_node">%s, CVC</string>
+    <string name="acc_label_expiry_date">วันหมดอายุ</string>
+    <string name="acc_label_expiry_date_node">%s, วันหมดอายุ</string>
+    <string name="acc_label_zip">รหัสไปรษณีย์</string>
+    <string name="acc_label_zip_short">รหัสไปรษณีย์</string>
+    <string name="add_card">เพิ่มบัตรเดบิตหรือเครดิตใหม่เพื่อชำระเงินในแอปนี้</string>
+    <string name="added">เพิ่ม %s แล้ว</string>
+    <string name="address_city_required">โปรดป้อนชื่อเมือง</string>
+    <string name="address_country_invalid">ประเทศไม่ถูกต้อง</string>
+    <string name="address_county_required">โปรดป้อนชื่อเคาน์ตี</string>
+    <string name="address_label_address">ที่อยู่</string>
+    <string name="address_label_address_line1">ที่อยู่บรรทัดที่ 1</string>
+    <string name="address_label_address_line1_optional">ที่อยู่บรรทัดที่ 1 (ระบุหรือไม่ก็ได้)</string>
+    <string name="address_label_address_line2_optional">ที่อยู่บรรทัดที่ 2 (ระบุหรือไม่ก็ได้)</string>
+    <string name="address_label_address_optional">ที่อยู่ (ระบุหรือไม่ก็ได้) </string>
+    <string name="address_label_apt">อพาร์ตเมนต์</string>
+    <string name="address_label_apt_optional">อพาร์ตเมนต์ (ระบุหรือไม่ก็ได้)</string>
+    <string name="address_label_city">เมือง</string>
+    <string name="address_label_city_optional">เมือง (ระบุหรือไม่ก็ได้)</string>
+    <string name="address_label_country">ประเทศ</string>
+    <string name="address_label_county">เคาน์ตี</string>
+    <string name="address_label_county_optional">เคาน์ตี (ระบุหรือไม่ก็ได้)</string>
+    <string name="address_label_name">ชื่อ</string>
+    <string name="address_label_phone_number">หมายเลขโทรศัพท์</string>
+    <string name="address_label_phone_number_optional">หมายเลขโทรศัพท์ (ระบุหรือไม่ก็ได้)</string>
+    <string name="address_label_postal_code">รหัสไปรษณีย์</string>
+    <string name="address_label_postal_code_optional">รหัสไปรษณีย์ (ระบุหรือไม่ก็ได้)</string>
+    <string name="address_label_postcode">รหัสไปรษณีย์</string>
+    <string name="address_label_postcode_optional">รหัสไปรษณีย์ (ระบุหรือไม่ก็ได้)</string>
+    <string name="address_label_province">จังหวัด</string>
+    <string name="address_label_province_optional">จังหวัด (ระบุหรือไม่ก็ได้)</string>
+    <string name="address_label_region_generic">รัฐ / จังหวัด / ภูมิภาค</string>
+    <string name="address_label_region_generic_optional">รัฐ / จังหวัด / ภูมิภาค (ระบุหรือไม่ก็ได้)</string>
+    <string name="address_label_state">รัฐ</string>
+    <string name="address_label_state_optional">รัฐ (ระบุหรือไม่ก็ได้)</string>
+    <string name="address_label_zip_code">รหัสไปรษณีย์</string>
+    <string name="address_label_zip_code_optional">รหัสไปรษณีย์ (ระบุหรือไม่ก็ได้)</string>
+    <string name="address_label_zip_postal_code">รหัสไปรษณีย์</string>
+    <string name="address_label_zip_postal_code_optional">รหัสไปรษณีย์ (ระบุหรือไม่ก็ได้)</string>
+    <string name="address_name_required">โปรดป้อนชื่อ</string>
+    <string name="address_phone_number_required">โปรดป้อนหมายเลขโทรศัพท์</string>
+    <string name="address_postal_code_invalid">รหัสไปรษณีย์ไม่ถูกต้อง</string>
+    <string name="address_postcode_invalid">รหัสไปรษณีย์ไม่ถูกต้อง</string>
+    <string name="address_province_required">โปรดป้อนชื่อจังหวัด</string>
+    <string name="address_region_generic_required">โปรดป้อนชื่อรัฐ/จังหวัด/ภูมิภาค</string>
+    <string name="address_required">โปรดป้อนที่อยู่</string>
+    <string name="address_shipping_address">ที่อยู่สำหรับจัดส่ง</string>
+    <string name="address_state_required">โปรดป้อนชื่อรัฐ</string>
+    <string name="address_zip_invalid">รหัสไปรษณีย์ไม่ถูกต้อง</string>
+    <string name="address_zip_postal_invalid">รหัสไปรษณีย์ไม่ถูกต้อง</string>
+    <string name="becs_mandate_acceptance">
+    การระบุรายละเอียดบัญชีธนาคารและการยืนยันการชำระเงินนี้หมายความว่าคุณยอมรับ
+    ข้อตกลงในการให้บริการการขอหักบัญชีอัตโนมัติ และอนุญาตให้
+    Stripe Payments Australia Pty Ltd ACN 160 180 343 Direct Debit User ID
+    หมายเลข 507156 (“Stripe”) หักเงินจากบัญชีของคุณผ่าน
+    Bulk Electronic Clearing System (BECS) ในนามของ %1$s (\"ผู้ค้า\") สำหรับจำนวนเงิน
+    ใดก็ตามที่ผู้ค้าได้แจ้งคุณไว้ต่างหาก และคุณรับรองว่า
+    ตนเองเป็นเจ้าของบัญชีหรือผู้มีอำนาจลงนามในบัญชีที่ระบุข้างต้น
+    </string>
+    <string name="becs_widget_account_number">หมายเลขบัญชี</string>
+    <string name="becs_widget_account_number_incomplete">หมายเลขบัญชีไม่ครบถ้วน</string>
+    <string name="becs_widget_account_number_required">หมายเลขบัญชีไม่ถูกต้อง</string>
+    <string name="becs_widget_bsb">BSB</string>
+    <string name="becs_widget_bsb_incomplete">BSB ที่คุณป้อนไม่ครบถ้วน</string>
+    <string name="becs_widget_bsb_invalid">BSB ที่คุณป้อนไม่ถูกต้อง</string>
+    <string name="becs_widget_email">ที่อยู่อีเมล</string>
+    <string name="becs_widget_email_invalid">ที่อยู่อีเมลไม่ถูกต้อง</string>
+    <string name="becs_widget_email_required">ต้องระบุที่อยู่อีเมล</string>
+    <string name="becs_widget_name">ชื่อ</string>
+    <string name="becs_widget_name_required">ต้องระบุชื่อ</string>
+    <string name="card_ending_in">%1$s ลงท้ายด้วย %2$s</string>
+    <string name="close">ปิด</string>
+    <string name="delete_payment_method">ลบวิธีการชำระเงิน</string>
+    <string name="delete_payment_method_prompt_title">ลบวิธีการชำระเงินใช่ไหม</string>
+    <string name="expiry_date_hint">ดด/ปป</string>
+    <string name="expiry_label_short">วันหมดอายุ</string>
+    <string name="fpx_bank_offline">%s - ออฟไลน์</string>
+    <string name="incomplete_expiry_date">วันที่หมดอายุของบัตรไม่ครบถ้วน</string>
+    <string name="invalid_card_number">หมายเลขบัตรไม่ถูกต้อง</string>
+    <string name="invalid_cvc">รหัสความปลอดภัยของบัตรไม่ถูกต้อง</string>
+    <string name="invalid_expiry_month">เดือนที่หมดอายุของบัตรไม่ถูกต้อง</string>
+    <string name="invalid_expiry_year">ปีที่หมดอายุของบัตรไม่ถูกต้อง</string>
+    <string name="invalid_shipping_information">ที่อยู่สำหรับจัดส่งไม่ถูกต้อง</string>
+    <string name="invalid_zip">รหัสไปรษณีย์ไม่ครบถ้วน</string>
+    <string name="no_payment_methods">ไม่มีวิธีการชำระเงิน</string>
+    <string name="payment_method_add_new_card">เพิ่มบัตรใหม่...</string>
+    <string name="payment_method_add_new_fpx">เลือกบัญชีธนาคาร (FPX)…</string>
+    <string name="price_free">ฟรี</string>
+    <string name="removed">นำ %s ออกแล้ว</string>
+    <string name="secure_checkout">Secure Checkout</string>
+    <string name="stripe_failure_connection_error">เรากำลังประสบปัญหาในการเชื่อมต่อกับผู้ให้บริการชำระเงิน โปรดตรวจสอบการเชื่อมต่ออินเทอร์เน็ตแล้วลองอีกครั้ง</string>
+    <string name="stripe_failure_reason_authentication">เราตรวจสอบสิทธิ์วิธีการชำระเงินของคุณไม่ได้ โปรดเลือกวิธีการชำระเงินอื่นแล้วลองอีกครั้ง</string>
+    <string name="stripe_failure_reason_timed_out">หมดเวลาตรวจสอบสิทธิ์วิธีการชำระเงินแล้ว โปรดลองอีกครั้ง</string>
+    <string name="stripe_paymentsheet_add_button_label">เพิ่ม</string>
+    <string name="stripe_paymentsheet_add_payment_method_button_label">+ เพิ่ม</string>
+    <string name="stripe_paymentsheet_add_payment_method_card_information">ข้อมูลบัตร</string>
+    <string name="stripe_paymentsheet_add_payment_method_country_or_region">ประเทศหรือภูมิภาค</string>
+    <string name="stripe_paymentsheet_add_payment_method_title">เพิ่มข้อมูลการชำระเงิน</string>
+    <string name="stripe_paymentsheet_back">ย้อนกลับ</string>
+    <string name="stripe_paymentsheet_close">ปิด</string>
+    <string name="stripe_paymentsheet_expiration_date_hint">ดด / ปป</string>
+    <string name="stripe_paymentsheet_or_pay_with_card">หรือชำระเงินด้วยบัตร</string>
+    <string name="stripe_paymentsheet_pay_button_amount">ชำระ %s</string>
+    <string name="stripe_paymentsheet_pay_button_label">ชำระเงิน</string>
+    <string name="stripe_paymentsheet_payment_method_card">บัตร</string>
+    <string name="stripe_paymentsheet_payment_method_ideal">iDEAL</string>
+    <string name="stripe_paymentsheet_primary_button_processing">กำลังประมวลผล...</string>
+    <string name="stripe_paymentsheet_save_this_card_with_merchant_name">บันทึกบัตรนี้เพื่อชำระเงินให้ %s ในอนาคต</string>
+    <string name="stripe_paymentsheet_select_payment_method">เลือกวิธีการชำระเงิน</string>
+    <string name="stripe_paymentsheet_setup_button_label">ตั้งค่า</string>
+    <string name="title_add_a_card">เพิ่มบัตร</string>
+    <string name="title_add_an_address">ระบุที่อยู่</string>
+    <string name="title_bank_account">บัญชีธนาคาร</string>
+    <string name="title_payment_method">วิธีการชำระเงิน</string>
+    <string name="title_select_shipping_method">เลือกวิธีการจัดส่ง</string>
+</resources>

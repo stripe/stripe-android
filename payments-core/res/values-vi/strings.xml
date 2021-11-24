@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+    <string name="acc_label_card_number">Số thẻ</string>
+    <string name="acc_label_card_number_node">%s, Số thẻ</string>
+    <string name="acc_label_cvc_node">%s, CVC</string>
+    <string name="acc_label_expiry_date">Ngày hết hạn</string>
+    <string name="acc_label_expiry_date_node">%s, Ngày hết hạn</string>
+    <string name="acc_label_zip">Mã ZIP</string>
+    <string name="acc_label_zip_short">ZIP</string>
+    <string name="add_card">Thêm thẻ ghi nợ hoặc thẻ tín dụng để mua hàng trong ứng dụng này.</string>
+    <string name="added">Đã thêm %s</string>
+    <string name="address_city_required">Vui lòng nhập tên thành phố</string>
+    <string name="address_country_invalid">Tên quận không hợp lệ</string>
+    <string name="address_county_required">Vui lòng nhập tên quận</string>
+    <string name="address_label_address">Địa chỉ</string>
+    <string name="address_label_address_line1">Dòng địa chỉ 1</string>
+    <string name="address_label_address_line1_optional">Dòng địa chỉ 1 (tùy chọn)</string>
+    <string name="address_label_address_line2_optional">Dòng địa chỉ 2 (tùy chọn)</string>
+    <string name="address_label_address_optional">Địa chỉ (tùy chọn) </string>
+    <string name="address_label_apt">Căn hộ</string>
+    <string name="address_label_apt_optional">Căn hộ (tùy chọn)</string>
+    <string name="address_label_city">Thành phố</string>
+    <string name="address_label_city_optional">Thành phố (tùy chọn)</string>
+    <string name="address_label_country">Quốc gia</string>
+    <string name="address_label_county">Quận</string>
+    <string name="address_label_county_optional">Quận (tùy chọn)</string>
+    <string name="address_label_name">Tên</string>
+    <string name="address_label_phone_number">Số điện thoại</string>
+    <string name="address_label_phone_number_optional">Số điện thoại (tùy chọn)</string>
+    <string name="address_label_postal_code">Mã bưu điện</string>
+    <string name="address_label_postal_code_optional">Mã bưu điện (tùy chọn)</string>
+    <string name="address_label_postcode">Mã bưu điện</string>
+    <string name="address_label_postcode_optional">Mã bưu điện (tùy chọn)</string>
+    <string name="address_label_province">Tỉnh</string>
+    <string name="address_label_province_optional">Tỉnh (tùy chọn)</string>
+    <string name="address_label_region_generic">Tiểu bang/Tỉnh/Khu vực</string>
+    <string name="address_label_region_generic_optional">Tiểu bang/Tỉnh/Khu vực (tùy chọn)</string>
+    <string name="address_label_state">Tiểu bang</string>
+    <string name="address_label_state_optional">Tiểu bang (tùy chọn)</string>
+    <string name="address_label_zip_code">Mã ZIP</string>
+    <string name="address_label_zip_code_optional">Mã ZIP (tùy chọn)</string>
+    <string name="address_label_zip_postal_code">Mã bưu điện/ZIP</string>
+    <string name="address_label_zip_postal_code_optional">Mã bưu điện/ZIP (tùy chọn)</string>
+    <string name="address_name_required">Vui lòng nhập tên của bạn</string>
+    <string name="address_phone_number_required">Vui lòng nhập số điện thoại</string>
+    <string name="address_postal_code_invalid">Mã bưu điện không hợp lệ</string>
+    <string name="address_postcode_invalid">Mã bưu điện không hợp lệ</string>
+    <string name="address_province_required">Vui lòng nhập tên tỉnh</string>
+    <string name="address_region_generic_required">Vui lòng nhập tên Tiểu bang/Tỉnh/Khu vực</string>
+    <string name="address_required">Vui lòng nhập địa chỉ email</string>
+    <string name="address_shipping_address">Địa chỉ vận chuyển</string>
+    <string name="address_state_required">Vui lòng nhập tên tiểu bang</string>
+    <string name="address_zip_invalid">Mã ZIP không hợp lệ</string>
+    <string name="address_zip_postal_invalid">Mã bưu điện/ZIP không hợp lệ</string>
+    <string name="becs_mandate_acceptance">
+    Khi cung cấp chi tiết tài khoản ngân hàng của bạn và xác nhận khoản thanh toán này, bạn đồng ý
+    với Yêu cầu Ghi nợ Trực tiếp này và thỏa thuận dịch vụ Yêu cầu Ghi nợ Trực tiếp và ủy quyền cho
+    Stripe Payments Australia Pty Ltd ACN 160 180 343 có số ID Người dùng Ghi nợ Trực tiếp là
+    507156 (“Stripe”), thay mặt cho %1$s (\"Người bán\") ghi nợ tài khoản thông qua Hệ thống thanh toán
+    bù trừ điện tử hàng loạt (BECS) đối với bất kỳ số tiền nào được Người bán thông báo riêng cho
+    bạn. Bạn xác nhận rằng bạn là chủ tài khoản hoặc người ký được ủy quyền trên tài khoản được
+    liệt kê ở trên.
+    </string>
+    <string name="becs_widget_account_number">Số tài khoản</string>
+    <string name="becs_widget_account_number_incomplete">Số tài khoản của bạn chưa đầy đủ.</string>
+    <string name="becs_widget_account_number_required">Số tài khoản của bạn là bắt buộc.</string>
+    <string name="becs_widget_bsb">BSB</string>
+    <string name="becs_widget_bsb_incomplete">BSB mà bạn nhập chưa đầy đủ.</string>
+    <string name="becs_widget_bsb_invalid">BSB mà bạn nhập không hợp lệ.</string>
+    <string name="becs_widget_email">Địa chỉ email</string>
+    <string name="becs_widget_email_invalid">Địa chỉ email của bạn không hợp lệ.</string>
+    <string name="becs_widget_email_required">Địa chỉ email của bạn là bắt buộc.</string>
+    <string name="becs_widget_name">Tên</string>
+    <string name="becs_widget_name_required">Tên của bạn là bắt buộc.</string>
+    <string name="card_ending_in">%1$s kết thúc bằng %2$s</string>
+    <string name="close">Đóng</string>
+    <string name="delete_payment_method">Xóa phương thức thanh toán</string>
+    <string name="delete_payment_method_prompt_title">Xóa phương thức thanh toán?</string>
+    <string name="expiry_date_hint">Tháng/Năm</string>
+    <string name="expiry_label_short">Hết hạn</string>
+    <string name="fpx_bank_offline">%s - Ngoại tuyến</string>
+    <string name="incomplete_expiry_date">Ngày hết hạn trên thẻ không hợp lệ.</string>
+    <string name="invalid_card_number">Số thẻ của bạn không hợp lệ.</string>
+    <string name="invalid_cvc">Mã bảo mật trên thẻ không hợp lệ.</string>
+    <string name="invalid_expiry_month">Tháng hết hạn trên thẻ của bạn không hợp lệ.</string>
+    <string name="invalid_expiry_year">Năm hết hạn trên thẻ của bạn không hợp lệ.</string>
+    <string name="invalid_shipping_information">Địa chỉ vận chuyển không hợp lệ</string>
+    <string name="invalid_zip">Mã bưu điện chưa đầy đủ.</string>
+    <string name="no_payment_methods">Không có phương thức thanh toán.</string>
+    <string name="payment_method_add_new_card">Thêm thẻ mới...</string>
+    <string name="payment_method_add_new_fpx">Chọn Tài khoản Ngân hàng (FPX)...</string>
+    <string name="price_free">Miễn phí</string>
+    <string name="removed">Đã xóa %s</string>
+    <string name="secure_checkout">Bảo mật Thanh toán</string>
+    <string name="stripe_failure_connection_error">Chúng tôi đang gặp sự cố khi kết nối với nhà cung cấp dịch vụ thanh toán của mình. Vui lòng kiểm tra kết nối internet của bạn và thử lại.</string>
+    <string name="stripe_failure_reason_authentication">Chúng tôi không thể xác thực phương thức thanh toán của bạn. Vui lòng chọn phương thức thanh toán khác và thử lại.</string>
+    <string name="stripe_failure_reason_timed_out">Đã hết thời gian xác thực phương thức thanh toán -- hãy thử lại sau</string>
+    <string name="stripe_paymentsheet_add_button_label">Thêm</string>
+    <string name="stripe_paymentsheet_add_payment_method_button_label">+ Thêm</string>
+    <string name="stripe_paymentsheet_add_payment_method_card_information">Thông tin thẻ</string>
+    <string name="stripe_paymentsheet_add_payment_method_country_or_region">Quốc gia hoặc khu vực</string>
+    <string name="stripe_paymentsheet_add_payment_method_title">Thêm thông tin thanh toán của bạn</string>
+    <string name="stripe_paymentsheet_back">Quay lại</string>
+    <string name="stripe_paymentsheet_close">Đóng</string>
+    <string name="stripe_paymentsheet_expiration_date_hint">Tháng /Năm</string>
+    <string name="stripe_paymentsheet_or_pay_with_card">Hoặc thanh toán bằng thẻ</string>
+    <string name="stripe_paymentsheet_pay_button_amount">Thanh toán %s</string>
+    <string name="stripe_paymentsheet_pay_button_label">Thanh toán</string>
+    <string name="stripe_paymentsheet_payment_method_card">Thẻ</string>
+    <string name="stripe_paymentsheet_payment_method_ideal">iDEAL</string>
+    <string name="stripe_paymentsheet_primary_button_processing">Đang xử lý...</string>
+    <string name="stripe_paymentsheet_save_this_card_with_merchant_name">Lưu thẻ này để thanh toán nhanh %s sau này</string>
+    <string name="stripe_paymentsheet_select_payment_method">Chọn phương thức thanh toán của bạn</string>
+    <string name="stripe_paymentsheet_setup_button_label">Cài đặt</string>
+    <string name="title_add_a_card">Thêm Thẻ</string>
+    <string name="title_add_an_address">Đặt địa chỉ</string>
+    <string name="title_bank_account">Tài khoản ngân hàng</string>
+    <string name="title_payment_method">Phương thức thanh toán</string>
+    <string name="title_select_shipping_method">Chọn phương thức vận chuyển</string>
+</resources>

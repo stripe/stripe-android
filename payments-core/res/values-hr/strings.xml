@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+    <string name="acc_label_card_number">Broj kartice</string>
+    <string name="acc_label_card_number_node">%s, broj kartice</string>
+    <string name="acc_label_cvc_node">%s, CVC</string>
+    <string name="acc_label_expiry_date">Datum isteka</string>
+    <string name="acc_label_expiry_date_node">%s, datum isteka</string>
+    <string name="acc_label_zip">ZIP broj</string>
+    <string name="acc_label_zip_short">ZIP</string>
+    <string name="add_card">Dodajte novu debitnu ili kreditnu karticu za obavljanje kupnji u ovoj aplikaciji.</string>
+    <string name="added">%s je dodano</string>
+    <string name="address_city_required">Unesite svoj grad</string>
+    <string name="address_country_invalid">Vaša država nije valjana</string>
+    <string name="address_county_required">Unesite svoju grofoviju</string>
+    <string name="address_label_address">Adresa</string>
+    <string name="address_label_address_line1">Ulica i kućni broj 1</string>
+    <string name="address_label_address_line1_optional">Ulica i kućni broj 1 (neobavezno)</string>
+    <string name="address_label_address_line2_optional">Ulica i kućni broj 2 (neobavezno)</string>
+    <string name="address_label_address_optional">Adresa (neobavezno)</string>
+    <string name="address_label_apt">Stan br.</string>
+    <string name="address_label_apt_optional">Stan br. (neobavezno)</string>
+    <string name="address_label_city">Grad</string>
+    <string name="address_label_city_optional">Grad (neobavezno)</string>
+    <string name="address_label_country">Zemlja</string>
+    <string name="address_label_county">Grofovija</string>
+    <string name="address_label_county_optional">Grofovija (neobavezno)</string>
+    <string name="address_label_name">Ime</string>
+    <string name="address_label_phone_number">Telefonski broj</string>
+    <string name="address_label_phone_number_optional">Telefonski broj (neobavezno)</string>
+    <string name="address_label_postal_code">Poštanski broj</string>
+    <string name="address_label_postal_code_optional">Poštanski broj (neobavezno)</string>
+    <string name="address_label_postcode">Poštanski broj</string>
+    <string name="address_label_postcode_optional">Poštanski broj (neobavezno)</string>
+    <string name="address_label_province">Provincija</string>
+    <string name="address_label_province_optional">Provincija (neobavezno)</string>
+    <string name="address_label_region_generic">Država / pokrajina / regija</string>
+    <string name="address_label_region_generic_optional">Država / pokrajina / regija (neobavezno)</string>
+    <string name="address_label_state">Država</string>
+    <string name="address_label_state_optional">Država (neobavezno)</string>
+    <string name="address_label_zip_code">ZIP broj</string>
+    <string name="address_label_zip_code_optional">ZIP broj (neobavezno)</string>
+    <string name="address_label_zip_postal_code">Poštanski broj</string>
+    <string name="address_label_zip_postal_code_optional">Poštanski broj (neobavezno)</string>
+    <string name="address_name_required">Unesite svoje ime</string>
+    <string name="address_phone_number_required">Unesite svoj telefonski broj</string>
+    <string name="address_postal_code_invalid">Vaš poštanski broj nije valjan</string>
+    <string name="address_postcode_invalid">Vaš poštanski broj nije valjan</string>
+    <string name="address_province_required">Unesite svoju provinciju</string>
+    <string name="address_region_generic_required">Unesite državu/pokrajinu/regiju</string>
+    <string name="address_required">Unesite svoju adresu</string>
+    <string name="address_shipping_address">Adresa za otpremu</string>
+    <string name="address_state_required">Unesite svoju državu</string>
+    <string name="address_zip_invalid">Vaš ZIP broj nije valjan.</string>
+    <string name="address_zip_postal_invalid">Vaš poštanski broj nije valjan</string>
+    <string name="becs_mandate_acceptance">
+    Unosom svojih podataka o bankovnom računu i potvrdom ovoga plaćanja, suglasni ste s 
+    ovim Zahtjevom za izravno terećenje i Ugovorom o usluzi za izravno terećenje te ovlašćujete
+    Stripe Payments Australia Pty Ltd ACN 160 180 343, ID broj korisnika za izravno terećenje
+    507156 (“Stripe”) da tereti vaš račun koristeći Bulk Electronic Clearing System (BECS) u ime %1$s 
+    (\"Trgovac\") za bilo koji iznos koji vam je Trgovac javio u odvojenoj korespondenciji. 
+    Potvrđujete da ste ili vlasnik računa ili ovlašteni potpisnik na prethodno 
+    navedenom računu.
+    </string>
+    <string name="becs_widget_account_number">Broj računa</string>
+    <string name="becs_widget_account_number_incomplete">Vaš broj računa nije kompletan.</string>
+    <string name="becs_widget_account_number_required">Vaš broj računa je obavezan.</string>
+    <string name="becs_widget_bsb">BSB</string>
+    <string name="becs_widget_bsb_incomplete">Uneseni BSB nije kompletan.</string>
+    <string name="becs_widget_bsb_invalid">Uneseni BSB nije valjan.</string>
+    <string name="becs_widget_email">Adresa e-maila</string>
+    <string name="becs_widget_email_invalid">Vaša e-mail adresa nije valjana.</string>
+    <string name="becs_widget_email_required">Vaša e-mail adresa je obavezna.</string>
+    <string name="becs_widget_name">Naziv</string>
+    <string name="becs_widget_name_required">Vaše ime je obavezno.</string>
+    <string name="card_ending_in">%1$s završava na %2$s</string>
+    <string name="close">Zatvori</string>
+    <string name="delete_payment_method">Izbriši način plaćanja</string>
+    <string name="delete_payment_method_prompt_title">Izbrisati način plaćanja?</string>
+    <string name="expiry_date_hint">MM/GG</string>
+    <string name="expiry_label_short">Istek</string>
+    <string name="fpx_bank_offline">%s - Izvan mreže</string>
+    <string name="incomplete_expiry_date">Datum isteka vaše kartice nije kompletan.</string>
+    <string name="invalid_card_number">Broj kartice nije valjan.</string>
+    <string name="invalid_cvc">Sigurnosni kod vaše kartice nije valjan.</string>
+    <string name="invalid_expiry_month">Mjesec isteka kartice nije valjan.</string>
+    <string name="invalid_expiry_year">Godina isteka kartice nije valjana.</string>
+    <string name="invalid_shipping_information">Adresa za otpremu nije valjana</string>
+    <string name="invalid_zip">Vaš poštanski broj nije kompletan.</string>
+    <string name="no_payment_methods">Nema načina plaćanja.</string>
+    <string name="payment_method_add_new_card">Dodajte novu karticu...</string>
+    <string name="payment_method_add_new_fpx">Odaberite bankovni račun (FPX)...</string>
+    <string name="price_free">Besplatno</string>
+    <string name="removed">%s je uklonjeno</string>
+    <string name="secure_checkout">Sigurna naplata</string>
+    <string name="stripe_failure_connection_error">Imamo problema u povezivanju s našim pružateljem platnih usluga. Provjerite vašu internet vezu i pokušajte ponovo.</string>
+    <string name="stripe_failure_reason_authentication">Nismo mogli potvrditi vaš način plaćanja. Odaberite drugi način plaćanja i pokušajte ponovno.</string>
+    <string name="stripe_failure_reason_timed_out">Istek vremena pri provjeri načina plaćanja -- pokušajte ponovno</string>
+    <string name="stripe_paymentsheet_add_button_label">Dodaj</string>
+    <string name="stripe_paymentsheet_add_payment_method_button_label">+ Dodaj</string>
+    <string name="stripe_paymentsheet_add_payment_method_card_information">Informacije o kartici</string>
+    <string name="stripe_paymentsheet_add_payment_method_country_or_region">Zemlja ili regija</string>
+    <string name="stripe_paymentsheet_add_payment_method_title">Dodavanje informacija o plaćanju</string>
+    <string name="stripe_paymentsheet_back">Natrag</string>
+    <string name="stripe_paymentsheet_close">Zatvori</string>
+    <string name="stripe_paymentsheet_expiration_date_hint">MM / GG</string>
+    <string name="stripe_paymentsheet_or_pay_with_card">Ili plati karticom</string>
+    <string name="stripe_paymentsheet_pay_button_amount">Plati %s</string>
+    <string name="stripe_paymentsheet_pay_button_label">Plati</string>
+    <string name="stripe_paymentsheet_payment_method_card">Kartica</string>
+    <string name="stripe_paymentsheet_payment_method_ideal">iDEAL</string>
+    <string name="stripe_paymentsheet_primary_button_processing">Obrađuje se...</string>
+    <string name="stripe_paymentsheet_save_this_card_with_merchant_name">Spremi ovu karticu za buduća plaćanja %s</string>
+    <string name="stripe_paymentsheet_select_payment_method">Odaberite način plaćanja</string>
+    <string name="stripe_paymentsheet_setup_button_label">Postavi</string>
+    <string name="title_add_a_card">Dodaj karticu</string>
+    <string name="title_add_an_address">Postavite adresu</string>
+    <string name="title_bank_account">Bankovni račun</string>
+    <string name="title_payment_method">Način plaćanja</string>
+    <string name="title_select_shipping_method">Odaberite način otpreme</string>
+</resources>
