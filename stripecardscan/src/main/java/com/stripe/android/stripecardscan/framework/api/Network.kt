@@ -73,12 +73,11 @@ interface Network {
         errorSerializer: KSerializer<Error>
     ): NetworkResult<out Response, out Error>
 
-
     /**
      * Download a file from Stripe endpoint
      */
     @Throws(IOException::class)
-        suspend fun downloadFileWithRetries(
+    suspend fun downloadFileWithRetries(
         url: URL,
         outputFile: File
     ): Int

@@ -175,6 +175,8 @@ public final class com/stripe/android/core/networking/DefaultStripeNetworkClient
 }
 
 public final class com/stripe/android/core/networking/NetworkConstantsKt {
+	public static final field HEADER_AUTHORIZATION Ljava/lang/String;
+	public static final field HEADER_CONTENT_TYPE Ljava/lang/String;
 	public static final field HTTP_TOO_MANY_REQUESTS I
 }
 

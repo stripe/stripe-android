@@ -42,7 +42,6 @@ class StripeNetworkTest {
         @SerialName("error_response_id") val errorResponseId: Int
     )
 
-
     private val testDispatcher = TestCoroutineDispatcher()
     private val mockStripeNetworkClient: StripeNetworkClient = mock()
     private val stripeNetwork = StripeNetwork(
@@ -65,12 +64,12 @@ class StripeNetworkTest {
 
         verify(mockStripeNetworkClient).executeRequest(
             argWhere { request ->
-                request is CardScanRequest
-                    && request.method == StripeRequest.Method.POST
-                    && request.url == "$TEST_BASE_URL$TEST_PATH"
-                    && request.retryResponseCodes == RETRY_STATUS_CODES
-                    && request.headers[HEADER_AUTHORIZATION] == "Bearer $TEST_PUBLISHABLE_KEY"
-                    && request.encodedPostData == "request_id=$REQUEST_ID"
+                request is CardScanRequest &&
+                    request.method == StripeRequest.Method.POST &&
+                    request.url == "$TEST_BASE_URL$TEST_PATH" &&
+                    request.retryResponseCodes == RETRY_STATUS_CODES &&
+                    request.headers[HEADER_AUTHORIZATION] == "Bearer $TEST_PUBLISHABLE_KEY" &&
+                    request.encodedPostData == "request_id=$REQUEST_ID"
             }
         )
         assertThat(networkResult).isInstanceOf(NetworkResult.Success::class.java)
@@ -95,12 +94,12 @@ class StripeNetworkTest {
 
         verify(mockStripeNetworkClient).executeRequest(
             argWhere { request ->
-                request is CardScanRequest
-                    && request.method == StripeRequest.Method.POST
-                    && request.url == "$TEST_BASE_URL$TEST_PATH"
-                    && request.retryResponseCodes == RETRY_STATUS_CODES
-                    && request.headers[HEADER_AUTHORIZATION] == "Bearer $TEST_PUBLISHABLE_KEY"
-                    && request.encodedPostData == "request_id=$REQUEST_ID"
+                request is CardScanRequest &&
+                    request.method == StripeRequest.Method.POST &&
+                    request.url == "$TEST_BASE_URL$TEST_PATH" &&
+                    request.retryResponseCodes == RETRY_STATUS_CODES &&
+                    request.headers[HEADER_AUTHORIZATION] == "Bearer $TEST_PUBLISHABLE_KEY" &&
+                    request.encodedPostData == "request_id=$REQUEST_ID"
             }
         )
 
@@ -128,12 +127,12 @@ class StripeNetworkTest {
 
         verify(mockStripeNetworkClient).executeRequest(
             argWhere { request ->
-                request is CardScanRequest
-                    && request.method == StripeRequest.Method.POST
-                    && request.url == "$TEST_BASE_URL$TEST_PATH"
-                    && request.retryResponseCodes == RETRY_STATUS_CODES
-                    && request.headers[HEADER_AUTHORIZATION] == "Bearer $TEST_PUBLISHABLE_KEY"
-                    && request.encodedPostData == "request_id=$REQUEST_ID"
+                request is CardScanRequest &&
+                    request.method == StripeRequest.Method.POST &&
+                    request.url == "$TEST_BASE_URL$TEST_PATH" &&
+                    request.retryResponseCodes == RETRY_STATUS_CODES &&
+                    request.headers[HEADER_AUTHORIZATION] == "Bearer $TEST_PUBLISHABLE_KEY" &&
+                    request.encodedPostData == "request_id=$REQUEST_ID"
             }
         )
 
@@ -157,12 +156,12 @@ class StripeNetworkTest {
 
         verify(mockStripeNetworkClient).executeRequest(
             argWhere { request ->
-                request is CardScanRequest
-                    && request.method == StripeRequest.Method.POST
-                    && request.url == "$TEST_BASE_URL$TEST_PATH"
-                    && request.retryResponseCodes == RETRY_STATUS_CODES
-                    && request.headers[HEADER_AUTHORIZATION] == "Bearer $TEST_PUBLISHABLE_KEY"
-                    && request.encodedPostData == "request_id=$REQUEST_ID"
+                request is CardScanRequest &&
+                    request.method == StripeRequest.Method.POST &&
+                    request.url == "$TEST_BASE_URL$TEST_PATH" &&
+                    request.retryResponseCodes == RETRY_STATUS_CODES &&
+                    request.headers[HEADER_AUTHORIZATION] == "Bearer $TEST_PUBLISHABLE_KEY" &&
+                    request.encodedPostData == "request_id=$REQUEST_ID"
             }
         )
     }
@@ -179,11 +178,11 @@ class StripeNetworkTest {
 
         verify(mockStripeNetworkClient).executeRequest(
             argWhere { request ->
-                request is CardScanRequest
-                    && request.method == StripeRequest.Method.GET
-                    && request.url == "$TEST_BASE_URL$TEST_PATH"
-                    && request.retryResponseCodes == RETRY_STATUS_CODES
-                    && request.headers[HEADER_AUTHORIZATION] == "Bearer $TEST_PUBLISHABLE_KEY"
+                request is CardScanRequest &&
+                    request.method == StripeRequest.Method.GET &&
+                    request.url == "$TEST_BASE_URL$TEST_PATH" &&
+                    request.retryResponseCodes == RETRY_STATUS_CODES &&
+                    request.headers[HEADER_AUTHORIZATION] == "Bearer $TEST_PUBLISHABLE_KEY"
             }
         )
         assertThat(networkResult).isInstanceOf(NetworkResult.Success::class.java)
@@ -206,11 +205,11 @@ class StripeNetworkTest {
 
         verify(mockStripeNetworkClient).executeRequest(
             argWhere { request ->
-                request is CardScanRequest
-                    && request.method == StripeRequest.Method.GET
-                    && request.url == "$TEST_BASE_URL$TEST_PATH"
-                    && request.retryResponseCodes == RETRY_STATUS_CODES
-                    && request.headers[HEADER_AUTHORIZATION] == "Bearer $TEST_PUBLISHABLE_KEY"
+                request is CardScanRequest &&
+                    request.method == StripeRequest.Method.GET &&
+                    request.url == "$TEST_BASE_URL$TEST_PATH" &&
+                    request.retryResponseCodes == RETRY_STATUS_CODES &&
+                    request.headers[HEADER_AUTHORIZATION] == "Bearer $TEST_PUBLISHABLE_KEY"
             }
         )
 
@@ -236,11 +235,11 @@ class StripeNetworkTest {
 
         verify(mockStripeNetworkClient).executeRequest(
             argWhere { request ->
-                request is CardScanRequest
-                    && request.method == StripeRequest.Method.GET
-                    && request.url == "$TEST_BASE_URL$TEST_PATH"
-                    && request.retryResponseCodes == RETRY_STATUS_CODES
-                    && request.headers[HEADER_AUTHORIZATION] == "Bearer $TEST_PUBLISHABLE_KEY"
+                request is CardScanRequest &&
+                    request.method == StripeRequest.Method.GET &&
+                    request.url == "$TEST_BASE_URL$TEST_PATH" &&
+                    request.retryResponseCodes == RETRY_STATUS_CODES &&
+                    request.headers[HEADER_AUTHORIZATION] == "Bearer $TEST_PUBLISHABLE_KEY"
             }
         )
 
@@ -270,11 +269,11 @@ class StripeNetworkTest {
 
         verify(mockStripeNetworkClient).executeRequestForFile(
             argWhere { request ->
-                request is CardScanFileDownloadRequest
-                    && request.method == StripeRequest.Method.GET
-                    && request.url == TEST_FILE_URL.path
-                    && request.retryResponseCodes == NetworkConfig.CARD_SCAN_RETRY_STATUS_CODES
-                    && request.headers.isEmpty()
+                request is CardScanFileDownloadRequest &&
+                    request.method == StripeRequest.Method.GET &&
+                    request.url == TEST_FILE_URL.path &&
+                    request.retryResponseCodes == NetworkConfig.CARD_SCAN_RETRY_STATUS_CODES &&
+                    request.headers.isEmpty()
             },
             argWhere {
                 it == mockFile
@@ -299,11 +298,11 @@ class StripeNetworkTest {
 
         verify(mockStripeNetworkClient).executeRequestForFile(
             argWhere { request ->
-                request is CardScanFileDownloadRequest
-                    && request.method == StripeRequest.Method.GET
-                    && request.url == TEST_FILE_URL.path
-                    && request.retryResponseCodes == NetworkConfig.CARD_SCAN_RETRY_STATUS_CODES
-                    && request.headers.isEmpty()
+                request is CardScanFileDownloadRequest &&
+                    request.method == StripeRequest.Method.GET &&
+                    request.url == TEST_FILE_URL.path &&
+                    request.retryResponseCodes == NetworkConfig.CARD_SCAN_RETRY_STATUS_CODES &&
+                    request.headers.isEmpty()
             },
             argWhere {
                 it == mockFile
