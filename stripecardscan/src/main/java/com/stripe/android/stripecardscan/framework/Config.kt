@@ -36,9 +36,13 @@ object Config {
 }
 
 object NetworkConfig {
+    val CARD_SCAN_RETRY_STATUS_CODES: Iterable<Int> = 500..599
+    private const val BASE_URL = "https://api.stripe.com/v1"
 
     /**
      * Whether or not to compress network request bodies.
+     *
+     * TODO(ccen): Remove this field as compression is not supported now.
      */
     @JvmStatic
     var useCompression: Boolean = false
@@ -51,6 +55,8 @@ object NetworkConfig {
 
     /**
      * The delay between network request retries.
+     *
+     * TODO(ccen): support constant retry delay from stripe-core and use this value.
      */
     @JvmStatic
     var retryDelay: Duration = 5.seconds
@@ -59,7 +65,7 @@ object NetworkConfig {
      * Status codes that should be retried from Stripe servers.
      */
     @JvmStatic
-    var retryStatusCodes: Iterable<Int> = 500..599
+    var retryStatusCodes: Iterable<Int> = CARD_SCAN_RETRY_STATUS_CODES
 
     /**
      * The JSON configuration to use throughout this SDK.
@@ -80,8 +86,7 @@ object NetworkConfig {
      */
     @JvmStatic
     var network: Network = StripeNetwork(
-        baseUrl = "https://api.stripe.com/v1",
-        retryDelay = retryDelay,
+        baseUrl = BASE_URL,
         retryTotalAttempts = retryTotalAttempts,
         retryStatusCodes = retryStatusCodes,
     )

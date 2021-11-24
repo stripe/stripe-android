@@ -66,7 +66,7 @@ class CardImageVerificationSheet private constructor(private val stripePublishab
                         override fun parseResult(
                             resultCode: Int,
                             intent: Intent?,
-                        ) = intent?.let { this@Companion.parseResult(it) }
+                        ) = this@Companion.parseResult(requireNotNull(intent))
                     },
                     ::onResult,
                 )

@@ -369,6 +369,7 @@ public abstract class com/stripe/android/stripecardscan/framework/MachineState {
 public final class com/stripe/android/stripecardscan/framework/NetworkConfig {
 	public static final field $stable I
 	public static final field INSTANCE Lcom/stripe/android/stripecardscan/framework/NetworkConfig;
+	public final fun getCARD_SCAN_RETRY_STATUS_CODES ()Ljava/lang/Iterable;
 	public static final fun getForm ()Lkotlinx/serialization/properties/Properties;
 	public static final fun getJson ()Lkotlinx/serialization/json/Json;
 	public static final fun getNetwork ()Lcom/stripe/android/stripecardscan/framework/api/Network;
@@ -470,6 +471,7 @@ protected final class com/stripe/android/stripecardscan/framework/WebFetcher$Dow
 }
 
 public abstract interface class com/stripe/android/stripecardscan/framework/api/Network {
+	public abstract fun downloadFileWithRetries (Ljava/net/URL;Ljava/io/File;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun getForResult (Ljava/lang/String;Ljava/lang/String;Lkotlinx/serialization/KSerializer;Lkotlinx/serialization/KSerializer;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun postData (Ljava/lang/String;Ljava/lang/String;Ljava/lang/Object;Lkotlinx/serialization/KSerializer;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun postForResult (Ljava/lang/String;Ljava/lang/String;Ljava/lang/Object;Lkotlinx/serialization/KSerializer;Lkotlinx/serialization/KSerializer;Lkotlinx/serialization/KSerializer;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;

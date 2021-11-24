@@ -3,6 +3,7 @@ package com.stripe.android.stripecardscan.framework.api
 import android.util.Log
 import com.stripe.android.stripecardscan.framework.Config
 import com.stripe.android.stripecardscan.framework.NetworkConfig
+import com.stripe.android.stripecardscan.framework.api.StripeNetwork.Companion.RESPONSE_CODE_UNSET
 import com.stripe.android.stripecardscan.framework.time.Duration
 import com.stripe.android.stripecardscan.framework.time.Timer
 import com.stripe.android.stripecardscan.framework.util.decodeFromJson
@@ -71,9 +72,24 @@ interface Network {
         responseSerializer: KSerializer<Response>,
         errorSerializer: KSerializer<Error>
     ): NetworkResult<out Response, out Error>
+
+    /**
+     * Download a file from Stripe endpoint
+     */
+    @Throws(IOException::class)
+    suspend fun downloadFileWithRetries(
+        url: URL,
+        outputFile: File
+    ): Int
 }
 
-internal class StripeNetwork(
+/**
+ * Legacy implementation of [Network], has support to [NetworkConfig.useCompression], kept for now
+ * until [NetworkConfig.useCompression] is added to [StripeNetwork].
+ *
+ * TODO(ccen): Delete this class once [NetworkConfig.useCompression] is supported in [StripeNetwork].
+ */
+internal class LegacyStripeNetwork(
     baseUrl: String,
     private val retryDelay: Duration,
     private val retryTotalAttempts: Int,
@@ -141,6 +157,11 @@ internal class StripeNetwork(
             responseSerializer,
             errorSerializer,
         )
+
+    override suspend fun downloadFileWithRetries(url: URL, outputFile: File): Int {
+        // No-op, see the implementation in [StripeNetwork#downloadFileWithRetries]
+        return RESPONSE_CODE_UNSET
+    }
 
     /**
      * Send a post request to a Stripe endpoint with retries.
@@ -334,6 +355,7 @@ private fun <Response, Error> translateNetworkResult(
         )
 }
 
+// TODO(ccen): Replace its caller with [StripeNetwork#downloadFileWithRetries]
 @Throws(IOException::class)
 internal suspend fun downloadFileWithRetries(url: URL, outputFile: File) = retry(
     NetworkConfig.retryDelay,
