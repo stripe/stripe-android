@@ -12,7 +12,10 @@ import androidx.lifecycle.viewModelScope
 import androidx.savedstate.SavedStateRegistryOwner
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.core.exception.APIException
+import com.stripe.android.core.injection.Injectable
 import com.stripe.android.core.injection.UIContext
+import com.stripe.android.core.injection.WeakMapInjectorRegistry
+import com.stripe.android.core.injection.injectWithFallback
 import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
@@ -29,10 +32,7 @@ import com.stripe.android.payments.SetupIntentFlowResultProcessor
 import com.stripe.android.payments.core.authentication.PaymentAuthenticatorRegistry
 import com.stripe.android.payments.core.injection.DaggerPaymentLauncherViewModelFactoryComponent
 import com.stripe.android.payments.core.injection.IS_PAYMENT_INTENT
-import com.stripe.android.payments.core.injection.Injectable
 import com.stripe.android.payments.core.injection.PaymentLauncherViewModelSubcomponent
-import com.stripe.android.payments.core.injection.WeakMapInjectorRegistry
-import com.stripe.android.payments.core.injection.injectWithFallback
 import com.stripe.android.view.AuthActivityStarterHost
 import dagger.Lazy
 import kotlinx.coroutines.launch

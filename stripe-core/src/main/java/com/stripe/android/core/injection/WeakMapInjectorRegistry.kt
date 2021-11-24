@@ -1,4 +1,4 @@
-package com.stripe.android.payments.core.injection
+package com.stripe.android.core.injection
 
 import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
@@ -13,7 +13,7 @@ import java.util.concurrent.atomic.AtomicInteger
  * [Injectable] implementations are responsible for detecting this and call
  * [Injectable.fallbackInitialize] accordingly.
  */
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 object WeakMapInjectorRegistry : InjectorRegistry {
     /**
      * Cache to map [Injector] to its corresponding [InjectorKey].
@@ -28,7 +28,7 @@ object WeakMapInjectorRegistry : InjectorRegistry {
      * registered [Injector]s.
      */
     @VisibleForTesting
-    internal val CURRENT_REGISTER_KEY = AtomicInteger(0)
+    val CURRENT_REGISTER_KEY = AtomicInteger(0)
 
     override fun register(injector: Injector, @InjectorKey key: String) {
         staticCacheMap[injector] = key

@@ -10,6 +10,9 @@ import androidx.lifecycle.ViewModel
 import com.stripe.android.PaymentRelayContract
 import com.stripe.android.PaymentRelayStarter
 import com.stripe.android.auth.PaymentBrowserAuthContract
+import com.stripe.android.core.injection.Injectable
+import com.stripe.android.core.injection.Injector
+import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.model.Source
 import com.stripe.android.model.StripeIntent
@@ -19,10 +22,7 @@ import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.payments.core.authentication.threeds2.Stripe3ds2TransactionViewModelFactory
 import com.stripe.android.payments.core.injection.AuthenticationComponent
 import com.stripe.android.payments.core.injection.DaggerAuthenticationComponent
-import com.stripe.android.payments.core.injection.Injectable
-import com.stripe.android.payments.core.injection.Injector
 import com.stripe.android.payments.core.injection.IntentAuthenticatorMap
-import com.stripe.android.payments.core.injection.WeakMapInjectorRegistry
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext

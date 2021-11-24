@@ -5,8 +5,8 @@ import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
+import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.model.ConfirmStripeIntentParams
-import com.stripe.android.payments.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.utils.InjectableActivityScenario
 import com.stripe.android.utils.TestUtils
 import com.stripe.android.utils.injectableActivityScenario
