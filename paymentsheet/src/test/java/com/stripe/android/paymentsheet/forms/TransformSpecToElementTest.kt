@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet.forms
 
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import com.google.common.truth.Truth.assertThat
@@ -192,7 +191,7 @@ internal class TransformSpecToElementTest {
         val staticText = StaticTextSpec(
             IdentifierSpec.Generic("mandate"),
             stringResId = R.string.stripe_paymentsheet_sepa_mandate,
-            color = Color.Gray,
+            color = R.color.stripe_paymentsheet_mandate_text_color,
             fontSizeSp = 120,
             letterSpacingSp = 120.0
         )
@@ -216,7 +215,7 @@ internal class TransformSpecToElementTest {
             val mandate = StaticTextSpec(
                 IdentifierSpec.Generic("mandate"),
                 R.string.stripe_paymentsheet_sepa_mandate,
-                Color.Gray
+                color = R.color.stripe_paymentsheet_mandate_text_color,
             )
             val hiddenIdentifiers = listOf(nameSection, mandate)
             val saveForFutureUseSpec = SaveForFutureUseSpec(hiddenIdentifiers)
