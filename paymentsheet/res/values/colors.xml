@@ -35,6 +35,7 @@
     <color name="stripe_paymentsheet_add_payment_method_form_stroke">#33787880</color>
     <color name="stripe_paymentsheet_add_pm_card_unselected_stroke">#E7E7E7</color>
     <color name="stripe_paymentsheet_add_pm_card_selected_stroke">#343434</color>
+    <color name="stripe_paymentsheet_mandate_text_color">#FF888888</color>
 
     <color name="stripe_paymentsheet_error_text">#DC2727</color>
     <color name="stripe_paymentsheet_form_error">#CF6679</color>
