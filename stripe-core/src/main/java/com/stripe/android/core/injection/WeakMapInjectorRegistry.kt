@@ -27,6 +27,7 @@ object WeakMapInjectorRegistry : InjectorRegistry {
      * Global unique monotonically increasing key to be assigned as a suffixes to
      * registered [Injector]s.
      */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @VisibleForTesting
     val CURRENT_REGISTER_KEY = AtomicInteger(0)
 
