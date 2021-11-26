@@ -6,7 +6,7 @@ plugins {
     id "org.jetbrains.kotlin.plugin.parcelize"
     id 'org.jetbrains.kotlin.plugin.serialization' version '1.6.0'
 }
-
+// test
 android {
     compileSdkVersion rootProject.ext.compileSdkVersion
     buildToolsVersion rootProject.ext.buildToolsVersion
