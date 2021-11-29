@@ -78,6 +78,7 @@ do
     mv android/$MODULE/values-es-r419 android/$MODULE/values-b+es+419
     mv android/$MODULE/values-zh-rHant android/$MODULE/values-zh-rTW
     mv android/$MODULE/values-zh-rHans android/$MODULE/values-zh
+    mv android/$MODULE/values-id android/$MODULE/values-in
 
     # This is used by the untranslated_project_keys.sh script
     cp android/$MODULE/values-en-rGB/strings.xml android/$MODULE-lokalize-strings.xml

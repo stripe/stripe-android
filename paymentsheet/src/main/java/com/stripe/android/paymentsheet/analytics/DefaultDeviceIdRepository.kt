@@ -3,7 +3,7 @@ package com.stripe.android.paymentsheet.analytics
 import android.content.Context
 import android.content.SharedPreferences
 import androidx.core.content.edit
-import com.stripe.android.payments.core.injection.IOContext
+import com.stripe.android.core.injection.IOContext
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext

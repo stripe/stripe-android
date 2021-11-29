@@ -50,7 +50,7 @@ dependencies {
     implementation 'com.google.code.gson:gson:2.8.9'
     implementation "com.squareup.retrofit2:converter-gson:$retrofitVersion"
 
-    implementation 'com.squareup.okhttp3:logging-interceptor:4.9.2'
+    implementation 'com.squareup.okhttp3:logging-interceptor:4.9.3'
 
     debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.7'
 

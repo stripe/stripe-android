@@ -42,6 +42,12 @@ internal class GooglePayPaymentMethodLauncherActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        val statusColor = intent.getIntExtra(GooglePayPaymentMethodLauncherContract.EXTRA_STATUS_BAR_COLOR, -1)
+        if (statusColor != -1) {
+            window.statusBarColor = statusColor
+        }
+
         if (Build.VERSION.SDK_INT != Build.VERSION_CODES.O) {
             // In Oreo, Activities where `android:windowIsTranslucent=true` can't request
             // orientation. See https://stackoverflow.com/a/50832408/11103900

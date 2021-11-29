@@ -4,7 +4,7 @@ import android.content.Context
 import androidx.appcompat.app.AlertDialog
 import com.stripe.android.CustomerSession
 import com.stripe.android.R
-import com.stripe.android.StripeError
+import com.stripe.android.core.StripeError
 import com.stripe.android.model.PaymentMethod
 
 internal class DeletePaymentMethodDialogFactory internal constructor(

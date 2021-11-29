@@ -14,7 +14,7 @@ import com.stripe.android.PaymentSession
 import com.stripe.android.PaymentSessionConfig
 import com.stripe.android.PaymentSessionData
 import com.stripe.android.Stripe
-import com.stripe.android.StripeError
+import com.stripe.android.core.StripeError
 import com.stripe.android.getPaymentIntentResult
 import com.stripe.android.getSetupIntentResult
 import com.stripe.android.model.ConfirmPaymentIntentParams

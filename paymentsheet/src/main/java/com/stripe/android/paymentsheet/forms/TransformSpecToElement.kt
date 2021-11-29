@@ -16,6 +16,8 @@ import com.stripe.android.paymentsheet.elements.DropdownFieldController
 import com.stripe.android.paymentsheet.elements.EmailConfig
 import com.stripe.android.paymentsheet.elements.EmailElement
 import com.stripe.android.paymentsheet.elements.EmailSpec
+import com.stripe.android.paymentsheet.elements.EmptyFormElement
+import com.stripe.android.paymentsheet.elements.EmptyFormSpec
 import com.stripe.android.paymentsheet.elements.FormElement
 import com.stripe.android.paymentsheet.elements.FormItemSpec
 import com.stripe.android.paymentsheet.elements.IbanConfig
@@ -66,6 +68,7 @@ internal class TransformSpecToElement @Inject constructor(
                 is StaticTextSpec -> it.transform(initialValues.merchantName)
                 is AfterpayClearpaySpec ->
                     it.transform(requireNotNull(initialValues.amount))
+                is EmptyFormSpec -> EmptyFormElement()
             }
         }
 

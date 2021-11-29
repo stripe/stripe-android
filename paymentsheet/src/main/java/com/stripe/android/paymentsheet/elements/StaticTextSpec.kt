@@ -1,7 +1,7 @@
 package com.stripe.android.paymentsheet.elements
 
+import androidx.annotation.ColorRes
 import androidx.annotation.StringRes
-import androidx.compose.ui.graphics.Color
 
 /**
  * This is for elements that do not receive user input
@@ -9,7 +9,7 @@ import androidx.compose.ui.graphics.Color
 internal data class StaticTextSpec(
     override val identifier: IdentifierSpec,
     @StringRes val stringResId: Int,
-    val color: Color? = null,
+    @ColorRes val color: Int? = null,
     val fontSizeSp: Int = 10,
     val letterSpacingSp: Double = .7
 ) : FormItemSpec(), RequiredItemSpec

@@ -1,1 +1,18 @@
-*   @brnunes-stripe @ccen-stripe @michelleb-stripe @skyler-stripe 
+# global - fallback to this group if the following groups don't match
+*   @brnunes-stripe @michelleb-stripe @skyler-stripe @ccen-stripe @awush-stripe
+
+# payment sdk
+/payments/ @brnunes-stripe @michelleb-stripe @skyler-stripe @ccen-stripe
+/payments-core/ @brnunes-stripe @michelleb-stripe @skyler-stripe @ccen-stripe
+/paymentsheet/ @brnunes-stripe @michelleb-stripe @skyler-stripe
+/example/ @brnunes-stripe @michelleb-stripe @skyler-stripe
+/paymentsheet-example/ @brnunes-stripe @michelleb-stripe @skyler-stripe
+/wechatpay/ @brnunes-stripe @michelleb-stripe @skyler-stripe @ccen-stripe
+/stripe-test-e2e/ @brnunes-stripe @michelleb-stripe @skyler-stripe
+
+# stripecardscan sdk
+/stripecardscan/ @awush-stripe @ccen-stripe
+/stripecardscan-example/ @awush-stripe @ccen-stripe
+
+# stripe-core
+/stripe-core/ @ccen-stripe

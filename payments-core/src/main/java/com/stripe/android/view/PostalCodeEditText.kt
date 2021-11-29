@@ -76,6 +76,7 @@ class PostalCodeEditText @JvmOverloads constructor(
         updateHint(R.string.address_label_postal_code)
         keyListener = TextKeyListener.getInstance()
         inputType = InputType.TYPE_TEXT_VARIATION_POSTAL_ADDRESS
+        filters = arrayOf()
     }
 
     /**

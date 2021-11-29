@@ -1,8 +1,8 @@
 package com.stripe.android.payments
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.exception.APIException
-import com.stripe.android.exception.StripeException
+import com.stripe.android.core.exception.APIException
+import com.stripe.android.core.exception.StripeException
 import kotlin.test.Test
 import kotlin.test.assertFailsWith
 

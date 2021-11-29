@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.forms
 
+import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.elements.EmailSpec
 import com.stripe.android.paymentsheet.elements.IdentifierSpec
 import com.stripe.android.paymentsheet.elements.KlarnaCountrySpec
@@ -27,7 +28,8 @@ internal val klarnaHeader = StaticTextSpec(
     identifier = IdentifierSpec.Generic("klarna_header"),
     stringResId = KlarnaHelper.getKlarnaHeader(),
     fontSizeSp = 13,
-    letterSpacingSp = -.15
+    letterSpacingSp = -.15,
+    color = R.color.stripe_paymentsheet_googlepay_divider_text
 )
 
 internal val klarnaEmailSection =
