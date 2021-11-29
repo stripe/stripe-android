@@ -264,6 +264,25 @@ class MainLoopStateMachineTest {
     }
 
     @Test
+    @LargeTest
+    fun panFound_wrongCardIgnored() = runBlocking {
+        val state = MainLoopState.OcrFound(
+            pan = "4847186095118770",
+            isCardVisible = true,
+            requiredCardIssuer = CardIssuer.Visa,
+            requiredLastFour = "8770",
+        )
+
+        val prediction = MainLoopAnalyzer.Prediction(
+            ocr = SSDOcr.Prediction(pan = "5445435282861343"),
+            card = null,
+        )
+
+        val newState = state.consumeTransition(prediction)
+        assertTrue(newState is MainLoopState.OcrFound, "$newState is not OcrFound")
+    }
+
+    @Test
     fun panSatisfied_runsCardDetectOnly() {
         val state = MainLoopState.OcrSatisfied(
             pan = "4847186095118770",
@@ -418,6 +437,24 @@ class MainLoopStateMachineTest {
 
         val newState = state.consumeTransition(prediction)
         assertTrue(newState is MainLoopState.Finished)
+    }
+
+    @Test
+    @LargeTest
+    fun cardSatisfied_wrongCardIgnored() = runBlocking {
+        val state = MainLoopState.CardSatisfied(
+            panCounter = ItemCounter("4847186095118770"),
+            requiredCardIssuer = CardIssuer.Visa,
+            requiredLastFour = "8770",
+        )
+
+        val prediction = MainLoopAnalyzer.Prediction(
+            ocr = SSDOcr.Prediction(pan = "5445435282861343"),
+            card = null,
+        )
+
+        val newState = state.consumeTransition(prediction)
+        assertTrue(newState is MainLoopState.CardSatisfied, "$newState is not CardSatisfied")
     }
 
     @Test
