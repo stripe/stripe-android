@@ -5182,29 +5182,6 @@ public final class com/stripe/android/payments/core/injection/AuthenticationModu
 	public static fun providePaymentRelayStarterFactory (Ldagger/Lazy;)Lkotlin/jvm/functions/Function1;
 }
 
-public final class com/stripe/android/payments/core/injection/CoroutineContextModule {
-	public static final field $stable I
-	public fun <init> ()V
-	public final fun provideUIContext ()Lkotlin/coroutines/CoroutineContext;
-	public final fun provideWorkContext ()Lkotlin/coroutines/CoroutineContext;
-}
-
-public final class com/stripe/android/payments/core/injection/CoroutineContextModule_ProvideUIContextFactory : dagger/internal/Factory {
-	public fun <init> (Lcom/stripe/android/payments/core/injection/CoroutineContextModule;)V
-	public static fun create (Lcom/stripe/android/payments/core/injection/CoroutineContextModule;)Lcom/stripe/android/payments/core/injection/CoroutineContextModule_ProvideUIContextFactory;
-	public synthetic fun get ()Ljava/lang/Object;
-	public fun get ()Lkotlin/coroutines/CoroutineContext;
-	public static fun provideUIContext (Lcom/stripe/android/payments/core/injection/CoroutineContextModule;)Lkotlin/coroutines/CoroutineContext;
-}
-
-public final class com/stripe/android/payments/core/injection/CoroutineContextModule_ProvideWorkContextFactory : dagger/internal/Factory {
-	public fun <init> (Lcom/stripe/android/payments/core/injection/CoroutineContextModule;)V
-	public static fun create (Lcom/stripe/android/payments/core/injection/CoroutineContextModule;)Lcom/stripe/android/payments/core/injection/CoroutineContextModule_ProvideWorkContextFactory;
-	public synthetic fun get ()Ljava/lang/Object;
-	public fun get ()Lkotlin/coroutines/CoroutineContext;
-	public static fun provideWorkContext (Lcom/stripe/android/payments/core/injection/CoroutineContextModule;)Lkotlin/coroutines/CoroutineContext;
-}
-
 public final class com/stripe/android/payments/core/injection/DaggerAuthenticationComponent : com/stripe/android/payments/core/injection/AuthenticationComponent {
 	public static fun builder ()Lcom/stripe/android/payments/core/injection/AuthenticationComponent$Builder;
 	public fun getRegistry ()Lcom/stripe/android/payments/core/authentication/DefaultPaymentAuthenticatorRegistry;
@@ -5226,25 +5203,6 @@ public final class com/stripe/android/payments/core/injection/DaggerStripe3ds2Tr
 	public fun inject (Lcom/stripe/android/payments/core/authentication/threeds2/Stripe3ds2TransactionViewModelFactory;)V
 }
 
-public abstract interface class com/stripe/android/payments/core/injection/Injectable {
-	public abstract fun fallbackInitialize (Ljava/lang/Object;)V
-}
-
-public final class com/stripe/android/payments/core/injection/InjectableKtxKt {
-	public static final fun injectWithFallback (Lcom/stripe/android/payments/core/injection/Injectable;Ljava/lang/String;Ljava/lang/Object;)V
-}
-
-public abstract interface class com/stripe/android/payments/core/injection/Injector {
-	public abstract fun inject (Lcom/stripe/android/payments/core/injection/Injectable;)V
-}
-
-public abstract interface annotation class com/stripe/android/payments/core/injection/InjectorKey : java/lang/annotation/Annotation {
-}
-
-public final class com/stripe/android/payments/core/injection/InjectorKt {
-	public static final field DUMMY_INJECTOR_KEY Ljava/lang/String;
-}
-
 public abstract interface annotation class com/stripe/android/payments/core/injection/IntentAuthenticatorKey : java/lang/annotation/Annotation {
 	public abstract fun value ()Ljava/lang/Class;
 }
@@ -5252,22 +5210,7 @@ public abstract interface annotation class com/stripe/android/payments/core/inje
 public abstract interface annotation class com/stripe/android/payments/core/injection/IntentAuthenticatorMap : java/lang/annotation/Annotation {
 }
 
-public final class com/stripe/android/payments/core/injection/LoggingModule {
-	public static final field $stable I
-	public fun <init> ()V
-	public final fun provideLogger (Z)Lcom/stripe/android/core/Logger;
-}
-
-public final class com/stripe/android/payments/core/injection/LoggingModule_ProvideLoggerFactory : dagger/internal/Factory {
-	public fun <init> (Lcom/stripe/android/payments/core/injection/LoggingModule;Ljavax/inject/Provider;)V
-	public static fun create (Lcom/stripe/android/payments/core/injection/LoggingModule;Ljavax/inject/Provider;)Lcom/stripe/android/payments/core/injection/LoggingModule_ProvideLoggerFactory;
-	public fun get ()Lcom/stripe/android/core/Logger;
-	public synthetic fun get ()Ljava/lang/Object;
-	public static fun provideLogger (Lcom/stripe/android/payments/core/injection/LoggingModule;Z)Lcom/stripe/android/core/Logger;
-}
-
 public final class com/stripe/android/payments/core/injection/NamedConstantsKt {
-	public static final field ENABLE_LOGGING Ljava/lang/String;
 	public static final field IS_PAYMENT_INTENT Ljava/lang/String;
 	public static final field PRODUCT_USAGE Ljava/lang/String;
 	public static final field PUBLISHABLE_KEY Ljava/lang/String;
@@ -5341,15 +5284,6 @@ public final class com/stripe/android/payments/core/injection/WeChatPayAuthentic
 	public fun get ()Lcom/stripe/android/payments/core/authentication/PaymentAuthenticator;
 	public synthetic fun get ()Ljava/lang/Object;
 	public static fun provideWeChatAuthenticator$payments_core_release (Lcom/stripe/android/payments/core/injection/WeChatPayAuthenticatorModule;Lcom/stripe/android/payments/core/authentication/UnsupportedAuthenticator;)Lcom/stripe/android/payments/core/authentication/PaymentAuthenticator;
-}
-
-public final class com/stripe/android/payments/core/injection/WeakMapInjectorRegistry : com/stripe/android/payments/core/injection/InjectorRegistry {
-	public static final field $stable I
-	public static final field INSTANCE Lcom/stripe/android/payments/core/injection/WeakMapInjectorRegistry;
-	public final fun getStaticCacheMap ()Ljava/util/WeakHashMap;
-	public fun nextKey (Ljava/lang/String;)Ljava/lang/String;
-	public fun register (Lcom/stripe/android/payments/core/injection/Injector;Ljava/lang/String;)V
-	public fun retrieve (Ljava/lang/String;)Lcom/stripe/android/payments/core/injection/Injector;
 }
 
 public abstract interface class com/stripe/android/payments/paymentlauncher/PaymentLauncher {
@@ -5522,13 +5456,13 @@ public final class com/stripe/android/payments/paymentlauncher/PaymentResult$Fai
 	public fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
-public final class com/stripe/android/payments/paymentlauncher/StripePaymentLauncher : com/stripe/android/payments/core/injection/Injector, com/stripe/android/payments/paymentlauncher/PaymentLauncher {
+public final class com/stripe/android/payments/paymentlauncher/StripePaymentLauncher : com/stripe/android/core/injection/Injector, com/stripe/android/payments/paymentlauncher/PaymentLauncher {
 	public static final field $stable I
 	public fun confirm (Lcom/stripe/android/model/ConfirmPaymentIntentParams;)V
 	public fun confirm (Lcom/stripe/android/model/ConfirmSetupIntentParams;)V
 	public fun handleNextActionForPaymentIntent (Ljava/lang/String;)V
 	public fun handleNextActionForSetupIntent (Ljava/lang/String;)V
-	public fun inject (Lcom/stripe/android/payments/core/injection/Injectable;)V
+	public fun inject (Lcom/stripe/android/core/injection/Injectable;)V
 }
 
 public abstract interface class com/stripe/android/payments/paymentlauncher/StripePaymentLauncherAssistedFactory {

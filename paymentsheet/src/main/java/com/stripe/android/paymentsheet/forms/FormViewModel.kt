@@ -4,8 +4,8 @@ import android.content.res.Resources
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.stripe.android.payments.core.injection.Injectable
-import com.stripe.android.payments.core.injection.injectWithFallback
+import com.stripe.android.core.injection.Injectable
+import com.stripe.android.core.injection.injectWithFallback
 import com.stripe.android.paymentsheet.elements.Form
 import com.stripe.android.paymentsheet.elements.FormElement
 import com.stripe.android.paymentsheet.elements.LayoutSpec

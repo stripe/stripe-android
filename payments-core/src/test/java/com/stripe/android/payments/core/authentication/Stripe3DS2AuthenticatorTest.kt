@@ -4,11 +4,11 @@ import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultLauncher
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentAuthConfig
+import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.networking.ApiRequest
 import com.stripe.android.payments.core.authentication.threeds2.Stripe3DS2Authenticator
 import com.stripe.android.payments.core.authentication.threeds2.Stripe3ds2TransactionContract
-import com.stripe.android.payments.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.view.AuthActivityStarterHost
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestCoroutineDispatcher

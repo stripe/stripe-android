@@ -1,8 +1,6 @@
-package com.stripe.android.payments.core.injection
+package com.stripe.android.core.injection
 
-import android.app.Activity
-import android.app.Application
-import androidx.fragment.app.Fragment
+import androidx.annotation.RestrictTo
 import dagger.Component
 
 /**
@@ -11,7 +9,8 @@ import dagger.Component
  * This registry is needed for dagger injection because the SDK can't access [Application], and
  * thus [Activity]s can't get required [Component] from by downcasting  [Activity.getApplication].
  */
-internal interface InjectorRegistry {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+interface InjectorRegistry {
     /**
      * Registers an [Injector] instance with corresponding [InjectorKey].
      */
