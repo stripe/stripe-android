@@ -21,6 +21,7 @@
             android:id="@+id/add_payment_method_header"
             style="@style/StripePaymentSheetTitle"
             android:layout_width="wrap_content"
+            android:singleLine="false"
             android:text="@string/stripe_paymentsheet_add_payment_method_title" />
 
         <com.stripe.android.paymentsheet.ui.GooglePayButton
