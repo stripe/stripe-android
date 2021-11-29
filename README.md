@@ -22,7 +22,6 @@ Table of contents
    * [Installation](#installation)
       * [Requirements](#requirements)
       * [Configuration](#configuration)
-      * [Proguard](#proguard)
    * [Getting Started](#getting-started)
    * [Examples](#examples)
 <!--te-->
@@ -68,10 +67,6 @@ dependencies {
     implementation 'com.stripe:stripe-android:18.2.0'
 }
 ```
-
-### Proguard
-
-The Stripe Android SDK will configure your app's Proguard rules using [proguard-rules.txt](stripe/proguard-rules.txt).
 
 ## Getting Started
 
