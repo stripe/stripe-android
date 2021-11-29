@@ -1,6 +1,7 @@
 package com.stripe.android.model
 
 import androidx.annotation.Size
+import com.stripe.android.core.model.StripeModel
 import kotlinx.parcelize.Parcelize
 import java.util.Currency
 

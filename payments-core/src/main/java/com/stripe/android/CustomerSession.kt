@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.annotation.IntRange
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.Stripe.Companion.appInfo
+import com.stripe.android.core.StripeError
 import com.stripe.android.model.Customer
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.ShippingInformation

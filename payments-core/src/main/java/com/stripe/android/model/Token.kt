@@ -1,5 +1,6 @@
 package com.stripe.android.model
 
+import com.stripe.android.core.model.StripeModel
 import com.stripe.android.model.Token.Type
 import com.stripe.android.model.parsers.TokenJsonParser
 import kotlinx.parcelize.Parcelize

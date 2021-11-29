@@ -1,5 +1,7 @@
 package com.stripe.android.payments.core.injection
 
+import com.stripe.android.core.injection.IOContext
+import com.stripe.android.core.injection.UIContext
 import dagger.Module
 import dagger.Provides
 import kotlinx.coroutines.Dispatchers

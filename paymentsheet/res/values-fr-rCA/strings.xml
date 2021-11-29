@@ -92,6 +92,10 @@
   <string name="stripe_paymentsheet_form_label_optional">%s (facultatif)</string>
   <!-- iDEAL bank section title for iDEAL form entry. -->
   <string name="stripe_paymentsheet_ideal_bank">Banque iDEAL</string>
+  <!-- Klarna buy now or pay later copy -->
+  <string name="stripe_paymentsheet_klarna_buy_now_pay_later">Payez maintenant ou plus tard avec Klarna.</string>
+  <!-- Klarna pay later copy -->
+  <string name="stripe_paymentsheet_klarna_pay_later">Payez plus tard avec Klarna.</string>
   <!-- Title of a section containing multiple payment methods that can selected and will collect the payment information from the user. -->
   <string name="stripe_paymentsheet_or_pay_using">Ou payer avec</string>
   <!-- Title of a section containing a card form that will collect the payment information from the user. -->
@@ -114,6 +118,8 @@
   <string name="stripe_paymentsheet_remove_pm">Supprimer %s</string>
   <!-- The label of a switch indicating whether to save the payment method for future payments. -->
   <string name="stripe_paymentsheet_save_for_future_payments">Enregistrer pour les prochains achats</string>
+  <!-- Next to the save payment method users will see the merchant name: "Save for future Example.inc Payments" -->
+  <string name="stripe_paymentsheet_save_for_future_payments_with_merchant_name">Enregistrer pour mes prochains paiements auprès de %s</string>
   <!-- The label of a switch indicating whether to save the user&apos;s card for future payments to this merchant -->
   <string name="stripe_paymentsheet_save_this_card_with_merchant_name">Enregistrer cette carte pour vos prochains achats chez %s</string>
   <!-- Title shown above a carousel containing the customer&apos;s payment methods -->

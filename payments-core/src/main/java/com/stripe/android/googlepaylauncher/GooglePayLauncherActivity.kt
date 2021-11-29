@@ -65,6 +65,11 @@ internal class GooglePayLauncherActivity : AppCompatActivity() {
             return
         }
 
+        val statusColor = intent.getIntExtra(GooglePayLauncherContract.EXTRA_STATUS_BAR_COLOR, -1)
+        if (statusColor != -1) {
+            window.statusBarColor = statusColor
+        }
+
         viewModel.googlePayResult.observe(this) { googlePayResult ->
             googlePayResult?.let(::finishWithResult)
         }

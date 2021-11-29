@@ -1,8 +1,8 @@
 package com.stripe.android
 
 import androidx.annotation.IntDef
+import com.stripe.android.core.model.StripeModel
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.model.StripeModel
 
 /**
  * A model representing the result of a [StripeIntent] confirmation or authentication attempt

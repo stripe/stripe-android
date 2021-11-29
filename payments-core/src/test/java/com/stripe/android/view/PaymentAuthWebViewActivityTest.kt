@@ -10,7 +10,7 @@ import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.auth.PaymentBrowserAuthContract
-import com.stripe.android.exception.StripeException
+import com.stripe.android.core.exception.StripeException
 import com.stripe.android.payments.PaymentFlowResult
 import org.junit.Rule
 import org.junit.runner.RunWith

@@ -1,7 +1,7 @@
 package com.stripe.android.payments.core.injection
 
 import androidx.annotation.RestrictTo
-import com.stripe.android.Logger
+import com.stripe.android.core.Logger
 import dagger.Module
 import dagger.Provides
 import javax.inject.Named

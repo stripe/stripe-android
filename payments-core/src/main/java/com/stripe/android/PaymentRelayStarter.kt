@@ -3,7 +3,7 @@ package com.stripe.android
 import android.os.Parcel
 import android.os.Parcelable
 import androidx.activity.result.ActivityResultLauncher
-import com.stripe.android.exception.StripeException
+import com.stripe.android.core.exception.StripeException
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.Source

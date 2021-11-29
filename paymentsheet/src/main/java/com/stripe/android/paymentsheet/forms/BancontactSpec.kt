@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet.forms
 
-import androidx.compose.ui.graphics.Color
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.elements.EmailSpec
 import com.stripe.android.paymentsheet.elements.IdentifierSpec
@@ -53,7 +52,7 @@ internal val bancontactEmailSection =
 internal val bancontactMandate = StaticTextSpec(
     IdentifierSpec.Generic("mandate"),
     R.string.stripe_paymentsheet_sepa_mandate,
-    Color.Gray
+    R.color.stripe_paymentsheet_mandate_text_color
 )
 
 internal val BancontactForm = LayoutSpec.create(

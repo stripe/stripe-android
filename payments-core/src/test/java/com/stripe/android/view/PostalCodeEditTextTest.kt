@@ -55,6 +55,19 @@ class PostalCodeEditTextTest {
     }
 
     @Test
+    fun changing_from_Us_to_other_country_should_allow_longer_postal() {
+        postalCodeEditText.config = PostalCodeEditText.Config.US
+        postalCodeEditText.setText("123456")
+        assertThat(postalCodeEditText.postalCode)
+            .isEqualTo("12345")
+
+        postalCodeEditText.config = PostalCodeEditText.Config.Global
+        postalCodeEditText.setText("123456")
+        assertThat(postalCodeEditText.postalCode)
+            .isEqualTo("123456")
+    }
+
+    @Test
     fun updateHint_whenTextInputLayoutHintEnabled_shouldSetHintOnTextInputLayout() {
         createActivity {
             val textInputLayout = TextInputLayout(it)

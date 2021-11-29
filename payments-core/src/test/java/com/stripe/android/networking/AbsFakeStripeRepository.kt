@@ -1,7 +1,7 @@
 package com.stripe.android.networking
 
 import com.stripe.android.cards.Bin
-import com.stripe.android.exception.APIException
+import com.stripe.android.core.exception.APIException
 import com.stripe.android.model.BankStatuses
 import com.stripe.android.model.BinFixtures
 import com.stripe.android.model.CardMetadata

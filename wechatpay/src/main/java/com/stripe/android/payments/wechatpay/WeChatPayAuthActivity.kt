@@ -7,7 +7,7 @@ import android.util.Log
 import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AppCompatActivity
 import com.stripe.android.StripeIntentResult
-import com.stripe.android.exception.StripeException
+import com.stripe.android.core.exception.StripeException
 import com.stripe.android.model.WeChat
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.payments.wechatpay.reflection.DefaultWeChatPayReflectionHelper

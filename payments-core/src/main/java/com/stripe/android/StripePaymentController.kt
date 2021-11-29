@@ -6,14 +6,15 @@ import androidx.activity.result.ActivityResultCallback
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.VisibleForTesting
+import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.APIConnectionException
+import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.exception.InvalidRequestException
+import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
 import com.stripe.android.core.networking.RetryDelaySupplier
-import com.stripe.android.exception.APIException
 import com.stripe.android.exception.AuthenticationException
-import com.stripe.android.exception.StripeException
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams

@@ -2,7 +2,7 @@ package com.stripe.android.payments.core.injection
 
 import androidx.annotation.RestrictTo
 import com.stripe.android.BuildConfig
-import com.stripe.android.Logger
+import com.stripe.android.core.Logger
 
 /**
  * Try use an [InjectorKey] to retrieve an [Injector] and inject, if no [Injector] is found,
