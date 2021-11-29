@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+  <!-- Label for card number entry text field -->
+  <string name="acc_label_card_number">หมายเลขบัตร</string>
+  <string name="acc_label_card_number_node">%s, หมายเลขบัตร</string>
+  <string name="acc_label_cvc_node">%s, CVC</string>
+  <string name="acc_label_expiry_date">วันหมดอายุ</string>
+  <string name="acc_label_expiry_date_node">%s, วันหมดอายุ</string>
+  <!-- Caption for Zip Code field on address form (only shown when country is United States only) -->
+  <string name="acc_label_zip">รหัสไปรษณีย์</string>
+  <!-- Short string for zip code (United States only) Please keep to 5 characters or less if possible. -->
+  <string name="acc_label_zip_short">รหัสไปรษณีย์</string>
+  <!-- Message displayed when a payment method is removed, stating its name. -->
+  <string name="added">เพิ่ม %s แล้ว</string>
+  <!-- Error text indicating that city is required, used for all locations -->
+  <string name="address_city_required">โปรดป้อนชื่อเมือง</string>
+  <!-- Error text indicating country is invalid -->
+  <string name="address_country_invalid">ประเทศไม่ถูกต้อง</string>
+  <!-- Error text indicating that county is required, used for UK addresses -->
+  <string name="address_county_required">โปรดป้อนชื่อเคาน์ตี</string>
+  <!-- Caption for Address field on address form -->
+  <string name="address_label_address">ที่อยู่</string>
+  <!-- Address line 1 placeholder for billing address form. -->
+  <string name="address_label_address_line1">ที่อยู่บรรทัดที่ 1</string>
+  <!-- Label for input requesting the first line of an address where , used for international addresses -->
+  <string name="address_label_address_line1_optional">ที่อยู่บรรทัดที่ 1 (ระบุหรือไม่ก็ได้)</string>
+  <!-- Address line 2 placeholder for billing address form. -->
+  <string name="address_label_address_line2_optional">ที่อยู่บรรทัดที่ 2 (ระบุหรือไม่ก็ได้)</string>
+  <!-- Label for input requesting the first line of an address where input is optional, used for US and Canada addresses -->
+  <string name="address_label_address_optional">ที่อยู่ (ระบุหรือไม่ก็ได้) </string>
+  <!-- Label for input requesting apartment number (address line 2) where input is optional, used for US based addresses -->
+  <string name="address_label_apt_optional">อพาร์ตเมนต์ (ระบุหรือไม่ก็ได้)</string>
+  <!-- Caption for City field on address form -->
+  <string name="address_label_city">เมือง</string>
+  <!-- Label for input requesting city where input is optional, used for all locations -->
+  <string name="address_label_city_optional">เมือง (ระบุหรือไม่ก็ได้)</string>
+  <!-- Caption for Country field on address form -->
+  <string name="address_label_country">ประเทศ</string>
+  <!-- Caption for County field on address form (only countries that use county, like United Kingdom) -->
+  <string name="address_label_county">เคาน์ตี</string>
+  <!-- Label for input requesting county where input is optional , used for UK based addresses -->
+  <string name="address_label_county_optional">เคาน์ตี (ระบุหรือไม่ก็ได้)</string>
+  <!-- Caption for Name field on address form -->
+  <string name="address_label_name">ชื่อ</string>
+  <!-- Label for input requesting phone number, used for all locations -->
+  <string name="address_label_phone_number">หมายเลขโทรศัพท์</string>
+  <!-- Label for input requesting phone number where input is optional, used for all locations -->
+  <string name="address_label_phone_number_optional">หมายเลขโทรศัพท์ (ระบุหรือไม่ก็ได้)</string>
+  <!-- Short string for postal code (text used in non-US countries) -->
+  <string name="address_label_postal_code">รหัสไปรษณีย์</string>
+  <!-- Label for input requesting postal code where input is optional, used for Canada based addresses -->
+  <string name="address_label_postal_code_optional">รหัสไปรษณีย์ (ระบุหรือไม่ก็ได้)</string>
+  <!-- Label for input requesting postcode, used for UK based addresses -->
+  <string name="address_label_postcode">รหัสไปรษณีย์</string>
+  <!-- Label for input requesting postcode where input is optional, used for UK based addresses -->
+  <string name="address_label_postcode_optional">รหัสไปรษณีย์ (ระบุหรือไม่ก็ได้)</string>
+  <!-- Caption for Province field on address form (only countries that use province, like Canada) -->
+  <string name="address_label_province">จังหวัด</string>
+  <!-- Label for input requesting province where province is optional, used for canadian addresses -->
+  <string name="address_label_province_optional">จังหวัด (ระบุหรือไม่ก็ได้)</string>
+  <!-- Label for input requesting the region, used for international addresses -->
+  <string name="address_label_region_generic">รัฐ / จังหวัด / ภูมิภาค</string>
+  <!-- Label for input requesting the region where input is optional, used for international addresses -->
+  <string name="address_label_region_generic_optional">รัฐ / จังหวัด / ภูมิภาค (ระบุหรือไม่ก็ได้)</string>
+  <!-- Caption for State field on address form (only countries that use state , like United States) -->
+  <string name="address_label_state">รัฐ</string>
+  <!-- Label for input requesting state where input is optional, used for US based addresses -->
+  <string name="address_label_state_optional">รัฐ (ระบุหรือไม่ก็ได้)</string>
+  <!-- Label for input requesting zip code, used for US based addreses -->
+  <string name="address_label_zip_code">รหัสไปรษณีย์</string>
+  <!-- Label for input requesting zip code where input is optional, used for US based addresses -->
+  <string name="address_label_zip_code_optional">รหัสไปรษณีย์ (ระบุหรือไม่ก็ได้)</string>
+  <!-- Label for input requesting postal code, used for international addresses -->
+  <string name="address_label_zip_postal_code">รหัสไปรษณีย์</string>
+  <!-- Label for input requesting postal code where input is optional, used for international addresses -->
+  <string name="address_label_zip_postal_code_optional">รหัสไปรษณีย์ (ระบุหรือไม่ก็ได้)</string>
+  <!-- Error text indicating name is required -->
+  <string name="address_name_required">โปรดป้อนชื่อ</string>
+  <!-- Error text indicating that phone number is required, used for all addresses -->
+  <string name="address_phone_number_required">โปรดป้อนหมายเลขโทรศัพท์</string>
+  <!-- Error message for when postal code in form is invalid -->
+  <string name="address_postal_code_invalid">รหัสไปรษณีย์ไม่ถูกต้อง</string>
+  <!-- Error text indicating postcode is invalid, used for UK addresses -->
+  <string name="address_postcode_invalid">รหัสไปรษณีย์ไม่ถูกต้อง</string>
+  <!-- Error text indicating that province is required, used for Canada addresses -->
+  <string name="address_province_required">โปรดป้อนชื่อจังหวัด</string>
+  <!-- Error text indicating that region is required, used for international addresses -->
+  <string name="address_region_generic_required">โปรดป้อนชื่อรัฐ/จังหวัด/ภูมิภาค</string>
+  <!-- Error text indicating that address is required, used for all locations -->
+  <string name="address_required">โปรดป้อนที่อยู่</string>
+  <!-- Error text indicating that state is required, used for US addresses -->
+  <string name="address_state_required">โปรดป้อนชื่อรัฐ</string>
+  <!-- Error text indicating zip code is invalid, used for US addresses -->
+  <string name="address_zip_invalid">รหัสไปรษณีย์ไม่ถูกต้อง</string>
+  <!-- Error text indicating zip/ postal code is invalid, used for international addresses -->
+  <string name="address_zip_postal_invalid">รหัสไปรษณีย์ไม่ถูกต้อง</string>
+  <!-- BECS Debit Widget - mandate acceptance -->
+  <string name="becs_mandate_acceptance">\n    การระบุรายละเอียดบัญชีธนาคารและการยืนยันการชำระเงินนี้หมายความว่าคุณยอมรับ\n    ข้อตกลงในการให้บริการการขอหักบัญชีอัตโนมัติ และอนุญาตให้\n    Stripe Payments Australia Pty Ltd ACN 160 180 343 Direct Debit User ID\n    หมายเลข 507156 (“Stripe”) หักเงินจากบัญชีของคุณผ่าน\n    Bulk Electronic Clearing System (BECS) ในนามของ %1$s (\"ผู้ค้า\") สำหรับจำนวนเงิน\n    ใดก็ตามที่ผู้ค้าได้แจ้งคุณไว้ต่างหาก และคุณรับรองว่า\n    ตนเองเป็นเจ้าของบัญชีหรือผู้มีอำนาจลงนามในบัญชีที่ระบุข้างต้น\n    </string>
+  <!-- Placeholder text for Account number entry field for BECS Debit. -->
+  <string name="becs_widget_account_number">หมายเลขบัญชี</string>
+  <!-- BECS Debit Widget - account number field - incomplete error message -->
+  <string name="becs_widget_account_number_incomplete">หมายเลขบัญชีไม่ครบถ้วน</string>
+  <!-- BECS Debit Widget - account number field - required error message -->
+  <string name="becs_widget_account_number_required">หมายเลขบัญชีไม่ถูกต้อง</string>
+  <!-- Placeholder text for BSB Number entry field for BECS Debit. -->
+  <string name="becs_widget_bsb">BSB</string>
+  <!-- Error string displayed to user when they have entered an incomplete BSB number. BSB refers to an Australian bank account number -->
+  <string name="becs_widget_bsb_incomplete">BSB ที่คุณป้อนไม่ครบถ้วน</string>
+  <!-- Error string displayed to user when they enter in an invalid BSB number. &quot;BSB&quot; refers to an Australian bank account. -->
+  <string name="becs_widget_bsb_invalid">BSB ที่คุณป้อนไม่ถูกต้อง</string>
+  <!-- BECS Debit Widget - email address field - label -->
+  <string name="becs_widget_email">ที่อยู่อีเมล</string>
+  <!-- BECS Debit Widget - email address field - invalid error message -->
+  <string name="becs_widget_email_invalid">ที่อยู่อีเมลไม่ถูกต้อง</string>
+  <!-- BECS Debit Widget - email address field - required error message -->
+  <string name="becs_widget_email_required">ต้องระบุที่อยู่อีเมล</string>
+  <!-- BECS Debit Widget - name field - label -->
+  <string name="becs_widget_name">ชื่อ</string>
+  <!-- BECS Debit Widget - name field - required error message -->
+  <string name="becs_widget_name_required">ต้องระบุชื่อ</string>
+  <!-- Details of a saved card. &apos;{card brand} ending in {last 4}&apos; e.g. &apos;VISA ending in 4242&apos; -->
+  <string name="card_ending_in">%1$s ลงท้ายด้วย %2$s</string>
+  <!-- Text for close button -->
+  <string name="close">ปิด</string>
+  <!-- Accessibility action for deleting a payment method -->
+  <string name="delete_payment_method">ลบวิธีการชำระเงิน</string>
+  <string name="delete_payment_method_prompt_title">ลบวิธีการชำระเงินใช่ไหม</string>
+  <!-- label for text field to enter card expiry -->
+  <string name="expiry_date_hint">ดด/ปป</string>
+  <string name="expiry_label_short">วันหมดอายุ</string>
+  <!-- Label that will show that an FPX bank is offline. For example, &quot;AmBank - Offline&quot; -->
+  <string name="fpx_bank_offline">%s - ออฟไลน์</string>
+  <!-- Error message for card details form when expiration date isn&apos;t entered completely -->
+  <string name="incomplete_expiry_date">วันที่หมดอายุของบัตรไม่ครบถ้วน</string>
+  <string name="invalid_card_number">หมายเลขบัตรไม่ถูกต้อง</string>
+  <!-- Error message for card entry form when CVC/CVV is invalid -->
+  <string name="invalid_cvc">รหัสความปลอดภัยของบัตรไม่ถูกต้อง</string>
+  <!-- String to describe an invalid month in expiry date. -->
+  <string name="invalid_expiry_month">เดือนที่หมดอายุของบัตรไม่ถูกต้อง</string>
+  <!-- String to describe an invalid year in expiry date. -->
+  <string name="invalid_expiry_year">ปีที่หมดอายุของบัตรไม่ถูกต้อง</string>
+  <!-- Shipping form error message -->
+  <string name="invalid_shipping_information">ที่อยู่สำหรับจัดส่งไม่ถูกต้อง</string>
+  <!-- Error message for when postal code in form is incomplete -->
+  <string name="invalid_zip">รหัสไปรษณีย์ไม่ครบถ้วน</string>
+  <string name="payment_method_add_new_card">เพิ่มบัตรใหม่...</string>
+  <string name="payment_method_add_new_fpx">เลือกบัญชีธนาคาร (FPX)…</string>
+  <!-- Label for free shipping method -->
+  <string name="price_free">ฟรี</string>
+  <!-- Message displayed when a payment method is removed, stating its name. -->
+  <string name="removed">นำ %s ออกแล้ว</string>
+  <string name="secure_checkout">การชำระเงินที่ปลอดภัย</string>
+  <!-- Error when 3DS2 authentication failed (e.g. customer entered the wrong code) -->
+  <string name="stripe_failure_reason_authentication">เราตรวจสอบสิทธิ์วิธีการชำระเงินของคุณไม่ได้ โปรดเลือกวิธีการชำระเงินอื่นแล้วลองอีกครั้ง</string>
+  <!-- Error when 3DS2 authentication timed out. -->
+  <string name="stripe_failure_reason_timed_out">หมดเวลาตรวจสอบสิทธิ์วิธีการชำระเงินแล้ว โปรดลองอีกครั้ง</string>
+  <!-- label for text field to enter card expiry -->
+  <string name="stripe_paymentsheet_expiration_date_hint">ดด / ปป</string>
+  <!-- When there are multiple browsers and web authentication is required, this will show in a window asking which browser they want to use to "Verify your payment" -->
+  <string name="stripe_verify_your_payment">ยืนยันการชำระเงินของคุณ</string>
+  <string name="title_add_a_card">เพิ่มบัตร</string>
+  <!-- Screen title telling users they should add an address -->
+  <string name="title_add_an_address">ระบุที่อยู่</string>
+  <!-- Label for Bank Account selection or detail entry form -->
+  <string name="title_bank_account">บัญชีธนาคาร</string>
+  <!-- Title for Payment Method screen -->
+  <string name="title_payment_method">วิธีการชำระเงิน</string>
+  <!-- Screen title telling users they should select a shipping address -->
+  <string name="title_select_shipping_method">เลือกวิธีการจัดส่ง</string>
+</resources>
