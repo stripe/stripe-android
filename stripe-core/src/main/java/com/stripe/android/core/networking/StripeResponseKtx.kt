@@ -5,8 +5,6 @@ import com.stripe.android.core.exception.APIException
 import org.json.JSONException
 import org.json.JSONObject
 
-internal const val HEADER_CONTENT_TYPE = "Content-Type"
-
 @Throws(APIException::class)
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun StripeResponse<String>.responseJson(): JSONObject =

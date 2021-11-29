@@ -10,3 +10,6 @@ import androidx.annotation.RestrictTo
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 const val HTTP_TOO_MANY_REQUESTS = 429
+
+const val HEADER_CONTENT_TYPE = "Content-Type"
+const val HEADER_AUTHORIZATION = "Authorization"

@@ -3,7 +3,7 @@ import java.time.Duration
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 buildscript {
     ext.kotlinVersion = '1.5.31'
-    ext.dokkaVersion = '1.5.31'
+    ext.dokkaVersion = '1.6.0'
 
     repositories {
         mavenCentral()
@@ -58,12 +58,12 @@ ext {
     espressoVersion = '3.4.0'
     ktlintVersion = '0.43.0'
     materialVersion = '1.4.0'
-    daggerVersion = '2.40.1'
+    daggerVersion = '2.40.2'
 
     androidTestVersion = '1.4.0'
     junitVersion = '4.13.2'
     robolectricVersion = '4.7.2'
-    mockitoCoreVersion = '4.0.0'
+    mockitoCoreVersion = '4.1.0'
     mockitoKotlinVersion = '4.0.0'
 
     group_name = GROUP
@@ -107,5 +107,5 @@ tasks.dokkaHtmlMultiModule.configure {
 
 apiValidation {
     ignoredPackages += ["com.stripe.android.databinding"]
-    ignoredProjects += ["example", "paymentsheet-example", "cardverificationsheet-example"]
+    ignoredProjects += ["example", "paymentsheet-example", "stripecardscan-example"]
 }

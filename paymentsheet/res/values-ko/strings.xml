@@ -92,6 +92,10 @@
   <string name="stripe_paymentsheet_form_label_optional">%s(선택 사항)</string>
   <!-- iDEAL bank section title for iDEAL form entry. -->
   <string name="stripe_paymentsheet_ideal_bank">iDEAL 은행</string>
+  <!-- Klarna buy now or pay later copy -->
+  <string name="stripe_paymentsheet_klarna_buy_now_pay_later">지금 구매하거나 Klarna로 나중에 결제</string>
+  <!-- Klarna pay later copy -->
+  <string name="stripe_paymentsheet_klarna_pay_later">Klarna로 나중에 결제</string>
   <!-- Title of a section containing multiple payment methods that can selected and will collect the payment information from the user. -->
   <string name="stripe_paymentsheet_or_pay_using">또는 다음 결제 방식 사용</string>
   <!-- Title of a section containing a card form that will collect the payment information from the user. -->
@@ -114,6 +118,8 @@
   <string name="stripe_paymentsheet_remove_pm">%s 제거</string>
   <!-- The label of a switch indicating whether to save the payment method for future payments. -->
   <string name="stripe_paymentsheet_save_for_future_payments">향후 결제에 사용하도록 저장</string>
+  <!-- Next to the save payment method users will see the merchant name: "Save for future Example.inc Payments" -->
+  <string name="stripe_paymentsheet_save_for_future_payments_with_merchant_name">향후 %s 결제에 사용하도록 저장</string>
   <!-- The label of a switch indicating whether to save the user&apos;s card for future payments to this merchant -->
   <string name="stripe_paymentsheet_save_this_card_with_merchant_name">이 카드를 향후 %s 결제에 사용하도록 저장</string>
   <!-- Title shown above a carousel containing the customer&apos;s payment methods -->

@@ -94,7 +94,6 @@
                         android:layout_height="@dimen/stripe_paymentsheet_primary_button_height"
                         android:text="@string/stripe_paymentsheet_pay_button_label"
                         android:layout_marginVertical="2dp"
-                        android:layout_marginHorizontal="2dp"
                         android:visibility="gone" />
 
                     <com.stripe.android.paymentsheet.ui.GooglePayButton

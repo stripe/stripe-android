@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet.elements
 
-import androidx.compose.ui.graphics.Color
 import com.stripe.android.paymentsheet.forms.FormFieldEntry
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -13,7 +12,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 internal data class StaticTextElement(
     override val identifier: IdentifierSpec,
     val stringResId: Int,
-    val color: Color?,
+    val color: Int?,
     val merchantName: String?,
     val fontSizeSp: Int = 10,
     val letterSpacingSp: Double = .7,
