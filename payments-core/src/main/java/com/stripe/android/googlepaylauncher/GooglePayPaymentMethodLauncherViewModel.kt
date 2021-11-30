@@ -17,13 +17,13 @@ import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.exception.InvalidRequestException
+import com.stripe.android.core.injection.Injectable
+import com.stripe.android.core.injection.injectWithFallback
 import com.stripe.android.googlepaylauncher.injection.DaggerGooglePayPaymentMethodLauncherViewModelFactoryComponent
 import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLauncherViewModelSubcomponent
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.networking.ApiRequest
 import com.stripe.android.networking.StripeRepository
-import com.stripe.android.payments.core.injection.Injectable
-import com.stripe.android.payments.core.injection.injectWithFallback
 import kotlinx.coroutines.flow.first
 import org.json.JSONObject
 import javax.inject.Inject

@@ -4,13 +4,13 @@ import com.stripe.android.PaymentBrowserAuthStarter
 import com.stripe.android.PaymentRelayStarter
 import com.stripe.android.StripePaymentController
 import com.stripe.android.auth.PaymentBrowserAuthContract
+import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.UIContext
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.model.Source
 import com.stripe.android.networking.ApiRequest
 import com.stripe.android.networking.PaymentAnalyticsEvent
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
-import com.stripe.android.payments.core.injection.ENABLE_LOGGING
 import com.stripe.android.payments.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.view.AuthActivityStarterHost
 import kotlinx.coroutines.withContext

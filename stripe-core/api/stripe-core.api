@@ -99,10 +99,86 @@ public final class com/stripe/android/core/exception/StripeException$Companion {
 	public final fun create (Ljava/lang/Throwable;)Lcom/stripe/android/core/exception/StripeException;
 }
 
+public final class com/stripe/android/core/injection/CoroutineContextModule {
+	public static final field $stable I
+	public fun <init> ()V
+	public final fun provideUIContext ()Lkotlin/coroutines/CoroutineContext;
+	public final fun provideWorkContext ()Lkotlin/coroutines/CoroutineContext;
+}
+
+public final class com/stripe/android/core/injection/CoroutineContextModule_ProvideUIContextFactory : dagger/internal/Factory {
+	public fun <init> (Lcom/stripe/android/core/injection/CoroutineContextModule;)V
+	public static fun create (Lcom/stripe/android/core/injection/CoroutineContextModule;)Lcom/stripe/android/core/injection/CoroutineContextModule_ProvideUIContextFactory;
+	public synthetic fun get ()Ljava/lang/Object;
+	public fun get ()Lkotlin/coroutines/CoroutineContext;
+	public static fun provideUIContext (Lcom/stripe/android/core/injection/CoroutineContextModule;)Lkotlin/coroutines/CoroutineContext;
+}
+
+public final class com/stripe/android/core/injection/CoroutineContextModule_ProvideWorkContextFactory : dagger/internal/Factory {
+	public fun <init> (Lcom/stripe/android/core/injection/CoroutineContextModule;)V
+	public static fun create (Lcom/stripe/android/core/injection/CoroutineContextModule;)Lcom/stripe/android/core/injection/CoroutineContextModule_ProvideWorkContextFactory;
+	public synthetic fun get ()Ljava/lang/Object;
+	public fun get ()Lkotlin/coroutines/CoroutineContext;
+	public static fun provideWorkContext (Lcom/stripe/android/core/injection/CoroutineContextModule;)Lkotlin/coroutines/CoroutineContext;
+}
+
 public abstract interface annotation class com/stripe/android/core/injection/IOContext : java/lang/annotation/Annotation {
 }
 
+public abstract interface class com/stripe/android/core/injection/Injectable {
+	public abstract fun fallbackInitialize (Ljava/lang/Object;)V
+}
+
+public final class com/stripe/android/core/injection/InjectableKtxKt {
+	public static final fun injectWithFallback (Lcom/stripe/android/core/injection/Injectable;Ljava/lang/String;Ljava/lang/Object;)V
+}
+
+public abstract interface class com/stripe/android/core/injection/Injector {
+	public abstract fun inject (Lcom/stripe/android/core/injection/Injectable;)V
+}
+
+public abstract interface annotation class com/stripe/android/core/injection/InjectorKey : java/lang/annotation/Annotation {
+}
+
+public final class com/stripe/android/core/injection/InjectorKt {
+	public static final field DUMMY_INJECTOR_KEY Ljava/lang/String;
+}
+
+public abstract interface class com/stripe/android/core/injection/InjectorRegistry {
+	public abstract fun nextKey (Ljava/lang/String;)Ljava/lang/String;
+	public abstract fun register (Lcom/stripe/android/core/injection/Injector;Ljava/lang/String;)V
+	public abstract fun retrieve (Ljava/lang/String;)Lcom/stripe/android/core/injection/Injector;
+}
+
+public final class com/stripe/android/core/injection/LoggingModule {
+	public static final field $stable I
+	public fun <init> ()V
+	public final fun provideLogger (Z)Lcom/stripe/android/core/Logger;
+}
+
+public final class com/stripe/android/core/injection/LoggingModule_ProvideLoggerFactory : dagger/internal/Factory {
+	public fun <init> (Lcom/stripe/android/core/injection/LoggingModule;Ljavax/inject/Provider;)V
+	public static fun create (Lcom/stripe/android/core/injection/LoggingModule;Ljavax/inject/Provider;)Lcom/stripe/android/core/injection/LoggingModule_ProvideLoggerFactory;
+	public fun get ()Lcom/stripe/android/core/Logger;
+	public synthetic fun get ()Ljava/lang/Object;
+	public static fun provideLogger (Lcom/stripe/android/core/injection/LoggingModule;Z)Lcom/stripe/android/core/Logger;
+}
+
+public final class com/stripe/android/core/injection/NamedConstantsKt {
+	public static final field ENABLE_LOGGING Ljava/lang/String;
+}
+
 public abstract interface annotation class com/stripe/android/core/injection/UIContext : java/lang/annotation/Annotation {
+}
+
+public final class com/stripe/android/core/injection/WeakMapInjectorRegistry : com/stripe/android/core/injection/InjectorRegistry {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/stripe/android/core/injection/WeakMapInjectorRegistry;
+	public final fun getCURRENT_REGISTER_KEY ()Ljava/util/concurrent/atomic/AtomicInteger;
+	public final fun getStaticCacheMap ()Ljava/util/WeakHashMap;
+	public fun nextKey (Ljava/lang/String;)Ljava/lang/String;
+	public fun register (Lcom/stripe/android/core/injection/Injector;Ljava/lang/String;)V
+	public fun retrieve (Ljava/lang/String;)Lcom/stripe/android/core/injection/Injector;
 }
 
 public abstract interface class com/stripe/android/core/model/StripeModel : android/os/Parcelable {

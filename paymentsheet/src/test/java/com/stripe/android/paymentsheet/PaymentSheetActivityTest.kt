@@ -22,7 +22,7 @@ import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
-import com.stripe.android.payments.core.injection.DUMMY_INJECTOR_KEY
+import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
 import com.stripe.android.paymentsheet.PaymentSheetViewModel.CheckoutIdentifier

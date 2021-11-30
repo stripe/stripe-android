@@ -6,10 +6,10 @@ import androidx.annotation.StringRes
 import androidx.lifecycle.asLiveData
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.payments.core.injection.DUMMY_INJECTOR_KEY
-import com.stripe.android.payments.core.injection.Injectable
-import com.stripe.android.payments.core.injection.Injector
-import com.stripe.android.payments.core.injection.WeakMapInjectorRegistry
+import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
+import com.stripe.android.core.injection.Injectable
+import com.stripe.android.core.injection.Injector
+import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.COMPOSE_FRAGMENT_ARGS
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.address.AddressFieldElementRepository

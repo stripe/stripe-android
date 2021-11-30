@@ -1,13 +1,13 @@
-package com.stripe.android.payments.core.injection
+package com.stripe.android.core.injection
 
-import com.stripe.android.core.injection.IOContext
-import com.stripe.android.core.injection.UIContext
+import androidx.annotation.RestrictTo
 import dagger.Module
 import dagger.Provides
 import kotlinx.coroutines.Dispatchers
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Module
 class CoroutineContextModule {
     @Provides

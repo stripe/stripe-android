@@ -16,7 +16,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.payments.core.injection.InjectorKey
+import com.stripe.android.core.injection.InjectorKey
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.databinding.FragmentPaymentsheetAddPaymentMethodBinding
 import com.stripe.android.paymentsheet.forms.FormFieldValues

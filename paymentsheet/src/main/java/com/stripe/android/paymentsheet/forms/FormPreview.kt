@@ -2,7 +2,7 @@ package com.stripe.android.paymentsheet.forms
 
 import android.annotation.SuppressLint
 import androidx.compose.runtime.Composable
-import com.stripe.android.payments.core.injection.DUMMY_INJECTOR_KEY
+import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.address.AddressFieldElementRepository
 import com.stripe.android.paymentsheet.address.parseAddressesSchema

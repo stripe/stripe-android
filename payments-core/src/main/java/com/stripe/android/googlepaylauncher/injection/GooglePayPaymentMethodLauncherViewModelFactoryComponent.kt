@@ -1,12 +1,12 @@
 package com.stripe.android.googlepaylauncher.injection
 
 import android.content.Context
+import com.stripe.android.core.injection.CoroutineContextModule
+import com.stripe.android.core.injection.ENABLE_LOGGING
+import com.stripe.android.core.injection.Injector
+import com.stripe.android.core.injection.LoggingModule
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherViewModel
-import com.stripe.android.payments.core.injection.CoroutineContextModule
-import com.stripe.android.payments.core.injection.ENABLE_LOGGING
-import com.stripe.android.payments.core.injection.Injector
-import com.stripe.android.payments.core.injection.LoggingModule
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.payments.core.injection.STRIPE_ACCOUNT_ID
