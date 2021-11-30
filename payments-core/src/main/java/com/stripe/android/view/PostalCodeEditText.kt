@@ -112,6 +112,9 @@ class PostalCodeEditText @JvmOverloads constructor(
         US
     }
 
+    internal fun hasValidUsZip() =
+        config == Config.US && ZIP_CODE_PATTERN.matcher(fieldText).matches()
+
     private companion object {
         private const val MAX_LENGTH_US = 5
 

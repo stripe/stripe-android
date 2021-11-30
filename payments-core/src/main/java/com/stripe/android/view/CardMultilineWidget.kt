@@ -367,6 +367,12 @@ class CardMultilineWidget @JvmOverloads constructor(
             cvcEditText.shouldShowError = false
         }
 
+        postalCodeEditText.setAfterTextChangedListener {
+            if (postalCodeEditText.hasValidUsZip()) {
+                cardInputListener?.onUsZipCodeComplete()
+            }
+        }
+
         adjustViewForPostalCodeAttribute(shouldShowPostalCode)
 
         cardNumberEditText.updateLengthFilter()

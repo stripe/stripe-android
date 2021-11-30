@@ -39,4 +39,11 @@ interface CardInputListener {
      * the user edits the CVC.
      */
     fun onCvcComplete()
+
+    /**
+     * Called when a valid US zip code has been entered.
+     * May be called multiple times, if the user edits the field.
+     * Only works if the [CardWidget] it's used in collects US cards.
+     */
+    fun onUsZipCodeComplete()
 }

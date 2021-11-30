@@ -747,6 +747,12 @@ class CardInputWidget @JvmOverloads constructor(
             }
         }
 
+        postalCodeEditText.setAfterTextChangedListener {
+            if (postalCodeEditText.hasValidUsZip()) {
+                cardInputListener?.onUsZipCodeComplete()
+            }
+        }
+
         cardNumberEditText.completionCallback = {
             scrollEnd()
             cardInputListener?.onCardComplete()

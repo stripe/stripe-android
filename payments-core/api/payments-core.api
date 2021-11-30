@@ -5671,6 +5671,7 @@ public abstract interface class com/stripe/android/view/CardInputListener {
 	public abstract fun onCvcComplete ()V
 	public abstract fun onExpirationComplete ()V
 	public abstract fun onFocusChange (Lcom/stripe/android/view/CardInputListener$FocusField;)V
+	public abstract fun onUsZipCodeComplete ()V
 }
 
 public final class com/stripe/android/view/CardInputListener$FocusField : java/lang/Enum {
