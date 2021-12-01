@@ -1,7 +1,7 @@
 package com.stripe.android.paymentsheet.forms.resources
 
 import android.content.res.Resources
-import com.stripe.android.payments.core.injection.IOContext
+import com.stripe.android.core.injection.IOContext
 import com.stripe.android.paymentsheet.address.AddressFieldElementRepository
 import com.stripe.android.paymentsheet.elements.BankRepository
 import com.stripe.android.view.CountryUtils

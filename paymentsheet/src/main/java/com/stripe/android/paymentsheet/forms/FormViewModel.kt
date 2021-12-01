@@ -21,12 +21,10 @@ import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.firstOrNull
-import kotlinx.coroutines.flow.flatMapConcat
+import kotlinx.coroutines.flow.flattenConcat
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.toList
-import kotlinx.coroutines.flow.transform
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Provider
@@ -82,12 +80,12 @@ internal class FormViewModel @Inject internal constructor(
         if (resourceRepository.isLoaded()) {
             elements = MutableStateFlow(transformSpecToElement.transform(layout.items))
         } else {
-            val elements = MutableStateFlow<List<FormElement>?>(null)
+            val delayedElements = MutableStateFlow<List<FormElement>?>(null)
             viewModelScope.launch {
                 resourceRepository.waitUntilLoaded()
-                elements.value = transformSpecToElement.transform(layout.items)
+                delayedElements.value = transformSpecToElement.transform(layout.items)
             }
-            this.elements = elements
+            this.elements = delayedElements
         }
     }
 
@@ -104,20 +102,21 @@ internal class FormViewModel @Inject internal constructor(
 
     internal suspend fun setSaveForFutureUse(value: Boolean) {
         elements
-            .filterIsInstance<SaveForFutureUseElement>()
-            .firstOrNull()?.controller?.onValueChange(value)
+            .firstOrNull()
+            ?.filterIsInstance<SaveForFutureUseElement>()
+            ?.firstOrNull()?.controller?.onValueChange(value)
     }
 
-    private val saveForFutureUseElementFlow = elements
+    private val saveForFutureUseElement = elements
         .map { elementsList ->
             elementsList?.find { element ->
                 element is SaveForFutureUseElement
             } as? SaveForFutureUseElement
         }
 
-    internal val saveForFutureUse = saveForFutureUseElementFlow.map {
-        it?.controller?.saveForFutureUse?.firstOrNull()
-    }
+    internal val saveForFutureUse = saveForFutureUseElement.map {
+        it?.controller?.saveForFutureUse ?: flowOf(false)
+    }.flattenConcat()
 
     private val sectionToFieldIdentifierMap = layout.items
         .filterIsInstance<SectionSpec>()
@@ -130,43 +129,45 @@ internal class FormViewModel @Inject internal constructor(
     internal val hiddenIdentifiers =
         combine(
             saveForFutureUseVisible,
-            saveForFutureUseElementFlow.transform {
-                emit(it?.controller?.hiddenIdentifiers?.firstOrNull())
-            }
+            saveForFutureUseElement.map {
+                it?.controller?.hiddenIdentifiers ?: flowOf(emptyList())
+            }.flattenConcat()
         ) { showFutureUse, hiddenIdentifiers ->
-            hiddenIdentifiers?.let {
-                // For hidden *section* identifiers, list of identifiers of elements in the section
-                val identifiers = sectionToFieldIdentifierMap
-                    .filter { idControllerPair ->
-                        hiddenIdentifiers.contains(idControllerPair.key)
-                    }
-                    .flatMap { sectionToSectionFieldEntry ->
-                        sectionToSectionFieldEntry.value
-                    }
-
-                val saveForFutureUseElement = saveForFutureUseElementFlow.firstOrNull()
-                if (!showFutureUse && saveForFutureUseElement != null) {
-                    hiddenIdentifiers
-                        .plus(identifiers)
-                        .plus(saveForFutureUseElement.identifier)
-                } else {
-                    hiddenIdentifiers
-                        .plus(identifiers)
+            // For hidden *section* identifiers, list of identifiers of elements in the section
+            val identifiers = sectionToFieldIdentifierMap
+                .filter { idControllerPair ->
+                    hiddenIdentifiers.contains(idControllerPair.key)
                 }
-            } ?: emptyList()
+                .flatMap { sectionToSectionFieldEntry ->
+                    sectionToSectionFieldEntry.value
+                }
+
+            val saveForFutureUseElement = saveForFutureUseElement.firstOrNull()
+            if (!showFutureUse && saveForFutureUseElement != null) {
+                hiddenIdentifiers
+                    .plus(identifiers)
+                    .plus(saveForFutureUseElement.identifier)
+            } else {
+                hiddenIdentifiers
+                    .plus(identifiers)
+            }
         }
 
     // Mandate is showing if it is an element of the form and it isn't hidden
-    private val showingMandate = hiddenIdentifiers.map {
-        elements
-            .filterIsInstance<StaticTextElement>()
-            .firstOrNull()?.let { mandate ->
-                !it.contains(mandate.identifier)
+    private val showingMandate =
+        combine(
+            hiddenIdentifiers,
+            elements.map {
+                it ?: emptyList()
+            }
+        ) { hiddenIdentifiers, formElements ->
+            formElements.filterIsInstance<StaticTextElement>().firstOrNull()?.let { mandate ->
+                !hiddenIdentifiers.contains(mandate.identifier)
             } ?: false
-    }
+        }
 
     private val userRequestedReuse =
-        saveForFutureUseElementFlow.flatMapConcat {
+        saveForFutureUseElement.map {
             it?.controller?.saveForFutureUse?.map { saveForFutureUse ->
                 if (config.showCheckbox) {
                     if (saveForFutureUse) {
@@ -177,16 +178,22 @@ internal class FormViewModel @Inject internal constructor(
                 } else {
                     PaymentSelection.CustomerRequestedSave.NoRequest
                 }
-            } ?: MutableStateFlow(PaymentSelection.CustomerRequestedSave.NoRequest)
+            }?.firstOrNull() ?: PaymentSelection.CustomerRequestedSave.NoRequest
         }
 
     val completeFormValues =
         CompleteFormFieldValueFilter(
-            elements.map { elementsList ->
-                elementsList?.map {
-                    it.getFormFieldValueFlow().toList().flatten()
-                }?.flatten()?.toMap() ?: emptyMap()
-            },
+            elements.map { nullableElementsList ->
+                nullableElementsList?.let { elementsList ->
+                    combine(
+                        elementsList.map {
+                            it.getFormFieldValueFlow()
+                        }
+                    ) {
+                        it.toList().flatten().toMap()
+                    }
+                } ?: flowOf(emptyMap())
+            }.flattenConcat(),
             hiddenIdentifiers,
             showingMandate,
             userRequestedReuse
