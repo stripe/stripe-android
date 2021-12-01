@@ -63,7 +63,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     internal val _isGooglePayReady = MutableLiveData<Boolean>()
     internal val isGooglePayReady: LiveData<Boolean> = _isGooglePayReady.distinctUntilChanged()
 
-    internal val _isResourceRepositoryReady = MutableLiveData<Boolean>()
+    private val _isResourceRepositoryReady = MutableLiveData<Boolean>()
     internal val isResourceRepositoryReady: LiveData<Boolean> =
         _isResourceRepositoryReady.distinctUntilChanged()
 
