@@ -9,12 +9,12 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
-import com.stripe.android.core.Logger
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.R
+import com.stripe.android.core.Logger
+import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethodFixtures
-import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.paymentsheet.PaymentOptionsViewModel.TransitionTarget
 import com.stripe.android.paymentsheet.address.AddressFieldElementRepository
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -48,16 +48,6 @@ class PaymentOptionsActivityTest {
 
     private val eventReporter = mock<EventReporter>()
     private val viewModel = createViewModel()
-
-    private val resourceRepository =
-        StaticResourceRepository(
-            BankRepository(
-                ApplicationProvider.getApplicationContext<Context>().resources
-            ),
-            AddressFieldElementRepository(
-                ApplicationProvider.getApplicationContext<Context>().resources
-            )
-        )
 
     @BeforeTest
     fun setup() {
@@ -312,7 +302,14 @@ class PaymentOptionsActivityTest {
             application = ApplicationProvider.getApplicationContext(),
             logger = Logger.noop(),
             injectorKey = DUMMY_INJECTOR_KEY,
-            resourceRepository = resourceRepository
+            resourceRepository = StaticResourceRepository(
+                BankRepository(
+                    ApplicationProvider.getApplicationContext<Context>().resources
+                ),
+                AddressFieldElementRepository(
+                    ApplicationProvider.getApplicationContext<Context>().resources
+                )
+            )
         )
     }
 
