@@ -58,7 +58,7 @@ class Stripe3ds2TransactionViewModelFactoryTest {
             // ViewModel.mBagOfTags that's initialized in base class.
             // Mocking it would leave this field null, causing an NPE.
             val viewModel = Stripe3ds2TransactionViewModel(
-                mock(), mock(), mock(), mock(), mock(), mock(), mock(), mock(), mock(), mock()
+                mock(), mock(), mock(), mock(), mock(), mock(), mock(), mock(), mock(), mock(), false
             )
             val mockBuilder = mock<Stripe3ds2TransactionViewModelSubcomponent.Builder>()
             val mockSubcomponent = mock<Stripe3ds2TransactionViewModelSubcomponent>()
