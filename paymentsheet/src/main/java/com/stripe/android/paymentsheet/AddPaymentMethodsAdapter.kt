@@ -30,13 +30,23 @@ internal class AddPaymentMethodsAdapter(
         return AddPaymentMethodViewHolder(parent)
             .apply {
                 val targetWidth = parent.measuredWidth - parent.paddingStart - parent.paddingEnd
-                val minItemWidth = 100 * parent.context.resources.displayMetrics.density +
-                    itemView.marginEnd + itemView.marginStart
-                // numVisibleItems is incremented in steps of 0.5 items (1, 1.5, 2, 2.5, 3, ...)
-                val numVisibleItems = (targetWidth * 2 / minItemWidth).toInt() / 2f
+
+                // if there are two items span them across the sheet.
+                // Otherwise the number of items visible should be a multiple of .5
                 val viewWidth =
-                    targetWidth / numVisibleItems - itemView.marginEnd - itemView.marginStart
-                itemView.layoutParams.width = viewWidth.toInt()
+                    if (paymentMethods.size == 2) {
+                        targetWidth / 2
+                    } else {
+                        val minItemWidth = 100 * parent.context.resources.displayMetrics.density +
+                            itemView.marginEnd + itemView.marginStart
+                        // numVisibleItems is incremented in steps of 0.5 items
+                        // (1, 1.5, 2, 2.5, 3, ...)
+                        val numVisibleItems = (targetWidth * 2 / minItemWidth).toInt() / 2f
+
+                        targetWidth / numVisibleItems
+                    }
+                itemView.layoutParams.width =
+                    viewWidth.toInt() - itemView.marginEnd - itemView.marginStart
                 itemView.setOnClickListener {
                     onItemSelected(bindingAdapterPosition)
                 }
