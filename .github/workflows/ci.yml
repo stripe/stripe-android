@@ -104,3 +104,7 @@ jobs:
               "summary": "stripe-android E2E test failed",
               "description": "Please ACK this ticket and investigate the failure. See https://github.com/stripe/stripe-android/actions/runs/${{ github.run_id }}"
             }
+          customHeaders: |
+            {
+              "X-TM-Signature" : "header_data_64"
+            }
