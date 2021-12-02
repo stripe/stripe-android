@@ -35,7 +35,6 @@ jobs:
       - name: Notify failure endpoint
         id: notifyFailureEndpoint
         uses: fjogeleit/http-request-action@master
-#        if: failure() // do this anyways
         with:
           url: ${{ secrets.SDK_FAILURE_NOTIFICATION_ENDPOINT }}
           method: 'POST'
