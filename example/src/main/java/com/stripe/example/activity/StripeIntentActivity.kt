@@ -75,6 +75,7 @@ abstract class StripeIntentActivity : AppCompatActivity() {
         country: String,
         paymentMethodCreateParams: PaymentMethodCreateParams?,
         supportedPaymentMethods: String? = null,
+        currency:String? = null,
         shippingDetails: ConfirmPaymentIntentParams.Shipping? = null,
         stripeAccountId: String? = null,
         existingPaymentMethodId: String? = null,
@@ -87,7 +88,8 @@ abstract class StripeIntentActivity : AppCompatActivity() {
 
         viewModel.createPaymentIntent(
             country = country,
-            supportedPaymentMethods = supportedPaymentMethods
+            supportedPaymentMethods = supportedPaymentMethods,
+            currency = currency
         ).observe(
             this,
             { result ->

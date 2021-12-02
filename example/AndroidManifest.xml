@@ -14,6 +14,7 @@
         android:name=".ExampleApplication"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/appName"
+        android:usesCleartextTraffic="true"
         android:theme="@style/AppTheme"
         android:supportsRtl="true"
         tools:ignore="AllowBackup">

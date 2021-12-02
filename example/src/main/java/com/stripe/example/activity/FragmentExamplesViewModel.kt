@@ -15,7 +15,7 @@ internal class FragmentExamplesViewModel(
     val paymentIntentResultLiveData = MutableLiveData<Result<PaymentIntentResult>>()
     val setupIntentResultLiveData = MutableLiveData<Result<SetupIntentResult>>()
 
-    fun createPaymentIntent() = createIntent { backendApi.createPaymentIntent(PARAMS) }
+    fun createPaymentIntent() = createIntent { backendApi.createPaymentIntent(PARAMS as MutableMap<String, Any>) }
 
     fun createSetupIntent() = createIntent { backendApi.createSetupIntent(PARAMS) }
 

@@ -23,23 +23,29 @@ internal class StripeIntentViewModel(
     fun createPaymentIntent(
         country: String,
         customerId: String? = null,
-        supportedPaymentMethods: String? = null
+        supportedPaymentMethods: String? = null,
+        currency: String? = null
     ) = makeBackendRequest(
         R.string.creating_payment_intent,
         R.string.payment_intent_status
     ) {
         backendApi.createPaymentIntent(
-            mapOf("country" to country)
-                .plus(
-                    customerId?.let {
-                        mapOf("customer_id" to it)
-                    }.orEmpty()
-                ).plus(
-                    supportedPaymentMethods?.let {
-                        mapOf("supported_payment_methods" to it)
-                    }.orEmpty()
-                )
-                .toMutableMap()
+                    mapOf("country" to country)
+                        .plus(
+                            customerId?.let {
+                                mapOf("customer_id" to it)
+                            }.orEmpty()
+                        ).plus(
+                            supportedPaymentMethods?.let {
+                                mapOf("payment_method_types" to it)
+                            }.orEmpty()
+                        )
+                        .plus(
+                            currency?.let {
+                                mapOf("currency" to it)
+                            }.orEmpty()
+                        )
+                        .toMutableMap()
         )
     }
 

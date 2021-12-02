@@ -74,7 +74,12 @@ class SimpleConfirmationActivity : StripeIntentActivity() {
         viewBinding.paymentMethod.setText(DropdownItem.P24.name, false)
 
         viewBinding.payNow.setOnClickListener {
-            createAndConfirmPaymentIntent(dropdownItem.country, paymentMethodCreateParams)
+            createAndConfirmPaymentIntent(
+                dropdownItem.country,
+                paymentMethodCreateParams,
+                paymentMethodCreateParams.typeCode,
+                currency = dropdownItem.currency
+            )
         }
 
         viewBinding.name.setText(simpleConfirmationViewModel.name)
@@ -111,6 +116,7 @@ class SimpleConfirmationActivity : StripeIntentActivity() {
         @DrawableRes val icon: Int,
         val createParams:
             (PaymentMethod.BillingDetails, Map<String, String>?) -> PaymentMethodCreateParams,
+        val currency: String,
         val requiresName: Boolean = true,
         val requiresEmail: Boolean = false
     ) {
@@ -118,33 +124,46 @@ class SimpleConfirmationActivity : StripeIntentActivity() {
             "pl",
             R.drawable.ic_brandicon__p24,
             PaymentMethodCreateParams.Companion::createP24,
+            currency = "eur",
             requiresName = false,
             requiresEmail = true
         ),
         Bancontact(
             "be",
             R.drawable.ic_brandicon__bancontact,
-            PaymentMethodCreateParams.Companion::createBancontact
+            PaymentMethodCreateParams.Companion::createBancontact,
+            currency = "eur",
         ),
         EPS(
             "at",
             R.drawable.ic_brandicon__eps,
-            PaymentMethodCreateParams.Companion::createEps
+            PaymentMethodCreateParams.Companion::createEps,
+            currency = "eur",
         ),
         Giropay(
             "de",
             R.drawable.ic_brandicon__giropay,
-            PaymentMethodCreateParams.Companion::createGiropay
+            PaymentMethodCreateParams.Companion::createGiropay,
+            currency = "eur",
         ),
         GrabPay(
             "sg",
             R.drawable.ic_brandicon_grabpay,
-            PaymentMethodCreateParams.Companion::createGrabPay
+            PaymentMethodCreateParams.Companion::createGrabPay,
+            currency = "sgd",
         ),
         Oxxo(
             "mx",
             R.drawable.ic_brandicon__oxxo,
             PaymentMethodCreateParams.Companion::createOxxo,
+            currency = "mxn",
+            requiresEmail = true
+        ),
+        Blik(
+            "pl",
+            R.drawable.ic_brandicon__oxxo,
+            PaymentMethodCreateParams.Companion::createBlik,
+            currency = "pln",
             requiresEmail = true
         )
     }
