@@ -15,7 +15,6 @@ import com.stripe.android.paymentsheet.elements.EmailElement
 import com.stripe.android.paymentsheet.elements.EmailSpec
 import com.stripe.android.paymentsheet.elements.IdentifierSpec
 import com.stripe.android.paymentsheet.elements.NameConfig
-import com.stripe.android.paymentsheet.elements.ResourceRepository
 import com.stripe.android.paymentsheet.elements.SaveForFutureUseElement
 import com.stripe.android.paymentsheet.elements.SaveForFutureUseSpec
 import com.stripe.android.paymentsheet.elements.SectionElement
@@ -26,6 +25,7 @@ import com.stripe.android.paymentsheet.elements.SimpleTextSpec
 import com.stripe.android.paymentsheet.elements.StaticTextElement
 import com.stripe.android.paymentsheet.elements.StaticTextSpec
 import com.stripe.android.paymentsheet.elements.SupportedBankType
+import com.stripe.android.paymentsheet.forms.resources.StaticResourceRepository
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.Before
@@ -56,7 +56,7 @@ internal class TransformSpecToElementTest {
 
         transformSpecToElement =
             TransformSpecToElement(
-                ResourceRepository(
+                StaticResourceRepository(
                     bankRepository,
                     mock()
                 ),
@@ -210,34 +210,33 @@ internal class TransformSpecToElementTest {
     }
 
     @Test
-    fun `Add a save for future use section spec sets the mandate element correctly`() =
-        runBlocking {
-            val mandate = StaticTextSpec(
-                IdentifierSpec.Generic("mandate"),
-                R.string.stripe_paymentsheet_sepa_mandate,
-                color = R.color.stripe_paymentsheet_mandate_text_color,
+    fun `Add a save for future use section spec sets the mandate element correctly`() = runBlocking {
+        val mandate = StaticTextSpec(
+            IdentifierSpec.Generic("mandate"),
+            R.string.stripe_paymentsheet_sepa_mandate,
+            color = R.color.stripe_paymentsheet_mandate_text_color,
+        )
+        val hiddenIdentifiers = listOf(nameSection, mandate)
+        val saveForFutureUseSpec = SaveForFutureUseSpec(hiddenIdentifiers)
+        val formElement = transformSpecToElement.transform(
+            listOf(saveForFutureUseSpec)
+        )
+
+        val saveForFutureUseElement =
+            formElement.first() as SaveForFutureUseElement
+        val saveForFutureUseController = saveForFutureUseElement.controller
+
+        assertThat(saveForFutureUseElement.identifier)
+            .isEqualTo(saveForFutureUseSpec.identifier)
+
+        assertThat(saveForFutureUseController.hiddenIdentifiers.first()).isEmpty()
+
+        saveForFutureUseController.onValueChange(false)
+        assertThat(saveForFutureUseController.hiddenIdentifiers.first())
+            .isEqualTo(
+                hiddenIdentifiers.map { it.identifier }
             )
-            val hiddenIdentifiers = listOf(nameSection, mandate)
-            val saveForFutureUseSpec = SaveForFutureUseSpec(hiddenIdentifiers)
-            val formElement = transformSpecToElement.transform(
-                listOf(saveForFutureUseSpec)
-            )
-
-            val saveForFutureUseElement =
-                formElement.first() as SaveForFutureUseElement
-            val saveForFutureUseController = saveForFutureUseElement.controller
-
-            assertThat(saveForFutureUseElement.identifier)
-                .isEqualTo(saveForFutureUseSpec.identifier)
-
-            assertThat(saveForFutureUseController.hiddenIdentifiers.first()).isEmpty()
-
-            saveForFutureUseController.onValueChange(false)
-            assertThat(saveForFutureUseController.hiddenIdentifiers.first())
-                .isEqualTo(
-                    hiddenIdentifiers.map { it.identifier }
-                )
-        }
+    }
 
     companion object {
         val IDEAL_BANK_CONFIG = BankDropdownSpec(

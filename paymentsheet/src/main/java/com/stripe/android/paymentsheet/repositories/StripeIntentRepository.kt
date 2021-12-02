@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet.repositories
 
-import androidx.core.os.LocaleListCompat
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.ApiRequest
@@ -36,8 +35,7 @@ internal sealed class StripeIntentRepository {
         private val stripeRepository: StripeRepository,
         private val lazyPaymentConfig: Lazy<PaymentConfiguration>,
         @IOContext private val workContext: CoroutineContext,
-        private val locale: Locale? =
-            LocaleListCompat.getAdjustedDefault().takeUnless { it.isEmpty }?.get(0)
+        private val locale: Locale?
     ) : StripeIntentRepository() {
         private val requestOptions by lazy {
             ApiRequest.Options(
@@ -45,6 +43,7 @@ internal sealed class StripeIntentRepository {
                 lazyPaymentConfig.get().stripeAccountId
             )
         }
+
         /**
          * Tries to retrieve the StripeIntent with ordered Payment Methods, falling back to
          * traditional GET if we don't have a locale or the call fails for any reason.

@@ -67,6 +67,7 @@ import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
+import java.util.Locale
 import javax.inject.Provider
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
@@ -588,7 +589,8 @@ internal class PaymentSheetViewModelTest {
             stripeIntentRepository = StripeIntentRepository.Api(
                 stripeRepository = failingStripeRepository,
                 lazyPaymentConfig = { paymentConfiguration },
-                workContext = testDispatcher
+                workContext = testDispatcher,
+                Locale.US
             )
         )
         var result: PaymentSheetResult? = null

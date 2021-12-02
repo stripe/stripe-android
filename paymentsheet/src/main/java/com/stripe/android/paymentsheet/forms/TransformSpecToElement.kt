@@ -23,7 +23,6 @@ import com.stripe.android.paymentsheet.elements.IdentifierSpec
 import com.stripe.android.paymentsheet.elements.KlarnaCountrySpec
 import com.stripe.android.paymentsheet.elements.KlarnaHelper
 import com.stripe.android.paymentsheet.elements.LayoutSpec
-import com.stripe.android.paymentsheet.elements.ResourceRepository
 import com.stripe.android.paymentsheet.elements.SaveForFutureUseController
 import com.stripe.android.paymentsheet.elements.SaveForFutureUseElement
 import com.stripe.android.paymentsheet.elements.SaveForFutureUseSpec
@@ -40,6 +39,7 @@ import com.stripe.android.paymentsheet.elements.SimpleTextSpec
 import com.stripe.android.paymentsheet.elements.StaticTextElement
 import com.stripe.android.paymentsheet.elements.StaticTextSpec
 import com.stripe.android.paymentsheet.elements.TextFieldController
+import com.stripe.android.paymentsheet.forms.resources.ResourceRepository
 import com.stripe.android.paymentsheet.model.Amount
 import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.getValue
@@ -109,7 +109,7 @@ internal class TransformSpecToElement @Inject constructor(
     private fun transformAddress(initialValues: FormFragmentArguments) =
         AddressElement(
             IdentifierSpec.Generic("billing"),
-            resourceRepository.addressRepository,
+            resourceRepository.getAddressRepository(),
             initialValues
         )
 
@@ -157,7 +157,7 @@ internal class TransformSpecToElement @Inject constructor(
             DropdownFieldController(
                 SimpleDropdownConfig(
                     label,
-                    resourceRepository.bankRepository.get(this.bankType)
+                    resourceRepository.getBankRepository().get(this.bankType)
                 )
             )
         )
