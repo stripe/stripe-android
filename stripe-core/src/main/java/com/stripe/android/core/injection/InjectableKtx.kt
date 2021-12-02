@@ -1,7 +1,7 @@
-package com.stripe.android.payments.core.injection
+package com.stripe.android.core.injection
 
 import androidx.annotation.RestrictTo
-import com.stripe.android.BuildConfig
+import com.stripe.android.core.BuildConfig
 import com.stripe.android.core.Logger
 
 /**

@@ -14,6 +14,10 @@ import com.stripe.android.PaymentIntentResult
 import com.stripe.android.SetupIntentResult
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.StripePaymentController.Companion.EXPAND_PAYMENT_METHOD
+import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
+import com.stripe.android.core.injection.Injectable
+import com.stripe.android.core.injection.Injector
+import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
@@ -30,11 +34,7 @@ import com.stripe.android.payments.PaymentIntentFlowResultProcessor
 import com.stripe.android.payments.SetupIntentFlowResultProcessor
 import com.stripe.android.payments.core.authentication.PaymentAuthenticator
 import com.stripe.android.payments.core.authentication.PaymentAuthenticatorRegistry
-import com.stripe.android.payments.core.injection.DUMMY_INJECTOR_KEY
-import com.stripe.android.payments.core.injection.Injectable
-import com.stripe.android.payments.core.injection.Injector
 import com.stripe.android.payments.core.injection.PaymentLauncherViewModelSubcomponent
-import com.stripe.android.payments.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.view.AuthActivityStarterHost
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestCoroutineDispatcher

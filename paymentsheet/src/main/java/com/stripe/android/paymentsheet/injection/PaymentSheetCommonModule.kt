@@ -4,7 +4,7 @@ import android.content.Context
 import android.content.res.Resources
 import androidx.core.os.LocaleListCompat
 import com.stripe.android.PaymentConfiguration
-import com.stripe.android.payments.core.injection.ENABLE_LOGGING
+import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.payments.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.payments.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.paymentsheet.BuildConfig
@@ -12,6 +12,8 @@ import com.stripe.android.paymentsheet.analytics.DefaultDeviceIdRepository
 import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
 import com.stripe.android.paymentsheet.analytics.DeviceIdRepository
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.forms.resources.AsyncResourceRepository
+import com.stripe.android.paymentsheet.forms.resources.ResourceRepository
 import com.stripe.android.paymentsheet.repositories.CustomerApiRepository
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
@@ -34,6 +36,10 @@ internal abstract class PaymentSheetCommonModule {
 
     @Binds
     abstract fun bindsCustomerRepository(repository: CustomerApiRepository): CustomerRepository
+
+    @Binds
+    abstract fun bindsResourceRepository(asyncResourceRepository: AsyncResourceRepository):
+        ResourceRepository
 
     @Binds
     abstract fun bindsStripeIntentRepository(

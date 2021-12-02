@@ -1,6 +1,9 @@
 package com.stripe.android.payments.core.injection
 
 import android.content.Context
+import com.stripe.android.core.injection.CoroutineContextModule
+import com.stripe.android.core.injection.ENABLE_LOGGING
+import com.stripe.android.core.injection.LoggingModule
 import com.stripe.android.payments.core.authentication.threeds2.Stripe3ds2TransactionViewModelFactory
 import dagger.BindsInstance
 import dagger.Component

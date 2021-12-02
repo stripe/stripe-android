@@ -10,6 +10,9 @@ import com.stripe.android.StripePaymentController
 import com.stripe.android.auth.PaymentBrowserAuthContract
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
+import com.stripe.android.core.injection.Injectable
+import com.stripe.android.core.injection.WeakMapInjectorRegistry
+import com.stripe.android.core.injection.injectWithFallback
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.model.Stripe3ds2AuthParams
 import com.stripe.android.model.Stripe3ds2AuthResult
@@ -20,10 +23,7 @@ import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.payments.core.injection.DaggerStripe3ds2TransactionViewModelFactoryComponent
-import com.stripe.android.payments.core.injection.Injectable
 import com.stripe.android.payments.core.injection.Stripe3ds2TransactionViewModelSubcomponent
-import com.stripe.android.payments.core.injection.WeakMapInjectorRegistry
-import com.stripe.android.payments.core.injection.injectWithFallback
 import com.stripe.android.stripe3ds2.service.StripeThreeDs2Service
 import com.stripe.android.stripe3ds2.transaction.ChallengeParameters
 import com.stripe.android.stripe3ds2.transaction.ChallengeResult

@@ -1,8 +1,8 @@
 package com.stripe.android.payments.paymentlauncher
 
 import androidx.activity.result.ActivityResultLauncher
+import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.model.ConfirmPaymentIntentParams
-import com.stripe.android.payments.core.injection.WeakMapInjectorRegistry
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.argWhere

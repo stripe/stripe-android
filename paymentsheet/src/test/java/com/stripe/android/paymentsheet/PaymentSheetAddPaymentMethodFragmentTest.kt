@@ -16,7 +16,7 @@ import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentIntentFixtures.PI_OFF_SESSION
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.payments.core.injection.DUMMY_INJECTOR_KEY
+import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.COMPOSE_FRAGMENT_ARGS
 import com.stripe.android.paymentsheet.PaymentSheetViewModel.CheckoutIdentifier
 import com.stripe.android.paymentsheet.analytics.EventReporter

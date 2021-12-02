@@ -2,9 +2,9 @@ package com.stripe.android.paymentsheet.injection
 
 import android.app.Application
 import com.stripe.android.googlepaylauncher.injection.GooglePayLauncherModule
-import com.stripe.android.payments.core.injection.CoroutineContextModule
-import com.stripe.android.payments.core.injection.InjectorKey
-import com.stripe.android.payments.core.injection.LoggingModule
+import com.stripe.android.core.injection.CoroutineContextModule
+import com.stripe.android.core.injection.InjectorKey
+import com.stripe.android.core.injection.LoggingModule
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import com.stripe.android.paymentsheet.PaymentSheetViewModel
 import com.stripe.android.paymentsheet.forms.FormViewModel

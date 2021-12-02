@@ -6,8 +6,8 @@ import android.os.Parcelable
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.annotation.RestrictTo
 import androidx.core.os.bundleOf
+import com.stripe.android.core.injection.InjectorKey
 import com.stripe.android.model.ConfirmStripeIntentParams
-import com.stripe.android.payments.core.injection.InjectorKey
 import kotlinx.parcelize.Parcelize
 
 /**

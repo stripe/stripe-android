@@ -1,7 +1,7 @@
 package com.stripe.android.paymentsheet
 
 import androidx.core.graphics.toColorInt
-import com.stripe.android.payments.core.injection.DUMMY_INJECTOR_KEY
+import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.SetupIntentClientSecret
 import com.stripe.android.paymentsheet.model.SupportedPaymentMethod

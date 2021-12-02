@@ -101,7 +101,8 @@ internal class StripeIntentRepositoryTest {
             val paymentIntent = StripeIntentRepository.Api(
                 stripeRepository,
                 { PaymentConfiguration(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY) },
-                testDispatcher
+                testDispatcher,
+                Locale.US
             ).get(PaymentIntentClientSecret("client_secret"))
 
             val localeArgumentCaptor: KArgumentCaptor<Locale> = argumentCaptor()

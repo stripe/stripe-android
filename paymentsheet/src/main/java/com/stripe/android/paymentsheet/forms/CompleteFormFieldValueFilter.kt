@@ -17,8 +17,8 @@ internal class CompleteFormFieldValueFilter(
     private val userRequestedReuse: Flow<PaymentSelection.CustomerRequestedSave>
 ) {
     /**
-     * This will return null if any form field values are incomplete, otherwise it is an object
-     * representing all the complete, non-hidden fields.
+     * This flow does not emit any value until all form field values are complete, then it emits an
+     * object representing all the complete, non-hidden fields.
      */
     fun filterFlow() = combine(
         currentFieldValueMap,
