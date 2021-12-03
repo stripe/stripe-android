@@ -127,7 +127,7 @@ internal class CardDataCollectionFragment<ViewModelType : BaseSheetViewModel<*>>
                 billingAddressView.focusFirstField()
             }
 
-            override fun onUsZipCodeComplete() {}
+            override fun onPostalCodeComplete() {}
         })
 
         sheetViewModel.processing.observe(viewLifecycleOwner) { isProcessing ->

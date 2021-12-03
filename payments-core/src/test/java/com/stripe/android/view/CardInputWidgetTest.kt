@@ -1526,24 +1526,45 @@ internal class CardInputWidgetTest {
     }
 
     @Test
-    fun usZipCodeRequired_whenFalse_shouldNotCallonUsZipCodeComplete() {
+    fun usZipCodeRequired_whenFalse_shouldNotCallOnPostalCodeComplete() {
         cardInputWidget.usZipCodeRequired = false
         postalCodeEditText.setText(POSTAL_CODE_VALUE)
-        assertThat(cardInputListener.usZipCodeCompleteCalls).isEqualTo(0)
+        assertThat(cardInputListener.onPostalCodeCompleteCalls).isEqualTo(0)
     }
 
     @Test
-    fun usZipCodeRequired_whenTrue_withValidZip_shouldCallonUsZipCodeComplete() {
+    fun usZipCodeRequired_whenTrue_withValidZip_shouldCallOnPostalCodeComplete() {
         cardInputWidget.usZipCodeRequired = true
         postalCodeEditText.setText(POSTAL_CODE_VALUE)
-        assertThat(cardInputListener.usZipCodeCompleteCalls).isEqualTo(1)
+        assertThat(cardInputListener.onPostalCodeCompleteCalls).isEqualTo(1)
     }
 
     @Test
-    fun usZipCodeRequired_whenTrue_withInvalidZip_shouldNotCallonUsZipCodeComplete() {
+    fun postalCodeEnabled_whenFalse_shouldNotCallOnPostalCodeComplete() {
+        cardInputWidget.postalCodeEnabled = false
+        postalCodeEditText.setText("123")
+        assertThat(cardInputListener.onPostalCodeCompleteCalls).isEqualTo(0)
+    }
+
+    @Test
+    fun usZipCodeRequired_whenTrue_withInvalidZip_shouldNotCallOnPostalCodeComplete() {
         cardInputWidget.usZipCodeRequired = true
         postalCodeEditText.setText("1234")
-        assertThat(cardInputListener.usZipCodeCompleteCalls).isEqualTo(0)
+        assertThat(cardInputListener.onPostalCodeCompleteCalls).isEqualTo(0)
+    }
+
+    @Test
+    fun postalCode_whenTrue_withNonEmptyZip_shouldCallOnPostalCodeComplete() {
+        cardInputWidget.postalCodeRequired = true
+        postalCodeEditText.setText("1234")
+        assertThat(cardInputListener.onPostalCodeCompleteCalls).isEqualTo(1)
+    }
+
+    @Test
+    fun postalCode_whenTrue_withEmptyZip_shouldNotCallOnPostalCodeComplete() {
+        cardInputWidget.postalCodeRequired = true
+        postalCodeEditText.setText("")
+        assertThat(cardInputListener.onPostalCodeCompleteCalls).isEqualTo(0)
     }
 
     @Test
@@ -1599,7 +1620,7 @@ internal class CardInputWidgetTest {
         var cardCompleteCalls = 0
         var expirationCompleteCalls = 0
         var cvcCompleteCalls = 0
-        var usZipCodeCompleteCalls = 0
+        var onPostalCodeCompleteCalls = 0
 
         override fun onFocusChange(focusField: CardInputListener.FocusField) {
             focusedFields.add(focusField)
@@ -1617,8 +1638,8 @@ internal class CardInputWidgetTest {
             cvcCompleteCalls++
         }
 
-        override fun onUsZipCodeComplete() {
-            usZipCodeCompleteCalls++
+        override fun onPostalCodeComplete() {
+            onPostalCodeCompleteCalls++
         }
     }
 
