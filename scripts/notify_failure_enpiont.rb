@@ -27,8 +27,6 @@ http = Net::HTTP.new(uri.host, uri.port).tap do |http|
 end
 req = Net::HTTP::Post.new(uri, 'Content-Type' => 'application/json')
 
-# Set up base params for tickets created under either
-# success or failure cases
 params = {
   project: "RUN_MOBILESDK",
 }
