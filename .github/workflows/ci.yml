@@ -74,25 +74,24 @@ jobs:
         with:
           distribution: 'zulu'
           java-version: '11'
-      - uses: actions/cache@v2
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-          restore-keys: |
-            ${{ runner.os }}-gradle-
+#      - uses: actions/cache@v2
+#        with:
+#          path: |
+#            ~/.gradle/caches
+#            ~/.gradle/wrapper
+#          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+#          restore-keys: |
+#            ${{ runner.os }}-gradle-
 #      - name: End-to-end tests
 #        env:
 #          STRIPE_END_TO_END_TESTS_BACKEND_URL: ${{ secrets.STRIPE_END_TO_END_TESTS_BACKEND_URL }}
 #        run: ./gradlew :stripe-test-e2e:testDebugUnitTest
-      - uses: actions/upload-artifact@v2
-        if: failure()
-        with:
-          name: unit-test-report
-          path: stripe-test-e2e/build/reports/tests/testDebugUnitTest/
+#      - uses: actions/upload-artifact@v2
+#        if: failure()
+#        with:
+#          name: unit-test-report
+#          path: stripe-test-e2e/build/reports/tests/testDebugUnitTest/
       - name: Notify failure endpoint
         id: notifyFailureEndpoint
-        if: failure()
         run: ./scripts/notify_failure_enpiont.rb ${{ secrets.SDK_FAILURE_NOTIFICATION_ENDPOINT }} ${{ secrets.SDK_FAILURE_NOTIFICATION_ENDPOINT_HMAC_KEY }} ${{ github.run_id }}
 
