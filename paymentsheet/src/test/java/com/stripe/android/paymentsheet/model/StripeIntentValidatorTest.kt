@@ -34,7 +34,7 @@ class StripeIntentValidatorTest {
     }
 
     @Test
-    fun `requireValid() processing is not valid`() {
+    fun `requireValid() Succeeded is not valid`() {
         assertFails {
             validator.requireValid(
                 PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
