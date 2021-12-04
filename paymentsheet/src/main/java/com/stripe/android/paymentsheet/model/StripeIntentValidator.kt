@@ -32,8 +32,7 @@ internal class StripeIntentValidator @Inject constructor() {
                     ) -> {
                 error(
                     """
-                        PaymentSheet received a PaymentIntent in a terminal state.
-                        The current PaymentIntent has status '${stripeIntent.status}'.
+                        PaymentSheet cannot set up a PaymentIntent in status '${stripeIntent.status}'.
                         See https://stripe.com/docs/api/payment_intents/object#payment_intent_object-status.
                     """.trimIndent()
                 )
@@ -45,8 +44,7 @@ internal class StripeIntentValidator @Inject constructor() {
                     ) -> {
                 error(
                     """
-                        PaymentSheet received a SetupIntent in a terminal state.
-                        The current SetupIntent has status '${stripeIntent.status}'.
+                        PaymentSheet cannot set up a SetupIntent in status '${stripeIntent.status}'.
                         See https://stripe.com/docs/api/setup_intents/object#setup_intent_object-status
                     """.trimIndent()
                 )
