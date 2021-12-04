@@ -1139,7 +1139,7 @@ internal class StripeApiRepositoryTest {
                 )
             }
             assertEquals(
-                "そのような setupintent はありません : 'seti_1CkiBMLENEVhOs7YMtUehLau' ",
+                "そのような setupintent はありません : 'seti_1CkiBMLENEVhOs7YMtUehLau'",
                 ex.stripeError?.message
             )
         }
