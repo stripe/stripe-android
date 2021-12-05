@@ -58,7 +58,8 @@ internal fun SignUpBody() {
             },
             label = {
                 Text(text = "email")
-            })
+            }
+        )
         TextField(
             modifier = Modifier
                 .fillMaxWidth()
@@ -69,7 +70,8 @@ internal fun SignUpBody() {
             },
             label = {
                 Text(text = "phone")
-            })
+            }
+        )
         Text(
             text = stringResource(R.string.sign_up_terms),
             modifier = Modifier
