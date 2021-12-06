@@ -92,7 +92,6 @@ dependencies {
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinCoroutinesVersion"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$kotlinCoroutinesVersion"
     implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:$kotlinSerializationVersion"
-    implementation "org.jetbrains.kotlinx:kotlinx-serialization-properties:$kotlinSerializationVersion"
 
     testImplementation "androidx.test:core:$androidTestVersion"
     testImplementation "androidx.test:runner:$androidTestVersion"

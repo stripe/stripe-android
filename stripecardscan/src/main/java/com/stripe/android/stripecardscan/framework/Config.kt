@@ -4,9 +4,7 @@ import com.stripe.android.stripecardscan.framework.api.Network
 import com.stripe.android.stripecardscan.framework.api.StripeNetwork
 import com.stripe.android.stripecardscan.framework.time.Duration
 import com.stripe.android.stripecardscan.framework.time.seconds
-import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.properties.Properties
 
 object Config {
 
@@ -76,10 +74,6 @@ object NetworkConfig {
         isLenient = true
         encodeDefaults = true
     }
-
-    @JvmStatic
-    @ExperimentalSerializationApi
-    var form: Properties = Properties
 
     /**
      * The network interface to use

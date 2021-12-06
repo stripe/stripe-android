@@ -11,7 +11,6 @@ import com.stripe.android.stripecardscan.framework.api.StripeNetwork.Companion.R
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestCoroutineDispatcher
 import kotlinx.coroutines.test.runBlockingTest
-import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import org.junit.Test
@@ -28,7 +27,6 @@ import java.net.HttpURLConnection.HTTP_OK
 import java.net.URL
 
 @ExperimentalCoroutinesApi
-@ExperimentalSerializationApi
 @RunWith(RobolectricTestRunner::class)
 class StripeNetworkTest {
     @Serializable

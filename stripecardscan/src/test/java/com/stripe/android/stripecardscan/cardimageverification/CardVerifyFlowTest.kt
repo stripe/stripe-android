@@ -13,21 +13,15 @@ class CardVerifyFlowTest {
     @SmallTest
     fun selectCompletionLoopFrames() {
 
-        val flow = CardVerifyFlow(
-            scanResultListener = object :
-                AggregateResultListener<
-                    MainLoopAggregator.InterimResult,
-                    MainLoopAggregator.FinalResult
-                    > {
-                override suspend fun onResult(result: MainLoopAggregator.FinalResult) {}
-                override suspend fun onInterimResult(result: MainLoopAggregator.InterimResult) {}
-                override suspend fun onReset() {}
-            },
+        val flow = object : CardVerifyFlow(
             scanErrorListener = object : AnalyzerLoopErrorListener {
                 override fun onAnalyzerFailure(t: Throwable): Boolean = false
                 override fun onResultFailure(t: Throwable): Boolean = false
             }
-        )
+        ) {
+            override suspend fun onInterimResult(result: MainLoopAggregator.InterimResult) {}
+            override suspend fun onReset() {}
+        }
 
         val frameMap = mapOf(
             SavedFrameType(hasCard = true, hasOcr = true) to listOf("A", "B", "C"),

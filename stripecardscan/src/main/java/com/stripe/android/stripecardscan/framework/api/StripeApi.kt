@@ -62,9 +62,7 @@ internal fun uploadScanStats(
         path = "/card_image_verifications/$civId/scan_stats",
         data = ScanStatsRequest(
             clientSecret = civSecret,
-            stats = b64Encode(
-                NetworkConfig.json.encodeToString(StatsPayload.serializer(), statsPayload)
-            ),
+            payload = statsPayload,
         ),
         requestSerializer = ScanStatsRequest.serializer(),
     )

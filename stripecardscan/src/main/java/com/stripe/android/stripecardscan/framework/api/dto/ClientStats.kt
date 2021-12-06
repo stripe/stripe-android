@@ -10,7 +10,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-internal data class StatsPayload(
+data class StatsPayload(
     @SerialName("instance_id") val instanceId: String,
     @SerialName("scan_id") val scanId: String?,
     @SerialName("payload_version") val payloadVersion: Int = 2,
@@ -22,7 +22,7 @@ internal data class StatsPayload(
 
 @Serializable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-internal data class ScanStatistics(
+data class ScanStatistics(
     @SerialName("tasks") val tasks: Map<String, List<TaskStatistics>>,
     @SerialName("repeating_tasks") val repeatingTasks: Map<String, List<RepeatingTaskStatistics>>,
 ) {
@@ -46,7 +46,7 @@ internal data class ScanStatistics(
 
 @Serializable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-internal data class ModelVersion(
+data class ModelVersion(
     @SerialName("name") val name: String,
     @SerialName("version") val version: String,
     @SerialName("framework_version") val frameworkVersion: Int,
@@ -64,7 +64,7 @@ internal data class ModelVersion(
 
 @Serializable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-internal data class TaskStatistics(
+data class TaskStatistics(
     @SerialName("started_at_ms") val startedAtMs: Long,
     @SerialName("duration_ms") val durationMs: Long,
     @SerialName("result") val result: String?
@@ -81,7 +81,7 @@ internal data class TaskStatistics(
 
 @Serializable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-internal data class RepeatingTaskStatistics(
+data class RepeatingTaskStatistics(
     @SerialName("result") val result: String,
     @SerialName("executions") val executions: Int,
     @SerialName("start_time_ms") val startTimeMs: Long,

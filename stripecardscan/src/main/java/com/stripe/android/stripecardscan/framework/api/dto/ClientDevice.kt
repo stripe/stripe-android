@@ -8,7 +8,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-internal data class ClientDevice(
+data class ClientDevice(
     @SerialName("ids") val ids: ClientDeviceIds,
     @SerialName("type") val name: String,
     @SerialName("boot_count") val bootCount: Int,
@@ -38,7 +38,7 @@ internal data class ClientDevice(
 
 @Serializable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-internal data class ClientDeviceIds(
+data class ClientDeviceIds(
     @SerialName("vendor_id") val androidId: String?
 ) {
     companion object {
