@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
+    <string name="link">Link</string>
+    <string name="sign_up_header">Save your info for faster checkout</string>
+    <string name="sign_up_message">Securely save your information for faster checkout at thousands of merchants.</string>
+    <string name="sign_up_terms">You agree to Link terms of service and to create a Link with Stripe account.</string>
+    <string name="sign_up">Join Link</string>
+</resources>

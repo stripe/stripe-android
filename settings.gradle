@@ -1,6 +1,7 @@
 enableFeaturePreview("VERSION_CATALOGS")
 
 include ':example'
+include ':link'
 include ':payments'
 include ':payments-core'
 include ':paymentsheet-example'
