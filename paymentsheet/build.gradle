@@ -60,7 +60,7 @@ dependencies {
     testImplementation "org.mockito:mockito-inline:$mockitoCoreVersion"
     testImplementation "org.robolectric:robolectric:$robolectricVersion"
     testImplementation "androidx.test:core:$androidTestVersion"
-    testImplementation 'org.json:json:20210307'
+    testImplementation 'org.json:json:20211205'
     testImplementation "org.mockito.kotlin:mockito-kotlin:$mockitoKotlinVersion"
     testImplementation "org.jetbrains.kotlin:kotlin-test-junit:$kotlinVersion"
     testImplementation "org.jetbrains.kotlin:kotlin-test-annotations-common:$kotlinVersion"
