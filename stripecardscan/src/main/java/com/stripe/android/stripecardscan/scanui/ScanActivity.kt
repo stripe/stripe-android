@@ -365,7 +365,7 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
      * The user cannot scan the required object.
      */
     protected open fun userCannotScan() {
-        runBlocking { scanStat.trackResult("user_cannot_scan") }
+        runBlocking { scanStat.trackResult("user_missing_card") }
         resultListener.userCanceled(CancellationReason.UserCannotScan)
         closeScanner()
     }
