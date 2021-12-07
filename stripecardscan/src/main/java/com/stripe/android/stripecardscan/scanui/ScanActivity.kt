@@ -299,7 +299,15 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
     protected open fun toggleFlashlight() {
         isFlashlightOn = !isFlashlightOn
         setFlashlightState(isFlashlightOn)
+<<<<<<< HEAD
         // TODO: this should be reported as part of scanstats, but is not yet supported
+=======
+// TODO: this should probably be reported as part of scanstats, but is not yet supported
+//        launch {
+//            Stats.trackRepeatingTask("torch_state")
+//                .trackResult(if (isFlashlightOn) "on" else "off")
+//        }
+>>>>>>> ef651ac34 (Conform to scanstats endpoint format)
     }
 
     /**
@@ -307,7 +315,15 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
      */
     protected open fun toggleCamera() {
         cameraAdapter.changeCamera()
+<<<<<<< HEAD
         // TODO: this should probably be reported as part of scanstats, but is not yet supported
+=======
+// TODO: this should probably be reported as part of scanstats, but is not yet supported
+//        launch {
+//            Stats.trackRepeatingTask("swap_camera")
+//                .trackResult("${cameraAdapter.getCurrentCamera()}")
+//        }
+>>>>>>> ef651ac34 (Conform to scanstats endpoint format)
     }
 
     /**
@@ -338,7 +354,11 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
      * Cancel the scan when the user presses back.
      */
     override fun onBackPressed() {
+<<<<<<< HEAD
         runBlocking { scanStat.trackResult("user_canceled") }
+=======
+        runBlocking { scanStat.trackResult("user_pressed_back") }
+>>>>>>> ef651ac34 (Conform to scanstats endpoint format)
         resultListener.userCanceled(CancellationReason.Back)
         closeScanner()
     }
@@ -356,7 +376,11 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
      * The camera permission was denied.
      */
     protected open fun userDeniedCameraPermission() {
+<<<<<<< HEAD
         runBlocking { scanStat.trackResult("user_canceled") }
+=======
+        runBlocking { scanStat.trackResult("permission_denied") }
+>>>>>>> ef651ac34 (Conform to scanstats endpoint format)
         resultListener.userCanceled(CancellationReason.CameraPermissionDenied)
         closeScanner()
     }
@@ -365,7 +389,11 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
      * The user cannot scan the required object.
      */
     protected open fun userCannotScan() {
+<<<<<<< HEAD
         runBlocking { scanStat.trackResult("user_missing_card") }
+=======
+        runBlocking { scanStat.trackResult("user_cannot_scan") }
+>>>>>>> ef651ac34 (Conform to scanstats endpoint format)
         resultListener.userCanceled(CancellationReason.UserCannotScan)
         closeScanner()
     }
@@ -393,8 +421,15 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
             onFlashSupported(it)
         }
 
+<<<<<<< HEAD
         // TODO: this should probably be reported as part of scanstats, but is not yet supported
         cameraAdapter.withSupportsMultipleCameras {
+=======
+// TODO: this should probably be reported as part of scanstats, but is not yet supported
+//        val cameraStat = Stats.trackTask("multiple_cameras_supported")
+        cameraAdapter.withSupportsMultipleCameras {
+//            launch { cameraStat.trackResult(if (it) "supported" else "unsupported") }
+>>>>>>> ef651ac34 (Conform to scanstats endpoint format)
             onSupportsMultipleCameras(it)
         }
 
