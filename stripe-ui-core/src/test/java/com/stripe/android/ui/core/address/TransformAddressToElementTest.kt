@@ -5,11 +5,11 @@ import androidx.compose.ui.text.input.KeyboardType
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.address.AddressFieldElementRepository.Companion.supportedCountries
-import com.stripe.android.ui.core.elements.TextFieldController
 import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.elements.RowElement
 import com.stripe.android.ui.core.elements.SectionSingleFieldElement
 import com.stripe.android.ui.core.elements.SimpleTextSpec
+import com.stripe.android.ui.core.elements.TextFieldController
 import org.junit.Test
 import java.io.File
 import java.security.InvalidParameterException

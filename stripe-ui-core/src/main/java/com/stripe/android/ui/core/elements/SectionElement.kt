@@ -23,5 +23,4 @@ data class SectionElement(
         combine(fields.map { it.getFormFieldValueFlow() }) {
             it.toList().flatten()
         }
-
 }
