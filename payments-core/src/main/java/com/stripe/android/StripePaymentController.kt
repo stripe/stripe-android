@@ -6,6 +6,7 @@ import androidx.activity.result.ActivityResultCallback
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.VisibleForTesting
+import com.google.android.instantapps.InstantApps
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.exception.APIException
@@ -81,6 +82,8 @@ constructor(
 
     private val defaultReturnUrl = DefaultReturnUrl.create(context)
 
+    private val isInstantApp = InstantApps.isInstantApp(context)
+
     /**
      * [paymentRelayLauncher] is mutable and might be updated during
      * through [registerLaunchersWithActivityResultCaller]
@@ -109,7 +112,8 @@ constructor(
             uiContext,
             threeDs1IntentReturnUrlMap,
             publishableKeyProvider,
-            paymentAnalyticsRequestFactory.defaultProductUsageTokens
+            paymentAnalyticsRequestFactory.defaultProductUsageTokens,
+            isInstantApp
         )
 
     override fun registerLaunchersWithActivityResultCaller(
@@ -141,9 +145,13 @@ constructor(
         requestOptions: ApiRequest.Options
     ) {
         logReturnUrl(confirmStripeIntentParams.returnUrl)
-
-        val returnUrl = confirmStripeIntentParams.returnUrl.takeUnless { it.isNullOrBlank() }
-            ?: defaultReturnUrl.value
+        val returnUrl =
+            if (isInstantApp) {
+                confirmStripeIntentParams.returnUrl
+            } else {
+                confirmStripeIntentParams.returnUrl.takeUnless { it.isNullOrBlank() }
+                    ?: defaultReturnUrl.value
+            }
 
         runCatching {
             when (confirmStripeIntentParams) {
@@ -169,7 +177,7 @@ constructor(
                 intent.nextActionData?.let {
                     if (it is StripeIntent.NextActionData.SdkData.Use3DS1) {
                         intent.id?.let { intentId ->
-                            threeDs1IntentReturnUrlMap[intentId] = returnUrl
+                            threeDs1IntentReturnUrlMap[intentId] = returnUrl.orEmpty()
                         }
                     }
                 }

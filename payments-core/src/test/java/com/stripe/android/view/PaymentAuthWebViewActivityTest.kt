@@ -96,7 +96,8 @@ internal class PaymentAuthWebViewActivityTest {
             requestCode = REQUEST_CODE,
             clientSecret = CLIENT_SECRET,
             url = "https://example.com",
-            publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
+            publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+            isInstantApp = false
         )
     }
 }

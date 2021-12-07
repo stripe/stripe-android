@@ -138,7 +138,8 @@ internal class DefaultPaymentAuthenticatorRegistry @Inject internal constructor(
             uiContext: CoroutineContext,
             threeDs1IntentReturnUrlMap: MutableMap<String, String>,
             publishableKeyProvider: () -> String,
-            productUsage: Set<String>
+            productUsage: Set<String>,
+            isInstantApp: Boolean
         ): PaymentAuthenticatorRegistry {
             val injectorKey =
                 WeakMapInjectorRegistry.nextKey(requireNotNull(PaymentAuthenticatorRegistry::class.simpleName))
@@ -154,6 +155,7 @@ internal class DefaultPaymentAuthenticatorRegistry @Inject internal constructor(
                 .injectorKey(injectorKey)
                 .publishableKeyProvider(publishableKeyProvider)
                 .productUsage(productUsage)
+                .isInstantApp(isInstantApp)
                 .build()
             val registry = component.registry
             registry.authenticationComponent = component

@@ -99,25 +99,13 @@ class PaymentSheetAddPaymentMethodFragmentTest {
 
     @Test
     @Config(qualifiers = "w475dp")
-    fun `when screen is 475dp wide, adapter should show 3 and a half items with 115dp width`() {
+    fun `when screen is 475dp wide, adapter should show 2 items evenly spread out`() {
         val paymentIntent = mock<PaymentIntent>().also {
-            whenever(it.paymentMethodTypes).thenReturn(listOf("card", "bancontact", "sofort", "ideal"))
+            whenever(it.paymentMethodTypes).thenReturn(listOf("card", "bancontact"))
         }
         createFragment(stripeIntent = paymentIntent) { fragment, viewBinding ->
             val item = viewBinding.paymentMethodsRecycler.layoutManager!!.findViewByPosition(0)
-            assertThat(item!!.measuredWidth).isEqualTo(115)
-        }
-    }
-
-    @Test
-    @Config(qualifiers = "w476dp")
-    fun `when screen is 476dp wide, adapter should show 4 items with 100dp width`() {
-        val paymentIntent = mock<PaymentIntent>().also {
-            whenever(it.paymentMethodTypes).thenReturn(listOf("card", "bancontact", "sofort", "ideal"))
-        }
-        createFragment(stripeIntent = paymentIntent) { fragment, viewBinding ->
-            val item = viewBinding.paymentMethodsRecycler.layoutManager!!.findViewByPosition(0)
-            assertThat(item!!.measuredWidth).isEqualTo(100)
+            assertThat(item!!.measuredWidth).isEqualTo(211)
         }
     }
 
