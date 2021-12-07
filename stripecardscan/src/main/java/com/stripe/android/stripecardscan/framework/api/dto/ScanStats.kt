@@ -4,10 +4,10 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class ScanStatsRequest(
+internal data class ScanStatsRequest(
     @SerialName("client_secret") val clientSecret: String,
     @SerialName("payload") val payload: StatsPayload,
 )
 
 @Serializable
-class ScanStatsResponse
+internal class ScanStatsResponse

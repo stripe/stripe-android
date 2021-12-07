@@ -7,7 +7,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-data class ClientDevice(
+internal data class ClientDevice(
     @SerialName("device_id") val android_id: String?,
     @SerialName("vendor_id") val vendor_id: String?,
     @SerialName("device_type") val name: String,

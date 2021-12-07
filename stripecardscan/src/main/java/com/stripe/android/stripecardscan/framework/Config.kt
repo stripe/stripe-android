@@ -2,7 +2,6 @@ package com.stripe.android.stripecardscan.framework
 
 import com.stripe.android.stripecardscan.framework.api.Network
 import com.stripe.android.stripecardscan.framework.api.StripeNetwork
-import com.stripe.android.stripecardscan.framework.time.Duration
 import com.stripe.android.stripecardscan.framework.time.seconds
 import kotlinx.serialization.json.Json
 
@@ -57,7 +56,7 @@ object NetworkConfig {
      * TODO(ccen): support constant retry delay from stripe-core and use this value.
      */
     @JvmStatic
-    var retryDelay: Duration = 5.seconds
+    var retryDelayMillis: Int = 5.seconds.inMilliseconds.toInt()
 
     /**
      * Status codes that should be retried from Stripe servers.
@@ -79,7 +78,7 @@ object NetworkConfig {
      * The network interface to use
      */
     @JvmStatic
-    var network: Network = StripeNetwork(
+    internal var network: Network = StripeNetwork(
         baseUrl = BASE_URL,
         retryTotalAttempts = retryTotalAttempts,
         retryStatusCodes = retryStatusCodes,

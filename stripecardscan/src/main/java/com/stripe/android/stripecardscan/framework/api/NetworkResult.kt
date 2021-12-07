@@ -1,6 +1,6 @@
 package com.stripe.android.stripecardscan.framework.api
 
-sealed class NetworkResult<Success, Error>(open val responseCode: Int) {
+internal sealed class NetworkResult<Success, Error>(open val responseCode: Int) {
 
     data class Success<Success>(override val responseCode: Int, val body: Success) :
         NetworkResult<Success, Nothing>(responseCode)

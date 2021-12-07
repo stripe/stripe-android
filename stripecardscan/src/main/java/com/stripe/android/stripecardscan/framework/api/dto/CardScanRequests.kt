@@ -1,4 +1,4 @@
-package com.stripe.android.stripecardscan.framework.api
+package com.stripe.android.stripecardscan.framework.api.dto
 
 import com.stripe.android.core.networking.HEADER_AUTHORIZATION
 import com.stripe.android.core.networking.HEADER_CONTENT_TYPE

@@ -18,7 +18,10 @@ import java.security.NoSuchAlgorithmException
 /**
  * Fetched data metadata.
  */
-sealed class FetchedModelMeta(open val modelVersion: String, open val hashAlgorithm: String)
+internal sealed class FetchedModelMeta(
+    open val modelVersion: String,
+    open val hashAlgorithm: String,
+)
 internal data class FetchedModelFileMeta(
     override val modelVersion: String,
     override val hashAlgorithm: String,
@@ -35,7 +38,7 @@ internal data class FetchedModelResourceMeta(
 /**
  * Fetched data information.
  */
-sealed class FetchedData(
+internal sealed class FetchedData(
     open val modelClass: String,
     open val modelFrameworkVersion: Int,
     open val modelVersion: String,
@@ -80,7 +83,7 @@ sealed class FetchedData(
     abstract val successfullyFetched: Boolean
 }
 
-data class FetchedResource(
+internal data class FetchedResource(
     override val modelClass: String,
     override val modelFrameworkVersion: Int,
     override val modelVersion: String,
@@ -91,7 +94,7 @@ data class FetchedResource(
     override val successfullyFetched: Boolean = assetFileName != null
 }
 
-data class FetchedFile(
+internal data class FetchedFile(
     override val modelClass: String,
     override val modelFrameworkVersion: Int,
     override val modelVersion: String,
@@ -105,7 +108,7 @@ data class FetchedFile(
 /**
  * An interface for getting data ready to be loaded into memory.
  */
-interface Fetcher {
+internal interface Fetcher {
     val modelClass: String
     val modelFrameworkVersion: Int
 
@@ -130,7 +133,7 @@ interface Fetcher {
 /**
  * A [Fetcher] that gets data from android resources.
  */
-abstract class ResourceFetcher : Fetcher {
+internal abstract class ResourceFetcher : Fetcher {
     protected abstract val modelVersion: String
     protected abstract val hash: String
     protected abstract val hashAlgorithm: String
@@ -154,7 +157,7 @@ abstract class ResourceFetcher : Fetcher {
 /**
  * A [Fetcher] that downloads data from the web.
  */
-abstract class WebFetcher : Fetcher {
+internal abstract class WebFetcher : Fetcher {
     protected data class DownloadDetails(
         val url: URL,
         val hash: String,

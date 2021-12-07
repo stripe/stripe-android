@@ -5,6 +5,8 @@ import com.stripe.android.core.networking.DefaultStripeNetworkClient
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.networking.StripeRequest
 import com.stripe.android.stripecardscan.framework.Config
+import com.stripe.android.stripecardscan.framework.api.dto.CardScanFileDownloadRequest
+import com.stripe.android.stripecardscan.framework.api.dto.CardScanRequest
 import com.stripe.android.stripecardscan.framework.time.Timer
 import com.stripe.android.stripecardscan.framework.util.decodeFromJson
 import com.stripe.android.stripecardscan.framework.util.encodeToXWWWFormUrl

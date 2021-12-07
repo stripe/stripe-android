@@ -7,7 +7,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-data class AppInfo(
+internal data class AppInfo(
     @SerialName("app_package_name") val appPackageName: String?,
     @SerialName("sdk_version") val sdkVersion: String,
     @SerialName("build") val build: String,

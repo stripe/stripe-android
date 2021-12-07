@@ -6,6 +6,7 @@ import com.stripe.android.stripecardscan.framework.NetworkConfig
 import com.stripe.android.stripecardscan.framework.api.StripeNetwork.Companion.RESPONSE_CODE_UNSET
 import com.stripe.android.stripecardscan.framework.time.Duration
 import com.stripe.android.stripecardscan.framework.time.Timer
+import com.stripe.android.stripecardscan.framework.time.milliseconds
 import com.stripe.android.stripecardscan.framework.util.decodeFromJson
 import com.stripe.android.stripecardscan.framework.util.encodeToXWWWFormUrl
 import com.stripe.android.stripecardscan.framework.util.retry
@@ -38,7 +39,7 @@ private const val GZIP_MIN_SIZE_BYTES = 1500
 
 private val networkTimer by lazy { Timer.newInstance(Config.logTag, "network") }
 
-interface Network {
+internal interface Network {
 
     /**
      * Send a post request to a Stripe endpoint.
@@ -355,7 +356,7 @@ private fun <Response, Error> translateNetworkResult(
 // TODO(ccen): Replace its caller with [StripeNetwork#downloadFileWithRetries]
 @Throws(IOException::class)
 internal suspend fun downloadFileWithRetries(url: URL, outputFile: File) = retry(
-    NetworkConfig.retryDelay,
+    NetworkConfig.retryDelayMillis.milliseconds,
     excluding = listOf(FileNotFoundException::class.java)
 ) {
     downloadFile(url, outputFile)

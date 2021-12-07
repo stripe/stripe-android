@@ -14,14 +14,14 @@ import kotlinx.coroutines.withContext
  * A result handler for data processing. This is called when results are available from an
  * [Analyzer].
  */
-interface ResultHandler<Input, Output, Verdict> {
+internal interface ResultHandler<Input, Output, Verdict> {
     suspend fun onResult(result: Output, data: Input): Verdict
 }
 
 /**
  * A specialized result handler that has some form of state.
  */
-abstract class StatefulResultHandler<Input, State, Output, Verdict>(
+internal abstract class StatefulResultHandler<Input, State, Output, Verdict>(
     private var initialState: State
 ) : ResultHandler<Input, Output, Verdict> {
 
@@ -40,7 +40,7 @@ abstract class StatefulResultHandler<Input, State, Output, Verdict>(
 /**
  * A result handler with a method that notifies when all data has been processed.
  */
-abstract class TerminatingResultHandler<Input, State, Output>(
+internal abstract class TerminatingResultHandler<Input, State, Output>(
     initialState: State
 ) : StatefulResultHandler<Input, State, Output, Unit>(initialState) {
     /**
@@ -54,7 +54,7 @@ abstract class TerminatingResultHandler<Input, State, Output>(
     abstract suspend fun onTerminatedEarly()
 }
 
-interface AggregateResultListener<InterimResult, FinalResult> {
+internal interface AggregateResultListener<InterimResult, FinalResult> {
 
     /**
      * The aggregated result of an [AnalyzerLoop] is available.
@@ -81,7 +81,13 @@ interface AggregateResultListener<InterimResult, FinalResult> {
  * The [ResultAggregator] processes results from analyzers until a condition is met. That condition
  * is part of the aggregator's logic.
  */
-abstract class ResultAggregator<DataFrame, State, AnalyzerResult, InterimResult, FinalResult>(
+internal abstract class ResultAggregator<
+    DataFrame,
+    State,
+    AnalyzerResult,
+    InterimResult,
+    FinalResult
+    >(
     private val listener: AggregateResultListener<InterimResult, FinalResult>,
     private val initialState: State,
     private val statsName: String?,
