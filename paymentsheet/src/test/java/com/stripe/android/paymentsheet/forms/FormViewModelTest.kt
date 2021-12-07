@@ -23,6 +23,7 @@ import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.elements.LayoutSpec
 import com.stripe.android.ui.core.elements.RowElement
 import com.stripe.android.ui.core.elements.SaveForFutureUseController
+import com.stripe.android.ui.core.elements.SaveForFutureUseElement
 import com.stripe.android.ui.core.elements.SaveForFutureUseSpec
 import com.stripe.android.ui.core.elements.SectionElement
 import com.stripe.android.ui.core.elements.SectionSingleFieldElement
@@ -35,6 +36,7 @@ import com.stripe.android.ui.core.forms.resources.StaticResourceRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.test.runBlockingTest
 import org.junit.Assert.assertNotNull
 import org.junit.Test
@@ -169,7 +171,7 @@ internal class FormViewModelTest {
             }
         assertThat(values[0]).isEmpty()
 
-        formViewModel.setSaveForFutureUseVisibility(false)
+        formViewModel.saveForFutureUseVisible.value = false
 
         ShadowLooper.runUiThreadTasksIncludingDelayedTasks()
 
@@ -556,4 +558,11 @@ internal class FormViewModelTest {
                     ?.firstOrNull { it?.label == label }
         }
     }
+}
+
+internal suspend fun FormViewModel.setSaveForFutureUse(value: Boolean) {
+    elements
+        .firstOrNull()
+        ?.filterIsInstance<SaveForFutureUseElement>()
+        ?.firstOrNull()?.controller?.onValueChange(value)
 }
