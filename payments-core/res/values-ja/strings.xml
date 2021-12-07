@@ -34,6 +34,8 @@
   <string name="address_label_city">市</string>
   <!-- Label for input requesting city where input is optional, used for all locations -->
   <string name="address_label_city_optional">市区町村 (省略可)</string>
+  <!-- Caption for Country field on address form -->
+  <string name="address_label_country">国</string>
   <!-- Caption for County field on address form (only countries that use county, like United Kingdom) -->
   <string name="address_label_county">群</string>
   <!-- Label for input requesting county where input is optional , used for UK based addresses -->
