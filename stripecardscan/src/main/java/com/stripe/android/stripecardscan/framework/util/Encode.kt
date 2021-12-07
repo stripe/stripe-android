@@ -13,17 +13,17 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import java.nio.charset.Charset
 
-fun b64Encode(s: String): String =
+internal fun b64Encode(s: String): String =
     Base64.encodeToString(s.toByteArray(Charset.defaultCharset()), Base64.NO_WRAP)
 
-fun b64Encode(b: ByteArray): String =
+internal fun b64Encode(b: ByteArray): String =
     Base64.encodeToString(b, Base64.NO_WRAP)
 
 /**
  * Encode a serializable object to a x-www-url-encoded string. The source object must convert to a
  * [Map] so that the parameters can be named.
  */
-fun <T> encodeToXWWWFormUrl(serializer: SerializationStrategy<T>, value: T): String =
+internal fun <T> encodeToXWWWFormUrl(serializer: SerializationStrategy<T>, value: T): String =
     QueryStringFactory.create(NetworkConfig.json.encodeToJsonElement(serializer, value).toMap())
 
 /**
@@ -61,11 +61,11 @@ private fun JsonObject.toMap(): Map<String, *> = map { it.key to it.value.toPrim
 /**
  * Encode a serializable object to a JSON string
  */
-fun <T> encodeToJson(serializer: SerializationStrategy<T>, value: T): String =
+internal fun <T> encodeToJson(serializer: SerializationStrategy<T>, value: T): String =
     NetworkConfig.json.encodeToString(serializer, value)
 
 /**
  * Decode an object from a JSON string
  */
-fun <T> decodeFromJson(deserializer: DeserializationStrategy<T>, value: String): T =
+internal fun <T> decodeFromJson(deserializer: DeserializationStrategy<T>, value: String): T =
     NetworkConfig.json.decodeFromString(deserializer, value)

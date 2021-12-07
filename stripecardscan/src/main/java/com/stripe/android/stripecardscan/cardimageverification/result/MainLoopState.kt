@@ -4,6 +4,7 @@ import com.stripe.android.stripecardscan.cardimageverification.CardImageVerifica
 import com.stripe.android.stripecardscan.cardimageverification.analyzer.MainLoopAnalyzer
 import com.stripe.android.stripecardscan.framework.MachineState
 import com.stripe.android.stripecardscan.framework.time.Clock
+import com.stripe.android.stripecardscan.framework.time.milliseconds
 import com.stripe.android.stripecardscan.framework.util.ItemCounter
 import com.stripe.android.stripecardscan.payment.card.CardIssuer
 import com.stripe.android.stripecardscan.payment.card.CardMatchResult
@@ -80,9 +81,11 @@ internal sealed class MainLoopState(
         private fun isOcrSatisfied() =
             highestOcrCount() >= CardImageVerificationConfig.DESIRED_OCR_AGREEMENT
         private fun isTimedOut() =
-            reachedStateAt.elapsedSince() > CardImageVerificationConfig.OCR_AND_CARD_SEARCH_DURATION
+            reachedStateAt.elapsedSince() >
+                CardImageVerificationConfig.OCR_AND_CARD_SEARCH_DURATION_MILLIS.milliseconds
         private fun isNoCardVisible() =
-            lastCardVisible.elapsedSince() > CardImageVerificationConfig.NO_CARD_VISIBLE_DURATION
+            lastCardVisible.elapsedSince() >
+                CardImageVerificationConfig.NO_CARD_VISIBLE_DURATION_MILLIS.milliseconds
 
         override suspend fun consumeTransition(
             transition: MainLoopAnalyzer.Prediction,
@@ -137,7 +140,8 @@ internal sealed class MainLoopState(
         private fun isCardSatisfied() =
             visibleCardCount >= CardImageVerificationConfig.DESIRED_CARD_COUNT
         private fun isTimedOut() =
-            reachedStateAt.elapsedSince() > CardImageVerificationConfig.CARD_ONLY_SEARCH_DURATION
+            reachedStateAt.elapsedSince() >
+                CardImageVerificationConfig.CARD_ONLY_SEARCH_DURATION_MILLIS.milliseconds
 
         override suspend fun consumeTransition(
             transition: MainLoopAnalyzer.Prediction,
@@ -168,9 +172,11 @@ internal sealed class MainLoopState(
         private fun isOcrSatisfied() =
             highestOcrCount() >= CardImageVerificationConfig.DESIRED_OCR_AGREEMENT
         private fun isTimedOut() =
-            reachedStateAt.elapsedSince() > CardImageVerificationConfig.OCR_ONLY_SEARCH_DURATION
+            reachedStateAt.elapsedSince() >
+                CardImageVerificationConfig.OCR_ONLY_SEARCH_DURATION_MILLIS.milliseconds
         private fun isNoCardVisible() =
-            lastCardVisible.elapsedSince() > CardImageVerificationConfig.NO_CARD_VISIBLE_DURATION
+            lastCardVisible.elapsedSince() >
+                CardImageVerificationConfig.NO_CARD_VISIBLE_DURATION_MILLIS.milliseconds
 
         override suspend fun consumeTransition(
             transition: MainLoopAnalyzer.Prediction,
@@ -203,7 +209,8 @@ internal sealed class MainLoopState(
         override val requiredLastFour: String?,
     ) : MainLoopState(runOcr = true, runCardDetect = false), RequiresMatchingCard {
         private fun isTimedOut() =
-            reachedStateAt.elapsedSince() > CardImageVerificationConfig.WRONG_CARD_DURATION
+            reachedStateAt.elapsedSince() >
+                CardImageVerificationConfig.WRONG_CARD_DURATION_MILLIS.milliseconds
 
         override suspend fun consumeTransition(
             transition: MainLoopAnalyzer.Prediction,

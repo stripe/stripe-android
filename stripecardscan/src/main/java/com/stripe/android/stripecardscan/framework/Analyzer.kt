@@ -12,7 +12,7 @@ internal const val DEFAULT_ANALYZER_PARALLEL_COUNT = 2
  * contain any state. They must define whether they can run on a multithreaded executor, and provide
  * a means of analyzing input data to return some form of result.
  */
-interface Analyzer<Input, State, Output> {
+internal interface Analyzer<Input, State, Output> {
     suspend fun analyze(data: Input, state: State): Output
 
     val statsName: String?
@@ -21,14 +21,14 @@ interface Analyzer<Input, State, Output> {
 /**
  * A factory to create analyzers.
  */
-interface AnalyzerFactory<Input, State, Output, AnalyzerType : Analyzer<Input, State, Output>> {
+internal interface AnalyzerFactory<Input, State, Output, AnalyzerType : Analyzer<Input, State, Output>> {
     suspend fun newInstance(): AnalyzerType?
 }
 
 /**
  * A pool of analyzers.
  */
-data class AnalyzerPool<DataFrame, State, Output>(
+internal data class AnalyzerPool<DataFrame, State, Output>(
     val desiredAnalyzerCount: Int,
     val analyzers: List<Analyzer<DataFrame, State, Output>>
 ) {

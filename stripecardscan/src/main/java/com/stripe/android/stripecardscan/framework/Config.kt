@@ -57,7 +57,7 @@ object NetworkConfig {
      * TODO(ccen): support constant retry delay from stripe-core and use this value.
      */
     @JvmStatic
-    var retryDelay: Duration = 5.seconds
+    var retryDelayMillis: Int = 5.seconds.inMilliseconds.toInt()
 
     /**
      * Status codes that should be retried from Stripe servers.
@@ -79,7 +79,7 @@ object NetworkConfig {
      * The network interface to use
      */
     @JvmStatic
-    var network: Network = StripeNetwork(
+    internal var network: Network = StripeNetwork(
         baseUrl = BASE_URL,
         retryTotalAttempts = retryTotalAttempts,
         retryStatusCodes = retryStatusCodes,

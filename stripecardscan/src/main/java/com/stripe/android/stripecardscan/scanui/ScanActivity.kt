@@ -16,6 +16,7 @@ import android.util.Size
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
+import androidx.annotation.RestrictTo
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -100,6 +101,7 @@ open class CameraErrorListenerImpl(
     }
 }
 
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
     companion object {
         const val PERMISSION_REQUEST_CODE = 1200
@@ -113,7 +115,7 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
     protected var isFlashlightOn: Boolean = false
         private set
 
-    protected val cameraAdapter by lazy { buildCameraAdapter() }
+    internal val cameraAdapter by lazy { buildCameraAdapter() }
     private val cameraErrorListener by lazy {
         CameraErrorListenerImpl(this) { t -> scanFailure(t) }
     }
@@ -418,7 +420,7 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
     /**
      * Generate a camera adapter
      */
-    protected open fun buildCameraAdapter(): CameraAdapter<CameraPreviewImage<Bitmap>> =
+    internal open fun buildCameraAdapter(): CameraAdapter<CameraPreviewImage<Bitmap>> =
         getCameraAdapter(
             activity = this,
             previewView = previewFrame,

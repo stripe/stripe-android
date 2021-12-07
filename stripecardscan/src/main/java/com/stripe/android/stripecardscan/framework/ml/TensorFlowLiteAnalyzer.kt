@@ -18,7 +18,7 @@ import java.nio.ByteBuffer
 /**
  * A TensorFlowLite analyzer uses an [Interpreter] to analyze data.
  */
-abstract class TensorFlowLiteAnalyzer<Input, MLInput, Output, MLOutput>(
+internal abstract class TensorFlowLiteAnalyzer<Input, MLInput, Output, MLOutput>(
     private val tfInterpreter: Interpreter,
     private val delegate: NnApiDelegate? = null,
 ) : Analyzer<Input, Any, Output>, Closeable {
@@ -59,7 +59,11 @@ abstract class TensorFlowLiteAnalyzer<Input, MLInput, Output, MLOutput>(
 /**
  * A factory that creates tensorflow models as analyzers.
  */
-abstract class TFLAnalyzerFactory<Input, Output, AnalyzerType : Analyzer<Input, Any, Output>>(
+internal abstract class TFLAnalyzerFactory<
+    Input,
+    Output,
+    AnalyzerType : Analyzer<Input, Any, Output>
+    >(
     private val context: Context,
     private val fetchedModel: FetchedData,
 ) : AnalyzerFactory<Input, Any, Output, AnalyzerType> {

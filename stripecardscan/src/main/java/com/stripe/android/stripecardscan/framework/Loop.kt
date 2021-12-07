@@ -21,11 +21,11 @@ import kotlinx.coroutines.withContext
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
 
-object NoAnalyzersAvailableException : Exception()
+internal object NoAnalyzersAvailableException : Exception()
 
-object AlreadySubscribedException : Exception()
+internal object AlreadySubscribedException : Exception()
 
-interface AnalyzerLoopErrorListener {
+internal interface AnalyzerLoopErrorListener {
 
     /**
      * A failure occurred during frame analysis. If this returns true, the loop will terminate. If
@@ -54,10 +54,10 @@ interface AnalyzerLoopErrorListener {
  * @param analyzerPool: A pool of analyzers to use in this loop.
  * @param analyzerLoopErrorListener: An error handler for this loop
  */
-sealed class AnalyzerLoop<DataFrame, State, Output>(
+internal sealed class AnalyzerLoop<DataFrame, State, Output>(
     private val analyzerPool: AnalyzerPool<DataFrame, in State, Output>,
     private val analyzerLoopErrorListener: AnalyzerLoopErrorListener,
-    private val statsName: String?,
+    statsName: String?,
 ) : ResultHandler<DataFrame, Output, Boolean> {
     private val started = AtomicBoolean(false)
     protected var startedAt: ClockMark? = null
@@ -171,7 +171,7 @@ sealed class AnalyzerLoop<DataFrame, State, Output>(
  *     this loop.
  * @param analyzerLoopErrorListener: An error handler for this loop
  */
-class ProcessBoundAnalyzerLoop<DataFrame, State, Output>(
+internal class ProcessBoundAnalyzerLoop<DataFrame, State, Output>(
     private val analyzerPool: AnalyzerPool<DataFrame, in State, Output>,
     private val resultHandler: StatefulResultHandler<DataFrame, out State, Output, Boolean>,
     analyzerLoopErrorListener: AnalyzerLoopErrorListener,
@@ -209,7 +209,7 @@ class ProcessBoundAnalyzerLoop<DataFrame, State, Output>(
  * @param timeLimit: If specified, this is the maximum allowed time for the loop to run. If the loop
  *     exceeds this duration, the loop will terminate
  */
-class FiniteAnalyzerLoop<DataFrame, State, Output>(
+internal class FiniteAnalyzerLoop<DataFrame, State, Output>(
     private val analyzerPool: AnalyzerPool<DataFrame, in State, Output>,
     private val resultHandler: TerminatingResultHandler<DataFrame, out State, Output>,
     analyzerLoopErrorListener: AnalyzerLoopErrorListener,
@@ -278,6 +278,6 @@ class FiniteAnalyzerLoop<DataFrame, State, Output>(
  * next element
  */
 @ExperimentalCoroutinesApi
-suspend fun <T> Flow<T>.backPressureDrop(): Flow<T> =
+internal suspend fun <T> Flow<T>.backPressureDrop(): Flow<T> =
     channelFlow { this@backPressureDrop.collect { trySend(it) } }
         .buffer(capacity = Channel.RENDEZVOUS)
