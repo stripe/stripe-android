@@ -106,6 +106,7 @@ internal abstract class CardVerifyFlow(
                 analyzerPool = analyzerPool,
                 resultHandler = mainLoopOcrAggregator,
                 analyzerLoopErrorListener = scanErrorListener,
+                statsName = null, // TODO: change this if we want to collect as part of scanstats
             ).apply {
                 subscribeTo(
                     imageStream.map {

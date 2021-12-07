@@ -6,5 +6,8 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class ScanStatsRequest(
     @SerialName("client_secret") val clientSecret: String,
-    @SerialName("stats") val stats: String,
+    @SerialName("payload") val payload: StatsPayload,
 )
+
+@Serializable
+class ScanStatsResponse

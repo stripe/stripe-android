@@ -9,7 +9,6 @@ import com.stripe.android.stripecardscan.framework.time.Timer
 import com.stripe.android.stripecardscan.framework.util.decodeFromJson
 import com.stripe.android.stripecardscan.framework.util.encodeToXWWWFormUrl
 import com.stripe.android.stripecardscan.framework.util.retry
-import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.KSerializer
 import java.io.File
 import java.io.FileNotFoundException
@@ -107,7 +106,6 @@ internal class LegacyStripeNetwork(
         }
     }
 
-    @ExperimentalSerializationApi
     override suspend fun <Request, Response, Error> postForResult(
         stripePublishableKey: String,
         path: String,
@@ -129,7 +127,6 @@ internal class LegacyStripeNetwork(
     /**
      * Send a post request to a Stripe endpoint and ignore the response.
      */
-    @ExperimentalSerializationApi
     override suspend fun <Request> postData(
         stripePublishableKey: String,
         path: String,

@@ -2,7 +2,6 @@ package com.stripe.android.stripecardscan.cardimageverification
 
 import androidx.test.filters.SmallTest
 import com.stripe.android.stripecardscan.cardimageverification.result.MainLoopAggregator
-import com.stripe.android.stripecardscan.framework.AggregateResultListener
 import com.stripe.android.stripecardscan.framework.AnalyzerLoopErrorListener
 import org.junit.Test
 import kotlin.test.assertEquals
@@ -13,21 +12,15 @@ class CardVerifyFlowTest {
     @SmallTest
     fun selectCompletionLoopFrames() {
 
-        val flow = CardVerifyFlow(
-            scanResultListener = object :
-                AggregateResultListener<
-                    MainLoopAggregator.InterimResult,
-                    MainLoopAggregator.FinalResult
-                    > {
-                override suspend fun onResult(result: MainLoopAggregator.FinalResult) {}
-                override suspend fun onInterimResult(result: MainLoopAggregator.InterimResult) {}
-                override suspend fun onReset() {}
-            },
+        val flow = object : CardVerifyFlow(
             scanErrorListener = object : AnalyzerLoopErrorListener {
                 override fun onAnalyzerFailure(t: Throwable): Boolean = false
                 override fun onResultFailure(t: Throwable): Boolean = false
             }
-        )
+        ) {
+            override suspend fun onInterimResult(result: MainLoopAggregator.InterimResult) {}
+            override suspend fun onReset() {}
+        }
 
         val frameMap = mapOf(
             SavedFrameType(hasCard = true, hasOcr = true) to listOf("A", "B", "C"),

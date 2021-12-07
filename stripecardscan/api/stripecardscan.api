@@ -213,6 +213,7 @@ public final class com/stripe/android/stripecardscan/framework/AlreadySubscribed
 
 public abstract interface class com/stripe/android/stripecardscan/framework/Analyzer {
 	public abstract fun analyze (Ljava/lang/Object;Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun getStatsName ()Ljava/lang/String;
 }
 
 public abstract interface class com/stripe/android/stripecardscan/framework/AnalyzerFactory {
@@ -221,7 +222,7 @@ public abstract interface class com/stripe/android/stripecardscan/framework/Anal
 
 public abstract class com/stripe/android/stripecardscan/framework/AnalyzerLoop : com/stripe/android/stripecardscan/framework/ResultHandler {
 	public static final field $stable I
-	public synthetic fun <init> (Lcom/stripe/android/stripecardscan/framework/AnalyzerPool;Lcom/stripe/android/stripecardscan/framework/AnalyzerLoopErrorListener;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (Lcom/stripe/android/stripecardscan/framework/AnalyzerPool;Lcom/stripe/android/stripecardscan/framework/AnalyzerLoopErrorListener;Ljava/lang/String;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
 	protected final fun getStartedAt ()Lcom/stripe/android/stripecardscan/framework/time/ClockMark;
 	public abstract fun getState ()Ljava/lang/Object;
 	protected final fun setStartedAt (Lcom/stripe/android/stripecardscan/framework/time/ClockMark;)V
@@ -347,8 +348,8 @@ public abstract interface class com/stripe/android/stripecardscan/framework/Fetc
 
 public final class com/stripe/android/stripecardscan/framework/FiniteAnalyzerLoop : com/stripe/android/stripecardscan/framework/AnalyzerLoop {
 	public static final field $stable I
-	public fun <init> (Lcom/stripe/android/stripecardscan/framework/AnalyzerPool;Lcom/stripe/android/stripecardscan/framework/TerminatingResultHandler;Lcom/stripe/android/stripecardscan/framework/AnalyzerLoopErrorListener;Lcom/stripe/android/stripecardscan/framework/time/Duration;)V
-	public synthetic fun <init> (Lcom/stripe/android/stripecardscan/framework/AnalyzerPool;Lcom/stripe/android/stripecardscan/framework/TerminatingResultHandler;Lcom/stripe/android/stripecardscan/framework/AnalyzerLoopErrorListener;Lcom/stripe/android/stripecardscan/framework/time/Duration;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Lcom/stripe/android/stripecardscan/framework/AnalyzerPool;Lcom/stripe/android/stripecardscan/framework/TerminatingResultHandler;Lcom/stripe/android/stripecardscan/framework/AnalyzerLoopErrorListener;Lcom/stripe/android/stripecardscan/framework/time/Duration;Ljava/lang/String;)V
+	public synthetic fun <init> (Lcom/stripe/android/stripecardscan/framework/AnalyzerPool;Lcom/stripe/android/stripecardscan/framework/TerminatingResultHandler;Lcom/stripe/android/stripecardscan/framework/AnalyzerLoopErrorListener;Lcom/stripe/android/stripecardscan/framework/time/Duration;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun cancel ()V
 	public fun getState ()Ljava/lang/Object;
 	public fun onResult (Ljava/lang/Object;Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
@@ -370,14 +371,12 @@ public final class com/stripe/android/stripecardscan/framework/NetworkConfig {
 	public static final field $stable I
 	public static final field INSTANCE Lcom/stripe/android/stripecardscan/framework/NetworkConfig;
 	public final fun getCARD_SCAN_RETRY_STATUS_CODES ()Ljava/lang/Iterable;
-	public static final fun getForm ()Lkotlinx/serialization/properties/Properties;
 	public static final fun getJson ()Lkotlinx/serialization/json/Json;
 	public static final fun getNetwork ()Lcom/stripe/android/stripecardscan/framework/api/Network;
 	public static final fun getRetryDelay ()Lcom/stripe/android/stripecardscan/framework/time/Duration;
 	public static final fun getRetryStatusCodes ()Ljava/lang/Iterable;
 	public static final fun getRetryTotalAttempts ()I
 	public static final fun getUseCompression ()Z
-	public static final fun setForm (Lkotlinx/serialization/properties/Properties;)V
 	public static final fun setJson (Lkotlinx/serialization/json/Json;)V
 	public static final fun setNetwork (Lcom/stripe/android/stripecardscan/framework/api/Network;)V
 	public static final fun setRetryDelay (Lcom/stripe/android/stripecardscan/framework/time/Duration;)V
@@ -393,7 +392,7 @@ public final class com/stripe/android/stripecardscan/framework/NoAnalyzersAvaila
 
 public final class com/stripe/android/stripecardscan/framework/ProcessBoundAnalyzerLoop : com/stripe/android/stripecardscan/framework/AnalyzerLoop {
 	public static final field $stable I
-	public fun <init> (Lcom/stripe/android/stripecardscan/framework/AnalyzerPool;Lcom/stripe/android/stripecardscan/framework/StatefulResultHandler;Lcom/stripe/android/stripecardscan/framework/AnalyzerLoopErrorListener;)V
+	public fun <init> (Lcom/stripe/android/stripecardscan/framework/AnalyzerPool;Lcom/stripe/android/stripecardscan/framework/StatefulResultHandler;Lcom/stripe/android/stripecardscan/framework/AnalyzerLoopErrorListener;Ljava/lang/String;)V
 	public fun getState ()Ljava/lang/Object;
 	public fun onResult (Ljava/lang/Object;Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun subscribeTo (Lkotlinx/coroutines/flow/Flow;Lkotlinx/coroutines/CoroutineScope;)Lkotlinx/coroutines/Job;
@@ -414,7 +413,7 @@ public abstract class com/stripe/android/stripecardscan/framework/ResourceFetche
 
 public abstract class com/stripe/android/stripecardscan/framework/ResultAggregator : com/stripe/android/stripecardscan/framework/StatefulResultHandler, androidx/lifecycle/LifecycleObserver {
 	public static final field $stable I
-	public fun <init> (Lcom/stripe/android/stripecardscan/framework/AggregateResultListener;Ljava/lang/Object;)V
+	public fun <init> (Lcom/stripe/android/stripecardscan/framework/AggregateResultListener;Ljava/lang/Object;Ljava/lang/String;)V
 	public abstract fun aggregateResult (Ljava/lang/Object;Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun bindToLifecycle (Landroidx/lifecycle/LifecycleOwner;)V
 	public final fun cancel ()V
@@ -525,18 +524,202 @@ public final class com/stripe/android/stripecardscan/framework/api/NetworkResult
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class com/stripe/android/stripecardscan/framework/api/dto/AppInfo {
+	public static final field $stable I
+	public static final field Companion Lcom/stripe/android/stripecardscan/framework/api/dto/AppInfo$Companion;
+	public synthetic fun <init> (ILjava/lang/String;Ljava/lang/String;Ljava/lang/String;ZLkotlinx/serialization/internal/SerializationConstructorMarker;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Z)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Z
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Z)Lcom/stripe/android/stripecardscan/framework/api/dto/AppInfo;
+	public static synthetic fun copy$default (Lcom/stripe/android/stripecardscan/framework/api/dto/AppInfo;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZILjava/lang/Object;)Lcom/stripe/android/stripecardscan/framework/api/dto/AppInfo;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAppPackageName ()Ljava/lang/String;
+	public final fun getBuild ()Ljava/lang/String;
+	public final fun getSdkVersion ()Ljava/lang/String;
+	public fun hashCode ()I
+	public final fun isDebugBuild ()Z
+	public fun toString ()Ljava/lang/String;
+	public static final fun write$Self (Lcom/stripe/android/stripecardscan/framework/api/dto/AppInfo;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V
+}
+
+public final class com/stripe/android/stripecardscan/framework/api/dto/AppInfo$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/stripe/android/stripecardscan/framework/api/dto/AppInfo$$serializer;
+	public static final synthetic field descriptor Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcom/stripe/android/stripecardscan/framework/api/dto/AppInfo;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/stripe/android/stripecardscan/framework/api/dto/AppInfo;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class com/stripe/android/stripecardscan/framework/api/dto/AppInfo$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class com/stripe/android/stripecardscan/framework/api/dto/ClientDevice {
+	public static final field $stable I
+	public static final field Companion Lcom/stripe/android/stripecardscan/framework/api/dto/ClientDevice$Companion;
+	public synthetic fun <init> (ILjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lkotlinx/serialization/internal/SerializationConstructorMarker;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun component5 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/stripecardscan/framework/api/dto/ClientDevice;
+	public static synthetic fun copy$default (Lcom/stripe/android/stripecardscan/framework/api/dto/ClientDevice;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/stripecardscan/framework/api/dto/ClientDevice;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAndroid_id ()Ljava/lang/String;
+	public final fun getName ()Ljava/lang/String;
+	public final fun getOsVersion ()Ljava/lang/String;
+	public final fun getPlatform ()Ljava/lang/String;
+	public final fun getVendor_id ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+	public static final fun write$Self (Lcom/stripe/android/stripecardscan/framework/api/dto/ClientDevice;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V
+}
+
+public final class com/stripe/android/stripecardscan/framework/api/dto/ClientDevice$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/stripe/android/stripecardscan/framework/api/dto/ClientDevice$$serializer;
+	public static final synthetic field descriptor Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcom/stripe/android/stripecardscan/framework/api/dto/ClientDevice;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/stripe/android/stripecardscan/framework/api/dto/ClientDevice;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class com/stripe/android/stripecardscan/framework/api/dto/ClientDevice$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class com/stripe/android/stripecardscan/framework/api/dto/ModelVersion {
+	public static final field $stable I
+	public static final field Companion Lcom/stripe/android/stripecardscan/framework/api/dto/ModelVersion$Companion;
+	public synthetic fun <init> (ILjava/lang/String;Ljava/lang/String;IZLkotlinx/serialization/internal/SerializationConstructorMarker;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;IZ)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()I
+	public final fun component4 ()Z
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;IZ)Lcom/stripe/android/stripecardscan/framework/api/dto/ModelVersion;
+	public static synthetic fun copy$default (Lcom/stripe/android/stripecardscan/framework/api/dto/ModelVersion;Ljava/lang/String;Ljava/lang/String;IZILjava/lang/Object;)Lcom/stripe/android/stripecardscan/framework/api/dto/ModelVersion;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getFrameworkVersion ()I
+	public final fun getLoadedSuccessfully ()Z
+	public final fun getName ()Ljava/lang/String;
+	public final fun getVersion ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+	public static final fun write$Self (Lcom/stripe/android/stripecardscan/framework/api/dto/ModelVersion;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V
+}
+
+public final class com/stripe/android/stripecardscan/framework/api/dto/ModelVersion$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/stripe/android/stripecardscan/framework/api/dto/ModelVersion$$serializer;
+	public static final synthetic field descriptor Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcom/stripe/android/stripecardscan/framework/api/dto/ModelVersion;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/stripe/android/stripecardscan/framework/api/dto/ModelVersion;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class com/stripe/android/stripecardscan/framework/api/dto/ModelVersion$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class com/stripe/android/stripecardscan/framework/api/dto/RepeatingTaskStatistics {
+	public static final field $stable I
+	public static final field Companion Lcom/stripe/android/stripecardscan/framework/api/dto/RepeatingTaskStatistics$Companion;
+	public fun <init> (I)V
+	public synthetic fun <init> (IILkotlinx/serialization/internal/SerializationConstructorMarker;)V
+	public final fun component1 ()I
+	public final fun copy (I)Lcom/stripe/android/stripecardscan/framework/api/dto/RepeatingTaskStatistics;
+	public static synthetic fun copy$default (Lcom/stripe/android/stripecardscan/framework/api/dto/RepeatingTaskStatistics;IILjava/lang/Object;)Lcom/stripe/android/stripecardscan/framework/api/dto/RepeatingTaskStatistics;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getExecutions ()I
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+	public static final fun write$Self (Lcom/stripe/android/stripecardscan/framework/api/dto/RepeatingTaskStatistics;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V
+}
+
+public final class com/stripe/android/stripecardscan/framework/api/dto/RepeatingTaskStatistics$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/stripe/android/stripecardscan/framework/api/dto/RepeatingTaskStatistics$$serializer;
+	public static final synthetic field descriptor Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcom/stripe/android/stripecardscan/framework/api/dto/RepeatingTaskStatistics;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/stripe/android/stripecardscan/framework/api/dto/RepeatingTaskStatistics;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class com/stripe/android/stripecardscan/framework/api/dto/RepeatingTaskStatistics$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class com/stripe/android/stripecardscan/framework/api/dto/ScanStatistics {
+	public static final field $stable I
+	public static final field Companion Lcom/stripe/android/stripecardscan/framework/api/dto/ScanStatistics$Companion;
+	public synthetic fun <init> (ILjava/util/Map;Ljava/util/Map;Lkotlinx/serialization/internal/SerializationConstructorMarker;)V
+	public fun <init> (Ljava/util/Map;Ljava/util/Map;)V
+	public final fun component1 ()Ljava/util/Map;
+	public final fun component2 ()Ljava/util/Map;
+	public final fun copy (Ljava/util/Map;Ljava/util/Map;)Lcom/stripe/android/stripecardscan/framework/api/dto/ScanStatistics;
+	public static synthetic fun copy$default (Lcom/stripe/android/stripecardscan/framework/api/dto/ScanStatistics;Ljava/util/Map;Ljava/util/Map;ILjava/lang/Object;)Lcom/stripe/android/stripecardscan/framework/api/dto/ScanStatistics;
+	public fun equals (Ljava/lang/Object;)Z
+	public static final fun fromStats ()Lcom/stripe/android/stripecardscan/framework/api/dto/ScanStatistics;
+	public final fun getRepeatingTasks ()Ljava/util/Map;
+	public final fun getTasks ()Ljava/util/Map;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+	public static final fun write$Self (Lcom/stripe/android/stripecardscan/framework/api/dto/ScanStatistics;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V
+}
+
+public final class com/stripe/android/stripecardscan/framework/api/dto/ScanStatistics$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/stripe/android/stripecardscan/framework/api/dto/ScanStatistics$$serializer;
+	public static final synthetic field descriptor Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcom/stripe/android/stripecardscan/framework/api/dto/ScanStatistics;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/stripe/android/stripecardscan/framework/api/dto/ScanStatistics;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class com/stripe/android/stripecardscan/framework/api/dto/ScanStatistics$Companion {
+	public final fun fromStats ()Lcom/stripe/android/stripecardscan/framework/api/dto/ScanStatistics;
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
 public final class com/stripe/android/stripecardscan/framework/api/dto/ScanStatsRequest {
 	public static final field $stable I
 	public static final field Companion Lcom/stripe/android/stripecardscan/framework/api/dto/ScanStatsRequest$Companion;
-	public synthetic fun <init> (ILjava/lang/String;Ljava/lang/String;Lkotlinx/serialization/internal/SerializationConstructorMarker;)V
-	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
+	public synthetic fun <init> (ILjava/lang/String;Lcom/stripe/android/stripecardscan/framework/api/dto/StatsPayload;Lkotlinx/serialization/internal/SerializationConstructorMarker;)V
+	public fun <init> (Ljava/lang/String;Lcom/stripe/android/stripecardscan/framework/api/dto/StatsPayload;)V
 	public final fun component1 ()Ljava/lang/String;
-	public final fun component2 ()Ljava/lang/String;
-	public final fun copy (Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/stripecardscan/framework/api/dto/ScanStatsRequest;
-	public static synthetic fun copy$default (Lcom/stripe/android/stripecardscan/framework/api/dto/ScanStatsRequest;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/stripecardscan/framework/api/dto/ScanStatsRequest;
+	public final fun component2 ()Lcom/stripe/android/stripecardscan/framework/api/dto/StatsPayload;
+	public final fun copy (Ljava/lang/String;Lcom/stripe/android/stripecardscan/framework/api/dto/StatsPayload;)Lcom/stripe/android/stripecardscan/framework/api/dto/ScanStatsRequest;
+	public static synthetic fun copy$default (Lcom/stripe/android/stripecardscan/framework/api/dto/ScanStatsRequest;Ljava/lang/String;Lcom/stripe/android/stripecardscan/framework/api/dto/StatsPayload;ILjava/lang/Object;)Lcom/stripe/android/stripecardscan/framework/api/dto/ScanStatsRequest;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getClientSecret ()Ljava/lang/String;
-	public final fun getStats ()Ljava/lang/String;
+	public final fun getPayload ()Lcom/stripe/android/stripecardscan/framework/api/dto/StatsPayload;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 	public static final fun write$Self (Lcom/stripe/android/stripecardscan/framework/api/dto/ScanStatsRequest;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V
@@ -557,6 +740,116 @@ public final class com/stripe/android/stripecardscan/framework/api/dto/ScanStats
 
 public final class com/stripe/android/stripecardscan/framework/api/dto/ScanStatsRequest$Companion {
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class com/stripe/android/stripecardscan/framework/api/dto/ScanStatsResponse {
+	public static final field $stable I
+	public static final field Companion Lcom/stripe/android/stripecardscan/framework/api/dto/ScanStatsResponse$Companion;
+	public fun <init> ()V
+	public synthetic fun <init> (ILkotlinx/serialization/internal/SerializationConstructorMarker;)V
+	public static final fun write$Self (Lcom/stripe/android/stripecardscan/framework/api/dto/ScanStatsResponse;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V
+}
+
+public final class com/stripe/android/stripecardscan/framework/api/dto/ScanStatsResponse$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/stripe/android/stripecardscan/framework/api/dto/ScanStatsResponse$$serializer;
+	public static final synthetic field descriptor Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcom/stripe/android/stripecardscan/framework/api/dto/ScanStatsResponse;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/stripe/android/stripecardscan/framework/api/dto/ScanStatsResponse;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class com/stripe/android/stripecardscan/framework/api/dto/ScanStatsResponse$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class com/stripe/android/stripecardscan/framework/api/dto/StatsPayload {
+	public static final field $stable I
+	public static final field Companion Lcom/stripe/android/stripecardscan/framework/api/dto/StatsPayload$Companion;
+	public synthetic fun <init> (ILjava/lang/String;Ljava/lang/String;ILcom/stripe/android/stripecardscan/framework/api/dto/ClientDevice;Lcom/stripe/android/stripecardscan/framework/api/dto/AppInfo;Lcom/stripe/android/stripecardscan/framework/api/dto/ScanStatistics;Lkotlinx/serialization/internal/SerializationConstructorMarker;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;ILcom/stripe/android/stripecardscan/framework/api/dto/ClientDevice;Lcom/stripe/android/stripecardscan/framework/api/dto/AppInfo;Lcom/stripe/android/stripecardscan/framework/api/dto/ScanStatistics;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;ILcom/stripe/android/stripecardscan/framework/api/dto/ClientDevice;Lcom/stripe/android/stripecardscan/framework/api/dto/AppInfo;Lcom/stripe/android/stripecardscan/framework/api/dto/ScanStatistics;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()I
+	public final fun component4 ()Lcom/stripe/android/stripecardscan/framework/api/dto/ClientDevice;
+	public final fun component5 ()Lcom/stripe/android/stripecardscan/framework/api/dto/AppInfo;
+	public final fun component6 ()Lcom/stripe/android/stripecardscan/framework/api/dto/ScanStatistics;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;ILcom/stripe/android/stripecardscan/framework/api/dto/ClientDevice;Lcom/stripe/android/stripecardscan/framework/api/dto/AppInfo;Lcom/stripe/android/stripecardscan/framework/api/dto/ScanStatistics;)Lcom/stripe/android/stripecardscan/framework/api/dto/StatsPayload;
+	public static synthetic fun copy$default (Lcom/stripe/android/stripecardscan/framework/api/dto/StatsPayload;Ljava/lang/String;Ljava/lang/String;ILcom/stripe/android/stripecardscan/framework/api/dto/ClientDevice;Lcom/stripe/android/stripecardscan/framework/api/dto/AppInfo;Lcom/stripe/android/stripecardscan/framework/api/dto/ScanStatistics;ILjava/lang/Object;)Lcom/stripe/android/stripecardscan/framework/api/dto/StatsPayload;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getApp ()Lcom/stripe/android/stripecardscan/framework/api/dto/AppInfo;
+	public final fun getDevice ()Lcom/stripe/android/stripecardscan/framework/api/dto/ClientDevice;
+	public final fun getInstanceId ()Ljava/lang/String;
+	public final fun getPayloadVersion ()I
+	public final fun getScanId ()Ljava/lang/String;
+	public final fun getScanStats ()Lcom/stripe/android/stripecardscan/framework/api/dto/ScanStatistics;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+	public static final fun write$Self (Lcom/stripe/android/stripecardscan/framework/api/dto/StatsPayload;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V
+}
+
+public final class com/stripe/android/stripecardscan/framework/api/dto/StatsPayload$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/stripe/android/stripecardscan/framework/api/dto/StatsPayload$$serializer;
+	public static final synthetic field descriptor Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcom/stripe/android/stripecardscan/framework/api/dto/StatsPayload;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/stripe/android/stripecardscan/framework/api/dto/StatsPayload;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class com/stripe/android/stripecardscan/framework/api/dto/StatsPayload$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class com/stripe/android/stripecardscan/framework/api/dto/TaskStatistics {
+	public static final field $stable I
+	public static final field Companion Lcom/stripe/android/stripecardscan/framework/api/dto/TaskStatistics$Companion;
+	public synthetic fun <init> (IJJLjava/lang/String;Lkotlinx/serialization/internal/SerializationConstructorMarker;)V
+	public fun <init> (JJLjava/lang/String;)V
+	public final fun component1 ()J
+	public final fun component2 ()J
+	public final fun component3 ()Ljava/lang/String;
+	public final fun copy (JJLjava/lang/String;)Lcom/stripe/android/stripecardscan/framework/api/dto/TaskStatistics;
+	public static synthetic fun copy$default (Lcom/stripe/android/stripecardscan/framework/api/dto/TaskStatistics;JJLjava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/stripecardscan/framework/api/dto/TaskStatistics;
+	public fun equals (Ljava/lang/Object;)Z
+	public static final fun fromTaskStats$stripecardscan_release (Lcom/stripe/android/stripecardscan/framework/TaskStats;)Lcom/stripe/android/stripecardscan/framework/api/dto/TaskStatistics;
+	public final fun getDurationMs ()J
+	public final fun getResult ()Ljava/lang/String;
+	public final fun getStartedAtMs ()J
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+	public static final fun write$Self (Lcom/stripe/android/stripecardscan/framework/api/dto/TaskStatistics;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V
+}
+
+public final class com/stripe/android/stripecardscan/framework/api/dto/TaskStatistics$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/stripe/android/stripecardscan/framework/api/dto/TaskStatistics$$serializer;
+	public static final synthetic field descriptor Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcom/stripe/android/stripecardscan/framework/api/dto/TaskStatistics;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/stripe/android/stripecardscan/framework/api/dto/TaskStatistics;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class com/stripe/android/stripecardscan/framework/api/dto/TaskStatistics$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class com/stripe/android/stripecardscan/framework/exception/InvalidSerializationException : java/lang/Exception {
+	public static final field $stable I
+	public fun <init> (Ljava/lang/String;)V
 }
 
 public abstract class com/stripe/android/stripecardscan/framework/ml/TFLAnalyzerFactory : com/stripe/android/stripecardscan/framework/AnalyzerFactory {
