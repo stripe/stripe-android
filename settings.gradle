@@ -20,3 +20,4 @@ dependencyResolutionManagement {
         }
     }
 }
+include ':stripe-ui-core'

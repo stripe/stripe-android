@@ -20,6 +20,7 @@ if (System.getenv("JITPACK")) {
 
 dependencies {
     implementation project(":payments-core")
+    implementation project(":stripe-ui-core")
 
     implementation libraries.androidx.annotation
     implementation libraries.androidx.appcompat

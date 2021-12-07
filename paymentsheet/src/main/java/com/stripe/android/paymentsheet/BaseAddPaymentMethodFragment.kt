@@ -20,7 +20,7 @@ import com.stripe.android.core.injection.InjectorKey
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.databinding.FragmentPaymentsheetAddPaymentMethodBinding
 import com.stripe.android.paymentsheet.forms.FormFieldValues
-import com.stripe.android.paymentsheet.model.Amount
+import com.stripe.android.ui.core.Amount
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
 import com.stripe.android.paymentsheet.paymentdatacollection.CardDataCollectionFragment

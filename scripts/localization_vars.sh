@@ -3,6 +3,7 @@
 MODULES=(
   "paymentsheet"
   "payments-core"
+  "stripe-ui-core"
 )
 
 #

@@ -34,8 +34,6 @@
   <string name="address_label_city">By</string>
   <!-- Label for input requesting city where input is optional, used for all locations -->
   <string name="address_label_city_optional">By (valgfritt)</string>
-  <!-- Caption for Country field on address form -->
-  <string name="address_label_country">Land</string>
   <!-- Caption for County field on address form (only countries that use county, like United Kingdom) -->
   <string name="address_label_county">Fylke</string>
   <!-- Label for input requesting county where input is optional , used for UK based addresses -->
