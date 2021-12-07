@@ -11,7 +11,6 @@ import com.stripe.android.stripecardscan.framework.api.dto.AppInfo
 import com.stripe.android.stripecardscan.framework.api.dto.CardImageVerificationDetailsRequest
 import com.stripe.android.stripecardscan.framework.api.dto.CardImageVerificationDetailsResult
 import com.stripe.android.stripecardscan.framework.api.dto.ClientDevice
-import com.stripe.android.stripecardscan.framework.api.dto.ModelVersion
 import com.stripe.android.stripecardscan.framework.api.dto.ScanStatistics
 import com.stripe.android.stripecardscan.framework.api.dto.ScanStatsRequest
 import com.stripe.android.stripecardscan.framework.api.dto.ScanStatsResponse
@@ -25,7 +24,6 @@ import com.stripe.android.stripecardscan.framework.image.constrainToSize
 import com.stripe.android.stripecardscan.framework.image.crop
 import com.stripe.android.stripecardscan.framework.image.size
 import com.stripe.android.stripecardscan.framework.image.toJpeg
-import com.stripe.android.stripecardscan.framework.ml.getLoadedModelVersions
 import com.stripe.android.stripecardscan.framework.util.AppDetails
 import com.stripe.android.stripecardscan.framework.util.Device
 import com.stripe.android.stripecardscan.framework.util.b64Encode
@@ -57,7 +55,7 @@ internal fun uploadScanStats(
         device = ClientDevice.fromDevice(device),
         app = AppInfo.fromAppDetails(appDetails),
         scanStats = scanStatistics,
-// TODO: these should probably be reported as part of scanstats, but are not yet supported
+// TODO: this should probably be reported as part of scanstats, but is not yet supported
 //        modelVersions = getLoadedModelVersions().map { ModelVersion.fromModelLoadDetails(it) },
     )
 
@@ -74,7 +72,7 @@ internal fun uploadScanStats(
             errorSerializer = StripeServerErrorResponse.serializer(),
         )
     ) {
-        is NetworkResult.Success -> Log.d(Config.logTag, "Scan stats uploaded")
+        is NetworkResult.Success -> Log.v(Config.logTag, "Scan stats uploaded")
         is NetworkResult.Error ->
             Log.e(
                 Config.logTag,

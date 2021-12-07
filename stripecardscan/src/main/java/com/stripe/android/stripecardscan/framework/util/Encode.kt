@@ -31,7 +31,7 @@ fun <T> encodeToXWWWFormUrl(serializer: SerializationStrategy<T>, value: T): Str
  * that this only supports [JsonObject]s currently. Other types will result in an
  * [InvalidSerializationException].
  */
-private fun JsonElement.toMap(): Map<String, *> = when(this) {
+private fun JsonElement.toMap(): Map<String, *> = when (this) {
     is JsonObject -> toMap()
     else -> throw InvalidSerializationException(this::class.java.simpleName)
 }
@@ -43,7 +43,7 @@ private fun JsonElement.toPrimitives(): Any? = when (this) {
     JsonNull -> null
     is JsonArray -> toPrimitives()
     is JsonObject -> toMap()
-    is JsonPrimitive -> content.replace(Regex("^\"|\"$"), "")  // remove "" around strings
+    is JsonPrimitive -> content.replace(Regex("^\"|\"$"), "") // remove "" around strings
 }
 
 /**

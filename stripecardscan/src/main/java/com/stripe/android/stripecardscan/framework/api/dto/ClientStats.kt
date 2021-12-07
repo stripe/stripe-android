@@ -1,7 +1,6 @@
 package com.stripe.android.stripecardscan.framework.api.dto
 
 import androidx.annotation.RestrictTo
-import com.stripe.android.stripecardscan.framework.RepeatingTaskStats
 import com.stripe.android.stripecardscan.framework.Stats
 import com.stripe.android.stripecardscan.framework.TaskStats
 import com.stripe.android.stripecardscan.framework.ml.ModelLoadDetails
@@ -82,30 +81,4 @@ data class TaskStatistics(
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 data class RepeatingTaskStatistics(
     @SerialName("executions") val executions: Int,
-// TODO: these should probably be reported as part of scanstats
-//    @SerialName("result") val result: String,
-//    @SerialName("start_time_ms") val startTimeMs: Long,
-//    @SerialName("total_duration_ms") val totalDurationMs: Long,
-//    @SerialName("total_cpu_duration_ms") val totalCpuDurationMs: Long,
-//    @SerialName("average_duration_ms") val averageDurationMs: Long,
-//    @SerialName("minimum_duration_ms") val minimumDurationMs: Long,
-//    @SerialName("maximum_duration_ms") val maximumDurationMs: Long,
-) {
-// TODO: these should probably be reported as part of scanstats
-//    companion object {
-//        @JvmStatic
-//        internal fun fromRepeatingTaskStats(
-//            result: String,
-//            repeatingTaskStats: RepeatingTaskStats,
-//        ) = RepeatingTaskStatistics(
-//            executions = repeatingTaskStats.executions,
-//            result = result,
-//            startTimeMs = repeatingTaskStats.startedAt.toMillisecondsSinceEpoch(),
-//            totalDurationMs = repeatingTaskStats.totalDuration.inMilliseconds.toLong(),
-//            totalCpuDurationMs = repeatingTaskStats.totalCpuDuration.inMilliseconds.toLong(),
-//            averageDurationMs = repeatingTaskStats.averageDuration().inMilliseconds.toLong(),
-//            minimumDurationMs = repeatingTaskStats.minimumDuration.inMilliseconds.toLong(),
-//            maximumDurationMs = repeatingTaskStats.maximumDuration.inMilliseconds.toLong(),
-//        )
-//    }
-}
+)

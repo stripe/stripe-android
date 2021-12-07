@@ -12,11 +12,6 @@ data class AppInfo(
     @SerialName("sdk_version") val sdkVersion: String,
     @SerialName("build") val build: String,
     @SerialName("is_debug_build") val isDebugBuild: Boolean,
-// TODO: these should probably be reported as part of scanstats, but are not yet supported
-//    @SerialName("application_id") val applicationId: String,
-//    @SerialName("library_package_name") val libraryPackageName: String,
-//    @SerialName("sdk_version_code") val sdkVersionCode: Int,
-//    @SerialName("sdk_flavor") val sdkFlavor: String,
 ) {
     companion object {
         internal fun fromAppDetails(appDetails: AppDetails): AppInfo = AppInfo(
@@ -24,11 +19,6 @@ data class AppInfo(
             sdkVersion = appDetails.sdkVersion,
             build = appDetails.sdkVersion,
             isDebugBuild = appDetails.isDebugBuild,
-// TODO: these should probably be reported as part of scanstats, but are not yet supported
-//            applicationId = appDetails.applicationId,
-//            libraryPackageName = appDetails.libraryPackageName,
-//            sdkVersionCode = appDetails.sdkVersionCode,
-//            sdkFlavor = appDetails.sdkFlavor,
         )
     }
 }

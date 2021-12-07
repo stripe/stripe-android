@@ -299,11 +299,7 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
     protected open fun toggleFlashlight() {
         isFlashlightOn = !isFlashlightOn
         setFlashlightState(isFlashlightOn)
-// TODO: this should probably be reported as part of scanstats, but is not yet supported
-//        launch {
-//            Stats.trackRepeatingTask("torch_state")
-//                .trackResult(if (isFlashlightOn) "on" else "off")
-//        }
+        // TODO: this should be reported as part of scanstats, but is not yet supported
     }
 
     /**
@@ -311,11 +307,7 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
      */
     protected open fun toggleCamera() {
         cameraAdapter.changeCamera()
-// TODO: this should probably be reported as part of scanstats, but is not yet supported
-//        launch {
-//            Stats.trackRepeatingTask("swap_camera")
-//                .trackResult("${cameraAdapter.getCurrentCamera()}")
-//        }
+        // TODO: this should probably be reported as part of scanstats, but is not yet supported
     }
 
     /**
@@ -401,10 +393,8 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
             onFlashSupported(it)
         }
 
-// TODO: this should probably be reported as part of scanstats, but is not yet supported
-//        val cameraStat = Stats.trackTask("multiple_cameras_supported")
+        // TODO: this should probably be reported as part of scanstats, but is not yet supported
         cameraAdapter.withSupportsMultipleCameras {
-//            launch { cameraStat.trackResult(if (it) "supported" else "unsupported") }
             onSupportsMultipleCameras(it)
         }
 
