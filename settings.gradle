@@ -9,6 +9,7 @@ include ':paymentsheet'
 include ':stripecardscan'
 include ':stripecardscan-example'
 include ':stripe-core'
+include ':stripe-ui-core'
 include ':stripe-test-e2e'
 include ':wechatpay'
 
@@ -21,4 +22,3 @@ dependencyResolutionManagement {
         }
     }
 }
-include ':stripe-ui-core'

@@ -17,3 +17,4 @@
 
 # stripe-core
 /stripe-core/ @ccen-stripe
+/stripe-ui-core/ @brnunes-stripe @michelleb-stripe @skyler-stripe
