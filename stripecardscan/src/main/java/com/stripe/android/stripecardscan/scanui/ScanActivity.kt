@@ -190,7 +190,7 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
             this,
             Manifest.permission.CAMERA,
         ) == PackageManager.PERMISSION_GRANTED -> {
-            launch { permissionStat.trackResult("already_granted") }
+            launch { permissionStat.trackResult("success") }
             prepareCamera { onCameraReady() }
         }
         ActivityCompat.shouldShowRequestPermissionRationale(
@@ -218,11 +218,11 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
         if (requestCode == PERMISSION_REQUEST_CODE && grantResults.isNotEmpty()) {
             when (grantResults[0]) {
                 PackageManager.PERMISSION_GRANTED -> {
-                    launch { permissionStat.trackResult("granted") }
+                    launch { permissionStat.trackResult("success") }
                     prepareCamera { onCameraReady() }
                 }
                 else -> {
-                    launch { permissionStat.trackResult("denied") }
+                    launch { permissionStat.trackResult("failure") }
                     userDeniedCameraPermission()
                 }
             }
@@ -338,7 +338,7 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
      * Cancel the scan when the user presses back.
      */
     override fun onBackPressed() {
-        runBlocking { scanStat.trackResult("user_pressed_back") }
+        runBlocking { scanStat.trackResult("user_canceled") }
         resultListener.userCanceled(CancellationReason.Back)
         closeScanner()
     }
@@ -356,7 +356,7 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
      * The camera permission was denied.
      */
     protected open fun userDeniedCameraPermission() {
-        runBlocking { scanStat.trackResult("permission_denied") }
+        runBlocking { scanStat.trackResult("user_canceled") }
         resultListener.userCanceled(CancellationReason.CameraPermissionDenied)
         closeScanner()
     }

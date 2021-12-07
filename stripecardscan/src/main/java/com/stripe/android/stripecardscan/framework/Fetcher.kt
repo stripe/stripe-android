@@ -170,7 +170,6 @@ abstract class WebFetcher : Fetcher {
     private var fetchException: Throwable? = null
 
     override suspend fun fetchData(forImmediateUse: Boolean, isOptional: Boolean): FetchedData {
-        val stat = Stats.trackPersistentRepeatingTask("web_fetcher_$modelClass")
         val cachedData = FetchedData.fromFetchedModelMeta(
             modelClass,
             modelFrameworkVersion,
@@ -189,7 +188,6 @@ abstract class WebFetcher : Fetcher {
                         "Fetcher: $modelClass is needed immediately and cached version " +
                             "${data.modelVersion} is available.",
                     )
-                    stat.trackResult("success")
                     return@fetchData data
                 }
             }
@@ -203,7 +201,6 @@ abstract class WebFetcher : Fetcher {
                     Config.logTag,
                     "Fetcher: using cached version ${cachedData.modelVersion} for $modelClass",
                 )
-                stat.trackResult("no_download_details")
                 return@fetchData cachedData
             }
 
@@ -214,7 +211,6 @@ abstract class WebFetcher : Fetcher {
                 Config.logTag,
                 "Fetcher: optional $modelClass needed for immediate use, but no cache available.",
             )
-            stat.trackResult("optional_model_not_downloaded")
             return FetchedData.fromFetchedModelMeta(
                 modelClass = modelClass,
                 modelFrameworkVersion = modelFrameworkVersion,
@@ -236,7 +232,6 @@ abstract class WebFetcher : Fetcher {
                         Config.logTag,
                         "Fetcher: $modelClass already has latest version downloaded.",
                     )
-                    stat.trackResult("success_cached")
                     return@fetchData data
                 }
             }
@@ -247,13 +242,11 @@ abstract class WebFetcher : Fetcher {
                         Config.logTag,
                         "Fetcher: $modelClass successfully downloaded.",
                     )
-                    stat.trackResult("success_downloaded")
                 } else {
                     Log.d(
                         Config.logTag,
                         "Fetcher: $modelClass failed to download from $downloadDetails.",
                     )
-                    stat.trackResult("download_failed")
                 }
             }
         } catch (t: Throwable) {
@@ -264,14 +257,12 @@ abstract class WebFetcher : Fetcher {
                     "Fetcher: Failed to download model $modelClass, loaded from local cache",
                     t,
                 )
-                stat.trackResult("success_download_failed_but_cached")
             } else {
                 Log.e(
                     Config.logTag,
                     "Fetcher: Failed to download model $modelClass, no local cache available",
                     t,
                 )
-                stat.trackResult("failure")
             }
             cachedData
         }
