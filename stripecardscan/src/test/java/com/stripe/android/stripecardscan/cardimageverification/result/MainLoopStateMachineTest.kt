@@ -195,8 +195,10 @@ class MainLoopStateMachineTest {
             assertTrue(state is MainLoopState.OcrFound)
         }
 
-        delay(CardImageVerificationConfig.OCR_AND_CARD_SEARCH_DURATION_MILLIS.milliseconds +
-            1.milliseconds)
+        delay(
+            CardImageVerificationConfig.OCR_AND_CARD_SEARCH_DURATION_MILLIS.milliseconds +
+                1.milliseconds
+        )
 
         val newState = state.consumeTransition(prediction)
         assertTrue(newState is MainLoopState.Finished)
@@ -227,8 +229,10 @@ class MainLoopStateMachineTest {
             assertTrue(state is MainLoopState.OcrFound)
         }
 
-        delay(CardImageVerificationConfig.NO_CARD_VISIBLE_DURATION_MILLIS.milliseconds +
-            1.milliseconds)
+        delay(
+            CardImageVerificationConfig.NO_CARD_VISIBLE_DURATION_MILLIS.milliseconds +
+                1.milliseconds
+        )
 
         val predictionWithoutCard = MainLoopAnalyzer.Prediction(
             ocr = null,
@@ -254,8 +258,10 @@ class MainLoopStateMachineTest {
             requiredLastFour = "8770",
         )
 
-        delay(CardImageVerificationConfig.OCR_AND_CARD_SEARCH_DURATION_MILLIS.milliseconds +
-            1.milliseconds)
+        delay(
+            CardImageVerificationConfig.OCR_AND_CARD_SEARCH_DURATION_MILLIS.milliseconds +
+                1.milliseconds
+        )
 
         val prediction = MainLoopAnalyzer.Prediction(
             ocr = null,
@@ -358,8 +364,10 @@ class MainLoopStateMachineTest {
             card = null,
         )
 
-        delay(CardImageVerificationConfig.NO_CARD_VISIBLE_DURATION_MILLIS.milliseconds +
-            1.milliseconds)
+        delay(
+            CardImageVerificationConfig.NO_CARD_VISIBLE_DURATION_MILLIS.milliseconds +
+                1.milliseconds
+        )
 
         val newState = state.consumeTransition(prediction)
         assertTrue(newState is MainLoopState.Finished)
@@ -437,8 +445,10 @@ class MainLoopStateMachineTest {
             card = null,
         )
 
-        delay(CardImageVerificationConfig.OCR_ONLY_SEARCH_DURATION_MILLIS.milliseconds +
-            1.milliseconds)
+        delay(
+            CardImageVerificationConfig.OCR_ONLY_SEARCH_DURATION_MILLIS.milliseconds +
+                1.milliseconds
+        )
 
         val newState = state.consumeTransition(prediction)
         assertTrue(newState is MainLoopState.Finished)
@@ -547,8 +557,10 @@ class MainLoopStateMachineTest {
             card = null,
         )
 
-        delay(CardImageVerificationConfig.WRONG_CARD_DURATION_MILLIS.milliseconds +
-            1.milliseconds)
+        delay(
+            CardImageVerificationConfig.WRONG_CARD_DURATION_MILLIS.milliseconds +
+                1.milliseconds
+        )
 
         val newState = state.consumeTransition(prediction)
         assertTrue(newState is MainLoopState.Initial)

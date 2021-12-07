@@ -718,8 +718,9 @@ internal fun <Result> cacheFirstResultSuspend(f: suspend() -> Result) =
     MemoizeSuspend0(f).memoize()
 internal fun <Input, Result> cacheFirstResultSuspend(f: suspend(Input) -> Result) =
     CachedFirstResultSuspend1(f).cacheFirstResult()
-internal fun <Input1, Input2, Result> cacheFirstResultSuspend(f: suspend(Input1, Input2) -> Result) =
-    CachedFirstResultSuspend2(f).cacheFirstResult()
+internal fun <Input1, Input2, Result> cacheFirstResultSuspend(
+    f: suspend(Input1, Input2) -> Result
+) = CachedFirstResultSuspend2(f).cacheFirstResult()
 internal fun <Input1, Input2, Input3, Result> cacheFirstResultSuspend(
     f: suspend(Input1, Input2, Input3) -> Result,
 ) = CachedFirstResultSuspend3(f).cacheFirstResult()

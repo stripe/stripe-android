@@ -21,7 +21,8 @@ internal interface Analyzer<Input, State, Output> {
 /**
  * A factory to create analyzers.
  */
-internal interface AnalyzerFactory<Input, State, Output, AnalyzerType : Analyzer<Input, State, Output>> {
+internal interface AnalyzerFactory<Input, State, Output, AnalyzerType :
+        Analyzer<Input, State, Output>> {
     suspend fun newInstance(): AnalyzerType?
 }
 

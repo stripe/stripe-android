@@ -18,7 +18,10 @@ import java.security.NoSuchAlgorithmException
 /**
  * Fetched data metadata.
  */
-internal sealed class FetchedModelMeta(open val modelVersion: String, open val hashAlgorithm: String)
+internal sealed class FetchedModelMeta(
+    open val modelVersion: String,
+    open val hashAlgorithm: String,
+)
 internal data class FetchedModelFileMeta(
     override val modelVersion: String,
     override val hashAlgorithm: String,

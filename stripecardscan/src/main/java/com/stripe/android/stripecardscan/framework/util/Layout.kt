@@ -298,7 +298,8 @@ internal fun Size.toSizeF() = SizeF(width.toFloat(), height.toFloat())
 internal fun SizeF.toSize() = Size(width.roundToInt(), height.roundToInt())
 
 @CheckResult
-internal fun Rect.toRectF() = RectF(left.toFloat(), top.toFloat(), right.toFloat(), bottom.toFloat())
+internal fun Rect.toRectF() =
+    RectF(left.toFloat(), top.toFloat(), right.toFloat(), bottom.toFloat())
 
 @CheckResult
 internal fun RectF.toRect() =

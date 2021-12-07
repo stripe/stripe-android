@@ -81,7 +81,13 @@ internal interface AggregateResultListener<InterimResult, FinalResult> {
  * The [ResultAggregator] processes results from analyzers until a condition is met. That condition
  * is part of the aggregator's logic.
  */
-internal abstract class ResultAggregator<DataFrame, State, AnalyzerResult, InterimResult, FinalResult>(
+internal abstract class ResultAggregator<
+    DataFrame,
+    State,
+    AnalyzerResult,
+    InterimResult,
+    FinalResult
+    >(
     private val listener: AggregateResultListener<InterimResult, FinalResult>,
     private val initialState: State,
     private val statsName: String?,
