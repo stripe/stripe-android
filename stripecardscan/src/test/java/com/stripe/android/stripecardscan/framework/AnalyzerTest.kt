@@ -45,5 +45,6 @@ class AnalyzerTest {
 
     private class TestAnalyzer : Analyzer<Int, Int, Int> {
         override suspend fun analyze(data: Int, state: Int): Int = data + state
+        override val statsName: String? = null
     }
 }

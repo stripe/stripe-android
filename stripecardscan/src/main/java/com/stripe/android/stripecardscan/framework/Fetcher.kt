@@ -271,7 +271,7 @@ abstract class WebFetcher : Fetcher {
                     "Fetcher: Failed to download model $modelClass, no local cache available",
                     t,
                 )
-                stat.trackResult(t::class.java.simpleName)
+                stat.trackResult("failure")
             }
             cachedData
         }

@@ -35,6 +35,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.parcelize.Parcelize
 import kotlin.coroutines.CoroutineContext
 
@@ -298,10 +299,11 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
     protected open fun toggleFlashlight() {
         isFlashlightOn = !isFlashlightOn
         setFlashlightState(isFlashlightOn)
-        launch {
-            Stats.trackRepeatingTask("torch_state")
-                .trackResult(if (isFlashlightOn) "on" else "off")
-        }
+// TODO: this should probably be reported as part of scanstats, but is not yet supported
+//        launch {
+//            Stats.trackRepeatingTask("torch_state")
+//                .trackResult(if (isFlashlightOn) "on" else "off")
+//        }
     }
 
     /**
@@ -309,10 +311,11 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
      */
     protected open fun toggleCamera() {
         cameraAdapter.changeCamera()
-        launch {
-            Stats.trackRepeatingTask("swap_camera")
-                .trackResult("${cameraAdapter.getCurrentCamera()}")
-        }
+// TODO: this should probably be reported as part of scanstats, but is not yet supported
+//        launch {
+//            Stats.trackRepeatingTask("swap_camera")
+//                .trackResult("${cameraAdapter.getCurrentCamera()}")
+//        }
     }
 
     /**
@@ -334,7 +337,7 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
      */
     protected open fun scanFailure(cause: Throwable? = null) {
         Log.e(Config.logTag, "Canceling scan due to error", cause)
-        launch { scanStat.trackResult("scan_failure") }
+        runBlocking { scanStat.trackResult("scan_failure") }
         resultListener.failed(cause)
         closeScanner()
     }
@@ -343,7 +346,7 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
      * Cancel the scan when the user presses back.
      */
     override fun onBackPressed() {
-        launch { scanStat.trackResult("user_pressed_back") }
+        runBlocking { scanStat.trackResult("user_pressed_back") }
         resultListener.userCanceled(CancellationReason.Back)
         closeScanner()
     }
@@ -352,7 +355,7 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
      * The scan has been closed by the user.
      */
     protected open fun userClosedScanner() {
-        launch { scanStat.trackResult("user_canceled") }
+        runBlocking { scanStat.trackResult("user_canceled") }
         resultListener.userCanceled(CancellationReason.Closed)
         closeScanner()
     }
@@ -361,7 +364,7 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
      * The camera permission was denied.
      */
     protected open fun userDeniedCameraPermission() {
-        launch { scanStat.trackResult("permission_denied") }
+        runBlocking { scanStat.trackResult("permission_denied") }
         resultListener.userCanceled(CancellationReason.CameraPermissionDenied)
         closeScanner()
     }
@@ -370,7 +373,7 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
      * The user cannot scan the required object.
      */
     protected open fun userCannotScan() {
-        launch { scanStat.trackResult("user_cannot_scan") }
+        runBlocking { scanStat.trackResult("user_cannot_scan") }
         resultListener.userCanceled(CancellationReason.UserCannotScan)
         closeScanner()
     }
@@ -398,9 +401,10 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
             onFlashSupported(it)
         }
 
-        val cameraStat = Stats.trackTask("multiple_cameras_supported")
+// TODO: this should probably be reported as part of scanstats, but is not yet supported
+//        val cameraStat = Stats.trackTask("multiple_cameras_supported")
         cameraAdapter.withSupportsMultipleCameras {
-            launch { cameraStat.trackResult(if (it) "supported" else "unsupported") }
+//            launch { cameraStat.trackResult(if (it) "supported" else "unsupported") }
             onSupportsMultipleCameras(it)
         }
 

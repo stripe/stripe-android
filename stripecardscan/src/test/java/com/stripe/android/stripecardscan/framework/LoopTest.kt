@@ -49,7 +49,8 @@ class LoopTest {
                 override fun onAnalyzerFailure(t: Throwable): Boolean { fail(t.message) }
                 override fun onResultFailure(t: Throwable): Boolean { fail(t.message) }
             },
-            resultHandler = TestResultHandler()
+            resultHandler = TestResultHandler(),
+            statsName = null,
         )
 
         val channel = Channel<Int>(dataCount)
@@ -102,7 +103,8 @@ class LoopTest {
                 override fun onAnalyzerFailure(t: Throwable): Boolean { fail(t.message) }
                 override fun onResultFailure(t: Throwable): Boolean { fail(t.message) }
             },
-            resultHandler = TestResultHandler()
+            resultHandler = TestResultHandler(),
+            statsName = null,
         )
 
         val channel = Channel<Int>(dataCount)
@@ -151,7 +153,8 @@ class LoopTest {
                 }
                 override fun onResultFailure(t: Throwable): Boolean { fail(t.message) }
             },
-            resultHandler = TestResultHandler()
+            resultHandler = TestResultHandler(),
+            statsName = null,
         )
 
         val channel = Channel<Int>(Channel.RENDEZVOUS)
@@ -197,7 +200,8 @@ class LoopTest {
                 override fun onResultFailure(t: Throwable): Boolean { fail(t.message) }
             },
             resultHandler = TestResultHandler(),
-            timeLimit = Duration.INFINITE
+            timeLimit = Duration.INFINITE,
+            statsName = null,
         )
 
         val job = loop.process((0 until dataCount).map { 2 }, this)
@@ -243,7 +247,8 @@ class LoopTest {
                 override fun onResultFailure(t: Throwable): Boolean { fail(t.message) }
             },
             resultHandler = TestResultHandler(),
-            timeLimit = 1.nanoseconds
+            timeLimit = 1.nanoseconds,
+            statsName = null,
         )
 
         val job = loop.process((0 until dataCount).map { 2 }, this)
@@ -279,7 +284,8 @@ class LoopTest {
                 override fun onResultFailure(t: Throwable): Boolean { fail(t.message) }
             },
             resultHandler = TestResultHandler(),
-            timeLimit = Duration.INFINITE
+            timeLimit = Duration.INFINITE,
+            statsName = null,
         )
 
         val job = loop.process(emptyList(), this)
@@ -294,6 +300,7 @@ class LoopTest {
             private val analyzerCounter = AtomicInteger(0)
         }
 
+        override val statsName: String? = null
         private val analyzerNumber = analyzerCounter.getAndIncrement()
         override suspend fun analyze(data: Int, state: Int): String =
             "Analyzer=$analyzerNumber, data=$data, state=$state"

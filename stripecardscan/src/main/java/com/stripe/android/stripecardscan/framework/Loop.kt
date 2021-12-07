@@ -57,6 +57,7 @@ interface AnalyzerLoopErrorListener {
 sealed class AnalyzerLoop<DataFrame, State, Output>(
     private val analyzerPool: AnalyzerPool<DataFrame, in State, Output>,
     private val analyzerLoopErrorListener: AnalyzerLoopErrorListener,
+    private val statsName: String?,
 ) : ResultHandler<DataFrame, Output, Boolean> {
     private val started = AtomicBoolean(false)
     protected var startedAt: ClockMark? = null
@@ -64,7 +65,7 @@ sealed class AnalyzerLoop<DataFrame, State, Output>(
 
     private val cancelMutex = Mutex()
 
-    private lateinit var loopExecutionStatTracker: StatTracker
+    private val loopExecutionStatTracker = statsName?.let { Stats.trackTask(it) }
 
     private var workerJob: Job? = null
 
@@ -79,10 +80,8 @@ sealed class AnalyzerLoop<DataFrame, State, Output>(
             return null
         }
 
-        loopExecutionStatTracker = Stats.trackTask("${this::class.java.simpleName}_execution")
-
         if (analyzerPool.analyzers.isEmpty()) {
-            processingCoroutineScope.launch { loopExecutionStatTracker.trackResult("canceled") }
+            processingCoroutineScope.launch { loopExecutionStatTracker?.trackResult("canceled") }
             analyzerLoopErrorListener.onAnalyzerFailure(NoAnalyzersAvailableException)
             return null
         }
@@ -117,28 +116,27 @@ sealed class AnalyzerLoop<DataFrame, State, Output>(
         analyzer: Analyzer<DataFrame, in State, Output>,
     ) {
         flow.collect { frame ->
-            val stat =
-                Stats.trackRepeatingTask("analyzer_execution:${analyzer::class.java.simpleName}")
+            val stat = analyzer.statsName?.let { Stats.trackRepeatingTask(it) }
             try {
                 val analyzerResult = analyzer.analyze(frame, getState())
 
                 try {
                     finished = onResult(analyzerResult, frame)
                 } catch (t: Throwable) {
-                    stat.trackResult("result_failure")
+                    stat?.trackResult("result_failure")
                     handleResultFailure(t)
                 }
             } catch (t: Throwable) {
-                stat.trackResult("analyzer_failure")
+                stat?.trackResult("analyzer_failure")
                 handleAnalyzerFailure(t)
             }
 
             if (finished) {
-                loopExecutionStatTracker.trackResult("success")
+                loopExecutionStatTracker?.trackResult("success")
                 unsubscribeFromFlow()
             }
 
-            stat.trackResult("success")
+            stat?.trackResult("success")
         }
     }
 
@@ -176,10 +174,12 @@ sealed class AnalyzerLoop<DataFrame, State, Output>(
 class ProcessBoundAnalyzerLoop<DataFrame, State, Output>(
     private val analyzerPool: AnalyzerPool<DataFrame, in State, Output>,
     private val resultHandler: StatefulResultHandler<DataFrame, out State, Output, Boolean>,
-    analyzerLoopErrorListener: AnalyzerLoopErrorListener
+    analyzerLoopErrorListener: AnalyzerLoopErrorListener,
+    statsName: String?,
 ) : AnalyzerLoop<DataFrame, State, Output>(
     analyzerPool,
     analyzerLoopErrorListener,
+    statsName,
 ) {
     /**
      * Subscribe to a flow. Loops can only subscribe to a single flow at a time.
@@ -213,10 +213,12 @@ class FiniteAnalyzerLoop<DataFrame, State, Output>(
     private val analyzerPool: AnalyzerPool<DataFrame, in State, Output>,
     private val resultHandler: TerminatingResultHandler<DataFrame, out State, Output>,
     analyzerLoopErrorListener: AnalyzerLoopErrorListener,
-    private val timeLimit: Duration = Duration.INFINITE
+    private val timeLimit: Duration = Duration.INFINITE,
+    statsName: String?,
 ) : AnalyzerLoop<DataFrame, State, Output>(
     analyzerPool,
     analyzerLoopErrorListener,
+    statsName,
 ) {
     private val framesProcessed: AtomicInteger = AtomicInteger(0)
     private var framesToProcess = 0

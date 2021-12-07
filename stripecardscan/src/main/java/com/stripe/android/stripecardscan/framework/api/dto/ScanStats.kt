@@ -8,3 +8,6 @@ data class ScanStatsRequest(
     @SerialName("client_secret") val clientSecret: String,
     @SerialName("payload") val payload: StatsPayload,
 )
+
+@Serializable
+class ScanStatsResponse

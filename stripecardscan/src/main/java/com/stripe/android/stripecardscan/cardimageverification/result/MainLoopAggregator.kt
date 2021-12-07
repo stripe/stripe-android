@@ -40,6 +40,7 @@ internal class MainLoopAggregator(
             requiredCardIssuer = requiredCardIssuer,
             requiredLastFour = requiredLastFour,
         ),
+        statsName = null, // TODO: when we want to collect this in scan stats, give this a name
     ) {
 
     @Keep

@@ -1,9 +1,11 @@
 @file:JvmName("StripeApi")
 package com.stripe.android.stripecardscan.framework.api
 
+import android.util.Log
 import android.util.Size
 import androidx.annotation.CheckResult
 import com.stripe.android.stripecardscan.cardimageverification.SavedFrame
+import com.stripe.android.stripecardscan.framework.Config
 import com.stripe.android.stripecardscan.framework.NetworkConfig
 import com.stripe.android.stripecardscan.framework.api.dto.AppInfo
 import com.stripe.android.stripecardscan.framework.api.dto.CardImageVerificationDetailsRequest
@@ -12,6 +14,7 @@ import com.stripe.android.stripecardscan.framework.api.dto.ClientDevice
 import com.stripe.android.stripecardscan.framework.api.dto.ModelVersion
 import com.stripe.android.stripecardscan.framework.api.dto.ScanStatistics
 import com.stripe.android.stripecardscan.framework.api.dto.ScanStatsRequest
+import com.stripe.android.stripecardscan.framework.api.dto.ScanStatsResponse
 import com.stripe.android.stripecardscan.framework.api.dto.StatsPayload
 import com.stripe.android.stripecardscan.framework.api.dto.StripeServerErrorResponse
 import com.stripe.android.stripecardscan.framework.api.dto.VerificationFrameData
@@ -54,18 +57,36 @@ internal fun uploadScanStats(
         device = ClientDevice.fromDevice(device),
         app = AppInfo.fromAppDetails(appDetails),
         scanStats = scanStatistics,
-        modelVersions = getLoadedModelVersions().map { ModelVersion.fromModelLoadDetails(it) },
+// TODO: these should probably be reported as part of scanstats, but are not yet supported
+//        modelVersions = getLoadedModelVersions().map { ModelVersion.fromModelLoadDetails(it) },
     )
 
-    NetworkConfig.network.postData(
-        stripePublishableKey = stripePublishableKey,
-        path = "/card_image_verifications/$civId/scan_stats",
-        data = ScanStatsRequest(
-            clientSecret = civSecret,
-            payload = statsPayload,
-        ),
-        requestSerializer = ScanStatsRequest.serializer(),
-    )
+    when (
+        val result = NetworkConfig.network.postForResult(
+            stripePublishableKey = stripePublishableKey,
+            path = "/card_image_verifications/$civId/scan_stats",
+            data = ScanStatsRequest(
+                clientSecret = civSecret,
+                payload = statsPayload,
+            ),
+            requestSerializer = ScanStatsRequest.serializer(),
+            responseSerializer = ScanStatsResponse.serializer(),
+            errorSerializer = StripeServerErrorResponse.serializer(),
+        )
+    ) {
+        is NetworkResult.Success -> Log.d(Config.logTag, "Scan stats uploaded")
+        is NetworkResult.Error ->
+            Log.e(
+                Config.logTag,
+                "Unable to upload scan stats (${result.responseCode}): ${result.error}",
+            )
+        is NetworkResult.Exception ->
+            Log.e(
+                Config.logTag,
+                "Unable to upload scan stats (${result.responseCode})",
+                result.exception,
+            )
+    }
 }
 
 @CheckResult
