@@ -23,3 +23,8 @@ const val STRIPE_ACCOUNT_ID = "stripeAccountId"
  * Name to indicate whether the current [StripeIntent] is a [PaymentIntent] or [SetupIntent].
  */
 const val IS_PAYMENT_INTENT = "isPaymentIntent"
+
+/**
+ * Name to indicate whether the current app is an instant app.
+ */
+const val IS_INSTANT_APP = "isInstantApp"
