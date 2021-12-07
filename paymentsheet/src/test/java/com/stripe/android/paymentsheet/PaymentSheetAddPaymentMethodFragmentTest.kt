@@ -35,6 +35,7 @@ import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArgumen
 import com.stripe.android.paymentsheet.ui.PaymentSheetFragmentFactory
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.Amount
+import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.forms.FormFieldEntry
 import com.stripe.android.utils.TestUtils.idleLooper
 import org.junit.Before
@@ -539,7 +540,7 @@ class PaymentSheetAddPaymentMethodFragmentTest {
     fun `payment method selection has the fields from formFieldValues`() {
         val formFieldValues = FormFieldValues(
             fieldValuePairs = mapOf(
-                com.stripe.android.ui.core.elements.IdentifierSpec.SaveForFutureUse to FormFieldEntry("true", true)
+                IdentifierSpec.SaveForFutureUse to FormFieldEntry("true", true)
             ),
             showsMandate = false,
             userRequestedReuse = PaymentSelection.CustomerRequestedSave.RequestReuse
