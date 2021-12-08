@@ -40,6 +40,7 @@ class CreateCardPaymentMethodActivity : AppCompatActivity() {
         }
     }
 
+    // customized error callback - implement customized UI logic on the callback results
     private fun registerCallback() {
         viewBinding.cardFormView.setCardValidCallback { isValid, invalidFields ->
             Log.d("CFVTest", "isValid? : $isValid")
@@ -54,16 +55,16 @@ class CreateCardPaymentMethodActivity : AppCompatActivity() {
         viewBinding.paymentMethods.layoutManager = LinearLayoutManager(this)
         viewBinding.paymentMethods.adapter = adapter
 
-        viewBinding.cardFormView.setCardValidCallback { isValid, invalidFields ->
-            viewBinding.createButton.isEnabled = isValid
-            Log.d(
-                CARD_VALID_CALLBACK_TAG,
-                "Card information is " + (if (isValid) " valid" else " invalid")
-            )
-            if (!isValid) {
-                Log.d(CARD_VALID_CALLBACK_TAG, " Invalid fields are $invalidFields")
-            }
-        }
+//        viewBinding.cardFormView.setCardValidCallback { isValid, invalidFields ->
+//            viewBinding.createButton.isEnabled = isValid
+//            Log.d(
+//                CARD_VALID_CALLBACK_TAG,
+//                "Card information is " + (if (isValid) " valid" else " invalid")
+//            )
+//            if (!isValid) {
+//                Log.d(CARD_VALID_CALLBACK_TAG, " Invalid fields are $invalidFields")
+//            }
+//        }
 
         removeCfvError()
         registerCallback()
