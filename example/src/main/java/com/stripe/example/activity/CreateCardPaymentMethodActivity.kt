@@ -5,12 +5,15 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.LinearLayout
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.view.CardValidCallback
+import com.stripe.example.R
 import com.stripe.example.databinding.CreateCardPaymentMethodActivityBinding
 import com.stripe.example.databinding.PaymentMethodItemBinding
 
@@ -27,6 +30,20 @@ class CreateCardPaymentMethodActivity : AppCompatActivity() {
     }
     private val keyboardController: KeyboardController by lazy {
         KeyboardController(this)
+    }
+
+    // remove the error field from CFV
+    private fun removeCfvError() {
+        viewBinding.cardFormView.let { cfv ->
+            cfv.removeView(cfv.findViewById(
+                R.id.errors))
+        }
+    }
+
+    private fun registerCallback() {
+        viewBinding.cardFormView.setCardValidCallback { isValid, invalidFields ->
+            Log.d("CFVTest", "isValid? : $isValid")
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -47,6 +64,9 @@ class CreateCardPaymentMethodActivity : AppCompatActivity() {
                 Log.d(CARD_VALID_CALLBACK_TAG, " Invalid fields are $invalidFields")
             }
         }
+
+        removeCfvError()
+        registerCallback()
 
         viewBinding.createButton.setOnClickListener {
             keyboardController.hide()
