@@ -70,7 +70,7 @@ internal val SepaDebitParamKey: MutableMap<String, Any?> = mutableMapOf(
 )
 
 internal val sepaDebitNameSection = SectionSpec(
-    IdentifierSpec.Generic("name _ection"),
+    IdentifierSpec.Generic("name_section"),
     SimpleTextSpec.NAME
 )
 internal val sepaDebitEmailSection = SectionSpec(

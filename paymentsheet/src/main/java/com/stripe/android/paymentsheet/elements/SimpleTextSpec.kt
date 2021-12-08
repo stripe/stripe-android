@@ -4,7 +4,9 @@ import androidx.annotation.StringRes
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import com.stripe.android.paymentsheet.R
+import kotlinx.parcelize.Parcelize
 
+@Parcelize
 internal data class SimpleTextSpec(
     override val identifier: IdentifierSpec,
     @StringRes val label: Int,

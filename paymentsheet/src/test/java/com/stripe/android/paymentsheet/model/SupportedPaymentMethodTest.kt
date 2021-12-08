@@ -45,9 +45,9 @@ class SupportedPaymentMethodTest {
                         )
                         csvOutput.append(
                             "${lpm.type.code}, ${
-                            testInput.copy(
-                                intentPMs = testInput.intentPMs.plus(lpm.type.code)
-                            ).toCsv()
+                                testInput.copy(
+                                    intentPMs = testInput.intentPMs.plus(lpm.type.code)
+                                ).toCsv()
                             }, ${testOutput.toCsv()}\n"
                         )
 
