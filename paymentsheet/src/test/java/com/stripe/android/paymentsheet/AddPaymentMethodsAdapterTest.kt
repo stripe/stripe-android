@@ -32,6 +32,6 @@ class AddPaymentMethodsAdapterTest {
     }
 
     private fun createAdapter() = AddPaymentMethodsAdapter(
-        listOf(*SupportedPaymentMethod.values()), 0
+        SupportedPaymentMethod.values(), 0
     ) { }
 }

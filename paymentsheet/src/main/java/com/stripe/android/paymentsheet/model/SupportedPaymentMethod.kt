@@ -12,12 +12,14 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.elements.LayoutFormDescriptor
 import com.stripe.android.paymentsheet.elements.LayoutSpec
+import com.stripe.android.paymentsheet.elements.SaveForFutureUseSpec
 import com.stripe.android.paymentsheet.forms.AfterpayClearpayForm
 import com.stripe.android.paymentsheet.forms.AfterpayClearpayParamKey
 import com.stripe.android.paymentsheet.forms.AfterpayClearpayRequirement
 import com.stripe.android.paymentsheet.forms.BancontactForm
 import com.stripe.android.paymentsheet.forms.BancontactParamKey
 import com.stripe.android.paymentsheet.forms.BancontactRequirement
+import com.stripe.android.paymentsheet.forms.CardRequirement
 import com.stripe.android.paymentsheet.forms.Delayed
 import com.stripe.android.paymentsheet.forms.EpsForm
 import com.stripe.android.paymentsheet.forms.EpsParamKey
@@ -67,9 +69,11 @@ internal sealed class SupportedPaymentMethod(
         PaymentMethod.Type.Card,
         R.string.stripe_paymentsheet_payment_method_card,
         R.drawable.stripe_ic_paymentsheet_pm_card,
-        BancontactRequirement,
-        BancontactParamKey,
-        BancontactForm
+        CardRequirement,
+        mutableMapOf(),
+        LayoutSpec.create(
+            SaveForFutureUseSpec(emptyList())
+        )
     )
 
     @Parcelize
