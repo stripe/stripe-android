@@ -1,4 +1,4 @@
-package com.stripe.android.stripecardscan.example.activity
+package com.stripe.android.stripecardscan.example
 
 import android.annotation.SuppressLint
 import androidx.coordinatorlayout.widget.CoordinatorLayout
