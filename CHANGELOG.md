@@ -1,14 +1,14 @@
 # CHANGELOG
 ## 19.0.0 - 2021-10-18
-### Payment
-This release includes several bug fixes, introduces Klarna as a payment method binding, and renables [WeChat Pay](https://github.com/stripe/stripe-android/tree/master/wechatpay) within the SDK
-* [4323](https://github.com/stripe/stripe-android/pull/4323) reship wechat module
-* [4325](https://github.com/stripe/stripe-android/pull/4325) Add klarna to sdk w/ example
-* [4339](https://github.com/stripe/stripe-android/pull/4339) Bump tensorflow-lite from 2.4.0 to 2.6.0
-* [4340](https://github.com/stripe/stripe-android/pull/4340) Bump okio from 2.10.0 to 3.0.0
+This is the first release where multiple SDKs are released. 
 
-### CardScan
-# link to CardScan
+### Stripe Android SDK
+This release includes several bug fixes
+* [4426](https://github.com/stripe/stripe-android/pull/4426) don't override returnUrl for instant app
+* [4424](https://github.com/stripe/stripe-android/pull/4424) callback for postal code complete
+* [4438](https://github.com/stripe/stripe-android/pull/4438) allow non-terminal state for PaymentSheet
+
+### Stripe CardScan
 See stripecardscan/README.md
 
 
