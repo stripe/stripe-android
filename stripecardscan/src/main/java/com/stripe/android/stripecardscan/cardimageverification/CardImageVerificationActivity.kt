@@ -67,7 +67,7 @@ internal interface CardImageVerificationResultListener : ScanResultListener {
     fun cardReadyForVerification(pan: String, frames: Collection<SavedFrame>)
 }
 
-data class RequiredCardDetails(
+internal data class RequiredCardDetails(
     val cardIssuer: CardIssuer?,
     val lastFour: String?,
 )
@@ -75,7 +75,7 @@ data class RequiredCardDetails(
 private val MINIMUM_RESOLUTION = Size(1067, 600) // minimum size of OCR
 
 @Keep
-open class CardImageVerificationActivity : SimpleScanActivity<RequiredCardDetails?>() {
+internal class CardImageVerificationActivity : SimpleScanActivity<RequiredCardDetails?>() {
 
     /**
      * The text view that lets a user indicate they do not have possession of the required card.
