@@ -75,7 +75,7 @@ internal data class RequiredCardDetails(
 private val MINIMUM_RESOLUTION = Size(1067, 600) // minimum size of OCR
 
 @Keep
-internal class CardImageVerificationActivity : SimpleScanActivity<RequiredCardDetails?>() {
+internal open class CardImageVerificationActivity : SimpleScanActivity<RequiredCardDetails?>() {
 
     /**
      * The text view that lets a user indicate they do not have possession of the required card.
