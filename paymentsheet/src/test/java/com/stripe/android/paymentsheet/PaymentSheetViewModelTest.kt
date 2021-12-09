@@ -638,8 +638,7 @@ internal class PaymentSheetViewModelTest {
         viewModel.maybeFetchStripeIntent()
         assertThat((result as? PaymentSheetResult.Failed)?.error?.message)
             .isEqualTo(
-                "A PaymentIntent with status='requires_payment_method' or 'requires_action` is required.\n" +
-                    "The current PaymentIntent has status 'succeeded'.\n" +
+                "PaymentSheet cannot set up a PaymentIntent in status 'succeeded'.\n" +
                     "See https://stripe.com/docs/api/payment_intents/object#payment_intent_object-status."
             )
     }
