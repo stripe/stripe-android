@@ -1,6 +1,5 @@
 package com.stripe.android.stripecardscan.cardimageverification.result
 
-import androidx.annotation.Keep
 import com.stripe.android.stripecardscan.cardimageverification.SavedFrame
 import com.stripe.android.stripecardscan.cardimageverification.SavedFrameType
 import com.stripe.android.stripecardscan.cardimageverification.CardImageVerificationConfig

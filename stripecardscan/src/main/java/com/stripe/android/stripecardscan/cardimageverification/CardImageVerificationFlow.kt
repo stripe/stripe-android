@@ -3,7 +3,6 @@ package com.stripe.android.stripecardscan.cardimageverification
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Rect
-import androidx.annotation.Keep
 import androidx.lifecycle.LifecycleOwner
 import com.stripe.android.stripecardscan.camera.CameraPreviewImage
 import com.stripe.android.stripecardscan.cardimageverification.analyzer.MainLoopAnalyzer

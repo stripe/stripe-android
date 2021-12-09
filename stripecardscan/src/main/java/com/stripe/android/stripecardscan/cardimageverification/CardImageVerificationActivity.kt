@@ -156,21 +156,24 @@ open class CardImageVerificationActivity : SimpleScanActivity<RequiredCardDetail
                 }
             }
 
-        override fun userCanceled(reason: CancellationReason) {
-            val intent = Intent()
-                .putExtra(INTENT_PARAM_RESULT, CardImageVerificationSheetResult.Canceled(reason))
-            setResult(Activity.RESULT_CANCELED, intent)
-        }
+            override fun userCanceled(reason: CancellationReason) {
+                val intent = Intent()
+                    .putExtra(
+                        INTENT_PARAM_RESULT,
+                        CardImageVerificationSheetResult.Canceled(reason),
+                    )
+                setResult(Activity.RESULT_CANCELED, intent)
+            }
 
-        override fun failed(cause: Throwable?) {
-            val intent = Intent()
-                .putExtra(
-                    INTENT_PARAM_RESULT,
-                    CardImageVerificationSheetResult.Failed(cause ?: UnknownScanException()),
-                )
-            setResult(Activity.RESULT_CANCELED, intent)
+            override fun failed(cause: Throwable?) {
+                val intent = Intent()
+                    .putExtra(
+                        INTENT_PARAM_RESULT,
+                        CardImageVerificationSheetResult.Failed(cause ?: UnknownScanException()),
+                    )
+                setResult(Activity.RESULT_CANCELED, intent)
+            }
         }
-    }
 
     /**
      * The flow used to scan an item.
