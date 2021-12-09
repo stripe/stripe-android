@@ -54,18 +54,17 @@ import java.util.concurrent.atomic.AtomicBoolean
 internal const val INTENT_PARAM_REQUEST = "request"
 internal const val INTENT_PARAM_RESULT = "result"
 
-@Keep
-internal interface CardVerifyResultListener : ScanResultListener {
+internal interface CardImageVerificationResultListener : ScanResultListener {
 
     /**
      * A payment card was successfully scanned.
      */
-    fun cardVerificationComplete(pan: String)
+    fun cardImageVerificationComplete(pan: String)
 
     /**
      * A card was scanned and is ready to be verified.
      */
-    fun cardScanned(pan: String, frames: Collection<SavedFrame>)
+    fun cardReadyForVerification(pan: String, frames: Collection<SavedFrame>)
 }
 
 data class RequiredCardDetails(
@@ -76,7 +75,7 @@ data class RequiredCardDetails(
 private val MINIMUM_RESOLUTION = Size(1067, 600) // minimum size of OCR
 
 @Keep
-open class CardVerifyActivity : SimpleScanActivity<RequiredCardDetails?>() {
+open class CardImageVerificationActivity : SimpleScanActivity<RequiredCardDetails?>() {
 
     /**
      * The text view that lets a user indicate they do not have possession of the required card.
@@ -121,62 +120,66 @@ open class CardVerifyActivity : SimpleScanActivity<RequiredCardDetails?>() {
     /**
      * The listener which handles results from the scan.
      */
-    override val resultListener: CardVerifyResultListener = object : CardVerifyResultListener {
-        override fun cardVerificationComplete(pan: String) {
-            val intent = Intent()
-                .putExtra(
-                    INTENT_PARAM_RESULT,
-                    CardImageVerificationSheetResult.Completed(
-                        ScannedCard(
-                            pan = pan
+    override val resultListener: CardImageVerificationResultListener =
+        object : CardImageVerificationResultListener {
+            override fun cardImageVerificationComplete(pan: String) {
+                val intent = Intent()
+                    .putExtra(
+                        INTENT_PARAM_RESULT,
+                        CardImageVerificationSheetResult.Completed(
+                            ScannedCard(
+                                pan = pan
+                            )
                         )
                     )
-                )
-            setResult(Activity.RESULT_OK, intent)
-            closeScanner()
-        }
+                setResult(Activity.RESULT_OK, intent)
+                closeScanner()
+            }
 
-        override fun cardScanned(pan: String, frames: Collection<SavedFrame>) {
-            launch {
-                when (
-                    val result = uploadSavedFrames(
-                        stripePublishableKey = params.stripePublishableKey,
-                        civId = params.cardImageVerificationIntentId,
-                        civSecret = params.cardImageVerificationIntentSecret,
-                        savedFrames = frames,
-                    )
-                ) {
-                    is NetworkResult.Success ->
-                        cardVerificationComplete(pan)
-                    is NetworkResult.Error ->
-                        scanFailure(StripeNetworkException(result.error.error.message))
-                    is NetworkResult.Exception ->
-                        scanFailure(result.exception)
+            override fun cardReadyForVerification(pan: String, frames: Collection<SavedFrame>) {
+                launch {
+                    when (
+                        val result = uploadSavedFrames(
+                            stripePublishableKey = params.stripePublishableKey,
+                            civId = params.cardImageVerificationIntentId,
+                            civSecret = params.cardImageVerificationIntentSecret,
+                            savedFrames = frames,
+                        )
+                    ) {
+                        is NetworkResult.Success ->
+                            cardImageVerificationComplete(pan)
+                        is NetworkResult.Error ->
+                            scanFailure(StripeNetworkException(result.error.error.message))
+                        is NetworkResult.Exception ->
+                            scanFailure(result.exception)
+                    }
                 }
             }
-        }
 
-        override fun userCanceled(reason: CancellationReason) {
-            val intent = Intent()
-                .putExtra(INTENT_PARAM_RESULT, CardImageVerificationSheetResult.Canceled(reason))
-            setResult(Activity.RESULT_CANCELED, intent)
-        }
+            override fun userCanceled(reason: CancellationReason) {
+                val intent = Intent()
+                    .putExtra(
+                        INTENT_PARAM_RESULT,
+                        CardImageVerificationSheetResult.Canceled(reason),
+                    )
+                setResult(Activity.RESULT_CANCELED, intent)
+            }
 
-        override fun failed(cause: Throwable?) {
-            val intent = Intent()
-                .putExtra(
-                    INTENT_PARAM_RESULT,
-                    CardImageVerificationSheetResult.Failed(cause ?: UnknownScanException()),
-                )
-            setResult(Activity.RESULT_CANCELED, intent)
+            override fun failed(cause: Throwable?) {
+                val intent = Intent()
+                    .putExtra(
+                        INTENT_PARAM_RESULT,
+                        CardImageVerificationSheetResult.Failed(cause ?: UnknownScanException()),
+                    )
+                setResult(Activity.RESULT_CANCELED, intent)
+            }
         }
-    }
 
     /**
      * The flow used to scan an item.
      */
-    override val scanFlow: CardVerifyFlow by lazy {
-        object : CardVerifyFlow(scanErrorListener) {
+    override val scanFlow: CardImageVerificationFlow by lazy {
+        object : CardImageVerificationFlow(scanErrorListener) {
             /**
              * A final result was received from the aggregator. Set the result from this activity.
              */
@@ -187,8 +190,8 @@ open class CardVerifyActivity : SimpleScanActivity<RequiredCardDetails?>() {
 
                 launch(Dispatchers.Main) {
                     changeScanState(ScanState.Correct)
-                    cameraAdapter.unbindFromLifecycle(this@CardVerifyActivity)
-                    resultListener.cardScanned(
+                    cameraAdapter.unbindFromLifecycle(this@CardImageVerificationActivity)
+                    resultListener.cardReadyForVerification(
                         pan = result.pan,
                         frames = scanFlow.selectCompletionLoopFrames(result.savedFrames),
                     )

@@ -73,7 +73,8 @@ class CardImageVerificationSheet private constructor(private val stripePublishab
             }
 
         private fun createIntent(context: Context, input: CardImageVerificationSheetParams) =
-            Intent(context, CardVerifyActivity::class.java).putExtra(INTENT_PARAM_REQUEST, input)
+            Intent(context, CardImageVerificationActivity::class.java)
+                .putExtra(INTENT_PARAM_REQUEST, input)
 
         private fun parseResult(intent: Intent): CardImageVerificationSheetResult =
             intent.getParcelableExtra(INTENT_PARAM_RESULT)
