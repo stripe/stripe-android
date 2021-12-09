@@ -2,7 +2,7 @@ plugins {
     id "com.android.library"
     id "kotlin-android"
     id 'kotlin-kapt'
-//    id 'org.jetbrains.dokka'
+    id 'org.jetbrains.dokka'
     id "org.jetbrains.kotlin.plugin.parcelize"
     id 'org.jetbrains.kotlin.plugin.serialization' version '1.6.0'
 }
@@ -68,10 +68,9 @@ android {
         disable "UnrememberedMutableState"
     }
 
-    // TODO: enable this when ready for release
-//    dokkaHtml {
-//        outputDirectory = new File("${project.rootDir}/docs/$project.name")
-//    }
+    dokkaHtml {
+        outputDirectory = new File("${project.rootDir}/docs/$project.name")
+    }
 }
 
 assemble.dependsOn('lint')
@@ -132,11 +131,10 @@ task ktlintFormat(type: JavaExec, group: "formatting") {
     args "-F", "src/**/*.kt"
 }
 
-// TODO: enable this one we're ready to release
-//ext {
-//    artifactId = "stripecardscan"
-//    artifactName = "stripecardscan"
-//    artifactDescrption = "The stripecardscan module of Stripe Payment Android SDK"
-//}
-//
-//apply from: "${rootDir}/deploy/deploy.gradle"
+ext {
+    artifactId = "stripecardscan"
+    artifactName = "stripecardscan"
+    artifactDescrption = "The stripecardscan module of Stripe Payment Android SDK"
+}
+
+apply from: "${rootDir}/deploy/deploy.gradle"
