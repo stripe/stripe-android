@@ -6,13 +6,13 @@ import com.stripe.android.stripecardscan.framework.AnalyzerLoopErrorListener
 import org.junit.Test
 import kotlin.test.assertEquals
 
-class CardVerifyFlowTest {
+class CardImageVerificationFlowTest {
 
     @Test
     @SmallTest
     fun selectCompletionLoopFrames() {
 
-        val flow = object : CardVerifyFlow(
+        val flow = object : CardImageVerificationFlow(
             scanErrorListener = object : AnalyzerLoopErrorListener {
                 override fun onAnalyzerFailure(t: Throwable): Boolean = false
                 override fun onResultFailure(t: Throwable): Boolean = false

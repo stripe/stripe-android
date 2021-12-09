@@ -43,14 +43,12 @@ internal class MainLoopAggregator(
         statsName = null, // TODO: when we want to collect this in scan stats, give this a name
     ) {
 
-    @Keep
     internal data class FinalResult(
         val pan: String,
         val savedFrames: Map<SavedFrameType, List<SavedFrame>>,
     )
 
-    @Keep
-    data class InterimResult(
+    internal data class InterimResult(
         val analyzerResult: MainLoopAnalyzer.Prediction,
         val frame: MainLoopAnalyzer.Input,
         val state: MainLoopState,

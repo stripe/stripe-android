@@ -25,20 +25,17 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
-@Keep
 internal data class SavedFrame(
     val hasOcr: Boolean,
     val frame: MainLoopAnalyzer.Input,
 )
 
-@Keep
 internal data class SavedFrameType(
     val hasCard: Boolean,
     val hasOcr: Boolean,
 )
 
-@Keep
-internal abstract class CardVerifyFlow(
+internal abstract class CardImageVerificationFlow(
     private val scanErrorListener: AnalyzerLoopErrorListener,
 ) : ScanFlow<RequiredCardDetails?>,
     AggregateResultListener<MainLoopAggregator.InterimResult, MainLoopAggregator.FinalResult> {
@@ -73,7 +70,7 @@ internal abstract class CardVerifyFlow(
         }
 
         mainLoopAggregator = MainLoopAggregator(
-            listener = this@CardVerifyFlow,
+            listener = this@CardImageVerificationFlow,
             requiredCardIssuer = parameters?.cardIssuer,
             requiredLastFour = parameters?.lastFour,
         ).also { mainLoopOcrAggregator ->
