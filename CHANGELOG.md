@@ -1,16 +1,9 @@
 # CHANGELOG
 ## 19.0.0 - 2021-10-18
-This is the first release where multiple SDKs are released. 
-
-### Stripe Android SDK
-This release includes several bug fixes
+This release includes several bug fixes and has the first release of [Stripe CardScan SDK](https://github.com/stripe/stripe-android/tree/master/stripecardscan)
 * [4426](https://github.com/stripe/stripe-android/pull/4426) don't override returnUrl for instant app
 * [4424](https://github.com/stripe/stripe-android/pull/4424) callback for postal code complete
 * [4438](https://github.com/stripe/stripe-android/pull/4438) allow non-terminal state for PaymentSheet
-
-### Stripe CardScan
-See stripecardscan/README.md
-
 
 ## 18.2.0 - 2021-10-29
 This release includes several bug fixes, introduces Klarna as a payment method binding, and renables [WeChat Pay](https://github.com/stripe/stripe-android/tree/master/wechatpay) within the SDK
