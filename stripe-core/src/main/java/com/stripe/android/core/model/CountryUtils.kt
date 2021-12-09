@@ -1,9 +1,7 @@
-package com.stripe.android.view
+package com.stripe.android.core.model
 
 import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
-import com.stripe.android.model.CountryCode
-import com.stripe.android.model.getCountryCode
 import java.text.Normalizer
 import java.util.Locale
 
@@ -81,7 +79,7 @@ object CountryUtils {
         )
     )
     @JvmSynthetic
-    internal fun doesCountryUsePostalCode(countryCode: String): Boolean {
+    fun doesCountryUsePostalCode(countryCode: String): Boolean {
         return CARD_POSTAL_CODE_COUNTRIES.contains(countryCode.uppercase())
     }
 

@@ -14,7 +14,7 @@ import com.stripe.android.PaymentSessionFixtures
 import com.stripe.android.R
 import com.stripe.android.model.Address
 import com.stripe.android.model.ShippingInformation
-import com.stripe.android.model.getCountryCode
+import com.stripe.android.core.model.getCountryCode
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
 import org.robolectric.RobolectricTestRunner

@@ -1,6 +1,6 @@
-package com.stripe.android.model
+package com.stripe.android.core.model
 
-import com.stripe.android.utils.ParcelUtils
+import com.stripe.android.core.utils.ParcelUtils
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test

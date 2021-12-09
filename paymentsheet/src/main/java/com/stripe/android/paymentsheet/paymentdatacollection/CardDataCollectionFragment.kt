@@ -19,7 +19,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.stripe.android.model.Address
-import com.stripe.android.model.CountryCode
+import com.stripe.android.core.model.CountryCode
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.databinding.FragmentPaymentsheetAddCardBinding
@@ -30,7 +30,7 @@ import com.stripe.android.paymentsheet.ui.BillingAddressView
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.view.CardInputListener
 import com.stripe.android.view.CardMultilineWidget
-import com.stripe.android.view.Country
+import com.stripe.android.core.model.Country
 
 /**
  * A [Fragment] for collecting data for a new card payment method.
