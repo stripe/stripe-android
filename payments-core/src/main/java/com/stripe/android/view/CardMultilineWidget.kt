@@ -146,6 +146,9 @@ class CardMultilineWidget @JvmOverloads constructor(
         }
     }
 
+    private fun isPostalRequired() =
+        (postalCodeRequired || usZipCodeRequired) && shouldShowPostalCode
+
     /**
      * A [PaymentMethodCreateParams.Card] representing the card details if all fields are valid;
      * otherwise `null`
@@ -365,6 +368,12 @@ class CardMultilineWidget @JvmOverloads constructor(
                 flipToCvcIconIfNotFinished()
             }
             cvcEditText.shouldShowError = false
+        }
+
+        postalCodeEditText.setAfterTextChangedListener {
+            if (isPostalRequired() && postalCodeEditText.hasValidPostal()) {
+                cardInputListener?.onPostalCodeComplete()
+            }
         }
 
         adjustViewForPostalCodeAttribute(shouldShowPostalCode)

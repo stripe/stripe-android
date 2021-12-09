@@ -126,6 +126,8 @@ internal class CardDataCollectionFragment<ViewModelType : BaseSheetViewModel<*>>
                 // move to first field when CVC is complete
                 billingAddressView.focusFirstField()
             }
+
+            override fun onPostalCodeComplete() {}
         })
 
         sheetViewModel.processing.observe(viewLifecycleOwner) { isProcessing ->
