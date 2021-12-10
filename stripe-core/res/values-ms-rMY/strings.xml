@@ -4,6 +4,8 @@
   <string name="address_label_address_line1">Alamat baris 1</string>
   <!-- Caption for City field on address form -->
   <string name="address_label_city">Bandar</string>
+  <!-- Caption for Country field on address form -->
+  <string name="address_label_country">Negara</string>
   <!-- Caption for County field on address form (only countries that use county, like United Kingdom) -->
   <string name="address_label_county">Kaunti</string>
   <!-- Caption for Name field on address form -->

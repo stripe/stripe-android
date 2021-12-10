@@ -4,6 +4,8 @@
   <string name="address_label_address_line1">주소란 1</string>
   <!-- Caption for City field on address form -->
   <string name="address_label_city">시</string>
+  <!-- Caption for Country field on address form -->
+  <string name="address_label_country">국가</string>
   <!-- Caption for County field on address form (only countries that use county, like United Kingdom) -->
   <string name="address_label_county">구/군</string>
   <!-- Caption for Name field on address form -->
