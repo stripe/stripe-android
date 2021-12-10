@@ -10,8 +10,9 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.PaymentSessionData
 import com.stripe.android.PaymentSessionFixtures
 import com.stripe.android.R
-import com.stripe.android.model.CountryCode
-import com.stripe.android.model.getCountryCode
+import com.stripe.android.core.model.CountryCode
+import com.stripe.android.core.model.CountryUtils
+import com.stripe.android.core.model.getCountryCode
 import com.stripe.android.utils.TestUtils.idleLooper
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock

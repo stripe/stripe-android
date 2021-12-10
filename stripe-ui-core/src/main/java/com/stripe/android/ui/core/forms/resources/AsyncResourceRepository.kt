@@ -3,9 +3,9 @@ package com.stripe.android.ui.core.forms.resources
 import android.content.res.Resources
 import androidx.annotation.RestrictTo
 import com.stripe.android.core.injection.IOContext
+import com.stripe.android.core.model.CountryUtils
 import com.stripe.android.ui.core.address.AddressFieldElementRepository
 import com.stripe.android.ui.core.elements.BankRepository
-import com.stripe.android.view.CountryUtils
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.joinAll

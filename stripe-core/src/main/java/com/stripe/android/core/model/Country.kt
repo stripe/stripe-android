@@ -1,9 +1,8 @@
-package com.stripe.android.view
+package com.stripe.android.core.model
 
 import androidx.annotation.RestrictTo
-import com.stripe.android.model.CountryCode
 
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 data class Country(
     val code: CountryCode,
     val name: String

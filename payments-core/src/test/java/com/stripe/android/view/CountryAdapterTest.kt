@@ -4,7 +4,9 @@ import android.content.Context
 import android.widget.TextView
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.model.CountryCode
+import com.stripe.android.core.model.Country
+import com.stripe.android.core.model.CountryCode
+import com.stripe.android.core.model.CountryUtils
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import java.util.Locale

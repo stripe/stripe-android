@@ -181,6 +181,62 @@ public final class com/stripe/android/core/injection/WeakMapInjectorRegistry : c
 	public fun retrieve (Ljava/lang/String;)Lcom/stripe/android/core/injection/Injector;
 }
 
+public final class com/stripe/android/core/model/Country {
+	public static final field $stable I
+	public fun <init> (Lcom/stripe/android/core/model/CountryCode;Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
+	public final fun component1 ()Lcom/stripe/android/core/model/CountryCode;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun copy (Lcom/stripe/android/core/model/CountryCode;Ljava/lang/String;)Lcom/stripe/android/core/model/Country;
+	public static synthetic fun copy$default (Lcom/stripe/android/core/model/Country;Lcom/stripe/android/core/model/CountryCode;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/core/model/Country;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCode ()Lcom/stripe/android/core/model/CountryCode;
+	public final fun getName ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/core/model/CountryCode : android/os/Parcelable {
+	public static final field $stable I
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public static final field Companion Lcom/stripe/android/core/model/CountryCode$Companion;
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lcom/stripe/android/core/model/CountryCode;
+	public static synthetic fun copy$default (Lcom/stripe/android/core/model/CountryCode;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/core/model/CountryCode;
+	public fun describeContents ()I
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getValue ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+	public fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public final class com/stripe/android/core/model/CountryCode$Companion {
+	public final fun create (Ljava/lang/String;)Lcom/stripe/android/core/model/CountryCode;
+	public final fun getCA ()Lcom/stripe/android/core/model/CountryCode;
+	public final fun getGB ()Lcom/stripe/android/core/model/CountryCode;
+	public final fun getUS ()Lcom/stripe/android/core/model/CountryCode;
+	public final fun isCA (Lcom/stripe/android/core/model/CountryCode;)Z
+	public final fun isGB (Lcom/stripe/android/core/model/CountryCode;)Z
+	public final fun isUS (Lcom/stripe/android/core/model/CountryCode;)Z
+}
+
+public final class com/stripe/android/core/model/CountryCodeKt {
+	public static final fun getCountryCode (Ljava/util/Locale;)Lcom/stripe/android/core/model/CountryCode;
+}
+
+public final class com/stripe/android/core/model/CountryUtils {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/stripe/android/core/model/CountryUtils;
+	public final synthetic fun doesCountryUsePostalCode (Lcom/stripe/android/core/model/CountryCode;)Z
+	public final synthetic fun doesCountryUsePostalCode (Ljava/lang/String;)Z
+	public final synthetic fun getCountryByCode (Lcom/stripe/android/core/model/CountryCode;Ljava/util/Locale;)Lcom/stripe/android/core/model/Country;
+	public final synthetic fun getCountryCodeByName (Ljava/lang/String;Ljava/util/Locale;)Lcom/stripe/android/core/model/CountryCode;
+	public final synthetic fun getDisplayCountry (Lcom/stripe/android/core/model/CountryCode;Ljava/util/Locale;)Ljava/lang/String;
+	public final synthetic fun getOrderedCountries (Ljava/util/Locale;)Ljava/util/List;
+}
+
 public abstract interface class com/stripe/android/core/model/StripeModel : android/os/Parcelable {
 	public abstract fun equals (Ljava/lang/Object;)Z
 	public abstract fun hashCode ()I

@@ -2,9 +2,9 @@ package com.stripe.android.ui.core.elements
 
 import androidx.annotation.RestrictTo
 import androidx.annotation.StringRes
-import com.stripe.android.model.CountryCode
+import com.stripe.android.core.model.CountryCode
+import com.stripe.android.core.model.CountryUtils
 import com.stripe.android.ui.core.R
-import com.stripe.android.view.CountryUtils
 import java.util.Locale
 
 /**
