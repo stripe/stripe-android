@@ -36,7 +36,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlin.math.min
 import kotlin.math.roundToInt
 
-abstract class SimpleScanActivity<ScanFlowParameters> : ScanActivity() {
+internal abstract class SimpleScanActivity<ScanFlowParameters> : ScanActivity() {
 
     /**
      * The state of the scan flow. This can be expanded if [displayState] is overridden to handle

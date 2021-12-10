@@ -16,7 +16,6 @@ import android.util.Size
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
-import androidx.annotation.RestrictTo
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -40,7 +39,7 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.parcelize.Parcelize
 import kotlin.coroutines.CoroutineContext
 
-const val PERMISSION_RATIONALE_SHOWN = "permission_rationale_shown"
+private const val PERMISSION_RATIONALE_SHOWN = "permission_rationale_shown"
 
 sealed interface CancellationReason : Parcelable {
 
@@ -57,7 +56,7 @@ sealed interface CancellationReason : Parcelable {
     object CameraPermissionDenied : CancellationReason
 }
 
-interface ScanResultListener {
+internal interface ScanResultListener {
 
     /**
      * The user canceled the scan.
@@ -73,7 +72,7 @@ interface ScanResultListener {
 /**
  * A basic implementation that displays error messages when there is a problem with the camera.
  */
-open class CameraErrorListenerImpl(
+internal class CameraErrorListenerImpl(
     protected val context: Context,
     protected val callback: (Throwable?) -> Unit
 ) : CameraErrorListener {
@@ -101,8 +100,7 @@ open class CameraErrorListenerImpl(
     }
 }
 
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
+internal abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
     companion object {
         const val PERMISSION_REQUEST_CODE = 1200
     }

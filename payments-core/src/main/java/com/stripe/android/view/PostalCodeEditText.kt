@@ -112,6 +112,13 @@ class PostalCodeEditText @JvmOverloads constructor(
         US
     }
 
+    /**
+     * Returns if the postal is valid. If config is not US, any non-empty postal is valid.
+     */
+    internal fun hasValidPostal() =
+        config == Config.US && ZIP_CODE_PATTERN.matcher(fieldText)
+            .matches() || config == Config.Global && fieldText.isNotEmpty()
+
     private companion object {
         private const val MAX_LENGTH_US = 5
 
