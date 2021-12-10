@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+  <!-- Address line 1 placeholder for billing address form. -->
+  <string name="address_label_address_line1">Naslov 1</string>
+  <!-- Caption for City field on address form -->
+  <string name="address_label_city">Mesto</string>
+  <!-- Caption for County field on address form (only countries that use county, like United Kingdom) -->
+  <string name="address_label_county">Okraj</string>
+  <!-- Caption for Name field on address form -->
+  <string name="address_label_name">Ime</string>
+  <!-- Short string for postal code (text used in non-US countries) -->
+  <string name="address_label_postal_code">Poštna številka</string>
+  <!-- Caption for Province field on address form (only countries that use province, like Canada) -->
+  <string name="address_label_province">Provinca</string>
+  <!-- Caption for State field on address form (only countries that use state , like United States) -->
+  <string name="address_label_state">Zvezna država</string>
+  <!-- Label for input requesting zip code, used for US based addreses -->
+  <string name="address_label_zip_code">Poštna številka</string>
+</resources>

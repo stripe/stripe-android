@@ -20,8 +20,6 @@
   <string name="address_county_required">국가를 입력하십시오</string>
   <!-- Caption for Address field on address form -->
   <string name="address_label_address">주소</string>
-  <!-- Address line 1 placeholder for billing address form. -->
-  <string name="address_label_address_line1">주소란 1</string>
   <!-- Label for input requesting the first line of an address where , used for international addresses -->
   <string name="address_label_address_line1_optional">주소란 1(선택 사항)</string>
   <!-- Address line 2 placeholder for billing address form. -->
@@ -30,44 +28,28 @@
   <string name="address_label_address_optional">주소(선택 사항)</string>
   <!-- Label for input requesting apartment number (address line 2) where input is optional, used for US based addresses -->
   <string name="address_label_apt_optional">아파트(선택 사항)</string>
-  <!-- Caption for City field on address form -->
-  <string name="address_label_city">시</string>
   <!-- Label for input requesting city where input is optional, used for all locations -->
   <string name="address_label_city_optional">도시(선택 사항)</string>
-  <!-- Caption for Country field on address form -->
-  <string name="address_label_country">국가</string>
-  <!-- Caption for County field on address form (only countries that use county, like United Kingdom) -->
-  <string name="address_label_county">구/군</string>
   <!-- Label for input requesting county where input is optional , used for UK based addresses -->
   <string name="address_label_county_optional">구/군(선택 사항)</string>
-  <!-- Caption for Name field on address form -->
-  <string name="address_label_name">이름</string>
   <!-- Label for input requesting phone number, used for all locations -->
   <string name="address_label_phone_number">전화번호</string>
   <!-- Label for input requesting phone number where input is optional, used for all locations -->
   <string name="address_label_phone_number_optional">전화번호(선택 사항)</string>
-  <!-- Short string for postal code (text used in non-US countries) -->
-  <string name="address_label_postal_code">우편번호</string>
   <!-- Label for input requesting postal code where input is optional, used for Canada based addresses -->
   <string name="address_label_postal_code_optional">우편번호(선택 사항)</string>
   <!-- Label for input requesting postcode, used for UK based addresses -->
   <string name="address_label_postcode">우편번호</string>
   <!-- Label for input requesting postcode where input is optional, used for UK based addresses -->
   <string name="address_label_postcode_optional">우편번호(선택 사항)</string>
-  <!-- Caption for Province field on address form (only countries that use province, like Canada) -->
-  <string name="address_label_province">도</string>
   <!-- Label for input requesting province where province is optional, used for canadian addresses -->
   <string name="address_label_province_optional">도(선택 사항)</string>
   <!-- Label for input requesting the region, used for international addresses -->
   <string name="address_label_region_generic">주/도/지역</string>
   <!-- Label for input requesting the region where input is optional, used for international addresses -->
   <string name="address_label_region_generic_optional">주 / 도 / 지역(선택 사항)</string>
-  <!-- Caption for State field on address form (only countries that use state , like United States) -->
-  <string name="address_label_state">주</string>
   <!-- Label for input requesting state where input is optional, used for US based addresses -->
   <string name="address_label_state_optional">주(선택 사항)</string>
-  <!-- Label for input requesting zip code, used for US based addreses -->
-  <string name="address_label_zip_code">우편번호</string>
   <!-- Label for input requesting zip code where input is optional, used for US based addresses -->
   <string name="address_label_zip_code_optional">우편번호(선택 사항)</string>
   <!-- Label for input requesting postal code, used for international addresses -->

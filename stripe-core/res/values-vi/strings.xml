@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+  <!-- Address line 1 placeholder for billing address form. -->
+  <string name="address_label_address_line1">Dòng địa chỉ 1</string>
+  <!-- Caption for City field on address form -->
+  <string name="address_label_city">Thành phố</string>
+  <!-- Caption for County field on address form (only countries that use county, like United Kingdom) -->
+  <string name="address_label_county">Quận</string>
+  <!-- Caption for Name field on address form -->
+  <string name="address_label_name">Tên</string>
+  <!-- Short string for postal code (text used in non-US countries) -->
+  <string name="address_label_postal_code">Mã bưu điện</string>
+  <!-- Caption for Province field on address form (only countries that use province, like Canada) -->
+  <string name="address_label_province">Tỉnh</string>
+  <!-- Caption for State field on address form (only countries that use state , like United States) -->
+  <string name="address_label_state">Tiểu bang</string>
+  <!-- Label for input requesting zip code, used for US based addreses -->
+  <string name="address_label_zip_code">Mã ZIP</string>
+</resources>
