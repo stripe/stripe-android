@@ -30,8 +30,6 @@
   <string name="address_label_apt_optional">Apt. (optional)</string>
   <!-- Label for input requesting city where input is optional, used for all locations -->
   <string name="address_label_city_optional">City (optional)</string>
-  <!-- Caption for Country field on address form -->
-  <string name="address_label_country">Country</string>
   <!-- Label for input requesting county where input is optional , used for UK based addresses -->
   <string name="address_label_county_optional">County (optional)</string>
   <!-- Label for input requesting phone number, used for all locations -->
