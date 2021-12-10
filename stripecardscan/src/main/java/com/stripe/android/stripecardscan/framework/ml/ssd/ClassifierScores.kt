@@ -3,7 +3,7 @@ package com.stripe.android.stripecardscan.framework.ml.ssd
 import com.stripe.android.stripecardscan.framework.util.updateEach
 import kotlin.math.exp
 
-typealias ClassifierScores = FloatArray
+internal typealias ClassifierScores = FloatArray
 
 /**
  * Compute softmax for the given row. This will replace each row value with a value normalized by

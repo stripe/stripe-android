@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.Flow
 /**
  * A flow for scanning something. This manages the callbacks and lifecycle of the flow.
  */
-interface ScanFlow<Parameters> {
+internal interface ScanFlow<Parameters> {
 
     /**
      * Start the image processing flow for scanning a card.

@@ -81,12 +81,8 @@ import androidx.annotation.CheckResult
 
 private const val IIN_LENGTH = 6
 private const val LAST_FOUR_LENGTH = 4
-const val QUICK_READ_LENGTH = 16
-const val QUICK_READ_GROUP_LENGTH = 4
-/**
- * The Jaccard similarity threshold for determining if two numbers are possibly the same.
- */
-private const val JACCARD_SIMILARITY_THRESHOLD = 0.5
+internal const val QUICK_READ_LENGTH = 16
+internal const val QUICK_READ_GROUP_LENGTH = 4
 
 private val VALID_CVC_LENGTHS = 3..4
 

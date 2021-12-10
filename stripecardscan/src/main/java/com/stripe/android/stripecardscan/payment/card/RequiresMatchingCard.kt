@@ -33,7 +33,7 @@ internal interface RequiresMatchingCard {
     }
 }
 
-sealed interface CardMatchResult {
+internal sealed interface CardMatchResult {
     object NoRequiredCard : CardMatchResult
     object Match : CardMatchResult
     object Mismatch : CardMatchResult
