@@ -5,6 +5,7 @@ This release includes several bug fixes and has the first release of [Stripe Car
 * [4424](https://github.com/stripe/stripe-android/pull/4424) callback for postal code complete
 * [4438](https://github.com/stripe/stripe-android/pull/4438) allow non-terminal state for PaymentSheet
 * [4432](https://github.com/stripe/stripe-android/pull/4432) Span PMs across the PaymentSheet when there are only two of them
+* [4414](https://github.com/stripe/stripe-android/pull/4414) Add support for new languages: fil, hr, in, ms-rMY, th, vi.
 * [4408](https://github.com/stripe/stripe-android/pull/4408) revert static height on cmw text boxes
 * [4387](https://github.com/stripe/stripe-android/pull/4387) add paypal to paymentsheet
 * [4396](https://github.com/stripe/stripe-android/pull/4396) Fix snackbar NPE
