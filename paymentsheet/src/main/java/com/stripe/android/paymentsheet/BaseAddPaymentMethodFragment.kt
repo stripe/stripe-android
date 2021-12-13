@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -15,12 +16,11 @@ import androidx.fragment.app.commit
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.stripe.android.model.StripeIntent
 import com.stripe.android.core.injection.InjectorKey
+import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.databinding.FragmentPaymentsheetAddPaymentMethodBinding
 import com.stripe.android.paymentsheet.forms.FormFieldValues
-import com.stripe.android.ui.core.Amount
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
 import com.stripe.android.paymentsheet.paymentdatacollection.CardDataCollectionFragment
@@ -30,6 +30,7 @@ import com.stripe.android.paymentsheet.paymentdatacollection.TransformToPaymentM
 import com.stripe.android.paymentsheet.ui.AddPaymentMethodsFragmentFactory
 import com.stripe.android.paymentsheet.ui.AnimationConstants
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
+import com.stripe.android.ui.core.Amount
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
@@ -57,6 +58,7 @@ internal abstract class BaseAddPaymentMethodFragment(
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+        Log.e("MLB", "BaseAddPaymentMethodFragment: onCreateView")
         val themedInflater = inflater.cloneInContext(
             ContextThemeWrapper(requireActivity(), R.style.StripePaymentSheetAddPaymentMethodTheme)
         )
@@ -69,6 +71,7 @@ internal abstract class BaseAddPaymentMethodFragment(
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        Log.e("MLB", "BaseAddPaymentMethodFragment: onViewCreated")
 
         val viewBinding = FragmentPaymentsheetAddPaymentMethodBinding.bind(view)
         addPaymentMethodHeader = viewBinding.addPaymentMethodHeader
@@ -93,7 +96,12 @@ internal abstract class BaseAddPaymentMethodFragment(
         }
 
         if (paymentMethods.isNotEmpty()) {
-            replacePaymentMethodFragment(paymentMethods[selectedPaymentMethodIndex])
+            if (savedInstanceState == null) {
+                Log.e("MLB", "replace fragment from onCreate")
+                replacePaymentMethodFragment(paymentMethods[selectedPaymentMethodIndex])
+            } else {
+                selectedPaymentMethod = paymentMethods[selectedPaymentMethodIndex]
+            }
         }
 
         sheetViewModel.processing.observe(viewLifecycleOwner) { isProcessing ->
@@ -106,6 +114,8 @@ internal abstract class BaseAddPaymentMethodFragment(
                 val formViewModel = formFragment.formViewModel
                 viewLifecycleOwner.lifecycleScope.launch {
                     formViewModel.completeFormValues.collect { formFieldValues ->
+
+                        Log.e("MLB", "collected complete form values, updating selection: ${formFieldValues}")
                         sheetViewModel.updateSelection(
                             transformToPaymentSelection(
                                 formFieldValues,

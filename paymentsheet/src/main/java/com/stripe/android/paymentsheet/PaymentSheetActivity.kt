@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.ViewGroup
 import android.widget.ScrollView
 import android.widget.TextView
@@ -18,6 +19,7 @@ import androidx.lifecycle.lifecycleScope
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.appbar.MaterialToolbar
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContract
+import com.stripe.android.model.PaymentIntent
 import com.stripe.android.paymentsheet.PaymentSheetViewModel.CheckoutIdentifier
 import com.stripe.android.paymentsheet.databinding.ActivityPaymentSheetBinding
 import com.stripe.android.ui.core.Amount
@@ -66,6 +68,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
     private val currencyFormatter = CurrencyFormatter()
 
     private val buyButtonStateObserver = { viewState: PaymentSheetViewState? ->
+        Log.e("MLB", "button state change - error message update")
         updateErrorMessage(viewState?.errorMessage)
         viewBinding.buyButton.updateState(viewState?.convert())
     }
@@ -106,7 +109,16 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
                 viewModel::onGooglePayResult
             )
         )
-        viewModel.maybeFetchStripeIntent()
+
+        // TODO: This might be a SetupIntent
+        val stripeIntent = savedInstanceState?.getParcelable<PaymentIntent>(STRIPE_INTENT)
+        if(stripeIntent == null) {
+            viewModel.maybeFetchStripeIntent()
+        }
+        else{
+            // The buy btton needs to be made visible since it is gone in the xml
+            viewModel.setStripeIntent(stripeIntent)
+        }
 
         starterArgs.statusBarColor?.let {
             window.statusBarColor = it
@@ -121,6 +133,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
         setupBuyButton()
 
         viewModel.transition.observe(this) { event ->
+            Log.e("MLB", "transition event")
             updateErrorMessage()
             val transitionTarget = event.getContentIfNotHandled()
             if (transitionTarget != null) {
@@ -162,6 +175,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
         viewModel.contentVisible.observe(this) {
             viewBinding.scrollView.isVisible = it
         }
+        Log.e("MLB", "PaymentSheetActivity onCreate complete")
     }
 
     override fun onDestroy() {
@@ -176,7 +190,13 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
         super.onBackPressed()
     }
 
+    override fun onSaveInstanceState(outState: Bundle) {
+        outState.putParcelable(STRIPE_INTENT, viewModel.stripeIntent.value)
+        super.onSaveInstanceState(outState)
+    }
+
     private fun updateErrorMessage(userMessage: BaseSheetViewModel.UserErrorMessage? = null) {
+        Log.e("MLB", "error: $userMessage")
         messageView.isVisible = userMessage != null
         messageView.text = userMessage?.message
     }
@@ -185,6 +205,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
         transitionTarget: PaymentSheetViewModel.TransitionTarget,
         fragmentArgs: Bundle
     ) {
+        Log.e("MLB", "Transition to $transitionTarget")
         supportFragmentManager.commit {
             when (transitionTarget) {
                 is PaymentSheetViewModel.TransitionTarget.AddPaymentMethodFull -> {
@@ -234,11 +255,13 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
     }
 
     private fun setupBuyButton() {
+        Log.e("MLB", "set buy btton")
         if (viewModel.isProcessingPaymentIntent) {
             viewModel.amount.observe(this) {
                 viewBinding.buyButton.setLabel(getLabelText(requireNotNull(it)))
             }
         } else {
+            Log.e("MLB", "set buy btton label")
             viewBinding.buyButton.setLabel(
                 resources.getString(R.string.stripe_paymentsheet_setup_button_label)
             )
@@ -248,26 +271,6 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
             .observe(this, buyButtonStateObserver)
         viewModel.getButtonStateObservable(CheckoutIdentifier.SheetBottomGooglePay)
             .observe(this, googlePayButtonStateObserver)
-
-        viewModel.selection.observe(this) { paymentSelection ->
-            updateErrorMessage()
-
-            val shouldShowGooglePay =
-                paymentSelection ==
-                    PaymentSelection.GooglePay && supportFragmentManager.findFragmentById(
-                    fragmentContainerId
-                ) is PaymentSheetListFragment
-
-            if (shouldShowGooglePay) {
-                viewBinding.googlePayButton.bringToFront()
-                viewBinding.googlePayButton.isVisible = true
-                viewBinding.buyButton.isVisible = false
-            } else {
-                viewBinding.buyButton.bringToFront()
-                viewBinding.buyButton.isVisible = true
-                viewBinding.googlePayButton.isVisible = false
-            }
-        }
 
         viewBinding.googlePayButton.setOnClickListener {
             viewModel.setContentVisible(false)
@@ -290,6 +293,31 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+
+        viewModel.selection.observe(this) { paymentSelection ->
+            Log.e("MLB", "selection change - error message update")
+            updateErrorMessage()
+
+            val shouldShowGooglePay =
+                paymentSelection ==
+                    PaymentSelection.GooglePay && supportFragmentManager.findFragmentById(
+                    fragmentContainerId
+                ) is PaymentSheetListFragment
+
+            if (shouldShowGooglePay) {
+                viewBinding.googlePayButton.bringToFront()
+                viewBinding.googlePayButton.isVisible = true
+                viewBinding.buyButton.isVisible = false
+            } else {
+                viewBinding.buyButton.bringToFront()
+                viewBinding.buyButton.isVisible = true
+                viewBinding.googlePayButton.isVisible = false
+            }
+        }
+    }
+
     private fun getLabelText(amount: Amount): String {
         return resources.getString(
             R.string.stripe_paymentsheet_pay_button_amount,
@@ -306,6 +334,8 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
     }
 
     internal companion object {
+
+        private const val STRIPE_INTENT = "stripe.intent"
         internal const val EXTRA_FRAGMENT_CONFIG = BaseSheetActivity.EXTRA_FRAGMENT_CONFIG
         internal const val EXTRA_STARTER_ARGS = BaseSheetActivity.EXTRA_STARTER_ARGS
     }
