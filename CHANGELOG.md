@@ -6,10 +6,8 @@ This release includes several bug fixes and has the first release of [Stripe Car
 * [4438](https://github.com/stripe/stripe-android/pull/4438) allow non-terminal state for PaymentSheet
 * [4432](https://github.com/stripe/stripe-android/pull/4432) Span PMs across the PaymentSheet when there are only two of them
 * [4408](https://github.com/stripe/stripe-android/pull/4408) revert static height on cmw text boxes
-* [4387](https://github.com/stripe/stripe-android/pull/4387) add paypal to paymentsheet
 * [4396](https://github.com/stripe/stripe-android/pull/4396) Fix snackbar NPE
 * [4385](https://github.com/stripe/stripe-android/pull/4385) Remove filter on postal codes when switching away from US
-* [4349](https://github.com/stripe/stripe-android/pull/4349) Add Klarna to paymentsheet
 * [4354](https://github.com/stripe/stripe-android/pull/4354) Convert toast to snackbar in examples
 * [4383](https://github.com/stripe/stripe-android/pull/4383) Convert entered country code to display name if needed
 * [4384](https://github.com/stripe/stripe-android/pull/4384) CardFormView will auto convert the country name to country code when typed
