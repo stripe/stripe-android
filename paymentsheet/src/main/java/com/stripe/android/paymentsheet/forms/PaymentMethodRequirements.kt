@@ -1,14 +1,19 @@
 package com.stripe.android.paymentsheet.forms
 
-internal sealed interface Requirement
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
+
+internal sealed interface Requirement : Parcelable
 internal sealed interface PIRequirement : Requirement
 internal sealed interface SIRequirement : Requirement
 
 /**
  * This requirement is dependent on the configuration passed by the app to the SDK.
  */
+@Parcelize
 internal object Delayed : PIRequirement, SIRequirement
 
+@Parcelize
 internal data class PaymentMethodRequirements(
 
     /**
@@ -43,7 +48,7 @@ internal data class PaymentMethodRequirements(
      *  - true means that a PM of this type attached to a customer can be confirmed
      */
     val confirmPMFromCustomer: Boolean?,
-)
+) : Parcelable
 
 internal val CardRequirement = PaymentMethodRequirements(
     piRequirements = emptySet(),
