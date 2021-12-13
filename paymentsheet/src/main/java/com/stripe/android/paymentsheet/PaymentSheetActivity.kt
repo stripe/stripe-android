@@ -313,12 +313,6 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
         }
     }
 
-    override fun onResume() {
-        super.onResume()
-
-        // Don't set the selection until on resume
-    }
-
     private fun getLabelText(amount: Amount): String {
         return resources.getString(
             R.string.stripe_paymentsheet_pay_button_amount,
