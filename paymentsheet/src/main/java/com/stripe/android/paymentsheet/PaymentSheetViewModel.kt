@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet
 
 import android.app.Application
-import android.util.Log
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.IntegerRes
@@ -214,8 +213,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     }
 
     private fun onStripeIntentFetchResponse(stripeIntent: StripeIntent) {
-
-        Log.e("MLB", "onStripeIntentFetchResponse")
         runCatching {
             stripeIntentValidator.requireValid(stripeIntent)
         }.fold(
@@ -359,7 +356,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
     @VisibleForTesting
     fun onPaymentResult(paymentResult: PaymentResult) {
-        Log.e("MLB", "onPaymentResult")
         viewModelScope.launch {
             runCatching {
                 stripeIntentRepository.get(args.clientSecret)

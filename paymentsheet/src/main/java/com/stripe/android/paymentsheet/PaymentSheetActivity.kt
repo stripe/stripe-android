@@ -3,7 +3,6 @@ package com.stripe.android.paymentsheet
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.ViewGroup
 import android.widget.ScrollView
 import android.widget.TextView
@@ -20,14 +19,15 @@ import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.appbar.MaterialToolbar
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContract
 import com.stripe.android.model.PaymentIntent
+import com.stripe.android.model.SetupIntent
 import com.stripe.android.paymentsheet.PaymentSheetViewModel.CheckoutIdentifier
 import com.stripe.android.paymentsheet.databinding.ActivityPaymentSheetBinding
-import com.stripe.android.ui.core.Amount
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.ui.AnimationConstants
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
+import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.CurrencyFormatter
 import kotlinx.coroutines.launch
 import java.security.InvalidParameterException
@@ -68,7 +68,6 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
     private val currencyFormatter = CurrencyFormatter()
 
     private val buyButtonStateObserver = { viewState: PaymentSheetViewState? ->
-        Log.e("MLB", "button state change - error message update")
         updateErrorMessage(viewState?.errorMessage)
         viewBinding.buyButton.updateState(viewState?.convert())
     }
@@ -110,14 +109,17 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
             )
         )
 
-        // TODO: This might be a SetupIntent
-        val stripeIntent = savedInstanceState?.getParcelable<PaymentIntent>(STRIPE_INTENT)
-        if(stripeIntent == null) {
-            viewModel.maybeFetchStripeIntent()
-        }
-        else{
+        when (savedInstanceState?.getBoolean(SAVE_IS_PAYMENT_INTENT_TYPE)) {
+            true -> savedInstanceState.getParcelable<PaymentIntent>(SAVE_STRIPE_INTENT)
+            false -> savedInstanceState.getParcelable<SetupIntent>(SAVE_STRIPE_INTENT)
+            null -> null
+        }?.let {
             // The buy btton needs to be made visible since it is gone in the xml
-            viewModel.setStripeIntent(stripeIntent)
+            viewModel.setStripeIntent(it)
+            buttonContainer.isVisible = true
+            viewBinding.buyButton.isVisible = true
+        } ?: run {
+            viewModel.maybeFetchStripeIntent()
         }
 
         starterArgs.statusBarColor?.let {
@@ -133,7 +135,6 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
         setupBuyButton()
 
         viewModel.transition.observe(this) { event ->
-            Log.e("MLB", "transition event")
             updateErrorMessage()
             val transitionTarget = event.getContentIfNotHandled()
             if (transitionTarget != null) {
@@ -175,7 +176,6 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
         viewModel.contentVisible.observe(this) {
             viewBinding.scrollView.isVisible = it
         }
-        Log.e("MLB", "PaymentSheetActivity onCreate complete")
     }
 
     override fun onDestroy() {
@@ -191,12 +191,12 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
-        outState.putParcelable(STRIPE_INTENT, viewModel.stripeIntent.value)
+        outState.putParcelable(SAVE_STRIPE_INTENT, viewModel.stripeIntent.value)
+        outState.putBoolean(SAVE_IS_PAYMENT_INTENT_TYPE, viewModel.isProcessingPaymentIntent)
         super.onSaveInstanceState(outState)
     }
 
     private fun updateErrorMessage(userMessage: BaseSheetViewModel.UserErrorMessage? = null) {
-        Log.e("MLB", "error: $userMessage")
         messageView.isVisible = userMessage != null
         messageView.text = userMessage?.message
     }
@@ -205,7 +205,6 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
         transitionTarget: PaymentSheetViewModel.TransitionTarget,
         fragmentArgs: Bundle
     ) {
-        Log.e("MLB", "Transition to $transitionTarget")
         supportFragmentManager.commit {
             when (transitionTarget) {
                 is PaymentSheetViewModel.TransitionTarget.AddPaymentMethodFull -> {
@@ -251,17 +250,16 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
             }
         }
 
+        // This should be visible when loading complete
         buttonContainer.isVisible = true
     }
 
     private fun setupBuyButton() {
-        Log.e("MLB", "set buy btton")
         if (viewModel.isProcessingPaymentIntent) {
             viewModel.amount.observe(this) {
                 viewBinding.buyButton.setLabel(getLabelText(requireNotNull(it)))
             }
         } else {
-            Log.e("MLB", "set buy btton label")
             viewBinding.buyButton.setLabel(
                 resources.getString(R.string.stripe_paymentsheet_setup_button_label)
             )
@@ -297,7 +295,6 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
         super.onResume()
 
         viewModel.selection.observe(this) { paymentSelection ->
-            Log.e("MLB", "selection change - error message update")
             updateErrorMessage()
 
             val shouldShowGooglePay =
@@ -335,7 +332,10 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
 
     internal companion object {
 
-        private const val STRIPE_INTENT = "stripe.intent"
+        private const val SAVE_STRIPE_INTENT =
+            "com.stripe.android.paymentsheet.paymentsheetactivity.save_stripe_intent"
+        private const val SAVE_IS_PAYMENT_INTENT_TYPE =
+            "com.stripe.android.paymentsheet.paymentsheetactivity.save_stripe_intent_type"
         internal const val EXTRA_FRAGMENT_CONFIG = BaseSheetActivity.EXTRA_FRAGMENT_CONFIG
         internal const val EXTRA_STARTER_ARGS = BaseSheetActivity.EXTRA_STARTER_ARGS
     }

@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -58,7 +57,6 @@ internal abstract class BaseAddPaymentMethodFragment(
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        Log.e("MLB", "BaseAddPaymentMethodFragment: onCreateView")
         val themedInflater = inflater.cloneInContext(
             ContextThemeWrapper(requireActivity(), R.style.StripePaymentSheetAddPaymentMethodTheme)
         )
@@ -71,7 +69,6 @@ internal abstract class BaseAddPaymentMethodFragment(
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        Log.e("MLB", "BaseAddPaymentMethodFragment: onViewCreated")
 
         val viewBinding = FragmentPaymentsheetAddPaymentMethodBinding.bind(view)
         addPaymentMethodHeader = viewBinding.addPaymentMethodHeader
@@ -97,7 +94,6 @@ internal abstract class BaseAddPaymentMethodFragment(
 
         if (paymentMethods.isNotEmpty()) {
             if (savedInstanceState == null) {
-                Log.e("MLB", "replace fragment from onCreate")
                 replacePaymentMethodFragment(paymentMethods[selectedPaymentMethodIndex])
             } else {
                 selectedPaymentMethod = paymentMethods[selectedPaymentMethodIndex]
@@ -108,27 +104,35 @@ internal abstract class BaseAddPaymentMethodFragment(
             (getFragment() as? ComposeFormDataCollectionFragment)?.setProcessing(isProcessing)
         }
 
-        childFragmentManager.addFragmentOnAttachListener { _, fragment ->
-            (fragment as? ComposeFormDataCollectionFragment)?.let { formFragment ->
-                // Need to access the formViewModel so it is constructed.
-                val formViewModel = formFragment.formViewModel
-                viewLifecycleOwner.lifecycleScope.launch {
-                    formViewModel.completeFormValues.collect { formFieldValues ->
+        // If the activity was destroyed and recreated then we need to re-attach the fragment,
+        // as attach will not be called again.
+        childFragmentManager.fragments.forEach { fragment ->
+            attachComposeFragmentViewModel(fragment)
+        }
 
-                        Log.e("MLB", "collected complete form values, updating selection: ${formFieldValues}")
-                        sheetViewModel.updateSelection(
-                            transformToPaymentSelection(
-                                formFieldValues,
-                                formFragment.paramKeySpec,
-                                selectedPaymentMethod
-                            )
-                        )
-                    }
-                }
-            }
+        childFragmentManager.addFragmentOnAttachListener { _, fragment ->
+            attachComposeFragmentViewModel(fragment)
         }
 
         eventReporter.onShowNewPaymentOptionForm()
+    }
+
+    private fun attachComposeFragmentViewModel(fragment: Fragment) {
+        (fragment as? ComposeFormDataCollectionFragment)?.let { formFragment ->
+            // Need to access the formViewModel so it is constructed.
+            val formViewModel = formFragment.formViewModel
+            viewLifecycleOwner.lifecycleScope.launch {
+                formViewModel.completeFormValues.collect { formFieldValues ->
+                    sheetViewModel.updateSelection(
+                        transformToPaymentSelection(
+                            formFieldValues,
+                            formFragment.paramKeySpec,
+                            selectedPaymentMethod
+                        )
+                    )
+                }
+            }
+        }
     }
 
     private fun setupRecyclerView(

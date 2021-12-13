@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet.paymentdatacollection
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -56,9 +55,6 @@ internal class ComposeFormDataCollectionFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View = ComposeView(inflater.context).apply {
-        Log.e("MLB", "CompoaseFormDataCollectionFragment: onCreateView ${requireArguments().getParcelable<FormFragmentArguments>(EXTRA_CONFIG)
-            ?.paymentMethod}")
-
         layoutParams = ViewGroup.LayoutParams(
             ViewGroup.LayoutParams.MATCH_PARENT,
             ViewGroup.LayoutParams.MATCH_PARENT
