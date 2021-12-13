@@ -109,6 +109,9 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
             )
         )
 
+        // If the activity was destroyed we need to restore the payment intent without triggering
+        // the transition (which would replace the existing fragment).  The button container
+        // and buy button visibility must be visible again.
         when (savedInstanceState?.getBoolean(SAVE_IS_PAYMENT_INTENT_TYPE)) {
             true -> savedInstanceState.getParcelable<PaymentIntent>(SAVE_STRIPE_INTENT)
             false -> savedInstanceState.getParcelable<SetupIntent>(SAVE_STRIPE_INTENT)
@@ -250,7 +253,6 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
             }
         }
 
-        // This should be visible when loading complete
         buttonContainer.isVisible = true
     }
 
@@ -269,6 +271,26 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
             .observe(this, buyButtonStateObserver)
         viewModel.getButtonStateObservable(CheckoutIdentifier.SheetBottomGooglePay)
             .observe(this, googlePayButtonStateObserver)
+
+        viewModel.selection.observe(this) { paymentSelection ->
+            updateErrorMessage()
+
+            val shouldShowGooglePay =
+                paymentSelection ==
+                    PaymentSelection.GooglePay && supportFragmentManager.findFragmentById(
+                    fragmentContainerId
+                ) is PaymentSheetListFragment
+
+            if (shouldShowGooglePay) {
+                viewBinding.googlePayButton.bringToFront()
+                viewBinding.googlePayButton.isVisible = true
+                viewBinding.buyButton.isVisible = false
+            } else {
+                viewBinding.buyButton.bringToFront()
+                viewBinding.buyButton.isVisible = true
+                viewBinding.googlePayButton.isVisible = false
+            }
+        }
 
         viewBinding.googlePayButton.setOnClickListener {
             viewModel.setContentVisible(false)
@@ -294,25 +316,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
     override fun onResume() {
         super.onResume()
 
-        viewModel.selection.observe(this) { paymentSelection ->
-            updateErrorMessage()
-
-            val shouldShowGooglePay =
-                paymentSelection ==
-                    PaymentSelection.GooglePay && supportFragmentManager.findFragmentById(
-                    fragmentContainerId
-                ) is PaymentSheetListFragment
-
-            if (shouldShowGooglePay) {
-                viewBinding.googlePayButton.bringToFront()
-                viewBinding.googlePayButton.isVisible = true
-                viewBinding.buyButton.isVisible = false
-            } else {
-                viewBinding.buyButton.bringToFront()
-                viewBinding.buyButton.isVisible = true
-                viewBinding.googlePayButton.isVisible = false
-            }
-        }
+        // Don't set the selection until on resume
     }
 
     private fun getLabelText(amount: Amount): String {
