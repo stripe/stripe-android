@@ -7,6 +7,6 @@ import androidx.annotation.RestrictTo
  * Identifies a field that can be made hidden.
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-interface RequiredItemSpec : Parcelable{
+interface RequiredItemSpec : Parcelable {
     val identifier: IdentifierSpec
 }

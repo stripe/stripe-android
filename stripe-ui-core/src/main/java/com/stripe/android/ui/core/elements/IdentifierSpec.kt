@@ -9,7 +9,7 @@ import kotlinx.parcelize.Parcelize
  * specs that need to be found when pre-populating fields, or when extracting data.
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-sealed class IdentifierSpec(val value: String) : Parcelable{
+sealed class IdentifierSpec(val value: String) : Parcelable {
     @Parcelize
     data class Generic(private val _value: String) : IdentifierSpec(_value)
 
