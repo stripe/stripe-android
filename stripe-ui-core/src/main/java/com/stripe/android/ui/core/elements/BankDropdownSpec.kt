@@ -1,7 +1,9 @@
 package com.stripe.android.ui.core.elements
 
 import androidx.annotation.StringRes
+import kotlinx.parcelize.Parcelize
 
+@Parcelize
 internal data class BankDropdownSpec(
     override val identifier: IdentifierSpec,
     @StringRes val label: Int,
