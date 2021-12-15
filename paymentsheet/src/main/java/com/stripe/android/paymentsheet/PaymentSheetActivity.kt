@@ -119,6 +119,9 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
         }?.let {
             // The buy btton needs to be made visible since it is gone in the xml
             viewModel.setStripeIntent(it)
+            // This is causing a transition, but needed for the
+            // saved customer cards to work.
+//            viewModel.updatePaymentMethods(it)
             buttonContainer.isVisible = true
             viewBinding.buyButton.isVisible = true
         } ?: run {
@@ -154,12 +157,12 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
         viewModel.fragmentConfigEvent.observe(this) { event ->
             val config = event.getContentIfNotHandled()
             if (config != null) {
-                val target = if (viewModel.paymentMethods.value.isNullOrEmpty()) {
-                    PaymentSheetViewModel.TransitionTarget.AddPaymentMethodSheet(config)
-                } else {
-                    PaymentSheetViewModel.TransitionTarget.SelectSavedPaymentMethod(config)
-                }
-                viewModel.transitionTo(target)
+                    val target = if (viewModel.paymentMethods.value.isNullOrEmpty()) {
+                        PaymentSheetViewModel.TransitionTarget.AddPaymentMethodSheet(config)
+                    } else {
+                        PaymentSheetViewModel.TransitionTarget.SelectSavedPaymentMethod(config)
+                    }
+                    viewModel.transitionTo(target)
             }
         }
 
