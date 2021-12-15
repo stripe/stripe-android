@@ -40,7 +40,7 @@ Table of contents
 
 **Stripe API**: We provide [low-level APIs](https://stripe.dev/stripe-android/stripe/com.stripe.android/-stripe/index.html) that correspond to objects and methods in the Stripe API. You can build a custom UI on top of this layer.
 
-**Localized**: We support the following localizations: Bulgarian, Chinese (Hong Kong), Chinese (Simplified), Chinese (Traditional), Czech, Danish, Dutch, English (US), English (United Kingdom), Estonian, Finnish, French, French (Canada), German, Greek, Hungarian, Italian, Japanese, Korean, Latvian, Lithuanian, Maltese, Norwegian Bokmål, Polish, Portuguese (Brazil), Portuguese, Romanian, Russian, Slovak, Slovenian, Spanish, Spanish (Latin America), Swedish, and Turkish.
+**Localized**: We support the following localizations: Bulgarian, Catalan, Chinese (Hong Kong), Chinese (Simplified), Chinese (Traditional), Croatian, Czech, Danish, Dutch, English (US), English (United Kingdom), Estonian, Filipino, Finnish, French, French (Canada), German, Greek, Hungarian, Indonesian, Italian, Japanese, Korean, Latvian, Lithuanian, Malay, Maltese, Norwegian Bokmål, Norwegian Nynorsk (Norway), Polish, Portuguese, Portuguese (Brazil), Romanian, Russian, Slovak, Slovenian, Spanish, Spanish (Latin America), Swedish, Turkish, Thai and Vietnamese.
 
 **Recommended usage**
 If you're selling digital products or services that will be consumed within your app, (e.g. subscriptions, in-game currencies, game levels, access to premium content, or unlocking a full version), and you plan to distribute it through the Google Play Store, you must use Googles's in-app purchase APIs. See the [Google Play Billing](https://developer.android.com/distribute/play-billing) for more information. For all other scenarios you can use this SDK to process payments via Stripe.
@@ -64,7 +64,7 @@ Add `stripe-android` to your `build.gradle` dependencies.
 
 ```
 dependencies {
-    implementation 'com.stripe:stripe-android:18.2.0'
+    implementation 'com.stripe:stripe-android:19.0.0'
 }
 ```
 

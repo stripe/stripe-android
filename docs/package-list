@@ -1,6 +1,8 @@
 $dokka.format:html-v1
 $dokka.linkExtension:html
 
+module:link
+com.stripe.android.link
 module:payments-core
 com.stripe.android
 com.stripe.android.exception
@@ -19,5 +21,22 @@ com.stripe.android.view
 com.stripe.android.view.i18n
 module:paymentsheet
 com.stripe.android.paymentsheet
-com.stripe.android.paymentsheet.injection
 com.stripe.android.paymentsheet.model
+module:stripe-core
+com.stripe.android.core
+com.stripe.android.core.exception
+com.stripe.android.core.injection
+com.stripe.android.core.model
+com.stripe.android.core.networking
+module:stripe-ui-core
+com.stripe.android.ui.core
+com.stripe.android.ui.core.address
+com.stripe.android.ui.core.elements
+com.stripe.android.ui.core.forms
+com.stripe.android.ui.core.forms.resources
+module:stripecardscan
+com.stripe.android.stripecardscan.cardimageverification
+com.stripe.android.stripecardscan.cardimageverification.exception
+com.stripe.android.stripecardscan.framework
+com.stripe.android.stripecardscan.payment.card
+com.stripe.android.stripecardscan.scanui
