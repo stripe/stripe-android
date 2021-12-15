@@ -20,8 +20,6 @@
   <string name="address_county_required">Vui lòng nhập tên quận</string>
   <!-- Caption for Address field on address form -->
   <string name="address_label_address">Địa chỉ</string>
-  <!-- Address line 1 placeholder for billing address form. -->
-  <string name="address_label_address_line1">Dòng địa chỉ 1</string>
   <!-- Label for input requesting the first line of an address where , used for international addresses -->
   <string name="address_label_address_line1_optional">Dòng địa chỉ 1 (tùy chọn)</string>
   <!-- Address line 2 placeholder for billing address form. -->
@@ -30,44 +28,28 @@
   <string name="address_label_address_optional">Địa chỉ (tùy chọn) </string>
   <!-- Label for input requesting apartment number (address line 2) where input is optional, used for US based addresses -->
   <string name="address_label_apt_optional">Căn hộ (tùy chọn)</string>
-  <!-- Caption for City field on address form -->
-  <string name="address_label_city">Thành phố</string>
   <!-- Label for input requesting city where input is optional, used for all locations -->
   <string name="address_label_city_optional">Thành phố (tùy chọn)</string>
-  <!-- Caption for Country field on address form -->
-  <string name="address_label_country">Quốc gia</string>
-  <!-- Caption for County field on address form (only countries that use county, like United Kingdom) -->
-  <string name="address_label_county">Quận</string>
   <!-- Label for input requesting county where input is optional , used for UK based addresses -->
   <string name="address_label_county_optional">Quận (tùy chọn)</string>
-  <!-- Caption for Name field on address form -->
-  <string name="address_label_name">Tên</string>
   <!-- Label for input requesting phone number, used for all locations -->
   <string name="address_label_phone_number">Số điện thoại</string>
   <!-- Label for input requesting phone number where input is optional, used for all locations -->
   <string name="address_label_phone_number_optional">Số điện thoại (tùy chọn)</string>
-  <!-- Short string for postal code (text used in non-US countries) -->
-  <string name="address_label_postal_code">Mã bưu điện</string>
   <!-- Label for input requesting postal code where input is optional, used for Canada based addresses -->
   <string name="address_label_postal_code_optional">Mã bưu điện (tùy chọn)</string>
   <!-- Label for input requesting postcode, used for UK based addresses -->
   <string name="address_label_postcode">Mã bưu điện</string>
   <!-- Label for input requesting postcode where input is optional, used for UK based addresses -->
   <string name="address_label_postcode_optional">Mã bưu điện (tùy chọn)</string>
-  <!-- Caption for Province field on address form (only countries that use province, like Canada) -->
-  <string name="address_label_province">Tỉnh</string>
   <!-- Label for input requesting province where province is optional, used for canadian addresses -->
   <string name="address_label_province_optional">Tỉnh (tùy chọn)</string>
   <!-- Label for input requesting the region, used for international addresses -->
   <string name="address_label_region_generic">Tiểu bang/Tỉnh/Khu vực</string>
   <!-- Label for input requesting the region where input is optional, used for international addresses -->
   <string name="address_label_region_generic_optional">Tiểu bang/Tỉnh/Khu vực (tùy chọn)</string>
-  <!-- Caption for State field on address form (only countries that use state , like United States) -->
-  <string name="address_label_state">Tiểu bang</string>
   <!-- Label for input requesting state where input is optional, used for US based addresses -->
   <string name="address_label_state_optional">Tiểu bang (tùy chọn)</string>
-  <!-- Label for input requesting zip code, used for US based addreses -->
-  <string name="address_label_zip_code">Mã ZIP</string>
   <!-- Label for input requesting zip code where input is optional, used for US based addresses -->
   <string name="address_label_zip_code_optional">Mã ZIP (tùy chọn)</string>
   <!-- Label for input requesting postal code, used for international addresses -->
