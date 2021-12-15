@@ -1,7 +1,16 @@
 plugins {
     id 'com.android.application'
     id 'kotlin-android'
-    id 'org.jetbrains.kotlin.plugin.serialization' version '1.6.0'
+    id 'org.jetbrains.kotlin.plugin.serialization' version '1.6.10'
+}
+
+// Read values from gradle.properties or system environment variable
+def getBackendUrl() {
+    return findProperty('STRIPE_CARDSCAN_EXAMPLE_BACKEND_URL') ?: "https://gradle"
+}
+
+def getPublishableKey() {
+    return findProperty('STRIPE_CARDSCAN_EXAMPLE_PUBLISHABLE_KEY') ?: ""
 }
 
 dependencies {
@@ -69,6 +78,11 @@ android {
         versionName "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+
+        manifestPlaceholders = [
+            BACKEND_URL: getBackendUrl(),
+            PUBLISHABLE_KEY: getPublishableKey(),
+        ]
     }
 
     buildTypes {

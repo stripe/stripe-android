@@ -105,7 +105,7 @@ class PaymentLauncherViewModelTest {
     private val succeededSetupResult =
         SetupIntentResult(setupIntent, StripeIntentResult.Outcome.SUCCEEDED)
 
-    private fun createViewModel(isPaymentIntent: Boolean = true) =
+    private fun createViewModel(isPaymentIntent: Boolean = true, isInstantApp: Boolean = false) =
         PaymentLauncherViewModel(
             isPaymentIntent,
             stripeApiRepository,
@@ -120,7 +120,8 @@ class PaymentLauncherViewModelTest {
             uiContext,
             authHost,
             activityResultCaller,
-            savedStateHandle
+            savedStateHandle,
+            isInstantApp
         )
 
     @Before
@@ -260,6 +261,23 @@ class PaymentLauncherViewModelTest {
                 eq(authHost),
                 eq(setupIntent),
                 eq(apiRequestOptions)
+            )
+        }
+
+    @Test
+    fun `verify instantApp confirm PaymentIntent without returnUrl gets null returnUrl`() =
+        runBlockingTest {
+            createViewModel(isInstantApp = true).confirmStripeIntent(confirmPaymentIntentParams)
+
+            verify(analyticsRequestFactory).createRequest(
+                PaymentAnalyticsEvent.ConfirmReturnUrlNull
+            )
+            verify(stripeApiRepository).confirmPaymentIntent(
+                argWhere {
+                    it.returnUrl == null
+                },
+                any(),
+                any()
             )
         }
 

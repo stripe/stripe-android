@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.model
 
+import android.os.Parcelable
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.annotation.VisibleForTesting
@@ -9,43 +10,44 @@ import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.elements.LayoutFormDescriptor
-import com.stripe.android.paymentsheet.elements.LayoutSpec
-import com.stripe.android.paymentsheet.elements.SaveForFutureUseSpec
-import com.stripe.android.paymentsheet.forms.AfterpayClearpayForm
-import com.stripe.android.paymentsheet.forms.AfterpayClearpayParamKey
 import com.stripe.android.paymentsheet.forms.AfterpayClearpayRequirement
-import com.stripe.android.paymentsheet.forms.BancontactForm
-import com.stripe.android.paymentsheet.forms.BancontactParamKey
 import com.stripe.android.paymentsheet.forms.BancontactRequirement
 import com.stripe.android.paymentsheet.forms.CardRequirement
 import com.stripe.android.paymentsheet.forms.Delayed
-import com.stripe.android.paymentsheet.forms.EpsForm
-import com.stripe.android.paymentsheet.forms.EpsParamKey
 import com.stripe.android.paymentsheet.forms.EpsRequirement
-import com.stripe.android.paymentsheet.forms.GiropayForm
-import com.stripe.android.paymentsheet.forms.GiropayParamKey
 import com.stripe.android.paymentsheet.forms.GiropayRequirement
-import com.stripe.android.paymentsheet.forms.IdealForm
-import com.stripe.android.paymentsheet.forms.IdealParamKey
 import com.stripe.android.paymentsheet.forms.IdealRequirement
-import com.stripe.android.paymentsheet.forms.KlarnaForm
-import com.stripe.android.paymentsheet.forms.KlarnaParamKey
 import com.stripe.android.paymentsheet.forms.KlarnaRequirement
-import com.stripe.android.paymentsheet.forms.P24Form
-import com.stripe.android.paymentsheet.forms.P24ParamKey
 import com.stripe.android.paymentsheet.forms.P24Requirement
 import com.stripe.android.paymentsheet.forms.PaymentMethodRequirements
-import com.stripe.android.paymentsheet.forms.PaypalForm
-import com.stripe.android.paymentsheet.forms.PaypalParamKey
 import com.stripe.android.paymentsheet.forms.PaypalRequirement
 import com.stripe.android.paymentsheet.forms.Requirement
-import com.stripe.android.paymentsheet.forms.SepaDebitForm
-import com.stripe.android.paymentsheet.forms.SepaDebitParamKey
 import com.stripe.android.paymentsheet.forms.SepaDebitRequirement
-import com.stripe.android.paymentsheet.forms.SofortForm
-import com.stripe.android.paymentsheet.forms.SofortParamKey
 import com.stripe.android.paymentsheet.forms.SofortRequirement
+import com.stripe.android.ui.core.elements.LayoutFormDescriptor
+import com.stripe.android.ui.core.elements.LayoutSpec
+import com.stripe.android.ui.core.elements.SaveForFutureUseSpec
+import com.stripe.android.ui.core.forms.AfterpayClearpayForm
+import com.stripe.android.ui.core.forms.AfterpayClearpayParamKey
+import com.stripe.android.ui.core.forms.BancontactForm
+import com.stripe.android.ui.core.forms.BancontactParamKey
+import com.stripe.android.ui.core.forms.EpsForm
+import com.stripe.android.ui.core.forms.EpsParamKey
+import com.stripe.android.ui.core.forms.GiropayForm
+import com.stripe.android.ui.core.forms.GiropayParamKey
+import com.stripe.android.ui.core.forms.IdealForm
+import com.stripe.android.ui.core.forms.IdealParamKey
+import com.stripe.android.ui.core.forms.KlarnaForm
+import com.stripe.android.ui.core.forms.KlarnaParamKey
+import com.stripe.android.ui.core.forms.P24Form
+import com.stripe.android.ui.core.forms.P24ParamKey
+import com.stripe.android.ui.core.forms.PaypalForm
+import com.stripe.android.ui.core.forms.PaypalParamKey
+import com.stripe.android.ui.core.forms.SepaDebitForm
+import com.stripe.android.ui.core.forms.SepaDebitParamKey
+import com.stripe.android.ui.core.forms.SofortForm
+import com.stripe.android.ui.core.forms.SofortParamKey
+import kotlinx.parcelize.Parcelize
 
 /**
  * Enum defining all payment method types for which Payment Sheet can collect
@@ -54,15 +56,16 @@ import com.stripe.android.paymentsheet.forms.SofortRequirement
  * FormSpec is optionally null only because Card is not converted to the
  * compose model.
  */
-internal enum class SupportedPaymentMethod(
+internal sealed class SupportedPaymentMethod(
     val type: PaymentMethod.Type,
     @StringRes val displayNameResource: Int,
     @DrawableRes val iconResource: Int,
     private val requirement: PaymentMethodRequirements,
     val paramKey: MutableMap<String, Any?>,
     val formSpec: LayoutSpec?,
-) {
-    Card(
+) : Parcelable {
+    @Parcelize
+    object Card : SupportedPaymentMethod(
         PaymentMethod.Type.Card,
         R.string.stripe_paymentsheet_payment_method_card,
         R.drawable.stripe_ic_paymentsheet_pm_card,
@@ -71,94 +74,97 @@ internal enum class SupportedPaymentMethod(
         LayoutSpec.create(
             SaveForFutureUseSpec(emptyList())
         )
-    ),
-
-    Bancontact(
+    )
+    @Parcelize
+    object Bancontact : SupportedPaymentMethod(
         PaymentMethod.Type.Bancontact,
         R.string.stripe_paymentsheet_payment_method_bancontact,
         R.drawable.stripe_ic_paymentsheet_pm_bancontact,
         BancontactRequirement,
         BancontactParamKey,
         BancontactForm
-    ),
-
-    Sofort(
+    )
+    @Parcelize
+    object Sofort : SupportedPaymentMethod(
         PaymentMethod.Type.Sofort,
         R.string.stripe_paymentsheet_payment_method_sofort,
         R.drawable.stripe_ic_paymentsheet_pm_klarna,
         SofortRequirement,
         SofortParamKey,
         SofortForm
-    ),
-
-    Ideal(
+    )
+    @Parcelize
+    object Ideal : SupportedPaymentMethod(
         PaymentMethod.Type.Ideal,
         R.string.stripe_paymentsheet_payment_method_ideal,
         R.drawable.stripe_ic_paymentsheet_pm_ideal,
         IdealRequirement,
         IdealParamKey,
         IdealForm
-    ),
-
-    SepaDebit(
+    )
+    @Parcelize
+    object SepaDebit : SupportedPaymentMethod(
         PaymentMethod.Type.SepaDebit,
         R.string.stripe_paymentsheet_payment_method_sepa_debit,
         R.drawable.stripe_ic_paymentsheet_pm_sepa_debit,
         SepaDebitRequirement,
         SepaDebitParamKey,
         SepaDebitForm
-    ),
-
-    Eps(
+    )
+    @Parcelize
+    object Eps : SupportedPaymentMethod(
         PaymentMethod.Type.Eps,
         R.string.stripe_paymentsheet_payment_method_eps,
         R.drawable.stripe_ic_paymentsheet_pm_eps,
         EpsRequirement,
         EpsParamKey,
         EpsForm
-    ),
-
-    P24(
+    )
+    @Parcelize
+    object P24 : SupportedPaymentMethod(
         PaymentMethod.Type.P24,
         R.string.stripe_paymentsheet_payment_method_p24,
         R.drawable.stripe_ic_paymentsheet_pm_p24,
         P24Requirement,
         P24ParamKey,
         P24Form
-    ),
-
-    Giropay(
+    )
+    @Parcelize
+    object Giropay : SupportedPaymentMethod(
         PaymentMethod.Type.Giropay,
         R.string.stripe_paymentsheet_payment_method_giropay,
         R.drawable.stripe_ic_paymentsheet_pm_giropay,
         GiropayRequirement,
         GiropayParamKey,
         GiropayForm
-    ),
-    AfterpayClearpay(
+    )
+    @Parcelize
+    object AfterpayClearpay : SupportedPaymentMethod(
         PaymentMethod.Type.AfterpayClearpay,
         R.string.stripe_paymentsheet_payment_method_afterpay_clearpay,
         R.drawable.stripe_ic_paymentsheet_pm_afterpay_clearpay,
         AfterpayClearpayRequirement,
         AfterpayClearpayParamKey,
         AfterpayClearpayForm
-    ),
-    Klarna(
+    )
+    @Parcelize
+    object Klarna : SupportedPaymentMethod(
         PaymentMethod.Type.Klarna,
         R.string.stripe_paymentsheet_payment_method_klarna,
         R.drawable.stripe_ic_paymentsheet_pm_klarna,
         KlarnaRequirement,
         KlarnaParamKey,
         KlarnaForm
-    ),
-    PayPal(
+    )
+    @Parcelize
+    object PayPal : SupportedPaymentMethod(
         PaymentMethod.Type.PayPal,
         R.string.stripe_paymentsheet_payment_method_paypal,
         R.drawable.stripe_ic_paymentsheet_pm_paypal,
         PaypalRequirement,
         PaypalParamKey,
         PaypalForm
-    );
+    )
 
     /**
      * This will get the form layout for the supported method that matches the top pick for the
@@ -336,6 +342,8 @@ internal enum class SupportedPaymentMethod(
     }
 
     companion object {
+        fun values() = exposedPaymentMethods
+
         /**
          * This is a list of the payment methods that we are allowing in the release
          */

@@ -10,6 +10,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.widget.LinearLayout
 import com.stripe.android.R
+import com.stripe.android.core.model.Country
+import com.stripe.android.core.model.CountryUtils
 import com.stripe.android.databinding.AddressWidgetBinding
 import com.stripe.android.model.Address
 import com.stripe.android.model.ShippingInformation

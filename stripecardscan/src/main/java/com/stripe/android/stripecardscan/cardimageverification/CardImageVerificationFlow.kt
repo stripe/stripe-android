@@ -3,7 +3,6 @@ package com.stripe.android.stripecardscan.cardimageverification
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Rect
-import androidx.annotation.Keep
 import androidx.lifecycle.LifecycleOwner
 import com.stripe.android.stripecardscan.camera.CameraPreviewImage
 import com.stripe.android.stripecardscan.cardimageverification.analyzer.MainLoopAnalyzer
@@ -25,20 +24,17 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
-@Keep
 internal data class SavedFrame(
     val hasOcr: Boolean,
     val frame: MainLoopAnalyzer.Input,
 )
 
-@Keep
 internal data class SavedFrameType(
     val hasCard: Boolean,
     val hasOcr: Boolean,
 )
 
-@Keep
-internal abstract class CardVerifyFlow(
+internal abstract class CardImageVerificationFlow(
     private val scanErrorListener: AnalyzerLoopErrorListener,
 ) : ScanFlow<RequiredCardDetails?>,
     AggregateResultListener<MainLoopAggregator.InterimResult, MainLoopAggregator.FinalResult> {
@@ -73,7 +69,7 @@ internal abstract class CardVerifyFlow(
         }
 
         mainLoopAggregator = MainLoopAggregator(
-            listener = this@CardVerifyFlow,
+            listener = this@CardImageVerificationFlow,
             requiredCardIssuer = parameters?.cardIssuer,
             requiredLastFour = parameters?.lastFour,
         ).also { mainLoopOcrAggregator ->
@@ -106,6 +102,7 @@ internal abstract class CardVerifyFlow(
                 analyzerPool = analyzerPool,
                 resultHandler = mainLoopOcrAggregator,
                 analyzerLoopErrorListener = scanErrorListener,
+                statsName = null, // TODO: change this if we want to collect as part of scanstats
             ).apply {
                 subscribeTo(
                     imageStream.map {

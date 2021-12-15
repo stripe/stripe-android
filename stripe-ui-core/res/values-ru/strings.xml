@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+  <!-- Label for input requesting address line 2, used for international addresses -->
+  <string name="address_label_address_line2">Адрес (строка 2)</string>
+  <!-- Used to describe address in United Arab Emirates -->
+  <string name="address_label_ae_emirate">Эмират</string>
+  <!-- Label of an address field -->
+  <string name="address_label_au_suburb_or_city">Населенный пункт</string>
+  <!-- Label of an address field -->
+  <string name="address_label_bb_jm_parish">Приход</string>
+  <!-- Used to describe a field of an address -->
+  <string name="address_label_cedex">Cedex</string>
+  <!-- Caption for Country field on address form -->
+  <string name="address_label_country">Страна</string>
+  <!-- Label of an address field -->
+  <string name="address_label_department">Департамент</string>
+  <!-- Label for the district field on an address form -->
+  <string name="address_label_district">Район</string>
+  <!-- Label of an address field in hk -->
+  <string name="address_label_hk_area">Область</string>
+  <!-- Label of an address field -->
+  <string name="address_label_ie_eircode">Почтовый индекс (Eircode)</string>
+  <!-- Used to describe an address field in Ireland -->
+  <string name="address_label_ie_townland">Таунленд</string>
+  <!-- Used to describe postal code in India -->
+  <string name="address_label_in_pin">Почтовый индекс</string>
+  <!-- Used to describe part of an address -->
+  <string name="address_label_island">Остров</string>
+  <!-- Label of an address field -->
+  <string name="address_label_jp_prefecture">Префектура</string>
+  <!-- Label of an address field -->
+  <string name="address_label_kr_do_si">Do Si</string>
+  <!-- Used to describe a field of an address -->
+  <string name="address_label_neighborhood">Микрорайон</string>
+  <!-- Label of an address field -->
+  <string name="address_label_oblast">Область</string>
+  <!-- Used to describe a field of an address -->
+  <string name="address_label_post_town">Почтовое отделение или город</string>
+  <!-- Label of an address field -->
+  <string name="address_label_suburb">Пригород</string>
+  <!-- Used to describe an address field. -->
+  <string name="address_label_village_township">Деревня или поселок</string>
+  <!-- Billing address section title for card form entry. -->
+  <string name="billing_details">Адрес для выставления счета</string>
+  <!-- Used when a required field is blank and submit is clicked. -->
+  <string name="blank_and_required">Введите данные в это поле.</string>
+  <!-- Used for accessibility to indicate that when you press the dropdown arrow on a form (such as a country or bank), it will bring up a menu to allow you to change the value. -->
+  <string name="change">Изменить</string>
+  <!-- Caption for Email field on address form -->
+  <string name="email">Эл. почта</string>
+  <!-- Error message when email is invalid -->
+  <string name="email_is_invalid">Недействительный адрес эл. почты.</string>
+  <!-- Label for the field containing the dropdown of EPS Banks -->
+  <string name="eps_bank">Банк EPS</string>
+  <!-- The label of a text field that is optional. For example, 'Email (optional)' or 'Name (optional) -->
+  <string name="form_label_optional">%s (необязательно)</string>
+  <!-- An error message displayed when the customer's IBAN is incomplete. -->
+  <string name="iban_incomplete">Введенный код IBAN неполон.</string>
+  <!-- An error message displayed when the customer's iban is invalid. -->
+  <string name="iban_invalid">Введенный код IBAN содержит ошибку.</string>
+  <!-- An error message displayed when the IBAN country code is not supported. -->
+  <string name="iban_invalid_country">Введенный код IBAN ошибочен, \"%s\" – неверный код страны.</string>
+  <!-- An error message displayed when the IBAN does not start with a two-letter country code. -->
+  <string name="iban_invalid_start">Код IBAN должен начинаться с двухбуквенного кода страны.</string>
+  <!-- iDEAL bank section title for iDEAL form entry. -->
+  <string name="ideal_bank">Банк в системе iDEAL</string>
+  <!-- Klarna buy now or pay later copy -->
+  <string name="klarna_buy_now_pay_later">Купить немедленно или оплатить позже через систему Klarna.</string>
+  <!-- Klarna pay later copy -->
+  <string name="klarna_pay_later">Оплатить позже через систему Klarna.</string>
+  <!-- Label on the dropdown to select the Przelewy24 Bank -->
+  <string name="p24_bank">Банк Przelewy24</string>
+  <!-- Next to the save payment method users will see the merchant name: "Save for future Example.inc Payments" -->
+  <string name="save_for_future_payments_with_merchant_name">Сохранить данные для будущих платежей поставщику %s</string>
+  <!-- SEPA mandate text -->
+  <string name="sepa_mandate">Указав свои платежные данные и подтвердив платеж, вы уполномочиваете (A) %s и Stripe, нашего поставщика платежных услуг, на отправку вашему банку инструкций на списание средств с вашего счета и (B) ваш банк на списание средств с вашего счета согласно данным инструкциям. Вы имеете право на возврат средств от вашего банка согласно положениям и условиям Вашего соглашения с банком. Подать заявку на возврат средств следует в течение 8 недель с даты списания средств с вашего счета. Ваши права объясняются в выписке, которую вы можете получить в своем банке. Вы даете согласие на получение уведомлений о будущих дебетованиях в срок до 2 дней до их поступления.</string>
+</resources>

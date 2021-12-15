@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+<!--    <color name="stripe_accent_color_default">#ff2296f3</color>-->
+<!--    <color name="stripe_control_normal_color_default">#ff90A4AE</color>-->
+<!--    <color name="stripe_toolbar_color_default">#ff3f51b5</color>-->
+<!--    <color name="stripe_toolbar_color_default_dark">#ff324090</color>-->
+
+<!--    <color name="stripe_title_text_color">@android:color/white</color>-->
+<!--    <color name="stripe_text_color_secondary">@android:color/secondary_text_light</color>-->
+
+<!--    &lt;!&ndash; Payment Sheet &ndash;&gt;-->
+<!--    <color name="stripe_paymentsheet_background">#ffffff</color>-->
+<!--    <color name="stripe_paymentsheet_form">#757575</color>-->
+<!--    <color name="stripe_paymentsheet_title_text">#303030</color>-->
+<!--    <color name="stripe_paymentsheet_header_text">#565656</color>-->
+<!--    <color name="stripe_paymentsheet_payment_option_unselected_stroke">@android:color/transparent-->
+<!--    </color>-->
+<!--    <color name="stripe_paymentsheet_payment_option_selected_stroke">#1EA672</color>-->
+<!--    <color name="stripe_paymentsheet_payment_method_label_text">#DE000000</color>-->
+<!--    <color name="stripe_paymentsheet_payment_method_label_text_disabled">#61000000</color>-->
+<!--    <color name="stripe_paymentsheet_primary_button_default_background">#0074D4</color>-->
+<!--    <color name="stripe_paymentsheet_primary_button_success_background">#24B47E</color>-->
+<!--    <color name="stripe_paymentsheet_primary_button_text">@android:color/white</color>-->
+<!--    <color name="stripe_paymentsheet_primary_button_confirming_progress">#ffffff</color>-->
+<!--    <color name="stripe_paymentsheet_form_border">#33787880</color>-->
+<!--    <color name="stripe_paymentsheet_elements_background_default">-->
+<!--        @color/stripe_paymentsheet_background-->
+<!--    </color>-->
+<!--    <color name="stripe_paymentsheet_elements_background_disabled">#F8F8F8</color>-->
+<!--    <color name="stripe_paymentsheet_textinputlayout_hint">#661A1A1A</color>-->
+<!--    <color name="stripe_paymentsheet_textinput_color">#E61A1A1A</color>-->
+<!--    <color name="stripe_paymentsheet_country_chevron_color">#000000</color>-->
+<!--    <color name="stripe_paymentsheet_save_checkbox_color">#000000</color>-->
+<!--    <color name="stripe_paymentsheet_toolbar_items_color">#000000</color>-->
+<!--    <color name="stripe_paymentsheet_add_payment_method_form_stroke">#33787880</color>-->
+<!--    <color name="stripe_paymentsheet_add_pm_card_unselected_stroke">#E7E7E7</color>-->
+<!--    <color name="stripe_paymentsheet_add_pm_card_selected_stroke">#343434</color>-->
+    <color name="mandate_text_color">#FF888888</color>
+
+<!--    <color name="stripe_paymentsheet_error_text">#DC2727</color>-->
+<!--    <color name="stripe_paymentsheet_form_error">#CF6679</color>-->
+
+<!--    <color name="stripe_paymentsheet_googlepay_divider_line">#1F000000</color>-->
+<!--    <color name="stripe_paymentsheet_googlepay_divider_background">@android:color/white</color>-->
+    <color name="divider_text_color">#99000000</color>
+
+<!--    <color name="stripe_paymentsheet_testmode_background">#FFDE94</color>-->
+<!--    <color name="stripe_paymentsheet_testmode_text">#8E5710</color>-->
+
+    <!-- CardFormView -->
+
+</resources>

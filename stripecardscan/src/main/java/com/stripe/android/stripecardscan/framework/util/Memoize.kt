@@ -572,154 +572,155 @@ private class CachedFirstResult3<in Input1, in Input2, in Input3, out Result>(
 }
 
 /* mark: memoized function extensions */
-fun <Result> (() -> Result)
+internal fun <Result> (() -> Result)
 .memoized(): () -> Result = Memoize0(this)
-fun <Input, Result> ((Input) -> Result)
+internal fun <Input, Result> ((Input) -> Result)
 .memoized(): (Input) -> Result = Memoize1(this)
-fun <Input1, Input2, Result> ((Input1, Input2) -> Result)
+internal fun <Input1, Input2, Result> ((Input1, Input2) -> Result)
 .memoized(): (Input1, Input2) -> Result = Memoize2(this)
-fun <Input1, Input2, Input3, Result> ((Input1, Input2, Input3) -> Result)
+internal fun <Input1, Input2, Input3, Result> ((Input1, Input2, Input3) -> Result)
 .memoized(): (Input1, Input2, Input3) -> Result = Memoize3(this)
 
 /* mark: memoized with duration function extensions */
-fun <Result> (() -> Result)
+internal fun <Result> (() -> Result)
 .memoized(validFor: Duration): () -> Result =
     MemoizeExpiring0(validFor, this)
-fun <Input, Result> ((Input) -> Result)
+internal fun <Input, Result> ((Input) -> Result)
 .memoized(validFor: Duration): (Input) -> Result =
     MemoizeExpiring1(validFor, this)
-fun <Input1, Input2, Result> ((Input1, Input2) -> Result)
+internal fun <Input1, Input2, Result> ((Input1, Input2) -> Result)
 .memoized(validFor: Duration): (Input1, Input2) -> Result =
     MemoizeExpiring2(validFor, this)
-fun <Input1, Input2, Input3, Result> ((Input1, Input2, Input3) -> Result)
+internal fun <Input1, Input2, Input3, Result> ((Input1, Input2, Input3) -> Result)
 .memoized(validFor: Duration): (Input1, Input2, Input3) -> Result =
     MemoizeExpiring3(validFor, this)
 
 /* mark: memoizeSuspend function extensions */
-fun <Result> (suspend () -> Result)
+internal fun <Result> (suspend () -> Result)
 .memoizedSuspend() = MemoizeSuspend0(this).memoize()
-fun <Input, Result> (suspend (Input) -> Result)
+internal fun <Input, Result> (suspend (Input) -> Result)
 .memoizedSuspend() = MemoizeSuspend1(this).memoize()
-fun <Input1, Input2, Result> (suspend (Input1, Input2) -> Result)
+internal fun <Input1, Input2, Result> (suspend (Input1, Input2) -> Result)
 .memoizedSuspend() = MemoizeSuspend2(this).memoize()
-fun <Input1, Input2, Input3, Result> (suspend (Input1, Input2, Input3) -> Result)
+internal fun <Input1, Input2, Input3, Result> (suspend (Input1, Input2, Input3) -> Result)
 .memoizedSuspend() = MemoizeSuspend3(this).memoize()
 
 /* mark: memoizeSuspend with duration function extensions */
-fun <Result> (suspend () -> Result)
+internal fun <Result> (suspend () -> Result)
 .memoizedSuspend(validFor: Duration) = MemoizeSuspendExpiring0(validFor, this).memoize()
-fun <Input, Result> (suspend (Input) -> Result)
+internal fun <Input, Result> (suspend (Input) -> Result)
 .memoizedSuspend(validFor: Duration) = MemoizeSuspendExpiring1(validFor, this).memoize()
-fun <Input1, Input2, Result> (suspend (Input1, Input2) -> Result)
+internal fun <Input1, Input2, Result> (suspend (Input1, Input2) -> Result)
 .memoizedSuspend(validFor: Duration) = MemoizeSuspendExpiring2(validFor, this).memoize()
-fun <Input1, Input2, Input3, Result> (suspend (Input1, Input2, Input3) -> Result)
+internal fun <Input1, Input2, Input3, Result> (suspend (Input1, Input2, Input3) -> Result)
 .memoizedSuspend(validFor: Duration) = MemoizeSuspendExpiring3(validFor, this).memoize()
 
 /* mark: memoize methods */
-fun <Result> memoize(
+internal fun <Result> memoize(
     f: () -> Result,
 ): () -> Result = Memoize0(f)
-fun <Input, Result> memoize(
+internal fun <Input, Result> memoize(
     f: (Input) -> Result,
 ): (Input) -> Result = Memoize1(f)
-fun <Input1, Input2, Result> memoize(
+internal fun <Input1, Input2, Result> memoize(
     f: (Input1, Input2) -> Result,
 ): (Input1, Input2) -> Result = Memoize2(f)
-fun <Input1, Input2, Input3, Result> memoize(
+internal fun <Input1, Input2, Input3, Result> memoize(
     f: (Input1, Input2, Input3) -> Result,
 ): (Input1, Input2, Input3) -> Result = Memoize3(f)
 
 /* mark: memoize with duration methods */
-fun <Result> memoize(
+internal fun <Result> memoize(
     validFor: Duration,
     f: () -> Result,
 ): () -> Result = MemoizeExpiring0(validFor, f)
-fun <Input, Result> memoize(
+internal fun <Input, Result> memoize(
     validFor: Duration,
     f: (Input) -> Result,
 ): (Input) -> Result = MemoizeExpiring1(validFor, f)
-fun <Input1, Input2, Result> memoize(
+internal fun <Input1, Input2, Result> memoize(
     validFor: Duration,
     f: (Input1, Input2) -> Result,
 ): (Input1, Input2) -> Result = MemoizeExpiring2(validFor, f)
-fun <Input1, Input2, Input3, Result> memoize(
+internal fun <Input1, Input2, Input3, Result> memoize(
     validFor: Duration,
     f: (Input1, Input2, Input3) -> Result,
 ): (Input1, Input2, Input3) -> Result = MemoizeExpiring3(validFor, f)
 
 /* mark: memoizeSuspend methods */
-fun <Result> memoizeSuspend(
+internal fun <Result> memoizeSuspend(
     f: suspend() -> Result,
 ): suspend () -> Result = MemoizeSuspend0(f).memoize()
-fun <Input, Result> memoizeSuspend(
+internal fun <Input, Result> memoizeSuspend(
     f: suspend(Input) -> Result,
 ): suspend (Input) -> Result = MemoizeSuspend1(f).memoize()
-fun <Input1, Input2, Result> memoizeSuspend(
+internal fun <Input1, Input2, Result> memoizeSuspend(
     f: suspend(Input1, Input2) -> Result,
 ): suspend (Input1, Input2) -> Result = MemoizeSuspend2(f).memoize()
-fun <Input1, Input2, Input3, Result> memoizeSuspend(
+internal fun <Input1, Input2, Input3, Result> memoizeSuspend(
     f: suspend(Input1, Input2, Input3) -> Result,
 ): suspend (Input1, Input2, Input3) -> Result = MemoizeSuspend3(f).memoize()
 
 /* mark: memoizeSuspend with duration methods */
-fun <Result> memoizeSuspend(
+internal fun <Result> memoizeSuspend(
     validFor: Duration,
     f: suspend() -> Result,
 ): suspend () -> Result = MemoizeSuspendExpiring0(validFor, f).memoize()
-fun <Input, Result> memoizeSuspend(
+internal fun <Input, Result> memoizeSuspend(
     validFor: Duration,
     f: suspend(Input) -> Result,
 ): suspend (Input) -> Result = MemoizeSuspendExpiring1(validFor, f).memoize()
-fun <Input1, Input2, Result> memoizeSuspend(
+internal fun <Input1, Input2, Result> memoizeSuspend(
     validFor: Duration,
     f: suspend(Input1, Input2) -> Result,
 ): suspend (Input1, Input2) -> Result = MemoizeSuspendExpiring2(validFor, f).memoize()
-fun <Input1, Input2, Input3, Result> memoizeSuspend(
+internal fun <Input1, Input2, Input3, Result> memoizeSuspend(
     validFor: Duration,
     f: suspend(Input1, Input2, Input3) -> Result,
 ): suspend (Input1, Input2, Input3) -> Result = MemoizeSuspendExpiring3(validFor, f).memoize()
 
 /* mark: extensions to functions */
-fun <Result> (() -> Result)
+internal fun <Result> (() -> Result)
 .cachedFirstResult(): () -> Result = Memoize0(this)
-fun <Input, Result> ((Input) -> Result)
+internal fun <Input, Result> ((Input) -> Result)
 .cachedFirstResult(): (Input) -> Result = CachedFirstResult1(this)
-fun <Input1, Input2, Result> ((Input1, Input2) -> Result)
+internal fun <Input1, Input2, Result> ((Input1, Input2) -> Result)
 .cachedFirstResult(): (Input1, Input2) -> Result = CachedFirstResult2(this)
-fun <Input1, Input2, Input3, Result> ((Input1, Input2, Input3) -> Result)
+internal fun <Input1, Input2, Input3, Result> ((Input1, Input2, Input3) -> Result)
 .cachedFirstResult(): (Input1, Input2, Input3) -> Result = CachedFirstResult3(this)
 
 /* mark: extensions to suspend functions */
-fun <Result> (suspend () -> Result)
+internal fun <Result> (suspend () -> Result)
 .cachedFirstResultSuspend() = MemoizeSuspend0(this).memoize()
-fun <Input, Result> (suspend (Input) -> Result)
+internal fun <Input, Result> (suspend (Input) -> Result)
 .cachedFirstResultSuspend() = CachedFirstResultSuspend1(this).cacheFirstResult()
-fun <Input1, Input2, Result> (suspend (Input1, Input2) -> Result)
+internal fun <Input1, Input2, Result> (suspend (Input1, Input2) -> Result)
 .cachedFirstResultSuspend() = CachedFirstResultSuspend2(this).cacheFirstResult()
-fun <Input1, Input2, Input3, Result> (suspend (Input1, Input2, Input3) -> Result)
+internal fun <Input1, Input2, Input3, Result> (suspend (Input1, Input2, Input3) -> Result)
 .cachedFirstResultSuspend() = CachedFirstResultSuspend3(this).cacheFirstResult()
 
 /* mark: cacheFirstResult methods */
-fun <Result> cacheFirstResult(
+internal fun <Result> cacheFirstResult(
     f: () -> Result,
 ): () -> Result = Memoize0(f)
-fun <Input, Result> cacheFirstResult(
+internal fun <Input, Result> cacheFirstResult(
     f: (Input) -> Result,
 ): (Input) -> Result = CachedFirstResult1(f)
-fun <Input1, Input2, Result> cacheFirstResult(
+internal fun <Input1, Input2, Result> cacheFirstResult(
     f: (Input1, Input2) -> Result,
 ): (Input1, Input2) -> Result = CachedFirstResult2(f)
-fun <Input1, Input2, Input3, Result> cacheFirstResult(
+internal fun <Input1, Input2, Input3, Result> cacheFirstResult(
     f: (Input1, Input2, Input3) -> Result,
 ): (Input1, Input2, Input3) -> Result = CachedFirstResult3(f)
 
 /* mark: cacheFirstResultSuspend methods */
-fun <Result> cacheFirstResultSuspend(f: suspend() -> Result) =
+internal fun <Result> cacheFirstResultSuspend(f: suspend() -> Result) =
     MemoizeSuspend0(f).memoize()
-fun <Input, Result> cacheFirstResultSuspend(f: suspend(Input) -> Result) =
+internal fun <Input, Result> cacheFirstResultSuspend(f: suspend(Input) -> Result) =
     CachedFirstResultSuspend1(f).cacheFirstResult()
-fun <Input1, Input2, Result> cacheFirstResultSuspend(f: suspend(Input1, Input2) -> Result) =
-    CachedFirstResultSuspend2(f).cacheFirstResult()
-fun <Input1, Input2, Input3, Result> cacheFirstResultSuspend(
+internal fun <Input1, Input2, Result> cacheFirstResultSuspend(
+    f: suspend(Input1, Input2) -> Result
+) = CachedFirstResultSuspend2(f).cacheFirstResult()
+internal fun <Input1, Input2, Input3, Result> cacheFirstResultSuspend(
     f: suspend(Input1, Input2, Input3) -> Result,
 ) = CachedFirstResultSuspend3(f).cacheFirstResult()

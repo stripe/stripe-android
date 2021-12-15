@@ -1,13 +1,14 @@
 package com.stripe.android.paymentsheet.forms
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.paymentsheet.elements.EmailElement
-import com.stripe.android.paymentsheet.elements.EmailConfig
-import com.stripe.android.paymentsheet.elements.SectionController
-import com.stripe.android.paymentsheet.elements.SectionElement
-import com.stripe.android.paymentsheet.elements.TextFieldController
-import com.stripe.android.paymentsheet.elements.IdentifierSpec
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.ui.core.elements.EmailConfig
+import com.stripe.android.ui.core.elements.EmailElement
+import com.stripe.android.ui.core.elements.IdentifierSpec
+import com.stripe.android.ui.core.elements.SectionController
+import com.stripe.android.ui.core.elements.SectionElement
+import com.stripe.android.ui.core.elements.TextFieldController
+import com.stripe.android.ui.core.forms.FormFieldEntry
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first

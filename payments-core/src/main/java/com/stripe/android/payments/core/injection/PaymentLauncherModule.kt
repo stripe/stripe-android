@@ -1,6 +1,7 @@
 package com.stripe.android.payments.core.injection
 
 import android.content.Context
+import com.google.android.instantapps.InstantApps
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.UIContext
@@ -40,7 +41,8 @@ internal class PaymentLauncherModule {
         defaultAnalyticsRequestExecutor: DefaultAnalyticsRequestExecutor,
         paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
         @Named(PUBLISHABLE_KEY) publishableKeyProvider: () -> String,
-        @Named(PRODUCT_USAGE) productUsage: Set<String>
+        @Named(PRODUCT_USAGE) productUsage: Set<String>,
+        @Named(IS_INSTANT_APP) isInstantApp: Boolean
     ): PaymentAuthenticatorRegistry = DefaultPaymentAuthenticatorRegistry.createInstance(
         context,
         stripeRepository,
@@ -51,6 +53,13 @@ internal class PaymentLauncherModule {
         uiContext,
         threeDs1IntentReturnUrlMap,
         publishableKeyProvider,
-        productUsage
+        productUsage,
+        isInstantApp
     )
+
+    @Provides
+    @Named(IS_INSTANT_APP)
+    fun provideIsInstantApp(context: Context): Boolean {
+        return InstantApps.isInstantApp(context)
+    }
 }

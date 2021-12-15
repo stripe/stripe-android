@@ -2,9 +2,9 @@ plugins {
     id "com.android.library"
     id "kotlin-android"
     id 'kotlin-kapt'
-//    id 'org.jetbrains.dokka'
+    id 'org.jetbrains.dokka'
     id "org.jetbrains.kotlin.plugin.parcelize"
-    id 'org.jetbrains.kotlin.plugin.serialization' version '1.6.0'
+    id 'org.jetbrains.kotlin.plugin.serialization' version '1.6.10'
 }
 
 android {
@@ -68,10 +68,9 @@ android {
         disable "UnrememberedMutableState"
     }
 
-    // TODO: enable this when ready for release
-//    dokkaHtml {
-//        outputDirectory = new File("${project.rootDir}/docs/$project.name")
-//    }
+    dokkaHtml {
+        outputDirectory = new File("${project.rootDir}/docs/$project.name")
+    }
 }
 
 assemble.dependsOn('lint')
@@ -92,7 +91,6 @@ dependencies {
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinCoroutinesVersion"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$kotlinCoroutinesVersion"
     implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:$kotlinSerializationVersion"
-    implementation "org.jetbrains.kotlinx:kotlinx-serialization-properties:$kotlinSerializationVersion"
 
     testImplementation "androidx.test:core:$androidTestVersion"
     testImplementation "androidx.test:runner:$androidTestVersion"
@@ -133,11 +131,10 @@ task ktlintFormat(type: JavaExec, group: "formatting") {
     args "-F", "src/**/*.kt"
 }
 
-// TODO: enable this one we're ready to release
-//ext {
-//    artifactId = "stripecardscan"
-//    artifactName = "stripecardscan"
-//    artifactDescrption = "The stripecardscan module of Stripe Payment Android SDK"
-//}
-//
-//apply from: "${rootDir}/deploy/deploy.gradle"
+ext {
+    artifactId = "stripecardscan"
+    artifactName = "stripecardscan"
+    artifactDescrption = "The stripecardscan module of Stripe Payment Android SDK"
+}
+
+apply from: "${rootDir}/deploy/deploy.gradle"

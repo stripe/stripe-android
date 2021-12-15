@@ -8,10 +8,11 @@ import com.stripe.android.core.networking.StripeRequest
 import com.stripe.android.core.networking.StripeResponse
 import com.stripe.android.stripecardscan.framework.NetworkConfig
 import com.stripe.android.stripecardscan.framework.api.StripeNetwork.Companion.RESPONSE_CODE_UNSET
+import com.stripe.android.stripecardscan.framework.api.dto.CardScanFileDownloadRequest
+import com.stripe.android.stripecardscan.framework.api.dto.CardScanRequest
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestCoroutineDispatcher
 import kotlinx.coroutines.test.runBlockingTest
-import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import org.junit.Test
@@ -28,7 +29,6 @@ import java.net.HttpURLConnection.HTTP_OK
 import java.net.URL
 
 @ExperimentalCoroutinesApi
-@ExperimentalSerializationApi
 @RunWith(RobolectricTestRunner::class)
 class StripeNetworkTest {
     @Serializable

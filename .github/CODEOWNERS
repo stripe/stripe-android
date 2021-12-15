@@ -9,6 +9,7 @@
 /paymentsheet-example/ @brnunes-stripe @michelleb-stripe @skyler-stripe
 /wechatpay/ @brnunes-stripe @michelleb-stripe @skyler-stripe @ccen-stripe
 /stripe-test-e2e/ @brnunes-stripe @michelleb-stripe @skyler-stripe
+/link/ @brnunes-stripe @michelleb-stripe @skyler-stripe
 
 # stripecardscan sdk
 /stripecardscan/ @awush-stripe @ccen-stripe
@@ -16,3 +17,4 @@
 
 # stripe-core
 /stripe-core/ @ccen-stripe
+/stripe-ui-core/ @brnunes-stripe @michelleb-stripe @skyler-stripe

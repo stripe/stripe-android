@@ -25,7 +25,7 @@ import kotlin.math.roundToInt
  * ```
  */
 @CheckResult
-fun maxAspectRatioInSize(area: Size, aspectRatio: Float): Size {
+internal fun maxAspectRatioInSize(area: Size, aspectRatio: Float): Size {
     var width = area.width
     var height = (width / aspectRatio).roundToInt()
 
@@ -53,7 +53,7 @@ fun maxAspectRatioInSize(area: Size, aspectRatio: Float): Size {
  * ```
  */
 @CheckResult
-fun minAspectRatioSurroundingSize(area: Size, aspectRatio: Float): Size {
+internal fun minAspectRatioSurroundingSize(area: Size, aspectRatio: Float): Size {
     var width = area.width
     var height = (width / aspectRatio).roundToInt()
 
@@ -73,7 +73,7 @@ fun minAspectRatioSurroundingSize(area: Size, aspectRatio: Float): Size {
  * to match.
  */
 @CheckResult
-fun adjustSizeToAspectRatio(area: Size, aspectRatio: Float): Size = if (aspectRatio < 1) {
+internal fun adjustSizeToAspectRatio(area: Size, aspectRatio: Float): Size = if (aspectRatio < 1) {
     Size(area.width, (area.width / aspectRatio).roundToInt())
 } else {
     Size((area.height * aspectRatio).roundToInt(), area.height)
@@ -93,7 +93,7 @@ fun adjustSizeToAspectRatio(area: Size, aspectRatio: Float): Size = if (aspectRa
  * resolutions.
  */
 @CheckResult
-fun Size.scaleAndCenterWithin(containingSize: Size): Rect {
+internal fun Size.scaleAndCenterWithin(containingSize: Size): Rect {
     val aspectRatio = width.toFloat() / height
 
     // Since the preview image may be at a different resolution than the full image, scale the
@@ -110,7 +110,7 @@ fun Size.scaleAndCenterWithin(containingSize: Size): Rect {
 }
 
 @CheckResult
-fun Size.scaleAndCenterWithin(containingRect: Rect): Rect =
+internal fun Size.scaleAndCenterWithin(containingRect: Rect): Rect =
     this.scaleAndCenterWithin(containingRect.size()).move(containingRect.left, containingRect.top)
 
 /**
@@ -131,7 +131,7 @@ fun Size.scaleAndCenterWithin(containingRect: Rect): Rect =
  * resolutions.
  */
 @CheckResult
-fun Size.scaleAndCenterSurrounding(surroundedSize: Size): Rect {
+internal fun Size.scaleAndCenterSurrounding(surroundedSize: Size): Rect {
     val aspectRatio = width.toFloat() / height
 
     val scaledSize = minAspectRatioSurroundingSize(surroundedSize, aspectRatio)
@@ -149,7 +149,7 @@ fun Size.scaleAndCenterSurrounding(surroundedSize: Size): Rect {
  * Scale a size based on percentage scale values, and keep track of its position.
  */
 @CheckResult
-fun Size.scaleCentered(x: Float, y: Float): Rect {
+internal fun Size.scaleCentered(x: Float, y: Float): Rect {
     val newSize = this.scale(x, y)
     val left = (this.width - newSize.width) / 2
     val top = (this.height - newSize.height) / 2
@@ -165,32 +165,32 @@ fun Size.scaleCentered(x: Float, y: Float): Rect {
  * Calculate the new size based on percentage scale values.
  */
 @CheckResult
-fun SizeF.scale(x: Float, y: Float) = SizeF(this.width * x, this.height * y)
+internal fun SizeF.scale(x: Float, y: Float) = SizeF(this.width * x, this.height * y)
 
 /**
  * Calculate the new size based on a percentage scale.
  */
 @CheckResult
-fun SizeF.scale(scale: Float) = this.scale(scale, scale)
+internal fun SizeF.scale(scale: Float) = this.scale(scale, scale)
 
 /**
  * Calculate the new size based on percentage scale values.
  */
 @CheckResult
-fun Size.scale(x: Float, y: Float): Size =
+internal fun Size.scale(x: Float, y: Float): Size =
     Size((this.width * x).roundToInt(), (this.height * y).roundToInt())
 
 /**
  * Calculate the new size based on a percentage scale.
  */
 @CheckResult
-fun Size.scale(scale: Float) = this.scale(scale, scale)
+internal fun Size.scale(scale: Float) = this.scale(scale, scale)
 
 /**
  * Center a size on a given rectangle. The size may be larger or smaller than the rect.
  */
 @CheckResult
-fun Size.centerOn(rect: Rect) = Rect(
+internal fun Size.centerOn(rect: Rect) = Rect(
     /* left */
     rect.centerX() - this.width / 2,
     /* top */
@@ -208,7 +208,7 @@ fun Size.centerOn(rect: Rect) = Rect(
  * For example, scaling a Rect(1, 2, 3, 4) by Size(5, 6) will result in a Rect(5, 12, 15, 24)
  */
 @CheckResult
-fun RectF.scaled(scaledSize: Size) = RectF(
+internal fun RectF.scaled(scaledSize: Size) = RectF(
     this.left * scaledSize.width,
     this.top * scaledSize.height,
     this.right * scaledSize.width,
@@ -222,7 +222,7 @@ fun RectF.scaled(scaledSize: Size) = RectF(
  * For example, scaling a Rect(5, 6, 7, 8) by Size(2, 0.5) will result
  */
 @CheckResult
-fun RectF.centerScaled(scaleX: Float, scaleY: Float) = RectF(
+internal fun RectF.centerScaled(scaleX: Float, scaleY: Float) = RectF(
     this.centerX() - this.width() * scaleX / 2,
     this.centerY() - this.height() * scaleY / 2,
     this.centerX() + this.width() * scaleX / 2,
@@ -230,7 +230,7 @@ fun RectF.centerScaled(scaleX: Float, scaleY: Float) = RectF(
 )
 
 @CheckResult
-fun Rect.centerScaled(scaleX: Float, scaleY: Float) = Rect(
+internal fun Rect.centerScaled(scaleX: Float, scaleY: Float) = Rect(
     this.centerX() - (this.width() * scaleX / 2).toInt(),
     this.centerY() - (this.height() * scaleY / 2).toInt(),
     this.centerX() + (this.width() * scaleX / 2).toInt(),
@@ -241,22 +241,22 @@ fun Rect.centerScaled(scaleX: Float, scaleY: Float) = Rect(
  * Converts a size to rectangle with the top left corner at 0,0
  */
 @CheckResult
-fun Size.toRect() = Rect(0, 0, this.width, this.height)
+internal fun Size.toRect() = Rect(0, 0, this.width, this.height)
 
 @CheckResult
-fun Size.toRectF() = RectF(0F, 0F, this.width.toFloat(), this.height.toFloat())
+internal fun Size.toRectF() = RectF(0F, 0F, this.width.toFloat(), this.height.toFloat())
 
 /**
  * Transpose a size's width and height.
  */
 @CheckResult
-fun Size.transpose() = Size(this.height, this.width)
+internal fun Size.transpose() = Size(this.height, this.width)
 
 /**
  * Return a rect that is the intersection of two other rects
  */
 @CheckResult
-fun Rect.intersectionWith(rect: Rect): Rect {
+internal fun Rect.intersectionWith(rect: Rect): Rect {
     require(this.intersect(rect)) {
         "Given rects do not intersect $this <> $rect"
     }
@@ -273,7 +273,7 @@ fun Rect.intersectionWith(rect: Rect): Rect {
  * Move relative to its current position
  */
 @CheckResult
-fun Rect.move(relativeX: Int, relativeY: Int) = Rect(
+internal fun Rect.move(relativeX: Int, relativeY: Int) = Rect(
     this.left + relativeX,
     this.top + relativeY,
     this.right + relativeX,
@@ -284,7 +284,7 @@ fun Rect.move(relativeX: Int, relativeY: Int) = Rect(
  * Move relative to its current position
  */
 @CheckResult
-fun RectF.move(relativeX: Float, relativeY: Float) = RectF(
+internal fun RectF.move(relativeX: Float, relativeY: Float) = RectF(
     this.left + relativeX,
     this.top + relativeY,
     this.right + relativeX,
@@ -292,16 +292,17 @@ fun RectF.move(relativeX: Float, relativeY: Float) = RectF(
 )
 
 @CheckResult
-fun Size.toSizeF() = SizeF(width.toFloat(), height.toFloat())
+internal fun Size.toSizeF() = SizeF(width.toFloat(), height.toFloat())
 
 @CheckResult
-fun SizeF.toSize() = Size(width.roundToInt(), height.roundToInt())
+internal fun SizeF.toSize() = Size(width.roundToInt(), height.roundToInt())
 
 @CheckResult
-fun Rect.toRectF() = RectF(left.toFloat(), top.toFloat(), right.toFloat(), bottom.toFloat())
+internal fun Rect.toRectF() =
+    RectF(left.toFloat(), top.toFloat(), right.toFloat(), bottom.toFloat())
 
 @CheckResult
-fun RectF.toRect() =
+internal fun RectF.toRect() =
     Rect(left.roundToInt(), top.roundToInt(), right.roundToInt(), bottom.roundToInt())
 
 /**
@@ -309,7 +310,7 @@ fun RectF.toRect() =
  * to that new location
  */
 @CheckResult
-fun SizeF.projectRegionOfInterest(toSize: SizeF, regionOfInterest: RectF): RectF {
+internal fun SizeF.projectRegionOfInterest(toSize: SizeF, regionOfInterest: RectF): RectF {
     require(this.width > 0 && this.height > 0) {
         "Cannot project from container with non-positive dimensions"
     }
@@ -327,15 +328,15 @@ fun SizeF.projectRegionOfInterest(toSize: SizeF, regionOfInterest: RectF): RectF
  * to that new location
  */
 @CheckResult
-fun Size.projectRegionOfInterest(toSize: Size, regionOfInterest: Rect) =
+internal fun Size.projectRegionOfInterest(toSize: Size, regionOfInterest: Rect) =
     this.toSizeF().projectRegionOfInterest(toSize.toSizeF(), regionOfInterest.toRectF()).toRect()
 
 @CheckResult
-fun RectF.projectRegionOfInterest(toSize: SizeF, regionOfInterest: RectF) =
+internal fun RectF.projectRegionOfInterest(toSize: SizeF, regionOfInterest: RectF) =
     this.size().projectRegionOfInterest(toSize, regionOfInterest.move(-this.left, -this.top))
 
 @CheckResult
-fun Rect.projectRegionOfInterest(toSize: Size, regionOfInterest: Rect) =
+internal fun Rect.projectRegionOfInterest(toSize: Size, regionOfInterest: Rect) =
     this.size().projectRegionOfInterest(toSize, regionOfInterest.move(-this.left, -this.top))
 
 /**
@@ -357,7 +358,7 @@ fun Rect.projectRegionOfInterest(toSize: Size, regionOfInterest: Rect) =
  * The position and size of the region of interest are scaled to the new rect.
  */
 @CheckResult
-fun RectF.projectRegionOfInterest(toRect: RectF, regionOfInterest: RectF) =
+internal fun RectF.projectRegionOfInterest(toRect: RectF, regionOfInterest: RectF) =
     this.projectRegionOfInterest(toRect.size(), regionOfInterest).move(toRect.left, toRect.top)
 
 /**
@@ -379,7 +380,7 @@ fun RectF.projectRegionOfInterest(toRect: RectF, regionOfInterest: RectF) =
  * The position and size of the region of interest are scaled to the new rect.
  */
 @CheckResult
-fun Rect.projectRegionOfInterest(toRect: Rect, regionOfInterest: Rect) =
+internal fun Rect.projectRegionOfInterest(toRect: Rect, regionOfInterest: Rect) =
     this.projectRegionOfInterest(toRect.size(), regionOfInterest).move(toRect.left, toRect.top)
 
 /**
@@ -418,7 +419,7 @@ fun Rect.projectRegionOfInterest(toRect: Rect, regionOfInterest: Rect) =
  * |_|___|__|
  */
 @CheckResult
-fun Size.resizeRegion(
+internal fun Size.resizeRegion(
     originalRegion: Rect,
     newRegion: Rect,
     newSize: Size
@@ -527,24 +528,24 @@ fun Size.resizeRegion(
 /**
  * Determine the size of a [Rect].
  */
-fun Rect.size() = Size(width(), height())
+internal fun Rect.size() = Size(width(), height())
 
 /**
  * Determine the size of a [RectF].
  */
-fun RectF.size() = SizeF(width(), height())
+internal fun RectF.size() = SizeF(width(), height())
 
 /**
  * Determine the aspect ratio of a [Size].
  */
-fun Size.aspectRatio() = width.toFloat() / height.toFloat()
+internal fun Size.aspectRatio() = width.toFloat() / height.toFloat()
 
 /**
  * Determine the aspect ratio of a [SizeF].
  */
-fun SizeF.aspectRatio() = width / height
+internal fun SizeF.aspectRatio() = width / height
 
 /**
  * Determine the size of a [View].
  */
-fun View.size() = Size(width, height)
+internal fun View.size() = Size(width, height)

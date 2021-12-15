@@ -1,6 +1,5 @@
 package com.stripe.android.stripecardscan.cardimageverification.result
 
-import androidx.annotation.Keep
 import com.stripe.android.stripecardscan.cardimageverification.SavedFrame
 import com.stripe.android.stripecardscan.cardimageverification.SavedFrameType
 import com.stripe.android.stripecardscan.cardimageverification.CardImageVerificationConfig
@@ -40,16 +39,15 @@ internal class MainLoopAggregator(
             requiredCardIssuer = requiredCardIssuer,
             requiredLastFour = requiredLastFour,
         ),
+        statsName = null, // TODO: when we want to collect this in scan stats, give this a name
     ) {
 
-    @Keep
     internal data class FinalResult(
         val pan: String,
         val savedFrames: Map<SavedFrameType, List<SavedFrame>>,
     )
 
-    @Keep
-    data class InterimResult(
+    internal data class InterimResult(
         val analyzerResult: MainLoopAnalyzer.Prediction,
         val frame: MainLoopAnalyzer.Input,
         val state: MainLoopState,

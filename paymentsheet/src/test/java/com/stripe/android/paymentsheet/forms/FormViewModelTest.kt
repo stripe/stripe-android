@@ -12,27 +12,31 @@ import com.stripe.android.core.injection.Injector
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.COMPOSE_FRAGMENT_ARGS
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.address.AddressFieldElementRepository
-import com.stripe.android.paymentsheet.elements.AddressElement
-import com.stripe.android.paymentsheet.elements.BankRepository
-import com.stripe.android.paymentsheet.elements.CountrySpec
-import com.stripe.android.paymentsheet.elements.EmailSpec
-import com.stripe.android.paymentsheet.elements.IdentifierSpec
-import com.stripe.android.paymentsheet.elements.LayoutSpec
-import com.stripe.android.paymentsheet.elements.RowElement
-import com.stripe.android.paymentsheet.elements.SaveForFutureUseController
-import com.stripe.android.paymentsheet.elements.SaveForFutureUseSpec
-import com.stripe.android.paymentsheet.elements.SectionElement
-import com.stripe.android.paymentsheet.elements.SectionSingleFieldElement
-import com.stripe.android.paymentsheet.elements.SectionSpec
-import com.stripe.android.paymentsheet.elements.SimpleTextSpec.Companion.NAME
-import com.stripe.android.paymentsheet.elements.TextFieldController
-import com.stripe.android.paymentsheet.forms.resources.StaticResourceRepository
 import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.ui.core.address.AddressFieldElementRepository
+import com.stripe.android.ui.core.elements.AddressElement
+import com.stripe.android.ui.core.elements.BankRepository
+import com.stripe.android.ui.core.elements.CountrySpec
+import com.stripe.android.ui.core.elements.EmailSpec
+import com.stripe.android.ui.core.elements.IdentifierSpec
+import com.stripe.android.ui.core.elements.LayoutSpec
+import com.stripe.android.ui.core.elements.RowElement
+import com.stripe.android.ui.core.elements.SaveForFutureUseController
+import com.stripe.android.ui.core.elements.SaveForFutureUseElement
+import com.stripe.android.ui.core.elements.SaveForFutureUseSpec
+import com.stripe.android.ui.core.elements.SectionElement
+import com.stripe.android.ui.core.elements.SectionSingleFieldElement
+import com.stripe.android.ui.core.elements.SectionSpec
+import com.stripe.android.ui.core.elements.SimpleTextSpec.Companion.NAME
+import com.stripe.android.ui.core.elements.TextFieldController
+import com.stripe.android.ui.core.forms.SepaDebitForm
+import com.stripe.android.ui.core.forms.SofortForm
+import com.stripe.android.ui.core.forms.resources.StaticResourceRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.test.runBlockingTest
 import org.junit.Assert.assertNotNull
 import org.junit.Test
@@ -167,7 +171,7 @@ internal class FormViewModelTest {
             }
         assertThat(values[0]).isEmpty()
 
-        formViewModel.setSaveForFutureUseVisibility(false)
+        formViewModel.saveForFutureUseVisible.value = false
 
         ShadowLooper.runUiThreadTasksIncludingDelayedTasks()
 
@@ -554,4 +558,11 @@ internal class FormViewModelTest {
                     ?.firstOrNull { it?.label == label }
         }
     }
+}
+
+internal suspend fun FormViewModel.setSaveForFutureUse(value: Boolean) {
+    elements
+        .firstOrNull()
+        ?.filterIsInstance<SaveForFutureUseElement>()
+        ?.firstOrNull()?.controller?.onValueChange(value)
 }

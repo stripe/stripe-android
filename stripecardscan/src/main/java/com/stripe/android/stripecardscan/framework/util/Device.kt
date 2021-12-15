@@ -8,7 +8,7 @@ import android.telephony.TelephonyManager
 import java.util.Locale
 
 internal data class Device(
-    val ids: DeviceIds,
+    val android_id: String?,
     val name: String,
     val bootCount: Int,
     val locale: String?,
@@ -22,7 +22,7 @@ internal data class Device(
     companion object {
         private val getDeviceDetails = cacheFirstResult { context: Context ->
             Device(
-                ids = DeviceIds.fromContext(context),
+                android_id = getAndroidId(context),
                 name = getDeviceName(),
                 bootCount = getDeviceBootCount(context),
                 locale = getDeviceLocale(),
@@ -37,20 +37,6 @@ internal data class Device(
 
         @JvmStatic
         fun fromContext(context: Context) = getDeviceDetails(context.applicationContext)
-    }
-}
-
-internal data class DeviceIds(
-    val androidId: String?
-) {
-    companion object {
-        private val getDeviceIds = cacheFirstResult { context: Context ->
-            DeviceIds(
-                androidId = getAndroidId(context)
-            )
-        }
-
-        fun fromContext(context: Context) = getDeviceIds(context.applicationContext)
     }
 }
 

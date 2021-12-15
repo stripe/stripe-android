@@ -10,23 +10,20 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentIntentFixtures.PI_OFF_SESSION
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.COMPOSE_FRAGMENT_ARGS
 import com.stripe.android.paymentsheet.PaymentSheetViewModel.CheckoutIdentifier
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.databinding.FragmentPaymentsheetAddPaymentMethodBinding
 import com.stripe.android.paymentsheet.databinding.PrimaryButtonBinding
 import com.stripe.android.paymentsheet.databinding.StripeGooglePayButtonBinding
-import com.stripe.android.paymentsheet.elements.IdentifierSpec
-import com.stripe.android.paymentsheet.forms.FormFieldEntry
 import com.stripe.android.paymentsheet.forms.FormFieldValues
-import com.stripe.android.paymentsheet.model.Amount
 import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.FragmentConfigFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -37,6 +34,9 @@ import com.stripe.android.paymentsheet.paymentdatacollection.ComposeFormDataColl
 import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
 import com.stripe.android.paymentsheet.ui.PaymentSheetFragmentFactory
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
+import com.stripe.android.ui.core.Amount
+import com.stripe.android.ui.core.elements.IdentifierSpec
+import com.stripe.android.ui.core.forms.FormFieldEntry
 import com.stripe.android.utils.TestUtils.idleLooper
 import org.junit.Before
 import org.junit.Rule
@@ -85,7 +85,8 @@ class PaymentSheetAddPaymentMethodFragmentTest {
         }
     }
 
-    @Test @Config(qualifiers = "w320dp")
+    @Test
+    @Config(qualifiers = "w320dp")
     fun `when screen is 320dp wide, adapter should show 2 and a half items with 104dp width`() {
         val paymentIntent = mock<PaymentIntent>().also {
             whenever(it.paymentMethodTypes).thenReturn(listOf("card", "bancontact", "sofort", "ideal"))
@@ -96,25 +97,15 @@ class PaymentSheetAddPaymentMethodFragmentTest {
         }
     }
 
-    @Test @Config(qualifiers = "w475dp")
-    fun `when screen is 475dp wide, adapter should show 3 and a half items with 115dp width`() {
+    @Test
+    @Config(qualifiers = "w475dp")
+    fun `when screen is 475dp wide, adapter should show 2 items evenly spread out`() {
         val paymentIntent = mock<PaymentIntent>().also {
-            whenever(it.paymentMethodTypes).thenReturn(listOf("card", "bancontact", "sofort", "ideal"))
+            whenever(it.paymentMethodTypes).thenReturn(listOf("card", "bancontact"))
         }
         createFragment(stripeIntent = paymentIntent) { fragment, viewBinding ->
             val item = viewBinding.paymentMethodsRecycler.layoutManager!!.findViewByPosition(0)
-            assertThat(item!!.measuredWidth).isEqualTo(115)
-        }
-    }
-
-    @Test @Config(qualifiers = "w476dp")
-    fun `when screen is 476dp wide, adapter should show 4 items with 100dp width`() {
-        val paymentIntent = mock<PaymentIntent>().also {
-            whenever(it.paymentMethodTypes).thenReturn(listOf("card", "bancontact", "sofort", "ideal"))
-        }
-        createFragment(stripeIntent = paymentIntent) { fragment, viewBinding ->
-            val item = viewBinding.paymentMethodsRecycler.layoutManager!!.findViewByPosition(0)
-            assertThat(item!!.measuredWidth).isEqualTo(100)
+            assertThat(item!!.measuredWidth).isEqualTo(211)
         }
     }
 

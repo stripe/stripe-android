@@ -77,6 +77,9 @@ internal interface AuthenticationComponent {
         @BindsInstance
         fun productUsage(@Named(PRODUCT_USAGE) productUsage: Set<String>): Builder
 
+        @BindsInstance
+        fun isInstantApp(@Named(IS_INSTANT_APP) isInstantApp: Boolean): Builder
+
         fun build(): AuthenticationComponent
     }
 }

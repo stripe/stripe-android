@@ -63,23 +63,6 @@ internal object Stats {
         }
 
     /**
-     * Track the result of a task.
-     */
-    suspend fun <T> trackTask(name: String, task: suspend () -> T): T {
-        val tracker = trackTask(name)
-        val result: T
-        try {
-            result = task()
-            tracker.trackResult("success")
-        } catch (t: Throwable) {
-            tracker.trackResult(t::class.java.simpleName)
-            throw t
-        }
-
-        return result
-    }
-
-    /**
      * Track a single execution of a repeating task.
      */
     @CheckResult
@@ -167,23 +150,6 @@ internal object Stats {
                 )
             }
         }
-
-    /**
-     * Track the result of a task.
-     */
-    suspend fun <T> trackRepeatingTask(name: String, task: () -> T): T {
-        val tracker = trackRepeatingTask(name)
-        val result: T
-        try {
-            result = task()
-            tracker.trackResult("success")
-        } catch (t: Throwable) {
-            tracker.trackResult(t::class.java.simpleName)
-            throw t
-        }
-
-        return result
-    }
 
     @JvmStatic
     @CheckResult

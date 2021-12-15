@@ -16,7 +16,7 @@ private const val DEFAULT_RETRIES = 3
  *
  * TODO: use contracts when they're no longer experimental
  */
-suspend fun <T> retry(
+internal suspend fun <T> retry(
     retryDelay: Duration,
     times: Int = DEFAULT_RETRIES,
     excluding: List<Class<out Throwable>> = emptyList(),
@@ -56,7 +56,7 @@ suspend fun <T> retry(
  *
  * TODO: use contracts when they're no longer experimental
  */
-fun <T> retrySync(
+internal fun <T> retrySync(
     times: Int = DEFAULT_RETRIES,
     excluding: List<Class<out Throwable>> = emptyList(),
     task: () -> T

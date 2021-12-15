@@ -13,7 +13,6 @@
  *
  * https://github.com/android/renderscript-intrinsics-replacement-toolkit/blob/main/renderscript-toolkit/src/main/java/com/google/android/renderscript/Toolkit.kt
  */
-/* RenderScript is deprecated, but alternatives are not yet well supported */
 package com.stripe.android.stripecardscan.framework.image
 
 import android.content.Context

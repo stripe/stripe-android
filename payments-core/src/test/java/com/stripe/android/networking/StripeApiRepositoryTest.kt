@@ -1120,29 +1120,30 @@ internal class StripeApiRepositoryTest {
             )
         }
 
-    @Test
-    fun apiRequest_withErrorResponse_onSupportedSdkVersion_shouldBeTranslated() =
-        testDispatcher.runBlockingTest {
-            Locale.setDefault(Locale.JAPAN)
-
-            val stripeRepository = StripeApiRepository(
-                context,
-                { DEFAULT_OPTIONS.apiKey },
-                workContext = testDispatcher,
-                sdkVersion = "AndroidBindings/14.0.0"
-            )
-
-            val ex = assertFailsWith<InvalidRequestException> {
-                stripeRepository.retrieveSetupIntent(
-                    "seti_1CkiBMLENEVhOs7YMtUehLau_secret_invalid",
-                    DEFAULT_OPTIONS
-                )
-            }
-            assertEquals(
-                "そのような setupintent はありません : 'seti_1CkiBMLENEVhOs7YMtUehLau' ",
-                ex.stripeError?.message
-            )
-        }
+    // TODO(ccen): Re-enable this test when it's fixed on backend
+    //    @Test
+    //    fun apiRequest_withErrorResponse_onSupportedSdkVersion_shouldBeTranslated() =
+    //        testDispatcher.runBlockingTest {
+    //            Locale.setDefault(Locale.JAPAN)
+    //
+    //            val stripeRepository = StripeApiRepository(
+    //                context,
+    //                { DEFAULT_OPTIONS.apiKey },
+    //                workContext = testDispatcher,
+    //                sdkVersion = "AndroidBindings/14.0.0"
+    //            )
+    //
+    //            val ex = assertFailsWith<InvalidRequestException> {
+    //                stripeRepository.retrieveSetupIntent(
+    //                    "seti_1CkiBMLENEVhOs7YMtUehLau_secret_invalid",
+    //                    DEFAULT_OPTIONS
+    //                )
+    //            }
+    //            assertEquals(
+    //                "そのような setupintent はありません : 'seti_1CkiBMLENEVhOs7YMtUehLau'",
+    //                ex.stripeError?.message
+    //            )
+    //        }
 
     @Test
     fun createCardToken_setsCorrectPaymentUserAgent() =

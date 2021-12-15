@@ -51,7 +51,7 @@ private const val ASPECT_TOLERANCE = 0.2
 
 private val MAXIMUM_RESOLUTION = Size(1920, 1080)
 
-data class CameraPreviewImage<ImageType>(
+internal data class CameraPreviewImage<ImageType>(
     val image: ImageType,
     val viewBounds: Rect,
 )
