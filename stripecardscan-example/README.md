@@ -14,9 +14,7 @@ The stripecardscan module is currently in private beta, and merchants must be ma
 
 If you're from outside Stripe, contact Stripe support to request to be added to the card image verification beta.
 
-If you're internal to Stripe:
-1. Add your merchant to the [feature flag](https://amp.corp.stripe.com/feature-flags/flag/gopiori.frontend.enable_card_verification).
-2. Add your merchant to the [gate](https://admin.corp.stripe.com/gates/card_verification_intent_web_beta).
+If you're internal to Stripe, contact the Bouncer team for help.
 
 ### Set up your own backend with Glitch
 1. [Create a Glitch account](https://glitch.com/signup/) if you don't have one.
