@@ -9,6 +9,13 @@
 
 <img width="215" height="108" src="https://raw.githubusercontent.com/stripe/stripe-android/master/stripecardscan-example/images/run_project.png" />
 
+### Set up permissions to use the flow
+The stripecardscan module is currently in private beta, and merchants must be manually included in the beta for this demo to work.
+
+If you're from outside Stripe, contact Stripe support to request to be added to the card image verification beta.
+
+If you're internal to Stripe, contact the Bouncer team for help.
+
 ### Set up your own backend with Glitch
 1. [Create a Glitch account](https://glitch.com/signup/) if you don't have one.
 2. Create your own copy of the [example mobile backend application](https://stripe-card-scan-civ-example-app.glitch.me/)
