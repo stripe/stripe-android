@@ -12,7 +12,7 @@ internal object PaymentSheetFixtures {
         get() = "#121212".toColorInt()
 
     internal const val MERCHANT_DISPLAY_NAME = "Merchant, Inc."
-    internal const val CLIENT_SECRET = "client_secret"
+    internal const val CLIENT_SECRET = "pi_1F7J1aCRMbs6FrXfaJcvbxF6_secret_mIuDLsSfoo1m6s"
 
     internal val PAYMENT_INTENT_CLIENT_SECRET = PaymentIntentClientSecret(
         CLIENT_SECRET

@@ -79,7 +79,7 @@ internal class PaymentSheetActivityTest {
     private val intent = contract.createIntent(
         context,
         PaymentSheetContract.Args(
-            PaymentIntentClientSecret("client_secret"),
+            PaymentIntentClientSecret(PaymentSheetFixtures.CLIENT_SECRET),
             PaymentSheetFixtures.CONFIG_CUSTOMER,
             statusBarColor = PaymentSheetFixtures.STATUS_BAR_COLOR,
         )
@@ -325,7 +325,7 @@ internal class PaymentSheetActivityTest {
                 .isEqualTo(
                     ConfirmPaymentIntentParams.createWithPaymentMethodId(
                         paymentMethodId = "pm_123456789",
-                        clientSecret = "client_secret"
+                        clientSecret = PaymentSheetFixtures.CLIENT_SECRET
                     )
                 )
         }
@@ -591,7 +591,7 @@ internal class PaymentSheetActivityTest {
             val intent = contract.createIntent(
                 activity,
                 PaymentSheetContract.Args(
-                    PaymentIntentClientSecret("client_secret"),
+                    PaymentIntentClientSecret(PaymentSheetFixtures.CLIENT_SECRET),
                     PaymentSheetFixtures.CONFIG_CUSTOMER
                 )
             )

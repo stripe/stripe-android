@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.model
 import android.os.Parcelable
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
+import com.stripe.android.model.StripeIntent
 import kotlinx.parcelize.Parcelize
 import java.security.InvalidParameterException
 
@@ -45,3 +46,13 @@ internal data class SetupIntentClientSecret(
         }
     }
 }
+
+internal fun StripeIntent.getTypedClientSecret(): ClientSecret? =
+    clientSecret?.let {
+        when (this) {
+            is PaymentIntent ->
+                PaymentIntentClientSecret(it)
+            is SetupIntent ->
+                SetupIntentClientSecret(it)
+        }
+    }

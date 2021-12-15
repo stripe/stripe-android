@@ -6,6 +6,7 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.ClientSecret
 import com.stripe.android.paymentsheet.model.SavedSelection
+import com.stripe.android.paymentsheet.model.getTypedClientSecret
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
@@ -17,4 +18,7 @@ internal data class InitData(
     val paymentMethods: List<PaymentMethod>,
     val savedSelection: SavedSelection,
     val isGooglePayReady: Boolean
-) : Parcelable
+) : Parcelable {
+    fun preferredClientSecret(): ClientSecret =
+        stripeIntent.getTypedClientSecret() ?: clientSecret
+}

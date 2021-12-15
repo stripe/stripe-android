@@ -105,6 +105,9 @@ data class ApiRequest internal constructor(
         internal val idempotencyKey: String? = null
     ) : Parcelable {
 
+        internal val apiKeyIsUserKey: Boolean
+            get() = apiKey.startsWith("uk_")
+
         /**
          * Dedicated constructor for injection.
          *

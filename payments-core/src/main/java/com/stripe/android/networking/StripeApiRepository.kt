@@ -34,6 +34,7 @@ import com.stripe.android.model.CardMetadata
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
+import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_CLIENT_SECRET
 import com.stripe.android.model.Customer
 import com.stripe.android.model.ListPaymentMethodsParams
 import com.stripe.android.model.PaymentIntent
@@ -187,10 +188,24 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         options: ApiRequest.Options,
         expandFields: List<String>
     ): PaymentIntent? {
+        return confirmPaymentIntentInternal(
+            confirmPaymentIntentParams = confirmPaymentIntentParams.maybeForDashboard(options),
+            options = options,
+            expandFields = expandFields
+        )
+    }
+
+    private suspend fun confirmPaymentIntentInternal(
+        confirmPaymentIntentParams: ConfirmPaymentIntentParams,
+        options: ApiRequest.Options,
+        expandFields: List<String>
+    ): PaymentIntent? {
         val params = fraudDetectionDataParamsUtils.addFraudDetectionData(
             // Add payment_user_agent if the Payment Method is being created on this call
             maybeAddPaymentUserAgent(
-                confirmPaymentIntentParams.toParamMap(),
+                confirmPaymentIntentParams.toParamMap()
+                    // Omit client_secret with user key auth.
+                    .let { if (options.apiKeyIsUserKey) it.minus(PARAM_CLIENT_SECRET) else it },
                 confirmPaymentIntentParams.paymentMethodCreateParams,
                 confirmPaymentIntentParams.sourceParams
             ).plus(createExpandParam(expandFields)),
@@ -235,16 +250,24 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         options: ApiRequest.Options,
         expandFields: List<String>
     ): PaymentIntent? {
-        val paymentIntentId = PaymentIntent.ClientSecret(clientSecret).paymentIntentId
+        val paymentIntentId: String
+        val params: Map<String, Any?>
+        if (options.apiKeyIsUserKey) {
+            require(clientSecret.startsWith("pi_")) {
+                "`clientSecret` format does not match expected identifier formatting."
+            }
+            paymentIntentId = clientSecret
+            params = createExpandParam(expandFields)
+        } else {
+            paymentIntentId = PaymentIntent.ClientSecret(clientSecret).paymentIntentId
+            params = createClientSecretParam(clientSecret, expandFields)
+        }
+        val url = getRetrievePaymentIntentUrl(paymentIntentId)
 
         fireFraudDetectionDataRequest()
 
         return fetchStripeModel(
-            apiRequestFactory.createGet(
-                getRetrievePaymentIntentUrl(paymentIntentId),
-                options,
-                createClientSecretParam(clientSecret, expandFields)
-            ),
+            apiRequestFactory.createGet(url, options, params),
             PaymentIntentJsonParser()
         ) {
             fireAnalyticsRequest(
@@ -1137,6 +1160,9 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         parser: PaymentMethodPreferenceJsonParser<T>,
         analyticsEvent: PaymentAnalyticsEvent
     ): T? {
+        // Unsupported for user key sessions.
+        if (options.apiKeyIsUserKey) return null
+
         fireFraudDetectionDataRequest()
 
         val params = createClientSecretParam(
@@ -1351,6 +1377,24 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
                 )
             )
         } ?: params
+
+    private suspend fun ConfirmPaymentIntentParams.maybeForDashboard(
+        options: ApiRequest.Options,
+    ): ConfirmPaymentIntentParams {
+        val paymentMethodCreateParams = paymentMethodCreateParams
+        if (!options.apiKeyIsUserKey || paymentMethodCreateParams == null) {
+            return this
+        }
+
+        // For user key auth, we must create the PM first.
+        val paymentMethodId = requireNotNull(
+            createPaymentMethod(paymentMethodCreateParams, options)?.id
+        )
+        return ConfirmPaymentIntentParams.createForDashboard(
+            clientSecret = clientSecret,
+            paymentMethodId = paymentMethodId
+        )
+    }
 
     private sealed class DnsCacheData {
         data class Success(

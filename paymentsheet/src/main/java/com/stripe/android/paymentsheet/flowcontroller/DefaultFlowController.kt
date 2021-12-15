@@ -49,6 +49,7 @@ import com.stripe.android.paymentsheet.model.PaymentOptionFactory
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.SetupIntentClientSecret
+import com.stripe.android.paymentsheet.model.getTypedClientSecret
 import com.stripe.android.paymentsheet.validate
 import com.stripe.android.ui.core.forms.resources.ResourceRepository
 import dagger.Lazy
@@ -264,7 +265,7 @@ internal class DefaultFlowController @Inject internal constructor(
         initData: InitData
     ) {
         val confirmParamsFactory =
-            ConfirmStripeIntentParamsFactory.createFactory(initData.clientSecret)
+            ConfirmStripeIntentParamsFactory.createFactory(initData.preferredClientSecret())
 
         when (paymentSelection) {
             is PaymentSelection.Saved -> {
