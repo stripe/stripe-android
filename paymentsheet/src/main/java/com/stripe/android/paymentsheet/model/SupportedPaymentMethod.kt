@@ -287,8 +287,7 @@ internal sealed class SupportedPaymentMethod(
     private fun supportsPaymentIntentSfuSettable(
         stripeIntent: PaymentIntent,
         config: PaymentSheet.Configuration?
-    ) = allHaveKnownReuseSupport(stripeIntent.paymentMethodTypes) &&
-        config?.customer != null &&
+    ) = config?.customer != null &&
         requirement.confirmPMFromCustomer == true &&
         checkRequirements(requirement.piRequirements, config) &&
         checkRequirements(requirement.siRequirements, config)
@@ -305,37 +304,6 @@ internal sealed class SupportedPaymentMethod(
                 Delayed -> config?.allowsDelayedPaymentMethods == true
             }
         }?.contains(false) == false
-
-    /**
-     * This checks that all PMs in the Intent have support for reuse.
-     *
-     * Currently a PaymentIntent can have multiple PaymentMethods allowed for confirm.
-     * Some of those PaymentMethods may support setup_future_usage = off_session,
-     * some might not. If a merchant creates a PaymentIntent with setup_future_usage
-     * set to null, the user should be able to select if they want to save it (thus
-     * setting setup_future_usage to off_session on confirm).  The problem is that
-     * if all the PaymentMethods in the PaymentIntent do not support off_session
-     * payments, the server will fail the confirmation.
-     *
-     * TODO: Fix when there is support on the server
-     */
-    private fun allHaveKnownReuseSupport(paymentMethodsInIntent: List<String?>): Boolean {
-        // The following PaymentMethods are know to work when
-        // PaymentIntent.setup_future_usage = on/off session
-        // This list is different from the PaymentMethod.Type.isReusable
-        // It is expected that this check will be removed soon
-        val knownReusable = setOf(
-            PaymentMethod.Type.Alipay.code,
-            PaymentMethod.Type.Card.code,
-            PaymentMethod.Type.SepaDebit.code,
-            PaymentMethod.Type.AuBecsDebit.code,
-            PaymentMethod.Type.Bancontact.code,
-            PaymentMethod.Type.Sofort.code,
-            PaymentMethod.Type.BacsDebit.code,
-            PaymentMethod.Type.Ideal.code
-        )
-        return paymentMethodsInIntent.filterNot { knownReusable.contains(it) }.isEmpty()
-    }
 
     override fun toString(): String {
         return type.code

@@ -25,18 +25,21 @@ sealed class PaymentMethodOptionsParams(
     @Parcelize
     data class Card(
         var cvc: String? = null,
-        var network: String? = null
+        var network: String? = null,
+        var setupFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage? = null
     ) : PaymentMethodOptionsParams(PaymentMethod.Type.Card) {
         override fun createTypeParams(): List<Pair<String, Any?>> {
             return listOf(
                 PARAM_CVC to cvc,
-                PARAM_NETWORK to network
+                PARAM_NETWORK to network,
+                PARAM_SETUP_FUTURE_USAGE to setupFutureUsage?.code
             )
         }
 
         private companion object {
             private const val PARAM_CVC = "cvc"
             private const val PARAM_NETWORK = "network"
+            private const val PARAM_SETUP_FUTURE_USAGE = "setup_future_usage"
         }
     }
 

@@ -4,6 +4,8 @@ import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.MandateDataParams
+import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodOptionsParams
 
 /**
  * Factory class for creating [ConfirmPaymentIntentParams] or [ConfirmSetupIntentParams].
@@ -26,16 +28,38 @@ internal sealed class ConfirmStripeIntentParamsFactory<out T : ConfirmStripeInte
 internal class ConfirmPaymentIntentParamsFactory(
     private val clientSecret: ClientSecret
 ) : ConfirmStripeIntentParamsFactory<ConfirmPaymentIntentParams>() {
-    override fun create(paymentSelection: PaymentSelection.Saved) =
-        ConfirmPaymentIntentParams.createWithPaymentMethodId(
+    override fun create(paymentSelection: PaymentSelection.Saved): ConfirmPaymentIntentParams {
+        val params = ConfirmPaymentIntentParams.createWithPaymentMethodId(
             paymentMethodId = paymentSelection.paymentMethod.id.orEmpty(),
             clientSecret = clientSecret.value,
         )
 
-    override fun create(paymentSelection: PaymentSelection.New) =
-        ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
+        params
+            .takeIf { paymentSelection.paymentMethod.type == PaymentMethod.Type.Card }
+            ?.paymentMethodOptions = PaymentMethodOptionsParams.Card(
+            setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.Blank
+        )
+
+        return params
+    }
+
+    override fun create(paymentSelection: PaymentSelection.New): ConfirmPaymentIntentParams {
+        val params = ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
             paymentMethodCreateParams = paymentSelection.paymentMethodCreateParams,
             clientSecret = clientSecret.value,
+        )
+
+        /**
+         Sets `payment_method_options[card][setup_future_usage]`
+
+         - Note: PaymentSheet uses this `setup_future_usage` (SFU) value very differently from the top-level one:
+         We read the top-level SFU to know the merchant’s desired save behavior
+         We write payment method options SFU to set the customer’s desired save behavior
+         */
+        // At this time, paymentMethodOptions card is the only PM that supports setup future usage
+        params
+            .takeIf { it.paymentMethodCreateParams?.typeCode == PaymentMethod.Type.Card.code }
+            ?.paymentMethodOptions = PaymentMethodOptionsParams.Card(
             setupFutureUsage = when (paymentSelection.customerRequestedSave) {
                 PaymentSelection.CustomerRequestedSave.RequestReuse ->
                     ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
@@ -45,6 +69,9 @@ internal class ConfirmPaymentIntentParamsFactory(
                     null
             }
         )
+
+        return params
+    }
 }
 
 internal class ConfirmSetupIntentParamsFactory(
