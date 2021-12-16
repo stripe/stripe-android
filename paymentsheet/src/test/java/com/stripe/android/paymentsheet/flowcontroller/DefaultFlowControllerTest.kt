@@ -564,7 +564,7 @@ internal class DefaultFlowControllerTest {
     private fun verifyPaymentSelection(
         clientSecret: String,
         paymentMethodCreateParams: PaymentMethodCreateParams,
-        expectedPaymentMethodOptions: PaymentMethodOptionsParams? = null
+        expectedPaymentMethodOptions: PaymentMethodOptionsParams? = PaymentMethodOptionsParams.Card()
     ) = runBlockingTest {
         val confirmPaymentIntentParams =
             ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
