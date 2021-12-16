@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.model
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
+import com.google.common.truth.Truth.assertWithMessage
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.StripeIntent
@@ -21,13 +22,14 @@ class SupportedPaymentMethodTest {
             .forEach { lpm ->
                 val resource = File(requireNotNull(javaClass.classLoader).getResource("${lpm.type.code}-support.csv").file)
                 val baseline = resource.readText()
+                val baselineLines = baseline.split("\n")
 
                 val csvOutput = StringBuilder()
                 csvOutput.append(
                     "lpm, ${PaymentIntentTestInput.toCsvHeader()}, ${TestOutput.toCsvHeader()}\n"
                 )
                 generatePaymentIntentScenarios()
-                    .map { testInput ->
+                    .mapIndexed { index, testInput ->
 
                         val formDescriptor = lpm.getSpecWithFullfilledRequirements(testInput.getIntent(lpm), testInput.getConfig())
                         val testOutput = TestOutput.create(
@@ -43,24 +45,27 @@ class SupportedPaymentMethodTest {
                                 testInput.getConfig()
                             ).contains(lpm)
                         )
-                        csvOutput.append(
-                            "${lpm.type.code}, ${
-                            testInput.copy(
-                                intentPMs = testInput.intentPMs.plus(lpm.type.code)
-                            ).toCsv()
-                            }, ${testOutput.toCsv()}\n"
-                        )
+                        val actualLine = "${lpm.type.code}, ${
+                        testInput.copy(
+                            intentPMs = testInput.intentPMs.plus(lpm.type.code)
+                        ).toCsv()
+                        }, ${testOutput.toCsv()}\n"
+
+                        csvOutput.append(actualLine)
 
                         PaymentIntentTestCase(
                             testInput,
                             testOutput
                         )
+
+                        assertWithMessage("Line: ${index + 2}")
+                            .that(actualLine.trim())
+                            .isEqualTo(baselineLines[index + 1])
                     }
 
                 if (baseline != csvOutput.toString()) {
                     println(csvOutput.toString())
                 }
-                assertThat(baseline).isEqualTo(csvOutput.toString())
             }
     }
 

@@ -407,7 +407,8 @@ data class ConfirmPaymentIntentParams internal constructor(
             mandateId: String? = null,
             mandateData: MandateDataParams? = null,
             setupFutureUsage: SetupFutureUsage? = null,
-            shipping: Shipping? = null
+            shipping: Shipping? = null,
+            paymentMethodOptions: PaymentMethodOptionsParams? = null
         ): ConfirmPaymentIntentParams {
             return ConfirmPaymentIntentParams(
                 clientSecret = clientSecret,
@@ -416,7 +417,8 @@ data class ConfirmPaymentIntentParams internal constructor(
                 mandateId = mandateId,
                 mandateData = mandateData,
                 setupFutureUsage = setupFutureUsage,
-                shipping = shipping
+                shipping = shipping,
+                paymentMethodOptions = paymentMethodOptions
             )
         }
 

@@ -23,6 +23,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
 import com.stripe.android.payments.paymentlauncher.PaymentResult
@@ -533,7 +534,8 @@ internal class DefaultFlowControllerTest {
 
             verifyPaymentSelection(
                 PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
-                PaymentMethodCreateParamsFixtures.DEFAULT_CARD
+                PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+                expectedPaymentMethodOptions = PaymentMethodOptionsParams.Card()
             )
         }
 
@@ -561,7 +563,8 @@ internal class DefaultFlowControllerTest {
 
     private fun verifyPaymentSelection(
         clientSecret: String,
-        paymentMethodCreateParams: PaymentMethodCreateParams
+        paymentMethodCreateParams: PaymentMethodCreateParams,
+        expectedPaymentMethodOptions: PaymentMethodOptionsParams? = null
     ) = runBlockingTest {
         val confirmPaymentIntentParams =
             ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
@@ -572,6 +575,7 @@ internal class DefaultFlowControllerTest {
                 savePaymentMethod = null,
                 mandateId = null,
                 mandateData = null,
+                paymentMethodOptions = expectedPaymentMethodOptions
             )
 
         verify(paymentLauncher).confirm(
