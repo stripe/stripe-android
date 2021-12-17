@@ -15,7 +15,7 @@ internal class PaymentOptionsAddPaymentMethodFragment(
                 requireArguments().getParcelable(PaymentOptionsActivity.EXTRA_STARTER_ARGS)
             )
         },
-        activity as AppCompatActivity
+        (activity as? AppCompatActivity) ?: this
     )
 
     override val sheetViewModel by activityViewModels<PaymentOptionsViewModel> {

@@ -28,7 +28,7 @@ internal class PaymentSheetListFragment(
                     requireArguments().getParcelable(PaymentSheetActivity.EXTRA_STARTER_ARGS)
                 )
             },
-            (this.activity as AppCompatActivity),
+            (activity as? AppCompatActivity) ?: this
         )
     }
 

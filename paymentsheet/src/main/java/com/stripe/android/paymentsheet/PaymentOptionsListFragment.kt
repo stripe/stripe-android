@@ -23,7 +23,7 @@ internal class PaymentOptionsListFragment(
                     requireArguments().getParcelable(PaymentOptionsActivity.EXTRA_STARTER_ARGS)
                 )
             },
-            activity as AppCompatActivity
+            (activity as? AppCompatActivity) ?: this
         )
     }
 

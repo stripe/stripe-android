@@ -72,10 +72,13 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     private val _stripeIntent = savedStateHandle.getLiveData<StripeIntent>(SAVE_STRIPE_INTENT)
     internal val stripeIntent: LiveData<StripeIntent?> = _stripeIntent
 
-    internal var supportedPaymentMethods = emptyList<SupportedPaymentMethod>()
+    internal var supportedPaymentMethods = savedStateHandle.get<List<SupportedPaymentMethod>>(
+        SAVE_SUPPORTED_PAYMENT_METHOD
+    ) ?: emptyList()
 
     @VisibleForTesting
-    internal val _paymentMethods = savedStateHandle.getLiveData<List<PaymentMethod>>(SAVE_PAYMENT_METHODS)
+    internal val _paymentMethods =
+        savedStateHandle.getLiveData<List<PaymentMethod>>(SAVE_PAYMENT_METHODS)
 
     /**
      * The list of saved payment methods for the current customer.
@@ -212,8 +215,12 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
          * they will be ready in the onViewCreated method of
          * the [BaseAddPaymentMethodFragment]
          */
-
-        supportedPaymentMethods = SupportedPaymentMethod.getPMsToAdd(stripeIntent, config)
+        val pmsToAdd = SupportedPaymentMethod.getPMsToAdd(stripeIntent, config)
+        savedStateHandle.set(
+            SAVE_SUPPORTED_PAYMENT_METHOD,
+            pmsToAdd
+        )
+        supportedPaymentMethods = pmsToAdd
 
         if (stripeIntent != null && supportedPaymentMethods.isEmpty()) {
             onFatal(
@@ -228,7 +235,8 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
 
         if (stripeIntent is PaymentIntent) {
             runCatching {
-                savedStateHandle.set(SAVE_AMOUNT, Amount(
+                savedStateHandle.set(
+                    SAVE_AMOUNT, Amount(
                         requireNotNull(stripeIntent.amount),
                         requireNotNull(stripeIntent.currency)
                     )
@@ -325,5 +333,6 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
         internal const val SAVE_PAYMENT_METHODS = "customer_payment_methods"
         internal const val SAVE_AMOUNT = "amount"
         internal const val SAVE_SELECTION = "selection"
+        internal const val SAVE_SUPPORTED_PAYMENT_METHOD = "supported_payment_methods"
     }
 }

@@ -95,11 +95,7 @@ internal abstract class BaseAddPaymentMethodFragment(
         if (paymentMethods.isNotEmpty()) {
             // If the activity is destroyed and recreated, then the fragment is already present
             // and doesn't need to be replaced, only the selected payment method needs to be set
-            if (savedInstanceState == null) {
-                replacePaymentMethodFragment(paymentMethods[selectedPaymentMethodIndex])
-            } else {
-                selectedPaymentMethod = paymentMethods[selectedPaymentMethodIndex]
-            }
+            replacePaymentMethodFragment(paymentMethods[selectedPaymentMethodIndex])
         }
 
         sheetViewModel.processing.observe(viewLifecycleOwner) { isProcessing ->
