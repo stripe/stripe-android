@@ -504,7 +504,6 @@ data class ConfirmPaymentIntentParams internal constructor(
             )
         }
 
-        @JvmStatic
         internal fun createForDashboard(
             clientSecret: String,
             paymentMethodId: String
