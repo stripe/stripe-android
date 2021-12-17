@@ -14,7 +14,7 @@ import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 
 internal class PaymentSheetAddPaymentMethodFragment(
-    eventReporter: EventReporter
+    eventReporter: EventReporter? = null
 ) : BaseAddPaymentMethodFragment(eventReporter) {
     override val viewModelFactory: ViewModelProvider.Factory = PaymentSheetViewModel.Factory(
         { requireActivity().application },
@@ -22,7 +22,8 @@ internal class PaymentSheetAddPaymentMethodFragment(
             requireNotNull(
                 requireArguments().getParcelable(PaymentSheetActivity.EXTRA_STARTER_ARGS)
             )
-        }
+        },
+        this
     )
 
     override val sheetViewModel by activityViewModels<PaymentSheetViewModel> {

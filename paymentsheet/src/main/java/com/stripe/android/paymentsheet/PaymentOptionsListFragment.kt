@@ -9,7 +9,7 @@ import com.stripe.android.paymentsheet.databinding.FragmentPaymentsheetPaymentMe
 import com.stripe.android.paymentsheet.model.PaymentSelection
 
 internal class PaymentOptionsListFragment(
-    eventReporter: EventReporter
+    eventReporter: EventReporter? = null
 ) : BasePaymentMethodsListFragment(
     canClickSelectedItem = true,
     eventReporter

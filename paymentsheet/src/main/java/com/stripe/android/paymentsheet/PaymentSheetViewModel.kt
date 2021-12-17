@@ -1,17 +1,20 @@
 package com.stripe.android.paymentsheet
 
 import android.app.Application
+import android.os.Bundle
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.IntegerRes
 import androidx.annotation.VisibleForTesting
+import androidx.lifecycle.AbstractSavedStateViewModelFactory
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.distinctUntilChanged
 import androidx.lifecycle.viewModelScope
+import androidx.savedstate.SavedStateRegistryOwner
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
@@ -86,7 +89,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     private val googlePayPaymentMethodLauncherFactory: GooglePayPaymentMethodLauncherFactory,
     logger: Logger,
     @IOContext workContext: CoroutineContext,
-    @InjectorKey injectorKey: String
+    @InjectorKey injectorKey: String,
+    handle: SavedStateHandle
 ) : BaseSheetViewModel<PaymentSheetViewModel.TransitionTarget>(
     application = application,
     config = args.config,
@@ -96,7 +100,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     workContext = workContext,
     logger = logger,
     injectorKey = injectorKey,
-    resourceRepository = resourceRepository
+    resourceRepository = resourceRepository,
+    handle = handle
 ) {
     private val confirmParamsFactory = ConfirmStripeIntentParamsFactory.createFactory(
         args.clientSecret
@@ -217,6 +222,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             stripeIntentValidator.requireValid(stripeIntent)
         }.fold(
             onSuccess = {
+                handle!!.set(SAVE_STRIPE_INTENT, stripeIntent)
                 updatePaymentMethods(stripeIntent)
                 resetViewState()
             },
@@ -256,7 +262,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                 }.orEmpty()
             }.fold(
                 onSuccess = {
-                    _paymentMethods.value = it
+                    handle!!.set(SAVE_PAYMENT_METHODS, it)
                     setStripeIntent(stripeIntent)
                     resetViewState()
                 },
@@ -460,10 +466,13 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
     internal class Factory(
         private val applicationSupplier: () -> Application,
-        private val starterArgsSupplier: () -> PaymentSheetContract.Args
-    ) : ViewModelProvider.Factory, Injectable<Factory.FallbackInitializeParam> {
+        private val starterArgsSupplier: () -> PaymentSheetContract.Args,
+        owner: SavedStateRegistryOwner,
+        defaultArgs: Bundle? = null
+    ) : AbstractSavedStateViewModelFactory(owner, defaultArgs), Injectable<Factory.FallbackInitializeParam> {
         internal data class FallbackInitializeParam(
             val application: Application,
+            val handle: SavedStateHandle,
         )
 
         @Inject
@@ -471,12 +480,18 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             Provider<PaymentSheetViewModelSubcomponent.Builder>
 
         @Suppress("UNCHECKED_CAST")
-        override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+        override fun <T : ViewModel?> create(
+            key: String,
+            modelClass: Class<T>,
+            handle:SavedStateHandle
+        ): T {
             val args = starterArgsSupplier()
-            injectWithFallback(args.injectorKey, FallbackInitializeParam(applicationSupplier()))
-            return subComponentBuilderProvider.get().paymentSheetViewModelModule(
-                PaymentSheetViewModelModule(args)
-            ).build().viewModel as T
+
+            injectWithFallback(args.injectorKey, FallbackInitializeParam(applicationSupplier(), handle))
+            return subComponentBuilderProvider.get()
+                .paymentSheetViewModelModule(PaymentSheetViewModelModule(args))
+                .savedStateHandle(handle)
+                .build().viewModel as T
         }
 
         override fun fallbackInitialize(arg: FallbackInitializeParam) {

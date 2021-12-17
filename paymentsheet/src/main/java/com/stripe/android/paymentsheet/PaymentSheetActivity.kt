@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.ViewGroup
 import android.widget.ScrollView
 import android.widget.TextView
@@ -18,8 +19,6 @@ import androidx.lifecycle.lifecycleScope
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.appbar.MaterialToolbar
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContract
-import com.stripe.android.model.PaymentIntent
-import com.stripe.android.model.SetupIntent
 import com.stripe.android.paymentsheet.PaymentSheetViewModel.CheckoutIdentifier
 import com.stripe.android.paymentsheet.databinding.ActivityPaymentSheetBinding
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -42,7 +41,8 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
     internal var viewModelFactory: ViewModelProvider.Factory =
         PaymentSheetViewModel.Factory(
             { application },
-            { requireNotNull(starterArgs) }
+            { requireNotNull(starterArgs) },
+            this
         )
 
     override val viewModel: PaymentSheetViewModel by viewModels { viewModelFactory }
@@ -109,22 +109,26 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
             )
         )
 
-        // If the activity was destroyed we need to restore the payment intent without triggering
-        // the transition (which would replace the existing fragment).  The button container
-        // and buy button visibility must be visible again.
-        when (savedInstanceState?.getBoolean(SAVE_IS_PAYMENT_INTENT_TYPE)) {
-            true -> savedInstanceState.getParcelable<PaymentIntent>(SAVE_STRIPE_INTENT)
-            false -> savedInstanceState.getParcelable<SetupIntent>(SAVE_STRIPE_INTENT)
-            null -> null
-        }?.let {
+
+        if (savedInstanceState != null) {
             // The buy btton needs to be made visible since it is gone in the xml
-            viewModel.setStripeIntent(it)
-            // This is causing a transition, but needed for the
-            // saved customer cards to work.
-//            viewModel.updatePaymentMethods(it)
             buttonContainer.isVisible = true
             viewBinding.buyButton.isVisible = true
-        } ?: run {
+            Log.e(
+                "MLB", "PaymentSheetActivity: payment methods present on handle: ${
+                    viewModel.handle!!.contains(
+                        BaseSheetViewModel.SAVE_PAYMENT_METHODS
+                    )
+                }"
+            )
+            Log.e(
+                "MLB", "PaymentSheetActivity: stripeIntent present on handle: ${
+                    viewModel.handle!!.contains(
+                        BaseSheetViewModel.SAVE_STRIPE_INTENT
+                    )
+                }"
+            )
+        } else {
             viewModel.maybeFetchStripeIntent()
         }
 
@@ -157,12 +161,12 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
         viewModel.fragmentConfigEvent.observe(this) { event ->
             val config = event.getContentIfNotHandled()
             if (config != null) {
-                    val target = if (viewModel.paymentMethods.value.isNullOrEmpty()) {
-                        PaymentSheetViewModel.TransitionTarget.AddPaymentMethodSheet(config)
-                    } else {
-                        PaymentSheetViewModel.TransitionTarget.SelectSavedPaymentMethod(config)
-                    }
-                    viewModel.transitionTo(target)
+                val target = if (viewModel.paymentMethods.value.isNullOrEmpty()) {
+                    PaymentSheetViewModel.TransitionTarget.AddPaymentMethodSheet(config)
+                } else {
+                    PaymentSheetViewModel.TransitionTarget.SelectSavedPaymentMethod(config)
+                }
+                viewModel.transitionTo(target)
             }
         }
 
@@ -194,12 +198,6 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
             updateErrorMessage()
         }
         super.onBackPressed()
-    }
-
-    override fun onSaveInstanceState(outState: Bundle) {
-        outState.putParcelable(SAVE_STRIPE_INTENT, viewModel.stripeIntent.value)
-        outState.putBoolean(SAVE_IS_PAYMENT_INTENT_TYPE, viewModel.isProcessingPaymentIntent)
-        super.onSaveInstanceState(outState)
     }
 
     private fun updateErrorMessage(userMessage: BaseSheetViewModel.UserErrorMessage? = null) {
@@ -333,10 +331,6 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
 
     internal companion object {
 
-        private const val SAVE_STRIPE_INTENT =
-            "com.stripe.android.paymentsheet.paymentsheetactivity.save_stripe_intent"
-        private const val SAVE_IS_PAYMENT_INTENT_TYPE =
-            "com.stripe.android.paymentsheet.paymentsheetactivity.save_stripe_intent_type"
         internal const val EXTRA_FRAGMENT_CONFIG = BaseSheetActivity.EXTRA_FRAGMENT_CONFIG
         internal const val EXTRA_STARTER_ARGS = BaseSheetActivity.EXTRA_STARTER_ARGS
     }

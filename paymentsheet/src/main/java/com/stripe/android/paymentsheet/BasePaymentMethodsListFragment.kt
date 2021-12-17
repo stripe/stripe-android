@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet
 
 import android.os.Bundle
+import android.util.Log
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
@@ -9,6 +10,7 @@ import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.databinding.FragmentPaymentsheetPaymentMethodsListBinding
 import com.stripe.android.paymentsheet.model.FragmentConfig
@@ -16,10 +18,11 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
+import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.Companion.SAVE_PAYMENT_METHODS
 
 internal abstract class BasePaymentMethodsListFragment(
     private val canClickSelectedItem: Boolean,
-    private val eventReporter: EventReporter
+    private val eventReporter: EventReporter?
 ) : Fragment(
     R.layout.fragment_paymentsheet_payment_methods_list
 ) {
@@ -53,7 +56,7 @@ internal abstract class BasePaymentMethodsListFragment(
         this.config = nullableConfig
 
         setHasOptionsMenu(!sheetViewModel.paymentMethods.value.isNullOrEmpty())
-        eventReporter.onShowExistingPaymentOptions()
+        eventReporter?.onShowExistingPaymentOptions()
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -112,6 +115,7 @@ internal abstract class BasePaymentMethodsListFragment(
             viewBinding.recycler.adapter = it
         }
 
+        Log.e("MLB", "BasePaymentMethodList: payment methods size: ${sheetViewModel.handle!!.get<List<PaymentMethod>>(SAVE_PAYMENT_METHODS)?.size}")
         adapter.setItems(
             config,
             sheetViewModel.paymentMethods.value.orEmpty(),

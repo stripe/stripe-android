@@ -1,16 +1,19 @@
 package com.stripe.android.paymentsheet
 
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import androidx.core.view.isVisible
 import androidx.fragment.app.activityViewModels
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.databinding.FragmentPaymentsheetPaymentMethodsListBinding
+import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.CurrencyFormatter
 
 internal class PaymentSheetListFragment(
-    eventReporter: EventReporter
+    eventReporter: EventReporter?
 ) : BasePaymentMethodsListFragment(
     canClickSelectedItem = false,
     eventReporter
@@ -23,7 +26,8 @@ internal class PaymentSheetListFragment(
                 requireNotNull(
                     requireArguments().getParcelable(PaymentSheetActivity.EXTRA_STARTER_ARGS)
                 )
-            }
+            },
+            this
         )
     }
 
@@ -47,6 +51,10 @@ internal class PaymentSheetListFragment(
         } else {
             viewBinding.total.isVisible = false
         }
+
+        Log.e("MLB", "PaymentSheetListFragment: payment methods size: ${sheetViewModel.handle!!.get<List<PaymentMethod>>(
+            BaseSheetViewModel.SAVE_PAYMENT_METHODS
+        )?.size}")
     }
 
     private fun getTotalText(amount: Amount): String {

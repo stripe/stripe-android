@@ -1,20 +1,22 @@
 package com.stripe.android.paymentsheet.viewmodels
 
 import android.app.Application
+import android.util.Log
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.asFlow
 import androidx.lifecycle.distinctUntilChanged
 import androidx.lifecycle.map
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.core.Logger
+import com.stripe.android.core.injection.InjectorKey
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.core.injection.InjectorKey
 import com.stripe.android.paymentsheet.BaseAddPaymentMethodFragment
 import com.stripe.android.paymentsheet.BasePaymentMethodsListFragment
 import com.stripe.android.paymentsheet.PaymentOptionsActivity
@@ -22,14 +24,14 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetActivity
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.analytics.EventReporter
-import com.stripe.android.ui.core.forms.resources.ResourceRepository
-import com.stripe.android.ui.core.Amount
 import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
 import com.stripe.android.paymentsheet.paymentdatacollection.CardDataCollectionFragment
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
+import com.stripe.android.ui.core.Amount
+import com.stripe.android.ui.core.forms.resources.ResourceRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -50,7 +52,8 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     protected val workContext: CoroutineContext = Dispatchers.IO,
     protected val logger: Logger,
     @InjectorKey val injectorKey: String,
-    resourceRepository: ResourceRepository
+    resourceRepository: ResourceRepository,
+    val handle: SavedStateHandle? = null
 ) : AndroidViewModel(application) {
     internal val customerConfig = config?.customer
     internal val merchantName = config?.merchantDisplayName
@@ -67,13 +70,13 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     internal val isResourceRepositoryReady: LiveData<Boolean> =
         _isResourceRepositoryReady.distinctUntilChanged()
 
-    private val _stripeIntent = MutableLiveData<StripeIntent?>()
+    private val _stripeIntent = handle!!.getLiveData<StripeIntent>(SAVE_STRIPE_INTENT)
     internal val stripeIntent: LiveData<StripeIntent?> = _stripeIntent
 
     internal var supportedPaymentMethods = emptyList<SupportedPaymentMethod>()
 
     @VisibleForTesting
-    internal val _paymentMethods = MutableLiveData<List<PaymentMethod>>()
+    internal val _paymentMethods = handle!!.getLiveData<List<PaymentMethod>>(SAVE_PAYMENT_METHODS)
 
     /**
      * The list of saved payment methods for the current customer.
@@ -203,7 +206,13 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
 
     @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
     fun setStripeIntent(stripeIntent: StripeIntent?) {
-        _stripeIntent.value = stripeIntent
+        handle?.set(SAVE_STRIPE_INTENT, stripeIntent)
+
+        Log.e(
+            "MLB", "PaymentSheetActivity: stripeIntent present on handle: ${
+                handle!!.contains(SAVE_STRIPE_INTENT)
+            }"
+        )
 
         /**
          * The settings of values in this function is so that
@@ -270,9 +279,10 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     fun removePaymentMethod(paymentMethod: PaymentMethod) = runBlocking {
         launch {
             paymentMethod.id?.let { paymentMethodId ->
-                _paymentMethods.value = _paymentMethods.value?.filter {
+                handle?.set(SAVE_PAYMENT_METHODS, _paymentMethods.value?.filter {
                     it.id != paymentMethodId
                 }
+                )
 
                 customerConfig?.let {
                     customerRepository.detachPaymentMethod(
@@ -315,5 +325,10 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
          */
         @TestOnly
         fun peekContent(): T = content
+    }
+
+    companion object {
+        internal const val SAVE_STRIPE_INTENT = "stripe_intent"
+        internal const val SAVE_PAYMENT_METHODS = "customer_payment_methods"
     }
 }

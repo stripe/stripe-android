@@ -34,7 +34,7 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 internal abstract class BaseAddPaymentMethodFragment(
-    private val eventReporter: EventReporter
+    private val eventReporter: EventReporter?
 ) : Fragment() {
     abstract val viewModelFactory: ViewModelProvider.Factory
     abstract val sheetViewModel: BaseSheetViewModel<*>
@@ -116,7 +116,7 @@ internal abstract class BaseAddPaymentMethodFragment(
             attachComposeFragmentViewModel(fragment)
         }
 
-        eventReporter.onShowNewPaymentOptionForm()
+        eventReporter?.onShowNewPaymentOptionForm()
     }
 
     private fun attachComposeFragmentViewModel(fragment: Fragment) {

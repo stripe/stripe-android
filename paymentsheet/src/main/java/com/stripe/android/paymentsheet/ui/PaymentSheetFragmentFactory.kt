@@ -9,7 +9,7 @@ import com.stripe.android.paymentsheet.PaymentSheetListFragment
 import com.stripe.android.paymentsheet.analytics.EventReporter
 
 internal class PaymentSheetFragmentFactory(
-    private val eventReporter: EventReporter
+    private val eventReporter: EventReporter?
 ) : FragmentFactory() {
     override fun instantiate(classLoader: ClassLoader, className: String): Fragment {
         return when (className) {
