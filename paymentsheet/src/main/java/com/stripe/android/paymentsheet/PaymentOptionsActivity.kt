@@ -35,7 +35,9 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
     internal var viewModelFactory: ViewModelProvider.Factory =
         PaymentOptionsViewModel.Factory(
             { application },
-            { requireNotNull(starterArgs) }
+            { requireNotNull(starterArgs) },
+            this,
+            intent.extras
         )
 
     override val viewModel: PaymentOptionsViewModel by viewModels { viewModelFactory }

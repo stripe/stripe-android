@@ -91,7 +91,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     logger: Logger,
     @IOContext workContext: CoroutineContext,
     @InjectorKey injectorKey: String,
-    handle: SavedStateHandle
+    savedStateHandle: SavedStateHandle
 ) : BaseSheetViewModel<PaymentSheetViewModel.TransitionTarget>(
     application = application,
     config = args.config,
@@ -102,7 +102,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     logger = logger,
     injectorKey = injectorKey,
     resourceRepository = resourceRepository,
-    handle = handle
+    savedStateHandle = savedStateHandle
 ) {
     private val confirmParamsFactory = ConfirmStripeIntentParamsFactory.createFactory(
         args.clientSecret
@@ -223,7 +223,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             stripeIntentValidator.requireValid(stripeIntent)
         }.fold(
             onSuccess = {
-                handle!!.set(SAVE_STRIPE_INTENT, stripeIntent)
+                savedStateHandle.set(SAVE_STRIPE_INTENT, stripeIntent)
                 updatePaymentMethods(stripeIntent)
                 resetViewState()
             },
@@ -263,7 +263,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                 }.orEmpty()
             }.fold(
                 onSuccess = {
-                    handle!!.set(SAVE_PAYMENT_METHODS, it)
+                    savedStateHandle.set(SAVE_PAYMENT_METHODS, it)
                     setStripeIntent(stripeIntent)
                     resetViewState()
                 },
@@ -483,7 +483,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         override fun <T : ViewModel?> create(
             key: String,
             modelClass: Class<T>,
-            handle:SavedStateHandle
+            savedStateHandle:SavedStateHandle
         ): T {
             val args = starterArgsSupplier()
 
@@ -491,7 +491,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
             return subComponentBuilderProvider.get()
                 .paymentSheetViewModelModule(PaymentSheetViewModelModule(args))
-                .savedStateHandle(handle)
+                .savedStateHandle(savedStateHandle)
                 .build().viewModel as T
         }
 

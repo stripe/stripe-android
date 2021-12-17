@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet
 
+import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.ViewModelProvider
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -13,7 +14,8 @@ internal class PaymentOptionsAddPaymentMethodFragment(
             requireNotNull(
                 requireArguments().getParcelable(PaymentOptionsActivity.EXTRA_STARTER_ARGS)
             )
-        }
+        },
+        activity as AppCompatActivity
     )
 
     override val sheetViewModel by activityViewModels<PaymentOptionsViewModel> {

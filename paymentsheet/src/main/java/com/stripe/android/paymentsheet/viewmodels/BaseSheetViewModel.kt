@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet.viewmodels
 
 import android.app.Application
-import android.util.Log
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
@@ -53,7 +52,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     protected val logger: Logger,
     @InjectorKey val injectorKey: String,
     resourceRepository: ResourceRepository,
-    val handle: SavedStateHandle? = null
+    protected val savedStateHandle: SavedStateHandle
 ) : AndroidViewModel(application) {
     internal val customerConfig = config?.customer
     internal val merchantName = config?.merchantDisplayName
@@ -70,13 +69,13 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     internal val isResourceRepositoryReady: LiveData<Boolean> =
         _isResourceRepositoryReady.distinctUntilChanged()
 
-    private val _stripeIntent = handle!!.getLiveData<StripeIntent>(SAVE_STRIPE_INTENT)
+    private val _stripeIntent = savedStateHandle.getLiveData<StripeIntent>(SAVE_STRIPE_INTENT)
     internal val stripeIntent: LiveData<StripeIntent?> = _stripeIntent
 
     internal var supportedPaymentMethods = emptyList<SupportedPaymentMethod>()
 
     @VisibleForTesting
-    internal val _paymentMethods = handle!!.getLiveData<List<PaymentMethod>>(SAVE_PAYMENT_METHODS)
+    internal val _paymentMethods = savedStateHandle.getLiveData<List<PaymentMethod>>(SAVE_PAYMENT_METHODS)
 
     /**
      * The list of saved payment methods for the current customer.
@@ -85,7 +84,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     internal val paymentMethods: LiveData<List<PaymentMethod>> = _paymentMethods
 
     @VisibleForTesting
-    internal val _amount = handle!!.getLiveData<Amount>(SAVE_AMOUNT)
+    internal val _amount = savedStateHandle.getLiveData<Amount>(SAVE_AMOUNT)
     internal val amount: LiveData<Amount> = _amount
 
     /**
@@ -109,7 +108,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
      * card fragment is determined to be valid (not necessarily selected)
      * On [BasePaymentMethodsListFragment] this is set when a user selects one of the options
      */
-    private val _selection = handle!!.getLiveData<PaymentSelection>(SAVE_SELECTION)
+    private val _selection = savedStateHandle.getLiveData<PaymentSelection>(SAVE_SELECTION)
     internal val selection: LiveData<PaymentSelection?> = _selection
 
     private val editing = MutableLiveData(false)
@@ -206,7 +205,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
 
     @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
     fun setStripeIntent(stripeIntent: StripeIntent?) {
-        handle?.set(SAVE_STRIPE_INTENT, stripeIntent)
+        savedStateHandle.set(SAVE_STRIPE_INTENT, stripeIntent)
 
         /**
          * The settings of values in this function is so that
@@ -229,7 +228,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
 
         if (stripeIntent is PaymentIntent) {
             runCatching {
-                handle!!.set(SAVE_AMOUNT, Amount(
+                savedStateHandle.set(SAVE_AMOUNT, Amount(
                         requireNotNull(stripeIntent.amount),
                         requireNotNull(stripeIntent.currency)
                     )
@@ -263,7 +262,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     }
 
     fun updateSelection(selection: PaymentSelection?) {
-        handle!!.set(SAVE_SELECTION, selection)
+        savedStateHandle.set(SAVE_SELECTION, selection)
     }
 
     fun setEditing(isEditing: Boolean) {
@@ -273,7 +272,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     fun removePaymentMethod(paymentMethod: PaymentMethod) = runBlocking {
         launch {
             paymentMethod.id?.let { paymentMethodId ->
-                handle?.set(SAVE_PAYMENT_METHODS, _paymentMethods.value?.filter {
+                savedStateHandle.set(SAVE_PAYMENT_METHODS, _paymentMethods.value?.filter {
                     it.id != paymentMethodId
                 }
                 )
