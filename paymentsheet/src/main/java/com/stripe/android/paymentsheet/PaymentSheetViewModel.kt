@@ -281,7 +281,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     private fun resetViewState(userErrorMessage: String? = null) {
         _viewState.value =
             PaymentSheetViewState.Reset(userErrorMessage?.let { UserErrorMessage(it) })
-        _processing.value = false
+        savedStateHandle.set(SAVE_PROCESSING, false)
     }
 
     fun checkout(checkoutIdentifier: CheckoutIdentifier) {
@@ -291,7 +291,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         }
 
         this.checkoutIdentifier = checkoutIdentifier
-        _processing.value = true
+        savedStateHandle.set(SAVE_PROCESSING, true)
         _viewState.value = PaymentSheetViewState.StartProcessing
 
         val paymentSelection = selection.value
@@ -470,7 +470,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         private val starterArgsSupplier: () -> PaymentSheetContract.Args,
         owner: SavedStateRegistryOwner,
         defaultArgs: Bundle? = null
-    ) : AbstractSavedStateViewModelFactory(owner, defaultArgs), Injectable<Factory.FallbackInitializeParam> {
+    ) : AbstractSavedStateViewModelFactory(owner, defaultArgs),
+        Injectable<Factory.FallbackInitializeParam> {
         internal data class FallbackInitializeParam(
             val application: Application,
         )
@@ -483,7 +484,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         override fun <T : ViewModel?> create(
             key: String,
             modelClass: Class<T>,
-            savedStateHandle:SavedStateHandle
+            savedStateHandle: SavedStateHandle
         ): T {
             val args = starterArgsSupplier()
 
@@ -496,7 +497,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         }
 
         override fun fallbackInitialize(arg: FallbackInitializeParam) {
-            Log.e("MLB", "Running fallback initialize")
+            Log.e("MLB", "Running fallback initialize ")
             DaggerPaymentSheetLauncherComponent
                 .builder()
                 .application(arg.application)

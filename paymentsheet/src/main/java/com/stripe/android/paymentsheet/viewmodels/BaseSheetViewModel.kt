@@ -117,7 +117,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     private val editing = MutableLiveData(false)
 
     @VisibleForTesting
-    internal val _processing = MutableLiveData(true)
+    internal val _processing = savedStateHandle.getLiveData<Boolean>(SAVE_PROCESSING)
     val processing: LiveData<Boolean> = _processing
 
     /**
@@ -334,5 +334,6 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
         internal const val SAVE_AMOUNT = "amount"
         internal const val SAVE_SELECTION = "selection"
         internal const val SAVE_SUPPORTED_PAYMENT_METHOD = "supported_payment_methods"
+        internal const val SAVE_PROCESSING = "processing"
     }
 }

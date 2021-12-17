@@ -75,7 +75,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
         setStripeIntent(args.stripeIntent)
         //TODO: Needs to be handle
         _paymentMethods.value = args.paymentMethods
-        _processing.postValue(false)
+        savedStateHandle.set(SAVE_PROCESSING, false)
     }
 
     override fun onFatal(throwable: Throwable) {
