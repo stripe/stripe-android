@@ -85,7 +85,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     internal val paymentMethods: LiveData<List<PaymentMethod>> = _paymentMethods
 
     @VisibleForTesting
-    internal val _amount = MutableLiveData<Amount>()
+    internal val _amount = handle!!.getLiveData<Amount>(SAVE_AMOUNT)
     internal val amount: LiveData<Amount> = _amount
 
     /**
@@ -109,7 +109,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
      * card fragment is determined to be valid (not necessarily selected)
      * On [BasePaymentMethodsListFragment] this is set when a user selects one of the options
      */
-    private val _selection = MutableLiveData<PaymentSelection?>()
+    private val _selection = handle!!.getLiveData<PaymentSelection>(SAVE_SELECTION)
     internal val selection: LiveData<PaymentSelection?> = _selection
 
     private val editing = MutableLiveData(false)
@@ -229,11 +229,11 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
 
         if (stripeIntent is PaymentIntent) {
             runCatching {
-                _amount.value =
-                    Amount(
+                handle!!.set(SAVE_AMOUNT, Amount(
                         requireNotNull(stripeIntent.amount),
                         requireNotNull(stripeIntent.currency)
                     )
+                )
             }.onFailure {
                 onFatal(
                     IllegalStateException("PaymentIntent must contain amount and currency.")
@@ -263,7 +263,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     }
 
     fun updateSelection(selection: PaymentSelection?) {
-        _selection.value = selection
+        handle!!.set(SAVE_SELECTION, selection)
     }
 
     fun setEditing(isEditing: Boolean) {
@@ -324,5 +324,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     companion object {
         internal const val SAVE_STRIPE_INTENT = "stripe_intent"
         internal const val SAVE_PAYMENT_METHODS = "customer_payment_methods"
+        internal const val SAVE_AMOUNT = "amount"
+        internal const val SAVE_SELECTION = "selection"
     }
 }
