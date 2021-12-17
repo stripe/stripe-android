@@ -49,7 +49,6 @@ import com.stripe.android.paymentsheet.model.PaymentOptionFactory
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.SetupIntentClientSecret
-import com.stripe.android.paymentsheet.model.getTypedClientSecret
 import com.stripe.android.paymentsheet.validate
 import com.stripe.android.ui.core.forms.resources.ResourceRepository
 import dagger.Lazy
