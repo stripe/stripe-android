@@ -45,7 +45,7 @@ internal abstract class FlowControllerModule {
         fun provideClientSecret(
             viewModel: FlowControllerViewModel
         ): ClientSecret {
-            return viewModel.initData.preferredClientSecret()
+            return viewModel.initData.clientSecret
         }
 
         @Provides

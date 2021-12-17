@@ -264,7 +264,7 @@ internal class DefaultFlowController @Inject internal constructor(
         initData: InitData
     ) {
         val confirmParamsFactory =
-            ConfirmStripeIntentParamsFactory.createFactory(initData.preferredClientSecret())
+            ConfirmStripeIntentParamsFactory.createFactory(initData.clientSecret)
 
         when (paymentSelection) {
             is PaymentSelection.Saved -> {

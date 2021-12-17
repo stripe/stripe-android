@@ -250,28 +250,22 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         options: ApiRequest.Options,
         expandFields: List<String>
     ): PaymentIntent? {
-        val paymentIntentId: String
-        val params: Map<String, Any?>
-        if (options.apiKeyIsUserKey) {
-            require(clientSecret.startsWith("pi_")) {
-                "`clientSecret` format does not match expected identifier formatting."
+        val paymentIntentId = PaymentIntent.ClientSecret(clientSecret).paymentIntentId
+        val params: Map<String, Any?> =
+            if (options.apiKeyIsUserKey) {
+                createExpandParam(expandFields)
+            } else {
+                createClientSecretParam(clientSecret, expandFields)
             }
-            paymentIntentId =
-                if (PaymentIntent.ClientSecret.isMatch(clientSecret))
-                    PaymentIntent.ClientSecret(clientSecret).paymentIntentId
-                else
-                    clientSecret
-            params = createExpandParam(expandFields)
-        } else {
-            paymentIntentId = PaymentIntent.ClientSecret(clientSecret).paymentIntentId
-            params = createClientSecretParam(clientSecret, expandFields)
-        }
-        val url = getRetrievePaymentIntentUrl(paymentIntentId)
 
         fireFraudDetectionDataRequest()
 
         return fetchStripeModel(
-            apiRequestFactory.createGet(url, options, params),
+            apiRequestFactory.createGet(
+                getRetrievePaymentIntentUrl(paymentIntentId),
+                options,
+                params
+            ),
             PaymentIntentJsonParser()
         ) {
             fireAnalyticsRequest(
