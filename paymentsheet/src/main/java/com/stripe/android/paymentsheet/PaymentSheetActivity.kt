@@ -42,7 +42,8 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
         PaymentSheetViewModel.Factory(
             { application },
             { requireNotNull(starterArgs) },
-            this
+            this,
+            intent?.extras
         )
 
     override val viewModel: PaymentSheetViewModel by viewModels { viewModelFactory }

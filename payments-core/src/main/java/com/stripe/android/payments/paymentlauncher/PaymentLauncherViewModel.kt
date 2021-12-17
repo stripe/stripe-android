@@ -1,6 +1,7 @@
 package com.stripe.android.payments.paymentlauncher
 
 import android.app.Application
+import android.util.Log
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.VisibleForTesting
@@ -78,7 +79,13 @@ internal class PaymentLauncherViewModel @Inject constructor(
      * confirm the same [StripeIntent] again.
      */
     internal val hasStarted: Boolean
-        get() = savedStateHandle.get(KEY_HAS_STARTED) ?: false
+        get() {
+            Log.e(
+                "MLB",
+                "PaymentLauncher handle contains: ${savedStateHandle.contains(KEY_HAS_STARTED)}"
+            )
+            return savedStateHandle.get(KEY_HAS_STARTED) ?: false
+        }
 
     /**
      * [PaymentResult] live data to be observed.

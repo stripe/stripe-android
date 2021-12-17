@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet
 
 import android.app.Application
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.IntegerRes
@@ -177,6 +178,9 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         if (googlePayLauncherConfig == null) {
             _isGooglePayReady.value = false
         }
+
+        Log.e("MLB", "PaymentSheetViewModel.init: handle is: $handle and values ${handle.contains(
+            "key")}")
     }
 
     fun setupGooglePay(
@@ -472,7 +476,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     ) : AbstractSavedStateViewModelFactory(owner, defaultArgs), Injectable<Factory.FallbackInitializeParam> {
         internal data class FallbackInitializeParam(
             val application: Application,
-            val handle: SavedStateHandle,
         )
 
         @Inject
@@ -487,7 +490,12 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         ): T {
             val args = starterArgsSupplier()
 
-            injectWithFallback(args.injectorKey, FallbackInitializeParam(applicationSupplier(), handle))
+            Log.e("MLB", "PaymentSheetViewModel.create: " +
+                "handle is: $handle " +
+                "and values ${handle.contains("key")}")
+
+            injectWithFallback(args.injectorKey, FallbackInitializeParam(applicationSupplier()))
+
             return subComponentBuilderProvider.get()
                 .paymentSheetViewModelModule(PaymentSheetViewModelModule(args))
                 .savedStateHandle(handle)
@@ -495,6 +503,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         }
 
         override fun fallbackInitialize(arg: FallbackInitializeParam) {
+            Log.e("MLB", "Running fallback initialize")
             DaggerPaymentSheetLauncherComponent
                 .builder()
                 .application(arg.application)
