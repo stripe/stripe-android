@@ -178,9 +178,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         if (googlePayLauncherConfig == null) {
             _isGooglePayReady.value = false
         }
-
-        Log.e("MLB", "PaymentSheetViewModel.init: handle is: $handle and values ${handle.contains(
-            "key")}")
     }
 
     fun setupGooglePay(
@@ -489,10 +486,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             handle:SavedStateHandle
         ): T {
             val args = starterArgsSupplier()
-
-            Log.e("MLB", "PaymentSheetViewModel.create: " +
-                "handle is: $handle " +
-                "and values ${handle.contains("key")}")
 
             injectWithFallback(args.injectorKey, FallbackInitializeParam(applicationSupplier()))
 

@@ -208,12 +208,6 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     fun setStripeIntent(stripeIntent: StripeIntent?) {
         handle?.set(SAVE_STRIPE_INTENT, stripeIntent)
 
-        Log.e(
-            "MLB", "PaymentSheetActivity: stripeIntent present on handle: ${
-                handle!!.contains(SAVE_STRIPE_INTENT)
-            }"
-        )
-
         /**
          * The settings of values in this function is so that
          * they will be ready in the onViewCreated method of

@@ -79,13 +79,7 @@ internal class PaymentLauncherViewModel @Inject constructor(
      * confirm the same [StripeIntent] again.
      */
     internal val hasStarted: Boolean
-        get() {
-            Log.e(
-                "MLB",
-                "PaymentLauncher handle contains: ${savedStateHandle.contains(KEY_HAS_STARTED)}"
-            )
-            return savedStateHandle.get(KEY_HAS_STARTED) ?: false
-        }
+        get() = savedStateHandle.get(KEY_HAS_STARTED) ?: false
 
     /**
      * [PaymentResult] live data to be observed.

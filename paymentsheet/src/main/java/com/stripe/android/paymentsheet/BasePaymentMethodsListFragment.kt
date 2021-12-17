@@ -115,7 +115,6 @@ internal abstract class BasePaymentMethodsListFragment(
             viewBinding.recycler.adapter = it
         }
 
-        Log.e("MLB", "BasePaymentMethodList: payment methods size: ${sheetViewModel.handle!!.get<List<PaymentMethod>>(SAVE_PAYMENT_METHODS)?.size}")
         adapter.setItems(
             config,
             sheetViewModel.paymentMethods.value.orEmpty(),

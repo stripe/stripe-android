@@ -52,10 +52,6 @@ internal class PaymentSheetListFragment(
         } else {
             viewBinding.total.isVisible = false
         }
-
-        Log.e("MLB", "PaymentSheetListFragment: payment methods size: ${sheetViewModel.handle!!.get<List<PaymentMethod>>(
-            BaseSheetViewModel.SAVE_PAYMENT_METHODS
-        )?.size}")
     }
 
     private fun getTotalText(amount: Amount): String {

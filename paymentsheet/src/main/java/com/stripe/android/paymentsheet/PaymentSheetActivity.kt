@@ -115,20 +115,6 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
             // The buy btton needs to be made visible since it is gone in the xml
             buttonContainer.isVisible = true
             viewBinding.buyButton.isVisible = true
-            Log.e(
-                "MLB", "PaymentSheetActivity: payment methods present on handle: ${
-                    viewModel.handle!!.contains(
-                        BaseSheetViewModel.SAVE_PAYMENT_METHODS
-                    )
-                }"
-            )
-            Log.e(
-                "MLB", "PaymentSheetActivity: stripeIntent present on handle: ${
-                    viewModel.handle!!.contains(
-                        BaseSheetViewModel.SAVE_STRIPE_INTENT
-                    )
-                }"
-            )
         } else {
             viewModel.maybeFetchStripeIntent()
         }
