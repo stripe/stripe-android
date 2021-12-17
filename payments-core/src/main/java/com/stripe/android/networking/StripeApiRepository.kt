@@ -1385,7 +1385,6 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
     private suspend fun ConfirmPaymentIntentParams.maybeForDashboard(
         options: ApiRequest.Options,
     ): ConfirmPaymentIntentParams {
-        val paymentMethodCreateParams = paymentMethodCreateParams
         if (!options.apiKeyIsUserKey || paymentMethodCreateParams == null) {
             return this
         }
