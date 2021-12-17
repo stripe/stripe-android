@@ -256,7 +256,11 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
             require(clientSecret.startsWith("pi_")) {
                 "`clientSecret` format does not match expected identifier formatting."
             }
-            paymentIntentId = clientSecret
+            paymentIntentId =
+                if (PaymentIntent.ClientSecret.isMatch(clientSecret))
+                    PaymentIntent.ClientSecret(clientSecret).paymentIntentId
+                else
+                    clientSecret
             params = createExpandParam(expandFields)
         } else {
             paymentIntentId = PaymentIntent.ClientSecret(clientSecret).paymentIntentId
