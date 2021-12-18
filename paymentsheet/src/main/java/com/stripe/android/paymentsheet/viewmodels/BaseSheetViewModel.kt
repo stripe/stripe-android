@@ -1,6 +1,8 @@
 package com.stripe.android.paymentsheet.viewmodels
 
 import android.app.Application
+import android.os.Parcelable
+import android.util.Log
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
@@ -36,13 +38,14 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
+import kotlinx.parcelize.Parcelize
 import org.jetbrains.annotations.TestOnly
 import kotlin.coroutines.CoroutineContext
 
 /**
  * Base `ViewModel` for activities that use `BottomSheet`.
  */
-internal abstract class BaseSheetViewModel<TransitionTargetType>(
+internal abstract class BaseSheetViewModel<TransitionTargetType : Parcelable>(
     application: Application,
     internal val config: PaymentSheet.Configuration?,
     internal val eventReporter: EventReporter,
@@ -90,6 +93,13 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     internal val _amount = savedStateHandle.getLiveData<Amount>(SAVE_AMOUNT)
     internal val amount: LiveData<Amount> = _amount
 
+
+    private var addFragmentSelectedLPM = savedStateHandle.get<SupportedPaymentMethod>(SAVE_SELECTED_ADD_LPM)
+    fun setAddFragmentSelectedLPM(lpm: SupportedPaymentMethod){
+        savedStateHandle.set(SAVE_SELECTED_ADD_LPM, lpm)
+    }
+    fun getAddFragmentSelectedLPM() = savedStateHandle.get<SupportedPaymentMethod>(SAVE_SELECTED_ADD_LPM) ?: SupportedPaymentMethod.Card
+
     /**
      * Request to retrieve the value from the repository happens when initialize any fragment
      * and any fragment will re-update when the result comes back.
@@ -99,8 +109,8 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     private val _savedSelection = MutableLiveData<SavedSelection>()
     private val savedSelection: LiveData<SavedSelection> = _savedSelection
 
-    private val _transition = MutableLiveData<Event<TransitionTargetType?>>(Event(null))
-    internal val transition: LiveData<Event<TransitionTargetType?>> = _transition
+    private val _transition = savedStateHandle.getLiveData<Event<TransitionTargetType>>(SAVE_TRANSITION_TARGET)
+    internal val transition: LiveData<Event<TransitionTargetType>?> = _transition.distinctUntilChanged()
 
     @VisibleForTesting
     internal val _liveMode = MutableLiveData<Boolean>()
@@ -151,11 +161,13 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
             val savedSelection = withContext(workContext) {
                 prefsRepository.getSavedSelection(isGooglePayReady.asFlow().first())
             }
+            Log.e("MLB", "Save selection updated")
             _savedSelection.value = savedSelection
         }
 
         viewModelScope.launch {
             resourceRepository.waitUntilLoaded()
+            Log.e("MLB", "resource repository is ready")
             _isResourceRepositoryReady.value = true
         }
     }
@@ -173,7 +185,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
             }
         }
     }.distinctUntilChanged().map {
-        Event(it)
+        Event<FragmentConfig>(it)
     }
 
     private fun createFragmentConfig(): FragmentConfig? {
@@ -203,11 +215,13 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     }
 
     open fun transitionTo(target: TransitionTargetType) {
-        _transition.postValue(Event(target))
+        savedStateHandle.set(SAVE_TRANSITION_TARGET, Event(target))
     }
 
     @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
     fun setStripeIntent(stripeIntent: StripeIntent?) {
+
+        Log.e("MLB", "Setting stripe intent")
         savedStateHandle.set(SAVE_STRIPE_INTENT, stripeIntent)
 
         /**
@@ -220,6 +234,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
             SAVE_SUPPORTED_PAYMENT_METHOD,
             pmsToAdd
         )
+        Log.e("MLB", "setStripeIntent set supportedPaymentMethods")
         supportedPaymentMethods = pmsToAdd
 
         if (stripeIntent != null && supportedPaymentMethods.isEmpty()) {
@@ -304,10 +319,10 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
      * From https://medium.com/androiddevelopers/livedata-with-snackbar-navigation-and-other-events-the-singleliveevent-case-ac2622673150
      * TODO(brnunes): Migrate to Flows once stable: https://medium.com/androiddevelopers/a-safer-way-to-collect-flows-from-android-uis-23080b1f8bda
      */
-    class Event<out T>(private val content: T) {
+    @Parcelize
+    class Event<out T: Parcelable>(private val content: T?) : Parcelable {
 
-        var hasBeenHandled = false
-            private set // Allow external read but not write
+        private var hasBeenHandled = false
 
         /**
          * Returns the content and prevents its use again.
@@ -325,15 +340,18 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
          * Returns the content, even if it's already been handled.
          */
         @TestOnly
-        fun peekContent(): T = content
+        fun peekContent(): T? = content
     }
 
     companion object {
         internal const val SAVE_STRIPE_INTENT = "stripe_intent"
         internal const val SAVE_PAYMENT_METHODS = "customer_payment_methods"
         internal const val SAVE_AMOUNT = "amount"
+        internal const val SAVE_SELECTED_ADD_LPM = "selected_add_lpm"
         internal const val SAVE_SELECTION = "selection"
         internal const val SAVE_SUPPORTED_PAYMENT_METHOD = "supported_payment_methods"
         internal const val SAVE_PROCESSING = "processing"
+        internal const val SAVE_TRANSITION_TARGET = "target"
+
     }
 }

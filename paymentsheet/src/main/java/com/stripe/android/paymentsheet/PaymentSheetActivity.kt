@@ -132,16 +132,19 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
         setupBuyButton()
 
         viewModel.transition.observe(this) { event ->
-            updateErrorMessage()
-            val transitionTarget = event.getContentIfNotHandled()
-            if (transitionTarget != null) {
-                onTransitionTarget(
-                    transitionTarget,
-                    bundleOf(
-                        EXTRA_STARTER_ARGS to starterArgs,
-                        EXTRA_FRAGMENT_CONFIG to transitionTarget.fragmentConfig
+            event?.let{
+
+                updateErrorMessage()
+                event.getContentIfNotHandled()?.let { transitionTarget ->
+                    Log.e("MLB", "transition target requested: ${event.getContentIfNotHandled()}")
+                    onTransitionTarget(
+                        transitionTarget,
+                        bundleOf(
+                            EXTRA_STARTER_ARGS to starterArgs,
+                            EXTRA_FRAGMENT_CONFIG to transitionTarget.fragmentConfig
+                        )
                     )
-                )
+                }
             }
         }
 

@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.ViewGroup
 import android.widget.ScrollView
 import android.widget.TextView
@@ -80,15 +81,16 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
         setupContinueButton(viewBinding.continueButton)
 
         viewModel.transition.observe(this) { event ->
-            val transitionTarget = event.getContentIfNotHandled()
-            if (transitionTarget != null) {
-                onTransitionTarget(
-                    transitionTarget,
-                    bundleOf(
-                        EXTRA_STARTER_ARGS to starterArgs,
-                        EXTRA_FRAGMENT_CONFIG to transitionTarget.fragmentConfig
+            event?.let{
+                event.getContentIfNotHandled()?.let { transitionTarget ->
+                    onTransitionTarget(
+                        transitionTarget,
+                        bundleOf(
+                            PaymentSheetActivity.EXTRA_STARTER_ARGS to starterArgs,
+                            PaymentSheetActivity.EXTRA_FRAGMENT_CONFIG to transitionTarget.fragmentConfig
+                        )
                     )
-                )
+                }
             }
         }
 

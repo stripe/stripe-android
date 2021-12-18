@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet
 
 import android.app.Application
 import android.os.Bundle
+import android.os.Parcelable
 import android.util.Log
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
@@ -55,6 +56,7 @@ import com.stripe.android.ui.core.forms.resources.ResourceRepository
 import dagger.Lazy
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
 import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
@@ -190,6 +192,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                     lifecycleScope = lifecycleScope,
                     config = config,
                     readyCallback = { isReady ->
+                        Log.e("MLB", "Google pay is ready")
                         _isGooglePayReady.value = isReady
                     },
                     activityResultLauncher = activityResultLauncher
@@ -263,6 +266,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                 }.orEmpty()
             }.fold(
                 onSuccess = {
+
+                    Log.e("MLB", "Setting customer payment methods ${it.size}")
                     savedStateHandle.set(SAVE_PAYMENT_METHODS, it)
                     setStripeIntent(stripeIntent)
                     resetViewState()
@@ -446,20 +451,23 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         _paymentSheetResult.value = PaymentSheetResult.Canceled
     }
 
-    internal sealed class TransitionTarget {
+    internal sealed class TransitionTarget : Parcelable {
         abstract val fragmentConfig: FragmentConfig
 
         // User has saved PM's and is selected
+        @Parcelize
         data class SelectSavedPaymentMethod(
             override val fragmentConfig: FragmentConfig
         ) : TransitionTarget()
 
         // User has saved PM's and is adding a new one
+        @Parcelize
         data class AddPaymentMethodFull(
             override val fragmentConfig: FragmentConfig
         ) : TransitionTarget()
 
         // User has no saved PM's
+        @Parcelize
         data class AddPaymentMethodSheet(
             override val fragmentConfig: FragmentConfig
         ) : TransitionTarget()
@@ -490,6 +498,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
             injectWithFallback(args.injectorKey, FallbackInitializeParam(applicationSupplier()))
 
+            Log.e("MLB", "Factory.create contains: SAVE_SUPPORTED_PAYMENT_METHOD: ${savedStateHandle.contains("SAVE_SUPPORTED_PAYMENT_METHOD")}")
+            
             return subComponentBuilderProvider.get()
                 .paymentSheetViewModelModule(PaymentSheetViewModelModule(args))
                 .savedStateHandle(savedStateHandle)

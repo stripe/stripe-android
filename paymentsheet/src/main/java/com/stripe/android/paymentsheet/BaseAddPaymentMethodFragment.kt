@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -41,16 +42,6 @@ internal abstract class BaseAddPaymentMethodFragment(
 
     protected lateinit var addPaymentMethodHeader: TextView
 
-    private lateinit var selectedPaymentMethod: SupportedPaymentMethod
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        // When the fragment is destroyed and recreated, the child fragment is re-instantiated
-        // during onCreate, so the factory must be set before calling super.
-        childFragmentManager.fragmentFactory = AddPaymentMethodsFragmentFactory(
-            sheetViewModel::class.java, viewModelFactory
-        )
-        super.onCreate(savedInstanceState)
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -84,8 +75,12 @@ internal abstract class BaseAddPaymentMethodFragment(
             }
         )
 
+        Log.e(
+            "MLB",
+            "selected payment method code: ${sheetViewModel.getAddFragmentSelectedLPM()?.type?.code}"
+        )
         val selectedPaymentMethodIndex = paymentMethods.indexOf(
-            SupportedPaymentMethod.fromCode(savedInstanceState?.getString(SELECTED_PAYMENT_METHOD))
+            sheetViewModel.getAddFragmentSelectedLPM()
         ).takeUnless { it == -1 } ?: 0
 
         if (paymentMethods.size > 1) {
@@ -93,9 +88,17 @@ internal abstract class BaseAddPaymentMethodFragment(
         }
 
         if (paymentMethods.isNotEmpty()) {
+            // This must be done after super.onCreate is called so the savedStateHandler works.
+            childFragmentManager.fragmentFactory = AddPaymentMethodsFragmentFactory(
+                sheetViewModel::class.java, viewModelFactory
+            )
+
             // If the activity is destroyed and recreated, then the fragment is already present
             // and doesn't need to be replaced, only the selected payment method needs to be set
-            replacePaymentMethodFragment(paymentMethods[selectedPaymentMethodIndex])
+            if (savedInstanceState == null) {
+                Log.e("MLB", "Replacing fragment")
+                replacePaymentMethodFragment(paymentMethods[selectedPaymentMethodIndex])
+            }
         }
 
         sheetViewModel.processing.observe(viewLifecycleOwner) { isProcessing ->
@@ -125,7 +128,7 @@ internal abstract class BaseAddPaymentMethodFragment(
                         transformToPaymentSelection(
                             formFieldValues,
                             formFragment.paramKeySpec,
-                            selectedPaymentMethod
+                            sheetViewModel.getAddFragmentSelectedLPM()
                         )
                     )
                 }
@@ -180,13 +183,8 @@ internal abstract class BaseAddPaymentMethodFragment(
         replacePaymentMethodFragment(paymentMethod)
     }
 
-    override fun onSaveInstanceState(outState: Bundle) {
-        outState.putString(SELECTED_PAYMENT_METHOD, selectedPaymentMethod.type.code)
-        super.onSaveInstanceState(outState)
-    }
-
     private fun replacePaymentMethodFragment(paymentMethod: SupportedPaymentMethod) {
-        selectedPaymentMethod = paymentMethod
+        sheetViewModel.setAddFragmentSelectedLPM(paymentMethod)
 
         val args = requireArguments()
         args.putParcelable(
@@ -220,7 +218,6 @@ internal abstract class BaseAddPaymentMethodFragment(
         childFragmentManager.findFragmentById(R.id.payment_method_fragment_container)
 
     companion object {
-        private const val SELECTED_PAYMENT_METHOD = "selected_pm"
 
         private fun fragmentForPaymentMethod(paymentMethod: SupportedPaymentMethod) =
             when (paymentMethod) {
