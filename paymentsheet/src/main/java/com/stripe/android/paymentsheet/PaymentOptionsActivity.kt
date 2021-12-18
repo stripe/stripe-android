@@ -38,7 +38,7 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
             { application },
             { requireNotNull(starterArgs) },
             this,
-            intent.extras
+            intent?.extras
         )
 
     override val viewModel: PaymentOptionsViewModel by viewModels { viewModelFactory }
