@@ -4,7 +4,7 @@ plugins {
     id 'kotlin-kapt'
     id 'org.jetbrains.dokka'
     id "org.jetbrains.kotlin.plugin.parcelize"
-    id 'org.jetbrains.kotlin.plugin.serialization' version '1.6.0'
+    id 'org.jetbrains.kotlin.plugin.serialization' version '1.6.10'
 }
 
 assemble.dependsOn('lint')
@@ -19,7 +19,7 @@ if (System.getenv("JITPACK")) {
 }
 
 dependencies {
-    implementation project(":payments-core")
+    implementation project(":stripe-core")
 
     implementation 'androidx.core:core-ktx:1.7.0'
     implementation libraries.androidx.appcompat
@@ -39,7 +39,7 @@ dependencies {
     implementation "androidx.activity:activity-compose:$composeActivityVersion"
     // Integration with observables
     implementation "androidx.compose.runtime:runtime-livedata:$composeVersion"
-    implementation "com.google.accompanist:accompanist-flowlayout:0.20.2"
+    implementation "com.google.accompanist:accompanist-flowlayout:0.20.3"
     // Tooling support (Previews, etc.)
     debugImplementation "androidx.compose.ui:ui-tooling:$composeVersion"
 

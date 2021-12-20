@@ -5,8 +5,10 @@ import androidx.annotation.StringRes
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import com.stripe.android.ui.core.R
+import kotlinx.parcelize.Parcelize
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+@Parcelize
 data class SimpleTextSpec(
     override val identifier: IdentifierSpec,
     @StringRes val label: Int,

@@ -10,8 +10,6 @@
   <string name="address_label_bb_jm_parish">교구</string>
   <!-- Used to describe a field of an address -->
   <string name="address_label_cedex">세덱스</string>
-  <!-- Caption for Country field on address form -->
-  <string name="address_label_country">국가</string>
   <!-- Label of an address field -->
   <string name="address_label_department">행정구/현</string>
   <!-- Label for the district field on an address form -->

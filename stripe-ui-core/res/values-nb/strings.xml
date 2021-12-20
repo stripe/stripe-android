@@ -10,8 +10,6 @@
   <string name="address_label_bb_jm_parish">Sogn</string>
   <!-- Used to describe a field of an address -->
   <string name="address_label_cedex">Cedex</string>
-  <!-- Caption for Country field on address form -->
-  <string name="address_label_country">Land</string>
   <!-- Label of an address field -->
   <string name="address_label_department">Avdeling</string>
   <!-- Label for the district field on an address form -->

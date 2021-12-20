@@ -2,10 +2,12 @@ package com.stripe.android.ui.core.elements
 
 import androidx.annotation.ColorRes
 import androidx.annotation.StringRes
+import kotlinx.parcelize.Parcelize
 
 /**
  * This is for elements that do not receive user input
  */
+@Parcelize
 internal data class StaticTextSpec(
     override val identifier: IdentifierSpec,
     @StringRes val stringResId: Int,
