@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -27,7 +26,6 @@ import com.stripe.android.paymentsheet.paymentdatacollection.CardDataCollectionF
 import com.stripe.android.paymentsheet.paymentdatacollection.ComposeFormDataCollectionFragment
 import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.TransformToPaymentMethodCreateParams
-import com.stripe.android.paymentsheet.ui.AddPaymentMethodsFragmentFactory
 import com.stripe.android.paymentsheet.ui.AnimationConstants
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.Amount
@@ -42,6 +40,8 @@ internal abstract class BaseAddPaymentMethodFragment(
 
     protected lateinit var addPaymentMethodHeader: TextView
 
+    // TODO: THis appears unused
+    private lateinit var selectedPaymentMethod: SupportedPaymentMethod
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -75,10 +75,6 @@ internal abstract class BaseAddPaymentMethodFragment(
             }
         )
 
-        Log.e(
-            "MLB",
-            "selected payment method code: ${sheetViewModel.getAddFragmentSelectedLPM()?.type?.code}"
-        )
         val selectedPaymentMethodIndex = paymentMethods.indexOf(
             sheetViewModel.getAddFragmentSelectedLPM()
         ).takeUnless { it == -1 } ?: 0
@@ -88,15 +84,10 @@ internal abstract class BaseAddPaymentMethodFragment(
         }
 
         if (paymentMethods.isNotEmpty()) {
-            // This must be done after super.onCreate is called so the savedStateHandler works.
-            childFragmentManager.fragmentFactory = AddPaymentMethodsFragmentFactory(
-                sheetViewModel::class.java, viewModelFactory
-            )
 
             // If the activity is destroyed and recreated, then the fragment is already present
             // and doesn't need to be replaced, only the selected payment method needs to be set
             if (savedInstanceState == null) {
-                Log.e("MLB", "Replacing fragment")
                 replacePaymentMethodFragment(paymentMethods[selectedPaymentMethodIndex])
             }
         }

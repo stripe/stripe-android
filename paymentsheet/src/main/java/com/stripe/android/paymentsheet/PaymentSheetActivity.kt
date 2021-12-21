@@ -26,6 +26,8 @@ import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.ui.AnimationConstants
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
+import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.Companion.SAVE_PAYMENT_METHODS
+import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.Companion.SAVE_TRANSITION_TARGET
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.CurrencyFormatter
 import kotlinx.coroutines.launch
@@ -110,13 +112,10 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
             )
         )
 
-
-        if (savedInstanceState != null) {
+        if (!viewModel.maybeFetchStripeIntent()) {
             // The buy btton needs to be made visible since it is gone in the xml
             buttonContainer.isVisible = true
             viewBinding.buyButton.isVisible = true
-        } else {
-            viewModel.maybeFetchStripeIntent()
         }
 
         starterArgs.statusBarColor?.let {
@@ -132,11 +131,10 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
         setupBuyButton()
 
         viewModel.transition.observe(this) { event ->
-            event?.let{
+            event?.let {
 
                 updateErrorMessage()
                 event.getContentIfNotHandled()?.let { transitionTarget ->
-                    Log.e("MLB", "transition target requested: ${event.getContentIfNotHandled()}")
                     onTransitionTarget(
                         transitionTarget,
                         bundleOf(
@@ -151,12 +149,15 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
         viewModel.fragmentConfigEvent.observe(this) { event ->
             val config = event.getContentIfNotHandled()
             if (config != null) {
-                val target = if (viewModel.paymentMethods.value.isNullOrEmpty()) {
-                    PaymentSheetViewModel.TransitionTarget.AddPaymentMethodSheet(config)
-                } else {
-                    PaymentSheetViewModel.TransitionTarget.SelectSavedPaymentMethod(config)
+
+                if (supportFragmentManager.fragments.firstOrNull() is PaymentSheetLoadingFragment) {
+                    val target = if (viewModel.paymentMethods.value.isNullOrEmpty()) {
+                        PaymentSheetViewModel.TransitionTarget.AddPaymentMethodSheet(config)
+                    } else {
+                        PaymentSheetViewModel.TransitionTarget.SelectSavedPaymentMethod(config)
+                    }
+                    viewModel.transitionTo(target)
                 }
-                viewModel.transitionTo(target)
             }
         }
 
@@ -181,6 +182,12 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
     override fun onDestroy() {
         super.onDestroy()
         viewModel.unregisterFromActivity()
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        // We don't want to replace the transition target when we come back.
+        viewModel.savedStateHandle.set(SAVE_TRANSITION_TARGET, null)
+        super.onSaveInstanceState(outState)
     }
 
     override fun onBackPressed() {

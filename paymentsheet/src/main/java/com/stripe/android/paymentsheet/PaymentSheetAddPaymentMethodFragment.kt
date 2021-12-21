@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet
 
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
@@ -24,7 +25,8 @@ internal class PaymentSheetAddPaymentMethodFragment(
                 requireArguments().getParcelable(PaymentSheetActivity.EXTRA_STARTER_ARGS)
             )
         },
-        (activity as? AppCompatActivity) ?: this
+        (activity as? AppCompatActivity) ?: this,
+        (activity as? AppCompatActivity)?.intent?.extras
     )
 
     override val sheetViewModel by activityViewModels<PaymentSheetViewModel> {

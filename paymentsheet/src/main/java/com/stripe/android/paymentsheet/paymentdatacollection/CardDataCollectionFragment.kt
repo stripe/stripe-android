@@ -10,6 +10,7 @@ import android.widget.CheckBox
 import android.widget.LinearLayout
 import android.widget.Space
 import android.widget.TextView
+import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.ContextThemeWrapper
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
@@ -18,9 +19,14 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.stripe.android.model.Address
+import com.stripe.android.core.model.Country
 import com.stripe.android.core.model.CountryCode
+import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.paymentsheet.PaymentOptionsActivity
+import com.stripe.android.paymentsheet.PaymentOptionsViewModel
+import com.stripe.android.paymentsheet.PaymentSheetActivity
+import com.stripe.android.paymentsheet.PaymentSheetViewModel
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.databinding.FragmentPaymentsheetAddCardBinding
 import com.stripe.android.paymentsheet.databinding.StripeHorizontalDividerBinding
@@ -30,22 +36,11 @@ import com.stripe.android.paymentsheet.ui.BillingAddressView
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.view.CardInputListener
 import com.stripe.android.view.CardMultilineWidget
-import com.stripe.android.core.model.Country
 
 /**
  * A [Fragment] for collecting data for a new card payment method.
  */
-internal class CardDataCollectionFragment<ViewModelType : BaseSheetViewModel<*>>(
-    private val viewModelClass: Class<ViewModelType>,
-    private val viewModelFactory: ViewModelProvider.Factory
-) : Fragment() {
-    // Because the ViewModel is a subclass of BaseSheetViewModel (depending on whether we're going
-    // through the complete or custom flow), we need to parameterize the ViewModel class so it is
-    // properly reused if it was already created.
-    val sheetViewModel: ViewModelType by lazy {
-        ViewModelProvider(requireActivity(), viewModelFactory).get(viewModelClass)
-    }
-
+internal class CardDataCollectionFragment : Fragment() {
     private lateinit var cardMultilineWidget: CardMultilineWidget
     private lateinit var billingAddressView: BillingAddressView
     private lateinit var cardErrors: TextView
@@ -69,6 +64,7 @@ internal class CardDataCollectionFragment<ViewModelType : BaseSheetViewModel<*>>
                 PaymentMethodCreateParams.createCard(it)
             }
         }
+    private lateinit var sheetViewModel: BaseSheetViewModel<*>
 
     private val addCardViewModel: AddCardViewModel by viewModels()
 
@@ -80,6 +76,33 @@ internal class CardDataCollectionFragment<ViewModelType : BaseSheetViewModel<*>>
         val themedInflater = inflater.cloneInContext(
             ContextThemeWrapper(requireActivity(), R.style.StripePaymentSheetAddPaymentMethodTheme)
         )
+        if (activity is PaymentOptionsActivity) {
+            sheetViewModel = ViewModelProvider(
+                requireActivity(), PaymentSheetViewModel.Factory(
+                    { requireActivity().application },
+                    {
+                        requireNotNull(
+                            requireArguments().getParcelable(PaymentSheetActivity.EXTRA_STARTER_ARGS)
+                        )
+                    },
+                    (activity as? AppCompatActivity) ?: this
+                )
+            ).get(PaymentOptionsViewModel::class.java)
+        } else {
+            sheetViewModel = ViewModelProvider(
+                requireActivity(), PaymentSheetViewModel.Factory(
+                    { requireActivity().application },
+                    {
+                        requireNotNull(
+                            requireArguments().getParcelable(PaymentSheetActivity.EXTRA_STARTER_ARGS)
+                        )
+                    },
+                    (activity as? AppCompatActivity) ?: this
+                )
+            ).get(PaymentSheetViewModel::class.java)
+
+        }
+
         return themedInflater.inflate(
             R.layout.fragment_paymentsheet_add_card,
             container,

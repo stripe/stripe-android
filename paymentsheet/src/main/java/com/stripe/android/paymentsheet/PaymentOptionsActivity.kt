@@ -2,7 +2,6 @@ package com.stripe.android.paymentsheet
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.ViewGroup
 import android.widget.ScrollView
 import android.widget.TextView
@@ -81,7 +80,7 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
         setupContinueButton(viewBinding.continueButton)
 
         viewModel.transition.observe(this) { event ->
-            event?.let{
+            event?.let {
                 event.getContentIfNotHandled()?.let { transitionTarget ->
                     onTransitionTarget(
                         transitionTarget,

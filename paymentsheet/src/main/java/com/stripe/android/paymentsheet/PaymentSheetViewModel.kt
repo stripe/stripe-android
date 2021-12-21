@@ -3,7 +3,6 @@ package com.stripe.android.paymentsheet
 import android.app.Application
 import android.os.Bundle
 import android.os.Parcelable
-import android.util.Log
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.IntegerRes
@@ -178,7 +177,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     init {
         eventReporter.onInit(config)
         if (googlePayLauncherConfig == null) {
-            _isGooglePayReady.value = false
+            savedStateHandle.set(SAVE_GOOGLE_PAY_READY, false)
         }
     }
 
@@ -186,17 +185,18 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         lifecycleScope: CoroutineScope,
         activityResultLauncher: ActivityResultLauncher<GooglePayPaymentMethodLauncherContract.Args>
     ) {
-        googlePayLauncherConfig?.let { config ->
-            googlePayPaymentMethodLauncher =
-                googlePayPaymentMethodLauncherFactory.create(
-                    lifecycleScope = lifecycleScope,
-                    config = config,
-                    readyCallback = { isReady ->
-                        Log.e("MLB", "Google pay is ready")
-                        _isGooglePayReady.value = isReady
-                    },
-                    activityResultLauncher = activityResultLauncher
-                )
+        if (_isGooglePayReady.value == null) {
+            googlePayLauncherConfig?.let { config ->
+                googlePayPaymentMethodLauncher =
+                    googlePayPaymentMethodLauncherFactory.create(
+                        lifecycleScope = lifecycleScope,
+                        config = config,
+                        readyCallback = { isReady ->
+                            savedStateHandle.set(SAVE_GOOGLE_PAY_READY, isReady)
+                        },
+                        activityResultLauncher = activityResultLauncher
+                    )
+            }
         }
     }
 
@@ -205,20 +205,21 @@ internal class PaymentSheetViewModel @Inject internal constructor(
      * not fetched yet. If successful, continues through validation and fetching the saved payment
      * methods for the customer.
      */
-    internal fun maybeFetchStripeIntent() {
-        if (stripeIntent.value == null) {
-            viewModelScope.launch {
-                runCatching {
-                    stripeIntentRepository.get(args.clientSecret)
-                }.fold(
-                    onSuccess = ::onStripeIntentFetchResponse,
-                    onFailure = {
-                        setStripeIntent(null)
-                        onFatal(it)
-                    }
-                )
-            }
+    internal fun maybeFetchStripeIntent() = if (stripeIntent.value == null) {
+        viewModelScope.launch {
+            runCatching {
+                stripeIntentRepository.get(args.clientSecret)
+            }.fold(
+                onSuccess = ::onStripeIntentFetchResponse,
+                onFailure = {
+                    setStripeIntent(null)
+                    onFatal(it)
+                }
+            )
         }
+        true
+    } else {
+        false
     }
 
     private fun onStripeIntentFetchResponse(stripeIntent: StripeIntent) {
@@ -267,7 +268,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             }.fold(
                 onSuccess = {
 
-                    Log.e("MLB", "Setting customer payment methods ${it.size}")
                     savedStateHandle.set(SAVE_PAYMENT_METHODS, it)
                     setStripeIntent(stripeIntent)
                     resetViewState()
@@ -498,8 +498,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
             injectWithFallback(args.injectorKey, FallbackInitializeParam(applicationSupplier()))
 
-            Log.e("MLB", "Factory.create contains: SAVE_SUPPORTED_PAYMENT_METHOD: ${savedStateHandle.contains("SAVE_SUPPORTED_PAYMENT_METHOD")}")
-            
             return subComponentBuilderProvider.get()
                 .paymentSheetViewModelModule(PaymentSheetViewModelModule(args))
                 .savedStateHandle(savedStateHandle)
@@ -507,7 +505,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         }
 
         override fun fallbackInitialize(arg: FallbackInitializeParam) {
-            Log.e("MLB", "Running fallback initialize ")
             DaggerPaymentSheetLauncherComponent
                 .builder()
                 .application(arg.application)

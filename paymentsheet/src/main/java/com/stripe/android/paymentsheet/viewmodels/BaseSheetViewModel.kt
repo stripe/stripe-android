@@ -2,7 +2,6 @@ package com.stripe.android.paymentsheet.viewmodels
 
 import android.app.Application
 import android.os.Parcelable
-import android.util.Log
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
@@ -55,7 +54,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType : Parcelable>(
     protected val logger: Logger,
     @InjectorKey val injectorKey: String,
     resourceRepository: ResourceRepository,
-    protected val savedStateHandle: SavedStateHandle
+    val savedStateHandle: SavedStateHandle
 ) : AndroidViewModel(application) {
     internal val customerConfig = config?.customer
     internal val merchantName = config?.merchantDisplayName
@@ -65,10 +64,14 @@ internal abstract class BaseSheetViewModel<TransitionTargetType : Parcelable>(
     protected val _fatal = MutableLiveData<Throwable>()
 
     @VisibleForTesting
-    internal val _isGooglePayReady = MutableLiveData<Boolean>()
+    internal val _isGooglePayReady = savedStateHandle.getLiveData<Boolean>(
+        SAVE_GOOGLE_PAY_READY
+    )
     internal val isGooglePayReady: LiveData<Boolean> = _isGooglePayReady.distinctUntilChanged()
 
-    private val _isResourceRepositoryReady = MutableLiveData<Boolean>()
+    private val _isResourceRepositoryReady = savedStateHandle.getLiveData<Boolean>(
+        SAVE_RESOURCE_REPOSITORY_READY
+    )
     internal val isResourceRepositoryReady: LiveData<Boolean> =
         _isResourceRepositoryReady.distinctUntilChanged()
 
@@ -94,11 +97,16 @@ internal abstract class BaseSheetViewModel<TransitionTargetType : Parcelable>(
     internal val amount: LiveData<Amount> = _amount
 
 
-    private var addFragmentSelectedLPM = savedStateHandle.get<SupportedPaymentMethod>(SAVE_SELECTED_ADD_LPM)
-    fun setAddFragmentSelectedLPM(lpm: SupportedPaymentMethod){
+    private var addFragmentSelectedLPM =
+        savedStateHandle.get<SupportedPaymentMethod>(SAVE_SELECTED_ADD_LPM)
+
+    fun setAddFragmentSelectedLPM(lpm: SupportedPaymentMethod) {
         savedStateHandle.set(SAVE_SELECTED_ADD_LPM, lpm)
     }
-    fun getAddFragmentSelectedLPM() = savedStateHandle.get<SupportedPaymentMethod>(SAVE_SELECTED_ADD_LPM) ?: SupportedPaymentMethod.Card
+
+    fun getAddFragmentSelectedLPM() =
+        savedStateHandle.get<SupportedPaymentMethod>(SAVE_SELECTED_ADD_LPM)
+            ?: SupportedPaymentMethod.Card
 
     /**
      * Request to retrieve the value from the repository happens when initialize any fragment
@@ -106,11 +114,13 @@ internal abstract class BaseSheetViewModel<TransitionTargetType : Parcelable>(
      * Represents what the user last selects (add or buy) on the
      * [PaymentOptionsActivity]/[PaymentSheetActivity], and saved/restored from the preferences.
      */
-    private val _savedSelection = MutableLiveData<SavedSelection>()
+    private val _savedSelection = savedStateHandle.getLiveData<SavedSelection>(SAVE_SAVED_SELECTION)
     private val savedSelection: LiveData<SavedSelection> = _savedSelection
 
-    private val _transition = savedStateHandle.getLiveData<Event<TransitionTargetType>>(SAVE_TRANSITION_TARGET)
-    internal val transition: LiveData<Event<TransitionTargetType>?> = _transition.distinctUntilChanged()
+    private val _transition =
+        savedStateHandle.getLiveData<Event<TransitionTargetType>>(SAVE_TRANSITION_TARGET)
+    internal val transition: LiveData<Event<TransitionTargetType>?> =
+        _transition.distinctUntilChanged()
 
     @VisibleForTesting
     internal val _liveMode = MutableLiveData<Boolean>()
@@ -157,18 +167,20 @@ internal abstract class BaseSheetViewModel<TransitionTargetType : Parcelable>(
     }.distinctUntilChanged()
 
     init {
-        viewModelScope.launch {
-            val savedSelection = withContext(workContext) {
-                prefsRepository.getSavedSelection(isGooglePayReady.asFlow().first())
+        if (_savedSelection.value == null) {
+            viewModelScope.launch {
+                val savedSelection = withContext(workContext) {
+                    prefsRepository.getSavedSelection(isGooglePayReady.asFlow().first())
+                }
+                savedStateHandle.set(SAVE_SAVED_SELECTION, savedSelection)
             }
-            Log.e("MLB", "Save selection updated")
-            _savedSelection.value = savedSelection
         }
 
-        viewModelScope.launch {
-            resourceRepository.waitUntilLoaded()
-            Log.e("MLB", "resource repository is ready")
-            _isResourceRepositoryReady.value = true
+        if (_isResourceRepositoryReady.value == null) {
+            viewModelScope.launch {
+                resourceRepository.waitUntilLoaded()
+                savedStateHandle.set(SAVE_RESOURCE_REPOSITORY_READY, true)
+            }
         }
     }
 
@@ -185,7 +197,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType : Parcelable>(
             }
         }
     }.distinctUntilChanged().map {
-        Event<FragmentConfig>(it)
+        Event(it)
     }
 
     private fun createFragmentConfig(): FragmentConfig? {
@@ -220,8 +232,6 @@ internal abstract class BaseSheetViewModel<TransitionTargetType : Parcelable>(
 
     @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
     fun setStripeIntent(stripeIntent: StripeIntent?) {
-
-        Log.e("MLB", "Setting stripe intent")
         savedStateHandle.set(SAVE_STRIPE_INTENT, stripeIntent)
 
         /**
@@ -234,7 +244,6 @@ internal abstract class BaseSheetViewModel<TransitionTargetType : Parcelable>(
             SAVE_SUPPORTED_PAYMENT_METHOD,
             pmsToAdd
         )
-        Log.e("MLB", "setStripeIntent set supportedPaymentMethods")
         supportedPaymentMethods = pmsToAdd
 
         if (stripeIntent != null && supportedPaymentMethods.isEmpty()) {
@@ -319,8 +328,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType : Parcelable>(
      * From https://medium.com/androiddevelopers/livedata-with-snackbar-navigation-and-other-events-the-singleliveevent-case-ac2622673150
      * TODO(brnunes): Migrate to Flows once stable: https://medium.com/androiddevelopers/a-safer-way-to-collect-flows-from-android-uis-23080b1f8bda
      */
-    @Parcelize
-    class Event<out T: Parcelable>(private val content: T?) : Parcelable {
+    class Event<out T : Parcelable>(private val content: T?) {
 
         private var hasBeenHandled = false
 
@@ -349,9 +357,12 @@ internal abstract class BaseSheetViewModel<TransitionTargetType : Parcelable>(
         internal const val SAVE_AMOUNT = "amount"
         internal const val SAVE_SELECTED_ADD_LPM = "selected_add_lpm"
         internal const val SAVE_SELECTION = "selection"
+        internal const val SAVE_SAVED_SELECTION = "saved_selection"
         internal const val SAVE_SUPPORTED_PAYMENT_METHOD = "supported_payment_methods"
         internal const val SAVE_PROCESSING = "processing"
         internal const val SAVE_TRANSITION_TARGET = "target"
+        internal const val SAVE_GOOGLE_PAY_READY = "google_pay_ready"
+        internal const val SAVE_RESOURCE_REPOSITORY_READY = "resource_repository_ready"
 
     }
 }
