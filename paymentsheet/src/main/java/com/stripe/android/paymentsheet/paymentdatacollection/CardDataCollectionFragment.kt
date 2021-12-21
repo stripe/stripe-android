@@ -10,6 +10,7 @@ import android.widget.CheckBox
 import android.widget.LinearLayout
 import android.widget.Space
 import android.widget.TextView
+import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.ContextThemeWrapper
 import androidx.core.content.ContextCompat
@@ -64,7 +65,9 @@ internal class CardDataCollectionFragment : Fragment() {
                 PaymentMethodCreateParams.createCard(it)
             }
         }
-    private lateinit var sheetViewModel: BaseSheetViewModel<*>
+
+    @VisibleForTesting
+    internal lateinit var sheetViewModel: BaseSheetViewModel<*>
 
     private val addCardViewModel: AddCardViewModel by viewModels()
 

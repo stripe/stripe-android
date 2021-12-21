@@ -9,8 +9,8 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
-import com.stripe.android.model.CardBrand
 import com.stripe.android.core.model.CountryCode
+import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
@@ -19,14 +19,12 @@ import com.stripe.android.paymentsheet.PaymentSheetActivity
 import com.stripe.android.paymentsheet.PaymentSheetContract
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.COMPOSE_FRAGMENT_ARGS
-import com.stripe.android.paymentsheet.PaymentSheetViewModel
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.databinding.FragmentPaymentsheetAddCardBinding
 import com.stripe.android.paymentsheet.databinding.StripeBillingAddressLayoutBinding
 import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.FragmentConfigFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.ui.AddPaymentMethodsFragmentFactory
 import com.stripe.android.utils.TestUtils.idleLooper
 import org.junit.Before
 import org.junit.Test
@@ -449,30 +447,22 @@ class CardDataCollectionFragmentTest {
             showCheckbox = true,
             showCheckboxControlledFields = true,
         ),
-        onReady: (CardDataCollectionFragment<PaymentSheetViewModel>, FragmentPaymentsheetAddCardBinding) -> Unit
+        onReady: (CardDataCollectionFragment, FragmentPaymentsheetAddCardBinding) -> Unit
     ) {
-        val factory = AddPaymentMethodsFragmentFactory(
-            PaymentSheetViewModel::class.java,
-            PaymentSheetViewModel.Factory(
-                { ApplicationProvider.getApplicationContext() },
-                { args }
-            )
-        )
-        launchFragmentInContainer<CardDataCollectionFragment<PaymentSheetViewModel>>(
+        launchFragmentInContainer<CardDataCollectionFragment>(
             bundleOf(
                 PaymentSheetActivity.EXTRA_FRAGMENT_CONFIG to fragmentConfig,
                 PaymentSheetActivity.EXTRA_STARTER_ARGS to args,
                 ComposeFormDataCollectionFragment.EXTRA_CONFIG to fragmentArgs,
             ),
             R.style.StripePaymentSheetDefaultTheme,
-            factory = factory,
             initialState = Lifecycle.State.INITIALIZED
-        ).onFragment { fragment ->
-            // Mock sheetViewModel loading the StripeIntent before the Fragment is created
-            fragment.sheetViewModel.setStripeIntent(stripeIntent)
-            fragment.sheetViewModel.newCard = newCard
-        }.moveToState(Lifecycle.State.STARTED)
+        )
+            .moveToState(Lifecycle.State.STARTED)
             .onFragment { fragment ->
+                // Mock sheetViewModel loading the StripeIntent before the Fragment is created
+                fragment.sheetViewModel.setStripeIntent(stripeIntent)
+                fragment.sheetViewModel.newCard = newCard
                 onReady(
                     fragment,
                     FragmentPaymentsheetAddCardBinding.bind(

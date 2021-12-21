@@ -7,10 +7,9 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
-import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
-import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.paymentsheet.databinding.FragmentPaymentsheetAddPaymentMethodBinding
 import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.FragmentConfigFixtures
@@ -25,7 +24,6 @@ import org.robolectric.RobolectricTestRunner
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
 class PaymentOptionsAddPaymentMethodFragmentTest {
-    private val eventReporter = mock<EventReporter>()
 
     @Before
     fun setup() {
@@ -69,7 +67,6 @@ class PaymentOptionsAddPaymentMethodFragmentTest {
                 PaymentOptionsActivity.EXTRA_STARTER_ARGS to args
             ),
             R.style.StripePaymentSheetDefaultTheme,
-            factory = PaymentSheetFragmentFactory(eventReporter)
         ).onFragment { fragment ->
             onReady(
                 fragment,

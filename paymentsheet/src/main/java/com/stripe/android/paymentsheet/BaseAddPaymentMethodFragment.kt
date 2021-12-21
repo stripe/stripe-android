@@ -77,8 +77,8 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
             setupRecyclerView(viewBinding, paymentMethods, selectedPaymentMethodIndex)
         }
 
+        println("Save instance state: $savedInstanceState selectedPaymentMethodIndex: $selectedPaymentMethodIndex paymentmethods: $paymentMethods")
         if (paymentMethods.isNotEmpty()) {
-
             // If the activity is destroyed and recreated, then the fragment is already present
             // and doesn't need to be replaced, only the selected payment method needs to be set
             if (savedInstanceState == null) {
@@ -161,6 +161,7 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
 
     @VisibleForTesting
     internal fun onPaymentMethodSelected(paymentMethod: SupportedPaymentMethod) {
+        println("Payment method selected")
         // hide the soft keyboard.
         ViewCompat.getWindowInsetsController(requireView())
             ?.hide(WindowInsetsCompat.Type.ime())
@@ -169,6 +170,7 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
     }
 
     private fun replacePaymentMethodFragment(paymentMethod: SupportedPaymentMethod) {
+        println("Repalce payment method fragment: $paymentMethod")
         sheetViewModel.setAddFragmentSelectedLPM(paymentMethod)
 
         val args = requireArguments()
@@ -206,8 +208,13 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
 
         private fun fragmentForPaymentMethod(paymentMethod: SupportedPaymentMethod) =
             when (paymentMethod) {
-                SupportedPaymentMethod.Card -> CardDataCollectionFragment::class.java
-                else -> ComposeFormDataCollectionFragment::class.java
+                SupportedPaymentMethod.Card -> {
+                    println("Create card collection fragment")
+                    CardDataCollectionFragment::class.java
+                }
+                else -> {
+                    ComposeFormDataCollectionFragment::class.java
+                }
             }
 
         private val transformToPaymentMethodCreateParams = TransformToPaymentMethodCreateParams()

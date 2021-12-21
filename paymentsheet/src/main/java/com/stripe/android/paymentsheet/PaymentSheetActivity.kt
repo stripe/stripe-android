@@ -25,7 +25,6 @@ import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.ui.AnimationConstants
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
-import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.Companion.SAVE_TRANSITION_TARGET
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.CurrencyFormatter
 import kotlinx.coroutines.launch
@@ -179,12 +178,6 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
     override fun onDestroy() {
         super.onDestroy()
         viewModel.unregisterFromActivity()
-    }
-
-    override fun onSaveInstanceState(outState: Bundle) {
-        // We don't want to replace the transition target when we come back.
-        viewModel.savedStateHandle.set(SAVE_TRANSITION_TARGET, null)
-        super.onSaveInstanceState(outState)
     }
 
     override fun onBackPressed() {

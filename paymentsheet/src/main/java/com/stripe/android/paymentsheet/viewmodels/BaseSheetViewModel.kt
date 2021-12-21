@@ -98,14 +98,6 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     private var addFragmentSelectedLPM =
         savedStateHandle.get<SupportedPaymentMethod>(SAVE_SELECTED_ADD_LPM)
 
-    fun setAddFragmentSelectedLPM(lpm: SupportedPaymentMethod) {
-        savedStateHandle.set(SAVE_SELECTED_ADD_LPM, lpm)
-    }
-
-    fun getAddFragmentSelectedLPM() =
-        savedStateHandle.get<SupportedPaymentMethod>(SAVE_SELECTED_ADD_LPM)
-            ?: SupportedPaymentMethod.Card
-
     /**
      * Request to retrieve the value from the repository happens when initialize any fragment
      * and any fragment will re-update when the result comes back.
@@ -115,10 +107,8 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     private val _savedSelection = savedStateHandle.getLiveData<SavedSelection>(SAVE_SAVED_SELECTION)
     private val savedSelection: LiveData<SavedSelection> = _savedSelection
 
-    private val _transition =
-        savedStateHandle.getLiveData<Event<TransitionTargetType>>(SAVE_TRANSITION_TARGET)
-    internal val transition: LiveData<Event<TransitionTargetType>?> =
-        _transition.distinctUntilChanged()
+    private val _transition = MutableLiveData<Event<TransitionTargetType?>>(Event(null))
+    internal val transition: LiveData<Event<TransitionTargetType?>> = _transition
 
     @VisibleForTesting
     internal val _liveMode = MutableLiveData<Boolean>()
@@ -225,7 +215,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     }
 
     open fun transitionTo(target: TransitionTargetType) {
-        savedStateHandle.set(SAVE_TRANSITION_TARGET, Event(target))
+        _transition.postValue(Event(target))
     }
 
     @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
@@ -295,6 +285,14 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
         savedStateHandle.set(SAVE_SELECTION, selection)
     }
 
+    fun setAddFragmentSelectedLPM(lpm: SupportedPaymentMethod) {
+        savedStateHandle.set(SAVE_SELECTED_ADD_LPM, lpm)
+    }
+
+    fun getAddFragmentSelectedLPM() =
+        savedStateHandle.get<SupportedPaymentMethod>(SAVE_SELECTED_ADD_LPM)
+            ?: SupportedPaymentMethod.Card
+
     fun setEditing(isEditing: Boolean) {
         editing.value = isEditing
     }
@@ -360,7 +358,6 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
         internal const val SAVE_SAVED_SELECTION = "saved_selection"
         internal const val SAVE_SUPPORTED_PAYMENT_METHOD = "supported_payment_methods"
         internal const val SAVE_PROCESSING = "processing"
-        internal const val SAVE_TRANSITION_TARGET = "target"
         internal const val SAVE_GOOGLE_PAY_READY = "google_pay_ready"
         internal const val SAVE_RESOURCE_REPOSITORY_READY = "resource_repository_ready"
 

@@ -5,6 +5,7 @@ import android.content.Intent
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
+import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.common.truth.Truth.assertThat
@@ -309,7 +310,8 @@ class PaymentOptionsActivityTest {
                 AddressFieldElementRepository(
                     ApplicationProvider.getApplicationContext<Context>().resources
                 )
-            )
+            ),
+            savedStateHandle = SavedStateHandle()
         )
     }
 

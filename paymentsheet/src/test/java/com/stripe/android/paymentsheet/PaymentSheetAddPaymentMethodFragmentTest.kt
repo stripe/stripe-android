@@ -1,22 +1,34 @@
 package com.stripe.android.paymentsheet
 
 import android.content.Context
+import androidx.activity.result.ActivityResultLauncher
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
+import androidx.fragment.app.testing.FragmentScenario
 import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
+import com.stripe.android.core.injection.Injectable
+import com.stripe.android.core.injection.Injector
+import com.stripe.android.core.injection.InjectorKey
+import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
+import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContract
+import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLauncherFactory
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentIntentFixtures.PI_OFF_SESSION
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.COMPOSE_FRAGMENT_ARGS
 import com.stripe.android.paymentsheet.PaymentSheetViewModel.CheckoutIdentifier
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -24,35 +36,42 @@ import com.stripe.android.paymentsheet.databinding.FragmentPaymentsheetAddPaymen
 import com.stripe.android.paymentsheet.databinding.PrimaryButtonBinding
 import com.stripe.android.paymentsheet.databinding.StripeGooglePayButtonBinding
 import com.stripe.android.paymentsheet.forms.FormFieldValues
+import com.stripe.android.paymentsheet.injection.PaymentSheetViewModelSubcomponent
 import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.FragmentConfigFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
+import com.stripe.android.paymentsheet.model.StripeIntentValidator
 import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
 import com.stripe.android.paymentsheet.paymentdatacollection.CardDataCollectionFragment
 import com.stripe.android.paymentsheet.paymentdatacollection.ComposeFormDataCollectionFragment
 import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
+import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.forms.FormFieldEntry
 import com.stripe.android.utils.TestUtils.idleLooper
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.TestCoroutineDispatcher
+import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
+import javax.inject.Provider
 
+@ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
-class PaymentSheetAddPaymentMethodFragmentTest {
-    @get:Rule
-    val rule = InstantTaskExecutorRule()
-
-    private val eventReporter = mock<EventReporter>()
+internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelTestInjection() {
     private val context: Context = ApplicationProvider.getApplicationContext()
 
     @Before
@@ -61,6 +80,11 @@ class PaymentSheetAddPaymentMethodFragmentTest {
             context,
             ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
         )
+    }
+
+    @After
+    override fun after(){
+        super.after()
     }
 
     @Test
@@ -77,6 +101,7 @@ class PaymentSheetAddPaymentMethodFragmentTest {
             whenever(it.paymentMethodTypes).thenReturn(listOf("card", "bancontact"))
         }
         createFragment(stripeIntent = paymentIntent) { fragment, viewBinding ->
+            idleLooper()
             fragment.sheetViewModel._processing.value = true
             val adapter =
                 viewBinding.paymentMethodsRecycler.adapter as AddPaymentMethodsAdapter
@@ -90,7 +115,7 @@ class PaymentSheetAddPaymentMethodFragmentTest {
         val paymentIntent = mock<PaymentIntent>().also {
             whenever(it.paymentMethodTypes).thenReturn(listOf("card", "bancontact", "sofort", "ideal"))
         }
-        createFragment(stripeIntent = paymentIntent) { fragment, viewBinding ->
+        createFragment(stripeIntent = paymentIntent) { _, viewBinding ->
             val item = viewBinding.paymentMethodsRecycler.layoutManager!!.findViewByPosition(0)
             assertThat(item!!.measuredWidth).isEqualTo(104)
         }
@@ -102,7 +127,7 @@ class PaymentSheetAddPaymentMethodFragmentTest {
         val paymentIntent = mock<PaymentIntent>().also {
             whenever(it.paymentMethodTypes).thenReturn(listOf("card", "bancontact"))
         }
-        createFragment(stripeIntent = paymentIntent) { fragment, viewBinding ->
+        createFragment(stripeIntent = paymentIntent) { _, viewBinding ->
             val item = viewBinding.paymentMethodsRecycler.layoutManager!!.findViewByPosition(0)
             assertThat(item!!.measuredWidth).isEqualTo(211)
         }
@@ -130,7 +155,9 @@ class PaymentSheetAddPaymentMethodFragmentTest {
 
     @Test
     fun `when back to Ready state should update PaymentSelection`() {
-        createFragment { fragment, viewBinding ->
+        createFragment(
+            paymentMethods = emptyList()
+        ) { fragment, viewBinding ->
             val paymentSelections = mutableListOf<PaymentSelection?>()
             fragment.sheetViewModel.selection.observeForever { paymentSelection ->
                 paymentSelections.add(paymentSelection)
@@ -139,6 +166,7 @@ class PaymentSheetAddPaymentMethodFragmentTest {
             assertThat(viewBinding.googlePayButton.isVisible)
                 .isTrue()
 
+            idleLooper()
             // Start with null PaymentSelection because the card entered is invalid
             assertThat(paymentSelections.size)
                 .isEqualTo(1)
@@ -166,6 +194,7 @@ class PaymentSheetAddPaymentMethodFragmentTest {
     @Test
     fun `started fragment should report onShowNewPaymentOptionForm() event`() {
         createFragment { _, _ ->
+            idleLooper()
             verify(eventReporter).onShowNewPaymentOptionForm()
         }
     }
@@ -318,6 +347,7 @@ class PaymentSheetAddPaymentMethodFragmentTest {
             paymentMethodTypes = listOf("card", "bancontact")
         )
         createFragment(stripeIntent = paymentIntent) { fragment, viewBinding ->
+            idleLooper()
             assertThat(
                 fragment.childFragmentManager.findFragmentById(
                     viewBinding.paymentMethodFragmentContainer.id
@@ -325,7 +355,6 @@ class PaymentSheetAddPaymentMethodFragmentTest {
             ).isInstanceOf(CardDataCollectionFragment::class.java)
 
             fragment.onPaymentMethodSelected(SupportedPaymentMethod.Bancontact)
-
             idleLooper()
 
             val addedFragment = fragment.childFragmentManager.findFragmentById(
@@ -345,7 +374,7 @@ class PaymentSheetAddPaymentMethodFragmentTest {
                         showCheckboxControlledFields = false,
                         merchantName = PaymentSheetFixtures.MERCHANT_DISPLAY_NAME,
                         amount = createAmount(),
-                        injectorKey = DUMMY_INJECTOR_KEY
+                        injectorKey = "testInjectorKey"
                     )
                 )
         }.recreate().onFragment { fragment ->
@@ -368,7 +397,7 @@ class PaymentSheetAddPaymentMethodFragmentTest {
                         showCheckboxControlledFields = false,
                         merchantName = PaymentSheetFixtures.MERCHANT_DISPLAY_NAME,
                         amount = createAmount(),
-                        injectorKey = DUMMY_INJECTOR_KEY
+                        injectorKey = "testInjectorKey"
                     )
                 )
         }
@@ -491,6 +520,7 @@ class PaymentSheetAddPaymentMethodFragmentTest {
         val args = PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY
         val stripeIntent = PI_OFF_SESSION
         createFragment(stripeIntent = stripeIntent, args = args) { fragment, viewBinding ->
+            idleLooper()
             assertThat(
                 fragment.childFragmentManager.findFragmentById(
                     viewBinding.paymentMethodFragmentContainer.id
@@ -555,28 +585,40 @@ class PaymentSheetAddPaymentMethodFragmentTest {
         Amount(paymentIntent.amount!!, paymentIntent.currency!!)
 
     private fun createFragment(
-        args: PaymentSheetContract.Args = PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY,
+        args: PaymentSheetContract.Args = PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
+            injectorKey = "testInjectorKey"
+        ),
         fragmentConfig: FragmentConfig? = FragmentConfigFixtures.DEFAULT,
+        paymentMethods: List<PaymentMethod> = emptyList(),//listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
         stripeIntent: StripeIntent? = PaymentIntentFixtures.PI_WITH_SHIPPING,
         onReady: (PaymentSheetAddPaymentMethodFragment, FragmentPaymentsheetAddPaymentMethodBinding) -> Unit
-    ) = launchFragmentInContainer<PaymentSheetAddPaymentMethodFragment>(
-        bundleOf(
-            PaymentSheetActivity.EXTRA_FRAGMENT_CONFIG to fragmentConfig,
-            PaymentSheetActivity.EXTRA_STARTER_ARGS to args
-        ),
-        R.style.StripePaymentSheetDefaultTheme,
-        factory = PaymentSheetFragmentFactory(eventReporter),
-        initialState = Lifecycle.State.INITIALIZED
-    ).onFragment { fragment ->
-        // Mock sheetViewModel loading the StripeIntent before the Fragment is created
-        fragment.sheetViewModel.setStripeIntent(stripeIntent)
-    }.moveToState(Lifecycle.State.STARTED)
-        .onFragment { fragment ->
-            onReady(
-                fragment,
-                FragmentPaymentsheetAddPaymentMethodBinding.bind(
-                    requireNotNull(fragment.view)
+    ): FragmentScenario<PaymentSheetAddPaymentMethodFragment> {
+        assertThat(WeakMapInjectorRegistry.staticCacheMap.size).isEqualTo(0)
+        val viewModel = createViewModel(
+            stripeIntent as PaymentIntent,
+            paymentMethods = paymentMethods,
+            injectorKey = args.injectorKey
+        )
+        viewModel.updatePaymentMethods(stripeIntent)
+        viewModel.setStripeIntent(stripeIntent)
+        idleLooper()
+        registerViewModel(viewModel, args.injectorKey)
+
+        return launchFragmentInContainer<PaymentSheetAddPaymentMethodFragment>(
+            bundleOf(
+                PaymentSheetActivity.EXTRA_FRAGMENT_CONFIG to fragmentConfig,
+                PaymentSheetActivity.EXTRA_STARTER_ARGS to args
+            ),
+            R.style.StripePaymentSheetDefaultTheme,
+            initialState = Lifecycle.State.INITIALIZED
+        ).moveToState(Lifecycle.State.STARTED)
+            .onFragment { fragment ->
+                onReady(
+                    fragment,
+                    FragmentPaymentsheetAddPaymentMethodBinding.bind(
+                        requireNotNull(fragment.view)
+                    )
                 )
-            )
-        }
+            }
+    }
 }
