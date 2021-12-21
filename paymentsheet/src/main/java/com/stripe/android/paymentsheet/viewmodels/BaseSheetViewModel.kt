@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet.viewmodels
 
 import android.app.Application
-import android.os.Parcelable
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
@@ -37,14 +36,13 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
-import kotlinx.parcelize.Parcelize
 import org.jetbrains.annotations.TestOnly
 import kotlin.coroutines.CoroutineContext
 
 /**
  * Base `ViewModel` for activities that use `BottomSheet`.
  */
-internal abstract class BaseSheetViewModel<TransitionTargetType : Parcelable>(
+internal abstract class BaseSheetViewModel<TransitionTargetType>(
     application: Application,
     internal val config: PaymentSheet.Configuration?,
     internal val eventReporter: EventReporter,
@@ -304,9 +302,10 @@ internal abstract class BaseSheetViewModel<TransitionTargetType : Parcelable>(
     fun removePaymentMethod(paymentMethod: PaymentMethod) = runBlocking {
         launch {
             paymentMethod.id?.let { paymentMethodId ->
-                savedStateHandle.set(SAVE_PAYMENT_METHODS, _paymentMethods.value?.filter {
-                    it.id != paymentMethodId
-                }
+                savedStateHandle.set(SAVE_PAYMENT_METHODS,
+                    _paymentMethods.value?.filter {
+                        it.id != paymentMethodId
+                    }
                 )
 
                 customerConfig?.let {
@@ -328,9 +327,10 @@ internal abstract class BaseSheetViewModel<TransitionTargetType : Parcelable>(
      * From https://medium.com/androiddevelopers/livedata-with-snackbar-navigation-and-other-events-the-singleliveevent-case-ac2622673150
      * TODO(brnunes): Migrate to Flows once stable: https://medium.com/androiddevelopers/a-safer-way-to-collect-flows-from-android-uis-23080b1f8bda
      */
-    class Event<out T : Parcelable>(private val content: T?) {
+    class Event<out T>(private val content: T) {
 
-        private var hasBeenHandled = false
+        var hasBeenHandled = false
+            private set // Allow external read but not write
 
         /**
          * Returns the content and prevents its use again.
@@ -348,7 +348,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType : Parcelable>(
          * Returns the content, even if it's already been handled.
          */
         @TestOnly
-        fun peekContent(): T? = content
+        fun peekContent(): T = content
     }
 
     companion object {

@@ -1,22 +1,17 @@
 package com.stripe.android.paymentsheet
 
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
 import androidx.fragment.app.activityViewModels
-import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.databinding.FragmentPaymentsheetPaymentMethodsListBinding
-import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.Companion.SAVE_AMOUNT
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.CurrencyFormatter
 
 internal class PaymentSheetListFragment(
-    eventReporter: EventReporter?
 ) : BasePaymentMethodsListFragment(
-    canClickSelectedItem = false,
-    eventReporter
+    canClickSelectedItem = false
 ) {
     private val currencyFormatter = CurrencyFormatter()
     private val activityViewModel by activityViewModels<PaymentSheetViewModel> {

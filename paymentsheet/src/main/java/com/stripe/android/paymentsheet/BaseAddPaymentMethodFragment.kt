@@ -17,7 +17,6 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.stripe.android.core.injection.InjectorKey
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.databinding.FragmentPaymentsheetAddPaymentMethodBinding
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -32,16 +31,11 @@ import com.stripe.android.ui.core.Amount
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
-internal abstract class BaseAddPaymentMethodFragment(
-    private val eventReporter: EventReporter?
-) : Fragment() {
+internal abstract class BaseAddPaymentMethodFragment : Fragment() {
     abstract val viewModelFactory: ViewModelProvider.Factory
     abstract val sheetViewModel: BaseSheetViewModel<*>
 
     protected lateinit var addPaymentMethodHeader: TextView
-
-    // TODO: THis appears unused
-    private lateinit var selectedPaymentMethod: SupportedPaymentMethod
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -106,7 +100,7 @@ internal abstract class BaseAddPaymentMethodFragment(
             attachComposeFragmentViewModel(fragment)
         }
 
-        eventReporter?.onShowNewPaymentOptionForm()
+        sheetViewModel.eventReporter.onShowNewPaymentOptionForm()
     }
 
     private fun attachComposeFragmentViewModel(fragment: Fragment) {

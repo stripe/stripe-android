@@ -52,8 +52,6 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        supportFragmentManager.fragmentFactory =
-            PaymentSheetFragmentFactory(null)
         super.onCreate(savedInstanceState)
 
         if (Build.VERSION.SDK_INT != Build.VERSION_CODES.O) {

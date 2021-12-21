@@ -267,7 +267,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                 }.orEmpty()
             }.fold(
                 onSuccess = {
-
                     savedStateHandle.set(SAVE_PAYMENT_METHODS, it)
                     setStripeIntent(stripeIntent)
                     resetViewState()

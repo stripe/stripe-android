@@ -1,14 +1,12 @@
 package com.stripe.android.paymentsheet
 
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.ViewModelProvider
 import com.stripe.android.paymentsheet.PaymentSheetViewModel.CheckoutIdentifier
-import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.databinding.FragmentPaymentsheetAddPaymentMethodBinding
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
@@ -16,8 +14,7 @@ import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 
 internal class PaymentSheetAddPaymentMethodFragment(
-    eventReporter: EventReporter? = null
-) : BaseAddPaymentMethodFragment(eventReporter) {
+) : BaseAddPaymentMethodFragment() {
     override val viewModelFactory: ViewModelProvider.Factory = PaymentSheetViewModel.Factory(
         { requireActivity().application },
         {

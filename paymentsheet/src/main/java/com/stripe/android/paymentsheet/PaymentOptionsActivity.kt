@@ -81,7 +81,7 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
 
         viewModel.transition.observe(this) { event ->
             event?.let {
-                event.getContentIfNotHandled()?.let { transitionTarget ->
+                it.getContentIfNotHandled()?.let { transitionTarget ->
                     onTransitionTarget(
                         transitionTarget,
                         bundleOf(

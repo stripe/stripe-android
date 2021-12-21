@@ -3,7 +3,6 @@ package com.stripe.android.paymentsheet
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.ViewGroup
 import android.widget.ScrollView
 import android.widget.TextView
@@ -26,7 +25,6 @@ import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.ui.AnimationConstants
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
-import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.Companion.SAVE_PAYMENT_METHODS
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.Companion.SAVE_TRANSITION_TARGET
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.CurrencyFormatter
@@ -130,11 +128,10 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
 
         setupBuyButton()
 
-        viewModel.transition.observe(this) { event ->
-            event?.let {
-
+        viewModel.transition.observe(this) { transitionEvent ->
+            transitionEvent?.let {
                 updateErrorMessage()
-                event.getContentIfNotHandled()?.let { transitionTarget ->
+                it.getContentIfNotHandled()?.let { transitionTarget ->
                     onTransitionTarget(
                         transitionTarget,
                         bundleOf(
@@ -327,7 +324,6 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
     }
 
     internal companion object {
-
         internal const val EXTRA_FRAGMENT_CONFIG = BaseSheetActivity.EXTRA_FRAGMENT_CONFIG
         internal const val EXTRA_STARTER_ARGS = BaseSheetActivity.EXTRA_STARTER_ARGS
     }

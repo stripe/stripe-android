@@ -23,7 +23,6 @@ import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.FragmentConfigFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
-import com.stripe.android.paymentsheet.ui.PaymentSheetFragmentFactory
 import com.stripe.android.utils.TestUtils.idleLooper
 import org.junit.Before
 import org.junit.Rule
