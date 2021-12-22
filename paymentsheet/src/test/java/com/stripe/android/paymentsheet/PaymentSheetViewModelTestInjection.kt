@@ -50,6 +50,8 @@ internal open class PaymentSheetViewModelTestInjection {
     private val stripePaymentLauncherAssistedFactory =
         mock<StripePaymentLauncherAssistedFactory>()
 
+    private lateinit var injector: Injector
+
     @After
     open fun after() {
         WeakMapInjectorRegistry.clear()
@@ -109,7 +111,7 @@ internal open class PaymentSheetViewModelTestInjection {
             transformSpecToElement = mock()
         )
     ) {
-        val injector = object : Injector {
+        injector = object : Injector {
             override fun inject(injectable: Injectable<*>) {
                 (injectable as? PaymentSheetViewModel.Factory)?.let {
                     val mockBuilder = mock<PaymentSheetViewModelSubcomponent.Builder>()

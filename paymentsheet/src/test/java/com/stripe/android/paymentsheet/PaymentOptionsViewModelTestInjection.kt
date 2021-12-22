@@ -31,6 +31,8 @@ internal open class PaymentOptionsViewModelTestInjection {
 
     val eventReporter = mock<EventReporter>()
 
+    private lateinit var injector: Injector
+
     @After
     open fun after() {
         WeakMapInjectorRegistry.clear()
@@ -75,7 +77,7 @@ internal open class PaymentOptionsViewModelTestInjection {
         whenever(mockSubcomponent.viewModel).thenReturn(viewModel)
         whenever(mockSubComponentBuilderProvider.get()).thenReturn(mockBuilder)
 
-        val injector = object : Injector {
+        injector = object : Injector {
             override fun inject(injectable: Injectable<*>) {
                 (injectable as? PaymentOptionsViewModel.Factory)?.let {
                     injectable.subComponentBuilderProvider = mockSubComponentBuilderProvider
