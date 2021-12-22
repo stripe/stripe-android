@@ -2,7 +2,7 @@ package com.stripe.android.core.injection
 
 import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
-import java.util.*
+import java.util.WeakHashMap
 import java.util.concurrent.atomic.AtomicInteger
 
 /**
@@ -33,20 +33,16 @@ object WeakMapInjectorRegistry : InjectorRegistry {
 
     @Synchronized
     override fun register(injector: Injector, @InjectorKey key: String) {
-        synchronized(staticCacheMap.entries) {
-            staticCacheMap[injector] = key
-            println("thread id: ${Thread.currentThread().id}, registering ${key} staticCacheMap: ${staticCacheMap}")
-        }
+        staticCacheMap[injector] = key
+        println("thread id: ${Thread.currentThread().id}, registering ${key} staticCacheMap: ${staticCacheMap}")
     }
 
     @Synchronized
     override fun retrieve(@InjectorKey injectorKey: String): Injector? {
-        synchronized(staticCacheMap) {
-            println("thread id: ${Thread.currentThread().id}, retrieving ${injectorKey} staticCacheMap: ${staticCacheMap}")
-            return staticCacheMap.entries.firstOrNull {
-                it.value == injectorKey
-            }?.key
-        }
+        println("thread id: ${Thread.currentThread().id}, retrieving ${injectorKey} staticCacheMap: ${staticCacheMap}")
+        return staticCacheMap.entries.firstOrNull {
+            it.value == injectorKey
+        }?.key
     }
 
     @InjectorKey
