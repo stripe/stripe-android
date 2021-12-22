@@ -828,64 +828,6 @@ internal class PaymentSheetViewModelTest {
             .isEqualTo("com.stripe.android.paymentsheet.test")
     }
 
-//    @Test
-//    fun `Factory gets initialized by Injector when Injector is available`() {
-//        val mockBuilder = mock<PaymentSheetViewModelSubcomponent.Builder>()
-//        val mockSubComponent = mock<PaymentSheetViewModelSubcomponent>()
-//        val mockViewModel = mock<PaymentSheetViewModel>()
-//
-//        whenever(mockBuilder.build()).thenReturn(mockSubComponent)
-//        whenever(mockBuilder.paymentSheetViewModelModule(any())).thenReturn(mockBuilder)
-//        whenever((mockSubComponent.viewModel)).thenReturn(mockViewModel)
-//
-//        val injector = object : Injector {
-//            override fun inject(injectable: Injectable<*>) {
-//                val factory = injectable as PaymentSheetViewModel.Factory
-//                factory.subComponentBuilderProvider = Provider { mockBuilder }
-//            }
-//        }
-//        val injectorKey = WeakMapInjectorRegistry.nextKey("testKey")
-//        WeakMapInjectorRegistry.register(injector, injectorKey)
-//        val factory = PaymentSheetViewModel.Factory(
-//            { ApplicationProvider.getApplicationContext() },
-//            {
-//                PaymentSheetContract.Args.createPaymentIntentArgsWithInjectorKey(
-//                    "testSecret",
-//                    injectorKey = injectorKey
-//                )
-//            },
-//
-//        )
-//        val factorySpy = spy(factory)
-//        val createdViewModel = factorySpy.create(PaymentSheetViewModel::class.java)
-//        verify(factorySpy, times(0)).fallbackInitialize(any())
-//        assertThat(createdViewModel).isEqualTo(mockViewModel)
-//
-//        WeakMapInjectorRegistry.staticCacheMap.clear()
-//    }
-//
-//    @Test
-//    fun `Factory gets initialized with fallback when no Injector is available`() = runBlockingTest {
-//        val context = ApplicationProvider.getApplicationContext<Application>()
-//        PaymentConfiguration.init(context, ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
-//        val factory = PaymentSheetViewModel.Factory(
-//            { context },
-//            {
-//                PaymentSheetContract.Args.createPaymentIntentArgs(
-//                    "testSecret",
-//                )
-//            }
-//        )
-//        val factorySpy = spy(factory)
-//
-//        assertNotNull(factorySpy.create(PaymentSheetViewModel::class.java))
-//        verify(factorySpy).fallbackInitialize(
-//            argWhere {
-//                it.application == context
-//            }
-//        )
-//    }
-
     @Test
     fun `getSupportedPaymentMethods() filters payment methods with delayed settlement`() {
         val viewModel = createViewModel()
