@@ -76,9 +76,11 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     private val _stripeIntent = savedStateHandle.getLiveData<StripeIntent>(SAVE_STRIPE_INTENT)
     internal val stripeIntent: LiveData<StripeIntent?> = _stripeIntent
 
-    internal var supportedPaymentMethods = savedStateHandle.get<List<SupportedPaymentMethod>>(
-        SAVE_SUPPORTED_PAYMENT_METHOD
-    ) ?: emptyList()
+    internal var supportedPaymentMethods
+        get() = savedStateHandle.get<List<SupportedPaymentMethod>>(
+            SAVE_SUPPORTED_PAYMENT_METHOD
+        ) ?: emptyList()
+        set(value) = savedStateHandle.set(SAVE_SUPPORTED_PAYMENT_METHOD, value)
 
     @VisibleForTesting
     internal val _paymentMethods =
@@ -232,7 +234,6 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
             SAVE_SUPPORTED_PAYMENT_METHOD,
             pmsToAdd
         )
-        supportedPaymentMethods = pmsToAdd
 
         if (stripeIntent != null && supportedPaymentMethods.isEmpty()) {
             onFatal(

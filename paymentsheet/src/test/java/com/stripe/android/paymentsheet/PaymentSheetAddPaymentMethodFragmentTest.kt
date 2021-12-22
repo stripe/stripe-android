@@ -1,73 +1,52 @@
 package com.stripe.android.paymentsheet
 
 import android.content.Context
-import androidx.activity.result.ActivityResultLauncher
-import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.fragment.app.testing.FragmentScenario
 import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
-import com.stripe.android.core.Logger
-import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
-import com.stripe.android.core.injection.Injectable
-import com.stripe.android.core.injection.Injector
-import com.stripe.android.core.injection.InjectorKey
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
-import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContract
-import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLauncherFactory
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentIntentFixtures.PI_OFF_SESSION
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.COMPOSE_FRAGMENT_ARGS
 import com.stripe.android.paymentsheet.PaymentSheetViewModel.CheckoutIdentifier
-import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.databinding.FragmentPaymentsheetAddPaymentMethodBinding
 import com.stripe.android.paymentsheet.databinding.PrimaryButtonBinding
 import com.stripe.android.paymentsheet.databinding.StripeGooglePayButtonBinding
 import com.stripe.android.paymentsheet.forms.FormFieldValues
-import com.stripe.android.paymentsheet.injection.PaymentSheetViewModelSubcomponent
 import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.FragmentConfigFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
-import com.stripe.android.paymentsheet.model.StripeIntentValidator
 import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
 import com.stripe.android.paymentsheet.paymentdatacollection.CardDataCollectionFragment
 import com.stripe.android.paymentsheet.paymentdatacollection.ComposeFormDataCollectionFragment
 import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
-import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.forms.FormFieldEntry
 import com.stripe.android.utils.TestUtils.idleLooper
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.test.TestCoroutineDispatcher
 import org.junit.After
 import org.junit.Before
-import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
-import javax.inject.Provider
 
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
@@ -83,7 +62,7 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
     }
 
     @After
-    override fun after(){
+    override fun after() {
         super.after()
     }
 
@@ -156,15 +135,16 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
     @Test
     fun `when back to Ready state should update PaymentSelection`() {
         createFragment(
-            paymentMethods = emptyList()
+            paymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
         ) { fragment, viewBinding ->
+            idleLooper()
             val paymentSelections = mutableListOf<PaymentSelection?>()
             fragment.sheetViewModel.selection.observeForever { paymentSelection ->
                 paymentSelections.add(paymentSelection)
             }
 
             assertThat(viewBinding.googlePayButton.isVisible)
-                .isTrue()
+                .isFalse()
 
             idleLooper()
             // Start with null PaymentSelection because the card entered is invalid
@@ -374,7 +354,7 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
                         showCheckboxControlledFields = false,
                         merchantName = PaymentSheetFixtures.MERCHANT_DISPLAY_NAME,
                         amount = createAmount(),
-                        injectorKey = "testInjectorKey"
+                        injectorKey = "testInjectorKeyAddFragmentTest"
                     )
                 )
         }.recreate().onFragment { fragment ->
@@ -397,7 +377,7 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
                         showCheckboxControlledFields = false,
                         merchantName = PaymentSheetFixtures.MERCHANT_DISPLAY_NAME,
                         amount = createAmount(),
-                        injectorKey = "testInjectorKey"
+                        injectorKey = "testInjectorKeyAddFragmentTest"
                     )
                 )
         }
@@ -586,23 +566,19 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
 
     private fun createFragment(
         args: PaymentSheetContract.Args = PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
-            injectorKey = "testInjectorKey"
+            injectorKey = "testInjectorKeyAddFragmentTest"
         ),
         fragmentConfig: FragmentConfig? = FragmentConfigFixtures.DEFAULT,
-        paymentMethods: List<PaymentMethod> = emptyList(),//listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
+        paymentMethods: List<PaymentMethod> = emptyList(),
         stripeIntent: StripeIntent? = PaymentIntentFixtures.PI_WITH_SHIPPING,
         onReady: (PaymentSheetAddPaymentMethodFragment, FragmentPaymentsheetAddPaymentMethodBinding) -> Unit
     ): FragmentScenario<PaymentSheetAddPaymentMethodFragment> {
         assertThat(WeakMapInjectorRegistry.staticCacheMap.size).isEqualTo(0)
         val viewModel = createViewModel(
             stripeIntent as PaymentIntent,
-            paymentMethods = paymentMethods,
+            customerRepositoryPMs = paymentMethods,
             injectorKey = args.injectorKey
         )
-        viewModel.updatePaymentMethods(stripeIntent)
-        viewModel.setStripeIntent(stripeIntent)
-        idleLooper()
-        registerViewModel(viewModel, args.injectorKey)
 
         return launchFragmentInContainer<PaymentSheetAddPaymentMethodFragment>(
             bundleOf(
@@ -611,8 +587,12 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
             ),
             R.style.StripePaymentSheetDefaultTheme,
             initialState = Lifecycle.State.INITIALIZED
-        ).moveToState(Lifecycle.State.STARTED)
-            .onFragment { fragment ->
+        ).moveToState(Lifecycle.State.CREATED).onFragment { fragment ->
+            viewModel.updatePaymentMethods(stripeIntent)
+            viewModel.setStripeIntent(stripeIntent)
+            idleLooper()
+            registerViewModel(args.injectorKey, viewModel)
+        }.moveToState(Lifecycle.State.STARTED).onFragment { fragment ->
                 onReady(
                     fragment,
                     FragmentPaymentsheetAddPaymentMethodBinding.bind(

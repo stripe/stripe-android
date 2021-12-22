@@ -14,9 +14,9 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.R
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
-import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.PaymentOptionsViewModel.TransitionTarget
+import com.stripe.android.paymentsheet.PaymentSheetFixtures.PAYMENT_OPTIONS_CONTRACT_ARGS
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.databinding.PrimaryButtonBinding
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -312,20 +312,6 @@ class PaymentOptionsActivityTest {
                 )
             ),
             savedStateHandle = SavedStateHandle()
-        )
-    }
-
-    private companion object {
-        private val PAYMENT_OPTIONS_CONTRACT_ARGS = PaymentOptionContract.Args(
-            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-            paymentMethods = emptyList(),
-            config = PaymentSheetFixtures.CONFIG_GOOGLEPAY,
-            isGooglePayReady = false,
-            newCard = null,
-            statusBarColor = PaymentSheetFixtures.STATUS_BAR_COLOR,
-            injectorKey = DUMMY_INJECTOR_KEY,
-            enableLogging = false,
-            productUsage = mock()
         )
     }
 }

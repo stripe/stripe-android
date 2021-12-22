@@ -14,6 +14,8 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.core.injection.InjectorKey
+import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
@@ -37,6 +39,8 @@ import org.robolectric.shadows.ShadowAlertDialog
 
 @RunWith(RobolectricTestRunner::class)
 internal class PaymentSheetListFragmentTest : PaymentSheetViewModelTestInjection() {
+    @InjectorKey
+    private val injectorKey: String = "PaymentSheetListFragmentTest"
 
     @After
     override fun after() {
@@ -258,7 +262,6 @@ internal class PaymentSheetListFragmentTest : PaymentSheetViewModelTestInjection
             initialState = Lifecycle.State.INITIALIZED,
             paymentMethods = PAYMENT_METHODS
         ).moveToState(Lifecycle.State.STARTED).onFragment { fragment ->
-            idleLooper()
             assertThat(fragment.hasOptionsMenu()).isTrue()
         }
     }
@@ -316,22 +319,24 @@ internal class PaymentSheetListFragmentTest : PaymentSheetViewModelTestInjection
 
     private fun createScenario(
         fragmentConfig: FragmentConfig? = FRAGMENT_CONFIG,
-        starterArgs: PaymentSheetContract.Args = PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY,
+        starterArgs: PaymentSheetContract.Args = PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
+            injectorKey = injectorKey
+        ),
         initialState: Lifecycle.State = Lifecycle.State.RESUMED,
         paymentMethods: List<PaymentMethod> = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
     ): FragmentScenario<PaymentSheetListFragment> {
-
+        assertThat(WeakMapInjectorRegistry.retrieve(injectorKey)).isNull()
         fragmentConfig?.let {
             createViewModel(
                 fragmentConfig.stripeIntent,
-                paymentMethods = paymentMethods,
+                customerRepositoryPMs = paymentMethods,
                 injectorKey = starterArgs.injectorKey,
                 args = starterArgs
             ).apply {
                 updatePaymentMethods(fragmentConfig.stripeIntent)
                 setStripeIntent(fragmentConfig.stripeIntent)
                 idleLooper()
-                registerViewModel(this, starterArgs.injectorKey)
+                registerViewModel(starterArgs.injectorKey, this)
             }
         }
         return launchFragmentInContainer(

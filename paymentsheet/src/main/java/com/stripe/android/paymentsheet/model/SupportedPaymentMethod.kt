@@ -62,7 +62,7 @@ internal sealed class SupportedPaymentMethod(
     @DrawableRes val iconResource: Int,
     private val requirement: PaymentMethodRequirements,
     val paramKey: MutableMap<String, Any?>,
-    val formSpec: LayoutSpec?,
+    val formSpec: LayoutSpec,
 ) : Parcelable {
     @Parcelize
     object Card : SupportedPaymentMethod(

@@ -777,6 +777,7 @@ internal class PaymentSheetViewModelTest {
     @Test
     fun `buyButton is only enabled when not processing, not editing, and a selection has been made`() {
         var isEnabled = false
+        viewModel.savedStateHandle.set(BaseSheetViewModel.SAVE_PROCESSING, true)
         viewModel.ctaEnabled.observeForever {
             isEnabled = it
         }
@@ -784,7 +785,6 @@ internal class PaymentSheetViewModelTest {
         assertThat(isEnabled)
             .isFalse()
 
-        //TODO: Failing Test
         viewModel.updateSelection(PaymentSelection.GooglePay)
         idleLooper()
         assertThat(isEnabled)

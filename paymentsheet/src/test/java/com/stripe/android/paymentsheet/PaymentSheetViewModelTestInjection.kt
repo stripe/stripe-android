@@ -18,12 +18,16 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.forms.FormViewModel
+import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
 import com.stripe.android.paymentsheet.injection.PaymentSheetViewModelSubcomponent
 import com.stripe.android.paymentsheet.model.StripeIntentValidator
 import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
+import com.stripe.android.ui.core.elements.LayoutSpec
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.TestCoroutineDispatcher
 import org.junit.After
@@ -33,6 +37,7 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import javax.inject.Provider
 
+@ExperimentalCoroutinesApi
 internal open class PaymentSheetViewModelTestInjection {
     @get:Rule
     val rule = InstantTaskExecutorRule()
@@ -47,8 +52,7 @@ internal open class PaymentSheetViewModelTestInjection {
 
     @After
     open fun after() {
-        println("Clear weakMapInjectorRegistry")
-        WeakMapInjectorRegistry.staticCacheMap.clear()
+        WeakMapInjectorRegistry.clear()
     }
 
     private fun createGooglePayPaymentMethodLauncherFactory() =
@@ -69,9 +73,9 @@ internal open class PaymentSheetViewModelTestInjection {
     @ExperimentalCoroutinesApi
     fun createViewModel(
         stripeIntent: StripeIntent,
-        paymentMethods: List<PaymentMethod> = emptyList(),
+        customerRepositoryPMs: List<PaymentMethod> = emptyList(),
         @InjectorKey injectorKey: String,
-        args: PaymentSheetContract.Args = PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY
+        args: PaymentSheetContract.Args = PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY,
     ): PaymentSheetViewModel = runBlocking {
         PaymentSheetViewModel(
             ApplicationProvider.getApplicationContext(),
@@ -80,7 +84,7 @@ internal open class PaymentSheetViewModelTestInjection {
             { PaymentConfiguration(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY) },
             StripeIntentRepository.Static(stripeIntent),
             StripeIntentValidator(),
-            FakeCustomerRepository(paymentMethods),
+            FakeCustomerRepository(customerRepositoryPMs),
             FakePrefsRepository(),
             resourceRepository = mock(),
             stripePaymentLauncherAssistedFactory,
@@ -94,24 +98,43 @@ internal open class PaymentSheetViewModelTestInjection {
         )
     }
 
+    @FlowPreview
     fun registerViewModel(
+        @InjectorKey injectorKey: String,
         viewModel: PaymentSheetViewModel,
-        @InjectorKey injectorKey: String
+        formViewModel: FormViewModel = FormViewModel(
+            layout = LayoutSpec.create(),
+            config = mock(),
+            resourceRepository = mock(),
+            transformSpecToElement = mock()
+        )
     ) {
-        val mockBuilder = mock<PaymentSheetViewModelSubcomponent.Builder>()
-        val mockSubcomponent = mock<PaymentSheetViewModelSubcomponent>()
-        val mockSubComponentBuilderProvider = mock<Provider<PaymentSheetViewModelSubcomponent.Builder>>()
-
-        whenever(mockBuilder.build()).thenReturn(mockSubcomponent)
-        whenever(mockBuilder.savedStateHandle(any())).thenReturn(mockBuilder)
-        whenever(mockBuilder.paymentSheetViewModelModule(any())).thenReturn(mockBuilder)
-        whenever(mockSubcomponent.viewModel).thenReturn(viewModel)
-        whenever(mockSubComponentBuilderProvider.get()).thenReturn(mockBuilder)
-
         val injector = object : Injector {
             override fun inject(injectable: Injectable<*>) {
-                val factory = injectable as PaymentSheetViewModel.Factory
-                factory.subComponentBuilderProvider = mockSubComponentBuilderProvider
+                (injectable as? PaymentSheetViewModel.Factory)?.let{
+                    val mockBuilder = mock<PaymentSheetViewModelSubcomponent.Builder>()
+                    val mockSubcomponent = mock<PaymentSheetViewModelSubcomponent>()
+                    val mockSubComponentBuilderProvider = mock<Provider<PaymentSheetViewModelSubcomponent.Builder>>()
+
+                    whenever(mockBuilder.build()).thenReturn(mockSubcomponent)
+                    whenever(mockBuilder.savedStateHandle(any())).thenReturn(mockBuilder)
+                    whenever(mockBuilder.paymentSheetViewModelModule(any())).thenReturn(mockBuilder)
+                    whenever(mockSubcomponent.viewModel).thenReturn(viewModel)
+                    whenever(mockSubComponentBuilderProvider.get()).thenReturn(mockBuilder)
+                    injectable.subComponentBuilderProvider = mockSubComponentBuilderProvider
+                }
+                (injectable as? FormViewModel.Factory)?.let{
+                    val mockBuilder = mock<FormViewModelSubcomponent.Builder>()
+                    val mockSubcomponent = mock<FormViewModelSubcomponent>()
+                    val mockSubComponentBuilderProvider = mock<Provider<FormViewModelSubcomponent.Builder>>()
+
+                    whenever(mockBuilder.build()).thenReturn(mockSubcomponent)
+                    whenever(mockBuilder.formFragmentArguments(any())).thenReturn(mockBuilder)
+                    whenever(mockBuilder.layout(any())).thenReturn(mockBuilder)
+                    whenever(mockSubcomponent.viewModel).thenReturn(formViewModel)
+                    whenever(mockSubComponentBuilderProvider.get()).thenReturn(mockBuilder)
+                    injectable.subComponentBuilderProvider = mockSubComponentBuilderProvider
+                }
             }
         }
         WeakMapInjectorRegistry.register(injector, injectorKey)

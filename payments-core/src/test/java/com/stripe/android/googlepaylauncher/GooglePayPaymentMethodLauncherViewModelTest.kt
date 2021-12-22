@@ -193,7 +193,7 @@ class GooglePayPaymentMethodLauncherViewModelTest {
             verify(factorySpy, times(0)).fallbackInitialize(any())
             assertThat(createdViewModel).isEqualTo(viewModel)
 
-            WeakMapInjectorRegistry.staticCacheMap.clear()
+            WeakMapInjectorRegistry.clear()
         }
     }
 

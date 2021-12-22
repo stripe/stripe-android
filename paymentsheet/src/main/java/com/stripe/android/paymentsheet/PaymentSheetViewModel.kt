@@ -504,6 +504,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         }
 
         override fun fallbackInitialize(arg: FallbackInitializeParam) {
+            println("Fallback initialize") // TODO: print statement
             DaggerPaymentSheetLauncherComponent
                 .builder()
                 .application(arg.application)

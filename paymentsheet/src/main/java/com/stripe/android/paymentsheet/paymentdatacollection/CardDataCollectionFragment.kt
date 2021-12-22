@@ -24,7 +24,7 @@ import com.stripe.android.core.model.Country
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentMethodCreateParams
-import com.stripe.android.paymentsheet.PaymentOptionsActivity
+import com.stripe.android.paymentsheet.PaymentOptionContract
 import com.stripe.android.paymentsheet.PaymentOptionsViewModel
 import com.stripe.android.paymentsheet.PaymentSheetActivity
 import com.stripe.android.paymentsheet.PaymentSheetViewModel
@@ -79,9 +79,11 @@ internal class CardDataCollectionFragment : Fragment() {
         val themedInflater = inflater.cloneInContext(
             ContextThemeWrapper(requireActivity(), R.style.StripePaymentSheetAddPaymentMethodTheme)
         )
-        if (activity is PaymentOptionsActivity) {
+        if (requireNotNull(
+                requireArguments().getParcelable(PaymentSheetActivity.EXTRA_STARTER_ARGS)
+            ) is PaymentOptionContract.Args) {
             sheetViewModel = ViewModelProvider(
-                requireActivity(), PaymentSheetViewModel.Factory(
+                requireActivity(), PaymentOptionsViewModel.Factory(
                     { requireActivity().application },
                     {
                         requireNotNull(

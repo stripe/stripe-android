@@ -13,6 +13,7 @@ import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.paymentsheet.databinding.FragmentPaymentsheetAddPaymentMethodBinding
 import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.FragmentConfigFixtures
+import com.stripe.android.utils.TestUtils
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.junit.After
 import org.junit.Before
@@ -23,7 +24,7 @@ import org.robolectric.RobolectricTestRunner
 
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
-class PaymentOptionsAddPaymentMethodFragmentTest {
+internal class PaymentOptionsAddPaymentMethodFragmentTest : PaymentOptionsViewModelTestInjection() {
 
     @Before
     fun setup() {
@@ -35,7 +36,7 @@ class PaymentOptionsAddPaymentMethodFragmentTest {
 
     @After
     fun cleanUp() {
-        WeakMapInjectorRegistry.staticCacheMap.clear()
+        super.after()
     }
 
     @Test
@@ -61,6 +62,16 @@ class PaymentOptionsAddPaymentMethodFragmentTest {
         fragmentConfig: FragmentConfig? = FragmentConfigFixtures.DEFAULT,
         onReady: (PaymentOptionsAddPaymentMethodFragment, FragmentPaymentsheetAddPaymentMethodBinding) -> Unit
     ) {
+        assertThat(WeakMapInjectorRegistry.staticCacheMap.size).isEqualTo(0)
+        val viewModel = createViewModel(
+            paymentMethods = args.paymentMethods,
+            injectorKey = args.injectorKey,
+            args = args
+        )
+        viewModel.setStripeIntent(args.stripeIntent)
+        TestUtils.idleLooper()
+        registerViewModel(args.injectorKey, viewModel)
+
         launchFragmentInContainer<PaymentOptionsAddPaymentMethodFragment>(
             bundleOf(
                 PaymentOptionsActivity.EXTRA_FRAGMENT_CONFIG to fragmentConfig,
