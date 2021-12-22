@@ -96,7 +96,6 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     internal val _amount = savedStateHandle.getLiveData<Amount>(SAVE_AMOUNT)
     internal val amount: LiveData<Amount> = _amount
 
-
     private var addFragmentSelectedLPM =
         savedStateHandle.get<SupportedPaymentMethod>(SAVE_SELECTED_ADD_LPM)
 
@@ -249,7 +248,8 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
         if (stripeIntent is PaymentIntent) {
             runCatching {
                 savedStateHandle.set(
-                    SAVE_AMOUNT, Amount(
+                    SAVE_AMOUNT,
+                    Amount(
                         requireNotNull(stripeIntent.amount),
                         requireNotNull(stripeIntent.currency)
                     )
@@ -301,7 +301,8 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     fun removePaymentMethod(paymentMethod: PaymentMethod) = runBlocking {
         launch {
             paymentMethod.id?.let { paymentMethodId ->
-                savedStateHandle.set(SAVE_PAYMENT_METHODS,
+                savedStateHandle.set(
+                    SAVE_PAYMENT_METHODS,
                     _paymentMethods.value?.filter {
                         it.id != paymentMethodId
                     }
@@ -361,6 +362,5 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
         internal const val SAVE_PROCESSING = "processing"
         internal const val SAVE_GOOGLE_PAY_READY = "google_pay_ready"
         internal const val SAVE_RESOURCE_REPOSITORY_READY = "resource_repository_ready"
-
     }
 }

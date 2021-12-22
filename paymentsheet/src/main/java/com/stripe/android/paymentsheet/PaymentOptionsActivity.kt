@@ -86,7 +86,8 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
                         transitionTarget,
                         bundleOf(
                             PaymentSheetActivity.EXTRA_STARTER_ARGS to starterArgs,
-                            PaymentSheetActivity.EXTRA_FRAGMENT_CONFIG to transitionTarget.fragmentConfig
+                            PaymentSheetActivity.EXTRA_FRAGMENT_CONFIG to
+                                transitionTarget.fragmentConfig
                         )
                     )
                 }

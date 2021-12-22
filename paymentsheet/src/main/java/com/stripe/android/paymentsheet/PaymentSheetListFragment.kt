@@ -9,8 +9,7 @@ import com.stripe.android.paymentsheet.databinding.FragmentPaymentsheetPaymentMe
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.CurrencyFormatter
 
-internal class PaymentSheetListFragment(
-) : BasePaymentMethodsListFragment(
+internal class PaymentSheetListFragment() : BasePaymentMethodsListFragment(
     canClickSelectedItem = false
 ) {
     private val currencyFormatter = CurrencyFormatter()

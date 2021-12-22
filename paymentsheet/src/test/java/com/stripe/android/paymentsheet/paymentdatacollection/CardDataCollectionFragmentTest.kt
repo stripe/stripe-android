@@ -57,7 +57,7 @@ internal class CardDataCollectionFragmentTest : PaymentSheetViewModelTestInjecti
     }
 
     @After
-    override fun after(){
+    override fun after() {
         super.after()
     }
 
@@ -482,19 +482,19 @@ internal class CardDataCollectionFragmentTest : PaymentSheetViewModelTestInjecti
             stripeIntent as PaymentIntent,
             customerRepositoryPMs = emptyList(),
             injectorKey = args.injectorKey,
-                args = args
+            args = args
         )
         viewModel.newCard = newCard
         idleLooper()
 
         val formFragmentArguments = FormFragmentArguments(
-                fragmentArgs.paymentMethod,
-                showCheckbox = fragmentArgs.showCheckbox,
-                showCheckboxControlledFields = fragmentArgs.showCheckboxControlledFields,
-                merchantName = fragmentArgs.merchantName,
-                amount = fragmentArgs.amount,
-                billingDetails = fragmentArgs.billingDetails,
-                injectorKey = args.injectorKey
+            fragmentArgs.paymentMethod,
+            showCheckbox = fragmentArgs.showCheckbox,
+            showCheckboxControlledFields = fragmentArgs.showCheckboxControlledFields,
+            merchantName = fragmentArgs.merchantName,
+            amount = fragmentArgs.amount,
+            billingDetails = fragmentArgs.billingDetails,
+            injectorKey = args.injectorKey
         )
         val formViewModel = FormViewModel(
             layout = fragmentArgs.paymentMethod.formSpec,

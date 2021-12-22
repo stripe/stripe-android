@@ -8,8 +8,7 @@ import androidx.fragment.app.activityViewModels
 import com.stripe.android.paymentsheet.databinding.FragmentPaymentsheetPaymentMethodsListBinding
 import com.stripe.android.paymentsheet.model.PaymentSelection
 
-internal class PaymentOptionsListFragment(
-) : BasePaymentMethodsListFragment(
+internal class PaymentOptionsListFragment() : BasePaymentMethodsListFragment(
     canClickSelectedItem = true
 ) {
     private val activityViewModel by activityViewModels<PaymentOptionsViewModel> {

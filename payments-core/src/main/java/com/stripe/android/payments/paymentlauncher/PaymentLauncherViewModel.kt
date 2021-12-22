@@ -1,7 +1,6 @@
 package com.stripe.android.payments.paymentlauncher
 
 import android.app.Application
-import android.util.Log
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.VisibleForTesting

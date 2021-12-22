@@ -81,13 +81,17 @@ internal class CardDataCollectionFragment : Fragment() {
         )
         if (requireNotNull(
                 requireArguments().getParcelable(PaymentSheetActivity.EXTRA_STARTER_ARGS)
-            ) is PaymentOptionContract.Args) {
+            ) is PaymentOptionContract.Args
+        ) {
             sheetViewModel = ViewModelProvider(
-                requireActivity(), PaymentOptionsViewModel.Factory(
+                requireActivity(),
+                PaymentOptionsViewModel.Factory(
                     { requireActivity().application },
                     {
                         requireNotNull(
-                            requireArguments().getParcelable(PaymentSheetActivity.EXTRA_STARTER_ARGS)
+                            requireArguments().getParcelable(
+                                PaymentSheetActivity.EXTRA_STARTER_ARGS
+                            )
                         )
                     },
                     (activity as? AppCompatActivity) ?: this
@@ -95,17 +99,19 @@ internal class CardDataCollectionFragment : Fragment() {
             ).get(PaymentOptionsViewModel::class.java)
         } else {
             sheetViewModel = ViewModelProvider(
-                requireActivity(), PaymentSheetViewModel.Factory(
+                requireActivity(),
+                PaymentSheetViewModel.Factory(
                     { requireActivity().application },
                     {
                         requireNotNull(
-                            requireArguments().getParcelable(PaymentSheetActivity.EXTRA_STARTER_ARGS)
+                            requireArguments().getParcelable(
+                                PaymentSheetActivity.EXTRA_STARTER_ARGS
+                            )
                         )
                     },
                     (activity as? AppCompatActivity) ?: this
                 )
             ).get(PaymentSheetViewModel::class.java)
-
         }
 
         return themedInflater.inflate(

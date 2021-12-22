@@ -111,7 +111,7 @@ internal open class PaymentSheetViewModelTestInjection {
     ) {
         val injector = object : Injector {
             override fun inject(injectable: Injectable<*>) {
-                (injectable as? PaymentSheetViewModel.Factory)?.let{
+                (injectable as? PaymentSheetViewModel.Factory)?.let {
                     val mockBuilder = mock<PaymentSheetViewModelSubcomponent.Builder>()
                     val mockSubcomponent = mock<PaymentSheetViewModelSubcomponent>()
                     val mockSubComponentBuilderProvider = mock<Provider<PaymentSheetViewModelSubcomponent.Builder>>()
@@ -123,7 +123,7 @@ internal open class PaymentSheetViewModelTestInjection {
                     whenever(mockSubComponentBuilderProvider.get()).thenReturn(mockBuilder)
                     injectable.subComponentBuilderProvider = mockSubComponentBuilderProvider
                 }
-                (injectable as? FormViewModel.Factory)?.let{
+                (injectable as? FormViewModel.Factory)?.let {
                     val mockBuilder = mock<FormViewModelSubcomponent.Builder>()
                     val mockSubcomponent = mock<FormViewModelSubcomponent>()
                     val mockSubComponentBuilderProvider = mock<Provider<FormViewModelSubcomponent.Builder>>()
@@ -139,5 +139,4 @@ internal open class PaymentSheetViewModelTestInjection {
         }
         WeakMapInjectorRegistry.register(injector, injectorKey)
     }
-
 }

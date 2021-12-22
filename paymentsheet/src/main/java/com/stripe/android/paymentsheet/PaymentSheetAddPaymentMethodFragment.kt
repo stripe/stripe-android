@@ -13,8 +13,7 @@ import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 
-internal class PaymentSheetAddPaymentMethodFragment(
-) : BaseAddPaymentMethodFragment() {
+internal class PaymentSheetAddPaymentMethodFragment() : BaseAddPaymentMethodFragment() {
     override val viewModelFactory: ViewModelProvider.Factory = PaymentSheetViewModel.Factory(
         { requireActivity().application },
         {
