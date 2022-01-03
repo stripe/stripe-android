@@ -2,7 +2,7 @@ package com.stripe.android.stripecardscan.framework
 
 import androidx.test.filters.SmallTest
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import kotlin.test.assertEquals
 
@@ -11,7 +11,7 @@ class AnalyzerTest {
     @Test
     @SmallTest
     @ExperimentalCoroutinesApi
-    fun analyzerPoolCreateNormally() = runBlockingTest {
+    fun analyzerPoolCreateNormally() = runTest {
         class TestAnalyzerFactory : AnalyzerFactory<Int, Int, Int, TestAnalyzer> {
             override suspend fun newInstance(): TestAnalyzer? = TestAnalyzer()
         }
@@ -29,7 +29,7 @@ class AnalyzerTest {
     @Test
     @SmallTest
     @ExperimentalCoroutinesApi
-    fun analyzerPoolCreateFailure() = runBlockingTest {
+    fun analyzerPoolCreateFailure() = runTest {
         class TestAnalyzerFactory : AnalyzerFactory<Int, Int, Int, TestAnalyzer> {
             override suspend fun newInstance(): TestAnalyzer? = null
         }

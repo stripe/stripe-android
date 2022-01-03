@@ -46,7 +46,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.test.TestCoroutineDispatcher
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
 import org.junit.Rule
@@ -64,7 +64,7 @@ internal class PaymentSheetActivityTest {
     val rule = InstantTaskExecutorRule()
 
     private val context = ApplicationProvider.getApplicationContext<Context>()
-    private val testDispatcher = TestCoroutineDispatcher()
+    private val testDispatcher = UnconfinedTestDispatcher()
 
     private val eventReporter = mock<EventReporter>()
     private val googlePayPaymentMethodLauncherFactory =
@@ -98,7 +98,6 @@ internal class PaymentSheetActivityTest {
     @AfterTest
     fun cleanup() {
         Dispatchers.resetMain()
-        testDispatcher.cleanupTestCoroutines()
     }
 
     @Test
@@ -424,7 +423,10 @@ internal class PaymentSheetActivityTest {
 
             idleLooper()
 
-            testDispatcher.advanceTimeBy(PrimaryButtonAnimator.HOLD_ANIMATION_ON_SLIDE_IN_COMPLETION)
+            testDispatcher.scheduler.apply {
+                advanceTimeBy(PrimaryButtonAnimator.HOLD_ANIMATION_ON_SLIDE_IN_COMPLETION)
+                runCurrent()
+            }
 
             assertThat(finishProcessingCalled).isTrue()
         }
@@ -466,7 +468,10 @@ internal class PaymentSheetActivityTest {
 
             idleLooper()
 
-            testDispatcher.advanceTimeBy(PrimaryButtonAnimator.HOLD_ANIMATION_ON_SLIDE_IN_COMPLETION)
+            testDispatcher.scheduler.apply {
+                advanceTimeBy(PrimaryButtonAnimator.HOLD_ANIMATION_ON_SLIDE_IN_COMPLETION)
+                runCurrent()
+            }
 
             assertThat(finishProcessingCalled).isTrue()
         }
@@ -499,9 +504,10 @@ internal class PaymentSheetActivityTest {
             idleLooper()
 
             // wait animate time...
-            testDispatcher.advanceTimeBy(
-                PrimaryButtonAnimator.HOLD_ANIMATION_ON_SLIDE_IN_COMPLETION
-            )
+            testDispatcher.scheduler.apply {
+                advanceTimeBy(PrimaryButtonAnimator.HOLD_ANIMATION_ON_SLIDE_IN_COMPLETION)
+                runCurrent()
+            }
 
             assertThat(activity.bottomSheetBehavior.state)
                 .isEqualTo(BottomSheetBehavior.STATE_HIDDEN)
@@ -513,7 +519,10 @@ internal class PaymentSheetActivityTest {
         val scenario = activityScenario(viewModel)
         scenario.launch(intent).onActivity { activity ->
             // wait for bottom sheet to animate in
-            testDispatcher.advanceTimeBy(500)
+            testDispatcher.scheduler.apply {
+                advanceTimeBy(500)
+                runCurrent()
+            }
             idleLooper()
 
             viewModel.checkoutIdentifier = CheckoutIdentifier.SheetBottomBuy

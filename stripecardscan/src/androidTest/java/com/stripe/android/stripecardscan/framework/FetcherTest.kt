@@ -2,7 +2,7 @@ package com.stripe.android.stripecardscan.framework
 
 import androidx.test.filters.SmallTest
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import kotlin.test.assertEquals
 
@@ -11,7 +11,7 @@ class FetcherTest {
     @Test
     @SmallTest
     @ExperimentalCoroutinesApi
-    fun fetchResource_success() = runBlockingTest {
+    fun fetchResource_success() = runTest {
         class ResourceFetcherImpl : ResourceFetcher() {
             override val assetFileName: String = "sample_resource.tflite"
             override val modelVersion: String = "sample_resource"

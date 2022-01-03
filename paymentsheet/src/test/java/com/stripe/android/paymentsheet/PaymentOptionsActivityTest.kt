@@ -29,13 +29,12 @@ import com.stripe.android.utils.TestUtils.viewModelFactoryFor
 import com.stripe.android.utils.injectableActivityScenario
 import com.stripe.android.view.ActivityStarter
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.TestCoroutineDispatcher
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
 import org.robolectric.RobolectricTestRunner
-import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 
 @ExperimentalCoroutinesApi
@@ -44,7 +43,7 @@ class PaymentOptionsActivityTest {
     @get:Rule
     val rule = InstantTaskExecutorRule()
 
-    private val testDispatcher = TestCoroutineDispatcher()
+    private val testDispatcher = UnconfinedTestDispatcher()
 
     private val eventReporter = mock<EventReporter>()
     private val viewModel = createViewModel()
@@ -55,11 +54,6 @@ class PaymentOptionsActivityTest {
             ApplicationProvider.getApplicationContext(),
             ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
         )
-    }
-
-    @AfterTest
-    fun cleanup() {
-        testDispatcher.cleanupTestCoroutines()
     }
 
     @Test

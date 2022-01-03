@@ -46,12 +46,12 @@ import com.stripe.android.view.ActivityScenarioFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.test.TestCoroutineDispatcher
-import kotlinx.coroutines.test.TestCoroutineScope
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.advanceTimeBy
+import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.runner.RunWith
 import org.mockito.Mockito.verifyNoInteractions
@@ -64,12 +64,12 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.verifyNoMoreInteractions
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
-import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertFailsWith
 
 @ExperimentalCoroutinesApi
+@kotlinx.coroutines.FlowPreview
 @RunWith(RobolectricTestRunner::class)
 internal class DefaultFlowControllerTest {
     private val paymentOptionCallback = mock<PaymentOptionCallback>()
@@ -92,8 +92,8 @@ internal class DefaultFlowControllerTest {
 
     private val lifeCycleOwner = mock<LifecycleOwner>()
 
-    private val testDispatcher = TestCoroutineDispatcher()
-    private val testScope = TestCoroutineScope(testDispatcher + Job())
+    private val testDispatcher = UnconfinedTestDispatcher()
+    private val testScope = TestScope(testDispatcher)
 
     private val context = ApplicationProvider.getApplicationContext<Context>()
     private val activityScenarioFactory = ActivityScenarioFactory(context)
@@ -141,12 +141,6 @@ internal class DefaultFlowControllerTest {
         val lifecycle = LifecycleRegistry(lifeCycleOwner)
         lifecycle.currentState = Lifecycle.State.CREATED
         whenever(lifeCycleOwner.lifecycle).thenReturn(lifecycle)
-    }
-
-    @AfterTest
-    fun cleanup() {
-        testDispatcher.cleanupTestCoroutines()
-        testScope.cleanupTestCoroutines()
     }
 
     @Test
@@ -516,7 +510,7 @@ internal class DefaultFlowControllerTest {
 
     @Test
     fun `confirmPaymentSelection() with new card payment method should start paymentlauncher`() =
-        runBlockingTest {
+        runTest {
             flowController.confirmPaymentSelection(
                 NEW_CARD_PAYMENT_SELECTION,
                 InitData(
@@ -562,7 +556,7 @@ internal class DefaultFlowControllerTest {
     private fun verifyPaymentSelection(
         clientSecret: String,
         paymentMethodCreateParams: PaymentMethodCreateParams
-    ) = runBlockingTest {
+    ) = runTest {
         val confirmPaymentIntentParams =
             ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
                 clientSecret = clientSecret,
@@ -615,7 +609,7 @@ internal class DefaultFlowControllerTest {
 
     @Test
     fun `onGooglePayResult() when PaymentData result should invoke confirm() with expected params`() =
-        testDispatcher.runBlockingTest {
+        runTest {
             flowController.configureWithPaymentIntent(
                 PaymentSheetFixtures.CLIENT_SECRET,
                 PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
@@ -658,11 +652,11 @@ internal class DefaultFlowControllerTest {
 
     @Test
     fun `onPaymentResult when succeeded should invoke callback with Completed`() =
-        testDispatcher.runBlockingTest {
+        runTest {
             var isReadyState = false
             flowController.configureWithPaymentIntent(
                 PaymentSheetFixtures.CLIENT_SECRET
-            ) { isReady, error ->
+            ) { isReady, _ ->
                 isReadyState = isReady
             }
             assertThat(isReadyState)
@@ -679,11 +673,11 @@ internal class DefaultFlowControllerTest {
 
     @Test
     fun `onPaymentResult when canceled should invoke callback with Cancelled`() =
-        testDispatcher.runBlockingTest {
+        runTest {
             var isReadyState = false
             flowController.configureWithPaymentIntent(
                 PaymentSheetFixtures.CLIENT_SECRET
-            ) { isReady, error ->
+            ) { isReady, _ ->
                 isReadyState = isReady
             }
             assertThat(isReadyState)
@@ -700,7 +694,7 @@ internal class DefaultFlowControllerTest {
 
     @Test
     fun `onPaymentResult when error should invoke callback with Failed`() =
-        testDispatcher.runBlockingTest {
+        runTest {
             flowController.onPaymentResult(PaymentResult.Failed(Throwable("error")))
 
             verify(paymentResultCallback).onPaymentSheetResult(

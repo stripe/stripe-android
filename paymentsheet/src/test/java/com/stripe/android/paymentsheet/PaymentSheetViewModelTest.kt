@@ -46,9 +46,9 @@ import com.stripe.android.utils.TestUtils.idleLooper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.test.TestCoroutineDispatcher
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
@@ -80,7 +80,7 @@ internal class PaymentSheetViewModelTest {
     @get:Rule
     val rule = InstantTaskExecutorRule()
 
-    private val testDispatcher = TestCoroutineDispatcher()
+    private val testDispatcher = UnconfinedTestDispatcher()
 
     private val prefsRepository = FakePrefsRepository()
     private val eventReporter = mock<EventReporter>()
@@ -98,7 +98,6 @@ internal class PaymentSheetViewModelTest {
     @AfterTest
     fun cleanup() {
         Dispatchers.resetMain()
-        testDispatcher.cleanupTestCoroutines()
     }
 
     @Test
@@ -121,7 +120,7 @@ internal class PaymentSheetViewModelTest {
 
     @Test
     fun `when allowsDelayedPaymentMethods is false then delayed payment methods are filtered out`() =
-        runBlockingTest {
+        runTest {
             val customerRepository = mock<CustomerRepository>()
             val viewModel = createViewModel(
                 customerRepository = customerRepository
@@ -145,7 +144,7 @@ internal class PaymentSheetViewModelTest {
 
     @Test
     fun `updatePaymentMethods() with customer config and failing request should emit empty list`() =
-        runBlockingTest {
+        runTest {
             val paymentConfiguration = PaymentConfiguration(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
             val failingStripeRepository: StripeRepository = mock()
             whenever(
@@ -176,7 +175,7 @@ internal class PaymentSheetViewModelTest {
         }
 
     @Test
-    fun `removePaymentMethod triggers async removal`() = runBlockingTest {
+    fun `removePaymentMethod triggers async removal`() = runTest {
         val customerRepository = spy(FakeCustomerRepository())
         val viewModel = createViewModel(
             customerRepository = customerRepository
@@ -205,7 +204,7 @@ internal class PaymentSheetViewModelTest {
 
     @Test
     fun `updatePaymentMethods() should fetch only supported payment method types`() =
-        testDispatcher.runBlockingTest {
+        runTest {
             val paymentMethodsRepository = mock<CustomerRepository>()
             val viewModel = createViewModel(
                 customerRepository = paymentMethodsRepository
@@ -249,7 +248,7 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    fun `checkout() should confirm saved payment methods`() = testDispatcher.runBlockingTest {
+    fun `checkout() should confirm saved payment methods`() = runTest {
         val confirmParams = mutableListOf<BaseSheetViewModel.Event<ConfirmStripeIntentParams>>()
         viewModel.startConfirm.observeForever {
             confirmParams.add(it)
@@ -292,7 +291,7 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    fun `checkout() should confirm new payment methods`() = testDispatcher.runBlockingTest {
+    fun `checkout() should confirm new payment methods`() = runTest {
         val confirmParams = mutableListOf<BaseSheetViewModel.Event<ConfirmStripeIntentParams>>()
         viewModel.startConfirm.observeForever {
             confirmParams.add(it)
@@ -416,7 +415,7 @@ internal class PaymentSheetViewModelTest {
 
     @Test
     fun `onPaymentResult() should update ViewState and save preferences`() =
-        testDispatcher.runBlockingTest {
+        runTest {
             val viewModel = createViewModel(
                 stripeIntentRepository = StripeIntentRepository.Static(PAYMENT_INTENT),
             )
@@ -456,7 +455,7 @@ internal class PaymentSheetViewModelTest {
 
     @Test
     fun `onPaymentResult() should update ViewState and save new payment method`() =
-        testDispatcher.runBlockingTest {
+        runTest {
             val viewModel = createViewModel(
                 stripeIntentRepository = StripeIntentRepository.Static(PAYMENT_INTENT_WITH_PM)
             )
@@ -506,7 +505,7 @@ internal class PaymentSheetViewModelTest {
 
     @Test
     fun `onPaymentResult() with non-success outcome should report failure event`() =
-        testDispatcher.runBlockingTest {
+        runTest {
             val selection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
             viewModel.updateSelection(selection)
 
@@ -524,7 +523,7 @@ internal class PaymentSheetViewModelTest {
 
     @Test
     fun `onPaymentResult() should update emit API errors`() =
-        testDispatcher.runBlockingTest {
+        runTest {
             viewModel.maybeFetchStripeIntent()
 
             val viewStateList = mutableListOf<PaymentSheetViewState>()
@@ -869,7 +868,7 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    fun `Factory gets initialized with fallback when no Injector is available`() = runBlockingTest {
+    fun `Factory gets initialized with fallback when no Injector is available`() = runTest {
         val context = ApplicationProvider.getApplicationContext<Application>()
         PaymentConfiguration.init(context, ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
         val factory = PaymentSheetViewModel.Factory(
