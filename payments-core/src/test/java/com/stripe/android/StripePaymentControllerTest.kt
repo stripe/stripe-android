@@ -28,9 +28,9 @@ import com.stripe.android.utils.ParcelUtils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.test.TestCoroutineDispatcher
+import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.resetMain
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
@@ -62,7 +62,7 @@ internal class StripePaymentControllerTest {
         context,
         ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
     )
-    private val testDispatcher = TestCoroutineDispatcher()
+    private val testDispatcher = StandardTestDispatcher()
 
     private val controller = createController()
 
@@ -80,7 +80,6 @@ internal class StripePaymentControllerTest {
     @AfterTest
     fun cleanup() {
         Dispatchers.resetMain()
-        testDispatcher.cleanupTestCoroutines()
     }
 
     @Test
@@ -111,7 +110,7 @@ internal class StripePaymentControllerTest {
 
     @Test
     fun handlePaymentResult_whenSourceShouldBeCanceled_onlyCallsCancelIntentOnce() =
-        testDispatcher.runBlockingTest {
+        runTest {
             // use a PaymentIntent in `requires_action` state
             val paymentIntent = PaymentIntentFixtures.PI_REQUIRES_3DS1
 
@@ -191,7 +190,7 @@ internal class StripePaymentControllerTest {
 
     @Test
     fun `confirmAndAuthenticateAlipay() should return expected outcome`() =
-        testDispatcher.runBlockingTest {
+        runTest {
             whenever(alipayRepository.authenticate(any(), any(), any())).thenReturn(
                 AlipayAuthResult(
                     StripeIntentResult.Outcome.SUCCEEDED

@@ -11,7 +11,7 @@ import com.stripe.android.stripecardscan.payment.ml.CardDetect
 import com.stripe.android.stripecardscan.payment.ml.SSDOcr
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -33,7 +33,7 @@ class MainLoopStateMachineTest {
 
     @Test
     @ExperimentalCoroutinesApi
-    fun initial_noCard_noOcr() = runBlockingTest {
+    fun initial_noCard_noOcr() = runTest {
         val state = MainLoopState.Initial(
             requiredCardIssuer = CardIssuer.Visa,
             requiredLastFour = "8770",
@@ -52,7 +52,7 @@ class MainLoopStateMachineTest {
 
     @Test
     @ExperimentalCoroutinesApi
-    fun initial_wrongCard() = runBlockingTest {
+    fun initial_wrongCard() = runTest {
         val state = MainLoopState.Initial(
             requiredCardIssuer = CardIssuer.Visa,
             requiredLastFour = "8770",
@@ -70,7 +70,7 @@ class MainLoopStateMachineTest {
 
     @Test
     @ExperimentalCoroutinesApi
-    fun initial_noCard_foundOcr() = runBlockingTest {
+    fun initial_noCard_foundOcr() = runTest {
         val state = MainLoopState.Initial(
             requiredCardIssuer = CardIssuer.Visa,
             requiredLastFour = "8770",
@@ -100,7 +100,7 @@ class MainLoopStateMachineTest {
 
     @Test
     @ExperimentalCoroutinesApi
-    fun panFound_noCard_noTimeout() = runBlockingTest {
+    fun panFound_noCard_noTimeout() = runTest {
         val state = MainLoopState.OcrFound(
             pan = "4847186095118770",
             isCardVisible = true,
@@ -119,7 +119,7 @@ class MainLoopStateMachineTest {
 
     @Test
     @ExperimentalCoroutinesApi
-    fun panFound_cardSatisfied_noTimeout() = runBlockingTest {
+    fun panFound_cardSatisfied_noTimeout() = runTest {
         var state: MainLoopState = MainLoopState.OcrFound(
             pan = "4847186095118770",
             isCardVisible = true,
@@ -148,7 +148,7 @@ class MainLoopStateMachineTest {
 
     @Test
     @ExperimentalCoroutinesApi
-    fun panFound_panSatisfied_noTimeout() = runBlockingTest {
+    fun panFound_panSatisfied_noTimeout() = runTest {
         var state: MainLoopState = MainLoopState.OcrFound(
             pan = "4847186095118770",
             isCardVisible = true,
@@ -304,7 +304,7 @@ class MainLoopStateMachineTest {
 
     @Test
     @ExperimentalCoroutinesApi
-    fun panSatisfied_noCard_noTimeout() = runBlockingTest {
+    fun panSatisfied_noCard_noTimeout() = runTest {
         val state = MainLoopState.OcrSatisfied(
             pan = "4847186095118770",
             visibleCardCount = 0,
@@ -326,7 +326,7 @@ class MainLoopStateMachineTest {
 
     @Test
     @ExperimentalCoroutinesApi
-    fun panSatisfied_enoughSides_noTimeout() = runBlockingTest {
+    fun panSatisfied_enoughSides_noTimeout() = runTest {
         val state = MainLoopState.OcrSatisfied(
             pan = "4847186095118770",
             visibleCardCount = CardImageVerificationConfig.DESIRED_CARD_COUNT - 1,
@@ -387,7 +387,7 @@ class MainLoopStateMachineTest {
 
     @Test
     @ExperimentalCoroutinesApi
-    fun cardSatisfied_noPan_noTimeout() = runBlockingTest {
+    fun cardSatisfied_noPan_noTimeout() = runTest {
         val state = MainLoopState.CardSatisfied(
             panCounter = ItemCounter("4847186095118770"),
             requiredCardIssuer = CardIssuer.Visa,
@@ -405,7 +405,7 @@ class MainLoopStateMachineTest {
 
     @Test
     @ExperimentalCoroutinesApi
-    fun cardSatisfied_pan_noTimeout() = runBlockingTest {
+    fun cardSatisfied_pan_noTimeout() = runTest {
         var state: MainLoopState = MainLoopState.CardSatisfied(
             panCounter = ItemCounter("4847186095118770"),
             requiredCardIssuer = CardIssuer.Visa,
@@ -486,7 +486,7 @@ class MainLoopStateMachineTest {
 
     @Test
     @ExperimentalCoroutinesApi
-    fun wrongPanFound_noPan_noTimeout() = runBlockingTest {
+    fun wrongPanFound_noPan_noTimeout() = runTest {
         val state = MainLoopState.WrongCard(
             pan = "5445435282861343",
             requiredCardIssuer = CardIssuer.Visa,
@@ -504,7 +504,7 @@ class MainLoopStateMachineTest {
 
     @Test
     @ExperimentalCoroutinesApi
-    fun wrongPanFound_wrongPan_noTimeout() = runBlockingTest {
+    fun wrongPanFound_wrongPan_noTimeout() = runTest {
         val state = MainLoopState.WrongCard(
             pan = "5445435282861343",
             requiredCardIssuer = CardIssuer.MasterCard,
@@ -522,7 +522,7 @@ class MainLoopStateMachineTest {
 
     @Test
     @ExperimentalCoroutinesApi
-    fun wrongPanFound_rightPan_noTimeout() = runBlockingTest {
+    fun wrongPanFound_rightPan_noTimeout() = runTest {
         val state = MainLoopState.WrongCard(
             pan = "5445435282861343",
             requiredCardIssuer = CardIssuer.Visa,
@@ -576,7 +576,7 @@ class MainLoopStateMachineTest {
 
     @Test
     @ExperimentalCoroutinesApi
-    fun finished_goesNowhere() = runBlockingTest {
+    fun finished_goesNowhere() = runTest {
         val state = MainLoopState.Finished("4847186095118770")
 
         val prediction = MainLoopAnalyzer.Prediction(
