@@ -27,6 +27,7 @@ import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.core.injection.Injectable
 import com.stripe.android.core.injection.Injector
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
+import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.paymentsheet.PaymentSheetViewModel.CheckoutIdentifier
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -263,7 +264,10 @@ internal class PaymentSheetViewModelTest {
             .isEqualTo(
                 ConfirmPaymentIntentParams.createWithPaymentMethodId(
                     requireNotNull(PaymentMethodFixtures.CARD_PAYMENT_METHOD.id),
-                    CLIENT_SECRET
+                    CLIENT_SECRET,
+                    paymentMethodOptions = PaymentMethodOptionsParams.Card(
+                        setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.Blank
+                    )
                 )
             )
     }
@@ -311,7 +315,9 @@ internal class PaymentSheetViewModelTest {
                 ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
                     PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
                     CLIENT_SECRET,
-                    setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
+                    paymentMethodOptions = PaymentMethodOptionsParams.Card(
+                        setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
+                    )
                 )
             )
     }
