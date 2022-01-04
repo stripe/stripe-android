@@ -9,8 +9,8 @@ import com.stripe.android.networking.DefaultFraudDetectionDataRequestFactory
 import com.stripe.android.networking.FraudDetectionData
 import com.stripe.android.networking.FraudDetectionDataRequestFactory
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.TestCoroutineDispatcher
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.runTest
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
@@ -29,12 +29,11 @@ import kotlin.test.Test
 @ExperimentalCoroutinesApi
 class FraudDetectionDataRepositoryTest {
     private val context = ApplicationProvider.getApplicationContext<Context>()
-    private val testDispatcher = TestCoroutineDispatcher()
+    private val testDispatcher = UnconfinedTestDispatcher()
 
     @AfterTest
     fun after() {
         Stripe.advancedFraudSignalsEnabled = true
-        testDispatcher.cleanupTestCoroutines()
     }
 
     @Test
@@ -49,7 +48,7 @@ class FraudDetectionDataRepositoryTest {
 
     @Test
     fun `get() when FraudDetectionData is expired should request new remote FraudDetectionData`() =
-        testDispatcher.runBlockingTest {
+        runTest {
             val mockStripeNetworkClient = mock<StripeNetworkClient>()
             val expectedGUID = UUID.randomUUID().toString()
             val expectedMUID = UUID.randomUUID().toString()
@@ -94,7 +93,7 @@ class FraudDetectionDataRepositoryTest {
 
     @Test
     fun `refresh() when advancedFraudSignals is disabled should not fetch FraudDetectionData`() =
-        testDispatcher.runBlockingTest {
+        runTest {
             Stripe.advancedFraudSignalsEnabled = false
             val mockStripeNetworkClient = mock<StripeNetworkClient>()
 

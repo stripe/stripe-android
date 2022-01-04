@@ -27,7 +27,7 @@ import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.testharness.ViewTestUtils
 import com.stripe.android.utils.TestUtils.idleLooper
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.TestCoroutineDispatcher
+import kotlinx.coroutines.test.StandardTestDispatcher
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
@@ -36,7 +36,6 @@ import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
 import java.util.Calendar
 import kotlin.coroutines.CoroutineContext
-import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 
@@ -46,7 +45,7 @@ import kotlin.test.Test
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
 internal class CardMultilineWidgetTest {
-    private val testDispatcher = TestCoroutineDispatcher()
+    private val testDispatcher = StandardTestDispatcher()
 
     private val cardMultilineWidget: CardMultilineWidget by lazy {
         activityScenarioFactory.createView {
@@ -96,11 +95,6 @@ internal class CardMultilineWidgetTest {
             BinFixtures.DINERSCLUB14,
             listOf(AccountRangeFixtures.DINERSCLUB14)
         )
-    }
-
-    @AfterTest
-    fun cleanup() {
-        testDispatcher.cleanupTestCoroutines()
     }
 
     private fun createWidget(

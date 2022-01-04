@@ -29,7 +29,7 @@ import com.stripe.android.view.CardInputWidget.Companion.LOGGING_TOKEN
 import com.stripe.android.view.CardInputWidget.Companion.shouldIconShowBrand
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.TestCoroutineDispatcher
+import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -41,7 +41,7 @@ import kotlin.test.Test
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
 internal class CardInputWidgetTest {
-    private val testDispatcher = TestCoroutineDispatcher()
+    private val testDispatcher = StandardTestDispatcher()
 
     private val context: Context = ApplicationProvider.getApplicationContext()
     private val activityScenarioFactory = ActivityScenarioFactory(context)
@@ -96,7 +96,6 @@ internal class CardInputWidgetTest {
     @AfterTest
     fun cleanup() {
         Dispatchers.resetMain()
-        testDispatcher.cleanupTestCoroutines()
     }
 
     private fun createCardInputWidget(activity: Activity): CardInputWidget {
