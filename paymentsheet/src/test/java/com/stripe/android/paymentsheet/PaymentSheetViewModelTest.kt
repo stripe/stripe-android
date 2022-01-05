@@ -904,7 +904,6 @@ internal class PaymentSheetViewModelTest {
                     PaymentMethod.Type.Card.code,
                     PaymentMethod.Type.Ideal.code,
                     PaymentMethod.Type.SepaDebit.code,
-                    PaymentMethod.Type.Eps.code,
                     PaymentMethod.Type.Sofort.code
                 )
             )
@@ -934,7 +933,6 @@ internal class PaymentSheetViewModelTest {
                     PaymentMethod.Type.Card.code,
                     PaymentMethod.Type.Ideal.code,
                     PaymentMethod.Type.SepaDebit.code,
-                    PaymentMethod.Type.Eps.code,
                     PaymentMethod.Type.Sofort.code
                 )
             )
