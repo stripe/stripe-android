@@ -23,3 +23,27 @@ paypal, false, true, null, false, card/paypal, false, true, oneTime, true
 paypal, false, true, null, false, card/eps/paypal, false, true, oneTime, true
 paypal, false, false, null, false, card/paypal, false, true, oneTime, true
 paypal, false, false, null, false, card/eps/paypal, false, true, oneTime, true
+paypal, true, true, off_session, true, card/paypal, false, false, not available, false
+paypal, true, true, off_session, true, card/eps/paypal, false, false, not available, false
+paypal, true, false, off_session, true, card/paypal, false, false, not available, false
+paypal, true, false, off_session, true, card/eps/paypal, false, false, not available, false
+paypal, true, true, on_session, true, card/paypal, false, false, not available, false
+paypal, true, true, on_session, true, card/eps/paypal, false, false, not available, false
+paypal, true, false, on_session, true, card/paypal, false, false, not available, false
+paypal, true, false, on_session, true, card/eps/paypal, false, false, not available, false
+paypal, true, true, null, true, card/paypal, false, true, oneTime, true
+paypal, true, true, null, true, card/eps/paypal, false, true, oneTime, true
+paypal, true, false, null, true, card/paypal, false, true, oneTime, true
+paypal, true, false, null, true, card/eps/paypal, false, true, oneTime, true
+paypal, false, true, off_session, true, card/paypal, false, false, not available, false
+paypal, false, true, off_session, true, card/eps/paypal, false, false, not available, false
+paypal, false, false, off_session, true, card/paypal, false, false, not available, false
+paypal, false, false, off_session, true, card/eps/paypal, false, false, not available, false
+paypal, false, true, on_session, true, card/paypal, false, false, not available, false
+paypal, false, true, on_session, true, card/eps/paypal, false, false, not available, false
+paypal, false, false, on_session, true, card/paypal, false, false, not available, false
+paypal, false, false, on_session, true, card/eps/paypal, false, false, not available, false
+paypal, false, true, null, true, card/paypal, false, true, oneTime, true
+paypal, false, true, null, true, card/eps/paypal, false, true, oneTime, true
+paypal, false, false, null, true, card/paypal, false, true, oneTime, true
+paypal, false, false, null, true, card/eps/paypal, false, true, oneTime, true

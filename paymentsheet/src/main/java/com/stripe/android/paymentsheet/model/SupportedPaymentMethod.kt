@@ -351,7 +351,17 @@ internal sealed class SupportedPaymentMethod(
          */
         @VisibleForTesting
         internal val exposedPaymentMethods = listOf(
-            Card, Bancontact, Sofort, Ideal, SepaDebit, Eps, Giropay, P24, Klarna, PayPal
+            Card,
+            Bancontact,
+            Sofort,
+            Ideal,
+            SepaDebit,
+            Eps,
+            Giropay,
+            P24,
+            Klarna,
+            PayPal,
+            AfterpayClearpay
         )
 
         /**
