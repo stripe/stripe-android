@@ -19,10 +19,12 @@ import com.stripe.android.paymentsheet.forms.GiropayRequirement
 import com.stripe.android.paymentsheet.forms.IdealRequirement
 import com.stripe.android.paymentsheet.forms.KlarnaRequirement
 import com.stripe.android.paymentsheet.forms.P24Requirement
+import com.stripe.android.paymentsheet.forms.PIRequirement
 import com.stripe.android.paymentsheet.forms.PaymentMethodRequirements
 import com.stripe.android.paymentsheet.forms.PaypalRequirement
-import com.stripe.android.paymentsheet.forms.Requirement
+import com.stripe.android.paymentsheet.forms.SIRequirement
 import com.stripe.android.paymentsheet.forms.SepaDebitRequirement
+import com.stripe.android.paymentsheet.forms.ShippingAddress
 import com.stripe.android.paymentsheet.forms.SofortRequirement
 import com.stripe.android.ui.core.elements.LayoutFormDescriptor
 import com.stripe.android.ui.core.elements.LayoutSpec
@@ -75,6 +77,7 @@ internal sealed class SupportedPaymentMethod(
             SaveForFutureUseSpec(emptyList())
         )
     )
+
     @Parcelize
     object Bancontact : SupportedPaymentMethod(
         PaymentMethod.Type.Bancontact,
@@ -84,6 +87,7 @@ internal sealed class SupportedPaymentMethod(
         BancontactParamKey,
         BancontactForm
     )
+
     @Parcelize
     object Sofort : SupportedPaymentMethod(
         PaymentMethod.Type.Sofort,
@@ -93,6 +97,7 @@ internal sealed class SupportedPaymentMethod(
         SofortParamKey,
         SofortForm
     )
+
     @Parcelize
     object Ideal : SupportedPaymentMethod(
         PaymentMethod.Type.Ideal,
@@ -102,6 +107,7 @@ internal sealed class SupportedPaymentMethod(
         IdealParamKey,
         IdealForm
     )
+
     @Parcelize
     object SepaDebit : SupportedPaymentMethod(
         PaymentMethod.Type.SepaDebit,
@@ -111,6 +117,7 @@ internal sealed class SupportedPaymentMethod(
         SepaDebitParamKey,
         SepaDebitForm
     )
+
     @Parcelize
     object Eps : SupportedPaymentMethod(
         PaymentMethod.Type.Eps,
@@ -120,6 +127,7 @@ internal sealed class SupportedPaymentMethod(
         EpsParamKey,
         EpsForm
     )
+
     @Parcelize
     object P24 : SupportedPaymentMethod(
         PaymentMethod.Type.P24,
@@ -129,6 +137,7 @@ internal sealed class SupportedPaymentMethod(
         P24ParamKey,
         P24Form
     )
+
     @Parcelize
     object Giropay : SupportedPaymentMethod(
         PaymentMethod.Type.Giropay,
@@ -138,6 +147,7 @@ internal sealed class SupportedPaymentMethod(
         GiropayParamKey,
         GiropayForm
     )
+
     @Parcelize
     object AfterpayClearpay : SupportedPaymentMethod(
         PaymentMethod.Type.AfterpayClearpay,
@@ -147,6 +157,7 @@ internal sealed class SupportedPaymentMethod(
         AfterpayClearpayParamKey,
         AfterpayClearpayForm
     )
+
     @Parcelize
     object Klarna : SupportedPaymentMethod(
         PaymentMethod.Type.Klarna,
@@ -156,6 +167,7 @@ internal sealed class SupportedPaymentMethod(
         KlarnaParamKey,
         KlarnaForm
     )
+
     @Parcelize
     object PayPal : SupportedPaymentMethod(
         PaymentMethod.Type.PayPal,
@@ -208,7 +220,7 @@ internal sealed class SupportedPaymentMethod(
         return when (stripeIntent) {
             is PaymentIntent -> {
                 if ((stripeIntent.isSetupFutureUsageSet())) {
-                    if (supportsPaymentIntentSfuSet(config)
+                    if (supportsPaymentIntentSfuSet(stripeIntent, config)
                     ) {
                         merchantRequestedSave
                     } else {
@@ -222,6 +234,7 @@ internal sealed class SupportedPaymentMethod(
                         )
                         -> userSelectableSave
                         supportsPaymentIntentSfuNotSettable(
+                            stripeIntent,
                             config
                         ) -> oneTimeUse
                         else -> null
@@ -252,7 +265,7 @@ internal sealed class SupportedPaymentMethod(
     private fun supportsSetupIntent(
         config: PaymentSheet.Configuration?
     ) = requirement.confirmPMFromCustomer == true &&
-        checkRequirements(requirement.siRequirements, config)
+        checkSetupIntentRequirements(requirement.siRequirements, config)
 
     /**
      * This checks if there is support using this payment method when SFU
@@ -261,18 +274,20 @@ internal sealed class SupportedPaymentMethod(
      * a consistent user experience.
      */
     private fun supportsPaymentIntentSfuSet(
+        paymentIntent: PaymentIntent,
         config: PaymentSheet.Configuration?
     ) = requirement.confirmPMFromCustomer == true &&
-        checkRequirements(requirement.siRequirements, config) &&
-        checkRequirements(requirement.piRequirements, config)
+        checkSetupIntentRequirements(requirement.siRequirements, config) &&
+        checkPaymentIntentRequirements(requirement.piRequirements, paymentIntent, config)
 
     /**
      * This detects if there is support with using this PM with the PI
      * where SFU is not settable by the user.
      */
     private fun supportsPaymentIntentSfuNotSettable(
+        paymentIntent: PaymentIntent,
         config: PaymentSheet.Configuration?
-    ) = checkRequirements(requirement.piRequirements, config)
+    ) = checkPaymentIntentRequirements(requirement.piRequirements, paymentIntent, config)
 
     /**
      * This checks to see if this PM is supported with the given
@@ -285,23 +300,42 @@ internal sealed class SupportedPaymentMethod(
      * and seeing the saved PMs associate with their customer object.
      */
     private fun supportsPaymentIntentSfuSettable(
-        stripeIntent: PaymentIntent,
+        paymentIntent: PaymentIntent,
         config: PaymentSheet.Configuration?
     ) = config?.customer != null &&
         requirement.confirmPMFromCustomer == true &&
-        checkRequirements(requirement.piRequirements, config) &&
-        checkRequirements(requirement.siRequirements, config)
+        checkPaymentIntentRequirements(requirement.piRequirements, paymentIntent, config) &&
+        checkSetupIntentRequirements(requirement.siRequirements, config)
 
     /**
-     * Currently the only required requirement in the SDK is Delayed PMs
+     * Verifies that all Setup Intent [requirements] are met.
      */
-    private fun checkRequirements(
-        requirements: Set<Requirement>?,
+    private fun checkSetupIntentRequirements(
+        requirements: Set<SIRequirement>?,
         config: PaymentSheet.Configuration?
     ) =
         requirements?.map { requirement ->
             when (requirement) {
                 Delayed -> config?.allowsDelayedPaymentMethods == true
+            }
+        }?.contains(false) == false
+
+    /**
+     * Verifies that all Payment Intent [requirements] are met.
+     */
+    private fun checkPaymentIntentRequirements(
+        requirements: Set<PIRequirement>?,
+        paymentIntent: PaymentIntent,
+        config: PaymentSheet.Configuration?
+    ) =
+        requirements?.map { requirement ->
+            when (requirement) {
+                Delayed -> config?.allowsDelayedPaymentMethods == true
+                ShippingAddress ->
+                    paymentIntent.shipping?.name != null &&
+                        paymentIntent.shipping?.address?.line1 != null &&
+                        paymentIntent.shipping?.address?.country != null &&
+                        paymentIntent.shipping?.address?.postalCode != null
             }
         }?.contains(false) == false
 
