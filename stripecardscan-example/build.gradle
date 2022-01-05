@@ -51,7 +51,7 @@ dependencies {
     // Integration with observables
     implementation "androidx.compose.runtime:runtime-livedata:$composeVersion"
 
-    debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.7'
+    debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.8'
 
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'
