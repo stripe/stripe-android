@@ -13,6 +13,13 @@ internal sealed interface SIRequirement : Requirement
 @Parcelize
 internal object Delayed : PIRequirement, SIRequirement
 
+/**
+ * The Payment Method requires a shipping address in the Payment Intent.
+ * The fields required are name, address line 1, country, and postal code.
+ */
+@Parcelize
+internal object ShippingAddress : PIRequirement
+
 @Parcelize
 internal data class PaymentMethodRequirements(
 
@@ -212,12 +219,7 @@ internal val GiropayRequirement = PaymentMethodRequirements(
  * This defines the requirements for usage as a Payment Method.
  */
 internal val AfterpayClearpayRequirement = PaymentMethodRequirements(
-    /**
-     * This is null until we have after cancellation support.  When we have cancellation support
-     * this will require Shipping name, address line 1, address country, and postal
-     */
-    piRequirements = null,
-
+    piRequirements = setOf(ShippingAddress),
     /**
      * SetupIntents are not supported by this payment method, in addition,
      * setup intents do not have shipping information

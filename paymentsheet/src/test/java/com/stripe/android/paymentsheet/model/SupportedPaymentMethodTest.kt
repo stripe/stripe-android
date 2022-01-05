@@ -125,28 +125,31 @@ class SupportedPaymentMethodTest {
         val customerStates = setOf(true, false)
         val setupFutureUsage = setOf(StripeIntent.Usage.OffSession, StripeIntent.Usage.OnSession, null)
         val allowsDelayedPayment = setOf(true, false)
+        val hasShippingAddress = setOf(false, true)
 
-        customerStates.forEach { customer ->
-            setupFutureUsage.forEach { usage ->
-                allowsDelayedPayment.forEach { delayed ->
-                    scenarios.addAll(
-                        listOf(
-                            PaymentIntentTestInput(
-                                hasCustomer = customer,
-                                intentPMs = setOf(SupportedPaymentMethod.Card.type.code),
-                                intentSetupFutureUsage = usage,
-                                intentHasShipping = false,
-                                allowsDelayedPayment = delayed
-                            ),
-                            PaymentIntentTestInput(
-                                hasCustomer = customer,
-                                intentPMs = setOf(SupportedPaymentMethod.Card.type.code, SupportedPaymentMethod.Eps.type.code),
-                                intentSetupFutureUsage = usage,
-                                intentHasShipping = false,
-                                allowsDelayedPayment = delayed
+        hasShippingAddress.forEach { hasShipping ->
+            customerStates.forEach { customer ->
+                setupFutureUsage.forEach { usage ->
+                    allowsDelayedPayment.forEach { delayed ->
+                        scenarios.addAll(
+                            listOf(
+                                PaymentIntentTestInput(
+                                    hasCustomer = customer,
+                                    intentPMs = setOf(SupportedPaymentMethod.Card.type.code),
+                                    intentSetupFutureUsage = usage,
+                                    intentHasShipping = hasShipping,
+                                    allowsDelayedPayment = delayed
+                                ),
+                                PaymentIntentTestInput(
+                                    hasCustomer = customer,
+                                    intentPMs = setOf(SupportedPaymentMethod.Card.type.code, SupportedPaymentMethod.Eps.type.code),
+                                    intentSetupFutureUsage = usage,
+                                    intentHasShipping = hasShipping,
+                                    allowsDelayedPayment = delayed
+                                )
                             )
                         )
-                    )
+                    }
                 }
             }
         }
@@ -187,7 +190,8 @@ class SupportedPaymentMethodTest {
 
         fun getIntent(lpm: SupportedPaymentMethod) = when (intentHasShipping) {
             false ->
-                PaymentIntentFixtures.PI_OFF_SESSION.copy(
+                PaymentIntentFixtures.PI_WITH_SHIPPING.copy(
+                    shipping = null,
                     setupFutureUsage = intentSetupFutureUsage,
                     paymentMethodTypes = intentPMs.plus(lpm.type.code).toList()
                 )
