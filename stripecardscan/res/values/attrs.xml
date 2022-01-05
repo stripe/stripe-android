@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="CameraView">
+        <!--defines the shape, aspect ratio of the viewfinder-->
+        <attr name="viewFinderType" format="enum">
+            <!--viewFinder fills previewView, no background/hole drawn-->
+            <enum name="fill" value="0" />
+            <!--viewFinder has aspect ratio for credit card, a hole is drawn to highlight the viewfinder-->
+            <enum name="creditCard" value="1" />
+            <!--viewFinder has aspect ratio for ID, a hole is drawn to highlight the viewfinder-->
+            <enum name="id" value="2" />
+            <!--viewFinder has aspect ratio for passport, a hole is drawn to highlight the viewfinder-->
+            <enum name="passport" value="3" />
+        </attr>
+        <!--defines the imageView of the border-->
+        <attr name="borderDrawable" format="reference" />
+    </declare-styleable>
+</resources>

@@ -30,9 +30,12 @@ import android.os.HandlerThread
 import android.util.DisplayMetrics
 import android.util.Log
 import android.util.Size
+import android.view.Gravity
 import android.view.SurfaceHolder
 import android.view.SurfaceView
 import android.view.ViewGroup
+import android.widget.FrameLayout
+import androidx.annotation.RestrictTo
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.OnLifecycleEvent
 import com.stripe.android.stripecardscan.framework.Config
@@ -51,15 +54,21 @@ private const val ASPECT_TOLERANCE = 0.2
 
 private val MAXIMUM_RESOLUTION = Size(1920, 1080)
 
-internal data class CameraPreviewImage<ImageType>(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+data class CameraPreviewImage<ImageType>(
     val image: ImageType,
     val viewBounds: Rect,
 )
 
+fun logBglm(msg: String) {
+    Log.d("BGLM", msg)
+}
+
 /**
  * A [CameraAdapter] that uses android's Camera 1 APIs to show previews and process images.
  */
-internal class Camera1Adapter(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+class Camera1Adapter(
     private val activity: Activity,
     private val previewView: ViewGroup,
     private val minimumResolution: Size,
@@ -132,10 +141,18 @@ internal class Camera1Adapter(
         // exception was due to the camera already having been closed or from an error with camera
         // hardware.
         val imageWidth =
-            try { camera.parameters.previewSize.width } catch (t: Throwable) { return }
+            try {
+                camera.parameters.previewSize.width
+            } catch (t: Throwable) {
+                return
+            }
         val imageHeight =
-            try { camera.parameters.previewSize.height } catch (t: Throwable) { return }
-
+            try {
+                camera.parameters.previewSize.height
+            } catch (t: Throwable) {
+                return
+            }
+//        logBglm("newFrame: width: ${previewView.width}, height: ${previewView.height}")
         if (bytes != null) {
             try {
                 sendImageToStream(
@@ -143,7 +160,14 @@ internal class Camera1Adapter(
                         image = NV21Image(imageWidth, imageHeight, bytes)
                             .toBitmap(getRenderScript(activity))
                             .rotate(mRotation.toFloat()),
-                        viewBounds = Rect(0, 0, previewView.width, previewView.height),
+                        // TODO(ccen): change to previewView.left and previewView.top
+//                        viewBounds = Rect(0, 0, previewView.width, previewView.height),
+                        viewBounds = Rect(
+                            previewView.left,
+                            previewView.top,
+                            previewView.width,
+                            previewView.height
+                        ),
                     ),
                 )
             } catch (t: Throwable) {
@@ -240,6 +264,70 @@ internal class Camera1Adapter(
         }
     }
 
+    private fun calculateNewParamInsideScreen(
+        parentWidth: Int,
+        parentHeight: Int,
+        targetWidth: Int,
+        targetHeight: Int
+    ): ViewGroup.LayoutParams {
+        // Target dimension
+        val targetRatio = targetWidth.toFloat() / targetHeight.toFloat()
+
+        // Parent dimension
+        val parentRatio = parentWidth.toFloat() / parentHeight.toFloat()
+
+        val finalWidth: Int
+        val finalHeight: Int
+        if (targetRatio > parentRatio) { // too wide, squeeze width to parent width
+            finalWidth = parentWidth
+            finalHeight = (parentWidth.toFloat() / targetRatio).toInt()
+        } else { // too high, squeeze height to parent height
+            finalWidth = (targetRatio * parentHeight.toFloat()).toInt()
+            finalHeight = parentHeight
+        }
+
+//        return ViewGroup.LayoutParams(finalWidth, finalHeight)
+        logBglm("parentWidth: $parentWidth, parentHeight: $parentHeight")
+        logBglm("finalWidth: $finalWidth, finalHeight: $finalHeight")
+        return ViewGroup.LayoutParams(finalWidth, finalHeight)
+    }
+
+    /**
+     * Create a LayoutParams by maintaining the target aspect ratio so that both dimensions
+     * (width and height) of the Layout will be equal to or larger than the corresponding dimension
+     * of the parent. (CENTER_CROP)
+     */
+    private fun calculateNewParamOverScreen(
+        parentWidth: Int,
+        parentHeight: Int,
+        targetWidth: Int,
+        targetHeight: Int
+    ): ViewGroup.LayoutParams {
+        // Target dimension
+        val targetRatio = targetWidth.toFloat() / targetHeight.toFloat()
+
+        // Parent dimension
+        val parentRatio = parentWidth.toFloat() / parentHeight.toFloat()
+
+        val finalWidth: Int
+        val finalHeight: Int
+        if (targetRatio > parentRatio) { // too wide, prospect height, let width go over
+            finalWidth = (targetRatio * parentHeight.toFloat()).toInt()
+            finalHeight = parentHeight
+        } else { // too high, prospect width, let height go over
+            finalWidth = parentWidth
+            finalHeight = (parentWidth.toFloat() / targetRatio).toInt()
+        }
+
+//        return ViewGroup.LayoutParams(finalWidth, finalHeight)
+//        logBglm("parentWidth: $parentWidth, parentHeight: $parentHeight")
+//        logBglm("finalWidth: $finalWidth, finalHeight: $finalHeight")
+
+        // PreviewView has to be a FrameLayout so that we can center it
+        return FrameLayout.LayoutParams(finalWidth, finalHeight)
+            .also { it.gravity = Gravity.CENTER }
+    }
+
     private fun onCameraOpen(camera: Camera?) {
         if (camera == null) {
             mainThreadHandler.post {
@@ -253,9 +341,17 @@ internal class Camera1Adapter(
 
             // Create our Preview view and set it as the content of our activity.
             cameraPreview = CameraPreview(activity, this).apply {
-                layoutParams = ViewGroup.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT,
-                    ViewGroup.LayoutParams.MATCH_PARENT,
+//                layoutParams = ViewGroup.LayoutParams(
+//                    ViewGroup.LayoutParams.MATCH_PARENT,
+//                    ViewGroup.LayoutParams.MATCH_PARENT,
+//                )
+                // TODO(ccen) change the aspect ratio, match the shorter edge
+                layoutParams = calculateNewParamOverScreen(
+                    previewView.width,
+                    previewView.height,
+                    // previewSize is always landscape, need to flip h and w
+                    camera.parameters.previewSize.height,
+                    camera.parameters.previewSize.width
                 )
             }.also { cameraPreview ->
                 mainThreadHandler.post {
@@ -280,13 +376,25 @@ internal class Camera1Adapter(
             val displayMetrics = DisplayMetrics()
             activity.windowManager.defaultDisplay.getRealMetrics(displayMetrics)
 
-            val displayWidth = max(displayMetrics.heightPixels, displayMetrics.widthPixels)
-            val displayHeight = min(displayMetrics.heightPixels, displayMetrics.widthPixels)
+            // TODO(ccen) change this to previewView height/width
+//            val displayWidth = max(displayMetrics.heightPixels, displayMetrics.widthPixels)
+//            logBglm("displayWidth: $displayWidth")
+//            val displayHeight = min(displayMetrics.heightPixels, displayMetrics.widthPixels)
+//            logBglm("displayHeight: $displayHeight")
+            val displayWidth = max(previewView.height, previewView.width)
+            logBglm("previewWidth: $displayWidth")
+            val displayHeight = min(previewView.height, previewView.width)
+            logBglm("previewHeight: $displayHeight")
 
             val height: Int = minimumResolution.height
             val width = displayWidth * height / displayHeight
 
+            logBglm("height: $height")
+            logBglm("width: $width")
+
             getOptimalPreviewSize(parameters.supportedPreviewSizes, width, height)?.apply {
+                logBglm("previewSize.height: ${this.height}")
+                logBglm("previewSize.width: ${this.width}")
                 parameters.setPreviewSize(this.width, this.height)
             }
 

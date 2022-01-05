@@ -8,6 +8,7 @@ import android.view.Surface
 import androidx.annotation.CheckResult
 import androidx.annotation.IntDef
 import androidx.annotation.MainThread
+import androidx.annotation.RestrictTo
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.LifecycleOwner
@@ -34,7 +35,8 @@ import kotlinx.coroutines.runBlocking
 @Retention(AnnotationRetention.SOURCE)
 internal annotation class RotationValue
 
-internal abstract class CameraAdapter<CameraOutput> : LifecycleObserver {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+abstract class CameraAdapter<CameraOutput> : LifecycleObserver {
 
     // TODO: change this to be a channelFlow once it's no longer experimental, add some capacity and use a backpressure drop strategy
     private val imageChannel = Channel<CameraOutput>(capacity = Channel.RENDEZVOUS)
@@ -158,7 +160,8 @@ internal abstract class CameraAdapter<CameraOutput> : LifecycleObserver {
     fun getImageStream(): Flow<CameraOutput> = imageChannel.receiveAsFlow()
 }
 
-internal interface CameraErrorListener {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+interface CameraErrorListener {
 
     @MainThread
     fun onCameraOpenError(cause: Throwable?)

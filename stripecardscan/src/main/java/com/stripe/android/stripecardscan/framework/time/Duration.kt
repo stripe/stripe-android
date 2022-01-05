@@ -1,5 +1,6 @@
 package com.stripe.android.stripecardscan.framework.time
 
+import androidx.annotation.RestrictTo
 import kotlin.math.round
 import kotlin.math.roundToLong
 
@@ -15,7 +16,8 @@ private fun Double.roundTo(numberOfDigits: Int): Double {
 /**
  * Since kotlin time is still experimental, implement our own version for utility.
  */
-internal sealed class Duration : Comparable<Duration> {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+sealed class Duration : Comparable<Duration> {
 
     companion object {
         val ZERO: Duration = DurationNanoseconds(0)
