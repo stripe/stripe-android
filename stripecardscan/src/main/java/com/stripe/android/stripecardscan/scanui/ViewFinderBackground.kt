@@ -16,7 +16,7 @@ import kotlin.math.roundToInt
 /**
  * This class draws a background with a hole in the middle of it.
  */
-internal class ViewFinderBackground(
+class ViewFinderBackground(
     context: Context,
     attrs: AttributeSet? = null,
 ) : View(context, attrs) {

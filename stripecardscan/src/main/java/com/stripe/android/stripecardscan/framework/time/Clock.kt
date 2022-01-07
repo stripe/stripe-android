@@ -1,6 +1,7 @@
 package com.stripe.android.stripecardscan.framework.time
 
 import androidx.annotation.CheckResult
+import androidx.annotation.RestrictTo
 
 internal object Clock {
     @JvmStatic
@@ -15,7 +16,8 @@ internal fun Long.asEpochMillisecondsClockMark(): ClockMark = AbsoluteClockMark(
 /**
  * A marked point in time.
  */
-internal sealed class ClockMark {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+sealed class ClockMark {
     abstract fun elapsedSince(): Duration
 
     abstract fun toMillisecondsSinceEpoch(): Long

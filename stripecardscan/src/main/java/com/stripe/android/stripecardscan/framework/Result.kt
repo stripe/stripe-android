@@ -1,5 +1,6 @@
 package com.stripe.android.stripecardscan.framework
 
+import androidx.annotation.RestrictTo
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.LifecycleOwner
@@ -21,7 +22,8 @@ internal interface ResultHandler<Input, Output, Verdict> {
 /**
  * A specialized result handler that has some form of state.
  */
-internal abstract class StatefulResultHandler<Input, State, Output, Verdict>(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+abstract class StatefulResultHandler<Input, State, Output, Verdict>(
     private var initialState: State
 ) : ResultHandler<Input, Output, Verdict> {
 
@@ -40,7 +42,8 @@ internal abstract class StatefulResultHandler<Input, State, Output, Verdict>(
 /**
  * A result handler with a method that notifies when all data has been processed.
  */
-internal abstract class TerminatingResultHandler<Input, State, Output>(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+abstract class TerminatingResultHandler<Input, State, Output>(
     initialState: State
 ) : StatefulResultHandler<Input, State, Output, Unit>(initialState) {
     /**
@@ -54,7 +57,8 @@ internal abstract class TerminatingResultHandler<Input, State, Output>(
     abstract suspend fun onTerminatedEarly()
 }
 
-internal interface AggregateResultListener<InterimResult, FinalResult> {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+interface AggregateResultListener<InterimResult, FinalResult> {
 
     /**
      * The aggregated result of an [AnalyzerLoop] is available.
@@ -81,7 +85,8 @@ internal interface AggregateResultListener<InterimResult, FinalResult> {
  * The [ResultAggregator] processes results from analyzers until a condition is met. That condition
  * is part of the aggregator's logic.
  */
-internal abstract class ResultAggregator<
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+abstract class ResultAggregator<
     DataFrame,
     State,
     AnalyzerResult,

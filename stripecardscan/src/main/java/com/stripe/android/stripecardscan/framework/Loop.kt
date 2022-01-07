@@ -1,5 +1,6 @@
 package com.stripe.android.stripecardscan.framework
 
+import androidx.annotation.RestrictTo
 import com.stripe.android.stripecardscan.framework.time.Clock
 import com.stripe.android.stripecardscan.framework.time.ClockMark
 import com.stripe.android.stripecardscan.framework.time.Duration
@@ -25,7 +26,8 @@ internal object NoAnalyzersAvailableException : Exception()
 
 internal object AlreadySubscribedException : Exception()
 
-internal interface AnalyzerLoopErrorListener {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+interface AnalyzerLoopErrorListener {
 
     /**
      * A failure occurred during frame analysis. If this returns true, the loop will terminate. If
@@ -54,7 +56,8 @@ internal interface AnalyzerLoopErrorListener {
  * @param analyzerPool: A pool of analyzers to use in this loop.
  * @param analyzerLoopErrorListener: An error handler for this loop
  */
-internal sealed class AnalyzerLoop<DataFrame, State, Output>(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+sealed class AnalyzerLoop<DataFrame, State, Output>(
     private val analyzerPool: AnalyzerPool<DataFrame, in State, Output>,
     private val analyzerLoopErrorListener: AnalyzerLoopErrorListener,
     statsName: String?,
@@ -171,7 +174,8 @@ internal sealed class AnalyzerLoop<DataFrame, State, Output>(
  *     this loop.
  * @param analyzerLoopErrorListener: An error handler for this loop
  */
-internal class ProcessBoundAnalyzerLoop<DataFrame, State, Output>(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+class ProcessBoundAnalyzerLoop<DataFrame, State, Output>(
     private val analyzerPool: AnalyzerPool<DataFrame, in State, Output>,
     private val resultHandler: StatefulResultHandler<DataFrame, out State, Output, Boolean>,
     analyzerLoopErrorListener: AnalyzerLoopErrorListener,
@@ -209,7 +213,8 @@ internal class ProcessBoundAnalyzerLoop<DataFrame, State, Output>(
  * @param timeLimit: If specified, this is the maximum allowed time for the loop to run. If the loop
  *     exceeds this duration, the loop will terminate
  */
-internal class FiniteAnalyzerLoop<DataFrame, State, Output>(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+class FiniteAnalyzerLoop<DataFrame, State, Output>(
     private val analyzerPool: AnalyzerPool<DataFrame, in State, Output>,
     private val resultHandler: TerminatingResultHandler<DataFrame, out State, Output>,
     analyzerLoopErrorListener: AnalyzerLoopErrorListener,
