@@ -1,4 +1,4 @@
-package com.stripe.android.stripecardscan.scanui.util
+package com.stripe.android.camera.scanui.util
 
 import android.view.View
 import androidx.constraintlayout.widget.ConstraintLayout

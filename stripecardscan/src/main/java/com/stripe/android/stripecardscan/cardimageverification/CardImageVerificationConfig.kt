@@ -1,7 +1,7 @@
 package com.stripe.android.stripecardscan.cardimageverification
 
 import androidx.annotation.Keep
-import com.stripe.android.stripecardscan.framework.time.seconds
+import com.stripe.android.camera.framework.time.seconds
 
 @Keep
 object CardImageVerificationConfig {

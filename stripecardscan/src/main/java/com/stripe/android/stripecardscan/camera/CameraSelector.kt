@@ -6,6 +6,10 @@ import android.os.Build
 import android.util.Log
 import android.util.Size
 import android.view.ViewGroup
+import com.stripe.android.camera.Camera1Adapter
+import com.stripe.android.camera.CameraAdapter
+import com.stripe.android.camera.CameraErrorListener
+import com.stripe.android.camera.CameraPreviewImage
 import com.stripe.android.stripecardscan.framework.Config
 
 /**

@@ -5,7 +5,7 @@ import android.graphics.Bitmap
 import android.graphics.Rect
 import androidx.annotation.RestrictTo
 import androidx.lifecycle.LifecycleOwner
-import com.stripe.android.stripecardscan.camera.CameraPreviewImage
+import com.stripe.android.camera.CameraPreviewImage
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 

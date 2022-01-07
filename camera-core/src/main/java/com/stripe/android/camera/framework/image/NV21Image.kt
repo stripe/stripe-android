@@ -13,7 +13,7 @@
  *
  * https://github.com/android/renderscript-intrinsics-replacement-toolkit/blob/main/renderscript-toolkit/src/main/java/com/google/android/renderscript/Toolkit.kt
  */
-package com.stripe.android.stripecardscan.framework.image
+package com.stripe.android.camera.framework.image
 
 import android.content.Context
 import android.graphics.Bitmap
@@ -30,12 +30,12 @@ import android.renderscript.Type
 import android.util.Log
 import android.util.Size
 import androidx.annotation.CheckResult
-import com.stripe.android.stripecardscan.framework.Config
-import com.stripe.android.stripecardscan.framework.exception.ImageTypeNotSupportedException
-import com.stripe.android.stripecardscan.framework.util.cacheFirstResult
-import com.stripe.android.stripecardscan.framework.util.mapArray
-import com.stripe.android.stripecardscan.framework.util.mapToIntArray
-import com.stripe.android.stripecardscan.framework.util.toByteArray
+import androidx.annotation.RestrictTo
+import com.stripe.android.camera.framework.exception.ImageTypeNotSupportedException
+import com.stripe.android.camera.framework.util.cacheFirstResult
+import com.stripe.android.camera.framework.util.mapArray
+import com.stripe.android.camera.framework.util.mapToIntArray
+import com.stripe.android.camera.framework.util.toByteArray
 import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.nio.ByteBuffer
@@ -47,10 +47,13 @@ import kotlin.experimental.inv
  */
 internal val getRenderScript = cacheFirstResult { context: Context -> RenderScript.create(context) }
 
+private val logTag: String = NV21Image::class.java.simpleName
+
 /**
  * An image made of data in the NV21 format.
  */
-internal class NV21Image(val width: Int, val height: Int, val nv21Data: ByteArray) {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+class NV21Image(val width: Int, val height: Int, val nv21Data: ByteArray) {
 
     @Throws(ImageTypeNotSupportedException::class)
     constructor(image: Image) : this(
@@ -391,7 +394,7 @@ private fun yuvPlanesToNV21Slow(planeBuffers: Array<ByteBuffer>): ByteArray {
         outputStream.write(buffer2Byte)
         outputStream.write(buffer1Byte)
     } catch (e: IOException) {
-        Log.e(Config.logTag, "Error converting image from YUV to NV21")
+        Log.e(logTag, "Error converting image from YUV to NV21")
     }
     rez = outputStream.toByteArray()
 

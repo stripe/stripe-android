@@ -1,10 +1,12 @@
-package com.stripe.android.stripecardscan.framework
+package com.stripe.android.camera.framework
 
 import android.util.Log
 import androidx.annotation.CheckResult
-import com.stripe.android.stripecardscan.framework.time.Clock
-import com.stripe.android.stripecardscan.framework.time.ClockMark
-import com.stripe.android.stripecardscan.framework.time.Duration
+import androidx.annotation.RestrictTo
+import com.stripe.android.camera.BuildConfig
+import com.stripe.android.camera.framework.time.Clock
+import com.stripe.android.camera.framework.time.ClockMark
+import com.stripe.android.camera.framework.time.Duration
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
@@ -14,11 +16,14 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import java.util.UUID
 
-internal object Stats {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+object Stats {
     val instanceId = UUID.randomUUID().toString()
 
     var scanId: String? = null
         private set
+
+    val logTag = Stats::class.java.simpleName
 
     private var persistentRepeatingTasks:
         MutableMap<String, MutableMap<String, RepeatingTaskStats>> = mutableMapOf()
@@ -54,9 +59,9 @@ internal object Stats {
                     tasks[name] = list + TaskStats(startedAt, startedAt.elapsedSince(), result)
                 }
             }
-            if (Config.isDebug) {
+            if (BuildConfig.DEBUG) {
                 Log.v(
-                    Config.logTag,
+                    logTag,
                     "Task $name got result $result after ${startedAt.elapsedSince()}",
                 )
             }
@@ -98,9 +103,9 @@ internal object Stats {
                     )
                 }
             }
-            if (Config.isDebug) {
+            if (BuildConfig.DEBUG) {
                 Log.v(
-                    Config.logTag,
+                    logTag,
                     "Repeating task $name got result $result after ${startedAt.elapsedSince()}",
                 )
             }
@@ -142,9 +147,9 @@ internal object Stats {
                     )
                 }
             }
-            if (Config.isDebug) {
+            if (BuildConfig.DEBUG) {
                 Log.v(
-                    Config.logTag,
+                    logTag,
                     "Persistent repeating task $name got result $result after " +
                         "${startedAt.elapsedSince()}",
                 )
@@ -180,7 +185,8 @@ internal object Stats {
 /**
  * Keep track of a single stat's duration and result
  */
-internal interface StatTracker {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+interface StatTracker {
 
     /**
      * When this task was started.
@@ -193,7 +199,8 @@ internal interface StatTracker {
     suspend fun trackResult(result: String? = null)
 }
 
-private class StatTrackerImpl(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+class StatTrackerImpl(
     private val onComplete: suspend (ClockMark, String?) -> Unit,
 ) : StatTracker {
     override val startedAt = Clock.markNow()
@@ -201,13 +208,15 @@ private class StatTrackerImpl(
         coroutineScope { launch { onComplete(startedAt, result) } }.let { }
 }
 
-internal data class TaskStats(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+data class TaskStats(
     val started: ClockMark,
     val duration: Duration,
     val result: String?,
 )
 
-internal data class RepeatingTaskStats(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+data class RepeatingTaskStats(
     val executions: Int,
     val startedAt: ClockMark,
     val totalDuration: Duration,

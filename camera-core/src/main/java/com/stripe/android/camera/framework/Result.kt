@@ -1,11 +1,11 @@
-package com.stripe.android.stripecardscan.framework
+package com.stripe.android.camera.framework
 
 import androidx.annotation.RestrictTo
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.OnLifecycleEvent
-import com.stripe.android.stripecardscan.framework.util.FrameRateTracker
+import com.stripe.android.camera.framework.util.FrameRateTracker
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking

@@ -1,8 +1,8 @@
 package com.stripe.android.stripecardscan.framework.api.dto
 
 import androidx.annotation.RestrictTo
-import com.stripe.android.stripecardscan.framework.Stats
-import com.stripe.android.stripecardscan.framework.TaskStats
+import com.stripe.android.camera.framework.Stats
+import com.stripe.android.camera.framework.TaskStats
 import com.stripe.android.stripecardscan.framework.ml.ModelLoadDetails
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable

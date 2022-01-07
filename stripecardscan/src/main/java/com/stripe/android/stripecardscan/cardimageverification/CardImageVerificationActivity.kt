@@ -1,7 +1,6 @@
 package com.stripe.android.stripecardscan.cardimageverification
 
 import android.annotation.SuppressLint
-import android.app.Activity
 import android.content.Intent
 import android.graphics.Typeface
 import android.os.Bundle
@@ -14,6 +13,8 @@ import android.widget.TextView
 import androidx.annotation.Keep
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
+import com.stripe.android.camera.framework.AnalyzerLoopErrorListener
+import com.stripe.android.camera.framework.Stats
 import com.stripe.android.stripecardscan.R
 import com.stripe.android.stripecardscan.cardimageverification.exception.InvalidCivException
 import com.stripe.android.stripecardscan.cardimageverification.exception.InvalidStripePublishableKeyException
@@ -21,9 +22,7 @@ import com.stripe.android.stripecardscan.cardimageverification.exception.StripeN
 import com.stripe.android.stripecardscan.cardimageverification.exception.UnknownScanException
 import com.stripe.android.stripecardscan.cardimageverification.result.MainLoopAggregator
 import com.stripe.android.stripecardscan.cardimageverification.result.MainLoopState
-import com.stripe.android.stripecardscan.framework.AnalyzerLoopErrorListener
 import com.stripe.android.stripecardscan.framework.Config
-import com.stripe.android.stripecardscan.framework.Stats
 import com.stripe.android.stripecardscan.framework.api.NetworkResult
 import com.stripe.android.stripecardscan.framework.api.dto.ScanStatistics
 import com.stripe.android.stripecardscan.framework.api.getCardImageVerificationIntentDetails
@@ -132,7 +131,7 @@ internal open class CardImageVerificationActivity : SimpleScanActivity<RequiredC
                             )
                         )
                     )
-                setResult(Activity.RESULT_OK, intent)
+                setResult(RESULT_OK, intent)
                 closeScanner()
             }
 
@@ -162,7 +161,7 @@ internal open class CardImageVerificationActivity : SimpleScanActivity<RequiredC
                         INTENT_PARAM_RESULT,
                         CardImageVerificationSheetResult.Canceled(reason),
                     )
-                setResult(Activity.RESULT_CANCELED, intent)
+                setResult(RESULT_CANCELED, intent)
             }
 
             override fun failed(cause: Throwable?) {
@@ -171,7 +170,7 @@ internal open class CardImageVerificationActivity : SimpleScanActivity<RequiredC
                         INTENT_PARAM_RESULT,
                         CardImageVerificationSheetResult.Failed(cause ?: UnknownScanException()),
                     )
-                setResult(Activity.RESULT_CANCELED, intent)
+                setResult(RESULT_CANCELED, intent)
             }
         }
 

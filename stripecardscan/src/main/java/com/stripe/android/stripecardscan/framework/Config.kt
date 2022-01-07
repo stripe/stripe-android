@@ -2,7 +2,7 @@ package com.stripe.android.stripecardscan.framework
 
 import com.stripe.android.stripecardscan.framework.api.Network
 import com.stripe.android.stripecardscan.framework.api.StripeNetwork
-import com.stripe.android.stripecardscan.framework.time.seconds
+import com.stripe.android.camera.framework.time.seconds
 import kotlinx.serialization.json.Json
 
 object Config {

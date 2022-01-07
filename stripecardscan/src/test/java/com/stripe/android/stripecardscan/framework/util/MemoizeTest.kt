@@ -1,6 +1,14 @@
 package com.stripe.android.stripecardscan.framework.util
 
 import androidx.test.filters.SmallTest
+import com.stripe.android.camera.framework.util.cacheFirstResult
+import com.stripe.android.camera.framework.util.cacheFirstResultSuspend
+import com.stripe.android.camera.framework.util.cachedFirstResult
+import com.stripe.android.camera.framework.util.cachedFirstResultSuspend
+import com.stripe.android.camera.framework.util.memoize
+import com.stripe.android.camera.framework.util.memoizeSuspend
+import com.stripe.android.camera.framework.util.memoized
+import com.stripe.android.camera.framework.util.memoizedSuspend
 import com.stripe.android.stripecardscan.framework.time.delay
 import com.stripe.android.stripecardscan.framework.time.milliseconds
 import kotlinx.coroutines.ExperimentalCoroutinesApi

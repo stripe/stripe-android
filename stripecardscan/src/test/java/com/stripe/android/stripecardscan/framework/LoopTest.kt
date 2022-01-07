@@ -2,8 +2,8 @@ package com.stripe.android.stripecardscan.framework
 
 import androidx.test.filters.MediumTest
 import androidx.test.filters.SmallTest
-import com.stripe.android.stripecardscan.framework.time.Duration
-import com.stripe.android.stripecardscan.framework.time.nanoseconds
+import com.stripe.android.camera.framework.time.Duration
+import com.stripe.android.camera.framework.time.nanoseconds
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel

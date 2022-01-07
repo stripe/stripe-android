@@ -1,5 +1,6 @@
 enableFeaturePreview("VERSION_CATALOGS")
 
+include ':camera-core'
 include ':example'
 include ':link'
 include ':payments'
