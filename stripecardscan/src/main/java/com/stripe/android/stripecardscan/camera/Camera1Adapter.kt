@@ -60,10 +60,6 @@ data class CameraPreviewImage<ImageType>(
     val viewBounds: Rect,
 )
 
-fun logBglm(msg: String) {
-    Log.d("BGLM", msg)
-}
-
 /**
  * A [CameraAdapter] that uses android's Camera 1 APIs to show previews and process images.
  */
@@ -141,18 +137,10 @@ class Camera1Adapter(
         // exception was due to the camera already having been closed or from an error with camera
         // hardware.
         val imageWidth =
-            try {
-                camera.parameters.previewSize.width
-            } catch (t: Throwable) {
-                return
-            }
+            try { camera.parameters.previewSize.width } catch (t: Throwable) { return }
         val imageHeight =
-            try {
-                camera.parameters.previewSize.height
-            } catch (t: Throwable) {
-                return
-            }
-//        logBglm("newFrame: width: ${previewView.width}, height: ${previewView.height}")
+            try { camera.parameters.previewSize.height } catch (t: Throwable) { return }
+
         if (bytes != null) {
             try {
                 sendImageToStream(
@@ -160,8 +148,6 @@ class Camera1Adapter(
                         image = NV21Image(imageWidth, imageHeight, bytes)
                             .toBitmap(getRenderScript(activity))
                             .rotate(mRotation.toFloat()),
-                        // TODO(ccen): change to previewView.left and previewView.top
-//                        viewBounds = Rect(0, 0, previewView.width, previewView.height),
                         viewBounds = Rect(
                             previewView.left,
                             previewView.top,
@@ -264,34 +250,6 @@ class Camera1Adapter(
         }
     }
 
-    private fun calculateNewParamInsideScreen(
-        parentWidth: Int,
-        parentHeight: Int,
-        targetWidth: Int,
-        targetHeight: Int
-    ): ViewGroup.LayoutParams {
-        // Target dimension
-        val targetRatio = targetWidth.toFloat() / targetHeight.toFloat()
-
-        // Parent dimension
-        val parentRatio = parentWidth.toFloat() / parentHeight.toFloat()
-
-        val finalWidth: Int
-        val finalHeight: Int
-        if (targetRatio > parentRatio) { // too wide, squeeze width to parent width
-            finalWidth = parentWidth
-            finalHeight = (parentWidth.toFloat() / targetRatio).toInt()
-        } else { // too high, squeeze height to parent height
-            finalWidth = (targetRatio * parentHeight.toFloat()).toInt()
-            finalHeight = parentHeight
-        }
-
-//        return ViewGroup.LayoutParams(finalWidth, finalHeight)
-        logBglm("parentWidth: $parentWidth, parentHeight: $parentHeight")
-        logBglm("finalWidth: $finalWidth, finalHeight: $finalHeight")
-        return ViewGroup.LayoutParams(finalWidth, finalHeight)
-    }
-
     /**
      * Create a LayoutParams by maintaining the target aspect ratio so that both dimensions
      * (width and height) of the Layout will be equal to or larger than the corresponding dimension
@@ -318,11 +276,6 @@ class Camera1Adapter(
             finalWidth = parentWidth
             finalHeight = (parentWidth.toFloat() / targetRatio).toInt()
         }
-
-//        return ViewGroup.LayoutParams(finalWidth, finalHeight)
-//        logBglm("parentWidth: $parentWidth, parentHeight: $parentHeight")
-//        logBglm("finalWidth: $finalWidth, finalHeight: $finalHeight")
-
         // PreviewView has to be a FrameLayout so that we can center it
         return FrameLayout.LayoutParams(finalWidth, finalHeight)
             .also { it.gravity = Gravity.CENTER }
@@ -341,15 +294,10 @@ class Camera1Adapter(
 
             // Create our Preview view and set it as the content of our activity.
             cameraPreview = CameraPreview(activity, this).apply {
-//                layoutParams = ViewGroup.LayoutParams(
-//                    ViewGroup.LayoutParams.MATCH_PARENT,
-//                    ViewGroup.LayoutParams.MATCH_PARENT,
-//                )
-                // TODO(ccen) change the aspect ratio, match the shorter edge
                 layoutParams = calculateNewParamOverScreen(
                     previewView.width,
                     previewView.height,
-                    // previewSize is always landscape, need to flip h and w
+                    // previewSize is always landscape, need to flip height and width
                     camera.parameters.previewSize.height,
                     camera.parameters.previewSize.width
                 )
@@ -376,25 +324,13 @@ class Camera1Adapter(
             val displayMetrics = DisplayMetrics()
             activity.windowManager.defaultDisplay.getRealMetrics(displayMetrics)
 
-            // TODO(ccen) change this to previewView height/width
-//            val displayWidth = max(displayMetrics.heightPixels, displayMetrics.widthPixels)
-//            logBglm("displayWidth: $displayWidth")
-//            val displayHeight = min(displayMetrics.heightPixels, displayMetrics.widthPixels)
-//            logBglm("displayHeight: $displayHeight")
-            val displayWidth = max(previewView.height, previewView.width)
-            logBglm("previewWidth: $displayWidth")
-            val displayHeight = min(previewView.height, previewView.width)
-            logBglm("previewHeight: $displayHeight")
+            val previewWidth = max(previewView.height, previewView.width)
+            val previewHeight = min(previewView.height, previewView.width)
 
             val height: Int = minimumResolution.height
-            val width = displayWidth * height / displayHeight
-
-            logBglm("height: $height")
-            logBglm("width: $width")
+            val width = previewWidth * height / previewHeight
 
             getOptimalPreviewSize(parameters.supportedPreviewSizes, width, height)?.apply {
-                logBglm("previewSize.height: ${this.height}")
-                logBglm("previewSize.width: ${this.width}")
                 parameters.setPreviewSize(this.width, this.height)
             }
 
