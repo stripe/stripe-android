@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="stripeViewFinderVerticalBias" description="The vertical position of the view finder. Lower numbers shift the view finder towards the top of the screen" format="float" type="dimen">
+        0.5
+    </item>
+    <item name="stripeViewFinderMargin" description="The minimum distance between the edge of the screen and the view finder window, in percentage of the screen" format="float" type="dimen">
+        0.08333333333
+    </item>
+    <item name="stripeViewFinderHorizontalBias" description="The horizontal position of the view finder. Lower numbers shift the view finder towards the left of the screen" format="float" type="dimen">
+        0.5
+    </item>
+</resources>

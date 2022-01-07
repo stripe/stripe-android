@@ -15,8 +15,10 @@ import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.content.ContextCompat
+import com.stripe.android.camera.scanui.CameraView
 import com.stripe.android.stripecardscan.R
-import com.stripe.android.stripecardscan.camera.CameraPreviewImage
+import com.stripe.android.camera.CameraPreviewImage
+import com.stripe.android.camera.scanui.ViewFinderBackground
 import com.stripe.android.stripecardscan.framework.Config
 import com.stripe.android.stripecardscan.framework.util.getSdkVersion
 import com.stripe.android.stripecardscan.scanui.util.asRect

@@ -13,13 +13,14 @@
  * For an implementation of CameraX, see the legacy bouncer code:
  * https://github.com/getbouncer/cardscan-android/blob/master/scan-camerax/src/main/java/com/getbouncer/scan/camera/extension/CameraAdapterImpl.kt
  */
-package com.stripe.android.stripecardscan.camera
+package com.stripe.android.camera
 
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.ImageFormat
+import android.graphics.Matrix
 import android.graphics.PointF
 import android.graphics.Rect
 import android.hardware.Camera
@@ -35,14 +36,13 @@ import android.view.SurfaceHolder
 import android.view.SurfaceView
 import android.view.ViewGroup
 import android.widget.FrameLayout
+import androidx.annotation.CheckResult
 import androidx.annotation.RestrictTo
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.OnLifecycleEvent
-import com.stripe.android.stripecardscan.framework.Config
-import com.stripe.android.stripecardscan.framework.image.NV21Image
-import com.stripe.android.stripecardscan.framework.image.getRenderScript
-import com.stripe.android.stripecardscan.framework.image.rotate
-import com.stripe.android.stripecardscan.framework.util.retrySync
+import com.stripe.android.camera.framework.image.NV21Image
+import com.stripe.android.camera.framework.image.getRenderScript
+import com.stripe.android.camera.framework.util.retrySync
 import java.lang.ref.WeakReference
 import java.util.ArrayList
 import kotlin.math.abs
@@ -53,6 +53,18 @@ import kotlin.math.roundToInt
 private const val ASPECT_TOLERANCE = 0.2
 
 private val MAXIMUM_RESOLUTION = Size(1920, 1080)
+
+/**
+ * Rotate a [Bitmap] by the given [rotationDegrees].
+ */
+@CheckResult
+internal fun Bitmap.rotate(rotationDegrees: Float): Bitmap = if (rotationDegrees != 0F) {
+    val matrix = Matrix()
+    matrix.postRotate(rotationDegrees)
+    Bitmap.createBitmap(this, 0, 0, this.width, this.height, matrix, true)
+} else {
+    this
+}
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 data class CameraPreviewImage<ImageType>(
@@ -158,7 +170,7 @@ class Camera1Adapter(
                 )
             } catch (t: Throwable) {
                 // ignore errors transforming the image (OOM, etc)
-                Log.e(Config.logTag, "Exception caught during camera transform", t)
+                Log.e(logTag, "Exception caught during camera transform", t)
             } finally {
                 camera.addCallbackBuffer(bytes)
             }
@@ -231,7 +243,7 @@ class Camera1Adapter(
         try {
             camera.parameters = parameters
         } catch (t: Throwable) {
-            Log.w(Config.logTag, "Error setting camera parameters", t)
+            Log.w(logTag, "Error setting camera parameters", t)
             // ignore failure to set camera parameters
         }
     }
@@ -518,4 +530,8 @@ class Camera1Adapter(
     }
 
     override fun getCurrentCamera(): Int = currentCameraId
+
+    private companion object {
+        val logTag: String = Camera1Adapter::class.java.simpleName
+    }
 }

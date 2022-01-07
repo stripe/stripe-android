@@ -1,4 +1,4 @@
-package com.stripe.android.stripecardscan.scanui
+package com.stripe.android.camera.scanui
 
 import android.content.Context
 import android.graphics.Rect
@@ -11,14 +11,12 @@ import androidx.annotation.DrawableRes
 import androidx.annotation.RestrictTo
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.withStyledAttributes
-import com.stripe.android.stripecardscan.R
-import com.stripe.android.stripecardscan.camera.CameraAdapter
-import com.stripe.android.stripecardscan.scanui.CameraView.ViewFinderType
-import com.stripe.android.stripecardscan.scanui.util.addConstraints
-import com.stripe.android.stripecardscan.scanui.util.asRect
-import com.stripe.android.stripecardscan.scanui.util.constrainToParent
-import com.stripe.android.stripecardscan.scanui.util.getDrawableByRes
-import com.stripe.android.stripecardscan.scanui.util.getFloatResource
+import com.stripe.android.camera.R
+import com.stripe.android.camera.scanui.util.addConstraints
+import com.stripe.android.camera.scanui.util.asRect
+import com.stripe.android.camera.scanui.util.constrainToParent
+import com.stripe.android.camera.scanui.util.getDrawableByRes
+import com.stripe.android.camera.scanui.util.getFloatResource
 import kotlin.math.min
 import kotlin.math.roundToInt
 

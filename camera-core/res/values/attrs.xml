@@ -15,4 +15,9 @@
         <!--defines the imageView of the border-->
         <attr name="borderDrawable" format="reference" />
     </declare-styleable>
+
+    <declare-styleable name="ViewFinderBackground">
+        <attr name="backgroundColor" format="color" />
+    </declare-styleable>
+
 </resources>

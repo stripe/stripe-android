@@ -1,4 +1,4 @@
-package com.stripe.android.stripecardscan.framework
+package com.stripe.android.camera.framework
 
 import androidx.annotation.RestrictTo
 import java.io.Closeable

@@ -1,9 +1,9 @@
-package com.stripe.android.stripecardscan.framework
+package com.stripe.android.camera.framework
 
 import androidx.annotation.RestrictTo
-import com.stripe.android.stripecardscan.framework.time.Clock
-import com.stripe.android.stripecardscan.framework.time.ClockMark
-import com.stripe.android.stripecardscan.framework.time.Duration
+import com.stripe.android.camera.framework.time.Clock
+import com.stripe.android.camera.framework.time.ClockMark
+import com.stripe.android.camera.framework.time.Duration
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi

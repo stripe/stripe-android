@@ -5,6 +5,7 @@ import android.content.Context
 import android.os.Build
 import android.provider.Settings
 import android.telephony.TelephonyManager
+import com.stripe.android.camera.framework.util.cacheFirstResult
 import java.util.Locale
 
 internal data class Device(

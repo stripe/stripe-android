@@ -13,10 +13,6 @@
 
     <dimen name="stripeCannotScanCardTextSize" description="The size of the Cannot Scan text at the bottom of the screen">18sp</dimen>
 
-    <item name="stripeViewFinderMargin" format="float" type="dimen" description="The minimum distance between the edge of the screen and the view finder window, in percentage of the screen">0.08333333333</item>
-    <item name="stripeViewFinderVerticalBias" format="float" type="dimen" description="The vertical position of the view finder. Lower numbers shift the view finder towards the top of the screen">0.5</item>
-    <item name="stripeViewFinderHorizontalBias" format="float" type="dimen" description="The horizontal position of the view finder. Lower numbers shift the view finder towards the left of the screen">0.5</item>
-
     <dimen name="stripeCardDetailsMargin" description="The minimum vertical and horizontal distance between the card details (number, expiry, name) and the border of the view finder window">12dp</dimen>
 
     <dimen name="stripeInstructionsMargin" description="The minimum amount of space surrounding the instructions text above the view finder window">16dp</dimen>
