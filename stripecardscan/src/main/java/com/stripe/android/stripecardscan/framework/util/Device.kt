@@ -22,7 +22,7 @@ internal data class Device(
     companion object {
         private val getDeviceDetails = cacheFirstResult { context: Context ->
             Device(
-                android_id = getAndroidId(context),
+                android_id = getAndroidId(),
                 name = getDeviceName(),
                 bootCount = getDeviceBootCount(context),
                 locale = getDeviceLocale(),
@@ -40,9 +40,15 @@ internal data class Device(
     }
 }
 
+/**
+ * This was redacted for privacy reasons. Normally, this would be retrieved by this code:
+ *
+ * ```
+ * Settings.Secure.getString(context.contentResolver, Settings.Secure.ANDROID_ID)
+ * ```
+ */
 @SuppressLint("HardwareIds")
-private fun getAndroidId(context: Context): String? =
-    Settings.Secure.getString(context.contentResolver, Settings.Secure.ANDROID_ID)
+private fun getAndroidId() = "Redacted"
 
 private fun getDeviceBootCount(context: Context): Int =
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
