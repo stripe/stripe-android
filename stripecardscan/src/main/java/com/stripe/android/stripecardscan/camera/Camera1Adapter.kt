@@ -253,7 +253,7 @@ class Camera1Adapter(
     /**
      * Create a LayoutParams by maintaining the target aspect ratio so that both dimensions
      * (width and height) of the Layout will be equal to or larger than the corresponding dimension
-     * of the parent. (CENTER_CROP)
+     * of the parent. This is similar to ImageView's CENTER_CROP scale type.
      */
     private fun calculateNewParamOverScreen(
         parentWidth: Int,
@@ -277,6 +277,7 @@ class Camera1Adapter(
             finalHeight = (parentWidth.toFloat() / targetRatio).toInt()
         }
         // PreviewView has to be a FrameLayout so that we can center it
+        // TODO(ccen) change the type of previewView to [FrameLayout]
         return FrameLayout.LayoutParams(finalWidth, finalHeight)
             .also { it.gravity = Gravity.CENTER }
     }
