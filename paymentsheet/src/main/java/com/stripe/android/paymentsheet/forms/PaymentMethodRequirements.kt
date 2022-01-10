@@ -13,6 +13,13 @@ internal sealed interface SIRequirement : Requirement
 @Parcelize
 internal object Delayed : PIRequirement, SIRequirement
 
+/**
+ * The Payment Method requires a shipping address in the Payment Intent.
+ * The fields required are name, address line 1, country, and postal code.
+ */
+@Parcelize
+internal object ShippingAddress : PIRequirement
+
 @Parcelize
 internal data class PaymentMethodRequirements(
 
@@ -187,28 +194,13 @@ internal val SepaDebitRequirement = PaymentMethodRequirements(
 )
 
 internal val EpsRequirement = PaymentMethodRequirements(
-
-    /**
-     * Disabling this support so that it doesn't negatively impact our ability
-     * to save cards when the user selects SFU set and the PI has PM that don't support
-     * SFU to be set.
-     *
-     * When supported there are no known pi requirements and can be set to an empty set.
-     */
-    piRequirements = null,
+    piRequirements = emptySet(),
     siRequirements = null, // this is not supported by this payment method
     confirmPMFromCustomer = null
 )
 
 internal val P24Requirement = PaymentMethodRequirements(
-    /**
-     * Disabling this support so that it doesn't negatively impact our ability
-     * to save cards when the user selects SFU set and the PI has PM that don't support
-     * SFU to be set.
-     *
-     * When supported there are no known PI requirements and can be set to an empty set.
-     */
-    piRequirements = null,
+    piRequirements = emptySet(),
     siRequirements = null, // this is not supported by this payment method
 
     /**
@@ -218,14 +210,7 @@ internal val P24Requirement = PaymentMethodRequirements(
 )
 
 internal val GiropayRequirement = PaymentMethodRequirements(
-    /**
-     * Disabling this support so that it doesn't negatively impact our ability
-     * to save cards when the user selects SFU set and the PI has PM that don't support
-     * SFU to be set.
-     *
-     * When supported there are no known PI requirements and can be set to an empty set.
-     */
-    piRequirements = null,
+    piRequirements = emptySet(),
     siRequirements = null, // this is not supported by this payment method
     confirmPMFromCustomer = null
 )
@@ -234,12 +219,7 @@ internal val GiropayRequirement = PaymentMethodRequirements(
  * This defines the requirements for usage as a Payment Method.
  */
 internal val AfterpayClearpayRequirement = PaymentMethodRequirements(
-    /**
-     * This is null until we have after cancellation support.  When we have cancellation support
-     * this will require Shipping name, address line 1, address country, and postal
-     */
-    piRequirements = null,
-
+    piRequirements = setOf(ShippingAddress),
     /**
      * SetupIntents are not supported by this payment method, in addition,
      * setup intents do not have shipping information

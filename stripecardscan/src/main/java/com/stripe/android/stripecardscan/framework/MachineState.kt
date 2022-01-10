@@ -1,8 +1,8 @@
 package com.stripe.android.stripecardscan.framework
 
 import android.util.Log
-import com.stripe.android.stripecardscan.framework.time.Clock
-import com.stripe.android.stripecardscan.framework.time.ClockMark
+import com.stripe.android.camera.framework.time.Clock
+import com.stripe.android.camera.framework.time.ClockMark
 
 internal abstract class MachineState {
 

@@ -50,8 +50,4 @@
     <attr name="stripeCorrectOutlineColor" format="color" />
     <attr name="stripeCorrectOutlineWidth" format="dimension" />
 
-    <declare-styleable name="ViewFinderBackground">
-        <attr name="backgroundColor" format="color" />
-    </declare-styleable>
-
 </resources>

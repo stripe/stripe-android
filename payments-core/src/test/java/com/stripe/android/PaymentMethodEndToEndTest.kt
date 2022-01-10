@@ -11,11 +11,10 @@ import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.networking.ApiRequest
 import com.stripe.android.networking.StripeApiRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.TestCoroutineDispatcher
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.runTest
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertFailsWith
 
@@ -23,12 +22,7 @@ import kotlin.test.assertFailsWith
 @RunWith(RobolectricTestRunner::class)
 internal class PaymentMethodEndToEndTest {
     private val context = ApplicationProvider.getApplicationContext<Context>()
-    private val testDispatcher = TestCoroutineDispatcher()
-
-    @AfterTest
-    fun cleanup() {
-        testDispatcher.cleanupTestCoroutines()
-    }
+    private val testDispatcher = UnconfinedTestDispatcher()
 
     @Test
     fun createPaymentMethod_withBacsDebit_shouldCreateObject() {
@@ -226,7 +220,7 @@ internal class PaymentMethodEndToEndTest {
     }
 
     @Test
-    fun createPaymentMethod_withGrabPay_shouldCreateObject() = testDispatcher.runBlockingTest {
+    fun createPaymentMethod_withGrabPay_shouldCreateObject() = runTest {
         val repository = StripeApiRepository(
             context,
             { ApiKeyFixtures.GRABPAY_PUBLISHABLE_KEY },
@@ -243,7 +237,7 @@ internal class PaymentMethodEndToEndTest {
     }
 
     @Test
-    fun `createPaymentMethod() with PayPal PaymentMethod should create expected object`() = testDispatcher.runBlockingTest {
+    fun `createPaymentMethod() with PayPal PaymentMethod should create expected object`() = runTest {
         val paymentMethod = StripeApiRepository(
             context,
             { ApiKeyFixtures.PAYPAL_PUBLISHABLE_KEY },

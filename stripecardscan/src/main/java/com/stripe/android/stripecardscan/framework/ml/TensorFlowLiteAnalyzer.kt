@@ -2,8 +2,8 @@ package com.stripe.android.stripecardscan.framework.ml
 
 import android.content.Context
 import android.util.Log
-import com.stripe.android.stripecardscan.framework.Analyzer
-import com.stripe.android.stripecardscan.framework.AnalyzerFactory
+import com.stripe.android.camera.framework.Analyzer
+import com.stripe.android.camera.framework.AnalyzerFactory
 import com.stripe.android.stripecardscan.framework.Config
 import com.stripe.android.stripecardscan.framework.FetchedData
 import com.stripe.android.stripecardscan.framework.Loader

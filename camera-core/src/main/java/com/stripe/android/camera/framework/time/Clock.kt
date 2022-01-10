@@ -1,8 +1,10 @@
-package com.stripe.android.stripecardscan.framework.time
+package com.stripe.android.camera.framework.time
 
 import androidx.annotation.CheckResult
+import androidx.annotation.RestrictTo
 
-internal object Clock {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+object Clock {
     @JvmStatic
     fun markNow(): ClockMark = PreciseClockMark(System.nanoTime())
 }
@@ -15,7 +17,8 @@ internal fun Long.asEpochMillisecondsClockMark(): ClockMark = AbsoluteClockMark(
 /**
  * A marked point in time.
  */
-internal sealed class ClockMark {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+sealed class ClockMark {
     abstract fun elapsedSince(): Duration
 
     abstract fun toMillisecondsSinceEpoch(): Long
@@ -117,7 +120,8 @@ private class PreciseClockMark(private val originMarkNanoseconds: Long) : ClockM
  * TODO: use contracts when they are no longer experimental
  */
 @CheckResult
-internal inline fun <T> measureTime(block: () -> T): Pair<Duration, T> {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+inline fun <T> measureTime(block: () -> T): Pair<Duration, T> {
     // contract { callsInPlace(block, EXACTLY_ONCE) }
     val mark = Clock.markNow()
     val result = block()

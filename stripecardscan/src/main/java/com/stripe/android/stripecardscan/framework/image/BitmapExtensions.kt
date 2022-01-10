@@ -3,7 +3,6 @@ package com.stripe.android.stripecardscan.framework.image
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
-import android.graphics.Matrix
 import android.graphics.Rect
 import android.os.Build
 import android.util.Size
@@ -66,18 +65,6 @@ internal fun Bitmap.cropCenter(size: Size): Bitmap =
     } else {
         crop(size.centerOn(size().toRect()))
     }
-
-/**
- * Rotate a [Bitmap] by the given [rotationDegrees].
- */
-@CheckResult
-internal fun Bitmap.rotate(rotationDegrees: Float): Bitmap = if (rotationDegrees != 0F) {
-    val matrix = Matrix()
-    matrix.postRotate(rotationDegrees)
-    Bitmap.createBitmap(this, 0, 0, this.width, this.height, matrix, true)
-} else {
-    this
-}
 
 /**
  * Scale a [Bitmap] by a given [percentage].

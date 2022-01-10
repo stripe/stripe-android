@@ -7,14 +7,12 @@ import com.stripe.android.StripeIntentResult
 import com.stripe.android.model.AlipayAuthResult
 import com.stripe.android.model.PaymentIntentFixtures
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.TestCoroutineDispatcher
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
-import kotlin.test.AfterTest
 import kotlin.test.assertFailsWith
 
 @ExperimentalCoroutinesApi
@@ -23,15 +21,8 @@ internal class DefaultAlipayRepositoryTest {
     private val stripeRepository: StripeRepository = mock()
     private val repository = DefaultAlipayRepository(stripeRepository)
 
-    private val testDispatcher = TestCoroutineDispatcher()
-
-    @AfterTest
-    fun cleanup() {
-        testDispatcher.cleanupTestCoroutines()
-    }
-
     @Test
-    fun `authenticate() should handle success`() = testDispatcher.runBlockingTest {
+    fun `authenticate() should handle success`() = runTest {
         val result = repository.authenticate(
             INTENT,
             createAuthenticator(AlipayAuthResult.RESULT_CODE_SUCCESS),
@@ -47,7 +38,7 @@ internal class DefaultAlipayRepositoryTest {
     }
 
     @Test
-    fun `authenticate() should handle cancelation`() = testDispatcher.runBlockingTest {
+    fun `authenticate() should handle cancelation`() = runTest {
         val result = repository.authenticate(
             INTENT,
             createAuthenticator(AlipayAuthResult.RESULT_CODE_CANCELLED),
@@ -58,7 +49,7 @@ internal class DefaultAlipayRepositoryTest {
     }
 
     @Test
-    fun `authenticate() should handle failure`() = testDispatcher.runBlockingTest {
+    fun `authenticate() should handle failure`() = runTest {
         val result = repository.authenticate(
             INTENT,
             createAuthenticator(AlipayAuthResult.RESULT_CODE_FAILED),
@@ -69,7 +60,7 @@ internal class DefaultAlipayRepositoryTest {
     }
 
     @Test
-    fun `authenticate() should handle unknown codes`() = testDispatcher.runBlockingTest {
+    fun `authenticate() should handle unknown codes`() = runTest {
         val result = repository.authenticate(
             INTENT,
             createAuthenticator("unknown"),
@@ -80,7 +71,7 @@ internal class DefaultAlipayRepositoryTest {
     }
 
     @Test
-    fun `authenticate() should handle missing results`() = testDispatcher.runBlockingTest {
+    fun `authenticate() should handle missing results`() = runTest {
         val result = repository.authenticate(
             INTENT,
             createAuthenticator(null),
@@ -91,7 +82,7 @@ internal class DefaultAlipayRepositoryTest {
     }
 
     @Test
-    fun `authenticate() should throw exception when alipay data missing`() = testDispatcher.runBlockingTest {
+    fun `authenticate() should throw exception when alipay data missing`() = runTest {
         val exception = assertFailsWith<RuntimeException> {
             repository.authenticate(
                 PaymentIntentFixtures.PI_REQUIRES_REDIRECT,
@@ -104,7 +95,7 @@ internal class DefaultAlipayRepositoryTest {
     }
 
     @Test
-    fun `authenticate() should throw exception in test mode`() = testDispatcher.runBlockingTest {
+    fun `authenticate() should throw exception in test mode`() = runTest {
         val exception = assertFailsWith<IllegalArgumentException> {
             repository.authenticate(
                 PaymentIntentFixtures.ALIPAY_TEST_MODE,

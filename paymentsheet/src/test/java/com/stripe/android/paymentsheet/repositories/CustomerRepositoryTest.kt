@@ -11,8 +11,8 @@ import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.utils.any
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.TestCoroutineDispatcher
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.anyString
@@ -24,12 +24,11 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 import java.security.InvalidParameterException
-import kotlin.test.AfterTest
 
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
 internal class CustomerRepositoryTest {
-    private val testDispatcher = TestCoroutineDispatcher()
+    private val testDispatcher = UnconfinedTestDispatcher()
     private val stripeRepository = mock<StripeRepository>() {
         onBlocking { getPaymentMethods(any(), anyString(), any(), any()) }.doReturn(emptyList())
         onBlocking { detachPaymentMethod(anyString(), any(), anyString(), any()) }.doThrow(InvalidParameterException("error"))
@@ -41,14 +40,9 @@ internal class CustomerRepositoryTest {
         workContext = testDispatcher
     )
 
-    @AfterTest
-    fun cleanup() {
-        testDispatcher.cleanupTestCoroutines()
-    }
-
     @Test
     fun `getPaymentMethods() should create expected ListPaymentMethodsParams`() =
-        testDispatcher.runBlockingTest {
+        runTest {
             repository.getPaymentMethods(
                 PaymentSheet.CustomerConfiguration(
                     "customer_id",
@@ -72,7 +66,7 @@ internal class CustomerRepositoryTest {
 
     @Test
     fun `getPaymentMethods() with partially failing requests should emit list with successful values`() =
-        testDispatcher.runBlockingTest {
+        runTest {
             val repository = CustomerApiRepository(
                 failsOnceStripeRepository(),
                 { PaymentConfiguration(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY) },
@@ -97,7 +91,7 @@ internal class CustomerRepositoryTest {
 
     @Test
     fun `detachPaymentMethod() should return null on failure`() =
-        testDispatcher.runBlockingTest {
+        runTest {
             val result = repository.detachPaymentMethod(
                 PaymentSheet.CustomerConfiguration(
                     "customer_id",

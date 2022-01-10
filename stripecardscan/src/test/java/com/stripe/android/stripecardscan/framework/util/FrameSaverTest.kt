@@ -1,7 +1,7 @@
 package com.stripe.android.stripecardscan.framework.util
 
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import kotlin.test.assertEquals
 
@@ -19,7 +19,7 @@ class FrameSaverTest {
 
     @Test
     @ExperimentalCoroutinesApi
-    fun saveFrames() = runBlockingTest {
+    fun saveFrames() = runTest {
         val frameSaver = TestFrameSaver()
 
         frameSaver.saveFrame(1, 1)
@@ -48,7 +48,7 @@ class FrameSaverTest {
 
     @Test
     @ExperimentalCoroutinesApi
-    fun doesNotLeakInternalMap() = runBlockingTest {
+    fun doesNotLeakInternalMap() = runTest {
         val frameSaver = TestFrameSaver()
 
         frameSaver.saveFrame(1, 1)

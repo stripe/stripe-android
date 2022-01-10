@@ -1,6 +1,12 @@
 apply plugin: "signing"
 apply plugin: "maven-publish"
 
+nexusStaging {
+    packageGroup = GROUP
+    numberOfRetries = 40
+    delayBetweenRetriesInMillis = 4000
+}
+
 def getReleaseRepositoryUrl() {
     return findProperty('RELEASE_REPOSITORY_URL') ?:
             "https://oss.sonatype.org/service/local/staging/deploy/maven2/"

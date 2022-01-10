@@ -37,7 +37,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertNotNull
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -108,7 +108,7 @@ internal class FormViewModelTest {
 
     @OptIn(ExperimentalCoroutinesApi::class)
     @Test
-    fun `Factory gets initialized with fallback when no Injector is available`() = runBlockingTest {
+    fun `Factory gets initialized with fallback when no Injector is available`() = runTest {
         val config = COMPOSE_FRAGMENT_ARGS.copy(injectorKey = DUMMY_INJECTOR_KEY)
         val factory = FormViewModel.Factory(
             config,
@@ -125,7 +125,7 @@ internal class FormViewModelTest {
     }
 
     @Test
-    fun `Verify setting save for future use`() = runBlockingTest {
+    fun `Verify setting save for future use`() = runTest {
         val args = COMPOSE_FRAGMENT_ARGS
         val formViewModel = FormViewModel(
             LayoutSpec.create(
@@ -179,7 +179,7 @@ internal class FormViewModelTest {
     }
 
     @Test
-    fun `Verify setting section as hidden sets sub-fields as hidden as well`() = runBlockingTest {
+    fun `Verify setting section as hidden sets sub-fields as hidden as well`() = runTest {
         val args = COMPOSE_FRAGMENT_ARGS
         val formViewModel = FormViewModel(
             LayoutSpec.create(
@@ -209,7 +209,7 @@ internal class FormViewModelTest {
 
     @ExperimentalCoroutinesApi
     @Test
-    fun `Verify if a field is hidden and valid it is not in the completeFormValues`() = runBlockingTest {
+    fun `Verify if a field is hidden and valid it is not in the completeFormValues`() = runTest {
         // Here we have one hidden and one required field, country will always be in the result,
         //  and name only if saveForFutureUse is true
         val args = COMPOSE_FRAGMENT_ARGS
@@ -249,7 +249,7 @@ internal class FormViewModelTest {
 
     @ExperimentalCoroutinesApi
     @Test
-    fun `Hidden invalid fields arent in the formViewValue and has no effect on complete state`() = runBlockingTest {
+    fun `Hidden invalid fields arent in the formViewValue and has no effect on complete state`() = runTest {
         // Here we have one hidden and one required field, country will always be in the result,
         //  and name only if saveForFutureUse is true
         val args = COMPOSE_FRAGMENT_ARGS
@@ -297,7 +297,7 @@ internal class FormViewModelTest {
      */
     @ExperimentalCoroutinesApi
     @Test
-    fun `Verify params are set when element flows are complete`() = runBlockingTest {
+    fun `Verify params are set when element flows are complete`() = runTest {
         /**
          * Using sofort as a complex enough example to test the form view model class.
          */
@@ -345,7 +345,7 @@ internal class FormViewModelTest {
 
     @ExperimentalCoroutinesApi
     @Test
-    fun `Verify params are set when element address fields are complete`() = runBlockingTest {
+    fun `Verify params are set when element address fields are complete`() = runTest {
         /**
          * Using sepa debit as a complex enough example to test the address portion.
          */
@@ -418,7 +418,7 @@ internal class FormViewModelTest {
 
     @ExperimentalCoroutinesApi
     @Test
-    fun `Verify params are set when required address fields are complete`() = runBlockingTest {
+    fun `Verify params are set when required address fields are complete`() = runTest {
         /**
          * Using sepa debit as a complex enough example to test the address portion.
          */

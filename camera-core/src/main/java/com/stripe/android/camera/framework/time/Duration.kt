@@ -1,5 +1,6 @@
-package com.stripe.android.stripecardscan.framework.time
+package com.stripe.android.camera.framework.time
 
+import androidx.annotation.RestrictTo
 import kotlin.math.round
 import kotlin.math.roundToLong
 
@@ -15,7 +16,8 @@ private fun Double.roundTo(numberOfDigits: Int): Double {
 /**
  * Since kotlin time is still experimental, implement our own version for utility.
  */
-internal sealed class Duration : Comparable<Duration> {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+sealed class Duration : Comparable<Duration> {
 
     companion object {
         val ZERO: Duration = DurationNanoseconds(0)
@@ -176,49 +178,49 @@ private class DurationNanoseconds(nanoseconds: Long) : Duration() {
     }
 }
 
-internal val Int.years get(): Duration = this.toDouble().years
-internal val Int.months get(): Duration = this.toDouble().months
-internal val Int.weeks get(): Duration = this.toDouble().weeks
-internal val Int.days get(): Duration = this.toDouble().days
-internal val Int.hours get(): Duration = this.toDouble().hours
-internal val Int.minutes get(): Duration = this.toDouble().minutes
-internal val Int.seconds get(): Duration = this.toDouble().seconds
-internal val Int.milliseconds get(): Duration = this.toDouble().milliseconds
-internal val Int.microseconds get(): Duration = this.toDouble().microseconds
-internal val Int.nanoseconds get(): Duration = this.toLong().nanoseconds
+val Int.years get(): Duration = this.toDouble().years
+val Int.months get(): Duration = this.toDouble().months
+val Int.weeks get(): Duration = this.toDouble().weeks
+val Int.days get(): Duration = this.toDouble().days
+val Int.hours get(): Duration = this.toDouble().hours
+val Int.minutes get(): Duration = this.toDouble().minutes
+val Int.seconds get(): Duration = this.toDouble().seconds
+val Int.milliseconds get(): Duration = this.toDouble().milliseconds
+val Int.microseconds get(): Duration = this.toDouble().microseconds
+val Int.nanoseconds get(): Duration = this.toLong().nanoseconds
 
-internal val Long.years get(): Duration = this.toDouble().years
-internal val Long.months get(): Duration = this.toDouble().months
-internal val Long.weeks get(): Duration = this.toDouble().weeks
-internal val Long.days get(): Duration = this.toDouble().days
-internal val Long.hours get(): Duration = this.toDouble().hours
-internal val Long.minutes get(): Duration = this.toDouble().minutes
-internal val Long.seconds get(): Duration = this.toDouble().seconds
-internal val Long.milliseconds get(): Duration = this.toDouble().milliseconds
-internal val Long.microseconds get(): Duration = this.toDouble().microseconds
-internal val Long.nanoseconds get(): Duration = DurationNanoseconds.fromNanoseconds(this)
+val Long.years get(): Duration = this.toDouble().years
+val Long.months get(): Duration = this.toDouble().months
+val Long.weeks get(): Duration = this.toDouble().weeks
+val Long.days get(): Duration = this.toDouble().days
+val Long.hours get(): Duration = this.toDouble().hours
+val Long.minutes get(): Duration = this.toDouble().minutes
+val Long.seconds get(): Duration = this.toDouble().seconds
+val Long.milliseconds get(): Duration = this.toDouble().milliseconds
+val Long.microseconds get(): Duration = this.toDouble().microseconds
+val Long.nanoseconds get(): Duration = DurationNanoseconds.fromNanoseconds(this)
 
-internal val Float.years get(): Duration = this.toDouble().years
-internal val Float.months get(): Duration = this.toDouble().months
-internal val Float.weeks get(): Duration = this.toDouble().weeks
-internal val Float.days get(): Duration = this.toDouble().days
-internal val Float.hours get(): Duration = this.toDouble().hours
-internal val Float.minutes get(): Duration = this.toDouble().minutes
-internal val Float.seconds get(): Duration = this.toDouble().seconds
-internal val Float.milliseconds get(): Duration = this.toDouble().milliseconds
-internal val Float.microseconds get(): Duration = this.toDouble().microseconds
-internal val Float.nanoseconds get(): Duration = this.roundToLong().nanoseconds
+val Float.years get(): Duration = this.toDouble().years
+val Float.months get(): Duration = this.toDouble().months
+val Float.weeks get(): Duration = this.toDouble().weeks
+val Float.days get(): Duration = this.toDouble().days
+val Float.hours get(): Duration = this.toDouble().hours
+val Float.minutes get(): Duration = this.toDouble().minutes
+val Float.seconds get(): Duration = this.toDouble().seconds
+val Float.milliseconds get(): Duration = this.toDouble().milliseconds
+val Float.microseconds get(): Duration = this.toDouble().microseconds
+val Float.nanoseconds get(): Duration = this.roundToLong().nanoseconds
 
-internal val Double.years get(): Duration = DurationNanoseconds.fromYears(this)
-internal val Double.months get(): Duration = DurationNanoseconds.fromMonths(this)
-internal val Double.weeks get(): Duration = DurationNanoseconds.fromWeeks(this)
-internal val Double.days get(): Duration = DurationNanoseconds.fromDays(this)
-internal val Double.hours get(): Duration = DurationNanoseconds.fromHours(this)
-internal val Double.minutes get(): Duration = DurationNanoseconds.fromMinutes(this)
-internal val Double.seconds get(): Duration = DurationNanoseconds.fromSeconds(this)
-internal val Double.milliseconds get(): Duration = DurationNanoseconds.fromMilliseconds(this)
-internal val Double.microseconds get(): Duration = DurationNanoseconds.fromMicroseconds(this)
-internal val Double.nanoseconds get(): Duration = this.roundToLong().nanoseconds
+val Double.years get(): Duration = DurationNanoseconds.fromYears(this)
+val Double.months get(): Duration = DurationNanoseconds.fromMonths(this)
+val Double.weeks get(): Duration = DurationNanoseconds.fromWeeks(this)
+val Double.days get(): Duration = DurationNanoseconds.fromDays(this)
+val Double.hours get(): Duration = DurationNanoseconds.fromHours(this)
+val Double.minutes get(): Duration = DurationNanoseconds.fromMinutes(this)
+val Double.seconds get(): Duration = DurationNanoseconds.fromSeconds(this)
+val Double.milliseconds get(): Duration = DurationNanoseconds.fromMilliseconds(this)
+val Double.microseconds get(): Duration = DurationNanoseconds.fromMicroseconds(this)
+val Double.nanoseconds get(): Duration = this.roundToLong().nanoseconds
 
 internal fun min(duration1: Duration, duration2: Duration): Duration =
     when {

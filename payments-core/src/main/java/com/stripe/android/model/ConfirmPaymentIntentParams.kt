@@ -339,7 +339,7 @@ data class ConfirmPaymentIntentParams internal constructor(
 
         /**
          * Create the parameters necessary for confirming a PaymentIntent while attaching a
-         * PaymentMethod that already exits.
+         * PaymentMethod that already exists.
          *
          * @param paymentMethodId the ID of the PaymentMethod that is being attached to the
          * PaymentIntent being confirmed
@@ -407,7 +407,8 @@ data class ConfirmPaymentIntentParams internal constructor(
             mandateId: String? = null,
             mandateData: MandateDataParams? = null,
             setupFutureUsage: SetupFutureUsage? = null,
-            shipping: Shipping? = null
+            shipping: Shipping? = null,
+            paymentMethodOptions: PaymentMethodOptionsParams? = null
         ): ConfirmPaymentIntentParams {
             return ConfirmPaymentIntentParams(
                 clientSecret = clientSecret,
@@ -416,7 +417,8 @@ data class ConfirmPaymentIntentParams internal constructor(
                 mandateId = mandateId,
                 mandateData = mandateData,
                 setupFutureUsage = setupFutureUsage,
-                shipping = shipping
+                shipping = shipping,
+                paymentMethodOptions = paymentMethodOptions
             )
         }
 
@@ -501,6 +503,20 @@ data class ConfirmPaymentIntentParams internal constructor(
                 // return_url is no longer used by is still required by the backend
                 // TODO(smaskell): remove this when no longer required
                 returnUrl = "stripe://return_url"
+            )
+        }
+
+        internal fun createForDashboard(
+            clientSecret: String,
+            paymentMethodId: String
+        ): ConfirmPaymentIntentParams {
+            // Dashboard only supports a specific payment flow today.
+            return ConfirmPaymentIntentParams(
+                clientSecret = clientSecret,
+                paymentMethodId = paymentMethodId,
+                paymentMethodOptions = PaymentMethodOptionsParams.Card(moto = true),
+                savePaymentMethod = false,
+                useStripeSdk = true,
             )
         }
     }

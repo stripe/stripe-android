@@ -13,13 +13,14 @@
  * For an implementation of CameraX, see the legacy bouncer code:
  * https://github.com/getbouncer/cardscan-android/blob/master/scan-camerax/src/main/java/com/getbouncer/scan/camera/extension/CameraAdapterImpl.kt
  */
-package com.stripe.android.stripecardscan.camera
+package com.stripe.android.camera
 
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.ImageFormat
+import android.graphics.Matrix
 import android.graphics.PointF
 import android.graphics.Rect
 import android.hardware.Camera
@@ -30,16 +31,18 @@ import android.os.HandlerThread
 import android.util.DisplayMetrics
 import android.util.Log
 import android.util.Size
+import android.view.Gravity
 import android.view.SurfaceHolder
 import android.view.SurfaceView
 import android.view.ViewGroup
+import android.widget.FrameLayout
+import androidx.annotation.CheckResult
+import androidx.annotation.RestrictTo
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.OnLifecycleEvent
-import com.stripe.android.stripecardscan.framework.Config
-import com.stripe.android.stripecardscan.framework.image.NV21Image
-import com.stripe.android.stripecardscan.framework.image.getRenderScript
-import com.stripe.android.stripecardscan.framework.image.rotate
-import com.stripe.android.stripecardscan.framework.util.retrySync
+import com.stripe.android.camera.framework.image.NV21Image
+import com.stripe.android.camera.framework.image.getRenderScript
+import com.stripe.android.camera.framework.util.retrySync
 import java.lang.ref.WeakReference
 import java.util.ArrayList
 import kotlin.math.abs
@@ -51,7 +54,20 @@ private const val ASPECT_TOLERANCE = 0.2
 
 private val MAXIMUM_RESOLUTION = Size(1920, 1080)
 
-internal data class CameraPreviewImage<ImageType>(
+/**
+ * Rotate a [Bitmap] by the given [rotationDegrees].
+ */
+@CheckResult
+internal fun Bitmap.rotate(rotationDegrees: Float): Bitmap = if (rotationDegrees != 0F) {
+    val matrix = Matrix()
+    matrix.postRotate(rotationDegrees)
+    Bitmap.createBitmap(this, 0, 0, this.width, this.height, matrix, true)
+} else {
+    this
+}
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+data class CameraPreviewImage<ImageType>(
     val image: ImageType,
     val viewBounds: Rect,
 )
@@ -59,7 +75,8 @@ internal data class CameraPreviewImage<ImageType>(
 /**
  * A [CameraAdapter] that uses android's Camera 1 APIs to show previews and process images.
  */
-internal class Camera1Adapter(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+class Camera1Adapter(
     private val activity: Activity,
     private val previewView: ViewGroup,
     private val minimumResolution: Size,
@@ -143,12 +160,17 @@ internal class Camera1Adapter(
                         image = NV21Image(imageWidth, imageHeight, bytes)
                             .toBitmap(getRenderScript(activity))
                             .rotate(mRotation.toFloat()),
-                        viewBounds = Rect(0, 0, previewView.width, previewView.height),
+                        viewBounds = Rect(
+                            previewView.left,
+                            previewView.top,
+                            previewView.width,
+                            previewView.height
+                        ),
                     ),
                 )
             } catch (t: Throwable) {
                 // ignore errors transforming the image (OOM, etc)
-                Log.e(Config.logTag, "Exception caught during camera transform", t)
+                Log.e(logTag, "Exception caught during camera transform", t)
             } finally {
                 camera.addCallbackBuffer(bytes)
             }
@@ -221,7 +243,7 @@ internal class Camera1Adapter(
         try {
             camera.parameters = parameters
         } catch (t: Throwable) {
-            Log.w(Config.logTag, "Error setting camera parameters", t)
+            Log.w(logTag, "Error setting camera parameters", t)
             // ignore failure to set camera parameters
         }
     }
@@ -240,6 +262,38 @@ internal class Camera1Adapter(
         }
     }
 
+    /**
+     * Create a LayoutParams by maintaining the target aspect ratio so that both dimensions
+     * (width and height) of the Layout will be equal to or larger than the corresponding dimension
+     * of the parent. This is similar to ImageView's CENTER_CROP scale type.
+     */
+    private fun calculateNewParamOverScreen(
+        parentWidth: Int,
+        parentHeight: Int,
+        targetWidth: Int,
+        targetHeight: Int
+    ): ViewGroup.LayoutParams {
+        // Target dimension
+        val targetRatio = targetWidth.toFloat() / targetHeight.toFloat()
+
+        // Parent dimension
+        val parentRatio = parentWidth.toFloat() / parentHeight.toFloat()
+
+        val finalWidth: Int
+        val finalHeight: Int
+        if (targetRatio > parentRatio) { // too wide, prospect height, let width go over
+            finalWidth = (targetRatio * parentHeight.toFloat()).toInt()
+            finalHeight = parentHeight
+        } else { // too high, prospect width, let height go over
+            finalWidth = parentWidth
+            finalHeight = (parentWidth.toFloat() / targetRatio).toInt()
+        }
+        // PreviewView has to be a FrameLayout so that we can center it
+        // TODO(ccen) change the type of previewView to [FrameLayout]
+        return FrameLayout.LayoutParams(finalWidth, finalHeight)
+            .also { it.gravity = Gravity.CENTER }
+    }
+
     private fun onCameraOpen(camera: Camera?) {
         if (camera == null) {
             mainThreadHandler.post {
@@ -253,9 +307,12 @@ internal class Camera1Adapter(
 
             // Create our Preview view and set it as the content of our activity.
             cameraPreview = CameraPreview(activity, this).apply {
-                layoutParams = ViewGroup.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT,
-                    ViewGroup.LayoutParams.MATCH_PARENT,
+                layoutParams = calculateNewParamOverScreen(
+                    previewView.width,
+                    previewView.height,
+                    // previewSize is always landscape, need to flip height and width
+                    camera.parameters.previewSize.height,
+                    camera.parameters.previewSize.width
                 )
             }.also { cameraPreview ->
                 mainThreadHandler.post {
@@ -280,11 +337,11 @@ internal class Camera1Adapter(
             val displayMetrics = DisplayMetrics()
             activity.windowManager.defaultDisplay.getRealMetrics(displayMetrics)
 
-            val displayWidth = max(displayMetrics.heightPixels, displayMetrics.widthPixels)
-            val displayHeight = min(displayMetrics.heightPixels, displayMetrics.widthPixels)
+            val previewWidth = max(previewView.height, previewView.width)
+            val previewHeight = min(previewView.height, previewView.width)
 
             val height: Int = minimumResolution.height
-            val width = displayWidth * height / displayHeight
+            val width = previewWidth * height / previewHeight
 
             getOptimalPreviewSize(parameters.supportedPreviewSizes, width, height)?.apply {
                 parameters.setPreviewSize(this.width, this.height)
@@ -473,4 +530,8 @@ internal class Camera1Adapter(
     }
 
     override fun getCurrentCamera(): Int = currentCameraId
+
+    private companion object {
+        val logTag: String = Camera1Adapter::class.java.simpleName
+    }
 }

@@ -1,4 +1,4 @@
-package com.stripe.android.stripecardscan.framework.time
+package com.stripe.android.camera.framework.time
 
 /**
  * A rate of execution.

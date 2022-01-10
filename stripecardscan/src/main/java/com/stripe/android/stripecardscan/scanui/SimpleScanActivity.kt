@@ -10,14 +10,15 @@ import android.util.Size
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
-import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.content.ContextCompat
+import com.stripe.android.camera.scanui.CameraView
 import com.stripe.android.stripecardscan.R
-import com.stripe.android.stripecardscan.camera.CameraPreviewImage
+import com.stripe.android.camera.CameraPreviewImage
+import com.stripe.android.camera.scanui.ViewFinderBackground
 import com.stripe.android.stripecardscan.framework.Config
 import com.stripe.android.stripecardscan.framework.util.getSdkVersion
 import com.stripe.android.stripecardscan.scanui.util.asRect
@@ -57,12 +58,12 @@ internal abstract class SimpleScanActivity<ScanFlowParameters> : ScanActivity() 
     /**
      * The main layout used to render the scan view.
      */
-    protected open val layout: ConstraintLayout by lazy { ConstraintLayout(this) }
+    protected open val layout: CameraView by lazy { CameraView(this) }
 
     /**
      * The frame where the camera preview will be displayed. This is usually the full screen.
      */
-    override val previewFrame: ViewGroup by lazy { FrameLayout(this) }
+    override val previewFrame: ViewGroup by lazy { layout.previewFrame }
 
     /**
      * The text view that displays the cardholder name once a card has been scanned.
@@ -107,19 +108,18 @@ internal abstract class SimpleScanActivity<ScanFlowParameters> : ScanActivity() 
     /**
      * The background that draws the user focus to the view finder.
      */
-    protected open val viewFinderBackgroundView: ViewFinderBackground by lazy {
-        ViewFinderBackground(this)
-    }
+    protected open val viewFinderBackgroundView: ViewFinderBackground
+        by lazy { layout.viewFinderBackgroundView }
 
     /**
      * The view finder window view.
      */
-    protected open val viewFinderWindowView: View by lazy { View(this) }
+    protected open val viewFinderWindowView: View by lazy { layout.viewFinderWindowView }
 
     /**
      * The border around the view finder.
      */
-    protected open val viewFinderBorderView: ImageView by lazy { ImageView(this) }
+    protected open val viewFinderBorderView: ImageView by lazy { layout.viewFinderBorderView }
 
     private val logoView: ImageView by lazy { ImageView(this) }
 
@@ -207,10 +207,6 @@ internal abstract class SimpleScanActivity<ScanFlowParameters> : ScanActivity() 
         layout.id = View.generateViewId()
 
         appendUiComponents(
-            previewFrame,
-            viewFinderBackgroundView,
-            viewFinderWindowView,
-            viewFinderBorderView,
             securityIconView,
             securityTextView,
             instructionsTextView,

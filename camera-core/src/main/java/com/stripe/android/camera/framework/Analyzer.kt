@@ -1,5 +1,6 @@
-package com.stripe.android.stripecardscan.framework
+package com.stripe.android.camera.framework
 
+import androidx.annotation.RestrictTo
 import java.io.Closeable
 
 /**
@@ -12,7 +13,8 @@ internal const val DEFAULT_ANALYZER_PARALLEL_COUNT = 2
  * contain any state. They must define whether they can run on a multithreaded executor, and provide
  * a means of analyzing input data to return some form of result.
  */
-internal interface Analyzer<Input, State, Output> {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+interface Analyzer<Input, State, Output> {
     suspend fun analyze(data: Input, state: State): Output
 
     val statsName: String?
@@ -21,7 +23,8 @@ internal interface Analyzer<Input, State, Output> {
 /**
  * A factory to create analyzers.
  */
-internal interface AnalyzerFactory<Input, State, Output, AnalyzerType :
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+interface AnalyzerFactory<Input, State, Output, AnalyzerType :
         Analyzer<Input, State, Output>> {
     suspend fun newInstance(): AnalyzerType?
 }
@@ -29,7 +32,8 @@ internal interface AnalyzerFactory<Input, State, Output, AnalyzerType :
 /**
  * A pool of analyzers.
  */
-internal data class AnalyzerPool<DataFrame, State, Output>(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+data class AnalyzerPool<DataFrame, State, Output>(
     val desiredAnalyzerCount: Int,
     val analyzers: List<Analyzer<DataFrame, State, Output>>
 ) {

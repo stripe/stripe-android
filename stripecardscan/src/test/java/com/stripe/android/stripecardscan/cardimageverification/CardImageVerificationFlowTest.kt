@@ -2,7 +2,7 @@ package com.stripe.android.stripecardscan.cardimageverification
 
 import androidx.test.filters.SmallTest
 import com.stripe.android.stripecardscan.cardimageverification.result.MainLoopAggregator
-import com.stripe.android.stripecardscan.framework.AnalyzerLoopErrorListener
+import com.stripe.android.camera.framework.AnalyzerLoopErrorListener
 import org.junit.Test
 import kotlin.test.assertEquals
 

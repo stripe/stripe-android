@@ -1,4 +1,4 @@
-package com.stripe.android.stripecardscan.scanui
+package com.stripe.android.camera.scanui
 
 import android.content.Context
 import android.graphics.Canvas
@@ -10,13 +10,13 @@ import android.os.Build
 import android.util.AttributeSet
 import android.view.View
 import androidx.annotation.ColorInt
-import com.stripe.android.stripecardscan.R
+import com.stripe.android.camera.R
 import kotlin.math.roundToInt
 
 /**
  * This class draws a background with a hole in the middle of it.
  */
-internal class ViewFinderBackground(
+class ViewFinderBackground(
     context: Context,
     attrs: AttributeSet? = null,
 ) : View(context, attrs) {

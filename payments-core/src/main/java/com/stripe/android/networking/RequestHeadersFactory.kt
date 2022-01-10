@@ -1,5 +1,6 @@
 package com.stripe.android.networking
 
+import android.system.Os
 import com.stripe.android.ApiVersion
 import com.stripe.android.AppInfo
 import com.stripe.android.Stripe
@@ -64,6 +65,13 @@ internal sealed class RequestHeadersFactory {
                     HEADER_AUTHORIZATION to "Bearer ${options.apiKey}"
                 ).plus(
                     stripeClientUserAgentHeaderFactory.create(appInfo)
+                ).plus(
+                    if (options.apiKeyIsUserKey) {
+                        val isLiveMode = Os.getenv("Stripe-Livemode") != "false"
+                        mapOf(HEADER_STRIPE_LIVEMODE to isLiveMode.toString())
+                    } else {
+                        emptyMap()
+                    }
                 ).plus(
                     options.stripeAccount?.let {
                         mapOf(HEADER_STRIPE_ACCOUNT to it)
@@ -152,6 +160,7 @@ internal sealed class RequestHeadersFactory {
         internal const val HEADER_ACCEPT = "Accept"
         internal const val HEADER_STRIPE_VERSION = "Stripe-Version"
         internal const val HEADER_STRIPE_ACCOUNT = "Stripe-Account"
+        internal const val HEADER_STRIPE_LIVEMODE = "Stripe-Livemode"
         internal const val HEADER_AUTHORIZATION = "Authorization"
         internal const val HEADER_IDEMPOTENCY_KEY = "Idempotency-Key"
 

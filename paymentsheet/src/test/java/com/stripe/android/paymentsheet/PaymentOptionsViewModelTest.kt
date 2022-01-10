@@ -23,18 +23,16 @@ import com.stripe.android.ui.core.address.AddressFieldElementRepository
 import com.stripe.android.ui.core.elements.BankRepository
 import com.stripe.android.ui.core.forms.resources.StaticResourceRepository
 import com.stripe.android.utils.TestUtils.idleLooper
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.TestCoroutineDispatcher
-import kotlinx.coroutines.test.resetMain
-import kotlinx.coroutines.test.runBlockingTest
-import kotlinx.coroutines.test.setMain
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
+import javax.inject.Provider
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -44,7 +42,7 @@ import kotlin.test.Test
 internal class PaymentOptionsViewModelTest {
     @get:Rule
     val rule = InstantTaskExecutorRule()
-    private val testDispatcher = TestCoroutineDispatcher()
+    private val testDispatcher = StandardTestDispatcher()
 
     private val eventReporter = mock<EventReporter>()
     private val prefsRepository = FakePrefsRepository()
@@ -73,17 +71,6 @@ internal class PaymentOptionsViewModelTest {
         savedStateHandle = SavedStateHandle()
     )
 
-    @BeforeTest
-    fun setup() {
-        Dispatchers.setMain(testDispatcher)
-    }
-
-    @AfterTest
-    fun cleanup() {
-        Dispatchers.resetMain()
-        testDispatcher.cleanupTestCoroutines()
-    }
-
     @Test
     fun `onUserSelection() when selection has been made should set the view state to process result`() {
         var paymentOptionResult: PaymentOptionResult? = null
@@ -104,7 +91,7 @@ internal class PaymentOptionsViewModelTest {
 
     @Test
     fun `onUserSelection() when new card selection with no save should set the view state to process result`() =
-        testDispatcher.runBlockingTest {
+        runTest {
             var paymentOptionResult: PaymentOptionResult? = null
             viewModel.paymentOptionResult.observeForever {
                 paymentOptionResult = it
@@ -127,7 +114,7 @@ internal class PaymentOptionsViewModelTest {
 
     @Test
     fun `onUserSelection() new card with save should complete with succeeded view state`() =
-        testDispatcher.runBlockingTest {
+        runTest {
             paymentMethodRepository.savedPaymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
 
             var paymentOptionResult: PaymentOptionResult? = null
@@ -239,7 +226,7 @@ internal class PaymentOptionsViewModelTest {
     }
 
     @Test
-    fun `removePaymentMethod removes it from payment methods list`() = runBlockingTest {
+    fun `removePaymentMethod removes it from payment methods list`() = runTest {
         val cards = PaymentMethodFixtures.createCards(3)
         val viewModel = PaymentOptionsViewModel(
             args = PAYMENT_OPTION_CONTRACT_ARGS.copy(paymentMethods = cards),

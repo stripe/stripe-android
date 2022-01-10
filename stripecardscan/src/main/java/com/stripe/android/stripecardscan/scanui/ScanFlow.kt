@@ -3,15 +3,17 @@ package com.stripe.android.stripecardscan.scanui
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Rect
+import androidx.annotation.RestrictTo
 import androidx.lifecycle.LifecycleOwner
-import com.stripe.android.stripecardscan.camera.CameraPreviewImage
+import com.stripe.android.camera.CameraPreviewImage
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 
 /**
  * A flow for scanning something. This manages the callbacks and lifecycle of the flow.
  */
-internal interface ScanFlow<Parameters> {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+interface ScanFlow<Parameters> {
 
     /**
      * Start the image processing flow for scanning a card.

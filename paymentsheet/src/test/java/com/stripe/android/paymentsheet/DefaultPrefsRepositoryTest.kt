@@ -6,17 +6,16 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.TestCoroutineDispatcher
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.runTest
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import kotlin.test.AfterTest
 import kotlin.test.Test
 
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
 internal class DefaultPrefsRepositoryTest {
-    private val testDispatcher = TestCoroutineDispatcher()
+    private val testDispatcher = UnconfinedTestDispatcher()
 
     private var isGooglePayReady = true
     private val prefsRepository = DefaultPrefsRepository(
@@ -25,13 +24,8 @@ internal class DefaultPrefsRepositoryTest {
         testDispatcher
     )
 
-    @AfterTest
-    fun after() {
-        testDispatcher.cleanupTestCoroutines()
-    }
-
     @Test
-    fun `save GooglePay should return GooglePay`() = testDispatcher.runBlockingTest {
+    fun `save GooglePay should return GooglePay`() = runTest {
         prefsRepository.savePaymentSelection(
             PaymentSelection.GooglePay
         )
@@ -44,7 +38,7 @@ internal class DefaultPrefsRepositoryTest {
 
     @Test
     fun `save then get GooglePay should return None if Google Pay is not available`() =
-        testDispatcher.runBlockingTest {
+        runTest {
             isGooglePayReady = false
 
             prefsRepository.savePaymentSelection(
@@ -58,7 +52,7 @@ internal class DefaultPrefsRepositoryTest {
         }
 
     @Test
-    fun `save Saved should return PaymentMethod`() = testDispatcher.runBlockingTest {
+    fun `save Saved should return PaymentMethod`() = runTest {
         prefsRepository.savePaymentSelection(
             PaymentSelection.Saved(
                 PaymentMethodFixtures.CARD_PAYMENT_METHOD

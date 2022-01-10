@@ -1,4 +1,4 @@
-package com.stripe.android.stripecardscan.camera
+package com.stripe.android.camera
 
 import android.content.Context
 import android.content.pm.PackageManager
@@ -8,11 +8,11 @@ import android.view.Surface
 import androidx.annotation.CheckResult
 import androidx.annotation.IntDef
 import androidx.annotation.MainThread
+import androidx.annotation.RestrictTo
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.OnLifecycleEvent
-import com.stripe.android.stripecardscan.framework.Config
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ClosedSendChannelException
 import kotlinx.coroutines.channels.onClosed
@@ -34,7 +34,8 @@ import kotlinx.coroutines.runBlocking
 @Retention(AnnotationRetention.SOURCE)
 internal annotation class RotationValue
 
-internal abstract class CameraAdapter<CameraOutput> : LifecycleObserver {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+abstract class CameraAdapter<CameraOutput> : LifecycleObserver {
 
     // TODO: change this to be a channelFlow once it's no longer experimental, add some capacity and use a backpressure drop strategy
     private val imageChannel = Channel<CameraOutput>(capacity = Channel.RENDEZVOUS)
@@ -50,7 +51,7 @@ internal abstract class CameraAdapter<CameraOutput> : LifecycleObserver {
         @JvmStatic
         fun isCameraSupported(context: Context): Boolean =
             (context.packageManager.hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY)).also {
-                if (!it) Log.e(Config.logTag, "System feature 'FEATURE_CAMERA_ANY' is unavailable")
+                if (!it) Log.e(logTag, "System feature 'FEATURE_CAMERA_ANY' is unavailable")
             }
 
         /**
@@ -58,24 +59,26 @@ internal abstract class CameraAdapter<CameraOutput> : LifecycleObserver {
          */
         @CheckResult
         fun Int.rotationToDegrees(): Int = this * 90
+
+        val logTag: String = CameraAdapter::class.java.simpleName
     }
 
     protected fun sendImageToStream(image: CameraOutput) = try {
         imageChannel.trySend(image).onClosed {
-            Log.w(Config.logTag, "Attempted to send image to closed channel", it)
+            Log.w(logTag, "Attempted to send image to closed channel", it)
         }.onFailure {
             if (it != null) {
-                Log.w(Config.logTag, "Failure when sending image to channel", it)
+                Log.w(logTag, "Failure when sending image to channel", it)
             } else {
-                Log.v(Config.logTag, "No analyzers available to process image")
+                Log.v(logTag, "No analyzers available to process image")
             }
         }.onSuccess {
-            Log.v(Config.logTag, "Successfully sent image to be processed")
+            Log.v(logTag, "Successfully sent image to be processed")
         }
     } catch (e: ClosedSendChannelException) {
-        Log.w(Config.logTag, "Attempted to send image to closed channel")
+        Log.w(logTag, "Attempted to send image to closed channel")
     } catch (t: Throwable) {
-        Log.e(Config.logTag, "Unable to send image to channel", t)
+        Log.e(logTag, "Unable to send image to channel", t)
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
@@ -99,7 +102,7 @@ internal abstract class CameraAdapter<CameraOutput> : LifecycleObserver {
 
         lifecyclesBound--
         if (lifecyclesBound < 0) {
-            Log.e(Config.logTag, "Bound lifecycle count $lifecyclesBound is below 0")
+            Log.e(logTag, "Bound lifecycle count $lifecyclesBound is below 0")
             lifecyclesBound = 0
         }
 
@@ -158,7 +161,8 @@ internal abstract class CameraAdapter<CameraOutput> : LifecycleObserver {
     fun getImageStream(): Flow<CameraOutput> = imageChannel.receiveAsFlow()
 }
 
-internal interface CameraErrorListener {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+interface CameraErrorListener {
 
     @MainThread
     fun onCameraOpenError(cause: Throwable?)
