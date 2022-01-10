@@ -1,5 +1,6 @@
 package com.stripe.android.stripecardscan.framework.time
 
+import com.stripe.android.camera.framework.time.Duration
 import kotlin.math.roundToLong
 
 /**

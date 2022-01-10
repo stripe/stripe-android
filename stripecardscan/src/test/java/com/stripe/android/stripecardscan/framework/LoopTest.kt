@@ -2,15 +2,15 @@ package com.stripe.android.stripecardscan.framework
 
 import androidx.test.filters.MediumTest
 import androidx.test.filters.SmallTest
-import com.stripe.android.stripecardscan.framework.time.Duration
-import com.stripe.android.stripecardscan.framework.time.nanoseconds
+import com.stripe.android.camera.framework.time.Duration
+import com.stripe.android.camera.framework.time.nanoseconds
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.yield
 import org.junit.Ignore
 import org.junit.Test
@@ -26,7 +26,7 @@ class LoopTest {
     @Test(timeout = 1000)
     @SmallTest
     @ExperimentalCoroutinesApi
-    fun processBoundAnalyzerLoop_analyzeData() = runBlockingTest {
+    fun processBoundAnalyzerLoop_analyzeData() = runTest {
         val dataCount = 3
         val resultCount = AtomicInteger(0)
 
@@ -70,7 +70,7 @@ class LoopTest {
     @Test(timeout = 200)
     @SmallTest
     @ExperimentalCoroutinesApi
-    fun processBoundAnalyzerLoop_analyzeDataNoDuplicates() = runBlockingTest {
+    fun processBoundAnalyzerLoop_analyzeDataNoDuplicates() = runTest {
         val dataCount = 3
         var resultCount = 0
 
@@ -129,7 +129,7 @@ class LoopTest {
     @Test(timeout = 200)
     @SmallTest
     @ExperimentalCoroutinesApi
-    fun processBoundAnalyzerLoop_noAnalyzersAvailable() = runBlockingTest {
+    fun processBoundAnalyzerLoop_noAnalyzersAvailable() = runTest {
         var analyzerFailure = false
 
         class TestResultHandler : StatefulResultHandler<Int, Int, String, Boolean>(1) {
@@ -167,7 +167,7 @@ class LoopTest {
     @SmallTest
     @ExperimentalCoroutinesApi
     @Ignore("This test is flaking in CI")
-    fun finiteAnalyzerLoop_analyzeData() = runBlockingTest {
+    fun finiteAnalyzerLoop_analyzeData() = runTest {
         val dataCount = 3
         var dataProcessed = false
         val resultCount = AtomicInteger(0)
@@ -214,7 +214,7 @@ class LoopTest {
     @Test(timeout = 1000)
     @MediumTest
     @ExperimentalCoroutinesApi
-    fun finiteAnalyzerLoop_analyzeDataTimeout() = runBlockingTest {
+    fun finiteAnalyzerLoop_analyzeDataTimeout() = runTest {
         val dataCount = 10000
         val resultCount = AtomicInteger(0)
         var terminatedEarly = false
@@ -261,7 +261,7 @@ class LoopTest {
     @Test(timeout = 200)
     @SmallTest
     @ExperimentalCoroutinesApi
-    fun finiteAnalyzerLoop_analyzeDataNoData() = runBlockingTest {
+    fun finiteAnalyzerLoop_analyzeDataNoData() = runTest {
         var dataProcessed = false
 
         class TestResultHandler : TerminatingResultHandler<Int, Int, String>(1) {

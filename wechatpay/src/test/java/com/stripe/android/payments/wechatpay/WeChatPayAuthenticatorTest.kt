@@ -4,8 +4,7 @@ import com.stripe.android.model.WeChat
 import com.stripe.android.networking.ApiRequest
 import com.stripe.android.payments.wechatpay.reflection.WeChatPayReflectionHelper
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.TestCoroutineDispatcher
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -20,7 +19,6 @@ import kotlin.test.assertFailsWith
 @RunWith(RobolectricTestRunner::class)
 @ExperimentalCoroutinesApi
 class WeChatPayAuthenticatorTest {
-    private val testDispatcher = TestCoroutineDispatcher()
     private val mockWeChatPayAuthStarter: WeChatPayAuthStarter = mock()
     private val mockReflectionHelper: WeChatPayReflectionHelper = mock()
     private val authenticator = WeChatPayAuthenticator().also {
@@ -35,7 +33,7 @@ class WeChatPayAuthenticatorTest {
 
     @Test
     fun `authenticate should throw exception when weChatPay dependency is not available`() =
-        testDispatcher.runBlockingTest {
+        runTest {
             whenever(mockReflectionHelper.isWeChatPayAvailable()).thenReturn(false)
 
             assertFailsWithMessage<IllegalArgumentException>(
@@ -52,7 +50,7 @@ class WeChatPayAuthenticatorTest {
 
     @Test
     fun `authenticate should throw exception when stripeIntent is not WeChatPay`() =
-        testDispatcher.runBlockingTest {
+        runTest {
             assertFailsWithMessage<IllegalArgumentException>(
                 "stripeIntent.nextActionData should be WeChatPayRedirect, " +
                     "instead it is BlikAuthorize"
@@ -67,7 +65,7 @@ class WeChatPayAuthenticatorTest {
 
     @Test
     fun `authenticate should throw exception when stripeIntent#nextActionData is null`() =
-        testDispatcher.runBlockingTest {
+        runTest {
             assertFailsWithMessage<IllegalArgumentException>(
                 "stripeIntent.nextActionData should be WeChatPayRedirect, " +
                     "instead it is null"
@@ -82,7 +80,7 @@ class WeChatPayAuthenticatorTest {
 
     @Test
     fun `wechatPayAuthStarter should start when stripeIntent is WeChatPay`() =
-        testDispatcher.runBlockingTest {
+        runTest {
             authenticator.authenticate(
                 mock(),
                 PaymentIntentFixtures.PI_REQUIRES_WECHAT_PAY_AUTHORIZE,

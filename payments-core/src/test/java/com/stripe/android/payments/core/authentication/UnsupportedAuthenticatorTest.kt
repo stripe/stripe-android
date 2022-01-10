@@ -14,8 +14,7 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.ApiRequest
 import com.stripe.android.view.AuthActivityStarterHost
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.TestCoroutineDispatcher
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -27,8 +26,6 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 @ExperimentalCoroutinesApi
 class UnsupportedAuthenticatorTest {
-    private val testDispatcher = TestCoroutineDispatcher()
-
     private val paymentRelayStarterFactory =
         mock<(AuthActivityStarterHost) -> PaymentRelayStarter>()
 
@@ -48,7 +45,7 @@ class UnsupportedAuthenticatorTest {
     }
 
     @Test
-    fun verifyWeChat() = testDispatcher.runBlockingTest {
+    fun verifyWeChat() = runTest {
         authenticator.authenticate(
             mock(),
             PaymentIntentFixtures.PI_REQUIRES_WECHAT_PAY_AUTHORIZE,
@@ -72,7 +69,7 @@ class UnsupportedAuthenticatorTest {
     }
 
     @Test
-    fun verifyNullNextActionType() = testDispatcher.runBlockingTest {
+    fun verifyNullNextActionType() = runTest {
         authenticator.authenticate(
             mock(),
             PI_SUCCEEDED,

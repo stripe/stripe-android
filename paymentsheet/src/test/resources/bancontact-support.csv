@@ -23,3 +23,27 @@ bancontact, false, true, null, false, card/bancontact, false, true, oneTime, tru
 bancontact, false, true, null, false, card/eps/bancontact, false, true, oneTime, true
 bancontact, false, false, null, false, card/bancontact, false, true, oneTime, true
 bancontact, false, false, null, false, card/eps/bancontact, false, true, oneTime, true
+bancontact, true, true, off_session, true, card/bancontact, false, false, not available, false
+bancontact, true, true, off_session, true, card/eps/bancontact, false, false, not available, false
+bancontact, true, false, off_session, true, card/bancontact, false, false, not available, false
+bancontact, true, false, off_session, true, card/eps/bancontact, false, false, not available, false
+bancontact, true, true, on_session, true, card/bancontact, false, false, not available, false
+bancontact, true, true, on_session, true, card/eps/bancontact, false, false, not available, false
+bancontact, true, false, on_session, true, card/bancontact, false, false, not available, false
+bancontact, true, false, on_session, true, card/eps/bancontact, false, false, not available, false
+bancontact, true, true, null, true, card/bancontact, false, true, oneTime, true
+bancontact, true, true, null, true, card/eps/bancontact, false, true, oneTime, true
+bancontact, true, false, null, true, card/bancontact, false, true, oneTime, true
+bancontact, true, false, null, true, card/eps/bancontact, false, true, oneTime, true
+bancontact, false, true, off_session, true, card/bancontact, false, false, not available, false
+bancontact, false, true, off_session, true, card/eps/bancontact, false, false, not available, false
+bancontact, false, false, off_session, true, card/bancontact, false, false, not available, false
+bancontact, false, false, off_session, true, card/eps/bancontact, false, false, not available, false
+bancontact, false, true, on_session, true, card/bancontact, false, false, not available, false
+bancontact, false, true, on_session, true, card/eps/bancontact, false, false, not available, false
+bancontact, false, false, on_session, true, card/bancontact, false, false, not available, false
+bancontact, false, false, on_session, true, card/eps/bancontact, false, false, not available, false
+bancontact, false, true, null, true, card/bancontact, false, true, oneTime, true
+bancontact, false, true, null, true, card/eps/bancontact, false, true, oneTime, true
+bancontact, false, false, null, true, card/bancontact, false, true, oneTime, true
+bancontact, false, false, null, true, card/eps/bancontact, false, true, oneTime, true

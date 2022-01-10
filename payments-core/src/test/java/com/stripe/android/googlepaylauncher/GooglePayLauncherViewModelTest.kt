@@ -25,8 +25,7 @@ import com.stripe.android.networking.ApiRequest
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.payments.core.authentication.AbsPaymentController
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.TestCoroutineDispatcher
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.runTest
 import org.junit.runner.RunWith
 import org.mockito.kotlin.KArgumentCaptor
 import org.mockito.kotlin.any
@@ -36,14 +35,12 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 import java.lang.Exception
-import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertFailsWith
 
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
 class GooglePayLauncherViewModelTest {
-    private val testDispatcher = TestCoroutineDispatcher()
     private val stripeRepository = FakeStripeRepository()
     private val googlePayJsonFactory = GooglePayJsonFactory(
         googlePayConfig = GooglePayConfig(
@@ -62,20 +59,15 @@ class GooglePayLauncherViewModelTest {
 
     private val viewModel = createViewModel()
 
-    @AfterTest
-    fun cleanup() {
-        testDispatcher.cleanupTestCoroutines()
-    }
-
     @Test
-    fun `isReadyToPay() should return expected value`() = testDispatcher.runBlockingTest {
+    fun `isReadyToPay() should return expected value`() = runTest {
         assertThat(viewModel.isReadyToPay())
             .isTrue()
     }
 
     @Test
     fun `createLoadPaymentDataTask() should throw expected exception when Google Pay is not available`() =
-        testDispatcher.runBlockingTest {
+        runTest {
             googlePayRepository.value = false
 
             val error = assertFailsWith<IllegalStateException> {
@@ -87,7 +79,7 @@ class GooglePayLauncherViewModelTest {
 
     @Test
     fun `createLoadPaymentDataTask() should return task when Google Pay is available`() =
-        testDispatcher.runBlockingTest {
+        runTest {
             assertThat(viewModel.createLoadPaymentDataTask())
                 .isNotNull()
         }
@@ -134,7 +126,7 @@ class GooglePayLauncherViewModelTest {
 
     @Test
     fun `getResultFromConfirmation() using PaymentIntent should return expected result`() =
-        testDispatcher.runBlockingTest {
+        runTest {
             val result = viewModel.getResultFromConfirmation(
                 StripePaymentController.PAYMENT_REQUEST_CODE,
                 Intent()
@@ -150,7 +142,7 @@ class GooglePayLauncherViewModelTest {
 
     @Test
     fun `getResultFromConfirmation() using SetupIntent should return expected result`() =
-        testDispatcher.runBlockingTest {
+        runTest {
             val result = viewModel.getResultFromConfirmation(
                 StripePaymentController.SETUP_REQUEST_CODE,
                 Intent()
@@ -166,7 +158,7 @@ class GooglePayLauncherViewModelTest {
 
     @Test
     fun `getResultFromConfirmation() with failed confirmation should return expected result`() =
-        testDispatcher.runBlockingTest {
+        runTest {
             val exception = StripeException.create(Exception("Failure"))
             val result = viewModel.getResultFromConfirmation(
                 StripePaymentController.PAYMENT_REQUEST_CODE,
@@ -184,7 +176,7 @@ class GooglePayLauncherViewModelTest {
 
     @Test
     fun `confirmStripeIntent() using PaymentIntent should confirm Payment Intent`() =
-        testDispatcher.runBlockingTest {
+        runTest {
             val mockPaymentController: PaymentController = mock()
             createViewModel(paymentController = mockPaymentController)
                 .confirmStripeIntent(mock(), mock())
@@ -198,7 +190,7 @@ class GooglePayLauncherViewModelTest {
 
     @Test
     fun `confirmStripeIntent() using SetupIntent should confirm Setup Intent`() =
-        testDispatcher.runBlockingTest {
+        runTest {
             val mockPaymentController: PaymentController = mock()
             createViewModel(
                 args = GooglePayLauncherContract.SetupIntentArgs(

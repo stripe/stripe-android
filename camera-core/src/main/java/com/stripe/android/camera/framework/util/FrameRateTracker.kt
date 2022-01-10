@@ -1,12 +1,12 @@
-package com.stripe.android.stripecardscan.framework.util
+package com.stripe.android.camera.framework.util
 
 import android.util.Log
-import com.stripe.android.stripecardscan.framework.Config
-import com.stripe.android.stripecardscan.framework.time.Clock
-import com.stripe.android.stripecardscan.framework.time.ClockMark
-import com.stripe.android.stripecardscan.framework.time.Duration
-import com.stripe.android.stripecardscan.framework.time.Rate
-import com.stripe.android.stripecardscan.framework.time.seconds
+import com.stripe.android.camera.BuildConfig
+import com.stripe.android.camera.framework.time.Clock
+import com.stripe.android.camera.framework.time.ClockMark
+import com.stripe.android.camera.framework.time.Duration
+import com.stripe.android.camera.framework.time.Rate
+import com.stripe.android.camera.framework.time.seconds
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import java.util.concurrent.atomic.AtomicLong
@@ -100,8 +100,12 @@ internal class FrameRateTracker(
             0.0
         }
 
-        if (Config.isDebug) {
-            Log.d(Config.logTag, "$name processing avg=$overallFps, inst=$instantFps")
+        if (BuildConfig.DEBUG) {
+            Log.d(logTag, "$name processing avg=$overallFps, inst=$instantFps")
         }
+    }
+
+    private companion object {
+        val logTag = FrameRateTracker::class.java.simpleName
     }
 }

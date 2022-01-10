@@ -22,12 +22,12 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.stripe.android.stripecardscan.R
-import com.stripe.android.stripecardscan.camera.CameraAdapter
-import com.stripe.android.stripecardscan.camera.CameraErrorListener
-import com.stripe.android.stripecardscan.camera.CameraPreviewImage
+import com.stripe.android.camera.CameraAdapter
+import com.stripe.android.camera.CameraErrorListener
+import com.stripe.android.camera.CameraPreviewImage
 import com.stripe.android.stripecardscan.camera.getCameraAdapter
 import com.stripe.android.stripecardscan.framework.Config
-import com.stripe.android.stripecardscan.framework.Stats
+import com.stripe.android.camera.framework.Stats
 import com.stripe.android.stripecardscan.framework.StorageFactory
 import com.stripe.android.stripecardscan.framework.util.getAppPackageName
 import kotlinx.coroutines.CoroutineScope

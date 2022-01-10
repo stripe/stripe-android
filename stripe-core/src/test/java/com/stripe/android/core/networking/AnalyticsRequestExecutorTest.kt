@@ -4,8 +4,8 @@ import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor.Companion.FIELD_EVENT
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.TestCoroutineDispatcher
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.runTest
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
@@ -20,7 +20,7 @@ import kotlin.test.Test
 @RunWith(RobolectricTestRunner::class)
 class AnalyticsRequestExecutorTest {
     private val logger: Logger = mock()
-    private val testDispatcher = TestCoroutineDispatcher()
+    private val testDispatcher = UnconfinedTestDispatcher()
     private val stripeNetworkClient: StripeNetworkClient = mock()
 
     private val analyticsRequestExecutor = DefaultAnalyticsRequestExecutor(
@@ -33,7 +33,7 @@ class AnalyticsRequestExecutorTest {
 
     @Test
     fun `executeAsync should log and delegate to stripeNetworkClient`() =
-        testDispatcher.runBlockingTest {
+        runTest {
             analyticsRequestExecutor.executeAsync(analyticsRequest)
 
             verify(logger).info(
@@ -44,7 +44,7 @@ class AnalyticsRequestExecutorTest {
 
     @Test
     fun `executeAsync should log error when stripeNetworkClient fails`() =
-        testDispatcher.runBlockingTest {
+        runTest {
             val expectedException = APIConnectionException("something went wrong")
             whenever(stripeNetworkClient.executeRequest(any())).thenThrow(expectedException)
             analyticsRequestExecutor.executeAsync(analyticsRequest)

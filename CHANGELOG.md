@@ -1,4 +1,19 @@
 # CHANGELOG
+## 19.1.0 - 2022-01-05
+This release enables new payment methods in the Mobile Payment Element: Eps, Giropay, P24, Klarna, PayPal, AfterpayClearpay.
+For a full list of the supported payment methods, refer to [our documentation](https://stripe.com/docs/payments/payment-methods/integration-options#payment-method-product-support).
+* [4492](https://github.com/stripe/stripe-android/pull/4492) Enable Afterpay in Payment Sheet
+* [4489](https://github.com/stripe/stripe-android/pull/4489) Enable Eps, Giropay, p24, klarna and paypal in payment sheet
+* [4481](https://github.com/stripe/stripe-android/pull/4481) Add minimal user key auth support to PaymentSheet
+
+Dependencies updated:
+* [4484](https://github.com/stripe/stripe-android/pull/4484) Bump kotlinCoroutinesVersion from 1.5.2 to 1.6.0
+* [4485](https://github.com/stripe/stripe-android/pull/4485) Bump kotlinx-serialization-json from 1.3.1 to 1.3.2
+* [4478](https://github.com/stripe/stripe-android/pull/4478) Bump navigation-compose from 2.4.0-beta02 to 2.4.0-rc01
+* [4475](https://github.com/stripe/stripe-android/pull/4475) Update gradle version from 7.1.1 to 7.3.2
+* [4464](https://github.com/stripe/stripe-android/pull/4464) Bump accompanist-flowlayout from 0.20.2 to 0.20.3
+* [4472](https://github.com/stripe/stripe-android/pull/4472) Bump org.jetbrains.kotlin.plugin.serialization from 1.6.0 to 1.6.10
+
 ## 19.0.0 - 2021-12-13
 This release includes several bug fixes and has the first release of [Stripe CardScan SDK](https://github.com/stripe/stripe-android/tree/master/stripecardscan)
 * [4426](https://github.com/stripe/stripe-android/pull/4426) don't override returnUrl for instant app

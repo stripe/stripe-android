@@ -22,14 +22,13 @@ import com.stripe.android.model.Token
 import com.stripe.android.networking.StripeApiRepository
 import com.stripe.android.utils.TestUtils.idleLooper
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.TestCoroutineDispatcher
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.runTest
 import org.junit.runner.RunWith
 import org.mockito.kotlin.argWhere
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
-import kotlin.test.AfterTest
 import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
@@ -38,12 +37,7 @@ internal class StripeEndToEndTest {
     private val context: Context = ApplicationProvider.getApplicationContext()
     private val defaultStripe = Stripe(context, ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)
 
-    private val testDispatcher = TestCoroutineDispatcher()
-
-    @AfterTest
-    fun cleanup() {
-        testDispatcher.cleanupTestCoroutines()
-    }
+    private val testDispatcher = UnconfinedTestDispatcher()
 
     @Test
     fun testCreateAccountToken() {
@@ -91,7 +85,7 @@ internal class StripeEndToEndTest {
     }
 
     @Test
-    fun retrieveSetupIntentAsync_withInvalidClientSecret_shouldReturnInvalidRequestException() = testDispatcher.runBlockingTest {
+    fun retrieveSetupIntentAsync_withInvalidClientSecret_shouldReturnInvalidRequestException() = runTest {
         val setupIntentCallback: ApiResultCallback<SetupIntent> = mock()
 
         createStripeWithTestScope().retrieveSetupIntent(
@@ -219,7 +213,7 @@ internal class StripeEndToEndTest {
     }
 
     @Test
-    fun `createRadarSession() should return a valid Radar Session id`() = testDispatcher.runBlockingTest {
+    fun `createRadarSession() should return a valid Radar Session id`() = runTest {
         val radarSession = createStripeWithTestScope().createRadarSession()
         assertThat(radarSession.id)
             .startsWith("rse_")
