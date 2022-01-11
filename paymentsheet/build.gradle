@@ -32,7 +32,7 @@ dependencies {
     implementation libraries.androidx.fragment.ktx
     implementation libraries.androidx.constraintlayout
     implementation libraries.androidx.activity.ktx
-    implementation 'com.google.android.gms:play-services-wallet:19.0.1'
+    implementation 'com.google.android.gms:play-services-wallet:19.1.0'
     implementation "com.google.android.material:material:$materialVersion"
     implementation "com.google.dagger:dagger:$daggerVersion"
     kapt "com.google.dagger:dagger-compiler:$daggerVersion"
