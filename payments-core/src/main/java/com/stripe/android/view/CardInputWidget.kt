@@ -333,8 +333,14 @@ class CardInputWidget @JvmOverloads constructor(
     private fun updatePostalRequired() {
         if (isPostalRequired()) {
             requiredFields.add(postalCodeEditText)
+            cardValidCallback?.let {
+                postalCodeEditText.addTextChangedListener(cardValidTextWatcher)
+            }
         } else {
             requiredFields.remove(postalCodeEditText)
+            cardValidCallback?.let {
+                postalCodeEditText.removeTextChangedListener(cardValidTextWatcher)
+            }
         }
     }
 
