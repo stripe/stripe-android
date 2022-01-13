@@ -5,6 +5,7 @@ import android.bluetooth.BluetoothAdapter
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
+import android.widget.EditText
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
@@ -57,9 +58,7 @@ abstract class StripeIntentActivity : AppCompatActivity() {
         Settings(this).stripeSecretKey
     }
 
-
     private lateinit var paymentLauncher: PaymentLauncher
-//    internal val DEFAULT_KEY = BuildConfig.STRIPE_API_KEY ?: ""
 
     private var terminalInstance: Terminal? = null
     private var availableCotsReader: Reader? = null
@@ -159,7 +158,7 @@ abstract class StripeIntentActivity : AppCompatActivity() {
                     viewModel.status.value =
                         """
                         Restored from a killed process...
-                        
+
                         Payment authentication completed, getting result
                         """.trimIndent()
                 } else {
@@ -216,6 +215,10 @@ abstract class StripeIntentActivity : AppCompatActivity() {
         requireNotNull(paymentMethodCreateParams ?: existingPaymentMethodId)
 
         keyboardController.hide()
+        val v = currentFocus
+        if (v is EditText) {
+            v.clearFocus()
+        }
 
         viewModel.createPaymentIntent(
             country = country,
