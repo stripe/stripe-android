@@ -20,6 +20,8 @@ if (System.getenv("JITPACK")) {
 
 dependencies {
     implementation project(':payments-core')
+    implementation project(':stripe-core')
+    implementation project(':stripe-ui-core')
 
     implementation 'androidx.core:core-ktx:1.7.0'
     implementation libraries.androidx.appcompat
@@ -27,6 +29,8 @@ dependencies {
     implementation libraries.androidx.lifecycle.livedata.ktx
     implementation libraries.androidx.lifecycle.viewmodel.ktx
     implementation "com.google.android.material:material:$materialVersion"
+    implementation "com.google.dagger:dagger:$daggerVersion"
+    kapt "com.google.dagger:dagger-compiler:$daggerVersion"
 
     implementation "androidx.compose.ui:ui:$composeVersion"
     // Foundation (Border, Background, Box, Image, Scroll, shapes, animations, etc.)

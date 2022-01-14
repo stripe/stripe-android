@@ -12,6 +12,7 @@ import com.stripe.android.model.BankStatuses
 import com.stripe.android.model.CardMetadata
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
+import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.Customer
 import com.stripe.android.model.ListPaymentMethodsParams
 import com.stripe.android.model.PaymentIntent
@@ -386,4 +387,15 @@ abstract class StripeRepository {
     internal abstract suspend fun createRadarSession(
         requestOptions: ApiRequest.Options
     ): RadarSession?
+
+    // Link endpoins
+
+    @Throws(
+        AuthenticationException::class,
+        InvalidRequestException::class,
+    )
+    abstract suspend fun lookupConsumerSession(
+        email: String,
+        requestOptions: ApiRequest.Options
+    ): ConsumerSessionLookup?
 }

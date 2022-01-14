@@ -15,9 +15,9 @@ import androidx.compose.ui.res.stringResource
 fun SectionElementUI(
     enabled: Boolean,
     element: SectionElement,
-    hiddenIdentifiers: List<IdentifierSpec>?,
+    hiddenIdentifiers: List<IdentifierSpec>,
 ) {
-    if (hiddenIdentifiers?.contains(element.identifier) == false) {
+    if (!hiddenIdentifiers.contains(element.identifier)) {
         val controller = element.controller
 
         val error by controller.error.collectAsState(null)

@@ -3,10 +3,12 @@ package com.stripe.android.link
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.annotation.RestrictTo
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.Icon
+import androidx.compose.material.LocalContentColor
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.TopAppBar
 import androidx.compose.runtime.Composable
@@ -19,12 +21,17 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.stripe.android.link.ui.signup.SignUpBody
 import com.stripe.android.link.ui.theme.DefaultLinkTheme
 
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class LinkActivity : ComponentActivity() {
+internal class LinkActivity : ComponentActivity() {
     internal lateinit var navController: NavHostController
 
+    private val starterArgs: LinkActivityContract.Args? by lazy {
+        LinkActivityContract.Args.fromIntent(intent)
+    }
+
+    @ExperimentalAnimationApi
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -34,10 +41,11 @@ class LinkActivity : ComponentActivity() {
                     Column(Modifier.fillMaxWidth()) {
                         LinkAppBar()
                         NavHost(navController, startDestination = LinkScreen.SignUp.name) {
-                            LinkScreen.values().forEach { screen ->
-                                composable(screen.name) {
-                                    screen.body()
-                                }
+                            composable(LinkScreen.SignUp.name) {
+                                SignUpBody(
+                                    application,
+                                    { requireNotNull(starterArgs) }
+                                )
                             }
                         }
                     }
@@ -49,8 +57,10 @@ class LinkActivity : ComponentActivity() {
 
 @Preview
 @Composable
-fun LinkAppBar() {
-    TopAppBar {
+internal fun LinkAppBar() {
+    TopAppBar(
+        backgroundColor = MaterialTheme.colors.background
+    ) {
         Column(
             modifier = Modifier.fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally
@@ -58,6 +68,7 @@ fun LinkAppBar() {
             Icon(
                 painter = painterResource(R.drawable.ic_link_logo),
                 contentDescription = stringResource(R.string.link),
+                tint = LocalContentColor.current.copy(alpha = 0.2f)
             )
         }
     }
