@@ -2098,6 +2098,88 @@ public abstract interface class com/stripe/android/model/ConfirmStripeIntentPara
 public final class com/stripe/android/model/ConfirmStripeIntentParams$Companion {
 }
 
+public final class com/stripe/android/model/ConsumerSessionLookup : com/stripe/android/core/model/StripeModel {
+	public static final field $stable I
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public final fun component1 ()Z
+	public final fun component2 ()Lcom/stripe/android/model/ConsumerSessionLookup$ConsumerSession;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun copy (ZLcom/stripe/android/model/ConsumerSessionLookup$ConsumerSession;Ljava/lang/String;)Lcom/stripe/android/model/ConsumerSessionLookup;
+	public static synthetic fun copy$default (Lcom/stripe/android/model/ConsumerSessionLookup;ZLcom/stripe/android/model/ConsumerSessionLookup$ConsumerSession;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/model/ConsumerSessionLookup;
+	public fun describeContents ()I
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getConsumerSession ()Lcom/stripe/android/model/ConsumerSessionLookup$ConsumerSession;
+	public final fun getErrorMessage ()Ljava/lang/String;
+	public final fun getExists ()Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+	public fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public final class com/stripe/android/model/ConsumerSessionLookup$ConsumerSession : com/stripe/android/core/model/StripeModel {
+	public static final field $stable I
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Ljava/util/List;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)Lcom/stripe/android/model/ConsumerSessionLookup$ConsumerSession;
+	public static synthetic fun copy$default (Lcom/stripe/android/model/ConsumerSessionLookup$ConsumerSession;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;ILjava/lang/Object;)Lcom/stripe/android/model/ConsumerSessionLookup$ConsumerSession;
+	public fun describeContents ()I
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getClientSecret ()Ljava/lang/String;
+	public final fun getEmailAddress ()Ljava/lang/String;
+	public final fun getRedactedPhoneNumber ()Ljava/lang/String;
+	public final fun getVerificationSessions ()Ljava/util/List;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+	public fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public final class com/stripe/android/model/ConsumerSessionLookup$VerificationSession : com/stripe/android/core/model/StripeModel {
+	public static final field $stable I
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public final fun component1 ()Lcom/stripe/android/model/ConsumerSessionLookup$VerificationSession$SessionType;
+	public final fun component2 ()Lcom/stripe/android/model/ConsumerSessionLookup$VerificationSession$SessionState;
+	public final fun copy (Lcom/stripe/android/model/ConsumerSessionLookup$VerificationSession$SessionType;Lcom/stripe/android/model/ConsumerSessionLookup$VerificationSession$SessionState;)Lcom/stripe/android/model/ConsumerSessionLookup$VerificationSession;
+	public static synthetic fun copy$default (Lcom/stripe/android/model/ConsumerSessionLookup$VerificationSession;Lcom/stripe/android/model/ConsumerSessionLookup$VerificationSession$SessionType;Lcom/stripe/android/model/ConsumerSessionLookup$VerificationSession$SessionState;ILjava/lang/Object;)Lcom/stripe/android/model/ConsumerSessionLookup$VerificationSession;
+	public fun describeContents ()I
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getState ()Lcom/stripe/android/model/ConsumerSessionLookup$VerificationSession$SessionState;
+	public final fun getType ()Lcom/stripe/android/model/ConsumerSessionLookup$VerificationSession$SessionType;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+	public fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public final class com/stripe/android/model/ConsumerSessionLookup$VerificationSession$SessionState : java/lang/Enum, android/os/Parcelable {
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public static final field Canceled Lcom/stripe/android/model/ConsumerSessionLookup$VerificationSession$SessionState;
+	public static final field Expired Lcom/stripe/android/model/ConsumerSessionLookup$VerificationSession$SessionState;
+	public static final field Failed Lcom/stripe/android/model/ConsumerSessionLookup$VerificationSession$SessionState;
+	public static final field Started Lcom/stripe/android/model/ConsumerSessionLookup$VerificationSession$SessionState;
+	public static final field Unknown Lcom/stripe/android/model/ConsumerSessionLookup$VerificationSession$SessionState;
+	public static final field Verified Lcom/stripe/android/model/ConsumerSessionLookup$VerificationSession$SessionState;
+	public fun describeContents ()I
+	public final fun getValue ()Ljava/lang/String;
+	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/model/ConsumerSessionLookup$VerificationSession$SessionState;
+	public static fun values ()[Lcom/stripe/android/model/ConsumerSessionLookup$VerificationSession$SessionState;
+	public fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public final class com/stripe/android/model/ConsumerSessionLookup$VerificationSession$SessionType : java/lang/Enum, android/os/Parcelable {
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public static final field Email Lcom/stripe/android/model/ConsumerSessionLookup$VerificationSession$SessionType;
+	public static final field SignUp Lcom/stripe/android/model/ConsumerSessionLookup$VerificationSession$SessionType;
+	public static final field Sms Lcom/stripe/android/model/ConsumerSessionLookup$VerificationSession$SessionType;
+	public static final field Unknown Lcom/stripe/android/model/ConsumerSessionLookup$VerificationSession$SessionType;
+	public fun describeContents ()I
+	public final fun getValue ()Ljava/lang/String;
+	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/model/ConsumerSessionLookup$VerificationSession$SessionType;
+	public static fun values ()[Lcom/stripe/android/model/ConsumerSessionLookup$VerificationSession$SessionType;
+	public fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
 public final class com/stripe/android/model/Customer : com/stripe/android/core/model/StripeModel {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
@@ -4977,6 +5059,7 @@ public abstract class com/stripe/android/networking/StripeRepository {
 	public abstract fun createPaymentMethod (Lcom/stripe/android/model/PaymentMethodCreateParams;Lcom/stripe/android/networking/ApiRequest$Options;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun detachPaymentMethod (Ljava/lang/String;Ljava/util/Set;Ljava/lang/String;Lcom/stripe/android/networking/ApiRequest$Options;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun getPaymentMethods (Lcom/stripe/android/model/ListPaymentMethodsParams;Ljava/lang/String;Ljava/util/Set;Lcom/stripe/android/networking/ApiRequest$Options;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun lookupConsumerSession (Ljava/lang/String;Lcom/stripe/android/networking/ApiRequest$Options;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun retrievePaymentIntent (Ljava/lang/String;Lcom/stripe/android/networking/ApiRequest$Options;Ljava/util/List;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun retrievePaymentIntent$default (Lcom/stripe/android/networking/StripeRepository;Ljava/lang/String;Lcom/stripe/android/networking/ApiRequest$Options;Ljava/util/List;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public abstract fun retrievePaymentIntentWithOrderedPaymentMethods (Ljava/lang/String;Lcom/stripe/android/networking/ApiRequest$Options;Ljava/util/Locale;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;

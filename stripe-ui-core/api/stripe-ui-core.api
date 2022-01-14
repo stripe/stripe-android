@@ -650,6 +650,10 @@ public final class com/stripe/android/ui/core/elements/SectionSpec : com/stripe/
 	public fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
+public final class com/stripe/android/ui/core/elements/SectionUIKt {
+	public static final fun SectionCard (Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;I)V
+}
+
 public final class com/stripe/android/ui/core/elements/SimpleDropdownConfig : com/stripe/android/ui/core/elements/DropdownConfig {
 	public static final field $stable I
 	public fun <init> (ILjava/util/List;)V
