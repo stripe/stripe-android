@@ -26,7 +26,7 @@ data class ConsumerSessionLookup internal constructor(
     data class VerificationSession internal constructor(
         val type: SessionType,
         val state: SessionState
-    ): StripeModel {
+    ) : StripeModel {
 
         @Parcelize
         enum class SessionType(val value: String) : Parcelable {

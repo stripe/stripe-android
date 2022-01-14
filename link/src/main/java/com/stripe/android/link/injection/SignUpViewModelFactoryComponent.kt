@@ -1,7 +1,6 @@
 package com.stripe.android.link.injection
 
 import android.content.Context
-import androidx.annotation.RestrictTo
 import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.LoggingModule

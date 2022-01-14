@@ -7,6 +7,7 @@ import com.stripe.android.model.BinFixtures
 import com.stripe.android.model.CardMetadata
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
+import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.Customer
 import com.stripe.android.model.ListPaymentMethodsParams
 import com.stripe.android.model.PaymentIntent
@@ -274,4 +275,11 @@ internal abstract class AbsFakeStripeRepository : StripeRepository() {
     override suspend fun createRadarSession(
         requestOptions: ApiRequest.Options
     ) = RadarSession("rse_abc123")
+
+    override suspend fun lookupConsumerSession(
+        email: String,
+        requestOptions: ApiRequest.Options
+    ): ConsumerSessionLookup? {
+        return null
+    }
 }
