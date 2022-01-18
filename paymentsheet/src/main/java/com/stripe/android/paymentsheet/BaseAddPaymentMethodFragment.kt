@@ -254,6 +254,8 @@ internal abstract class BaseAddPaymentMethodFragment(
                 merchantName = merchantName,
                 amount = amount,
                 billingDetails = config?.defaultBillingDetails,
+                requiresUserOptInToSavePaymentMethod
+                    = config?.requiresUserOptInToSavePaymentMethod ?: false,
                 injectorKey = injectorKey
             )
         }

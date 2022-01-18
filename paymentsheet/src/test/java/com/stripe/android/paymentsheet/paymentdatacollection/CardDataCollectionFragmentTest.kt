@@ -28,6 +28,8 @@ import com.stripe.android.paymentsheet.model.FragmentConfigFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.ui.AddPaymentMethodsFragmentFactory
 import com.stripe.android.utils.TestUtils.idleLooper
+import junit.framework.Assert.assertFalse
+import junit.framework.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -437,6 +439,24 @@ class CardDataCollectionFragmentTest {
                         PaymentSheetFixtures.MERCHANT_DISPLAY_NAME
                     )
                 )
+        }
+    }
+
+    @Test
+    fun `checkbox is checked by default`() {
+        createFragment { _, viewBinding ->
+            assertTrue(viewBinding.saveCardCheckbox.isChecked)
+        }
+    }
+
+    @Test
+    fun `checkbox can be configured to default to unchecked`() {
+        createFragment(
+            fragmentArgs = COMPOSE_FRAGMENT_ARGS.copy(
+                requiresUserOptInToSavePaymentMethod = true
+            )
+        ) { _, viewBinding ->
+            assertFalse(viewBinding.saveCardCheckbox.isChecked)
         }
     }
 

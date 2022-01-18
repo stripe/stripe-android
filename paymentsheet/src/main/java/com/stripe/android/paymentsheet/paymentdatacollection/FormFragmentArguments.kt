@@ -16,6 +16,7 @@ internal data class FormFragmentArguments(
     val merchantName: String,
     val amount: Amount? = null,
     val billingDetails: PaymentSheet.BillingDetails? = null,
+    val requiresUserOptInToSavePaymentMethod: Boolean = false,
     @InjectorKey val injectorKey: String,
 ) : Parcelable
 

@@ -122,7 +122,15 @@ class PaymentSheet internal constructor(
          *
          * See [payment-notification](https://stripe.com/docs/payments/payment-methods#payment-notification).
          */
-        val allowsDelayedPaymentMethods: Boolean = false
+        val allowsDelayedPaymentMethods: Boolean = false,
+
+        /**
+         * PaymentSheet offers users an option to save some payment methods for later use.
+         * By default, this option is enabled, and the user can opt-out.
+         * Setting this to `true` will require that the user explicitly opt-in
+         * (e.g. by checking a box) to save their payment method.
+         */
+        val requiresUserOptInToSavePaymentMethod: Boolean = false
     ) : Parcelable {
         /**
          * [Configuration] builder for cleaner object creation from Java.
