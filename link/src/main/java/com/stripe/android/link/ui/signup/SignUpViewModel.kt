@@ -20,6 +20,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
@@ -54,7 +55,7 @@ internal class SignUpViewModel @Inject internal constructor(
     }
 
     private val _signUpStatus = MutableStateFlow(SignUpStatus.InputtingEmail)
-    val signUpStatus: Flow<SignUpStatus> = _signUpStatus
+    val signUpStatus: StateFlow<SignUpStatus> = _signUpStatus
 
     // Holds a Job that looks up the email after a delay, so that we can cancel it
     private var lookupJob: Job? = null
@@ -73,7 +74,7 @@ internal class SignUpViewModel @Inject internal constructor(
                         }
                     }
                 } else {
-                    SignUpStatus.InputtingEmail
+                    _signUpStatus.value = SignUpStatus.InputtingEmail
                 }
             }
         }
@@ -145,7 +146,7 @@ internal class SignUpViewModel @Inject internal constructor(
 
     companion object {
         // How long to wait (in milliseconds) before triggering a call to lookup the email
-        private const val LOOKUP_DEBOUNCE_MS = 300L
+        private const val LOOKUP_DEBOUNCE_MS = 700L
     }
 }
 
