@@ -704,8 +704,8 @@ internal class DefaultFlowControllerTest {
 
             verify(paymentResultCallback).onPaymentSheetResult(
                 argWhere { paymentResult ->
-                    paymentResult is PaymentSheetResult.Failed
-                        && errorMessage.equals(paymentResult.error.localizedMessage)
+                    paymentResult is PaymentSheetResult.Failed &&
+                        errorMessage == paymentResult.error.localizedMessage
                 }
             )
         }
