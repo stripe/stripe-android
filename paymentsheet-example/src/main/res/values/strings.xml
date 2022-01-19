@@ -34,4 +34,5 @@
     <string name="shipping_address">Shipping Address</string>
     <string name="allowsDelayedPaymentMethods">Delayed PMs</string>
     <string name="automatic_pm">Automatic PMs</string>
+    <string name="save_pm_opt_in">Require opt-in to save PM</string>
 </resources>

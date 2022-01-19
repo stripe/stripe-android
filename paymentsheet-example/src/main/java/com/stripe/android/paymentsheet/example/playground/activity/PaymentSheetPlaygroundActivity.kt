@@ -191,7 +191,8 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
             customer = viewModel.customerConfig.value,
             googlePay = googlePayConfig,
             defaultBillingDetails = defaultBilling,
-            allowsDelayedPaymentMethods = viewBinding.allowsDelayedPaymentMethodsOnButton.isChecked
+            allowsDelayedPaymentMethods = viewBinding.allowsDelayedPaymentMethodsOnButton.isChecked,
+            requiresUserOptInToSavePaymentMethod = viewBinding.savePmOptInOnButton.isChecked
         )
     }
 
