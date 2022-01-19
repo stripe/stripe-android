@@ -699,7 +699,7 @@ internal class DefaultFlowControllerTest {
     @Test
     fun `onPaymentResult when error should invoke callback with Failed and relay error message`() =
         runTest {
-            val errorMessage = "Localized error message"
+            val errorMessage = "Original error message"
             flowController.onPaymentResult(PaymentResult.Failed(Throwable(errorMessage)))
 
             verify(paymentResultCallback).onPaymentSheetResult(
