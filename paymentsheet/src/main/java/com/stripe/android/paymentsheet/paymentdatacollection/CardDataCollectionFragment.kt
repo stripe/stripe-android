@@ -324,7 +324,7 @@ internal class CardDataCollectionFragment<ViewModelType : BaseSheetViewModel<*>>
         requireArguments().getParcelable<FormFragmentArguments>(
             ComposeFormDataCollectionFragment.EXTRA_CONFIG
         )?.let { args ->
-            saveCardCheckbox.isChecked = true
+            saveCardCheckbox.isChecked = false
             saveCardCheckbox.isVisible = args.showCheckbox
         }
         sheetViewModel.newCard?.customerRequestedSave?.also {
