@@ -2,6 +2,7 @@
 ## X.X.X - 2022-XX-XX
 
 ### PaymentSheet
+* [CHANGED] [4515](https://github.com/stripe/stripe-android/pull/4515) Disable card saving by default in PaymentSheet
 ### Identity
 ### Card scanning
 
