@@ -16,10 +16,7 @@ import com.stripe.android.paymentsheet.example.playground.model.CheckoutMode
 import com.stripe.android.paymentsheet.example.playground.viewmodel.PaymentSheetPlaygroundViewModel
 import com.stripe.android.paymentsheet.model.PaymentOption
 import kotlinx.coroutines.launch
-import android.content.SharedPreferences
-
-
-
+import com.stripe.android.paymentsheet.example.playground.model.Toggle
 
 internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
     private val viewBinding by lazy {
@@ -88,7 +85,14 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
         val backendUrl = Settings(this).playgroundBackendUrl
 
         viewBinding.resetDefaultsButton.setOnClickListener {
-            setToggles(CheckoutCustomer.Guest.value, true, CheckoutCurrency.USD.value, CheckoutMode.Payment.value, true, true)
+            setToggles(
+                Toggle.Customer.default.toString(),
+                Toggle.GooglePay.default as Boolean,
+                Toggle.Currency.default.toString(),
+                Toggle.Mode.default.toString(),
+                Toggle.SetShippingAddress.default as Boolean,
+                Toggle.SetAutomaticPaymentMethods.default as Boolean
+            )
         }
 
         viewBinding.reloadButton.setOnClickListener {
@@ -142,31 +146,13 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        val sharedPreferences = getSharedPreferences(sharedPreferencesName, MODE_PRIVATE)
-
-        val customer = sharedPreferences.getString("customer", CheckoutCustomer.Guest.value)
-        val googlePay = sharedPreferences.getBoolean("googlePayConfig", true)
-        val currency = sharedPreferences.getString("currency", CheckoutCurrency.USD.value)
-        val mode = sharedPreferences.getString("mode", CheckoutMode.Payment.value)
-        val setShippingAddress = sharedPreferences.getBoolean("setShippingAddress", true)
-        val setAutomaticPaymentMethods = sharedPreferences.getBoolean("setAutomaticPaymentMethods", true)
-
+        val (customer, googlePay, currency, mode, setShippingAddress, setAutomaticPaymentMethods) = viewModel.getSharedPreferences()
         setToggles(customer, googlePay, currency, mode, setShippingAddress, setAutomaticPaymentMethods)
     }
 
     override fun onPause() {
         super.onPause()
-
-        val sharedPreferences = getSharedPreferences(sharedPreferencesName, MODE_PRIVATE)
-        val editor = sharedPreferences.edit()
-
-        editor.putString("customer", customer.value)
-        editor.putBoolean("googlePayConfig", googlePayConfig != null)
-        editor.putString("currency", currency.value)
-        editor.putString("mode", mode.value)
-        editor.putBoolean("setShippingAddress", setShippingAddress)
-        editor.putBoolean("setAutomaticPaymentMethods", setAutomaticPaymentMethods)
-        editor.apply()
+        viewModel.setSharedPreferences(customer.value, googlePayConfig != null, currency.value, mode.value, setShippingAddress, setAutomaticPaymentMethods)
     }
 
     private fun setToggles(customer: String?, googlePay: Boolean, currency: String?, mode: String?, setShippingAddress: Boolean, setAutomaticPaymentMethods: Boolean) {
