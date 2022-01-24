@@ -59,11 +59,34 @@ import kotlinx.parcelize.Parcelize
  * compose model.
  */
 internal sealed class SupportedPaymentMethod(
+    /**
+     * This describes the PaymentMethod Type as described
+     * https://stripe.com/docs/api/payment_intents/create#create_payment_intent-payment_method_types
+     */
     val type: PaymentMethod.Type,
+
+    /** This describes the name that appears under the selector. */
     @StringRes val displayNameResource: Int,
+
+    /** This describes the image in the LPM selector */
     @DrawableRes val iconResource: Int,
+
+    /**
+     * This describes the requirements of the LPM including if it is supported with
+     * PaymentIntents w/ or w/out SetupFutureUsage set, SetupIntent, or on-session when attached
+     * to the customer object.
+     */
     private val requirement: PaymentMethodRequirements,
+
+    /**
+     * This is a map of the fields in payment_method_options.  See
+     * https://stripe.com/docs/api/payment_intents/create#create_payment_intent-payment_method_options
+     */
     val paramKey: MutableMap<String, Any?>,
+
+    /**
+     * This describes how the UI should look.
+     */
     val formSpec: LayoutSpec?,
 ) : Parcelable {
     @Parcelize
