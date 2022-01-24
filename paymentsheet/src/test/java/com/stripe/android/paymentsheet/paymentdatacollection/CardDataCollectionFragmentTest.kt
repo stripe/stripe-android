@@ -171,7 +171,7 @@ class CardDataCollectionFragmentTest {
             assertThat(viewBinding.billingAddress.countryView.text.toString())
                 .isEqualTo("Germany")
             assertThat(viewBinding.saveCardCheckbox.isVisible).isTrue()
-            assertThat(viewBinding.saveCardCheckbox.isChecked).isTrue()
+            assertThat(viewBinding.saveCardCheckbox.isChecked).isFalse()
         }
     }
 
