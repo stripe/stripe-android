@@ -38,7 +38,7 @@ internal class PaymentSheetPlaygroundViewModel(
 
     private val sharedPreferencesName = "playgroundToggles"
 
-    fun setSharedPreferences(customer: String, googlePay: Boolean, currency: String, mode: String, setShippingAddress: Boolean, setAutomaticPaymentMethods: Boolean) {
+    fun storeToggleState(customer: String, googlePay: Boolean, currency: String, mode: String, setShippingAddress: Boolean, setAutomaticPaymentMethods: Boolean) {
         val sharedPreferences = getApplication<Application>().getSharedPreferences(sharedPreferencesName, AppCompatActivity.MODE_PRIVATE)
         val editor = sharedPreferences.edit()
 
@@ -51,7 +51,7 @@ internal class PaymentSheetPlaygroundViewModel(
         editor.apply()
     }
 
-    fun getSharedPreferences(): SavedToggles {
+    fun getSavedToggleState(): SavedToggles {
         val sharedPreferences = getApplication<Application>().getSharedPreferences(sharedPreferencesName, AppCompatActivity.MODE_PRIVATE)
 
         val customer = sharedPreferences.getString(Toggle.Customer.key, Toggle.Customer.default.toString())

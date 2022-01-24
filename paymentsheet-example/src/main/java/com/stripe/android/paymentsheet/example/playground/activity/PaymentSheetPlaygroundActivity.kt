@@ -146,13 +146,13 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        val (customer, googlePay, currency, mode, setShippingAddress, setAutomaticPaymentMethods) = viewModel.getSharedPreferences()
+        val (customer, googlePay, currency, mode, setShippingAddress, setAutomaticPaymentMethods) = viewModel.getSavedToggleState()
         setToggles(customer, googlePay, currency, mode, setShippingAddress, setAutomaticPaymentMethods)
     }
 
     override fun onPause() {
         super.onPause()
-        viewModel.setSharedPreferences(customer.value, googlePayConfig != null, currency.value, mode.value, setShippingAddress, setAutomaticPaymentMethods)
+        viewModel.storeToggleState(customer.value, googlePayConfig != null, currency.value, mode.value, setShippingAddress, setAutomaticPaymentMethods)
     }
 
     private fun setToggles(customer: String?, googlePay: Boolean, currency: String?, mode: String?, setShippingAddress: Boolean, setAutomaticPaymentMethods: Boolean) {
