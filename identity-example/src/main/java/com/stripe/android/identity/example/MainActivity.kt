@@ -1,8 +1,8 @@
 package com.stripe.android.identity.example
 
 import android.os.Bundle
-import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
+import com.google.android.material.snackbar.Snackbar
 import com.stripe.android.identity.IdentityVerificationSheet
 import com.stripe.android.identity.example.databinding.ActivityMainBinding
 
@@ -32,12 +32,10 @@ class MainActivity : AppCompatActivity() {
                 verificationSessionId = "testVerificationSessionId",
                 ephemeralKeySecret = "testEphemeralKeySecret"
             ) {
-                Log.d(TAG, "verification result: $it")
+                Snackbar.make(
+                    binding.root, "Verification result: $it", Snackbar.LENGTH_SHORT
+                ).show()
             }
         }
-    }
-
-    private companion object {
-        val TAG: String = MainActivity::class.java.simpleName
     }
 }
