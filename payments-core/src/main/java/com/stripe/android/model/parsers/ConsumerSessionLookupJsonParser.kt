@@ -8,7 +8,9 @@ internal class ConsumerSessionLookupJsonParser : ModelJsonParser<ConsumerSession
     override fun parse(json: JSONObject): ConsumerSessionLookup? {
         val exists = json.getBoolean(FIELD_EXISTS)
         val consumerSession = parseConsumerSession(json.optJSONObject(FIELD_CONSUMER_SESSION))
-        val errorMessage = json.optString(FIELD_ERROR_MESSAGE)
+        val errorMessage = json.optString(FIELD_ERROR_MESSAGE).takeIf {
+            it.isNotBlank() && !it.equals("null")
+        }
 
         return ConsumerSessionLookup(exists, consumerSession, errorMessage)
     }

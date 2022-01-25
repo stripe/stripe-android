@@ -24,6 +24,7 @@ import com.stripe.android.model.CardParamsFixtures
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
+import com.stripe.android.model.ConsumerFixtures
 import com.stripe.android.model.ListPaymentMethodsParams
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
@@ -218,6 +219,14 @@ internal class StripeApiRepositoryTest {
         assertEquals(
             "https://api.stripe.com/v1/payment_intents/pi123/confirm",
             StripeApiRepository.getConfirmPaymentIntentUrl("pi123")
+        )
+    }
+
+    @Test
+    fun testConsumerSessionLookupUrl() {
+        assertEquals(
+            "https://api.stripe.com/v1/consumers/sessions/lookup",
+            StripeApiRepository.consumerSessionLookupUrl
         )
     }
 
@@ -1559,6 +1568,28 @@ internal class StripeApiRepositoryTest {
             )
 
             verifyFraudDetectionDataAndAnalyticsRequests(PaymentAnalyticsEvent.PaymentIntentRefresh)
+        }
+
+    @Test
+    fun `lookupConsumerSession() sends all parameters`() =
+        runTest {
+            val stripeResponse = StripeResponse(
+                200,
+                ConsumerFixtures.EXISTING_CONSUMER_JSON.toString(),
+                emptyMap()
+            )
+            whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+                .thenReturn(stripeResponse)
+
+            val email = "email@example.com"
+            create().lookupConsumerSession(
+                email,
+                DEFAULT_OPTIONS
+            )
+
+            verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
+            val params = requireNotNull(apiRequestArgumentCaptor.firstValue.params)
+            assertEquals(params["email_address"], email)
         }
 
     private fun verifyFraudDetectionDataAndAnalyticsRequests(

@@ -15,7 +15,6 @@ import com.stripe.android.link.injection.SignUpViewModelSubcomponent
 import com.stripe.android.link.repositories.LinkRepository
 import com.stripe.android.ui.core.elements.EmailSpec
 import com.stripe.android.ui.core.elements.SectionFieldElement
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -44,7 +43,7 @@ internal class SignUpViewModel @Inject internal constructor(
     /**
      * Emits the email entered in the form if valid, null otherwise.
      */
-    val consumerEmail: Flow<String?> = emailElement.getFormFieldValueFlow().map {
+    private val consumerEmail: Flow<String?> = emailElement.getFormFieldValueFlow().map {
         it.firstOrNull()?.second?.let { formFieldEntry ->
             if (formFieldEntry.isComplete) {
                 formFieldEntry.value
@@ -66,7 +65,7 @@ internal class SignUpViewModel @Inject internal constructor(
                 lookupJob?.cancel()
 
                 if (email != null) {
-                    lookupJob = CoroutineScope(workContext).launch {
+                    lookupJob = launch {
                         delay(LOOKUP_DEBOUNCE_MS)
                         if (isActive) {
                             _signUpStatus.value = SignUpStatus.VerifyingEmail
@@ -146,7 +145,7 @@ internal class SignUpViewModel @Inject internal constructor(
 
     companion object {
         // How long to wait (in milliseconds) before triggering a call to lookup the email
-        private const val LOOKUP_DEBOUNCE_MS = 700L
+        const val LOOKUP_DEBOUNCE_MS = 700L
     }
 }
 

@@ -58,6 +58,7 @@ public final class com/stripe/android/link/LinkPaymentLauncher {
 	public static final field $stable I
 	public fun <init> (Landroidx/activity/result/ActivityResultLauncher;Landroid/content/Context;Ljava/util/Set;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;ZLkotlin/coroutines/CoroutineContext;Lcom/stripe/android/networking/PaymentAnalyticsRequestFactory;Lcom/stripe/android/core/networking/AnalyticsRequestExecutor;Lcom/stripe/android/networking/StripeRepository;)V
 	public final fun present (Ljava/lang/String;Ljava/lang/String;)V
+	public static synthetic fun present$default (Lcom/stripe/android/link/LinkPaymentLauncher;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)V
 }
 
 public final class com/stripe/android/link/LinkPaymentLauncher_Factory {

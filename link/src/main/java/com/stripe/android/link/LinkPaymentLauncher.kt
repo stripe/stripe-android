@@ -74,7 +74,7 @@ class LinkPaymentLauncher @AssistedInject constructor(
 
     fun present(
         merchantName: String,
-        customerEmail: String?
+        customerEmail: String? = null
     ) {
         activityResultLauncher.launch(
             LinkActivityContract.Args(

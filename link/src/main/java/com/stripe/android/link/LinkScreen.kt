@@ -1,5 +1,8 @@
 package com.stripe.android.link
 
+/**
+ * All Link screens.
+ */
 internal sealed class LinkScreen(
     val name: String
 ) {
