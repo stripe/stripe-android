@@ -5,19 +5,6 @@ public final class com/stripe/android/identity/BuildConfig {
 	public fun <init> ()V
 }
 
-public final class com/stripe/android/identity/IdentityActivity : androidx/appcompat/app/AppCompatActivity {
-	public static final field Companion Lcom/stripe/android/identity/IdentityActivity$Companion;
-	public field identityVerificationSheet Lcom/stripe/android/identity/IdentityVerificationSheet;
-	public fun <init> ()V
-	public final fun getIdentityVerificationSheet ()Lcom/stripe/android/identity/IdentityVerificationSheet;
-	public final fun setIdentityVerificationSheet (Lcom/stripe/android/identity/IdentityVerificationSheet;)V
-	public final fun startVerification ()V
-}
-
-public final class com/stripe/android/identity/IdentityActivity$Companion {
-	public final fun start (Landroid/content/Context;)V
-}
-
 public abstract interface class com/stripe/android/identity/IdentityVerificationSheet {
 	public static final field Companion Lcom/stripe/android/identity/IdentityVerificationSheet$Companion;
 	public abstract fun present (Ljava/lang/String;Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
@@ -68,13 +55,5 @@ public final class com/stripe/android/identity/IdentityVerificationSheet$Verific
 public final class com/stripe/android/identity/StripeIdentityVerificationSheet : com/stripe/android/identity/IdentityVerificationSheet {
 	public fun <init> ()V
 	public fun present (Ljava/lang/String;Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
-}
-
-public final class com/stripe/android/identity/databinding/ToyMainBinding : androidx/viewbinding/ViewBinding {
-	public static fun bind (Landroid/view/View;)Lcom/stripe/android/identity/databinding/ToyMainBinding;
-	public synthetic fun getRoot ()Landroid/view/View;
-	public fun getRoot ()Landroid/widget/LinearLayout;
-	public static fun inflate (Landroid/view/LayoutInflater;)Lcom/stripe/android/identity/databinding/ToyMainBinding;
-	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Z)Lcom/stripe/android/identity/databinding/ToyMainBinding;
 }
 
