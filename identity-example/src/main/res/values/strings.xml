@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">Stripe Identity Example</string>
+    <string name="start_verification">Start Verification</string>
+</resources>

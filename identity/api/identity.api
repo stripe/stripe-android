@@ -1,0 +1,80 @@
+public final class com/stripe/android/identity/BuildConfig {
+	public static final field BUILD_TYPE Ljava/lang/String;
+	public static final field DEBUG Z
+	public static final field LIBRARY_PACKAGE_NAME Ljava/lang/String;
+	public fun <init> ()V
+}
+
+public final class com/stripe/android/identity/IdentityActivity : androidx/appcompat/app/AppCompatActivity {
+	public static final field Companion Lcom/stripe/android/identity/IdentityActivity$Companion;
+	public field identityVerificationSheet Lcom/stripe/android/identity/IdentityVerificationSheet;
+	public fun <init> ()V
+	public final fun getIdentityVerificationSheet ()Lcom/stripe/android/identity/IdentityVerificationSheet;
+	public final fun setIdentityVerificationSheet (Lcom/stripe/android/identity/IdentityVerificationSheet;)V
+	public final fun startVerification ()V
+}
+
+public final class com/stripe/android/identity/IdentityActivity$Companion {
+	public final fun start (Landroid/content/Context;)V
+}
+
+public abstract interface class com/stripe/android/identity/IdentityVerificationSheet {
+	public static final field Companion Lcom/stripe/android/identity/IdentityVerificationSheet$Companion;
+	public abstract fun present (Ljava/lang/String;Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
+}
+
+public final class com/stripe/android/identity/IdentityVerificationSheet$Companion {
+	public final fun create (Landroidx/activity/ComponentActivity;Lcom/stripe/android/identity/IdentityVerificationSheet$Configuration;)Lcom/stripe/android/identity/IdentityVerificationSheet;
+}
+
+public final class com/stripe/android/identity/IdentityVerificationSheet$Configuration {
+	public fun <init> (ILjava/lang/String;)V
+	public final fun component1 ()I
+	public final fun component2 ()Ljava/lang/String;
+	public final fun copy (ILjava/lang/String;)Lcom/stripe/android/identity/IdentityVerificationSheet$Configuration;
+	public static synthetic fun copy$default (Lcom/stripe/android/identity/IdentityVerificationSheet$Configuration;ILjava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/identity/IdentityVerificationSheet$Configuration;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getMerchantLogo ()I
+	public final fun getStripePublishableKey ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface class com/stripe/android/identity/IdentityVerificationSheet$VerificationResult : android/os/Parcelable {
+}
+
+public final class com/stripe/android/identity/IdentityVerificationSheet$VerificationResult$Canceled : com/stripe/android/identity/IdentityVerificationSheet$VerificationResult {
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public static final field INSTANCE Lcom/stripe/android/identity/IdentityVerificationSheet$VerificationResult$Canceled;
+	public fun describeContents ()I
+	public fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public final class com/stripe/android/identity/IdentityVerificationSheet$VerificationResult$Completed : com/stripe/android/identity/IdentityVerificationSheet$VerificationResult {
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public static final field INSTANCE Lcom/stripe/android/identity/IdentityVerificationSheet$VerificationResult$Completed;
+	public fun describeContents ()I
+	public fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public final class com/stripe/android/identity/IdentityVerificationSheet$VerificationResult$Failed : com/stripe/android/identity/IdentityVerificationSheet$VerificationResult {
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public fun <init> (Ljava/lang/Throwable;)V
+	public fun describeContents ()I
+	public final fun getThrowable ()Ljava/lang/Throwable;
+	public fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public final class com/stripe/android/identity/StripeIdentityVerificationSheet : com/stripe/android/identity/IdentityVerificationSheet {
+	public fun <init> ()V
+	public fun present (Ljava/lang/String;Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
+}
+
+public final class com/stripe/android/identity/databinding/ToyMainBinding : androidx/viewbinding/ViewBinding {
+	public static fun bind (Landroid/view/View;)Lcom/stripe/android/identity/databinding/ToyMainBinding;
+	public synthetic fun getRoot ()Landroid/view/View;
+	public fun getRoot ()Landroid/widget/LinearLayout;
+	public static fun inflate (Landroid/view/LayoutInflater;)Lcom/stripe/android/identity/databinding/ToyMainBinding;
+	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Z)Lcom/stripe/android/identity/databinding/ToyMainBinding;
+}
+
