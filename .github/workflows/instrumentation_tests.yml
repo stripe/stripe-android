@@ -3,6 +3,7 @@ on:
   schedule:
     # every 12 hours
     - cron: '0 */12 * * *'
+  pull_request:
 jobs:
   instrumentation-tests:
     name: Instrumentation tests
@@ -30,4 +31,4 @@ jobs:
         if: failure()
         with:
           name: instrumentation-test-report
-          path: example/build/reports/androidTests/connected/flavors/debugAndroidTest/
+          path: example/build/reports/androidTests/connected/index.html
