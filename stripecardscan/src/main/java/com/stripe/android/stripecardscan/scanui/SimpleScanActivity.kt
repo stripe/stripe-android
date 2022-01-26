@@ -144,7 +144,7 @@ internal abstract class SimpleScanActivity<ScanFlowParameters> : ScanActivity() 
     /**
      * The flow used to scan an item.
      */
-    internal abstract val scanFlow: ScanFlow<ScanFlowParameters>
+    internal abstract val scanFlow: ScanFlow<ScanFlowParameters, CameraPreviewImage<Bitmap>>
 
     /**
      * The scan flow parameters that will be populated.

@@ -13,7 +13,7 @@ import kotlinx.coroutines.flow.Flow
  * A flow for scanning something. This manages the callbacks and lifecycle of the flow.
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-interface ScanFlow<Parameters> {
+interface ScanFlow<Parameters, DataType> {
 
     /**
      * Start the image processing flow for scanning a card.
@@ -27,7 +27,7 @@ interface ScanFlow<Parameters> {
      */
     fun startFlow(
         context: Context,
-        imageStream: Flow<CameraPreviewImage<Bitmap>>,
+        imageStream: Flow<DataType>,
         viewFinder: Rect,
         lifecycleOwner: LifecycleOwner,
         coroutineScope: CoroutineScope,
