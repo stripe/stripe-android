@@ -16,7 +16,7 @@ import com.stripe.android.stripecardscan.payment.ml.CardDetect
 import com.stripe.android.stripecardscan.payment.ml.CardDetectModelManager
 import com.stripe.android.stripecardscan.payment.ml.SSDOcr
 import com.stripe.android.stripecardscan.payment.ml.SSDOcrModelManager
-import com.stripe.android.stripecardscan.scanui.ScanFlow
+import com.stripe.android.camera.scanui.ScanFlow
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job

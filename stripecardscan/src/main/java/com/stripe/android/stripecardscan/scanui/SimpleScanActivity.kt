@@ -18,6 +18,7 @@ import androidx.core.content.ContextCompat
 import com.stripe.android.camera.scanui.CameraView
 import com.stripe.android.stripecardscan.R
 import com.stripe.android.camera.CameraPreviewImage
+import com.stripe.android.camera.scanui.ScanFlow
 import com.stripe.android.camera.scanui.ViewFinderBackground
 import com.stripe.android.stripecardscan.framework.Config
 import com.stripe.android.stripecardscan.framework.util.getSdkVersion
