@@ -3,7 +3,6 @@ on:
   schedule:
     # every 12 hours
     - cron: '0 */12 * * *'
-  pull_request:
 jobs:
   instrumentation-tests:
     name: Instrumentation tests
