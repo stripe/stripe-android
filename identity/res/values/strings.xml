@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="text_with_link">
+        <a href="https://google.com">This is some text with a link to url with colorPrimary</a>
+    </string>
+
+</resources>
