@@ -12,8 +12,6 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
-@Ignore("Failing tests")
-// TODO(awush-stripe): Fix and re-enable tests
 class BitmapExtensionsTest {
 
     private val testResources = InstrumentationRegistry.getInstrumentation().context.resources
@@ -25,8 +23,11 @@ class BitmapExtensionsTest {
         val bitmap = testResources.getDrawable(R.drawable.ocr_card_numbers, null)
             .toBitmap()
         assertNotNull(bitmap)
-        assertEquals(600, bitmap.width, "Bitmap width is not expected")
-        assertEquals(375, bitmap.height, "Bitmap height is not expected")
+        // we use modulus division because some android devices scale up the bitmap size for display
+        // purposes. This does not affect camera image processing, only reading images from
+        // resources.
+        assertEquals(0, bitmap.width % 600, "Bitmap width is not expected")
+        assertEquals(0, bitmap.height % 375, "Bitmap height is not expected")
 
         // scale the bitmap
         val scaledBitmap = bitmap.scale(0.2F)
@@ -56,8 +57,11 @@ class BitmapExtensionsTest {
         val bitmap = testResources.getDrawable(R.drawable.ocr_card_numbers, null)
             .toBitmap()
         assertNotNull(bitmap)
-        assertEquals(600, bitmap.width, "Bitmap width is not expected")
-        assertEquals(375, bitmap.height, "Bitmap height is not expected")
+        // we use modulus division because some android devices scale up the bitmap size for display
+        // purposes. This does not affect camera image processing, only reading images from
+        // resources.
+        assertEquals(0, bitmap.width % 600, "Bitmap width is not expected")
+        assertEquals(0, bitmap.height % 375, "Bitmap height is not expected")
 
         // crop the bitmap
         val croppedBitmap = bitmap.crop(
