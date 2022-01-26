@@ -22,7 +22,10 @@ jobs:
           api-level: 29
           arch: x86
           disable-animations: true
-          script: ./gradlew connectedAndroidTest
+          script: |
+            adb logcat -c
+            adb logcat &
+            ./gradlew connectedAndroidTest
         env:
           STRIPE_EXAMPLE_BACKEND_URL: ${{ secrets.STRIPE_EXAMPLE_BACKEND_URL }}
           STRIPE_EXAMPLE_PUBLISHABLE_KEY: ${{ secrets.STRIPE_EXAMPLE_PUBLISHABLE_KEY }}
