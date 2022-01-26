@@ -16,6 +16,7 @@ import com.stripe.android.paymentsheet.example.playground.model.CheckoutMode
 import com.stripe.android.paymentsheet.example.playground.viewmodel.PaymentSheetPlaygroundViewModel
 import com.stripe.android.paymentsheet.model.PaymentOption
 import kotlinx.coroutines.launch
+import com.stripe.android.paymentsheet.example.playground.model.Toggle
 
 internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
     private val viewBinding by lazy {
@@ -82,6 +83,18 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
             ::onPaymentSheetResult
         )
         val backendUrl = Settings(this).playgroundBackendUrl
+
+        viewBinding.resetDefaultsButton.setOnClickListener {
+            setToggles(
+                Toggle.Customer.default.toString(),
+                Toggle.GooglePay.default as Boolean,
+                Toggle.Currency.default.toString(),
+                Toggle.Mode.default.toString(),
+                Toggle.SetShippingAddress.default as Boolean,
+                Toggle.SetAutomaticPaymentMethods.default as Boolean
+            )
+        }
+
         viewBinding.reloadButton.setOnClickListener {
             lifecycleScope.launch {
                 viewModel.prepareCheckout(
@@ -129,6 +142,51 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
         }
 
         disableViews()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        val (customer, googlePay, currency, mode, setShippingAddress, setAutomaticPaymentMethods) = viewModel.getSavedToggleState()
+        setToggles(customer, googlePay, currency, mode, setShippingAddress, setAutomaticPaymentMethods)
+    }
+
+    override fun onPause() {
+        super.onPause()
+        viewModel.storeToggleState(customer.value, googlePayConfig != null, currency.value, mode.value, setShippingAddress, setAutomaticPaymentMethods)
+    }
+
+    private fun setToggles(customer: String?, googlePay: Boolean, currency: String?, mode: String?, setShippingAddress: Boolean, setAutomaticPaymentMethods: Boolean) {
+        when (customer) {
+            CheckoutCustomer.Guest.value -> viewBinding.customerRadioGroup.check(R.id.guest_customer_button)
+            CheckoutCustomer.New.value -> viewBinding.customerRadioGroup.check(R.id.new_customer_button)
+            else -> viewBinding.customerRadioGroup.check(R.id.returning_customer_button)
+        }
+
+        when (googlePay) {
+            true -> viewBinding.googlePayRadioGroup.check(R.id.google_pay_on_button)
+            false -> viewBinding.googlePayRadioGroup.check(R.id.google_pay_off_button)
+        }
+
+        when (currency) {
+            CheckoutCurrency.USD.value -> viewBinding.currencyRadioGroup.check(R.id.currency_usd_button)
+            else -> viewBinding.currencyRadioGroup.check(R.id.currency_eur_button)
+        }
+
+        when (mode) {
+            CheckoutMode.Payment.value -> viewBinding.modeRadioGroup.check(R.id.mode_payment_button)
+            CheckoutMode.PaymentWithSetup.value -> viewBinding.modeRadioGroup.check(R.id.mode_payment_with_setup_button)
+            else -> viewBinding.modeRadioGroup.check(R.id.mode_setup_button)
+        }
+
+        when (setShippingAddress) {
+            true -> viewBinding.shippingRadioGroup.check(R.id.shipping_on_button)
+            false -> viewBinding.shippingRadioGroup.check(R.id.shipping_off_button)
+        }
+
+        when (setAutomaticPaymentMethods) {
+            true -> viewBinding.automaticPmGroup.check(R.id.automatic_pm_on_button)
+            false -> viewBinding.automaticPmGroup.check(R.id.automatic_pm_off_button)
+        }
     }
 
     private fun disableViews() {
@@ -232,5 +290,6 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
 
     companion object {
         private const val merchantName = "Example, Inc."
+        private const val sharedPreferencesName = "playgroundToggles"
     }
 }
