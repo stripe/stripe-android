@@ -15,5 +15,10 @@
             android:name=".cardimageverification.CardImageVerificationActivity"
             android:screenOrientation="nosensor"
             android:theme="@style/stripeDefaultTheme" />
+
+        <activity
+            android:name=".cardscan.CardScanActivity"
+            android:screenOrientation="nosensor"
+            android:theme="@style/stripeDefaultTheme" />
     </application>
 </manifest>
