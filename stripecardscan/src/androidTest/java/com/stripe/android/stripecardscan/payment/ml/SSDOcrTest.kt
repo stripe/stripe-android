@@ -10,7 +10,6 @@ import com.stripe.android.stripecardscan.framework.image.size
 import com.stripe.android.stripecardscan.framework.util.toRect
 import com.stripe.android.stripecardscan.test.R
 import kotlinx.coroutines.runBlocking
-import org.junit.Ignore
 import org.junit.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull

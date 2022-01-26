@@ -19,7 +19,6 @@ import com.stripe.android.stripecardscan.framework.image.zoom
 import com.stripe.android.stripecardscan.framework.util.centerOn
 import com.stripe.android.stripecardscan.framework.util.toRect
 import com.stripe.android.stripecardscan.test.R
-import org.junit.Ignore
 import org.junit.Test
 import java.nio.ByteBuffer
 import kotlin.test.assertEquals
@@ -182,7 +181,12 @@ class ImageTest {
 
         for (y in 0 until croppedBitmap.height) {
             for (x in 0 until croppedBitmap.width) {
-                if (x < 100 || x > croppedBitmap.width - 100 || y < 100 || y > croppedBitmap.height - 100) {
+                if (
+                    x < 100 ||
+                    x > croppedBitmap.width - 100 ||
+                    y < 100 ||
+                    y > croppedBitmap.height - 100
+                ) {
                     val croppedPixel = croppedBitmap.getPixel(x, y)
                     assertEquals(Color.GRAY, croppedPixel, "Pixel $x, $y not gray")
                 }
