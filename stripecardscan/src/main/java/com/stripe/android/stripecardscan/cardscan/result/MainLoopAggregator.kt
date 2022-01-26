@@ -20,16 +20,16 @@ import kotlinx.coroutines.runBlocking
 internal class MainLoopAggregator(
     listener: AggregateResultListener<InterimResult, FinalResult>
 ) : ResultAggregator<
-        SSDOcr.Input,
-        MainLoopState,
-        SSDOcr.Prediction,
-        MainLoopAggregator.InterimResult,
-        MainLoopAggregator.FinalResult
-        >(
-        listener = listener,
-        initialState = MainLoopState.Initial(),
-        statsName = null, // TODO: when we want to collect this in scan stats, give this a name
-    ) {
+    SSDOcr.Input,
+    MainLoopState,
+    SSDOcr.Prediction,
+    MainLoopAggregator.InterimResult,
+    MainLoopAggregator.FinalResult
+    >(
+    listener = listener,
+    initialState = MainLoopState.Initial(),
+    statsName = null, // TODO: when we want to collect this in scan stats, give this a name
+) {
 
     internal data class FinalResult(
         val pan: String,

@@ -82,8 +82,8 @@ sealed interface CancellationReason : Parcelable {
 internal interface ScanResultListener {
 
     /**
-    * The scan completed.
-    */
+     * The scan completed.
+     */
     fun cardScanComplete(pan: String)
     /**
      * The user canceled the scan.
@@ -128,7 +128,7 @@ internal open class CameraErrorListenerImpl(
 }
 
 @Keep
-internal open class CardScanActivity: AppCompatActivity(), CoroutineScope {
+internal open class CardScanActivity : AppCompatActivity(), CoroutineScope {
 
     companion object {
         const val PERMISSION_REQUEST_CODE = 1200
@@ -286,7 +286,8 @@ internal open class CardScanActivity: AppCompatActivity(), CoroutineScope {
             cameraAdapter.changeCamera()
         }
         viewBinding.viewFinderBorder.setOnTouchListener { _, e ->
-            setFocus(PointF(e.x + viewBinding.viewFinderWindow.left, e.y + viewBinding.viewFinderWindow.top))
+            setFocus(PointF(e.x + viewBinding.viewFinderWindow.left,
+                e.y + viewBinding.viewFinderWindow.top))
             true
         }
 
@@ -387,7 +388,8 @@ internal open class CardScanActivity: AppCompatActivity(), CoroutineScope {
             ).roundToInt()
 
         listOf(viewBinding.viewFinderWindow, viewBinding.viewFinderBorder).forEach { view ->
-            (view.layoutParams as ViewGroup.MarginLayoutParams).updateMargins(viewFinderMargin, viewFinderMargin, viewFinderMargin, viewFinderMargin)
+            (view.layoutParams as ViewGroup.MarginLayoutParams)
+                .updateMargins(viewFinderMargin, viewFinderMargin, viewFinderMargin, viewFinderMargin)
         }
 
         viewBinding.viewFinderBackground.setViewFinderRect(viewBinding.viewFinderWindow.asRect())

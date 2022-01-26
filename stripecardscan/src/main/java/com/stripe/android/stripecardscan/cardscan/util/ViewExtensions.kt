@@ -80,4 +80,3 @@ internal fun Context.getFloatResource(@DimenRes id: Int): Float {
             "#0x${Integer.toHexString(value.type)} is not valid"
     )
 }
-
