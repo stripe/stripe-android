@@ -11,14 +11,12 @@ import android.graphics.PointF
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.os.Parcelable
 import android.provider.Settings
 import android.util.Log
 import android.util.Size
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
-import androidx.annotation.Keep
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -57,7 +55,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import kotlinx.parcelize.Parcelize
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.coroutines.CoroutineContext
 import kotlin.math.min
@@ -69,7 +66,7 @@ internal const val INTENT_PARAM_RESULT = "result"
 private val MINIMUM_RESOLUTION = Size(1067, 600) // minimum size of OCR
 private const val PERMISSION_RATIONALE_SHOWN = "permission_rationale_shown"
 
-internal interface CardScanResultListener: ScanResultListener {
+internal interface CardScanResultListener : ScanResultListener {
 
     /**
      * The scan completed.

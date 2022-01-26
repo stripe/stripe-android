@@ -107,5 +107,4 @@ internal abstract class CardScanFlow(
         mainLoopAnalyzerPool?.closeAllAnalyzers()
         mainLoopAnalyzerPool = null
     }
-
 }

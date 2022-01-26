@@ -1,13 +1,8 @@
 package com.stripe.android.stripecardscan.cardscan.result
 
-import com.stripe.android.stripecardscan.cardscan.SavedFrame
-import com.stripe.android.stripecardscan.cardscan.SavedFrameType
-import com.stripe.android.stripecardscan.cardscan.CardScanConfig
 import com.stripe.android.camera.framework.AggregateResultListener
 import com.stripe.android.camera.framework.ResultAggregator
-import com.stripe.android.stripecardscan.framework.util.FrameSaver
 import com.stripe.android.stripecardscan.payment.ml.SSDOcr
-import kotlinx.coroutines.runBlocking
 
 /**
  * Aggregate results from the main loop. Each frame will trigger an [InterimResult] to the
