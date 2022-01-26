@@ -393,7 +393,9 @@ internal open class CardScanActivity : AppCompatActivity(), CoroutineScope {
 
         listOf(viewBinding.viewFinderWindow, viewBinding.viewFinderBorder).forEach { view ->
             (view.layoutParams as ViewGroup.MarginLayoutParams)
-                .updateMargins(viewFinderMargin, viewFinderMargin, viewFinderMargin, viewFinderMargin)
+                .updateMargins(
+                    viewFinderMargin, viewFinderMargin, viewFinderMargin, viewFinderMargin
+                )
         }
 
         viewBinding.viewFinderBackground.setViewFinderRect(viewBinding.viewFinderWindow.asRect())
@@ -531,7 +533,8 @@ internal open class CardScanActivity : AppCompatActivity(), CoroutineScope {
      */
     private fun prepareCamera(onCameraReady: () -> Unit) {
         viewBinding.previewFrame.post {
-            viewBinding.viewFinderBackground.setViewFinderRect(viewBinding.viewFinderWindow.asRect())
+            viewBinding.viewFinderBackground
+                .setViewFinderRect(viewBinding.viewFinderWindow.asRect())
             onCameraReady()
         }
     }
@@ -639,7 +642,8 @@ internal open class CardScanActivity : AppCompatActivity(), CoroutineScope {
                     .setBackgroundColor(getColorByRes(R.color.stripeFoundBackground))
                 viewBinding.viewFinderWindow
                     .setBackgroundResource(R.drawable.stripe_card_background_found)
-                viewBinding.viewFinderBorder.startAnimation(R.drawable.stripe_card_border_found_long)
+                viewBinding.viewFinderBorder
+                    .startAnimation(R.drawable.stripe_card_border_found_long)
                 viewBinding.instructions.setText(R.string.stripe_card_scan_instructions)
                 viewBinding.instructions.show()
             }
