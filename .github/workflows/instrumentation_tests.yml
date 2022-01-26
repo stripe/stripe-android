@@ -9,14 +9,11 @@ jobs:
     runs-on: macos-latest
 
     steps:
-      - name: Setup Java 11
+      - uses: actions/checkout@v2
       - uses: actions/setup-java@v2
         with:
           distribution: 'zulu'
           java-version: '11'
-
-      - name: Checkout
-      - uses: actions/checkout@v2
 
       - name: Instrumentation tests
         uses: reactivecircus/android-emulator-runner@v2.22.0
