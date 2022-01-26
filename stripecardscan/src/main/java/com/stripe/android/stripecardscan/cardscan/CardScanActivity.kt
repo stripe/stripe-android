@@ -286,8 +286,12 @@ internal open class CardScanActivity : AppCompatActivity(), CoroutineScope {
             cameraAdapter.changeCamera()
         }
         viewBinding.viewFinderBorder.setOnTouchListener { _, e ->
-            setFocus(PointF(e.x + viewBinding.viewFinderWindow.left,
-                e.y + viewBinding.viewFinderWindow.top))
+            setFocus(
+                PointF(
+                    e.x + viewBinding.viewFinderWindow.left,
+                    e.y + viewBinding.viewFinderWindow.top
+                )
+            )
             true
         }
 
