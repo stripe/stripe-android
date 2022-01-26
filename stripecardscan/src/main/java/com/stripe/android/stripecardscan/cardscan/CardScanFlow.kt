@@ -63,9 +63,9 @@ internal abstract class CardScanFlow(
 
         mainLoopAggregator = MainLoopAggregator(
             listener = this@CardScanFlow
-        ).also { mainLoopOcrAggregator ->
+        ).also {
             // make this result aggregator pause and reset when the lifecycle pauses.
-            mainLoopOcrAggregator.bindToLifecycle(lifecycleOwner)
+            it.bindToLifecycle(lifecycleOwner)
 
             val analyzerPool = AnalyzerPool.of(
                 SSDOcr.Factory(
@@ -81,7 +81,7 @@ internal abstract class CardScanFlow(
 
             mainLoop = ProcessBoundAnalyzerLoop(
                 analyzerPool = analyzerPool,
-                resultHandler = mainLoopOcrAggregator,
+                resultHandler = it,
                 analyzerLoopErrorListener = scanErrorListener,
                 statsName = null, // TODO: change this if we want to collect as part of scanstats
             ).apply {
@@ -108,19 +108,4 @@ internal abstract class CardScanFlow(
         mainLoopAnalyzerPool = null
     }
 
-    fun cancelFlow() {
-        canceled = true
-
-        mainLoopAggregator?.run { cancel() }
-        mainLoopAggregator = null
-
-        mainLoop?.unsubscribe()
-        mainLoop = null
-
-        mainLoopAnalyzerPool?.closeAllAnalyzers()
-        mainLoopAnalyzerPool = null
-
-        mainLoopJob?.apply { if (isActive) { cancel() } }
-        mainLoopJob = null
-    }
 }

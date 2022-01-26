@@ -36,19 +36,21 @@ import com.stripe.android.stripecardscan.cardscan.exception.InvalidStripePublish
 import com.stripe.android.stripecardscan.cardscan.exception.UnknownScanException
 import com.stripe.android.stripecardscan.cardscan.result.MainLoopAggregator
 import com.stripe.android.stripecardscan.cardscan.result.MainLoopState
-import com.stripe.android.stripecardscan.cardscan.util.asRect
-import com.stripe.android.stripecardscan.cardscan.util.getColorByRes
-import com.stripe.android.stripecardscan.cardscan.util.getFloatResource
-import com.stripe.android.stripecardscan.cardscan.util.hide
-import com.stripe.android.stripecardscan.cardscan.util.setDrawable
-import com.stripe.android.stripecardscan.cardscan.util.setVisible
-import com.stripe.android.stripecardscan.cardscan.util.show
-import com.stripe.android.stripecardscan.cardscan.util.startAnimation
 import com.stripe.android.stripecardscan.databinding.ActivityCardscanBinding
 import com.stripe.android.stripecardscan.framework.Config
 import com.stripe.android.stripecardscan.framework.StorageFactory
 import com.stripe.android.stripecardscan.framework.util.getAppPackageName
 import com.stripe.android.stripecardscan.payment.card.ScannedCard
+import com.stripe.android.stripecardscan.scanui.CancellationReason
+import com.stripe.android.stripecardscan.scanui.ScanResultListener
+import com.stripe.android.stripecardscan.scanui.util.asRect
+import com.stripe.android.stripecardscan.scanui.util.getColorByRes
+import com.stripe.android.stripecardscan.scanui.util.getFloatResource
+import com.stripe.android.stripecardscan.scanui.util.hide
+import com.stripe.android.stripecardscan.scanui.util.setDrawable
+import com.stripe.android.stripecardscan.scanui.util.startAnimation
+import com.stripe.android.stripecardscan.scanui.util.setVisible
+import com.stripe.android.stripecardscan.scanui.util.show
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -67,39 +69,18 @@ internal const val INTENT_PARAM_RESULT = "result"
 private val MINIMUM_RESOLUTION = Size(1067, 600) // minimum size of OCR
 private const val PERMISSION_RATIONALE_SHOWN = "permission_rationale_shown"
 
-sealed interface CancellationReason : Parcelable {
-
-    @Parcelize
-    object Closed : CancellationReason
-
-    @Parcelize
-    object Back : CancellationReason
-
-    @Parcelize
-    object CameraPermissionDenied : CancellationReason
-}
-
-internal interface ScanResultListener {
+internal interface CardScanResultListener: ScanResultListener {
 
     /**
      * The scan completed.
      */
-    fun cardScanComplete(pan: String)
-    /**
-     * The user canceled the scan.
-     */
-    fun userCanceled(reason: CancellationReason)
-
-    /**
-     * The scan failed because of an error.
-     */
-    fun failed(cause: Throwable?)
+    fun cardScanComplete(card: ScannedCard)
 }
 
 /**
  * A basic implementation that displays error messages when there is a problem with the camera.
  */
-internal open class CameraErrorListenerImpl(
+private class CameraErrorListenerImpl(
     protected val context: Context,
     protected val callback: (Throwable?) -> Unit
 ) : CameraErrorListener {
@@ -127,8 +108,7 @@ internal open class CameraErrorListenerImpl(
     }
 }
 
-@Keep
-internal open class CardScanActivity : AppCompatActivity(), CoroutineScope {
+internal class CardScanActivity : AppCompatActivity(), CoroutineScope {
 
     companion object {
         const val PERMISSION_REQUEST_CODE = 1200
@@ -140,8 +120,7 @@ internal open class CardScanActivity : AppCompatActivity(), CoroutineScope {
      */
     abstract class ScanState(val isFinal: Boolean) {
         object NotFound : ScanState(isFinal = false)
-        object FoundShort : ScanState(isFinal = false)
-        object FoundLong : ScanState(isFinal = false)
+        object Found : ScanState(isFinal = false)
         object Correct : ScanState(isFinal = true)
     }
 
@@ -178,16 +157,16 @@ internal open class CardScanActivity : AppCompatActivity(), CoroutineScope {
     /**
      * The listener which handles results from the scan.
      */
-    private val resultListener: ScanResultListener =
-        object : ScanResultListener {
+    private val resultListener: CardScanResultListener =
+        object : CardScanResultListener {
 
-            override fun cardScanComplete(pan: String) {
+            override fun cardScanComplete(card: ScannedCard) {
                 val intent = Intent()
                     .putExtra(
                         INTENT_PARAM_RESULT,
                         CardScanSheetResult.Completed(
                             ScannedCard(
-                                pan = pan
+                                pan = card.pan
                             )
                         )
                     )
@@ -230,7 +209,7 @@ internal open class CardScanActivity : AppCompatActivity(), CoroutineScope {
                 launch(Dispatchers.Main) {
                     changeScanState(ScanState.Correct)
                     cameraAdapter.unbindFromLifecycle(this@CardScanActivity)
-                    resultListener.cardScanComplete(result.pan)
+                    resultListener.cardScanComplete(ScannedCard(result.pan))
                 }.let { }
             }
 
@@ -249,7 +228,7 @@ internal open class CardScanActivity : AppCompatActivity(), CoroutineScope {
 
                 when (result.state) {
                     is MainLoopState.Initial -> changeScanState(ScanState.NotFound)
-                    is MainLoopState.OcrFound -> changeScanState(ScanState.FoundLong)
+                    is MainLoopState.OcrFound -> changeScanState(ScanState.Found)
                     is MainLoopState.Finished -> changeScanState(ScanState.Correct)
                 }
             }.let { }
@@ -592,28 +571,10 @@ internal open class CardScanActivity : AppCompatActivity(), CoroutineScope {
             scanFailure(InvalidStripePublishableKeyException("Missing publishable key"))
             false
         }
-//        params.cardImageVerificationIntentId.isEmpty() -> {
-//            scanFailure(InvalidCivException("Missing card image verification ID"))
-//            false
-//        }
-//        params.cardImageVerificationIntentSecret.isEmpty() -> {
-//            scanFailure(InvalidCivException("Missing card image verification client secret"))
-//            false
-//        }
         else -> true
     }
 
     private fun closeScanner() {
-//        uploadScanStats(
-//            stripePublishableKey = params.stripePublishableKey,
-//            civId = params.cardImageVerificationIntentId,
-//            civSecret = params.cardImageVerificationIntentSecret,
-//            instanceId = Stats.instanceId,
-//            scanId = Stats.scanId,
-//            device = Device.fromContext(this),
-//            appDetails = AppDetails.fromContext(this),
-//            scanStatistics = ScanStatistics.fromStats()
-//        )
         setFlashlightState(false)
         finish()
     }
@@ -628,22 +589,12 @@ internal open class CardScanActivity : AppCompatActivity(), CoroutineScope {
                 viewBinding.viewFinderBorder.startAnimation(R.drawable.stripe_card_border_not_found)
                 viewBinding.instructions.setText(R.string.stripe_card_scan_instructions)
             }
-            is ScanState.FoundShort -> {
+            is ScanState.Found -> {
                 viewBinding.viewFinderBackground
                     .setBackgroundColor(getColorByRes(R.color.stripeFoundBackground))
                 viewBinding.viewFinderWindow
                     .setBackgroundResource(R.drawable.stripe_card_background_found)
                 viewBinding.viewFinderBorder.startAnimation(R.drawable.stripe_card_border_found)
-                viewBinding.instructions.setText(R.string.stripe_card_scan_instructions)
-                viewBinding.instructions.show()
-            }
-            is ScanState.FoundLong -> {
-                viewBinding.viewFinderBackground
-                    .setBackgroundColor(getColorByRes(R.color.stripeFoundBackground))
-                viewBinding.viewFinderWindow
-                    .setBackgroundResource(R.drawable.stripe_card_background_found)
-                viewBinding.viewFinderBorder
-                    .startAnimation(R.drawable.stripe_card_border_found_long)
                 viewBinding.instructions.setText(R.string.stripe_card_scan_instructions)
                 viewBinding.instructions.show()
             }

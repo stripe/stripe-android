@@ -32,8 +32,7 @@ internal class MainLoopAggregator(
 ) {
 
     internal data class FinalResult(
-        val pan: String,
-        val savedFrames: Map<SavedFrameType, List<SavedFrame>>,
+        val pan: String
     )
 
     internal data class InterimResult(
@@ -41,21 +40,6 @@ internal class MainLoopAggregator(
         val frame: SSDOcr.Input,
         val state: MainLoopState,
     )
-
-    private val frameSaver = object : FrameSaver<SavedFrameType, SavedFrame, InterimResult>() {
-        override fun getMaxSavedFrames(savedFrameIdentifier: SavedFrameType): Int =
-            CardScanConfig.MAX_SAVED_FRAMES_PER_TYPE
-        override fun getSaveFrameIdentifier(
-            frame: SavedFrame,
-            metaData: InterimResult,
-        ): SavedFrameType? {
-
-            return when {
-                metaData.analyzerResult.pan.isNullOrEmpty() -> SavedFrameType(hasOcr = false)
-                else -> SavedFrameType(hasOcr = true)
-            }
-        }
-    }
 
     override suspend fun aggregateResult(
         frame: SSDOcr.Input,
@@ -72,24 +56,10 @@ internal class MainLoopAggregator(
             state = currentState,
         )
 
-        val savedFrame = SavedFrame(
-            hasOcr = result.pan?.isNotEmpty() == true,
-            frame = frame,
-        )
-
-        frameSaver.saveFrame(savedFrame, interimResult)
-
         return if (currentState is MainLoopState.Finished) {
-            val savedFrames = frameSaver.getSavedFrames()
-            frameSaver.reset()
-            interimResult to FinalResult(currentState.pan, savedFrames)
+            interimResult to FinalResult(currentState.pan)
         } else {
             interimResult to null
         }
-    }
-
-    override fun reset() {
-        super.reset()
-        runBlocking { frameSaver.reset() }
     }
 }

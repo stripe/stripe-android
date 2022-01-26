@@ -24,10 +24,4 @@ object CardScanConfig {
      */
     @JvmStatic
     var DESIRED_OCR_AGREEMENT = 3
-
-    /**
-     * The maximum number of saved frames per type to use.
-     */
-    @JvmStatic
-    var MAX_SAVED_FRAMES_PER_TYPE = 6
 }
