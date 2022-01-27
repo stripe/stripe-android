@@ -39,6 +39,7 @@ import com.stripe.android.stripecardscan.framework.Config
 import com.stripe.android.stripecardscan.framework.StorageFactory
 import com.stripe.android.stripecardscan.framework.util.getAppPackageName
 import com.stripe.android.stripecardscan.payment.card.ScannedCard
+import com.stripe.android.stripecardscan.scanui.CameraErrorListenerImpl
 import com.stripe.android.stripecardscan.scanui.CancellationReason
 import com.stripe.android.stripecardscan.scanui.ScanResultListener
 import com.stripe.android.stripecardscan.scanui.util.asRect
@@ -74,38 +75,7 @@ internal interface CardScanResultListener : ScanResultListener {
     fun cardScanComplete(card: ScannedCard)
 }
 
-/**
- * A basic implementation that displays error messages when there is a problem with the camera.
- */
-private class CameraErrorListenerImpl(
-    protected val context: Context,
-    protected val callback: (Throwable?) -> Unit
-) : CameraErrorListener {
-    override fun onCameraOpenError(cause: Throwable?) {
-        showCameraError(R.string.stripe_error_camera_open, cause)
-    }
-
-    override fun onCameraAccessError(cause: Throwable?) {
-        showCameraError(R.string.stripe_error_camera_access, cause)
-    }
-
-    override fun onCameraUnsupportedError(cause: Throwable?) {
-        Log.e(Config.logTag, "Camera not supported", cause)
-        showCameraError(R.string.stripe_error_camera_unsupported, cause)
-    }
-
-    private fun showCameraError(@StringRes message: Int, cause: Throwable?) {
-        AlertDialog.Builder(context)
-            .setTitle(R.string.stripe_error_camera_title)
-            .setMessage(message)
-            .setPositiveButton(R.string.stripe_error_camera_acknowledge_button) { _, _ ->
-                callback(cause)
-            }
-            .show()
-    }
-}
-
-internal class CardScanActivity : AppCompatActivity(), CoroutineScope {
+internal class CardScanActivity : AppCompatActivity(), SimpleScanStateful, CoroutineScope {
 
     companion object {
         const val PERMISSION_REQUEST_CODE = 1200
