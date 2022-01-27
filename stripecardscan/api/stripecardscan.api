@@ -110,42 +110,13 @@ public final class com/stripe/android/stripecardscan/cardimageverification/excep
 	public synthetic fun <init> (Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 }
 
-public abstract interface class com/stripe/android/stripecardscan/cardscan/CancellationReason : android/os/Parcelable {
-}
-
-public final class com/stripe/android/stripecardscan/cardscan/CancellationReason$Back : com/stripe/android/stripecardscan/cardscan/CancellationReason {
-	public static final field $stable I
-	public static final field CREATOR Landroid/os/Parcelable$Creator;
-	public static final field INSTANCE Lcom/stripe/android/stripecardscan/cardscan/CancellationReason$Back;
-	public fun describeContents ()I
-	public fun writeToParcel (Landroid/os/Parcel;I)V
-}
-
-public final class com/stripe/android/stripecardscan/cardscan/CancellationReason$CameraPermissionDenied : com/stripe/android/stripecardscan/cardscan/CancellationReason {
-	public static final field $stable I
-	public static final field CREATOR Landroid/os/Parcelable$Creator;
-	public static final field INSTANCE Lcom/stripe/android/stripecardscan/cardscan/CancellationReason$CameraPermissionDenied;
-	public fun describeContents ()I
-	public fun writeToParcel (Landroid/os/Parcel;I)V
-}
-
-public final class com/stripe/android/stripecardscan/cardscan/CancellationReason$Closed : com/stripe/android/stripecardscan/cardscan/CancellationReason {
-	public static final field $stable I
-	public static final field CREATOR Landroid/os/Parcelable$Creator;
-	public static final field INSTANCE Lcom/stripe/android/stripecardscan/cardscan/CancellationReason$Closed;
-	public fun describeContents ()I
-	public fun writeToParcel (Landroid/os/Parcel;I)V
-}
-
 public final class com/stripe/android/stripecardscan/cardscan/CardScanConfig {
 	public static final field $stable I
 	public static final field INSTANCE Lcom/stripe/android/stripecardscan/cardscan/CardScanConfig;
 	public static final fun getDESIRED_OCR_AGREEMENT ()I
-	public static final fun getMAX_SAVED_FRAMES_PER_TYPE ()I
 	public static final fun getNO_CARD_VISIBLE_DURATION_MILLIS ()I
 	public static final fun getOCR_SEARCH_DURATION_MILLIS ()I
 	public static final fun setDESIRED_OCR_AGREEMENT (I)V
-	public static final fun setMAX_SAVED_FRAMES_PER_TYPE (I)V
 	public static final fun setNO_CARD_VISIBLE_DURATION_MILLIS (I)V
 	public static final fun setOCR_SEARCH_DURATION_MILLIS (I)V
 }
@@ -168,13 +139,13 @@ public abstract interface class com/stripe/android/stripecardscan/cardscan/CardS
 public final class com/stripe/android/stripecardscan/cardscan/CardScanSheetResult$Canceled : com/stripe/android/stripecardscan/cardscan/CardScanSheetResult {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
-	public fun <init> (Lcom/stripe/android/stripecardscan/cardscan/CancellationReason;)V
-	public final fun component1 ()Lcom/stripe/android/stripecardscan/cardscan/CancellationReason;
-	public final fun copy (Lcom/stripe/android/stripecardscan/cardscan/CancellationReason;)Lcom/stripe/android/stripecardscan/cardscan/CardScanSheetResult$Canceled;
-	public static synthetic fun copy$default (Lcom/stripe/android/stripecardscan/cardscan/CardScanSheetResult$Canceled;Lcom/stripe/android/stripecardscan/cardscan/CancellationReason;ILjava/lang/Object;)Lcom/stripe/android/stripecardscan/cardscan/CardScanSheetResult$Canceled;
+	public fun <init> (Lcom/stripe/android/stripecardscan/scanui/CancellationReason;)V
+	public final fun component1 ()Lcom/stripe/android/stripecardscan/scanui/CancellationReason;
+	public final fun copy (Lcom/stripe/android/stripecardscan/scanui/CancellationReason;)Lcom/stripe/android/stripecardscan/cardscan/CardScanSheetResult$Canceled;
+	public static synthetic fun copy$default (Lcom/stripe/android/stripecardscan/cardscan/CardScanSheetResult$Canceled;Lcom/stripe/android/stripecardscan/scanui/CancellationReason;ILjava/lang/Object;)Lcom/stripe/android/stripecardscan/cardscan/CardScanSheetResult$Canceled;
 	public fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
-	public final fun getReason ()Lcom/stripe/android/stripecardscan/cardscan/CancellationReason;
+	public final fun getReason ()Lcom/stripe/android/stripecardscan/scanui/CancellationReason;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 	public fun writeToParcel (Landroid/os/Parcel;I)V
