@@ -408,6 +408,11 @@ public final class com/stripe/android/camera/scanui/CameraView : androidx/constr
 	public final fun getViewFinderWindowView ()Landroid/view/View;
 }
 
+public abstract interface class com/stripe/android/camera/scanui/ScanFlow {
+	public abstract fun cancelFlow ()V
+	public abstract fun startFlow (Landroid/content/Context;Lkotlinx/coroutines/flow/Flow;Landroid/graphics/Rect;Landroidx/lifecycle/LifecycleOwner;Lkotlinx/coroutines/CoroutineScope;Ljava/lang/Object;)V
+}
+
 public final class com/stripe/android/camera/scanui/ViewFinderBackground : android/view/View {
 	public fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;)V
 	public synthetic fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;ILkotlin/jvm/internal/DefaultConstructorMarker;)V

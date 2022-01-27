@@ -18,6 +18,7 @@ import androidx.core.content.ContextCompat
 import com.stripe.android.camera.scanui.CameraView
 import com.stripe.android.stripecardscan.R
 import com.stripe.android.camera.CameraPreviewImage
+import com.stripe.android.camera.scanui.ScanFlow
 import com.stripe.android.camera.scanui.ViewFinderBackground
 import com.stripe.android.stripecardscan.framework.Config
 import com.stripe.android.stripecardscan.framework.util.getSdkVersion
@@ -143,7 +144,7 @@ internal abstract class SimpleScanActivity<ScanFlowParameters> : ScanActivity() 
     /**
      * The flow used to scan an item.
      */
-    internal abstract val scanFlow: ScanFlow<ScanFlowParameters>
+    internal abstract val scanFlow: ScanFlow<ScanFlowParameters, CameraPreviewImage<Bitmap>>
 
     /**
      * The scan flow parameters that will be populated.

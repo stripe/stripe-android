@@ -1,11 +1,9 @@
-package com.stripe.android.stripecardscan.scanui
+package com.stripe.android.camera.scanui
 
 import android.content.Context
-import android.graphics.Bitmap
 import android.graphics.Rect
 import androidx.annotation.RestrictTo
 import androidx.lifecycle.LifecycleOwner
-import com.stripe.android.camera.CameraPreviewImage
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 
@@ -13,7 +11,7 @@ import kotlinx.coroutines.flow.Flow
  * A flow for scanning something. This manages the callbacks and lifecycle of the flow.
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-interface ScanFlow<Parameters> {
+interface ScanFlow<Parameters, DataType> {
 
     /**
      * Start the image processing flow for scanning a card.
@@ -27,7 +25,7 @@ interface ScanFlow<Parameters> {
      */
     fun startFlow(
         context: Context,
-        imageStream: Flow<CameraPreviewImage<Bitmap>>,
+        imageStream: Flow<DataType>,
         viewFinder: Rect,
         lifecycleOwner: LifecycleOwner,
         coroutineScope: CoroutineScope,

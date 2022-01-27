@@ -275,8 +275,3 @@ public final class com/stripe/android/stripecardscan/scanui/CancellationReason$U
 	public fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
-public abstract interface class com/stripe/android/stripecardscan/scanui/ScanFlow {
-	public abstract fun cancelFlow ()V
-	public abstract fun startFlow (Landroid/content/Context;Lkotlinx/coroutines/flow/Flow;Landroid/graphics/Rect;Landroidx/lifecycle/LifecycleOwner;Lkotlinx/coroutines/CoroutineScope;Ljava/lang/Object;)V
-}
-
