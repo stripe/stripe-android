@@ -2,7 +2,6 @@ package com.stripe.android.stripecardscan.cardscan
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.Resources
@@ -17,16 +16,13 @@ import android.util.Size
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
-import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.updateMargins
 import com.stripe.android.camera.CameraAdapter
-import com.stripe.android.camera.CameraErrorListener
 import com.stripe.android.camera.CameraPreviewImage
-import com.stripe.android.camera.framework.AnalyzerLoopErrorListener
 import com.stripe.android.camera.framework.Stats
 import com.stripe.android.stripecardscan.R
 import com.stripe.android.stripecardscan.camera.getCameraAdapter
@@ -41,7 +37,10 @@ import com.stripe.android.stripecardscan.framework.util.getAppPackageName
 import com.stripe.android.stripecardscan.payment.card.ScannedCard
 import com.stripe.android.stripecardscan.scanui.CameraErrorListenerImpl
 import com.stripe.android.stripecardscan.scanui.CancellationReason
+import com.stripe.android.stripecardscan.scanui.ScanErrorListener
 import com.stripe.android.stripecardscan.scanui.ScanResultListener
+import com.stripe.android.stripecardscan.scanui.SimpleScanStateful
+import com.stripe.android.stripecardscan.scanui.SimpleScanStateful.ScanState
 import com.stripe.android.stripecardscan.scanui.util.asRect
 import com.stripe.android.stripecardscan.scanui.util.getColorByRes
 import com.stripe.android.stripecardscan.scanui.util.getFloatResource
@@ -81,16 +80,6 @@ internal class CardScanActivity : AppCompatActivity(), SimpleScanStateful, Corou
         const val PERMISSION_REQUEST_CODE = 1200
     }
 
-    /**
-     * The state of the scan flow. This can be expanded if [displayState] is overridden to handle
-     * the added states.
-     */
-    abstract class ScanState(val isFinal: Boolean) {
-        object NotFound : ScanState(isFinal = false)
-        object Found : ScanState(isFinal = false)
-        object Correct : ScanState(isFinal = true)
-    }
-
     private val viewBinding by lazy {
         ActivityCardscanBinding.inflate(layoutInflater)
     }
@@ -116,10 +105,13 @@ internal class CardScanActivity : AppCompatActivity(), SimpleScanStateful, Corou
         CameraErrorListenerImpl(this) { t -> scanFailure(t) }
     }
 
-    private var scanStatePrevious: ScanState? = null
-    private var scanState: ScanState = ScanState.NotFound
-
     private val hasPreviousValidResult = AtomicBoolean(false)
+
+    override var scanState: ScanState = ScanState.NotFound
+
+    override var scanStatePrevious: ScanState? = null
+
+    override val scanErrorListener: ScanErrorListener = ScanErrorListener()
 
     /**
      * The listener which handles results from the scan.
@@ -195,7 +187,7 @@ internal class CardScanActivity : AppCompatActivity(), SimpleScanStateful, Corou
 
                 when (result.state) {
                     is MainLoopState.Initial -> changeScanState(ScanState.NotFound)
-                    is MainLoopState.OcrFound -> changeScanState(ScanState.Found)
+                    is MainLoopState.OcrFound -> changeScanState(ScanState.FoundShort)
                     is MainLoopState.Finished -> changeScanState(ScanState.Correct)
                 }
             }.let { }
@@ -248,6 +240,7 @@ internal class CardScanActivity : AppCompatActivity(), SimpleScanStateful, Corou
     override fun onResume() {
         super.onResume()
         hideSystemUi()
+        scanState = ScanState.NotFound
 
         launch {
             delay(1500)
@@ -459,7 +452,7 @@ internal class CardScanActivity : AppCompatActivity(), SimpleScanStateful, Corou
     /**
      * The scan has been closed by the user.
      */
-    protected open fun userClosedScanner() {
+    private fun userClosedScanner() {
         runBlocking { scanStat.trackResult("user_canceled") }
         resultListener.userCanceled(CancellationReason.Closed)
         closeScanner()
@@ -468,7 +461,7 @@ internal class CardScanActivity : AppCompatActivity(), SimpleScanStateful, Corou
     /**
      * The camera permission was denied.
      */
-    protected open fun userDeniedCameraPermission() {
+    private fun userDeniedCameraPermission() {
         runBlocking { scanStat.trackResult("user_canceled") }
         resultListener.userCanceled(CancellationReason.CameraPermissionDenied)
         closeScanner()
@@ -533,7 +526,7 @@ internal class CardScanActivity : AppCompatActivity(), SimpleScanStateful, Corou
             cameraErrorListener = cameraErrorListener,
         )
 
-    private fun ensureValidParams() = when {
+    override fun ensureValidParams() = when {
         params.stripePublishableKey.isEmpty() -> {
             scanFailure(InvalidStripePublishableKeyException("Missing publishable key"))
             false
@@ -546,7 +539,7 @@ internal class CardScanActivity : AppCompatActivity(), SimpleScanStateful, Corou
         finish()
     }
 
-    private fun displayState(newState: ScanState, previousState: ScanState?) {
+    override fun displayState(newState: ScanState, previousState: ScanState?) {
         when (newState) {
             is ScanState.NotFound -> {
                 viewBinding.viewFinderBackground
@@ -556,7 +549,7 @@ internal class CardScanActivity : AppCompatActivity(), SimpleScanStateful, Corou
                 viewBinding.viewFinderBorder.startAnimation(R.drawable.stripe_card_border_not_found)
                 viewBinding.instructions.setText(R.string.stripe_card_scan_instructions)
             }
-            is ScanState.Found -> {
+            is ScanState.FoundShort -> {
                 viewBinding.viewFinderBackground
                     .setBackgroundColor(getColorByRes(R.color.stripeFoundBackground))
                 viewBinding.viewFinderWindow
@@ -573,29 +566,6 @@ internal class CardScanActivity : AppCompatActivity(), SimpleScanStateful, Corou
                 viewBinding.viewFinderBorder.startAnimation(R.drawable.stripe_card_border_correct)
                 viewBinding.instructions.hide()
             }
-        }
-    }
-
-    private fun changeScanState(newState: ScanState): Boolean {
-        if (newState == scanStatePrevious || scanStatePrevious?.isFinal == true) {
-            return false
-        }
-
-        scanState = newState
-        displayState(newState, scanStatePrevious)
-        scanStatePrevious = newState
-        return true
-    }
-
-    private val scanErrorListener = object : AnalyzerLoopErrorListener {
-        override fun onAnalyzerFailure(t: Throwable): Boolean {
-            Log.e(Config.logTag, "Error executing analyzer", t)
-            return false
-        }
-
-        override fun onResultFailure(t: Throwable): Boolean {
-            Log.e(Config.logTag, "Error executing result", t)
-            return true
         }
     }
 }
