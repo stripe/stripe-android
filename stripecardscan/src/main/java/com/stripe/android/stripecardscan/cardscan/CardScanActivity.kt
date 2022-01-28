@@ -10,19 +10,24 @@ import android.util.Size
 import android.view.ViewGroup
 import androidx.core.view.updateMargins
 import com.stripe.android.camera.CameraPreviewImage
+import com.stripe.android.camera.framework.Stats
 import com.stripe.android.stripecardscan.R
 import com.stripe.android.stripecardscan.cardscan.exception.InvalidStripePublishableKeyException
 import com.stripe.android.stripecardscan.cardscan.exception.UnknownScanException
 import com.stripe.android.stripecardscan.cardscan.result.MainLoopAggregator
 import com.stripe.android.stripecardscan.cardscan.result.MainLoopState
 import com.stripe.android.stripecardscan.databinding.ActivityCardscanBinding
+import com.stripe.android.stripecardscan.framework.api.dto.ScanStatistics
+import com.stripe.android.stripecardscan.framework.api.uploadScanStats
+import com.stripe.android.stripecardscan.framework.util.AppDetails
+import com.stripe.android.stripecardscan.framework.util.Device
 import com.stripe.android.stripecardscan.payment.card.ScannedCard
 import com.stripe.android.stripecardscan.scanui.CancellationReason
 import com.stripe.android.stripecardscan.scanui.ScanActivity
 import com.stripe.android.stripecardscan.scanui.ScanErrorListener
 import com.stripe.android.stripecardscan.scanui.ScanResultListener
+import com.stripe.android.stripecardscan.scanui.ScanState
 import com.stripe.android.stripecardscan.scanui.SimpleScanStateful
-import com.stripe.android.stripecardscan.scanui.SimpleScanStateful.ScanState
 import com.stripe.android.stripecardscan.scanui.util.asRect
 import com.stripe.android.stripecardscan.scanui.util.getColorByRes
 import com.stripe.android.stripecardscan.scanui.util.getFloatResource
@@ -52,7 +57,13 @@ internal interface CardScanResultListener : ScanResultListener {
     fun cardScanComplete(card: ScannedCard)
 }
 
-internal class CardScanActivity : ScanActivity(), SimpleScanStateful {
+sealed class CardScanState(isFinal: Boolean) : ScanState(isFinal) {
+    object NotFound : CardScanState(isFinal = false)
+    object Found : CardScanState(isFinal = false)
+    object Correct : CardScanState(isFinal = true)
+}
+
+internal class CardScanActivity : ScanActivity(), SimpleScanStateful<CardScanState> {
 
     override val minimumAnalysisResolution = MINIMUM_RESOLUTION
 
@@ -71,7 +82,7 @@ internal class CardScanActivity : ScanActivity(), SimpleScanStateful {
 
     private val hasPreviousValidResult = AtomicBoolean(false)
 
-    override var scanState: ScanState = ScanState.NotFound
+    override var scanState: ScanState = CardScanState.NotFound
 
     override var scanStatePrevious: ScanState? = null
 
@@ -130,7 +141,7 @@ internal class CardScanActivity : ScanActivity(), SimpleScanStateful {
                 super.onResult(result)
 
                 launch(Dispatchers.Main) {
-                    changeScanState(ScanState.Correct)
+                    changeScanState(CardScanState.Correct)
                     cameraAdapter.unbindFromLifecycle(this@CardScanActivity)
                     resultListener.cardScanComplete(ScannedCard(result.pan))
                 }.let { }
@@ -150,14 +161,14 @@ internal class CardScanActivity : ScanActivity(), SimpleScanStateful {
                 }
 
                 when (result.state) {
-                    is MainLoopState.Initial -> changeScanState(ScanState.NotFound)
-                    is MainLoopState.OcrFound -> changeScanState(ScanState.Found)
-                    is MainLoopState.Finished -> changeScanState(ScanState.Correct)
+                    is MainLoopState.Initial -> changeScanState(CardScanState.NotFound)
+                    is MainLoopState.OcrFound -> changeScanState(CardScanState.Found)
+                    is MainLoopState.Finished -> changeScanState(CardScanState.Correct)
                 }
             }.let { }
 
             override suspend fun onReset() = launch(Dispatchers.Main) {
-                changeScanState(ScanState.NotFound)
+                changeScanState(CardScanState.NotFound)
             }.let { }
         }
     }
@@ -197,7 +208,7 @@ internal class CardScanActivity : ScanActivity(), SimpleScanStateful {
 
     override fun onResume() {
         super.onResume()
-        scanState = ScanState.NotFound
+        scanState = CardScanState.NotFound
     }
 
     override fun onDestroy() {
@@ -291,7 +302,7 @@ internal class CardScanActivity : ScanActivity(), SimpleScanStateful {
 
     override fun displayState(newState: ScanState, previousState: ScanState?) {
         when (newState) {
-            is ScanState.NotFound -> {
+            is CardScanState.NotFound -> {
                 viewBinding.viewFinderBackground
                     .setBackgroundColor(getColorByRes(R.color.stripeNotFoundBackground))
                 viewBinding.viewFinderWindow
@@ -299,7 +310,7 @@ internal class CardScanActivity : ScanActivity(), SimpleScanStateful {
                 viewBinding.viewFinderBorder.startAnimation(R.drawable.stripe_card_border_not_found)
                 viewBinding.instructions.setText(R.string.stripe_card_scan_instructions)
             }
-            is ScanState.Found -> {
+            is CardScanState.Found -> {
                 viewBinding.viewFinderBackground
                     .setBackgroundColor(getColorByRes(R.color.stripeFoundBackground))
                 viewBinding.viewFinderWindow
@@ -308,7 +319,7 @@ internal class CardScanActivity : ScanActivity(), SimpleScanStateful {
                 viewBinding.instructions.setText(R.string.stripe_card_scan_instructions)
                 viewBinding.instructions.show()
             }
-            is ScanState.Correct -> {
+            is CardScanState.Correct -> {
                 viewBinding.viewFinderBackground
                     .setBackgroundColor(getColorByRes(R.color.stripeCorrectBackground))
                 viewBinding.viewFinderWindow
@@ -317,5 +328,19 @@ internal class CardScanActivity : ScanActivity(), SimpleScanStateful {
                 viewBinding.instructions.hide()
             }
         }
+    }
+
+    override fun closeScanner() {
+        uploadScanStats(
+            stripePublishableKey = params.stripePublishableKey,
+            civId = "",
+            civSecret = "",
+            instanceId = Stats.instanceId,
+            scanId = Stats.scanId,
+            device = Device.fromContext(this),
+            appDetails = AppDetails.fromContext(this),
+            scanStatistics = ScanStatistics.fromStats()
+        )
+        super.closeScanner()
     }
 }

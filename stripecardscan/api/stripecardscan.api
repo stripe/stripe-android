@@ -88,6 +88,31 @@ public final class com/stripe/android/stripecardscan/cardimageverification/CardI
 	public fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
+public abstract class com/stripe/android/stripecardscan/cardimageverification/CardVerificationScanState : com/stripe/android/stripecardscan/scanui/ScanState {
+	public static final field $stable I
+	public synthetic fun <init> (ZLkotlin/jvm/internal/DefaultConstructorMarker;)V
+}
+
+public final class com/stripe/android/stripecardscan/cardimageverification/CardVerificationScanState$Correct : com/stripe/android/stripecardscan/cardimageverification/CardVerificationScanState {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/stripe/android/stripecardscan/cardimageverification/CardVerificationScanState$Correct;
+}
+
+public final class com/stripe/android/stripecardscan/cardimageverification/CardVerificationScanState$Found : com/stripe/android/stripecardscan/cardimageverification/CardVerificationScanState {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/stripe/android/stripecardscan/cardimageverification/CardVerificationScanState$Found;
+}
+
+public final class com/stripe/android/stripecardscan/cardimageverification/CardVerificationScanState$NotFound : com/stripe/android/stripecardscan/cardimageverification/CardVerificationScanState {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/stripe/android/stripecardscan/cardimageverification/CardVerificationScanState$NotFound;
+}
+
+public final class com/stripe/android/stripecardscan/cardimageverification/CardVerificationScanState$Wrong : com/stripe/android/stripecardscan/cardimageverification/CardVerificationScanState {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/stripe/android/stripecardscan/cardimageverification/CardVerificationScanState$Wrong;
+}
+
 public final class com/stripe/android/stripecardscan/cardimageverification/exception/InvalidCivException : java/lang/Exception {
 	public static final field $stable I
 	public fun <init> (Ljava/lang/String;)V
@@ -179,6 +204,26 @@ public final class com/stripe/android/stripecardscan/cardscan/CardScanSheetResul
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 	public fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public abstract class com/stripe/android/stripecardscan/cardscan/CardScanState : com/stripe/android/stripecardscan/scanui/ScanState {
+	public static final field $stable I
+	public synthetic fun <init> (ZLkotlin/jvm/internal/DefaultConstructorMarker;)V
+}
+
+public final class com/stripe/android/stripecardscan/cardscan/CardScanState$Correct : com/stripe/android/stripecardscan/cardscan/CardScanState {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/stripe/android/stripecardscan/cardscan/CardScanState$Correct;
+}
+
+public final class com/stripe/android/stripecardscan/cardscan/CardScanState$Found : com/stripe/android/stripecardscan/cardscan/CardScanState {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/stripe/android/stripecardscan/cardscan/CardScanState$Found;
+}
+
+public final class com/stripe/android/stripecardscan/cardscan/CardScanState$NotFound : com/stripe/android/stripecardscan/cardscan/CardScanState {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/stripe/android/stripecardscan/cardscan/CardScanState$NotFound;
 }
 
 public final class com/stripe/android/stripecardscan/cardscan/exception/InvalidStripePublishableKeyException : java/lang/Exception {
@@ -377,5 +422,11 @@ public final class com/stripe/android/stripecardscan/scanui/CancellationReason$U
 public abstract interface class com/stripe/android/stripecardscan/scanui/ScanFlow {
 	public abstract fun cancelFlow ()V
 	public abstract fun startFlow (Landroid/content/Context;Lkotlinx/coroutines/flow/Flow;Landroid/graphics/Rect;Landroidx/lifecycle/LifecycleOwner;Lkotlinx/coroutines/CoroutineScope;Ljava/lang/Object;)V
+}
+
+public abstract class com/stripe/android/stripecardscan/scanui/ScanState {
+	public static final field $stable I
+	public fun <init> (Z)V
+	public final fun isFinal ()Z
 }
 

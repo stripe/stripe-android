@@ -23,7 +23,8 @@ import kotlinx.coroutines.launch
 
 internal abstract class CardScanFlow(
     private val scanErrorListener: AnalyzerLoopErrorListener,
-) : ScanFlow<Unit?>, AggregateResultListener<MainLoopAggregator.InterimResult, MainLoopAggregator.FinalResult> {
+) : ScanFlow<Unit?>,
+    AggregateResultListener<MainLoopAggregator.InterimResult, MainLoopAggregator.FinalResult> {
 
     /**
      * If this is true, do not start the flow.
