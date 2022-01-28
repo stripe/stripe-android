@@ -563,7 +563,9 @@ internal open class CardImageVerificationActivity :
         }
 
         when (newState) {
-            is CardVerificationScanState.NotFound, CardVerificationScanState.Found, CardVerificationScanState.Wrong -> {
+            is CardVerificationScanState.NotFound,
+            CardVerificationScanState.Found,
+            CardVerificationScanState.Wrong -> {
                 processingOverlayView.hide()
                 processingSpinnerView.hide()
                 processingTextView.hide()
