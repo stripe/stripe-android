@@ -252,8 +252,10 @@ internal open class CardImageVerificationActivity :
                 when (result.state) {
                     is MainLoopState.Initial -> changeScanState(CardVerificationScanState.NotFound)
                     is MainLoopState.OcrFound -> changeScanState(CardVerificationScanState.Found)
-                    is MainLoopState.OcrSatisfied -> changeScanState(CardVerificationScanState.Found)
-                    is MainLoopState.CardSatisfied -> changeScanState(CardVerificationScanState.Found)
+                    is MainLoopState.OcrSatisfied ->
+                        changeScanState(CardVerificationScanState.Found)
+                    is MainLoopState.CardSatisfied ->
+                        changeScanState(CardVerificationScanState.Found)
                     is MainLoopState.WrongCard -> changeScanState(CardVerificationScanState.Wrong)
                     is MainLoopState.Finished -> changeScanState(CardVerificationScanState.Correct)
                 }
