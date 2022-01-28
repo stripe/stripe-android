@@ -1,42 +1,24 @@
 package com.stripe.android.stripecardscan.cardscan
 
-import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.content.res.Resources
 import android.graphics.Bitmap
 import android.graphics.PointF
-import android.net.Uri
-import android.os.Build
 import android.os.Bundle
-import android.provider.Settings
-import android.util.Log
 import android.util.Size
-import android.view.View
 import android.view.ViewGroup
-import android.view.WindowManager
-import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
 import androidx.core.view.updateMargins
-import com.stripe.android.camera.CameraAdapter
 import com.stripe.android.camera.CameraPreviewImage
-import com.stripe.android.camera.framework.Stats
 import com.stripe.android.stripecardscan.R
-import com.stripe.android.stripecardscan.camera.getCameraAdapter
 import com.stripe.android.stripecardscan.cardscan.exception.InvalidStripePublishableKeyException
 import com.stripe.android.stripecardscan.cardscan.exception.UnknownScanException
 import com.stripe.android.stripecardscan.cardscan.result.MainLoopAggregator
 import com.stripe.android.stripecardscan.cardscan.result.MainLoopState
 import com.stripe.android.stripecardscan.databinding.ActivityCardscanBinding
-import com.stripe.android.stripecardscan.framework.Config
-import com.stripe.android.stripecardscan.framework.StorageFactory
-import com.stripe.android.stripecardscan.framework.util.getAppPackageName
 import com.stripe.android.stripecardscan.payment.card.ScannedCard
-import com.stripe.android.stripecardscan.scanui.CameraErrorListenerImpl
 import com.stripe.android.stripecardscan.scanui.CancellationReason
+import com.stripe.android.stripecardscan.scanui.ScanActivity
 import com.stripe.android.stripecardscan.scanui.ScanErrorListener
 import com.stripe.android.stripecardscan.scanui.ScanResultListener
 import com.stripe.android.stripecardscan.scanui.SimpleScanStateful
@@ -49,14 +31,11 @@ import com.stripe.android.stripecardscan.scanui.util.setDrawable
 import com.stripe.android.stripecardscan.scanui.util.startAnimation
 import com.stripe.android.stripecardscan.scanui.util.setVisible
 import com.stripe.android.stripecardscan.scanui.util.show
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import java.util.concurrent.atomic.AtomicBoolean
-import kotlin.coroutines.CoroutineContext
 import kotlin.math.min
 import kotlin.math.roundToInt
 
@@ -64,7 +43,6 @@ internal const val INTENT_PARAM_REQUEST = "request"
 internal const val INTENT_PARAM_RESULT = "result"
 
 private val MINIMUM_RESOLUTION = Size(1067, 600) // minimum size of OCR
-private const val PERMISSION_RATIONALE_SHOWN = "permission_rationale_shown"
 
 internal interface CardScanResultListener : ScanResultListener {
 
@@ -74,35 +52,21 @@ internal interface CardScanResultListener : ScanResultListener {
     fun cardScanComplete(card: ScannedCard)
 }
 
-internal class CardScanActivity : AppCompatActivity(), SimpleScanStateful, CoroutineScope {
+internal class CardScanActivity : ScanActivity(), SimpleScanStateful {
 
-    companion object {
-        const val PERMISSION_REQUEST_CODE = 1200
-    }
+    override val minimumAnalysisResolution = MINIMUM_RESOLUTION
 
     private val viewBinding by lazy {
         ActivityCardscanBinding.inflate(layoutInflater)
     }
 
+    override val previewFrame: ViewGroup by lazy {
+        viewBinding.previewFrame
+    }
+
     private val params: CardScanSheetParams by lazy {
         intent.getParcelableExtra(INTENT_PARAM_REQUEST)
             ?: CardScanSheetParams("")
-    }
-
-    override val coroutineContext: CoroutineContext = Dispatchers.Main
-
-    private val scanStat = Stats.trackTask("scan_activity")
-    private val permissionStat = Stats.trackTask("camera_permission")
-
-    private val storage by lazy {
-        StorageFactory.getStorageInstance(this, "scan_camera_permissions")
-    }
-
-    private var isFlashlightOn: Boolean = false
-
-    private val cameraAdapter by lazy { buildCameraAdapter() }
-    private val cameraErrorListener by lazy {
-        CameraErrorListenerImpl(this) { t -> scanFailure(t) }
     }
 
     private val hasPreviousValidResult = AtomicBoolean(false)
@@ -116,7 +80,7 @@ internal class CardScanActivity : AppCompatActivity(), SimpleScanStateful, Corou
     /**
      * The listener which handles results from the scan.
      */
-    private val resultListener: CardScanResultListener =
+    override val resultListener: CardScanResultListener =
         object : CardScanResultListener {
 
             override fun cardScanComplete(card: ScannedCard) {
@@ -187,7 +151,7 @@ internal class CardScanActivity : AppCompatActivity(), SimpleScanStateful, Corou
 
                 when (result.state) {
                     is MainLoopState.Initial -> changeScanState(ScanState.NotFound)
-                    is MainLoopState.OcrFound -> changeScanState(ScanState.FoundShort)
+                    is MainLoopState.OcrFound -> changeScanState(ScanState.Found)
                     is MainLoopState.Finished -> changeScanState(ScanState.Correct)
                 }
             }.let { }
@@ -207,21 +171,16 @@ internal class CardScanActivity : AppCompatActivity(), SimpleScanStateful, Corou
             return
         }
 
-        if (!CameraAdapter.isCameraSupported(this)) {
-            showCameraNotSupportedDialog()
-        }
-
         setupViewFinderConstraints()
 
         viewBinding.closeButton.setOnClickListener {
             userClosedScanner()
         }
         viewBinding.torchButton.setOnClickListener {
-            isFlashlightOn = !isFlashlightOn
-            setFlashlightState(isFlashlightOn)
+            toggleFlashlight()
         }
         viewBinding.swapCameraButton.setOnClickListener {
-            cameraAdapter.changeCamera()
+            toggleCamera()
         }
         viewBinding.viewFinderBorder.setOnTouchListener { _, e ->
             setFocus(
@@ -234,53 +193,16 @@ internal class CardScanActivity : AppCompatActivity(), SimpleScanStateful, Corou
         }
 
         displayState(scanState, scanStatePrevious)
-        Stats.startScan()
     }
 
     override fun onResume() {
         super.onResume()
-        hideSystemUi()
         scanState = ScanState.NotFound
-
-        launch {
-            delay(1500)
-            hideSystemUi()
-        }
-
-        if (!cameraAdapter.isBoundToLifecycle()) {
-            ensurePermissionAndStartCamera()
-        }
     }
 
-    private fun hideSystemUi() {
-        // Prevent screenshots and keep the screen on while scanning.
-        window.setFlags(
-            WindowManager.LayoutParams.FLAG_SECURE +
-                WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON,
-            WindowManager.LayoutParams.FLAG_SECURE +
-                WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON,
-        )
-
-        // Hide both the navigation bar and the status bar. Allow system gestures to show the
-        // navigation and status bar, but prevent the UI from resizing when they are shown.
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            window.setDecorFitsSystemWindows(true)
-        } else {
-            @Suppress("deprecation")
-            window.decorView.apply {
-                systemUiVisibility = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or
-                    View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION or
-                    View.SYSTEM_UI_FLAG_FULLSCREEN or
-                    View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or
-                    View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY or
-                    View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-            }
-        }
-    }
-
-    override fun onPause() {
-        super.onPause()
-        setFlashlightState(false)
+    override fun onDestroy() {
+        scanFlow.cancelFlow()
+        super.onDestroy()
     }
 
     /**
@@ -290,31 +212,6 @@ internal class CardScanActivity : AppCompatActivity(), SimpleScanStateful, Corou
         runBlocking { scanStat.trackResult("user_canceled") }
         resultListener.userCanceled(CancellationReason.Back)
         closeScanner()
-    }
-
-    /**
-     * Handle permission status changes. If the camera permission has been granted, start it. If
-     * not, show a dialog.
-     */
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<out String>,
-        grantResults: IntArray
-    ) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-
-        if (requestCode == PERMISSION_REQUEST_CODE && grantResults.isNotEmpty()) {
-            when (grantResults[0]) {
-                PackageManager.PERMISSION_GRANTED -> {
-                    launch { permissionStat.trackResult("success") }
-                    prepareCamera { onCameraReady() }
-                }
-                else -> {
-                    launch { permissionStat.trackResult("failure") }
-                    userDeniedCameraPermission()
-                }
-            }
-        }
     }
 
     /**
@@ -340,137 +237,18 @@ internal class CardScanActivity : AppCompatActivity(), SimpleScanStateful, Corou
         viewBinding.viewFinderBackground.setViewFinderRect(viewBinding.viewFinderWindow.asRect())
     }
 
-    /**
-     * Ensure that the camera permission is available. If so, start the camera. If not, request it.
-     */
-    private fun ensurePermissionAndStartCamera() = when {
-        ContextCompat.checkSelfPermission(
-            this,
-            Manifest.permission.CAMERA,
-        ) == PackageManager.PERMISSION_GRANTED -> {
-            launch { permissionStat.trackResult("success") }
-            prepareCamera { onCameraReady() }
-        }
-        ActivityCompat.shouldShowRequestPermissionRationale(
-            this,
-            Manifest.permission.CAMERA,
-        ) -> showPermissionRationaleDialog()
-        storage.getBoolean(
-            PERMISSION_RATIONALE_SHOWN,
-            false,
-        ) -> showPermissionDeniedDialog()
-        else -> requestCameraPermission()
+    override fun onFlashSupported(supported: Boolean) {
+        viewBinding.torchButton.setVisible(supported)
     }
 
-    /**
-     * Once the camera stream is available, start processing images.
-     */
-    private fun onCameraStreamAvailable(cameraStream: Flow<CameraPreviewImage<Bitmap>>) {
-        scanFlow.startFlow(
-            context = this,
-            imageStream = cameraStream,
-            viewFinder = viewBinding.viewFinderWindow.asRect(),
-            lifecycleOwner = this,
-            coroutineScope = this
-        )
-    }
-
-    /**
-     * Show a dialog explaining that the camera is not available.
-     */
-    private fun showCameraNotSupportedDialog() {
-        AlertDialog.Builder(this)
-            .setTitle(R.string.stripe_error_camera_title)
-            .setMessage(R.string.stripe_error_camera_unsupported)
-            .setPositiveButton(R.string.stripe_error_camera_acknowledge_button) { _, _ ->
-                scanFailure()
-            }
-            .show()
-    }
-
-    /**
-     * Show an explanation dialog for why we are requesting camera permissions.
-     */
-    private fun showPermissionRationaleDialog() {
-        val builder = AlertDialog.Builder(this)
-        builder.setMessage(R.string.stripe_camera_permission_denied_message)
-            .setPositiveButton(R.string.stripe_camera_permission_denied_ok) { _, _ ->
-                requestCameraPermission()
-            }
-        builder.show()
-        storage.storeValue(PERMISSION_RATIONALE_SHOWN, true)
-    }
-
-    /**
-     * Show an explanation dialog for why we are requesting camera permissions when the permission
-     * has been permanently denied.
-     */
-    private fun showPermissionDeniedDialog() {
-        val builder = AlertDialog.Builder(this)
-        builder.setMessage(R.string.stripe_camera_permission_denied_message)
-            .setPositiveButton(R.string.stripe_camera_permission_denied_ok) { _, _ ->
-                storage.storeValue(PERMISSION_RATIONALE_SHOWN, false)
-                openAppSettings()
-            }
-            .setNegativeButton(R.string.stripe_camera_permission_denied_cancel) { _, _ ->
-                userDeniedCameraPermission()
-            }
-        builder.show()
-    }
-
-    /**
-     * Request permission to use the camera.
-     */
-    private fun requestCameraPermission() {
-        ActivityCompat.requestPermissions(
-            this,
-            arrayOf(Manifest.permission.CAMERA),
-            PERMISSION_REQUEST_CODE,
-        )
-    }
-
-    /**
-     * Open the settings for this app
-     */
-    private fun openAppSettings() {
-        val intent = Intent()
-            .setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
-            .setData(Uri.fromParts("package", getAppPackageName(this), null))
-        startActivity(intent)
-    }
-
-    /**
-     * Cancel scanning due to a camera error.
-     */
-    private fun scanFailure(cause: Throwable? = null) {
-        Log.e(Config.logTag, "Canceling scan due to error", cause)
-        runBlocking { scanStat.trackResult("scan_failure") }
-        resultListener.failed(cause)
-        closeScanner()
-    }
-
-    /**
-     * The scan has been closed by the user.
-     */
-    private fun userClosedScanner() {
-        runBlocking { scanStat.trackResult("user_canceled") }
-        resultListener.userCanceled(CancellationReason.Closed)
-        closeScanner()
-    }
-
-    /**
-     * The camera permission was denied.
-     */
-    private fun userDeniedCameraPermission() {
-        runBlocking { scanStat.trackResult("user_canceled") }
-        resultListener.userCanceled(CancellationReason.CameraPermissionDenied)
-        closeScanner()
+    override fun onSupportsMultipleCameras(supported: Boolean) {
+        viewBinding.swapCameraButton.setVisible(supported)
     }
 
     /**
      * Prepare to start the camera. Once the camera is ready, [onCameraReady] must be called.
      */
-    private fun prepareCamera(onCameraReady: () -> Unit) {
+    override fun prepareCamera(onCameraReady: () -> Unit) {
         viewBinding.previewFrame.post {
             viewBinding.viewFinderBackground
                 .setViewFinderRect(viewBinding.viewFinderWindow.asRect())
@@ -478,53 +256,30 @@ internal class CardScanActivity : AppCompatActivity(), SimpleScanStateful, Corou
         }
     }
 
-    private fun onCameraReady() {
-        cameraAdapter.bindToLifecycle(this)
-
-        val torchStat = Stats.trackTask("torch_supported")
-        cameraAdapter.withFlashSupport {
-            launch { torchStat.trackResult(if (it) "supported" else "unsupported") }
-            setFlashlightState(cameraAdapter.isTorchOn())
-            viewBinding.torchButton.setVisible(it)
-        }
-
-        cameraAdapter.withSupportsMultipleCameras {
-            viewBinding.swapCameraButton.setVisible(it)
-        }
-
-        launch { onCameraStreamAvailable(cameraAdapter.getImageStream()) }
+    /**
+     * Once the camera stream is available, start processing images.
+     */
+    override suspend fun onCameraStreamAvailable(cameraStream: Flow<CameraPreviewImage<Bitmap>>) {
+        scanFlow.startFlow(
+            context = this,
+            imageStream = cameraStream,
+            viewFinder = viewBinding.viewFinderWindow.asRect(),
+            lifecycleOwner = this,
+            coroutineScope = this,
+            parameters = null
+        )
     }
 
     /**
-     * Turn the flashlight on or off.
+     * Called when the flashlight state has changed.
      */
-    private fun setFlashlightState(on: Boolean) {
-        cameraAdapter.setTorchState(on)
-        isFlashlightOn = on
-        if (isFlashlightOn) {
+    override fun onFlashlightStateChanged(flashlightOn: Boolean) {
+        if (flashlightOn) {
             viewBinding.torchButton.setDrawable(R.drawable.stripe_flash_on_dark)
         } else {
             viewBinding.torchButton.setDrawable(R.drawable.stripe_flash_off_dark)
         }
     }
-
-    /**
-     * Set the focus of the camera.
-     */
-    private fun setFocus(point: PointF) {
-        cameraAdapter.setFocus(point)
-    }
-
-    /**
-     * Generate a camera adapter
-     */
-    private fun buildCameraAdapter(): CameraAdapter<CameraPreviewImage<Bitmap>> =
-        getCameraAdapter(
-            activity = this,
-            previewView = viewBinding.previewFrame,
-            minimumResolution = MINIMUM_RESOLUTION,
-            cameraErrorListener = cameraErrorListener,
-        )
 
     override fun ensureValidParams() = when {
         params.stripePublishableKey.isEmpty() -> {
@@ -532,11 +287,6 @@ internal class CardScanActivity : AppCompatActivity(), SimpleScanStateful, Corou
             false
         }
         else -> true
-    }
-
-    private fun closeScanner() {
-        setFlashlightState(false)
-        finish()
     }
 
     override fun displayState(newState: ScanState, previousState: ScanState?) {
@@ -549,7 +299,7 @@ internal class CardScanActivity : AppCompatActivity(), SimpleScanStateful, Corou
                 viewBinding.viewFinderBorder.startAnimation(R.drawable.stripe_card_border_not_found)
                 viewBinding.instructions.setText(R.string.stripe_card_scan_instructions)
             }
-            is ScanState.FoundShort -> {
+            is ScanState.Found -> {
                 viewBinding.viewFinderBackground
                     .setBackgroundColor(getColorByRes(R.color.stripeFoundBackground))
                 viewBinding.viewFinderWindow

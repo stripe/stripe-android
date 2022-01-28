@@ -13,6 +13,7 @@ import com.stripe.android.camera.framework.AnalyzerPool
 import com.stripe.android.camera.framework.ProcessBoundAnalyzerLoop
 import com.stripe.android.stripecardscan.payment.ml.SSDOcr
 import com.stripe.android.stripecardscan.payment.ml.SSDOcrModelManager
+import com.stripe.android.stripecardscan.scanui.ScanFlow
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -20,18 +21,9 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
-internal data class SavedFrame(
-    val hasOcr: Boolean,
-    val frame: SSDOcr.Input,
-)
-
-internal data class SavedFrameType(
-    val hasOcr: Boolean,
-)
-
 internal abstract class CardScanFlow(
     private val scanErrorListener: AnalyzerLoopErrorListener,
-) : AggregateResultListener<MainLoopAggregator.InterimResult, MainLoopAggregator.FinalResult> {
+) : ScanFlow<Unit?>, AggregateResultListener<MainLoopAggregator.InterimResult, MainLoopAggregator.FinalResult> {
 
     /**
      * If this is true, do not start the flow.
@@ -50,12 +42,13 @@ internal abstract class CardScanFlow(
 
     private var mainLoopJob: Job? = null
 
-    fun startFlow(
+    override fun startFlow(
         context: Context,
         imageStream: Flow<CameraPreviewImage<Bitmap>>,
         viewFinder: Rect,
         lifecycleOwner: LifecycleOwner,
-        coroutineScope: CoroutineScope
+        coroutineScope: CoroutineScope,
+        parameters: Unit?
     ) = coroutineScope.launch(Dispatchers.Main) {
         if (canceled) {
             return@launch
@@ -96,15 +89,25 @@ internal abstract class CardScanFlow(
     }.let { }
 
     override suspend fun onResult(result: MainLoopAggregator.FinalResult) {
+        stopFlow()
+    }
+
+    override fun cancelFlow() {
+        canceled = true
+        mainLoopAggregator?.run { cancel() }
+        stopFlow()
+    }
+
+    private fun stopFlow() {
+        mainLoopAggregator = null
+
         mainLoop?.unsubscribe()
         mainLoop = null
 
-        mainLoopJob?.apply { if (isActive) { cancel() } }
-        mainLoopJob = null
-
-        mainLoopAggregator = null
-
         mainLoopAnalyzerPool?.closeAllAnalyzers()
         mainLoopAnalyzerPool = null
+
+        mainLoopJob?.apply { if (isActive) { cancel() } }
+        mainLoopJob = null
     }
 }

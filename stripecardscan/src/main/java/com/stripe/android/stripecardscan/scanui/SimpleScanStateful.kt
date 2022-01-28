@@ -16,8 +16,7 @@ internal interface SimpleScanStateful {
      */
     abstract class ScanState(val isFinal: Boolean) {
         object NotFound : ScanState(isFinal = false)
-        object FoundShort : ScanState(isFinal = false)
-        object FoundLong : ScanState(isFinal = false)
+        object Found : ScanState(isFinal = false)
         object Correct : ScanState(isFinal = true)
         object Wrong : ScanState(isFinal = false)
     }

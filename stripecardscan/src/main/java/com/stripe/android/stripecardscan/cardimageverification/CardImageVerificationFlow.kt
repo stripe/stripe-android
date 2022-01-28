@@ -118,22 +118,16 @@ internal abstract class CardImageVerificationFlow(
     }.let { }
 
     override suspend fun onResult(result: MainLoopAggregator.FinalResult) {
-        mainLoop?.unsubscribe()
-        mainLoop = null
-
-        mainLoopJob?.apply { if (isActive) { cancel() } }
-        mainLoopJob = null
-
-        mainLoopAggregator = null
-
-        mainLoopAnalyzerPool?.closeAllAnalyzers()
-        mainLoopAnalyzerPool = null
+        stopFlow()
     }
 
     override fun cancelFlow() {
         canceled = true
-
         mainLoopAggregator?.run { cancel() }
+        stopFlow()
+    }
+
+    private fun stopFlow() {
         mainLoopAggregator = null
 
         mainLoop?.unsubscribe()

@@ -244,9 +244,9 @@ internal open class CardImageVerificationActivity :
 
                 when (result.state) {
                     is MainLoopState.Initial -> changeScanState(ScanState.NotFound)
-                    is MainLoopState.OcrFound -> changeScanState(ScanState.FoundLong)
-                    is MainLoopState.OcrSatisfied -> changeScanState(ScanState.FoundLong)
-                    is MainLoopState.CardSatisfied -> changeScanState(ScanState.FoundLong)
+                    is MainLoopState.OcrFound -> changeScanState(ScanState.Found)
+                    is MainLoopState.OcrSatisfied -> changeScanState(ScanState.Found)
+                    is MainLoopState.CardSatisfied -> changeScanState(ScanState.Found)
                     is MainLoopState.WrongCard -> changeScanState(ScanState.Wrong)
                     is MainLoopState.Finished -> changeScanState(ScanState.Correct)
                 }
@@ -526,21 +526,12 @@ internal open class CardImageVerificationActivity :
                 cardNumberTextView.hide()
                 cardNameTextView.hide()
             }
-            is ScanState.FoundShort -> {
+            is ScanState.Found -> {
                 viewFinderBackgroundView
                     .setBackgroundColor(getColorByRes(R.color.stripeFoundBackground))
                 viewFinderWindowView
                     .setBackgroundResource(R.drawable.stripe_card_background_found)
                 viewFinderBorderView.startAnimation(R.drawable.stripe_card_border_found)
-                instructionsTextView.setText(R.string.stripe_card_scan_instructions)
-                instructionsTextView.show()
-            }
-            is ScanState.FoundLong -> {
-                viewFinderBackgroundView
-                    .setBackgroundColor(getColorByRes(R.color.stripeFoundBackground))
-                viewFinderWindowView
-                    .setBackgroundResource(R.drawable.stripe_card_background_found)
-                viewFinderBorderView.startAnimation(R.drawable.stripe_card_border_found_long)
                 instructionsTextView.setText(R.string.stripe_card_scan_instructions)
                 instructionsTextView.show()
             }
@@ -563,7 +554,7 @@ internal open class CardImageVerificationActivity :
         }
 
         when (newState) {
-            is ScanState.NotFound, ScanState.FoundShort, ScanState.FoundLong, ScanState.Wrong -> {
+            is ScanState.NotFound, ScanState.Found, ScanState.Wrong -> {
                 processingOverlayView.hide()
                 processingSpinnerView.hide()
                 processingTextView.hide()
