@@ -6,7 +6,6 @@ import android.util.Size
 import androidx.core.graphics.drawable.toBitmap
 import androidx.test.filters.SmallTest
 import androidx.test.platform.app.InstrumentationRegistry
-import com.stripe.android.camera.test.R
 import com.stripe.android.camera.framework.image.crop
 import com.stripe.android.camera.framework.image.cropWithFill
 import com.stripe.android.camera.framework.image.scale
@@ -14,6 +13,7 @@ import com.stripe.android.camera.framework.image.size
 import com.stripe.android.camera.framework.image.zoom
 import com.stripe.android.camera.framework.util.centerOn
 import com.stripe.android.camera.framework.util.toRect
+import com.stripe.android.camera.test.R
 import org.junit.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
