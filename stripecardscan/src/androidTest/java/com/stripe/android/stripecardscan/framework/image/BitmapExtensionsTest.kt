@@ -24,8 +24,8 @@ class BitmapExtensionsTest {
             .toBitmap()
         assertNotNull(bitmap)
         // Make sure a non-empty image is read.
-        assertNotEquals(0, bitmap.width , "Bitmap width is 0")
-        assertNotEquals(0, bitmap.height , "Bitmap height is 0")
+        assertNotEquals(0, bitmap.width, "Bitmap width is 0")
+        assertNotEquals(0, bitmap.height, "Bitmap height is 0")
 
         // scale the bitmap
         val scaledBitmap = bitmap.scale(0.2F)
@@ -56,8 +56,8 @@ class BitmapExtensionsTest {
             .toBitmap()
         assertNotNull(bitmap)
         // Make sure a non-empty image is read.
-        assertNotEquals(0, bitmap.width , "Bitmap width is 0")
-        assertNotEquals(0, bitmap.height , "Bitmap height is 0")
+        assertNotEquals(0, bitmap.width, "Bitmap width is 0")
+        assertNotEquals(0, bitmap.height, "Bitmap height is 0")
 
         // crop the bitmap
         val croppedBitmap = bitmap.crop(

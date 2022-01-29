@@ -74,8 +74,8 @@ class ImageTest {
         val bitmap = testResources.getDrawable(R.drawable.ocr_card_numbers, null).toBitmap()
         assertNotNull(bitmap)
         // Make sure a non-empty image is read.
-        assertNotEquals(0, bitmap.width , "Bitmap width is 0")
-        assertNotEquals(0, bitmap.height , "Bitmap height is 0")
+        assertNotEquals(0, bitmap.width, "Bitmap width is 0")
+        assertNotEquals(0, bitmap.height, "Bitmap height is 0")
 
         // scale the bitmap
         val scaledBitmap = bitmap.scale(Size(bitmap.width / 5, bitmap.height / 5))
@@ -105,8 +105,8 @@ class ImageTest {
         val bitmap = testResources.getDrawable(R.drawable.ocr_card_numbers, null).toBitmap()
         assertNotNull(bitmap)
         // Make sure a non-empty image is read.
-        assertNotEquals(0, bitmap.width , "Bitmap width is 0")
-        assertNotEquals(0, bitmap.height , "Bitmap height is 0")
+        assertNotEquals(0, bitmap.width, "Bitmap width is 0")
+        assertNotEquals(0, bitmap.height, "Bitmap height is 0")
 
         // crop the bitmap
         val croppedBitmap = bitmap.crop(
@@ -149,8 +149,8 @@ class ImageTest {
         val bitmap = testResources.getDrawable(R.drawable.ocr_card_numbers, null).toBitmap()
         assertNotNull(bitmap)
         // Make sure a non-empty image is read.
-        assertNotEquals(0, bitmap.width , "Bitmap width is 0")
-        assertNotEquals(0, bitmap.height , "Bitmap height is 0")
+        assertNotEquals(0, bitmap.width, "Bitmap width is 0")
+        assertNotEquals(0, bitmap.height, "Bitmap height is 0")
 
         val cropRegion = Rect(
             -100,
@@ -208,8 +208,8 @@ class ImageTest {
         val bitmap = testResources.getDrawable(R.drawable.ocr_card_numbers, null).toBitmap()
         assertNotNull(bitmap)
         // Make sure a non-empty image is read.
-        assertNotEquals(0, bitmap.width , "Bitmap width is 0")
-        assertNotEquals(0, bitmap.height , "Bitmap height is 0")
+        assertNotEquals(0, bitmap.width, "Bitmap width is 0")
+        assertNotEquals(0, bitmap.height, "Bitmap height is 0")
 
         // zoom the bitmap
         val zoomedBitmap = bitmap.zoom(
