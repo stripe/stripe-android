@@ -12,7 +12,6 @@ import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.payments.StripeBrowserLauncherActivity
 import com.stripe.android.stripe3ds2.init.ui.StripeToolbarCustomization
 import com.stripe.android.view.PaymentAuthWebViewActivity
-import kotlinx.parcelize.Parcelize
 
 /**
  * An [ActivityResultContract] for completing payment authentication in a browser. This will
