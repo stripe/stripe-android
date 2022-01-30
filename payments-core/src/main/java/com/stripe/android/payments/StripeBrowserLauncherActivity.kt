@@ -33,7 +33,12 @@ internal class StripeBrowserLauncherActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val args = PaymentBrowserAuthContract.parseArgs(intent)
+        val args = try {
+            PaymentBrowserAuthContract.parseArgs(intent)
+        } catch (e: Exception) {
+            null
+        }
+
         if (args == null) {
             // handle failures
             finish()
