@@ -13,7 +13,7 @@ import com.stripe.android.camera.framework.AnalyzerPool
 import com.stripe.android.camera.framework.ProcessBoundAnalyzerLoop
 import com.stripe.android.stripecardscan.payment.ml.SSDOcr
 import com.stripe.android.stripecardscan.payment.ml.SSDOcrModelManager
-import com.stripe.android.stripecardscan.scanui.ScanFlow
+import com.stripe.android.camera.scanui.ScanFlow
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -23,7 +23,7 @@ import kotlinx.coroutines.launch
 
 internal abstract class CardScanFlow(
     private val scanErrorListener: AnalyzerLoopErrorListener,
-) : ScanFlow<Unit?>,
+) : ScanFlow<Unit?, CameraPreviewImage<Bitmap>>,
     AggregateResultListener<MainLoopAggregator.InterimResult, MainLoopAggregator.FinalResult> {
 
     /**
