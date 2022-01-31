@@ -1,6 +1,19 @@
 package com.stripe.android.stripecardscan.framework.time
 
 import androidx.test.filters.SmallTest
+import com.stripe.android.camera.framework.time.Duration
+import com.stripe.android.camera.framework.time.days
+import com.stripe.android.camera.framework.time.hours
+import com.stripe.android.camera.framework.time.max
+import com.stripe.android.camera.framework.time.microseconds
+import com.stripe.android.camera.framework.time.milliseconds
+import com.stripe.android.camera.framework.time.min
+import com.stripe.android.camera.framework.time.minutes
+import com.stripe.android.camera.framework.time.months
+import com.stripe.android.camera.framework.time.nanoseconds
+import com.stripe.android.camera.framework.time.seconds
+import com.stripe.android.camera.framework.time.weeks
+import com.stripe.android.camera.framework.time.years
 import org.junit.Test
 import kotlin.math.pow
 import kotlin.math.roundToInt

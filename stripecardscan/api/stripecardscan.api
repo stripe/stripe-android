@@ -429,4 +429,3 @@ public abstract class com/stripe/android/stripecardscan/scanui/ScanState {
 	public fun <init> (Z)V
 	public final fun isFinal ()Z
 }
-

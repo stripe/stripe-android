@@ -335,6 +335,8 @@ public final class com/stripe/android/camera/framework/time/DurationKt {
 	public static final fun getYears (F)Lcom/stripe/android/camera/framework/time/Duration;
 	public static final fun getYears (I)Lcom/stripe/android/camera/framework/time/Duration;
 	public static final fun getYears (J)Lcom/stripe/android/camera/framework/time/Duration;
+	public static final fun max (Lcom/stripe/android/camera/framework/time/Duration;Lcom/stripe/android/camera/framework/time/Duration;)Lcom/stripe/android/camera/framework/time/Duration;
+	public static final fun min (Lcom/stripe/android/camera/framework/time/Duration;Lcom/stripe/android/camera/framework/time/Duration;)Lcom/stripe/android/camera/framework/time/Duration;
 }
 
 public final class com/stripe/android/camera/framework/util/MemoizeKt {
@@ -406,6 +408,11 @@ public final class com/stripe/android/camera/scanui/CameraView : androidx/constr
 	public final fun getViewFinderBackgroundView ()Lcom/stripe/android/camera/scanui/ViewFinderBackground;
 	public final fun getViewFinderBorderView ()Landroid/widget/ImageView;
 	public final fun getViewFinderWindowView ()Landroid/view/View;
+}
+
+public abstract interface class com/stripe/android/camera/scanui/ScanFlow {
+	public abstract fun cancelFlow ()V
+	public abstract fun startFlow (Landroid/content/Context;Lkotlinx/coroutines/flow/Flow;Landroid/graphics/Rect;Landroidx/lifecycle/LifecycleOwner;Lkotlinx/coroutines/CoroutineScope;Ljava/lang/Object;)V
 }
 
 public final class com/stripe/android/camera/scanui/ViewFinderBackground : android/view/View {

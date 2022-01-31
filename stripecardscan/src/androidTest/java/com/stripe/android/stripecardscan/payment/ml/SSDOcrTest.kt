@@ -1,9 +1,11 @@
 package com.stripe.android.stripecardscan.payment.ml
 
+import android.util.Size
 import androidx.core.graphics.drawable.toBitmap
 import androidx.test.filters.MediumTest
 import androidx.test.platform.app.InstrumentationRegistry
 import com.stripe.android.stripecardscan.framework.ResourceFetcher
+import com.stripe.android.stripecardscan.framework.image.scale
 import com.stripe.android.stripecardscan.framework.image.size
 import com.stripe.android.stripecardscan.framework.util.toRect
 import com.stripe.android.stripecardscan.test.R
@@ -29,6 +31,7 @@ class SSDOcrTest {
     fun resourceModelExecution_works() = runBlocking {
         val bitmap = testContext.resources.getDrawable(R.drawable.ocr_card_numbers, null)
             .toBitmap()
+            .scale(Size(600, 375))
         val fetcher = SSDOcrModelManager.getModelFetcher(appContext)
         assertNotNull(fetcher)
         assertTrue(fetcher is ResourceFetcher)
@@ -65,6 +68,7 @@ class SSDOcrTest {
     fun resourceModelExecution_worksWithQR() = runBlocking {
         val bitmap = testContext.resources.getDrawable(R.drawable.ocr_card_numbers_qr, null)
             .toBitmap()
+            .scale(Size(600, 375))
         val fetcher = SSDOcrModelManager.getModelFetcher(appContext)
         assertNotNull(fetcher)
         assertTrue(fetcher is ResourceFetcher)
@@ -101,6 +105,7 @@ class SSDOcrTest {
     fun resourceModelExecution_worksRepeatedly() = runBlocking {
         val bitmap = testContext.resources.getDrawable(R.drawable.ocr_card_numbers, null)
             .toBitmap()
+            .scale(Size(600, 375))
         val fetcher = SSDOcrModelManager.getModelFetcher(appContext)
         assertNotNull(fetcher)
         assertTrue(fetcher is ResourceFetcher)

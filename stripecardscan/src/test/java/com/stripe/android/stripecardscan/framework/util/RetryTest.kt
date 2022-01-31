@@ -1,7 +1,7 @@
 package com.stripe.android.stripecardscan.framework.util
 
 import androidx.test.filters.SmallTest
-import com.stripe.android.stripecardscan.framework.time.milliseconds
+import com.stripe.android.camera.framework.time.milliseconds
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
