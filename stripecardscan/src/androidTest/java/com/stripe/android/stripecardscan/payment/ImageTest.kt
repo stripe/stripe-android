@@ -22,6 +22,7 @@ import com.stripe.android.stripecardscan.test.R
 import org.junit.Test
 import java.nio.ByteBuffer
 import kotlin.test.assertEquals
+import kotlin.test.assertNotEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
@@ -72,8 +73,9 @@ class ImageTest {
         // read in a sample bitmap file
         val bitmap = testResources.getDrawable(R.drawable.ocr_card_numbers, null).toBitmap()
         assertNotNull(bitmap)
-        assertEquals(600, bitmap.width, "Bitmap width is not expected")
-        assertEquals(375, bitmap.height, "Bitmap height is not expected")
+        // Make sure a non-empty image is read.
+        assertNotEquals(0, bitmap.width, "Bitmap width is 0")
+        assertNotEquals(0, bitmap.height, "Bitmap height is 0")
 
         // scale the bitmap
         val scaledBitmap = bitmap.scale(Size(bitmap.width / 5, bitmap.height / 5))
@@ -102,8 +104,9 @@ class ImageTest {
     fun bitmap_crop_isCorrect() {
         val bitmap = testResources.getDrawable(R.drawable.ocr_card_numbers, null).toBitmap()
         assertNotNull(bitmap)
-        assertEquals(600, bitmap.width, "Bitmap width is not expected")
-        assertEquals(375, bitmap.height, "Bitmap height is not expected")
+        // Make sure a non-empty image is read.
+        assertNotEquals(0, bitmap.width, "Bitmap width is 0")
+        assertNotEquals(0, bitmap.height, "Bitmap height is 0")
 
         // crop the bitmap
         val croppedBitmap = bitmap.crop(
@@ -145,8 +148,9 @@ class ImageTest {
     fun bitmap_cropWithFill_isCorrect() {
         val bitmap = testResources.getDrawable(R.drawable.ocr_card_numbers, null).toBitmap()
         assertNotNull(bitmap)
-        assertEquals(600, bitmap.width, "Bitmap width is not expected")
-        assertEquals(375, bitmap.height, "Bitmap height is not expected")
+        // Make sure a non-empty image is read.
+        assertNotEquals(0, bitmap.width, "Bitmap width is 0")
+        assertNotEquals(0, bitmap.height, "Bitmap height is 0")
 
         val cropRegion = Rect(
             -100,
@@ -172,7 +176,12 @@ class ImageTest {
 
         for (y in 0 until croppedBitmap.height) {
             for (x in 0 until croppedBitmap.width) {
-                if (x < 100 || x > 700 || y < 100 || y > 475) {
+                if (
+                    x < 100 ||
+                    x > croppedBitmap.width - 100 ||
+                    y < 100 ||
+                    y > croppedBitmap.height - 100
+                ) {
                     val croppedPixel = croppedBitmap.getPixel(x, y)
                     assertEquals(Color.GRAY, croppedPixel, "Pixel $x, $y not gray")
                 }
@@ -198,8 +207,9 @@ class ImageTest {
     fun zoom_isCorrect() {
         val bitmap = testResources.getDrawable(R.drawable.ocr_card_numbers, null).toBitmap()
         assertNotNull(bitmap)
-        assertEquals(600, bitmap.width, "Bitmap width is not expected")
-        assertEquals(375, bitmap.height, "Bitmap height is not expected")
+        // Make sure a non-empty image is read.
+        assertNotEquals(0, bitmap.width, "Bitmap width is 0")
+        assertNotEquals(0, bitmap.height, "Bitmap height is 0")
 
         // zoom the bitmap
         val zoomedBitmap = bitmap.zoom(

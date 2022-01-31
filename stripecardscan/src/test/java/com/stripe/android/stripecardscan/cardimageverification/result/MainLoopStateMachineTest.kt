@@ -1,10 +1,10 @@
 package com.stripe.android.stripecardscan.cardimageverification.result
 
 import androidx.test.filters.LargeTest
+import com.stripe.android.camera.framework.time.milliseconds
 import com.stripe.android.stripecardscan.cardimageverification.CardImageVerificationConfig
 import com.stripe.android.stripecardscan.cardimageverification.analyzer.MainLoopAnalyzer
 import com.stripe.android.stripecardscan.framework.time.delay
-import com.stripe.android.stripecardscan.framework.time.milliseconds
 import com.stripe.android.stripecardscan.framework.util.ItemCounter
 import com.stripe.android.stripecardscan.payment.card.CardIssuer
 import com.stripe.android.stripecardscan.payment.ml.CardDetect
