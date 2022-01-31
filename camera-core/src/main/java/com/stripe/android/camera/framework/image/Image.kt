@@ -1,4 +1,4 @@
-package com.stripe.android.stripecardscan.payment
+package com.stripe.android.camera.framework.image
 
 import android.app.ActivityManager
 import android.content.Context
@@ -9,14 +9,12 @@ import android.os.Build
 import android.util.Log
 import android.util.Size
 import androidx.annotation.CheckResult
-import com.stripe.android.stripecardscan.framework.Config
-import com.stripe.android.stripecardscan.framework.image.crop
-import com.stripe.android.stripecardscan.framework.image.size
-import com.stripe.android.stripecardscan.framework.util.centerOn
-import com.stripe.android.stripecardscan.framework.util.intersectionWith
-import com.stripe.android.stripecardscan.framework.util.maxAspectRatioInSize
-import com.stripe.android.stripecardscan.framework.util.projectRegionOfInterest
-import com.stripe.android.stripecardscan.framework.util.toRect
+import androidx.annotation.RestrictTo
+import com.stripe.android.camera.framework.util.centerOn
+import com.stripe.android.camera.framework.util.intersectionWith
+import com.stripe.android.camera.framework.util.maxAspectRatioInSize
+import com.stripe.android.camera.framework.util.projectRegionOfInterest
+import com.stripe.android.camera.framework.util.toRect
 
 /**
  * Get a rect indicating what part of the preview is actually visible on screen. This assumes that the preview
@@ -38,7 +36,8 @@ private fun getVisiblePreview(previewBounds: Rect) = Size(
  *    size as the [previewBounds]
  * 3. the [previewBounds] and the [cameraPreviewImageSize] have the same orientation
  */
-internal fun determineViewFinderCrop(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+fun determineViewFinderCrop(
     cameraPreviewImageSize: Size,
     previewBounds: Rect,
     viewFinder: Rect,
@@ -69,7 +68,8 @@ internal fun determineViewFinderCrop(
  *    [previewBounds]
  * 3. the [previewBounds] and the [cameraPreviewImage] have the same orientation
  */
-internal fun cropCameraPreviewToViewFinder(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+fun cropCameraPreviewToViewFinder(
     cameraPreviewImage: Bitmap,
     previewBounds: Rect,
     viewFinder: Rect,
@@ -96,7 +96,8 @@ internal fun cropCameraPreviewToViewFinder(
  *    cameraPreviewImage's fields of view are smaller than or the same size as the previewBounds's
  * 3. the previewBounds and the cameraPreviewImage have the same orientation
  */
-internal fun cropCameraPreviewToSquare(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+fun cropCameraPreviewToSquare(
     cameraPreviewImage: Bitmap,
     previewBounds: Rect,
     viewFinder: Rect,
@@ -112,8 +113,10 @@ internal fun cropCameraPreviewToSquare(
     val squareViewFinder = maxAspectRatioInSize(visiblePreview, 1F).centerOn(viewFinder)
 
     // calculate the projected squareViewFinder
-    val projectedSquare = previewBounds
-        .projectRegionOfInterest(cameraPreviewImage.size(), squareViewFinder)
+    val projectedSquare = previewBounds.projectRegionOfInterest(
+        cameraPreviewImage.size(),
+        squareViewFinder
+    )
         .intersectionWith(cameraPreviewImage.size().toRect())
 
     return cameraPreviewImage.crop(projectedSquare)
@@ -122,8 +125,9 @@ internal fun cropCameraPreviewToSquare(
 /**
  * Determine if the device supports OpenGL version 3.1.
  */
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @CheckResult
-internal fun hasOpenGl31(context: Context): Boolean {
+fun hasOpenGl31(context: Context): Boolean {
     val openGlVersion = 0x00030001
     val activityManager = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
     val configInfo = activityManager.deviceConfigurationInfo
@@ -134,6 +138,6 @@ internal fun hasOpenGl31(context: Context): Boolean {
         false
     }
 
-    Log.d(Config.logTag, "OpenGL is supported? $isSupported")
+    Log.d("Image#hasOpenGl31", "OpenGL is supported? $isSupported")
     return isSupported
 }

@@ -1,10 +1,9 @@
-package com.stripe.android.stripecardscan.framework.util
+package com.stripe.android.camera.framework.util
 
 import android.graphics.Rect
 import android.util.Size
 import androidx.test.filters.SmallTest
 import org.junit.Test
-import java.lang.IllegalArgumentException
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 
