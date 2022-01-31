@@ -185,18 +185,16 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         lifecycleScope: CoroutineScope,
         activityResultLauncher: ActivityResultLauncher<GooglePayPaymentMethodLauncherContract.Args>
     ) {
-        if (_isGooglePayReady.value == null) {
-            googlePayLauncherConfig?.let { config ->
-                googlePayPaymentMethodLauncher =
-                    googlePayPaymentMethodLauncherFactory.create(
-                        lifecycleScope = lifecycleScope,
-                        config = config,
-                        readyCallback = { isReady ->
-                            savedStateHandle.set(SAVE_GOOGLE_PAY_READY, isReady)
-                        },
-                        activityResultLauncher = activityResultLauncher
-                    )
-            }
+        googlePayLauncherConfig?.let { config ->
+            googlePayPaymentMethodLauncher =
+                googlePayPaymentMethodLauncherFactory.create(
+                    lifecycleScope = lifecycleScope,
+                    config = config,
+                    readyCallback = { isReady ->
+                        savedStateHandle.set(SAVE_GOOGLE_PAY_READY, isReady)
+                    },
+                    activityResultLauncher = activityResultLauncher
+                )
         }
     }
 
