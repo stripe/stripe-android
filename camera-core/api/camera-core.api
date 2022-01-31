@@ -224,6 +224,32 @@ public final class com/stripe/android/camera/framework/exception/ImageTypeNotSup
 	public final fun getImageType ()I
 }
 
+public final class com/stripe/android/camera/framework/image/BitmapExtensionsKt {
+	public static final fun constrainToSize (Landroid/graphics/Bitmap;Landroid/util/Size;Z)Landroid/graphics/Bitmap;
+	public static synthetic fun constrainToSize$default (Landroid/graphics/Bitmap;Landroid/util/Size;ZILjava/lang/Object;)Landroid/graphics/Bitmap;
+	public static final fun crop (Landroid/graphics/Bitmap;Landroid/graphics/Rect;)Landroid/graphics/Bitmap;
+	public static final fun cropCenter (Landroid/graphics/Bitmap;Landroid/util/Size;)Landroid/graphics/Bitmap;
+	public static final fun cropWithFill (Landroid/graphics/Bitmap;Landroid/graphics/Rect;)Landroid/graphics/Bitmap;
+	public static final fun rearrangeBySegments (Landroid/graphics/Bitmap;Ljava/util/Map;)Landroid/graphics/Bitmap;
+	public static final fun scale (Landroid/graphics/Bitmap;FZ)Landroid/graphics/Bitmap;
+	public static final fun scale (Landroid/graphics/Bitmap;Landroid/util/Size;Z)Landroid/graphics/Bitmap;
+	public static synthetic fun scale$default (Landroid/graphics/Bitmap;FZILjava/lang/Object;)Landroid/graphics/Bitmap;
+	public static synthetic fun scale$default (Landroid/graphics/Bitmap;Landroid/util/Size;ZILjava/lang/Object;)Landroid/graphics/Bitmap;
+	public static final fun scaleAndCrop (Landroid/graphics/Bitmap;Landroid/util/Size;Z)Landroid/graphics/Bitmap;
+	public static synthetic fun scaleAndCrop$default (Landroid/graphics/Bitmap;Landroid/util/Size;ZILjava/lang/Object;)Landroid/graphics/Bitmap;
+	public static final fun size (Landroid/graphics/Bitmap;)Landroid/util/Size;
+	public static final fun toJpeg (Landroid/graphics/Bitmap;)[B
+	public static final fun toWebP (Landroid/graphics/Bitmap;)[B
+	public static final fun zoom (Landroid/graphics/Bitmap;Landroid/graphics/Rect;Landroid/graphics/Rect;Landroid/util/Size;)Landroid/graphics/Bitmap;
+}
+
+public final class com/stripe/android/camera/framework/image/ImageKt {
+	public static final fun cropCameraPreviewToSquare (Landroid/graphics/Bitmap;Landroid/graphics/Rect;Landroid/graphics/Rect;)Landroid/graphics/Bitmap;
+	public static final fun cropCameraPreviewToViewFinder (Landroid/graphics/Bitmap;Landroid/graphics/Rect;Landroid/graphics/Rect;)Landroid/graphics/Bitmap;
+	public static final fun determineViewFinderCrop (Landroid/util/Size;Landroid/graphics/Rect;Landroid/graphics/Rect;)Landroid/graphics/Rect;
+	public static final fun hasOpenGl31 (Landroid/content/Context;)Z
+}
+
 public final class com/stripe/android/camera/framework/image/NV21Image {
 	public fun <init> (II[B)V
 	public fun <init> (Landroid/graphics/YuvImage;)V
@@ -335,6 +361,48 @@ public final class com/stripe/android/camera/framework/time/DurationKt {
 	public static final fun getYears (F)Lcom/stripe/android/camera/framework/time/Duration;
 	public static final fun getYears (I)Lcom/stripe/android/camera/framework/time/Duration;
 	public static final fun getYears (J)Lcom/stripe/android/camera/framework/time/Duration;
+	public static final fun max (Lcom/stripe/android/camera/framework/time/Duration;Lcom/stripe/android/camera/framework/time/Duration;)Lcom/stripe/android/camera/framework/time/Duration;
+	public static final fun min (Lcom/stripe/android/camera/framework/time/Duration;Lcom/stripe/android/camera/framework/time/Duration;)Lcom/stripe/android/camera/framework/time/Duration;
+}
+
+public final class com/stripe/android/camera/framework/util/LayoutKt {
+	public static final fun adjustSizeToAspectRatio (Landroid/util/Size;F)Landroid/util/Size;
+	public static final fun aspectRatio (Landroid/util/Size;)F
+	public static final fun aspectRatio (Landroid/util/SizeF;)F
+	public static final fun centerOn (Landroid/util/Size;Landroid/graphics/Rect;)Landroid/graphics/Rect;
+	public static final fun centerScaled (Landroid/graphics/Rect;FF)Landroid/graphics/Rect;
+	public static final fun centerScaled (Landroid/graphics/RectF;FF)Landroid/graphics/RectF;
+	public static final fun intersectionWith (Landroid/graphics/Rect;Landroid/graphics/Rect;)Landroid/graphics/Rect;
+	public static final fun maxAspectRatioInSize (Landroid/util/Size;F)Landroid/util/Size;
+	public static final fun minAspectRatioSurroundingSize (Landroid/util/Size;F)Landroid/util/Size;
+	public static final fun move (Landroid/graphics/Rect;II)Landroid/graphics/Rect;
+	public static final fun move (Landroid/graphics/RectF;FF)Landroid/graphics/RectF;
+	public static final fun projectRegionOfInterest (Landroid/graphics/Rect;Landroid/graphics/Rect;Landroid/graphics/Rect;)Landroid/graphics/Rect;
+	public static final fun projectRegionOfInterest (Landroid/graphics/Rect;Landroid/util/Size;Landroid/graphics/Rect;)Landroid/graphics/Rect;
+	public static final fun projectRegionOfInterest (Landroid/graphics/RectF;Landroid/graphics/RectF;Landroid/graphics/RectF;)Landroid/graphics/RectF;
+	public static final fun projectRegionOfInterest (Landroid/graphics/RectF;Landroid/util/SizeF;Landroid/graphics/RectF;)Landroid/graphics/RectF;
+	public static final fun projectRegionOfInterest (Landroid/util/Size;Landroid/util/Size;Landroid/graphics/Rect;)Landroid/graphics/Rect;
+	public static final fun projectRegionOfInterest (Landroid/util/SizeF;Landroid/util/SizeF;Landroid/graphics/RectF;)Landroid/graphics/RectF;
+	public static final fun resizeRegion (Landroid/util/Size;Landroid/graphics/Rect;Landroid/graphics/Rect;Landroid/util/Size;)Ljava/util/Map;
+	public static final fun scale (Landroid/util/Size;F)Landroid/util/Size;
+	public static final fun scale (Landroid/util/Size;FF)Landroid/util/Size;
+	public static final fun scale (Landroid/util/SizeF;F)Landroid/util/SizeF;
+	public static final fun scale (Landroid/util/SizeF;FF)Landroid/util/SizeF;
+	public static final fun scaleAndCenterSurrounding (Landroid/util/Size;Landroid/util/Size;)Landroid/graphics/Rect;
+	public static final fun scaleAndCenterWithin (Landroid/util/Size;Landroid/graphics/Rect;)Landroid/graphics/Rect;
+	public static final fun scaleAndCenterWithin (Landroid/util/Size;Landroid/util/Size;)Landroid/graphics/Rect;
+	public static final fun scaleCentered (Landroid/util/Size;FF)Landroid/graphics/Rect;
+	public static final fun scaled (Landroid/graphics/RectF;Landroid/util/Size;)Landroid/graphics/RectF;
+	public static final fun size (Landroid/graphics/Rect;)Landroid/util/Size;
+	public static final fun size (Landroid/graphics/RectF;)Landroid/util/SizeF;
+	public static final fun size (Landroid/view/View;)Landroid/util/Size;
+	public static final fun toRect (Landroid/graphics/RectF;)Landroid/graphics/Rect;
+	public static final fun toRect (Landroid/util/Size;)Landroid/graphics/Rect;
+	public static final fun toRectF (Landroid/graphics/Rect;)Landroid/graphics/RectF;
+	public static final fun toRectF (Landroid/util/Size;)Landroid/graphics/RectF;
+	public static final fun toSize (Landroid/util/SizeF;)Landroid/util/Size;
+	public static final fun toSizeF (Landroid/util/Size;)Landroid/util/SizeF;
+	public static final fun transpose (Landroid/util/Size;)Landroid/util/Size;
 }
 
 public final class com/stripe/android/camera/framework/util/MemoizeKt {
@@ -406,6 +474,11 @@ public final class com/stripe/android/camera/scanui/CameraView : androidx/constr
 	public final fun getViewFinderBackgroundView ()Lcom/stripe/android/camera/scanui/ViewFinderBackground;
 	public final fun getViewFinderBorderView ()Landroid/widget/ImageView;
 	public final fun getViewFinderWindowView ()Landroid/view/View;
+}
+
+public abstract interface class com/stripe/android/camera/scanui/ScanFlow {
+	public abstract fun cancelFlow ()V
+	public abstract fun startFlow (Landroid/content/Context;Lkotlinx/coroutines/flow/Flow;Landroid/graphics/Rect;Landroidx/lifecycle/LifecycleOwner;Lkotlinx/coroutines/CoroutineScope;Ljava/lang/Object;)V
 }
 
 public final class com/stripe/android/camera/scanui/ViewFinderBackground : android/view/View {

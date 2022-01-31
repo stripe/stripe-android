@@ -1,6 +1,9 @@
 package com.stripe.android.stripecardscan.framework
 
 import androidx.test.filters.SmallTest
+import com.stripe.android.camera.framework.Analyzer
+import com.stripe.android.camera.framework.AnalyzerFactory
+import com.stripe.android.camera.framework.AnalyzerPool
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
