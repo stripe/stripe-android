@@ -430,3 +430,5 @@ public abstract class com/stripe/android/stripecardscan/scanui/ScanState {
 	public final fun isFinal ()Z
 }
 
+=========
+>>>>>>>>> Temporary merge branch 2
