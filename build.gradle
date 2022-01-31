@@ -12,7 +12,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:7.0.4'
+        classpath 'com.android.tools.build:gradle:7.1.0'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
         classpath "org.jetbrains.dokka:dokka-gradle-plugin:$dokkaVersion"
         classpath "org.jetbrains.kotlinx:binary-compatibility-validator:0.8.0"
@@ -58,13 +58,15 @@ ext {
     composeActivityVersion = '1.4.0'
     espressoVersion = '3.4.0'
     ktlintVersion = '0.43.2'
-    materialVersion = '1.4.0'
+    materialVersion = '1.5.0'
     daggerVersion = '2.40.5'
 
     androidTestVersion = '1.4.0'
+    androidTestJunitVersion = '1.1.3'
+    truthVersion = '1.1.3'
     junitVersion = '4.13.2'
     robolectricVersion = '4.7.3'
-    mockitoCoreVersion = '4.2.0'
+    mockitoCoreVersion = '4.3.1'
     mockitoKotlinVersion = '4.0.0'
 
     group_name = GROUP
@@ -108,5 +110,5 @@ tasks.dokkaHtmlMultiModule.configure {
 
 apiValidation {
     ignoredPackages += ["com.stripe.android.databinding"]
-    ignoredProjects += ["example", "paymentsheet-example", "stripecardscan-example"]
+    ignoredProjects += ["example", "paymentsheet-example", "stripecardscan-example", "identity-example"]
 }

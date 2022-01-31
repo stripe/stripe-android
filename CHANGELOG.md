@@ -1,4 +1,11 @@
 # CHANGELOG
+## X.X.X - 2022-XX-XX
+
+### PaymentSheet
+* [CHANGED] [4515](https://github.com/stripe/stripe-android/pull/4515) Disable card saving by default in PaymentSheet
+### Identity
+### Card scanning
+
 ## 19.1.0 - 2022-01-05
 This release enables new payment methods in the Mobile Payment Element: Eps, Giropay, P24, Klarna, PayPal, AfterpayClearpay.
 For a full list of the supported payment methods, refer to [our documentation](https://stripe.com/docs/payments/payment-methods/integration-options#payment-method-product-support).

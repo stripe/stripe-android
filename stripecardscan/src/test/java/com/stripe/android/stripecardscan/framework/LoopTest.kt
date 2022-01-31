@@ -2,6 +2,14 @@ package com.stripe.android.stripecardscan.framework
 
 import androidx.test.filters.MediumTest
 import androidx.test.filters.SmallTest
+import com.stripe.android.camera.framework.Analyzer
+import com.stripe.android.camera.framework.AnalyzerFactory
+import com.stripe.android.camera.framework.AnalyzerLoopErrorListener
+import com.stripe.android.camera.framework.AnalyzerPool
+import com.stripe.android.camera.framework.FiniteAnalyzerLoop
+import com.stripe.android.camera.framework.ProcessBoundAnalyzerLoop
+import com.stripe.android.camera.framework.StatefulResultHandler
+import com.stripe.android.camera.framework.TerminatingResultHandler
 import com.stripe.android.camera.framework.time.Duration
 import com.stripe.android.camera.framework.time.nanoseconds
 import kotlinx.coroutines.ExperimentalCoroutinesApi

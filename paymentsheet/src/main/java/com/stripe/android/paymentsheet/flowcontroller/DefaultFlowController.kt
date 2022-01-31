@@ -450,9 +450,7 @@ internal class DefaultFlowController @Inject internal constructor(
         }
         is PaymentResult.Failed -> {
             PaymentSheetResult.Failed(
-                IllegalArgumentException(
-                    "Failed to confirm intent: ${paymentResult.throwable.message}"
-                )
+                paymentResult.throwable
             )
         }
         else -> {

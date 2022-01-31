@@ -222,7 +222,8 @@ val Double.milliseconds get(): Duration = DurationNanoseconds.fromMilliseconds(t
 val Double.microseconds get(): Duration = DurationNanoseconds.fromMicroseconds(this)
 val Double.nanoseconds get(): Duration = this.roundToLong().nanoseconds
 
-internal fun min(duration1: Duration, duration2: Duration): Duration =
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+fun min(duration1: Duration, duration2: Duration): Duration =
     when {
         duration1 is DurationInfinitePositive -> duration2
         duration1 is DurationInfiniteNegative -> duration1
@@ -231,7 +232,8 @@ internal fun min(duration1: Duration, duration2: Duration): Duration =
         else -> kotlin.math.min(duration1.inNanoseconds, duration2.inNanoseconds).nanoseconds
     }
 
-internal fun max(duration1: Duration, duration2: Duration): Duration =
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+fun max(duration1: Duration, duration2: Duration): Duration =
     when {
         duration1 is DurationInfinitePositive -> duration1
         duration1 is DurationInfiniteNegative -> duration2

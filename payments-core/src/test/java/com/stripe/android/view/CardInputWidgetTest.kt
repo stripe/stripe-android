@@ -32,6 +32,10 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import org.junit.runner.RunWith
+import org.mockito.kotlin.any
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.times
+import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
 import java.util.Calendar
 import kotlin.test.AfterTest
@@ -1607,6 +1611,29 @@ internal class CardInputWidgetTest {
 
         assertThat(cardInputListener.focusedFields)
             .contains(CardInputListener.FocusField.CardNumber)
+    }
+
+    @Test
+    fun `Requiring postal code after setting CardValidCallback should still notify of change`() {
+        val callback = mock<CardValidCallback>()
+        cardInputWidget.setCardValidCallback(callback)
+
+        cardInputWidget.postalCodeRequired = true
+        postalCodeEditText.setText("54321")
+
+        verify(callback, times(2)).onInputChanged(any(), any())
+    }
+
+    @Test
+    fun `Removing postal code requirement removes CardValidCallback notifications for the field`() {
+        val callback = mock<CardValidCallback>()
+        cardInputWidget.postalCodeRequired = true
+        cardInputWidget.setCardValidCallback(callback)
+        cardInputWidget.postalCodeRequired = false
+
+        postalCodeEditText.setText("54321")
+
+        verify(callback, times(1)).onInputChanged(any(), any())
     }
 
     private fun updateCardNumberAndIdle(cardNumber: String) {
