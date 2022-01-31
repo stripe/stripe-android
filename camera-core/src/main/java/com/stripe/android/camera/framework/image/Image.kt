@@ -9,6 +9,7 @@ import android.os.Build
 import android.util.Log
 import android.util.Size
 import androidx.annotation.CheckResult
+import androidx.annotation.RestrictTo
 import com.stripe.android.camera.framework.util.centerOn
 import com.stripe.android.camera.framework.util.intersectionWith
 import com.stripe.android.camera.framework.util.maxAspectRatioInSize
@@ -35,6 +36,7 @@ private fun getVisiblePreview(previewBounds: Rect) = Size(
  *    size as the [previewBounds]
  * 3. the [previewBounds] and the [cameraPreviewImageSize] have the same orientation
  */
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun determineViewFinderCrop(
     cameraPreviewImageSize: Size,
     previewBounds: Rect,
@@ -66,6 +68,7 @@ fun determineViewFinderCrop(
  *    [previewBounds]
  * 3. the [previewBounds] and the [cameraPreviewImage] have the same orientation
  */
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun cropCameraPreviewToViewFinder(
     cameraPreviewImage: Bitmap,
     previewBounds: Rect,
@@ -93,6 +96,7 @@ fun cropCameraPreviewToViewFinder(
  *    cameraPreviewImage's fields of view are smaller than or the same size as the previewBounds's
  * 3. the previewBounds and the cameraPreviewImage have the same orientation
  */
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun cropCameraPreviewToSquare(
     cameraPreviewImage: Bitmap,
     previewBounds: Rect,
@@ -121,6 +125,7 @@ fun cropCameraPreviewToSquare(
 /**
  * Determine if the device supports OpenGL version 3.1.
  */
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @CheckResult
 fun hasOpenGl31(context: Context): Boolean {
     val openGlVersion = 0x00030001

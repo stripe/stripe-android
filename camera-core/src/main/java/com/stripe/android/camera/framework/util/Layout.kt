@@ -6,6 +6,7 @@ import android.util.Size
 import android.util.SizeF
 import android.view.View
 import androidx.annotation.CheckResult
+import androidx.annotation.RestrictTo
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.roundToInt
@@ -25,6 +26,7 @@ import kotlin.math.roundToInt
  * ```
  */
 @CheckResult
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun maxAspectRatioInSize(area: Size, aspectRatio: Float): Size {
     var width = area.width
     var height = (width / aspectRatio).roundToInt()
@@ -53,6 +55,7 @@ fun maxAspectRatioInSize(area: Size, aspectRatio: Float): Size {
  * ```
  */
 @CheckResult
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun minAspectRatioSurroundingSize(area: Size, aspectRatio: Float): Size {
     var width = area.width
     var height = (width / aspectRatio).roundToInt()
@@ -73,6 +76,7 @@ fun minAspectRatioSurroundingSize(area: Size, aspectRatio: Float): Size {
  * to match.
  */
 @CheckResult
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun adjustSizeToAspectRatio(area: Size, aspectRatio: Float): Size = if (aspectRatio < 1) {
     Size(area.width, (area.width / aspectRatio).roundToInt())
 } else {
@@ -93,6 +97,7 @@ fun adjustSizeToAspectRatio(area: Size, aspectRatio: Float): Size = if (aspectRa
  * resolutions.
  */
 @CheckResult
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun Size.scaleAndCenterWithin(containingSize: Size): Rect {
     val aspectRatio = width.toFloat() / height
 
@@ -110,6 +115,7 @@ fun Size.scaleAndCenterWithin(containingSize: Size): Rect {
 }
 
 @CheckResult
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun Size.scaleAndCenterWithin(containingRect: Rect): Rect =
     this.scaleAndCenterWithin(containingRect.size()).move(containingRect.left, containingRect.top)
 
@@ -131,6 +137,7 @@ fun Size.scaleAndCenterWithin(containingRect: Rect): Rect =
  * resolutions.
  */
 @CheckResult
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun Size.scaleAndCenterSurrounding(surroundedSize: Size): Rect {
     val aspectRatio = width.toFloat() / height
 
@@ -149,6 +156,7 @@ fun Size.scaleAndCenterSurrounding(surroundedSize: Size): Rect {
  * Scale a size based on percentage scale values, and keep track of its position.
  */
 @CheckResult
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun Size.scaleCentered(x: Float, y: Float): Rect {
     val newSize = this.scale(x, y)
     val left = (this.width - newSize.width) / 2
@@ -165,18 +173,21 @@ fun Size.scaleCentered(x: Float, y: Float): Rect {
  * Calculate the new size based on percentage scale values.
  */
 @CheckResult
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun SizeF.scale(x: Float, y: Float) = SizeF(this.width * x, this.height * y)
 
 /**
  * Calculate the new size based on a percentage scale.
  */
 @CheckResult
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun SizeF.scale(scale: Float) = this.scale(scale, scale)
 
 /**
  * Calculate the new size based on percentage scale values.
  */
 @CheckResult
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun Size.scale(x: Float, y: Float): Size =
     Size((this.width * x).roundToInt(), (this.height * y).roundToInt())
 
@@ -184,12 +195,14 @@ fun Size.scale(x: Float, y: Float): Size =
  * Calculate the new size based on a percentage scale.
  */
 @CheckResult
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun Size.scale(scale: Float) = this.scale(scale, scale)
 
 /**
  * Center a size on a given rectangle. The size may be larger or smaller than the rect.
  */
 @CheckResult
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun Size.centerOn(rect: Rect) = Rect(
     /* left */
     rect.centerX() - this.width / 2,
@@ -208,6 +221,7 @@ fun Size.centerOn(rect: Rect) = Rect(
  * For example, scaling a Rect(1, 2, 3, 4) by Size(5, 6) will result in a Rect(5, 12, 15, 24)
  */
 @CheckResult
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun RectF.scaled(scaledSize: Size) = RectF(
     this.left * scaledSize.width,
     this.top * scaledSize.height,
@@ -222,6 +236,7 @@ fun RectF.scaled(scaledSize: Size) = RectF(
  * For example, scaling a Rect(5, 6, 7, 8) by Size(2, 0.5) will result
  */
 @CheckResult
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun RectF.centerScaled(scaleX: Float, scaleY: Float) = RectF(
     this.centerX() - this.width() * scaleX / 2,
     this.centerY() - this.height() * scaleY / 2,
@@ -230,6 +245,7 @@ fun RectF.centerScaled(scaleX: Float, scaleY: Float) = RectF(
 )
 
 @CheckResult
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun Rect.centerScaled(scaleX: Float, scaleY: Float) = Rect(
     this.centerX() - (this.width() * scaleX / 2).toInt(),
     this.centerY() - (this.height() * scaleY / 2).toInt(),
@@ -241,21 +257,25 @@ fun Rect.centerScaled(scaleX: Float, scaleY: Float) = Rect(
  * Converts a size to rectangle with the top left corner at 0,0
  */
 @CheckResult
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun Size.toRect() = Rect(0, 0, this.width, this.height)
 
 @CheckResult
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun Size.toRectF() = RectF(0F, 0F, this.width.toFloat(), this.height.toFloat())
 
 /**
  * Transpose a size's width and height.
  */
 @CheckResult
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun Size.transpose() = Size(this.height, this.width)
 
 /**
  * Return a rect that is the intersection of two other rects
  */
 @CheckResult
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun Rect.intersectionWith(rect: Rect): Rect {
     require(this.intersect(rect)) {
         "Given rects do not intersect $this <> $rect"
@@ -273,6 +293,7 @@ fun Rect.intersectionWith(rect: Rect): Rect {
  * Move relative to its current position
  */
 @CheckResult
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun Rect.move(relativeX: Int, relativeY: Int) = Rect(
     this.left + relativeX,
     this.top + relativeY,
@@ -284,6 +305,7 @@ fun Rect.move(relativeX: Int, relativeY: Int) = Rect(
  * Move relative to its current position
  */
 @CheckResult
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun RectF.move(relativeX: Float, relativeY: Float) = RectF(
     this.left + relativeX,
     this.top + relativeY,
@@ -292,16 +314,20 @@ fun RectF.move(relativeX: Float, relativeY: Float) = RectF(
 )
 
 @CheckResult
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun Size.toSizeF() = SizeF(width.toFloat(), height.toFloat())
 
 @CheckResult
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun SizeF.toSize() = Size(width.roundToInt(), height.roundToInt())
 
 @CheckResult
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun Rect.toRectF() =
     RectF(left.toFloat(), top.toFloat(), right.toFloat(), bottom.toFloat())
 
 @CheckResult
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun RectF.toRect() =
     Rect(left.roundToInt(), top.roundToInt(), right.roundToInt(), bottom.roundToInt())
 
@@ -310,6 +336,7 @@ fun RectF.toRect() =
  * to that new location
  */
 @CheckResult
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun SizeF.projectRegionOfInterest(toSize: SizeF, regionOfInterest: RectF): RectF {
     require(this.width > 0 && this.height > 0) {
         "Cannot project from container with non-positive dimensions"
@@ -328,14 +355,17 @@ fun SizeF.projectRegionOfInterest(toSize: SizeF, regionOfInterest: RectF): RectF
  * to that new location
  */
 @CheckResult
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun Size.projectRegionOfInterest(toSize: Size, regionOfInterest: Rect) =
     this.toSizeF().projectRegionOfInterest(toSize.toSizeF(), regionOfInterest.toRectF()).toRect()
 
 @CheckResult
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun RectF.projectRegionOfInterest(toSize: SizeF, regionOfInterest: RectF) =
     this.size().projectRegionOfInterest(toSize, regionOfInterest.move(-this.left, -this.top))
 
 @CheckResult
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun Rect.projectRegionOfInterest(toSize: Size, regionOfInterest: Rect) =
     this.size().projectRegionOfInterest(toSize, regionOfInterest.move(-this.left, -this.top))
 
@@ -358,6 +388,7 @@ fun Rect.projectRegionOfInterest(toSize: Size, regionOfInterest: Rect) =
  * The position and size of the region of interest are scaled to the new rect.
  */
 @CheckResult
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun RectF.projectRegionOfInterest(toRect: RectF, regionOfInterest: RectF) =
     this.projectRegionOfInterest(toRect.size(), regionOfInterest).move(toRect.left, toRect.top)
 
@@ -380,6 +411,7 @@ fun RectF.projectRegionOfInterest(toRect: RectF, regionOfInterest: RectF) =
  * The position and size of the region of interest are scaled to the new rect.
  */
 @CheckResult
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun Rect.projectRegionOfInterest(toRect: Rect, regionOfInterest: Rect) =
     this.projectRegionOfInterest(toRect.size(), regionOfInterest).move(toRect.left, toRect.top)
 
@@ -419,6 +451,7 @@ fun Rect.projectRegionOfInterest(toRect: Rect, regionOfInterest: Rect) =
  * |_|___|__|
  */
 @CheckResult
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun Size.resizeRegion(
     originalRegion: Rect,
     newRegion: Rect,
@@ -528,24 +561,29 @@ fun Size.resizeRegion(
 /**
  * Determine the size of a [Rect].
  */
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun Rect.size() = Size(width(), height())
 
 /**
  * Determine the size of a [RectF].
  */
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun RectF.size() = SizeF(width(), height())
 
 /**
  * Determine the aspect ratio of a [Size].
  */
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun Size.aspectRatio() = width.toFloat() / height.toFloat()
 
 /**
  * Determine the aspect ratio of a [SizeF].
  */
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun SizeF.aspectRatio() = width / height
 
 /**
  * Determine the size of a [View].
  */
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun View.size() = Size(width, height)

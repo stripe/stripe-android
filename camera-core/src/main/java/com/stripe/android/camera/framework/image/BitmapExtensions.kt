@@ -7,6 +7,7 @@ import android.graphics.Rect
 import android.os.Build
 import android.util.Size
 import androidx.annotation.CheckResult
+import androidx.annotation.RestrictTo
 import com.stripe.android.camera.framework.util.centerOn
 import com.stripe.android.camera.framework.util.intersectionWith
 import com.stripe.android.camera.framework.util.move
@@ -19,6 +20,7 @@ import kotlin.math.max
 import kotlin.math.min
 
 @CheckResult
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun Bitmap.toWebP(): ByteArray =
     ByteArrayOutputStream().use {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
@@ -32,6 +34,7 @@ fun Bitmap.toWebP(): ByteArray =
     }
 
 @CheckResult
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun Bitmap.toJpeg(): ByteArray =
     ByteArrayOutputStream().use {
         this.compress(Bitmap.CompressFormat.JPEG, 92, it)
@@ -44,6 +47,7 @@ fun Bitmap.toJpeg(): ByteArray =
  * within the bounds of the source [Bitmap].
  */
 @CheckResult
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun Bitmap.crop(crop: Rect): Bitmap {
     require(crop.left < crop.right && crop.top < crop.bottom) { "Cannot use negative crop" }
     require(
@@ -58,6 +62,7 @@ fun Bitmap.crop(crop: Rect): Bitmap {
 }
 
 @CheckResult
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun Bitmap.cropCenter(size: Size): Bitmap =
     if (size.width > width || size.height > height) {
         val cropRegion = size.scaleAndCenterWithin(Size(width, height))
@@ -70,6 +75,7 @@ fun Bitmap.cropCenter(size: Size): Bitmap =
  * Scale a [Bitmap] by a given [percentage].
  */
 @CheckResult
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun Bitmap.scale(percentage: Float, filter: Boolean = false): Bitmap =
     if (percentage == 1F) {
         this
@@ -86,12 +92,14 @@ fun Bitmap.scale(percentage: Float, filter: Boolean = false): Bitmap =
  * Get the size of a [Bitmap].
  */
 @CheckResult
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun Bitmap.size() = Size(this.width, this.height)
 
 /**
  * Scale the [Bitmap] to circumscribe the given [Size], then crop the excess.
  */
 @CheckResult
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun Bitmap.scaleAndCrop(size: Size, filter: Boolean = false): Bitmap =
     if (size.width == width && size.height == height) {
         this
@@ -109,6 +117,7 @@ fun Bitmap.scaleAndCrop(size: Size, filter: Boolean = false): Bitmap =
  * gray for the best results
  */
 @CheckResult
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun Bitmap.cropWithFill(cropRegion: Rect): Bitmap {
     val intersectionRegion = this.size().toRect().intersectionWith(cropRegion)
     val result = Bitmap.createBitmap(cropRegion.width(), cropRegion.height(), this.config)
@@ -132,6 +141,7 @@ fun Bitmap.cropWithFill(cropRegion: Rect): Bitmap {
  * Fragments the [Bitmap] into multiple segments and places them in new segments.
  */
 @CheckResult
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun Bitmap.rearrangeBySegments(
     segmentMap: Map<Rect, Rect>
 ): Bitmap {
@@ -173,6 +183,7 @@ fun Bitmap.rearrangeBySegments(
  * remainder of the [Bitmap] into a border. See [resizeRegion] and [rearrangeBySegments].
  */
 @CheckResult
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun Bitmap.zoom(
     originalRegion: Rect,
     newRegion: Rect,
