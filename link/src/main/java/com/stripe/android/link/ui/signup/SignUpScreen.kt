@@ -118,7 +118,7 @@ internal fun SignUpBody(
         AnimatedVisibility(
             visible = signUpStatus == SignUpStatus.InputtingPhone
         ) {
-            PhoneCollectionSection()
+            PhoneCollectionSection(onSignUpClick)
         }
     }
 }
@@ -166,7 +166,9 @@ private fun EmailCollectionSection(
 }
 
 @Composable
-private fun PhoneCollectionSection() {
+private fun PhoneCollectionSection(
+    onSignUpClick: (String) -> Unit
+) {
     var phone by remember { mutableStateOf("") }
 
     Column(
@@ -203,13 +205,13 @@ private fun PhoneCollectionSection() {
         )
         Button(
             onClick = {
-                        onSignUpClick(phone)
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(56.dp)
-                        .padding(vertical = 8.dp),
-                    enabled = phone.length == 10
+                onSignUpClick(phone)
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(56.dp)
+                .padding(vertical = 8.dp),
+            enabled = phone.length == 10
         ) {
             Text(
                 text = stringResource(R.string.sign_up),
