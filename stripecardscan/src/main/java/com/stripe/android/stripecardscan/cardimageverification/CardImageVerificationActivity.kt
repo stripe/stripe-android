@@ -75,7 +75,7 @@ internal data class RequiredCardDetails(
 
 private val MINIMUM_RESOLUTION = Size(1067, 600) // minimum size of OCR
 
-sealed class CardVerificationScanState(isFinal: Boolean) : ScanState(isFinal) {
+internal sealed class CardVerificationScanState(isFinal: Boolean) : ScanState(isFinal) {
     object NotFound : CardVerificationScanState(isFinal = false)
     object Found : CardVerificationScanState(isFinal = false)
     object Correct : CardVerificationScanState(isFinal = true)
@@ -298,7 +298,7 @@ internal open class CardImageVerificationActivity :
         scanState = CardVerificationScanState.NotFound
     }
 
-    override fun ensureValidParams() = when {
+    private fun ensureValidParams() = when {
         params.stripePublishableKey.isEmpty() -> {
             scanFailure(InvalidStripePublishableKeyException("Missing publishable key"))
             false

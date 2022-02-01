@@ -4,15 +4,13 @@ import android.util.Log
 import com.stripe.android.camera.framework.AnalyzerLoopErrorListener
 import com.stripe.android.stripecardscan.framework.Config
 
-abstract class ScanState(val isFinal: Boolean)
+internal abstract class ScanState(val isFinal: Boolean)
 
 internal interface SimpleScanStateful<State : ScanState> {
 
     var scanStatePrevious: ScanState?
     var scanState: ScanState
     val scanErrorListener: ScanErrorListener
-
-    fun ensureValidParams(): Boolean
 
     fun displayState(newState: ScanState, previousState: ScanState?)
 
