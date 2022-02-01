@@ -16,11 +16,4 @@ internal class StripeBrowserProxyReturnActivity : AppCompatActivity() {
         startActivity(Intent(this, StripeBrowserLauncherActivity::class.java))
         finish()
     }
-
-    override fun onNewIntent(intent: Intent?) {
-        super.onNewIntent(intent)
-
-        // given singleTask in the manifest, this will fire if the activity is launched
-        // and it is already in the backstack.
-    }
 }
