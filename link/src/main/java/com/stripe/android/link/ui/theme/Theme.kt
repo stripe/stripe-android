@@ -22,7 +22,7 @@ private val LightColorPalette = lightColors(
 )
 
 @Composable
-internal fun LinkTextFieldColors(): TextFieldColors =
+internal fun linkTextFieldColors() =
     TextFieldDefaults.textFieldColors(
         backgroundColor = MaterialTheme.colors.background,
         focusedIndicatorColor = Color.Transparent,
