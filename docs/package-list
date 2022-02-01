@@ -1,17 +1,6 @@
 $dokka.format:html-v1
 $dokka.linkExtension:html
 
-module:camera-core
-com.stripe.android.camera
-com.stripe.android.camera.framework
-com.stripe.android.camera.framework.exception
-com.stripe.android.camera.framework.image
-com.stripe.android.camera.framework.time
-com.stripe.android.camera.framework.util
-com.stripe.android.camera.scanui
-com.stripe.android.camera.scanui.util
-module:identity
-com.stripe.android.identity
 module:link
 com.stripe.android.link
 module:payments-core
