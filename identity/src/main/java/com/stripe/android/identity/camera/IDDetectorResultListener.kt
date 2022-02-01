@@ -11,7 +11,6 @@ internal class IDDetectorResultListener :
 
     override suspend fun onInterimResult(result: IDDetectorAggregator.InterimResult) {
         Log.d(TAG, "IDDetectorResultListener::onInterimResult: $result")
-
     }
 
     override suspend fun onReset() {

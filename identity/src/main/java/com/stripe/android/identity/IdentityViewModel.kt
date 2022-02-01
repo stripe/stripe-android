@@ -13,6 +13,5 @@ internal class IdentityViewModel : ViewModel() {
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
             return IdentityViewModel() as T
         }
-
     }
 }

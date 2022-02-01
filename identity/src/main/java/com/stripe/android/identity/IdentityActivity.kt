@@ -46,7 +46,6 @@ class IdentityActivity : AppCompatActivity(), CameraErrorListener {
     @VisibleForTesting
     internal val viewModel: IdentityViewModel by viewModels { viewModelFactory }
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
@@ -55,7 +54,6 @@ class IdentityActivity : AppCompatActivity(), CameraErrorListener {
             onCameraReady() // TODO: make the call after permission check
         }
     }
-
 
     /**
      * Get a rect from a view.
@@ -77,7 +75,6 @@ class IdentityActivity : AppCompatActivity(), CameraErrorListener {
     private companion object {
         val TAG: String = IdentityActivity::class.java.simpleName
         val MINIMUM_RESOLUTION = Size(1067, 600) // TODO: decide what to use
-
     }
 
     override fun onCameraOpenError(cause: Throwable?) {

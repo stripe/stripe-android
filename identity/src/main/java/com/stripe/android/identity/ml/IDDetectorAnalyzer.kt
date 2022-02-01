@@ -17,7 +17,6 @@ import org.tensorflow.lite.support.image.ops.ResizeOp
 import java.io.FileInputStream
 import java.nio.channels.FileChannel
 
-
 /**
  * Result category of IDDetector
  */
@@ -33,14 +32,12 @@ data class BoundingBox(
     val height: Float,
 )
 
-
 /**
  * Analyzer to run a model input.
  * TODO(ccen): reimplement with ImageClassifier
  */
 internal class IDDetectorAnalyzer(context: Context) :
     Analyzer<IDDetectorAnalyzer.Input, IDDetectorAnalyzer.State, IDDetectorAnalyzer.Output> {
-
 
     private val tfliteInterpreter = Interpreter(
         context.assets.openFd(modelName).use { fileDescriptor ->
@@ -85,7 +82,6 @@ internal class IDDetectorAnalyzer(context: Context) :
             )
                 .build() // add nomalization
         tensorImage = imageProcessor.process(tensorImage)
-
 
         // inference - input: (1, 224, 224, 3), output: (1, 4), (1, 5)
         val boundingBoxes = Array(1) { FloatArray(OUTPUT_BOUNDING_BOX_TENSOR_SIZE) }
@@ -135,15 +131,14 @@ internal class IDDetectorAnalyzer(context: Context) :
     internal class Factory(
         private val context: Context
     ) : AnalyzerFactory<
-        Input,
-        State,
-        Output,
-        Analyzer<Input, State, Output>
-        > {
+            Input,
+            State,
+            Output,
+            Analyzer<Input, State, Output>
+            > {
         override suspend fun newInstance(): Analyzer<Input, State, Output>? {
             return IDDetectorAnalyzer(context)
         }
-
     }
 
     private companion object {

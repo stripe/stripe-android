@@ -62,7 +62,6 @@ class IdentityScanFlow :
                 coroutineScope,
             )
         }
-
     }
 
     override fun cancelFlow() {

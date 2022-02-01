@@ -30,7 +30,6 @@ interface IdentityVerificationSheet {
         @Parcelize
         class Failed(val throwable: Throwable) : VerificationResult()
 
-
         @JvmSynthetic
         fun toBundle() = bundleOf(EXTRA to this)
 
@@ -42,7 +41,6 @@ interface IdentityVerificationSheet {
                     ?: Failed(IllegalStateException("Failed to get VerificationResult from Intent"))
             }
         }
-
     }
 
     /**
