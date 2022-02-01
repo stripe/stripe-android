@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <com.stripe.android.stripe3ds2.views.BrandZoneView
+            android:id="@+id/ca_brand_zone"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/stripe_3ds2_brand_zone_max_height"
+            android:gravity="center"
+            android:orientation="horizontal"
+            tools:ignore="UnusedAttribute"
+            android:accessibilityTraversalBefore="@+id/ca_challenge_zone" />
+
+        <View style="@style/Stripe3DS2Divider"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/stripe_3ds2_divider"/>
+
+        <com.stripe.android.stripe3ds2.views.ChallengeZoneView
+            android:id="@+id/ca_challenge_zone"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="@dimen/stripe_3ds2_challenge_activity_padding"
+            tools:ignore="UnusedAttribute"
+            android:accessibilityTraversalBefore="@+id/ca_information_zone"
+            android:accessibilityTraversalAfter="@+id/ca_brand_zone" />
+
+        <View style="@style/Stripe3DS2Divider"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/stripe_3ds2_divider"/>
+
+        <com.stripe.android.stripe3ds2.views.InformationZoneView
+            android:id="@+id/ca_information_zone"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="@dimen/stripe_3ds2_challenge_activity_padding"
+            tools:ignore="UnusedAttribute"
+            android:accessibilityTraversalAfter="@+id/ca_challenge_zone" />
+
+    </LinearLayout>
+</ScrollView>

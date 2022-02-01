@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <ImageView
+        android:id="@+id/issuer_image"
+        android:layout_width="0dp"
+        android:layout_weight="1"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        android:contentDescription="@string/stripe_3ds2_bzv_issuer_image_description"
+        android:maxHeight="@dimen/stripe_3ds2_brand_zone_max_height" />
+
+    <View
+        style="@style/Stripe3DS2Divider.Vertical"
+        android:layout_margin="@dimen/stripe_3ds2_brand_zone_horizontal_margin" />
+
+    <ImageView
+        android:id="@+id/payment_system_image"
+        android:layout_width="0dp"
+        android:layout_weight="1"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        android:contentDescription="@string/stripe_3ds2_bzv_payment_system_image_description"
+        android:maxHeight="@dimen/stripe_3ds2_brand_zone_max_height" />
+
+</merge>

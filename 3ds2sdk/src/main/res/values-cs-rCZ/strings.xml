@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+    <string name="stripe_3ds2_bzv_issuer_image_description">Obrázek vydavatele</string>
+    <string name="stripe_3ds2_bzv_payment_system_image_description">Obrázek platebního systému</string>
+    <string name="stripe_3ds2_czv_whitelist_no_label">Ne</string>
+    <string name="stripe_3ds2_czv_whitelist_yes_label">Ano</string>
+    <string name="stripe_3ds2_hzv_cancel_label">Zrušit</string>
+    <string name="stripe_3ds2_hzv_header_label">Bezpečné dokončení platby</string>
+    <string name="stripe_3ds2_processing">Zpracování\u2026</string>
+</resources>
