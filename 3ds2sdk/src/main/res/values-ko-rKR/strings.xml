@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+    <string name="stripe_3ds2_bzv_issuer_image_description">발급자 이미지</string>
+    <string name="stripe_3ds2_bzv_payment_system_image_description">결제 시스템 이미지</string>
+    <string name="stripe_3ds2_czv_whitelist_no_label">아니요</string>
+    <string name="stripe_3ds2_czv_whitelist_yes_label">예</string>
+    <string name="stripe_3ds2_hzv_cancel_label">취소</string>
+    <string name="stripe_3ds2_hzv_header_label">보안 체크 아웃</string>
+    <string name="stripe_3ds2_processing">처리 중\u2026</string>
+</resources>

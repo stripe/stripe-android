@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+    <string name="stripe_3ds2_bzv_issuer_image_description">發卡行圖片</string>
+    <string name="stripe_3ds2_bzv_payment_system_image_description">支付系統圖片</string>
+    <string name="stripe_3ds2_czv_whitelist_no_label">否</string>
+    <string name="stripe_3ds2_czv_whitelist_yes_label">是</string>
+    <string name="stripe_3ds2_hzv_cancel_label">取消</string>
+    <string name="stripe_3ds2_hzv_header_label">安全結帳</string>
+    <string name="stripe_3ds2_processing">處理中\u2026</string>
+</resources>

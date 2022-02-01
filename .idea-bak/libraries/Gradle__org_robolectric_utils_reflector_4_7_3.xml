@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="Gradle: org.robolectric:utils-reflector:4.7.3">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.robolectric/utils-reflector/4.7.3/e27d1c1f867ff08b5aa28cae6a5b1f3d067002e4/utils-reflector-4.7.3.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.robolectric/utils-reflector/4.7.3/d28b7d1d2a8384ee042b5da06bfe4a4458cd2331/utils-reflector-4.7.3-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.robolectric/utils-reflector/4.7.3/dcaf159946612dd9ea9654e7ff323787c787f80/utils-reflector-4.7.3-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

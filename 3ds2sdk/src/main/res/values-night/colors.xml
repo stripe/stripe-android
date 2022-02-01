@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="stripe_3ds2_background">#303030</color>
+    <color name="stripe_3ds2_divider">#a5a5a5</color>
+    <color name="stripe_3ds2_primary">#1f1f1f</color>
+    <color name="stripe_3ds2_accent">#5a5a5a</color>
+    <color name="stripe_3ds2_primary_dark">#000000</color>
+    <color name="stripe_3ds2_control_activated">#c1c1c1</color>
+    <color name="stripe_3ds2_text_color">#e1e1e1</color>
+    <color name="stripe_3ds2_text_color_primary">@android:color/white</color>
+
+    <color name="stripe_3ds2_text_info_toggled">#a1a1a1</color>
+    <color name="stripe_3ds2_text_input_fill">#353535</color>
+    <color name="stripe_3ds2_text_input_hint">#7a7a7a</color>
+    <color name="stripe_3ds2_text_edit">@color/stripe_3ds2_text_color</color>
+    <color name="stripe_3ds2_chevron">#80ffffff</color>
+</resources>

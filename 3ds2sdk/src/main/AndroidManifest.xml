@@ -1,0 +1,9 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.stripe.android.stripe3ds2">
+
+    <application>
+        <activity android:name=".views.ChallengeActivity"
+            android:theme="@style/Stripe3DS2Theme"
+            android:exported="false" />
+    </application>
+</manifest>

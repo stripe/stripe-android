@@ -1,0 +1,1508 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AnalysisUIOptions">
+    <option name="FILTER_RESOLVED_ITEMS" value="false" />
+    <option name="ANALYZE_TEST_SOURCES" value="false" />
+    <option name="SCOPE_TYPE" value="8" />
+    <option name="CUSTOM_SCOPE_NAME" value="Module 'stripe-android.paymentsheet'" />
+    <option name="FILE_MASK" value="strings.xml" />
+  </component>
+  <component name="AndroidLayouts">
+    <shared>
+      <config />
+    </shared>
+  </component>
+  <component name="AndroidLogFilters">
+    <option name="TOOL_WINDOW_LOG_LEVEL" value="error" />
+    <option name="TOOL_WINDOW_CONFIGURED_FILTER" value="No Filters" />
+    <option name="LOGCAT_FORMAT_STRING" value="%1$s %4$c/%5$s: %6$s" />
+  </component>
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="NONE" />
+  </component>
+  <component name="AutomaticModuleUnloader">
+    <loaded-modules>
+      <module name="stripe-android.camera-core" />
+      <module name="stripe-android.paymentsheet" />
+      <module name="stripe-android.wechatpay" />
+      <module name="stripe-android.stripecardscan" />
+      <module name="stripe-android.stripe-core" />
+      <module name="stripe-android" />
+      <module name="stripe-android.stripe-test-e2e" />
+      <module name="stripe-android.link" />
+      <module name="stripe-android.stripecardscan-example" />
+      <module name="stripe-android.paymentsheet-example" />
+      <module name="stripe-android.payments" />
+      <module name="stripe-android.stripe-ui-core" />
+      <module name="stripe-android.payments-core" />
+    </loaded-modules>
+  </component>
+  <component name="BranchesTreeState">
+    <expand>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="LOCAL_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="LOCAL_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:michelle" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="LOCAL_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:michelleb" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+    </expand>
+    <select>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="LOCAL_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:michelleb" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="BRANCH:michelleb/optional-to-hidden" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+    </select>
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="22bf8083-0491-4a14-8fca-999f17193aa0" name="Default Changelist" comment="Only applicable to google play store distribution." />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ChangesViewManager">
+    <option name="groupingKeys">
+      <option value="directory" />
+    </option>
+  </component>
+  <component name="ExecutionTargetManager" SELECTED_TARGET="device_and_snapshot_combo_box_target[/Users/michelleb/.android/avd/Copy_of_Pixel_4_API_29.avd]" />
+  <component name="ExternalProjectsData">
+    <projectState path="$PROJECT_DIR$">
+      <ProjectState />
+    </projectState>
+  </component>
+  <component name="ExternalProjectsManager">
+    <system id="GRADLE">
+      <state>
+        <task path="$PROJECT_DIR$">
+          <activation />
+        </task>
+        <projects_view>
+          <tree_state>
+            <expand>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="stripe-android" type="f1a62948:ProjectNode" />
+              </path>
+            </expand>
+            <select />
+          </tree_state>
+        </projects_view>
+      </state>
+    </system>
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="layoutResourceFile_vertical" />
+        <option value="Kotlin Interface" />
+        <option value="Kotlin Object" />
+        <option value="Class" />
+        <option value="resourceFile" />
+        <option value="layoutResourceFile" />
+        <option value="Kotlin File" />
+        <option value="Kotlin Class" />
+        <option value="valueResourceFile" />
+      </list>
+    </option>
+  </component>
+  <component name="GenerateSignedApkSettings">
+    <option name="KEY_STORE_PATH" value="$PROJECT_DIR$/../debug.keystore" />
+    <option name="KEY_ALIAS" value="androiddebugkey" />
+    <option name="REMEMBER_PASSWORDS" value="true" />
+    <option name="BUILD_TARGET_KEY" value="apk" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="dccc2055e6d76d5ff3c47b3e28258da6470da84e" />
+      </map>
+    </option>
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitSEFilterConfiguration">
+    <file-type-list>
+      <filtered-out-file-type name="LOCAL_BRANCH" />
+      <filtered-out-file-type name="REMOTE_BRANCH" />
+      <filtered-out-file-type name="TAG" />
+      <filtered-out-file-type name="COMMIT_BY_MESSAGE" />
+    </file-type-list>
+  </component>
+  <component name="KotlinMultiplatform">
+    <allAvailableExecutables />
+  </component>
+  <component name="ProjectId" id="1sWsiKQmkX2mWpllBDajSDeHx8J" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="ApkExportedModule" value="stripe-android.paymentsheet-example" />
+    <property name="DEBUGGABLE_DEVICE" value="Copy_of_Pixel_4_API_29_-_Pay [emulator-5554]" />
+    <property name="DEBUGGABLE_PROCESS" value="com.stripe.android.paymentsheet.example" />
+    <property name="DEBUGGER_ID" value="Auto" />
+    <property name="DeviceAndSnapshotComboBoxAction.selectedDevice" value="VirtualDevicePath@/Users/michelleb/.android/avd/Copy_of_Pixel_4_API_29.avd" />
+    <property name="DeviceAndSnapshotComboBoxAction.selectionTime" value="2021-07-19T14:50:21.528102Z" />
+    <property name="ExportApk.ApkPath" value="$PROJECT_DIR$/paymentsheet-example" />
+    <property name="ExportApk.BuildVariants" value="release" />
+    <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="SHOW_ALL_PROCESSES" value="false" />
+    <property name="ScreenRecorderTask.SavePath" value="$USER_HOME$/Desktop/Multi-step.mp4" />
+    <property name="ScreenshotViewer.SavePath" value="$PROJECT_DIR$" />
+    <property name="android-custom-view/Users/michelleb/.gradle/caches/modules-2/files-2.1/androidx.coordinatorlayout/coordinatorlayout/1.1.0/a15529ac349d76a872ae5ef42b84c320c456cd7f/coordinatorlayout-1.1.0-sources.jar!/androidx/coordinatorlayout/widget/CoordinatorLayout.java_SELECTED" value="CoordinatorLayout" />
+    <property name="android-custom-view/Users/michelleb/.gradle/caches/modules-2/files-2.1/androidx.recyclerview/recyclerview/1.2.1/f0f93e67af3f7417bdd560d5142f6dec4fe629c3/recyclerview-1.2.1-sources.jar!/androidx/recyclerview/widget/RecyclerView.java_SELECTED" value="RecyclerView" />
+    <property name="android-custom-view/Users/michelleb/.gradle/caches/modules-2/files-2.1/com.google.android.material/material/1.4.0/51035a8f6342c20d4d8f242d100e6f25e0c271ac/material-1.4.0-sources.jar!/com/google/android/material/appbar/AppBarLayout.java_SELECTED" value="AppBarLayout" />
+    <property name="android-custom-view/Users/michelleb/.gradle/caches/modules-2/files-2.1/com.google.android.material/material/1.4.0/51035a8f6342c20d4d8f242d100e6f25e0c271ac/material-1.4.0-sources.jar!/com/google/android/material/bottomappbar/BottomAppBar.java_SELECTED" value="BottomAppBar" />
+    <property name="android-custom-view/Users/michelleb/.gradle/caches/modules-2/files-2.1/com.google.android.material/material/1.4.0/51035a8f6342c20d4d8f242d100e6f25e0c271ac/material-1.4.0-sources.jar!/com/google/android/material/progressindicator/BaseProgressIndicator.java_SELECTED" value="BaseProgressIndicator" />
+    <property name="android-custom-view/Users/michelleb/.gradle/caches/modules-2/files-2.1/com.google.android.material/material/1.4.0/51035a8f6342c20d4d8f242d100e6f25e0c271ac/material-1.4.0-sources.jar!/com/google/android/material/textfield/TextInputEditText.java_SELECTED" value="TextInputEditText" />
+    <property name="android-custom-view/Users/michelleb/.gradle/caches/modules-2/files-2.1/com.google.android.material/material/1.4.0/51035a8f6342c20d4d8f242d100e6f25e0c271ac/material-1.4.0-sources.jar!/com/google/android/material/textfield/TextInputLayout.java_SELECTED" value="TextInputLayout" />
+    <property name="android-custom-view/Users/michelleb/.gradle/caches/modules-2/files-2.1/com.google.android.material/material/1.5.0/8d3b87c7463f55053836b805e014cb238f64757a/material-1.5.0-sources.jar!/com/google/android/material/textfield/TextInputLayout.java_SELECTED" value="TextInputLayout" />
+    <property name="android-custom-view/Users/michelleb/Library/Android/sdk/sources/android-30/android/view/View.java_SELECTED" value="View" />
+    <property name="android-custom-view/Users/michelleb/Library/Android/sdk/sources/android-30/android/widget/AutoCompleteTextView.java_SELECTED" value="AutoCompleteTextView" />
+    <property name="android-custom-view/Users/michelleb/Library/Android/sdk/sources/android-30/android/widget/CheckBox.java_SELECTED" value="CheckBox" />
+    <property name="android-custom-view/Users/michelleb/Library/Android/sdk/sources/android-30/android/widget/ImageView.java_SELECTED" value="ImageView" />
+    <property name="android-custom-view/Users/michelleb/Library/Android/sdk/sources/android-30/android/widget/TextView.java_SELECTED" value="TextView" />
+    <property name="android-custom-view/Users/michelleb/Library/Android/sdk/sources/android-31/android/view/View.java_SELECTED" value="View" />
+    <property name="android-custom-view/Users/michelleb/Library/Android/sdk/sources/android-31/android/view/ViewGroup.java_SELECTED" value="ViewGroup" />
+    <property name="android-custom-view/Users/michelleb/Library/Android/sdk/sources/android-31/android/widget/TextView.java_SELECTED" value="TextView" />
+    <property name="android-custom-view/Users/michelleb/Library/Android/sdk/sources/android-31/android/widget/TextView.java_TextView_DIMENSIONS" value="1080&#10;1920" />
+    <property name="android-custom-view/Users/michelleb/stripe/stripe-android/3ds2sdk/src/main/kotlin/com/stripe/android/stripe3ds2/views/ThreeDS2WebView.kt_SELECTED" value="ThreeDS2WebView" />
+    <property name="android-custom-view/Users/michelleb/stripe/stripe-android/example/src/main/java/com/stripe/example/activity/GooglePayButton.kt_SELECTED" value="GooglePayButton" />
+    <property name="android-custom-view/Users/michelleb/stripe/stripe-android/payments-core/build/tmp/kapt3/stubs/debug/com/stripe/android/view/CardInputWidget.java_SELECTED" value="CardInputWidget" />
+    <property name="android-custom-view/Users/michelleb/stripe/stripe-android/payments-core/build/tmp/kapt3/stubs/debug/com/stripe/android/view/CardMultilineWidget.java_SELECTED" value="CardMultilineWidget" />
+    <property name="android-custom-view/Users/michelleb/stripe/stripe-android/payments-core/src/main/java/com/stripe/android/paymentsheet/ui/BillingAddressView.kt_SELECTED" value="BillingAddressView" />
+    <property name="android-custom-view/Users/michelleb/stripe/stripe-android/payments-core/src/main/java/com/stripe/android/paymentsheet/ui/GooglePayButton.kt_SELECTED" value="GooglePayButton" />
+    <property name="android-custom-view/Users/michelleb/stripe/stripe-android/payments-core/src/main/java/com/stripe/android/paymentsheet/ui/PrimaryButton.kt_SELECTED" value="PrimaryButton" />
+    <property name="android-custom-view/Users/michelleb/stripe/stripe-android/payments-core/src/main/java/com/stripe/android/view/AddPaymentMethodCardView.kt_SELECTED" value="AddPaymentMethodCardView" />
+    <property name="android-custom-view/Users/michelleb/stripe/stripe-android/payments-core/src/main/java/com/stripe/android/view/AddPaymentMethodFpxView.kt_SELECTED" value="AddPaymentMethodFpxView" />
+    <property name="android-custom-view/Users/michelleb/stripe/stripe-android/payments-core/src/main/java/com/stripe/android/view/AddPaymentMethodNetbankingView.kt_SELECTED" value="AddPaymentMethodNetbankingView" />
+    <property name="android-custom-view/Users/michelleb/stripe/stripe-android/payments-core/src/main/java/com/stripe/android/view/AddPaymentMethodView.kt_SELECTED" value="AddPaymentMethodView" />
+    <property name="android-custom-view/Users/michelleb/stripe/stripe-android/payments-core/src/main/java/com/stripe/android/view/BecsDebitMandateAcceptanceTextView.kt_SELECTED" value="BecsDebitMandateAcceptanceTextView" />
+    <property name="android-custom-view/Users/michelleb/stripe/stripe-android/payments-core/src/main/java/com/stripe/android/view/BecsDebitWidget.kt_SELECTED" value="BecsDebitWidget" />
+    <property name="android-custom-view/Users/michelleb/stripe/stripe-android/payments-core/src/main/java/com/stripe/android/view/CardFormView.kt_SELECTED" value="CardFormView" />
+    <property name="android-custom-view/Users/michelleb/stripe/stripe-android/payments-core/src/main/java/com/stripe/android/view/CardInputWidget.kt_CardInputWidget_DIMENSIONS" value="1080&#10;1920" />
+    <property name="android-custom-view/Users/michelleb/stripe/stripe-android/payments-core/src/main/java/com/stripe/android/view/CardInputWidget.kt_SELECTED" value="CardInputWidget" />
+    <property name="android-custom-view/Users/michelleb/stripe/stripe-android/payments-core/src/main/java/com/stripe/android/view/CardMultilineWidget.kt_CardMultilineWidget_DIMENSIONS" value="1080&#10;1920" />
+    <property name="android-custom-view/Users/michelleb/stripe/stripe-android/payments-core/src/main/java/com/stripe/android/view/CardMultilineWidget.kt_SELECTED" value="CardMultilineWidget" />
+    <property name="android-custom-view/Users/michelleb/stripe/stripe-android/payments-core/src/main/java/com/stripe/android/view/CardNumberEditText.kt_CardNumberEditText_DIMENSIONS" value="1080&#10;1920" />
+    <property name="android-custom-view/Users/michelleb/stripe/stripe-android/payments-core/src/main/java/com/stripe/android/view/CardNumberEditText.kt_SELECTED" value="CardNumberEditText" />
+    <property name="android-custom-view/Users/michelleb/stripe/stripe-android/payments-core/src/main/java/com/stripe/android/view/CardNumberTextInputLayout.kt_SELECTED" value="CardNumberTextInputLayout" />
+    <property name="android-custom-view/Users/michelleb/stripe/stripe-android/payments-core/src/main/java/com/stripe/android/view/CountryTextInputLayout.kt_SELECTED" value="CountryTextInputLayout" />
+    <property name="android-custom-view/Users/michelleb/stripe/stripe-android/payments-core/src/main/java/com/stripe/android/view/CvcEditText.kt_SELECTED" value="CvcEditText" />
+    <property name="android-custom-view/Users/michelleb/stripe/stripe-android/payments-core/src/main/java/com/stripe/android/view/ExpiryDateEditText.kt_SELECTED" value="ExpiryDateEditText" />
+    <property name="android-custom-view/Users/michelleb/stripe/stripe-android/payments-core/src/main/java/com/stripe/android/view/MaskedCardView.kt_SELECTED" value="MaskedCardView" />
+    <property name="android-custom-view/Users/michelleb/stripe/stripe-android/payments-core/src/main/java/com/stripe/android/view/PaymentAuthWebView.kt_SELECTED" value="PaymentAuthWebView" />
+    <property name="android-custom-view/Users/michelleb/stripe/stripe-android/payments-core/src/main/java/com/stripe/android/view/PostalCodeEditText.kt_SELECTED" value="PostalCodeEditText" />
+    <property name="android-custom-view/Users/michelleb/stripe/stripe-android/payments-core/src/main/java/com/stripe/android/view/ShippingInfoWidget.kt_SELECTED" value="ShippingInfoWidget" />
+    <property name="android-custom-view/Users/michelleb/stripe/stripe-android/payments-core/src/main/java/com/stripe/android/view/StripeEditText.kt_SELECTED" value="StripeEditText" />
+    <property name="android-custom-view/Users/michelleb/stripe/stripe-android/paymentsheet/build/tmp/kapt3/stubs/debug/com/stripe/android/paymentsheet/ui/PrimaryButton.java_SELECTED" value="PrimaryButton" />
+    <property name="android-custom-view/Users/michelleb/stripe/stripe-android/paymentsheet/src/main/java/com/stripe/android/paymentsheet/date/ExpiryDateEditText.kt_SELECTED" value="ExpiryDateEditText" />
+    <property name="android-custom-view/Users/michelleb/stripe/stripe-android/paymentsheet/src/main/java/com/stripe/android/paymentsheet/date/StripeEditText.kt_SELECTED" value="StripeEditText" />
+    <property name="android-custom-view/Users/michelleb/stripe/stripe-android/paymentsheet/src/main/java/com/stripe/android/paymentsheet/ui/BillingAddressView.kt_SELECTED" value="BillingAddressView" />
+    <property name="android-custom-view/Users/michelleb/stripe/stripe-android/paymentsheet/src/main/java/com/stripe/android/paymentsheet/ui/GooglePayButton.kt_SELECTED" value="GooglePayButton" />
+    <property name="android-custom-view/Users/michelleb/stripe/stripe-android/paymentsheet/src/main/java/com/stripe/android/paymentsheet/ui/GooglePayDivider.kt_SELECTED" value="GooglePayDivider" />
+    <property name="android-custom-view/Users/michelleb/stripe/stripe-android/paymentsheet/src/main/java/com/stripe/android/paymentsheet/ui/PrimaryButton.kt_SELECTED" value="PrimaryButton" />
+    <property name="android-custom-view/Users/michelleb/stripe/stripe-android/paymentsheet/src/main/java/com/stripe/android/view/CountryTextInputLayout.kt_SELECTED" value="CountryTextInputLayout" />
+    <property name="android-custom-view/Users/michelleb/stripe/stripe-android/stripe/src/main/java/com/stripe/android/view/CardBrandView.kt_SELECTED" value="CardBrandView" />
+    <property name="android-custom-view/Users/michelleb/stripe/stripe-android/stripe/src/main/java/com/stripe/android/view/CardFormView.kt_SELECTED" value="CardFormView" />
+    <property name="android-custom-view/Users/michelleb/stripe/stripe-android/stripe/src/main/java/com/stripe/android/view/CardInputWidget.kt_SELECTED" value="CardInputWidget" />
+    <property name="android-custom-view/Users/michelleb/stripe/stripe-android/stripe/src/main/java/com/stripe/android/view/CardMultilineWidget.kt_SELECTED" value="CardMultilineWidget" />
+    <property name="android-custom-view/Users/michelleb/stripe/stripe-android/stripe/src/main/java/com/stripe/android/view/CardNumberEditText.kt_SELECTED" value="CardNumberEditText" />
+    <property name="android-custom-view/Users/michelleb/stripe/stripe-android/stripe/src/main/java/com/stripe/android/view/CountryTextInputLayout.kt_SELECTED" value="CountryTextInputLayout" />
+    <property name="android-custom-view/Users/michelleb/stripe/stripe-android/stripe/src/main/java/com/stripe/android/view/CvcEditText.kt_SELECTED" value="CvcEditText" />
+    <property name="android-custom-view/Users/michelleb/stripe/stripe-android/stripe/src/main/java/com/stripe/android/view/EmailEditText.kt_SELECTED" value="EmailEditText" />
+    <property name="android-custom-view/Users/michelleb/stripe/stripe-android/stripe/src/main/java/com/stripe/android/view/IconTextInputLayout.java_SELECTED" value="IconTextInputLayout" />
+    <property name="android-custom-view/Users/michelleb/stripe/stripe-android/stripe/src/main/java/com/stripe/android/view/PostalCodeEditText.kt_SELECTED" value="PostalCodeEditText" />
+    <property name="android-custom-view/Users/michelleb/stripe/stripe-android/stripe/src/main/java/com/stripe/android/view/StripeEditText.kt_SELECTED" value="StripeEditText" />
+    <property name="com.intellij.ide.scratch.LRUPopupBuilder$1/New Scratch File" value="TEXT&#10;JSON&#10;Groovy" />
+    <property name="last_directory_selection" value="$PROJECT_DIR$/paymentsheet/src/main/java/com/stripe/android" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="project.structure.last.edited" value="Modules" />
+    <property name="project.structure.proportion" value="0.17" />
+    <property name="project.structure.side.proportion" value="0.2" />
+    <property name="run.code.analysis.last.selected.profile" value="pProject Default" />
+    <property name="settings.editor.selected.configurable" value="preferences.language.Kotlin" />
+    <property name="two.files.diff.last.used.folder" value="$PROJECT_DIR$/../stripe-android-clean/paymentsheet/res" />
+  </component>
+  <component name="PsdUISettings">
+    <option name="MODULE_TAB" value="Properties" />
+    <option name="LAST_EDITED_SIGNING_CONFIG" value="debug" />
+  </component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/example/res/layout" />
+      <recent name="$PROJECT_DIR$/paymentsheet/res/drawable-night" />
+      <recent name="$PROJECT_DIR$/paymentsheet/res/anim" />
+      <recent name="$PROJECT_DIR$/paymentsheet/src/main/java/com/stripe/android/paymentsheet/forms" />
+      <recent name="$PROJECT_DIR$/paymentsheet-example/src/main/res/layout" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/paymentsheet/res/drawable-night" />
+      <recent name="$PROJECT_DIR$/paymentsheet/src/main/java/com/stripe/android/paymentsheet/elements" />
+      <recent name="$PROJECT_DIR$/paymentsheet/src/androidTestDebug" />
+      <recent name="$PROJECT_DIR$/paymentsheet/res/values/" />
+      <recent name="$PROJECT_DIR$/paymentsheet/res/values-el-rGR" />
+    </key>
+    <key name="MoveKotlinTopLevelDeclarationsDialog.RECENTS_KEY">
+      <recent name="com.stripe.android.ui.core.elements" />
+      <recent name="" />
+      <recent name="com.stripe.android" />
+      <recent name="com.stripe.android.paymentsheet.elements.row" />
+      <recent name="com.stripe.android.forms" />
+    </key>
+    <key name="android.template.-2058777385">
+      <recent name="com.stripe.android" />
+    </key>
+    <key name="MoveClassesOrPackagesDialog.RECENTS_KEY">
+      <recent name="com.stripe.android.ui.core.forms" />
+      <recent name="com.stripe.android.ui.core" />
+      <recent name="com.stripe.android.paymentsheet" />
+      <recent name="com.stripe.android.paymentsheet.forms" />
+      <recent name="com.stripe.android.paymentsheet.elements" />
+    </key>
+    <key name="android.template.581038847">
+      <recent name="com.stripe.android.paymentsheet.example.activity" />
+    </key>
+    <key name="CopyKotlinDeclarationDialog.RECENTS_KEY">
+      <recent name="com.stripe.android.paymentsheet.forms" />
+      <recent name="com.stripe.android.ui.core.elements" />
+      <recent name="com.stripe.android.paymentsheet" />
+      <recent name="com.stripe.android.paymentsheet.example.samples.activity" />
+      <recent name="com.stripe.android.paymentsheet.elements" />
+    </key>
+    <key name="android.template.1045563628">
+      <recent name="com.stripe.android.paymentsheet" />
+    </key>
+    <key name="android.template.-1816423453">
+      <recent name="com.stripe.android.paymentsheet.example" />
+    </key>
+    <key name="CopyClassDialog.RECENTS_KEY">
+      <recent name="com.android.i18n.addressinput" />
+    </key>
+  </component>
+  <component name="RunManager" selected="Android App.example">
+    <configuration default="true" type="AndroidJUnit" factoryName="Android JUnit">
+      <useClassPathOnly />
+      <option name="MAIN_CLASS_NAME" value="" />
+      <option name="METHOD_NAME" value="" />
+      <option name="TEST_OBJECT" value="class" />
+      <option name="PARAMETERS" value="" />
+      <option name="WORKING_DIRECTORY" value="$MODULE_DIR$" />
+      <method v="2">
+        <option name="Android.Gradle.BeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="app" type="AndroidRunConfigurationType" factoryName="Android App">
+      <option name="DEPLOY" value="true" />
+      <option name="DEPLOY_APK_FROM_BUNDLE" value="false" />
+      <option name="DEPLOY_AS_INSTANT" value="false" />
+      <option name="ARTIFACT_NAME" value="" />
+      <option name="PM_INSTALL_OPTIONS" value="" />
+      <option name="ALL_USERS" value="false" />
+      <option name="ALWAYS_INSTALL_WITH_PM" value="false" />
+      <option name="DYNAMIC_FEATURES_DISABLED_LIST" value="" />
+      <option name="ACTIVITY_EXTRA_FLAGS" value="" />
+      <option name="MODE" value="default_activity" />
+      <option name="CLEAR_LOGCAT" value="false" />
+      <option name="SHOW_LOGCAT_AUTOMATICALLY" value="false" />
+      <option name="SKIP_NOOP_APK_INSTALLATIONS" value="true" />
+      <option name="FORCE_STOP_RUNNING_APP" value="true" />
+      <option name="TARGET_SELECTION_MODE" value="DEVICE_AND_SNAPSHOT_COMBO_BOX" />
+      <option name="SELECTED_CLOUD_MATRIX_CONFIGURATION_ID" value="-1" />
+      <option name="SELECTED_CLOUD_MATRIX_PROJECT_ID" value="" />
+      <option name="DEBUGGER_TYPE" value="Auto" />
+      <Auto>
+        <option name="USE_JAVA_AWARE_DEBUGGER" value="false" />
+        <option name="SHOW_STATIC_VARS" value="true" />
+        <option name="WORKING_DIR" value="" />
+        <option name="TARGET_LOGGING_CHANNELS" value="lldb process:gdb-remote packets" />
+        <option name="SHOW_OPTIMIZED_WARNING" value="true" />
+      </Auto>
+      <Hybrid>
+        <option name="USE_JAVA_AWARE_DEBUGGER" value="false" />
+        <option name="SHOW_STATIC_VARS" value="true" />
+        <option name="WORKING_DIR" value="" />
+        <option name="TARGET_LOGGING_CHANNELS" value="lldb process:gdb-remote packets" />
+        <option name="SHOW_OPTIMIZED_WARNING" value="true" />
+      </Hybrid>
+      <Java />
+      <Native>
+        <option name="USE_JAVA_AWARE_DEBUGGER" value="false" />
+        <option name="SHOW_STATIC_VARS" value="true" />
+        <option name="WORKING_DIR" value="" />
+        <option name="TARGET_LOGGING_CHANNELS" value="lldb process:gdb-remote packets" />
+        <option name="SHOW_OPTIMIZED_WARNING" value="true" />
+      </Native>
+      <Profilers>
+        <option name="ADVANCED_PROFILING_ENABLED" value="false" />
+        <option name="STARTUP_PROFILING_ENABLED" value="false" />
+        <option name="STARTUP_CPU_PROFILING_ENABLED" value="false" />
+        <option name="STARTUP_CPU_PROFILING_CONFIGURATION_NAME" value="Sample Java Methods" />
+        <option name="STARTUP_NATIVE_MEMORY_PROFILING_ENABLED" value="false" />
+        <option name="NATIVE_MEMORY_SAMPLE_RATE_BYTES" value="2048" />
+      </Profilers>
+      <option name="DEEP_LINK" value="" />
+      <option name="ACTIVITY_CLASS" value="" />
+      <option name="SEARCH_ACTIVITY_IN_GLOBAL_SCOPE" value="false" />
+      <option name="SKIP_ACTIVITY_VALIDATION" value="false" />
+      <method v="2">
+        <option name="Android.Gradle.BeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="cardverificationsheet-example" type="AndroidRunConfigurationType" factoryName="Android App">
+      <module name="stripe-android.cardverificationsheet-example" />
+      <option name="DEPLOY" value="true" />
+      <option name="DEPLOY_APK_FROM_BUNDLE" value="false" />
+      <option name="DEPLOY_AS_INSTANT" value="false" />
+      <option name="ARTIFACT_NAME" value="" />
+      <option name="PM_INSTALL_OPTIONS" value="" />
+      <option name="ALL_USERS" value="false" />
+      <option name="ALWAYS_INSTALL_WITH_PM" value="false" />
+      <option name="DYNAMIC_FEATURES_DISABLED_LIST" value="" />
+      <option name="ACTIVITY_EXTRA_FLAGS" value="" />
+      <option name="MODE" value="default_activity" />
+      <option name="CLEAR_LOGCAT" value="false" />
+      <option name="SHOW_LOGCAT_AUTOMATICALLY" value="false" />
+      <option name="SKIP_NOOP_APK_INSTALLATIONS" value="true" />
+      <option name="FORCE_STOP_RUNNING_APP" value="true" />
+      <option name="TARGET_SELECTION_MODE" value="DEVICE_AND_SNAPSHOT_COMBO_BOX" />
+      <option name="SELECTED_CLOUD_MATRIX_CONFIGURATION_ID" value="-1" />
+      <option name="SELECTED_CLOUD_MATRIX_PROJECT_ID" value="" />
+      <option name="DEBUGGER_TYPE" value="Auto" />
+      <Auto>
+        <option name="USE_JAVA_AWARE_DEBUGGER" value="false" />
+        <option name="SHOW_STATIC_VARS" value="true" />
+        <option name="WORKING_DIR" value="" />
+        <option name="TARGET_LOGGING_CHANNELS" value="lldb process:gdb-remote packets" />
+        <option name="SHOW_OPTIMIZED_WARNING" value="true" />
+      </Auto>
+      <Hybrid>
+        <option name="USE_JAVA_AWARE_DEBUGGER" value="false" />
+        <option name="SHOW_STATIC_VARS" value="true" />
+        <option name="WORKING_DIR" value="" />
+        <option name="TARGET_LOGGING_CHANNELS" value="lldb process:gdb-remote packets" />
+        <option name="SHOW_OPTIMIZED_WARNING" value="true" />
+      </Hybrid>
+      <Java />
+      <Native>
+        <option name="USE_JAVA_AWARE_DEBUGGER" value="false" />
+        <option name="SHOW_STATIC_VARS" value="true" />
+        <option name="WORKING_DIR" value="" />
+        <option name="TARGET_LOGGING_CHANNELS" value="lldb process:gdb-remote packets" />
+        <option name="SHOW_OPTIMIZED_WARNING" value="true" />
+      </Native>
+      <Profilers>
+        <option name="ADVANCED_PROFILING_ENABLED" value="false" />
+        <option name="STARTUP_PROFILING_ENABLED" value="false" />
+        <option name="STARTUP_CPU_PROFILING_ENABLED" value="false" />
+        <option name="STARTUP_CPU_PROFILING_CONFIGURATION_NAME" value="Sample Java Methods" />
+        <option name="STARTUP_NATIVE_MEMORY_PROFILING_ENABLED" value="false" />
+        <option name="NATIVE_MEMORY_SAMPLE_RATE_BYTES" value="2048" />
+      </Profilers>
+      <option name="DEEP_LINK" value="" />
+      <option name="ACTIVITY_CLASS" value="" />
+      <option name="SEARCH_ACTIVITY_IN_GLOBAL_SCOPE" value="false" />
+      <option name="SKIP_ACTIVITY_VALIDATION" value="false" />
+      <method v="2">
+        <option name="Android.Gradle.BeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="example-forms" type="AndroidRunConfigurationType" factoryName="Android App" activateToolWindowBeforeRun="false">
+      <module name="stripe-android.example-forms" />
+      <option name="DEPLOY" value="true" />
+      <option name="DEPLOY_APK_FROM_BUNDLE" value="false" />
+      <option name="DEPLOY_AS_INSTANT" value="false" />
+      <option name="ARTIFACT_NAME" value="" />
+      <option name="PM_INSTALL_OPTIONS" value="" />
+      <option name="ALL_USERS" value="false" />
+      <option name="ALWAYS_INSTALL_WITH_PM" value="false" />
+      <option name="DYNAMIC_FEATURES_DISABLED_LIST" value="" />
+      <option name="ACTIVITY_EXTRA_FLAGS" value="" />
+      <option name="MODE" value="default_activity" />
+      <option name="CLEAR_LOGCAT" value="false" />
+      <option name="SHOW_LOGCAT_AUTOMATICALLY" value="false" />
+      <option name="SKIP_NOOP_APK_INSTALLATIONS" value="true" />
+      <option name="FORCE_STOP_RUNNING_APP" value="true" />
+      <option name="TARGET_SELECTION_MODE" value="DEVICE_AND_SNAPSHOT_COMBO_BOX" />
+      <option name="SELECTED_CLOUD_MATRIX_CONFIGURATION_ID" value="-1" />
+      <option name="SELECTED_CLOUD_MATRIX_PROJECT_ID" value="" />
+      <option name="DEBUGGER_TYPE" value="Auto" />
+      <Auto>
+        <option name="USE_JAVA_AWARE_DEBUGGER" value="false" />
+        <option name="SHOW_STATIC_VARS" value="true" />
+        <option name="WORKING_DIR" value="" />
+        <option name="TARGET_LOGGING_CHANNELS" value="lldb process:gdb-remote packets" />
+        <option name="SHOW_OPTIMIZED_WARNING" value="true" />
+      </Auto>
+      <Hybrid>
+        <option name="USE_JAVA_AWARE_DEBUGGER" value="false" />
+        <option name="SHOW_STATIC_VARS" value="true" />
+        <option name="WORKING_DIR" value="" />
+        <option name="TARGET_LOGGING_CHANNELS" value="lldb process:gdb-remote packets" />
+        <option name="SHOW_OPTIMIZED_WARNING" value="true" />
+      </Hybrid>
+      <Java />
+      <Native>
+        <option name="USE_JAVA_AWARE_DEBUGGER" value="false" />
+        <option name="SHOW_STATIC_VARS" value="true" />
+        <option name="WORKING_DIR" value="" />
+        <option name="TARGET_LOGGING_CHANNELS" value="lldb process:gdb-remote packets" />
+        <option name="SHOW_OPTIMIZED_WARNING" value="true" />
+      </Native>
+      <Profilers>
+        <option name="ADVANCED_PROFILING_ENABLED" value="false" />
+        <option name="STARTUP_PROFILING_ENABLED" value="false" />
+        <option name="STARTUP_CPU_PROFILING_ENABLED" value="false" />
+        <option name="STARTUP_CPU_PROFILING_CONFIGURATION_NAME" value="Sample Java Methods" />
+        <option name="STARTUP_NATIVE_MEMORY_PROFILING_ENABLED" value="false" />
+        <option name="NATIVE_MEMORY_SAMPLE_RATE_BYTES" value="2048" />
+      </Profilers>
+      <option name="DEEP_LINK" value="" />
+      <option name="ACTIVITY_CLASS" value="" />
+      <option name="SEARCH_ACTIVITY_IN_GLOBAL_SCOPE" value="false" />
+      <option name="SKIP_ACTIVITY_VALIDATION" value="false" />
+      <method v="2">
+        <option name="Android.Gradle.BeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="example" type="AndroidRunConfigurationType" factoryName="Android App" activateToolWindowBeforeRun="false">
+      <module name="stripe-android.example" />
+      <option name="DEPLOY" value="true" />
+      <option name="DEPLOY_APK_FROM_BUNDLE" value="false" />
+      <option name="DEPLOY_AS_INSTANT" value="false" />
+      <option name="ARTIFACT_NAME" value="" />
+      <option name="PM_INSTALL_OPTIONS" value="" />
+      <option name="ALL_USERS" value="false" />
+      <option name="ALWAYS_INSTALL_WITH_PM" value="false" />
+      <option name="DYNAMIC_FEATURES_DISABLED_LIST" value="" />
+      <option name="ACTIVITY_EXTRA_FLAGS" value="" />
+      <option name="MODE" value="default_activity" />
+      <option name="CLEAR_LOGCAT" value="false" />
+      <option name="SHOW_LOGCAT_AUTOMATICALLY" value="false" />
+      <option name="SKIP_NOOP_APK_INSTALLATIONS" value="true" />
+      <option name="FORCE_STOP_RUNNING_APP" value="true" />
+      <option name="TARGET_SELECTION_MODE" value="DEVICE_AND_SNAPSHOT_COMBO_BOX" />
+      <option name="SELECTED_CLOUD_MATRIX_CONFIGURATION_ID" value="-1" />
+      <option name="SELECTED_CLOUD_MATRIX_PROJECT_ID" value="" />
+      <option name="DEBUGGER_TYPE" value="Auto" />
+      <Auto>
+        <option name="USE_JAVA_AWARE_DEBUGGER" value="false" />
+        <option name="SHOW_STATIC_VARS" value="true" />
+        <option name="WORKING_DIR" value="" />
+        <option name="TARGET_LOGGING_CHANNELS" value="lldb process:gdb-remote packets" />
+        <option name="SHOW_OPTIMIZED_WARNING" value="true" />
+      </Auto>
+      <Hybrid>
+        <option name="USE_JAVA_AWARE_DEBUGGER" value="false" />
+        <option name="SHOW_STATIC_VARS" value="true" />
+        <option name="WORKING_DIR" value="" />
+        <option name="TARGET_LOGGING_CHANNELS" value="lldb process:gdb-remote packets" />
+        <option name="SHOW_OPTIMIZED_WARNING" value="true" />
+      </Hybrid>
+      <Java />
+      <Native>
+        <option name="USE_JAVA_AWARE_DEBUGGER" value="false" />
+        <option name="SHOW_STATIC_VARS" value="true" />
+        <option name="WORKING_DIR" value="" />
+        <option name="TARGET_LOGGING_CHANNELS" value="lldb process:gdb-remote packets" />
+        <option name="SHOW_OPTIMIZED_WARNING" value="true" />
+      </Native>
+      <Profilers>
+        <option name="ADVANCED_PROFILING_ENABLED" value="false" />
+        <option name="STARTUP_PROFILING_ENABLED" value="false" />
+        <option name="STARTUP_CPU_PROFILING_ENABLED" value="false" />
+        <option name="STARTUP_CPU_PROFILING_CONFIGURATION_NAME" value="Sample Java Methods" />
+        <option name="STARTUP_NATIVE_MEMORY_PROFILING_ENABLED" value="false" />
+        <option name="NATIVE_MEMORY_SAMPLE_RATE_BYTES" value="2048" />
+      </Profilers>
+      <option name="DEEP_LINK" value="" />
+      <option name="ACTIVITY_CLASS" value="" />
+      <option name="SEARCH_ACTIVITY_IN_GLOBAL_SCOPE" value="false" />
+      <option name="SKIP_ACTIVITY_VALIDATION" value="false" />
+      <method v="2">
+        <option name="Android.Gradle.BeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="paymentsheet-example" type="AndroidRunConfigurationType" factoryName="Android App" activateToolWindowBeforeRun="false">
+      <module name="stripe-android.paymentsheet-example" />
+      <option name="DEPLOY" value="true" />
+      <option name="DEPLOY_APK_FROM_BUNDLE" value="false" />
+      <option name="DEPLOY_AS_INSTANT" value="false" />
+      <option name="ARTIFACT_NAME" value="" />
+      <option name="PM_INSTALL_OPTIONS" value="" />
+      <option name="ALL_USERS" value="true" />
+      <option name="ALWAYS_INSTALL_WITH_PM" value="false" />
+      <option name="DYNAMIC_FEATURES_DISABLED_LIST" value="" />
+      <option name="ACTIVITY_EXTRA_FLAGS" value="" />
+      <option name="MODE" value="default_activity" />
+      <option name="CLEAR_LOGCAT" value="false" />
+      <option name="SHOW_LOGCAT_AUTOMATICALLY" value="false" />
+      <option name="SKIP_NOOP_APK_INSTALLATIONS" value="true" />
+      <option name="FORCE_STOP_RUNNING_APP" value="true" />
+      <option name="TARGET_SELECTION_MODE" value="SHOW_DIALOG" />
+      <option name="SELECTED_CLOUD_MATRIX_CONFIGURATION_ID" value="-1" />
+      <option name="SELECTED_CLOUD_MATRIX_PROJECT_ID" value="" />
+      <option name="DEBUGGER_TYPE" value="Auto" />
+      <Auto>
+        <option name="USE_JAVA_AWARE_DEBUGGER" value="false" />
+        <option name="SHOW_STATIC_VARS" value="true" />
+        <option name="WORKING_DIR" value="" />
+        <option name="TARGET_LOGGING_CHANNELS" value="lldb process:gdb-remote packets" />
+        <option name="SHOW_OPTIMIZED_WARNING" value="true" />
+      </Auto>
+      <Hybrid>
+        <option name="USE_JAVA_AWARE_DEBUGGER" value="false" />
+        <option name="SHOW_STATIC_VARS" value="true" />
+        <option name="WORKING_DIR" value="" />
+        <option name="TARGET_LOGGING_CHANNELS" value="lldb process:gdb-remote packets" />
+        <option name="SHOW_OPTIMIZED_WARNING" value="true" />
+      </Hybrid>
+      <Java />
+      <Native>
+        <option name="USE_JAVA_AWARE_DEBUGGER" value="false" />
+        <option name="SHOW_STATIC_VARS" value="true" />
+        <option name="WORKING_DIR" value="" />
+        <option name="TARGET_LOGGING_CHANNELS" value="lldb process:gdb-remote packets" />
+        <option name="SHOW_OPTIMIZED_WARNING" value="true" />
+      </Native>
+      <Profilers>
+        <option name="ADVANCED_PROFILING_ENABLED" value="false" />
+        <option name="STARTUP_PROFILING_ENABLED" value="false" />
+        <option name="STARTUP_CPU_PROFILING_ENABLED" value="false" />
+        <option name="STARTUP_CPU_PROFILING_CONFIGURATION_NAME" value="Sample Java Methods" />
+        <option name="STARTUP_NATIVE_MEMORY_PROFILING_ENABLED" value="false" />
+        <option name="NATIVE_MEMORY_SAMPLE_RATE_BYTES" value="2048" />
+      </Profilers>
+      <option name="DEEP_LINK" value="" />
+      <option name="ACTIVITY_CLASS" value="" />
+      <option name="SEARCH_ACTIVITY_IN_GLOBAL_SCOPE" value="false" />
+      <option name="SKIP_ACTIVITY_VALIDATION" value="false" />
+      <method v="2">
+        <option name="Android.Gradle.BeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="samplestore" type="AndroidRunConfigurationType" factoryName="Android App">
+      <module name="stripe-android.samplestore" />
+      <option name="DEPLOY" value="true" />
+      <option name="DEPLOY_APK_FROM_BUNDLE" value="false" />
+      <option name="DEPLOY_AS_INSTANT" value="false" />
+      <option name="ARTIFACT_NAME" value="" />
+      <option name="PM_INSTALL_OPTIONS" value="" />
+      <option name="ALL_USERS" value="false" />
+      <option name="ALWAYS_INSTALL_WITH_PM" value="false" />
+      <option name="DYNAMIC_FEATURES_DISABLED_LIST" value="" />
+      <option name="ACTIVITY_EXTRA_FLAGS" value="" />
+      <option name="MODE" value="default_activity" />
+      <option name="CLEAR_LOGCAT" value="false" />
+      <option name="SHOW_LOGCAT_AUTOMATICALLY" value="false" />
+      <option name="SKIP_NOOP_APK_INSTALLATIONS" value="true" />
+      <option name="FORCE_STOP_RUNNING_APP" value="true" />
+      <option name="TARGET_SELECTION_MODE" value="DEVICE_AND_SNAPSHOT_COMBO_BOX" />
+      <option name="SELECTED_CLOUD_MATRIX_CONFIGURATION_ID" value="-1" />
+      <option name="SELECTED_CLOUD_MATRIX_PROJECT_ID" value="" />
+      <option name="DEBUGGER_TYPE" value="Auto" />
+      <Auto>
+        <option name="USE_JAVA_AWARE_DEBUGGER" value="false" />
+        <option name="SHOW_STATIC_VARS" value="true" />
+        <option name="WORKING_DIR" value="" />
+        <option name="TARGET_LOGGING_CHANNELS" value="lldb process:gdb-remote packets" />
+        <option name="SHOW_OPTIMIZED_WARNING" value="true" />
+      </Auto>
+      <Hybrid>
+        <option name="USE_JAVA_AWARE_DEBUGGER" value="false" />
+        <option name="SHOW_STATIC_VARS" value="true" />
+        <option name="WORKING_DIR" value="" />
+        <option name="TARGET_LOGGING_CHANNELS" value="lldb process:gdb-remote packets" />
+        <option name="SHOW_OPTIMIZED_WARNING" value="true" />
+      </Hybrid>
+      <Java />
+      <Native>
+        <option name="USE_JAVA_AWARE_DEBUGGER" value="false" />
+        <option name="SHOW_STATIC_VARS" value="true" />
+        <option name="WORKING_DIR" value="" />
+        <option name="TARGET_LOGGING_CHANNELS" value="lldb process:gdb-remote packets" />
+        <option name="SHOW_OPTIMIZED_WARNING" value="true" />
+      </Native>
+      <Profilers>
+        <option name="ADVANCED_PROFILING_ENABLED" value="false" />
+        <option name="STARTUP_PROFILING_ENABLED" value="false" />
+        <option name="STARTUP_CPU_PROFILING_ENABLED" value="false" />
+        <option name="STARTUP_CPU_PROFILING_CONFIGURATION_NAME" value="Sample Java Methods" />
+        <option name="STARTUP_NATIVE_MEMORY_PROFILING_ENABLED" value="false" />
+        <option name="NATIVE_MEMORY_SAMPLE_RATE_BYTES" value="2048" />
+      </Profilers>
+      <option name="DEEP_LINK" value="" />
+      <option name="ACTIVITY_CLASS" value="" />
+      <option name="SEARCH_ACTIVITY_IN_GLOBAL_SCOPE" value="false" />
+      <option name="SKIP_ACTIVITY_VALIDATION" value="false" />
+      <method v="2">
+        <option name="Android.Gradle.BeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="stripecardscan-example" type="AndroidRunConfigurationType" factoryName="Android App" activateToolWindowBeforeRun="false">
+      <module name="stripe-android.stripecardscan-example" />
+      <option name="DEPLOY" value="true" />
+      <option name="DEPLOY_APK_FROM_BUNDLE" value="false" />
+      <option name="DEPLOY_AS_INSTANT" value="false" />
+      <option name="ARTIFACT_NAME" value="" />
+      <option name="PM_INSTALL_OPTIONS" value="" />
+      <option name="ALL_USERS" value="false" />
+      <option name="ALWAYS_INSTALL_WITH_PM" value="false" />
+      <option name="DYNAMIC_FEATURES_DISABLED_LIST" value="" />
+      <option name="ACTIVITY_EXTRA_FLAGS" value="" />
+      <option name="MODE" value="default_activity" />
+      <option name="CLEAR_LOGCAT" value="false" />
+      <option name="SHOW_LOGCAT_AUTOMATICALLY" value="false" />
+      <option name="SKIP_NOOP_APK_INSTALLATIONS" value="true" />
+      <option name="FORCE_STOP_RUNNING_APP" value="true" />
+      <option name="TARGET_SELECTION_MODE" value="DEVICE_AND_SNAPSHOT_COMBO_BOX" />
+      <option name="SELECTED_CLOUD_MATRIX_CONFIGURATION_ID" value="-1" />
+      <option name="SELECTED_CLOUD_MATRIX_PROJECT_ID" value="" />
+      <option name="DEBUGGER_TYPE" value="Auto" />
+      <Auto>
+        <option name="USE_JAVA_AWARE_DEBUGGER" value="false" />
+        <option name="SHOW_STATIC_VARS" value="true" />
+        <option name="WORKING_DIR" value="" />
+        <option name="TARGET_LOGGING_CHANNELS" value="lldb process:gdb-remote packets" />
+        <option name="SHOW_OPTIMIZED_WARNING" value="true" />
+      </Auto>
+      <Hybrid>
+        <option name="USE_JAVA_AWARE_DEBUGGER" value="false" />
+        <option name="SHOW_STATIC_VARS" value="true" />
+        <option name="WORKING_DIR" value="" />
+        <option name="TARGET_LOGGING_CHANNELS" value="lldb process:gdb-remote packets" />
+        <option name="SHOW_OPTIMIZED_WARNING" value="true" />
+      </Hybrid>
+      <Java />
+      <Native>
+        <option name="USE_JAVA_AWARE_DEBUGGER" value="false" />
+        <option name="SHOW_STATIC_VARS" value="true" />
+        <option name="WORKING_DIR" value="" />
+        <option name="TARGET_LOGGING_CHANNELS" value="lldb process:gdb-remote packets" />
+        <option name="SHOW_OPTIMIZED_WARNING" value="true" />
+      </Native>
+      <Profilers>
+        <option name="ADVANCED_PROFILING_ENABLED" value="false" />
+        <option name="STARTUP_PROFILING_ENABLED" value="false" />
+        <option name="STARTUP_CPU_PROFILING_ENABLED" value="false" />
+        <option name="STARTUP_CPU_PROFILING_CONFIGURATION_NAME" value="Sample Java Methods" />
+        <option name="STARTUP_NATIVE_MEMORY_PROFILING_ENABLED" value="false" />
+        <option name="NATIVE_MEMORY_SAMPLE_RATE_BYTES" value="2048" />
+      </Profilers>
+      <option name="DEEP_LINK" value="" />
+      <option name="ACTIVITY_CLASS" value="" />
+      <option name="SEARCH_ACTIVITY_IN_GLOBAL_SCOPE" value="false" />
+      <option name="SKIP_ACTIVITY_VALIDATION" value="false" />
+      <method v="2">
+        <option name="Android.Gradle.BeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="FormViewModelTest.test get target values" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+      <ExternalSystemSettings>
+        <option name="executionName" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="externalSystemIdString" value="GRADLE" />
+        <option name="scriptParameters" value="--tests &quot;com.stripe.android.paymentsheet.forms.FormViewModelTest.test get target values&quot;" />
+        <option name="taskDescriptions">
+          <list />
+        </option>
+        <option name="taskNames">
+          <list>
+            <option value=":paymentsheet:cleanTestDebugUnitTest" />
+            <option value=":paymentsheet:testDebugUnitTest" />
+          </list>
+        </option>
+        <option name="vmOptions" />
+      </ExternalSystemSettings>
+      <ExternalSystemDebugServerProcess>false</ExternalSystemDebugServerProcess>
+      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
+      <DebugAllEnabled>false</DebugAllEnabled>
+      <method v="2" />
+    </configuration>
+    <configuration name="FormViewModelTest.test" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+      <ExternalSystemSettings>
+        <option name="executionName" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="externalSystemIdString" value="GRADLE" />
+        <option name="scriptParameters" value="--tests &quot;com.stripe.android.paymentsheet.forms.FormViewModelTest.test&quot;" />
+        <option name="taskDescriptions">
+          <list />
+        </option>
+        <option name="taskNames">
+          <list>
+            <option value=":paymentsheet:cleanTestDebugUnitTest" />
+            <option value=":paymentsheet:testDebugUnitTest" />
+          </list>
+        </option>
+        <option name="vmOptions" />
+      </ExternalSystemSettings>
+      <ExternalSystemDebugServerProcess>false</ExternalSystemDebugServerProcess>
+      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
+      <DebugAllEnabled>false</DebugAllEnabled>
+      <method v="2" />
+    </configuration>
+    <configuration name="FormViewModelTest.url format" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+      <ExternalSystemSettings>
+        <option name="executionName" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="externalSystemIdString" value="GRADLE" />
+        <option name="scriptParameters" value="--tests &quot;com.stripe.android.paymentsheet.forms.FormViewModelTest.url format&quot;" />
+        <option name="taskDescriptions">
+          <list />
+        </option>
+        <option name="taskNames">
+          <list>
+            <option value=":paymentsheet:cleanTestDebugUnitTest" />
+            <option value=":paymentsheet:testDebugUnitTest" />
+          </list>
+        </option>
+        <option name="vmOptions" />
+      </ExternalSystemSettings>
+      <ExternalSystemDebugServerProcess>false</ExternalSystemDebugServerProcess>
+      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
+      <DebugAllEnabled>false</DebugAllEnabled>
+      <method v="2" />
+    </configuration>
+    <configuration name="SupportedPaymentMethodTest" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+      <ExternalSystemSettings>
+        <option name="executionName" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="externalSystemIdString" value="GRADLE" />
+        <option name="scriptParameters" value="--tests &quot;com.stripe.android.paymentsheet.model.SupportedPaymentMethodTest&quot;" />
+        <option name="taskDescriptions">
+          <list />
+        </option>
+        <option name="taskNames">
+          <list>
+            <option value=":paymentsheet:cleanTestDebugUnitTest" />
+            <option value=":paymentsheet:testDebugUnitTest" />
+          </list>
+        </option>
+        <option name="vmOptions" />
+      </ExternalSystemSettings>
+      <ExternalSystemDebugServerProcess>false</ExternalSystemDebugServerProcess>
+      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
+      <DebugAllEnabled>false</DebugAllEnabled>
+      <method v="2" />
+    </configuration>
+    <configuration name="Tests in 'com.stripe.android'" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+      <ExternalSystemSettings>
+        <option name="executionName" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="externalSystemIdString" value="GRADLE" />
+        <option name="scriptParameters" value="--tests &quot;com.stripe.android.*&quot;" />
+        <option name="taskDescriptions">
+          <list />
+        </option>
+        <option name="taskNames">
+          <list>
+            <option value=":paymentsheet:cleanTestDebugUnitTest" />
+            <option value=":paymentsheet:testDebugUnitTest" />
+          </list>
+        </option>
+        <option name="vmOptions" />
+      </ExternalSystemSettings>
+      <ExternalSystemDebugServerProcess>false</ExternalSystemDebugServerProcess>
+      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
+      <DebugAllEnabled>false</DebugAllEnabled>
+      <method v="2" />
+    </configuration>
+    <list>
+      <item itemvalue="Android App.app" />
+      <item itemvalue="Android App.cardverificationsheet-example" />
+      <item itemvalue="Android App.example-forms" />
+      <item itemvalue="Android App.example" />
+      <item itemvalue="Android App.paymentsheet-example" />
+      <item itemvalue="Android App.samplestore" />
+      <item itemvalue="Android App.stripecardscan-example" />
+      <item itemvalue="Gradle.Tests in 'com.stripe.android'" />
+      <item itemvalue="Gradle.FormViewModelTest.test get target values" />
+      <item itemvalue="Gradle.FormViewModelTest.test" />
+      <item itemvalue="Gradle.FormViewModelTest.url format" />
+      <item itemvalue="Gradle.SupportedPaymentMethodTest" />
+    </list>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Gradle.SupportedPaymentMethodTest" />
+        <item itemvalue="Gradle.Tests in 'com.stripe.android'" />
+        <item itemvalue="Gradle.FormViewModelTest.url format" />
+        <item itemvalue="Gradle.FormViewModelTest.test" />
+        <item itemvalue="Gradle.FormViewModelTest.test get target values" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="22bf8083-0491-4a14-8fca-999f17193aa0" name="Default Changelist" comment="" />
+      <created>1620999805358</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1620999805358</updated>
+    </task>
+    <task id="LOCAL-01018" summary="Merge with master">
+      <created>1636642926246</created>
+      <option name="number" value="01018" />
+      <option name="presentableId" value="LOCAL-01018" />
+      <option name="project" value="LOCAL" />
+      <updated>1636642926246</updated>
+    </task>
+    <task id="LOCAL-01019" summary="If country code is entered reset it to country name.">
+      <created>1636995200437</created>
+      <option name="number" value="01019" />
+      <option name="presentableId" value="LOCAL-01019" />
+      <option name="project" value="LOCAL" />
+      <updated>1636995200437</updated>
+    </task>
+    <task id="LOCAL-01020" summary="Merge with master">
+      <created>1638190584871</created>
+      <option name="number" value="01020" />
+      <option name="presentableId" value="LOCAL-01020" />
+      <option name="project" value="LOCAL" />
+      <updated>1638190584872</updated>
+    </task>
+    <task id="LOCAL-01021" summary="Get Oxxo working with the legacy backend locally.">
+      <created>1638409353538</created>
+      <option name="number" value="01021" />
+      <option name="presentableId" value="LOCAL-01021" />
+      <option name="project" value="LOCAL" />
+      <updated>1638409353539</updated>
+    </task>
+    <task id="LOCAL-01022" summary="Merge with master">
+      <created>1638476214589</created>
+      <option name="number" value="01022" />
+      <option name="presentableId" value="LOCAL-01022" />
+      <option name="project" value="LOCAL" />
+      <updated>1638476214589</updated>
+    </task>
+    <task id="LOCAL-01023" summary="Ignore tests that cause other failures">
+      <created>1638718208923</created>
+      <option name="number" value="01023" />
+      <option name="presentableId" value="LOCAL-01023" />
+      <option name="project" value="LOCAL" />
+      <updated>1638718208923</updated>
+    </task>
+    <task id="LOCAL-01024" summary="Test with compose in the PaymentSheetActivity is failing">
+      <created>1638878057920</created>
+      <option name="number" value="01024" />
+      <option name="presentableId" value="LOCAL-01024" />
+      <option name="project" value="LOCAL" />
+      <updated>1638878057920</updated>
+    </task>
+    <task id="LOCAL-01025" summary="Add parcelization to the FormSpec fields so that in a later commit it can be passed as an argument.">
+      <created>1638971410456</created>
+      <option name="number" value="01025" />
+      <option name="presentableId" value="LOCAL-01025" />
+      <option name="project" value="LOCAL" />
+      <updated>1638971410456</updated>
+    </task>
+    <task id="LOCAL-01026" summary="Fix test, ktlintFormat">
+      <created>1638972687584</created>
+      <option name="number" value="01026" />
+      <option name="presentableId" value="LOCAL-01026" />
+      <option name="project" value="LOCAL" />
+      <updated>1638972687584</updated>
+    </task>
+    <task id="LOCAL-01027" summary="Merge with master">
+      <created>1639395567497</created>
+      <option name="number" value="01027" />
+      <option name="presentableId" value="LOCAL-01027" />
+      <option name="project" value="LOCAL" />
+      <updated>1639395567498</updated>
+    </task>
+    <task id="LOCAL-01028" summary="Add parcelization to the FormSpec, and change SupportedPaymentMethods to a sealed class.">
+      <created>1639396914418</created>
+      <option name="number" value="01028" />
+      <option name="presentableId" value="LOCAL-01028" />
+      <option name="project" value="LOCAL" />
+      <updated>1639396914418</updated>
+    </task>
+    <task id="LOCAL-01029" summary="Works for card element">
+      <created>1639401988080</created>
+      <option name="number" value="01029" />
+      <option name="presentableId" value="LOCAL-01029" />
+      <option name="project" value="LOCAL" />
+      <updated>1639401988081</updated>
+    </task>
+    <task id="LOCAL-01030" summary="ktlintFormat apiDump">
+      <created>1639409127899</created>
+      <option name="number" value="01030" />
+      <option name="presentableId" value="LOCAL-01030" />
+      <option name="project" value="LOCAL" />
+      <updated>1639409127899</updated>
+    </task>
+    <task id="LOCAL-01031" summary="Fix add fragment save card.">
+      <created>1639411274414</created>
+      <option name="number" value="01031" />
+      <option name="presentableId" value="LOCAL-01031" />
+      <option name="project" value="LOCAL" />
+      <updated>1639411274414</updated>
+    </task>
+    <task id="LOCAL-01032" summary="Fix up comments explaing the why">
+      <created>1639411551836</created>
+      <option name="number" value="01032" />
+      <option name="presentableId" value="LOCAL-01032" />
+      <option name="project" value="LOCAL" />
+      <updated>1639411551836</updated>
+    </task>
+    <task id="LOCAL-01033" summary="Cleanup code">
+      <created>1639411906384</created>
+      <option name="number" value="01033" />
+      <option name="presentableId" value="LOCAL-01033" />
+      <option name="project" value="LOCAL" />
+      <updated>1639411906384</updated>
+    </task>
+    <task id="LOCAL-01034" summary="Confirm from the CardFormView">
+      <created>1639413860250</created>
+      <option name="number" value="01034" />
+      <option name="presentableId" value="LOCAL-01034" />
+      <option name="project" value="LOCAL" />
+      <updated>1639413860250</updated>
+    </task>
+    <task id="LOCAL-01035" summary="Add a note on the save customer card flow.">
+      <created>1639578521052</created>
+      <option name="number" value="01035" />
+      <option name="presentableId" value="LOCAL-01035" />
+      <option name="project" value="LOCAL" />
+      <updated>1639578521053</updated>
+    </task>
+    <task id="LOCAL-01036" summary="Update gradle version.">
+      <created>1639581256163</created>
+      <option name="number" value="01036" />
+      <option name="presentableId" value="LOCAL-01036" />
+      <option name="project" value="LOCAL" />
+      <updated>1639581256163</updated>
+    </task>
+    <task id="LOCAL-01037" summary="Apply patch">
+      <created>1639617385453</created>
+      <option name="number" value="01037" />
+      <option name="presentableId" value="LOCAL-01037" />
+      <option name="project" value="LOCAL" />
+      <updated>1639617385453</updated>
+    </task>
+    <task id="LOCAL-01038" summary="Per PM SFU">
+      <created>1639624976043</created>
+      <option name="number" value="01038" />
+      <option name="presentableId" value="LOCAL-01038" />
+      <option name="project" value="LOCAL" />
+      <updated>1639624976043</updated>
+    </task>
+    <task id="LOCAL-01039" summary="Fix up unit tests.">
+      <created>1639670981058</created>
+      <option name="number" value="01039" />
+      <option name="presentableId" value="LOCAL-01039" />
+      <option name="project" value="LOCAL" />
+      <updated>1639670981058</updated>
+    </task>
+    <task id="LOCAL-01040" summary="Cleanup code.">
+      <created>1639671494999</created>
+      <option name="number" value="01040" />
+      <option name="presentableId" value="LOCAL-01040" />
+      <option name="project" value="LOCAL" />
+      <updated>1639671494999</updated>
+    </task>
+    <task id="LOCAL-01041" summary="Fix failing test.">
+      <created>1639679837266</created>
+      <option name="number" value="01041" />
+      <option name="presentableId" value="LOCAL-01041" />
+      <option name="project" value="LOCAL" />
+      <updated>1639679837267</updated>
+    </task>
+    <task id="LOCAL-01042" summary="Add in SaveStateHandle">
+      <created>1639753420089</created>
+      <option name="number" value="01042" />
+      <option name="presentableId" value="LOCAL-01042" />
+      <option name="project" value="LOCAL" />
+      <updated>1639753420089</updated>
+    </task>
+    <task id="LOCAL-01043" summary="Working version with lots of extra log statements.">
+      <created>1639774210087</created>
+      <option name="number" value="01043" />
+      <option name="presentableId" value="LOCAL-01043" />
+      <option name="project" value="LOCAL" />
+      <updated>1639774210087</updated>
+    </task>
+    <task id="LOCAL-01044" summary="Remove log statements">
+      <created>1639774405814</created>
+      <option name="number" value="01044" />
+      <option name="presentableId" value="LOCAL-01044" />
+      <option name="project" value="LOCAL" />
+      <updated>1639774405814</updated>
+    </task>
+    <task id="LOCAL-01045" summary="Save the selected item">
+      <created>1639775150598</created>
+      <option name="number" value="01045" />
+      <option name="presentableId" value="LOCAL-01045" />
+      <option name="project" value="LOCAL" />
+      <updated>1639775150598</updated>
+    </task>
+    <task id="LOCAL-01046" summary="Add savedHandleState to PaymentOptionsViewModel.">
+      <created>1639775787289</created>
+      <option name="number" value="01046" />
+      <option name="presentableId" value="LOCAL-01046" />
+      <option name="project" value="LOCAL" />
+      <updated>1639775787290</updated>
+    </task>
+    <task id="LOCAL-01047" summary="Returning user, on authentication screen, home, recent activities, Cancel authenticate, Add new card">
+      <created>1639777650690</created>
+      <option name="number" value="01047" />
+      <option name="presentableId" value="LOCAL-01047" />
+      <option name="project" value="LOCAL" />
+      <updated>1639777650690</updated>
+    </task>
+    <task id="LOCAL-01048" summary="Guest, Complete, home, recent, makes so not in processing state">
+      <created>1639778570672</created>
+      <option name="number" value="01048" />
+      <option name="presentableId" value="LOCAL-01048" />
+      <option name="project" value="LOCAL" />
+      <updated>1639778570672</updated>
+    </task>
+    <task id="LOCAL-01049" summary="PaymentSheet Complete working.">
+      <created>1639830833655</created>
+      <option name="number" value="01049" />
+      <option name="presentableId" value="LOCAL-01049" />
+      <option name="project" value="LOCAL" />
+      <updated>1639830833656</updated>
+    </task>
+    <task id="LOCAL-01050" summary="Fix problem in options flow">
+      <created>1639831731061</created>
+      <option name="number" value="01050" />
+      <option name="presentableId" value="LOCAL-01050" />
+      <option name="project" value="LOCAL" />
+      <updated>1639831731061</updated>
+    </task>
+    <task id="LOCAL-01051" summary="All working.">
+      <created>1640095881265</created>
+      <option name="number" value="01051" />
+      <option name="presentableId" value="LOCAL-01051" />
+      <option name="project" value="LOCAL" />
+      <updated>1640095881266</updated>
+    </task>
+    <task id="LOCAL-01052" summary="Cleanup event reporter and other code.">
+      <created>1640097432153</created>
+      <option name="number" value="01052" />
+      <option name="presentableId" value="LOCAL-01052" />
+      <option name="project" value="LOCAL" />
+      <updated>1640097432153</updated>
+    </task>
+    <task id="LOCAL-01053" summary="Working on unit tests.">
+      <created>1640111163498</created>
+      <option name="number" value="01053" />
+      <option name="presentableId" value="LOCAL-01053" />
+      <option name="project" value="LOCAL" />
+      <updated>1640111163498</updated>
+    </task>
+    <task id="LOCAL-01054" summary="Experiment">
+      <created>1640119500584</created>
+      <option name="number" value="01054" />
+      <option name="presentableId" value="LOCAL-01054" />
+      <option name="project" value="LOCAL" />
+      <updated>1640119500584</updated>
+    </task>
+    <task id="LOCAL-01055" summary="Unit tests passing and manual testing complete">
+      <created>1640191914641</created>
+      <option name="number" value="01055" />
+      <option name="presentableId" value="LOCAL-01055" />
+      <option name="project" value="LOCAL" />
+      <updated>1640191914642</updated>
+    </task>
+    <task id="LOCAL-01056" summary="Undo weak registry map changes.">
+      <created>1640192033909</created>
+      <option name="number" value="01056" />
+      <option name="presentableId" value="LOCAL-01056" />
+      <option name="project" value="LOCAL" />
+      <updated>1640192033909</updated>
+    </task>
+    <task id="LOCAL-01057" summary="Add injection and injection fallback tests.">
+      <created>1640198501036</created>
+      <option name="number" value="01057" />
+      <option name="presentableId" value="LOCAL-01057" />
+      <option name="project" value="LOCAL" />
+      <updated>1640198501036</updated>
+    </task>
+    <task id="LOCAL-01058" summary="format and apiDump">
+      <created>1640199075290</created>
+      <option name="number" value="01058" />
+      <option name="presentableId" value="LOCAL-01058" />
+      <option name="project" value="LOCAL" />
+      <updated>1640199075290</updated>
+    </task>
+    <task id="LOCAL-01059" summary="format and apiDump">
+      <created>1640199088032</created>
+      <option name="number" value="01059" />
+      <option name="presentableId" value="LOCAL-01059" />
+      <option name="project" value="LOCAL" />
+      <updated>1640199088032</updated>
+    </task>
+    <task id="LOCAL-01060" summary="Fix intermittent failures">
+      <created>1640204924841</created>
+      <option name="number" value="01060" />
+      <option name="presentableId" value="LOCAL-01060" />
+      <option name="project" value="LOCAL" />
+      <updated>1640204924842</updated>
+    </task>
+    <task id="LOCAL-01061" summary="Merge with master.">
+      <created>1640967004850</created>
+      <option name="number" value="01061" />
+      <option name="presentableId" value="LOCAL-01061" />
+      <option name="project" value="LOCAL" />
+      <updated>1640967004851</updated>
+    </task>
+    <task id="LOCAL-01062" summary="Merge with master">
+      <created>1641825309801</created>
+      <option name="number" value="01062" />
+      <option name="presentableId" value="LOCAL-01062" />
+      <option name="project" value="LOCAL" />
+      <updated>1641825309801</updated>
+    </task>
+    <task id="LOCAL-01063" summary="format">
+      <created>1641828828719</created>
+      <option name="number" value="01063" />
+      <option name="presentableId" value="LOCAL-01063" />
+      <option name="project" value="LOCAL" />
+      <updated>1641828828719</updated>
+    </task>
+    <task id="LOCAL-01064" summary="Working with remote ui">
+      <created>1642512864179</created>
+      <option name="number" value="01064" />
+      <option name="presentableId" value="LOCAL-01064" />
+      <option name="project" value="LOCAL" />
+      <updated>1642512864180</updated>
+    </task>
+    <task id="LOCAL-01065" summary="This adds more comments to how to add a new Payment Method.">
+      <created>1643043047608</created>
+      <option name="number" value="01065" />
+      <option name="presentableId" value="LOCAL-01065" />
+      <option name="project" value="LOCAL" />
+      <updated>1643043047608</updated>
+    </task>
+    <task id="LOCAL-01066" summary="Update documentation further.">
+      <created>1643047970823</created>
+      <option name="number" value="01066" />
+      <option name="presentableId" value="LOCAL-01066" />
+      <option name="project" value="LOCAL" />
+      <updated>1643047970823</updated>
+    </task>
+    <option name="localTasksCounter" value="1067" />
+    <servers />
+  </component>
+  <component name="UnknownFeatures">
+    <option featureType="com.intellij.fileTypeFactory" implementationName="*.csv" />
+  </component>
+  <component name="UnloadedModulesList">
+    <module name="stripe-android.example" />
+  </component>
+  <component name="Vcs.Log.History.Properties">
+    <option name="COLUMN_ID_ORDER">
+      <list>
+        <option value="Default.Root" />
+        <option value="Default.Author" />
+        <option value="Default.Date" />
+        <option value="Default.Subject" />
+      </list>
+    </option>
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="1">
+          <value>
+            <State>
+              <option name="SHOW_ONLY_AFFECTED_CHANGES" value="true" />
+              <option name="FILTERS">
+                <map>
+                  <entry key="branch">
+                    <value>
+                      <list>
+                        <option value="HEAD" />
+                      </list>
+                    </value>
+                  </entry>
+                  <entry key="roots">
+                    <value>
+                      <list>
+                        <option value="$PROJECT_DIR$" />
+                      </list>
+                    </value>
+                  </entry>
+                </map>
+              </option>
+            </State>
+          </value>
+        </entry>
+        <entry key="2">
+          <value>
+            <State>
+              <option name="SHOW_ONLY_AFFECTED_CHANGES" value="true" />
+              <option name="FILTERS">
+                <map>
+                  <entry key="branch">
+                    <value>
+                      <list>
+                        <option value="HEAD" />
+                      </list>
+                    </value>
+                  </entry>
+                  <entry key="structure">
+                    <value>
+                      <list>
+                        <option value="dir:/Users/michelleb/stripe/stripe-android/example/src/main/java/com/stripe/example/activity" />
+                      </list>
+                    </value>
+                  </entry>
+                </map>
+              </option>
+            </State>
+          </value>
+        </entry>
+        <entry key="3">
+          <value>
+            <State>
+              <option name="SHOW_ONLY_AFFECTED_CHANGES" value="true" />
+              <option name="FILTERS">
+                <map>
+                  <entry key="branch">
+                    <value>
+                      <list>
+                        <option value="HEAD" />
+                      </list>
+                    </value>
+                  </entry>
+                  <entry key="structure">
+                    <value>
+                      <list>
+                        <option value="dir:/Users/michelleb/stripe/stripe-android/.idea" />
+                      </list>
+                    </value>
+                  </entry>
+                </map>
+              </option>
+            </State>
+          </value>
+        </entry>
+        <entry key="4">
+          <value>
+            <State>
+              <option name="SHOW_ONLY_AFFECTED_CHANGES" value="true" />
+              <option name="FILTERS">
+                <map>
+                  <entry key="branch">
+                    <value>
+                      <list>
+                        <option value="master" />
+                      </list>
+                    </value>
+                  </entry>
+                  <entry key="structure">
+                    <value>
+                      <list>
+                        <option value="dir:/Users/michelleb/stripe/stripe-android/example" />
+                      </list>
+                    </value>
+                  </entry>
+                </map>
+              </option>
+            </State>
+          </value>
+        </entry>
+        <entry key="MAIN">
+          <value>
+            <State>
+              <option name="FILTERS">
+                <map>
+                  <entry key="branch">
+                    <value>
+                      <list>
+                        <option value="HEAD" />
+                      </list>
+                    </value>
+                  </entry>
+                </map>
+              </option>
+            </State>
+          </value>
+        </entry>
+      </map>
+    </option>
+    <option name="OPEN_GENERIC_TABS">
+      <map>
+        <entry key="1" value="TOOL_WINDOW" />
+        <entry key="2" value="TOOL_WINDOW" />
+        <entry key="3" value="TOOL_WINDOW" />
+        <entry key="4" value="TOOL_WINDOW" />
+      </map>
+    </option>
+    <option name="RECENT_FILTERS">
+      <map>
+        <entry key="Branch">
+          <value>
+            <list>
+              <RecentGroup>
+                <option name="FILTER_VALUES">
+                  <option value="master" />
+                </option>
+              </RecentGroup>
+              <RecentGroup>
+                <option name="FILTER_VALUES">
+                  <option value="HEAD" />
+                </option>
+              </RecentGroup>
+              <RecentGroup>
+                <option name="FILTER_VALUES">
+                  <option value="michelleb/hide-sheet-on-google-pay" />
+                </option>
+              </RecentGroup>
+            </list>
+          </value>
+        </entry>
+      </map>
+    </option>
+    <option name="oldMeFiltersMigrated" value="true" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="Fix failing test." />
+    <MESSAGE value="Add in SaveStateHandle" />
+    <MESSAGE value="Working version with lots of extra log statements." />
+    <MESSAGE value="Remove log statements" />
+    <MESSAGE value="Save the selected item" />
+    <MESSAGE value="Add savedHandleState to PaymentOptionsViewModel." />
+    <MESSAGE value="Returning user, on authentication screen, home, recent activities, Cancel authenticate, Add new card" />
+    <MESSAGE value="Guest, Complete, home, recent, makes so not in processing state" />
+    <MESSAGE value="PaymentSheet Complete working." />
+    <MESSAGE value="Fix problem in options flow" />
+    <MESSAGE value="All working." />
+    <MESSAGE value="Cleanup event reporter and other code." />
+    <MESSAGE value="Working on unit tests." />
+    <MESSAGE value="Experiment" />
+    <MESSAGE value="Unit tests passing and manual testing complete" />
+    <MESSAGE value="Undo weak registry map changes." />
+    <MESSAGE value="Add injection and injection fallback tests." />
+    <MESSAGE value="format and apiDump" />
+    <MESSAGE value="Fix intermittent failures" />
+    <MESSAGE value="Merge with master." />
+    <MESSAGE value="Merge with master" />
+    <MESSAGE value="format" />
+    <MESSAGE value="Working with remote ui" />
+    <MESSAGE value="This adds more comments to how to add a new Payment Method." />
+    <MESSAGE value="Update documentation further." />
+    <option name="LAST_COMMIT_MESSAGE" value="Update documentation further." />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" suspend="THREAD" type="kotlin-line">
+          <url>file://$PROJECT_DIR$/payments-core/src/main/java/com/stripe/android/payments/PaymentFlowResult.kt</url>
+          <line>30</line>
+          <option name="timeStamp" value="76" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="kotlin-line">
+          <url>file://$PROJECT_DIR$/payments-core/src/main/java/com/stripe/android/view/PaymentAuthWebViewActivityViewModel.kt</url>
+          <line>50</line>
+          <option name="timeStamp" value="79" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="kotlin-line">
+          <url>file://$PROJECT_DIR$/payments-core/src/main/java/com/stripe/android/payments/StripeBrowserLauncherViewModel.kt</url>
+          <line>77</line>
+          <option name="timeStamp" value="82" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="kotlin-line">
+          <url>file://$PROJECT_DIR$/payments-core/src/main/java/com/stripe/android/payments/core/authentication/threeds2/Stripe3ds2TransactionContract.kt</url>
+          <line>30</line>
+          <option name="timeStamp" value="83" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="kotlin-line">
+          <url>file://$PROJECT_DIR$/paymentsheet/src/test/java/com/stripe/android/paymentsheet/forms/FormViewModelTest.kt</url>
+          <line>106</line>
+          <option name="timeStamp" value="84" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="kotlin-function">
+          <url>file://$PROJECT_DIR$/payments-core/src/main/java/com/stripe/android/payments/PaymentFlowResult.kt</url>
+          <line>25</line>
+          <properties class="com.stripe.android.payments.PaymentFlowResult.Unvalidated" method="&lt;init&gt;" />
+          <option name="timeStamp" value="77" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="kotlin-field">
+          <url>file://$PROJECT_DIR$/payments-core/src/main/java/com/stripe/android/view/PaymentAuthWebViewActivityViewModel.kt</url>
+          <line>22</line>
+          <properties myFieldName="args" myClassName="com.stripe.android.view.PaymentAuthWebViewActivityViewModel" />
+          <option name="timeStamp" value="81" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
+    <pin-to-top-manager>
+      <pinned-members>
+        <PinnedItemInfo parentTag="java.util.HashMap$Node" memberName="value" />
+        <PinnedItemInfo parentTag="kotlinx.coroutines.test.TestCoroutineDispatcher" memberName="queue" />
+        <PinnedItemInfo parentTag="com.stripe.android.paymentsheet.PaymentSheetViewModel" memberName="injectorKey" />
+      </pinned-members>
+    </pin-to-top-manager>
+    <watches-manager>
+      <configuration name="newUserComplete()">
+        <watch expression="verifyPayment.exists()" />
+      </configuration>
+      <configuration name="SofortReturningCus...()">
+        <watch expression="customHolder.binding.label.text.toString().contains(cardLabel)" />
+        <watch expression="customHolder.binding.label.text.toString()" />
+        <watch expression="cardLabel" />
+      </configuration>
+      <configuration name="AndroidJUnit">
+        <watch expression="sectionToFieldIdentifierMap" />
+      </configuration>
+      <configuration name="GradleRunConfiguration">
+        <watch expression="format.decodeFromString&lt;SerializedData&gt;(jsonString2)" language="kotlin" />
+      </configuration>
+      <configuration name="example-forms">
+        <watch expression="element.getIdentifier()" language="kotlin" />
+      </configuration>
+      <configuration name="paymentsheet-example">
+        <watch expression="inProgress" />
+      </configuration>
+      <configuration name="Remote">
+        <watch expression="intent" language="kotlin" />
+        <watch expression="decodedData.type" language="kotlin" />
+        <watch expression="paymentFlowResult" />
+      </configuration>
+      <configuration name="ReturningCustomer()">
+        <watch expression="scenario" language="kotlin" />
+        <watch expression="scenario" />
+      </configuration>
+    </watches-manager>
+  </component>
+  <component name="com.intellij.coverage.CoverageDataManagerImpl">
+    <SUITE FILE_PATH="coverage/stripe_android$TransformSpecToElementTest.ic" NAME="TransformSpecToElementTest Coverage Results" MODIFIED="1624036853975" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false">
+      <FILTER>com.stripe.android.paymentsheet.forms.*</FILTER>
+    </SUITE>
+    <SUITE FILE_PATH="coverage/stripe_android$TransformElementToFormViewValueFlowTest.ic" NAME="TransformElementToFormViewValueFlowTest Coverage Results" MODIFIED="1624036827451" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false">
+      <FILTER>com.stripe.android.paymentsheet.forms.*</FILTER>
+    </SUITE>
+    <SUITE FILE_PATH="coverage/stripe_android$com_stripe_android_paymentsheet_in_stripe_android_paymentsheet.exec" NAME="com.stripe.android.paymentsheet in stripe-android.paymentsheet Coverage Results" MODIFIED="1624036144067" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="jacoco" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false">
+      <EXCLUDED_FILTER>com.stripe.android.paymentsheet.elements.common.CardStyle</EXCLUDED_FILTER>
+      <EXCLUDED_FILTER>com.stripe.android.paymentsheet.elements.common.TextFieldColors</EXCLUDED_FILTER>
+      <EXCLUDED_FILTER>com.stripe.android.paymentsheet.forms.FormKt</EXCLUDED_FILTER>
+      <EXCLUDED_FILTER>com.stripe.android.paymentsheet.elements.common.SectionKt</EXCLUDED_FILTER>
+      <EXCLUDED_FILTER>com.stripe.android.paymentsheet.elements.common.TextFieldKt</EXCLUDED_FILTER>
+      <EXCLUDED_FILTER>com.stripe.android.paymentsheet.elements.common.DropdownFieldKt</EXCLUDED_FILTER>
+    </SUITE>
+    <SUITE FILE_PATH="coverage/stripe_android$TransformFormToPaymentMethodTest.ic" NAME="TransformFormToPaymentMethodTest Coverage Results" MODIFIED="1624036839311" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false">
+      <FILTER>com.stripe.android.paymentsheet.forms.*</FILTER>
+    </SUITE>
+    <SUITE FILE_PATH="coverage/stripe_android$PopulateFormFromFormFieldValuesTest.ic" NAME="PopulateFormFromFormFieldValuesTest Coverage Results" MODIFIED="1624036796242" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false">
+      <FILTER>com.stripe.android.paymentsheet.forms.*</FILTER>
+    </SUITE>
+    <SUITE FILE_PATH="coverage/stripe_android$com_stripe_android_paymentsheet_in_stripe_android_paymentsheet.ic" NAME="com.stripe.android.paymentsheet in stripe-android.paymentsheet Coverage Results" MODIFIED="1624036724979" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false">
+      <FILTER>com.stripe.android.paymentsheet.*</FILTER>
+    </SUITE>
+  </component>
+</project>
