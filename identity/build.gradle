@@ -69,6 +69,7 @@ dependencies {
 
     implementation libraries.androidx.constraintlayout
     implementation("androidx.activity:activity-ktx:$composeActivityVersion")
+    implementation("androidx.fragment:fragment-ktx:1.4.1")
 
     implementation "androidx.core:core-ktx:$coreKtxVersion"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinCoroutinesVersion"
