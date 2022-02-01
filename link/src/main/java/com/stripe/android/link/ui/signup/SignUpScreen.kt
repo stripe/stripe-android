@@ -153,14 +153,14 @@ private fun EmailCollectionSection(
                         end = 16.dp,
                         bottom = 8.dp
                     )
-                        .semantics {
-                            testTag = "CircularProgressIndicator"
-                        },
-                    strokeWidth = 2.dp
-                )
-            }
+                    .semantics {
+                        testTag = "CircularProgressIndicator"
+                    },
+                strokeWidth = 2.dp
+            )
         }
-        }
+    }
+}
 
 @Composable
 private fun PhoneCollectionSection() {
