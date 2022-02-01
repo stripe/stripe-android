@@ -57,7 +57,7 @@ internal interface CardScanResultListener : ScanResultListener {
     fun cardScanComplete(card: ScannedCard)
 }
 
-sealed class CardScanState(isFinal: Boolean) : ScanState(isFinal) {
+internal sealed class CardScanState(isFinal: Boolean) : ScanState(isFinal) {
     object NotFound : CardScanState(isFinal = false)
     object Found : CardScanState(isFinal = false)
     object Correct : CardScanState(isFinal = true)
@@ -292,7 +292,7 @@ internal class CardScanActivity : ScanActivity(), SimpleScanStateful<CardScanSta
         }
     }
 
-    override fun ensureValidParams() = when {
+    private fun ensureValidParams() = when {
         params.stripePublishableKey.isEmpty() -> {
             scanFailure(InvalidStripePublishableKeyException("Missing publishable key"))
             false
