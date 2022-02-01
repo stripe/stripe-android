@@ -20,7 +20,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.stripe.android.link.R
-import com.stripe.android.link.ui.theme.DefaultLinkTheme
+import com.stripe.android.link.theme.DefaultLinkTheme
 
 @Preview
 @Composable

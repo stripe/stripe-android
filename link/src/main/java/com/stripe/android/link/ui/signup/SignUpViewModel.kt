@@ -10,17 +10,22 @@ import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.Injectable
 import com.stripe.android.core.injection.injectWithFallback
 import com.stripe.android.link.LinkActivityContract
+import com.stripe.android.link.LinkScreen
 import com.stripe.android.link.injection.DaggerSignUpViewModelFactoryComponent
 import com.stripe.android.link.injection.SignUpViewModelSubcomponent
+import com.stripe.android.link.model.LinkAccount
+import com.stripe.android.link.model.Navigator
 import com.stripe.android.link.repositories.LinkRepository
+import com.stripe.android.model.ConsumerSession
 import com.stripe.android.ui.core.elements.EmailSpec
 import com.stripe.android.ui.core.elements.SectionFieldElement
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -34,6 +39,7 @@ internal class SignUpViewModel @Inject internal constructor(
     @IOContext private val workContext: CoroutineContext,
     args: LinkActivityContract.Args,
     private val linkRepository: LinkRepository,
+    private val navigator: Navigator,
     private val logger: Logger
 ) : ViewModel() {
     val merchantName: String = args.merchantName
@@ -43,7 +49,7 @@ internal class SignUpViewModel @Inject internal constructor(
     /**
      * Emits the email entered in the form if valid, null otherwise.
      */
-    private val consumerEmail: Flow<String?> = emailElement.getFormFieldValueFlow().map {
+    private val consumerEmail: StateFlow<String?> = emailElement.getFormFieldValueFlow().map {
         it.firstOrNull()?.second?.let { formFieldEntry ->
             if (formFieldEntry.isComplete) {
                 formFieldEntry.value
@@ -51,7 +57,7 @@ internal class SignUpViewModel @Inject internal constructor(
                 null
             }
         }
-    }
+    }.stateIn(viewModelScope, SharingStarted.Lazily, args.customerEmail)
 
     private val _signUpStatus = MutableStateFlow(SignUpStatus.InputtingEmail)
     val signUpStatus: StateFlow<SignUpStatus> = _signUpStatus
@@ -62,6 +68,16 @@ internal class SignUpViewModel @Inject internal constructor(
     init {
         viewModelScope.launch {
             consumerEmail.collect { email ->
+                // The first emitted value is the one provided in the arguments, and shouldn't
+                // trigger a lookup
+                if (email == args.customerEmail && lookupJob == null) {
+                    // If it's a valid email, collect phone number
+                    if (email != null) {
+                        _signUpStatus.value = SignUpStatus.InputtingPhone
+                    }
+                    return@collect
+                }
+
                 lookupJob?.cancel()
 
                 if (email != null) {
@@ -79,14 +95,36 @@ internal class SignUpViewModel @Inject internal constructor(
         }
     }
 
+    fun onSignUpClick(phone: String) {
+        // Email must be valid otherwise sign up button would not be displayed
+        val email = requireNotNull(consumerEmail.value)
+        viewModelScope.launch {
+            // TODO(brnunes-stripe): Read formatted phone and country code from phone number element
+            linkRepository.consumerSignUp(email, "+1$phone", "US")?.let {
+                onConsumerSessionResult(it)
+            } ?: onError("")
+        }
+    }
+
     private suspend fun lookupConsumerEmail(email: String) {
-        linkRepository.lookupConsumer(email)?.let {
-            if (it.consumerSession != null) {
-                // TODO(brnunes): Trigger verification
+        linkRepository.lookupConsumer(email)?.let { consumerSessionLookup ->
+            val consumerSession = consumerSessionLookup.consumerSession
+            if (consumerSession != null) {
+                onConsumerSessionResult(consumerSession)
             } else {
                 _signUpStatus.value = SignUpStatus.InputtingPhone
             }
         } ?: onError("")
+    }
+
+    private fun onConsumerSessionResult(consumerSession: ConsumerSession) {
+        navigator.navigateTo(
+            if (LinkAccount(consumerSession).isVerified) {
+                LinkScreen.Wallet
+            } else {
+                LinkScreen.Verification
+            }
+        )
     }
 
     private fun onError(errorMessage: String) {
@@ -129,7 +167,7 @@ internal class SignUpViewModel @Inject internal constructor(
             )
             return subComponentBuilderProvider.get()
                 .args(args)
-                .build().viewModel as T
+                .build().signUpViewModel as T
         }
 
         override fun fallbackInitialize(arg: FallbackInitializeParam) {

@@ -35,6 +35,7 @@ import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_CLIENT_SECRET
+import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.Customer
 import com.stripe.android.model.ListPaymentMethodsParams
@@ -55,6 +56,7 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.Token
 import com.stripe.android.model.TokenParams
 import com.stripe.android.model.parsers.CardMetadataJsonParser
+import com.stripe.android.model.parsers.ConsumerSessionJsonParser
 import com.stripe.android.model.parsers.ConsumerSessionLookupJsonParser
 import com.stripe.android.model.parsers.CustomerJsonParser
 import com.stripe.android.model.parsers.FpxBankStatusesJsonParser
@@ -1161,6 +1163,33 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         }
     }
 
+    override suspend fun consumerSignUp(
+        email: String,
+        phoneNumber: String,
+        country: String,
+        cookies: String?,
+        requestOptions: ApiRequest.Options
+    ): ConsumerSession? {
+        return fetchStripeModel(
+            apiRequestFactory.createPost(
+                consumerSignUpUrl,
+                requestOptions,
+                mapOf(
+                    "email_address" to email.lowercase(),
+                    "phone_number" to phoneNumber,
+                    "country" to country
+                ).plus(
+                    cookies?.let {
+                        listOf("cookies" to it)
+                    } ?: emptyList()
+                )
+            ),
+            ConsumerSessionJsonParser()
+        ) {
+            // no-op
+        }
+    }
+
     /**
      * @return `https://api.stripe.com/v1/payment_methods/:id/detach`
      */
@@ -1460,6 +1489,13 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         internal val consumerSessionLookupUrl: String
             @JvmSynthetic
             get() = getApiUrl("consumers/sessions/lookup")
+
+        /**
+         * @return `https://api.stripe.com/v1/consumers/accounts/sign_up`
+         */
+        internal val consumerSignUpUrl: String
+            @JvmSynthetic
+            get() = getApiUrl("consumers/accounts/sign_up")
 
         /**
          * @return `https://api.stripe.com/v1/payment_intents/:id`

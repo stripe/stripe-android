@@ -5,6 +5,7 @@ import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.LoggingModule
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
+import com.stripe.android.link.LinkActivityViewModel
 import com.stripe.android.link.ui.signup.SignUpViewModel
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networking.StripeRepository
@@ -28,6 +29,7 @@ import kotlin.coroutines.CoroutineContext
     ]
 )
 internal abstract class LinkPaymentLauncherComponent {
+    abstract fun inject(factory: LinkActivityViewModel.Factory)
     abstract fun inject(factory: SignUpViewModel.Factory)
 
     @Component.Builder

@@ -1,5 +1,6 @@
 package com.stripe.android.link.repositories
 
+import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
 
 /**
@@ -13,4 +14,13 @@ internal interface LinkRepository {
     suspend fun lookupConsumer(
         email: String
     ): ConsumerSessionLookup?
+
+    /**
+     * Sign up for a new Link account
+     */
+    suspend fun consumerSignUp(
+        email: String,
+        phone: String,
+        country: String
+    ): ConsumerSession?
 }

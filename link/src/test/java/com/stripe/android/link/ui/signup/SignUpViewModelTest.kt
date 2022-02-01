@@ -139,7 +139,7 @@ class SignUpViewModelTest {
 
         whenever(mockBuilder.args(any())).thenReturn(mockBuilder)
         whenever(mockBuilder.build()).thenReturn(mockSubComponent)
-        whenever((mockSubComponent.viewModel)).thenReturn(vmToBeReturned)
+        whenever((mockSubComponent.signUpViewModel)).thenReturn(vmToBeReturned)
 
         val mockSavedStateRegistryOwner = mock<SavedStateRegistryOwner>()
         val mockSavedStateRegistry = mock<SavedStateRegistry>()
@@ -163,7 +163,7 @@ class SignUpViewModelTest {
         val factorySpy = spy(factory)
         val createdViewModel = factorySpy.create(SignUpViewModel::class.java)
         verify(factorySpy, times(0)).fallbackInitialize(any())
-        Truth.assertThat(createdViewModel).isEqualTo(vmToBeReturned)
+        assertThat(createdViewModel).isEqualTo(vmToBeReturned)
 
         WeakMapInjectorRegistry.staticCacheMap.clear()
     }
@@ -197,7 +197,8 @@ class SignUpViewModelTest {
         workContext = StandardTestDispatcher(),
         args = args,
         linkRepository = linkRepository,
-        logger = Logger.noop()
+        logger = Logger.noop(),
+        navigator = mock()
     )
 
     companion object {

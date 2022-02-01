@@ -58,9 +58,8 @@ class LinkPaymentLauncher @AssistedInject constructor(
     private val injector = object : Injector {
         override fun inject(injectable: Injectable<*>) {
             when (injectable) {
-                is SignUpViewModel.Factory -> {
-                    launcherComponent.inject(injectable)
-                }
+                is LinkActivityViewModel.Factory -> launcherComponent.inject(injectable)
+                is SignUpViewModel.Factory -> launcherComponent.inject(injectable)
                 else -> {
                     throw IllegalArgumentException("invalid Injectable $injectable requested in $this")
                 }

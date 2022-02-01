@@ -2,6 +2,7 @@ package com.stripe.android.link.repositories
 
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.IOContext
+import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.networking.ApiRequest
 import com.stripe.android.networking.StripeRepository
@@ -37,6 +38,28 @@ internal class LinkApiRepository @Inject constructor(
                 )
             }.onFailure {
                 logger.error("Error looking up consumer", it)
+            }.getOrNull()
+        }
+
+    override suspend fun consumerSignUp(
+        email: String,
+        phone: String,
+        country: String
+    ): ConsumerSession? =
+        withContext(workContext) {
+            kotlin.runCatching {
+                stripeRepository.consumerSignUp(
+                    email,
+                    phone,
+                    country,
+                    null,
+                    ApiRequest.Options(
+                        publishableKeyProvider(),
+                        stripeAccountIdProvider()
+                    )
+                )
+            }.onFailure {
+                logger.error("Error signing up consumer", it)
             }.getOrNull()
         }
 }

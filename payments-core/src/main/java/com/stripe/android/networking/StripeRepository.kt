@@ -12,6 +12,7 @@ import com.stripe.android.model.BankStatuses
 import com.stripe.android.model.CardMetadata
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
+import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.Customer
 import com.stripe.android.model.ListPaymentMethodsParams
@@ -398,4 +399,16 @@ abstract class StripeRepository {
         email: String,
         requestOptions: ApiRequest.Options
     ): ConsumerSessionLookup?
+
+    @Throws(
+        AuthenticationException::class,
+        InvalidRequestException::class,
+    )
+    abstract suspend fun consumerSignUp(
+        email: String,
+        phoneNumber: String,
+        country: String,
+        cookies: String?,
+        requestOptions: ApiRequest.Options
+    ): ConsumerSession?
 }
