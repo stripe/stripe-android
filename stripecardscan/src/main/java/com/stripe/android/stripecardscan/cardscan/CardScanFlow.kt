@@ -1,19 +1,16 @@
-package com.stripe.android.stripecardscan.cardimageverification
+package com.stripe.android.stripecardscan.cardscan
 
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Rect
 import androidx.lifecycle.LifecycleOwner
 import com.stripe.android.camera.CameraPreviewImage
-import com.stripe.android.stripecardscan.cardimageverification.analyzer.MainLoopAnalyzer
-import com.stripe.android.stripecardscan.cardimageverification.result.MainLoopAggregator
-import com.stripe.android.stripecardscan.cardimageverification.result.MainLoopState
+import com.stripe.android.stripecardscan.cardscan.result.MainLoopAggregator
+import com.stripe.android.stripecardscan.cardscan.result.MainLoopState
 import com.stripe.android.camera.framework.AggregateResultListener
 import com.stripe.android.camera.framework.AnalyzerLoopErrorListener
 import com.stripe.android.camera.framework.AnalyzerPool
 import com.stripe.android.camera.framework.ProcessBoundAnalyzerLoop
-import com.stripe.android.stripecardscan.payment.ml.CardDetect
-import com.stripe.android.stripecardscan.payment.ml.CardDetectModelManager
 import com.stripe.android.stripecardscan.payment.ml.SSDOcr
 import com.stripe.android.stripecardscan.payment.ml.SSDOcrModelManager
 import com.stripe.android.camera.scanui.ScanFlow
@@ -24,19 +21,9 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
-internal data class SavedFrame(
-    val hasOcr: Boolean,
-    val frame: MainLoopAnalyzer.Input,
-)
-
-internal data class SavedFrameType(
-    val hasCard: Boolean,
-    val hasOcr: Boolean,
-)
-
-internal abstract class CardImageVerificationFlow(
+internal abstract class CardScanFlow(
     private val scanErrorListener: AnalyzerLoopErrorListener,
-) : ScanFlow<RequiredCardDetails?, CameraPreviewImage<Bitmap>>,
+) : ScanFlow<Unit?, CameraPreviewImage<Bitmap>>,
     AggregateResultListener<MainLoopAggregator.InterimResult, MainLoopAggregator.FinalResult> {
 
     /**
@@ -45,14 +32,14 @@ internal abstract class CardImageVerificationFlow(
     private var canceled = false
 
     private var mainLoopAnalyzerPool: AnalyzerPool<
-        MainLoopAnalyzer.Input,
-        MainLoopState,
-        MainLoopAnalyzer.Prediction>? = null
+        SSDOcr.Input,
+        Any,
+        SSDOcr.Prediction>? = null
     private var mainLoopAggregator: MainLoopAggregator? = null
     private var mainLoop: ProcessBoundAnalyzerLoop<
-        MainLoopAnalyzer.Input,
+        SSDOcr.Input,
         MainLoopState,
-        MainLoopAnalyzer.Prediction>? = null
+        SSDOcr.Prediction>? = null
 
     private var mainLoopJob: Job? = null
 
@@ -62,54 +49,39 @@ internal abstract class CardImageVerificationFlow(
         viewFinder: Rect,
         lifecycleOwner: LifecycleOwner,
         coroutineScope: CoroutineScope,
-        parameters: RequiredCardDetails?,
+        parameters: Unit?
     ) = coroutineScope.launch(Dispatchers.Main) {
         if (canceled) {
             return@launch
         }
 
         mainLoopAggregator = MainLoopAggregator(
-            listener = this@CardImageVerificationFlow,
-            requiredCardIssuer = parameters?.cardIssuer,
-            requiredLastFour = parameters?.lastFour,
-        ).also { mainLoopOcrAggregator ->
+            listener = this@CardScanFlow
+        ).also {
             // make this result aggregator pause and reset when the lifecycle pauses.
-            mainLoopOcrAggregator.bindToLifecycle(lifecycleOwner)
+            it.bindToLifecycle(lifecycleOwner)
 
             val analyzerPool = AnalyzerPool.of(
-                MainLoopAnalyzer.Factory(
-                    SSDOcr.Factory(
+                SSDOcr.Factory(
+                    context,
+                    SSDOcrModelManager.fetchModel(
                         context,
-                        SSDOcrModelManager.fetchModel(
-                            context,
-                            forImmediateUse = true,
-                            isOptional = false
-                        )
-                    ),
-                    CardDetect.Factory(
-                        context,
-                        CardDetectModelManager.fetchModel(
-                            context,
-                            forImmediateUse = true,
-                            isOptional = false,
-                        )
-                    ),
+                        forImmediateUse = true,
+                        isOptional = false
+                    )
                 )
             )
             mainLoopAnalyzerPool = analyzerPool
 
             mainLoop = ProcessBoundAnalyzerLoop(
                 analyzerPool = analyzerPool,
-                resultHandler = mainLoopOcrAggregator,
+                resultHandler = it,
                 analyzerLoopErrorListener = scanErrorListener,
                 statsName = null, // TODO: change this if we want to collect as part of scanstats
             ).apply {
                 subscribeTo(
                     imageStream.map {
-                        MainLoopAnalyzer.Input(
-                            cameraPreviewImage = it,
-                            cardFinder = viewFinder,
-                        )
+                        SSDOcr.cameraPreviewToInput(it.image, it.viewBounds, viewFinder)
                     },
                     coroutineScope,
                 )
@@ -138,21 +110,5 @@ internal abstract class CardImageVerificationFlow(
 
         mainLoopJob?.apply { if (isActive) { cancel() } }
         mainLoopJob = null
-    }
-
-    /**
-     * Select which frames to use in the completion loop.
-     */
-    fun <SavedFrame> selectCompletionLoopFrames(
-        frames: Map<SavedFrameType, List<SavedFrame>>,
-    ): Collection<SavedFrame> {
-        fun getFrames(frameType: SavedFrameType) = frames[frameType] ?: emptyList()
-
-        val cardAndPan = getFrames(SavedFrameType(hasCard = true, hasOcr = true))
-        val pan = getFrames(SavedFrameType(hasCard = false, hasOcr = true))
-        val card = getFrames(SavedFrameType(hasCard = true, hasOcr = false))
-
-        return (cardAndPan + pan + card)
-            .take(CardImageVerificationConfig.MAX_COMPLETION_LOOP_FRAMES)
     }
 }

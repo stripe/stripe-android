@@ -27,30 +27,15 @@ import com.stripe.android.stripecardscan.scanui.util.dpToPixels
 import com.stripe.android.stripecardscan.scanui.util.getColorByRes
 import com.stripe.android.stripecardscan.scanui.util.getDrawableByRes
 import com.stripe.android.stripecardscan.scanui.util.getFloatResource
-import com.stripe.android.stripecardscan.scanui.util.hide
 import com.stripe.android.stripecardscan.scanui.util.setDrawable
 import com.stripe.android.stripecardscan.scanui.util.setTextSizeByRes
 import com.stripe.android.stripecardscan.scanui.util.setVisible
-import com.stripe.android.stripecardscan.scanui.util.show
-import com.stripe.android.stripecardscan.scanui.util.startAnimation
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.flow.Flow
 import kotlin.math.min
 import kotlin.math.roundToInt
 
 internal abstract class SimpleScanActivity<ScanFlowParameters> : ScanActivity() {
-
-    /**
-     * The state of the scan flow. This can be expanded if [displayState] is overridden to handle
-     * the added states.
-     */
-    abstract class ScanState(val isFinal: Boolean) {
-        object NotFound : ScanState(isFinal = false)
-        object FoundShort : ScanState(isFinal = false)
-        object FoundLong : ScanState(isFinal = false)
-        object Correct : ScanState(isFinal = true)
-        object Wrong : ScanState(isFinal = false)
-    }
 
     companion object {
         private const val LOGO_WIDTH_DP = 100
@@ -181,7 +166,6 @@ internal abstract class SimpleScanActivity<ScanFlowParameters> : ScanActivity() 
             true
         }
 
-        displayState(scanState, scanStatePrevious)
         setContentView(layout)
     }
 
@@ -192,7 +176,6 @@ internal abstract class SimpleScanActivity<ScanFlowParameters> : ScanActivity() 
 
     override fun onResume() {
         super.onResume()
-        scanState = ScanState.NotFound
         viewFinderBackgroundView.setOnDrawListener { setupUiComponents() }
     }
 
@@ -607,73 +590,6 @@ internal abstract class SimpleScanActivity<ScanFlowParameters> : ScanActivity() 
             connect(it.id, ConstraintSet.BOTTOM, ConstraintSet.PARENT_ID, ConstraintSet.BOTTOM)
             connect(it.id, ConstraintSet.START, ConstraintSet.PARENT_ID, ConstraintSet.START)
             connect(it.id, ConstraintSet.END, ConstraintSet.PARENT_ID, ConstraintSet.END)
-        }
-    }
-
-    private var scanStatePrevious: ScanState? = null
-    protected var scanState: ScanState = ScanState.NotFound
-        private set
-
-    /**
-     * Change the state of the scanner.
-     */
-    protected fun changeScanState(newState: ScanState): Boolean {
-        if (newState == scanStatePrevious || scanStatePrevious?.isFinal == true) {
-            return false
-        }
-
-        scanState = newState
-        displayState(newState, scanStatePrevious)
-        scanStatePrevious = newState
-        return true
-    }
-
-    protected open fun displayState(newState: ScanState, previousState: ScanState?) {
-        when (newState) {
-            is ScanState.NotFound -> {
-                viewFinderBackgroundView
-                    .setBackgroundColor(getColorByRes(R.color.stripeNotFoundBackground))
-                viewFinderWindowView
-                    .setBackgroundResource(R.drawable.stripe_card_background_not_found)
-                viewFinderBorderView.startAnimation(R.drawable.stripe_card_border_not_found)
-                instructionsTextView.setText(R.string.stripe_card_scan_instructions)
-                cardNumberTextView.hide()
-                cardNameTextView.hide()
-            }
-            is ScanState.FoundShort -> {
-                viewFinderBackgroundView
-                    .setBackgroundColor(getColorByRes(R.color.stripeFoundBackground))
-                viewFinderWindowView
-                    .setBackgroundResource(R.drawable.stripe_card_background_found)
-                viewFinderBorderView.startAnimation(R.drawable.stripe_card_border_found)
-                instructionsTextView.setText(R.string.stripe_card_scan_instructions)
-                instructionsTextView.show()
-            }
-            is ScanState.FoundLong -> {
-                viewFinderBackgroundView
-                    .setBackgroundColor(getColorByRes(R.color.stripeFoundBackground))
-                viewFinderWindowView
-                    .setBackgroundResource(R.drawable.stripe_card_background_found)
-                viewFinderBorderView.startAnimation(R.drawable.stripe_card_border_found_long)
-                instructionsTextView.setText(R.string.stripe_card_scan_instructions)
-                instructionsTextView.show()
-            }
-            is ScanState.Correct -> {
-                viewFinderBackgroundView
-                    .setBackgroundColor(getColorByRes(R.color.stripeCorrectBackground))
-                viewFinderWindowView
-                    .setBackgroundResource(R.drawable.stripe_card_background_correct)
-                viewFinderBorderView.startAnimation(R.drawable.stripe_card_border_correct)
-                instructionsTextView.hide()
-            }
-            is ScanState.Wrong -> {
-                viewFinderBackgroundView
-                    .setBackgroundColor(getColorByRes(R.color.stripeWrongBackground))
-                viewFinderWindowView
-                    .setBackgroundResource(R.drawable.stripe_card_background_wrong)
-                viewFinderBorderView.startAnimation(R.drawable.stripe_card_border_wrong)
-                instructionsTextView.setText(R.string.stripe_scanned_wrong_card)
-            }
         }
     }
 
