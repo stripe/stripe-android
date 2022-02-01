@@ -35,7 +35,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.stripe.android.link.LinkActivityContract
 import com.stripe.android.link.R
 import com.stripe.android.link.theme.DefaultLinkTheme
-import com.stripe.android.link.theme.LinkTextFieldColors
+import com.stripe.android.link.theme.linkTextFieldColors
 import com.stripe.android.ui.core.elements.EmailSpec
 import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.elements.SectionCard
@@ -89,7 +89,6 @@ internal fun SignUpBody(
     signUpStatus: SignUpStatus,
     onSignUpClick: (String) -> Unit
 ) {
-    var phone by remember { mutableStateOf("") }
 
     Column(
         modifier = Modifier
@@ -112,76 +111,98 @@ internal fun SignUpBody(
             textAlign = TextAlign.Center,
             style = MaterialTheme.typography.body1
         )
-        Box(
+        EmailCollectionSection(
+            emailElement = emailElement,
+            signUpStatus = signUpStatus
+        )
+        AnimatedVisibility(
+            visible = signUpStatus == SignUpStatus.InputtingPhone
+        ) {
+            PhoneCollectionSection()
+        }
+    }
+}
+
+@Composable
+private fun EmailCollectionSection(
+    emailElement: SectionFieldElement,
+    signUpStatus: SignUpStatus
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(0.dp),
+        contentAlignment = Alignment.CenterEnd
+    ) {
+        SectionElementUI(
+            enabled = signUpStatus != SignUpStatus.VerifyingEmail,
+            element = SectionElement(
+                identifier = IdentifierSpec.Generic("email"),
+                fields = listOf(emailElement),
+                controller = SectionController(
+                    null,
+                    listOf(emailElement.sectionFieldErrorController())
+                )
+            ),
+            emptyList()
+        )
+        if (signUpStatus == SignUpStatus.VerifyingEmail) {
+            CircularProgressIndicator(
+                modifier = Modifier
+                    .size(32.dp)
+                    .padding(
+                        start = 0.dp,
+                        top = 8.dp,
+                        end = 16.dp,
+                        bottom = 8.dp
+                    )
+                    .semantics {
+                        testTag = "CircularProgressIndicator"
+                    },
+                strokeWidth = 2.dp
+            )
+        }
+    }
+}
+
+@Composable
+private fun PhoneCollectionSection() {
+    var phone by remember { mutableStateOf("") }
+
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        SectionCard {
+            TextField(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                value = phone,
+                onValueChange = {
+                    phone = it
+                },
+                label = {
+                    Text(text = "Mobile Number")
+                },
+                shape = MaterialTheme.shapes.medium,
+                colors = linkTextFieldColors(),
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Phone,
+                    imeAction = ImeAction.Go
+                ),
+                singleLine = true
+            )
+        }
+        Text(
+            text = stringResource(R.string.sign_up_terms),
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(0.dp),
-            contentAlignment = Alignment.CenterEnd
-        ) {
-            SectionElementUI(
-                enabled = signUpStatus != SignUpStatus.VerifyingEmail,
-                element = SectionElement(
-                    identifier = IdentifierSpec.Generic("email"),
-                    fields = listOf(emailElement),
-                    controller = SectionController(
-                        null,
-                        listOf(emailElement.sectionFieldErrorController())
-                    )
-                ),
-                emptyList()
-            )
-            if (signUpStatus == SignUpStatus.VerifyingEmail) {
-                CircularProgressIndicator(
-                    modifier = Modifier
-                        .size(32.dp)
-                        .padding(
-                            start = 0.dp,
-                            top = 8.dp,
-                            end = 16.dp,
-                            bottom = 8.dp
-                        )
-                        .semantics {
-                            testTag = "CircularProgressIndicator"
-                        },
-                    strokeWidth = 2.dp
-                )
-            }
-        }
-        AnimatedVisibility(visible = signUpStatus == SignUpStatus.InputtingPhone) {
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                SectionCard {
-                    TextField(
-                        modifier = Modifier
-                            .fillMaxWidth(),
-                        value = phone,
-                        onValueChange = {
-                            phone = it
-                        },
-                        label = {
-                            Text(text = "Mobile Number")
-                        },
-                        shape = MaterialTheme.shapes.medium,
-                        colors = LinkTextFieldColors(),
-                        keyboardOptions = KeyboardOptions(
-                            keyboardType = KeyboardType.Phone,
-                            imeAction = ImeAction.Go
-                        ),
-                        singleLine = true
-                    )
-                }
-                Text(
-                    text = stringResource(R.string.sign_up_terms),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    textAlign = TextAlign.Center,
-                    style = MaterialTheme.typography.caption
-                )
-                Button(
-                    onClick = {
+                .padding(16.dp),
+            textAlign = TextAlign.Center,
+            style = MaterialTheme.typography.caption
+        )
+        Button(
+            onClick = {
                         onSignUpClick(phone)
                     },
                     modifier = Modifier
@@ -189,13 +210,11 @@ internal fun SignUpBody(
                         .height(56.dp)
                         .padding(vertical = 8.dp),
                     enabled = phone.length == 10
-                ) {
-                    Text(
-                        text = stringResource(R.string.sign_up),
-                        style = MaterialTheme.typography.button
-                    )
-                }
-            }
+        ) {
+            Text(
+                text = stringResource(R.string.sign_up),
+                style = MaterialTheme.typography.button
+            )
         }
     }
 }

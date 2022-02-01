@@ -26,6 +26,7 @@ import com.stripe.android.link.ui.signup.SignUpBody
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 
+@Suppress("EXPERIMENTAL_ANNOTATION_ON_OVERRIDE_WARNING")
 internal class LinkActivity : ComponentActivity() {
 
     private val viewModel: LinkActivityViewModel by viewModels {

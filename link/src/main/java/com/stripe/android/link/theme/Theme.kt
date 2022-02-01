@@ -2,7 +2,6 @@ package com.stripe.android.link.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material.MaterialTheme
-import androidx.compose.material.TextFieldColors
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.darkColors
 import androidx.compose.material.lightColors
@@ -22,7 +21,7 @@ private val LightColorPalette = lightColors(
 )
 
 @Composable
-internal fun LinkTextFieldColors(): TextFieldColors =
+internal fun linkTextFieldColors() =
     TextFieldDefaults.textFieldColors(
         backgroundColor = MaterialTheme.colors.background,
         focusedIndicatorColor = Color.Transparent,

@@ -389,7 +389,7 @@ abstract class StripeRepository {
         requestOptions: ApiRequest.Options
     ): RadarSession?
 
-    // Link endpoins
+    // Link endpoints
 
     @Throws(
         AuthenticationException::class,
