@@ -6,7 +6,6 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.Logger
-import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.Injectable
 import com.stripe.android.core.injection.injectWithFallback
 import com.stripe.android.link.LinkActivityContract
@@ -25,13 +24,11 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Provider
-import kotlin.coroutines.CoroutineContext
 
 /**
  * ViewModel that handles user sign up logic.
  */
 internal class SignUpViewModel @Inject internal constructor(
-    @IOContext private val workContext: CoroutineContext,
     args: LinkActivityContract.Args,
     private val linkRepository: LinkRepository,
     private val logger: Logger
@@ -56,7 +53,10 @@ internal class SignUpViewModel @Inject internal constructor(
     private val _signUpStatus = MutableStateFlow(SignUpStatus.InputtingEmail)
     val signUpStatus: StateFlow<SignUpStatus> = _signUpStatus
 
-    // Holds a Job that looks up the email after a delay, so that we can cancel it
+    /**
+     * Holds a Job that looks up the email after a delay, so that we can cancel it if the user is
+     * still typing.
+     */
     private var lookupJob: Job? = null
 
     init {
@@ -82,7 +82,7 @@ internal class SignUpViewModel @Inject internal constructor(
     private suspend fun lookupConsumerEmail(email: String) {
         linkRepository.lookupConsumer(email)?.let {
             if (it.consumerSession != null) {
-                // TODO(brnunes): Trigger verification
+                // TODO(brnunes-stripe): Trigger verification
             } else {
                 _signUpStatus.value = SignUpStatus.InputtingPhone
             }
@@ -91,6 +91,7 @@ internal class SignUpViewModel @Inject internal constructor(
 
     private fun onError(errorMessage: String) {
         logger.error(errorMessage)
+        // TODO(brnunes-stripe): Add localized error messages, show them in UI.
     }
 
     internal class Factory(
