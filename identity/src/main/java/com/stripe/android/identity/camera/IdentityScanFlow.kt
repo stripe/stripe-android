@@ -51,8 +51,7 @@ class IdentityScanFlow :
             loop = ProcessBoundAnalyzerLoop(
                 analyzerPool = requireNotNull(analyzerPool),
                 resultHandler = aggregator,
-                analyzerLoopErrorListener = IDDetectorAnalyzerLoopErrorListener(),
-                statsName = null // TODO(ccen): determine if we need this
+                analyzerLoopErrorListener = IDDetectorAnalyzerLoopErrorListener()
             )
 
             requireNotNull(loop).subscribeTo(
