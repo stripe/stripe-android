@@ -597,11 +597,9 @@ internal abstract class SimpleScanActivity<ScanFlowParameters> : ScanActivity() 
         setupUiComponents()
     }
 
-    override fun prepareCamera(onCameraReady: () -> Unit) {
-        previewFrame.post {
-            viewFinderBackgroundView.setViewFinderRect(viewFinderWindowView.asRect())
-            onCameraReady()
-        }
+    override fun onCameraReady() {
+        viewFinderBackgroundView.setViewFinderRect(viewFinderWindowView.asRect())
+        startCameraAdapter()
     }
 
     override fun onFlashSupported(supported: Boolean) {

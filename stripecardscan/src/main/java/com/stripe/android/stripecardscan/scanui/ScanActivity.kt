@@ -262,7 +262,7 @@ internal abstract class ScanActivity : CameraPermissionCheckingActivity(), Corou
         finish()
     }
 
-    override fun onCameraReady() {
+    protected fun startCameraAdapter() {
         cameraAdapter.bindToLifecycle(this)
 
         val torchStat = Stats.trackTask("torch_supported")

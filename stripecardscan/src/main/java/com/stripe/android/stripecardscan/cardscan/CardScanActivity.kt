@@ -256,15 +256,10 @@ internal class CardScanActivity : ScanActivity(), SimpleScanStateful<CardScanSta
         viewBinding.swapCameraButton.setVisible(supported)
     }
 
-    /**
-     * Prepare to start the camera. Once the camera is ready, [onCameraReady] must be called.
-     */
-    override fun prepareCamera(onCameraReady: () -> Unit) {
-        viewBinding.previewFrame.post {
-            viewBinding.viewFinderBackground
-                .setViewFinderRect(viewBinding.viewFinderWindow.asRect())
-            onCameraReady()
-        }
+    override fun onCameraReady() {
+        viewBinding.viewFinderBackground
+            .setViewFinderRect(viewBinding.viewFinderWindow.asRect())
+        startCameraAdapter()
     }
 
     /**
