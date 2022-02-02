@@ -1,6 +1,5 @@
 package com.stripe.android.stripecardscan.scanui
 
-import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.PointF
 import android.os.Build
@@ -11,12 +10,11 @@ import android.util.Size
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
-import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog
 import com.stripe.android.camera.CameraAdapter
-import com.stripe.android.camera.CameraErrorListener
 import com.stripe.android.camera.CameraPermissionCheckingActivity
 import com.stripe.android.camera.CameraPreviewImage
+import com.stripe.android.camera.DefaultCameraErrorListener
 import com.stripe.android.camera.framework.Stats
 import com.stripe.android.stripecardscan.R
 import com.stripe.android.stripecardscan.camera.getCameraAdapter
@@ -58,37 +56,6 @@ internal interface ScanResultListener {
     fun failed(cause: Throwable?)
 }
 
-/**
- * A basic implementation that displays error messages when there is a problem with the camera.
- */
-internal class CameraErrorListenerImpl(
-    protected val context: Context,
-    protected val callback: (Throwable?) -> Unit
-) : CameraErrorListener {
-    override fun onCameraOpenError(cause: Throwable?) {
-        showCameraError(R.string.stripe_error_camera_open, cause)
-    }
-
-    override fun onCameraAccessError(cause: Throwable?) {
-        showCameraError(R.string.stripe_error_camera_access, cause)
-    }
-
-    override fun onCameraUnsupportedError(cause: Throwable?) {
-        Log.e(Config.logTag, "Camera not supported", cause)
-        showCameraError(R.string.stripe_error_camera_unsupported, cause)
-    }
-
-    private fun showCameraError(@StringRes message: Int, cause: Throwable?) {
-        AlertDialog.Builder(context)
-            .setTitle(R.string.stripe_error_camera_title)
-            .setMessage(message)
-            .setPositiveButton(R.string.stripe_error_camera_acknowledge_button) { _, _ ->
-                callback(cause)
-            }
-            .show()
-    }
-}
-
 internal abstract class ScanActivity : CameraPermissionCheckingActivity(), CoroutineScope {
 
     override val coroutineContext: CoroutineContext = Dispatchers.Main
@@ -101,7 +68,7 @@ internal abstract class ScanActivity : CameraPermissionCheckingActivity(), Corou
 
     internal val cameraAdapter by lazy { buildCameraAdapter() }
     private val cameraErrorListener by lazy {
-        CameraErrorListenerImpl(this) { t -> scanFailure(t) }
+        DefaultCameraErrorListener(this) { t -> scanFailure(t) }
     }
 
     /**
