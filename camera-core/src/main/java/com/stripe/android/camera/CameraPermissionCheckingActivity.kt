@@ -19,19 +19,14 @@ import kotlinx.coroutines.launch
 
 /**
  * A [AppCompatActivity] class to handle camera permission.
- * Subclass should override [prepareCamera], [onCameraReady] and [onUserDeniedCameraPermission].
+ * Subclass should override [onCameraReady] and [onUserDeniedCameraPermission].
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 abstract class CameraPermissionCheckingActivity : AppCompatActivity() {
 
     /**
-     * Prepare to start the camera. Once the camera is ready, [onCameraReady] must be called.
-     */
-    protected abstract fun prepareCamera(onCameraReady: () -> Unit)
-
-    /**
-     * Callback when camera permission is granted, [prepareCamera] is called and camera is
-     * ready to use.
+     * The camera permission was granted and camera is ready to use.
+     * Note this callback will be invoked on the main thread.
      */
     protected abstract fun onCameraReady()
 
@@ -58,7 +53,9 @@ abstract class CameraPermissionCheckingActivity : AppCompatActivity() {
             Manifest.permission.CAMERA,
         ) == PackageManager.PERMISSION_GRANTED -> {
             mainScope.launch { permissionStat.trackResult("success") }
-            prepareCamera { onCameraReady() }
+            mainScope.launch {
+                onCameraReady()
+            }
         }
         ActivityCompat.shouldShowRequestPermissionRationale(
             this,
@@ -86,7 +83,9 @@ abstract class CameraPermissionCheckingActivity : AppCompatActivity() {
             when (grantResults[0]) {
                 PackageManager.PERMISSION_GRANTED -> {
                     mainScope.launch { permissionStat.trackResult("success") }
-                    prepareCamera { onCameraReady() }
+                    mainScope.launch {
+                        onCameraReady()
+                    }
                 }
                 else -> {
                     mainScope.launch { permissionStat.trackResult("failure") }

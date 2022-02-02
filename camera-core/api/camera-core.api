@@ -55,12 +55,11 @@ public abstract interface class com/stripe/android/camera/CameraErrorListener {
 
 public abstract class com/stripe/android/camera/CameraPermissionCheckingActivity : androidx/appcompat/app/AppCompatActivity {
 	public fun <init> ()V
-	protected final fun ensureCameraPermission ()V
+	protected final fun ensureCameraPermission ()Ljava/lang/Object;
 	protected abstract fun onCameraReady ()V
 	public fun onRequestPermissionsResult (I[Ljava/lang/String;[I)V
 	protected abstract fun onUserDeniedCameraPermission ()V
 	protected fun openAppSettings (Landroid/app/Activity;)V
-	protected abstract fun prepareCamera (Lkotlin/jvm/functions/Function0;)V
 	protected fun requestCameraPermission ()V
 	protected fun showPermissionDeniedDialog ()V
 	protected fun showPermissionRationaleDialog ()V
