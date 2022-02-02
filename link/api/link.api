@@ -102,10 +102,6 @@ public final class com/stripe/android/link/ui/ComposableSingletons$LinkButtonKt 
 	public final fun getLambda-1$link_release ()Lkotlin/jvm/functions/Function3;
 }
 
-public final class com/stripe/android/link/ui/LinkButtonKt {
-	public static final fun LinkButton (Lkotlin/jvm/functions/Function0;Landroidx/compose/runtime/Composer;I)V
-}
-
 public final class com/stripe/android/link/ui/LinkViewButton : androidx/compose/ui/platform/AbstractComposeView {
 	public static final field $stable I
 	public fun <init> (Landroid/content/Context;)V
@@ -120,20 +116,22 @@ public final class com/stripe/android/link/ui/LinkViewButton : androidx/compose/
 public final class com/stripe/android/link/ui/signup/ComposableSingletons$SignUpScreenKt {
 	public static final field INSTANCE Lcom/stripe/android/link/ui/signup/ComposableSingletons$SignUpScreenKt;
 	public static field lambda-1 Lkotlin/jvm/functions/Function2;
-	public static field lambda-2 Lkotlin/jvm/functions/Function2;
-	public static field lambda-3 Lkotlin/jvm/functions/Function3;
+	public static field lambda-2 Lkotlin/jvm/functions/Function3;
+	public static field lambda-3 Lkotlin/jvm/functions/Function2;
+	public static field lambda-4 Lkotlin/jvm/functions/Function3;
 	public fun <init> ()V
 	public final fun getLambda-1$link_release ()Lkotlin/jvm/functions/Function2;
-	public final fun getLambda-2$link_release ()Lkotlin/jvm/functions/Function2;
-	public final fun getLambda-3$link_release ()Lkotlin/jvm/functions/Function3;
+	public final fun getLambda-2$link_release ()Lkotlin/jvm/functions/Function3;
+	public final fun getLambda-3$link_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda-4$link_release ()Lkotlin/jvm/functions/Function3;
 }
 
 public final class com/stripe/android/link/ui/signup/SignUpViewModel_Factory : dagger/internal/Factory {
-	public fun <init> (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)V
-	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/link/ui/signup/SignUpViewModel_Factory;
+	public fun <init> (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)V
+	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/link/ui/signup/SignUpViewModel_Factory;
 	public fun get ()Lcom/stripe/android/link/ui/signup/SignUpViewModel;
 	public synthetic fun get ()Ljava/lang/Object;
-	public static fun newInstance (Lkotlin/coroutines/CoroutineContext;Lcom/stripe/android/link/LinkActivityContract$Args;Lcom/stripe/android/link/repositories/LinkRepository;Lcom/stripe/android/core/Logger;)Lcom/stripe/android/link/ui/signup/SignUpViewModel;
+	public static fun newInstance (Lcom/stripe/android/link/LinkActivityContract$Args;Lcom/stripe/android/link/repositories/LinkRepository;Lcom/stripe/android/core/Logger;)Lcom/stripe/android/link/ui/signup/SignUpViewModel;
 }
 
 public final class com/stripe/android/link/ui/signup/SignUpViewModel_Factory_MembersInjector : dagger/MembersInjector {
