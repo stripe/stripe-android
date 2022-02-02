@@ -29,7 +29,8 @@ private fun LinkButton() {
 }
 
 @Composable
-private fun LinkButton(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+fun LinkButton(
     onClick: () -> Unit
 ) {
     DefaultLinkTheme {
@@ -54,9 +55,7 @@ private fun LinkButton(
 }
 
 /**
- * Wrapper view around a button for paying with Link, for use in xml layout.
- *
- * Set the `onClick` function to launch LinkPaymentLauncher.
+ * Wrapper around [LinkButton] for use in xml layout.
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class LinkViewButton @JvmOverloads constructor(

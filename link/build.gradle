@@ -46,6 +46,7 @@ dependencies {
     implementation "androidx.compose.runtime:runtime-livedata:$composeVersion"
     implementation "com.google.accompanist:accompanist-flowlayout:0.20.3"
     implementation "androidx.compose.ui:ui-tooling-preview:$composeVersion"
+    implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.4.0'
 
 
     testImplementation project(':payments-core')
@@ -103,6 +104,7 @@ android {
 
     kotlinOptions {
         jvmTarget = "1.8"
+        useIR = true
     }
 
     buildFeatures {

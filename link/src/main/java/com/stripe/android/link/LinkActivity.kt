@@ -24,7 +24,6 @@ import androidx.navigation.compose.rememberNavController
 import com.stripe.android.link.ui.signup.SignUpBody
 import com.stripe.android.link.ui.theme.DefaultLinkTheme
 
-@Suppress("EXPERIMENTAL_ANNOTATION_ON_OVERRIDE_WARNING")
 internal class LinkActivity : ComponentActivity() {
     internal lateinit var navController: NavHostController
 

@@ -27,7 +27,7 @@ internal class LinkApiRepository @Inject constructor(
 
     override suspend fun lookupConsumer(email: String): ConsumerSessionLookup? =
         withContext(workContext) {
-            runCatching {
+            kotlin.runCatching {
                 stripeRepository.lookupConsumerSession(
                     email,
                     ApiRequest.Options(

@@ -20,6 +20,7 @@ import com.stripe.android.ui.core.elements.IdentifierSpec
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.resetMain
@@ -193,6 +194,7 @@ class SignUpViewModelTest {
     }
 
     private fun createViewModel(args: LinkActivityContract.Args = defaultArgs) = SignUpViewModel(
+        workContext = StandardTestDispatcher(),
         args = args,
         linkRepository = linkRepository,
         logger = Logger.noop()

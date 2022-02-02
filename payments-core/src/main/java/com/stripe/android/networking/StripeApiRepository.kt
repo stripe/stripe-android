@@ -1145,9 +1145,6 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         }
     }
 
-    /**
-     * Retrieves the ConsumerSession if the given email is associated with a Link account.
-     */
     override suspend fun lookupConsumerSession(
         email: String,
         requestOptions: ApiRequest.Options
