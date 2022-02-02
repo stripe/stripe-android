@@ -82,7 +82,7 @@ public abstract interface class com/stripe/android/camera/framework/AnalyzerFact
 }
 
 public abstract class com/stripe/android/camera/framework/AnalyzerLoop : com/stripe/android/camera/framework/ResultHandler {
-	public synthetic fun <init> (Lcom/stripe/android/camera/framework/AnalyzerPool;Lcom/stripe/android/camera/framework/AnalyzerLoopErrorListener;Ljava/lang/String;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (Lcom/stripe/android/camera/framework/AnalyzerPool;Lcom/stripe/android/camera/framework/AnalyzerLoopErrorListener;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
 	protected final fun getStartedAt ()Lcom/stripe/android/camera/framework/time/ClockMark;
 	public abstract fun getState ()Ljava/lang/Object;
 	protected final fun setStartedAt (Lcom/stripe/android/camera/framework/time/ClockMark;)V
@@ -116,8 +116,8 @@ public final class com/stripe/android/camera/framework/AnalyzerPool$Companion {
 }
 
 public final class com/stripe/android/camera/framework/FiniteAnalyzerLoop : com/stripe/android/camera/framework/AnalyzerLoop {
-	public fun <init> (Lcom/stripe/android/camera/framework/AnalyzerPool;Lcom/stripe/android/camera/framework/TerminatingResultHandler;Lcom/stripe/android/camera/framework/AnalyzerLoopErrorListener;Lcom/stripe/android/camera/framework/time/Duration;Ljava/lang/String;)V
-	public synthetic fun <init> (Lcom/stripe/android/camera/framework/AnalyzerPool;Lcom/stripe/android/camera/framework/TerminatingResultHandler;Lcom/stripe/android/camera/framework/AnalyzerLoopErrorListener;Lcom/stripe/android/camera/framework/time/Duration;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Lcom/stripe/android/camera/framework/AnalyzerPool;Lcom/stripe/android/camera/framework/TerminatingResultHandler;Lcom/stripe/android/camera/framework/AnalyzerLoopErrorListener;Lcom/stripe/android/camera/framework/time/Duration;)V
+	public synthetic fun <init> (Lcom/stripe/android/camera/framework/AnalyzerPool;Lcom/stripe/android/camera/framework/TerminatingResultHandler;Lcom/stripe/android/camera/framework/AnalyzerLoopErrorListener;Lcom/stripe/android/camera/framework/time/Duration;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun cancel ()V
 	public fun getState ()Ljava/lang/Object;
 	public fun onResult (Ljava/lang/Object;Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
@@ -125,7 +125,7 @@ public final class com/stripe/android/camera/framework/FiniteAnalyzerLoop : com/
 }
 
 public final class com/stripe/android/camera/framework/ProcessBoundAnalyzerLoop : com/stripe/android/camera/framework/AnalyzerLoop {
-	public fun <init> (Lcom/stripe/android/camera/framework/AnalyzerPool;Lcom/stripe/android/camera/framework/StatefulResultHandler;Lcom/stripe/android/camera/framework/AnalyzerLoopErrorListener;Ljava/lang/String;)V
+	public fun <init> (Lcom/stripe/android/camera/framework/AnalyzerPool;Lcom/stripe/android/camera/framework/StatefulResultHandler;Lcom/stripe/android/camera/framework/AnalyzerLoopErrorListener;)V
 	public fun getState ()Ljava/lang/Object;
 	public fun onResult (Ljava/lang/Object;Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun subscribeTo (Lkotlinx/coroutines/flow/Flow;Lkotlinx/coroutines/CoroutineScope;)Lkotlinx/coroutines/Job;
