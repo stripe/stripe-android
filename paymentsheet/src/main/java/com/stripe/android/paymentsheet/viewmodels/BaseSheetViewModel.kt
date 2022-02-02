@@ -120,7 +120,11 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
      * card fragment is determined to be valid (not necessarily selected)
      * On [BasePaymentMethodsListFragment] this is set when a user selects one of the options
      */
-    private val _selection = savedStateHandle.getLiveData<PaymentSelection>(SAVE_SELECTION)
+    private val _selection = savedStateHandle.getLiveData<PaymentSelection>(
+        SAVE_SELECTION, savedStateHandle.get(
+            SAVE_SELECTION
+        )
+    )
     internal val selection: LiveData<PaymentSelection?> = _selection
 
     private val editing = MutableLiveData(false)
