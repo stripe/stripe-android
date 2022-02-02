@@ -1,5 +1,6 @@
 # CHANGELOG
 ## X.X.X - 2022-XX-XX
+* [CHANGED] [4546](https://github.com/stripe/stripe-android/pull/4546) Update to kotlin 1.6
 ### PaymentSheet
 ### Identity
 ### Card scanning
