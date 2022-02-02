@@ -111,7 +111,7 @@ internal class SignUpViewModel @Inject internal constructor(
             Provider<SignUpViewModelSubcomponent.Builder>
 
         @Suppress("UNCHECKED_CAST")
-        override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+        override fun <T : ViewModel> create(modelClass: Class<T>): T {
             val args = starterArgsSupplier()
             injectWithFallback(
                 args.injectionParams?.injectorKey,
