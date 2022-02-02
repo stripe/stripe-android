@@ -1,15 +1,19 @@
-package com.stripe.android.stripecardscan.framework
+package com.stripe.android.core.storage
 
+import android.content.Context
+import androidx.test.core.app.ApplicationProvider
 import androidx.test.filters.SmallTest
-import androidx.test.platform.app.InstrumentationRegistry
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 private const val PURPOSE_TEST = "test"
 
+@RunWith(RobolectricTestRunner::class)
 class StorageTest {
-    private val testContext = InstrumentationRegistry.getInstrumentation().context
+    private val testContext = ApplicationProvider.getApplicationContext<Context>()
 
     @Test
     @SmallTest

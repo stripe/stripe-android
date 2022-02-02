@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="stripe_camera_permission_denied_message" description="Message shown to the user when camera permission is denied">Please allow camera access to scan your card</string>
+    <string name="stripe_camera_permission_denied_ok" description="Affirmative button shown as part of the permission denied dialog">OK</string>
+    <string name="stripe_camera_permission_denied_cancel" description="Negative button shown as part of the permission denied dialog">Cancel</string>
+    
+</resources>

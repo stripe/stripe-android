@@ -1,12 +1,14 @@
-package com.stripe.android.stripecardscan.framework
+package com.stripe.android.core.storage
 
 import android.content.Context
 import android.content.SharedPreferences
 import android.util.Log
+import androidx.annotation.RestrictTo
 
 private const val STORAGE_FILE_NAME = "stripe_shared_prefs"
 
-internal interface Storage {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+interface Storage {
 
     /**
      * Store a String in app storage by a [key].
@@ -72,12 +74,14 @@ internal interface Storage {
 /**
  * A class that handles access to storage.
  */
-internal object StorageFactory {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+object StorageFactory {
     fun getStorageInstance(context: Context, purpose: String): Storage =
         SharedPreferencesStorage(context.applicationContext, purpose)
 }
 
-internal class SharedPreferencesStorage(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+class SharedPreferencesStorage(
     private val context: Context,
     private val purpose: String,
 ) : Storage {
@@ -91,7 +95,7 @@ internal class SharedPreferencesStorage(
             commit()
         }
     } ?: false.apply {
-        Log.e(Config.logTag, "Shared preferences is unavailable to store $value for $key")
+        Log.e(logTag, "Shared preferences is unavailable to store $value for $key")
     }
 
     override fun storeValue(key: String, value: Long) = sharedPrefs?.run {
@@ -100,7 +104,7 @@ internal class SharedPreferencesStorage(
             commit()
         }
     } ?: false.apply {
-        Log.e(Config.logTag, "Shared preferences is unavailable to store $value for $key")
+        Log.e(logTag, "Shared preferences is unavailable to store $value for $key")
     }
 
     override fun storeValue(key: String, value: Int) = sharedPrefs?.run {
@@ -109,7 +113,7 @@ internal class SharedPreferencesStorage(
             commit()
         }
     } ?: false.apply {
-        Log.e(Config.logTag, "Shared preferences is unavailable to store $value for $key")
+        Log.e(logTag, "Shared preferences is unavailable to store $value for $key")
     }
 
     override fun storeValue(key: String, value: Float) = sharedPrefs?.run {
@@ -118,7 +122,7 @@ internal class SharedPreferencesStorage(
             commit()
         }
     } ?: false.apply {
-        Log.e(Config.logTag, "Shared preferences is unavailable to store $value for $key")
+        Log.e(logTag, "Shared preferences is unavailable to store $value for $key")
     }
 
     override fun storeValue(key: String, value: Boolean) = sharedPrefs?.run {
@@ -127,18 +131,18 @@ internal class SharedPreferencesStorage(
             commit()
         }
     } ?: false.apply {
-        Log.e(Config.logTag, "Shared preferences is unavailable to store $value for $key")
+        Log.e(logTag, "Shared preferences is unavailable to store $value for $key")
     }
 
     override fun getString(key: String, defaultValue: String): String {
         return try {
             sharedPrefs?.getString("${purpose}_$key", defaultValue) ?: defaultValue.apply {
-                Log.e(Config.logTag, "Unable to retrieve a String for $key")
+                Log.e(logTag, "Unable to retrieve a String for $key")
             }
         } catch (t: Throwable) {
             when (t) {
-                is ClassCastException -> Log.e(Config.logTag, "$key is not a String", t)
-                else -> Log.d(Config.logTag, "Error retrieving String for $key", t)
+                is ClassCastException -> Log.e(logTag, "$key is not a String", t)
+                else -> Log.d(logTag, "Error retrieving String for $key", t)
             }
             defaultValue
         }
@@ -147,12 +151,12 @@ internal class SharedPreferencesStorage(
     override fun getLong(key: String, defaultValue: Long): Long {
         return try {
             sharedPrefs?.getLong("${purpose}_$key", defaultValue) ?: defaultValue.apply {
-                Log.e(Config.logTag, "Unable to retrieve a Long for $key")
+                Log.e(logTag, "Unable to retrieve a Long for $key")
             }
         } catch (t: Throwable) {
             when (t) {
-                is ClassCastException -> Log.e(Config.logTag, "$key is not a Long", t)
-                else -> Log.d(Config.logTag, "Error retrieving Long for $key", t)
+                is ClassCastException -> Log.e(logTag, "$key is not a Long", t)
+                else -> Log.d(logTag, "Error retrieving Long for $key", t)
             }
             defaultValue
         }
@@ -161,12 +165,12 @@ internal class SharedPreferencesStorage(
     override fun getInt(key: String, defaultValue: Int): Int {
         return try {
             sharedPrefs?.getInt("${purpose}_$key", defaultValue) ?: defaultValue.apply {
-                Log.e(Config.logTag, "Unable to retrieve an Int for $key")
+                Log.e(logTag, "Unable to retrieve an Int for $key")
             }
         } catch (t: Throwable) {
             when (t) {
-                is ClassCastException -> Log.e(Config.logTag, "$key is not a Int", t)
-                else -> Log.d(Config.logTag, "Error retrieving Int for $key", t)
+                is ClassCastException -> Log.e(logTag, "$key is not a Int", t)
+                else -> Log.d(logTag, "Error retrieving Int for $key", t)
             }
             defaultValue
         }
@@ -175,12 +179,12 @@ internal class SharedPreferencesStorage(
     override fun getFloat(key: String, defaultValue: Float): Float {
         return try {
             sharedPrefs?.getFloat("${purpose}_$key", defaultValue) ?: defaultValue.apply {
-                Log.e(Config.logTag, "Unable to retrieve a Float for $key")
+                Log.e(logTag, "Unable to retrieve a Float for $key")
             }
         } catch (t: Throwable) {
             when (t) {
-                is ClassCastException -> Log.e(Config.logTag, "$key is not a Float", t)
-                else -> Log.d(Config.logTag, "Error retrieving Float for $key", t)
+                is ClassCastException -> Log.e(logTag, "$key is not a Float", t)
+                else -> Log.d(logTag, "Error retrieving Float for $key", t)
             }
             defaultValue
         }
@@ -189,12 +193,12 @@ internal class SharedPreferencesStorage(
     override fun getBoolean(key: String, defaultValue: Boolean): Boolean {
         return try {
             sharedPrefs?.getBoolean("${purpose}_$key", defaultValue) ?: defaultValue.apply {
-                Log.e(Config.logTag, "Unable to retrieve a Boolean for $key")
+                Log.e(logTag, "Unable to retrieve a Boolean for $key")
             }
         } catch (t: Throwable) {
             when (t) {
-                is ClassCastException -> Log.e(Config.logTag, "$key is not a Boolean", t)
-                else -> Log.d(Config.logTag, "Error retrieving Boolean for $key", t)
+                is ClassCastException -> Log.e(logTag, "$key is not a Boolean", t)
+                else -> Log.d(logTag, "Error retrieving Boolean for $key", t)
             }
             defaultValue
         }
@@ -206,7 +210,7 @@ internal class SharedPreferencesStorage(
             commit()
         }
     } ?: false.apply {
-        Log.e(Config.logTag, "Shared preferences is unavailable to remove values")
+        Log.e(logTag, "Shared preferences is unavailable to remove values")
     }
 
     override fun clear(): Boolean = sharedPrefs?.run {
@@ -215,6 +219,10 @@ internal class SharedPreferencesStorage(
             commit()
         }
     } ?: false.apply {
-        Log.e(Config.logTag, "Shared preferences is unavailable to clear values")
+        Log.e(logTag, "Shared preferences is unavailable to clear values")
+    }
+
+    private companion object {
+        val logTag: String = SharedPreferencesStorage::class.java.simpleName
     }
 }

@@ -50,6 +50,7 @@ configurations {
 }
 
 dependencies {
+    implementation project(":stripe-core")
     implementation libraries.androidx.constraintlayout
 
     implementation "androidx.core:core-ktx:$coreKtxVersion"
