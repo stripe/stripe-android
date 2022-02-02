@@ -1,14 +1,16 @@
 package com.stripe.android.link
 
-import androidx.compose.runtime.Composable
-import com.stripe.android.link.ui.signup.SignUpBody
-
-internal enum class LinkScreen(
-    val body: @Composable () -> Unit
+/**
+ * All Link screens.
+ */
+internal sealed class LinkScreen(
+    val name: String
 ) {
-    SignUp(
-        body = {
-            SignUpBody()
-        }
-    );
+    companion object {
+        fun values() = listOf(SignUp)
+    }
+
+    object SignUp : LinkScreen(
+        "SignUp"
+    )
 }

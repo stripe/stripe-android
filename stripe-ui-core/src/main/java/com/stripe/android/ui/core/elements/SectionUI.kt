@@ -1,5 +1,6 @@
 package com.stripe.android.ui.core.elements
 
+import androidx.annotation.RestrictTo
 import androidx.annotation.StringRes
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -100,7 +101,8 @@ internal fun SectionTitle(@StringRes titleText: Int?) {
  * This is the layout for the section card.
  */
 @Composable
-internal fun SectionCard(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+fun SectionCard(
     content: @Composable () -> Unit
 ) {
     val cardStyle = CardStyle(isSystemInDarkTheme())
