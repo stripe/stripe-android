@@ -239,7 +239,7 @@ internal abstract class ScanActivity : CameraPermissionCheckingActivity(), Corou
     /**
      * The camera permission was denied.
      */
-    override fun userDeniedCameraPermission() {
+    override fun onUserDeniedCameraPermission() {
         runBlocking { scanStat.trackResult("user_canceled") }
         resultListener.userCanceled(CancellationReason.CameraPermissionDenied)
         closeScanner()

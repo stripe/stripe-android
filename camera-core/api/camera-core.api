@@ -58,12 +58,12 @@ public abstract class com/stripe/android/camera/CameraPermissionCheckingActivity
 	protected final fun ensureCameraPermission ()V
 	protected abstract fun onCameraReady ()V
 	public fun onRequestPermissionsResult (I[Ljava/lang/String;[I)V
+	protected abstract fun onUserDeniedCameraPermission ()V
 	protected fun openAppSettings (Landroid/app/Activity;)V
 	protected abstract fun prepareCamera (Lkotlin/jvm/functions/Function0;)V
 	protected fun requestCameraPermission ()V
 	protected fun showPermissionDeniedDialog ()V
 	protected fun showPermissionRationaleDialog ()V
-	protected abstract fun userDeniedCameraPermission ()V
 }
 
 public final class com/stripe/android/camera/CameraPreviewImage {

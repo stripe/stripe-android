@@ -17,6 +17,10 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
+/**
+ * A [AppCompatActivity] class to handle camera permission.
+ * Subclass should override [prepareCamera], [onCameraReady] and [onUserDeniedCameraPermission].
+ */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 abstract class CameraPermissionCheckingActivity : AppCompatActivity() {
 
@@ -26,14 +30,15 @@ abstract class CameraPermissionCheckingActivity : AppCompatActivity() {
     protected abstract fun prepareCamera(onCameraReady: () -> Unit)
 
     /**
-     * Callback when camera is ready.
+     * Callback when camera permission is granted, [prepareCamera] is called and camera is
+     * ready to use.
      */
     protected abstract fun onCameraReady()
 
     /**
      * The camera permission was denied.
      */
-    protected abstract fun userDeniedCameraPermission()
+    protected abstract fun onUserDeniedCameraPermission()
 
     private val storage by lazy {
         StorageFactory.getStorageInstance(this, PERMISSION_STORAGE_NAME)
@@ -45,7 +50,7 @@ abstract class CameraPermissionCheckingActivity : AppCompatActivity() {
 
     /**
      * Check the camera permission, invokes [onCameraReady] upon permission grant,
-     * invokes [userDeniedCameraPermission] otherwise.
+     * invokes [onUserDeniedCameraPermission] otherwise.
      */
     protected fun ensureCameraPermission() = when {
         ContextCompat.checkSelfPermission(
@@ -85,7 +90,7 @@ abstract class CameraPermissionCheckingActivity : AppCompatActivity() {
                 }
                 else -> {
                     mainScope.launch { permissionStat.trackResult("failure") }
-                    userDeniedCameraPermission()
+                    onUserDeniedCameraPermission()
                 }
             }
         }
@@ -116,7 +121,7 @@ abstract class CameraPermissionCheckingActivity : AppCompatActivity() {
                 openAppSettings(this)
             }
             .setNegativeButton(R.string.stripe_camera_permission_denied_cancel) { _, _ ->
-                userDeniedCameraPermission()
+                onUserDeniedCameraPermission()
             }
         builder.show()
     }
