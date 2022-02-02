@@ -2,6 +2,14 @@ package com.stripe.android.stripecardscan.framework
 
 import androidx.test.filters.MediumTest
 import androidx.test.filters.SmallTest
+import com.stripe.android.camera.framework.Analyzer
+import com.stripe.android.camera.framework.AnalyzerFactory
+import com.stripe.android.camera.framework.AnalyzerLoopErrorListener
+import com.stripe.android.camera.framework.AnalyzerPool
+import com.stripe.android.camera.framework.FiniteAnalyzerLoop
+import com.stripe.android.camera.framework.ProcessBoundAnalyzerLoop
+import com.stripe.android.camera.framework.StatefulResultHandler
+import com.stripe.android.camera.framework.TerminatingResultHandler
 import com.stripe.android.camera.framework.time.Duration
 import com.stripe.android.camera.framework.time.nanoseconds
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -49,8 +57,7 @@ class LoopTest {
                 override fun onAnalyzerFailure(t: Throwable): Boolean { fail(t.message) }
                 override fun onResultFailure(t: Throwable): Boolean { fail(t.message) }
             },
-            resultHandler = TestResultHandler(),
-            statsName = null,
+            resultHandler = TestResultHandler()
         )
 
         val channel = Channel<Int>(dataCount)
@@ -103,8 +110,7 @@ class LoopTest {
                 override fun onAnalyzerFailure(t: Throwable): Boolean { fail(t.message) }
                 override fun onResultFailure(t: Throwable): Boolean { fail(t.message) }
             },
-            resultHandler = TestResultHandler(),
-            statsName = null,
+            resultHandler = TestResultHandler()
         )
 
         val channel = Channel<Int>(dataCount)
@@ -153,8 +159,7 @@ class LoopTest {
                 }
                 override fun onResultFailure(t: Throwable): Boolean { fail(t.message) }
             },
-            resultHandler = TestResultHandler(),
-            statsName = null,
+            resultHandler = TestResultHandler()
         )
 
         val channel = Channel<Int>(Channel.RENDEZVOUS)
@@ -200,8 +205,7 @@ class LoopTest {
                 override fun onResultFailure(t: Throwable): Boolean { fail(t.message) }
             },
             resultHandler = TestResultHandler(),
-            timeLimit = Duration.INFINITE,
-            statsName = null,
+            timeLimit = Duration.INFINITE
         )
 
         val job = loop.process((0 until dataCount).map { 2 }, this)
@@ -247,8 +251,7 @@ class LoopTest {
                 override fun onResultFailure(t: Throwable): Boolean { fail(t.message) }
             },
             resultHandler = TestResultHandler(),
-            timeLimit = 1.nanoseconds,
-            statsName = null,
+            timeLimit = 1.nanoseconds
         )
 
         val job = loop.process((0 until dataCount).map { 2 }, this)
@@ -284,8 +287,7 @@ class LoopTest {
                 override fun onResultFailure(t: Throwable): Boolean { fail(t.message) }
             },
             resultHandler = TestResultHandler(),
-            timeLimit = Duration.INFINITE,
-            statsName = null,
+            timeLimit = Duration.INFINITE
         )
 
         val job = loop.process(emptyList(), this)

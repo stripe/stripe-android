@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.graphics.Typeface
 import android.os.Bundle
-import android.util.Log
 import android.util.Size
 import android.view.Gravity
 import android.view.View
@@ -13,7 +12,6 @@ import android.widget.TextView
 import androidx.annotation.Keep
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
-import com.stripe.android.camera.framework.AnalyzerLoopErrorListener
 import com.stripe.android.camera.framework.Stats
 import com.stripe.android.stripecardscan.R
 import com.stripe.android.stripecardscan.cardimageverification.exception.InvalidCivException
@@ -37,14 +35,18 @@ import com.stripe.android.stripecardscan.payment.card.getIssuerByDisplayName
 import com.stripe.android.stripecardscan.payment.card.isValidPanLastFour
 import com.stripe.android.stripecardscan.payment.card.lastFour
 import com.stripe.android.stripecardscan.scanui.CancellationReason
+import com.stripe.android.stripecardscan.scanui.ScanErrorListener
 import com.stripe.android.stripecardscan.scanui.ScanResultListener
+import com.stripe.android.stripecardscan.scanui.ScanState
 import com.stripe.android.stripecardscan.scanui.SimpleScanActivity
+import com.stripe.android.stripecardscan.scanui.SimpleScanStateful
 import com.stripe.android.stripecardscan.scanui.util.getColorByRes
 import com.stripe.android.stripecardscan.scanui.util.getDrawableByRes
 import com.stripe.android.stripecardscan.scanui.util.hide
 import com.stripe.android.stripecardscan.scanui.util.setTextSizeByRes
 import com.stripe.android.stripecardscan.scanui.util.setVisible
 import com.stripe.android.stripecardscan.scanui.util.show
+import com.stripe.android.stripecardscan.scanui.util.startAnimation
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
@@ -73,8 +75,22 @@ internal data class RequiredCardDetails(
 
 private val MINIMUM_RESOLUTION = Size(1067, 600) // minimum size of OCR
 
+internal sealed class CardVerificationScanState(isFinal: Boolean) : ScanState(isFinal) {
+    object NotFound : CardVerificationScanState(isFinal = false)
+    object Found : CardVerificationScanState(isFinal = false)
+    object Correct : CardVerificationScanState(isFinal = true)
+    object Wrong : CardVerificationScanState(isFinal = false)
+}
+
 @Keep
-internal open class CardImageVerificationActivity : SimpleScanActivity<RequiredCardDetails?>() {
+internal open class CardImageVerificationActivity :
+    SimpleScanActivity<RequiredCardDetails?>(), SimpleScanStateful<CardVerificationScanState> {
+
+    override var scanState: ScanState = CardVerificationScanState.NotFound
+
+    override var scanStatePrevious: ScanState? = null
+
+    override val scanErrorListener: ScanErrorListener = ScanErrorListener()
 
     /**
      * The text view that lets a user indicate they do not have possession of the required card.
@@ -188,7 +204,7 @@ internal open class CardImageVerificationActivity : SimpleScanActivity<RequiredC
                 super.onResult(result)
 
                 launch(Dispatchers.Main) {
-                    changeScanState(ScanState.Correct)
+                    changeScanState(CardVerificationScanState.Correct)
                     cameraAdapter.unbindFromLifecycle(this@CardImageVerificationActivity)
                     resultListener.cardReadyForVerification(
                         pan = result.pan,
@@ -234,17 +250,19 @@ internal open class CardImageVerificationActivity : SimpleScanActivity<RequiredC
                 }
 
                 when (result.state) {
-                    is MainLoopState.Initial -> changeScanState(ScanState.NotFound)
-                    is MainLoopState.OcrFound -> changeScanState(ScanState.FoundLong)
-                    is MainLoopState.OcrSatisfied -> changeScanState(ScanState.FoundLong)
-                    is MainLoopState.CardSatisfied -> changeScanState(ScanState.FoundLong)
-                    is MainLoopState.WrongCard -> changeScanState(ScanState.Wrong)
-                    is MainLoopState.Finished -> changeScanState(ScanState.Correct)
+                    is MainLoopState.Initial -> changeScanState(CardVerificationScanState.NotFound)
+                    is MainLoopState.OcrFound -> changeScanState(CardVerificationScanState.Found)
+                    is MainLoopState.OcrSatisfied ->
+                        changeScanState(CardVerificationScanState.Found)
+                    is MainLoopState.CardSatisfied ->
+                        changeScanState(CardVerificationScanState.Found)
+                    is MainLoopState.WrongCard -> changeScanState(CardVerificationScanState.Wrong)
+                    is MainLoopState.Finished -> changeScanState(CardVerificationScanState.Correct)
                 }
             }.let { }
 
             override suspend fun onReset() = launch(Dispatchers.Main) {
-                changeScanState(ScanState.NotFound)
+                changeScanState(CardVerificationScanState.NotFound)
             }.let { }
         }
     }
@@ -271,6 +289,13 @@ internal open class CardImageVerificationActivity : SimpleScanActivity<RequiredC
         }
 
         cannotScanTextView.setOnClickListener { userCannotScan() }
+
+        displayState(scanState, scanStatePrevious)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        scanState = CardVerificationScanState.NotFound
     }
 
     private fun ensureValidParams() = when {
@@ -499,15 +524,53 @@ internal open class CardImageVerificationActivity : SimpleScanActivity<RequiredC
     }
 
     override fun displayState(newState: ScanState, previousState: ScanState?) {
-        super.displayState(newState, previousState)
+        when (newState) {
+            is CardVerificationScanState.NotFound -> {
+                viewFinderBackgroundView
+                    .setBackgroundColor(getColorByRes(R.color.stripeNotFoundBackground))
+                viewFinderWindowView
+                    .setBackgroundResource(R.drawable.stripe_card_background_not_found)
+                viewFinderBorderView.startAnimation(R.drawable.stripe_card_border_not_found)
+                instructionsTextView.setText(R.string.stripe_card_scan_instructions)
+                cardNumberTextView.hide()
+                cardNameTextView.hide()
+            }
+            is CardVerificationScanState.Found -> {
+                viewFinderBackgroundView
+                    .setBackgroundColor(getColorByRes(R.color.stripeFoundBackground))
+                viewFinderWindowView
+                    .setBackgroundResource(R.drawable.stripe_card_background_found)
+                viewFinderBorderView.startAnimation(R.drawable.stripe_card_border_found)
+                instructionsTextView.setText(R.string.stripe_card_scan_instructions)
+                instructionsTextView.show()
+            }
+            is CardVerificationScanState.Correct -> {
+                viewFinderBackgroundView
+                    .setBackgroundColor(getColorByRes(R.color.stripeCorrectBackground))
+                viewFinderWindowView
+                    .setBackgroundResource(R.drawable.stripe_card_background_correct)
+                viewFinderBorderView.startAnimation(R.drawable.stripe_card_border_correct)
+                instructionsTextView.hide()
+            }
+            is CardVerificationScanState.Wrong -> {
+                viewFinderBackgroundView
+                    .setBackgroundColor(getColorByRes(R.color.stripeWrongBackground))
+                viewFinderWindowView
+                    .setBackgroundResource(R.drawable.stripe_card_background_wrong)
+                viewFinderBorderView.startAnimation(R.drawable.stripe_card_border_wrong)
+                instructionsTextView.setText(R.string.stripe_scanned_wrong_card)
+            }
+        }
 
         when (newState) {
-            is ScanState.NotFound, ScanState.FoundShort, ScanState.FoundLong, ScanState.Wrong -> {
+            is CardVerificationScanState.NotFound,
+            CardVerificationScanState.Found,
+            CardVerificationScanState.Wrong -> {
                 processingOverlayView.hide()
                 processingSpinnerView.hide()
                 processingTextView.hide()
             }
-            is ScanState.Correct -> {
+            is CardVerificationScanState.Correct -> {
                 processingOverlayView.show()
                 processingSpinnerView.show()
                 processingTextView.show()
@@ -527,17 +590,5 @@ internal open class CardImageVerificationActivity : SimpleScanActivity<RequiredC
             scanStatistics = ScanStatistics.fromStats()
         )
         super.closeScanner()
-    }
-
-    private val scanErrorListener = object : AnalyzerLoopErrorListener {
-        override fun onAnalyzerFailure(t: Throwable): Boolean {
-            Log.e(Config.logTag, "Error executing analyzer", t)
-            return false
-        }
-
-        override fun onResultFailure(t: Throwable): Boolean {
-            Log.e(Config.logTag, "Error executing result", t)
-            return true
-        }
     }
 }

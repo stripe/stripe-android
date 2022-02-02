@@ -16,7 +16,7 @@ import com.stripe.android.stripecardscan.payment.ml.CardDetect
 import com.stripe.android.stripecardscan.payment.ml.CardDetectModelManager
 import com.stripe.android.stripecardscan.payment.ml.SSDOcr
 import com.stripe.android.stripecardscan.payment.ml.SSDOcrModelManager
-import com.stripe.android.stripecardscan.scanui.ScanFlow
+import com.stripe.android.camera.scanui.ScanFlow
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -36,7 +36,7 @@ internal data class SavedFrameType(
 
 internal abstract class CardImageVerificationFlow(
     private val scanErrorListener: AnalyzerLoopErrorListener,
-) : ScanFlow<RequiredCardDetails?>,
+) : ScanFlow<RequiredCardDetails?, CameraPreviewImage<Bitmap>>,
     AggregateResultListener<MainLoopAggregator.InterimResult, MainLoopAggregator.FinalResult> {
 
     /**
@@ -101,8 +101,7 @@ internal abstract class CardImageVerificationFlow(
             mainLoop = ProcessBoundAnalyzerLoop(
                 analyzerPool = analyzerPool,
                 resultHandler = mainLoopOcrAggregator,
-                analyzerLoopErrorListener = scanErrorListener,
-                statsName = null, // TODO: change this if we want to collect as part of scanstats
+                analyzerLoopErrorListener = scanErrorListener
             ).apply {
                 subscribeTo(
                     imageStream.map {
@@ -118,22 +117,16 @@ internal abstract class CardImageVerificationFlow(
     }.let { }
 
     override suspend fun onResult(result: MainLoopAggregator.FinalResult) {
-        mainLoop?.unsubscribe()
-        mainLoop = null
-
-        mainLoopJob?.apply { if (isActive) { cancel() } }
-        mainLoopJob = null
-
-        mainLoopAggregator = null
-
-        mainLoopAnalyzerPool?.closeAllAnalyzers()
-        mainLoopAnalyzerPool = null
+        stopFlow()
     }
 
     override fun cancelFlow() {
         canceled = true
-
         mainLoopAggregator?.run { cancel() }
+        stopFlow()
+    }
+
+    private fun stopFlow() {
         mainLoopAggregator = null
 
         mainLoop?.unsubscribe()

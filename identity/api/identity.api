@@ -5,6 +5,13 @@ public final class com/stripe/android/identity/BuildConfig {
 	public fun <init> ()V
 }
 
+public final class com/stripe/android/identity/IdentityActivity : androidx/appcompat/app/AppCompatActivity, com/stripe/android/camera/CameraErrorListener {
+	public fun <init> ()V
+	public fun onCameraAccessError (Ljava/lang/Throwable;)V
+	public fun onCameraOpenError (Ljava/lang/Throwable;)V
+	public fun onCameraUnsupportedError (Ljava/lang/Throwable;)V
+}
+
 public abstract interface class com/stripe/android/identity/IdentityVerificationSheet {
 	public static final field Companion Lcom/stripe/android/identity/IdentityVerificationSheet$Companion;
 	public abstract fun present (Ljava/lang/String;Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
@@ -27,7 +34,8 @@ public final class com/stripe/android/identity/IdentityVerificationSheet$Configu
 	public fun toString ()Ljava/lang/String;
 }
 
-public abstract interface class com/stripe/android/identity/IdentityVerificationSheet$VerificationResult : android/os/Parcelable {
+public abstract class com/stripe/android/identity/IdentityVerificationSheet$VerificationResult : android/os/Parcelable {
+	public final synthetic fun toBundle ()Landroid/os/Bundle;
 }
 
 public final class com/stripe/android/identity/IdentityVerificationSheet$VerificationResult$Canceled : com/stripe/android/identity/IdentityVerificationSheet$VerificationResult {
@@ -52,8 +60,58 @@ public final class com/stripe/android/identity/IdentityVerificationSheet$Verific
 	public fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
-public final class com/stripe/android/identity/StripeIdentityVerificationSheet : com/stripe/android/identity/IdentityVerificationSheet {
+public final class com/stripe/android/identity/camera/IDDetectorAnalyzerLoopErrorListener : com/stripe/android/camera/framework/AnalyzerLoopErrorListener {
+	public static final field Companion Lcom/stripe/android/identity/camera/IDDetectorAnalyzerLoopErrorListener$Companion;
 	public fun <init> ()V
-	public fun present (Ljava/lang/String;Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
+	public fun onAnalyzerFailure (Ljava/lang/Throwable;)Z
+	public fun onResultFailure (Ljava/lang/Throwable;)Z
+}
+
+public final class com/stripe/android/identity/camera/IDDetectorAnalyzerLoopErrorListener$Companion {
+	public final fun getTAG ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/identity/camera/IdentityScanFlow : com/stripe/android/camera/scanui/ScanFlow {
+	public fun <init> ()V
+	public fun cancelFlow ()V
+	public fun startFlow (Landroid/content/Context;Lkotlinx/coroutines/flow/Flow;Landroid/graphics/Rect;Landroidx/lifecycle/LifecycleOwner;Lkotlinx/coroutines/CoroutineScope;I)V
+	public synthetic fun startFlow (Landroid/content/Context;Lkotlinx/coroutines/flow/Flow;Landroid/graphics/Rect;Landroidx/lifecycle/LifecycleOwner;Lkotlinx/coroutines/CoroutineScope;Ljava/lang/Object;)V
+}
+
+public final class com/stripe/android/identity/databinding/IdentityActivityBinding : androidx/viewbinding/ViewBinding {
+	public final field cameraView Lcom/stripe/android/camera/scanui/CameraView;
+	public final field next Landroid/widget/Button;
+	public static fun bind (Landroid/view/View;)Lcom/stripe/android/identity/databinding/IdentityActivityBinding;
+	public synthetic fun getRoot ()Landroid/view/View;
+	public fun getRoot ()Landroidx/constraintlayout/widget/ConstraintLayout;
+	public static fun inflate (Landroid/view/LayoutInflater;)Lcom/stripe/android/identity/databinding/IdentityActivityBinding;
+	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Z)Lcom/stripe/android/identity/databinding/IdentityActivityBinding;
+}
+
+public final class com/stripe/android/identity/ml/BoundingBox {
+	public fun <init> (FFFF)V
+	public final fun component1 ()F
+	public final fun component2 ()F
+	public final fun component3 ()F
+	public final fun component4 ()F
+	public final fun copy (FFFF)Lcom/stripe/android/identity/ml/BoundingBox;
+	public static synthetic fun copy$default (Lcom/stripe/android/identity/ml/BoundingBox;FFFFILjava/lang/Object;)Lcom/stripe/android/identity/ml/BoundingBox;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getHeight ()F
+	public final fun getLeft ()F
+	public final fun getTop ()F
+	public final fun getWidth ()F
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/identity/ml/Category : java/lang/Enum {
+	public static final field ID_BACK Lcom/stripe/android/identity/ml/Category;
+	public static final field ID_FRONT Lcom/stripe/android/identity/ml/Category;
+	public static final field INVALID Lcom/stripe/android/identity/ml/Category;
+	public static final field NO_ID Lcom/stripe/android/identity/ml/Category;
+	public static final field PASSPORT Lcom/stripe/android/identity/ml/Category;
+	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/identity/ml/Category;
+	public static fun values ()[Lcom/stripe/android/identity/ml/Category;
 }
 

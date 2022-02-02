@@ -1,10 +1,14 @@
 # CHANGELOG
 ## X.X.X - 2022-XX-XX
-
 ### PaymentSheet
-* [CHANGED] [4515](https://github.com/stripe/stripe-android/pull/4515) Disable card saving by default in PaymentSheet
 ### Identity
 ### Card scanning
+
+## 19.1.1 - 2022-01-31
+### PaymentSheet
+* [CHANGED] [4515](https://github.com/stripe/stripe-android/pull/4515) Disable card saving by default in PaymentSheet
+* [FIXED] [4504](https://github.com/stripe/stripe-android/pull/4504) Fix CardValidCallback not firing on postal code changes
+* [CHANGED] [4512](https://github.com/stripe/stripe-android/pull/4512) Relay error message on PaymentResult.Failed
 
 ## 19.1.0 - 2022-01-05
 This release enables new payment methods in the Mobile Payment Element: Eps, Giropay, P24, Klarna, PayPal, AfterpayClearpay.
