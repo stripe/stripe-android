@@ -103,7 +103,7 @@ internal abstract class CardImageVerificationFlow(
                 resultHandler = mainLoopOcrAggregator,
                 analyzerLoopErrorListener = scanErrorListener
             ).apply {
-                subscribeTo(
+                mainLoopJob = subscribeTo(
                     imageStream.map {
                         MainLoopAnalyzer.Input(
                             cameraPreviewImage = it,
