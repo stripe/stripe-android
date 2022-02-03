@@ -150,6 +150,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
                 // a new fragment to be created if don't keep activities is turned on.
                 if (supportFragmentManager.fragments.firstOrNull() is PaymentSheetLoadingFragment) {
                     val target = if (viewModel.paymentMethods.value.isNullOrEmpty()) {
+                        viewModel.updateSelection(null)
                         PaymentSheetViewModel.TransitionTarget.AddPaymentMethodSheet(config)
                     } else {
                         PaymentSheetViewModel.TransitionTarget.SelectSavedPaymentMethod(config)

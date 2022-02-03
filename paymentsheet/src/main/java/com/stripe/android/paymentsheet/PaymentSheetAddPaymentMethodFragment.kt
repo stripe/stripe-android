@@ -56,7 +56,6 @@ internal class PaymentSheetAddPaymentMethodFragment() : BaseAddPaymentMethodFrag
         addPaymentMethodHeader.isVisible = !shouldShowGooglePayButton
 
         sheetViewModel.selection.observe(viewLifecycleOwner) { paymentSelection ->
-            // Last selection is saved and restore, and when that is google pay it will trigger it
             updateErrorMessage(null)
             if (paymentSelection == PaymentSelection.GooglePay) {
                 sheetViewModel.checkout(CheckoutIdentifier.AddFragmentTopGooglePay)
