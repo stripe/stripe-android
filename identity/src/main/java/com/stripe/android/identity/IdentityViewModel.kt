@@ -8,7 +8,9 @@ import com.stripe.android.camera.framework.AnalyzerLoopErrorListener
 import com.stripe.android.identity.camera.IDDetectorAggregator
 import com.stripe.android.identity.camera.IdentityScanFlow
 
-internal class IdentityViewModel : ViewModel(), AnalyzerLoopErrorListener,
+internal class IdentityViewModel :
+    ViewModel(),
+    AnalyzerLoopErrorListener,
     AggregateResultListener<IDDetectorAggregator.InterimResult, IDDetectorAggregator.FinalResult> {
 
     internal val identityScanFlow = IdentityScanFlow(

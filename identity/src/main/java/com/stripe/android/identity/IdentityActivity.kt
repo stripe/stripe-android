@@ -87,7 +87,6 @@ internal class IdentityActivity : CameraPermissionCheckingActivity() {
         finish()
     }
 
-
     override fun onDestroy() {
         super.onDestroy()
         viewModel.identityScanFlow.cancelFlow()

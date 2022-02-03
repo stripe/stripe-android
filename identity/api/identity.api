@@ -5,13 +5,6 @@ public final class com/stripe/android/identity/BuildConfig {
 	public fun <init> ()V
 }
 
-public final class com/stripe/android/identity/IdentityActivity : androidx/appcompat/app/AppCompatActivity, com/stripe/android/camera/CameraErrorListener {
-	public fun <init> ()V
-	public fun onCameraAccessError (Ljava/lang/Throwable;)V
-	public fun onCameraOpenError (Ljava/lang/Throwable;)V
-	public fun onCameraUnsupportedError (Ljava/lang/Throwable;)V
-}
-
 public abstract interface class com/stripe/android/identity/IdentityVerificationSheet {
 	public static final field Companion Lcom/stripe/android/identity/IdentityVerificationSheet$Companion;
 	public abstract fun present (Ljava/lang/String;Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
@@ -58,24 +51,6 @@ public final class com/stripe/android/identity/IdentityVerificationSheet$Verific
 	public fun describeContents ()I
 	public final fun getThrowable ()Ljava/lang/Throwable;
 	public fun writeToParcel (Landroid/os/Parcel;I)V
-}
-
-public final class com/stripe/android/identity/camera/IDDetectorAnalyzerLoopErrorListener : com/stripe/android/camera/framework/AnalyzerLoopErrorListener {
-	public static final field Companion Lcom/stripe/android/identity/camera/IDDetectorAnalyzerLoopErrorListener$Companion;
-	public fun <init> ()V
-	public fun onAnalyzerFailure (Ljava/lang/Throwable;)Z
-	public fun onResultFailure (Ljava/lang/Throwable;)Z
-}
-
-public final class com/stripe/android/identity/camera/IDDetectorAnalyzerLoopErrorListener$Companion {
-	public final fun getTAG ()Ljava/lang/String;
-}
-
-public final class com/stripe/android/identity/camera/IdentityScanFlow : com/stripe/android/camera/scanui/ScanFlow {
-	public fun <init> ()V
-	public fun cancelFlow ()V
-	public fun startFlow (Landroid/content/Context;Lkotlinx/coroutines/flow/Flow;Landroid/graphics/Rect;Landroidx/lifecycle/LifecycleOwner;Lkotlinx/coroutines/CoroutineScope;I)V
-	public synthetic fun startFlow (Landroid/content/Context;Lkotlinx/coroutines/flow/Flow;Landroid/graphics/Rect;Landroidx/lifecycle/LifecycleOwner;Lkotlinx/coroutines/CoroutineScope;Ljava/lang/Object;)V
 }
 
 public final class com/stripe/android/identity/databinding/IdentityActivityBinding : androidx/viewbinding/ViewBinding {
