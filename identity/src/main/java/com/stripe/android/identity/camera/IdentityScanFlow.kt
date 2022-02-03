@@ -21,6 +21,8 @@ import kotlinx.coroutines.launch
  * Identity's [ScanFlow] implementation, uses a pool of [IDDetectorAnalyzer] to within a
  * [ProcessBoundAnalyzerLoop] to analyze a [Flow] of [CameraPreviewImage]s.
  * The results are handled in [IDDetectorAggregator].
+ *
+ * TODO(ccen): merge with [CardScanFlow].
  */
 internal class IdentityScanFlow(
     private val analyzerLoopErrorListener: AnalyzerLoopErrorListener,
