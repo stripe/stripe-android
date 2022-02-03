@@ -1,26 +1,28 @@
 package com.stripe.android.identity
 
-import android.graphics.Rect
+import android.app.Activity
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.util.Size
-import android.view.View
 import androidx.activity.viewModels
 import androidx.annotation.VisibleForTesting
-import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.camera.Camera1Adapter
-import com.stripe.android.camera.CameraErrorListener
+import com.stripe.android.camera.CameraPermissionCheckingActivity
+import com.stripe.android.camera.DefaultCameraErrorListener
 import com.stripe.android.camera.scanui.CameraView
+import com.stripe.android.camera.scanui.util.asRect
+import com.stripe.android.identity.IdentityVerificationSheet.VerificationResult
 import com.stripe.android.identity.databinding.IdentityActivityBinding
 
 /**
- * TODO(ccen): The activity handles camera permission,
- * TODO(ccen): Switching between different fragments that has different aspect ratios for different ID types,
+ * Host activity to perform Identity verification.
  *
+ * TODO(ccen): Switching between different fragments that has different aspect ratios for different ID types.
  */
-class IdentityActivity : AppCompatActivity(), CameraErrorListener {
+internal class IdentityActivity : CameraPermissionCheckingActivity() {
     private val binding by lazy {
         IdentityActivityBinding.inflate(layoutInflater)
     }
@@ -34,7 +36,10 @@ class IdentityActivity : AppCompatActivity(), CameraErrorListener {
             this,
             cameraView.previewFrame,
             MINIMUM_RESOLUTION,
-            this
+            DefaultCameraErrorListener(this) { cause ->
+                Log.d(TAG, "scan fails with exception: $cause")
+                // TODO(ccen) determine if further handling is required
+            }
         )
     }
 
@@ -49,18 +54,10 @@ class IdentityActivity : AppCompatActivity(), CameraErrorListener {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
-        Log.d(TAG, "started")
-        binding.next.setOnClickListener {
-            onCameraReady() // TODO: make the call after permission check
-        }
+        ensureCameraPermission()
     }
 
-    /**
-     * Get a rect from a view.
-     */
-    private fun View.asRect() = Rect(left, top, right, bottom)
-
-    private fun onCameraReady() {
+    override fun onCameraReady() {
         cameraAdapter.bindToLifecycle(this)
         viewModel.identityScanFlow.startFlow(
             context = this,
@@ -72,20 +69,32 @@ class IdentityActivity : AppCompatActivity(), CameraErrorListener {
         )
     }
 
+    override fun onUserDeniedCameraPermission() {
+        Log.d(TAG, "onUserDeniedCameraPermission")
+        // TODO(ccen): determine whether to return Fail or Canceled
+        finishWithResult(VerificationResult.Canceled)
+    }
+
+    override fun onBackPressed() {
+        finishWithResult(VerificationResult.Canceled)
+    }
+
+    private fun finishWithResult(result: VerificationResult) {
+        setResult(
+            Activity.RESULT_OK,
+            Intent().putExtras(result.toBundle())
+        )
+        finish()
+    }
+
+
+    override fun onDestroy() {
+        super.onDestroy()
+        viewModel.identityScanFlow.cancelFlow()
+    }
+
     private companion object {
         val TAG: String = IdentityActivity::class.java.simpleName
         val MINIMUM_RESOLUTION = Size(1067, 600) // TODO: decide what to use
-    }
-
-    override fun onCameraOpenError(cause: Throwable?) {
-        Log.d(TAG, "onCameraOpenError: $cause")
-    }
-
-    override fun onCameraAccessError(cause: Throwable?) {
-        Log.d(TAG, "onCameraAccessError: $cause")
-    }
-
-    override fun onCameraUnsupportedError(cause: Throwable?) {
-        Log.d(TAG, "onCameraUnsupportedError: $cause")
     }
 }
