@@ -47,25 +47,27 @@ abstract class CameraPermissionCheckingActivity : AppCompatActivity() {
      * Check the camera permission, invokes [onCameraReady] upon permission grant,
      * invokes [onUserDeniedCameraPermission] otherwise.
      */
-    protected fun ensureCameraPermission(): Unit = when {
-        ContextCompat.checkSelfPermission(
-            this,
-            Manifest.permission.CAMERA,
-        ) == PackageManager.PERMISSION_GRANTED -> {
-            mainScope.launch { permissionStat.trackResult("success") }
-            mainScope.launch {
-                onCameraReady()
-            }.let {}
+    protected fun ensureCameraPermission() {
+        when {
+            ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.CAMERA,
+            ) == PackageManager.PERMISSION_GRANTED -> {
+                mainScope.launch { permissionStat.trackResult("success") }
+                mainScope.launch {
+                    onCameraReady()
+                }
+            }
+            ActivityCompat.shouldShowRequestPermissionRationale(
+                this,
+                Manifest.permission.CAMERA,
+            ) -> showPermissionRationaleDialog()
+            storage.getBoolean(
+                PERMISSION_RATIONALE_SHOWN,
+                false,
+            ) -> showPermissionDeniedDialog()
+            else -> requestCameraPermission()
         }
-        ActivityCompat.shouldShowRequestPermissionRationale(
-            this,
-            Manifest.permission.CAMERA,
-        ) -> showPermissionRationaleDialog()
-        storage.getBoolean(
-            PERMISSION_RATIONALE_SHOWN,
-            false,
-        ) -> showPermissionDeniedDialog()
-        else -> requestCameraPermission()
     }
 
     /**
