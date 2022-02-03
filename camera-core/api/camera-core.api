@@ -78,6 +78,13 @@ public final class com/stripe/android/camera/CameraPreviewImage {
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class com/stripe/android/camera/DefaultCameraErrorListener : com/stripe/android/camera/CameraErrorListener {
+	public fun <init> (Landroid/content/Context;Lkotlin/jvm/functions/Function1;)V
+	public fun onCameraAccessError (Ljava/lang/Throwable;)V
+	public fun onCameraOpenError (Ljava/lang/Throwable;)V
+	public fun onCameraUnsupportedError (Ljava/lang/Throwable;)V
+}
+
 public abstract interface class com/stripe/android/camera/framework/AggregateResultListener {
 	public abstract fun onInterimResult (Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun onReset (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
@@ -502,6 +509,10 @@ public final class com/stripe/android/camera/scanui/ViewFinderBackground : andro
 	public fun setBackgroundColor (I)V
 	public final fun setOnDrawListener (Lkotlin/jvm/functions/Function0;)V
 	public final fun setViewFinderRect (Landroid/graphics/Rect;)V
+}
+
+public final class com/stripe/android/camera/scanui/util/ViewExtensionsKt {
+	public static final fun asRect (Landroid/view/View;)Landroid/graphics/Rect;
 }
 
 public final class com/stripe/android/camera/scanui/util/ViewUtilsKt {

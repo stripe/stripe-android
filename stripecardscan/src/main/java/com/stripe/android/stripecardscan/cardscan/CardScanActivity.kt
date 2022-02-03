@@ -11,6 +11,7 @@ import android.view.ViewGroup
 import androidx.core.view.updateMargins
 import com.stripe.android.camera.CameraPreviewImage
 import com.stripe.android.camera.framework.Stats
+import com.stripe.android.camera.scanui.util.asRect
 import com.stripe.android.stripecardscan.R
 import com.stripe.android.stripecardscan.cardscan.exception.InvalidStripePublishableKeyException
 import com.stripe.android.stripecardscan.cardscan.exception.UnknownScanException
@@ -28,7 +29,6 @@ import com.stripe.android.stripecardscan.scanui.ScanErrorListener
 import com.stripe.android.stripecardscan.scanui.ScanResultListener
 import com.stripe.android.stripecardscan.scanui.ScanState
 import com.stripe.android.stripecardscan.scanui.SimpleScanStateful
-import com.stripe.android.stripecardscan.scanui.util.asRect
 import com.stripe.android.stripecardscan.scanui.util.getColorByRes
 import com.stripe.android.stripecardscan.scanui.util.getFloatResource
 import com.stripe.android.stripecardscan.scanui.util.hide
