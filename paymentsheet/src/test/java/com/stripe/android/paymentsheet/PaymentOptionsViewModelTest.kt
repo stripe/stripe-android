@@ -5,34 +5,31 @@ import android.content.Context
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.core.Logger
 import com.stripe.android.PaymentConfiguration
-import com.stripe.android.model.CardBrand
-import com.stripe.android.model.PaymentIntentFixtures
-import com.stripe.android.model.PaymentMethodCreateParams
-import com.stripe.android.model.PaymentMethodCreateParamsFixtures.DEFAULT_CARD
-import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.core.injection.Injectable
 import com.stripe.android.core.injection.Injector
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
+import com.stripe.android.core.model.CardBrand
+import com.stripe.android.model.PaymentIntentFixtures
+import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.PaymentMethodCreateParamsFixtures.DEFAULT_CARD
+import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.PaymentOptionsViewModel.TransitionTarget
-import com.stripe.android.paymentsheet.address.AddressFieldElementRepository
 import com.stripe.android.paymentsheet.analytics.EventReporter
-import com.stripe.android.paymentsheet.elements.BankRepository
-import com.stripe.android.paymentsheet.forms.resources.StaticResourceRepository
 import com.stripe.android.paymentsheet.injection.PaymentOptionsViewModelSubcomponent
 import com.stripe.android.paymentsheet.model.FragmentConfigFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
+import com.stripe.android.ui.core.address.AddressFieldElementRepository
+import com.stripe.android.ui.core.elements.BankRepository
+import com.stripe.android.ui.core.forms.resources.StaticResourceRepository
 import com.stripe.android.utils.TestUtils.idleLooper
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.TestCoroutineDispatcher
-import kotlinx.coroutines.test.resetMain
-import kotlinx.coroutines.test.runBlockingTest
-import kotlinx.coroutines.test.setMain
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
@@ -44,8 +41,6 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 import javax.inject.Provider
-import kotlin.test.AfterTest
-import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertNotNull
 
@@ -54,7 +49,7 @@ import kotlin.test.assertNotNull
 internal class PaymentOptionsViewModelTest {
     @get:Rule
     val rule = InstantTaskExecutorRule()
-    private val testDispatcher = TestCoroutineDispatcher()
+    private val testDispatcher = StandardTestDispatcher()
 
     private val eventReporter = mock<EventReporter>()
     private val prefsRepository = FakePrefsRepository()
@@ -82,17 +77,6 @@ internal class PaymentOptionsViewModelTest {
         resourceRepository = resourceRepository
     )
 
-    @BeforeTest
-    fun setup() {
-        Dispatchers.setMain(testDispatcher)
-    }
-
-    @AfterTest
-    fun cleanup() {
-        Dispatchers.resetMain()
-        testDispatcher.cleanupTestCoroutines()
-    }
-
     @Test
     fun `onUserSelection() when selection has been made should set the view state to process result`() {
         var paymentOptionResult: PaymentOptionResult? = null
@@ -113,7 +97,7 @@ internal class PaymentOptionsViewModelTest {
 
     @Test
     fun `onUserSelection() when new card selection with no save should set the view state to process result`() =
-        testDispatcher.runBlockingTest {
+        runTest {
             var paymentOptionResult: PaymentOptionResult? = null
             viewModel.paymentOptionResult.observeForever {
                 paymentOptionResult = it
@@ -136,7 +120,7 @@ internal class PaymentOptionsViewModelTest {
 
     @Test
     fun `onUserSelection() new card with save should complete with succeeded view state`() =
-        testDispatcher.runBlockingTest {
+        runTest {
             paymentMethodRepository.savedPaymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
 
             var paymentOptionResult: PaymentOptionResult? = null
@@ -245,7 +229,7 @@ internal class PaymentOptionsViewModelTest {
     }
 
     @Test
-    fun `removePaymentMethod removes it from payment methods list`() = runBlockingTest {
+    fun `removePaymentMethod removes it from payment methods list`() = runTest {
         val cards = PaymentMethodFixtures.createCards(3)
         val viewModel = PaymentOptionsViewModel(
             args = PAYMENT_OPTION_CONTRACT_ARGS.copy(paymentMethods = cards),
@@ -310,7 +294,7 @@ internal class PaymentOptionsViewModelTest {
     }
 
     @Test
-    fun `Factory gets initialized with fallback when no Injector is available`() = runBlockingTest {
+    fun `Factory gets initialized with fallback when no Injector is available`() = runTest {
         val context = ApplicationProvider.getApplicationContext<Application>()
         val productUsage = setOf("TestProductUsage")
         PaymentConfiguration.init(context, "testKey")

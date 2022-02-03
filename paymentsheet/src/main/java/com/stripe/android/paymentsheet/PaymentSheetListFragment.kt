@@ -6,7 +6,8 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.activityViewModels
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.databinding.FragmentPaymentsheetPaymentMethodsListBinding
-import com.stripe.android.paymentsheet.model.Amount
+import com.stripe.android.ui.core.Amount
+import com.stripe.android.ui.core.CurrencyFormatter
 
 internal class PaymentSheetListFragment(
     eventReporter: EventReporter

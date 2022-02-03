@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="stripeNotFoundBackground" description="The background color of the scan window when no card is visible">#DD222222</color>
+</resources>

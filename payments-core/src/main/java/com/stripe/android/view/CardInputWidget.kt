@@ -30,11 +30,11 @@ import androidx.core.view.updateLayoutParams
 import androidx.core.widget.doAfterTextChanged
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.R
-import com.stripe.android.cards.CardNumber
+import com.stripe.android.ui.core.elements.CardNumber
 import com.stripe.android.cards.Cvc
 import com.stripe.android.databinding.CardInputWidgetBinding
 import com.stripe.android.model.Address
-import com.stripe.android.model.CardBrand
+import com.stripe.android.ui.core.elements.CardBrand
 import com.stripe.android.model.CardParams
 import com.stripe.android.model.ExpirationDate
 import com.stripe.android.model.PaymentMethod
@@ -148,7 +148,7 @@ class CardInputWidget @JvmOverloads constructor(
             return cvcEditText.cvc
         }
 
-    private val brand: CardBrand
+    private val brand: com.stripe.android.ui.core.elements.CardBrand
         get() {
             return cardNumberEditText.cardBrand
         }
@@ -333,8 +333,14 @@ class CardInputWidget @JvmOverloads constructor(
     private fun updatePostalRequired() {
         if (isPostalRequired()) {
             requiredFields.add(postalCodeEditText)
+            cardValidCallback?.let {
+                postalCodeEditText.addTextChangedListener(cardValidTextWatcher)
+            }
         } else {
             requiredFields.remove(postalCodeEditText)
+            cardValidCallback?.let {
+                postalCodeEditText.removeTextChangedListener(cardValidTextWatcher)
+            }
         }
     }
 
@@ -747,6 +753,12 @@ class CardInputWidget @JvmOverloads constructor(
             }
         }
 
+        postalCodeEditText.setAfterTextChangedListener {
+            if (isPostalRequired() && postalCodeEditText.hasValidPostal()) {
+                cardInputListener?.onPostalCodeComplete()
+            }
+        }
+
         cardNumberEditText.completionCallback = {
             scrollEnd()
             cardInputListener?.onCardComplete()
@@ -814,7 +826,7 @@ class CardInputWidget @JvmOverloads constructor(
     internal fun createHiddenCardText(
         panLength: Int
     ): String {
-        val formattedNumber = CardNumber.Unvalidated(
+        val formattedNumber = com.stripe.android.ui.core.elements.CardNumber.Unvalidated(
             "0".repeat(panLength)
         ).getFormatted(panLength)
 
@@ -1004,7 +1016,7 @@ class CardInputWidget @JvmOverloads constructor(
 
     private val cvcPlaceHolder: String
         get() {
-            return if (CardBrand.AmericanExpress == brand) {
+            return if (com.stripe.android.ui.core.elements.CardBrand.AmericanExpress == brand) {
                 CVC_PLACEHOLDER_AMEX
             } else {
                 CVC_PLACEHOLDER_COMMON
@@ -1238,7 +1250,7 @@ class CardInputWidget @JvmOverloads constructor(
          */
         @VisibleForTesting
         internal fun shouldIconShowBrand(
-            brand: CardBrand,
+            brand: com.stripe.android.ui.core.elements.CardBrand,
             cvcHasFocus: Boolean,
             cvcText: String?
         ): Boolean {

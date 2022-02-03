@@ -11,7 +11,7 @@ class DefaultStaticCardAccountRangesTest {
     fun `filter with matching accounts should return non-empty`() {
         assertThat(
             DefaultStaticCardAccountRanges().filter(
-                CardNumber.Unvalidated("6")
+                com.stripe.android.ui.core.elements.CardNumber.Unvalidated("6")
             )
         ).hasSize(4)
     }
@@ -20,7 +20,7 @@ class DefaultStaticCardAccountRangesTest {
     fun `first with matching accounts should return expected value`() {
         assertThat(
             DefaultStaticCardAccountRanges().first(
-                CardNumber.Unvalidated("6")
+                com.stripe.android.ui.core.elements.CardNumber.Unvalidated("6")
             )
         ).isEqualTo(
             AccountRange(
@@ -36,7 +36,7 @@ class DefaultStaticCardAccountRangesTest {
     fun `filter with no matching accounts should return empty`() {
         assertThat(
             DefaultStaticCardAccountRanges().filter(
-                CardNumber.Unvalidated("9")
+                com.stripe.android.ui.core.elements.CardNumber.Unvalidated("9")
             )
         ).isEmpty()
     }
@@ -45,7 +45,7 @@ class DefaultStaticCardAccountRangesTest {
     fun `first with no matching accounts should return null`() {
         assertThat(
             DefaultStaticCardAccountRanges().first(
-                CardNumber.Unvalidated("9")
+                com.stripe.android.ui.core.elements.CardNumber.Unvalidated("9")
             )
         ).isNull()
     }

@@ -6,29 +6,21 @@ import com.stripe.android.model.AccountRange
 import com.stripe.android.model.BinFixtures
 import com.stripe.android.model.BinRange
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.TestCoroutineDispatcher
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.runTest
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import kotlin.test.AfterTest
 import kotlin.test.Test
 
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
 internal class DefaultCardAccountRangeStoreTest {
-    private val testDispatcher = TestCoroutineDispatcher()
 
     private val store = DefaultCardAccountRangeStore(
         ApplicationProvider.getApplicationContext()
     )
 
-    @AfterTest
-    fun cleanup() {
-        testDispatcher.cleanupTestCoroutines()
-    }
-
     @Test
-    fun `cache hit should return expected results`() = testDispatcher.runBlockingTest {
+    fun `cache hit should return expected results`() = runTest {
         store.save(BinFixtures.VISA, AccountRangeFixtures.DEFAULT)
         store.save(BinFixtures.FAKE, BRANDX_ACCOUNT_RANGES)
 
@@ -40,7 +32,7 @@ internal class DefaultCardAccountRangeStoreTest {
     }
 
     @Test
-    fun `cache miss should return empty`() = testDispatcher.runBlockingTest {
+    fun `cache miss should return empty`() = runTest {
         assertThat(store.get(BinFixtures.FAKE))
             .isEmpty()
     }

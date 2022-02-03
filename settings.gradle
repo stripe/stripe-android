@@ -1,6 +1,10 @@
 enableFeaturePreview("VERSION_CATALOGS")
 
+include ':camera-core'
 include ':example'
+include ':identity'
+include ':identity-example'
+include ':link'
 include ':payments'
 include ':payments-core'
 include ':paymentsheet-example'
@@ -8,6 +12,7 @@ include ':paymentsheet'
 include ':stripecardscan'
 include ':stripecardscan-example'
 include ':stripe-core'
+include ':stripe-ui-core'
 include ':stripe-test-e2e'
 include ':wechatpay'
 

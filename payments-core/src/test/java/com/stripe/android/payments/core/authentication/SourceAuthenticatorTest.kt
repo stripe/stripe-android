@@ -14,8 +14,8 @@ import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.view.AuthActivityStarterHost
 import com.stripe.android.view.PaymentRelayActivity
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.TestCoroutineDispatcher
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.argWhere
@@ -41,7 +41,7 @@ class SourceAuthenticatorTest {
         context,
         ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
     )
-    private val testDispatcher = TestCoroutineDispatcher()
+    private val testDispatcher = UnconfinedTestDispatcher()
 
     private val authenticator = SourceAuthenticator(
         paymentBrowserAuthStarterFactory,
@@ -50,12 +50,13 @@ class SourceAuthenticatorTest {
         analyticsRequestFactory,
         false,
         testDispatcher,
-        { ApiKeyFixtures.FAKE_PUBLISHABLE_KEY }
+        { ApiKeyFixtures.FAKE_PUBLISHABLE_KEY },
+        false
     )
 
     @Test
     fun authenticate_withNoneFlowSource_shouldBypassAuth() =
-        testDispatcher.runBlockingTest {
+        runTest {
             authenticator.authenticate(
                 host = host,
                 authenticatable = SourceFixtures.SOURCE_WITH_SOURCE_ORDER.copy(

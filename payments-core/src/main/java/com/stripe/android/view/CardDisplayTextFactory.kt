@@ -9,7 +9,7 @@ import android.text.style.ForegroundColorSpan
 import android.text.style.TypefaceSpan
 import androidx.annotation.ColorInt
 import com.stripe.android.R
-import com.stripe.android.model.CardBrand
+import com.stripe.android.ui.core.elements.CardBrand
 import com.stripe.android.model.PaymentMethod
 
 internal class CardDisplayTextFactory internal constructor(
@@ -20,7 +20,7 @@ internal class CardDisplayTextFactory internal constructor(
 
     @JvmSynthetic
     internal fun createStyled(
-        brand: CardBrand,
+        brand: com.stripe.android.ui.core.elements.CardBrand,
         last4: String?,
         isSelected: Boolean
     ): SpannableString {

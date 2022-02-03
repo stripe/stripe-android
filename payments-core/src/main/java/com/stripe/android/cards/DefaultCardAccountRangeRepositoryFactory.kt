@@ -89,7 +89,7 @@ internal class DefaultCardAccountRangeRepositoryFactory(
 
     private class NullCardAccountRangeSource : CardAccountRangeSource {
         override suspend fun getAccountRange(
-            cardNumber: CardNumber.Unvalidated
+            cardNumber: com.stripe.android.ui.core.elements.CardNumber.Unvalidated
         ): AccountRange? = null
 
         override val loading: Flow<Boolean> = flowOf(false)

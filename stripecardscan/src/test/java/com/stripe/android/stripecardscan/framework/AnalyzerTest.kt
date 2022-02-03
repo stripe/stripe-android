@@ -1,8 +1,11 @@
 package com.stripe.android.stripecardscan.framework
 
 import androidx.test.filters.SmallTest
+import com.stripe.android.camera.framework.Analyzer
+import com.stripe.android.camera.framework.AnalyzerFactory
+import com.stripe.android.camera.framework.AnalyzerPool
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import kotlin.test.assertEquals
 
@@ -11,7 +14,7 @@ class AnalyzerTest {
     @Test
     @SmallTest
     @ExperimentalCoroutinesApi
-    fun analyzerPoolCreateNormally() = runBlockingTest {
+    fun analyzerPoolCreateNormally() = runTest {
         class TestAnalyzerFactory : AnalyzerFactory<Int, Int, Int, TestAnalyzer> {
             override suspend fun newInstance(): TestAnalyzer? = TestAnalyzer()
         }
@@ -29,7 +32,7 @@ class AnalyzerTest {
     @Test
     @SmallTest
     @ExperimentalCoroutinesApi
-    fun analyzerPoolCreateFailure() = runBlockingTest {
+    fun analyzerPoolCreateFailure() = runTest {
         class TestAnalyzerFactory : AnalyzerFactory<Int, Int, Int, TestAnalyzer> {
             override suspend fun newInstance(): TestAnalyzer? = null
         }
@@ -45,5 +48,6 @@ class AnalyzerTest {
 
     private class TestAnalyzer : Analyzer<Int, Int, Int> {
         override suspend fun analyze(data: Int, state: Int): Int = data + state
+        override val statsName: String? = null
     }
 }

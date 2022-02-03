@@ -1,9 +1,9 @@
 package com.stripe.android.stripecardscan.framework.util
 
 import androidx.test.filters.SmallTest
-import com.stripe.android.stripecardscan.framework.time.milliseconds
+import com.stripe.android.camera.framework.time.milliseconds
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -13,7 +13,7 @@ class RetryTest {
     @Test
     @SmallTest
     @ExperimentalCoroutinesApi
-    fun retry_succeedsFirst() = runBlockingTest {
+    fun retry_succeedsFirst() = runTest {
         var executions = 0
 
         assertEquals(
@@ -29,7 +29,7 @@ class RetryTest {
     @Test
     @SmallTest
     @ExperimentalCoroutinesApi
-    fun retry_succeedsSecond() = runBlockingTest {
+    fun retry_succeedsSecond() = runTest {
         var executions = 0
 
         assertEquals(
@@ -49,7 +49,7 @@ class RetryTest {
     @Test
     @SmallTest
     @ExperimentalCoroutinesApi
-    fun retry_fails() = runBlockingTest {
+    fun retry_fails() = runTest {
         var executions = 0
 
         assertFailsWith<RuntimeException> {
@@ -64,7 +64,7 @@ class RetryTest {
     @Test
     @SmallTest
     @ExperimentalCoroutinesApi
-    fun retry_excluding() = runBlockingTest {
+    fun retry_excluding() = runTest {
         var executions = 0
 
         assertFailsWith<RuntimeException> {

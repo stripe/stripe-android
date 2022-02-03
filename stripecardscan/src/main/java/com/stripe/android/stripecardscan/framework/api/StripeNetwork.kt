@@ -5,10 +5,11 @@ import com.stripe.android.core.networking.DefaultStripeNetworkClient
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.networking.StripeRequest
 import com.stripe.android.stripecardscan.framework.Config
+import com.stripe.android.stripecardscan.framework.api.dto.CardScanFileDownloadRequest
+import com.stripe.android.stripecardscan.framework.api.dto.CardScanRequest
 import com.stripe.android.stripecardscan.framework.time.Timer
 import com.stripe.android.stripecardscan.framework.util.decodeFromJson
 import com.stripe.android.stripecardscan.framework.util.encodeToXWWWFormUrl
-import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.KSerializer
 import java.io.File
 import java.net.HttpURLConnection.HTTP_MULT_CHOICE
@@ -35,7 +36,6 @@ internal class StripeNetwork internal constructor(
 
     private val networkTimer by lazy { Timer.newInstance(Config.logTag, "network") }
 
-    @ExperimentalSerializationApi
     override suspend fun <Request, Response, Error> postForResult(
         stripePublishableKey: String,
         path: String,
@@ -58,7 +58,6 @@ internal class StripeNetwork internal constructor(
     /**
      * Send a post request to a Stripe endpoint and ignore the response.
      */
-    @ExperimentalSerializationApi
     override suspend fun <Request> postData(
         stripePublishableKey: String,
         path: String,

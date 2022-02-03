@@ -6,7 +6,7 @@ import kotlinx.coroutines.flow.flowOf
 
 internal class NullCardAccountRangeRepository : CardAccountRangeRepository {
     override suspend fun getAccountRange(
-        cardNumber: CardNumber.Unvalidated
+        cardNumber: com.stripe.android.ui.core.elements.CardNumber.Unvalidated
     ): AccountRange? = null
 
     override val loading: Flow<Boolean> = flowOf(false)

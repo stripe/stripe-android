@@ -1,12 +1,11 @@
 package com.stripe.android.stripecardscan.cardimageverification.result
 
-import androidx.annotation.Keep
 import com.stripe.android.stripecardscan.cardimageverification.SavedFrame
 import com.stripe.android.stripecardscan.cardimageverification.SavedFrameType
 import com.stripe.android.stripecardscan.cardimageverification.CardImageVerificationConfig
 import com.stripe.android.stripecardscan.cardimageverification.analyzer.MainLoopAnalyzer
-import com.stripe.android.stripecardscan.framework.AggregateResultListener
-import com.stripe.android.stripecardscan.framework.ResultAggregator
+import com.stripe.android.camera.framework.AggregateResultListener
+import com.stripe.android.camera.framework.ResultAggregator
 import com.stripe.android.stripecardscan.framework.util.FrameSaver
 import com.stripe.android.stripecardscan.payment.card.CardIssuer
 import com.stripe.android.stripecardscan.payment.card.CardMatchResult
@@ -40,16 +39,15 @@ internal class MainLoopAggregator(
             requiredCardIssuer = requiredCardIssuer,
             requiredLastFour = requiredLastFour,
         ),
+        statsName = null, // TODO: when we want to collect this in scan stats, give this a name
     ) {
 
-    @Keep
     internal data class FinalResult(
         val pan: String,
         val savedFrames: Map<SavedFrameType, List<SavedFrame>>,
     )
 
-    @Keep
-    data class InterimResult(
+    internal data class InterimResult(
         val analyzerResult: MainLoopAnalyzer.Prediction,
         val frame: MainLoopAnalyzer.Input,
         val state: MainLoopState,

@@ -1,8 +1,8 @@
 package com.stripe.android.paymentsheet.injection
 
 import androidx.core.os.LocaleListCompat
-import com.stripe.android.paymentsheet.forms.resources.AsyncResourceRepository
-import com.stripe.android.paymentsheet.forms.resources.ResourceRepository
+import com.stripe.android.ui.core.forms.resources.AsyncResourceRepository
+import com.stripe.android.ui.core.forms.resources.ResourceRepository
 import dagger.Binds
 import dagger.Module
 import dagger.Provides

@@ -1,7 +1,7 @@
 package com.stripe.android
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.model.CardBrand
+import com.stripe.android.ui.core.elements.CardBrand
 import kotlin.test.Test
 
 /**
@@ -11,66 +11,66 @@ class CardUtilsTest {
 
     @Test
     fun getPossibleCardBrand_withEmptyCard_returnsUnknown() {
-        assertThat(CardUtils.getPossibleCardBrand("   ")).isEqualTo(CardBrand.Unknown)
+        assertThat(CardUtils.getPossibleCardBrand("   ")).isEqualTo(com.stripe.android.ui.core.elements.CardBrand.Unknown)
     }
 
     @Test
     fun getPossibleCardBrand_withNullCardNumber_returnsUnknown() {
-        assertThat(CardUtils.getPossibleCardBrand(null)).isEqualTo(CardBrand.Unknown)
+        assertThat(CardUtils.getPossibleCardBrand(null)).isEqualTo(com.stripe.android.ui.core.elements.CardBrand.Unknown)
     }
 
     @Test
     fun getPossibleCardBrand_withVisaPrefix_returnsVisa() {
-        assertThat(CardUtils.getPossibleCardBrand("4899 99")).isEqualTo(CardBrand.Visa)
-        assertThat(CardUtils.getPossibleCardBrand("4")).isEqualTo(CardBrand.Visa)
+        assertThat(CardUtils.getPossibleCardBrand("4899 99")).isEqualTo(com.stripe.android.ui.core.elements.CardBrand.Visa)
+        assertThat(CardUtils.getPossibleCardBrand("4")).isEqualTo(com.stripe.android.ui.core.elements.CardBrand.Visa)
     }
 
     @Test
     fun getPossibleCardBrand_withAmexPrefix_returnsAmex() {
-        assertThat(CardUtils.getPossibleCardBrand("345")).isEqualTo(CardBrand.AmericanExpress)
-        assertThat(CardUtils.getPossibleCardBrand("37999999999")).isEqualTo(CardBrand.AmericanExpress)
+        assertThat(CardUtils.getPossibleCardBrand("345")).isEqualTo(com.stripe.android.ui.core.elements.CardBrand.AmericanExpress)
+        assertThat(CardUtils.getPossibleCardBrand("37999999999")).isEqualTo(com.stripe.android.ui.core.elements.CardBrand.AmericanExpress)
     }
 
     @Test
     fun getPossibleCardBrand_withJCBPrefix_returnsJCB() {
-        assertThat(CardUtils.getPossibleCardBrand("3535 3535")).isEqualTo(CardBrand.JCB)
+        assertThat(CardUtils.getPossibleCardBrand("3535 3535")).isEqualTo(com.stripe.android.ui.core.elements.CardBrand.JCB)
     }
 
     @Test
     fun getPossibleCardBrand_withMasterCardPrefix_returnsMasterCard() {
-        assertThat(CardUtils.getPossibleCardBrand("2222 452")).isEqualTo(CardBrand.MasterCard)
-        assertThat(CardUtils.getPossibleCardBrand("5050")).isEqualTo(CardBrand.MasterCard)
+        assertThat(CardUtils.getPossibleCardBrand("2222 452")).isEqualTo(com.stripe.android.ui.core.elements.CardBrand.MasterCard)
+        assertThat(CardUtils.getPossibleCardBrand("5050")).isEqualTo(com.stripe.android.ui.core.elements.CardBrand.MasterCard)
     }
 
     @Test
     fun getPossibleCardBrand_withDinersClub16Prefix_returnsDinersClub() {
-        assertThat(CardUtils.getPossibleCardBrand("303922 2234")).isEqualTo(CardBrand.DinersClub)
+        assertThat(CardUtils.getPossibleCardBrand("303922 2234")).isEqualTo(com.stripe.android.ui.core.elements.CardBrand.DinersClub)
     }
 
     @Test
     fun getPossibleCardBrand_withDinersClub14Prefix_returnsDinersClub() {
-        assertThat(CardUtils.getPossibleCardBrand("36778 9098")).isEqualTo(CardBrand.DinersClub)
+        assertThat(CardUtils.getPossibleCardBrand("36778 9098")).isEqualTo(com.stripe.android.ui.core.elements.CardBrand.DinersClub)
     }
 
     @Test
     fun getPossibleCardBrand_withDiscoverPrefix_returnsDiscover() {
-        assertThat(CardUtils.getPossibleCardBrand("60355")).isEqualTo(CardBrand.Discover)
-        assertThat(CardUtils.getPossibleCardBrand("6433 8 90923")).isEqualTo(CardBrand.Discover)
+        assertThat(CardUtils.getPossibleCardBrand("60355")).isEqualTo(com.stripe.android.ui.core.elements.CardBrand.Discover)
+        assertThat(CardUtils.getPossibleCardBrand("6433 8 90923")).isEqualTo(com.stripe.android.ui.core.elements.CardBrand.Discover)
         // This one has too many numbers on purpose. Checking for length is not part of the
         // function under test.
-        assertThat(CardUtils.getPossibleCardBrand("6523452309209340293423")).isEqualTo(CardBrand.Discover)
+        assertThat(CardUtils.getPossibleCardBrand("6523452309209340293423")).isEqualTo(com.stripe.android.ui.core.elements.CardBrand.Discover)
     }
 
     @Test
     fun getPossibleCardBrand_withUnionPayPrefix_returnsUnionPay() {
-        assertThat(CardUtils.getPossibleCardBrand("62")).isEqualTo(CardBrand.UnionPay)
+        assertThat(CardUtils.getPossibleCardBrand("62")).isEqualTo(com.stripe.android.ui.core.elements.CardBrand.UnionPay)
     }
 
     @Test
     fun getPossibleCardBrand_withNonsenseNumber_returnsUnknown() {
-        assertThat(CardUtils.getPossibleCardBrand("1234567890123456")).isEqualTo(CardBrand.Unknown)
-        assertThat(CardUtils.getPossibleCardBrand("9999 9999 9999 9999")).isEqualTo(CardBrand.Unknown)
-        assertThat(CardUtils.getPossibleCardBrand("3")).isEqualTo(CardBrand.Unknown)
+        assertThat(CardUtils.getPossibleCardBrand("1234567890123456")).isEqualTo(com.stripe.android.ui.core.elements.CardBrand.Unknown)
+        assertThat(CardUtils.getPossibleCardBrand("9999 9999 9999 9999")).isEqualTo(com.stripe.android.ui.core.elements.CardBrand.Unknown)
+        assertThat(CardUtils.getPossibleCardBrand("3")).isEqualTo(com.stripe.android.ui.core.elements.CardBrand.Unknown)
     }
 
     @Test

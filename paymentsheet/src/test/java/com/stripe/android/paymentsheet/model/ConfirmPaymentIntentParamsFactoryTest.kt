@@ -1,9 +1,10 @@
 package com.stripe.android.paymentsheet.model
 
 import com.google.common.truth.Truth
-import com.stripe.android.model.CardBrand
+import com.stripe.android.core.model.CardBrand
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
+import com.stripe.android.model.PaymentMethodOptionsParams
 import org.junit.Test
 
 class ConfirmPaymentIntentParamsFactoryTest {
@@ -25,7 +26,10 @@ class ConfirmPaymentIntentParamsFactoryTest {
             ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
                 paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
                 clientSecret = CLIENT_SECRET,
-                setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
+                setupFutureUsage = null,
+                paymentMethodOptions = PaymentMethodOptionsParams.Card(
+                    setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
+                )
             )
         )
     }
@@ -44,7 +48,10 @@ class ConfirmPaymentIntentParamsFactoryTest {
             ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
                 paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
                 clientSecret = CLIENT_SECRET,
-                setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.Blank
+                setupFutureUsage = null,
+                paymentMethodOptions = PaymentMethodOptionsParams.Card(
+                    setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.Blank
+                )
             )
         )
     }
@@ -63,7 +70,8 @@ class ConfirmPaymentIntentParamsFactoryTest {
             ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
                 paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
                 clientSecret = CLIENT_SECRET,
-                setupFutureUsage = null
+                setupFutureUsage = null,
+                paymentMethodOptions = PaymentMethodOptionsParams.Card()
             )
         )
     }

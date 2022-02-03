@@ -11,7 +11,7 @@ internal class DefaultCardAccountRangeRepository(
     private val store: CardAccountRangeStore
 ) : CardAccountRangeRepository {
     override suspend fun getAccountRange(
-        cardNumber: CardNumber.Unvalidated
+        cardNumber: com.stripe.android.ui.core.elements.CardNumber.Unvalidated
     ): AccountRange? {
         return cardNumber.bin?.let { bin ->
             if (store.contains(bin)) {

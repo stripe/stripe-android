@@ -5,7 +5,7 @@ import kotlinx.coroutines.flow.Flow
 
 internal interface CardAccountRangeSource {
     suspend fun getAccountRange(
-        cardNumber: CardNumber.Unvalidated
+        cardNumber: com.stripe.android.ui.core.elements.CardNumber.Unvalidated
     ): AccountRange?
 
     val loading: Flow<Boolean>

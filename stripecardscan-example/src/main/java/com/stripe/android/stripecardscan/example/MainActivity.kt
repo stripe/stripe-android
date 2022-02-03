@@ -1,16 +1,12 @@
 package com.stripe.android.stripecardscan.example
 
-import android.content.Intent
 import android.os.Bundle
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.widget.addTextChangedListener
 import com.github.kittinunf.fuel.Fuel
 import com.github.kittinunf.result.Result
-import com.stripe.android.stripecardscan.example.activity.LaunchCardImageVerificationSheetCompleteActivity
-import com.stripe.android.stripecardscan.example.activity.PARAM_PUBLISHABLE_KEY
-import com.stripe.android.stripecardscan.example.activity.PARAM_VERIFICATION_RESULT
-import com.stripe.android.stripecardscan.example.activity.SnackbarController
+import com.stripe.android.stripecardscan.cardimageverification.CardImageVerificationSheet
+import com.stripe.android.stripecardscan.cardimageverification.CardImageVerificationSheetResult
 import com.stripe.android.stripecardscan.example.databinding.ActivityMainBinding
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -33,57 +29,120 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private val settings by lazy { Settings(this) }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(viewBinding.root)
-        setSupportActionBar(findViewById(R.id.toolbar))
 
-        val civLauncher = registerForActivityResult(
-            ActivityResultContracts.StartActivityForResult()
-        ) { result ->
-            viewBinding.scanResultText.text = result.data?.getStringExtra(PARAM_VERIFICATION_RESULT)
-        }
+        val cardImageVerificationSheet =
+            CardImageVerificationSheet.create(this, settings.publishableKey)
 
-        viewBinding.getPublishableKeyButton.setOnClickListener {
-            Fuel.get("https://stripe-card-scan-civ-example-app.glitch.me/publishable_key")
+        viewBinding.generateCivIntent.setOnClickListener {
+            Fuel.post("${settings.backendUrl}/card-set/checkout")
+                .header("content-type", "application/json")
+                .body(
+                    json.encodeToString(
+                        CivCreationRequest.serializer(),
+                        CivCreationRequest(
+                            iin = viewBinding.requiredIinText.text.toString(),
+                            lastFour = viewBinding.requiredLast4Text.text.toString(),
+                        ),
+                    )
+                )
                 .responseString { _, _, result ->
                     when (result) {
-                        is Result.Failure -> runOnUiThread {
-                            snackbarController
-                                .show("Error getting key: ${result.getException().message}")
-                        }
+                        is Result.Failure -> snackbarController
+                            .show("Error generating CIV: ${result.getException().message}")
                         is Result.Success -> runOnUiThread {
-                            json.decodeFromString(PubKeyResponse.serializer(), result.get())
-                                .let {
-                                    viewBinding.stripePublishableKey.setText(it.publishableKey)
-                                    viewBinding.launchCompleteButton.isEnabled = true
-                                }
+                            try {
+                                json.decodeFromString(
+                                    CivCreationResponse.serializer(),
+                                    result.get()
+                                )
+                                    .let {
+                                        viewBinding.scanResultText.setText("")
+                                        viewBinding.civIdText.setText(it.civId)
+                                        viewBinding.civSecretText.setText(it.civClientSecret)
+                                        viewBinding.launchScanButton.isEnabled = true
+                                    }
+                            } catch (t: Throwable) {
+                                viewBinding.scanResultText.text = result.value
+                                viewBinding.civIdText.setText("")
+                                viewBinding.civSecretText.setText("")
+                            }
                         }
                     }
                 }
         }
 
-        viewBinding.stripePublishableKey.addTextChangedListener(
+        viewBinding.civIdText.addTextChangedListener(
             { _, _, _, _ -> /* before change */ },
             { _, _, _, _ -> /* on change */ },
             { s ->
-                viewBinding.launchCompleteButton.isEnabled = !s.isNullOrEmpty()
+                viewBinding.launchScanButton.isEnabled =
+                    !s.isNullOrEmpty() && !viewBinding.civSecretText.text.isNullOrEmpty()
             }
         )
 
-        viewBinding.launchCompleteButton.setOnClickListener {
-            civLauncher.launch(
-                Intent(this, LaunchCardImageVerificationSheetCompleteActivity::class.java)
-                    .putExtra(
-                        PARAM_PUBLISHABLE_KEY,
-                        viewBinding.stripePublishableKey.text.toString(),
-                    )
+        viewBinding.civSecretText.addTextChangedListener(
+            { _, _, _, _ -> /* before change */ },
+            { _, _, _, _ -> /* on change */ },
+            { s ->
+                viewBinding.launchScanButton.isEnabled =
+                    !s.isNullOrEmpty() && !viewBinding.civIdText.text.isNullOrEmpty()
+            }
+        )
+
+        viewBinding.launchScanButton.setOnClickListener {
+            cardImageVerificationSheet.present(
+                viewBinding.civIdText.text.toString(),
+                viewBinding.civSecretText.text.toString(),
+                this::onScanFinished,
             )
         }
     }
 
+    private fun onScanFinished(result: CardImageVerificationSheetResult) {
+        snackbarController.show(result.toString())
+
+        Fuel.post("${settings.backendUrl}/verify")
+            .header("content-type", "application/json")
+            .body(
+                json.encodeToString(
+                    VerifyRequest.serializer(),
+                    VerifyRequest(
+                        civId = viewBinding.civIdText.text.toString()
+                    )
+                )
+            )
+            .responseString { _, _, result ->
+                when (result) {
+                    is Result.Failure -> snackbarController
+                        .show("Error getting validation payload: ${result.getException().message}")
+                    is Result.Success -> runOnUiThread {
+                        viewBinding.scanResultText.text = result.value
+                        viewBinding.civIdText.setText("")
+                        viewBinding.civSecretText.setText("")
+                    }
+                }
+            }
+    }
+
     @Serializable
-    data class PubKeyResponse(
-        @SerialName("publishable_key") val publishableKey: String,
+    data class CivCreationRequest(
+        @SerialName("expected_card[iin]") val iin: String,
+        @SerialName("expected_card[last4]") val lastFour: String,
+    )
+
+    @Serializable
+    data class CivCreationResponse(
+        @SerialName("id") val civId: String,
+        @SerialName("client_secret") val civClientSecret: String,
+    )
+
+    @Serializable
+    data class VerifyRequest(
+        @SerialName("civ_id") val civId: String,
     )
 }

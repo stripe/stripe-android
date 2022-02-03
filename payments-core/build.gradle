@@ -32,16 +32,17 @@ dependencies {
     implementation libraries.androidx.fragment.ktx
     implementation libraries.androidx.constraintlayout
     implementation libraries.androidx.activity.ktx
-    implementation 'com.google.android.gms:play-services-wallet:18.1.3'
+    implementation 'com.google.android.gms:play-services-wallet:19.1.0'
     implementation "com.google.android.material:material:$materialVersion"
     implementation "com.google.dagger:dagger:$daggerVersion"
     kapt "com.google.dagger:dagger-compiler:$daggerVersion"
 
     implementation "androidx.activity:activity-compose:$composeActivityVersion"
+    implementation 'com.google.android.instantapps:instantapps:1.1.0'
 
     // For instructions on replacing the BouncyCastle dependency used by the 3DS2 SDK, see
     // https://github.com/stripe/stripe-android/issues/3173#issuecomment-785176608
-    implementation "com.stripe:stripe-3ds2-android:6.1.2"
+    implementation "com.stripe:stripe-3ds2-android:6.1.3"
 
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinCoroutinesVersion"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$kotlinCoroutinesVersion"
@@ -54,12 +55,12 @@ dependencies {
     testImplementation "org.mockito:mockito-core:$mockitoCoreVersion"
     testImplementation "org.robolectric:robolectric:$robolectricVersion"
     testImplementation "androidx.test:core:$androidTestVersion"
-    testImplementation 'org.json:json:20210307'
+    testImplementation 'org.json:json:20211205'
     testImplementation "org.mockito.kotlin:mockito-kotlin:$mockitoKotlinVersion"
     testImplementation "org.jetbrains.kotlin:kotlin-test-junit:$kotlinVersion"
     testImplementation "org.jetbrains.kotlin:kotlin-test-annotations-common:$kotlinVersion"
     testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$kotlinCoroutinesVersion"
-    testImplementation 'com.google.truth:truth:1.1.3'
+    testImplementation "com.google.truth:truth:$truthVersion"
     testImplementation "androidx.arch.core:core-testing:2.1.0"
     testImplementation libraries.androidx.fragment.testing
 

@@ -77,6 +77,19 @@ class PaymentBrowserAuthContractTest {
     }
 
     @Test
+    fun `createIntent() when isInstantApp should use StripeBrowserLauncherActivity`() {
+        val intent = PaymentBrowserAuthContract().createIntent(
+            activity,
+            ARGS.copy(
+                isInstantApp = true
+            )
+        )
+
+        assertThat(intent.component?.className)
+            .isEqualTo(StripeBrowserLauncherActivity::class.java.name)
+    }
+
+    @Test
     fun `createIntent() should set statusBarColor from activity`() {
         val intent = PaymentBrowserAuthContract().createIntent(
             activity,
@@ -99,7 +112,8 @@ class PaymentBrowserAuthContractTest {
             requestCode = 5000,
             url = "https://mybank.com/auth",
             returnUrl = "myapp://custom",
-            publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
+            publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+            isInstantApp = false
         )
     }
 }

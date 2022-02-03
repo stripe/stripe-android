@@ -5,7 +5,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.android.material.textfield.TextInputLayout
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.R
-import com.stripe.android.model.CardBrand
+import com.stripe.android.ui.core.elements.CardBrand
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
@@ -30,7 +30,7 @@ class CvcEditTextTest {
     @Test
     fun cvcValue_withValidVisaValue_returnsCvcValue() {
         cvcEditText.setText("123")
-        cvcEditText.updateBrand(CardBrand.Visa)
+        cvcEditText.updateBrand(com.stripe.android.ui.core.elements.CardBrand.Visa)
         assertThat(cvcEditText.cvc?.value)
             .isEqualTo("123")
     }
@@ -47,7 +47,7 @@ class CvcEditTextTest {
     @Test
     fun cvcValue_withValidInvalidVisaValue_returnsCvcValue() {
         cvcEditText.setText("1234")
-        cvcEditText.updateBrand(CardBrand.Visa)
+        cvcEditText.updateBrand(com.stripe.android.ui.core.elements.CardBrand.Visa)
         assertThat(cvcEditText.cvc)
             .isNull()
     }
@@ -55,7 +55,7 @@ class CvcEditTextTest {
     @Test
     fun cvcValue_withInvalidAmexValue_returnsCvcValue() {
         cvcEditText.setText("12")
-        cvcEditText.updateBrand(CardBrand.AmericanExpress)
+        cvcEditText.updateBrand(com.stripe.android.ui.core.elements.CardBrand.AmericanExpress)
         assertThat(cvcEditText.cvc)
             .isNull()
     }
@@ -63,7 +63,7 @@ class CvcEditTextTest {
     @Test
     fun cvcValue_withValid3DigitAmexValue_returnsCvcValue() {
         cvcEditText.setText("123")
-        cvcEditText.updateBrand(CardBrand.AmericanExpress)
+        cvcEditText.updateBrand(com.stripe.android.ui.core.elements.CardBrand.AmericanExpress)
         assertThat(cvcEditText.cvc?.value)
             .isEqualTo("123")
     }
@@ -71,7 +71,7 @@ class CvcEditTextTest {
     @Test
     fun cvcValue_withValid4DigitAmexValue_returnsCvcValue() {
         cvcEditText.setText("1234")
-        cvcEditText.updateBrand(CardBrand.AmericanExpress)
+        cvcEditText.updateBrand(com.stripe.android.ui.core.elements.CardBrand.AmericanExpress)
         assertThat(cvcEditText.cvc?.value)
             .isEqualTo("1234")
     }
@@ -80,7 +80,7 @@ class CvcEditTextTest {
     fun completionCallback_whenVisa_isInvoked_whenMax() {
         var hasCompleted = false
 
-        cvcEditText.updateBrand(CardBrand.Visa)
+        cvcEditText.updateBrand(com.stripe.android.ui.core.elements.CardBrand.Visa)
         cvcEditText.completionCallback = { hasCompleted = true }
 
         cvcEditText.setText("1")
@@ -97,7 +97,7 @@ class CvcEditTextTest {
     fun completionCallback_whenAmex_isInvoked_whenMax() {
         var hasCompleted = false
 
-        cvcEditText.updateBrand(CardBrand.AmericanExpress)
+        cvcEditText.updateBrand(com.stripe.android.ui.core.elements.CardBrand.AmericanExpress)
         cvcEditText.completionCallback = { hasCompleted = true }
 
         cvcEditText.setText("1")
@@ -122,14 +122,14 @@ class CvcEditTextTest {
             )
         )
         cvcEditText.updateBrand(
-            CardBrand.AmericanExpress,
+            com.stripe.android.ui.core.elements.CardBrand.AmericanExpress,
             customPlaceholderText = "custom placeholder",
             textInputLayout = textInputLayout
         )
         assertThat(textInputLayout.placeholderText).isEqualTo("custom placeholder")
 
         cvcEditText.updateBrand(
-            CardBrand.AmericanExpress,
+            com.stripe.android.ui.core.elements.CardBrand.AmericanExpress,
             textInputLayout = textInputLayout
         )
         assertThat(textInputLayout.placeholderText).isEqualTo("1234")
@@ -138,7 +138,7 @@ class CvcEditTextTest {
     @Test
     fun `when lose focus and cvc length is wrong, show error`() {
         cvcEditText.setText("12")
-        cvcEditText.updateBrand(CardBrand.AmericanExpress)
+        cvcEditText.updateBrand(com.stripe.android.ui.core.elements.CardBrand.AmericanExpress)
         cvcEditText.onFocusChangeListener?.onFocusChange(cvcEditText, false)
         assertThat(cvcEditText.shouldShowError)
             .isTrue()

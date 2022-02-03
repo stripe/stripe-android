@@ -2,11 +2,11 @@ package com.stripe.android.stripecardscan.framework
 
 import android.util.Log
 import androidx.annotation.VisibleForTesting
+import com.stripe.android.camera.framework.util.memoizeSuspend
+import com.stripe.android.camera.framework.time.days
 import com.stripe.android.stripecardscan.framework.api.downloadFileWithRetries
-import com.stripe.android.stripecardscan.framework.time.days
 import com.stripe.android.stripecardscan.framework.util.HashMismatchException
 import com.stripe.android.stripecardscan.framework.util.calculateHash
-import com.stripe.android.stripecardscan.framework.util.memoizeSuspend
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
@@ -18,7 +18,10 @@ import java.security.NoSuchAlgorithmException
 /**
  * Fetched data metadata.
  */
-sealed class FetchedModelMeta(open val modelVersion: String, open val hashAlgorithm: String)
+internal sealed class FetchedModelMeta(
+    open val modelVersion: String,
+    open val hashAlgorithm: String,
+)
 internal data class FetchedModelFileMeta(
     override val modelVersion: String,
     override val hashAlgorithm: String,
@@ -35,7 +38,7 @@ internal data class FetchedModelResourceMeta(
 /**
  * Fetched data information.
  */
-sealed class FetchedData(
+internal sealed class FetchedData(
     open val modelClass: String,
     open val modelFrameworkVersion: Int,
     open val modelVersion: String,
@@ -80,7 +83,7 @@ sealed class FetchedData(
     abstract val successfullyFetched: Boolean
 }
 
-data class FetchedResource(
+internal data class FetchedResource(
     override val modelClass: String,
     override val modelFrameworkVersion: Int,
     override val modelVersion: String,
@@ -91,7 +94,7 @@ data class FetchedResource(
     override val successfullyFetched: Boolean = assetFileName != null
 }
 
-data class FetchedFile(
+internal data class FetchedFile(
     override val modelClass: String,
     override val modelFrameworkVersion: Int,
     override val modelVersion: String,
@@ -105,7 +108,7 @@ data class FetchedFile(
 /**
  * An interface for getting data ready to be loaded into memory.
  */
-interface Fetcher {
+internal interface Fetcher {
     val modelClass: String
     val modelFrameworkVersion: Int
 
@@ -130,7 +133,7 @@ interface Fetcher {
 /**
  * A [Fetcher] that gets data from android resources.
  */
-abstract class ResourceFetcher : Fetcher {
+internal abstract class ResourceFetcher : Fetcher {
     protected abstract val modelVersion: String
     protected abstract val hash: String
     protected abstract val hashAlgorithm: String
@@ -154,7 +157,7 @@ abstract class ResourceFetcher : Fetcher {
 /**
  * A [Fetcher] that downloads data from the web.
  */
-abstract class WebFetcher : Fetcher {
+internal abstract class WebFetcher : Fetcher {
     protected data class DownloadDetails(
         val url: URL,
         val hash: String,
@@ -170,7 +173,6 @@ abstract class WebFetcher : Fetcher {
     private var fetchException: Throwable? = null
 
     override suspend fun fetchData(forImmediateUse: Boolean, isOptional: Boolean): FetchedData {
-        val stat = Stats.trackPersistentRepeatingTask("web_fetcher_$modelClass")
         val cachedData = FetchedData.fromFetchedModelMeta(
             modelClass,
             modelFrameworkVersion,
@@ -189,7 +191,6 @@ abstract class WebFetcher : Fetcher {
                         "Fetcher: $modelClass is needed immediately and cached version " +
                             "${data.modelVersion} is available.",
                     )
-                    stat.trackResult("success")
                     return@fetchData data
                 }
             }
@@ -203,7 +204,6 @@ abstract class WebFetcher : Fetcher {
                     Config.logTag,
                     "Fetcher: using cached version ${cachedData.modelVersion} for $modelClass",
                 )
-                stat.trackResult("no_download_details")
                 return@fetchData cachedData
             }
 
@@ -214,7 +214,6 @@ abstract class WebFetcher : Fetcher {
                 Config.logTag,
                 "Fetcher: optional $modelClass needed for immediate use, but no cache available.",
             )
-            stat.trackResult("optional_model_not_downloaded")
             return FetchedData.fromFetchedModelMeta(
                 modelClass = modelClass,
                 modelFrameworkVersion = modelFrameworkVersion,
@@ -236,7 +235,6 @@ abstract class WebFetcher : Fetcher {
                         Config.logTag,
                         "Fetcher: $modelClass already has latest version downloaded.",
                     )
-                    stat.trackResult("success_cached")
                     return@fetchData data
                 }
             }
@@ -247,13 +245,11 @@ abstract class WebFetcher : Fetcher {
                         Config.logTag,
                         "Fetcher: $modelClass successfully downloaded.",
                     )
-                    stat.trackResult("success_downloaded")
                 } else {
                     Log.d(
                         Config.logTag,
                         "Fetcher: $modelClass failed to download from $downloadDetails.",
                     )
-                    stat.trackResult("download_failed")
                 }
             }
         } catch (t: Throwable) {
@@ -264,14 +260,12 @@ abstract class WebFetcher : Fetcher {
                     "Fetcher: Failed to download model $modelClass, loaded from local cache",
                     t,
                 )
-                stat.trackResult("success_download_failed_but_cached")
             } else {
                 Log.e(
                     Config.logTag,
                     "Fetcher: Failed to download model $modelClass, no local cache available",
                     t,
                 )
-                stat.trackResult(t::class.java.simpleName)
             }
             cachedData
         }

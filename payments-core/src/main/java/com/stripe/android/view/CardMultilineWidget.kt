@@ -20,10 +20,10 @@ import androidx.core.view.updateLayoutParams
 import androidx.core.widget.doAfterTextChanged
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.R
-import com.stripe.android.cards.CardNumber
+import com.stripe.android.ui.core.elements.CardNumber
 import com.stripe.android.databinding.CardMultilineWidgetBinding
 import com.stripe.android.model.Address
-import com.stripe.android.model.CardBrand
+import com.stripe.android.ui.core.elements.CardBrand
 import com.stripe.android.model.CardParams
 import com.stripe.android.model.ExpirationDate
 import com.stripe.android.model.PaymentMethod
@@ -110,9 +110,9 @@ class CardMultilineWidget @JvmOverloads constructor(
     private var customCvcLabel: String? = null
     private var customCvcPlaceholderText: String? = null
 
-    private var cardBrand: CardBrand = CardBrand.Unknown
+    private var cardBrand: com.stripe.android.ui.core.elements.CardBrand = com.stripe.android.ui.core.elements.CardBrand.Unknown
 
-    internal val brand: CardBrand
+    internal val brand: com.stripe.android.ui.core.elements.CardBrand
         @JvmSynthetic
         get() = cardBrand
 
@@ -145,6 +145,9 @@ class CardMultilineWidget @JvmOverloads constructor(
             postalCodeEditText.config = PostalCodeEditText.Config.Global
         }
     }
+
+    private fun isPostalRequired() =
+        (postalCodeRequired || usZipCodeRequired) && shouldShowPostalCode
 
     /**
      * A [PaymentMethodCreateParams.Card] representing the card details if all fields are valid;
@@ -230,7 +233,7 @@ class CardMultilineWidget @JvmOverloads constructor(
             )
         }
 
-    internal val validatedCardNumber: CardNumber.Validated?
+    internal val validatedCardNumber: com.stripe.android.ui.core.elements.CardNumber.Validated?
         get() {
             return cardNumberEditText.validatedCardNumber
         }
@@ -367,11 +370,17 @@ class CardMultilineWidget @JvmOverloads constructor(
             cvcEditText.shouldShowError = false
         }
 
+        postalCodeEditText.setAfterTextChangedListener {
+            if (isPostalRequired() && postalCodeEditText.hasValidPostal()) {
+                cardInputListener?.onPostalCodeComplete()
+            }
+        }
+
         adjustViewForPostalCodeAttribute(shouldShowPostalCode)
 
         cardNumberEditText.updateLengthFilter()
 
-        cardBrand = CardBrand.Unknown
+        cardBrand = com.stripe.android.ui.core.elements.CardBrand.Unknown
         updateBrandUi()
 
         allFields.forEach { field ->
@@ -406,7 +415,7 @@ class CardMultilineWidget @JvmOverloads constructor(
         cvcEditText.shouldShowError = false
         postalCodeEditText.shouldShowError = false
 
-        cardBrand = CardBrand.Unknown
+        cardBrand = com.stripe.android.ui.core.elements.CardBrand.Unknown
         updateBrandUi()
     }
 
@@ -744,7 +753,7 @@ class CardMultilineWidget @JvmOverloads constructor(
         }
     }
     internal fun interface CardBrandIconSupplier {
-        fun get(cardBrand: CardBrand): CardBrandIcon
+        fun get(cardBrand: com.stripe.android.ui.core.elements.CardBrand): CardBrandIcon
     }
 
     internal data class CardBrandIcon(

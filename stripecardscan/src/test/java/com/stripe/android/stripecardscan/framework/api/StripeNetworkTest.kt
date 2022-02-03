@@ -8,10 +8,10 @@ import com.stripe.android.core.networking.StripeRequest
 import com.stripe.android.core.networking.StripeResponse
 import com.stripe.android.stripecardscan.framework.NetworkConfig
 import com.stripe.android.stripecardscan.framework.api.StripeNetwork.Companion.RESPONSE_CODE_UNSET
+import com.stripe.android.stripecardscan.framework.api.dto.CardScanFileDownloadRequest
+import com.stripe.android.stripecardscan.framework.api.dto.CardScanRequest
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.TestCoroutineDispatcher
-import kotlinx.coroutines.test.runBlockingTest
-import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import org.junit.Test
@@ -28,7 +28,6 @@ import java.net.HttpURLConnection.HTTP_OK
 import java.net.URL
 
 @ExperimentalCoroutinesApi
-@ExperimentalSerializationApi
 @RunWith(RobolectricTestRunner::class)
 class StripeNetworkTest {
     @Serializable
@@ -42,7 +41,6 @@ class StripeNetworkTest {
         @SerialName("error_response_id") val errorResponseId: Int
     )
 
-    private val testDispatcher = TestCoroutineDispatcher()
     private val mockStripeNetworkClient: StripeNetworkClient = mock()
     private val stripeNetwork = StripeNetwork(
         baseUrl = TEST_BASE_URL,
@@ -51,7 +49,7 @@ class StripeNetworkTest {
     )
 
     @Test
-    fun `postForResult with ok response`() = testDispatcher.runBlockingTest {
+    fun `postForResult with ok response`() = runTest {
         whenever(mockStripeNetworkClient.executeRequest(any())).thenReturn(OK_RESPONSE)
         val networkResult = stripeNetwork.postForResult(
             TEST_PUBLISHABLE_KEY,
@@ -81,7 +79,7 @@ class StripeNetworkTest {
     }
 
     @Test
-    fun `postForResult with error response`() = testDispatcher.runBlockingTest {
+    fun `postForResult with error response`() = runTest {
         whenever(mockStripeNetworkClient.executeRequest(any())).thenReturn(ERROR_RESPONSE)
         val networkResult = stripeNetwork.postForResult(
             TEST_PUBLISHABLE_KEY,
@@ -112,7 +110,7 @@ class StripeNetworkTest {
     }
 
     @Test
-    fun `postForResult with exception thrown`() = testDispatcher.runBlockingTest {
+    fun `postForResult with exception thrown`() = runTest {
         val exception = APIConnectionException()
         whenever(mockStripeNetworkClient.executeRequest(any())).thenThrow(exception)
 
@@ -145,7 +143,7 @@ class StripeNetworkTest {
     }
 
     @Test
-    fun `postData with ok response`() = testDispatcher.runBlockingTest {
+    fun `postData with ok response`() = runTest {
         whenever(mockStripeNetworkClient.executeRequest(any())).thenReturn(OK_RESPONSE)
         stripeNetwork.postData(
             TEST_PUBLISHABLE_KEY,
@@ -167,7 +165,7 @@ class StripeNetworkTest {
     }
 
     @Test
-    fun `getForResult with ok response`() = testDispatcher.runBlockingTest {
+    fun `getForResult with ok response`() = runTest {
         whenever(mockStripeNetworkClient.executeRequest(any())).thenReturn(OK_RESPONSE)
         val networkResult = stripeNetwork.getForResult(
             TEST_PUBLISHABLE_KEY,
@@ -194,7 +192,7 @@ class StripeNetworkTest {
     }
 
     @Test
-    fun `getForResult with error response`() = testDispatcher.runBlockingTest {
+    fun `getForResult with error response`() = runTest {
         whenever(mockStripeNetworkClient.executeRequest(any())).thenReturn(ERROR_RESPONSE)
         val networkResult = stripeNetwork.getForResult(
             TEST_PUBLISHABLE_KEY,
@@ -222,7 +220,7 @@ class StripeNetworkTest {
     }
 
     @Test
-    fun `getForResult with exception thrown`() = testDispatcher.runBlockingTest {
+    fun `getForResult with exception thrown`() = runTest {
         val exception = APIConnectionException()
         whenever(mockStripeNetworkClient.executeRequest(any())).thenThrow(exception)
 
@@ -252,7 +250,7 @@ class StripeNetworkTest {
     }
 
     @Test
-    fun `downloadFileWithRetries succeeds`() = testDispatcher.runBlockingTest {
+    fun `downloadFileWithRetries succeeds`() = runTest {
         val mockFile = mock<File>()
 
         whenever(mockStripeNetworkClient.executeRequestForFile(any(), any())).thenReturn(
@@ -284,7 +282,7 @@ class StripeNetworkTest {
     }
 
     @Test
-    fun `downloadFileWithRetries with exception thrown`() = testDispatcher.runBlockingTest {
+    fun `downloadFileWithRetries with exception thrown`() = runTest {
         val mockFile = mock<File>()
 
         whenever(mockStripeNetworkClient.executeRequestForFile(any(), any())).thenThrow(

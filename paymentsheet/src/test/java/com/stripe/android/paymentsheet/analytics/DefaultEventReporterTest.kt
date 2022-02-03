@@ -9,20 +9,19 @@ import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.TestCoroutineDispatcher
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.runner.RunWith
 import org.mockito.kotlin.argWhere
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
 import java.util.UUID
-import kotlin.test.AfterTest
 import kotlin.test.Test
 
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
 class DefaultEventReporterTest {
-    private val testDispatcher = TestCoroutineDispatcher()
+    private val testDispatcher = UnconfinedTestDispatcher()
 
     private val analyticsRequestExecutor = mock<AnalyticsRequestExecutor>()
     private val analyticsRequestFactory = PaymentAnalyticsRequestFactory(
@@ -42,11 +41,6 @@ class DefaultEventReporterTest {
 
     private val completeEventReporter = eventReporterFactory(EventReporter.Mode.Complete)
     private val customEventReporter = eventReporterFactory(EventReporter.Mode.Custom)
-
-    @AfterTest
-    fun cleanup() {
-        testDispatcher.cleanupTestCoroutines()
-    }
 
     @Test
     fun `onInit() should fire analytics request with expected event value`() {

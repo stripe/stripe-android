@@ -11,7 +11,7 @@ import com.stripe.android.utils.InjectableActivityScenario
 import com.stripe.android.utils.TestUtils
 import com.stripe.android.utils.injectableActivityScenario
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
@@ -46,7 +46,7 @@ class PaymentLauncherConfirmationActivityTest {
             )
         ).use {
             it.onActivity {
-                runBlockingTest {
+                runTest {
                     verify(viewModel).confirmStripeIntent(confirmStripeIntentParams)
                 }
             }
@@ -65,7 +65,7 @@ class PaymentLauncherConfirmationActivityTest {
             )
         ).use {
             it.onActivity {
-                runBlockingTest {
+                runTest {
                     verify(viewModel).handleNextActionForStripeIntent(CLIENT_SECRET)
                 }
             }
@@ -91,7 +91,7 @@ class PaymentLauncherConfirmationActivityTest {
             )
         ).use {
             it.onActivity {
-                runBlockingTest {
+                runTest {
                     verify(viewModel).handleNextActionForStripeIntent(CLIENT_SECRET)
                 }
             }

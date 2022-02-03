@@ -559,7 +559,7 @@ constructor(
          *
          * [card.brand](https://stripe.com/docs/api/payment_methods/object#payment_method_object-card-brand)
          */
-        @JvmField val brand: CardBrand = CardBrand.Unknown,
+        @JvmField val brand: com.stripe.android.ui.core.elements.CardBrand = com.stripe.android.ui.core.elements.CardBrand.Unknown,
 
         /**
          * Checks on Card address and CVC if provided

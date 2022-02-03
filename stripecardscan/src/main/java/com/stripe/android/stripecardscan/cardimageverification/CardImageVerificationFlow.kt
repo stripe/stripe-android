@@ -3,21 +3,20 @@ package com.stripe.android.stripecardscan.cardimageverification
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Rect
-import androidx.annotation.Keep
 import androidx.lifecycle.LifecycleOwner
-import com.stripe.android.stripecardscan.camera.CameraPreviewImage
+import com.stripe.android.camera.CameraPreviewImage
 import com.stripe.android.stripecardscan.cardimageverification.analyzer.MainLoopAnalyzer
 import com.stripe.android.stripecardscan.cardimageverification.result.MainLoopAggregator
 import com.stripe.android.stripecardscan.cardimageverification.result.MainLoopState
-import com.stripe.android.stripecardscan.framework.AggregateResultListener
-import com.stripe.android.stripecardscan.framework.AnalyzerLoopErrorListener
-import com.stripe.android.stripecardscan.framework.AnalyzerPool
-import com.stripe.android.stripecardscan.framework.ProcessBoundAnalyzerLoop
+import com.stripe.android.camera.framework.AggregateResultListener
+import com.stripe.android.camera.framework.AnalyzerLoopErrorListener
+import com.stripe.android.camera.framework.AnalyzerPool
+import com.stripe.android.camera.framework.ProcessBoundAnalyzerLoop
 import com.stripe.android.stripecardscan.payment.ml.CardDetect
 import com.stripe.android.stripecardscan.payment.ml.CardDetectModelManager
 import com.stripe.android.stripecardscan.payment.ml.SSDOcr
 import com.stripe.android.stripecardscan.payment.ml.SSDOcrModelManager
-import com.stripe.android.stripecardscan.scanui.ScanFlow
+import com.stripe.android.camera.scanui.ScanFlow
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -25,22 +24,19 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
-@Keep
 internal data class SavedFrame(
     val hasOcr: Boolean,
     val frame: MainLoopAnalyzer.Input,
 )
 
-@Keep
 internal data class SavedFrameType(
     val hasCard: Boolean,
     val hasOcr: Boolean,
 )
 
-@Keep
-internal abstract class CardVerifyFlow(
+internal abstract class CardImageVerificationFlow(
     private val scanErrorListener: AnalyzerLoopErrorListener,
-) : ScanFlow<RequiredCardDetails?>,
+) : ScanFlow<RequiredCardDetails?, CameraPreviewImage<Bitmap>>,
     AggregateResultListener<MainLoopAggregator.InterimResult, MainLoopAggregator.FinalResult> {
 
     /**
@@ -73,7 +69,7 @@ internal abstract class CardVerifyFlow(
         }
 
         mainLoopAggregator = MainLoopAggregator(
-            listener = this@CardVerifyFlow,
+            listener = this@CardImageVerificationFlow,
             requiredCardIssuer = parameters?.cardIssuer,
             requiredLastFour = parameters?.lastFour,
         ).also { mainLoopOcrAggregator ->
@@ -105,9 +101,9 @@ internal abstract class CardVerifyFlow(
             mainLoop = ProcessBoundAnalyzerLoop(
                 analyzerPool = analyzerPool,
                 resultHandler = mainLoopOcrAggregator,
-                analyzerLoopErrorListener = scanErrorListener,
+                analyzerLoopErrorListener = scanErrorListener
             ).apply {
-                subscribeTo(
+                mainLoopJob = subscribeTo(
                     imageStream.map {
                         MainLoopAnalyzer.Input(
                             cameraPreviewImage = it,
@@ -121,22 +117,16 @@ internal abstract class CardVerifyFlow(
     }.let { }
 
     override suspend fun onResult(result: MainLoopAggregator.FinalResult) {
-        mainLoop?.unsubscribe()
-        mainLoop = null
-
-        mainLoopJob?.apply { if (isActive) { cancel() } }
-        mainLoopJob = null
-
-        mainLoopAggregator = null
-
-        mainLoopAnalyzerPool?.closeAllAnalyzers()
-        mainLoopAnalyzerPool = null
+        stopFlow()
     }
 
     override fun cancelFlow() {
         canceled = true
-
         mainLoopAggregator?.run { cancel() }
+        stopFlow()
+    }
+
+    private fun stopFlow() {
         mainLoopAggregator = null
 
         mainLoop?.unsubscribe()

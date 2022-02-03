@@ -10,7 +10,7 @@ internal class InMemoryCardAccountRangeSource(
     override val loading: Flow<Boolean> = flowOf(false)
 
     override suspend fun getAccountRange(
-        cardNumber: CardNumber.Unvalidated
+        cardNumber: com.stripe.android.ui.core.elements.CardNumber.Unvalidated
     ): AccountRange? {
         return cardNumber.bin?.let { bin ->
             store.get(bin)

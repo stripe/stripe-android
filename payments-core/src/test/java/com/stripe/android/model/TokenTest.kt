@@ -55,7 +55,7 @@ class TokenTest {
             id = "card_189fi32eZvKYlo2CHK8NPRME",
             expMonth = 8,
             expYear = 2017,
-            brand = CardBrand.Visa,
+            brand = com.stripe.android.ui.core.elements.CardBrand.Visa,
             country = "US",
             last4 = "4242",
             funding = CardFunding.Credit

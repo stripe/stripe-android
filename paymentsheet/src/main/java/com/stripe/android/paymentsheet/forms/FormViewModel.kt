@@ -1,28 +1,29 @@
 package com.stripe.android.paymentsheet.forms
 
 import android.content.res.Resources
+import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.stripe.android.paymentsheet.elements.CardBillingElement
+import com.stripe.android.ui.core.elements.CardBillingElement
 import com.stripe.android.core.injection.Injectable
 import com.stripe.android.core.injection.injectWithFallback
-import com.stripe.android.paymentsheet.elements.Form
-import com.stripe.android.paymentsheet.elements.FormElement
-import com.stripe.android.paymentsheet.elements.LayoutSpec
-import com.stripe.android.paymentsheet.elements.SaveForFutureUseElement
-import com.stripe.android.paymentsheet.elements.SectionElement
-import com.stripe.android.paymentsheet.elements.SectionSpec
-import com.stripe.android.paymentsheet.elements.StaticTextElement
-import com.stripe.android.paymentsheet.forms.resources.ResourceRepository
 import com.stripe.android.paymentsheet.injection.DaggerFormViewModelComponent
 import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
+import com.stripe.android.ui.core.elements.FormElement
+import com.stripe.android.ui.core.elements.LayoutSpec
+import com.stripe.android.ui.core.elements.SaveForFutureUseElement
+import com.stripe.android.ui.core.elements.SectionElement
+import com.stripe.android.ui.core.elements.SectionSpec
+import com.stripe.android.ui.core.elements.StaticTextElement
+import com.stripe.android.ui.core.forms.resources.ResourceRepository
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flattenConcat
 import kotlinx.coroutines.flow.flowOf
@@ -96,18 +97,8 @@ internal class FormViewModel @Inject internal constructor(
         this.enabled.value = enabled
     }
 
-    private val saveForFutureUseVisible = MutableStateFlow(config.showCheckbox)
-
-    internal fun setSaveForFutureUseVisibility(isVisible: Boolean) {
-        saveForFutureUseVisible.value = isVisible
-    }
-
-    internal suspend fun setSaveForFutureUse(value: Boolean) {
-        elements
-            .firstOrNull()
-            ?.filterIsInstance<SaveForFutureUseElement>()
-            ?.firstOrNull()?.controller?.onValueChange(value)
-    }
+    @VisibleForTesting
+    internal val saveForFutureUseVisible = MutableStateFlow(config.showCheckbox)
 
     private val saveForFutureUseElement = elements
         .map { elementsList ->
@@ -198,16 +189,14 @@ internal class FormViewModel @Inject internal constructor(
 
     val completeFormValues =
         CompleteFormFieldValueFilter(
-            elements.map { nullableElementsList ->
-                nullableElementsList?.let { elementsList ->
-                    combine(
-                        elementsList.map {
-                            it.getFormFieldValueFlow()
-                        }
-                    ) {
-                        it.toList().flatten().toMap()
+            elements.filterNotNull().map { elementsList ->
+                combine(
+                    elementsList.map {
+                        it.getFormFieldValueFlow()
                     }
-                } ?: flowOf(emptyMap())
+                ) {
+                    it.toList().flatten().toMap()
+                }
             }.flattenConcat(),
             hiddenIdentifiers,
             showingMandate,

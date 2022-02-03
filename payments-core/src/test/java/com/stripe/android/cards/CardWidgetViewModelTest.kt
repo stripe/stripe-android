@@ -34,7 +34,7 @@ class CardWidgetViewModelTest {
 
     private class FakeCardAccountRangeRepository : CardAccountRangeRepository {
         override suspend fun getAccountRange(
-            cardNumber: CardNumber.Unvalidated
+            cardNumber: com.stripe.android.ui.core.elements.CardNumber.Unvalidated
         ) = ACCOUNT_RANGE
 
         override val loading: Flow<Boolean> = flowOf(false)

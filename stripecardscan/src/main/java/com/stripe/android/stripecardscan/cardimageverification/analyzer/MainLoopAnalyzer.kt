@@ -2,10 +2,10 @@ package com.stripe.android.stripecardscan.cardimageverification.analyzer
 
 import android.graphics.Bitmap
 import android.graphics.Rect
-import com.stripe.android.stripecardscan.camera.CameraPreviewImage
+import com.stripe.android.camera.CameraPreviewImage
 import com.stripe.android.stripecardscan.cardimageverification.result.MainLoopState
-import com.stripe.android.stripecardscan.framework.Analyzer
-import com.stripe.android.stripecardscan.framework.AnalyzerFactory
+import com.stripe.android.camera.framework.Analyzer
+import com.stripe.android.camera.framework.AnalyzerFactory
 import com.stripe.android.stripecardscan.payment.ml.CardDetect
 import com.stripe.android.stripecardscan.payment.ml.SSDOcr
 import kotlinx.coroutines.supervisorScope
@@ -61,6 +61,8 @@ internal class MainLoopAnalyzer(
             card = cardResult,
         )
     }
+
+    override val statsName = "main_loop_images_processed"
 
     class Factory(
         private val ssdOcrFactory: AnalyzerFactory<

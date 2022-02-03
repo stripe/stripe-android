@@ -1,0 +1,928 @@
+public final class com/stripe/android/ui/core/Amount : android/os/Parcelable {
+	public static final field $stable I
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public fun <init> (JLjava/lang/String;)V
+	public final fun component1 ()J
+	public final fun component2 ()Ljava/lang/String;
+	public final fun copy (JLjava/lang/String;)Lcom/stripe/android/ui/core/Amount;
+	public static synthetic fun copy$default (Lcom/stripe/android/ui/core/Amount;JLjava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/ui/core/Amount;
+	public fun describeContents ()I
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCurrencyCode ()Ljava/lang/String;
+	public final fun getValue ()J
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+	public fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public final class com/stripe/android/ui/core/BuildConfig {
+	public static final field BUILD_TYPE Ljava/lang/String;
+	public static final field DEBUG Z
+	public static final field LIBRARY_PACKAGE_NAME Ljava/lang/String;
+	public fun <init> ()V
+}
+
+public final class com/stripe/android/ui/core/CurrencyFormatter {
+	public static final field $stable I
+	public fun <init> ()V
+	public final fun format (JLjava/lang/String;Ljava/util/Locale;)Ljava/lang/String;
+	public final fun format (JLjava/util/Currency;Ljava/util/Locale;)Ljava/lang/String;
+	public static synthetic fun format$default (Lcom/stripe/android/ui/core/CurrencyFormatter;JLjava/lang/String;Ljava/util/Locale;ILjava/lang/Object;)Ljava/lang/String;
+	public static synthetic fun format$default (Lcom/stripe/android/ui/core/CurrencyFormatter;JLjava/util/Currency;Ljava/util/Locale;ILjava/lang/Object;)Ljava/lang/String;
+}
+
+public final class com/stripe/android/ui/core/StripeThemeKt {
+	public static final fun StripeTheme (ZLkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;II)V
+}
+
+public final class com/stripe/android/ui/core/address/AddressFieldElementRepository {
+	public static final field $stable I
+	public static final field Companion Lcom/stripe/android/ui/core/address/AddressFieldElementRepository$Companion;
+	public fun <init> (Landroid/content/res/Resources;)V
+	public final fun getResources ()Landroid/content/res/Resources;
+	public final fun initialize (Ljava/lang/String;Ljava/io/ByteArrayInputStream;)V
+}
+
+public final class com/stripe/android/ui/core/address/AddressFieldElementRepository$Companion {
+}
+
+public final class com/stripe/android/ui/core/address/AddressFieldElementRepository_Factory : dagger/internal/Factory {
+	public fun <init> (Ljavax/inject/Provider;)V
+	public static fun create (Ljavax/inject/Provider;)Lcom/stripe/android/ui/core/address/AddressFieldElementRepository_Factory;
+	public fun get ()Lcom/stripe/android/ui/core/address/AddressFieldElementRepository;
+	public synthetic fun get ()Ljava/lang/Object;
+	public static fun newInstance (Landroid/content/res/Resources;)Lcom/stripe/android/ui/core/address/AddressFieldElementRepository;
+}
+
+public final class com/stripe/android/ui/core/elements/AddressController : com/stripe/android/ui/core/elements/SectionFieldErrorController {
+	public static final field $stable I
+	public fun <init> (Lkotlinx/coroutines/flow/Flow;)V
+	public fun getError ()Lkotlinx/coroutines/flow/Flow;
+	public final fun getFieldsFlowable ()Lkotlinx/coroutines/flow/Flow;
+	public final fun getLabel ()Ljava/lang/Integer;
+}
+
+public final class com/stripe/android/ui/core/elements/AddressElement : com/stripe/android/ui/core/elements/SectionMultiFieldElement {
+	public static final field $stable I
+	public fun <init> (Lcom/stripe/android/ui/core/elements/IdentifierSpec;Lcom/stripe/android/ui/core/address/AddressFieldElementRepository;Ljava/util/Map;Ljava/util/Set;Lcom/stripe/android/ui/core/elements/DropdownFieldController;)V
+	public synthetic fun <init> (Lcom/stripe/android/ui/core/elements/IdentifierSpec;Lcom/stripe/android/ui/core/address/AddressFieldElementRepository;Ljava/util/Map;Ljava/util/Set;Lcom/stripe/android/ui/core/elements/DropdownFieldController;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun getController ()Lcom/stripe/android/ui/core/elements/AddressController;
+	public final fun getCountryElement ()Lcom/stripe/android/ui/core/elements/CountryElement;
+	public final fun getFields ()Lkotlinx/coroutines/flow/Flow;
+	public fun getFormFieldValueFlow ()Lkotlinx/coroutines/flow/Flow;
+	public fun sectionFieldErrorController ()Lcom/stripe/android/ui/core/elements/SectionFieldErrorController;
+	public fun setRawValue (Ljava/util/Map;)V
+}
+
+public final class com/stripe/android/ui/core/elements/AfterpayClearpayElementUIKt {
+	public static final fun AfterpayClearpayElementUI (ZLcom/stripe/android/ui/core/elements/AfterpayClearpayHeaderElement;Landroidx/compose/runtime/Composer;I)V
+}
+
+public final class com/stripe/android/ui/core/elements/AfterpayClearpayHeaderElement : com/stripe/android/ui/core/elements/FormElement {
+	public static final field $stable I
+	public static final field Companion Lcom/stripe/android/ui/core/elements/AfterpayClearpayHeaderElement$Companion;
+	public static final field url Ljava/lang/String;
+	public fun <init> (Lcom/stripe/android/ui/core/elements/IdentifierSpec;Lcom/stripe/android/ui/core/Amount;Lcom/stripe/android/ui/core/elements/Controller;)V
+	public synthetic fun <init> (Lcom/stripe/android/ui/core/elements/IdentifierSpec;Lcom/stripe/android/ui/core/Amount;Lcom/stripe/android/ui/core/elements/Controller;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Lcom/stripe/android/ui/core/elements/IdentifierSpec;
+	public final fun component3 ()Lcom/stripe/android/ui/core/elements/Controller;
+	public final fun copy (Lcom/stripe/android/ui/core/elements/IdentifierSpec;Lcom/stripe/android/ui/core/Amount;Lcom/stripe/android/ui/core/elements/Controller;)Lcom/stripe/android/ui/core/elements/AfterpayClearpayHeaderElement;
+	public static synthetic fun copy$default (Lcom/stripe/android/ui/core/elements/AfterpayClearpayHeaderElement;Lcom/stripe/android/ui/core/elements/IdentifierSpec;Lcom/stripe/android/ui/core/Amount;Lcom/stripe/android/ui/core/elements/Controller;ILjava/lang/Object;)Lcom/stripe/android/ui/core/elements/AfterpayClearpayHeaderElement;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun getController ()Lcom/stripe/android/ui/core/elements/Controller;
+	public fun getFormFieldValueFlow ()Lkotlinx/coroutines/flow/Flow;
+	public fun getIdentifier ()Lcom/stripe/android/ui/core/elements/IdentifierSpec;
+	public final fun getInfoUrl ()Ljava/lang/String;
+	public final fun getLabel (Landroid/content/res/Resources;)Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/ui/core/elements/AfterpayClearpayHeaderElement$Companion {
+}
+
+public final class com/stripe/android/ui/core/elements/BankRepository {
+	public static final field $stable I
+	public fun <init> (Landroid/content/res/Resources;)V
+	public final fun component1 ()Landroid/content/res/Resources;
+	public final fun copy (Landroid/content/res/Resources;)Lcom/stripe/android/ui/core/elements/BankRepository;
+	public static synthetic fun copy$default (Lcom/stripe/android/ui/core/elements/BankRepository;Landroid/content/res/Resources;ILjava/lang/Object;)Lcom/stripe/android/ui/core/elements/BankRepository;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun get (Lcom/stripe/android/ui/core/elements/SupportedBankType;)Ljava/util/List;
+	public final fun getResources ()Landroid/content/res/Resources;
+	public fun hashCode ()I
+	public final fun initialize (Ljava/util/Map;)V
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/ui/core/elements/BankRepository_Factory : dagger/internal/Factory {
+	public fun <init> (Ljavax/inject/Provider;)V
+	public static fun create (Ljavax/inject/Provider;)Lcom/stripe/android/ui/core/elements/BankRepository_Factory;
+	public fun get ()Lcom/stripe/android/ui/core/elements/BankRepository;
+	public synthetic fun get ()Ljava/lang/Object;
+	public static fun newInstance (Landroid/content/res/Resources;)Lcom/stripe/android/ui/core/elements/BankRepository;
+}
+
+public final class com/stripe/android/ui/core/elements/ComposableSingletons$AfterpayClearpayElementUIKt {
+	public static final field INSTANCE Lcom/stripe/android/ui/core/elements/ComposableSingletons$AfterpayClearpayElementUIKt;
+	public static field lambda-1 Lkotlin/jvm/functions/Function3;
+	public fun <init> ()V
+	public final fun getLambda-1$stripe_ui_core_release ()Lkotlin/jvm/functions/Function3;
+}
+
+public abstract interface class com/stripe/android/ui/core/elements/Controller {
+}
+
+public final class com/stripe/android/ui/core/elements/CountryConfig : com/stripe/android/ui/core/elements/DropdownConfig {
+	public static final field $stable I
+	public fun <init> ()V
+	public fun <init> (Ljava/util/Set;Ljava/util/Locale;)V
+	public synthetic fun <init> (Ljava/util/Set;Ljava/util/Locale;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun convertFromRaw (Ljava/lang/String;)Ljava/lang/String;
+	public fun convertToRaw (Ljava/lang/String;)Ljava/lang/String;
+	public fun getDebugLabel ()Ljava/lang/String;
+	public fun getDisplayItems ()Ljava/util/List;
+	public fun getLabel ()I
+	public final fun getLocale ()Ljava/util/Locale;
+	public final fun getOnlyShowCountryCodes ()Ljava/util/Set;
+}
+
+public final class com/stripe/android/ui/core/elements/CountryElement : com/stripe/android/ui/core/elements/SectionSingleFieldElement {
+	public static final field $stable I
+	public fun <init> (Lcom/stripe/android/ui/core/elements/IdentifierSpec;Lcom/stripe/android/ui/core/elements/DropdownFieldController;)V
+	public final fun component1 ()Lcom/stripe/android/ui/core/elements/IdentifierSpec;
+	public final fun component2 ()Lcom/stripe/android/ui/core/elements/DropdownFieldController;
+	public final fun copy (Lcom/stripe/android/ui/core/elements/IdentifierSpec;Lcom/stripe/android/ui/core/elements/DropdownFieldController;)Lcom/stripe/android/ui/core/elements/CountryElement;
+	public static synthetic fun copy$default (Lcom/stripe/android/ui/core/elements/CountryElement;Lcom/stripe/android/ui/core/elements/IdentifierSpec;Lcom/stripe/android/ui/core/elements/DropdownFieldController;ILjava/lang/Object;)Lcom/stripe/android/ui/core/elements/CountryElement;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun getController ()Lcom/stripe/android/ui/core/elements/DropdownFieldController;
+	public synthetic fun getController ()Lcom/stripe/android/ui/core/elements/InputController;
+	public fun getIdentifier ()Lcom/stripe/android/ui/core/elements/IdentifierSpec;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/ui/core/elements/CountrySpec : com/stripe/android/ui/core/elements/SectionFieldSpec {
+	public static final field $stable I
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public fun <init> ()V
+	public fun <init> (Ljava/util/Set;)V
+	public synthetic fun <init> (Ljava/util/Set;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/util/Set;
+	public final fun copy (Ljava/util/Set;)Lcom/stripe/android/ui/core/elements/CountrySpec;
+	public static synthetic fun copy$default (Lcom/stripe/android/ui/core/elements/CountrySpec;Ljava/util/Set;ILjava/lang/Object;)Lcom/stripe/android/ui/core/elements/CountrySpec;
+	public fun describeContents ()I
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getOnlyShowCountryCodes ()Ljava/util/Set;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+	public final fun transform (Ljava/lang/String;)Lcom/stripe/android/ui/core/elements/SectionFieldElement;
+	public fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public abstract interface class com/stripe/android/ui/core/elements/DropdownConfig {
+	public abstract fun convertFromRaw (Ljava/lang/String;)Ljava/lang/String;
+	public abstract fun convertToRaw (Ljava/lang/String;)Ljava/lang/String;
+	public abstract fun getDebugLabel ()Ljava/lang/String;
+	public abstract fun getDisplayItems ()Ljava/util/List;
+	public abstract fun getLabel ()I
+}
+
+public final class com/stripe/android/ui/core/elements/DropdownFieldController : com/stripe/android/ui/core/elements/InputController, com/stripe/android/ui/core/elements/SectionFieldErrorController {
+	public static final field $stable I
+	public fun <init> (Lcom/stripe/android/ui/core/elements/DropdownConfig;Ljava/lang/String;)V
+	public synthetic fun <init> (Lcom/stripe/android/ui/core/elements/DropdownConfig;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun getDisplayItems ()Ljava/util/List;
+	public fun getError ()Lkotlinx/coroutines/flow/Flow;
+	public fun getFieldValue ()Lkotlinx/coroutines/flow/Flow;
+	public fun getFormFieldValue ()Lkotlinx/coroutines/flow/Flow;
+	public fun getLabel ()I
+	public fun getRawFieldValue ()Lkotlinx/coroutines/flow/Flow;
+	public final fun getSelectedIndex ()Lkotlinx/coroutines/flow/Flow;
+	public fun getShowOptionalLabel ()Z
+	public fun isComplete ()Lkotlinx/coroutines/flow/Flow;
+	public fun onRawValueChange (Ljava/lang/String;)V
+	public final fun onValueChange (I)V
+}
+
+public final class com/stripe/android/ui/core/elements/DropdownItemSpec {
+	public static final field $stable I
+	public static final field Companion Lcom/stripe/android/ui/core/elements/DropdownItemSpec$Companion;
+	public synthetic fun <init> (ILjava/lang/String;Ljava/lang/String;Lkotlinx/serialization/internal/SerializationConstructorMarker;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/ui/core/elements/DropdownItemSpec;
+	public static synthetic fun copy$default (Lcom/stripe/android/ui/core/elements/DropdownItemSpec;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/ui/core/elements/DropdownItemSpec;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getText ()Ljava/lang/String;
+	public final fun getValue ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+	public static final fun write$Self (Lcom/stripe/android/ui/core/elements/DropdownItemSpec;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V
+}
+
+public final class com/stripe/android/ui/core/elements/DropdownItemSpec$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/stripe/android/ui/core/elements/DropdownItemSpec$$serializer;
+	public static final synthetic field descriptor Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcom/stripe/android/ui/core/elements/DropdownItemSpec;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/stripe/android/ui/core/elements/DropdownItemSpec;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class com/stripe/android/ui/core/elements/DropdownItemSpec$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class com/stripe/android/ui/core/elements/EmailConfig : com/stripe/android/ui/core/elements/TextFieldConfig {
+	public static final field $stable I
+	public static final field Companion Lcom/stripe/android/ui/core/elements/EmailConfig$Companion;
+	public fun <init> ()V
+	public fun convertFromRaw (Ljava/lang/String;)Ljava/lang/String;
+	public fun convertToRaw (Ljava/lang/String;)Ljava/lang/String;
+	public fun determineState (Ljava/lang/String;)Lcom/stripe/android/ui/core/elements/TextFieldState;
+	public fun filter (Ljava/lang/String;)Ljava/lang/String;
+	public fun getCapitalization-IUNYP9k ()I
+	public fun getDebugLabel ()Ljava/lang/String;
+	public fun getKeyboard-PjHm6EE ()I
+	public fun getLabel ()I
+	public fun getVisualTransformation ()Landroidx/compose/ui/text/input/VisualTransformation;
+}
+
+public final class com/stripe/android/ui/core/elements/EmailConfig$Companion {
+	public final fun getPATTERN ()Ljava/util/regex/Pattern;
+}
+
+public final class com/stripe/android/ui/core/elements/EmailElement : com/stripe/android/ui/core/elements/SectionSingleFieldElement {
+	public static final field $stable I
+	public fun <init> (Lcom/stripe/android/ui/core/elements/IdentifierSpec;Lcom/stripe/android/ui/core/elements/TextFieldController;)V
+	public final fun component1 ()Lcom/stripe/android/ui/core/elements/IdentifierSpec;
+	public final fun component2 ()Lcom/stripe/android/ui/core/elements/TextFieldController;
+	public final fun copy (Lcom/stripe/android/ui/core/elements/IdentifierSpec;Lcom/stripe/android/ui/core/elements/TextFieldController;)Lcom/stripe/android/ui/core/elements/EmailElement;
+	public static synthetic fun copy$default (Lcom/stripe/android/ui/core/elements/EmailElement;Lcom/stripe/android/ui/core/elements/IdentifierSpec;Lcom/stripe/android/ui/core/elements/TextFieldController;ILjava/lang/Object;)Lcom/stripe/android/ui/core/elements/EmailElement;
+	public fun equals (Ljava/lang/Object;)Z
+	public synthetic fun getController ()Lcom/stripe/android/ui/core/elements/InputController;
+	public fun getController ()Lcom/stripe/android/ui/core/elements/TextFieldController;
+	public fun getIdentifier ()Lcom/stripe/android/ui/core/elements/IdentifierSpec;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/ui/core/elements/EmailSpec : com/stripe/android/ui/core/elements/SectionFieldSpec {
+	public static final field $stable I
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public static final field INSTANCE Lcom/stripe/android/ui/core/elements/EmailSpec;
+	public fun describeContents ()I
+	public final fun transform (Ljava/lang/String;)Lcom/stripe/android/ui/core/elements/SectionFieldElement;
+	public fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public final class com/stripe/android/ui/core/elements/FieldError {
+	public static final field $stable I
+	public fun <init> (I[Ljava/lang/Object;)V
+	public synthetic fun <init> (I[Ljava/lang/Object;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun getErrorMessage ()I
+	public final fun getFormatArgs ()[Ljava/lang/Object;
+}
+
+public abstract class com/stripe/android/ui/core/elements/FormElement {
+	public static final field $stable I
+	public abstract fun getController ()Lcom/stripe/android/ui/core/elements/Controller;
+	public abstract fun getFormFieldValueFlow ()Lkotlinx/coroutines/flow/Flow;
+	public abstract fun getIdentifier ()Lcom/stripe/android/ui/core/elements/IdentifierSpec;
+}
+
+public abstract class com/stripe/android/ui/core/elements/FormItemSpec : android/os/Parcelable {
+	public static final field $stable I
+}
+
+public final class com/stripe/android/ui/core/elements/IbanConfig : com/stripe/android/ui/core/elements/TextFieldConfig {
+	public static final field $stable I
+	public static final field MAX_LENGTH I
+	public static final field MIN_LENGTH I
+	public fun <init> ()V
+	public fun convertFromRaw (Ljava/lang/String;)Ljava/lang/String;
+	public fun convertToRaw (Ljava/lang/String;)Ljava/lang/String;
+	public fun determineState (Ljava/lang/String;)Lcom/stripe/android/ui/core/elements/TextFieldState;
+	public fun filter (Ljava/lang/String;)Ljava/lang/String;
+	public fun getCapitalization-IUNYP9k ()I
+	public fun getDebugLabel ()Ljava/lang/String;
+	public fun getKeyboard-PjHm6EE ()I
+	public fun getLabel ()I
+	public fun getVisualTransformation ()Landroidx/compose/ui/text/input/VisualTransformation;
+}
+
+public abstract class com/stripe/android/ui/core/elements/IdentifierSpec : android/os/Parcelable {
+	public static final field $stable I
+	public synthetic fun <init> (Ljava/lang/String;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun getValue ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/ui/core/elements/IdentifierSpec$City : com/stripe/android/ui/core/elements/IdentifierSpec {
+	public static final field $stable I
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public static final field INSTANCE Lcom/stripe/android/ui/core/elements/IdentifierSpec$City;
+	public fun describeContents ()I
+	public fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public final class com/stripe/android/ui/core/elements/IdentifierSpec$Country : com/stripe/android/ui/core/elements/IdentifierSpec {
+	public static final field $stable I
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public static final field INSTANCE Lcom/stripe/android/ui/core/elements/IdentifierSpec$Country;
+	public fun describeContents ()I
+	public fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public final class com/stripe/android/ui/core/elements/IdentifierSpec$Email : com/stripe/android/ui/core/elements/IdentifierSpec {
+	public static final field $stable I
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public static final field INSTANCE Lcom/stripe/android/ui/core/elements/IdentifierSpec$Email;
+	public fun describeContents ()I
+	public fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public final class com/stripe/android/ui/core/elements/IdentifierSpec$Generic : com/stripe/android/ui/core/elements/IdentifierSpec {
+	public static final field $stable I
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public fun <init> (Ljava/lang/String;)V
+	public final fun copy (Ljava/lang/String;)Lcom/stripe/android/ui/core/elements/IdentifierSpec$Generic;
+	public static synthetic fun copy$default (Lcom/stripe/android/ui/core/elements/IdentifierSpec$Generic;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/ui/core/elements/IdentifierSpec$Generic;
+	public fun describeContents ()I
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+	public fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public final class com/stripe/android/ui/core/elements/IdentifierSpec$Line1 : com/stripe/android/ui/core/elements/IdentifierSpec {
+	public static final field $stable I
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public static final field INSTANCE Lcom/stripe/android/ui/core/elements/IdentifierSpec$Line1;
+	public fun describeContents ()I
+	public fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public final class com/stripe/android/ui/core/elements/IdentifierSpec$Line2 : com/stripe/android/ui/core/elements/IdentifierSpec {
+	public static final field $stable I
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public static final field INSTANCE Lcom/stripe/android/ui/core/elements/IdentifierSpec$Line2;
+	public fun describeContents ()I
+	public fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public final class com/stripe/android/ui/core/elements/IdentifierSpec$Name : com/stripe/android/ui/core/elements/IdentifierSpec {
+	public static final field $stable I
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public static final field INSTANCE Lcom/stripe/android/ui/core/elements/IdentifierSpec$Name;
+	public fun describeContents ()I
+	public fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public final class com/stripe/android/ui/core/elements/IdentifierSpec$Phone : com/stripe/android/ui/core/elements/IdentifierSpec {
+	public static final field $stable I
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public static final field INSTANCE Lcom/stripe/android/ui/core/elements/IdentifierSpec$Phone;
+	public fun describeContents ()I
+	public fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public final class com/stripe/android/ui/core/elements/IdentifierSpec$PostalCode : com/stripe/android/ui/core/elements/IdentifierSpec {
+	public static final field $stable I
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public static final field INSTANCE Lcom/stripe/android/ui/core/elements/IdentifierSpec$PostalCode;
+	public fun describeContents ()I
+	public fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public final class com/stripe/android/ui/core/elements/IdentifierSpec$SaveForFutureUse : com/stripe/android/ui/core/elements/IdentifierSpec {
+	public static final field $stable I
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public static final field INSTANCE Lcom/stripe/android/ui/core/elements/IdentifierSpec$SaveForFutureUse;
+	public fun describeContents ()I
+	public fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public final class com/stripe/android/ui/core/elements/IdentifierSpec$State : com/stripe/android/ui/core/elements/IdentifierSpec {
+	public static final field $stable I
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public static final field INSTANCE Lcom/stripe/android/ui/core/elements/IdentifierSpec$State;
+	public fun describeContents ()I
+	public fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public abstract interface class com/stripe/android/ui/core/elements/InputController : com/stripe/android/ui/core/elements/SectionFieldErrorController {
+	public abstract fun getFieldValue ()Lkotlinx/coroutines/flow/Flow;
+	public abstract fun getFormFieldValue ()Lkotlinx/coroutines/flow/Flow;
+	public abstract fun getLabel ()I
+	public abstract fun getRawFieldValue ()Lkotlinx/coroutines/flow/Flow;
+	public abstract fun getShowOptionalLabel ()Z
+	public abstract fun isComplete ()Lkotlinx/coroutines/flow/Flow;
+	public abstract fun onRawValueChange (Ljava/lang/String;)V
+}
+
+public final class com/stripe/android/ui/core/elements/KlarnaHelper {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/stripe/android/ui/core/elements/KlarnaHelper;
+	public final fun getAllowedCountriesForCurrency (Ljava/lang/String;)Ljava/util/Set;
+	public final fun getKlarnaHeader (Ljava/util/Locale;)I
+	public static synthetic fun getKlarnaHeader$default (Lcom/stripe/android/ui/core/elements/KlarnaHelper;Ljava/util/Locale;ILjava/lang/Object;)I
+}
+
+public final class com/stripe/android/ui/core/elements/LayoutFormDescriptor {
+	public static final field $stable I
+	public fun <init> (Lcom/stripe/android/ui/core/elements/LayoutSpec;ZZ)V
+	public final fun component1 ()Lcom/stripe/android/ui/core/elements/LayoutSpec;
+	public final fun component2 ()Z
+	public final fun component3 ()Z
+	public final fun copy (Lcom/stripe/android/ui/core/elements/LayoutSpec;ZZ)Lcom/stripe/android/ui/core/elements/LayoutFormDescriptor;
+	public static synthetic fun copy$default (Lcom/stripe/android/ui/core/elements/LayoutFormDescriptor;Lcom/stripe/android/ui/core/elements/LayoutSpec;ZZILjava/lang/Object;)Lcom/stripe/android/ui/core/elements/LayoutFormDescriptor;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getLayoutSpec ()Lcom/stripe/android/ui/core/elements/LayoutSpec;
+	public final fun getShowCheckbox ()Z
+	public final fun getShowCheckboxControlledFields ()Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/ui/core/elements/LayoutSpec : android/os/Parcelable {
+	public static final field $stable I
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public static final field Companion Lcom/stripe/android/ui/core/elements/LayoutSpec$Companion;
+	public synthetic fun <init> (Ljava/util/List;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/util/List;
+	public final fun copy (Ljava/util/List;)Lcom/stripe/android/ui/core/elements/LayoutSpec;
+	public static synthetic fun copy$default (Lcom/stripe/android/ui/core/elements/LayoutSpec;Ljava/util/List;ILjava/lang/Object;)Lcom/stripe/android/ui/core/elements/LayoutSpec;
+	public fun describeContents ()I
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getItems ()Ljava/util/List;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+	public fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public final class com/stripe/android/ui/core/elements/LayoutSpec$Companion {
+	public final fun create ()Lcom/stripe/android/ui/core/elements/LayoutSpec;
+	public final fun create ([Lcom/stripe/android/ui/core/elements/FormItemSpec;)Lcom/stripe/android/ui/core/elements/LayoutSpec;
+}
+
+public final class com/stripe/android/ui/core/elements/NameConfig : com/stripe/android/ui/core/elements/TextFieldConfig {
+	public static final field $stable I
+	public fun <init> ()V
+	public fun convertFromRaw (Ljava/lang/String;)Ljava/lang/String;
+	public fun convertToRaw (Ljava/lang/String;)Ljava/lang/String;
+	public fun determineState (Ljava/lang/String;)Lcom/stripe/android/ui/core/elements/TextFieldState;
+	public fun filter (Ljava/lang/String;)Ljava/lang/String;
+	public fun getCapitalization-IUNYP9k ()I
+	public fun getDebugLabel ()Ljava/lang/String;
+	public fun getKeyboard-PjHm6EE ()I
+	public fun getLabel ()I
+	public fun getVisualTransformation ()Landroidx/compose/ui/text/input/VisualTransformation;
+}
+
+public abstract interface class com/stripe/android/ui/core/elements/RequiredItemSpec : android/os/Parcelable {
+	public abstract fun getIdentifier ()Lcom/stripe/android/ui/core/elements/IdentifierSpec;
+}
+
+public final class com/stripe/android/ui/core/elements/RowController : com/stripe/android/ui/core/elements/SectionFieldErrorController {
+	public static final field $stable I
+	public fun <init> (Ljava/util/List;)V
+	public fun getError ()Lkotlinx/coroutines/flow/Flow;
+	public final fun getFields ()Ljava/util/List;
+}
+
+public final class com/stripe/android/ui/core/elements/RowElement : com/stripe/android/ui/core/elements/SectionMultiFieldElement {
+	public static final field $stable I
+	public fun <init> (Lcom/stripe/android/ui/core/elements/IdentifierSpec;Ljava/util/List;Lcom/stripe/android/ui/core/elements/RowController;)V
+	public final fun getController ()Lcom/stripe/android/ui/core/elements/RowController;
+	public final fun getFields ()Ljava/util/List;
+	public fun getFormFieldValueFlow ()Lkotlinx/coroutines/flow/Flow;
+	public fun sectionFieldErrorController ()Lcom/stripe/android/ui/core/elements/RowController;
+	public synthetic fun sectionFieldErrorController ()Lcom/stripe/android/ui/core/elements/SectionFieldErrorController;
+	public fun setRawValue (Ljava/util/Map;)V
+}
+
+public final class com/stripe/android/ui/core/elements/SaveForFutureUseController : com/stripe/android/ui/core/elements/InputController {
+	public static final field $stable I
+	public fun <init> (Ljava/util/List;Z)V
+	public synthetic fun <init> (Ljava/util/List;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun getError ()Lkotlinx/coroutines/flow/Flow;
+	public fun getFieldValue ()Lkotlinx/coroutines/flow/Flow;
+	public fun getFormFieldValue ()Lkotlinx/coroutines/flow/Flow;
+	public final fun getHiddenIdentifiers ()Lkotlinx/coroutines/flow/Flow;
+	public fun getLabel ()I
+	public fun getRawFieldValue ()Lkotlinx/coroutines/flow/Flow;
+	public final fun getSaveForFutureUse ()Lkotlinx/coroutines/flow/Flow;
+	public fun getShowOptionalLabel ()Z
+	public fun isComplete ()Lkotlinx/coroutines/flow/Flow;
+	public fun onRawValueChange (Ljava/lang/String;)V
+	public final fun onValueChange (Z)V
+}
+
+public final class com/stripe/android/ui/core/elements/SaveForFutureUseElement : com/stripe/android/ui/core/elements/FormElement {
+	public static final field $stable I
+	public fun <init> (Lcom/stripe/android/ui/core/elements/IdentifierSpec;Lcom/stripe/android/ui/core/elements/SaveForFutureUseController;Ljava/lang/String;)V
+	public final fun component1 ()Lcom/stripe/android/ui/core/elements/IdentifierSpec;
+	public final fun component2 ()Lcom/stripe/android/ui/core/elements/SaveForFutureUseController;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun copy (Lcom/stripe/android/ui/core/elements/IdentifierSpec;Lcom/stripe/android/ui/core/elements/SaveForFutureUseController;Ljava/lang/String;)Lcom/stripe/android/ui/core/elements/SaveForFutureUseElement;
+	public static synthetic fun copy$default (Lcom/stripe/android/ui/core/elements/SaveForFutureUseElement;Lcom/stripe/android/ui/core/elements/IdentifierSpec;Lcom/stripe/android/ui/core/elements/SaveForFutureUseController;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/ui/core/elements/SaveForFutureUseElement;
+	public fun equals (Ljava/lang/Object;)Z
+	public synthetic fun getController ()Lcom/stripe/android/ui/core/elements/Controller;
+	public fun getController ()Lcom/stripe/android/ui/core/elements/SaveForFutureUseController;
+	public fun getFormFieldValueFlow ()Lkotlinx/coroutines/flow/Flow;
+	public fun getIdentifier ()Lcom/stripe/android/ui/core/elements/IdentifierSpec;
+	public final fun getMerchantName ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/ui/core/elements/SaveForFutureUseElementUIKt {
+	public static final fun SaveForFutureUseElementUI (ZLcom/stripe/android/ui/core/elements/SaveForFutureUseElement;Landroidx/compose/runtime/Composer;I)V
+}
+
+public final class com/stripe/android/ui/core/elements/SaveForFutureUseSpec : com/stripe/android/ui/core/elements/FormItemSpec, com/stripe/android/ui/core/elements/RequiredItemSpec {
+	public static final field $stable I
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public fun <init> (Ljava/util/List;)V
+	public final fun component1 ()Ljava/util/List;
+	public final fun copy (Ljava/util/List;)Lcom/stripe/android/ui/core/elements/SaveForFutureUseSpec;
+	public static synthetic fun copy$default (Lcom/stripe/android/ui/core/elements/SaveForFutureUseSpec;Ljava/util/List;ILjava/lang/Object;)Lcom/stripe/android/ui/core/elements/SaveForFutureUseSpec;
+	public fun describeContents ()I
+	public fun equals (Ljava/lang/Object;)Z
+	public fun getIdentifier ()Lcom/stripe/android/ui/core/elements/IdentifierSpec$SaveForFutureUse;
+	public synthetic fun getIdentifier ()Lcom/stripe/android/ui/core/elements/IdentifierSpec;
+	public final fun getIdentifierRequiredForFutureUse ()Ljava/util/List;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+	public final fun transform (ZLjava/lang/String;)Lcom/stripe/android/ui/core/elements/FormElement;
+	public fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public final class com/stripe/android/ui/core/elements/SectionController : com/stripe/android/ui/core/elements/Controller {
+	public static final field $stable I
+	public fun <init> (Ljava/lang/Integer;Ljava/util/List;)V
+	public final fun getError ()Lkotlinx/coroutines/flow/Flow;
+	public final fun getLabel ()Ljava/lang/Integer;
+	public final fun getSectionFieldErrorControllers ()Ljava/util/List;
+}
+
+public final class com/stripe/android/ui/core/elements/SectionElement : com/stripe/android/ui/core/elements/FormElement {
+	public static final field $stable I
+	public fun <init> (Lcom/stripe/android/ui/core/elements/IdentifierSpec;Lcom/stripe/android/ui/core/elements/SectionFieldElement;Lcom/stripe/android/ui/core/elements/SectionController;)V
+	public fun <init> (Lcom/stripe/android/ui/core/elements/IdentifierSpec;Ljava/util/List;Lcom/stripe/android/ui/core/elements/SectionController;)V
+	public final fun component1 ()Lcom/stripe/android/ui/core/elements/IdentifierSpec;
+	public final fun component2 ()Ljava/util/List;
+	public final fun component3 ()Lcom/stripe/android/ui/core/elements/SectionController;
+	public final fun copy (Lcom/stripe/android/ui/core/elements/IdentifierSpec;Ljava/util/List;Lcom/stripe/android/ui/core/elements/SectionController;)Lcom/stripe/android/ui/core/elements/SectionElement;
+	public static synthetic fun copy$default (Lcom/stripe/android/ui/core/elements/SectionElement;Lcom/stripe/android/ui/core/elements/IdentifierSpec;Ljava/util/List;Lcom/stripe/android/ui/core/elements/SectionController;ILjava/lang/Object;)Lcom/stripe/android/ui/core/elements/SectionElement;
+	public fun equals (Ljava/lang/Object;)Z
+	public synthetic fun getController ()Lcom/stripe/android/ui/core/elements/Controller;
+	public fun getController ()Lcom/stripe/android/ui/core/elements/SectionController;
+	public final fun getFields ()Ljava/util/List;
+	public fun getFormFieldValueFlow ()Lkotlinx/coroutines/flow/Flow;
+	public fun getIdentifier ()Lcom/stripe/android/ui/core/elements/IdentifierSpec;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/ui/core/elements/SectionElementUIKt {
+	public static final fun SectionElementUI (ZLcom/stripe/android/ui/core/elements/SectionElement;Ljava/util/List;Landroidx/compose/runtime/Composer;I)V
+}
+
+public abstract interface class com/stripe/android/ui/core/elements/SectionFieldElement {
+	public abstract fun getFormFieldValueFlow ()Lkotlinx/coroutines/flow/Flow;
+	public abstract fun getIdentifier ()Lcom/stripe/android/ui/core/elements/IdentifierSpec;
+	public abstract fun sectionFieldErrorController ()Lcom/stripe/android/ui/core/elements/SectionFieldErrorController;
+	public abstract fun setRawValue (Ljava/util/Map;)V
+}
+
+public abstract interface class com/stripe/android/ui/core/elements/SectionFieldErrorController : com/stripe/android/ui/core/elements/Controller {
+	public abstract fun getError ()Lkotlinx/coroutines/flow/Flow;
+}
+
+public abstract class com/stripe/android/ui/core/elements/SectionFieldSpec : android/os/Parcelable {
+	public static final field $stable I
+	public synthetic fun <init> (Lcom/stripe/android/ui/core/elements/IdentifierSpec;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun getIdentifier ()Lcom/stripe/android/ui/core/elements/IdentifierSpec;
+}
+
+public abstract class com/stripe/android/ui/core/elements/SectionMultiFieldElement : com/stripe/android/ui/core/elements/SectionFieldElement {
+	public static final field $stable I
+	public synthetic fun <init> (Lcom/stripe/android/ui/core/elements/IdentifierSpec;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun getIdentifier ()Lcom/stripe/android/ui/core/elements/IdentifierSpec;
+}
+
+public abstract class com/stripe/android/ui/core/elements/SectionSingleFieldElement : com/stripe/android/ui/core/elements/SectionFieldElement {
+	public static final field $stable I
+	public synthetic fun <init> (Lcom/stripe/android/ui/core/elements/IdentifierSpec;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public abstract fun getController ()Lcom/stripe/android/ui/core/elements/InputController;
+	public fun getFormFieldValueFlow ()Lkotlinx/coroutines/flow/Flow;
+	public fun getIdentifier ()Lcom/stripe/android/ui/core/elements/IdentifierSpec;
+	public fun sectionFieldErrorController ()Lcom/stripe/android/ui/core/elements/SectionFieldErrorController;
+	public fun setRawValue (Ljava/util/Map;)V
+}
+
+public final class com/stripe/android/ui/core/elements/SectionSpec : com/stripe/android/ui/core/elements/FormItemSpec, android/os/Parcelable, com/stripe/android/ui/core/elements/RequiredItemSpec {
+	public static final field $stable I
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public fun <init> (Lcom/stripe/android/ui/core/elements/IdentifierSpec;Lcom/stripe/android/ui/core/elements/SectionFieldSpec;Ljava/lang/Integer;)V
+	public synthetic fun <init> (Lcom/stripe/android/ui/core/elements/IdentifierSpec;Lcom/stripe/android/ui/core/elements/SectionFieldSpec;Ljava/lang/Integer;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Lcom/stripe/android/ui/core/elements/IdentifierSpec;Ljava/util/List;Ljava/lang/Integer;)V
+	public synthetic fun <init> (Lcom/stripe/android/ui/core/elements/IdentifierSpec;Ljava/util/List;Ljava/lang/Integer;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Lcom/stripe/android/ui/core/elements/IdentifierSpec;
+	public final fun component2 ()Ljava/util/List;
+	public final fun component3 ()Ljava/lang/Integer;
+	public final fun copy (Lcom/stripe/android/ui/core/elements/IdentifierSpec;Ljava/util/List;Ljava/lang/Integer;)Lcom/stripe/android/ui/core/elements/SectionSpec;
+	public static synthetic fun copy$default (Lcom/stripe/android/ui/core/elements/SectionSpec;Lcom/stripe/android/ui/core/elements/IdentifierSpec;Ljava/util/List;Ljava/lang/Integer;ILjava/lang/Object;)Lcom/stripe/android/ui/core/elements/SectionSpec;
+	public fun describeContents ()I
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getFields ()Ljava/util/List;
+	public fun getIdentifier ()Lcom/stripe/android/ui/core/elements/IdentifierSpec;
+	public final fun getTitle ()Ljava/lang/Integer;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+	public fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public final class com/stripe/android/ui/core/elements/SectionUIKt {
+	public static final fun SectionCard (Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;I)V
+}
+
+public final class com/stripe/android/ui/core/elements/SimpleDropdownConfig : com/stripe/android/ui/core/elements/DropdownConfig {
+	public static final field $stable I
+	public fun <init> (ILjava/util/List;)V
+	public fun convertFromRaw (Ljava/lang/String;)Ljava/lang/String;
+	public fun convertToRaw (Ljava/lang/String;)Ljava/lang/String;
+	public fun getDebugLabel ()Ljava/lang/String;
+	public fun getDisplayItems ()Ljava/util/List;
+	public fun getLabel ()I
+}
+
+public final class com/stripe/android/ui/core/elements/SimpleDropdownElement : com/stripe/android/ui/core/elements/SectionSingleFieldElement {
+	public static final field $stable I
+	public fun <init> (Lcom/stripe/android/ui/core/elements/IdentifierSpec;Lcom/stripe/android/ui/core/elements/DropdownFieldController;)V
+	public final fun component1 ()Lcom/stripe/android/ui/core/elements/IdentifierSpec;
+	public final fun component2 ()Lcom/stripe/android/ui/core/elements/DropdownFieldController;
+	public final fun copy (Lcom/stripe/android/ui/core/elements/IdentifierSpec;Lcom/stripe/android/ui/core/elements/DropdownFieldController;)Lcom/stripe/android/ui/core/elements/SimpleDropdownElement;
+	public static synthetic fun copy$default (Lcom/stripe/android/ui/core/elements/SimpleDropdownElement;Lcom/stripe/android/ui/core/elements/IdentifierSpec;Lcom/stripe/android/ui/core/elements/DropdownFieldController;ILjava/lang/Object;)Lcom/stripe/android/ui/core/elements/SimpleDropdownElement;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun getController ()Lcom/stripe/android/ui/core/elements/DropdownFieldController;
+	public synthetic fun getController ()Lcom/stripe/android/ui/core/elements/InputController;
+	public fun getIdentifier ()Lcom/stripe/android/ui/core/elements/IdentifierSpec;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/ui/core/elements/SimpleTextElement : com/stripe/android/ui/core/elements/SectionSingleFieldElement {
+	public static final field $stable I
+	public fun <init> (Lcom/stripe/android/ui/core/elements/IdentifierSpec;Lcom/stripe/android/ui/core/elements/TextFieldController;)V
+	public final fun component1 ()Lcom/stripe/android/ui/core/elements/IdentifierSpec;
+	public final fun component2 ()Lcom/stripe/android/ui/core/elements/TextFieldController;
+	public final fun copy (Lcom/stripe/android/ui/core/elements/IdentifierSpec;Lcom/stripe/android/ui/core/elements/TextFieldController;)Lcom/stripe/android/ui/core/elements/SimpleTextElement;
+	public static synthetic fun copy$default (Lcom/stripe/android/ui/core/elements/SimpleTextElement;Lcom/stripe/android/ui/core/elements/IdentifierSpec;Lcom/stripe/android/ui/core/elements/TextFieldController;ILjava/lang/Object;)Lcom/stripe/android/ui/core/elements/SimpleTextElement;
+	public fun equals (Ljava/lang/Object;)Z
+	public synthetic fun getController ()Lcom/stripe/android/ui/core/elements/InputController;
+	public fun getController ()Lcom/stripe/android/ui/core/elements/TextFieldController;
+	public fun getIdentifier ()Lcom/stripe/android/ui/core/elements/IdentifierSpec;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/ui/core/elements/SimpleTextFieldConfig : com/stripe/android/ui/core/elements/TextFieldConfig {
+	public static final field $stable I
+	public synthetic fun <init> (IIIILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (IIILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun convertFromRaw (Ljava/lang/String;)Ljava/lang/String;
+	public fun convertToRaw (Ljava/lang/String;)Ljava/lang/String;
+	public fun determineState (Ljava/lang/String;)Lcom/stripe/android/ui/core/elements/TextFieldState;
+	public fun filter (Ljava/lang/String;)Ljava/lang/String;
+	public fun getCapitalization-IUNYP9k ()I
+	public fun getDebugLabel ()Ljava/lang/String;
+	public fun getKeyboard-PjHm6EE ()I
+	public fun getLabel ()I
+	public fun getVisualTransformation ()Landroidx/compose/ui/text/input/VisualTransformation;
+}
+
+public final class com/stripe/android/ui/core/elements/SimpleTextSpec : com/stripe/android/ui/core/elements/SectionFieldSpec {
+	public static final field $stable I
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public static final field Companion Lcom/stripe/android/ui/core/elements/SimpleTextSpec$Companion;
+	public synthetic fun <init> (Lcom/stripe/android/ui/core/elements/IdentifierSpec;IIIZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (Lcom/stripe/android/ui/core/elements/IdentifierSpec;IIIZLkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Lcom/stripe/android/ui/core/elements/IdentifierSpec;
+	public final fun component2 ()I
+	public final fun component3-IUNYP9k ()I
+	public final fun component4-PjHm6EE ()I
+	public final fun component5 ()Z
+	public final fun copy-25FCGzQ (Lcom/stripe/android/ui/core/elements/IdentifierSpec;IIIZ)Lcom/stripe/android/ui/core/elements/SimpleTextSpec;
+	public static synthetic fun copy-25FCGzQ$default (Lcom/stripe/android/ui/core/elements/SimpleTextSpec;Lcom/stripe/android/ui/core/elements/IdentifierSpec;IIIZILjava/lang/Object;)Lcom/stripe/android/ui/core/elements/SimpleTextSpec;
+	public fun describeContents ()I
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCapitalization-IUNYP9k ()I
+	public fun getIdentifier ()Lcom/stripe/android/ui/core/elements/IdentifierSpec;
+	public final fun getKeyboardType-PjHm6EE ()I
+	public final fun getLabel ()I
+	public final fun getShowOptionalLabel ()Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+	public final fun transform (Ljava/util/Map;)Lcom/stripe/android/ui/core/elements/SectionSingleFieldElement;
+	public static synthetic fun transform$default (Lcom/stripe/android/ui/core/elements/SimpleTextSpec;Ljava/util/Map;ILjava/lang/Object;)Lcom/stripe/android/ui/core/elements/SectionSingleFieldElement;
+	public fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public final class com/stripe/android/ui/core/elements/SimpleTextSpec$Companion {
+	public final fun getNAME ()Lcom/stripe/android/ui/core/elements/SimpleTextSpec;
+}
+
+public final class com/stripe/android/ui/core/elements/StaticTextElement : com/stripe/android/ui/core/elements/FormElement {
+	public static final field $stable I
+	public fun <init> (Lcom/stripe/android/ui/core/elements/IdentifierSpec;ILjava/lang/Integer;Ljava/lang/String;IDLcom/stripe/android/ui/core/elements/InputController;)V
+	public synthetic fun <init> (Lcom/stripe/android/ui/core/elements/IdentifierSpec;ILjava/lang/Integer;Ljava/lang/String;IDLcom/stripe/android/ui/core/elements/InputController;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Lcom/stripe/android/ui/core/elements/IdentifierSpec;
+	public final fun component2 ()I
+	public final fun component3 ()Ljava/lang/Integer;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun component5 ()I
+	public final fun component6 ()D
+	public final fun component7 ()Lcom/stripe/android/ui/core/elements/InputController;
+	public final fun copy (Lcom/stripe/android/ui/core/elements/IdentifierSpec;ILjava/lang/Integer;Ljava/lang/String;IDLcom/stripe/android/ui/core/elements/InputController;)Lcom/stripe/android/ui/core/elements/StaticTextElement;
+	public static synthetic fun copy$default (Lcom/stripe/android/ui/core/elements/StaticTextElement;Lcom/stripe/android/ui/core/elements/IdentifierSpec;ILjava/lang/Integer;Ljava/lang/String;IDLcom/stripe/android/ui/core/elements/InputController;ILjava/lang/Object;)Lcom/stripe/android/ui/core/elements/StaticTextElement;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getColor ()Ljava/lang/Integer;
+	public synthetic fun getController ()Lcom/stripe/android/ui/core/elements/Controller;
+	public fun getController ()Lcom/stripe/android/ui/core/elements/InputController;
+	public final fun getFontSizeSp ()I
+	public fun getFormFieldValueFlow ()Lkotlinx/coroutines/flow/Flow;
+	public fun getIdentifier ()Lcom/stripe/android/ui/core/elements/IdentifierSpec;
+	public final fun getLetterSpacingSp ()D
+	public final fun getMerchantName ()Ljava/lang/String;
+	public final fun getStringResId ()I
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/ui/core/elements/StaticTextElementUIKt {
+	public static final fun StaticElementUI (Lcom/stripe/android/ui/core/elements/StaticTextElement;Landroidx/compose/runtime/Composer;I)V
+}
+
+public final class com/stripe/android/ui/core/elements/SupportedBankType : java/lang/Enum {
+	public static final field Eps Lcom/stripe/android/ui/core/elements/SupportedBankType;
+	public static final field Ideal Lcom/stripe/android/ui/core/elements/SupportedBankType;
+	public static final field P24 Lcom/stripe/android/ui/core/elements/SupportedBankType;
+	public final fun getAssetFileName ()Ljava/lang/String;
+	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/ui/core/elements/SupportedBankType;
+	public static fun values ()[Lcom/stripe/android/ui/core/elements/SupportedBankType;
+}
+
+public abstract interface class com/stripe/android/ui/core/elements/TextFieldConfig {
+	public abstract fun convertFromRaw (Ljava/lang/String;)Ljava/lang/String;
+	public abstract fun convertToRaw (Ljava/lang/String;)Ljava/lang/String;
+	public abstract fun determineState (Ljava/lang/String;)Lcom/stripe/android/ui/core/elements/TextFieldState;
+	public abstract fun filter (Ljava/lang/String;)Ljava/lang/String;
+	public abstract fun getCapitalization-IUNYP9k ()I
+	public abstract fun getDebugLabel ()Ljava/lang/String;
+	public abstract fun getKeyboard-PjHm6EE ()I
+	public abstract fun getLabel ()I
+	public abstract fun getVisualTransformation ()Landroidx/compose/ui/text/input/VisualTransformation;
+}
+
+public final class com/stripe/android/ui/core/elements/TextFieldController : com/stripe/android/ui/core/elements/InputController, com/stripe/android/ui/core/elements/SectionFieldErrorController {
+	public static final field $stable I
+	public fun <init> (Lcom/stripe/android/ui/core/elements/TextFieldConfig;ZLjava/lang/String;)V
+	public synthetic fun <init> (Lcom/stripe/android/ui/core/elements/TextFieldConfig;ZLjava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun getCapitalization-IUNYP9k ()I
+	public final fun getDebugLabel ()Ljava/lang/String;
+	public fun getError ()Lkotlinx/coroutines/flow/Flow;
+	public fun getFieldValue ()Lkotlinx/coroutines/flow/Flow;
+	public fun getFormFieldValue ()Lkotlinx/coroutines/flow/Flow;
+	public final fun getKeyboardType-PjHm6EE ()I
+	public fun getLabel ()I
+	public fun getRawFieldValue ()Lkotlinx/coroutines/flow/Flow;
+	public fun getShowOptionalLabel ()Z
+	public final fun getVisibleError ()Lkotlinx/coroutines/flow/Flow;
+	public final fun getVisualTransformation ()Landroidx/compose/ui/text/input/VisualTransformation;
+	public fun isComplete ()Lkotlinx/coroutines/flow/Flow;
+	public final fun isFull ()Lkotlinx/coroutines/flow/Flow;
+	public final fun onFocusChange (Z)V
+	public fun onRawValueChange (Ljava/lang/String;)V
+	public final fun onValueChange (Ljava/lang/String;)V
+}
+
+public abstract interface class com/stripe/android/ui/core/elements/TextFieldState {
+	public abstract fun getError ()Lcom/stripe/android/ui/core/elements/FieldError;
+	public abstract fun isBlank ()Z
+	public abstract fun isFull ()Z
+	public abstract fun isValid ()Z
+	public abstract fun shouldShowError (Z)Z
+}
+
+public final class com/stripe/android/ui/core/forms/AfterpayClearpaySpecKt {
+	public static final fun getAfterpayClearpayForm ()Lcom/stripe/android/ui/core/elements/LayoutSpec;
+	public static final fun getAfterpayClearpayParamKey ()Ljava/util/Map;
+}
+
+public final class com/stripe/android/ui/core/forms/BancontactSpecKt {
+	public static final fun getBancontactForm ()Lcom/stripe/android/ui/core/elements/LayoutSpec;
+	public static final fun getBancontactParamKey ()Ljava/util/Map;
+}
+
+public final class com/stripe/android/ui/core/forms/EpsSpecKt {
+	public static final fun getEpsForm ()Lcom/stripe/android/ui/core/elements/LayoutSpec;
+	public static final fun getEpsParamKey ()Ljava/util/Map;
+}
+
+public final class com/stripe/android/ui/core/forms/FormFieldEntry {
+	public static final field $stable I
+	public fun <init> (Ljava/lang/String;Z)V
+	public synthetic fun <init> (Ljava/lang/String;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Z
+	public final fun copy (Ljava/lang/String;Z)Lcom/stripe/android/ui/core/forms/FormFieldEntry;
+	public static synthetic fun copy$default (Lcom/stripe/android/ui/core/forms/FormFieldEntry;Ljava/lang/String;ZILjava/lang/Object;)Lcom/stripe/android/ui/core/forms/FormFieldEntry;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getValue ()Ljava/lang/String;
+	public fun hashCode ()I
+	public final fun isComplete ()Z
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/ui/core/forms/GiropaySpecKt {
+	public static final fun getGiropayForm ()Lcom/stripe/android/ui/core/elements/LayoutSpec;
+	public static final fun getGiropayParamKey ()Ljava/util/Map;
+}
+
+public final class com/stripe/android/ui/core/forms/IdealSpecKt {
+	public static final fun getIdealForm ()Lcom/stripe/android/ui/core/elements/LayoutSpec;
+	public static final fun getIdealParamKey ()Ljava/util/Map;
+}
+
+public final class com/stripe/android/ui/core/forms/KlarnaSpecKt {
+	public static final fun getKlarnaForm ()Lcom/stripe/android/ui/core/elements/LayoutSpec;
+	public static final fun getKlarnaParamKey ()Ljava/util/Map;
+}
+
+public final class com/stripe/android/ui/core/forms/P24SpecKt {
+	public static final fun getP24Form ()Lcom/stripe/android/ui/core/elements/LayoutSpec;
+	public static final fun getP24ParamKey ()Ljava/util/Map;
+}
+
+public final class com/stripe/android/ui/core/forms/PaypalSpecKt {
+	public static final fun getPaypalForm ()Lcom/stripe/android/ui/core/elements/LayoutSpec;
+	public static final fun getPaypalParamKey ()Ljava/util/Map;
+}
+
+public final class com/stripe/android/ui/core/forms/SepaDebitSpecKt {
+	public static final fun getSepaDebitForm ()Lcom/stripe/android/ui/core/elements/LayoutSpec;
+	public static final fun getSepaDebitParamKey ()Ljava/util/Map;
+}
+
+public final class com/stripe/android/ui/core/forms/SofortSpecKt {
+	public static final fun getSofortForm ()Lcom/stripe/android/ui/core/elements/LayoutSpec;
+	public static final fun getSofortParamKey ()Ljava/util/Map;
+}
+
+public final class com/stripe/android/ui/core/forms/TransformSpecToElements {
+	public static final field $stable I
+	public fun <init> (Lcom/stripe/android/ui/core/forms/resources/ResourceRepository;Ljava/util/Map;Lcom/stripe/android/ui/core/Amount;Ljava/lang/String;ZLjava/lang/String;)V
+	public final fun transform (Ljava/util/List;)Ljava/util/List;
+}
+
+public final class com/stripe/android/ui/core/forms/resources/AsyncResourceRepository : com/stripe/android/ui/core/forms/resources/ResourceRepository {
+	public static final field $stable I
+	public fun <init> (Landroid/content/res/Resources;Lkotlin/coroutines/CoroutineContext;Ljava/util/Locale;)V
+	public fun getAddressRepository ()Lcom/stripe/android/ui/core/address/AddressFieldElementRepository;
+	public fun getBankRepository ()Lcom/stripe/android/ui/core/elements/BankRepository;
+	public fun isLoaded ()Z
+	public fun waitUntilLoaded (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class com/stripe/android/ui/core/forms/resources/AsyncResourceRepository_Factory : dagger/internal/Factory {
+	public fun <init> (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)V
+	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/ui/core/forms/resources/AsyncResourceRepository_Factory;
+	public fun get ()Lcom/stripe/android/ui/core/forms/resources/AsyncResourceRepository;
+	public synthetic fun get ()Ljava/lang/Object;
+	public static fun newInstance (Landroid/content/res/Resources;Lkotlin/coroutines/CoroutineContext;Ljava/util/Locale;)Lcom/stripe/android/ui/core/forms/resources/AsyncResourceRepository;
+}
+
+public abstract interface class com/stripe/android/ui/core/forms/resources/ResourceRepository {
+	public abstract fun getAddressRepository ()Lcom/stripe/android/ui/core/address/AddressFieldElementRepository;
+	public abstract fun getBankRepository ()Lcom/stripe/android/ui/core/elements/BankRepository;
+	public abstract fun isLoaded ()Z
+	public abstract fun waitUntilLoaded (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class com/stripe/android/ui/core/forms/resources/StaticResourceRepository : com/stripe/android/ui/core/forms/resources/ResourceRepository {
+	public static final field $stable I
+	public fun <init> (Lcom/stripe/android/ui/core/elements/BankRepository;Lcom/stripe/android/ui/core/address/AddressFieldElementRepository;)V
+	public fun getAddressRepository ()Lcom/stripe/android/ui/core/address/AddressFieldElementRepository;
+	public fun getBankRepository ()Lcom/stripe/android/ui/core/elements/BankRepository;
+	public fun isLoaded ()Z
+	public fun waitUntilLoaded (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+

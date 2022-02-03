@@ -18,8 +18,8 @@ import com.stripe.android.networking.PaymentAnalyticsEvent
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.view.AuthActivityStarterHost
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.TestCoroutineDispatcher
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -43,7 +43,7 @@ class WebIntentAuthenticatorTest {
         ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
     )
 
-    private val testDispatcher = TestCoroutineDispatcher()
+    private val testDispatcher = UnconfinedTestDispatcher()
     private val host = mock<AuthActivityStarterHost>()
 
     private val paymentBrowserWebStarter = mock<PaymentBrowserAuthStarter>()
@@ -61,7 +61,8 @@ class WebIntentAuthenticatorTest {
         enableLogging = false,
         testDispatcher,
         threeDs1IntentReturnUrlMap,
-        { ApiKeyFixtures.FAKE_PUBLISHABLE_KEY }
+        { ApiKeyFixtures.FAKE_PUBLISHABLE_KEY },
+        false
     )
 
     @Before
@@ -135,7 +136,7 @@ class WebIntentAuthenticatorTest {
         expectedRequestCode: Int,
         expectedShouldCancelIntentOnUserNavigation: Boolean = true,
         expectedAnalyticsEvent: PaymentAnalyticsEvent?
-    ) = testDispatcher.runBlockingTest {
+    ) = runTest {
         authenticator.authenticate(
             host,
             stripeIntent,

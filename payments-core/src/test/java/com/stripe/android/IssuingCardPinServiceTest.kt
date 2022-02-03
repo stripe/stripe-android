@@ -8,7 +8,7 @@ import com.stripe.android.networking.ApiRequest
 import com.stripe.android.testharness.TestEphemeralKeyProvider
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.TestCoroutineDispatcher
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
 import org.json.JSONObject
@@ -29,7 +29,7 @@ class IssuingCardPinServiceTest {
     private val retrievalListener: IssuingCardPinService.IssuingCardPinRetrievalListener = mock()
     private val updateListener: IssuingCardPinService.IssuingCardPinUpdateListener = mock()
 
-    private val testDispatcher = TestCoroutineDispatcher()
+    private val testDispatcher = UnconfinedTestDispatcher()
 
     private val stripeRepository = FakeStripeRepository()
     private val service = IssuingCardPinService(
@@ -50,7 +50,6 @@ class IssuingCardPinServiceTest {
     @AfterTest
     fun cleanup() {
         Dispatchers.resetMain()
-        testDispatcher.cleanupTestCoroutines()
     }
 
     @Test

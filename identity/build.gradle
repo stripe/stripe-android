@@ -1,0 +1,98 @@
+plugins {
+    id 'com.android.library'
+    id 'kotlin-android'
+    id 'org.jetbrains.dokka'
+    id 'org.jetbrains.kotlin.plugin.parcelize'
+}
+
+android {
+    compileSdkVersion rootProject.ext.compileSdkVersion
+    buildToolsVersion rootProject.ext.buildToolsVersion
+
+    defaultConfig {
+        minSdkVersion 21
+        targetSdkVersion rootProject.ext.compileSdkVersion
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles "consumer-rules.pro"
+    }
+
+    sourceSets {
+        main {
+            res.srcDirs = ['res']
+            assets {
+                srcDirs 'src/main/assets'
+            }
+        }
+    }
+
+    lintOptions {
+        enable "Interoperability"
+        disable "CoroutineCreationDuringComposition"
+        lintConfig file("../settings/lint.xml")
+    }
+
+    dokkaHtml {
+        outputDirectory = new File("${project.rootDir}/docs/$project.name")
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
+
+    buildFeatures {
+        viewBinding true
+    }
+}
+
+assemble.dependsOn('lint')
+check.dependsOn('checkstyle')
+
+configurations {
+    ktlint
+}
+
+dependencies {
+
+    implementation project(":camera-core")
+    // vanilla tflite library
+    implementation "org.tensorflow:tensorflow-lite:2.7.0"
+    // flex ops
+    implementation 'org.tensorflow:tensorflow-lite-select-tf-ops:2.6.0'
+    // support library to reshape image to the input model shape
+    implementation 'org.tensorflow:tensorflow-lite-support:0.3.1'
+
+    implementation libraries.androidx.constraintlayout
+    implementation("androidx.activity:activity-ktx:$composeActivityVersion")
+    implementation("androidx.fragment:fragment-ktx:1.4.1")
+
+    implementation "androidx.core:core-ktx:$coreKtxVersion"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinCoroutinesVersion"
+
+    testImplementation "junit:junit:$junitVersion"
+
+    ktlint "com.pinterest:ktlint:$ktlintVersion"
+}
+
+task ktlint(type: JavaExec, group: "verification") {
+    description = "Check Kotlin code style."
+    mainClass = "com.pinterest.ktlint.Main"
+    classpath = configurations.ktlint
+    args "src/**/*.kt"
+    // to generate report in checkstyle format prepend following args:
+    // "--reporter=plain", "--reporter=checkstyle,output=${buildDir}/ktlint.xml"
+    // see https://github.com/pinterest/ktlint#usage for more
+}
+check.dependsOn ktlint
+
+task ktlintFormat(type: JavaExec, group: "formatting") {
+    description = "Fix Kotlin code style deviations."
+    mainClass = "com.pinterest.ktlint.Main"
+    classpath = configurations.ktlint
+    args "-F", "src/**/*.kt"
+}

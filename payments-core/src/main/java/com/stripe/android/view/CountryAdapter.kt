@@ -9,6 +9,7 @@ import android.widget.ArrayAdapter
 import android.widget.Filter
 import android.widget.TextView
 import com.stripe.android.R
+import com.stripe.android.core.model.Country
 import java.lang.ref.WeakReference
 
 /**

@@ -20,8 +20,6 @@
   <string name="address_county_required">Skriv inn fylket ditt</string>
   <!-- Caption for Address field on address form -->
   <string name="address_label_address">Adresse</string>
-  <!-- Address line 1 placeholder for billing address form. -->
-  <string name="address_label_address_line1">Adresselinje 1</string>
   <!-- Label for input requesting the first line of an address where , used for international addresses -->
   <string name="address_label_address_line1_optional">Adresselinje 1 (valgfritt)</string>
   <!-- Address line 2 placeholder for billing address form. -->
@@ -30,44 +28,28 @@
   <string name="address_label_address_optional">Adresse (valgfritt)</string>
   <!-- Label for input requesting apartment number (address line 2) where input is optional, used for US based addresses -->
   <string name="address_label_apt_optional">Leil. (valgfritt)</string>
-  <!-- Caption for City field on address form -->
-  <string name="address_label_city">By</string>
   <!-- Label for input requesting city where input is optional, used for all locations -->
   <string name="address_label_city_optional">By (valgfritt)</string>
-  <!-- Caption for Country field on address form -->
-  <string name="address_label_country">Land</string>
-  <!-- Caption for County field on address form (only countries that use county, like United Kingdom) -->
-  <string name="address_label_county">Fylke</string>
   <!-- Label for input requesting county where input is optional , used for UK based addresses -->
   <string name="address_label_county_optional">Fylke (valgfritt)</string>
-  <!-- Caption for Name field on address form -->
-  <string name="address_label_name">Navn</string>
   <!-- Label for input requesting phone number, used for all locations -->
   <string name="address_label_phone_number">Telefonnummer</string>
   <!-- Label for input requesting phone number where input is optional, used for all locations -->
   <string name="address_label_phone_number_optional">Telefonnummer (valgfritt)</string>
-  <!-- Short string for postal code (text used in non-US countries) -->
-  <string name="address_label_postal_code">Postnummer</string>
   <!-- Label for input requesting postal code where input is optional, used for Canada based addresses -->
   <string name="address_label_postal_code_optional">Postnummer (valgfritt)</string>
   <!-- Label for input requesting postcode, used for UK based addresses -->
   <string name="address_label_postcode">Postnummer</string>
   <!-- Label for input requesting postcode where input is optional, used for UK based addresses -->
   <string name="address_label_postcode_optional">Postnummer (valgfritt)</string>
-  <!-- Caption for Province field on address form (only countries that use province, like Canada) -->
-  <string name="address_label_province">Provins</string>
   <!-- Label for input requesting province where province is optional, used for canadian addresses -->
   <string name="address_label_province_optional">Provins (valgfritt)</string>
   <!-- Label for input requesting the region, used for international addresses -->
   <string name="address_label_region_generic">Stat / provins / region</string>
   <!-- Label for input requesting the region where input is optional, used for international addresses -->
   <string name="address_label_region_generic_optional">Stat / provins / region (valgfritt)</string>
-  <!-- Caption for State field on address form (only countries that use state , like United States) -->
-  <string name="address_label_state">Stat</string>
   <!-- Label for input requesting state where input is optional, used for US based addresses -->
   <string name="address_label_state_optional">Stat (valgfritt)</string>
-  <!-- Label for input requesting zip code, used for US based addreses -->
-  <string name="address_label_zip_code">Postnummer</string>
   <!-- Label for input requesting zip code where input is optional, used for US based addresses -->
   <string name="address_label_zip_code_optional">Postnummer (valgfritt)</string>
   <!-- Label for input requesting postal code, used for international addresses -->

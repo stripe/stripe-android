@@ -14,7 +14,7 @@ import androidx.core.graphics.drawable.DrawableCompat
 import com.stripe.android.R
 import com.stripe.android.databinding.CardBrandSpinnerDropdownBinding
 import com.stripe.android.databinding.CardBrandSpinnerMainBinding
-import com.stripe.android.model.CardBrand
+import com.stripe.android.ui.core.elements.CardBrand
 
 internal class CardBrandSpinner @JvmOverloads constructor(
     context: Context,
@@ -29,9 +29,9 @@ internal class CardBrandSpinner @JvmOverloads constructor(
         dropDownWidth = resources.getDimensionPixelSize(R.dimen.card_brand_spinner_dropdown_width)
     }
 
-    val cardBrand: CardBrand?
+    val cardBrand: com.stripe.android.ui.core.elements.CardBrand?
         get() {
-            return selectedItem as CardBrand?
+            return selectedItem as com.stripe.android.ui.core.elements.CardBrand?
         }
 
     override fun onFinishInflate() {
@@ -40,7 +40,7 @@ internal class CardBrandSpinner @JvmOverloads constructor(
         defaultBackground = background
 
         setCardBrands(
-            listOf(CardBrand.Unknown)
+            listOf(com.stripe.android.ui.core.elements.CardBrand.Unknown)
         )
     }
 
@@ -49,7 +49,7 @@ internal class CardBrandSpinner @JvmOverloads constructor(
     }
 
     @JvmSynthetic
-    fun setCardBrands(cardBrands: List<CardBrand>) {
+    fun setCardBrands(cardBrands: List<com.stripe.android.ui.core.elements.CardBrand>) {
         cardBrandsAdapter.clear()
         cardBrandsAdapter.addAll(cardBrands)
         cardBrandsAdapter.notifyDataSetChanged()
@@ -71,7 +71,7 @@ internal class CardBrandSpinner @JvmOverloads constructor(
 
     internal class Adapter(
         context: Context
-    ) : ArrayAdapter<CardBrand>(
+    ) : ArrayAdapter<com.stripe.android.ui.core.elements.CardBrand>(
         context,
         0
     ) {
@@ -113,11 +113,11 @@ internal class CardBrandSpinner @JvmOverloads constructor(
             return viewBinding.root
         }
 
-        private fun createCardBrandDrawable(cardBrand: CardBrand): Drawable {
+        private fun createCardBrandDrawable(cardBrand: com.stripe.android.ui.core.elements.CardBrand): Drawable {
             val icon = requireNotNull(
                 ContextCompat.getDrawable(context, cardBrand.icon)
             )
-            return if (cardBrand == CardBrand.Unknown) {
+            return if (cardBrand == com.stripe.android.ui.core.elements.CardBrand.Unknown) {
                 val compatIcon = DrawableCompat.wrap(icon)
                 DrawableCompat.setTint(compatIcon.mutate(), tintColor)
                 DrawableCompat.unwrap(compatIcon)

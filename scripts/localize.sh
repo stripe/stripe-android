@@ -42,7 +42,7 @@ lokalise2 --token $API_TOKEN --project-id $PROJECT_ID language list | grep iso
 
 echo "DOWNLOADING LANGUAGES: ${LANGUAGES}"
 
-for MODULE in "paymentsheet" "payments-core"
+for MODULE in ${MODULES[@]}
 do
     echo ""
     echo ""

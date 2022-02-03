@@ -1,44 +1,32 @@
 package com.stripe.android.stripecardscan.scanui
 
-import android.Manifest
-import android.content.Context
-import android.content.Intent
-import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.PointF
-import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Parcelable
-import android.provider.Settings
 import android.util.Log
 import android.util.Size
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
-import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
+import com.stripe.android.camera.CameraAdapter
+import com.stripe.android.camera.CameraPermissionCheckingActivity
+import com.stripe.android.camera.CameraPreviewImage
+import com.stripe.android.camera.DefaultCameraErrorListener
+import com.stripe.android.camera.framework.Stats
 import com.stripe.android.stripecardscan.R
-import com.stripe.android.stripecardscan.camera.CameraAdapter
-import com.stripe.android.stripecardscan.camera.CameraErrorListener
-import com.stripe.android.stripecardscan.camera.CameraPreviewImage
 import com.stripe.android.stripecardscan.camera.getCameraAdapter
 import com.stripe.android.stripecardscan.framework.Config
-import com.stripe.android.stripecardscan.framework.Stats
-import com.stripe.android.stripecardscan.framework.StorageFactory
-import com.stripe.android.stripecardscan.framework.util.getAppPackageName
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.parcelize.Parcelize
 import kotlin.coroutines.CoroutineContext
-
-const val PERMISSION_RATIONALE_SHOWN = "permission_rationale_shown"
 
 sealed interface CancellationReason : Parcelable {
 
@@ -55,7 +43,7 @@ sealed interface CancellationReason : Parcelable {
     object CameraPermissionDenied : CancellationReason
 }
 
-interface ScanResultListener {
+internal interface ScanResultListener {
 
     /**
      * The user canceled the scan.
@@ -68,41 +56,7 @@ interface ScanResultListener {
     fun failed(cause: Throwable?)
 }
 
-/**
- * A basic implementation that displays error messages when there is a problem with the camera.
- */
-open class CameraErrorListenerImpl(
-    protected val context: Context,
-    protected val callback: (Throwable?) -> Unit
-) : CameraErrorListener {
-    override fun onCameraOpenError(cause: Throwable?) {
-        showCameraError(R.string.stripe_error_camera_open, cause)
-    }
-
-    override fun onCameraAccessError(cause: Throwable?) {
-        showCameraError(R.string.stripe_error_camera_access, cause)
-    }
-
-    override fun onCameraUnsupportedError(cause: Throwable?) {
-        Log.e(Config.logTag, "Camera not supported", cause)
-        showCameraError(R.string.stripe_error_camera_unsupported, cause)
-    }
-
-    private fun showCameraError(@StringRes message: Int, cause: Throwable?) {
-        AlertDialog.Builder(context)
-            .setTitle(R.string.stripe_error_camera_title)
-            .setMessage(message)
-            .setPositiveButton(R.string.stripe_error_camera_acknowledge_button) { _, _ ->
-                callback(cause)
-            }
-            .show()
-    }
-}
-
-abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
-    companion object {
-        const val PERMISSION_REQUEST_CODE = 1200
-    }
+internal abstract class ScanActivity : CameraPermissionCheckingActivity(), CoroutineScope {
 
     override val coroutineContext: CoroutineContext = Dispatchers.Main
 
@@ -112,19 +66,15 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
     protected var isFlashlightOn: Boolean = false
         private set
 
-    protected val cameraAdapter by lazy { buildCameraAdapter() }
+    internal val cameraAdapter by lazy { buildCameraAdapter() }
     private val cameraErrorListener by lazy {
-        CameraErrorListenerImpl(this) { t -> scanFailure(t) }
+        DefaultCameraErrorListener(this) { t -> scanFailure(t) }
     }
 
     /**
      * The listener which will handle the results from the scan.
      */
     internal abstract val resultListener: ScanResultListener
-
-    private val storage by lazy {
-        StorageFactory.getStorageInstance(this, "scan_camera_permissions")
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -146,7 +96,7 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
         }
 
         if (!cameraAdapter.isBoundToLifecycle()) {
-            ensurePermissionAndStartCamera()
+            ensureCameraPermission()
         }
     }
 
@@ -182,53 +132,6 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
     }
 
     /**
-     * Ensure that the camera permission is available. If so, start the camera. If not, request it.
-     */
-    protected open fun ensurePermissionAndStartCamera() = when {
-        ContextCompat.checkSelfPermission(
-            this,
-            Manifest.permission.CAMERA,
-        ) == PackageManager.PERMISSION_GRANTED -> {
-            launch { permissionStat.trackResult("already_granted") }
-            prepareCamera { onCameraReady() }
-        }
-        ActivityCompat.shouldShowRequestPermissionRationale(
-            this,
-            Manifest.permission.CAMERA,
-        ) -> showPermissionRationaleDialog()
-        storage.getBoolean(
-            PERMISSION_RATIONALE_SHOWN,
-            false,
-        ) -> showPermissionDeniedDialog()
-        else -> requestCameraPermission()
-    }
-
-    /**
-     * Handle permission status changes. If the camera permission has been granted, start it. If
-     * not, show a dialog.
-     */
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<out String>,
-        grantResults: IntArray
-    ) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-
-        if (requestCode == PERMISSION_REQUEST_CODE && grantResults.isNotEmpty()) {
-            when (grantResults[0]) {
-                PackageManager.PERMISSION_GRANTED -> {
-                    launch { permissionStat.trackResult("granted") }
-                    prepareCamera { onCameraReady() }
-                }
-                else -> {
-                    launch { permissionStat.trackResult("denied") }
-                    userDeniedCameraPermission()
-                }
-            }
-        }
-    }
-
-    /**
      * Show a dialog explaining that the camera is not available.
      */
     protected open fun showCameraNotSupportedDialog() {
@@ -242,66 +145,12 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
     }
 
     /**
-     * Show an explanation dialog for why we are requesting camera permissions.
-     */
-    protected open fun showPermissionRationaleDialog() {
-        val builder = AlertDialog.Builder(this)
-        builder.setMessage(R.string.stripe_camera_permission_denied_message)
-            .setPositiveButton(R.string.stripe_camera_permission_denied_ok) { _, _ ->
-                requestCameraPermission()
-            }
-        builder.show()
-        storage.storeValue(PERMISSION_RATIONALE_SHOWN, true)
-    }
-
-    /**
-     * Show an explanation dialog for why we are requesting camera permissions when the permission
-     * has been permanently denied.
-     */
-    protected open fun showPermissionDeniedDialog() {
-        val builder = AlertDialog.Builder(this)
-        builder.setMessage(R.string.stripe_camera_permission_denied_message)
-            .setPositiveButton(R.string.stripe_camera_permission_denied_ok) { _, _ ->
-                storage.storeValue(PERMISSION_RATIONALE_SHOWN, false)
-                openAppSettings()
-            }
-            .setNegativeButton(R.string.stripe_camera_permission_denied_cancel) { _, _ ->
-                userDeniedCameraPermission()
-            }
-        builder.show()
-    }
-
-    /**
-     * Request permission to use the camera.
-     */
-    protected open fun requestCameraPermission() {
-        ActivityCompat.requestPermissions(
-            this,
-            arrayOf(Manifest.permission.CAMERA),
-            PERMISSION_REQUEST_CODE,
-        )
-    }
-
-    /**
-     * Open the settings for this app
-     */
-    protected open fun openAppSettings() {
-        val intent = Intent()
-            .setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
-            .setData(Uri.fromParts("package", getAppPackageName(this), null))
-        startActivity(intent)
-    }
-
-    /**
      * Turn the flashlight on or off.
      */
     protected open fun toggleFlashlight() {
         isFlashlightOn = !isFlashlightOn
         setFlashlightState(isFlashlightOn)
-        launch {
-            Stats.trackRepeatingTask("torch_state")
-                .trackResult(if (isFlashlightOn) "on" else "off")
-        }
+        // TODO: this should be reported as part of scanstats, but is not yet supported
     }
 
     /**
@@ -309,10 +158,7 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
      */
     protected open fun toggleCamera() {
         cameraAdapter.changeCamera()
-        launch {
-            Stats.trackRepeatingTask("swap_camera")
-                .trackResult("${cameraAdapter.getCurrentCamera()}")
-        }
+        // TODO: this should probably be reported as part of scanstats, but is not yet supported
     }
 
     /**
@@ -334,7 +180,7 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
      */
     protected open fun scanFailure(cause: Throwable? = null) {
         Log.e(Config.logTag, "Canceling scan due to error", cause)
-        launch { scanStat.trackResult("scan_failure") }
+        runBlocking { scanStat.trackResult("scan_failure") }
         resultListener.failed(cause)
         closeScanner()
     }
@@ -343,7 +189,7 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
      * Cancel the scan when the user presses back.
      */
     override fun onBackPressed() {
-        launch { scanStat.trackResult("user_pressed_back") }
+        runBlocking { scanStat.trackResult("user_canceled") }
         resultListener.userCanceled(CancellationReason.Back)
         closeScanner()
     }
@@ -352,7 +198,7 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
      * The scan has been closed by the user.
      */
     protected open fun userClosedScanner() {
-        launch { scanStat.trackResult("user_canceled") }
+        runBlocking { scanStat.trackResult("user_canceled") }
         resultListener.userCanceled(CancellationReason.Closed)
         closeScanner()
     }
@@ -360,8 +206,8 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
     /**
      * The camera permission was denied.
      */
-    protected open fun userDeniedCameraPermission() {
-        launch { scanStat.trackResult("permission_denied") }
+    override fun onUserDeniedCameraPermission() {
+        runBlocking { scanStat.trackResult("user_canceled") }
         resultListener.userCanceled(CancellationReason.CameraPermissionDenied)
         closeScanner()
     }
@@ -370,7 +216,7 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
      * The user cannot scan the required object.
      */
     protected open fun userCannotScan() {
-        launch { scanStat.trackResult("user_cannot_scan") }
+        runBlocking { scanStat.trackResult("user_missing_card") }
         resultListener.userCanceled(CancellationReason.UserCannotScan)
         closeScanner()
     }
@@ -383,12 +229,7 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
         finish()
     }
 
-    /**
-     * Prepare to start the camera. Once the camera is ready, [onCameraReady] must be called.
-     */
-    protected abstract fun prepareCamera(onCameraReady: () -> Unit)
-
-    protected open fun onCameraReady() {
+    protected fun startCameraAdapter() {
         cameraAdapter.bindToLifecycle(this)
 
         val torchStat = Stats.trackTask("torch_supported")
@@ -398,9 +239,8 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
             onFlashSupported(it)
         }
 
-        val cameraStat = Stats.trackTask("multiple_cameras_supported")
+        // TODO: this should probably be reported as part of scanstats, but is not yet supported
         cameraAdapter.withSupportsMultipleCameras {
-            launch { cameraStat.trackResult(if (it) "supported" else "unsupported") }
             onSupportsMultipleCameras(it)
         }
 
@@ -424,7 +264,7 @@ abstract class ScanActivity : AppCompatActivity(), CoroutineScope {
     /**
      * Generate a camera adapter
      */
-    protected open fun buildCameraAdapter(): CameraAdapter<CameraPreviewImage<Bitmap>> =
+    internal open fun buildCameraAdapter(): CameraAdapter<CameraPreviewImage<Bitmap>> =
         getCameraAdapter(
             activity = this,
             previewView = previewFrame,

@@ -31,6 +31,7 @@ import com.stripe.android.payments.PaymentIntentFlowResultProcessor
 import com.stripe.android.payments.SetupIntentFlowResultProcessor
 import com.stripe.android.payments.core.authentication.PaymentAuthenticatorRegistry
 import com.stripe.android.payments.core.injection.DaggerPaymentLauncherViewModelFactoryComponent
+import com.stripe.android.payments.core.injection.IS_INSTANT_APP
 import com.stripe.android.payments.core.injection.IS_PAYMENT_INTENT
 import com.stripe.android.payments.core.injection.PaymentLauncherViewModelSubcomponent
 import com.stripe.android.view.AuthActivityStarterHost
@@ -59,7 +60,8 @@ internal class PaymentLauncherViewModel @Inject constructor(
     @UIContext private val uiContext: CoroutineContext,
     private val authActivityStarterHost: AuthActivityStarterHost,
     activityResultCaller: ActivityResultCaller,
-    private val savedStateHandle: SavedStateHandle
+    private val savedStateHandle: SavedStateHandle,
+    @Named(IS_INSTANT_APP) private val isInstantApp: Boolean
 ) : ViewModel() {
     init {
         authenticatorRegistry.onNewActivityResultCaller(
@@ -89,8 +91,13 @@ internal class PaymentLauncherViewModel @Inject constructor(
     internal suspend fun confirmStripeIntent(confirmStripeIntentParams: ConfirmStripeIntentParams) {
         savedStateHandle.set(KEY_HAS_STARTED, true)
         logReturnUrl(confirmStripeIntentParams.returnUrl)
-        val returnUrl = confirmStripeIntentParams.returnUrl.takeUnless { it.isNullOrBlank() }
-            ?: defaultReturnUrl.value
+        val returnUrl =
+            if (isInstantApp) {
+                confirmStripeIntentParams.returnUrl
+            } else {
+                confirmStripeIntentParams.returnUrl.takeUnless { it.isNullOrBlank() }
+                    ?: defaultReturnUrl.value
+            }
         runCatching {
             confirmIntent(confirmStripeIntentParams, returnUrl)
         }.fold(
@@ -98,7 +105,7 @@ internal class PaymentLauncherViewModel @Inject constructor(
                 intent.nextActionData?.let {
                     if (it is StripeIntent.NextActionData.SdkData.Use3DS1) {
                         intent.id?.let { intentId ->
-                            threeDs1IntentReturnUrlMap[intentId] = returnUrl
+                            threeDs1IntentReturnUrlMap[intentId] = returnUrl.orEmpty()
                         }
                     }
                 }
@@ -116,7 +123,7 @@ internal class PaymentLauncherViewModel @Inject constructor(
 
     private suspend fun confirmIntent(
         confirmStripeIntentParams: ConfirmStripeIntentParams,
-        returnUrl: String
+        returnUrl: String?
     ): StripeIntent =
         confirmStripeIntentParams.also {
             it.returnUrl = returnUrl

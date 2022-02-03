@@ -4,8 +4,8 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.APIConnectionException
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.TestCoroutineDispatcher
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.runTest
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
@@ -18,7 +18,6 @@ import java.io.File
 import java.io.InputStream
 import java.net.HttpURLConnection
 import java.net.UnknownHostException
-import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertFailsWith
@@ -26,7 +25,7 @@ import kotlin.test.assertFailsWith
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
 internal class DefaultStripeNetworkClientTest {
-    private val testDispatcher = TestCoroutineDispatcher()
+    private val testDispatcher = UnconfinedTestDispatcher()
 
     private val okResponseWithString =
         StripeResponse(code = HttpURLConnection.HTTP_OK, body = "response_string")
@@ -37,11 +36,6 @@ internal class DefaultStripeNetworkClientTest {
     private val okConnectionFactory = mock<ConnectionFactory>()
 
     private val mockLogger = mock<Logger>()
-
-    @AfterTest
-    fun cleanup() {
-        testDispatcher.cleanupTestCoroutines()
-    }
 
     @BeforeTest
     fun setUp() {
@@ -56,7 +50,7 @@ internal class DefaultStripeNetworkClientTest {
 
     @Test
     fun `executeRequest should return StripeResponse with String`() =
-        testDispatcher.runBlockingTest {
+        runTest {
             val executor = DefaultStripeNetworkClient(
                 workContext = testDispatcher,
                 connectionFactory = okConnectionFactory,
@@ -68,7 +62,7 @@ internal class DefaultStripeNetworkClientTest {
 
     @Test
     fun `executeRequestForFile should return StripeResponse with File`() =
-        testDispatcher.runBlockingTest {
+        runTest {
             val executor = DefaultStripeNetworkClient(
                 workContext = testDispatcher,
                 connectionFactory = okConnectionFactory,
@@ -80,7 +74,7 @@ internal class DefaultStripeNetworkClientTest {
 
     @Test
     fun `executeRequest with IllegalStateException should throw the exception`() =
-        testDispatcher.runBlockingTest {
+        runTest {
 
             val client = DefaultStripeNetworkClient(
                 workContext = testDispatcher,
@@ -100,7 +94,7 @@ internal class DefaultStripeNetworkClientTest {
 
     @Test
     fun `executeRequest with IOException should throw an APIConnectionException`() =
-        testDispatcher.runBlockingTest {
+        runTest {
             val exception = UnknownHostException("Could not connect to Stripe API")
             val client = DefaultStripeNetworkClient(
                 workContext = testDispatcher,
@@ -130,7 +124,7 @@ internal class DefaultStripeNetworkClientTest {
 
     @Test
     fun `executeRequest when retries exhausted should return rate-limited response`() =
-        testDispatcher.runBlockingTest {
+        runTest {
             val connectionFactory = RetryCountConnectionFactory(
                 ResponseCodeOverrideConnection(HTTP_TOO_MANY_REQUESTS)
             )
@@ -149,7 +143,7 @@ internal class DefaultStripeNetworkClientTest {
 
     @Test
     fun `executeRequest when retry code is returned once then succeeds should return OK response`() =
-        testDispatcher.runBlockingTest {
+        runTest {
             val connectionFactory = RetryCountConnectionFactory { count ->
                 if (count <= 1) {
                     ResponseCodeOverrideConnection(TEST_RETRY_CODES_START)
@@ -174,7 +168,7 @@ internal class DefaultStripeNetworkClientTest {
 
     @Test
     fun `executeRequest when non retry code should not retry and return response with the code`() =
-        testDispatcher.runBlockingTest {
+        runTest {
             val connectionFactory = RetryCountConnectionFactory(
                 ResponseCodeOverrideConnection(TEST_NON_RETRY_CODES_END)
             )

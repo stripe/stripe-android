@@ -1,7 +1,7 @@
 package com.stripe.android.model.parsers
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.model.CardBrand
+import com.stripe.android.ui.core.elements.CardBrand
 import com.stripe.android.model.CardFunding
 import com.stripe.android.model.SourceFixtures
 import com.stripe.android.model.SourceTypeModel
@@ -14,7 +14,7 @@ class SourceCardDataJsonParserTest {
         assertThat(CARD_DATA)
             .isEqualTo(
                 SourceTypeModel.Card(
-                    brand = CardBrand.Visa,
+                    brand = com.stripe.android.ui.core.elements.CardBrand.Visa,
                     funding = CardFunding.Credit,
                     last4 = "4242",
                     expiryMonth = 12,

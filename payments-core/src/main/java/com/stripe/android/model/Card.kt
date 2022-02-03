@@ -103,7 +103,7 @@ data class Card internal constructor(
      *
      * See [API Reference](https://stripe.com/docs/api/cards/object#card_object-brand).
      */
-    val brand: CardBrand,
+    val brand: com.stripe.android.ui.core.elements.CardBrand,
 
     /**
      * Card funding type. See [CardFunding].
@@ -174,16 +174,16 @@ data class Card internal constructor(
          * See https://stripe.com/docs/api/cards/object#card_object-brand for valid values.
          */
         @JvmSynthetic
-        internal fun getCardBrand(brandName: String?): CardBrand {
+        internal fun getCardBrand(brandName: String?): com.stripe.android.ui.core.elements.CardBrand {
             return when (brandName) {
-                "American Express" -> CardBrand.AmericanExpress
-                "Diners Club" -> CardBrand.DinersClub
-                "Discover" -> CardBrand.Discover
-                "JCB" -> CardBrand.JCB
-                "MasterCard" -> CardBrand.MasterCard
-                "UnionPay" -> CardBrand.UnionPay
-                "Visa" -> CardBrand.Visa
-                else -> CardBrand.Unknown
+                "American Express" -> com.stripe.android.ui.core.elements.CardBrand.AmericanExpress
+                "Diners Club" -> com.stripe.android.ui.core.elements.CardBrand.DinersClub
+                "Discover" -> com.stripe.android.ui.core.elements.CardBrand.Discover
+                "JCB" -> com.stripe.android.ui.core.elements.CardBrand.JCB
+                "MasterCard" -> com.stripe.android.ui.core.elements.CardBrand.MasterCard
+                "UnionPay" -> com.stripe.android.ui.core.elements.CardBrand.UnionPay
+                "Visa" -> com.stripe.android.ui.core.elements.CardBrand.Visa
+                else -> com.stripe.android.ui.core.elements.CardBrand.Unknown
             }
         }
     }

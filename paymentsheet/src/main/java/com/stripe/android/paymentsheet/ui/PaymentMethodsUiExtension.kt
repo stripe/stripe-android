@@ -2,7 +2,7 @@ package com.stripe.android.paymentsheet.ui
 
 import android.content.res.Resources
 import androidx.annotation.DrawableRes
-import com.stripe.android.model.CardBrand
+import com.stripe.android.core.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.R
 

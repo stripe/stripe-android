@@ -5,9 +5,11 @@ import android.graphics.Bitmap
 import android.graphics.Rect
 import android.util.Size
 import androidx.annotation.VisibleForTesting
+import com.stripe.android.camera.framework.image.cropCameraPreviewToViewFinder
+import com.stripe.android.camera.framework.image.hasOpenGl31
+import com.stripe.android.camera.framework.image.scale
 import com.stripe.android.stripecardscan.framework.FetchedData
 import com.stripe.android.stripecardscan.framework.image.MLImage
-import com.stripe.android.stripecardscan.framework.image.scale
 import com.stripe.android.stripecardscan.framework.image.toMLImage
 import com.stripe.android.stripecardscan.framework.ml.TFLAnalyzerFactory
 import com.stripe.android.stripecardscan.framework.ml.TensorFlowLiteAnalyzer
@@ -16,8 +18,6 @@ import com.stripe.android.stripecardscan.framework.ml.ssd.softMax
 import com.stripe.android.stripecardscan.framework.ml.ssd.toRectForm
 import com.stripe.android.stripecardscan.framework.util.reshape
 import com.stripe.android.stripecardscan.payment.card.isValidPan
-import com.stripe.android.stripecardscan.payment.cropCameraPreviewToViewFinder
-import com.stripe.android.stripecardscan.payment.hasOpenGl31
 import com.stripe.android.stripecardscan.payment.ml.ssd.OcrFeatureMapSizes
 import com.stripe.android.stripecardscan.payment.ml.ssd.combinePriors
 import com.stripe.android.stripecardscan.payment.ml.ssd.determineLayoutAndFilter
@@ -189,6 +189,8 @@ internal class SSDOcr private constructor(interpreter: Interpreter) :
         tfInterpreter.runForMultipleInputsOutputs(data, mlOutput)
         return mlOutput
     }
+
+    override val statsName: String? = null
 
     /**
      * A factory for creating instances of this analyzer.

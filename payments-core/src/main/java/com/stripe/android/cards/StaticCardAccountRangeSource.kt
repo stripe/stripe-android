@@ -13,7 +13,7 @@ internal class StaticCardAccountRangeSource(
     override val loading: Flow<Boolean> = flowOf(false)
 
     override suspend fun getAccountRange(
-        cardNumber: CardNumber.Unvalidated
+        cardNumber: com.stripe.android.ui.core.elements.CardNumber.Unvalidated
     ): AccountRange? {
         return accountRanges.first(cardNumber)
     }

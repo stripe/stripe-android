@@ -11,7 +11,7 @@ data class CardParams internal constructor(
     /**
      * The likely [CardBrand] based on the [number].
      */
-    val brand: CardBrand,
+    val brand: com.stripe.android.ui.core.elements.CardBrand,
 
     private val loggingTokens: Set<String> = emptySet(),
 

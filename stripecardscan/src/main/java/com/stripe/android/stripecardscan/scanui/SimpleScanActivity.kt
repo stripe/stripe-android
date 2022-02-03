@@ -10,45 +10,32 @@ import android.util.Size
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
-import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.content.ContextCompat
+import com.stripe.android.camera.scanui.CameraView
 import com.stripe.android.stripecardscan.R
-import com.stripe.android.stripecardscan.camera.CameraPreviewImage
+import com.stripe.android.camera.CameraPreviewImage
+import com.stripe.android.camera.scanui.ScanFlow
+import com.stripe.android.camera.scanui.ViewFinderBackground
+import com.stripe.android.camera.scanui.util.asRect
 import com.stripe.android.stripecardscan.framework.Config
 import com.stripe.android.stripecardscan.framework.util.getSdkVersion
-import com.stripe.android.stripecardscan.scanui.util.asRect
 import com.stripe.android.stripecardscan.scanui.util.dpToPixels
 import com.stripe.android.stripecardscan.scanui.util.getColorByRes
 import com.stripe.android.stripecardscan.scanui.util.getDrawableByRes
 import com.stripe.android.stripecardscan.scanui.util.getFloatResource
-import com.stripe.android.stripecardscan.scanui.util.hide
 import com.stripe.android.stripecardscan.scanui.util.setDrawable
 import com.stripe.android.stripecardscan.scanui.util.setTextSizeByRes
 import com.stripe.android.stripecardscan.scanui.util.setVisible
-import com.stripe.android.stripecardscan.scanui.util.show
-import com.stripe.android.stripecardscan.scanui.util.startAnimation
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.flow.Flow
 import kotlin.math.min
 import kotlin.math.roundToInt
 
-abstract class SimpleScanActivity<ScanFlowParameters> : ScanActivity() {
-
-    /**
-     * The state of the scan flow. This can be expanded if [displayState] is overridden to handle
-     * the added states.
-     */
-    abstract class ScanState(val isFinal: Boolean) {
-        object NotFound : ScanState(isFinal = false)
-        object FoundShort : ScanState(isFinal = false)
-        object FoundLong : ScanState(isFinal = false)
-        object Correct : ScanState(isFinal = true)
-        object Wrong : ScanState(isFinal = false)
-    }
+internal abstract class SimpleScanActivity<ScanFlowParameters> : ScanActivity() {
 
     companion object {
         private const val LOGO_WIDTH_DP = 100
@@ -57,12 +44,12 @@ abstract class SimpleScanActivity<ScanFlowParameters> : ScanActivity() {
     /**
      * The main layout used to render the scan view.
      */
-    protected open val layout: ConstraintLayout by lazy { ConstraintLayout(this) }
+    protected open val layout: CameraView by lazy { CameraView(this) }
 
     /**
      * The frame where the camera preview will be displayed. This is usually the full screen.
      */
-    override val previewFrame: ViewGroup by lazy { FrameLayout(this) }
+    override val previewFrame: ViewGroup by lazy { layout.previewFrame }
 
     /**
      * The text view that displays the cardholder name once a card has been scanned.
@@ -107,19 +94,18 @@ abstract class SimpleScanActivity<ScanFlowParameters> : ScanActivity() {
     /**
      * The background that draws the user focus to the view finder.
      */
-    protected open val viewFinderBackgroundView: ViewFinderBackground by lazy {
-        ViewFinderBackground(this)
-    }
+    protected open val viewFinderBackgroundView: ViewFinderBackground
+        by lazy { layout.viewFinderBackgroundView }
 
     /**
      * The view finder window view.
      */
-    protected open val viewFinderWindowView: View by lazy { View(this) }
+    protected open val viewFinderWindowView: View by lazy { layout.viewFinderWindowView }
 
     /**
      * The border around the view finder.
      */
-    protected open val viewFinderBorderView: ImageView by lazy { ImageView(this) }
+    protected open val viewFinderBorderView: ImageView by lazy { layout.viewFinderBorderView }
 
     private val logoView: ImageView by lazy { ImageView(this) }
 
@@ -143,7 +129,7 @@ abstract class SimpleScanActivity<ScanFlowParameters> : ScanActivity() {
     /**
      * The flow used to scan an item.
      */
-    internal abstract val scanFlow: ScanFlow<ScanFlowParameters>
+    internal abstract val scanFlow: ScanFlow<ScanFlowParameters, CameraPreviewImage<Bitmap>>
 
     /**
      * The scan flow parameters that will be populated.
@@ -180,7 +166,6 @@ abstract class SimpleScanActivity<ScanFlowParameters> : ScanActivity() {
             true
         }
 
-        displayState(scanState, scanStatePrevious)
         setContentView(layout)
     }
 
@@ -191,7 +176,6 @@ abstract class SimpleScanActivity<ScanFlowParameters> : ScanActivity() {
 
     override fun onResume() {
         super.onResume()
-        scanState = ScanState.NotFound
         viewFinderBackgroundView.setOnDrawListener { setupUiComponents() }
     }
 
@@ -207,10 +191,6 @@ abstract class SimpleScanActivity<ScanFlowParameters> : ScanActivity() {
         layout.id = View.generateViewId()
 
         appendUiComponents(
-            previewFrame,
-            viewFinderBackgroundView,
-            viewFinderWindowView,
-            viewFinderBorderView,
             securityIconView,
             securityTextView,
             instructionsTextView,
@@ -613,82 +593,13 @@ abstract class SimpleScanActivity<ScanFlowParameters> : ScanActivity() {
         }
     }
 
-    private var scanStatePrevious: ScanState? = null
-    protected var scanState: ScanState = ScanState.NotFound
-        private set
-
-    /**
-     * Change the state of the scanner.
-     */
-    protected fun changeScanState(newState: ScanState): Boolean {
-        if (newState == scanStatePrevious || scanStatePrevious?.isFinal == true) {
-            return false
-        }
-
-        scanState = newState
-        displayState(newState, scanStatePrevious)
-        scanStatePrevious = newState
-        return true
-    }
-
-    protected open fun displayState(newState: ScanState, previousState: ScanState?) {
-        when (newState) {
-            is ScanState.NotFound -> {
-                viewFinderBackgroundView
-                    .setBackgroundColor(getColorByRes(R.color.stripeNotFoundBackground))
-                viewFinderWindowView
-                    .setBackgroundResource(R.drawable.stripe_card_background_not_found)
-                viewFinderBorderView.startAnimation(R.drawable.stripe_card_border_not_found)
-                instructionsTextView.setText(R.string.stripe_card_scan_instructions)
-                cardNumberTextView.hide()
-                cardNameTextView.hide()
-            }
-            is ScanState.FoundShort -> {
-                viewFinderBackgroundView
-                    .setBackgroundColor(getColorByRes(R.color.stripeFoundBackground))
-                viewFinderWindowView
-                    .setBackgroundResource(R.drawable.stripe_card_background_found)
-                viewFinderBorderView.startAnimation(R.drawable.stripe_card_border_found)
-                instructionsTextView.setText(R.string.stripe_card_scan_instructions)
-                instructionsTextView.show()
-            }
-            is ScanState.FoundLong -> {
-                viewFinderBackgroundView
-                    .setBackgroundColor(getColorByRes(R.color.stripeFoundBackground))
-                viewFinderWindowView
-                    .setBackgroundResource(R.drawable.stripe_card_background_found)
-                viewFinderBorderView.startAnimation(R.drawable.stripe_card_border_found_long)
-                instructionsTextView.setText(R.string.stripe_card_scan_instructions)
-                instructionsTextView.show()
-            }
-            is ScanState.Correct -> {
-                viewFinderBackgroundView
-                    .setBackgroundColor(getColorByRes(R.color.stripeCorrectBackground))
-                viewFinderWindowView
-                    .setBackgroundResource(R.drawable.stripe_card_background_correct)
-                viewFinderBorderView.startAnimation(R.drawable.stripe_card_border_correct)
-                instructionsTextView.hide()
-            }
-            is ScanState.Wrong -> {
-                viewFinderBackgroundView
-                    .setBackgroundColor(getColorByRes(R.color.stripeWrongBackground))
-                viewFinderWindowView
-                    .setBackgroundResource(R.drawable.stripe_card_background_wrong)
-                viewFinderBorderView.startAnimation(R.drawable.stripe_card_border_wrong)
-                instructionsTextView.setText(R.string.stripe_scanned_wrong_card)
-            }
-        }
-    }
-
     override fun onFlashlightStateChanged(flashlightOn: Boolean) {
         setupUiComponents()
     }
 
-    override fun prepareCamera(onCameraReady: () -> Unit) {
-        previewFrame.post {
-            viewFinderBackgroundView.setViewFinderRect(viewFinderWindowView.asRect())
-            onCameraReady()
-        }
+    override fun onCameraReady() {
+        viewFinderBackgroundView.setViewFinderRect(viewFinderWindowView.asRect())
+        startCameraAdapter()
     }
 
     override fun onFlashSupported(supported: Boolean) {

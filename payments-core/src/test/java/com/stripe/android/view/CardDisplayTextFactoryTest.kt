@@ -6,7 +6,7 @@ import android.text.style.ForegroundColorSpan
 import android.text.style.TypefaceSpan
 import androidx.core.text.getSpans
 import androidx.test.core.app.ApplicationProvider
-import com.stripe.android.model.CardBrand
+import com.stripe.android.ui.core.elements.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import org.junit.runner.RunWith
@@ -58,7 +58,7 @@ class CardDisplayTextFactoryTest {
         assertEquals(
             "Visa",
             cardDisplayTextFactory.createStyled(
-                CardBrand.Visa,
+                com.stripe.android.ui.core.elements.CardBrand.Visa,
                 null,
                 false
             ).toString()
@@ -75,7 +75,7 @@ class CardDisplayTextFactoryTest {
         assertEquals(
             "Visa",
             cardDisplayTextFactory.createStyled(
-                CardBrand.Visa,
+                com.stripe.android.ui.core.elements.CardBrand.Visa,
                 "",
                 false
             ).toString()
@@ -92,7 +92,7 @@ class CardDisplayTextFactoryTest {
             themeConfig
         )
         val styledString = cardDisplayTextFactory.createStyled(
-            CardBrand.MasterCard,
+            com.stripe.android.ui.core.elements.CardBrand.MasterCard,
             "4242",
             false
         )
@@ -144,7 +144,7 @@ class CardDisplayTextFactoryTest {
             themeConfig
         )
         val styledString = cardDisplayTextFactory.createStyled(
-            CardBrand.Visa,
+            com.stripe.android.ui.core.elements.CardBrand.Visa,
             "4242",
             false
         )

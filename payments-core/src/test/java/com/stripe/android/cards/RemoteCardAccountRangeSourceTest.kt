@@ -14,31 +14,22 @@ import com.stripe.android.networking.ApiRequest
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networking.StripeRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.TestCoroutineDispatcher
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.runTest
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
-import kotlin.test.AfterTest
 import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
 @ExperimentalCoroutinesApi
 internal class RemoteCardAccountRangeSourceTest {
-    private val testDispatcher = TestCoroutineDispatcher()
-
     private val cardAccountRangeStore = mock<CardAccountRangeStore>()
 
-    @AfterTest
-    fun cleanup() {
-        testDispatcher.cleanupTestCoroutines()
-    }
-
     @Test
-    fun `getAccountRange() should return expected AccountRange`() = testDispatcher.runBlockingTest {
+    fun `getAccountRange() should return expected AccountRange`() = runTest {
         val remoteCardAccountRangeSource = RemoteCardAccountRangeSource(
             FakeStripeRepository(VISA_METADATA),
             REQUEST_OPTIONS,
@@ -73,7 +64,7 @@ internal class RemoteCardAccountRangeSourceTest {
 
     @Test
     fun `getAccountRange() when CardMetadata is empty should return null`() =
-        testDispatcher.runBlockingTest {
+        runTest {
             val remoteCardAccountRangeSource = RemoteCardAccountRangeSource(
                 FakeStripeRepository(EMPTY_METADATA),
                 REQUEST_OPTIONS,
@@ -98,7 +89,7 @@ internal class RemoteCardAccountRangeSourceTest {
 
     @Test
     fun `getAccountRange() when card number is less than required BIN length should return null`() =
-        testDispatcher.runBlockingTest {
+        runTest {
             val repository = mock<StripeRepository>()
 
             val remoteCardAccountRangeSource = RemoteCardAccountRangeSource(
@@ -114,7 +105,7 @@ internal class RemoteCardAccountRangeSourceTest {
 
             assertThat(
                 remoteCardAccountRangeSource.getAccountRange(
-                    CardNumber.Unvalidated("42")
+                    com.stripe.android.ui.core.elements.CardNumber.Unvalidated("42")
                 )
             ).isNull()
 
@@ -124,7 +115,7 @@ internal class RemoteCardAccountRangeSourceTest {
 
     @Test
     fun `getAccountRange() should fire missing range analytics request when response is not empty but card number does not match`() =
-        testDispatcher.runBlockingTest {
+        runTest {
             val analyticsRequests = mutableListOf<AnalyticsRequest>()
 
             val remoteCardAccountRangeSource = RemoteCardAccountRangeSource(
@@ -156,7 +147,7 @@ internal class RemoteCardAccountRangeSourceTest {
             )
 
             remoteCardAccountRangeSource.getAccountRange(
-                CardNumber.Unvalidated("4242424242424242")
+                com.stripe.android.ui.core.elements.CardNumber.Unvalidated("4242424242424242")
             )
 
             assertThat(analyticsRequests)

@@ -7,7 +7,7 @@ import com.stripe.android.core.exception.InvalidRequestException
 import com.stripe.android.model.AccountParams
 import com.stripe.android.model.AddressFixtures
 import com.stripe.android.model.Card
-import com.stripe.android.model.CardBrand
+import com.stripe.android.ui.core.elements.CardBrand
 import com.stripe.android.model.CardFunding
 import com.stripe.android.model.CardParamsFixtures
 import com.stripe.android.model.DateOfBirth
@@ -22,14 +22,13 @@ import com.stripe.android.model.Token
 import com.stripe.android.networking.StripeApiRepository
 import com.stripe.android.utils.TestUtils.idleLooper
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.TestCoroutineDispatcher
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.runTest
 import org.junit.runner.RunWith
 import org.mockito.kotlin.argWhere
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
-import kotlin.test.AfterTest
 import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
@@ -38,12 +37,7 @@ internal class StripeEndToEndTest {
     private val context: Context = ApplicationProvider.getApplicationContext()
     private val defaultStripe = Stripe(context, ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)
 
-    private val testDispatcher = TestCoroutineDispatcher()
-
-    @AfterTest
-    fun cleanup() {
-        testDispatcher.cleanupTestCoroutines()
-    }
+    private val testDispatcher = UnconfinedTestDispatcher()
 
     @Test
     fun testCreateAccountToken() {
@@ -91,7 +85,7 @@ internal class StripeEndToEndTest {
     }
 
     @Test
-    fun retrieveSetupIntentAsync_withInvalidClientSecret_shouldReturnInvalidRequestException() = testDispatcher.runBlockingTest {
+    fun retrieveSetupIntentAsync_withInvalidClientSecret_shouldReturnInvalidRequestException() = runTest {
         val setupIntentCallback: ApiResultCallback<SetupIntent> = mock()
 
         createStripeWithTestScope().retrieveSetupIntent(
@@ -152,7 +146,7 @@ internal class StripeEndToEndTest {
                 SourceTypeModel.Card(
                     addressLine1Check = "unchecked",
                     addressZipCheck = "unchecked",
-                    brand = CardBrand.Visa,
+                    brand = com.stripe.android.ui.core.elements.CardBrand.Visa,
                     country = "US",
                     cvcCheck = "unchecked",
                     expiryMonth = 12,
@@ -187,7 +181,7 @@ internal class StripeEndToEndTest {
                     addressZip = "94107",
                     addressZipCheck = "unchecked",
                     addressCountry = "US",
-                    brand = CardBrand.Visa,
+                    brand = com.stripe.android.ui.core.elements.CardBrand.Visa,
                     funding = CardFunding.Credit,
                     country = "US",
                     currency = "usd",
@@ -200,13 +194,13 @@ internal class StripeEndToEndTest {
     fun `Card objects should be populated with the expected CardBrand value`() {
         assertThat(
             listOf(
-                CardNumberFixtures.AMEX_NO_SPACES to CardBrand.AmericanExpress,
-                CardNumberFixtures.VISA_NO_SPACES to CardBrand.Visa,
-                CardNumberFixtures.MASTERCARD_NO_SPACES to CardBrand.MasterCard,
-                CardNumberFixtures.JCB_NO_SPACES to CardBrand.JCB,
-                CardNumberFixtures.UNIONPAY_NO_SPACES to CardBrand.UnionPay,
-                CardNumberFixtures.DISCOVER_NO_SPACES to CardBrand.Discover,
-                CardNumberFixtures.DINERS_CLUB_14_NO_SPACES to CardBrand.DinersClub
+                CardNumberFixtures.AMEX_NO_SPACES to com.stripe.android.ui.core.elements.CardBrand.AmericanExpress,
+                CardNumberFixtures.VISA_NO_SPACES to com.stripe.android.ui.core.elements.CardBrand.Visa,
+                CardNumberFixtures.MASTERCARD_NO_SPACES to com.stripe.android.ui.core.elements.CardBrand.MasterCard,
+                CardNumberFixtures.JCB_NO_SPACES to com.stripe.android.ui.core.elements.CardBrand.JCB,
+                CardNumberFixtures.UNIONPAY_NO_SPACES to com.stripe.android.ui.core.elements.CardBrand.UnionPay,
+                CardNumberFixtures.DISCOVER_NO_SPACES to com.stripe.android.ui.core.elements.CardBrand.Discover,
+                CardNumberFixtures.DINERS_CLUB_14_NO_SPACES to com.stripe.android.ui.core.elements.CardBrand.DinersClub
             ).all { (cardNumber, cardBrand) ->
                 val token = defaultStripe.createCardTokenSynchronous(
                     CardParamsFixtures.DEFAULT.copy(
@@ -219,7 +213,7 @@ internal class StripeEndToEndTest {
     }
 
     @Test
-    fun `createRadarSession() should return a valid Radar Session id`() = testDispatcher.runBlockingTest {
+    fun `createRadarSession() should return a valid Radar Session id`() = runTest {
         val radarSession = createStripeWithTestScope().createRadarSession()
         assertThat(radarSession.id)
             .startsWith("rse_")

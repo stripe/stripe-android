@@ -24,7 +24,7 @@ internal object CardParamsFixtures {
     )
 
     val WITH_ATTRIBUTION = CardParams(
-        brand = CardBrand.Visa,
+        brand = com.stripe.android.ui.core.elements.CardBrand.Visa,
         loggingTokens = setOf(CardInputWidget.LOGGING_TOKEN),
         number = CardNumberFixtures.VISA_NO_SPACES,
         expMonth = 12,

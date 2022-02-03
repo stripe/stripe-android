@@ -10,19 +10,19 @@ internal data class AccountRange internal constructor(
     val brandInfo: BrandInfo,
     val country: String? = null
 ) : StripeModel {
-    val brand: CardBrand
+    val brand: com.stripe.android.ui.core.elements.CardBrand
         get() = brandInfo.brand
 
     internal enum class BrandInfo(
         val brandName: String,
-        val brand: CardBrand
+        val brand: com.stripe.android.ui.core.elements.CardBrand
     ) {
-        Visa("VISA", CardBrand.Visa),
-        Mastercard("MASTERCARD", CardBrand.MasterCard),
-        AmericanExpress("AMERICAN_EXPRESS", CardBrand.AmericanExpress),
-        JCB("JCB", CardBrand.JCB),
-        DinersClub("DINERS_CLUB", CardBrand.DinersClub),
-        Discover("DISCOVER", CardBrand.Discover),
-        UnionPay("UNIONPAY", CardBrand.UnionPay)
+        Visa("VISA", com.stripe.android.ui.core.elements.CardBrand.Visa),
+        Mastercard("MASTERCARD", com.stripe.android.ui.core.elements.CardBrand.MasterCard),
+        AmericanExpress("AMERICAN_EXPRESS", com.stripe.android.ui.core.elements.CardBrand.AmericanExpress),
+        JCB("JCB", com.stripe.android.ui.core.elements.CardBrand.JCB),
+        DinersClub("DINERS_CLUB", com.stripe.android.ui.core.elements.CardBrand.DinersClub),
+        Discover("DISCOVER", com.stripe.android.ui.core.elements.CardBrand.Discover),
+        UnionPay("UNIONPAY", com.stripe.android.ui.core.elements.CardBrand.UnionPay)
     }
 }
