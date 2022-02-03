@@ -11,6 +11,7 @@
     <string name="stripe_scanned_wrong_card" description="Text displayed above the scan window when the wrong card is scanned">Card doesn\'t match</string>
 
     <string name="stripe_camera_permission_denied_message" description="Message shown to the user when camera permission is denied">Please allow camera access to scan your card</string>
+    <string name="stripe_camera_permission_settings_message" description="Message shown to the user when camera permission is denied in fragment">Please allow camera access in settings to scan your card</string>
     <string name="stripe_camera_permission_denied_ok" description="Affirmative button shown as part of the permission denied dialog">OK</string>
     <string name="stripe_camera_permission_denied_cancel" description="Negative button shown as part of the permission denied dialog">Cancel</string>
 
