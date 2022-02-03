@@ -78,7 +78,7 @@ internal abstract class CardScanFlow(
                 resultHandler = it,
                 analyzerLoopErrorListener = scanErrorListener
             ).apply {
-                subscribeTo(
+                mainLoopJob = subscribeTo(
                     imageStream.map {
                         SSDOcr.cameraPreviewToInput(it.image, it.viewBounds, viewFinder)
                     },
