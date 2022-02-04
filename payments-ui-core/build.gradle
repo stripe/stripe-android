@@ -1,0 +1,153 @@
+plugins {
+    id "com.android.library"
+    id "kotlin-android"
+    id 'kotlin-kapt'
+    id 'org.jetbrains.dokka'
+    id "org.jetbrains.kotlin.plugin.parcelize"
+    id 'org.jetbrains.kotlin.plugin.serialization' version '1.6.10'
+}
+
+assemble.dependsOn('lint')
+check.dependsOn('checkstyle')
+
+configurations {
+    ktlint
+}
+
+if (System.getenv("JITPACK")) {
+    group='com.github.stripe.stripe-android'
+}
+
+dependencies {
+    implementation project(":stripe-core")
+    implementation project(":payments-core")
+
+    implementation 'androidx.core:core-ktx:1.7.0'
+    implementation libraries.androidx.appcompat
+    implementation libraries.androidx.lifecycle.livedata.ktx
+    implementation "com.google.android.material:material:$materialVersion"
+    implementation "com.google.dagger:dagger:$daggerVersion"
+    kapt "com.google.dagger:dagger-compiler:$daggerVersion"
+
+    implementation "androidx.compose.ui:ui:$composeVersion"
+    // Foundation (Border, Background, Box, Image, Scroll, shapes, animations, etc.)
+    implementation "androidx.compose.foundation:foundation:$composeVersion"
+    // Material Design
+    implementation "androidx.compose.material:material:$composeVersion"
+    // Material design icons
+    implementation "androidx.compose.material:material-icons-core:$composeVersion"
+    // Integration with activities
+    implementation "androidx.activity:activity-compose:$composeActivityVersion"
+    // Integration with observables
+    implementation "androidx.compose.runtime:runtime-livedata:$composeVersion"
+    implementation "com.google.accompanist:accompanist-flowlayout:0.20.3"
+    // Tooling support (Previews, etc.)
+    debugImplementation "androidx.compose.ui:ui-tooling:$composeVersion"
+
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinCoroutinesVersion"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$kotlinCoroutinesVersion"
+    implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.2"
+
+    testImplementation "junit:junit:$junitVersion"
+    testImplementation "org.mockito:mockito-core:$mockitoCoreVersion"
+    testImplementation "org.mockito:mockito-inline:$mockitoCoreVersion"
+    testImplementation "org.robolectric:robolectric:$robolectricVersion"
+    testImplementation "androidx.test:core:$androidTestVersion"
+    testImplementation 'org.json:json:20210307'
+    testImplementation "org.mockito.kotlin:mockito-kotlin:$mockitoKotlinVersion"
+    testImplementation "org.jetbrains.kotlin:kotlin-test-junit:$kotlinVersion"
+    testImplementation "org.jetbrains.kotlin:kotlin-test-annotations-common:$kotlinVersion"
+    testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$kotlinCoroutinesVersion"
+    testImplementation "com.google.truth:truth:$truthVersion"
+    testImplementation "androidx.test.ext:junit-ktx:$androidTestJunitVersion"
+    testImplementation "androidx.arch.core:core-testing:2.1.0"
+    testImplementation libraries.androidx.fragment.testing
+
+    ktlint "com.pinterest:ktlint:$ktlintVersion"
+}
+
+android {
+    compileSdkVersion rootProject.ext.compileSdkVersion
+    buildToolsVersion rootProject.ext.buildToolsVersion
+
+    defaultConfig {
+        minSdkVersion 21
+        targetSdkVersion rootProject.ext.compileSdkVersion
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+
+        vectorDrawables.useSupportLibrary = true
+
+        // From https://developer.android.com/training/testing/junit-runner:
+        // > To remove all shared state from your device"s CPU and memory after each test,
+        // > use the clearPackageData flag.
+        testInstrumentationRunnerArguments clearPackageData: "true"
+    }
+
+    sourceSets {
+        main {
+            res.srcDirs = ['res']
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
+
+    buildFeatures {
+        compose = true
+    }
+
+    testOptions {
+        unitTests {
+            // Note: without this, all Robolectric tests using assets will fail.
+            includeAndroidResources = true
+            all {
+                maxHeapSize = "1024m"
+            }
+        }
+    }
+
+    composeOptions {
+        kotlinCompilerExtensionVersion "$composeVersion"
+    }
+
+    lintOptions {
+        disable "UnrememberedMutableState"
+    }
+
+    dokkaHtml {
+        outputDirectory = new File("${project.rootDir}/docs/$project.name")
+    }
+}
+
+task ktlint(type: JavaExec, group: "verification") {
+    description = "Check Kotlin code style."
+    mainClass = "com.pinterest.ktlint.Main"
+    classpath = configurations.ktlint
+    args "src/**/*.kt"
+    // to generate report in checkstyle format prepend following args:
+    // "--reporter=plain", "--reporter=checkstyle,output=${buildDir}/ktlint.xml"
+    // see https://github.com/pinterest/ktlint#usage for more
+}
+check.dependsOn ktlint
+
+task ktlintFormat(type: JavaExec, group: "formatting") {
+    description = "Fix Kotlin code style deviations."
+    mainClass = "com.pinterest.ktlint.Main"
+    classpath = configurations.ktlint
+    args "-F", "src/**/*.kt"
+}
+
+ext {
+    artifactId = "stripe-ui-core"
+    artifactName = "stripe-ui-core"
+    artifactDescrption = "The core UI module of Stripe Android SDKs"
+}
+
+apply from: "${rootDir}/deploy/deploy.gradle"

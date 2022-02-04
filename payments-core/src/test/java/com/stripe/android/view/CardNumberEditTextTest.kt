@@ -33,7 +33,7 @@ import com.stripe.android.cards.StaticCardAccountRanges
 import com.stripe.android.core.networking.AnalyticsRequest
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.model.AccountRange
-import com.stripe.android.ui.core.elements.CardBrand
+import com.stripe.android.model.CardBrand
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.testharness.ViewTestUtils
 import com.stripe.android.utils.TestUtils.idleLooper
@@ -75,8 +75,8 @@ internal class CardNumberEditTextTest {
     private var completionCallbackInvocations = 0
     private val completionCallback: () -> Unit = { completionCallbackInvocations++ }
 
-    private var lastBrandChangeCallbackInvocation: com.stripe.android.ui.core.elements.CardBrand? = null
-    private val brandChangeCallback: (com.stripe.android.ui.core.elements.CardBrand) -> Unit = {
+    private var lastBrandChangeCallbackInvocation: CardBrand? = null
+    private val brandChangeCallback: (CardBrand) -> Unit = {
         lastBrandChangeCallbackInvocation = it
     }
 
@@ -207,7 +207,7 @@ internal class CardNumberEditTextTest {
 
     @Test
     fun calculateCursorPosition_whenPastingIntoAGap_includesTheGapJump() {
-        cardNumberEditText.cardBrand = com.stripe.android.ui.core.elements.CardBrand.Unknown
+        cardNumberEditText.cardBrand = CardBrand.Unknown
 
         assertThat(
             cardNumberEditText.calculateCursorPosition(12, 8, 2)
@@ -216,7 +216,7 @@ internal class CardNumberEditTextTest {
 
     @Test
     fun calculateCursorPosition_whenPastingOverAGap_includesTheGapJump() {
-        cardNumberEditText.cardBrand = com.stripe.android.ui.core.elements.CardBrand.Unknown
+        cardNumberEditText.cardBrand = CardBrand.Unknown
         assertThat(
             cardNumberEditText.calculateCursorPosition(12, 3, 5)
         ).isEqualTo(9)
@@ -224,7 +224,7 @@ internal class CardNumberEditTextTest {
 
     @Test
     fun calculateCursorPosition_whenIndexWouldGoOutOfBounds_setsToEndOfString() {
-        cardNumberEditText.cardBrand = com.stripe.android.ui.core.elements.CardBrand.Visa
+        cardNumberEditText.cardBrand = CardBrand.Visa
 
         // This case could happen when you paste over 5 digits with only 2
         assertThat(
@@ -282,11 +282,11 @@ internal class CardNumberEditTextTest {
             cardAccountRangeRepository = NullCardAccountRangeRepository(),
             staticCardAccountRanges = object : StaticCardAccountRanges {
                 override fun first(
-                    cardNumber: com.stripe.android.ui.core.elements.CardNumber.Unvalidated
+                    cardNumber: CardNumber.Unvalidated
                 ): AccountRange = AccountRangeFixtures.UNIONPAY19
 
                 override fun filter(
-                    cardNumber: com.stripe.android.ui.core.elements.CardNumber.Unvalidated
+                    cardNumber: CardNumber.Unvalidated
                 ) = listOf(AccountRangeFixtures.UNIONPAY19)
             },
             analyticsRequestExecutor = analyticsRequestExecutor,
@@ -313,11 +313,11 @@ internal class CardNumberEditTextTest {
             cardAccountRangeRepository = NullCardAccountRangeRepository(),
             staticCardAccountRanges = object : StaticCardAccountRanges {
                 override fun first(
-                    cardNumber: com.stripe.android.ui.core.elements.CardNumber.Unvalidated
+                    cardNumber: CardNumber.Unvalidated
                 ): AccountRange? = null
 
                 override fun filter(
-                    cardNumber: com.stripe.android.ui.core.elements.CardNumber.Unvalidated
+                    cardNumber: CardNumber.Unvalidated
                 ) = emptyList<AccountRange>()
             },
             analyticsRequestExecutor = analyticsRequestExecutor,
@@ -347,7 +347,7 @@ internal class CardNumberEditTextTest {
         assertThat(cardNumberEditText.fieldText)
             .isEqualTo(UNIONPAY_WITH_SPACES)
         assertThat(cardNumberEditText.cardBrand)
-            .isEqualTo(com.stripe.android.ui.core.elements.CardBrand.Unknown)
+            .isEqualTo(CardBrand.Unknown)
     }
 
     @Test
@@ -527,39 +527,39 @@ internal class CardNumberEditTextTest {
 
     @Test
     fun setCardBrandChangeListener_callsSetCardBrand() {
-        assertEquals(com.stripe.android.ui.core.elements.CardBrand.Unknown, lastBrandChangeCallbackInvocation)
+        assertEquals(CardBrand.Unknown, lastBrandChangeCallbackInvocation)
     }
 
     @Test
     fun enterVisaBin_callsBrandListener() {
         updateCardNumberAndIdle(VISA_BIN)
-        assertEquals(com.stripe.android.ui.core.elements.CardBrand.Visa, lastBrandChangeCallbackInvocation)
+        assertEquals(CardBrand.Visa, lastBrandChangeCallbackInvocation)
     }
 
     @Test
     fun addAmExBin_callsBrandListener() {
-        verifyCardBrandBin(com.stripe.android.ui.core.elements.CardBrand.AmericanExpress, AMEX_BIN)
+        verifyCardBrandBin(CardBrand.AmericanExpress, AMEX_BIN)
     }
 
     @Test
     fun addDinersClubBin_callsBrandListener() {
-        verifyCardBrandBin(com.stripe.android.ui.core.elements.CardBrand.DinersClub, CardNumberFixtures.DINERS_CLUB_14_BIN)
-        verifyCardBrandBin(com.stripe.android.ui.core.elements.CardBrand.DinersClub, CardNumberFixtures.DINERS_CLUB_16_BIN)
+        verifyCardBrandBin(CardBrand.DinersClub, CardNumberFixtures.DINERS_CLUB_14_BIN)
+        verifyCardBrandBin(CardBrand.DinersClub, CardNumberFixtures.DINERS_CLUB_16_BIN)
     }
 
     @Test
     fun addDiscoverBin_callsBrandListener() {
-        verifyCardBrandBin(com.stripe.android.ui.core.elements.CardBrand.Discover, CardNumberFixtures.DISCOVER_BIN)
+        verifyCardBrandBin(CardBrand.Discover, CardNumberFixtures.DISCOVER_BIN)
     }
 
     @Test
     fun addMasterCardBin_callsBrandListener() {
-        verifyCardBrandBin(com.stripe.android.ui.core.elements.CardBrand.MasterCard, CardNumberFixtures.MASTERCARD_BIN)
+        verifyCardBrandBin(CardBrand.MasterCard, CardNumberFixtures.MASTERCARD_BIN)
     }
 
     @Test
     fun addJcbBin_callsBrandListener() {
-        verifyCardBrandBin(com.stripe.android.ui.core.elements.CardBrand.JCB, CardNumberFixtures.JCB_BIN)
+        verifyCardBrandBin(CardBrand.JCB, CardNumberFixtures.JCB_BIN)
     }
 
     @Test
@@ -568,23 +568,23 @@ internal class CardNumberEditTextTest {
         idleLooper()
         cardNumberEditText.append(AMEX_WITH_SPACES.drop(2))
         idleLooper()
-        assertEquals(com.stripe.android.ui.core.elements.CardBrand.AmericanExpress, lastBrandChangeCallbackInvocation)
+        assertEquals(CardBrand.AmericanExpress, lastBrandChangeCallbackInvocation)
     }
 
     @Test
     fun enterBrandBin_thenDelete_callsUpdateWithUnknown() {
         updateCardNumberAndIdle(UNIONPAY_BIN)
-        assertEquals(com.stripe.android.ui.core.elements.CardBrand.UnionPay, lastBrandChangeCallbackInvocation)
+        assertEquals(CardBrand.UnionPay, lastBrandChangeCallbackInvocation)
 
         ViewTestUtils.sendDeleteKeyEvent(cardNumberEditText)
         idleLooper()
-        assertEquals(com.stripe.android.ui.core.elements.CardBrand.Unknown, lastBrandChangeCallbackInvocation)
+        assertEquals(CardBrand.Unknown, lastBrandChangeCallbackInvocation)
     }
 
     @Test
     fun enterBrandBin_thenClearAllText_callsUpdateWithUnknown() {
         updateCardNumberAndIdle(VISA_BIN)
-        assertEquals(com.stripe.android.ui.core.elements.CardBrand.Visa, lastBrandChangeCallbackInvocation)
+        assertEquals(CardBrand.Visa, lastBrandChangeCallbackInvocation)
 
         // Just adding some other text. Not enough to invalidate the card or complete it.
         lastBrandChangeCallbackInvocation = null
@@ -596,7 +596,7 @@ internal class CardNumberEditTextTest {
         // This simulates the user selecting all text and deleting it.
         updateCardNumberAndIdle("")
 
-        assertEquals(com.stripe.android.ui.core.elements.CardBrand.Unknown, lastBrandChangeCallbackInvocation)
+        assertEquals(CardBrand.Unknown, lastBrandChangeCallbackInvocation)
     }
 
     @Test
@@ -671,17 +671,17 @@ internal class CardNumberEditTextTest {
     fun `queryAccountRangeRepository() should update cardBrand value`() {
         cardNumberEditText.queryAccountRangeRepository(CardNumberFixtures.DINERS_CLUB_14)
         idleLooper()
-        assertEquals(com.stripe.android.ui.core.elements.CardBrand.DinersClub, lastBrandChangeCallbackInvocation)
+        assertEquals(CardBrand.DinersClub, lastBrandChangeCallbackInvocation)
 
         cardNumberEditText.queryAccountRangeRepository(CardNumberFixtures.AMEX)
         idleLooper()
-        assertEquals(com.stripe.android.ui.core.elements.CardBrand.AmericanExpress, lastBrandChangeCallbackInvocation)
+        assertEquals(CardBrand.AmericanExpress, lastBrandChangeCallbackInvocation)
     }
 
     @Test
     fun `queryAccountRangeRepository() with null bin should set cardBrand to Unknown`() {
-        cardNumberEditText.queryAccountRangeRepository(com.stripe.android.ui.core.elements.CardNumber.Unvalidated(""))
-        assertEquals(com.stripe.android.ui.core.elements.CardBrand.Unknown, lastBrandChangeCallbackInvocation)
+        cardNumberEditText.queryAccountRangeRepository(CardNumber.Unvalidated(""))
+        assertEquals(CardBrand.Unknown, lastBrandChangeCallbackInvocation)
     }
 
     @Test
@@ -723,7 +723,7 @@ internal class CardNumberEditTextTest {
             workContext = testDispatcher,
             cardAccountRangeRepository = object : CardAccountRangeRepository {
                 override suspend fun getAccountRange(
-                    cardNumber: com.stripe.android.ui.core.elements.CardNumber.Unvalidated
+                    cardNumber: CardNumber.Unvalidated
                 ): AccountRange? {
                     repositoryCalls++
                     return cardAccountRangeRepository.getAccountRange(cardNumber)
@@ -746,7 +746,7 @@ internal class CardNumberEditTextTest {
         // matches Visa
         updateCardNumberAndIdle("4")
         assertThat(lastBrandChangeCallbackInvocation)
-            .isEqualTo(com.stripe.android.ui.core.elements.CardBrand.Visa)
+            .isEqualTo(CardBrand.Visa)
         assertThat(cardNumberEditText.isCardNumberValid)
             .isFalse()
         assertThat(cardNumberEditText.shouldShowError)
@@ -758,7 +758,7 @@ internal class CardNumberEditTextTest {
         // matches Amex and diners
         updateCardNumberAndIdle("3")
         assertThat(lastBrandChangeCallbackInvocation)
-            .isEqualTo(com.stripe.android.ui.core.elements.CardBrand.Unknown)
+            .isEqualTo(CardBrand.Unknown)
         assertThat(cardNumberEditText.isCardNumberValid)
             .isFalse()
         assertThat(cardNumberEditText.shouldShowError)
@@ -780,7 +780,7 @@ internal class CardNumberEditTextTest {
         // matches Discover and Union Pay
         updateCardNumberAndIdle("6")
         assertThat(lastBrandChangeCallbackInvocation)
-            .isEqualTo(com.stripe.android.ui.core.elements.CardBrand.Unknown)
+            .isEqualTo(CardBrand.Unknown)
     }
 
     @Test
@@ -820,7 +820,7 @@ internal class CardNumberEditTextTest {
             workContext = testDispatcher,
             cardAccountRangeRepository = object : CardAccountRangeRepository {
                 override suspend fun getAccountRange(
-                    cardNumber: com.stripe.android.ui.core.elements.CardNumber.Unvalidated
+                    cardNumber: CardNumber.Unvalidated
                 ): AccountRange? {
                     repositoryCalls++
                     return cardAccountRangeRepository.getAccountRange(cardNumber)
@@ -881,7 +881,7 @@ internal class CardNumberEditTextTest {
             workContext = testDispatcher,
             cardAccountRangeRepository = object : CardAccountRangeRepository {
                 override suspend fun getAccountRange(
-                    cardNumber: com.stripe.android.ui.core.elements.CardNumber.Unvalidated
+                    cardNumber: CardNumber.Unvalidated
                 ): AccountRange? = null
 
                 override val loading: Flow<Boolean> = flowOf(false)
@@ -911,7 +911,7 @@ internal class CardNumberEditTextTest {
     }
 
     private fun verifyCardBrandBin(
-        cardBrand: com.stripe.android.ui.core.elements.CardBrand,
+        cardBrand: CardBrand,
         bin: String
     ) {
         // Reset inside the loop so we don't count each prefix
@@ -928,7 +928,7 @@ internal class CardNumberEditTextTest {
 
     private class DelayedCardAccountRangeRepository : CardAccountRangeRepository {
         override suspend fun getAccountRange(
-            cardNumber: com.stripe.android.ui.core.elements.CardNumber.Unvalidated
+            cardNumber: CardNumber.Unvalidated
         ): AccountRange? {
             delay(TimeUnit.SECONDS.toMillis(10))
             return null
@@ -940,7 +940,7 @@ internal class CardNumberEditTextTest {
     private class FakeCardAccountRangeRepository : CardAccountRangeRepository {
         private val staticCardAccountRangeSource = StaticCardAccountRangeSource()
         override suspend fun getAccountRange(
-            cardNumber: com.stripe.android.ui.core.elements.CardNumber.Unvalidated
+            cardNumber: CardNumber.Unvalidated
         ): AccountRange? {
             return cardNumber.bin?.let {
                 staticCardAccountRangeSource.getAccountRange(cardNumber)

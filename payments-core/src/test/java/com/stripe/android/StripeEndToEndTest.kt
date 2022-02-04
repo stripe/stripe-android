@@ -7,7 +7,7 @@ import com.stripe.android.core.exception.InvalidRequestException
 import com.stripe.android.model.AccountParams
 import com.stripe.android.model.AddressFixtures
 import com.stripe.android.model.Card
-import com.stripe.android.ui.core.elements.CardBrand
+import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardFunding
 import com.stripe.android.model.CardParamsFixtures
 import com.stripe.android.model.DateOfBirth
@@ -146,7 +146,7 @@ internal class StripeEndToEndTest {
                 SourceTypeModel.Card(
                     addressLine1Check = "unchecked",
                     addressZipCheck = "unchecked",
-                    brand = com.stripe.android.ui.core.elements.CardBrand.Visa,
+                    brand = CardBrand.Visa,
                     country = "US",
                     cvcCheck = "unchecked",
                     expiryMonth = 12,
@@ -181,7 +181,7 @@ internal class StripeEndToEndTest {
                     addressZip = "94107",
                     addressZipCheck = "unchecked",
                     addressCountry = "US",
-                    brand = com.stripe.android.ui.core.elements.CardBrand.Visa,
+                    brand = CardBrand.Visa,
                     funding = CardFunding.Credit,
                     country = "US",
                     currency = "usd",
@@ -194,13 +194,13 @@ internal class StripeEndToEndTest {
     fun `Card objects should be populated with the expected CardBrand value`() {
         assertThat(
             listOf(
-                CardNumberFixtures.AMEX_NO_SPACES to com.stripe.android.ui.core.elements.CardBrand.AmericanExpress,
-                CardNumberFixtures.VISA_NO_SPACES to com.stripe.android.ui.core.elements.CardBrand.Visa,
-                CardNumberFixtures.MASTERCARD_NO_SPACES to com.stripe.android.ui.core.elements.CardBrand.MasterCard,
-                CardNumberFixtures.JCB_NO_SPACES to com.stripe.android.ui.core.elements.CardBrand.JCB,
-                CardNumberFixtures.UNIONPAY_NO_SPACES to com.stripe.android.ui.core.elements.CardBrand.UnionPay,
-                CardNumberFixtures.DISCOVER_NO_SPACES to com.stripe.android.ui.core.elements.CardBrand.Discover,
-                CardNumberFixtures.DINERS_CLUB_14_NO_SPACES to com.stripe.android.ui.core.elements.CardBrand.DinersClub
+                CardNumberFixtures.AMEX_NO_SPACES to CardBrand.AmericanExpress,
+                CardNumberFixtures.VISA_NO_SPACES to CardBrand.Visa,
+                CardNumberFixtures.MASTERCARD_NO_SPACES to CardBrand.MasterCard,
+                CardNumberFixtures.JCB_NO_SPACES to CardBrand.JCB,
+                CardNumberFixtures.UNIONPAY_NO_SPACES to CardBrand.UnionPay,
+                CardNumberFixtures.DISCOVER_NO_SPACES to CardBrand.Discover,
+                CardNumberFixtures.DINERS_CLUB_14_NO_SPACES to CardBrand.DinersClub
             ).all { (cardNumber, cardBrand) ->
                 val token = defaultStripe.createCardTokenSynchronous(
                     CardParamsFixtures.DEFAULT.copy(

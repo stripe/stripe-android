@@ -19,7 +19,7 @@ import com.stripe.android.cards.AccountRangeFixtures
 import com.stripe.android.cards.DefaultCardAccountRangeStore
 import com.stripe.android.model.Address
 import com.stripe.android.model.BinFixtures
-import com.stripe.android.ui.core.elements.CardBrand
+import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardParams
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
@@ -135,7 +135,7 @@ internal class CardInputWidgetTest {
         assertThat(cardInputWidget.cardParams)
             .isEqualTo(
                 CardParams(
-                    brand = com.stripe.android.ui.core.elements.CardBrand.Visa,
+                    brand = CardBrand.Visa,
                     loggingTokens = ATTRIBUTION,
                     number = VISA_NO_SPACES,
                     expMonth = 12,
@@ -173,7 +173,7 @@ internal class CardInputWidgetTest {
         assertThat(cardInputWidget.cardParams)
             .isEqualTo(
                 CardParams(
-                    brand = com.stripe.android.ui.core.elements.CardBrand.Visa,
+                    brand = CardBrand.Visa,
                     loggingTokens = ATTRIBUTION,
                     number = VISA_NO_SPACES,
                     expMonth = 12,
@@ -216,7 +216,7 @@ internal class CardInputWidgetTest {
         assertThat(cardInputWidget.cardParams)
             .isEqualTo(
                 CardParams(
-                    brand = com.stripe.android.ui.core.elements.CardBrand.AmericanExpress,
+                    brand = CardBrand.AmericanExpress,
                     loggingTokens = ATTRIBUTION,
                     number = AMEX_NO_SPACES,
                     expMonth = 12,
@@ -254,7 +254,7 @@ internal class CardInputWidgetTest {
         assertThat(cardInputWidget.cardParams)
             .isEqualTo(
                 CardParams(
-                    brand = com.stripe.android.ui.core.elements.CardBrand.AmericanExpress,
+                    brand = CardBrand.AmericanExpress,
                     loggingTokens = ATTRIBUTION,
                     number = AMEX_NO_SPACES,
                     expMonth = 12,
@@ -299,7 +299,7 @@ internal class CardInputWidgetTest {
         assertThat(cardInputWidget.cardParams)
             .isEqualTo(
                 CardParams(
-                    brand = com.stripe.android.ui.core.elements.CardBrand.DinersClub,
+                    brand = CardBrand.DinersClub,
                     loggingTokens = ATTRIBUTION,
                     number = DINERS_CLUB_14_NO_SPACES,
                     expMonth = 12,
@@ -335,7 +335,7 @@ internal class CardInputWidgetTest {
         assertThat(cardInputWidget.cardParams)
             .isEqualTo(
                 CardParams(
-                    brand = com.stripe.android.ui.core.elements.CardBrand.DinersClub,
+                    brand = CardBrand.DinersClub,
                     loggingTokens = ATTRIBUTION,
                     number = DINERS_CLUB_14_NO_SPACES,
                     expMonth = 12,
@@ -430,7 +430,7 @@ internal class CardInputWidgetTest {
         assertThat(cardInputWidget.cardParams)
             .isEqualTo(
                 CardParams(
-                    brand = com.stripe.android.ui.core.elements.CardBrand.Visa,
+                    brand = CardBrand.Visa,
                     loggingTokens = ATTRIBUTION,
                     number = VISA_NO_SPACES,
                     expMonth = 12,
@@ -455,7 +455,7 @@ internal class CardInputWidgetTest {
         assertThat(cardInputWidget.cardParams)
             .isEqualTo(
                 CardParams(
-                    brand = com.stripe.android.ui.core.elements.CardBrand.AmericanExpress,
+                    brand = CardBrand.AmericanExpress,
                     loggingTokens = ATTRIBUTION,
                     number = AMEX_NO_SPACES,
                     expMonth = 12,
@@ -481,7 +481,7 @@ internal class CardInputWidgetTest {
         assertThat(cardInputWidget.cardParams)
             .isEqualTo(
                 CardParams(
-                    brand = com.stripe.android.ui.core.elements.CardBrand.AmericanExpress,
+                    brand = CardBrand.AmericanExpress,
                     loggingTokens = ATTRIBUTION,
                     number = AMEX_NO_SPACES,
                     expMonth = 12,
@@ -1028,7 +1028,7 @@ internal class CardInputWidgetTest {
 
     @Test
     fun setCvcCode_withLongString_truncatesValue() {
-        cvcEditText.updateBrand(com.stripe.android.ui.core.elements.CardBrand.Visa)
+        cvcEditText.updateBrand(CardBrand.Visa)
         cardInputWidget.setCvcCode(CVC_VALUE_AMEX)
 
         assertThat(cvcEditText.fieldText)
@@ -1111,7 +1111,7 @@ internal class CardInputWidgetTest {
         assertThat(cardInputWidget.cardParams)
             .isEqualTo(
                 CardParams(
-                    brand = com.stripe.android.ui.core.elements.CardBrand.AmericanExpress,
+                    brand = CardBrand.AmericanExpress,
                     loggingTokens = ATTRIBUTION,
                     number = AMEX_NO_SPACES,
                     expMonth = 12,
@@ -1146,7 +1146,7 @@ internal class CardInputWidgetTest {
         assertThat(cardInputWidget.cardParams)
             .isEqualTo(
                 CardParams(
-                    brand = com.stripe.android.ui.core.elements.CardBrand.AmericanExpress,
+                    brand = CardBrand.AmericanExpress,
                     loggingTokens = ATTRIBUTION,
                     number = AMEX_NO_SPACES,
                     expMonth = 12,
@@ -1226,71 +1226,71 @@ internal class CardInputWidgetTest {
 
     @Test
     fun shouldIconShowBrand_whenCvcNotFocused_isAlwaysTrue() {
-        assertThat(shouldIconShowBrand(com.stripe.android.ui.core.elements.CardBrand.AmericanExpress, false, CVC_VALUE_AMEX))
+        assertThat(shouldIconShowBrand(CardBrand.AmericanExpress, false, CVC_VALUE_AMEX))
             .isTrue()
-        assertThat(shouldIconShowBrand(com.stripe.android.ui.core.elements.CardBrand.AmericanExpress, false, ""))
+        assertThat(shouldIconShowBrand(CardBrand.AmericanExpress, false, ""))
             .isTrue()
-        assertThat(shouldIconShowBrand(com.stripe.android.ui.core.elements.CardBrand.Visa, false, "333"))
+        assertThat(shouldIconShowBrand(CardBrand.Visa, false, "333"))
             .isTrue()
-        assertThat(shouldIconShowBrand(com.stripe.android.ui.core.elements.CardBrand.DinersClub, false, "12"))
+        assertThat(shouldIconShowBrand(CardBrand.DinersClub, false, "12"))
             .isTrue()
-        assertThat(shouldIconShowBrand(com.stripe.android.ui.core.elements.CardBrand.Discover, false, null))
+        assertThat(shouldIconShowBrand(CardBrand.Discover, false, null))
             .isTrue()
-        assertThat(shouldIconShowBrand(com.stripe.android.ui.core.elements.CardBrand.JCB, false, "7"))
+        assertThat(shouldIconShowBrand(CardBrand.JCB, false, "7"))
             .isTrue()
     }
 
     @Test
     fun shouldIconShowBrand_whenAmexAndCvCStringLengthNotFour_isFalse() {
-        assertThat(shouldIconShowBrand(com.stripe.android.ui.core.elements.CardBrand.AmericanExpress, true, ""))
+        assertThat(shouldIconShowBrand(CardBrand.AmericanExpress, true, ""))
             .isFalse()
-        assertThat(shouldIconShowBrand(com.stripe.android.ui.core.elements.CardBrand.AmericanExpress, true, "1"))
+        assertThat(shouldIconShowBrand(CardBrand.AmericanExpress, true, "1"))
             .isFalse()
-        assertThat(shouldIconShowBrand(com.stripe.android.ui.core.elements.CardBrand.AmericanExpress, true, "22"))
+        assertThat(shouldIconShowBrand(CardBrand.AmericanExpress, true, "22"))
             .isFalse()
-        assertThat(shouldIconShowBrand(com.stripe.android.ui.core.elements.CardBrand.AmericanExpress, true, "333"))
+        assertThat(shouldIconShowBrand(CardBrand.AmericanExpress, true, "333"))
             .isFalse()
     }
 
     @Test
     fun shouldIconShowBrand_whenAmexAndCvcStringLengthIsFour_isTrue() {
-        assertThat(shouldIconShowBrand(com.stripe.android.ui.core.elements.CardBrand.AmericanExpress, true, CVC_VALUE_AMEX))
+        assertThat(shouldIconShowBrand(CardBrand.AmericanExpress, true, CVC_VALUE_AMEX))
             .isTrue()
     }
 
     @Test
     fun shouldIconShowBrand_whenNotAmexAndCvcStringLengthIsNotThree_isFalse() {
-        assertThat(shouldIconShowBrand(com.stripe.android.ui.core.elements.CardBrand.Visa, true, ""))
+        assertThat(shouldIconShowBrand(CardBrand.Visa, true, ""))
             .isFalse()
-        assertThat(shouldIconShowBrand(com.stripe.android.ui.core.elements.CardBrand.Discover, true, "12"))
+        assertThat(shouldIconShowBrand(CardBrand.Discover, true, "12"))
             .isFalse()
-        assertThat(shouldIconShowBrand(com.stripe.android.ui.core.elements.CardBrand.JCB, true, "55"))
+        assertThat(shouldIconShowBrand(CardBrand.JCB, true, "55"))
             .isFalse()
-        assertThat(shouldIconShowBrand(com.stripe.android.ui.core.elements.CardBrand.MasterCard, true, "9"))
+        assertThat(shouldIconShowBrand(CardBrand.MasterCard, true, "9"))
             .isFalse()
-        assertThat(shouldIconShowBrand(com.stripe.android.ui.core.elements.CardBrand.DinersClub, true, null))
+        assertThat(shouldIconShowBrand(CardBrand.DinersClub, true, null))
             .isFalse()
-        assertThat(shouldIconShowBrand(com.stripe.android.ui.core.elements.CardBrand.Unknown, true, "12"))
+        assertThat(shouldIconShowBrand(CardBrand.Unknown, true, "12"))
             .isFalse()
     }
 
     @Test
     fun shouldIconShowBrand_whenNotAmexAndCvcStringLengthIsThree_isTrue() {
-        assertThat(shouldIconShowBrand(com.stripe.android.ui.core.elements.CardBrand.Visa, true, "999"))
+        assertThat(shouldIconShowBrand(CardBrand.Visa, true, "999"))
             .isTrue()
-        assertThat(shouldIconShowBrand(com.stripe.android.ui.core.elements.CardBrand.Discover, true, "123"))
+        assertThat(shouldIconShowBrand(CardBrand.Discover, true, "123"))
             .isTrue()
-        assertThat(shouldIconShowBrand(com.stripe.android.ui.core.elements.CardBrand.JCB, true, "555"))
+        assertThat(shouldIconShowBrand(CardBrand.JCB, true, "555"))
             .isTrue()
-        assertThat(shouldIconShowBrand(com.stripe.android.ui.core.elements.CardBrand.MasterCard, true, "919"))
+        assertThat(shouldIconShowBrand(CardBrand.MasterCard, true, "919"))
             .isTrue()
-        assertThat(shouldIconShowBrand(com.stripe.android.ui.core.elements.CardBrand.DinersClub, true, "415"))
+        assertThat(shouldIconShowBrand(CardBrand.DinersClub, true, "415"))
             .isTrue()
     }
 
     @Test
     fun shouldIconShowBrand_whenUnknownBrandAndCvcStringLengthIsFour_isTrue() {
-        assertThat(shouldIconShowBrand(com.stripe.android.ui.core.elements.CardBrand.Unknown, true, "2124"))
+        assertThat(shouldIconShowBrand(CardBrand.Unknown, true, "2124"))
             .isTrue()
     }
 
@@ -1515,7 +1515,7 @@ internal class CardInputWidgetTest {
         assertThat(cardInputWidget.cardParams)
             .isEqualTo(
                 CardParams(
-                    brand = com.stripe.android.ui.core.elements.CardBrand.Visa,
+                    brand = CardBrand.Visa,
                     loggingTokens = ATTRIBUTION,
                     number = VISA_NO_SPACES,
                     expMonth = 12,

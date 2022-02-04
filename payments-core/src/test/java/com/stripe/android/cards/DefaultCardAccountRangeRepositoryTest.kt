@@ -11,6 +11,7 @@ import com.stripe.android.model.BinRange
 import com.stripe.android.networking.ApiRequest
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networking.StripeApiRepository
+import com.stripe.android.ui.core.elements.CardNumber
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
@@ -36,7 +37,7 @@ internal class DefaultCardAccountRangeRepositoryTest {
     fun `repository with real sources returns expected results`() = runBlocking {
         assertThat(
             realRepository.getAccountRange(
-                com.stripe.android.ui.core.elements.CardNumber.Unvalidated("42424")
+                CardNumber.Unvalidated("42424")
             )
         ).isNull()
 
@@ -75,7 +76,7 @@ internal class DefaultCardAccountRangeRepositoryTest {
 
         assertThat(
             realRepository.getAccountRange(
-                com.stripe.android.ui.core.elements.CardNumber.Unvalidated("378282")
+                CardNumber.Unvalidated("378282")
             )
         ).isEqualTo(
             AccountRangeFixtures.AMERICANEXPRESS
@@ -86,7 +87,7 @@ internal class DefaultCardAccountRangeRepositoryTest {
         ).hasSize(1)
 
         assertThat(
-            realRepository.getAccountRange(com.stripe.android.ui.core.elements.CardNumber.Unvalidated("5555552500001001"))
+            realRepository.getAccountRange(CardNumber.Unvalidated("5555552500001001"))
         ).isEqualTo(
             AccountRangeFixtures.MASTERCARD
         )
@@ -103,7 +104,7 @@ internal class DefaultCardAccountRangeRepositoryTest {
 
         assertThat(
             realRepository.getAccountRange(
-                com.stripe.android.ui.core.elements.CardNumber.Unvalidated("356840")
+                CardNumber.Unvalidated("356840")
             )
         ).isEqualTo(
             AccountRangeFixtures.JCB
@@ -114,7 +115,7 @@ internal class DefaultCardAccountRangeRepositoryTest {
 
         assertThat(
             realRepository.getAccountRange(
-                com.stripe.android.ui.core.elements.CardNumber.Unvalidated("621682")
+                CardNumber.Unvalidated("621682")
             )
         ).isEqualTo(
             AccountRangeFixtures.UNIONPAY19
@@ -219,7 +220,7 @@ internal class DefaultCardAccountRangeRepositoryTest {
         isLoading: Boolean = false
     ) : CardAccountRangeSource {
         override suspend fun getAccountRange(
-            cardNumber: com.stripe.android.ui.core.elements.CardNumber.Unvalidated
+            cardNumber: CardNumber.Unvalidated
         ): AccountRange? {
             return null
         }

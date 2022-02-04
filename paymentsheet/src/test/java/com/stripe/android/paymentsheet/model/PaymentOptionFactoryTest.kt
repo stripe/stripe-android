@@ -3,7 +3,7 @@ package com.stripe.android.paymentsheet.model
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.ui.core.elements.CardBrand
+import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.R

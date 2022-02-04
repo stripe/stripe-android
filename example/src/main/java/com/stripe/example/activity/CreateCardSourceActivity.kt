@@ -11,7 +11,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.stripe.android.ApiResultCallback
 import com.stripe.android.Stripe
-import com.stripe.android.ui.core.elements.CardBrand
+import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardParams
 import com.stripe.android.model.Source
 import com.stripe.android.model.SourceParams
@@ -184,7 +184,7 @@ class CreateCardSourceActivity : AppCompatActivity() {
 
     private fun createAuthenticateSourceDialog(source: Source): AlertDialog {
         val typeData = source.sourceTypeData.orEmpty()
-        val cardBrand = com.stripe.android.ui.core.elements.CardBrand.fromCode(typeData["brand"] as String?)
+        val cardBrand = CardBrand.fromCode(typeData["brand"] as String?)
         return MaterialAlertDialogBuilder(this)
             .setTitle(this.getString(R.string.authentication_dialog_title))
             .setMessage(

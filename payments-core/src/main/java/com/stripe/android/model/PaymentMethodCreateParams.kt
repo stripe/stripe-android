@@ -2,9 +2,9 @@ package com.stripe.android.model
 
 import android.os.Parcelable
 import androidx.annotation.RestrictTo
-import com.stripe.android.CardUtils
 import com.stripe.android.ObjectBuilder
 import com.stripe.android.Stripe
+import com.stripe.android.ui.core.elements.CardUtils
 import kotlinx.parcelize.Parcelize
 import kotlinx.parcelize.RawValue
 import org.json.JSONException
@@ -203,7 +203,7 @@ data class PaymentMethodCreateParams internal constructor(
         private val token: String? = null,
         internal val attribution: Set<String>? = null
     ) : StripeParamsModel, Parcelable {
-        internal val brand: com.stripe.android.ui.core.elements.CardBrand get() = com.stripe.android.CardUtils.getPossibleCardBrand(number)
+        internal val brand: CardBrand get() = CardUtils.getPossibleCardBrand(number)
         internal val last4: String? get() = number?.takeLast(4)
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet

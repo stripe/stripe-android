@@ -2,14 +2,15 @@ package com.stripe.android.cards
 
 import com.stripe.android.model.AccountRange
 import com.stripe.android.model.BinRange
+import com.stripe.android.ui.core.elements.CardNumber
 
 internal class DefaultStaticCardAccountRanges : StaticCardAccountRanges {
     override fun first(
-        cardNumber: com.stripe.android.ui.core.elements.CardNumber.Unvalidated
+        cardNumber: CardNumber.Unvalidated
     ) = filter(cardNumber).firstOrNull()
 
     override fun filter(
-        cardNumber: com.stripe.android.ui.core.elements.CardNumber.Unvalidated
+        cardNumber: CardNumber.Unvalidated
     ): List<AccountRange> = ACCOUNTS.filter { it.binRange.matches(cardNumber) }
 
     internal companion object {

@@ -9,6 +9,7 @@ import com.stripe.android.networking.ApiRequest
 import com.stripe.android.networking.PaymentAnalyticsEvent
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networking.StripeApiRepository
+import com.stripe.android.ui.core.elements.CardNumber
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 
@@ -89,7 +90,7 @@ internal class DefaultCardAccountRangeRepositoryFactory(
 
     private class NullCardAccountRangeSource : CardAccountRangeSource {
         override suspend fun getAccountRange(
-            cardNumber: com.stripe.android.ui.core.elements.CardNumber.Unvalidated
+            cardNumber: CardNumber.Unvalidated
         ): AccountRange? = null
 
         override val loading: Flow<Boolean> = flowOf(false)

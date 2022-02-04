@@ -15,7 +15,7 @@ import com.stripe.android.R
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.databinding.StripeCardFormViewBinding
 import com.stripe.android.model.Address
-import com.stripe.android.ui.core.elements.CardBrand
+import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardParams
 import com.stripe.android.utils.TestUtils.idleLooper
 import org.junit.After
@@ -105,7 +105,7 @@ class CardFormViewTest {
         assertThat(standardCardFormView.cardParams)
             .isEqualTo(
                 CardParams(
-                    brand = com.stripe.android.ui.core.elements.CardBrand.Visa,
+                    brand = CardBrand.Visa,
                     loggingTokens = setOf(CardFormView.CARD_FORM_VIEW),
                     number = CardNumberFixtures.VISA_NO_SPACES,
                     expMonth = 12,

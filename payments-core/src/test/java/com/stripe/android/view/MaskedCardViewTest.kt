@@ -4,7 +4,7 @@ import android.content.Context
 import android.view.View
 import android.widget.ImageView
 import androidx.test.core.app.ApplicationProvider
-import com.stripe.android.ui.core.elements.CardBrand
+import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethodFixtures
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -43,7 +43,7 @@ class MaskedCardViewTest {
         val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
         maskedCardView.setPaymentMethod(paymentMethod)
         assertEquals("4242", maskedCardView.last4)
-        assertEquals(com.stripe.android.ui.core.elements.CardBrand.Visa, maskedCardView.cardBrand)
+        assertEquals(CardBrand.Visa, maskedCardView.cardBrand)
         assertFalse(maskedCardView.isSelected)
     }
 

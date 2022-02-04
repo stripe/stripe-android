@@ -12,7 +12,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.widget.ImageViewCompat
 import com.stripe.android.R
 import com.stripe.android.databinding.MaskedCardViewBinding
-import com.stripe.android.ui.core.elements.CardBrand
+import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 
 /**
@@ -27,7 +27,7 @@ internal class MaskedCardView @JvmOverloads constructor(
     defStyle: Int = 0
 ) : LinearLayout(context, attrs, defStyle) {
 
-    var cardBrand: com.stripe.android.ui.core.elements.CardBrand = com.stripe.android.ui.core.elements.CardBrand.Unknown
+    var cardBrand: CardBrand = CardBrand.Unknown
         private set
 
     @get:VisibleForTesting
@@ -62,7 +62,7 @@ internal class MaskedCardView @JvmOverloads constructor(
     }
 
     fun setPaymentMethod(paymentMethod: PaymentMethod) {
-        cardBrand = paymentMethod.card?.brand ?: com.stripe.android.ui.core.elements.CardBrand.Unknown
+        cardBrand = paymentMethod.card?.brand ?: CardBrand.Unknown
         last4 = paymentMethod.card?.last4
         updateUi()
     }
@@ -77,14 +77,14 @@ internal class MaskedCardView @JvmOverloads constructor(
             ContextCompat.getDrawable(
                 context,
                 when (cardBrand) {
-                    com.stripe.android.ui.core.elements.CardBrand.AmericanExpress -> R.drawable.stripe_ic_amex_template_32
-                    com.stripe.android.ui.core.elements.CardBrand.Discover -> R.drawable.stripe_ic_discover_template_32
-                    com.stripe.android.ui.core.elements.CardBrand.JCB -> R.drawable.stripe_ic_jcb_template_32
-                    com.stripe.android.ui.core.elements.CardBrand.DinersClub -> R.drawable.stripe_ic_diners_template_32
-                    com.stripe.android.ui.core.elements.CardBrand.Visa -> R.drawable.stripe_ic_visa_template_32
-                    com.stripe.android.ui.core.elements.CardBrand.MasterCard -> R.drawable.stripe_ic_mastercard_template_32
-                    com.stripe.android.ui.core.elements.CardBrand.UnionPay -> R.drawable.stripe_ic_unionpay_template_32
-                    com.stripe.android.ui.core.elements.CardBrand.Unknown -> R.drawable.stripe_ic_unknown
+                    CardBrand.AmericanExpress -> R.drawable.stripe_ic_amex_template_32
+                    CardBrand.Discover -> R.drawable.stripe_ic_discover_template_32
+                    CardBrand.JCB -> R.drawable.stripe_ic_jcb_template_32
+                    CardBrand.DinersClub -> R.drawable.stripe_ic_diners_template_32
+                    CardBrand.Visa -> R.drawable.stripe_ic_visa_template_32
+                    CardBrand.MasterCard -> R.drawable.stripe_ic_mastercard_template_32
+                    CardBrand.UnionPay -> R.drawable.stripe_ic_unionpay_template_32
+                    CardBrand.Unknown -> R.drawable.stripe_ic_unknown
                 }
             )
         )

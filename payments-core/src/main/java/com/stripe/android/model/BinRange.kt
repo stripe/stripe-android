@@ -13,7 +13,7 @@ internal data class BinRange(
      * Number matching strategy: Truncate the longer of the two numbers (theirs and our
      * bounds) to match the length of the shorter one, then do numerical compare.
      */
-    internal fun matches(cardNumber: com.stripe.android.ui.core.elements.CardNumber.Unvalidated): Boolean {
+    internal fun matches(cardNumber: CardNumber.Unvalidated): Boolean {
         val number = cardNumber.normalized
         val numberBigDecimal = number.toBigDecimalOrNull() ?: return false
 

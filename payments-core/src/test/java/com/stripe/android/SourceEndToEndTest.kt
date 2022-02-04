@@ -3,7 +3,7 @@ package com.stripe.android
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.Address
-import com.stripe.android.ui.core.elements.CardBrand
+import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardParams
 import com.stripe.android.model.DateOfBirth
 import com.stripe.android.model.KlarnaSourceParams
@@ -106,13 +106,13 @@ internal class SourceEndToEndTest {
 
         assertThat(
             listOf(
-                CardNumberFixtures.AMEX_NO_SPACES to com.stripe.android.ui.core.elements.CardBrand.AmericanExpress,
-                CardNumberFixtures.VISA_NO_SPACES to com.stripe.android.ui.core.elements.CardBrand.Visa,
-                CardNumberFixtures.MASTERCARD_NO_SPACES to com.stripe.android.ui.core.elements.CardBrand.MasterCard,
-                CardNumberFixtures.JCB_NO_SPACES to com.stripe.android.ui.core.elements.CardBrand.JCB,
-                CardNumberFixtures.UNIONPAY_NO_SPACES to com.stripe.android.ui.core.elements.CardBrand.UnionPay,
-                CardNumberFixtures.DISCOVER_NO_SPACES to com.stripe.android.ui.core.elements.CardBrand.Discover,
-                CardNumberFixtures.DINERS_CLUB_14_NO_SPACES to com.stripe.android.ui.core.elements.CardBrand.DinersClub
+                CardNumberFixtures.AMEX_NO_SPACES to CardBrand.AmericanExpress,
+                CardNumberFixtures.VISA_NO_SPACES to CardBrand.Visa,
+                CardNumberFixtures.MASTERCARD_NO_SPACES to CardBrand.MasterCard,
+                CardNumberFixtures.JCB_NO_SPACES to CardBrand.JCB,
+                CardNumberFixtures.UNIONPAY_NO_SPACES to CardBrand.UnionPay,
+                CardNumberFixtures.DISCOVER_NO_SPACES to CardBrand.Discover,
+                CardNumberFixtures.DINERS_CLUB_14_NO_SPACES to CardBrand.DinersClub
             ).all { (cardNumber, cardBrand) ->
                 val source = requireNotNull(
                     stripe.createSourceSynchronous(

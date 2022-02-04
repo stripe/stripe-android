@@ -20,7 +20,7 @@ import com.stripe.android.cards.AccountRangeFixtures
 import com.stripe.android.cards.DefaultCardAccountRangeStore
 import com.stripe.android.model.Address
 import com.stripe.android.model.BinFixtures
-import com.stripe.android.ui.core.elements.CardBrand
+import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardParams
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
@@ -168,7 +168,7 @@ internal class CardMultilineWidgetTest {
         assertThat(cardMultilineWidget.cardParams)
             .isEqualTo(
                 CardParams(
-                    brand = com.stripe.android.ui.core.elements.CardBrand.Visa,
+                    brand = CardBrand.Visa,
                     loggingTokens = ATTRIBUTION,
                     number = VISA_NO_SPACES,
                     expMonth = 12,
@@ -191,7 +191,7 @@ internal class CardMultilineWidgetTest {
         assertThat(cardMultilineWidget.cardParams)
             .isEqualTo(
                 CardParams(
-                    brand = com.stripe.android.ui.core.elements.CardBrand.Visa,
+                    brand = CardBrand.Visa,
                     loggingTokens = ATTRIBUTION,
                     number = VISA_NO_SPACES,
                     expMonth = 12,
@@ -213,7 +213,7 @@ internal class CardMultilineWidgetTest {
         assertThat(noZipCardMultilineWidget.cardParams)
             .isEqualTo(
                 CardParams(
-                    brand = com.stripe.android.ui.core.elements.CardBrand.Visa,
+                    brand = CardBrand.Visa,
                     loggingTokens = ATTRIBUTION,
                     number = VISA_NO_SPACES,
                     expMonth = 12,
@@ -235,7 +235,7 @@ internal class CardMultilineWidgetTest {
         assertThat(noZipCardMultilineWidget.cardParams)
             .isEqualTo(
                 CardParams(
-                    brand = com.stripe.android.ui.core.elements.CardBrand.AmericanExpress,
+                    brand = CardBrand.AmericanExpress,
                     loggingTokens = ATTRIBUTION,
                     number = AMEX_NO_SPACES,
                     expMonth = 12,
@@ -257,7 +257,7 @@ internal class CardMultilineWidgetTest {
         assertThat(noZipCardMultilineWidget.cardParams)
             .isEqualTo(
                 CardParams(
-                    brand = com.stripe.android.ui.core.elements.CardBrand.AmericanExpress,
+                    brand = CardBrand.AmericanExpress,
                     loggingTokens = ATTRIBUTION,
                     number = AMEX_NO_SPACES,
                     expMonth = 12,
@@ -744,7 +744,7 @@ internal class CardMultilineWidgetTest {
         assertThat(cardMultilineWidget.cardParams)
             .isEqualTo(
                 CardParams(
-                    brand = com.stripe.android.ui.core.elements.CardBrand.Visa,
+                    brand = CardBrand.Visa,
                     loggingTokens = ATTRIBUTION,
                     number = VISA_NO_SPACES,
                     expMonth = 12,
@@ -768,7 +768,7 @@ internal class CardMultilineWidgetTest {
         assertThat(cardMultilineWidget.cardParams)
             .isEqualTo(
                 CardParams(
-                    brand = com.stripe.android.ui.core.elements.CardBrand.Visa,
+                    brand = CardBrand.Visa,
                     loggingTokens = ATTRIBUTION,
                     number = VISA_NO_SPACES,
                     expMonth = 12,
@@ -837,7 +837,7 @@ internal class CardMultilineWidgetTest {
         assertThat(cardMultilineWidget.cardParams)
             .isEqualTo(
                 CardParams(
-                    brand = com.stripe.android.ui.core.elements.CardBrand.Visa,
+                    brand = CardBrand.Visa,
                     loggingTokens = ATTRIBUTION,
                     number = VISA_NO_SPACES,
                     expMonth = 12,
@@ -888,7 +888,7 @@ internal class CardMultilineWidgetTest {
         assertThat(cardMultilineWidget.cardParams)
             .isEqualTo(
                 CardParams(
-                    brand = com.stripe.android.ui.core.elements.CardBrand.Visa,
+                    brand = CardBrand.Visa,
                     loggingTokens = ATTRIBUTION,
                     number = VISA_NO_SPACES,
                     expMonth = 12,

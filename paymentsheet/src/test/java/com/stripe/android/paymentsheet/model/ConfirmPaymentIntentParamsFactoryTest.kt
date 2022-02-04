@@ -1,7 +1,7 @@
 package com.stripe.android.paymentsheet.model
 
 import com.google.common.truth.Truth
-import com.stripe.android.ui.core.elements.CardBrand
+import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodOptionsParams

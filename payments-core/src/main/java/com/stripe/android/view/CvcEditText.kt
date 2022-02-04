@@ -9,7 +9,7 @@ import androidx.core.widget.doAfterTextChanged
 import com.google.android.material.textfield.TextInputLayout
 import com.stripe.android.R
 import com.stripe.android.cards.Cvc
-import com.stripe.android.ui.core.elements.CardBrand
+import com.stripe.android.model.CardBrand
 
 /**
  * A [StripeEditText] for CVC input.
@@ -30,7 +30,7 @@ class CvcEditText @JvmOverloads constructor(
             return unvalidatedCvc.validate(cardBrand.maxCvcLength)
         }
 
-    private var cardBrand: com.stripe.android.ui.core.elements.CardBrand = com.stripe.android.ui.core.elements.CardBrand.Unknown
+    private var cardBrand: CardBrand = CardBrand.Unknown
 
     // invoked when a valid CVC has been entered
     @JvmSynthetic
@@ -40,7 +40,7 @@ class CvcEditText @JvmOverloads constructor(
         setErrorMessage(resources.getString(R.string.invalid_cvc))
         setHint(R.string.cvc_number_hint)
         maxLines = 1
-        filters = createFilters(com.stripe.android.ui.core.elements.CardBrand.Unknown)
+        filters = createFilters(CardBrand.Unknown)
 
         setNumberOnlyInputType()
 
@@ -79,7 +79,7 @@ class CvcEditText @JvmOverloads constructor(
      */
     @JvmSynthetic
     internal fun updateBrand(
-        cardBrand: com.stripe.android.ui.core.elements.CardBrand,
+        cardBrand: CardBrand,
         customHintText: String? = null,
         customPlaceholderText: String? = null,
         textInputLayout: TextInputLayout? = null
@@ -88,7 +88,7 @@ class CvcEditText @JvmOverloads constructor(
         filters = createFilters(cardBrand)
 
         val hintText = customHintText
-            ?: if (cardBrand == com.stripe.android.ui.core.elements.CardBrand.AmericanExpress) {
+            ?: if (cardBrand == CardBrand.AmericanExpress) {
                 resources.getString(R.string.cvc_amex_hint)
             } else {
                 resources.getString(R.string.cvc_number_hint)
@@ -107,7 +107,7 @@ class CvcEditText @JvmOverloads constructor(
             textInputLayout.placeholderText = customPlaceholderText
                 ?: resources.getString(
                     when (cardBrand) {
-                        com.stripe.android.ui.core.elements.CardBrand.AmericanExpress -> R.string.cvc_multiline_helper_amex
+                        CardBrand.AmericanExpress -> R.string.cvc_multiline_helper_amex
                         else -> R.string.cvc_multiline_helper
                     }
                 )
@@ -116,7 +116,7 @@ class CvcEditText @JvmOverloads constructor(
         }
     }
 
-    private fun createFilters(cardBrand: com.stripe.android.ui.core.elements.CardBrand): Array<InputFilter> {
+    private fun createFilters(cardBrand: CardBrand): Array<InputFilter> {
         return arrayOf(InputFilter.LengthFilter(cardBrand.maxCvcLength))
     }
 }

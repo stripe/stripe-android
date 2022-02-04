@@ -47,7 +47,7 @@ class SourceTest {
         assertTrue(source.sourceTypeModel is SourceTypeModel.Card)
 
         val sourceCardData = source.sourceTypeModel as SourceTypeModel.Card?
-        assertEquals(com.stripe.android.ui.core.elements.CardBrand.Visa, sourceCardData?.brand)
+        assertEquals(CardBrand.Visa, sourceCardData?.brand)
     }
 
     @Test

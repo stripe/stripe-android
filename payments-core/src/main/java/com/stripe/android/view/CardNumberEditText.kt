@@ -10,16 +10,16 @@ import androidx.annotation.VisibleForTesting
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.R
 import com.stripe.android.cards.CardAccountRangeRepository
-import com.stripe.android.ui.core.elements.CardNumber
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
 import com.stripe.android.cards.DefaultStaticCardAccountRanges
 import com.stripe.android.cards.StaticCardAccountRanges
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
 import com.stripe.android.model.AccountRange
-import com.stripe.android.ui.core.elements.CardBrand
+import com.stripe.android.model.CardBrand
 import com.stripe.android.networking.PaymentAnalyticsEvent
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
+import com.stripe.android.ui.core.elements.CardNumber
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -78,7 +78,7 @@ class CardNumberEditText internal constructor(
     )
 
     @VisibleForTesting
-    var cardBrand: com.stripe.android.ui.core.elements.CardBrand = com.stripe.android.ui.core.elements.CardBrand.Unknown
+    var cardBrand: CardBrand = CardBrand.Unknown
         internal set(value) {
             val prevBrand = field
             field = value
@@ -89,7 +89,7 @@ class CardNumberEditText internal constructor(
         }
 
     @JvmSynthetic
-    internal var brandChangeCallback: (com.stripe.android.ui.core.elements.CardBrand) -> Unit = {}
+    internal var brandChangeCallback: (CardBrand) -> Unit = {}
         set(callback) {
             field = callback
 
@@ -111,10 +111,10 @@ class CardNumberEditText internal constructor(
     internal val panLength: Int
         get() = accountRange?.panLength
             ?: staticCardAccountRanges.first(unvalidatedCardNumber)?.panLength
-            ?: com.stripe.android.ui.core.elements.CardNumber.DEFAULT_PAN_LENGTH
+            ?: CardNumber.DEFAULT_PAN_LENGTH
 
     private val formattedPanLength: Int
-        get() = panLength + com.stripe.android.ui.core.elements.CardNumber.getSpacePositions(panLength).size
+        get() = panLength + CardNumber.getSpacePositions(panLength).size
 
     /**
      * Check whether or not the card number is valid
@@ -122,11 +122,11 @@ class CardNumberEditText internal constructor(
     var isCardNumberValid: Boolean = false
         private set
 
-    internal val validatedCardNumber: com.stripe.android.ui.core.elements.CardNumber.Validated?
+    internal val validatedCardNumber: CardNumber.Validated?
         get() = unvalidatedCardNumber.validate(panLength)
 
-    private val unvalidatedCardNumber: com.stripe.android.ui.core.elements.CardNumber.Unvalidated
-        get() = com.stripe.android.ui.core.elements.CardNumber.Unvalidated(fieldText)
+    private val unvalidatedCardNumber: CardNumber.Unvalidated
+        get() = CardNumber.Unvalidated(fieldText)
 
     private val isValid: Boolean
         get() = validatedCardNumber != null
@@ -208,7 +208,7 @@ class CardNumberEditText internal constructor(
         addedDigits: Int,
         panLength: Int = this.panLength
     ): Int {
-        val gapSet = com.stripe.android.ui.core.elements.CardNumber.getSpacePositions(panLength)
+        val gapSet = CardNumber.getSpacePositions(panLength)
 
         val gapsJumped = gapSet.count { gap ->
             start <= gap && start + addedDigits >= gap
@@ -233,7 +233,7 @@ class CardNumberEditText internal constructor(
     }
 
     @JvmSynthetic
-    internal fun queryAccountRangeRepository(cardNumber: com.stripe.android.ui.core.elements.CardNumber.Unvalidated) {
+    internal fun queryAccountRangeRepository(cardNumber: CardNumber.Unvalidated) {
         if (shouldQueryAccountRange(cardNumber)) {
             // cancel in-flight job
             cancelAccountRangeRepositoryJob()
@@ -266,10 +266,10 @@ class CardNumberEditText internal constructor(
         newAccountRange: AccountRange?
     ) {
         accountRange = newAccountRange
-        cardBrand = newAccountRange?.brand ?: com.stripe.android.ui.core.elements.CardBrand.Unknown
+        cardBrand = newAccountRange?.brand ?: CardBrand.Unknown
     }
 
-    private fun shouldQueryAccountRange(cardNumber: com.stripe.android.ui.core.elements.CardNumber.Unvalidated): Boolean {
+    private fun shouldQueryAccountRange(cardNumber: CardNumber.Unvalidated): Boolean {
         return accountRange == null ||
             cardNumber.bin == null ||
             accountRange?.binRange?.matches(cardNumber) == false
@@ -302,7 +302,7 @@ class CardNumberEditText internal constructor(
         }
 
         override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-            val cardNumber = com.stripe.android.ui.core.elements.CardNumber.Unvalidated(s?.toString().orEmpty())
+            val cardNumber = CardNumber.Unvalidated(s?.toString().orEmpty())
             val staticAccountRange = staticCardAccountRanges.filter(cardNumber)
                 .let { accountRanges ->
                     if (accountRanges.size == 1) {
@@ -407,17 +407,17 @@ class CardNumberEditText internal constructor(
             startPosition: Int,
             previousCount: Int,
             currentCount: Int,
-            cardNumber: com.stripe.android.ui.core.elements.CardNumber.Unvalidated
+            cardNumber: CardNumber.Unvalidated
         ): Boolean {
             return currentCount > previousCount && startPosition == 0 &&
-                cardNumber.normalized.length >= com.stripe.android.ui.core.elements.CardNumber.MIN_PAN_LENGTH
+                cardNumber.normalized.length >= CardNumber.MIN_PAN_LENGTH
         }
 
         private fun shouldQueryRepository(
             accountRange: AccountRange
         ) = when (accountRange.brand) {
-            com.stripe.android.ui.core.elements.CardBrand.Unknown,
-            com.stripe.android.ui.core.elements.CardBrand.UnionPay -> true
+            CardBrand.Unknown,
+            CardBrand.UnionPay -> true
             else -> false
         }
     }

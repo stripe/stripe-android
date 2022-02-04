@@ -6,7 +6,7 @@ import org.json.JSONArray
 import org.json.JSONObject
 
 internal class CardMetadataJsonParser(
-    private val bin: Bin
+    private val bin: com.stripe.android.cards.Bin
 ) : ModelJsonParser<CardMetadata> {
     private val accountRangeJsonParser = AccountRangeJsonParser()
 

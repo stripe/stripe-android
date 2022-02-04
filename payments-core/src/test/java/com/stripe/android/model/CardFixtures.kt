@@ -15,7 +15,7 @@ object CardFixtures {
         addressZip = AddressFixtures.ADDRESS.postalCode,
         currency = "USD",
         name = "Jenny Rosen",
-        brand = com.stripe.android.ui.core.elements.CardBrand.Visa,
+        brand = CardBrand.Visa,
         last4 = "4242",
         id = "id"
     )

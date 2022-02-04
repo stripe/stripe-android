@@ -11,7 +11,7 @@ sealed class SourceTypeModel : StripeModel {
     data class Card internal constructor(
         val addressLine1Check: String? = null,
         val addressZipCheck: String? = null,
-        val brand: com.stripe.android.ui.core.elements.CardBrand,
+        val brand: CardBrand,
         val country: String? = null,
         val cvcCheck: String? = null,
         val dynamicLast4: String? = null,

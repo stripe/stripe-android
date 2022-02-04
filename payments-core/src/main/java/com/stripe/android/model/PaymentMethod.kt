@@ -559,72 +559,61 @@ constructor(
          *
          * [card.brand](https://stripe.com/docs/api/payment_methods/object#payment_method_object-card-brand)
          */
-        @JvmField val brand: com.stripe.android.ui.core.elements.CardBrand = com.stripe.android.ui.core.elements.CardBrand.Unknown,
-
+        @JvmField val brand: CardBrand = CardBrand.Unknown,
         /**
          * Checks on Card address and CVC if provided
          *
          * [card.checks](https://stripe.com/docs/api/payment_methods/object#payment_method_object-card-checks)
          */
         @JvmField val checks: Checks? = null,
-
         /**
          * Two-letter ISO code representing the country of the card. You could use this attribute to get a sense of the international breakdown of cards you’ve collected.
          *
          * [card.country](https://stripe.com/docs/api/payment_methods/object#payment_method_object-card-country)
          */
         @JvmField val country: String? = null,
-
         /**
          * Two-digit number representing the card’s expiration month.
          *
          * [card.exp_month](https://stripe.com/docs/api/payment_methods/object#payment_method_object-card-exp_month)
          */
         @JvmField val expiryMonth: Int? = null,
-
         /**
          * Four-digit number representing the card’s expiration year.
          *
          * [card.exp_year](https://stripe.com/docs/api/payment_methods/object#payment_method_object-card-exp_year)
          */
         @JvmField val expiryYear: Int? = null,
-
         /**
          * Uniquely identifies this particular card number. You can use this attribute to check whether two customers who’ve signed up with you are using the same card number, for example. For payment methods that tokenize card information (Apple Pay, Google Pay), the tokenized number might be provided instead of the underlying card number.
          *
          * [card.fingerprint](https://stripe.com/docs/api/payment_methods/object#payment_method_object-card-fingerprint)
          */
         @JvmField val fingerprint: String? = null,
-
         /**
          * Card funding type. Can be `credit`, `debit, `prepaid`, or `unknown`.
          *
          * [card.funding](https://stripe.com/docs/api/payment_methods/object#payment_method_object-card-funding)
          */
         @JvmField val funding: String? = null,
-
         /**
          * The last four digits of the card.
          *
          * [card.last4](https://stripe.com/docs/api/payment_methods/object#payment_method_object-card-last4)
          */
         @JvmField val last4: String? = null,
-
         /**
          * Contains details on how this Card maybe be used for 3D Secure authentication.
          *
          * [card.three_d_secure_usage](https://stripe.com/docs/api/payment_methods/object#payment_method_object-card-three_d_secure_usage)
          */
         @JvmField val threeDSecureUsage: ThreeDSecureUsage? = null,
-
         /**
          * If this Card is part of a card wallet, this contains the details of the card wallet.
          *
          * [card.wallet](https://stripe.com/docs/api/payment_methods/object#payment_method_object-card-wallet)
          */
-        @JvmField val wallet: Wallet? = null,
-
-        @JvmField
+        @JvmField val wallet: Wallet? = null, @JvmField
         internal val networks: Networks? = null
     ) : TypeData() {
         override val type: Type get() = Type.Card

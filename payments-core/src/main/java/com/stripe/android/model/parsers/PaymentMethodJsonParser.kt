@@ -1,7 +1,7 @@
 package com.stripe.android.model.parsers
 
 import androidx.annotation.RestrictTo
-import com.stripe.android.ui.core.elements.CardBrand
+import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeJsonUtils
 import org.json.JSONObject
@@ -111,7 +111,7 @@ class PaymentMethodJsonParser : ModelJsonParser<PaymentMethod> {
     internal class CardJsonParser : ModelJsonParser<PaymentMethod.Card> {
         override fun parse(json: JSONObject): PaymentMethod.Card {
             return PaymentMethod.Card(
-                brand = com.stripe.android.ui.core.elements.CardBrand.fromCode(StripeJsonUtils.optString(json, FIELD_BRAND)),
+                brand = CardBrand.fromCode(StripeJsonUtils.optString(json, FIELD_BRAND)),
                 checks = json.optJSONObject(FIELD_CHECKS)?.let {
                     ChecksJsonParser().parse(it)
                 },

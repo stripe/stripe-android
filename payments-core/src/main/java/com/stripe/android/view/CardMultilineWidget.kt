@@ -20,14 +20,14 @@ import androidx.core.view.updateLayoutParams
 import androidx.core.widget.doAfterTextChanged
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.R
-import com.stripe.android.ui.core.elements.CardNumber
 import com.stripe.android.databinding.CardMultilineWidgetBinding
 import com.stripe.android.model.Address
-import com.stripe.android.ui.core.elements.CardBrand
+import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardParams
 import com.stripe.android.model.ExpirationDate
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.ui.core.elements.CardNumber
 import com.stripe.android.view.CardMultilineWidget.CardBrandIconSupplier
 import kotlin.properties.Delegates
 
@@ -110,9 +110,9 @@ class CardMultilineWidget @JvmOverloads constructor(
     private var customCvcLabel: String? = null
     private var customCvcPlaceholderText: String? = null
 
-    private var cardBrand: com.stripe.android.ui.core.elements.CardBrand = com.stripe.android.ui.core.elements.CardBrand.Unknown
+    private var cardBrand: CardBrand = CardBrand.Unknown
 
-    internal val brand: com.stripe.android.ui.core.elements.CardBrand
+    internal val brand: CardBrand
         @JvmSynthetic
         get() = cardBrand
 
@@ -233,7 +233,7 @@ class CardMultilineWidget @JvmOverloads constructor(
             )
         }
 
-    internal val validatedCardNumber: com.stripe.android.ui.core.elements.CardNumber.Validated?
+    internal val validatedCardNumber: CardNumber.Validated?
         get() {
             return cardNumberEditText.validatedCardNumber
         }
@@ -380,7 +380,7 @@ class CardMultilineWidget @JvmOverloads constructor(
 
         cardNumberEditText.updateLengthFilter()
 
-        cardBrand = com.stripe.android.ui.core.elements.CardBrand.Unknown
+        cardBrand = CardBrand.Unknown
         updateBrandUi()
 
         allFields.forEach { field ->
@@ -415,7 +415,7 @@ class CardMultilineWidget @JvmOverloads constructor(
         cvcEditText.shouldShowError = false
         postalCodeEditText.shouldShowError = false
 
-        cardBrand = com.stripe.android.ui.core.elements.CardBrand.Unknown
+        cardBrand = CardBrand.Unknown
         updateBrandUi()
     }
 
@@ -753,7 +753,7 @@ class CardMultilineWidget @JvmOverloads constructor(
         }
     }
     internal fun interface CardBrandIconSupplier {
-        fun get(cardBrand: com.stripe.android.ui.core.elements.CardBrand): CardBrandIcon
+        fun get(cardBrand: CardBrand): CardBrandIcon
     }
 
     internal data class CardBrandIcon(

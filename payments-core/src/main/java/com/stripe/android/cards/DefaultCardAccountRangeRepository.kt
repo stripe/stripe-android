@@ -1,6 +1,7 @@
 package com.stripe.android.cards
 
 import com.stripe.android.model.AccountRange
+import com.stripe.android.ui.core.elements.CardNumber
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 
@@ -11,7 +12,7 @@ internal class DefaultCardAccountRangeRepository(
     private val store: CardAccountRangeStore
 ) : CardAccountRangeRepository {
     override suspend fun getAccountRange(
-        cardNumber: com.stripe.android.ui.core.elements.CardNumber.Unvalidated
+        cardNumber: CardNumber.Unvalidated
     ): AccountRange? {
         return cardNumber.bin?.let { bin ->
             if (store.contains(bin)) {

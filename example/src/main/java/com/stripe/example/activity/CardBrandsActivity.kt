@@ -7,7 +7,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.stripe.android.ui.core.elements.CardBrand
+import com.stripe.android.model.CardBrand
 import com.stripe.example.databinding.CardBrandItemBinding
 import com.stripe.example.databinding.CardBrandsActivityBinding
 
@@ -33,7 +33,7 @@ class CardBrandsActivity : AppCompatActivity() {
         }
 
         override fun getItemCount(): Int {
-            return com.stripe.android.ui.core.elements.CardBrand.values().size
+            return CardBrand.values().size
         }
 
         override fun onCreateViewHolder(
@@ -50,7 +50,7 @@ class CardBrandsActivity : AppCompatActivity() {
         }
 
         override fun onBindViewHolder(holder: CardBrandViewHolder, position: Int) {
-            val brand = com.stripe.android.ui.core.elements.CardBrand.values()[position]
+            val brand = CardBrand.values()[position]
             holder.viewBinding.brandName.text = brand.displayName
             holder.viewBinding.brandLogo.setImageDrawable(
                 ContextCompat.getDrawable(activity, brand.icon)

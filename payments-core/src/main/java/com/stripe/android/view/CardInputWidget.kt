@@ -30,15 +30,15 @@ import androidx.core.view.updateLayoutParams
 import androidx.core.widget.doAfterTextChanged
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.R
-import com.stripe.android.ui.core.elements.CardNumber
 import com.stripe.android.cards.Cvc
 import com.stripe.android.databinding.CardInputWidgetBinding
 import com.stripe.android.model.Address
-import com.stripe.android.ui.core.elements.CardBrand
+import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardParams
 import com.stripe.android.model.ExpirationDate
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.ui.core.elements.CardNumber
 import kotlin.properties.Delegates
 
 /**
@@ -148,7 +148,7 @@ class CardInputWidget @JvmOverloads constructor(
             return cvcEditText.cvc
         }
 
-    private val brand: com.stripe.android.ui.core.elements.CardBrand
+    private val brand
         get() {
             return cardNumberEditText.cardBrand
         }
@@ -224,7 +224,7 @@ class CardInputWidget @JvmOverloads constructor(
             cvcEditText.shouldShowError = cvc == null
             postalCodeEditText.shouldShowError =
                 (postalCodeRequired || usZipCodeRequired) &&
-                postalCodeEditText.postalCode.isNullOrBlank()
+                    postalCodeEditText.postalCode.isNullOrBlank()
 
             // Announce error messages for accessibility
             currentFields
@@ -826,7 +826,7 @@ class CardInputWidget @JvmOverloads constructor(
     internal fun createHiddenCardText(
         panLength: Int
     ): String {
-        val formattedNumber = com.stripe.android.ui.core.elements.CardNumber.Unvalidated(
+        val formattedNumber = CardNumber.Unvalidated(
             "0".repeat(panLength)
         ).getFormatted(panLength)
 
@@ -1016,7 +1016,7 @@ class CardInputWidget @JvmOverloads constructor(
 
     private val cvcPlaceHolder: String
         get() {
-            return if (com.stripe.android.ui.core.elements.CardBrand.AmericanExpress == brand) {
+            return if (CardBrand.AmericanExpress == brand) {
                 CVC_PLACEHOLDER_AMEX
             } else {
                 CVC_PLACEHOLDER_COMMON
@@ -1250,7 +1250,7 @@ class CardInputWidget @JvmOverloads constructor(
          */
         @VisibleForTesting
         internal fun shouldIconShowBrand(
-            brand: com.stripe.android.ui.core.elements.CardBrand,
+            brand: CardBrand,
             cvcHasFocus: Boolean,
             cvcText: String?
         ): Boolean {

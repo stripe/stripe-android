@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.liveData
+import com.stripe.android.ui.core.elements.CardNumber
 import com.stripe.android.view.CardWidget
 
 /**
@@ -25,7 +26,7 @@ internal class CardWidgetViewModel(
         cardAccountRangeRepositoryFactory.create()
     }
 
-    fun getAccountRange(cardNumber: com.stripe.android.ui.core.elements.CardNumber.Unvalidated) = liveData {
+    fun getAccountRange(cardNumber: CardNumber.Unvalidated) = liveData {
         emit(cardAccountRangeRepository.getAccountRange(cardNumber))
     }
 }

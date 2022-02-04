@@ -8,7 +8,7 @@ import androidx.annotation.ColorInt
 import androidx.core.graphics.drawable.DrawableCompat
 import androidx.core.view.doOnNextLayout
 import com.stripe.android.databinding.CardBrandViewBinding
-import com.stripe.android.ui.core.elements.CardBrand
+import com.stripe.android.model.CardBrand
 import kotlin.properties.Delegates
 
 internal class CardBrandView @JvmOverloads constructor(
@@ -40,8 +40,8 @@ internal class CardBrandView @JvmOverloads constructor(
         }
     }
 
-    var brand: com.stripe.android.ui.core.elements.CardBrand by Delegates.observable(
-        com.stripe.android.ui.core.elements.CardBrand.Unknown
+    var brand: CardBrand by Delegates.observable(
+        CardBrand.Unknown
     ) { _, prevValue, newValue ->
         if (prevValue != newValue) {
             updateIcon()
@@ -94,7 +94,7 @@ internal class CardBrandView @JvmOverloads constructor(
     private fun renderBrandIcon() {
         iconView.setImageResource(brand.icon)
 
-        if (brand == com.stripe.android.ui.core.elements.CardBrand.Unknown) {
+        if (brand == CardBrand.Unknown) {
             applyTint()
         }
     }

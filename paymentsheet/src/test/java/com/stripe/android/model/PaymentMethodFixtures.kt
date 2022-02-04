@@ -1,7 +1,6 @@
 package com.stripe.android.model
 
 import com.stripe.android.model.parsers.PaymentMethodJsonParser
-import com.stripe.android.ui.core.elements.CardBrand
 import org.json.JSONObject
 import java.util.UUID
 import java.util.concurrent.ThreadLocalRandom

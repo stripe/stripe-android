@@ -7,7 +7,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.databinding.CardBrandSpinnerDropdownBinding
 import com.stripe.android.databinding.CardBrandSpinnerMainBinding
-import com.stripe.android.ui.core.elements.CardBrand
+import com.stripe.android.model.CardBrand
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
@@ -21,13 +21,13 @@ class CardBrandSpinnerTest {
     fun setCardBrands_shouldPopulatesViews() {
         spinner.setCardBrands(
             listOf(
-                com.stripe.android.ui.core.elements.CardBrand.Visa,
-                com.stripe.android.ui.core.elements.CardBrand.MasterCard
+                CardBrand.Visa,
+                CardBrand.MasterCard
             )
         )
 
         val parentView = FrameLayout(context)
-        val arrayAdapter = spinner.adapter as ArrayAdapter<com.stripe.android.ui.core.elements.CardBrand>
+        val arrayAdapter = spinner.adapter as ArrayAdapter<CardBrand>
         val viewBinding = CardBrandSpinnerMainBinding.bind(
             arrayAdapter.getView(0, null, parentView)
         )
@@ -51,12 +51,12 @@ class CardBrandSpinnerTest {
     fun cardBrand_shouldReturnSelectedCardBrand() {
         spinner.setCardBrands(
             listOf(
-                com.stripe.android.ui.core.elements.CardBrand.Visa,
-                com.stripe.android.ui.core.elements.CardBrand.MasterCard
+                CardBrand.Visa,
+                CardBrand.MasterCard
             )
         )
 
         assertThat(spinner.cardBrand)
-            .isEqualTo(com.stripe.android.ui.core.elements.CardBrand.Visa)
+            .isEqualTo(CardBrand.Visa)
     }
 }

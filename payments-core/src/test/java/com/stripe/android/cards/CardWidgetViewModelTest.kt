@@ -6,6 +6,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.CardNumberFixtures
 import com.stripe.android.model.AccountRange
 import com.stripe.android.model.BinRange
+import com.stripe.android.ui.core.elements.CardNumber
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import org.junit.runner.RunWith
@@ -34,7 +35,7 @@ class CardWidgetViewModelTest {
 
     private class FakeCardAccountRangeRepository : CardAccountRangeRepository {
         override suspend fun getAccountRange(
-            cardNumber: com.stripe.android.ui.core.elements.CardNumber.Unvalidated
+            cardNumber: CardNumber.Unvalidated
         ) = ACCOUNT_RANGE
 
         override val loading: Flow<Boolean> = flowOf(false)

@@ -2,7 +2,7 @@ package com.stripe.android.model.parsers
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.Card
-import com.stripe.android.ui.core.elements.CardBrand
+import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardFixtures
 import com.stripe.android.model.CardFunding
 import com.stripe.android.model.TokenizationMethod
@@ -25,7 +25,7 @@ class CardJsonParserTest {
                 expYear = 2017,
                 expMonth = 8,
                 cvcCheck = "unavailable",
-                brand = com.stripe.android.ui.core.elements.CardBrand.Visa,
+                brand = CardBrand.Visa,
                 addressLine1 = "123 Market St",
                 addressLine1Check = "unavailable",
                 addressLine2 = "#345",
