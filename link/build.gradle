@@ -21,7 +21,7 @@ if (System.getenv("JITPACK")) {
 dependencies {
     implementation project(':payments-core')
     implementation project(':stripe-core')
-    implementation project(':stripe-ui-core')
+    implementation project(':payments-ui-core')
 
     implementation 'androidx.core:core-ktx:1.7.0'
     implementation libraries.androidx.appcompat
