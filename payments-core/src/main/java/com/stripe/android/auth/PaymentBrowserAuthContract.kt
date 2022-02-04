@@ -87,8 +87,9 @@ internal class PaymentBrowserAuthContract :
     ) : Parcelable {
 
         /**
-         * We are using this custom parse-able so that if StripeBrowserProxyReturnActivity
-         * is called that it doesn't crash the app.
+         * We are using the default generated parcelable with the addition of settting null strings
+         * to empty so that if StripeBrowserProxyReturnActivity is called from an unexpected
+         * external source that it doesn't crash the app.
          */
         constructor(parcel: Parcel) : this(
             parcel.readString() ?: "",
