@@ -4,7 +4,7 @@ import android.util.Log
 import com.stripe.android.camera.framework.AnalyzerLoopErrorListener
 import com.stripe.android.stripecardscan.framework.Config
 
-abstract class ScanState(val isFinal: Boolean)
+internal abstract class ScanState(val isFinal: Boolean)
 
 internal interface SimpleScanStateful<State : ScanState> {
 
@@ -26,7 +26,7 @@ internal interface SimpleScanStateful<State : ScanState> {
     }
 }
 
-class ScanErrorListener : AnalyzerLoopErrorListener {
+internal class ScanErrorListener : AnalyzerLoopErrorListener {
     override fun onAnalyzerFailure(t: Throwable): Boolean {
         Log.e(Config.logTag, "Error executing analyzer", t)
         return false

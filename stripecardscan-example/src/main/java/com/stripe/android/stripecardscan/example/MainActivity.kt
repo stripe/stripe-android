@@ -33,21 +33,6 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        if (savedInstanceState == null) {
-            supportFragmentManager.commit {
-                setReorderingAllowed(true)
-                add<CardScanFragment>(R.id.fragment_container, args = bundleOf("test" to settings.publishableKey))
-            }
-        }
-
-        supportFragmentManager
-            .setFragmentResultListener(CARD_SCAN_FRAGMENT_REQUEST_KEY, this) { _, bundle ->
-                val result: CardScanSheetResult? = bundle.getParcelable(CARD_SCAN_FRAGMENT_BUNDLE_KEY)
-                // Do something with the result
-                Log.e("aaaaa", result.toString())
-            }
-
         setContentView(viewBinding.root)
 
         val cardImageVerificationSheet =
