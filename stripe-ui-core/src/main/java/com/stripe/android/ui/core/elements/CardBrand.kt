@@ -1,8 +1,8 @@
-package com.stripe.android.core.model
+package com.stripe.android.ui.core.elements
 
 import androidx.annotation.DrawableRes
 import androidx.annotation.RestrictTo
-import com.stripe.android.core.R
+import com.stripe.android.ui.core.R
 import java.util.regex.Pattern
 
 /**

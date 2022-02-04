@@ -159,7 +159,7 @@ data class CardParams internal constructor(
          */
         metadata: Map<String, String>? = null
     ) : this(
-        brand = CardUtils.getPossibleCardBrand(number),
+        brand = com.stripe.android.CardUtils.getPossibleCardBrand(number),
         loggingTokens = emptySet(),
         number = number,
         expMonth = expMonth,

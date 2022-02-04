@@ -1,6 +1,7 @@
 package com.stripe.android.ui.core.elements
 
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.forms.PaymentMethodRequirements
 
 internal val CardRequirement = PaymentMethodRequirements(
     piRequirements = emptySet(),

@@ -203,7 +203,7 @@ data class PaymentMethodCreateParams internal constructor(
         private val token: String? = null,
         internal val attribution: Set<String>? = null
     ) : StripeParamsModel, Parcelable {
-        internal val brand: com.stripe.android.ui.core.elements.CardBrand get() = CardUtils.getPossibleCardBrand(number)
+        internal val brand: com.stripe.android.ui.core.elements.CardBrand get() = com.stripe.android.CardUtils.getPossibleCardBrand(number)
         internal val last4: String? get() = number?.takeLast(4)
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet

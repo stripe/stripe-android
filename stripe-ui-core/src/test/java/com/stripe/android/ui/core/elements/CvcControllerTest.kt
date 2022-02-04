@@ -2,7 +2,6 @@ package com.stripe.android.ui.core.elements
 
 import androidx.lifecycle.asLiveData
 import com.google.common.truth.Truth
-import com.stripe.android.core.model.CardBrand
 import kotlinx.coroutines.flow.MutableStateFlow
 import org.junit.Test
 import org.junit.runner.RunWith

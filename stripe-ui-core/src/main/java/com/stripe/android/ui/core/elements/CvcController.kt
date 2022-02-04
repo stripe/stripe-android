@@ -2,7 +2,6 @@ package com.stripe.android.ui.core.elements
 
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
-import com.stripe.android.core.model.CardBrand
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.forms.FormFieldEntry
 import kotlinx.coroutines.flow.Flow

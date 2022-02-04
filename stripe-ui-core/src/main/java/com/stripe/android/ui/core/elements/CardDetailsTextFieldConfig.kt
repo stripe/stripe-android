@@ -3,7 +3,6 @@ package com.stripe.android.ui.core.elements
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
-import com.stripe.android.core.model.CardBrand
 
 /**
  * This is similar to the [TextFieldConfig], but in order to determine

@@ -1,7 +1,6 @@
-package com.stripe.android
+package com.stripe.android.ui.core.elements
 
 import androidx.annotation.RestrictTo
-import com.stripe.android.core.model.CardBrand
 
 /**
  * Utility class for functions to do with cards.

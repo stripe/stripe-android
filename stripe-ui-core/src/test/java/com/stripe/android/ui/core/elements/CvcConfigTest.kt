@@ -1,7 +1,6 @@
 package com.stripe.android.ui.core.elements
 
 import com.google.common.truth.Truth
-import com.stripe.android.core.model.CardBrand
 import org.junit.Test
 
 class CvcConfigTest {
