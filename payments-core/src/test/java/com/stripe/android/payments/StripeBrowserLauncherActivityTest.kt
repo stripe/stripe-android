@@ -36,7 +36,6 @@ class StripeBrowserLauncherActivityTest {
         }
     }
 
-
     private fun parseResult(
         activityScenario: ActivityScenario<*>
     ): PaymentFlowResult.Unvalidated {
