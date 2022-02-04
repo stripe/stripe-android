@@ -9,7 +9,8 @@ import com.stripe.android.camera.framework.AggregateResultListener
 import com.stripe.android.camera.framework.AnalyzerLoopErrorListener
 import com.stripe.android.camera.framework.AnalyzerPool
 import com.stripe.android.camera.framework.ProcessBoundAnalyzerLoop
-import com.stripe.android.camera.framework.image.scaleAndCrop
+import com.stripe.android.camera.framework.util.centerOn
+import com.stripe.android.camera.framework.util.minAspectRatioSurroundingSize
 import com.stripe.android.camera.framework.util.size
 import com.stripe.android.camera.scanui.ScanFlow
 import com.stripe.android.stripecardscan.cardscan.result.MainLoopAggregator
@@ -84,7 +85,11 @@ internal abstract class CardScanFlow(
                 subscribeTo(
                     imageStream.map {
                         SSDOcr.cameraPreviewToInput(
-                            it.image.scaleAndCrop(it.viewBounds.size()), it.viewBounds, viewFinder
+                            it.image,
+                            minAspectRatioSurroundingSize(
+                                it.viewBounds.size(), it.image.width.toFloat() / it.image.height
+                            ).centerOn(it.viewBounds),
+                            viewFinder
                         )
                     },
                     coroutineScope,
