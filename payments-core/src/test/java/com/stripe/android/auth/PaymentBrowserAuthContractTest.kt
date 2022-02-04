@@ -107,7 +107,7 @@ class PaymentBrowserAuthContractTest {
     }
 
     @Test
-    fun `unparcel when no parameters as when started from StripeBrowserLauncherActivity`(){
+    fun `unparcel when no parameters as when started from StripeBrowserLauncherActivity`() {
         val parcel = Parcel.obtain()
 
         // An NullPointerException is thrown if a constructor doesn't exist that

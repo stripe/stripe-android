@@ -5,7 +5,6 @@ import android.os.Bundle
 import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
-import com.google.common.truth.Truth
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.auth.PaymentBrowserAuthContract
 import org.junit.Test
