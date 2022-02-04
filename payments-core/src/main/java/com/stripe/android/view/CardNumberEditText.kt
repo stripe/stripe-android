@@ -10,6 +10,7 @@ import androidx.annotation.VisibleForTesting
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.R
 import com.stripe.android.cards.CardAccountRangeRepository
+import com.stripe.android.cards.CardNumber
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
 import com.stripe.android.cards.DefaultStaticCardAccountRanges
 import com.stripe.android.cards.StaticCardAccountRanges
@@ -19,7 +20,6 @@ import com.stripe.android.model.AccountRange
 import com.stripe.android.model.CardBrand
 import com.stripe.android.networking.PaymentAnalyticsEvent
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
-import com.stripe.android.ui.core.elements.CardNumber
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job

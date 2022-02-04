@@ -28,7 +28,6 @@ import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArgumen
 import com.stripe.android.paymentsheet.paymentdatacollection.TransformToPaymentMethodCreateParams
 import com.stripe.android.paymentsheet.ui.AnimationConstants
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 internal abstract class BaseAddPaymentMethodFragment(

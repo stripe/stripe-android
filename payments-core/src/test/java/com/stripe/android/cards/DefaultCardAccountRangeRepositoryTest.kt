@@ -11,7 +11,6 @@ import com.stripe.android.model.BinRange
 import com.stripe.android.networking.ApiRequest
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networking.StripeApiRepository
-import com.stripe.android.ui.core.elements.CardNumber
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf

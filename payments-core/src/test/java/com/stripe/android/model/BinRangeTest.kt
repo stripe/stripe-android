@@ -1,7 +1,7 @@
 package com.stripe.android.model
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.ui.core.elements.CardNumber
+import com.stripe.android.cards.CardNumber
 import kotlin.test.Test
 
 class BinRangeTest {

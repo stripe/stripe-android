@@ -3,7 +3,6 @@ package com.stripe.android.cards
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.CardNumberFixtures
 import com.stripe.android.model.CardBrand
-import com.stripe.android.ui.core.elements.CardNumber
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test

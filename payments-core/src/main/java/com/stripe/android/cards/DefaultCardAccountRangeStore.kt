@@ -15,7 +15,7 @@ internal class DefaultCardAccountRangeStore(
         context.getSharedPreferences(PREF_FILE, Context.MODE_PRIVATE)
     }
 
-    override suspend fun get(bin: com.stripe.android.cards.Bin): List<AccountRange> {
+    override suspend fun get(bin: Bin): List<AccountRange> {
         return prefs.getStringSet(createPrefKey(bin), null)
             .orEmpty()
             .mapNotNull {
@@ -24,7 +24,7 @@ internal class DefaultCardAccountRangeStore(
     }
 
     override fun save(
-        bin: com.stripe.android.cards.Bin,
+        bin: Bin,
         accountRanges: List<AccountRange>
     ) {
         val serializedAccountRanges = accountRanges.map {
@@ -37,11 +37,11 @@ internal class DefaultCardAccountRangeStore(
     }
 
     override suspend fun contains(
-        bin: com.stripe.android.cards.Bin
+        bin: Bin
     ): Boolean = prefs.contains(createPrefKey(bin))
 
     @VisibleForTesting
-    internal fun createPrefKey(bin: com.stripe.android.cards.Bin): String = "$PREF_KEY_ACCOUNT_RANGES:$bin"
+    internal fun createPrefKey(bin: Bin): String = "$PREF_KEY_ACCOUNT_RANGES:$bin"
 
     private companion object {
         private const val PREF_FILE = "InMemoryCardAccountRangeSource.Store"

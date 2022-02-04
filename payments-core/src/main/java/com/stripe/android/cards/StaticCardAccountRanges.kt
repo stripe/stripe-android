@@ -1,7 +1,6 @@
 package com.stripe.android.cards
 
 import com.stripe.android.model.AccountRange
-import com.stripe.android.ui.core.elements.CardNumber
 
 internal interface StaticCardAccountRanges {
     /**

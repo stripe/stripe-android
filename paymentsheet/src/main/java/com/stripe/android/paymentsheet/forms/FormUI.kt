@@ -60,7 +60,7 @@ internal fun FormInternal(
                         is SectionElement -> SectionElementUI(enabled, element, hiddenIdentifiers)
                         is StaticTextElement -> StaticElementUI(element)
                         is SaveForFutureUseElement -> SaveForFutureUseElementUI(enabled, element)
-                        is AfterpayClearpayElement -> AfterpayClearpayElementUI(
+                        is AfterpayClearpayHeaderElement -> AfterpayClearpayElementUI(
                             enabled,
                             element
                         )

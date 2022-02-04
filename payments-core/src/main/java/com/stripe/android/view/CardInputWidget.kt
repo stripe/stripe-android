@@ -30,6 +30,7 @@ import androidx.core.view.updateLayoutParams
 import androidx.core.widget.doAfterTextChanged
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.R
+import com.stripe.android.cards.CardNumber
 import com.stripe.android.cards.Cvc
 import com.stripe.android.databinding.CardInputWidgetBinding
 import com.stripe.android.model.Address
@@ -38,7 +39,6 @@ import com.stripe.android.model.CardParams
 import com.stripe.android.model.ExpirationDate
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
-import com.stripe.android.ui.core.elements.CardNumber
 import kotlin.properties.Delegates
 
 /**

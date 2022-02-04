@@ -360,7 +360,7 @@ abstract class StripeRepository {
     internal abstract suspend fun getFpxBankStatus(options: ApiRequest.Options): BankStatuses
 
     internal abstract suspend fun getCardMetadata(
-        bin: com.stripe.android.cards.Bin,
+        bin: Bin,
         options: ApiRequest.Options
     ): CardMetadata?
 

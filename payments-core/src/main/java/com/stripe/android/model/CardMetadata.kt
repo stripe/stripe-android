@@ -6,6 +6,6 @@ import kotlinx.parcelize.Parcelize
 
 @Parcelize
 internal data class CardMetadata internal constructor(
-    val bin: com.stripe.android.cards.Bin,
+    val bin: Bin,
     val accountRanges: List<AccountRange>
 ) : StripeModel

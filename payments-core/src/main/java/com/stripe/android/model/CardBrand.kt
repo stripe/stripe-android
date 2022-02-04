@@ -3,7 +3,7 @@ package com.stripe.android.model
 import androidx.annotation.DrawableRes
 import androidx.annotation.RestrictTo
 import com.stripe.android.R
-import com.stripe.android.ui.core.elements.CardNumber
+import com.stripe.android.cards.CardNumber
 import java.util.regex.Pattern
 
 /**

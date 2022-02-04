@@ -1,6 +1,6 @@
 package com.stripe.android
 
-import com.stripe.android.ui.core.elements.CardNumber
+import com.stripe.android.cards.CardNumber
 
 /**
  * See [Basic test card numbers](https://stripe.com/docs/testing#cards)

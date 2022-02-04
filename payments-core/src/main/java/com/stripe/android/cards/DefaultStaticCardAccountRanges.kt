@@ -2,7 +2,6 @@ package com.stripe.android.cards
 
 import com.stripe.android.model.AccountRange
 import com.stripe.android.model.BinRange
-import com.stripe.android.ui.core.elements.CardNumber
 
 internal class DefaultStaticCardAccountRanges : StaticCardAccountRanges {
     override fun first(

@@ -26,7 +26,7 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.R
 import com.stripe.android.cards.AccountRangeFixtures
 import com.stripe.android.cards.CardAccountRangeRepository
-import com.stripe.android.ui.core.elements.CardNumber
+import com.stripe.android.cards.CardNumber
 import com.stripe.android.cards.NullCardAccountRangeRepository
 import com.stripe.android.cards.StaticCardAccountRangeSource
 import com.stripe.android.cards.StaticCardAccountRanges

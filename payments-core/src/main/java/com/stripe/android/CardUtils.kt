@@ -1,6 +1,7 @@
-package com.stripe.android.ui.core.elements
+package com.stripe.android
 
 import androidx.annotation.RestrictTo
+import com.stripe.android.cards.CardNumber
 import com.stripe.android.model.CardBrand
 
 /**

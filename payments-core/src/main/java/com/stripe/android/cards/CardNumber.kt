@@ -1,11 +1,9 @@
-package com.stripe.android.ui.core.elements
+package com.stripe.android.cards
 
-import androidx.annotation.RestrictTo
-import com.stripe.android.cards.Bin
+import com.stripe.android.CardUtils
 import com.stripe.android.model.CardBrand
 
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-sealed class CardNumber {
+internal sealed class CardNumber {
 
     /**
      * A representation of a partial or full card number that hasn't been validated.
@@ -19,10 +17,9 @@ sealed class CardNumber {
 
         val isMaxLength = length == MAX_PAN_LENGTH
 
-        val bin: com.stripe.android.cards.Bin? = com.stripe.android.cards.Bin.create(normalized)
+        val bin: Bin? = Bin.create(normalized)
 
-        val isValidLuhn =
-            CardUtils.isValidLuhnNumber(normalized)
+        val isValidLuhn = CardUtils.isValidLuhnNumber(normalized)
 
         fun validate(panLength: Int): Validated? {
             return if (panLength >= MIN_PAN_LENGTH &&
@@ -87,8 +84,7 @@ sealed class CardNumber {
 
         internal fun isPossibleCardBrand(): Boolean {
             return normalized.isNotBlank() &&
-                CardBrand.Companion.getCardBrands(normalized)
-                    .first() != CardBrand.Unknown
+                CardBrand.getCardBrands(normalized).first() != CardBrand.Unknown
         }
 
         private companion object {

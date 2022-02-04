@@ -6,7 +6,6 @@ import com.stripe.android.networking.ApiRequest
 import com.stripe.android.networking.PaymentAnalyticsEvent
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networking.StripeRepository
-import com.stripe.android.ui.core.elements.CardNumber
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 

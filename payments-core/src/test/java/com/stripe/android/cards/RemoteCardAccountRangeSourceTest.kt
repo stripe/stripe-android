@@ -13,7 +13,6 @@ import com.stripe.android.networking.AbsFakeStripeRepository
 import com.stripe.android.networking.ApiRequest
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networking.StripeRepository
-import com.stripe.android.ui.core.elements.CardNumber
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.runner.RunWith

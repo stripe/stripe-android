@@ -5,7 +5,6 @@ import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.stripe.android.ui.core.elements.CardBillingElement
 import com.stripe.android.core.injection.Injectable
 import com.stripe.android.core.injection.injectWithFallback
 import com.stripe.android.paymentsheet.injection.DaggerFormViewModelComponent

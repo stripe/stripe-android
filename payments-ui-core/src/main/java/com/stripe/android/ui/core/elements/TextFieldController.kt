@@ -108,4 +108,3 @@ internal class SimpleTextFieldController constructor(
         _hasFocus.value = newHasFocus
     }
 }
-

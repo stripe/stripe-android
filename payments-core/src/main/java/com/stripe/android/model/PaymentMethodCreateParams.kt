@@ -2,9 +2,9 @@ package com.stripe.android.model
 
 import android.os.Parcelable
 import androidx.annotation.RestrictTo
+import com.stripe.android.CardUtils
 import com.stripe.android.ObjectBuilder
 import com.stripe.android.Stripe
-import com.stripe.android.ui.core.elements.CardUtils
 import kotlinx.parcelize.Parcelize
 import kotlinx.parcelize.RawValue
 import org.json.JSONException

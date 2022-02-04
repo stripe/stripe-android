@@ -1,6 +1,6 @@
 package com.stripe.android.model
 
-import com.stripe.android.ui.core.elements.CardUtils
+import com.stripe.android.CardUtils
 import kotlinx.parcelize.Parcelize
 
 /**

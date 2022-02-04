@@ -1,6 +1,6 @@
 package com.stripe.android.model
 
-import com.stripe.android.ui.core.elements.CardNumber
+import com.stripe.android.cards.CardNumber
 import com.stripe.android.core.model.StripeModel
 import kotlinx.parcelize.Parcelize
 
