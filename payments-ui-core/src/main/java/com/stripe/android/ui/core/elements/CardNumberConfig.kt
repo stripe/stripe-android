@@ -3,6 +3,7 @@ package com.stripe.android.ui.core.elements
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
+import com.stripe.android.CardUtils
 import com.stripe.android.model.CardBrand
 import com.stripe.android.ui.core.R
 

@@ -148,7 +148,7 @@ class CardInputWidget @JvmOverloads constructor(
             return cvcEditText.cvc
         }
 
-    private val brand
+    private val brand: CardBrand
         get() {
             return cardNumberEditText.cardBrand
         }
