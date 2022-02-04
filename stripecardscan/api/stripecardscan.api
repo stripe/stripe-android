@@ -121,6 +121,28 @@ public final class com/stripe/android/stripecardscan/cardscan/CardScanConfig {
 	public static final fun setOCR_SEARCH_DURATION_MILLIS (I)V
 }
 
+public final class com/stripe/android/stripecardscan/cardscan/CardScanFragment : com/stripe/android/stripecardscan/scanui/ScanFragment, com/stripe/android/stripecardscan/scanui/SimpleScanStateful {
+	public static final field $stable I
+	public fun <init> ()V
+	public fun changeScanState (Lcom/stripe/android/stripecardscan/scanui/ScanState;)Z
+	public fun displayState (Lcom/stripe/android/stripecardscan/scanui/ScanState;Lcom/stripe/android/stripecardscan/scanui/ScanState;)V
+	public synthetic fun getResultListener$stripecardscan_release ()Lcom/stripe/android/stripecardscan/scanui/ScanResultListener;
+	public fun getScanErrorListener ()Lcom/stripe/android/stripecardscan/scanui/ScanErrorListener;
+	public fun getScanState ()Lcom/stripe/android/stripecardscan/scanui/ScanState;
+	public fun getScanStatePrevious ()Lcom/stripe/android/stripecardscan/scanui/ScanState;
+	public fun onCreate (Landroid/os/Bundle;)V
+	public fun onCreateView (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Landroid/os/Bundle;)Landroid/view/View;
+	public fun onDestroy ()V
+	public fun onResume ()V
+	public fun setScanState (Lcom/stripe/android/stripecardscan/scanui/ScanState;)V
+	public fun setScanStatePrevious (Lcom/stripe/android/stripecardscan/scanui/ScanState;)V
+}
+
+public final class com/stripe/android/stripecardscan/cardscan/CardScanFragmentKt {
+	public static final field CARD_SCAN_FRAGMENT_BUNDLE_KEY Ljava/lang/String;
+	public static final field CARD_SCAN_FRAGMENT_REQUEST_KEY Ljava/lang/String;
+}
+
 public final class com/stripe/android/stripecardscan/cardscan/CardScanSheet {
 	public static final field $stable I
 	public static final field Companion Lcom/stripe/android/stripecardscan/cardscan/CardScanSheet$Companion;
@@ -207,6 +229,20 @@ public final class com/stripe/android/stripecardscan/databinding/ActivityCardsca
 	public fun getRoot ()Landroidx/constraintlayout/widget/ConstraintLayout;
 	public static fun inflate (Landroid/view/LayoutInflater;)Lcom/stripe/android/stripecardscan/databinding/ActivityCardscanBinding;
 	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Z)Lcom/stripe/android/stripecardscan/databinding/ActivityCardscanBinding;
+}
+
+public final class com/stripe/android/stripecardscan/databinding/FragmentCardscanBinding : androidx/viewbinding/ViewBinding {
+	public final field closeButton Landroid/widget/ImageView;
+	public final field instructions Landroid/widget/TextView;
+	public final field previewFrame Landroid/widget/FrameLayout;
+	public final field viewFinderBackground Lcom/stripe/android/camera/scanui/ViewFinderBackground;
+	public final field viewFinderBorder Landroid/widget/ImageView;
+	public final field viewFinderWindow Landroid/view/View;
+	public static fun bind (Landroid/view/View;)Lcom/stripe/android/stripecardscan/databinding/FragmentCardscanBinding;
+	public synthetic fun getRoot ()Landroid/view/View;
+	public fun getRoot ()Landroidx/constraintlayout/widget/ConstraintLayout;
+	public static fun inflate (Landroid/view/LayoutInflater;)Lcom/stripe/android/stripecardscan/databinding/FragmentCardscanBinding;
+	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Z)Lcom/stripe/android/stripecardscan/databinding/FragmentCardscanBinding;
 }
 
 public final class com/stripe/android/stripecardscan/framework/Config {
@@ -372,5 +408,49 @@ public final class com/stripe/android/stripecardscan/scanui/CancellationReason$U
 	public static final field INSTANCE Lcom/stripe/android/stripecardscan/scanui/CancellationReason$UserCannotScan;
 	public fun describeContents ()I
 	public fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public final class com/stripe/android/stripecardscan/scanui/ScanErrorListener : com/stripe/android/camera/framework/AnalyzerLoopErrorListener {
+	public static final field $stable I
+	public fun <init> ()V
+	public fun onAnalyzerFailure (Ljava/lang/Throwable;)Z
+	public fun onResultFailure (Ljava/lang/Throwable;)Z
+}
+
+public abstract class com/stripe/android/stripecardscan/scanui/ScanFragment : androidx/fragment/app/Fragment, kotlinx/coroutines/CoroutineScope {
+	public static final field $stable I
+	public fun <init> ()V
+	protected fun closeScanner ()V
+	protected fun ensurePermissionAndStartCamera ()V
+	public fun getCoroutineContext ()Lkotlin/coroutines/CoroutineContext;
+	protected abstract fun getInstructionsText ()Landroid/widget/TextView;
+	protected abstract fun getMinimumAnalysisResolution ()Landroid/util/Size;
+	protected abstract fun getPreviewFrame ()Landroid/view/ViewGroup;
+	protected fun hideSystemUi ()V
+	protected final fun isFlashlightOn ()Z
+	protected fun onCameraReady ()V
+	protected abstract fun onCameraStreamAvailable (Lkotlinx/coroutines/flow/Flow;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	protected abstract fun onFlashSupported (Z)V
+	protected abstract fun onFlashlightStateChanged (Z)V
+	public fun onPause ()V
+	public fun onResume ()V
+	public fun onStart ()V
+	protected abstract fun onSupportsMultipleCameras (Z)V
+	protected abstract fun prepareCamera (Lkotlin/jvm/functions/Function0;)V
+	protected fun requestCameraPermission ()V
+	protected fun scanFailure (Ljava/lang/Throwable;)V
+	public static synthetic fun scanFailure$default (Lcom/stripe/android/stripecardscan/scanui/ScanFragment;Ljava/lang/Throwable;ILjava/lang/Object;)V
+	protected fun setFocus (Landroid/graphics/PointF;)V
+	protected fun showCameraNotSupported ()V
+	protected fun showPermissionDenied ()V
+	protected fun toggleCamera ()V
+	protected fun toggleFlashlight ()V
+	protected fun userClosedScanner ()V
+}
+
+public abstract class com/stripe/android/stripecardscan/scanui/ScanState {
+	public static final field $stable I
+	public fun <init> (Z)V
+	public final fun isFinal ()Z
 }
 

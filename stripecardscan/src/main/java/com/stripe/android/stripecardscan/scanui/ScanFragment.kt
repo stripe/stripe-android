@@ -207,7 +207,6 @@ abstract class ScanFragment : Fragment(), CoroutineScope {
      */
     protected open fun closeScanner() {
         setFlashlightState(false)
-//        finish()
     }
 
     /**

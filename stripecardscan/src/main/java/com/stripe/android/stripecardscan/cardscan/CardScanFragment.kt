@@ -54,9 +54,7 @@ class CardScanFragment : ScanFragment(), SimpleScanStateful<CardScanState> {
 
     override val instructionsText: TextView by lazy { viewBinding.instructions }
 
-    override val previewFrame: ViewGroup by lazy {
-        viewBinding.previewFrame
-    }
+    override val previewFrame: ViewGroup by lazy { viewBinding.previewFrame }
 
     private val params: CardScanSheetParams by lazy {
         requireActivity().intent.getParcelableExtra(INTENT_PARAM_REQUEST)
@@ -161,9 +159,9 @@ class CardScanFragment : ScanFragment(), SimpleScanStateful<CardScanState> {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-//        if (!ensureValidParams()) {
-//            return
-//        }
+        if (!ensureValidParams()) {
+            return
+        }
     }
 
     @SuppressLint("ClickableViewAccessibility")
