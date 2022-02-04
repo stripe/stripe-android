@@ -20,6 +20,7 @@ if (System.getenv("JITPACK")) {
 
 dependencies {
     implementation project(":stripe-core")
+    implementation project(":payments-core")
 
     implementation 'androidx.core:core-ktx:1.7.0'
     implementation libraries.androidx.appcompat
