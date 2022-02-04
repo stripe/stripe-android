@@ -18,7 +18,7 @@ class StripeBrowserLauncherActivityTest {
     private val contract = PaymentBrowserAuthContract()
 
     @Test
-    fun `start with args should finish with no setResult`() {
+    fun `start with no args should finish with no setResult`() {
         ActivityScenario.launch(
             StripeBrowserLauncherActivity::class.java, Bundle.EMPTY
         ).use { activityScenario ->
