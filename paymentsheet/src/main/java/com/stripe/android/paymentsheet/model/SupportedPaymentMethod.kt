@@ -12,9 +12,9 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.forms.AfterpayClearpayRequirement
 import com.stripe.android.paymentsheet.forms.BancontactRequirement
-import com.stripe.android.ui.core.elements.CardForm
-import com.stripe.android.ui.core.elements.CardParamKey
-import com.stripe.android.ui.core.elements.CardRequirement
+import com.stripe.android.paymentsheet.forms.CardRequirement
+import com.stripe.android.ui.core.forms.CardForm
+import com.stripe.android.ui.core.forms.CardParamKey
 import com.stripe.android.paymentsheet.forms.Delayed
 import com.stripe.android.paymentsheet.forms.EpsRequirement
 import com.stripe.android.paymentsheet.forms.GiropayRequirement
