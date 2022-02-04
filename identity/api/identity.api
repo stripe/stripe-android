@@ -63,30 +63,3 @@ public final class com/stripe/android/identity/databinding/IdentityActivityBindi
 	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Z)Lcom/stripe/android/identity/databinding/IdentityActivityBinding;
 }
 
-public final class com/stripe/android/identity/ml/BoundingBox {
-	public fun <init> (FFFF)V
-	public final fun component1 ()F
-	public final fun component2 ()F
-	public final fun component3 ()F
-	public final fun component4 ()F
-	public final fun copy (FFFF)Lcom/stripe/android/identity/ml/BoundingBox;
-	public static synthetic fun copy$default (Lcom/stripe/android/identity/ml/BoundingBox;FFFFILjava/lang/Object;)Lcom/stripe/android/identity/ml/BoundingBox;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getHeight ()F
-	public final fun getLeft ()F
-	public final fun getTop ()F
-	public final fun getWidth ()F
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class com/stripe/android/identity/ml/Category : java/lang/Enum {
-	public static final field ID_BACK Lcom/stripe/android/identity/ml/Category;
-	public static final field ID_FRONT Lcom/stripe/android/identity/ml/Category;
-	public static final field INVALID Lcom/stripe/android/identity/ml/Category;
-	public static final field NO_ID Lcom/stripe/android/identity/ml/Category;
-	public static final field PASSPORT Lcom/stripe/android/identity/ml/Category;
-	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/identity/ml/Category;
-	public static fun values ()[Lcom/stripe/android/identity/ml/Category;
-}
-

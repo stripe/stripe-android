@@ -16,6 +16,7 @@ import com.stripe.android.camera.scanui.CameraView
 import com.stripe.android.camera.scanui.util.asRect
 import com.stripe.android.identity.IdentityVerificationSheet.VerificationResult
 import com.stripe.android.identity.databinding.IdentityActivityBinding
+import com.stripe.android.identity.states.ScanState
 
 /**
  * Host activity to perform Identity verification.
@@ -45,7 +46,8 @@ internal class IdentityActivity : CameraPermissionCheckingActivity() {
 
     @VisibleForTesting
     internal val viewModelFactory: ViewModelProvider.Factory by lazy {
-        IdentityViewModel.IdentityViewModelFactory()
+        // TODO(ccen) Pass the correct scan type parameter after moved to separate Fragments
+        IdentityViewModel.IdentityViewModelFactory(scanType = ScanState.ScanType.ID_FRONT)
     }
 
     @VisibleForTesting

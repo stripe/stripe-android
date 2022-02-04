@@ -1,13 +1,10 @@
 package com.stripe.android.identity.ml
 
 import android.content.Context
-import android.graphics.Bitmap
-import android.graphics.Rect
-import android.util.Log
-import com.stripe.android.camera.CameraPreviewImage
 import com.stripe.android.camera.framework.Analyzer
 import com.stripe.android.camera.framework.AnalyzerFactory
 import com.stripe.android.camera.framework.image.cropCameraPreviewToSquare
+import com.stripe.android.identity.states.ScanState
 import org.tensorflow.lite.DataType
 import org.tensorflow.lite.Interpreter
 import org.tensorflow.lite.support.common.ops.NormalizeOp
@@ -18,26 +15,12 @@ import java.io.FileInputStream
 import java.nio.channels.FileChannel
 
 /**
- * Result category of IDDetector
- */
-enum class Category { NO_ID, PASSPORT, ID_FRONT, ID_BACK, INVALID }
-
-/**
- * Result bounding box coordinates of IDDetector, in percentage values with regard to original image's width/height
- */
-data class BoundingBox(
-    val top: Float,
-    val left: Float,
-    val width: Float,
-    val height: Float,
-)
-
-/**
  * Analyzer to run a model input.
+ *
  * TODO(ccen): reimplement with ImageClassifier
  */
 internal class IDDetectorAnalyzer(context: Context) :
-    Analyzer<IDDetectorAnalyzer.Input, IDDetectorAnalyzer.State, IDDetectorAnalyzer.Output> {
+    Analyzer<AnalyzerInput, ScanState, AnalyzerOutput> {
 
     private val tfliteInterpreter = Interpreter(
         context.assets.openFd(modelName).use { fileDescriptor ->
@@ -51,19 +34,7 @@ internal class IDDetectorAnalyzer(context: Context) :
         }
     )
 
-    /**
-     * Input from CameraAdapter, note: the bitmap should already be encoded in RGB value
-     */
-    data class Input(val cameraPreviewImage: CameraPreviewImage<Bitmap>, val viewFinderBounds: Rect)
-
-    data class State(val value: Int)
-
-    /**
-     * Output the category with highest score and the bounding box
-     */
-    data class Output(val boundingBox: BoundingBox, val category: Category, val score: Float)
-
-    override suspend fun analyze(data: Input, state: State): Output {
+    override suspend fun analyze(data: AnalyzerInput, state: ScanState): AnalyzerOutput {
         var tensorImage = TensorImage(INPUT_TENSOR_TYPE)
         val croppedImage = cropCameraPreviewToSquare(
             data.cameraPreviewImage.image,
@@ -97,31 +68,26 @@ internal class IDDetectorAnalyzer(context: Context) :
         // find the category with highest score and build output
         val resultIndex = requireNotNull(categories[0].indices.maxByOrNull { categories[0][it] })
 
-        if (categories[0][resultIndex] > THRESHOLD) {
-            Log.d(
-                TAG,
-                "IDDetectorAnalyzer::analyze result: ${requireNotNull(INDEX_CATEGORY_MAP[resultIndex])} - ${categories[0][resultIndex]}"
-            )
+        val resultCategory: Category
+        val resultScore: Float
 
-            Log.d(
-                TAG,
-                "IDDetectorAnalyzer::bounding box: (${boundingBoxes[0][0]}, ${boundingBoxes[0][1]}) - (${boundingBoxes[0][2]}, ${boundingBoxes[0][3]})"
-            )
+        if (categories[0][resultIndex] > THRESHOLD) {
+            resultCategory = requireNotNull(INDEX_CATEGORY_MAP[resultIndex])
+            resultScore = categories[0][resultIndex]
         } else {
-            Log.d(
-                TAG, "no_result"
-            )
+            resultCategory = Category.NO_ID
+            resultScore = 0f
         }
 
-        return Output(
+        return AnalyzerOutput(
             BoundingBox(
                 boundingBoxes[0][0],
                 boundingBoxes[0][1],
                 boundingBoxes[0][2],
                 boundingBoxes[0][3],
             ),
-            requireNotNull(INDEX_CATEGORY_MAP[resultIndex]),
-            categories[0][resultIndex]
+            resultCategory,
+            resultScore
         )
     }
 
@@ -131,12 +97,12 @@ internal class IDDetectorAnalyzer(context: Context) :
     internal class Factory(
         private val context: Context
     ) : AnalyzerFactory<
-            Input,
-            State,
-            Output,
-            Analyzer<Input, State, Output>
+            AnalyzerInput,
+            ScanState,
+            AnalyzerOutput,
+            Analyzer<AnalyzerInput, ScanState, AnalyzerOutput>
             > {
-        override suspend fun newInstance(): Analyzer<Input, State, Output>? {
+        override suspend fun newInstance(): Analyzer<AnalyzerInput, ScanState, AnalyzerOutput> {
             return IDDetectorAnalyzer(context)
         }
     }
