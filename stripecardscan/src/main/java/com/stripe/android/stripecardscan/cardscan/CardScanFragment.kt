@@ -270,23 +270,15 @@ class CardScanFragment : ScanFragment(), SimpleScanStateful<CardScanState> {
 
     override fun displayState(newState: ScanState, previousState: ScanState?) {
         when (newState) {
-            is CardScanState.NotFound -> {
+            is CardScanState.NotFound, CardScanState.Found -> {
                 viewBinding.viewFinderBackground
                     .setBackgroundColor(
                         requireActivity().getColorByRes(R.color.stripeNotFoundBackground)
                     )
                 viewBinding.viewFinderWindow
                     .setBackgroundResource(R.drawable.stripe_card_background_not_found)
-                viewBinding.viewFinderBorder.startAnimation(R.drawable.stripe_card_border_not_found)
-            }
-            is CardScanState.Found -> {
-                viewBinding.viewFinderBackground
-                    .setBackgroundColor(
-                        requireActivity().getColorByRes(R.color.stripeFoundBackground)
-                    )
-                viewBinding.viewFinderWindow
-                    .setBackgroundResource(R.drawable.stripe_card_background_found)
-                viewBinding.viewFinderBorder.startAnimation(R.drawable.stripe_card_border_found)
+                viewBinding.viewFinderBorder
+                    .startAnimation(R.drawable.stripe_paymentsheet_card_border_not_found)
             }
             is CardScanState.Correct -> {
                 viewBinding.viewFinderBackground

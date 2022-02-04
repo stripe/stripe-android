@@ -19,6 +19,7 @@
     <dimen name="stripeSecurityMargin" description="The minimum amount of space surrounding the security notification text below the view finder window">16dp</dimen>
     <dimen name="stripeSecurityIconMargin" description="The distance between the security notification lock icon and the security notification text">4dp</dimen>
 
+    <item name="stripePaymentSheetNotFoundOutlineWidth" type="integer" description="The width of the border around the view finder window in paymentsheet when no card is present">2</item>
     <item name="stripeNotFoundOutlineWidth" type="integer" description="The width of the border around the view finder window when no card is present">1</item>
     <item name="stripeFoundOutlineWidth" type="integer" description="The width of the border around the view finder window when a card has been found and the scan has started">5</item>
     <item name="stripeCorrectOutlineWidth" type="integer" description="The width of the border around the view finder window when the scan completes">10</item>

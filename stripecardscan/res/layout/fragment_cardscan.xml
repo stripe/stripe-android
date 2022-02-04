@@ -32,7 +32,7 @@
     <ImageView
         android:id="@+id/view_finder_border"
         android:contentDescription="@string/stripe_card_view_finder_description"
-        android:background="@drawable/stripe_card_border_not_found"
+        android:background="@drawable/stripe_paymentsheet_card_border_not_found"
         android:layout_width="0dp"
         android:layout_height="0dp"
         app:layout_constraintTop_toTopOf="parent"
@@ -46,7 +46,7 @@
     <ImageView
         android:id="@+id/close_button"
         android:contentDescription="@string/stripe_close_button_description"
-        android:src="@drawable/stripe_close_button_dark"
+        android:src="@drawable/stripe_paymentsheet_close_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
