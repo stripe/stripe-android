@@ -1,5 +1,6 @@
 package com.stripe.android.ui.core.elements
 
+import androidx.annotation.RestrictTo
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
@@ -10,7 +11,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 
-internal interface TextFieldController : InputController {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
+interface TextFieldController : InputController {
     fun onValueChange(displayFormatted: String)
     fun onFocusChange(newHasFocus: Boolean)
 
@@ -36,7 +38,8 @@ internal interface TextFieldController : InputController {
  * composable.  These functions will update the observables as needed.  It is responsible for
  * exposing immutable observers for its data
  */
-internal class SimpleTextFieldController constructor(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+class SimpleTextFieldController constructor(
     private val textFieldConfig: TextFieldConfig,
     override val showOptionalLabel: Boolean = false,
     initialValue: String? = null

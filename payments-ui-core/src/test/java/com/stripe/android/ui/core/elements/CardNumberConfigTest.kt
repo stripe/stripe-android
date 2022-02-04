@@ -3,6 +3,7 @@ package com.stripe.android.ui.core.elements
 import androidx.compose.ui.text.AnnotatedString
 import com.google.common.truth.Truth
 import com.stripe.android.model.CardBrand
+import com.stripe.android.ui.core.R
 import org.junit.Test
 
 class CardNumberConfigTest {

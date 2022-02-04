@@ -1,8 +1,11 @@
 package com.stripe.android.ui.core.elements
 
 import androidx.lifecycle.asLiveData
-import com.google.common.truth.Truth
+import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.CardBrand
+import com.stripe.android.ui.core.R
+import com.stripe.android.ui.core.forms.FormFieldEntry
+import com.stripe.android.utils.TestUtils.idleLooper
 import kotlinx.coroutines.flow.MutableStateFlow
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -68,13 +71,13 @@ internal class CvcControllerTest {
         cvcController.onValueChange("12")
         idleLooper()
 
-        Truth.assertThat(visibleErrorFlow[visibleErrorFlow.size - 1])
+        assertThat(visibleErrorFlow[visibleErrorFlow.size - 1])
             .isFalse()
 
         cvcController.onFocusChange(false)
         idleLooper()
 
-        Truth.assertThat(visibleErrorFlow[visibleErrorFlow.size - 1])
+        assertThat(visibleErrorFlow[visibleErrorFlow.size - 1])
             .isTrue()
     }
 }

@@ -186,6 +186,7 @@ internal class PaymentSheetActivityTest {
             idleLooper()
 
             // Initially empty card
+            // TODO: Consistent failure
             assertThat(activity.viewBinding.buyButton.isVisible).isTrue()
             assertThat(activity.viewBinding.buyButton.isEnabled).isFalse()
             assertThat(activity.viewBinding.googlePayButton.isVisible).isFalse()

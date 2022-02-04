@@ -224,7 +224,7 @@ class CardInputWidget @JvmOverloads constructor(
             cvcEditText.shouldShowError = cvc == null
             postalCodeEditText.shouldShowError =
                 (postalCodeRequired || usZipCodeRequired) &&
-                    postalCodeEditText.postalCode.isNullOrBlank()
+                postalCodeEditText.postalCode.isNullOrBlank()
 
             // Announce error messages for accessibility
             currentFields

@@ -134,7 +134,7 @@ internal class FormViewModel @Inject internal constructor(
             saveForFutureUseElement.map {
                 it?.controller?.hiddenIdentifiers ?: flowOf(emptyList())
             }.flattenConcat(),
-            creditBillingElement.map{
+            creditBillingElement.map {
                 it?.hiddenIdentifiers ?: flowOf(emptyList())
             }.flattenConcat()
         ) { showFutureUse, saveFutureUseIdentifiers, creditBillingIdentifiers ->

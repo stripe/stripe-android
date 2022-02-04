@@ -252,11 +252,13 @@ class PaymentSheetAddPaymentMethodFragmentTest {
 
             idleLooper()
 
+            // TODO: Failure
             assertThat(fragment.sheetViewModel.selection.value).isEqualTo(lastPaymentMethod)
         }
     }
 
     @Test
+    // TODO: Intermittent test failure
     fun `when new payment method is selected then error message is cleared`() {
         createFragment(PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY) { fragment, viewBinding ->
             viewBinding.googlePayButton.performClick()
@@ -290,6 +292,7 @@ class PaymentSheetAddPaymentMethodFragmentTest {
 
             idleLooper()
 
+            // TODO: failure
             assertThat(viewBinding.message.isVisible).isTrue()
             assertThat(viewBinding.message.text).isEqualTo(errorMessage)
 

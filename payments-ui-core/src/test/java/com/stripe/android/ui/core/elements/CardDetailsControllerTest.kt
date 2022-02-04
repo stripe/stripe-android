@@ -2,6 +2,8 @@ package com.stripe.android.ui.core.elements
 
 import androidx.lifecycle.asLiveData
 import com.google.common.truth.Truth
+import com.stripe.android.ui.core.R
+import com.stripe.android.utils.TestUtils.idleLooper
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -22,14 +24,14 @@ class CardDetailsControllerTest {
         cardController.cvcElement.controller.onValueChange("123")
         cardController.expirationDateElement.controller.onValueChange("13")
 
-        TestUtils.idleLooper()
+        idleLooper()
 
         Truth.assertThat(flowValues[flowValues.size - 1]?.errorMessage).isEqualTo(
             R.string.invalid_card_number
         )
 
         cardController.numberElement.controller.onValueChange("4242424242424242")
-        TestUtils.idleLooper()
+        idleLooper()
 
         Truth.assertThat(flowValues[flowValues.size - 1]?.errorMessage).isEqualTo(
             R.string.incomplete_expiry_date

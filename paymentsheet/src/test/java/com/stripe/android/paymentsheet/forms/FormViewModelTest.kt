@@ -28,6 +28,7 @@ import com.stripe.android.ui.core.elements.SaveForFutureUseSpec
 import com.stripe.android.ui.core.elements.SectionElement
 import com.stripe.android.ui.core.elements.SectionSingleFieldElement
 import com.stripe.android.ui.core.elements.SectionSpec
+import com.stripe.android.ui.core.elements.SimpleTextFieldController
 import com.stripe.android.ui.core.elements.SimpleTextSpec.Companion.NAME
 import com.stripe.android.ui.core.elements.TextFieldController
 import com.stripe.android.ui.core.forms.SepaDebitForm
@@ -459,13 +460,13 @@ internal class FormViewModelTest {
                 ?.value
         ).isNull()
 
-            // Fill all address values except line2
-            val addressControllers = AddressControllers.create(formViewModel)
-            val populateAddressControllers = addressControllers.controllers
-                .filter { it.label.first() != R.string.address_label_address_line2 }
-            populateAddressControllers
-                .forEachIndexed { index, textFieldController ->
-                    textFieldController.onValueChange("1234")
+        // Fill all address values except line2
+        val addressControllers = AddressControllers.create(formViewModel)
+        val populateAddressControllers = addressControllers.controllers
+            .filter { it.label.first() != R.string.address_label_address_line2 }
+        populateAddressControllers
+            .forEachIndexed { index, textFieldController ->
+                textFieldController.onValueChange("1234")
 
                 if (index == populateAddressControllers.size - 1) {
                     assertThat(

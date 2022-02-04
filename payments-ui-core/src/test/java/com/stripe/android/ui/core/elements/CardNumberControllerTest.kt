@@ -1,7 +1,10 @@
 package com.stripe.android.ui.core.elements
 
 import androidx.lifecycle.asLiveData
-import com.google.common.truth.Truth
+import com.google.common.truth.Truth.assertThat
+import com.stripe.android.ui.core.R
+import com.stripe.android.ui.core.forms.FormFieldEntry
+import com.stripe.android.utils.TestUtils.idleLooper
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -64,13 +67,13 @@ internal class CardNumberControllerTest {
         cardNumberController.onValueChange("4242")
         idleLooper()
 
-        Truth.assertThat(visibleErrorFlow[visibleErrorFlow.size - 1])
+        assertThat(visibleErrorFlow[visibleErrorFlow.size - 1])
             .isFalse()
 
         cardNumberController.onFocusChange(false)
         idleLooper()
 
-        Truth.assertThat(visibleErrorFlow[visibleErrorFlow.size - 1])
+        assertThat(visibleErrorFlow[visibleErrorFlow.size - 1])
             .isTrue()
     }
 }

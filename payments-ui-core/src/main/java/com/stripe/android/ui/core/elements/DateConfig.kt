@@ -4,8 +4,8 @@ import androidx.annotation.StringRes
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import com.stripe.android.ui.core.R
-import com.stripe.android.ui.core.elements.TextFieldStateConstants.Valid
 import com.stripe.android.ui.core.elements.TextFieldStateConstants.Error
+import com.stripe.android.ui.core.elements.TextFieldStateConstants.Valid
 import java.util.Calendar
 
 internal class DateConfig : TextFieldConfig {

@@ -10,7 +10,6 @@ import com.stripe.android.ui.core.elements.SaveForFutureUseSpec
 import com.stripe.android.ui.core.elements.SectionSpec
 import com.stripe.android.ui.core.elements.billingParams
 
-
 internal val cardParams: MutableMap<String, Any?> = mutableMapOf(
     "number" to null,
     "exp_month" to null,
