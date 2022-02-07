@@ -3,6 +3,7 @@ enableFeaturePreview("VERSION_CATALOGS")
 include ':example'
 include ':payments'
 include ':payments-core'
+include ':payments-ui-core'
 include ':paymentsheet-example'
 include ':paymentsheet'
 include ':stripecardscan'
