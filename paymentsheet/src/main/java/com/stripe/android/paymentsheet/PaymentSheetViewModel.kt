@@ -2,7 +2,6 @@ package com.stripe.android.paymentsheet
 
 import android.app.Application
 import android.os.Bundle
-import android.os.Parcelable
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.IntegerRes
@@ -55,7 +54,6 @@ import com.stripe.android.ui.core.forms.resources.ResourceRepository
 import dagger.Lazy
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
 import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
@@ -448,23 +446,20 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         _paymentSheetResult.value = PaymentSheetResult.Canceled
     }
 
-    internal sealed class TransitionTarget : Parcelable {
+    internal sealed class TransitionTarget {
         abstract val fragmentConfig: FragmentConfig
 
         // User has saved PM's and is selected
-        @Parcelize
         data class SelectSavedPaymentMethod(
             override val fragmentConfig: FragmentConfig
         ) : TransitionTarget()
 
         // User has saved PM's and is adding a new one
-        @Parcelize
         data class AddPaymentMethodFull(
             override val fragmentConfig: FragmentConfig
         ) : TransitionTarget()
 
         // User has no saved PM's
-        @Parcelize
         data class AddPaymentMethodSheet(
             override val fragmentConfig: FragmentConfig
         ) : TransitionTarget()

@@ -124,23 +124,20 @@ internal class PaymentOptionsViewModel @Inject constructor(
         }
     }
 
-    internal sealed class TransitionTarget : Parcelable {
+    internal sealed class TransitionTarget {
         abstract val fragmentConfig: FragmentConfig
 
         // User has saved PM's and is selected
-        @Parcelize
         data class SelectSavedPaymentMethod(
             override val fragmentConfig: FragmentConfig
         ) : TransitionTarget()
 
         // User has saved PM's and is adding a new one
-        @Parcelize
         data class AddPaymentMethodFull(
             override val fragmentConfig: FragmentConfig
         ) : TransitionTarget()
 
         // User has no saved PM's
-        @Parcelize
         data class AddPaymentMethodSheet(
             override val fragmentConfig: FragmentConfig
         ) : TransitionTarget()
