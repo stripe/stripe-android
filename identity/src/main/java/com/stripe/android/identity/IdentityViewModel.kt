@@ -48,7 +48,6 @@ internal class IdentityViewModel(scanType: ScanState.ScanType) :
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
             return IdentityViewModel(scanType) as T
         }
-
     }
 
     private companion object {
