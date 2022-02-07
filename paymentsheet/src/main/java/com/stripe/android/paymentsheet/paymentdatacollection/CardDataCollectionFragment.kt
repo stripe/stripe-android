@@ -71,14 +71,8 @@ internal class CardDataCollectionFragment : Fragment() {
 
     private val addCardViewModel: AddCardViewModel by viewModels()
 
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        val themedInflater = inflater.cloneInContext(
-            ContextThemeWrapper(requireActivity(), R.style.StripePaymentSheetAddPaymentMethodTheme)
-        )
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
         if (requireNotNull(
                 requireArguments().getParcelable(PaymentSheetActivity.EXTRA_STARTER_ARGS)
             ) is PaymentOptionContract.Args
@@ -113,6 +107,16 @@ internal class CardDataCollectionFragment : Fragment() {
                 )
             ).get(PaymentSheetViewModel::class.java)
         }
+    }
+
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        val themedInflater = inflater.cloneInContext(
+            ContextThemeWrapper(requireActivity(), R.style.StripePaymentSheetAddPaymentMethodTheme)
+        )
 
         return themedInflater.inflate(
             R.layout.fragment_paymentsheet_add_card,

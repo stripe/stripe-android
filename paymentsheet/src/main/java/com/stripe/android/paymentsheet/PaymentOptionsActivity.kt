@@ -80,17 +80,15 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
         setupContinueButton(viewBinding.continueButton)
 
         viewModel.transition.observe(this) { event ->
-            event?.let {
-                it.getContentIfNotHandled()?.let { transitionTarget ->
-                    onTransitionTarget(
-                        transitionTarget,
-                        bundleOf(
-                            PaymentSheetActivity.EXTRA_STARTER_ARGS to starterArgs,
-                            PaymentSheetActivity.EXTRA_FRAGMENT_CONFIG to
-                                transitionTarget.fragmentConfig
-                        )
+            event?.getContentIfNotHandled()?.let { transitionTarget ->
+                onTransitionTarget(
+                    transitionTarget,
+                    bundleOf(
+                        PaymentSheetActivity.EXTRA_STARTER_ARGS to starterArgs,
+                        PaymentSheetActivity.EXTRA_FRAGMENT_CONFIG to
+                            transitionTarget.fragmentConfig
                     )
-                }
+                )
             }
         }
 
