@@ -1,7 +1,7 @@
-package com.stripe.android.paymentsheet.elements
+package com.stripe.android.ui.core.elements
 
 import androidx.annotation.StringRes
-import com.stripe.android.paymentsheet.R
+import com.stripe.android.ui.core.R
 
 internal class TextFieldStateConstants {
     sealed class Valid : TextFieldState {

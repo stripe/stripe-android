@@ -1,9 +1,10 @@
-package com.stripe.android.paymentsheet.elements
+package com.stripe.android.ui.core.elements
 
+import androidx.annotation.RestrictTo
 import androidx.annotation.StringRes
-import com.stripe.android.model.CountryCode
-import com.stripe.android.paymentsheet.R
-import com.stripe.android.view.CountryUtils
+import com.stripe.android.core.model.CountryCode
+import com.stripe.android.core.model.CountryUtils
+import com.stripe.android.ui.core.R
 import java.util.Locale
 
 /**
@@ -13,7 +14,8 @@ import java.util.Locale
  * countries will be shown.
  * @property locale: this is the locale used to display the country names.
  */
-internal class CountryConfig(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+class CountryConfig(
     val onlyShowCountryCodes: Set<String> = emptySet(),
     val locale: Locale = Locale.getDefault()
 ) : DropdownConfig {

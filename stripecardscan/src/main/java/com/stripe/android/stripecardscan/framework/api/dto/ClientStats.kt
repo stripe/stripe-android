@@ -1,9 +1,8 @@
 package com.stripe.android.stripecardscan.framework.api.dto
 
 import androidx.annotation.RestrictTo
-import com.stripe.android.stripecardscan.framework.RepeatingTaskStats
-import com.stripe.android.stripecardscan.framework.Stats
-import com.stripe.android.stripecardscan.framework.TaskStats
+import com.stripe.android.camera.framework.Stats
+import com.stripe.android.camera.framework.TaskStats
 import com.stripe.android.stripecardscan.framework.ml.ModelLoadDetails
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -17,14 +16,15 @@ internal data class StatsPayload(
     @SerialName("device") val device: ClientDevice,
     @SerialName("app") val app: AppInfo,
     @SerialName("scan_stats") val scanStats: ScanStatistics,
-    @SerialName("model_versions") val modelVersions: List<ModelVersion>,
+// TODO: these should probably be reported as part of scanstats
+//    @SerialName("model_versions") val modelVersions: List<ModelVersion>,
 )
 
 @Serializable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 internal data class ScanStatistics(
     @SerialName("tasks") val tasks: Map<String, List<TaskStatistics>>,
-    @SerialName("repeating_tasks") val repeatingTasks: Map<String, List<RepeatingTaskStatistics>>,
+    @SerialName("repeating_tasks") val repeatingTasks: Map<String, RepeatingTaskStatistics>,
 ) {
     companion object {
         @JvmStatic
@@ -32,13 +32,11 @@ internal data class ScanStatistics(
             tasks = Stats.getTasks().mapValues { entry ->
                 entry.value.map { TaskStatistics.fromTaskStats(it) }
             },
-            repeatingTasks = Stats.getRepeatingTasks().mapValues { repeatingTasks ->
-                repeatingTasks.value.map { resultMap ->
-                    RepeatingTaskStatistics.fromRepeatingTaskStats(
-                        result = resultMap.key,
-                        repeatingTaskStats = resultMap.value,
-                    )
-                }
+            repeatingTasks = Stats.getRepeatingTasks().mapValues { repeatingTask ->
+                RepeatingTaskStatistics(
+                    executions = repeatingTask.value.map { resultMap -> resultMap.value.executions }
+                        .sum()
+                )
             }
         )
     }
@@ -82,29 +80,5 @@ internal data class TaskStatistics(
 @Serializable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 internal data class RepeatingTaskStatistics(
-    @SerialName("result") val result: String,
     @SerialName("executions") val executions: Int,
-    @SerialName("start_time_ms") val startTimeMs: Long,
-    @SerialName("total_duration_ms") val totalDurationMs: Long,
-    @SerialName("total_cpu_duration_ms") val totalCpuDurationMs: Long,
-    @SerialName("average_duration_ms") val averageDurationMs: Long,
-    @SerialName("minimum_duration_ms") val minimumDurationMs: Long,
-    @SerialName("maximum_duration_ms") val maximumDurationMs: Long,
-) {
-    companion object {
-        @JvmStatic
-        internal fun fromRepeatingTaskStats(
-            result: String,
-            repeatingTaskStats: RepeatingTaskStats,
-        ) = RepeatingTaskStatistics(
-            result = result,
-            executions = repeatingTaskStats.executions,
-            startTimeMs = repeatingTaskStats.startedAt.toMillisecondsSinceEpoch(),
-            totalDurationMs = repeatingTaskStats.totalDuration.inMilliseconds.toLong(),
-            totalCpuDurationMs = repeatingTaskStats.totalCpuDuration.inMilliseconds.toLong(),
-            averageDurationMs = repeatingTaskStats.averageDuration().inMilliseconds.toLong(),
-            minimumDurationMs = repeatingTaskStats.minimumDuration.inMilliseconds.toLong(),
-            maximumDurationMs = repeatingTaskStats.maximumDuration.inMilliseconds.toLong(),
-        )
-    }
-}
+)

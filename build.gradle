@@ -110,5 +110,5 @@ tasks.dokkaHtmlMultiModule.configure {
 
 apiValidation {
     ignoredPackages += ["com.stripe.android.databinding"]
-    ignoredProjects += ["example", "paymentsheet-example", "stripecardscan-example"]
+    ignoredProjects += ["example", "paymentsheet-example", "stripecardscan-example", "identity-example"]
 }

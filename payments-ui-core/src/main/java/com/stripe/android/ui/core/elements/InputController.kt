@@ -1,12 +1,14 @@
-package com.stripe.android.paymentsheet.elements
+package com.stripe.android.ui.core.elements
 
-import com.stripe.android.paymentsheet.forms.FormFieldEntry
+import androidx.annotation.RestrictTo
+import com.stripe.android.ui.core.forms.FormFieldEntry
 import kotlinx.coroutines.flow.Flow
 
 /**
  * This class provides the logic behind the fields.
  */
-internal sealed interface InputController : SectionFieldErrorController {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+sealed interface InputController : SectionFieldErrorController {
     val label: Flow<Int>
     val fieldValue: Flow<String>
     val rawFieldValue: Flow<String?>

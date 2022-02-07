@@ -1,11 +1,13 @@
 package com.stripe.android.stripecardscan.payment.ml
 
+import android.util.Size
 import androidx.core.graphics.drawable.toBitmap
 import androidx.test.filters.MediumTest
 import androidx.test.platform.app.InstrumentationRegistry
+import com.stripe.android.camera.framework.image.scale
+import com.stripe.android.camera.framework.image.size
+import com.stripe.android.camera.framework.util.toRect
 import com.stripe.android.stripecardscan.framework.ResourceFetcher
-import com.stripe.android.stripecardscan.framework.image.size
-import com.stripe.android.stripecardscan.framework.util.toRect
 import com.stripe.android.stripecardscan.test.R
 import kotlinx.coroutines.runBlocking
 import org.junit.Test
@@ -27,7 +29,9 @@ class CardDetectTest {
     @Test
     @MediumTest
     fun cardDetect_pan() = runBlocking {
-        val bitmap = testContext.resources.getDrawable(R.drawable.card_pan, null).toBitmap()
+        val bitmap = testContext.resources.getDrawable(R.drawable.card_pan, null)
+            .toBitmap()
+            .scale(Size(224, 224))
         val fetcher = CardDetectModelManager.getModelFetcher(appContext)
         assertNotNull(fetcher)
         assertTrue(fetcher is ResourceFetcher)
@@ -63,6 +67,7 @@ class CardDetectTest {
     fun cardDetect_noPan() = runBlocking {
         val bitmap = testContext.resources.getDrawable(R.drawable.card_no_pan, null)
             .toBitmap()
+            .scale(Size(224, 224))
         val fetcher = CardDetectModelManager.getModelFetcher(appContext)
         assertNotNull(fetcher)
         assertTrue(fetcher is ResourceFetcher)
@@ -98,6 +103,7 @@ class CardDetectTest {
     fun cardDetect_noCard() = runBlocking {
         val bitmap = testContext.resources.getDrawable(R.drawable.card_no_card, null)
             .toBitmap()
+            .scale(Size(224, 224))
         val fetcher = CardDetectModelManager.getModelFetcher(appContext)
         assertNotNull(fetcher)
         assertTrue(fetcher is ResourceFetcher)

@@ -1,5 +1,6 @@
-package com.stripe.android.paymentsheet.elements
+package com.stripe.android.ui.core.elements
 
+import androidx.annotation.RestrictTo
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Divider
@@ -10,12 +11,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 
 @Composable
-internal fun SectionElementUI(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+fun SectionElementUI(
     enabled: Boolean,
     element: SectionElement,
-    hiddenIdentifiers: List<IdentifierSpec>?,
+    hiddenIdentifiers: List<IdentifierSpec>,
 ) {
-    if (hiddenIdentifiers?.contains(element.identifier) == false) {
+    if (!hiddenIdentifiers.contains(element.identifier)) {
         val controller = element.controller
 
         val error by controller.error.collectAsState(null)

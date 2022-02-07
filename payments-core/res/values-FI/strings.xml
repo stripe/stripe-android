@@ -20,8 +20,6 @@
   <string name="address_county_required">Kirjoita lääni</string>
   <!-- Caption for Address field on address form -->
   <string name="address_label_address">Osoite</string>
-  <!-- Address line 1 placeholder for billing address form. -->
-  <string name="address_label_address_line1">Osoiterivi 1</string>
   <!-- Label for input requesting the first line of an address where , used for international addresses -->
   <string name="address_label_address_line1_optional">Osoiterivi 1 (valinnainen)</string>
   <!-- Address line 2 placeholder for billing address form. -->
@@ -30,44 +28,28 @@
   <string name="address_label_address_optional">Osoite (valinnainen) </string>
   <!-- Label for input requesting apartment number (address line 2) where input is optional, used for US based addresses -->
   <string name="address_label_apt_optional">Asunto (valinnainen)</string>
-  <!-- Caption for City field on address form -->
-  <string name="address_label_city">Paikkakunta</string>
   <!-- Label for input requesting city where input is optional, used for all locations -->
   <string name="address_label_city_optional">Paikkakunta (valinnainen)</string>
-  <!-- Caption for Country field on address form -->
-  <string name="address_label_country">Maa</string>
-  <!-- Caption for County field on address form (only countries that use county, like United Kingdom) -->
-  <string name="address_label_county">Lääni</string>
   <!-- Label for input requesting county where input is optional , used for UK based addresses -->
   <string name="address_label_county_optional">Lääni (valinnainen)</string>
-  <!-- Caption for Name field on address form -->
-  <string name="address_label_name">Nimi</string>
   <!-- Label for input requesting phone number, used for all locations -->
   <string name="address_label_phone_number">Puhelinnumero</string>
   <!-- Label for input requesting phone number where input is optional, used for all locations -->
   <string name="address_label_phone_number_optional">Puhelinnumero (valinnainen)</string>
-  <!-- Short string for postal code (text used in non-US countries) -->
-  <string name="address_label_postal_code">Postinumero</string>
   <!-- Label for input requesting postal code where input is optional, used for Canada based addresses -->
   <string name="address_label_postal_code_optional">Postinumero (valinnainen)</string>
   <!-- Label for input requesting postcode, used for UK based addresses -->
   <string name="address_label_postcode">Postinumero</string>
   <!-- Label for input requesting postcode where input is optional, used for UK based addresses -->
   <string name="address_label_postcode_optional">Postinumero (valinnainen)</string>
-  <!-- Caption for Province field on address form (only countries that use province, like Canada) -->
-  <string name="address_label_province">Provinssi</string>
   <!-- Label for input requesting province where province is optional, used for canadian addresses -->
   <string name="address_label_province_optional">Maakunta (valinnainen)</string>
   <!-- Label for input requesting the region, used for international addresses -->
   <string name="address_label_region_generic">Osavaltio/maakunta/alue</string>
   <!-- Label for input requesting the region where input is optional, used for international addresses -->
   <string name="address_label_region_generic_optional">Osavaltio/maakunta/alue (valinnainen)</string>
-  <!-- Caption for State field on address form (only countries that use state , like United States) -->
-  <string name="address_label_state">Osavaltio</string>
   <!-- Label for input requesting state where input is optional, used for US based addresses -->
   <string name="address_label_state_optional">Osavaltio (valinnainen)</string>
-  <!-- Label for input requesting zip code, used for US based addreses -->
-  <string name="address_label_zip_code">Postinumero</string>
   <!-- Label for input requesting zip code where input is optional, used for US based addresses -->
   <string name="address_label_zip_code_optional">Postinumero (valinnainen)</string>
   <!-- Label for input requesting postal code, used for international addresses -->

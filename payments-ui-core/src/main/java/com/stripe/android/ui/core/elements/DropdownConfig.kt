@@ -1,6 +1,9 @@
-package com.stripe.android.paymentsheet.elements
+package com.stripe.android.ui.core.elements
 
-internal sealed interface DropdownConfig {
+import androidx.annotation.RestrictTo
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+sealed interface DropdownConfig {
     /** This is a label for debug logs **/
     val debugLabel: String
 

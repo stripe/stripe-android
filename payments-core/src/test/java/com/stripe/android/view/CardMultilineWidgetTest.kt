@@ -27,7 +27,7 @@ import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.testharness.ViewTestUtils
 import com.stripe.android.utils.TestUtils.idleLooper
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.TestCoroutineDispatcher
+import kotlinx.coroutines.test.StandardTestDispatcher
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
@@ -36,7 +36,6 @@ import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
 import java.util.Calendar
 import kotlin.coroutines.CoroutineContext
-import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 
@@ -46,7 +45,7 @@ import kotlin.test.Test
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
 internal class CardMultilineWidgetTest {
-    private val testDispatcher = TestCoroutineDispatcher()
+    private val testDispatcher = StandardTestDispatcher()
 
     private val cardMultilineWidget: CardMultilineWidget by lazy {
         activityScenarioFactory.createView {
@@ -96,11 +95,6 @@ internal class CardMultilineWidgetTest {
             BinFixtures.DINERSCLUB14,
             listOf(AccountRangeFixtures.DINERSCLUB14)
         )
-    }
-
-    @AfterTest
-    fun cleanup() {
-        testDispatcher.cleanupTestCoroutines()
     }
 
     private fun createWidget(
@@ -330,35 +324,42 @@ internal class CardMultilineWidgetTest {
     @Test
     fun paymentMethodCreateParams_whenPostalCodeIsRequiredAndValueIsBlank_returnsNull() {
         cardMultilineWidget.setShouldShowPostalCode(true)
+        cardMultilineWidget.setCardInputListener(fullCardListener)
         cardMultilineWidget.postalCodeRequired = true
 
         fullGroup.cardNumberEditText.setText(VISA_WITH_SPACES)
         fullGroup.expiryDateEditText.append("12")
         fullGroup.expiryDateEditText.append("50")
         fullGroup.cvcEditText.append(CVC_VALUE_COMMON)
+        fullGroup.postalCodeEditText.setText("")
 
         assertThat(cardMultilineWidget.paymentMethodCreateParams)
             .isNull()
+        verify(fullCardListener, never()).onPostalCodeComplete()
     }
 
     @Test
     fun paymentMethodCreateParams_whenPostalCodeIsRequiredAndValueIsNotBlank_returnsNotNull() {
         cardMultilineWidget.setShouldShowPostalCode(true)
-        cardMultilineWidget.postalCodeRequired = false
+        cardMultilineWidget.setCardInputListener(fullCardListener)
+        cardMultilineWidget.postalCodeRequired = true
 
         fullGroup.cardNumberEditText.setText(VISA_WITH_SPACES)
         fullGroup.expiryDateEditText.append("12")
         fullGroup.expiryDateEditText.append("50")
         fullGroup.cvcEditText.append(CVC_VALUE_COMMON)
+        fullGroup.postalCodeEditText.setText("1234")
 
         assertThat(cardMultilineWidget.paymentMethodCreateParams)
             .isNotNull()
+        verify(fullCardListener).onPostalCodeComplete()
     }
 
     @Test
     fun paymentMethodCreateParams_whenPostalCodeIsNotRequiredAndValueIsBlank_returnsNotNull() {
         cardMultilineWidget.setShouldShowPostalCode(true)
         cardMultilineWidget.postalCodeRequired = false
+        cardMultilineWidget.setCardInputListener(fullCardListener)
 
         fullGroup.cardNumberEditText.setText(VISA_WITH_SPACES)
         fullGroup.expiryDateEditText.append("12")
@@ -367,6 +368,7 @@ internal class CardMultilineWidgetTest {
 
         assertThat(cardMultilineWidget.paymentMethodCreateParams)
             .isNotNull()
+        verify(fullCardListener, never()).onPostalCodeComplete()
     }
 
     @Test
@@ -586,6 +588,9 @@ internal class CardMultilineWidgetTest {
         verify(noZipCardListener).onFocusChange(CardInputListener.FocusField.ExpiryDate)
         assertThat(noZipGroup.expiryDateEditText.hasFocus())
             .isTrue()
+
+        verify(fullCardListener, never()).onPostalCodeComplete()
+        verify(noZipCardListener, never()).onPostalCodeComplete()
     }
 
     @Test
@@ -606,6 +611,9 @@ internal class CardMultilineWidgetTest {
         verify(noZipCardListener).onFocusChange(CardInputListener.FocusField.Cvc)
         assertThat(noZipGroup.cvcEditText.hasFocus())
             .isTrue()
+
+        verify(fullCardListener, never()).onPostalCodeComplete()
+        verify(noZipCardListener, never()).onPostalCodeComplete()
     }
 
     @Test
@@ -630,6 +638,9 @@ internal class CardMultilineWidgetTest {
         verify(noZipCardListener, never()).onFocusChange(CardInputListener.FocusField.PostalCode)
         assertThat(noZipGroup.cvcEditText.hasFocus())
             .isTrue()
+
+        verify(fullCardListener, never()).onPostalCodeComplete()
+        verify(noZipCardListener, never()).onPostalCodeComplete()
     }
 
     @Test
@@ -646,6 +657,10 @@ internal class CardMultilineWidgetTest {
             .isTrue()
         assertThat(fullGroup.cardNumberEditText.text?.toString())
             .isEqualTo(VISA_WITH_SPACES.take(VISA_WITH_SPACES.length - 1))
+
+        verify(fullCardListener, never()).onPostalCodeComplete()
+
+        verify(fullCardListener, never()).onPostalCodeComplete()
     }
 
     @Test
@@ -662,6 +677,8 @@ internal class CardMultilineWidgetTest {
             .isTrue()
         assertThat(noZipGroup.cardNumberEditText.text?.toString())
             .isEqualTo(VISA_WITH_SPACES.take(VISA_WITH_SPACES.length - 1))
+
+        verify(noZipCardListener, never()).onPostalCodeComplete()
     }
 
     @Test
@@ -694,6 +711,9 @@ internal class CardMultilineWidgetTest {
             .isTrue()
         assertThat(noZipGroup.expiryDateEditText.fieldText)
             .isEqualTo("12/5")
+
+        verify(fullCardListener, never()).onPostalCodeComplete()
+        verify(noZipCardListener, never()).onPostalCodeComplete()
     }
 
     @Test
@@ -805,6 +825,7 @@ internal class CardMultilineWidgetTest {
     @Test
     fun usZipCodeRequired_whenFalse_shouldSetPostalCodeHint() {
         cardMultilineWidget.usZipCodeRequired = false
+        cardMultilineWidget.setCardInputListener(fullCardListener)
         assertThat(cardMultilineWidget.postalInputLayout.hint)
             .isEqualTo("Postal code")
 
@@ -826,11 +847,14 @@ internal class CardMultilineWidgetTest {
                         .build()
                 )
             )
+
+        verify(fullCardListener, never()).onPostalCodeComplete()
     }
 
     @Test
     fun usZipCodeRequired_whenTrue_withInvalidZipCode_shouldReturnNullCard() {
         cardMultilineWidget.usZipCodeRequired = true
+        cardMultilineWidget.setCardInputListener(fullCardListener)
         assertThat(cardMultilineWidget.postalInputLayout.hint)
             .isEqualTo("ZIP Code")
 
@@ -843,11 +867,14 @@ internal class CardMultilineWidgetTest {
         fullGroup.postalCodeEditText.setText("1234")
         assertThat(cardMultilineWidget.cardParams)
             .isNull()
+
+        verify(fullCardListener, never()).onPostalCodeComplete()
     }
 
     @Test
     fun usZipCodeRequired_whenTrue_withValidZipCode_shouldReturnNotNullCard() {
         cardMultilineWidget.usZipCodeRequired = true
+        cardMultilineWidget.setCardInputListener(fullCardListener)
         assertThat(cardMultilineWidget.postalInputLayout.hint)
             .isEqualTo("ZIP Code")
 
@@ -872,6 +899,8 @@ internal class CardMultilineWidgetTest {
                         .build()
                 )
             )
+
+        verify(fullCardListener).onPostalCodeComplete()
     }
 
     @Test

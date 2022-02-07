@@ -1,4 +1,4 @@
-package com.stripe.android.paymentsheet.elements
+package com.stripe.android.ui.core.elements
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box

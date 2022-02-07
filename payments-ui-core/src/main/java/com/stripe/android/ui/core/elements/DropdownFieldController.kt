@@ -1,6 +1,7 @@
-package com.stripe.android.paymentsheet.elements
+package com.stripe.android.ui.core.elements
 
-import com.stripe.android.paymentsheet.forms.FormFieldEntry
+import androidx.annotation.RestrictTo
+import com.stripe.android.ui.core.forms.FormFieldEntry
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
@@ -11,7 +12,8 @@ import kotlinx.coroutines.flow.map
  * Because it can never be in error the `errorMessage` is always null.  It is also
  * designed to always have a value selected, so isComplete is always true.
  */
-internal class DropdownFieldController(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+class DropdownFieldController(
     private val config: DropdownConfig,
     initialValue: String? = null
 ) : InputController, SectionFieldErrorController {

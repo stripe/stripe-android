@@ -1,19 +1,21 @@
-package com.stripe.android.paymentsheet.elements
+package com.stripe.android.ui.core.elements
 
-import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.forms.FormFieldEntry
+import androidx.annotation.RestrictTo
+import com.stripe.android.ui.core.R
+import com.stripe.android.ui.core.forms.FormFieldEntry
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 
-internal class SaveForFutureUseController(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+class SaveForFutureUseController(
     identifiersRequiredForFutureUse: List<IdentifierSpec> = emptyList(),
     saveForFutureUseInitialValue: Boolean
 ) : InputController {
     override val label: Flow<Int> = MutableSharedFlow(
-        R.string.stripe_paymentsheet_save_for_future_payments_with_merchant_name
+        R.string.save_for_future_payments_with_merchant_name
     )
     private val _saveForFutureUse = MutableStateFlow(saveForFutureUseInitialValue)
     val saveForFutureUse: Flow<Boolean> = _saveForFutureUse

@@ -42,9 +42,9 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.test.TestCoroutineDispatcher
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.runTest
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
@@ -65,7 +65,7 @@ import kotlin.test.assertNull
 @RunWith(RobolectricTestRunner::class)
 @LooperMode(LooperMode.Mode.PAUSED)
 internal class CardNumberEditTextTest {
-    private val testDispatcher = TestCoroutineDispatcher()
+    private val testDispatcher = UnconfinedTestDispatcher()
     private val context = ContextThemeWrapper(
         ApplicationProvider.getApplicationContext(),
         R.style.StripeDefaultTheme
@@ -100,12 +100,11 @@ internal class CardNumberEditTextTest {
     @AfterTest
     fun cleanup() {
         Dispatchers.resetMain()
-        testDispatcher.cleanupTestCoroutines()
     }
 
     @Test
     fun calculateCursorPosition_whenVisa_increasesIndexWhenGoingPastTheSpaces() =
-        testDispatcher.runBlockingTest {
+        runTest {
             // Adding 1 character, starting at position 4, with a final string length 6
             assertThat(
                 cardNumberEditText.calculateCursorPosition(6, 4, 1)
@@ -123,7 +122,7 @@ internal class CardNumberEditTextTest {
 
     @Test
     fun `calculateCursorPosition() when pasting 19 digit number should return expected value`() =
-        testDispatcher.runBlockingTest {
+        runTest {
             assertThat(
                 cardNumberEditText.calculateCursorPosition(
                     newFormattedLength = 23,
@@ -136,7 +135,7 @@ internal class CardNumberEditTextTest {
 
     @Test
     fun calculateCursorPosition_whenAmEx_increasesIndexWhenGoingPastTheSpaces() =
-        testDispatcher.runBlockingTest {
+        runTest {
             cardNumberEditText.onAccountRangeResult(
                 AccountRangeFixtures.AMERICANEXPRESS
             )
@@ -151,7 +150,7 @@ internal class CardNumberEditTextTest {
 
     @Test
     fun calculateCursorPosition_whenDinersClub16_decreasesIndexWhenDeletingPastTheSpaces() =
-        testDispatcher.runBlockingTest {
+        runTest {
             cardNumberEditText.onAccountRangeResult(
                 AccountRangeFixtures.DINERSCLUB16
             )
@@ -169,7 +168,7 @@ internal class CardNumberEditTextTest {
 
     @Test
     fun calculateCursorPosition_whenDeletingNotOnGaps_doesNotDecreaseIndex() =
-        testDispatcher.runBlockingTest {
+        runTest {
             cardNumberEditText.onAccountRangeResult(
                 AccountRangeFixtures.DINERSCLUB14
             )
@@ -181,7 +180,7 @@ internal class CardNumberEditTextTest {
 
     @Test
     fun calculateCursorPosition_whenAmEx_decreasesIndexWhenDeletingPastTheSpaces() =
-        testDispatcher.runBlockingTest {
+        runTest {
             cardNumberEditText.onAccountRangeResult(
                 AccountRangeFixtures.AMERICANEXPRESS
             )
@@ -196,7 +195,7 @@ internal class CardNumberEditTextTest {
 
     @Test
     fun calculateCursorPosition_whenSelectionInTheMiddle_increasesIndexOverASpace() =
-        testDispatcher.runBlockingTest {
+        runTest {
             cardNumberEditText.onAccountRangeResult(
                 AccountRangeFixtures.VISA
             )

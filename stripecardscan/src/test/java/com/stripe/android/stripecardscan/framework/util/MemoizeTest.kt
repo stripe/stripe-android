@@ -1,11 +1,19 @@
 package com.stripe.android.stripecardscan.framework.util
 
 import androidx.test.filters.SmallTest
+import com.stripe.android.camera.framework.time.milliseconds
+import com.stripe.android.camera.framework.util.cacheFirstResult
+import com.stripe.android.camera.framework.util.cacheFirstResultSuspend
+import com.stripe.android.camera.framework.util.cachedFirstResult
+import com.stripe.android.camera.framework.util.cachedFirstResultSuspend
+import com.stripe.android.camera.framework.util.memoize
+import com.stripe.android.camera.framework.util.memoizeSuspend
+import com.stripe.android.camera.framework.util.memoized
+import com.stripe.android.camera.framework.util.memoizedSuspend
 import com.stripe.android.stripecardscan.framework.time.delay
-import com.stripe.android.stripecardscan.framework.time.milliseconds
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -54,7 +62,7 @@ class MemoizeTest {
     @Test
     @SmallTest
     @ExperimentalCoroutinesApi
-    fun memoizeSuspend0wrapper_onlyRunsOnce() = runBlockingTest {
+    fun memoizeSuspend0wrapper_onlyRunsOnce() = runTest {
         var functionRunCount = 0
 
         val testFunction = memoizeSuspend<Boolean> {
@@ -146,7 +154,7 @@ class MemoizeTest {
     @Test
     @SmallTest
     @ExperimentalCoroutinesApi
-    fun memoizeSuspend0_onlyRunsOnce() = runBlockingTest {
+    fun memoizeSuspend0_onlyRunsOnce() = runTest {
         var functionRunCount = 0
 
         val testFunction = suspend {
@@ -283,7 +291,7 @@ class MemoizeTest {
     @Test
     @SmallTest
     @ExperimentalCoroutinesApi
-    fun memoizeSuspend1wrapper_onlyRunsOnce() = runBlockingTest {
+    fun memoizeSuspend1wrapper_onlyRunsOnce() = runTest {
         var functionRunCount = 0
 
         val testFunction = memoizeSuspend { input: Int ->
@@ -342,7 +350,7 @@ class MemoizeTest {
     @Test
     @SmallTest
     @ExperimentalCoroutinesApi
-    fun memoizeSuspend1_onlyRunsOnce() = runBlockingTest {
+    fun memoizeSuspend1_onlyRunsOnce() = runTest {
         var functionRunCount = 0
 
         val testFunction: suspend (Int) -> Boolean = { input ->
@@ -491,7 +499,7 @@ class MemoizeTest {
     @Test
     @SmallTest
     @ExperimentalCoroutinesApi
-    fun memoizeSuspend2wrapper_onlyRunsOnce() = runBlockingTest {
+    fun memoizeSuspend2wrapper_onlyRunsOnce() = runTest {
         var functionRunCount = 0
 
         val testFunction = memoizeSuspend { input1: Int, input2: Int ->
@@ -552,7 +560,7 @@ class MemoizeTest {
     @Test
     @SmallTest
     @ExperimentalCoroutinesApi
-    fun memoizeSuspend2_onlyRunsOnce() = runBlockingTest {
+    fun memoizeSuspend2_onlyRunsOnce() = runTest {
         var functionRunCount = 0
 
         val testFunction: suspend (Int, Int) -> Boolean = { input1, input2 ->
@@ -705,7 +713,7 @@ class MemoizeTest {
     @Test
     @SmallTest
     @ExperimentalCoroutinesApi
-    fun memoizeSuspend3wrapper_onlyRunsOnce() = runBlockingTest {
+    fun memoizeSuspend3wrapper_onlyRunsOnce() = runTest {
         var functionRunCount = 0
 
         val testFunction = memoizeSuspend { input1: Int, input2: Int, input3: Int ->
@@ -769,7 +777,7 @@ class MemoizeTest {
     @Test
     @SmallTest
     @ExperimentalCoroutinesApi
-    fun memoizeSuspend3_onlyRunsOnce() = runBlockingTest {
+    fun memoizeSuspend3_onlyRunsOnce() = runTest {
         var functionRunCount = 0
 
         val testFunction: suspend (Int, Int, Int) -> Boolean = { input1, input2, input3 ->
@@ -870,7 +878,7 @@ class MemoizeTest {
     @Test
     @SmallTest
     @ExperimentalCoroutinesApi
-    fun cacheFirstResultSuspend0wrapper_onlyRunsOnce() = runBlockingTest {
+    fun cacheFirstResultSuspend0wrapper_onlyRunsOnce() = runTest {
         var functionRunCount = 0
 
         val testFunction = cacheFirstResultSuspend<Boolean> {
@@ -893,7 +901,7 @@ class MemoizeTest {
     @Test
     @SmallTest
     @ExperimentalCoroutinesApi
-    fun cachedFirstResultSuspend0_onlyRunsOnce() = runBlockingTest {
+    fun cachedFirstResultSuspend0_onlyRunsOnce() = runTest {
         var functionRunCount = 0
 
         val testFunction = suspend {
@@ -958,7 +966,7 @@ class MemoizeTest {
     @Test
     @SmallTest
     @ExperimentalCoroutinesApi
-    fun cacheFirstResultSuspend1wrapper_onlyRunsOnce() = runBlockingTest {
+    fun cacheFirstResultSuspend1wrapper_onlyRunsOnce() = runTest {
         var functionRunCount = 0
 
         val testFunction = cacheFirstResultSuspend { input: Int ->
@@ -989,7 +997,7 @@ class MemoizeTest {
     @Test
     @SmallTest
     @ExperimentalCoroutinesApi
-    fun cachedFirstResultSuspend1_onlyRunsOnce() = runBlockingTest {
+    fun cachedFirstResultSuspend1_onlyRunsOnce() = runTest {
         var functionRunCount = 0
 
         val testFunction: suspend (Int) -> Boolean = { input ->
@@ -1064,7 +1072,7 @@ class MemoizeTest {
     @Test
     @SmallTest
     @ExperimentalCoroutinesApi
-    fun cacheFirstResultSuspend2wrapper_onlyRunsOnce() = runBlockingTest {
+    fun cacheFirstResultSuspend2wrapper_onlyRunsOnce() = runTest {
         var functionRunCount = 0
 
         val testFunction = cacheFirstResultSuspend { input1: Int, input2: Int ->
@@ -1095,7 +1103,7 @@ class MemoizeTest {
     @Test
     @SmallTest
     @ExperimentalCoroutinesApi
-    fun cachedFirstResultSuspend2_onlyRunsOnce() = runBlockingTest {
+    fun cachedFirstResultSuspend2_onlyRunsOnce() = runTest {
         var functionRunCount = 0
 
         val testFunction: suspend (Int, Int) -> Boolean = { input1, input2 ->
@@ -1172,7 +1180,7 @@ class MemoizeTest {
     @Test
     @SmallTest
     @ExperimentalCoroutinesApi
-    fun cacheFirstResultSuspend3wrapper_onlyRunsOnce() = runBlockingTest {
+    fun cacheFirstResultSuspend3wrapper_onlyRunsOnce() = runTest {
         var functionRunCount = 0
 
         val testFunction = cacheFirstResultSuspend { input1: Int, input2: Int, input3: Int ->
@@ -1205,7 +1213,7 @@ class MemoizeTest {
     @Test
     @SmallTest
     @ExperimentalCoroutinesApi
-    fun cachedFirstResultSuspend3_onlyRunsOnce() = runBlockingTest {
+    fun cachedFirstResultSuspend3_onlyRunsOnce() = runTest {
         var functionRunCount = 0
 
         val testFunction: suspend (Int, Int, Int) -> Boolean = { input1, input2, input3 ->

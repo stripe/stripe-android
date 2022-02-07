@@ -1,8 +1,10 @@
-package com.stripe.android.paymentsheet.elements
+package com.stripe.android.ui.core.elements
 
+import androidx.annotation.RestrictTo
 import androidx.annotation.StringRes
 
-internal class SimpleDropdownConfig(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+class SimpleDropdownConfig(
     @StringRes override val label: Int,
     private val items: List<DropdownItemSpec>
 ) : DropdownConfig {

@@ -1,12 +1,14 @@
-package com.stripe.android.paymentsheet.elements
+package com.stripe.android.ui.core.elements
 
+import androidx.annotation.RestrictTo
 import androidx.annotation.StringRes
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
 import kotlinx.coroutines.flow.MutableStateFlow
 
-internal class SimpleTextFieldConfig(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+class SimpleTextFieldConfig(
     @StringRes override val label: Int,
     override val capitalization: KeyboardCapitalization = KeyboardCapitalization.Words,
     override val keyboard: KeyboardType = KeyboardType.Text

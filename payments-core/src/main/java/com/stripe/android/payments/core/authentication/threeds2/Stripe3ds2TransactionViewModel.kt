@@ -6,10 +6,14 @@ import androidx.lifecycle.AbstractSavedStateViewModelFactory
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.savedstate.SavedStateRegistryOwner
+import com.google.android.instantapps.InstantApps
 import com.stripe.android.StripePaymentController
 import com.stripe.android.auth.PaymentBrowserAuthContract
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
+import com.stripe.android.core.injection.Injectable
+import com.stripe.android.core.injection.WeakMapInjectorRegistry
+import com.stripe.android.core.injection.injectWithFallback
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.model.Stripe3ds2AuthParams
 import com.stripe.android.model.Stripe3ds2AuthResult
@@ -20,10 +24,8 @@ import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.payments.core.injection.DaggerStripe3ds2TransactionViewModelFactoryComponent
-import com.stripe.android.payments.core.injection.Injectable
+import com.stripe.android.payments.core.injection.IS_INSTANT_APP
 import com.stripe.android.payments.core.injection.Stripe3ds2TransactionViewModelSubcomponent
-import com.stripe.android.payments.core.injection.WeakMapInjectorRegistry
-import com.stripe.android.payments.core.injection.injectWithFallback
 import com.stripe.android.stripe3ds2.service.StripeThreeDs2Service
 import com.stripe.android.stripe3ds2.transaction.ChallengeParameters
 import com.stripe.android.stripe3ds2.transaction.ChallengeResult
@@ -35,6 +37,7 @@ import com.stripe.android.stripe3ds2.transaction.Transaction
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
+import javax.inject.Named
 import kotlin.coroutines.CoroutineContext
 
 internal class Stripe3ds2TransactionViewModel @Inject constructor(
@@ -47,7 +50,8 @@ internal class Stripe3ds2TransactionViewModel @Inject constructor(
     private val challengeResultProcessor: Stripe3ds2ChallengeResultProcessor,
     private val initChallengeRepository: InitChallengeRepository,
     @IOContext private val workContext: CoroutineContext,
-    private val savedStateHandle: SavedStateHandle
+    private val savedStateHandle: SavedStateHandle,
+    @Named(IS_INSTANT_APP) private val isInstantApp: Boolean
 ) : ViewModel() {
 
     var hasCompleted: Boolean = savedStateHandle.contains(KEY_HAS_COMPLETED)
@@ -222,7 +226,8 @@ internal class Stripe3ds2TransactionViewModel @Inject constructor(
                 stripeAccountId = args.requestOptions.stripeAccount,
                 // 3D-Secure requires cancelling the source when the user cancels auth (AUTHN-47)
                 shouldCancelSource = true,
-                publishableKey = args.publishableKey
+                publishableKey = args.publishableKey,
+                isInstantApp = isInstantApp
             )
         )
     }
@@ -319,6 +324,7 @@ internal class Stripe3ds2TransactionViewModelFactory(
             .enableLogging(arg.enableLogging)
             .publishableKeyProvider { arg.publishableKey }
             .productUsage(arg.productUsage)
+            .isInstantApp(InstantApps.isInstantApp(arg.application))
             .build()
             .inject(this)
     }

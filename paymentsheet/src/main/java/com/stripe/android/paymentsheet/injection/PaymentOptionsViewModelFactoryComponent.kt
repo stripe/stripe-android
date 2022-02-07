@@ -1,8 +1,8 @@
 package com.stripe.android.paymentsheet.injection
 
 import android.content.Context
-import com.stripe.android.payments.core.injection.CoroutineContextModule
-import com.stripe.android.payments.core.injection.LoggingModule
+import com.stripe.android.core.injection.CoroutineContextModule
+import com.stripe.android.core.injection.LoggingModule
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import com.stripe.android.paymentsheet.PaymentOptionsViewModel

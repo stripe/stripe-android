@@ -1,13 +1,15 @@
-package com.stripe.android.paymentsheet.elements
+package com.stripe.android.ui.core.elements
 
-import com.stripe.android.paymentsheet.forms.FormFieldEntry
+import androidx.annotation.RestrictTo
+import com.stripe.android.ui.core.forms.FormFieldEntry
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
 /**
  * This is an element that is in a section and accepts user input.
  */
-internal sealed class SectionSingleFieldElement(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+sealed class SectionSingleFieldElement(
     override val identifier: IdentifierSpec,
 ) : SectionFieldElement {
     /**
@@ -24,5 +26,9 @@ internal sealed class SectionSingleFieldElement(
         return controller.formFieldValue.map { formFieldEntry ->
             listOf(identifier to formFieldEntry)
         }
+    }
+
+    override fun setRawValue(rawValuesMap: Map<IdentifierSpec, String?>) {
+        rawValuesMap[identifier]?.let { controller.onRawValueChange(it) }
     }
 }

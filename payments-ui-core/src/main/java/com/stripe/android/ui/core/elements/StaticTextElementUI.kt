@@ -1,5 +1,6 @@
-package com.stripe.android.paymentsheet.elements
+package com.stripe.android.ui.core.elements
 
+import androidx.annotation.RestrictTo
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Text
@@ -13,7 +14,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 @Composable
-internal fun StaticElementUI(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+fun StaticElementUI(
     element: StaticTextElement
 ) {
     Text(

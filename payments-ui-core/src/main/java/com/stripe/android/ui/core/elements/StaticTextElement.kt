@@ -1,6 +1,7 @@
-package com.stripe.android.paymentsheet.elements
+package com.stripe.android.ui.core.elements
 
-import com.stripe.android.paymentsheet.forms.FormFieldEntry
+import androidx.annotation.RestrictTo
+import com.stripe.android.ui.core.forms.FormFieldEntry
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 
@@ -9,7 +10,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
  * outputted from the list of form field values.  If the stringResId contains a %s, the first
  * one will be populated in the form with the merchantName parameter.
  */
-internal data class StaticTextElement(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+data class StaticTextElement(
     override val identifier: IdentifierSpec,
     val stringResId: Int,
     val color: Int?,

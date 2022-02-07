@@ -1,4 +1,4 @@
-package com.stripe.android.paymentsheet.elements
+package com.stripe.android.ui.core.elements
 
 import android.util.Log
 import androidx.compose.foundation.Image
@@ -28,7 +28,7 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
-import com.stripe.android.paymentsheet.R
+import com.stripe.android.ui.core.R
 
 internal data class TextFieldColors(
     private val isDarkMode: Boolean,
@@ -111,7 +111,7 @@ internal fun TextField(
             Text(
                 text = if (textFieldController.showOptionalLabel) {
                     stringResource(
-                        R.string.stripe_paymentsheet_form_label_optional,
+                        R.string.form_label_optional,
                         label?.let { stringResource(it) } ?: ""
                     )
                 } else {

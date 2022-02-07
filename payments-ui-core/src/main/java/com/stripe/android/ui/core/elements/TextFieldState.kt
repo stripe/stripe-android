@@ -1,4 +1,6 @@
-package com.stripe.android.paymentsheet.elements
+package com.stripe.android.ui.core.elements
+
+import androidx.annotation.RestrictTo
 
 /**
  * This represents the different states a field can be in,
@@ -7,7 +9,8 @@ package com.stripe.android.paymentsheet.elements
  * is implemented from what information is required by clients of the interface.
  * This will allow the implementation to change without impacting the clients.
  */
-internal interface TextFieldState {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
+interface TextFieldState {
 
     /**
      * Indicate if this is an error that should be displayed to the user.

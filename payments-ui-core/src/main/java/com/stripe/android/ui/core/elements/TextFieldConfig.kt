@@ -1,11 +1,13 @@
-package com.stripe.android.paymentsheet.elements
+package com.stripe.android.ui.core.elements
 
+import androidx.annotation.RestrictTo
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
 import kotlinx.coroutines.flow.Flow
 
-internal sealed interface TextFieldConfig {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
+sealed interface TextFieldConfig {
     /** This specifies how the field should be capitalized **/
     val capitalization: KeyboardCapitalization
 

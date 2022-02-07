@@ -20,8 +20,6 @@
   <string name="address_county_required">Zadejte okres</string>
   <!-- Caption for Address field on address form -->
   <string name="address_label_address">Adresa</string>
-  <!-- Address line 1 placeholder for billing address form. -->
-  <string name="address_label_address_line1">1. řádek adresy</string>
   <!-- Label for input requesting the first line of an address where , used for international addresses -->
   <string name="address_label_address_line1_optional">1. řádek adresy (volitelně)</string>
   <!-- Address line 2 placeholder for billing address form. -->
@@ -30,44 +28,28 @@
   <string name="address_label_address_optional">Adresa(volitelně) </string>
   <!-- Label for input requesting apartment number (address line 2) where input is optional, used for US based addresses -->
   <string name="address_label_apt_optional">Byt (volitelně)</string>
-  <!-- Caption for City field on address form -->
-  <string name="address_label_city">Město</string>
   <!-- Label for input requesting city where input is optional, used for all locations -->
   <string name="address_label_city_optional">Město (volitelně)</string>
-  <!-- Caption for Country field on address form -->
-  <string name="address_label_country">Země</string>
-  <!-- Caption for County field on address form (only countries that use county, like United Kingdom) -->
-  <string name="address_label_county">Okres</string>
   <!-- Label for input requesting county where input is optional , used for UK based addresses -->
   <string name="address_label_county_optional">Okres (volitelně)</string>
-  <!-- Caption for Name field on address form -->
-  <string name="address_label_name">Jméno</string>
   <!-- Label for input requesting phone number, used for all locations -->
   <string name="address_label_phone_number">Telefonní číslo</string>
   <!-- Label for input requesting phone number where input is optional, used for all locations -->
   <string name="address_label_phone_number_optional">Telefonní číslo (volitelně)</string>
-  <!-- Short string for postal code (text used in non-US countries) -->
-  <string name="address_label_postal_code">Poštovní směrovací číslo</string>
   <!-- Label for input requesting postal code where input is optional, used for Canada based addresses -->
   <string name="address_label_postal_code_optional">Poštovní směrovací číslo (volitelně)</string>
   <!-- Label for input requesting postcode, used for UK based addresses -->
   <string name="address_label_postcode">Poštovní směrovací číslo</string>
   <!-- Label for input requesting postcode where input is optional, used for UK based addresses -->
   <string name="address_label_postcode_optional">Poštovní směrovací číslo (volitelně)</string>
-  <!-- Caption for Province field on address form (only countries that use province, like Canada) -->
-  <string name="address_label_province">Provincie</string>
   <!-- Label for input requesting province where province is optional, used for canadian addresses -->
   <string name="address_label_province_optional">Provincie (volitelně)</string>
   <!-- Label for input requesting the region, used for international addresses -->
   <string name="address_label_region_generic">Stát / provincie / region</string>
   <!-- Label for input requesting the region where input is optional, used for international addresses -->
   <string name="address_label_region_generic_optional">Stát / provincie / region (volitelně)</string>
-  <!-- Caption for State field on address form (only countries that use state , like United States) -->
-  <string name="address_label_state">Stát</string>
   <!-- Label for input requesting state where input is optional, used for US based addresses -->
   <string name="address_label_state_optional">Stát (volitelně)</string>
-  <!-- Label for input requesting zip code, used for US based addreses -->
-  <string name="address_label_zip_code">PSČ</string>
   <!-- Label for input requesting zip code where input is optional, used for US based addresses -->
   <string name="address_label_zip_code_optional">PSČ (volitelně)</string>
   <!-- Label for input requesting postal code, used for international addresses -->

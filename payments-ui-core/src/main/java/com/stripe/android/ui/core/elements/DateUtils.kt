@@ -1,4 +1,4 @@
-package com.stripe.android.paymentsheet.elements
+package com.stripe.android.ui.core.elements
 
 internal fun convertTo4DigitDate(input: String) =
     "0$input".takeIf {

@@ -10,6 +10,9 @@ internal data class StripeServerErrorResponse(
 
 @Serializable
 internal data class StripeServerError(
+    @SerialName("code") val code: String? = null,
+    @SerialName("doc_url") val docUrl: String? = null,
     @SerialName("message") val message: String,
+    @SerialName("param") val param: String? = null,
     @SerialName("type") val type: String,
 )

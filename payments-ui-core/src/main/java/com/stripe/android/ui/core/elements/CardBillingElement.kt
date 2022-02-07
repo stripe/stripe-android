@@ -1,8 +1,8 @@
-package com.stripe.android.paymentsheet.elements
+package com.stripe.android.ui.core.elements
 
-import com.stripe.android.paymentsheet.address.AddressFieldElementRepository
-import com.stripe.android.paymentsheet.address.FieldType
-import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
+import androidx.annotation.RestrictTo
+import com.stripe.android.ui.core.address.AddressFieldElementRepository
+import com.stripe.android.ui.core.address.FieldType
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
@@ -11,18 +11,19 @@ import kotlinx.coroutines.flow.map
  * removes fields from the address based on the country.  It
  * is only intended to be used with the credit payment method.
  */
-internal class CardBillingElement(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+class CardBillingElement(
     identifier: IdentifierSpec,
     addressFieldRepository: AddressFieldElementRepository,
     countryCodes: Set<String> = emptySet(),
     countryDropdownFieldController: DropdownFieldController = DropdownFieldController(
         CountryConfig(countryCodes)
     ),
-    args: FormFragmentArguments? = null,
+    rawValuesMap: Map<IdentifierSpec, String?> = emptyMap(),
 ) : AddressElement(
     identifier,
     addressFieldRepository,
-    args,
+    rawValuesMap,
     countryCodes,
     countryDropdownFieldController
 ) {

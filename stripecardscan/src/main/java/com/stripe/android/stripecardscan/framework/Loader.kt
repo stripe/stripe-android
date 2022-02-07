@@ -28,8 +28,6 @@ internal class Loader(private val context: Context) {
      * Create a [ByteBuffer] object from an android resource.
      */
     private suspend fun loadResourceData(fetchedData: FetchedResource): ByteBuffer? {
-        val stat = Stats.trackPersistentRepeatingTask("resource_loader:${fetchedData.modelClass}")
-
         if (fetchedData.assetFileName == null) {
             trackModelLoaded(
                 fetchedData.modelClass,
@@ -37,13 +35,11 @@ internal class Loader(private val context: Context) {
                 fetchedData.modelFrameworkVersion,
                 false,
             )
-            stat.trackResult("failure:${fetchedData.modelClass}")
             return null
         }
 
         return try {
             val loadedData = readAssetToByteBuffer(context, fetchedData.assetFileName)
-            stat.trackResult("success")
             trackModelLoaded(
                 fetchedData.modelClass,
                 fetchedData.modelVersion,
@@ -67,8 +63,6 @@ internal class Loader(private val context: Context) {
      * Create a [ByteBuffer] object from a [File].
      */
     private suspend fun loadFileData(fetchedData: FetchedFile): ByteBuffer? {
-        val stat = Stats.trackPersistentRepeatingTask("web_loader:${fetchedData.modelClass}")
-
         if (fetchedData.file == null) {
             trackModelLoaded(
                 fetchedData.modelClass,
@@ -76,13 +70,11 @@ internal class Loader(private val context: Context) {
                 fetchedData.modelFrameworkVersion,
                 false,
             )
-            stat.trackResult("failure:${fetchedData.modelClass}")
             return null
         }
 
         return try {
             val loadedData = readFileToByteBuffer(fetchedData.file)
-            stat.trackResult("success")
             trackModelLoaded(
                 fetchedData.modelClass,
                 fetchedData.modelVersion,
@@ -91,7 +83,6 @@ internal class Loader(private val context: Context) {
             )
             loadedData
         } catch (t: Throwable) {
-            stat.trackResult("failure:${fetchedData.modelClass}")
             trackModelLoaded(
                 fetchedData.modelClass,
                 fetchedData.modelVersion,

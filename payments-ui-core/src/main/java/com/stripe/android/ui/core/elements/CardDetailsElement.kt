@@ -1,6 +1,5 @@
-package com.stripe.android.paymentsheet.elements
+package com.stripe.android.ui.core.elements
 
-import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
 import kotlinx.coroutines.flow.combine
 
 /**
@@ -14,7 +13,7 @@ internal class CardDetailsElement(
     override fun sectionFieldErrorController(): SectionFieldErrorController =
         controller
 
-    override fun setRawValue(formFragmentArguments: FormFragmentArguments) {
+    override fun setRawValue(rawValuesMap: Map<IdentifierSpec, String?>) {
         TODO("Not yet implemented")
     }
 

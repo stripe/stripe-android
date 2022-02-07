@@ -8,7 +8,7 @@ import kotlinx.coroutines.sync.withLock
 /**
  * A class that counts and saves items.
  */
-class ItemCounter<T>(initialValue: T) {
+internal class ItemCounter<T>(initialValue: T) {
     private val storageMutex = Mutex()
     private val items = mutableMapOf<T, Int>()
 

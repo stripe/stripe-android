@@ -1,22 +1,23 @@
-package com.stripe.android.paymentsheet.elements
+package com.stripe.android.ui.core.elements
 
+import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
-import com.stripe.android.paymentsheet.address.AddressFieldElementRepository
-import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
+import com.stripe.android.ui.core.address.AddressFieldElementRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 
-internal open class AddressElement constructor(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+open class AddressElement constructor(
     _identifier: IdentifierSpec,
     private val addressFieldRepository: AddressFieldElementRepository,
-    private var args: FormFragmentArguments? = null,
+    private var rawValuesMap: Map<IdentifierSpec, String?> = emptyMap(),
     countryCodes: Set<String> = emptySet(),
     countryDropdownFieldController: DropdownFieldController = DropdownFieldController(
         CountryConfig(countryCodes),
-        args?.billingDetails?.address?.country
+        rawValuesMap[IdentifierSpec.Country]
     ),
 ) : SectionMultiFieldElement(_identifier) {
 
@@ -33,10 +34,8 @@ internal open class AddressElement constructor(
                 ?: emptyList()
         }
         .map { fields ->
-            args?.let {
-                fields.forEach { field ->
-                    field.setRawValue(it)
-                }
+            fields.forEach { field ->
+                field.setRawValue(rawValuesMap)
             }
             fields
         }
@@ -63,7 +62,7 @@ internal open class AddressElement constructor(
         }
     }
 
-    override fun setRawValue(formFragmentArguments: FormFragmentArguments) {
-        args = formFragmentArguments
+    override fun setRawValue(rawValuesMap: Map<IdentifierSpec, String?>) {
+        this.rawValuesMap = rawValuesMap
     }
 }

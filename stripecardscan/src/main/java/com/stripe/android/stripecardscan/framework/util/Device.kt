@@ -5,10 +5,11 @@ import android.content.Context
 import android.os.Build
 import android.provider.Settings
 import android.telephony.TelephonyManager
+import com.stripe.android.camera.framework.util.cacheFirstResult
 import java.util.Locale
 
 internal data class Device(
-    val ids: DeviceIds,
+    val android_id: String?,
     val name: String,
     val bootCount: Int,
     val locale: String?,
@@ -22,7 +23,7 @@ internal data class Device(
     companion object {
         private val getDeviceDetails = cacheFirstResult { context: Context ->
             Device(
-                ids = DeviceIds.fromContext(context),
+                android_id = getAndroidId(),
                 name = getDeviceName(),
                 bootCount = getDeviceBootCount(context),
                 locale = getDeviceLocale(),
@@ -40,23 +41,15 @@ internal data class Device(
     }
 }
 
-internal data class DeviceIds(
-    val androidId: String?
-) {
-    companion object {
-        private val getDeviceIds = cacheFirstResult { context: Context ->
-            DeviceIds(
-                androidId = getAndroidId(context)
-            )
-        }
-
-        fun fromContext(context: Context) = getDeviceIds(context.applicationContext)
-    }
-}
-
+/**
+ * This was redacted for privacy reasons. Normally, this would be retrieved by this code:
+ *
+ * ```
+ * Settings.Secure.getString(context.contentResolver, Settings.Secure.ANDROID_ID)
+ * ```
+ */
 @SuppressLint("HardwareIds")
-private fun getAndroidId(context: Context): String? =
-    Settings.Secure.getString(context.contentResolver, Settings.Secure.ANDROID_ID)
+private fun getAndroidId() = "Redacted"
 
 private fun getDeviceBootCount(context: Context): Int =
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {

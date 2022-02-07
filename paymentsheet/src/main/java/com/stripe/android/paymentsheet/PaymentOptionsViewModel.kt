@@ -8,10 +8,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.IOContext
-import com.stripe.android.payments.core.injection.Injectable
-import com.stripe.android.payments.core.injection.InjectorKey
-import com.stripe.android.payments.core.injection.injectWithFallback
+import com.stripe.android.core.injection.Injectable
+import com.stripe.android.core.injection.InjectorKey
+import com.stripe.android.core.injection.injectWithFallback
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.ui.core.forms.resources.ResourceRepository
 import com.stripe.android.paymentsheet.injection.DaggerPaymentOptionsViewModelFactoryComponent
 import com.stripe.android.paymentsheet.injection.PaymentOptionsViewModelSubcomponent
 import com.stripe.android.paymentsheet.model.FragmentConfig
@@ -32,7 +33,8 @@ internal class PaymentOptionsViewModel @Inject constructor(
     @IOContext workContext: CoroutineContext,
     application: Application,
     logger: Logger,
-    @InjectorKey injectorKey: String
+    @InjectorKey injectorKey: String,
+    resourceRepository: ResourceRepository
 ) : BaseSheetViewModel<PaymentOptionsViewModel.TransitionTarget>(
     config = args.config,
     prefsRepository = prefsRepositoryFactory(args.config?.customer),
@@ -41,7 +43,8 @@ internal class PaymentOptionsViewModel @Inject constructor(
     workContext = workContext,
     application = application,
     logger = logger,
-    injectorKey = injectorKey
+    injectorKey = injectorKey,
+    resourceRepository = resourceRepository
 ) {
     @VisibleForTesting
     internal val _paymentOptionResult = MutableLiveData<PaymentOptionResult>()

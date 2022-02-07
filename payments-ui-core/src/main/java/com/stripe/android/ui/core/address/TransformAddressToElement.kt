@@ -1,16 +1,15 @@
-package com.stripe.android.paymentsheet.address
+package com.stripe.android.ui.core.address
 
 import androidx.annotation.StringRes
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
-import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.elements.IdentifierSpec
-import com.stripe.android.paymentsheet.elements.RowController
-import com.stripe.android.paymentsheet.elements.RowElement
-import com.stripe.android.paymentsheet.elements.SectionFieldElement
-import com.stripe.android.paymentsheet.elements.SectionSingleFieldElement
-import com.stripe.android.paymentsheet.elements.SimpleTextSpec
-import com.stripe.android.paymentsheet.forms.transform
+import com.stripe.android.ui.core.R
+import com.stripe.android.ui.core.elements.IdentifierSpec
+import com.stripe.android.ui.core.elements.RowController
+import com.stripe.android.ui.core.elements.RowElement
+import com.stripe.android.ui.core.elements.SectionFieldElement
+import com.stripe.android.ui.core.elements.SectionSingleFieldElement
+import com.stripe.android.ui.core.elements.SimpleTextSpec
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString

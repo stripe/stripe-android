@@ -7,7 +7,9 @@ import android.graphics.Rect
 import android.media.Image
 import android.renderscript.RenderScript
 import androidx.annotation.CheckResult
-import com.stripe.android.stripecardscan.framework.exception.ImageTypeNotSupportedException
+import com.stripe.android.camera.framework.exception.ImageTypeNotSupportedException
+import com.stripe.android.camera.framework.image.NV21Image
+import com.stripe.android.camera.framework.image.crop
 
 /**
  * Determine if this application supports an image format.

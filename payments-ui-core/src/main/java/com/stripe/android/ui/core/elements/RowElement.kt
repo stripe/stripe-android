@@ -1,11 +1,12 @@
-package com.stripe.android.paymentsheet.elements
+package com.stripe.android.ui.core.elements
 
-import com.stripe.android.paymentsheet.forms.FormFieldEntry
-import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
+import androidx.annotation.RestrictTo
+import com.stripe.android.ui.core.forms.FormFieldEntry
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 
-internal class RowElement constructor(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+class RowElement constructor(
     _identifier: IdentifierSpec,
     val fields: List<SectionSingleFieldElement>,
     val controller: RowController
@@ -17,9 +18,9 @@ internal class RowElement constructor(
 
     override fun sectionFieldErrorController() = controller
 
-    override fun setRawValue(formFragmentArguments: FormFragmentArguments) {
+    override fun setRawValue(rawValuesMap: Map<IdentifierSpec, String?>) {
         fields.forEach {
-            it.setRawValue(formFragmentArguments)
+            it.setRawValue(rawValuesMap)
         }
     }
 }

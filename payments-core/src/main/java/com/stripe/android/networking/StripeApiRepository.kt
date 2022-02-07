@@ -34,6 +34,8 @@ import com.stripe.android.model.CardMetadata
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
+import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_CLIENT_SECRET
+import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.Customer
 import com.stripe.android.model.ListPaymentMethodsParams
 import com.stripe.android.model.PaymentIntent
@@ -53,6 +55,7 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.Token
 import com.stripe.android.model.TokenParams
 import com.stripe.android.model.parsers.CardMetadataJsonParser
+import com.stripe.android.model.parsers.ConsumerSessionLookupJsonParser
 import com.stripe.android.model.parsers.CustomerJsonParser
 import com.stripe.android.model.parsers.FpxBankStatusesJsonParser
 import com.stripe.android.model.parsers.IssuingCardPinJsonParser
@@ -187,10 +190,24 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         options: ApiRequest.Options,
         expandFields: List<String>
     ): PaymentIntent? {
+        return confirmPaymentIntentInternal(
+            confirmPaymentIntentParams = confirmPaymentIntentParams.maybeForDashboard(options),
+            options = options,
+            expandFields = expandFields
+        )
+    }
+
+    private suspend fun confirmPaymentIntentInternal(
+        confirmPaymentIntentParams: ConfirmPaymentIntentParams,
+        options: ApiRequest.Options,
+        expandFields: List<String>
+    ): PaymentIntent? {
         val params = fraudDetectionDataParamsUtils.addFraudDetectionData(
             // Add payment_user_agent if the Payment Method is being created on this call
             maybeAddPaymentUserAgent(
-                confirmPaymentIntentParams.toParamMap(),
+                confirmPaymentIntentParams.toParamMap()
+                    // Omit client_secret with user key auth.
+                    .let { if (options.apiKeyIsUserKey) it.minus(PARAM_CLIENT_SECRET) else it },
                 confirmPaymentIntentParams.paymentMethodCreateParams,
                 confirmPaymentIntentParams.sourceParams
             ).plus(createExpandParam(expandFields)),
@@ -236,6 +253,12 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         expandFields: List<String>
     ): PaymentIntent? {
         val paymentIntentId = PaymentIntent.ClientSecret(clientSecret).paymentIntentId
+        val params: Map<String, Any?> =
+            if (options.apiKeyIsUserKey) {
+                createExpandParam(expandFields)
+            } else {
+                createClientSecretParam(clientSecret, expandFields)
+            }
 
         fireFraudDetectionDataRequest()
 
@@ -243,7 +266,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
             apiRequestFactory.createGet(
                 getRetrievePaymentIntentUrl(paymentIntentId),
                 options,
-                createClientSecretParam(clientSecret, expandFields)
+                params
             ),
             PaymentIntentJsonParser()
         ) {
@@ -1123,6 +1146,25 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
     }
 
     /**
+     * Retrieves the ConsumerSession if the given email is associated with a Link account.
+     */
+    override suspend fun lookupConsumerSession(
+        email: String,
+        requestOptions: ApiRequest.Options
+    ): ConsumerSessionLookup? {
+        return fetchStripeModel(
+            apiRequestFactory.createPost(
+                consumerSessionLookupUrl,
+                requestOptions,
+                mapOf("email_address" to email.lowercase())
+            ),
+            ConsumerSessionLookupJsonParser()
+        ) {
+            // no-op
+        }
+    }
+
+    /**
      * @return `https://api.stripe.com/v1/payment_methods/:id/detach`
      */
     @VisibleForTesting
@@ -1137,6 +1179,9 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         parser: PaymentMethodPreferenceJsonParser<T>,
         analyticsEvent: PaymentAnalyticsEvent
     ): T? {
+        // Unsupported for user key sessions.
+        if (options.apiKeyIsUserKey) return null
+
         fireFraudDetectionDataRequest()
 
         val params = createClientSecretParam(
@@ -1352,6 +1397,23 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
             )
         } ?: params
 
+    private suspend fun ConfirmPaymentIntentParams.maybeForDashboard(
+        options: ApiRequest.Options,
+    ): ConfirmPaymentIntentParams {
+        if (!options.apiKeyIsUserKey || paymentMethodCreateParams == null) {
+            return this
+        }
+
+        // For user key auth, we must create the PM first.
+        val paymentMethodId = requireNotNull(
+            createPaymentMethod(paymentMethodCreateParams, options)?.id
+        )
+        return ConfirmPaymentIntentParams.createForDashboard(
+            clientSecret = clientSecret,
+            paymentMethodId = paymentMethodId
+        )
+    }
+
     private sealed class DnsCacheData {
         data class Success(
             val originalDnsCacheTtl: String?
@@ -1394,6 +1456,13 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         internal val paymentMethodsUrl: String
             @JvmSynthetic
             get() = getApiUrl("payment_methods")
+
+        /**
+         * @return `https://api.stripe.com/v1/consumers/sessions/lookup`
+         */
+        internal val consumerSessionLookupUrl: String
+            @JvmSynthetic
+            get() = getApiUrl("consumers/sessions/lookup")
 
         /**
          * @return `https://api.stripe.com/v1/payment_intents/:id`

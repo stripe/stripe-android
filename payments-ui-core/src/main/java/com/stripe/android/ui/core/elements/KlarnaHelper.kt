@@ -1,9 +1,11 @@
-package com.stripe.android.paymentsheet.elements
+package com.stripe.android.ui.core.elements
 
-import com.stripe.android.paymentsheet.R
+import androidx.annotation.RestrictTo
+import com.stripe.android.ui.core.R
 import java.util.Locale
 
-internal object KlarnaHelper {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+object KlarnaHelper {
     private val currencyToAllowedCountries = mapOf(
         "eur" to setOf("AT", "FI", "DE", "NL", "BE", "ES", "IT", "FR"),
         "dkk" to setOf("DK"),
@@ -20,8 +22,8 @@ internal object KlarnaHelper {
 
     fun getKlarnaHeader(locale: Locale = Locale.getDefault()) =
         if (buyNowCountries.contains(locale.country)) {
-            R.string.stripe_paymentsheet_klarna_buy_now_pay_later
+            R.string.klarna_buy_now_pay_later
         } else {
-            R.string.stripe_paymentsheet_klarna_pay_later
+            R.string.klarna_pay_later
         }
 }

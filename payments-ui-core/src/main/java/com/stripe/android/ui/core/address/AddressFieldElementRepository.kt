@@ -1,18 +1,18 @@
-package com.stripe.android.paymentsheet.address
+package com.stripe.android.ui.core.address
 
 import android.content.res.Resources
+import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
-import com.stripe.android.paymentsheet.elements.SectionFieldElement
+import com.stripe.android.ui.core.elements.SectionFieldElement
+import java.io.ByteArrayInputStream
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-internal class AddressFieldElementRepository @Inject internal constructor(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+class AddressFieldElementRepository @Inject constructor(
     val resources: Resources?
 ) {
-    // This is needed for @Preview and inject does not support a constructor with default parameters.
-    internal constructor() : this(null)
-
     private val countryFieldMap = mutableMapOf<String, List<SectionFieldElement>?>()
 
     internal fun get(countryCode: String?) = countryCode?.let {
@@ -34,7 +34,12 @@ internal class AddressFieldElementRepository @Inject internal constructor(
     }
 
     @VisibleForTesting
-    internal fun initialize(
+    fun initialize(
+        countryCode: String,
+        schema: ByteArrayInputStream
+    ) = initialize(mapOf(countryCode to parseAddressesSchema(schema)!!))
+
+    private fun initialize(
         countryAddressSchemaPair: Map<String, List<CountryAddressSchema>>
     ) {
         countryAddressSchemaPair.map { (countryCode, schemaList) ->

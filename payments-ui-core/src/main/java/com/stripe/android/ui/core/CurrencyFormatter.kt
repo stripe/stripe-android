@@ -1,12 +1,14 @@
-package com.stripe.android.paymentsheet
+package com.stripe.android.ui.core
 
+import androidx.annotation.RestrictTo
 import java.text.DecimalFormat
 import java.text.NumberFormat
 import java.util.Currency
 import java.util.Locale
 import kotlin.math.pow
 
-internal class CurrencyFormatter {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+class CurrencyFormatter {
 
     fun format(
         amount: Long,

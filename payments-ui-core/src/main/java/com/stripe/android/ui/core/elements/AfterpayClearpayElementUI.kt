@@ -1,7 +1,8 @@
-package com.stripe.android.paymentsheet.elements
+package com.stripe.android.ui.core.elements
 
 import android.content.Intent
 import android.net.Uri
+import androidx.annotation.RestrictTo
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.PaddingValues
@@ -21,12 +22,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.flowlayout.FlowCrossAxisAlignment
 import com.google.accompanist.flowlayout.FlowRow
-import com.stripe.android.paymentsheet.R
+import com.stripe.android.ui.core.R
 
 @Composable
-internal fun AfterpayClearpayElementUI(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+fun AfterpayClearpayElementUI(
     enabled: Boolean,
-    element: AfterpayClearpayElement
+    element: AfterpayClearpayHeaderElement
 ) {
     val context = LocalContext.current
 
@@ -47,7 +49,7 @@ internal fun AfterpayClearpayElementUI(
         Image(
             painter = painterResource(R.drawable.stripe_ic_afterpay_clearpay_logo),
             contentDescription = stringResource(
-                R.string.stripe_paymentsheet_afterpay_clearpay_message
+                R.string.afterpay_clearpay_message
             ),
             colorFilter = if (isSystemInDarkTheme()) {
                 ColorFilter.tint(Color.White)

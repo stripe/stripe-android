@@ -26,26 +26,25 @@ internal class StripeIntentValidator @Inject constructor() {
             }
             stripeIntent is PaymentIntent &&
                 (
-                    (stripeIntent.status != StripeIntent.Status.RequiresPaymentMethod) &&
-                        (stripeIntent.status != StripeIntent.Status.RequiresAction)
+                    (stripeIntent.status == StripeIntent.Status.Canceled) ||
+                        (stripeIntent.status == StripeIntent.Status.Succeeded) ||
+                        (stripeIntent.status == StripeIntent.Status.RequiresCapture)
                     ) -> {
                 error(
                     """
-                        A PaymentIntent with status='requires_payment_method' or 'requires_action` is required.
-                        The current PaymentIntent has status '${stripeIntent.status}'.
+                        PaymentSheet cannot set up a PaymentIntent in status '${stripeIntent.status}'.
                         See https://stripe.com/docs/api/payment_intents/object#payment_intent_object-status.
                     """.trimIndent()
                 )
             }
             stripeIntent is SetupIntent &&
                 (
-                    (stripeIntent.status != StripeIntent.Status.RequiresPaymentMethod) &&
-                        (stripeIntent.status != StripeIntent.Status.RequiresAction)
+                    (stripeIntent.status == StripeIntent.Status.Canceled) ||
+                        (stripeIntent.status == StripeIntent.Status.Succeeded)
                     ) -> {
                 error(
                     """
-                        A SetupIntent with status='requires_payment_method' or 'requires_action` is required.
-                        The current SetupIntent has status '${stripeIntent.status}'.
+                        PaymentSheet cannot set up a SetupIntent in status '${stripeIntent.status}'.
                         See https://stripe.com/docs/api/setup_intents/object#setup_intent_object-status
                     """.trimIndent()
                 )

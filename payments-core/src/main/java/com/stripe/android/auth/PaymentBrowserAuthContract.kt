@@ -25,7 +25,8 @@ internal class PaymentBrowserAuthContract :
         input: Args
     ): Intent {
         val defaultReturnUrl = DefaultReturnUrl.create(context)
-        val shouldUseBrowser = input.hasDefaultReturnUrl(defaultReturnUrl)
+        val shouldUseBrowser =
+            input.hasDefaultReturnUrl(defaultReturnUrl) || input.isInstantApp
 
         val statusBarColor = when (context) {
             is Activity -> context.window?.statusBarColor
@@ -82,7 +83,8 @@ internal class PaymentBrowserAuthContract :
         val shouldCancelIntentOnUserNavigation: Boolean = true,
 
         val statusBarColor: Int? = null,
-        val publishableKey: String
+        val publishableKey: String,
+        val isInstantApp: Boolean
     ) : Parcelable {
         /**
          * Pre-requisite for using [StripeBrowserLauncherActivity].

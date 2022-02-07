@@ -1,15 +1,19 @@
-package com.stripe.android.paymentsheet.elements
+package com.stripe.android.ui.core.elements
 
-import com.stripe.android.paymentsheet.forms.FormFieldEntry
+import androidx.annotation.RestrictTo
+import androidx.annotation.VisibleForTesting
+import com.stripe.android.ui.core.forms.FormFieldEntry
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 
-internal data class SectionElement(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+data class SectionElement(
     override val identifier: IdentifierSpec,
     val fields: List<SectionFieldElement>,
     override val controller: SectionController
 ) : FormElement() {
-    internal constructor(
+    @VisibleForTesting
+    constructor(
         identifier: IdentifierSpec,
         field: SectionFieldElement,
         controller: SectionController

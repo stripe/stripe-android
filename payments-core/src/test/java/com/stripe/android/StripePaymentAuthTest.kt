@@ -11,35 +11,29 @@ import com.stripe.android.model.SourceFixtures
 import com.stripe.android.networking.StripeApiRepository
 import com.stripe.android.utils.TestUtils.idleLooper
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.TestCoroutineDispatcher
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.runTest
 import org.junit.runner.RunWith
 import org.mockito.kotlin.isA
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
-import kotlin.test.AfterTest
 import kotlin.test.Test
 
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
 internal class StripePaymentAuthTest {
-    private val testDispatcher = TestCoroutineDispatcher()
+    private val testDispatcher = UnconfinedTestDispatcher()
 
     private val paymentController: PaymentController = mock()
     private val paymentCallback: ApiResultCallback<PaymentIntentResult> = mock()
     private val setupCallback: ApiResultCallback<SetupIntentResult> = mock()
     private val sourceCallback: ApiResultCallback<Source> = mock()
 
-    @AfterTest
-    fun cleanup() {
-        testDispatcher.cleanupTestCoroutines()
-    }
-
     @Test
     fun onPaymentResult_whenShouldHandleResultAndControllerReturnsCorrectResult_shouldGetCorrectResult() =
-        testDispatcher.runBlockingTest {
+        runTest {
             val data = Intent()
             val result = PaymentIntentResult(PaymentIntentFixtures.PI_SUCCEEDED)
             whenever(
@@ -68,7 +62,7 @@ internal class StripePaymentAuthTest {
 
     @Test
     fun onPaymentResult_whenShouldHandleResultAndControllerReturnsNull_shouldThrowException() =
-        testDispatcher.runBlockingTest {
+        runTest {
             val data = Intent()
             whenever(
                 paymentController.shouldHandlePaymentResult(
@@ -96,7 +90,7 @@ internal class StripePaymentAuthTest {
 
     @Test
     fun onSetupResult_whenShouldHandleResultAndControllerReturnsCorrectResult_shouldGetCorrectResult() =
-        testDispatcher.runBlockingTest {
+        runTest {
             val data = Intent()
             val result = SetupIntentResult(SetupIntentFixtures.SI_SUCCEEDED)
             whenever(
@@ -124,7 +118,7 @@ internal class StripePaymentAuthTest {
 
     @Test
     fun onSetupResult_whenShouldHandleResultAndControllerReturnsNull_shouldThrowException() =
-        testDispatcher.runBlockingTest {
+        runTest {
             val data = Intent()
             whenever(
                 paymentController.shouldHandleSetupResult(
@@ -152,7 +146,7 @@ internal class StripePaymentAuthTest {
 
     @Test
     fun onAuthenticateSourceResult_whenControllerReturnsCorrectResult_shouldGetCorrectResult() =
-        testDispatcher.runBlockingTest {
+        runTest {
             val source = SourceFixtures.CARD
             val data = Intent()
             whenever(
@@ -174,7 +168,7 @@ internal class StripePaymentAuthTest {
 
     @Test
     fun onAuthenticateSourceResult_whenControllerReturnsNull_shouldThrowException() =
-        testDispatcher.runBlockingTest {
+        runTest {
             val data = Intent()
             whenever(
                 paymentController.getAuthenticateSourceResult(

@@ -1,5 +1,6 @@
-package com.stripe.android.paymentsheet.elements
+package com.stripe.android.ui.core.elements
 
+import androidx.annotation.RestrictTo
 import androidx.annotation.StringRes
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.KeyboardCapitalization
@@ -9,6 +10,7 @@ import androidx.compose.ui.text.input.TransformedText
 import androidx.compose.ui.text.input.VisualTransformation
 import com.stripe.android.paymentsheet.R
 import kotlinx.coroutines.flow.MutableStateFlow
+import com.stripe.android.ui.core.R
 import java.math.BigInteger
 import java.util.Locale
 
@@ -18,7 +20,8 @@ import java.util.Locale
  *
  * @see [IBAN on Wikipedia](https://en.wikipedia.org/wiki/International_Bank_Account_Number)
  */
-internal class IbanConfig : TextFieldConfig {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+class IbanConfig : TextFieldConfig {
     override val capitalization: KeyboardCapitalization = KeyboardCapitalization.Characters
     override val debugLabel = "iban"
 

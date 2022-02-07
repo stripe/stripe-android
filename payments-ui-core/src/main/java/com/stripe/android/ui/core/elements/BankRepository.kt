@@ -1,6 +1,7 @@
-package com.stripe.android.paymentsheet.elements
+package com.stripe.android.ui.core.elements
 
 import android.content.res.Resources
+import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
@@ -9,17 +10,15 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-internal data class BankRepository @Inject internal constructor(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+data class BankRepository @Inject constructor(
     val resources: Resources?
 ) {
-    // This is needed for @Preview and inject does not support a constructor with default parameters.
-    internal constructor() : this(null)
-
     private val bankItemMap = mutableMapOf<SupportedBankType, List<DropdownItemSpec>?>()
 
     private val format = Json { ignoreUnknownKeys = true }
 
-    internal fun get(bankType: SupportedBankType) = requireNotNull(bankItemMap[bankType])
+    fun get(bankType: SupportedBankType) = requireNotNull(bankItemMap[bankType])
 
     init {
         initialize(
@@ -30,7 +29,7 @@ internal data class BankRepository @Inject internal constructor(
     }
 
     @VisibleForTesting
-    internal fun initialize(supportedBankTypeInputStreamMap: Map<SupportedBankType, InputStream?>) {
+    fun initialize(supportedBankTypeInputStreamMap: Map<SupportedBankType, InputStream?>) {
         supportedBankTypeInputStreamMap.forEach { (bankType, banksOfType) ->
             bankItemMap[bankType] = parseBank(banksOfType)
         }

@@ -1,5 +1,6 @@
-package com.stripe.android.paymentsheet.elements
+package com.stripe.android.ui.core.elements
 
+import androidx.annotation.RestrictTo
 import androidx.annotation.StringRes
 import kotlinx.coroutines.flow.Flow
 
@@ -8,14 +9,16 @@ import kotlinx.coroutines.flow.Flow
  * an error and have a type.  This is used for a single field in a section
  * or a section field that has other fields in it.
  */
-internal sealed interface SectionFieldErrorController : Controller {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+sealed interface SectionFieldErrorController : Controller {
     val error: Flow<FieldError?>
 }
 
 /**
  * Encapsulates an error message including the string resource and the variable arguments
  */
-internal class FieldError(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+class FieldError(
     @StringRes val errorMessage: Int,
     val formatArgs: Array<out Any>? = null
 )

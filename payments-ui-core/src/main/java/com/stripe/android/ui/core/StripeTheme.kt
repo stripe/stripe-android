@@ -1,5 +1,6 @@
-package com.stripe.android.paymentsheet
+package com.stripe.android.ui.core
 
+import androidx.annotation.RestrictTo
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.darkColors
@@ -64,7 +65,8 @@ internal val LocalFieldTextStyle = TextStyle.Default.copy(
 )
 
 @Composable
-internal fun StripeTheme(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+fun StripeTheme(
     isDarkTheme: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit
 ) {

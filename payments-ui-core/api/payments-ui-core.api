@@ -62,7 +62,7 @@ public final class com/stripe/android/ui/core/elements/AddressController : com/s
 	public final fun getLabel ()Ljava/lang/Integer;
 }
 
-public final class com/stripe/android/ui/core/elements/AddressElement : com/stripe/android/ui/core/elements/SectionMultiFieldElement {
+public class com/stripe/android/ui/core/elements/AddressElement : com/stripe/android/ui/core/elements/SectionMultiFieldElement {
 	public static final field $stable I
 	public fun <init> (Lcom/stripe/android/ui/core/elements/IdentifierSpec;Lcom/stripe/android/ui/core/address/AddressFieldElementRepository;Ljava/util/Map;Ljava/util/Set;Lcom/stripe/android/ui/core/elements/DropdownFieldController;)V
 	public synthetic fun <init> (Lcom/stripe/android/ui/core/elements/IdentifierSpec;Lcom/stripe/android/ui/core/address/AddressFieldElementRepository;Ljava/util/Map;Ljava/util/Set;Lcom/stripe/android/ui/core/elements/DropdownFieldController;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
@@ -121,6 +121,13 @@ public final class com/stripe/android/ui/core/elements/BankRepository_Factory : 
 	public fun get ()Lcom/stripe/android/ui/core/elements/BankRepository;
 	public synthetic fun get ()Ljava/lang/Object;
 	public static fun newInstance (Landroid/content/res/Resources;)Lcom/stripe/android/ui/core/elements/BankRepository;
+}
+
+public final class com/stripe/android/ui/core/elements/CardBillingElement : com/stripe/android/ui/core/elements/AddressElement {
+	public static final field $stable I
+	public fun <init> (Lcom/stripe/android/ui/core/elements/IdentifierSpec;Lcom/stripe/android/ui/core/address/AddressFieldElementRepository;Ljava/util/Set;Lcom/stripe/android/ui/core/elements/DropdownFieldController;Ljava/util/Map;)V
+	public synthetic fun <init> (Lcom/stripe/android/ui/core/elements/IdentifierSpec;Lcom/stripe/android/ui/core/address/AddressFieldElementRepository;Ljava/util/Set;Lcom/stripe/android/ui/core/elements/DropdownFieldController;Ljava/util/Map;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun getHiddenIdentifiers ()Lkotlinx/coroutines/flow/Flow;
 }
 
 public final class com/stripe/android/ui/core/elements/ComposableSingletons$AfterpayClearpayElementUIKt {
@@ -196,7 +203,7 @@ public final class com/stripe/android/ui/core/elements/DropdownFieldController :
 	public fun getError ()Lkotlinx/coroutines/flow/Flow;
 	public fun getFieldValue ()Lkotlinx/coroutines/flow/Flow;
 	public fun getFormFieldValue ()Lkotlinx/coroutines/flow/Flow;
-	public fun getLabel ()I
+	public fun getLabel ()Lkotlinx/coroutines/flow/Flow;
 	public fun getRawFieldValue ()Lkotlinx/coroutines/flow/Flow;
 	public final fun getSelectedIndex ()Lkotlinx/coroutines/flow/Flow;
 	public fun getShowOptionalLabel ()Z
@@ -419,7 +426,7 @@ public final class com/stripe/android/ui/core/elements/IdentifierSpec$State : co
 public abstract interface class com/stripe/android/ui/core/elements/InputController : com/stripe/android/ui/core/elements/SectionFieldErrorController {
 	public abstract fun getFieldValue ()Lkotlinx/coroutines/flow/Flow;
 	public abstract fun getFormFieldValue ()Lkotlinx/coroutines/flow/Flow;
-	public abstract fun getLabel ()I
+	public abstract fun getLabel ()Lkotlinx/coroutines/flow/Flow;
 	public abstract fun getRawFieldValue ()Lkotlinx/coroutines/flow/Flow;
 	public abstract fun getShowOptionalLabel ()Z
 	public abstract fun isComplete ()Lkotlinx/coroutines/flow/Flow;
@@ -515,7 +522,7 @@ public final class com/stripe/android/ui/core/elements/SaveForFutureUseControlle
 	public fun getFieldValue ()Lkotlinx/coroutines/flow/Flow;
 	public fun getFormFieldValue ()Lkotlinx/coroutines/flow/Flow;
 	public final fun getHiddenIdentifiers ()Lkotlinx/coroutines/flow/Flow;
-	public fun getLabel ()I
+	public fun getLabel ()Lkotlinx/coroutines/flow/Flow;
 	public fun getRawFieldValue ()Lkotlinx/coroutines/flow/Flow;
 	public final fun getSaveForFutureUse ()Lkotlinx/coroutines/flow/Flow;
 	public fun getShowOptionalLabel ()Z
@@ -679,21 +686,6 @@ public final class com/stripe/android/ui/core/elements/SimpleDropdownElement : c
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class com/stripe/android/ui/core/elements/SimpleTextElement : com/stripe/android/ui/core/elements/SectionSingleFieldElement {
-	public static final field $stable I
-	public fun <init> (Lcom/stripe/android/ui/core/elements/IdentifierSpec;Lcom/stripe/android/ui/core/elements/TextFieldController;)V
-	public final fun component1 ()Lcom/stripe/android/ui/core/elements/IdentifierSpec;
-	public final fun component2 ()Lcom/stripe/android/ui/core/elements/TextFieldController;
-	public final fun copy (Lcom/stripe/android/ui/core/elements/IdentifierSpec;Lcom/stripe/android/ui/core/elements/TextFieldController;)Lcom/stripe/android/ui/core/elements/SimpleTextElement;
-	public static synthetic fun copy$default (Lcom/stripe/android/ui/core/elements/SimpleTextElement;Lcom/stripe/android/ui/core/elements/IdentifierSpec;Lcom/stripe/android/ui/core/elements/TextFieldController;ILjava/lang/Object;)Lcom/stripe/android/ui/core/elements/SimpleTextElement;
-	public fun equals (Ljava/lang/Object;)Z
-	public synthetic fun getController ()Lcom/stripe/android/ui/core/elements/InputController;
-	public fun getController ()Lcom/stripe/android/ui/core/elements/TextFieldController;
-	public fun getIdentifier ()Lcom/stripe/android/ui/core/elements/IdentifierSpec;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
 public final class com/stripe/android/ui/core/elements/SimpleTextFieldConfig : com/stripe/android/ui/core/elements/TextFieldConfig {
 	public static final field $stable I
 	public synthetic fun <init> (IIIILkotlin/jvm/internal/DefaultConstructorMarker;)V
@@ -707,6 +699,29 @@ public final class com/stripe/android/ui/core/elements/SimpleTextFieldConfig : c
 	public fun getKeyboard-PjHm6EE ()I
 	public fun getLabel ()I
 	public fun getVisualTransformation ()Landroidx/compose/ui/text/input/VisualTransformation;
+}
+
+public final class com/stripe/android/ui/core/elements/SimpleTextFieldController : com/stripe/android/ui/core/elements/SectionFieldErrorController, com/stripe/android/ui/core/elements/TextFieldController {
+	public static final field $stable I
+	public fun <init> (Lcom/stripe/android/ui/core/elements/TextFieldConfig;ZLjava/lang/String;)V
+	public synthetic fun <init> (Lcom/stripe/android/ui/core/elements/TextFieldConfig;ZLjava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun getCapitalization-IUNYP9k ()I
+	public fun getDebugLabel ()Ljava/lang/String;
+	public fun getError ()Lkotlinx/coroutines/flow/Flow;
+	public fun getFieldState ()Lkotlinx/coroutines/flow/Flow;
+	public fun getFieldValue ()Lkotlinx/coroutines/flow/Flow;
+	public fun getFormFieldValue ()Lkotlinx/coroutines/flow/Flow;
+	public fun getKeyboardType-PjHm6EE ()I
+	public fun getLabel ()Lkotlinx/coroutines/flow/Flow;
+	public fun getRawFieldValue ()Lkotlinx/coroutines/flow/Flow;
+	public fun getShowOptionalLabel ()Z
+	public fun getVisibleError ()Lkotlinx/coroutines/flow/Flow;
+	public fun getVisualTransformation ()Landroidx/compose/ui/text/input/VisualTransformation;
+	public fun isComplete ()Lkotlinx/coroutines/flow/Flow;
+	public final fun isFull ()Lkotlinx/coroutines/flow/Flow;
+	public fun onFocusChange (Z)V
+	public fun onRawValueChange (Ljava/lang/String;)V
+	public fun onValueChange (Ljava/lang/String;)V
 }
 
 public final class com/stripe/android/ui/core/elements/SimpleTextSpec : com/stripe/android/ui/core/elements/SectionFieldSpec {
@@ -792,26 +807,18 @@ public abstract interface class com/stripe/android/ui/core/elements/TextFieldCon
 	public abstract fun getVisualTransformation ()Landroidx/compose/ui/text/input/VisualTransformation;
 }
 
-public final class com/stripe/android/ui/core/elements/TextFieldController : com/stripe/android/ui/core/elements/InputController, com/stripe/android/ui/core/elements/SectionFieldErrorController {
-	public static final field $stable I
-	public fun <init> (Lcom/stripe/android/ui/core/elements/TextFieldConfig;ZLjava/lang/String;)V
-	public synthetic fun <init> (Lcom/stripe/android/ui/core/elements/TextFieldConfig;ZLjava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun getCapitalization-IUNYP9k ()I
-	public final fun getDebugLabel ()Ljava/lang/String;
-	public fun getError ()Lkotlinx/coroutines/flow/Flow;
-	public fun getFieldValue ()Lkotlinx/coroutines/flow/Flow;
-	public fun getFormFieldValue ()Lkotlinx/coroutines/flow/Flow;
-	public final fun getKeyboardType-PjHm6EE ()I
-	public fun getLabel ()I
-	public fun getRawFieldValue ()Lkotlinx/coroutines/flow/Flow;
-	public fun getShowOptionalLabel ()Z
-	public final fun getVisibleError ()Lkotlinx/coroutines/flow/Flow;
-	public final fun getVisualTransformation ()Landroidx/compose/ui/text/input/VisualTransformation;
-	public fun isComplete ()Lkotlinx/coroutines/flow/Flow;
-	public final fun isFull ()Lkotlinx/coroutines/flow/Flow;
-	public final fun onFocusChange (Z)V
-	public fun onRawValueChange (Ljava/lang/String;)V
-	public final fun onValueChange (Ljava/lang/String;)V
+public abstract interface class com/stripe/android/ui/core/elements/TextFieldController : com/stripe/android/ui/core/elements/InputController {
+	public abstract fun getCapitalization-IUNYP9k ()I
+	public abstract fun getDebugLabel ()Ljava/lang/String;
+	public abstract fun getFieldState ()Lkotlinx/coroutines/flow/Flow;
+	public abstract fun getFieldValue ()Lkotlinx/coroutines/flow/Flow;
+	public abstract fun getKeyboardType-PjHm6EE ()I
+	public abstract fun getLabel ()Lkotlinx/coroutines/flow/Flow;
+	public abstract fun getShowOptionalLabel ()Z
+	public abstract fun getVisibleError ()Lkotlinx/coroutines/flow/Flow;
+	public abstract fun getVisualTransformation ()Landroidx/compose/ui/text/input/VisualTransformation;
+	public abstract fun onFocusChange (Z)V
+	public abstract fun onValueChange (Ljava/lang/String;)V
 }
 
 public abstract interface class com/stripe/android/ui/core/elements/TextFieldState {
@@ -830,6 +837,11 @@ public final class com/stripe/android/ui/core/forms/AfterpayClearpaySpecKt {
 public final class com/stripe/android/ui/core/forms/BancontactSpecKt {
 	public static final fun getBancontactForm ()Lcom/stripe/android/ui/core/elements/LayoutSpec;
 	public static final fun getBancontactParamKey ()Ljava/util/Map;
+}
+
+public final class com/stripe/android/ui/core/forms/CardSpecKt {
+	public static final fun getCardForm ()Lcom/stripe/android/ui/core/elements/LayoutSpec;
+	public static final fun getCardParamKey ()Ljava/util/Map;
 }
 
 public final class com/stripe/android/ui/core/forms/EpsSpecKt {

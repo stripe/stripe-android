@@ -1,5 +1,6 @@
-package com.stripe.android.paymentsheet.elements
+package com.stripe.android.ui.core.elements
 
+import androidx.annotation.RestrictTo
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -20,10 +21,11 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.unit.dp
-import com.stripe.android.paymentsheet.R
+import com.stripe.android.ui.core.R
 
 @Composable
-internal fun SaveForFutureUseElementUI(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+fun SaveForFutureUseElementUI(
     enabled: Boolean,
     element: SaveForFutureUseElement
 ) {

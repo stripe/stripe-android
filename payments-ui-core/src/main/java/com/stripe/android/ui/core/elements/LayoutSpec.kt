@@ -1,10 +1,16 @@
-package com.stripe.android.paymentsheet.elements
+package com.stripe.android.ui.core.elements
+
+import android.os.Parcelable
+import androidx.annotation.RestrictTo
+import kotlinx.parcelize.Parcelize
 
 /**
  * This is a data representation of the layout of UI fields on the screen.
  */
 @Suppress("DataClassPrivateConstructor")
-internal data class LayoutSpec private constructor(val items: List<FormItemSpec>) {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+@Parcelize
+data class LayoutSpec private constructor(val items: List<FormItemSpec>) : Parcelable {
     companion object {
         fun create(vararg item: FormItemSpec) = LayoutSpec(item.toList())
 

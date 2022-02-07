@@ -151,7 +151,8 @@ class PaymentAuthWebViewActivityViewModelTest {
             requestCode = 100,
             clientSecret = "client_secret",
             url = "https://example.com",
-            publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
+            publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+            isInstantApp = false
         )
     }
 }

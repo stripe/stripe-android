@@ -5,13 +5,13 @@ import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
+import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.model.ConfirmStripeIntentParams
-import com.stripe.android.payments.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.utils.InjectableActivityScenario
 import com.stripe.android.utils.TestUtils
 import com.stripe.android.utils.injectableActivityScenario
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
@@ -46,7 +46,7 @@ class PaymentLauncherConfirmationActivityTest {
             )
         ).use {
             it.onActivity {
-                runBlockingTest {
+                runTest {
                     verify(viewModel).confirmStripeIntent(confirmStripeIntentParams)
                 }
             }
@@ -65,7 +65,7 @@ class PaymentLauncherConfirmationActivityTest {
             )
         ).use {
             it.onActivity {
-                runBlockingTest {
+                runTest {
                     verify(viewModel).handleNextActionForStripeIntent(CLIENT_SECRET)
                 }
             }
@@ -91,7 +91,7 @@ class PaymentLauncherConfirmationActivityTest {
             )
         ).use {
             it.onActivity {
-                runBlockingTest {
+                runTest {
                     verify(viewModel).handleNextActionForStripeIntent(CLIENT_SECRET)
                 }
             }

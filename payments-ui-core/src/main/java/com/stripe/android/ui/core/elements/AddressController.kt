@@ -1,5 +1,6 @@
-package com.stripe.android.paymentsheet.elements
+package com.stripe.android.ui.core.elements
 
+import androidx.annotation.RestrictTo
 import androidx.annotation.StringRes
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -11,7 +12,8 @@ import kotlinx.coroutines.flow.flatMapLatest
  * This is in contrast to the [SectionController] which is a section in which the fields
  * in it do not change.
  */
-internal class AddressController(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+class AddressController(
     val fieldsFlowable: Flow<List<SectionFieldElement>>
 ) : SectionFieldErrorController {
     @StringRes
