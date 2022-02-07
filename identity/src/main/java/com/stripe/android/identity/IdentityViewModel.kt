@@ -45,9 +45,10 @@ internal class IdentityViewModel(scanType: ScanState.ScanType) :
     internal class IdentityViewModelFactory(private val scanType: ScanState.ScanType) :
         ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
-        override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+        override fun <T : ViewModel> create(modelClass: Class<T>): T {
             return IdentityViewModel(scanType) as T
         }
+
     }
 
     private companion object {

@@ -16,6 +16,7 @@ import com.stripe.android.camera.scanui.CameraView
 import com.stripe.android.camera.scanui.util.asRect
 import com.stripe.android.identity.IdentityVerificationSheet.VerificationResult
 import com.stripe.android.identity.databinding.IdentityActivityBinding
+import com.stripe.android.identity.navigation.NavHostActivity
 import com.stripe.android.identity.states.ScanState
 
 /**
@@ -56,7 +57,12 @@ internal class IdentityActivity : CameraPermissionCheckingActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
-        ensureCameraPermission()
+//        ensureCameraPermission()
+        binding.next.setOnClickListener {
+            startActivity(
+                Intent(this, NavHostActivity::class.java)
+            )
+        }
     }
 
     override fun onCameraReady() {
