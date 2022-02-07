@@ -8,9 +8,6 @@ import androidx.compose.ui.text.input.VisualTransformation
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.TextFieldStateConstants.Error
 import com.stripe.android.ui.core.elements.TextFieldStateConstants.Valid
-import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.elements.TextFieldStateConstants.Error
-import com.stripe.android.paymentsheet.elements.TextFieldStateConstants.Valid
 import kotlinx.coroutines.flow.MutableStateFlow
 import java.util.regex.Pattern
 

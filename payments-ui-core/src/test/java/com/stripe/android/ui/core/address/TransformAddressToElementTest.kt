@@ -19,7 +19,6 @@ import java.security.InvalidParameterException
 class TransformAddressToElementTest {
 
     @Test
-
     fun `Read US Json`() = runBlocking {
         val addressSchema = readFile("src/main/assets/addressinfo/US.json")!!
         val simpleTextList = addressSchema.transformToElementList()

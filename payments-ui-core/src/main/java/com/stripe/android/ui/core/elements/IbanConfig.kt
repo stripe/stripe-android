@@ -8,7 +8,6 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.OffsetMapping
 import androidx.compose.ui.text.input.TransformedText
 import androidx.compose.ui.text.input.VisualTransformation
-import com.stripe.android.paymentsheet.R
 import kotlinx.coroutines.flow.MutableStateFlow
 import com.stripe.android.ui.core.R
 import java.math.BigInteger

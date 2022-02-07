@@ -3,14 +3,11 @@ package com.stripe.android.ui.core.elements
 import androidx.annotation.StringRes
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
-import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.elements.TextFieldStateConstants.Error
-import com.stripe.android.paymentsheet.elements.TextFieldStateConstants.Valid
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.TextFieldStateConstants.Error
 import com.stripe.android.ui.core.elements.TextFieldStateConstants.Valid
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import java.util.Calendar
 
 internal class DateConfig : TextFieldConfig {
@@ -31,7 +28,7 @@ internal class DateConfig : TextFieldConfig {
 
     override fun determineState(input: String): TextFieldState {
         return if (input.isBlank()) {
-            TextFieldStateConstants.Error.Blank
+            Error.Blank
         } else {
             val newString = convertTo4DigitDate(input)
             when {
