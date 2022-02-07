@@ -1,23 +1,39 @@
-package com.stripe.android.ui.core.forms
+package com.stripe.android.paymentsheet.forms
 
-import androidx.annotation.RestrictTo
-import com.stripe.android.ui.core.R
-import com.stripe.android.ui.core.elements.AddressSpec
-import com.stripe.android.ui.core.elements.AfterpayClearpayTextSpec
-import com.stripe.android.ui.core.elements.EmailSpec
-import com.stripe.android.ui.core.elements.IdentifierSpec
-import com.stripe.android.ui.core.elements.LayoutSpec
-import com.stripe.android.ui.core.elements.SectionSpec
-import com.stripe.android.ui.core.elements.SimpleTextSpec
-import com.stripe.android.ui.core.elements.billingParams
+import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.elements.AddressSpec
+import com.stripe.android.paymentsheet.elements.AfterpayClearpaySpec
+import com.stripe.android.paymentsheet.elements.EmailSpec
+import com.stripe.android.paymentsheet.elements.IdentifierSpec
+import com.stripe.android.paymentsheet.elements.LayoutSpec
+import com.stripe.android.paymentsheet.elements.SectionSpec
+import com.stripe.android.paymentsheet.elements.SimpleTextSpec
+import com.stripe.android.paymentsheet.elements.billingParams
 
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-val AfterpayClearpayParamKey: MutableMap<String, Any?> = mutableMapOf(
+/**
+ * This defines the requirements for usage as a Payment Method.
+ */
+internal val AfterpayClearpayRequirement = PaymentMethodRequirements(
+    /**
+     * This is null until we have after cancellation support.  When we have cancellation support
+     * this will require Shipping name, address line 1, address country, and postal
+     */
+    piRequirements = null,
+
+    /**
+     * SetupIntents are not supported by this payment method, in addition,
+     * setup intents do not have shipping information
+     */
+    siRequirements = null,
+    confirmPMFromCustomer = null
+)
+
+internal val AfterpayClearpayParamKey: MutableMap<String, Any?> = mutableMapOf(
     "type" to "afterpay_clearpay",
     "billing_details" to billingParams
 )
 
-internal val afterpayClearpayHeader = AfterpayClearpayTextSpec(
+internal val afterpayClearpayHeader = AfterpayClearpaySpec(
     IdentifierSpec.Generic("afterpay_clearpay_header")
 )
 internal val afterpayClearpayNameSection = SectionSpec(
@@ -33,8 +49,7 @@ internal val afterpayClearpayBillingSection = SectionSpec(
     R.string.billing_details
 )
 
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-val AfterpayClearpayForm = LayoutSpec.create(
+internal val AfterpayClearpayForm = LayoutSpec.create(
     afterpayClearpayHeader,
     afterpayClearpayNameSection,
     afterpayClearpayEmailSection,

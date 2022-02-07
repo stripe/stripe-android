@@ -1,22 +1,14 @@
-package com.stripe.android.ui.core.forms.resources
+package com.stripe.android.paymentsheet.elements
 
-import androidx.annotation.RestrictTo
-import com.stripe.android.ui.core.address.AddressFieldElementRepository
-import com.stripe.android.ui.core.elements.BankRepository
+import com.stripe.android.paymentsheet.address.AddressFieldElementRepository
+import javax.inject.Inject
+import javax.inject.Singleton
 
 /**
- * Interface that provides all resources needed by the forms.
+ * This holds all the resources read in from JSON.
  */
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-interface ResourceRepository {
-    /**
-     * Suspend function that will wait for all resources to be loaded.
-     * Must be called before trying to get any of the repositories.
-     */
-    suspend fun waitUntilLoaded()
-
-    fun isLoaded(): Boolean
-
-    fun getBankRepository(): BankRepository
-    fun getAddressRepository(): AddressFieldElementRepository
-}
+@Singleton
+internal class ResourceRepository @Inject internal constructor(
+    internal val bankRepository: BankRepository,
+    internal val addressRepository: AddressFieldElementRepository
+)

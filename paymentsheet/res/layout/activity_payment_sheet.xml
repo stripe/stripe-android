@@ -81,6 +81,7 @@
                 <FrameLayout
                     android:id="@+id/button_container"
                     android:animateLayoutChanges="true"
+                    android:visibility="gone"
                     android:layout_width="match_parent"
                     android:layout_height="@dimen/stripe_paymentsheet_max_primary_button_height"
                     android:layout_marginTop="@dimen/stripe_paymentsheet_button_container_spacing"
