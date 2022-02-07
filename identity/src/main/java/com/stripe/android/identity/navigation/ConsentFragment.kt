@@ -1,13 +1,13 @@
 package com.stripe.android.identity.navigation
 
-import androidx.lifecycle.ViewModelProvider
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.stripe.android.identity.viewmodel.ConsentViewModel
+import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
 import com.stripe.android.identity.R
+import com.stripe.android.identity.viewmodel.ConsentViewModel
 
 class ConsentFragment : Fragment() {
 
@@ -18,7 +18,8 @@ class ConsentFragment : Fragment() {
     private lateinit var viewModel: ConsentViewModel
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
+        inflater: LayoutInflater,
+        container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         return inflater.inflate(R.layout.consent_fragment, container, false)
@@ -29,5 +30,4 @@ class ConsentFragment : Fragment() {
         viewModel = ViewModelProvider(this).get(ConsentViewModel::class.java)
         // TODO: Use the ViewModel
     }
-
 }

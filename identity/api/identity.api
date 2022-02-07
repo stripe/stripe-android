@@ -53,6 +53,79 @@ public final class com/stripe/android/identity/IdentityVerificationSheet$Verific
 	public fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
+public final class com/stripe/android/identity/databinding/ActivityNavHostBinding : androidx/viewbinding/ViewBinding {
+	public final field identityNavHost Landroidx/fragment/app/FragmentContainerView;
+	public static fun bind (Landroid/view/View;)Lcom/stripe/android/identity/databinding/ActivityNavHostBinding;
+	public synthetic fun getRoot ()Landroid/view/View;
+	public fun getRoot ()Landroidx/constraintlayout/widget/ConstraintLayout;
+	public static fun inflate (Landroid/view/LayoutInflater;)Lcom/stripe/android/identity/databinding/ActivityNavHostBinding;
+	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Z)Lcom/stripe/android/identity/databinding/ActivityNavHostBinding;
+}
+
+public final class com/stripe/android/identity/databinding/CameraErrorFragmentBinding : androidx/viewbinding/ViewBinding {
+	public static fun bind (Landroid/view/View;)Lcom/stripe/android/identity/databinding/CameraErrorFragmentBinding;
+	public synthetic fun getRoot ()Landroid/view/View;
+	public fun getRoot ()Landroid/widget/FrameLayout;
+	public static fun inflate (Landroid/view/LayoutInflater;)Lcom/stripe/android/identity/databinding/CameraErrorFragmentBinding;
+	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Z)Lcom/stripe/android/identity/databinding/CameraErrorFragmentBinding;
+}
+
+public final class com/stripe/android/identity/databinding/CameraPermissionDeniedFragmentBinding : androidx/viewbinding/ViewBinding {
+	public static fun bind (Landroid/view/View;)Lcom/stripe/android/identity/databinding/CameraPermissionDeniedFragmentBinding;
+	public synthetic fun getRoot ()Landroid/view/View;
+	public fun getRoot ()Landroid/widget/FrameLayout;
+	public static fun inflate (Landroid/view/LayoutInflater;)Lcom/stripe/android/identity/databinding/CameraPermissionDeniedFragmentBinding;
+	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Z)Lcom/stripe/android/identity/databinding/CameraPermissionDeniedFragmentBinding;
+}
+
+public final class com/stripe/android/identity/databinding/ConfirmationFragmentBinding : androidx/viewbinding/ViewBinding {
+	public static fun bind (Landroid/view/View;)Lcom/stripe/android/identity/databinding/ConfirmationFragmentBinding;
+	public synthetic fun getRoot ()Landroid/view/View;
+	public fun getRoot ()Landroid/widget/FrameLayout;
+	public static fun inflate (Landroid/view/LayoutInflater;)Lcom/stripe/android/identity/databinding/ConfirmationFragmentBinding;
+	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Z)Lcom/stripe/android/identity/databinding/ConfirmationFragmentBinding;
+}
+
+public final class com/stripe/android/identity/databinding/ConsentFragmentBinding : androidx/viewbinding/ViewBinding {
+	public static fun bind (Landroid/view/View;)Lcom/stripe/android/identity/databinding/ConsentFragmentBinding;
+	public synthetic fun getRoot ()Landroid/view/View;
+	public fun getRoot ()Landroid/widget/FrameLayout;
+	public static fun inflate (Landroid/view/LayoutInflater;)Lcom/stripe/android/identity/databinding/ConsentFragmentBinding;
+	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Z)Lcom/stripe/android/identity/databinding/ConsentFragmentBinding;
+}
+
+public final class com/stripe/android/identity/databinding/DriverLicenseScanFragmentBinding : androidx/viewbinding/ViewBinding {
+	public static fun bind (Landroid/view/View;)Lcom/stripe/android/identity/databinding/DriverLicenseScanFragmentBinding;
+	public synthetic fun getRoot ()Landroid/view/View;
+	public fun getRoot ()Landroid/widget/FrameLayout;
+	public static fun inflate (Landroid/view/LayoutInflater;)Lcom/stripe/android/identity/databinding/DriverLicenseScanFragmentBinding;
+	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Z)Lcom/stripe/android/identity/databinding/DriverLicenseScanFragmentBinding;
+}
+
+public final class com/stripe/android/identity/databinding/DriverLicenseUploadFragmentBinding : androidx/viewbinding/ViewBinding {
+	public static fun bind (Landroid/view/View;)Lcom/stripe/android/identity/databinding/DriverLicenseUploadFragmentBinding;
+	public synthetic fun getRoot ()Landroid/view/View;
+	public fun getRoot ()Landroid/widget/FrameLayout;
+	public static fun inflate (Landroid/view/LayoutInflater;)Lcom/stripe/android/identity/databinding/DriverLicenseUploadFragmentBinding;
+	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Z)Lcom/stripe/android/identity/databinding/DriverLicenseUploadFragmentBinding;
+}
+
+public final class com/stripe/android/identity/databinding/IdScanFragmentBinding : androidx/viewbinding/ViewBinding {
+	public static fun bind (Landroid/view/View;)Lcom/stripe/android/identity/databinding/IdScanFragmentBinding;
+	public synthetic fun getRoot ()Landroid/view/View;
+	public fun getRoot ()Landroid/widget/FrameLayout;
+	public static fun inflate (Landroid/view/LayoutInflater;)Lcom/stripe/android/identity/databinding/IdScanFragmentBinding;
+	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Z)Lcom/stripe/android/identity/databinding/IdScanFragmentBinding;
+}
+
+public final class com/stripe/android/identity/databinding/IdUploadFragmentBinding : androidx/viewbinding/ViewBinding {
+	public static fun bind (Landroid/view/View;)Lcom/stripe/android/identity/databinding/IdUploadFragmentBinding;
+	public synthetic fun getRoot ()Landroid/view/View;
+	public fun getRoot ()Landroid/widget/FrameLayout;
+	public static fun inflate (Landroid/view/LayoutInflater;)Lcom/stripe/android/identity/databinding/IdUploadFragmentBinding;
+	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Z)Lcom/stripe/android/identity/databinding/IdUploadFragmentBinding;
+}
+
 public final class com/stripe/android/identity/databinding/IdentityActivityBinding : androidx/viewbinding/ViewBinding {
 	public final field cameraView Lcom/stripe/android/camera/scanui/CameraView;
 	public final field next Landroid/widget/Button;
@@ -61,5 +134,175 @@ public final class com/stripe/android/identity/databinding/IdentityActivityBindi
 	public fun getRoot ()Landroidx/constraintlayout/widget/ConstraintLayout;
 	public static fun inflate (Landroid/view/LayoutInflater;)Lcom/stripe/android/identity/databinding/IdentityActivityBinding;
 	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Z)Lcom/stripe/android/identity/databinding/IdentityActivityBinding;
+}
+
+public final class com/stripe/android/identity/databinding/PassportScanFragmentBinding : androidx/viewbinding/ViewBinding {
+	public static fun bind (Landroid/view/View;)Lcom/stripe/android/identity/databinding/PassportScanFragmentBinding;
+	public synthetic fun getRoot ()Landroid/view/View;
+	public fun getRoot ()Landroid/widget/FrameLayout;
+	public static fun inflate (Landroid/view/LayoutInflater;)Lcom/stripe/android/identity/databinding/PassportScanFragmentBinding;
+	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Z)Lcom/stripe/android/identity/databinding/PassportScanFragmentBinding;
+}
+
+public final class com/stripe/android/identity/databinding/PassportUploadFragmentBinding : androidx/viewbinding/ViewBinding {
+	public static fun bind (Landroid/view/View;)Lcom/stripe/android/identity/databinding/PassportUploadFragmentBinding;
+	public synthetic fun getRoot ()Landroid/view/View;
+	public fun getRoot ()Landroid/widget/FrameLayout;
+	public static fun inflate (Landroid/view/LayoutInflater;)Lcom/stripe/android/identity/databinding/PassportUploadFragmentBinding;
+	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Z)Lcom/stripe/android/identity/databinding/PassportUploadFragmentBinding;
+}
+
+public final class com/stripe/android/identity/navigation/CameraErrorFragment : androidx/fragment/app/Fragment {
+	public static final field Companion Lcom/stripe/android/identity/navigation/CameraErrorFragment$Companion;
+	public fun <init> ()V
+	public fun onActivityCreated (Landroid/os/Bundle;)V
+	public fun onCreateView (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Landroid/os/Bundle;)Landroid/view/View;
+}
+
+public final class com/stripe/android/identity/navigation/CameraErrorFragment$Companion {
+	public final fun newInstance ()Lcom/stripe/android/identity/navigation/CameraErrorFragment;
+}
+
+public final class com/stripe/android/identity/navigation/CameraPermissionDeniedFragment : androidx/fragment/app/Fragment {
+	public static final field Companion Lcom/stripe/android/identity/navigation/CameraPermissionDeniedFragment$Companion;
+	public fun <init> ()V
+	public fun onActivityCreated (Landroid/os/Bundle;)V
+	public fun onCreateView (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Landroid/os/Bundle;)Landroid/view/View;
+}
+
+public final class com/stripe/android/identity/navigation/CameraPermissionDeniedFragment$Companion {
+	public final fun newInstance ()Lcom/stripe/android/identity/navigation/CameraPermissionDeniedFragment;
+}
+
+public final class com/stripe/android/identity/navigation/ConfirmationFragment : androidx/fragment/app/Fragment {
+	public static final field Companion Lcom/stripe/android/identity/navigation/ConfirmationFragment$Companion;
+	public fun <init> ()V
+	public fun onActivityCreated (Landroid/os/Bundle;)V
+	public fun onCreateView (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Landroid/os/Bundle;)Landroid/view/View;
+}
+
+public final class com/stripe/android/identity/navigation/ConfirmationFragment$Companion {
+	public final fun newInstance ()Lcom/stripe/android/identity/navigation/ConfirmationFragment;
+}
+
+public final class com/stripe/android/identity/navigation/ConsentFragment : androidx/fragment/app/Fragment {
+	public static final field Companion Lcom/stripe/android/identity/navigation/ConsentFragment$Companion;
+	public fun <init> ()V
+	public fun onActivityCreated (Landroid/os/Bundle;)V
+	public fun onCreateView (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Landroid/os/Bundle;)Landroid/view/View;
+}
+
+public final class com/stripe/android/identity/navigation/ConsentFragment$Companion {
+	public final fun newInstance ()Lcom/stripe/android/identity/navigation/ConsentFragment;
+}
+
+public final class com/stripe/android/identity/navigation/DriverLicenseScanFragment : androidx/fragment/app/Fragment {
+	public static final field Companion Lcom/stripe/android/identity/navigation/DriverLicenseScanFragment$Companion;
+	public fun <init> ()V
+	public fun onActivityCreated (Landroid/os/Bundle;)V
+	public fun onCreateView (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Landroid/os/Bundle;)Landroid/view/View;
+}
+
+public final class com/stripe/android/identity/navigation/DriverLicenseScanFragment$Companion {
+	public final fun newInstance ()Lcom/stripe/android/identity/navigation/DriverLicenseScanFragment;
+}
+
+public final class com/stripe/android/identity/navigation/DriverLicenseUploadFragment : androidx/fragment/app/Fragment {
+	public static final field Companion Lcom/stripe/android/identity/navigation/DriverLicenseUploadFragment$Companion;
+	public fun <init> ()V
+	public fun onActivityCreated (Landroid/os/Bundle;)V
+	public fun onCreateView (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Landroid/os/Bundle;)Landroid/view/View;
+}
+
+public final class com/stripe/android/identity/navigation/DriverLicenseUploadFragment$Companion {
+	public final fun newInstance ()Lcom/stripe/android/identity/navigation/DriverLicenseUploadFragment;
+}
+
+public final class com/stripe/android/identity/navigation/IDScanFragment : androidx/fragment/app/Fragment {
+	public static final field Companion Lcom/stripe/android/identity/navigation/IDScanFragment$Companion;
+	public fun <init> ()V
+	public fun onActivityCreated (Landroid/os/Bundle;)V
+	public fun onCreateView (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Landroid/os/Bundle;)Landroid/view/View;
+}
+
+public final class com/stripe/android/identity/navigation/IDScanFragment$Companion {
+	public final fun newInstance ()Lcom/stripe/android/identity/navigation/IDScanFragment;
+}
+
+public final class com/stripe/android/identity/navigation/IDUploadFragment : androidx/fragment/app/Fragment {
+	public static final field Companion Lcom/stripe/android/identity/navigation/IDUploadFragment$Companion;
+	public fun <init> ()V
+	public fun onActivityCreated (Landroid/os/Bundle;)V
+	public fun onCreateView (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Landroid/os/Bundle;)Landroid/view/View;
+}
+
+public final class com/stripe/android/identity/navigation/IDUploadFragment$Companion {
+	public final fun newInstance ()Lcom/stripe/android/identity/navigation/IDUploadFragment;
+}
+
+public final class com/stripe/android/identity/navigation/NavHostActivity : androidx/appcompat/app/AppCompatActivity {
+	public fun <init> ()V
+}
+
+public final class com/stripe/android/identity/navigation/PassportScanFragment : androidx/fragment/app/Fragment {
+	public static final field Companion Lcom/stripe/android/identity/navigation/PassportScanFragment$Companion;
+	public fun <init> ()V
+	public fun onActivityCreated (Landroid/os/Bundle;)V
+	public fun onCreateView (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Landroid/os/Bundle;)Landroid/view/View;
+}
+
+public final class com/stripe/android/identity/navigation/PassportScanFragment$Companion {
+	public final fun newInstance ()Lcom/stripe/android/identity/navigation/PassportScanFragment;
+}
+
+public final class com/stripe/android/identity/navigation/PassportUploadFragment : androidx/fragment/app/Fragment {
+	public static final field Companion Lcom/stripe/android/identity/navigation/PassportUploadFragment$Companion;
+	public fun <init> ()V
+	public fun onActivityCreated (Landroid/os/Bundle;)V
+	public fun onCreateView (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Landroid/os/Bundle;)Landroid/view/View;
+}
+
+public final class com/stripe/android/identity/navigation/PassportUploadFragment$Companion {
+	public final fun newInstance ()Lcom/stripe/android/identity/navigation/PassportUploadFragment;
+}
+
+public final class com/stripe/android/identity/viewmodel/CameraErrorViewModel : androidx/lifecycle/ViewModel {
+	public fun <init> ()V
+}
+
+public final class com/stripe/android/identity/viewmodel/CameraPermissionDeniedViewModel : androidx/lifecycle/ViewModel {
+	public fun <init> ()V
+}
+
+public final class com/stripe/android/identity/viewmodel/ConfirmationViewModel : androidx/lifecycle/ViewModel {
+	public fun <init> ()V
+}
+
+public final class com/stripe/android/identity/viewmodel/ConsentViewModel : androidx/lifecycle/ViewModel {
+	public fun <init> ()V
+}
+
+public final class com/stripe/android/identity/viewmodel/DriverLicenseScanViewModel : androidx/lifecycle/ViewModel {
+	public fun <init> ()V
+}
+
+public final class com/stripe/android/identity/viewmodel/DriverLicenseUploadViewModel : androidx/lifecycle/ViewModel {
+	public fun <init> ()V
+}
+
+public final class com/stripe/android/identity/viewmodel/IDScanViewModel : androidx/lifecycle/ViewModel {
+	public fun <init> ()V
+}
+
+public final class com/stripe/android/identity/viewmodel/IDUploadViewModel : androidx/lifecycle/ViewModel {
+	public fun <init> ()V
+}
+
+public final class com/stripe/android/identity/viewmodel/PassportScanViewModel : androidx/lifecycle/ViewModel {
+	public fun <init> ()V
+}
+
+public final class com/stripe/android/identity/viewmodel/PassportUploadViewModel : androidx/lifecycle/ViewModel {
+	public fun <init> ()V
 }
 
