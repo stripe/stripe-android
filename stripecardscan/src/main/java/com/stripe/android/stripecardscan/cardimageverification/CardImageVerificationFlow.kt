@@ -101,10 +101,9 @@ internal abstract class CardImageVerificationFlow(
             mainLoop = ProcessBoundAnalyzerLoop(
                 analyzerPool = analyzerPool,
                 resultHandler = mainLoopOcrAggregator,
-                analyzerLoopErrorListener = scanErrorListener,
-                statsName = null, // TODO: change this if we want to collect as part of scanstats
+                analyzerLoopErrorListener = scanErrorListener
             ).apply {
-                subscribeTo(
+                mainLoopJob = subscribeTo(
                     imageStream.map {
                         MainLoopAnalyzer.Input(
                             cameraPreviewImage = it,
@@ -118,22 +117,16 @@ internal abstract class CardImageVerificationFlow(
     }.let { }
 
     override suspend fun onResult(result: MainLoopAggregator.FinalResult) {
-        mainLoop?.unsubscribe()
-        mainLoop = null
-
-        mainLoopJob?.apply { if (isActive) { cancel() } }
-        mainLoopJob = null
-
-        mainLoopAggregator = null
-
-        mainLoopAnalyzerPool?.closeAllAnalyzers()
-        mainLoopAnalyzerPool = null
+        stopFlow()
     }
 
     override fun cancelFlow() {
         canceled = true
-
         mainLoopAggregator?.run { cancel() }
+        stopFlow()
+    }
+
+    private fun stopFlow() {
         mainLoopAggregator = null
 
         mainLoop?.unsubscribe()

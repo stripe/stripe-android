@@ -14,7 +14,7 @@ class LinkActivityTest {
     private val context = ApplicationProvider.getApplicationContext<Context>()
     private val intent = LinkActivityContract().createIntent(
         context,
-        LinkActivityContract.Args()
+        LinkActivityContract.Args("Example, Inc.")
     )
 
     @Test

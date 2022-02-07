@@ -50,13 +50,28 @@ configurations {
 }
 
 dependencies {
+    implementation project(":stripe-core")
     implementation libraries.androidx.constraintlayout
 
     implementation "androidx.core:core-ktx:$coreKtxVersion"
     implementation 'androidx.annotation:annotation:1.3.0'
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinCoroutinesVersion"
 
+    testImplementation "androidx.test:core:$androidTestVersion"
+    testImplementation "androidx.test:runner:$androidTestVersion"
     testImplementation "junit:junit:$junitVersion"
+    testImplementation "org.jetbrains.kotlin:kotlin-test:$kotlinVersion"
+    testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$kotlinCoroutinesVersion"
+    testImplementation "org.mockito:mockito-core:$mockitoCoreVersion"
+    testImplementation "org.mockito.kotlin:mockito-kotlin:$mockitoKotlinVersion"
+    testImplementation "com.google.truth:truth:$truthVersion"
+    testImplementation "org.robolectric:robolectric:$robolectricVersion"
+
+    androidTestImplementation "androidx.test:rules:$androidTestVersion"
+    androidTestImplementation "androidx.test:runner:$androidTestVersion"
+    androidTestImplementation "org.jetbrains.kotlin:kotlin-test:$kotlinVersion"
+    androidTestImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$kotlinCoroutinesVersion"
+    androidTestUtil "androidx.test:orchestrator:$androidTestVersion"
 
     ktlint "com.pinterest:ktlint:$ktlintVersion"
 }

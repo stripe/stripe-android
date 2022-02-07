@@ -20,6 +20,9 @@ android {
     sourceSets {
         main {
             res.srcDirs = ['res']
+            assets {
+                srcDirs 'src/main/assets'
+            }
         }
     }
 
@@ -55,9 +58,18 @@ configurations {
 }
 
 dependencies {
-    implementation libraries.androidx.constraintlayout
 
+    implementation project(":camera-core")
+    // vanilla tflite library
+    implementation "org.tensorflow:tensorflow-lite:2.7.0"
+    // flex ops
+    implementation 'org.tensorflow:tensorflow-lite-select-tf-ops:2.6.0'
+    // support library to reshape image to the input model shape
+    implementation 'org.tensorflow:tensorflow-lite-support:0.3.1'
+
+    implementation libraries.androidx.constraintlayout
     implementation("androidx.activity:activity-ktx:$composeActivityVersion")
+    implementation("androidx.fragment:fragment-ktx:1.4.1")
 
     implementation "androidx.core:core-ktx:$coreKtxVersion"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinCoroutinesVersion"
