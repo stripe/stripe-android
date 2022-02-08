@@ -7,48 +7,49 @@ import android.util.Log
 import android.util.Size
 import androidx.activity.viewModels
 import androidx.annotation.VisibleForTesting
+import androidx.core.os.bundleOf
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
-import com.stripe.android.camera.Camera1Adapter
+import androidx.navigation.fragment.NavHostFragment
 import com.stripe.android.camera.CameraPermissionCheckingActivity
-import com.stripe.android.camera.DefaultCameraErrorListener
-import com.stripe.android.camera.scanui.CameraView
-import com.stripe.android.camera.scanui.util.asRect
 import com.stripe.android.identity.IdentityVerificationSheet.VerificationResult
 import com.stripe.android.identity.databinding.IdentityActivityBinding
-import com.stripe.android.identity.navigation.NavHostActivity
-import com.stripe.android.identity.states.ScanState
+import com.stripe.android.identity.navigation.ConsentFragment
 
 /**
  * Host activity to perform Identity verification.
- *
- * TODO(ccen): Switching between different fragments that has different aspect ratios for different ID types.
  */
 internal class IdentityActivity : CameraPermissionCheckingActivity() {
     private val binding by lazy {
         IdentityActivityBinding.inflate(layoutInflater)
     }
 
-    private val cameraView: CameraView by lazy {
-        binding.cameraView
-    }
+    // TODO(ccen) defer cameraAdapter initialization logic to the scanning Fragments
+//    private val cameraView: CameraView by lazy {
+//        binding.cameraView
+//    }
+//    private val cameraAdapter: Camera1Adapter by lazy {
+//        Camera1Adapter(
+//            this,
+//            cameraView.previewFrame,
+//            MINIMUM_RESOLUTION,
+//            DefaultCameraErrorListener(this) { cause ->
+//                Log.d(TAG, "scan fails with exception: $cause")
+//                // TODO(ccen) determine if further handling is required
+//            }
+//        )
+//    }
 
-    private val cameraAdapter: Camera1Adapter by lazy {
-        Camera1Adapter(
-            this,
-            cameraView.previewFrame,
-            MINIMUM_RESOLUTION,
-            DefaultCameraErrorListener(this) { cause ->
-                Log.d(TAG, "scan fails with exception: $cause")
-                // TODO(ccen) determine if further handling is required
-            }
-        )
+    private val starterArgs: IdentityVerificationSheetContract.Args by lazy {
+        requireNotNull(IdentityVerificationSheetContract.Args.fromIntent(intent)) {
+            EMPTY_ARG_ERROR
+        }
     }
 
     @VisibleForTesting
     internal val viewModelFactory: ViewModelProvider.Factory by lazy {
-        // TODO(ccen) Pass the correct scan type parameter after moved to separate Fragments
-        IdentityViewModel.IdentityViewModelFactory(scanType = ScanState.ScanType.ID_FRONT)
+        IdentityViewModel.IdentityViewModelFactory(
+            starterArgs
+        )
     }
 
     @VisibleForTesting
@@ -57,25 +58,30 @@ internal class IdentityActivity : CameraPermissionCheckingActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
-        // ensureCameraPermission()
-        // TODO(ccen) clean up this activity and move camera features to actual Fragments
-        binding.next.setOnClickListener {
-            startActivity(
-                Intent(this, NavHostActivity::class.java)
+
+        val navHostFragment =
+            supportFragmentManager.findFragmentById(R.id.identity_nav_host) as NavHostFragment
+        navHostFragment.navController.setGraph(
+            R.navigation.identity_nav_graph,
+            bundleOf(
+                ConsentFragment.ARG_CONSENT_CONTEXT to "This is some context string that tells user how stripe will" +
+                    " verify their identity. It could be in html format. It's sent from server",
+                ConsentFragment.ARG_MERCHANT_LOGO to starterArgs.merchantLogo
             )
-        }
+        )
     }
 
     override fun onCameraReady() {
-        cameraAdapter.bindToLifecycle(this)
-        viewModel.identityScanFlow.startFlow(
-            context = this,
-            imageStream = cameraAdapter.getImageStream(),
-            viewFinder = cameraView.viewFinderWindowView.asRect(),
-            lifecycleOwner = this,
-            coroutineScope = lifecycleScope,
-            parameters = 23
-        )
+        // TODO(ccen) notify cameraReady() for Fragments
+//        cameraAdapter.bindToLifecycle(this)
+//        viewModel.identityScanFlow.startFlow(
+//            context = this,
+//            imageStream = cameraAdapter.getImageStream(),
+//            viewFinder = cameraView.viewFinderWindowView.asRect(),
+//            lifecycleOwner = this,
+//            coroutineScope = lifecycleScope,
+//            parameters = 23
+//        )
     }
 
     override fun onUserDeniedCameraPermission() {
@@ -103,6 +109,8 @@ internal class IdentityActivity : CameraPermissionCheckingActivity() {
 
     private companion object {
         val TAG: String = IdentityActivity::class.java.simpleName
+        const val EMPTY_ARG_ERROR =
+            "IdentityActivity was started without arguments"
         val MINIMUM_RESOLUTION = Size(1067, 600) // TODO: decide what to use
     }
 }

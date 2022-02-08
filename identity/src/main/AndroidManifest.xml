@@ -6,9 +6,6 @@
 
     <application>
         <activity
-            android:name=".navigation.NavHostActivity"
-            android:exported="false" />
-        <activity
             android:name=".IdentityActivity"
             android:exported="false" />
     </application>

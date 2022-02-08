@@ -18,6 +18,12 @@
         android:name="com.stripe.android.identity.navigation.ConsentFragment"
         android:label="consent_fragment"
         tools:layout="@layout/consent_fragment">
+        <argument
+            android:name="consentContext"
+            app:argType="string" />
+        <argument
+            android:name="merchantLogo"
+            app:argType="integer" />
         <action
             android:id="@+id/action_consentFragment_to_docSelectionFragment"
             app:destination="@id/docSelectionFragment" />
@@ -105,7 +111,7 @@
         android:id="@+id/docSelectionFragment"
         android:name="com.stripe.android.identity.navigation.DocSelectionFragment"
         android:label="doc_selection_fragment"
-        tools:layout="@layout/doc_selection_fragment" >
+        tools:layout="@layout/doc_selection_fragment">
         <action
             android:id="@+id/action_docSelectionFragment_to_passportScanFragment"
             app:destination="@id/passportScanFragment" />

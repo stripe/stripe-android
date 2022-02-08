@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="next">next</string>
-
+    <string name="agree_and_continue">Agree and continue</string>
+    <string name="decline">Decline and use alternative method</string>
 </resources>

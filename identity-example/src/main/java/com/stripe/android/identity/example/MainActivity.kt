@@ -22,7 +22,7 @@ class MainActivity : AppCompatActivity() {
             IdentityVerificationSheet.create(
                 this,
                 IdentityVerificationSheet.Configuration(
-                    merchantLogo = R.drawable.stripe_logo,
+                    merchantLogo = R.drawable.merchant_logo,
                     stripePublishableKey = "pk_test"
                 )
             )
