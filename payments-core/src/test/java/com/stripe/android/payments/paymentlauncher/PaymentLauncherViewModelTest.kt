@@ -487,7 +487,7 @@ class PaymentLauncherViewModelTest {
         verify(factorySpy, times(0)).fallbackInitialize(any())
         assertThat(createdViewModel).isEqualTo(vmToBeReturned)
 
-        WeakMapInjectorRegistry.staticCacheMap.clear()
+        WeakMapInjectorRegistry.clear()
     }
 
     @Test

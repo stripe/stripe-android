@@ -1,17 +1,20 @@
 package com.stripe.android.paymentsheet
 
 import android.app.Application
+import android.os.Bundle
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.IntegerRes
 import androidx.annotation.VisibleForTesting
+import androidx.lifecycle.AbstractSavedStateViewModelFactory
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.distinctUntilChanged
 import androidx.lifecycle.viewModelScope
+import androidx.savedstate.SavedStateRegistryOwner
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
@@ -86,7 +89,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     private val googlePayPaymentMethodLauncherFactory: GooglePayPaymentMethodLauncherFactory,
     logger: Logger,
     @IOContext workContext: CoroutineContext,
-    @InjectorKey injectorKey: String
+    @InjectorKey injectorKey: String,
+    savedStateHandle: SavedStateHandle
 ) : BaseSheetViewModel<PaymentSheetViewModel.TransitionTarget>(
     application = application,
     config = args.config,
@@ -96,7 +100,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     workContext = workContext,
     logger = logger,
     injectorKey = injectorKey,
-    resourceRepository = resourceRepository
+    resourceRepository = resourceRepository,
+    savedStateHandle = savedStateHandle
 ) {
     private val confirmParamsFactory = ConfirmStripeIntentParamsFactory.createFactory(
         args.clientSecret
@@ -170,7 +175,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     init {
         eventReporter.onInit(config)
         if (googlePayLauncherConfig == null) {
-            _isGooglePayReady.value = false
+            savedStateHandle.set(SAVE_GOOGLE_PAY_READY, false)
         }
     }
 
@@ -184,7 +189,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                     lifecycleScope = lifecycleScope,
                     config = config,
                     readyCallback = { isReady ->
-                        _isGooglePayReady.value = isReady
+                        savedStateHandle.set(SAVE_GOOGLE_PAY_READY, isReady)
                     },
                     activityResultLauncher = activityResultLauncher
                 )
@@ -196,20 +201,21 @@ internal class PaymentSheetViewModel @Inject internal constructor(
      * not fetched yet. If successful, continues through validation and fetching the saved payment
      * methods for the customer.
      */
-    internal fun maybeFetchStripeIntent() {
-        if (stripeIntent.value == null) {
-            viewModelScope.launch {
-                runCatching {
-                    stripeIntentRepository.get(args.clientSecret)
-                }.fold(
-                    onSuccess = ::onStripeIntentFetchResponse,
-                    onFailure = {
-                        setStripeIntent(null)
-                        onFatal(it)
-                    }
-                )
-            }
+    internal fun maybeFetchStripeIntent() = if (stripeIntent.value == null) {
+        viewModelScope.launch {
+            runCatching {
+                stripeIntentRepository.get(args.clientSecret)
+            }.fold(
+                onSuccess = ::onStripeIntentFetchResponse,
+                onFailure = {
+                    setStripeIntent(null)
+                    onFatal(it)
+                }
+            )
         }
+        true
+    } else {
+        false
     }
 
     private fun onStripeIntentFetchResponse(stripeIntent: StripeIntent) {
@@ -217,6 +223,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             stripeIntentValidator.requireValid(stripeIntent)
         }.fold(
             onSuccess = {
+                savedStateHandle.set(SAVE_STRIPE_INTENT, stripeIntent)
                 updatePaymentMethods(stripeIntent)
                 resetViewState()
             },
@@ -256,7 +263,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                 }.orEmpty()
             }.fold(
                 onSuccess = {
-                    _paymentMethods.value = it
+                    savedStateHandle.set(SAVE_PAYMENT_METHODS, it)
                     setStripeIntent(stripeIntent)
                     resetViewState()
                 },
@@ -274,7 +281,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     private fun resetViewState(userErrorMessage: String? = null) {
         _viewState.value =
             PaymentSheetViewState.Reset(userErrorMessage?.let { UserErrorMessage(it) })
-        _processing.value = false
+        savedStateHandle.set(SAVE_PROCESSING, false)
     }
 
     fun checkout(checkoutIdentifier: CheckoutIdentifier) {
@@ -284,7 +291,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         }
 
         this.checkoutIdentifier = checkoutIdentifier
-        _processing.value = true
+        savedStateHandle.set(SAVE_PROCESSING, true)
         _viewState.value = PaymentSheetViewState.StartProcessing
 
         val paymentSelection = selection.value
@@ -460,8 +467,11 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
     internal class Factory(
         private val applicationSupplier: () -> Application,
-        private val starterArgsSupplier: () -> PaymentSheetContract.Args
-    ) : ViewModelProvider.Factory, Injectable<Factory.FallbackInitializeParam> {
+        private val starterArgsSupplier: () -> PaymentSheetContract.Args,
+        owner: SavedStateRegistryOwner,
+        defaultArgs: Bundle? = null
+    ) : AbstractSavedStateViewModelFactory(owner, defaultArgs),
+        Injectable<Factory.FallbackInitializeParam> {
         internal data class FallbackInitializeParam(
             val application: Application,
         )
@@ -471,12 +481,19 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             Provider<PaymentSheetViewModelSubcomponent.Builder>
 
         @Suppress("UNCHECKED_CAST")
-        override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+        override fun <T : ViewModel?> create(
+            key: String,
+            modelClass: Class<T>,
+            savedStateHandle: SavedStateHandle
+        ): T {
             val args = starterArgsSupplier()
+
             injectWithFallback(args.injectorKey, FallbackInitializeParam(applicationSupplier()))
-            return subComponentBuilderProvider.get().paymentSheetViewModelModule(
-                PaymentSheetViewModelModule(args)
-            ).build().viewModel as T
+
+            return subComponentBuilderProvider.get()
+                .paymentSheetViewModelModule(PaymentSheetViewModelModule(args))
+                .savedStateHandle(savedStateHandle)
+                .build().viewModel as T
         }
 
         override fun fallbackInitialize(arg: FallbackInitializeParam) {
