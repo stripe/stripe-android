@@ -52,7 +52,7 @@ private fun SignUpBodyPreview() {
         SignUpBody(
             merchantName = "Example, Inc.",
             emailElement = EmailSpec.transform("email"),
-            signUpStatus = SignUpStatus.InputtingPhone,
+            signUpState = SignUpState.InputtingPhone,
             onSignUpClick = {}
         )
     }
@@ -71,12 +71,12 @@ internal fun SignUpBody(
         )
     )
 
-    val signUpStatus by signUpViewModel.signUpStatus.collectAsState(SignUpStatus.InputtingEmail)
+    val signUpStatus by signUpViewModel.signUpState.collectAsState(SignUpState.InputtingEmail)
 
     SignUpBody(
         merchantName = signUpViewModel.merchantName,
         emailElement = signUpViewModel.emailElement,
-        signUpStatus = signUpStatus,
+        signUpState = signUpStatus,
         onSignUpClick = signUpViewModel::onSignUpClick
     )
 }
@@ -86,10 +86,9 @@ internal fun SignUpBody(
 internal fun SignUpBody(
     merchantName: String,
     emailElement: SectionFieldElement,
-    signUpStatus: SignUpStatus,
+    signUpState: SignUpState,
     onSignUpClick: (String) -> Unit
 ) {
-
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -113,10 +112,10 @@ internal fun SignUpBody(
         )
         EmailCollectionSection(
             emailElement = emailElement,
-            signUpStatus = signUpStatus
+            signUpState = signUpState
         )
         AnimatedVisibility(
-            visible = signUpStatus == SignUpStatus.InputtingPhone
+            visible = signUpState == SignUpState.InputtingPhone
         ) {
             PhoneCollectionSection(onSignUpClick)
         }
@@ -126,7 +125,7 @@ internal fun SignUpBody(
 @Composable
 private fun EmailCollectionSection(
     emailElement: SectionFieldElement,
-    signUpStatus: SignUpStatus
+    signUpState: SignUpState
 ) {
     Box(
         modifier = Modifier
@@ -135,7 +134,7 @@ private fun EmailCollectionSection(
         contentAlignment = Alignment.CenterEnd
     ) {
         SectionElementUI(
-            enabled = signUpStatus != SignUpStatus.VerifyingEmail,
+            enabled = signUpState != SignUpState.VerifyingEmail,
             element = SectionElement(
                 identifier = IdentifierSpec.Generic("email"),
                 fields = listOf(emailElement),
@@ -146,7 +145,7 @@ private fun EmailCollectionSection(
             ),
             emptyList()
         )
-        if (signUpStatus == SignUpStatus.VerifyingEmail) {
+        if (signUpState == SignUpState.VerifyingEmail) {
             CircularProgressIndicator(
                 modifier = Modifier
                     .size(32.dp)

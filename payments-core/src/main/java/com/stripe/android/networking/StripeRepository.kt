@@ -391,23 +391,33 @@ abstract class StripeRepository {
 
     // Link endpoints
 
-    @Throws(
-        AuthenticationException::class,
-        InvalidRequestException::class,
-    )
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     abstract suspend fun lookupConsumerSession(
         email: String,
         requestOptions: ApiRequest.Options
     ): ConsumerSessionLookup?
 
-    @Throws(
-        AuthenticationException::class,
-        InvalidRequestException::class,
-    )
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     abstract suspend fun consumerSignUp(
         email: String,
         phoneNumber: String,
         country: String,
+        cookies: String?,
+        requestOptions: ApiRequest.Options
+    ): ConsumerSession?
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    abstract suspend fun startConsumerVerification(
+        consumerSessionClientSecret: String,
+        locale: Locale,
+        cookies: String?,
+        requestOptions: ApiRequest.Options
+    ): ConsumerSession?
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    abstract suspend fun confirmConsumerVerification(
+        consumerSessionClientSecret: String,
+        verificationCode: String,
         cookies: String?,
         requestOptions: ApiRequest.Options
     ): ConsumerSession?

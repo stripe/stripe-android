@@ -24,7 +24,7 @@ internal class SignUpScreenTest {
 
     @Test
     fun status_inputting_email_shows_only_email_field() {
-        setContent(SignUpStatus.InputtingEmail)
+        setContent(SignUpState.InputtingEmail)
 
         onEmailField().assertExists()
         onEmailField().assertIsEnabled()
@@ -35,7 +35,7 @@ internal class SignUpScreenTest {
 
     @Test
     fun status_verifying_email_is_disabled() {
-        setContent(SignUpStatus.VerifyingEmail)
+        setContent(SignUpState.VerifyingEmail)
 
         onEmailField().assertExists()
         onEmailField().assertIsNotEnabled()
@@ -46,7 +46,7 @@ internal class SignUpScreenTest {
 
     @Test
     fun status_inputting_phone_shows_all_fields() {
-        setContent(SignUpStatus.InputtingPhone)
+        setContent(SignUpState.InputtingPhone)
 
         onEmailField().assertExists()
         onEmailField().assertIsEnabled()
@@ -59,7 +59,7 @@ internal class SignUpScreenTest {
 
     @Test
     fun signup_button_is_enabled_only_when_inputs_are_valid() {
-        setContent(SignUpStatus.InputtingPhone)
+        setContent(SignUpState.InputtingPhone)
 
         onSignUpButton().assertExists()
         onSignUpButton().assertIsNotEnabled()
@@ -71,13 +71,13 @@ internal class SignUpScreenTest {
         onSignUpButton().assertIsEnabled()
     }
 
-    private fun setContent(signUpStatus: SignUpStatus) =
+    private fun setContent(signUpState: SignUpState) =
         composeTestRule.setContent {
             DefaultLinkTheme {
                 SignUpBody(
                     merchantName = "Example, Inc.",
                     emailElement = EmailSpec.transform(""),
-                    signUpStatus = signUpStatus,
+                    signUpState = signUpState,
                     onSignUpClick = {}
                 )
             }

@@ -13,14 +13,23 @@ internal interface LinkRepository {
      */
     suspend fun lookupConsumer(
         email: String
-    ): ConsumerSessionLookup?
+    ): Result<ConsumerSessionLookup>
 
     /**
-     * Sign up for a new Link account
+     * Sign up for a new Link account.
      */
     suspend fun consumerSignUp(
         email: String,
         phone: String,
         country: String
-    ): ConsumerSession?
+    ): Result<ConsumerSession>
+
+    suspend fun startVerification(
+        consumerSessionClientSecret: String
+    ): Result<ConsumerSession>
+
+    suspend fun confirmVerification(
+        consumerSessionClientSecret: String,
+        verificationCode: String
+    ): Result<ConsumerSession>
 }

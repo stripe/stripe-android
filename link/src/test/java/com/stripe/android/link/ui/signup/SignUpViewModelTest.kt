@@ -5,12 +5,12 @@ import androidx.lifecycle.Lifecycle
 import androidx.savedstate.SavedStateRegistry
 import androidx.savedstate.SavedStateRegistryOwner
 import androidx.test.core.app.ApplicationProvider
-import com.google.common.truth.Truth
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.Injectable
 import com.stripe.android.core.injection.Injector
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
+import com.stripe.android.link.LinkAccountManager
 import com.stripe.android.link.LinkActivityContract
 import com.stripe.android.link.injection.SignUpViewModelSubcomponent
 import com.stripe.android.link.repositories.LinkRepository
@@ -73,15 +73,15 @@ class SignUpViewModelTest {
     fun `When email is valid then lookup is triggered with delay`() =
         runTest(UnconfinedTestDispatcher()) {
             val viewModel = createViewModel(defaultArgs.copy(customerEmail = null))
-            assertThat(viewModel.signUpStatus.value).isEqualTo(SignUpStatus.InputtingEmail)
+            assertThat(viewModel.signUpState.value).isEqualTo(SignUpState.InputtingEmail)
 
             viewModel.emailElement.setRawValue(mapOf(IdentifierSpec.Email to "valid@email.com"))
-            assertThat(viewModel.signUpStatus.value).isEqualTo(SignUpStatus.InputtingEmail)
+            assertThat(viewModel.signUpState.value).isEqualTo(SignUpState.InputtingEmail)
 
             // Advance past lookup debounce delay
             advanceTimeBy(LOOKUP_DEBOUNCE_MS + 1)
 
-            assertThat(viewModel.signUpStatus.value).isEqualTo(SignUpStatus.VerifyingEmail)
+            assertThat(viewModel.signUpState.value).isEqualTo(SignUpState.VerifyingEmail)
         }
 
     @Test
@@ -95,12 +95,12 @@ class SignUpViewModelTest {
             advanceTimeBy(LOOKUP_DEBOUNCE_MS / 2)
 
             viewModel.emailElement.setRawValue(mapOf(IdentifierSpec.Email to "third@email.com"))
-            assertThat(viewModel.signUpStatus.value).isEqualTo(SignUpStatus.InputtingEmail)
+            assertThat(viewModel.signUpState.value).isEqualTo(SignUpState.InputtingEmail)
 
             // Advance past lookup debounce delay
             advanceTimeBy(LOOKUP_DEBOUNCE_MS + 1)
 
-            assertThat(viewModel.signUpStatus.value).isEqualTo(SignUpStatus.VerifyingEmail)
+            assertThat(viewModel.signUpState.value).isEqualTo(SignUpState.VerifyingEmail)
 
             val emailCaptor = argumentCaptor<String>()
             verify(linkRepository).lookupConsumer(emailCaptor.capture())
@@ -110,24 +110,12 @@ class SignUpViewModelTest {
         }
 
     @Test
-    fun `When consumer does not exist then collect phone number`() =
+    fun `When email is provided it should not trigger lookup and should collect phone number`() =
         runTest(UnconfinedTestDispatcher()) {
-            linkRepository.stub {
-                onBlocking { lookupConsumer(any()) }.doSuspendableAnswer {
-                    delay(DELAY)
-                    mock<ConsumerSessionLookup>().stub { whenever(it.exists).thenReturn(false) }
-                }
-            }
-
             val viewModel = createViewModel(defaultArgs.copy(customerEmail = "valid@email.com"))
-            // Advance past lookup debounce delay
-            advanceTimeBy(LOOKUP_DEBOUNCE_MS + 1)
-            assertThat(viewModel.signUpStatus.value).isEqualTo(SignUpStatus.VerifyingEmail)
+            assertThat(viewModel.signUpState.value).isEqualTo(SignUpState.InputtingPhone)
 
-            // Advance past response received by LinkRepository
-            advanceTimeBy(DELAY + 1)
-
-            assertThat(viewModel.signUpStatus.value).isEqualTo(SignUpStatus.InputtingPhone)
+            verify(linkRepository, times(0)).lookupConsumer(any())
         }
 
     @Test
@@ -194,7 +182,7 @@ class SignUpViewModelTest {
 
     private fun createViewModel(args: LinkActivityContract.Args = defaultArgs) = SignUpViewModel(
         args = args,
-        linkRepository = linkRepository,
+        linkAccountManager = LinkAccountManager(linkRepository),
         logger = Logger.noop(),
         navigator = mock()
     )

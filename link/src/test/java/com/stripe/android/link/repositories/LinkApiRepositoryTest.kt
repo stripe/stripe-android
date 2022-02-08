@@ -5,6 +5,7 @@ import com.stripe.android.core.Logger
 import com.stripe.android.networking.ApiRequest
 import com.stripe.android.networking.StripeRepository
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.mockito.kotlin.any
@@ -12,7 +13,9 @@ import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import java.util.Locale
 
+@ExperimentalCoroutinesApi
 class LinkApiRepositoryTest {
     private val stripeRepository = mock<StripeRepository>()
 
@@ -21,7 +24,8 @@ class LinkApiRepositoryTest {
         stripeAccountIdProvider = { STRIPE_ACCOUNT_ID },
         stripeRepository = stripeRepository,
         logger = Logger.noop(),
-        workContext = Dispatchers.IO
+        workContext = Dispatchers.IO,
+        locale = Locale.US
     )
 
     @Test

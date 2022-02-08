@@ -3,6 +3,7 @@ package com.stripe.android.link.injection
 import com.stripe.android.link.LinkActivityContract
 import com.stripe.android.link.LinkActivityViewModel
 import com.stripe.android.link.ui.signup.SignUpViewModel
+import com.stripe.android.link.ui.verification.VerificationViewModel
 import dagger.BindsInstance
 import dagger.Subcomponent
 
@@ -10,6 +11,7 @@ import dagger.Subcomponent
 internal interface SignUpViewModelSubcomponent {
     val linkActivityViewModel: LinkActivityViewModel
     val signUpViewModel: SignUpViewModel
+    val verificationViewModel: VerificationViewModel
 
     @Subcomponent.Builder
     interface Builder {

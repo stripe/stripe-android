@@ -8,14 +8,13 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.Injectable
 import com.stripe.android.core.injection.injectWithFallback
+import com.stripe.android.link.LinkAccountManager
 import com.stripe.android.link.LinkActivityContract
 import com.stripe.android.link.LinkScreen
 import com.stripe.android.link.injection.DaggerSignUpViewModelFactoryComponent
 import com.stripe.android.link.injection.SignUpViewModelSubcomponent
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.model.Navigator
-import com.stripe.android.link.repositories.LinkRepository
-import com.stripe.android.model.ConsumerSession
 import com.stripe.android.ui.core.elements.EmailSpec
 import com.stripe.android.ui.core.elements.SectionFieldElement
 import kotlinx.coroutines.Job
@@ -33,9 +32,9 @@ import javax.inject.Provider
 /**
  * ViewModel that handles user sign up logic.
  */
-internal class SignUpViewModel @Inject internal constructor(
+internal class SignUpViewModel @Inject constructor(
     args: LinkActivityContract.Args,
-    private val linkRepository: LinkRepository,
+    private val linkAccountManager: LinkAccountManager,
     private val navigator: Navigator,
     private val logger: Logger
 ) : ViewModel() {
@@ -56,8 +55,8 @@ internal class SignUpViewModel @Inject internal constructor(
         }
     }.stateIn(viewModelScope, SharingStarted.Lazily, args.customerEmail)
 
-    private val _signUpStatus = MutableStateFlow(SignUpStatus.InputtingEmail)
-    val signUpStatus: StateFlow<SignUpStatus> = _signUpStatus
+    private val _signUpStatus = MutableStateFlow(SignUpState.InputtingEmail)
+    val signUpState: StateFlow<SignUpState> = _signUpStatus
 
     /**
      * Holds a Job that looks up the email after a delay, so that we can cancel it if the user is
@@ -73,7 +72,7 @@ internal class SignUpViewModel @Inject internal constructor(
                 if (email == args.customerEmail && lookupJob == null) {
                     // If it's a valid email, collect phone number
                     if (email != null) {
-                        _signUpStatus.value = SignUpStatus.InputtingPhone
+                        _signUpStatus.value = SignUpState.InputtingPhone
                     }
                     return@collect
                 }
@@ -84,12 +83,12 @@ internal class SignUpViewModel @Inject internal constructor(
                     lookupJob = launch {
                         delay(LOOKUP_DEBOUNCE_MS)
                         if (isActive) {
-                            _signUpStatus.value = SignUpStatus.VerifyingEmail
+                            _signUpStatus.value = SignUpState.VerifyingEmail
                             lookupConsumerEmail(email)
                         }
                     }
                 } else {
-                    _signUpStatus.value = SignUpStatus.InputtingEmail
+                    _signUpStatus.value = SignUpState.InputtingEmail
                 }
             }
         }
@@ -100,26 +99,31 @@ internal class SignUpViewModel @Inject internal constructor(
         val email = requireNotNull(consumerEmail.value)
         viewModelScope.launch {
             // TODO(brnunes-stripe): Read formatted phone and country code from phone number element
-            linkRepository.consumerSignUp(email, "+1$phone", "US")?.let {
-                onConsumerSessionResult(it)
-            } ?: onError("")
+            linkAccountManager.signUp(email, "+1$phone", "US").fold(
+                onSuccess = {
+                    onAccountFetched(it)
+                },
+                onFailure = ::onError
+            )
         }
     }
 
     private suspend fun lookupConsumerEmail(email: String) {
-        linkRepository.lookupConsumer(email)?.let { consumerSessionLookup ->
-            val consumerSession = consumerSessionLookup.consumerSession
-            if (consumerSession != null) {
-                onConsumerSessionResult(consumerSession)
-            } else {
-                _signUpStatus.value = SignUpStatus.InputtingPhone
-            }
-        } ?: onError("")
+        linkAccountManager.lookupConsumer(email).fold(
+            onSuccess = {
+                if (it != null) {
+                    onAccountFetched(it)
+                } else {
+                    _signUpStatus.value = SignUpState.InputtingPhone
+                }
+            },
+            onFailure = ::onError
+        )
     }
 
-    private fun onConsumerSessionResult(consumerSession: ConsumerSession) {
+    private fun onAccountFetched(linkAccount: LinkAccount) {
         navigator.navigateTo(
-            if (LinkAccount(consumerSession).isVerified) {
+            if (linkAccount.isVerified) {
                 LinkScreen.Wallet
             } else {
                 LinkScreen.Verification
@@ -127,8 +131,8 @@ internal class SignUpViewModel @Inject internal constructor(
         )
     }
 
-    private fun onError(errorMessage: String) {
-        logger.error(errorMessage)
+    private fun onError(error: Throwable) {
+        logger.error(error.localizedMessage ?: "Internal error.")
         // TODO(brnunes-stripe): Add localized error messages, show them in UI.
     }
 
@@ -186,10 +190,4 @@ internal class SignUpViewModel @Inject internal constructor(
         // How long to wait (in milliseconds) before triggering a call to lookup the email
         const val LOOKUP_DEBOUNCE_MS = 700L
     }
-}
-
-internal enum class SignUpStatus {
-    InputtingEmail,
-    VerifyingEmail,
-    InputtingPhone
 }

@@ -1,6 +1,7 @@
 package com.stripe.android.model
 
 import android.os.Parcelable
+import androidx.annotation.RestrictTo
 import com.stripe.android.core.model.StripeModel
 import kotlinx.parcelize.Parcelize
 
@@ -8,6 +9,7 @@ import kotlinx.parcelize.Parcelize
  * The result of a call to Link consumer sign up.
  */
 @Parcelize
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 data class ConsumerSession internal constructor(
     val clientSecret: String,
     val emailAddress: String,

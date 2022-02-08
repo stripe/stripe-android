@@ -1,12 +1,16 @@
-package com.stripe.android.link
+package com.stripe.android.link.ui.verification
 
 import android.app.Application
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.Injectable
 import com.stripe.android.core.injection.injectWithFallback
+import com.stripe.android.link.LinkAccountManager
+import com.stripe.android.link.LinkActivityContract
+import com.stripe.android.link.LinkScreen
 import com.stripe.android.link.injection.DaggerSignUpViewModelFactoryComponent
 import com.stripe.android.link.injection.SignUpViewModelSubcomponent
 import com.stripe.android.link.model.Navigator
@@ -15,39 +19,35 @@ import javax.inject.Inject
 import javax.inject.Provider
 
 /**
- * ViewModel that coordinates the user flow through the screens.
+ * ViewModel that handles user verification confirmation logic.
  */
-internal class LinkActivityViewModel @Inject internal constructor(
-    args: LinkActivityContract.Args,
+internal class VerificationViewModel @Inject constructor(
     private val linkAccountManager: LinkAccountManager,
-    val navigator: Navigator
+    private val navigator: Navigator,
+    private val logger: Logger
 ) : ViewModel() {
 
-    val startDestination = args.customerEmail?.let {
-        LinkScreen.Loading
-    } ?: LinkScreen.SignUp
+    val linkAccount = requireNotNull(linkAccountManager.linkAccount)
 
-    init {
-        if (startDestination == LinkScreen.Loading) {
-            viewModelScope.launch {
-                navigator.navigateTo(
-                    linkAccountManager.lookupConsumer(args.customerEmail!!).fold(
-                        onSuccess = {
-                            it?.let { linkAccount ->
-                                if (linkAccount.isVerified) {
-                                    LinkScreen.Wallet
-                                } else {
-                                    LinkScreen.Verification
-                                }
-                            } ?: LinkScreen.SignUp
-                        },
-                        onFailure = {
-                            LinkScreen.SignUp
-                        }
-                    )
-                )
-            }
+
+    fun onVerificationCodeEntered(code: String) {
+        viewModelScope.launch {
+            linkAccountManager.confirmVerification(code).fold(
+                onSuccess = {
+                    navigator.navigateTo(LinkScreen.Wallet)
+                },
+                onFailure = ::onError
+            )
         }
+    }
+
+    fun onResendCodeClicked() {
+
+    }
+
+    private fun onError(error: Throwable) {
+        logger.error(error.localizedMessage ?: "Internal error.")
+        // TODO(brnunes-stripe): Add localized error messages, show them in UI.
     }
 
     internal class Factory(
@@ -86,7 +86,7 @@ internal class LinkActivityViewModel @Inject internal constructor(
             )
             return subComponentBuilderProvider.get()
                 .args(args)
-                .build().linkActivityViewModel as T
+                .build().verificationViewModel as T
         }
 
         override fun fallbackInitialize(arg: FallbackInitializeParam) {

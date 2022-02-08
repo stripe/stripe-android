@@ -23,6 +23,7 @@ import androidx.navigation.compose.rememberNavController
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.ui.LinkAppBar
 import com.stripe.android.link.ui.signup.SignUpBody
+import com.stripe.android.link.ui.verification.VerificationBody
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 
@@ -73,14 +74,10 @@ internal class LinkActivity : ComponentActivity() {
                                 )
                             }
                             composable(LinkScreen.Verification.route) {
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .fillMaxHeight(),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Text(text = "Verification Placeholder")
-                                }
+                                VerificationBody(
+                                    application,
+                                    { requireNotNull(starterArgs) }
+                                )
                             }
                             composable(LinkScreen.Wallet.route) {
                                 Box(
