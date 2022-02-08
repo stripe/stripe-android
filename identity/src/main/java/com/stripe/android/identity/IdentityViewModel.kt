@@ -7,13 +7,15 @@ import com.stripe.android.camera.framework.AggregateResultListener
 import com.stripe.android.camera.framework.AnalyzerLoopErrorListener
 import com.stripe.android.identity.camera.IDDetectorAggregator
 import com.stripe.android.identity.camera.IdentityScanFlow
+import com.stripe.android.identity.states.ScanState
 
-internal class IdentityViewModel :
+internal class IdentityViewModel(scanType: ScanState.ScanType) :
     ViewModel(),
     AnalyzerLoopErrorListener,
     AggregateResultListener<IDDetectorAggregator.InterimResult, IDDetectorAggregator.FinalResult> {
 
     internal val identityScanFlow = IdentityScanFlow(
+        scanType,
         this,
         this
     )
@@ -40,11 +42,11 @@ internal class IdentityViewModel :
         return true
     }
 
-    internal class IdentityViewModelFactory :
+    internal class IdentityViewModelFactory(private val scanType: ScanState.ScanType) :
         ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
-        override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-            return IdentityViewModel() as T
+        override fun <T : ViewModel> create(modelClass: Class<T>): T {
+            return IdentityViewModel(scanType) as T
         }
     }
 
