@@ -11,6 +11,7 @@ import android.view.ViewGroup
 import android.view.WindowManager
 import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RestrictTo
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.stripe.android.stripecardscan.R
@@ -30,6 +31,7 @@ import kotlin.coroutines.CoroutineContext
 
 private const val PERMISSION_RATIONALE_SHOWN = "permission_rationale_shown"
 
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 abstract class ScanFragment : Fragment(), CoroutineScope {
 
     override val coroutineContext: CoroutineContext = Dispatchers.Main
