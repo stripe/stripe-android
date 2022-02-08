@@ -119,18 +119,8 @@ class TransformSpecToElements(
                     currencyCode,
                     country
                 )
-                is CardDetailsSpec -> transformCreditDetail()
-                is CardBillingSpec -> transformCreditBilling()
+                is CardDetailsSpec -> it.transform()
+                is CardBillingSpec -> it.transform(addressRepository)
             }
         }
-
-    // TODO: Move these to the SPECS!!!
-    private fun transformCreditDetail() = CardDetailsElement(
-        IdentifierSpec.Generic("credit_detail")
-    )
-
-    private fun transformCreditBilling() = CardBillingElement(
-        IdentifierSpec.Generic("credit_billing"),
-        resourceRepository.getAddressRepository()
-    )
 }
