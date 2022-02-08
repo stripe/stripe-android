@@ -59,14 +59,10 @@ internal class TextFieldControllerTest {
         val controller = createControllerWithState()
 
         var isFull = false
-        controller.isFull.asLiveData()
+        controller.fieldState.asLiveData()
             .observeForever {
-                isFull = it
+                isFull = it.isFull()
             }
-//        controller.fieldState.asLiveData()
-//            .observeForever {
-//                isFull = it.isFull()
-//            }
 
         controller.onValueChange("full")
         assertThat(isFull).isEqualTo(true)
@@ -77,14 +73,10 @@ internal class TextFieldControllerTest {
         val controller = createControllerWithState()
 
         var isFull = false
-        controller.isFull.asLiveData()
+        controller.fieldState.asLiveData()
             .observeForever {
-                isFull = it
+                isFull = it.isFull()
             }
-//        controller.fieldState.asLiveData()
-//            .observeForever {
-//                isFull = it.isFull()
-//            }
 
         controller.onValueChange("limitless")
         assertThat(isFull).isEqualTo(false)
