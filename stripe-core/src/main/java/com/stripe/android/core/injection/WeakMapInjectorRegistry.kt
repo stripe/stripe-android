@@ -34,12 +34,10 @@ object WeakMapInjectorRegistry : InjectorRegistry {
     @Synchronized
     override fun register(injector: Injector, @InjectorKey key: String) {
         staticCacheMap[injector] = key
-        println("thread id: ${Thread.currentThread().id}, registering $key staticCacheMap: $staticCacheMap")
     }
 
     @Synchronized
     override fun retrieve(@InjectorKey injectorKey: String): Injector? {
-        println("thread id: ${Thread.currentThread().id}, retrieving $injectorKey staticCacheMap: $staticCacheMap")
         return staticCacheMap.entries.firstOrNull {
             it.value == injectorKey
         }?.key
@@ -52,7 +50,6 @@ object WeakMapInjectorRegistry : InjectorRegistry {
 
     fun clear() {
         synchronized(staticCacheMap) {
-            println("thread id: ${Thread.currentThread().id}, Clearing WeakMapRegistry")
             staticCacheMap.clear()
         }
     }
