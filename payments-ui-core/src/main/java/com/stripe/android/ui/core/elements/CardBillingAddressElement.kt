@@ -9,10 +9,10 @@ import kotlinx.coroutines.flow.map
 /**
  * This is a special type of AddressElement that
  * removes fields from the address based on the country.  It
- * is only intended to be used with the credit payment method.
+ * is only intended to be used with the card payment method.
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class CardBillingElement(
+class CardBillingAddressElement(
     identifier: IdentifierSpec,
     addressFieldRepository: AddressFieldElementRepository,
     countryCodes: Set<String> = emptySet(),

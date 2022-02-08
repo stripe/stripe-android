@@ -10,14 +10,14 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
-internal class CardBillingElementTest {
+internal class CardBillingAddressElementTest {
     private val addressFieldElementRepository = AddressFieldElementRepository(
         ApplicationProvider.getApplicationContext<Application>().resources
     )
     val dropdownFieldController = DropdownFieldController(
         CountryConfig(emptySet())
     )
-    val cardBillingElement = CardBillingElement(
+    val cardBillingElement = CardBillingAddressElement(
         IdentifierSpec.Generic("billing_element"),
         addressFieldElementRepository,
         emptySet(),

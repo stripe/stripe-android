@@ -5,10 +5,17 @@ import androidx.compose.ui.text.input.OffsetMapping
 import androidx.compose.ui.text.input.TransformedText
 import androidx.compose.ui.text.input.VisualTransformation
 
-internal class ExpiryDateVisualTransformation() : VisualTransformation {
+internal class ExpiryDateVisualTransformation : VisualTransformation {
     private val separator = " / "
 
     override fun filter(text: AnnotatedString): TransformedText {
+
+        /**
+         * Depending on the first number is where the separator will be placed
+         * If the first number is 2-9 then the slash will come after the
+         * 2, if the first number is 11 or 12 it will be after the second digit,
+         * if the number is 01 it will be after the second digit.
+         */
         var separatorAfterIndex = 1
         if (text.isNotBlank() && !(text[0] == '0' || text[0] == '1')) {
             separatorAfterIndex = 0
@@ -26,16 +33,7 @@ internal class ExpiryDateVisualTransformation() : VisualTransformation {
             }
         }
 
-        /**
-         * The offset translator should ignore the hyphen characters, so conversion from
-         *  original offset to transformed text works like
-         *  - The 4th char of the original text is 5th char in the transformed text.
-         *  - The 13th char of the original text is 15th char in the transformed text.
-         *  Similarly, the reverse conversion works like
-         *  - The 5th char of the transformed text is 4th char in the original text.
-         *  - The 12th char of the transformed text is 10th char in the original text.
-         */
-        val creditCardOffsetTranslator = object : OffsetMapping {
+        val offsetTranslator = object : OffsetMapping {
             override fun originalToTransformed(offset: Int) =
                 if (offset <= separatorAfterIndex) {
                     offset
@@ -51,6 +49,6 @@ internal class ExpiryDateVisualTransformation() : VisualTransformation {
                 }
         }
 
-        return TransformedText(AnnotatedString(out), creditCardOffsetTranslator)
+        return TransformedText(AnnotatedString(out), offsetTranslator)
     }
 }
