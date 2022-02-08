@@ -6,9 +6,7 @@ import com.stripe.android.ui.core.elements.AddressSpec
 import com.stripe.android.ui.core.elements.AfterpayClearpayTextSpec
 import com.stripe.android.ui.core.elements.BankDropdownSpec
 import com.stripe.android.ui.core.elements.BankRepository
-import com.stripe.android.ui.core.elements.CardBillingElement
 import com.stripe.android.ui.core.elements.CardBillingSpec
-import com.stripe.android.ui.core.elements.CardDetailsElement
 import com.stripe.android.ui.core.elements.CardDetailsSpec
 import com.stripe.android.ui.core.elements.CountrySpec
 import com.stripe.android.ui.core.elements.EmailSpec
