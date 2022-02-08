@@ -110,7 +110,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
         )
 
         if (!viewModel.maybeFetchStripeIntent()) {
-            // The buy btton needs to be made visible since it is gone in the xml
+            // The buy button needs to be made visible since it is gone in the xml
             buttonContainer.isVisible = true
             viewBinding.buyButton.isVisible = true
         }
@@ -147,7 +147,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
             if (config != null) {
 
                 // We only want to do this if the loading fragment is shown.  Otherwise this causes
-                // a new fragment to be created if don't keep activities is turned on.
+                // a new fragment to be created if the activity was destroyed and recreated.
                 if (supportFragmentManager.fragments.firstOrNull() is PaymentSheetLoadingFragment) {
                     val target = if (viewModel.paymentMethods.value.isNullOrEmpty()) {
                         viewModel.updateSelection(null)
