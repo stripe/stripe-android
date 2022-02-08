@@ -39,12 +39,10 @@ class ScanStateTests {
         val mockClockMark: ClockMark = mock()
         whenever(mockClockMark.elapsedSince()).thenReturn(DURATION_BEFORE_TIMEOUT)
 
-        val initialScanType = ScanState.ScanType.ID_FRONT
-        val initialState = ScanState.Satisfied(initialScanType, mockClockMark)
+        val initialState = ScanState.Satisfied(ScanState.ScanType.ID_FRONT, mockClockMark)
         val resultState = initialState.consumeTransition(ID_FRONT_OUTPUT)
 
         assertThat(resultState).isSameInstanceAs(initialState)
-        assertThat(resultState.type).isEqualTo(initialScanType)
     }
 
     @Test
@@ -61,9 +59,24 @@ class ScanStateTests {
     }
 
     @Test
-    fun `Unsatisfied automatically transitions Initial`() {
+    fun `Unsatisfied transitions to Unsatisfied before timeout`() {
+        val mockClockMark: ClockMark = mock()
+        whenever(mockClockMark.elapsedSince()).thenReturn(DURATION_BEFORE_TIMEOUT)
+
+        val initialState =
+            ScanState.Unsatisfied("reason", ScanState.ScanType.ID_FRONT, mockClockMark)
+        val resultState = initialState.consumeTransition(ID_FRONT_OUTPUT)
+
+        assertThat(resultState).isSameInstanceAs(initialState)
+    }
+
+    @Test
+    fun `Unsatisfied transitions to Initial after timeout`() {
+        val mockClockMark: ClockMark = mock()
+        whenever(mockClockMark.elapsedSince()).thenReturn(DURATION_AFTER_TIMEOUT)
+
         val initialScanType = ScanState.ScanType.ID_FRONT
-        val initialState = ScanState.Unsatisfied("reason", initialScanType)
+        val initialState = ScanState.Unsatisfied("reason", initialScanType, mockClockMark)
         val resultState = initialState.consumeTransition(ID_FRONT_OUTPUT)
 
         assertThat(resultState).isInstanceOf(ScanState.Initial::class.java)

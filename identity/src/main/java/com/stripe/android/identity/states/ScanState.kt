@@ -103,7 +103,7 @@ internal sealed class ScanState(val type: ScanType) {
     }
 
     /**
-     * State  when satisfaction checking passed.
+     * State when satisfaction checking passed.
      */
     internal class Satisfied(
         type: ScanType,
@@ -126,12 +126,26 @@ internal sealed class ScanState(val type: ScanType) {
     }
 
     /**
-     * State  when satisfaction checking failed.
+     * State when satisfaction checking failed.
      */
-    internal class Unsatisfied(private val reason: String, type: ScanType) : ScanState(type) {
+    internal class Unsatisfied(
+        private val reason: String,
+        type: ScanType,
+        private val reachedStateAt: ClockMark = Clock.markNow()
+    ) : ScanState(type) {
+
         override fun consumeTransition(analyzerOutput: AnalyzerOutput): ScanState {
-            Log.d(TAG, "Scan for $type Unsatisfied with reason $reason, transition to Initial.")
-            return Initial(type)
+            return if (reachedStateAt.elapsedSince() > DISPLAY_UNSATISFIED_DURATION) {
+                Log.d(TAG, "Scan for $type Unsatisfied with reason $reason, transition to Initial.")
+                Initial(type)
+            } else {
+                Log.d(TAG, "Displaying unsatisfied state, waiting for timeout")
+                this
+            }
+        }
+
+        private companion object {
+            val DISPLAY_UNSATISFIED_DURATION = 500.milliseconds
         }
     }
 
