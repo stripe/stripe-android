@@ -3,6 +3,7 @@
 ### PaymentSheet
 ### Identity
 ### Card scanning
+* [FIXED] [4548](https://github.com/stripe/stripe-android/pull/4548) Potential work leak when canceling a card scan in StripeCardScan
 
 ## 19.1.1 - 2022-01-31
 ### PaymentSheet

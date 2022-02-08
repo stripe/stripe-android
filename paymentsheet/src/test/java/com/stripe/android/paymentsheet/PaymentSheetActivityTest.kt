@@ -6,6 +6,7 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.common.truth.Truth.assertThat
@@ -773,7 +774,8 @@ internal class PaymentSheetActivityTest {
             googlePayPaymentMethodLauncherFactory,
             Logger.noop(),
             testDispatcher,
-            DUMMY_INJECTOR_KEY
+            DUMMY_INJECTOR_KEY,
+            savedStateHandle = SavedStateHandle()
         )
     }
 

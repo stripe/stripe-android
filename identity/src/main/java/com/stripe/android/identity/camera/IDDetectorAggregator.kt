@@ -1,20 +1,22 @@
 package com.stripe.android.identity.camera
 
+import com.stripe.android.camera.framework.AggregateResultListener
 import com.stripe.android.camera.framework.ResultAggregator
 import com.stripe.android.identity.ml.IDDetectorAnalyzer
 
-internal class IDDetectorAggregator :
-    ResultAggregator<
-        IDDetectorAnalyzer.Input,
-        IDDetectorAnalyzer.State,
-        IDDetectorAnalyzer.Output,
-        IDDetectorAggregator.InterimResult,
-        IDDetectorAggregator.FinalResult
-        >(
-        IDDetectorResultListener(),
-        IDDetectorAnalyzer.State(23),
-        statsName = null
-    ) {
+internal class IDDetectorAggregator(
+    aggregateResultListener: AggregateResultListener<InterimResult, FinalResult>
+) : ResultAggregator<
+    IDDetectorAnalyzer.Input,
+    IDDetectorAnalyzer.State,
+    IDDetectorAnalyzer.Output,
+    IDDetectorAggregator.InterimResult,
+    IDDetectorAggregator.FinalResult
+    >(
+    aggregateResultListener,
+    IDDetectorAnalyzer.State(23),
+    statsName = null
+) {
 
     internal data class InterimResult(
         val value: Int

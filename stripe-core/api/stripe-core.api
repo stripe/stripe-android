@@ -174,6 +174,7 @@ public abstract interface annotation class com/stripe/android/core/injection/UIC
 public final class com/stripe/android/core/injection/WeakMapInjectorRegistry : com/stripe/android/core/injection/InjectorRegistry {
 	public static final field $stable I
 	public static final field INSTANCE Lcom/stripe/android/core/injection/WeakMapInjectorRegistry;
+	public final fun clear ()V
 	public final fun getCURRENT_REGISTER_KEY ()Ljava/util/concurrent/atomic/AtomicInteger;
 	public final fun getStaticCacheMap ()Ljava/util/WeakHashMap;
 	public fun nextKey (Ljava/lang/String;)Ljava/lang/String;
@@ -434,5 +435,43 @@ public final class com/stripe/android/core/networking/StripeResponse {
 
 public final class com/stripe/android/core/networking/StripeResponseKtxKt {
 	public static final fun responseJson (Lcom/stripe/android/core/networking/StripeResponse;)Lorg/json/JSONObject;
+}
+
+public final class com/stripe/android/core/storage/SharedPreferencesStorage : com/stripe/android/core/storage/Storage {
+	public static final field $stable I
+	public fun <init> (Landroid/content/Context;Ljava/lang/String;)V
+	public fun clear ()Z
+	public fun getBoolean (Ljava/lang/String;Z)Z
+	public fun getFloat (Ljava/lang/String;F)F
+	public fun getInt (Ljava/lang/String;I)I
+	public fun getLong (Ljava/lang/String;J)J
+	public fun getString (Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
+	public fun remove (Ljava/lang/String;)Z
+	public fun storeValue (Ljava/lang/String;F)Z
+	public fun storeValue (Ljava/lang/String;I)Z
+	public fun storeValue (Ljava/lang/String;J)Z
+	public fun storeValue (Ljava/lang/String;Ljava/lang/String;)Z
+	public fun storeValue (Ljava/lang/String;Z)Z
+}
+
+public abstract interface class com/stripe/android/core/storage/Storage {
+	public abstract fun clear ()Z
+	public abstract fun getBoolean (Ljava/lang/String;Z)Z
+	public abstract fun getFloat (Ljava/lang/String;F)F
+	public abstract fun getInt (Ljava/lang/String;I)I
+	public abstract fun getLong (Ljava/lang/String;J)J
+	public abstract fun getString (Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
+	public abstract fun remove (Ljava/lang/String;)Z
+	public abstract fun storeValue (Ljava/lang/String;F)Z
+	public abstract fun storeValue (Ljava/lang/String;I)Z
+	public abstract fun storeValue (Ljava/lang/String;J)Z
+	public abstract fun storeValue (Ljava/lang/String;Ljava/lang/String;)Z
+	public abstract fun storeValue (Ljava/lang/String;Z)Z
+}
+
+public final class com/stripe/android/core/storage/StorageFactory {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/stripe/android/core/storage/StorageFactory;
+	public final fun getStorageInstance (Landroid/content/Context;Ljava/lang/String;)Lcom/stripe/android/core/storage/Storage;
 }
 
