@@ -57,7 +57,8 @@ internal class IdentityActivity : CameraPermissionCheckingActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
-//        ensureCameraPermission()
+        // ensureCameraPermission()
+        // TODO(ccen) clean up this activity and move camera features to actual Fragments
         binding.next.setOnClickListener {
             startActivity(
                 Intent(this, NavHostActivity::class.java)

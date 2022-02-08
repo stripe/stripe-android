@@ -3,8 +3,12 @@ package com.stripe.android.identity.navigation
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.fragment.NavHostFragment
+import com.stripe.android.identity.IdentityActivity
 import com.stripe.android.identity.R
 
+/**
+ * TODO: Remove this activity and combine with [IdentityActivity].
+ */
 class NavHostActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
