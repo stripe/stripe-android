@@ -32,12 +32,6 @@ interface TextFieldController : InputController {
  * composable.  These functions will update the observables as needed.  It is responsible for
  * exposing immutable observers for its data
  */
-
-/**
- * This class will provide the onValueChanged and onFocusChanged functionality to the field's
- * composable.  These functions will update the observables as needed.  It is responsible for
- * exposing immutable observers for its data
- */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class SimpleTextFieldController constructor(
     private val textFieldConfig: TextFieldConfig,
