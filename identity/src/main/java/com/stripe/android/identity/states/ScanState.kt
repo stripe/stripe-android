@@ -123,7 +123,6 @@ internal sealed class ScanState(val type: ScanType) {
         private companion object {
             val DISPLAY_SATISFIED_DURATION = 500.milliseconds
         }
-
     }
 
     /**
