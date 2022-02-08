@@ -250,8 +250,6 @@ class PaymentSheetAddPaymentMethodFragmentTest {
 
             fragment.sheetViewModel._viewState.value = PaymentSheetViewState.Reset()
 
-            idleLooper()
-
             assertThat(fragment.sheetViewModel.selection.value).isEqualTo(lastPaymentMethod)
         }
     }
@@ -264,8 +262,6 @@ class PaymentSheetAddPaymentMethodFragmentTest {
             val errorMessage = "Error message"
             fragment.sheetViewModel._viewState.value =
                 PaymentSheetViewState.Reset(BaseSheetViewModel.UserErrorMessage(errorMessage))
-
-            idleLooper()
 
             assertThat(viewBinding.message.isVisible).isTrue()
             assertThat(viewBinding.message.text).isEqualTo(errorMessage)
@@ -287,8 +283,6 @@ class PaymentSheetAddPaymentMethodFragmentTest {
             val errorMessage = "Error message"
             fragment.sheetViewModel._viewState.value =
                 PaymentSheetViewState.Reset(BaseSheetViewModel.UserErrorMessage(errorMessage))
-
-            idleLooper()
 
             assertThat(viewBinding.message.isVisible).isTrue()
             assertThat(viewBinding.message.text).isEqualTo(errorMessage)

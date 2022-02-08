@@ -89,8 +89,6 @@ internal class PaymentSheetActivityTest {
 
     @BeforeTest
     fun before() {
-        Dispatchers.setMain(testDispatcher)
-
         PaymentConfiguration.init(
             context,
             ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
@@ -222,7 +220,6 @@ internal class PaymentSheetActivityTest {
         }
     }
 
-    @Ignore("Causing failures in updates buy test")
     @Test
     fun `handles fragment transitions`() {
         val scenario = activityScenario()
@@ -415,6 +412,7 @@ internal class PaymentSheetActivityTest {
 
     @Test
     fun `Verify FinishProcessing state calls the callback`() {
+        Dispatchers.setMain(testDispatcher)
         val scenario = activityScenario()
         scenario.launch(intent).onActivity {
             // wait for bottom sheet to animate in
@@ -460,6 +458,7 @@ internal class PaymentSheetActivityTest {
 
     @Test
     fun `Verify FinishProcessing state calls the callback on google pay view state observer`() {
+        Dispatchers.setMain(testDispatcher)
         val scenario = activityScenario()
         scenario.launch(intent).onActivity {
             viewModel.checkoutIdentifier = CheckoutIdentifier.SheetBottomGooglePay
@@ -500,6 +499,7 @@ internal class PaymentSheetActivityTest {
 
     @Test
     fun `Verify ProcessResult state closes the sheet`() {
+        Dispatchers.setMain(testDispatcher)
         val scenario = activityScenario()
         scenario.launch(intent).onActivity { activity ->
             // wait for bottom sheet to animate in
@@ -522,6 +522,7 @@ internal class PaymentSheetActivityTest {
 
     @Test
     fun `successful payment should dismiss bottom sheet`() {
+        Dispatchers.setMain(testDispatcher)
         val scenario = activityScenario(viewModel)
         scenario.launch(intent).onActivity { activity ->
             // wait for bottom sheet to animate in
@@ -618,7 +619,6 @@ internal class PaymentSheetActivityTest {
         }
     }
 
-    @Ignore("causing failure in update buy test")
     @Test
     fun `Complete fragment transactions prior to setting the sheet mode and thus the back button`() {
         val scenario = activityScenario()
