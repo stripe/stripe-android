@@ -62,7 +62,8 @@ internal class IdentityActivity : CameraPermissionCheckingActivity() {
         val navHostFragment =
             supportFragmentManager.findFragmentById(R.id.identity_nav_host) as NavHostFragment
         navHostFragment.navController.setGraph(
-            R.navigation.identity_nav_graph, bundleOf(
+            R.navigation.identity_nav_graph,
+            bundleOf(
                 ConsentFragment.ARG_CONSENT_CONTEXT to "This is some context string that tells user how stripe will" +
                     " verify their identity. It could be in html format. It's sent from server",
                 ConsentFragment.ARG_MERCHANT_LOGO to starterArgs.merchantLogo
