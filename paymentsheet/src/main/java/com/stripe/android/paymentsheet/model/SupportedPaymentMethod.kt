@@ -87,7 +87,7 @@ internal sealed class SupportedPaymentMethod(
     /**
      * This describes how the UI should look.
      */
-    val formSpec: LayoutSpec?,
+    val formSpec: LayoutSpec,
 ) : Parcelable {
     @Parcelize
     object Card : SupportedPaymentMethod(
