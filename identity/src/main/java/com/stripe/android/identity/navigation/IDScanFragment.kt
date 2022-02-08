@@ -6,10 +6,13 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
-import com.stripe.android.identity.R
+import com.stripe.android.identity.databinding.IdScanFragmentBinding
 import com.stripe.android.identity.viewmodel.IDScanViewModel
 
-class IDScanFragment : Fragment() {
+/**
+ * TODO(ccen) connect the logic to initialize CameraAdapter and call IdentityActivity#ensureCameraPermission
+ */
+internal class IDScanFragment : Fragment() {
 
     companion object {
         fun newInstance() = IDScanFragment()
@@ -21,8 +24,8 @@ class IDScanFragment : Fragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        return inflater.inflate(R.layout.id_scan_fragment, container, false)
+    ): View {
+        return IdScanFragmentBinding.inflate(inflater, container, false).root
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {

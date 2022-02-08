@@ -1,13 +1,175 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:layout_marginStart="@dimen/page_horizontal_margin"
+    android:layout_marginEnd="@dimen/page_horizontal_margin"
+    android:layout_marginTop="@dimen/page_vertical_margin"
+    android:layout_marginBottom="@dimen/page_vertical_margin"
+    android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".navigation.ConsentFragment">
+    android:layout_height="match_parent">
 
-    <TextView
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="Consent" />
+        android:layout_height="0dp"
+        android:layout_weight="1">
 
-</FrameLayout>
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            tools:context=".navigation.ConsentFragment">
+
+            <LinearLayout
+                android:id="@+id/title_icons"
+                android:layout_width="0dp"
+                android:gravity="center_vertical"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <ImageView
+                    android:id="@+id/merchant_logo"
+                    android:src="@drawable/ic_baseline_question_mark_32"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp" />
+
+                <ImageView
+                    android:id="@+id/plus"
+                    android:src="@drawable/ic_baseline_add_16"
+                    android:layout_width="16dp"
+                    android:layout_height="16dp" />
+
+                <ImageView
+                    android:id="@+id/stripe_logo"
+                    android:src="@drawable/ic_stripe_square_32"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/title_text"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/item_vertical_margin"
+                android:textSize="@dimen/consent_title_text_size"
+                android:textStyle="bold"
+                android:text="XXX uses Stripe to verify your information"
+                android:layout_marginBottom="42dp"
+                app:layout_constraintBottom_toTopOf="@id/time_takes"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/title_icons"
+                tools:text="XXX uses Stripe to verify your information" />
+
+            <TextView
+                android:id="@+id/time_takes"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="Takes about 1-2 minutes"
+                android:textStyle="bold"
+                android:layout_marginBottom="@dimen/item_vertical_margin"
+                android:drawablePadding="6dp"
+                app:drawableStartCompat="@drawable/ic_clock_16"
+                app:layout_constraintBottom_toTopOf="@id/divider"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/title_text"
+                tools:text="Takes about 1-2 minutes" />
+
+            <View
+                android:id="@+id/divider"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginBottom="@dimen/item_vertical_margin"
+                android:background="?android:attr/listDivider"
+                app:layout_constraintBottom_toTopOf="@id/how_title"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/time_takes" />
+
+            <TextView
+                android:id="@+id/how_title"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:textStyle="bold"
+                android:text="How Stripe will verify your identity"
+                android:layout_marginBottom="@dimen/item_vertical_margin"
+                app:layout_constraintBottom_toTopOf="@id/how_content"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/divider"
+                tools:text="How Stripe will verify your identity" />
+
+            <TextView
+                android:id="@+id/how_content"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="Stripe will use biometric technology(on images of you and your IDs) and other data sources to confirm your identity and for fraud and security purposes."
+                android:layout_marginBottom="@dimen/item_vertical_margin"
+                android:lineSpacingExtra="2sp"
+                app:layout_constraintBottom_toTopOf="@id/learn_more_1"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/how_title"
+                tools:text="Stripe will use biometric technology(on images of you and your IDs) and other data sources to confirm your identity and for fraud and security purposes." />
+
+            <TextView
+                android:id="@+id/learn_more_1"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="Lean about Stripe"
+                android:textColor="?android:colorPrimary"
+                android:textStyle="bold"
+                app:layout_constraintBottom_toTopOf="@id/learn_more_2"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/how_content"
+                tools:text="Lean about Stripe" />
+
+            <TextView
+                android:id="@+id/learn_more_2"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="Lean how stripe identity works"
+                android:textColor="?android:colorPrimary"
+                android:layout_marginTop="@dimen/item_vertical_margin"
+                android:textStyle="bold"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/learn_more_1"
+                tools:text="Lean how stripe identity works" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </ScrollView>
+
+    <LinearLayout
+        android:id="@+id/buttons"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom">
+
+        <Button
+            android:id="@+id/agree"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/agree_and_continue"
+            android:layout_marginBottom="10dp"
+            app:layout_constraintBottom_toTopOf="@+id/decline"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <Button
+            android:id="@+id/decline"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/decline"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+    </LinearLayout>
+
+</LinearLayout>
+

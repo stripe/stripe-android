@@ -9,13 +9,16 @@ import com.stripe.android.identity.camera.IDDetectorAggregator
 import com.stripe.android.identity.camera.IdentityScanFlow
 import com.stripe.android.identity.states.ScanState
 
-internal class IdentityViewModel(scanType: ScanState.ScanType) :
+internal class IdentityViewModel(
+    val args: IdentityVerificationSheetContract.Args
+) :
     ViewModel(),
     AnalyzerLoopErrorListener,
     AggregateResultListener<IDDetectorAggregator.InterimResult, IDDetectorAggregator.FinalResult> {
 
     internal val identityScanFlow = IdentityScanFlow(
-        scanType,
+        // TODO(ccen) Pass the correct scan type parameter after moved to separate Fragments
+        scanType = ScanState.ScanType.ID_FRONT,
         this,
         this
     )
@@ -42,11 +45,13 @@ internal class IdentityViewModel(scanType: ScanState.ScanType) :
         return true
     }
 
-    internal class IdentityViewModelFactory(private val scanType: ScanState.ScanType) :
+    internal class IdentityViewModelFactory(
+        private val args: IdentityVerificationSheetContract.Args
+    ) :
         ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return IdentityViewModel(scanType) as T
+            return IdentityViewModel(args) as T
         }
     }
 
