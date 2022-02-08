@@ -18,54 +18,54 @@ internal fun RowElementUI(
     hiddenIdentifiers: List<IdentifierSpec>
 ) {
     val fields = controller.fields
+    val cardStyle = CardStyle(isSystemInDarkTheme())
 
     // An attempt was made to do this with a row, and a vertical divider created with a box.
     // The row had a height of IntrinsicSize.Min, and the box/vertical divider filled the height
     // when adding in the trailing icon this broke and caused the overall height of the row to
-    // increase.  The approach only supports two items in the row.
+    // increase.  By using the constraint layout the vertical divider does not negatively effect
+    // the size of the row.
     ConstraintLayout {
         // Create references for the composables to constrain
-        val (field1Ref, dividerRef, field2Ref) = createRefs()
+        val fieldRefs = fields.map { createRef() }
+        val dividerRefs = fields.map { createRef() }
 
-        val field1 = fields[0]
-        SectionFieldElementUI(
-            enabled,
-            field1,
-            Modifier
-                .constrainAs(field1Ref) {
-                    start.linkTo(parent.start)
-                    top.linkTo(parent.top)
-                }
-                .fillMaxWidth(0.5f),
-            hiddenIdentifiers
-        )
-        val cardStyle = CardStyle(isSystemInDarkTheme())
+        fields.forEachIndexed { index, field ->
+            SectionFieldElementUI(
+                enabled,
+                field,
+                Modifier
+                    .constrainAs(fieldRefs[index]) {
+                        if(index == 0) {
+                            start.linkTo(parent.start)
+                        }
+                        else{
+                            start.linkTo(dividerRefs[index -1].end)
+                        }
+                        top.linkTo(parent.top)
+                    }
+                    .fillMaxWidth(
+                        (1f / fields.size.toFloat()).takeIf { index != (fields.size - 1) } ?: 1f
+                    ),
+                hiddenIdentifiers
+            )
 
-        Divider(
-            modifier = Modifier
-                .constrainAs(dividerRef) {
-                    start.linkTo(field1Ref.end)
-                    top.linkTo(parent.top)
-                    bottom.linkTo(parent.bottom)
-                    height = (Dimension.fillToConstraints)
-                }
-                .padding(
-                    horizontal = cardStyle.cardBorderWidth
+            if (index != (fields.size - 1)) {
+                Divider(
+                    modifier = Modifier
+                        .constrainAs(dividerRefs[index]) {
+                            start.linkTo(fieldRefs[index].end)
+                            top.linkTo(parent.top)
+                            bottom.linkTo(parent.bottom)
+                            height = (Dimension.fillToConstraints)
+                        }
+                        .padding(
+                            horizontal = cardStyle.cardBorderWidth
+                        )
+                        .width(cardStyle.cardBorderWidth)
+                        .background(cardStyle.cardBorderColor)
                 )
-                .width(cardStyle.cardBorderWidth)
-                .background(cardStyle.cardBorderColor)
-        )
-        val field2 = fields[1]
-        SectionFieldElementUI(
-            enabled,
-            field2,
-            Modifier
-                .constrainAs(field2Ref) {
-                    start.linkTo(dividerRef.end)
-                    top.linkTo(parent.top)
-                }
-                .fillMaxWidth(0.5f),
-            hiddenIdentifiers
-        )
+            }
+        }
     }
 }
