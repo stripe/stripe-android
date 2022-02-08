@@ -2,6 +2,8 @@
 ## X.X.X - 2022-XX-XX
 ### PaymentSheet
 * [FIXED] [4466](https://github.com/stripe/stripe-android/pull/4466) Fix issues when activities are lost on low resource phones.
+* [FIXED] [4557](https://github.com/stripe/stripe-android/pull/4557) Add missing app info to some Stripe API requests
+
 ### Identity
 ### Card scanning
 * [FIXED] [4548](https://github.com/stripe/stripe-android/pull/4548) Potential work leak when canceling a card scan in StripeCardScan

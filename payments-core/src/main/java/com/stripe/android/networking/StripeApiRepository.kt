@@ -92,7 +92,7 @@ import kotlin.coroutines.CoroutineContext
 internal class StripeApiRepository @JvmOverloads internal constructor(
     context: Context,
     publishableKeyProvider: () -> String,
-    private val appInfo: AppInfo? = null,
+    private val appInfo: AppInfo? = Stripe.appInfo,
     private val logger: Logger = Logger.noop(),
     private val workContext: CoroutineContext = Dispatchers.IO,
     private val productUsageTokens: Set<String> = emptySet(),
