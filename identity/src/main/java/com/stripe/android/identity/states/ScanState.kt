@@ -1,6 +1,9 @@
 package com.stripe.android.identity.states
 
 import android.util.Log
+import com.stripe.android.camera.framework.time.Clock
+import com.stripe.android.camera.framework.time.ClockMark
+import com.stripe.android.camera.framework.time.milliseconds
 import com.stripe.android.identity.ml.AnalyzerOutput
 import com.stripe.android.identity.ml.Category
 
@@ -102,11 +105,25 @@ internal sealed class ScanState(val type: ScanType) {
     /**
      * State  when satisfaction checking passed.
      */
-    internal class Satisfied(type: ScanType) : ScanState(type) {
+    internal class Satisfied(
+        type: ScanType,
+        private val reachedStateAt: ClockMark = Clock.markNow()
+    ) : ScanState(type) {
+
         override fun consumeTransition(analyzerOutput: AnalyzerOutput): ScanState {
-            Log.d(TAG, "Scan for $type Satisfied, transition to Finished.")
-            return Finished(type)
+            return if (reachedStateAt.elapsedSince() > DISPLAY_SATISFIED_DURATION) {
+                Log.d(TAG, "Scan for $type Satisfied, transition to Finished.")
+                Finished(type)
+            } else {
+                Log.d(TAG, "Displaying satisfied state, waiting for timeout")
+                this
+            }
         }
+
+        private companion object {
+            val DISPLAY_SATISFIED_DURATION = 500.milliseconds
+        }
+
     }
 
     /**
