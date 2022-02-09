@@ -140,6 +140,7 @@ public final class com/stripe/android/stripecardscan/cardscan/CardScanFragment :
 
 public final class com/stripe/android/stripecardscan/cardscan/CardScanFragmentKt {
 	public static final field CARD_SCAN_FRAGMENT_BUNDLE_KEY Ljava/lang/String;
+	public static final field CARD_SCAN_FRAGMENT_PARAMS_KEY Ljava/lang/String;
 	public static final field CARD_SCAN_FRAGMENT_REQUEST_KEY Ljava/lang/String;
 }
 
