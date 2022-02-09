@@ -45,6 +45,7 @@ import kotlin.math.roundToInt
 private val MINIMUM_RESOLUTION = Size(1067, 600) // minimum size of OCR
 const val CARD_SCAN_FRAGMENT_REQUEST_KEY = "CardScanRequestKey"
 const val CARD_SCAN_FRAGMENT_BUNDLE_KEY = "CardScanBundleKey"
+const val CARD_SCAN_FRAGMENT_PARAMS_KEY = "CardScanParamsKey"
 
 class CardScanFragment : ScanFragment(), SimpleScanStateful<CardScanState> {
 
@@ -57,8 +58,7 @@ class CardScanFragment : ScanFragment(), SimpleScanStateful<CardScanState> {
     override val previewFrame: ViewGroup by lazy { viewBinding.previewFrame }
 
     private val params: CardScanSheetParams by lazy {
-        requireActivity().intent.getParcelableExtra(INTENT_PARAM_REQUEST)
-            ?: CardScanSheetParams("")
+        CardScanSheetParams(arguments?.getString(CARD_SCAN_FRAGMENT_PARAMS_KEY) ?: "")
     }
 
     private val hasPreviousValidResult = AtomicBoolean(false)

@@ -194,6 +194,7 @@ abstract class ScanFragment : Fragment(), CoroutineScope {
         Log.e(Config.logTag, "Canceling scan due to error", cause)
         runBlocking { scanStat.trackResult("scan_failure") }
         resultListener.failed(cause)
+        closeScanner()
     }
 
     /**
