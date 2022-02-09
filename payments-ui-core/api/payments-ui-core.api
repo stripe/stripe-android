@@ -123,7 +123,7 @@ public final class com/stripe/android/ui/core/elements/BankRepository_Factory : 
 	public static fun newInstance (Landroid/content/res/Resources;)Lcom/stripe/android/ui/core/elements/BankRepository;
 }
 
-public final class com/stripe/android/ui/core/elements/CardBillingElement : com/stripe/android/ui/core/elements/AddressElement {
+public final class com/stripe/android/ui/core/elements/CardBillingAddressElement : com/stripe/android/ui/core/elements/AddressElement {
 	public static final field $stable I
 	public fun <init> (Lcom/stripe/android/ui/core/elements/IdentifierSpec;Lcom/stripe/android/ui/core/address/AddressFieldElementRepository;Ljava/util/Set;Lcom/stripe/android/ui/core/elements/DropdownFieldController;Ljava/util/Map;)V
 	public synthetic fun <init> (Lcom/stripe/android/ui/core/elements/IdentifierSpec;Lcom/stripe/android/ui/core/address/AddressFieldElementRepository;Ljava/util/Set;Lcom/stripe/android/ui/core/elements/DropdownFieldController;Ljava/util/Map;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
