@@ -96,7 +96,10 @@ internal abstract class ScanActivity : CameraPermissionCheckingActivity(), Corou
         }
 
         if (!cameraAdapter.isBoundToLifecycle()) {
-            ensureCameraPermission()
+            ensureCameraPermission(
+                ::onCameraReady,
+                ::onUserDeniedCameraPermission
+            )
         }
     }
 
@@ -204,9 +207,14 @@ internal abstract class ScanActivity : CameraPermissionCheckingActivity(), Corou
     }
 
     /**
+     * The camera permission was granted.
+     */
+    protected abstract fun onCameraReady()
+
+    /**
      * The camera permission was denied.
      */
-    override fun onUserDeniedCameraPermission() {
+    protected fun onUserDeniedCameraPermission() {
         runBlocking { scanStat.trackResult("user_canceled") }
         resultListener.userCanceled(CancellationReason.CameraPermissionDenied)
         closeScanner()

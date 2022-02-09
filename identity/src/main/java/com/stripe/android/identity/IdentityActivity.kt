@@ -3,7 +3,6 @@ package com.stripe.android.identity
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.util.Size
 import androidx.activity.viewModels
 import androidx.annotation.VisibleForTesting
@@ -71,8 +70,8 @@ internal class IdentityActivity : CameraPermissionCheckingActivity() {
         )
     }
 
-    override fun onCameraReady() {
-        // TODO(ccen) notify cameraReady() for Fragments
+//    override fun onCameraReady() {
+    // TODO(ccen) notify cameraReady() for Fragments
 //        cameraAdapter.bindToLifecycle(this)
 //        viewModel.identityScanFlow.startFlow(
 //            context = this,
@@ -82,13 +81,13 @@ internal class IdentityActivity : CameraPermissionCheckingActivity() {
 //            coroutineScope = lifecycleScope,
 //            parameters = 23
 //        )
-    }
+//    }
 
-    override fun onUserDeniedCameraPermission() {
-        Log.d(TAG, "onUserDeniedCameraPermission")
-        // TODO(ccen): determine whether to return Fail or Canceled
-        finishWithResult(VerificationResult.Canceled)
-    }
+//    override fun onUserDeniedCameraPermission() {
+//        Log.d(TAG, "onUserDeniedCameraPermission")
+//        // TODO(ccen): determine whether to return Fail or Canceled
+//        finishWithResult(VerificationResult.Canceled)
+//    }
 
     override fun onBackPressed() {
         finishWithResult(VerificationResult.Canceled)
