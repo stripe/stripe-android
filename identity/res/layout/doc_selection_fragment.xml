@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:layout_marginStart="@dimen/page_horizontal_margin"
+    android:layout_marginEnd="@dimen/page_horizontal_margin"
+    tools:context=".navigation.DocSelectionFragment">
+
+    <TextView
+        android:id="@+id/title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="@dimen/doc_selection_title_text_size"
+        android:textStyle="bold"
+        android:layout_marginTop="58dp"
+        android:layout_marginBottom="32dp"
+        android:text="@string/doc_select_title" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginBottom="@dimen/item_vertical_margin"
+        android:background="?android:attr/listDivider" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/dl"
+        android:textColor="?android:textColorPrimary"
+        android:background="@android:color/transparent"
+        android:text="@string/driver_license"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/item_vertical_margin" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginBottom="@dimen/item_vertical_margin"
+        android:background="?android:attr/listDivider" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/id"
+        android:background="@android:color/transparent"
+        android:textColor="?android:textColorPrimary"
+        android:text="@string/id_card"
+        android:layout_marginBottom="@dimen/item_vertical_margin"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginBottom="@dimen/item_vertical_margin"
+        android:background="?android:attr/listDivider" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/passport"
+        android:background="@android:color/transparent"
+        android:textColor="?android:textColorPrimary"
+        android:text="@string/passport"
+        android:layout_marginBottom="@dimen/item_vertical_margin"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="?android:attr/listDivider" />
+
+</LinearLayout>
