@@ -1,16 +1,13 @@
 package com.stripe.android.paymentsheet
 
-import android.app.Application
 import android.content.Context
+import androidx.appcompat.app.AppCompatActivity
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
+import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
-import com.stripe.android.core.injection.Injectable
-import com.stripe.android.core.injection.Injector
-import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethodCreateParams
@@ -18,7 +15,6 @@ import com.stripe.android.model.PaymentMethodCreateParamsFixtures.DEFAULT_CARD
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.PaymentOptionsViewModel.TransitionTarget
 import com.stripe.android.paymentsheet.analytics.EventReporter
-import com.stripe.android.paymentsheet.injection.PaymentOptionsViewModelSubcomponent
 import com.stripe.android.paymentsheet.model.FragmentConfigFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
@@ -32,17 +28,11 @@ import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.runner.RunWith
-import org.mockito.kotlin.any
-import org.mockito.kotlin.argWhere
 import org.mockito.kotlin.mock
-import org.mockito.kotlin.spy
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
-import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
-import javax.inject.Provider
 import kotlin.test.Test
-import kotlin.test.assertNotNull
 
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
@@ -74,7 +64,8 @@ internal class PaymentOptionsViewModelTest {
         application = ApplicationProvider.getApplicationContext(),
         logger = Logger.noop(),
         injectorKey = DUMMY_INJECTOR_KEY,
-        resourceRepository = resourceRepository
+        resourceRepository = resourceRepository,
+        savedStateHandle = SavedStateHandle()
     )
 
     @Test
@@ -150,7 +141,8 @@ internal class PaymentOptionsViewModelTest {
             application = ApplicationProvider.getApplicationContext(),
             logger = Logger.noop(),
             injectorKey = DUMMY_INJECTOR_KEY,
-            resourceRepository = resourceRepository
+            resourceRepository = resourceRepository,
+            savedStateHandle = SavedStateHandle()
         )
 
         var transitionTarget: BaseSheetViewModel.Event<TransitionTarget?>? = null
@@ -180,7 +172,8 @@ internal class PaymentOptionsViewModelTest {
             application = ApplicationProvider.getApplicationContext(),
             logger = Logger.noop(),
             injectorKey = DUMMY_INJECTOR_KEY,
-            resourceRepository = resourceRepository
+            resourceRepository = resourceRepository,
+            savedStateHandle = SavedStateHandle()
         )
 
         val transitionTarget = mutableListOf<BaseSheetViewModel.Event<TransitionTarget?>>()
@@ -210,7 +203,8 @@ internal class PaymentOptionsViewModelTest {
             application = ApplicationProvider.getApplicationContext(),
             logger = Logger.noop(),
             injectorKey = DUMMY_INJECTOR_KEY,
-            resourceRepository = resourceRepository
+            resourceRepository = resourceRepository,
+            savedStateHandle = SavedStateHandle()
         )
 
         val transitionTarget = mutableListOf<BaseSheetViewModel.Event<TransitionTarget?>>()
@@ -240,7 +234,8 @@ internal class PaymentOptionsViewModelTest {
             application = ApplicationProvider.getApplicationContext(),
             logger = Logger.noop(),
             injectorKey = DUMMY_INJECTOR_KEY,
-            resourceRepository = resourceRepository
+            resourceRepository = resourceRepository,
+            savedStateHandle = SavedStateHandle()
         )
 
         viewModel.removePaymentMethod(cards[1])
@@ -248,79 +243,6 @@ internal class PaymentOptionsViewModelTest {
 
         assertThat(viewModel.paymentMethods.value)
             .containsExactly(cards[0], cards[2])
-    }
-
-    @Test
-    fun `Factory gets initialized by Injector when Injector is available`() {
-        val mockBuilder = mock<PaymentOptionsViewModelSubcomponent.Builder>()
-        val mockSubcomponent = mock<PaymentOptionsViewModelSubcomponent>()
-        val mockViewModel = mock<PaymentOptionsViewModel>()
-
-        whenever(mockBuilder.build()).thenReturn(mockSubcomponent)
-        whenever(mockBuilder.application(any())).thenReturn(mockBuilder)
-        whenever(mockBuilder.args(any())).thenReturn(mockBuilder)
-        whenever(mockSubcomponent.viewModel).thenReturn(mockViewModel)
-
-        val injector = object : Injector {
-            override fun inject(injectable: Injectable<*>) {
-                val factory = injectable as PaymentOptionsViewModel.Factory
-                factory.subComponentBuilderProvider = Provider { mockBuilder }
-            }
-        }
-        val injectorKey = WeakMapInjectorRegistry.nextKey("testKey")
-        WeakMapInjectorRegistry.register(injector, injectorKey)
-        val factory = PaymentOptionsViewModel.Factory(
-            { ApplicationProvider.getApplicationContext() },
-            {
-                PaymentOptionContract.Args(
-                    mock(),
-                    mock(),
-                    null,
-                    false,
-                    null,
-                    null,
-                    injectorKey,
-                    false,
-                    mock()
-                )
-            }
-        )
-        val factorySpy = spy(factory)
-        val createdViewModel = factorySpy.create(PaymentOptionsViewModel::class.java)
-        verify(factorySpy, times(0)).fallbackInitialize(any())
-        assertThat(createdViewModel).isEqualTo(mockViewModel)
-
-        WeakMapInjectorRegistry.staticCacheMap.clear()
-    }
-
-    @Test
-    fun `Factory gets initialized with fallback when no Injector is available`() = runTest {
-        val context = ApplicationProvider.getApplicationContext<Application>()
-        val productUsage = setOf("TestProductUsage")
-        PaymentConfiguration.init(context, "testKey")
-        val factory = PaymentOptionsViewModel.Factory(
-            { context },
-            {
-                PaymentOptionContract.Args(
-                    mock(),
-                    mock(),
-                    null,
-                    false,
-                    null,
-                    null,
-                    DUMMY_INJECTOR_KEY,
-                    false,
-                    productUsage
-                )
-            }
-        )
-        val factorySpy = spy(factory)
-        assertNotNull(factorySpy.create(PaymentOptionsViewModel::class.java))
-        verify(factorySpy).fallbackInitialize(
-            argWhere {
-                it.application == context && it.productUsage == productUsage
-            }
-        )
     }
 
     private companion object {
@@ -359,4 +281,6 @@ internal class PaymentOptionsViewModelTest {
         private val PAYMENT_METHOD_REPOSITORY_PARAMS =
             listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
     }
+
+    private class MyHostActivity : AppCompatActivity()
 }

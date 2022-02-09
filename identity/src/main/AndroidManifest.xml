@@ -2,4 +2,12 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.stripe.android.identity">
 
+    <uses-permission android:name="android.permission.CAMERA" />
+
+    <application>
+        <activity
+            android:name=".IdentityActivity"
+            android:exported="false" />
+    </application>
+
 </manifest>

@@ -48,6 +48,8 @@ com.stripe.android.ui.core.forms.resources
 module:stripecardscan
 com.stripe.android.stripecardscan.cardimageverification
 com.stripe.android.stripecardscan.cardimageverification.exception
+com.stripe.android.stripecardscan.cardscan
+com.stripe.android.stripecardscan.cardscan.exception
 com.stripe.android.stripecardscan.framework
 com.stripe.android.stripecardscan.payment.card
 com.stripe.android.stripecardscan.scanui

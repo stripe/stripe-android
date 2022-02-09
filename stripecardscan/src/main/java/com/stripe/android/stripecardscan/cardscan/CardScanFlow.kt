@@ -79,10 +79,9 @@ internal abstract class CardScanFlow(
             mainLoop = ProcessBoundAnalyzerLoop(
                 analyzerPool = analyzerPool,
                 resultHandler = it,
-                analyzerLoopErrorListener = scanErrorListener,
-                statsName = null, // TODO: change this if we want to collect as part of scanstats
+                analyzerLoopErrorListener = scanErrorListener
             ).apply {
-                subscribeTo(
+                mainLoopJob = subscribeTo(
                     imageStream.map {
                         SSDOcr.cameraPreviewToInput(
                             it.image,

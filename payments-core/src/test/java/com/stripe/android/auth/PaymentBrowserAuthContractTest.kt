@@ -2,6 +2,7 @@ package com.stripe.android.auth
 
 import android.app.Activity
 import android.content.Context
+import android.os.Parcel
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
@@ -103,6 +104,16 @@ class PaymentBrowserAuthContractTest {
             .isNotNull()
         assertThat(args.statusBarColor)
             .isEqualTo(activity.window.statusBarColor)
+    }
+
+    @Test
+    fun `unparcel when no parameters as when started from StripeBrowserLauncherActivity`() {
+        val parcel = Parcel.obtain()
+
+        // An NullPointerException is thrown if a constructor doesn't exist that
+        // takes a parcel and created the object with empty strings if they
+        // don't exist.
+        PaymentBrowserAuthContract.Args(parcel)
     }
 
     private companion object {

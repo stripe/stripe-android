@@ -101,10 +101,9 @@ internal abstract class CardImageVerificationFlow(
             mainLoop = ProcessBoundAnalyzerLoop(
                 analyzerPool = analyzerPool,
                 resultHandler = mainLoopOcrAggregator,
-                analyzerLoopErrorListener = scanErrorListener,
-                statsName = null, // TODO: change this if we want to collect as part of scanstats
+                analyzerLoopErrorListener = scanErrorListener
             ).apply {
-                subscribeTo(
+                mainLoopJob = subscribeTo(
                     imageStream.map {
                         MainLoopAnalyzer.Input(
                             cameraPreviewImage = it,

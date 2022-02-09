@@ -19,7 +19,7 @@ class WeakMapInjectorRegistryTest {
 
     @Before
     fun clearStaticCache() {
-        WeakMapInjectorRegistry.staticCacheMap.clear()
+        WeakMapInjectorRegistry.clear()
     }
 
     @Test

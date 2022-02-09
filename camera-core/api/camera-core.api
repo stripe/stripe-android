@@ -5,109 +5,10 @@ public final class com/stripe/android/camera/BuildConfig {
 	public fun <init> ()V
 }
 
-public final class com/stripe/android/camera/Camera1Adapter : com/stripe/android/camera/CameraAdapter, android/hardware/Camera$PreviewCallback {
-	public fun <init> (Landroid/app/Activity;Landroid/view/ViewGroup;Landroid/util/Size;Lcom/stripe/android/camera/CameraErrorListener;)V
-	public fun changeCamera ()V
-	public fun getCurrentCamera ()I
-	public fun getImplementationName ()Ljava/lang/String;
-	public fun isTorchOn ()Z
-	public fun onPause ()V
-	public fun onPreviewFrame ([BLandroid/hardware/Camera;)V
-	public final fun onResume ()V
-	public fun setFocus (Landroid/graphics/PointF;)V
-	public fun setTorchState (Z)V
-	public fun withFlashSupport (Lkotlin/jvm/functions/Function1;)V
-	public fun withSupportsMultipleCameras (Lkotlin/jvm/functions/Function1;)V
-}
-
-public abstract class com/stripe/android/camera/CameraAdapter : androidx/lifecycle/LifecycleObserver {
-	public static final field Companion Lcom/stripe/android/camera/CameraAdapter$Companion;
-	public fun <init> ()V
-	public fun bindToLifecycle (Landroidx/lifecycle/LifecycleOwner;)V
-	public abstract fun changeCamera ()V
-	public abstract fun getCurrentCamera ()I
-	public final fun getImageStream ()Lkotlinx/coroutines/flow/Flow;
-	public abstract fun getImplementationName ()Ljava/lang/String;
-	public fun isBoundToLifecycle ()Z
-	public static final fun isCameraSupported (Landroid/content/Context;)Z
-	public abstract fun isTorchOn ()Z
-	public final fun onDestroyed ()V
-	public fun onPause ()V
-	protected final fun sendImageToStream (Ljava/lang/Object;)Ljava/lang/Object;
-	public abstract fun setFocus (Landroid/graphics/PointF;)V
-	public abstract fun setTorchState (Z)V
-	public fun unbindFromLifecycle (Landroidx/lifecycle/LifecycleOwner;)V
-	public abstract fun withFlashSupport (Lkotlin/jvm/functions/Function1;)V
-	public abstract fun withSupportsMultipleCameras (Lkotlin/jvm/functions/Function1;)V
-}
-
 public final class com/stripe/android/camera/CameraAdapter$Companion {
 	public final fun getLogTag ()Ljava/lang/String;
 	public final fun isCameraSupported (Landroid/content/Context;)Z
 	public final fun rotationToDegrees (I)I
-}
-
-public abstract interface class com/stripe/android/camera/CameraErrorListener {
-	public abstract fun onCameraAccessError (Ljava/lang/Throwable;)V
-	public abstract fun onCameraOpenError (Ljava/lang/Throwable;)V
-	public abstract fun onCameraUnsupportedError (Ljava/lang/Throwable;)V
-}
-
-public final class com/stripe/android/camera/CameraPreviewImage {
-	public fun <init> (Ljava/lang/Object;Landroid/graphics/Rect;)V
-	public final fun component1 ()Ljava/lang/Object;
-	public final fun component2 ()Landroid/graphics/Rect;
-	public final fun copy (Ljava/lang/Object;Landroid/graphics/Rect;)Lcom/stripe/android/camera/CameraPreviewImage;
-	public static synthetic fun copy$default (Lcom/stripe/android/camera/CameraPreviewImage;Ljava/lang/Object;Landroid/graphics/Rect;ILjava/lang/Object;)Lcom/stripe/android/camera/CameraPreviewImage;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getImage ()Ljava/lang/Object;
-	public final fun getViewBounds ()Landroid/graphics/Rect;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public abstract interface class com/stripe/android/camera/framework/AggregateResultListener {
-	public abstract fun onInterimResult (Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public abstract fun onReset (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public abstract fun onResult (Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-}
-
-public abstract interface class com/stripe/android/camera/framework/Analyzer {
-	public abstract fun analyze (Ljava/lang/Object;Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public abstract fun getStatsName ()Ljava/lang/String;
-}
-
-public abstract interface class com/stripe/android/camera/framework/AnalyzerFactory {
-	public abstract fun newInstance (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-}
-
-public abstract class com/stripe/android/camera/framework/AnalyzerLoop : com/stripe/android/camera/framework/ResultHandler {
-	public synthetic fun <init> (Lcom/stripe/android/camera/framework/AnalyzerPool;Lcom/stripe/android/camera/framework/AnalyzerLoopErrorListener;Ljava/lang/String;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
-	protected final fun getStartedAt ()Lcom/stripe/android/camera/framework/time/ClockMark;
-	public abstract fun getState ()Ljava/lang/Object;
-	protected final fun setStartedAt (Lcom/stripe/android/camera/framework/time/ClockMark;)V
-	protected final fun subscribeToFlow (Lkotlinx/coroutines/flow/Flow;Lkotlinx/coroutines/CoroutineScope;)Lkotlinx/coroutines/Job;
-	protected final fun unsubscribeFromFlow (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-}
-
-public abstract interface class com/stripe/android/camera/framework/AnalyzerLoopErrorListener {
-	public abstract fun onAnalyzerFailure (Ljava/lang/Throwable;)Z
-	public abstract fun onResultFailure (Ljava/lang/Throwable;)Z
-}
-
-public final class com/stripe/android/camera/framework/AnalyzerPool {
-	public static final field Companion Lcom/stripe/android/camera/framework/AnalyzerPool$Companion;
-	public fun <init> (ILjava/util/List;)V
-	public final fun closeAllAnalyzers ()V
-	public final fun component1 ()I
-	public final fun component2 ()Ljava/util/List;
-	public final fun copy (ILjava/util/List;)Lcom/stripe/android/camera/framework/AnalyzerPool;
-	public static synthetic fun copy$default (Lcom/stripe/android/camera/framework/AnalyzerPool;ILjava/util/List;ILjava/lang/Object;)Lcom/stripe/android/camera/framework/AnalyzerPool;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getAnalyzers ()Ljava/util/List;
-	public final fun getDesiredAnalyzerCount ()I
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
 }
 
 public final class com/stripe/android/camera/framework/AnalyzerPool$Companion {
@@ -115,203 +16,23 @@ public final class com/stripe/android/camera/framework/AnalyzerPool$Companion {
 	public static synthetic fun of$default (Lcom/stripe/android/camera/framework/AnalyzerPool$Companion;Lcom/stripe/android/camera/framework/AnalyzerFactory;ILkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 }
 
-public final class com/stripe/android/camera/framework/FiniteAnalyzerLoop : com/stripe/android/camera/framework/AnalyzerLoop {
-	public fun <init> (Lcom/stripe/android/camera/framework/AnalyzerPool;Lcom/stripe/android/camera/framework/TerminatingResultHandler;Lcom/stripe/android/camera/framework/AnalyzerLoopErrorListener;Lcom/stripe/android/camera/framework/time/Duration;Ljava/lang/String;)V
-	public synthetic fun <init> (Lcom/stripe/android/camera/framework/AnalyzerPool;Lcom/stripe/android/camera/framework/TerminatingResultHandler;Lcom/stripe/android/camera/framework/AnalyzerLoopErrorListener;Lcom/stripe/android/camera/framework/time/Duration;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun cancel ()V
-	public fun getState ()Ljava/lang/Object;
-	public fun onResult (Ljava/lang/Object;Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public final fun process (Ljava/util/Collection;Lkotlinx/coroutines/CoroutineScope;)Lkotlinx/coroutines/Job;
-}
-
-public final class com/stripe/android/camera/framework/ProcessBoundAnalyzerLoop : com/stripe/android/camera/framework/AnalyzerLoop {
-	public fun <init> (Lcom/stripe/android/camera/framework/AnalyzerPool;Lcom/stripe/android/camera/framework/StatefulResultHandler;Lcom/stripe/android/camera/framework/AnalyzerLoopErrorListener;Ljava/lang/String;)V
-	public fun getState ()Ljava/lang/Object;
-	public fun onResult (Ljava/lang/Object;Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public final fun subscribeTo (Lkotlinx/coroutines/flow/Flow;Lkotlinx/coroutines/CoroutineScope;)Lkotlinx/coroutines/Job;
-	public final fun unsubscribe ()V
-}
-
-public final class com/stripe/android/camera/framework/RepeatingTaskStats {
-	public fun <init> (ILcom/stripe/android/camera/framework/time/ClockMark;Lcom/stripe/android/camera/framework/time/Duration;Lcom/stripe/android/camera/framework/time/Duration;Lcom/stripe/android/camera/framework/time/Duration;Lcom/stripe/android/camera/framework/time/Duration;)V
-	public final fun averageDuration ()Lcom/stripe/android/camera/framework/time/Duration;
-	public final fun component1 ()I
-	public final fun component2 ()Lcom/stripe/android/camera/framework/time/ClockMark;
-	public final fun component3 ()Lcom/stripe/android/camera/framework/time/Duration;
-	public final fun component4 ()Lcom/stripe/android/camera/framework/time/Duration;
-	public final fun component5 ()Lcom/stripe/android/camera/framework/time/Duration;
-	public final fun component6 ()Lcom/stripe/android/camera/framework/time/Duration;
-	public final fun copy (ILcom/stripe/android/camera/framework/time/ClockMark;Lcom/stripe/android/camera/framework/time/Duration;Lcom/stripe/android/camera/framework/time/Duration;Lcom/stripe/android/camera/framework/time/Duration;Lcom/stripe/android/camera/framework/time/Duration;)Lcom/stripe/android/camera/framework/RepeatingTaskStats;
-	public static synthetic fun copy$default (Lcom/stripe/android/camera/framework/RepeatingTaskStats;ILcom/stripe/android/camera/framework/time/ClockMark;Lcom/stripe/android/camera/framework/time/Duration;Lcom/stripe/android/camera/framework/time/Duration;Lcom/stripe/android/camera/framework/time/Duration;Lcom/stripe/android/camera/framework/time/Duration;ILjava/lang/Object;)Lcom/stripe/android/camera/framework/RepeatingTaskStats;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getExecutions ()I
-	public final fun getMaximumDuration ()Lcom/stripe/android/camera/framework/time/Duration;
-	public final fun getMinimumDuration ()Lcom/stripe/android/camera/framework/time/Duration;
-	public final fun getStartedAt ()Lcom/stripe/android/camera/framework/time/ClockMark;
-	public final fun getTotalCpuDuration ()Lcom/stripe/android/camera/framework/time/Duration;
-	public final fun getTotalDuration ()Lcom/stripe/android/camera/framework/time/Duration;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public abstract class com/stripe/android/camera/framework/ResultAggregator : com/stripe/android/camera/framework/StatefulResultHandler, androidx/lifecycle/LifecycleObserver {
-	public fun <init> (Lcom/stripe/android/camera/framework/AggregateResultListener;Ljava/lang/Object;Ljava/lang/String;)V
-	public abstract fun aggregateResult (Ljava/lang/Object;Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public fun bindToLifecycle (Landroidx/lifecycle/LifecycleOwner;)V
-	public final fun cancel ()V
-	public fun onResult (Ljava/lang/Object;Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	protected fun reset ()V
-}
-
-public abstract interface class com/stripe/android/camera/framework/StatTracker {
-	public abstract fun getStartedAt ()Lcom/stripe/android/camera/framework/time/ClockMark;
-	public abstract fun trackResult (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-}
-
 public final class com/stripe/android/camera/framework/StatTracker$DefaultImpls {
 	public static synthetic fun trackResult$default (Lcom/stripe/android/camera/framework/StatTracker;Ljava/lang/String;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
-}
-
-public final class com/stripe/android/camera/framework/StatTrackerImpl : com/stripe/android/camera/framework/StatTracker {
-	public fun <init> (Lkotlin/jvm/functions/Function3;)V
-	public fun getStartedAt ()Lcom/stripe/android/camera/framework/time/ClockMark;
-	public fun trackResult (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-}
-
-public abstract class com/stripe/android/camera/framework/StatefulResultHandler : com/stripe/android/camera/framework/ResultHandler {
-	public fun <init> (Ljava/lang/Object;)V
-	public final fun getState ()Ljava/lang/Object;
-	protected fun reset ()V
-	protected final fun setState (Ljava/lang/Object;)V
-}
-
-public final class com/stripe/android/camera/framework/Stats {
-	public static final field INSTANCE Lcom/stripe/android/camera/framework/Stats;
-	public final fun getInstanceId ()Ljava/lang/String;
-	public final fun getLogTag ()Ljava/lang/String;
-	public static final fun getRepeatingTasks ()Ljava/util/Map;
-	public final fun getScanId ()Ljava/lang/String;
-	public static final fun getTasks ()Ljava/util/Map;
-	public final fun startScan ()V
-	public final fun trackPersistentRepeatingTask (Ljava/lang/String;)Lcom/stripe/android/camera/framework/StatTracker;
-	public final fun trackRepeatingTask (Ljava/lang/String;)Lcom/stripe/android/camera/framework/StatTracker;
-	public final fun trackTask (Ljava/lang/String;)Lcom/stripe/android/camera/framework/StatTracker;
-}
-
-public final class com/stripe/android/camera/framework/TaskStats {
-	public fun <init> (Lcom/stripe/android/camera/framework/time/ClockMark;Lcom/stripe/android/camera/framework/time/Duration;Ljava/lang/String;)V
-	public final fun component1 ()Lcom/stripe/android/camera/framework/time/ClockMark;
-	public final fun component2 ()Lcom/stripe/android/camera/framework/time/Duration;
-	public final fun component3 ()Ljava/lang/String;
-	public final fun copy (Lcom/stripe/android/camera/framework/time/ClockMark;Lcom/stripe/android/camera/framework/time/Duration;Ljava/lang/String;)Lcom/stripe/android/camera/framework/TaskStats;
-	public static synthetic fun copy$default (Lcom/stripe/android/camera/framework/TaskStats;Lcom/stripe/android/camera/framework/time/ClockMark;Lcom/stripe/android/camera/framework/time/Duration;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/camera/framework/TaskStats;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getDuration ()Lcom/stripe/android/camera/framework/time/Duration;
-	public final fun getResult ()Ljava/lang/String;
-	public final fun getStarted ()Lcom/stripe/android/camera/framework/time/ClockMark;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public abstract class com/stripe/android/camera/framework/TerminatingResultHandler : com/stripe/android/camera/framework/StatefulResultHandler {
-	public fun <init> (Ljava/lang/Object;)V
-	public abstract fun onAllDataProcessed (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public abstract fun onTerminatedEarly (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-}
-
-public final class com/stripe/android/camera/framework/exception/ImageTypeNotSupportedException : java/lang/Exception {
-	public fun <init> (I)V
-	public final fun getImageType ()I
 }
 
 public final class com/stripe/android/camera/framework/image/BitmapExtensionsKt {
 	public static final fun constrainToSize (Landroid/graphics/Bitmap;Landroid/util/Size;Z)Landroid/graphics/Bitmap;
 	public static synthetic fun constrainToSize$default (Landroid/graphics/Bitmap;Landroid/util/Size;ZILjava/lang/Object;)Landroid/graphics/Bitmap;
-	public static final fun crop (Landroid/graphics/Bitmap;Landroid/graphics/Rect;)Landroid/graphics/Bitmap;
-	public static final fun cropCenter (Landroid/graphics/Bitmap;Landroid/util/Size;)Landroid/graphics/Bitmap;
-	public static final fun cropWithFill (Landroid/graphics/Bitmap;Landroid/graphics/Rect;)Landroid/graphics/Bitmap;
-	public static final fun rearrangeBySegments (Landroid/graphics/Bitmap;Ljava/util/Map;)Landroid/graphics/Bitmap;
-	public static final fun scale (Landroid/graphics/Bitmap;FZ)Landroid/graphics/Bitmap;
 	public static final fun scale (Landroid/graphics/Bitmap;Landroid/util/Size;Z)Landroid/graphics/Bitmap;
 	public static synthetic fun scale$default (Landroid/graphics/Bitmap;FZILjava/lang/Object;)Landroid/graphics/Bitmap;
 	public static synthetic fun scale$default (Landroid/graphics/Bitmap;Landroid/util/Size;ZILjava/lang/Object;)Landroid/graphics/Bitmap;
-	public static final fun scaleAndCrop (Landroid/graphics/Bitmap;Landroid/util/Size;Z)Landroid/graphics/Bitmap;
 	public static synthetic fun scaleAndCrop$default (Landroid/graphics/Bitmap;Landroid/util/Size;ZILjava/lang/Object;)Landroid/graphics/Bitmap;
-	public static final fun size (Landroid/graphics/Bitmap;)Landroid/util/Size;
-	public static final fun toJpeg (Landroid/graphics/Bitmap;)[B
-	public static final fun toWebP (Landroid/graphics/Bitmap;)[B
-	public static final fun zoom (Landroid/graphics/Bitmap;Landroid/graphics/Rect;Landroid/graphics/Rect;Landroid/util/Size;)Landroid/graphics/Bitmap;
 }
 
 public final class com/stripe/android/camera/framework/image/ImageKt {
-	public static final fun cropCameraPreviewToSquare (Landroid/graphics/Bitmap;Landroid/graphics/Rect;Landroid/graphics/Rect;)Landroid/graphics/Bitmap;
-	public static final fun cropCameraPreviewToViewFinder (Landroid/graphics/Bitmap;Landroid/graphics/Rect;Landroid/graphics/Rect;)Landroid/graphics/Bitmap;
-	public static final fun determineViewFinderCrop (Landroid/util/Size;Landroid/graphics/Rect;Landroid/graphics/Rect;)Landroid/graphics/Rect;
-	public static final fun hasOpenGl31 (Landroid/content/Context;)Z
-}
-
-public final class com/stripe/android/camera/framework/image/NV21Image {
-	public fun <init> (II[B)V
-	public fun <init> (Landroid/graphics/YuvImage;)V
-	public fun <init> (Landroid/media/Image;)V
-	public final fun crop (IIII)Lcom/stripe/android/camera/framework/image/NV21Image;
-	public final fun crop (Landroid/graphics/Rect;)Lcom/stripe/android/camera/framework/image/NV21Image;
-	public final fun getHeight ()I
-	public final fun getNv21Data ()[B
-	public final fun getSize ()Landroid/util/Size;
-	public final fun getWidth ()I
-	public final fun rotate (I)Lcom/stripe/android/camera/framework/image/NV21Image;
-	public final fun toBitmap (Landroid/renderscript/RenderScript;)Landroid/graphics/Bitmap;
-	public final fun toYuvImage ()Landroid/graphics/YuvImage;
-}
-
-public final class com/stripe/android/camera/framework/time/Clock {
-	public static final field INSTANCE Lcom/stripe/android/camera/framework/time/Clock;
-	public static final fun markNow ()Lcom/stripe/android/camera/framework/time/ClockMark;
 }
 
 public final class com/stripe/android/camera/framework/time/ClockKt {
-	public static final fun measureTime (Lkotlin/jvm/functions/Function0;)Lkotlin/Pair;
-}
-
-public abstract class com/stripe/android/camera/framework/time/ClockMark {
-	public abstract fun compareTo (Lcom/stripe/android/camera/framework/time/ClockMark;)I
-	public abstract fun elapsedSince ()Lcom/stripe/android/camera/framework/time/Duration;
-	public abstract fun hasPassed ()Z
-	public abstract fun isInFuture ()Z
-	public abstract fun minus (Lcom/stripe/android/camera/framework/time/Duration;)Lcom/stripe/android/camera/framework/time/ClockMark;
-	public abstract fun plus (Lcom/stripe/android/camera/framework/time/Duration;)Lcom/stripe/android/camera/framework/time/ClockMark;
-	public abstract fun toMillisecondsSinceEpoch ()J
-}
-
-public abstract class com/stripe/android/camera/framework/time/Duration : java/lang/Comparable {
-	public static final field Companion Lcom/stripe/android/camera/framework/time/Duration$Companion;
-	public fun compareTo (Lcom/stripe/android/camera/framework/time/Duration;)I
-	public synthetic fun compareTo (Ljava/lang/Object;)I
-	public fun div (D)Lcom/stripe/android/camera/framework/time/Duration;
-	public fun div (F)Lcom/stripe/android/camera/framework/time/Duration;
-	public fun div (I)Lcom/stripe/android/camera/framework/time/Duration;
-	public fun div (J)Lcom/stripe/android/camera/framework/time/Duration;
-	public fun equals (Ljava/lang/Object;)Z
-	public abstract fun getInDays ()D
-	public abstract fun getInHours ()D
-	public abstract fun getInMicroseconds ()D
-	public abstract fun getInMilliseconds ()D
-	public abstract fun getInMinutes ()D
-	public abstract fun getInMonths ()D
-	public abstract fun getInNanoseconds ()J
-	public abstract fun getInSeconds ()D
-	public abstract fun getInWeeks ()D
-	public abstract fun getInYears ()D
-	public fun hashCode ()I
-	public fun minus (Lcom/stripe/android/camera/framework/time/Duration;)Lcom/stripe/android/camera/framework/time/Duration;
-	public fun plus (Lcom/stripe/android/camera/framework/time/Duration;)Lcom/stripe/android/camera/framework/time/Duration;
-	public fun times (D)Lcom/stripe/android/camera/framework/time/Duration;
-	public fun times (F)Lcom/stripe/android/camera/framework/time/Duration;
-	public fun times (I)Lcom/stripe/android/camera/framework/time/Duration;
-	public fun times (J)Lcom/stripe/android/camera/framework/time/Duration;
-	public fun toString ()Ljava/lang/String;
-	public fun unaryMinus ()Lcom/stripe/android/camera/framework/time/Duration;
 }
 
 public final class com/stripe/android/camera/framework/time/Duration$Companion {
@@ -361,48 +82,9 @@ public final class com/stripe/android/camera/framework/time/DurationKt {
 	public static final fun getYears (F)Lcom/stripe/android/camera/framework/time/Duration;
 	public static final fun getYears (I)Lcom/stripe/android/camera/framework/time/Duration;
 	public static final fun getYears (J)Lcom/stripe/android/camera/framework/time/Duration;
-	public static final fun max (Lcom/stripe/android/camera/framework/time/Duration;Lcom/stripe/android/camera/framework/time/Duration;)Lcom/stripe/android/camera/framework/time/Duration;
-	public static final fun min (Lcom/stripe/android/camera/framework/time/Duration;Lcom/stripe/android/camera/framework/time/Duration;)Lcom/stripe/android/camera/framework/time/Duration;
 }
 
 public final class com/stripe/android/camera/framework/util/LayoutKt {
-	public static final fun adjustSizeToAspectRatio (Landroid/util/Size;F)Landroid/util/Size;
-	public static final fun aspectRatio (Landroid/util/Size;)F
-	public static final fun aspectRatio (Landroid/util/SizeF;)F
-	public static final fun centerOn (Landroid/util/Size;Landroid/graphics/Rect;)Landroid/graphics/Rect;
-	public static final fun centerScaled (Landroid/graphics/Rect;FF)Landroid/graphics/Rect;
-	public static final fun centerScaled (Landroid/graphics/RectF;FF)Landroid/graphics/RectF;
-	public static final fun intersectionWith (Landroid/graphics/Rect;Landroid/graphics/Rect;)Landroid/graphics/Rect;
-	public static final fun maxAspectRatioInSize (Landroid/util/Size;F)Landroid/util/Size;
-	public static final fun minAspectRatioSurroundingSize (Landroid/util/Size;F)Landroid/util/Size;
-	public static final fun move (Landroid/graphics/Rect;II)Landroid/graphics/Rect;
-	public static final fun move (Landroid/graphics/RectF;FF)Landroid/graphics/RectF;
-	public static final fun projectRegionOfInterest (Landroid/graphics/Rect;Landroid/graphics/Rect;Landroid/graphics/Rect;)Landroid/graphics/Rect;
-	public static final fun projectRegionOfInterest (Landroid/graphics/Rect;Landroid/util/Size;Landroid/graphics/Rect;)Landroid/graphics/Rect;
-	public static final fun projectRegionOfInterest (Landroid/graphics/RectF;Landroid/graphics/RectF;Landroid/graphics/RectF;)Landroid/graphics/RectF;
-	public static final fun projectRegionOfInterest (Landroid/graphics/RectF;Landroid/util/SizeF;Landroid/graphics/RectF;)Landroid/graphics/RectF;
-	public static final fun projectRegionOfInterest (Landroid/util/Size;Landroid/util/Size;Landroid/graphics/Rect;)Landroid/graphics/Rect;
-	public static final fun projectRegionOfInterest (Landroid/util/SizeF;Landroid/util/SizeF;Landroid/graphics/RectF;)Landroid/graphics/RectF;
-	public static final fun resizeRegion (Landroid/util/Size;Landroid/graphics/Rect;Landroid/graphics/Rect;Landroid/util/Size;)Ljava/util/Map;
-	public static final fun scale (Landroid/util/Size;F)Landroid/util/Size;
-	public static final fun scale (Landroid/util/Size;FF)Landroid/util/Size;
-	public static final fun scale (Landroid/util/SizeF;F)Landroid/util/SizeF;
-	public static final fun scale (Landroid/util/SizeF;FF)Landroid/util/SizeF;
-	public static final fun scaleAndCenterSurrounding (Landroid/util/Size;Landroid/util/Size;)Landroid/graphics/Rect;
-	public static final fun scaleAndCenterWithin (Landroid/util/Size;Landroid/graphics/Rect;)Landroid/graphics/Rect;
-	public static final fun scaleAndCenterWithin (Landroid/util/Size;Landroid/util/Size;)Landroid/graphics/Rect;
-	public static final fun scaleCentered (Landroid/util/Size;FF)Landroid/graphics/Rect;
-	public static final fun scaled (Landroid/graphics/RectF;Landroid/util/Size;)Landroid/graphics/RectF;
-	public static final fun size (Landroid/graphics/Rect;)Landroid/util/Size;
-	public static final fun size (Landroid/graphics/RectF;)Landroid/util/SizeF;
-	public static final fun size (Landroid/view/View;)Landroid/util/Size;
-	public static final fun toRect (Landroid/graphics/RectF;)Landroid/graphics/Rect;
-	public static final fun toRect (Landroid/util/Size;)Landroid/graphics/Rect;
-	public static final fun toRectF (Landroid/graphics/Rect;)Landroid/graphics/RectF;
-	public static final fun toRectF (Landroid/util/Size;)Landroid/graphics/RectF;
-	public static final fun toSize (Landroid/util/SizeF;)Landroid/util/Size;
-	public static final fun toSizeF (Landroid/util/Size;)Landroid/util/SizeF;
-	public static final fun transpose (Landroid/util/Size;)Landroid/util/Size;
 }
 
 public final class com/stripe/android/camera/framework/util/MemoizeKt {
@@ -456,31 +138,6 @@ public final class com/stripe/android/camera/framework/util/MemoizeKt {
 	public static final fun memoizedSuspend (Lkotlin/jvm/functions/Function4;Lcom/stripe/android/camera/framework/time/Duration;)Lkotlin/jvm/functions/Function4;
 }
 
-public final class com/stripe/android/camera/framework/util/UnexpectedRetryException : java/lang/Exception {
-	public fun <init> ()V
-}
-
-public final class com/stripe/android/camera/scanui/CameraView : androidx/constraintlayout/widget/ConstraintLayout {
-	public static final field CREDIT_CARD_ASPECT_RATIO Ljava/lang/String;
-	public static final field FILL_ASPECT_RATIO Ljava/lang/String;
-	public static final field ID_ASPECT_RATIO Ljava/lang/String;
-	public static final field NO_BORDER I
-	public static final field PASSPORT_ASPECT_RATIO Ljava/lang/String;
-	public fun <init> (Landroid/content/Context;)V
-	public fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;)V
-	public fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;I)V
-	public synthetic fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;IILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun getPreviewFrame ()Landroid/widget/FrameLayout;
-	public final fun getViewFinderBackgroundView ()Lcom/stripe/android/camera/scanui/ViewFinderBackground;
-	public final fun getViewFinderBorderView ()Landroid/widget/ImageView;
-	public final fun getViewFinderWindowView ()Landroid/view/View;
-}
-
-public abstract interface class com/stripe/android/camera/scanui/ScanFlow {
-	public abstract fun cancelFlow ()V
-	public abstract fun startFlow (Landroid/content/Context;Lkotlinx/coroutines/flow/Flow;Landroid/graphics/Rect;Landroidx/lifecycle/LifecycleOwner;Lkotlinx/coroutines/CoroutineScope;Ljava/lang/Object;)V
-}
-
 public final class com/stripe/android/camera/scanui/ViewFinderBackground : android/view/View {
 	public fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;)V
 	public synthetic fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
@@ -490,6 +147,9 @@ public final class com/stripe/android/camera/scanui/ViewFinderBackground : andro
 	public fun setBackgroundColor (I)V
 	public final fun setOnDrawListener (Lkotlin/jvm/functions/Function0;)V
 	public final fun setViewFinderRect (Landroid/graphics/Rect;)V
+}
+
+public final class com/stripe/android/camera/scanui/util/ViewExtensionsKt {
 }
 
 public final class com/stripe/android/camera/scanui/util/ViewUtilsKt {

@@ -17,10 +17,11 @@ import androidx.fragment.app.Fragment
 import com.stripe.android.stripecardscan.R
 import com.stripe.android.camera.CameraAdapter
 import com.stripe.android.camera.CameraPreviewImage
+import com.stripe.android.camera.DefaultCameraErrorListener
 import com.stripe.android.stripecardscan.camera.getCameraAdapter
 import com.stripe.android.stripecardscan.framework.Config
 import com.stripe.android.camera.framework.Stats
-import com.stripe.android.stripecardscan.framework.StorageFactory
+import com.stripe.android.core.storage.StorageFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -44,7 +45,7 @@ abstract class ScanFragment : Fragment(), CoroutineScope {
 
     internal val cameraAdapter by lazy { buildCameraAdapter() }
     private val cameraErrorListener by lazy {
-        CameraErrorListenerImpl(requireActivity()) { t -> scanFailure(t) }
+        DefaultCameraErrorListener(requireActivity()) { t -> scanFailure(t) }
     }
 
     /**

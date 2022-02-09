@@ -31,7 +31,7 @@ class Stripe3ds2TransactionActivityTest {
 
     @After
     fun cleanUpInjector() {
-        WeakMapInjectorRegistry.staticCacheMap.clear()
+        WeakMapInjectorRegistry.clear()
     }
 
     @Test

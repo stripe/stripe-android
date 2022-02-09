@@ -7,6 +7,7 @@ import android.util.TypedValue
 import android.view.View
 import androidx.annotation.DimenRes
 import androidx.annotation.DrawableRes
+import androidx.annotation.RestrictTo
 import androidx.core.content.ContextCompat
 
 /**
@@ -18,7 +19,8 @@ internal fun Context.getDrawableByRes(@DrawableRes drawableRes: Int) =
 /**
  * Get a rect from a view.
  */
-internal fun View.asRect() = Rect(left, top, right, bottom)
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+fun View.asRect() = Rect(left, top, right, bottom)
 
 /**
  * This is copied from Resources.java for API 29 so that we can continue to support API 21.
