@@ -3,4 +3,8 @@
     <string name="next">next</string>
     <string name="agree_and_continue">Agree and continue</string>
     <string name="decline">Decline and use alternative method</string>
+    <string name="driver_license">Driver\'s license</string>
+    <string name="id_card">Identity card</string>
+    <string name="passport">Passport</string>
+    <string name="doc_select_title">Which form of identification do you want to use?</string>
 </resources>

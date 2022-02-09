@@ -100,9 +100,13 @@ public final class com/stripe/android/identity/databinding/ConsentFragmentBindin
 }
 
 public final class com/stripe/android/identity/databinding/DocSelectionFragmentBinding : androidx/viewbinding/ViewBinding {
+	public final field dl Lcom/google/android/material/button/MaterialButton;
+	public final field id Lcom/google/android/material/button/MaterialButton;
+	public final field passport Lcom/google/android/material/button/MaterialButton;
+	public final field title Landroid/widget/TextView;
 	public static fun bind (Landroid/view/View;)Lcom/stripe/android/identity/databinding/DocSelectionFragmentBinding;
 	public synthetic fun getRoot ()Landroid/view/View;
-	public fun getRoot ()Landroid/widget/FrameLayout;
+	public fun getRoot ()Landroid/widget/LinearLayout;
 	public static fun inflate (Landroid/view/LayoutInflater;)Lcom/stripe/android/identity/databinding/DocSelectionFragmentBinding;
 	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Z)Lcom/stripe/android/identity/databinding/DocSelectionFragmentBinding;
 }
@@ -199,17 +203,6 @@ public final class com/stripe/android/identity/navigation/ConfirmationFragment$C
 	public final fun newInstance ()Lcom/stripe/android/identity/navigation/ConfirmationFragment;
 }
 
-public final class com/stripe/android/identity/navigation/DocSelectionFragment : androidx/fragment/app/Fragment {
-	public static final field Companion Lcom/stripe/android/identity/navigation/DocSelectionFragment$Companion;
-	public fun <init> ()V
-	public fun onActivityCreated (Landroid/os/Bundle;)V
-	public fun onCreateView (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Landroid/os/Bundle;)Landroid/view/View;
-}
-
-public final class com/stripe/android/identity/navigation/DocSelectionFragment$Companion {
-	public final fun newInstance ()Lcom/stripe/android/identity/navigation/DocSelectionFragment;
-}
-
 public final class com/stripe/android/identity/navigation/DriverLicenseScanFragment : androidx/fragment/app/Fragment {
 	public static final field Companion Lcom/stripe/android/identity/navigation/DriverLicenseScanFragment$Companion;
 	public fun <init> ()V
@@ -274,10 +267,6 @@ public final class com/stripe/android/identity/viewmodel/CameraPermissionDeniedV
 }
 
 public final class com/stripe/android/identity/viewmodel/ConfirmationViewModel : androidx/lifecycle/ViewModel {
-	public fun <init> ()V
-}
-
-public final class com/stripe/android/identity/viewmodel/DocSelectionViewModel : androidx/lifecycle/ViewModel {
 	public fun <init> ()V
 }
 
