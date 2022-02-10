@@ -3,7 +3,6 @@ package com.stripe.android.ui.core.elements
 import androidx.appcompat.view.ContextThemeWrapper
 import androidx.lifecycle.asLiveData
 import androidx.test.core.app.ApplicationProvider
-import androidx.test.platform.app.InstrumentationRegistry
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.forms.FormFieldEntry

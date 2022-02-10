@@ -878,6 +878,46 @@ public final class com/stripe/android/StripeKtxKt {
 	public static synthetic fun retrieveSource$default (Lcom/stripe/android/Stripe;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 }
 
+public final class com/stripe/android/cards/Bin$Companion {
+	public final fun create (Ljava/lang/String;)Lcom/stripe/android/cards/Bin;
+}
+
+public abstract interface class com/stripe/android/cards/CardAccountRangeRepository$Factory {
+	public abstract fun create ()Lcom/stripe/android/cards/CardAccountRangeRepository;
+}
+
+public final class com/stripe/android/cards/CardNumber$Companion {
+	public final fun getSpacePositions (I)Ljava/util/Set;
+}
+
+public final class com/stripe/android/cards/CardNumber$Unvalidated : com/stripe/android/cards/CardNumber {
+	public static final field $stable I
+	public fun <init> (Ljava/lang/String;)V
+	public final fun copy (Ljava/lang/String;)Lcom/stripe/android/cards/CardNumber$Unvalidated;
+	public static synthetic fun copy$default (Lcom/stripe/android/cards/CardNumber$Unvalidated;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/cards/CardNumber$Unvalidated;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBin ()Lcom/stripe/android/cards/Bin;
+	public final fun getFormatted (I)Ljava/lang/String;
+	public static synthetic fun getFormatted$default (Lcom/stripe/android/cards/CardNumber$Unvalidated;IILjava/lang/Object;)Ljava/lang/String;
+	public final fun getLength ()I
+	public final fun getNormalized ()Ljava/lang/String;
+	public fun hashCode ()I
+	public final fun isMaxLength ()Z
+	public final fun isValidLuhn ()Z
+	public fun toString ()Ljava/lang/String;
+	public final fun validate (I)Lcom/stripe/android/cards/CardNumber$Validated;
+}
+
+public final class com/stripe/android/cards/CardNumber$Validated : com/stripe/android/cards/CardNumber {
+	public static final field $stable I
+	public fun <init> (Ljava/lang/String;)V
+	public final fun copy (Ljava/lang/String;)Lcom/stripe/android/cards/CardNumber$Validated;
+	public static synthetic fun copy$default (Lcom/stripe/android/cards/CardNumber$Validated;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/cards/CardNumber$Validated;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
 public final class com/stripe/android/exception/AuthenticationException : com/stripe/android/core/exception/StripeException {
 	public static final field $stable I
 }

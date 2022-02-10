@@ -50,12 +50,11 @@ class CardNumberConfigTest {
     @Test
     fun `card number is too long`() {
         val state = cardNumberConfig.determineState(CardBrand.Visa, "1234567890123456789", CardBrand.Visa.getMaxLengthForCardNumber("1234567890123456789"))
+        Truth.assertThat(state)
+            .isInstanceOf(TextFieldStateConstants.Error.Invalid::class.java)
         Truth.assertThat(
             state.getError()?.errorMessage
-        ).isEqualTo(R.string.card_number_longer_than_expected)
-        Truth.assertThat(state.isFull()).isTrue()
-        Truth.assertThat(state.isValid()).isTrue()
-        Truth.assertThat(state.isBlank()).isFalse()
+        ).isEqualTo(R.string.invalid_card_number)
     }
 
     @Test

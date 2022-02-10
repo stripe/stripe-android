@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.forms
 import android.app.Application
 import android.content.Context
 import androidx.annotation.StringRes
+import androidx.appcompat.view.ContextThemeWrapper
 import androidx.lifecycle.asLiveData
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
@@ -62,6 +63,9 @@ internal class FormViewModelTest {
     private val countrySection = SectionSpec(
         IdentifierSpec.Generic("country_section"),
         CountrySpec()
+    )
+    private val context = ContextThemeWrapper(
+        ApplicationProvider.getApplicationContext(), com.stripe.android.ui.core.R.style.StripeDefaultTheme
     )
 
     private val resourceRepository =
@@ -136,7 +140,7 @@ internal class FormViewModelTest {
             ),
             args,
             resourceRepository = resourceRepository,
-            transformSpecToElement = TransformSpecToElement(resourceRepository, args)
+            transformSpecToElement = TransformSpecToElement(resourceRepository, args, context)
         )
 
         val values = mutableListOf<Boolean?>()
@@ -162,7 +166,7 @@ internal class FormViewModelTest {
             ),
             args,
             resourceRepository = resourceRepository,
-            transformSpecToElement = TransformSpecToElement(resourceRepository, args)
+            transformSpecToElement = TransformSpecToElement(resourceRepository, args, context)
         )
 
         val values = mutableListOf<List<IdentifierSpec>>()
@@ -190,7 +194,7 @@ internal class FormViewModelTest {
             ),
             args,
             resourceRepository = resourceRepository,
-            transformSpecToElement = TransformSpecToElement(resourceRepository, args)
+            transformSpecToElement = TransformSpecToElement(resourceRepository, args, context)
         )
 
         val values = mutableListOf<List<IdentifierSpec>>()
@@ -222,7 +226,7 @@ internal class FormViewModelTest {
             ),
             args,
             resourceRepository = resourceRepository,
-            transformSpecToElement = TransformSpecToElement(resourceRepository, args)
+            transformSpecToElement = TransformSpecToElement(resourceRepository, args, context)
         )
 
         val saveForFutureUseController = formViewModel.elements.first()!!.map { it.controller }
@@ -262,7 +266,7 @@ internal class FormViewModelTest {
             ),
             args,
             resourceRepository = resourceRepository,
-            transformSpecToElement = TransformSpecToElement(resourceRepository, args)
+            transformSpecToElement = TransformSpecToElement(resourceRepository, args, context)
         )
 
         val saveForFutureUseController = formViewModel.elements.first()!!.map { it.controller }
@@ -311,7 +315,7 @@ internal class FormViewModelTest {
             SofortForm,
             args,
             resourceRepository = resourceRepository,
-            transformSpecToElement = TransformSpecToElement(resourceRepository, args)
+            transformSpecToElement = TransformSpecToElement(resourceRepository, args, context)
         )
 
         val nameElement =
@@ -359,7 +363,7 @@ internal class FormViewModelTest {
             SepaDebitForm,
             args,
             resourceRepository = resourceRepository,
-            transformSpecToElement = TransformSpecToElement(resourceRepository, args)
+            transformSpecToElement = TransformSpecToElement(resourceRepository, args, context)
         )
 
         getSectionFieldTextControllerWithLabel(
@@ -430,7 +434,7 @@ internal class FormViewModelTest {
             SepaDebitForm,
             args,
             resourceRepository = resourceRepository,
-            transformSpecToElement = TransformSpecToElement(resourceRepository, args)
+            transformSpecToElement = TransformSpecToElement(resourceRepository, args, context)
         )
 
         getSectionFieldTextControllerWithLabel(
