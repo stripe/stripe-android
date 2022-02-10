@@ -1,5 +1,6 @@
 # CHANGELOG
 ## X.X.X - 2022-XX-XX
+* [FIXED] [4560](https://github.com/stripe/stripe-android/pull/4560) Fix `cardValidCallback` being added multiple times in `CardInputWidget`.
 ### PaymentSheet
 * [FIXED] [4466](https://github.com/stripe/stripe-android/pull/4466) Fix issues when activities are lost on low resource phones.
 * [FIXED] [4557](https://github.com/stripe/stripe-android/pull/4557) Add missing app info to some Stripe API requests
