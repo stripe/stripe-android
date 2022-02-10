@@ -334,6 +334,8 @@ class CardInputWidget @JvmOverloads constructor(
         if (isPostalRequired()) {
             requiredFields.add(postalCodeEditText)
             cardValidCallback?.let {
+                // First remove if it's already added, to make sure it's not added multiple times.
+                postalCodeEditText.removeTextChangedListener(cardValidTextWatcher)
                 postalCodeEditText.addTextChangedListener(cardValidTextWatcher)
             }
         } else {
