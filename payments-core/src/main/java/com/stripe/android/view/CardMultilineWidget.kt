@@ -397,8 +397,13 @@ class CardMultilineWidget @JvmOverloads constructor(
         }
 
         postalCodeEditText.config = PostalCodeEditText.Config.Global
-        cvcEditText.hint = null
         isEnabled = true
+    }
+
+    override fun onAttachedToWindow() {
+        super.onAttachedToWindow()
+        // see https://github.com/stripe/stripe-android/pull/3154
+        cvcEditText.hint = null
     }
 
     /**
