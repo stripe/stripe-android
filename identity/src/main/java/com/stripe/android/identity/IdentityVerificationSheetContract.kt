@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Parcelable
 import androidx.activity.result.contract.ActivityResultContract
+import androidx.annotation.DrawableRes
 import androidx.core.os.bundleOf
 import kotlinx.parcelize.Parcelize
 
@@ -14,6 +15,7 @@ internal class IdentityVerificationSheetContract :
     internal data class Args(
         val verificationSessionId: String,
         val ephemeralKeySecret: String,
+        @DrawableRes
         val merchantLogo: Int,
         val stripePublishableKey: String
     ) : Parcelable {

@@ -104,7 +104,7 @@ internal class FormViewModelTest {
         verify(factorySpy, times(0)).fallbackInitialize(any())
         assertThat(createdViewModel).isEqualTo(mockViewModel)
 
-        WeakMapInjectorRegistry.staticCacheMap.clear()
+        WeakMapInjectorRegistry.clear()
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)

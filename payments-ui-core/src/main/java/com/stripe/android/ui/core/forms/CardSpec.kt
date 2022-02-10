@@ -15,7 +15,6 @@ internal val cardParams: MutableMap<String, Any?> = mutableMapOf(
     "exp_month" to null,
     "exp_year" to null,
     "cvc" to null,
-//    "attribution" to listOf("PaymentSheet.Form")
 )
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

@@ -7,7 +7,7 @@ import kotlinx.parcelize.Parcelize
 internal object CardBillingSpec : SectionFieldSpec(IdentifierSpec.Generic("card_billing")) {
     fun transform(
         addressRepository: AddressFieldElementRepository
-    ) = CardBillingElement(
+    ) = CardBillingAddressElement(
         IdentifierSpec.Generic("credit_billing"),
         addressRepository
     )

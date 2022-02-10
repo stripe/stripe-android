@@ -84,8 +84,6 @@ class SimpleTextFieldController constructor(
         _fieldState.value.getError()?.takeIf { visibleError }
     }
 
-    val isFull: Flow<Boolean> = _fieldState.map { it.isFull() }
-
     override val isComplete: Flow<Boolean> = _fieldState.map {
         it.isValid() || (!it.isValid() && showOptionalLabel && it.isBlank())
     }

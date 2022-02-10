@@ -28,12 +28,12 @@ abstract class CameraPermissionCheckingActivity : AppCompatActivity() {
      * The camera permission was granted and camera is ready to use.
      * Note this callback will be invoked on the main thread.
      */
-    protected abstract fun onCameraReady()
+    private lateinit var onCameraReady: () -> Unit
 
     /**
      * The camera permission was denied.
      */
-    protected abstract fun onUserDeniedCameraPermission()
+    private lateinit var onUserDeniedCameraPermission: () -> Unit
 
     private val storage by lazy {
         StorageFactory.getStorageInstance(this, PERMISSION_STORAGE_NAME)
@@ -47,7 +47,12 @@ abstract class CameraPermissionCheckingActivity : AppCompatActivity() {
      * Check the camera permission, invokes [onCameraReady] upon permission grant,
      * invokes [onUserDeniedCameraPermission] otherwise.
      */
-    protected fun ensureCameraPermission() {
+    protected fun ensureCameraPermission(
+        onCameraReady: () -> Unit,
+        onUserDeniedCameraPermission: () -> Unit,
+    ) {
+        this.onCameraReady = onCameraReady
+        this.onUserDeniedCameraPermission = onUserDeniedCameraPermission
         when {
             ContextCompat.checkSelfPermission(
                 this,

@@ -15,12 +15,10 @@ import androidx.fragment.app.commit
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.stripe.android.model.StripeIntent
 import com.stripe.android.core.injection.InjectorKey
-import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.databinding.FragmentPaymentsheetAddPaymentMethodBinding
 import com.stripe.android.paymentsheet.forms.FormFieldValues
-import com.stripe.android.ui.core.Amount
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
 import com.stripe.android.paymentsheet.paymentdatacollection.ComposeFormDataCollectionFragment
@@ -28,11 +26,10 @@ import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArgumen
 import com.stripe.android.paymentsheet.paymentdatacollection.TransformToPaymentMethodCreateParams
 import com.stripe.android.paymentsheet.ui.AnimationConstants
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
+import com.stripe.android.ui.core.Amount
 import kotlinx.coroutines.launch
 
-internal abstract class BaseAddPaymentMethodFragment(
-    private val eventReporter: EventReporter
-) : Fragment() {
+internal abstract class BaseAddPaymentMethodFragment : Fragment() {
     abstract val viewModelFactory: ViewModelProvider.Factory
     abstract val sheetViewModel: BaseSheetViewModel<*>
 
@@ -73,7 +70,7 @@ internal abstract class BaseAddPaymentMethodFragment(
         )
 
         val selectedPaymentMethodIndex = paymentMethods.indexOf(
-            SupportedPaymentMethod.fromCode(savedInstanceState?.getString(SELECTED_PAYMENT_METHOD))
+            sheetViewModel.getAddFragmentSelectedLPM()
         ).takeUnless { it == -1 } ?: 0
 
         if (paymentMethods.size > 1) {
@@ -81,32 +78,46 @@ internal abstract class BaseAddPaymentMethodFragment(
         }
 
         if (paymentMethods.isNotEmpty()) {
-            replacePaymentMethodFragment(paymentMethods[selectedPaymentMethodIndex])
+            // If the activity is destroyed and recreated, then the fragment is already present
+            // and doesn't need to be replaced, only the selected payment method needs to be set
+            if (savedInstanceState == null) {
+                replacePaymentMethodFragment(paymentMethods[selectedPaymentMethodIndex])
+            }
         }
 
         sheetViewModel.processing.observe(viewLifecycleOwner) { isProcessing ->
             (getFragment() as? ComposeFormDataCollectionFragment)?.setProcessing(isProcessing)
         }
 
+        // If the activity was destroyed and recreated then we need to re-attach the fragment,
+        // as attach will not be called again.
+        childFragmentManager.fragments.forEach { fragment ->
+            attachComposeFragmentViewModel(fragment)
+        }
+
         childFragmentManager.addFragmentOnAttachListener { _, fragment ->
-            (fragment as? ComposeFormDataCollectionFragment)?.let { formFragment ->
-                // Need to access the formViewModel so it is constructed.
-                val formViewModel = formFragment.formViewModel
-                viewLifecycleOwner.lifecycleScope.launch {
-                    formViewModel.completeFormValues.collect { formFieldValues ->
-                        sheetViewModel.updateSelection(
-                            transformToPaymentSelection(
-                                formFieldValues,
-                                formFragment.paramKeySpec,
-                                selectedPaymentMethod
-                            )
+            attachComposeFragmentViewModel(fragment)
+        }
+
+        sheetViewModel.eventReporter.onShowNewPaymentOptionForm()
+    }
+
+    private fun attachComposeFragmentViewModel(fragment: Fragment) {
+        (fragment as? ComposeFormDataCollectionFragment)?.let { formFragment ->
+            // Need to access the formViewModel so it is constructed.
+            val formViewModel = formFragment.formViewModel
+            viewLifecycleOwner.lifecycleScope.launch {
+                formViewModel.completeFormValues.collect { formFieldValues ->
+                    sheetViewModel.updateSelection(
+                        transformToPaymentSelection(
+                            formFieldValues,
+                            formFragment.paramKeySpec,
+                            sheetViewModel.getAddFragmentSelectedLPM()
                         )
-                    }
+                    )
                 }
             }
         }
-
-        eventReporter.onShowNewPaymentOptionForm()
     }
 
     private fun setupRecyclerView(
@@ -156,13 +167,8 @@ internal abstract class BaseAddPaymentMethodFragment(
         replacePaymentMethodFragment(paymentMethod)
     }
 
-    override fun onSaveInstanceState(outState: Bundle) {
-        outState.putString(SELECTED_PAYMENT_METHOD, selectedPaymentMethod.type.code)
-        super.onSaveInstanceState(outState)
-    }
-
     private fun replacePaymentMethodFragment(paymentMethod: SupportedPaymentMethod) {
-        selectedPaymentMethod = paymentMethod
+        sheetViewModel.setAddFragmentSelectedLPM(paymentMethod)
 
         val args = requireArguments()
         args.putParcelable(
@@ -196,7 +202,6 @@ internal abstract class BaseAddPaymentMethodFragment(
         childFragmentManager.findFragmentById(R.id.payment_method_fragment_container)
 
     companion object {
-        private const val SELECTED_PAYMENT_METHOD = "selected_pm"
 
         private fun fragmentForPaymentMethod(paymentMethod: SupportedPaymentMethod) =
             ComposeFormDataCollectionFragment::class.java

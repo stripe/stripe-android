@@ -4,7 +4,6 @@ import androidx.annotation.RestrictTo
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.forms.FormFieldEntry
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
@@ -14,7 +13,7 @@ class SaveForFutureUseController(
     identifiersRequiredForFutureUse: List<IdentifierSpec> = emptyList(),
     saveForFutureUseInitialValue: Boolean
 ) : InputController {
-    override val label: Flow<Int> = MutableSharedFlow(
+    override val label: Flow<Int> = MutableStateFlow(
         R.string.save_for_future_payments_with_merchant_name
     )
     private val _saveForFutureUse = MutableStateFlow(saveForFutureUseInitialValue)

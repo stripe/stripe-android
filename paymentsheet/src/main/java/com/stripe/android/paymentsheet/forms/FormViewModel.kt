@@ -11,7 +11,7 @@ import com.stripe.android.paymentsheet.injection.DaggerFormViewModelComponent
 import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
-import com.stripe.android.ui.core.elements.CardBillingElement
+import com.stripe.android.ui.core.elements.CardBillingAddressElement
 import com.stripe.android.ui.core.elements.FormElement
 import com.stripe.android.ui.core.elements.LayoutSpec
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
@@ -124,7 +124,7 @@ internal class FormViewModel @Inject internal constructor(
             elementsList
                 ?.filterIsInstance<SectionElement>()
                 ?.flatMap { it.fields }
-                ?.filterIsInstance<CardBillingElement>()
+                ?.filterIsInstance<CardBillingAddressElement>()
                 ?.firstOrNull()
         }
 

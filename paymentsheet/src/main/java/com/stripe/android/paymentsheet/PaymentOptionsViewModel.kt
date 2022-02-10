@@ -1,24 +1,27 @@
 package com.stripe.android.paymentsheet
 
 import android.app.Application
+import android.os.Bundle
 import androidx.annotation.VisibleForTesting
+import androidx.lifecycle.AbstractSavedStateViewModelFactory
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
+import androidx.savedstate.SavedStateRegistryOwner
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.Injectable
 import com.stripe.android.core.injection.InjectorKey
 import com.stripe.android.core.injection.injectWithFallback
 import com.stripe.android.paymentsheet.analytics.EventReporter
-import com.stripe.android.ui.core.forms.resources.ResourceRepository
 import com.stripe.android.paymentsheet.injection.DaggerPaymentOptionsViewModelFactoryComponent
 import com.stripe.android.paymentsheet.injection.PaymentOptionsViewModelSubcomponent
 import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
+import com.stripe.android.ui.core.forms.resources.ResourceRepository
 import javax.inject.Inject
 import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
@@ -34,7 +37,8 @@ internal class PaymentOptionsViewModel @Inject constructor(
     application: Application,
     logger: Logger,
     @InjectorKey injectorKey: String,
-    resourceRepository: ResourceRepository
+    resourceRepository: ResourceRepository,
+    savedStateHandle: SavedStateHandle
 ) : BaseSheetViewModel<PaymentOptionsViewModel.TransitionTarget>(
     config = args.config,
     prefsRepository = prefsRepositoryFactory(args.config?.customer),
@@ -44,7 +48,8 @@ internal class PaymentOptionsViewModel @Inject constructor(
     application = application,
     logger = logger,
     injectorKey = injectorKey,
-    resourceRepository = resourceRepository
+    resourceRepository = resourceRepository,
+    savedStateHandle = savedStateHandle
 ) {
     @VisibleForTesting
     internal val _paymentOptionResult = MutableLiveData<PaymentOptionResult>()
@@ -66,10 +71,10 @@ internal class PaymentOptionsViewModel @Inject constructor(
                 } ?: false
 
     init {
-        _isGooglePayReady.value = args.isGooglePayReady
+        savedStateHandle.set(SAVE_GOOGLE_PAY_READY, args.isGooglePayReady)
         setStripeIntent(args.stripeIntent)
-        _paymentMethods.value = args.paymentMethods
-        _processing.postValue(false)
+        savedStateHandle.set(SAVE_PAYMENT_METHODS, args.paymentMethods)
+        savedStateHandle.set(SAVE_PROCESSING, false)
     }
 
     override fun onFatal(throwable: Throwable) {
@@ -138,8 +143,11 @@ internal class PaymentOptionsViewModel @Inject constructor(
 
     internal class Factory(
         private val applicationSupplier: () -> Application,
-        private val starterArgsSupplier: () -> PaymentOptionContract.Args
-    ) : ViewModelProvider.Factory, Injectable<Factory.FallbackInitializeParam> {
+        private val starterArgsSupplier: () -> PaymentOptionContract.Args,
+        owner: SavedStateRegistryOwner,
+        defaultArgs: Bundle? = null
+    ) : AbstractSavedStateViewModelFactory(owner, defaultArgs),
+        Injectable<Factory.FallbackInitializeParam> {
         internal data class FallbackInitializeParam(
             val application: Application,
             val productUsage: Set<String>
@@ -157,14 +165,21 @@ internal class PaymentOptionsViewModel @Inject constructor(
             Provider<PaymentOptionsViewModelSubcomponent.Builder>
 
         @Suppress("UNCHECKED_CAST")
-        override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+        override fun <T : ViewModel?> create(
+            key: String,
+            modelClass: Class<T>,
+            savedStateHandle: SavedStateHandle
+        ): T {
             val application = applicationSupplier()
             val starterArgs = starterArgsSupplier()
             injectWithFallback(
                 starterArgsSupplier().injectorKey,
                 FallbackInitializeParam(application, starterArgs.productUsage)
             )
-            return subComponentBuilderProvider.get().application(application).args(starterArgs)
+            return subComponentBuilderProvider.get()
+                .application(application)
+                .args(starterArgs)
+                .savedStateHandle(savedStateHandle)
                 .build().viewModel as T
         }
     }

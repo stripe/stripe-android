@@ -10,21 +10,21 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 
 internal class CardNumberController constructor(
-    private val creditTextFieldConfig: CardNumberConfig,
+    private val cardTextFieldConfig: CardNumberConfig,
     override val showOptionalLabel: Boolean = false
 ) : TextFieldController, SectionFieldErrorController {
-    override val capitalization: KeyboardCapitalization = creditTextFieldConfig.capitalization
-    override val keyboardType: KeyboardType = creditTextFieldConfig.keyboard
-    override val visualTransformation = creditTextFieldConfig.visualTransformation
-    override val debugLabel = creditTextFieldConfig.debugLabel
+    override val capitalization: KeyboardCapitalization = cardTextFieldConfig.capitalization
+    override val keyboardType: KeyboardType = cardTextFieldConfig.keyboard
+    override val visualTransformation = cardTextFieldConfig.visualTransformation
+    override val debugLabel = cardTextFieldConfig.debugLabel
 
-    override val label: Flow<Int> = MutableStateFlow(creditTextFieldConfig.label)
+    override val label: Flow<Int> = MutableStateFlow(cardTextFieldConfig.label)
 
     private val _fieldValue = MutableStateFlow("")
     override val fieldValue: Flow<String> = _fieldValue
 
     override val rawFieldValue: Flow<String> =
-        _fieldValue.map { creditTextFieldConfig.convertToRaw(it) }
+        _fieldValue.map { cardTextFieldConfig.convertToRaw(it) }
 
     internal val cardBrandFlow = _fieldValue.map {
         CardBrand.getCardBrands(it).firstOrNull() ?: CardBrand.Unknown
@@ -35,7 +35,7 @@ internal class CardNumberController constructor(
     }
 
     private val _fieldState = combine(cardBrandFlow, _fieldValue) { brand, fieldValue ->
-        creditTextFieldConfig.determineState(brand, fieldValue)
+        cardTextFieldConfig.determineState(brand, fieldValue)
     }
     override val fieldState: Flow<TextFieldState> = _fieldState
 
@@ -69,14 +69,14 @@ internal class CardNumberController constructor(
      * This is called when the value changed to is a display value.
      */
     override fun onValueChange(displayFormatted: String) {
-        _fieldValue.value = creditTextFieldConfig.filter(displayFormatted)
+        _fieldValue.value = cardTextFieldConfig.filter(displayFormatted)
     }
 
     /**
      * This is called when the value changed to is a raw backing value, not a display value.
      */
     override fun onRawValueChange(rawValue: String) {
-        onValueChange(creditTextFieldConfig.convertFromRaw(rawValue))
+        onValueChange(cardTextFieldConfig.convertFromRaw(rawValue))
     }
 
     override fun onFocusChange(newHasFocus: Boolean) {

@@ -12,17 +12,6 @@ public final class com/stripe/android/link/ComposableSingletons$LinkActivityKt {
 	public final fun getLambda-1$link_release ()Lkotlin/jvm/functions/Function3;
 }
 
-public final class com/stripe/android/link/LinkActivityContract : androidx/activity/result/contract/ActivityResultContract {
-	public static final field $stable I
-	public static final field Companion Lcom/stripe/android/link/LinkActivityContract$Companion;
-	public static final field EXTRA_ARGS Ljava/lang/String;
-	public fun <init> ()V
-	public fun createIntent (Landroid/content/Context;Lcom/stripe/android/link/LinkActivityContract$Args;)Landroid/content/Intent;
-	public synthetic fun createIntent (Landroid/content/Context;Ljava/lang/Object;)Landroid/content/Intent;
-	public fun parseResult (ILandroid/content/Intent;)Lcom/stripe/android/link/LinkActivityResult$Success;
-	public synthetic fun parseResult (ILandroid/content/Intent;)Ljava/lang/Object;
-}
-
 public final class com/stripe/android/link/LinkActivityContract$Args : com/stripe/android/view/ActivityStarter$Args {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
@@ -54,13 +43,6 @@ public final class com/stripe/android/link/LinkActivityResult$Success : com/stri
 	public fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
-public final class com/stripe/android/link/LinkPaymentLauncher {
-	public static final field $stable I
-	public fun <init> (Landroidx/activity/result/ActivityResultLauncher;Landroid/content/Context;Ljava/util/Set;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;ZLkotlin/coroutines/CoroutineContext;Lcom/stripe/android/networking/PaymentAnalyticsRequestFactory;Lcom/stripe/android/core/networking/AnalyticsRequestExecutor;Lcom/stripe/android/networking/StripeRepository;)V
-	public final fun present (Ljava/lang/String;Ljava/lang/String;)V
-	public static synthetic fun present$default (Lcom/stripe/android/link/LinkPaymentLauncher;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)V
-}
-
 public final class com/stripe/android/link/LinkPaymentLauncher_Factory {
 	public fun <init> (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)V
 	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/link/LinkPaymentLauncher_Factory;
@@ -76,10 +58,6 @@ public final class com/stripe/android/link/injection/DaggerLinkPaymentLauncherCo
 public final class com/stripe/android/link/injection/DaggerSignUpViewModelFactoryComponent : com/stripe/android/link/injection/SignUpViewModelFactoryComponent {
 	public static fun builder ()Lcom/stripe/android/link/injection/SignUpViewModelFactoryComponent$Builder;
 	public fun inject (Lcom/stripe/android/link/ui/signup/SignUpViewModel$Factory;)V
-}
-
-public abstract interface class com/stripe/android/link/injection/LinkPaymentLauncherFactory {
-	public abstract fun create (Landroidx/activity/result/ActivityResultLauncher;)Lcom/stripe/android/link/LinkPaymentLauncher;
 }
 
 public final class com/stripe/android/link/injection/LinkPaymentLauncherFactory_Impl : com/stripe/android/link/injection/LinkPaymentLauncherFactory {
@@ -100,17 +78,6 @@ public final class com/stripe/android/link/ui/ComposableSingletons$LinkButtonKt 
 	public static field lambda-1 Lkotlin/jvm/functions/Function3;
 	public fun <init> ()V
 	public final fun getLambda-1$link_release ()Lkotlin/jvm/functions/Function3;
-}
-
-public final class com/stripe/android/link/ui/LinkViewButton : androidx/compose/ui/platform/AbstractComposeView {
-	public static final field $stable I
-	public fun <init> (Landroid/content/Context;)V
-	public fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;)V
-	public fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;I)V
-	public synthetic fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;IILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public fun Content (Landroidx/compose/runtime/Composer;I)V
-	public final fun getOnClick ()Lkotlin/jvm/functions/Function0;
-	public final fun setOnClick (Lkotlin/jvm/functions/Function0;)V
 }
 
 public final class com/stripe/android/link/ui/signup/ComposableSingletons$SignUpScreenKt {

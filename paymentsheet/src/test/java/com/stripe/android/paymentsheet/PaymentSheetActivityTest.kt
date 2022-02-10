@@ -6,6 +6,7 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.common.truth.Truth.assertThat
@@ -50,7 +51,6 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
-import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -89,8 +89,6 @@ internal class PaymentSheetActivityTest {
 
     @BeforeTest
     fun before() {
-        Dispatchers.setMain(testDispatcher)
-
         PaymentConfiguration.init(
             context,
             ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
@@ -186,9 +184,9 @@ internal class PaymentSheetActivityTest {
             idleLooper()
 
             // Initially empty card
+            assertThat(activity.viewBinding.googlePayButton.isVisible).isFalse()
             assertThat(activity.viewBinding.buyButton.isVisible).isTrue()
             assertThat(activity.viewBinding.buyButton.isEnabled).isFalse()
-            assertThat(activity.viewBinding.googlePayButton.isVisible).isFalse()
 
             // Update to Google Pay
             viewModel.updateSelection(PaymentSelection.GooglePay)
@@ -414,6 +412,7 @@ internal class PaymentSheetActivityTest {
 
     @Test
     fun `Verify FinishProcessing state calls the callback`() {
+        Dispatchers.setMain(testDispatcher)
         val scenario = activityScenario()
         scenario.launch(intent).onActivity {
             // wait for bottom sheet to animate in
@@ -459,6 +458,7 @@ internal class PaymentSheetActivityTest {
 
     @Test
     fun `Verify FinishProcessing state calls the callback on google pay view state observer`() {
+        Dispatchers.setMain(testDispatcher)
         val scenario = activityScenario()
         scenario.launch(intent).onActivity {
             viewModel.checkoutIdentifier = CheckoutIdentifier.SheetBottomGooglePay
@@ -499,6 +499,7 @@ internal class PaymentSheetActivityTest {
 
     @Test
     fun `Verify ProcessResult state closes the sheet`() {
+        Dispatchers.setMain(testDispatcher)
         val scenario = activityScenario()
         scenario.launch(intent).onActivity { activity ->
             // wait for bottom sheet to animate in
@@ -521,6 +522,7 @@ internal class PaymentSheetActivityTest {
 
     @Test
     fun `successful payment should dismiss bottom sheet`() {
+        Dispatchers.setMain(testDispatcher)
         val scenario = activityScenario(viewModel)
         scenario.launch(intent).onActivity { activity ->
             // wait for bottom sheet to animate in
@@ -774,7 +776,8 @@ internal class PaymentSheetActivityTest {
             googlePayPaymentMethodLauncherFactory,
             Logger.noop(),
             testDispatcher,
-            DUMMY_INJECTOR_KEY
+            DUMMY_INJECTOR_KEY,
+            savedStateHandle = SavedStateHandle()
         )
     }
 
