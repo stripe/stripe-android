@@ -1,6 +1,9 @@
 package com.stripe.android.ui.core.elements
 
+import androidx.appcompat.view.ContextThemeWrapper
 import androidx.lifecycle.asLiveData
+import androidx.test.core.app.ApplicationProvider
+import androidx.test.platform.app.InstrumentationRegistry
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.forms.FormFieldEntry
@@ -11,7 +14,9 @@ import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
 internal class CardNumberControllerTest {
-    private val cardNumberController = CardNumberController(CardNumberConfig())
+    private val cardNumberController = CardNumberController(
+        CardNumberConfig(), ContextThemeWrapper(ApplicationProvider.getApplicationContext(), R.style.StripeDefaultTheme)
+    )
 
     @Test
     fun `When invalid card number verify visible error`() {

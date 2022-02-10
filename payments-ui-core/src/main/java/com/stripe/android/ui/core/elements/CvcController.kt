@@ -37,7 +37,7 @@ internal class CvcController constructor(
         _fieldValue.map { cvcTextFieldConfig.convertToRaw(it) }
 
     private val _fieldState = combine(cardBrandFlow, _fieldValue) { brand, fieldValue ->
-        cvcTextFieldConfig.determineState(brand, fieldValue)
+        cvcTextFieldConfig.determineState(brand, fieldValue, brand.maxCvcLength)
     }
     override val fieldState: Flow<TextFieldState> = _fieldState
 

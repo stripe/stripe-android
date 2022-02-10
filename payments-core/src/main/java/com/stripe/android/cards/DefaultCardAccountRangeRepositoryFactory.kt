@@ -1,6 +1,7 @@
 package com.stripe.android.cards
 
 import android.content.Context
+import androidx.annotation.RestrictTo
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
@@ -17,7 +18,8 @@ import kotlinx.coroutines.flow.flowOf
  *
  * Will throw an exception if [PaymentConfiguration] has not been instantiated.
  */
-internal class DefaultCardAccountRangeRepositoryFactory(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+class DefaultCardAccountRangeRepositoryFactory(
     context: Context,
     private val analyticsRequestExecutor: AnalyticsRequestExecutor
 ) : CardAccountRangeRepository.Factory {

@@ -1,9 +1,11 @@
 package com.stripe.android.cards
 
+import androidx.annotation.RestrictTo
 import com.stripe.android.model.AccountRange
 import com.stripe.android.model.BinRange
 
-internal class DefaultStaticCardAccountRanges : StaticCardAccountRanges {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+class DefaultStaticCardAccountRanges : StaticCardAccountRanges {
     override fun first(
         cardNumber: CardNumber.Unvalidated
     ) = filter(cardNumber).firstOrNull()
