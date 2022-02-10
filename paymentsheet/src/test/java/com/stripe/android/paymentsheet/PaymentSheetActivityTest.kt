@@ -184,9 +184,9 @@ internal class PaymentSheetActivityTest {
             idleLooper()
 
             // Initially empty card
+            assertThat(activity.viewBinding.googlePayButton.isVisible).isFalse()
             assertThat(activity.viewBinding.buyButton.isVisible).isTrue()
             assertThat(activity.viewBinding.buyButton.isEnabled).isFalse()
-            assertThat(activity.viewBinding.googlePayButton.isVisible).isFalse()
 
             // Update to Google Pay
             viewModel.updateSelection(PaymentSelection.GooglePay)
