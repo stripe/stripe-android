@@ -47,7 +47,8 @@ abstract class CameraPermissionCheckingActivity : AppCompatActivity() {
      * Check the camera permission, invokes [onCameraReady] upon permission grant,
      * invokes [onUserDeniedCameraPermission] otherwise.
      */
-    protected fun ensureCameraPermission(
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    fun ensureCameraPermission(
         onCameraReady: () -> Unit,
         onUserDeniedCameraPermission: () -> Unit,
     ) {
