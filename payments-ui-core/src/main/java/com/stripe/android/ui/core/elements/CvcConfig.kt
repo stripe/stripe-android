@@ -15,7 +15,8 @@ internal class CvcConfig : CardDetailsTextFieldConfig {
 
     override fun determineState(
         brand: CardBrand,
-        number: String
+        number: String,
+        numberAllowedDigits: Int
     ): TextFieldState {
         val numberAllowedDigits = brand.maxCvcLength
         val isDigitLimit = brand.maxCvcLength != -1

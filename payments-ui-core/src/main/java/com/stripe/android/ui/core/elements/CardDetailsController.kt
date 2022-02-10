@@ -1,15 +1,16 @@
 package com.stripe.android.ui.core.elements
 
+import android.content.Context
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.combine
 import java.util.UUID
 
-internal class CardDetailsController : SectionFieldErrorController {
+internal class CardDetailsController constructor(context: Context) : SectionFieldErrorController {
 
     val label: Int? = null
     val numberElement = CardNumberElement(
         IdentifierSpec.Generic("number"),
-        CardNumberController(CardNumberConfig())
+        CardNumberController(CardNumberConfig(), context)
     )
 
     val cvcElement = CvcElement(
