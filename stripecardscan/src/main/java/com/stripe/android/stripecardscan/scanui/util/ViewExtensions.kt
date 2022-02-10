@@ -3,7 +3,6 @@ package com.stripe.android.stripecardscan.scanui.util
 import android.content.Context
 import android.content.res.Resources.NotFoundException
 import android.graphics.PointF
-import android.graphics.Rect
 import android.graphics.drawable.Animatable
 import android.util.TypedValue
 import android.view.View
@@ -68,11 +67,6 @@ internal fun ImageView.startAnimation(@DrawableRes drawableRes: Int) {
         d.start()
     }
 }
-
-/**
- * Get a rect from a view.
- */
-internal fun View.asRect() = Rect(left, top, right, bottom)
 
 /**
  * Convert an int in DP to pixels.

@@ -9,8 +9,10 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
-import com.stripe.android.model.CardBrand
+import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.core.model.CountryCode
+import com.stripe.android.model.CardBrand
+import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
@@ -19,22 +21,31 @@ import com.stripe.android.paymentsheet.PaymentSheetActivity
 import com.stripe.android.paymentsheet.PaymentSheetContract
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.COMPOSE_FRAGMENT_ARGS
-import com.stripe.android.paymentsheet.PaymentSheetViewModel
+import com.stripe.android.paymentsheet.PaymentSheetViewModelTestInjection
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.databinding.FragmentPaymentsheetAddCardBinding
 import com.stripe.android.paymentsheet.databinding.StripeBillingAddressLayoutBinding
+import com.stripe.android.paymentsheet.forms.FormViewModel
+import com.stripe.android.paymentsheet.forms.TransformSpecToElement
 import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.FragmentConfigFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.ui.AddPaymentMethodsFragmentFactory
+import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
+import com.stripe.android.ui.core.Amount
 import com.stripe.android.utils.TestUtils.idleLooper
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.FlowPreview
+import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.mock
 import org.robolectric.RobolectricTestRunner
 
+@ExperimentalCoroutinesApi
+@FlowPreview
 @RunWith(RobolectricTestRunner::class)
-class CardDataCollectionFragmentTest {
+internal class CardDataCollectionFragmentTest : PaymentSheetViewModelTestInjection() {
     private val context: Context = ApplicationProvider.getApplicationContext()
 
     @Before
@@ -43,6 +54,11 @@ class CardDataCollectionFragmentTest {
             context,
             ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
         )
+    }
+
+    @After
+    override fun after() {
+        super.after()
     }
 
     @Test
@@ -445,33 +461,60 @@ class CardDataCollectionFragmentTest {
         fragmentConfig: FragmentConfig? = FragmentConfigFixtures.DEFAULT,
         stripeIntent: StripeIntent = PaymentIntentFixtures.PI_WITH_SHIPPING,
         newCard: PaymentSelection.New.Card? = null,
-        fragmentArgs: FormFragmentArguments? = COMPOSE_FRAGMENT_ARGS.copy(
+        fragmentArgs: FormFragmentArguments = FormFragmentArguments(
+            SupportedPaymentMethod.Card,
+            injectorKey = args.injectorKey,
             showCheckbox = true,
             showCheckboxControlledFields = true,
+            merchantName = args.config?.merchantDisplayName ?: "com.stripe.android.paymentsheet",
+            billingDetails = args.config?.defaultBillingDetails,
+            amount = (stripeIntent as? PaymentIntent)?.let {
+                Amount(
+                    it.amount ?: 0,
+                    it.currency ?: "usd",
+                )
+            }
         ),
-        onReady: (CardDataCollectionFragment<PaymentSheetViewModel>, FragmentPaymentsheetAddCardBinding) -> Unit
+        onReady: (CardDataCollectionFragment, FragmentPaymentsheetAddCardBinding) -> Unit
     ) {
-        val factory = AddPaymentMethodsFragmentFactory(
-            PaymentSheetViewModel::class.java,
-            PaymentSheetViewModel.Factory(
-                { ApplicationProvider.getApplicationContext() },
-                { args }
-            )
+        assertThat(WeakMapInjectorRegistry.staticCacheMap.size).isEqualTo(0)
+        val viewModel = createViewModel(
+            stripeIntent as PaymentIntent,
+            customerRepositoryPMs = emptyList(),
+            injectorKey = args.injectorKey,
+            args = args
         )
-        launchFragmentInContainer<CardDataCollectionFragment<PaymentSheetViewModel>>(
+        viewModel.newCard = newCard
+        idleLooper()
+
+        val formFragmentArguments = FormFragmentArguments(
+            fragmentArgs.paymentMethod,
+            showCheckbox = fragmentArgs.showCheckbox,
+            showCheckboxControlledFields = fragmentArgs.showCheckboxControlledFields,
+            merchantName = fragmentArgs.merchantName,
+            amount = fragmentArgs.amount,
+            billingDetails = fragmentArgs.billingDetails,
+            injectorKey = args.injectorKey
+        )
+        val formViewModel = FormViewModel(
+            layout = fragmentArgs.paymentMethod.formSpec,
+            config = formFragmentArguments,
+            resourceRepository = mock(),
+            transformSpecToElement = TransformSpecToElement(mock(), formFragmentArguments)
+        )
+
+        registerViewModel(args.injectorKey, viewModel, formViewModel)
+
+        launchFragmentInContainer<CardDataCollectionFragment>(
             bundleOf(
                 PaymentSheetActivity.EXTRA_FRAGMENT_CONFIG to fragmentConfig,
                 PaymentSheetActivity.EXTRA_STARTER_ARGS to args,
                 ComposeFormDataCollectionFragment.EXTRA_CONFIG to fragmentArgs,
             ),
             R.style.StripePaymentSheetDefaultTheme,
-            factory = factory,
             initialState = Lifecycle.State.INITIALIZED
-        ).onFragment { fragment ->
-            // Mock sheetViewModel loading the StripeIntent before the Fragment is created
-            fragment.sheetViewModel.setStripeIntent(stripeIntent)
-            fragment.sheetViewModel.newCard = newCard
-        }.moveToState(Lifecycle.State.STARTED)
+        )
+            .moveToState(Lifecycle.State.STARTED)
             .onFragment { fragment ->
                 onReady(
                     fragment,

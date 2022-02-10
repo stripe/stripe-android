@@ -35,7 +35,9 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
     internal var viewModelFactory: ViewModelProvider.Factory =
         PaymentOptionsViewModel.Factory(
             { application },
-            { requireNotNull(starterArgs) }
+            { requireNotNull(starterArgs) },
+            this,
+            intent?.extras
         )
 
     override val viewModel: PaymentOptionsViewModel by viewModels { viewModelFactory }
@@ -78,13 +80,13 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
         setupContinueButton(viewBinding.continueButton)
 
         viewModel.transition.observe(this) { event ->
-            val transitionTarget = event.getContentIfNotHandled()
-            if (transitionTarget != null) {
+            event?.getContentIfNotHandled()?.let { transitionTarget ->
                 onTransitionTarget(
                     transitionTarget,
                     bundleOf(
-                        EXTRA_STARTER_ARGS to starterArgs,
-                        EXTRA_FRAGMENT_CONFIG to transitionTarget.fragmentConfig
+                        PaymentSheetActivity.EXTRA_STARTER_ARGS to starterArgs,
+                        PaymentSheetActivity.EXTRA_FRAGMENT_CONFIG to
+                            transitionTarget.fragmentConfig
                     )
                 )
             }

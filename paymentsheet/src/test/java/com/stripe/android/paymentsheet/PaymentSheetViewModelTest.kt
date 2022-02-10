@@ -2,14 +2,16 @@ package com.stripe.android.paymentsheet
 
 import android.app.Application
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
+import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
 import com.google.android.gms.common.api.Status
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
-import com.stripe.android.core.Logger
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.PaymentIntentResult
 import com.stripe.android.StripeIntentResult
+import com.stripe.android.core.Logger
+import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConfirmPaymentIntentParams
@@ -23,15 +25,10 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.StripeRepository
-import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
-import com.stripe.android.core.injection.Injectable
-import com.stripe.android.core.injection.Injector
-import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.paymentsheet.PaymentSheetViewModel.CheckoutIdentifier
 import com.stripe.android.paymentsheet.analytics.EventReporter
-import com.stripe.android.paymentsheet.injection.PaymentSheetViewModelSubcomponent
 import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
@@ -58,22 +55,18 @@ import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Captor
 import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.any
-import org.mockito.kotlin.argWhere
 import org.mockito.kotlin.capture
 import org.mockito.kotlin.doThrow
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.spy
-import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 import java.util.Locale
-import javax.inject.Provider
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
-import kotlin.test.assertNotNull
 
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
@@ -789,6 +782,7 @@ internal class PaymentSheetViewModelTest {
     @Test
     fun `buyButton is only enabled when not processing, not editing, and a selection has been made`() {
         var isEnabled = false
+        viewModel.savedStateHandle.set(BaseSheetViewModel.SAVE_PROCESSING, true)
         viewModel.ctaEnabled.observeForever {
             isEnabled = it
         }
@@ -797,6 +791,7 @@ internal class PaymentSheetViewModelTest {
             .isFalse()
 
         viewModel.updateSelection(PaymentSelection.GooglePay)
+        idleLooper()
         assertThat(isEnabled)
             .isFalse()
 
@@ -836,63 +831,6 @@ internal class PaymentSheetViewModelTest {
         // In a real app, the app name will be used. In tests the package name is returned.
         assertThat(viewModel.merchantName)
             .isEqualTo("com.stripe.android.paymentsheet.test")
-    }
-
-    @Test
-    fun `Factory gets initialized by Injector when Injector is available`() {
-        val mockBuilder = mock<PaymentSheetViewModelSubcomponent.Builder>()
-        val mockSubComponent = mock<PaymentSheetViewModelSubcomponent>()
-        val mockViewModel = mock<PaymentSheetViewModel>()
-
-        whenever(mockBuilder.build()).thenReturn(mockSubComponent)
-        whenever(mockBuilder.paymentSheetViewModelModule(any())).thenReturn(mockBuilder)
-        whenever((mockSubComponent.viewModel)).thenReturn(mockViewModel)
-
-        val injector = object : Injector {
-            override fun inject(injectable: Injectable<*>) {
-                val factory = injectable as PaymentSheetViewModel.Factory
-                factory.subComponentBuilderProvider = Provider { mockBuilder }
-            }
-        }
-        val injectorKey = WeakMapInjectorRegistry.nextKey("testKey")
-        WeakMapInjectorRegistry.register(injector, injectorKey)
-        val factory = PaymentSheetViewModel.Factory(
-            { ApplicationProvider.getApplicationContext() },
-            {
-                PaymentSheetContract.Args.createPaymentIntentArgsWithInjectorKey(
-                    "testSecret",
-                    injectorKey = injectorKey
-                )
-            }
-        )
-        val factorySpy = spy(factory)
-        val createdViewModel = factorySpy.create(PaymentSheetViewModel::class.java)
-        verify(factorySpy, times(0)).fallbackInitialize(any())
-        assertThat(createdViewModel).isEqualTo(mockViewModel)
-
-        WeakMapInjectorRegistry.staticCacheMap.clear()
-    }
-
-    @Test
-    fun `Factory gets initialized with fallback when no Injector is available`() = runTest {
-        val context = ApplicationProvider.getApplicationContext<Application>()
-        PaymentConfiguration.init(context, ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
-        val factory = PaymentSheetViewModel.Factory(
-            { context },
-            {
-                PaymentSheetContract.Args.createPaymentIntentArgs(
-                    "testSecret",
-                )
-            }
-        )
-        val factorySpy = spy(factory)
-
-        assertNotNull(factorySpy.create(PaymentSheetViewModel::class.java))
-        verify(factorySpy).fallbackInitialize(
-            argWhere {
-                it.application == context
-            }
-        )
     }
 
     @Test
@@ -972,7 +910,8 @@ internal class PaymentSheetViewModelTest {
             mock(),
             Logger.noop(),
             testDispatcher,
-            DUMMY_INJECTOR_KEY
+            DUMMY_INJECTOR_KEY,
+            savedStateHandle = SavedStateHandle()
         )
     }
 

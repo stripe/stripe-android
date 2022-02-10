@@ -20,9 +20,9 @@ import com.stripe.android.stripecardscan.R
 import com.stripe.android.camera.CameraPreviewImage
 import com.stripe.android.camera.scanui.ScanFlow
 import com.stripe.android.camera.scanui.ViewFinderBackground
+import com.stripe.android.camera.scanui.util.asRect
 import com.stripe.android.stripecardscan.framework.Config
 import com.stripe.android.stripecardscan.framework.util.getSdkVersion
-import com.stripe.android.stripecardscan.scanui.util.asRect
 import com.stripe.android.stripecardscan.scanui.util.dpToPixels
 import com.stripe.android.stripecardscan.scanui.util.getColorByRes
 import com.stripe.android.stripecardscan.scanui.util.getDrawableByRes
@@ -597,11 +597,9 @@ internal abstract class SimpleScanActivity<ScanFlowParameters> : ScanActivity() 
         setupUiComponents()
     }
 
-    override fun prepareCamera(onCameraReady: () -> Unit) {
-        previewFrame.post {
-            viewFinderBackgroundView.setViewFinderRect(viewFinderWindowView.asRect())
-            onCameraReady()
-        }
+    override fun onCameraReady() {
+        viewFinderBackgroundView.setViewFinderRect(viewFinderWindowView.asRect())
+        startCameraAdapter()
     }
 
     override fun onFlashSupported(supported: Boolean) {

@@ -2,17 +2,14 @@ package com.stripe.android.paymentsheet
 
 import android.os.Bundle
 import android.view.View
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
 import androidx.fragment.app.activityViewModels
-import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.databinding.FragmentPaymentsheetPaymentMethodsListBinding
 import com.stripe.android.paymentsheet.model.PaymentSelection
 
-internal class PaymentOptionsListFragment(
-    eventReporter: EventReporter
-) : BasePaymentMethodsListFragment(
-    canClickSelectedItem = true,
-    eventReporter
+internal class PaymentOptionsListFragment() : BasePaymentMethodsListFragment(
+    canClickSelectedItem = true
 ) {
     private val activityViewModel by activityViewModels<PaymentOptionsViewModel> {
         PaymentOptionsViewModel.Factory(
@@ -21,7 +18,8 @@ internal class PaymentOptionsListFragment(
                 requireNotNull(
                     requireArguments().getParcelable(PaymentOptionsActivity.EXTRA_STARTER_ARGS)
                 )
-            }
+            },
+            (activity as? AppCompatActivity) ?: this
         )
     }
 

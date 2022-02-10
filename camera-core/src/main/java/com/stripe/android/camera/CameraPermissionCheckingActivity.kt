@@ -19,26 +19,21 @@ import kotlinx.coroutines.launch
 
 /**
  * A [AppCompatActivity] class to handle camera permission.
- * Subclass should override [prepareCamera], [onCameraReady] and [onUserDeniedCameraPermission].
+ * Subclass should override [onCameraReady] and [onUserDeniedCameraPermission].
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 abstract class CameraPermissionCheckingActivity : AppCompatActivity() {
 
     /**
-     * Prepare to start the camera. Once the camera is ready, [onCameraReady] must be called.
+     * The camera permission was granted and camera is ready to use.
+     * Note this callback will be invoked on the main thread.
      */
-    protected abstract fun prepareCamera(onCameraReady: () -> Unit)
-
-    /**
-     * Callback when camera permission is granted, [prepareCamera] is called and camera is
-     * ready to use.
-     */
-    protected abstract fun onCameraReady()
+    private lateinit var onCameraReady: () -> Unit
 
     /**
      * The camera permission was denied.
      */
-    protected abstract fun onUserDeniedCameraPermission()
+    private lateinit var onUserDeniedCameraPermission: () -> Unit
 
     private val storage by lazy {
         StorageFactory.getStorageInstance(this, PERMISSION_STORAGE_NAME)
@@ -52,23 +47,32 @@ abstract class CameraPermissionCheckingActivity : AppCompatActivity() {
      * Check the camera permission, invokes [onCameraReady] upon permission grant,
      * invokes [onUserDeniedCameraPermission] otherwise.
      */
-    protected fun ensureCameraPermission() = when {
-        ContextCompat.checkSelfPermission(
-            this,
-            Manifest.permission.CAMERA,
-        ) == PackageManager.PERMISSION_GRANTED -> {
-            mainScope.launch { permissionStat.trackResult("success") }
-            prepareCamera { onCameraReady() }
+    protected fun ensureCameraPermission(
+        onCameraReady: () -> Unit,
+        onUserDeniedCameraPermission: () -> Unit,
+    ) {
+        this.onCameraReady = onCameraReady
+        this.onUserDeniedCameraPermission = onUserDeniedCameraPermission
+        when {
+            ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.CAMERA,
+            ) == PackageManager.PERMISSION_GRANTED -> {
+                mainScope.launch { permissionStat.trackResult("success") }
+                mainScope.launch {
+                    onCameraReady()
+                }
+            }
+            ActivityCompat.shouldShowRequestPermissionRationale(
+                this,
+                Manifest.permission.CAMERA,
+            ) -> showPermissionRationaleDialog()
+            storage.getBoolean(
+                PERMISSION_RATIONALE_SHOWN,
+                false,
+            ) -> showPermissionDeniedDialog()
+            else -> requestCameraPermission()
         }
-        ActivityCompat.shouldShowRequestPermissionRationale(
-            this,
-            Manifest.permission.CAMERA,
-        ) -> showPermissionRationaleDialog()
-        storage.getBoolean(
-            PERMISSION_RATIONALE_SHOWN,
-            false,
-        ) -> showPermissionDeniedDialog()
-        else -> requestCameraPermission()
     }
 
     /**
@@ -86,7 +90,9 @@ abstract class CameraPermissionCheckingActivity : AppCompatActivity() {
             when (grantResults[0]) {
                 PackageManager.PERMISSION_GRANTED -> {
                     mainScope.launch { permissionStat.trackResult("success") }
-                    prepareCamera { onCameraReady() }
+                    mainScope.launch {
+                        onCameraReady()
+                    }
                 }
                 else -> {
                     mainScope.launch { permissionStat.trackResult("failure") }

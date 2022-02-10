@@ -5,33 +5,67 @@ import android.graphics.Bitmap
 import android.graphics.Rect
 import androidx.lifecycle.LifecycleOwner
 import com.stripe.android.camera.CameraPreviewImage
+import com.stripe.android.camera.framework.AggregateResultListener
+import com.stripe.android.camera.framework.AnalyzerLoopErrorListener
 import com.stripe.android.camera.framework.AnalyzerPool
 import com.stripe.android.camera.framework.ProcessBoundAnalyzerLoop
 import com.stripe.android.camera.scanui.ScanFlow
+import com.stripe.android.identity.ml.AnalyzerInput
+import com.stripe.android.identity.ml.AnalyzerOutput
 import com.stripe.android.identity.ml.IDDetectorAnalyzer
+import com.stripe.android.identity.states.ScanState
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
-class IdentityScanFlow :
-    ScanFlow<Int, CameraPreviewImage<Bitmap>> {
+/**
+ * Identity's [ScanFlow] implementation, uses a pool of [IDDetectorAnalyzer] to within a
+ * [ProcessBoundAnalyzerLoop] to analyze a [Flow] of [CameraPreviewImage]s.
+ * The results are handled in [IDDetectorAggregator].
+ *
+ * TODO(ccen): merge with [CardScanFlow].
+ */
+internal class IdentityScanFlow(
+    scanType: ScanState.ScanType,
+    private val analyzerLoopErrorListener: AnalyzerLoopErrorListener,
+    aggregateResultListener: AggregateResultListener<IDDetectorAggregator.InterimResult, IDDetectorAggregator.FinalResult>
+) : ScanFlow<Int, CameraPreviewImage<Bitmap>> {
+    private var aggregator = IDDetectorAggregator(
+        scanType,
+        aggregateResultListener
+    )
 
-    private var loop:
-        ProcessBoundAnalyzerLoop<
-            IDDetectorAnalyzer.Input,
-            IDDetectorAnalyzer.State,
-            IDDetectorAnalyzer.Output
-            >? = null
+    /**
+     * If this is true, do not start the flow.
+     */
+    private var canceled = false
 
-    private var aggregator = IDDetectorAggregator()
-
+    /**
+     * Pool of analyzers, initialized when [startFlow] is called.
+     */
     private var analyzerPool:
         AnalyzerPool<
-            IDDetectorAnalyzer.Input,
-            IDDetectorAnalyzer.State,
-            IDDetectorAnalyzer.Output
+            AnalyzerInput,
+            ScanState,
+            AnalyzerOutput
             >? = null
+
+    /**
+     * The loop to execute analyze, initialized upon [analyzerPool] is initialized.
+     */
+    private var loop:
+        ProcessBoundAnalyzerLoop<
+            AnalyzerInput,
+            ScanState,
+            AnalyzerOutput
+            >? = null
+
+    /**
+     * The [Job] to track loop, initialized upon [loop] starts.
+     */
+    private var loopJob: Job? = null
 
     override fun startFlow(
         context: Context,
@@ -42,6 +76,9 @@ class IdentityScanFlow :
         parameters: Int
     ) {
         coroutineScope.launch {
+            if (canceled) {
+                return@launch
+            }
             aggregator.bindToLifecycle(lifecycleOwner)
 
             analyzerPool = AnalyzerPool.of(
@@ -51,12 +88,12 @@ class IdentityScanFlow :
             loop = ProcessBoundAnalyzerLoop(
                 analyzerPool = requireNotNull(analyzerPool),
                 resultHandler = aggregator,
-                analyzerLoopErrorListener = IDDetectorAnalyzerLoopErrorListener()
+                analyzerLoopErrorListener = analyzerLoopErrorListener
             )
 
-            requireNotNull(loop).subscribeTo(
+            loopJob = requireNotNull(loop).subscribeTo(
                 imageStream.map { cameraPreviewImage ->
-                    IDDetectorAnalyzer.Input(cameraPreviewImage, viewFinder)
+                    AnalyzerInput(cameraPreviewImage, viewFinder)
                 },
                 coroutineScope,
             )
@@ -64,5 +101,23 @@ class IdentityScanFlow :
     }
 
     override fun cancelFlow() {
+        canceled = true
+        aggregator.run { cancel() }
+        stopFlow()
+    }
+
+    private fun stopFlow() {
+        loop?.unsubscribe()
+        loop = null
+
+        analyzerPool?.closeAllAnalyzers()
+        analyzerPool = null
+
+        loopJob?.apply {
+            if (isActive) {
+                cancel()
+            }
+        }
+        loopJob = null
     }
 }

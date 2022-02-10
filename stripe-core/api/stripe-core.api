@@ -5,16 +5,7 @@ public final class com/stripe/android/core/BuildConfig {
 	public fun <init> ()V
 }
 
-public abstract interface class com/stripe/android/core/Logger {
-	public static final field Companion Lcom/stripe/android/core/Logger$Companion;
-	public abstract fun debug (Ljava/lang/String;)V
-	public abstract fun error (Ljava/lang/String;Ljava/lang/Throwable;)V
-	public abstract fun info (Ljava/lang/String;)V
-	public abstract fun warning (Ljava/lang/String;)V
-}
-
 public final class com/stripe/android/core/Logger$Companion {
-	public final fun getInstance (Z)Lcom/stripe/android/core/Logger;
 	public final fun noop ()Lcom/stripe/android/core/Logger;
 	public final fun real ()Lcom/stripe/android/core/Logger;
 }
@@ -26,8 +17,6 @@ public final class com/stripe/android/core/Logger$DefaultImpls {
 public final class com/stripe/android/core/StripeError : com/stripe/android/core/model/StripeModel, java/io/Serializable {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
-	public fun <init> ()V
-	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
 	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Ljava/lang/String;
@@ -61,7 +50,6 @@ public final class com/stripe/android/core/exception/APIConnectionException : co
 }
 
 public final class com/stripe/android/core/exception/APIConnectionException$Companion {
-	public final synthetic fun create (Ljava/io/IOException;Ljava/lang/String;)Lcom/stripe/android/core/exception/APIConnectionException;
 	public static synthetic fun create$default (Lcom/stripe/android/core/exception/APIConnectionException$Companion;Ljava/io/IOException;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/core/exception/APIConnectionException;
 }
 
@@ -70,7 +58,6 @@ public final class com/stripe/android/core/exception/APIException : com/stripe/a
 	public fun <init> ()V
 	public fun <init> (Lcom/stripe/android/core/StripeError;Ljava/lang/String;ILjava/lang/String;Ljava/lang/Throwable;)V
 	public synthetic fun <init> (Lcom/stripe/android/core/StripeError;Ljava/lang/String;ILjava/lang/String;Ljava/lang/Throwable;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public fun <init> (Ljava/lang/Throwable;)V
 }
 
 public final class com/stripe/android/core/exception/InvalidRequestException : com/stripe/android/core/exception/StripeException {
@@ -95,17 +82,6 @@ public abstract class com/stripe/android/core/exception/StripeException : java/l
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class com/stripe/android/core/exception/StripeException$Companion {
-	public final fun create (Ljava/lang/Throwable;)Lcom/stripe/android/core/exception/StripeException;
-}
-
-public final class com/stripe/android/core/injection/CoroutineContextModule {
-	public static final field $stable I
-	public fun <init> ()V
-	public final fun provideUIContext ()Lkotlin/coroutines/CoroutineContext;
-	public final fun provideWorkContext ()Lkotlin/coroutines/CoroutineContext;
-}
-
 public final class com/stripe/android/core/injection/CoroutineContextModule_ProvideUIContextFactory : dagger/internal/Factory {
 	public fun <init> (Lcom/stripe/android/core/injection/CoroutineContextModule;)V
 	public static fun create (Lcom/stripe/android/core/injection/CoroutineContextModule;)Lcom/stripe/android/core/injection/CoroutineContextModule_ProvideUIContextFactory;
@@ -122,38 +98,10 @@ public final class com/stripe/android/core/injection/CoroutineContextModule_Prov
 	public static fun provideWorkContext (Lcom/stripe/android/core/injection/CoroutineContextModule;)Lkotlin/coroutines/CoroutineContext;
 }
 
-public abstract interface annotation class com/stripe/android/core/injection/IOContext : java/lang/annotation/Annotation {
-}
-
-public abstract interface class com/stripe/android/core/injection/Injectable {
-	public abstract fun fallbackInitialize (Ljava/lang/Object;)V
-}
-
 public final class com/stripe/android/core/injection/InjectableKtxKt {
-	public static final fun injectWithFallback (Lcom/stripe/android/core/injection/Injectable;Ljava/lang/String;Ljava/lang/Object;)V
-}
-
-public abstract interface class com/stripe/android/core/injection/Injector {
-	public abstract fun inject (Lcom/stripe/android/core/injection/Injectable;)V
-}
-
-public abstract interface annotation class com/stripe/android/core/injection/InjectorKey : java/lang/annotation/Annotation {
 }
 
 public final class com/stripe/android/core/injection/InjectorKt {
-	public static final field DUMMY_INJECTOR_KEY Ljava/lang/String;
-}
-
-public abstract interface class com/stripe/android/core/injection/InjectorRegistry {
-	public abstract fun nextKey (Ljava/lang/String;)Ljava/lang/String;
-	public abstract fun register (Lcom/stripe/android/core/injection/Injector;Ljava/lang/String;)V
-	public abstract fun retrieve (Ljava/lang/String;)Lcom/stripe/android/core/injection/Injector;
-}
-
-public final class com/stripe/android/core/injection/LoggingModule {
-	public static final field $stable I
-	public fun <init> ()V
-	public final fun provideLogger (Z)Lcom/stripe/android/core/Logger;
 }
 
 public final class com/stripe/android/core/injection/LoggingModule_ProvideLoggerFactory : dagger/internal/Factory {
@@ -165,76 +113,9 @@ public final class com/stripe/android/core/injection/LoggingModule_ProvideLogger
 }
 
 public final class com/stripe/android/core/injection/NamedConstantsKt {
-	public static final field ENABLE_LOGGING Ljava/lang/String;
-}
-
-public abstract interface annotation class com/stripe/android/core/injection/UIContext : java/lang/annotation/Annotation {
-}
-
-public final class com/stripe/android/core/injection/WeakMapInjectorRegistry : com/stripe/android/core/injection/InjectorRegistry {
-	public static final field $stable I
-	public static final field INSTANCE Lcom/stripe/android/core/injection/WeakMapInjectorRegistry;
-	public final fun getCURRENT_REGISTER_KEY ()Ljava/util/concurrent/atomic/AtomicInteger;
-	public final fun getStaticCacheMap ()Ljava/util/WeakHashMap;
-	public fun nextKey (Ljava/lang/String;)Ljava/lang/String;
-	public fun register (Lcom/stripe/android/core/injection/Injector;Ljava/lang/String;)V
-	public fun retrieve (Ljava/lang/String;)Lcom/stripe/android/core/injection/Injector;
-}
-
-public final class com/stripe/android/core/model/Country {
-	public static final field $stable I
-	public fun <init> (Lcom/stripe/android/core/model/CountryCode;Ljava/lang/String;)V
-	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
-	public final fun component1 ()Lcom/stripe/android/core/model/CountryCode;
-	public final fun component2 ()Ljava/lang/String;
-	public final fun copy (Lcom/stripe/android/core/model/CountryCode;Ljava/lang/String;)Lcom/stripe/android/core/model/Country;
-	public static synthetic fun copy$default (Lcom/stripe/android/core/model/Country;Lcom/stripe/android/core/model/CountryCode;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/core/model/Country;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getCode ()Lcom/stripe/android/core/model/CountryCode;
-	public final fun getName ()Ljava/lang/String;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class com/stripe/android/core/model/CountryCode : android/os/Parcelable {
-	public static final field $stable I
-	public static final field CREATOR Landroid/os/Parcelable$Creator;
-	public static final field Companion Lcom/stripe/android/core/model/CountryCode$Companion;
-	public fun <init> (Ljava/lang/String;)V
-	public final fun component1 ()Ljava/lang/String;
-	public final fun copy (Ljava/lang/String;)Lcom/stripe/android/core/model/CountryCode;
-	public static synthetic fun copy$default (Lcom/stripe/android/core/model/CountryCode;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/core/model/CountryCode;
-	public fun describeContents ()I
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getValue ()Ljava/lang/String;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-	public fun writeToParcel (Landroid/os/Parcel;I)V
-}
-
-public final class com/stripe/android/core/model/CountryCode$Companion {
-	public final fun create (Ljava/lang/String;)Lcom/stripe/android/core/model/CountryCode;
-	public final fun getCA ()Lcom/stripe/android/core/model/CountryCode;
-	public final fun getGB ()Lcom/stripe/android/core/model/CountryCode;
-	public final fun getUS ()Lcom/stripe/android/core/model/CountryCode;
-	public final fun isCA (Lcom/stripe/android/core/model/CountryCode;)Z
-	public final fun isGB (Lcom/stripe/android/core/model/CountryCode;)Z
-	public final fun isUS (Lcom/stripe/android/core/model/CountryCode;)Z
 }
 
 public final class com/stripe/android/core/model/CountryCodeKt {
-	public static final fun getCountryCode (Ljava/util/Locale;)Lcom/stripe/android/core/model/CountryCode;
-}
-
-public final class com/stripe/android/core/model/CountryUtils {
-	public static final field $stable I
-	public static final field INSTANCE Lcom/stripe/android/core/model/CountryUtils;
-	public final synthetic fun doesCountryUsePostalCode (Lcom/stripe/android/core/model/CountryCode;)Z
-	public final synthetic fun doesCountryUsePostalCode (Ljava/lang/String;)Z
-	public final synthetic fun getCountryByCode (Lcom/stripe/android/core/model/CountryCode;Ljava/util/Locale;)Lcom/stripe/android/core/model/Country;
-	public final synthetic fun getCountryCodeByName (Ljava/lang/String;Ljava/util/Locale;)Lcom/stripe/android/core/model/CountryCode;
-	public final synthetic fun getDisplayCountry (Lcom/stripe/android/core/model/CountryCode;Ljava/util/Locale;)Ljava/lang/String;
-	public final synthetic fun getOrderedCountries (Ljava/util/Locale;)Ljava/util/List;
 }
 
 public abstract interface class com/stripe/android/core/model/StripeModel : android/os/Parcelable {
@@ -242,47 +123,11 @@ public abstract interface class com/stripe/android/core/model/StripeModel : andr
 	public abstract fun hashCode ()I
 }
 
-public final class com/stripe/android/core/networking/AnalyticsRequest : com/stripe/android/core/networking/StripeRequest {
-	public static final field $stable I
-	public fun <init> (Ljava/util/Map;Ljava/util/Map;)V
-	public final fun component1 ()Ljava/util/Map;
-	public final fun component2 ()Ljava/util/Map;
-	public final fun copy (Ljava/util/Map;Ljava/util/Map;)Lcom/stripe/android/core/networking/AnalyticsRequest;
-	public static synthetic fun copy$default (Lcom/stripe/android/core/networking/AnalyticsRequest;Ljava/util/Map;Ljava/util/Map;ILjava/lang/Object;)Lcom/stripe/android/core/networking/AnalyticsRequest;
-	public fun equals (Ljava/lang/Object;)Z
-	public fun getHeaders ()Ljava/util/Map;
-	public fun getMethod ()Lcom/stripe/android/core/networking/StripeRequest$Method;
-	public fun getMimeType ()Lcom/stripe/android/core/networking/StripeRequest$MimeType;
-	public final fun getParams ()Ljava/util/Map;
-	public fun getRetryResponseCodes ()Ljava/lang/Iterable;
-	public fun getUrl ()Ljava/lang/String;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public abstract interface class com/stripe/android/core/networking/AnalyticsRequestExecutor {
-	public abstract fun executeAsync (Lcom/stripe/android/core/networking/AnalyticsRequest;)V
-}
-
-public abstract interface class com/stripe/android/core/networking/ConnectionFactory {
-	public abstract fun create (Lcom/stripe/android/core/networking/StripeRequest;)Lcom/stripe/android/core/networking/StripeConnection;
-	public abstract fun createForFile (Lcom/stripe/android/core/networking/StripeRequest;Ljava/io/File;)Lcom/stripe/android/core/networking/StripeConnection;
-}
-
 public final class com/stripe/android/core/networking/ConnectionFactory$Default : com/stripe/android/core/networking/ConnectionFactory {
 	public static final field $stable I
 	public static final field INSTANCE Lcom/stripe/android/core/networking/ConnectionFactory$Default;
 	public synthetic fun create (Lcom/stripe/android/core/networking/StripeRequest;)Lcom/stripe/android/core/networking/StripeConnection;
 	public fun createForFile (Lcom/stripe/android/core/networking/StripeRequest;Ljava/io/File;)Lcom/stripe/android/core/networking/StripeConnection;
-}
-
-public final class com/stripe/android/core/networking/DefaultAnalyticsRequestExecutor : com/stripe/android/core/networking/AnalyticsRequestExecutor {
-	public static final field $stable I
-	public static final field FIELD_EVENT Ljava/lang/String;
-	public fun <init> ()V
-	public fun <init> (Lcom/stripe/android/core/Logger;Lkotlin/coroutines/CoroutineContext;)V
-	public fun <init> (Lcom/stripe/android/core/networking/StripeNetworkClient;Lkotlin/coroutines/CoroutineContext;Lcom/stripe/android/core/Logger;)V
-	public fun executeAsync (Lcom/stripe/android/core/networking/AnalyticsRequest;)V
 }
 
 public final class com/stripe/android/core/networking/DefaultAnalyticsRequestExecutor_Factory : dagger/internal/Factory {
@@ -293,50 +138,9 @@ public final class com/stripe/android/core/networking/DefaultAnalyticsRequestExe
 	public static fun newInstance (Lcom/stripe/android/core/Logger;Lkotlin/coroutines/CoroutineContext;)Lcom/stripe/android/core/networking/DefaultAnalyticsRequestExecutor;
 }
 
-public final class com/stripe/android/core/networking/DefaultStripeNetworkClient : com/stripe/android/core/networking/StripeNetworkClient {
-	public static final field $stable I
-	public fun <init> ()V
-	public fun <init> (Lkotlin/coroutines/CoroutineContext;)V
-	public fun <init> (Lkotlin/coroutines/CoroutineContext;Lcom/stripe/android/core/networking/ConnectionFactory;)V
-	public fun <init> (Lkotlin/coroutines/CoroutineContext;Lcom/stripe/android/core/networking/ConnectionFactory;Lcom/stripe/android/core/networking/RetryDelaySupplier;)V
-	public fun <init> (Lkotlin/coroutines/CoroutineContext;Lcom/stripe/android/core/networking/ConnectionFactory;Lcom/stripe/android/core/networking/RetryDelaySupplier;I)V
-	public fun <init> (Lkotlin/coroutines/CoroutineContext;Lcom/stripe/android/core/networking/ConnectionFactory;Lcom/stripe/android/core/networking/RetryDelaySupplier;ILcom/stripe/android/core/Logger;)V
-	public synthetic fun <init> (Lkotlin/coroutines/CoroutineContext;Lcom/stripe/android/core/networking/ConnectionFactory;Lcom/stripe/android/core/networking/RetryDelaySupplier;ILcom/stripe/android/core/Logger;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public fun executeRequest (Lcom/stripe/android/core/networking/StripeRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public fun executeRequestForFile (Lcom/stripe/android/core/networking/StripeRequest;Ljava/io/File;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-}
-
 public final class com/stripe/android/core/networking/NetworkConstantsKt {
 	public static final field HEADER_AUTHORIZATION Ljava/lang/String;
 	public static final field HEADER_CONTENT_TYPE Ljava/lang/String;
-	public static final field HTTP_TOO_MANY_REQUESTS I
-}
-
-public final class com/stripe/android/core/networking/QueryStringFactory {
-	public static final field $stable I
-	public static final field INSTANCE Lcom/stripe/android/core/networking/QueryStringFactory;
-	public final fun compactParams (Ljava/util/Map;)Ljava/util/Map;
-	public final fun create (Ljava/util/Map;)Ljava/lang/String;
-	public final fun createFromParamsWithEmptyValues (Ljava/util/Map;)Ljava/lang/String;
-}
-
-public final class com/stripe/android/core/networking/RequestId {
-	public static final field $stable I
-	public fun <init> (Ljava/lang/String;)V
-	public final fun component1 ()Ljava/lang/String;
-	public final fun copy (Ljava/lang/String;)Lcom/stripe/android/core/networking/RequestId;
-	public static synthetic fun copy$default (Lcom/stripe/android/core/networking/RequestId;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/core/networking/RequestId;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getValue ()Ljava/lang/String;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class com/stripe/android/core/networking/RetryDelaySupplier {
-	public static final field $stable I
-	public fun <init> ()V
-	public fun <init> (J)V
-	public final fun getDelayMillis (II)J
 }
 
 public final class com/stripe/android/core/networking/RetryDelaySupplier_Factory : dagger/internal/Factory {
@@ -345,12 +149,6 @@ public final class com/stripe/android/core/networking/RetryDelaySupplier_Factory
 	public fun get ()Lcom/stripe/android/core/networking/RetryDelaySupplier;
 	public synthetic fun get ()Ljava/lang/Object;
 	public static fun newInstance ()Lcom/stripe/android/core/networking/RetryDelaySupplier;
-}
-
-public abstract interface class com/stripe/android/core/networking/StripeConnection : java/io/Closeable {
-	public abstract fun createBodyFromResponseStream (Ljava/io/InputStream;)Ljava/lang/Object;
-	public abstract fun getResponse ()Lcom/stripe/android/core/networking/StripeResponse;
-	public abstract fun getResponseCode ()I
 }
 
 public abstract class com/stripe/android/core/networking/StripeConnection$AbstractConnection : com/stripe/android/core/networking/StripeConnection {
@@ -373,24 +171,6 @@ public final class com/stripe/android/core/networking/StripeConnection$FileConne
 	public synthetic fun createBodyFromResponseStream (Ljava/io/InputStream;)Ljava/lang/Object;
 }
 
-public abstract interface class com/stripe/android/core/networking/StripeNetworkClient {
-	public abstract fun executeRequest (Lcom/stripe/android/core/networking/StripeRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public abstract fun executeRequestForFile (Lcom/stripe/android/core/networking/StripeRequest;Ljava/io/File;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-}
-
-public abstract class com/stripe/android/core/networking/StripeRequest {
-	public static final field $stable I
-	public fun <init> ()V
-	public abstract fun getHeaders ()Ljava/util/Map;
-	public abstract fun getMethod ()Lcom/stripe/android/core/networking/StripeRequest$Method;
-	public abstract fun getMimeType ()Lcom/stripe/android/core/networking/StripeRequest$MimeType;
-	public fun getPostHeaders ()Ljava/util/Map;
-	public abstract fun getRetryResponseCodes ()Ljava/lang/Iterable;
-	public abstract fun getUrl ()Ljava/lang/String;
-	public fun setPostHeaders (Ljava/util/Map;)V
-	public fun writePostBody (Ljava/io/OutputStream;)V
-}
-
 public final class com/stripe/android/core/networking/StripeRequest$Method : java/lang/Enum {
 	public static final field DELETE Lcom/stripe/android/core/networking/StripeRequest$Method;
 	public static final field GET Lcom/stripe/android/core/networking/StripeRequest$Method;
@@ -410,67 +190,6 @@ public final class com/stripe/android/core/networking/StripeRequest$MimeType : j
 	public static fun values ()[Lcom/stripe/android/core/networking/StripeRequest$MimeType;
 }
 
-public final class com/stripe/android/core/networking/StripeResponse {
-	public static final field $stable I
-	public fun <init> (ILjava/lang/Object;Ljava/util/Map;)V
-	public synthetic fun <init> (ILjava/lang/Object;Ljava/util/Map;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun component1 ()I
-	public final fun component2 ()Ljava/lang/Object;
-	public final fun component3 ()Ljava/util/Map;
-	public final fun copy (ILjava/lang/Object;Ljava/util/Map;)Lcom/stripe/android/core/networking/StripeResponse;
-	public static synthetic fun copy$default (Lcom/stripe/android/core/networking/StripeResponse;ILjava/lang/Object;Ljava/util/Map;ILjava/lang/Object;)Lcom/stripe/android/core/networking/StripeResponse;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getBody ()Ljava/lang/Object;
-	public final fun getCode ()I
-	public final fun getHeaderValue (Ljava/lang/String;)Ljava/util/List;
-	public final fun getHeaders ()Ljava/util/Map;
-	public final fun getRequestId ()Lcom/stripe/android/core/networking/RequestId;
-	public fun hashCode ()I
-	public final fun isError ()Z
-	public final fun isOk ()Z
-	public final fun isRateLimited ()Z
-	public fun toString ()Ljava/lang/String;
-}
-
 public final class com/stripe/android/core/networking/StripeResponseKtxKt {
-	public static final fun responseJson (Lcom/stripe/android/core/networking/StripeResponse;)Lorg/json/JSONObject;
-}
-
-public final class com/stripe/android/core/storage/SharedPreferencesStorage : com/stripe/android/core/storage/Storage {
-	public static final field $stable I
-	public fun <init> (Landroid/content/Context;Ljava/lang/String;)V
-	public fun clear ()Z
-	public fun getBoolean (Ljava/lang/String;Z)Z
-	public fun getFloat (Ljava/lang/String;F)F
-	public fun getInt (Ljava/lang/String;I)I
-	public fun getLong (Ljava/lang/String;J)J
-	public fun getString (Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
-	public fun remove (Ljava/lang/String;)Z
-	public fun storeValue (Ljava/lang/String;F)Z
-	public fun storeValue (Ljava/lang/String;I)Z
-	public fun storeValue (Ljava/lang/String;J)Z
-	public fun storeValue (Ljava/lang/String;Ljava/lang/String;)Z
-	public fun storeValue (Ljava/lang/String;Z)Z
-}
-
-public abstract interface class com/stripe/android/core/storage/Storage {
-	public abstract fun clear ()Z
-	public abstract fun getBoolean (Ljava/lang/String;Z)Z
-	public abstract fun getFloat (Ljava/lang/String;F)F
-	public abstract fun getInt (Ljava/lang/String;I)I
-	public abstract fun getLong (Ljava/lang/String;J)J
-	public abstract fun getString (Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
-	public abstract fun remove (Ljava/lang/String;)Z
-	public abstract fun storeValue (Ljava/lang/String;F)Z
-	public abstract fun storeValue (Ljava/lang/String;I)Z
-	public abstract fun storeValue (Ljava/lang/String;J)Z
-	public abstract fun storeValue (Ljava/lang/String;Ljava/lang/String;)Z
-	public abstract fun storeValue (Ljava/lang/String;Z)Z
-}
-
-public final class com/stripe/android/core/storage/StorageFactory {
-	public static final field $stable I
-	public static final field INSTANCE Lcom/stripe/android/core/storage/StorageFactory;
-	public final fun getStorageInstance (Landroid/content/Context;Ljava/lang/String;)Lcom/stripe/android/core/storage/Storage;
 }
 

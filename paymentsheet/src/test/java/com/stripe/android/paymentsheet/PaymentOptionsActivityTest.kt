@@ -5,6 +5,7 @@ import android.content.Intent
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
+import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.common.truth.Truth.assertThat
@@ -13,9 +14,9 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.R
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
-import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.PaymentOptionsViewModel.TransitionTarget
+import com.stripe.android.paymentsheet.PaymentSheetFixtures.PAYMENT_OPTIONS_CONTRACT_ARGS
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.databinding.PrimaryButtonBinding
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -34,6 +35,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.times
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.BeforeTest
 
@@ -303,21 +305,8 @@ class PaymentOptionsActivityTest {
                 AddressFieldElementRepository(
                     ApplicationProvider.getApplicationContext<Context>().resources
                 )
-            )
-        )
-    }
-
-    private companion object {
-        private val PAYMENT_OPTIONS_CONTRACT_ARGS = PaymentOptionContract.Args(
-            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-            paymentMethods = emptyList(),
-            config = PaymentSheetFixtures.CONFIG_GOOGLEPAY,
-            isGooglePayReady = false,
-            newCard = null,
-            statusBarColor = PaymentSheetFixtures.STATUS_BAR_COLOR,
-            injectorKey = DUMMY_INJECTOR_KEY,
-            enableLogging = false,
-            productUsage = mock()
+            ),
+            savedStateHandle = SavedStateHandle()
         )
     }
 }
