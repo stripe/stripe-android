@@ -3,7 +3,6 @@ package com.stripe.android.link
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.Icon
@@ -32,7 +31,6 @@ internal class LinkActivity : ComponentActivity() {
         LinkActivityContract.Args.fromIntent(intent)
     }
 
-    @ExperimentalAnimationApi
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {

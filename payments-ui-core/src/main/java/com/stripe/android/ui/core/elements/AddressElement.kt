@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+@ExperimentalCoroutinesApi
 class AddressElement constructor(
     _identifier: IdentifierSpec,
     private val addressFieldRepository: AddressFieldElementRepository,
@@ -50,7 +51,6 @@ class AddressElement constructor(
     override fun sectionFieldErrorController(): SectionFieldErrorController =
         controller
 
-    @ExperimentalCoroutinesApi
     override fun getFormFieldValueFlow() = fields.flatMapLatest { fieldElements ->
         combine(
             fieldElements
