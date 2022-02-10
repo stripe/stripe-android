@@ -6,7 +6,7 @@ import com.stripe.android.identity.IdentityActivity
 /**
  * Gets the hosting [IdentityActivity] and invokes [IdentityActivity.ensureCameraPermission].
  */
-fun Fragment.ensureCameraPermissionFromIdentityActivity(
+internal fun Fragment.ensureCameraPermissionFromIdentityActivity(
     onCameraReady: () -> Unit,
     onUserDeniedCameraPermission: () -> Unit
 ) {

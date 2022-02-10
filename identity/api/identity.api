@@ -215,10 +215,6 @@ public final class com/stripe/android/identity/navigation/DriverLicenseUploadFra
 	public final fun newInstance ()Lcom/stripe/android/identity/navigation/DriverLicenseUploadFragment;
 }
 
-public final class com/stripe/android/identity/navigation/FragmentKtxKt {
-	public static final fun ensureCameraPermissionFromIdentityActivity (Landroidx/fragment/app/Fragment;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;)V
-}
-
 public final class com/stripe/android/identity/navigation/IDUploadFragment : androidx/fragment/app/Fragment {
 	public static final field Companion Lcom/stripe/android/identity/navigation/IDUploadFragment$Companion;
 	public fun <init> ()V
