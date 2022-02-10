@@ -36,11 +36,10 @@ internal fun RowElementUI(
                 field,
                 Modifier
                     .constrainAs(fieldRefs[index]) {
-                        if(index == 0) {
+                        if (index == 0) {
                             start.linkTo(parent.start)
-                        }
-                        else{
-                            start.linkTo(dividerRefs[index -1].end)
+                        } else {
+                            start.linkTo(dividerRefs[index - 1].end)
                         }
                         top.linkTo(parent.top)
                     }
