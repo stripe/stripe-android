@@ -12,11 +12,15 @@ class CardScanFragmentDemoActivity : AppCompatActivity() {
         ActivityCardScanFragmentDemoBinding.inflate(layoutInflater)
     }
 
+    private lateinit var cardScanSheet: CardScanSheet
+
     private val settings by lazy { Settings(this) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(viewBinding.root)
+
+        cardScanSheet = CardScanSheet.create(this, settings.publishableKey)
 
         viewBinding.launchScanButton.setOnClickListener {
             attachCardScanFragment()
@@ -26,12 +30,12 @@ class CardScanFragmentDemoActivity : AppCompatActivity() {
     private fun attachCardScanFragment() {
         viewBinding.launchScanButton.isEnabled = false
         viewBinding.fragmentContainer.visibility = View.VISIBLE
-        CardScanSheet.attachCardScanFragment(
+        cardScanSheet.attachCardScanFragment(
             this, supportFragmentManager, R.id.fragment_container, settings.publishableKey, this::onScanFinished
         )
     }
 
-    private fun onScanFinished(result: CardScanSheetResult?) {
+    private fun onScanFinished(result: CardScanSheetResult) {
 
         CardScanSheet.removeCardScanFragment(supportFragmentManager)
         viewBinding.fragmentContainer.visibility = View.GONE
