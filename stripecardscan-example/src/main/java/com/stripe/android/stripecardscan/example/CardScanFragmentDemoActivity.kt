@@ -31,7 +31,7 @@ class CardScanFragmentDemoActivity : AppCompatActivity() {
         viewBinding.launchScanButton.isEnabled = false
         viewBinding.fragmentContainer.visibility = View.VISIBLE
         cardScanSheet.attachCardScanFragment(
-            this, supportFragmentManager, R.id.fragment_container, settings.publishableKey, this::onScanFinished
+            this, supportFragmentManager, R.id.fragment_container, this::onScanFinished
         )
     }
 

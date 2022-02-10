@@ -148,7 +148,7 @@ public final class com/stripe/android/stripecardscan/cardscan/CardScanSheet {
 	public static final field $stable I
 	public static final field Companion Lcom/stripe/android/stripecardscan/cardscan/CardScanSheet$Companion;
 	public synthetic fun <init> (Ljava/lang/String;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun attachCardScanFragment (Landroidx/lifecycle/LifecycleOwner;Landroidx/fragment/app/FragmentManager;ILjava/lang/String;Lkotlin/jvm/functions/Function1;)V
+	public final fun attachCardScanFragment (Landroidx/lifecycle/LifecycleOwner;Landroidx/fragment/app/FragmentManager;ILkotlin/jvm/functions/Function1;)V
 	public static final fun create (Landroidx/activity/ComponentActivity;Ljava/lang/String;)Lcom/stripe/android/stripecardscan/cardscan/CardScanSheet;
 	public final fun present (Lkotlin/jvm/functions/Function1;)V
 }

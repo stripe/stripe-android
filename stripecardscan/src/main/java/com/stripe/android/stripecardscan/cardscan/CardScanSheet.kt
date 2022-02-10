@@ -134,7 +134,6 @@ class CardScanSheet private constructor(private val stripePublishableKey: String
         lifecycleOwner: LifecycleOwner,
         supportFragmentManager: FragmentManager,
         @IdRes fragmentContainer: Int,
-        stripePublishableKey: String,
         onFinished: (cardScanSheetResult: CardScanSheetResult) -> Unit
     ) {
         supportFragmentManager.commit {
