@@ -58,7 +58,7 @@ class CardScanFragment : ScanFragment(), SimpleScanStateful<CardScanState> {
     override val previewFrame: ViewGroup by lazy { viewBinding.previewFrame }
 
     private val params: CardScanSheetParams by lazy {
-        CardScanSheetParams(arguments?.getString(CARD_SCAN_FRAGMENT_PARAMS_KEY) ?: "")
+        arguments?.getParcelable(CARD_SCAN_FRAGMENT_PARAMS_KEY) ?: CardScanSheetParams("")
     }
 
     private val hasPreviousValidResult = AtomicBoolean(false)
@@ -157,13 +157,6 @@ class CardScanFragment : ScanFragment(), SimpleScanStateful<CardScanState> {
         }
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        if (!ensureValidParams()) {
-            return
-        }
-    }
-
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -189,6 +182,13 @@ class CardScanFragment : ScanFragment(), SimpleScanStateful<CardScanState> {
 
         displayState(scanState, scanStatePrevious)
         return viewBinding.root
+    }
+
+    override fun onStart() {
+        super.onStart()
+        if (!ensureValidParams()) {
+            return
+        }
     }
 
     override fun onResume() {
@@ -301,6 +301,7 @@ class CardScanFragment : ScanFragment(), SimpleScanStateful<CardScanState> {
             appDetails = AppDetails.fromContext(requireActivity()),
             scanStatistics = ScanStatistics.fromStats()
         )
+        scanFlow.cancelFlow()
         super.closeScanner()
     }
 }
