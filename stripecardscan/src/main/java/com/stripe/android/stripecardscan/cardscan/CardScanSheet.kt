@@ -6,6 +6,12 @@ import android.os.Parcelable
 import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContract
+import androidx.annotation.IdRes
+import androidx.core.os.bundleOf
+import androidx.fragment.app.FragmentManager
+import androidx.fragment.app.add
+import androidx.fragment.app.commit
+import androidx.lifecycle.LifecycleOwner
 import com.stripe.android.stripecardscan.cardscan.exception.UnknownScanException
 import com.stripe.android.stripecardscan.payment.card.ScannedCard
 import com.stripe.android.stripecardscan.scanui.CancellationReason
@@ -31,6 +37,8 @@ sealed interface CardScanSheetResult : Parcelable {
     @Parcelize
     data class Failed(val error: Throwable) : CardScanSheetResult
 }
+
+private const val CARD_SCAN_FRAGMENT_TAG = "CardScanFragmentTag"
 
 class CardScanSheet private constructor(private val stripePublishableKey: String) {
 
@@ -79,6 +87,51 @@ class CardScanSheet private constructor(private val stripePublishableKey: String
                 ?: CardScanSheetResult.Failed(
                     UnknownScanException("No data in the result intent")
                 )
+
+        /**
+         * Attach the cardscan fragment to the specified container.
+         * Results will be returned in the callback function.
+         */
+        fun attachCardScanFragment(
+            lifecycleOwner: LifecycleOwner,
+            supportFragmentManager: FragmentManager,
+            @IdRes fragmentContainer: Int,
+            stripePublishableKey: String,
+            onFinished: (cardScanSheetResult: CardScanSheetResult?) -> Unit
+        ) {
+            supportFragmentManager.commit {
+                setReorderingAllowed(true)
+                add<CardScanFragment>(
+                    fragmentContainer,
+                    args = bundleOf(
+                        CARD_SCAN_FRAGMENT_PARAMS_KEY to CardScanSheetParams(stripePublishableKey)
+                    ),
+                    tag = CARD_SCAN_FRAGMENT_TAG
+                )
+            }
+
+            supportFragmentManager
+                .setFragmentResultListener(
+                    CARD_SCAN_FRAGMENT_REQUEST_KEY, lifecycleOwner
+                ) { _, bundle ->
+                    val result: CardScanSheetResult? = bundle.getParcelable(
+                        CARD_SCAN_FRAGMENT_BUNDLE_KEY
+                    )
+                    onFinished(result)
+                }
+        }
+
+        fun removeCardScanFragment(
+            supportFragmentManager: FragmentManager
+        ) {
+            supportFragmentManager.commit {
+                setReorderingAllowed(true)
+                val fragment = supportFragmentManager.findFragmentByTag(CARD_SCAN_FRAGMENT_TAG)
+                if (fragment != null) {
+                    remove(fragment)
+                }
+            }
+        }
     }
 
     /**

@@ -130,10 +130,10 @@ public final class com/stripe/android/stripecardscan/cardscan/CardScanFragment :
 	public fun getScanErrorListener ()Lcom/stripe/android/stripecardscan/scanui/ScanErrorListener;
 	public fun getScanState ()Lcom/stripe/android/stripecardscan/scanui/ScanState;
 	public fun getScanStatePrevious ()Lcom/stripe/android/stripecardscan/scanui/ScanState;
-	public fun onCreate (Landroid/os/Bundle;)V
 	public fun onCreateView (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Landroid/os/Bundle;)Landroid/view/View;
 	public fun onDestroy ()V
 	public fun onResume ()V
+	public fun onStart ()V
 	public fun setScanState (Lcom/stripe/android/stripecardscan/scanui/ScanState;)V
 	public fun setScanStatePrevious (Lcom/stripe/android/stripecardscan/scanui/ScanState;)V
 }
@@ -153,7 +153,9 @@ public final class com/stripe/android/stripecardscan/cardscan/CardScanSheet {
 }
 
 public final class com/stripe/android/stripecardscan/cardscan/CardScanSheet$Companion {
+	public final fun attachCardScanFragment (Landroidx/lifecycle/LifecycleOwner;Landroidx/fragment/app/FragmentManager;ILjava/lang/String;Lkotlin/jvm/functions/Function1;)V
 	public final fun create (Landroidx/activity/ComponentActivity;Ljava/lang/String;)Lcom/stripe/android/stripecardscan/cardscan/CardScanSheet;
+	public final fun removeCardScanFragment (Landroidx/fragment/app/FragmentManager;)V
 }
 
 public abstract interface class com/stripe/android/stripecardscan/cardscan/CardScanSheetResult : android/os/Parcelable {
