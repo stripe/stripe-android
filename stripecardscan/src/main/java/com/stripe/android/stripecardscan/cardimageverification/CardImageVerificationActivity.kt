@@ -354,7 +354,7 @@ internal open class CardImageVerificationActivity :
     private fun onScanDetailsAvailable(
         requiredCardDetails: RequiredCardDetails?,
     ) {
-        if (requiredCardDetails != null) {
+        if (requiredCardDetails != null && !requiredCardDetails.lastFour.isNullOrEmpty()) {
             this.requiredCardIssuer = requiredCardDetails.cardIssuer
             this.requiredCardLastFour = requiredCardDetails.lastFour
 
