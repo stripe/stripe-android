@@ -88,39 +88,6 @@ class CardScanSheet private constructor(private val stripePublishableKey: String
                     UnknownScanException("No data in the result intent")
                 )
 
-        /**
-         * Attach the cardscan fragment to the specified container.
-         * Results will be returned in the callback function.
-         */
-        fun attachCardScanFragment(
-            lifecycleOwner: LifecycleOwner,
-            supportFragmentManager: FragmentManager,
-            @IdRes fragmentContainer: Int,
-            stripePublishableKey: String,
-            onFinished: (cardScanSheetResult: CardScanSheetResult?) -> Unit
-        ) {
-            supportFragmentManager.commit {
-                setReorderingAllowed(true)
-                add<CardScanFragment>(
-                    fragmentContainer,
-                    args = bundleOf(
-                        CARD_SCAN_FRAGMENT_PARAMS_KEY to CardScanSheetParams(stripePublishableKey)
-                    ),
-                    tag = CARD_SCAN_FRAGMENT_TAG
-                )
-            }
-
-            supportFragmentManager
-                .setFragmentResultListener(
-                    CARD_SCAN_FRAGMENT_REQUEST_KEY, lifecycleOwner
-                ) { _, bundle ->
-                    val result: CardScanSheetResult? = bundle.getParcelable(
-                        CARD_SCAN_FRAGMENT_BUNDLE_KEY
-                    )
-                    onFinished(result)
-                }
-        }
-
         fun removeCardScanFragment(
             supportFragmentManager: FragmentManager
         ) {
@@ -157,5 +124,38 @@ class CardScanSheet private constructor(private val stripePublishableKey: String
      */
     private fun onResult(cardScanSheetResult: CardScanSheetResult) {
         onFinished?.let { it(cardScanSheetResult) }
+    }
+
+    /**
+     * Attach the cardscan fragment to the specified container.
+     * Results will be returned in the callback function.
+     */
+    fun attachCardScanFragment(
+        lifecycleOwner: LifecycleOwner,
+        supportFragmentManager: FragmentManager,
+        @IdRes fragmentContainer: Int,
+        stripePublishableKey: String,
+        onFinished: (cardScanSheetResult: CardScanSheetResult) -> Unit
+    ) {
+        supportFragmentManager.commit {
+            setReorderingAllowed(true)
+            add<CardScanFragment>(
+                fragmentContainer,
+                args = bundleOf(
+                    CARD_SCAN_FRAGMENT_PARAMS_KEY to CardScanSheetParams(stripePublishableKey)
+                ),
+                tag = CARD_SCAN_FRAGMENT_TAG
+            )
+        }
+
+        supportFragmentManager
+            .setFragmentResultListener(
+                CARD_SCAN_FRAGMENT_REQUEST_KEY, lifecycleOwner
+            ) { _, bundle ->
+                val result: CardScanSheetResult = bundle.getParcelable(
+                    CARD_SCAN_FRAGMENT_BUNDLE_KEY
+                ) ?: CardScanSheetResult.Failed(Throwable("Card scan params not provided"))
+                onFinished(result)
+            }
     }
 }
