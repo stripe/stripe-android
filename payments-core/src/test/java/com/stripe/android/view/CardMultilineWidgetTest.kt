@@ -1031,6 +1031,138 @@ internal class CardMultilineWidgetTest {
     }
 
     @Test
+    fun testCardValidCallback_usZipCodeRequired() {
+        cardMultilineWidget.usZipCodeRequired = true
+
+        var currentIsValid = false
+        var currentInvalidFields = emptySet<CardValidCallback.Fields>()
+        cardMultilineWidget.setCardValidCallback { isValid, invalidFields ->
+            currentIsValid = isValid
+            currentInvalidFields = invalidFields
+        }
+
+        assertThat(currentIsValid)
+            .isFalse()
+        assertThat(currentInvalidFields)
+            .containsExactly(
+                CardValidCallback.Fields.Number,
+                CardValidCallback.Fields.Expiry,
+                CardValidCallback.Fields.Cvc,
+                CardValidCallback.Fields.Postal
+            )
+
+        cardMultilineWidget.setCardNumber(VISA_NO_SPACES)
+        assertThat(currentIsValid)
+            .isFalse()
+        assertThat(currentInvalidFields)
+            .containsExactly(
+                CardValidCallback.Fields.Expiry,
+                CardValidCallback.Fields.Cvc,
+                CardValidCallback.Fields.Postal
+            )
+
+        fullGroup.expiryDateEditText.append("12")
+        assertThat(currentIsValid)
+            .isFalse()
+        assertThat(currentInvalidFields)
+            .containsExactly(
+                CardValidCallback.Fields.Expiry,
+                CardValidCallback.Fields.Cvc,
+                CardValidCallback.Fields.Postal
+            )
+
+        fullGroup.expiryDateEditText.append("50")
+        assertThat(currentIsValid)
+            .isFalse()
+        assertThat(currentInvalidFields)
+            .containsExactly(
+                CardValidCallback.Fields.Cvc,
+                CardValidCallback.Fields.Postal
+            )
+
+        fullGroup.cvcEditText.append("123")
+        assertThat(currentIsValid)
+            .isFalse()
+        assertThat(currentInvalidFields)
+            .containsExactly(CardValidCallback.Fields.Postal)
+
+        fullGroup.postalCodeEditText.append("1")
+        assertThat(currentIsValid)
+            .isFalse()
+        assertThat(currentInvalidFields)
+            .containsExactly(CardValidCallback.Fields.Postal)
+
+        fullGroup.postalCodeEditText.append("2345")
+        assertThat(currentIsValid)
+            .isTrue()
+        assertThat(currentInvalidFields)
+            .isEmpty()
+    }
+
+    @Test
+    fun testCardValidCallback_postalCodeRequired() {
+        cardMultilineWidget.postalCodeRequired = true
+
+        var currentIsValid = false
+        var currentInvalidFields = emptySet<CardValidCallback.Fields>()
+        cardMultilineWidget.setCardValidCallback { isValid, invalidFields ->
+            currentIsValid = isValid
+            currentInvalidFields = invalidFields
+        }
+
+        assertThat(currentIsValid)
+            .isFalse()
+        assertThat(currentInvalidFields)
+            .containsExactly(
+                CardValidCallback.Fields.Number,
+                CardValidCallback.Fields.Expiry,
+                CardValidCallback.Fields.Cvc,
+                CardValidCallback.Fields.Postal
+            )
+
+        cardMultilineWidget.setCardNumber(VISA_NO_SPACES)
+        assertThat(currentIsValid)
+            .isFalse()
+        assertThat(currentInvalidFields)
+            .containsExactly(
+                CardValidCallback.Fields.Expiry,
+                CardValidCallback.Fields.Cvc,
+                CardValidCallback.Fields.Postal
+            )
+
+        fullGroup.expiryDateEditText.append("12")
+        assertThat(currentIsValid)
+            .isFalse()
+        assertThat(currentInvalidFields)
+            .containsExactly(
+                CardValidCallback.Fields.Expiry,
+                CardValidCallback.Fields.Cvc,
+                CardValidCallback.Fields.Postal
+            )
+
+        fullGroup.expiryDateEditText.append("50")
+        assertThat(currentIsValid)
+            .isFalse()
+        assertThat(currentInvalidFields)
+            .containsExactly(
+                CardValidCallback.Fields.Cvc,
+                CardValidCallback.Fields.Postal
+            )
+
+        fullGroup.cvcEditText.append("123")
+        assertThat(currentIsValid)
+            .isFalse()
+        assertThat(currentInvalidFields)
+            .containsExactly(CardValidCallback.Fields.Postal)
+
+        fullGroup.postalCodeEditText.setText("A")
+        assertThat(currentIsValid)
+            .isTrue()
+        assertThat(currentInvalidFields)
+            .isEmpty()
+    }
+
+    @Test
     fun shouldShowErrorIcon_shouldBeUpdatedCorrectly() {
         cardMultilineWidget.setExpiryDate(12, 2030)
         cardMultilineWidget.setCvcCode(CVC_VALUE_COMMON)
