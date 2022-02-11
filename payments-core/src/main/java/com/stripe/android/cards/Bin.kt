@@ -11,7 +11,7 @@ data class Bin internal constructor(
 ) : StripeModel {
     override fun toString() = value
 
-    companion object {
+    internal companion object {
         fun create(cardNumber: String): Bin? {
             return cardNumber
                 .take(BIN_LENGTH)

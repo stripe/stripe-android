@@ -23,7 +23,7 @@ sealed class CardNumber {
 
         val isValidLuhn = CardUtils.isValidLuhnNumber(normalized)
 
-        fun validate(panLength: Int): Validated? {
+        internal fun validate(panLength: Int): Validated? {
             return if (panLength >= MIN_PAN_LENGTH &&
                 normalized.length == panLength &&
                 isValidLuhn
@@ -43,7 +43,7 @@ sealed class CardNumber {
          * `"424242"` with pan length `16` will return `"4242 42"`;
          * `"4242424242424242"` with pan length `14` will return `"4242 424242 4242"`
          */
-        fun getFormatted(
+        internal fun getFormatted(
             panLength: Int = DEFAULT_PAN_LENGTH
         ) = formatNumber(panLength)
 
@@ -98,12 +98,12 @@ sealed class CardNumber {
     /**
      * A representation of a client-side validated card number.
      */
-    data class Validated constructor(
+    internal data class Validated constructor(
         internal val value: String
     ) : CardNumber()
 
     companion object {
-        fun getSpacePositions(panLength: Int) = SPACE_POSITIONS[panLength]
+        internal fun getSpacePositions(panLength: Int) = SPACE_POSITIONS[panLength]
             ?: DEFAULT_SPACE_POSITIONS
 
         internal const val MIN_PAN_LENGTH = 14
