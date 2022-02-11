@@ -1,6 +1,7 @@
 package com.stripe.android.ui.core.elements
 
 import androidx.annotation.StringRes
+import androidx.annotation.VisibleForTesting
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import com.stripe.android.ui.core.R
@@ -25,7 +26,7 @@ internal class DateConfig : TextFieldConfig {
 
     override fun determineState(input: String): TextFieldState {
         return if (input.isBlank()) {
-            TextFieldStateConstants.Error.Blank
+            Error.Blank
         } else {
             val newString = convertTo4DigitDate(input)
             when {
@@ -36,23 +37,38 @@ internal class DateConfig : TextFieldConfig {
                     Error.Invalid(R.string.incomplete_expiry_date)
                 }
                 else -> {
-                    val month = requireNotNull(newString.take(2).toIntOrNull())
-                    val year = requireNotNull(newString.takeLast(2).toIntOrNull())
-                    val yearMinus1900 = year + (2000 - 1900)
-                    val currentYear = Calendar.getInstance().get(Calendar.YEAR) - 1900
-                    val currentMonth = Calendar.getInstance().get(Calendar.MONTH) + 1
-                    if ((yearMinus1900 - currentYear) < 0) {
-                        Error.Invalid(R.string.incomplete_expiry_date)
-                    } else if ((yearMinus1900 - currentYear) > 50) {
-                        Error.Invalid(R.string.invalid_expiry_year)
-                    } else if ((yearMinus1900 - currentYear) == 0 && currentMonth > month) {
-                        Error.Invalid(R.string.incomplete_expiry_date)
-                    } else if (month !in 1..12) {
-                        Error.Incomplete(R.string.invalid_expiry_month)
-                    } else {
-                        Valid.Full
-                    }
+                    return determineTextFieldState(
+                        requireNotNull(newString.take(2).toIntOrNull()),
+                        requireNotNull(newString.takeLast(2).toIntOrNull()),
+                        // Calendar.getInstance().get(Calendar.MONTH) is 0-based, so add 1
+                        Calendar.getInstance().get(Calendar.MONTH) + 1,
+                        Calendar.getInstance().get(Calendar.YEAR)
+                    )
                 }
+            }
+        }
+    }
+
+    companion object {
+        @VisibleForTesting
+        fun determineTextFieldState(
+            month1Based: Int,
+            twoDigitYear: Int,
+            current1BasedMonth: Int,
+            currentYear: Int
+        ): TextFieldState {
+            val twoDigitCurrentYear = currentYear % 100
+
+            return if ((twoDigitYear - twoDigitCurrentYear) < 0) {
+                Error.Invalid(R.string.incomplete_expiry_date)
+            } else if ((twoDigitYear - twoDigitCurrentYear) > 50) {
+                Error.Invalid(R.string.invalid_expiry_year)
+            } else if ((twoDigitYear - twoDigitCurrentYear) == 0 && current1BasedMonth > month1Based) {
+                Error.Invalid(R.string.incomplete_expiry_date)
+            } else if (month1Based !in 1..12) {
+                Error.Incomplete(R.string.invalid_expiry_month)
+            } else {
+                Valid.Full
             }
         }
     }
