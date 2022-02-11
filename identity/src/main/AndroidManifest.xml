@@ -7,6 +7,8 @@
     <application>
         <activity
             android:name=".IdentityActivity"
+            android:screenOrientation="portrait"
+            android:configChanges="orientation|keyboardHidden"
             android:exported="false" />
     </application>
 

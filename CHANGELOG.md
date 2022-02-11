@@ -1,14 +1,15 @@
 # CHANGELOG
 ## X.X.X - 2022-XX-XX
+* [CHANGED] [4546](https://github.com/stripe/stripe-android/pull/4546) Update to kotlin 1.6
 * [FIXED] [4560](https://github.com/stripe/stripe-android/pull/4560) Fix `cardValidCallback` being added multiple times in `CardInputWidget`.
 ### PaymentSheet
 * [FIXED] [4466](https://github.com/stripe/stripe-android/pull/4466) Fix issues when activities are lost on low resource phones.
 * [FIXED] [4557](https://github.com/stripe/stripe-android/pull/4557) Add missing app info to some Stripe API requests
-
 ### Identity
 ### Card scanning
 * [FIXED] [4548](https://github.com/stripe/stripe-android/pull/4548) Potential work leak when canceling a card scan in StripeCardScan
 * [ADDED] [4562](https://github.com/stripe/stripe-android/pull/4562) Add an example page for cardscan
+* [FIXED] [4575](https://github.com/stripe/stripe-android/pull/4575) Fix card add display bug
 
 ## 19.1.1 - 2022-01-31
 ### PaymentSheet

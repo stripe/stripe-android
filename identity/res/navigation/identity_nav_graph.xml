@@ -87,6 +87,9 @@
         android:name="com.stripe.android.identity.navigation.CameraPermissionDeniedFragment"
         android:label="camera_permission_denied_fragment"
         tools:layout="@layout/camera_permission_denied_fragment">
+        <argument
+            android:name="scanType"
+            app:argType="com.stripe.android.identity.states.ScanState$ScanType" />
         <action
             android:id="@+id/action_cameraPermissionDeniedFragment_to_passportUploadFragment"
             app:destination="@id/passportUploadFragment" />
