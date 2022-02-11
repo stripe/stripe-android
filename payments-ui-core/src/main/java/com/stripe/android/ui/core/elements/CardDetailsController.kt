@@ -1,6 +1,5 @@
 package com.stripe.android.ui.core.elements
 
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.combine
 import java.util.UUID
 
@@ -32,7 +31,6 @@ internal class CardDetailsController : SectionFieldErrorController {
         )
     )
 
-    @ExperimentalCoroutinesApi
     override val error = combine(
         listOf(numberElement, expirationDateElement, cvcElement)
             .map { it.controller }
