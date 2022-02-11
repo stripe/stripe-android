@@ -56,7 +56,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-
       - name: Unit tests
-        run: ./gradlew :payments-core:testDebugUnitTest  :paymentsheet:testDebugUnitTest
+        run: ./gradlew testDebugUnitTest
       - uses: actions/upload-artifact@v2
         if: failure()
         with:
