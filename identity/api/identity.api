@@ -62,6 +62,7 @@ public final class com/stripe/android/identity/databinding/CameraErrorFragmentBi
 }
 
 public final class com/stripe/android/identity/databinding/CameraPermissionDeniedFragmentBinding : androidx/viewbinding/ViewBinding {
+	public final field info Landroid/widget/TextView;
 	public static fun bind (Landroid/view/View;)Lcom/stripe/android/identity/databinding/CameraPermissionDeniedFragmentBinding;
 	public synthetic fun getRoot ()Landroid/view/View;
 	public fun getRoot ()Landroid/widget/FrameLayout;
@@ -181,17 +182,6 @@ public final class com/stripe/android/identity/navigation/CameraErrorFragment$Co
 	public final fun newInstance ()Lcom/stripe/android/identity/navigation/CameraErrorFragment;
 }
 
-public final class com/stripe/android/identity/navigation/CameraPermissionDeniedFragment : androidx/fragment/app/Fragment {
-	public static final field Companion Lcom/stripe/android/identity/navigation/CameraPermissionDeniedFragment$Companion;
-	public fun <init> ()V
-	public fun onActivityCreated (Landroid/os/Bundle;)V
-	public fun onCreateView (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Landroid/os/Bundle;)Landroid/view/View;
-}
-
-public final class com/stripe/android/identity/navigation/CameraPermissionDeniedFragment$Companion {
-	public final fun newInstance ()Lcom/stripe/android/identity/navigation/CameraPermissionDeniedFragment;
-}
-
 public final class com/stripe/android/identity/navigation/ConfirmationFragment : androidx/fragment/app/Fragment {
 	public static final field Companion Lcom/stripe/android/identity/navigation/ConfirmationFragment$Companion;
 	public fun <init> ()V
@@ -275,10 +265,6 @@ public final class com/stripe/android/identity/viewmodel/DriverLicenseScanViewMo
 }
 
 public final class com/stripe/android/identity/viewmodel/DriverLicenseUploadViewModel : androidx/lifecycle/ViewModel {
-	public fun <init> ()V
-}
-
-public final class com/stripe/android/identity/viewmodel/IDScanViewModel : androidx/lifecycle/ViewModel {
 	public fun <init> ()V
 }
 

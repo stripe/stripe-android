@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.flatMapLatest
  * This is in contrast to the [SectionController] which is a section in which the fields
  * in it do not change.
  */
+@ExperimentalCoroutinesApi
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class AddressController(
     val fieldsFlowable: Flow<List<SectionFieldElement>>
@@ -19,7 +20,6 @@ class AddressController(
     @StringRes
     val label: Int? = null
 
-    @ExperimentalCoroutinesApi
     override val error = fieldsFlowable.flatMapLatest { sectionFieldElements ->
         combine(
             sectionFieldElements.map { it.sectionFieldErrorController().error }
