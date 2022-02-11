@@ -50,7 +50,7 @@ class AddFpxPaymentMethodTest {
     fun launchFpxAndConfirmWithoutSelectingBank() {
         launchBankSelector()
 
-        // click on first bank in the list
+        // confirm selection without selecting a bank
         onView(withId(R.id.action_save)).perform(click())
 
         // Nothing should happen as no bank was selected
