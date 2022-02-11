@@ -1,7 +1,10 @@
 package com.stripe.android.ui.core.elements
 
+import androidx.appcompat.view.ContextThemeWrapper
 import androidx.lifecycle.asLiveData
+import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth
+import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.forms.FormFieldEntry
 import com.stripe.android.utils.TestUtils.idleLooper
 import org.junit.Test
@@ -10,11 +13,15 @@ import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
 class CardDetailsElementTest {
+
+    private val context = ContextThemeWrapper(ApplicationProvider.getApplicationContext(), R.style.StripeDefaultTheme)
+
     @Test
     fun `test form field values returned and expiration date parsing`() {
-        val cardController = CardDetailsController()
+        val cardController = CardDetailsController(context)
         val cardDetailsElement = CardDetailsElement(
             IdentifierSpec.Generic("card_details"),
+            context,
             cardController
         )
 
