@@ -18,7 +18,6 @@ internal class CvcConfig : CardDetailsTextFieldConfig {
         number: String,
         numberAllowedDigits: Int
     ): TextFieldState {
-        val numberAllowedDigits = brand.maxCvcLength
         val isDigitLimit = brand.maxCvcLength != -1
         return if (number.isEmpty()) {
             TextFieldStateConstants.Error.Blank

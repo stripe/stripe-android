@@ -161,7 +161,7 @@ internal class CardNumberController constructor(
         newAccountRange: AccountRange?
     ) {
         accountRange = newAccountRange
-        (visualTransformation as CardNumberVisualTransformation).maxPanLength = 19
+        (visualTransformation as CardNumberVisualTransformation).binBasedMaxPan = 19
     }
 
     private fun shouldQueryAccountRange(cardNumber: CardNumber.Unvalidated): Boolean {

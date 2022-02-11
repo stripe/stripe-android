@@ -9,11 +9,11 @@ import com.stripe.android.model.CardBrand
 internal class CardNumberVisualTransformation(private val separator: Char) :
     VisualTransformation {
 
-    internal var maxPanLength: Int? = null
+    internal var binBasedMaxPan: Int? = null
 
     override fun filter(text: AnnotatedString): TransformedText {
         val cardBrand = CardBrand.fromCardNumber(text.text)
-        val panLength = maxPanLength ?: cardBrand.getMaxLengthForCardNumber(text.text)
+        val panLength = binBasedMaxPan ?: cardBrand.getMaxLengthForCardNumber(text.text)
         return if (panLength == 14 || panLength == 15) {
             space4and11(text)
         } else if (panLength == 16) {
