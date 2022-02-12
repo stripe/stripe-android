@@ -13,6 +13,7 @@ import androidx.annotation.Keep
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import com.stripe.android.camera.framework.Stats
+import com.stripe.android.camera.scanui.util.startAnimation
 import com.stripe.android.stripecardscan.R
 import com.stripe.android.stripecardscan.cardimageverification.exception.InvalidCivException
 import com.stripe.android.stripecardscan.cardimageverification.exception.InvalidStripePublishableKeyException
@@ -46,7 +47,6 @@ import com.stripe.android.stripecardscan.scanui.util.hide
 import com.stripe.android.stripecardscan.scanui.util.setTextSizeByRes
 import com.stripe.android.stripecardscan.scanui.util.setVisible
 import com.stripe.android.stripecardscan.scanui.util.show
-import com.stripe.android.stripecardscan.scanui.util.startAnimation
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch

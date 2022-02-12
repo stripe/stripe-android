@@ -34,7 +34,7 @@ import com.stripe.android.camera.scanui.util.asRect
 import com.stripe.android.stripecardscan.framework.api.uploadScanStatsOCR
 import com.stripe.android.stripecardscan.scanui.util.getColorByRes
 import com.stripe.android.stripecardscan.scanui.util.getFloatResource
-import com.stripe.android.stripecardscan.scanui.util.startAnimation
+import com.stripe.android.camera.scanui.util.startAnimation
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
