@@ -62,7 +62,7 @@ class CardScanFragment : ScanFragment(), SimpleScanStateful<CardScanState> {
 
     private val hasPreviousValidResult = AtomicBoolean(false)
 
-    override var scanState: CardScanState = CardScanState.NotFound
+    override var scanState: CardScanState? = CardScanState.NotFound
 
     override var scanStatePrevious: CardScanState? = null
 
@@ -179,7 +179,7 @@ class CardScanFragment : ScanFragment(), SimpleScanStateful<CardScanState> {
             true
         }
 
-        displayState(scanState, scanStatePrevious)
+        displayState(requireNotNull(scanState), scanStatePrevious)
         return viewBinding.root
     }
 

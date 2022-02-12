@@ -86,7 +86,7 @@ internal sealed class CardVerificationScanState(isFinal: Boolean) : ScanState(is
 internal open class CardImageVerificationActivity :
     SimpleScanActivity<RequiredCardDetails?>(), SimpleScanStateful<CardVerificationScanState> {
 
-    override var scanState: CardVerificationScanState = CardVerificationScanState.NotFound
+    override var scanState: CardVerificationScanState? = CardVerificationScanState.NotFound
 
     override var scanStatePrevious: CardVerificationScanState? = null
 
@@ -290,7 +290,9 @@ internal open class CardImageVerificationActivity :
 
         cannotScanTextView.setOnClickListener { userCannotScan() }
 
-        displayState(scanState, scanStatePrevious)
+        displayState(
+            requireNotNull(scanState), scanStatePrevious
+        )
     }
 
     override fun onResume() {

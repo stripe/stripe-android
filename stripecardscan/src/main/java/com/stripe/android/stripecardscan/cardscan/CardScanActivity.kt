@@ -84,7 +84,7 @@ internal class CardScanActivity : ScanActivity(), SimpleScanStateful<CardScanSta
 
     private val hasPreviousValidResult = AtomicBoolean(false)
 
-    override var scanState: CardScanState = CardScanState.NotFound
+    override var scanState: CardScanState? = CardScanState.NotFound
 
     override var scanStatePrevious: CardScanState? = null
 
@@ -205,7 +205,7 @@ internal class CardScanActivity : ScanActivity(), SimpleScanStateful<CardScanSta
             true
         }
 
-        displayState(scanState, scanStatePrevious)
+        displayState(requireNotNull(scanState), scanStatePrevious)
     }
 
     override fun onResume() {

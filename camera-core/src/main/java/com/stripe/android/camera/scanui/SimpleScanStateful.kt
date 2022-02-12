@@ -11,7 +11,7 @@ abstract class ScanState(val isFinal: Boolean)
 interface SimpleScanStateful<State : ScanState> {
 
     var scanStatePrevious: State?
-    var scanState: State
+    var scanState: State?
     val scanErrorListener: ScanErrorListener
 
     fun displayState(newState: State, previousState: State?)
