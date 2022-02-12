@@ -13,6 +13,9 @@ import androidx.annotation.Keep
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import com.stripe.android.camera.framework.Stats
+import com.stripe.android.camera.scanui.ScanErrorListener
+import com.stripe.android.camera.scanui.ScanState
+import com.stripe.android.camera.scanui.SimpleScanStateful
 import com.stripe.android.camera.scanui.util.startAnimation
 import com.stripe.android.stripecardscan.R
 import com.stripe.android.stripecardscan.cardimageverification.exception.InvalidCivException
@@ -36,11 +39,8 @@ import com.stripe.android.stripecardscan.payment.card.getIssuerByDisplayName
 import com.stripe.android.stripecardscan.payment.card.isValidPanLastFour
 import com.stripe.android.stripecardscan.payment.card.lastFour
 import com.stripe.android.stripecardscan.scanui.CancellationReason
-import com.stripe.android.stripecardscan.scanui.ScanErrorListener
 import com.stripe.android.stripecardscan.scanui.ScanResultListener
-import com.stripe.android.stripecardscan.scanui.ScanState
 import com.stripe.android.stripecardscan.scanui.SimpleScanActivity
-import com.stripe.android.stripecardscan.scanui.SimpleScanStateful
 import com.stripe.android.stripecardscan.scanui.util.getColorByRes
 import com.stripe.android.stripecardscan.scanui.util.getDrawableByRes
 import com.stripe.android.stripecardscan.scanui.util.hide

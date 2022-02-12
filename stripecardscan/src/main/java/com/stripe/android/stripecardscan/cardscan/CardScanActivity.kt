@@ -11,6 +11,9 @@ import android.view.ViewGroup
 import androidx.core.view.updateMargins
 import com.stripe.android.camera.CameraPreviewImage
 import com.stripe.android.camera.framework.Stats
+import com.stripe.android.camera.scanui.ScanErrorListener
+import com.stripe.android.camera.scanui.ScanState
+import com.stripe.android.camera.scanui.SimpleScanStateful
 import com.stripe.android.camera.scanui.util.asRect
 import com.stripe.android.camera.scanui.util.setDrawable
 import com.stripe.android.camera.scanui.util.startAnimation
@@ -27,10 +30,7 @@ import com.stripe.android.stripecardscan.framework.util.Device
 import com.stripe.android.stripecardscan.payment.card.ScannedCard
 import com.stripe.android.stripecardscan.scanui.CancellationReason
 import com.stripe.android.stripecardscan.scanui.ScanActivity
-import com.stripe.android.stripecardscan.scanui.ScanErrorListener
 import com.stripe.android.stripecardscan.scanui.ScanResultListener
-import com.stripe.android.stripecardscan.scanui.ScanState
-import com.stripe.android.stripecardscan.scanui.SimpleScanStateful
 import com.stripe.android.stripecardscan.scanui.util.getColorByRes
 import com.stripe.android.stripecardscan.scanui.util.getFloatResource
 import com.stripe.android.stripecardscan.scanui.util.hide

@@ -138,6 +138,10 @@ public final class com/stripe/android/camera/framework/util/MemoizeKt {
 	public static final fun memoizedSuspend (Lkotlin/jvm/functions/Function4;Lcom/stripe/android/camera/framework/time/Duration;)Lkotlin/jvm/functions/Function4;
 }
 
+public final class com/stripe/android/camera/scanui/SimpleScanStateful$DefaultImpls {
+	public static fun changeScanState (Lcom/stripe/android/camera/scanui/SimpleScanStateful;Lcom/stripe/android/camera/scanui/ScanState;)Z
+}
+
 public final class com/stripe/android/camera/scanui/ViewFinderBackground : android/view/View {
 	public fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;)V
 	public synthetic fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;ILkotlin/jvm/internal/DefaultConstructorMarker;)V

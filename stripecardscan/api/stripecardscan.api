@@ -121,21 +121,21 @@ public final class com/stripe/android/stripecardscan/cardscan/CardScanConfig {
 	public static final fun setOCR_SEARCH_DURATION_MILLIS (I)V
 }
 
-public final class com/stripe/android/stripecardscan/cardscan/CardScanFragment : com/stripe/android/stripecardscan/scanui/ScanFragment, com/stripe/android/stripecardscan/scanui/SimpleScanStateful {
+public final class com/stripe/android/stripecardscan/cardscan/CardScanFragment : com/stripe/android/stripecardscan/scanui/ScanFragment, com/stripe/android/camera/scanui/SimpleScanStateful {
 	public static final field $stable I
 	public fun <init> ()V
-	public fun changeScanState (Lcom/stripe/android/stripecardscan/scanui/ScanState;)Z
-	public fun displayState (Lcom/stripe/android/stripecardscan/scanui/ScanState;Lcom/stripe/android/stripecardscan/scanui/ScanState;)V
+	public fun changeScanState (Lcom/stripe/android/camera/scanui/ScanState;)Z
+	public fun displayState (Lcom/stripe/android/camera/scanui/ScanState;Lcom/stripe/android/camera/scanui/ScanState;)V
 	public synthetic fun getResultListener$stripecardscan_release ()Lcom/stripe/android/stripecardscan/scanui/ScanResultListener;
-	public fun getScanErrorListener ()Lcom/stripe/android/stripecardscan/scanui/ScanErrorListener;
-	public fun getScanState ()Lcom/stripe/android/stripecardscan/scanui/ScanState;
-	public fun getScanStatePrevious ()Lcom/stripe/android/stripecardscan/scanui/ScanState;
+	public fun getScanErrorListener ()Lcom/stripe/android/camera/scanui/ScanErrorListener;
+	public fun getScanState ()Lcom/stripe/android/camera/scanui/ScanState;
+	public fun getScanStatePrevious ()Lcom/stripe/android/camera/scanui/ScanState;
 	public fun onCreateView (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Landroid/os/Bundle;)Landroid/view/View;
 	public fun onDestroy ()V
 	public fun onResume ()V
 	public fun onStart ()V
-	public fun setScanState (Lcom/stripe/android/stripecardscan/scanui/ScanState;)V
-	public fun setScanStatePrevious (Lcom/stripe/android/stripecardscan/scanui/ScanState;)V
+	public fun setScanState (Lcom/stripe/android/camera/scanui/ScanState;)V
+	public fun setScanStatePrevious (Lcom/stripe/android/camera/scanui/ScanState;)V
 }
 
 public final class com/stripe/android/stripecardscan/cardscan/CardScanFragmentKt {
