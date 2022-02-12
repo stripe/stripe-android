@@ -10,13 +10,13 @@ abstract class ScanState(val isFinal: Boolean)
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 interface SimpleScanStateful<State : ScanState> {
 
-    var scanStatePrevious: ScanState?
-    var scanState: ScanState
+    var scanStatePrevious: State?
+    var scanState: State
     val scanErrorListener: ScanErrorListener
 
-    fun displayState(newState: ScanState, previousState: ScanState?)
+    fun displayState(newState: State, previousState: State?)
 
-    fun changeScanState(newState: ScanState): Boolean {
+    fun changeScanState(newState: State): Boolean {
         if (newState == scanStatePrevious || scanStatePrevious?.isFinal == true) {
             return false
         }

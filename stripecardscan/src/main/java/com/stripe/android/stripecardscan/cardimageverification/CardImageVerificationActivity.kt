@@ -86,9 +86,9 @@ internal sealed class CardVerificationScanState(isFinal: Boolean) : ScanState(is
 internal open class CardImageVerificationActivity :
     SimpleScanActivity<RequiredCardDetails?>(), SimpleScanStateful<CardVerificationScanState> {
 
-    override var scanState: ScanState = CardVerificationScanState.NotFound
+    override var scanState: CardVerificationScanState = CardVerificationScanState.NotFound
 
-    override var scanStatePrevious: ScanState? = null
+    override var scanStatePrevious: CardVerificationScanState? = null
 
     override val scanErrorListener: ScanErrorListener = ScanErrorListener()
 
@@ -523,7 +523,10 @@ internal open class CardImageVerificationActivity :
         }
     }
 
-    override fun displayState(newState: ScanState, previousState: ScanState?) {
+    override fun displayState(
+        newState: CardVerificationScanState,
+        previousState: CardVerificationScanState?
+    ) {
         when (newState) {
             is CardVerificationScanState.NotFound -> {
                 viewFinderBackgroundView

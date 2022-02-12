@@ -16,7 +16,6 @@ import androidx.fragment.app.setFragmentResult
 import com.stripe.android.camera.CameraPreviewImage
 import com.stripe.android.camera.framework.Stats
 import com.stripe.android.camera.scanui.ScanErrorListener
-import com.stripe.android.camera.scanui.ScanState
 import com.stripe.android.camera.scanui.SimpleScanStateful
 import com.stripe.android.camera.scanui.util.asRect
 import com.stripe.android.camera.scanui.util.startAnimation
@@ -63,9 +62,9 @@ class CardScanFragment : ScanFragment(), SimpleScanStateful<CardScanState> {
 
     private val hasPreviousValidResult = AtomicBoolean(false)
 
-    override var scanState: ScanState = CardScanState.NotFound
+    override var scanState: CardScanState = CardScanState.NotFound
 
-    override var scanStatePrevious: ScanState? = null
+    override var scanStatePrevious: CardScanState? = null
 
     override val scanErrorListener: ScanErrorListener = ScanErrorListener()
 
@@ -266,7 +265,7 @@ class CardScanFragment : ScanFragment(), SimpleScanStateful<CardScanState> {
         else -> true
     }
 
-    override fun displayState(newState: ScanState, previousState: ScanState?) {
+    override fun displayState(newState: CardScanState, previousState: CardScanState?) {
         when (newState) {
             is CardScanState.NotFound, CardScanState.Found -> {
                 viewBinding.viewFinderBackground
