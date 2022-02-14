@@ -25,7 +25,7 @@ import com.stripe.android.stripecardscan.framework.api.NetworkResult
 import com.stripe.android.stripecardscan.framework.api.dto.ScanStatistics
 import com.stripe.android.stripecardscan.framework.api.getCardImageVerificationIntentDetails
 import com.stripe.android.stripecardscan.framework.api.uploadSavedFrames
-import com.stripe.android.stripecardscan.framework.api.uploadScanStats
+import com.stripe.android.stripecardscan.framework.api.uploadScanStatsCIV
 import com.stripe.android.stripecardscan.framework.util.AppDetails
 import com.stripe.android.stripecardscan.framework.util.Device
 import com.stripe.android.stripecardscan.payment.card.CardIssuer
@@ -579,7 +579,7 @@ internal open class CardImageVerificationActivity :
     }
 
     override fun closeScanner() {
-        uploadScanStats(
+        uploadScanStatsCIV(
             stripePublishableKey = params.stripePublishableKey,
             civId = params.cardImageVerificationIntentId,
             civSecret = params.cardImageVerificationIntentSecret,

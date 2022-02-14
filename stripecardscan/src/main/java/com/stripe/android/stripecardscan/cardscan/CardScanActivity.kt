@@ -19,7 +19,7 @@ import com.stripe.android.stripecardscan.cardscan.result.MainLoopAggregator
 import com.stripe.android.stripecardscan.cardscan.result.MainLoopState
 import com.stripe.android.stripecardscan.databinding.ActivityCardscanBinding
 import com.stripe.android.stripecardscan.framework.api.dto.ScanStatistics
-import com.stripe.android.stripecardscan.framework.api.uploadScanStats
+import com.stripe.android.stripecardscan.framework.api.uploadScanStatsOCR
 import com.stripe.android.stripecardscan.framework.util.AppDetails
 import com.stripe.android.stripecardscan.framework.util.Device
 import com.stripe.android.stripecardscan.payment.card.ScannedCard
@@ -326,10 +326,8 @@ internal class CardScanActivity : ScanActivity(), SimpleScanStateful<CardScanSta
     }
 
     override fun closeScanner() {
-        uploadScanStats(
+        uploadScanStatsOCR(
             stripePublishableKey = params.stripePublishableKey,
-            civId = "",
-            civSecret = "",
             instanceId = Stats.instanceId,
             scanId = Stats.scanId,
             device = Device.fromContext(this),

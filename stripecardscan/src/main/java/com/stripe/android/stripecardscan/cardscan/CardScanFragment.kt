@@ -22,7 +22,6 @@ import com.stripe.android.stripecardscan.cardscan.result.MainLoopAggregator
 import com.stripe.android.stripecardscan.cardscan.result.MainLoopState
 import com.stripe.android.stripecardscan.databinding.FragmentCardscanBinding
 import com.stripe.android.stripecardscan.framework.api.dto.ScanStatistics
-import com.stripe.android.stripecardscan.framework.api.uploadScanStats
 import com.stripe.android.stripecardscan.framework.util.AppDetails
 import com.stripe.android.stripecardscan.framework.util.Device
 import com.stripe.android.stripecardscan.payment.card.ScannedCard
@@ -32,6 +31,7 @@ import com.stripe.android.stripecardscan.scanui.ScanFragment
 import com.stripe.android.stripecardscan.scanui.ScanState
 import com.stripe.android.stripecardscan.scanui.SimpleScanStateful
 import com.stripe.android.camera.scanui.util.asRect
+import com.stripe.android.stripecardscan.framework.api.uploadScanStatsOCR
 import com.stripe.android.stripecardscan.scanui.util.getColorByRes
 import com.stripe.android.stripecardscan.scanui.util.getFloatResource
 import com.stripe.android.stripecardscan.scanui.util.startAnimation
@@ -291,10 +291,8 @@ class CardScanFragment : ScanFragment(), SimpleScanStateful<CardScanState> {
     }
 
     override fun closeScanner() {
-        uploadScanStats(
+        uploadScanStatsOCR(
             stripePublishableKey = params.stripePublishableKey,
-            civId = "",
-            civSecret = "",
             instanceId = Stats.instanceId,
             scanId = Stats.scanId,
             device = Device.fromContext(requireActivity()),

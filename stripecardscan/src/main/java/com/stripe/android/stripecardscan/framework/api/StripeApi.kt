@@ -18,7 +18,7 @@ import com.stripe.android.stripecardscan.framework.api.dto.CardImageVerification
 import com.stripe.android.stripecardscan.framework.api.dto.CardImageVerificationDetailsResult
 import com.stripe.android.stripecardscan.framework.api.dto.ClientDevice
 import com.stripe.android.stripecardscan.framework.api.dto.ScanStatistics
-import com.stripe.android.stripecardscan.framework.api.dto.ScanStatsRequest
+import com.stripe.android.stripecardscan.framework.api.dto.ScanStatsCIVRequest
 import com.stripe.android.stripecardscan.framework.api.dto.ScanStatsResponse
 import com.stripe.android.stripecardscan.framework.api.dto.StatsPayload
 import com.stripe.android.stripecardscan.framework.api.dto.StripeServerErrorResponse
@@ -30,6 +30,7 @@ import com.stripe.android.stripecardscan.framework.util.AppDetails
 import com.stripe.android.stripecardscan.framework.util.Device
 import com.stripe.android.stripecardscan.framework.util.b64Encode
 import com.stripe.android.camera.framework.util.scaleAndCenterWithin
+import com.stripe.android.stripecardscan.framework.api.dto.ScanStatsOCRRequest
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -39,7 +40,7 @@ import kotlinx.serialization.builtins.ListSerializer
 /**
  * Upload stats data to stripe servers.
  */
-internal fun uploadScanStats(
+internal fun uploadScanStatsCIV(
     stripePublishableKey: String,
     civId: String,
     civSecret: String,
@@ -63,11 +64,56 @@ internal fun uploadScanStats(
         val result = NetworkConfig.network.postForResult(
             stripePublishableKey = stripePublishableKey,
             path = "/card_image_verifications/$civId/scan_stats",
-            data = ScanStatsRequest(
+            data = ScanStatsCIVRequest(
                 clientSecret = civSecret,
                 payload = statsPayload,
             ),
-            requestSerializer = ScanStatsRequest.serializer(),
+            requestSerializer = ScanStatsCIVRequest.serializer(),
+            responseSerializer = ScanStatsResponse.serializer(),
+            errorSerializer = StripeServerErrorResponse.serializer(),
+        )
+    ) {
+        is NetworkResult.Success -> Log.v(Config.logTag, "Scan stats uploaded")
+        is NetworkResult.Error ->
+            Log.e(
+                Config.logTag,
+                "Unable to upload scan stats (${result.responseCode}): ${result.error}",
+            )
+        is NetworkResult.Exception ->
+            Log.e(
+                Config.logTag,
+                "Unable to upload scan stats (${result.responseCode})",
+                result.exception,
+            )
+    }
+}
+
+internal fun uploadScanStatsOCR(
+    stripePublishableKey: String,
+    instanceId: String,
+    scanId: String?,
+    device: Device,
+    appDetails: AppDetails,
+    scanStatistics: ScanStatistics,
+) = GlobalScope.launch(Dispatchers.IO) {
+    val statsPayload = StatsPayload(
+        instanceId = instanceId,
+        scanId = scanId,
+        device = ClientDevice.fromDevice(device),
+        app = AppInfo.fromAppDetails(appDetails),
+        scanStats = scanStatistics,
+// TODO: this should probably be reported as part of scanstats, but is not yet supported
+//        modelVersions = getLoadedModelVersions().map { ModelVersion.fromModelLoadDetails(it) },
+    )
+
+    when (
+        val result = NetworkConfig.network.postForResult(
+            stripePublishableKey = stripePublishableKey,
+            path = "/card_image_scans/scan_stats",
+            data = ScanStatsOCRRequest(
+                payload = statsPayload,
+            ),
+            requestSerializer = ScanStatsOCRRequest.serializer(),
             responseSerializer = ScanStatsResponse.serializer(),
             errorSerializer = StripeServerErrorResponse.serializer(),
         )
