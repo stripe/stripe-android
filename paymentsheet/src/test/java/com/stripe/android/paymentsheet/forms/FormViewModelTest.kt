@@ -101,8 +101,8 @@ internal class FormViewModelTest {
         val factory = FormViewModel.Factory(
             config,
             ApplicationProvider.getApplicationContext<Application>().resources,
-            SofortForm,
-        )
+            SofortForm
+        ) { ApplicationProvider.getApplicationContext<Application>() }
         val factorySpy = spy(factory)
         val createdViewModel = factorySpy.create(FormViewModel::class.java)
         verify(factorySpy, times(0)).fallbackInitialize(any())
@@ -119,7 +119,7 @@ internal class FormViewModelTest {
             config,
             ApplicationProvider.getApplicationContext<Application>().resources,
             SofortForm
-        )
+        ) { ApplicationProvider.getApplicationContext<Application>() }
         val factorySpy = spy(factory)
         assertNotNull(factorySpy.create(FormViewModel::class.java))
         verify(factorySpy).fallbackInitialize(
