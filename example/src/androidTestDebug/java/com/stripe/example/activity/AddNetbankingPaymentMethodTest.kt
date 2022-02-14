@@ -44,6 +44,25 @@ class AddNetbankingPaymentMethodTest {
 
     @Test
     fun launchNetbankingAndSelectBank() {
+        launchBankSelector()
+
+        // click on first bank in the list
+        onView(withId(R.id.bank_list)).perform(
+            RecyclerViewActions.actionOnItemAtPosition<RecyclerView.ViewHolder>(0, click())
+        )
+    }
+
+    @Test
+    fun launchNetbankingAndConfirmWithoutSelectingBank() {
+        launchBankSelector()
+
+        // confirm selection without selecting a bank
+        onView(withId(R.id.action_save)).perform(click())
+
+        // Nothing should happen as no bank was selected
+    }
+
+    private fun launchBankSelector() {
         // launch Netbanking selection activity
         onView(withId(R.id.examples)).perform(
             RecyclerViewActions.actionOnItemAtPosition<RecyclerView.ViewHolder>(10, click())
@@ -52,10 +71,5 @@ class AddNetbankingPaymentMethodTest {
         // click select payment method button
         onView(withId(R.id.select_payment_method_button))
             .perform(click())
-
-        // click on first bank in the list
-        onView(withId(R.id.bank_list)).perform(
-            RecyclerViewActions.actionOnItemAtPosition<RecyclerView.ViewHolder>(0, click())
-        )
     }
 }

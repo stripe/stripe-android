@@ -2,8 +2,9 @@
     <string name="app_name">StripeCardScan Example</string>
     <string name="cardimageverificationsheet">CardImageVerificationSheet</string>
     <string name="cardscansheet">CardScanSheet</string>
+    <string name="cardscanfragment">CardScanFragment</string>
 
-    <string name="getPublishableKey">Uset Test Publishable Key</string>
+    <string name="getPublishableKey">Use Test Publishable Key</string>
     <string name="stripePublishableKey">Stripe Publishable Key</string>
 
     <string name="requiredIin">Required Card IIN (first 6)</string>

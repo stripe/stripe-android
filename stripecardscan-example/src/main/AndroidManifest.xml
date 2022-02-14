@@ -37,6 +37,10 @@
         <activity
             android:name=".CardScanDemoActivity"
             android:exported="false" />
+
+        <activity
+            android:name=".CardScanFragmentDemoActivity"
+            android:exported="false" />
     </application>
 
 </manifest>
