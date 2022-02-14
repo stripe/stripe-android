@@ -88,6 +88,7 @@ dependencies {
 
     implementation libraries.androidx.appcompat
     implementation libraries.androidx.constraintlayout
+    implementation "androidx.fragment:fragment-ktx:$fragment_version"
     implementation "androidx.core:core-ktx:$coreKtxVersion"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinCoroutinesVersion"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$kotlinCoroutinesVersion"

@@ -2,7 +2,6 @@ package com.stripe.android.link.ui.signup
 
 import android.app.Application
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -44,7 +43,6 @@ import com.stripe.android.ui.core.elements.SectionElement
 import com.stripe.android.ui.core.elements.SectionElementUI
 import com.stripe.android.ui.core.elements.SectionFieldElement
 
-@ExperimentalAnimationApi
 @Preview
 @Composable
 private fun SignUpBodyPreview() {
@@ -57,7 +55,6 @@ private fun SignUpBodyPreview() {
     }
 }
 
-@ExperimentalAnimationApi
 @Composable
 internal fun SignUpBody(
     application: Application,
@@ -79,7 +76,6 @@ internal fun SignUpBody(
     )
 }
 
-@ExperimentalAnimationApi
 @Composable
 internal fun SignUpBody(
     merchantName: String,

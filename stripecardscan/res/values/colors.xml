@@ -33,6 +33,7 @@
     <color name="stripeFoundBackground" description="The background color of the scan window when a card has been found and the scan is started">#DD222222</color>
     <color name="stripeCorrectBackground" description="The background color of the scan window when a card has been found and the scan is completed">#DD222222</color>
     <color name="stripeWrongBackground" description="The background color of the scan window when a card has been found that does not match the required card">#DD222222</color>
+    <color name="stripeDisplayInstructionsBackground" description="The background color of the scan window when instructions are displayed over top">#DD222222</color>
 
     <color name="stripeNotFoundOutline" description="The outline color of the scan window when no card is visible">#FFFFFF</color>
     <color name="stripeFoundOutline" description="The outline color of the scan window when a card has been found and the scan is started">#1E90FF</color>

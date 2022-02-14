@@ -2,7 +2,6 @@ package com.stripe.android.ui.core.elements
 
 import androidx.annotation.RestrictTo
 import androidx.annotation.StringRes
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
@@ -19,7 +18,6 @@ class AddressController(
     @StringRes
     val label: Int? = null
 
-    @ExperimentalCoroutinesApi
     override val error = fieldsFlowable.flatMapLatest { sectionFieldElements ->
         combine(
             sectionFieldElements.map { it.sectionFieldErrorController().error }

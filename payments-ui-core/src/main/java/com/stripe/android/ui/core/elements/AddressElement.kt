@@ -3,7 +3,6 @@ package com.stripe.android.ui.core.elements
 import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.ui.core.address.AddressFieldElementRepository
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
@@ -50,7 +49,6 @@ open class AddressElement constructor(
     override fun sectionFieldErrorController(): SectionFieldErrorController =
         controller
 
-    @ExperimentalCoroutinesApi
     override fun getFormFieldValueFlow() = fields.flatMapLatest { fieldElements ->
         combine(
             fieldElements
