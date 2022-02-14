@@ -5,6 +5,7 @@
 ### Card scanning
 
 ## 19.2.1 - 2022-02-14
+This release includes several bug fixes and upgrades Kotlin to 1.6.
 * [CHANGED] [4546](https://github.com/stripe/stripe-android/pull/4546) Update to kotlin 1.6
 * [FIXED] [4560](https://github.com/stripe/stripe-android/pull/4560) Fix `cardValidCallback` being added multiple times in `CardInputWidget`.
 * [FIXED] [4574](https://github.com/stripe/stripe-android/pull/4574) Take `postalCode` into account in `CardMultilineWidget` validation.
