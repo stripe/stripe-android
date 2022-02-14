@@ -5,15 +5,18 @@ import android.graphics.Bitmap
 import android.graphics.Rect
 import androidx.lifecycle.LifecycleOwner
 import com.stripe.android.camera.CameraPreviewImage
-import com.stripe.android.stripecardscan.cardscan.result.MainLoopAggregator
-import com.stripe.android.stripecardscan.cardscan.result.MainLoopState
 import com.stripe.android.camera.framework.AggregateResultListener
 import com.stripe.android.camera.framework.AnalyzerLoopErrorListener
 import com.stripe.android.camera.framework.AnalyzerPool
 import com.stripe.android.camera.framework.ProcessBoundAnalyzerLoop
+import com.stripe.android.camera.framework.util.centerOn
+import com.stripe.android.camera.framework.util.minAspectRatioSurroundingSize
+import com.stripe.android.camera.framework.util.size
+import com.stripe.android.camera.scanui.ScanFlow
+import com.stripe.android.stripecardscan.cardscan.result.MainLoopAggregator
+import com.stripe.android.stripecardscan.cardscan.result.MainLoopState
 import com.stripe.android.stripecardscan.payment.ml.SSDOcr
 import com.stripe.android.stripecardscan.payment.ml.SSDOcrModelManager
-import com.stripe.android.camera.scanui.ScanFlow
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -80,7 +83,13 @@ internal abstract class CardScanFlow(
             ).apply {
                 mainLoopJob = subscribeTo(
                     imageStream.map {
-                        SSDOcr.cameraPreviewToInput(it.image, it.viewBounds, viewFinder)
+                        SSDOcr.cameraPreviewToInput(
+                            it.image,
+                            minAspectRatioSurroundingSize(
+                                it.viewBounds.size(), it.image.width.toFloat() / it.image.height
+                            ).centerOn(it.viewBounds),
+                            viewFinder
+                        )
                     },
                     coroutineScope,
                 )

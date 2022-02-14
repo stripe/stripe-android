@@ -1636,6 +1636,23 @@ internal class CardInputWidgetTest {
         verify(callback, times(1)).onInputChanged(any(), any())
     }
 
+    @Test
+    fun `Setting postal code requirements multiple times only sets callback once`() {
+        val callback = mock<CardValidCallback>()
+        cardInputWidget.setCardValidCallback(callback)
+
+        cardInputWidget.postalCodeRequired = true
+        cardInputWidget.postalCodeEnabled = true
+        cardInputWidget.postalCodeEnabled = false
+        cardInputWidget.postalCodeRequired = false
+        cardInputWidget.postalCodeRequired = true
+        cardInputWidget.postalCodeEnabled = true
+        postalCodeEditText.setText("54321")
+
+        // Called only when the callback is set and when the text is set.
+        verify(callback, times(2)).onInputChanged(any(), any())
+    }
+
     private fun updateCardNumberAndIdle(cardNumber: String) {
         cardNumberEditText.setText(cardNumber)
         idleLooper()

@@ -143,6 +143,8 @@ class CameraView @JvmOverloads constructor(
 
     private fun setupBorder() {
         if (borderDrawable != NO_BORDER) {
+            // TODO(ccen) when border is set, need to also set the background of viewFinderWindow
+            // to fill the seam between border and darkened area
             viewFinderBorderView.background = context.getDrawableByRes(borderDrawable)
         }
     }
@@ -209,9 +211,8 @@ class CameraView @JvmOverloads constructor(
          */
         const val FILL_ASPECT_RATIO = ""
         const val CREDIT_CARD_ASPECT_RATIO = "200:126"
-        // TODO(ccen) Finalize the correct aspect ratio for ID and PASSPORT
-        const val ID_ASPECT_RATIO = "1:1"
-        const val PASSPORT_ASPECT_RATIO = "1:2"
+        const val ID_ASPECT_RATIO = "3:2"
+        const val PASSPORT_ASPECT_RATIO = "3:2"
         const val NO_BORDER = -1
     }
 }

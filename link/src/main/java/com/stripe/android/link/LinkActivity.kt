@@ -44,7 +44,6 @@ internal class LinkActivity : ComponentActivity() {
         LinkActivityContract.Args.fromIntent(intent)
     }
 
-    @ExperimentalAnimationApi
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
