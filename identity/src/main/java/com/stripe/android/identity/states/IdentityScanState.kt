@@ -4,13 +4,14 @@ import android.util.Log
 import com.stripe.android.camera.framework.time.Clock
 import com.stripe.android.camera.framework.time.ClockMark
 import com.stripe.android.camera.framework.time.milliseconds
+import com.stripe.android.camera.scanui.ScanState
 import com.stripe.android.identity.ml.AnalyzerOutput
 import com.stripe.android.identity.ml.Category
 
 /**
  * States during scanning a document.
  */
-internal sealed class ScanState(val type: ScanType) {
+internal sealed class IdentityScanState(val type: ScanType, isFinal: Boolean) : ScanState(isFinal) {
     /**
      * Type of documents being scanned
      */
@@ -26,12 +27,12 @@ internal sealed class ScanState(val type: ScanType) {
      */
     internal abstract fun consumeTransition(
         analyzerOutput: AnalyzerOutput
-    ): ScanState
+    ): IdentityScanState
 
     /**
      * Initial state when scan starts, no documents have been detected yet.
      */
-    internal class Initial(type: ScanType) : ScanState(type) {
+    internal class Initial(type: ScanType) : IdentityScanState(type, false) {
         /**
          * Only transitions to [Found] when ML output type matches scan type
          */
@@ -63,7 +64,7 @@ internal sealed class ScanState(val type: ScanType) {
      * State when scan has found the required type, the machine could stay in this state for a
      * while if more image needs to be processed to reach the next state.
      */
-    internal class Found(type: ScanType) : ScanState(type) {
+    internal class Found(type: ScanType) : IdentityScanState(type, false) {
         override fun consumeTransition(analyzerOutput: AnalyzerOutput) =
             when {
                 isUnsatisfied() -> {
@@ -108,9 +109,9 @@ internal sealed class ScanState(val type: ScanType) {
     internal class Satisfied(
         type: ScanType,
         private val reachedStateAt: ClockMark = Clock.markNow()
-    ) : ScanState(type) {
+    ) : IdentityScanState(type, false) {
 
-        override fun consumeTransition(analyzerOutput: AnalyzerOutput): ScanState {
+        override fun consumeTransition(analyzerOutput: AnalyzerOutput): IdentityScanState {
             return if (reachedStateAt.elapsedSince() > DISPLAY_SATISFIED_DURATION) {
                 Log.d(TAG, "Scan for $type Satisfied, transition to Finished.")
                 Finished(type)
@@ -132,9 +133,9 @@ internal sealed class ScanState(val type: ScanType) {
         private val reason: String,
         type: ScanType,
         private val reachedStateAt: ClockMark = Clock.markNow()
-    ) : ScanState(type) {
+    ) : IdentityScanState(type, false) {
 
-        override fun consumeTransition(analyzerOutput: AnalyzerOutput): ScanState {
+        override fun consumeTransition(analyzerOutput: AnalyzerOutput): IdentityScanState {
             return if (reachedStateAt.elapsedSince() > DISPLAY_UNSATISFIED_DURATION) {
                 Log.d(TAG, "Scan for $type Unsatisfied with reason $reason, transition to Initial.")
                 Initial(type)
@@ -152,11 +153,11 @@ internal sealed class ScanState(val type: ScanType) {
     /**
      * Terminal state, indicting the scan is finished.
      */
-    internal class Finished(type: ScanType) : ScanState(type) {
+    internal class Finished(type: ScanType) : IdentityScanState(type, true) {
         override fun consumeTransition(analyzerOutput: AnalyzerOutput) = this
     }
 
     private companion object {
-        val TAG: String = ScanState::class.java.simpleName
+        val TAG: String = IdentityScanState::class.java.simpleName
     }
 }

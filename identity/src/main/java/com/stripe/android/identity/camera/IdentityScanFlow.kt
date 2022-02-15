@@ -13,7 +13,7 @@ import com.stripe.android.camera.scanui.ScanFlow
 import com.stripe.android.identity.ml.AnalyzerInput
 import com.stripe.android.identity.ml.AnalyzerOutput
 import com.stripe.android.identity.ml.IDDetectorAnalyzer
-import com.stripe.android.identity.states.ScanState
+import com.stripe.android.identity.states.IdentityScanState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
@@ -28,12 +28,12 @@ import kotlinx.coroutines.launch
  * TODO(ccen): merge with [CardScanFlow].
  */
 internal class IdentityScanFlow(
-    scanType: ScanState.ScanType,
+    identityScanType: IdentityScanState.ScanType,
     private val analyzerLoopErrorListener: AnalyzerLoopErrorListener,
     aggregateResultListener: AggregateResultListener<IDDetectorAggregator.InterimResult, IDDetectorAggregator.FinalResult>
 ) : ScanFlow<Int, CameraPreviewImage<Bitmap>> {
     private var aggregator = IDDetectorAggregator(
-        scanType,
+        identityScanType,
         aggregateResultListener
     )
 
@@ -48,7 +48,7 @@ internal class IdentityScanFlow(
     private var analyzerPool:
         AnalyzerPool<
             AnalyzerInput,
-            ScanState,
+            IdentityScanState,
             AnalyzerOutput
             >? = null
 
@@ -58,7 +58,7 @@ internal class IdentityScanFlow(
     private var loop:
         ProcessBoundAnalyzerLoop<
             AnalyzerInput,
-            ScanState,
+            IdentityScanState,
             AnalyzerOutput
             >? = null
 
