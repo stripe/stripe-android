@@ -13,6 +13,10 @@ import androidx.annotation.Keep
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import com.stripe.android.camera.framework.Stats
+import com.stripe.android.camera.scanui.ScanErrorListener
+import com.stripe.android.camera.scanui.ScanState
+import com.stripe.android.camera.scanui.SimpleScanStateful
+import com.stripe.android.camera.scanui.util.startAnimation
 import com.stripe.android.stripecardscan.R
 import com.stripe.android.stripecardscan.cardimageverification.exception.InvalidCivException
 import com.stripe.android.stripecardscan.cardimageverification.exception.InvalidStripePublishableKeyException
@@ -35,18 +39,14 @@ import com.stripe.android.stripecardscan.payment.card.getIssuerByDisplayName
 import com.stripe.android.stripecardscan.payment.card.isValidPanLastFour
 import com.stripe.android.stripecardscan.payment.card.lastFour
 import com.stripe.android.stripecardscan.scanui.CancellationReason
-import com.stripe.android.stripecardscan.scanui.ScanErrorListener
 import com.stripe.android.stripecardscan.scanui.ScanResultListener
-import com.stripe.android.stripecardscan.scanui.ScanState
 import com.stripe.android.stripecardscan.scanui.SimpleScanActivity
-import com.stripe.android.stripecardscan.scanui.SimpleScanStateful
 import com.stripe.android.stripecardscan.scanui.util.getColorByRes
 import com.stripe.android.stripecardscan.scanui.util.getDrawableByRes
 import com.stripe.android.stripecardscan.scanui.util.hide
 import com.stripe.android.stripecardscan.scanui.util.setTextSizeByRes
 import com.stripe.android.stripecardscan.scanui.util.setVisible
 import com.stripe.android.stripecardscan.scanui.util.show
-import com.stripe.android.stripecardscan.scanui.util.startAnimation
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
@@ -86,9 +86,9 @@ internal sealed class CardVerificationScanState(isFinal: Boolean) : ScanState(is
 internal open class CardImageVerificationActivity :
     SimpleScanActivity<RequiredCardDetails?>(), SimpleScanStateful<CardVerificationScanState> {
 
-    override var scanState: ScanState = CardVerificationScanState.NotFound
+    override var scanState: CardVerificationScanState? = CardVerificationScanState.NotFound
 
-    override var scanStatePrevious: ScanState? = null
+    override var scanStatePrevious: CardVerificationScanState? = null
 
     override val scanErrorListener: ScanErrorListener = ScanErrorListener()
 
@@ -290,7 +290,9 @@ internal open class CardImageVerificationActivity :
 
         cannotScanTextView.setOnClickListener { userCannotScan() }
 
-        displayState(scanState, scanStatePrevious)
+        displayState(
+            requireNotNull(scanState), scanStatePrevious
+        )
     }
 
     override fun onResume() {
@@ -523,7 +525,10 @@ internal open class CardImageVerificationActivity :
         }
     }
 
-    override fun displayState(newState: ScanState, previousState: ScanState?) {
+    override fun displayState(
+        newState: CardVerificationScanState,
+        previousState: CardVerificationScanState?
+    ) {
         when (newState) {
             is CardVerificationScanState.NotFound -> {
                 viewFinderBackgroundView

@@ -15,6 +15,10 @@ import androidx.core.view.updateMargins
 import androidx.fragment.app.setFragmentResult
 import com.stripe.android.camera.CameraPreviewImage
 import com.stripe.android.camera.framework.Stats
+import com.stripe.android.camera.scanui.ScanErrorListener
+import com.stripe.android.camera.scanui.SimpleScanStateful
+import com.stripe.android.camera.scanui.util.asRect
+import com.stripe.android.camera.scanui.util.startAnimation
 import com.stripe.android.stripecardscan.R
 import com.stripe.android.stripecardscan.cardscan.exception.InvalidStripePublishableKeyException
 import com.stripe.android.stripecardscan.cardscan.exception.UnknownScanException
@@ -22,19 +26,14 @@ import com.stripe.android.stripecardscan.cardscan.result.MainLoopAggregator
 import com.stripe.android.stripecardscan.cardscan.result.MainLoopState
 import com.stripe.android.stripecardscan.databinding.FragmentCardscanBinding
 import com.stripe.android.stripecardscan.framework.api.dto.ScanStatistics
+import com.stripe.android.stripecardscan.framework.api.uploadScanStatsOCR
 import com.stripe.android.stripecardscan.framework.util.AppDetails
 import com.stripe.android.stripecardscan.framework.util.Device
 import com.stripe.android.stripecardscan.payment.card.ScannedCard
 import com.stripe.android.stripecardscan.scanui.CancellationReason
-import com.stripe.android.stripecardscan.scanui.ScanErrorListener
 import com.stripe.android.stripecardscan.scanui.ScanFragment
-import com.stripe.android.stripecardscan.scanui.ScanState
-import com.stripe.android.stripecardscan.scanui.SimpleScanStateful
-import com.stripe.android.camera.scanui.util.asRect
-import com.stripe.android.stripecardscan.framework.api.uploadScanStatsOCR
 import com.stripe.android.stripecardscan.scanui.util.getColorByRes
 import com.stripe.android.stripecardscan.scanui.util.getFloatResource
-import com.stripe.android.stripecardscan.scanui.util.startAnimation
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
@@ -63,9 +62,9 @@ class CardScanFragment : ScanFragment(), SimpleScanStateful<CardScanState> {
 
     private val hasPreviousValidResult = AtomicBoolean(false)
 
-    override var scanState: ScanState = CardScanState.NotFound
+    override var scanState: CardScanState? = CardScanState.NotFound
 
-    override var scanStatePrevious: ScanState? = null
+    override var scanStatePrevious: CardScanState? = null
 
     override val scanErrorListener: ScanErrorListener = ScanErrorListener()
 
@@ -180,7 +179,7 @@ class CardScanFragment : ScanFragment(), SimpleScanStateful<CardScanState> {
             true
         }
 
-        displayState(scanState, scanStatePrevious)
+        displayState(requireNotNull(scanState), scanStatePrevious)
         return viewBinding.root
     }
 
@@ -266,7 +265,7 @@ class CardScanFragment : ScanFragment(), SimpleScanStateful<CardScanState> {
         else -> true
     }
 
-    override fun displayState(newState: ScanState, previousState: ScanState?) {
+    override fun displayState(newState: CardScanState, previousState: CardScanState?) {
         when (newState) {
             is CardScanState.NotFound, CardScanState.Found -> {
                 viewBinding.viewFinderBackground

@@ -8,10 +8,16 @@ import android.graphics.PointF
 import android.os.Bundle
 import android.util.Size
 import android.view.ViewGroup
+import androidx.annotation.RestrictTo
 import androidx.core.view.updateMargins
 import com.stripe.android.camera.CameraPreviewImage
 import com.stripe.android.camera.framework.Stats
+import com.stripe.android.camera.scanui.ScanErrorListener
+import com.stripe.android.camera.scanui.ScanState
+import com.stripe.android.camera.scanui.SimpleScanStateful
 import com.stripe.android.camera.scanui.util.asRect
+import com.stripe.android.camera.scanui.util.setDrawable
+import com.stripe.android.camera.scanui.util.startAnimation
 import com.stripe.android.stripecardscan.R
 import com.stripe.android.stripecardscan.cardscan.exception.InvalidStripePublishableKeyException
 import com.stripe.android.stripecardscan.cardscan.exception.UnknownScanException
@@ -25,15 +31,10 @@ import com.stripe.android.stripecardscan.framework.util.Device
 import com.stripe.android.stripecardscan.payment.card.ScannedCard
 import com.stripe.android.stripecardscan.scanui.CancellationReason
 import com.stripe.android.stripecardscan.scanui.ScanActivity
-import com.stripe.android.stripecardscan.scanui.ScanErrorListener
 import com.stripe.android.stripecardscan.scanui.ScanResultListener
-import com.stripe.android.stripecardscan.scanui.ScanState
-import com.stripe.android.stripecardscan.scanui.SimpleScanStateful
 import com.stripe.android.stripecardscan.scanui.util.getColorByRes
 import com.stripe.android.stripecardscan.scanui.util.getFloatResource
 import com.stripe.android.stripecardscan.scanui.util.hide
-import com.stripe.android.stripecardscan.scanui.util.setDrawable
-import com.stripe.android.stripecardscan.scanui.util.startAnimation
 import com.stripe.android.stripecardscan.scanui.util.setVisible
 import com.stripe.android.stripecardscan.scanui.util.show
 import kotlinx.coroutines.Dispatchers
@@ -57,7 +58,8 @@ internal interface CardScanResultListener : ScanResultListener {
     fun cardScanComplete(card: ScannedCard)
 }
 
-internal sealed class CardScanState(isFinal: Boolean) : ScanState(isFinal) {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+sealed class CardScanState(isFinal: Boolean) : ScanState(isFinal) {
     object NotFound : CardScanState(isFinal = false)
     object Found : CardScanState(isFinal = false)
     object Correct : CardScanState(isFinal = true)
@@ -82,9 +84,9 @@ internal class CardScanActivity : ScanActivity(), SimpleScanStateful<CardScanSta
 
     private val hasPreviousValidResult = AtomicBoolean(false)
 
-    override var scanState: ScanState = CardScanState.NotFound
+    override var scanState: CardScanState? = CardScanState.NotFound
 
-    override var scanStatePrevious: ScanState? = null
+    override var scanStatePrevious: CardScanState? = null
 
     override val scanErrorListener: ScanErrorListener = ScanErrorListener()
 
@@ -203,7 +205,7 @@ internal class CardScanActivity : ScanActivity(), SimpleScanStateful<CardScanSta
             true
         }
 
-        displayState(scanState, scanStatePrevious)
+        displayState(requireNotNull(scanState), scanStatePrevious)
     }
 
     override fun onResume() {
@@ -295,7 +297,7 @@ internal class CardScanActivity : ScanActivity(), SimpleScanStateful<CardScanSta
         else -> true
     }
 
-    override fun displayState(newState: ScanState, previousState: ScanState?) {
+    override fun displayState(newState: CardScanState, previousState: CardScanState?) {
         when (newState) {
             is CardScanState.NotFound -> {
                 viewBinding.viewFinderBackground

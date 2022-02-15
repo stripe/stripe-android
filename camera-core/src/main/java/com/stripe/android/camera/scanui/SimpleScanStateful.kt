@@ -1,22 +1,22 @@
-package com.stripe.android.stripecardscan.scanui
+package com.stripe.android.camera.scanui
 
 import android.util.Log
 import androidx.annotation.RestrictTo
 import com.stripe.android.camera.framework.AnalyzerLoopErrorListener
-import com.stripe.android.stripecardscan.framework.Config
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 abstract class ScanState(val isFinal: Boolean)
 
-internal interface SimpleScanStateful<State : ScanState> {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+interface SimpleScanStateful<State : ScanState> {
 
-    var scanStatePrevious: ScanState?
-    var scanState: ScanState
+    var scanStatePrevious: State?
+    var scanState: State?
     val scanErrorListener: ScanErrorListener
 
-    fun displayState(newState: ScanState, previousState: ScanState?)
+    fun displayState(newState: State, previousState: State?)
 
-    fun changeScanState(newState: ScanState): Boolean {
+    fun changeScanState(newState: State): Boolean {
         if (newState == scanStatePrevious || scanStatePrevious?.isFinal == true) {
             return false
         }
@@ -31,12 +31,16 @@ internal interface SimpleScanStateful<State : ScanState> {
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class ScanErrorListener : AnalyzerLoopErrorListener {
     override fun onAnalyzerFailure(t: Throwable): Boolean {
-        Log.e(Config.logTag, "Error executing analyzer", t)
+        Log.e(TAG, "Error executing analyzer", t)
         return false
     }
 
     override fun onResultFailure(t: Throwable): Boolean {
-        Log.e(Config.logTag, "Error executing result", t)
+        Log.e(TAG, "Error executing result", t)
         return true
+    }
+
+    private companion object {
+        val TAG: String = SimpleScanStateful::class.java.simpleName
     }
 }
