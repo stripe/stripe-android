@@ -129,6 +129,8 @@ internal class CardNumberController constructor(
 
     override fun onAccountRangeResult(newAccountRange: AccountRange?) {
         super.onAccountRangeResult(newAccountRange)
-        (visualTransformation as CardNumberVisualTransformation).binBasedMaxPan = 19
+        if (accountRange?.panLength != null) {
+            (visualTransformation as CardNumberVisualTransformation).binBasedMaxPan = accountRange?.panLength
+        }
     }
 }
