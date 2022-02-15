@@ -21,9 +21,11 @@ internal class LinkAccountManager @Inject constructor(
      */
     suspend fun lookupConsumer(email: String): Result<LinkAccount?> =
         linkRepository.lookupConsumer(email).map { consumerSessionLookup ->
-            setAndReturnNullable(consumerSessionLookup.consumerSession?.let { consumerSession ->
-                LinkAccount(consumerSession)
-            })
+            setAndReturnNullable(
+                consumerSessionLookup.consumerSession?.let { consumerSession ->
+                    LinkAccount(consumerSession)
+                }
+            )
         }.mapCatching {
             it?.let { account ->
                 if (account.isVerified) {

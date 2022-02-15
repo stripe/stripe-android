@@ -143,7 +143,6 @@ class SignUpViewModelTest {
         runTest(UnconfinedTestDispatcher()) {
             val viewModel = createViewModel(defaultArgs)
 
-
             val consumerSession = mockConsumerSessionWithVerificationSession(
                 ConsumerSession.VerificationSession.SessionType.Sms,
                 ConsumerSession.VerificationSession.SessionState.Verified

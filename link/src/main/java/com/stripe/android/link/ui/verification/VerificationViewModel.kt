@@ -29,7 +29,6 @@ internal class VerificationViewModel @Inject constructor(
 
     val linkAccount = requireNotNull(linkAccountManager.linkAccount)
 
-
     fun onVerificationCodeEntered(code: String) {
         viewModelScope.launch {
             linkAccountManager.confirmVerification(code).fold(
@@ -42,7 +41,6 @@ internal class VerificationViewModel @Inject constructor(
     }
 
     fun onResendCodeClicked() {
-
     }
 
     private fun onError(error: Throwable) {
