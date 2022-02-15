@@ -121,21 +121,27 @@ public final class com/stripe/android/stripecardscan/cardscan/CardScanConfig {
 	public static final fun setOCR_SEARCH_DURATION_MILLIS (I)V
 }
 
-public final class com/stripe/android/stripecardscan/cardscan/CardScanFragment : com/stripe/android/stripecardscan/scanui/ScanFragment, com/stripe/android/stripecardscan/scanui/SimpleScanStateful {
+public final class com/stripe/android/stripecardscan/cardscan/CardScanFragment : com/stripe/android/stripecardscan/scanui/ScanFragment, com/stripe/android/camera/scanui/SimpleScanStateful {
 	public static final field $stable I
 	public fun <init> ()V
-	public fun changeScanState (Lcom/stripe/android/stripecardscan/scanui/ScanState;)Z
-	public fun displayState (Lcom/stripe/android/stripecardscan/scanui/ScanState;Lcom/stripe/android/stripecardscan/scanui/ScanState;)V
+	public synthetic fun changeScanState (Lcom/stripe/android/camera/scanui/ScanState;)Z
+	public fun changeScanState (Lcom/stripe/android/stripecardscan/cardscan/CardScanState;)Z
+	public synthetic fun displayState (Lcom/stripe/android/camera/scanui/ScanState;Lcom/stripe/android/camera/scanui/ScanState;)V
+	public fun displayState (Lcom/stripe/android/stripecardscan/cardscan/CardScanState;Lcom/stripe/android/stripecardscan/cardscan/CardScanState;)V
 	public synthetic fun getResultListener$stripecardscan_release ()Lcom/stripe/android/stripecardscan/scanui/ScanResultListener;
-	public fun getScanErrorListener ()Lcom/stripe/android/stripecardscan/scanui/ScanErrorListener;
-	public fun getScanState ()Lcom/stripe/android/stripecardscan/scanui/ScanState;
-	public fun getScanStatePrevious ()Lcom/stripe/android/stripecardscan/scanui/ScanState;
+	public fun getScanErrorListener ()Lcom/stripe/android/camera/scanui/ScanErrorListener;
+	public synthetic fun getScanState ()Lcom/stripe/android/camera/scanui/ScanState;
+	public fun getScanState ()Lcom/stripe/android/stripecardscan/cardscan/CardScanState;
+	public synthetic fun getScanStatePrevious ()Lcom/stripe/android/camera/scanui/ScanState;
+	public fun getScanStatePrevious ()Lcom/stripe/android/stripecardscan/cardscan/CardScanState;
 	public fun onCreateView (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Landroid/os/Bundle;)Landroid/view/View;
 	public fun onDestroy ()V
 	public fun onResume ()V
 	public fun onStart ()V
-	public fun setScanState (Lcom/stripe/android/stripecardscan/scanui/ScanState;)V
-	public fun setScanStatePrevious (Lcom/stripe/android/stripecardscan/scanui/ScanState;)V
+	public synthetic fun setScanState (Lcom/stripe/android/camera/scanui/ScanState;)V
+	public fun setScanState (Lcom/stripe/android/stripecardscan/cardscan/CardScanState;)V
+	public synthetic fun setScanStatePrevious (Lcom/stripe/android/camera/scanui/ScanState;)V
+	public fun setScanStatePrevious (Lcom/stripe/android/stripecardscan/cardscan/CardScanState;)V
 }
 
 public final class com/stripe/android/stripecardscan/cardscan/CardScanFragmentKt {
@@ -204,6 +210,21 @@ public final class com/stripe/android/stripecardscan/cardscan/CardScanSheetResul
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 	public fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public final class com/stripe/android/stripecardscan/cardscan/CardScanState$Correct : com/stripe/android/stripecardscan/cardscan/CardScanState {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/stripe/android/stripecardscan/cardscan/CardScanState$Correct;
+}
+
+public final class com/stripe/android/stripecardscan/cardscan/CardScanState$Found : com/stripe/android/stripecardscan/cardscan/CardScanState {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/stripe/android/stripecardscan/cardscan/CardScanState$Found;
+}
+
+public final class com/stripe/android/stripecardscan/cardscan/CardScanState$NotFound : com/stripe/android/stripecardscan/cardscan/CardScanState {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/stripe/android/stripecardscan/cardscan/CardScanState$NotFound;
 }
 
 public final class com/stripe/android/stripecardscan/cardscan/exception/InvalidStripePublishableKeyException : java/lang/Exception {

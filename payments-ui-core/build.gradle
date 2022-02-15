@@ -145,9 +145,9 @@ task ktlintFormat(type: JavaExec, group: "formatting") {
 }
 
 ext {
-    artifactId = "stripe-ui-core"
-    artifactName = "stripe-ui-core"
-    artifactDescrption = "The core UI module of Stripe Android SDKs"
+    artifactId = "payments-ui-core"
+    artifactName = "payments-ui-core"
+    artifactDescrption = "The core UI module of Stripe Android Payments SDKs"
 }
 
 apply from: "${rootDir}/deploy/deploy.gradle"
