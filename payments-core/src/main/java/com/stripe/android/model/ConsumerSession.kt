@@ -31,7 +31,7 @@ data class ConsumerSession internal constructor(
             Sms("sms");
 
             companion object {
-                fun fromValue(value: String) : SessionType =
+                fun fromValue(value: String): SessionType =
                     values().firstOrNull { it.value.equals(value, ignoreCase = true) } ?: Unknown
             }
         }
@@ -46,7 +46,7 @@ data class ConsumerSession internal constructor(
             Expired("expired");
 
             companion object {
-                fun fromValue(value: String) : SessionState =
+                fun fromValue(value: String): SessionState =
                     values().firstOrNull { it.value.equals(value, ignoreCase = true) } ?: Unknown
             }
         }

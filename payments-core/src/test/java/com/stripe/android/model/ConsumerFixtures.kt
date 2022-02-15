@@ -63,7 +63,7 @@ object ConsumerFixtures {
                 ]
               }
             }
-            """.trimIndent()
+        """.trimIndent()
     )
     val CONSUMER_VERIFICATION_STARTED =
         ConsumerSessionJsonParser().parse(CONSUMER_VERIFICATION_STARTED_JSON)
@@ -94,7 +94,7 @@ object ConsumerFixtures {
                 ]
               }
             }
-            """.trimIndent()
+        """.trimIndent()
     )
     val CONSUMER_VERIFIED = ConsumerSessionJsonParser().parse(CONSUMER_VERIFIED_JSON)
 
@@ -116,7 +116,7 @@ object ConsumerFixtures {
                 ]
               }
             }
-            """.trimIndent()
+        """.trimIndent()
     )
     val CONSUMER_SIGNUP_STARTED = ConsumerSessionJsonParser().parse(CONSUMER_SIGNUP_STARTED_JSON)
 }
