@@ -41,6 +41,6 @@ class ScanErrorListener : AnalyzerLoopErrorListener {
     }
 
     private companion object {
-        val TAG: String = ScanErrorListener::class.java.simpleName
+        val TAG: String = SimpleScanStateful::class.java.simpleName
     }
 }
