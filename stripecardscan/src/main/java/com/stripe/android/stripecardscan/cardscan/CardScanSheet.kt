@@ -58,23 +58,7 @@ class CardScanSheet private constructor(private val stripePublishableKey: String
         @JvmStatic
         fun create(from: ComponentActivity, stripePublishableKey: String) =
             CardScanSheet(stripePublishableKey).apply {
-                launcher = from.registerForActivityResult(
-                    object : ActivityResultContract<
-                        CardScanSheetParams,
-                        CardScanSheetResult
-                        >() {
-                        override fun createIntent(
-                            context: Context,
-                            input: CardScanSheetParams,
-                        ) = this@Companion.createIntent(context, input)
-
-                        override fun parseResult(
-                            resultCode: Int,
-                            intent: Intent?,
-                        ) = this@Companion.parseResult(requireNotNull(intent))
-                    },
-                    ::onResult,
-                )
+                launcher = from.registerForActivityResult(activityResultContract, ::onResult)
             }
 
         /**
@@ -86,23 +70,7 @@ class CardScanSheet private constructor(private val stripePublishableKey: String
         @JvmStatic
         fun create(from: Fragment, stripePublishableKey: String) =
             CardScanSheet(stripePublishableKey).apply {
-                launcher = from.registerForActivityResult(
-                    object : ActivityResultContract<
-                        CardScanSheetParams,
-                        CardScanSheetResult
-                        >() {
-                        override fun createIntent(
-                            context: Context,
-                            input: CardScanSheetParams,
-                        ) = this@Companion.createIntent(context, input)
-
-                        override fun parseResult(
-                            resultCode: Int,
-                            intent: Intent?,
-                        ) = this@Companion.parseResult(requireNotNull(intent))
-                    },
-                    ::onResult,
-                )
+                launcher = from.registerForActivityResult(activityResultContract, ::onResult)
             }
 
         private fun createIntent(context: Context, input: CardScanSheetParams) =
@@ -125,6 +93,21 @@ class CardScanSheet private constructor(private val stripePublishableKey: String
                     remove(fragment)
                 }
             }
+        }
+
+        private val activityResultContract = object : ActivityResultContract<
+            CardScanSheetParams,
+            CardScanSheetResult
+            >() {
+            override fun createIntent(
+                context: Context,
+                input: CardScanSheetParams,
+            ) = this@Companion.createIntent(context, input)
+
+            override fun parseResult(
+                resultCode: Int,
+                intent: Intent?,
+            ) = this@Companion.parseResult(requireNotNull(intent))
         }
     }
 

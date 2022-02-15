@@ -52,23 +52,7 @@ class CardImageVerificationSheet private constructor(private val stripePublishab
         @JvmStatic
         fun create(from: ComponentActivity, stripePublishableKey: String) =
             CardImageVerificationSheet(stripePublishableKey).apply {
-                launcher = from.registerForActivityResult(
-                    object : ActivityResultContract<
-                        CardImageVerificationSheetParams,
-                        CardImageVerificationSheetResult
-                        >() {
-                        override fun createIntent(
-                            context: Context,
-                            input: CardImageVerificationSheetParams,
-                        ) = this@Companion.createIntent(context, input)
-
-                        override fun parseResult(
-                            resultCode: Int,
-                            intent: Intent?,
-                        ) = this@Companion.parseResult(requireNotNull(intent))
-                    },
-                    ::onResult,
-                )
+                launcher = from.registerForActivityResult(activityResultContract, ::onResult)
             }
 
         /**
@@ -80,23 +64,7 @@ class CardImageVerificationSheet private constructor(private val stripePublishab
         @JvmStatic
         fun create(from: Fragment, stripePublishableKey: String) =
             CardImageVerificationSheet(stripePublishableKey).apply {
-                launcher = from.registerForActivityResult(
-                    object : ActivityResultContract<
-                        CardImageVerificationSheetParams,
-                        CardImageVerificationSheetResult
-                        >() {
-                        override fun createIntent(
-                            context: Context,
-                            input: CardImageVerificationSheetParams,
-                        ) = this@Companion.createIntent(context, input)
-
-                        override fun parseResult(
-                            resultCode: Int,
-                            intent: Intent?,
-                        ) = this@Companion.parseResult(requireNotNull(intent))
-                    },
-                    ::onResult,
-                )
+                launcher = from.registerForActivityResult(activityResultContract, ::onResult)
             }
 
         private fun createIntent(context: Context, input: CardImageVerificationSheetParams) =
@@ -108,6 +76,21 @@ class CardImageVerificationSheet private constructor(private val stripePublishab
                 ?: CardImageVerificationSheetResult.Failed(
                     UnknownScanException("No data in the result intent")
                 )
+
+        private val activityResultContract = object : ActivityResultContract<
+            CardImageVerificationSheetParams,
+            CardImageVerificationSheetResult
+            >() {
+            override fun createIntent(
+                context: Context,
+                input: CardImageVerificationSheetParams,
+            ) = this@Companion.createIntent(context, input)
+
+            override fun parseResult(
+                resultCode: Int,
+                intent: Intent?,
+            ) = this@Companion.parseResult(requireNotNull(intent))
+        }
     }
 
     /**
