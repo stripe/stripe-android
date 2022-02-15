@@ -12,14 +12,15 @@ import com.stripe.android.core.injection.Injector
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.link.LinkAccountManager
 import com.stripe.android.link.LinkActivityContract
+import com.stripe.android.link.LinkScreen
 import com.stripe.android.link.injection.SignUpViewModelSubcomponent
+import com.stripe.android.link.model.Navigator
 import com.stripe.android.link.repositories.LinkRepository
 import com.stripe.android.link.ui.signup.SignUpViewModel.Companion.LOOKUP_DEBOUNCE_MS
-import com.stripe.android.model.ConsumerSessionLookup
+import com.stripe.android.model.ConsumerSession
 import com.stripe.android.ui.core.elements.IdentifierSpec
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.resetMain
@@ -30,10 +31,8 @@ import org.junit.runner.RunWith
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argWhere
 import org.mockito.kotlin.argumentCaptor
-import org.mockito.kotlin.doSuspendableAnswer
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.spy
-import org.mockito.kotlin.stub
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
@@ -58,6 +57,7 @@ class SignUpViewModelTest {
         )
     )
     private val linkRepository = mock<LinkRepository>()
+    private val navigator = mock<Navigator>()
 
     @BeforeTest
     fun setUp() {
@@ -112,10 +112,49 @@ class SignUpViewModelTest {
     @Test
     fun `When email is provided it should not trigger lookup and should collect phone number`() =
         runTest(UnconfinedTestDispatcher()) {
-            val viewModel = createViewModel(defaultArgs.copy(customerEmail = "valid@email.com"))
+            val viewModel = createViewModel(defaultArgs)
             assertThat(viewModel.signUpState.value).isEqualTo(SignUpState.InputtingPhone)
 
             verify(linkRepository, times(0)).lookupConsumer(any())
+        }
+
+    @Test
+    fun `When signed up with unverified account then it navigates to Verification screen`() =
+        runTest(UnconfinedTestDispatcher()) {
+            val viewModel = createViewModel(defaultArgs)
+
+            val consumerSession = mockConsumerSessionWithVerificationSession(
+                ConsumerSession.VerificationSession.SessionType.Sms,
+                ConsumerSession.VerificationSession.SessionState.Started
+            )
+
+            whenever(linkRepository.consumerSignUp(any(), any(), any()))
+                .thenReturn(Result.success(consumerSession))
+            whenever(linkRepository.startVerification(any()))
+                .thenReturn(Result.success(consumerSession))
+
+            viewModel.onSignUpClick("phone")
+
+            verify(navigator).navigateTo(LinkScreen.Verification)
+        }
+
+    @Test
+    fun `When signed up with verified account then it navigates to Wallet screen`() =
+        runTest(UnconfinedTestDispatcher()) {
+            val viewModel = createViewModel(defaultArgs)
+
+
+            val consumerSession = mockConsumerSessionWithVerificationSession(
+                ConsumerSession.VerificationSession.SessionType.Sms,
+                ConsumerSession.VerificationSession.SessionState.Verified
+            )
+
+            whenever(linkRepository.consumerSignUp(any(), any(), any()))
+                .thenReturn(Result.success(consumerSession))
+
+            viewModel.onSignUpClick("phone")
+
+            verify(navigator).navigateTo(LinkScreen.Wallet)
         }
 
     @Test
@@ -180,11 +219,27 @@ class SignUpViewModelTest {
         )
     }
 
+    private fun mockConsumerSessionWithVerificationSession(
+        type: ConsumerSession.VerificationSession.SessionType,
+        state: ConsumerSession.VerificationSession.SessionState
+    ): ConsumerSession {
+        val verificationSession = mock<ConsumerSession.VerificationSession>()
+        whenever(verificationSession.type).thenReturn(type)
+        whenever(verificationSession.state).thenReturn(state)
+        val verificationSessions = listOf(verificationSession)
+
+        val consumerSession = mock<ConsumerSession>()
+        whenever(consumerSession.verificationSessions).thenReturn(verificationSessions)
+        whenever(consumerSession.clientSecret).thenReturn("secret")
+        whenever(consumerSession.emailAddress).thenReturn("email")
+        return consumerSession
+    }
+
     private fun createViewModel(args: LinkActivityContract.Args = defaultArgs) = SignUpViewModel(
         args = args,
         linkAccountManager = LinkAccountManager(linkRepository),
         logger = Logger.noop(),
-        navigator = mock()
+        navigator = navigator
     )
 
     companion object {
@@ -195,7 +250,5 @@ class SignUpViewModelTest {
 
         const val MERCHANT_NAME = "merchantName"
         const val CUSTOMER_EMAIL = "customer@email.com"
-
-        const val DELAY = 100L
     }
 }

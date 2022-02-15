@@ -68,7 +68,7 @@ internal class SignUpViewModel @Inject constructor(
         viewModelScope.launch {
             consumerEmail.collect { email ->
                 // The first emitted value is the one provided in the arguments, and shouldn't
-                // trigger a lookup
+                // trigger a lookup because it was already done on the loading screen.
                 if (email == args.customerEmail && lookupJob == null) {
                     // If it's a valid email, collect phone number
                     if (email != null) {
