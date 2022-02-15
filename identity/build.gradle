@@ -63,7 +63,7 @@ dependencies {
     // vanilla tflite library
     implementation "org.tensorflow:tensorflow-lite:2.8.0"
     // flex ops
-    implementation 'org.tensorflow:tensorflow-lite-select-tf-ops:2.6.0'
+    implementation 'org.tensorflow:tensorflow-lite-select-tf-ops:2.8.0'
     // support library to reshape image to the input model shape
     implementation 'org.tensorflow:tensorflow-lite-support:0.3.1'
 
