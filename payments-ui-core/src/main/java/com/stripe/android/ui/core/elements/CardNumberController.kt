@@ -1,9 +1,10 @@
 package com.stripe.android.ui.core.elements
 
 import android.content.Context
-import androidx.annotation.VisibleForTesting
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
+import com.stripe.android.cards.CardAccountRangeRepository
+import com.stripe.android.cards.CardAccountRangeService
 import com.stripe.android.cards.CardNumber
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
 import com.stripe.android.cards.DefaultStaticCardAccountRanges
@@ -11,23 +12,32 @@ import com.stripe.android.cards.StaticCardAccountRanges
 import com.stripe.android.model.AccountRange
 import com.stripe.android.model.CardBrand
 import com.stripe.android.ui.core.forms.FormFieldEntry
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import kotlin.coroutines.CoroutineContext
 
 internal class CardNumberController constructor(
     private val cardTextFieldConfig: CardNumberConfig,
-    context: Context,
+    override val cardAccountRangeRepository: CardAccountRangeRepository,
+    override val workContext: CoroutineContext,
+    private val staticCardAccountRanges: StaticCardAccountRanges = DefaultStaticCardAccountRanges(),
     override val showOptionalLabel: Boolean = false
-) : TextFieldController, SectionFieldErrorController {
-    private val cardAccountRangeRepository = DefaultCardAccountRangeRepositoryFactory(context).create()
-    private val staticCardAccountRanges: StaticCardAccountRanges = DefaultStaticCardAccountRanges()
+) : TextFieldController, SectionFieldErrorController, CardAccountRangeService {
+
+    @JvmOverloads
+    constructor(
+        cardTextFieldConfig: CardNumberConfig,
+        context: Context
+    ) : this(
+        cardTextFieldConfig,
+        DefaultCardAccountRangeRepositoryFactory(context).create(),
+        Dispatchers.IO
+    )
+
     override val capitalization: KeyboardCapitalization = cardTextFieldConfig.capitalization
     override val keyboardType: KeyboardType = cardTextFieldConfig.keyboard
     override val visualTransformation = cardTextFieldConfig.visualTransformation
@@ -56,10 +66,8 @@ internal class CardNumberController constructor(
 
     private val _hasFocus = MutableStateFlow(false)
 
-    private var accountRange: AccountRange? = null
-
-    @VisibleForTesting
-    internal var accountRangeRepositoryJob: Job? = null
+    override var accountRange: AccountRange? = null
+    override var accountRangeRepositoryJob: Job? = null
 
     override val visibleError: Flow<Boolean> =
         combine(_fieldState, _hasFocus) { fieldState, hasFocus ->
@@ -119,54 +127,8 @@ internal class CardNumberController constructor(
         _hasFocus.value = newHasFocus
     }
 
-    private fun shouldQueryRepository(
-        accountRange: AccountRange
-    ) = when (accountRange.brand) {
-        CardBrand.Unknown,
-        CardBrand.UnionPay -> true
-        else -> false
-    }
-
-    @JvmSynthetic
-    internal fun queryAccountRangeRepository(cardNumber: CardNumber.Unvalidated) {
-        if (shouldQueryAccountRange(cardNumber)) {
-            // cancel in-flight job
-            cancelAccountRangeRepositoryJob()
-
-            // invalidate accountRange before fetching
-            accountRange = null
-
-            accountRangeRepositoryJob = CoroutineScope(Dispatchers.IO).launch {
-                val bin = cardNumber.bin
-                val accountRange = if (bin != null) {
-                    cardAccountRangeRepository.getAccountRange(cardNumber)
-                } else {
-                    null
-                }
-
-                withContext(Dispatchers.Main) {
-                    onAccountRangeResult(accountRange)
-                }
-            }
-        }
-    }
-
-    private fun cancelAccountRangeRepositoryJob() {
-        accountRangeRepositoryJob?.cancel()
-        accountRangeRepositoryJob = null
-    }
-
-    @JvmSynthetic
-    internal fun onAccountRangeResult(
-        newAccountRange: AccountRange?
-    ) {
-        accountRange = newAccountRange
+    override fun onAccountRangeResult(newAccountRange: AccountRange?) {
+        super.onAccountRangeResult(newAccountRange)
         (visualTransformation as CardNumberVisualTransformation).binBasedMaxPan = 19
-    }
-
-    private fun shouldQueryAccountRange(cardNumber: CardNumber.Unvalidated): Boolean {
-        return accountRange == null ||
-            cardNumber.bin == null ||
-            accountRange?.binRange?.matches(cardNumber) == false
     }
 }

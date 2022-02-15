@@ -56,7 +56,7 @@ class CvcConfigTest {
         Truth.assertThat(state)
             .isInstanceOf(TextFieldStateConstants.Valid.Full::class.java)
 
-        state = cvcConfig.determineState(CardBrand.AmericanExpress, "1234", CardBrand.Visa.maxCvcLength)
+        state = cvcConfig.determineState(CardBrand.AmericanExpress, "1234", CardBrand.AmericanExpress.maxCvcLength)
         Truth.assertThat(state)
             .isInstanceOf(TextFieldStateConstants.Valid.Full::class.java)
     }

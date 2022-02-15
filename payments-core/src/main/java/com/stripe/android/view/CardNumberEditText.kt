@@ -10,6 +10,7 @@ import androidx.annotation.VisibleForTesting
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.R
 import com.stripe.android.cards.CardAccountRangeRepository
+import com.stripe.android.cards.CardAccountRangeService
 import com.stripe.android.cards.CardNumber
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
 import com.stripe.android.cards.DefaultStaticCardAccountRanges
@@ -36,13 +37,13 @@ class CardNumberEditText internal constructor(
     defStyleAttr: Int = androidx.appcompat.R.attr.editTextStyle,
 
     // TODO(mshafrir-stripe): make immutable after `CardWidgetViewModel` is integrated in `CardWidget` subclasses
-    internal var workContext: CoroutineContext,
+    override var workContext: CoroutineContext,
 
-    private val cardAccountRangeRepository: CardAccountRangeRepository,
+    override val cardAccountRangeRepository: CardAccountRangeRepository,
     private val staticCardAccountRanges: StaticCardAccountRanges = DefaultStaticCardAccountRanges(),
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
     private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory
-) : StripeEditText(context, attrs, defStyleAttr) {
+) : StripeEditText(context, attrs, defStyleAttr), CardAccountRangeService {
 
     @JvmOverloads
     constructor(
@@ -102,7 +103,7 @@ class CardNumberEditText internal constructor(
     @JvmSynthetic
     internal var completionCallback: () -> Unit = {}
 
-    private var accountRange: AccountRange? = null
+    override var accountRange: AccountRange? = null
         set(value) {
             field = value
             updateLengthFilter()
@@ -132,7 +133,7 @@ class CardNumberEditText internal constructor(
         get() = validatedCardNumber != null
 
     @VisibleForTesting
-    internal var accountRangeRepositoryJob: Job? = null
+    override var accountRangeRepositoryJob: Job? = null
 
     @JvmSynthetic
     internal var isLoadingCallback: (Boolean) -> Unit = {}
@@ -233,46 +234,11 @@ class CardNumberEditText internal constructor(
     }
 
     @JvmSynthetic
-    internal fun queryAccountRangeRepository(cardNumber: CardNumber.Unvalidated) {
-        if (shouldQueryAccountRange(cardNumber)) {
-            // cancel in-flight job
-            cancelAccountRangeRepositoryJob()
-
-            // invalidate accountRange before fetching
-            accountRange = null
-
-            accountRangeRepositoryJob = CoroutineScope(workContext).launch {
-                val bin = cardNumber.bin
-                val accountRange = if (bin != null) {
-                    cardAccountRangeRepository.getAccountRange(cardNumber)
-                } else {
-                    null
-                }
-
-                withContext(Dispatchers.Main) {
-                    onAccountRangeResult(accountRange)
-                }
-            }
-        }
-    }
-
-    private fun cancelAccountRangeRepositoryJob() {
-        accountRangeRepositoryJob?.cancel()
-        accountRangeRepositoryJob = null
-    }
-
-    @JvmSynthetic
-    internal fun onAccountRangeResult(
+    override fun onAccountRangeResult(
         newAccountRange: AccountRange?
     ) {
-        accountRange = newAccountRange
+        super.onAccountRangeResult(newAccountRange)
         cardBrand = newAccountRange?.brand ?: CardBrand.Unknown
-    }
-
-    private fun shouldQueryAccountRange(cardNumber: CardNumber.Unvalidated): Boolean {
-        return accountRange == null ||
-            cardNumber.bin == null ||
-            accountRange?.binRange?.matches(cardNumber) == false
     }
 
     @JvmSynthetic

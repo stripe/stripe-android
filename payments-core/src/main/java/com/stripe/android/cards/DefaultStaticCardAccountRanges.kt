@@ -101,9 +101,14 @@ class DefaultStaticCardAccountRanges : StaticCardAccountRanges {
             )
         }
 
-        private val UNIONPAY_ACCOUNTS = setOf(
+        private val UNIONPAY16_ACCOUNTS = setOf(
             BinRange(
                 low = "6200000000000000",
+                high = "6216828049999999"
+            ),
+
+            BinRange(
+                low = "6216828060000000",
                 high = "6299999999999999"
             ),
 
@@ -115,6 +120,19 @@ class DefaultStaticCardAccountRanges : StaticCardAccountRanges {
             AccountRange(
                 binRange = it,
                 panLength = 16,
+                brandInfo = AccountRange.BrandInfo.UnionPay
+            )
+        }
+
+        private val UNIONPAY19_ACCOUNTS = setOf(
+            BinRange(
+                low = "6216828050000000000",
+                high = "6216828059999999999"
+            )
+        ).map {
+            AccountRange(
+                binRange = it,
+                panLength = 19,
                 brandInfo = AccountRange.BrandInfo.UnionPay
             )
         }
@@ -161,7 +179,8 @@ class DefaultStaticCardAccountRanges : StaticCardAccountRanges {
                 .plus(AMEX_ACCOUNTS)
                 .plus(DISCOVER_ACCOUNTS)
                 .plus(JCB_ACCOUNTS)
-                .plus(UNIONPAY_ACCOUNTS)
+                .plus(UNIONPAY16_ACCOUNTS)
+                .plus(UNIONPAY19_ACCOUNTS)
                 .plus(DINERSCLUB16_ACCOUNT_RANGES)
                 .plus(DINERSCLUB14_ACCOUNT_RANGES)
     }
