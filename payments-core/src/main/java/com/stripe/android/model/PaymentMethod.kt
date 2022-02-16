@@ -303,6 +303,13 @@ constructor(
             isVoucher = false,
             requiresMandate = false,
             hasDelayedSettlement = false
+        ),
+        Affirm(
+            "affirm",
+            isReusable = false,
+            isVoucher = false,
+            requiresMandate = false,
+            hasDelayedSettlement = false
         );
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
