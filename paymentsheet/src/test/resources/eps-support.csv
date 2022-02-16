@@ -1,0 +1,49 @@
+lpm, hasCustomer, allowsDelayedPayment, intentSetupFutureUsage, intentHasShipping, intentLpms, supportCustomerSavedCard, formExists, formType, supportsAdding
+eps, true, true, off_session, false, card/eps, false, false, not available, false
+eps, true, true, off_session, false, card/eps, false, false, not available, false
+eps, true, false, off_session, false, card/eps, false, false, not available, false
+eps, true, false, off_session, false, card/eps, false, false, not available, false
+eps, true, true, on_session, false, card/eps, false, false, not available, false
+eps, true, true, on_session, false, card/eps, false, false, not available, false
+eps, true, false, on_session, false, card/eps, false, false, not available, false
+eps, true, false, on_session, false, card/eps, false, false, not available, false
+eps, true, true, null, false, card/eps, false, true, oneTime, true
+eps, true, true, null, false, card/eps, false, true, oneTime, true
+eps, true, false, null, false, card/eps, false, true, oneTime, true
+eps, true, false, null, false, card/eps, false, true, oneTime, true
+eps, false, true, off_session, false, card/eps, false, false, not available, false
+eps, false, true, off_session, false, card/eps, false, false, not available, false
+eps, false, false, off_session, false, card/eps, false, false, not available, false
+eps, false, false, off_session, false, card/eps, false, false, not available, false
+eps, false, true, on_session, false, card/eps, false, false, not available, false
+eps, false, true, on_session, false, card/eps, false, false, not available, false
+eps, false, false, on_session, false, card/eps, false, false, not available, false
+eps, false, false, on_session, false, card/eps, false, false, not available, false
+eps, false, true, null, false, card/eps, false, true, oneTime, true
+eps, false, true, null, false, card/eps, false, true, oneTime, true
+eps, false, false, null, false, card/eps, false, true, oneTime, true
+eps, false, false, null, false, card/eps, false, true, oneTime, true
+eps, true, true, off_session, true, card/eps, false, false, not available, false
+eps, true, true, off_session, true, card/eps, false, false, not available, false
+eps, true, false, off_session, true, card/eps, false, false, not available, false
+eps, true, false, off_session, true, card/eps, false, false, not available, false
+eps, true, true, on_session, true, card/eps, false, false, not available, false
+eps, true, true, on_session, true, card/eps, false, false, not available, false
+eps, true, false, on_session, true, card/eps, false, false, not available, false
+eps, true, false, on_session, true, card/eps, false, false, not available, false
+eps, true, true, null, true, card/eps, false, true, oneTime, true
+eps, true, true, null, true, card/eps, false, true, oneTime, true
+eps, true, false, null, true, card/eps, false, true, oneTime, true
+eps, true, false, null, true, card/eps, false, true, oneTime, true
+eps, false, true, off_session, true, card/eps, false, false, not available, false
+eps, false, true, off_session, true, card/eps, false, false, not available, false
+eps, false, false, off_session, true, card/eps, false, false, not available, false
+eps, false, false, off_session, true, card/eps, false, false, not available, false
+eps, false, true, on_session, true, card/eps, false, false, not available, false
+eps, false, true, on_session, true, card/eps, false, false, not available, false
+eps, false, false, on_session, true, card/eps, false, false, not available, false
+eps, false, false, on_session, true, card/eps, false, false, not available, false
+eps, false, true, null, true, card/eps, false, true, oneTime, true
+eps, false, true, null, true, card/eps, false, true, oneTime, true
+eps, false, false, null, true, card/eps, false, true, oneTime, true
+eps, false, false, null, true, card/eps, false, true, oneTime, true

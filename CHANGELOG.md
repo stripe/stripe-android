@@ -1,4 +1,151 @@
 # CHANGELOG
+## X.X.X - 2022-XX-XX
+### PaymentSheet
+### Identity
+### Card scanning
+[ADDED] [4592](https://github.com/stripe/stripe-android/pull/4592) Add support for launching card scan from fragments.
+
+## 19.2.0 - 2022-02-14
+This release includes several bug fixes and upgrades Kotlin to 1.6.
+* [CHANGED] [4546](https://github.com/stripe/stripe-android/pull/4546) Update to kotlin 1.6
+* [FIXED] [4560](https://github.com/stripe/stripe-android/pull/4560) Fix `cardValidCallback` being added multiple times in `CardInputWidget`.
+* [FIXED] [4574](https://github.com/stripe/stripe-android/pull/4574) Take `postalCode` into account in `CardMultilineWidget` validation.
+* [FIXED] [4579](https://github.com/stripe/stripe-android/pull/4579) Fix crash when no bank is selected in `AddPaymentMethodActivity`.
+### PaymentSheet
+* [FIXED] [4466](https://github.com/stripe/stripe-android/pull/4466) Fix issues when activities are lost on low resource phones.
+* [FIXED] [4557](https://github.com/stripe/stripe-android/pull/4557) Add missing app info to some Stripe API requests
+### Card scanning
+* [FIXED] [4548](https://github.com/stripe/stripe-android/pull/4548) Potential work leak when canceling a card scan in StripeCardScan
+* [ADDED] [4562](https://github.com/stripe/stripe-android/pull/4562) Add an example page for cardscan
+* [FIXED] [4575](https://github.com/stripe/stripe-android/pull/4575) Fix card add display bug
+
+## 19.1.1 - 2022-01-31
+### PaymentSheet
+* [CHANGED] [4515](https://github.com/stripe/stripe-android/pull/4515) Disable card saving by default in PaymentSheet
+* [FIXED] [4504](https://github.com/stripe/stripe-android/pull/4504) Fix CardValidCallback not firing on postal code changes
+* [CHANGED] [4512](https://github.com/stripe/stripe-android/pull/4512) Relay error message on PaymentResult.Failed
+
+## 19.1.0 - 2022-01-05
+This release enables new payment methods in the Mobile Payment Element: Eps, Giropay, P24, Klarna, PayPal, AfterpayClearpay.
+For a full list of the supported payment methods, refer to [our documentation](https://stripe.com/docs/payments/payment-methods/integration-options#payment-method-product-support).
+* [4492](https://github.com/stripe/stripe-android/pull/4492) Enable Afterpay in Payment Sheet
+* [4489](https://github.com/stripe/stripe-android/pull/4489) Enable Eps, Giropay, p24, klarna and paypal in payment sheet
+* [4481](https://github.com/stripe/stripe-android/pull/4481) Add minimal user key auth support to PaymentSheet
+
+Dependencies updated:
+* [4484](https://github.com/stripe/stripe-android/pull/4484) Bump kotlinCoroutinesVersion from 1.5.2 to 1.6.0
+* [4485](https://github.com/stripe/stripe-android/pull/4485) Bump kotlinx-serialization-json from 1.3.1 to 1.3.2
+* [4478](https://github.com/stripe/stripe-android/pull/4478) Bump navigation-compose from 2.4.0-beta02 to 2.4.0-rc01
+* [4475](https://github.com/stripe/stripe-android/pull/4475) Update gradle version from 7.1.1 to 7.3.2
+* [4464](https://github.com/stripe/stripe-android/pull/4464) Bump accompanist-flowlayout from 0.20.2 to 0.20.3
+* [4472](https://github.com/stripe/stripe-android/pull/4472) Bump org.jetbrains.kotlin.plugin.serialization from 1.6.0 to 1.6.10
+
+## 19.0.0 - 2021-12-13
+This release includes several bug fixes and has the first release of [Stripe CardScan SDK](https://github.com/stripe/stripe-android/tree/master/stripecardscan)
+* [4426](https://github.com/stripe/stripe-android/pull/4426) don't override returnUrl for instant app
+* [4424](https://github.com/stripe/stripe-android/pull/4424) callback for postal code complete
+* [4438](https://github.com/stripe/stripe-android/pull/4438) allow non-terminal state for PaymentSheet
+* [4432](https://github.com/stripe/stripe-android/pull/4432) Span PMs across the PaymentSheet when there are only two of them
+* [4414](https://github.com/stripe/stripe-android/pull/4414) Add support for new languages: fil, hr, in, ms-rMY, th, vi.
+* [4408](https://github.com/stripe/stripe-android/pull/4408) revert static height on cmw text boxes
+* [4396](https://github.com/stripe/stripe-android/pull/4396) Fix snackbar NPE
+* [4385](https://github.com/stripe/stripe-android/pull/4385) Remove filter on postal codes when switching away from US
+* [4354](https://github.com/stripe/stripe-android/pull/4354) Convert toast to snackbar in examples
+* [4383](https://github.com/stripe/stripe-android/pull/4383) Convert entered country code to display name if needed
+* [4384](https://github.com/stripe/stripe-android/pull/4384) CardFormView will auto convert the country name to country code when typed
+
+Dependencies updated:
+* [4463](https://github.com/stripe/stripe-android/pull/4463) Bump play-services-wallet from 18.1.3 to 19.0.0
+* [4456](https://github.com/stripe/stripe-android/pull/4456) Bump gradle from 7.0.3 to 7.0.4
+* [4447](https://github.com/stripe/stripe-android/pull/4447) Bump daggerVersion from 2.40.4 to 2.40.5
+* [4441](https://github.com/stripe/stripe-android/pull/4441) Bump json from 20210307 to 20211205
+* [4434](https://github.com/stripe/stripe-android/pull/4434) Bump daggerVersion from 2.40.3 to 2.40.4
+* [4433](https://github.com/stripe/stripe-android/pull/4433) Bump ktlint from 0.43.1 to 0.43.2
+* [4428](https://github.com/stripe/stripe-android/pull/4428) Bump robolectric from 4.7.2 to 4.7.3
+* [4425](https://github.com/stripe/stripe-android/pull/4425) Bump ktlint from 0.43.0 to 0.43.1
+* [4422](https://github.com/stripe/stripe-android/pull/4422) Bump daggerVersion from 2.40.2 to 2.40.3
+* [4407](https://github.com/stripe/stripe-android/pull/4407) Bump dokka-gradle-plugin from 1.5.31 to 1.6.0
+* [4406](https://github.com/stripe/stripe-android/pull/4406) Bump daggerVersion from 2.40.1 to 2.40.2
+* [4395](https://github.com/stripe/stripe-android/pull/4395) Bump robolectric from 4.7.1 to 4.7.2
+* [4394](https://github.com/stripe/stripe-android/pull/4394) Bump logging-interceptor from 4.9.2 to 4.9.3
+* [4393](https://github.com/stripe/stripe-android/pull/4393) Bump mockitoCoreVersion from 4.0.0 to 4.1.0
+* [4388](https://github.com/stripe/stripe-android/pull/4388) Bump robolectric from 4.7 to 4.7.1
+* [4384](https://github.com/stripe/stripe-android/pull/4384) Bump activity-compose from 1.3.1 to 1.4.0
+* [4382](https://github.com/stripe/stripe-android/pull/4382) Bump org.jetbrains.kotlin.plugin.serialization from 1.5.31 to 1.6.0
+* [4379](https://github.com/stripe/stripe-android/pull/4379) Bump daggerVersion from 2.40 to 2.40.1
+* [4378](https://github.com/stripe/stripe-android/pull/4378) Bump kotlinSerializationVersion from 1.3.0 to 1.3.1
+* [4377](https://github.com/stripe/stripe-android/pull/4377) Bump robolectric from 4.6.1 to 4.7
+* [4373](https://github.com/stripe/stripe-android/pull/4373) Bump tensorflow-lite from 2.6.0 to 2.7.0
+* [4365](https://github.com/stripe/stripe-android/pull/4365) Bump binary-compatibility-validator from 0.7.1 to 0.8.0
+* [4363](https://github.com/stripe/stripe-android/pull/4363) Bump accompanist-flowlayout from 0.20.1 to 0.20.2
+* [4356](https://github.com/stripe/stripe-android/pull/4356) Bump composeVersion from 1.0.4 to 1.0.5
+* [4353](https://github.com/stripe/stripe-android/pull/4353) Bump accompanist-flowlayout from 0.20.0 to 0.20.1
+* [4352](https://github.com/stripe/stripe-android/pull/4352) Bump ktlint from 0.42.1 to 0.43.0
+* [4347](https://github.com/stripe/stripe-android/pull/4347) Bump gson from 2.8.8 to 2.8.9
+
+## 18.2.0 - 2021-10-29
+This release includes several bug fixes, introduces Klarna as a payment method binding, and renables [WeChat Pay](https://github.com/stripe/stripe-android/tree/master/wechatpay) within the SDK
+* [4323](https://github.com/stripe/stripe-android/pull/4323) reship wechat module 
+* [4325](https://github.com/stripe/stripe-android/pull/4325) Add klarna to sdk w/ example
+* [4339](https://github.com/stripe/stripe-android/pull/4339) Bump tensorflow-lite from 2.4.0 to 2.6.0
+* [4340](https://github.com/stripe/stripe-android/pull/4340) Bump okio from 2.10.0 to 3.0.0
+* [4334](https://github.com/stripe/stripe-android/pull/4334) Bank value is allowed to be null in the case of "other"
+* [4330](https://github.com/stripe/stripe-android/pull/4330) Bump lifecycle-viewmodel-compose from 2.4.0-rc01 to 2.4.0
+* [4329](https://github.com/stripe/stripe-android/pull/4329) Bump daggerVersion from 2.39.1 to 2.40
+* [4309](https://github.com/stripe/stripe-android/pull/4309) Card number, CVC, postal, and expiration date should only show digits in keypad 
+* [4198](https://github.com/stripe/stripe-android/pull/4198) Bump lifecycle-viewmodel-compose from 1.0.0-alpha07 to 2.4.0-rc01 
+* [4296](https://github.com/stripe/stripe-android/pull/4296) When processing Result for a PI, refresh until reaches deterministic state
+* [4290](https://github.com/stripe/stripe-android/pull/4290) Bump composeVersion from 1.0.2 to 1.0.4 
+## 18.1.0 - 2021-10-18
+### PaymentSheet
+This release adds several new features to `PaymentSheet`, our drop-in UI integration:
+
+#### More supported payment methods
+The list of supported payment methods depends on your integration. If you’re using a `PaymentIntent`, we support:
+- Card
+- SEPA Debit, bancontact, iDEAL, sofort
+ 
+If you’re using a `PaymentIntent` with `setup_future_usage` or a `SetupIntent`, we support:
+- Card
+- GooglePay
+
+Note: To enable SEPA Debit and sofort, set `PaymentSheet.Configuration.allowsDelayedPaymentMethods` to `true` on the client. These payment methods can't guarantee you will receive funds from your customer at the end of the checkout because they take time to settle. Don't enable these if your business requires immediate payment (e.g., an on-demand service). See https://stripe.com/payments/payment-methods-guide
+
+#### Pre-fill billing details
+`PaymentSheet` collects billing details like name and email for certain payment methods. Pre-fill these fields to save customers time by setting `PaymentSheet.Configuration.defaultBillingDetails`.
+
+#### Save payment methods on payment
+> This is currently only available for cards + Apple/Google Pay.
+
+`PaymentSheet` supports `PaymentIntents` with `setup_future_usage` set. This property tells us to save the payment method for future use (e.g., taking initial payment of a recurring subscription). When set, PaymentSheet hides the 'Save this card for future use' checkbox and always saves.
+
+#### SetupIntent support
+> This is currently only available for cards + Apple/Google Pay.
+
+Initialize `PaymentSheet` with a `SetupIntent` to set up cards for future use without charging.
+
+#### Smart payment method ordering
+When a customer is adding a new payment method, `PaymentSheet` uses information like the customer's region to show the most relevant payment methods first.
+
+### Other changes
+* [4165](https://github.com/stripe/stripe-android/pull/4165) Postal code collection for cards is now limited to US, CA, UK
+* [4274](https://github.com/stripe/stripe-android/pull/4274) Bump mockitoCoreVersion from 3.12.4 to 4.0.0
+* [4279](https://github.com/stripe/stripe-android/pull/4279) Fix dependency incorrectly marked as implementation
+* [4281](https://github.com/stripe/stripe-android/pull/4281) Add analytics event for failure creating 3ds2 params
+* [4282](https://github.com/stripe/stripe-android/pull/4282) Bump gradle from 7.0.2 to 7.0.3
+* [4283](https://github.com/stripe/stripe-android/pull/4283) Bump mockito-kotlin from 3.2.0 to 4.0.0
+* [4291](https://github.com/stripe/stripe-android/pull/4291) Fix so empty string parameters are sent to the server
+* [4295](https://github.com/stripe/stripe-android/pull/4295) Fix height on CardMultilineWidget textboxes
+* [4297](https://github.com/stripe/stripe-android/pull/4297) Bump accompanist-flowlayout from 0.19.0 to 0.20.0
+
+## 18.0.0 - 2021-10-07
+This release includes several bug fixes, introduces a test mode indicator, makes a builder class for [payment sheet configuration](https://github.com/stripe/stripe-android/blob/master/paymentsheet/src/main/java/com/stripe/android/paymentsheet/PaymentSheet.kt#L130) and makes config properties immutable. 
+* [4202](https://github.com/stripe/stripe-android/pull/4202) CardInputWidget.CardValidCallback will consider the postal code in validation
+* [4183](https://github.com/stripe/stripe-android/pull/4183) Fix address pre-populate on line 1
+* [4192](https://github.com/stripe/stripe-android/pull/4192) Remove internal on CardUtils
+* [4214](https://github.com/stripe/stripe-android/pull/4214) Create test mode indicator
+* [4265](https://github.com/stripe/stripe-android/pull/4265) Make config properties immutable, create Builder
+
 ## 17.2.0 - 2021-09-10
 This release includes several bug fixes, introduces [PaymentLauncher](https://github.com/stripe/stripe-android/blob/master/payments-core/src/main/java/com/stripe/android/payments/paymentlauncher/PaymentLauncher.kt) as a replacement of [https://github.com/stripe/stripe-android/blob/master/payments-core/src/main/java/com/stripe/android/Stripe.kt](https://github.com/stripe/stripe-android/blob/master/payments-core/src/main/java/com/stripe/android/Stripe.kt) see example in [StripeIntentActivity](https://github.com/stripe/stripe-android/blob/master/example/src/main/java/com/stripe/example/activity/StripeIntentActivity.kt) on [line 28](https://github.com/stripe/stripe-android/blob/master/example/src/main/java/com/stripe/example/activity/StripeIntentActivity.kt#L28)
 * [4157](https://github.com/stripe/stripe-android/pull/4157) Pass GooglePayLauncher arguments to DefaultGooglePayRepository
@@ -428,6 +575,9 @@ See the [migration guide](https://github.com/stripe/stripe-android/blob/master/M
     * See [Advanced fraud detection](https://stripe.com/docs/disputes/prevention/advanced-fraud-detection) for more details
 
 ## 14.3.0 - 2020-04-20
+*This version of the SDK is not compliant with Google Play's Prominent Disclosure & Consent Requirements. The non-compliant code was unused and has been removed.*
+*Please upgrade to version [14.4.0](https://github.com/stripe/stripe-android/blob/master/CHANGELOG.md#1440---2020-04-28) or greater.*
+
 * [#2334](https://github.com/stripe/stripe-android/pull/2334) Add support for BACS Debit in `PaymentMethodCreateParams`
 * [#2335](https://github.com/stripe/stripe-android/pull/2335) Add support for BACS Debit Payment Method
 * [#2336](https://github.com/stripe/stripe-android/pull/2336) Improve `ShippingInfoWidget`
@@ -453,7 +603,7 @@ See the [migration guide](https://github.com/stripe/stripe-android/blob/master/M
 
 ## 14.2.1 - 2020-03-26
 *This version of the SDK is not compliant with Google Play's Prominent Disclosure & Consent Requirements. The non-compliant code was unused and has been removed.*
-*Please upgrade to version [14.3.0](https://github.com/stripe/stripe-android/blob/master/CHANGELOG.md#1430---2020-04-20) or greater.*
+*Please upgrade to version [14.4.0](https://github.com/stripe/stripe-android/blob/master/CHANGELOG.md#1440---2020-04-28) or greater.*
 
 * [#2299](https://github.com/stripe/stripe-android/pull/2299) Make `SourceParams.OwnerParams` constructor public and properties mutable
 * [#2304](https://github.com/stripe/stripe-android/pull/2304) Force Canadian postal codes to be uppercase
@@ -462,7 +612,7 @@ See the [migration guide](https://github.com/stripe/stripe-android/blob/master/M
 
 ## 14.2.0 - 2020-03-18
 *This version of the SDK is not compliant with Google Play's Prominent Disclosure & Consent Requirements. The non-compliant code was unused and has been removed.*
-*Please upgrade to version [14.3.0](https://github.com/stripe/stripe-android/blob/master/CHANGELOG.md#1430---2020-04-20) or greater.*
+*Please upgrade to version [14.4.0](https://github.com/stripe/stripe-android/blob/master/CHANGELOG.md#1440---2020-04-28) or greater.*
 
 * [#2278](https://github.com/stripe/stripe-android/pull/2278) Add ability to require US ZIP code in `CardInputWidget` and `CardMultilineWidget`
 * [#2279](https://github.com/stripe/stripe-android/pull/2279) Default `CardMultilineWidget` to global postal code configuration
@@ -478,7 +628,7 @@ See the [migration guide](https://github.com/stripe/stripe-android/blob/master/M
 
 ## 14.1.1 - 2020-03-09
 *This version of the SDK is not compliant with Google Play's Prominent Disclosure & Consent Requirements. The non-compliant code was unused and has been removed.*
-*Please upgrade to version [14.3.0](https://github.com/stripe/stripe-android/blob/master/CHANGELOG.md#1430---2020-04-20) or greater.*
+*Please upgrade to version [14.4.0](https://github.com/stripe/stripe-android/blob/master/CHANGELOG.md#1440---2020-04-28) or greater.*
 
 * [#2257](https://github.com/stripe/stripe-android/pull/2257) Disable Kotlin Synthetics and migrate to [view binding](https://developer.android.com/topic/libraries/view-binding)
 * [#2260](https://github.com/stripe/stripe-android/pull/2260) Update Kotlin Gradle Plugin to `1.3.70`
@@ -488,7 +638,7 @@ See the [migration guide](https://github.com/stripe/stripe-android/blob/master/M
 
 ## 14.1.0 - 2020-03-02
 *This version of the SDK is not compliant with Google Play's Prominent Disclosure & Consent Requirements. The non-compliant code was unused and has been removed.*
-*Please upgrade to version [14.3.0](https://github.com/stripe/stripe-android/blob/master/CHANGELOG.md#1430---2020-04-20) or greater.*
+*Please upgrade to version [14.4.0](https://github.com/stripe/stripe-android/blob/master/CHANGELOG.md#1440---2020-04-28) or greater.*
 
 * [#2207](https://github.com/stripe/stripe-android/pull/2207) Add `CardInputWidget#setPostalCodeTextWatcher`
 * [#2211](https://github.com/stripe/stripe-android/pull/2211) Add support for 16-digit Diners Club card numbers
@@ -506,7 +656,7 @@ This release includes several breaking changes.
 See the [migration guide](https://github.com/stripe/stripe-android/blob/master/MIGRATING.md) for more details.
 
 *This version of the SDK is not compliant with Google Play's Prominent Disclosure & Consent Requirements. The non-compliant code was unused and has been removed.*
-*Please upgrade to version [14.3.0](https://github.com/stripe/stripe-android/blob/master/CHANGELOG.md#1430---2020-04-20) or greater.*
+*Please upgrade to version [14.4.0](https://github.com/stripe/stripe-android/blob/master/CHANGELOG.md#1440---2020-04-28) or greater.*
 
 * [#2136](https://github.com/stripe/stripe-android/pull/2136) Update `com.google.android.material:material` to `1.1.0`
 * [#2141](https://github.com/stripe/stripe-android/pull/2141) Fix crash when deleting a payment method in `PaymentMethodsActivity`

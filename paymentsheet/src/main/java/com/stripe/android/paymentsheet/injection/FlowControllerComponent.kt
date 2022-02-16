@@ -4,14 +4,16 @@ import android.content.Context
 import androidx.activity.result.ActivityResultCaller
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModelStoreOwner
-import com.stripe.android.googlepaylauncher.GooglePayLauncherModule
-import com.stripe.android.payments.core.injection.CoroutineContextModule
-import com.stripe.android.payments.core.injection.InjectorKey
-import com.stripe.android.payments.core.injection.PaymentCommonModule
+import com.stripe.android.googlepaylauncher.injection.GooglePayLauncherModule
+import com.stripe.android.core.injection.CoroutineContextModule
+import com.stripe.android.core.injection.InjectorKey
+import com.stripe.android.core.injection.LoggingModule
+import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import com.stripe.android.paymentsheet.PaymentOptionCallback
 import com.stripe.android.paymentsheet.PaymentOptionsViewModel
 import com.stripe.android.paymentsheet.PaymentSheetResultCallback
 import com.stripe.android.paymentsheet.flowcontroller.DefaultFlowController
+import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.model.PaymentOptionFactory
 import dagger.BindsInstance
 import dagger.Component
@@ -21,17 +23,19 @@ import javax.inject.Singleton
 @Singleton
 @Component(
     modules = [
-        PaymentCommonModule::class,
+        StripeRepositoryModule::class,
         PaymentSheetCommonModule::class,
         FlowControllerModule::class,
         GooglePayLauncherModule::class,
-        CoroutineContextModule::class
+        CoroutineContextModule::class,
+        LoggingModule::class
     ]
 )
 internal interface FlowControllerComponent {
     val flowController: DefaultFlowController
 
     fun inject(paymentOptionsViewModel: PaymentOptionsViewModel.Factory)
+    fun inject(factory: FormViewModel.Factory)
 
     @Component.Builder
     interface Builder {
@@ -63,7 +67,7 @@ internal interface FlowControllerComponent {
         fun paymentResultCallback(paymentResultCallback: PaymentSheetResultCallback): Builder
 
         @BindsInstance
-        fun injectorKey(@InjectorKey injectorKey: Int): Builder
+        fun injectorKey(@InjectorKey injectorKey: String): Builder
 
         fun build(): FlowControllerComponent
     }

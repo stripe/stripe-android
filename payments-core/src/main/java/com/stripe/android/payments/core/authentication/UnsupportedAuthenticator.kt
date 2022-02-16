@@ -2,7 +2,7 @@ package com.stripe.android.payments.core.authentication
 
 import com.stripe.android.PaymentRelayStarter
 import com.stripe.android.Stripe
-import com.stripe.android.exception.StripeException
+import com.stripe.android.core.exception.StripeException
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.getRequestCode
 import com.stripe.android.networking.ApiRequest

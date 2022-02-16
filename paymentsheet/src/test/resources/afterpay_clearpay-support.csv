@@ -1,0 +1,49 @@
+lpm, hasCustomer, allowsDelayedPayment, intentSetupFutureUsage, intentHasShipping, intentLpms, supportCustomerSavedCard, formExists, formType, supportsAdding
+afterpay_clearpay, true, true, off_session, false, card/afterpay_clearpay, false, false, not available, false
+afterpay_clearpay, true, true, off_session, false, card/eps/afterpay_clearpay, false, false, not available, false
+afterpay_clearpay, true, false, off_session, false, card/afterpay_clearpay, false, false, not available, false
+afterpay_clearpay, true, false, off_session, false, card/eps/afterpay_clearpay, false, false, not available, false
+afterpay_clearpay, true, true, on_session, false, card/afterpay_clearpay, false, false, not available, false
+afterpay_clearpay, true, true, on_session, false, card/eps/afterpay_clearpay, false, false, not available, false
+afterpay_clearpay, true, false, on_session, false, card/afterpay_clearpay, false, false, not available, false
+afterpay_clearpay, true, false, on_session, false, card/eps/afterpay_clearpay, false, false, not available, false
+afterpay_clearpay, true, true, null, false, card/afterpay_clearpay, false, false, not available, false
+afterpay_clearpay, true, true, null, false, card/eps/afterpay_clearpay, false, false, not available, false
+afterpay_clearpay, true, false, null, false, card/afterpay_clearpay, false, false, not available, false
+afterpay_clearpay, true, false, null, false, card/eps/afterpay_clearpay, false, false, not available, false
+afterpay_clearpay, false, true, off_session, false, card/afterpay_clearpay, false, false, not available, false
+afterpay_clearpay, false, true, off_session, false, card/eps/afterpay_clearpay, false, false, not available, false
+afterpay_clearpay, false, false, off_session, false, card/afterpay_clearpay, false, false, not available, false
+afterpay_clearpay, false, false, off_session, false, card/eps/afterpay_clearpay, false, false, not available, false
+afterpay_clearpay, false, true, on_session, false, card/afterpay_clearpay, false, false, not available, false
+afterpay_clearpay, false, true, on_session, false, card/eps/afterpay_clearpay, false, false, not available, false
+afterpay_clearpay, false, false, on_session, false, card/afterpay_clearpay, false, false, not available, false
+afterpay_clearpay, false, false, on_session, false, card/eps/afterpay_clearpay, false, false, not available, false
+afterpay_clearpay, false, true, null, false, card/afterpay_clearpay, false, false, not available, false
+afterpay_clearpay, false, true, null, false, card/eps/afterpay_clearpay, false, false, not available, false
+afterpay_clearpay, false, false, null, false, card/afterpay_clearpay, false, false, not available, false
+afterpay_clearpay, false, false, null, false, card/eps/afterpay_clearpay, false, false, not available, false
+afterpay_clearpay, true, true, off_session, true, card/afterpay_clearpay, false, false, not available, false
+afterpay_clearpay, true, true, off_session, true, card/eps/afterpay_clearpay, false, false, not available, false
+afterpay_clearpay, true, false, off_session, true, card/afterpay_clearpay, false, false, not available, false
+afterpay_clearpay, true, false, off_session, true, card/eps/afterpay_clearpay, false, false, not available, false
+afterpay_clearpay, true, true, on_session, true, card/afterpay_clearpay, false, false, not available, false
+afterpay_clearpay, true, true, on_session, true, card/eps/afterpay_clearpay, false, false, not available, false
+afterpay_clearpay, true, false, on_session, true, card/afterpay_clearpay, false, false, not available, false
+afterpay_clearpay, true, false, on_session, true, card/eps/afterpay_clearpay, false, false, not available, false
+afterpay_clearpay, true, true, null, true, card/afterpay_clearpay, false, true, oneTime, true
+afterpay_clearpay, true, true, null, true, card/eps/afterpay_clearpay, false, true, oneTime, true
+afterpay_clearpay, true, false, null, true, card/afterpay_clearpay, false, true, oneTime, true
+afterpay_clearpay, true, false, null, true, card/eps/afterpay_clearpay, false, true, oneTime, true
+afterpay_clearpay, false, true, off_session, true, card/afterpay_clearpay, false, false, not available, false
+afterpay_clearpay, false, true, off_session, true, card/eps/afterpay_clearpay, false, false, not available, false
+afterpay_clearpay, false, false, off_session, true, card/afterpay_clearpay, false, false, not available, false
+afterpay_clearpay, false, false, off_session, true, card/eps/afterpay_clearpay, false, false, not available, false
+afterpay_clearpay, false, true, on_session, true, card/afterpay_clearpay, false, false, not available, false
+afterpay_clearpay, false, true, on_session, true, card/eps/afterpay_clearpay, false, false, not available, false
+afterpay_clearpay, false, false, on_session, true, card/afterpay_clearpay, false, false, not available, false
+afterpay_clearpay, false, false, on_session, true, card/eps/afterpay_clearpay, false, false, not available, false
+afterpay_clearpay, false, true, null, true, card/afterpay_clearpay, false, true, oneTime, true
+afterpay_clearpay, false, true, null, true, card/eps/afterpay_clearpay, false, true, oneTime, true
+afterpay_clearpay, false, false, null, true, card/afterpay_clearpay, false, true, oneTime, true
+afterpay_clearpay, false, false, null, true, card/eps/afterpay_clearpay, false, true, oneTime, true

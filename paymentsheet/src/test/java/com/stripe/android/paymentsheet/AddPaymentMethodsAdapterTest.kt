@@ -31,7 +31,7 @@ class AddPaymentMethodsAdapterTest {
             .isFalse()
     }
 
-    private fun createAdapter() = com.stripe.android.paymentsheet.AddPaymentMethodsAdapter(
-        listOf(*SupportedPaymentMethod.values())
+    private fun createAdapter() = AddPaymentMethodsAdapter(
+        SupportedPaymentMethod.values(), 0
     ) { }
 }

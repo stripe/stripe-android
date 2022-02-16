@@ -4,6 +4,7 @@ import android.widget.FrameLayout
 import androidx.appcompat.view.ContextThemeWrapper
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.FragmentConfigFixtures
@@ -23,6 +24,7 @@ class PaymentOptionsAdapterTest {
     private val paymentSelections = mutableSetOf<PaymentSelection>()
     private val paymentMethodsDeleted =
         mutableListOf<PaymentOptionsAdapter.Item.SavedPaymentMethod>()
+    private val paymentMethods = PaymentMethodFixtures.createCards(6)
     private var addCardClicks = 0
 
     @Test
@@ -108,7 +110,7 @@ class PaymentOptionsAdapterTest {
         val adapter = createConfiguredAdapter(
             CONFIG.copy(
                 isGooglePayReady = true,
-                savedSelection = SavedSelection.PaymentMethod(CONFIG.paymentMethods[1].id!!)
+                savedSelection = SavedSelection.PaymentMethod(paymentMethods[1].id!!)
             )
         )
 
@@ -123,7 +125,7 @@ class PaymentOptionsAdapterTest {
         val adapter = createConfiguredAdapter(
             CONFIG.copy(
                 isGooglePayReady = true,
-                savedSelection = SavedSelection.PaymentMethod(CONFIG.paymentMethods[1].id!!)
+                savedSelection = SavedSelection.PaymentMethod(paymentMethods[1].id!!)
             )
         )
         adapter.isEnabled = false
@@ -161,10 +163,10 @@ class PaymentOptionsAdapterTest {
         val adapter = createConfiguredAdapter(
             CONFIG.copy(
                 isGooglePayReady = true,
-                savedSelection = SavedSelection.PaymentMethod(CONFIG.paymentMethods[1].id!!)
+                savedSelection = SavedSelection.PaymentMethod(paymentMethods[1].id!!)
             )
         )
-        adapter.toggleEditing()
+        adapter.setEditing(true)
 
         val googlePayViewHolder = adapter.onCreateViewHolder(
             FrameLayout(context),
@@ -208,13 +210,14 @@ class PaymentOptionsAdapterTest {
 
     @Test
     fun `initial selected item should reflect SavedSelection`() {
-        val savedPaymentMethod = CONFIG.paymentMethods[3]
+        val savedPaymentMethod = paymentMethods[3]
         val adapter = createAdapter().also {
-            it.update(
+            it.setItems(
                 CONFIG.copy(
                     isGooglePayReady = true,
                     savedSelection = SavedSelection.PaymentMethod(savedPaymentMethod.id!!)
-                )
+                ),
+                paymentMethods
             )
         }
 
@@ -226,14 +229,15 @@ class PaymentOptionsAdapterTest {
 
     @Test
     fun `initial selected item should reflect PaymentSelection`() {
-        val savedPaymentMethod = CONFIG.paymentMethods[2]
-        val selectedPaymentMethod = CONFIG.paymentMethods[3]
+        val savedPaymentMethod = paymentMethods[2]
+        val selectedPaymentMethod = paymentMethods[3]
         val adapter = createAdapter().also {
-            it.update(
+            it.setItems(
                 CONFIG.copy(
                     isGooglePayReady = true,
                     savedSelection = SavedSelection.PaymentMethod(savedPaymentMethod.id!!)
                 ),
+                paymentMethods,
                 PaymentSelection.Saved(selectedPaymentMethod)
             )
         }
@@ -246,14 +250,15 @@ class PaymentOptionsAdapterTest {
 
     @Test
     fun `initial selected item should fallback to config when invalid PaymentSelection`() {
-        val savedPaymentMethod = CONFIG.paymentMethods[2]
+        val savedPaymentMethod = paymentMethods[2]
         val selectedPaymentMethod = PaymentMethodFixtures.createCards(1).first()
         val adapter = createAdapter().also {
-            it.update(
+            it.setItems(
                 CONFIG.copy(
                     isGooglePayReady = true,
                     savedSelection = SavedSelection.PaymentMethod(savedPaymentMethod.id!!)
                 ),
+                paymentMethods,
                 PaymentSelection.Saved(selectedPaymentMethod)
             )
         }
@@ -268,9 +273,9 @@ class PaymentOptionsAdapterTest {
     fun `initial selected item should be null when the only item is AddCard`() {
         val adapter = createConfiguredAdapter(
             CONFIG.copy(
-                isGooglePayReady = false,
-                paymentMethods = emptyList()
-            )
+                isGooglePayReady = false
+            ),
+            paymentMethods = emptyList()
         )
         assertThat(adapter.itemCount)
             .isEqualTo(1)
@@ -279,10 +284,11 @@ class PaymentOptionsAdapterTest {
     }
 
     private fun createConfiguredAdapter(
-        fragmentConfig: FragmentConfig = CONFIG
+        fragmentConfig: FragmentConfig = CONFIG,
+        paymentMethods: List<PaymentMethod> = this.paymentMethods
     ): PaymentOptionsAdapter {
         return createAdapter().also {
-            it.update(fragmentConfig)
+            it.setItems(fragmentConfig, paymentMethods)
         }
     }
 
@@ -302,8 +308,6 @@ class PaymentOptionsAdapterTest {
     }
 
     private companion object {
-        private val CONFIG = FragmentConfigFixtures.DEFAULT.copy(
-            paymentMethods = PaymentMethodFixtures.createCards(6)
-        )
+        private val CONFIG = FragmentConfigFixtures.DEFAULT
     }
 }

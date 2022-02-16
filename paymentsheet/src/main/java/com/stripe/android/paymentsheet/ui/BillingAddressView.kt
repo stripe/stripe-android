@@ -18,12 +18,12 @@ import androidx.core.widget.doAfterTextChanged
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.stripe.android.model.Address
-import com.stripe.android.model.CountryCode
-import com.stripe.android.model.CountryCode.Companion.isUS
+import com.stripe.android.core.model.CountryCode
+import com.stripe.android.core.model.CountryCode.Companion.isUS
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.databinding.StripeBillingAddressLayoutBinding
-import com.stripe.android.view.Country
-import com.stripe.android.view.CountryUtils
+import com.stripe.android.core.model.Country
+import com.stripe.android.core.model.CountryUtils
 import com.stripe.android.view.PostalCodeValidator
 import java.util.Locale
 import kotlin.properties.Delegates
@@ -107,7 +107,14 @@ internal class BillingAddressView @JvmOverloads constructor(
     ) { _, _, config ->
         postalCodeView.filters = arrayOf(InputFilter.LengthFilter(config.maxLength))
         postalCodeView.keyListener = config.getKeyListener()
-        postalCodeView.inputType = config.inputType
+
+        if (config.inputType ==
+            (InputType.TYPE_NUMBER_VARIATION_PASSWORD or InputType.TYPE_CLASS_NUMBER)
+        ) {
+            postalCodeView.setNumberOnlyInputType()
+        } else {
+            postalCodeView.inputType = config.inputType
+        }
     }
 
     private val newCountryCodeCallback = { newCountryCode: CountryCode ->
@@ -388,7 +395,9 @@ internal class BillingAddressView @JvmOverloads constructor(
 
         object UnitedStates : PostalCodeConfig() {
             override val maxLength = 5
-            override val inputType = InputType.TYPE_CLASS_NUMBER
+            override val inputType =
+                InputType.TYPE_NUMBER_VARIATION_PASSWORD or InputType.TYPE_CLASS_NUMBER
+
             override fun getKeyListener(): KeyListener {
                 return DigitsKeyListener.getInstance(false, true)
             }

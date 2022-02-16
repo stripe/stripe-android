@@ -1,5 +1,8 @@
 package com.stripe.android.payments.core.injection
 
+import com.stripe.android.core.injection.Injectable
+import com.stripe.android.core.injection.Injector
+import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.junit.Before
 import org.junit.Test
@@ -16,16 +19,19 @@ class WeakMapInjectorRegistryTest {
 
     @Before
     fun clearStaticCache() {
-        WeakMapInjectorRegistry.staticCacheMap.clear()
+        WeakMapInjectorRegistry.clear()
     }
 
     @Test
     fun verifyRegistryRetrievesCorrectObject() {
+
         val injector1 = TestInjector()
-        val keyForInjector1 = WeakMapInjectorRegistry.nextKey()
+        val keyForInjector1 =
+            WeakMapInjectorRegistry.nextKey(requireNotNull(TestInjector::class.simpleName))
 
         val injector2 = TestInjector()
-        val keyForInjector2 = WeakMapInjectorRegistry.nextKey()
+        val keyForInjector2 =
+            WeakMapInjectorRegistry.nextKey(requireNotNull(TestInjector::class.simpleName))
 
         WeakMapInjectorRegistry.register(injector1, keyForInjector1)
         WeakMapInjectorRegistry.register(injector2, keyForInjector2)
@@ -42,7 +48,8 @@ class WeakMapInjectorRegistryTest {
     @Test
     fun verifyCacheIsClearedOnceWeakReferenceIsDeReferenced() {
         var injector1: Injector? = TestInjector()
-        val keyForInjector1 = WeakMapInjectorRegistry.nextKey()
+        val keyForInjector1 =
+            WeakMapInjectorRegistry.nextKey(requireNotNull(TestInjector::class.simpleName))
         WeakMapInjectorRegistry.register(injector1!!, keyForInjector1)
 
         assertNotNull(WeakMapInjectorRegistry.retrieve(keyForInjector1))

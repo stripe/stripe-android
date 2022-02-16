@@ -1,25 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
-  <!-- Billing address section title for card form entry. -->
-  <string name="billing_details">Adresse de facturation</string>
+  <!-- Used for accessibility to describe the button on the payment sheet list of options to add a new payment method. -->
+  <string name="add_new_payment_method">Ajouter un moyen de paiement</string>
+  <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
+  <string name="bank_account_ending_in">Supprimer le compte bancaire se terminant par %s</string>
   <!-- Button title to cancel action in an alert -->
   <string name="cancel">Annuler</string>
   <!-- Done button title -->
   <string name="done">Terminé</string>
   <!-- Button title to enter editing mode -->
   <string name="edit">Modifier</string>
-  <!-- Caption for Email field on address form -->
-  <string name="email">E-mail</string>
-  <!-- Error message when email is invalid -->
-  <string name="email_is_invalid">Votre adresse e-mail n\'est pas valide.</string>
-  <!-- An error message displayed when the customer's IBAN is incomplete. -->
-  <string name="iban_incomplete">L\'IBAN que vous avez saisi est incomplet.</string>
-  <!-- An error message displayed when the customer's iban is invalid. -->
-  <string name="iban_invalid">L\'IBAN que vous avez saisi n\'est pas valide.</string>
-  <!-- An error message displayed when the IBAN country code is not supported. -->
-  <string name="iban_invalid_country">L\'IBAN que vous avez saisi n\'est pas valide, « %s » n\'est pas un code pays pris en charge.</string>
-  <!-- An error message displayed when the IBAN does not start with a two-letter country code. -->
-  <string name="iban_invalid_start">Votre IBAN doit commencer par un code pays à deux lettres.</string>
   <!-- Button title for confirmation alert to remove a saved payment method
    Text for remove button -->
   <string name="remove">Supprimer</string>
@@ -27,7 +17,6 @@
   <string name="stripe_failure_connection_error">Nous ne parvenons pas à nous connecter à notre prestataire de services de paiement. Veuillez vérifier votre connexion Internet et réessayer.</string>
   <!-- When an internal error is reported when a google pay payment is started. -->
   <string name="stripe_google_pay_error_internal">Une erreur interne s\'est produite.</string>
-  <string name="stripe_paymentsheet_add_button_label">Ajouter</string>
   <!-- Text for a button that, when tapped, displays another screen where the customer can add payment method details -->
   <string name="stripe_paymentsheet_add_payment_method_button_label">+ Ajouter</string>
   <!-- Card details entry form header title -->
@@ -39,10 +28,8 @@
   <!-- Text for back button -->
   <string name="stripe_paymentsheet_back">Retour</string>
   <string name="stripe_paymentsheet_close">Fermer</string>
-  <!-- The label of a text field that is optional. For example, 'Email (optional)' or 'Name (optional) -->
-  <string name="stripe_paymentsheet_form_label_optional">%s (facultatif)</string>
-  <!-- iDEAL bank section title for iDEAL form entry. -->
-  <string name="stripe_paymentsheet_ideal_bank">Banque iDEAL</string>
+  <!-- Text for continue button -->
+  <string name="stripe_paymentsheet_continue_button_label">Continuer</string>
   <!-- Title of a section containing multiple payment methods that can selected and will collect the payment information from the user. -->
   <string name="stripe_paymentsheet_or_pay_using">Ou payer avec</string>
   <!-- Title of a section containing a card form that will collect the payment information from the user. -->
@@ -51,6 +38,8 @@
   <string name="stripe_paymentsheet_pay_button_amount">Payer %s</string>
   <!-- Label for a button that starts processing the payment. -->
   <string name="stripe_paymentsheet_pay_button_label">Payer</string>
+  <!-- Payment Method type brand name  -->
+  <string name="stripe_paymentsheet_payment_method_afterpay_clearpay">Afterpay</string>
   <!-- Title for credit card number entry field -->
   <string name="stripe_paymentsheet_payment_method_card">Carte</string>
   <!-- Payment method brand name -->
@@ -65,8 +54,8 @@
   <string name="stripe_paymentsheet_save_this_card_with_merchant_name">Enregistrer cette carte pour vos futurs achats auprès de %s</string>
   <!-- Title shown above a carousel containing the customer&apos;s payment methods -->
   <string name="stripe_paymentsheet_select_payment_method">Sélectionnez votre moyen de paiement</string>
-  <!-- SEPA mandate text -->
-  <string name="stripe_paymentsheet_sepa_mandate">En fournissant vos informations de paiement et en confirmant ce paiement, vous autorisez (A) %s et Stripe, notre prestataire de services de paiement, à donner à votre banque l\'instruction de débiter votre compte, et (B) votre banque à débiter votre compte conformément à ces instructions. Vous bénéficiez d\'un droit à remboursement par votre banque selon les conditions décrites dans la convention que vous avez passée avec elle. Toute demande de remboursement doit être présentée dans les 8 semaines suivant la date de débit de votre compte. Vos droits sont précisés dans une déclaration que vous pouvez obtenir auprès de votre banque. Vous acceptez de recevoir des notifications concernant les débits futurs jusqu\'à 2 jours avant leur réalisation.</string>
   <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->
   <string name="stripe_paymentsheet_setup_button_label">Configurer</string>
+  <!-- Label indicating the total amount that the user is authorizing (e.g. "Total: $25.00") -->
+  <string name="stripe_paymentsheet_total_amount">Total : %s</string>
 </resources>

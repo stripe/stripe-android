@@ -4,47 +4,38 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.CardNumberFixtures
+import com.stripe.android.core.networking.AnalyticsRequest
 import com.stripe.android.model.AccountRange
 import com.stripe.android.model.BinFixtures
 import com.stripe.android.model.BinRange
 import com.stripe.android.model.CardMetadata
 import com.stripe.android.networking.AbsFakeStripeRepository
-import com.stripe.android.networking.AnalyticsRequest
-import com.stripe.android.networking.AnalyticsRequestFactory
 import com.stripe.android.networking.ApiRequest
+import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networking.StripeRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.TestCoroutineDispatcher
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.runTest
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
-import kotlin.test.AfterTest
 import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
 @ExperimentalCoroutinesApi
 internal class RemoteCardAccountRangeSourceTest {
-    private val testDispatcher = TestCoroutineDispatcher()
-
     private val cardAccountRangeStore = mock<CardAccountRangeStore>()
 
-    @AfterTest
-    fun cleanup() {
-        testDispatcher.cleanupTestCoroutines()
-    }
-
     @Test
-    fun `getAccountRange() should return expected AccountRange`() = testDispatcher.runBlockingTest {
+    fun `getAccountRange() should return expected AccountRange`() = runTest {
         val remoteCardAccountRangeSource = RemoteCardAccountRangeSource(
             FakeStripeRepository(VISA_METADATA),
             REQUEST_OPTIONS,
             cardAccountRangeStore,
             { },
-            AnalyticsRequestFactory(
+            PaymentAnalyticsRequestFactory(
                 ApplicationProvider.getApplicationContext(),
                 ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
             )
@@ -73,13 +64,13 @@ internal class RemoteCardAccountRangeSourceTest {
 
     @Test
     fun `getAccountRange() when CardMetadata is empty should return null`() =
-        testDispatcher.runBlockingTest {
+        runTest {
             val remoteCardAccountRangeSource = RemoteCardAccountRangeSource(
                 FakeStripeRepository(EMPTY_METADATA),
                 REQUEST_OPTIONS,
                 cardAccountRangeStore,
                 { },
-                AnalyticsRequestFactory(
+                PaymentAnalyticsRequestFactory(
                     ApplicationProvider.getApplicationContext(),
                     ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
                 )
@@ -98,7 +89,7 @@ internal class RemoteCardAccountRangeSourceTest {
 
     @Test
     fun `getAccountRange() when card number is less than required BIN length should return null`() =
-        testDispatcher.runBlockingTest {
+        runTest {
             val repository = mock<StripeRepository>()
 
             val remoteCardAccountRangeSource = RemoteCardAccountRangeSource(
@@ -106,7 +97,7 @@ internal class RemoteCardAccountRangeSourceTest {
                 REQUEST_OPTIONS,
                 cardAccountRangeStore,
                 { },
-                AnalyticsRequestFactory(
+                PaymentAnalyticsRequestFactory(
                     ApplicationProvider.getApplicationContext(),
                     ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
                 )
@@ -124,7 +115,7 @@ internal class RemoteCardAccountRangeSourceTest {
 
     @Test
     fun `getAccountRange() should fire missing range analytics request when response is not empty but card number does not match`() =
-        testDispatcher.runBlockingTest {
+        runTest {
             val analyticsRequests = mutableListOf<AnalyticsRequest>()
 
             val remoteCardAccountRangeSource = RemoteCardAccountRangeSource(
@@ -149,7 +140,7 @@ internal class RemoteCardAccountRangeSourceTest {
                 {
                     analyticsRequests.add(it)
                 },
-                AnalyticsRequestFactory(
+                PaymentAnalyticsRequestFactory(
                     ApplicationProvider.getApplicationContext(),
                     ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
                 )

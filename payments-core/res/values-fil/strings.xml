@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+  <!-- Label for card number entry text field -->
+  <string name="acc_label_card_number">Numero ng kard</string>
+  <string name="acc_label_card_number_node">%s, Numero ng kard</string>
+  <string name="acc_label_cvc_node">%s, CVC</string>
+  <string name="acc_label_expiry_date">Petsa ng pagkapaso</string>
+  <string name="acc_label_expiry_date_node">%s, Petsa ng pagkapaso</string>
+  <!-- Caption for Zip Code field on address form (only shown when country is United States only) -->
+  <string name="acc_label_zip">ZIP Code</string>
+  <!-- Short string for zip code (United States only) Please keep to 5 characters or less if possible. -->
+  <string name="acc_label_zip_short">ZIP</string>
+  <!-- Message displayed when a payment method is removed, stating its name. -->
+  <string name="added">Dinagdag %s</string>
+  <!-- Error text indicating that city is required, used for all locations -->
+  <string name="address_city_required">Mangyaring ilagay ang iyong siyudad</string>
+  <!-- Error text indicating country is invalid -->
+  <string name="address_country_invalid">Ang iyong bansa ay di balido</string>
+  <!-- Error text indicating that county is required, used for UK addresses -->
+  <string name="address_county_required">Mangyaring ilagay ang iyong bansa</string>
+  <!-- Caption for Address field on address form -->
+  <string name="address_label_address">Adres</string>
+  <!-- Label for input requesting the first line of an address where , used for international addresses -->
+  <string name="address_label_address_line1_optional">Unang linya ng adres (opsyonal)</string>
+  <!-- Address line 2 placeholder for billing address form. -->
+  <string name="address_label_address_line2_optional">Pangalawang linya ng adres</string>
+  <!-- Label for input requesting the first line of an address where input is optional, used for US and Canada addresses -->
+  <string name="address_label_address_optional">Adres (opsyonal) </string>
+  <!-- Label for input requesting apartment number (address line 2) where input is optional, used for US based addresses -->
+  <string name="address_label_apt_optional">Apt. (opsyonal)</string>
+  <!-- Label for input requesting city where input is optional, used for all locations -->
+  <string name="address_label_city_optional">Siyudad (opsyonal)</string>
+  <!-- Label for input requesting county where input is optional , used for UK based addresses -->
+  <string name="address_label_county_optional">County (opsyonal)</string>
+  <!-- Label for input requesting phone number, used for all locations -->
+  <string name="address_label_phone_number">Numero ng telepono</string>
+  <!-- Label for input requesting phone number where input is optional, used for all locations -->
+  <string name="address_label_phone_number_optional">Numero ng telepono (opsyonal)</string>
+  <!-- Label for input requesting postal code where input is optional, used for Canada based addresses -->
+  <string name="address_label_postal_code_optional">Postal code (opsyonal)</string>
+  <!-- Label for input requesting postcode, used for UK based addresses -->
+  <string name="address_label_postcode">Postcode</string>
+  <!-- Label for input requesting postcode where input is optional, used for UK based addresses -->
+  <string name="address_label_postcode_optional">Postcode (opsyonal)</string>
+  <!-- Label for input requesting province where province is optional, used for canadian addresses -->
+  <string name="address_label_province_optional">Probinsiya (opsyonal)</string>
+  <!-- Label for input requesting the region, used for international addresses -->
+  <string name="address_label_region_generic">Estado / Probinsiya / Rehiyon</string>
+  <!-- Label for input requesting the region where input is optional, used for international addresses -->
+  <string name="address_label_region_generic_optional">State / Probinsiya / Rehiyon (opsyonal)</string>
+  <!-- Label for input requesting state where input is optional, used for US based addresses -->
+  <string name="address_label_state_optional">State (opsyonal)</string>
+  <!-- Label for input requesting zip code where input is optional, used for US based addresses -->
+  <string name="address_label_zip_code_optional">ZIP code (opsyonal)</string>
+  <!-- Label for input requesting postal code, used for international addresses -->
+  <string name="address_label_zip_postal_code">ZIP/Postal code</string>
+  <!-- Label for input requesting postal code where input is optional, used for international addresses -->
+  <string name="address_label_zip_postal_code_optional">ZIP / Postal code (opsyonal)</string>
+  <!-- Error text indicating name is required -->
+  <string name="address_name_required">Mangyaring ilagay ang iyong pangalan</string>
+  <!-- Error text indicating that phone number is required, used for all addresses -->
+  <string name="address_phone_number_required">Mangyaring ilagay ang iyong numero ng telepono.</string>
+  <!-- Error message for when postal code in form is invalid -->
+  <string name="address_postal_code_invalid">Ang iyong postal code ay di balido.</string>
+  <!-- Error text indicating postcode is invalid, used for UK addresses -->
+  <string name="address_postcode_invalid">Ang iyong postcode ay di balido</string>
+  <!-- Error text indicating that province is required, used for Canada addresses -->
+  <string name="address_province_required">Mangyaring ilagay ang iyong probinsiya</string>
+  <!-- Error text indicating that region is required, used for international addresses -->
+  <string name="address_region_generic_required">Mangyaring ilagay ang iyong State/Probinsiya/Rehiyon</string>
+  <!-- Error text indicating that address is required, used for all locations -->
+  <string name="address_required">Mangyaring ilagay ang iyong adres</string>
+  <!-- Error text indicating that state is required, used for US addresses -->
+  <string name="address_state_required">Mangyaring ilagay ang iyong state</string>
+  <!-- Error text indicating zip code is invalid, used for US addresses -->
+  <string name="address_zip_invalid">Ang iyong ZIP code ay di balido.</string>
+  <!-- Error text indicating zip/ postal code is invalid, used for international addresses -->
+  <string name="address_zip_postal_invalid">Ang iyong ZIP/Postal code ay di balido</string>
+  <!-- BECS Debit Widget - mandate acceptance -->
+  <string name="becs_mandate_acceptance">\n    Sa pagbibigay ng mga detalye ng iyong account sa bangko at pagkumpirma sa pagbabayad na ito, sumasang-ayon ka sa \n    kasunduan sa serbisyo ng Direct Debit Request at Direct Debit Request, at pinahihintulutan ang\n    Stripe Payments Australia Pty Ltd ACN 160 180 343 Direct Debit User ID number 507156\n    (“Stripe”) na magbawas sa iyong account gamit ang Bulk Electronic Clearing System (BECS)\n    sa ngalan ng %1$s (the \"Merchant\") para sa anumang mga halaga na hiwalay na ipinaalam sa iyo\n    ng Merchant. Pinatutunayan mo na ikaw ay alinman sa may-ari ng account o isang pinahihintulutan \n    na pumirma sa account na nakalista sa itaas.\n    </string>
+  <!-- Placeholder text for Account number entry field for BECS Debit. -->
+  <string name="becs_widget_account_number">Numero ng account</string>
+  <!-- BECS Debit Widget - account number field - incomplete error message -->
+  <string name="becs_widget_account_number_incomplete">Ang numero ng iyong account ay di kumpleto.</string>
+  <!-- BECS Debit Widget - account number field - required error message -->
+  <string name="becs_widget_account_number_required">Kailangan ang numero ng iyong account.</string>
+  <!-- Placeholder text for BSB Number entry field for BECS Debit. -->
+  <string name="becs_widget_bsb">BSB</string>
+  <!-- Error string displayed to user when they have entered an incomplete BSB number. BSB refers to an Australian bank account number -->
+  <string name="becs_widget_bsb_incomplete">Ang BSB na ipinasok mo ay di kumpleto.</string>
+  <!-- Error string displayed to user when they enter in an invalid BSB number. &quot;BSB&quot; refers to an Australian bank account. -->
+  <string name="becs_widget_bsb_invalid">Ang BSB na ipinasok mo ay di balido.</string>
+  <!-- BECS Debit Widget - email address field - label -->
+  <string name="becs_widget_email">Email Adres</string>
+  <!-- BECS Debit Widget - email address field - invalid error message -->
+  <string name="becs_widget_email_invalid">Ang iyong email adres ay di balido.</string>
+  <!-- BECS Debit Widget - email address field - required error message -->
+  <string name="becs_widget_email_required">Kailangan ang iyong email adres.</string>
+  <!-- BECS Debit Widget - name field - label -->
+  <string name="becs_widget_name">Pangalan</string>
+  <!-- BECS Debit Widget - name field - required error message -->
+  <string name="becs_widget_name_required">Kailangan ang iyong pangalan.</string>
+  <!-- Details of a saved card. &apos;{card brand} ending in {last 4}&apos; e.g. &apos;VISA ending in 4242&apos; -->
+  <string name="card_ending_in">%1$s nagtatapos sa %2$s</string>
+  <!-- Text for close button -->
+  <string name="close">Isara</string>
+  <!-- Accessibility action for deleting a payment method -->
+  <string name="delete_payment_method">Tanggalin ang Paraan ng Pagbabayad</string>
+  <string name="delete_payment_method_prompt_title">Tanggalin ang paraan ng pagbabayad?</string>
+  <!-- label for text field to enter card expiry -->
+  <string name="expiry_date_hint">BB / TT</string>
+  <string name="expiry_label_short">Pagkapaso</string>
+  <!-- Label that will show that an FPX bank is offline. For example, &quot;AmBank - Offline&quot; -->
+  <string name="fpx_bank_offline">%s - Offline</string>
+  <!-- Error message for card details form when expiration date isn&apos;t entered completely -->
+  <string name="incomplete_expiry_date">Ang petsa ng pagkapaso ng iyong kard ay di kumpleto.</string>
+  <string name="invalid_card_number">Ang numero ng iyong kard ay di balido.</string>
+  <!-- Error message for card entry form when CVC/CVV is invalid -->
+  <string name="invalid_cvc">Ang security code ng iyong kard ay di balido.</string>
+  <!-- String to describe an invalid month in expiry date. -->
+  <string name="invalid_expiry_month">Ang buwan ng pagkapaso ng iyong kard ay di balido.</string>
+  <!-- String to describe an invalid year in expiry date. -->
+  <string name="invalid_expiry_year">Ang taon ng pagkapaso ng iyong kard ay di balido.</string>
+  <!-- Shipping form error message -->
+  <string name="invalid_shipping_information">Adres ng Nagpadala ay di balido</string>
+  <!-- Error message for when postal code in form is incomplete -->
+  <string name="invalid_zip">Ang iyong postal code ay di kumpleto.</string>
+  <string name="payment_method_add_new_card">Magdagdag ng bagong kard...</string>
+  <string name="payment_method_add_new_fpx">Piliin ang Account sa Bangko (FPX)…</string>
+  <!-- Label for free shipping method -->
+  <string name="price_free">Libre</string>
+  <!-- Message displayed when a payment method is removed, stating its name. -->
+  <string name="removed">Tinanggal %s</string>
+  <string name="secure_checkout">Ligtas na Pag-checkout</string>
+  <!-- Error when 3DS2 authentication failed (e.g. customer entered the wrong code) -->
+  <string name="stripe_failure_reason_authentication">Hindi namin mapatunayan ang paraan ng iyong pagbabayad. Mangyaring pumili ng ibang paraan ng pagbabayad at subukin muli.</string>
+  <!-- Error when 3DS2 authentication timed out. -->
+  <string name="stripe_failure_reason_timed_out">Nag- time out sa pagpapatunay ng iyong paraan ng pagbabayad --- subukin muli</string>
+  <!-- label for text field to enter card expiry -->
+  <string name="stripe_paymentsheet_expiration_date_hint">BB / TT</string>
+  <!-- When there are multiple browsers and web authentication is required, this will show in a window asking which browser they want to use to "Verify your payment" -->
+  <string name="stripe_verify_your_payment">Patunayan ang iyong pagbabayad</string>
+  <string name="title_add_a_card">Magdagdag ng Kard</string>
+  <!-- Screen title telling users they should add an address -->
+  <string name="title_add_an_address">I-set ang Adres</string>
+  <!-- Label for Bank Account selection or detail entry form -->
+  <string name="title_bank_account">Account sa Bangko</string>
+  <!-- Title for Payment Method screen -->
+  <string name="title_payment_method">Paraan ng Pagbabayad</string>
+  <!-- Screen title telling users they should select a shipping address -->
+  <string name="title_select_shipping_method">Piliin ang Paraan ng Pagpapadala</string>
+</resources>

@@ -1,5 +1,6 @@
 package com.stripe.android.model
 
+import com.stripe.android.core.model.StripeModel
 import com.stripe.android.model.parsers.SetupIntentJsonParser
 import kotlinx.parcelize.Parcelize
 import org.json.JSONObject
@@ -84,6 +85,11 @@ data class SetupIntent internal constructor(
      * The error encountered in the previous [SetupIntent] confirmation.
      */
     val lastSetupError: Error? = null,
+
+    /**
+     * Payment types that have not been activated in livemode, but have been activated in testmode.
+     */
+    override val unactivatedPaymentMethods: List<String>,
 
     override val nextActionData: StripeIntent.NextActionData?
 ) : StripeIntent {
@@ -190,7 +196,7 @@ data class SetupIntent internal constructor(
 
         init {
             require(isMatch(value)) {
-                "Invalid client secret: $value"
+                "Invalid Setup Intent client secret: $value"
             }
         }
 

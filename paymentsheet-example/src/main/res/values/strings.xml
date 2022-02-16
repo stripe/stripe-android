@@ -32,7 +32,7 @@
     <string name="currency">Currency</string>
     <string name="default_billing_address">Default Billing Address</string>
     <string name="shipping_address">Shipping Address</string>
-    <string name="currency_usd">USD</string>
-    <string name="currency_eur">EUR</string>
-    <string name="confirm">Confirm</string>
+    <string name="allowsDelayedPaymentMethods">Delayed PMs</string>
+    <string name="automatic_pm">Automatic PMs</string>
+    <string name="reset_defaults">Reset Defaults</string>
 </resources>

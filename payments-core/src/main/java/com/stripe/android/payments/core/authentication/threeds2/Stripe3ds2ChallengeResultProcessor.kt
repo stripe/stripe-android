@@ -1,22 +1,20 @@
 package com.stripe.android.payments.core.authentication.threeds2
 
-import com.stripe.android.Logger
 import com.stripe.android.StripeIntentResult
-import com.stripe.android.exception.StripeException
-import com.stripe.android.networking.AnalyticsEvent
-import com.stripe.android.networking.AnalyticsRequestExecutor
-import com.stripe.android.networking.AnalyticsRequestFactory
+import com.stripe.android.core.Logger
+import com.stripe.android.core.exception.StripeException
+import com.stripe.android.core.injection.IOContext
+import com.stripe.android.core.networking.AnalyticsRequestExecutor
+import com.stripe.android.core.networking.RetryDelaySupplier
 import com.stripe.android.networking.ApiRequest
-import com.stripe.android.networking.RetryDelaySupplier
+import com.stripe.android.networking.PaymentAnalyticsEvent
+import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.PaymentFlowResult
-import com.stripe.android.payments.core.injection.ENABLE_LOGGING
-import com.stripe.android.payments.core.injection.IOContext
 import com.stripe.android.stripe3ds2.transaction.ChallengeResult
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
-import javax.inject.Named
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
@@ -28,12 +26,11 @@ internal interface Stripe3ds2ChallengeResultProcessor {
 internal class DefaultStripe3ds2ChallengeResultProcessor @Inject constructor(
     private val stripeRepository: StripeRepository,
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
-    private val analyticsRequestFactory: AnalyticsRequestFactory,
+    private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
     private val retryDelaySupplier: RetryDelaySupplier,
-    @Named(ENABLE_LOGGING) enableLogging: Boolean,
+    private val logger: Logger,
     @IOContext private val workContext: CoroutineContext
 ) : Stripe3ds2ChallengeResultProcessor {
-    private val logger = Logger.getInstance(enableLogging)
 
     override suspend fun process(
         challengeResult: ChallengeResult
@@ -41,42 +38,42 @@ internal class DefaultStripe3ds2ChallengeResultProcessor @Inject constructor(
         when (challengeResult) {
             is ChallengeResult.Succeeded -> {
                 analyticsRequestExecutor.executeAsync(
-                    analyticsRequestFactory.create3ds2Challenge(
-                        AnalyticsEvent.Auth3ds2ChallengeCompleted,
+                    paymentAnalyticsRequestFactory.create3ds2Challenge(
+                        PaymentAnalyticsEvent.Auth3ds2ChallengeCompleted,
                         challengeResult.uiTypeCode
                     )
                 )
             }
             is ChallengeResult.Failed -> {
                 analyticsRequestExecutor.executeAsync(
-                    analyticsRequestFactory.create3ds2Challenge(
-                        AnalyticsEvent.Auth3ds2ChallengeCompleted,
+                    paymentAnalyticsRequestFactory.create3ds2Challenge(
+                        PaymentAnalyticsEvent.Auth3ds2ChallengeCompleted,
                         challengeResult.uiTypeCode
                     )
                 )
             }
             is ChallengeResult.Canceled -> {
                 analyticsRequestExecutor.executeAsync(
-                    analyticsRequestFactory.create3ds2Challenge(
-                        AnalyticsEvent.Auth3ds2ChallengeCanceled,
+                    paymentAnalyticsRequestFactory.create3ds2Challenge(
+                        PaymentAnalyticsEvent.Auth3ds2ChallengeCanceled,
                         challengeResult.uiTypeCode
                     )
                 )
             }
             is ChallengeResult.ProtocolError -> {
                 analyticsRequestExecutor.executeAsync(
-                    analyticsRequestFactory.createRequest(AnalyticsEvent.Auth3ds2ChallengeErrored)
+                    paymentAnalyticsRequestFactory.createRequest(PaymentAnalyticsEvent.Auth3ds2ChallengeErrored)
                 )
             }
             is ChallengeResult.RuntimeError -> {
                 analyticsRequestExecutor.executeAsync(
-                    analyticsRequestFactory.createRequest(AnalyticsEvent.Auth3ds2ChallengeErrored)
+                    paymentAnalyticsRequestFactory.createRequest(PaymentAnalyticsEvent.Auth3ds2ChallengeErrored)
                 )
             }
             is ChallengeResult.Timeout -> {
                 analyticsRequestExecutor.executeAsync(
-                    analyticsRequestFactory.create3ds2Challenge(
-                        AnalyticsEvent.Auth3ds2ChallengeTimedOut,
+                    paymentAnalyticsRequestFactory.create3ds2Challenge(
+                        PaymentAnalyticsEvent.Auth3ds2ChallengeTimedOut,
                         challengeResult.uiTypeCode
                     )
                 )
@@ -84,8 +81,8 @@ internal class DefaultStripe3ds2ChallengeResultProcessor @Inject constructor(
         }
 
         analyticsRequestExecutor.executeAsync(
-            analyticsRequestFactory.create3ds2Challenge(
-                AnalyticsEvent.Auth3ds2ChallengePresented,
+            paymentAnalyticsRequestFactory.create3ds2Challenge(
+                PaymentAnalyticsEvent.Auth3ds2ChallengePresented,
                 challengeResult.initialUiType?.code.orEmpty()
             )
         )

@@ -1,18 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="iban">IBAN</string>
     <string name="stripe_paymentsheet_payment_method_sofort">Sofort</string>
     <string name="stripe_paymentsheet_payment_method_ideal">iDEAL</string>
     <string name="stripe_paymentsheet_payment_method_bancontact">Bancontact</string>
     <string name="stripe_paymentsheet_payment_method_eps">EPS</string>
     <string name="stripe_paymentsheet_payment_method_p24">Przelewy24</string>
     <string name="stripe_paymentsheet_payment_method_giropay">Giropay</string>
+    <string name="stripe_paymentsheet_payment_method_klarna">Klarna</string>
+    <string name="stripe_paymentsheet_payment_method_paypal">PayPal</string>
 
     <string name="paymentsheet_payment_method_item_card_number">····%1$s</string>
 
-    <!-- Message shown for Afterpay/Clearpay payments. Placeholder will be replaced with the installment amount,
-    and the Afterpay/Clearpay logo will be added at the end of the message, so the translation must make sense
-    when reading as: "Pay in 4 interest-free payments of $100 with <Afterpay> ⓘ"
-        This will not be translated initially as it must have specific values per language -->
-    <string name="stripe_paymentsheet_afterpay_clearpay_message">Pay in 4 interest-free payments of %s with</string>
+    <!-- Label indicating the payment intent is in testmode -->
+    <string name="stripe_paymentsheet_test_mode_indicator">TEST MODE</string>
 </resources>

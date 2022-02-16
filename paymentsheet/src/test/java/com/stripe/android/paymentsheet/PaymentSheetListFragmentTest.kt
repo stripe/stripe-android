@@ -2,7 +2,6 @@ package com.stripe.android.paymentsheet
 
 import android.os.Looper.getMainLooper
 import androidx.appcompat.app.AlertDialog
-import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.core.os.bundleOf
 import androidx.core.view.children
 import androidx.core.view.isVisible
@@ -15,34 +14,38 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.core.injection.InjectorKey
+import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
-import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.paymentsheet.databinding.FragmentPaymentsheetPaymentMethodsListBinding
-import com.stripe.android.paymentsheet.model.Amount
 import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.FragmentConfigFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
-import com.stripe.android.paymentsheet.ui.PaymentSheetFragmentFactory
 import com.stripe.android.utils.TestUtils.idleLooper
+import org.junit.After
 import org.junit.Before
-import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows.shadowOf
+import org.robolectric.annotation.Config
 import org.robolectric.shadows.ShadowAlertDialog
 
 @RunWith(RobolectricTestRunner::class)
-class PaymentSheetListFragmentTest {
-    @get:Rule
-    val rule = InstantTaskExecutorRule()
+internal class PaymentSheetListFragmentTest : PaymentSheetViewModelTestInjection() {
+    @InjectorKey
+    private val injectorKey: String = "PaymentSheetListFragmentTest"
 
-    private val eventReporter = mock<EventReporter>()
+    @After
+    override fun after() {
+        super.after()
+    }
 
     @Before
     fun setup() {
@@ -53,18 +56,19 @@ class PaymentSheetListFragmentTest {
     }
 
     @Test
-    fun `resets payment method selection when shown`() {
+    fun `recovers payment method selection when shown`() {
         val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
         val paymentSelection = PaymentSelection.Saved(paymentMethod)
 
         val scenario = createScenario(
             fragmentConfig = FRAGMENT_CONFIG.copy(
                 isGooglePayReady = true,
-                paymentMethods = listOf(paymentMethod),
                 savedSelection = SavedSelection.PaymentMethod(paymentMethod.id.orEmpty())
-            )
-        )
-        scenario.onFragment {
+            ),
+            initialState = Lifecycle.State.INITIALIZED
+        ).moveToState(Lifecycle.State.CREATED).onFragment { fragment ->
+            fragment.sheetViewModel._paymentMethods.value = listOf(paymentMethod)
+        }.moveToState(Lifecycle.State.STARTED).onFragment {
             assertThat(activityViewModel(it).selection.value)
                 .isEqualTo(paymentSelection)
         }
@@ -77,13 +81,76 @@ class PaymentSheetListFragmentTest {
     }
 
     @Test
+    fun `recovers edit state when shown`() {
+        val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
+
+        createScenario(
+            fragmentConfig = FRAGMENT_CONFIG.copy(
+                isGooglePayReady = true,
+                savedSelection = SavedSelection.PaymentMethod(paymentMethod.id.orEmpty())
+            ),
+            initialState = Lifecycle.State.INITIALIZED
+        ).moveToState(Lifecycle.State.CREATED).onFragment { fragment ->
+            fragment.sheetViewModel._paymentMethods.value = listOf(paymentMethod)
+        }.moveToState(Lifecycle.State.STARTED).onFragment { fragment ->
+            assertThat(fragment.isEditing).isFalse()
+            fragment.isEditing = true
+        }.recreate().onFragment {
+            assertThat(it.isEditing).isTrue()
+        }
+    }
+
+    @Test
     fun `sets up adapter`() {
-        createScenario().onFragment {
+        createScenario(
+            initialState = Lifecycle.State.INITIALIZED
+        ).moveToState(Lifecycle.State.CREATED).onFragment { fragment ->
+            fragment.sheetViewModel._paymentMethods.value = PAYMENT_METHODS
+        }.moveToState(Lifecycle.State.STARTED).onFragment {
             idleLooper()
 
             val adapter = recyclerView(it).adapter as PaymentOptionsAdapter
             assertThat(adapter.itemCount)
                 .isEqualTo(4)
+        }
+    }
+
+    @Test
+    @Config(qualifiers = "w320dp")
+    fun `when screen is 320dp wide, adapter should show 2 and a half items with 114dp width`() {
+        createScenario(
+            initialState = Lifecycle.State.INITIALIZED
+        ).moveToState(Lifecycle.State.CREATED).onFragment { fragment ->
+            fragment.sheetViewModel._paymentMethods.value = PAYMENT_METHODS
+        }.moveToState(Lifecycle.State.STARTED).onFragment {
+            val item = recyclerView(it).layoutManager!!.findViewByPosition(0)
+            assertThat(item!!.measuredWidth).isEqualTo(114)
+        }
+    }
+
+    @Test
+    @Config(qualifiers = "w481dp")
+    fun `when screen is 481dp wide, adapter should show 3 and a half items with 127dp width`() {
+        createScenario(
+            initialState = Lifecycle.State.INITIALIZED
+        ).moveToState(Lifecycle.State.CREATED).onFragment { fragment ->
+            fragment.sheetViewModel._paymentMethods.value = PAYMENT_METHODS
+        }.moveToState(Lifecycle.State.STARTED).onFragment {
+            val item = recyclerView(it).layoutManager!!.findViewByPosition(0)
+            assertThat(item!!.measuredWidth).isEqualTo(127)
+        }
+    }
+
+    @Test
+    @Config(qualifiers = "w482dp")
+    fun `when screen is 482dp wide, adapter should show 4 items with 112dp width`() {
+        createScenario(
+            initialState = Lifecycle.State.INITIALIZED
+        ).moveToState(Lifecycle.State.CREATED).onFragment { fragment ->
+            fragment.sheetViewModel._paymentMethods.value = PAYMENT_METHODS
+        }.moveToState(Lifecycle.State.STARTED).onFragment {
+            val item = recyclerView(it).layoutManager!!.findViewByPosition(0)
+            assertThat(item!!.measuredWidth).isEqualTo(112)
         }
     }
 
@@ -119,9 +186,7 @@ class PaymentSheetListFragmentTest {
             assertThat(activityViewModel.transition.value?.peekContent())
                 .isEqualTo(
                     PaymentSheetViewModel.TransitionTarget.AddPaymentMethodFull(
-                        FragmentConfigFixtures.DEFAULT.copy(
-                            paymentMethods = PAYMENT_METHODS
-                        )
+                        FragmentConfigFixtures.DEFAULT
                     )
                 )
         }
@@ -165,9 +230,11 @@ class PaymentSheetListFragmentTest {
     fun `total amount label correctly displays amount`() {
         createScenario().onFragment { fragment ->
             shadowOf(getMainLooper()).idle()
-            fragment.sheetViewModel.setStripeIntent(PaymentIntentFixtures.PI_OFF_SESSION.copy(
-                amount = 399
-            ))
+            fragment.sheetViewModel.setStripeIntent(
+                PaymentIntentFixtures.PI_OFF_SESSION.copy(
+                    amount = 399
+                )
+            )
             val viewBinding = FragmentPaymentsheetPaymentMethodsListBinding.bind(fragment.view!!)
 
             assertThat(viewBinding.total.text)
@@ -178,8 +245,8 @@ class PaymentSheetListFragmentTest {
     @Test
     fun `total amount label is hidden for SetupIntent`() {
         createScenario(
-            FRAGMENT_CONFIG,
-            PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP
+            FRAGMENT_CONFIG.copy(stripeIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD),
+            PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP,
         ).onFragment { fragment ->
             shadowOf(getMainLooper()).idle()
             val viewBinding = FragmentPaymentsheetPaymentMethodsListBinding.bind(fragment.view!!)
@@ -191,15 +258,20 @@ class PaymentSheetListFragmentTest {
 
     @Test
     fun `when config has saved payment methods then show options menu`() {
-        createScenario().onFragment { fragment ->
-            idleLooper()
+        createScenario(
+            initialState = Lifecycle.State.INITIALIZED,
+            paymentMethods = PAYMENT_METHODS
+        ).moveToState(Lifecycle.State.STARTED).onFragment { fragment ->
             assertThat(fragment.hasOptionsMenu()).isTrue()
         }
     }
 
     @Test
     fun `when config does not have saved payment methods then show no options menu`() {
-        createScenario(FragmentConfigFixtures.DEFAULT).onFragment { fragment ->
+        createScenario(
+            initialState = Lifecycle.State.INITIALIZED,
+            paymentMethods = emptyList()
+        ).moveToState(Lifecycle.State.STARTED).onFragment { fragment ->
             idleLooper()
             assertThat(fragment.hasOptionsMenu()).isFalse()
         }
@@ -207,13 +279,16 @@ class PaymentSheetListFragmentTest {
 
     @Test
     fun `deletePaymentMethod() removes item from adapter`() {
-        createScenario().onFragment { fragment ->
+        createScenario(
+            initialState = Lifecycle.State.INITIALIZED,
+            paymentMethods = PAYMENT_METHODS
+        ).moveToState(Lifecycle.State.STARTED).onFragment { fragment ->
             idleLooper()
 
             val adapter = recyclerView(fragment).adapter as PaymentOptionsAdapter
             assertThat(adapter.itemCount).isEqualTo(4)
 
-            adapter.toggleEditing()
+            fragment.isEditing = true
             adapter.paymentMethodDeleteListener(
                 adapter.items[3] as PaymentOptionsAdapter.Item.SavedPaymentMethod
             )
@@ -236,24 +311,43 @@ class PaymentSheetListFragmentTest {
         return fragment.activityViewModels<PaymentSheetViewModel> {
             PaymentSheetViewModel.Factory(
                 { fragment.requireActivity().application },
-                { PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY }
+                { PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY },
+                mock(),
             )
         }.value
     }
 
     private fun createScenario(
         fragmentConfig: FragmentConfig? = FRAGMENT_CONFIG,
-        starterArgs: PaymentSheetContract.Args = PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY,
-        initialState: Lifecycle.State = Lifecycle.State.RESUMED,
-    ): FragmentScenario<PaymentSheetListFragment> = launchFragmentInContainer(
-        bundleOf(
-            PaymentSheetActivity.EXTRA_FRAGMENT_CONFIG to fragmentConfig,
-            PaymentSheetActivity.EXTRA_STARTER_ARGS to starterArgs
+        starterArgs: PaymentSheetContract.Args = PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
+            injectorKey = injectorKey
         ),
-        R.style.StripePaymentSheetDefaultTheme,
-        initialState = initialState,
-        factory = PaymentSheetFragmentFactory(eventReporter)
-    )
+        initialState: Lifecycle.State = Lifecycle.State.RESUMED,
+        paymentMethods: List<PaymentMethod> = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+    ): FragmentScenario<PaymentSheetListFragment> {
+        assertThat(WeakMapInjectorRegistry.retrieve(injectorKey)).isNull()
+        fragmentConfig?.let {
+            createViewModel(
+                fragmentConfig.stripeIntent,
+                customerRepositoryPMs = paymentMethods,
+                injectorKey = starterArgs.injectorKey,
+                args = starterArgs
+            ).apply {
+                updatePaymentMethods(fragmentConfig.stripeIntent)
+                setStripeIntent(fragmentConfig.stripeIntent)
+                idleLooper()
+                registerViewModel(starterArgs.injectorKey, this)
+            }
+        }
+        return launchFragmentInContainer(
+            bundleOf(
+                PaymentSheetActivity.EXTRA_FRAGMENT_CONFIG to fragmentConfig,
+                PaymentSheetActivity.EXTRA_STARTER_ARGS to starterArgs
+            ),
+            R.style.StripePaymentSheetDefaultTheme,
+            initialState = initialState,
+        )
+    }
 
     private companion object {
         private val PAYMENT_METHODS = listOf(
@@ -261,8 +355,6 @@ class PaymentSheetListFragmentTest {
             PaymentMethodFixtures.CARD_PAYMENT_METHOD,
         )
 
-        private val FRAGMENT_CONFIG = FragmentConfigFixtures.DEFAULT.copy(
-            paymentMethods = PAYMENT_METHODS
-        )
+        private val FRAGMENT_CONFIG = FragmentConfigFixtures.DEFAULT
     }
 }

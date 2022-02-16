@@ -3,8 +3,8 @@ package com.stripe.android
 import android.content.Intent
 import androidx.activity.ComponentActivity
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.exception.APIException
-import com.stripe.android.exception.InvalidRequestException
+import com.stripe.android.core.exception.APIException
+import com.stripe.android.core.exception.InvalidRequestException
 import com.stripe.android.exception.PermissionException
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.SetupIntentFixtures

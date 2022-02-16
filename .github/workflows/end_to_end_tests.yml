@@ -7,7 +7,7 @@ jobs:
   end-to-end-tests:
     name: End-to-end tests
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+
     steps:
       - uses: actions/checkout@v2
       - uses: gradle/wrapper-validation-action@v1
@@ -34,14 +34,5 @@ jobs:
           path: stripe-test-e2e/build/reports/tests/testDebugUnitTest/
       - name: Notify failure endpoint
         id: notifyFailureEndpoint
-        uses: fjogeleit/http-request-action@master
         if: failure()
-        with:
-          url: ${{ secrets.SDK_FAILURE_NOTIFICATION_ENDPOINT }}
-          method: 'POST'
-          data: |
-            {
-              "project": "RUN_MOBILESDK",
-              "summary": "stripe-android E2E test failed",
-              "description": "Please ACK this ticket and investigate the failure. See https://github.com/stripe/stripe-android/actions/runs/${{ github.run_id }}"
-            }
+        run: ./scripts/notify_failure_enpiont.rb ${{ secrets.SDK_FAILURE_NOTIFICATION_ENDPOINT }} ${{ secrets.SDK_FAILURE_NOTIFICATION_ENDPOINT_HMAC_KEY }} ${{ github.run_id }}

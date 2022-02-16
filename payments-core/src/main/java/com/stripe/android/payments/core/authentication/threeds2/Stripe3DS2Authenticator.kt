@@ -5,12 +5,12 @@ import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.PaymentAuthConfig
+import com.stripe.android.core.injection.ENABLE_LOGGING
+import com.stripe.android.core.injection.InjectorKey
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.ApiRequest
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.payments.core.authentication.PaymentAuthenticator
-import com.stripe.android.payments.core.injection.ENABLE_LOGGING
-import com.stripe.android.payments.core.injection.InjectorKey
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.stripe3ds2.transaction.SdkTransactionId
@@ -26,7 +26,7 @@ import javax.inject.Singleton
 internal class Stripe3DS2Authenticator @Inject constructor(
     private val config: PaymentAuthConfig,
     @Named(ENABLE_LOGGING) private val enableLogging: Boolean,
-    @InjectorKey private val injectorKey: Int,
+    @InjectorKey private val injectorKey: String,
     @Named(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String,
     @Named(PRODUCT_USAGE) private val productUsage: Set<String>
 ) : PaymentAuthenticator<StripeIntent> {

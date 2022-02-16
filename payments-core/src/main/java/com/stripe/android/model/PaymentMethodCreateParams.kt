@@ -201,7 +201,6 @@ data class PaymentMethodCreateParams internal constructor(
         internal val expiryYear: Int? = null,
         internal val cvc: String? = null,
         private val token: String? = null,
-
         internal val attribution: Set<String>? = null
     ) : StripeParamsModel, Parcelable {
         internal val brand: CardBrand get() = CardUtils.getPossibleCardBrand(number)
@@ -730,6 +729,19 @@ data class PaymentMethodCreateParams internal constructor(
         ): PaymentMethodCreateParams {
             return PaymentMethodCreateParams(
                 type = PaymentMethod.Type.WeChatPay,
+                billingDetails = billingDetails,
+                metadata = metadata
+            )
+        }
+
+        @JvmStatic
+        @JvmOverloads
+        fun createKlarna(
+            billingDetails: PaymentMethod.BillingDetails? = null,
+            metadata: Map<String, String>? = null
+        ): PaymentMethodCreateParams {
+            return PaymentMethodCreateParams(
+                type = PaymentMethod.Type.Klarna,
                 billingDetails = billingDetails,
                 metadata = metadata
             )

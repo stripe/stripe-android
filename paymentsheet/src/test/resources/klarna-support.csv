@@ -1,0 +1,49 @@
+lpm, hasCustomer, allowsDelayedPayment, intentSetupFutureUsage, intentHasShipping, intentLpms, supportCustomerSavedCard, formExists, formType, supportsAdding
+klarna, true, true, off_session, false, card/klarna, false, false, not available, false
+klarna, true, true, off_session, false, card/eps/klarna, false, false, not available, false
+klarna, true, false, off_session, false, card/klarna, false, false, not available, false
+klarna, true, false, off_session, false, card/eps/klarna, false, false, not available, false
+klarna, true, true, on_session, false, card/klarna, false, false, not available, false
+klarna, true, true, on_session, false, card/eps/klarna, false, false, not available, false
+klarna, true, false, on_session, false, card/klarna, false, false, not available, false
+klarna, true, false, on_session, false, card/eps/klarna, false, false, not available, false
+klarna, true, true, null, false, card/klarna, false, true, oneTime, true
+klarna, true, true, null, false, card/eps/klarna, false, true, oneTime, true
+klarna, true, false, null, false, card/klarna, false, true, oneTime, true
+klarna, true, false, null, false, card/eps/klarna, false, true, oneTime, true
+klarna, false, true, off_session, false, card/klarna, false, false, not available, false
+klarna, false, true, off_session, false, card/eps/klarna, false, false, not available, false
+klarna, false, false, off_session, false, card/klarna, false, false, not available, false
+klarna, false, false, off_session, false, card/eps/klarna, false, false, not available, false
+klarna, false, true, on_session, false, card/klarna, false, false, not available, false
+klarna, false, true, on_session, false, card/eps/klarna, false, false, not available, false
+klarna, false, false, on_session, false, card/klarna, false, false, not available, false
+klarna, false, false, on_session, false, card/eps/klarna, false, false, not available, false
+klarna, false, true, null, false, card/klarna, false, true, oneTime, true
+klarna, false, true, null, false, card/eps/klarna, false, true, oneTime, true
+klarna, false, false, null, false, card/klarna, false, true, oneTime, true
+klarna, false, false, null, false, card/eps/klarna, false, true, oneTime, true
+klarna, true, true, off_session, true, card/klarna, false, false, not available, false
+klarna, true, true, off_session, true, card/eps/klarna, false, false, not available, false
+klarna, true, false, off_session, true, card/klarna, false, false, not available, false
+klarna, true, false, off_session, true, card/eps/klarna, false, false, not available, false
+klarna, true, true, on_session, true, card/klarna, false, false, not available, false
+klarna, true, true, on_session, true, card/eps/klarna, false, false, not available, false
+klarna, true, false, on_session, true, card/klarna, false, false, not available, false
+klarna, true, false, on_session, true, card/eps/klarna, false, false, not available, false
+klarna, true, true, null, true, card/klarna, false, true, oneTime, true
+klarna, true, true, null, true, card/eps/klarna, false, true, oneTime, true
+klarna, true, false, null, true, card/klarna, false, true, oneTime, true
+klarna, true, false, null, true, card/eps/klarna, false, true, oneTime, true
+klarna, false, true, off_session, true, card/klarna, false, false, not available, false
+klarna, false, true, off_session, true, card/eps/klarna, false, false, not available, false
+klarna, false, false, off_session, true, card/klarna, false, false, not available, false
+klarna, false, false, off_session, true, card/eps/klarna, false, false, not available, false
+klarna, false, true, on_session, true, card/klarna, false, false, not available, false
+klarna, false, true, on_session, true, card/eps/klarna, false, false, not available, false
+klarna, false, false, on_session, true, card/klarna, false, false, not available, false
+klarna, false, false, on_session, true, card/eps/klarna, false, false, not available, false
+klarna, false, true, null, true, card/klarna, false, true, oneTime, true
+klarna, false, true, null, true, card/eps/klarna, false, true, oneTime, true
+klarna, false, false, null, true, card/klarna, false, true, oneTime, true
+klarna, false, false, null, true, card/eps/klarna, false, true, oneTime, true

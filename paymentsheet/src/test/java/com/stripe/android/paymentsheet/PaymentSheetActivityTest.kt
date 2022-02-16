@@ -6,15 +6,16 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
-import com.stripe.android.Logger
+import com.stripe.android.core.Logger
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContract
-import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherFactory
+import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLauncherFactory
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentIntent
@@ -22,6 +23,8 @@ import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
+import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
 import com.stripe.android.paymentsheet.PaymentSheetViewModel.CheckoutIdentifier
@@ -45,7 +48,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.test.TestCoroutineDispatcher
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
 import org.junit.Rule
@@ -63,7 +66,7 @@ internal class PaymentSheetActivityTest {
     val rule = InstantTaskExecutorRule()
 
     private val context = ApplicationProvider.getApplicationContext<Context>()
-    private val testDispatcher = TestCoroutineDispatcher()
+    private val testDispatcher = UnconfinedTestDispatcher()
 
     private val eventReporter = mock<EventReporter>()
     private val googlePayPaymentMethodLauncherFactory =
@@ -97,7 +100,6 @@ internal class PaymentSheetActivityTest {
     @AfterTest
     fun cleanup() {
         Dispatchers.resetMain()
-        testDispatcher.cleanupTestCoroutines()
     }
 
     @Test
@@ -212,7 +214,7 @@ internal class PaymentSheetActivityTest {
                 PaymentSelection.New.Card(
                     PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
                     CardBrand.Visa,
-                    shouldSavePaymentMethod = false
+                    customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestNoReuse
                 )
             )
             assertThat(activity.viewBinding.buyButton.isVisible).isTrue()
@@ -324,7 +326,10 @@ internal class PaymentSheetActivityTest {
                 .isEqualTo(
                     ConfirmPaymentIntentParams.createWithPaymentMethodId(
                         paymentMethodId = "pm_123456789",
-                        clientSecret = "client_secret"
+                        clientSecret = "client_secret",
+                        paymentMethodOptions = PaymentMethodOptionsParams.Card(
+                            setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.Blank
+                        )
                     )
                 )
         }
@@ -423,7 +428,10 @@ internal class PaymentSheetActivityTest {
 
             idleLooper()
 
-            testDispatcher.advanceTimeBy(PrimaryButtonAnimator.HOLD_ANIMATION_ON_SLIDE_IN_COMPLETION)
+            testDispatcher.scheduler.apply {
+                advanceTimeBy(PrimaryButtonAnimator.HOLD_ANIMATION_ON_SLIDE_IN_COMPLETION)
+                runCurrent()
+            }
 
             assertThat(finishProcessingCalled).isTrue()
         }
@@ -465,9 +473,27 @@ internal class PaymentSheetActivityTest {
 
             idleLooper()
 
-            testDispatcher.advanceTimeBy(PrimaryButtonAnimator.HOLD_ANIMATION_ON_SLIDE_IN_COMPLETION)
+            testDispatcher.scheduler.apply {
+                advanceTimeBy(PrimaryButtonAnimator.HOLD_ANIMATION_ON_SLIDE_IN_COMPLETION)
+                runCurrent()
+            }
 
             assertThat(finishProcessingCalled).isTrue()
+        }
+    }
+
+    @Test
+    fun `google pay flow updates the scroll view before and after`() {
+        val scenario = activityScenario()
+        scenario.launch(intent).onActivity { activity ->
+            viewModel.checkoutIdentifier = CheckoutIdentifier.SheetBottomGooglePay
+
+            activity.viewBinding.googlePayButton.performClick()
+
+            assertThat(viewModel._contentVisible.value).isEqualTo(false)
+
+            viewModel.onGooglePayResult(GooglePayPaymentMethodLauncher.Result.Canceled)
+            assertThat(viewModel._contentVisible.value).isEqualTo(true)
         }
     }
 
@@ -483,9 +509,10 @@ internal class PaymentSheetActivityTest {
             idleLooper()
 
             // wait animate time...
-            testDispatcher.advanceTimeBy(
-                PrimaryButtonAnimator.HOLD_ANIMATION_ON_SLIDE_IN_COMPLETION
-            )
+            testDispatcher.scheduler.apply {
+                advanceTimeBy(PrimaryButtonAnimator.HOLD_ANIMATION_ON_SLIDE_IN_COMPLETION)
+                runCurrent()
+            }
 
             assertThat(activity.bottomSheetBehavior.state)
                 .isEqualTo(BottomSheetBehavior.STATE_HIDDEN)
@@ -497,7 +524,10 @@ internal class PaymentSheetActivityTest {
         val scenario = activityScenario(viewModel)
         scenario.launch(intent).onActivity { activity ->
             // wait for bottom sheet to animate in
-            testDispatcher.advanceTimeBy(500)
+            testDispatcher.scheduler.apply {
+                advanceTimeBy(500)
+                runCurrent()
+            }
             idleLooper()
 
             viewModel.checkoutIdentifier = CheckoutIdentifier.SheetBottomBuy
@@ -689,6 +719,30 @@ internal class PaymentSheetActivityTest {
         }
     }
 
+    @Test
+    fun `when intent is in live mode show no indicator`() {
+        val scenario = activityScenario(viewModel)
+        scenario.launch(intent).onActivity { activity ->
+            // wait for bottom sheet to animate in
+            idleLooper()
+
+            viewModel._liveMode.value = true
+            assertThat(activity.viewBinding.testmode.isVisible).isFalse()
+        }
+    }
+
+    @Test
+    fun `when intent is not in live mode show indicator`() {
+        val scenario = activityScenario(viewModel)
+        scenario.launch(intent).onActivity { activity ->
+            // wait for bottom sheet to animate in
+            idleLooper()
+
+            viewModel._liveMode.value = false
+            assertThat(activity.viewBinding.testmode.isVisible).isTrue()
+        }
+    }
+
     private fun currentFragment(activity: PaymentSheetActivity) =
         activity.supportFragmentManager.findFragmentById(activity.viewBinding.fragmentContainer.id)
 
@@ -715,10 +769,13 @@ internal class PaymentSheetActivityTest {
             StripeIntentValidator(),
             FakeCustomerRepository(paymentMethods),
             FakePrefsRepository(),
+            mock(),
             stripePaymentLauncherAssistedFactory,
             googlePayPaymentMethodLauncherFactory,
             Logger.noop(),
-            testDispatcher
+            testDispatcher,
+            DUMMY_INJECTOR_KEY,
+            savedStateHandle = SavedStateHandle()
         )
     }
 
@@ -728,7 +785,8 @@ internal class PaymentSheetActivityTest {
                 lifecycleScope: CoroutineScope,
                 config: GooglePayPaymentMethodLauncher.Config,
                 readyCallback: GooglePayPaymentMethodLauncher.ReadyCallback,
-                activityResultLauncher: ActivityResultLauncher<GooglePayPaymentMethodLauncherContract.Args>
+                activityResultLauncher: ActivityResultLauncher<GooglePayPaymentMethodLauncherContract.Args>,
+                skipReadyCheck: Boolean
             ): GooglePayPaymentMethodLauncher {
                 val googlePayPaymentMethodLauncher = mock<GooglePayPaymentMethodLauncher>()
                 readyCallback.onReady(true)

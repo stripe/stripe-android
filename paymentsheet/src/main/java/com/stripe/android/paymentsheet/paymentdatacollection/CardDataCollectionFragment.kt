@@ -10,6 +10,8 @@ import android.widget.CheckBox
 import android.widget.LinearLayout
 import android.widget.Space
 import android.widget.TextView
+import androidx.annotation.VisibleForTesting
+import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.ContextThemeWrapper
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
@@ -18,9 +20,14 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import com.stripe.android.core.model.Country
+import com.stripe.android.core.model.CountryCode
 import com.stripe.android.model.Address
-import com.stripe.android.model.CountryCode
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.paymentsheet.PaymentOptionContract
+import com.stripe.android.paymentsheet.PaymentOptionsViewModel
+import com.stripe.android.paymentsheet.PaymentSheetActivity
+import com.stripe.android.paymentsheet.PaymentSheetViewModel
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.databinding.FragmentPaymentsheetAddCardBinding
 import com.stripe.android.paymentsheet.databinding.StripeHorizontalDividerBinding
@@ -30,22 +37,11 @@ import com.stripe.android.paymentsheet.ui.BillingAddressView
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.view.CardInputListener
 import com.stripe.android.view.CardMultilineWidget
-import com.stripe.android.view.Country
 
 /**
  * A [Fragment] for collecting data for a new card payment method.
  */
-internal class CardDataCollectionFragment<ViewModelType : BaseSheetViewModel<*>>(
-    private val viewModelClass: Class<ViewModelType>,
-    private val viewModelFactory: ViewModelProvider.Factory
-) : Fragment() {
-    // Because the ViewModel is a subclass of BaseSheetViewModel (depending on whether we're going
-    // through the complete or custom flow), we need to parameterize the ViewModel class so it is
-    // properly reused if it was already created.
-    val sheetViewModel: ViewModelType by lazy {
-        ViewModelProvider(requireActivity(), viewModelFactory).get(viewModelClass)
-    }
-
+internal class CardDataCollectionFragment : Fragment() {
     private lateinit var cardMultilineWidget: CardMultilineWidget
     private lateinit var billingAddressView: BillingAddressView
     private lateinit var cardErrors: TextView
@@ -70,7 +66,48 @@ internal class CardDataCollectionFragment<ViewModelType : BaseSheetViewModel<*>>
             }
         }
 
+    @VisibleForTesting
+    internal lateinit var sheetViewModel: BaseSheetViewModel<*>
+
     private val addCardViewModel: AddCardViewModel by viewModels()
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        if (requireNotNull(
+                requireArguments().getParcelable(PaymentSheetActivity.EXTRA_STARTER_ARGS)
+            ) is PaymentOptionContract.Args
+        ) {
+            sheetViewModel = ViewModelProvider(
+                requireActivity(),
+                PaymentOptionsViewModel.Factory(
+                    { requireActivity().application },
+                    {
+                        requireNotNull(
+                            requireArguments().getParcelable(
+                                PaymentSheetActivity.EXTRA_STARTER_ARGS
+                            )
+                        )
+                    },
+                    (activity as? AppCompatActivity) ?: this
+                )
+            ).get(PaymentOptionsViewModel::class.java)
+        } else {
+            sheetViewModel = ViewModelProvider(
+                requireActivity(),
+                PaymentSheetViewModel.Factory(
+                    { requireActivity().application },
+                    {
+                        requireNotNull(
+                            requireArguments().getParcelable(
+                                PaymentSheetActivity.EXTRA_STARTER_ARGS
+                            )
+                        )
+                    },
+                    (activity as? AppCompatActivity) ?: this
+                )
+            ).get(PaymentSheetViewModel::class.java)
+        }
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -80,6 +117,7 @@ internal class CardDataCollectionFragment<ViewModelType : BaseSheetViewModel<*>>
         val themedInflater = inflater.cloneInContext(
             ContextThemeWrapper(requireActivity(), R.style.StripePaymentSheetAddPaymentMethodTheme)
         )
+
         return themedInflater.inflate(
             R.layout.fragment_paymentsheet_add_card,
             container,
@@ -126,6 +164,8 @@ internal class CardDataCollectionFragment<ViewModelType : BaseSheetViewModel<*>>
                 // move to first field when CVC is complete
                 billingAddressView.focusFirstField()
             }
+
+            override fun onPostalCodeComplete() {}
         })
 
         sheetViewModel.processing.observe(viewLifecycleOwner) { isProcessing ->
@@ -137,13 +177,13 @@ internal class CardDataCollectionFragment<ViewModelType : BaseSheetViewModel<*>>
         setupSaveCardCheckbox()
     }
 
-    fun updateSelection() {
+    private fun updateSelection() {
         val validCard = if (addCardViewModel.isCardValid) {
             paymentMethodParams?.let { params ->
                 PaymentSelection.New.Card(
                     params,
                     cardMultilineWidget.getBrand(),
-                    shouldSavePaymentMethod = shouldSaveCard()
+                    customerRequestedSave = shouldSaveCard()
                 )
             }
         } else {
@@ -284,7 +324,8 @@ internal class CardDataCollectionFragment<ViewModelType : BaseSheetViewModel<*>>
 
     private fun populateFieldsFromNewCard() {
         val paymentMethodCreateParams = sheetViewModel.newCard?.paymentMethodCreateParams
-        saveCardCheckbox.isChecked = sheetViewModel.newCard?.shouldSavePaymentMethod ?: true
+        saveCardCheckbox.isChecked = sheetViewModel.newCard?.customerRequestedSave ==
+            PaymentSelection.CustomerRequestedSave.RequestReuse
         cardMultilineWidget.populate(paymentMethodCreateParams?.card)
         billingAddressView.populate(paymentMethodCreateParams?.billingDetails?.address)
     }
@@ -321,12 +362,13 @@ internal class CardDataCollectionFragment<ViewModelType : BaseSheetViewModel<*>>
         requireArguments().getParcelable<FormFragmentArguments>(
             ComposeFormDataCollectionFragment.EXTRA_CONFIG
         )?.let { args ->
-            saveCardCheckbox.isChecked = args.saveForFutureUseInitialValue
-            saveCardCheckbox.isVisible = args.saveForFutureUseInitialVisibility
+            saveCardCheckbox.isChecked = false
+            saveCardCheckbox.isVisible = args.showCheckbox
         }
-        sheetViewModel.newCard?.shouldSavePaymentMethod?.also {
+        sheetViewModel.newCard?.customerRequestedSave?.also {
             if (saveCardCheckbox.isVisible) {
-                saveCardCheckbox.isChecked = it
+                saveCardCheckbox.isChecked =
+                    it == PaymentSelection.CustomerRequestedSave.RequestReuse
             }
         }
 
@@ -340,13 +382,22 @@ internal class CardDataCollectionFragment<ViewModelType : BaseSheetViewModel<*>>
     private fun onSaveCardCheckboxChanged() {
         val selection = sheetViewModel.selection.value
         if (selection is PaymentSelection.New.Card) {
-            val newCardSelection = selection.copy(shouldSavePaymentMethod = shouldSaveCard())
+            val newCardSelection = selection.copy(customerRequestedSave = shouldSaveCard())
             sheetViewModel.updateSelection(newCardSelection)
             sheetViewModel.newCard = newCardSelection
         }
     }
 
-    private fun shouldSaveCard() = saveCardCheckbox.isChecked
+    private fun shouldSaveCard() =
+        if (saveCardCheckbox.isVisible) {
+            if (saveCardCheckbox.isChecked) {
+                PaymentSelection.CustomerRequestedSave.RequestReuse
+            } else {
+                PaymentSelection.CustomerRequestedSave.RequestNoReuse
+            }
+        } else {
+            PaymentSelection.CustomerRequestedSave.NoRequest
+        }
 
     internal class AddCardViewModel : ViewModel() {
         var isCardValid: Boolean = false

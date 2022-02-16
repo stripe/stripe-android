@@ -12,6 +12,7 @@
 # This script can be run with no arguments:
 #  ./localize.sh
 
+API_TOKEN=$LOKALISE_API_TOKEN
 if [ -z "$API_TOKEN" ]; then
   echo "You need to add the API_TOKEN to: localization_vars.sh"
   exit
@@ -41,7 +42,7 @@ lokalise2 --token $API_TOKEN --project-id $PROJECT_ID language list | grep iso
 
 echo "DOWNLOADING LANGUAGES: ${LANGUAGES}"
 
-for MODULE in "paymentsheet" "payments-core"
+for MODULE in ${MODULES[@]}
 do
     echo ""
     echo ""
@@ -77,6 +78,7 @@ do
     mv android/$MODULE/values-es-r419 android/$MODULE/values-b+es+419
     mv android/$MODULE/values-zh-rHant android/$MODULE/values-zh-rTW
     mv android/$MODULE/values-zh-rHans android/$MODULE/values-zh
+    mv android/$MODULE/values-id android/$MODULE/values-in
 
     # This is used by the untranslated_project_keys.sh script
     cp android/$MODULE/values-en-rGB/strings.xml android/$MODULE-lokalize-strings.xml

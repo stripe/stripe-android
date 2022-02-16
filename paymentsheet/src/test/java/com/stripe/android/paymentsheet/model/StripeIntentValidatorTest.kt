@@ -34,11 +34,11 @@ class StripeIntentValidatorTest {
     }
 
     @Test
-    fun `requireValid() processing is not valid`() {
+    fun `requireValid() Succeeded is not valid`() {
         assertFails {
             validator.requireValid(
                 PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
-                    status = StripeIntent.Status.Processing
+                    status = StripeIntent.Status.Succeeded
                 )
             )
         }
@@ -69,6 +69,24 @@ class StripeIntentValidatorTest {
     fun `SetupIntent requireValid() allows status = RequiresAction`() {
         validator.requireValid(
             SetupIntentFixtures.SI_NEXT_ACTION_REDIRECT
+        )
+    }
+
+    @Test
+    fun `PaymentIntent requireValid() allows status = RequiresConfirmation`() {
+        validator.requireValid(
+            PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                status = StripeIntent.Status.RequiresConfirmation
+            )
+        )
+    }
+
+    @Test
+    fun `PaymentIntent requireValid() allows status = Processing`() {
+        validator.requireValid(
+            PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                status = StripeIntent.Status.Processing
+            )
         )
     }
 }

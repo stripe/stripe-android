@@ -1,18 +1,22 @@
 package com.stripe.android.paymentsheet
 
+import android.annotation.SuppressLint
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.core.view.marginEnd
+import androidx.core.view.marginStart
 import androidx.recyclerview.widget.RecyclerView
 import com.stripe.android.paymentsheet.databinding.LayoutPaymentsheetAddPaymentMethodCardViewBinding
 import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
 import kotlin.math.roundToInt
 import kotlin.properties.Delegates
 
-class AddPaymentMethodsAdapter(
+@SuppressLint("NotifyDataSetChanged")
+internal class AddPaymentMethodsAdapter(
     private val paymentMethods: List<SupportedPaymentMethod>,
-    val paymentMethodSelectedListener: (paymentMethod: SupportedPaymentMethod) -> Unit
+    private var selectedItemPosition: Int,
+    val paymentMethodSelectedListener: (paymentMethod: SupportedPaymentMethod) -> Unit,
 ) : RecyclerView.Adapter<AddPaymentMethodsAdapter.AddPaymentMethodViewHolder>() {
-    private var selectedItemPosition = 0
 
     internal var isEnabled: Boolean by Delegates.observable(true) { _, oldValue, newValue ->
         if (oldValue != newValue) {
@@ -25,6 +29,24 @@ class AddPaymentMethodsAdapter(
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AddPaymentMethodViewHolder {
         return AddPaymentMethodViewHolder(parent)
             .apply {
+                val targetWidth = parent.measuredWidth - parent.paddingStart - parent.paddingEnd
+                val minItemWidth = 100 * parent.context.resources.displayMetrics.density +
+                    itemView.marginEnd + itemView.marginStart
+
+                // if all items fit at min width, then span them across the sheet evenly filling it.
+                // otherwise the number of items visible should be a multiple of .5
+                val viewWidth =
+                    if (minItemWidth * paymentMethods.size < targetWidth) {
+                        targetWidth / paymentMethods.size
+                    } else {
+                        // numVisibleItems is incremented in steps of 0.5 items
+                        // (1, 1.5, 2, 2.5, 3, ...)
+                        val numVisibleItems = (targetWidth * 2 / minItemWidth).toInt() / 2f
+                        targetWidth / numVisibleItems
+                    }
+
+                itemView.layoutParams.width =
+                    viewWidth.toInt() - itemView.marginEnd - itemView.marginStart
                 itemView.setOnClickListener {
                     onItemSelected(bindingAdapterPosition)
                 }
@@ -51,7 +73,7 @@ class AddPaymentMethodsAdapter(
         }
     }
 
-    class AddPaymentMethodViewHolder(
+    internal class AddPaymentMethodViewHolder(
         private val binding: LayoutPaymentsheetAddPaymentMethodCardViewBinding
     ) : RecyclerView.ViewHolder(binding.root) {
         constructor(parent: ViewGroup) : this(

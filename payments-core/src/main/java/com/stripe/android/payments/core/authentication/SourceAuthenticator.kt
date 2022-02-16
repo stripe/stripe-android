@@ -4,14 +4,15 @@ import com.stripe.android.PaymentBrowserAuthStarter
 import com.stripe.android.PaymentRelayStarter
 import com.stripe.android.StripePaymentController
 import com.stripe.android.auth.PaymentBrowserAuthContract
+import com.stripe.android.core.injection.ENABLE_LOGGING
+import com.stripe.android.core.injection.UIContext
+import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.model.Source
-import com.stripe.android.networking.AnalyticsEvent
-import com.stripe.android.networking.AnalyticsRequestExecutor
-import com.stripe.android.networking.AnalyticsRequestFactory
 import com.stripe.android.networking.ApiRequest
-import com.stripe.android.payments.core.injection.ENABLE_LOGGING
+import com.stripe.android.networking.PaymentAnalyticsEvent
+import com.stripe.android.networking.PaymentAnalyticsRequestFactory
+import com.stripe.android.payments.core.injection.IS_INSTANT_APP
 import com.stripe.android.payments.core.injection.PUBLISHABLE_KEY
-import com.stripe.android.payments.core.injection.UIContext
 import com.stripe.android.view.AuthActivityStarterHost
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -28,10 +29,11 @@ internal class SourceAuthenticator @Inject constructor(
     private val paymentBrowserAuthStarterFactory: (AuthActivityStarterHost) -> PaymentBrowserAuthStarter,
     private val paymentRelayStarterFactory: (AuthActivityStarterHost) -> PaymentRelayStarter,
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
-    private val analyticsRequestFactory: AnalyticsRequestFactory,
+    private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
     @Named(ENABLE_LOGGING) private val enableLogging: Boolean,
     @UIContext private val uiContext: CoroutineContext,
-    @Named(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String
+    @Named(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String,
+    @Named(IS_INSTANT_APP) private val isInstantApp: Boolean
 ) : PaymentAuthenticator<Source> {
 
     override suspend fun authenticate(
@@ -56,7 +58,7 @@ internal class SourceAuthenticator @Inject constructor(
         requestOptions: ApiRequest.Options
     ) = withContext(uiContext) {
         analyticsRequestExecutor.executeAsync(
-            analyticsRequestFactory.createRequest(AnalyticsEvent.AuthSourceRedirect)
+            paymentAnalyticsRequestFactory.createRequest(PaymentAnalyticsEvent.AuthSourceRedirect)
         )
 
         paymentBrowserAuthStarter.start(
@@ -68,7 +70,8 @@ internal class SourceAuthenticator @Inject constructor(
                 returnUrl = source.redirect?.returnUrl,
                 enableLogging = enableLogging,
                 stripeAccountId = requestOptions.stripeAccount,
-                publishableKey = publishableKeyProvider()
+                publishableKey = publishableKeyProvider(),
+                isInstantApp = isInstantApp
             )
         )
     }

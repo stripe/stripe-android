@@ -3,22 +3,22 @@ package com.stripe.android.payments.paymentlauncher
 import android.content.Context
 import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.RestrictTo
+import com.stripe.android.core.injection.ENABLE_LOGGING
+import com.stripe.android.core.injection.IOContext
+import com.stripe.android.core.injection.Injectable
+import com.stripe.android.core.injection.Injector
+import com.stripe.android.core.injection.InjectorKey
+import com.stripe.android.core.injection.UIContext
+import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
-import com.stripe.android.networking.AnalyticsRequestFactory
+import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.core.injection.DaggerPaymentLauncherComponent
-import com.stripe.android.payments.core.injection.ENABLE_LOGGING
-import com.stripe.android.payments.core.injection.IOContext
-import com.stripe.android.payments.core.injection.Injectable
-import com.stripe.android.payments.core.injection.Injector
-import com.stripe.android.payments.core.injection.InjectorKey
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.payments.core.injection.PaymentLauncherComponent
 import com.stripe.android.payments.core.injection.STRIPE_ACCOUNT_ID
-import com.stripe.android.payments.core.injection.UIContext
-import com.stripe.android.payments.core.injection.WeakMapInjectorRegistry
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import javax.inject.Named
@@ -38,7 +38,7 @@ class StripePaymentLauncher @AssistedInject internal constructor(
     @IOContext ioContext: CoroutineContext,
     @UIContext uiContext: CoroutineContext,
     stripeRepository: StripeRepository,
-    analyticsRequestFactory: AnalyticsRequestFactory,
+    paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
     @Named(PRODUCT_USAGE) private val productUsage: Set<String>
 ) : PaymentLauncher, Injector {
     private val paymentLauncherComponent: PaymentLauncherComponent =
@@ -48,14 +48,15 @@ class StripePaymentLauncher @AssistedInject internal constructor(
             .ioContext(ioContext)
             .uiContext(uiContext)
             .stripeRepository(stripeRepository)
-            .analyticsRequestFactory(analyticsRequestFactory)
+            .analyticsRequestFactory(paymentAnalyticsRequestFactory)
             .publishableKeyProvider(publishableKeyProvider)
             .stripeAccountIdProvider(stripeAccountIdProvider)
             .productUsage(productUsage)
             .build()
 
     @InjectorKey
-    private val injectorKey: Int = WeakMapInjectorRegistry.nextKey()
+    private val injectorKey: String =
+        WeakMapInjectorRegistry.nextKey(requireNotNull(PaymentLauncher::class.simpleName))
 
     init {
         WeakMapInjectorRegistry.register(this, injectorKey)

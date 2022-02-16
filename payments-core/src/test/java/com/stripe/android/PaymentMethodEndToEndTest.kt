@@ -3,18 +3,18 @@ package com.stripe.android
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.exception.InvalidRequestException
+import com.stripe.android.core.exception.InvalidRequestException
+import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.networking.ApiRequest
 import com.stripe.android.networking.StripeApiRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.TestCoroutineDispatcher
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.runTest
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertFailsWith
 
@@ -22,12 +22,7 @@ import kotlin.test.assertFailsWith
 @RunWith(RobolectricTestRunner::class)
 internal class PaymentMethodEndToEndTest {
     private val context = ApplicationProvider.getApplicationContext<Context>()
-    private val testDispatcher = TestCoroutineDispatcher()
-
-    @AfterTest
-    fun cleanup() {
-        testDispatcher.cleanupTestCoroutines()
-    }
+    private val testDispatcher = UnconfinedTestDispatcher()
 
     @Test
     fun createPaymentMethod_withBacsDebit_shouldCreateObject() {
@@ -225,7 +220,7 @@ internal class PaymentMethodEndToEndTest {
     }
 
     @Test
-    fun createPaymentMethod_withGrabPay_shouldCreateObject() = testDispatcher.runBlockingTest {
+    fun createPaymentMethod_withGrabPay_shouldCreateObject() = runTest {
         val repository = StripeApiRepository(
             context,
             { ApiKeyFixtures.GRABPAY_PUBLISHABLE_KEY },
@@ -242,7 +237,7 @@ internal class PaymentMethodEndToEndTest {
     }
 
     @Test
-    fun `createPaymentMethod() with PayPal PaymentMethod should create expected object`() = testDispatcher.runBlockingTest {
+    fun `createPaymentMethod() with PayPal PaymentMethod should create expected object`() = runTest {
         val paymentMethod = StripeApiRepository(
             context,
             { ApiKeyFixtures.PAYPAL_PUBLISHABLE_KEY },
@@ -337,5 +332,48 @@ internal class PaymentMethodEndToEndTest {
                 .createPaymentMethodSynchronous(params)
         assertThat(paymentMethod?.type)
             .isEqualTo(PaymentMethod.Type.WeChatPay)
+    }
+
+    @Test
+    fun createPaymentMethod_withKlarna_shouldCreateObject() {
+        val missingAddressException = assertFailsWith<InvalidRequestException>(
+            "Address is required to create a klarna payment method"
+        ) {
+            val params = PaymentMethodCreateParams.createKlarna(
+                billingDetails =
+                PaymentMethodCreateParamsFixtures.BILLING_DETAILS.copy(address = null)
+            )
+            Stripe(context, ApiKeyFixtures.KLARNA_PUBLISHABLE_KEY)
+                .createPaymentMethodSynchronous(params)
+        }
+
+        assertThat(missingAddressException.message)
+            .isEqualTo("You must provide `billing_details[address][country]` to use Klarna.")
+
+        val missingCountryException = assertFailsWith<InvalidRequestException>(
+            "Country is required to create a klarna payment method"
+        ) {
+            val address = Address(country = null)
+            val params = PaymentMethodCreateParams.createKlarna(
+                billingDetails =
+                PaymentMethodCreateParamsFixtures.BILLING_DETAILS.copy(address = address)
+            )
+
+            Stripe(context, ApiKeyFixtures.KLARNA_PUBLISHABLE_KEY)
+                .createPaymentMethodSynchronous(params)
+        }
+
+        assertThat(missingCountryException.message)
+            .isEqualTo("You must provide `billing_details[address][country]` to use Klarna.")
+
+        val params = PaymentMethodCreateParams.createKlarna(
+            billingDetails = PaymentMethodCreateParamsFixtures.BILLING_DETAILS.copy()
+        )
+
+        val paymentMethod =
+            Stripe(context, ApiKeyFixtures.KLARNA_PUBLISHABLE_KEY)
+                .createPaymentMethodSynchronous(params)
+
+        assertThat(paymentMethod?.type).isEqualTo(PaymentMethod.Type.Klarna)
     }
 }

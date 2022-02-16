@@ -29,9 +29,13 @@ import com.stripe.android.view.CardInputWidget.Companion.LOGGING_TOKEN
 import com.stripe.android.view.CardInputWidget.Companion.shouldIconShowBrand
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.TestCoroutineDispatcher
+import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import org.junit.runner.RunWith
+import org.mockito.kotlin.any
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.times
+import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
 import java.util.Calendar
 import kotlin.test.AfterTest
@@ -41,7 +45,7 @@ import kotlin.test.Test
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
 internal class CardInputWidgetTest {
-    private val testDispatcher = TestCoroutineDispatcher()
+    private val testDispatcher = StandardTestDispatcher()
 
     private val context: Context = ApplicationProvider.getApplicationContext()
     private val activityScenarioFactory = ActivityScenarioFactory(context)
@@ -96,7 +100,6 @@ internal class CardInputWidgetTest {
     @AfterTest
     fun cleanup() {
         Dispatchers.resetMain()
-        testDispatcher.cleanupTestCoroutines()
     }
 
     private fun createCardInputWidget(activity: Activity): CardInputWidget {
@@ -808,14 +811,14 @@ internal class CardInputWidgetTest {
                     dateWidth = 50,
                     dateCvcSeparation = 82,
                     cvcWidth = 30,
-                    cvcPostalCodeSeparation = 0,
+                    cvcPostalCodeSeparation = 100,
                     postalCodeWidth = 100,
                     cvcStartPosition = 330,
                     dateEndTouchBufferLimit = 110,
                     cardTouchBufferLimit = 66,
                     dateStartPosition = 198,
-                    cvcEndTouchBufferLimit = 120,
-                    postalCodeStartPosition = 360
+                    cvcEndTouchBufferLimit = 153,
+                    postalCodeStartPosition = 460
                 )
             )
     }
@@ -854,7 +857,7 @@ internal class CardInputWidgetTest {
         cardInputWidget.postalCodeEnabled = true
 
         // Moving to the end with an actual Visa number does the same as moving when empty.
-        // |(peek==40)--(space==98)--(date==50)--(space==82)--(cvc==30)--(space==0)--(postal==100)|
+        // |(peek==40)--(space==98)--(date==50)--(space==82)--(cvc==30)--(space==100)--(postal==100)|
         updateCardNumberAndIdle(VISA_WITH_SPACES)
 
         assertThat(cardInputWidget.placement)
@@ -868,14 +871,14 @@ internal class CardInputWidgetTest {
                     dateWidth = 50,
                     dateCvcSeparation = 82,
                     cvcWidth = 30,
-                    cvcPostalCodeSeparation = 0,
+                    cvcPostalCodeSeparation = 100,
                     postalCodeWidth = 100,
                     cvcStartPosition = 330,
-                    cvcEndTouchBufferLimit = 120,
+                    cvcEndTouchBufferLimit = 153,
                     dateEndTouchBufferLimit = 110,
                     cardTouchBufferLimit = 66,
                     dateStartPosition = 198,
-                    postalCodeStartPosition = 360
+                    postalCodeStartPosition = 460
                 )
             )
     }
@@ -914,7 +917,7 @@ internal class CardInputWidgetTest {
         cardInputWidget.postalCodeEnabled = true
 
         // Moving to the end with an AmEx number has a larger peek and cvc size.
-        // |(peek==50)--(space==88)--(date==50)--(space==72)--(cvc==40)--(space==0)--(postal==100)|
+        // |(peek==50)--(space==88)--(date==50)--(space==72)--(cvc==40)--(space==100)--(postal==100)|
         updateCardNumberAndIdle(AMEX_WITH_SPACES)
 
         assertThat(cardInputWidget.placement)
@@ -928,14 +931,14 @@ internal class CardInputWidgetTest {
                     dateWidth = 50,
                     dateCvcSeparation = 72,
                     cvcWidth = 40,
-                    cvcPostalCodeSeparation = 0,
+                    cvcPostalCodeSeparation = 100,
                     postalCodeWidth = 100,
                     cvcStartPosition = 320,
-                    cvcEndTouchBufferLimit = 120,
+                    cvcEndTouchBufferLimit = 153,
                     dateEndTouchBufferLimit = 106,
                     cardTouchBufferLimit = 66,
                     dateStartPosition = 198,
-                    postalCodeStartPosition = 360
+                    postalCodeStartPosition = 460
                 )
             )
     }
@@ -974,7 +977,7 @@ internal class CardInputWidgetTest {
         cardInputWidget.postalCodeEnabled = true
 
         // When we move for a Diner's club card, the peek text is shorter, so we expect:
-        // |(peek==20)--(space==205)--(date==50)--(space==195)--(cvc==30)--(space==0)--(postal==100)|
+        // |(peek==20)--(space==205)--(date==50)--(space==195)--(cvc==30)--(space==100)--(postal==100)|
         updateCardNumberAndIdle(DINERS_CLUB_14_WITH_SPACES)
 
         assertThat(cardInputWidget.placement)
@@ -988,14 +991,14 @@ internal class CardInputWidgetTest {
                     dateWidth = 50,
                     dateCvcSeparation = 82,
                     cvcWidth = 30,
-                    cvcPostalCodeSeparation = 0,
+                    cvcPostalCodeSeparation = 100,
                     postalCodeWidth = 100,
                     cvcStartPosition = 330,
                     dateEndTouchBufferLimit = 110,
                     cardTouchBufferLimit = 66,
                     dateStartPosition = 198,
-                    cvcEndTouchBufferLimit = 120,
-                    postalCodeStartPosition = 360
+                    cvcEndTouchBufferLimit = 153,
+                    postalCodeStartPosition = 460
                 )
             )
     }
@@ -1297,18 +1300,18 @@ internal class CardInputWidgetTest {
         idleLooper()
 
         assertThat(cardInputWidget.requiredFields)
-            .isEqualTo(cardInputWidget.currentFields)
+            .isEqualTo(cardInputWidget.currentFields.toHashSet())
     }
 
     @Test
     fun currentFields_notEquals_requiredFields_withPostalCodeEnabled() {
         cardInputWidget.postalCodeEnabled = true
         assertThat(cardInputWidget.requiredFields)
-            .isNotEqualTo(cardInputWidget.currentFields)
+            .isNotEqualTo(cardInputWidget.currentFields.toHashSet())
     }
 
     @Test
-    fun testCardValidCallback() {
+    fun testCardValidCallback_withPostalCodeDefaultDisabled() {
         var currentIsValid = false
         var currentInvalidFields = emptySet<CardValidCallback.Fields>()
         cardInputWidget.setCardValidCallback { isValid, invalidFields ->
@@ -1360,6 +1363,60 @@ internal class CardInputWidgetTest {
             .isFalse()
         assertThat(currentInvalidFields)
             .containsExactly(CardValidCallback.Fields.Cvc)
+    }
+
+    @Test
+    fun testCardValidCallback_withPostalCodeEnabledNotRequired() {
+        var currentIsValid = false
+        var currentInvalidFields = emptySet<CardValidCallback.Fields>()
+        cardInputWidget.postalCodeEnabled = true
+        cardInputWidget.setCardValidCallback { isValid, invalidFields ->
+            currentIsValid = isValid
+            currentInvalidFields = invalidFields
+        }
+        assertThat(currentIsValid)
+            .isFalse()
+        assertThat(currentInvalidFields)
+            .containsExactly(
+                CardValidCallback.Fields.Number,
+                CardValidCallback.Fields.Expiry,
+                CardValidCallback.Fields.Cvc
+            )
+    }
+
+    @Test
+    fun testCardValidCallback_withPostalCodeEnabledAndRequired() {
+        var currentIsValid = false
+        var currentInvalidFields = emptySet<CardValidCallback.Fields>()
+        cardInputWidget.postalCodeEnabled = true
+        cardInputWidget.usZipCodeRequired = true
+        cardInputWidget.setCardValidCallback { isValid, invalidFields ->
+            currentIsValid = isValid
+            currentInvalidFields = invalidFields
+        }
+        assertThat(currentIsValid)
+            .isFalse()
+        assertThat(currentInvalidFields)
+            .containsExactly(
+                CardValidCallback.Fields.Number,
+                CardValidCallback.Fields.Expiry,
+                CardValidCallback.Fields.Cvc,
+                CardValidCallback.Fields.Postal
+            )
+
+        cardInputWidget.setCardNumber(VISA_NO_SPACES)
+        expiryEditText.setText("1250")
+        cvcEditText.setText("123")
+        assertThat(currentIsValid).isFalse()
+        assertThat(currentInvalidFields).containsExactly(CardValidCallback.Fields.Postal)
+
+        postalCodeEditText.setText("12345")
+        assertThat(currentIsValid).isTrue()
+        assertThat(currentInvalidFields).isEmpty()
+
+        postalCodeEditText.setText("123")
+        assertThat(currentIsValid).isFalse()
+        assertThat(currentInvalidFields).containsExactly(CardValidCallback.Fields.Postal)
     }
 
     @Test
@@ -1472,6 +1529,48 @@ internal class CardInputWidgetTest {
     }
 
     @Test
+    fun usZipCodeRequired_whenFalse_shouldNotCallOnPostalCodeComplete() {
+        cardInputWidget.usZipCodeRequired = false
+        postalCodeEditText.setText(POSTAL_CODE_VALUE)
+        assertThat(cardInputListener.onPostalCodeCompleteCalls).isEqualTo(0)
+    }
+
+    @Test
+    fun usZipCodeRequired_whenTrue_withValidZip_shouldCallOnPostalCodeComplete() {
+        cardInputWidget.usZipCodeRequired = true
+        postalCodeEditText.setText(POSTAL_CODE_VALUE)
+        assertThat(cardInputListener.onPostalCodeCompleteCalls).isEqualTo(1)
+    }
+
+    @Test
+    fun postalCodeEnabled_whenFalse_shouldNotCallOnPostalCodeComplete() {
+        cardInputWidget.postalCodeEnabled = false
+        postalCodeEditText.setText("123")
+        assertThat(cardInputListener.onPostalCodeCompleteCalls).isEqualTo(0)
+    }
+
+    @Test
+    fun usZipCodeRequired_whenTrue_withInvalidZip_shouldNotCallOnPostalCodeComplete() {
+        cardInputWidget.usZipCodeRequired = true
+        postalCodeEditText.setText("1234")
+        assertThat(cardInputListener.onPostalCodeCompleteCalls).isEqualTo(0)
+    }
+
+    @Test
+    fun postalCode_whenTrue_withNonEmptyZip_shouldCallOnPostalCodeComplete() {
+        cardInputWidget.postalCodeRequired = true
+        postalCodeEditText.setText("1234")
+        assertThat(cardInputListener.onPostalCodeCompleteCalls).isEqualTo(1)
+    }
+
+    @Test
+    fun postalCode_whenTrue_withEmptyZip_shouldNotCallOnPostalCodeComplete() {
+        cardInputWidget.postalCodeRequired = true
+        postalCodeEditText.setText("")
+        assertThat(cardInputListener.onPostalCodeCompleteCalls).isEqualTo(0)
+    }
+
+    @Test
     fun `setCvcLabel is not reset when card number entered`() {
         cardInputWidget.setCvcLabel("123")
         assertThat(cardInputWidget.cvcEditText.hint)
@@ -1480,7 +1579,8 @@ internal class CardInputWidgetTest {
 
     @Test
     fun `Verify on postal code focus change listeners trigger the callback`() {
-        cardInputWidget.postalCodeEditText.getParentOnFocusChangeListener().onFocusChange(cardInputWidget.postalCodeEditText, true)
+        cardInputWidget.postalCodeEditText.getParentOnFocusChangeListener()
+            .onFocusChange(cardInputWidget.postalCodeEditText, true)
 
         assertThat(cardInputListener.focusedFields)
             .contains(CardInputListener.FocusField.PostalCode)
@@ -1488,7 +1588,8 @@ internal class CardInputWidgetTest {
 
     @Test
     fun `Verify on cvc focus change listeners trigger the callback`() {
-        cardInputWidget.cvcEditText.getParentOnFocusChangeListener().onFocusChange(cardInputWidget.cvcEditText, true)
+        cardInputWidget.cvcEditText.getParentOnFocusChangeListener()
+            .onFocusChange(cardInputWidget.cvcEditText, true)
 
         assertThat(cardInputListener.focusedFields)
             .contains(CardInputListener.FocusField.Cvc)
@@ -1496,7 +1597,8 @@ internal class CardInputWidgetTest {
 
     @Test
     fun `Verify on expiration date focus change listeners trigger the callback`() {
-        cardInputWidget.expiryDateEditText.getParentOnFocusChangeListener().onFocusChange(cardInputWidget.expiryDateEditText, true)
+        cardInputWidget.expiryDateEditText.getParentOnFocusChangeListener()
+            .onFocusChange(cardInputWidget.expiryDateEditText, true)
 
         assertThat(cardInputListener.focusedFields)
             .contains(CardInputListener.FocusField.ExpiryDate)
@@ -1504,10 +1606,51 @@ internal class CardInputWidgetTest {
 
     @Test
     fun `Verify on card number focus change listeners trigger the callback`() {
-        cardInputWidget.cardNumberEditText.getParentOnFocusChangeListener().onFocusChange(cardInputWidget.cardNumberEditText, true)
+        cardInputWidget.cardNumberEditText.getParentOnFocusChangeListener()
+            .onFocusChange(cardInputWidget.cardNumberEditText, true)
 
         assertThat(cardInputListener.focusedFields)
             .contains(CardInputListener.FocusField.CardNumber)
+    }
+
+    @Test
+    fun `Requiring postal code after setting CardValidCallback should still notify of change`() {
+        val callback = mock<CardValidCallback>()
+        cardInputWidget.setCardValidCallback(callback)
+
+        cardInputWidget.postalCodeRequired = true
+        postalCodeEditText.setText("54321")
+
+        verify(callback, times(2)).onInputChanged(any(), any())
+    }
+
+    @Test
+    fun `Removing postal code requirement removes CardValidCallback notifications for the field`() {
+        val callback = mock<CardValidCallback>()
+        cardInputWidget.postalCodeRequired = true
+        cardInputWidget.setCardValidCallback(callback)
+        cardInputWidget.postalCodeRequired = false
+
+        postalCodeEditText.setText("54321")
+
+        verify(callback, times(1)).onInputChanged(any(), any())
+    }
+
+    @Test
+    fun `Setting postal code requirements multiple times only sets callback once`() {
+        val callback = mock<CardValidCallback>()
+        cardInputWidget.setCardValidCallback(callback)
+
+        cardInputWidget.postalCodeRequired = true
+        cardInputWidget.postalCodeEnabled = true
+        cardInputWidget.postalCodeEnabled = false
+        cardInputWidget.postalCodeRequired = false
+        cardInputWidget.postalCodeRequired = true
+        cardInputWidget.postalCodeEnabled = true
+        postalCodeEditText.setText("54321")
+
+        // Called only when the callback is set and when the text is set.
+        verify(callback, times(2)).onInputChanged(any(), any())
     }
 
     private fun updateCardNumberAndIdle(cardNumber: String) {
@@ -1520,6 +1663,7 @@ internal class CardInputWidgetTest {
         var cardCompleteCalls = 0
         var expirationCompleteCalls = 0
         var cvcCompleteCalls = 0
+        var onPostalCodeCompleteCalls = 0
 
         override fun onFocusChange(focusField: CardInputListener.FocusField) {
             focusedFields.add(focusField)
@@ -1535,6 +1679,10 @@ internal class CardInputWidgetTest {
 
         override fun onCvcComplete() {
             cvcCompleteCalls++
+        }
+
+        override fun onPostalCodeComplete() {
+            onPostalCodeCompleteCalls++
         }
     }
 

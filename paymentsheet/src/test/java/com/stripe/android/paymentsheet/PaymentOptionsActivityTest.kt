@@ -1,36 +1,42 @@
 package com.stripe.android.paymentsheet
 
+import android.content.Context
 import android.content.Intent
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
+import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
-import com.stripe.android.Logger
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.R
-import com.stripe.android.model.PaymentIntentFixtures
+import com.stripe.android.core.Logger
+import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.PaymentOptionsViewModel.TransitionTarget
+import com.stripe.android.paymentsheet.PaymentSheetFixtures.PAYMENT_OPTIONS_CONTRACT_ARGS
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.databinding.PrimaryButtonBinding
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
+import com.stripe.android.ui.core.address.AddressFieldElementRepository
+import com.stripe.android.ui.core.elements.BankRepository
+import com.stripe.android.ui.core.forms.resources.StaticResourceRepository
 import com.stripe.android.utils.InjectableActivityScenario
 import com.stripe.android.utils.TestUtils.idleLooper
 import com.stripe.android.utils.TestUtils.viewModelFactoryFor
 import com.stripe.android.utils.injectableActivityScenario
 import com.stripe.android.view.ActivityStarter
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.TestCoroutineDispatcher
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.times
 import org.robolectric.RobolectricTestRunner
-import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 
 @ExperimentalCoroutinesApi
@@ -39,7 +45,7 @@ class PaymentOptionsActivityTest {
     @get:Rule
     val rule = InstantTaskExecutorRule()
 
-    private val testDispatcher = TestCoroutineDispatcher()
+    private val testDispatcher = UnconfinedTestDispatcher()
 
     private val eventReporter = mock<EventReporter>()
     private val viewModel = createViewModel()
@@ -50,11 +56,6 @@ class PaymentOptionsActivityTest {
             ApplicationProvider.getApplicationContext(),
             ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
         )
-    }
-
-    @AfterTest
-    fun cleanup() {
-        testDispatcher.cleanupTestCoroutines()
     }
 
     @Test
@@ -98,7 +99,7 @@ class PaymentOptionsActivityTest {
     }
 
     @Test
-    fun `AddButton should be hidden when showing payment options`() {
+    fun `ContinueButton should be hidden when showing payment options`() {
         val scenario = activityScenario()
         scenario.launch(
             createIntent(
@@ -108,27 +109,27 @@ class PaymentOptionsActivityTest {
             )
         ).use {
             it.onActivity { activity ->
-                assertThat(activity.viewBinding.addButton.isVisible)
+                assertThat(activity.viewBinding.continueButton.isVisible)
                     .isFalse()
             }
         }
     }
 
     @Test
-    fun `AddButton should be visible when showing add payment method form`() {
+    fun `ContinueButton should be visible when showing add payment method form`() {
         val scenario = activityScenario()
         scenario.launch(
             createIntent()
         ).use {
             it.onActivity { activity ->
-                assertThat(activity.viewBinding.addButton.isVisible)
+                assertThat(activity.viewBinding.continueButton.isVisible)
                     .isTrue()
             }
         }
     }
 
     @Test
-    fun `AddButton should be hidden when returning to payment options`() {
+    fun `ContinueButton should be hidden when returning to payment options`() {
         val scenario = activityScenario()
         scenario.launch(
             createIntent(
@@ -138,7 +139,7 @@ class PaymentOptionsActivityTest {
             )
         ).use {
             it.onActivity { activity ->
-                assertThat(activity.viewBinding.addButton.isVisible)
+                assertThat(activity.viewBinding.continueButton.isVisible)
                     .isFalse()
 
                 // Navigate to "Add Payment Method" fragment
@@ -150,14 +151,14 @@ class PaymentOptionsActivityTest {
                 }
                 idleLooper()
 
-                assertThat(activity.viewBinding.addButton.isVisible)
+                assertThat(activity.viewBinding.continueButton.isVisible)
                     .isTrue()
 
                 // Navigate back to payment options list
                 activity.onBackPressed()
                 idleLooper()
 
-                assertThat(activity.viewBinding.addButton.isVisible)
+                assertThat(activity.viewBinding.continueButton.isVisible)
                     .isFalse()
             }
         }
@@ -172,13 +173,13 @@ class PaymentOptionsActivityTest {
             it.onActivity { activity ->
                 idleLooper()
 
-                val addBinding = PrimaryButtonBinding.bind(activity.viewBinding.addButton)
+                val addBinding = PrimaryButtonBinding.bind(activity.viewBinding.continueButton)
 
                 assertThat(addBinding.confirmedIcon.isVisible)
                     .isFalse()
 
                 assertThat(addBinding.label.text)
-                    .isEqualTo("Add")
+                    .isEqualTo("Continue")
 
                 activity.finish()
             }
@@ -213,7 +214,7 @@ class PaymentOptionsActivityTest {
 
         val viewModel = createViewModel(args)
         val transitionTarget =
-            mutableListOf<BaseSheetViewModel.Event<PaymentOptionsViewModel.TransitionTarget?>>()
+            mutableListOf<BaseSheetViewModel.Event<TransitionTarget?>>()
         viewModel.transition.observeForever {
             transitionTarget.add(it)
         }
@@ -224,7 +225,7 @@ class PaymentOptionsActivityTest {
         ).use {
             idleLooper()
             assertThat(transitionTarget[1].peekContent())
-                .isInstanceOf(PaymentOptionsViewModel.TransitionTarget.SelectSavedPaymentMethod::class.java)
+                .isInstanceOf(TransitionTarget.SelectSavedPaymentMethod::class.java)
         }
     }
 
@@ -290,26 +291,22 @@ class PaymentOptionsActivityTest {
     ): PaymentOptionsViewModel {
         return PaymentOptionsViewModel(
             args = args,
-            prefsRepository = FakePrefsRepository(),
+            prefsRepositoryFactory = { FakePrefsRepository() },
             eventReporter = eventReporter,
             customerRepository = FakeCustomerRepository(),
             workContext = testDispatcher,
             application = ApplicationProvider.getApplicationContext(),
-            logger = Logger.noop()
-        )
-    }
-
-    private companion object {
-        private val PAYMENT_OPTIONS_CONTRACT_ARGS = PaymentOptionContract.Args(
-            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-            paymentMethods = emptyList(),
-            config = PaymentSheetFixtures.CONFIG_GOOGLEPAY,
-            isGooglePayReady = false,
-            newCard = null,
-            statusBarColor = PaymentSheetFixtures.STATUS_BAR_COLOR,
-            injectorKey = 0,
-            enableLogging = false,
-            productUsage = mock()
+            logger = Logger.noop(),
+            injectorKey = DUMMY_INJECTOR_KEY,
+            resourceRepository = StaticResourceRepository(
+                BankRepository(
+                    ApplicationProvider.getApplicationContext<Context>().resources
+                ),
+                AddressFieldElementRepository(
+                    ApplicationProvider.getApplicationContext<Context>().resources
+                )
+            ),
+            savedStateHandle = SavedStateHandle()
         )
     }
 }

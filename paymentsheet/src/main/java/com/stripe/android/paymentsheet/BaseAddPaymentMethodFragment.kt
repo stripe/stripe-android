@@ -7,49 +7,35 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.annotation.VisibleForTesting
 import androidx.appcompat.view.ContextThemeWrapper
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.commit
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.asLiveData
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.stripe.android.model.PaymentIntent
-import com.stripe.android.model.SetupIntent
+import com.stripe.android.core.injection.InjectorKey
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.databinding.FragmentPaymentsheetAddPaymentMethodBinding
-import com.stripe.android.paymentsheet.elements.IdentifierSpec
 import com.stripe.android.paymentsheet.forms.FormFieldValues
-import com.stripe.android.paymentsheet.model.Amount
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
 import com.stripe.android.paymentsheet.paymentdatacollection.CardDataCollectionFragment
 import com.stripe.android.paymentsheet.paymentdatacollection.ComposeFormDataCollectionFragment
 import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.TransformToPaymentMethodCreateParams
-import com.stripe.android.paymentsheet.ui.AddPaymentMethodsFragmentFactory
 import com.stripe.android.paymentsheet.ui.AnimationConstants
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
-import kotlinx.coroutines.ExperimentalCoroutinesApi
+import com.stripe.android.ui.core.Amount
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 
-internal abstract class BaseAddPaymentMethodFragment(
-    private val eventReporter: EventReporter
-) : Fragment() {
+internal abstract class BaseAddPaymentMethodFragment : Fragment() {
     abstract val viewModelFactory: ViewModelProvider.Factory
     abstract val sheetViewModel: BaseSheetViewModel<*>
 
     protected lateinit var addPaymentMethodHeader: TextView
-
-    private lateinit var selectedPaymentMethod: SupportedPaymentMethod
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        // When the fragment is destroyed and recreated, the child fragment is re-instantiated
-        // during onCreate, so the factory must be set before calling super.
-        childFragmentManager.fragmentFactory = AddPaymentMethodsFragmentFactory(
-            sheetViewModel::class.java, viewModelFactory
-        )
-        super.onCreate(savedInstanceState)
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -66,28 +52,36 @@ internal abstract class BaseAddPaymentMethodFragment(
         )
     }
 
-    @ExperimentalCoroutinesApi
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         val viewBinding = FragmentPaymentsheetAddPaymentMethodBinding.bind(view)
         addPaymentMethodHeader = viewBinding.addPaymentMethodHeader
 
-        sheetViewModel.supportedPaymentMethods.observe(viewLifecycleOwner) { paymentMethods ->
-            viewBinding.googlePayDivider.setText(
-                if (paymentMethods.contains(SupportedPaymentMethod.Card) && paymentMethods.size == 1) {
-                    R.string.stripe_paymentsheet_or_pay_with_card
-                } else {
-                    R.string.stripe_paymentsheet_or_pay_using
-                }
-            )
-
-            if (paymentMethods.size > 1) {
-                setupRecyclerView(viewBinding, paymentMethods)
+        val paymentMethods = sheetViewModel.supportedPaymentMethods
+        viewBinding.googlePayDivider.setText(
+            if (paymentMethods.contains(SupportedPaymentMethod.Card) &&
+                paymentMethods.size == 1
+            ) {
+                R.string.stripe_paymentsheet_or_pay_with_card
+            } else {
+                R.string.stripe_paymentsheet_or_pay_using
             }
+        )
 
-            if (paymentMethods.isNotEmpty()) {
-                replacePaymentMethodFragment(paymentMethods[0])
+        val selectedPaymentMethodIndex = paymentMethods.indexOf(
+            sheetViewModel.getAddFragmentSelectedLPM()
+        ).takeUnless { it == -1 } ?: 0
+
+        if (paymentMethods.size > 1) {
+            setupRecyclerView(viewBinding, paymentMethods, selectedPaymentMethodIndex)
+        }
+
+        if (paymentMethods.isNotEmpty()) {
+            // If the activity is destroyed and recreated, then the fragment is already present
+            // and doesn't need to be replaced, only the selected payment method needs to be set
+            if (savedInstanceState == null) {
+                replacePaymentMethodFragment(paymentMethods[selectedPaymentMethodIndex])
             }
         }
 
@@ -95,27 +89,41 @@ internal abstract class BaseAddPaymentMethodFragment(
             (getFragment() as? ComposeFormDataCollectionFragment)?.setProcessing(isProcessing)
         }
 
-        childFragmentManager.addFragmentOnAttachListener { _, fragment ->
-            (fragment as? ComposeFormDataCollectionFragment)?.let { formFragment ->
-                formFragment.formViewModel.completeFormValues.asLiveData()
-                    .observe(viewLifecycleOwner) { formFieldValues ->
-                        sheetViewModel.updateSelection(
-                            transformToPaymentSelection(
-                                formFieldValues,
-                                formFragment.formSpec.paramKey,
-                                selectedPaymentMethod
-                            )
-                        )
-                    }
-            }
+        // If the activity was destroyed and recreated then we need to re-attach the fragment,
+        // as attach will not be called again.
+        childFragmentManager.fragments.forEach { fragment ->
+            attachComposeFragmentViewModel(fragment)
         }
 
-        eventReporter.onShowNewPaymentOptionForm()
+        childFragmentManager.addFragmentOnAttachListener { _, fragment ->
+            attachComposeFragmentViewModel(fragment)
+        }
+
+        sheetViewModel.eventReporter.onShowNewPaymentOptionForm()
+    }
+
+    private fun attachComposeFragmentViewModel(fragment: Fragment) {
+        (fragment as? ComposeFormDataCollectionFragment)?.let { formFragment ->
+            // Need to access the formViewModel so it is constructed.
+            val formViewModel = formFragment.formViewModel
+            viewLifecycleOwner.lifecycleScope.launch {
+                formViewModel.completeFormValues.collect { formFieldValues ->
+                    sheetViewModel.updateSelection(
+                        transformToPaymentSelection(
+                            formFieldValues,
+                            formFragment.paramKeySpec,
+                            sheetViewModel.getAddFragmentSelectedLPM()
+                        )
+                    )
+                }
+            }
+        }
     }
 
     private fun setupRecyclerView(
         viewBinding: FragmentPaymentsheetAddPaymentMethodBinding,
-        paymentMethods: List<SupportedPaymentMethod>
+        paymentMethods: List<SupportedPaymentMethod>,
+        selectedItemPosition: Int
     ) {
         viewBinding.paymentMethodsRecycler.isVisible = true
         // The default item animator conflicts with `animateLayoutChanges`, causing a crash when
@@ -138,6 +146,7 @@ internal abstract class BaseAddPaymentMethodFragment(
 
         val adapter = AddPaymentMethodsAdapter(
             paymentMethods,
+            selectedItemPosition,
             ::onPaymentMethodSelected
         ).also {
             viewBinding.paymentMethodsRecycler.adapter = it
@@ -151,22 +160,26 @@ internal abstract class BaseAddPaymentMethodFragment(
 
     @VisibleForTesting
     internal fun onPaymentMethodSelected(paymentMethod: SupportedPaymentMethod) {
+        // hide the soft keyboard.
+        ViewCompat.getWindowInsetsController(requireView())
+            ?.hide(WindowInsetsCompat.Type.ime())
+
         replacePaymentMethodFragment(paymentMethod)
     }
 
     private fun replacePaymentMethodFragment(paymentMethod: SupportedPaymentMethod) {
-        selectedPaymentMethod = paymentMethod
+        sheetViewModel.setAddFragmentSelectedLPM(paymentMethod)
 
         val args = requireArguments()
         args.putParcelable(
             ComposeFormDataCollectionFragment.EXTRA_CONFIG,
             getFormArguments(
-                hasCustomer = sheetViewModel.customerConfig != null,
                 stripeIntent = requireNotNull(sheetViewModel.stripeIntent.value),
-                supportedPaymentMethodName = paymentMethod.name,
+                config = sheetViewModel.config,
+                showPaymentMethod = paymentMethod,
                 merchantName = sheetViewModel.merchantName,
                 amount = sheetViewModel.amount.value,
-                billingAddress = sheetViewModel.config?.defaultBillingDetails
+                injectorKey = sheetViewModel.injectorKey
             )
         )
 
@@ -189,10 +202,15 @@ internal abstract class BaseAddPaymentMethodFragment(
         childFragmentManager.findFragmentById(R.id.payment_method_fragment_container)
 
     companion object {
+
         private fun fragmentForPaymentMethod(paymentMethod: SupportedPaymentMethod) =
             when (paymentMethod) {
-                SupportedPaymentMethod.Card -> CardDataCollectionFragment::class.java
-                else -> ComposeFormDataCollectionFragment::class.java
+                SupportedPaymentMethod.Card -> {
+                    CardDataCollectionFragment::class.java
+                }
+                else -> {
+                    ComposeFormDataCollectionFragment::class.java
+                }
             }
 
         private val transformToPaymentMethodCreateParams = TransformToPaymentMethodCreateParams()
@@ -209,79 +227,31 @@ internal abstract class BaseAddPaymentMethodFragment(
                         selectedPaymentMethodResources.displayNameResource,
                         selectedPaymentMethodResources.iconResource,
                         this,
-                        formFieldValues
-                            .fieldValuePairs[IdentifierSpec.SaveForFutureUse]
-                            ?.value
-                            .toBoolean()
+                        customerRequestedSave = formFieldValues.userRequestedReuse
                     )
                 }
         }
 
         @VisibleForTesting
         internal fun getFormArguments(
-            hasCustomer: Boolean,
-            supportedPaymentMethodName: String,
+            showPaymentMethod: SupportedPaymentMethod,
             stripeIntent: StripeIntent,
+            config: PaymentSheet.Configuration?,
             merchantName: String,
             amount: Amount? = null,
-            billingAddress: PaymentSheet.BillingDetails? = null
+            @InjectorKey injectorKey: String
         ): FormFragmentArguments {
-            // Has effect of setting off session on PIs (not SIs) and also impacts reopening
-            // the card
-            var saveForFutureUseValue = true
-            // This will impact the setting of the off_session on confirm
-            var saveForFutureUseVisible = true
 
-            val supportedPaymentMethod =
-                SupportedPaymentMethod.fromCode(supportedPaymentMethodName)
-
-            val isSetupIntent = stripeIntent is SetupIntent
-            val isPaymentIntentOffSession = (stripeIntent as? PaymentIntent)
-                ?.setupFutureUsage == StripeIntent.Usage.OffSession
-            if (isSetupIntent || isPaymentIntentOffSession) {
-                saveForFutureUseVisible = false
-                saveForFutureUseValue = true
-            } else if (stripeIntent is PaymentIntent &&
-                (!hasCustomer || (supportedPaymentMethod?.requiresMandate == true))
-            ) {
-                // If paymentMethodTypes contains payment method that does not support
-                // save for future should be false and unselected until future fix
-                saveForFutureUseValue = false
-                saveForFutureUseVisible = false
-            } else if (stripeIntent is PaymentIntent) {
-                // If the intent includes any payment method types that don't support save remove
-                // checkbox regardless of the payment method until future fix
-                stripeIntent.paymentMethodTypes.forEach {
-                    if (SupportedPaymentMethod.fromCode(it)?.userRequestedConfirmSaveForFutureSupported == false) {
-                        saveForFutureUseValue = false
-                        saveForFutureUseVisible = false
-                    }
-                }
-            }
+            val layoutFormDescriptor = showPaymentMethod.getPMAddForm(stripeIntent, config)
 
             return FormFragmentArguments(
-                supportedPaymentMethodName = supportedPaymentMethodName,
-                saveForFutureUseInitialVisibility = saveForFutureUseVisible,
-                saveForFutureUseInitialValue = saveForFutureUseValue,
+                paymentMethod = showPaymentMethod,
+                showCheckbox = layoutFormDescriptor.showCheckbox,
+                showCheckboxControlledFields = layoutFormDescriptor.showCheckboxControlledFields,
                 merchantName = merchantName,
                 amount = amount,
-                billingDetails = billingAddress?.let {
-                    PaymentSheet.BillingDetails(
-                        name = billingAddress.name,
-                        email = billingAddress.email,
-                        phone = billingAddress.phone,
-                        address = billingAddress.address?.let {
-                            PaymentSheet.Address(
-                                city = it.city,
-                                state = it.state,
-                                country = it.country,
-                                line1 = it.line1,
-                                line2 = it.line2,
-                                postalCode = it.postalCode
-                            )
-                        }
-                    )
-                }
+                billingDetails = config?.defaultBillingDetails,
+                injectorKey = injectorKey
             )
         }
     }

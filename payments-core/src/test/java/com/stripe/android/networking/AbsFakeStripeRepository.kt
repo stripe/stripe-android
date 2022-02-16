@@ -1,12 +1,13 @@
 package com.stripe.android.networking
 
 import com.stripe.android.cards.Bin
-import com.stripe.android.exception.APIException
+import com.stripe.android.core.exception.APIException
 import com.stripe.android.model.BankStatuses
 import com.stripe.android.model.BinFixtures
 import com.stripe.android.model.CardMetadata
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
+import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.Customer
 import com.stripe.android.model.ListPaymentMethodsParams
 import com.stripe.android.model.PaymentIntent
@@ -49,6 +50,13 @@ internal abstract class AbsFakeStripeRepository : StripeRepository() {
         clientSecret: String,
         options: ApiRequest.Options,
         expandFields: List<String>
+    ): PaymentIntent? {
+        return null
+    }
+
+    override suspend fun refreshPaymentIntent(
+        clientSecret: String,
+        options: ApiRequest.Options
     ): PaymentIntent? {
         return null
     }
@@ -267,4 +275,11 @@ internal abstract class AbsFakeStripeRepository : StripeRepository() {
     override suspend fun createRadarSession(
         requestOptions: ApiRequest.Options
     ) = RadarSession("rse_abc123")
+
+    override suspend fun lookupConsumerSession(
+        email: String,
+        requestOptions: ApiRequest.Options
+    ): ConsumerSessionLookup? {
+        return null
+    }
 }

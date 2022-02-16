@@ -1,7 +1,11 @@
 package com.stripe.android.payments.core.injection
 
 import android.content.Context
-import com.stripe.android.networking.AnalyticsRequestFactory
+import com.stripe.android.core.injection.ENABLE_LOGGING
+import com.stripe.android.core.injection.IOContext
+import com.stripe.android.core.injection.LoggingModule
+import com.stripe.android.core.injection.UIContext
+import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.paymentlauncher.PaymentLauncherViewModel
 import dagger.BindsInstance
@@ -13,7 +17,8 @@ import kotlin.coroutines.CoroutineContext
 @Singleton
 @Component(
     modules = [
-        PaymentLauncherModule::class
+        PaymentLauncherModule::class,
+        LoggingModule::class
     ]
 )
 internal interface PaymentLauncherComponent {
@@ -37,7 +42,7 @@ internal interface PaymentLauncherComponent {
         fun stripeRepository(stripeRepository: StripeRepository): Builder
 
         @BindsInstance
-        fun analyticsRequestFactory(analyticsRequestFactory: AnalyticsRequestFactory): Builder
+        fun analyticsRequestFactory(paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory): Builder
 
         @BindsInstance
         fun publishableKeyProvider(@Named(PUBLISHABLE_KEY) publishableKeyProvider: () -> String): Builder

@@ -1,129 +1,61 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Label for input requesting address line 2, used for international addresses -->
-    <string name="address_label_address_line2" tools:ignore="MissingTranslation">Address line 2</string>
-    <!-- Used to describe address in United Arab Emirates -->
-    <string name="address_label_ae_emirate" tools:ignore="MissingTranslation">Emirate</string>
-    <!-- Label of an address field -->
-    <string name="address_label_au_suburb_or_city" tools:ignore="MissingTranslation">Suburb or city</string>
-    <!-- Label of an address field -->
-    <string name="address_label_bb_jm_parish" tools:ignore="MissingTranslation">Parish</string>
-    <!-- Used to describe a field of an address -->
-    <string name="address_label_cedex" tools:ignore="MissingTranslation">Cedex</string>
-    <!-- Label of an address field -->
-    <string name="address_label_department" tools:ignore="MissingTranslation">Department</string>
-    <!-- Label for the district field on an address form -->
-    <string name="address_label_district" tools:ignore="MissingTranslation">District</string>
-    <!-- Label of an address field in hk -->
-    <string name="address_label_hk_area" tools:ignore="MissingTranslation">Area</string>
-    <!-- Label of an address field -->
-    <string name="address_label_ie_eircode" tools:ignore="MissingTranslation">Eircode</string>
-    <!-- Used to describe an address field in Ireland -->
-    <string name="address_label_ie_townland" tools:ignore="MissingTranslation">Townland</string>
-    <!-- Used to describe postal code in India -->
-    <string name="address_label_in_pin" tools:ignore="MissingTranslation">Pin</string>
-    <!-- Used to describe part of an address -->
-    <string name="address_label_island" tools:ignore="MissingTranslation">Island</string>
-    <!-- Label of an address field -->
-    <string name="address_label_jp_prefecture" tools:ignore="MissingTranslation">Prefecture</string>
-    <!-- Label of an address field -->
-    <string name="address_label_kr_do_si" tools:ignore="MissingTranslation">Do Si</string>
-    <!-- Used to describe a field of an address -->
-    <string name="address_label_neighborhood" tools:ignore="MissingTranslation">Neighborhood</string>
-    <!-- Label of an address field -->
-    <string name="address_label_oblast" tools:ignore="MissingTranslation">Oblast</string>
-    <!-- Used to describe a field of an address -->
-    <string name="address_label_post_town" tools:ignore="MissingTranslation">Post or Town</string>
-    <!-- Label of an address field -->
-    <string name="address_label_suburb" tools:ignore="MissingTranslation">Suburb</string>
-    <!-- Used to describe an address field. -->
-    <string name="address_label_village_township" tools:ignore="MissingTranslation">Village or Township</string>
-    <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
-    <string name="bank_account_ending_in" tools:ignore="MissingTranslation">Remove bank account ending in %s</string>
-    <!-- Billing address section title for card form entry. -->
-    <string name="billing_details">Billing address</string>
-    <!-- Used when a required field is blank and submit is clicked. -->
-    <string name="blank_and_required" tools:ignore="MissingTranslation">This field cannot be blank.</string>
-    <!-- Button title to cancel action in an alert -->
-    <string name="cancel">Cancel</string>
-    <!-- Done button title -->
-    <string name="done">Done</string>
-    <!-- Button title to enter editing mode -->
-    <string name="edit">Edit</string>
-    <!-- Caption for Email field on address form -->
-    <string name="email">Email</string>
-    <!-- Error message when email is invalid -->
-    <string name="email_is_invalid">Your email is invalid.</string>
-    <!-- An error message displayed when the customer's IBAN is incomplete. -->
-    <string name="iban_incomplete">The IBAN you entered is incomplete.</string>
-    <!-- An error message displayed when the customer's iban is invalid. -->
-    <string name="iban_invalid">The IBAN you entered is invalid.</string>
-    <!-- An error message displayed when the IBAN country code is not supported. -->
-    <string name="iban_invalid_country">The IBAN you entered is invalid, \"%s\" is not a supported country code.</string>
-    <!-- An error message displayed when the IBAN does not start with a two-letter country code. -->
-    <string name="iban_invalid_start">Your IBAN should start with a two-letter country code.</string>
-    <!-- Button title for confirmation alert to remove a saved payment method
-     Text for remove button -->
-    <string name="remove">Remove</string>
-    <!-- Generic error message shown when payment cannot be processed. -->
-    <string name="stripe_failure_connection_error">We are experiencing issues connecting to our payments provider. Please check your internet connection and try again.</string>
-    <!-- When an internal error is reported when a google pay payment is started. -->
-    <string name="stripe_google_pay_error_internal">An internal error occurred.</string>
-    <string name="stripe_paymentsheet_add_button_label">Add</string>
-    <!-- Text for a button that, when tapped, displays another screen where the customer can add payment method details -->
-    <string name="stripe_paymentsheet_add_payment_method_button_label">+ Add</string>
-    <!-- Card details entry form header title -->
-    <string name="stripe_paymentsheet_add_payment_method_card_information">Card information</string>
-    <!-- Country selector and postal code entry form header title -->
-    <string name="stripe_paymentsheet_add_payment_method_country_or_region">Country or region</string>
-    <!-- Title shown above a form where the customer can enter payment information like credit card details, email, billing address, etc. -->
-    <string name="stripe_paymentsheet_add_payment_method_title">Add your payment information</string>
-    <!-- Text for back button -->
-    <string name="stripe_paymentsheet_back">Back</string>
-    <string name="stripe_paymentsheet_close">Close</string>
-    <!-- Label for the field containing the dropdown of EPS Banks -->
-    <string name="stripe_paymentsheet_eps_bank" tools:ignore="MissingTranslation">EPS Bank</string>
-    <!-- The label of a text field that is optional. For example, 'Email (optional)' or 'Name (optional) -->
-    <string name="stripe_paymentsheet_form_label_optional">%s (optional)</string>
-    <!-- iDEAL bank section title for iDEAL form entry. -->
-    <string name="stripe_paymentsheet_ideal_bank">iDEAL Bank</string>
-    <!-- Title of a section containing multiple payment methods that can selected and will collect the payment information from the user. -->
-    <string name="stripe_paymentsheet_or_pay_using">Or pay using</string>
-    <!-- Title of a section containing a card form that will collect the payment information from the user. -->
-    <string name="stripe_paymentsheet_or_pay_with_card">Or pay with a card</string>
-    <!-- Label on the dropdown to select the Przelewy24 Bank -->
-    <string name="stripe_paymentsheet_p24_bank" tools:ignore="MissingTranslation">Przelewy24 Bank</string>
-    <!-- Label of a button that initiates payment when tapped -->
-    <string name="stripe_paymentsheet_pay_button_amount">Pay %s</string>
-    <!-- Label for a button that starts processing the payment. -->
-    <string name="stripe_paymentsheet_pay_button_label">Pay</string>
-    <!-- Title for credit card number entry field -->
-    <string name="stripe_paymentsheet_payment_method_card">Card</string>
-    <!-- Payment method brand name -->
-    <string name="stripe_paymentsheet_payment_method_sepa_debit">SEPA Debit</string>
-    <!-- Label of a button that, when tapped, initiates payment, becomes disabled, and displays this text -->
-    <string name="stripe_paymentsheet_primary_button_processing">Processing…</string>
-    <!-- Content for alert popup prompting to confirm removing saved payment method. -->
-    <string name="stripe_paymentsheet_remove_pm">Remove %s</string>
-    <!-- The label of a switch indicating whether to save the payment method for future payments. -->
-    <string name="stripe_paymentsheet_save_for_future_payments">Save for future payments</string>
-    <!-- The label of a switch indicating whether to save the user&apos;s card for future payments to this merchant -->
-    <string name="stripe_paymentsheet_save_this_card_with_merchant_name">Save this card for future %s payments</string>
-    <!-- Title shown above a carousel containing the customer&apos;s payment methods -->
-    <string name="stripe_paymentsheet_select_payment_method">Select your payment method</string>
-    <!-- SEPA mandate text -->
-    <string name="stripe_paymentsheet_sepa_mandate">By providing your payment information and confirming this payment, you authorise (A) %s and Stripe, our payment service provider, to send instructions to your bank to debit your account and (B) your bank to debit your account in accordance with those instructions. As part of your rights, you are entitled to a refund from your bank under the terms and conditions of your agreement with your bank. A refund must be claimed within 8 weeks starting from the date on which your account was debited. Your rights are explained in a statement that you can obtain from your bank. You agree to receive notifications for future debits up to 2 days before they occur.</string>
-    <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->
-    <string name="stripe_paymentsheet_setup_button_label">Set up</string>
-    <!-- Label indicating the total amount that the user is authorizing (e.g. "Total: $25.00") -->
-    <string name="stripe_paymentsheet_total_amount" tools:ignore="MissingTranslation">Total: %s</string>
-    <string name="stripe_paymentsheet_payment_method_afterpay_clearpay" tools:ignore="MissingTranslation">Afterpay</string>
-
-
-    <!-- Used for accessibility to indicate that when you double tap the dropdown it will bring up the menu for selection !-->
-    <string name="change" tools:ignore="MissingTranslation">Change</string>
-    <!-- Used for accessibility to indicate that pressing the button will allow you to add a new payment method.  !-->
-    <string name="add_new_payment_method" tools:ignore="MissingTranslation">Add a new payment method</string>
-    <string name="playground_generic">PaymentMethod Create Params</string>
-    <string name="stripe_paymentsheet_payment_method_paypal">PayPal</string>
+<resources>
+  <!-- Used for accessibility to describe the button on the payment sheet list of options to add a new payment method. -->
+  <string name="add_new_payment_method">Add a new payment method</string>
+  <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
+  <string name="bank_account_ending_in">Remove bank account ending in %s</string>
+  <!-- Button title to cancel action in an alert -->
+  <string name="cancel">Cancel</string>
+  <!-- Done button title -->
+  <string name="done">Done</string>
+  <!-- Button title to enter editing mode -->
+  <string name="edit">Edit</string>
+  <!-- Button title for confirmation alert to remove a saved payment method
+   Text for remove button -->
+  <string name="remove">Remove</string>
+  <!-- Generic error message shown when payment cannot be processed. -->
+  <string name="stripe_failure_connection_error">We are experiencing issues connecting to our payments provider. Please check your internet connection and try again.</string>
+  <!-- When an internal error is reported when a google pay payment is started. -->
+  <string name="stripe_google_pay_error_internal">An internal error occurred.</string>
+  <!-- Text for a button that, when tapped, displays another screen where the customer can add payment method details -->
+  <string name="stripe_paymentsheet_add_payment_method_button_label">+ Add</string>
+  <!-- Card details entry form header title -->
+  <string name="stripe_paymentsheet_add_payment_method_card_information">Card information</string>
+  <!-- Country selector and postal code entry form header title -->
+  <string name="stripe_paymentsheet_add_payment_method_country_or_region">Country or region</string>
+  <!-- Title shown above a form where the customer can enter payment information like credit card details, email, billing address, etc. -->
+  <string name="stripe_paymentsheet_add_payment_method_title">Add your payment information</string>
+  <!-- Text for back button -->
+  <string name="stripe_paymentsheet_back">Back</string>
+  <string name="stripe_paymentsheet_close">Close</string>
+  <!-- Text for continue button -->
+  <string name="stripe_paymentsheet_continue_button_label">Continue</string>
+  <!-- Title of a section containing multiple payment methods that can selected and will collect the payment information from the user. -->
+  <string name="stripe_paymentsheet_or_pay_using">Or pay using</string>
+  <!-- Title of a section containing a card form that will collect the payment information from the user. -->
+  <string name="stripe_paymentsheet_or_pay_with_card">Or pay with a card</string>
+  <!-- Label of a button that initiates payment when tapped -->
+  <string name="stripe_paymentsheet_pay_button_amount">Pay %s</string>
+  <!-- Label for a button that starts processing the payment. -->
+  <string name="stripe_paymentsheet_pay_button_label">Pay</string>
+  <!-- Payment Method type brand name  -->
+  <string name="stripe_paymentsheet_payment_method_afterpay_clearpay">Afterpay</string>
+  <!-- Title for credit card number entry field -->
+  <string name="stripe_paymentsheet_payment_method_card">Card</string>
+  <!-- Payment method brand name -->
+  <string name="stripe_paymentsheet_payment_method_sepa_debit">SEPA Debit</string>
+  <!-- Label of a button that, when tapped, initiates payment, becomes disabled, and displays this text -->
+  <string name="stripe_paymentsheet_primary_button_processing">Processing…</string>
+  <!-- Content for alert popup prompting to confirm removing saved payment method. -->
+  <string name="stripe_paymentsheet_remove_pm">Remove %s</string>
+  <!-- The label of a switch indicating whether to save the payment method for future payments. -->
+  <string name="stripe_paymentsheet_save_for_future_payments">Save for future payments</string>
+  <!-- The label of a switch indicating whether to save the user&apos;s card for future payments to this merchant -->
+  <string name="stripe_paymentsheet_save_this_card_with_merchant_name">Save this card for future %s payments</string>
+  <!-- Title shown above a carousel containing the customer&apos;s payment methods -->
+  <string name="stripe_paymentsheet_select_payment_method">Select your payment method</string>
+  <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->
+  <string name="stripe_paymentsheet_setup_button_label">Set up</string>
+  <!-- Label indicating the total amount that the user is authorizing (e.g. "Total: $25.00") -->
+  <string name="stripe_paymentsheet_total_amount">Total: %s</string>
 </resources>

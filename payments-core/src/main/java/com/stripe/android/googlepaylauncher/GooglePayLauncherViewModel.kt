@@ -14,18 +14,18 @@ import com.google.android.gms.wallet.PaymentDataRequest
 import com.google.android.gms.wallet.PaymentsClient
 import com.stripe.android.GooglePayConfig
 import com.stripe.android.GooglePayJsonFactory
-import com.stripe.android.Logger
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.PaymentController
 import com.stripe.android.StripePaymentController
+import com.stripe.android.core.Logger
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.networking.AnalyticsRequestFactory
 import com.stripe.android.networking.ApiRequest
+import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networking.StripeApiRepository
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.view.AuthActivityStarterHost
@@ -219,11 +219,12 @@ internal class GooglePayLauncherViewModel(
             val config = PaymentConfiguration.getInstance(application)
             val publishableKey = config.publishableKey
             val stripeAccountId = config.stripeAccountId
+            val productUsageTokens = setOf(GooglePayLauncher.PRODUCT_USAGE)
 
-            val analyticsRequestFactory = AnalyticsRequestFactory(
+            val analyticsRequestFactory = PaymentAnalyticsRequestFactory(
                 application,
                 publishableKey,
-                setOf(GooglePayLauncher.PRODUCT_USAGE)
+                productUsageTokens
             )
 
             val stripeRepository = StripeApiRepository(
@@ -231,7 +232,8 @@ internal class GooglePayLauncherViewModel(
                 { publishableKey },
                 logger = logger,
                 workContext = workContext,
-                analyticsRequestFactory = analyticsRequestFactory
+                productUsageTokens = productUsageTokens,
+                paymentAnalyticsRequestFactory = analyticsRequestFactory
             )
 
             val googlePayRepository = DefaultGooglePayRepository(

@@ -22,7 +22,8 @@ internal class StripeIntentViewModel(
 
     fun createPaymentIntent(
         country: String,
-        customerId: String? = null
+        customerId: String? = null,
+        supportedPaymentMethods: String? = null
     ) = makeBackendRequest(
         R.string.creating_payment_intent,
         R.string.payment_intent_status
@@ -34,6 +35,10 @@ internal class StripeIntentViewModel(
                 .plus(
                     customerId?.let {
                         mapOf("customer_id" to it)
+                    }.orEmpty()
+                ).plus(
+                    supportedPaymentMethods?.let {
+                        mapOf("supported_payment_methods" to it)
                     }.orEmpty()
                 )
                 .toMutableMap()

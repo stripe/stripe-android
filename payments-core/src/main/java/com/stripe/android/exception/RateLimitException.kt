@@ -1,6 +1,8 @@
 package com.stripe.android.exception
 
-import com.stripe.android.StripeError
+import com.stripe.android.core.StripeError
+import com.stripe.android.core.exception.StripeException
+import com.stripe.android.core.networking.HTTP_TOO_MANY_REQUESTS
 
 /**
  * An [Exception] indicating that too many requests have hit the API too quickly.
@@ -13,7 +15,7 @@ class RateLimitException(
 ) : StripeException(
     stripeError,
     requestId,
-    429,
+    HTTP_TOO_MANY_REQUESTS,
     cause,
     message
 )

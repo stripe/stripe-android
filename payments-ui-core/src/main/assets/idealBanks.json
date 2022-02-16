@@ -1,0 +1,66 @@
+[
+  {
+    "value": "abn_amro",
+    "icon": "abn_amro",
+    "text": "ABN Amro"
+  },
+  {
+    "value": "asn_bank",
+    "icon": "asn_bank",
+    "text": "ASN Bank"
+  },
+  {
+    "value": "bunq",
+    "icon": "bunq",
+    "text": "bunq B.V.‎"
+  },
+  {
+    "value": "handelsbanken",
+    "icon": "handelsbanken",
+    "text": "Handelsbanken"
+  },
+  {
+    "value": "ing",
+    "icon": "ing",
+    "text": "ING Bank"
+  },
+  {
+    "value": "knab",
+    "icon": "knab",
+    "text": "Knab"
+  },
+  {
+    "value": "rabobank",
+    "icon": "rabobank",
+    "text": "Rabobank"
+  },
+  {
+    "value": "regiobank",
+    "icon": "regiobank",
+    "text": "RegioBank"
+  },
+  {
+    "value": "revolut",
+    "icon": "revolut",
+    "text": "Revolut"
+  },
+  {
+    "value": "sns_bank",
+    "icon": "sns_bank",
+    "text": "SNS Bank"
+  },
+  {
+    "value": "triodos_bank",
+    "icon": "triodos_bank",
+    "text": "Triodos Bank"
+  },
+  {
+    "value": "van_lanschot",
+    "icon": "van_lanschot",
+    "text": "Van Lanschot"
+  },
+  {
+    "value": null,
+    "text": "Other"
+  }
+]

@@ -1,8 +1,8 @@
 package com.stripe.android.payments.paymentlauncher
 
 import androidx.activity.result.ActivityResultLauncher
+import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.model.ConfirmPaymentIntentParams
-import com.stripe.android.payments.core.injection.WeakMapInjectorRegistry
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.argWhere
@@ -23,7 +23,7 @@ class StripePaymentLauncherTest {
         ioContext = mock(),
         uiContext = mock(),
         stripeRepository = mock(),
-        analyticsRequestFactory = mock(),
+        paymentAnalyticsRequestFactory = mock(),
         productUsage = mock()
     )
 
@@ -36,7 +36,7 @@ class StripePaymentLauncherTest {
         verify(mockHostActivityLauncher).launch(
             argWhere { arg ->
                 arg is PaymentLauncherContract.Args.IntentConfirmationArgs &&
-                    arg.injectorKey == WeakMapInjectorRegistry.CURRENT_REGISTER_KEY.get() &&
+                    arg.injectorKey == (PaymentLauncher::class.simpleName + WeakMapInjectorRegistry.CURRENT_REGISTER_KEY.get()) &&
                     arg.confirmStripeIntentParams == params
             }
         )
@@ -51,7 +51,7 @@ class StripePaymentLauncherTest {
         verify(mockHostActivityLauncher).launch(
             argWhere { arg ->
                 arg is PaymentLauncherContract.Args.IntentConfirmationArgs &&
-                    arg.injectorKey == WeakMapInjectorRegistry.CURRENT_REGISTER_KEY.get() &&
+                    arg.injectorKey == (PaymentLauncher::class.simpleName + WeakMapInjectorRegistry.CURRENT_REGISTER_KEY.get()) &&
                     arg.confirmStripeIntentParams == params
             }
         )
@@ -64,7 +64,7 @@ class StripePaymentLauncherTest {
         verify(mockHostActivityLauncher).launch(
             argWhere { arg ->
                 arg is PaymentLauncherContract.Args.PaymentIntentNextActionArgs &&
-                    arg.injectorKey == WeakMapInjectorRegistry.CURRENT_REGISTER_KEY.get() &&
+                    arg.injectorKey == (PaymentLauncher::class.simpleName + WeakMapInjectorRegistry.CURRENT_REGISTER_KEY.get()) &&
                     arg.paymentIntentClientSecret == CLIENT_SECRET
             }
         )
@@ -77,7 +77,7 @@ class StripePaymentLauncherTest {
         verify(mockHostActivityLauncher).launch(
             argWhere { arg ->
                 arg is PaymentLauncherContract.Args.SetupIntentNextActionArgs &&
-                    arg.injectorKey == WeakMapInjectorRegistry.CURRENT_REGISTER_KEY.get() &&
+                    arg.injectorKey == (PaymentLauncher::class.simpleName + WeakMapInjectorRegistry.CURRENT_REGISTER_KEY.get()) &&
                     arg.setupIntentClientSecret == CLIENT_SECRET
             }
         )

@@ -13,7 +13,7 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.view.ActivityScenarioFactory
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.TestCoroutineDispatcher
+import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
 import org.junit.runner.RunWith
@@ -27,7 +27,7 @@ import kotlin.test.Test
 @RunWith(RobolectricTestRunner::class)
 class FlowControllerFactoryTest {
     private val context = ApplicationProvider.getApplicationContext<Context>()
-    private val testDispatcher = TestCoroutineDispatcher()
+    private val testDispatcher = StandardTestDispatcher()
 
     private val activityScenarioFactory = ActivityScenarioFactory(context)
 
@@ -53,7 +53,6 @@ class FlowControllerFactoryTest {
     @AfterTest
     fun cleanup() {
         Dispatchers.resetMain()
-        testDispatcher.cleanupTestCoroutines()
     }
 
     @Test

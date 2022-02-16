@@ -38,18 +38,32 @@ class AddFpxPaymentMethodTest {
 
     @Test
     fun launchFpxAndSelectBank() {
-        // launch FPX selection activity
-        onView(withId(R.id.examples)).perform(
-            RecyclerViewActions.actionOnItemAtPosition<RecyclerView.ViewHolder>(9, click())
-        )
-
-        // click select payment method button
-        onView(withId(R.id.select_payment_method_button))
-            .perform(click())
+        launchBankSelector()
 
         // click on first bank in the list
         onView(withId(R.id.bank_list)).perform(
             RecyclerViewActions.actionOnItemAtPosition<RecyclerView.ViewHolder>(0, click())
         )
+    }
+
+    @Test
+    fun launchFpxAndConfirmWithoutSelectingBank() {
+        launchBankSelector()
+
+        // confirm selection without selecting a bank
+        onView(withId(R.id.action_save)).perform(click())
+
+        // Nothing should happen as no bank was selected
+    }
+
+    private fun launchBankSelector() {
+        // launch FPX selection activity
+        onView(withId(R.id.examples)).perform(
+            RecyclerViewActions.actionOnItemAtPosition<RecyclerView.ViewHolder>(11, click())
+        )
+
+        // click select payment method button
+        onView(withId(R.id.select_payment_method_button))
+            .perform(click())
     }
 }

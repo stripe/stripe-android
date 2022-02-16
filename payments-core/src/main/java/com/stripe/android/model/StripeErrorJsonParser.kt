@@ -1,7 +1,7 @@
 package com.stripe.android.model
 
 import androidx.annotation.VisibleForTesting
-import com.stripe.android.StripeError
+import com.stripe.android.core.StripeError
 import com.stripe.android.model.StripeJsonUtils.optString
 import com.stripe.android.model.parsers.ModelJsonParser
 import org.json.JSONObject

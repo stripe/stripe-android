@@ -6,7 +6,7 @@ import com.stripe.android.model.CardBrand
 /**
  * Utility class for functions to do with cards.
  */
-internal object CardUtils {
+object CardUtils {
 
     /**
      * @param cardNumber a full or partial card number

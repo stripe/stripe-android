@@ -1,39 +1,55 @@
 package com.stripe.android.paymentsheet
 
 import android.app.Application
+import android.os.Bundle
 import androidx.annotation.VisibleForTesting
+import androidx.lifecycle.AbstractSavedStateViewModelFactory
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
-import com.stripe.android.Logger
-import com.stripe.android.payments.core.injection.IOContext
-import com.stripe.android.payments.core.injection.Injectable
-import com.stripe.android.payments.core.injection.WeakMapInjectorRegistry
+import androidx.savedstate.SavedStateRegistryOwner
+import com.stripe.android.core.Logger
+import com.stripe.android.core.injection.IOContext
+import com.stripe.android.core.injection.Injectable
+import com.stripe.android.core.injection.InjectorKey
+import com.stripe.android.core.injection.injectWithFallback
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.injection.DaggerPaymentOptionsViewModelFactoryComponent
+import com.stripe.android.paymentsheet.injection.PaymentOptionsViewModelSubcomponent
+import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
+import com.stripe.android.ui.core.forms.resources.ResourceRepository
 import javax.inject.Inject
+import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
 
-internal class PaymentOptionsViewModel(
+@JvmSuppressWildcards
+internal class PaymentOptionsViewModel @Inject constructor(
     args: PaymentOptionContract.Args,
-    prefsRepository: PrefsRepository,
+    prefsRepositoryFactory:
+        (PaymentSheet.CustomerConfiguration?) -> PrefsRepository,
     eventReporter: EventReporter,
     customerRepository: CustomerRepository,
-    workContext: CoroutineContext,
+    @IOContext workContext: CoroutineContext,
     application: Application,
-    logger: Logger
+    logger: Logger,
+    @InjectorKey injectorKey: String,
+    resourceRepository: ResourceRepository,
+    savedStateHandle: SavedStateHandle
 ) : BaseSheetViewModel<PaymentOptionsViewModel.TransitionTarget>(
     config = args.config,
-    prefsRepository = prefsRepository,
+    prefsRepository = prefsRepositoryFactory(args.config?.customer),
     eventReporter = eventReporter,
     customerRepository = customerRepository,
     workContext = workContext,
     application = application,
-    logger = logger
+    logger = logger,
+    injectorKey = injectorKey,
+    resourceRepository = resourceRepository,
+    savedStateHandle = savedStateHandle
 ) {
     @VisibleForTesting
     internal val _paymentOptionResult = MutableLiveData<PaymentOptionResult>()
@@ -50,13 +66,15 @@ internal class PaymentOptionsViewModel(
     private val shouldTransitionToUnsavedCard: Boolean
         get() =
             !hasTransitionToUnsavedCard &&
-                (newCard as? PaymentSelection.New)?.let { !it.shouldSavePaymentMethod } ?: false
+                (newCard as? PaymentSelection.New)?.let {
+                    it.customerRequestedSave != PaymentSelection.CustomerRequestedSave.RequestReuse
+                } ?: false
 
     init {
-        _isGooglePayReady.value = args.isGooglePayReady
+        savedStateHandle.set(SAVE_GOOGLE_PAY_READY, args.isGooglePayReady)
         setStripeIntent(args.stripeIntent)
-        _paymentMethods.value = args.paymentMethods
-        _processing.postValue(false)
+        savedStateHandle.set(SAVE_PAYMENT_METHODS, args.paymentMethods)
+        savedStateHandle.set(SAVE_PROCESSING, false)
     }
 
     override fun onFatal(throwable: Throwable) {
@@ -93,7 +111,7 @@ internal class PaymentOptionsViewModel(
         _paymentOptionResult.value = PaymentOptionResult.Succeeded(paymentSelection)
     }
 
-    fun resolveTransitionTarget(config: com.stripe.android.paymentsheet.model.FragmentConfig) {
+    fun resolveTransitionTarget(config: FragmentConfig) {
         if (shouldTransitionToUnsavedCard) {
             hasTransitionToUnsavedCard = true
             transitionTo(
@@ -105,28 +123,31 @@ internal class PaymentOptionsViewModel(
     }
 
     internal sealed class TransitionTarget {
-        abstract val fragmentConfig: com.stripe.android.paymentsheet.model.FragmentConfig
+        abstract val fragmentConfig: FragmentConfig
 
         // User has saved PM's and is selected
         data class SelectSavedPaymentMethod(
-            override val fragmentConfig: com.stripe.android.paymentsheet.model.FragmentConfig
+            override val fragmentConfig: FragmentConfig
         ) : TransitionTarget()
 
         // User has saved PM's and is adding a new one
         data class AddPaymentMethodFull(
-            override val fragmentConfig: com.stripe.android.paymentsheet.model.FragmentConfig
+            override val fragmentConfig: FragmentConfig
         ) : TransitionTarget()
 
         // User has no saved PM's
         data class AddPaymentMethodSheet(
-            override val fragmentConfig: com.stripe.android.paymentsheet.model.FragmentConfig
+            override val fragmentConfig: FragmentConfig
         ) : TransitionTarget()
     }
 
     internal class Factory(
         private val applicationSupplier: () -> Application,
-        private val starterArgsSupplier: () -> PaymentOptionContract.Args
-    ) : ViewModelProvider.Factory, Injectable<Factory.FallbackInitializeParam> {
+        private val starterArgsSupplier: () -> PaymentOptionContract.Args,
+        owner: SavedStateRegistryOwner,
+        defaultArgs: Bundle? = null
+    ) : AbstractSavedStateViewModelFactory(owner, defaultArgs),
+        Injectable<Factory.FallbackInitializeParam> {
         internal data class FallbackInitializeParam(
             val application: Application,
             val productUsage: Set<String>
@@ -140,54 +161,26 @@ internal class PaymentOptionsViewModel(
         }
 
         @Inject
-        lateinit var eventReporter: EventReporter
-
-        @Inject
-        lateinit var customerRepository: CustomerRepository
-
-        @Inject
-        lateinit var logger: Logger
-
-        @Inject
-        @IOContext
-        lateinit var workContext: CoroutineContext
-
-        @Inject
-        @JvmSuppressWildcards
-        lateinit var prefsRepositoryFactory:
-            (PaymentSheet.CustomerConfiguration?) -> PrefsRepository
+        lateinit var subComponentBuilderProvider:
+            Provider<PaymentOptionsViewModelSubcomponent.Builder>
 
         @Suppress("UNCHECKED_CAST")
-        override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+        override fun <T : ViewModel?> create(
+            key: String,
+            modelClass: Class<T>,
+            savedStateHandle: SavedStateHandle
+        ): T {
             val application = applicationSupplier()
             val starterArgs = starterArgsSupplier()
-
-            val logger = Logger.getInstance(starterArgs.enableLogging)
-            WeakMapInjectorRegistry.retrieve(starterArgsSupplier().injectorKey)?.let {
-                logger.info(
-                    "Injector available, " +
-                        "injecting dependencies into PaymentOptionsViewModel.Factory"
-                )
-                it.inject(this)
-            } ?: run {
-                logger.info(
-                    "Injector unavailable, " +
-                        "initializing dependencies of PaymentOptionsViewModel.Factory"
-                )
-                fallbackInitialize(
-                    FallbackInitializeParam(application, starterArgs.productUsage)
-                )
-            }
-
-            return PaymentOptionsViewModel(
-                starterArgs,
-                prefsRepositoryFactory(starterArgs.config?.customer),
-                eventReporter,
-                customerRepository,
-                workContext,
-                applicationSupplier(),
-                logger
-            ) as T
+            injectWithFallback(
+                starterArgsSupplier().injectorKey,
+                FallbackInitializeParam(application, starterArgs.productUsage)
+            )
+            return subComponentBuilderProvider.get()
+                .application(application)
+                .args(starterArgs)
+                .savedStateHandle(savedStateHandle)
+                .build().viewModel as T
         }
     }
 }

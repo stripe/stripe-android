@@ -2,15 +2,15 @@ package com.stripe.android.paymentsheet.forms
 
 import android.annotation.SuppressLint
 import androidx.compose.runtime.Composable
+import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.address.AddressFieldElementRepository
-import com.stripe.android.paymentsheet.address.parseAddressesSchema
-import com.stripe.android.paymentsheet.elements.FormInternal
-import com.stripe.android.paymentsheet.model.Amount
+import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
 import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
-import com.stripe.android.paymentsheet.elements.BankRepository
-import com.stripe.android.paymentsheet.elements.ResourceRepository
-import com.stripe.android.paymentsheet.elements.SupportedBankType
+import com.stripe.android.ui.core.address.AddressFieldElementRepository
+import com.stripe.android.ui.core.elements.BankRepository
+import com.stripe.android.ui.core.elements.SupportedBankType
+import com.stripe.android.ui.core.forms.SofortForm
+import com.stripe.android.ui.core.forms.resources.StaticResourceRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 
 /**
@@ -21,17 +21,13 @@ import kotlinx.coroutines.flow.MutableStateFlow
 @SuppressLint("VisibleForTests")
 @Composable
 internal fun FormInternalPreview() {
-    val formElements = sofort.layout.items
-    val addressFieldElementRepository = AddressFieldElementRepository()
-    val bankRepository = BankRepository()
+    val formElements = SofortForm.items
+    val addressFieldElementRepository = AddressFieldElementRepository(null)
+    val bankRepository = BankRepository(null)
 
-    addressFieldElementRepository.init(
-        mapOf(
-            "ZZ" to parseAddressesSchema(ZZ_ADDRESS)!!
-        )
-    )
+    addressFieldElementRepository.initialize("ZZ", ZZ_ADDRESS)
 
-    bankRepository.init(
+    bankRepository.initialize(
         mapOf(
             SupportedBankType.Ideal to IDEAL_BANKS,
             SupportedBankType.Eps to EPS_Banks,
@@ -42,30 +38,34 @@ internal fun FormInternalPreview() {
     FormInternal(
         MutableStateFlow(emptyList()),
         MutableStateFlow(true),
-        TransformSpecToElement(
-            ResourceRepository(
-                bankRepository,
-                addressFieldElementRepository
-            ),
-            FormFragmentArguments(
-                "Card",
-                saveForFutureUseInitialVisibility = true,
-                saveForFutureUseInitialValue = true,
-                "Merchant, Inc.",
-                Amount(10, "USD"),
-                PaymentSheet.BillingDetails(
-                    PaymentSheet.Address(
-                        "San Fransciso",
-                        "US",
-                        "123 Main Street",
-                        null,
-                        "94111",
-                        "CA",
-                    )
+        MutableStateFlow(
+            TransformSpecToElement(
+                StaticResourceRepository(
+                    bankRepository,
+                    addressFieldElementRepository
+                ),
+                FormFragmentArguments(
+                    SupportedPaymentMethod.Bancontact,
+                    showCheckbox = false,
+                    showCheckboxControlledFields = true,
+                    merchantName = "Merchant, Inc.",
+                    billingDetails = PaymentSheet.BillingDetails(
+                        address = PaymentSheet.Address(
+                            line1 = "123 Main Street",
+                            line2 = null,
+                            city = "San Francisco",
+                            state = "CA",
+                            postalCode = "94111",
+                            country = "DE",
+                        ),
+                        email = "email",
+                        name = "Jenny Rosen",
+                        phone = "+18008675309"
+                    ),
+                    injectorKey = DUMMY_INJECTOR_KEY
                 )
-
-            )
-        ).transform(formElements)
+            ).transform(formElements)
+        )
     )
 }
 

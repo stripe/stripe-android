@@ -1,6 +1,9 @@
 package com.stripe.android.payments.core.injection
 
 import android.content.Context
+import com.stripe.android.core.injection.CoroutineContextModule
+import com.stripe.android.core.injection.ENABLE_LOGGING
+import com.stripe.android.core.injection.LoggingModule
 import com.stripe.android.payments.paymentlauncher.PaymentLauncherViewModel
 import dagger.BindsInstance
 import dagger.Component
@@ -16,7 +19,8 @@ import javax.inject.Singleton
     modules = [
         PaymentLauncherModule::class,
         StripeRepositoryModule::class,
-        CoroutineContextModule::class
+        CoroutineContextModule::class,
+        LoggingModule::class
     ]
 )
 internal interface PaymentLauncherViewModelFactoryComponent {

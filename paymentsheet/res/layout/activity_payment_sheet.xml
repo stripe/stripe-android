@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/coordinator"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
@@ -9,7 +10,7 @@
         android:id="@+id/bottom_sheet"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom"
+        android:layout_gravity="bottom|center_horizontal"
         android:animateLayoutChanges="true"
         android:orientation="vertical"
         android:background="?colorSurface"
@@ -19,7 +20,6 @@
             android:id="@+id/appbar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:visibility="invisible"
             android:animateLayoutChanges="true"
             app:elevation="0dp">
 
@@ -27,7 +27,27 @@
                 android:id="@+id/toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="?colorSurface" />
+                android:background="?colorSurface"
+                android:paddingEnd="12dp"
+                app:contentInsetStart="0dp"
+                app:contentInsetStartWithNavigation="0dp"
+                tools:ignore="RtlSymmetry">
+
+                <TextView
+                    android:id="@+id/testmode"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:visibility="gone"
+                    android:paddingTop="2dp"
+                    android:paddingBottom="2dp"
+                    android:paddingEnd="6dp"
+                    android:paddingStart="6dp"
+                    android:background="@drawable/stripe_paymentsheet_testmode_background"
+                    android:textColor="@color/stripe_paymentsheet_testmode_text"
+                    android:textStyle="bold"
+                    android:text="@string/stripe_paymentsheet_test_mode_indicator" />
+
+            </com.google.android.material.appbar.MaterialToolbar>
 
         </com.google.android.material.appbar.AppBarLayout>
 
@@ -61,8 +81,9 @@
                 <FrameLayout
                     android:id="@+id/button_container"
                     android:animateLayoutChanges="true"
+                    android:visibility="gone"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="@dimen/stripe_paymentsheet_max_primary_button_height"
                     android:layout_marginTop="@dimen/stripe_paymentsheet_button_container_spacing"
                     android:layout_marginHorizontal="@dimen/stripe_paymentsheet_outer_spacing_horizontal"
                     android:layout_marginBottom="@dimen/stripe_paymentsheet_button_container_spacing_bottom">
@@ -70,17 +91,15 @@
                     <com.stripe.android.paymentsheet.ui.PrimaryButton
                         android:id="@+id/buy_button"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_margin="@dimen/stripe_paymentsheet_primary_button_margin"
+                        android:layout_height="@dimen/stripe_paymentsheet_primary_button_height"
                         android:text="@string/stripe_paymentsheet_pay_button_label"
-                        android:minHeight="48dp"
+                        android:layout_marginVertical="2dp"
                         android:visibility="gone" />
 
                     <com.stripe.android.paymentsheet.ui.GooglePayButton
                         android:id="@+id/google_pay_button"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:minHeight="48dp"
                         android:visibility="gone" />
                 </FrameLayout>
             </LinearLayout>

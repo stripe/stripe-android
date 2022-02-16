@@ -1,11 +1,11 @@
 package com.stripe.android.paymentsheet.flowcontroller
 
-import com.stripe.android.Logger
+import com.stripe.android.core.Logger
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.payments.core.injection.IOContext
+import com.stripe.android.core.injection.IOContext
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.model.ClientSecret
@@ -80,10 +80,11 @@ internal class DefaultFlowControllerInitializer @Inject constructor(
             retrieveStripeIntent(clientSecret)
         }.fold(
             onSuccess = { stripeIntent ->
-                val paymentMethodTypes = stripeIntent.paymentMethodTypes.mapNotNull {
-                    PaymentMethod.Type.fromCode(it)
-                }.filter {
-                    SupportedPaymentMethod.supportedSavedPaymentMethods.contains(it.code)
+                val paymentMethodTypes = SupportedPaymentMethod.getSupportedSavedCustomerPMs(
+                    stripeIntent,
+                    config,
+                ).map {
+                    it.type
                 }
                 customerRepository.getPaymentMethods(
                     customerConfig,
@@ -99,7 +100,6 @@ internal class DefaultFlowControllerInitializer @Inject constructor(
                             config = config,
                             clientSecret = clientSecret,
                             stripeIntent = stripeIntent,
-                            paymentMethodTypes = paymentMethodTypes,
                             paymentMethods = paymentMethods,
                             savedSelection = prefsRepository.getSavedSelection(isGooglePayReady),
                             isGooglePayReady = isGooglePayReady
@@ -123,11 +123,6 @@ internal class DefaultFlowControllerInitializer @Inject constructor(
             retrieveStripeIntent(clientSecret)
         }.fold(
             onSuccess = { stripeIntent ->
-                val paymentMethodTypes = stripeIntent.paymentMethodTypes
-                    .mapNotNull {
-                        PaymentMethod.Type.fromCode(it)
-                    }
-
                 val savedSelection = if (isGooglePayReady) {
                     SavedSelection.GooglePay
                 } else {
@@ -139,7 +134,6 @@ internal class DefaultFlowControllerInitializer @Inject constructor(
                         config = config,
                         clientSecret = clientSecret,
                         stripeIntent = stripeIntent,
-                        paymentMethodTypes = paymentMethodTypes,
                         paymentMethods = emptyList(),
                         savedSelection = savedSelection,
                         isGooglePayReady = isGooglePayReady

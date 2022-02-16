@@ -6,15 +6,18 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.asFlow
 import androidx.lifecycle.distinctUntilChanged
 import androidx.lifecycle.map
 import androidx.lifecycle.viewModelScope
-import com.stripe.android.Logger
+import com.stripe.android.core.Logger
+import com.stripe.android.core.injection.InjectorKey
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.paymentsheet.BaseAddPaymentMethodFragment
 import com.stripe.android.paymentsheet.BasePaymentMethodsListFragment
 import com.stripe.android.paymentsheet.BuildConfig
 import com.stripe.android.paymentsheet.PaymentOptionsActivity
@@ -22,13 +25,14 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetActivity
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.analytics.EventReporter
-import com.stripe.android.paymentsheet.model.Amount
 import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
 import com.stripe.android.paymentsheet.paymentdatacollection.CardDataCollectionFragment
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
+import com.stripe.android.ui.core.Amount
+import com.stripe.android.ui.core.forms.resources.ResourceRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -47,7 +51,10 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     protected val customerRepository: CustomerRepository,
     protected val prefsRepository: PrefsRepository,
     protected val workContext: CoroutineContext = Dispatchers.IO,
-    protected val logger: Logger
+    protected val logger: Logger,
+    @InjectorKey val injectorKey: String,
+    resourceRepository: ResourceRepository,
+    val savedStateHandle: SavedStateHandle
 ) : AndroidViewModel(application) {
     internal val customerConfig = config?.customer
     internal val merchantName = config?.merchantDisplayName
@@ -57,49 +64,42 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     protected val _fatal = MutableLiveData<Throwable>()
 
     @VisibleForTesting
-    internal val _isGooglePayReady = MutableLiveData<Boolean>()
+    internal val _isGooglePayReady = savedStateHandle.getLiveData<Boolean>(
+        SAVE_GOOGLE_PAY_READY
+    )
     internal val isGooglePayReady: LiveData<Boolean> = _isGooglePayReady.distinctUntilChanged()
 
-    private val _stripeIntent = MutableLiveData<StripeIntent?>()
+    private val _isResourceRepositoryReady = savedStateHandle.getLiveData<Boolean>(
+        SAVE_RESOURCE_REPOSITORY_READY
+    )
+    internal val isResourceRepositoryReady: LiveData<Boolean> =
+        _isResourceRepositoryReady.distinctUntilChanged()
+
+    private val _stripeIntent = savedStateHandle.getLiveData<StripeIntent>(SAVE_STRIPE_INTENT)
     internal val stripeIntent: LiveData<StripeIntent?> = _stripeIntent
 
-    internal val supportedPaymentMethods = _stripeIntent.map {
-        val newSupportedPaymentMethods = getSupportedPaymentMethods(it)
+    internal var supportedPaymentMethods
+        get() = savedStateHandle.get<List<SupportedPaymentMethod>>(
+            SAVE_SUPPORTED_PAYMENT_METHOD
+        ) ?: emptyList()
+        set(value) = savedStateHandle.set(SAVE_SUPPORTED_PAYMENT_METHOD, value)
 
-        if (it != null && newSupportedPaymentMethods.isEmpty()) {
-            onFatal(
-                IllegalArgumentException(
-                    "None of the requested payment methods" +
-                        " (${it.paymentMethodTypes})" +
-                        " match the supported payment types" +
-                        " (${SupportedPaymentMethod.values().toList()})"
-                )
-            )
-        }
+    @VisibleForTesting
+    internal val _paymentMethods =
+        savedStateHandle.getLiveData<List<PaymentMethod>>(SAVE_PAYMENT_METHODS)
 
-        newSupportedPaymentMethods
-    }
-
-    protected val _paymentMethods = MutableLiveData<List<PaymentMethod>>()
+    /**
+     * The list of saved payment methods for the current customer.
+     * Value is null until it's loaded, and non-null (could be empty) after that.
+     */
     internal val paymentMethods: LiveData<List<PaymentMethod>> = _paymentMethods
 
     @VisibleForTesting
-    internal val amount = _stripeIntent.map { stripeIntent ->
-        if (stripeIntent is PaymentIntent) {
-            runCatching {
-                Amount(
-                    requireNotNull(stripeIntent.amount),
-                    requireNotNull(stripeIntent.currency)
-                )
-            }.onFailure {
-                onFatal(
-                    IllegalStateException("PaymentIntent must contain amount and currency.")
-                )
-            }.getOrNull()
-        } else {
-            null
-        }
-    }
+    internal val _amount = savedStateHandle.getLiveData<Amount>(SAVE_AMOUNT)
+    internal val amount: LiveData<Amount> = _amount
+
+    private var addFragmentSelectedLPM =
+        savedStateHandle.get<SupportedPaymentMethod>(SAVE_SELECTED_ADD_LPM)
 
     /**
      * Request to retrieve the value from the repository happens when initialize any fragment
@@ -107,24 +107,29 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
      * Represents what the user last selects (add or buy) on the
      * [PaymentOptionsActivity]/[PaymentSheetActivity], and saved/restored from the preferences.
      */
-    private val _savedSelection = MutableLiveData<SavedSelection>()
+    private val _savedSelection = savedStateHandle.getLiveData<SavedSelection>(SAVE_SAVED_SELECTION)
     private val savedSelection: LiveData<SavedSelection> = _savedSelection
 
     private val _transition = MutableLiveData<Event<TransitionTargetType?>>(Event(null))
     internal val transition: LiveData<Event<TransitionTargetType?>> = _transition
+
+    @VisibleForTesting
+    internal val _liveMode = MutableLiveData<Boolean>()
+    internal val liveMode: LiveData<Boolean> = _liveMode
 
     /**
      * On [CardDataCollectionFragment] this is set every time the details in the add
      * card fragment is determined to be valid (not necessarily selected)
      * On [BasePaymentMethodsListFragment] this is set when a user selects one of the options
      */
-    private val _selection = MutableLiveData<PaymentSelection?>()
+    private val _selection = savedStateHandle.getLiveData<PaymentSelection>(SAVE_SELECTION)
+
     internal val selection: LiveData<PaymentSelection?> = _selection
 
     private val editing = MutableLiveData(false)
 
     @VisibleForTesting
-    internal val _processing = MutableLiveData(true)
+    internal val _processing = savedStateHandle.getLiveData<Boolean>(SAVE_PROCESSING)
     val processing: LiveData<Boolean> = _processing
 
     /**
@@ -154,42 +159,57 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     }.distinctUntilChanged()
 
     init {
-        viewModelScope.launch {
-            val savedSelection = withContext(workContext) {
-                prefsRepository.getSavedSelection(isGooglePayReady.asFlow().first())
+        if (_savedSelection.value == null) {
+            viewModelScope.launch {
+                val savedSelection = withContext(workContext) {
+                    prefsRepository.getSavedSelection(isGooglePayReady.asFlow().first())
+                }
+                savedStateHandle.set(SAVE_SAVED_SELECTION, savedSelection)
             }
-            _savedSelection.value = savedSelection
+        }
+
+        if (_isResourceRepositoryReady.value == null) {
+            viewModelScope.launch {
+                resourceRepository.waitUntilLoaded()
+                savedStateHandle.set(SAVE_RESOURCE_REPOSITORY_READY, true)
+            }
         }
     }
 
-    val fragmentConfig = MediatorLiveData<FragmentConfig?>().apply {
+    val fragmentConfigEvent = MediatorLiveData<FragmentConfig?>().apply {
         listOf(
             savedSelection,
             stripeIntent,
             paymentMethods,
-            isGooglePayReady
+            isGooglePayReady,
+            isResourceRepositoryReady
         ).forEach { source ->
             addSource(source) {
                 value = createFragmentConfig()
             }
         }
-    }.distinctUntilChanged()
+    }.distinctUntilChanged().map {
+        Event(it)
+    }
 
     private fun createFragmentConfig(): FragmentConfig? {
         val stripeIntentValue = stripeIntent.value
-        val paymentMethodsValue = paymentMethods.value
         val isGooglePayReadyValue = isGooglePayReady.value
+        val isResourceRepositoryReadyValue = isResourceRepositoryReady.value
         val savedSelectionValue = savedSelection.value
+        // List of Payment Methods is not passed in the config but we still wait for it to be loaded
+        // before adding the Fragment.
+        val paymentMethodsValue = paymentMethods.value
 
         return if (
             stripeIntentValue != null &&
             paymentMethodsValue != null &&
             isGooglePayReadyValue != null &&
+            isResourceRepositoryReadyValue != null &&
             savedSelectionValue != null
         ) {
             FragmentConfig(
                 stripeIntent = stripeIntentValue,
-                paymentMethods = paymentMethodsValue,
                 isGooglePayReady = isGooglePayReadyValue,
                 savedSelection = savedSelectionValue
             )
@@ -204,45 +224,78 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
 
     @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
     fun setStripeIntent(stripeIntent: StripeIntent?) {
-        _stripeIntent.value = stripeIntent
-    }
+        savedStateHandle.set(SAVE_STRIPE_INTENT, stripeIntent)
 
-    private fun getSupportedPaymentMethods(stripeIntent: StripeIntent?): List<SupportedPaymentMethod> {
-        stripeIntent?.let { stripeIntent ->
-            return stripeIntent.paymentMethodTypes.mapNotNull {
-                SupportedPaymentMethod.fromCode(it)
-            }.filterNot {
-                // AfterpayClearpay requires a shipping address, filter it out if not provided
-                val excludeAfterPay = it == SupportedPaymentMethod.AfterpayClearpay &&
-                    (stripeIntent as? PaymentIntent)?.shipping == null
-                if (excludeAfterPay && BuildConfig.DEBUG) {
-                    logger.debug("AfterPay will not be shown. It requires that Shipping is included in the Payment or Setup Intent")
-                }
-                excludeAfterPay
-            }.filterNot { supportedPaymentMethod ->
-                val excludeRequiresMandate =
-                    (stripeIntent is SetupIntent) && supportedPaymentMethod.requiresMandate
-                if (excludeRequiresMandate && BuildConfig.DEBUG) {
-                    logger.debug("${supportedPaymentMethod.name} will not be shown. It requires a mandate which is incompatible with SetupIntents")
-                }
-                excludeRequiresMandate
-            }.filterNot { supportedPaymentMethod ->
-                val excludeRequiresMandate = (stripeIntent is PaymentIntent) &&
-                    supportedPaymentMethod.requiresMandate &&
-                    stripeIntent.setupFutureUsage == StripeIntent.Usage.OffSession
-                if (excludeRequiresMandate && BuildConfig.DEBUG) {
-                    logger.debug("${supportedPaymentMethod.name} will not be shown.  It requires a mandate which is incompatible with off_session PaymentIntents")
-                }
-                excludeRequiresMandate
-            } // .filter { it == SupportedPaymentMethod.Card }
+        /**
+         * The settings of values in this function is so that
+         * they will be ready in the onViewCreated method of
+         * the [BaseAddPaymentMethodFragment]
+         */
+        val pmsToAdd = SupportedPaymentMethod.getPMsToAdd(stripeIntent, config)
+        savedStateHandle.set(
+            SAVE_SUPPORTED_PAYMENT_METHOD,
+            pmsToAdd
+        )
+
+        if (stripeIntent != null && supportedPaymentMethods.isEmpty()) {
+            onFatal(
+                IllegalArgumentException(
+                    "None of the requested payment methods" +
+                        " (${stripeIntent.paymentMethodTypes})" +
+                        " match the supported payment types" +
+                        " (${SupportedPaymentMethod.values().toList()})"
+                )
+            )
         }
 
-        return emptyList()
+        if (stripeIntent is PaymentIntent) {
+            runCatching {
+                savedStateHandle.set(
+                    SAVE_AMOUNT,
+                    Amount(
+                        requireNotNull(stripeIntent.amount),
+                        requireNotNull(stripeIntent.currency)
+                    )
+                )
+            }.onFailure {
+                onFatal(
+                    IllegalStateException("PaymentIntent must contain amount and currency.")
+                )
+            }
+        }
+
+        if (stripeIntent != null) {
+            _liveMode.postValue(stripeIntent.isLiveMode)
+            warnUnactivatedIfNeeded(stripeIntent.unactivatedPaymentMethods)
+        }
+    }
+
+    private fun warnUnactivatedIfNeeded(unactivatedPaymentMethodTypes: List<String>) {
+        if (unactivatedPaymentMethodTypes.isEmpty()) {
+            return
+        }
+
+        val message = "[Stripe SDK] Warning: Your Intent contains the following payment method " +
+            "types which are activated for test mode but not activated for " +
+            "live mode: $unactivatedPaymentMethodTypes. These payment method types will not be " +
+            "displayed in live mode until they are activated. To activate these payment method " +
+            "types visit your Stripe dashboard." +
+            "More information: https://support.stripe.com/questions/activate-a-new-payment-method"
+
+        logger.warning(message)
     }
 
     fun updateSelection(selection: PaymentSelection?) {
-        _selection.value = selection
+        savedStateHandle.set(SAVE_SELECTION, selection)
     }
+
+    fun setAddFragmentSelectedLPM(lpm: SupportedPaymentMethod) {
+        savedStateHandle.set(SAVE_SELECTED_ADD_LPM, lpm)
+    }
+
+    fun getAddFragmentSelectedLPM() =
+        savedStateHandle.get<SupportedPaymentMethod>(SAVE_SELECTED_ADD_LPM)
+            ?: SupportedPaymentMethod.Card
 
     fun setEditing(isEditing: Boolean) {
         editing.value = isEditing
@@ -250,11 +303,20 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
 
     fun removePaymentMethod(paymentMethod: PaymentMethod) = runBlocking {
         launch {
-            if (customerConfig != null && paymentMethod.id != null) {
-                customerRepository.detachPaymentMethod(
-                    customerConfig,
-                    requireNotNull(paymentMethod.id)
+            paymentMethod.id?.let { paymentMethodId ->
+                savedStateHandle.set(
+                    SAVE_PAYMENT_METHODS,
+                    _paymentMethods.value?.filter {
+                        it.id != paymentMethodId
+                    }
                 )
+
+                customerConfig?.let {
+                    customerRepository.detachPaymentMethod(
+                        it,
+                        paymentMethodId
+                    )
+                }
             }
         }
     }
@@ -290,5 +352,18 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
          */
         @TestOnly
         fun peekContent(): T = content
+    }
+
+    companion object {
+        internal const val SAVE_STRIPE_INTENT = "stripe_intent"
+        internal const val SAVE_PAYMENT_METHODS = "customer_payment_methods"
+        internal const val SAVE_AMOUNT = "amount"
+        internal const val SAVE_SELECTED_ADD_LPM = "selected_add_lpm"
+        internal const val SAVE_SELECTION = "selection"
+        internal const val SAVE_SAVED_SELECTION = "saved_selection"
+        internal const val SAVE_SUPPORTED_PAYMENT_METHOD = "supported_payment_methods"
+        internal const val SAVE_PROCESSING = "processing"
+        internal const val SAVE_GOOGLE_PAY_READY = "google_pay_ready"
+        internal const val SAVE_RESOURCE_REPOSITORY_READY = "resource_repository_ready"
     }
 }

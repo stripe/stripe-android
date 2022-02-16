@@ -1,5 +1,6 @@
 package com.stripe.android.model
 
+import com.stripe.android.core.model.StripeModel
 import com.stripe.android.model.SourceOrder.Item.Type
 import kotlinx.parcelize.Parcelize
 

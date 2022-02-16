@@ -7,7 +7,8 @@ import androidx.activity.ComponentActivity
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.StripePaymentController.Companion.EXPAND_PAYMENT_METHOD
-import com.stripe.android.exception.InvalidRequestException
+import com.stripe.android.core.exception.InvalidRequestException
+import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.model.AlipayAuthResult
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentIntent
@@ -18,9 +19,8 @@ import com.stripe.android.model.SourceFixtures
 import com.stripe.android.model.Stripe3ds2Fixtures
 import com.stripe.android.networking.AbsFakeStripeRepository
 import com.stripe.android.networking.AlipayRepository
-import com.stripe.android.networking.AnalyticsRequestExecutor
-import com.stripe.android.networking.AnalyticsRequestFactory
 import com.stripe.android.networking.ApiRequest
+import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.stripe3ds2.transaction.SdkTransactionId
 import com.stripe.android.stripe3ds2.transaction.Transaction
@@ -28,9 +28,9 @@ import com.stripe.android.utils.ParcelUtils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.test.TestCoroutineDispatcher
+import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.resetMain
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
@@ -58,11 +58,11 @@ internal class StripePaymentControllerTest {
     private val stripeRepository = FakeStripeRepository()
 
     private val context: Context = ApplicationProvider.getApplicationContext()
-    private val analyticsRequestFactory = AnalyticsRequestFactory(
+    private val analyticsRequestFactory = PaymentAnalyticsRequestFactory(
         context,
         ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
     )
-    private val testDispatcher = TestCoroutineDispatcher()
+    private val testDispatcher = StandardTestDispatcher()
 
     private val controller = createController()
 
@@ -80,7 +80,6 @@ internal class StripePaymentControllerTest {
     @AfterTest
     fun cleanup() {
         Dispatchers.resetMain()
-        testDispatcher.cleanupTestCoroutines()
     }
 
     @Test
@@ -111,7 +110,7 @@ internal class StripePaymentControllerTest {
 
     @Test
     fun handlePaymentResult_whenSourceShouldBeCanceled_onlyCallsCancelIntentOnce() =
-        testDispatcher.runBlockingTest {
+        runTest {
             // use a PaymentIntent in `requires_action` state
             val paymentIntent = PaymentIntentFixtures.PI_REQUIRES_3DS1
 
@@ -191,7 +190,7 @@ internal class StripePaymentControllerTest {
 
     @Test
     fun `confirmAndAuthenticateAlipay() should return expected outcome`() =
-        testDispatcher.runBlockingTest {
+        runTest {
             whenever(alipayRepository.authenticate(any(), any(), any())).thenReturn(
                 AlipayAuthResult(
                     StripeIntentResult.Outcome.SUCCEEDED
@@ -229,7 +228,7 @@ internal class StripePaymentControllerTest {
             false,
             workContext = testDispatcher,
             analyticsRequestExecutor = analyticsRequestExecutor,
-            analyticsRequestFactory = analyticsRequestFactory,
+            paymentAnalyticsRequestFactory = analyticsRequestFactory,
             alipayRepository = alipayRepository,
             uiContext = testDispatcher
         )

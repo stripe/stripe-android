@@ -17,8 +17,7 @@ import androidx.fragment.app.commit
 import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.appbar.MaterialToolbar
-import com.google.android.material.bottomsheet.BottomSheetBehavior
-import com.stripe.android.paymentsheet.databinding.StripeActivityPaymentOptionsBinding
+import com.stripe.android.paymentsheet.databinding.ActivityPaymentOptionsBinding
 import com.stripe.android.paymentsheet.ui.AnimationConstants
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.ui.PrimaryButton
@@ -29,27 +28,22 @@ import com.stripe.android.paymentsheet.ui.PrimaryButton
 internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>() {
     @VisibleForTesting
     internal val viewBinding by lazy {
-        StripeActivityPaymentOptionsBinding.inflate(layoutInflater)
+        ActivityPaymentOptionsBinding.inflate(layoutInflater)
     }
 
     @VisibleForTesting
     internal var viewModelFactory: ViewModelProvider.Factory =
         PaymentOptionsViewModel.Factory(
             { application },
-            { requireNotNull(starterArgs) }
+            { requireNotNull(starterArgs) },
+            this,
+            intent?.extras
         )
 
     override val viewModel: PaymentOptionsViewModel by viewModels { viewModelFactory }
 
     private val starterArgs: PaymentOptionContract.Args? by lazy {
         PaymentOptionContract.Args.fromIntent(intent)
-    }
-
-    @VisibleForTesting
-    internal val bottomSheetBehavior by lazy { BottomSheetBehavior.from(bottomSheet) }
-
-    override val bottomSheetController: BottomSheetController by lazy {
-        BottomSheetController(bottomSheetBehavior = bottomSheetBehavior)
     }
 
     private val fragmentContainerId: Int
@@ -63,6 +57,7 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
     override val scrollView: ScrollView by lazy { viewBinding.scrollView }
     override val messageView: TextView by lazy { viewBinding.message }
     override val fragmentContainerParent: ViewGroup by lazy { viewBinding.fragmentContainerParent }
+    override val testModeIndicator: TextView by lazy { viewBinding.testmode }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -82,22 +77,23 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
             closeSheet(it)
         }
 
-        setupAddButton(viewBinding.addButton)
+        setupContinueButton(viewBinding.continueButton)
 
         viewModel.transition.observe(this) { event ->
-            val transitionTarget = event.getContentIfNotHandled()
-            if (transitionTarget != null) {
+            event?.getContentIfNotHandled()?.let { transitionTarget ->
                 onTransitionTarget(
                     transitionTarget,
                     bundleOf(
-                        EXTRA_STARTER_ARGS to starterArgs,
-                        EXTRA_FRAGMENT_CONFIG to transitionTarget.fragmentConfig
+                        PaymentSheetActivity.EXTRA_STARTER_ARGS to starterArgs,
+                        PaymentSheetActivity.EXTRA_FRAGMENT_CONFIG to
+                            transitionTarget.fragmentConfig
                     )
                 )
             }
         }
 
-        viewModel.fragmentConfig.observe(this) { config ->
+        viewModel.fragmentConfigEvent.observe(this) { event ->
+            val config = event.getContentIfNotHandled()
             if (config != null) {
                 viewModel.transitionTo(
                     // It would be nice to see this condition move into the PaymentOptionsListFragment
@@ -116,7 +112,7 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
         supportFragmentManager.registerFragmentLifecycleCallbacks(
             object : FragmentManager.FragmentLifecycleCallbacks() {
                 override fun onFragmentStarted(fm: FragmentManager, fragment: Fragment) {
-                    viewBinding.addButton.isVisible =
+                    viewBinding.continueButton.isVisible =
                         fragment is PaymentOptionsAddPaymentMethodFragment
                 }
             },
@@ -124,11 +120,12 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
         )
     }
 
-    private fun setupAddButton(addButton: PrimaryButton) {
-        viewBinding.addButton.updateState(PrimaryButton.State.Ready)
+    private fun setupContinueButton(addButton: PrimaryButton) {
+        viewBinding.continueButton.lockVisible = false
+        viewBinding.continueButton.updateState(PrimaryButton.State.Ready)
 
         viewModel.config?.primaryButtonColor?.let {
-            viewBinding.addButton.backgroundTintList = it
+            viewBinding.continueButton.backgroundTintList = it
         }
 
         addButton.setOnClickListener {

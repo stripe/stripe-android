@@ -2,27 +2,26 @@ package com.stripe.android
 
 import android.content.Intent
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.exception.InvalidRequestException
+import com.stripe.android.core.model.StripeModel
 import com.stripe.android.exception.AuthenticationException
-import com.stripe.android.exception.InvalidRequestException
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.Source
 import com.stripe.android.model.StripeFile
-import com.stripe.android.model.StripeModel
 import com.stripe.android.model.StripeParamsModel
 import com.stripe.android.model.WeChatPayNextAction
 import com.stripe.android.networking.ApiRequest
 import com.stripe.android.networking.StripeApiRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.TestCoroutineDispatcher
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.JUnit4
 import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
-import kotlin.test.AfterTest
 import kotlin.test.assertFailsWith
 import kotlin.test.assertSame
 
@@ -35,7 +34,7 @@ internal class StripeKtxTest {
     private val mockApiRepository: StripeApiRepository = mock()
     private val mockPaymentController: PaymentController = mock()
 
-    private val testDispatcher = TestCoroutineDispatcher()
+    private val testDispatcher = StandardTestDispatcher()
 
     private val stripe: Stripe =
         Stripe(
@@ -45,11 +44,6 @@ internal class StripeKtxTest {
             TEST_STRIPE_ACCOUNT_ID,
             testDispatcher
         )
-
-    @AfterTest
-    fun cleanup() {
-        testDispatcher.cleanupTestCoroutines()
-    }
 
     @Test
     fun `When repository returns correct value then createPaymentMethod should Succeed`(): Unit =
@@ -221,7 +215,7 @@ internal class StripeKtxTest {
 
     @Test
     fun `When repository returns correct value then createFile should Succeed`(): Unit =
-        testDispatcher.runBlockingTest {
+        runTest {
             val expectedFile = mock<StripeFile>()
 
             whenever(
@@ -239,7 +233,7 @@ internal class StripeKtxTest {
 
     @Test
     fun `When repository returns null then createFile should throw InvalidRequestException`(): Unit =
-        testDispatcher.runBlockingTest {
+        runTest {
             whenever(
                 mockApiRepository.createFile(any(), any())
             ).thenReturn(null)
@@ -296,7 +290,7 @@ internal class StripeKtxTest {
         )
 
     @Test
-    fun `When repository returns correct value then retrieveSource should Succeed`() = testDispatcher.runBlockingTest {
+    fun `When repository returns correct value then retrieveSource should Succeed`() = runTest {
         val expectedApiObj = mock<Source>()
         whenever(
             mockApiRepository.retrieveSource(any(), any(), any())
@@ -312,7 +306,7 @@ internal class StripeKtxTest {
 
     @Test
     fun `When repository throws exception then retrieveSource should throw same exception`(): Unit =
-        testDispatcher.runBlockingTest {
+        runTest {
             whenever(
                 mockApiRepository.retrieveSource(any(), any(), any())
             ).thenThrow(mock<AuthenticationException>())
@@ -328,7 +322,7 @@ internal class StripeKtxTest {
 
     @Test
     fun `When repository returns null then retrieveSource should throw InvalidRequestException`(): Unit =
-        testDispatcher.runBlockingTest {
+        runTest {
             whenever(
                 mockApiRepository.retrieveSource(any(), any(), any())
             ).thenReturn(null)
@@ -344,7 +338,7 @@ internal class StripeKtxTest {
 
     @Test
     fun `When repository returns correct value then confirmSetupIntentSuspend should Succeed`() =
-        testDispatcher.runBlockingTest {
+        runTest {
             val expectedApiObj = mock<SetupIntent>()
             whenever(
                 mockApiRepository.confirmSetupIntent(any(), any(), any())
@@ -356,7 +350,7 @@ internal class StripeKtxTest {
 
     @Test
     fun `When repository throws exception then confirmSetupIntentSuspend should throw same exception`(): Unit =
-        testDispatcher.runBlockingTest {
+        runTest {
             whenever(
                 mockApiRepository.confirmSetupIntent(any(), any(), any())
             ).thenThrow(mock<AuthenticationException>())
@@ -368,7 +362,7 @@ internal class StripeKtxTest {
 
     @Test
     fun `When repository returns null then confirmSetupIntentSuspend should throw InvalidRequestException`(): Unit =
-        testDispatcher.runBlockingTest {
+        runTest {
             whenever(
                 mockApiRepository.confirmSetupIntent(any(), any(), any())
             ).thenReturn(null)
@@ -380,7 +374,7 @@ internal class StripeKtxTest {
 
     @Test
     fun `When repository returns correct value then confirmPaymentIntentSuspend should Succeed`() =
-        testDispatcher.runBlockingTest {
+        runTest {
             val expectedApiObj = mock<PaymentIntent>()
             whenever(
                 mockApiRepository.confirmPaymentIntent(any(), any(), any())
@@ -392,7 +386,7 @@ internal class StripeKtxTest {
 
     @Test
     fun `When repository throws exception then confirmPaymentIntentSuspend should throw same exception`(): Unit =
-        testDispatcher.runBlockingTest {
+        runTest {
             whenever(
                 mockApiRepository.confirmPaymentIntent(any(), any(), any())
             ).thenThrow(mock<AuthenticationException>())
@@ -404,7 +398,7 @@ internal class StripeKtxTest {
 
     @Test
     fun `When repository returns null then confirmPaymentIntentSuspend should throw InvalidRequestException`(): Unit =
-        testDispatcher.runBlockingTest {
+        runTest {
             whenever(
                 mockApiRepository.confirmPaymentIntent(any(), any(), any())
             ).thenReturn(null)
@@ -416,7 +410,7 @@ internal class StripeKtxTest {
 
     @Test
     fun `When controller throws exception then confirmAlipayPayment should throw same exception`(): Unit =
-        testDispatcher.runBlockingTest {
+        runTest {
             whenever(
                 mockPaymentController.confirmAndAuthenticateAlipay(any(), any(), any())
             ).thenThrow(mock<AuthenticationException>())
@@ -432,7 +426,7 @@ internal class StripeKtxTest {
 
     @Test
     fun `When controller returns correct value then confirmAlipayPayment should succeed`(): Unit =
-        testDispatcher.runBlockingTest {
+        runTest {
             val expectedApiObj = mock<PaymentIntentResult>()
 
             whenever(
@@ -519,7 +513,7 @@ internal class StripeKtxTest {
 
     @Test
     fun `When controller returns correct value then confirmWeChatPayPayment should succeed`(): Unit =
-        testDispatcher.runBlockingTest {
+        runTest {
             val expectedApiObj = mock<WeChatPayNextAction>()
 
             whenever(
@@ -536,7 +530,7 @@ internal class StripeKtxTest {
 
     @Test
     fun `When controller throws exception then confirmWeChatPayPayment should throw same exception`(): Unit =
-        testDispatcher.runBlockingTest {
+        runTest {
             whenever(
                 mockPaymentController.confirmWeChatPay(any(), any())
             ).thenThrow(mock<AuthenticationException>())
@@ -553,7 +547,7 @@ internal class StripeKtxTest {
     fun `When nextAction is not for WeChatPay then should throw InvalidRequestException`(): Unit =
         // when nextAction is not for WeChatPay, mockPaymentController fails in `require` and
         // throws an IllegalArgumentException
-        testDispatcher.runBlockingTest {
+        runTest {
             whenever(
                 mockPaymentController.confirmWeChatPay(any(), any())
             ).thenThrow(mock<IllegalArgumentException>())
@@ -570,7 +564,7 @@ internal class StripeKtxTest {
     `Given repository returns non-empty value when calling createAPI then returns correct result`(
         crossinline repositoryBlock: suspend (RepositoryParam, ApiRequest.Options) -> ApiObject?,
         crossinline createApiInvocationBlock: suspend (CreateAPIParam, String?, String?) -> ApiObject
-    ) = testDispatcher.runBlockingTest {
+    ) = runTest {
         val expectedApiObj = mock<ApiObject>()
 
         whenever(
@@ -590,7 +584,7 @@ internal class StripeKtxTest {
     `Given repository throws exception when calling createAPI then throws same exception`(
         crossinline repositoryBlock: suspend (RepositoryParam, ApiRequest.Options) -> StripeModel?,
         crossinline createApiInvocationBlock: suspend (CreateAPIParam, String?, String?) -> StripeModel
-    ): Unit = testDispatcher.runBlockingTest {
+    ): Unit = runTest {
         whenever(
             repositoryBlock(any(), any())
         ).thenThrow(mock<AuthenticationException>())
@@ -608,7 +602,7 @@ internal class StripeKtxTest {
     `Given repository returns null when calling createAPI then throws InvalidRequestException`(
         crossinline repositoryBlock: suspend (RepositoryParam, ApiRequest.Options) -> ApiObject?,
         crossinline createApiInvocationBlock: suspend (CreateAPIParam, String?, String?) -> ApiObject
-    ): Unit = testDispatcher.runBlockingTest {
+    ): Unit = runTest {
         whenever(
             repositoryBlock(any(), any())
         ).thenReturn(null)
@@ -626,7 +620,7 @@ internal class StripeKtxTest {
     `Given repository returns non-empty value when calling createAPI with String param then returns correct result`(
         crossinline repositoryBlock: suspend (RepositoryParam, ApiRequest.Options) -> ApiObject?,
         crossinline createApiInvocationBlock: suspend (String, String?, String?) -> ApiObject
-    ) = testDispatcher.runBlockingTest {
+    ) = runTest {
         val expectedApiObj = mock<ApiObject>()
 
         whenever(
@@ -646,7 +640,7 @@ internal class StripeKtxTest {
     `Given repository throws exception when calling createAPI with String param then throws same exception`(
         crossinline repositoryBlock: suspend (RepositoryParam, ApiRequest.Options) -> StripeModel?,
         crossinline createApiInvocationBlock: suspend (String, String?, String?) -> StripeModel
-    ): Unit = testDispatcher.runBlockingTest {
+    ): Unit = runTest {
         whenever(
             repositoryBlock(any(), any())
         ).thenThrow(mock<AuthenticationException>())
@@ -664,7 +658,7 @@ internal class StripeKtxTest {
     `Given repository returns null when calling createAPI with String param then throws InvalidRequestException`(
         crossinline repositoryBlock: suspend (RepositoryParam, ApiRequest.Options) -> ApiObject?,
         crossinline createApiInvocationBlock: suspend (String, String?, String?) -> ApiObject
-    ): Unit = testDispatcher.runBlockingTest {
+    ): Unit = runTest {
         whenever(
             repositoryBlock(any(), any())
         ).thenReturn(null)
@@ -682,7 +676,7 @@ internal class StripeKtxTest {
     `Given repository returns non-empty value when calling retrieveAPI with String param then returns correct result`(
         crossinline repositoryBlock: suspend (String, ApiRequest.Options, List<String>) -> ApiObject?,
         crossinline retrieveApiInvocationBlock: suspend (String, String?) -> ApiObject
-    ): Unit = testDispatcher.runBlockingTest {
+    ): Unit = runTest {
         val expectedApiObj = mock<ApiObject>()
 
         whenever(
@@ -701,7 +695,7 @@ internal class StripeKtxTest {
     `Given repository throws exception when calling retrieveAPI with String param then throws same exception`(
         repositoryBlock: suspend (String, ApiRequest.Options, List<String>) -> StripeModel?,
         retrieveApiInvocationBlock: suspend (String, String?) -> StripeModel
-    ): Unit = testDispatcher.runBlockingTest {
+    ): Unit = runTest {
         whenever(
             repositoryBlock(any(), any(), any())
         ).thenThrow(mock<AuthenticationException>())
@@ -718,7 +712,7 @@ internal class StripeKtxTest {
     `Given repository returns null when calling retrieveAPI with String param then throws InvalidRequestException`(
         crossinline repositoryBlock: suspend (String, ApiRequest.Options, List<String>) -> ApiObject?,
         crossinline retrieveApiInvocationBlock: suspend (String, String?) -> ApiObject
-    ): Unit = testDispatcher.runBlockingTest {
+    ): Unit = runTest {
         whenever(
             repositoryBlock(any(), any(), any())
         ).thenReturn(null)
@@ -736,7 +730,7 @@ internal class StripeKtxTest {
         crossinline controllerCheckBlock: (Int, Intent?) -> Boolean,
         crossinline controllerInvocationBlock: suspend (Intent) -> ApiObject,
         crossinline getAPIInvocationBlock: suspend (Int, Intent) -> ApiObject
-    ) = testDispatcher.runBlockingTest {
+    ) = runTest {
         val expectedApiObj = mock<ApiObject>()
 
         whenever(
@@ -760,7 +754,7 @@ internal class StripeKtxTest {
         crossinline controllerCheckBlock: (Int, Intent?) -> Boolean,
         crossinline controllerInvocationBlock: suspend (Intent) -> ApiObject,
         crossinline getAPIInvocationBlock: suspend (Int, Intent) -> ApiObject
-    ): Unit = testDispatcher.runBlockingTest {
+    ): Unit = runTest {
         whenever(
             controllerCheckBlock(any(), any())
         ).thenReturn(true)
@@ -781,7 +775,7 @@ internal class StripeKtxTest {
     `Given controller check fails when calling getAPI then throws InvalidRequestException`(
         crossinline controllerCheckBlock: (Int, Intent?) -> Boolean,
         crossinline getAPIInvocationBlock: suspend (Int, Intent) -> ApiObject
-    ): Unit = testDispatcher.runBlockingTest {
+    ): Unit = runTest {
         whenever(
             controllerCheckBlock(any(), any())
         ).thenReturn(false)

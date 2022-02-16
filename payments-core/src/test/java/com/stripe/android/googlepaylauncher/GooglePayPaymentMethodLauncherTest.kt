@@ -1,5 +1,6 @@
 package com.stripe.android.googlepaylauncher
 
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -14,23 +15,22 @@ import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
+import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.model.PaymentMethodFixtures
-import com.stripe.android.networking.AnalyticsRequestExecutor
-import com.stripe.android.networking.AnalyticsRequestFactory
+import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.TestCoroutineDispatcher
-import kotlinx.coroutines.test.TestCoroutineScope
+import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertFailsWith
 
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
 class GooglePayPaymentMethodLauncherTest {
-    private val testDispatcher = TestCoroutineDispatcher()
-    private val testScope = TestCoroutineScope(testDispatcher)
+    private val testDispatcher = UnconfinedTestDispatcher()
+    private val testScope = TestScope(testDispatcher)
 
     private val scenario = launchFragmentInContainer(initialState = Lifecycle.State.CREATED) {
         TestFragment()
@@ -43,19 +43,14 @@ class GooglePayPaymentMethodLauncherTest {
         GooglePayPaymentMethodLauncher.ReadyCallback(readyCallbackInvocations::add)
     private val resultCallback = GooglePayPaymentMethodLauncher.ResultCallback(results::add)
 
-    private val analyticsRequestFactory = AnalyticsRequestFactory(
-        ApplicationProvider.getApplicationContext(),
+    val context: Context = ApplicationProvider.getApplicationContext()
+    private val analyticsRequestFactory = PaymentAnalyticsRequestFactory(
+        context,
         ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
     )
     private val firedEvents = mutableListOf<String>()
     private val analyticsRequestExecutor = AnalyticsRequestExecutor {
         firedEvents.add(it.params["event"].toString())
-    }
-
-    @AfterTest
-    fun cleanup() {
-        testDispatcher.cleanupTestCoroutines()
-        testScope.cleanupTestCoroutines()
     }
 
     @Test
@@ -74,9 +69,14 @@ class GooglePayPaymentMethodLauncherTest {
                 ) {
                     resultCallback.onResult(it)
                 },
+                false,
+                context,
                 { FakeGooglePayRepository(true) },
-                analyticsRequestFactory,
-                analyticsRequestExecutor
+                emptySet(),
+                { ApiKeyFixtures.FAKE_PUBLISHABLE_KEY },
+                { null },
+                paymentAnalyticsRequestFactory = analyticsRequestFactory,
+                analyticsRequestExecutor = analyticsRequestExecutor
             )
             scenario.moveToState(Lifecycle.State.RESUMED)
 
@@ -108,9 +108,14 @@ class GooglePayPaymentMethodLauncherTest {
                 ) {
                     resultCallback.onResult(it)
                 },
+                false,
+                context,
                 { FakeGooglePayRepository(true) },
-                analyticsRequestFactory,
-                analyticsRequestExecutor
+                emptySet(),
+                { ApiKeyFixtures.FAKE_PUBLISHABLE_KEY },
+                { null },
+                paymentAnalyticsRequestFactory = analyticsRequestFactory,
+                analyticsRequestExecutor = analyticsRequestExecutor
             )
 
             assertThat(firedEvents)
@@ -135,9 +140,14 @@ class GooglePayPaymentMethodLauncherTest {
                 ) {
                     resultCallback.onResult(it)
                 },
+                false,
+                context,
                 { FakeGooglePayRepository(false) },
-                analyticsRequestFactory,
-                analyticsRequestExecutor
+                emptySet(),
+                { ApiKeyFixtures.FAKE_PUBLISHABLE_KEY },
+                { null },
+                paymentAnalyticsRequestFactory = analyticsRequestFactory,
+                analyticsRequestExecutor = analyticsRequestExecutor
             )
             scenario.moveToState(Lifecycle.State.RESUMED)
 
@@ -149,6 +159,42 @@ class GooglePayPaymentMethodLauncherTest {
                     currencyCode = "usd"
                 )
             }
+        }
+    }
+
+    @Test
+    fun `when skipReadyCheck should not check if Google Pay is ready`() {
+        scenario.onFragment { fragment ->
+            val launcher = GooglePayPaymentMethodLauncher(
+                testScope,
+                CONFIG,
+                readyCallback,
+                fragment.registerForActivityResult(
+                    GooglePayPaymentMethodLauncherContract(),
+                    FakeActivityResultRegistry(
+                        GooglePayPaymentMethodLauncher.Result.Completed(
+                            PaymentMethodFixtures.CARD_PAYMENT_METHOD
+                        )
+                    )
+                ) {
+                    resultCallback.onResult(it)
+                },
+                true,
+                context,
+                { FakeGooglePayRepository(false) },
+                emptySet(),
+                { ApiKeyFixtures.FAKE_PUBLISHABLE_KEY },
+                { null },
+                paymentAnalyticsRequestFactory = analyticsRequestFactory,
+                analyticsRequestExecutor = analyticsRequestExecutor
+            )
+            scenario.moveToState(Lifecycle.State.RESUMED)
+
+            assertThat(readyCallbackInvocations)
+                .isEmpty()
+
+            // Should not throw error
+            launcher.present(currencyCode = "usd")
         }
     }
 

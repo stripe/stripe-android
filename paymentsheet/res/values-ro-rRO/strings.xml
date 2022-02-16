@@ -1,25 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
-  <!-- Billing address section title for card form entry. -->
-  <string name="billing_details">Adresă de facturare</string>
+  <!-- Used for accessibility to describe the button on the payment sheet list of options to add a new payment method. -->
+  <string name="add_new_payment_method">Adăugați o nouă metodă de plată</string>
+  <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
+  <string name="bank_account_ending_in">Eliminați contul bancar care se termină cu %s</string>
   <!-- Button title to cancel action in an alert -->
   <string name="cancel">Anulare</string>
   <!-- Done button title -->
   <string name="done">Efectuat</string>
   <!-- Button title to enter editing mode -->
   <string name="edit">Editare</string>
-  <!-- Caption for Email field on address form -->
-  <string name="email">E-mail</string>
-  <!-- Error message when email is invalid -->
-  <string name="email_is_invalid">E-mailul dvs. nu este valid.</string>
-  <!-- An error message displayed when the customer's IBAN is incomplete. -->
-  <string name="iban_incomplete">Codul IBAN pe care l-ați introdus nu este complet.</string>
-  <!-- An error message displayed when the customer's iban is invalid. -->
-  <string name="iban_invalid">Codul IBAN pe care l-ați introdus nu este valid.</string>
-  <!-- An error message displayed when the IBAN country code is not supported. -->
-  <string name="iban_invalid_country">Codul IBAN pe care l-ați introdus nu este valid, \"%s\" nu este un cod de țară acceptat.</string>
-  <!-- An error message displayed when the IBAN does not start with a two-letter country code. -->
-  <string name="iban_invalid_start">Codul dvs. IBAN trebuie să înceapă cu un cod de țară format din două litere.</string>
   <!-- Button title for confirmation alert to remove a saved payment method
    Text for remove button -->
   <string name="remove">Eliminare</string>
@@ -27,7 +17,6 @@
   <string name="stripe_failure_connection_error">Întâmpinăm probleme de conectare cu furnizorul nostru de plăți. Verificați conexiunea la internet și încercați din nou.</string>
   <!-- When an internal error is reported when a google pay payment is started. -->
   <string name="stripe_google_pay_error_internal">A apărut o eroare internă.</string>
-  <string name="stripe_paymentsheet_add_button_label">Adăugare</string>
   <!-- Text for a button that, when tapped, displays another screen where the customer can add payment method details -->
   <string name="stripe_paymentsheet_add_payment_method_button_label">+ Adăugare</string>
   <!-- Card details entry form header title -->
@@ -39,10 +28,8 @@
   <!-- Text for back button -->
   <string name="stripe_paymentsheet_back">Înapoi</string>
   <string name="stripe_paymentsheet_close">Închidere</string>
-  <!-- The label of a text field that is optional. For example, 'Email (optional)' or 'Name (optional) -->
-  <string name="stripe_paymentsheet_form_label_optional">%s (opțional)</string>
-  <!-- iDEAL bank section title for iDEAL form entry. -->
-  <string name="stripe_paymentsheet_ideal_bank">iDEAL Bank</string>
+  <!-- Text for continue button -->
+  <string name="stripe_paymentsheet_continue_button_label">Continuare</string>
   <!-- Title of a section containing multiple payment methods that can selected and will collect the payment information from the user. -->
   <string name="stripe_paymentsheet_or_pay_using">Sau folosiți ca metodă de plată</string>
   <!-- Title of a section containing a card form that will collect the payment information from the user. -->
@@ -51,6 +38,8 @@
   <string name="stripe_paymentsheet_pay_button_amount">Plătiți %s</string>
   <!-- Label for a button that starts processing the payment. -->
   <string name="stripe_paymentsheet_pay_button_label">Plătiți</string>
+  <!-- Payment Method type brand name  -->
+  <string name="stripe_paymentsheet_payment_method_afterpay_clearpay">Afterpay</string>
   <!-- Title for credit card number entry field -->
   <string name="stripe_paymentsheet_payment_method_card">Număr card</string>
   <!-- Payment method brand name -->
@@ -65,8 +54,8 @@
   <string name="stripe_paymentsheet_save_this_card_with_merchant_name">Salvați acest card pentru plăți viitoare către %s</string>
   <!-- Title shown above a carousel containing the customer&apos;s payment methods -->
   <string name="stripe_paymentsheet_select_payment_method">Selectați metoda de plată</string>
-  <!-- SEPA mandate text -->
-  <string name="stripe_paymentsheet_sepa_mandate">Prin furnizarea informațiilor dvs. privind plata și confirmarea acestei plăți, autorizați (A) %s și Stripe, furnizorul nostru de servicii de plată, să trimită instrucțiuni băncii dvs. pentru a vă debita contul și pentru ca (B) banca dvs. să facă acest lucru în conformitate cu instrucțiunile respective. Conform drepturilor dvs., aveți dreptul la o rambursare din partea băncii dvs. în conformitate cu termenii și condițiile acordului dvs. cu aceasta. O rambursare trebuie revendicată în termen de opt săptămâni de la data debitării contului. Drepturile dvs. sunt explicate într-o declarație pe care o puteți obține de la bancă. Sunteți de acord să primiți notificări pentru debitări viitoare cu până la două zile înainte de efectuarea acestora.</string>
   <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->
   <string name="stripe_paymentsheet_setup_button_label">Configurare</string>
+  <!-- Label indicating the total amount that the user is authorizing (e.g. "Total: $25.00") -->
+  <string name="stripe_paymentsheet_total_amount">Total: %s</string>
 </resources>

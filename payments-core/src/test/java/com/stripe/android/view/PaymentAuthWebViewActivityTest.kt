@@ -10,7 +10,7 @@ import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.auth.PaymentBrowserAuthContract
-import com.stripe.android.exception.StripeException
+import com.stripe.android.core.exception.StripeException
 import com.stripe.android.payments.PaymentFlowResult
 import org.junit.Rule
 import org.junit.runner.RunWith
@@ -96,7 +96,8 @@ internal class PaymentAuthWebViewActivityTest {
             requestCode = REQUEST_CODE,
             clientSecret = CLIENT_SECRET,
             url = "https://example.com",
-            publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
+            publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+            isInstantApp = false
         )
     }
 }

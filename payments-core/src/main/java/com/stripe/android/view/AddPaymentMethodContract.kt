@@ -9,7 +9,7 @@ internal class AddPaymentMethodContract :
 
     override fun createIntent(
         context: Context,
-        input: AddPaymentMethodActivityStarter.Args?
+        input: AddPaymentMethodActivityStarter.Args
     ): Intent {
         return Intent(context, AddPaymentMethodActivity::class.java)
             .putExtra(ActivityStarter.Args.EXTRA, input)

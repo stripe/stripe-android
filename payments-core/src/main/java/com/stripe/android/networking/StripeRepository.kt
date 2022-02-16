@@ -3,15 +3,16 @@ package com.stripe.android.networking
 import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.cards.Bin
-import com.stripe.android.exception.APIConnectionException
-import com.stripe.android.exception.APIException
+import com.stripe.android.core.exception.APIConnectionException
+import com.stripe.android.core.exception.APIException
+import com.stripe.android.core.exception.InvalidRequestException
 import com.stripe.android.exception.AuthenticationException
 import com.stripe.android.exception.CardException
-import com.stripe.android.exception.InvalidRequestException
 import com.stripe.android.model.BankStatuses
 import com.stripe.android.model.CardMetadata
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
+import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.Customer
 import com.stripe.android.model.ListPaymentMethodsParams
 import com.stripe.android.model.PaymentIntent
@@ -81,6 +82,18 @@ abstract class StripeRepository {
         clientSecret: String,
         options: ApiRequest.Options,
         locale: Locale
+    ): PaymentIntent?
+
+    @Throws(
+        AuthenticationException::class,
+        InvalidRequestException::class,
+        APIConnectionException::class,
+        APIException::class
+    )
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    internal abstract suspend fun refreshPaymentIntent(
+        clientSecret: String,
+        options: ApiRequest.Options
     ): PaymentIntent?
 
     @Throws(
@@ -175,7 +188,6 @@ abstract class StripeRepository {
         APIException::class
     )
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    @VisibleForTesting
     abstract suspend fun createPaymentMethod(
         paymentMethodCreateParams: PaymentMethodCreateParams,
         options: ApiRequest.Options
@@ -375,4 +387,15 @@ abstract class StripeRepository {
     internal abstract suspend fun createRadarSession(
         requestOptions: ApiRequest.Options
     ): RadarSession?
+
+    // Link endpoints
+
+    @Throws(
+        AuthenticationException::class,
+        InvalidRequestException::class,
+    )
+    abstract suspend fun lookupConsumerSession(
+        email: String,
+        requestOptions: ApiRequest.Options
+    ): ConsumerSessionLookup?
 }

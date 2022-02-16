@@ -8,10 +8,10 @@ import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.model.Address
 import com.stripe.android.model.AddressFixtures
-import com.stripe.android.model.CountryCode
+import com.stripe.android.core.model.CountryCode
 import com.stripe.android.utils.TestUtils.idleLooper
 import com.stripe.android.view.ActivityScenarioFactory
-import com.stripe.android.view.Country
+import com.stripe.android.core.model.Country
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify

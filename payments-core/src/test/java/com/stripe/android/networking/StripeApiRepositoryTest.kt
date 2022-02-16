@@ -9,13 +9,22 @@ import com.stripe.android.FileFactory
 import com.stripe.android.FraudDetectionDataFixtures
 import com.stripe.android.FraudDetectionDataRepository
 import com.stripe.android.Stripe
-import com.stripe.android.exception.APIConnectionException
-import com.stripe.android.exception.InvalidRequestException
+import com.stripe.android.core.exception.APIConnectionException
+import com.stripe.android.core.exception.InvalidRequestException
+import com.stripe.android.core.networking.AnalyticsRequest
+import com.stripe.android.core.networking.AnalyticsRequestExecutor
+import com.stripe.android.core.networking.DefaultStripeNetworkClient
+import com.stripe.android.core.networking.StripeNetworkClient
+import com.stripe.android.core.networking.StripeRequest
+import com.stripe.android.core.networking.StripeResponse
 import com.stripe.android.model.BankAccountTokenParamsFixtures
 import com.stripe.android.model.BinFixtures
 import com.stripe.android.model.CardParams
 import com.stripe.android.model.CardParamsFixtures
 import com.stripe.android.model.ConfirmPaymentIntentParams
+import com.stripe.android.model.ConfirmSetupIntentParams
+import com.stripe.android.model.ConfirmStripeIntentParams
+import com.stripe.android.model.ConsumerFixtures
 import com.stripe.android.model.ListPaymentMethodsParams
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
@@ -23,6 +32,7 @@ import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodPreferenceFixtures
+import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.SourceFixtures
 import com.stripe.android.model.SourceParams
 import com.stripe.android.model.Stripe3ds2AuthParams
@@ -32,19 +42,20 @@ import com.stripe.android.model.StripeFileParams
 import com.stripe.android.model.StripeFilePurpose
 import com.stripe.android.model.TokenFixtures
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.TestCoroutineDispatcher
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.runTest
 import org.junit.runner.RunWith
 import org.mockito.kotlin.KArgumentCaptor
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argThat
+import org.mockito.kotlin.argWhere
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
+import org.mockito.kotlin.verifyNoInteractions
 import org.mockito.kotlin.verifyNoMoreInteractions
-import org.mockito.kotlin.verifyZeroInteractions
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 import java.net.HttpURLConnection
@@ -63,7 +74,7 @@ import kotlin.test.assertTrue
 @RunWith(RobolectricTestRunner::class)
 @ExperimentalCoroutinesApi
 internal class StripeApiRepositoryTest {
-    private val testDispatcher = TestCoroutineDispatcher()
+    private val testDispatcher = UnconfinedTestDispatcher()
 
     private val context: Context = ApplicationProvider.getApplicationContext()
     private val stripeApiRepository = StripeApiRepository(
@@ -73,7 +84,7 @@ internal class StripeApiRepositoryTest {
     )
     private val fileFactory = FileFactory(context)
 
-    private val stripeApiRequestExecutor: ApiRequestExecutor = mock()
+    private val stripeNetworkClient: StripeNetworkClient = mock()
     private val analyticsRequestExecutor: AnalyticsRequestExecutor = mock()
     private val fraudDetectionDataRepository: FraudDetectionDataRepository = mock()
 
@@ -92,7 +103,6 @@ internal class StripeApiRepositoryTest {
     @AfterTest
     fun cleanup() {
         Stripe.advancedFraudSignalsEnabled = true
-        testDispatcher.cleanupTestCoroutines()
     }
 
     @Test
@@ -197,6 +207,14 @@ internal class StripeApiRepositoryTest {
     }
 
     @Test
+    fun testGetRefreshPaymentIntentUrl() {
+        assertEquals(
+            "https://api.stripe.com/v1/payment_intents/pi123/refresh",
+            StripeApiRepository.getRefreshPaymentIntentUrl("pi123")
+        )
+    }
+
+    @Test
     fun testConfirmPaymentIntentUrl() {
         assertEquals(
             "https://api.stripe.com/v1/payment_intents/pi123/confirm",
@@ -205,7 +223,15 @@ internal class StripeApiRepositoryTest {
     }
 
     @Test
-    fun createSource_shouldLogSourceCreation_andReturnSource() = testDispatcher.runBlockingTest {
+    fun testConsumerSessionLookupUrl() {
+        assertEquals(
+            "https://api.stripe.com/v1/consumers/sessions/lookup",
+            StripeApiRepository.consumerSessionLookupUrl
+        )
+    }
+
+    @Test
+    fun createSource_shouldLogSourceCreation_andReturnSource() = runTest {
         // Check that we get a token back; we don't care about its fields for this test.
         requireNotNull(
             stripeApiRepository.createSource(
@@ -216,14 +242,65 @@ internal class StripeApiRepositoryTest {
     }
 
     @Test
-    fun createCardSource_withAttribution_shouldPopulateProductUsage() =
-        testDispatcher.runBlockingTest {
+    fun createCardSource_setsCorrectPaymentUserAgent() =
+        runTest {
             val stripeResponse = StripeResponse(
                 200,
                 SourceFixtures.SOURCE_CARD_JSON.toString(),
                 emptyMap()
             )
-            whenever(stripeApiRequestExecutor.execute(any<ApiRequest>()))
+            whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+                .thenReturn(stripeResponse)
+
+            val productUsage = "TestProductUsage"
+            create(setOf(productUsage)).createSource(
+                SourceParams.createCardParams(CardParamsFixtures.DEFAULT),
+                DEFAULT_OPTIONS
+            )
+
+            verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
+            val apiRequest = apiRequestArgumentCaptor.firstValue
+            assertThat(apiRequest.params?.get("payment_user_agent"))
+                .isEqualTo(
+                    "stripe-android/${Stripe.VERSION_NAME};$productUsage"
+                )
+        }
+
+    @Test
+    fun createCardSource_withAttribution_setsCorrectPaymentUserAgent() =
+        runTest {
+            val stripeResponse = StripeResponse(
+                200,
+                SourceFixtures.SOURCE_CARD_JSON.toString(),
+                emptyMap()
+            )
+            whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+                .thenReturn(stripeResponse)
+
+            val productUsage = "TestProductUsage"
+            create(setOf(productUsage)).createSource(
+                SourceParams.createCardParams(CardParamsFixtures.WITH_ATTRIBUTION),
+                DEFAULT_OPTIONS
+            )
+
+            verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
+            val apiRequest = apiRequestArgumentCaptor.firstValue
+            assertThat(apiRequest.params?.get("payment_user_agent"))
+                .isEqualTo(
+                    "stripe-android/${Stripe.VERSION_NAME}" +
+                        ";$productUsage;CardInputView"
+                )
+        }
+
+    @Test
+    fun createCardSource_withAttribution_shouldPopulateProductUsage() =
+        runTest {
+            val stripeResponse = StripeResponse(
+                200,
+                SourceFixtures.SOURCE_CARD_JSON.toString(),
+                emptyMap()
+            )
+            whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
                 .thenReturn(stripeResponse)
             create().createSource(
                 SourceParams.createCardParams(CardParamsFixtures.WITH_ATTRIBUTION),
@@ -231,20 +308,20 @@ internal class StripeApiRepositoryTest {
             )
 
             verifyFraudDetectionDataAndAnalyticsRequests(
-                AnalyticsEvent.SourceCreate,
+                PaymentAnalyticsEvent.SourceCreate,
                 productUsage = listOf("CardInputView")
             )
         }
 
     @Test
     fun createAlipaySource_withAttribution_shouldPopulateProductUsage() =
-        testDispatcher.runBlockingTest {
+        runTest {
             val stripeResponse = StripeResponse(
                 200,
                 SourceFixtures.ALIPAY_JSON.toString(),
                 emptyMap()
             )
-            whenever(stripeApiRequestExecutor.execute(any<ApiRequest>()))
+            whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
                 .thenReturn(stripeResponse)
             create().createSource(
                 SourceParams.createMultibancoParams(
@@ -256,13 +333,13 @@ internal class StripeApiRepositoryTest {
             )
 
             verifyFraudDetectionDataAndAnalyticsRequests(
-                AnalyticsEvent.SourceCreate,
+                PaymentAnalyticsEvent.SourceCreate,
                 productUsage = null
             )
         }
 
     @Test
-    fun createSource_withConnectAccount_keepsHeaderInAccount() = testDispatcher.runBlockingTest {
+    fun createSource_withConnectAccount_keepsHeaderInAccount() = runTest {
         val connectAccountId = "acct_1Acj2PBUgO3KuWzz"
 
         // Check that we get a source back; we don't care about its fields for this test.
@@ -278,13 +355,13 @@ internal class StripeApiRepositoryTest {
     }
 
     @Test
-    fun retrieveSource_shouldFireAnalytics_andReturnSource() = testDispatcher.runBlockingTest {
+    fun retrieveSource_shouldFireAnalytics_andReturnSource() = runTest {
         val stripeResponse = StripeResponse(
             200,
             SourceFixtures.SOURCE_CARD_JSON.toString(),
             emptyMap()
         )
-        whenever(stripeApiRequestExecutor.execute(any<ApiRequest>()))
+        whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
             .thenReturn(stripeResponse)
 
         val sourceId = "src_19t3xKBZqEXluyI4uz2dxAfQ"
@@ -299,12 +376,12 @@ internal class StripeApiRepositoryTest {
         assertThat(source.id)
             .isEqualTo(sourceId)
 
-        verifyAnalyticsRequest(AnalyticsEvent.SourceRetrieve)
+        verifyAnalyticsRequest(PaymentAnalyticsEvent.SourceRetrieve)
     }
 
     @Test
     fun start3ds2Auth_withInvalidSource_shouldThrowInvalidRequestException() =
-        testDispatcher.runBlockingTest {
+        runTest {
             val authParams = Stripe3ds2AuthParams(
                 "src_invalid",
                 "1.0.0",
@@ -340,7 +417,7 @@ internal class StripeApiRepositoryTest {
 
     @Test
     fun complete3ds2Auth_withInvalidSource_shouldThrowInvalidRequestException() =
-        testDispatcher.runBlockingTest {
+        runTest {
             val invalidRequestException =
                 assertFailsWith<InvalidRequestException> {
                     stripeApiRepository.complete3ds2Auth(
@@ -359,13 +436,13 @@ internal class StripeApiRepositoryTest {
         // This is the one and only test where we actually log something, because
         // we are testing whether or not we log.
         stripeApiRepository.fireAnalyticsRequest(
-            AnalyticsRequest(emptyMap<String, String>())
+            AnalyticsRequest(emptyMap<String, String>(), emptyMap())
         )
     }
 
     @Test
     fun requestData_withConnectAccount_shouldReturnCorrectResponseHeaders() =
-        testDispatcher.runBlockingTest {
+        runTest {
             val connectAccountId = "acct_1Acj2PBUgO3KuWzz"
             val response = requireNotNull(
                 stripeApiRepository.makeApiRequest(
@@ -392,11 +469,11 @@ internal class StripeApiRepositoryTest {
 
     @Test
     fun confirmPaymentIntent_withSourceData_canSuccessfulConfirm() =
-        testDispatcher.runBlockingTest {
+        runTest {
             // put a private key here to simulate the backend
             val clientSecret = "pi_12345_secret_fake"
 
-            whenever(stripeApiRequestExecutor.execute(any<ApiRequest>()))
+            whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
                 .thenReturn(
                     StripeResponse(
                         200,
@@ -418,7 +495,7 @@ internal class StripeApiRepositoryTest {
                 )
             )
 
-            verify(stripeApiRequestExecutor).execute(apiRequestArgumentCaptor.capture())
+            verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
             val apiRequest = apiRequestArgumentCaptor.firstValue
             val paymentMethodDataParams =
                 apiRequest.params?.get("payment_method_data") as Map<*, *>
@@ -426,16 +503,249 @@ internal class StripeApiRepositoryTest {
             assertTrue(paymentMethodDataParams["guid"] is String)
             assertEquals("card", paymentMethodDataParams["type"])
 
-            verifyFraudDetectionDataAndAnalyticsRequests(AnalyticsEvent.PaymentIntentConfirm)
+            verifyFraudDetectionDataAndAnalyticsRequests(PaymentAnalyticsEvent.PaymentIntentConfirm)
 
             val analyticsRequest = analyticsRequestArgumentCaptor.firstValue
             assertThat(analyticsRequest.params["source_type"])
                 .isEqualTo(PaymentMethod.Type.Card.code)
         }
 
+    @Test
+    fun confirmPaymentIntent_setsCorrectPaymentUserAgent() =
+        runTest {
+            // put a private key here to simulate the backend
+            val clientSecret = "pi_12345_secret_fake"
+            whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+                .thenReturn(
+                    StripeResponse(
+                        200,
+                        PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2_JSON.toString(),
+                        emptyMap()
+                    )
+                )
+
+            val confirmPaymentIntentParams =
+                ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
+                    PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+                    clientSecret
+                )
+
+            val productUsage = "TestProductUsage"
+            requireNotNull(
+                create(setOf(productUsage)).confirmPaymentIntent(
+                    confirmPaymentIntentParams,
+                    ApiRequest.Options(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
+                )
+            )
+
+            verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
+            val apiRequest = apiRequestArgumentCaptor.firstValue
+            val paymentMethodDataParams =
+                apiRequest.params?.get(ConfirmStripeIntentParams.PARAM_PAYMENT_METHOD_DATA) as Map<*, *>
+            assertThat(paymentMethodDataParams["payment_user_agent"])
+                .isEqualTo("stripe-android/${Stripe.VERSION_NAME};$productUsage")
+        }
+
+    @Test
+    fun confirmPaymentIntent_withSourceAttribution_setsCorrectPaymentUserAgent() =
+        runTest {
+            // put a private key here to simulate the backend
+            val clientSecret = "pi_12345_secret_fake"
+            whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+                .thenReturn(
+                    StripeResponse(
+                        200,
+                        PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2_JSON.toString(),
+                        emptyMap()
+                    )
+                )
+
+            val sourceParamsProductUsage = "SourceParamsToken"
+            val confirmPaymentIntentParams =
+                ConfirmPaymentIntentParams.createWithSourceParams(
+                    SourceParams.createCardParams(
+                        CARD_PARAMS.copy(loggingTokens = setOf(sourceParamsProductUsage))
+                    ),
+                    clientSecret,
+                    "returnUrl"
+                )
+
+            val stripeApiRequestProductUsage = "TestProductUsage"
+            requireNotNull(
+                create(setOf(stripeApiRequestProductUsage)).confirmPaymentIntent(
+                    confirmPaymentIntentParams,
+                    ApiRequest.Options(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
+                )
+            )
+
+            verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
+            val apiRequest = apiRequestArgumentCaptor.firstValue
+            val paymentMethodDataParams =
+                apiRequest.params?.get(ConfirmPaymentIntentParams.PARAM_SOURCE_DATA) as Map<*, *>
+            assertThat(paymentMethodDataParams["payment_user_agent"])
+                .isEqualTo(
+                    "stripe-android/${Stripe.VERSION_NAME};" +
+                        "$stripeApiRequestProductUsage;$sourceParamsProductUsage"
+                )
+        }
+
+    @Test
+    fun confirmPaymentIntent_withPaymentMethodCreateParamsAttribution_setsCorrectPaymentUserAgent() =
+        runTest {
+            // put a private key here to simulate the backend
+            val clientSecret = "pi_12345_secret_fake"
+            whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+                .thenReturn(
+                    StripeResponse(
+                        200,
+                        PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2_JSON.toString(),
+                        emptyMap()
+                    )
+                )
+
+            val pmCreateParamsProductUsage = "PMCreateParamsToken"
+            val confirmPaymentIntentParams =
+                ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
+                    PaymentMethodCreateParamsFixtures.DEFAULT_CARD.copy(
+                        productUsage = setOf(
+                            pmCreateParamsProductUsage
+                        )
+                    ),
+                    clientSecret
+                )
+
+            val productUsage = "TestProductUsage"
+            requireNotNull(
+                create(setOf(productUsage)).confirmPaymentIntent(
+                    confirmPaymentIntentParams,
+                    ApiRequest.Options(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
+                )
+            )
+
+            verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
+            val apiRequest = apiRequestArgumentCaptor.firstValue
+            val paymentMethodDataParams =
+                apiRequest.params?.get(ConfirmStripeIntentParams.PARAM_PAYMENT_METHOD_DATA) as Map<*, *>
+            assertThat(paymentMethodDataParams["payment_user_agent"])
+                .isEqualTo(
+                    "stripe-android/${Stripe.VERSION_NAME};" +
+                        "$productUsage;$pmCreateParamsProductUsage"
+                )
+        }
+
+    @Test
+    fun confirmPaymentIntent_withApiUserKey_sendsValidRequest() =
+        runTest {
+            val apiKey = "uk_12345"
+            val clientSecret = "pi_12345_secret_fake"
+            val confirmPaymentIntentParams = ConfirmPaymentIntentParams.create(clientSecret)
+            whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+                .thenReturn(
+                    StripeResponse(
+                        200,
+                        PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2_JSON.toString(),
+                        emptyMap()
+                    )
+                )
+
+            create().confirmPaymentIntent(
+                confirmPaymentIntentParams = confirmPaymentIntentParams,
+                options = ApiRequest.Options(apiKey),
+            )
+
+            verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
+            val apiRequest = apiRequestArgumentCaptor.firstValue
+            assertThat(apiRequest.baseUrl)
+                .contains("pi_12345/confirm")
+            assertThat(apiRequest.params)
+                .doesNotContainKey(ConfirmStripeIntentParams.PARAM_CLIENT_SECRET)
+        }
+
+    @Test
+    fun confirmSetupIntent_setsCorrectPaymentUserAgent() =
+        runTest {
+            // put a private key here to simulate the backend
+            val clientSecret = "seti_12345_secret_fake"
+            whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+                .thenReturn(
+                    StripeResponse(
+                        200,
+                        SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD_JSON.toString(),
+                        emptyMap()
+                    )
+                )
+
+            val confirmSetupIntentParams =
+                ConfirmSetupIntentParams.create(
+                    PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+                    clientSecret
+                )
+
+            val productUsage = "TestProductUsage"
+            requireNotNull(
+                create(setOf(productUsage)).confirmSetupIntent(
+                    confirmSetupIntentParams,
+                    ApiRequest.Options(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
+                )
+            )
+
+            verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
+            val apiRequest = apiRequestArgumentCaptor.firstValue
+            val paymentMethodDataParams =
+                apiRequest.params?.get(ConfirmStripeIntentParams.PARAM_PAYMENT_METHOD_DATA) as Map<*, *>
+            assertThat(paymentMethodDataParams["payment_user_agent"])
+                .isEqualTo(
+                    "stripe-android/${Stripe.VERSION_NAME};$productUsage"
+                )
+        }
+
+    @Test
+    fun confirmSetupIntent_withPaymentMethodCreateParamsAttribution_setsCorrectPaymentUserAgent() =
+        runTest {
+            // put a private key here to simulate the backend
+            val clientSecret = "seti_12345_secret_fake"
+            whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+                .thenReturn(
+                    StripeResponse(
+                        200,
+                        SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD_JSON.toString(),
+                        emptyMap()
+                    )
+                )
+
+            val pmCreateParamsProductUsage = "PMCreateParamsToken"
+            val confirmSetupIntentParams =
+                ConfirmSetupIntentParams.create(
+                    PaymentMethodCreateParamsFixtures.DEFAULT_CARD.copy(
+                        productUsage = setOf(
+                            pmCreateParamsProductUsage
+                        )
+                    ),
+                    clientSecret
+                )
+
+            val productUsage = "TestProductUsage"
+            requireNotNull(
+                create(setOf(productUsage)).confirmSetupIntent(
+                    confirmSetupIntentParams,
+                    ApiRequest.Options(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
+                )
+            )
+
+            verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
+            val apiRequest = apiRequestArgumentCaptor.firstValue
+            val paymentMethodDataParams =
+                apiRequest.params?.get(ConfirmStripeIntentParams.PARAM_PAYMENT_METHOD_DATA) as Map<*, *>
+            assertThat(paymentMethodDataParams["payment_user_agent"])
+                .isEqualTo(
+                    "stripe-android/${Stripe.VERSION_NAME};" +
+                        "$productUsage;$pmCreateParamsProductUsage"
+                )
+        }
+
     @Ignore("requires a secret key")
     fun disabled_confirmPaymentIntent_withSourceId_canSuccessfulConfirm() =
-        testDispatcher.runBlockingTest {
+        runTest {
             val clientSecret = "temporarily put a private key here simulate the backend"
             val publishableKey = "put a public key that matches the private key here"
             val sourceId = "id of the source created on the backend"
@@ -455,7 +765,7 @@ internal class StripeApiRepositoryTest {
 
     @Ignore("requires a secret key")
     fun disabled_confirmRetrieve_withSourceId_canSuccessfulRetrieve() =
-        testDispatcher.runBlockingTest {
+        runTest {
             val clientSecret = "temporarily put a private key here simulate the backend"
             val publishableKey = "put a public key that matches the private key here"
 
@@ -468,12 +778,12 @@ internal class StripeApiRepositoryTest {
         }
 
     @Test
-    fun createSource_createsObjectAndLogs() = testDispatcher.runBlockingTest {
+    fun createSource_createsObjectAndLogs() = runTest {
         val stripeApiRepository = StripeApiRepository(
             context,
             { DEFAULT_OPTIONS.apiKey },
             workContext = testDispatcher,
-            stripeApiRequestExecutor = DefaultApiRequestExecutor(
+            stripeNetworkClient = DefaultStripeNetworkClient(
                 workContext = testDispatcher
             ),
             analyticsRequestExecutor = analyticsRequestExecutor,
@@ -487,20 +797,20 @@ internal class StripeApiRepositoryTest {
             )
         )
 
-        verifyFraudDetectionDataAndAnalyticsRequests(AnalyticsEvent.SourceCreate)
+        verifyFraudDetectionDataAndAnalyticsRequests(PaymentAnalyticsEvent.SourceCreate)
     }
 
     @Test
     fun fireAnalyticsRequest_whenShouldLogRequestIsFalse_doesNotCreateAConnection() {
         val stripeApiRepository = create()
         stripeApiRepository.fireAnalyticsRequest(
-            AnalyticsRequest(emptyMap<String, String>())
+            AnalyticsRequest(emptyMap<String, String>(), emptyMap())
         )
-        verifyNoMoreInteractions(stripeApiRequestExecutor)
+        verifyNoMoreInteractions(stripeNetworkClient)
     }
 
     @Test
-    fun getPaymentMethods_whenPopulated_returnsExpectedList() = testDispatcher.runBlockingTest {
+    fun getPaymentMethods_whenPopulated_returnsExpectedList() = runTest {
         val responseBody =
             """
             {
@@ -647,7 +957,7 @@ internal class StripeApiRepositoryTest {
         ).url
 
         whenever(
-            stripeApiRequestExecutor.execute(
+            stripeNetworkClient.executeRequest(
                 argThat<ApiRequest> {
                     ApiRequestMatcher(StripeRequest.Method.GET, url, options, queryParams)
                         .matches(this)
@@ -675,13 +985,13 @@ internal class StripeApiRepositoryTest {
             )
 
         verifyAnalyticsRequest(
-            AnalyticsEvent.CustomerRetrievePaymentMethods,
+            PaymentAnalyticsEvent.CustomerRetrievePaymentMethods,
             null
         )
     }
 
     @Test
-    fun getPaymentMethods_whenNotPopulated_returnsEmptyList() = testDispatcher.runBlockingTest {
+    fun getPaymentMethods_whenNotPopulated_returnsEmptyList() = runTest {
         val responseBody =
             """
             {
@@ -705,7 +1015,7 @@ internal class StripeApiRepositoryTest {
         ).url
 
         whenever(
-            stripeApiRequestExecutor.execute(
+            stripeNetworkClient.executeRequest(
                 argThat<ApiRequest> {
                     ApiRequestMatcher(StripeRequest.Method.GET, url, options, queryParams)
                         .matches(this)
@@ -728,7 +1038,7 @@ internal class StripeApiRepositoryTest {
     }
 
     @Test
-    fun getFpxBankStatus_withFpxKey() = testDispatcher.runBlockingTest {
+    fun getFpxBankStatus_withFpxKey() = runTest {
         val fpxBankStatuses = stripeApiRepository.getFpxBankStatus(
             ApiRequest.Options(ApiKeyFixtures.FPX_PUBLISHABLE_KEY)
         )
@@ -737,7 +1047,7 @@ internal class StripeApiRepositoryTest {
     }
 
     @Test
-    fun getFpxBankStatus_withFpxKey_ignoresStripeAccountId() = testDispatcher.runBlockingTest {
+    fun getFpxBankStatus_withFpxKey_ignoresStripeAccountId() = runTest {
         val fpxBankStatuses = stripeApiRepository.getFpxBankStatus(
             ApiRequest.Options(
                 apiKey = ApiKeyFixtures.FPX_PUBLISHABLE_KEY,
@@ -749,7 +1059,7 @@ internal class StripeApiRepositoryTest {
     }
 
     @Test
-    fun `getCardMetadata with valid bin prefix should succeed`() = testDispatcher.runBlockingTest {
+    fun `getCardMetadata with valid bin prefix should succeed`() = runTest {
         val cardMetadata =
             stripeApiRepository.getCardMetadata(
                 BinFixtures.VISA,
@@ -764,7 +1074,7 @@ internal class StripeApiRepositoryTest {
 
     @Test
     fun cancelPaymentIntentSource_whenAlreadyCanceled_throwsInvalidRequestException() =
-        testDispatcher.runBlockingTest {
+        runTest {
             val exception = assertFailsWith<InvalidRequestException> {
                 stripeApiRepository.cancelPaymentIntentSource(
                     "pi_1FejpSH8dsfnfKo38L276wr6",
@@ -781,8 +1091,8 @@ internal class StripeApiRepositoryTest {
 
     @Test
     fun createSource_whenUnknownHostExceptionThrown_convertsToAPIConnectionException() =
-        testDispatcher.runBlockingTest {
-            whenever(stripeApiRequestExecutor.execute(any<ApiRequest>()))
+        runTest {
+            whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
                 .thenAnswer { throw UnknownHostException() }
 
             assertFailsWith<APIConnectionException> {
@@ -794,8 +1104,8 @@ internal class StripeApiRepositoryTest {
         }
 
     @Test
-    fun createFile_shouldFireExpectedRequests() = testDispatcher.runBlockingTest {
-        whenever(stripeApiRequestExecutor.execute(any<FileUploadRequest>()))
+    fun createFile_shouldFireExpectedRequests() = runTest {
+        whenever(stripeNetworkClient.executeRequest(any<FileUploadRequest>()))
             .thenReturn(
                 StripeResponse(
                     200,
@@ -814,17 +1124,17 @@ internal class StripeApiRepositoryTest {
             DEFAULT_OPTIONS
         )
 
-        verify(stripeApiRequestExecutor, never()).execute(any<ApiRequest>())
-        verify(stripeApiRequestExecutor).execute(fileUploadRequestArgumentCaptor.capture())
+        verify(stripeNetworkClient, never()).executeRequest(any<ApiRequest>())
+        verify(stripeNetworkClient).executeRequest(fileUploadRequestArgumentCaptor.capture())
         assertThat(fileUploadRequestArgumentCaptor.firstValue)
             .isNotNull()
 
-        verifyAnalyticsRequest(AnalyticsEvent.FileCreate)
+        verifyAnalyticsRequest(PaymentAnalyticsEvent.FileCreate)
     }
 
     @Test
     fun apiRequest_withErrorResponse_onUnsupportedSdkVersion_shouldNotBeTranslated() =
-        testDispatcher.runBlockingTest {
+        runTest {
             Locale.setDefault(Locale.JAPAN)
 
             val stripeRepository = StripeApiRepository(
@@ -846,78 +1156,181 @@ internal class StripeApiRepositoryTest {
             )
         }
 
+    // TODO(ccen): Re-enable this test when it's fixed on backend
+    //    @Test
+    //    fun apiRequest_withErrorResponse_onSupportedSdkVersion_shouldBeTranslated() =
+    //        runTest {
+    //            Locale.setDefault(Locale.JAPAN)
+    //
+    //            val stripeRepository = StripeApiRepository(
+    //                context,
+    //                { DEFAULT_OPTIONS.apiKey },
+    //                workContext = testDispatcher,
+    //                sdkVersion = "AndroidBindings/14.0.0"
+    //            )
+    //
+    //            val ex = assertFailsWith<InvalidRequestException> {
+    //                stripeRepository.retrieveSetupIntent(
+    //                    "seti_1CkiBMLENEVhOs7YMtUehLau_secret_invalid",
+    //                    DEFAULT_OPTIONS
+    //                )
+    //            }
+    //            assertEquals(
+    //                "そのような setupintent はありません : 'seti_1CkiBMLENEVhOs7YMtUehLau'",
+    //                ex.stripeError?.message
+    //            )
+    //        }
+
     @Test
-    fun apiRequest_withErrorResponse_onSupportedSdkVersion_shouldBeTranslated() =
-        testDispatcher.runBlockingTest {
-            Locale.setDefault(Locale.JAPAN)
-
-            val stripeRepository = StripeApiRepository(
-                context,
-                { DEFAULT_OPTIONS.apiKey },
-                workContext = testDispatcher,
-                sdkVersion = "AndroidBindings/14.0.0"
-            )
-
-            val ex = assertFailsWith<InvalidRequestException> {
-                stripeRepository.retrieveSetupIntent(
-                    "seti_1CkiBMLENEVhOs7YMtUehLau_secret_invalid",
-                    DEFAULT_OPTIONS
-                )
-            }
-            assertEquals(
-                "そのような setupintent はありません : 'seti_1CkiBMLENEVhOs7YMtUehLau' ",
-                ex.stripeError?.message
-            )
-        }
-
-    @Test
-    fun createCardToken_withAttribution_shouldPopulateProductUsage() =
-        testDispatcher.runBlockingTest {
+    fun createCardToken_setsCorrectPaymentUserAgent() =
+        runTest {
             val stripeResponse = StripeResponse(
                 200,
                 TokenFixtures.CARD_TOKEN_JSON.toString(),
                 emptyMap()
             )
-            whenever(stripeApiRequestExecutor.execute(any<ApiRequest>())).thenReturn(stripeResponse)
+            whenever(stripeNetworkClient.executeRequest(any<ApiRequest>())).thenReturn(stripeResponse)
+
+            val productUsage = "TestProductUsage"
+            create(setOf(productUsage)).createToken(
+                CardParamsFixtures.DEFAULT,
+                DEFAULT_OPTIONS
+            )
+
+            verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
+            val apiRequest = apiRequestArgumentCaptor.firstValue
+            assertThat(apiRequest.params?.get("payment_user_agent"))
+                .isEqualTo(
+                    "stripe-android/${Stripe.VERSION_NAME};$productUsage"
+                )
+        }
+
+    @Test
+    fun createCardToken_withAttribution_setsCorrectPaymentUserAgent() =
+        runTest {
+            val stripeResponse = StripeResponse(
+                200,
+                TokenFixtures.CARD_TOKEN_JSON.toString(),
+                emptyMap()
+            )
+            whenever(stripeNetworkClient.executeRequest(any<ApiRequest>())).thenReturn(stripeResponse)
+
+            val productUsage = "TestProductUsage"
+            create(setOf(productUsage)).createToken(
+                CardParamsFixtures.WITH_ATTRIBUTION,
+                DEFAULT_OPTIONS
+            )
+
+            verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
+            val apiRequest = apiRequestArgumentCaptor.firstValue
+            assertThat(apiRequest.params?.get("payment_user_agent"))
+                .isEqualTo(
+                    "stripe-android/${Stripe.VERSION_NAME}" +
+                        ";$productUsage;CardInputView"
+                )
+        }
+
+    @Test
+    fun createCardToken_withAttribution_shouldPopulateProductUsage() =
+        runTest {
+            val stripeResponse = StripeResponse(
+                200,
+                TokenFixtures.CARD_TOKEN_JSON.toString(),
+                emptyMap()
+            )
+            whenever(stripeNetworkClient.executeRequest(any<ApiRequest>())).thenReturn(stripeResponse)
             create().createToken(
                 CardParamsFixtures.WITH_ATTRIBUTION,
                 DEFAULT_OPTIONS
             )
 
             verifyFraudDetectionDataAndAnalyticsRequests(
-                AnalyticsEvent.TokenCreate,
+                PaymentAnalyticsEvent.TokenCreate,
                 listOf("CardInputView")
             )
         }
 
     @Test
-    fun createBankToken_shouldNotPopulateProductUsage() = testDispatcher.runBlockingTest {
+    fun createBankToken_shouldNotPopulateProductUsage() = runTest {
         val stripeResponse = StripeResponse(
             200,
             TokenFixtures.BANK_TOKEN_JSON.toString(),
             emptyMap()
         )
-        whenever(stripeApiRequestExecutor.execute(any<ApiRequest>())).thenReturn(stripeResponse)
+        whenever(stripeNetworkClient.executeRequest(any<ApiRequest>())).thenReturn(stripeResponse)
         create().createToken(
             BankAccountTokenParamsFixtures.DEFAULT,
             DEFAULT_OPTIONS
         )
 
         verifyFraudDetectionDataAndAnalyticsRequests(
-            AnalyticsEvent.TokenCreate,
+            PaymentAnalyticsEvent.TokenCreate,
             productUsage = null
         )
     }
 
     @Test
-    fun createCardPaymentMethod_withAttribution_shouldPopulateProductUsage() =
-        testDispatcher.runBlockingTest {
+    fun createCardPaymentMethod_setsCorrectPaymentUserAgent() =
+        runTest {
             val stripeResponse = StripeResponse(
                 200,
                 PaymentMethodFixtures.CARD_JSON.toString(),
                 emptyMap()
             )
-            whenever(stripeApiRequestExecutor.execute(any<ApiRequest>()))
+            whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+                .thenReturn(stripeResponse)
+
+            val productUsage = "TestProductUsage"
+            create(setOf(productUsage)).createPaymentMethod(
+                PaymentMethodCreateParams.create(PaymentMethodCreateParamsFixtures.CARD),
+                DEFAULT_OPTIONS
+            )
+
+            verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
+            val apiRequest = apiRequestArgumentCaptor.firstValue
+            assertThat(apiRequest.params?.get("payment_user_agent"))
+                .isEqualTo("stripe-android/${Stripe.VERSION_NAME};$productUsage")
+        }
+
+    @Test
+    fun createCardPaymentMethod_withAttribution_setsCorrectPaymentUserAgent() =
+        runTest {
+            val stripeResponse = StripeResponse(
+                200,
+                PaymentMethodFixtures.CARD_JSON.toString(),
+                emptyMap()
+            )
+            whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+                .thenReturn(stripeResponse)
+
+            val productUsage = "TestProductUsage"
+            val cardAttribution = "CardInputView"
+            create(setOf(productUsage)).createPaymentMethod(
+                PaymentMethodCreateParams.create(
+                    PaymentMethodCreateParamsFixtures.CARD
+                        .copy(attribution = setOf(cardAttribution))
+                ),
+                DEFAULT_OPTIONS
+            )
+
+            verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
+            val apiRequest = apiRequestArgumentCaptor.firstValue
+            assertThat(apiRequest.params?.get("payment_user_agent"))
+                .isEqualTo(
+                    "stripe-android/${Stripe.VERSION_NAME}" +
+                        ";$productUsage;$cardAttribution"
+                )
+        }
+
+    @Test
+    fun createCardPaymentMethod_withAttribution_shouldPopulateProductUsage() =
+        runTest {
+            val stripeResponse = StripeResponse(
+                200,
+                PaymentMethodFixtures.CARD_JSON.toString(),
+                emptyMap()
+            )
+            whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
                 .thenReturn(stripeResponse)
 
             create().createPaymentMethod(
@@ -929,20 +1342,20 @@ internal class StripeApiRepositoryTest {
             )
 
             verifyFraudDetectionDataAndAnalyticsRequests(
-                AnalyticsEvent.PaymentMethodCreate,
+                PaymentAnalyticsEvent.PaymentMethodCreate,
                 productUsage = listOf("CardInputView")
             )
         }
 
     @Test
     fun createPaymentMethodWithOverriddenParamMap_withAttribution_shouldPopulateProductUsage() =
-        testDispatcher.runBlockingTest {
+        runTest {
             val stripeResponse = StripeResponse(
                 200,
                 PaymentMethodFixtures.CARD_JSON.toString(),
                 emptyMap()
             )
-            whenever(stripeApiRequestExecutor.execute(any<ApiRequest>()))
+            whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
                 .thenReturn(stripeResponse)
 
             val paramMap = mapOf(
@@ -969,20 +1382,20 @@ internal class StripeApiRepositoryTest {
             )
 
             verifyFraudDetectionDataAndAnalyticsRequests(
-                AnalyticsEvent.PaymentMethodCreate,
+                PaymentAnalyticsEvent.PaymentMethodCreate,
                 productUsage = listOf("PaymentSheet")
             )
         }
 
     @Test
     fun createSepaDebitPaymentMethod_shouldNotPopulateProductUsage() =
-        testDispatcher.runBlockingTest {
+        runTest {
             val stripeResponse = StripeResponse(
                 200,
                 PaymentMethodFixtures.SEPA_DEBIT_JSON.toString(),
                 emptyMap()
             )
-            whenever(stripeApiRequestExecutor.execute(any<ApiRequest>())).thenReturn(stripeResponse)
+            whenever(stripeNetworkClient.executeRequest(any<ApiRequest>())).thenReturn(stripeResponse)
             create().createPaymentMethod(
                 PaymentMethodCreateParams.create(
                     PaymentMethodCreateParams.SepaDebit("my_iban")
@@ -991,69 +1404,72 @@ internal class StripeApiRepositoryTest {
             )
 
             verifyFraudDetectionDataAndAnalyticsRequests(
-                AnalyticsEvent.PaymentMethodCreate,
+                PaymentAnalyticsEvent.PaymentMethodCreate,
                 productUsage = null
             )
         }
 
     @Test
-    fun `createRadarSession() with FraudDetectionData should return expected value`() = testDispatcher.runBlockingTest {
-        val stripeRepository = StripeApiRepository(
-            context,
-            { DEFAULT_OPTIONS.apiKey },
-            analyticsRequestExecutor = analyticsRequestExecutor,
-            fraudDetectionDataRepository = FakeFraudDetectionDataRepository(
-                FraudDetectionData(
-                    guid = "8ae65368-76c5-4dd5-81b9-279f61efa591c80a51",
-                    muid = "ac3febde-f658-41b5-8c4d-94905501c7a6f4ca3c",
-                    sid = "02892cd4-183a-4074-bca2-5dc0647dd816ce4cbf"
-                )
-            ),
-            workContext = testDispatcher
-        )
-        val radarSession = requireNotNull(
-            stripeRepository.createRadarSession(DEFAULT_OPTIONS)
-        )
-        assertThat(radarSession.id)
-            .startsWith("rse_")
+    fun `createRadarSession() with FraudDetectionData should return expected value`() =
+        runTest {
+            val stripeRepository = StripeApiRepository(
+                context,
+                { DEFAULT_OPTIONS.apiKey },
+                analyticsRequestExecutor = analyticsRequestExecutor,
+                fraudDetectionDataRepository = FakeFraudDetectionDataRepository(
+                    FraudDetectionData(
+                        guid = "8ae65368-76c5-4dd5-81b9-279f61efa591c80a51",
+                        muid = "ac3febde-f658-41b5-8c4d-94905501c7a6f4ca3c",
+                        sid = "02892cd4-183a-4074-bca2-5dc0647dd816ce4cbf"
+                    )
+                ),
+                workContext = testDispatcher
+            )
+            val radarSession = requireNotNull(
+                stripeRepository.createRadarSession(DEFAULT_OPTIONS)
+            )
+            assertThat(radarSession.id)
+                .startsWith("rse_")
 
-        verifyAnalyticsRequest(AnalyticsEvent.RadarSessionCreate)
-    }
+            verifyAnalyticsRequest(PaymentAnalyticsEvent.RadarSessionCreate)
+        }
 
     @Test
-    fun `createRadarSession() with null FraudDetectionData should throw an exception`() = testDispatcher.runBlockingTest {
-        val stripeRepository = StripeApiRepository(
-            context,
-            { DEFAULT_OPTIONS.apiKey },
-            fraudDetectionDataRepository = FakeFraudDetectionDataRepository(
-                null
-            ),
-            workContext = testDispatcher
-        )
+    fun `createRadarSession() with null FraudDetectionData should throw an exception`() =
+        runTest {
+            val stripeRepository = StripeApiRepository(
+                context,
+                { DEFAULT_OPTIONS.apiKey },
+                fraudDetectionDataRepository = FakeFraudDetectionDataRepository(
+                    null
+                ),
+                workContext = testDispatcher
+            )
 
-        val invalidRequestException = assertFailsWith<InvalidRequestException> {
-            stripeRepository.createRadarSession(DEFAULT_OPTIONS)
+            val invalidRequestException = assertFailsWith<InvalidRequestException> {
+                stripeRepository.createRadarSession(DEFAULT_OPTIONS)
+            }
+            assertThat(invalidRequestException.message)
+                .isEqualTo("Could not obtain fraud data required to create a Radar Session.")
         }
-        assertThat(invalidRequestException.message)
-            .isEqualTo("Could not obtain fraud data required to create a Radar Session.")
-    }
 
     @Test
-    fun `createRadarSession() with advancedFraudSignalsEnabled set to false should throw an exception`() = testDispatcher.runBlockingTest {
-        verifyZeroInteractions(fraudDetectionDataRepository)
+    fun `createRadarSession() with advancedFraudSignalsEnabled set to false should throw an exception`() =
+        runTest {
+            verifyNoInteractions(fraudDetectionDataRepository)
 
-        Stripe.advancedFraudSignalsEnabled = false
-        val stripeRepository = create()
-        val invalidRequestException = assertFailsWith<InvalidRequestException> {
-            stripeRepository.createRadarSession(DEFAULT_OPTIONS)
+            Stripe.advancedFraudSignalsEnabled = false
+            val stripeRepository = create()
+            val invalidRequestException = assertFailsWith<InvalidRequestException> {
+                stripeRepository.createRadarSession(DEFAULT_OPTIONS)
+            }
+            assertThat(invalidRequestException.message)
+                .isEqualTo("Stripe.advancedFraudSignalsEnabled must be set to 'true' to create a Radar Session.")
         }
-        assertThat(invalidRequestException.message)
-            .isEqualTo("Stripe.advancedFraudSignalsEnabled must be set to 'true' to create a Radar Session.")
-    }
 
     @Test
     fun `retrieveStripeIntent() with invalid client secret should throw exception`() =
-        testDispatcher.runBlockingTest {
+        runTest {
             val error = assertFailsWith<IllegalStateException> {
                 stripeApiRepository.retrieveStripeIntent(
                     "invalid!",
@@ -1066,13 +1482,13 @@ internal class StripeApiRepositoryTest {
 
     @Test
     fun `retrievePaymentIntentWithOrderedPaymentMethods() sends all parameters`() =
-        testDispatcher.runBlockingTest {
+        runTest {
             val stripeResponse = StripeResponse(
                 200,
                 PaymentMethodPreferenceFixtures.EXPANDED_PAYMENT_INTENT_JSON.toString(),
                 emptyMap()
             )
-            whenever(stripeApiRequestExecutor.execute(any<ApiRequest>()))
+            whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
                 .thenReturn(stripeResponse)
 
             val clientSecret = "test_locale"
@@ -1083,26 +1499,26 @@ internal class StripeApiRepositoryTest {
                 locale
             )
 
-            verify(stripeApiRequestExecutor).execute(apiRequestArgumentCaptor.capture())
+            verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
             val apiRequest = apiRequestArgumentCaptor.firstValue
             val paymentMethodDataParams = apiRequest.params?.get("expand") as Collection<*>
             assertTrue(paymentMethodDataParams.contains("payment_method_preference.payment_intent.payment_method"))
-            assertEquals(apiRequest.params?.get("locale"), locale.toLanguageTag())
-            assertEquals(apiRequest.params?.get("type"), "payment_intent")
-            assertEquals(apiRequest.params?.get("client_secret"), clientSecret)
+            assertEquals(apiRequest.params["locale"], locale.toLanguageTag())
+            assertEquals(apiRequest.params["type"], "payment_intent")
+            assertEquals(apiRequest.params["client_secret"], clientSecret)
 
-            verifyFraudDetectionDataAndAnalyticsRequests(AnalyticsEvent.PaymentIntentRetrieve)
+            verifyFraudDetectionDataAndAnalyticsRequests(PaymentAnalyticsEvent.PaymentIntentRetrieve)
         }
 
     @Test
     fun `retrieveSetupIntentWithOrderedPaymentMethods() sends all parameters`() =
-        testDispatcher.runBlockingTest {
+        runTest {
             val stripeResponse = StripeResponse(
                 200,
                 PaymentMethodPreferenceFixtures.EXPANDED_SETUP_INTENT_JSON.toString(),
                 emptyMap()
             )
-            whenever(stripeApiRequestExecutor.execute(any<ApiRequest>()))
+            whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
                 .thenReturn(stripeResponse)
 
             val clientSecret = "test_client_secret"
@@ -1113,19 +1529,71 @@ internal class StripeApiRepositoryTest {
                 locale
             )
 
-            verify(stripeApiRequestExecutor).execute(apiRequestArgumentCaptor.capture())
+            verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
             val apiRequest = apiRequestArgumentCaptor.firstValue
             val paymentMethodDataParams = apiRequest.params?.get("expand") as Collection<*>
             assertTrue(paymentMethodDataParams.contains("payment_method_preference.setup_intent.payment_method"))
-            assertEquals(apiRequest.params?.get("locale"), locale.toLanguageTag())
-            assertEquals(apiRequest.params?.get("type"), "setup_intent")
-            assertEquals(apiRequest.params?.get("client_secret"), clientSecret)
+            assertEquals(apiRequest.params["locale"], locale.toLanguageTag())
+            assertEquals(apiRequest.params["type"], "setup_intent")
+            assertEquals(apiRequest.params["client_secret"], clientSecret)
 
-            verifyFraudDetectionDataAndAnalyticsRequests(AnalyticsEvent.SetupIntentRetrieve)
+            verifyFraudDetectionDataAndAnalyticsRequests(PaymentAnalyticsEvent.SetupIntentRetrieve)
+        }
+
+    @Test
+    fun verifyRefreshPaymentIntent() =
+        runTest {
+            val clientSecret = "pi_3JkCxKBNJ02ErVOj0kNqBMAZ_secret_bC6oXqo976LFM06Z9rlhmzUQq"
+            whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+                .thenReturn(
+                    StripeResponse(
+                        200,
+                        PaymentIntentFixtures.PI_REFRESH_RESPONSE_REQUIRES_WECHAT_PAY_AUTHORIZE_JSON.toString(),
+                        emptyMap()
+                    )
+                )
+
+            requireNotNull(
+                create().refreshPaymentIntent(
+                    clientSecret,
+                    ApiRequest.Options(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY),
+                )
+            )
+
+            verify(stripeNetworkClient).executeRequest(
+                argWhere<ApiRequest> {
+                    it.options.apiKey == ApiKeyFixtures.FAKE_PUBLISHABLE_KEY &&
+                        it.params?.get("client_secret") == clientSecret
+                }
+            )
+
+            verifyFraudDetectionDataAndAnalyticsRequests(PaymentAnalyticsEvent.PaymentIntentRefresh)
+        }
+
+    @Test
+    fun `lookupConsumerSession() sends all parameters`() =
+        runTest {
+            val stripeResponse = StripeResponse(
+                200,
+                ConsumerFixtures.EXISTING_CONSUMER_JSON.toString(),
+                emptyMap()
+            )
+            whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+                .thenReturn(stripeResponse)
+
+            val email = "email@example.com"
+            create().lookupConsumerSession(
+                email,
+                DEFAULT_OPTIONS
+            )
+
+            verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
+            val params = requireNotNull(apiRequestArgumentCaptor.firstValue.params)
+            assertEquals(params["email_address"], email)
         }
 
     private fun verifyFraudDetectionDataAndAnalyticsRequests(
-        event: AnalyticsEvent,
+        event: PaymentAnalyticsEvent,
         productUsage: List<String>? = null
     ) {
         verify(fraudDetectionDataRepository, times(2))
@@ -1135,14 +1603,14 @@ internal class StripeApiRepositoryTest {
     }
 
     private fun verifyAnalyticsRequest(
-        event: AnalyticsEvent,
+        event: PaymentAnalyticsEvent,
         productUsage: List<String>? = null
     ) {
         verify(analyticsRequestExecutor)
             .executeAsync(analyticsRequestArgumentCaptor.capture())
 
         val analyticsRequest = analyticsRequestArgumentCaptor.firstValue
-        val analyticsParams = analyticsRequest.compactParams.orEmpty()
+        val analyticsParams = analyticsRequest.params
         assertEquals(
             event.toString(),
             analyticsParams["event"]
@@ -1154,12 +1622,13 @@ internal class StripeApiRepositoryTest {
         )
     }
 
-    private fun create(): StripeApiRepository {
+    private fun create(productUsage: Set<String> = emptySet()): StripeApiRepository {
         return StripeApiRepository(
             context,
             { DEFAULT_OPTIONS.apiKey },
             workContext = testDispatcher,
-            stripeApiRequestExecutor = stripeApiRequestExecutor,
+            productUsageTokens = productUsage,
+            stripeNetworkClient = stripeNetworkClient,
             analyticsRequestExecutor = analyticsRequestExecutor,
             fraudDetectionDataRepository = fraudDetectionDataRepository,
             fraudDetectionDataParamsUtils = FraudDetectionDataParamsUtils()

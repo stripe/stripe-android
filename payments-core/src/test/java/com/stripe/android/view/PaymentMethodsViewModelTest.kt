@@ -4,7 +4,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.CustomerSession
 import com.stripe.android.PaymentSession
-import com.stripe.android.exception.APIException
+import com.stripe.android.core.exception.APIException
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import org.junit.runner.RunWith

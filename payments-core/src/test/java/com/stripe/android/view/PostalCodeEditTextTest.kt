@@ -32,7 +32,7 @@ class PostalCodeEditTextTest {
     fun testConfigureForUs() {
         postalCodeEditText.config = PostalCodeEditText.Config.US
         assertThat(postalCodeEditText.inputType)
-            .isEqualTo(InputType.TYPE_CLASS_NUMBER)
+            .isEqualTo(InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_VARIATION_PASSWORD)
     }
 
     @Test
@@ -52,6 +52,19 @@ class PostalCodeEditTextTest {
         postalCodeEditText.setText("12345")
         assertThat(postalCodeEditText.postalCode)
             .isEqualTo("12345")
+    }
+
+    @Test
+    fun changing_from_Us_to_other_country_should_allow_longer_postal() {
+        postalCodeEditText.config = PostalCodeEditText.Config.US
+        postalCodeEditText.setText("123456")
+        assertThat(postalCodeEditText.postalCode)
+            .isEqualTo("12345")
+
+        postalCodeEditText.config = PostalCodeEditText.Config.Global
+        postalCodeEditText.setText("123456")
+        assertThat(postalCodeEditText.postalCode)
+            .isEqualTo("123456")
     }
 
     @Test
