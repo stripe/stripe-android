@@ -22,7 +22,7 @@ import kotlinx.coroutines.launch
  * Subclass should override [onCameraReady] and [onUserDeniedCameraPermission].
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-abstract class CameraPermissionCheckingActivity : AppCompatActivity() {
+abstract class CameraPermissionCheckingActivity : AppCompatActivity(), CameraPermissionEnsureable {
 
     /**
      * The camera permission was granted and camera is ready to use.
@@ -43,12 +43,8 @@ abstract class CameraPermissionCheckingActivity : AppCompatActivity() {
 
     private val permissionStat = Stats.trackTask(PERMISSION_STATS_TRACK_NAME)
 
-    /**
-     * Check the camera permission, invokes [onCameraReady] upon permission grant,
-     * invokes [onUserDeniedCameraPermission] otherwise.
-     */
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    fun ensureCameraPermission(
+    override fun ensureCameraPermission(
         onCameraReady: () -> Unit,
         onUserDeniedCameraPermission: () -> Unit,
     ) {

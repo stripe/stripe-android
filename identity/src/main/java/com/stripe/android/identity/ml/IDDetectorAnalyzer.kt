@@ -4,7 +4,7 @@ import android.content.Context
 import com.stripe.android.camera.framework.Analyzer
 import com.stripe.android.camera.framework.AnalyzerFactory
 import com.stripe.android.camera.framework.image.cropCameraPreviewToSquare
-import com.stripe.android.identity.states.ScanState
+import com.stripe.android.identity.states.IdentityScanState
 import org.tensorflow.lite.DataType
 import org.tensorflow.lite.Interpreter
 import org.tensorflow.lite.support.common.ops.NormalizeOp
@@ -20,7 +20,7 @@ import java.nio.channels.FileChannel
  * TODO(ccen): reimplement with ImageClassifier
  */
 internal class IDDetectorAnalyzer(context: Context) :
-    Analyzer<AnalyzerInput, ScanState, AnalyzerOutput> {
+    Analyzer<AnalyzerInput, IdentityScanState, AnalyzerOutput> {
 
     private val tfliteInterpreter = Interpreter(
         context.assets.openFd(modelName).use { fileDescriptor ->
@@ -34,7 +34,7 @@ internal class IDDetectorAnalyzer(context: Context) :
         }
     )
 
-    override suspend fun analyze(data: AnalyzerInput, state: ScanState): AnalyzerOutput {
+    override suspend fun analyze(data: AnalyzerInput, identityState: IdentityScanState): AnalyzerOutput {
         var tensorImage = TensorImage(INPUT_TENSOR_TYPE)
         val croppedImage = cropCameraPreviewToSquare(
             data.cameraPreviewImage.image,
@@ -98,11 +98,11 @@ internal class IDDetectorAnalyzer(context: Context) :
         private val context: Context
     ) : AnalyzerFactory<
             AnalyzerInput,
-            ScanState,
+            IdentityScanState,
             AnalyzerOutput,
-            Analyzer<AnalyzerInput, ScanState, AnalyzerOutput>
+            Analyzer<AnalyzerInput, IdentityScanState, AnalyzerOutput>
             > {
-        override suspend fun newInstance(): Analyzer<AnalyzerInput, ScanState, AnalyzerOutput> {
+        override suspend fun newInstance(): Analyzer<AnalyzerInput, IdentityScanState, AnalyzerOutput> {
             return IDDetectorAnalyzer(context)
         }
     }

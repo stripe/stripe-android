@@ -26,6 +26,12 @@ android {
         }
     }
 
+    testOptions {
+        unitTests {
+            includeAndroidResources = true
+        }
+    }
+
     lintOptions {
         enable "Interoperability"
         disable "CoroutineCreationDuringComposition"
@@ -61,9 +67,9 @@ dependencies {
 
     implementation project(":camera-core")
     // vanilla tflite library
-    implementation "org.tensorflow:tensorflow-lite:2.7.0"
+    implementation "org.tensorflow:tensorflow-lite:2.8.0"
     // flex ops
-    implementation 'org.tensorflow:tensorflow-lite-select-tf-ops:2.6.0'
+    implementation 'org.tensorflow:tensorflow-lite-select-tf-ops:2.8.0'
     // support library to reshape image to the input model shape
     implementation 'org.tensorflow:tensorflow-lite-support:0.3.1'
 
@@ -86,8 +92,12 @@ dependencies {
 
     testImplementation "junit:junit:$junitVersion"
     testImplementation "org.mockito.kotlin:mockito-kotlin:$mockitoKotlinVersion"
+    testImplementation "org.mockito:mockito-inline:$mockitoCoreVersion"
     testImplementation "com.google.truth:truth:$truthVersion"
     testImplementation "org.robolectric:robolectric:$robolectricVersion"
+    testImplementation "androidx.fragment:fragment-testing:$fragment_version"
+    testImplementation "androidx.navigation:navigation-testing:$navigationVersion"
+    testImplementation "androidx.arch.core:core-testing:2.1.0"
 
     ktlint "com.pinterest:ktlint:$ktlintVersion"
 }
