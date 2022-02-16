@@ -3,6 +3,7 @@
 ### PaymentSheet
 ### Identity
 ### Card scanning
+[ADDED] [4592](https://github.com/stripe/stripe-android/pull/4592) Add support for launching card scan from fragments.
 
 ## 19.2.0 - 2022-02-14
 This release includes several bug fixes and upgrades Kotlin to 1.6.

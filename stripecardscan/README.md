@@ -15,6 +15,9 @@ This library can be used entirely outside of a Stripe integration and with other
 
 Note: Your app does not have to be written in kotlin to integrate this library, but must be able to depend on kotlin functionality.
 
+# Example
+See the `stripecardscan-example` directory for an example application that you can try for yourself!
+
 # Integration
 * In app/build.gradle, add these dependencies:
     ```gradle
@@ -23,7 +26,81 @@ Note: Your app does not have to be written in kotlin to integrate this library, 
     }
     ```
 
-# Usage
+# Credit Card OCR
+
+Add `CardScanSheet` in your activity or fragment where you want to invoke the verification flow
+
+Note: the `create` method must be called in your fragment or activity’s `onCreate` method in order to register the `ActivityResultListener` with your activity.
+
+a. Initialize `CardScanSheet`  with your `publishableKey` and the `id, client secret`
+b. When it's time to invoke the verification flow, display the sheet with `CardScanSheet.present()`
+c. When the verification flow is finished, the sheet will be dismissed and the `onFinished` block will be called with a `CardScanSheetResult`
+
+```kotlin
+class LaunchActivity : AppCompatActivity {
+
+  override fun onCreate(savedInstanceState: Bundle?) {
+    super.onCreate(savedInstanceState)
+    setContentView(R.layout.activity_launch)
+
+    /**
+     * Create a [CardScanSheet] instance with [ComponentActivity].
+     *
+     * This API registers an [ActivityResultLauncher] into the
+     * [ComponentActivity], it must be called before the [ComponentActivity]
+     * is created (in the onCreate method).
+     */
+    val cardScanSheet = CardScanSheet.create(
+      from = LaunchActivity.this,
+      stripePublishableKey = "stripe_key",
+    )
+
+    findViewById(R.id.scanCardButton).setOnClickListener { _ ->
+      cardScanSheet.present(
+        from = LaunchActivity.this,
+      ) { cardScanSheetResult ->
+        when (cardScanSheetResult) {
+          is CardScanSheet.Completed -> {
+            /*
+             * The user scanned a card. The result of the scan can be found
+             * by querying the stripe card image verification endpoint with
+             * the CVI_ID, CVI_SECRET, and Stripe secret key.
+             * 
+             * Details about the card itself are returned in the `scannedCard`
+             * field of the result.
+             */
+            Log.i(cardScanSheetResult.scannedCard.pan)
+          }
+          is CardScanSheet.Canceled -> {
+            /*
+             * The scan was canceled. This could be because any of the
+             * following reasons (returned as the
+             * [CancellationReason] in the result):
+             *
+             * - Closed - the user pressed the X
+             * - Back - the user pressed the back button
+             * - UserCannotScan - the user is unable to scan this card
+             * - CameraPermissionDenied - the user did not grant permissions
+             */
+            Log.i(cardScanSheetResult.reason)
+          }
+          is CardScanSheet.Failed -> {
+            /*
+             * The scan failed. The error that caused the failure is
+             * included in the [Throwable] `error` field of the verification
+             * result.
+             */
+            Log.e(cardScanSheetResult.error.message)
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+# Credit Card Verification
+
 1. Create a `CardImageVerificationIntent` (CIV Intent) on your backend
 
     Perform the following tasks on your server:
@@ -34,13 +111,13 @@ Note: Your app does not have to be written in kotlin to integrate this library, 
 
     b. Provide the CIV intent's `id` and the `client_secret` to the SDK
 
-2. Add `CardVerificationSheet` in your activity or fragment where you want to invoke the verification flow
+2. Add `CardImageVerificationSheet` in your activity or fragment where you want to invoke the verification flow
 
     Note: the `create` method must be called in your fragment or activity’s `onCreate` method in order to register the `ActivityResultListener` with your activity.
 
-    a. Initialize `CardVerificationSheet`  with your `publishableKey` and the `id, client secret`
-    b. When it's time to invoke the verification flow, display the sheet with `CardVerificationSheet.present()`
-    c. When the verification flow is finished, the sheet will be dismissed and the `onFinished` block will be called with a `CardVerificationSheetResult`
+    a. Initialize `CardImageVerificationSheet`  with your `publishableKey` and the `id, client secret`
+    b. When it's time to invoke the verification flow, display the sheet with `CardImageVerificationSheet.present()`
+    c. When the verification flow is finished, the sheet will be dismissed and the `onFinished` block will be called with a `CardImageVerificationSheetResult`
 
     ```kotlin
     class LaunchActivity : AppCompatActivity {
@@ -50,27 +127,25 @@ Note: Your app does not have to be written in kotlin to integrate this library, 
         setContentView(R.layout.activity_launch)
     
         /**
-         * Create a [CardVerificationSheet] instance with [ComponentActivity].
+         * Create a [CardImageVerificationSheet] instance with [ComponentActivity].
          *
          * This API registers an [ActivityResultLauncher] into the
          * [ComponentActivity], it must be called before the [ComponentActivity]
          * is created (in the onCreate method).
-         *
-         * see https://github.com/stripe/stripe-android/blob/3e92b79190834dc3aab1c2d9ac2dfb7bc343afd2/payments-core/src/main/java/com/stripe/android/payments/paymentlauncher/PaymentLauncher.kt#L52
          */
-        val cardVerificationSheet = CardVerificationSheet.create(
+        val cardImageVerificationSheet = CardImageVerificationSheet.create(
           from = LaunchActivity.this,
           stripePublishableKey = "stripe_key",
         )
     
         findViewById(R.id.scanCardButton).setOnClickListener { _ ->
-          cardVerificationSheet.present(
+          cardImageVerificationSheet.present(
             from = LaunchActivity.this,
             cardImageVerificationIntentId = "civ_id",
             cardImageVerificationIntentSecret = "civ_client_secret",
-          ) { cardVerificationSheetResult ->
-            when (cardVerificationSheetResult) {
-              is CardVerificationSheetResult.Completed -> {
+          ) { cardImageVerificationSheetResult ->
+            when (cardImageVerificationSheetResult) {
+              is CardImageVerificationSheetResult.Completed -> {
                 /*
                  * The user scanned a card. The result of the scan can be found
                  * by querying the stripe card image verification endpoint with
@@ -79,28 +154,28 @@ Note: Your app does not have to be written in kotlin to integrate this library, 
                  * Details about the card itself are returned in the `scannedCard`
                  * field of the result.
                  */
-                Log.i(cardVerificationSheetResult.scannedCard.pan)
+                Log.i(cardImageVerificationSheetResult.scannedCard.pan)
               }
-              is CardVerificationSheetResult.Canceled -> {
+              is CardImageVerificationSheetResult.Canceled -> {
                 /*
                  * The scan was canceled. This could be because any of the
                  * following reasons (returned as the
-                 * [CardVerificationSheetCancelationReason] in the result):
+                 * [CancellationReason] in the result):
                  *
                  * - Closed - the user pressed the X
                  * - Back - the user pressed the back button
                  * - UserCannotScan - the user is unable to scan this card
                  * - CameraPermissionDenied - the user did not grant permissions
                  */
-                Log.i(cardVerificationSheetResult.reason)
+                Log.i(cardImageVerificationSheetResult.reason)
               }
-              is CardVerificationSheetResult.Failed -> {
+              is CardImageVerificationSheetResult.Failed -> {
                 /*
                  * The scan failed. The error that caused the failure is
                  * included in the [Throwable] `error` field of the verification
                  * result.
                  */
-                Log.e(cardVerificationSheetResult.error.message)
+                Log.e(cardImageVerificationSheetResult.error.message)
               }
             }
           }
@@ -108,6 +183,3 @@ Note: Your app does not have to be written in kotlin to integrate this library, 
       }
     }
    ```
-
-# Example
-See the stripecardscan-example directory for an example application that you can try for yourself!
