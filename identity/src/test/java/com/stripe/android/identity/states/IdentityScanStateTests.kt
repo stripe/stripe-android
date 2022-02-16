@@ -6,6 +6,8 @@ import com.stripe.android.camera.framework.time.milliseconds
 import com.stripe.android.identity.ml.AnalyzerOutput
 import com.stripe.android.identity.ml.BoundingBox
 import com.stripe.android.identity.ml.Category
+import com.stripe.android.identity.states.IdentityScanState.Found.Companion.FRAMES_REQUIRED
+import com.stripe.android.identity.states.IdentityScanState.Found.Companion.HIT_RATIO
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
@@ -31,15 +33,61 @@ class IdentityScanStateTests {
         assertThat(resultState).isInstanceOf(IdentityScanState.Found::class.java)
     }
 
-    // TODO(ccen) add test for Found -> Unsatisfied when #isUnsatisfied is implemented
-    // TODO(ccen) add test for Found -> Found when #moreResultsRequired is implemented
+    @Test
+    fun `Found transitions to Unsatisfied with bad hit rate`() {
+        val badHitCount = (FRAMES_REQUIRED * HIT_RATIO).toInt() - 10
+
+        val initialState = IdentityScanState.Found(IdentityScanState.ScanType.ID_FRONT).also {
+            // hits count below required
+            it.hitsCount = badHitCount
+            for (i in 1..FRAMES_REQUIRED) {
+                it.results.addLast(true)
+            }
+        }
+        val resultState = initialState.consumeTransition(ID_FRONT_OUTPUT)
+
+        assertThat(resultState).isInstanceOf(IdentityScanState.Unsatisfied::class.java)
+        assertThat((resultState as IdentityScanState.Unsatisfied).reason).isEqualTo(
+            "hit ratio below expected: ${badHitCount.toFloat().div(FRAMES_REQUIRED)}"
+        )
+    }
+
+    @Test
+    fun `Found transitions to Satisfied with good hit rate`() {
+        val goodHitCount = (FRAMES_REQUIRED * HIT_RATIO).toInt() + 10
+
+        val initialState = IdentityScanState.Found(IdentityScanState.ScanType.ID_FRONT).also {
+            // hits count below required
+            it.hitsCount = goodHitCount
+            for (i in 1..FRAMES_REQUIRED) {
+                it.results.addLast(true)
+            }
+        }
+        val resultState = initialState.consumeTransition(ID_FRONT_OUTPUT)
+
+        assertThat(resultState).isInstanceOf(IdentityScanState.Satisfied::class.java)
+    }
+
+    @Test
+    fun `Found transitions to Found when more results are required`() {
+        val initialState = IdentityScanState.Found(IdentityScanState.ScanType.ID_FRONT).also {
+            // hits count below required
+            for (i in 1..(FRAMES_REQUIRED - 10)) {
+                it.results.addLast(true)
+            }
+        }
+        val resultState = initialState.consumeTransition(ID_FRONT_OUTPUT)
+
+        assertThat(resultState).isSameInstanceAs(initialState)
+    }
 
     @Test
     fun `Satisfied transitions to Satisfied before timeout`() {
         val mockClockMark: ClockMark = mock()
         whenever(mockClockMark.elapsedSince()).thenReturn(DURATION_BEFORE_TIMEOUT)
 
-        val initialState = IdentityScanState.Satisfied(IdentityScanState.ScanType.ID_FRONT, mockClockMark)
+        val initialState =
+            IdentityScanState.Satisfied(IdentityScanState.ScanType.ID_FRONT, mockClockMark)
         val resultState = initialState.consumeTransition(ID_FRONT_OUTPUT)
 
         assertThat(resultState).isSameInstanceAs(initialState)
@@ -64,7 +112,11 @@ class IdentityScanStateTests {
         whenever(mockClockMark.elapsedSince()).thenReturn(DURATION_BEFORE_TIMEOUT)
 
         val initialState =
-            IdentityScanState.Unsatisfied("reason", IdentityScanState.ScanType.ID_FRONT, mockClockMark)
+            IdentityScanState.Unsatisfied(
+                "reason",
+                IdentityScanState.ScanType.ID_FRONT,
+                mockClockMark
+            )
         val resultState = initialState.consumeTransition(ID_FRONT_OUTPUT)
 
         assertThat(resultState).isSameInstanceAs(initialState)
