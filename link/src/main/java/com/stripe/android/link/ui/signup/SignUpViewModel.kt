@@ -8,9 +8,9 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.Injectable
 import com.stripe.android.core.injection.injectWithFallback
-import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.LinkActivityContract
 import com.stripe.android.link.LinkScreen
+import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.injection.DaggerLinkViewModelFactoryComponent
 import com.stripe.android.link.injection.LinkViewModelSubcomponent
 import com.stripe.android.link.model.LinkAccount
