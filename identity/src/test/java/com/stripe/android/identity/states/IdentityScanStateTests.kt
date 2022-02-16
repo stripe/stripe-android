@@ -13,11 +13,11 @@ import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
-class ScanStateTests {
+class IdentityScanStateTests {
 
     @Test
     fun `Initial can't transition with unmatched AnalyzerOutput`() {
-        val initialState = ScanState.Initial(ScanState.ScanType.ID_FRONT)
+        val initialState = IdentityScanState.Initial(IdentityScanState.ScanType.ID_FRONT)
         val resultState = initialState.consumeTransition(ID_BACK_OUTPUT)
 
         assertThat(resultState).isSameInstanceAs(initialState)
@@ -25,10 +25,10 @@ class ScanStateTests {
 
     @Test
     fun `Initial transitions to Found with matched AnalyzerOutput`() {
-        val initialState = ScanState.Initial(ScanState.ScanType.ID_FRONT)
+        val initialState = IdentityScanState.Initial(IdentityScanState.ScanType.ID_FRONT)
         val resultState = initialState.consumeTransition(ID_FRONT_OUTPUT)
 
-        assertThat(resultState).isInstanceOf(ScanState.Found::class.java)
+        assertThat(resultState).isInstanceOf(IdentityScanState.Found::class.java)
     }
 
     // TODO(ccen) add test for Found -> Unsatisfied when #isUnsatisfied is implemented
@@ -39,7 +39,7 @@ class ScanStateTests {
         val mockClockMark: ClockMark = mock()
         whenever(mockClockMark.elapsedSince()).thenReturn(DURATION_BEFORE_TIMEOUT)
 
-        val initialState = ScanState.Satisfied(ScanState.ScanType.ID_FRONT, mockClockMark)
+        val initialState = IdentityScanState.Satisfied(IdentityScanState.ScanType.ID_FRONT, mockClockMark)
         val resultState = initialState.consumeTransition(ID_FRONT_OUTPUT)
 
         assertThat(resultState).isSameInstanceAs(initialState)
@@ -50,11 +50,11 @@ class ScanStateTests {
         val mockClockMark: ClockMark = mock()
         whenever(mockClockMark.elapsedSince()).thenReturn(DURATION_AFTER_TIMEOUT)
 
-        val initialScanType = ScanState.ScanType.ID_FRONT
-        val initialState = ScanState.Satisfied(initialScanType, mockClockMark)
+        val initialScanType = IdentityScanState.ScanType.ID_FRONT
+        val initialState = IdentityScanState.Satisfied(initialScanType, mockClockMark)
         val resultState = initialState.consumeTransition(ID_FRONT_OUTPUT)
 
-        assertThat(resultState).isInstanceOf(ScanState.Finished::class.java)
+        assertThat(resultState).isInstanceOf(IdentityScanState.Finished::class.java)
         assertThat(resultState.type).isEqualTo(initialScanType)
     }
 
@@ -64,7 +64,7 @@ class ScanStateTests {
         whenever(mockClockMark.elapsedSince()).thenReturn(DURATION_BEFORE_TIMEOUT)
 
         val initialState =
-            ScanState.Unsatisfied("reason", ScanState.ScanType.ID_FRONT, mockClockMark)
+            IdentityScanState.Unsatisfied("reason", IdentityScanState.ScanType.ID_FRONT, mockClockMark)
         val resultState = initialState.consumeTransition(ID_FRONT_OUTPUT)
 
         assertThat(resultState).isSameInstanceAs(initialState)
@@ -75,11 +75,11 @@ class ScanStateTests {
         val mockClockMark: ClockMark = mock()
         whenever(mockClockMark.elapsedSince()).thenReturn(DURATION_AFTER_TIMEOUT)
 
-        val initialScanType = ScanState.ScanType.ID_FRONT
-        val initialState = ScanState.Unsatisfied("reason", initialScanType, mockClockMark)
+        val initialScanType = IdentityScanState.ScanType.ID_FRONT
+        val initialState = IdentityScanState.Unsatisfied("reason", initialScanType, mockClockMark)
         val resultState = initialState.consumeTransition(ID_FRONT_OUTPUT)
 
-        assertThat(resultState).isInstanceOf(ScanState.Initial::class.java)
+        assertThat(resultState).isInstanceOf(IdentityScanState.Initial::class.java)
         assertThat(resultState.type).isEqualTo(initialScanType)
     }
 
