@@ -1,4 +1,4 @@
-package com.stripe.android.link
+package com.stripe.android.link.account
 
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.repositories.LinkRepository
@@ -67,7 +67,11 @@ internal class LinkAccountManager @Inject constructor(
             linkRepository.confirmVerification(account.clientSecret, code).map { consumerSession ->
                 setAndReturn(LinkAccount(consumerSession))
             }
-        } ?: Result.failure(IllegalStateException("Confirming verification for null account"))
+        } ?: Result.failure(
+            IllegalStateException(
+                "A non-null Link account is needed to confirm verification"
+            )
+        )
 
     private fun setAndReturn(linkAccount: LinkAccount): LinkAccount {
         this.linkAccount = linkAccount

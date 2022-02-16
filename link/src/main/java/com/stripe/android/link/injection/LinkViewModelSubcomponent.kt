@@ -8,7 +8,7 @@ import dagger.BindsInstance
 import dagger.Subcomponent
 
 @Subcomponent
-internal interface SignUpViewModelSubcomponent {
+internal interface LinkViewModelSubcomponent {
     val linkActivityViewModel: LinkActivityViewModel
     val signUpViewModel: SignUpViewModel
     val verificationViewModel: VerificationViewModel
@@ -19,6 +19,6 @@ internal interface SignUpViewModelSubcomponent {
         @BindsInstance
         fun args(args: LinkActivityContract.Args): Builder
 
-        fun build(): SignUpViewModelSubcomponent
+        fun build(): LinkViewModelSubcomponent
     }
 }

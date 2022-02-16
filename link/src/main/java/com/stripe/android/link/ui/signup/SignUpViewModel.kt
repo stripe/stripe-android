@@ -8,11 +8,11 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.Injectable
 import com.stripe.android.core.injection.injectWithFallback
-import com.stripe.android.link.LinkAccountManager
+import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.LinkActivityContract
 import com.stripe.android.link.LinkScreen
-import com.stripe.android.link.injection.DaggerSignUpViewModelFactoryComponent
-import com.stripe.android.link.injection.SignUpViewModelSubcomponent
+import com.stripe.android.link.injection.DaggerLinkViewModelFactoryComponent
+import com.stripe.android.link.injection.LinkViewModelSubcomponent
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.model.Navigator
 import com.stripe.android.ui.core.elements.EmailSpec
@@ -150,7 +150,7 @@ internal class SignUpViewModel @Inject constructor(
 
         @Inject
         lateinit var subComponentBuilderProvider:
-            Provider<SignUpViewModelSubcomponent.Builder>
+            Provider<LinkViewModelSubcomponent.Builder>
 
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
@@ -176,7 +176,7 @@ internal class SignUpViewModel @Inject constructor(
         }
 
         override fun fallbackInitialize(arg: FallbackInitializeParam) {
-            DaggerSignUpViewModelFactoryComponent.builder()
+            DaggerLinkViewModelFactoryComponent.builder()
                 .context(arg.application)
                 .enableLogging(arg.enableLogging)
                 .publishableKeyProvider { arg.publishableKey }

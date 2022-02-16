@@ -17,7 +17,7 @@ import javax.inject.Named
 import javax.inject.Singleton
 
 /**
- * Component to inject [SignUpViewModel.Factory] when the app process is killed and there is no
+ * Component to inject the ViewModels Factory when the app process is killed and there is no
  * Injector available.
  * This component will create new instances of all dependencies.
  */
@@ -30,7 +30,7 @@ import javax.inject.Singleton
         LoggingModule::class
     ]
 )
-internal interface SignUpViewModelFactoryComponent {
+internal interface LinkViewModelFactoryComponent {
     fun inject(factory: LinkActivityViewModel.Factory)
     fun inject(factory: SignUpViewModel.Factory)
     fun inject(factory: VerificationViewModel.Factory)
@@ -52,6 +52,6 @@ internal interface SignUpViewModelFactoryComponent {
         @BindsInstance
         fun productUsage(@Named(PRODUCT_USAGE) productUsage: Set<String>): Builder
 
-        fun build(): SignUpViewModelFactoryComponent
+        fun build(): LinkViewModelFactoryComponent
     }
 }

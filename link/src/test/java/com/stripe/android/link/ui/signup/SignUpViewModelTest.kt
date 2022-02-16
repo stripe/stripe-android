@@ -10,17 +10,18 @@ import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.Injectable
 import com.stripe.android.core.injection.Injector
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
-import com.stripe.android.link.LinkAccountManager
 import com.stripe.android.link.LinkActivityContract
 import com.stripe.android.link.LinkScreen
-import com.stripe.android.link.injection.SignUpViewModelSubcomponent
+import com.stripe.android.link.account.LinkAccountManager
+import com.stripe.android.link.injection.LinkViewModelSubcomponent
+import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.model.Navigator
-import com.stripe.android.link.repositories.LinkRepository
 import com.stripe.android.link.ui.signup.SignUpViewModel.Companion.LOOKUP_DEBOUNCE_MS
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.ui.core.elements.IdentifierSpec
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.resetMain
@@ -31,8 +32,10 @@ import org.junit.runner.RunWith
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argWhere
 import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.doSuspendableAnswer
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.spy
+import org.mockito.kotlin.stub
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
@@ -56,7 +59,7 @@ class SignUpViewModelTest {
             STRIPE_ACCOUNT_ID
         )
     )
-    private val linkRepository = mock<LinkRepository>()
+    private val linkAccountManager = mock<LinkAccountManager>()
     private val navigator = mock<Navigator>()
 
     @BeforeTest
@@ -78,6 +81,14 @@ class SignUpViewModelTest {
             viewModel.emailElement.setRawValue(mapOf(IdentifierSpec.Email to "valid@email.com"))
             assertThat(viewModel.signUpState.value).isEqualTo(SignUpState.InputtingEmail)
 
+            // Mock a delayed response so we stay in the loading state
+            linkAccountManager.stub {
+                onBlocking { lookupConsumer(any()) }.doSuspendableAnswer {
+                    delay(100)
+                    Result.success(mock())
+                }
+            }
+
             // Advance past lookup debounce delay
             advanceTimeBy(LOOKUP_DEBOUNCE_MS + 1)
 
@@ -97,13 +108,21 @@ class SignUpViewModelTest {
             viewModel.emailElement.setRawValue(mapOf(IdentifierSpec.Email to "third@email.com"))
             assertThat(viewModel.signUpState.value).isEqualTo(SignUpState.InputtingEmail)
 
+            // Mock a delayed response so we stay in the loading state
+            linkAccountManager.stub {
+                onBlocking { lookupConsumer(any()) }.doSuspendableAnswer {
+                    delay(100)
+                    Result.success(mock())
+                }
+            }
+
             // Advance past lookup debounce delay
             advanceTimeBy(LOOKUP_DEBOUNCE_MS + 1)
 
             assertThat(viewModel.signUpState.value).isEqualTo(SignUpState.VerifyingEmail)
 
             val emailCaptor = argumentCaptor<String>()
-            verify(linkRepository).lookupConsumer(emailCaptor.capture())
+            verify(linkAccountManager).lookupConsumer(emailCaptor.capture())
 
             assertThat(emailCaptor.allValues.size).isEqualTo(1)
             assertThat(emailCaptor.firstValue).isEqualTo("third@email.com")
@@ -115,7 +134,7 @@ class SignUpViewModelTest {
             val viewModel = createViewModel(defaultArgs)
             assertThat(viewModel.signUpState.value).isEqualTo(SignUpState.InputtingPhone)
 
-            verify(linkRepository, times(0)).lookupConsumer(any())
+            verify(linkAccountManager, times(0)).lookupConsumer(any())
         }
 
     @Test
@@ -123,15 +142,15 @@ class SignUpViewModelTest {
         runTest(UnconfinedTestDispatcher()) {
             val viewModel = createViewModel(defaultArgs)
 
-            val consumerSession = mockConsumerSessionWithVerificationSession(
-                ConsumerSession.VerificationSession.SessionType.Sms,
-                ConsumerSession.VerificationSession.SessionState.Started
+            val linkAccount = LinkAccount(
+                mockConsumerSessionWithVerificationSession(
+                    ConsumerSession.VerificationSession.SessionType.Sms,
+                    ConsumerSession.VerificationSession.SessionState.Started
+                )
             )
 
-            whenever(linkRepository.consumerSignUp(any(), any(), any()))
-                .thenReturn(Result.success(consumerSession))
-            whenever(linkRepository.startVerification(any()))
-                .thenReturn(Result.success(consumerSession))
+            whenever(linkAccountManager.signUp(any(), any(), any()))
+                .thenReturn(Result.success(linkAccount))
 
             viewModel.onSignUpClick("phone")
 
@@ -143,13 +162,15 @@ class SignUpViewModelTest {
         runTest(UnconfinedTestDispatcher()) {
             val viewModel = createViewModel(defaultArgs)
 
-            val consumerSession = mockConsumerSessionWithVerificationSession(
-                ConsumerSession.VerificationSession.SessionType.Sms,
-                ConsumerSession.VerificationSession.SessionState.Verified
+            val linkAccount = LinkAccount(
+                mockConsumerSessionWithVerificationSession(
+                    ConsumerSession.VerificationSession.SessionType.Sms,
+                    ConsumerSession.VerificationSession.SessionState.Verified
+                )
             )
 
-            whenever(linkRepository.consumerSignUp(any(), any(), any()))
-                .thenReturn(Result.success(consumerSession))
+            whenever(linkAccountManager.signUp(any(), any(), any()))
+                .thenReturn(Result.success(linkAccount))
 
             viewModel.onSignUpClick("phone")
 
@@ -158,8 +179,8 @@ class SignUpViewModelTest {
 
     @Test
     fun `Factory gets initialized by Injector when Injector is available`() {
-        val mockBuilder = mock<SignUpViewModelSubcomponent.Builder>()
-        val mockSubComponent = mock<SignUpViewModelSubcomponent>()
+        val mockBuilder = mock<LinkViewModelSubcomponent.Builder>()
+        val mockSubComponent = mock<LinkViewModelSubcomponent>()
         val vmToBeReturned = mock<SignUpViewModel>()
 
         whenever(mockBuilder.args(any())).thenReturn(mockBuilder)
@@ -218,6 +239,13 @@ class SignUpViewModelTest {
         )
     }
 
+    private fun createViewModel(args: LinkActivityContract.Args = defaultArgs) = SignUpViewModel(
+        args = args,
+        linkAccountManager = linkAccountManager,
+        logger = Logger.noop(),
+        navigator = navigator
+    )
+
     private fun mockConsumerSessionWithVerificationSession(
         type: ConsumerSession.VerificationSession.SessionType,
         state: ConsumerSession.VerificationSession.SessionState
@@ -234,14 +262,7 @@ class SignUpViewModelTest {
         return consumerSession
     }
 
-    private fun createViewModel(args: LinkActivityContract.Args = defaultArgs) = SignUpViewModel(
-        args = args,
-        linkAccountManager = LinkAccountManager(linkRepository),
-        logger = Logger.noop(),
-        navigator = navigator
-    )
-
-    companion object {
+    private companion object {
         const val INJECTOR_KEY = "injectorKey"
         const val PRODUCT_USAGE = "productUsage"
         const val PUBLISHABLE_KEY = "publishableKey"
