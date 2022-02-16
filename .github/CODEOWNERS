@@ -21,5 +21,5 @@
 
 # shared modules
 /stripe-core/ @ccen-stripe
-/stripe-ui-core/ @brnunes-stripe @michelleb-stripe @skyler-stripe
+/payments-ui-core/ @brnunes-stripe @michelleb-stripe @skyler-stripe
 /camera-core/ @ccen-stripe @awush-stripe
