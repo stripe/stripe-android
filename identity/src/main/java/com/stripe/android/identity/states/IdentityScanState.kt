@@ -60,7 +60,6 @@ internal sealed class IdentityScanState(val type: ScanType, isFinal: Boolean) : 
      * while if more image needs to be processed to reach the next state.
      */
     internal class Found(type: ScanType) : IdentityScanState(type, false) {
-        // number of consecutive hits
         @VisibleForTesting
         internal var hitsCount = 0
 
