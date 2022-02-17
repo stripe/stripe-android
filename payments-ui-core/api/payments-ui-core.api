@@ -175,6 +175,11 @@ public final class com/stripe/android/ui/core/elements/SimpleTextSpec$Companion 
 public final class com/stripe/android/ui/core/elements/StaticTextElementUIKt {
 }
 
+public final class com/stripe/android/ui/core/forms/AffirmSpecKt {
+  public static final fun getAffirmForm ()Lcom/stripe/android/ui/core/elements/LayoutSpec;
+  public static final fun getAffirmParamKey ()Ljava/util/Map;
+}
+
 public final class com/stripe/android/ui/core/forms/AfterpayClearpaySpecKt {
 	public static final fun getAfterpayClearpayForm ()Lcom/stripe/android/ui/core/elements/LayoutSpec;
 	public static final fun getAfterpayClearpayParamKey ()Ljava/util/Map;
