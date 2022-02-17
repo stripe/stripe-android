@@ -70,7 +70,7 @@ ext {
     flowlayoutVersion = '0.23.0'
     ktlintVersion = '0.43.2'
     materialVersion = '1.5.0'
-    daggerVersion = '2.40.5'
+    daggerVersion = '2.41'
     playServicesWalletVersion = '19.1.0'
 
     androidTestVersion = '1.4.0'
