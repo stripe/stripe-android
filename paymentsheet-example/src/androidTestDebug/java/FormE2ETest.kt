@@ -20,18 +20,24 @@ import androidx.test.platform.app.InstrumentationRegistry.getInstrumentation
 import androidx.test.runner.screenshot.BasicScreenCaptureProcessor
 import androidx.test.runner.screenshot.Screenshot
 import androidx.test.uiautomator.UiDevice
+import com.github.kittinunf.fuel.Fuel
+import com.github.kittinunf.fuel.core.extensions.jsonBody
+import com.github.kittinunf.result.Result
 import com.google.common.truth.Truth.assertThat
+import com.google.gson.Gson
 import com.stripe.android.ApiResultCallback
+import com.stripe.android.PaymentConfiguration
 import com.stripe.android.Stripe
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.example.R
-import com.stripe.android.paymentsheet.example.activity.PaymentSheetPlaygroundActivity
-import com.stripe.android.paymentsheet.example.activity.PaymentSheetPlaygroundActivity.Companion.multiStepUIIdlingResource
-import com.stripe.android.paymentsheet.example.activity.PaymentSheetPlaygroundActivity.Companion.singleStepUIIdlingResource
-import com.stripe.android.paymentsheet.example.repository.DefaultRepository
-import com.stripe.android.paymentsheet.example.service.BackendApiFactory
+import com.stripe.android.paymentsheet.example.playground.activity.PaymentSheetPlaygroundActivity.Companion.multiStepUIIdlingResource
+import com.stripe.android.paymentsheet.example.playground.activity.PaymentSheetPlaygroundActivity.Companion.singleStepUIIdlingResource
+import com.stripe.android.paymentsheet.example.playground.activity.PaymentSheetPlaygroundActivity
+import com.stripe.android.paymentsheet.example.playground.model.CheckoutCustomer
+import com.stripe.android.paymentsheet.example.playground.model.CheckoutRequest
+import com.stripe.android.paymentsheet.example.playground.model.CheckoutResponse
 import com.stripe.android.paymentsheet.matchFirstPaymentOptionsHolder
 import com.stripe.android.paymentsheet.transitionFragmentResource
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -56,9 +62,6 @@ internal class FormE2ETest {
 
     private lateinit var device: UiDevice
     private val screenshotProcessor = setOf(MyScreenCaptureProcessor())
-
-    private val repository =
-        DefaultRepository(BackendApiFactory("https://stripe-mobile-payment-sheet-test-playground-v4.glitch.me/").createCheckout())
 
     @Before
     fun before() {
@@ -262,12 +265,45 @@ internal class FormE2ETest {
         }
 
     private suspend fun retrievePaymentIntent(testParameters: TestParameters): StripeIntent? {
-        val response = repository.checkout(
+        val requestBody = CheckoutRequest(
             testParameters.customer.toRepository(),
             testParameters.currency.toRepository(),
             testParameters.checkout.toRepository(),
+            false,
             false
         )
+
+        Fuel.post("https://stripe-mobile-payment-sheet-test-playground-v6.glitch.me/checkout")
+            .jsonBody(Gson().toJson(requestBody))
+            .responseString { _, _, result ->
+                when (result) {
+                    is Result.Failure -> {
+                        status.postValue(
+                            "Preparing checkout failed:\n${result.getException().message}"
+                        )
+                    }
+                    is Result.Success -> {
+                        val checkoutResponse = Gson()
+                            .fromJson(result.get(), CheckoutResponse::class.java)
+                        checkoutMode = mode
+                        temporaryCustomerId = if (customer == CheckoutCustomer.New) {
+                            checkoutResponse.customerId
+                        } else {
+                            null
+                        }
+
+                        // Init PaymentConfiguration with the publishable key returned from the backend,
+                        // which will be used on all Stripe API calls
+                        PaymentConfiguration.init(getApplication(), checkoutResponse.publishableKey)
+
+                        customerConfig.postValue(checkoutResponse.makeCustomerConfig())
+                        clientSecret.postValue(checkoutResponse.intentClientSecret)
+                    }
+                }
+                inProgress.postValue(false)
+            }
+
+
         val stripe = Stripe(getInstrumentation().targetContext, response.publishableKey)
 
         return suspendCoroutine { cont ->

@@ -13,7 +13,7 @@ import java.util.concurrent.TimeUnit
 /**
  * Factory to generate our Retrofit instance.
  */
-internal class BackendApiFactory internal constructor(private val backendUrl: String) {
+class BackendApiFactory internal constructor(private val backendUrl: String) {
 
     constructor(context: Context) : this(Settings(context).backendUrl)
 

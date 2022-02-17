@@ -4,18 +4,21 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.map
+import com.github.kittinunf.fuel.Fuel
+import com.github.kittinunf.fuel.core.extensions.jsonBody
+import com.github.kittinunf.result.Result
+import com.google.gson.Gson
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.example.repository.DefaultRepository
-import com.stripe.android.paymentsheet.example.repository.Repository
-import com.stripe.android.paymentsheet.example.service.BackendApiFactory
+import com.stripe.android.paymentsheet.example.playground.model.CheckoutCurrency
+import com.stripe.android.paymentsheet.example.playground.model.CheckoutCustomer
+import com.stripe.android.paymentsheet.example.playground.model.CheckoutMode
+import com.stripe.android.paymentsheet.example.playground.model.CheckoutRequest
+import com.stripe.android.paymentsheet.example.playground.model.CheckoutResponse
 
 internal class LpmPlaygroundViewModel(
     application: Application,
-    private val repository: Repository
 ) : AndroidViewModel(application) {
     val inProgress = MutableLiveData<Boolean>()
     val status = MutableLiveData<String>()
@@ -27,64 +30,62 @@ internal class LpmPlaygroundViewModel(
         it != null
     }
 
-    var checkoutMode: Repository.CheckoutMode? = null
+    var checkoutMode: CheckoutMode? = null
     var temporaryCustomerId: String? = null
 
     /**
      * Calls the backend to prepare for checkout. The server creates a new Payment or Setup Intent
      * that will be confirmed on the client using Payment Sheet.
      */
-    suspend fun prepareCheckout(
-        customer: Repository.CheckoutCustomer,
-        currency: Repository.CheckoutCurrency,
-        mode: Repository.CheckoutMode,
-        setShippingAddress: Boolean
+    fun prepareCheckout(
+        customer: CheckoutCustomer,
+        currency: CheckoutCurrency,
+        mode: CheckoutMode,
+        setShippingAddress: Boolean,
+        setAutomaticPaymentMethod: Boolean,
+        backendUrl: String
     ) {
         customerConfig.value = null
         clientSecret.value = null
 
         inProgress.postValue(true)
 
-        runCatching {
-            repository.checkout(customer, currency, mode, setShippingAddress)
-        }.fold(
-            onSuccess = {
-                checkoutMode = mode
-                temporaryCustomerId = if (customer == Repository.CheckoutCustomer.New) {
-                    it.customerId
-                } else {
-                    null
-                }
-
-                customerConfig.value = it.makeCustomerConfig()
-                clientSecret.value = it.intentClientSecret
-            },
-            onFailure = {
-                status.postValue(
-                    "Preparing checkout failed:\n${it.message}"
-                )
-            }
+        val requestBody = CheckoutRequest(
+            customer.value,
+            currency.value,
+            mode.value,
+            setShippingAddress,
+            setAutomaticPaymentMethod
         )
 
-        inProgress.postValue(false)
-    }
+        Fuel.post(backendUrl + "checkout")
+            .jsonBody(Gson().toJson(requestBody))
+            .responseString { _, _, result ->
+                when (result) {
+                    is Result.Failure -> {
+                        status.postValue(
+                            "Preparing checkout failed:\n${result.getException().message}"
+                        )
+                    }
+                    is Result.Success -> {
+                        val checkoutResponse = Gson()
+                            .fromJson(result.get(), CheckoutResponse::class.java)
+                        checkoutMode = mode
+                        temporaryCustomerId = if (customer == CheckoutCustomer.New) {
+                            checkoutResponse.customerId
+                        } else {
+                            null
+                        }
 
-    internal class Factory(
-        private val application: Application
-    ) : ViewModelProvider.Factory {
+                        // Init PaymentConfiguration with the publishable key returned from the backend,
+                        // which will be used on all Stripe API calls
+                        PaymentConfiguration.init(getApplication(), checkoutResponse.publishableKey)
 
-        @Suppress("UNCHECKED_CAST")
-        override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-            val checkoutBackendApi = BackendApiFactory(application).createCheckout()
-
-            val repository = DefaultRepository(
-                checkoutBackendApi
-            )
-
-            return LpmPlaygroundViewModel(
-                application,
-                repository
-            ) as T
-        }
+                        customerConfig.postValue(checkoutResponse.makeCustomerConfig())
+                        clientSecret.postValue(checkoutResponse.intentClientSecret)
+                    }
+                }
+                inProgress.postValue(false)
+            }
     }
 }

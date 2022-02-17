@@ -20,7 +20,7 @@ import com.stripe.android.paymentsheet.example.playground.model.CheckoutResponse
 import com.stripe.android.paymentsheet.example.playground.model.SavedToggles
 import com.stripe.android.paymentsheet.example.playground.model.Toggle
 
-internal class PaymentSheetPlaygroundViewModel(
+class PaymentSheetPlaygroundViewModel(
     application: Application
 ) : AndroidViewModel(application) {
     val inProgress = MutableLiveData<Boolean>()
@@ -38,8 +38,18 @@ internal class PaymentSheetPlaygroundViewModel(
 
     private val sharedPreferencesName = "playgroundToggles"
 
-    fun storeToggleState(customer: String, googlePay: Boolean, currency: String, mode: String, setShippingAddress: Boolean, setAutomaticPaymentMethods: Boolean) {
-        val sharedPreferences = getApplication<Application>().getSharedPreferences(sharedPreferencesName, AppCompatActivity.MODE_PRIVATE)
+    fun storeToggleState(
+        customer: String,
+        googlePay: Boolean,
+        currency: String,
+        mode: String,
+        setShippingAddress: Boolean,
+        setAutomaticPaymentMethods: Boolean
+    ) {
+        val sharedPreferences = getApplication<Application>().getSharedPreferences(
+            sharedPreferencesName,
+            AppCompatActivity.MODE_PRIVATE
+        )
         val editor = sharedPreferences.edit()
 
         editor.putString(Toggle.Customer.key, customer)
@@ -52,16 +62,35 @@ internal class PaymentSheetPlaygroundViewModel(
     }
 
     fun getSavedToggleState(): SavedToggles {
-        val sharedPreferences = getApplication<Application>().getSharedPreferences(sharedPreferencesName, AppCompatActivity.MODE_PRIVATE)
+        val sharedPreferences = getApplication<Application>().getSharedPreferences(
+            sharedPreferencesName,
+            AppCompatActivity.MODE_PRIVATE
+        )
 
-        val customer = sharedPreferences.getString(Toggle.Customer.key, Toggle.Customer.default.toString())
-        val googlePay = sharedPreferences.getBoolean(Toggle.GooglePay.key, Toggle.GooglePay.default as Boolean)
-        val currency = sharedPreferences.getString(Toggle.Currency.key, Toggle.Currency.default.toString())
+        val customer =
+            sharedPreferences.getString(Toggle.Customer.key, Toggle.Customer.default.toString())
+        val googlePay =
+            sharedPreferences.getBoolean(Toggle.GooglePay.key, Toggle.GooglePay.default as Boolean)
+        val currency =
+            sharedPreferences.getString(Toggle.Currency.key, Toggle.Currency.default.toString())
         val mode = sharedPreferences.getString(Toggle.Mode.key, Toggle.Mode.default.toString())
-        val setShippingAddress = sharedPreferences.getBoolean(Toggle.SetShippingAddress.key, Toggle.SetShippingAddress.default as Boolean)
-        val setAutomaticPaymentMethods = sharedPreferences.getBoolean(Toggle.SetAutomaticPaymentMethods.key, Toggle.SetAutomaticPaymentMethods.default as Boolean)
+        val setShippingAddress = sharedPreferences.getBoolean(
+            Toggle.SetShippingAddress.key,
+            Toggle.SetShippingAddress.default as Boolean
+        )
+        val setAutomaticPaymentMethods = sharedPreferences.getBoolean(
+            Toggle.SetAutomaticPaymentMethods.key,
+            Toggle.SetAutomaticPaymentMethods.default as Boolean
+        )
 
-        return SavedToggles(customer.toString(), googlePay, currency.toString(), mode.toString(), setShippingAddress, setAutomaticPaymentMethods)
+        return SavedToggles(
+            customer.toString(),
+            googlePay,
+            currency.toString(),
+            mode.toString(),
+            setShippingAddress,
+            setAutomaticPaymentMethods
+        )
     }
 
     /**
@@ -89,10 +118,10 @@ internal class PaymentSheetPlaygroundViewModel(
             setAutomaticPaymentMethod
         )
 
-        Fuel.post(backendUrl+"checkout")
+        Fuel.post(backendUrl + "checkout")
             .jsonBody(Gson().toJson(requestBody))
             .responseString { _, _, result ->
-                when(result) {
+                when (result) {
                     is Result.Failure -> {
                         status.postValue(
                             "Preparing checkout failed:\n${result.getException().message}"
@@ -117,6 +146,6 @@ internal class PaymentSheetPlaygroundViewModel(
                     }
                 }
                 inProgress.postValue(false)
-        }
+            }
     }
 }

@@ -71,7 +71,10 @@ dependencies {
     testImplementation "androidx.arch.core:core-testing:2.1.0"
     testImplementation libraries.androidx.fragment.testing
 
+    androidTestImplementation "androidx.test.ext:junit:$junitVersion"
     androidTestImplementation "androidx.test.espresso:espresso-core:$espressoVersion"
+    androidTestImplementation "androidx.test.espresso:espresso-contrib:$espressoVersion"
+    implementation "androidx.test.espresso:espresso-idling-resource:$espressoVersion"
     androidTestImplementation "androidx.test:rules:$androidTestVersion"
     androidTestImplementation "androidx.test:runner:$androidTestVersion"
     androidTestUtil "androidx.test:orchestrator:$androidTestVersion"
