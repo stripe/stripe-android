@@ -1240,4 +1240,77 @@ internal object PaymentIntentFixtures {
 
     val PI_WITH_KLARNA_IN_PAYMENT_METHODS =
         PARSER.parse(PI_WITH_KLARNA_IN_PAYMENT_METHODS_JSON)!!
+
+    val PI_WITH_AFFIRM_IN_PAYMENT_METHODS_JSON = JSONObject(
+        """
+        {
+          "id": "pi_3KTyNsLu5o3P18Zp1aPD6iIX",
+          "object": "payment_intent",
+          "amount": 1099,
+          "amount_capturable": 0,
+          "amount_received": 0,
+          "application": null,
+          "application_fee_amount": null,
+          "automatic_payment_methods": null,
+          "canceled_at": null,
+          "cancellation_reason": null,
+          "capture_method": "automatic",
+          "charges": {
+            "object": "list",
+            "data": [
+        
+            ],
+            "has_more": false,
+            "total_count": 0,
+            "url": "/v1/charges?payment_intent=pi_3KTyNsLu5o3P18Zp1aPD6iIX"
+          },
+          "client_secret": "pi_3KTyNsLu5o3P18Zp1aPD6iIX_secret_jDzWndA5ybPCzqBKJTf6Hn6Zp",
+          "confirmation_method": "automatic",
+          "created": 1645059732,
+          "currency": "usd",
+          "customer": null,
+          "description": null,
+          "invoice": null,
+          "last_payment_error": null,
+          "livemode": false,
+          "metadata": {
+          },
+          "next_action": null,
+          "on_behalf_of": null,
+          "payment_method": null,
+          "payment_method_options": {
+          },
+          "payment_method_types": [
+            "affirm"
+          ],
+          "processing": null,
+          "receipt_email": null,
+          "review": null,
+          "setup_future_usage": null,
+          "shipping": {
+            "address": {
+              "city": "San Francisco",
+              "country": "US",
+              "line1": "1234 Main Street",
+              "line2": null,
+              "postal_code": "94111",
+              "state": "CA"
+            },
+            "carrier": null,
+            "name": "Jenny Rosen",
+            "phone": null,
+            "tracking_number": null
+          },
+          "source": null,
+          "statement_descriptor": null,
+          "statement_descriptor_suffix": null,
+          "status": "requires_payment_method",
+          "transfer_data": null,
+          "transfer_group": null
+        }
+        """.trimIndent()
+    )
+
+    val PI_WITH_AFFIRM_IN_PAYMENT_METHODS =
+        PARSER.parse(PI_WITH_AFFIRM_IN_PAYMENT_METHODS_JSON)!!
 }

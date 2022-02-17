@@ -376,4 +376,14 @@ internal class PaymentMethodEndToEndTest {
 
         assertThat(paymentMethod?.type).isEqualTo(PaymentMethod.Type.Klarna)
     }
+
+    @Test
+    fun `createPaymentMethod with Affirm should create expected object`() {
+        val paymentMethod = Stripe(context, ApiKeyFixtures.AFFIRM_PUBLISHABLE_KEY)
+            .createPaymentMethodSynchronous(
+                PaymentMethodCreateParams.createAffirm()
+            )
+        assertThat(paymentMethod?.type)
+            .isEqualTo(PaymentMethod.Type.Affirm)
+    }
 }

@@ -747,6 +747,17 @@ data class PaymentMethodCreateParams internal constructor(
             )
         }
 
+        @JvmStatic
+        @JvmOverloads
+        fun createAffirm(
+            metadata: Map<String, String>? = null
+        ): PaymentMethodCreateParams {
+            return PaymentMethodCreateParams(
+                type = PaymentMethod.Type.Affirm,
+                metadata = metadata
+            )
+        }
+
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
         fun createWithOverride(
             type: PaymentMethod.Type,
