@@ -6,6 +6,7 @@ import android.util.Size
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.annotation.VisibleForTesting
@@ -24,6 +25,8 @@ import com.stripe.android.camera.scanui.util.startAnimation
 import com.stripe.android.identity.R
 import com.stripe.android.identity.databinding.IdScanFragmentBinding
 import com.stripe.android.identity.states.IdentityScanState
+import com.stripe.android.identity.states.IdentityScanState.ScanType.ID_BACK
+import com.stripe.android.identity.states.IdentityScanState.ScanType.ID_FRONT
 import com.stripe.android.identity.viewmodel.CameraViewModel
 
 /**
@@ -35,9 +38,11 @@ internal class IDScanFragment(
 ) : Fragment() {
     private val cameraViewModel: CameraViewModel by viewModels { cameraViewModelFactory }
     private lateinit var binding: IdScanFragmentBinding
+    private lateinit var headerTitle: TextView
     private lateinit var messageView: TextView
     private lateinit var cameraView: CameraView
     private lateinit var checkMarkView: ImageView
+    private lateinit var continueButton: Button
 
     @VisibleForTesting
     internal lateinit var cameraAdapter: Camera1Adapter
@@ -48,18 +53,34 @@ internal class IDScanFragment(
         savedInstanceState: Bundle?
     ): View {
         binding = IdScanFragmentBinding.inflate(inflater, container, false)
+        headerTitle = binding.headerTitle
         messageView = binding.message
         cameraView = binding.cameraView
         checkMarkView = binding.checkMarkView
+        continueButton = binding.kontinue
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        continueButton.setOnClickListener {
+            when (cameraViewModel.targetScanType) {
+                ID_FRONT -> {
+                    startScanning(ID_BACK)
+                    cameraViewModel.targetScanType = ID_BACK
+                }
+                ID_BACK -> {
+                    findNavController().navigate(R.id.action_IDScanFragment_to_confirmationFragment)
+                }
+                else -> {
+                    Log.e(TAG, "Incorrect target scan type: ${cameraViewModel.targetScanType}")
+                }
+            }
+        }
+
         cameraViewModel.finalResult.observe(viewLifecycleOwner) {
-            cameraViewModel.identityScanFlow.cancelFlow()
-            cameraAdapter.unbindFromLifecycle(this)
+            stopScanning()
         }
 
         cameraViewModel.displayStateChanged.observe(viewLifecycleOwner) { (newState, _) ->
@@ -71,26 +92,15 @@ internal class IDScanFragment(
             binding.cameraView.previewFrame,
             MINIMUM_RESOLUTION,
             DefaultCameraErrorListener(requireNotNull(activity)) { cause ->
-                Log.d(TAG, "scan fails with exception: $cause")
-                // TODO(ccen) determine if further handling is required
+                Log.e(TAG, "scan fails with exception: $cause")
             }
-        )
-        cameraViewModel.initializeScanFlow(
-            IdentityScanState.ScanType.ID_FRONT // determine how to transition to ID_BACK
         )
 
         cameraPermissionEnsureable.ensureCameraPermission(
             onCameraReady = {
                 Log.d(TAG, "Camera permission granted")
-                cameraAdapter.bindToLifecycle(this)
-                cameraViewModel.identityScanFlow.startFlow(
-                    context = requireContext(),
-                    imageStream = cameraAdapter.getImageStream(),
-                    viewFinder = binding.cameraView.viewFinderWindowView.asRect(),
-                    lifecycleOwner = viewLifecycleOwner,
-                    coroutineScope = lifecycleScope,
-                    parameters = 23 // TODO(ccen) pass correct parameter
-                )
+                cameraViewModel.targetScanType = ID_FRONT
+                startScanning(ID_FRONT)
             },
 
             onUserDeniedCameraPermission = {
@@ -98,11 +108,37 @@ internal class IDScanFragment(
                 findNavController().navigate(
                     R.id.action_camera_permission_denied,
                     bundleOf(
-                        CameraPermissionDeniedFragment.ARG_SCAN_TYPE to IdentityScanState.ScanType.ID_FRONT
+                        CameraPermissionDeniedFragment.ARG_SCAN_TYPE to ID_FRONT
                     )
                 )
             }
         )
+    }
+
+    /**
+     * Start scanning for the required scan type.
+     */
+    private fun startScanning(scanType: IdentityScanState.ScanType) {
+        cameraAdapter.bindToLifecycle(this)
+        // TODO(ccen): pack this logic into a IdentitySpecific CameraViewModel
+        cameraViewModel.scanState = null
+        cameraViewModel.scanStatePrevious = null
+        cameraViewModel.identityScanFlow.startFlow(
+            context = requireContext(),
+            imageStream = cameraAdapter.getImageStream(),
+            viewFinder = binding.cameraView.viewFinderWindowView.asRect(),
+            lifecycleOwner = viewLifecycleOwner,
+            coroutineScope = lifecycleScope,
+            parameters = scanType
+        )
+    }
+
+    /**
+     * Stop scanning, may start again later.
+     */
+    private fun stopScanning() {
+        cameraViewModel.identityScanFlow.resetFlow()
+        cameraAdapter.unbindFromLifecycle(this)
     }
 
     private fun updateUI(identityState: IdentityScanState) {
@@ -111,9 +147,25 @@ internal class IDScanFragment(
                 cameraView.viewFinderBackgroundView.visibility = View.VISIBLE
                 cameraView.viewFinderWindowView.visibility = View.VISIBLE
                 cameraView.viewFinderBorderView.visibility = View.VISIBLE
+                continueButton.isEnabled = false
                 checkMarkView.visibility = View.GONE
+                when (cameraViewModel.targetScanType) {
+                    ID_FRONT -> {
+                        headerTitle.text = requireContext().getText(R.string.front_of_id)
+                        messageView.text = requireContext().getText(R.string.position_id_front)
+                    }
+                    ID_BACK -> {
+                        headerTitle.text = requireContext().getText(R.string.back_of_id)
+                        messageView.text = requireContext().getText(R.string.position_id_back)
+                    }
+                    else -> {
+                        Log.e(
+                            TAG,
+                            "Incorrect target scan type: ${cameraViewModel.targetScanType}"
+                        )
+                    }
+                }
 
-                messageView.text = requireContext().getText(R.string.position_id_front)
                 cameraView.viewFinderWindowView.setBackgroundResource(R.drawable.id_viewfinder_background)
                 cameraView.viewFinderBorderView.startAnimation(R.drawable.id_border_initial)
             }
@@ -123,7 +175,20 @@ internal class IDScanFragment(
                 cameraView.viewFinderBorderView.startAnimation(R.drawable.id_border_found)
             }
             is IdentityScanState.Unsatisfied -> {
-                messageView.text = requireContext().getText(R.string.position_id_in_center)
+                when (cameraViewModel.targetScanType) {
+                    ID_FRONT -> {
+                        messageView.text = requireContext().getText(R.string.position_id_front)
+                    }
+                    ID_BACK -> {
+                        messageView.text = requireContext().getText(R.string.position_id_back)
+                    }
+                    else -> {
+                        Log.e(
+                            TAG,
+                            "Incorrect target scan type: ${cameraViewModel.targetScanType}"
+                        )
+                    }
+                }
                 cameraView.viewFinderWindowView.setBackgroundResource(R.drawable.id_viewfinder_background)
                 cameraView.viewFinderBorderView.startAnimation(R.drawable.id_border_unsatisfied)
             }
@@ -137,6 +202,7 @@ internal class IDScanFragment(
                 cameraView.viewFinderWindowView.visibility = View.INVISIBLE
                 cameraView.viewFinderBorderView.visibility = View.INVISIBLE
                 checkMarkView.visibility = View.VISIBLE
+                continueButton.isEnabled = true
 
                 messageView.text = requireContext().getText(R.string.scanned)
             }

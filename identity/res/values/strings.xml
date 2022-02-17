@@ -8,6 +8,7 @@
     <string name="passport">Passport</string>
     <string name="doc_select_title">Which form of identification do you want to use?</string>
     <string name="front_of_id">Front of ID</string>
+    <string name="back_of_id">Back of ID</string>
     <string name="position_id_front">Position your ID in the center of the frame</string>
     <string name="position_id_back">Flip your ID over to the other side</string>
     <string name="hold_still">Hold still, scanning</string>
@@ -15,6 +16,5 @@
     <string name="help">Help</string>
     <string name="id_scan_complete">ID scan complete</string>
 
-    <string name="position_id_in_center">Position your id in the center of the frame</string>
     <string name="check_mark">Check mark to indicate document capture success</string>
 </resources>

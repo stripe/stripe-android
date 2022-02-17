@@ -26,11 +26,18 @@ internal class CameraViewModel :
 
     internal val interimResults = MutableLiveData<IDDetectorAggregator.InterimResult>()
     internal val finalResult = MutableLiveData<IDDetectorAggregator.FinalResult>()
-    internal val reset = MutableLiveData<Unit>()
+    private val reset = MutableLiveData<Unit>()
     internal val displayStateChanged =
         MutableLiveData<Pair<IdentityScanState, IdentityScanState?>>()
 
-    lateinit var identityScanFlow: IdentityScanFlow
+    /**
+     * The target ScanType of current scan.
+     *
+     * TODO(ccen): Move this to a subclass, make CameraViewModel ScanType agnostic.
+     */
+    internal var targetScanType: IdentityScanState.ScanType? = null
+
+    internal val identityScanFlow = IdentityScanFlow(this, this)
 
     override var scanState: IdentityScanState? = null
 
@@ -40,23 +47,6 @@ internal class CameraViewModel :
 
     override fun displayState(newState: IdentityScanState, previousState: IdentityScanState?) {
         displayStateChanged.postValue(newState to previousState)
-    }
-
-    /**
-     * Initialize [identityScanFlow] with the target scanType.
-     *
-     * TODO(ccen): Extract scanType from [IdentityScanFlow]'s constructor, initialize the scan flow
-     * upon [CameraViewModel]'s initialization, add the ability to update scanType of a
-     * [IdentityScanFlow] on the fly.
-     */
-    fun initializeScanFlow(
-        identityScanType: IdentityScanState.ScanType
-    ) {
-        identityScanFlow = IdentityScanFlow(
-            identityScanType = identityScanType,
-            this,
-            this
-        )
     }
 
     override suspend fun onResult(result: IDDetectorAggregator.FinalResult) {
