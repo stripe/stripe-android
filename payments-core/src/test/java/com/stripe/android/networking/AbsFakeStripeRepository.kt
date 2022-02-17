@@ -7,6 +7,7 @@ import com.stripe.android.model.BinFixtures
 import com.stripe.android.model.CardMetadata
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
+import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.Customer
 import com.stripe.android.model.ListPaymentMethodsParams
@@ -280,6 +281,34 @@ internal abstract class AbsFakeStripeRepository : StripeRepository() {
         email: String,
         requestOptions: ApiRequest.Options
     ): ConsumerSessionLookup? {
+        return null
+    }
+
+    override suspend fun consumerSignUp(
+        email: String,
+        phoneNumber: String,
+        country: String,
+        cookies: String?,
+        requestOptions: ApiRequest.Options
+    ): ConsumerSession? {
+        return null
+    }
+
+    override suspend fun startConsumerVerification(
+        consumerSessionClientSecret: String,
+        locale: Locale,
+        cookies: String?,
+        requestOptions: ApiRequest.Options
+    ): ConsumerSession? {
+        return null
+    }
+
+    override suspend fun confirmConsumerVerification(
+        consumerSessionClientSecret: String,
+        verificationCode: String,
+        cookies: String?,
+        requestOptions: ApiRequest.Options
+    ): ConsumerSession? {
         return null
     }
 }
