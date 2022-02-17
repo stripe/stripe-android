@@ -15,13 +15,3 @@ include ':stripecardscan-example'
 include ':stripe-core'
 include ':stripe-test-e2e'
 include ':wechatpay'
-
-dependencyResolutionManagement {
-    versionCatalogs {
-        create("libraries") {
-            from(files(
-                    "gradle/androidx.versions.toml"
-            ))
-        }
-    }
-}

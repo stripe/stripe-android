@@ -16,44 +16,44 @@ def getPublishableKey() {
 dependencies {
     implementation project(':stripecardscan')
 
-    implementation libraries.androidx.lifecycle.livedata.ktx
-    implementation libraries.androidx.lifecycle.viewmodel.ktx
-    implementation libraries.androidx.preference.ktx
-    implementation libraries.androidx.core.ktx
-    implementation libraries.androidx.appcompat
-    implementation libraries.androidx.constraintlayout
-    implementation libraries.androidx.navigation.fragment.ktx
-    implementation libraries.androidx.navigation.ui.ktx
-    implementation libraries.androidx.activity.ktx
-    implementation 'com.google.android.material:material:1.5.0'
+    implementation "androidx.lifecycle:lifecycle-livedata-ktx:$androidxLifecycleVersion"
+    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$androidxLifecycleVersion"
+    implementation "androidx.preference:preference-ktx:$androidxPreferenceVersion"
+    implementation "androidx.core:core-ktx:$androidxCoreVersion"
+    implementation "androidx.appcompat:appcompat:$androidxAppcompatVersion"
+    implementation "androidx.constraintlayout:constraintlayout:$androidxConstraintlayoutVersion"
+    implementation "androidx.navigation:navigation-fragment-ktx:$androidxNavigationVersion"
+    implementation "androidx.navigation:navigation-ui-ktx:$androidxNavigationVersion"
+    implementation "androidx.activity:activity-ktx:$androidxActivityVersion"
+    implementation "com.google.android.material:material:$materialVersion"
 
     implementation 'com.github.kittinunf.fuel:fuel:2.3.1'
 
-    implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.2"
+    implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:$kotlinSerializationVersion"
 
     implementation 'com.squareup.okhttp3:logging-interceptor:4.9.3'
     implementation "com.jakewharton.retrofit:retrofit2-kotlinx-serialization-converter:0.8.0"
 
-    implementation "androidx.compose.ui:ui:$composeVersion"
+    implementation "androidx.compose.ui:ui:$androidxComposeVersion"
     // Tooling support (Previews, etc.)
-    implementation "androidx.compose.ui:ui-tooling:$composeVersion"
+    implementation "androidx.compose.ui:ui-tooling:$androidxComposeVersion"
     // Foundation (Border, Background, Box, Image, Scroll, shapes, animations, etc.)
-    implementation "androidx.compose.foundation:foundation:$composeVersion"
+    implementation "androidx.compose.foundation:foundation:$androidxComposeVersion"
     // Material Design
-    implementation "androidx.compose.material:material:$composeVersion"
+    implementation "androidx.compose.material:material:$androidxComposeVersion"
     // Material design icons
-    implementation "androidx.compose.material:material-icons-core:$composeVersion"
-    implementation "androidx.compose.material:material-icons-extended:$composeVersion"
+    implementation "androidx.compose.material:material-icons-core:$androidxComposeVersion"
+    implementation "androidx.compose.material:material-icons-extended:$androidxComposeVersion"
     // Integration with activities
-    implementation "androidx.activity:activity-compose:1.4.0"
+    implementation "androidx.activity:activity-compose:$androidxActivityVersion"
     // Integration with ViewModels
-    implementation "androidx.lifecycle:lifecycle-viewmodel-compose:2.4.1"
+    implementation "androidx.lifecycle:lifecycle-viewmodel-compose:$androidxLifecycleVersion"
     // Integration with observables
-    implementation "androidx.compose.runtime:runtime-livedata:$composeVersion"
+    implementation "androidx.compose.runtime:runtime-livedata:$androidxComposeVersion"
 
     debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.8.1'
 
-    testImplementation 'junit:junit:4.13.2'
+    testImplementation "junit:junit:$junitVersion"
     androidTestImplementation "androidx.test.ext:junit:$androidTestJunitVersion"
     androidTestImplementation "androidx.test.espresso:espresso-core:$espressoVersion"
 }
@@ -96,6 +96,6 @@ android {
         compose true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion "$composeVersion"
+        kotlinCompilerExtensionVersion "$androidxComposeVersion"
     }
 }

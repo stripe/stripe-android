@@ -212,7 +212,7 @@ internal class GooglePayLauncherViewModel(
         private val workContext: CoroutineContext = Dispatchers.IO
     ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
-        override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+        override fun <T : ViewModel> create(modelClass: Class<T>): T {
             val googlePayEnvironment = args.config.environment
             val logger = Logger.getInstance(enableLogging)
 

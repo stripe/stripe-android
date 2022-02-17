@@ -58,7 +58,7 @@ internal class FormViewModel @Inject internal constructor(
         lateinit var subComponentBuilderProvider: Provider<FormViewModelSubcomponent.Builder>
 
         @Suppress("UNCHECKED_CAST")
-        override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+        override fun <T : ViewModel> create(modelClass: Class<T>): T {
             injectWithFallback(config.injectorKey, FallbackInitializeParam(resource))
             return subComponentBuilderProvider.get()
                 .formFragmentArguments(config)

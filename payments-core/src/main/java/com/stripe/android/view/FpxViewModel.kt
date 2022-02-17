@@ -30,7 +30,8 @@ internal class FpxViewModel internal constructor(
     internal class Factory(
         private val application: Application
     ) : ViewModelProvider.Factory {
-        override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+        @Suppress("UNCHECKED_CAST")
+        override fun <T : ViewModel> create(modelClass: Class<T>): T {
             val publishableKey = PaymentConfiguration.getInstance(application).publishableKey
             val stripeRepository = StripeApiRepository(
                 application,
