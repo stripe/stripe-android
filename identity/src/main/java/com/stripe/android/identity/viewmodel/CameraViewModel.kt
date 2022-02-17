@@ -60,15 +60,11 @@ internal class CameraViewModel :
     }
 
     override suspend fun onResult(result: IDDetectorAggregator.FinalResult) {
-        Log.d("BGLM", "Final result received: ${result.result.category} - ${result.result.score}")
-
         Log.d(TAG, "Final result received: $result")
         finalResult.postValue(result)
     }
 
     override suspend fun onInterimResult(result: IDDetectorAggregator.InterimResult) {
-        Log.d("BGLM", "Interim result received: ${result.result.category} - ${result.result.score}")
-
         Log.d(TAG, "Interim result received: $result")
         interimResults.postValue(result)
 
