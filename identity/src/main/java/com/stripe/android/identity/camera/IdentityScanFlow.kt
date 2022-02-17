@@ -31,7 +31,7 @@ internal class IdentityScanFlow(
     private val analyzerLoopErrorListener: AnalyzerLoopErrorListener,
     private val aggregateResultListener: AggregateResultListener<IDDetectorAggregator.InterimResult, IDDetectorAggregator.FinalResult>
 ) : ScanFlow<IdentityScanState.ScanType, CameraPreviewImage<Bitmap>> {
-    internal var aggregator: IDDetectorAggregator? = null
+    private var aggregator: IDDetectorAggregator? = null
 
     /**
      * If this is true, do not start the flow.
