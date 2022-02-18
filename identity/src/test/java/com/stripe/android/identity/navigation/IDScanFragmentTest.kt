@@ -68,7 +68,7 @@ internal class IDScanFragmentTest {
     }
 
     @Test
-    fun `when created identityScanFlow is initialized and camera permission is requested`() {
+    fun `when created camera permission is requested`() {
         launchIDScanFragment(mockCameraPermissionEnsurable)
 
         verify(mockCameraPermissionEnsurable).ensureCameraPermission(any(), any())
