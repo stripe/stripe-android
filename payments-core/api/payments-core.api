@@ -2975,6 +2975,7 @@ public final class com/stripe/android/model/PaymentMethod$Sofort : com/stripe/an
 }
 
 public final class com/stripe/android/model/PaymentMethod$Type : java/lang/Enum, android/os/Parcelable {
+	public static final field Affirm Lcom/stripe/android/model/PaymentMethod$Type;
 	public static final field AfterpayClearpay Lcom/stripe/android/model/PaymentMethod$Type;
 	public static final field Alipay Lcom/stripe/android/model/PaymentMethod$Type;
 	public static final field AuBecsDebit Lcom/stripe/android/model/PaymentMethod$Type;
