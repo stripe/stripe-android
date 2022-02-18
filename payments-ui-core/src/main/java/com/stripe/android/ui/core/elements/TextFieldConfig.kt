@@ -4,6 +4,7 @@ import androidx.annotation.RestrictTo
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
+import kotlinx.coroutines.flow.StateFlow
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
 sealed interface TextFieldConfig {
@@ -21,6 +22,8 @@ sealed interface TextFieldConfig {
 
     /** Transformation for changing visual output of the input field. */
     val visualTransformation: VisualTransformation?
+
+    val trailingIcon: StateFlow<TextFieldIcon?>
 
     /** This will determine the state of the field based on the text */
     fun determineState(input: String): TextFieldState

@@ -63,6 +63,10 @@ internal class CvcController constructor(
             FormFieldEntry(value, complete)
         }
 
+    override val trailingIcon: Flow<TextFieldIcon?> = cardBrandFlow.map {
+        TextFieldIcon(it.cvcIcon, isIcon = false)
+    }
+
     init {
         onValueChange("")
     }
