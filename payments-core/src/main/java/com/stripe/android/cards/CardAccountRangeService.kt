@@ -1,6 +1,7 @@
 package com.stripe.android.cards
 
 import androidx.annotation.RestrictTo
+import androidx.annotation.VisibleForTesting
 import com.stripe.android.model.AccountRange
 import com.stripe.android.model.CardBrand
 import kotlinx.coroutines.CoroutineScope
@@ -19,7 +20,9 @@ class CardAccountRangeService constructor(
 
     var accountRange: AccountRange? = null
         private set
-    private var accountRangeRepositoryJob: Job? = null
+
+    @VisibleForTesting
+    var accountRangeRepositoryJob: Job? = null
 
     fun shouldQueryRepository(
         accountRange: AccountRange

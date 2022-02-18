@@ -126,7 +126,7 @@ internal class CardNumberControllerTest {
     fun `Entering valid 19 digit UnionPay BIN returns accountRange of 19`() {
         cardNumberController.onValueChange("6216828050000000000")
         idleLooper()
-        assertThat(cardNumberController.accountRange!!.panLength).isEqualTo(19)
+        assertThat(cardNumberController.accountRangeService.accountRange!!.panLength).isEqualTo(19)
     }
 
     private class FakeCardAccountRangeRepository : CardAccountRangeRepository {

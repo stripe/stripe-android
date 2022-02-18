@@ -37,7 +37,8 @@ class CardNumberEditText internal constructor(
     defStyleAttr: Int = androidx.appcompat.R.attr.editTextStyle,
 
     // TODO(mshafrir-stripe): make immutable after `CardWidgetViewModel` is integrated in `CardWidget` subclasses
-    private var workContext: CoroutineContext,
+    @VisibleForTesting
+    var workContext: CoroutineContext,
 
     private val cardAccountRangeRepository: CardAccountRangeRepository,
     private val staticCardAccountRanges: StaticCardAccountRanges = DefaultStaticCardAccountRanges(),
@@ -126,7 +127,8 @@ class CardNumberEditText internal constructor(
     private val isValid: Boolean
         get() = validatedCardNumber != null
 
-    private val accountRangeService = CardAccountRangeService(
+    @VisibleForTesting
+    val accountRangeService = CardAccountRangeService(
         cardAccountRangeRepository, workContext,
         object : CardAccountRangeService.AccountRangeResultListener {
             override fun onAccountRangeResult(newAccountRange: AccountRange?) {

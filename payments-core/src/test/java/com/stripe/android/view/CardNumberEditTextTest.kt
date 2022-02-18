@@ -136,7 +136,7 @@ internal class CardNumberEditTextTest {
     @Test
     fun calculateCursorPosition_whenAmEx_increasesIndexWhenGoingPastTheSpaces() =
         runTest {
-            cardNumberEditText.onAccountRangeResult(
+            cardNumberEditText.accountRangeService.updateAccountRangeResult(
                 AccountRangeFixtures.AMERICANEXPRESS
             )
 
@@ -151,7 +151,7 @@ internal class CardNumberEditTextTest {
     @Test
     fun calculateCursorPosition_whenDinersClub16_decreasesIndexWhenDeletingPastTheSpaces() =
         runTest {
-            cardNumberEditText.onAccountRangeResult(
+            cardNumberEditText.accountRangeService.updateAccountRangeResult(
                 AccountRangeFixtures.DINERSCLUB16
             )
 
@@ -169,7 +169,7 @@ internal class CardNumberEditTextTest {
     @Test
     fun calculateCursorPosition_whenDeletingNotOnGaps_doesNotDecreaseIndex() =
         runTest {
-            cardNumberEditText.onAccountRangeResult(
+            cardNumberEditText.accountRangeService.updateAccountRangeResult(
                 AccountRangeFixtures.DINERSCLUB14
             )
 
@@ -181,7 +181,7 @@ internal class CardNumberEditTextTest {
     @Test
     fun calculateCursorPosition_whenAmEx_decreasesIndexWhenDeletingPastTheSpaces() =
         runTest {
-            cardNumberEditText.onAccountRangeResult(
+            cardNumberEditText.accountRangeService.updateAccountRangeResult(
                 AccountRangeFixtures.AMERICANEXPRESS
             )
 
@@ -196,7 +196,7 @@ internal class CardNumberEditTextTest {
     @Test
     fun calculateCursorPosition_whenSelectionInTheMiddle_increasesIndexOverASpace() =
         runTest {
-            cardNumberEditText.onAccountRangeResult(
+            cardNumberEditText.accountRangeService.updateAccountRangeResult(
                 AccountRangeFixtures.VISA
             )
 
@@ -669,18 +669,18 @@ internal class CardNumberEditTextTest {
 
     @Test
     fun `queryAccountRangeRepository() should update cardBrand value`() {
-        cardNumberEditText.queryAccountRangeRepository(CardNumberFixtures.DINERS_CLUB_14)
+        cardNumberEditText.accountRangeService.queryAccountRangeRepository(CardNumberFixtures.DINERS_CLUB_14)
         idleLooper()
         assertEquals(CardBrand.DinersClub, lastBrandChangeCallbackInvocation)
 
-        cardNumberEditText.queryAccountRangeRepository(CardNumberFixtures.AMEX)
+        cardNumberEditText.accountRangeService.queryAccountRangeRepository(CardNumberFixtures.AMEX)
         idleLooper()
         assertEquals(CardBrand.AmericanExpress, lastBrandChangeCallbackInvocation)
     }
 
     @Test
     fun `queryAccountRangeRepository() with null bin should set cardBrand to Unknown`() {
-        cardNumberEditText.queryAccountRangeRepository(CardNumber.Unvalidated(""))
+        cardNumberEditText.accountRangeService.queryAccountRangeRepository(CardNumber.Unvalidated(""))
         assertEquals(CardBrand.Unknown, lastBrandChangeCallbackInvocation)
     }
 
@@ -705,11 +705,11 @@ internal class CardNumberEditTextTest {
                     }
 
                     cardNumberEditText.setText(UNIONPAY_NO_SPACES)
-                    assertThat(cardNumberEditText.accountRangeRepositoryJob)
+                    assertThat(cardNumberEditText.accountRangeService.accountRangeRepositoryJob)
                         .isNotNull()
 
                     root.removeView(cardNumberEditText)
-                    assertThat(cardNumberEditText.accountRangeRepositoryJob)
+                    assertThat(cardNumberEditText.accountRangeService.accountRangeRepositoryJob)
                         .isNull()
                 }
             }

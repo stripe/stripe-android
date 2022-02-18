@@ -1,6 +1,7 @@
 package com.stripe.android.ui.core.elements
 
 import android.content.Context
+import androidx.annotation.VisibleForTesting
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import com.stripe.android.cards.CardAccountRangeRepository
@@ -65,7 +66,8 @@ internal class CardNumberController constructor(
 
     private val _hasFocus = MutableStateFlow(false)
 
-    private val accountRangeService = CardAccountRangeService(
+    @VisibleForTesting
+    val accountRangeService = CardAccountRangeService(
         cardAccountRangeRepository,
         workContext,
         object : CardAccountRangeService.AccountRangeResultListener {
