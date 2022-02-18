@@ -18,16 +18,12 @@ import com.stripe.android.ui.core.R
 @Composable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun AffirmElementUI(
-//    element: AffirmHeaderElement
 ) {
-//    val context = LocalContext.current
-
     FlowRow(
         modifier = Modifier.padding(4.dp, 8.dp, 4.dp, 4.dp),
         crossAxisAlignment = FlowCrossAxisAlignment.Center
     ) {
         Text(
-//            element.getLabel(context.resources),
             stringResource(R.string.affirm_buy_now_pay_later),
             Modifier
                 .padding(end = 4.dp)
