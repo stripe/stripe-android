@@ -23,6 +23,10 @@ internal class IdentityFragmentFactory(
                 cameraPermissionEnsureable,
                 cameraViewModelFactory
             )
+            PassportScanFragment::class.java.name -> PassportScanFragment(
+                cameraPermissionEnsureable,
+                cameraViewModelFactory
+            )
             else -> super.instantiate(classLoader, className)
         }
     }
