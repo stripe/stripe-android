@@ -11,11 +11,17 @@ import com.stripe.android.identity.viewmodel.CameraViewModel
 internal class IdentityFragmentFactory(
     private val cameraPermissionEnsureable: CameraPermissionEnsureable
 ) : FragmentFactory() {
+    private val cameraViewModelFactory = CameraViewModel.CameraViewModelFactory()
+
     override fun instantiate(classLoader: ClassLoader, className: String): Fragment {
         return when (className) {
             IDScanFragment::class.java.name -> IDScanFragment(
                 cameraPermissionEnsureable,
-                CameraViewModel.CameraViewModelFactory()
+                cameraViewModelFactory
+            )
+            DriverLicenseScanFragment::class.java.name -> DriverLicenseScanFragment(
+                cameraPermissionEnsureable,
+                cameraViewModelFactory
             )
             else -> super.instantiate(classLoader, className)
         }
