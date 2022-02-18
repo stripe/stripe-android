@@ -72,8 +72,8 @@ internal class CardNumberController constructor(
         workContext,
         object : CardAccountRangeService.AccountRangeResultListener {
             override fun onAccountRangeResult(newAccountRange: AccountRange?) {
-                if (newAccountRange?.panLength != null) {
-                    (visualTransformation as CardNumberVisualTransformation).binBasedMaxPan = newAccountRange?.panLength
+                newAccountRange?.panLength?.let { panLength ->
+                    (visualTransformation as CardNumberVisualTransformation).binBasedMaxPan = panLength
                 }
             }
         }
