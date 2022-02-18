@@ -22,8 +22,8 @@ import kotlin.coroutines.CoroutineContext
 
 internal class CardNumberController constructor(
     private val cardTextFieldConfig: CardNumberConfig,
-    private val cardAccountRangeRepository: CardAccountRangeRepository,
-    private val workContext: CoroutineContext,
+    cardAccountRangeRepository: CardAccountRangeRepository,
+    workContext: CoroutineContext,
     private val staticCardAccountRanges: StaticCardAccountRanges = DefaultStaticCardAccountRanges(),
     override val showOptionalLabel: Boolean = false
 ) : TextFieldController, SectionFieldErrorController {
@@ -70,6 +70,7 @@ internal class CardNumberController constructor(
     val accountRangeService = CardAccountRangeService(
         cardAccountRangeRepository,
         workContext,
+        staticCardAccountRanges,
         object : CardAccountRangeService.AccountRangeResultListener {
             override fun onAccountRangeResult(newAccountRange: AccountRange?) {
                 newAccountRange?.panLength?.let { panLength ->
@@ -109,17 +110,7 @@ internal class CardNumberController constructor(
     override fun onValueChange(displayFormatted: String) {
         _fieldValue.value = cardTextFieldConfig.filter(displayFormatted)
         val cardNumber = CardNumber.Unvalidated(displayFormatted)
-        val staticAccountRange = staticCardAccountRanges.filter(cardNumber)
-            .let { accountRanges ->
-               accountRanges.firstOrNull()
-            }
-        if (staticAccountRange == null || accountRangeService.shouldQueryRepository(staticAccountRange)) {
-            // query for AccountRange data
-            accountRangeService.queryAccountRangeRepository(cardNumber)
-        } else {
-            // use static AccountRange data
-            accountRangeService.updateAccountRangeResult(staticAccountRange)
-        }
+        accountRangeService.onCardNumberChanged(cardNumber)
     }
 
     /**

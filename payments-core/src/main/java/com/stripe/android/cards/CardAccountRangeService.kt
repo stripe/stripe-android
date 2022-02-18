@@ -15,6 +15,7 @@ import kotlin.coroutines.CoroutineContext
 class CardAccountRangeService constructor(
     private val cardAccountRangeRepository: CardAccountRangeRepository,
     private val workContext: CoroutineContext,
+    val staticCardAccountRanges: StaticCardAccountRanges,
     private val accountRangeResultListener: AccountRangeResultListener
 ) {
 
@@ -24,12 +25,18 @@ class CardAccountRangeService constructor(
     @VisibleForTesting
     var accountRangeRepositoryJob: Job? = null
 
-    fun shouldQueryRepository(
-        accountRange: AccountRange
-    ) = when (accountRange.brand) {
-        CardBrand.Unknown,
-        CardBrand.UnionPay -> true
-        else -> false
+    fun onCardNumberChanged(cardNumber: CardNumber.Unvalidated) {
+        val staticAccountRange = staticCardAccountRanges.filter(cardNumber)
+            .let { accountRanges ->
+                accountRanges.firstOrNull()
+            }
+        if (staticAccountRange == null || shouldQueryRepository(staticAccountRange)) {
+            // query for AccountRange data
+            queryAccountRangeRepository(cardNumber)
+        } else {
+            // use static AccountRange data
+            updateAccountRangeResult(staticAccountRange)
+        }
     }
 
     @JvmSynthetic
@@ -67,6 +74,14 @@ class CardAccountRangeService constructor(
         newAccountRange: AccountRange?
     ) {
         accountRange = newAccountRange
+    }
+
+    private fun shouldQueryRepository(
+        accountRange: AccountRange
+    ) = when (accountRange.brand) {
+        CardBrand.Unknown,
+        CardBrand.UnionPay -> true
+        else -> false
     }
 
     private fun shouldQueryAccountRange(cardNumber: CardNumber.Unvalidated): Boolean {

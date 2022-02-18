@@ -106,7 +106,7 @@ class CardNumberEditText internal constructor(
 
     internal val panLength: Int
         get() = accountRangeService.accountRange?.panLength
-            ?: staticCardAccountRanges.first(unvalidatedCardNumber)?.panLength
+            ?: accountRangeService.staticCardAccountRanges.first(unvalidatedCardNumber)?.panLength
             ?: CardNumber.DEFAULT_PAN_LENGTH
 
     private val formattedPanLength: Int
@@ -129,7 +129,9 @@ class CardNumberEditText internal constructor(
 
     @VisibleForTesting
     val accountRangeService = CardAccountRangeService(
-        cardAccountRangeRepository, workContext,
+        cardAccountRangeRepository,
+        workContext,
+        staticCardAccountRanges,
         object : CardAccountRangeService.AccountRangeResultListener {
             override fun onAccountRangeResult(newAccountRange: AccountRange?) {
                 updateLengthFilter()
@@ -264,21 +266,7 @@ class CardNumberEditText internal constructor(
 
         override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
             val cardNumber = CardNumber.Unvalidated(s?.toString().orEmpty())
-            val staticAccountRange = staticCardAccountRanges.filter(cardNumber)
-                .let { accountRanges ->
-                    if (accountRanges.size == 1) {
-                        accountRanges.first()
-                    } else {
-                        null
-                    }
-                }
-            if (staticAccountRange == null || shouldQueryRepository(staticAccountRange)) {
-                // query for AccountRange data
-                accountRangeService.queryAccountRangeRepository(cardNumber)
-            } else {
-                // use static AccountRange data
-                accountRangeService.updateAccountRangeResult(staticAccountRange)
-            }
+            accountRangeService.onCardNumberChanged(cardNumber)
 
             isPastedPan = isPastedPan(start, before, count, cardNumber)
 
