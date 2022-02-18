@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import android.widget.FrameLayout
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.fragment.app.testing.launchFragmentInContainer
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -136,6 +137,12 @@ class IdentityCameraScanFragmentTest {
             verify(mockScanFlow).resetFlow()
             assertThat(it.cameraAdapter.isBoundToLifecycle()).isFalse()
         }
+    }
+
+    @Test
+    fun `when destroyed scanFlow is cancelled`() {
+        launchIDScanFragment(testCameraPermissionEnsureable).moveToState(Lifecycle.State.DESTROYED)
+        verify(mockScanFlow).cancelFlow()
     }
 
     private fun launchIDScanFragment(
