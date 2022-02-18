@@ -124,7 +124,7 @@ internal class FormViewModel @Inject internal constructor(
             }
         }
 
-    private val creditBillingElement = elements
+    private val cardBillingElement = elements
         .map { elementsList ->
             elementsList
                 ?.filterIsInstance<SectionElement>()
@@ -139,11 +139,11 @@ internal class FormViewModel @Inject internal constructor(
             saveForFutureUseElement.map {
                 it?.controller?.hiddenIdentifiers ?: flowOf(emptyList())
             }.flattenConcat(),
-            creditBillingElement.map {
+            cardBillingElement.map {
                 it?.hiddenIdentifiers ?: flowOf(emptyList())
             }.flattenConcat()
-        ) { showFutureUse, saveFutureUseIdentifiers, creditBillingIdentifiers ->
-            val hiddenIdentifiers = saveFutureUseIdentifiers.plus(creditBillingIdentifiers)
+        ) { showFutureUse, saveFutureUseIdentifiers, cardBillingIdentifiers ->
+            val hiddenIdentifiers = saveFutureUseIdentifiers.plus(cardBillingIdentifiers)
             // For hidden *section* identifiers, list of identifiers of elements in the section
             val identifiers = sectionToFieldIdentifierMap
                 .filter { idControllerPair ->

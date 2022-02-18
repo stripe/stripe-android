@@ -7,6 +7,8 @@ import androidx.compose.ui.text.input.KeyboardType
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.TextFieldStateConstants.Error
 import com.stripe.android.ui.core.elements.TextFieldStateConstants.Valid
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import java.util.Calendar
 
 internal class DateConfig : TextFieldConfig {
@@ -17,6 +19,7 @@ internal class DateConfig : TextFieldConfig {
     override val label = R.string.stripe_paymentsheet_expiration_date_hint
     override val keyboard = KeyboardType.NumberPassword
     override val visualTransformation = ExpiryDateVisualTransformation()
+    override val trailingIcon: StateFlow<TextFieldIcon?> = MutableStateFlow(null)
 
     override fun filter(userTyped: String) = userTyped.filter { it.isDigit() }
 

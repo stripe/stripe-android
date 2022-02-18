@@ -11,8 +11,9 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
-import com.stripe.android.core.Logger
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.core.Logger
+import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContract
 import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLauncherFactory
@@ -23,7 +24,6 @@ import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
-import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
@@ -176,6 +176,9 @@ internal class PaymentSheetActivityTest {
     fun `updates buy button state on add payment`() {
         val scenario = activityScenario()
         scenario.launch(intent).onActivity { activity ->
+            // Based on previously run tests the viewModel might have a different selection state saved
+            viewModel.updateSelection(null)
+
             viewModel.transitionTo(
                 PaymentSheetViewModel.TransitionTarget.AddPaymentMethodFull(
                     FragmentConfigFixtures.DEFAULT
