@@ -74,7 +74,7 @@ internal class IDScanFragment(
         findNavController().navigate(
             R.id.action_camera_permission_denied,
             bundleOf(
-                CameraPermissionDeniedFragment.ARG_SCAN_TYPE to IdentityScanState.ScanType.ID_FRONT
+                CameraPermissionDeniedFragment.ARG_SCAN_TYPE to ID_FRONT
             )
         )
     }
