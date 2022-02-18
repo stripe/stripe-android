@@ -25,6 +25,7 @@ import com.stripe.android.core.networking.RequestId
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.networking.StripeResponse
 import com.stripe.android.core.networking.responseJson
+import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.exception.AuthenticationException
 import com.stripe.android.exception.CardException
 import com.stripe.android.exception.PermissionException
@@ -111,7 +112,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
     private val fraudDetectionDataParamsUtils: FraudDetectionDataParamsUtils = FraudDetectionDataParamsUtils(),
     betas: Set<StripeApiBeta> = emptySet(),
     apiVersion: String = ApiVersion(betas = betas).code,
-    sdkVersion: String = Stripe.VERSION
+    sdkVersion: String = StripeSdkVersion.VERSION
 ) : StripeRepository() {
 
     @Inject
@@ -1464,7 +1465,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
 
     private fun buildPaymentUserAgentPair(attribution: Set<String> = emptySet()) =
         PAYMENT_USER_AGENT to
-            setOf("stripe-android/${Stripe.VERSION_NAME}")
+            setOf("stripe-android/${StripeSdkVersion.VERSION_NAME}")
                 .plus(productUsageTokens)
                 .plus(attribution)
                 .joinToString(";")

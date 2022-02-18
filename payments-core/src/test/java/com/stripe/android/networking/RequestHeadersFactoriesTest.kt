@@ -8,6 +8,7 @@ import com.stripe.android.AppInfo
 import com.stripe.android.AppInfoFixtures
 import com.stripe.android.Stripe
 import com.stripe.android.core.networking.StripeRequest
+import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.networking.RequestHeadersFactory.Companion.HEADER_ACCEPT
 import com.stripe.android.networking.RequestHeadersFactory.Companion.HEADER_ACCEPT_CHARSET
 import com.stripe.android.networking.RequestHeadersFactory.Companion.HEADER_ACCEPT_LANGUAGE
@@ -72,7 +73,7 @@ class RequestHeadersFactoriesTest {
             requireNotNull(headers[HEADER_STRIPE_CLIENT_USER_AGENT])
         )
         assertThat(userAgentData.getString("bindings.version"))
-            .isEqualTo(Stripe.VERSION_NAME)
+            .isEqualTo(StripeSdkVersion.VERSION_NAME)
         assertThat(userAgentData.getString("lang"))
             .isEqualTo("Java")
         assertThat(userAgentData.getString("publisher"))
@@ -87,7 +88,7 @@ class RequestHeadersFactoriesTest {
     fun headers_correctlyAddsExpectedAdditionalParameters() {
         val headers = createBasePaymentApiHeaders()
 
-        val expectedUserAgent = "Stripe/v1 AndroidBindings/${Stripe.VERSION_NAME}"
+        val expectedUserAgent = "Stripe/v1 AndroidBindings/${StripeSdkVersion.VERSION_NAME}"
         assertThat(headers[HEADER_USER_AGENT]).isEqualTo(expectedUserAgent)
         assertThat(headers[HEADER_ACCEPT]).isEqualTo("application/json")
         assertThat(headers[HEADER_ACCEPT_CHARSET]).isEqualTo("UTF-8")

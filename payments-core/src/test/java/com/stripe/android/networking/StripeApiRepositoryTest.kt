@@ -17,6 +17,7 @@ import com.stripe.android.core.networking.DefaultStripeNetworkClient
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.networking.StripeRequest
 import com.stripe.android.core.networking.StripeResponse
+import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.model.BankAccountTokenParamsFixtures
 import com.stripe.android.model.BinFixtures
 import com.stripe.android.model.CardParams
@@ -262,7 +263,7 @@ internal class StripeApiRepositoryTest {
             val apiRequest = apiRequestArgumentCaptor.firstValue
             assertThat(apiRequest.params?.get("payment_user_agent"))
                 .isEqualTo(
-                    "stripe-android/${Stripe.VERSION_NAME};$productUsage"
+                    "stripe-android/${StripeSdkVersion.VERSION_NAME};$productUsage"
                 )
         }
 
@@ -287,7 +288,7 @@ internal class StripeApiRepositoryTest {
             val apiRequest = apiRequestArgumentCaptor.firstValue
             assertThat(apiRequest.params?.get("payment_user_agent"))
                 .isEqualTo(
-                    "stripe-android/${Stripe.VERSION_NAME}" +
+                    "stripe-android/${StripeSdkVersion.VERSION_NAME}" +
                         ";$productUsage;CardInputView"
                 )
         }
@@ -543,7 +544,7 @@ internal class StripeApiRepositoryTest {
             val paymentMethodDataParams =
                 apiRequest.params?.get(ConfirmStripeIntentParams.PARAM_PAYMENT_METHOD_DATA) as Map<*, *>
             assertThat(paymentMethodDataParams["payment_user_agent"])
-                .isEqualTo("stripe-android/${Stripe.VERSION_NAME};$productUsage")
+                .isEqualTo("stripe-android/${StripeSdkVersion.VERSION_NAME};$productUsage")
         }
 
     @Test
@@ -584,7 +585,7 @@ internal class StripeApiRepositoryTest {
                 apiRequest.params?.get(ConfirmPaymentIntentParams.PARAM_SOURCE_DATA) as Map<*, *>
             assertThat(paymentMethodDataParams["payment_user_agent"])
                 .isEqualTo(
-                    "stripe-android/${Stripe.VERSION_NAME};" +
+                    "stripe-android/${StripeSdkVersion.VERSION_NAME};" +
                         "$stripeApiRequestProductUsage;$sourceParamsProductUsage"
                 )
         }
@@ -628,7 +629,7 @@ internal class StripeApiRepositoryTest {
                 apiRequest.params?.get(ConfirmStripeIntentParams.PARAM_PAYMENT_METHOD_DATA) as Map<*, *>
             assertThat(paymentMethodDataParams["payment_user_agent"])
                 .isEqualTo(
-                    "stripe-android/${Stripe.VERSION_NAME};" +
+                    "stripe-android/${StripeSdkVersion.VERSION_NAME};" +
                         "$productUsage;$pmCreateParamsProductUsage"
                 )
         }
@@ -695,7 +696,7 @@ internal class StripeApiRepositoryTest {
                 apiRequest.params?.get(ConfirmStripeIntentParams.PARAM_PAYMENT_METHOD_DATA) as Map<*, *>
             assertThat(paymentMethodDataParams["payment_user_agent"])
                 .isEqualTo(
-                    "stripe-android/${Stripe.VERSION_NAME};$productUsage"
+                    "stripe-android/${StripeSdkVersion.VERSION_NAME};$productUsage"
                 )
         }
 
@@ -738,7 +739,7 @@ internal class StripeApiRepositoryTest {
                 apiRequest.params?.get(ConfirmStripeIntentParams.PARAM_PAYMENT_METHOD_DATA) as Map<*, *>
             assertThat(paymentMethodDataParams["payment_user_agent"])
                 .isEqualTo(
-                    "stripe-android/${Stripe.VERSION_NAME};" +
+                    "stripe-android/${StripeSdkVersion.VERSION_NAME};" +
                         "$productUsage;$pmCreateParamsProductUsage"
                 )
         }
@@ -1203,7 +1204,7 @@ internal class StripeApiRepositoryTest {
             val apiRequest = apiRequestArgumentCaptor.firstValue
             assertThat(apiRequest.params?.get("payment_user_agent"))
                 .isEqualTo(
-                    "stripe-android/${Stripe.VERSION_NAME};$productUsage"
+                    "stripe-android/${StripeSdkVersion.VERSION_NAME};$productUsage"
                 )
         }
 
@@ -1229,7 +1230,7 @@ internal class StripeApiRepositoryTest {
             val apiRequest = apiRequestArgumentCaptor.firstValue
             assertThat(apiRequest.params?.get("payment_user_agent"))
                 .isEqualTo(
-                    "stripe-android/${Stripe.VERSION_NAME}" +
+                    "stripe-android/${StripeSdkVersion.VERSION_NAME}" +
                         ";$productUsage;CardInputView"
                 )
         }
@@ -1295,7 +1296,7 @@ internal class StripeApiRepositoryTest {
             verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
             val apiRequest = apiRequestArgumentCaptor.firstValue
             assertThat(apiRequest.params?.get("payment_user_agent"))
-                .isEqualTo("stripe-android/${Stripe.VERSION_NAME};$productUsage")
+                .isEqualTo("stripe-android/${StripeSdkVersion.VERSION_NAME};$productUsage")
         }
 
     @Test
@@ -1323,7 +1324,7 @@ internal class StripeApiRepositoryTest {
             val apiRequest = apiRequestArgumentCaptor.firstValue
             assertThat(apiRequest.params?.get("payment_user_agent"))
                 .isEqualTo(
-                    "stripe-android/${Stripe.VERSION_NAME}" +
+                    "stripe-android/${StripeSdkVersion.VERSION_NAME}" +
                         ";$productUsage;$cardAttribution"
                 )
         }

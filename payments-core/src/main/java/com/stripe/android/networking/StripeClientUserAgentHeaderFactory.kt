@@ -3,7 +3,7 @@ package com.stripe.android.networking
 import android.os.Build
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.AppInfo
-import com.stripe.android.Stripe
+import com.stripe.android.core.version.StripeSdkVersion
 import org.json.JSONObject
 
 internal class StripeClientUserAgentHeaderFactory(
@@ -25,7 +25,7 @@ internal class StripeClientUserAgentHeaderFactory(
             mapOf(
                 "os.name" to "android",
                 "os.version" to Build.VERSION.SDK_INT.toString(),
-                "bindings.version" to Stripe.VERSION_NAME,
+                "bindings.version" to StripeSdkVersion.VERSION_NAME,
                 "lang" to "Java",
                 "publisher" to "Stripe",
                 "http.agent" to systemPropertySupplier(PROP_USER_AGENT)
