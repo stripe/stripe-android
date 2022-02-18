@@ -3,10 +3,8 @@ package com.stripe.android.stripecardscan.scanui.util
 import android.content.Context
 import android.content.res.Resources.NotFoundException
 import android.graphics.PointF
-import android.graphics.drawable.Animatable
 import android.util.TypedValue
 import android.view.View
-import android.widget.ImageView
 import android.widget.TextView
 import androidx.annotation.ColorInt
 import androidx.annotation.ColorRes
@@ -14,11 +12,6 @@ import androidx.annotation.DimenRes
 import androidx.annotation.DrawableRes
 import androidx.core.content.ContextCompat
 import kotlin.math.roundToInt
-
-/**
- * Determine if a view is visible.
- */
-internal fun View.isVisible() = this.visibility == View.VISIBLE
 
 /**
  * Set a view's visibility.
@@ -49,24 +42,6 @@ internal fun Context.getColorByRes(@ColorRes colorRes: Int) =
  */
 internal fun Context.getDrawableByRes(@DrawableRes drawableRes: Int) =
     ContextCompat.getDrawable(this, drawableRes)
-
-/**
- * Set the image of an [ImageView] using a [DrawableRes].
- */
-internal fun ImageView.setDrawable(@DrawableRes drawableRes: Int) {
-    this.setImageDrawable(this.context.getDrawableByRes(drawableRes))
-}
-
-/**
- * Set the image of an [ImageView] using a [DrawableRes] and start the animation.
- */
-internal fun ImageView.startAnimation(@DrawableRes drawableRes: Int) {
-    val d = this.context.getDrawableByRes(drawableRes)
-    setImageDrawable(d)
-    if (d is Animatable) {
-        d.start()
-    }
-}
 
 /**
  * Convert an int in DP to pixels.

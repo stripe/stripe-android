@@ -1,6 +1,7 @@
 package com.stripe.android.payments.paymentlauncher
 
 import android.content.Intent
+import android.graphics.Color
 import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
@@ -25,6 +26,31 @@ class PaymentLauncherConfirmationActivityTest {
         whenever(it.paymentLauncherResult).thenReturn(mock())
     }
     private val testFactory = TestUtils.viewModelFactoryFor(viewModel)
+
+    @Test
+    fun `statusBarColor is set on window`() {
+        val color = Color.CYAN
+        mockViewModelActivityScenario().launch(
+            Intent(
+                ApplicationProvider.getApplicationContext(),
+                PaymentLauncherConfirmationActivity::class.java
+            ).putExtras(
+                PaymentLauncherContract.Args.IntentConfirmationArgs(
+                    INJECTOR_KEY,
+                    ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+                    TEST_STRIPE_ACCOUNT_ID,
+                    false,
+                    PRODUCT_USAGE,
+                    mock(),
+                    color
+                ).toBundle()
+            )
+        ).use {
+            it.onActivity {
+                assertThat(it.window.statusBarColor).isEqualTo(color)
+            }
+        }
+    }
 
     @ExperimentalCoroutinesApi
     @Test

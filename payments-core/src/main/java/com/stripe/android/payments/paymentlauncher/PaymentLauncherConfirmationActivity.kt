@@ -57,6 +57,10 @@ internal class PaymentLauncherConfirmationActivity : AppCompatActivity() {
             return
         }
 
+        args.statusBarColor?.let {
+            window.statusBarColor = it
+        }
+
         viewModel.paymentLauncherResult.observe(this, ::finishWithResult)
 
         // [viewModel.hasStarted] could be true if the app process is killed by system, then

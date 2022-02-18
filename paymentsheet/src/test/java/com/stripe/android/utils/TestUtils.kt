@@ -9,7 +9,8 @@ internal object TestUtils {
     fun idleLooper() = idleMainLooper()
 
     fun viewModelFactoryFor(viewModel: ViewModel) = object : ViewModelProvider.Factory {
-        override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+        @Suppress("UNCHECKED_CAST")
+        override fun <T : ViewModel> create(modelClass: Class<T>): T {
             return viewModel as T
         }
     }
