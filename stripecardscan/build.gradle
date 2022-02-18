@@ -84,7 +84,7 @@ dependencies {
     api project(":stripe-core")
     implementation project(":camera-core")
 
-    implementation "org.tensorflow:tensorflow-lite:2.7.0"
+    implementation "org.tensorflow:tensorflow-lite:2.8.0"
 
     implementation libraries.androidx.appcompat
     implementation libraries.androidx.constraintlayout
