@@ -11,7 +11,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.Navigation
 import androidx.navigation.testing.TestNavHostController
 import androidx.test.core.app.ApplicationProvider
-import com.google.common.truth.Truth
+import com.google.common.truth.Truth.assertThat
 import com.stripe.android.camera.CameraPermissionEnsureable
 import com.stripe.android.identity.R
 import com.stripe.android.identity.camera.IDDetectorAggregator
@@ -78,7 +78,7 @@ internal class DriverLicenseScanFragmentTest {
     fun `when camera permission granted cameraAdapter is bound and identityScanFlow is started`() {
         launchDriverLicenseFragment(testCameraPermissionEnsureable).onFragment {
             testCameraPermissionEnsureable.onCameraReady()
-            Truth.assertThat(it.cameraAdapter.isBoundToLifecycle()).isTrue()
+            assertThat(it.cameraAdapter.isBoundToLifecycle()).isTrue()
             verify(mockScanFlow).startFlow(
                 same(it.requireContext()),
                 any(),
@@ -99,7 +99,7 @@ internal class DriverLicenseScanFragmentTest {
 
             // stopScanning() is called
             verify(mockScanFlow).resetFlow()
-            Truth.assertThat(it.cameraAdapter.isBoundToLifecycle()).isFalse()
+            assertThat(it.cameraAdapter.isBoundToLifecycle()).isFalse()
 
             // mock viewModel target change
             whenever(mockCameraViewModel.targetScanType)
@@ -109,7 +109,7 @@ internal class DriverLicenseScanFragmentTest {
             DriverLicenseScanFragmentBinding.bind(it.requireView()).kontinue.callOnClick()
 
             // verify start to scan back
-            Truth.assertThat(it.cameraAdapter.isBoundToLifecycle()).isTrue()
+            assertThat(it.cameraAdapter.isBoundToLifecycle()).isTrue()
             verify(mockScanFlow).startFlow(
                 same(it.requireContext()),
                 any(),
@@ -159,7 +159,7 @@ internal class DriverLicenseScanFragmentTest {
 
             // click continue, navigates
             binding.kontinue.callOnClick()
-            Truth.assertThat(navController.currentDestination?.id)
+            assertThat(navController.currentDestination?.id)
                 .isEqualTo(R.id.confirmationFragment)
         }
     }
@@ -179,9 +179,16 @@ internal class DriverLicenseScanFragmentTest {
 
             testCameraPermissionEnsureable.onUserDeniedCameraPermission()
 
-            Truth.assertThat(it.cameraAdapter.isBoundToLifecycle()).isFalse()
-            Truth.assertThat(navController.currentDestination?.id)
+            assertThat(it.cameraAdapter.isBoundToLifecycle()).isFalse()
+            assertThat(navController.currentDestination?.id)
                 .isEqualTo(R.id.cameraPermissionDeniedFragment)
+
+            assertThat(
+                navController.backStack.last()
+                    .arguments!![CameraPermissionDeniedFragment.ARG_SCAN_TYPE]
+            ).isEqualTo(
+                IdentityScanState.ScanType.ID_FRONT
+            )
         }
     }
 
@@ -189,12 +196,12 @@ internal class DriverLicenseScanFragmentTest {
     fun `when final result is received scanFlow is reset and cameraAdapter is unbound`() {
         launchDriverLicenseFragment(testCameraPermissionEnsureable).onFragment {
             testCameraPermissionEnsureable.onCameraReady()
-            Truth.assertThat(it.cameraAdapter.isBoundToLifecycle()).isTrue()
+            assertThat(it.cameraAdapter.isBoundToLifecycle()).isTrue()
 
             finalResultLiveData.postValue(mock())
 
             verify(mockScanFlow).resetFlow()
-            Truth.assertThat(it.cameraAdapter.isBoundToLifecycle()).isFalse()
+            assertThat(it.cameraAdapter.isBoundToLifecycle()).isFalse()
         }
     }
 
@@ -202,18 +209,18 @@ internal class DriverLicenseScanFragmentTest {
     fun `when displayStateChanged to Initial UI is properly updated for ID_FRONT`() {
         whenever(mockCameraViewModel.targetScanType).thenReturn(IdentityScanState.ScanType.ID_FRONT)
         postDisplayStateChangedDataAndVerifyUI(mock<IdentityScanState.Initial>()) { binding, context ->
-            Truth.assertThat(binding.cameraView.viewFinderBackgroundView.visibility)
+            assertThat(binding.cameraView.viewFinderBackgroundView.visibility)
                 .isEqualTo(View.VISIBLE)
-            Truth.assertThat(binding.cameraView.viewFinderWindowView.visibility)
+            assertThat(binding.cameraView.viewFinderWindowView.visibility)
                 .isEqualTo(View.VISIBLE)
-            Truth.assertThat(binding.cameraView.viewFinderBorderView.visibility)
+            assertThat(binding.cameraView.viewFinderBorderView.visibility)
                 .isEqualTo(View.VISIBLE)
-            Truth.assertThat(binding.checkMarkView.visibility).isEqualTo(View.GONE)
-            Truth.assertThat(binding.kontinue.isEnabled).isFalse()
-            Truth.assertThat(binding.headerTitle.text).isEqualTo(
+            assertThat(binding.checkMarkView.visibility).isEqualTo(View.GONE)
+            assertThat(binding.kontinue.isEnabled).isFalse()
+            assertThat(binding.headerTitle.text).isEqualTo(
                 context.getText(R.string.front_of_dl)
             )
-            Truth.assertThat(binding.message.text).isEqualTo(
+            assertThat(binding.message.text).isEqualTo(
                 context.getText(R.string.position_dl_front)
             )
         }
@@ -223,18 +230,18 @@ internal class DriverLicenseScanFragmentTest {
     fun `when displayStateChanged to Initial UI is properly updated for ID_BACK`() {
         whenever(mockCameraViewModel.targetScanType).thenReturn(IdentityScanState.ScanType.ID_BACK)
         postDisplayStateChangedDataAndVerifyUI(mock<IdentityScanState.Initial>()) { binding, context ->
-            Truth.assertThat(binding.cameraView.viewFinderBackgroundView.visibility)
+            assertThat(binding.cameraView.viewFinderBackgroundView.visibility)
                 .isEqualTo(View.VISIBLE)
-            Truth.assertThat(binding.cameraView.viewFinderWindowView.visibility)
+            assertThat(binding.cameraView.viewFinderWindowView.visibility)
                 .isEqualTo(View.VISIBLE)
-            Truth.assertThat(binding.cameraView.viewFinderBorderView.visibility)
+            assertThat(binding.cameraView.viewFinderBorderView.visibility)
                 .isEqualTo(View.VISIBLE)
-            Truth.assertThat(binding.checkMarkView.visibility).isEqualTo(View.GONE)
-            Truth.assertThat(binding.kontinue.isEnabled).isFalse()
-            Truth.assertThat(binding.headerTitle.text).isEqualTo(
+            assertThat(binding.checkMarkView.visibility).isEqualTo(View.GONE)
+            assertThat(binding.kontinue.isEnabled).isFalse()
+            assertThat(binding.headerTitle.text).isEqualTo(
                 context.getText(R.string.back_of_dl)
             )
-            Truth.assertThat(binding.message.text).isEqualTo(
+            assertThat(binding.message.text).isEqualTo(
                 context.getText(R.string.position_dl_back)
             )
         }
@@ -243,15 +250,15 @@ internal class DriverLicenseScanFragmentTest {
     @Test
     fun `when displayStateChanged to Found UI is properly updated`() {
         postDisplayStateChangedDataAndVerifyUI(mock<IdentityScanState.Found>()) { binding, context ->
-            Truth.assertThat(binding.cameraView.viewFinderBackgroundView.visibility)
+            assertThat(binding.cameraView.viewFinderBackgroundView.visibility)
                 .isEqualTo(View.VISIBLE)
-            Truth.assertThat(binding.cameraView.viewFinderWindowView.visibility)
+            assertThat(binding.cameraView.viewFinderWindowView.visibility)
                 .isEqualTo(View.VISIBLE)
-            Truth.assertThat(binding.cameraView.viewFinderBorderView.visibility)
+            assertThat(binding.cameraView.viewFinderBorderView.visibility)
                 .isEqualTo(View.VISIBLE)
-            Truth.assertThat(binding.checkMarkView.visibility).isEqualTo(View.GONE)
-            Truth.assertThat(binding.kontinue.isEnabled).isFalse()
-            Truth.assertThat(binding.message.text).isEqualTo(
+            assertThat(binding.checkMarkView.visibility).isEqualTo(View.GONE)
+            assertThat(binding.kontinue.isEnabled).isFalse()
+            assertThat(binding.message.text).isEqualTo(
                 context.getText(R.string.hold_still)
             )
         }
@@ -261,15 +268,15 @@ internal class DriverLicenseScanFragmentTest {
     fun `when displayStateChanged to Unsatisfied UI is properly updated for ID_FRONT`() {
         whenever(mockCameraViewModel.targetScanType).thenReturn(IdentityScanState.ScanType.ID_FRONT)
         postDisplayStateChangedDataAndVerifyUI(mock<IdentityScanState.Unsatisfied>()) { binding, context ->
-            Truth.assertThat(binding.cameraView.viewFinderBackgroundView.visibility)
+            assertThat(binding.cameraView.viewFinderBackgroundView.visibility)
                 .isEqualTo(View.VISIBLE)
-            Truth.assertThat(binding.cameraView.viewFinderWindowView.visibility)
+            assertThat(binding.cameraView.viewFinderWindowView.visibility)
                 .isEqualTo(View.VISIBLE)
-            Truth.assertThat(binding.cameraView.viewFinderBorderView.visibility)
+            assertThat(binding.cameraView.viewFinderBorderView.visibility)
                 .isEqualTo(View.VISIBLE)
-            Truth.assertThat(binding.checkMarkView.visibility).isEqualTo(View.GONE)
-            Truth.assertThat(binding.kontinue.isEnabled).isFalse()
-            Truth.assertThat(binding.message.text).isEqualTo(
+            assertThat(binding.checkMarkView.visibility).isEqualTo(View.GONE)
+            assertThat(binding.kontinue.isEnabled).isFalse()
+            assertThat(binding.message.text).isEqualTo(
                 context.getText(R.string.position_dl_front)
             )
         }
@@ -279,15 +286,15 @@ internal class DriverLicenseScanFragmentTest {
     fun `when displayStateChanged to Unsatisfied UI is properly updated for ID_BACK`() {
         whenever(mockCameraViewModel.targetScanType).thenReturn(IdentityScanState.ScanType.ID_BACK)
         postDisplayStateChangedDataAndVerifyUI(mock<IdentityScanState.Unsatisfied>()) { binding, context ->
-            Truth.assertThat(binding.cameraView.viewFinderBackgroundView.visibility)
+            assertThat(binding.cameraView.viewFinderBackgroundView.visibility)
                 .isEqualTo(View.VISIBLE)
-            Truth.assertThat(binding.cameraView.viewFinderWindowView.visibility)
+            assertThat(binding.cameraView.viewFinderWindowView.visibility)
                 .isEqualTo(View.VISIBLE)
-            Truth.assertThat(binding.cameraView.viewFinderBorderView.visibility)
+            assertThat(binding.cameraView.viewFinderBorderView.visibility)
                 .isEqualTo(View.VISIBLE)
-            Truth.assertThat(binding.checkMarkView.visibility).isEqualTo(View.GONE)
-            Truth.assertThat(binding.kontinue.isEnabled).isFalse()
-            Truth.assertThat(binding.message.text).isEqualTo(
+            assertThat(binding.checkMarkView.visibility).isEqualTo(View.GONE)
+            assertThat(binding.kontinue.isEnabled).isFalse()
+            assertThat(binding.message.text).isEqualTo(
                 context.getText(R.string.position_dl_back)
             )
         }
@@ -296,15 +303,15 @@ internal class DriverLicenseScanFragmentTest {
     @Test
     fun `when displayStateChanged to Satisfied UI is properly updated`() {
         postDisplayStateChangedDataAndVerifyUI(mock<IdentityScanState.Satisfied>()) { binding, context ->
-            Truth.assertThat(binding.cameraView.viewFinderBackgroundView.visibility)
+            assertThat(binding.cameraView.viewFinderBackgroundView.visibility)
                 .isEqualTo(View.VISIBLE)
-            Truth.assertThat(binding.cameraView.viewFinderWindowView.visibility)
+            assertThat(binding.cameraView.viewFinderWindowView.visibility)
                 .isEqualTo(View.VISIBLE)
-            Truth.assertThat(binding.cameraView.viewFinderBorderView.visibility)
+            assertThat(binding.cameraView.viewFinderBorderView.visibility)
                 .isEqualTo(View.VISIBLE)
-            Truth.assertThat(binding.checkMarkView.visibility).isEqualTo(View.GONE)
-            Truth.assertThat(binding.kontinue.isEnabled).isFalse()
-            Truth.assertThat(binding.message.text).isEqualTo(
+            assertThat(binding.checkMarkView.visibility).isEqualTo(View.GONE)
+            assertThat(binding.kontinue.isEnabled).isFalse()
+            assertThat(binding.message.text).isEqualTo(
                 context.getText(R.string.scanned)
             )
         }
@@ -313,15 +320,15 @@ internal class DriverLicenseScanFragmentTest {
     @Test
     fun `when displayStateChanged to Finished UI is properly updated`() {
         postDisplayStateChangedDataAndVerifyUI(mock<IdentityScanState.Finished>()) { binding, context ->
-            Truth.assertThat(binding.cameraView.viewFinderBackgroundView.visibility)
+            assertThat(binding.cameraView.viewFinderBackgroundView.visibility)
                 .isEqualTo(View.INVISIBLE)
-            Truth.assertThat(binding.cameraView.viewFinderWindowView.visibility)
+            assertThat(binding.cameraView.viewFinderWindowView.visibility)
                 .isEqualTo(View.INVISIBLE)
-            Truth.assertThat(binding.cameraView.viewFinderBorderView.visibility)
+            assertThat(binding.cameraView.viewFinderBorderView.visibility)
                 .isEqualTo(View.INVISIBLE)
-            Truth.assertThat(binding.checkMarkView.visibility).isEqualTo(View.VISIBLE)
-            Truth.assertThat(binding.kontinue.isEnabled).isTrue()
-            Truth.assertThat(binding.message.text).isEqualTo(
+            assertThat(binding.checkMarkView.visibility).isEqualTo(View.VISIBLE)
+            assertThat(binding.kontinue.isEnabled).isTrue()
+            assertThat(binding.message.text).isEqualTo(
                 context.getText(R.string.scanned)
             )
         }
