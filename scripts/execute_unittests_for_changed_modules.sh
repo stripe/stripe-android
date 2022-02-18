@@ -1,15 +1,15 @@
-# This script first finds all the modules changed in a PR, then finds all their dependent modules, and executes testDebugUnitTest on these modules.
+# This script first finds all the modules changed in a PR, then finds all their dependent modules, finally it executes testDebugUnitTest on these modules.
 # If some critical dependency is changed, e.g the root build.gradle file, all unit tests will be executed.
 
 
-# directory names that corresponds to a module that has unit tests - this list needs to be manually updated when a new module is added
+# directory names that corresponds to a module that has unit tests - this list needs to be manually updated when a new module is added/deleted
 TESTABLE_MODULES="payments payments-core paymentsheet wechatpay link stripecardscan identity stripe-core payments-ui-core camera-core"
 # a function to check if a dir is in TESTABLE_MODULES
 isTestableModule() {
   [[ $TESTABLE_MODULES =~ (^|[[:space:]])$1($|[[:space:]]) ]]
 }
 
-# Files or directories that if changed, will trigger all the unitest run
+# Files or directories that trigger all the unitest run if changed
 CRITICAL_DEPS="build.gradle settings.gradle"
 # a function to check if a file/dir is in CRITICAL_DEPS
 isCriticalDeps() {
@@ -40,24 +40,35 @@ do
     if [[ $modules_to_test != *"$dir"* ]]; then
       modules_to_test="$modules_to_test $dir"
     fi
-    # The gradle command outputs all dependencies, for project dependencies, it looks like this:
-    #
-    # +--- project :payments-core
-    # |    +--- project :stripe-core
-    # +--- project :stripe-core (*)
-    # +--- project :payments-ui-core
-    #
-    # Note dependencies that appears more than once are suffixed with "(*)"
-    #
-    # The output is grep-ed with all project dependency lines that doesn't end with ")", then the last part of the line after : is cut
-    #
-    # For the previous output, module_deps will be assigned these values: ["payments-core", "stripe-core", "payments-ui-core"]
-    module_deps=$(./gradlew :$dir:dependencies --configuration debugCompileClasspath | grep '+--- project :.*\w$' | cut -d ":" -f 2)
-    for dep in $module_deps
+
+    # For each of the testable modules, check if depends on $dir
+    for testable_module in $TESTABLE_MODULES
     do
-      # add this dep module if we haven't added it yet
-      if [[ $modules_to_test != *"$dep"* ]]; then
-        modules_to_test="$modules_to_test $dep"
+      if [[ $testable_module != $dir ]]; then
+        # checking if $testable_module depends on $dir
+        # The gradle command outputs all dependencies, for project dependencies, it looks like this:
+        #
+        # +--- project :payments-core
+        # |    +--- project :stripe-core
+        # +--- project :stripe-core (*)
+        # +--- project :payments-ui-core
+        #
+        # Note dependencies that appears more than once are suffixed with "(*)"
+        # The output is grep-ed with all project dependency lines that doesn't end with ")", then the last part of the line after : is cut
+        #
+        # For the previous output, module_deps will be assigned these values: ["payments-core", "stripe-core", "payments-ui-core"]
+        module_deps=$(./gradlew :$testable_module:dependencies --configuration debugCompileClasspath | grep '+--- project :.*\w$' | cut -d ":" -f 2)
+        for dep in $module_deps
+        do
+          if [[ $dep == $dir ]]; then
+            # add this testable_module if we haven't add it yet
+            if [[ $modules_to_test != *"$testable_module"* ]]; then
+              modules_to_test="$modules_to_test $testable_module"
+            fi
+            # break the loop since we already add testable_module
+            break
+          fi
+        done
       fi
     done
   fi
@@ -71,9 +82,9 @@ do
 done
 echo -------------------------------------------
 
-# run test commands for modules_to_test
-for module in $modules_to_test
-do
-    echo "./gradlew :${module}:testDebugUnitTest"
-    eval "./gradlew :${module}:testDebugUnitTest"
-done
+## run test commands for modules_to_test
+#for module in $modules_to_test
+#do
+#    echo "./gradlew :${module}:testDebugUnitTest"
+#    eval "./gradlew :${module}:testDebugUnitTest"
+#done
