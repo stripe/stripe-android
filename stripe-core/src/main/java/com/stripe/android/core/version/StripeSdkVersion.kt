@@ -4,7 +4,7 @@ package com.stripe.android.core.version
  * A class that represents the Stripe SDK version.
  *
  * See [https://github.com/stripe/stripe-android/releases](https://github.com/stripe/stripe-android/releases)
- * for documentation on SDK versioning.
+ * for changelog reference..
  *
  */
 object StripeSdkVersion {
