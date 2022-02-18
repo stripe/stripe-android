@@ -17,8 +17,7 @@ import com.stripe.android.ui.core.R
 
 @Composable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-fun AffirmElementUI(
-) {
+fun AffirmElementUI() {
     FlowRow(
         modifier = Modifier.padding(4.dp, 8.dp, 4.dp, 4.dp),
         crossAxisAlignment = FlowCrossAxisAlignment.Center
