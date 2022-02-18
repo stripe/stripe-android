@@ -68,10 +68,9 @@ internal class IDScanFragmentTest {
     }
 
     @Test
-    fun `when created identityScanFlow is initialized and camera permission is requested`() {
+    fun `when created camera permission is requested`() {
         launchIDScanFragment(mockCameraPermissionEnsurable)
 
-        verify(mockCameraViewModel).initializeScanFlow(eq(IdentityScanState.ScanType.ID_FRONT))
         verify(mockCameraPermissionEnsurable).ensureCameraPermission(any(), any())
     }
 
@@ -86,8 +85,81 @@ internal class IDScanFragmentTest {
                 any(),
                 same(it.viewLifecycleOwner),
                 same(it.lifecycleScope),
-                eq(23)
+                eq(IdentityScanState.ScanType.ID_FRONT)
             )
+        }
+    }
+
+    @Test
+    fun `when front is scanned clicking button triggers back scan`() {
+        launchIDScanFragment(testCameraPermissionEnsureable).onFragment {
+            testCameraPermissionEnsureable.onCameraReady()
+            // mock success of front scan
+            finalResultLiveData.postValue(mock())
+
+            // stopScanning() is called
+            verify(mockScanFlow).resetFlow()
+            assertThat(it.cameraAdapter.isBoundToLifecycle()).isFalse()
+
+            // mock viewModel target change
+            whenever(mockCameraViewModel.targetScanType)
+                .thenReturn(IdentityScanState.ScanType.ID_FRONT)
+
+            // button clicked
+            IdScanFragmentBinding.bind(it.requireView()).kontinue.callOnClick()
+
+            // verify start to scan back
+            assertThat(it.cameraAdapter.isBoundToLifecycle()).isTrue()
+            verify(mockScanFlow).startFlow(
+                same(it.requireContext()),
+                any(),
+                any(),
+                same(it.viewLifecycleOwner),
+                same(it.lifecycleScope),
+                eq(IdentityScanState.ScanType.ID_BACK)
+            )
+        }
+    }
+
+    @Test
+    fun `when both sides are scanned clicking button triggers navigation`() {
+        launchIDScanFragment(testCameraPermissionEnsureable).onFragment {
+            val navController = TestNavHostController(
+                ApplicationProvider.getApplicationContext()
+            )
+            navController.setGraph(
+                R.navigation.identity_nav_graph
+            )
+            navController.setCurrentDestination(R.id.IDScanFragment)
+            Navigation.setViewNavController(
+                it.requireView(),
+                navController
+            )
+
+            // scan front
+            testCameraPermissionEnsureable.onCameraReady()
+
+            // mock success of front scan
+            finalResultLiveData.postValue(mock())
+
+            // mock viewModel target change
+            whenever(mockCameraViewModel.targetScanType)
+                .thenReturn(IdentityScanState.ScanType.ID_FRONT)
+
+            // click continue, scan back
+            val binding = IdScanFragmentBinding.bind(it.requireView())
+            binding.kontinue.callOnClick()
+
+            // mock success of back scan
+            finalResultLiveData.postValue(mock())
+
+            // mock viewModel target change
+            whenever(mockCameraViewModel.targetScanType)
+                .thenReturn(IdentityScanState.ScanType.ID_BACK)
+
+            // click continue, navigates
+            binding.kontinue.callOnClick()
+            assertThat(navController.currentDestination?.id).isEqualTo(R.id.confirmationFragment)
         }
     }
 
@@ -98,6 +170,7 @@ internal class IDScanFragmentTest {
                 ApplicationProvider.getApplicationContext()
             )
             navController.setGraph(R.navigation.identity_nav_graph)
+
             Navigation.setViewNavController(
                 it.requireView(),
                 navController
@@ -111,27 +184,50 @@ internal class IDScanFragmentTest {
     }
 
     @Test
-    fun `when final result is received scanFlow is cancelled and cameraAdapter is unbound`() {
+    fun `when final result is received scanFlow is reset and cameraAdapter is unbound`() {
         launchIDScanFragment(testCameraPermissionEnsureable).onFragment {
             testCameraPermissionEnsureable.onCameraReady()
             assertThat(it.cameraAdapter.isBoundToLifecycle()).isTrue()
 
             finalResultLiveData.postValue(mock())
 
-            verify(mockScanFlow).cancelFlow()
+            verify(mockScanFlow).resetFlow()
             assertThat(it.cameraAdapter.isBoundToLifecycle()).isFalse()
         }
     }
 
     @Test
-    fun `when displayStateChanged to Initial UI is properly updated`() {
+    fun `when displayStateChanged to Initial UI is properly updated for ID_FRONT`() {
+        whenever(mockCameraViewModel.targetScanType).thenReturn(IdentityScanState.ScanType.ID_FRONT)
         postDisplayStateChangedDataAndVerifyUI(mock<IdentityScanState.Initial>()) { binding, context ->
             assertThat(binding.cameraView.viewFinderBackgroundView.visibility).isEqualTo(View.VISIBLE)
             assertThat(binding.cameraView.viewFinderWindowView.visibility).isEqualTo(View.VISIBLE)
             assertThat(binding.cameraView.viewFinderBorderView.visibility).isEqualTo(View.VISIBLE)
             assertThat(binding.checkMarkView.visibility).isEqualTo(View.GONE)
+            assertThat(binding.kontinue.isEnabled).isFalse()
+            assertThat(binding.headerTitle.text).isEqualTo(
+                context.getText(R.string.front_of_id)
+            )
             assertThat(binding.message.text).isEqualTo(
                 context.getText(R.string.position_id_front)
+            )
+        }
+    }
+
+    @Test
+    fun `when displayStateChanged to Initial UI is properly updated for ID_BACK`() {
+        whenever(mockCameraViewModel.targetScanType).thenReturn(IdentityScanState.ScanType.ID_BACK)
+        postDisplayStateChangedDataAndVerifyUI(mock<IdentityScanState.Initial>()) { binding, context ->
+            assertThat(binding.cameraView.viewFinderBackgroundView.visibility).isEqualTo(View.VISIBLE)
+            assertThat(binding.cameraView.viewFinderWindowView.visibility).isEqualTo(View.VISIBLE)
+            assertThat(binding.cameraView.viewFinderBorderView.visibility).isEqualTo(View.VISIBLE)
+            assertThat(binding.checkMarkView.visibility).isEqualTo(View.GONE)
+            assertThat(binding.kontinue.isEnabled).isFalse()
+            assertThat(binding.headerTitle.text).isEqualTo(
+                context.getText(R.string.back_of_id)
+            )
+            assertThat(binding.message.text).isEqualTo(
+                context.getText(R.string.position_id_back)
             )
         }
     }
@@ -143,6 +239,7 @@ internal class IDScanFragmentTest {
             assertThat(binding.cameraView.viewFinderWindowView.visibility).isEqualTo(View.VISIBLE)
             assertThat(binding.cameraView.viewFinderBorderView.visibility).isEqualTo(View.VISIBLE)
             assertThat(binding.checkMarkView.visibility).isEqualTo(View.GONE)
+            assertThat(binding.kontinue.isEnabled).isFalse()
             assertThat(binding.message.text).isEqualTo(
                 context.getText(R.string.hold_still)
             )
@@ -150,14 +247,31 @@ internal class IDScanFragmentTest {
     }
 
     @Test
-    fun `when displayStateChanged to Unsatisfied UI is properly updated`() {
+    fun `when displayStateChanged to Unsatisfied UI is properly updated for ID_FRONT`() {
+        whenever(mockCameraViewModel.targetScanType).thenReturn(IdentityScanState.ScanType.ID_FRONT)
         postDisplayStateChangedDataAndVerifyUI(mock<IdentityScanState.Unsatisfied>()) { binding, context ->
             assertThat(binding.cameraView.viewFinderBackgroundView.visibility).isEqualTo(View.VISIBLE)
             assertThat(binding.cameraView.viewFinderWindowView.visibility).isEqualTo(View.VISIBLE)
             assertThat(binding.cameraView.viewFinderBorderView.visibility).isEqualTo(View.VISIBLE)
             assertThat(binding.checkMarkView.visibility).isEqualTo(View.GONE)
+            assertThat(binding.kontinue.isEnabled).isFalse()
             assertThat(binding.message.text).isEqualTo(
-                context.getText(R.string.position_id_in_center)
+                context.getText(R.string.position_id_front)
+            )
+        }
+    }
+
+    @Test
+    fun `when displayStateChanged to Unsatisfied UI is properly updated for ID_BACK`() {
+        whenever(mockCameraViewModel.targetScanType).thenReturn(IdentityScanState.ScanType.ID_BACK)
+        postDisplayStateChangedDataAndVerifyUI(mock<IdentityScanState.Unsatisfied>()) { binding, context ->
+            assertThat(binding.cameraView.viewFinderBackgroundView.visibility).isEqualTo(View.VISIBLE)
+            assertThat(binding.cameraView.viewFinderWindowView.visibility).isEqualTo(View.VISIBLE)
+            assertThat(binding.cameraView.viewFinderBorderView.visibility).isEqualTo(View.VISIBLE)
+            assertThat(binding.checkMarkView.visibility).isEqualTo(View.GONE)
+            assertThat(binding.kontinue.isEnabled).isFalse()
+            assertThat(binding.message.text).isEqualTo(
+                context.getText(R.string.position_id_back)
             )
         }
     }
@@ -169,6 +283,7 @@ internal class IDScanFragmentTest {
             assertThat(binding.cameraView.viewFinderWindowView.visibility).isEqualTo(View.VISIBLE)
             assertThat(binding.cameraView.viewFinderBorderView.visibility).isEqualTo(View.VISIBLE)
             assertThat(binding.checkMarkView.visibility).isEqualTo(View.GONE)
+            assertThat(binding.kontinue.isEnabled).isFalse()
             assertThat(binding.message.text).isEqualTo(
                 context.getText(R.string.scanned)
             )
@@ -182,6 +297,7 @@ internal class IDScanFragmentTest {
             assertThat(binding.cameraView.viewFinderWindowView.visibility).isEqualTo(View.INVISIBLE)
             assertThat(binding.cameraView.viewFinderBorderView.visibility).isEqualTo(View.INVISIBLE)
             assertThat(binding.checkMarkView.visibility).isEqualTo(View.VISIBLE)
+            assertThat(binding.kontinue.isEnabled).isTrue()
             assertThat(binding.message.text).isEqualTo(
                 context.getText(R.string.scanned)
             )
@@ -206,7 +322,6 @@ internal class IDScanFragmentTest {
         launchIDScanFragment(
             mockCameraPermissionEnsurable
         ).onFragment {
-
             displayStateChanged.postValue((newScanState to mock()))
             check(IdScanFragmentBinding.bind(it.requireView()), it.requireContext())
         }
