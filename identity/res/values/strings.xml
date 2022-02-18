@@ -11,6 +11,10 @@
     <string name="back_of_id">Back of ID</string>
     <string name="position_id_front">Position your ID in the center of the frame</string>
     <string name="position_id_back">Flip your ID over to the other side</string>
+    <string name="front_of_dl">Front of driver license</string>
+    <string name="back_of_dl">Back of driver license</string>
+    <string name="position_dl_front">Position your driver license in the center of the frame</string>
+    <string name="position_dl_back">Flip your driver license over to the other side</string>
     <string name="hold_still">Hold still, scanning</string>
     <string name="scanned">Scanned</string>
     <string name="help">Help</string>
