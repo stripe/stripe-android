@@ -1,7 +1,6 @@
 package com.stripe.android.networking
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.Stripe
 import com.stripe.android.core.version.StripeSdkVersion
 import org.json.JSONObject
 import org.junit.runner.RunWith

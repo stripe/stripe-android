@@ -1,6 +1,5 @@
 package com.stripe.android.payments.core.injection
 
-import com.stripe.android.Stripe
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.StripeIntent.NextActionData
 import com.stripe.android.payments.core.authentication.PaymentAuthenticator

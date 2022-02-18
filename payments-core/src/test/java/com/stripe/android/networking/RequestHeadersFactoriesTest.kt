@@ -6,7 +6,6 @@ import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.ApiVersion
 import com.stripe.android.AppInfo
 import com.stripe.android.AppInfoFixtures
-import com.stripe.android.Stripe
 import com.stripe.android.core.networking.StripeRequest
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.networking.RequestHeadersFactory.Companion.HEADER_ACCEPT

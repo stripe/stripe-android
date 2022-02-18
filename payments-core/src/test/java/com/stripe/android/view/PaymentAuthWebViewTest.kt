@@ -5,7 +5,6 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
-import com.stripe.android.Stripe
 import com.stripe.android.core.version.StripeSdkVersion
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
