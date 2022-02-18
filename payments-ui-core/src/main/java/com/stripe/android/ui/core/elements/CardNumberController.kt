@@ -111,11 +111,7 @@ internal class CardNumberController constructor(
         val cardNumber = CardNumber.Unvalidated(displayFormatted)
         val staticAccountRange = staticCardAccountRanges.filter(cardNumber)
             .let { accountRanges ->
-                if (accountRanges.size == 1) {
-                    accountRanges.first()
-                } else {
-                    null
-                }
+               accountRanges.firstOrNull()
             }
         if (staticAccountRange == null || accountRangeService.shouldQueryRepository(staticAccountRange)) {
             // query for AccountRange data
