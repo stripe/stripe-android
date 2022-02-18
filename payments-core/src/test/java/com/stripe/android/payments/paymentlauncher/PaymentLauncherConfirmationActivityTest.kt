@@ -28,7 +28,7 @@ class PaymentLauncherConfirmationActivityTest {
     private val testFactory = TestUtils.viewModelFactoryFor(viewModel)
 
     @Test
-    fun `statusBarColor is properly set`() {
+    fun `statusBarColor is set on window`() {
         val color = Color.CYAN
         mockViewModelActivityScenario().launch(
             Intent(
