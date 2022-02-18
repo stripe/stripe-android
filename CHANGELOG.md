@@ -1,5 +1,6 @@
 # CHANGELOG
 ## X.X.X - 2022-XX-XX
+[FIXED] [4606](https://github.com/stripe/stripe-android/pull/4606) Keep status bar color in PaymentLauncher.
 ### PaymentSheet
 ### Identity
 ### Card scanning
