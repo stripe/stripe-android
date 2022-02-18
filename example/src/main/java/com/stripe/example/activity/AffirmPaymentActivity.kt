@@ -26,13 +26,14 @@ class AffirmPaymentActivity : StripeIntentActivity() {
                 country = "US",
                 paymentMethodCreateParams = confirmParams,
                 shippingDetails = ConfirmPaymentIntentParams.Shipping(
-                    Address(
-                        city = "Seattle",
-                        country = "US",
-                        line1 = "1201 Seattle Rd",
-                        state = "WA",
-                        postalCode = "98101"
-                    ),
+                    Address.Builder()
+                        .setCity("San Francisco")
+                        .setCountry("US")
+                        .setLine1("123 Market St")
+                        .setLine2("#345")
+                        .setPostalCode("94107")
+                        .setState("CA")
+                        .build(),
                     name = "Jane Doe",
                 ),
                 supportedPaymentMethods = "affirm"
