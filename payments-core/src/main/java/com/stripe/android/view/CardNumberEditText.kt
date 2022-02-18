@@ -37,13 +37,13 @@ class CardNumberEditText internal constructor(
     defStyleAttr: Int = androidx.appcompat.R.attr.editTextStyle,
 
     // TODO(mshafrir-stripe): make immutable after `CardWidgetViewModel` is integrated in `CardWidget` subclasses
-    override var workContext: CoroutineContext,
+    private var workContext: CoroutineContext,
 
-    override val cardAccountRangeRepository: CardAccountRangeRepository,
+    private val cardAccountRangeRepository: CardAccountRangeRepository,
     private val staticCardAccountRanges: StaticCardAccountRanges = DefaultStaticCardAccountRanges(),
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
     private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory
-) : StripeEditText(context, attrs, defStyleAttr), CardAccountRangeService {
+) : StripeEditText(context, attrs, defStyleAttr) {
 
     @JvmOverloads
     constructor(
@@ -103,14 +103,8 @@ class CardNumberEditText internal constructor(
     @JvmSynthetic
     internal var completionCallback: () -> Unit = {}
 
-    override var accountRange: AccountRange? = null
-        set(value) {
-            field = value
-            updateLengthFilter()
-        }
-
     internal val panLength: Int
-        get() = accountRange?.panLength
+        get() = accountRangeService.accountRange?.panLength
             ?: staticCardAccountRanges.first(unvalidatedCardNumber)?.panLength
             ?: CardNumber.DEFAULT_PAN_LENGTH
 
@@ -132,8 +126,15 @@ class CardNumberEditText internal constructor(
     private val isValid: Boolean
         get() = validatedCardNumber != null
 
-    @VisibleForTesting
-    override var accountRangeRepositoryJob: Job? = null
+    private val accountRangeService = CardAccountRangeService(
+        cardAccountRangeRepository, workContext,
+        object : CardAccountRangeService.AccountRangeResultListener {
+            override fun onAccountRangeResult(newAccountRange: AccountRange?) {
+                updateLengthFilter()
+                cardBrand = newAccountRange?.brand ?: CardBrand.Unknown
+            }
+        }
+    )
 
     @JvmSynthetic
     internal var isLoadingCallback: (Boolean) -> Unit = {}
@@ -181,7 +182,7 @@ class CardNumberEditText internal constructor(
         loadingJob?.cancel()
         loadingJob = null
 
-        cancelAccountRangeRepositoryJob()
+        accountRangeService.cancelAccountRangeRepositoryJob()
 
         super.onDetachedFromWindow()
     }
@@ -234,14 +235,6 @@ class CardNumberEditText internal constructor(
     }
 
     @JvmSynthetic
-    override fun onAccountRangeResult(
-        newAccountRange: AccountRange?
-    ) {
-        super.onAccountRangeResult(newAccountRange)
-        cardBrand = newAccountRange?.brand ?: CardBrand.Unknown
-    }
-
-    @JvmSynthetic
     internal fun onCardMetadataLoadedTooSlow() {
         analyticsRequestExecutor.executeAsync(
             paymentAnalyticsRequestFactory.createRequest(PaymentAnalyticsEvent.CardMetadataLoadedTooSlow)
@@ -279,10 +272,10 @@ class CardNumberEditText internal constructor(
                 }
             if (staticAccountRange == null || shouldQueryRepository(staticAccountRange)) {
                 // query for AccountRange data
-                queryAccountRangeRepository(cardNumber)
+                accountRangeService.queryAccountRangeRepository(cardNumber)
             } else {
                 // use static AccountRange data
-                onAccountRangeResult(staticAccountRange)
+                accountRangeService.updateAccountRangeResult(staticAccountRange)
             }
 
             isPastedPan = isPastedPan(start, before, count, cardNumber)
@@ -323,7 +316,7 @@ class CardNumberEditText internal constructor(
                 isCardNumberValid = isValid
                 shouldShowError = !isValid
 
-                if (accountRange == null && unvalidatedCardNumber.isValidLuhn) {
+                if (accountRangeService.accountRange == null && unvalidatedCardNumber.isValidLuhn) {
                     // a complete PAN was inputted before the card service returned results
                     onCardMetadataLoadedTooSlow()
                 }
@@ -361,7 +354,7 @@ class CardNumberEditText internal constructor(
             wasCardNumberValid: Boolean
         ) = !wasCardNumberValid && (
             unvalidatedCardNumber.isMaxLength ||
-                (isValid && accountRange != null)
+                (isValid && accountRangeService.accountRange != null)
             )
 
         /**

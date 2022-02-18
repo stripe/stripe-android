@@ -11,12 +11,15 @@ import kotlinx.coroutines.withContext
 import kotlin.coroutines.CoroutineContext
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-interface CardAccountRangeService {
+class CardAccountRangeService constructor(
+    private val cardAccountRangeRepository: CardAccountRangeRepository,
+    private val workContext: CoroutineContext,
+    private val accountRangeResultListener: AccountRangeResultListener
+) {
 
-    var accountRange: AccountRange?
-    val cardAccountRangeRepository: CardAccountRangeRepository
-    var accountRangeRepositoryJob: Job?
-    val workContext: CoroutineContext
+    var accountRange: AccountRange? = null
+        private set
+    private var accountRangeRepositoryJob: Job? = null
 
     fun shouldQueryRepository(
         accountRange: AccountRange
@@ -44,7 +47,8 @@ interface CardAccountRangeService {
                 }
 
                 withContext(Dispatchers.Main) {
-                    onAccountRangeResult(accountRange)
+                    updateAccountRangeResult(accountRange)
+                    accountRangeResultListener.onAccountRangeResult(accountRange)
                 }
             }
         }
@@ -56,7 +60,7 @@ interface CardAccountRangeService {
     }
 
     @JvmSynthetic
-    fun onAccountRangeResult(
+    fun updateAccountRangeResult(
         newAccountRange: AccountRange?
     ) {
         accountRange = newAccountRange
@@ -66,5 +70,9 @@ interface CardAccountRangeService {
         return accountRange == null ||
             cardNumber.bin == null ||
             accountRange?.binRange?.matches(cardNumber) == false
+    }
+
+    interface AccountRangeResultListener {
+        fun onAccountRangeResult(newAccountRange: AccountRange?)
     }
 }

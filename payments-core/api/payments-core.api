@@ -882,11 +882,8 @@ public abstract interface class com/stripe/android/cards/CardAccountRangeReposit
 	public abstract fun create ()Lcom/stripe/android/cards/CardAccountRangeRepository;
 }
 
-public final class com/stripe/android/cards/CardAccountRangeService$DefaultImpls {
-	public static fun cancelAccountRangeRepositoryJob (Lcom/stripe/android/cards/CardAccountRangeService;)V
-	public static synthetic fun onAccountRangeResult (Lcom/stripe/android/cards/CardAccountRangeService;Lcom/stripe/android/model/AccountRange;)V
-	public static synthetic fun queryAccountRangeRepository (Lcom/stripe/android/cards/CardAccountRangeService;Lcom/stripe/android/cards/CardNumber$Unvalidated;)V
-	public static fun shouldQueryRepository (Lcom/stripe/android/cards/CardAccountRangeService;Lcom/stripe/android/model/AccountRange;)Z
+public abstract interface class com/stripe/android/cards/CardAccountRangeService$AccountRangeResultListener {
+	public abstract fun onAccountRangeResult (Lcom/stripe/android/model/AccountRange;)V
 }
 
 public final class com/stripe/android/cards/CardNumber$Companion {
@@ -5623,25 +5620,14 @@ public final class com/stripe/android/view/CardMultilineWidget : android/widget/
 	public final fun validateCardNumber ()Z
 }
 
-public final class com/stripe/android/view/CardNumberEditText : com/stripe/android/view/StripeEditText, com/stripe/android/cards/CardAccountRangeService {
+public final class com/stripe/android/view/CardNumberEditText : com/stripe/android/view/StripeEditText {
 	public static final field $stable I
 	public fun <init> (Landroid/content/Context;)V
 	public fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;)V
 	public fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;I)V
 	public synthetic fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;IILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public fun cancelAccountRangeRepositoryJob ()V
-	public fun getAccountRange ()Lcom/stripe/android/model/AccountRange;
-	public fun getAccountRangeRepositoryJob ()Lkotlinx/coroutines/Job;
-	public fun getCardAccountRangeRepository ()Lcom/stripe/android/cards/CardAccountRangeRepository;
 	public final fun getCardBrand ()Lcom/stripe/android/model/CardBrand;
-	public fun getWorkContext ()Lkotlin/coroutines/CoroutineContext;
 	public final fun isCardNumberValid ()Z
-	public synthetic fun onAccountRangeResult (Lcom/stripe/android/model/AccountRange;)V
-	public synthetic fun queryAccountRangeRepository (Lcom/stripe/android/cards/CardNumber$Unvalidated;)V
-	public fun setAccountRange (Lcom/stripe/android/model/AccountRange;)V
-	public fun setAccountRangeRepositoryJob (Lkotlinx/coroutines/Job;)V
-	public fun setWorkContext (Lkotlin/coroutines/CoroutineContext;)V
-	public fun shouldQueryRepository (Lcom/stripe/android/model/AccountRange;)Z
 }
 
 public abstract interface class com/stripe/android/view/CardValidCallback {

@@ -13,7 +13,6 @@ import com.stripe.android.model.AccountRange
 import com.stripe.android.model.CardBrand
 import com.stripe.android.ui.core.forms.FormFieldEntry
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
@@ -22,11 +21,11 @@ import kotlin.coroutines.CoroutineContext
 
 internal class CardNumberController constructor(
     private val cardTextFieldConfig: CardNumberConfig,
-    override val cardAccountRangeRepository: CardAccountRangeRepository,
-    override val workContext: CoroutineContext,
+    private val cardAccountRangeRepository: CardAccountRangeRepository,
+    private val workContext: CoroutineContext,
     private val staticCardAccountRanges: StaticCardAccountRanges = DefaultStaticCardAccountRanges(),
     override val showOptionalLabel: Boolean = false
-) : TextFieldController, SectionFieldErrorController, CardAccountRangeService {
+) : TextFieldController, SectionFieldErrorController {
 
     @JvmOverloads
     constructor(
@@ -59,15 +58,24 @@ internal class CardNumberController constructor(
         cardTextFieldConfig.determineState(
             brand,
             fieldValue,
-            accountRange?.panLength ?: brand.getMaxLengthForCardNumber(fieldValue)
+            accountRangeService.accountRange?.panLength ?: brand.getMaxLengthForCardNumber(fieldValue)
         )
     }
     override val fieldState: Flow<TextFieldState> = _fieldState
 
     private val _hasFocus = MutableStateFlow(false)
 
-    override var accountRange: AccountRange? = null
-    override var accountRangeRepositoryJob: Job? = null
+    private val accountRangeService = CardAccountRangeService(
+        cardAccountRangeRepository,
+        workContext,
+        object : CardAccountRangeService.AccountRangeResultListener {
+            override fun onAccountRangeResult(newAccountRange: AccountRange?) {
+                if (newAccountRange?.panLength != null) {
+                    (visualTransformation as CardNumberVisualTransformation).binBasedMaxPan = newAccountRange?.panLength
+                }
+            }
+        }
+    )
 
     override val visibleError: Flow<Boolean> =
         combine(_fieldState, _hasFocus) { fieldState, hasFocus ->
@@ -107,12 +115,12 @@ internal class CardNumberController constructor(
                     null
                 }
             }
-        if (staticAccountRange == null || shouldQueryRepository(staticAccountRange)) {
+        if (staticAccountRange == null || accountRangeService.shouldQueryRepository(staticAccountRange)) {
             // query for AccountRange data
-            queryAccountRangeRepository(cardNumber)
+            accountRangeService.queryAccountRangeRepository(cardNumber)
         } else {
             // use static AccountRange data
-            onAccountRangeResult(staticAccountRange)
+            accountRangeService.updateAccountRangeResult(staticAccountRange)
         }
     }
 
@@ -125,12 +133,5 @@ internal class CardNumberController constructor(
 
     override fun onFocusChange(newHasFocus: Boolean) {
         _hasFocus.value = newHasFocus
-    }
-
-    override fun onAccountRangeResult(newAccountRange: AccountRange?) {
-        super.onAccountRangeResult(newAccountRange)
-        if (accountRange?.panLength != null) {
-            (visualTransformation as CardNumberVisualTransformation).binBasedMaxPan = accountRange?.panLength
-        }
     }
 }
