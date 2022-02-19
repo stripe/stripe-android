@@ -16,18 +16,23 @@ isCriticalDeps() {
   [[ $CRITICAL_DEPS =~ (^|[[:space:]])$1($|[[:space:]]) ]]
 }
 
+# Determines the list passed in as $1 contains the element passed in as $2
+listContainsElement() {
+  [[ $1 =~ (^|[[:space:]])$2($|[[:space:]]) ]]
+}
+
 # find all dirs changed through git diff
 changed_dirs=""
 while read line; do
   module_name=${line%%/*} # This gets the first word before '/'
   # add this dir if we haven't add it yet
-  if [[ ${changed_dirs} != *"${module_name}"* ]]; then
+#  if [[ !($changed_dirs =~ (^| )"$module_name"($| )) ]]; then
+  if ! listContainsElement "${changed_dirs[@]}" $module_name; then
     changed_dirs="$changed_dirs $module_name" # string concat
   fi
 done < <(git diff --name-only origin/master)
 
-# for all changed dirs, first determine if it is a module, then find all its project dependencies
-modules_to_test=""
+# for all changed dirs, first check if it's a critical dep, if so run all tests and exit
 for dir in $changed_dirs
 do
   if isCriticalDeps $dir; then
@@ -35,50 +40,65 @@ do
     echo "./gradlew testDebugUnitTest"
     eval "./gradlew testDebugUnitTest"
     exit
-  elif isTestableModule $dir; then
-    # add this module if we haven't add it yet
-    if [[ $modules_to_test != *"$dir"* ]]; then
-      modules_to_test="$modules_to_test $dir"
-    fi
-
-    # For each of the testable modules, check if depends on $dir
-    for testable_module in $TESTABLE_MODULES
-    do
-      if [[ $testable_module != $dir ]]; then
-        # checking if $testable_module depends on $dir
-        # The gradle command outputs all dependencies, for project dependencies, it looks like this:
-        #
-        # +--- project :payments-core
-        # |    +--- project :stripe-core
-        # +--- project :stripe-core (*)
-        # +--- project :payments-ui-core
-        #
-        # Note dependencies that appears more than once are suffixed with "(*)"
-        # The output is grep-ed with all project dependency lines that doesn't end with ")", then the last part of the line after : is cut
-        #
-        # For the previous output, module_deps will be assigned these values: ["payments-core", "stripe-core", "payments-ui-core"]
-        module_deps=$(./gradlew :$testable_module:dependencies --configuration debugCompileClasspath | grep '+--- project :.*\w$' | cut -d ":" -f 2)
-        for dep in $module_deps
-        do
-          if [[ $dep == $dir ]]; then
-            # add this testable_module if we haven't add it yet
-            if [[ $modules_to_test != *"$testable_module"* ]]; then
-              modules_to_test="$modules_to_test $testable_module"
-            fi
-            # break the loop since we already add testable_module
-            break
-          fi
-        done
-      fi
-    done
   fi
+done
+
+# no critical deps changed, run tests on selective modules
+
+# changed_modules are the ones that are directly changed in the PR
+changed_modules=""
+for dir in $changed_dirs
+do
+  if isTestableModule $dir; then
+    changed_modules="$changed_modules $dir"
+  fi
+done
+
+# modules_to_test are the ones that are not directly changed, but has dependency to modules in changed_modules
+modules_to_test=""
+for testable_module in $TESTABLE_MODULES
+do
+  # this testable_module is directly changed by the PR, will execute its test, look at next one
+  if listContainsElement "${changed_modules[@]}" $testable_module; then
+    continue
+  fi
+
+  # The gradle command outputs all dependencies for a testable_module. For project dependencies, it looks like this:
+  #
+  # +--- project :payments-core
+  # |    +--- project :stripe-core
+  # +--- project :stripe-core (*)
+  # +--- project :payments-ui-core
+  #
+  # Note dependencies that appears more than once are suffixed with "(*)"
+  # The output is grep-ed with all project dependency lines that doesn't end with ")", then the last part of the line after : is cut
+  #
+  # For the previous output, module_deps will be assigned these values: ["payments-core", "stripe-core", "payments-ui-core"]
+  module_deps=$(./gradlew :$testable_module:dependencies --configuration debugCompileClasspath | grep '+--- project :.*\w$' | cut -d ":" -f 2)
+
+  # check testable_module's dependency include the modules directly changed in this PR. If so, we need to add testable_module
+  for changed_module in $changed_modules
+  do
+    if listContainsElement "${module_deps[@]}" $changed_module; then
+      if ! listContainsElement "${modules_to_test[@]}" $testable_module; then
+        modules_to_test="$modules_to_test $testable_module"
+      fi
+      break
+    fi
+  done
+done
+
+# concatenate changed_modules to modules_to_test
+for changed_module in $changed_modules
+do
+  modules_to_test="$modules_to_test $changed_module"
 done
 
 # print out for debug purposes
 echo -----Executing tests for these modules-----
 for module in $modules_to_test
 do
-    echo $module
+  echo $module
 done
 echo -------------------------------------------
 
