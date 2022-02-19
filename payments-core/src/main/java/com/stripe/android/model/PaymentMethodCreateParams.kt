@@ -750,10 +750,12 @@ data class PaymentMethodCreateParams internal constructor(
         @JvmStatic
         @JvmOverloads
         fun createAffirm(
+            billingDetails: PaymentMethod.BillingDetails? = null,
             metadata: Map<String, String>? = null
         ): PaymentMethodCreateParams {
             return PaymentMethodCreateParams(
                 type = PaymentMethod.Type.Affirm,
+                billingDetails = billingDetails,
                 metadata = metadata
             )
         }

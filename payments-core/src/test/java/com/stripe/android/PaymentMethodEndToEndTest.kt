@@ -381,7 +381,9 @@ internal class PaymentMethodEndToEndTest {
     fun `createPaymentMethod with Affirm should create expected object`() {
         val paymentMethod = Stripe(context, ApiKeyFixtures.AFFIRM_PUBLISHABLE_KEY)
             .createPaymentMethodSynchronous(
-                PaymentMethodCreateParams.createAffirm()
+                PaymentMethodCreateParams.createAffirm(
+                    billingDetails = PaymentMethodCreateParamsFixtures.BILLING_DETAILS
+                )
             )
         assertThat(paymentMethod?.type)
             .isEqualTo(PaymentMethod.Type.Affirm)
