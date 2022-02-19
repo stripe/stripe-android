@@ -76,7 +76,7 @@ do
   # For the previous output, module_deps will be assigned these values: ["payments-core", "stripe-core", "payments-ui-core"]
   module_deps=$(./gradlew :$testable_module:dependencies --configuration debugCompileClasspath | grep '+--- project :.*\w$' | cut -d ":" -f 2)
 
-  # check testable_module's dependency include the modules directly changed in this PR. If so, we need to add testable_module
+  # check if testable_module's dependency include the modules directly changed in this PR. If so, we need to add testable_module
   for changed_module in $changed_modules
   do
     if listContainsElement "${module_deps[@]}" $changed_module; then
@@ -102,9 +102,9 @@ do
 done
 echo -------------------------------------------
 
-## run test commands for modules_to_test
-#for module in $modules_to_test
-#do
-#    echo "./gradlew :${module}:testDebugUnitTest"
-#    eval "./gradlew :${module}:testDebugUnitTest"
-#done
+# run test commands for modules_to_test
+for module in $modules_to_test
+do
+    echo "./gradlew :${module}:testDebugUnitTest"
+    eval "./gradlew :${module}:testDebugUnitTest"
+done
