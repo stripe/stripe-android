@@ -62,10 +62,15 @@ public final class com/stripe/android/identity/databinding/CameraErrorFragmentBi
 }
 
 public final class com/stripe/android/identity/databinding/CameraPermissionDeniedFragmentBinding : androidx/viewbinding/ViewBinding {
-	public final field info Landroid/widget/TextView;
+	public final field appSettings Lcom/google/android/material/button/MaterialButton;
+	public final field buttons Landroid/widget/LinearLayout;
+	public final field fileUpload Lcom/google/android/material/button/MaterialButton;
+	public final field grantPermissionText Landroid/widget/TextView;
+	public final field titleText Landroid/widget/TextView;
+	public final field uploadFileText Landroid/widget/TextView;
 	public static fun bind (Landroid/view/View;)Lcom/stripe/android/identity/databinding/CameraPermissionDeniedFragmentBinding;
 	public synthetic fun getRoot ()Landroid/view/View;
-	public fun getRoot ()Landroid/widget/FrameLayout;
+	public fun getRoot ()Landroid/widget/LinearLayout;
 	public static fun inflate (Landroid/view/LayoutInflater;)Lcom/stripe/android/identity/databinding/CameraPermissionDeniedFragmentBinding;
 	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Z)Lcom/stripe/android/identity/databinding/CameraPermissionDeniedFragmentBinding;
 }
@@ -243,10 +248,6 @@ public final class com/stripe/android/identity/navigation/PassportUploadFragment
 }
 
 public final class com/stripe/android/identity/viewmodel/CameraErrorViewModel : androidx/lifecycle/ViewModel {
-	public fun <init> ()V
-}
-
-public final class com/stripe/android/identity/viewmodel/CameraPermissionDeniedViewModel : androidx/lifecycle/ViewModel {
 	public fun <init> ()V
 }
 

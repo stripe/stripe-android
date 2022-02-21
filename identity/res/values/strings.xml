@@ -26,4 +26,15 @@
     <string name="id_scan_complete">ID scan complete</string>
 
     <string name="check_mark">Check mark to indicate document capture success</string>
+
+    <string name="file_upload">File Upload</string>
+    <string name="app_settings">App Settings</string>
+    <string name="camera_permission">Camera permission</string>
+    <string name="grant_camera_permission_text">We need permission to use your camera. Please allow camera access in app settings.</string>
+    <string name="upload_file_text">Alternatively, you may manually upload a photo of your %1$s</string>
+
+    <string name="displayname_id">ID</string>
+    <string name="displayname_dl">Driver\'s License</string>
+    <string name="displayname_passport">Passport</string>
+    <string name="displayname_selfie">Passport</string>
 </resources>
