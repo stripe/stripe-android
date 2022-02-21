@@ -19,6 +19,8 @@ internal sealed class IdentityScanState(val type: ScanType, isFinal: Boolean) : 
     enum class ScanType {
         ID_FRONT,
         ID_BACK,
+        DL_FRONT,
+        DL_BACK,
         PASSPORT,
         SELFIE
     }
@@ -199,8 +201,14 @@ internal sealed class IdentityScanState(val type: ScanType, isFinal: Boolean) : 
     }
 }
 
+/**
+ * Checks if [Category] matches [IdentityScanState].
+ * Note: the ML model will output ID_FRONT or ID_BACK for both ID and Driver License.
+ */
 private fun Category.matchesScanType(scanType: IdentityScanState.ScanType): Boolean {
     return this == Category.ID_BACK && scanType == IdentityScanState.ScanType.ID_BACK ||
         this == Category.ID_FRONT && scanType == IdentityScanState.ScanType.ID_FRONT ||
+        this == Category.ID_BACK && scanType == IdentityScanState.ScanType.DL_BACK ||
+        this == Category.ID_FRONT && scanType == IdentityScanState.ScanType.DL_FRONT ||
         this == Category.PASSPORT && scanType == IdentityScanState.ScanType.PASSPORT
 }

@@ -50,11 +50,11 @@ internal class DriverLicenseScanFragment(
 
         continueButton.setOnClickListener {
             when (cameraViewModel.targetScanType) {
-                IdentityScanState.ScanType.ID_FRONT -> {
-                    startScanning(IdentityScanState.ScanType.ID_BACK)
-                    cameraViewModel.targetScanType = IdentityScanState.ScanType.ID_BACK
+                IdentityScanState.ScanType.DL_FRONT -> {
+                    startScanning(IdentityScanState.ScanType.DL_BACK)
+                    cameraViewModel.targetScanType = IdentityScanState.ScanType.DL_BACK
                 }
-                IdentityScanState.ScanType.ID_BACK -> {
+                IdentityScanState.ScanType.DL_BACK -> {
                     findNavController().navigate(R.id.action_driverLicenseScanFragment_to_confirmationFragment)
                 }
                 else -> {
@@ -65,15 +65,15 @@ internal class DriverLicenseScanFragment(
     }
 
     override fun onCameraReady() {
-        cameraViewModel.targetScanType = IdentityScanState.ScanType.ID_FRONT
-        startScanning(IdentityScanState.ScanType.ID_FRONT)
+        cameraViewModel.targetScanType = IdentityScanState.ScanType.DL_FRONT
+        startScanning(IdentityScanState.ScanType.DL_FRONT)
     }
 
     override fun onUserDeniedCameraPermission() {
         findNavController().navigate(
             R.id.action_camera_permission_denied,
             bundleOf(
-                CameraPermissionDeniedFragment.ARG_SCAN_TYPE to IdentityScanState.ScanType.ID_FRONT
+                CameraPermissionDeniedFragment.ARG_SCAN_TYPE to IdentityScanState.ScanType.DL_FRONT
             )
         )
     }
@@ -87,11 +87,11 @@ internal class DriverLicenseScanFragment(
                 continueButton.isEnabled = false
                 checkMarkView.visibility = View.GONE
                 when (cameraViewModel.targetScanType) {
-                    IdentityScanState.ScanType.ID_FRONT -> {
+                    IdentityScanState.ScanType.DL_FRONT -> {
                         headerTitle.text = requireContext().getText(R.string.front_of_dl)
                         messageView.text = requireContext().getText(R.string.position_dl_front)
                     }
-                    IdentityScanState.ScanType.ID_BACK -> {
+                    IdentityScanState.ScanType.DL_BACK -> {
                         headerTitle.text = requireContext().getText(R.string.back_of_dl)
                         messageView.text = requireContext().getText(R.string.position_dl_back)
                     }
@@ -113,10 +113,10 @@ internal class DriverLicenseScanFragment(
             }
             is IdentityScanState.Unsatisfied -> {
                 when (cameraViewModel.targetScanType) {
-                    IdentityScanState.ScanType.ID_FRONT -> {
+                    IdentityScanState.ScanType.DL_FRONT -> {
                         messageView.text = requireContext().getText(R.string.position_dl_front)
                     }
-                    IdentityScanState.ScanType.ID_BACK -> {
+                    IdentityScanState.ScanType.DL_BACK -> {
                         messageView.text = requireContext().getText(R.string.position_dl_back)
                     }
                     else -> {

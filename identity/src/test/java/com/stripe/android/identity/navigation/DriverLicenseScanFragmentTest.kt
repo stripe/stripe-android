@@ -85,7 +85,7 @@ internal class DriverLicenseScanFragmentTest {
                 any(),
                 same(it.viewLifecycleOwner),
                 same(it.lifecycleScope),
-                eq(IdentityScanState.ScanType.ID_FRONT)
+                eq(IdentityScanState.ScanType.DL_FRONT)
             )
         }
     }
@@ -103,7 +103,7 @@ internal class DriverLicenseScanFragmentTest {
 
             // mock viewModel target change
             whenever(mockCameraViewModel.targetScanType)
-                .thenReturn(IdentityScanState.ScanType.ID_FRONT)
+                .thenReturn(IdentityScanState.ScanType.DL_FRONT)
 
             // button clicked
             DriverLicenseScanFragmentBinding.bind(it.requireView()).kontinue.callOnClick()
@@ -116,7 +116,7 @@ internal class DriverLicenseScanFragmentTest {
                 any(),
                 same(it.viewLifecycleOwner),
                 same(it.lifecycleScope),
-                eq(IdentityScanState.ScanType.ID_BACK)
+                eq(IdentityScanState.ScanType.DL_BACK)
             )
         }
     }
@@ -144,7 +144,7 @@ internal class DriverLicenseScanFragmentTest {
 
             // mock viewModel target change
             whenever(mockCameraViewModel.targetScanType)
-                .thenReturn(IdentityScanState.ScanType.ID_FRONT)
+                .thenReturn(IdentityScanState.ScanType.DL_FRONT)
 
             // click continue, scan back
             val binding = DriverLicenseScanFragmentBinding.bind(it.requireView())
@@ -155,7 +155,7 @@ internal class DriverLicenseScanFragmentTest {
 
             // mock viewModel target change
             whenever(mockCameraViewModel.targetScanType)
-                .thenReturn(IdentityScanState.ScanType.ID_BACK)
+                .thenReturn(IdentityScanState.ScanType.DL_BACK)
 
             // click continue, navigates
             binding.kontinue.callOnClick()
@@ -187,7 +187,7 @@ internal class DriverLicenseScanFragmentTest {
                 navController.backStack.last()
                     .arguments!![CameraPermissionDeniedFragment.ARG_SCAN_TYPE]
             ).isEqualTo(
-                IdentityScanState.ScanType.ID_FRONT
+                IdentityScanState.ScanType.DL_FRONT
             )
         }
     }
@@ -206,8 +206,8 @@ internal class DriverLicenseScanFragmentTest {
     }
 
     @Test
-    fun `when displayStateChanged to Initial UI is properly updated for ID_FRONT`() {
-        whenever(mockCameraViewModel.targetScanType).thenReturn(IdentityScanState.ScanType.ID_FRONT)
+    fun `when displayStateChanged to Initial UI is properly updated for DL_FRONT`() {
+        whenever(mockCameraViewModel.targetScanType).thenReturn(IdentityScanState.ScanType.DL_FRONT)
         postDisplayStateChangedDataAndVerifyUI(mock<IdentityScanState.Initial>()) { binding, context ->
             assertThat(binding.cameraView.viewFinderBackgroundView.visibility)
                 .isEqualTo(View.VISIBLE)
@@ -227,8 +227,8 @@ internal class DriverLicenseScanFragmentTest {
     }
 
     @Test
-    fun `when displayStateChanged to Initial UI is properly updated for ID_BACK`() {
-        whenever(mockCameraViewModel.targetScanType).thenReturn(IdentityScanState.ScanType.ID_BACK)
+    fun `when displayStateChanged to Initial UI is properly updated for DL_BACK`() {
+        whenever(mockCameraViewModel.targetScanType).thenReturn(IdentityScanState.ScanType.DL_BACK)
         postDisplayStateChangedDataAndVerifyUI(mock<IdentityScanState.Initial>()) { binding, context ->
             assertThat(binding.cameraView.viewFinderBackgroundView.visibility)
                 .isEqualTo(View.VISIBLE)
@@ -265,8 +265,8 @@ internal class DriverLicenseScanFragmentTest {
     }
 
     @Test
-    fun `when displayStateChanged to Unsatisfied UI is properly updated for ID_FRONT`() {
-        whenever(mockCameraViewModel.targetScanType).thenReturn(IdentityScanState.ScanType.ID_FRONT)
+    fun `when displayStateChanged to Unsatisfied UI is properly updated for DL_FRONT`() {
+        whenever(mockCameraViewModel.targetScanType).thenReturn(IdentityScanState.ScanType.DL_FRONT)
         postDisplayStateChangedDataAndVerifyUI(mock<IdentityScanState.Unsatisfied>()) { binding, context ->
             assertThat(binding.cameraView.viewFinderBackgroundView.visibility)
                 .isEqualTo(View.VISIBLE)
@@ -283,8 +283,8 @@ internal class DriverLicenseScanFragmentTest {
     }
 
     @Test
-    fun `when displayStateChanged to Unsatisfied UI is properly updated for ID_BACK`() {
-        whenever(mockCameraViewModel.targetScanType).thenReturn(IdentityScanState.ScanType.ID_BACK)
+    fun `when displayStateChanged to Unsatisfied UI is properly updated for DL_BACK`() {
+        whenever(mockCameraViewModel.targetScanType).thenReturn(IdentityScanState.ScanType.DL_BACK)
         postDisplayStateChangedDataAndVerifyUI(mock<IdentityScanState.Unsatisfied>()) { binding, context ->
             assertThat(binding.cameraView.viewFinderBackgroundView.visibility)
                 .isEqualTo(View.VISIBLE)
