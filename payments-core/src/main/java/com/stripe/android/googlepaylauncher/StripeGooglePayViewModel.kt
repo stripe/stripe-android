@@ -94,7 +94,8 @@ internal class StripeGooglePayViewModel(
         private val stripeAccountId: String? = null,
         private val args: StripeGooglePayContract.Args
     ) : ViewModelProvider.Factory {
-        override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+        @Suppress("UNCHECKED_CAST")
+        override fun <T : ViewModel> create(modelClass: Class<T>): T {
             val appName =
                 application.applicationInfo.loadLabel(application.packageManager).toString()
             return StripeGooglePayViewModel(

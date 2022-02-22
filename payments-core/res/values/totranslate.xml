@@ -3,5 +3,6 @@
     <!--
     Items here need to be entered in our translation tool
     -->
-
+    <!-- Affirm buy now, pay later copy -->
+    <string name="affirm_buy_now_pay_later">Buy now, pay later with Affirm.</string>
 </resources>

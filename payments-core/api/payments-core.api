@@ -2083,68 +2083,58 @@ public abstract interface class com/stripe/android/model/ConfirmStripeIntentPara
 public final class com/stripe/android/model/ConfirmStripeIntentParams$Companion {
 }
 
-public final class com/stripe/android/model/ConsumerSessionLookup$ConsumerSession : com/stripe/android/core/model/StripeModel {
+public final class com/stripe/android/model/ConsumerSession$VerificationSession : com/stripe/android/core/model/StripeModel {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
-	public final fun component1 ()Ljava/lang/String;
-	public final fun component2 ()Ljava/lang/String;
-	public final fun component3 ()Ljava/lang/String;
-	public final fun component4 ()Ljava/util/List;
-	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)Lcom/stripe/android/model/ConsumerSessionLookup$ConsumerSession;
-	public static synthetic fun copy$default (Lcom/stripe/android/model/ConsumerSessionLookup$ConsumerSession;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;ILjava/lang/Object;)Lcom/stripe/android/model/ConsumerSessionLookup$ConsumerSession;
+	public final fun component1 ()Lcom/stripe/android/model/ConsumerSession$VerificationSession$SessionType;
+	public final fun component2 ()Lcom/stripe/android/model/ConsumerSession$VerificationSession$SessionState;
+	public final fun copy (Lcom/stripe/android/model/ConsumerSession$VerificationSession$SessionType;Lcom/stripe/android/model/ConsumerSession$VerificationSession$SessionState;)Lcom/stripe/android/model/ConsumerSession$VerificationSession;
+	public static synthetic fun copy$default (Lcom/stripe/android/model/ConsumerSession$VerificationSession;Lcom/stripe/android/model/ConsumerSession$VerificationSession$SessionType;Lcom/stripe/android/model/ConsumerSession$VerificationSession$SessionState;ILjava/lang/Object;)Lcom/stripe/android/model/ConsumerSession$VerificationSession;
 	public fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
-	public final fun getClientSecret ()Ljava/lang/String;
-	public final fun getEmailAddress ()Ljava/lang/String;
-	public final fun getRedactedPhoneNumber ()Ljava/lang/String;
-	public final fun getVerificationSessions ()Ljava/util/List;
+	public final fun getState ()Lcom/stripe/android/model/ConsumerSession$VerificationSession$SessionState;
+	public final fun getType ()Lcom/stripe/android/model/ConsumerSession$VerificationSession$SessionType;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 	public fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
-public final class com/stripe/android/model/ConsumerSessionLookup$VerificationSession : com/stripe/android/core/model/StripeModel {
-	public static final field $stable I
+public final class com/stripe/android/model/ConsumerSession$VerificationSession$SessionState : java/lang/Enum, android/os/Parcelable {
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
-	public final fun component1 ()Lcom/stripe/android/model/ConsumerSessionLookup$VerificationSession$SessionType;
-	public final fun component2 ()Lcom/stripe/android/model/ConsumerSessionLookup$VerificationSession$SessionState;
-	public final fun copy (Lcom/stripe/android/model/ConsumerSessionLookup$VerificationSession$SessionType;Lcom/stripe/android/model/ConsumerSessionLookup$VerificationSession$SessionState;)Lcom/stripe/android/model/ConsumerSessionLookup$VerificationSession;
-	public static synthetic fun copy$default (Lcom/stripe/android/model/ConsumerSessionLookup$VerificationSession;Lcom/stripe/android/model/ConsumerSessionLookup$VerificationSession$SessionType;Lcom/stripe/android/model/ConsumerSessionLookup$VerificationSession$SessionState;ILjava/lang/Object;)Lcom/stripe/android/model/ConsumerSessionLookup$VerificationSession;
+	public static final field Canceled Lcom/stripe/android/model/ConsumerSession$VerificationSession$SessionState;
+	public static final field Companion Lcom/stripe/android/model/ConsumerSession$VerificationSession$SessionState$Companion;
+	public static final field Expired Lcom/stripe/android/model/ConsumerSession$VerificationSession$SessionState;
+	public static final field Failed Lcom/stripe/android/model/ConsumerSession$VerificationSession$SessionState;
+	public static final field Started Lcom/stripe/android/model/ConsumerSession$VerificationSession$SessionState;
+	public static final field Unknown Lcom/stripe/android/model/ConsumerSession$VerificationSession$SessionState;
+	public static final field Verified Lcom/stripe/android/model/ConsumerSession$VerificationSession$SessionState;
 	public fun describeContents ()I
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getState ()Lcom/stripe/android/model/ConsumerSessionLookup$VerificationSession$SessionState;
-	public final fun getType ()Lcom/stripe/android/model/ConsumerSessionLookup$VerificationSession$SessionType;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
+	public final fun getValue ()Ljava/lang/String;
+	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/model/ConsumerSession$VerificationSession$SessionState;
+	public static fun values ()[Lcom/stripe/android/model/ConsumerSession$VerificationSession$SessionState;
 	public fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
-public final class com/stripe/android/model/ConsumerSessionLookup$VerificationSession$SessionState : java/lang/Enum, android/os/Parcelable {
+public final class com/stripe/android/model/ConsumerSession$VerificationSession$SessionState$Companion {
+	public final fun fromValue (Ljava/lang/String;)Lcom/stripe/android/model/ConsumerSession$VerificationSession$SessionState;
+}
+
+public final class com/stripe/android/model/ConsumerSession$VerificationSession$SessionType : java/lang/Enum, android/os/Parcelable {
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
-	public static final field Canceled Lcom/stripe/android/model/ConsumerSessionLookup$VerificationSession$SessionState;
-	public static final field Expired Lcom/stripe/android/model/ConsumerSessionLookup$VerificationSession$SessionState;
-	public static final field Failed Lcom/stripe/android/model/ConsumerSessionLookup$VerificationSession$SessionState;
-	public static final field Started Lcom/stripe/android/model/ConsumerSessionLookup$VerificationSession$SessionState;
-	public static final field Unknown Lcom/stripe/android/model/ConsumerSessionLookup$VerificationSession$SessionState;
-	public static final field Verified Lcom/stripe/android/model/ConsumerSessionLookup$VerificationSession$SessionState;
+	public static final field Companion Lcom/stripe/android/model/ConsumerSession$VerificationSession$SessionType$Companion;
+	public static final field Email Lcom/stripe/android/model/ConsumerSession$VerificationSession$SessionType;
+	public static final field SignUp Lcom/stripe/android/model/ConsumerSession$VerificationSession$SessionType;
+	public static final field Sms Lcom/stripe/android/model/ConsumerSession$VerificationSession$SessionType;
+	public static final field Unknown Lcom/stripe/android/model/ConsumerSession$VerificationSession$SessionType;
 	public fun describeContents ()I
 	public final fun getValue ()Ljava/lang/String;
-	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/model/ConsumerSessionLookup$VerificationSession$SessionState;
-	public static fun values ()[Lcom/stripe/android/model/ConsumerSessionLookup$VerificationSession$SessionState;
+	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/model/ConsumerSession$VerificationSession$SessionType;
+	public static fun values ()[Lcom/stripe/android/model/ConsumerSession$VerificationSession$SessionType;
 	public fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
-public final class com/stripe/android/model/ConsumerSessionLookup$VerificationSession$SessionType : java/lang/Enum, android/os/Parcelable {
-	public static final field CREATOR Landroid/os/Parcelable$Creator;
-	public static final field Email Lcom/stripe/android/model/ConsumerSessionLookup$VerificationSession$SessionType;
-	public static final field SignUp Lcom/stripe/android/model/ConsumerSessionLookup$VerificationSession$SessionType;
-	public static final field Sms Lcom/stripe/android/model/ConsumerSessionLookup$VerificationSession$SessionType;
-	public static final field Unknown Lcom/stripe/android/model/ConsumerSessionLookup$VerificationSession$SessionType;
-	public fun describeContents ()I
-	public final fun getValue ()Ljava/lang/String;
-	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/model/ConsumerSessionLookup$VerificationSession$SessionType;
-	public static fun values ()[Lcom/stripe/android/model/ConsumerSessionLookup$VerificationSession$SessionType;
-	public fun writeToParcel (Landroid/os/Parcel;I)V
+public final class com/stripe/android/model/ConsumerSession$VerificationSession$SessionType$Companion {
+	public final fun fromValue (Ljava/lang/String;)Lcom/stripe/android/model/ConsumerSession$VerificationSession$SessionType;
 }
 
 public final class com/stripe/android/model/Customer : com/stripe/android/core/model/StripeModel {
@@ -2985,6 +2975,7 @@ public final class com/stripe/android/model/PaymentMethod$Sofort : com/stripe/an
 }
 
 public final class com/stripe/android/model/PaymentMethod$Type : java/lang/Enum, android/os/Parcelable {
+	public static final field Affirm Lcom/stripe/android/model/PaymentMethod$Type;
 	public static final field AfterpayClearpay Lcom/stripe/android/model/PaymentMethod$Type;
 	public static final field Alipay Lcom/stripe/android/model/PaymentMethod$Type;
 	public static final field AuBecsDebit Lcom/stripe/android/model/PaymentMethod$Type;
@@ -5201,27 +5192,30 @@ public abstract interface class com/stripe/android/payments/paymentlauncher/Paym
 
 public abstract class com/stripe/android/payments/paymentlauncher/PaymentLauncherContract$Args : android/os/Parcelable {
 	public static final field $stable I
-	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZLjava/util/Set;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZLjava/util/Set;Ljava/lang/Integer;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZLjava/util/Set;Ljava/lang/Integer;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun getEnableLogging ()Z
 	public fun getInjectorKey ()Ljava/lang/String;
 	public fun getProductUsage ()Ljava/util/Set;
 	public fun getPublishableKey ()Ljava/lang/String;
+	public fun getStatusBarColor ()Ljava/lang/Integer;
 	public fun getStripeAccountId ()Ljava/lang/String;
+	public fun setStatusBarColor (Ljava/lang/Integer;)V
 	public final fun toBundle ()Landroid/os/Bundle;
 }
 
 public final class com/stripe/android/payments/paymentlauncher/PaymentLauncherContract$Args$IntentConfirmationArgs : com/stripe/android/payments/paymentlauncher/PaymentLauncherContract$Args {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
-	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZLjava/util/Set;Lcom/stripe/android/model/ConfirmStripeIntentParams;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Ljava/lang/String;
 	public final fun component3 ()Ljava/lang/String;
 	public final fun component4 ()Z
 	public final fun component5 ()Ljava/util/Set;
 	public final fun component6 ()Lcom/stripe/android/model/ConfirmStripeIntentParams;
-	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZLjava/util/Set;Lcom/stripe/android/model/ConfirmStripeIntentParams;)Lcom/stripe/android/payments/paymentlauncher/PaymentLauncherContract$Args$IntentConfirmationArgs;
-	public static synthetic fun copy$default (Lcom/stripe/android/payments/paymentlauncher/PaymentLauncherContract$Args$IntentConfirmationArgs;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZLjava/util/Set;Lcom/stripe/android/model/ConfirmStripeIntentParams;ILjava/lang/Object;)Lcom/stripe/android/payments/paymentlauncher/PaymentLauncherContract$Args$IntentConfirmationArgs;
+	public final fun component7 ()Ljava/lang/Integer;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZLjava/util/Set;Lcom/stripe/android/model/ConfirmStripeIntentParams;Ljava/lang/Integer;)Lcom/stripe/android/payments/paymentlauncher/PaymentLauncherContract$Args$IntentConfirmationArgs;
+	public static synthetic fun copy$default (Lcom/stripe/android/payments/paymentlauncher/PaymentLauncherContract$Args$IntentConfirmationArgs;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZLjava/util/Set;Lcom/stripe/android/model/ConfirmStripeIntentParams;Ljava/lang/Integer;ILjava/lang/Object;)Lcom/stripe/android/payments/paymentlauncher/PaymentLauncherContract$Args$IntentConfirmationArgs;
 	public fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getConfirmStripeIntentParams ()Lcom/stripe/android/model/ConfirmStripeIntentParams;
@@ -5229,8 +5223,10 @@ public final class com/stripe/android/payments/paymentlauncher/PaymentLauncherCo
 	public fun getInjectorKey ()Ljava/lang/String;
 	public fun getProductUsage ()Ljava/util/Set;
 	public fun getPublishableKey ()Ljava/lang/String;
+	public fun getStatusBarColor ()Ljava/lang/Integer;
 	public fun getStripeAccountId ()Ljava/lang/String;
 	public fun hashCode ()I
+	public fun setStatusBarColor (Ljava/lang/Integer;)V
 	public fun toString ()Ljava/lang/String;
 	public fun writeToParcel (Landroid/os/Parcel;I)V
 }
@@ -5238,15 +5234,15 @@ public final class com/stripe/android/payments/paymentlauncher/PaymentLauncherCo
 public final class com/stripe/android/payments/paymentlauncher/PaymentLauncherContract$Args$PaymentIntentNextActionArgs : com/stripe/android/payments/paymentlauncher/PaymentLauncherContract$Args {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
-	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZLjava/util/Set;Ljava/lang/String;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Ljava/lang/String;
 	public final fun component3 ()Ljava/lang/String;
 	public final fun component4 ()Z
 	public final fun component5 ()Ljava/util/Set;
 	public final fun component6 ()Ljava/lang/String;
-	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZLjava/util/Set;Ljava/lang/String;)Lcom/stripe/android/payments/paymentlauncher/PaymentLauncherContract$Args$PaymentIntentNextActionArgs;
-	public static synthetic fun copy$default (Lcom/stripe/android/payments/paymentlauncher/PaymentLauncherContract$Args$PaymentIntentNextActionArgs;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZLjava/util/Set;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/payments/paymentlauncher/PaymentLauncherContract$Args$PaymentIntentNextActionArgs;
+	public final fun component7 ()Ljava/lang/Integer;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZLjava/util/Set;Ljava/lang/String;Ljava/lang/Integer;)Lcom/stripe/android/payments/paymentlauncher/PaymentLauncherContract$Args$PaymentIntentNextActionArgs;
+	public static synthetic fun copy$default (Lcom/stripe/android/payments/paymentlauncher/PaymentLauncherContract$Args$PaymentIntentNextActionArgs;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZLjava/util/Set;Ljava/lang/String;Ljava/lang/Integer;ILjava/lang/Object;)Lcom/stripe/android/payments/paymentlauncher/PaymentLauncherContract$Args$PaymentIntentNextActionArgs;
 	public fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public fun getEnableLogging ()Z
@@ -5254,8 +5250,10 @@ public final class com/stripe/android/payments/paymentlauncher/PaymentLauncherCo
 	public final fun getPaymentIntentClientSecret ()Ljava/lang/String;
 	public fun getProductUsage ()Ljava/util/Set;
 	public fun getPublishableKey ()Ljava/lang/String;
+	public fun getStatusBarColor ()Ljava/lang/Integer;
 	public fun getStripeAccountId ()Ljava/lang/String;
 	public fun hashCode ()I
+	public fun setStatusBarColor (Ljava/lang/Integer;)V
 	public fun toString ()Ljava/lang/String;
 	public fun writeToParcel (Landroid/os/Parcel;I)V
 }
@@ -5263,15 +5261,15 @@ public final class com/stripe/android/payments/paymentlauncher/PaymentLauncherCo
 public final class com/stripe/android/payments/paymentlauncher/PaymentLauncherContract$Args$SetupIntentNextActionArgs : com/stripe/android/payments/paymentlauncher/PaymentLauncherContract$Args {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
-	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZLjava/util/Set;Ljava/lang/String;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Ljava/lang/String;
 	public final fun component3 ()Ljava/lang/String;
 	public final fun component4 ()Z
 	public final fun component5 ()Ljava/util/Set;
 	public final fun component6 ()Ljava/lang/String;
-	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZLjava/util/Set;Ljava/lang/String;)Lcom/stripe/android/payments/paymentlauncher/PaymentLauncherContract$Args$SetupIntentNextActionArgs;
-	public static synthetic fun copy$default (Lcom/stripe/android/payments/paymentlauncher/PaymentLauncherContract$Args$SetupIntentNextActionArgs;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZLjava/util/Set;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/payments/paymentlauncher/PaymentLauncherContract$Args$SetupIntentNextActionArgs;
+	public final fun component7 ()Ljava/lang/Integer;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZLjava/util/Set;Ljava/lang/String;Ljava/lang/Integer;)Lcom/stripe/android/payments/paymentlauncher/PaymentLauncherContract$Args$SetupIntentNextActionArgs;
+	public static synthetic fun copy$default (Lcom/stripe/android/payments/paymentlauncher/PaymentLauncherContract$Args$SetupIntentNextActionArgs;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZLjava/util/Set;Ljava/lang/String;Ljava/lang/Integer;ILjava/lang/Object;)Lcom/stripe/android/payments/paymentlauncher/PaymentLauncherContract$Args$SetupIntentNextActionArgs;
 	public fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public fun getEnableLogging ()Z
@@ -5279,8 +5277,10 @@ public final class com/stripe/android/payments/paymentlauncher/PaymentLauncherCo
 	public fun getProductUsage ()Ljava/util/Set;
 	public fun getPublishableKey ()Ljava/lang/String;
 	public final fun getSetupIntentClientSecret ()Ljava/lang/String;
+	public fun getStatusBarColor ()Ljava/lang/Integer;
 	public fun getStripeAccountId ()Ljava/lang/String;
 	public fun hashCode ()I
+	public fun setStatusBarColor (Ljava/lang/Integer;)V
 	public fun toString ()Ljava/lang/String;
 	public fun writeToParcel (Landroid/os/Parcel;I)V
 }

@@ -1,10 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="next">next</string>
+    <string name="kontinue">continue</string>
     <string name="agree_and_continue">Agree and continue</string>
     <string name="decline">Decline and use alternative method</string>
     <string name="driver_license">Driver\'s license</string>
     <string name="id_card">Identity card</string>
-    <string name="passport">Passport</string>
     <string name="doc_select_title">Which form of identification do you want to use?</string>
+
+    <string name="front_of_id">Front of ID</string>
+    <string name="back_of_id">Back of ID</string>
+    <string name="position_id_front">Position your ID in the center of the frame</string>
+    <string name="position_id_back">Flip your ID over to the other side</string>
+
+    <string name="front_of_dl">Front of driver license</string>
+    <string name="back_of_dl">Back of driver license</string>
+    <string name="position_dl_front">Position your driver license in the center of the frame</string>
+    <string name="position_dl_back">Flip your driver license over to the other side</string>
+
+    <string name="passport">Passport</string>
+    <string name="position_passport">Position your Passport in the center of the frame</string>
+
+    <string name="hold_still">Hold still, scanning</string>
+    <string name="scanned">Scanned</string>
+    <string name="help">Help</string>
+    <string name="id_scan_complete">ID scan complete</string>
+
+    <string name="check_mark">Check mark to indicate document capture success</string>
 </resources>

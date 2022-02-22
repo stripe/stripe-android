@@ -13,7 +13,7 @@ import com.stripe.android.camera.scanui.ScanFlow
 import com.stripe.android.identity.ml.AnalyzerInput
 import com.stripe.android.identity.ml.AnalyzerOutput
 import com.stripe.android.identity.ml.IDDetectorAnalyzer
-import com.stripe.android.identity.states.ScanState
+import com.stripe.android.identity.states.IdentityScanState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
@@ -28,14 +28,10 @@ import kotlinx.coroutines.launch
  * TODO(ccen): merge with [CardScanFlow].
  */
 internal class IdentityScanFlow(
-    scanType: ScanState.ScanType,
     private val analyzerLoopErrorListener: AnalyzerLoopErrorListener,
-    aggregateResultListener: AggregateResultListener<IDDetectorAggregator.InterimResult, IDDetectorAggregator.FinalResult>
-) : ScanFlow<Int, CameraPreviewImage<Bitmap>> {
-    private var aggregator = IDDetectorAggregator(
-        scanType,
-        aggregateResultListener
-    )
+    private val aggregateResultListener: AggregateResultListener<IDDetectorAggregator.InterimResult, IDDetectorAggregator.FinalResult>
+) : ScanFlow<IdentityScanState.ScanType, CameraPreviewImage<Bitmap>> {
+    private var aggregator: IDDetectorAggregator? = null
 
     /**
      * If this is true, do not start the flow.
@@ -48,7 +44,7 @@ internal class IdentityScanFlow(
     private var analyzerPool:
         AnalyzerPool<
             AnalyzerInput,
-            ScanState,
+            IdentityScanState,
             AnalyzerOutput
             >? = null
 
@@ -58,7 +54,7 @@ internal class IdentityScanFlow(
     private var loop:
         ProcessBoundAnalyzerLoop<
             AnalyzerInput,
-            ScanState,
+            IdentityScanState,
             AnalyzerOutput
             >? = null
 
@@ -73,13 +69,18 @@ internal class IdentityScanFlow(
         viewFinder: Rect,
         lifecycleOwner: LifecycleOwner,
         coroutineScope: CoroutineScope,
-        parameters: Int
+        parameters: IdentityScanState.ScanType
     ) {
         coroutineScope.launch {
             if (canceled) {
                 return@launch
             }
-            aggregator.bindToLifecycle(lifecycleOwner)
+            aggregator = IDDetectorAggregator(
+                parameters,
+                aggregateResultListener
+            )
+
+            requireNotNull(aggregator).bindToLifecycle(lifecycleOwner)
 
             analyzerPool = AnalyzerPool.of(
                 IDDetectorAnalyzer.Factory(context)
@@ -87,7 +88,7 @@ internal class IdentityScanFlow(
 
             loop = ProcessBoundAnalyzerLoop(
                 analyzerPool = requireNotNull(analyzerPool),
-                resultHandler = aggregator,
+                resultHandler = requireNotNull(aggregator),
                 analyzerLoopErrorListener = analyzerLoopErrorListener
             )
 
@@ -100,13 +101,23 @@ internal class IdentityScanFlow(
         }
     }
 
-    override fun cancelFlow() {
-        canceled = true
-        aggregator.run { cancel() }
-        stopFlow()
+    /**
+     * Reset the flow to the initial state, ready to be started again
+     */
+    internal fun resetFlow() {
+        canceled = false
+        cleanUp()
     }
 
-    private fun stopFlow() {
+    override fun cancelFlow() {
+        canceled = true
+        cleanUp()
+    }
+
+    private fun cleanUp() {
+        aggregator?.run { cancel() }
+        aggregator = null
+
         loop?.unsubscribe()
         loop = null
 

@@ -10,6 +10,7 @@ import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.forms.AffirmRequirement
 import com.stripe.android.paymentsheet.forms.AfterpayClearpayRequirement
 import com.stripe.android.paymentsheet.forms.BancontactRequirement
 import com.stripe.android.paymentsheet.forms.CardRequirement
@@ -30,6 +31,8 @@ import com.stripe.android.paymentsheet.forms.ShippingAddress
 import com.stripe.android.paymentsheet.forms.SofortRequirement
 import com.stripe.android.ui.core.elements.LayoutFormDescriptor
 import com.stripe.android.ui.core.elements.LayoutSpec
+import com.stripe.android.ui.core.forms.AffirmForm
+import com.stripe.android.ui.core.forms.AffirmParamKey
 import com.stripe.android.ui.core.forms.AfterpayClearpayForm
 import com.stripe.android.ui.core.forms.AfterpayClearpayParamKey
 import com.stripe.android.ui.core.forms.BancontactForm
@@ -197,6 +200,16 @@ internal sealed class SupportedPaymentMethod(
         PaypalRequirement,
         PaypalParamKey,
         PaypalForm
+    )
+
+    @Parcelize
+    object Affirm : SupportedPaymentMethod(
+        PaymentMethod.Type.Affirm,
+        R.string.stripe_paymentsheet_payment_method_affirm,
+        R.drawable.stripe_ic_paymentsheet_pm_affirm,
+        AffirmRequirement,
+        AffirmParamKey,
+        AffirmForm
     )
 
     /**
@@ -383,6 +396,7 @@ internal sealed class SupportedPaymentMethod(
             Klarna,
             PayPal,
             AfterpayClearpay
+            // Affirm //TODO: uncomment once we are ready to go live
         )
 
         /**

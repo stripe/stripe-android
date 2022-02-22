@@ -6,6 +6,7 @@ import android.os.Parcelable
 import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContract
+import androidx.fragment.app.Fragment
 import com.stripe.android.stripecardscan.cardimageverification.exception.UnknownScanException
 import com.stripe.android.stripecardscan.payment.card.ScannedCard
 import com.stripe.android.stripecardscan.scanui.CancellationReason
@@ -47,29 +48,23 @@ class CardImageVerificationSheet private constructor(private val stripePublishab
          * This API registers an [ActivityResultLauncher] into the
          * [ComponentActivity], it must be called before the [ComponentActivity]
          * is created (in the onCreate method).
-         *
-         * see https://github.com/stripe/stripe-android/blob/3e92b79190834dc3aab1c2d9ac2dfb7bc343afd2/payments-core/src/main/java/com/stripe/android/payments/paymentlauncher/PaymentLauncher.kt#L52
          */
         @JvmStatic
         fun create(from: ComponentActivity, stripePublishableKey: String) =
             CardImageVerificationSheet(stripePublishableKey).apply {
-                launcher = from.registerForActivityResult(
-                    object : ActivityResultContract<
-                        CardImageVerificationSheetParams,
-                        CardImageVerificationSheetResult
-                        >() {
-                        override fun createIntent(
-                            context: Context,
-                            input: CardImageVerificationSheetParams,
-                        ) = this@Companion.createIntent(context, input)
+                launcher = from.registerForActivityResult(activityResultContract, ::onResult)
+            }
 
-                        override fun parseResult(
-                            resultCode: Int,
-                            intent: Intent?,
-                        ) = this@Companion.parseResult(requireNotNull(intent))
-                    },
-                    ::onResult,
-                )
+        /**
+         * Create a [CardImageVerificationSheet] instance with [Fragment].
+         *
+         * This API registers an [ActivityResultLauncher] into the [Fragment], it must be called
+         * before the [Fragment] is created (in the onCreate method).
+         */
+        @JvmStatic
+        fun create(from: Fragment, stripePublishableKey: String) =
+            CardImageVerificationSheet(stripePublishableKey).apply {
+                launcher = from.registerForActivityResult(activityResultContract, ::onResult)
             }
 
         private fun createIntent(context: Context, input: CardImageVerificationSheetParams) =
@@ -81,6 +76,21 @@ class CardImageVerificationSheet private constructor(private val stripePublishab
                 ?: CardImageVerificationSheetResult.Failed(
                     UnknownScanException("No data in the result intent")
                 )
+
+        private val activityResultContract = object : ActivityResultContract<
+            CardImageVerificationSheetParams,
+            CardImageVerificationSheetResult
+            >() {
+            override fun createIntent(
+                context: Context,
+                input: CardImageVerificationSheetParams,
+            ) = this@Companion.createIntent(context, input)
+
+            override fun parseResult(
+                resultCode: Int,
+                intent: Intent?,
+            ) = this@Companion.parseResult(requireNotNull(intent))
+        }
     }
 
     /**

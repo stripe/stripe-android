@@ -1,22 +1,26 @@
 package com.stripe.android.identity.states
 
 import android.util.Log
+import androidx.annotation.VisibleForTesting
 import com.stripe.android.camera.framework.time.Clock
 import com.stripe.android.camera.framework.time.ClockMark
 import com.stripe.android.camera.framework.time.milliseconds
+import com.stripe.android.camera.scanui.ScanState
 import com.stripe.android.identity.ml.AnalyzerOutput
 import com.stripe.android.identity.ml.Category
 
 /**
  * States during scanning a document.
  */
-internal sealed class ScanState(val type: ScanType) {
+internal sealed class IdentityScanState(val type: ScanType, isFinal: Boolean) : ScanState(isFinal) {
     /**
      * Type of documents being scanned
      */
     enum class ScanType {
         ID_FRONT,
         ID_BACK,
+        DL_FRONT,
+        DL_BACK,
         PASSPORT,
         SELFIE
     }
@@ -26,12 +30,12 @@ internal sealed class ScanState(val type: ScanType) {
      */
     internal abstract fun consumeTransition(
         analyzerOutput: AnalyzerOutput
-    ): ScanState
+    ): IdentityScanState
 
     /**
      * Initial state when scan starts, no documents have been detected yet.
      */
-    internal class Initial(type: ScanType) : ScanState(type) {
+    internal class Initial(type: ScanType) : IdentityScanState(type, false) {
         /**
          * Only transitions to [Found] when ML output type matches scan type
          */
@@ -51,30 +55,50 @@ internal sealed class ScanState(val type: ScanType) {
                 )
                 this
             }
-
-        private fun Category.matchesScanType(scanType: ScanType): Boolean {
-            return this == Category.ID_BACK && scanType == ScanType.ID_BACK ||
-                this == Category.ID_FRONT && scanType == ScanType.ID_FRONT ||
-                this == Category.PASSPORT && scanType == ScanType.PASSPORT
-        }
     }
 
     /**
      * State when scan has found the required type, the machine could stay in this state for a
      * while if more image needs to be processed to reach the next state.
      */
-    internal class Found(type: ScanType) : ScanState(type) {
-        override fun consumeTransition(analyzerOutput: AnalyzerOutput) =
-            when {
+    internal class Found(type: ScanType) : IdentityScanState(type, false) {
+        @VisibleForTesting
+        internal var hitsCount = 0
+
+        // saves the results of previous certain number of frames
+        @VisibleForTesting
+        internal val results = ArrayDeque<Boolean>()
+
+        override fun consumeTransition(analyzerOutput: AnalyzerOutput): IdentityScanState {
+            val isHit = analyzerOutput.category.matchesScanType(type)
+            if (isHit) {
+                hitsCount++
+            }
+            results.addLast(isHit)
+            // only save the last certain number of frames, dropping the first one if it goes beyond
+            // If the first result is a hit, then decrease the hitsCount
+            if (results.size > FRAMES_REQUIRED) {
+                val firstResultIsHit = results.removeFirst()
+                if (firstResultIsHit) {
+                    hitsCount--
+                }
+            }
+
+            return when {
                 isUnsatisfied() -> {
-                    val reason = "unsatisfied reason"
+                    val reason =
+                        "hit ratio below expected: ${hitsCount.toFloat().div(FRAMES_REQUIRED)}"
                     Log.d(
-                        TAG, "Satisfaction check fails due to $reason, transition to Unsatisfied."
+                        TAG,
+                        "Satisfaction check fails due to $reason, transition to Unsatisfied."
                     )
                     Unsatisfied(reason, type)
                 }
                 moreResultsRequired() -> {
-                    Log.d(TAG, "More results needed, stay in Found.")
+                    Log.d(
+                        TAG,
+                        "More results needed, stay in Found, currently ${results.size} results are collected"
+                    )
                     this
                 }
                 else -> {
@@ -82,23 +106,38 @@ internal sealed class ScanState(val type: ScanType) {
                     Satisfied(type)
                 }
             }
+        }
 
         /**
          * Determine if more images should be processed before reaching [Satisfied].
          *
-         * TODO(ccen) - Introduce conditions that requires more results
+         * Need to collect [FRAMES_REQUIRED] results.
          */
         private fun moreResultsRequired(): Boolean {
-            return false
+            return results.size < FRAMES_REQUIRED
         }
 
         /**
          * Determine if satisfaction failed and should transition to [Unsatisfied].
          *
-         * TODO(ccen) - Introduce unsatisfied reasons
+         * Transfers to when the previous [FRAMES_REQUIRED] number of frames has a hit ratio
+         * below [HIT_RATIO].
          */
         private fun isUnsatisfied(): Boolean {
-            return false
+            return (results.size == FRAMES_REQUIRED) && (
+                hitsCount.toFloat()
+                    .div(FRAMES_REQUIRED) < HIT_RATIO
+                )
+        }
+
+        @VisibleForTesting
+        internal companion object {
+            // The number of frames needs to collected to determine if a model has found the
+            // correct item.
+            const val FRAMES_REQUIRED = 100
+
+            // The ratio to determine if the model has found the correct item.
+            const val HIT_RATIO = 0.5
         }
     }
 
@@ -108,9 +147,9 @@ internal sealed class ScanState(val type: ScanType) {
     internal class Satisfied(
         type: ScanType,
         private val reachedStateAt: ClockMark = Clock.markNow()
-    ) : ScanState(type) {
+    ) : IdentityScanState(type, false) {
 
-        override fun consumeTransition(analyzerOutput: AnalyzerOutput): ScanState {
+        override fun consumeTransition(analyzerOutput: AnalyzerOutput): IdentityScanState {
             return if (reachedStateAt.elapsedSince() > DISPLAY_SATISFIED_DURATION) {
                 Log.d(TAG, "Scan for $type Satisfied, transition to Finished.")
                 Finished(type)
@@ -129,12 +168,13 @@ internal sealed class ScanState(val type: ScanType) {
      * State when satisfaction checking failed.
      */
     internal class Unsatisfied(
-        private val reason: String,
+        @VisibleForTesting
+        internal val reason: String,
         type: ScanType,
         private val reachedStateAt: ClockMark = Clock.markNow()
-    ) : ScanState(type) {
+    ) : IdentityScanState(type, false) {
 
-        override fun consumeTransition(analyzerOutput: AnalyzerOutput): ScanState {
+        override fun consumeTransition(analyzerOutput: AnalyzerOutput): IdentityScanState {
             return if (reachedStateAt.elapsedSince() > DISPLAY_UNSATISFIED_DURATION) {
                 Log.d(TAG, "Scan for $type Unsatisfied with reason $reason, transition to Initial.")
                 Initial(type)
@@ -152,11 +192,23 @@ internal sealed class ScanState(val type: ScanType) {
     /**
      * Terminal state, indicting the scan is finished.
      */
-    internal class Finished(type: ScanType) : ScanState(type) {
+    internal class Finished(type: ScanType) : IdentityScanState(type, true) {
         override fun consumeTransition(analyzerOutput: AnalyzerOutput) = this
     }
 
     private companion object {
-        val TAG: String = ScanState::class.java.simpleName
+        val TAG: String = IdentityScanState::class.java.simpleName
     }
+}
+
+/**
+ * Checks if [Category] matches [IdentityScanState].
+ * Note: the ML model will output ID_FRONT or ID_BACK for both ID and Driver License.
+ */
+private fun Category.matchesScanType(scanType: IdentityScanState.ScanType): Boolean {
+    return this == Category.ID_BACK && scanType == IdentityScanState.ScanType.ID_BACK ||
+        this == Category.ID_FRONT && scanType == IdentityScanState.ScanType.ID_FRONT ||
+        this == Category.ID_BACK && scanType == IdentityScanState.ScanType.DL_BACK ||
+        this == Category.ID_FRONT && scanType == IdentityScanState.ScanType.DL_FRONT ||
+        this == Category.PASSPORT && scanType == IdentityScanState.ScanType.PASSPORT
 }

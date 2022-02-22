@@ -93,7 +93,8 @@ internal class PaymentFlowViewModel(
         private val customerSession: CustomerSession,
         private val paymentSessionData: PaymentSessionData
     ) : ViewModelProvider.Factory {
-        override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+        @Suppress("UNCHECKED_CAST")
+        override fun <T : ViewModel> create(modelClass: Class<T>): T {
             return PaymentFlowViewModel(
                 customerSession,
                 paymentSessionData,
