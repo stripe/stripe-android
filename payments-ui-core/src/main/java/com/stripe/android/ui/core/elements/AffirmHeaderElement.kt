@@ -9,7 +9,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 data class AffirmHeaderElement(
     override val identifier: IdentifierSpec,
-    private val amount: Amount,
     override val controller: Controller? = null
 ) : FormElement() {
     override fun getFormFieldValueFlow(): Flow<List<Pair<IdentifierSpec, FormFieldEntry>>> =

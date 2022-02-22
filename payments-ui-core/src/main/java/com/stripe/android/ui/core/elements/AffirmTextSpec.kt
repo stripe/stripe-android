@@ -10,6 +10,6 @@ import kotlinx.parcelize.Parcelize
 internal data class AffirmTextSpec(
     val identifier: IdentifierSpec
 ) : FormItemSpec() {
-    fun transform(amount: Amount): FormElement =
-        AffirmHeaderElement(this.identifier, amount)
+    fun transform(): FormElement =
+        AffirmHeaderElement(this.identifier)
 }

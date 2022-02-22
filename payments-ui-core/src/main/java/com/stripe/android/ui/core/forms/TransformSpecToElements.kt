@@ -59,7 +59,7 @@ class TransformSpecToElements(
                 is AfterpayClearpayTextSpec ->
                     it.transform(requireNotNull(amount))
                 is AffirmTextSpec ->
-                    it.transform(requireNotNull(amount))
+                    it.transform()
                 is EmptyFormSpec -> EmptyFormElement()
             }
         }
