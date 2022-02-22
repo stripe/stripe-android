@@ -1,6 +1,8 @@
 package com.stripe.android.ui.core.elements
 
+import androidx.annotation.DrawableRes
 import androidx.annotation.RestrictTo
+import androidx.annotation.StringRes
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
@@ -17,6 +19,7 @@ interface TextFieldController : InputController {
     fun onFocusChange(newHasFocus: Boolean)
 
     val debugLabel: String
+    val trailingIcon: Flow<TextFieldIcon?>
     val capitalization: KeyboardCapitalization
     val keyboardType: KeyboardType
     override val label: Flow<Int>
@@ -27,17 +30,29 @@ interface TextFieldController : InputController {
     val visibleError: Flow<Boolean>
 }
 
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
+data class TextFieldIcon(
+    @DrawableRes
+    val idRes: Int,
+    @StringRes
+    val contentDescription: Int? = null,
+
+    /** If it is an icon that should be tinted to match the text the value should be true */
+    val isIcon: Boolean
+)
+
 /**
  * This class will provide the onValueChanged and onFocusChanged functionality to the field's
  * composable.  These functions will update the observables as needed.  It is responsible for
  * exposing immutable observers for its data
  */
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
 class SimpleTextFieldController constructor(
     private val textFieldConfig: TextFieldConfig,
     override val showOptionalLabel: Boolean = false,
     initialValue: String? = null
 ) : TextFieldController, SectionFieldErrorController {
+    override val trailingIcon: Flow<TextFieldIcon?> = textFieldConfig.trailingIcon
     override val capitalization: KeyboardCapitalization = textFieldConfig.capitalization
     override val keyboardType: KeyboardType = textFieldConfig.keyboard
     override val visualTransformation =

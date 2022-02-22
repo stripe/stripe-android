@@ -9,6 +9,7 @@ import androidx.compose.ui.text.input.OffsetMapping
 import androidx.compose.ui.text.input.TransformedText
 import androidx.compose.ui.text.input.VisualTransformation
 import com.stripe.android.ui.core.R
+import kotlinx.coroutines.flow.MutableStateFlow
 import java.math.BigInteger
 import java.util.Locale
 
@@ -26,6 +27,13 @@ class IbanConfig : TextFieldConfig {
     @StringRes
     override val label = R.string.iban
     override val keyboard = KeyboardType.Ascii
+
+    override val trailingIcon: MutableStateFlow<TextFieldIcon?> = MutableStateFlow(
+        TextFieldIcon(
+            R.drawable.stripe_ic_bank_generic,
+            isIcon = true
+        )
+    )
 
     // Displays the IBAN in groups of 4 characters with spaces added between them
     override val visualTransformation: VisualTransformation = VisualTransformation { text ->
