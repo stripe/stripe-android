@@ -46,13 +46,7 @@ internal class SignUpViewModel @Inject constructor(
      * Emits the email entered in the form if valid, null otherwise.
      */
     private val consumerEmail: StateFlow<String?> = emailElement.getFormFieldValueFlow().map {
-        it.firstOrNull()?.second?.let { formFieldEntry ->
-            if (formFieldEntry.isComplete) {
-                formFieldEntry.value
-            } else {
-                null
-            }
-        }
+        it.firstOrNull()?.second?.takeIf { formFieldEntry -> formFieldEntry.isComplete }?.value
     }.stateIn(viewModelScope, SharingStarted.Lazily, args.customerEmail)
 
     private val _signUpStatus = MutableStateFlow(SignUpState.InputtingEmail)

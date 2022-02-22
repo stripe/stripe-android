@@ -30,9 +30,11 @@ internal class LinkActivityViewModel @Inject internal constructor(
 
     init {
         if (startDestination == LinkScreen.Loading) {
+            // Loading screen is shown only when customer email is not null
+            val consumerEmail = requireNotNull(args.customerEmail)
             viewModelScope.launch {
                 navigator.navigateTo(
-                    linkAccountManager.lookupConsumer(args.customerEmail!!).fold(
+                    linkAccountManager.lookupConsumer(consumerEmail).fold(
                         onSuccess = {
                             it?.let { linkAccount ->
                                 if (linkAccount.isVerified) {
