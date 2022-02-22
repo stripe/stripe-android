@@ -104,7 +104,7 @@ internal fun VerificationBody(
 private fun VerificationCodeInput(
     onCodeEntered: (String) -> Unit
 ) {
-    //TODO(brnunes-stripe): Migrate to OTP collection element
+    // TODO(brnunes-stripe): Migrate to OTP collection element
     var code by remember { mutableStateOf("") }
 
     Column(

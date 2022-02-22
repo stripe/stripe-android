@@ -44,7 +44,7 @@ internal class VerificationViewModel @Inject constructor(
     }
 
     fun onResendCodeClicked() {
-        //TODO(brnunes-stripe): Request resend.
+        // TODO(brnunes-stripe): Request resend.
     }
 
     private fun onError(error: Throwable) {

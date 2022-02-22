@@ -164,7 +164,7 @@ private fun EmailCollectionSection(
 private fun PhoneCollectionSection(
     onSignUpClick: (String) -> Unit
 ) {
-    //TODO(brnunes-stripe): Migrate to phone number collection element
+    // TODO(brnunes-stripe): Migrate to phone number collection element
     var phone by remember { mutableStateOf("") }
 
     Column(
