@@ -4,6 +4,45 @@ plugins {
     id 'org.jetbrains.dokka'
 }
 
+assemble.dependsOn('lint')
+check.dependsOn('checkstyle')
+
+configurations {
+    ktlint
+}
+
+if (System.getenv("JITPACK")) {
+    group='com.github.stripe.stripe-android'
+}
+
+dependencies {
+    implementation project(":stripe-core")
+    implementation "androidx.constraintlayout:constraintlayout:$androidxConstraintlayoutVersion"
+
+    implementation "androidx.appcompat:appcompat:$androidxAppcompatVersion"
+    implementation "androidx.core:core-ktx:$androidxCoreVersion"
+    implementation "androidx.annotation:annotation:$androidxAnnotationVersion"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinCoroutinesVersion"
+
+    testImplementation "androidx.test:core:$androidTestVersion"
+    testImplementation "androidx.test:runner:$androidTestVersion"
+    testImplementation "junit:junit:$junitVersion"
+    testImplementation "org.jetbrains.kotlin:kotlin-test:$kotlinVersion"
+    testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$kotlinCoroutinesVersion"
+    testImplementation "org.mockito:mockito-core:$mockitoCoreVersion"
+    testImplementation "org.mockito.kotlin:mockito-kotlin:$mockitoKotlinVersion"
+    testImplementation "com.google.truth:truth:$truthVersion"
+    testImplementation "org.robolectric:robolectric:$robolectricVersion"
+
+    androidTestImplementation "androidx.test:rules:$androidTestVersion"
+    androidTestImplementation "androidx.test:runner:$androidTestVersion"
+    androidTestImplementation "org.jetbrains.kotlin:kotlin-test:$kotlinVersion"
+    androidTestImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$kotlinCoroutinesVersion"
+    androidTestUtil "androidx.test:orchestrator:$androidTestVersion"
+
+    ktlint "com.pinterest:ktlint:$ktlintVersion"
+}
+
 android {
     compileSdkVersion rootProject.ext.compileSdkVersion
     buildToolsVersion rootProject.ext.buildToolsVersion
@@ -40,41 +79,6 @@ android {
     kotlinOptions {
         jvmTarget = '1.8'
     }
-}
-
-assemble.dependsOn('lint')
-check.dependsOn('checkstyle')
-
-configurations {
-    ktlint
-}
-
-dependencies {
-    implementation project(":stripe-core")
-    implementation "androidx.constraintlayout:constraintlayout:$androidxConstraintlayoutVersion"
-
-    implementation "androidx.appcompat:appcompat:$androidxAppcompatVersion"
-    implementation "androidx.core:core-ktx:$androidxCoreVersion"
-    implementation "androidx.annotation:annotation:$androidxAnnotationVersion"
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinCoroutinesVersion"
-
-    testImplementation "androidx.test:core:$androidTestVersion"
-    testImplementation "androidx.test:runner:$androidTestVersion"
-    testImplementation "junit:junit:$junitVersion"
-    testImplementation "org.jetbrains.kotlin:kotlin-test:$kotlinVersion"
-    testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$kotlinCoroutinesVersion"
-    testImplementation "org.mockito:mockito-core:$mockitoCoreVersion"
-    testImplementation "org.mockito.kotlin:mockito-kotlin:$mockitoKotlinVersion"
-    testImplementation "com.google.truth:truth:$truthVersion"
-    testImplementation "org.robolectric:robolectric:$robolectricVersion"
-
-    androidTestImplementation "androidx.test:rules:$androidTestVersion"
-    androidTestImplementation "androidx.test:runner:$androidTestVersion"
-    androidTestImplementation "org.jetbrains.kotlin:kotlin-test:$kotlinVersion"
-    androidTestImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$kotlinCoroutinesVersion"
-    androidTestUtil "androidx.test:orchestrator:$androidTestVersion"
-
-    ktlint "com.pinterest:ktlint:$ktlintVersion"
 }
 
 task ktlint(type: JavaExec, group: "verification") {
