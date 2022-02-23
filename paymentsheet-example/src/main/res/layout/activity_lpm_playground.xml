@@ -117,7 +117,7 @@
 
             <RadioButton
                 android:id="@+id/currency_usd_button"
-                android:text="@string/currency_usd"
+                android:text="USB"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:checked="true"
@@ -125,7 +125,7 @@
 
             <RadioButton
                 android:id="@+id/currency_eur_button"
-                android:text="@string/currency_eur"
+                android:text="EUR"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 tools:ignore="HardcodedText" />

@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.View.IMPORTANT_FOR_ACCESSIBILITY_YES
 import android.view.ViewGroup
+import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import androidx.core.view.isVisible
 import androidx.core.view.marginEnd
@@ -256,7 +257,8 @@ internal class PaymentOptionsAdapter(
         }
     }
 
-    internal class SavedPaymentMethodViewHolder(
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
+    class SavedPaymentMethodViewHolder(
         internal val binding: LayoutPaymentsheetPaymentMethodItemBinding,
         private val onRemoveListener: (Int) -> Unit
     ) : PaymentOptionViewHolder(binding.root) {

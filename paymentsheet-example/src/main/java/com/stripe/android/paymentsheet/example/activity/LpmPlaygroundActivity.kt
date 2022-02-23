@@ -3,7 +3,6 @@ package com.stripe.android.paymentsheet.example.activity
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
-import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isInvisible
 import androidx.lifecycle.lifecycleScope
@@ -16,7 +15,9 @@ import com.stripe.android.payments.paymentlauncher.PaymentLauncher
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.paymentsheet.example.R
 import com.stripe.android.paymentsheet.example.databinding.ActivityLpmPlaygroundBinding
-import com.stripe.android.paymentsheet.example.repository.Repository
+import com.stripe.android.paymentsheet.example.playground.model.CheckoutCurrency
+import com.stripe.android.paymentsheet.example.playground.model.CheckoutCustomer
+import com.stripe.android.paymentsheet.example.playground.model.CheckoutMode
 import com.stripe.android.paymentsheet.example.viewmodel.LpmPlaygroundViewModel
 import kotlinx.coroutines.launch
 
@@ -25,34 +26,32 @@ internal open class LpmPlaygroundActivity : AppCompatActivity() {
         ActivityLpmPlaygroundBinding.inflate(layoutInflater)
     }
 
-    val viewModel: LpmPlaygroundViewModel by viewModels {
-        LpmPlaygroundViewModel.Factory(
-            application
-        )
+    val viewModel: LpmPlaygroundViewModel by lazy {
+        LpmPlaygroundViewModel(application)
     }
 
-    private val customer: Repository.CheckoutCustomer
+    private val customer: CheckoutCustomer
         get() = when (viewBinding.customerRadioGroup.checkedRadioButtonId) {
-            R.id.guest_customer_button -> Repository.CheckoutCustomer.Guest
+            R.id.guest_customer_button -> CheckoutCustomer.Guest
             R.id.new_customer_button -> {
                 viewModel.temporaryCustomerId?.let {
-                    Repository.CheckoutCustomer.WithId(it)
-                } ?: Repository.CheckoutCustomer.New
+                    CheckoutCustomer.WithId(it)
+                } ?: CheckoutCustomer.New
             }
-            else -> Repository.CheckoutCustomer.Returning
+            else -> CheckoutCustomer.Returning
         }
 
-    private val currency: Repository.CheckoutCurrency
+    private val currency: CheckoutCurrency
         get() = when (viewBinding.currencyRadioGroup.checkedRadioButtonId) {
-            R.id.currency_usd_button -> Repository.CheckoutCurrency.USD
-            else -> Repository.CheckoutCurrency.EUR
+            R.id.currency_usd_button -> CheckoutCurrency.USD
+            else -> CheckoutCurrency.EUR
         }
 
-    private val mode: Repository.CheckoutMode
+    private val mode: CheckoutMode
         get() = when (viewBinding.modeRadioGroup.checkedRadioButtonId) {
-            R.id.mode_payment_button -> Repository.CheckoutMode.Payment
-            R.id.mode_payment_with_setup_button -> Repository.CheckoutMode.PaymentWithSetup
-            else -> Repository.CheckoutMode.Setup
+            R.id.mode_payment_button -> CheckoutMode.Payment
+            R.id.mode_payment_with_setup_button -> CheckoutMode.PaymentWithSetup
+            else -> CheckoutMode.Setup
         }
 
     private val setShippingAddress: Boolean
@@ -87,7 +86,14 @@ internal open class LpmPlaygroundActivity : AppCompatActivity() {
 
         viewBinding.reloadButton.setOnClickListener {
             lifecycleScope.launch {
-                viewModel.prepareCheckout(customer, currency, mode, setShippingAddress)
+                viewModel.prepareCheckout(
+                    customer,
+                    currency,
+                    mode,
+                    setShippingAddress,
+                    false,
+                    "https://stripe-mobile-payment-sheet-test-playground-v6.glitch.me/"
+                )
             }
         }
 
@@ -126,7 +132,7 @@ internal open class LpmPlaygroundActivity : AppCompatActivity() {
         selectedIndex: Int,
         paymentLauncher: PaymentLauncher
     ) {
-        val paramMap = params[items[selectedIndex]]?.toParamMap()
+        val paramMap = Companion.params[items[selectedIndex]]?.toParamMap()
         PaymentMethod.Type.fromCode(paramMap?.get("type") as String)?.let {
             createAndConfirmPaymentIntent(
                 PaymentMethodCreateParams.createWithOverride(it, paramMap, setOf("test")),
@@ -139,7 +145,7 @@ internal open class LpmPlaygroundActivity : AppCompatActivity() {
         params: PaymentMethodCreateParams,
         paymentLauncher: PaymentLauncher
     ) {
-        if (viewModel.checkoutMode == Repository.CheckoutMode.Setup) {
+        if (viewModel.checkoutMode == CheckoutMode.Setup) {
             val confirmSetupIntentParams =
                 ConfirmSetupIntentParams.create(
                     paymentMethodCreateParams = params,

@@ -34,6 +34,7 @@
         <activity android:name=".samples.activity.LaunchPaymentSheetCompleteActivity" />
         <activity android:name=".samples.activity.LaunchPaymentSheetCustomActivity" />
         <activity android:name=".playground.activity.PaymentSheetPlaygroundActivity" />
+        <activity android:name=".activity.LpmPlaygroundActivity" />
     </application>
 
 </manifest>

@@ -58,4 +58,5 @@
   <string name="stripe_paymentsheet_setup_button_label">Set up</string>
   <!-- Label indicating the total amount that the user is authorizing (e.g. "Total: $25.00") -->
   <string name="stripe_paymentsheet_total_amount">Total: %s</string>
+    <string name="playground_generic">playground generic</string>
 </resources>

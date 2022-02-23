@@ -3,16 +3,13 @@ import android.util.Log
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performTextInput
+import androidx.lifecycle.MutableLiveData
 import androidx.test.core.app.ActivityScenario.launch
 import androidx.test.espresso.Espresso.closeSoftKeyboard
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.IdlingRegistry
-import androidx.test.espresso.PerformException
 import androidx.test.espresso.action.ViewActions
 import androidx.test.espresso.action.ViewActions.click
-import androidx.test.espresso.assertion.ViewAssertions.matches
-import androidx.test.espresso.contrib.RecyclerViewActions
-import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
 import androidx.test.espresso.matcher.ViewMatchers.withId
 import androidx.test.espresso.matcher.ViewMatchers.withText
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -30,18 +27,17 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.Stripe
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
-import com.stripe.android.model.StripeIntent
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.R
+import com.stripe.android.paymentsheet.example.playground.activity.PaymentSheetPlaygroundActivity
 import com.stripe.android.paymentsheet.example.playground.activity.PaymentSheetPlaygroundActivity.Companion.multiStepUIIdlingResource
 import com.stripe.android.paymentsheet.example.playground.activity.PaymentSheetPlaygroundActivity.Companion.singleStepUIIdlingResource
-import com.stripe.android.paymentsheet.example.playground.activity.PaymentSheetPlaygroundActivity
-import com.stripe.android.paymentsheet.example.playground.model.CheckoutCustomer
 import com.stripe.android.paymentsheet.example.playground.model.CheckoutRequest
 import com.stripe.android.paymentsheet.example.playground.model.CheckoutResponse
-import com.stripe.android.paymentsheet.matchFirstPaymentOptionsHolder
 import com.stripe.android.paymentsheet.transitionFragmentResource
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
+import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -60,6 +56,15 @@ internal class FormE2ETest {
     @get:Rule
     val composeTestRule = createEmptyComposeRule()
 
+    val inProgress = MutableLiveData<Boolean>()
+    val status = MutableLiveData<String>()
+
+    val customerConfig = MutableLiveData<PaymentSheet.CustomerConfiguration?>()
+    val clientSecret = MutableLiveData<String?>()
+
+    var checkoutMode: Checkout? = null
+    var temporaryCustomerId: String? = null
+
     private lateinit var device: UiDevice
     private val screenshotProcessor = setOf(MyScreenCaptureProcessor())
 
@@ -67,6 +72,11 @@ internal class FormE2ETest {
     fun before() {
         androidx.test.espresso.intent.Intents.init()
         device = UiDevice.getInstance(getInstrumentation())
+    }
+
+    @After
+    fun after() {
+        androidx.test.espresso.intent.Intents.release()
     }
 
     // TODO: Need to revist the idle resource construction - should probably be dependency injected
@@ -121,33 +131,33 @@ internal class FormE2ETest {
             // TODO: Need to add scrolling
         }
     }
-
-    @Test
-    fun returningCustomerComplete() {
-        confirmComplete(
-            TestParameters(
-                Customer.Returning,
-                GooglePayState.Off,
-                Currency.EUR,
-                Checkout.Pay,
-                Billing.On,
-                false
-            ),
-        ) {
-            try {
-                onView(withId(com.stripe.android.paymentsheet.R.id.recycler))
-                    .check(matches(isDisplayed()))
-                    .perform(
-                        RecyclerViewActions.actionOnHolderItem(
-                            matchFirstPaymentOptionsHolder("4242"),
-                            click()
-                        )
-                    )
-            } catch (e: PerformException) {
-                // Item is already selected.
-            }
-        }
-    }
+//
+//    @Test
+//    fun returningCustomerComplete() {
+//        confirmComplete(
+//            TestParameters(
+//                Customer.Returning,
+//                GooglePayState.Off,
+//                Currency.EUR,
+//                Checkout.Pay,
+//                Billing.On,
+//                false
+//            ),
+//        ) {
+//            try {
+//                onView(withId(com.stripe.android.paymentsheet.R.id.recycler))
+//                    .check(matches(isDisplayed()))
+//                    .perform(
+//                        RecyclerViewActions.actionOnHolderItem(
+//                            matchFirstPaymentOptionsHolder("4242"),
+//                            click()
+//                        )
+//                    )
+//            } catch (e: PerformException) {
+//                // Item is already selected.
+//            }
+//        }
+//    }
 
     private fun getResourceString(id: Int) =
         getInstrumentation().targetContext.resources.getString(id)
@@ -248,15 +258,25 @@ internal class FormE2ETest {
                                 saveCheckboxValue
                             )
 
-                            retrievePaymentIntent(testParameters)?.let { intent ->
-                                intent.paymentMethodTypes
-                                    // acss_debit not supported, not able to fill in card fields
-                                    .filterNot { it == "acss_debit" || it == "card" || it == "sepa_debit" }
-                                    .map { lpmStr ->
-                                        PaymentSelection.fromString(lpmStr)
-                                    }.forEach {
-                                        yield(testParameters, it)
-                                    }
+                            val checkoutResponse = checkoutSessionSetup(testParameters)
+                            // TODO: Ideally this would be returned from the playground
+                            clientSecret.value?.let { clientSecretValue ->
+                                when (testParameters.checkout) {
+                                    Checkout.Pay,
+                                    Checkout.PayWithSetup ->
+                                        retrievePaymentIntentPMs(clientSecretValue)?.let { intentPaymentMethodTypes ->
+                                            intentPaymentMethodTypes
+                                                // acss_debit not supported, not able to fill in card fields
+                                                .filterNot { it == "acss_debit" || it == "card" || it == "sepa_debit" }
+                                                .map { lpmStr ->
+                                                    PaymentSelection.fromString(lpmStr)
+                                                }.forEach {
+                                                    yield(testParameters, it)
+                                                }
+                                        }
+                                    Checkout.Setup -> retrieveSetupIntentPMs(clientSecretValue)
+                                }
+
                             }
                         }
                     }
@@ -264,81 +284,83 @@ internal class FormE2ETest {
             }
         }
 
-    private suspend fun retrievePaymentIntent(testParameters: TestParameters): StripeIntent? {
-        val requestBody = CheckoutRequest(
-            testParameters.customer.toRepository(),
-            testParameters.currency.toRepository(),
-            testParameters.checkout.toRepository(),
-            false,
-            false
+    private suspend fun retrieveSetupIntentPMs(
+        clientSecret: String
+    ): List<String> {
+        val stripe = Stripe(
+            getInstrumentation().targetContext,
+            PaymentConfiguration.getInstance(getInstrumentation().targetContext).publishableKey
         )
 
-        Fuel.post("https://stripe-mobile-payment-sheet-test-playground-v6.glitch.me/checkout")
-            .jsonBody(Gson().toJson(requestBody))
-            .responseString { _, _, result ->
-                when (result) {
-                    is Result.Failure -> {
-                        status.postValue(
-                            "Preparing checkout failed:\n${result.getException().message}"
-                        )
+        return suspendCoroutine { cont ->
+            stripe.retrieveSetupIntent(
+                clientSecret,
+                null,
+                object : ApiResultCallback<SetupIntent> {
+                    override fun onSuccess(result: SetupIntent) {
+                        cont.resume(result.paymentMethodTypes)
                     }
-                    is Result.Success -> {
-                        val checkoutResponse = Gson()
-                            .fromJson(result.get(), CheckoutResponse::class.java)
-                        checkoutMode = mode
-                        temporaryCustomerId = if (customer == CheckoutCustomer.New) {
-                            checkoutResponse.customerId
-                        } else {
-                            null
-                        }
 
-                        // Init PaymentConfiguration with the publishable key returned from the backend,
-                        // which will be used on all Stripe API calls
-                        PaymentConfiguration.init(getApplication(), checkoutResponse.publishableKey)
-
-                        customerConfig.postValue(checkoutResponse.makeCustomerConfig())
-                        clientSecret.postValue(checkoutResponse.intentClientSecret)
+                    override fun onError(e: Exception) {
+                        cont.resume(emptyList())
                     }
                 }
-                inProgress.postValue(false)
-            }
+            )
+        }
+    }
 
-
-        val stripe = Stripe(getInstrumentation().targetContext, response.publishableKey)
+    private suspend fun retrievePaymentIntentPMs(
+        clientSecret: String
+    ): List<String> {
+        val stripe = Stripe(
+            getInstrumentation().targetContext,
+            PaymentConfiguration.getInstance(getInstrumentation().targetContext).publishableKey
+        )
 
         return suspendCoroutine { cont ->
-            when (testParameters.checkout) {
-                is Checkout.Pay, is Checkout.PayWithSetup ->
-                    stripe.retrievePaymentIntent(
-                        response.intentClientSecret,
-                        null,
-                        object : ApiResultCallback<PaymentIntent> {
-                            override fun onSuccess(result: PaymentIntent) {
-                                cont.resume(result)
-                            }
+            stripe.retrievePaymentIntent(
+                clientSecret,
+                null,
+                object : ApiResultCallback<PaymentIntent> {
+                    override fun onSuccess(result: PaymentIntent) {
+                        cont.resume(result.paymentMethodTypes)
+                    }
 
-                            override fun onError(e: Exception) {
-                                cont.resume(null)
-                            }
-                        }
-                    )
-                else -> {
-                    stripe.retrieveSetupIntent(
-                        response.intentClientSecret,
-                        null,
-                        object : ApiResultCallback<SetupIntent> {
-                            override fun onSuccess(result: SetupIntent) {
-                                cont.resume(result)
-                            }
-
-                            override fun onError(e: Exception) {
-                                cont.resume(null)
-                            }
-                        }
-                    )
+                    override fun onError(e: Exception) {
+                        cont.resume(emptyList())
+                    }
                 }
-            }
+            )
         }
+    }
+
+
+    private suspend fun checkoutSessionSetup(testParameters: TestParameters, ) {
+        val requestBody = CheckoutRequest(
+            testParameters.customer.toRepository().value,
+            testParameters.currency.toRepository().value,
+            testParameters.checkout.toRepository().value,
+            set_shipping_address = false,
+            automatic_payment_methods = false
+        )
+
+        return suspendCoroutine { continuation ->
+            Fuel.post("https://innate-lofty-napkin.glitch.me/checkout")
+                .jsonBody(Gson().toJson(requestBody))
+                .responseString { _, _, result ->
+                    when (result) {
+                        is Result.Failure -> {
+                            status.postValue(
+                                "Preparing checkout failed:\n${result.getException().message}"
+                            )
+                        }
+                        is Result.Success -> {
+                        }
+                    }
+                    inProgress.postValue(false)
+                }
+        }
+
     }
 
     class MyScreenCaptureProcessor : BasicScreenCaptureProcessor() {

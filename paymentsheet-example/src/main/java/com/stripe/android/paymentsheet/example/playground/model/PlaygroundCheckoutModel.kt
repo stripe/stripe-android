@@ -45,6 +45,7 @@ data class CheckoutRequest(
 data class CheckoutResponse(
     val publishableKey: String,
     val intentClientSecret: String,
+    val intentLpms: String,
     val customerId: String? = null,
     val customerEphemeralKeySecret: String? = null
 ) {

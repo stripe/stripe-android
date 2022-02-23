@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.model
 
 import android.os.Parcelable
 import androidx.annotation.DrawableRes
+import androidx.annotation.RestrictTo
 import androidx.annotation.StringRes
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.model.PaymentIntent
@@ -58,7 +59,8 @@ import kotlinx.parcelize.Parcelize
  * FormSpec is optionally null only because Card is not converted to the
  * compose model.
  */
-internal sealed class SupportedPaymentMethod(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
+sealed class SupportedPaymentMethod(
     /**
      * This describes the PaymentMethod Type as described
      * https://stripe.com/docs/api/payment_intents/create#create_payment_intent-payment_method_types

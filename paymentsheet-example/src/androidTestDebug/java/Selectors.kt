@@ -12,7 +12,9 @@ import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.UiSelector
 import androidx.test.uiautomator.Until
 import com.stripe.android.paymentsheet.example.R
-import com.stripe.android.paymentsheet.example.repository.Repository
+import com.stripe.android.paymentsheet.example.playground.model.CheckoutCurrency
+import com.stripe.android.paymentsheet.example.playground.model.CheckoutCustomer
+import com.stripe.android.paymentsheet.example.playground.model.CheckoutMode
 import com.stripe.android.paymentsheet.matchPaymentMethodHolder
 import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
 import java.security.InvalidParameterException
@@ -136,9 +138,9 @@ sealed class Checkout(@StringRes id: Int) : EspressoLabelIdButton(id) {
 }
 
 internal fun Checkout.toRepository() = when (this) {
-    Checkout.Pay -> Repository.CheckoutMode.Payment
-    Checkout.PayWithSetup -> Repository.CheckoutMode.PaymentWithSetup
-    Checkout.Setup -> Repository.CheckoutMode.Setup
+    Checkout.Pay -> CheckoutMode.Payment
+    Checkout.PayWithSetup -> CheckoutMode.PaymentWithSetup
+    Checkout.Setup -> CheckoutMode.Setup
 }
 
 sealed class Currency(@StringRes id: Int) : EspressoLabelIdButton(id) {
@@ -147,8 +149,8 @@ sealed class Currency(@StringRes id: Int) : EspressoLabelIdButton(id) {
 }
 
 internal fun Currency.toRepository() = when (this) {
-    Currency.USD -> Repository.CheckoutCurrency.USD
-    Currency.EUR -> Repository.CheckoutCurrency.EUR
+    Currency.USD -> CheckoutCurrency.USD
+    Currency.EUR -> CheckoutCurrency.EUR
 }
 
 sealed class GooglePayState(@IntegerRes id: Int) : EspressoIdButton(id) {
@@ -163,9 +165,9 @@ sealed class Customer(@StringRes id: Int) : EspressoLabelIdButton(id) {
 }
 
 internal fun Customer.toRepository() = when (this) {
-    Customer.Guest -> Repository.CheckoutCustomer.Guest
-    Customer.New -> Repository.CheckoutCustomer.New
-    Customer.Returning -> Repository.CheckoutCustomer.Returning
+    Customer.Guest -> CheckoutCustomer.Guest
+    Customer.New -> CheckoutCustomer.New
+    Customer.Returning -> CheckoutCustomer.Returning
 }
 
 // No 3DS2 support

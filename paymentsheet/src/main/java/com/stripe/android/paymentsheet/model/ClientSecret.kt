@@ -9,7 +9,7 @@ import java.security.InvalidParameterException
 /**
  * Represents the client secret for a [SetupIntent] or [PaymentIntent]
  */
-internal sealed class ClientSecret : Parcelable {
+sealed class ClientSecret : Parcelable {
     abstract val value: String
     abstract fun validate()
 }

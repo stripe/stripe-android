@@ -12,10 +12,10 @@ import kotlin.math.roundToInt
 import kotlin.properties.Delegates
 
 @SuppressLint("NotifyDataSetChanged")
-internal class AddPaymentMethodsAdapter(
+class AddPaymentMethodsAdapter internal constructor(
     private val paymentMethods: List<SupportedPaymentMethod>,
     private var selectedItemPosition: Int,
-    val paymentMethodSelectedListener: (paymentMethod: SupportedPaymentMethod) -> Unit,
+    internal val paymentMethodSelectedListener: (paymentMethod: SupportedPaymentMethod) -> Unit,
 ) : RecyclerView.Adapter<AddPaymentMethodsAdapter.AddPaymentMethodViewHolder>() {
 
     internal var isEnabled: Boolean by Delegates.observable(true) { _, oldValue, newValue ->
@@ -73,16 +73,16 @@ internal class AddPaymentMethodsAdapter(
         }
     }
 
-    internal class AddPaymentMethodViewHolder(
+    class AddPaymentMethodViewHolder(
         private val binding: LayoutPaymentsheetAddPaymentMethodCardViewBinding
     ) : RecyclerView.ViewHolder(binding.root) {
-        constructor(parent: ViewGroup) : this(
+        internal constructor(parent: ViewGroup) : this(
             LayoutPaymentsheetAddPaymentMethodCardViewBinding.inflate(
                 LayoutInflater.from(parent.context), parent, false
             )
         )
 
-        fun setSelected(selected: Boolean) {
+        internal fun setSelected(selected: Boolean) {
             binding.root.isSelected = selected
             binding.root.strokeWidth = if (selected) {
                 itemView.resources
@@ -102,12 +102,12 @@ internal class AddPaymentMethodsAdapter(
             }
         }
 
-        fun setEnabled(enabled: Boolean) {
+        internal fun setEnabled(enabled: Boolean) {
             binding.root.isEnabled = enabled
             binding.title.isEnabled = enabled
         }
 
-        fun bind(paymentMethod: SupportedPaymentMethod) {
+        internal fun bind(paymentMethod: SupportedPaymentMethod) {
             binding.icon.setImageResource(paymentMethod.iconResource)
             binding.title.text = itemView.resources.getString(paymentMethod.displayNameResource)
         }
