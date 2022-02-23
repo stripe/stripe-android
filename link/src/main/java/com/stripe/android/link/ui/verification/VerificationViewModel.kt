@@ -44,7 +44,14 @@ internal class VerificationViewModel @Inject constructor(
     }
 
     fun onResendCodeClicked() {
-        // TODO(brnunes-stripe): Request resend.
+        viewModelScope.launch {
+            linkAccountManager.startVerification().fold(
+                onSuccess = {
+                    logger.info("Verification code sent")
+                },
+                onFailure = ::onError
+            )
+        }
     }
 
     private fun onError(error: Throwable) {

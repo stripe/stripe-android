@@ -62,15 +62,28 @@ internal class LinkAccountManager @Inject constructor(
             }
         }
 
+    /**
+     * Triggers sending a verification code to the user.
+     */
+    suspend fun startVerification(): Result<LinkAccount> =
+        linkAccount?.let { account ->
+            linkRepository.startVerification(account.clientSecret).map { consumerSession ->
+                setAndReturn(LinkAccount(consumerSession))
+            }
+        } ?: Result.failure(
+            IllegalStateException("A non-null Link account is needed to start verification")
+        )
+
+    /**
+     * Confirms a verification code sent to the user.
+     */
     suspend fun confirmVerification(code: String): Result<LinkAccount> =
         linkAccount?.let { account ->
             linkRepository.confirmVerification(account.clientSecret, code).map { consumerSession ->
                 setAndReturn(LinkAccount(consumerSession))
             }
         } ?: Result.failure(
-            IllegalStateException(
-                "A non-null Link account is needed to confirm verification"
-            )
+            IllegalStateException("A non-null Link account is needed to confirm verification")
         )
 
     private fun setAndReturn(linkAccount: LinkAccount): LinkAccount {

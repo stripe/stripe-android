@@ -50,9 +50,20 @@ class VerificationViewModelTest {
     private val logger = Logger.noop()
 
     @Test
+    fun `onResendCodeClicked triggers verification start`() = runTest {
+        whenever(linkAccountManager.startVerification())
+            .thenReturn(Result.success(mock()))
+
+        val viewModel = createViewModel()
+        viewModel.onResendCodeClicked()
+
+        verify(linkAccountManager).startVerification()
+    }
+
+    @Test
     fun `onVerificationCodeEntered succeeds then it navigates to Wallet`() = runTest {
         whenever(linkAccountManager.confirmVerification(any()))
-            .thenReturn(mock())
+            .thenReturn(Result.success(mock()))
 
         val viewModel = createViewModel()
         viewModel.onVerificationCodeEntered("code")
