@@ -9,7 +9,7 @@ import androidx.compose.ui.text.input.OffsetMapping
 import androidx.compose.ui.text.input.TransformedText
 import androidx.compose.ui.text.input.VisualTransformation
 import com.stripe.android.ui.core.R
-//import com.stripe.android.view.BecsDebitBanks
+// import com.stripe.android.view.BecsDebitBanks
 
 /**
  * A text field configuration for a BSB number, or Bank State Branch Number,

@@ -11,9 +11,9 @@ internal object AccountNumberSpec : SectionFieldSpec(IdentifierSpec.Generic("acc
             this.identifier,
             TextFieldController(
                 SimpleTextFieldConfig(
-                label = R.string.address_label_name,
-                keyboard = KeyboardType.Number
-            )
+                    label = R.string.address_label_name,
+                    keyboard = KeyboardType.Number
+                )
             )
         )
 }
