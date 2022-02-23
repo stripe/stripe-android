@@ -4,5 +4,9 @@
     Items here need to be entered in our translation tool
     -->
     <!-- Affirm buy now, pay later copy -->
-    <string name="affirm_buy_now_pay_later">Buy now, pay later with Affirm.</string>
+    <string name="affirm_buy_now_pay_later">Buy now, pay later with</string>
+    <!-- An error message displayed when the customer's BSB number is incomplete. -->
+    <string name="bsb_incomplete">The BSB number you entered is incomplete.</string>
+    <!-- An error message displayed when the customer's BSB number is invalid. -->
+    <string name="bsb_invalid">The BSB number you entered is invalid.</string>
 </resources>

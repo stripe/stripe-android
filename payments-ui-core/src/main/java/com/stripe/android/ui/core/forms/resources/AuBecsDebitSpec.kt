@@ -3,6 +3,7 @@ package com.stripe.android.ui.core.forms.resources
 import androidx.annotation.RestrictTo
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.AccountNumberSpec
+import com.stripe.android.ui.core.elements.BsbSpec
 import com.stripe.android.ui.core.elements.EmailSpec
 import com.stripe.android.ui.core.elements.IbanSpec
 import com.stripe.android.ui.core.elements.IdentifierSpec
@@ -27,6 +28,11 @@ internal val auBecsDebitEmailSection = SectionSpec(
     EmailSpec
 )
 
+internal val auBecsBsbNumberSection = SectionSpec(
+    IdentifierSpec.Generic("bsb_number_section"),
+    BsbSpec
+)
+
 internal val auBecsDebitSection = SectionSpec(
     IdentifierSpec.Generic("account_number"),
     AccountNumberSpec
@@ -36,5 +42,6 @@ internal val auBecsDebitSection = SectionSpec(
 val AuBecsDebitForm = LayoutSpec.create(
     auBecsDebitEmailSection,
     auBecsDebitNameSection,
+    auBecsBsbNumberSection,
     auBecsDebitSection
 )

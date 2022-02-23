@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="iban">IBAN</string>
+    <string name="bsb_number">BSB number</string>
 <!--    <string name="stripe_paymentsheet_payment_method_sofort">Sofort</string>-->
 <!--    <string name="stripe_paymentsheet_payment_method_ideal">iDEAL</string>-->
 <!--    <string name="stripe_paymentsheet_payment_method_bancontact">Bancontact</string>-->

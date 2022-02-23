@@ -7,6 +7,7 @@ import com.stripe.android.ui.core.elements.AddressSpec
 import com.stripe.android.ui.core.elements.AfterpayClearpayTextSpec
 import com.stripe.android.ui.core.elements.BankDropdownSpec
 import com.stripe.android.ui.core.elements.BankRepository
+import com.stripe.android.ui.core.elements.BsbSpec
 import com.stripe.android.ui.core.elements.CountrySpec
 import com.stripe.android.ui.core.elements.EmailSpec
 import com.stripe.android.ui.core.elements.EmptyFormElement
@@ -117,6 +118,7 @@ class TransformSpecToElements(
                     country
                 )
                 is AccountNumberSpec -> it.transform()
+                is BsbSpec -> it.transform()
             }
         }
 }
