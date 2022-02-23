@@ -15,8 +15,6 @@ internal abstract class MachineState {
         "${this::class.java.simpleName}(reachedStateAt=$reachedStateAt)"
 
     init {
-        if (Config.isDebug) {
-            Log.d(Config.logTag, "${this::class.java.simpleName} machine state reached")
-        }
+        Log.d(Config.logTag, "${this::class.java.simpleName} machine state reached")
     }
 }

@@ -14,8 +14,8 @@ internal sealed class Timer {
         fun newInstance(
             tag: String,
             name: String,
+            enabled: Boolean,
             updateInterval: Duration = 2.seconds,
-            enabled: Boolean = Config.isDebug
         ) = if (enabled) {
             LoggingTimer(
                 tag,

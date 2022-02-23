@@ -8,22 +8,10 @@ import kotlinx.serialization.json.Json
 object Config {
 
     /**
-     * If set to true, turns on debug information.
-     */
-    @JvmStatic
-    var isDebug: Boolean = false
-
-    /**
      * A log tag used by this library.
      */
     @JvmStatic
     var logTag: String = "StripeCardScan"
-
-    /**
-     * Whether or not to display the Stripe logo.
-     */
-    @JvmStatic
-    var displayLogo: Boolean = true
 
     /**
      * Whether or not to display the "I cannot scan" button.

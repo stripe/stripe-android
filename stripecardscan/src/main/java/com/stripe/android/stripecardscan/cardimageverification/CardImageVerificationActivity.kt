@@ -119,7 +119,7 @@ internal open class CardImageVerificationActivity :
 
     private val params: CardImageVerificationSheetParams by lazy {
         intent.getParcelableExtra(INTENT_PARAM_REQUEST)
-            ?: CardImageVerificationSheetParams("", "", "")
+            ?: CardImageVerificationSheetParams(CardImageVerificationSheet.Configuration(""), "", "")
     }
 
     /**
@@ -155,7 +155,7 @@ internal open class CardImageVerificationActivity :
                 launch {
                     when (
                         val result = uploadSavedFrames(
-                            stripePublishableKey = params.stripePublishableKey,
+                            stripePublishableKey = params.configuration.stripePublishableKey,
                             civId = params.cardImageVerificationIntentId,
                             civSecret = params.cardImageVerificationIntentSecret,
                             savedFrames = frames,
@@ -301,7 +301,7 @@ internal open class CardImageVerificationActivity :
     }
 
     private fun ensureValidParams() = when {
-        params.stripePublishableKey.isEmpty() -> {
+        params.configuration.stripePublishableKey.isEmpty() -> {
             scanFailure(InvalidStripePublishableKeyException("Missing publishable key"))
             false
         }
@@ -318,7 +318,7 @@ internal open class CardImageVerificationActivity :
 
     private suspend fun getCivDetails(): RequiredCardDetails? = when (
         val result = getCardImageVerificationIntentDetails(
-            stripePublishableKey = params.stripePublishableKey,
+            stripePublishableKey = params.configuration.stripePublishableKey,
             civId = params.cardImageVerificationIntentId,
             civSecret = params.cardImageVerificationIntentSecret,
         )
@@ -585,7 +585,7 @@ internal open class CardImageVerificationActivity :
 
     override fun closeScanner() {
         uploadScanStatsCIV(
-            stripePublishableKey = params.stripePublishableKey,
+            stripePublishableKey = params.configuration.stripePublishableKey,
             civId = params.cardImageVerificationIntentId,
             civSecret = params.cardImageVerificationIntentSecret,
             instanceId = Stats.instanceId,

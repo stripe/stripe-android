@@ -7,6 +7,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.fragment.app.Fragment
+import com.stripe.android.stripecardscan.cardimageverification.CardImageVerificationConfig.MAX_COMPLETION_LOOP_FRAMES
 import com.stripe.android.stripecardscan.cardimageverification.exception.UnknownScanException
 import com.stripe.android.stripecardscan.payment.card.ScannedCard
 import com.stripe.android.stripecardscan.scanui.CancellationReason
@@ -14,7 +15,7 @@ import kotlinx.parcelize.Parcelize
 
 @Parcelize
 internal data class CardImageVerificationSheetParams(
-    val stripePublishableKey: String,
+    val configuration: CardImageVerificationSheet.Configuration,
     val cardImageVerificationIntentId: String,
     val cardImageVerificationIntentSecret: String,
 ) : Parcelable
@@ -35,7 +36,27 @@ sealed interface CardImageVerificationSheetResult : Parcelable {
     data class Failed(val error: Throwable) : CardImageVerificationSheetResult
 }
 
-class CardImageVerificationSheet private constructor(private val stripePublishableKey: String) {
+class CardImageVerificationSheet private constructor(private val configuration: Configuration) {
+
+    @Parcelize
+    data class Configuration(
+        val stripePublishableKey: String,
+        val verificationConfiguration: VerificationConfiguration = VerificationConfiguration(),
+    ) : Parcelable
+
+    @Parcelize
+    data class VerificationConfiguration(
+        // The amount of frames that must have a centered, focused card before the scan
+        // is allowed to terminate
+        val strictModeFrames: StrictModeFrameCount = StrictModeFrameCount.None,
+    ) : Parcelable {
+        sealed class StrictModeFrameCount(val count: Int) : Parcelable {
+            @Parcelize object None : StrictModeFrameCount(0)
+            @Parcelize object Low : StrictModeFrameCount(1)
+            @Parcelize object Medium : StrictModeFrameCount(MAX_COMPLETION_LOOP_FRAMES / 2)
+            @Parcelize object High : StrictModeFrameCount(MAX_COMPLETION_LOOP_FRAMES)
+        }
+    }
 
     private var onFinished:
         ((cardImageVerificationSheetResult: CardImageVerificationSheetResult) -> Unit)? = null
@@ -50,8 +71,8 @@ class CardImageVerificationSheet private constructor(private val stripePublishab
          * is created (in the onCreate method).
          */
         @JvmStatic
-        fun create(from: ComponentActivity, stripePublishableKey: String) =
-            CardImageVerificationSheet(stripePublishableKey).apply {
+        fun create(from: ComponentActivity, config: Configuration) =
+            CardImageVerificationSheet(config).apply {
                 launcher = from.registerForActivityResult(activityResultContract, ::onResult)
             }
 
@@ -62,8 +83,8 @@ class CardImageVerificationSheet private constructor(private val stripePublishab
          * before the [Fragment] is created (in the onCreate method).
          */
         @JvmStatic
-        fun create(from: Fragment, stripePublishableKey: String) =
-            CardImageVerificationSheet(stripePublishableKey).apply {
+        fun create(from: Fragment, config: Configuration) =
+            CardImageVerificationSheet(config).apply {
                 launcher = from.registerForActivityResult(activityResultContract, ::onResult)
             }
 
@@ -108,7 +129,7 @@ class CardImageVerificationSheet private constructor(private val stripePublishab
         this.onFinished = onFinished
         launcher.launch(
             CardImageVerificationSheetParams(
-                stripePublishableKey = stripePublishableKey,
+                configuration = configuration,
                 cardImageVerificationIntentId = cardImageVerificationIntentId,
                 cardImageVerificationIntentSecret = cardImageVerificationIntentSecret,
             )

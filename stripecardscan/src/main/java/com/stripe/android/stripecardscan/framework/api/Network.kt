@@ -37,7 +37,9 @@ private const val CONTENT_ENCODING_GZIP = "gzip"
  */
 private const val GZIP_MIN_SIZE_BYTES = 1500
 
-private val networkTimer by lazy { Timer.newInstance(Config.logTag, "network") }
+private val networkTimer by lazy {
+    Timer.newInstance(Network::class.java.simpleName, "network", enabled = false)
+}
 
 internal interface Network {
 
