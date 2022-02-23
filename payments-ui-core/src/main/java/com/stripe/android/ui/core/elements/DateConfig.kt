@@ -20,6 +20,7 @@ internal class DateConfig : TextFieldConfig {
     override val keyboard = KeyboardType.NumberPassword
     override val visualTransformation = ExpiryDateVisualTransformation()
     override val trailingIcon: StateFlow<TextFieldIcon?> = MutableStateFlow(null)
+    override val loading: StateFlow<Boolean> = MutableStateFlow(false)
 
     override fun filter(userTyped: String) = userTyped.filter { it.isDigit() }
 

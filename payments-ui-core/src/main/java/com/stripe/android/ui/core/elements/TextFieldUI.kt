@@ -6,6 +6,7 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Icon
 import androidx.compose.material.LocalContentAlpha
 import androidx.compose.material.LocalContentColor
@@ -63,6 +64,7 @@ internal fun TextField(
     val value by textFieldController.fieldValue.collectAsState("")
     val trailingIcon by textFieldController.trailingIcon.collectAsState(null)
     val shouldShowError by textFieldController.visibleError.collectAsState(false)
+    val loading by textFieldController.loading.collectAsState(false)
 
     var hasFocus by rememberSaveable { mutableStateOf(false) }
     val textFieldColors = TextFieldColors(
@@ -143,7 +145,7 @@ internal fun TextField(
         singleLine = true,
         enabled = enabled,
         trailingIcon = trailingIcon?.let {
-            { TrailingIcon(it, colors) }
+            { TrailingIcon(it, colors, loading) }
         }
     )
 }
@@ -159,9 +161,12 @@ internal fun nextFocus(focusManager: FocusManager) {
 @Composable
 internal fun TrailingIcon(
     trailingIcon: TextFieldIcon,
-    colors: androidx.compose.material.TextFieldColors
+    colors: androidx.compose.material.TextFieldColors,
+    loading: Boolean
 ) {
-    if (trailingIcon.isIcon) {
+    if (loading) {
+        CircularProgressIndicator()
+    } else if (trailingIcon.isIcon) {
         Icon(
             painter = painterResource(id = trailingIcon.idRes),
             contentDescription = trailingIcon.contentDescription?.let {
