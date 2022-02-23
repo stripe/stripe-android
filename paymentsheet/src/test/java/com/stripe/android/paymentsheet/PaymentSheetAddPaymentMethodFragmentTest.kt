@@ -97,7 +97,7 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
         }
         createFragment(stripeIntent = paymentIntent) { _, viewBinding, _ ->
             val item = viewBinding.paymentMethodsRecycler.layoutManager!!.findViewByPosition(0)
-            assertThat(item!!.measuredWidth).isEqualTo(104)
+            assertThat(item!!.measuredWidth).isEqualTo(116)
         }
     }
 
@@ -109,7 +109,7 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
         }
         createFragment(stripeIntent = paymentIntent) { _, viewBinding, _ ->
             val item = viewBinding.paymentMethodsRecycler.layoutManager!!.findViewByPosition(0)
-            assertThat(item!!.measuredWidth).isEqualTo(211)
+            assertThat(item!!.measuredWidth).isEqualTo(223)
         }
     }
 
