@@ -16,6 +16,7 @@ class SimpleTextFieldConfig(
     override val debugLabel: String = "generic_text"
     override val visualTransformation: VisualTransformation? = null
     override val trailingIcon: MutableStateFlow<TextFieldIcon?> = MutableStateFlow(null)
+    override val loading: MutableStateFlow<Boolean> = MutableStateFlow(false)
 
     override fun determineState(input: String): TextFieldState = object : TextFieldState {
         override fun shouldShowError(hasFocus: Boolean) = false

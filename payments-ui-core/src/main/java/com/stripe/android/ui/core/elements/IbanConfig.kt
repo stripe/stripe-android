@@ -10,6 +10,7 @@ import androidx.compose.ui.text.input.TransformedText
 import androidx.compose.ui.text.input.VisualTransformation
 import com.stripe.android.ui.core.R
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import java.math.BigInteger
 import java.util.Locale
 
@@ -34,6 +35,7 @@ class IbanConfig : TextFieldConfig {
             isIcon = true
         )
     )
+    override val loading: StateFlow<Boolean> = MutableStateFlow(false)
 
     // Displays the IBAN in groups of 4 characters with spaces added between them
     override val visualTransformation: VisualTransformation = VisualTransformation { text ->

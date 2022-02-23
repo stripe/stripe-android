@@ -24,7 +24,7 @@ internal class CardNumberController constructor(
     private val cardTextFieldConfig: CardNumberConfig,
     cardAccountRangeRepository: CardAccountRangeRepository,
     workContext: CoroutineContext,
-    private val staticCardAccountRanges: StaticCardAccountRanges = DefaultStaticCardAccountRanges(),
+    staticCardAccountRanges: StaticCardAccountRanges = DefaultStaticCardAccountRanges(),
     override val showOptionalLabel: Boolean = false
 ) : TextFieldController, SectionFieldErrorController {
 
@@ -83,6 +83,8 @@ internal class CardNumberController constructor(
             }
         }
     )
+
+    override val loading: Flow<Boolean> = accountRangeService.isLoading
 
     override val visibleError: Flow<Boolean> =
         combine(_fieldState, _hasFocus) { fieldState, hasFocus ->

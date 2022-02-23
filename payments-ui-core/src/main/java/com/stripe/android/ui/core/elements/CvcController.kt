@@ -67,6 +67,8 @@ internal class CvcController constructor(
         TextFieldIcon(it.cvcIcon, isIcon = false)
     }
 
+    override val loading: Flow<Boolean> = MutableStateFlow(false)
+
     init {
         onValueChange("")
     }
