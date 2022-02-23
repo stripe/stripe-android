@@ -7,7 +7,7 @@ import kotlinx.parcelize.Parcelize
 import org.json.JSONObject
 import java.util.Scanner
 
-internal class BecsDebitBanks(
+class BecsDebitBanks(
     internal val banks: List<Bank>,
     private val shouldIncludeTestBank: Boolean = true
 ) {

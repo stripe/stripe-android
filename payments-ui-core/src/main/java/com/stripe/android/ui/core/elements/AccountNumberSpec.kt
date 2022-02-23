@@ -9,9 +9,11 @@ internal object AccountNumberSpec : SectionFieldSpec(IdentifierSpec.Generic("acc
     fun transform(): SectionFieldElement =
         AccountNumberElement(
             this.identifier,
-            TextFieldController(SimpleTextFieldConfig(
+            TextFieldController(
+                SimpleTextFieldConfig(
                 label = R.string.address_label_name,
                 keyboard = KeyboardType.Number
-            ))
+            )
+            )
         )
 }
