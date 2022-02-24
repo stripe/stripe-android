@@ -165,7 +165,7 @@ fun PaymentMethodUI(
         modifier = Modifier
             .height(60.dp)
             .width(viewWidth)
-            .padding(start = 6.dp, end = 6.dp)
+            .padding(horizontal = 6.dp)
             .selectable(
                 selected = isSelected,
                 enabled = isEnabled,
