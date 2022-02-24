@@ -55,12 +55,12 @@ fun AuBecsDebitMandateElementUI(
         )
         withStyle(
             style = SpanStyle(
-            color = Color.Blue,
-            fontWeight = FontWeight.Bold,
-            fontSize = element.fontSizeSp.sp,
-            letterSpacing = element.letterSpacingSp.sp,
-            textDecoration = TextDecoration.Underline
-        )
+                color = Color.Blue,
+                fontWeight = FontWeight.Bold,
+                fontSize = element.fontSizeSp.sp,
+                letterSpacing = element.letterSpacingSp.sp,
+                textDecoration = TextDecoration.Underline
+            )
         ) {
             append(" Direct Debit Request service agreement")
         }
