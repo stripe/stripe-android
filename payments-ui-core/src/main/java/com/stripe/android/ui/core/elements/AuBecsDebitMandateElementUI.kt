@@ -49,9 +49,12 @@ fun AuBecsDebitMandateElementUI(
 
         // We attach this *URL* annotation to the following content
         // until `pop()` is called
-        pushStringAnnotation(tag = "URL",
-            annotation = "https://stripe.com/au-becs-dd-service-agreement/legal")
-        withStyle(style = SpanStyle(
+        pushStringAnnotation(
+            tag = "URL",
+            annotation = "https://stripe.com/au-becs-dd-service-agreement/legal"
+        )
+        withStyle(
+            style = SpanStyle(
             color = Color.Blue,
             fontWeight = FontWeight.Bold,
             fontSize = element.fontSizeSp.sp,
@@ -73,8 +76,10 @@ fun AuBecsDebitMandateElementUI(
         onClick = { offset ->
             // We check if there is an *URL* annotation attached to the text
             // at the clicked position
-            annotatedText.getStringAnnotations(tag = "URL", start = offset,
-                end = offset)
+            annotatedText.getStringAnnotations(
+                tag = "URL", start = offset,
+                end = offset
+            )
                 .firstOrNull()?.let { annotation ->
 //                    val openURL = Intent(Intent.ACTION_VIEW)
 //                    openURL.data = Uri.parse(annotation.item)
