@@ -23,6 +23,7 @@ import com.github.kittinunf.result.Result
 import com.google.common.truth.Truth.assertThat
 import com.google.gson.Gson
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.paymentsheet.PaymentSheetResult
 import com.stripe.android.paymentsheet.example.R
 import com.stripe.android.paymentsheet.example.playground.activity.PaymentSheetPlaygroundActivity
 import com.stripe.android.paymentsheet.example.playground.activity.PaymentSheetPlaygroundActivity.Companion.multiStepUIIdlingResource
@@ -68,6 +69,45 @@ internal class FormE2ETest {
     }
 
     // TODO: Need to revist the idle resource construction - should probably be dependency injected
+
+    @Test
+    fun testBancontact() = runBlocking {
+        val testParameters = TestParameters(
+            Customer.New,
+            GooglePayState.Off,
+            Currency.EUR,
+            Checkout.Pay,
+            Billing.On,
+            false
+        )
+        val paymentSelection = PaymentSelection.Bancontact as PaymentSelection
+        try {
+            confirmComplete(testParameters) {
+                print("Testing: $testParameters, paymentSelection: $paymentSelection")
+                if (paymentSelection.exists()) {
+                    paymentSelection.click(getInstrumentation().targetContext.resources)
+                    // Fill in form values (SEPA needs IBAN and all card fields)
+                    if (paymentSelection is PaymentSelection.SepaDebit) {
+                        composeTestRule.onNodeWithText("IBAN")
+                            .performTextInput("DE89370400440532013000")
+                    }
+
+                    if (SaveForFutureCheckbox.exists()) {
+                        print("... save for future use not visible")
+                    } else if (SaveForFutureCheckbox.exists() && !testParameters.saveCheckboxValue) {
+                        SaveForFutureCheckbox.click()
+                    }
+
+                    // Validate the state of the save checkbox
+                } else {
+                    throw InvalidParameterException("... paymentSelection: $paymentSelection is not a valid test setup")
+                }
+
+            }
+        } catch (e: InvalidParameterException) {
+            print(e)
+        }
+    }
 
     @ExperimentalCoroutinesApi
     @Test
@@ -222,7 +262,7 @@ internal class FormE2ETest {
         IdlingRegistry.getInstance().unregister(transitionFragmentResource)
 
         callbackLock.acquire()
-        assertThat(resultValue).isEqualTo("Completed")
+        assertThat(resultValue).isEqualTo(PaymentSheetResult.Completed)
         callbackLock.release()
     }
 
