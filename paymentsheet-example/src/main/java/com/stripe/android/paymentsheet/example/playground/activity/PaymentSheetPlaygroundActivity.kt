@@ -134,6 +134,13 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
 
         viewModel.inProgress.observe(this) {
             viewBinding.progressBar.isInvisible = !it
+            if (it) {
+                singleStepUIIdlingResource.increment()
+                multiStepUIIdlingResource.increment()
+            } else {
+                singleStepUIIdlingResource.decrement()
+                multiStepUIIdlingResource.decrement()
+            }
         }
 
         viewModel.readyToCheckout.observe(this) { isReady ->

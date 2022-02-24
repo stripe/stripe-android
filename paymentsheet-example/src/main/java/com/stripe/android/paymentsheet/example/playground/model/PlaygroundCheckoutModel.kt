@@ -14,7 +14,14 @@ enum class CheckoutCurrency(val value: String) {
     EUR("eur")
 }
 
-data class SavedToggles(val customer: String, val googlePay: Boolean, val currency: String, val mode: String, val setShippingAddress: Boolean, val setAutomaticPaymentMethods: Boolean)
+data class SavedToggles(
+    val customer: String,
+    val googlePay: Boolean,
+    val currency: String,
+    val mode: String,
+    val setShippingAddress: Boolean,
+    val setAutomaticPaymentMethods: Boolean
+)
 
 enum class Toggle(val key: String, val default: Any) {
     Customer("customer", CheckoutCustomer.Guest.value),
@@ -45,7 +52,7 @@ data class CheckoutRequest(
 data class CheckoutResponse(
     val publishableKey: String,
     val intentClientSecret: String,
-    val intentLpms: String,
+    val intentLpms: List<String>,
     val customerId: String? = null,
     val customerEphemeralKeySecret: String? = null
 ) {
