@@ -8,7 +8,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlin.coroutines.CoroutineContext
@@ -21,9 +20,8 @@ class CardAccountRangeService constructor(
     private val accountRangeResultListener: AccountRangeResultListener
 ) {
 
-    val isLoading: Flow<Boolean> = cardAccountRangeRepository.loading.map {
-        it
-    }
+    val isLoading: Flow<Boolean> = cardAccountRangeRepository.loading
+
     var accountRange: AccountRange? = null
         private set
 
