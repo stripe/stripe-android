@@ -2,9 +2,9 @@ package com.stripe.android.ui.core.forms
 
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.address.AddressFieldElementRepository
-import com.stripe.android.ui.core.elements.AccountNumberSpec
 import com.stripe.android.ui.core.elements.AddressSpec
 import com.stripe.android.ui.core.elements.AfterpayClearpayTextSpec
+import com.stripe.android.ui.core.elements.AuBankAccountNumberSpec
 import com.stripe.android.ui.core.elements.BankDropdownSpec
 import com.stripe.android.ui.core.elements.BankRepository
 import com.stripe.android.ui.core.elements.BsbSpec
@@ -117,7 +117,7 @@ class TransformSpecToElements(
                     currencyCode,
                     country
                 )
-                is AccountNumberSpec -> it.transform()
+                is AuBankAccountNumberSpec -> it.transform()
                 is BsbSpec -> it.transform()
             }
         }

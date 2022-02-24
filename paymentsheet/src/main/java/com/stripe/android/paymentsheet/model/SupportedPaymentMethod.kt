@@ -53,8 +53,8 @@ import com.stripe.android.ui.core.forms.SepaDebitForm
 import com.stripe.android.ui.core.forms.SepaDebitParamKey
 import com.stripe.android.ui.core.forms.SofortForm
 import com.stripe.android.ui.core.forms.SofortParamKey
-import com.stripe.android.ui.core.forms.resources.AuBecsDebitForm
-import com.stripe.android.ui.core.forms.resources.AuBecsDebitParamKey
+import com.stripe.android.ui.core.forms.AuBecsDebitForm
+import com.stripe.android.ui.core.forms.AuBecsDebitParamKey
 import kotlinx.parcelize.Parcelize
 
 /**
