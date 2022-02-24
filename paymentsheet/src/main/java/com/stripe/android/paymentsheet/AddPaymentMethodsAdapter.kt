@@ -15,16 +15,21 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.recyclerview.widget.RecyclerView
+import com.stripe.android.paymentsheet.AddPaymentMethodsAdapter.Companion.ADD_PM_DEFAULT_PADDING
+import com.stripe.android.paymentsheet.AddPaymentMethodsAdapter.Companion.CARD_HORIZONTAL_PADDING
 import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
+import com.stripe.android.paymentsheet.ui.LpmSelectorText
 import kotlin.properties.Delegates
 
 @SuppressLint("NotifyDataSetChanged")
@@ -115,7 +120,7 @@ internal class AddPaymentMethodsAdapter(
         private fun calculateViewWidth(parent: ViewGroup, numberOfPaymentMethods: Int): Dp {
             val targetWidth = parent.measuredWidth - parent.paddingStart - parent.paddingEnd
             val screenDensity = parent.context.resources.displayMetrics.density
-            val minItemWidth = 100 * screenDensity + 6.0f + 6.0f
+            val minItemWidth = 100 * screenDensity + (2 * CARD_HORIZONTAL_PADDING)
 
             // if all items fit at min width, then span them across the sheet evenly filling it.
             // otherwise the number of items visible should be a multiple of .5
@@ -131,11 +136,14 @@ internal class AddPaymentMethodsAdapter(
 
             return (viewWidth.toInt() / screenDensity).dp
         }
+
+        internal const val ADD_PM_DEFAULT_PADDING = 12.0f
+        internal const val CARD_HORIZONTAL_PADDING = 6.0f
     }
 }
 
 @Composable
-fun PaymentMethodUI(
+internal fun PaymentMethodUI(
     viewWidth: Dp,
     iconRes: Int,
     title: String,
@@ -152,7 +160,7 @@ fun PaymentMethodUI(
     )
 
     val cardBackgroundColor = if (isEnabled) {
-        MaterialTheme.colors.surface
+        colorResource(R.color.stripe_paymentsheet_elements_background_default)
     } else {
         colorResource(R.color.stripe_paymentsheet_elements_background_disabled)
     }
@@ -165,7 +173,7 @@ fun PaymentMethodUI(
         modifier = Modifier
             .height(60.dp)
             .width(viewWidth)
-            .padding(start = 6.dp, end = 6.dp)
+            .padding(horizontal = CARD_HORIZONTAL_PADDING.dp)
             .selectable(
                 selected = isSelected,
                 enabled = isEnabled,
@@ -179,17 +187,12 @@ fun PaymentMethodUI(
                 painter = painterResource(iconRes),
                 contentDescription = "",
                 modifier = Modifier
-                    .padding(top = 12.dp, start = 12.dp)
+                    .padding(top = ADD_PM_DEFAULT_PADDING.dp, start = ADD_PM_DEFAULT_PADDING.dp)
             )
-            val color = colorResource(R.color.stripe_paymentsheet_title_text)
-            Text(
+            LpmSelectorText(
                 text = title,
-                fontSize = 13.sp,
-                fontWeight = FontWeight.Bold,
-                color = if (isEnabled) color else color.copy(alpha = 0.6f),
-                lineHeight = 1.sp,
-                modifier = Modifier
-                    .padding(top = 6.dp, start = 12.dp)
+                isEnabled = isEnabled,
+                modifier = Modifier.padding(top = 6.dp, start = ADD_PM_DEFAULT_PADDING.dp)
             )
         }
     }

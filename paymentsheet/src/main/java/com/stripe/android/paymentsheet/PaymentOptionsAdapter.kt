@@ -35,9 +35,11 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.NO_POSITION
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.paymentsheet.PaymentOptionsAdapter.Companion.PM_OPTIONS_DEFAULT_PADDING
 import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
+import com.stripe.android.paymentsheet.ui.LpmSelectorText
 import com.stripe.android.paymentsheet.ui.getLabel
 import com.stripe.android.paymentsheet.ui.getSavedPaymentMethodIcon
 import kotlin.properties.Delegates
@@ -289,6 +291,8 @@ internal class PaymentOptionsAdapter(
             position: Int
         ) {
             val savedPaymentMethod = item as Item.SavedPaymentMethod
+            val labelText = savedPaymentMethod.paymentMethod.getLabel(itemView.resources) ?: return
+
             composeView.setContent {
                 PaymentOptionUi(
                     viewWidth = width,
@@ -296,7 +300,7 @@ internal class PaymentOptionsAdapter(
                     isSelected = isSelected,
                     isEnabled = isEnabled,
                     iconRes = savedPaymentMethod.paymentMethod.getSavedPaymentMethodIcon() ?: 0,
-                    labelText = savedPaymentMethod.paymentMethod.getLabel(itemView.resources),
+                    labelText = labelText,
                     accessibilityDescription = item.getDescription(itemView.resources),
                     onRemoveListener = { onRemoveListener(position) },
                     onRemoveAccessibilityDescription =
@@ -461,24 +465,26 @@ internal class PaymentOptionsAdapter(
             val screenDensity = parent.context.resources.displayMetrics.density
             // minimum width for each item, accounting for the CardView margin so that the CardView
             // is at least 100dp wide
-            val minItemWidth = 100 * screenDensity + 6.0f + 6.0f
+            val minItemWidth = 100 * screenDensity + (2 * PM_OPTIONS_DEFAULT_PADDING)
             // numVisibleItems is incremented in steps of 0.5 items (1, 1.5, 2, 2.5, 3, ...)
             val numVisibleItems = (targetWidth * 2 / minItemWidth).toInt() / 2f
             val viewWidth = (targetWidth / numVisibleItems)
             return (viewWidth / screenDensity).dp
         }
+
+        internal const val PM_OPTIONS_DEFAULT_PADDING = 6.0F
     }
 }
 
 @Composable
-fun PaymentOptionUi(
+internal fun PaymentOptionUi(
     viewWidth: Dp,
     isSelected: Boolean,
     isEditing: Boolean,
     isEnabled: Boolean,
     iconRes: Int,
     accessibilityDescription: String,
-    labelText: String? = "",
+    labelText: String = "",
     onRemoveListener: (() -> Unit)? = null,
     onRemoveAccessibilityDescription: String = "",
     onItemSelectedListener: (() -> Unit)
@@ -492,11 +498,13 @@ fun PaymentOptionUi(
     )
 
     val cardBackgroundColor = if (isEnabled) {
-        MaterialTheme.colors.surface
+        colorResource(R.color.stripe_paymentsheet_elements_background_default)
     } else {
         colorResource(id = R.color.stripe_paymentsheet_elements_background_disabled)
     }
 
+    // An attempt was made to not use constraint layout here but it was unsuccessful in
+    // precisely positioning the check and delete icons to match the mocks.
     ConstraintLayout(
         modifier = Modifier
             .padding(top = 12.dp)
@@ -513,7 +521,7 @@ fun PaymentOptionUi(
             backgroundColor = cardBackgroundColor,
             modifier = Modifier
                 .height(64.dp)
-                .padding(start = 6.dp, end = 6.dp)
+                .padding(horizontal = PM_OPTIONS_DEFAULT_PADDING.dp)
                 .fillMaxWidth()
                 .constrainAs(card) {
                     top.linkTo(parent.top)
@@ -564,29 +572,25 @@ fun PaymentOptionUi(
             )
         }
 
-        if (labelText != null) {
-            val color = colorResource(R.color.stripe_paymentsheet_title_text)
-            Text(
-                text = labelText,
-                fontSize = 13.sp,
-                fontWeight = FontWeight.Bold,
-                color = if (isEnabled) color else color.copy(alpha = 0.6f),
-                lineHeight = 1.sp,
-                modifier = Modifier
-                    .constrainAs(label) {
-                        top.linkTo(card.bottom)
-                        start.linkTo(card.start)
-                    }
-                    .padding(
-                        top = 4.dp, start = 6.dp, end = 6.dp
-                    )
-                    .semantics {
-                        // This makes the screen reader read out numbers digit by digit
-                        // one one one one vs one thousand one hundred eleven
-                        this.contentDescription =
-                            accessibilityDescription.replace("\\d".toRegex(), "$0 ")
-                    }
-            )
-        }
+        LpmSelectorText(
+            text = labelText,
+            isEnabled = isEnabled,
+            modifier = Modifier
+                .constrainAs(label) {
+                    top.linkTo(card.bottom)
+                    start.linkTo(card.start)
+                }
+                .padding(
+                    top = 4.dp,
+                    start = PM_OPTIONS_DEFAULT_PADDING.dp,
+                    end = PM_OPTIONS_DEFAULT_PADDING.dp
+                )
+                .semantics {
+                    // This makes the screen reader read out numbers digit by digit
+                    // one one one one vs one thousand one hundred eleven
+                    this.contentDescription =
+                        accessibilityDescription.replace("\\d".toRegex(), "$0 ")
+                },
+        )
     }
 }
