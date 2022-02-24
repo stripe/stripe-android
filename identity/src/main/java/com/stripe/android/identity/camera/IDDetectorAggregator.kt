@@ -4,30 +4,32 @@ import com.stripe.android.camera.framework.AggregateResultListener
 import com.stripe.android.camera.framework.ResultAggregator
 import com.stripe.android.identity.ml.AnalyzerInput
 import com.stripe.android.identity.ml.AnalyzerOutput
-import com.stripe.android.identity.states.ScanState
+import com.stripe.android.identity.states.IdentityScanState
 
 internal class IDDetectorAggregator(
-    scanType: ScanState.ScanType,
+    identityScanType: IdentityScanState.ScanType,
     aggregateResultListener: AggregateResultListener<InterimResult, FinalResult>
 ) : ResultAggregator<
     AnalyzerInput,
-    ScanState,
+    IdentityScanState,
     AnalyzerOutput,
     IDDetectorAggregator.InterimResult,
     IDDetectorAggregator.FinalResult
     >(
     aggregateResultListener,
-    ScanState.Initial(scanType),
+    IdentityScanState.Initial(identityScanType),
     statsName = null
 ) {
 
     internal data class InterimResult(
         val frame: AnalyzerInput,
-        val result: AnalyzerOutput
+        val result: AnalyzerOutput,
+        val identityState: IdentityScanState
     )
 
     internal data class FinalResult(
-        val result: AnalyzerOutput
+        val result: AnalyzerOutput,
+        val identityState: IdentityScanState
     )
 
     override suspend fun aggregateResult(
@@ -36,9 +38,9 @@ internal class IDDetectorAggregator(
     ): Pair<InterimResult, FinalResult?> {
         val previousState = state
         state = previousState.consumeTransition(result)
-        val interimResult = InterimResult(frame, result)
-        return if (state is ScanState.Finished) {
-            interimResult to FinalResult(result)
+        val interimResult = InterimResult(frame, result, state)
+        return if (state is IdentityScanState.Finished) {
+            interimResult to FinalResult(result, state)
         } else {
             interimResult to null
         }

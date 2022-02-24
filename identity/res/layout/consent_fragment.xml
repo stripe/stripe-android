@@ -156,19 +156,13 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/agree_and_continue"
-            android:layout_marginBottom="10dp"
-            app:layout_constraintBottom_toTopOf="@+id/decline"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent" />
+            android:layout_marginBottom="10dp" />
 
         <Button
             android:id="@+id/decline"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/decline"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent" />
+            android:text="@string/decline" />
     </LinearLayout>
 
 </LinearLayout>

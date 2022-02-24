@@ -23,29 +23,29 @@ dependencies {
     implementation project(':stripe-core')
     implementation project(':payments-ui-core')
 
-    implementation 'androidx.core:core-ktx:1.7.0'
-    implementation libraries.androidx.appcompat
-    implementation libraries.androidx.constraintlayout
-    implementation libraries.androidx.lifecycle.livedata.ktx
-    implementation libraries.androidx.lifecycle.viewmodel.ktx
+    implementation "androidx.core:core-ktx:$androidxCoreVersion"
+    implementation "androidx.appcompat:appcompat:$androidxAppcompatVersion"
+    implementation "androidx.constraintlayout:constraintlayout:$androidxConstraintlayoutVersion"
+    implementation "androidx.lifecycle:lifecycle-livedata-ktx:$androidxLifecycleVersion"
+    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$androidxLifecycleVersion"
     implementation "com.google.android.material:material:$materialVersion"
     implementation "com.google.dagger:dagger:$daggerVersion"
     kapt "com.google.dagger:dagger-compiler:$daggerVersion"
 
-    implementation "androidx.compose.ui:ui:$composeVersion"
+    implementation "androidx.compose.ui:ui:$androidxComposeVersion"
     // Foundation (Border, Background, Box, Image, Scroll, shapes, animations, etc.)
-    implementation "androidx.compose.foundation:foundation:$composeVersion"
+    implementation "androidx.compose.foundation:foundation:$androidxComposeVersion"
     // Material Design
-    implementation "androidx.compose.material:material:$composeVersion"
+    implementation "androidx.compose.material:material:$androidxComposeVersion"
     // Material design icons
-    implementation "androidx.compose.material:material-icons-core:$composeVersion"
+    implementation "androidx.compose.material:material-icons-core:$androidxComposeVersion"
     // Integration with activities
-    implementation "androidx.activity:activity-compose:$composeActivityVersion"
-    implementation("androidx.navigation:navigation-compose:2.5.0-alpha02")
+    implementation "androidx.activity:activity-compose:$androidxActivityVersion"
+    implementation "androidx.navigation:navigation-compose:2.5.0-alpha03"
     // Integration with observables
-    implementation "androidx.compose.runtime:runtime-livedata:$composeVersion"
+    implementation "androidx.compose.runtime:runtime-livedata:$androidxComposeVersion"
     implementation "com.google.accompanist:accompanist-flowlayout:$flowlayoutVersion"
-    implementation "androidx.compose.ui:ui-tooling-preview:$composeVersion"
+    implementation "androidx.compose.ui:ui-tooling-preview:$androidxComposeVersion"
 
 
     testImplementation project(':payments-core')
@@ -62,12 +62,12 @@ dependencies {
     androidTestImplementation "com.google.truth:truth:$truthVersion"
     androidTestImplementation "androidx.test.ext:junit:$androidTestJunitVersion"
     // Test rules and transitive dependencies:
-    androidTestImplementation "androidx.compose.ui:ui-test-junit4:$composeVersion"
+    androidTestImplementation "androidx.compose.ui:ui-test-junit4:$androidxComposeVersion"
 
     // Tooling support (Previews, etc.)
-    debugImplementation "androidx.compose.ui:ui-tooling:$composeVersion"
+    debugImplementation "androidx.compose.ui:ui-tooling:$androidxComposeVersion"
     // Needed for createComposeRule, but not createAndroidComposeRule:
-    debugImplementation("androidx.compose.ui:ui-test-manifest:$composeVersion")
+    debugImplementation("androidx.compose.ui:ui-test-manifest:$androidxComposeVersion")
 
     ktlint "com.pinterest:ktlint:$ktlintVersion"
 }
@@ -121,7 +121,7 @@ android {
     }
 
     composeOptions {
-        kotlinCompilerExtensionVersion "$composeVersion"
+        kotlinCompilerExtensionVersion "$androidxComposeVersion"
     }
 
     dokkaHtml {

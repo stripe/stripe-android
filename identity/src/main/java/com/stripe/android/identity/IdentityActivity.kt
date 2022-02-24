@@ -12,6 +12,7 @@ import com.stripe.android.camera.CameraPermissionCheckingActivity
 import com.stripe.android.identity.IdentityVerificationSheet.VerificationResult
 import com.stripe.android.identity.databinding.IdentityActivityBinding
 import com.stripe.android.identity.navigation.ConsentFragment
+import com.stripe.android.identity.navigation.IdentityFragmentFactory
 
 /**
  * Host activity to perform Identity verification.
@@ -40,6 +41,8 @@ internal class IdentityActivity : CameraPermissionCheckingActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
+
+        supportFragmentManager.fragmentFactory = IdentityFragmentFactory(this, this)
 
         val navHostFragment =
             supportFragmentManager.findFragmentById(R.id.identity_nav_host) as NavHostFragment

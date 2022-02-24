@@ -19,6 +19,9 @@ public final class com/stripe/android/ui/core/address/AddressFieldElementReposit
 	public static fun newInstance (Landroid/content/res/Resources;)Lcom/stripe/android/ui/core/address/AddressFieldElementRepository;
 }
 
+public final class com/stripe/android/ui/core/elements/AffirmElementUIKt {
+}
+
 public final class com/stripe/android/ui/core/elements/AfterpayClearpayElementUIKt {
 }
 
@@ -31,6 +34,13 @@ public final class com/stripe/android/ui/core/elements/BankRepository_Factory : 
 	public fun get ()Lcom/stripe/android/ui/core/elements/BankRepository;
 	public synthetic fun get ()Ljava/lang/Object;
 	public static fun newInstance (Landroid/content/res/Resources;)Lcom/stripe/android/ui/core/elements/BankRepository;
+}
+
+public final class com/stripe/android/ui/core/elements/ComposableSingletons$AffirmElementUIKt {
+	public static final field INSTANCE Lcom/stripe/android/ui/core/elements/ComposableSingletons$AffirmElementUIKt;
+	public static field lambda-1 Lkotlin/jvm/functions/Function2;
+	public fun <init> ()V
+	public final fun getLambda-1$payments_ui_core_release ()Lkotlin/jvm/functions/Function2;
 }
 
 public final class com/stripe/android/ui/core/elements/ComposableSingletons$AfterpayClearpayElementUIKt {
@@ -173,6 +183,11 @@ public final class com/stripe/android/ui/core/elements/SimpleTextSpec$Companion 
 }
 
 public final class com/stripe/android/ui/core/elements/StaticTextElementUIKt {
+}
+
+public final class com/stripe/android/ui/core/forms/AffirmSpecKt {
+	public static final fun getAffirmForm ()Lcom/stripe/android/ui/core/elements/LayoutSpec;
+	public static final fun getAffirmParamKey ()Ljava/util/Map;
 }
 
 public final class com/stripe/android/ui/core/forms/AfterpayClearpaySpecKt {
