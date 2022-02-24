@@ -9,7 +9,7 @@ import androidx.compose.ui.unit.sp
 import com.stripe.android.paymentsheet.R
 
 @Composable
-fun LpmSelectorText(text: String, modifier: Modifier, isEnabled: Boolean) {
+internal fun LpmSelectorText(text: String, modifier: Modifier, isEnabled: Boolean) {
     val textColor = colorResource(R.color.stripe_paymentsheet_title_text)
     Text(
         text = text,

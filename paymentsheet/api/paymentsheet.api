@@ -1,7 +1,3 @@
-public final class com/stripe/android/paymentsheet/AddPaymentMethodsAdapterKt {
-	public static final fun PaymentMethodUI-PBTpf3Q (FILjava/lang/String;ZZLkotlin/jvm/functions/Function0;Landroidx/compose/runtime/Composer;I)V
-}
-
 public final class com/stripe/android/paymentsheet/BuildConfig {
 	public static final field BUILD_TYPE Ljava/lang/String;
 	public static final field DEBUG Z
@@ -11,10 +7,6 @@ public final class com/stripe/android/paymentsheet/BuildConfig {
 
 public abstract interface class com/stripe/android/paymentsheet/PaymentOptionCallback {
 	public abstract fun onPaymentOption (Lcom/stripe/android/paymentsheet/model/PaymentOption;)V
-}
-
-public final class com/stripe/android/paymentsheet/PaymentOptionsAdapterKt {
-	public static final fun PaymentOptionUi-EeR-3n4 (FZZZILjava/lang/String;Ljava/lang/String;Lkotlin/jvm/functions/Function0;Ljava/lang/String;Lkotlin/jvm/functions/Function0;Landroidx/compose/runtime/Composer;II)V
 }
 
 public final class com/stripe/android/paymentsheet/PaymentOptionsViewModel_Factory : dagger/internal/Factory {
