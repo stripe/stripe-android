@@ -12,8 +12,8 @@
     <string name="position_id_front">Position your ID in the center of the frame</string>
     <string name="position_id_back">Flip your ID over to the other side</string>
 
-    <string name="front_of_dl">Front of driver license</string>
-    <string name="back_of_dl">Back of driver license</string>
+    <string name="front_of_dl">Front of dirver\'s license</string>
+    <string name="back_of_dl">Back of dirver\'s license</string>
     <string name="position_dl_front">Position your driver license in the center of the frame</string>
     <string name="position_dl_back">Flip your driver license over to the other side</string>
 
@@ -37,4 +37,17 @@
     <string name="displayname_dl">Driver\'s License</string>
     <string name="displayname_passport">Passport</string>
     <string name="displayname_selfie">Passport</string>
+
+    <string name="select">Select</string>
+
+    <string name="file_upload_content_id">Please upload images of the front and back of your ID</string>
+
+    <string name="file_upload_content_dl">Please upload images of the front and back of your driver\'s license</string>
+    <string name="back_of_id_selected">Back of ID is selected</string>
+    <string name="front_of_id_selected">Front of ID is selected</string>
+    <string name="choose_file">Choose File</string>
+    <string name="take_photo">Take Photo</string>
+    <string name="cancel">Cancel</string>
+
+
 </resources>
