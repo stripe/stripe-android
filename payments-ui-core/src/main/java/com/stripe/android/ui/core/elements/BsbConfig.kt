@@ -21,7 +21,7 @@ class BsbConfig(private val Banks: List<BecsDebitBanks.Bank>) : TextFieldConfig 
     override val debugLabel = "bsb"
 
     @StringRes
-    override val label = R.string.bsb_number
+    override val label = R.string.becs_widget_bsb
     override val keyboard = KeyboardType.Number
 
     // Displays the BSB number in 2 groups of 3 characters with a dash added between them

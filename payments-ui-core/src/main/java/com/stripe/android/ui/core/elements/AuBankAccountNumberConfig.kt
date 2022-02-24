@@ -17,7 +17,7 @@ class AuBankAccountNumberConfig : TextFieldConfig {
     override val visualTransformation: VisualTransformation? = null
 
     @StringRes
-    override val label = R.string.account_number
+    override val label = R.string.becs_widget_account_number
     override val keyboard = KeyboardType.Number
 
     override fun filter(userTyped: String) =
@@ -34,13 +34,13 @@ class AuBankAccountNumberConfig : TextFieldConfig {
 
         if (input.length < LENGTH) {
             return TextFieldStateConstants.Error.Incomplete(
-                R.string.account_number_incomplete
+                R.string.becs_widget_account_number_incomplete
             )
         }
 
         if (input.length > LENGTH) {
             return TextFieldStateConstants.Error.Invalid(
-                R.string.account_number_invalid
+                R.string.becs_widget_account_number_invalid
             )
         }
 
