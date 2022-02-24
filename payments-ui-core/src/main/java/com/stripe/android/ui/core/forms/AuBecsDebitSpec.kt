@@ -10,10 +10,18 @@ import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.elements.LayoutSpec
 import com.stripe.android.ui.core.elements.SectionSpec
 import com.stripe.android.ui.core.elements.SimpleTextSpec
+import com.stripe.android.ui.core.elements.billingParams
+
+internal val AuBecsDebitParams: MutableMap<String, Any?> = mutableMapOf(
+    "bsb_number" to null,
+    "account_number" to null
+)
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 val AuBecsDebitParamKey: MutableMap<String, Any?> = mutableMapOf(
-    "type" to "au_becs_debit"
+    "type" to "au_becs_debit",
+    "au_becs_debit" to AuBecsDebitParams,
+    "billing_details" to billingParams
 )
 
 internal val auBecsDebitNameSection = SectionSpec(
