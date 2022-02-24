@@ -2,11 +2,13 @@ package com.stripe.android.view
 
 import android.content.Context
 import android.os.Parcelable
+import androidx.annotation.RestrictTo
 import com.stripe.android.model.StripeJsonUtils
 import kotlinx.parcelize.Parcelize
 import org.json.JSONObject
 import java.util.Scanner
 
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class BecsDebitBanks(
     internal val banks: List<Bank>,
     private val shouldIncludeTestBank: Boolean = true
