@@ -1,6 +1,7 @@
 package com.stripe.android.ui.core.elements
 
-import android.util.Log
+import android.content.Intent
+import android.net.Uri
 import androidx.annotation.RestrictTo
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.padding
@@ -8,6 +9,7 @@ import androidx.compose.foundation.text.ClickableText
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
@@ -27,18 +29,19 @@ fun AuBecsDebitMandateElementUI(
 ) {
 
     val annotatedText = buildAnnotatedString {
+        val textColor = when {
+            element.color != null -> {
+                colorResource(element.color)
+            }
+            isSystemInDarkTheme() -> {
+                Color.LightGray
+            }
+            else -> {
+                Color.Black
+            }
+        }
         val nonLinkTextStyle = SpanStyle(
-            color = when {
-                element.color != null -> {
-                    colorResource(element.color)
-                }
-                isSystemInDarkTheme() -> {
-                    Color.LightGray
-                }
-                else -> {
-                    Color.Black
-                }
-            },
+            color = textColor,
             fontSize = element.fontSizeSp.sp,
             letterSpacing = element.letterSpacingSp.sp,
         )
@@ -55,14 +58,15 @@ fun AuBecsDebitMandateElementUI(
         )
         withStyle(
             style = SpanStyle(
-                color = Color.Blue,
+                color = textColor,
                 fontWeight = FontWeight.Bold,
                 fontSize = element.fontSizeSp.sp,
                 letterSpacing = element.letterSpacingSp.sp,
                 textDecoration = TextDecoration.Underline
             )
         ) {
-            append(" Direct Debit Request service agreement")
+            append(" ")
+            append(stringResource(R.string.au_becs_mandate_link))
         }
         pop()
 
@@ -71,22 +75,18 @@ fun AuBecsDebitMandateElementUI(
         }
     }
 
+    val context = LocalContext.current
     ClickableText(
         text = annotatedText,
         onClick = { offset ->
-            // We check if there is an *URL* annotation attached to the text
-            // at the clicked position
             annotatedText.getStringAnnotations(
                 tag = "URL", start = offset,
                 end = offset
             )
                 .firstOrNull()?.let { annotation ->
-//                    val openURL = Intent(Intent.ACTION_VIEW)
-//                    openURL.data = Uri.parse(annotation.item)
-//                    startActivity(openURL)
-
-                    // If yes, we log its value
-                    Log.d("Clicked URL", annotation.item)
+                    val openURL = Intent(Intent.ACTION_VIEW)
+                    openURL.data = Uri.parse(annotation.item)
+                    context.startActivity(openURL)
                 }
         },
 
