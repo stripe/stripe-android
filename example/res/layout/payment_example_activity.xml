@@ -21,17 +21,16 @@
             style="@style/Widget.MaterialComponents.LinearProgressIndicator" />
 
         <TextView
+            android:id="@+id/payment_example_intro"
             android:layout_marginTop="10dp"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/klarna_example_intro" />
+            android:layout_height="wrap_content" />
 
         <Button
-            android:id="@+id/confirm_with_klarna_button"
+            android:id="@+id/confirm_with_payment_button"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="4dp"
-            android:text="@string/confirm_klarna_button" />
+            android:layout_marginBottom="4dp" />
 
         <TextView
             android:id="@+id/status"

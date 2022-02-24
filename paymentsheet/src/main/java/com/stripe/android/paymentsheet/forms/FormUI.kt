@@ -16,6 +16,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.dimensionResource
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.ui.core.elements.AffirmElementUI
+import com.stripe.android.ui.core.elements.AffirmHeaderElement
 import com.stripe.android.ui.core.elements.AfterpayClearpayElementUI
 import com.stripe.android.ui.core.elements.AfterpayClearpayHeaderElement
 import com.stripe.android.ui.core.elements.AuBecsDebitMandateElementUI
@@ -70,6 +72,7 @@ internal fun FormInternal(
                             element
                         )
                         is AuBecsDebitMandateTextElement -> AuBecsDebitMandateElementUI(element)
+                        is AffirmHeaderElement -> AffirmElementUI()
                     }
                 }
             }
