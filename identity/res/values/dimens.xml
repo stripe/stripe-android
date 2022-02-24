@@ -3,9 +3,12 @@
     <dimen name="page_horizontal_margin">16dp</dimen>
     <dimen name="page_vertical_margin">24dp</dimen>
     <dimen name="item_vertical_margin">16dp</dimen>
+    <dimen name="item_horizontal_margin">16dp</dimen>
     <dimen name="consent_title_text_size">24sp</dimen>
     <dimen name="scan_title_text_size">24sp</dimen>
     <dimen name="doc_selection_title_text_size">24sp</dimen>
     <dimen name="view_finder_corner_radius">10dp</dimen>
     <dimen name="camera_permission_title_text_size">28sp</dimen>
+
+    <dimen name="upload_title_text_size">28sp</dimen>
 </resources>
