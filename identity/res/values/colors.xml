@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="id_border_initial_color">#FFFFFF</color>
+
+    <color name="check_mark_background">#80FFFFFF</color>
+
+    <color name="exclamation_mark">#88919E</color>
+</resources>

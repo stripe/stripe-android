@@ -1,14 +1,88 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:layout_marginStart="@dimen/page_horizontal_margin"
+    android:layout_marginEnd="@dimen/page_horizontal_margin"
+    android:layout_marginTop="@dimen/page_vertical_margin"
+    android:layout_marginBottom="@dimen/page_vertical_margin"
+    android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".navigation.CameraPermissionDeniedFragment">
+    android:layout_height="match_parent">
 
-    <TextView
-        android:id="@+id/info"
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="CameraPermissionDenied" />
+        android:layout_height="0dp"
+        android:layout_weight="1">
 
-</FrameLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginTop="180dp"
+            android:gravity="center">
+
+            <ImageView
+                android:layout_gravity="center_horizontal"
+                android:layout_width="92dp"
+                android:layout_height="92dp"
+                android:src="@drawable/ic_exclamation"
+                android:layout_marginBottom="26dp"
+                app:tint="@color/exclamation_mark" />
+
+            <TextView
+                android:id="@+id/title_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/item_vertical_margin"
+                android:textSize="@dimen/camera_permission_title_text_size"
+                android:textStyle="bold"
+                android:gravity="center"
+                android:text="@string/camera_permission"
+                android:layout_marginBottom="12dp"
+                tools:text="@string/camera_permission" />
+
+            <TextView
+                android:id="@+id/grant_permission_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/grant_camera_permission_text"
+                android:gravity="center"
+                android:layout_marginBottom="@dimen/item_vertical_margin"
+                tools:text="@string/grant_camera_permission_text" />
+
+            <TextView
+                android:id="@+id/upload_file_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/upload_file_text"
+                android:gravity="center"
+                tools:text="@string/upload_file_text" />
+
+        </LinearLayout>
+    </ScrollView>
+
+    <LinearLayout
+        android:id="@+id/buttons"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/file_upload"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/file_upload"
+            android:layout_marginBottom="10dp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/app_settings"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/app_settings" />
+    </LinearLayout>
+
+</LinearLayout>
+

@@ -1,7 +1,6 @@
 package com.stripe.android.camera
 
 import android.Manifest
-import android.app.Activity
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
@@ -22,7 +21,8 @@ import kotlinx.coroutines.launch
  * Subclass should override [onCameraReady] and [onUserDeniedCameraPermission].
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-abstract class CameraPermissionCheckingActivity : AppCompatActivity(), CameraPermissionEnsureable {
+abstract class CameraPermissionCheckingActivity :
+    AppCompatActivity(), CameraPermissionEnsureable, AppSettingsOpenable {
 
     /**
      * The camera permission was granted and camera is ready to use.
@@ -121,7 +121,7 @@ abstract class CameraPermissionCheckingActivity : AppCompatActivity(), CameraPer
         builder.setMessage(R.string.stripe_camera_permission_denied_message)
             .setPositiveButton(R.string.stripe_camera_permission_denied_ok) { _, _ ->
                 storage.storeValue(PERMISSION_RATIONALE_SHOWN, false)
-                openAppSettings(this)
+                openAppSettings()
             }
             .setNegativeButton(R.string.stripe_camera_permission_denied_cancel) { _, _ ->
                 onUserDeniedCameraPermission()
@@ -140,14 +140,11 @@ abstract class CameraPermissionCheckingActivity : AppCompatActivity(), CameraPer
         )
     }
 
-    /**
-     * Open the settings for this app
-     */
-    protected open fun openAppSettings(activity: Activity) {
+    override fun openAppSettings() {
         val intent = Intent()
             .setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
-            .setData(Uri.fromParts("package", activity.applicationContext.packageName, null))
-        activity.startActivity(intent)
+            .setData(Uri.fromParts("package", applicationContext.packageName, null))
+        startActivity(intent)
     }
 
     private companion object {
