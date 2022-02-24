@@ -5,10 +5,6 @@
     -->
     <!-- Affirm buy now, pay later copy -->
     <string name="affirm_buy_now_pay_later">Buy now, pay later with</string>
-    <!-- An error message displayed when the customer's BSB number is incomplete. -->
-    <string name="bsb_incomplete">The BSB number you entered is incomplete.</string>
-    <!-- An error message displayed when the customer's BSB number is invalid. -->
-    <string name="bsb_invalid">The BSB number you entered is invalid.</string>
     <!-- AU BECS mandate text pre link-->
     <string name="au_becs_mandate_pre_link">By clicking Pay, you agree to this Direct Debit Request and the</string>
     <!-- AU BECS mandate text link-->

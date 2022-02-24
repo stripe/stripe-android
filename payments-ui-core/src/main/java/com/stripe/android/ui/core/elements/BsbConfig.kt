@@ -54,7 +54,7 @@ class BsbConfig(private val Banks: List<BecsDebitBanks.Bank>) : TextFieldConfig 
 
         if (input.length < LENGTH) {
             return TextFieldStateConstants.Error.Incomplete(
-                R.string.bsb_incomplete
+                R.string.becs_widget_bsb_incomplete
             )
         }
 
@@ -64,7 +64,7 @@ class BsbConfig(private val Banks: List<BecsDebitBanks.Bank>) : TextFieldConfig 
 
         if (bank == null || input.length > LENGTH) {
             return TextFieldStateConstants.Error.Invalid(
-                R.string.bsb_invalid
+                R.string.becs_widget_bsb_invalid
             )
         }
 
