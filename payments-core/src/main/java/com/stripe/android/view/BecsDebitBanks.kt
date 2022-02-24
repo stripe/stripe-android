@@ -29,9 +29,9 @@ class BecsDebitBanks(
 
     @Parcelize
     data class Bank(
-        internal val prefix: String,
-        internal val code: String,
-        internal val name: String
+        val prefix: String,
+        val code: String,
+        val name: String
     ) : Parcelable
 
     private companion object {

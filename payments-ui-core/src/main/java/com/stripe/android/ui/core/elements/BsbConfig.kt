@@ -9,14 +9,14 @@ import androidx.compose.ui.text.input.OffsetMapping
 import androidx.compose.ui.text.input.TransformedText
 import androidx.compose.ui.text.input.VisualTransformation
 import com.stripe.android.ui.core.R
-// import com.stripe.android.view.BecsDebitBanks
+import com.stripe.android.view.BecsDebitBanks
 
 /**
  * A text field configuration for a BSB number, or Bank State Branch Number,
  * a six-digit number used to identify the individual branch of an Australian financial institution
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class BsbConfig : TextFieldConfig {
+class BsbConfig(private val Banks: List<BecsDebitBanks.Bank>) : TextFieldConfig {
     override val capitalization: KeyboardCapitalization = KeyboardCapitalization.None
     override val debugLabel = "bsb"
 
@@ -58,16 +58,18 @@ class BsbConfig : TextFieldConfig {
             )
         }
 
-        if (input.length > LENGTH) {
-            return TextFieldStateConstants.Error.Incomplete(
+        val bank = banks.firstOrNull {
+            input.startsWith(it.prefix)
+        }
+
+        if (bank == null || input.length > LENGTH) {
+            return TextFieldStateConstants.Error.Invalid(
                 R.string.bsb_invalid
             )
         }
 
         return TextFieldStateConstants.Valid.Full
     }
-
-//    private val banks = BecsDebitBanks()
 
     private companion object {
         const val LENGTH = 6
