@@ -5,6 +5,7 @@ import com.stripe.android.ui.core.address.AddressFieldElementRepository
 import com.stripe.android.ui.core.elements.AddressSpec
 import com.stripe.android.ui.core.elements.AfterpayClearpayTextSpec
 import com.stripe.android.ui.core.elements.AuBankAccountNumberSpec
+import com.stripe.android.ui.core.elements.AuBecsDebitMandateTextSpec
 import com.stripe.android.ui.core.elements.BankDropdownSpec
 import com.stripe.android.ui.core.elements.BankRepository
 import com.stripe.android.ui.core.elements.BsbSpec
@@ -60,6 +61,7 @@ class TransformSpecToElements(
                 is AfterpayClearpayTextSpec ->
                     it.transform(requireNotNull(amount))
                 is EmptyFormSpec -> EmptyFormElement()
+                is AuBecsDebitMandateTextSpec -> it.transform(merchantName)
             }
         }
 

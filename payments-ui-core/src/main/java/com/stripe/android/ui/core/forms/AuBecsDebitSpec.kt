@@ -3,13 +3,13 @@ package com.stripe.android.ui.core.forms
 import androidx.annotation.RestrictTo
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.AuBankAccountNumberSpec
+import com.stripe.android.ui.core.elements.AuBecsDebitMandateTextSpec
 import com.stripe.android.ui.core.elements.BsbSpec
 import com.stripe.android.ui.core.elements.EmailSpec
 import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.elements.LayoutSpec
 import com.stripe.android.ui.core.elements.SectionSpec
 import com.stripe.android.ui.core.elements.SimpleTextSpec
-import com.stripe.android.ui.core.elements.StaticTextSpec
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 val AuBecsDebitParamKey: MutableMap<String, Any?> = mutableMapOf(
@@ -36,9 +36,8 @@ internal val auBecsDebitAccountNumberSection = SectionSpec(
     AuBankAccountNumberSpec
 )
 
-internal val auBecsDebitMandate = StaticTextSpec(
-    IdentifierSpec.Generic("mandate"),
-    R.string.au_becs_mandate,
+internal val auBecsDebitCustomMandate = AuBecsDebitMandateTextSpec(
+    IdentifierSpec.Generic("au_becs_mandate"),
     R.color.mandate_text_color
 )
 
@@ -48,5 +47,5 @@ val AuBecsDebitForm = LayoutSpec.create(
     auBecsBsbNumberSection,
     auBecsDebitAccountNumberSection,
     auBecsDebitNameSection,
-    auBecsDebitMandate
+    auBecsDebitCustomMandate
 )
