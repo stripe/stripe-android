@@ -39,7 +39,7 @@ class AuBankAccountNumberConfig : TextFieldConfig {
         }
 
         if (input.length > LENGTH) {
-            return TextFieldStateConstants.Error.Incomplete(
+            return TextFieldStateConstants.Error.Invalid(
                 R.string.account_number_invalid
             )
         }

@@ -5,7 +5,7 @@ import kotlinx.parcelize.Parcelize
 @Parcelize
 internal object AuBankAccountNumberSpec : SectionFieldSpec(IdentifierSpec.Generic("account_number")) {
     fun transform(): SectionFieldElement =
-        AuBankAccountNumberElement(
+        SimpleTextElement(
             this.identifier,
             TextFieldController(AuBankAccountNumberConfig())
         )

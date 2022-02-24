@@ -21,7 +21,7 @@ class AuBankAccountNumberConfigTest {
             .isInstanceOf(TextFieldStateConstants.Error.Incomplete::class.java)
 
         Truth.assertThat(auBankAccountNumberConfig.determineState("1234567890"))
-            .isInstanceOf(TextFieldStateConstants.Error.Incomplete::class.java)
+            .isInstanceOf(TextFieldStateConstants.Error.Invalid::class.java)
     }
 
     @Test
