@@ -1,5 +1,6 @@
 package com.stripe.android.ui.core.forms
 
+import android.content.Context
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.address.AddressFieldElementRepository
 import com.stripe.android.ui.core.elements.AddressSpec
@@ -39,7 +40,8 @@ class TransformSpecToElements(
     private val amount: Amount?,
     private val country: String?,
     private val saveForFutureUseInitialValue: Boolean,
-    private val merchantName: String
+    private val merchantName: String,
+    private val context: Context
 ) {
     fun transform(
         list: List<FormItemSpec>
@@ -120,7 +122,7 @@ class TransformSpecToElements(
                     currencyCode,
                     country
                 )
-                is CardDetailsSpec -> it.transform()
+                is CardDetailsSpec -> it.transform(context)
                 is CardBillingSpec -> it.transform(addressRepository)
             }
         }

@@ -25,6 +25,8 @@ sealed interface TextFieldConfig {
 
     val trailingIcon: StateFlow<TextFieldIcon?>
 
+    val loading: StateFlow<Boolean>
+
     /** This will determine the state of the field based on the text */
     fun determineState(input: String): TextFieldState
 

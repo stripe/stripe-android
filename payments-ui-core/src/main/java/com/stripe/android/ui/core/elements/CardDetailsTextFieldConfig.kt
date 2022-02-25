@@ -15,7 +15,7 @@ internal interface CardDetailsTextFieldConfig {
     val label: Int
     val keyboard: KeyboardType
     val visualTransformation: VisualTransformation
-    fun determineState(brand: CardBrand, number: String): TextFieldState
+    fun determineState(brand: CardBrand, number: String, numberAllowedDigits: Int): TextFieldState
     fun filter(userTyped: String): String
     fun convertToRaw(displayName: String): String
     fun convertFromRaw(rawValue: String): String

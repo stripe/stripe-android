@@ -10,6 +10,7 @@ import androidx.annotation.VisibleForTesting
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.R
 import com.stripe.android.cards.CardAccountRangeRepository
+import com.stripe.android.cards.CardAccountRangeService
 import com.stripe.android.cards.CardNumber
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
 import com.stripe.android.cards.DefaultStaticCardAccountRanges
@@ -36,7 +37,8 @@ class CardNumberEditText internal constructor(
     defStyleAttr: Int = androidx.appcompat.R.attr.editTextStyle,
 
     // TODO(mshafrir-stripe): make immutable after `CardWidgetViewModel` is integrated in `CardWidget` subclasses
-    internal var workContext: CoroutineContext,
+    @VisibleForTesting
+    var workContext: CoroutineContext,
 
     private val cardAccountRangeRepository: CardAccountRangeRepository,
     private val staticCardAccountRanges: StaticCardAccountRanges = DefaultStaticCardAccountRanges(),
@@ -102,15 +104,9 @@ class CardNumberEditText internal constructor(
     @JvmSynthetic
     internal var completionCallback: () -> Unit = {}
 
-    private var accountRange: AccountRange? = null
-        set(value) {
-            field = value
-            updateLengthFilter()
-        }
-
     internal val panLength: Int
-        get() = accountRange?.panLength
-            ?: staticCardAccountRanges.first(unvalidatedCardNumber)?.panLength
+        get() = accountRangeService.accountRange?.panLength
+            ?: accountRangeService.staticCardAccountRanges.first(unvalidatedCardNumber)?.panLength
             ?: CardNumber.DEFAULT_PAN_LENGTH
 
     private val formattedPanLength: Int
@@ -132,7 +128,17 @@ class CardNumberEditText internal constructor(
         get() = validatedCardNumber != null
 
     @VisibleForTesting
-    internal var accountRangeRepositoryJob: Job? = null
+    val accountRangeService = CardAccountRangeService(
+        cardAccountRangeRepository,
+        workContext,
+        staticCardAccountRanges,
+        object : CardAccountRangeService.AccountRangeResultListener {
+            override fun onAccountRangeResult(newAccountRange: AccountRange?) {
+                updateLengthFilter()
+                cardBrand = newAccountRange?.brand ?: CardBrand.Unknown
+            }
+        }
+    )
 
     @JvmSynthetic
     internal var isLoadingCallback: (Boolean) -> Unit = {}
@@ -180,7 +186,7 @@ class CardNumberEditText internal constructor(
         loadingJob?.cancel()
         loadingJob = null
 
-        cancelAccountRangeRepositoryJob()
+        accountRangeService.cancelAccountRangeRepositoryJob()
 
         super.onDetachedFromWindow()
     }
@@ -233,49 +239,6 @@ class CardNumberEditText internal constructor(
     }
 
     @JvmSynthetic
-    internal fun queryAccountRangeRepository(cardNumber: CardNumber.Unvalidated) {
-        if (shouldQueryAccountRange(cardNumber)) {
-            // cancel in-flight job
-            cancelAccountRangeRepositoryJob()
-
-            // invalidate accountRange before fetching
-            accountRange = null
-
-            accountRangeRepositoryJob = CoroutineScope(workContext).launch {
-                val bin = cardNumber.bin
-                val accountRange = if (bin != null) {
-                    cardAccountRangeRepository.getAccountRange(cardNumber)
-                } else {
-                    null
-                }
-
-                withContext(Dispatchers.Main) {
-                    onAccountRangeResult(accountRange)
-                }
-            }
-        }
-    }
-
-    private fun cancelAccountRangeRepositoryJob() {
-        accountRangeRepositoryJob?.cancel()
-        accountRangeRepositoryJob = null
-    }
-
-    @JvmSynthetic
-    internal fun onAccountRangeResult(
-        newAccountRange: AccountRange?
-    ) {
-        accountRange = newAccountRange
-        cardBrand = newAccountRange?.brand ?: CardBrand.Unknown
-    }
-
-    private fun shouldQueryAccountRange(cardNumber: CardNumber.Unvalidated): Boolean {
-        return accountRange == null ||
-            cardNumber.bin == null ||
-            accountRange?.binRange?.matches(cardNumber) == false
-    }
-
-    @JvmSynthetic
     internal fun onCardMetadataLoadedTooSlow() {
         analyticsRequestExecutor.executeAsync(
             paymentAnalyticsRequestFactory.createRequest(PaymentAnalyticsEvent.CardMetadataLoadedTooSlow)
@@ -303,21 +266,7 @@ class CardNumberEditText internal constructor(
 
         override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
             val cardNumber = CardNumber.Unvalidated(s?.toString().orEmpty())
-            val staticAccountRange = staticCardAccountRanges.filter(cardNumber)
-                .let { accountRanges ->
-                    if (accountRanges.size == 1) {
-                        accountRanges.first()
-                    } else {
-                        null
-                    }
-                }
-            if (staticAccountRange == null || shouldQueryRepository(staticAccountRange)) {
-                // query for AccountRange data
-                queryAccountRangeRepository(cardNumber)
-            } else {
-                // use static AccountRange data
-                onAccountRangeResult(staticAccountRange)
-            }
+            accountRangeService.onCardNumberChanged(cardNumber)
 
             isPastedPan = isPastedPan(start, before, count, cardNumber)
 
@@ -357,7 +306,7 @@ class CardNumberEditText internal constructor(
                 isCardNumberValid = isValid
                 shouldShowError = !isValid
 
-                if (accountRange == null && unvalidatedCardNumber.isValidLuhn) {
+                if (accountRangeService.accountRange == null && unvalidatedCardNumber.isValidLuhn) {
                     // a complete PAN was inputted before the card service returned results
                     onCardMetadataLoadedTooSlow()
                 }
@@ -395,7 +344,7 @@ class CardNumberEditText internal constructor(
             wasCardNumberValid: Boolean
         ) = !wasCardNumberValid && (
             unvalidatedCardNumber.isMaxLength ||
-                (isValid && accountRange != null)
+                (isValid && accountRangeService.accountRange != null)
             )
 
         /**
@@ -411,14 +360,6 @@ class CardNumberEditText internal constructor(
         ): Boolean {
             return currentCount > previousCount && startPosition == 0 &&
                 cardNumber.normalized.length >= CardNumber.MIN_PAN_LENGTH
-        }
-
-        private fun shouldQueryRepository(
-            accountRange: AccountRange
-        ) = when (accountRange.brand) {
-            CardBrand.Unknown,
-            CardBrand.UnionPay -> true
-            else -> false
         }
     }
 }

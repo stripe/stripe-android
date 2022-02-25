@@ -3,5 +3,4 @@
     <!--
     Items here need to be entered in our translation tool
     -->
-    <string name="card_number_longer_than_expected" tools:ignore="ExtraTranslation">The card number is longer than expected, but you can still submit it.</string>
 </resources>
