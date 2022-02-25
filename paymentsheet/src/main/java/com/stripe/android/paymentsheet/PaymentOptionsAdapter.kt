@@ -532,7 +532,7 @@ internal fun PaymentOptionUi(
                 Image(
                     alpha = if (isEnabled) 1.0F else 0.6F,
                     painter = painterResource(iconRes),
-                    contentDescription = "",
+                    contentDescription = null,
                     modifier = Modifier
                         .height(40.dp)
                         .width(56.dp)
@@ -543,7 +543,7 @@ internal fun PaymentOptionUi(
         if (isSelected) {
             Image(
                 painter = painterResource(R.drawable.stripe_ic_check_circle),
-                contentDescription = "",
+                contentDescription = null,
                 modifier = Modifier
                     .constrainAs(checkIcon) {
                         top.linkTo(card.bottom, (-16).dp)

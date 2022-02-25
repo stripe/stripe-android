@@ -179,7 +179,7 @@ internal fun PaymentMethodUI(
         Column {
             Image(
                 painter = painterResource(iconRes),
-                contentDescription = "",
+                contentDescription = null,
                 modifier = Modifier
                     .padding(top = ADD_PM_DEFAULT_PADDING.dp, start = ADD_PM_DEFAULT_PADDING.dp)
             )
