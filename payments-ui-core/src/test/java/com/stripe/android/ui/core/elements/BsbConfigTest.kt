@@ -8,11 +8,7 @@ import org.junit.Test
 class BsbConfigTest {
     // TODO: remove this list, not sure if we will remove the manually added bank list in BsbSpec.
     private val banks: List<BecsDebitBanks.Bank> = listOf(
-        BecsDebitBanks.Bank(
-            "00",
-            "STRIPE",
-            "Stripe Test Bank"
-        )
+        BecsDebitBanks.Bank("00", "Stripe Test Bank")
     )
     private val bsbConfig = BsbConfig(banks)
 
