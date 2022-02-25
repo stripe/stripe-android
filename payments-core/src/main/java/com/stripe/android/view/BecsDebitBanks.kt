@@ -32,7 +32,6 @@ class BecsDebitBanks(
     @Parcelize
     data class Bank(
         val prefix: String,
-        val code: String,
         val name: String
     ) : Parcelable
 
@@ -41,13 +40,10 @@ class BecsDebitBanks(
             return StripeJsonUtils.jsonObjectToMap(
                 JSONObject(readFile(context))
             ).orEmpty().map { entry ->
-                (entry.value as List<*>).let {
-                    Bank(
-                        prefix = entry.key,
-                        code = it.first().toString(),
-                        name = it.last().toString()
-                    )
-                }
+                Bank(
+                    prefix = entry.key,
+                    name = entry.value.toString()
+                )
             }
         }
 
@@ -59,7 +55,6 @@ class BecsDebitBanks(
 
         private val STRIPE_TEST_BANK = Bank(
             prefix = "00",
-            code = "STRIPE",
             name = "Stripe Test Bank"
         )
     }
