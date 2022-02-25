@@ -20,6 +20,8 @@ import com.stripe.android.ui.core.elements.AffirmElementUI
 import com.stripe.android.ui.core.elements.AffirmHeaderElement
 import com.stripe.android.ui.core.elements.AfterpayClearpayElementUI
 import com.stripe.android.ui.core.elements.AfterpayClearpayHeaderElement
+import com.stripe.android.ui.core.elements.AuBecsDebitMandateElementUI
+import com.stripe.android.ui.core.elements.AuBecsDebitMandateTextElement
 import com.stripe.android.ui.core.elements.FormElement
 import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
@@ -69,6 +71,7 @@ internal fun FormInternal(
                             enabled,
                             element
                         )
+                        is AuBecsDebitMandateTextElement -> AuBecsDebitMandateElementUI(element)
                         is AffirmHeaderElement -> AffirmElementUI()
                     }
                 }

@@ -11,7 +11,8 @@ enum class CheckoutMode(val value: String) {
 
 enum class CheckoutCurrency(val value: String) {
     USD("usd"),
-    EUR("eur")
+    EUR("eur"),
+    AUD("aud")
 }
 
 data class SavedToggles(val customer: String, val googlePay: Boolean, val currency: String, val mode: String, val setShippingAddress: Boolean, val setAutomaticPaymentMethods: Boolean)

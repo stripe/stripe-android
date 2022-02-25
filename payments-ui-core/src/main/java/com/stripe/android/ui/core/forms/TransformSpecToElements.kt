@@ -5,8 +5,11 @@ import com.stripe.android.ui.core.address.AddressFieldElementRepository
 import com.stripe.android.ui.core.elements.AddressSpec
 import com.stripe.android.ui.core.elements.AffirmTextSpec
 import com.stripe.android.ui.core.elements.AfterpayClearpayTextSpec
+import com.stripe.android.ui.core.elements.AuBankAccountNumberSpec
+import com.stripe.android.ui.core.elements.AuBecsDebitMandateTextSpec
 import com.stripe.android.ui.core.elements.BankDropdownSpec
 import com.stripe.android.ui.core.elements.BankRepository
+import com.stripe.android.ui.core.elements.BsbSpec
 import com.stripe.android.ui.core.elements.CountrySpec
 import com.stripe.android.ui.core.elements.EmailSpec
 import com.stripe.android.ui.core.elements.EmptyFormElement
@@ -61,6 +64,7 @@ class TransformSpecToElements(
                 is AffirmTextSpec ->
                     it.transform()
                 is EmptyFormSpec -> EmptyFormElement()
+                is AuBecsDebitMandateTextSpec -> it.transform(merchantName)
             }
         }
 
@@ -118,6 +122,8 @@ class TransformSpecToElements(
                     currencyCode,
                     country
                 )
+                is AuBankAccountNumberSpec -> it.transform()
+                is BsbSpec -> it.transform()
             }
         }
 }
