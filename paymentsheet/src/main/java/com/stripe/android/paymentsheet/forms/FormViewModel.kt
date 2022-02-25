@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.forms
 
+import android.content.Context
 import android.content.res.Resources
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.ViewModel
@@ -50,10 +51,12 @@ internal class FormViewModel @Inject internal constructor(
     internal class Factory(
         val config: FormFragmentArguments,
         val resource: Resources,
-        var layout: LayoutSpec
+        var layout: LayoutSpec,
+        private val contextSupplier: () -> Context
     ) : ViewModelProvider.Factory, Injectable<Factory.FallbackInitializeParam> {
         internal data class FallbackInitializeParam(
-            val resource: Resources
+            val resource: Resources,
+            val context: Context
         )
 
         @Inject
@@ -61,7 +64,8 @@ internal class FormViewModel @Inject internal constructor(
 
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-            injectWithFallback(config.injectorKey, FallbackInitializeParam(resource))
+            val context = contextSupplier()
+            injectWithFallback(config.injectorKey, FallbackInitializeParam(resource, context))
             return subComponentBuilderProvider.get()
                 .formFragmentArguments(config)
                 .layout(layout)
@@ -70,6 +74,7 @@ internal class FormViewModel @Inject internal constructor(
 
         override fun fallbackInitialize(arg: FallbackInitializeParam) {
             DaggerFormViewModelComponent.builder()
+                .context(arg.context)
                 .resources(arg.resource)
                 .build()
                 .inject(this)

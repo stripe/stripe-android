@@ -878,6 +878,32 @@ public final class com/stripe/android/StripeKtxKt {
 	public static synthetic fun retrieveSource$default (Lcom/stripe/android/Stripe;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 }
 
+public abstract interface class com/stripe/android/cards/CardAccountRangeRepository$Factory {
+	public abstract fun create ()Lcom/stripe/android/cards/CardAccountRangeRepository;
+}
+
+public abstract interface class com/stripe/android/cards/CardAccountRangeService$AccountRangeResultListener {
+	public abstract fun onAccountRangeResult (Lcom/stripe/android/model/AccountRange;)V
+}
+
+public final class com/stripe/android/cards/CardNumber$Companion {
+}
+
+public final class com/stripe/android/cards/CardNumber$Unvalidated : com/stripe/android/cards/CardNumber {
+	public static final field $stable I
+	public fun <init> (Ljava/lang/String;)V
+	public final fun copy (Ljava/lang/String;)Lcom/stripe/android/cards/CardNumber$Unvalidated;
+	public static synthetic fun copy$default (Lcom/stripe/android/cards/CardNumber$Unvalidated;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/cards/CardNumber$Unvalidated;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBin ()Lcom/stripe/android/cards/Bin;
+	public final fun getLength ()I
+	public final fun getNormalized ()Ljava/lang/String;
+	public fun hashCode ()I
+	public final fun isMaxLength ()Z
+	public final fun isValidLuhn ()Z
+	public fun toString ()Ljava/lang/String;
+}
+
 public final class com/stripe/android/exception/AuthenticationException : com/stripe/android/core/exception/StripeException {
 	public static final field $stable I
 }
@@ -5600,8 +5626,11 @@ public final class com/stripe/android/view/CardNumberEditText : com/stripe/andro
 	public fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;)V
 	public fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;I)V
 	public synthetic fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;IILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun getAccountRangeService ()Lcom/stripe/android/cards/CardAccountRangeService;
 	public final fun getCardBrand ()Lcom/stripe/android/model/CardBrand;
+	public final fun getWorkContext ()Lkotlin/coroutines/CoroutineContext;
 	public final fun isCardNumberValid ()Z
+	public final fun setWorkContext (Lkotlin/coroutines/CoroutineContext;)V
 }
 
 public abstract interface class com/stripe/android/view/CardValidCallback {

@@ -28,6 +28,7 @@ interface TextFieldController : InputController {
     val fieldState: Flow<TextFieldState>
     override val fieldValue: Flow<String>
     val visibleError: Flow<Boolean>
+    val loading: Flow<Boolean>
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
@@ -69,6 +70,8 @@ class SimpleTextFieldController constructor(
 
     private val _fieldState = MutableStateFlow<TextFieldState>(Blank)
     override val fieldState: Flow<TextFieldState> = _fieldState
+
+    override val loading: Flow<Boolean> = textFieldConfig.loading
 
     private val _hasFocus = MutableStateFlow(false)
 

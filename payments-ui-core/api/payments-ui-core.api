@@ -232,7 +232,7 @@ public final class com/stripe/android/ui/core/forms/SofortSpecKt {
 
 public final class com/stripe/android/ui/core/forms/TransformSpecToElements {
 	public static final field $stable I
-	public fun <init> (Lcom/stripe/android/ui/core/forms/resources/ResourceRepository;Ljava/util/Map;Lcom/stripe/android/ui/core/Amount;Ljava/lang/String;ZLjava/lang/String;)V
+	public fun <init> (Lcom/stripe/android/ui/core/forms/resources/ResourceRepository;Ljava/util/Map;Lcom/stripe/android/ui/core/Amount;Ljava/lang/String;ZLjava/lang/String;Landroid/content/Context;)V
 	public final fun transform (Ljava/util/List;)Ljava/util/List;
 }
 

@@ -1,5 +1,6 @@
 package com.stripe.android.ui.core.elements
 
+import android.content.Context
 import kotlinx.coroutines.flow.combine
 
 /**
@@ -8,7 +9,8 @@ import kotlinx.coroutines.flow.combine
  */
 internal class CardDetailsElement(
     identifier: IdentifierSpec,
-    val controller: CardDetailsController = CardDetailsController(),
+    context: Context,
+    val controller: CardDetailsController = CardDetailsController(context),
 ) : SectionMultiFieldElement(identifier) {
     override fun sectionFieldErrorController(): SectionFieldErrorController =
         controller

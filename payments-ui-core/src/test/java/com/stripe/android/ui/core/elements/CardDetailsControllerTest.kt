@@ -1,6 +1,8 @@
 package com.stripe.android.ui.core.elements
 
+import androidx.appcompat.view.ContextThemeWrapper
 import androidx.lifecycle.asLiveData
+import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth
 import com.stripe.android.ui.core.R
 import com.stripe.android.utils.TestUtils.idleLooper
@@ -10,9 +12,12 @@ import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
 class CardDetailsControllerTest {
+
+    private val context = ContextThemeWrapper(ApplicationProvider.getApplicationContext(), R.style.StripeDefaultTheme)
+
     @Test
     fun `Verify the first field in error is returned in error flow`() {
-        val cardController = CardDetailsController()
+        val cardController = CardDetailsController(context)
 
         val flowValues = mutableListOf<FieldError?>()
         cardController.error.asLiveData()

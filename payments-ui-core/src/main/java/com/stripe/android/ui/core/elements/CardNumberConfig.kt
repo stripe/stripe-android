@@ -14,12 +14,9 @@ internal class CardNumberConfig : CardDetailsTextFieldConfig {
     override val keyboard: KeyboardType = KeyboardType.NumberPassword
     override val visualTransformation: VisualTransformation = CardNumberVisualTransformation(' ')
 
-    override fun determineState(brand: CardBrand, number: String): TextFieldState {
+    override fun determineState(brand: CardBrand, number: String, numberAllowedDigits: Int): TextFieldState {
         val luhnValid = CardUtils.isValidLuhnNumber(number)
         val isDigitLimit = brand.getMaxLengthForCardNumber(number) != -1
-        // This only accounts for the hard coded card brand information not the card metadata
-        // service
-        val numberAllowedDigits = brand.getMaxLengthForCardNumber(number)
 
         return if (number.isBlank()) {
             TextFieldStateConstants.Error.Blank
@@ -27,19 +24,6 @@ internal class CardNumberConfig : CardDetailsTextFieldConfig {
             TextFieldStateConstants.Error.Invalid(R.string.invalid_card_number)
         } else if (isDigitLimit && number.length < numberAllowedDigits) {
             TextFieldStateConstants.Error.Incomplete(R.string.invalid_card_number)
-        } else if (isDigitLimit && number.length > numberAllowedDigits) {
-            object : TextFieldState {
-                override fun shouldShowError(hasFocus: Boolean) = true
-
-                // We will assume we don't know the correct number of numbers until we get
-                // the metadata service added back in
-                override fun isValid() = true
-                override fun isFull() = true
-                override fun isBlank() = false
-                override fun getError() = FieldError(
-                    R.string.card_number_longer_than_expected
-                )
-            }
         } else if (!luhnValid) {
             TextFieldStateConstants.Error.Invalid(R.string.invalid_card_number)
         } else if (isDigitLimit && number.length == numberAllowedDigits) {
