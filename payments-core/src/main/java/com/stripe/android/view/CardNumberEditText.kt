@@ -361,13 +361,5 @@ class CardNumberEditText internal constructor(
             return currentCount > previousCount && startPosition == 0 &&
                 cardNumber.normalized.length >= CardNumber.MIN_PAN_LENGTH
         }
-
-        private fun shouldQueryRepository(
-            accountRange: AccountRange
-        ) = when (accountRange.brand) {
-            CardBrand.Unknown,
-            CardBrand.UnionPay -> true
-            else -> false
-        }
     }
 }

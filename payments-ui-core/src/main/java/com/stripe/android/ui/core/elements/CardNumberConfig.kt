@@ -20,7 +20,7 @@ internal class CardNumberConfig : CardDetailsTextFieldConfig {
 
         return if (number.isBlank()) {
             TextFieldStateConstants.Error.Blank
-        } else if (brand == CardBrand.Unknown) {
+        } else if (brand == CardBrand.Unknown && number.length == numberAllowedDigits) {
             TextFieldStateConstants.Error.Invalid(R.string.invalid_card_number)
         } else if (isDigitLimit && number.length < numberAllowedDigits) {
             TextFieldStateConstants.Error.Incomplete(R.string.invalid_card_number)
