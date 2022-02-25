@@ -396,7 +396,7 @@ internal sealed class SupportedPaymentMethod(
             Klarna,
             PayPal,
             AfterpayClearpay
-            // Affirm //TODO: uncomment once we are ready to go live
+            // Affirm // TODO: uncomment once we are ready to go live
         )
 
         /**

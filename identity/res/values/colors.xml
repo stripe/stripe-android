@@ -3,4 +3,9 @@
     <color name="id_border_initial_color">#FFFFFF</color>
 
     <color name="check_mark_background">#80FFFFFF</color>
+
+    <color name="exclamation_mark">#88919E</color>
+
+    <color name="choose_file_tint">#88919E</color>
+    <color name="take_photo_tint">#88919E</color>
 </resources>

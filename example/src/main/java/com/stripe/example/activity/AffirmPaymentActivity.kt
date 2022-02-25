@@ -4,12 +4,12 @@ import android.os.Bundle
 import android.view.View
 import androidx.lifecycle.Observer
 import com.stripe.android.model.Address
-import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.example.R
 import com.stripe.example.databinding.PaymentExampleActivityBinding
 
-class KlarnaPaymentActivity : StripeIntentActivity() {
+class AffirmPaymentActivity : StripeIntentActivity() {
 
     private val viewBinding: PaymentExampleActivityBinding by lazy {
         PaymentExampleActivityBinding.inflate(layoutInflater)
@@ -20,15 +20,30 @@ class KlarnaPaymentActivity : StripeIntentActivity() {
         setContentView(viewBinding.root)
 
         viewBinding.confirmWithPaymentButton.text =
-            resources.getString(R.string.confirm_klarna_button)
+            resources.getString(R.string.confirm_affirm_button)
         viewBinding.paymentExampleIntro.text =
-            resources.getString(R.string.klarna_example_intro)
+            resources.getString(R.string.affirm_example_intro)
 
         viewModel.inProgress.observe(this, { enableUi(!it) })
         viewModel.status.observe(this, Observer(viewBinding.status::setText))
 
         viewBinding.confirmWithPaymentButton.setOnClickListener {
-            createAndConfirmPaymentIntent("US", confirmParams, "klarna")
+            createAndConfirmPaymentIntent(
+                country = "US",
+                paymentMethodCreateParams = confirmParams,
+                shippingDetails = ConfirmPaymentIntentParams.Shipping(
+                    Address.Builder()
+                        .setCity("San Francisco")
+                        .setCountry("US")
+                        .setLine1("123 Market St")
+                        .setLine2("#345")
+                        .setPostalCode("94107")
+                        .setState("CA")
+                        .build(),
+                    name = "Jane Doe",
+                ),
+                supportedPaymentMethods = "affirm"
+            )
         }
     }
 
@@ -38,13 +53,6 @@ class KlarnaPaymentActivity : StripeIntentActivity() {
     }
 
     private companion object {
-        private val confirmParams = PaymentMethodCreateParams.createKlarna(
-            billingDetails = PaymentMethod.BillingDetails(
-                email = "jenny@example.com",
-                address = Address.Builder()
-                    .setCountry("US")
-                    .build()
-            )
-        )
+        private val confirmParams = PaymentMethodCreateParams.createAffirm()
     }
 }
