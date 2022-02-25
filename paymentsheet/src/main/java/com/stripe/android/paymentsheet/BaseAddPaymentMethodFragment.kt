@@ -16,6 +16,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.stripe.android.core.injection.InjectorKey
+import com.stripe.android.link.LinkActivityContract
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.databinding.FragmentPaymentsheetAddPaymentMethodBinding
 import com.stripe.android.paymentsheet.forms.FormFieldValues
@@ -28,12 +29,15 @@ import com.stripe.android.paymentsheet.paymentdatacollection.TransformToPaymentM
 import com.stripe.android.paymentsheet.ui.AnimationConstants
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.Amount
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 internal abstract class BaseAddPaymentMethodFragment : Fragment() {
     abstract val viewModelFactory: ViewModelProvider.Factory
     abstract val sheetViewModel: BaseSheetViewModel<*>
+
+    private val linkLauncher = registerForActivityResult(LinkActivityContract()) {
+        println("Link result: $it")
+    }
 
     protected lateinit var addPaymentMethodHeader: TextView
 
@@ -68,6 +72,18 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
                 R.string.stripe_paymentsheet_or_pay_using
             }
         )
+
+        viewBinding.linkButton.isVisible = true
+        viewBinding.linkButton.isEnabled = true
+        viewBinding.linkButton.apply {
+            onClick = {
+                sheetViewModel.linkPaymentLauncherFactory.create(linkLauncher)
+                    .present(
+                        sheetViewModel.merchantName,
+                        "brnunes+022401@stripe.com"
+                    )
+            }
+        }
 
         val selectedPaymentMethodIndex = paymentMethods.indexOf(
             sheetViewModel.getAddFragmentSelectedLPM()

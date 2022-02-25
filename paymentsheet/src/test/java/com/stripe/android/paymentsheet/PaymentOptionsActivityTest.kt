@@ -306,7 +306,8 @@ class PaymentOptionsActivityTest {
                     ApplicationProvider.getApplicationContext<Context>().resources
                 )
             ),
-            savedStateHandle = SavedStateHandle()
+            savedStateHandle = SavedStateHandle(),
+            linkPaymentLauncherFactory = mock()
         )
     }
 }

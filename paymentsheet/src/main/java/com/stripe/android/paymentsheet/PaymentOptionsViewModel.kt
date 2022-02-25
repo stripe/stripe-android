@@ -14,6 +14,7 @@ import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.Injectable
 import com.stripe.android.core.injection.InjectorKey
 import com.stripe.android.core.injection.injectWithFallback
+import com.stripe.android.link.injection.LinkPaymentLauncherFactory
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.injection.DaggerPaymentOptionsViewModelFactoryComponent
 import com.stripe.android.paymentsheet.injection.PaymentOptionsViewModelSubcomponent
@@ -38,7 +39,8 @@ internal class PaymentOptionsViewModel @Inject constructor(
     logger: Logger,
     @InjectorKey injectorKey: String,
     resourceRepository: ResourceRepository,
-    savedStateHandle: SavedStateHandle
+    savedStateHandle: SavedStateHandle,
+    linkPaymentLauncherFactory: LinkPaymentLauncherFactory
 ) : BaseSheetViewModel<PaymentOptionsViewModel.TransitionTarget>(
     config = args.config,
     prefsRepository = prefsRepositoryFactory(args.config?.customer),
@@ -49,7 +51,8 @@ internal class PaymentOptionsViewModel @Inject constructor(
     logger = logger,
     injectorKey = injectorKey,
     resourceRepository = resourceRepository,
-    savedStateHandle = savedStateHandle
+    savedStateHandle = savedStateHandle,
+    linkPaymentLauncherFactory = linkPaymentLauncherFactory
 ) {
     @VisibleForTesting
     internal val _paymentOptionResult = MutableLiveData<PaymentOptionResult>()
@@ -165,7 +168,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
             Provider<PaymentOptionsViewModelSubcomponent.Builder>
 
         @Suppress("UNCHECKED_CAST")
-        override fun <T : ViewModel?> create(
+        override fun <T : ViewModel> create(
             key: String,
             modelClass: Class<T>,
             savedStateHandle: SavedStateHandle

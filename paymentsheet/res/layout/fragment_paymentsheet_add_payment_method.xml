@@ -31,6 +31,14 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
+        <com.stripe.android.link.ui.LinkViewButton
+            android:id="@+id/link_button"
+            android:visibility="gone"
+            android:layout_marginTop="6dp"
+            android:padding="2dp"
+            android:layout_width="match_parent"
+            android:layout_height="48dp" />
+
         <TextView
             android:id="@+id/message"
             style="@style/StripePaymentSheetErrorMessage"

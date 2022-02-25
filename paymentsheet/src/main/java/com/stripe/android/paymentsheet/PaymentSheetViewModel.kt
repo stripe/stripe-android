@@ -26,6 +26,7 @@ import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContract
 import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLauncherFactory
+import com.stripe.android.link.injection.LinkPaymentLauncherFactory
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
@@ -90,7 +91,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     logger: Logger,
     @IOContext workContext: CoroutineContext,
     @InjectorKey injectorKey: String,
-    savedStateHandle: SavedStateHandle
+    savedStateHandle: SavedStateHandle,
+    linkPaymentLauncherFactory: LinkPaymentLauncherFactory
 ) : BaseSheetViewModel<PaymentSheetViewModel.TransitionTarget>(
     application = application,
     config = args.config,
@@ -101,7 +103,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     logger = logger,
     injectorKey = injectorKey,
     resourceRepository = resourceRepository,
-    savedStateHandle = savedStateHandle
+    savedStateHandle = savedStateHandle,
+    linkPaymentLauncherFactory = linkPaymentLauncherFactory
 ) {
     private val confirmParamsFactory = ConfirmStripeIntentParamsFactory.createFactory(
         args.clientSecret
@@ -481,7 +484,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             Provider<PaymentSheetViewModelSubcomponent.Builder>
 
         @Suppress("UNCHECKED_CAST")
-        override fun <T : ViewModel?> create(
+        override fun <T : ViewModel> create(
             key: String,
             modelClass: Class<T>,
             savedStateHandle: SavedStateHandle
