@@ -28,6 +28,9 @@ public final class com/stripe/android/ui/core/elements/AfterpayClearpayElementUI
 public final class com/stripe/android/ui/core/elements/AfterpayClearpayHeaderElement$Companion {
 }
 
+public final class com/stripe/android/ui/core/elements/AuBecsDebitMandateElementUIKt {
+}
+
 public final class com/stripe/android/ui/core/elements/BankRepository_Factory : dagger/internal/Factory {
 	public fun <init> (Ljavax/inject/Provider;)V
 	public static fun create (Ljavax/inject/Provider;)Lcom/stripe/android/ui/core/elements/BankRepository_Factory;
@@ -193,6 +196,11 @@ public final class com/stripe/android/ui/core/forms/AffirmSpecKt {
 public final class com/stripe/android/ui/core/forms/AfterpayClearpaySpecKt {
 	public static final fun getAfterpayClearpayForm ()Lcom/stripe/android/ui/core/elements/LayoutSpec;
 	public static final fun getAfterpayClearpayParamKey ()Ljava/util/Map;
+}
+
+public final class com/stripe/android/ui/core/forms/AuBecsDebitSpecKt {
+	public static final fun getAuBecsDebitForm ()Lcom/stripe/android/ui/core/elements/LayoutSpec;
+	public static final fun getAuBecsDebitParamKey ()Ljava/util/Map;
 }
 
 public final class com/stripe/android/ui/core/forms/BancontactSpecKt {
