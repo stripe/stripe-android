@@ -5,6 +5,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.sp
 import com.stripe.android.paymentsheet.R
 
@@ -17,6 +18,8 @@ internal fun LpmSelectorText(text: String, modifier: Modifier, isEnabled: Boolea
         fontWeight = FontWeight.Bold,
         color = if (isEnabled) textColor else textColor.copy(alpha = 0.6f),
         lineHeight = 1.sp,
+        maxLines = 1,
+        overflow = TextOverflow.Ellipsis,
         modifier = modifier
     )
 }
