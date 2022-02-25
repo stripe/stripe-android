@@ -44,7 +44,6 @@ internal class ConfirmPaymentIntentParamsFactory(
 
             /**
              Sets `payment_method_options[card][setup_future_usage]`
-
              - Note: PaymentSheet uses this `setup_future_usage` (SFU) value very differently from the top-level one:
              We read the top-level SFU to know the merchant’s desired save behavior
              We write payment method options SFU to set the customer’s desired save behavior
