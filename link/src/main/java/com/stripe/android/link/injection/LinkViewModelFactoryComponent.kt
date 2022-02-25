@@ -4,7 +4,9 @@ import android.content.Context
 import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.LoggingModule
+import com.stripe.android.link.LinkActivityViewModel
 import com.stripe.android.link.ui.signup.SignUpViewModel
+import com.stripe.android.link.ui.verification.VerificationViewModel
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.payments.core.injection.STRIPE_ACCOUNT_ID
@@ -15,8 +17,8 @@ import javax.inject.Named
 import javax.inject.Singleton
 
 /**
- * Component to inject [SignUpViewModel.Factory] when the app process is killed and there is no
- * [Injector] available.
+ * Component to inject the ViewModels Factory when the app process is killed and there is no
+ * Injector available.
  * This component will create new instances of all dependencies.
  */
 @Singleton
@@ -28,8 +30,10 @@ import javax.inject.Singleton
         LoggingModule::class
     ]
 )
-internal interface SignUpViewModelFactoryComponent {
+internal interface LinkViewModelFactoryComponent {
+    fun inject(factory: LinkActivityViewModel.Factory)
     fun inject(factory: SignUpViewModel.Factory)
+    fun inject(factory: VerificationViewModel.Factory)
 
     @Component.Builder
     interface Builder {
@@ -48,6 +52,6 @@ internal interface SignUpViewModelFactoryComponent {
         @BindsInstance
         fun productUsage(@Named(PRODUCT_USAGE) productUsage: Set<String>): Builder
 
-        fun build(): SignUpViewModelFactoryComponent
+        fun build(): LinkViewModelFactoryComponent
     }
 }

@@ -1,4 +1,4 @@
-package com.stripe.android.link.ui.theme
+package com.stripe.android.link.theme
 
 import androidx.compose.ui.graphics.Color
 

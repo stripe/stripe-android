@@ -21,7 +21,7 @@ class LinkActivityTest {
     fun `Activity launches sign up UI`() {
         activityScenario().launch(intent).onActivity { activity ->
             assertThat(activity.navController.currentDestination?.route)
-                .isEqualTo(LinkScreen.SignUp.name)
+                .isEqualTo(LinkScreen.SignUp.route)
         }
     }
 
