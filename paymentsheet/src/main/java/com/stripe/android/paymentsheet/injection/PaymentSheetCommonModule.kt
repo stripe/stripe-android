@@ -5,8 +5,8 @@ import android.content.res.Resources
 import androidx.core.os.LocaleListCompat
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.injection.ENABLE_LOGGING
-import com.stripe.android.payments.core.injection.PUBLISHABLE_KEY
-import com.stripe.android.payments.core.injection.STRIPE_ACCOUNT_ID
+import com.stripe.android.core.injection.PUBLISHABLE_KEY
+import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.paymentsheet.BuildConfig
 import com.stripe.android.paymentsheet.analytics.DefaultDeviceIdRepository
 import com.stripe.android.paymentsheet.analytics.DefaultEventReporter

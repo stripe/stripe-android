@@ -1,7 +1,7 @@
 package com.stripe.android.payments.wechatpay
 
+import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.WeChat
-import com.stripe.android.networking.ApiRequest
 import com.stripe.android.payments.wechatpay.reflection.WeChatPayReflectionHelper
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest

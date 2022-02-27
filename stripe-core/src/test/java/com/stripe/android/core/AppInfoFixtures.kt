@@ -1,4 +1,4 @@
-package com.stripe.android
+package com.stripe.android.core
 
 internal object AppInfoFixtures {
     internal val DEFAULT = AppInfo.create(

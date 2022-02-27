@@ -7,8 +7,8 @@ import com.stripe.android.FakeActivityResultLauncher
 import com.stripe.android.PaymentRelayContract
 import com.stripe.android.PaymentRelayStarter
 import com.stripe.android.StripePaymentController.Companion.PAYMENT_REQUEST_CODE
+import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.PaymentIntentFixtures
-import com.stripe.android.networking.ApiRequest
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.view.AuthActivityStarterHost
 import com.stripe.android.view.PaymentRelayActivity

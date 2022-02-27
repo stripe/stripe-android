@@ -19,10 +19,10 @@ import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.exception.InvalidRequestException
 import com.stripe.android.core.injection.Injectable
 import com.stripe.android.core.injection.injectWithFallback
+import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.googlepaylauncher.injection.DaggerGooglePayPaymentMethodLauncherViewModelFactoryComponent
 import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLauncherViewModelSubcomponent
 import com.stripe.android.model.PaymentMethodCreateParams
-import com.stripe.android.networking.ApiRequest
 import com.stripe.android.networking.StripeRepository
 import kotlinx.coroutines.flow.first
 import org.json.JSONObject

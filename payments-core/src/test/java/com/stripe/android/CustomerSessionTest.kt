@@ -3,6 +3,7 @@ package com.stripe.android
 import androidx.test.core.app.ApplicationProvider
 import com.stripe.android.core.StripeError
 import com.stripe.android.core.exception.APIException
+import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.Customer
 import com.stripe.android.model.CustomerFixtures
 import com.stripe.android.model.ListPaymentMethodsParams
@@ -10,7 +11,6 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.Source
 import com.stripe.android.model.SourceFixtures
-import com.stripe.android.networking.ApiRequest
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.testharness.TestEphemeralKeyProvider
 import com.stripe.android.utils.TestUtils.idleLooper

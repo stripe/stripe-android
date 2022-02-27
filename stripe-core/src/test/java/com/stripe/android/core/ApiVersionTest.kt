@@ -1,7 +1,7 @@
-package com.stripe.android
+package com.stripe.android.core
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.ApiVersion.Companion.API_VERSION_CODE
+import com.stripe.android.core.ApiVersion.Companion.API_VERSION_CODE
 import org.junit.Test
 
 class ApiVersionTest {
@@ -12,7 +12,8 @@ class ApiVersionTest {
 
     @Test
     fun `single beta header should have correct code`() {
-        assertThat(ApiVersion(setOf(StripeApiBeta.WeChatPayV1)).code)
-            .isEqualTo("$API_VERSION_CODE;${StripeApiBeta.WeChatPayV1.code}")
+        val betaCode = "betaCode=v1"
+        assertThat(ApiVersion(setOf(betaCode)).code)
+            .isEqualTo("$API_VERSION_CODE;$betaCode")
     }
 }

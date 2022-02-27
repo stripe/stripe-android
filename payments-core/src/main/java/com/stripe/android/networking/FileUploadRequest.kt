@@ -1,7 +1,10 @@
 package com.stripe.android.networking
 
 import androidx.annotation.VisibleForTesting
-import com.stripe.android.AppInfo
+import com.stripe.android.core.AppInfo
+import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.networking.DEFAULT_RETRY_CODES
+import com.stripe.android.core.networking.RequestHeadersFactory
 import com.stripe.android.core.networking.StripeRequest
 import com.stripe.android.core.networking.StripeRequest.MimeType
 import com.stripe.android.model.StripeFileParams
@@ -38,7 +41,7 @@ internal class FileUploadRequest(
 
     override val url = HOST
 
-    override val retryResponseCodes: Iterable<Int> = PAYMENT_RETRY_CODES
+    override val retryResponseCodes: Iterable<Int> = DEFAULT_RETRY_CODES
 
     override val headers: Map<String, String> = headersFactory.create()
 

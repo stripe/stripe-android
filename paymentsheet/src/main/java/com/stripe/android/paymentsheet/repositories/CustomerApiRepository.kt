@@ -4,7 +4,7 @@ import com.stripe.android.core.Logger
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.model.ListPaymentMethodsParams
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.networking.ApiRequest
+import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE

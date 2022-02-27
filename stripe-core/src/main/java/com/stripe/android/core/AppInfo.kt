@@ -1,6 +1,7 @@
-package com.stripe.android
+package com.stripe.android.core
 
 import android.os.Parcelable
+import androidx.annotation.RestrictTo
 import kotlinx.parcelize.Parcelize
 
 /**
@@ -13,6 +14,7 @@ import kotlinx.parcelize.Parcelize
  * @param url Website for your application (e.g. "https://myawesomeapp.info")
  * @param partnerId Your Stripe Partner ID (e.g. "pp_partner_1234")
  */
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Parcelize
 data class AppInfo internal constructor(
     private val name: String,
@@ -21,7 +23,7 @@ data class AppInfo internal constructor(
     private val partnerId: String?
 ) : Parcelable {
 
-    internal fun toUserAgent(): String {
+    fun toUserAgent(): String {
         return listOfNotNull(
             name,
             version?.let { "/$it" },
@@ -29,7 +31,7 @@ data class AppInfo internal constructor(
         ).joinToString("")
     }
 
-    internal fun createClientHeaders(): Map<String, Map<String, String?>> {
+    fun createClientHeaders(): Map<String, Map<String, String?>> {
         val appInfo = mapOf(
             "name" to name,
             "version" to version,

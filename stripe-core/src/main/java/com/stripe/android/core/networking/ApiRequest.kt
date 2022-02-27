@@ -1,16 +1,14 @@
-package com.stripe.android.networking
+package com.stripe.android.core.networking
 
 import android.os.Parcelable
 import androidx.annotation.RestrictTo
-import com.stripe.android.ApiKeyValidator
-import com.stripe.android.ApiVersion
-import com.stripe.android.AppInfo
+import com.stripe.android.core.ApiKeyValidator
+import com.stripe.android.core.ApiVersion
+import com.stripe.android.core.AppInfo
 import com.stripe.android.core.exception.InvalidRequestException
-import com.stripe.android.core.networking.QueryStringFactory
-import com.stripe.android.core.networking.StripeRequest
+import com.stripe.android.core.injection.PUBLISHABLE_KEY
+import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.core.version.StripeSdkVersion
-import com.stripe.android.payments.core.injection.PUBLISHABLE_KEY
-import com.stripe.android.payments.core.injection.STRIPE_ACCOUNT_ID
 import kotlinx.parcelize.Parcelize
 import java.io.OutputStream
 import java.io.UnsupportedEncodingException
@@ -24,9 +22,9 @@ import javax.inject.Provider
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 data class ApiRequest internal constructor(
     override val method: Method,
-    internal val baseUrl: String,
-    internal val params: Map<String, *>? = null,
-    internal val options: Options,
+    val baseUrl: String,
+    val params: Map<String, *>? = null,
+    val options: Options,
     private val appInfo: AppInfo? = null,
     private val apiVersion: String = ApiVersion.get().code,
     private val sdkVersion: String = StripeSdkVersion.VERSION,
@@ -56,7 +54,7 @@ data class ApiRequest internal constructor(
 
     override val mimeType: MimeType = MimeType.Form
 
-    override val retryResponseCodes: Iterable<Int> = PAYMENT_RETRY_CODES
+    override val retryResponseCodes: Iterable<Int> = DEFAULT_RETRY_CODES
 
     /**
      * If the HTTP method is [Method.GET], this is the URL with query string;
@@ -100,12 +98,12 @@ data class ApiRequest internal constructor(
      */
     @Parcelize
     data class Options constructor(
-        internal val apiKey: String,
-        internal val stripeAccount: String? = null,
-        internal val idempotencyKey: String? = null
+        val apiKey: String,
+        val stripeAccount: String? = null,
+        val idempotencyKey: String? = null
     ) : Parcelable {
 
-        internal val apiKeyIsUserKey: Boolean
+        val apiKeyIsUserKey: Boolean
             get() = apiKey.startsWith("uk_")
 
         /**
@@ -185,7 +183,7 @@ data class ApiRequest internal constructor(
         }
     }
 
-    internal companion object {
-        internal const val API_HOST = "https://api.stripe.com"
+    companion object {
+        const val API_HOST = "https://api.stripe.com"
     }
 }

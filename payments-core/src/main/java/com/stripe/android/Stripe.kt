@@ -9,12 +9,16 @@ import androidx.annotation.UiThread
 import androidx.annotation.WorkerThread
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import com.stripe.android.core.ApiKeyValidator
+import com.stripe.android.core.ApiVersion
+import com.stripe.android.core.AppInfo
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.exception.InvalidRequestException
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.model.StripeModel
+import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.exception.AuthenticationException
 import com.stripe.android.exception.CardException
@@ -40,7 +44,6 @@ import com.stripe.android.model.StripeFileParams
 import com.stripe.android.model.Token
 import com.stripe.android.model.TokenParams
 import com.stripe.android.model.WeChatPayNextAction
-import com.stripe.android.networking.ApiRequest
 import com.stripe.android.networking.StripeApiRepository
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.view.AuthActivityStarterHost

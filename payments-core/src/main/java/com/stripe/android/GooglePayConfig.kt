@@ -1,6 +1,8 @@
 package com.stripe.android
 
 import android.content.Context
+import com.stripe.android.core.ApiKeyValidator
+import com.stripe.android.core.ApiVersion
 import org.json.JSONException
 import org.json.JSONObject
 

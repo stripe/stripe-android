@@ -1,23 +1,14 @@
-package com.stripe.android.networking
+package com.stripe.android.core.networking
 
 import android.os.Build
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.ApiKeyFixtures
-import com.stripe.android.ApiVersion
-import com.stripe.android.AppInfo
-import com.stripe.android.AppInfoFixtures
-import com.stripe.android.core.networking.StripeRequest
+import com.stripe.android.core.ApiKeyFixtures
+import com.stripe.android.core.ApiVersion
+import com.stripe.android.core.AppInfo
+import com.stripe.android.core.AppInfoFixtures
+import com.stripe.android.core.networking.RequestHeadersFactory.FraudDetection.Companion.HEADER_COOKIE
+import com.stripe.android.core.networking.StripeClientUserAgentHeaderFactory.Companion.HEADER_STRIPE_CLIENT_USER_AGENT
 import com.stripe.android.core.version.StripeSdkVersion
-import com.stripe.android.networking.RequestHeadersFactory.Companion.HEADER_ACCEPT
-import com.stripe.android.networking.RequestHeadersFactory.Companion.HEADER_ACCEPT_CHARSET
-import com.stripe.android.networking.RequestHeadersFactory.Companion.HEADER_ACCEPT_LANGUAGE
-import com.stripe.android.networking.RequestHeadersFactory.Companion.HEADER_AUTHORIZATION
-import com.stripe.android.networking.RequestHeadersFactory.Companion.HEADER_CONTENT_TYPE
-import com.stripe.android.networking.RequestHeadersFactory.Companion.HEADER_STRIPE_ACCOUNT
-import com.stripe.android.networking.RequestHeadersFactory.Companion.HEADER_STRIPE_VERSION
-import com.stripe.android.networking.RequestHeadersFactory.Companion.HEADER_USER_AGENT
-import com.stripe.android.networking.RequestHeadersFactory.FraudDetection.Companion.HEADER_COOKIE
-import com.stripe.android.networking.StripeClientUserAgentHeaderFactory.Companion.HEADER_STRIPE_CLIENT_USER_AGENT
 import org.json.JSONObject
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -102,19 +93,8 @@ class RequestHeadersFactoriesTest {
         val stripeClientUserAgent = headers[HEADER_STRIPE_CLIENT_USER_AGENT]
             ?: error("Invalid JSON in `$HEADER_STRIPE_CLIENT_USER_AGENT`")
         val stripeClientUserAgentData = JSONObject(stripeClientUserAgent)
-        assertThat(JSONObject(stripeClientUserAgentData.getString("application")).toString())
-            .isEqualTo(
-                JSONObject(
-                    """
-            {
-                "name": "MyAwesomePlugin",
-                "version": "1.2.34",
-                "url": "https:\/\/myawesomeplugin.info",
-                "partner_id": "pp_partner_1234"
-            }
-                    """.trimIndent()
-                ).toString()
-            )
+        assertThat(stripeClientUserAgentData.get("application"))
+            .isEqualTo("{name=MyAwesomePlugin, version=1.2.34, url=https://myawesomeplugin.info, partner_id=pp_partner_1234}")
     }
 
     private fun createBasePaymentApiHeaders(
@@ -187,7 +167,7 @@ class RequestHeadersFactoriesTest {
     }
 
     private companion object {
-        private val OPTIONS = ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)
         private const val BOUNDARY = "TEST_BOUNDARY"
+        private val OPTIONS = ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)
     }
 }

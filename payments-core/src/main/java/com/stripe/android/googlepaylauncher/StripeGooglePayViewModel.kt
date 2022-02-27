@@ -9,9 +9,9 @@ import androidx.lifecycle.distinctUntilChanged
 import androidx.lifecycle.liveData
 import com.google.android.gms.wallet.IsReadyToPayRequest
 import com.stripe.android.GooglePayJsonFactory
+import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
-import com.stripe.android.networking.ApiRequest
 import com.stripe.android.networking.StripeApiRepository
 import com.stripe.android.networking.StripeRepository
 import kotlinx.coroutines.Dispatchers

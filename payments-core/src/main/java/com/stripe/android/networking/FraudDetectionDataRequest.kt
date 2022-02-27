@@ -1,6 +1,8 @@
 package com.stripe.android.networking
 
 import com.stripe.android.core.exception.InvalidRequestException
+import com.stripe.android.core.networking.DEFAULT_RETRY_CODES
+import com.stripe.android.core.networking.RequestHeadersFactory
 import com.stripe.android.core.networking.StripeRequest
 import com.stripe.android.model.StripeJsonUtils
 import java.io.OutputStream
@@ -38,7 +40,7 @@ internal class FraudDetectionDataRequest(
 
     override val mimeType = MimeType.Json
 
-    override val retryResponseCodes: Iterable<Int> = PAYMENT_RETRY_CODES
+    override val retryResponseCodes: Iterable<Int> = DEFAULT_RETRY_CODES
 
     override val url = URL
 

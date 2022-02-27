@@ -5,6 +5,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.FileFactory
+import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.StripeFileParams
 import com.stripe.android.model.StripeFilePurpose
 import org.junit.runner.RunWith

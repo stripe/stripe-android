@@ -1,13 +1,14 @@
-package com.stripe.android.networking
+package com.stripe.android.core.networking
 
 import android.system.Os
-import com.stripe.android.ApiVersion
-import com.stripe.android.AppInfo
-import com.stripe.android.core.networking.StripeRequest
+import androidx.annotation.RestrictTo
+import com.stripe.android.core.ApiVersion
+import com.stripe.android.core.AppInfo
 import com.stripe.android.core.version.StripeSdkVersion
 import java.util.Locale
 
-internal sealed class RequestHeadersFactory {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+sealed class RequestHeadersFactory {
     /**
      * Creates a map for headers attached to all requests.
      */
@@ -105,6 +106,7 @@ internal sealed class RequestHeadersFactory {
 
     /**
      * Factory for [FileUploadRequest].
+     * TODO(ccen) Move FileUpload to payments-core.
      */
     class FileUpload(
         options: ApiRequest.Options,
@@ -123,6 +125,7 @@ internal sealed class RequestHeadersFactory {
 
     /**
      * Factory for [FraudDetectionDataRequest].
+     * TODO(ccen) Move FraudDetection to payments-core.
      */
     class FraudDetection(
         guid: String
@@ -131,8 +134,8 @@ internal sealed class RequestHeadersFactory {
 
         override val userAgent = getUserAgent(StripeSdkVersion.VERSION)
 
-        internal companion object {
-            internal const val HEADER_COOKIE = "Cookie"
+        companion object {
+            const val HEADER_COOKIE = "Cookie"
         }
 
         override var postHeaders = mapOf(
@@ -148,22 +151,11 @@ internal sealed class RequestHeadersFactory {
         override val extraHeaders = emptyMap<String, String>()
     }
 
-    internal companion object {
-        internal fun getUserAgent(
+    companion object {
+        fun getUserAgent(
             sdkVersion: String = StripeSdkVersion.VERSION
         ) = "Stripe/v1 $sdkVersion"
 
-        internal const val HEADER_USER_AGENT = "User-Agent"
-        internal const val HEADER_ACCEPT_CHARSET = "Accept-Charset"
-        internal const val HEADER_ACCEPT_LANGUAGE = "Accept-Language"
-        internal const val HEADER_CONTENT_TYPE = "Content-Type"
-        internal const val HEADER_ACCEPT = "Accept"
-        internal const val HEADER_STRIPE_VERSION = "Stripe-Version"
-        internal const val HEADER_STRIPE_ACCOUNT = "Stripe-Account"
-        internal const val HEADER_STRIPE_LIVEMODE = "Stripe-Livemode"
-        internal const val HEADER_AUTHORIZATION = "Authorization"
-        internal const val HEADER_IDEMPOTENCY_KEY = "Idempotency-Key"
-
-        internal val CHARSET = Charsets.UTF_8.name()
+        val CHARSET: String = Charsets.UTF_8.name()
     }
 }

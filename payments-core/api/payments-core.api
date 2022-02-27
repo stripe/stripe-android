@@ -7,31 +7,6 @@ public abstract interface class com/stripe/android/ApiResultCallback {
 	public abstract fun onSuccess (Lcom/stripe/android/core/model/StripeModel;)V
 }
 
-public final class com/stripe/android/AppInfo : android/os/Parcelable {
-	public static final field $stable I
-	public static final field CREATOR Landroid/os/Parcelable$Creator;
-	public static final field Companion Lcom/stripe/android/AppInfo$Companion;
-	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/AppInfo;
-	public static synthetic fun copy$default (Lcom/stripe/android/AppInfo;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/AppInfo;
-	public static final fun create (Ljava/lang/String;)Lcom/stripe/android/AppInfo;
-	public static final fun create (Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/AppInfo;
-	public static final fun create (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/AppInfo;
-	public static final fun create (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/AppInfo;
-	public fun describeContents ()I
-	public fun equals (Ljava/lang/Object;)Z
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-	public fun writeToParcel (Landroid/os/Parcel;I)V
-}
-
-public final class com/stripe/android/AppInfo$Companion {
-	public final fun create (Ljava/lang/String;)Lcom/stripe/android/AppInfo;
-	public final fun create (Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/AppInfo;
-	public final fun create (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/AppInfo;
-	public final fun create (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/AppInfo;
-	public static synthetic fun create$default (Lcom/stripe/android/AppInfo$Companion;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/AppInfo;
-}
-
 public final class com/stripe/android/BuildConfig {
 	public static final field BUILD_TYPE Ljava/lang/String;
 	public static final field DEBUG Z
@@ -760,7 +735,7 @@ public final class com/stripe/android/Stripe {
 	public final fun createSourceSynchronous (Lcom/stripe/android/model/SourceParams;Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/model/Source;
 	public static synthetic fun createSourceSynchronous$default (Lcom/stripe/android/Stripe;Lcom/stripe/android/model/SourceParams;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/model/Source;
 	public static final fun getAdvancedFraudSignalsEnabled ()Z
-	public static final fun getAppInfo ()Lcom/stripe/android/AppInfo;
+	public static final fun getAppInfo ()Lcom/stripe/android/core/AppInfo;
 	public final fun handleNextActionForPayment (Landroidx/activity/ComponentActivity;Ljava/lang/String;)V
 	public final fun handleNextActionForPayment (Landroidx/activity/ComponentActivity;Ljava/lang/String;Ljava/lang/String;)V
 	public final fun handleNextActionForPayment (Landroidx/fragment/app/Fragment;Ljava/lang/String;)V
@@ -798,14 +773,14 @@ public final class com/stripe/android/Stripe {
 	public final fun retrieveSourceSynchronous (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/model/Source;
 	public static synthetic fun retrieveSourceSynchronous$default (Lcom/stripe/android/Stripe;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/model/Source;
 	public static final fun setAdvancedFraudSignalsEnabled (Z)V
-	public static final fun setAppInfo (Lcom/stripe/android/AppInfo;)V
+	public static final fun setAppInfo (Lcom/stripe/android/core/AppInfo;)V
 }
 
 public final class com/stripe/android/Stripe$Companion {
 	public final fun getAdvancedFraudSignalsEnabled ()Z
-	public final fun getAppInfo ()Lcom/stripe/android/AppInfo;
+	public final fun getAppInfo ()Lcom/stripe/android/core/AppInfo;
 	public final fun setAdvancedFraudSignalsEnabled (Z)V
-	public final fun setAppInfo (Lcom/stripe/android/AppInfo;)V
+	public final fun setAppInfo (Lcom/stripe/android/core/AppInfo;)V
 }
 
 public final class com/stripe/android/StripeApiBeta : java/lang/Enum {
@@ -1229,7 +1204,7 @@ public final class com/stripe/android/googlepaylauncher/GooglePayPaymentMethodLa
 	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncherViewModel_Factory;
 	public fun get ()Lcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncherViewModel;
 	public synthetic fun get ()Ljava/lang/Object;
-	public static fun newInstance (Lcom/google/android/gms/wallet/PaymentsClient;Lcom/stripe/android/networking/ApiRequest$Options;Lcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncherContract$Args;Lcom/stripe/android/networking/StripeRepository;Lcom/stripe/android/GooglePayJsonFactory;Lcom/stripe/android/googlepaylauncher/GooglePayRepository;Landroidx/lifecycle/SavedStateHandle;)Lcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncherViewModel;
+	public static fun newInstance (Lcom/google/android/gms/wallet/PaymentsClient;Lcom/stripe/android/core/networking/ApiRequest$Options;Lcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncherContract$Args;Lcom/stripe/android/networking/StripeRepository;Lcom/stripe/android/GooglePayJsonFactory;Lcom/stripe/android/googlepaylauncher/GooglePayRepository;Landroidx/lifecycle/SavedStateHandle;)Lcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncherViewModel;
 }
 
 public final class com/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncherViewModel_Factory_MembersInjector : dagger/MembersInjector {
@@ -4860,46 +4835,6 @@ public final class com/stripe/android/model/wallets/Wallet$VisaCheckoutWallet : 
 	public fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
-public final class com/stripe/android/networking/ApiRequest$Factory {
-	public static final field $stable I
-	public fun <init> ()V
-	public fun <init> (Lcom/stripe/android/AppInfo;Ljava/lang/String;Ljava/lang/String;)V
-	public synthetic fun <init> (Lcom/stripe/android/AppInfo;Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun createDelete (Ljava/lang/String;Lcom/stripe/android/networking/ApiRequest$Options;)Lcom/stripe/android/networking/ApiRequest;
-	public final fun createGet (Ljava/lang/String;Lcom/stripe/android/networking/ApiRequest$Options;Ljava/util/Map;)Lcom/stripe/android/networking/ApiRequest;
-	public static synthetic fun createGet$default (Lcom/stripe/android/networking/ApiRequest$Factory;Ljava/lang/String;Lcom/stripe/android/networking/ApiRequest$Options;Ljava/util/Map;ILjava/lang/Object;)Lcom/stripe/android/networking/ApiRequest;
-	public final fun createPost (Ljava/lang/String;Lcom/stripe/android/networking/ApiRequest$Options;Ljava/util/Map;)Lcom/stripe/android/networking/ApiRequest;
-	public static synthetic fun createPost$default (Lcom/stripe/android/networking/ApiRequest$Factory;Ljava/lang/String;Lcom/stripe/android/networking/ApiRequest$Options;Ljava/util/Map;ILjava/lang/Object;)Lcom/stripe/android/networking/ApiRequest;
-}
-
-public final class com/stripe/android/networking/ApiRequest$Options : android/os/Parcelable {
-	public static final field $stable I
-	public static final field CREATOR Landroid/os/Parcelable$Creator;
-	public static final field Companion Lcom/stripe/android/networking/ApiRequest$Options$Companion;
-	public static final field UNDEFINED_PUBLISHABLE_KEY Ljava/lang/String;
-	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
-	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public fun <init> (Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;)V
-	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/networking/ApiRequest$Options;
-	public static synthetic fun copy$default (Lcom/stripe/android/networking/ApiRequest$Options;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/networking/ApiRequest$Options;
-	public fun describeContents ()I
-	public fun equals (Ljava/lang/Object;)Z
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-	public fun writeToParcel (Landroid/os/Parcel;I)V
-}
-
-public final class com/stripe/android/networking/ApiRequest$Options$Companion {
-}
-
-public final class com/stripe/android/networking/ApiRequest_Options_Factory : dagger/internal/Factory {
-	public fun <init> (Ljavax/inject/Provider;Ljavax/inject/Provider;)V
-	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/networking/ApiRequest_Options_Factory;
-	public fun get ()Lcom/stripe/android/networking/ApiRequest$Options;
-	public synthetic fun get ()Ljava/lang/Object;
-	public static fun newInstance (Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;)Lcom/stripe/android/networking/ApiRequest$Options;
-}
-
 public final class com/stripe/android/networking/PaymentAnalyticsRequestFactory_Factory : dagger/internal/Factory {
 	public fun <init> (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)V
 	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/networking/PaymentAnalyticsRequestFactory_Factory;
@@ -5101,8 +5036,6 @@ public final class com/stripe/android/payments/core/injection/NamedConstantsKt {
 	public static final field IS_INSTANT_APP Ljava/lang/String;
 	public static final field IS_PAYMENT_INTENT Ljava/lang/String;
 	public static final field PRODUCT_USAGE Ljava/lang/String;
-	public static final field PUBLISHABLE_KEY Ljava/lang/String;
-	public static final field STRIPE_ACCOUNT_ID Ljava/lang/String;
 }
 
 public final class com/stripe/android/payments/core/injection/PaymentLauncherModule_ProvideDefaultReturnUrlFactory : dagger/internal/Factory {

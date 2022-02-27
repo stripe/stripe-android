@@ -5,6 +5,7 @@ import android.content.Context;
 import androidx.annotation.NonNull;
 import androidx.test.core.app.ApplicationProvider;
 
+import com.stripe.android.core.AppInfo;
 import com.stripe.android.core.networking.AnalyticsRequest;
 import com.stripe.android.core.networking.AnalyticsRequestExecutor;
 import com.stripe.android.core.networking.DefaultStripeNetworkClient;
