@@ -35,7 +35,7 @@ sealed class RequestHeadersFactory {
 
     protected open var postHeaders: Map<String, String> = emptyMap()
 
-    open class BasePaymentApiHeadersFactory(
+    open class BaseApiHeadersFactory(
         private val options: ApiRequest.Options,
         private val appInfo: AppInfo? = null,
         private val locale: Locale = Locale.getDefault(),
@@ -97,7 +97,7 @@ sealed class RequestHeadersFactory {
         locale: Locale = Locale.getDefault(),
         apiVersion: String = ApiVersion.get().code,
         sdkVersion: String = StripeSdkVersion.VERSION,
-    ) : BasePaymentApiHeadersFactory(
+    ) : BaseApiHeadersFactory(
         options, appInfo, locale, apiVersion, sdkVersion
     ) {
         override var postHeaders = mapOf(
@@ -117,7 +117,7 @@ sealed class RequestHeadersFactory {
         apiVersion: String = ApiVersion.get().code,
         sdkVersion: String = StripeSdkVersion.VERSION,
         boundary: String
-    ) : BasePaymentApiHeadersFactory(
+    ) : BaseApiHeadersFactory(
         options, appInfo, locale, apiVersion, sdkVersion
     ) {
         override var postHeaders = mapOf(

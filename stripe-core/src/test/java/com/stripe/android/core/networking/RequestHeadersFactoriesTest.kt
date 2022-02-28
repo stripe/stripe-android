@@ -102,7 +102,7 @@ class RequestHeadersFactoriesTest {
         options: ApiRequest.Options = OPTIONS,
         appInfo: AppInfo? = null
     ): Map<String, String> {
-        return RequestHeadersFactory.BasePaymentApiHeadersFactory(
+        return RequestHeadersFactory.BaseApiHeadersFactory(
             options = options,
             appInfo = appInfo,
             locale = locale
