@@ -325,7 +325,7 @@ class Stripe internal constructor(
      * Handle the [next_action](https://stripe.com/docs/api/payment_intents/object#payment_intent_object-next_action)
      * for a previously confirmed [PaymentIntent].
      *
-     * Used for [manual confirmation](https://stripe.com/docs/payments/payment-intents/android-manual) flow.
+     * Used for [manual confirmation](https://stripe.com/docs/payments/accept-a-payment-synchronously) flow.
      *
      * @param fragment the `Fragment` that is launching the payment authentication flow
      * @param clientSecret the [client_secret](https://stripe.com/docs/api/payment_intents/object#payment_intent_object-client_secret)
