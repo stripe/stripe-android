@@ -5,14 +5,6 @@ public final class com/stripe/android/payments/wechatpay/BuildConfig {
 	public fun <init> ()V
 }
 
-public final class com/stripe/android/payments/wechatpay/WeChatPayAuthenticator : com/stripe/android/payments/core/authentication/PaymentAuthenticator {
-	public fun <init> ()V
-	public fun authenticate (Lcom/stripe/android/view/AuthActivityStarterHost;Lcom/stripe/android/model/StripeIntent;Lcom/stripe/android/core/networking/ApiRequest$Options;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public synthetic fun authenticate (Lcom/stripe/android/view/AuthActivityStarterHost;Ljava/lang/Object;Lcom/stripe/android/core/networking/ApiRequest$Options;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public fun onLauncherInvalidated ()V
-	public fun onNewActivityResultCaller (Landroidx/activity/result/ActivityResultCaller;Landroidx/activity/result/ActivityResultCallback;)V
-}
-
 public final class com/stripe/android/payments/wechatpay/reflection/DefaultWeChatPayReflectionHelper : com/stripe/android/payments/wechatpay/reflection/WeChatPayReflectionHelper {
 	public fun <init> ()V
 	public fun createIWXAPIEventHandler (Ljava/lang/reflect/InvocationHandler;)Ljava/lang/Object;

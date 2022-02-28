@@ -1,9 +1,20 @@
-public final class com/stripe/android/core/ApiKeyValidator$Companion {
-	public final fun get ()Lcom/stripe/android/core/ApiKeyValidator;
-}
-
-public final class com/stripe/android/core/ApiVersion$Companion {
-	public final synthetic fun get ()Lcom/stripe/android/core/ApiVersion;
+public final class com/stripe/android/core/AppInfo : android/os/Parcelable {
+	public static final field $stable I
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public static final field Companion Lcom/stripe/android/core/AppInfo$Companion;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/core/AppInfo;
+	public static synthetic fun copy$default (Lcom/stripe/android/core/AppInfo;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/core/AppInfo;
+	public static final fun create (Ljava/lang/String;)Lcom/stripe/android/core/AppInfo;
+	public static final fun create (Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/core/AppInfo;
+	public static final fun create (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/core/AppInfo;
+	public static final fun create (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/core/AppInfo;
+	public final fun createClientHeaders ()Ljava/util/Map;
+	public fun describeContents ()I
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+	public final fun toUserAgent ()Ljava/lang/String;
+	public fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
 public final class com/stripe/android/core/AppInfo$Companion {
@@ -139,48 +150,6 @@ public abstract interface class com/stripe/android/core/model/StripeModel : andr
 	public abstract fun hashCode ()I
 }
 
-public final class com/stripe/android/core/networking/ApiRequest$Companion {
-}
-
-public final class com/stripe/android/core/networking/ApiRequest$Factory {
-	public static final field $stable I
-	public fun <init> ()V
-	public fun <init> (Lcom/stripe/android/core/AppInfo;Ljava/lang/String;Ljava/lang/String;)V
-	public synthetic fun <init> (Lcom/stripe/android/core/AppInfo;Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun createDelete (Ljava/lang/String;Lcom/stripe/android/core/networking/ApiRequest$Options;)Lcom/stripe/android/core/networking/ApiRequest;
-	public final fun createGet (Ljava/lang/String;Lcom/stripe/android/core/networking/ApiRequest$Options;Ljava/util/Map;)Lcom/stripe/android/core/networking/ApiRequest;
-	public static synthetic fun createGet$default (Lcom/stripe/android/core/networking/ApiRequest$Factory;Ljava/lang/String;Lcom/stripe/android/core/networking/ApiRequest$Options;Ljava/util/Map;ILjava/lang/Object;)Lcom/stripe/android/core/networking/ApiRequest;
-	public final fun createPost (Ljava/lang/String;Lcom/stripe/android/core/networking/ApiRequest$Options;Ljava/util/Map;)Lcom/stripe/android/core/networking/ApiRequest;
-	public static synthetic fun createPost$default (Lcom/stripe/android/core/networking/ApiRequest$Factory;Ljava/lang/String;Lcom/stripe/android/core/networking/ApiRequest$Options;Ljava/util/Map;ILjava/lang/Object;)Lcom/stripe/android/core/networking/ApiRequest;
-}
-
-public final class com/stripe/android/core/networking/ApiRequest$Options : android/os/Parcelable {
-	public static final field $stable I
-	public static final field CREATOR Landroid/os/Parcelable$Creator;
-	public static final field Companion Lcom/stripe/android/core/networking/ApiRequest$Options$Companion;
-	public static final field UNDEFINED_PUBLISHABLE_KEY Ljava/lang/String;
-	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
-	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public fun <init> (Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;)V
-	public final fun component1 ()Ljava/lang/String;
-	public final fun component2 ()Ljava/lang/String;
-	public final fun component3 ()Ljava/lang/String;
-	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/core/networking/ApiRequest$Options;
-	public static synthetic fun copy$default (Lcom/stripe/android/core/networking/ApiRequest$Options;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/core/networking/ApiRequest$Options;
-	public fun describeContents ()I
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getApiKey ()Ljava/lang/String;
-	public final fun getApiKeyIsUserKey ()Z
-	public final fun getIdempotencyKey ()Ljava/lang/String;
-	public final fun getStripeAccount ()Ljava/lang/String;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-	public fun writeToParcel (Landroid/os/Parcel;I)V
-}
-
-public final class com/stripe/android/core/networking/ApiRequest$Options$Companion {
-}
-
 public final class com/stripe/android/core/networking/ApiRequest_Options_Factory : dagger/internal/Factory {
 	public fun <init> (Ljavax/inject/Provider;Ljavax/inject/Provider;)V
 	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/core/networking/ApiRequest_Options_Factory;
@@ -208,17 +177,6 @@ public final class com/stripe/android/core/networking/NetworkConstantsKt {
 	public static final fun getDEFAULT_RETRY_CODES ()Ljava/lang/Iterable;
 }
 
-public final class com/stripe/android/core/networking/RequestHeadersFactory$Analytics : com/stripe/android/core/networking/RequestHeadersFactory {
-	public static final field $stable I
-	public static final field INSTANCE Lcom/stripe/android/core/networking/RequestHeadersFactory$Analytics;
-}
-
-public final class com/stripe/android/core/networking/RequestHeadersFactory$Api : com/stripe/android/core/networking/RequestHeadersFactory$BasePaymentApiHeadersFactory {
-	public static final field $stable I
-	public fun <init> (Lcom/stripe/android/core/networking/ApiRequest$Options;Lcom/stripe/android/core/AppInfo;Ljava/util/Locale;Ljava/lang/String;Ljava/lang/String;)V
-	public synthetic fun <init> (Lcom/stripe/android/core/networking/ApiRequest$Options;Lcom/stripe/android/core/AppInfo;Ljava/util/Locale;Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-}
-
 public class com/stripe/android/core/networking/RequestHeadersFactory$BasePaymentApiHeadersFactory : com/stripe/android/core/networking/RequestHeadersFactory {
 	public static final field $stable I
 	public fun <init> (Lcom/stripe/android/core/networking/ApiRequest$Options;Lcom/stripe/android/core/AppInfo;Ljava/util/Locale;Ljava/lang/String;Ljava/lang/String;)V
@@ -227,37 +185,12 @@ public class com/stripe/android/core/networking/RequestHeadersFactory$BasePaymen
 	protected fun getUserAgent ()Ljava/lang/String;
 }
 
-public final class com/stripe/android/core/networking/RequestHeadersFactory$Companion {
-	public final fun getCHARSET ()Ljava/lang/String;
-	public final fun getUserAgent (Ljava/lang/String;)Ljava/lang/String;
-	public static synthetic fun getUserAgent$default (Lcom/stripe/android/core/networking/RequestHeadersFactory$Companion;Ljava/lang/String;ILjava/lang/Object;)Ljava/lang/String;
-}
-
-public final class com/stripe/android/core/networking/RequestHeadersFactory$FileUpload : com/stripe/android/core/networking/RequestHeadersFactory$BasePaymentApiHeadersFactory {
-	public static final field $stable I
-	public fun <init> (Lcom/stripe/android/core/networking/ApiRequest$Options;Lcom/stripe/android/core/AppInfo;Ljava/util/Locale;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
-	public synthetic fun <init> (Lcom/stripe/android/core/networking/ApiRequest$Options;Lcom/stripe/android/core/AppInfo;Ljava/util/Locale;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-}
-
-public final class com/stripe/android/core/networking/RequestHeadersFactory$FraudDetection : com/stripe/android/core/networking/RequestHeadersFactory {
-	public static final field $stable I
-	public static final field Companion Lcom/stripe/android/core/networking/RequestHeadersFactory$FraudDetection$Companion;
-	public static final field HEADER_COOKIE Ljava/lang/String;
-	public fun <init> (Ljava/lang/String;)V
-}
-
-public final class com/stripe/android/core/networking/RequestHeadersFactory$FraudDetection$Companion {
-}
-
 public final class com/stripe/android/core/networking/RetryDelaySupplier_Factory : dagger/internal/Factory {
 	public fun <init> ()V
 	public static fun create ()Lcom/stripe/android/core/networking/RetryDelaySupplier_Factory;
 	public fun get ()Lcom/stripe/android/core/networking/RetryDelaySupplier;
 	public synthetic fun get ()Ljava/lang/Object;
 	public static fun newInstance ()Lcom/stripe/android/core/networking/RetryDelaySupplier;
-}
-
-public final class com/stripe/android/core/networking/StripeClientUserAgentHeaderFactory$Companion {
 }
 
 public abstract class com/stripe/android/core/networking/StripeConnection$AbstractConnection : com/stripe/android/core/networking/StripeConnection {

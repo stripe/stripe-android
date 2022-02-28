@@ -96,6 +96,7 @@ data class ApiRequest internal constructor(
     /**
      * Data class representing options for a Stripe API request.
      */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Parcelize
     data class Options constructor(
         val apiKey: String,
@@ -126,11 +127,13 @@ data class ApiRequest internal constructor(
             ApiKeyValidator().requireValid(apiKey)
         }
 
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         companion object {
             const val UNDEFINED_PUBLISHABLE_KEY = "pk_undefined"
         }
     }
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     class Factory(
         private val appInfo: AppInfo? = null,
         private val apiVersion: String = ApiVersion.get().code,
@@ -183,6 +186,7 @@ data class ApiRequest internal constructor(
         }
     }
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
         const val API_HOST = "https://api.stripe.com"
     }

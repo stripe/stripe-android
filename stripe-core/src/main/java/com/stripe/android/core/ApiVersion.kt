@@ -28,6 +28,7 @@ data class ApiVersion internal constructor(
                 )
                 .joinToString(";")
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
         const val API_VERSION_CODE: String = "2020-03-02"
 

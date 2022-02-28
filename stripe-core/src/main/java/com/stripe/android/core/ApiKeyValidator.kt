@@ -21,6 +21,7 @@ class ApiKeyValidator {
         return apiKey
     }
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
         private val DEFAULT = ApiKeyValidator()
 

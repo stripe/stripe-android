@@ -37,6 +37,7 @@ class StripeClientUserAgentHeaderFactory(
         )
     }
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
         // this is the default user agent set by the system
         private const val PROP_USER_AGENT = "http.agent"

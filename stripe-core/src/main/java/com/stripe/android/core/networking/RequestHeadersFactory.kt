@@ -90,6 +90,7 @@ sealed class RequestHeadersFactory {
     /**
      * Factory for [ApiRequest].
      */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     class Api(
         options: ApiRequest.Options,
         appInfo: AppInfo? = null,
@@ -108,6 +109,7 @@ sealed class RequestHeadersFactory {
      * Factory for [FileUploadRequest].
      * TODO(ccen) Move FileUpload to payments-core.
      */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     class FileUpload(
         options: ApiRequest.Options,
         appInfo: AppInfo? = null,
@@ -127,6 +129,7 @@ sealed class RequestHeadersFactory {
      * Factory for [FraudDetectionDataRequest].
      * TODO(ccen) Move FraudDetection to payments-core.
      */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     class FraudDetection(
         guid: String
     ) : RequestHeadersFactory() {
@@ -134,6 +137,7 @@ sealed class RequestHeadersFactory {
 
         override val userAgent = getUserAgent(StripeSdkVersion.VERSION)
 
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         companion object {
             const val HEADER_COOKIE = "Cookie"
         }
@@ -146,11 +150,13 @@ sealed class RequestHeadersFactory {
     /**
      * Factory for [AnalyticsRequest].
      */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     object Analytics : RequestHeadersFactory() {
         override val userAgent = getUserAgent(StripeSdkVersion.VERSION)
         override val extraHeaders = emptyMap<String, String>()
     }
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
         fun getUserAgent(
             sdkVersion: String = StripeSdkVersion.VERSION
