@@ -193,3 +193,10 @@ public final class com/stripe/android/core/networking/StripeRequest$MimeType : j
 public final class com/stripe/android/core/networking/StripeResponseKtxKt {
 }
 
+public final class com/stripe/android/core/version/StripeSdkVersion {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/stripe/android/core/version/StripeSdkVersion;
+	public static final field VERSION Ljava/lang/String;
+	public static final field VERSION_NAME Ljava/lang/String;
+}
+

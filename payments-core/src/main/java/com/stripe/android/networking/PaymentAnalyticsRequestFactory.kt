@@ -7,8 +7,8 @@ import android.os.Build
 import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.BuildConfig
-import com.stripe.android.Stripe
 import com.stripe.android.core.networking.AnalyticsRequest
+import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.Source
 import com.stripe.android.model.Token
@@ -265,7 +265,7 @@ class PaymentAnalyticsRequestFactory @VisibleForTesting internal constructor(
             FIELD_OS_RELEASE to Build.VERSION.RELEASE,
             FIELD_OS_VERSION to Build.VERSION.SDK_INT,
             FIELD_DEVICE_TYPE to DEVICE_TYPE,
-            FIELD_BINDINGS_VERSION to Stripe.VERSION_NAME,
+            FIELD_BINDINGS_VERSION to StripeSdkVersion.VERSION_NAME,
             FIELD_IS_DEVELOPMENT to BuildConfig.DEBUG
         )
     }

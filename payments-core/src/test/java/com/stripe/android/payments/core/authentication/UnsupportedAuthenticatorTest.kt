@@ -5,9 +5,9 @@ import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.FakeActivityResultLauncher
 import com.stripe.android.PaymentRelayContract
 import com.stripe.android.PaymentRelayStarter
-import com.stripe.android.Stripe
 import com.stripe.android.StripePaymentController
 import com.stripe.android.core.exception.StripeException
+import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentIntentFixtures.PI_SUCCEEDED
 import com.stripe.android.model.StripeIntent
@@ -59,7 +59,7 @@ class UnsupportedAuthenticatorTest {
                         IllegalArgumentException(
                             "${StripeIntent.NextActionData.WeChatPayRedirect::class.java.simpleName} " +
                                 "type is not supported, add " +
-                                "com.stripe:stripe-wechatpay:${Stripe.VERSION_NAME} in build.gradle " +
+                                "com.stripe:stripe-wechatpay:${StripeSdkVersion.VERSION_NAME} in build.gradle " +
                                 "to support it"
                         )
                     ),

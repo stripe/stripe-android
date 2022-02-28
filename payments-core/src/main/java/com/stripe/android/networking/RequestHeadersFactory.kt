@@ -3,8 +3,8 @@ package com.stripe.android.networking
 import android.system.Os
 import com.stripe.android.ApiVersion
 import com.stripe.android.AppInfo
-import com.stripe.android.Stripe
 import com.stripe.android.core.networking.StripeRequest
+import com.stripe.android.core.version.StripeSdkVersion
 import java.util.Locale
 
 internal sealed class RequestHeadersFactory {
@@ -39,7 +39,7 @@ internal sealed class RequestHeadersFactory {
         private val appInfo: AppInfo? = null,
         private val locale: Locale = Locale.getDefault(),
         private val apiVersion: String = ApiVersion.get().code,
-        private val sdkVersion: String = Stripe.VERSION
+        private val sdkVersion: String = StripeSdkVersion.VERSION
     ) : RequestHeadersFactory() {
         private val stripeClientUserAgentHeaderFactory = StripeClientUserAgentHeaderFactory()
 
@@ -94,7 +94,7 @@ internal sealed class RequestHeadersFactory {
         appInfo: AppInfo? = null,
         locale: Locale = Locale.getDefault(),
         apiVersion: String = ApiVersion.get().code,
-        sdkVersion: String = Stripe.VERSION,
+        sdkVersion: String = StripeSdkVersion.VERSION,
     ) : BasePaymentApiHeadersFactory(
         options, appInfo, locale, apiVersion, sdkVersion
     ) {
@@ -111,7 +111,7 @@ internal sealed class RequestHeadersFactory {
         appInfo: AppInfo? = null,
         locale: Locale = Locale.getDefault(),
         apiVersion: String = ApiVersion.get().code,
-        sdkVersion: String = Stripe.VERSION,
+        sdkVersion: String = StripeSdkVersion.VERSION,
         boundary: String
     ) : BasePaymentApiHeadersFactory(
         options, appInfo, locale, apiVersion, sdkVersion
@@ -129,7 +129,7 @@ internal sealed class RequestHeadersFactory {
     ) : RequestHeadersFactory() {
         override val extraHeaders = mapOf(HEADER_COOKIE to "m=$guid")
 
-        override val userAgent = getUserAgent(Stripe.VERSION)
+        override val userAgent = getUserAgent(StripeSdkVersion.VERSION)
 
         internal companion object {
             internal const val HEADER_COOKIE = "Cookie"
@@ -144,13 +144,13 @@ internal sealed class RequestHeadersFactory {
      * Factory for [AnalyticsRequest].
      */
     object Analytics : RequestHeadersFactory() {
-        override val userAgent = getUserAgent(Stripe.VERSION)
+        override val userAgent = getUserAgent(StripeSdkVersion.VERSION)
         override val extraHeaders = emptyMap<String, String>()
     }
 
     internal companion object {
         internal fun getUserAgent(
-            sdkVersion: String = Stripe.VERSION
+            sdkVersion: String = StripeSdkVersion.VERSION
         ) = "Stripe/v1 $sdkVersion"
 
         internal const val HEADER_USER_AGENT = "User-Agent"

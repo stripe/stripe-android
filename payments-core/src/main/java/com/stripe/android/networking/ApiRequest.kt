@@ -5,10 +5,10 @@ import androidx.annotation.RestrictTo
 import com.stripe.android.ApiKeyValidator
 import com.stripe.android.ApiVersion
 import com.stripe.android.AppInfo
-import com.stripe.android.Stripe
 import com.stripe.android.core.exception.InvalidRequestException
 import com.stripe.android.core.networking.QueryStringFactory
 import com.stripe.android.core.networking.StripeRequest
+import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.payments.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.payments.core.injection.STRIPE_ACCOUNT_ID
 import kotlinx.parcelize.Parcelize
@@ -29,7 +29,7 @@ data class ApiRequest internal constructor(
     internal val options: Options,
     private val appInfo: AppInfo? = null,
     private val apiVersion: String = ApiVersion.get().code,
-    private val sdkVersion: String = Stripe.VERSION,
+    private val sdkVersion: String = StripeSdkVersion.VERSION,
 ) : StripeRequest() {
     private val query: String = QueryStringFactory.createFromParamsWithEmptyValues(params)
 
@@ -136,7 +136,7 @@ data class ApiRequest internal constructor(
     class Factory(
         private val appInfo: AppInfo? = null,
         private val apiVersion: String = ApiVersion.get().code,
-        private val sdkVersion: String = Stripe.VERSION
+        private val sdkVersion: String = StripeSdkVersion.VERSION
     ) {
         fun createGet(
             url: String,
