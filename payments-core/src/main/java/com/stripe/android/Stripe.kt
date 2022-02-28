@@ -1672,7 +1672,7 @@ class Stripe internal constructor(
         val API_VERSION: String = ApiVersion.get().code
 
         @Deprecated(
-            message = "User StripeSdkVersion.VERSION_NAME instead",
+            message = "Use StripeSdkVersion.VERSION_NAME instead",
             replaceWith = ReplaceWith(
                 expression = "StripeSdkVersion.VERSION_NAME",
                 imports = ["com.stripe.android.core.version.StripeSdkVersion"]
@@ -1681,7 +1681,7 @@ class Stripe internal constructor(
         const val VERSION_NAME = StripeSdkVersion.VERSION_NAME
 
         @Deprecated(
-            message = "User StripeSdkVersion.VERSION instead",
+            message = "Use StripeSdkVersion.VERSION instead",
             replaceWith = ReplaceWith(
                 expression = "StripeSdkVersion.VERSION",
                 imports = ["com.stripe.android.core.version.StripeSdkVersion"]
