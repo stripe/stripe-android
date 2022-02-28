@@ -1,7 +1,7 @@
 package com.stripe.android.networking
 
 import androidx.annotation.VisibleForTesting
-import com.stripe.android.core.AppInfo
+import com.stripe.android.AppInfo
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.DEFAULT_RETRY_CODES
 import com.stripe.android.core.networking.RequestHeadersFactory
@@ -31,7 +31,7 @@ internal class FileUploadRequest(
 ) : StripeRequest() {
     private val headersFactory: RequestHeadersFactory = RequestHeadersFactory.FileUpload(
         options = options,
-        appInfo = appInfo,
+        appInfo = appInfo?.toInternalAppInfo(),
         boundary = boundary
     )
 

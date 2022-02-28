@@ -1,7 +1,7 @@
 package com.stripe.android.core
 
-internal object AppInfoFixtures {
-    internal val DEFAULT = AppInfo.create(
+internal object InternalAppInfoFixtures {
+    internal val DEFAULT = InternalAppInfo.create(
         "MyAwesomePlugin",
         "1.2.34",
         "https://myawesomeplugin.info",

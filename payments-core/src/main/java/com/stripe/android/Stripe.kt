@@ -11,7 +11,6 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.core.ApiKeyValidator
 import com.stripe.android.core.ApiVersion
-import com.stripe.android.core.AppInfo
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.exception.APIException

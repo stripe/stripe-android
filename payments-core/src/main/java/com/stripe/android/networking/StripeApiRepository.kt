@@ -2,13 +2,13 @@ package com.stripe.android.networking
 
 import android.content.Context
 import androidx.annotation.VisibleForTesting
+import com.stripe.android.AppInfo
 import com.stripe.android.DefaultFraudDetectionDataRepository
 import com.stripe.android.FraudDetectionDataRepository
 import com.stripe.android.Stripe
 import com.stripe.android.StripeApiBeta
 import com.stripe.android.cards.Bin
 import com.stripe.android.core.ApiVersion
-import com.stripe.android.core.AppInfo
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.exception.APIException
@@ -136,7 +136,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
     )
 
     private val apiRequestFactory = ApiRequest.Factory(
-        appInfo = appInfo,
+        appInfo = appInfo?.toInternalAppInfo(),
         apiVersion = apiVersion,
         sdkVersion = sdkVersion
     )

@@ -25,7 +25,7 @@ internal class PaymentAuthWebViewActivityViewModel(
     private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory
 ) : ViewModel() {
     val extraHeaders: Map<String, String> by lazy {
-        StripeClientUserAgentHeaderFactory().create(Stripe.appInfo)
+        StripeClientUserAgentHeaderFactory().create(Stripe.appInfo?.toInternalAppInfo())
     }
 
     @JvmSynthetic
