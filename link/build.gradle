@@ -23,7 +23,6 @@ dependencies {
     implementation project(':stripe-core')
     implementation project(':payments-ui-core')
 
-    implementation "androidx.core:core-ktx:$androidxCoreVersion"
     implementation "androidx.appcompat:appcompat:$androidxAppcompatVersion"
     implementation "androidx.constraintlayout:constraintlayout:$androidxConstraintlayoutVersion"
     implementation "androidx.lifecycle:lifecycle-livedata-ktx:$androidxLifecycleVersion"
@@ -41,12 +40,11 @@ dependencies {
     implementation "androidx.compose.material:material-icons-core:$androidxComposeVersion"
     // Integration with activities
     implementation "androidx.activity:activity-compose:$androidxActivityVersion"
-    implementation "androidx.navigation:navigation-compose:2.5.0-alpha02"
+    implementation "androidx.navigation:navigation-compose:2.5.0-alpha03"
     // Integration with observables
     implementation "androidx.compose.runtime:runtime-livedata:$androidxComposeVersion"
     implementation "com.google.accompanist:accompanist-flowlayout:$flowlayoutVersion"
     implementation "androidx.compose.ui:ui-tooling-preview:$androidxComposeVersion"
-
 
     testImplementation project(':payments-core')
     testImplementation "junit:junit:$junitVersion"
@@ -67,7 +65,7 @@ dependencies {
     // Tooling support (Previews, etc.)
     debugImplementation "androidx.compose.ui:ui-tooling:$androidxComposeVersion"
     // Needed for createComposeRule, but not createAndroidComposeRule:
-    debugImplementation("androidx.compose.ui:ui-test-manifest:$androidxComposeVersion")
+    debugImplementation "androidx.compose.ui:ui-test-manifest:$androidxComposeVersion"
 
     ktlint "com.pinterest:ktlint:$ktlintVersion"
 }

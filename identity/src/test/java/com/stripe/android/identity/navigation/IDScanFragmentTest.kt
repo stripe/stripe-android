@@ -180,6 +180,12 @@ internal class IDScanFragmentTest {
 
             assertThat(it.cameraAdapter.isBoundToLifecycle()).isFalse()
             assertThat(navController.currentDestination?.id).isEqualTo(R.id.cameraPermissionDeniedFragment)
+            assertThat(
+                navController.backStack.last()
+                    .arguments!![CameraPermissionDeniedFragment.ARG_SCAN_TYPE]
+            ).isEqualTo(
+                IdentityScanState.ScanType.ID_FRONT
+            )
         }
     }
 

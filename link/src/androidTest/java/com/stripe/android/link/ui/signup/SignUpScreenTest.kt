@@ -6,10 +6,11 @@ import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performTextInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.stripe.android.link.LinkActivity
 import com.stripe.android.link.R
-import com.stripe.android.link.ui.theme.DefaultLinkTheme
+import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.ui.core.elements.EmailSpec
 import org.junit.Rule
 import org.junit.Test
@@ -23,7 +24,7 @@ internal class SignUpScreenTest {
 
     @Test
     fun status_inputting_email_shows_only_email_field() {
-        setContent(SignUpStatus.InputtingEmail)
+        setContent(SignUpState.InputtingEmail)
 
         onEmailField().assertExists()
         onEmailField().assertIsEnabled()
@@ -34,7 +35,7 @@ internal class SignUpScreenTest {
 
     @Test
     fun status_verifying_email_is_disabled() {
-        setContent(SignUpStatus.VerifyingEmail)
+        setContent(SignUpState.VerifyingEmail)
 
         onEmailField().assertExists()
         onEmailField().assertIsNotEnabled()
@@ -45,7 +46,7 @@ internal class SignUpScreenTest {
 
     @Test
     fun status_inputting_phone_shows_all_fields() {
-        setContent(SignUpStatus.InputtingPhone)
+        setContent(SignUpState.InputtingPhone)
 
         onEmailField().assertExists()
         onEmailField().assertIsEnabled()
@@ -53,16 +54,31 @@ internal class SignUpScreenTest {
         onPhoneField().assertExists()
         onPhoneField().assertIsEnabled()
         onSignUpButton().assertExists()
+        onSignUpButton().assertIsNotEnabled()
+    }
+
+    @Test
+    fun signup_button_is_enabled_only_when_inputs_are_valid() {
+        setContent(SignUpState.InputtingPhone)
+
+        onSignUpButton().assertExists()
+        onSignUpButton().assertIsNotEnabled()
+
+        onPhoneField().performTextInput("12345")
+        onSignUpButton().assertIsNotEnabled()
+
+        onPhoneField().performTextInput("1234567890")
         onSignUpButton().assertIsEnabled()
     }
 
-    private fun setContent(signUpStatus: SignUpStatus) =
+    private fun setContent(signUpState: SignUpState) =
         composeTestRule.setContent {
             DefaultLinkTheme {
                 SignUpBody(
                     merchantName = "Example, Inc.",
                     emailElement = EmailSpec.transform(""),
-                    signUpStatus = signUpStatus
+                    signUpState = signUpState,
+                    onSignUpClick = {}
                 )
             }
         }

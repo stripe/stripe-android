@@ -1,9 +1,11 @@
 package com.stripe.android.payments.paymentlauncher
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Parcelable
 import androidx.activity.result.contract.ActivityResultContract
+import androidx.annotation.ColorInt
 import androidx.annotation.RestrictTo
 import androidx.core.os.bundleOf
 import com.stripe.android.core.injection.InjectorKey
@@ -17,6 +19,7 @@ import kotlinx.parcelize.Parcelize
 class PaymentLauncherContract :
     ActivityResultContract<PaymentLauncherContract.Args, PaymentResult>() {
     override fun createIntent(context: Context, input: Args): Intent {
+        input.statusBarColor = (context as? Activity)?.window?.statusBarColor
         return Intent(
             context,
             PaymentLauncherConfirmationActivity::class.java
@@ -32,39 +35,64 @@ class PaymentLauncherContract :
         open val publishableKey: String,
         open val stripeAccountId: String?,
         open val enableLogging: Boolean,
-        open val productUsage: Set<String>
+        open val productUsage: Set<String>,
+        @ColorInt open var statusBarColor: Int? = null
     ) : Parcelable {
         fun toBundle() = bundleOf(EXTRA_ARGS to this)
 
         @Parcelize
-        data class IntentConfirmationArgs(
+        data class IntentConfirmationArgs internal constructor(
             @InjectorKey override val injectorKey: String,
             override val publishableKey: String,
             override val stripeAccountId: String?,
             override val enableLogging: Boolean,
             override val productUsage: Set<String>,
-            val confirmStripeIntentParams: ConfirmStripeIntentParams
-        ) : Args(injectorKey, publishableKey, stripeAccountId, enableLogging, productUsage)
+            val confirmStripeIntentParams: ConfirmStripeIntentParams,
+            @ColorInt override var statusBarColor: Int? = null
+        ) : Args(
+            injectorKey,
+            publishableKey,
+            stripeAccountId,
+            enableLogging,
+            productUsage,
+            statusBarColor
+        )
 
         @Parcelize
-        data class PaymentIntentNextActionArgs(
+        data class PaymentIntentNextActionArgs internal constructor(
             @InjectorKey override val injectorKey: String,
             override val publishableKey: String,
             override val stripeAccountId: String?,
             override val enableLogging: Boolean,
             override val productUsage: Set<String>,
-            val paymentIntentClientSecret: String
-        ) : Args(injectorKey, publishableKey, stripeAccountId, enableLogging, productUsage)
+            val paymentIntentClientSecret: String,
+            @ColorInt override var statusBarColor: Int? = null
+        ) : Args(
+            injectorKey,
+            publishableKey,
+            stripeAccountId,
+            enableLogging,
+            productUsage,
+            statusBarColor
+        )
 
         @Parcelize
-        data class SetupIntentNextActionArgs(
+        data class SetupIntentNextActionArgs internal constructor(
             @InjectorKey override val injectorKey: String,
             override val publishableKey: String,
             override val stripeAccountId: String?,
             override val enableLogging: Boolean,
             override val productUsage: Set<String>,
-            val setupIntentClientSecret: String
-        ) : Args(injectorKey, publishableKey, stripeAccountId, enableLogging, productUsage)
+            val setupIntentClientSecret: String,
+            @ColorInt override var statusBarColor: Int? = null
+        ) : Args(
+            injectorKey,
+            publishableKey,
+            stripeAccountId,
+            enableLogging,
+            productUsage,
+            statusBarColor
+        )
 
         internal companion object {
             private const val EXTRA_ARGS = "extra_args"
