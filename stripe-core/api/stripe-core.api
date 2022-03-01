@@ -146,6 +146,9 @@ public final class com/stripe/android/core/networking/DefaultAnalyticsRequestExe
 	public static fun newInstance (Lcom/stripe/android/core/Logger;Lkotlin/coroutines/CoroutineContext;)Lcom/stripe/android/core/networking/DefaultAnalyticsRequestExecutor;
 }
 
+public final class com/stripe/android/core/networking/JsonUtilsKt {
+}
+
 public final class com/stripe/android/core/networking/NetworkConstantsKt {
 	public static final fun getDEFAULT_RETRY_CODES ()Ljava/lang/Iterable;
 }
