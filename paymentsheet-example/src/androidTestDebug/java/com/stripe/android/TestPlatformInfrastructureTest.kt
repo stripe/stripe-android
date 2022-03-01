@@ -15,7 +15,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
-internal class FormE2ETest {
+internal class TestPlatformInfrastructureTest {
     @get:Rule
     val composeTestRule = createEmptyComposeRule()
 
@@ -49,15 +49,47 @@ internal class FormE2ETest {
             saveCheckboxValue = false,
             authorizationParameters = AuthorizationParameters(
                 Browser.Chrome,
-                AuthorizeAction.Authorize
+                AuthorizeAction.Fail
             ),
             saveForFutureUseCheckboxVisible = false
         )
-        confirmCompleteSuccess(device, composeTestRule, screenshotProcessor, testParameters)
+//        confirmCompleteSuccess(
+//            device,
+//            composeTestRule,
+//            screenshotProcessor,
+//            testParameters.copy(
+//                authorizationParameters = AuthorizationParameters(
+//                    Browser.Chrome,
+//                    AuthorizeAction.Authorize
+//                )
+//            )
+//        )
+        confirmCompleteSuccess(
+            device,
+            composeTestRule,
+            screenshotProcessor,
+            testParameters.copy(
+                authorizationParameters = AuthorizationParameters(
+                    Browser.Opera,
+                    AuthorizeAction.Authorize
+                )
+            )
+        )
+        confirmCompleteSuccess(
+            device,
+            composeTestRule,
+            screenshotProcessor,
+            testParameters.copy(
+                authorizationParameters = AuthorizationParameters(
+                    Browser.Firefox,
+                    AuthorizeAction.Authorize
+                )
+            )
+        )
     }
 
     @Test
-    fun testSepaDebit() = runBlocking {
+    fun scrollToLpm() = runBlocking {
         val testParameters = TestParameters(
             SupportedPaymentMethod.SepaDebit,
             Customer.New,
@@ -79,4 +111,10 @@ internal class FormE2ETest {
     }
 
     // TODO verify other browsers are working
+    // Dropdown
+    // Other address fields
+
+    // Scroll to any item in the list
+    // Address field
+
 }

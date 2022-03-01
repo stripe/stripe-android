@@ -8,7 +8,6 @@ import android.widget.TextView
 import androidx.annotation.VisibleForTesting
 import androidx.appcompat.view.ContextThemeWrapper
 import androidx.compose.ui.platform.ViewCompositionStrategy
-import androidx.compose.ui.unit.dp
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
@@ -73,7 +72,6 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
         ).takeUnless { it == -1 } ?: 0
 
         if (paymentMethods.size > 1) {
-
             setupRecyclerView(viewBinding, paymentMethods)
         }
 
@@ -124,8 +122,6 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
         viewBinding: FragmentPaymentsheetAddPaymentMethodBinding,
         paymentMethods: List<SupportedPaymentMethod>
     ) {
-//
-//
 //        viewBinding.paymentMethodsRecycler.isVisible = true
 //        // The default item animator conflicts with `animateLayoutChanges`, causing a crash when
 //        // quickly switching payment methods. Set to null since the items never change anyway.
@@ -144,25 +140,30 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
 //        }.also {
 //            viewBinding.paymentMethodsRecycler.layoutManager = it
 //        }
+        val selectedPaymentMethodIndex = paymentMethods.indexOf(
+            sheetViewModel.getAddFragmentSelectedLPM()
+        ).takeUnless { it == -1 } ?: 0
 
         viewBinding.paymentMethodsRecycler.apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
             setContent {
-                val viewWidth = 100.dp
-//                    AddPaymentMethodsAdapter.calculateViewWidth(
-//                    viewBinding.paymentMethodsRecycler,
-//                    paymentMethods.size
-//                )
+                view?.rootView?.let {
+                    val viewWidth = AddPaymentMethodsAdapter.calculateViewWidth(
+                        it,
+                        paymentMethods.size
+                    )
 
-                PaymentMethodsUI(
-                    viewWidth = viewWidth,
-                    selectedIndex = 0,
-                    isEnabled = true,
-                    lpms = paymentMethods,
-                    onItemSelectedListener = {
-                        onPaymentMethodSelected(it)
-                    }
-                )
+                    PaymentMethodsUI(
+                        viewWidth = viewWidth,
+                        selectedIndex = selectedPaymentMethodIndex,
+                        isEnabled = true,
+                        lpms = paymentMethods,
+                        onItemSelectedListener = { selectedLpm ->
+                            onPaymentMethodSelected(selectedLpm)
+                        }
+                    )
+
+                }
             }
         }
 

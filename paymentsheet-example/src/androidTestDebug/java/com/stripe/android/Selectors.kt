@@ -161,13 +161,11 @@ sealed class GooglePayState(@IntegerRes id: Int) : EspressoIdButton(id) {
 sealed class Customer(@StringRes id: Int) : EspressoLabelIdButton(id) {
     object Guest : Customer(R.string.customer_guest)
     object New : Customer(R.string.customer_new)
-    object Returning : Customer(R.string.customer_returning)
 }
 
 internal fun Customer.toRepository() = when (this) {
     Customer.Guest -> CheckoutCustomer.Guest
     Customer.New -> CheckoutCustomer.New
-    Customer.Returning -> CheckoutCustomer.Returning
 }
 
 // No 3DS2 support
@@ -205,6 +203,7 @@ sealed class Browser(name: String, val packageName: String, val resourceID: Stri
     UiAutomatorText(name) {
 
     object Chrome : Browser("Chrome", "com.android.chrome", "com.android.chrome:id/coordinator")
-    object Opera : Browser("Opera", "com.opera.browser", "")
-    object Firefox : Browser("Firefox", "org.mozilla.firefox", "")
+    object Opera : Browser("Opera", "com.opera.browser", "com.opera.browser:id/action_bar_root")
+    object Firefox :
+        Browser("Firefox", "org.mozilla.firefox", "org.mozilla.firefox:id/action_bar_root")
 }
