@@ -1,8 +1,7 @@
 # CHANGELOG
-## X.X.X - 2022-XX-XX
-[FIXED] [4606](https://github.com/stripe/stripe-android/pull/4606) Keep status bar color in PaymentLauncher.
-### PaymentSheet
-### Identity
+## 19.2.1 - 2022-03-01
+[FIXED] [4606](https://github.com/stripe/stripe-android/pull/4606) Keep status bar color in PaymentLauncher
+
 ### Card scanning
 [ADDED] [4592](https://github.com/stripe/stripe-android/pull/4592) Add support for launching card scan from fragments.
 
