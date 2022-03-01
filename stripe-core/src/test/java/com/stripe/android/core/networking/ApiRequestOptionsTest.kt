@@ -1,7 +1,7 @@
-package com.stripe.android.networking
+package com.stripe.android.core.networking
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.ApiKeyFixtures
+import com.stripe.android.core.ApiKeyFixtures
 import kotlin.test.Test
 import kotlin.test.assertFailsWith
 

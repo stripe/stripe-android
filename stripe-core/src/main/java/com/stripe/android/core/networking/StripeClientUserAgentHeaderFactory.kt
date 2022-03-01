@@ -1,16 +1,18 @@
-package com.stripe.android.networking
+package com.stripe.android.core.networking
 
 import android.os.Build
+import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
-import com.stripe.android.AppInfo
+import com.stripe.android.core.InternalAppInfo
 import com.stripe.android.core.version.StripeSdkVersion
 import org.json.JSONObject
 
-internal class StripeClientUserAgentHeaderFactory(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+class StripeClientUserAgentHeaderFactory(
     private val systemPropertySupplier: (String) -> String = DEFAULT_SYSTEM_PROPERTY_SUPPLIER
 ) {
     fun create(
-        appInfo: AppInfo? = null
+        appInfo: InternalAppInfo? = null
     ): Map<String, String> {
         return mapOf(
             HEADER_STRIPE_CLIENT_USER_AGENT to createHeaderValue(appInfo).toString()
@@ -19,7 +21,7 @@ internal class StripeClientUserAgentHeaderFactory(
 
     @VisibleForTesting
     fun createHeaderValue(
-        appInfo: AppInfo? = null
+        appInfo: InternalAppInfo? = null
     ): JSONObject {
         return JSONObject(
             mapOf(
@@ -35,7 +37,8 @@ internal class StripeClientUserAgentHeaderFactory(
         )
     }
 
-    internal companion object {
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    companion object {
         // this is the default user agent set by the system
         private const val PROP_USER_AGENT = "http.agent"
 
@@ -43,6 +46,6 @@ internal class StripeClientUserAgentHeaderFactory(
             System.getProperty(name).orEmpty()
         }
 
-        internal const val HEADER_STRIPE_CLIENT_USER_AGENT = "X-Stripe-Client-User-Agent"
+        const val HEADER_STRIPE_CLIENT_USER_AGENT = "X-Stripe-Client-User-Agent"
     }
 }

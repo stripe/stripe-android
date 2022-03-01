@@ -1,5 +1,6 @@
-package com.stripe.android.networking
+package com.stripe.android.core.networking
 
+import android.os.Build
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.version.StripeSdkVersion
 import org.json.JSONObject
@@ -22,7 +23,7 @@ class StripeClientUserAgentHeaderFactoryTest {
                 """
                 {
                     "os.name": "android",
-                    "os.version": "30",
+                    "os.version": "${Build.VERSION.SDK_INT}",
                     "bindings.version": "${StripeSdkVersion.VERSION_NAME}",
                     "lang": "Java",
                     "publisher": "Stripe",

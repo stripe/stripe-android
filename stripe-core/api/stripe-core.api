@@ -123,6 +123,14 @@ public abstract interface class com/stripe/android/core/model/StripeModel : andr
 	public abstract fun hashCode ()I
 }
 
+public final class com/stripe/android/core/networking/ApiRequest_Options_Factory : dagger/internal/Factory {
+	public fun <init> (Ljavax/inject/Provider;Ljavax/inject/Provider;)V
+	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/core/networking/ApiRequest_Options_Factory;
+	public fun get ()Lcom/stripe/android/core/networking/ApiRequest$Options;
+	public synthetic fun get ()Ljava/lang/Object;
+	public static fun newInstance (Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;)Lcom/stripe/android/core/networking/ApiRequest$Options;
+}
+
 public final class com/stripe/android/core/networking/ConnectionFactory$Default : com/stripe/android/core/networking/ConnectionFactory {
 	public static final field $stable I
 	public static final field INSTANCE Lcom/stripe/android/core/networking/ConnectionFactory$Default;
@@ -139,8 +147,15 @@ public final class com/stripe/android/core/networking/DefaultAnalyticsRequestExe
 }
 
 public final class com/stripe/android/core/networking/NetworkConstantsKt {
-	public static final field HEADER_AUTHORIZATION Ljava/lang/String;
-	public static final field HEADER_CONTENT_TYPE Ljava/lang/String;
+	public static final fun getDEFAULT_RETRY_CODES ()Ljava/lang/Iterable;
+}
+
+public class com/stripe/android/core/networking/RequestHeadersFactory$BaseApiHeadersFactory : com/stripe/android/core/networking/RequestHeadersFactory {
+	public static final field $stable I
+	public fun <init> (Lcom/stripe/android/core/networking/ApiRequest$Options;Lcom/stripe/android/core/InternalAppInfo;Ljava/util/Locale;Ljava/lang/String;Ljava/lang/String;)V
+	public synthetic fun <init> (Lcom/stripe/android/core/networking/ApiRequest$Options;Lcom/stripe/android/core/InternalAppInfo;Ljava/util/Locale;Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	protected fun getExtraHeaders ()Ljava/util/Map;
+	protected fun getUserAgent ()Ljava/lang/String;
 }
 
 public final class com/stripe/android/core/networking/RetryDelaySupplier_Factory : dagger/internal/Factory {

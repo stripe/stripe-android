@@ -6,6 +6,7 @@ import com.stripe.android.cards.Bin
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.exception.InvalidRequestException
+import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.exception.AuthenticationException
 import com.stripe.android.exception.CardException
 import com.stripe.android.model.BankStatuses

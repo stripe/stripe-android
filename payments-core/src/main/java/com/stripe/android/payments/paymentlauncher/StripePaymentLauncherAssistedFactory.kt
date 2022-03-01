@@ -2,8 +2,8 @@ package com.stripe.android.payments.paymentlauncher
 
 import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.RestrictTo
-import com.stripe.android.payments.core.injection.PUBLISHABLE_KEY
-import com.stripe.android.payments.core.injection.STRIPE_ACCOUNT_ID
+import com.stripe.android.core.injection.PUBLISHABLE_KEY
+import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 

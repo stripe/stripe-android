@@ -12,9 +12,9 @@ import com.stripe.android.core.Logger
 import com.stripe.android.core.networking.AnalyticsRequest
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
+import com.stripe.android.core.networking.StripeClientUserAgentHeaderFactory
 import com.stripe.android.networking.PaymentAnalyticsEvent
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
-import com.stripe.android.networking.StripeClientUserAgentHeaderFactory
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.stripe3ds2.init.ui.StripeToolbarCustomization
 import kotlinx.coroutines.Dispatchers
@@ -25,7 +25,7 @@ internal class PaymentAuthWebViewActivityViewModel(
     private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory
 ) : ViewModel() {
     val extraHeaders: Map<String, String> by lazy {
-        StripeClientUserAgentHeaderFactory().create(Stripe.appInfo)
+        StripeClientUserAgentHeaderFactory().create(Stripe.appInfo?.toInternalAppInfo())
     }
 
     @JvmSynthetic

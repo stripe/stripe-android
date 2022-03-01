@@ -1,6 +1,9 @@
-package com.stripe.android
+package com.stripe.android.core
 
-internal class ApiKeyValidator {
+import androidx.annotation.RestrictTo
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+class ApiKeyValidator {
 
     fun requireValid(apiKey: String?): String {
         require(!apiKey.isNullOrBlank()) {
@@ -18,11 +21,12 @@ internal class ApiKeyValidator {
         return apiKey
     }
 
-    internal companion object {
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    companion object {
         private val DEFAULT = ApiKeyValidator()
 
         @JvmStatic
-        internal fun get(): ApiKeyValidator {
+        fun get(): ApiKeyValidator {
             return DEFAULT
         }
     }

@@ -1,4 +1,6 @@
-package com.stripe.android
+package com.stripe.android.core
+
+import androidx.annotation.RestrictTo
 
 /**
  * A class that represents a Stripe API version.
@@ -9,29 +11,31 @@ package com.stripe.android
  * See [https://stripe.com/docs/upgrades](https://stripe.com/docs/upgrades) for latest
  * API changes.
  */
-internal data class ApiVersion internal constructor(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+data class ApiVersion internal constructor(
     internal val version: String,
-    internal val betas: Set<StripeApiBeta> = emptySet()
+    internal val betaCodes: Set<String> = emptySet()
 ) {
     constructor(
-        betas: Set<StripeApiBeta>
+        betas: Set<String>
     ) : this(API_VERSION_CODE, betas)
 
     val code: String
         get() =
             listOf(this.version)
                 .plus(
-                    betas.map { it.code }
+                    betaCodes.map { it }
                 )
                 .joinToString(";")
 
-    internal companion object {
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    companion object {
         const val API_VERSION_CODE: String = "2020-03-02"
 
         private val INSTANCE = ApiVersion(API_VERSION_CODE)
 
         @JvmSynthetic
-        internal fun get(): ApiVersion {
+        fun get(): ApiVersion {
             return INSTANCE
         }
     }
