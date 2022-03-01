@@ -7,7 +7,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.fragment.app.Fragment
-import com.stripe.android.stripecardscan.cardimageverification.CardImageVerificationConfig.MAX_COMPLETION_LOOP_FRAMES
+import com.stripe.android.stripecardscan.cardimageverification.CardImageVerificationFlow.Companion.MAX_COMPLETION_LOOP_FRAMES
 import com.stripe.android.stripecardscan.cardimageverification.exception.UnknownScanException
 import com.stripe.android.stripecardscan.payment.card.ScannedCard
 import com.stripe.android.stripecardscan.scanui.CancellationReason

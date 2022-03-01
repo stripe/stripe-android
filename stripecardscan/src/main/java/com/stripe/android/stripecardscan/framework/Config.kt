@@ -12,12 +12,6 @@ object Config {
      */
     @JvmStatic
     var logTag: String = "StripeCardScan"
-
-    /**
-     * Whether or not to display the "I cannot scan" button.
-     */
-    @JvmStatic
-    var enableCannotScanButton: Boolean = true
 }
 
 object NetworkConfig {
@@ -33,24 +27,12 @@ object NetworkConfig {
     var useCompression: Boolean = false
 
     /**
-     * The total number of times to try making a network request.
-     */
-    @JvmStatic
-    var retryTotalAttempts: Int = 3
-
-    /**
      * The delay between network request retries.
      *
      * TODO(ccen): support constant retry delay from stripe-core and use this value.
      */
     @JvmStatic
     var retryDelayMillis: Int = 5.seconds.inMilliseconds.toInt()
-
-    /**
-     * Status codes that should be retried from Stripe servers.
-     */
-    @JvmStatic
-    var retryStatusCodes: Iterable<Int> = CARD_SCAN_RETRY_STATUS_CODES
 
     /**
      * The JSON configuration to use throughout this SDK.
@@ -68,7 +50,7 @@ object NetworkConfig {
     @JvmStatic
     internal var network: Network = StripeNetwork(
         baseUrl = BASE_URL,
-        retryTotalAttempts = retryTotalAttempts,
-        retryStatusCodes = retryStatusCodes,
+        retryTotalAttempts = 3,
+        retryStatusCodes = 500..599,
     )
 }

@@ -39,6 +39,13 @@ internal abstract class CardImageVerificationFlow(
 ) : ScanFlow<RequiredCardDetails?, CameraPreviewImage<Bitmap>>,
     AggregateResultListener<MainLoopAggregator.InterimResult, MainLoopAggregator.FinalResult> {
 
+    companion object {
+        /**
+         * The maximum number of frames to process
+         */
+        const val MAX_COMPLETION_LOOP_FRAMES = 5
+    }
+
     /**
      * If this is true, do not start the flow.
      */
@@ -151,7 +158,6 @@ internal abstract class CardImageVerificationFlow(
         val pan = getFrames(SavedFrameType(hasCard = false, hasOcr = true))
         val card = getFrames(SavedFrameType(hasCard = true, hasOcr = false))
 
-        return (cardAndPan + pan + card)
-            .take(CardImageVerificationConfig.MAX_COMPLETION_LOOP_FRAMES)
+        return (cardAndPan + pan + card).take(MAX_COMPLETION_LOOP_FRAMES)
     }
 }

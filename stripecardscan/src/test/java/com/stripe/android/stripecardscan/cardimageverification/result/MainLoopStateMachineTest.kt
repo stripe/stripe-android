@@ -2,8 +2,13 @@ package com.stripe.android.stripecardscan.cardimageverification.result
 
 import androidx.test.filters.LargeTest
 import com.stripe.android.camera.framework.time.milliseconds
-import com.stripe.android.stripecardscan.cardimageverification.CardImageVerificationConfig
 import com.stripe.android.stripecardscan.cardimageverification.analyzer.MainLoopAnalyzer
+import com.stripe.android.stripecardscan.cardimageverification.result.MainLoopState.Companion.DESIRED_CARD_COUNT
+import com.stripe.android.stripecardscan.cardimageverification.result.MainLoopState.Companion.DESIRED_OCR_AGREEMENT
+import com.stripe.android.stripecardscan.cardimageverification.result.MainLoopState.Companion.NO_CARD_VISIBLE_DURATION
+import com.stripe.android.stripecardscan.cardimageverification.result.MainLoopState.Companion.OCR_AND_CARD_SEARCH_DURATION
+import com.stripe.android.stripecardscan.cardimageverification.result.MainLoopState.Companion.OCR_ONLY_SEARCH_DURATION
+import com.stripe.android.stripecardscan.cardimageverification.result.MainLoopState.Companion.WRONG_CARD_DURATION
 import com.stripe.android.stripecardscan.framework.time.delay
 import com.stripe.android.stripecardscan.framework.util.ItemCounter
 import com.stripe.android.stripecardscan.payment.card.CardIssuer
@@ -137,7 +142,7 @@ class MainLoopStateMachineTest {
             ),
         )
 
-        repeat(CardImageVerificationConfig.DESIRED_CARD_COUNT - 2) {
+        repeat(DESIRED_CARD_COUNT - 2) {
             state = state.consumeTransition(prediction)
             assertTrue(state is MainLoopState.OcrFound)
         }
@@ -161,7 +166,7 @@ class MainLoopStateMachineTest {
             card = null,
         )
 
-        repeat(CardImageVerificationConfig.DESIRED_OCR_AGREEMENT - 2) {
+        repeat(DESIRED_OCR_AGREEMENT - 2) {
             state = state.consumeTransition(prediction)
             assertTrue(state is MainLoopState.OcrFound)
         }
@@ -190,15 +195,12 @@ class MainLoopStateMachineTest {
             card = null,
         )
 
-        repeat(CardImageVerificationConfig.DESIRED_OCR_AGREEMENT - 3) {
+        repeat(DESIRED_OCR_AGREEMENT - 3) {
             state = state.consumeTransition(prediction)
             assertTrue(state is MainLoopState.OcrFound)
         }
 
-        delay(
-            CardImageVerificationConfig.OCR_AND_CARD_SEARCH_DURATION_MILLIS.milliseconds +
-                1.milliseconds
-        )
+        delay(OCR_AND_CARD_SEARCH_DURATION + 1.milliseconds)
 
         val newState = state.consumeTransition(prediction)
         assertTrue(newState is MainLoopState.Finished)
@@ -224,15 +226,12 @@ class MainLoopStateMachineTest {
             card = null,
         )
 
-        repeat(CardImageVerificationConfig.DESIRED_OCR_AGREEMENT - 2) {
+        repeat(DESIRED_OCR_AGREEMENT - 2) {
             state = state.consumeTransition(predictionWithCard)
             assertTrue(state is MainLoopState.OcrFound)
         }
 
-        delay(
-            CardImageVerificationConfig.NO_CARD_VISIBLE_DURATION_MILLIS.milliseconds +
-                1.milliseconds
-        )
+        delay(NO_CARD_VISIBLE_DURATION + 1.milliseconds)
 
         val predictionWithoutCard = MainLoopAnalyzer.Prediction(
             ocr = null,
@@ -258,10 +257,7 @@ class MainLoopStateMachineTest {
             requiredLastFour = "8770",
         )
 
-        delay(
-            CardImageVerificationConfig.OCR_AND_CARD_SEARCH_DURATION_MILLIS.milliseconds +
-                1.milliseconds
-        )
+        delay(OCR_AND_CARD_SEARCH_DURATION + 1.milliseconds)
 
         val prediction = MainLoopAnalyzer.Prediction(
             ocr = null,
@@ -329,7 +325,7 @@ class MainLoopStateMachineTest {
     fun panSatisfied_enoughSides_noTimeout() = runTest {
         val state = MainLoopState.OcrSatisfied(
             pan = "4847186095118770",
-            visibleCardCount = CardImageVerificationConfig.DESIRED_CARD_COUNT - 1,
+            visibleCardCount = DESIRED_CARD_COUNT - 1,
         )
 
         val prediction = MainLoopAnalyzer.Prediction(
@@ -356,7 +352,7 @@ class MainLoopStateMachineTest {
     fun panSatisfied_timeout() = runBlocking {
         val state = MainLoopState.OcrSatisfied(
             pan = "4847186095118770",
-            visibleCardCount = CardImageVerificationConfig.DESIRED_CARD_COUNT - 1,
+            visibleCardCount = DESIRED_CARD_COUNT - 1,
         )
 
         val prediction = MainLoopAnalyzer.Prediction(
@@ -364,10 +360,7 @@ class MainLoopStateMachineTest {
             card = null,
         )
 
-        delay(
-            CardImageVerificationConfig.NO_CARD_VISIBLE_DURATION_MILLIS.milliseconds +
-                1.milliseconds
-        )
+        delay(NO_CARD_VISIBLE_DURATION + 1.milliseconds)
 
         val newState = state.consumeTransition(prediction)
         assertTrue(newState is MainLoopState.Finished)
@@ -417,7 +410,7 @@ class MainLoopStateMachineTest {
             card = null,
         )
 
-        repeat(CardImageVerificationConfig.DESIRED_OCR_AGREEMENT - 2) {
+        repeat(DESIRED_OCR_AGREEMENT - 2) {
             state = state.consumeTransition(prediction)
             assertTrue(state is MainLoopState.CardSatisfied)
         }
@@ -445,10 +438,7 @@ class MainLoopStateMachineTest {
             card = null,
         )
 
-        delay(
-            CardImageVerificationConfig.OCR_ONLY_SEARCH_DURATION_MILLIS.milliseconds +
-                1.milliseconds
-        )
+        delay(OCR_ONLY_SEARCH_DURATION + 1.milliseconds)
 
         val newState = state.consumeTransition(prediction)
         assertTrue(newState is MainLoopState.Finished)
@@ -557,10 +547,7 @@ class MainLoopStateMachineTest {
             card = null,
         )
 
-        delay(
-            CardImageVerificationConfig.WRONG_CARD_DURATION_MILLIS.milliseconds +
-                1.milliseconds
-        )
+        delay(WRONG_CARD_DURATION + 1.milliseconds)
 
         val newState = state.consumeTransition(prediction)
         assertTrue(newState is MainLoopState.Initial)

@@ -7,7 +7,6 @@ import com.stripe.android.camera.framework.AnalyzerFactory
 import com.stripe.android.stripecardscan.framework.Config
 import com.stripe.android.stripecardscan.framework.FetchedData
 import com.stripe.android.stripecardscan.framework.Loader
-import com.stripe.android.stripecardscan.framework.time.Timer
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import org.tensorflow.lite.Interpreter
@@ -32,22 +31,12 @@ internal abstract class TensorFlowLiteAnalyzer<Input, MLInput, Output, MLOutput>
         data: MLInput,
     ): MLOutput
 
-    private val loggingTimer by lazy {
-        Timer.newInstance(Config.logTag, this::class.java.simpleName)
-    }
-
     override suspend fun analyze(data: Input, state: Any): Output {
-        val mlInput = loggingTimer.measureSuspend("transform") {
-            transformData(data)
-        }
+        val mlInput = transformData(data)
 
-        val mlOutput = loggingTimer.measureSuspend("infer") {
-            executeInference(tfInterpreter, mlInput)
-        }
+        val mlOutput = executeInference(tfInterpreter, mlInput)
 
-        return loggingTimer.measureSuspend("interpret") {
-            interpretMLOutput(data, mlOutput)
-        }
+        return interpretMLOutput(data, mlOutput)
     }
 
     override fun close() {

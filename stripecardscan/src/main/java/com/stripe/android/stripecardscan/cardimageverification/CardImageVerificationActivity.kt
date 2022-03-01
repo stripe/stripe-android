@@ -24,7 +24,6 @@ import com.stripe.android.stripecardscan.cardimageverification.exception.StripeN
 import com.stripe.android.stripecardscan.cardimageverification.exception.UnknownScanException
 import com.stripe.android.stripecardscan.cardimageverification.result.MainLoopAggregator
 import com.stripe.android.stripecardscan.cardimageverification.result.MainLoopState
-import com.stripe.android.stripecardscan.framework.Config
 import com.stripe.android.stripecardscan.framework.api.NetworkResult
 import com.stripe.android.stripecardscan.framework.api.dto.ScanStatistics
 import com.stripe.android.stripecardscan.framework.api.getCardImageVerificationIntentDetails
@@ -45,7 +44,6 @@ import com.stripe.android.stripecardscan.scanui.util.getColorByRes
 import com.stripe.android.stripecardscan.scanui.util.getDrawableByRes
 import com.stripe.android.stripecardscan.scanui.util.hide
 import com.stripe.android.stripecardscan.scanui.util.setTextSizeByRes
-import com.stripe.android.stripecardscan.scanui.util.setVisible
 import com.stripe.android.stripecardscan.scanui.util.show
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -399,8 +397,6 @@ internal open class CardImageVerificationActivity :
             resources.getDimensionPixelSize(R.dimen.stripeButtonPadding),
             resources.getDimensionPixelSize(R.dimen.stripeButtonPadding),
         )
-
-        cannotScanTextView.setVisible(Config.enableCannotScanButton)
 
         if (isBackgroundDark()) {
             cannotScanTextView.setTextColor(getColorByRes(R.color.stripeButtonDarkText))

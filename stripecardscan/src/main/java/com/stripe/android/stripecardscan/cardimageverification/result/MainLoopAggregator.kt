@@ -2,7 +2,6 @@ package com.stripe.android.stripecardscan.cardimageverification.result
 
 import com.stripe.android.stripecardscan.cardimageverification.SavedFrame
 import com.stripe.android.stripecardscan.cardimageverification.SavedFrameType
-import com.stripe.android.stripecardscan.cardimageverification.CardImageVerificationConfig
 import com.stripe.android.stripecardscan.cardimageverification.analyzer.MainLoopAnalyzer
 import com.stripe.android.camera.framework.AggregateResultListener
 import com.stripe.android.camera.framework.ResultAggregator
@@ -42,6 +41,14 @@ internal class MainLoopAggregator(
         statsName = null, // TODO: when we want to collect this in scan stats, give this a name
     ) {
 
+    companion object {
+
+        /**
+         * The maximum number of saved frames per type to use.
+         */
+        const val MAX_SAVED_FRAMES_PER_TYPE = 6
+    }
+
     internal data class FinalResult(
         val pan: String,
         val savedFrames: Map<SavedFrameType, List<SavedFrame>>,
@@ -64,7 +71,7 @@ internal class MainLoopAggregator(
 
     private val frameSaver = object : FrameSaver<SavedFrameType, SavedFrame, InterimResult>() {
         override fun getMaxSavedFrames(savedFrameIdentifier: SavedFrameType): Int =
-            CardImageVerificationConfig.MAX_SAVED_FRAMES_PER_TYPE
+            MAX_SAVED_FRAMES_PER_TYPE
         override fun getSaveFrameIdentifier(
             frame: SavedFrame,
             metaData: InterimResult,
