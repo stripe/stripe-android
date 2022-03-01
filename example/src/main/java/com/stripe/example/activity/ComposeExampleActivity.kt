@@ -136,7 +136,7 @@ class ComposeExampleActivity : AppCompatActivity() {
 
                 Button(
                     onClick = {
-                        val paramMap = params[items[selectedIndex]]?.toParamMap()
+                        val paramMap = Companion.params[items[selectedIndex]]?.toParamMap()
                         PaymentMethod.Type.fromCode(paramMap?.get("type") as String)?.let {
                             createAndConfirmPaymentIntent(
                                 PaymentMethodCreateParams.createWithOverride(it, paramMap, setOf("test")),

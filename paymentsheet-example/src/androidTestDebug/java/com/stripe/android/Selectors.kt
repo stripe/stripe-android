@@ -1,3 +1,5 @@
+package com.stripe.android
+
 import android.content.res.Resources
 import androidx.annotation.IntegerRes
 import androidx.annotation.StringRes
@@ -16,7 +18,6 @@ import com.stripe.android.paymentsheet.example.playground.model.CheckoutCurrency
 import com.stripe.android.paymentsheet.example.playground.model.CheckoutCustomer
 import com.stripe.android.paymentsheet.example.playground.model.CheckoutMode
 import com.stripe.android.paymentsheet.matchPaymentMethodHolder
-import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
 import java.security.InvalidParameterException
 
 open class EspressoLabelIdButton(@StringRes val label: Int) {
@@ -65,18 +66,8 @@ open class UiAutomatorText(
 object SaveForFutureCheckbox :
     EspressoLabelIdButton(R.string.stripe_paymentsheet_save_this_card_with_merchant_name)
 
-sealed class PaymentSelection(@StringRes val label: Int) {
-    //: EspressoLabelIdButton(id) {
-    object Card : PaymentSelection(R.string.stripe_paymentsheet_payment_method_card)
-    object Sofort : PaymentSelection(R.string.stripe_paymentsheet_payment_method_sofort)
-    object iDEAL : PaymentSelection(R.string.stripe_paymentsheet_payment_method_ideal)
-    object Bancontact : PaymentSelection(R.string.stripe_paymentsheet_payment_method_bancontact)
-    object SepaDebit : PaymentSelection(R.string.stripe_paymentsheet_payment_method_sepa_debit)
-    object Eps : PaymentSelection(R.string.stripe_paymentsheet_payment_method_eps)
-    object Giropay : PaymentSelection(R.string.stripe_paymentsheet_payment_method_giropay)
-    object P24 : PaymentSelection(R.string.stripe_paymentsheet_payment_method_p24)
-    object AfterpayClearPay :
-        PaymentSelection(R.string.stripe_paymentsheet_payment_method_afterpay_clearpay)
+class PaymentSelection(@StringRes val label: Int) {
+    //: com.stripe.android.EspressoLabelIdButton(id) {
 
     fun exists(): Boolean {
         return try {
@@ -105,26 +96,18 @@ sealed class PaymentSelection(@StringRes val label: Int) {
         } catch (e: PerformException) {
             // Item is already selected.
         }
-
-    }
-
-    companion object {
-        fun fromString(name: String) =
-            when (SupportedPaymentMethod.fromCode(name)?.displayNameResource) {
-                Card.label -> Card
-                Sofort.label -> Sofort
-                iDEAL.label -> iDEAL
-                Bancontact.label -> Bancontact
-                Eps.label -> Eps
-                SepaDebit.label -> SepaDebit
-                Giropay.label -> Giropay
-                P24.label -> P24
-                AfterpayClearPay.label -> AfterpayClearPay
-                else -> throw InvalidParameterException("Payment intent payment selection not recognized: $name")
-            }
     }
 }
 
+sealed class Automatic(@IntegerRes id: Int) : EspressoIdButton(id) {
+    object On : Automatic(R.id.automatic_pm_on_button)
+    object Off : Automatic(R.id.automatic_pm_off_button)
+}
+
+sealed class DelayedPMs(@IntegerRes id: Int) : EspressoIdButton(id) {
+    object On : DelayedPMs(R.id.allowsDelayedPaymentMethods_on_button)
+    object Off : DelayedPMs(R.id.allowsDelayedPaymentMethods_off_button)
+}
 
 sealed class Billing(@IntegerRes id: Int) : EspressoIdButton(id) {
     object On : Billing(R.id.default_billing_on_button)
@@ -187,7 +170,7 @@ object AuthorizeWindow {
 
     private fun getSelector(browser: Browser?) = UiSelector()
         .packageName(browser?.packageName)
-        .resourceId(browser?.resourdID)
+        .resourceId(browser?.resourceID)
 }
 
 object AuthorizePageLoaded {
@@ -201,11 +184,10 @@ object AuthorizePageLoaded {
     }
 }
 
-sealed class Browser(name: String, val packageName: String) :
+sealed class Browser(name: String, val packageName: String, val resourceID: String) :
     UiAutomatorText(name) {
-    val resourdID = "$packageName:id/action_bar_root"
 
-    object Chrome : Browser("Chrome", "com.android.chrome")
-    object Opera : Browser("Opera", "com.opera.browser")
-    object Firefox : Browser("Firefox", "org.mozilla.firefox")
+    object Chrome : Browser("Chrome", "com.android.chrome", "com.android.chrome:id/coordinator")
+    object Opera : Browser("Opera", "com.opera.browser", "")
+    object Firefox : Browser("Firefox", "org.mozilla.firefox", "")
 }

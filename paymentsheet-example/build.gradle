@@ -86,6 +86,7 @@ dependencies {
 
 // Test rules and transitive dependencies:
     androidTestImplementation("androidx.compose.ui:ui-test-junit4:$composeVersion")
+    androidTestImplementation project(path: ':payments-ui-core')
 // Needed for createComposeRule, but not createAndroidComposeRule:
     debugImplementation("androidx.compose.ui:ui-test-manifest:$composeVersion")
     androidTestImplementation "com.android.support.test.espresso:espresso-intents:3.0.2"

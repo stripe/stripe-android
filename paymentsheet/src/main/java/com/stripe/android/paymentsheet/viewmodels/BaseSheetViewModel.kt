@@ -11,6 +11,7 @@ import androidx.lifecycle.asFlow
 import androidx.lifecycle.distinctUntilChanged
 import androidx.lifecycle.map
 import androidx.lifecycle.viewModelScope
+import androidx.test.espresso.idling.CountingIdlingResource
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.InjectorKey
 import com.stripe.android.model.PaymentIntent
@@ -40,6 +41,9 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import org.jetbrains.annotations.TestOnly
 import kotlin.coroutines.CoroutineContext
+
+@VisibleForTesting
+val transitionFragmentResource = CountingIdlingResource("transition")
 
 /**
  * Base `ViewModel` for activities that use `BottomSheet`.
@@ -159,6 +163,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     }.distinctUntilChanged()
 
     init {
+        transitionFragmentResource.increment()
         if (_savedSelection.value == null) {
             viewModelScope.launch {
                 val savedSelection = withContext(workContext) {
@@ -219,6 +224,9 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     }
 
     open fun transitionTo(target: TransitionTargetType) {
+        if(!transitionFragmentResource.isIdleNow){
+            transitionFragmentResource.decrement()
+        }
         _transition.postValue(Event(target))
     }
 

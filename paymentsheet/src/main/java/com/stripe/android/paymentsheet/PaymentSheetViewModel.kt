@@ -59,8 +59,7 @@ import javax.inject.Inject
 import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
 
-@VisibleForTesting
-val transitionFragmentResource = CountingIdlingResource("transition")
+
 
 /**
  * This is used by both the [PaymentSheetActivity] and the [PaymentSheetAddPaymentMethodFragment]
@@ -206,7 +205,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
      * methods for the customer.
      */
     internal fun maybeFetchStripeIntent() = if (stripeIntent.value == null) {
-        transitionFragmentResource.increment()
         viewModelScope.launch {
             runCatching {
                 stripeIntentRepository.get(args.clientSecret)
@@ -270,7 +268,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                 onSuccess = {
                     savedStateHandle.set(SAVE_PAYMENT_METHODS, it)
                     setStripeIntent(stripeIntent)
-                    transitionFragmentResource.decrement()
                     resetViewState()
                 },
                 onFailure = ::onFatal
