@@ -35,8 +35,9 @@ sealed class RequestHeadersFactory {
 
     protected open var postHeaders: Map<String, String> = emptyMap()
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     open class BaseApiHeadersFactory(
-        private val options: ApiRequest.Options,
+        private val optionsProvider: () -> ApiRequest.Options,
         private val appInfo: InternalAppInfo? = null,
         private val locale: Locale = Locale.getDefault(),
         private val apiVersion: String = ApiVersion.get().code,
@@ -60,25 +61,26 @@ sealed class RequestHeadersFactory {
 
         override val extraHeaders: Map<String, String>
             get() {
+                val apiRequestOptions = optionsProvider()
                 return mapOf(
                     HEADER_ACCEPT to "application/json",
                     HEADER_STRIPE_VERSION to apiVersion,
-                    HEADER_AUTHORIZATION to "Bearer ${options.apiKey}"
+                    HEADER_AUTHORIZATION to "Bearer ${apiRequestOptions.apiKey}"
                 ).plus(
                     stripeClientUserAgentHeaderFactory.create(appInfo)
                 ).plus(
-                    if (options.apiKeyIsUserKey) {
+                    if (apiRequestOptions.apiKeyIsUserKey) {
                         val isLiveMode = Os.getenv("Stripe-Livemode") != "false"
                         mapOf(HEADER_STRIPE_LIVEMODE to isLiveMode.toString())
                     } else {
                         emptyMap()
                     }
                 ).plus(
-                    options.stripeAccount?.let {
+                    apiRequestOptions.stripeAccount?.let {
                         mapOf(HEADER_STRIPE_ACCOUNT to it)
                     }.orEmpty()
                 ).plus(
-                    options.idempotencyKey?.let {
+                    apiRequestOptions.idempotencyKey?.let {
                         mapOf(HEADER_IDEMPOTENCY_KEY to it)
                     }.orEmpty()
                 ).plus(
@@ -98,7 +100,7 @@ sealed class RequestHeadersFactory {
         apiVersion: String = ApiVersion.get().code,
         sdkVersion: String = StripeSdkVersion.VERSION,
     ) : BaseApiHeadersFactory(
-        options, appInfo, locale, apiVersion, sdkVersion
+        { options }, appInfo, locale, apiVersion, sdkVersion
     ) {
         override var postHeaders = mapOf(
             HEADER_CONTENT_TYPE to "${StripeRequest.MimeType.Form}; charset=$CHARSET"
@@ -118,7 +120,7 @@ sealed class RequestHeadersFactory {
         sdkVersion: String = StripeSdkVersion.VERSION,
         boundary: String
     ) : BaseApiHeadersFactory(
-        options, appInfo, locale, apiVersion, sdkVersion
+        { options }, appInfo, locale, apiVersion, sdkVersion
     ) {
         override var postHeaders = mapOf(
             HEADER_CONTENT_TYPE to "${StripeRequest.MimeType.MultipartForm.code}; boundary=$boundary"

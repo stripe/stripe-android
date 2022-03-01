@@ -103,7 +103,7 @@ class RequestHeadersFactoriesTest {
         appInfo: InternalAppInfo? = null
     ): Map<String, String> {
         return RequestHeadersFactory.BaseApiHeadersFactory(
-            options = options,
+            optionsProvider = { options },
             appInfo = appInfo,
             locale = locale
         ).create()
