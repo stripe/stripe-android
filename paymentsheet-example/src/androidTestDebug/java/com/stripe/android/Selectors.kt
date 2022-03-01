@@ -3,11 +3,18 @@ package com.stripe.android
 import android.content.res.Resources
 import androidx.annotation.IntegerRes
 import androidx.annotation.StringRes
+import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsEnabled
+import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.junit4.ComposeTestRule
+import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollToNode
 import androidx.test.espresso.Espresso
 import androidx.test.espresso.PerformException
 import androidx.test.espresso.action.ViewActions
 import androidx.test.espresso.assertion.ViewAssertions
-import androidx.test.espresso.contrib.RecyclerViewActions
 import androidx.test.espresso.matcher.ViewMatchers
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.UiDevice
@@ -17,7 +24,6 @@ import com.stripe.android.paymentsheet.example.R
 import com.stripe.android.paymentsheet.example.playground.model.CheckoutCurrency
 import com.stripe.android.paymentsheet.example.playground.model.CheckoutCustomer
 import com.stripe.android.paymentsheet.example.playground.model.CheckoutMode
-import com.stripe.android.paymentsheet.matchPaymentMethodHolder
 import java.security.InvalidParameterException
 
 open class EspressoLabelIdButton(@StringRes val label: Int) {
@@ -83,16 +89,27 @@ class PaymentSelection(@StringRes val label: Int) {
         }
     }
 
-    fun click(resource: Resources) {
+    fun click(composeTestRule: ComposeTestRule, resource: Resources) {
         try {
-            Espresso.onView(ViewMatchers.withId(com.stripe.android.paymentsheet.R.id.payment_methods_recycler))
-                .check(ViewAssertions.matches(ViewMatchers.isDisplayed()))
-                .perform(
-                    RecyclerViewActions.actionOnHolderItem(
-                        matchPaymentMethodHolder(resource.getString(label)),
-                        ViewActions.click()
-                    )
-                )
+            val onNodeWithText = composeTestRule.onNodeWithText(
+//                "Card"
+                resource.getString(label)
+            )
+            composeTestRule.onNodeWithTag("PaymentMethodsUI", true)
+                .performScrollToNode(hasText(resource.getString(label)))
+            onNodeWithText.assertIsDisplayed()
+            onNodeWithText.assertIsEnabled()
+            onNodeWithText.performClick()
+
+            composeTestRule.waitForIdle()
+//            Espresso.onView(ViewMatchers.withId(com.stripe.android.paymentsheet.R.id.payment_methods_recycler))
+//                .check(ViewAssertions.matches(ViewMatchers.isDisplayed()))
+//                .perform(
+//                    RecyclerViewActions.actionOnHolderItem(
+//                        matchPaymentMethodHolder(composeTestRule, resource.getString(label)),
+//                        ViewActions.click()
+//                    )
+//                )
         } catch (e: PerformException) {
             // Item is already selected.
         }

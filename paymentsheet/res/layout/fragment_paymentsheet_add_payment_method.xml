@@ -48,14 +48,14 @@
             android:layout_height="wrap_content" />
     </LinearLayout>
 
-    <androidx.recyclerview.widget.RecyclerView
+    <androidx.compose.ui.platform.ComposeView
         android:id="@+id/payment_methods_recycler"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:paddingHorizontal="14dp"
         android:paddingTop="18dp"
         android:paddingBottom="6dp"
-        android:visibility="gone"
+        android:visibility="visible"
         android:clipChildren="false"
         android:clipToPadding="false"
         android:orientation="horizontal"
@@ -68,6 +68,6 @@
         android:layout_height="wrap_content"
         android:paddingHorizontal="@dimen/stripe_paymentsheet_outer_spacing_horizontal"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"/>
+        app:layout_constraintStart_toStartOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -11,7 +11,9 @@ import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.forms.AffirmRequirement
 import com.stripe.android.paymentsheet.forms.AfterpayClearpayRequirement
+import com.stripe.android.paymentsheet.forms.AuBecsDebitRequirement
 import com.stripe.android.paymentsheet.forms.BancontactRequirement
 import com.stripe.android.paymentsheet.forms.CardRequirement
 import com.stripe.android.paymentsheet.forms.Delayed
@@ -30,6 +32,8 @@ import com.stripe.android.paymentsheet.forms.SofortRequirement
 import com.stripe.android.ui.core.elements.LayoutFormDescriptor
 import com.stripe.android.ui.core.elements.LayoutSpec
 import com.stripe.android.ui.core.elements.SaveForFutureUseSpec
+import com.stripe.android.ui.core.forms.AffirmForm
+import com.stripe.android.ui.core.forms.AffirmParamKey
 import com.stripe.android.ui.core.forms.AfterpayClearpayForm
 import com.stripe.android.ui.core.forms.AfterpayClearpayParamKey
 import com.stripe.android.ui.core.forms.BancontactForm
@@ -50,6 +54,8 @@ import com.stripe.android.ui.core.forms.SepaDebitForm
 import com.stripe.android.ui.core.forms.SepaDebitParamKey
 import com.stripe.android.ui.core.forms.SofortForm
 import com.stripe.android.ui.core.forms.SofortParamKey
+import com.stripe.android.ui.core.forms.AuBecsDebitForm
+import com.stripe.android.ui.core.forms.AuBecsDebitParamKey
 import kotlinx.parcelize.Parcelize
 
 /**
@@ -200,6 +206,26 @@ sealed class SupportedPaymentMethod(
         PaypalRequirement,
         PaypalParamKey,
         PaypalForm
+    )
+
+    @Parcelize
+    object Affirm : SupportedPaymentMethod(
+        PaymentMethod.Type.Affirm,
+        R.string.stripe_paymentsheet_payment_method_affirm,
+        R.drawable.stripe_ic_paymentsheet_pm_affirm,
+        AffirmRequirement,
+        AffirmParamKey,
+        AffirmForm
+    )
+
+    @Parcelize
+    object AuBecsDebit : SupportedPaymentMethod(
+        PaymentMethod.Type.AuBecsDebit,
+        R.string.stripe_paymentsheet_payment_method_au_becs_debit,
+        R.drawable.stripe_ic_paymentsheet_pm_bank,
+        AuBecsDebitRequirement,
+        AuBecsDebitParamKey,
+        AuBecsDebitForm
     )
 
     /**
@@ -387,6 +413,8 @@ sealed class SupportedPaymentMethod(
                 Klarna,
                 PayPal,
                 AfterpayClearpay,
+                // Affirm // TODO: uncomment once we are ready to go live
+                // AuBecsDebit // TODO: uncomment once we are ready to go live
             )
         }
 

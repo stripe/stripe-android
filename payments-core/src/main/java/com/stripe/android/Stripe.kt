@@ -15,6 +15,7 @@ import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.exception.InvalidRequestException
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.model.StripeModel
+import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.exception.AuthenticationException
 import com.stripe.android.exception.CardException
 import com.stripe.android.model.AccountParams
@@ -325,7 +326,7 @@ class Stripe internal constructor(
      * Handle the [next_action](https://stripe.com/docs/api/payment_intents/object#payment_intent_object-next_action)
      * for a previously confirmed [PaymentIntent].
      *
-     * Used for [manual confirmation](https://stripe.com/docs/payments/payment-intents/android-manual) flow.
+     * Used for [manual confirmation](https://stripe.com/docs/payments/accept-a-payment-synchronously) flow.
      *
      * @param fragment the `Fragment` that is launching the payment authentication flow
      * @param clientSecret the [client_secret](https://stripe.com/docs/api/payment_intents/object#payment_intent_object-client_secret)
@@ -1670,8 +1671,23 @@ class Stripe internal constructor(
         @JvmField
         val API_VERSION: String = ApiVersion.get().code
 
-        const val VERSION_NAME = "19.2.0"
-        const val VERSION: String = "AndroidBindings/$VERSION_NAME"
+        @Deprecated(
+            message = "Use StripeSdkVersion.VERSION_NAME instead",
+            replaceWith = ReplaceWith(
+                expression = "StripeSdkVersion.VERSION_NAME",
+                imports = ["com.stripe.android.core.version.StripeSdkVersion"]
+            )
+        )
+        const val VERSION_NAME = StripeSdkVersion.VERSION_NAME
+
+        @Deprecated(
+            message = "Use StripeSdkVersion.VERSION instead",
+            replaceWith = ReplaceWith(
+                expression = "StripeSdkVersion.VERSION",
+                imports = ["com.stripe.android.core.version.StripeSdkVersion"]
+            )
+        )
+        const val VERSION: String = StripeSdkVersion.VERSION
 
         /**
          * Setter for identifying your plug-in or library.

@@ -303,6 +303,13 @@ constructor(
             isVoucher = false,
             requiresMandate = false,
             hasDelayedSettlement = false
+        ),
+        Affirm(
+            "affirm",
+            isReusable = false,
+            isVoucher = false,
+            requiresMandate = false,
+            hasDelayedSettlement = false
         );
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
@@ -826,7 +833,7 @@ constructor(
         /**
          * The customer’s bank.
          *
-         * [netbanking.bank](https://stripe.com/docs/payments/netbanking/banks)
+         * [netbanking.bank](https://stripe.com/docs/js#stripe_create_payment_method-paymentMethodData-netbanking[bank])
          */
         @JvmField val bank: String?
     ) : TypeData() {

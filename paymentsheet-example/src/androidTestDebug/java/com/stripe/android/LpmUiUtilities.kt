@@ -1,5 +1,6 @@
 package com.stripe.android
 
+import android.util.Log
 import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performTextInput
@@ -25,6 +26,7 @@ import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
 import com.stripe.android.paymentsheet.viewmodels.transitionFragmentResource
 import com.stripe.android.ui.core.elements.AddressSpec
 import com.stripe.android.ui.core.elements.EmailSpec
+import com.stripe.android.ui.core.elements.SaveForFutureUseSpec
 import com.stripe.android.ui.core.elements.SectionSpec
 import com.stripe.android.ui.core.elements.SimpleTextSpec
 import java.util.concurrent.Semaphore
@@ -59,7 +61,10 @@ internal fun confirmCompleteSuccess(
     }
 
     assert(testParameters.paymentSelection.exists())
-    testParameters.paymentSelection.click(InstrumentationRegistry.getInstrumentation().targetContext.resources)
+    testParameters.paymentSelection.click(
+        composeTestRule,
+        InstrumentationRegistry.getInstrumentation().targetContext.resources
+    )
 
     populatePlatformLpmFields(composeTestRule, testParameters)
 
@@ -142,6 +147,24 @@ private fun launchCompleteScenario(
     Espresso.onView(ViewMatchers.withText(R.string.checkout_complete)).perform(ViewActions.click())
 }
 
+private fun isHidden(
+    testParameters: TestParameters,
+    section: SectionSpec
+): Boolean {
+    val saveForFutureUseSpec = testParameters.paymentMethod.formSpec.items
+        .mapNotNull { it as? SaveForFutureUseSpec }
+        .firstOrNull()
+    return (!testParameters.saveCheckboxValue
+        && saveForFutureUseSpec?.identifierRequiredForFutureUse
+        ?.map { saveForFutureUseHidesIdentifier ->
+            saveForFutureUseHidesIdentifier.identifier.value
+        }
+        ?.firstOrNull { saveForFutureUseHidesIdentifier ->
+            saveForFutureUseHidesIdentifier == section.identifier.value
+        } != null)
+
+}
+
 private fun populatePlatformLpmFields(
     composeTestRule: ComposeTestRule,
     testParameters: TestParameters
@@ -150,32 +173,39 @@ private fun populatePlatformLpmFields(
     testParameters.paymentMethod.formSpec.items.forEach {
         when (it) {
             is SectionSpec -> {
-                it.fields.forEach { sectionField ->
-                    when (sectionField) {
-                        is EmailSpec -> {
-                            composeTestRule.onNodeWithText("Email")
-                                .performTextInput("jrosen@email.com")
-                        }
-                        SimpleTextSpec.NAME -> {
-                            composeTestRule.onNodeWithText("Name")
-                                .performTextInput("Jenny Rosen")
-
-                        }
-                        is AddressSpec -> {
-                            // TODO: This will not work when other countries are selected or defaulted
-                            composeTestRule.onNodeWithText("Address line 1")
-                                .performTextInput("123 Main Street")
-                            composeTestRule.onNodeWithText("City")
-                                .performTextInput("123 Main Street")
-                            composeTestRule.onNodeWithText("ZIP Code")
-                                .performTextInput("12345")
-                            composeTestRule.onNodeWithText("State")
-                                .performTextInput("NY")
-                        }
+                if (!isHidden(testParameters, it)) {
+                    it.fields.forEach { sectionField ->
+                        when (sectionField) {
+                            is EmailSpec -> {
+                                if (testParameters.billing == Billing.Off) {
+                                    composeTestRule.onNodeWithText("Email")
+                                        .performTextInput("jrosen@email.com")
+                                }
+                            }
+                            SimpleTextSpec.NAME -> {
+                                if (testParameters.billing == Billing.Off) {
+                                    composeTestRule.onNodeWithText("Name")
+                                        .performTextInput("Jenny Rosen")
+                                }
+                            }
+                            is AddressSpec -> {
+                                if (testParameters.billing == Billing.Off) {
+                                    // TODO: This will not work when other countries are selected or defaulted
+                                    composeTestRule.onNodeWithText("Address line 1")
+                                        .performTextInput("123 Main Street")
+                                    composeTestRule.onNodeWithText("City")
+                                        .performTextInput("123 Main Street")
+                                    composeTestRule.onNodeWithText("ZIP Code")
+                                        .performTextInput("12345")
+                                    composeTestRule.onNodeWithText("State")
+                                        .performTextInput("NY")
+                                }
+                            }
 //                        is BankDropdownSpec -> {}
 //                        is CountrySpec -> {}
 //                        is KlarnaCountrySpec -> {}
 //                        is SimpleTextSpec -> {}
+                        }
                     }
                 }
             }

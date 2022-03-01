@@ -117,7 +117,8 @@ internal class PaymentAuthWebViewActivityViewModel(
         private val logger: Logger,
         private val args: PaymentBrowserAuthContract.Args
     ) : ViewModelProvider.Factory {
-        override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+        @Suppress("UNCHECKED_CAST")
+        override fun <T : ViewModel> create(modelClass: Class<T>): T {
 
             return PaymentAuthWebViewActivityViewModel(
                 args,

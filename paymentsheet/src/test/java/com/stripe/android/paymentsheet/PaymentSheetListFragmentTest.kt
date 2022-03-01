@@ -130,14 +130,14 @@ internal class PaymentSheetListFragmentTest : PaymentSheetViewModelTestInjection
 
     @Test
     @Config(qualifiers = "w481dp")
-    fun `when screen is 481dp wide, adapter should show 3 and a half items with 127dp width`() {
+    fun `when screen is 481dp wide, adapter should show 3 and a half items with 128dp width`() {
         createScenario(
             initialState = Lifecycle.State.INITIALIZED
         ).moveToState(Lifecycle.State.CREATED).onFragment { fragment ->
             fragment.sheetViewModel._paymentMethods.value = PAYMENT_METHODS
         }.moveToState(Lifecycle.State.STARTED).onFragment {
             val item = recyclerView(it).layoutManager!!.findViewByPosition(0)
-            assertThat(item!!.measuredWidth).isEqualTo(127)
+            assertThat(item!!.measuredWidth).isEqualTo(128)
         }
     }
 
@@ -180,7 +180,7 @@ internal class PaymentSheetListFragmentTest : PaymentSheetViewModelTestInjection
             idleLooper()
 
             val adapter = recyclerView(it).adapter as PaymentOptionsAdapter
-            adapter.addCardClickListener.onClick(it.requireView())
+            adapter.addCardClickListener()
             idleLooper()
 
             assertThat(activityViewModel.transition.value?.peekContent())

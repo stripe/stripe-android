@@ -105,7 +105,8 @@ internal class PaymentMethodsViewModel(
         private val initialPaymentMethodId: String?,
         private val startedFromPaymentSession: Boolean
     ) : ViewModelProvider.Factory {
-        override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+        @Suppress("UNCHECKED_CAST")
+        override fun <T : ViewModel> create(modelClass: Class<T>): T {
             return PaymentMethodsViewModel(
                 application,
                 customerSession,

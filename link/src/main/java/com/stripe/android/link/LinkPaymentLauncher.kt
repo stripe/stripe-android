@@ -12,6 +12,7 @@ import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.link.injection.DaggerLinkPaymentLauncherComponent
 import com.stripe.android.link.ui.signup.SignUpViewModel
+import com.stripe.android.link.ui.verification.VerificationViewModel
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
@@ -58,9 +59,9 @@ class LinkPaymentLauncher @AssistedInject constructor(
     private val injector = object : Injector {
         override fun inject(injectable: Injectable<*>) {
             when (injectable) {
-                is SignUpViewModel.Factory -> {
-                    launcherComponent.inject(injectable)
-                }
+                is LinkActivityViewModel.Factory -> launcherComponent.inject(injectable)
+                is SignUpViewModel.Factory -> launcherComponent.inject(injectable)
+                is VerificationViewModel.Factory -> launcherComponent.inject(injectable)
                 else -> {
                     throw IllegalArgumentException("invalid Injectable $injectable requested in $this")
                 }

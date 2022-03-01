@@ -7,14 +7,14 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.annotation.VisibleForTesting
 import androidx.appcompat.view.ContextThemeWrapper
+import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.unit.dp
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.commit
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
-import androidx.recyclerview.widget.LinearLayoutManager
 import com.stripe.android.core.injection.InjectorKey
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.databinding.FragmentPaymentsheetAddPaymentMethodBinding
@@ -28,7 +28,6 @@ import com.stripe.android.paymentsheet.paymentdatacollection.TransformToPaymentM
 import com.stripe.android.paymentsheet.ui.AnimationConstants
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.Amount
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 internal abstract class BaseAddPaymentMethodFragment : Fragment() {
@@ -74,7 +73,8 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
         ).takeUnless { it == -1 } ?: 0
 
         if (paymentMethods.size > 1) {
-            setupRecyclerView(viewBinding, paymentMethods, selectedPaymentMethodIndex)
+
+            setupRecyclerView(viewBinding, paymentMethods)
         }
 
         if (paymentMethods.isNotEmpty()) {
@@ -122,40 +122,62 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
 
     private fun setupRecyclerView(
         viewBinding: FragmentPaymentsheetAddPaymentMethodBinding,
-        paymentMethods: List<SupportedPaymentMethod>,
-        selectedItemPosition: Int
+        paymentMethods: List<SupportedPaymentMethod>
     ) {
-        viewBinding.paymentMethodsRecycler.isVisible = true
-        // The default item animator conflicts with `animateLayoutChanges`, causing a crash when
-        // quickly switching payment methods. Set to null since the items never change anyway.
-        viewBinding.paymentMethodsRecycler.itemAnimator = null
+//
+//
+//        viewBinding.paymentMethodsRecycler.isVisible = true
+//        // The default item animator conflicts with `animateLayoutChanges`, causing a crash when
+//        // quickly switching payment methods. Set to null since the items never change anyway.
+//        viewBinding.paymentMethodsRecycler.itemAnimator = null
+//
+//        val layoutManager = object : LinearLayoutManager(
+//            activity,
+//            HORIZONTAL,
+//            false
+//        ) {
+//            var canScroll = true
+//
+//            override fun canScrollHorizontally(): Boolean {
+//                return canScroll && super.canScrollHorizontally()
+//            }
+//        }.also {
+//            viewBinding.paymentMethodsRecycler.layoutManager = it
+//        }
 
-        val layoutManager = object : LinearLayoutManager(
-            activity,
-            HORIZONTAL,
-            false
-        ) {
-            var canScroll = true
+        viewBinding.paymentMethodsRecycler.apply {
+            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
+            setContent {
+                val viewWidth = 100.dp
+//                    AddPaymentMethodsAdapter.calculateViewWidth(
+//                    viewBinding.paymentMethodsRecycler,
+//                    paymentMethods.size
+//                )
 
-            override fun canScrollHorizontally(): Boolean {
-                return canScroll && super.canScrollHorizontally()
+                PaymentMethodsUI(
+                    viewWidth = viewWidth,
+                    selectedIndex = 0,
+                    isEnabled = true,
+                    lpms = paymentMethods,
+                    onItemSelectedListener = {
+                        onPaymentMethodSelected(it)
+                    }
+                )
             }
-        }.also {
-            viewBinding.paymentMethodsRecycler.layoutManager = it
         }
 
-        val adapter = AddPaymentMethodsAdapter(
-            paymentMethods,
-            selectedItemPosition,
-            ::onPaymentMethodSelected
-        ).also {
-            viewBinding.paymentMethodsRecycler.adapter = it
-        }
-
-        sheetViewModel.processing.observe(viewLifecycleOwner) { isProcessing ->
-            adapter.isEnabled = !isProcessing
-            layoutManager.canScroll = !isProcessing
-        }
+//        val adapter = AddPaymentMethodsAdapter(
+//            paymentMethods,
+//            selectedItemPosition,
+//            ::onPaymentMethodSelected
+//        ).also {
+//            viewBinding.paymentMethodsRecycler.adapter = it
+//        }
+//
+//        sheetViewModel.processing.observe(viewLifecycleOwner) { isProcessing ->
+//            adapter.isEnabled = !isProcessing
+//            layoutManager.canScroll = !isProcessing
+//        }
     }
 
     @VisibleForTesting

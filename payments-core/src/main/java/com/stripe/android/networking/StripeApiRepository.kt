@@ -25,6 +25,7 @@ import com.stripe.android.core.networking.RequestId
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.networking.StripeResponse
 import com.stripe.android.core.networking.responseJson
+import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.exception.AuthenticationException
 import com.stripe.android.exception.CardException
 import com.stripe.android.exception.PermissionException
@@ -35,6 +36,7 @@ import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_CLIENT_SECRET
+import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.Customer
 import com.stripe.android.model.ListPaymentMethodsParams
@@ -55,6 +57,7 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.Token
 import com.stripe.android.model.TokenParams
 import com.stripe.android.model.parsers.CardMetadataJsonParser
+import com.stripe.android.model.parsers.ConsumerSessionJsonParser
 import com.stripe.android.model.parsers.ConsumerSessionLookupJsonParser
 import com.stripe.android.model.parsers.CustomerJsonParser
 import com.stripe.android.model.parsers.FpxBankStatusesJsonParser
@@ -109,7 +112,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
     private val fraudDetectionDataParamsUtils: FraudDetectionDataParamsUtils = FraudDetectionDataParamsUtils(),
     betas: Set<StripeApiBeta> = emptySet(),
     apiVersion: String = ApiVersion(betas = betas).code,
-    sdkVersion: String = Stripe.VERSION
+    sdkVersion: String = StripeSdkVersion.VERSION
 ) : StripeRepository() {
 
     @Inject
@@ -1165,6 +1168,99 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
     }
 
     /**
+     * Creates a new Link account for the credentials provided.
+     */
+    override suspend fun consumerSignUp(
+        email: String,
+        phoneNumber: String,
+        country: String,
+        cookies: String?,
+        requestOptions: ApiRequest.Options
+    ): ConsumerSession? {
+        return fetchStripeModel(
+            apiRequestFactory.createPost(
+                consumerSignUpUrl,
+                requestOptions,
+                mapOf(
+                    "email_address" to email.lowercase(),
+                    "phone_number" to phoneNumber,
+                    "country" to country
+                ).plus(
+                    cookies?.let {
+                        listOf("cookies" to it)
+                    } ?: emptyList()
+                )
+            ),
+            ConsumerSessionJsonParser()
+        ) {
+            // no-op
+        }
+    }
+
+    /**
+     * Triggers an SMS verification for the consumer corresponding to the given client secret.
+     */
+    override suspend fun startConsumerVerification(
+        consumerSessionClientSecret: String,
+        locale: Locale,
+        cookies: String?,
+        requestOptions: ApiRequest.Options
+    ): ConsumerSession? {
+        return fetchStripeModel(
+            apiRequestFactory.createPost(
+                startConsumerVerificationUrl,
+                requestOptions,
+                mapOf(
+                    "credentials" to mapOf(
+                        "consumer_session_client_secret" to consumerSessionClientSecret
+                    ),
+                    "type" to "SMS",
+                    "locale" to locale.toLanguageTag()
+                ).plus(
+                    cookies?.let {
+                        listOf("cookies" to it)
+                    } ?: emptyList()
+                )
+            ),
+            ConsumerSessionJsonParser()
+        ) {
+            // no-op
+        }
+    }
+
+    /**
+     * Confirms an SMS verification for the consumer corresponding to the given client secret.
+     */
+    override suspend fun confirmConsumerVerification(
+        consumerSessionClientSecret: String,
+        verificationCode: String,
+        cookies: String?,
+        requestOptions: ApiRequest.Options
+    ): ConsumerSession? {
+        return fetchStripeModel(
+            apiRequestFactory.createPost(
+                confirmConsumerVerificationUrl,
+                requestOptions,
+                mapOf(
+                    "credentials" to mapOf(
+                        "consumer_session_client_secret" to consumerSessionClientSecret
+                    ),
+                    "type" to "SMS",
+                    "code" to verificationCode,
+                    "client_type" to "MOBILE_SDK"
+                ).plus(
+                    cookies?.let {
+                        listOf("cookies" to it)
+                    } ?: emptyList()
+                )
+            ),
+            ConsumerSessionJsonParser()
+        ) {
+            // no-op
+        }
+    }
+
+    /**
      * @return `https://api.stripe.com/v1/payment_methods/:id/detach`
      */
     @VisibleForTesting
@@ -1369,7 +1465,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
 
     private fun buildPaymentUserAgentPair(attribution: Set<String> = emptySet()) =
         PAYMENT_USER_AGENT to
-            setOf("stripe-android/${Stripe.VERSION_NAME}")
+            setOf("stripe-android/${StripeSdkVersion.VERSION_NAME}")
                 .plus(productUsageTokens)
                 .plus(attribution)
                 .joinToString(";")
@@ -1463,6 +1559,27 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         internal val consumerSessionLookupUrl: String
             @JvmSynthetic
             get() = getApiUrl("consumers/sessions/lookup")
+
+        /**
+         * @return `https://api.stripe.com/v1/consumers/accounts/sign_up`
+         */
+        internal val consumerSignUpUrl: String
+            @JvmSynthetic
+            get() = getApiUrl("consumers/accounts/sign_up")
+
+        /**
+         * @return `https://api.stripe.com/v1/consumers/sessions/start_verification`
+         */
+        internal val startConsumerVerificationUrl: String
+            @JvmSynthetic
+            get() = getApiUrl("consumers/sessions/start_verification")
+
+        /**
+         * @return `https://api.stripe.com/v1/consumers/sessions/confirm_verification`
+         */
+        internal val confirmConsumerVerificationUrl: String
+            @JvmSynthetic
+            get() = getApiUrl("consumers/sessions/confirm_verification")
 
         /**
          * @return `https://api.stripe.com/v1/payment_intents/:id`

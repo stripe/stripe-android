@@ -3,10 +3,14 @@ package com.stripe.android.paymentsheet
 import android.widget.FrameLayout
 import androidx.appcompat.view.ContextThemeWrapper
 import androidx.test.core.app.ApplicationProvider
-import com.google.common.truth.Truth.assertThat
 import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.Mockito
+import org.mockito.kotlin.any
+import org.mockito.kotlin.eq
+import org.mockito.kotlin.times
+import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
@@ -21,14 +25,20 @@ class AddPaymentMethodsAdapterTest {
         val adapter = createAdapter()
         adapter.isEnabled = false
 
-        val viewHolder = adapter.onCreateViewHolder(
-            FrameLayout(context),
-            adapter.getItemViewType(0)
+        val viewHolder = Mockito.spy(
+            adapter.onCreateViewHolder(
+                FrameLayout(context),
+                adapter.getItemViewType(0)
+            )
         )
         adapter.bindViewHolder(viewHolder, 0)
-
-        assertThat(viewHolder.itemView.isEnabled)
-            .isFalse()
+        verify(viewHolder, times(1))
+            .bind(
+                paymentMethod = eq(SupportedPaymentMethod.Card),
+                isSelected = eq(true),
+                isEnabled = eq(false),
+                onItemSelectedListener = any()
+            )
     }
 
     private fun createAdapter() = AddPaymentMethodsAdapter(

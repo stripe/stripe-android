@@ -3,7 +3,7 @@ package com.stripe.android.paymentsheet.example
 import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import com.stripe.android.Stripe
+import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.paymentsheet.example.activity.LpmPlaygroundActivity
 import com.stripe.android.paymentsheet.example.samples.activity.LaunchPaymentSheetCompleteActivity
 import com.stripe.android.paymentsheet.example.samples.activity.LaunchPaymentSheetCustomActivity
@@ -33,10 +33,11 @@ class MainActivity : AppCompatActivity() {
             startActivity(Intent(this, PaymentSheetPlaygroundActivity::class.java))
         }
 
+        viewBinding.version.text = StripeSdkVersion.VERSION_NAME
         viewBinding.launchLpmPlaygroundButton.setOnClickListener {
             startActivity(Intent(this, LpmPlaygroundActivity::class.java))
         }
 
-        viewBinding.version.text = Stripe.VERSION_NAME
+        viewBinding.version.text = StripeSdkVersion.VERSION_NAME
     }
 }

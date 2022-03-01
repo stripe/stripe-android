@@ -20,9 +20,11 @@
         tools:layout="@layout/consent_fragment">
         <argument
             android:name="consentContext"
+            android:defaultValue=""
             app:argType="string" />
         <argument
             android:name="merchantLogo"
+            android:defaultValue="0"
             app:argType="integer" />
         <action
             android:id="@+id/action_consentFragment_to_docSelectionFragment"
@@ -34,7 +36,7 @@
         android:label="id_scan_fragment"
         tools:layout="@layout/id_scan_fragment">
         <action
-            android:id="@+id/action_IDScanFragment_to_confirmationFragment2"
+            android:id="@+id/action_IDScanFragment_to_confirmationFragment"
             app:destination="@id/confirmationFragment" />
     </fragment>
     <fragment

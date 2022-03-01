@@ -1,6 +1,7 @@
 package com.stripe.android.identity.states
 
 import android.util.Log
+import androidx.annotation.VisibleForTesting
 import com.stripe.android.camera.framework.time.Clock
 import com.stripe.android.camera.framework.time.ClockMark
 import com.stripe.android.camera.framework.time.milliseconds
@@ -18,6 +19,8 @@ internal sealed class IdentityScanState(val type: ScanType, isFinal: Boolean) : 
     enum class ScanType {
         ID_FRONT,
         ID_BACK,
+        DL_FRONT,
+        DL_BACK,
         PASSPORT,
         SELFIE
     }
@@ -52,12 +55,6 @@ internal sealed class IdentityScanState(val type: ScanType, isFinal: Boolean) : 
                 )
                 this
             }
-
-        private fun Category.matchesScanType(scanType: ScanType): Boolean {
-            return this == Category.ID_BACK && scanType == ScanType.ID_BACK ||
-                this == Category.ID_FRONT && scanType == ScanType.ID_FRONT ||
-                this == Category.PASSPORT && scanType == ScanType.PASSPORT
-        }
     }
 
     /**
@@ -65,17 +62,43 @@ internal sealed class IdentityScanState(val type: ScanType, isFinal: Boolean) : 
      * while if more image needs to be processed to reach the next state.
      */
     internal class Found(type: ScanType) : IdentityScanState(type, false) {
-        override fun consumeTransition(analyzerOutput: AnalyzerOutput) =
-            when {
+        @VisibleForTesting
+        internal var hitsCount = 0
+
+        // saves the results of previous certain number of frames
+        @VisibleForTesting
+        internal val results = ArrayDeque<Boolean>()
+
+        override fun consumeTransition(analyzerOutput: AnalyzerOutput): IdentityScanState {
+            val isHit = analyzerOutput.category.matchesScanType(type)
+            if (isHit) {
+                hitsCount++
+            }
+            results.addLast(isHit)
+            // only save the last certain number of frames, dropping the first one if it goes beyond
+            // If the first result is a hit, then decrease the hitsCount
+            if (results.size > FRAMES_REQUIRED) {
+                val firstResultIsHit = results.removeFirst()
+                if (firstResultIsHit) {
+                    hitsCount--
+                }
+            }
+
+            return when {
                 isUnsatisfied() -> {
-                    val reason = "unsatisfied reason"
+                    val reason =
+                        "hit ratio below expected: ${hitsCount.toFloat().div(FRAMES_REQUIRED)}"
                     Log.d(
-                        TAG, "Satisfaction check fails due to $reason, transition to Unsatisfied."
+                        TAG,
+                        "Satisfaction check fails due to $reason, transition to Unsatisfied."
                     )
                     Unsatisfied(reason, type)
                 }
                 moreResultsRequired() -> {
-                    Log.d(TAG, "More results needed, stay in Found.")
+                    Log.d(
+                        TAG,
+                        "More results needed, stay in Found, currently ${results.size} results are collected"
+                    )
                     this
                 }
                 else -> {
@@ -83,23 +106,38 @@ internal sealed class IdentityScanState(val type: ScanType, isFinal: Boolean) : 
                     Satisfied(type)
                 }
             }
+        }
 
         /**
          * Determine if more images should be processed before reaching [Satisfied].
          *
-         * TODO(ccen) - Introduce conditions that requires more results
+         * Need to collect [FRAMES_REQUIRED] results.
          */
         private fun moreResultsRequired(): Boolean {
-            return false
+            return results.size < FRAMES_REQUIRED
         }
 
         /**
          * Determine if satisfaction failed and should transition to [Unsatisfied].
          *
-         * TODO(ccen) - Introduce unsatisfied reasons
+         * Transfers to when the previous [FRAMES_REQUIRED] number of frames has a hit ratio
+         * below [HIT_RATIO].
          */
         private fun isUnsatisfied(): Boolean {
-            return false
+            return (results.size == FRAMES_REQUIRED) && (
+                hitsCount.toFloat()
+                    .div(FRAMES_REQUIRED) < HIT_RATIO
+                )
+        }
+
+        @VisibleForTesting
+        internal companion object {
+            // The number of frames needs to collected to determine if a model has found the
+            // correct item.
+            const val FRAMES_REQUIRED = 100
+
+            // The ratio to determine if the model has found the correct item.
+            const val HIT_RATIO = 0.5
         }
     }
 
@@ -130,7 +168,8 @@ internal sealed class IdentityScanState(val type: ScanType, isFinal: Boolean) : 
      * State when satisfaction checking failed.
      */
     internal class Unsatisfied(
-        private val reason: String,
+        @VisibleForTesting
+        internal val reason: String,
         type: ScanType,
         private val reachedStateAt: ClockMark = Clock.markNow()
     ) : IdentityScanState(type, false) {
@@ -160,4 +199,16 @@ internal sealed class IdentityScanState(val type: ScanType, isFinal: Boolean) : 
     private companion object {
         val TAG: String = IdentityScanState::class.java.simpleName
     }
+}
+
+/**
+ * Checks if [Category] matches [IdentityScanState].
+ * Note: the ML model will output ID_FRONT or ID_BACK for both ID and Driver License.
+ */
+private fun Category.matchesScanType(scanType: IdentityScanState.ScanType): Boolean {
+    return this == Category.ID_BACK && scanType == IdentityScanState.ScanType.ID_BACK ||
+        this == Category.ID_FRONT && scanType == IdentityScanState.ScanType.ID_FRONT ||
+        this == Category.ID_BACK && scanType == IdentityScanState.ScanType.DL_BACK ||
+        this == Category.ID_FRONT && scanType == IdentityScanState.ScanType.DL_FRONT ||
+        this == Category.PASSPORT && scanType == IdentityScanState.ScanType.PASSPORT
 }

@@ -43,7 +43,7 @@ internal class FormE2ETest {
             GooglePayState.Off,
             Currency.EUR,
             Checkout.Pay,
-            Billing.On,
+            Billing.Off,
             automatic = Automatic.Off,
             delayed = DelayedPMs.Off,
             saveCheckboxValue = false,

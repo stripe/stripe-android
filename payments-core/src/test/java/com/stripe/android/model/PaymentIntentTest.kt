@@ -65,6 +65,13 @@ class PaymentIntentTest {
     }
 
     @Test
+    fun parsePaymentIntentWithAffirmPaymentMethods() {
+        val paymentIntent = PaymentIntentFixtures.PI_WITH_AFFIRM_IN_PAYMENT_METHODS
+        assertThat(paymentIntent.paymentMethodTypes)
+            .containsExactly("affirm")
+    }
+
+    @Test
     fun getNextActionData_whenUseStripeSdkWith3ds2() {
         val paymentIntent = PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2
         assertThat(paymentIntent.nextActionData)

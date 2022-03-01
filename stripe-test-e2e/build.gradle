@@ -57,9 +57,9 @@ dependencies {
     implementation project(':payments')
 
     testImplementation "org.robolectric:robolectric:$robolectricVersion"
-    testImplementation 'junit:junit:4.13.2'
+    testImplementation "junit:junit:$junitVersion"
     testImplementation "com.google.truth:truth:$truthVersion"
-    testImplementation "androidx.arch.core:core-testing:2.1.0"
+    testImplementation "androidx.arch.core:core-testing:$androidxArchCoreVersion"
     testImplementation "androidx.test:core:$androidTestVersion"
     testImplementation "androidx.test.ext:junit-ktx:$androidTestJunitVersion"
 

@@ -5,17 +5,19 @@ import androidx.lifecycle.Lifecycle
 import androidx.savedstate.SavedStateRegistry
 import androidx.savedstate.SavedStateRegistryOwner
 import androidx.test.core.app.ApplicationProvider
-import com.google.common.truth.Truth
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.Injectable
 import com.stripe.android.core.injection.Injector
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.link.LinkActivityContract
-import com.stripe.android.link.injection.SignUpViewModelSubcomponent
-import com.stripe.android.link.repositories.LinkRepository
+import com.stripe.android.link.LinkScreen
+import com.stripe.android.link.account.LinkAccountManager
+import com.stripe.android.link.injection.LinkViewModelSubcomponent
+import com.stripe.android.link.model.LinkAccount
+import com.stripe.android.link.model.Navigator
 import com.stripe.android.link.ui.signup.SignUpViewModel.Companion.LOOKUP_DEBOUNCE_MS
-import com.stripe.android.model.ConsumerSessionLookup
+import com.stripe.android.model.ConsumerSession
 import com.stripe.android.ui.core.elements.IdentifierSpec
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -57,7 +59,8 @@ class SignUpViewModelTest {
             STRIPE_ACCOUNT_ID
         )
     )
-    private val linkRepository = mock<LinkRepository>()
+    private val linkAccountManager = mock<LinkAccountManager>()
+    private val navigator = mock<Navigator>()
 
     @BeforeTest
     fun setUp() {
@@ -73,15 +76,23 @@ class SignUpViewModelTest {
     fun `When email is valid then lookup is triggered with delay`() =
         runTest(UnconfinedTestDispatcher()) {
             val viewModel = createViewModel(defaultArgs.copy(customerEmail = null))
-            assertThat(viewModel.signUpStatus.value).isEqualTo(SignUpStatus.InputtingEmail)
+            assertThat(viewModel.signUpState.value).isEqualTo(SignUpState.InputtingEmail)
 
             viewModel.emailElement.setRawValue(mapOf(IdentifierSpec.Email to "valid@email.com"))
-            assertThat(viewModel.signUpStatus.value).isEqualTo(SignUpStatus.InputtingEmail)
+            assertThat(viewModel.signUpState.value).isEqualTo(SignUpState.InputtingEmail)
+
+            // Mock a delayed response so we stay in the loading state
+            linkAccountManager.stub {
+                onBlocking { lookupConsumer(any()) }.doSuspendableAnswer {
+                    delay(100)
+                    Result.success(mock())
+                }
+            }
 
             // Advance past lookup debounce delay
             advanceTimeBy(LOOKUP_DEBOUNCE_MS + 1)
 
-            assertThat(viewModel.signUpStatus.value).isEqualTo(SignUpStatus.VerifyingEmail)
+            assertThat(viewModel.signUpState.value).isEqualTo(SignUpState.VerifyingEmail)
         }
 
     @Test
@@ -95,50 +106,86 @@ class SignUpViewModelTest {
             advanceTimeBy(LOOKUP_DEBOUNCE_MS / 2)
 
             viewModel.emailElement.setRawValue(mapOf(IdentifierSpec.Email to "third@email.com"))
-            assertThat(viewModel.signUpStatus.value).isEqualTo(SignUpStatus.InputtingEmail)
+            assertThat(viewModel.signUpState.value).isEqualTo(SignUpState.InputtingEmail)
+
+            // Mock a delayed response so we stay in the loading state
+            linkAccountManager.stub {
+                onBlocking { lookupConsumer(any()) }.doSuspendableAnswer {
+                    delay(100)
+                    Result.success(mock())
+                }
+            }
 
             // Advance past lookup debounce delay
             advanceTimeBy(LOOKUP_DEBOUNCE_MS + 1)
 
-            assertThat(viewModel.signUpStatus.value).isEqualTo(SignUpStatus.VerifyingEmail)
+            assertThat(viewModel.signUpState.value).isEqualTo(SignUpState.VerifyingEmail)
 
             val emailCaptor = argumentCaptor<String>()
-            verify(linkRepository).lookupConsumer(emailCaptor.capture())
+            verify(linkAccountManager).lookupConsumer(emailCaptor.capture())
 
             assertThat(emailCaptor.allValues.size).isEqualTo(1)
             assertThat(emailCaptor.firstValue).isEqualTo("third@email.com")
         }
 
     @Test
-    fun `When consumer does not exist then collect phone number`() =
+    fun `When email is provided it should not trigger lookup and should collect phone number`() =
         runTest(UnconfinedTestDispatcher()) {
-            linkRepository.stub {
-                onBlocking { lookupConsumer(any()) }.doSuspendableAnswer {
-                    delay(DELAY)
-                    mock<ConsumerSessionLookup>().stub { whenever(it.exists).thenReturn(false) }
-                }
-            }
+            val viewModel = createViewModel(defaultArgs)
+            assertThat(viewModel.signUpState.value).isEqualTo(SignUpState.InputtingPhone)
 
-            val viewModel = createViewModel(defaultArgs.copy(customerEmail = "valid@email.com"))
-            // Advance past lookup debounce delay
-            advanceTimeBy(LOOKUP_DEBOUNCE_MS + 1)
-            assertThat(viewModel.signUpStatus.value).isEqualTo(SignUpStatus.VerifyingEmail)
+            verify(linkAccountManager, times(0)).lookupConsumer(any())
+        }
 
-            // Advance past response received by LinkRepository
-            advanceTimeBy(DELAY + 1)
+    @Test
+    fun `When signed up with unverified account then it navigates to Verification screen`() =
+        runTest(UnconfinedTestDispatcher()) {
+            val viewModel = createViewModel(defaultArgs)
 
-            assertThat(viewModel.signUpStatus.value).isEqualTo(SignUpStatus.InputtingPhone)
+            val linkAccount = LinkAccount(
+                mockConsumerSessionWithVerificationSession(
+                    ConsumerSession.VerificationSession.SessionType.Sms,
+                    ConsumerSession.VerificationSession.SessionState.Started
+                )
+            )
+
+            whenever(linkAccountManager.signUp(any(), any(), any()))
+                .thenReturn(Result.success(linkAccount))
+
+            viewModel.onSignUpClick("phone")
+
+            verify(navigator).navigateTo(LinkScreen.Verification)
+        }
+
+    @Test
+    fun `When signed up with verified account then it navigates to Wallet screen`() =
+        runTest(UnconfinedTestDispatcher()) {
+            val viewModel = createViewModel(defaultArgs)
+
+            val linkAccount = LinkAccount(
+                mockConsumerSessionWithVerificationSession(
+                    ConsumerSession.VerificationSession.SessionType.Sms,
+                    ConsumerSession.VerificationSession.SessionState.Verified
+                )
+            )
+
+            whenever(linkAccountManager.signUp(any(), any(), any()))
+                .thenReturn(Result.success(linkAccount))
+
+            viewModel.onSignUpClick("phone")
+
+            verify(navigator).navigateTo(LinkScreen.Wallet)
         }
 
     @Test
     fun `Factory gets initialized by Injector when Injector is available`() {
-        val mockBuilder = mock<SignUpViewModelSubcomponent.Builder>()
-        val mockSubComponent = mock<SignUpViewModelSubcomponent>()
+        val mockBuilder = mock<LinkViewModelSubcomponent.Builder>()
+        val mockSubComponent = mock<LinkViewModelSubcomponent>()
         val vmToBeReturned = mock<SignUpViewModel>()
 
         whenever(mockBuilder.args(any())).thenReturn(mockBuilder)
         whenever(mockBuilder.build()).thenReturn(mockSubComponent)
-        whenever((mockSubComponent.viewModel)).thenReturn(vmToBeReturned)
+        whenever((mockSubComponent.signUpViewModel)).thenReturn(vmToBeReturned)
 
         val mockSavedStateRegistryOwner = mock<SavedStateRegistryOwner>()
         val mockSavedStateRegistry = mock<SavedStateRegistry>()
@@ -162,7 +209,7 @@ class SignUpViewModelTest {
         val factorySpy = spy(factory)
         val createdViewModel = factorySpy.create(SignUpViewModel::class.java)
         verify(factorySpy, times(0)).fallbackInitialize(any())
-        Truth.assertThat(createdViewModel).isEqualTo(vmToBeReturned)
+        assertThat(createdViewModel).isEqualTo(vmToBeReturned)
 
         WeakMapInjectorRegistry.staticCacheMap.clear()
     }
@@ -194,11 +241,28 @@ class SignUpViewModelTest {
 
     private fun createViewModel(args: LinkActivityContract.Args = defaultArgs) = SignUpViewModel(
         args = args,
-        linkRepository = linkRepository,
-        logger = Logger.noop()
+        linkAccountManager = linkAccountManager,
+        logger = Logger.noop(),
+        navigator = navigator
     )
 
-    companion object {
+    private fun mockConsumerSessionWithVerificationSession(
+        type: ConsumerSession.VerificationSession.SessionType,
+        state: ConsumerSession.VerificationSession.SessionState
+    ): ConsumerSession {
+        val verificationSession = mock<ConsumerSession.VerificationSession>()
+        whenever(verificationSession.type).thenReturn(type)
+        whenever(verificationSession.state).thenReturn(state)
+        val verificationSessions = listOf(verificationSession)
+
+        val consumerSession = mock<ConsumerSession>()
+        whenever(consumerSession.verificationSessions).thenReturn(verificationSessions)
+        whenever(consumerSession.clientSecret).thenReturn("secret")
+        whenever(consumerSession.emailAddress).thenReturn("email")
+        return consumerSession
+    }
+
+    private companion object {
         const val INJECTOR_KEY = "injectorKey"
         const val PRODUCT_USAGE = "productUsage"
         const val PUBLISHABLE_KEY = "publishableKey"
@@ -206,7 +270,5 @@ class SignUpViewModelTest {
 
         const val MERCHANT_NAME = "merchantName"
         const val CUSTOMER_EMAIL = "customer@email.com"
-
-        const val DELAY = 100L
     }
 }
