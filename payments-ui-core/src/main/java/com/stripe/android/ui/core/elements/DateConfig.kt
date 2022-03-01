@@ -64,11 +64,11 @@ internal class DateConfig : TextFieldConfig {
             val twoDigitCurrentYear = currentYear % 100
 
             return if ((twoDigitYear - twoDigitCurrentYear) < 0) {
-                Error.Invalid(R.string.incomplete_expiry_date)
+                Error.Invalid(R.string.invalid_expiry_year)
             } else if ((twoDigitYear - twoDigitCurrentYear) > 50) {
                 Error.Invalid(R.string.invalid_expiry_year)
             } else if ((twoDigitYear - twoDigitCurrentYear) == 0 && current1BasedMonth > month1Based) {
-                Error.Invalid(R.string.incomplete_expiry_date)
+                Error.Invalid(R.string.invalid_expiry_month)
             } else if (month1Based !in 1..12) {
                 Error.Incomplete(R.string.invalid_expiry_month)
             } else {
