@@ -48,7 +48,8 @@
             android:layout_height="wrap_content" />
     </LinearLayout>
 
-    <androidx.recyclerview.widget.RecyclerView
+
+    <androidx.compose.ui.platform.ComposeView
         android:id="@+id/payment_methods_recycler"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
