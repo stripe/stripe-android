@@ -13,6 +13,7 @@ com.stripe.android.camera.scanui.util
 module:identity
 com.stripe.android.identity
 com.stripe.android.identity.navigation
+com.stripe.android.identity.utils
 com.stripe.android.identity.viewmodel
 module:link
 com.stripe.android.link
@@ -48,8 +49,10 @@ com.stripe.android.core
 com.stripe.android.core.exception
 com.stripe.android.core.injection
 com.stripe.android.core.model
+com.stripe.android.core.model.parsers
 com.stripe.android.core.networking
 com.stripe.android.core.storage
+com.stripe.android.core.version
 module:stripecardscan
 com.stripe.android.stripecardscan.cardimageverification
 com.stripe.android.stripecardscan.cardimageverification.exception
