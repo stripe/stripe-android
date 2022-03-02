@@ -1,8 +1,8 @@
-package com.stripe.android
+package com.stripe.android.core.model.parsers
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.StripeError
-import com.stripe.android.model.StripeErrorJsonParser
+import com.stripe.android.core.StripeErrorFixtures
 import org.json.JSONObject
 import kotlin.test.Test
 

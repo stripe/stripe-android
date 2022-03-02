@@ -1,14 +1,17 @@
-package com.stripe.android.model.parsers
+package com.stripe.android.core.model.parsers
 
+import androidx.annotation.RestrictTo
 import com.stripe.android.core.model.StripeModel
 import org.json.JSONArray
 import org.json.JSONObject
 
-internal interface ModelJsonParser<out ModelType : StripeModel> {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+interface ModelJsonParser<out ModelType : StripeModel> {
     fun parse(json: JSONObject): ModelType?
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
-        internal fun jsonArrayToList(jsonArray: JSONArray?): List<String> {
+        fun jsonArrayToList(jsonArray: JSONArray?): List<String> {
             return jsonArray?.let {
                 (0 until jsonArray.length()).map { jsonArray.getString(it) }
             } ?: emptyList()
