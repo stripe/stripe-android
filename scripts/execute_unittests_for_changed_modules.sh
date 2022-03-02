@@ -54,8 +54,8 @@ do
   fi
 done
 
-# modules_to_test are the ones that are not directly changed, but has dependency to modules in changed_modules
-modules_to_test=""
+# affected_modules are the ones that are not directly changed, but have a dependency on modules in changed_modules
+affected_modules=""
 for testable_module in $TESTABLE_MODULES
 do
   # this testable_module is directly changed by the PR, will execute its test, look at next one
@@ -70,8 +70,8 @@ do
   # +--- project :stripe-core (*)
   # +--- project :payments-ui-core
   #
-  # Note dependencies that appears more than once are suffixed with "(*)"
-  # The output is grep-ed with all project dependency lines that doesn't end with ")", then the last part of the line after : is cut
+  # Note dependencies that appear more than once are suffixed with "(*)"
+  # The output is grep-ed with all project dependency lines that don't end with ")", then the last part of the line after : is cut
   #
   # For the previous output, module_deps will be assigned these values: ["payments-core", "stripe-core", "payments-ui-core"]
   module_deps=$(./gradlew :$testable_module:dependencies --configuration debugCompileClasspath | grep '+--- project :.*\w$' | cut -d ":" -f 2)
@@ -80,30 +80,30 @@ do
   for changed_module in $changed_modules
   do
     if listContainsElement "${module_deps[@]}" $changed_module; then
-      if ! listContainsElement "${modules_to_test[@]}" $testable_module; then
-        modules_to_test="$modules_to_test $testable_module"
+      if ! listContainsElement "${affected_modules[@]}" $testable_module; then
+        affected_modules="$affected_modules $testable_module"
       fi
       break
     fi
   done
 done
 
-# concatenate changed_modules to modules_to_test
+# concatenate changed_modules to affected_modules
 for changed_module in $changed_modules
 do
-  modules_to_test="$modules_to_test $changed_module"
+  affected_modules="$affected_modules $changed_module"
 done
 
 # print out for debug purposes
 echo -----Executing tests for these modules-----
-for module in $modules_to_test
+for module in $affected_modules
 do
   echo $module
 done
 echo -------------------------------------------
 
-# run test commands for modules_to_test
-for module in $modules_to_test
+# run test commands for affected_modules
+for module in $affected_modules
 do
     echo "./gradlew :${module}:testDebugUnitTest"
     eval "./gradlew :${module}:testDebugUnitTest"
