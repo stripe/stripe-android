@@ -6,6 +6,8 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
 import com.stripe.android.ui.core.R
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 
 /**
  * A text field configuration for an AU bank account number
@@ -15,6 +17,9 @@ class AuBankAccountNumberConfig : TextFieldConfig {
     override val capitalization: KeyboardCapitalization = KeyboardCapitalization.None
     override val debugLabel = "au_bank_account_number"
     override val visualTransformation: VisualTransformation? = null
+
+    override val trailingIcon: StateFlow<TextFieldIcon?> = MutableStateFlow(null)
+    override val loading: StateFlow<Boolean> = MutableStateFlow(false)
 
     @StringRes
     override val label = R.string.becs_widget_account_number

@@ -7,6 +7,6 @@ internal object AuBankAccountNumberSpec : SectionFieldSpec(IdentifierSpec.Generi
     fun transform(): SectionFieldElement =
         SimpleTextElement(
             this.identifier,
-            TextFieldController(AuBankAccountNumberConfig())
+            SimpleTextFieldController(AuBankAccountNumberConfig())
         )
 }

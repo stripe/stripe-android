@@ -8,7 +8,7 @@ internal object BsbSpec : SectionFieldSpec(IdentifierSpec.Generic("bsb_number"))
     fun transform(): SectionFieldElement =
         SimpleTextElement(
             this.identifier,
-            TextFieldController(BsbConfig(banks))
+            SimpleTextFieldController(BsbConfig(banks))
         )
 }
 
