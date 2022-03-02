@@ -30,7 +30,7 @@ while read line; do
   if ! listContainsElement "${changed_dirs[@]}" $module_name; then
     changed_dirs="$changed_dirs $module_name" # string concat
   fi
-done < <(git diff --name-only origin/master)
+done < <(git diff --name-only remotes/origin/master)
 
 # for all changed dirs, first check if it's a critical dep, if so run all tests and exit
 for dir in $changed_dirs
