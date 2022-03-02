@@ -33,7 +33,7 @@ internal const val CARD_HORIZONTAL_PADDING = 6.0f
 
 @Composable
 internal fun PaymentMethodsUI(
-    lpms: List<SupportedPaymentMethod>,
+    paymentMethods: List<SupportedPaymentMethod>,
     selectedIndex: Int,
     isEnabled: Boolean,
     onItemSelectedListener: (SupportedPaymentMethod) -> Unit
@@ -51,19 +51,18 @@ internal fun PaymentMethodsUI(
     }
 
     BoxWithConstraints {
-        val boxWithConstraintsScope = this
         val resources = LocalContext.current.resources
         val density = resources.displayMetrics.density
         val measuredWidth =
             dpToPx(
                 resources.displayMetrics,
-                boxWithConstraintsScope.maxWidth.value - (horizontalPadding * 2)
+                this.maxWidth.value - (horizontalPadding * 2)
             )
-        val viewWidth = calculateViewWidth(measuredWidth, density, lpms.size)
+        val viewWidth = calculateViewWidth(measuredWidth, density, paymentMethods.size)
 
         // TODO: userScrollEnabled will be available in compose version 1.2.0-alpha01+
         LazyRow(state = state, modifier = Modifier.padding(start = horizontalPadding.dp)) {
-            itemsIndexed(items = lpms, itemContent = { index, item ->
+            itemsIndexed(items = paymentMethods, itemContent = { index, item ->
                 PaymentMethodUI(
                     viewWidth = viewWidth,
                     iconRes = item.iconResource,
@@ -72,13 +71,11 @@ internal fun PaymentMethodsUI(
                     isEnabled = isEnabled,
                     itemIndex = index,
                     onItemSelectedListener = {
-                        onItemSelectedListener(lpms[it])
+                        onItemSelectedListener(paymentMethods[it])
                     }
                 )
-            }
-            )
+            })
         }
-
     }
 }
 

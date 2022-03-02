@@ -144,7 +144,7 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
                 PaymentMethodsUI(
                     selectedIndex = paymentMethods.indexOf(selectedItem),
                     isEnabled = !processing,
-                    lpms = paymentMethods,
+                    paymentMethods = paymentMethods,
                     onItemSelectedListener = { selectedLpm ->
                         onPaymentMethodSelected(selectedLpm)
                     }
