@@ -20,7 +20,6 @@ if (System.getenv("JITPACK")) {
     group='com.github.stripe.stripe-android'
 }
 
-
 dependencies {
     implementation "com.google.dagger:dagger:$daggerVersion"
     kapt "com.google.dagger:dagger-compiler:$daggerVersion"
