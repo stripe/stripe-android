@@ -53,27 +53,11 @@ internal class TestPlatformInfrastructureTest {
             ),
             saveForFutureUseCheckboxVisible = false
         )
-//        confirmCompleteSuccess(
-//            device,
-//            composeTestRule,
-//            screenshotProcessor,
-//            testParameters.copy(
-//                authorizationParameters = AuthorizationParameters(
-//                    Browser.Chrome,
-//                    AuthorizeAction.Authorize
-//                )
-//            )
-//        )
         confirmCompleteSuccess(
             device,
             composeTestRule,
             screenshotProcessor,
-            testParameters.copy(
-                authorizationParameters = AuthorizationParameters(
-                    Browser.Opera,
-                    AuthorizeAction.Authorize
-                )
-            )
+            testParameters
         )
         confirmCompleteSuccess(
             device,

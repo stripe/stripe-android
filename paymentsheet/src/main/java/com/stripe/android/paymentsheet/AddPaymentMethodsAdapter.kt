@@ -147,6 +147,9 @@ class AddPaymentMethodsAdapter internal constructor(
     }
 }
 
+@VisibleForTesting
+val PaymentMethodListTestTag = "PaymentMethodsUI"
+
 @Composable
 internal fun PaymentMethodsUI(
     lpms: List<SupportedPaymentMethod>,
@@ -156,7 +159,7 @@ internal fun PaymentMethodsUI(
     onItemSelectedListener: (SupportedPaymentMethod) -> Unit
 ) {
     val selectedIndex = remember { mutableStateOf(selectedIndex) }
-    LazyRow(Modifier.testTag("PaymentMethodsUI")) {
+    LazyRow(Modifier.testTag(PaymentMethodListTestTag)) {
         itemsIndexed(items = lpms, itemContent = { index, item ->
             PaymentMethodUI(
                 viewWidth = viewWidth,

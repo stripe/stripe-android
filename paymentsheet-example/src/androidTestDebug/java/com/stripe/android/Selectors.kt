@@ -12,7 +12,6 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToNode
 import androidx.test.espresso.Espresso
-import androidx.test.espresso.PerformException
 import androidx.test.espresso.action.ViewActions
 import androidx.test.espresso.assertion.ViewAssertions
 import androidx.test.espresso.matcher.ViewMatchers
@@ -20,6 +19,7 @@ import androidx.test.uiautomator.By
 import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.UiSelector
 import androidx.test.uiautomator.Until
+import com.stripe.android.paymentsheet.PaymentMethodListTestTag
 import com.stripe.android.paymentsheet.example.R
 import com.stripe.android.paymentsheet.example.playground.model.CheckoutCurrency
 import com.stripe.android.paymentsheet.example.playground.model.CheckoutCustomer
@@ -90,29 +90,15 @@ class PaymentSelection(@StringRes val label: Int) {
     }
 
     fun click(composeTestRule: ComposeTestRule, resource: Resources) {
-        try {
-            val onNodeWithText = composeTestRule.onNodeWithText(
-//                "Card"
-                resource.getString(label)
-            )
-            composeTestRule.onNodeWithTag("PaymentMethodsUI", true)
-                .performScrollToNode(hasText(resource.getString(label)))
-            onNodeWithText.assertIsDisplayed()
-            onNodeWithText.assertIsEnabled()
-            onNodeWithText.performClick()
+        composeTestRule.onNodeWithTag(PaymentMethodListTestTag, true)
+            .performScrollToNode(hasText(resource.getString(label)))
+        composeTestRule
+            .onNodeWithText(resource.getString(label))
+            .assertIsDisplayed()
+            .assertIsEnabled()
+            .performClick()
 
-            composeTestRule.waitForIdle()
-//            Espresso.onView(ViewMatchers.withId(com.stripe.android.paymentsheet.R.id.payment_methods_recycler))
-//                .check(ViewAssertions.matches(ViewMatchers.isDisplayed()))
-//                .perform(
-//                    RecyclerViewActions.actionOnHolderItem(
-//                        matchPaymentMethodHolder(composeTestRule, resource.getString(label)),
-//                        ViewActions.click()
-//                    )
-//                )
-        } catch (e: PerformException) {
-            // Item is already selected.
-        }
+        composeTestRule.waitForIdle()
     }
 }
 
@@ -202,8 +188,16 @@ object AuthorizePageLoaded {
 sealed class Browser(name: String, val packageName: String, val resourceID: String) :
     UiAutomatorText(name) {
 
-    object Chrome : Browser("Chrome", "com.android.chrome", "com.android.chrome:id/coordinator")
-    object Opera : Browser("Opera", "com.opera.browser", "com.opera.browser:id/action_bar_root")
+    object Chrome : Browser(
+        "Chrome",
+        "com.android.chrome",
+        "com.android.chrome:id/coordinator"
+    )
+
     object Firefox :
-        Browser("Firefox", "org.mozilla.firefox", "org.mozilla.firefox:id/action_bar_root")
+        Browser(
+            "Firefox",
+            "org.mozilla.firefox",
+            "org.mozilla.firefox:id/action_bar_root"
+        )
 }
