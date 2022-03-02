@@ -1,6 +1,8 @@
 package com.stripe.android.link.ui.verification
 
 import android.app.Application
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -14,7 +16,16 @@ import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.injection.DaggerLinkViewModelFactoryComponent
 import com.stripe.android.link.injection.LinkViewModelSubcomponent
 import com.stripe.android.link.model.Navigator
+import com.stripe.android.ui.core.elements.EmailSpec
+import com.stripe.android.ui.core.elements.EmailSpec.transform
+import com.stripe.android.ui.core.elements.IdentifierSpec
+import com.stripe.android.ui.core.elements.OTPController
+import com.stripe.android.ui.core.elements.OTPElement
+import com.stripe.android.ui.core.elements.OTPSpec
+import com.stripe.android.ui.core.elements.SectionFieldElement
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import org.intellij.lang.annotations.Identifier
 import javax.inject.Inject
 import javax.inject.Provider
 
@@ -31,6 +42,8 @@ internal class VerificationViewModel @Inject constructor(
         // The Link account is already loaded in linkAccountManager when we get to Verification
         requireNotNull(linkAccountManager.linkAccount)
     }
+
+    val otpController = OTPController()
 
     fun onVerificationCodeEntered(code: String) {
         viewModelScope.launch {

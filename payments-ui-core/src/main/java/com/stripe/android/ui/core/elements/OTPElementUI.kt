@@ -12,91 +12,57 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.TextFieldColors
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusOrder
-import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.core.text.isDigitsOnly
 
 @Composable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun OTPElementUI(
     colors: TextFieldColors,
-    onComplete: (String) -> Unit
+    controller: OTPController
 ) {
-    val otpLength = 6
-    val codes = remember {
-        mutableStateListOf(*((0 until otpLength).map { "" }.toTypedArray() ))
-    }
-    val focusRequesters: List<FocusRequester> = remember {
-        (0 until otpLength).map { FocusRequester() }
-    }
-
-    val width = LocalConfiguration.current.screenWidthDp.dp / (otpLength + 2)
-
-    // Prevent the callback from being called twice when updating the field programmatically
-    var valueChangedCallbackEnabled = true
+    val codes by controller.fieldValue.collectAsState(
+        initial = (0 until controller.otpLength).map { "" }
+    )
+    val width = LocalConfiguration.current.screenWidthDp.dp / (controller.otpLength + 2)
+    val focusManager = LocalFocusManager.current
 
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
     ) {
-        (0 until otpLength).map { index ->
-            if (index == 0) {
-                LaunchedEffect(Unit) {
-                    focusRequesters[0].requestFocus()
-                }
-            }
+        (0 until controller.otpLength).map { index ->
             OTPCell(
                 modifier = Modifier
                     .width(width)
                     .onKeyEvent { event ->
-                        val value = codes[index]
                         if (event.type == KeyEventType.KeyUp) {
-                            if (event.nativeKeyEvent.keyCode == KeyEvent.KEYCODE_DEL && value.isEmpty()) {
-                                focusRequesters.getOrNull(index - 1)?.requestFocus()
-                            } else if (value.isNotEmpty()) {
-                                focusRequesters.getOrNull(index + 1)?.requestFocus()
+                            if (event.nativeKeyEvent.keyCode == KeyEvent.KEYCODE_DEL) {
+                                focusManager.moveFocus(FocusDirection.Previous)
+                            } else {
+                                focusManager.moveFocus(FocusDirection.Next)
                             }
                         }
                         false
-                    }
-                    .focusOrder(focusRequesters[index])
-                    .focusRequester(focusRequesters[index]),
+                    },
                 colors = colors,
                 value = codes[index],
-
                 onValueChange = { value ->
-                    if (valueChangedCallbackEnabled && value.isDigitsOnly()) {
-                        valueChangedCallbackEnabled = false
-                        if (value.length > 1) {
-                            val val1 = value.getOrNull(0)?.toString() ?: ""
-                            val val2 = value.getOrNull(1)?.toString() ?: ""
-                            codes[index] = if (codes[index] == val1) val2 else val1
-                            return@OTPCell
-                        }
-
-                        codes[index] = value
-
-                        val currentCode = codes.joinToString("")
-                        if (currentCode.length == otpLength) {
-                            onComplete(codes.joinToString(""))
-                        }
-                    }
-                    valueChangedCallbackEnabled = true
+                    controller.onValueChange(index, value)
                 },
             )
         }

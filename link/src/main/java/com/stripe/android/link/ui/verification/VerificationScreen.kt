@@ -8,6 +8,9 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -19,19 +22,20 @@ import com.stripe.android.link.LinkActivityContract
 import com.stripe.android.link.R
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.linkTextFieldColors
+import com.stripe.android.ui.core.elements.OTPController
 import com.stripe.android.ui.core.elements.OTPElementUI
 
-@Preview
-@Composable
-private fun VerificationBodyPreview() {
-    DefaultLinkTheme {
-        VerificationBody(
-            redactedPhoneNumber = "+1********23",
-            onCodeEntered = { },
-            onResendCodeClick = { }
-        )
-    }
-}
+//@Preview
+//@Composable
+//private fun VerificationBodyPreview() {
+//    DefaultLinkTheme {
+//        VerificationBody(
+//            redactedPhoneNumber = "+1********23",
+//            onCodeEntered = { },
+//            onResendCodeClick = { }
+//        )
+//    }
+//}
 
 @Composable
 internal fun VerificationBody(
@@ -45,19 +49,20 @@ internal fun VerificationBody(
         )
     )
 
-    VerificationBody(
-        redactedPhoneNumber = viewModel.linkAccount.redactedPhoneNumber,
-        onCodeEntered = viewModel::onVerificationCodeEntered,
-        onResendCodeClick = viewModel::onResendCodeClicked
-    )
+    VerificationBody(viewModel)
 }
 
 @Composable
 internal fun VerificationBody(
-    redactedPhoneNumber: String,
-    onCodeEntered: (String) -> Unit,
-    onResendCodeClick: () -> Unit
+    viewModel: VerificationViewModel
 ) {
+    val otpValue by viewModel.otpController.rawFieldValue.collectAsState("")
+
+    LaunchedEffect(otpValue) {
+        if (otpValue.length == 6) {
+            viewModel.onVerificationCodeEntered(otpValue)
+        }
+    }
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -72,7 +77,7 @@ internal fun VerificationBody(
             style = MaterialTheme.typography.h2
         )
         Text(
-            text = stringResource(R.string.verification_message, redactedPhoneNumber),
+            text = stringResource(R.string.verification_message, viewModel.linkAccount.redactedPhoneNumber),
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 4.dp, bottom = 30.dp),
@@ -81,10 +86,10 @@ internal fun VerificationBody(
         )
         OTPElementUI(
             colors = linkTextFieldColors(),
-            onComplete = { onCodeEntered(it) }
+            controller = viewModel.otpController
         )
         TextButton(
-            onClick = onResendCodeClick,
+            onClick = viewModel::onResendCodeClicked,
             modifier = Modifier.padding(top = 30.dp)
         ) {
             Text(

@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -24,6 +25,8 @@ import com.stripe.android.ui.core.elements.AuBecsDebitMandateElementUI
 import com.stripe.android.ui.core.elements.AuBecsDebitMandateTextElement
 import com.stripe.android.ui.core.elements.FormElement
 import com.stripe.android.ui.core.elements.IdentifierSpec
+import com.stripe.android.ui.core.elements.OTPElement
+import com.stripe.android.ui.core.elements.OTPElementUI
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
 import com.stripe.android.ui.core.elements.SaveForFutureUseElementUI
 import com.stripe.android.ui.core.elements.SectionElement
@@ -73,6 +76,11 @@ internal fun FormInternal(
                         )
                         is AuBecsDebitMandateTextElement -> AuBecsDebitMandateElementUI(element)
                         is AffirmHeaderElement -> AffirmElementUI()
+                        is OTPElement -> OTPElementUI(
+                            // TODO: Think about how to make this compatible with LINK
+                            colors = TextFieldDefaults.textFieldColors(),
+                            controller = element.controller
+                        )
                     }
                 }
             }
