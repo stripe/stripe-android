@@ -53,12 +53,9 @@
         android:id="@+id/payment_methods_recycler"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingHorizontal="14dp"
         android:paddingTop="18dp"
         android:paddingBottom="6dp"
         android:visibility="gone"
-        android:clipChildren="false"
-        android:clipToPadding="false"
         android:orientation="horizontal"
         app:layout_constraintBottom_toTopOf="@+id/payment_method_fragment_container"
         app:layout_constraintStart_toStartOf="parent" />

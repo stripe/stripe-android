@@ -129,27 +129,28 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
     ) {
         viewBinding.paymentMethodsRecycler.isVisible = true
 
+
+
         viewBinding.paymentMethodsRecycler.apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
             setContent {
                 val processing by sheetViewModel.processing.asFlow().collectAsState(initial = false)
-                view?.rootView?.let {
-                    val viewWidth = calculateViewWidth(
-                        it,
-                        paymentMethods.size
-                    )
+//                view?.rootView?.let {
+//                    val viewWidth = calculateViewWidth(
+//                        it,
+//                        paymentMethods.size
+//                    )
 
-                    PaymentMethodsUI(
-                        viewWidth = viewWidth,
-                        initialSelectedIndex = selectedItemPosition,
-                        isEnabled = !processing,
-                        lpms = paymentMethods,
-                        onItemSelectedListener = { selectedLpm ->
-                            onPaymentMethodSelected(selectedLpm)
-                        }
-                    )
+                PaymentMethodsUI(
+                    initialSelectedIndex = selectedItemPosition,
+                    isEnabled = !processing,
+                    lpms = paymentMethods,
+                    onItemSelectedListener = { selectedLpm ->
+                        onPaymentMethodSelected(selectedLpm)
+                    }
+                )
 
-                }
+//                }
             }
         }
     }

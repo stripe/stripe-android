@@ -1,8 +1,9 @@
 package com.stripe.android.paymentsheet
 
-import android.view.View
+import android.util.DisplayMetrics
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -19,6 +20,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -26,12 +28,17 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
 import com.stripe.android.paymentsheet.ui.LpmSelectorText
+import kotlin.math.roundToInt
+
 
 internal const val ADD_PM_DEFAULT_PADDING = 12.0f
 internal const val CARD_HORIZONTAL_PADDING = 6.0f
-internal fun calculateViewWidth(parent: View, numberOfPaymentMethods: Int): Dp {
-    val targetWidth = parent.measuredWidth - parent.paddingStart - parent.paddingEnd
-    val screenDensity = parent.context.resources.displayMetrics.density
+
+internal fun calculateViewWidth(
+    targetWidth: Int,
+    screenDensity: Float,
+    numberOfPaymentMethods: Int
+): Dp {
     val minItemWidth = 100 * screenDensity + (2 * CARD_HORIZONTAL_PADDING)
 
     // if all items fit at min width, then span them across the sheet evenly filling it.
@@ -49,18 +56,22 @@ internal fun calculateViewWidth(parent: View, numberOfPaymentMethods: Int): Dp {
     return (viewWidth.toInt() / screenDensity).dp
 }
 
+private fun dpToPx(displayMetrics: DisplayMetrics, dp: Float): Int {
+    return (dp * (displayMetrics.xdpi / DisplayMetrics.DENSITY_DEFAULT)).roundToInt()
+}
+
 @Composable
 internal fun PaymentMethodsUI(
     lpms: List<SupportedPaymentMethod>,
     initialSelectedIndex: Int,
     isEnabled: Boolean,
-    viewWidth: Dp,
     onItemSelectedListener: (SupportedPaymentMethod) -> Unit
 ) {
     // TODO: Would prefer to make the selectedIndex observable
     val selectedIndex = remember { mutableStateOf(initialSelectedIndex) }
     val scope = rememberCoroutineScope()
     val state = rememberLazyListState()
+    val horizontalPadding = 14
 
     LaunchedEffect(isEnabled) {
         if (isEnabled) {
@@ -70,23 +81,36 @@ internal fun PaymentMethodsUI(
         }
     }
 
-    // TODO: userScrollEnabled will be available in compose version 1.2.0-alpha01+
-    LazyRow(state = state) {
-        itemsIndexed(items = lpms, itemContent = { index, item ->
-            PaymentMethodUI(
-                viewWidth = viewWidth,
-                iconRes = item.iconResource,
-                title = stringResource(item.displayNameResource),
-                isSelected = index == selectedIndex.value,
-                isEnabled = isEnabled,
-                itemIndex = index,
-                onItemSelectedListener = {
-                    selectedIndex.value = it
-                    onItemSelectedListener(lpms.get(it))
-                }
+    BoxWithConstraints {
+        val boxWithConstraintsScope = this
+        val resources = LocalContext.current.resources
+        val density = resources.displayMetrics.density
+        val measuredWidth =
+            dpToPx(
+                resources.displayMetrics,
+                boxWithConstraintsScope.maxWidth.value - (horizontalPadding * 2)
+            )
+        val viewWidth = calculateViewWidth(measuredWidth, density, lpms.size)
+
+        // TODO: userScrollEnabled will be available in compose version 1.2.0-alpha01+
+        LazyRow(state = state, modifier = Modifier.padding(start = horizontalPadding.dp)) {
+            itemsIndexed(items = lpms, itemContent = { index, item ->
+                PaymentMethodUI(
+                    viewWidth = viewWidth,
+                    iconRes = item.iconResource,
+                    title = stringResource(item.displayNameResource),
+                    isSelected = index == selectedIndex.value,
+                    isEnabled = isEnabled,
+                    itemIndex = index,
+                    onItemSelectedListener = {
+                        selectedIndex.value = it
+                        onItemSelectedListener(lpms.get(it))
+                    }
+                )
+            }
             )
         }
-        )
+
     }
 }
 
