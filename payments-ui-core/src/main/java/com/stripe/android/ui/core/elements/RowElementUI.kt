@@ -44,7 +44,7 @@ internal fun RowElementUI(
                         top.linkTo(parent.top)
                     }
                     .fillMaxWidth(
-                        (1f / fields.size.toFloat()).takeIf { index != (fields.size - 1) } ?: 1f
+                        (1f / fields.size.toFloat())
                     ),
                 hiddenIdentifiers
             )

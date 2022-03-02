@@ -151,10 +151,8 @@ internal fun TextField(
 }
 
 internal fun nextFocus(focusManager: FocusManager) {
-    if (!focusManager.moveFocus(FocusDirection.Right)) {
-        if (!focusManager.moveFocus(FocusDirection.Down)) {
-            focusManager.clearFocus(true)
-        }
+    if (!focusManager.moveFocus(FocusDirection.Next)) {
+        focusManager.clearFocus(true)
     }
 }
 
