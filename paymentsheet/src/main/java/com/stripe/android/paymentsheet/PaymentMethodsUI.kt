@@ -16,8 +16,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -36,12 +34,10 @@ internal const val CARD_HORIZONTAL_PADDING = 6.0f
 @Composable
 internal fun PaymentMethodsUI(
     lpms: List<SupportedPaymentMethod>,
-    initialSelectedIndex: Int,
+    selectedIndex: Int,
     isEnabled: Boolean,
     onItemSelectedListener: (SupportedPaymentMethod) -> Unit
 ) {
-    // TODO: Would prefer to make the selectedIndex observable
-    val selectedIndex = remember { mutableStateOf(initialSelectedIndex) }
     val scope = rememberCoroutineScope()
     val state = rememberLazyListState()
     val horizontalPadding = 14
@@ -72,12 +68,11 @@ internal fun PaymentMethodsUI(
                     viewWidth = viewWidth,
                     iconRes = item.iconResource,
                     title = stringResource(item.displayNameResource),
-                    isSelected = index == selectedIndex.value,
+                    isSelected = index == selectedIndex,
                     isEnabled = isEnabled,
                     itemIndex = index,
                     onItemSelectedListener = {
-                        selectedIndex.value = it
-                        onItemSelectedListener(lpms.get(it))
+                        onItemSelectedListener(lpms[it])
                     }
                 )
             }

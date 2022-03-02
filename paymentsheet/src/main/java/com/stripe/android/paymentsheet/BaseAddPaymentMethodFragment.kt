@@ -72,11 +72,15 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
         )
 
         val selectedPaymentMethodIndex = paymentMethods.indexOf(
-            sheetViewModel.getAddFragmentSelectedLPM()
+            sheetViewModel.getAddFragmentSelectedLpm().value
         ).takeUnless { it == -1 } ?: 0
 
         if (paymentMethods.size > 1) {
-            setupRecyclerView(viewBinding, paymentMethods, selectedPaymentMethodIndex)
+            setupRecyclerView(
+                viewBinding,
+                paymentMethods,
+                sheetViewModel.getAddFragmentSelectedLpmValue()
+            )
         }
 
         if (paymentMethods.isNotEmpty()) {
@@ -114,7 +118,7 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
                         transformToPaymentSelection(
                             formFieldValues,
                             formFragment.paramKeySpec,
-                            sheetViewModel.getAddFragmentSelectedLPM()
+                            sheetViewModel.getAddFragmentSelectedLpmValue()
                         )
                     )
                 }
@@ -125,32 +129,26 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
     private fun setupRecyclerView(
         viewBinding: FragmentPaymentsheetAddPaymentMethodBinding,
         paymentMethods: List<SupportedPaymentMethod>,
-        selectedItemPosition: Int
+        initialSelectedItem: SupportedPaymentMethod
     ) {
         viewBinding.paymentMethodsRecycler.isVisible = true
-
-
-
         viewBinding.paymentMethodsRecycler.apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
             setContent {
                 val processing by sheetViewModel.processing.asFlow().collectAsState(initial = false)
-//                view?.rootView?.let {
-//                    val viewWidth = calculateViewWidth(
-//                        it,
-//                        paymentMethods.size
-//                    )
-
+                val selectedItem by sheetViewModel.getAddFragmentSelectedLpm()
+                    .asFlow()
+                    .collectAsState(
+                        initial = initialSelectedItem
+                    )
                 PaymentMethodsUI(
-                    initialSelectedIndex = selectedItemPosition,
+                    selectedIndex = paymentMethods.indexOf(selectedItem),
                     isEnabled = !processing,
                     lpms = paymentMethods,
                     onItemSelectedListener = { selectedLpm ->
                         onPaymentMethodSelected(selectedLpm)
                     }
                 )
-
-//                }
             }
         }
     }
