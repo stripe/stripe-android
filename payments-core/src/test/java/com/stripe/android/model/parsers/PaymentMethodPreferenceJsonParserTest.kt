@@ -1,6 +1,7 @@
 package com.stripe.android.model.parsers
 
 import com.google.common.truth.Truth
+import com.stripe.android.core.model.parsers.ModelJsonParser
 import com.stripe.android.model.PaymentMethodPreferenceFixtures
 import org.junit.Test
 

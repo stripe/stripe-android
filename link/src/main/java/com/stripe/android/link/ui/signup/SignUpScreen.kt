@@ -33,8 +33,8 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.stripe.android.link.LinkActivityContract
 import com.stripe.android.link.R
-import com.stripe.android.link.ui.theme.DefaultLinkTheme
-import com.stripe.android.link.ui.theme.linkTextFieldColors
+import com.stripe.android.link.theme.DefaultLinkTheme
+import com.stripe.android.link.theme.linkTextFieldColors
 import com.stripe.android.ui.core.elements.EmailSpec
 import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.elements.SectionCard
@@ -50,7 +50,8 @@ private fun SignUpBodyPreview() {
         SignUpBody(
             merchantName = "Example, Inc.",
             emailElement = EmailSpec.transform("email"),
-            signUpStatus = SignUpStatus.InputtingPhone
+            signUpState = SignUpState.InputtingPhone,
+            onSignUpClick = {}
         )
     }
 }
@@ -67,12 +68,13 @@ internal fun SignUpBody(
         )
     )
 
-    val signUpStatus by signUpViewModel.signUpStatus.collectAsState(SignUpStatus.InputtingEmail)
+    val signUpStatus by signUpViewModel.signUpState.collectAsState(SignUpState.InputtingEmail)
 
     SignUpBody(
         merchantName = signUpViewModel.merchantName,
         emailElement = signUpViewModel.emailElement,
-        signUpStatus = signUpStatus
+        signUpState = signUpStatus,
+        onSignUpClick = signUpViewModel::onSignUpClick
     )
 }
 
@@ -80,9 +82,9 @@ internal fun SignUpBody(
 internal fun SignUpBody(
     merchantName: String,
     emailElement: SectionFieldElement,
-    signUpStatus: SignUpStatus
+    signUpState: SignUpState,
+    onSignUpClick: (String) -> Unit
 ) {
-
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -106,12 +108,12 @@ internal fun SignUpBody(
         )
         EmailCollectionSection(
             emailElement = emailElement,
-            signUpStatus = signUpStatus
+            signUpState = signUpState
         )
         AnimatedVisibility(
-            visible = signUpStatus == SignUpStatus.InputtingPhone
+            visible = signUpState == SignUpState.InputtingPhone
         ) {
-            PhoneCollectionSection()
+            PhoneCollectionSection(onSignUpClick)
         }
     }
 }
@@ -119,7 +121,7 @@ internal fun SignUpBody(
 @Composable
 private fun EmailCollectionSection(
     emailElement: SectionFieldElement,
-    signUpStatus: SignUpStatus
+    signUpState: SignUpState
 ) {
     Box(
         modifier = Modifier
@@ -128,7 +130,7 @@ private fun EmailCollectionSection(
         contentAlignment = Alignment.CenterEnd
     ) {
         SectionElementUI(
-            enabled = signUpStatus != SignUpStatus.VerifyingEmail,
+            enabled = signUpState != SignUpState.VerifyingEmail,
             element = SectionElement(
                 identifier = IdentifierSpec.Generic("email"),
                 fields = listOf(emailElement),
@@ -139,7 +141,7 @@ private fun EmailCollectionSection(
             ),
             emptyList()
         )
-        if (signUpStatus == SignUpStatus.VerifyingEmail) {
+        if (signUpState == SignUpState.VerifyingEmail) {
             CircularProgressIndicator(
                 modifier = Modifier
                     .size(32.dp)
@@ -159,7 +161,10 @@ private fun EmailCollectionSection(
 }
 
 @Composable
-private fun PhoneCollectionSection() {
+private fun PhoneCollectionSection(
+    onSignUpClick: (String) -> Unit
+) {
+    // TODO(brnunes-stripe): Migrate to phone number collection element
     var phone by remember { mutableStateOf("") }
 
     Column(
@@ -195,11 +200,14 @@ private fun PhoneCollectionSection() {
             style = MaterialTheme.typography.caption
         )
         Button(
-            onClick = {},
+            onClick = {
+                onSignUpClick(phone)
+            },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(56.dp)
-                .padding(vertical = 8.dp)
+                .padding(vertical = 8.dp),
+            enabled = phone.length == 10
         ) {
             Text(
                 text = stringResource(R.string.sign_up),

@@ -123,6 +123,14 @@
                 tools:ignore="HardcodedText" />
 
             <RadioButton
+                android:id="@+id/currency_aud_button"
+                android:text="AUD"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:checked="true"
+                tools:ignore="HardcodedText" />
+
+            <RadioButton
                 android:id="@+id/currency_eur_button"
                 android:text="EUR"
                 android:layout_width="match_parent"

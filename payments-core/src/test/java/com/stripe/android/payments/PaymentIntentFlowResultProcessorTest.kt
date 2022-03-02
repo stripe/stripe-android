@@ -6,9 +6,9 @@ import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentIntentResult
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.core.Logger
+import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.exception.MaxRetryReachedException
 import com.stripe.android.model.PaymentIntentFixtures
-import com.stripe.android.networking.ApiRequest
 import com.stripe.android.networking.StripeRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher

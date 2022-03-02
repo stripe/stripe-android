@@ -1,9 +1,10 @@
 package com.stripe.android.model.parsers
 
+import com.stripe.android.core.model.StripeJsonUtils
+import com.stripe.android.core.model.StripeJsonUtils.optString
+import com.stripe.android.core.model.parsers.ModelJsonParser
 import com.stripe.android.model.Customer
 import com.stripe.android.model.CustomerPaymentSource
-import com.stripe.android.model.StripeJsonUtils
-import com.stripe.android.model.StripeJsonUtils.optString
 import com.stripe.android.model.TokenizationMethod
 import org.json.JSONArray
 import org.json.JSONObject

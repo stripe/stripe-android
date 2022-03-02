@@ -6,9 +6,9 @@ import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.SetupIntentResult
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.core.Logger
+import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.networking.AbsFakeStripeRepository
-import com.stripe.android.networking.ApiRequest
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest

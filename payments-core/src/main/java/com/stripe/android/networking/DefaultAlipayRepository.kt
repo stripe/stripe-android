@@ -2,6 +2,7 @@ package com.stripe.android.networking
 
 import com.stripe.android.AlipayAuthenticator
 import com.stripe.android.StripeIntentResult
+import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.AlipayAuthResult
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.StripeIntent

@@ -6,10 +6,11 @@ import android.content.pm.PackageManager
 import android.os.Build
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.Source
 import com.stripe.android.model.Token
-import com.stripe.android.networking.ApiRequest
 import com.stripe.android.networking.PaymentAnalyticsEvent
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import org.junit.runner.RunWith
@@ -112,7 +113,7 @@ class PaymentAnalyticsRequestFactoryTest {
                 "os_release" to "11",
                 "os_version" to 30,
                 "device_type" to "robolectric_robolectric_robolectric",
-                "bindings_version" to Stripe.VERSION_NAME,
+                "bindings_version" to StripeSdkVersion.VERSION_NAME,
                 "app_name" to "com.stripe.android.test",
                 "app_version" to 0,
                 "product_usage" to ATTRIBUTION.toList(),
@@ -204,7 +205,7 @@ class PaymentAnalyticsRequestFactoryTest {
         assertThat(params[PaymentAnalyticsRequestFactory.FIELD_APP_NAME])
             .isEqualTo(BuildConfig.LIBRARY_PACKAGE_NAME)
 
-        assertEquals(Stripe.VERSION_NAME, params[PaymentAnalyticsRequestFactory.FIELD_BINDINGS_VERSION])
+        assertEquals(StripeSdkVersion.VERSION_NAME, params[PaymentAnalyticsRequestFactory.FIELD_BINDINGS_VERSION])
         assertEquals(expectedEventName, params[PaymentAnalyticsRequestFactory.FIELD_EVENT])
         assertEquals(expectedUaName, params[PaymentAnalyticsRequestFactory.FIELD_ANALYTICS_UA])
 
@@ -236,7 +237,7 @@ class PaymentAnalyticsRequestFactoryTest {
         assertNotNull(params[PaymentAnalyticsRequestFactory.FIELD_OS_RELEASE])
         assertNotNull(params[PaymentAnalyticsRequestFactory.FIELD_OS_NAME])
 
-        assertEquals(Stripe.VERSION_NAME, params[PaymentAnalyticsRequestFactory.FIELD_BINDINGS_VERSION])
+        assertEquals(StripeSdkVersion.VERSION_NAME, params[PaymentAnalyticsRequestFactory.FIELD_BINDINGS_VERSION])
         assertEquals(expectedEventName, params[PaymentAnalyticsRequestFactory.FIELD_EVENT])
         assertEquals(expectedUaName, params[PaymentAnalyticsRequestFactory.FIELD_ANALYTICS_UA])
 
@@ -321,7 +322,7 @@ class PaymentAnalyticsRequestFactoryTest {
 
     @Test
     fun `create should create object with expected url and headers`() {
-        val sdkVersion = Stripe.VERSION_NAME
+        val sdkVersion = StripeSdkVersion.VERSION_NAME
         val analyticsRequest = analyticsRequestFactory.createPaymentMethodCreation(
             PaymentMethod.Type.Card,
             emptySet()

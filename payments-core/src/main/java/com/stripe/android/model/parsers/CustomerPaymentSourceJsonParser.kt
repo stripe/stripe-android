@@ -1,10 +1,11 @@
 package com.stripe.android.model.parsers
 
+import com.stripe.android.core.model.StripeJsonUtils.optString
+import com.stripe.android.core.model.parsers.ModelJsonParser
 import com.stripe.android.model.CustomerBankAccount
 import com.stripe.android.model.CustomerCard
 import com.stripe.android.model.CustomerPaymentSource
 import com.stripe.android.model.CustomerSource
-import com.stripe.android.model.StripeJsonUtils.optString
 import org.json.JSONObject
 
 internal class CustomerPaymentSourceJsonParser : ModelJsonParser<CustomerPaymentSource> {

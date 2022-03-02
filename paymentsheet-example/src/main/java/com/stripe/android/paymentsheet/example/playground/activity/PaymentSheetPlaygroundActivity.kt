@@ -53,6 +53,7 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
     private val currency: CheckoutCurrency
         get() = when (viewBinding.currencyRadioGroup.checkedRadioButtonId) {
             R.id.currency_usd_button -> CheckoutCurrency.USD
+            R.id.currency_aud_button -> CheckoutCurrency.AUD
             else -> CheckoutCurrency.EUR
         }
 
@@ -169,6 +170,7 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
 
         when (currency) {
             CheckoutCurrency.USD.value -> viewBinding.currencyRadioGroup.check(R.id.currency_usd_button)
+            CheckoutCurrency.AUD.value -> viewBinding.currencyRadioGroup.check(R.id.currency_aud_button)
             else -> viewBinding.currencyRadioGroup.check(R.id.currency_eur_button)
         }
 

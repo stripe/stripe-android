@@ -8,15 +8,16 @@ import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.Injectable
 import com.stripe.android.core.injection.Injector
 import com.stripe.android.core.injection.InjectorKey
+import com.stripe.android.core.injection.PUBLISHABLE_KEY
+import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.link.injection.DaggerLinkPaymentLauncherComponent
 import com.stripe.android.link.ui.signup.SignUpViewModel
+import com.stripe.android.link.ui.verification.VerificationViewModel
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
-import com.stripe.android.payments.core.injection.PUBLISHABLE_KEY
-import com.stripe.android.payments.core.injection.STRIPE_ACCOUNT_ID
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import javax.inject.Named
@@ -58,9 +59,9 @@ class LinkPaymentLauncher @AssistedInject constructor(
     private val injector = object : Injector {
         override fun inject(injectable: Injectable<*>) {
             when (injectable) {
-                is SignUpViewModel.Factory -> {
-                    launcherComponent.inject(injectable)
-                }
+                is LinkActivityViewModel.Factory -> launcherComponent.inject(injectable)
+                is SignUpViewModel.Factory -> launcherComponent.inject(injectable)
+                is VerificationViewModel.Factory -> launcherComponent.inject(injectable)
                 else -> {
                     throw IllegalArgumentException("invalid Injectable $injectable requested in $this")
                 }

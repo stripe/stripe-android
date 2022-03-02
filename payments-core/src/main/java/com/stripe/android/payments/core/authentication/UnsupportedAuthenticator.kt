@@ -1,11 +1,11 @@
 package com.stripe.android.payments.core.authentication
 
 import com.stripe.android.PaymentRelayStarter
-import com.stripe.android.Stripe
 import com.stripe.android.core.exception.StripeException
+import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.getRequestCode
-import com.stripe.android.networking.ApiRequest
 import com.stripe.android.view.AuthActivityStarterHost
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -50,7 +50,7 @@ internal class UnsupportedAuthenticator @Inject constructor(
     internal companion object {
         val ACTION_DEPENDENCY_MAP = mapOf<Class<out StripeIntent.NextActionData>, String>(
             StripeIntent.NextActionData.WeChatPayRedirect::class.java
-                to "com.stripe:stripe-wechatpay:${Stripe.VERSION_NAME}"
+                to "com.stripe:stripe-wechatpay:${StripeSdkVersion.VERSION_NAME}"
         )
     }
 }

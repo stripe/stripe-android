@@ -1,8 +1,9 @@
 package com.stripe.android.model.parsers
 
+import com.stripe.android.core.model.StripeJsonUtils
+import com.stripe.android.core.model.parsers.ModelJsonParser
 import com.stripe.android.model.AccountRange
 import com.stripe.android.model.BinRange
-import com.stripe.android.model.StripeJsonUtils
 import org.json.JSONObject
 
 internal class AccountRangeJsonParser : ModelJsonParser<AccountRange> {

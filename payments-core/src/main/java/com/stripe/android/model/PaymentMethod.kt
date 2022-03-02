@@ -833,7 +833,7 @@ constructor(
         /**
          * The customer’s bank.
          *
-         * [netbanking.bank](https://stripe.com/docs/payments/netbanking/banks)
+         * [netbanking.bank](https://stripe.com/docs/js#stripe_create_payment_method-paymentMethodData-netbanking[bank])
          */
         @JvmField val bank: String?
     ) : TypeData() {

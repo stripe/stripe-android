@@ -4,6 +4,7 @@ import android.os.Parcel
 import android.os.Parcelable
 import androidx.annotation.IntRange
 import androidx.annotation.Size
+import com.stripe.android.core.model.StripeJsonUtils
 import com.stripe.android.model.Source.Companion.asSourceType
 import com.stripe.android.model.Source.SourceType
 import kotlinx.parcelize.Parceler

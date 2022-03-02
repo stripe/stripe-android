@@ -1,8 +1,5 @@
 package com.stripe.android.paymentsheet
 
-import android.widget.FrameLayout
-import androidx.appcompat.view.ContextThemeWrapper
-import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
@@ -11,16 +8,16 @@ import com.stripe.android.paymentsheet.model.FragmentConfigFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import org.junit.runner.RunWith
+import org.mockito.kotlin.any
+import org.mockito.kotlin.eq
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.times
+import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
 class PaymentOptionsAdapterTest {
-    private val context = ContextThemeWrapper(
-        ApplicationProvider.getApplicationContext(),
-        R.style.StripePaymentSheetDefaultTheme
-    )
-
     private val paymentSelections = mutableSetOf<PaymentSelection>()
     private val paymentMethodsDeleted =
         mutableListOf<PaymentOptionsAdapter.Item.SavedPaymentMethod>()
@@ -130,32 +127,35 @@ class PaymentOptionsAdapterTest {
         )
         adapter.isEnabled = false
 
-        val googlePayViewHolder = adapter.onCreateViewHolder(
-            FrameLayout(context),
-            adapter.getItemViewType(1)
-        )
+        val googlePayViewHolder = mock<PaymentOptionsAdapter.GooglePayViewHolder>()
         adapter.onBindViewHolder(googlePayViewHolder, 1)
-
-        assertThat(googlePayViewHolder.itemView.isEnabled)
-            .isFalse()
-
-        val addCardViewHolder = adapter.onCreateViewHolder(
-            FrameLayout(context),
-            adapter.getItemViewType(0)
+        verify(googlePayViewHolder, times(1)).bind(
+            isEnabled = eq(false),
+            isSelected = eq(false),
+            isEditing = eq(false),
+            item = any(),
+            position = eq(1)
         )
+
+        val addCardViewHolder = mock<PaymentOptionsAdapter.AddNewPaymentMethodViewHolder>()
         adapter.onBindViewHolder(addCardViewHolder, 0)
-
-        assertThat(addCardViewHolder.itemView.isEnabled)
-            .isFalse()
-
-        val cardViewHolder = adapter.createViewHolder(
-            FrameLayout(context),
-            adapter.getItemViewType(3)
+        verify(addCardViewHolder, times(1)).bind(
+            isEnabled = eq(false),
+            isSelected = eq(false),
+            isEditing = eq(false),
+            item = any(),
+            position = eq(0)
         )
-        adapter.onBindViewHolder(cardViewHolder, 3)
 
-        assertThat(cardViewHolder.itemView.isEnabled)
-            .isFalse()
+        val cardViewHolder = mock<PaymentOptionsAdapter.SavedPaymentMethodViewHolder>()
+        adapter.onBindViewHolder(cardViewHolder, 3)
+        verify(cardViewHolder, times(1)).bind(
+            isEnabled = eq(false),
+            isSelected = eq(false),
+            isEditing = eq(false),
+            item = any(),
+            position = eq(3)
+        )
     }
 
     @Test
@@ -168,33 +168,35 @@ class PaymentOptionsAdapterTest {
         )
         adapter.setEditing(true)
 
-        val googlePayViewHolder = adapter.onCreateViewHolder(
-            FrameLayout(context),
-            adapter.getItemViewType(1)
-        )
+        val googlePayViewHolder = mock<PaymentOptionsAdapter.GooglePayViewHolder>()
         adapter.onBindViewHolder(googlePayViewHolder, 1)
-
-        assertThat(googlePayViewHolder.itemView.isEnabled)
-            .isFalse()
-
-        val addCardViewHolder = adapter.onCreateViewHolder(
-            FrameLayout(context),
-            adapter.getItemViewType(0)
+        verify(googlePayViewHolder, times(1)).bind(
+            isSelected = eq(false),
+            isEnabled = eq(false),
+            isEditing = eq(true),
+            item = any(),
+            position = eq(1)
         )
+
+        val addCardViewHolder = mock<PaymentOptionsAdapter.AddNewPaymentMethodViewHolder>()
         adapter.onBindViewHolder(addCardViewHolder, 0)
-
-        assertThat(addCardViewHolder.itemView.isEnabled)
-            .isFalse()
-
-        val cardViewHolder = adapter.createViewHolder(
-            FrameLayout(context),
-            adapter.getItemViewType(3)
+        verify(addCardViewHolder, times(1)).bind(
+            isSelected = eq(false),
+            isEnabled = eq(false),
+            isEditing = eq(true),
+            item = any(),
+            position = eq(0)
         )
-        adapter.onBindViewHolder(cardViewHolder, 3)
 
-        // Saved payment methods should still look enabled
-        assertThat(cardViewHolder.itemView.isEnabled)
-            .isTrue()
+        val cardViewHolder = mock<PaymentOptionsAdapter.SavedPaymentMethodViewHolder>()
+        adapter.onBindViewHolder(cardViewHolder, 3)
+        verify(cardViewHolder, times(1)).bind(
+            isSelected = eq(false),
+            isEnabled = eq(true),
+            isEditing = eq(true),
+            item = any(),
+            position = eq(3)
+        )
     }
 
     @Test
