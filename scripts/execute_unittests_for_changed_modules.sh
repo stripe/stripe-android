@@ -1,7 +1,11 @@
 # This script first finds all the modules changed in a PR, then finds all their dependent modules, finally it executes testDebugUnitTest on these modules.
 # If some critical dependency is changed, e.g the root build.gradle file, all unit tests will be executed.
+echo -----Fetching orign master
+git fetch origin master:refs/remotes/origin/master
+git branch -a
+echo -----Done fetching orign master
 
-
+echo -----Calculating modules to test
 # directory names that corresponds to a module that has unit tests - this list needs to be manually updated when a new module is added/deleted
 TESTABLE_MODULES="payments payments-core paymentsheet wechatpay link stripecardscan identity stripe-core payments-ui-core camera-core"
 # a function to check if a dir is in TESTABLE_MODULES
@@ -30,7 +34,7 @@ while read line; do
   if ! listContainsElement "${changed_dirs[@]}" $module_name; then
     changed_dirs="$changed_dirs $module_name" # string concat
   fi
-done < <(git diff --name-only origin/master)
+done < <(git diff --name-only remotes/origin/master)
 
 # for all changed dirs, first check if it's a critical dep, if so run all tests and exit
 for dir in $changed_dirs
