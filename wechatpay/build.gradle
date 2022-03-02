@@ -30,8 +30,6 @@ dependencies {
     ktlint "com.pinterest:ktlint:$ktlintVersion"
 }
 
-
-
 android {
     compileSdkVersion rootProject.ext.compileSdkVersion
     buildToolsVersion rootProject.ext.buildToolsVersion
