@@ -30,35 +30,8 @@ import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
 import com.stripe.android.paymentsheet.ui.LpmSelectorText
 import kotlin.math.roundToInt
 
-
 internal const val ADD_PM_DEFAULT_PADDING = 12.0f
 internal const val CARD_HORIZONTAL_PADDING = 6.0f
-
-internal fun calculateViewWidth(
-    targetWidth: Int,
-    screenDensity: Float,
-    numberOfPaymentMethods: Int
-): Dp {
-    val minItemWidth = 100 * screenDensity + (2 * CARD_HORIZONTAL_PADDING)
-
-    // if all items fit at min width, then span them across the sheet evenly filling it.
-    // otherwise the number of items visible should be a multiple of .5
-    val viewWidth =
-        if (minItemWidth * numberOfPaymentMethods < targetWidth) {
-            targetWidth / numberOfPaymentMethods
-        } else {
-            // numVisibleItems is incremented in steps of 0.5 items
-            // (1, 1.5, 2, 2.5, 3, ...)
-            val numVisibleItems = (targetWidth * 2 / minItemWidth).toInt() / 2f
-            targetWidth / numVisibleItems
-        }
-
-    return (viewWidth.toInt() / screenDensity).dp
-}
-
-private fun dpToPx(displayMetrics: DisplayMetrics, dp: Float): Int {
-    return (dp * (displayMetrics.xdpi / DisplayMetrics.DENSITY_DEFAULT)).roundToInt()
-}
 
 @Composable
 internal fun PaymentMethodsUI(
@@ -112,6 +85,32 @@ internal fun PaymentMethodsUI(
         }
 
     }
+}
+
+internal fun calculateViewWidth(
+    targetWidth: Int,
+    screenDensity: Float,
+    numberOfPaymentMethods: Int
+): Dp {
+    val minItemWidth = 100 * screenDensity + (2 * CARD_HORIZONTAL_PADDING)
+
+    // if all items fit at min width, then span them across the sheet evenly filling it.
+    // otherwise the number of items visible should be a multiple of .5
+    val viewWidth =
+        if (minItemWidth * numberOfPaymentMethods < targetWidth) {
+            targetWidth / numberOfPaymentMethods
+        } else {
+            // numVisibleItems is incremented in steps of 0.5 items
+            // (1, 1.5, 2, 2.5, 3, ...)
+            val numVisibleItems = (targetWidth * 2 / minItemWidth).toInt() / 2f
+            targetWidth / numVisibleItems
+        }
+
+    return (viewWidth.toInt() / screenDensity).dp
+}
+
+private fun dpToPx(displayMetrics: DisplayMetrics, dp: Float): Int {
+    return (dp * (displayMetrics.xdpi / DisplayMetrics.DENSITY_DEFAULT)).roundToInt()
 }
 
 @Composable
