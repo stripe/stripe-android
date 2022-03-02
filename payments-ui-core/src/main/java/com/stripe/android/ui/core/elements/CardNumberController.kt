@@ -51,6 +51,8 @@ internal class CardNumberController constructor(
     override val rawFieldValue: Flow<String> =
         _fieldValue.map { cardTextFieldConfig.convertToRaw(it) }
 
+    override val contentDescription: Flow<String> = _fieldValue
+
     internal val cardBrandFlow = _fieldValue.map {
         CardBrand.getCardBrands(it).firstOrNull() ?: CardBrand.Unknown
     }

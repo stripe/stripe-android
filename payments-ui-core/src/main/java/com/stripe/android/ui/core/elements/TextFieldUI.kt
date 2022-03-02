@@ -28,6 +28,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.ImeAction
 import com.stripe.android.ui.core.R
 
@@ -65,6 +67,7 @@ internal fun TextField(
     val trailingIcon by textFieldController.trailingIcon.collectAsState(null)
     val shouldShowError by textFieldController.visibleError.collectAsState(false)
     val loading by textFieldController.loading.collectAsState(false)
+    val contentDescription by textFieldController.contentDescription.collectAsState("")
 
     var hasFocus by rememberSaveable { mutableStateOf(false) }
     val textFieldColors = TextFieldColors(
@@ -128,6 +131,9 @@ internal fun TextField(
                     textFieldController.onFocusChange(it.isFocused)
                 }
                 hasFocus = it.isFocused
+            }
+            .semantics {
+                this.contentDescription = contentDescription
             },
         keyboardActions = KeyboardActions(
             onNext = {

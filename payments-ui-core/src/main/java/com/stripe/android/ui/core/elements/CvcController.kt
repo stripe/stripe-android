@@ -36,6 +36,9 @@ internal class CvcController constructor(
     override val rawFieldValue: Flow<String> =
         _fieldValue.map { cvcTextFieldConfig.convertToRaw(it) }
 
+    // This makes the screen reader read out numbers digit by digit
+    override val contentDescription: Flow<String> = _fieldValue.map { it.replace("\\d".toRegex(), "$0 ") }
+
     private val _fieldState = combine(cardBrandFlow, _fieldValue) { brand, fieldValue ->
         cvcTextFieldConfig.determineState(brand, fieldValue, brand.maxCvcLength)
     }

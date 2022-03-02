@@ -29,6 +29,9 @@ interface TextFieldController : InputController {
     override val fieldValue: Flow<String>
     val visibleError: Flow<Boolean>
     val loading: Flow<Boolean>
+    // This dictates how the accessibility reader reads the text in the field.
+    // Default this to _fieldValue to read the field normally
+    val contentDescription: Flow<String>
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
@@ -67,6 +70,8 @@ class SimpleTextFieldController constructor(
     override val fieldValue: Flow<String> = _fieldValue
 
     override val rawFieldValue: Flow<String> = _fieldValue.map { textFieldConfig.convertToRaw(it) }
+
+    override val contentDescription: Flow<String> = _fieldValue
 
     private val _fieldState = MutableStateFlow<TextFieldState>(Blank)
     override val fieldState: Flow<TextFieldState> = _fieldState
