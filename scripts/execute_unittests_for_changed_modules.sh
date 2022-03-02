@@ -1,9 +1,9 @@
 # This script first finds all the modules changed in a PR, then finds all their dependent modules, finally it executes testDebugUnitTest on these modules.
 # If some critical dependency is changed, e.g the root build.gradle file, all unit tests will be executed.
-echo --------current branches
+echo --------fetching orign master
 git fetch origin master:refs/remotes/origin/master
 git branch -a
-echo --------end of current branches
+echo --------end of fetching orign master
 
 # directory names that corresponds to a module that has unit tests - this list needs to be manually updated when a new module is added/deleted
 TESTABLE_MODULES="payments payments-core paymentsheet wechatpay link stripecardscan identity stripe-core payments-ui-core camera-core"
