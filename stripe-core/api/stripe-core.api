@@ -150,14 +150,6 @@ public final class com/stripe/android/core/networking/NetworkConstantsKt {
 	public static final fun getDEFAULT_RETRY_CODES ()Ljava/lang/Iterable;
 }
 
-public class com/stripe/android/core/networking/RequestHeadersFactory$BaseApiHeadersFactory : com/stripe/android/core/networking/RequestHeadersFactory {
-	public static final field $stable I
-	public fun <init> (Lcom/stripe/android/core/networking/ApiRequest$Options;Lcom/stripe/android/core/InternalAppInfo;Ljava/util/Locale;Ljava/lang/String;Ljava/lang/String;)V
-	public synthetic fun <init> (Lcom/stripe/android/core/networking/ApiRequest$Options;Lcom/stripe/android/core/InternalAppInfo;Ljava/util/Locale;Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	protected fun getExtraHeaders ()Ljava/util/Map;
-	protected fun getUserAgent ()Ljava/lang/String;
-}
-
 public final class com/stripe/android/core/networking/RetryDelaySupplier_Factory : dagger/internal/Factory {
 	public fun <init> ()V
 	public static fun create ()Lcom/stripe/android/core/networking/RetryDelaySupplier_Factory;
