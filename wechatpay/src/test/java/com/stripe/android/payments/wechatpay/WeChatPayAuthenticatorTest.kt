@@ -81,6 +81,11 @@ class WeChatPayAuthenticatorTest {
     @Test
     fun `wechatPayAuthStarter should start when stripeIntent is WeChatPay`() =
         runTest {
+
+            val authenticator =  WeChatPayAuthenticator().also {
+                it.weChatAuthLauncherFactory = { _, _ -> mockWeChatPayAuthStarter }
+                it.reflectionHelper = mockReflectionHelper
+            }
             authenticator.authenticate(
                 mock(),
                 PaymentIntentFixtures.PI_REQUIRES_WECHAT_PAY_AUTHORIZE,
