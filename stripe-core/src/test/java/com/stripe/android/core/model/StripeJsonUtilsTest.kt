@@ -1,4 +1,4 @@
-package com.stripe.android.model
+package com.stripe.android.core.model
 
 import org.json.JSONArray
 import org.json.JSONObject

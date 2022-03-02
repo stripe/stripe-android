@@ -1,6 +1,7 @@
 package com.stripe.android.model.parsers
 
 import com.stripe.android.cards.Bin
+import com.stripe.android.core.model.parsers.ModelJsonParser
 import com.stripe.android.model.CardMetadata
 import org.json.JSONArray
 import org.json.JSONObject

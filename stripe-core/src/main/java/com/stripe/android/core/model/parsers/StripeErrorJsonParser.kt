@@ -1,12 +1,13 @@
-package com.stripe.android.model
+package com.stripe.android.core.model.parsers
 
+import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.core.StripeError
-import com.stripe.android.model.StripeJsonUtils.optString
-import com.stripe.android.model.parsers.ModelJsonParser
+import com.stripe.android.core.model.StripeJsonUtils.optString
 import org.json.JSONObject
 
-internal class StripeErrorJsonParser : ModelJsonParser<StripeError> {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+class StripeErrorJsonParser : ModelJsonParser<StripeError> {
 
     override fun parse(json: JSONObject): StripeError {
         return runCatching {
@@ -28,9 +29,11 @@ internal class StripeErrorJsonParser : ModelJsonParser<StripeError> {
         )
     }
 
-    internal companion object {
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    companion object {
         @VisibleForTesting
-        internal const val MALFORMED_RESPONSE_MESSAGE = "An improperly formatted error response was found."
+        internal const val MALFORMED_RESPONSE_MESSAGE =
+            "An improperly formatted error response was found."
 
         private const val FIELD_CHARGE = "charge"
         private const val FIELD_CODE = "code"

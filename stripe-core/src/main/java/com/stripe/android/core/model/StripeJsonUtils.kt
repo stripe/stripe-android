@@ -1,5 +1,6 @@
-package com.stripe.android.model
+package com.stripe.android.core.model
 
+import androidx.annotation.RestrictTo
 import androidx.annotation.Size
 import org.json.JSONArray
 import org.json.JSONException
@@ -8,7 +9,8 @@ import org.json.JSONObject
 /**
  * A set of JSON parsing utility functions.
  */
-internal object StripeJsonUtils {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+object StripeJsonUtils {
     private const val NULL = "null"
 
     /**
@@ -20,7 +22,7 @@ internal object StripeJsonUtils {
      * @return the value stored in the requested field, or `false` if the key is not present
      */
     @JvmSynthetic
-    internal fun optBoolean(
+    fun optBoolean(
         jsonObject: JSONObject,
         @Size(min = 1) fieldName: String
     ): Boolean {
@@ -36,7 +38,7 @@ internal object StripeJsonUtils {
      * @return the value stored in the requested field, or `null` if the key is not present
      */
     @JvmSynthetic
-    internal fun optInteger(
+    fun optInteger(
         jsonObject: JSONObject,
         @Size(min = 1) fieldName: String
     ): Int? {
@@ -56,7 +58,7 @@ internal object StripeJsonUtils {
      * @return the value stored in the requested field, or `null` if the key is not present
      */
     @JvmSynthetic
-    internal fun optLong(
+    fun optLong(
         jsonObject: JSONObject,
         @Size(min = 1) fieldName: String
     ): Long? {
@@ -94,7 +96,7 @@ internal object StripeJsonUtils {
      */
     @JvmSynthetic
     @Size(2)
-    internal fun optCountryCode(
+    fun optCountryCode(
         jsonObject: JSONObject,
         @Size(min = 1) fieldName: String
     ): String? {
@@ -112,7 +114,7 @@ internal object StripeJsonUtils {
      */
     @JvmStatic
     @Size(3)
-    internal fun optCurrency(
+    fun optCurrency(
         jsonObject: JSONObject,
         @Size(min = 1) fieldName: String
     ): String? {
@@ -128,7 +130,7 @@ internal object StripeJsonUtils {
      * @return the value stored in the requested field, or `null` if the key is not present
      */
     @JvmSynthetic
-    internal fun optMap(
+    fun optMap(
         jsonObject: JSONObject,
         @Size(min = 1) fieldName: String
     ): Map<String, Any?>? {
@@ -145,7 +147,7 @@ internal object StripeJsonUtils {
      * @return the value stored in the requested field, or `null` if the key is not present
      */
     @JvmSynthetic
-    internal fun optHash(
+    fun optHash(
         jsonObject: JSONObject,
         @Size(min = 1) fieldName: String
     ): Map<String, String>? {
@@ -161,7 +163,7 @@ internal object StripeJsonUtils {
      * @return a [Map] representing the input, or `null` if the input is `null`
      */
     @JvmSynthetic
-    internal fun jsonObjectToMap(jsonObject: JSONObject?): Map<String, Any?>? {
+    fun jsonObjectToMap(jsonObject: JSONObject?): Map<String, Any?>? {
         if (jsonObject == null) {
             return null
         }
@@ -196,7 +198,7 @@ internal object StripeJsonUtils {
      * @return a [Map] representing the input, or `null` if the input is `null`
      */
     @JvmSynthetic
-    internal fun jsonObjectToStringMap(jsonObject: JSONObject?): Map<String, String>? {
+    fun jsonObjectToStringMap(jsonObject: JSONObject?): Map<String, String>? {
         if (jsonObject == null) {
             return null
         }
@@ -222,7 +224,7 @@ internal object StripeJsonUtils {
      * @return a [List] representing the input, or `null` if said input is `null`
      */
     @JvmSynthetic
-    internal fun jsonArrayToList(jsonArray: JSONArray?): List<Any>? {
+    fun jsonArrayToList(jsonArray: JSONArray?): List<Any>? {
         if (jsonArray == null) {
             return null
         }
@@ -252,7 +254,7 @@ internal object StripeJsonUtils {
      * @return a [JSONObject] representing the input map, or `null` if the input
      * object is `null`
      */
-    internal fun mapToJsonObject(mapObject: Map<String, *>?): JSONObject? {
+    fun mapToJsonObject(mapObject: Map<String, *>?): JSONObject? {
         if (mapObject == null) {
             return null
         }
@@ -317,7 +319,7 @@ internal object StripeJsonUtils {
     }
 
     @JvmSynthetic
-    internal fun nullIfNullOrEmpty(possibleNull: String?): String? {
+    fun nullIfNullOrEmpty(possibleNull: String?): String? {
         return possibleNull?.let { s ->
             s.takeUnless { NULL == it || it.isEmpty() }
         }

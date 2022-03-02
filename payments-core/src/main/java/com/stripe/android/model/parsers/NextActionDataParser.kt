@@ -1,9 +1,10 @@
 package com.stripe.android.model.parsers
 
 import android.net.Uri
+import com.stripe.android.core.model.StripeJsonUtils
+import com.stripe.android.core.model.StripeJsonUtils.optString
+import com.stripe.android.core.model.parsers.ModelJsonParser
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.model.StripeJsonUtils
-import com.stripe.android.model.StripeJsonUtils.optString
 import com.stripe.android.model.WeChat
 import org.json.JSONObject
 
