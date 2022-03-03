@@ -41,8 +41,9 @@
     <string name="select">Select</string>
 
     <string name="file_upload_content_id">Please upload images of the front and back of your ID</string>
-
     <string name="file_upload_content_dl">Please upload images of the front and back of your driver\'s license</string>
+    <string name="file_upload_content_passport">Please upload images of your passport</string>
+
     <string name="back_of_id_selected">Back of ID is selected</string>
     <string name="front_of_id_selected">Front of ID is selected</string>
     <string name="back_of_dl_selected">Back of driver license is selected</string>
