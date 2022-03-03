@@ -49,7 +49,6 @@ class MainActivity : AppCompatActivity() {
                 Snackbar.LENGTH_LONG
             )
 
-
             Fuel.post(EXAMPLE_BACKEND_URL)
                 .responseString { _, _, result ->
                     when (result) {
