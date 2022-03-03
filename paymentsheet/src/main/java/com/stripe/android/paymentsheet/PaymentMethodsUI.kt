@@ -33,7 +33,6 @@ internal const val CARD_HORIZONTAL_PADDING = 6.0f
 internal const val TEST_TAG_LIST = "PaymentMethodsUITestTag"
 internal const val PM_LIST_PADDING = 14.0f
 
-
 @Composable
 internal fun PaymentMethodsUI(
     paymentMethods: List<SupportedPaymentMethod>,
