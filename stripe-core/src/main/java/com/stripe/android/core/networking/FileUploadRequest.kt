@@ -1,13 +1,10 @@
-package com.stripe.android.networking
+package com.stripe.android.core.networking
 
+import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
-import com.stripe.android.AppInfo
-import com.stripe.android.core.networking.ApiRequest
-import com.stripe.android.core.networking.DEFAULT_RETRY_CODES
-import com.stripe.android.core.networking.RequestHeadersFactory
-import com.stripe.android.core.networking.StripeRequest
+import com.stripe.android.core.InternalAppInfo
+import com.stripe.android.core.model.InternalStripeFileParams
 import com.stripe.android.core.networking.StripeRequest.MimeType
-import com.stripe.android.model.StripeFileParams
 import java.io.OutputStream
 import java.io.PrintWriter
 import java.net.URLConnection
@@ -18,10 +15,11 @@ import kotlin.random.Random
  *
  * See [File upload guide](https://stripe.com/docs/file-upload)
  */
-internal class FileUploadRequest(
-    private val fileParams: StripeFileParams,
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+class FileUploadRequest(
+    private val fileParams: InternalStripeFileParams,
     options: ApiRequest.Options,
-    appInfo: AppInfo? = null,
+    appInfo: InternalAppInfo? = null,
     /**
      * Boundary to delineate parts of the message
      *
@@ -31,7 +29,7 @@ internal class FileUploadRequest(
 ) : StripeRequest() {
     private val headersFactory: RequestHeadersFactory = RequestHeadersFactory.FileUpload(
         options = options,
-        appInfo = appInfo?.toInternalAppInfo(),
+        appInfo = appInfo,
         boundary = boundary
     )
 
