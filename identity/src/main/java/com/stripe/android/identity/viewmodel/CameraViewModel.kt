@@ -8,7 +8,6 @@ import com.stripe.android.camera.framework.AggregateResultListener
 import com.stripe.android.camera.framework.AnalyzerLoopErrorListener
 import com.stripe.android.camera.scanui.ScanErrorListener
 import com.stripe.android.camera.scanui.SimpleScanStateful
-import com.stripe.android.identity.IdentityViewModel
 import com.stripe.android.identity.camera.IDDetectorAggregator
 import com.stripe.android.identity.camera.IdentityScanFlow
 import com.stripe.android.identity.states.IdentityScanState

@@ -2,7 +2,7 @@ package com.stripe.android
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.ApiVersion
-import com.stripe.android.model.StripeJsonUtils
+import com.stripe.android.core.model.StripeJsonUtils
 import org.json.JSONObject
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner

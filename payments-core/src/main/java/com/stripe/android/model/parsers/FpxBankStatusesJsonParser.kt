@@ -1,7 +1,8 @@
 package com.stripe.android.model.parsers
 
+import com.stripe.android.core.model.StripeJsonUtils
+import com.stripe.android.core.model.parsers.ModelJsonParser
 import com.stripe.android.model.BankStatuses
-import com.stripe.android.model.StripeJsonUtils
 import org.json.JSONObject
 
 internal class FpxBankStatusesJsonParser : ModelJsonParser<BankStatuses> {

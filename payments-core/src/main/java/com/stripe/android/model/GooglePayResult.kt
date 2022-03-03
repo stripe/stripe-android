@@ -1,7 +1,7 @@
 package com.stripe.android.model
 
 import android.os.Parcelable
-import com.stripe.android.model.StripeJsonUtils.optString
+import com.stripe.android.core.model.StripeJsonUtils.optString
 import com.stripe.android.model.parsers.TokenJsonParser
 import kotlinx.parcelize.Parcelize
 import org.json.JSONException

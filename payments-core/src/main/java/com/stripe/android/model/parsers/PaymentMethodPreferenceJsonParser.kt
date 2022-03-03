@@ -1,9 +1,10 @@
 package com.stripe.android.model.parsers
 
+import com.stripe.android.core.model.StripeJsonUtils
+import com.stripe.android.core.model.parsers.ModelJsonParser
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.model.StripeJsonUtils
 import org.json.JSONObject
 
 internal sealed class PaymentMethodPreferenceJsonParser<out StripeIntentType : StripeIntent> :

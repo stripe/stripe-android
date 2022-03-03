@@ -1,5 +1,5 @@
 # CHANGELOG
-## 19.2.1 - 2022-03-01
+## 19.2.2 - 2022-03-01
 [FIXED] [4606](https://github.com/stripe/stripe-android/pull/4606) Keep status bar color in PaymentLauncher
 
 ### Card scanning
