@@ -1,15 +1,18 @@
 package com.stripe.android.link.ui.signup
 
+import android.content.Intent
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
-import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performTextInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.stripe.android.PaymentConfiguration
 import com.stripe.android.link.LinkActivity
+import com.stripe.android.link.LinkActivityContract
 import com.stripe.android.link.R
+import com.stripe.android.link.createAndroidIntentComposeRule
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.ui.core.elements.EmailSpec
 import org.junit.Rule
@@ -20,7 +23,19 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 internal class SignUpScreenTest {
     @get:Rule
-    val composeTestRule = createAndroidComposeRule<LinkActivity>()
+    val composeTestRule = createAndroidIntentComposeRule<LinkActivity> {
+        PaymentConfiguration.init(it, "publishable_key")
+        Intent(it, LinkActivity::class.java).apply {
+            putExtra(
+                LinkActivityContract.EXTRA_ARGS,
+                LinkActivityContract.Args(
+                    "Merchant, Inc",
+                    "customer@email.com",
+                    null
+                )
+            )
+        }
+    }
 
     @Test
     fun status_inputting_email_shows_only_email_field() {
@@ -67,7 +82,7 @@ internal class SignUpScreenTest {
         onPhoneField().performTextInput("12345")
         onSignUpButton().assertIsNotEnabled()
 
-        onPhoneField().performTextInput("1234567890")
+        onPhoneField().performTextInput("67890")
         onSignUpButton().assertIsEnabled()
     }
 
