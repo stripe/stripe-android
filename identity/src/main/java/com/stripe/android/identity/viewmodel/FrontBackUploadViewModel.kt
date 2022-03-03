@@ -4,55 +4,48 @@ import android.content.Context
 import android.net.Uri
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.stripe.android.identity.states.IdentityScanState.ScanType
 import com.stripe.android.identity.utils.ImageChooser
 import com.stripe.android.identity.utils.PhotoTaker
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 /**
- * View model for IDUploadFragment, responsible for picking images for front of ID and back of ID,
- * either through camera or from local file storage.
+ * ViewModel to upload front and back image of a document either through camera or from local
+ * file storage.
  */
-internal class IDUploadViewModel : ViewModel() {
-    /**
-     * The ID front image has been picked, either through camera or local file
-     */
-    internal val frontPicked = MutableLiveData<Uri>()
-
-    /**
-     * The ID back image has been picked, either through camera or local file
-     */
-    internal val backPicked = MutableLiveData<Uri>()
+internal class FrontBackUploadViewModel : ViewModel() {
 
     /**
      * The ID front image has been uploaded
      */
-    internal val frontUploaded = MutableLiveData<Unit>()
+    private val _frontUploaded = MutableLiveData<Unit>()
+    val frontUploaded: LiveData<Unit> = _frontUploaded
 
     /**
      * The ID back image has been uploaded
      */
-    internal val backUploaded = MutableLiveData<Unit>()
+    private val _backUploaded = MutableLiveData<Unit>()
+    val backUploaded: LiveData<Unit> = _backUploaded
 
     /**
      * Both front and back of ID are uploaded
      */
-    internal val uploadFinished = object : MediatorLiveData<Unit>() {
+    val uploadFinished = object : MediatorLiveData<Unit>() {
         private var frontUploaded = false
         private var backUploaded = false
 
         init {
-            addSource(this@IDUploadViewModel.frontUploaded) {
+            addSource(this@FrontBackUploadViewModel.frontUploaded) {
                 frontUploaded = true
                 postValueWhenBothUploaded()
             }
-            addSource(this@IDUploadViewModel.backUploaded) {
+            addSource(this@FrontBackUploadViewModel.backUploaded) {
                 backUploaded = true
                 postValueWhenBothUploaded()
             }
@@ -82,56 +75,75 @@ internal class IDUploadViewModel : ViewModel() {
     }
 
     /**
-     * Takes a photo for corresponding ScanType, notifies its corresponding live data when finished.
+     * Takes a photo for front.
      */
-    internal fun takePhoto(
-        scanType: ScanType,
-        context: Context
+    fun takePhotoFront(
+        context: Context,
+        onPhotoTaken: (Uri) -> Unit
     ) {
-        if (scanType == ScanType.ID_FRONT) {
-            frontPhotoTaker.takePhoto(context, frontPicked::postValue)
-        } else if (scanType == ScanType.ID_BACK) {
-            backPhotoTaker.takePhoto(context, backPicked::postValue)
-        }
+        frontPhotoTaker.takePhoto(context, onPhotoTaken)
     }
 
     /**
-     * Choose an image for corresponding ScanType, notifies its corresponding live data when
-     * finished.
+     * Takes a photo for back.
      */
-    internal fun chooseImage(
-        scanType: ScanType
+    fun takePhotoBack(
+        context: Context,
+        onPhotoTaken: (Uri) -> Unit
     ) {
-        if (scanType == ScanType.ID_FRONT) {
-            frontImageChooser.chooseImage(frontPicked::postValue)
-        } else if (scanType == ScanType.ID_BACK) {
-            backImageChooser.chooseImage(backPicked::postValue)
-        }
+        backPhotoTaker.takePhoto(context, onPhotoTaken)
     }
 
     /**
-     * Upload the chosen image for corresponding ScanType, notifies its corresponding live data when
-     * finished.
-     * TODO(ccen): Implement upload functions.s
+     * Choose an image for front.
      */
-    internal fun uploadImage(
-        uri: Uri,
-        scanType: ScanType
+    fun chooseImageFront(
+        onImageChosen: (Uri) -> Unit
+    ) {
+        frontImageChooser.chooseImage(onImageChosen)
+    }
+
+    /**
+     * Choose an image for back.
+     */
+    fun chooseImageBack(
+        onImageChosen: (Uri) -> Unit
+    ) {
+        backImageChooser.chooseImage(onImageChosen)
+    }
+
+    /**
+     * Upload the chosen image for front, notifies its corresponding live data when
+     * finished.
+     * TODO(ccen): Implement upload functions.
+     */
+    fun uploadImageFront(
+        uri: Uri
     ) {
         viewModelScope.launch {
             delay(1000)
-            if (scanType == ScanType.ID_FRONT) {
-                frontUploaded.postValue(Unit)
-            } else if (scanType == ScanType.ID_BACK) {
-                backUploaded.postValue(Unit)
-            }
+            _frontUploaded.postValue(Unit)
         }
     }
 
-    internal class IDUploadViewModelFactory : ViewModelProvider.Factory {
+    /**
+     * Upload the chosen image for back, notifies its corresponding live data when
+     * finished.
+     * TODO(ccen): Implement upload functions.
+     */
+    fun uploadImageBack(
+        uri: Uri
+    ) {
+        viewModelScope.launch {
+            delay(1000)
+            _backUploaded.postValue(Unit)
+        }
+    }
+
+    internal class FrontBackUploadViewModelFactory : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return IDUploadViewModel() as T
+            return FrontBackUploadViewModel() as T
         }
     }
 }
