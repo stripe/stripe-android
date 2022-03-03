@@ -68,21 +68,6 @@
         android:layout_height="wrap_content"
         android:text="@string/kontinue"
         android:layout_marginBottom="10dp" />
-    <!--    -->
-    <!--    <LinearLayout-->
-    <!--        android:id="@+id/buttons"-->
-    <!--        android:orientation="vertical"-->
-    <!--        android:layout_width="match_parent"-->
-    <!--        android:layout_height="wrap_content"-->
-    <!--        android:layout_gravity="bottom">-->
-
-
-    <!--        <Button-->
-    <!--            android:id="@+id/decline"-->
-    <!--            android:layout_width="match_parent"-->
-    <!--            android:layout_height="wrap_content"-->
-    <!--            android:text="@string/decline" />-->
-    <!--    </LinearLayout>-->
 
 </LinearLayout>
 
