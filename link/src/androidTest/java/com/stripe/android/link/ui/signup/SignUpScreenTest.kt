@@ -28,11 +28,7 @@ internal class SignUpScreenTest {
         Intent(it, LinkActivity::class.java).apply {
             putExtra(
                 LinkActivityContract.EXTRA_ARGS,
-                LinkActivityContract.Args(
-                    "Merchant, Inc",
-                    "customer@email.com",
-                    null
-                )
+                LinkActivityContract.Args("Merchant, Inc")
             )
         }
     }
