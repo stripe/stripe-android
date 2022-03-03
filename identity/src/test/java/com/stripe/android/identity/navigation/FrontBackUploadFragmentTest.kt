@@ -68,6 +68,13 @@ class FrontBackUploadFragmentTest {
             assertThat(binding.progressCircularBack.visibility).isEqualTo(View.GONE)
             assertThat(binding.finishedCheckMarkBack.visibility).isEqualTo(View.GONE)
             assertThat(binding.kontinue.isEnabled).isEqualTo(false)
+
+            assertThat(binding.titleText.text).isEqualTo(it.getString(R.string.file_upload))
+            assertThat(binding.contentText.text).isEqualTo(it.getString(R.string.file_upload_content_id))
+            assertThat(binding.labelFront.text).isEqualTo(it.getString(R.string.front_of_id))
+            assertThat(binding.labelBack.text).isEqualTo(it.getString(R.string.back_of_id))
+            assertThat(binding.finishedCheckMarkFront.contentDescription).isEqualTo(it.getString(R.string.front_of_id_selected))
+            assertThat(binding.finishedCheckMarkBack.contentDescription).isEqualTo(it.getString(R.string.back_of_id_selected))
         }
     }
 
@@ -243,6 +250,8 @@ class FrontBackUploadFragmentTest {
         override val contextRes = R.string.file_upload_content_id
         override val frontTextRes = R.string.front_of_id
         override val backTextRes = R.string.back_of_id
+        override val frontCheckMarkContentDescription = R.string.front_of_id_selected
+        override val backCheckMarkContentDescription = R.string.back_of_id_selected
         override val continueButtonNavigationId =
             R.id.action_IDUploadFragment_to_confirmationFragment
         override val frontScanType = IdentityScanState.ScanType.ID_FRONT
