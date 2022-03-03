@@ -5,29 +5,21 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
-import com.stripe.android.identity.R
-import com.stripe.android.identity.viewmodel.ConfirmationViewModel
+import com.stripe.android.identity.databinding.ConfirmationFragmentBinding
 
-class ConfirmationFragment : Fragment() {
-
-    companion object {
-        fun newInstance() = ConfirmationFragment()
-    }
-
-    private lateinit var viewModel: ConfirmationViewModel
+/**
+ * Fragment for confirmation.
+ */
+internal class ConfirmationFragment : Fragment() {
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        return inflater.inflate(R.layout.confirmation_fragment, container, false)
-    }
+    ): View {
+        val binding = ConfirmationFragmentBinding.inflate(inflater, container, false)
+        // TODO(ccen) set text to bindings from network response
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
-        viewModel = ViewModelProvider(this).get(ConfirmationViewModel::class.java)
-        // TODO: Use the ViewModel
+        return binding.root
     }
 }
