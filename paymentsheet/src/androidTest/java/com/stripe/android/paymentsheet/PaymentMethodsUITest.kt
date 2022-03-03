@@ -127,7 +127,6 @@ internal class PaymentMethodsUITest {
         eps.assertIsNotEnabled()
     }
 
-
     /**
      * Disabling of scrolling will fail because it will not be able to find the node
      * in the scroll list.
@@ -141,11 +140,11 @@ internal class PaymentMethodsUITest {
         } catch (e: AssertionError) {
             errorMsg = e.message
         }
-        assert(
-            errorMsg?.contains(
-                "No node found that matches TestTag = '${testTag}' in scrollable container"
-            ) ?: false
-        )
+        assertThat(errorMsg)
+            .contains(
+                "No node found that matches TestTag = '$testTag' in scrollable container"
+
+            )
     }
 
     private val bancontact

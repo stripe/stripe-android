@@ -35,7 +35,6 @@ internal const val CARD_HORIZONTAL_PADDING = 6.0f
 internal const val TEST_TAG_LIST = "PaymentMethodsUITestTag"
 internal const val PM_LIST_PADDING = 14.0f
 
-
 @Composable
 internal fun PaymentMethodsUI(
     paymentMethods: List<SupportedPaymentMethod>,
@@ -71,7 +70,9 @@ internal fun PaymentMethodsUI(
         ) {
             itemsIndexed(items = paymentMethods, itemContent = { index, item ->
                 PaymentMethodUI(
-                    modifier = Modifier.testTag(TEST_TAG_LIST + stringResource(item.displayNameResource)),
+                    modifier = Modifier.testTag(
+                        TEST_TAG_LIST + stringResource(item.displayNameResource)
+                    ),
                     viewWidth = viewWidth,
                     iconRes = item.iconResource,
                     title = stringResource(item.displayNameResource),
@@ -173,7 +174,6 @@ internal fun PaymentMethodUI(
         }
     }
 }
-
 
 @Preview(
     widthDp = 320
