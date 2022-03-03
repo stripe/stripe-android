@@ -76,9 +76,13 @@ public final class com/stripe/android/identity/databinding/CameraPermissionDenie
 }
 
 public final class com/stripe/android/identity/databinding/ConfirmationFragmentBinding : androidx/viewbinding/ViewBinding {
+	public final field clockLogo Landroid/widget/ImageView;
+	public final field contentText Landroid/widget/TextView;
+	public final field kontinue Landroid/widget/Button;
+	public final field titleText Landroid/widget/TextView;
 	public static fun bind (Landroid/view/View;)Lcom/stripe/android/identity/databinding/ConfirmationFragmentBinding;
 	public synthetic fun getRoot ()Landroid/view/View;
-	public fun getRoot ()Landroid/widget/FrameLayout;
+	public fun getRoot ()Landroid/widget/LinearLayout;
 	public static fun inflate (Landroid/view/LayoutInflater;)Lcom/stripe/android/identity/databinding/ConfirmationFragmentBinding;
 	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Z)Lcom/stripe/android/identity/databinding/ConfirmationFragmentBinding;
 }
@@ -224,17 +228,6 @@ public final class com/stripe/android/identity/navigation/CameraErrorFragment$Co
 	public final fun newInstance ()Lcom/stripe/android/identity/navigation/CameraErrorFragment;
 }
 
-public final class com/stripe/android/identity/navigation/ConfirmationFragment : androidx/fragment/app/Fragment {
-	public static final field Companion Lcom/stripe/android/identity/navigation/ConfirmationFragment$Companion;
-	public fun <init> ()V
-	public fun onActivityCreated (Landroid/os/Bundle;)V
-	public fun onCreateView (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Landroid/os/Bundle;)Landroid/view/View;
-}
-
-public final class com/stripe/android/identity/navigation/ConfirmationFragment$Companion {
-	public final fun newInstance ()Lcom/stripe/android/identity/navigation/ConfirmationFragment;
-}
-
 public final class com/stripe/android/identity/navigation/PassportUploadFragment : androidx/fragment/app/Fragment {
 	public static final field Companion Lcom/stripe/android/identity/navigation/PassportUploadFragment$Companion;
 	public fun <init> ()V
@@ -260,10 +253,6 @@ public final class com/stripe/android/identity/utils/ContentUriResult {
 }
 
 public final class com/stripe/android/identity/viewmodel/CameraErrorViewModel : androidx/lifecycle/ViewModel {
-	public fun <init> ()V
-}
-
-public final class com/stripe/android/identity/viewmodel/ConfirmationViewModel : androidx/lifecycle/ViewModel {
 	public fun <init> ()V
 }
 

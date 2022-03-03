@@ -48,6 +48,8 @@
     <string name="choose_file">Choose File</string>
     <string name="take_photo">Take Photo</string>
     <string name="cancel">Cancel</string>
+    <string name="sample_title_text">Sample title text</string>
+    <string name="sample_content_text">Sample content text</string>
 
 
 </resources>
