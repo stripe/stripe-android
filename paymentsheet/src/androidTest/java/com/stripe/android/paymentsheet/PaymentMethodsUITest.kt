@@ -5,7 +5,9 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotDisplayed
+import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertWidthIsEqualTo
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
@@ -13,6 +15,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.google.common.truth.Truth.assertThat
 import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
 import kotlinx.coroutines.flow.MutableStateFlow
 import org.junit.Rule
@@ -62,6 +65,31 @@ internal class PaymentMethodsUITest {
     }
 
     @Test
+    fun testPmItemIsDisabledWhenListDisabled() {
+        val enableListControl = MutableStateFlow(true)
+        composeTestRule.setContent {
+            val enabled by enableListControl.collectAsState(true)
+            PaymentMethodsUI(
+                paymentMethods = listOf(
+                    SupportedPaymentMethod.Bancontact,
+                    SupportedPaymentMethod.SepaDebit,
+                    SupportedPaymentMethod.Sofort,
+                    SupportedPaymentMethod.Ideal,
+                    SupportedPaymentMethod.Eps
+                ),
+                selectedIndex = 0,
+                isEnabled = enabled,
+                onItemSelectedListener = {}
+            )
+        }
+
+        bancontact.assertIsEnabled()
+
+        enableListControl.value = false
+        bancontact.assertIsNotEnabled()
+    }
+
+    @Test
     fun testScrollIsDisabledWhenListDisabled() {
         val enableListControl = MutableStateFlow(true)
         composeTestRule.setContent {
@@ -87,6 +115,7 @@ internal class PaymentMethodsUITest {
         paymentMethodList.performScrollToNode(hasTestTag(epsTestTag))
         bancontact.assertIsNotDisplayed()
         eps.assertIsDisplayed()
+        eps.assertIsEnabled()
 
         // When we disable the list no longer scroll to the first item in the list
         enableListControl.value = false
@@ -95,7 +124,9 @@ internal class PaymentMethodsUITest {
         paymentMethodList.assertScrollToListItemDisabled(bancontactTestTag)
         bancontact.assertIsNotDisplayed()
         eps.assertIsDisplayed()
+        eps.assertIsNotEnabled()
     }
+
 
     /**
      * Disabling of scrolling will fail because it will not be able to find the node

@@ -76,9 +76,11 @@ dependencies {
     androidTestImplementation "androidx.test.espresso:espresso-core:$espressoVersion"
     androidTestImplementation "androidx.test:rules:$androidTestVersion"
     androidTestImplementation "androidx.test:runner:$androidTestVersion"
-//    // Test rules and transitive dependencies:
+    // Test rules and transitive dependencies:
     androidTestImplementation "androidx.compose.ui:ui-test-junit4:$androidxComposeVersion"
     androidTestUtil "androidx.test:orchestrator:$androidTestVersion"
+    androidTestImplementation "androidx.test.ext:truth:$androidTestVersion"
+    androidTestImplementation "com.google.truth:truth:$truthVersion"
 
     ktlint "com.pinterest:ktlint:$ktlintVersion"
 }

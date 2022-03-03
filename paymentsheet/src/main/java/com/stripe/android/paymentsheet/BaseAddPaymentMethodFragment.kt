@@ -135,12 +135,12 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
         viewBinding.paymentMethodsRecycler.apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
             setContent {
-                val processing by sheetViewModel.processing.asFlow().collectAsState(initial = false)
+                val processing by sheetViewModel.processing
+                    .asFlow()
+                    .collectAsState(initial = false)
                 val selectedItem by sheetViewModel.getAddFragmentSelectedLpm()
                     .asFlow()
-                    .collectAsState(
-                        initial = initialSelectedItem
-                    )
+                    .collectAsState(initial = initialSelectedItem)
                 PaymentMethodsUI(
                     selectedIndex = paymentMethods.indexOf(selectedItem),
                     isEnabled = !processing,

@@ -23,15 +23,18 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
 import com.stripe.android.paymentsheet.ui.LpmSelectorText
+import com.stripe.android.ui.core.StripeTheme
 
 internal const val ADD_PM_DEFAULT_PADDING = 12.0f
 internal const val CARD_HORIZONTAL_PADDING = 6.0f
 internal const val TEST_TAG_LIST = "PaymentMethodsUITestTag"
 internal const val PM_LIST_PADDING = 14.0f
+
 
 @Composable
 internal fun PaymentMethodsUI(
@@ -53,7 +56,11 @@ internal fun PaymentMethodsUI(
 
     BoxWithConstraints {
         val resources = LocalContext.current.resources
-        val viewWidth = calculateViewWidth(resources.displayMetrics, paymentMethods.size)
+        val viewWidth = calculateViewWidth(
+            dpToPx(resources.displayMetrics, this.maxWidth),
+            resources.displayMetrics,
+            paymentMethods.size
+        )
 
         // TODO: userScrollEnabled will be available in compose version 1.2.0-alpha01+
         LazyRow(
@@ -81,10 +88,11 @@ internal fun PaymentMethodsUI(
 }
 
 internal fun calculateViewWidth(
+    maxWidth: Int,
     displayMetrics: DisplayMetrics,
     numberOfPaymentMethods: Int
 ): Dp {
-    val maxWidth = displayMetrics.widthPixels
+//    val maxWidth = displayMetrics.widthPixels
     val screenDensity = displayMetrics.density
     val targetWidth = maxWidth - dpToPx(displayMetrics, PM_LIST_PADDING.dp * 2)
     val minItemWidth = 100 * screenDensity + (2 * CARD_HORIZONTAL_PADDING)
@@ -104,7 +112,7 @@ internal fun calculateViewWidth(
     return (viewWidth.toInt() / screenDensity).dp
 }
 
-private fun dpToPx(displayMetrics: DisplayMetrics, dp: Dp): Int {
+fun dpToPx(displayMetrics: DisplayMetrics, dp: Dp): Int {
     return (dp.value * (displayMetrics.xdpi / DisplayMetrics.DENSITY_DEFAULT)).toInt()
 }
 
@@ -163,5 +171,48 @@ internal fun PaymentMethodUI(
                 modifier = Modifier.padding(top = 6.dp, start = ADD_PM_DEFAULT_PADDING.dp)
             )
         }
+    }
+}
+
+
+@Preview(
+    widthDp = 320
+)
+@Composable
+internal fun PreviewPaymentMethodUI320dp() {
+    StripeTheme {
+        PaymentMethodsUI(
+            paymentMethods = listOf(
+                SupportedPaymentMethod.Bancontact,
+                SupportedPaymentMethod.SepaDebit,
+                SupportedPaymentMethod.Sofort,
+                SupportedPaymentMethod.Ideal,
+                SupportedPaymentMethod.Eps
+            ),
+            selectedIndex = 0,
+            isEnabled = true,
+            onItemSelectedListener = {}
+        )
+    }
+}
+
+@Preview(
+    widthDp = 475
+)
+@Composable
+internal fun PreviewPaymentMethodUI475dp() {
+    StripeTheme {
+        PaymentMethodsUI(
+            paymentMethods = listOf(
+                SupportedPaymentMethod.Bancontact,
+                SupportedPaymentMethod.SepaDebit,
+                SupportedPaymentMethod.Sofort,
+                SupportedPaymentMethod.Ideal,
+                SupportedPaymentMethod.Eps
+            ),
+            selectedIndex = 0,
+            isEnabled = true,
+            onItemSelectedListener = {}
+        )
     }
 }

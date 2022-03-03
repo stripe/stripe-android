@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet
 
 import android.content.Context
+import androidx.compose.ui.unit.dp
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.fragment.app.testing.FragmentScenario
@@ -43,8 +44,11 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
@@ -72,43 +76,41 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
         }
     }
 
-//    @Test
-//    fun `when processing then payment methods UI should be disabled`() {
-//        val paymentIntent = mock<PaymentIntent>().also {
-//            whenever(it.paymentMethodTypes).thenReturn(listOf("card", "bancontact"))
-//        }
-//        createFragment(stripeIntent = paymentIntent) { fragment, viewBinding, _ ->
-//            idleLooper()
-//            fragment.sheetViewModel._processing.value = true
-//            val adapter =
-//                viewBinding.paymentMethodsRecycler.adapter as AddPaymentMethodsAdapter
-//            assertThat(adapter.isEnabled).isFalse()
-//        }
-//    }
+    @Test
+    @Config(qualifiers = "w320dp")
+    fun `when screen is 320dp wide, adapter should show 2 and a half items with 104dp width`() {
+        val paymentIntent = mock<PaymentIntent>().also {
+            whenever(it.paymentMethodTypes).thenReturn(listOf("card", "bancontact", "sofort", "ideal"))
+        }
+        createFragment(stripeIntent = paymentIntent) { fragment, _, _ ->
+            assertThat(116.dp)
+                .isEqualTo(
+                    calculateViewWidth(
+                        292,
+                        fragment.resources.displayMetrics,
+                        paymentIntent.paymentMethodTypes.size
+                    )
+                )
+        }
+    }
 
-//    @Test
-//    @Config(qualifiers = "w320dp")
-//    fun `when screen is 320dp wide, adapter should show 2 and a half items with 104dp width`() {
-//        val paymentIntent = mock<PaymentIntent>().also {
-//            whenever(it.paymentMethodTypes).thenReturn(listOf("card", "bancontact", "sofort", "ideal"))
-//        }
-//        createFragment(stripeIntent = paymentIntent) { _, viewBinding, _ ->
-//            val item = viewBinding.paymentMethodsRecycler.layoutManager!!.findViewByPosition(0)
-//            assertThat(item!!.measuredWidth).isEqualTo(116)
-//        }
-//    }
-//
-//    @Test
-//    @Config(qualifiers = "w475dp")
-//    fun `when screen is 475dp wide, adapter should show 2 items evenly spread out`() {
-//        val paymentIntent = mock<PaymentIntent>().also {
-//            whenever(it.paymentMethodTypes).thenReturn(listOf("card", "bancontact"))
-//        }
-//        createFragment(stripeIntent = paymentIntent) { _, viewBinding, _ ->
-//            val item = viewBinding.paymentMethodsRecycler.layoutManager!!.findViewByPosition(0)
-//            assertThat(item!!.measuredWidth).isEqualTo(223)
-//        }
-//    }
+    @Test
+    @Config(qualifiers = "w475dp")
+    fun `when screen is 475dp wide, adapter should show 2 items evenly spread out`() {
+        val paymentIntent = mock<PaymentIntent>().also {
+            whenever(it.paymentMethodTypes).thenReturn(listOf("card", "bancontact"))
+        }
+        createFragment(stripeIntent = paymentIntent) { fragment, _, _ ->
+            assertThat(223.dp)
+                .isEqualTo(
+                    calculateViewWidth(
+                        447,
+                        fragment.resources.displayMetrics,
+                        paymentIntent.paymentMethodTypes.size
+                    )
+                )
+        }
+    }
 
     @Test
     fun `when isGooglePayEnabled=true should configure Google Pay button`() {
