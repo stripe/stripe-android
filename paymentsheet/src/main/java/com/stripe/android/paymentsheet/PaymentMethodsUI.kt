@@ -33,6 +33,7 @@ internal const val CARD_HORIZONTAL_PADDING = 6.0f
 internal const val TEST_TAG_LIST = "PaymentMethodsUITestTag"
 internal const val PM_LIST_PADDING = 14.0f
 
+
 @Composable
 internal fun PaymentMethodsUI(
     paymentMethods: List<SupportedPaymentMethod>,
@@ -111,7 +112,7 @@ internal fun calculateViewWidth(
     return (viewWidth.toInt() / screenDensity).dp
 }
 
-fun dpToPx(displayMetrics: DisplayMetrics, dp: Dp): Int {
+internal fun dpToPx(displayMetrics: DisplayMetrics, dp: Dp): Int {
     return (dp.value * (displayMetrics.xdpi / DisplayMetrics.DENSITY_DEFAULT)).toInt()
 }
 
