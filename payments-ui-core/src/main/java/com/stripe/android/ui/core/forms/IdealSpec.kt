@@ -39,8 +39,7 @@ internal val idealBankSection = SectionSpec(
 )
 internal val idealMandate = StaticTextSpec(
     IdentifierSpec.Generic("mandate"),
-    R.string.sepa_mandate,
-    R.color.mandate_text_color
+    R.string.sepa_mandate
 )
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

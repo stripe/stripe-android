@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.dp
 import com.google.accompanist.flowlayout.FlowCrossAxisAlignment
 import com.google.accompanist.flowlayout.FlowRow
 import com.stripe.android.ui.core.R
+import com.stripe.android.ui.core.StripeTheme
 
 @Composable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -40,11 +41,7 @@ fun AfterpayClearpayElementUI(
             element.getLabel(context.resources),
             Modifier
                 .padding(end = 4.dp),
-            color = if (isSystemInDarkTheme()) {
-                Color.LightGray
-            } else {
-                Color.Black
-            }
+            color = StripeTheme.colors.colorTextSecondary
         )
         Image(
             painter = painterResource(R.drawable.stripe_ic_afterpay_clearpay_logo),
@@ -71,11 +68,7 @@ fun AfterpayClearpayElementUI(
                 text = "ⓘ",
                 modifier = Modifier.padding(0.dp),
                 style = TextStyle(fontWeight = FontWeight.Bold),
-                color = if (isSystemInDarkTheme()) {
-                    Color.LightGray
-                } else {
-                    Color.Black
-                }
+                color = StripeTheme.colors.colorTextSecondary
             )
         }
     }

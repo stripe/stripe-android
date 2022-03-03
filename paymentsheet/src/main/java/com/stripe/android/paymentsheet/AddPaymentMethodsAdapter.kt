@@ -13,9 +13,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -24,6 +24,7 @@ import com.stripe.android.paymentsheet.AddPaymentMethodsAdapter.Companion.ADD_PM
 import com.stripe.android.paymentsheet.AddPaymentMethodsAdapter.Companion.CARD_HORIZONTAL_PADDING
 import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
 import com.stripe.android.paymentsheet.ui.LpmSelectorText
+import com.stripe.android.ui.core.StripeTheme
 import kotlin.properties.Delegates
 
 @SuppressLint("NotifyDataSetChanged")
@@ -145,26 +146,20 @@ internal fun PaymentMethodUI(
     isEnabled: Boolean,
     onItemSelectedListener: () -> Unit
 ) {
-    val strokeColor = colorResource(
+    val strokeColor =
         if (isSelected) {
-            R.color.stripe_paymentsheet_add_pm_card_selected_stroke
+            StripeTheme.colors.material.primary
         } else {
-            R.color.stripe_paymentsheet_add_pm_card_unselected_stroke
+            StripeTheme.colors.colorComponentBorder
         }
-    )
-
-    val cardBackgroundColor = if (isEnabled) {
-        colorResource(R.color.stripe_paymentsheet_elements_background_default)
-    } else {
-        colorResource(R.color.stripe_paymentsheet_elements_background_disabled)
-    }
 
     Card(
         border = BorderStroke(if (isSelected) 2.dp else 1.5.dp, strokeColor),
         shape = RoundedCornerShape(6.dp),
         elevation = if (isSelected) 1.5.dp else 0.dp,
-        backgroundColor = cardBackgroundColor,
+        backgroundColor = StripeTheme.colors.colorComponentBackground,
         modifier = Modifier
+            .alpha(alpha = if (isEnabled) 1.0F else 0.6F)
             .height(60.dp)
             .width(viewWidth)
             .padding(horizontal = CARD_HORIZONTAL_PADDING.dp)
@@ -186,6 +181,7 @@ internal fun PaymentMethodUI(
             LpmSelectorText(
                 text = title,
                 isEnabled = isEnabled,
+                textColor = StripeTheme.colors.material.onBackground,
                 modifier = Modifier.padding(top = 6.dp, start = ADD_PM_DEFAULT_PADDING.dp)
             )
         }

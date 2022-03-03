@@ -1,83 +1,144 @@
 package com.stripe.android.ui.core
 
+import android.content.Context
+import android.content.res.Configuration.UI_MODE_NIGHT_MASK
+import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import androidx.annotation.RestrictTo
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material.Colors
 import androidx.compose.material.MaterialTheme
-import androidx.compose.material.darkColors
 import androidx.compose.material.lightColors
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.ReadOnlyComposable
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.sp
-
-private val Green400 = Color(0xFF3CB043)
-private val Green800 = Color(0xFF234F1E)
-
-private val Yellow400 = Color(0xFFF6E547)
-private val Yellow700 = Color(0xFFF3B711)
-private val Yellow800 = Color(0xFFF29F05)
-
-private val Blue200 = Color(0xFF9DA3FA)
-private val Blue500 = Color(0xFF0540F2)
-
-private val Red300 = Color(0xFFEA6D7E)
-private val Red800 = Color(0xFFD00036)
-
-private val Teal = Color(0xFF0097a7)
-private val TealLight = Color(0xFF56c8d8)
-
-private val Purple = Color(0xFF4a148c)
-private val PurpleLight = Color(0xFF7c43bd)
-
-internal val GrayLight = Color(0xFFF8F8F8)
-
-private val StripeDarkPalette = darkColors(
-    primary = Blue200,
-    primaryVariant = Green400,
-    onPrimary = Color.Green,
-    secondary = Color.Gray,
-    surface = Color.Black,
-    onSecondary = Color.Black,
-    onSurface = Color.Gray,
-    onBackground = Color.Green,
-    error = Red300,
-    onError = Color.Black
-)
-
-private val StripeLightPalette = lightColors(
-    primary = Color(0xFF1A1A1A),
-    primaryVariant = TealLight,
-    onPrimary = Color.Black,
-    secondary = Color.Gray,
-    secondaryVariant = PurpleLight,
-    surface = Color.White,
-    onSecondary = Color.Black,
-    onSurface = Color.Black,
-    onBackground = Color.Black,
-    error = Red800,
-    onError = Color.White
-)
 
 internal val LocalFieldTextStyle = TextStyle.Default.copy(
     fontFamily = FontFamily.SansSerif,
     fontSize = 14.sp
 )
 
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+data class PaymentSheetConfigColors(
+    val primary: Color,
+    val surface: Color,
+    val componentBackground: Color,
+    val componentBorder: Color,
+    val componentDivider: Color,
+    val onPrimary: Color,
+    val textSecondary: Color,
+    val placeholderText: Color,
+    val onBackground: Color,
+    val appBarIcon: Color,
+    val error: Color,
+)
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+object PaymentSheetThemeConfig {
+    fun colors(isDark: Boolean): PaymentSheetConfigColors {
+        return if (isDark) colorsDark else colorsLight
+    }
+
+    private val colorsLight = PaymentSheetConfigColors(
+        primary = Color(0xFF007AFF),
+        surface = Color.White,
+        componentBackground = Color.White,
+        componentBorder = Color(0x33787880),
+        componentDivider = Color(0x33787880),
+        onPrimary = Color.Black,
+        textSecondary = Color(0x99000000),
+        placeholderText = Color(0x993C3C43),
+        onBackground = Color.Black,
+        appBarIcon = Color(0x99000000),
+        error = Color.Red,
+    )
+
+    private val colorsDark = PaymentSheetConfigColors(
+        primary = Color(0xFF0074D4),
+        surface = Color(0xff2e2e2e),
+        componentBackground = Color.DarkGray,
+        componentBorder = Color(0xFF787880),
+        componentDivider = Color(0xFF787880),
+        onPrimary = Color.White,
+        textSecondary = Color(0x99FFFFFF),
+        placeholderText = Color.White,
+        onBackground = Color.White,
+        appBarIcon = Color.White,
+        error = Color.Red,
+    )
+}
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+data class PaymentSheetComposeColors(
+    val colorComponentBackground: Color,
+    val colorComponentBorder: Color,
+    val colorComponentDivider: Color,
+    val colorTextSecondary: Color,
+    val placeholderText: Color,
+    val material: Colors
+)
+
+@Composable
+@ReadOnlyComposable
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+fun PaymentSheetThemeConfig.toComposeColors(): PaymentSheetComposeColors {
+    val colors = colors(isSystemInDarkTheme())
+    return PaymentSheetComposeColors(
+        colorComponentBackground = colors.componentBackground,
+        colorComponentBorder = colors.componentBorder,
+        colorComponentDivider = colors.componentDivider,
+        colorTextSecondary = colors.textSecondary,
+        placeholderText = colors.placeholderText,
+
+        material = lightColors(
+            primary = colors.primary,
+            onPrimary = colors.onPrimary,
+            surface = colors.surface,
+            onBackground = colors.onBackground,
+            error = colors.error,
+        )
+    )
+}
+
 @Composable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun StripeTheme(
-    isDarkTheme: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit
 ) {
-    val myColors = if (isDarkTheme) StripeDarkPalette else StripeLightPalette
+    val colors = PaymentSheetThemeConfig.toComposeColors()
+    val localColors = staticCompositionLocalOf { colors }
 
-    MaterialTheme(
-        colors = myColors,
-        typography = MaterialTheme.typography.copy(
-            body1 = LocalFieldTextStyle,
-            subtitle1 = LocalFieldTextStyle
-        ),
-        content = content
-    )
+    CompositionLocalProvider(
+        localColors provides colors
+    ) {
+        MaterialTheme(
+            colors = StripeTheme.colors.material,
+            typography = MaterialTheme.typography.copy(
+                body1 = LocalFieldTextStyle,
+                subtitle1 = LocalFieldTextStyle
+            ),
+            content = content
+        )
+    }
+}
+
+// This object lets you access colors in composables via
+// StripeTheme.colors.primary etc
+// This mirrors an object that lives inside of MaterialTheme.
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+object StripeTheme {
+    val colors: PaymentSheetComposeColors
+        @Composable
+        @ReadOnlyComposable
+        get() = PaymentSheetThemeConfig.toComposeColors()
+}
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+fun Context.isSystemDarkTheme(): Boolean {
+    return resources.configuration.uiMode and
+        UI_MODE_NIGHT_MASK == UI_MODE_NIGHT_YES
 }

@@ -1,13 +1,9 @@
 package com.stripe.android.ui.core.elements
 
 import android.util.Log
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.LocalContentAlpha
-import androidx.compose.material.LocalContentColor
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.TextField
 import androidx.compose.material.TextFieldDefaults
@@ -26,26 +22,12 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import com.stripe.android.ui.core.R
+import com.stripe.android.ui.core.StripeTheme
 
 /** This is a helpful method for setting the next action based on the nextFocus Requester **/
 internal fun imeAction(nextFocusRequester: FocusRequester?): ImeAction = nextFocusRequester?.let {
     ImeAction.Next
 } ?: ImeAction.Done
-
-internal data class TextFieldColors(
-    private val isDarkMode: Boolean,
-    private val defaultTextColor: Color,
-    val textColor: Color = if (isDarkMode) {
-        Color.White
-    } else {
-        defaultTextColor
-    },
-    val placeholderColor: Color = Color(0x14000000),
-    val backgroundColor: Color = Color.Transparent,
-    val focusedIndicatorColor: Color = Color.Transparent, // primary color by default
-    val unfocusedIndicatorColor: Color = Color.Transparent,
-    val disabledIndicatorColor: Color = Color.Transparent
-)
 
 /**
  * This is focused on converting an `Element` into what is displayed in a textField.
@@ -66,21 +48,19 @@ internal fun TextField(
     val shouldShowError by textFieldController.visibleError.collectAsState(false)
 
     var hasFocus by rememberSaveable { mutableStateOf(false) }
-    val textFieldColors = TextFieldColors(
-        isSystemInDarkTheme(),
-        LocalContentColor.current.copy(LocalContentAlpha.current)
-    )
     val colors = TextFieldDefaults.textFieldColors(
         textColor = if (shouldShowError) {
-            MaterialTheme.colors.error
+            StripeTheme.colors.material.error
         } else {
-            textFieldColors.textColor
+            StripeTheme.colors.material.onBackground
         },
-        placeholderColor = textFieldColors.placeholderColor,
-        backgroundColor = textFieldColors.backgroundColor,
-        focusedIndicatorColor = textFieldColors.focusedIndicatorColor,
-        disabledIndicatorColor = textFieldColors.disabledIndicatorColor,
-        unfocusedIndicatorColor = textFieldColors.unfocusedIndicatorColor
+        unfocusedLabelColor = StripeTheme.colors.placeholderText,
+        focusedLabelColor = StripeTheme.colors.placeholderText,
+        placeholderColor = StripeTheme.colors.placeholderText,
+        backgroundColor = StripeTheme.colors.colorComponentBackground,
+        focusedIndicatorColor = Color.Transparent,
+        disabledIndicatorColor = Color.Transparent,
+        unfocusedIndicatorColor = Color.Transparent
     )
 
     TextField(

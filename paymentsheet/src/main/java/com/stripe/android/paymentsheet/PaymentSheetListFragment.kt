@@ -3,11 +3,14 @@ package com.stripe.android.paymentsheet
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.ui.graphics.toArgb
 import androidx.core.view.isVisible
 import androidx.fragment.app.activityViewModels
 import com.stripe.android.paymentsheet.databinding.FragmentPaymentsheetPaymentMethodsListBinding
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.CurrencyFormatter
+import com.stripe.android.ui.core.PaymentSheetThemeConfig
+import com.stripe.android.ui.core.isSystemDarkTheme
 
 internal class PaymentSheetListFragment() : BasePaymentMethodsListFragment(
     canClickSelectedItem = false
@@ -37,7 +40,11 @@ internal class PaymentSheetListFragment() : BasePaymentMethodsListFragment(
         super.onViewCreated(view, savedInstanceState)
 
         val viewBinding = FragmentPaymentsheetPaymentMethodsListBinding.bind(view)
-
+        val isDark = context?.isSystemDarkTheme() ?: false
+        viewBinding.header.setTextColor(PaymentSheetThemeConfig.colors(isDark).onPrimary.toArgb())
+        viewBinding.total.setTextColor(
+            PaymentSheetThemeConfig.colors(isDark).textSecondary.toArgb()
+        )
         if (sheetViewModel.isProcessingPaymentIntent) {
             sheetViewModel.amount.observe(viewLifecycleOwner) {
                 viewBinding.total.text = getTotalText(requireNotNull(it))
