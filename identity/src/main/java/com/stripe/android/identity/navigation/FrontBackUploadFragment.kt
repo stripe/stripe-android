@@ -40,6 +40,12 @@ internal abstract class FrontBackUploadFragment(
     @get:StringRes
     abstract val backTextRes: Int
 
+    @get:StringRes
+    abstract val frontCheckMarkContentDescription: Int
+
+    @get:StringRes
+    abstract val backCheckMarkContentDescription: Int
+
     @get:IdRes
     abstract val continueButtonNavigationId: Int
 
@@ -66,6 +72,8 @@ internal abstract class FrontBackUploadFragment(
         binding.contentText.text = getString(contextRes)
         binding.labelFront.text = getString(frontTextRes)
         binding.labelBack.text = getString(backTextRes)
+        binding.finishedCheckMarkFront.contentDescription = getString(frontCheckMarkContentDescription)
+        binding.finishedCheckMarkBack.contentDescription = getString(backCheckMarkContentDescription)
 
         binding.selectBack.setOnClickListener {
             buildBottomSheetDialog(backScanType).show()
