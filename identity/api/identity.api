@@ -210,9 +210,16 @@ public final class com/stripe/android/identity/databinding/PassportScanFragmentB
 }
 
 public final class com/stripe/android/identity/databinding/PassportUploadFragmentBinding : androidx/viewbinding/ViewBinding {
+	public final field contentText Landroid/widget/TextView;
+	public final field finishedCheckMark Landroid/widget/ImageView;
+	public final field kontinue Lcom/google/android/material/button/MaterialButton;
+	public final field label Landroid/widget/TextView;
+	public final field progressCircular Lcom/google/android/material/progressindicator/CircularProgressIndicator;
+	public final field select Lcom/google/android/material/button/MaterialButton;
+	public final field titleText Landroid/widget/TextView;
 	public static fun bind (Landroid/view/View;)Lcom/stripe/android/identity/databinding/PassportUploadFragmentBinding;
 	public synthetic fun getRoot ()Landroid/view/View;
-	public fun getRoot ()Landroid/widget/FrameLayout;
+	public fun getRoot ()Landroid/widget/LinearLayout;
 	public static fun inflate (Landroid/view/LayoutInflater;)Lcom/stripe/android/identity/databinding/PassportUploadFragmentBinding;
 	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Z)Lcom/stripe/android/identity/databinding/PassportUploadFragmentBinding;
 }
@@ -226,17 +233,6 @@ public final class com/stripe/android/identity/navigation/CameraErrorFragment : 
 
 public final class com/stripe/android/identity/navigation/CameraErrorFragment$Companion {
 	public final fun newInstance ()Lcom/stripe/android/identity/navigation/CameraErrorFragment;
-}
-
-public final class com/stripe/android/identity/navigation/PassportUploadFragment : androidx/fragment/app/Fragment {
-	public static final field Companion Lcom/stripe/android/identity/navigation/PassportUploadFragment$Companion;
-	public fun <init> ()V
-	public fun onActivityCreated (Landroid/os/Bundle;)V
-	public fun onCreateView (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Landroid/os/Bundle;)Landroid/view/View;
-}
-
-public final class com/stripe/android/identity/navigation/PassportUploadFragment$Companion {
-	public final fun newInstance ()Lcom/stripe/android/identity/navigation/PassportUploadFragment;
 }
 
 public final class com/stripe/android/identity/utils/ContentUriResult {
@@ -253,10 +249,6 @@ public final class com/stripe/android/identity/utils/ContentUriResult {
 }
 
 public final class com/stripe/android/identity/viewmodel/CameraErrorViewModel : androidx/lifecycle/ViewModel {
-	public fun <init> ()V
-}
-
-public final class com/stripe/android/identity/viewmodel/PassportUploadViewModel : androidx/lifecycle/ViewModel {
 	public fun <init> ()V
 }
 
