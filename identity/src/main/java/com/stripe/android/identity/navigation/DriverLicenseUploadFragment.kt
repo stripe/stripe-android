@@ -1,33 +1,22 @@
 package com.stripe.android.identity.navigation
 
-import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.stripe.android.identity.R
-import com.stripe.android.identity.viewmodel.DriverLicenseUploadViewModel
+import com.stripe.android.identity.states.IdentityScanState
 
-class DriverLicenseUploadFragment : Fragment() {
-
-    companion object {
-        fun newInstance() = DriverLicenseUploadFragment()
-    }
-
-    private lateinit var viewModel: DriverLicenseUploadViewModel
-
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        return inflater.inflate(R.layout.driver_license_upload_fragment, container, false)
-    }
-
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
-        viewModel = ViewModelProvider(this).get(DriverLicenseUploadViewModel::class.java)
-        // TODO: Use the ViewModel
-    }
+/**
+ * Fragment to upload Driver license.
+ */
+internal class DriverLicenseUploadFragment(frontBackUploadViewModelFactory: ViewModelProvider.Factory) :
+    FrontBackUploadFragment(frontBackUploadViewModelFactory) {
+    override val titleRes = R.string.file_upload
+    override val contextRes = R.string.file_upload_content_dl
+    override val frontTextRes = R.string.front_of_dl
+    override val backTextRes = R.string.back_of_dl
+    override val frontCheckMarkContentDescription = R.string.front_of_dl_selected
+    override val backCheckMarkContentDescription = R.string.back_of_dl_selected
+    override val continueButtonNavigationId =
+        R.id.action_driverLicenseUploadFragment_to_confirmationFragment
+    override val frontScanType = IdentityScanState.ScanType.DL_FRONT
+    override val backScanType = IdentityScanState.ScanType.DL_BACK
 }

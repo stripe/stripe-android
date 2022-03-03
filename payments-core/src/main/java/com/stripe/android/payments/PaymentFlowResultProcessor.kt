@@ -9,15 +9,15 @@ import com.stripe.android.StripeIntentResult.Outcome.Companion.SUCCEEDED
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.InvalidRequestException
 import com.stripe.android.core.injection.IOContext
+import com.stripe.android.core.injection.PUBLISHABLE_KEY
+import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.RetryDelaySupplier
 import com.stripe.android.exception.MaxRetryReachedException
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.shouldRefresh
-import com.stripe.android.networking.ApiRequest
 import com.stripe.android.networking.StripeRepository
-import com.stripe.android.payments.core.injection.PUBLISHABLE_KEY
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import javax.inject.Inject

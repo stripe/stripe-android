@@ -2,22 +2,26 @@ package com.stripe.android.networking
 
 import android.content.Context
 import androidx.annotation.VisibleForTesting
-import com.stripe.android.ApiVersion
 import com.stripe.android.AppInfo
 import com.stripe.android.DefaultFraudDetectionDataRepository
 import com.stripe.android.FraudDetectionDataRepository
 import com.stripe.android.Stripe
 import com.stripe.android.StripeApiBeta
 import com.stripe.android.cards.Bin
+import com.stripe.android.core.ApiVersion
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.exception.InvalidRequestException
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
+import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.model.StripeModel
+import com.stripe.android.core.model.parsers.ModelJsonParser
+import com.stripe.android.core.model.parsers.StripeErrorJsonParser
 import com.stripe.android.core.networking.AnalyticsRequest
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
+import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
 import com.stripe.android.core.networking.HTTP_TOO_MANY_REQUESTS
@@ -50,7 +54,6 @@ import com.stripe.android.model.Source
 import com.stripe.android.model.SourceParams
 import com.stripe.android.model.Stripe3ds2AuthParams
 import com.stripe.android.model.Stripe3ds2AuthResult
-import com.stripe.android.model.StripeErrorJsonParser
 import com.stripe.android.model.StripeFile
 import com.stripe.android.model.StripeFileParams
 import com.stripe.android.model.StripeIntent
@@ -62,7 +65,6 @@ import com.stripe.android.model.parsers.ConsumerSessionLookupJsonParser
 import com.stripe.android.model.parsers.CustomerJsonParser
 import com.stripe.android.model.parsers.FpxBankStatusesJsonParser
 import com.stripe.android.model.parsers.IssuingCardPinJsonParser
-import com.stripe.android.model.parsers.ModelJsonParser
 import com.stripe.android.model.parsers.PaymentIntentJsonParser
 import com.stripe.android.model.parsers.PaymentMethodJsonParser
 import com.stripe.android.model.parsers.PaymentMethodPreferenceForPaymentIntentJsonParser
@@ -76,7 +78,6 @@ import com.stripe.android.model.parsers.Stripe3ds2AuthResultJsonParser
 import com.stripe.android.model.parsers.StripeFileJsonParser
 import com.stripe.android.model.parsers.TokenJsonParser
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
-import com.stripe.android.payments.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.utils.StripeUrlUtils
 import kotlinx.coroutines.Dispatchers
 import org.json.JSONException
@@ -111,7 +112,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         PaymentAnalyticsRequestFactory(context, publishableKeyProvider, productUsageTokens),
     private val fraudDetectionDataParamsUtils: FraudDetectionDataParamsUtils = FraudDetectionDataParamsUtils(),
     betas: Set<StripeApiBeta> = emptySet(),
-    apiVersion: String = ApiVersion(betas = betas).code,
+    apiVersion: String = ApiVersion(betas = betas.map { it.code }.toSet()).code,
     sdkVersion: String = StripeSdkVersion.VERSION
 ) : StripeRepository() {
 
@@ -135,7 +136,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
     )
 
     private val apiRequestFactory = ApiRequest.Factory(
-        appInfo = appInfo,
+        appInfo = appInfo?.toInternalAppInfo(),
         apiVersion = apiVersion,
         sdkVersion = sdkVersion
     )

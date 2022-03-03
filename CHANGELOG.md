@@ -1,8 +1,10 @@
 # CHANGELOG
-## X.X.X - 2022-XX-XX
-[FIXED] [4606](https://github.com/stripe/stripe-android/pull/4606) Keep status bar color in PaymentLauncher.
-### PaymentSheet
-### Identity
+### xx.x.x - YYYY-MM-DD
+[FIXED] [4646](https://github.com/stripe/stripe-android/pull/4646) Update 3ds2 to latest version 6.1.4, see PR for specific issues addressed. 
+
+## 19.2.2 - 2022-03-01
+[FIXED] [4606](https://github.com/stripe/stripe-android/pull/4606) Keep status bar color in PaymentLauncher
+
 ### Card scanning
 [ADDED] [4592](https://github.com/stripe/stripe-android/pull/4592) Add support for launching card scan from fragments.
 

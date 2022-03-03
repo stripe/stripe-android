@@ -1,8 +1,9 @@
 package com.stripe.android.model.parsers
 
+import com.stripe.android.core.model.StripeJsonUtils.optBoolean
+import com.stripe.android.core.model.StripeJsonUtils.optString
+import com.stripe.android.core.model.parsers.ModelJsonParser
 import com.stripe.android.model.ConsumerSessionLookup
-import com.stripe.android.model.StripeJsonUtils.optBoolean
-import com.stripe.android.model.StripeJsonUtils.optString
 import org.json.JSONObject
 
 internal class ConsumerSessionLookupJsonParser : ModelJsonParser<ConsumerSessionLookup> {

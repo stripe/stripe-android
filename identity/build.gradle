@@ -3,6 +3,7 @@ plugins {
     id 'kotlin-android'
     id 'org.jetbrains.dokka'
     id 'org.jetbrains.kotlin.plugin.parcelize'
+    id 'org.jetbrains.kotlin.plugin.serialization' version '1.6.10'
 }
 
 assemble.dependsOn('lint')
@@ -19,6 +20,8 @@ if (System.getenv("JITPACK")) {
 
 dependencies {
     implementation project(":camera-core")
+    implementation project(":stripe-core")
+
     // vanilla tflite library
     implementation "org.tensorflow:tensorflow-lite:2.8.0"
     // flex ops
@@ -34,6 +37,8 @@ dependencies {
     implementation "androidx.navigation:navigation-fragment-ktx:$androidxNavigationVersion"
     implementation "androidx.navigation:navigation-ui-ktx:$androidxNavigationVersion"
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
+
+    implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:$kotlinSerializationVersion"
 
     implementation "androidx.core:core-ktx:$androidxCoreVersion"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinCoroutinesVersion"

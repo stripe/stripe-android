@@ -2,12 +2,12 @@ package com.stripe.android.link.repositories
 
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.IOContext
+import com.stripe.android.core.injection.PUBLISHABLE_KEY
+import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
+import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
-import com.stripe.android.networking.ApiRequest
 import com.stripe.android.networking.StripeRepository
-import com.stripe.android.payments.core.injection.PUBLISHABLE_KEY
-import com.stripe.android.payments.core.injection.STRIPE_ACCOUNT_ID
 import kotlinx.coroutines.withContext
 import java.util.Locale
 import javax.inject.Inject

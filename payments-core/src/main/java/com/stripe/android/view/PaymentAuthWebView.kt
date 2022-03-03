@@ -4,7 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.util.AttributeSet
 import android.webkit.WebView
-import com.stripe.android.networking.RequestHeadersFactory
+import com.stripe.android.core.networking.RequestHeadersFactory
 import com.stripe.android.view.PaymentAuthWebViewClient.Companion.BLANK_PAGE
 
 /**

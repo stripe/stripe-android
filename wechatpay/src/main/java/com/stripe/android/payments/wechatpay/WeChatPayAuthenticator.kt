@@ -3,10 +3,11 @@ package com.stripe.android.payments.wechatpay
 import androidx.activity.result.ActivityResultCallback
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
+import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
+import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.getRequestCode
-import com.stripe.android.networking.ApiRequest
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.payments.core.authentication.PaymentAuthenticator
 import com.stripe.android.payments.wechatpay.reflection.DefaultWeChatPayReflectionHelper
@@ -16,6 +17,7 @@ import com.stripe.android.view.AuthActivityStarterHost
 /**
  * [PaymentAuthenticator] implementation to authenticate through WeChatPay SDK.
  */
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class WeChatPayAuthenticator : PaymentAuthenticator<StripeIntent> {
     /**
      * [weChatPayAuthLauncher] is mutable and might be updated during

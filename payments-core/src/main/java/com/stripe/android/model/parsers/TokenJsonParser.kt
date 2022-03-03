@@ -1,6 +1,7 @@
 package com.stripe.android.model.parsers
 
-import com.stripe.android.model.StripeJsonUtils
+import com.stripe.android.core.model.StripeJsonUtils
+import com.stripe.android.core.model.parsers.ModelJsonParser
 import com.stripe.android.model.Token
 import com.stripe.android.model.Token.Type
 import org.json.JSONObject

@@ -1,10 +1,11 @@
 package com.stripe.android.model.parsers
 
+import com.stripe.android.core.model.StripeJsonUtils.optInteger
+import com.stripe.android.core.model.StripeJsonUtils.optLong
+import com.stripe.android.core.model.StripeJsonUtils.optString
+import com.stripe.android.core.model.parsers.ModelJsonParser
 import com.stripe.android.model.StripeFile
 import com.stripe.android.model.StripeFilePurpose
-import com.stripe.android.model.StripeJsonUtils.optInteger
-import com.stripe.android.model.StripeJsonUtils.optLong
-import com.stripe.android.model.StripeJsonUtils.optString
 import org.json.JSONObject
 
 internal class StripeFileJsonParser : ModelJsonParser<StripeFile> {

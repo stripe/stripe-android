@@ -3,7 +3,7 @@ package com.stripe.android.paymentsheet.repositories
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.networking.ApiRequest
+import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentsheet.model.ClientSecret
 import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret

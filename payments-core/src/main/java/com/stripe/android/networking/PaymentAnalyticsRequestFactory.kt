@@ -7,13 +7,15 @@ import android.os.Build
 import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.BuildConfig
+import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.networking.AnalyticsRequest
+import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.networking.RequestHeadersFactory
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.Source
 import com.stripe.android.model.Token
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
-import com.stripe.android.payments.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.utils.ContextUtils.packageInfo
 import javax.inject.Inject
 import javax.inject.Named

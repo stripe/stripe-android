@@ -5,6 +5,7 @@ plugins {
     id 'checkstyle'
     id 'org.jetbrains.dokka'
     id 'org.jetbrains.kotlin.plugin.parcelize'
+    id 'org.jetbrains.kotlin.plugin.serialization' version '1.6.10'
 }
 
 assemble.dependsOn('lint')
@@ -27,6 +28,7 @@ dependencies {
 
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinCoroutinesVersion"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$kotlinCoroutinesVersion"
+    implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:$kotlinSerializationVersion"
 
     testImplementation "junit:junit:$junitVersion"
     testImplementation "org.mockito:mockito-core:$mockitoCoreVersion"

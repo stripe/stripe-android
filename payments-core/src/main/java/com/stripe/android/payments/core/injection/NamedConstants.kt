@@ -10,16 +10,6 @@ import com.stripe.android.model.StripeIntent
 const val PRODUCT_USAGE = "productUsage"
 
 /**
- * Name for user's publishable key
- */
-const val PUBLISHABLE_KEY = "publishableKey"
-
-/**
- * Name for user's account id
- */
-const val STRIPE_ACCOUNT_ID = "stripeAccountId"
-
-/**
  * Name to indicate whether the current [StripeIntent] is a [PaymentIntent] or [SetupIntent].
  */
 const val IS_PAYMENT_INTENT = "isPaymentIntent"

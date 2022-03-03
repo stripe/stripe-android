@@ -16,12 +16,12 @@ import com.stripe.android.core.injection.Injectable
 import com.stripe.android.core.injection.UIContext
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.core.injection.injectWithFallback
+import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.networking.ApiRequest
 import com.stripe.android.networking.PaymentAnalyticsEvent
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networking.StripeRepository

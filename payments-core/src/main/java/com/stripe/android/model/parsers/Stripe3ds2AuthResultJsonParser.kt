@@ -1,7 +1,8 @@
 package com.stripe.android.model.parsers
 
+import com.stripe.android.core.model.StripeJsonUtils.optString
+import com.stripe.android.core.model.parsers.ModelJsonParser
 import com.stripe.android.model.Stripe3ds2AuthResult
-import com.stripe.android.model.StripeJsonUtils.optString
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -60,7 +61,8 @@ internal class Stripe3ds2AuthResultJsonParser : ModelJsonParser<Stripe3ds2AuthRe
         }
     }
 
-    internal class MessageExtensionJsonParser : ModelJsonParser<Stripe3ds2AuthResult.MessageExtension> {
+    internal class MessageExtensionJsonParser :
+        ModelJsonParser<Stripe3ds2AuthResult.MessageExtension> {
         fun parse(jsonArray: JSONArray): List<Stripe3ds2AuthResult.MessageExtension> {
             return (0 until jsonArray.length())
                 .mapNotNull { jsonArray.optJSONObject(it) }
