@@ -1,8 +1,6 @@
 package com.stripe.android.link.ui.verification
 
 import android.app.Application
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -16,16 +14,12 @@ import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.injection.DaggerLinkViewModelFactoryComponent
 import com.stripe.android.link.injection.LinkViewModelSubcomponent
 import com.stripe.android.link.model.Navigator
-import com.stripe.android.ui.core.elements.EmailSpec
-import com.stripe.android.ui.core.elements.EmailSpec.transform
-import com.stripe.android.ui.core.elements.IdentifierSpec
-import com.stripe.android.ui.core.elements.OTPController
-import com.stripe.android.ui.core.elements.OTPElement
 import com.stripe.android.ui.core.elements.OTPSpec
-import com.stripe.android.ui.core.elements.SectionFieldElement
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import org.intellij.lang.annotations.Identifier
 import javax.inject.Inject
 import javax.inject.Provider
 
@@ -43,7 +37,23 @@ internal class VerificationViewModel @Inject constructor(
         requireNotNull(linkAccountManager.linkAccount)
     }
 
-    val otpController = OTPController()
+    val otpElement = OTPSpec.transform()
+
+    private val otpCode: StateFlow<String?> = otpElement.getFormFieldValueFlow()
+        .map {
+            it.map { field -> field.second }
+                .takeIf { entries -> entries.all { entry -> entry.isComplete } }
+                ?.map { entry -> entry.value }
+                ?.joinToString("")
+        }.stateIn(viewModelScope, SharingStarted.Lazily, "")
+
+    init {
+        viewModelScope.launch {
+            otpCode.collect { code ->
+                code?.let { onVerificationCodeEntered(code) }
+            }
+        }
+    }
 
     fun onVerificationCodeEntered(code: String) {
         viewModelScope.launch {

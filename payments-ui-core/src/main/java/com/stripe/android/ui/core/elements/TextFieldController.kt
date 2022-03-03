@@ -21,14 +21,14 @@ import kotlinx.coroutines.flow.map
 class TextFieldController constructor(
     private val textFieldConfig: TextFieldConfig,
     override val showOptionalLabel: Boolean = false,
-    initialValue: String? = null
+    initialValue: String? = null,
 ) : InputController, SectionFieldErrorController {
     val capitalization: KeyboardCapitalization = textFieldConfig.capitalization
     val keyboardType: KeyboardType = textFieldConfig.keyboard
     val visualTransformation = textFieldConfig.visualTransformation ?: VisualTransformation.None
 
     @StringRes
-    override val label: Int = textFieldConfig.label
+    override val label: Int? = textFieldConfig.label
     val debugLabel = textFieldConfig.debugLabel
 
     /** This is all the information that can be observed on the element */

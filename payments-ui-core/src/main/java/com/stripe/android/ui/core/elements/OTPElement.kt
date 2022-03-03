@@ -9,10 +9,10 @@ import kotlinx.coroutines.flow.map
 data class OTPElement(
     override val identifier: IdentifierSpec,
     override val controller: OTPController,
-) : FormElement()  {
+) : FormElement() {
     override fun getFormFieldValueFlow(): Flow<List<Pair<IdentifierSpec, FormFieldEntry>>> {
         return controller.rawFieldValue.map {
-            listOf(identifier to FormFieldEntry(it, it.length == 6))
+            listOf(identifier to FormFieldEntry(it, it.length == controller.otpLength))
         }
     }
 }

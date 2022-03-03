@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -76,11 +75,7 @@ internal fun FormInternal(
                         )
                         is AuBecsDebitMandateTextElement -> AuBecsDebitMandateElementUI(element)
                         is AffirmHeaderElement -> AffirmElementUI()
-                        is OTPElement -> OTPElementUI(
-                            // TODO: Think about how to make this compatible with LINK
-                            colors = TextFieldDefaults.textFieldColors(),
-                            controller = element.controller
-                        )
+                        is OTPElement -> OTPElementUI(element)
                     }
                 }
             }

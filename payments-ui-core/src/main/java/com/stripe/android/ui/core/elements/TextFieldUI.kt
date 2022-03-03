@@ -1,12 +1,14 @@
 package com.stripe.android.ui.core.elements
 
 import android.util.Log
+import androidx.annotation.RestrictTo
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.LocalContentAlpha
 import androidx.compose.material.LocalContentColor
+import androidx.compose.material.LocalTextStyle
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.TextField
@@ -24,6 +26,7 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import com.stripe.android.ui.core.R
 
@@ -32,7 +35,8 @@ internal fun imeAction(nextFocusRequester: FocusRequester?): ImeAction = nextFoc
     ImeAction.Next
 } ?: ImeAction.Done
 
-internal data class TextFieldColors(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+data class TextFieldColors(
     private val isDarkMode: Boolean,
     private val defaultTextColor: Color,
     val textColor: Color = if (isDarkMode) {
@@ -58,6 +62,9 @@ internal fun TextField(
     textFieldController: TextFieldController,
     modifier: Modifier = Modifier,
     enabled: Boolean,
+    placeholder: @Composable (() -> Unit)? = null,
+    colors: androidx.compose.material.TextFieldColors? = null,
+    textStyle: TextStyle? = null,
 ) {
     Log.d("Construct", "SimpleTextFieldElement ${textFieldController.debugLabel}")
 
@@ -70,7 +77,7 @@ internal fun TextField(
         isSystemInDarkTheme(),
         LocalContentColor.current.copy(LocalContentAlpha.current)
     )
-    val colors = TextFieldDefaults.textFieldColors(
+    val themedColors = colors ?: TextFieldDefaults.textFieldColors(
         textColor = if (shouldShowError) {
             MaterialTheme.colors.error
         } else {
@@ -87,18 +94,20 @@ internal fun TextField(
         value = value,
         onValueChange = { textFieldController.onValueChange(it) },
         isError = shouldShowError,
-        label = {
-            Text(
-                text = if (textFieldController.showOptionalLabel) {
-                    stringResource(
-                        R.string.form_label_optional,
+        label = if (textFieldController.label != null) {
+            {
+                Text(
+                    text = if (textFieldController.showOptionalLabel) {
+                        stringResource(
+                            R.string.form_label_optional,
+                            stringResource(textFieldController.label)
+                        )
+                    } else {
                         stringResource(textFieldController.label)
-                    )
-                } else {
-                    stringResource(textFieldController.label)
-                }
-            )
-        },
+                    }
+                )
+            }
+        } else null,
         modifier = modifier
             .fillMaxWidth()
             .onFocusChanged {
@@ -120,9 +129,11 @@ internal fun TextField(
             capitalization = textFieldController.capitalization,
             imeAction = ImeAction.Next
         ),
-        colors = colors,
+        colors = themedColors,
         maxLines = 1,
         singleLine = true,
-        enabled = enabled
+        enabled = enabled,
+        placeholder = placeholder,
+        textStyle = textStyle ?: LocalTextStyle.current,
     )
 }
