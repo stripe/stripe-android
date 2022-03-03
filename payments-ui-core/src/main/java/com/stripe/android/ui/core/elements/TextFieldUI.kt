@@ -1,6 +1,7 @@
 package com.stripe.android.ui.core.elements
 
 import android.util.Log
+import android.view.KeyEvent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -25,6 +26,9 @@ import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.input.key.type
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -126,6 +130,15 @@ internal fun TextField(
         },
         modifier = modifier
             .fillMaxWidth()
+            .onKeyEvent { event ->
+                if (event.type == KeyEventType.KeyUp &&
+                    event.nativeKeyEvent.keyCode == KeyEvent.KEYCODE_DEL &&
+                    value.isEmpty()
+                ) {
+                    focusManager.moveFocus(FocusDirection.Previous)
+                }
+                false
+            }
             .onFocusChanged {
                 if (hasFocus != it.isFocused) {
                     textFieldController.onFocusChange(it.isFocused)
