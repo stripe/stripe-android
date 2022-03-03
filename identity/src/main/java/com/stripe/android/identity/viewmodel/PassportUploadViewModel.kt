@@ -14,6 +14,9 @@ import com.stripe.android.identity.utils.PhotoTaker
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
+/**
+ * Fragment to upload passport image.
+ */
 internal class PassportUploadViewModel : ViewModel() {
 
     /**
