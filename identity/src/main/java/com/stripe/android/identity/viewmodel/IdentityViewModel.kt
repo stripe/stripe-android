@@ -1,7 +1,8 @@
-package com.stripe.android.identity
+package com.stripe.android.identity.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import com.stripe.android.identity.IdentityVerificationSheetContract
 
 internal class IdentityViewModel(
     val args: IdentityVerificationSheetContract.Args

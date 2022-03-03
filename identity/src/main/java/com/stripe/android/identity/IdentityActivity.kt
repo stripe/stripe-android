@@ -13,6 +13,7 @@ import com.stripe.android.identity.IdentityVerificationSheet.VerificationResult
 import com.stripe.android.identity.databinding.IdentityActivityBinding
 import com.stripe.android.identity.navigation.ConsentFragment
 import com.stripe.android.identity.navigation.IdentityFragmentFactory
+import com.stripe.android.identity.viewmodel.IdentityViewModel
 
 /**
  * Host activity to perform Identity verification.
