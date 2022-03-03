@@ -23,12 +23,10 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
 import com.stripe.android.paymentsheet.ui.LpmSelectorText
-import com.stripe.android.ui.core.StripeTheme
 
 internal const val ADD_PM_DEFAULT_PADDING = 12.0f
 internal const val CARD_HORIZONTAL_PADDING = 6.0f
@@ -172,47 +170,5 @@ internal fun PaymentMethodUI(
                 modifier = Modifier.padding(top = 6.dp, start = ADD_PM_DEFAULT_PADDING.dp)
             )
         }
-    }
-}
-
-@Preview(
-    widthDp = 320
-)
-@Composable
-internal fun PreviewPaymentMethodUI320dp() {
-    StripeTheme {
-        PaymentMethodsUI(
-            paymentMethods = listOf(
-                SupportedPaymentMethod.Bancontact,
-                SupportedPaymentMethod.SepaDebit,
-                SupportedPaymentMethod.Sofort,
-                SupportedPaymentMethod.Ideal,
-                SupportedPaymentMethod.Eps
-            ),
-            selectedIndex = 0,
-            isEnabled = true,
-            onItemSelectedListener = {}
-        )
-    }
-}
-
-@Preview(
-    widthDp = 475
-)
-@Composable
-internal fun PreviewPaymentMethodUI475dp() {
-    StripeTheme {
-        PaymentMethodsUI(
-            paymentMethods = listOf(
-                SupportedPaymentMethod.Bancontact,
-                SupportedPaymentMethod.SepaDebit,
-                SupportedPaymentMethod.Sofort,
-                SupportedPaymentMethod.Ideal,
-                SupportedPaymentMethod.Eps
-            ),
-            selectedIndex = 0,
-            isEnabled = true,
-            onItemSelectedListener = {}
-        )
     }
 }

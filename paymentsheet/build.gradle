@@ -82,6 +82,11 @@ dependencies {
     androidTestImplementation "androidx.test.ext:truth:$androidTestVersion"
     androidTestImplementation "com.google.truth:truth:$truthVersion"
 
+    // Tooling support (Previews, etc.)
+    debugImplementation "androidx.compose.ui:ui-tooling:$androidxComposeVersion"
+    // Needed for createComposeRule, but not createAndroidComposeRule:
+    debugImplementation "androidx.compose.ui:ui-test-manifest:$androidxComposeVersion"
+
     ktlint "com.pinterest:ktlint:$ktlintVersion"
 }
 
