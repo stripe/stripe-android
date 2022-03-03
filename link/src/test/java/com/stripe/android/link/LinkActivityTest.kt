@@ -3,8 +3,10 @@ package com.stripe.android.link
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.PaymentConfiguration
 import com.stripe.android.link.utils.InjectableActivityScenario
 import com.stripe.android.link.utils.injectableActivityScenario
+import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -16,6 +18,11 @@ class LinkActivityTest {
         context,
         LinkActivityContract.Args("Example, Inc.")
     )
+
+    @Before
+    fun before() {
+        PaymentConfiguration.init(context, "publishable_key")
+    }
 
     @Test
     fun `Activity launches sign up UI`() {
