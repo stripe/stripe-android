@@ -19,6 +19,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -26,10 +27,11 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
 import com.stripe.android.paymentsheet.ui.LpmSelectorText
-import kotlin.math.roundToInt
 
 internal const val ADD_PM_DEFAULT_PADDING = 12.0f
 internal const val CARD_HORIZONTAL_PADDING = 6.0f
+internal const val TEST_TAG_LIST = "PaymentMethodsUITestTag"
+internal const val PM_LIST_PADDING = 14.0f
 
 @Composable
 internal fun PaymentMethodsUI(
@@ -40,7 +42,6 @@ internal fun PaymentMethodsUI(
 ) {
     val scope = rememberCoroutineScope()
     val state = rememberLazyListState()
-    val horizontalPadding = 14
 
     LaunchedEffect(isEnabled) {
         if (isEnabled) {
@@ -52,18 +53,18 @@ internal fun PaymentMethodsUI(
 
     BoxWithConstraints {
         val resources = LocalContext.current.resources
-        val density = resources.displayMetrics.density
-        val measuredWidth =
-            dpToPx(
-                resources.displayMetrics,
-                this.maxWidth.value - (horizontalPadding * 2)
-            )
-        val viewWidth = calculateViewWidth(measuredWidth, density, paymentMethods.size)
+        val viewWidth = calculateViewWidth(resources.displayMetrics, paymentMethods.size)
 
         // TODO: userScrollEnabled will be available in compose version 1.2.0-alpha01+
-        LazyRow(state = state, modifier = Modifier.padding(start = horizontalPadding.dp)) {
+        LazyRow(
+            state = state,
+            modifier = Modifier
+                .padding(start = PM_LIST_PADDING.dp)
+                .testTag(TEST_TAG_LIST)
+        ) {
             itemsIndexed(items = paymentMethods, itemContent = { index, item ->
                 PaymentMethodUI(
+                    modifier = Modifier.testTag(TEST_TAG_LIST + stringResource(item.displayNameResource)),
                     viewWidth = viewWidth,
                     iconRes = item.iconResource,
                     title = stringResource(item.displayNameResource),
@@ -80,10 +81,12 @@ internal fun PaymentMethodsUI(
 }
 
 internal fun calculateViewWidth(
-    targetWidth: Int,
-    screenDensity: Float,
+    displayMetrics: DisplayMetrics,
     numberOfPaymentMethods: Int
 ): Dp {
+    val maxWidth = displayMetrics.widthPixels
+    val screenDensity = displayMetrics.density
+    val targetWidth = maxWidth - dpToPx(displayMetrics, PM_LIST_PADDING.dp * 2)
     val minItemWidth = 100 * screenDensity + (2 * CARD_HORIZONTAL_PADDING)
 
     // if all items fit at min width, then span them across the sheet evenly filling it.
@@ -101,8 +104,8 @@ internal fun calculateViewWidth(
     return (viewWidth.toInt() / screenDensity).dp
 }
 
-private fun dpToPx(displayMetrics: DisplayMetrics, dp: Float): Int {
-    return (dp * (displayMetrics.xdpi / DisplayMetrics.DENSITY_DEFAULT)).roundToInt()
+private fun dpToPx(displayMetrics: DisplayMetrics, dp: Dp): Int {
+    return (dp.value * (displayMetrics.xdpi / DisplayMetrics.DENSITY_DEFAULT)).toInt()
 }
 
 @Composable
@@ -113,6 +116,7 @@ internal fun PaymentMethodUI(
     isSelected: Boolean,
     isEnabled: Boolean,
     itemIndex: Int,
+    modifier: Modifier = Modifier,
     onItemSelectedListener: (Int) -> Unit
 ) {
     val strokeColor = colorResource(
@@ -134,7 +138,7 @@ internal fun PaymentMethodUI(
         shape = RoundedCornerShape(6.dp),
         elevation = if (isSelected) 1.5.dp else 0.dp,
         backgroundColor = cardBackgroundColor,
-        modifier = Modifier
+        modifier = modifier
             .height(60.dp)
             .width(viewWidth)
             .padding(horizontal = CARD_HORIZONTAL_PADDING.dp)
