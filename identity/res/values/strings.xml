@@ -48,6 +48,7 @@
     <string name="front_of_id_selected">Front of ID is selected</string>
     <string name="back_of_dl_selected">Back of driver license is selected</string>
     <string name="front_of_dl_selected">Front of driver license is selected</string>
+    <string name="passport_selected">Front of driver license is selected</string>
     <string name="choose_file">Choose File</string>
     <string name="take_photo">Take Photo</string>
     <string name="cancel">Cancel</string>
