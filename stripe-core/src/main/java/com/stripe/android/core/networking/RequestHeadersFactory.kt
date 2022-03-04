@@ -109,7 +109,6 @@ sealed class RequestHeadersFactory {
 
     /**
      * Factory for [FileUploadRequest].
-     * TODO(ccen) Move FileUpload to payments-core.
      */
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     class FileUpload(

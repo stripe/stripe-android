@@ -1,24 +1,22 @@
-package com.stripe.android.model
+package com.stripe.android.core.model
 
 import android.os.Parcelable
-import com.stripe.android.core.model.InternalStripeFileParams
-import com.stripe.android.model.StripeFilePurpose.Companion.toInternal
+import androidx.annotation.RestrictTo
 import kotlinx.parcelize.Parcelize
 import java.io.File
 
 /**
- * [Create a file](https://stripe.com/docs/api/files/create)
- *
- * To upload a file to Stripe, you’ll need to send a request of type `multipart/form-data`.
- * The request should contain the file you would like to upload, as well as the parameters for
- * creating a file.
+ * Internal copy of [com.stripe.android.model.StripeFileParams]. It's a public API object and can't be changed
+ * without introducing backward incompatibility.
+ * TODO(ccen): Move StripeFileParams to stripe-core and delete this copy during the next major version bump.
  */
-data class StripeFileParams constructor(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+data class InternalStripeFileParams constructor(
     /**
      * A file to upload. The file should follow the specifications of RFC 2388 (which defines file
      * transfers for the `multipart/form-data` protocol).
      */
-    internal val file: File,
+    val file: File,
 
     /**
      * The purpose of the uploaded file. Possible values are `business_icon`, `business_logo`,
@@ -27,7 +25,7 @@ data class StripeFileParams constructor(
      *
      * [purpose](https://stripe.com/docs/api/files/create#create_file-purpose)
      */
-    internal val purpose: StripeFilePurpose
+    val purpose: InternalStripeFilePurpose
 ) {
     /**
      * Optional parameters to automatically create a
@@ -44,7 +42,7 @@ data class StripeFileParams constructor(
      * [file_link_data]](https://stripe.com/docs/api/files/create#create_file-file_link_data)
      */
     @Parcelize
-    data class FileLink @JvmOverloads constructor(
+    internal data class FileLink @JvmOverloads constructor(
         /**
          * Set this to `true` to create a file link for the newly created file. Creating a link is
          * only possible when the file’s `purpose` is one of the following: `business_icon`,
@@ -72,15 +70,4 @@ data class StripeFileParams constructor(
          */
         private val metadata: Map<String, String>? = null
     ) : Parcelable
-
-    /**
-     * Temporary method to convert [StripeFileParams] to [InternalStripeFileParams].
-     * TODO(ccen): Move StripeFileParams to stripe-core during the next major version bump.
-     */
-    internal companion object {
-        fun StripeFileParams.toInternal() = InternalStripeFileParams(
-            this.file,
-            this.purpose.toInternal()
-        )
-    }
 }
