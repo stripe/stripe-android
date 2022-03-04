@@ -15,7 +15,8 @@ enum class InternalStripeFilePurpose(val code: String) {
     DisputeEvidence("dispute_evidence"),
     IdentityDocument("identity_document"),
     PciDocument("pci_document"),
-    TaxDocumentUserUpload("tax_document_user_upload");
+    TaxDocumentUserUpload("tax_document_user_upload"),
+    IdentityPrivate("identity_private");
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {

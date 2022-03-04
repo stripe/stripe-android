@@ -16,7 +16,7 @@ import kotlin.random.Random
  * See [File upload guide](https://stripe.com/docs/file-upload)
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class FileUploadRequest(
+open class FileUploadRequest(
     private val fileParams: InternalStripeFileParams,
     options: ApiRequest.Options,
     appInfo: InternalAppInfo? = null,
@@ -25,7 +25,7 @@ class FileUploadRequest(
      *
      * See [Multipart messages](https://en.wikipedia.org/wiki/MIME#Multipart_messages)
      */
-    private val boundary: String = createBoundary()
+    protected val boundary: String = createBoundary()
 ) : StripeRequest() {
     private val headersFactory: RequestHeadersFactory = RequestHeadersFactory.FileUpload(
         options = options,
@@ -59,17 +59,16 @@ class FileUploadRequest(
         }
     }
 
-    private fun writeString(writer: PrintWriter, contents: String) {
+    protected fun writeString(writer: PrintWriter, contents: String) {
         writer.write(contents.replace("\n", LINE_BREAK))
         writer.flush()
     }
 
-    private fun writeFile(outputStream: OutputStream) {
+    protected fun writeFile(outputStream: OutputStream) {
         fileParams.file.inputStream().copyTo(outputStream)
     }
 
-    @VisibleForTesting
-    internal val fileMetadata: String
+    protected val fileMetadata: String
         get() {
             val fileName = fileParams.file.name
             val probableContentType = URLConnection.guessContentTypeFromName(fileName)
@@ -83,8 +82,7 @@ class FileUploadRequest(
             """.trimIndent()
         }
 
-    @VisibleForTesting
-    internal val purposeContents: String
+    protected val purposeContents: String
         get() {
             return """
                 --$boundary
@@ -95,8 +93,8 @@ class FileUploadRequest(
             """.trimIndent()
         }
 
-    internal companion object {
-        private const val LINE_BREAK = "\r\n"
+    protected companion object {
+        const val LINE_BREAK = "\r\n"
 
         private const val HOST = "https://files.stripe.com/v1/files"
 
