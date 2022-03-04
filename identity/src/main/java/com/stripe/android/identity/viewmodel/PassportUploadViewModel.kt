@@ -15,7 +15,6 @@ import com.stripe.android.identity.networking.IdentityRepository
 import com.stripe.android.identity.utils.ImageChooser
 import com.stripe.android.identity.utils.PhotoTaker
 import com.stripe.android.identity.utils.resizeUriAndCreateFileToUpload
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 /**
@@ -71,7 +70,6 @@ internal class PassportUploadViewModel(
         context: Context
     ) {
         viewModelScope.launch {
-            delay(1000)
             identityRepository.uploadImage(
                 verificationId = verificationArgs.verificationSessionId,
                 ephemeralKey = verificationArgs.ephemeralKeySecret,
