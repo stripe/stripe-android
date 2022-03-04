@@ -71,7 +71,6 @@ internal class PassportUploadViewModel(
         context: Context
     ) {
         viewModelScope.launch {
-            delay(1000)
             identityRepository.uploadImage(
                 verificationId = verificationArgs.verificationSessionId,
                 ephemeralKey = verificationArgs.ephemeralKeySecret,
