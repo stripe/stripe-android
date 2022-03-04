@@ -21,7 +21,7 @@ open class AnalyticsRequestFactory(
      * Builds an Analytics request for the given [AnalyticsEvent],
      * including common params + event-specific params defined in [AnalyticsEvent.params]
      *
-     * @param  additionalParams any extra parameters that should be sent with this event.
+     * @param additionalParams any extra parameters that should be sent with this event.
      * Ensure this common parameters are not already included in [standardParams].
      *
      */
@@ -46,8 +46,8 @@ open class AnalyticsRequestFactory(
         additionalParams: Map<String, Any>
     ): AnalyticsRequest {
         return createRequest(
-            object : AnalyticsEvent {
-                override val code: String = event
+            event = object : AnalyticsEvent {
+                override val eventName: String = event
             },
             additionalParams = additionalParams
         )
@@ -63,8 +63,7 @@ open class AnalyticsRequestFactory(
         return mapOf(FIELD_EVENT to this.toString())
     }
 
-    private fun standardParams(
-    ): Map<String, Any> = mapOf(
+    private fun standardParams(): Map<String, Any> = mapOf(
         FIELD_ANALYTICS_UA to ANALYTICS_UA,
         FIELD_PUBLISHABLE_KEY to runCatching {
             publishableKeyProvider.get()
@@ -123,5 +122,8 @@ open class AnalyticsRequestFactory(
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 interface AnalyticsEvent {
-    val code: String
+    /**
+     * value that will be sent as [FIELD_EVENT] param.
+     */
+    val eventName: String
 }

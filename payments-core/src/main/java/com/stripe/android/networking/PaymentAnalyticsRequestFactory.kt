@@ -27,10 +27,10 @@ import javax.inject.Provider
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class PaymentAnalyticsRequestFactory @VisibleForTesting internal constructor(
-    private val packageManager: PackageManager?,
-    private val packageInfo: PackageInfo?,
-    private val packageName: String,
-    private val publishableKeyProvider: Provider<String>,
+    packageManager: PackageManager?,
+    packageInfo: PackageInfo?,
+    packageName: String,
+    publishableKeyProvider: Provider<String>,
     internal val defaultProductUsageTokens: Set<String> = emptySet()
 ) : AnalyticsRequestFactory(
     packageManager,

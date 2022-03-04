@@ -24,8 +24,7 @@ class AnalyticsRequestFactoryTest : TestCase() {
     private val apiKey = "pk_abc123"
 
     private val mockEvent = object : AnalyticsEvent {
-        override val code: String = "randomEvent"
-        override fun toString(): String = code
+        override val eventName: String = "randomEvent"
     }
 
     val factory = AnalyticsRequestFactory(
