@@ -247,7 +247,6 @@ class PaymentAnalyticsRequestFactoryTest {
         )
     }
 
-
     @Test
     fun getEventParamName_withTokenCreation_createsExpectedParameter() {
         val expectedEventParam = "stripe_android.token_creation"

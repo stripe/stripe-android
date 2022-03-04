@@ -3,16 +3,11 @@ package com.stripe.android.networking
 import android.content.Context
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
-import android.os.Build
 import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
-import com.stripe.android.BuildConfig
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.networking.AnalyticsRequest
 import com.stripe.android.core.networking.AnalyticsRequestFactory
-import com.stripe.android.core.networking.ApiRequest
-import com.stripe.android.core.networking.RequestHeadersFactory
-import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.Source
 import com.stripe.android.model.Token
