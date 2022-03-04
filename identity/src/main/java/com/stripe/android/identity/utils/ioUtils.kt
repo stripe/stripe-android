@@ -69,6 +69,16 @@ internal fun resizeUriAndCreateFileToUpload(
     }
 }
 
+/**
+ * Create a file for tflite model.
+ */
+internal fun createTFLiteFile(context: Context): File {
+    return File(
+        context.filesDir,
+        generateTFLiteFileName()
+    )
+}
+
 @Throws(IOException::class)
 private fun createImageFile(context: Context): File {
     return File.createTempFile(
@@ -80,3 +90,6 @@ private fun createImageFile(context: Context): File {
 
 private fun generateJpgFileName() =
     "JPEG_" + SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
+
+private fun generateTFLiteFileName() =
+    "TFLITE_${(SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date()))}.tflite"
