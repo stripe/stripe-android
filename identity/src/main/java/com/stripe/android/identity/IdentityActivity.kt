@@ -43,7 +43,11 @@ internal class IdentityActivity : CameraPermissionCheckingActivity() {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
 
-        supportFragmentManager.fragmentFactory = IdentityFragmentFactory(this, this)
+        supportFragmentManager.fragmentFactory = IdentityFragmentFactory(
+            this,
+            this,
+            starterArgs
+        )
 
         val navHostFragment =
             supportFragmentManager.findFragmentById(R.id.identity_nav_host) as NavHostFragment

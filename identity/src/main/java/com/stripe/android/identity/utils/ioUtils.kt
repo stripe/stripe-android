@@ -5,6 +5,7 @@ import android.net.Uri
 import android.os.Environment
 import androidx.core.content.FileProvider
 import java.io.File
+import java.io.FileOutputStream
 import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -25,6 +26,46 @@ internal fun createInternalFileUri(context: Context): ContentUriResult {
             ),
             file.absolutePath
         )
+    }
+}
+
+/**
+ * Read the image at uri, resize it with corresponding resolution and save it as a [File] with proper name.
+ *
+ * TODO(ccen) resize the image
+ */
+internal fun resizeUriAndCreateFileToUpload(
+    context: Context,
+    originalUri: Uri,
+    verificationId: String,
+    isFullFrame: Boolean,
+    side: String? = null
+): File {
+    context.contentResolver.openInputStream(originalUri).use { inputStream ->
+        val nameBuilder = StringBuilder().also { nameBuilder ->
+            nameBuilder.append(verificationId)
+            side?.let {
+                nameBuilder.append("_$side")
+            }
+            if (isFullFrame) {
+                nameBuilder.append("_full_frame")
+            }
+            nameBuilder.append(".jpeg")
+        }
+
+        val fileToSave = File(
+            context.getExternalFilesDir(Environment.DIRECTORY_PICTURES),
+            nameBuilder.toString()
+        )
+
+        FileOutputStream(fileToSave, false).use { fileOutputStream ->
+            var read: Int
+            val bytes = ByteArray(DEFAULT_BUFFER_SIZE)
+            while (inputStream!!.read(bytes).also { read = it } != -1) {
+                fileOutputStream.write(bytes, 0, read)
+            }
+        }
+        return fileToSave
     }
 }
 

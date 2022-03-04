@@ -3,6 +3,7 @@ package com.stripe.android.identity.networking
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.exception.APIException
+import com.stripe.android.core.model.InternalStripeFile
 import com.stripe.android.core.model.parsers.StripeErrorJsonParser
 import com.stripe.android.core.networking.HEADER_AUTHORIZATION
 import com.stripe.android.core.networking.StripeNetworkClient
@@ -123,7 +124,7 @@ class DefaultIdentityRepositoryTest {
     }
 
     @Test
-    fun `retrieveVerificationPage with error response throws APIException`() {
+    fun `retrieveVerificationPage with error response throws APIException from executeRequestWithKSerializer`() {
         runBlocking {
             whenever(mockStripeNetworkClient.executeRequest(any())).thenReturn(
                 StripeResponse(
@@ -146,7 +147,7 @@ class DefaultIdentityRepositoryTest {
     }
 
     @Test
-    fun `retrieveVerificationPage with network failure throws APIConnectionException`() {
+    fun `retrieveVerificationPage with network failure throws APIConnectionException from executeRequestWithKSerializer`() {
         runBlocking {
             val networkException = APIConnectionException()
             whenever(mockStripeNetworkClient.executeRequest(any())).thenThrow(networkException)
@@ -154,6 +155,78 @@ class DefaultIdentityRepositoryTest {
                 identityRepository.retrieveVerificationPage(
                     TEST_ID,
                     TEST_EPHEMERAL_KEY
+                )
+            }.let { apiConnectionException ->
+                verify(mockStripeNetworkClient).executeRequest(requestCaptor.capture())
+                assertThat(apiConnectionException.message).isEqualTo("Failed to execute ${requestCaptor.firstValue}")
+                assertThat(apiConnectionException.cause).isSameInstanceAs(networkException)
+            }
+        }
+    }
+
+    @Test
+    fun `uploadImage returns InternalStripeFile`() {
+        runBlocking {
+            whenever(mockStripeNetworkClient.executeRequest(any())).thenReturn(
+                StripeResponse(
+                    code = HTTP_OK,
+                    body = FILE_UPLOAD_SUCCESS_JSON_STRING
+                )
+            )
+            val verificationPage = identityRepository.uploadImage(
+                TEST_ID,
+                TEST_EPHEMERAL_KEY,
+                mock(),
+                mock()
+            )
+
+            assertThat(verificationPage).isInstanceOf(InternalStripeFile::class.java)
+            verify(mockStripeNetworkClient).executeRequest(requestCaptor.capture())
+
+            val request = requestCaptor.firstValue
+
+            assertThat(request).isInstanceOf(IdentityFileUploadRequest::class.java)
+            assertThat((request as IdentityFileUploadRequest).verificationId).isEqualTo(TEST_ID)
+            assertThat(request.headers[HEADER_AUTHORIZATION]).isEqualTo("Bearer $TEST_EPHEMERAL_KEY")
+        }
+    }
+
+    @Test
+    fun `uploadImage with error response throws APIException from executeRequestWithModelJsonParser`() {
+        runBlocking {
+            whenever(mockStripeNetworkClient.executeRequest(any())).thenReturn(
+                StripeResponse(
+                    code = HTTP_UNAUTHORIZED,
+                    body = ERROR_JSON_STRING
+                )
+            )
+            assertFailsWith<APIException> {
+                identityRepository.uploadImage(
+                    TEST_ID,
+                    TEST_EPHEMERAL_KEY,
+                    mock(),
+                    mock()
+                )
+            }.let { apiException ->
+                assertThat(apiException.stripeError).isEqualTo(
+                    StripeErrorJsonParser().parse(JSONObject(ERROR_JSON_STRING))
+                )
+                assertThat(apiException.statusCode).isEqualTo(HTTP_UNAUTHORIZED)
+            }
+        }
+    }
+
+    @Test
+    fun `uploadImage with network failure throws APIConnectionException from executeRequestWithModelJsonParser`() {
+        runBlocking {
+            val networkException = APIConnectionException()
+            whenever(mockStripeNetworkClient.executeRequest(any())).thenThrow(networkException)
+            assertFailsWith<APIConnectionException> {
+                identityRepository.uploadImage(
+                    TEST_ID,
+                    TEST_EPHEMERAL_KEY,
+                    mock(),
+                    mock()
                 )
             }.let { apiConnectionException ->
                 verify(mockStripeNetworkClient).executeRequest(requestCaptor.capture())
