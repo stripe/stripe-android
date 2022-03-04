@@ -46,6 +46,7 @@ internal class IdentityActivity : CameraPermissionCheckingActivity() {
         supportFragmentManager.fragmentFactory = IdentityFragmentFactory(
             this,
             this,
+            this,
             starterArgs
         )
 
