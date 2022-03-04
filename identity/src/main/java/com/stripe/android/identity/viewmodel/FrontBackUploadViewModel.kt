@@ -10,16 +10,22 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.stripe.android.core.model.InternalStripeFilePurpose
+import com.stripe.android.identity.IdentityVerificationSheetContract
+import com.stripe.android.identity.networking.IdentityRepository
 import com.stripe.android.identity.utils.ImageChooser
 import com.stripe.android.identity.utils.PhotoTaker
-import kotlinx.coroutines.delay
+import com.stripe.android.identity.utils.resizeUriAndCreateFileToUpload
 import kotlinx.coroutines.launch
 
 /**
  * ViewModel to upload front and back image of a document either through camera or from local
  * file storage.
  */
-internal class FrontBackUploadViewModel : ViewModel() {
+internal class FrontBackUploadViewModel(
+    private val identityRepository: IdentityRepository,
+    private val verificationArgs: IdentityVerificationSheetContract.Args
+) : ViewModel() {
 
     /**
      * The ID front image has been uploaded
@@ -115,13 +121,27 @@ internal class FrontBackUploadViewModel : ViewModel() {
     /**
      * Upload the chosen image for front, notifies its corresponding live data when
      * finished.
-     * TODO(ccen): Implement upload functions.
      */
     fun uploadImageFront(
-        uri: Uri
+        uri: Uri,
+        context: Context
     ) {
         viewModelScope.launch {
-            delay(1000)
+            identityRepository.uploadImage(
+                verificationId = verificationArgs.verificationSessionId,
+                ephemeralKey = verificationArgs.ephemeralKeySecret,
+                imageFile = resizeUriAndCreateFileToUpload(
+                    context,
+                    uri,
+                    verificationArgs.verificationSessionId,
+                    // TODO(ccen) upload both full frame and non full frame
+                    true,
+                    FRONT
+                ),
+                // TODO(ccen) pass it over from VerificationPage response
+                filePurpose = InternalStripeFilePurpose.IdentityPrivate
+            )
+
             _frontUploaded.postValue(Unit)
         }
     }
@@ -129,21 +149,44 @@ internal class FrontBackUploadViewModel : ViewModel() {
     /**
      * Upload the chosen image for back, notifies its corresponding live data when
      * finished.
-     * TODO(ccen): Implement upload functions.
      */
     fun uploadImageBack(
-        uri: Uri
+        uri: Uri,
+        context: Context
     ) {
         viewModelScope.launch {
-            delay(1000)
+            identityRepository.uploadImage(
+                verificationId = verificationArgs.verificationSessionId,
+                ephemeralKey = verificationArgs.ephemeralKeySecret,
+                imageFile = resizeUriAndCreateFileToUpload(
+                    context,
+                    uri,
+                    verificationArgs.verificationSessionId,
+                    // TODO(ccen) upload both full frame and non full frame
+                    true,
+                    BACK
+                ),
+                // TODO(ccen) pass it over from VerificationPage response
+                filePurpose = InternalStripeFilePurpose.IdentityPrivate
+            )
+
             _backUploaded.postValue(Unit)
         }
     }
 
-    internal class FrontBackUploadViewModelFactory : ViewModelProvider.Factory {
+    internal class FrontBackUploadViewModelFactory(
+        private val identityRepository: IdentityRepository,
+        private val verificationArgs: IdentityVerificationSheetContract.Args
+    ) :
+        ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return FrontBackUploadViewModel() as T
+            return FrontBackUploadViewModel(identityRepository, verificationArgs) as T
         }
+    }
+
+    private companion object {
+        const val FRONT = "front"
+        const val BACK = "back"
     }
 }
