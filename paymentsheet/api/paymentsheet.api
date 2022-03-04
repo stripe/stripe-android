@@ -401,7 +401,7 @@ public final class com/stripe/android/paymentsheet/databinding/FragmentPaymentsh
 	public final field googlePayDivider Lcom/stripe/android/paymentsheet/ui/GooglePayDivider;
 	public final field message Landroid/widget/TextView;
 	public final field paymentMethodFragmentContainer Landroidx/fragment/app/FragmentContainerView;
-	public final field paymentMethodsRecycler Landroidx/recyclerview/widget/RecyclerView;
+	public final field paymentMethodsRecycler Landroidx/compose/ui/platform/ComposeView;
 	public final field topContainer Landroid/widget/LinearLayout;
 	public static fun bind (Landroid/view/View;)Lcom/stripe/android/paymentsheet/databinding/FragmentPaymentsheetAddPaymentMethodBinding;
 	public synthetic fun getRoot ()Landroid/view/View;
