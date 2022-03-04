@@ -15,7 +15,6 @@ import com.stripe.android.identity.networking.IdentityRepository
 import com.stripe.android.identity.utils.ImageChooser
 import com.stripe.android.identity.utils.PhotoTaker
 import com.stripe.android.identity.utils.resizeUriAndCreateFileToUpload
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 /**
