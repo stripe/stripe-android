@@ -1,7 +1,6 @@
 package com.stripe.android.core.networking
 
 import androidx.annotation.RestrictTo
-import androidx.annotation.VisibleForTesting
 import com.stripe.android.core.InternalAppInfo
 import com.stripe.android.core.model.InternalStripeFileParams
 import com.stripe.android.core.networking.StripeRequest.MimeType
@@ -93,6 +92,7 @@ open class FileUploadRequest(
             """.trimIndent()
         }
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     protected companion object {
         const val LINE_BREAK = "\r\n"
 
