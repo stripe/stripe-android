@@ -60,28 +60,28 @@ open class AnalyticsRequestFactory(
     }
 
     private fun AnalyticsEvent.params(): Map<String, String> {
-        return mapOf(FIELD_EVENT to this.toString())
+        return mapOf(AnalyticsFields.EVENT to this.toString())
     }
 
     private fun standardParams(): Map<String, Any> = mapOf(
-        FIELD_ANALYTICS_UA to ANALYTICS_UA,
-        FIELD_PUBLISHABLE_KEY to runCatching {
+        AnalyticsFields.ANALYTICS_UA to ANALYTICS_UA,
+        AnalyticsFields.PUBLISHABLE_KEY to runCatching {
             publishableKeyProvider.get()
         }.getOrDefault(ApiRequest.Options.UNDEFINED_PUBLISHABLE_KEY),
-        FIELD_OS_NAME to Build.VERSION.CODENAME,
-        FIELD_OS_RELEASE to Build.VERSION.RELEASE,
-        FIELD_OS_VERSION to Build.VERSION.SDK_INT,
-        FIELD_DEVICE_TYPE to DEVICE_TYPE,
-        FIELD_BINDINGS_VERSION to StripeSdkVersion.VERSION_NAME,
-        FIELD_IS_DEVELOPMENT to BuildConfig.DEBUG
+        AnalyticsFields.OS_NAME to Build.VERSION.CODENAME,
+        AnalyticsFields.OS_RELEASE to Build.VERSION.RELEASE,
+        AnalyticsFields.OS_VERSION to Build.VERSION.SDK_INT,
+        AnalyticsFields.DEVICE_TYPE to DEVICE_TYPE,
+        AnalyticsFields.BINDINGS_VERSION to StripeSdkVersion.VERSION_NAME,
+        AnalyticsFields.IS_DEVELOPMENT to BuildConfig.DEBUG
     )
 
     internal fun appDataParams(): Map<String, Any> {
         return when {
             packageManager != null && packageInfo != null -> {
                 mapOf(
-                    FIELD_APP_NAME to getAppName(packageInfo, packageManager),
-                    FIELD_APP_VERSION to packageInfo.versionCode
+                    AnalyticsFields.APP_NAME to getAppName(packageInfo, packageManager),
+                    AnalyticsFields.APP_VERSION to packageInfo.versionCode
                 )
             }
             else -> emptyMap()
@@ -99,17 +99,6 @@ open class AnalyticsRequestFactory(
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
-        const val FIELD_ANALYTICS_UA = "analytics_ua"
-        const val FIELD_APP_NAME = "app_name"
-        const val FIELD_APP_VERSION = "app_version"
-        const val FIELD_BINDINGS_VERSION = "bindings_version"
-        const val FIELD_IS_DEVELOPMENT = "is_development"
-        const val FIELD_DEVICE_TYPE = "device_type"
-        const val FIELD_EVENT = "event"
-        const val FIELD_OS_NAME = "os_name"
-        const val FIELD_OS_RELEASE = "os_release"
-        const val FIELD_OS_VERSION = "os_version"
-        const val FIELD_PUBLISHABLE_KEY = "publishable_key"
         private const val ANALYTICS_PREFIX = "analytics"
         private const val ANALYTICS_NAME = "stripe_android"
         private const val ANALYTICS_VERSION = "1.0"
@@ -123,7 +112,7 @@ open class AnalyticsRequestFactory(
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 interface AnalyticsEvent {
     /**
-     * value that will be sent as [FIELD_EVENT] param.
+     * value that will be sent as [AnalyticsFields.EVENT] param.
      */
     val eventName: String
 }
