@@ -67,7 +67,7 @@ open class FileUploadRequest(
         fileParams.file.inputStream().copyTo(outputStream)
     }
 
-    protected val fileMetadata: String
+    val fileMetadata: String
         get() {
             val fileName = fileParams.file.name
             val probableContentType = URLConnection.guessContentTypeFromName(fileName)
@@ -81,7 +81,7 @@ open class FileUploadRequest(
             """.trimIndent()
         }
 
-    protected val purposeContents: String
+    val purposeContents: String
         get() {
             return """
                 --$boundary
