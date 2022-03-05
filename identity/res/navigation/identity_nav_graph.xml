@@ -13,6 +13,10 @@
         android:id="@+id/action_camera_error"
         app:destination="@id/cameraErrorFragment" />
 
+    <action
+        android:id="@+id/action_global_errorFragment"
+        app:destination="@id/errorFragment" />
+
     <fragment
         android:id="@+id/consentFragment"
         android:name="com.stripe.android.identity.navigation.ConsentFragment"
@@ -126,5 +130,25 @@
         <action
             android:id="@+id/action_docSelectionFragment_to_driverLicenseScanFragment"
             app:destination="@id/driverLicenseScanFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/errorFragment"
+        android:name="com.stripe.android.identity.navigation.ErrorFragment"
+        android:label="ErrorFragment">
+        <argument
+            android:name="errorTitle"
+            android:defaultValue=""
+            app:argType="string" />
+        <argument
+            android:name="errorContent"
+            android:defaultValue=""
+            app:argType="string" />
+        <argument
+            android:name="goBackButtonDestination"
+            android:defaultValue="0"
+            app:argType="integer" />
+        <action
+            android:id="@+id/action_errorFragment_to_consentFragment"
+            app:destination="@id/consentFragment" />
     </fragment>
 </navigation>
