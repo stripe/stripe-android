@@ -3,6 +3,9 @@ package com.stripe.android.identity.navigation
 import android.view.View
 import androidx.core.os.bundleOf
 import androidx.fragment.app.testing.launchFragmentInContainer
+import androidx.navigation.Navigation
+import androidx.navigation.testing.TestNavHostController
+import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.identity.R
 import com.stripe.android.identity.databinding.ErrorFragmentBinding
@@ -33,9 +36,25 @@ class ErrorFragmentTest {
     @Test
     fun `go back button is set correctly when set`() {
         launchErrorFragment(R.id.action_errorFragment_to_consentFragment).onFragment {
+            val navController = TestNavHostController(
+                ApplicationProvider.getApplicationContext()
+            )
+            navController.setGraph(
+                R.navigation.identity_nav_graph
+            )
+            navController.setCurrentDestination(R.id.errorFragment)
+            Navigation.setViewNavController(
+                it.requireView(),
+                navController
+            )
             val binding = ErrorFragmentBinding.bind(it.requireView())
 
-            assertThat(ErrorFragmentBinding.bind(it.requireView()).goBack.visibility).isEqualTo(View.VISIBLE)
+            assertThat(binding.goBack.visibility).isEqualTo(View.VISIBLE)
+
+            binding.goBack.callOnClick()
+
+            assertThat(navController.currentDestination?.id)
+                .isEqualTo(R.id.consentFragment)
         }
     }
 
