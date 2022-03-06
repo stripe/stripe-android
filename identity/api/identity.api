@@ -87,17 +87,18 @@ public final class com/stripe/android/identity/databinding/ConfirmationFragmentB
 
 public final class com/stripe/android/identity/databinding/ConsentFragmentBinding : androidx/viewbinding/ViewBinding {
 	public final field agree Landroid/widget/Button;
+	public final field body Landroid/widget/TextView;
 	public final field buttons Landroid/widget/LinearLayout;
 	public final field decline Landroid/widget/Button;
 	public final field divider Landroid/view/View;
-	public final field howContent Landroid/widget/TextView;
-	public final field howTitle Landroid/widget/TextView;
-	public final field learnMore1 Landroid/widget/TextView;
-	public final field learnMore2 Landroid/widget/TextView;
+	public final field loadings Landroid/widget/LinearLayout;
 	public final field merchantLogo Landroid/widget/ImageView;
 	public final field plus Landroid/widget/ImageView;
+	public final field privacyPolicy Landroid/widget/TextView;
+	public final field progressCircular Lcom/google/android/material/progressindicator/CircularProgressIndicator;
 	public final field stripeLogo Landroid/widget/ImageView;
-	public final field timeTakes Landroid/widget/TextView;
+	public final field texts Landroid/widget/ScrollView;
+	public final field timeEstimate Landroid/widget/TextView;
 	public final field titleIcons Landroid/widget/LinearLayout;
 	public final field titleText Landroid/widget/TextView;
 	public static fun bind (Landroid/view/View;)Lcom/stripe/android/identity/databinding/ConsentFragmentBinding;
