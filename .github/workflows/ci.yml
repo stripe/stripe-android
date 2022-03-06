@@ -26,6 +26,8 @@ jobs:
             ${{ runner.os }}-gradle-
       - name: Ktlint
         run: ./gradlew ktlint
+      - name: Detekt
+        run: ./gradlew detekt
       - name: Checkstyle
         run: ./gradlew checkstyle
       - name: Lint
