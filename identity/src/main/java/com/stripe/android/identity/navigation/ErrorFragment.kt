@@ -24,6 +24,7 @@ internal class ErrorFragment : Fragment() {
         binding.errorContent.text = args[ARG_ERROR_CONTENT] as String
 
         if (args.getInt(ARG_GO_BACK_BUTTON_DESTINATION) != UNSET_DESTINATION) {
+            binding.goBack.text = args[ARG_GO_BACK_BUTTON_TEXT] as String
             binding.goBack.visibility = View.VISIBLE
             binding.goBack.setOnClickListener {
                 // Can only go back to consent page at the moment
@@ -37,7 +38,9 @@ internal class ErrorFragment : Fragment() {
     internal companion object {
         const val ARG_ERROR_TITLE = "errorTitle"
         const val ARG_ERROR_CONTENT = "errorContent"
+
         // if set, shows go_back button, clicking it would navigate to the destination.
+        const val ARG_GO_BACK_BUTTON_TEXT = "goBackButtonText"
         const val ARG_GO_BACK_BUTTON_DESTINATION = "goBackButtonDestination"
         private const val UNSET_DESTINATION = 0
     }

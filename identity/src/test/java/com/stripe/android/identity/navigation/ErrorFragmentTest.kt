@@ -50,6 +50,7 @@ class ErrorFragmentTest {
             val binding = ErrorFragmentBinding.bind(it.requireView())
 
             assertThat(binding.goBack.visibility).isEqualTo(View.VISIBLE)
+            assertThat(binding.goBack.text).isEqualTo(TEST_GO_BACK_BUTTON_TEXT)
 
             binding.goBack.callOnClick()
 
@@ -67,6 +68,7 @@ class ErrorFragmentTest {
         ).also { bundle ->
             navigationDestination?.let {
                 bundle.putInt(ErrorFragment.ARG_GO_BACK_BUTTON_DESTINATION, navigationDestination)
+                bundle.putString(ErrorFragment.ARG_GO_BACK_BUTTON_TEXT, TEST_GO_BACK_BUTTON_TEXT)
             }
         },
         themeResId = R.style.Theme_MaterialComponents
@@ -77,5 +79,6 @@ class ErrorFragmentTest {
     private companion object {
         const val TEST_ERROR_TITLE = "test error title"
         const val TEST_ERROR_CONTENT = "test error content"
+        const val TEST_GO_BACK_BUTTON_TEXT = "go back"
     }
 }

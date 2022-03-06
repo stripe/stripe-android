@@ -144,6 +144,10 @@
             android:defaultValue=""
             app:argType="string" />
         <argument
+            android:name="goBackButtonText"
+            android:defaultValue=""
+            app:argType="string" />
+        <argument
             android:name="goBackButtonDestination"
             android:defaultValue="0"
             app:argType="integer" />
