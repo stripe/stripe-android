@@ -1,0 +1,33 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>EmptyFunctionBlock:DefaultStripeNetworkClientTest.kt$DefaultStripeNetworkClientTest.FailingConnection${ }</ID>
+    <ID>EmptyFunctionBlock:DefaultStripeNetworkClientTest.kt$DefaultStripeNetworkClientTest.ResponseCodeOverrideConnection${ }</ID>
+    <ID>MagicNumber:StripeConnection.kt$StripeConnection.AbstractConnection$200</ID>
+    <ID>MagicNumber:StripeConnection.kt$StripeConnection.AbstractConnection$299</ID>
+    <ID>MagicNumber:StripeException.kt$StripeException$400</ID>
+    <ID>MagicNumber:StripeException.kt$StripeException$499</ID>
+    <ID>MagicNumber:StripeJsonUtils.kt$StripeJsonUtils$3</ID>
+    <ID>MaxLineLength:InternalAppInfo.kt$InternalAppInfo$*</ID>
+    <ID>MaxLineLength:QueryStringFactoryTest.kt$QueryStringFactoryTest$"colors[]=blue&amp;colors[]=green&amp;empty_list=&amp;person[age]=45&amp;person[city]=San Francisco&amp;person[wishes]=&amp;person[friends][]=Alice&amp;person[friends][]=Bob"</ID>
+    <ID>MaxLineLength:RequestHeadersFactoriesTest.kt$RequestHeadersFactoriesTest$.</ID>
+    <ID>MaxLineLength:StripeErrorJsonParserTest.kt$StripeErrorJsonParserTest$message = "The Stripe API is only accessible over HTTPS. Please see &lt;https://stripe.com/docs> for more information."</ID>
+    <ID>MaxLineLength:StripeErrorJsonParserTest.kt$StripeErrorJsonParserTest.Companion$ </ID>
+    <ID>MaximumLineLength:com.stripe.android.core.model.parsers.StripeErrorJsonParserTest.kt:18</ID>
+    <ID>MaximumLineLength:com.stripe.android.core.networking.QueryStringFactoryTest.kt:38</ID>
+    <ID>MaximumLineLength:com.stripe.android.core.networking.RequestHeadersFactoriesTest.kt:97</ID>
+    <ID>NestedBlockDepth:StripeJsonUtils.kt$StripeJsonUtils$ fun mapToJsonObject(mapObject: Map&lt;String, *>?): JSONObject?</ID>
+    <ID>SerialVersionUIDInSerializableClass:StripeError.kt$StripeError : StripeModelSerializable</ID>
+    <ID>SwallowedException:StripeJsonUtils.kt$StripeJsonUtils$classCastException: ClassCastException</ID>
+    <ID>SwallowedException:StripeJsonUtils.kt$StripeJsonUtils$jsonException: JSONException</ID>
+    <ID>TooGenericExceptionCaught:Storage.kt$SharedPreferencesStorage$t: Throwable</ID>
+    <ID>TooManyFunctions:Storage.kt$SharedPreferencesStorage : Storage</ID>
+    <ID>TooManyFunctions:Storage.kt$Storage</ID>
+    <ID>TooManyFunctions:StripeJsonUtils.kt$StripeJsonUtils$StripeJsonUtils</ID>
+    <ID>UnusedPrivateMember:InternalStripeFileParams.kt$InternalStripeFileParams$/** * Optional parameters to automatically create a * [file link](https://stripe.com/docs/api/files/create#file_links) for the newly created file. * * [file_link_data]](https://stripe.com/docs/api/files/create#create_file-file_link_data) */ private val fileLink: FileLink? = null</ID>
+    <ID>UnusedPrivateMember:InternalStripeFileParams.kt$InternalStripeFileParams.FileLink$/** * A future timestamp after which the link will no longer be usable. * * [file_link_data.expires_at](https://stripe.com/docs/api/files/create#create_file-file_link_data-expires_at) */ private val expiresAt: Long? = null</ID>
+    <ID>UnusedPrivateMember:InternalStripeFileParams.kt$InternalStripeFileParams.FileLink$/** * Set of key-value pairs that you can attach to an object. This can be useful for storing * additional information about the object in a structured format. Individual keys can be * unset by posting an empty value to them. All keys can be unset by posting an empty value * to metadata. * * [file_link_data.metadata](https://stripe.com/docs/api/files/create#create_file-file_link_data-metadata) */ private val metadata: Map&lt;String, String>? = null</ID>
+    <ID>UnusedPrivateMember:InternalStripeFileParams.kt$InternalStripeFileParams.FileLink$/** * Set this to `true` to create a file link for the newly created file. Creating a link is * only possible when the file’s `purpose` is one of the following: `business_icon`, * `business_logo`, `customer_signature`, `dispute_evidence`, `pci_document`, or * `tax_document_user_upload`. * * [file_link_data.create](https://stripe.com/docs/api/files/create#create_file-file_link_data-create) */ private val create: Boolean = false</ID>
+  </CurrentIssues>
+</SmellBaseline>

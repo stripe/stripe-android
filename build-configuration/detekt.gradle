@@ -1,0 +1,21 @@
+apply plugin: 'io.gitlab.arturbosch.detekt'
+
+detekt {
+    buildUponDefaultConfig = true
+    baseline = file("detekt-baseline.xml")
+    ignoredBuildTypes = ["debug"]
+    ignoredFlavors = []
+    ignoredVariants = []
+    parallel = true
+    autoCorrect = true // disable on Github Actions
+    reports {
+        html.enabled = true // disable on Github Actions
+        xml.enabled = true
+        txt.enabled = true // disable on Github Actions
+    }
+}
+
+dependencies {
+    detektPlugins "io.gitlab.arturbosch.detekt:detekt-formatting:$versions.detekt"
+    detektPlugins "io.gitlab.arturbosch.detekt:detekt-cli:$versions.detekt"
+}
