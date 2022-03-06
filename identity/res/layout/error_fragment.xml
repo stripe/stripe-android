@@ -35,7 +35,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/item_vertical_margin"
-                android:textSize="@dimen/camera_permission_title_text_size"
+                android:textSize="@dimen/error_title_text_size"
                 android:textStyle="bold"
                 android:gravity="center"
                 android:text="@string/error"
