@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.annotation.IdRes
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.navigation.NavController
@@ -48,13 +49,16 @@ internal class ErrorFragment : Fragment() {
         const val ARG_GO_BACK_BUTTON_DESTINATION = "goBackButtonDestination"
         private const val UNSET_DESTINATION = 0
 
-        fun NavController.navigateToErrorFragmentWithRequirementError(requirementError: VerificationPageDataRequirementError) {
+        fun NavController.navigateToErrorFragmentWithRequirementErrorAndDestination(
+            requirementError: VerificationPageDataRequirementError,
+            @IdRes backButtonDestination: Int
+        ) {
             navigate(
                 R.id.action_global_errorFragment,
                 bundleOf(
                     ARG_ERROR_TITLE to requirementError.title,
                     ARG_ERROR_CONTENT to requirementError.body,
-                    ARG_GO_BACK_BUTTON_DESTINATION to R.id.action_errorFragment_to_consentFragment,
+                    ARG_GO_BACK_BUTTON_DESTINATION to backButtonDestination,
                     ARG_GO_BACK_BUTTON_TEXT to requirementError.buttonText,
                 )
             )
