@@ -7,11 +7,11 @@ detekt {
     ignoredFlavors = []
     ignoredVariants = []
     parallel = true
-    autoCorrect = true // disable on Github Actions
+    autoCorrect = !gradle.ext.isCi
     reports {
-        html.enabled = true // disable on Github Actions
+        html.enabled = !gradle.ext.isCi
         xml.enabled = true
-        txt.enabled = true // disable on Github Actions
+        txt.enabled = !gradle.ext.isCi
     }
 }
 
