@@ -15,7 +15,7 @@ configurations {
 }
 
 if (System.getenv("JITPACK")) {
-    group='com.github.stripe.stripe-android'
+    group = 'com.github.stripe.stripe-android'
 }
 
 dependencies {
@@ -76,7 +76,16 @@ dependencies {
     androidTestImplementation "androidx.test.espresso:espresso-core:$espressoVersion"
     androidTestImplementation "androidx.test:rules:$androidTestVersion"
     androidTestImplementation "androidx.test:runner:$androidTestVersion"
+    // Test rules and transitive dependencies:
+    androidTestImplementation "androidx.compose.ui:ui-test-junit4:$androidxComposeVersion"
     androidTestUtil "androidx.test:orchestrator:$androidTestVersion"
+    androidTestImplementation "androidx.test.ext:truth:$androidTestVersion"
+    androidTestImplementation "com.google.truth:truth:$truthVersion"
+
+    // Tooling support (Previews, etc.)
+    debugImplementation "androidx.compose.ui:ui-tooling:$androidxComposeVersion"
+    // Needed for createComposeRule, but not createAndroidComposeRule:
+    debugImplementation "androidx.compose.ui:ui-test-manifest:$androidxComposeVersion"
 
     ktlint "com.pinterest:ktlint:$ktlintVersion"
 }

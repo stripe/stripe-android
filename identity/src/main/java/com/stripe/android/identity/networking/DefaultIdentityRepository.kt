@@ -1,5 +1,6 @@
 package com.stripe.android.identity.networking
 
+import android.content.Context
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.exception.APIException
@@ -19,11 +20,13 @@ import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.networking.models.CollectedDataParam.Companion.createCollectedDataParam
 import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.networking.models.VerificationPageData
+import com.stripe.android.identity.utils.createTFLiteFile
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.json.Json
 import java.io.File
 
 internal class DefaultIdentityRepository(
+    private val context: Context,
     private val stripeNetworkClient: StripeNetworkClient = DefaultStripeNetworkClient()
 ) : IdentityRepository {
 
@@ -83,6 +86,35 @@ internal class DefaultIdentityRepository(
             verificationId = verificationId
         ),
         responseJsonParser = stripeFileJsonParser
+    )
+
+    override suspend fun downloadModel(modelUrl: String) = runCatching {
+        stripeNetworkClient.executeRequestForFile(
+            IdentityModelDownloadRequest(modelUrl),
+            createTFLiteFile(context)
+        )
+    }.fold(
+        onSuccess = { response ->
+            if (response.isError) {
+                throw APIException(
+                    requestId = response.requestId?.value,
+                    statusCode = response.code,
+                    message = "Downloading from $modelUrl returns error response"
+                )
+            } else {
+                response.body ?: run {
+                    throw APIException(
+                        message = "Downloading from $modelUrl returns a null body"
+                    )
+                }
+            }
+        },
+        onFailure = {
+            throw APIConnectionException(
+                "Fail to download file at $modelUrl",
+                cause = it
+            )
+        }
     )
 
     private suspend fun <Response> executeRequestWithKSerializer(

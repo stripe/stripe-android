@@ -1,5 +1,6 @@
 package com.stripe.android.identity.navigation
 
+import android.content.Context
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentFactory
 import com.stripe.android.camera.AppSettingsOpenable
@@ -14,11 +15,12 @@ import com.stripe.android.identity.viewmodel.PassportUploadViewModel
  * Factory for creating Identity fragments.
  */
 internal class IdentityFragmentFactory(
+    context: Context,
     private val cameraPermissionEnsureable: CameraPermissionEnsureable,
     private val appSettingsOpenable: AppSettingsOpenable,
-    private val verificationArgs: IdentityVerificationSheetContract.Args
+    verificationArgs: IdentityVerificationSheetContract.Args
 ) : FragmentFactory() {
-    private val identityRepository = DefaultIdentityRepository()
+    private val identityRepository = DefaultIdentityRepository(context)
     private val cameraViewModelFactory = CameraViewModel.CameraViewModelFactory()
     private val frontBackUploadViewModelFactory =
         FrontBackUploadViewModel.FrontBackUploadViewModelFactory(
