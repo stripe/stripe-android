@@ -69,6 +69,7 @@ import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Ignore
 import kotlin.test.Test
+import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
@@ -1691,6 +1692,32 @@ internal class StripeApiRepositoryTest {
             assertEquals(params["type"], "SMS")
             assertEquals(params["code"], verificationCode)
             assertEquals(params["cookies"], cookies)
+        }
+
+    @Test
+    fun `listPaymentDetails() sends all parameters`() =
+        runTest {
+            val stripeResponse = StripeResponse(
+                200,
+                ConsumerFixtures.CONSUMER_PAYMENT_DETAILS_JSON.toString(),
+                emptyMap()
+            )
+            whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+                .thenReturn(stripeResponse)
+
+            val clientSecret = "secret"
+            val paymentMethodTypes = setOf("type1")
+            create().listPaymentDetails(
+                clientSecret,
+                paymentMethodTypes,
+                DEFAULT_OPTIONS
+            )
+
+            verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
+            val params = requireNotNull(apiRequestArgumentCaptor.firstValue.params)
+            val credentials = params["credentials"] as Map<*, *>
+            assertEquals(credentials["consumer_session_client_secret"], clientSecret)
+            assertContentEquals(params["types"] as? List<*>, paymentMethodTypes.toList())
         }
 
     private fun verifyFraudDetectionDataAndAnalyticsRequests(
