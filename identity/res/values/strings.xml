@@ -55,5 +55,10 @@
     <string name="sample_title_text">Sample title text</string>
     <string name="sample_content_text">Sample content text</string>
 
+    <string name="error">Error</string>
+    <string name="unexpected_error_try_again">There was an unexpected error — try again in a few seconds</string>
+    <string name="go_back">Go Back</string>
+    <string name="description_exclamation_mark">Exclamation point for error page</string>
+
 
 </resources>
