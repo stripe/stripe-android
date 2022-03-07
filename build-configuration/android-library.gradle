@@ -8,13 +8,14 @@ apply plugin: "kotlin-android"
 apply plugin: "org.jetbrains.dokka"
 
 apply from: rootProject.file('build-configuration/detekt.gradle')
+apply from: rootProject.file('build-configuration/ktlint.gradle')
 
 assemble.dependsOn('lint')
 check.dependsOn('checkstyle')
+check.dependsOn('ktlint')
 
 configurations {
     javadocDeps
-    ktlint
 }
 
 if (System.getenv("JITPACK")) {
@@ -63,22 +64,4 @@ android {
     kotlinOptions {
         jvmTarget = "1.8"
     }
-}
-
-task ktlint(type: JavaExec, group: "verification") {
-    description = "Check Kotlin code style."
-    mainClass = "com.pinterest.ktlint.Main"
-    classpath = configurations.ktlint
-    args "src/**/*.kt"
-    // to generate report in checkstyle format prepend following args:
-    // "--reporter=plain", "--reporter=checkstyle,output=${buildDir}/ktlint.xml"
-    // see https://github.com/pinterest/ktlint#usage for more
-}
-check.dependsOn ktlint
-
-task ktlintFormat(type: JavaExec, group: "formatting") {
-    description = "Fix Kotlin code style deviations."
-    mainClass = "com.pinterest.ktlint.Main"
-    classpath = configurations.ktlint
-    args "-F", "src/**/*.kt"
 }
