@@ -6,5 +6,5 @@ import kotlinx.serialization.Serializable
 @Serializable
 internal data class ConsentParam(
     @SerialName("biometric")
-    val biometric: kotlin.Boolean? = null
+    val biometric: Boolean? = null
 )

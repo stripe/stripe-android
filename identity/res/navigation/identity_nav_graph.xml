@@ -22,14 +22,6 @@
         android:name="com.stripe.android.identity.navigation.ConsentFragment"
         android:label="consent_fragment"
         tools:layout="@layout/consent_fragment">
-        <argument
-            android:name="consentContext"
-            android:defaultValue=""
-            app:argType="string" />
-        <argument
-            android:name="merchantLogo"
-            android:defaultValue="0"
-            app:argType="integer" />
         <action
             android:id="@+id/action_consentFragment_to_docSelectionFragment"
             app:destination="@id/docSelectionFragment" />

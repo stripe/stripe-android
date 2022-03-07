@@ -9,7 +9,6 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.camera.CameraPermissionEnsureable
@@ -18,6 +17,7 @@ import com.stripe.android.identity.R
 import com.stripe.android.identity.camera.IDDetectorAggregator
 import com.stripe.android.identity.camera.IdentityScanFlow
 import com.stripe.android.identity.states.IdentityScanState
+import com.stripe.android.identity.viewModelFactoryFor
 import com.stripe.android.identity.viewmodel.CameraViewModel
 import org.junit.Rule
 import org.junit.Test
@@ -57,12 +57,6 @@ class IdentityCameraScanFragmentTest {
         ) {
             this.onCameraReady = onCameraReady
             this.onUserDeniedCameraPermission = onUserDeniedCameraPermission
-        }
-    }
-    private val cameraViewModelFactory = object : ViewModelProvider.Factory {
-        @Suppress("UNCHECKED_CAST")
-        override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return mockCameraViewModel as T
         }
     }
 
@@ -152,7 +146,7 @@ class IdentityCameraScanFragmentTest {
     ) {
         TestFragment(
             cameraPermissionEnsureable,
-            cameraViewModelFactory,
+            viewModelFactoryFor(mockCameraViewModel),
             mockCameraView
         )
     }
