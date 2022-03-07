@@ -63,6 +63,7 @@ internal fun TextField(
     textFieldController: TextFieldController,
     modifier: Modifier = Modifier,
     enabled: Boolean,
+    isImeDone: Boolean,
 ) {
     Log.d("Construct", "SimpleTextFieldElement ${textFieldController.debugLabel}")
 
@@ -151,13 +152,16 @@ internal fun TextField(
         keyboardActions = KeyboardActions(
             onNext = {
                 nextFocus(focusManager)
+            },
+            onDone = {
+                focusManager.clearFocus(true)
             }
         ),
         visualTransformation = textFieldController.visualTransformation,
         keyboardOptions = KeyboardOptions(
             keyboardType = textFieldController.keyboardType,
             capitalization = textFieldController.capitalization,
-            imeAction = ImeAction.Next
+            imeAction = if (isImeDone) ImeAction.Done else ImeAction.Next
         ),
         colors = colors,
         maxLines = 1,
@@ -170,9 +174,7 @@ internal fun TextField(
 }
 
 internal fun nextFocus(focusManager: FocusManager) {
-    if (!focusManager.moveFocus(FocusDirection.Next)) {
-        focusManager.clearFocus(true)
-    }
+    focusManager.moveFocus(FocusDirection.Next)
 }
 
 @Composable

@@ -15,7 +15,8 @@ import androidx.constraintlayout.compose.Dimension
 internal fun RowElementUI(
     enabled: Boolean,
     controller: RowController,
-    hiddenIdentifiers: List<IdentifierSpec>
+    hiddenIdentifiers: List<IdentifierSpec>,
+    lastTetFieldIdentifier: IdentifierSpec?
 ) {
     val fields = controller.fields
     val cardStyle = CardStyle(isSystemInDarkTheme())
@@ -34,7 +35,9 @@ internal fun RowElementUI(
             SectionFieldElementUI(
                 enabled,
                 field,
-                Modifier
+                hiddenIdentifiers,
+                lastTetFieldIdentifier,
+                modifier= Modifier
                     .constrainAs(fieldRefs[index]) {
                         if (index == 0) {
                             start.linkTo(parent.start)
@@ -45,11 +48,10 @@ internal fun RowElementUI(
                     }
                     .fillMaxWidth(
                         (1f / fields.size.toFloat())
-                    ),
-                hiddenIdentifiers
+                    )
             )
 
-            if (index != (fields.size - 1)) {
+            if (!hiddenIdentifiers.contains(field.identifier) && index != (fields.size - 1)) {
                 Divider(
                     modifier = Modifier
                         .constrainAs(dividerRefs[index]) {

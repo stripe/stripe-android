@@ -3,6 +3,7 @@ package com.stripe.android.ui.core.elements
 import androidx.annotation.StringRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
@@ -66,6 +67,7 @@ internal fun DropDown(
         // Click handling happens on the box, so that it is a single accessible item
         Box(
             modifier = Modifier
+                .focusable(false)
                 .clickable(
                     enabled = enabled,
                     onClickLabel = stringResource(R.string.change),
@@ -74,26 +76,34 @@ internal fun DropDown(
                 }
         ) {
             Column(
-                modifier = Modifier.padding(
-                    start = 16.dp,
-                    top = 4.dp,
-                    bottom = 8.dp
-                )
+                modifier = Modifier
+                    .padding(
+                        start = 16.dp,
+                        top = 4.dp,
+                        bottom = 8.dp
+                    )
+                    .focusable(false)
             ) {
                 DropdownLabel(label)
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .focusable(false),
                     verticalAlignment = Alignment.Bottom
                 ) {
                     Text(
                         items[selectedIndex],
-                        modifier = Modifier.fillMaxWidth(.9f),
+                        modifier = Modifier
+                            .fillMaxWidth(.9f)
+                            .focusable(false),
                         color = currentTextColor
                     )
                     Icon(
                         Icons.Filled.ArrowDropDown,
                         contentDescription = null,
-                        modifier = Modifier.height(24.dp),
+                        modifier = Modifier
+                            .height(24.dp)
+                            .focusable(false),
                         tint = currentTextColor
                     )
                 }
@@ -102,7 +112,8 @@ internal fun DropDown(
 
         DropdownMenu(
             expanded = expanded,
-            onDismissRequest = { expanded = false }
+            onDismissRequest = { expanded = false },
+            modifier = Modifier.focusable(false)
         ) {
             items.forEachIndexed { index, displayValue ->
                 DropdownMenuItem(
@@ -137,7 +148,8 @@ internal fun DropdownLabel(
                     error = false,
                     interactionSource = interactionSource
                 ).value,
-            style = MaterialTheme.typography.caption
+            style = MaterialTheme.typography.caption,
+            modifier = Modifier.focusable(false)
         )
     }
 }

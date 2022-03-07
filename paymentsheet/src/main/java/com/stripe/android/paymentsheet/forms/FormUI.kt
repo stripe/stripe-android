@@ -39,7 +39,8 @@ internal fun Form(formViewModel: FormViewModel) {
     FormInternal(
         formViewModel.hiddenIdentifiers,
         formViewModel.enabled,
-        formViewModel.elements
+        formViewModel.elements,
+        formViewModel.lastTextFieldIdentifier
     )
 }
 
@@ -47,21 +48,25 @@ internal fun Form(formViewModel: FormViewModel) {
 internal fun FormInternal(
     hiddenIdentifiersFlow: Flow<List<IdentifierSpec>>,
     enabledFlow: Flow<Boolean>,
-    elementsFlow: Flow<List<FormElement>?>
+    elementsFlow: Flow<List<FormElement>?>,
+    lastTextFieldIdentifierFlow: Flow<IdentifierSpec?>
 ) {
     val hiddenIdentifiers by hiddenIdentifiersFlow.collectAsState(emptyList())
     val enabled by enabledFlow.collectAsState(true)
     val elements by elementsFlow.collectAsState(null)
+    val lastTextFieldIdentifier by lastTextFieldIdentifierFlow.collectAsState(null)
+
+    // Get the index of the last text field that is not hidden
 
     Column(
         modifier = Modifier.fillMaxWidth(1f)
 
     ) {
         elements?.let {
-            it.forEach { element ->
+            it.forEachIndexed { index, element ->
                 if (!hiddenIdentifiers.contains(element.identifier)) {
                     when (element) {
-                        is SectionElement -> SectionElementUI(enabled, element, hiddenIdentifiers)
+                        is SectionElement -> SectionElementUI(enabled, element, hiddenIdentifiers, lastTextFieldIdentifier)
                         is StaticTextElement -> StaticElementUI(element)
                         is SaveForFutureUseElement -> SaveForFutureUseElementUI(enabled, element)
                         is AfterpayClearpayHeaderElement -> AfterpayClearpayElementUI(
