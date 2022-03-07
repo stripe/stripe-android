@@ -51,4 +51,10 @@ internal interface IdentityRepository {
         imageFile: File,
         filePurpose: InternalStripeFilePurpose
     ): InternalStripeFile
+
+    @Throws(
+        APIConnectionException::class,
+        APIException::class
+    )
+    suspend fun downloadModel(modelUrl: String): File
 }
