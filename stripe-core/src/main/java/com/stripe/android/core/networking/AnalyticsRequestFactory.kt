@@ -60,7 +60,7 @@ open class AnalyticsRequestFactory(
     }
 
     private fun AnalyticsEvent.params(): Map<String, String> {
-        return mapOf(AnalyticsFields.EVENT to this.toString())
+        return mapOf(AnalyticsFields.EVENT to this.eventName)
     }
 
     private fun standardParams(): Map<String, Any> = mapOf(

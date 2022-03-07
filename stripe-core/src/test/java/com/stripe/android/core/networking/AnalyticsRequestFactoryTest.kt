@@ -77,7 +77,7 @@ class AnalyticsRequestFactoryTest : TestCase() {
         assertThat(versionCode).isEqualTo(params[AnalyticsFields.APP_VERSION])
         assertThat(params[AnalyticsFields.APP_NAME]).isEqualTo(BuildConfig.LIBRARY_PACKAGE_NAME)
         assertThat(StripeSdkVersion.VERSION_NAME).isEqualTo(params[AnalyticsFields.BINDINGS_VERSION])
-        assertThat(mockEvent.toString()).isEqualTo(params[AnalyticsFields.EVENT])
+        assertThat(mockEvent.eventName).isEqualTo(params[AnalyticsFields.EVENT])
         assertThat(expectedUaName).isEqualTo(params[AnalyticsFields.ANALYTICS_UA])
         assertThat("unknown_generic_x86_robolectric").isEqualTo(params[AnalyticsFields.DEVICE_TYPE])
         assertNotNull(params[AnalyticsFields.OS_RELEASE])
@@ -111,5 +111,13 @@ class AnalyticsRequestFactoryTest : TestCase() {
     fun getAnalyticsUa_returnsExpectedValue() {
         assertThat(AnalyticsRequestFactory.ANALYTICS_UA)
             .isEqualTo("analytics.stripe_android-1.0")
+    }
+
+    @Test
+    fun `createEvent(String) - event name field matches passed string`() {
+        val event = "my_event_name"
+        val request = factory.createRequest(event, emptyMap())
+
+        assertThat(request.params["event"]).isEqualTo(event)
     }
 }

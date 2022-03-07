@@ -12,5 +12,9 @@ internal data class VerificationPageStaticContentConsentPage(
     @SerialName("decline_button_text")
     val declineButtonText: String,
     @SerialName("title")
-    val title: String
+    val title: String,
+    @SerialName("privacy_policy")
+    val privacyPolicy: String,
+    @SerialName("time_estimate")
+    val timeEstimate: String,
 )
