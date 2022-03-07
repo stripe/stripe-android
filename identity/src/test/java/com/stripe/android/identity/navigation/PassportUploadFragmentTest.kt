@@ -6,8 +6,6 @@ import android.widget.Button
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.Navigation
 import androidx.navigation.testing.TestNavHostController
 import androidx.test.core.app.ApplicationProvider
@@ -15,6 +13,7 @@ import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.identity.R
 import com.stripe.android.identity.databinding.PassportUploadFragmentBinding
+import com.stripe.android.identity.viewModelFactoryFor
 import com.stripe.android.identity.viewmodel.PassportUploadViewModel
 import org.junit.Rule
 import org.junit.Test
@@ -39,13 +38,6 @@ class PassportUploadFragmentTest {
 
     private val mockPassportUploadViewModel = mock<PassportUploadViewModel>().also {
         whenever(it.uploaded).thenReturn(uploaded)
-    }
-
-    private val passportUploadViewModelFactory = object : ViewModelProvider.Factory {
-        @Suppress("UNCHECKED_CAST")
-        override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return mockPassportUploadViewModel as T
-        }
     }
 
     @Test
@@ -160,6 +152,6 @@ class PassportUploadFragmentTest {
     private fun launchFragment() = launchFragmentInContainer(
         themeResId = R.style.Theme_MaterialComponents
     ) {
-        PassportUploadFragment(passportUploadViewModelFactory)
+        PassportUploadFragment(viewModelFactoryFor(mockPassportUploadViewModel))
     }
 }

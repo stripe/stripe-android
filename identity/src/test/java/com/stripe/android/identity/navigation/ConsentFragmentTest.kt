@@ -20,6 +20,7 @@ import com.stripe.android.identity.networking.models.VerificationPageStaticConte
 import com.stripe.android.identity.viewModelFactoryFor
 import com.stripe.android.identity.viewmodel.IdentityViewModel
 import kotlinx.coroutines.runBlocking
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestRule
@@ -86,6 +87,19 @@ internal class ConsentFragmentTest {
         )
     }
 
+    @Before
+    fun setup() {
+        whenever(mockIdentityViewModel.verificationPage).thenReturn(verificationPageLiveData)
+        whenever(mockIdentityViewModel.verificationPageApiError).thenReturn(verificationApiErrorLiveData)
+        whenever(mockIdentityViewModel.args).thenReturn(
+            IdentityVerificationSheetContract.Args(
+                verificationSessionId = VERIFICATION_SESSION_ID,
+                ephemeralKeySecret = EPHEMERAL_KEY,
+                merchantLogo = MERCHANT_LOGO
+            )
+        )
+    }
+
     @Test
     fun `when waiting verificationPage UI shows progress circular`() {
         launchConsentFragment { binding, _ ->
@@ -104,7 +118,6 @@ internal class ConsentFragmentTest {
             assertThat(binding.texts.visibility).isEqualTo(View.VISIBLE)
             assertThat(binding.buttons.visibility).isEqualTo(View.VISIBLE)
 
-            assertThat(binding.merchantLogo.sourceLayoutResId).isEqualTo(MERCHANT_LOGO)
             assertThat(binding.titleText.text).isEqualTo(CONSENT_TITLE)
             assertThat(binding.privacyPolicy.text.toString()).isEqualTo(CONSENT_PRIVACY_POLICY)
             assertThat(binding.timeEstimate.text).isEqualTo(CONSENT_TIME_ESTIMATE)
