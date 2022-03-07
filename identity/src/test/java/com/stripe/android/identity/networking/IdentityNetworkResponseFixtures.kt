@@ -88,3 +88,18 @@ internal val ERROR_JSON_STRING = """
     }
 
 """.trimIndent()
+
+internal val FILE_UPLOAD_SUCCESS_JSON_STRING = """
+    {
+      "id": "file_1KZUtnEAjaOkiuGM9AuSSXXO",
+      "object": "file",
+      "created": 1646376359,
+      "expires_at": null,
+      "filename": "initialScreen.png",
+      "purpose": "identity_private",
+      "size": 136000,
+      "title": null,
+      "type": "png",
+      "url": null
+    }
+""".trimIndent()

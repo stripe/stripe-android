@@ -1,13 +1,12 @@
-package com.stripe.android.networking
+package com.stripe.android.core.networking
 
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.ApiKeyFixtures
-import com.stripe.android.FileFactory
-import com.stripe.android.core.networking.ApiRequest
-import com.stripe.android.model.StripeFileParams
-import com.stripe.android.model.StripeFilePurpose
+import com.stripe.android.core.ApiKeyFixtures
+import com.stripe.android.core.FileFactory
+import com.stripe.android.core.model.InternalStripeFileParams
+import com.stripe.android.core.model.InternalStripeFilePurpose
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import java.io.ByteArrayOutputStream
@@ -21,9 +20,9 @@ class FileUploadRequestTest {
     @Test
     fun writeBody_shouldWriteExpectedNumberOfBytes() {
         val request = FileUploadRequest(
-            StripeFileParams(
+            InternalStripeFileParams(
                 file = fileFactory.create(),
-                purpose = StripeFilePurpose.IdentityDocument
+                purpose = InternalStripeFilePurpose.IdentityDocument
             ),
             OPTIONS,
             boundary = "5955816017232305695"
@@ -39,9 +38,9 @@ class FileUploadRequestTest {
     @Test
     fun purposeContents_shouldReturnExpectedValue() {
         val request = FileUploadRequest(
-            StripeFileParams(
+            InternalStripeFileParams(
                 file = fileFactory.create(),
-                purpose = StripeFilePurpose.IdentityDocument
+                purpose = InternalStripeFilePurpose.IdentityDocument
             ),
             OPTIONS,
             boundary = "5955816017232305695"
@@ -61,9 +60,9 @@ class FileUploadRequestTest {
     @Test
     fun fileMetadata_shouldReturnExpectedValue() {
         val request = FileUploadRequest(
-            StripeFileParams(
+            InternalStripeFileParams(
                 file = fileFactory.create(),
-                purpose = StripeFilePurpose.IdentityDocument
+                purpose = InternalStripeFilePurpose.IdentityDocument
             ),
             OPTIONS,
             boundary = "5955816017232305695"

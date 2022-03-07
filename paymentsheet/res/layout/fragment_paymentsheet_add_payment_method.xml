@@ -52,12 +52,9 @@
         android:id="@+id/payment_methods_recycler"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingHorizontal="14dp"
         android:paddingTop="18dp"
         android:paddingBottom="6dp"
-        android:visibility="visible"
-        android:clipChildren="false"
-        android:clipToPadding="false"
+        android:visibility="gone"
         android:orientation="horizontal"
         app:layout_constraintBottom_toTopOf="@+id/payment_method_fragment_container"
         app:layout_constraintStart_toStartOf="parent" />
@@ -68,6 +65,6 @@
         android:layout_height="wrap_content"
         android:paddingHorizontal="@dimen/stripe_paymentsheet_outer_spacing_horizontal"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

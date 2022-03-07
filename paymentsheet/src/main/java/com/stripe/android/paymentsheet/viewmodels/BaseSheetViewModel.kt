@@ -301,9 +301,16 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
         savedStateHandle.set(SAVE_SELECTED_ADD_LPM, lpm)
     }
 
-    fun getAddFragmentSelectedLPM() =
-        savedStateHandle.get<SupportedPaymentMethod>(SAVE_SELECTED_ADD_LPM)
-            ?: SupportedPaymentMethod.Card
+    fun getAddFragmentSelectedLpm() =
+        savedStateHandle.getLiveData<SupportedPaymentMethod>(
+            SAVE_SELECTED_ADD_LPM,
+            SupportedPaymentMethod.Card
+        )
+
+    fun getAddFragmentSelectedLpmValue() =
+        savedStateHandle.get<SupportedPaymentMethod>(
+            SAVE_SELECTED_ADD_LPM
+        ) ?: SupportedPaymentMethod.Card
 
     fun setEditing(isEditing: Boolean) {
         editing.value = isEditing
