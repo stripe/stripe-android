@@ -7,6 +7,7 @@ import android.os.Build
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.BuildConfig
+import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.version.StripeSdkVersion
 import junit.framework.TestCase
 import org.junit.Test
@@ -38,11 +39,12 @@ class AnalyticsRequestFactoryTest : TestCase() {
 
     @Test
     fun `when publishable key is unavailable, create params with undefined key`() {
+        val exception = APIException(RuntimeException())
         val factory = AnalyticsRequestFactory(
             mock(),
             null,
             packageName,
-            { throw RuntimeException() }
+            { throw exception }
         )
 
         val params = factory.createRequest(mockEvent, emptyMap()).params
