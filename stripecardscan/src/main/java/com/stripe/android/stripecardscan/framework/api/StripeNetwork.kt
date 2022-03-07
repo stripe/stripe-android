@@ -1,11 +1,10 @@
 package com.stripe.android.stripecardscan.framework.api
 
 import android.util.Log
-import com.stripe.android.camera.framework.time.Duration
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.networking.StripeRequest
-import com.stripe.android.stripecardscan.framework.Config
+import com.stripe.android.stripecardscan.framework.LOG_TAG
 import com.stripe.android.stripecardscan.framework.api.dto.CardScanFileDownloadRequest
 import com.stripe.android.stripecardscan.framework.api.dto.CardScanRequest
 import com.stripe.android.stripecardscan.framework.util.decodeFromJson
@@ -26,7 +25,6 @@ internal class StripeNetwork internal constructor(
         baseUrl: String,
         retryTotalAttempts: Int,
         retryStatusCodes: Iterable<Int>,
-        retryDelayFunction: (attempt: Int, totalAttempts: Int) -> Duration,
     ) : this(
         baseUrl,
         retryStatusCodes,
@@ -99,7 +97,7 @@ internal class StripeNetwork internal constructor(
                 ).code
             responseCode
         } catch (t: Throwable) {
-            Log.w(Config.logTag, "Failed network request to download file $url", t)
+            Log.w(LOG_TAG, "Failed network request to download file $url", t)
             responseCode
         }
     }
@@ -156,7 +154,7 @@ internal class StripeNetwork internal constructor(
                 }
             }
         } catch (t: Throwable) {
-            Log.w(Config.logTag, "Failed network request to endpoint ${request.url}", t)
+            Log.w(LOG_TAG, "Failed network request to endpoint ${request.url}", t)
             NetworkResult.Exception(responseCode, t)
         }
     }

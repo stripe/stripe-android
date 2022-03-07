@@ -4,8 +4,8 @@ import android.content.Context
 import android.util.Log
 import com.stripe.android.camera.framework.Analyzer
 import com.stripe.android.camera.framework.AnalyzerFactory
-import com.stripe.android.stripecardscan.framework.Config
 import com.stripe.android.stripecardscan.framework.FetchedData
+import com.stripe.android.stripecardscan.framework.LOG_TAG
 import com.stripe.android.stripecardscan.framework.Loader
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -71,7 +71,7 @@ internal abstract class TFLAnalyzerFactory<
         loadModel(fetchedModel)?.let { Interpreter(it, tfOptions) }
     } catch (t: Throwable) {
         Log.e(
-            Config.logTag,
+            LOG_TAG,
             "Error loading ${fetchedModel.modelClass} version ${fetchedModel.modelVersion}",
             t,
         )
@@ -79,7 +79,7 @@ internal abstract class TFLAnalyzerFactory<
     }.apply {
         if (this == null) {
             Log.w(
-                Config.logTag,
+                LOG_TAG,
                 "Unable to load ${fetchedModel.modelClass} version ${fetchedModel.modelVersion}",
             )
         }

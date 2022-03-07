@@ -19,9 +19,9 @@ import com.stripe.android.camera.CameraAdapter
 import com.stripe.android.camera.CameraPreviewImage
 import com.stripe.android.camera.DefaultCameraErrorListener
 import com.stripe.android.stripecardscan.camera.getCameraAdapter
-import com.stripe.android.stripecardscan.framework.Config
 import com.stripe.android.camera.framework.Stats
 import com.stripe.android.core.storage.StorageFactory
+import com.stripe.android.stripecardscan.framework.LOG_TAG
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -191,7 +191,7 @@ abstract class ScanFragment : Fragment(), CoroutineScope {
      * Cancel scanning due to a camera error.
      */
     protected open fun scanFailure(cause: Throwable? = null) {
-        Log.e(Config.logTag, "Canceling scan due to error", cause)
+        Log.e(LOG_TAG, "Canceling scan due to error", cause)
         runBlocking { scanStat.trackResult("scan_failure") }
         resultListener.failed(cause)
         closeScanner()

@@ -3,7 +3,7 @@ package com.stripe.android.stripecardscan.framework.api.dto
 import com.stripe.android.core.networking.HEADER_AUTHORIZATION
 import com.stripe.android.core.networking.HEADER_CONTENT_TYPE
 import com.stripe.android.core.networking.StripeRequest
-import com.stripe.android.stripecardscan.framework.NetworkConfig.CARD_SCAN_RETRY_STATUS_CODES
+import com.stripe.android.stripecardscan.framework.api.CARD_SCAN_RETRY_STATUS_CODES
 import java.io.OutputStream
 import java.io.OutputStreamWriter
 

@@ -15,6 +15,6 @@ internal abstract class MachineState {
         "${this::class.java.simpleName}(reachedStateAt=$reachedStateAt)"
 
     init {
-        Log.d(Config.logTag, "${this::class.java.simpleName} machine state reached")
+        Log.d(LOG_TAG, "${this::class.java.simpleName} machine state reached")
     }
 }

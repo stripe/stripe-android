@@ -1,11 +1,10 @@
 package com.stripe.android.stripecardscan.framework.api
 
 import android.util.Log
-import com.stripe.android.stripecardscan.framework.Config
-import com.stripe.android.stripecardscan.framework.NetworkConfig
 import com.stripe.android.stripecardscan.framework.api.StripeNetwork.Companion.RESPONSE_CODE_UNSET
 import com.stripe.android.camera.framework.time.Duration
-import com.stripe.android.camera.framework.time.milliseconds
+import com.stripe.android.camera.framework.time.seconds
+import com.stripe.android.stripecardscan.framework.LOG_TAG
 import com.stripe.android.stripecardscan.framework.util.decodeFromJson
 import com.stripe.android.stripecardscan.framework.util.encodeToXWWWFormUrl
 import com.stripe.android.stripecardscan.framework.util.retry
@@ -92,6 +91,10 @@ internal class LegacyStripeNetwork(
     private val retryTotalAttempts: Int,
     private val retryStatusCodes: Iterable<Int>,
 ) : Network {
+
+    companion object {
+        const val useCompression: Boolean = false
+    }
 
     /**
      * Get the [baseUrl] with no trailing slashes.
@@ -230,9 +233,7 @@ internal class LegacyStripeNetwork(
                 setRequestProperty(REQUEST_PROPERTY_CONTENT_TYPE, CONTENT_TYPE_FORM)
 
                 // Write the data
-                if (NetworkConfig.useCompression &&
-                    encodedData.toByteArray().size >= GZIP_MIN_SIZE_BYTES
-                ) {
+                if (useCompression && encodedData.toByteArray().size >= GZIP_MIN_SIZE_BYTES) {
                     setRequestProperty(REQUEST_PROPERTY_CONTENT_ENCODING, CONTENT_ENCODING_GZIP)
                     writeGzipData(
                         outputStream,
@@ -261,7 +262,7 @@ internal class LegacyStripeNetwork(
                 }
             }
         } catch (t: Throwable) {
-            Log.w(Config.logTag, "Failed network request to endpoint $url", t)
+            Log.w(LOG_TAG, "Failed network request to endpoint $url", t)
             NetworkResult.Exception(responseCode, t)
         }
     }
@@ -304,7 +305,7 @@ internal class LegacyStripeNetwork(
                 }
             }
         } catch (t: Throwable) {
-            Log.w(Config.logTag, "Failed network request to endpoint $url", t)
+            Log.w(LOG_TAG, "Failed network request to endpoint $url", t)
             NetworkResult.Exception(responseCode, t)
         }
     }
@@ -352,8 +353,12 @@ private fun <Response, Error> translateNetworkResult(
 
 // TODO(ccen): Replace its caller with [StripeNetwork#downloadFileWithRetries]
 @Throws(IOException::class)
-internal suspend fun downloadFileWithRetries(url: URL, outputFile: File) = retry(
-    NetworkConfig.retryDelayMillis.milliseconds,
+internal suspend fun downloadFileWithRetries(
+    url: URL,
+    outputFile: File,
+    retryDelayFunction: (attempt: Int, totalAttempts: Int) -> Duration = { _, _ -> 3.seconds },
+) = retry(
+    retryDelayFunction,
     excluding = listOf(FileNotFoundException::class.java)
 ) {
     downloadFile(url, outputFile)
@@ -384,7 +389,7 @@ private fun downloadFile(
         responseCode
     }
 } catch (t: Throwable) {
-    Log.w(Config.logTag, "Failed network request to endpoint $url", t)
+    Log.w(LOG_TAG, "Failed network request to endpoint $url", t)
     throw t
 }
 

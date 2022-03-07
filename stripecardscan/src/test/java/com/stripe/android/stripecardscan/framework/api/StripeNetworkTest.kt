@@ -6,7 +6,6 @@ import com.stripe.android.core.networking.HEADER_AUTHORIZATION
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.networking.StripeRequest
 import com.stripe.android.core.networking.StripeResponse
-import com.stripe.android.stripecardscan.framework.NetworkConfig
 import com.stripe.android.stripecardscan.framework.api.StripeNetwork.Companion.RESPONSE_CODE_UNSET
 import com.stripe.android.stripecardscan.framework.api.dto.CardScanFileDownloadRequest
 import com.stripe.android.stripecardscan.framework.api.dto.CardScanRequest
@@ -270,7 +269,7 @@ class StripeNetworkTest {
                 request is CardScanFileDownloadRequest &&
                     request.method == StripeRequest.Method.GET &&
                     request.url == TEST_FILE_URL.path &&
-                    request.retryResponseCodes == NetworkConfig.CARD_SCAN_RETRY_STATUS_CODES &&
+                    request.retryResponseCodes == CARD_SCAN_RETRY_STATUS_CODES &&
                     request.headers.isEmpty()
             },
             argWhere {
@@ -299,7 +298,7 @@ class StripeNetworkTest {
                 request is CardScanFileDownloadRequest &&
                     request.method == StripeRequest.Method.GET &&
                     request.url == TEST_FILE_URL.path &&
-                    request.retryResponseCodes == NetworkConfig.CARD_SCAN_RETRY_STATUS_CODES &&
+                    request.retryResponseCodes == CARD_SCAN_RETRY_STATUS_CODES &&
                     request.headers.isEmpty()
             },
             argWhere {
