@@ -1,10 +1,7 @@
 /**
- * Base build configuration for all core libraries.
+ * Base build configuration for all android libraries (modules applying the android library plugin).
  *
- * Core library described as any module added as a dependency directly,
- * or transitively via another core library, by an sdk library.
- *
- * Don't add any configuration here that is not common to *every* core library.
+ * Don't add any configuration here that is not common to *every* android library.
  */
 apply plugin: "com.android.library"
 apply plugin: "kotlin-android"

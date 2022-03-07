@@ -7,5 +7,5 @@ ext.buildLibs = [
 ]
 
 ext.configs = [
-        coreLibrary: "${project.rootDir}/build-configuration/core-library.gradle",
+        androidLibrary: "${project.rootDir}/build-configuration/android-library.gradle",
 ]
