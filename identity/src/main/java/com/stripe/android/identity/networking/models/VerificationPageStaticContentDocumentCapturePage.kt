@@ -8,7 +8,7 @@ internal data class VerificationPageStaticContentDocumentCapturePage(
     @SerialName("autocapture_timeout")
     val autocaptureTimeout: Int,
     @SerialName("file_purpose")
-    val filePurpose: kotlin.String,
+    val filePurpose: String,
     @SerialName("high_res_image_compression_quality")
     val highResImageCompressionQuality: Float,
     @SerialName("high_res_image_crop_padding")

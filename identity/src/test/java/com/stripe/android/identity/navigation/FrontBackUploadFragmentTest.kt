@@ -222,14 +222,16 @@ class FrontBackUploadFragmentTest {
             // viewmodel triggers and UI updates
             if (scanType == IdentityScanState.ScanType.ID_FRONT) {
                 verify(mockFrontBackUploadViewModel).uploadImageFront(
-                    same(mockUri)
+                    same(mockUri),
+                    same(it.requireContext())
                 )
                 assertThat(binding.selectFront.visibility).isEqualTo(View.GONE)
                 assertThat(binding.progressCircularFront.visibility).isEqualTo(View.VISIBLE)
                 assertThat(binding.finishedCheckMarkFront.visibility).isEqualTo(View.GONE)
             } else if (scanType == IdentityScanState.ScanType.ID_BACK) {
                 verify(mockFrontBackUploadViewModel).uploadImageBack(
-                    same(mockUri)
+                    same(mockUri),
+                    same(it.requireContext())
                 )
                 assertThat(binding.selectBack.visibility).isEqualTo(View.GONE)
                 assertThat(binding.progressCircularBack.visibility).isEqualTo(View.VISIBLE)

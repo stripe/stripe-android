@@ -72,8 +72,10 @@ internal abstract class FrontBackUploadFragment(
         binding.contentText.text = getString(contextRes)
         binding.labelFront.text = getString(frontTextRes)
         binding.labelBack.text = getString(backTextRes)
-        binding.finishedCheckMarkFront.contentDescription = getString(frontCheckMarkContentDescription)
-        binding.finishedCheckMarkBack.contentDescription = getString(backCheckMarkContentDescription)
+        binding.finishedCheckMarkFront.contentDescription =
+            getString(frontCheckMarkContentDescription)
+        binding.finishedCheckMarkBack.contentDescription =
+            getString(backCheckMarkContentDescription)
 
         binding.selectBack.setOnClickListener {
             buildBottomSheetDialog(backScanType).show()
@@ -132,12 +134,12 @@ internal abstract class FrontBackUploadFragment(
 
     private fun uploadFront(frontUri: Uri) {
         showFrontUploading()
-        frontBackUploadViewModel.uploadImageFront(frontUri)
+        frontBackUploadViewModel.uploadImageFront(frontUri, requireContext())
     }
 
     private fun uploadBack(backUri: Uri) {
         showBackUploading()
-        frontBackUploadViewModel.uploadImageBack(backUri)
+        frontBackUploadViewModel.uploadImageBack(backUri, requireContext())
     }
 
     private fun showFrontUploading() {

@@ -1,14 +1,16 @@
-package com.stripe.android.model
+package com.stripe.android.core.model
 
-import com.stripe.android.core.model.InternalStripeFile
-import com.stripe.android.core.model.StripeModel
+import androidx.annotation.RestrictTo
 import kotlinx.parcelize.Parcelize
 
 /**
- * [The file object](https://stripe.com/docs/api/files/object)
+ * Internal copy of [com.stripe.android.model.StripeFile]. It's a public API object and can't be changed
+ * without introducing backward incompatibility.
+ * TODO(ccen): Move StripeFile to stripe-core and delete this copy during the next major version bump.
  */
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Parcelize
-data class StripeFile internal constructor(
+data class InternalStripeFile constructor(
     /**
      * Unique identifier for the object.
      *
@@ -37,7 +39,7 @@ data class StripeFile internal constructor(
      *
      * [purpose](https://stripe.com/docs/api/files/object#file_object-purpose)
      */
-    val purpose: StripeFilePurpose? = null,
+    val purpose: InternalStripeFilePurpose? = null,
 
     /**
      * The size in bytes of the file object.
@@ -66,22 +68,4 @@ data class StripeFile internal constructor(
      * [url](https://stripe.com/docs/api/files/object#file_object-url)
      */
     val url: String? = null
-) : StripeModel {
-
-    /**
-     * Temporary method to convert [StripeFile] to [InternalStripeFile].
-     * TODO(ccen): Move StripeFile to stripe-core during the next major version bump.
-     */
-    internal companion object {
-        fun fromInternal(internalStripeFile: InternalStripeFile) = StripeFile(
-            internalStripeFile.id,
-            internalStripeFile.created,
-            internalStripeFile.filename,
-            StripeFilePurpose.fromCode(internalStripeFile.purpose?.code),
-            internalStripeFile.size,
-            internalStripeFile.title,
-            internalStripeFile.type,
-            internalStripeFile.url
-        )
-    }
-}
+) : StripeModel

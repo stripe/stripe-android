@@ -1,13 +1,9 @@
-package com.stripe.android.networking
+package com.stripe.android.core.networking
 
-import androidx.annotation.VisibleForTesting
-import com.stripe.android.AppInfo
-import com.stripe.android.core.networking.ApiRequest
-import com.stripe.android.core.networking.DEFAULT_RETRY_CODES
-import com.stripe.android.core.networking.RequestHeadersFactory
-import com.stripe.android.core.networking.StripeRequest
+import androidx.annotation.RestrictTo
+import com.stripe.android.core.InternalAppInfo
+import com.stripe.android.core.model.InternalStripeFileParams
 import com.stripe.android.core.networking.StripeRequest.MimeType
-import com.stripe.android.model.StripeFileParams
 import java.io.OutputStream
 import java.io.PrintWriter
 import java.net.URLConnection
@@ -18,20 +14,21 @@ import kotlin.random.Random
  *
  * See [File upload guide](https://stripe.com/docs/file-upload)
  */
-internal class FileUploadRequest(
-    private val fileParams: StripeFileParams,
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+open class FileUploadRequest(
+    private val fileParams: InternalStripeFileParams,
     options: ApiRequest.Options,
-    appInfo: AppInfo? = null,
+    appInfo: InternalAppInfo? = null,
     /**
      * Boundary to delineate parts of the message
      *
      * See [Multipart messages](https://en.wikipedia.org/wiki/MIME#Multipart_messages)
      */
-    private val boundary: String = createBoundary()
+    protected val boundary: String = createBoundary()
 ) : StripeRequest() {
     private val headersFactory: RequestHeadersFactory = RequestHeadersFactory.FileUpload(
         options = options,
-        appInfo = appInfo?.toInternalAppInfo(),
+        appInfo = appInfo,
         boundary = boundary
     )
 
@@ -61,17 +58,16 @@ internal class FileUploadRequest(
         }
     }
 
-    private fun writeString(writer: PrintWriter, contents: String) {
+    protected fun writeString(writer: PrintWriter, contents: String) {
         writer.write(contents.replace("\n", LINE_BREAK))
         writer.flush()
     }
 
-    private fun writeFile(outputStream: OutputStream) {
+    protected fun writeFile(outputStream: OutputStream) {
         fileParams.file.inputStream().copyTo(outputStream)
     }
 
-    @VisibleForTesting
-    internal val fileMetadata: String
+    val fileMetadata: String
         get() {
             val fileName = fileParams.file.name
             val probableContentType = URLConnection.guessContentTypeFromName(fileName)
@@ -85,8 +81,7 @@ internal class FileUploadRequest(
             """.trimIndent()
         }
 
-    @VisibleForTesting
-    internal val purposeContents: String
+    val purposeContents: String
         get() {
             return """
                 --$boundary
@@ -97,8 +92,9 @@ internal class FileUploadRequest(
             """.trimIndent()
         }
 
-    internal companion object {
-        private const val LINE_BREAK = "\r\n"
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    protected companion object {
+        const val LINE_BREAK = "\r\n"
 
         private const val HOST = "https://files.stripe.com/v1/files"
 

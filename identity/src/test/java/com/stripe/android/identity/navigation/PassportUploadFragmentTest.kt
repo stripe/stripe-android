@@ -148,7 +148,8 @@ class PassportUploadFragmentTest {
 
             // viewmodel triggers and UI updates
             verify(mockPassportUploadViewModel).uploadImage(
-                same(mockUri)
+                same(mockUri),
+                same(it.requireContext())
             )
             assertThat(binding.select.visibility).isEqualTo(View.GONE)
             assertThat(binding.progressCircular.visibility).isEqualTo(View.VISIBLE)
