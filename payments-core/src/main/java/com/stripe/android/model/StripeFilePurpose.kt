@@ -1,5 +1,7 @@
 package com.stripe.android.model
 
+import com.stripe.android.core.model.InternalStripeFilePurpose
+
 /**
  * The purpose of the uploaded file. Possible values are `business_icon`, `business_logo`,
  * `customer_signature`, `dispute_evidence`, `identity_document`, `pci_document`,
@@ -20,5 +22,12 @@ enum class StripeFilePurpose(internal val code: String) {
         fun fromCode(code: String?): StripeFilePurpose? {
             return values().first { it.code == code }
         }
+
+        /**
+         * Temporary method to convert [StripeFilePurpose] to [InternalStripeFilePurpose].
+         * TODO(ccen): Move StripeFilePurpose to stripe-core during the next major version bump.
+         */
+        fun StripeFilePurpose.toInternal() =
+            requireNotNull(InternalStripeFilePurpose.fromCode(this.code))
     }
 }

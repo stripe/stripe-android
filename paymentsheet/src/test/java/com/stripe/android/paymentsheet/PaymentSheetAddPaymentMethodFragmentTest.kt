@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet
 
 import android.content.Context
+import androidx.compose.ui.unit.dp
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.fragment.app.testing.FragmentScenario
@@ -37,7 +38,7 @@ import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.forms.FormFieldEntry
 import com.stripe.android.utils.TestUtils.idleLooper
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -75,28 +76,20 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
     }
 
     @Test
-    fun `when processing then payment methods UI should be disabled`() {
-        val paymentIntent = mock<PaymentIntent>().also {
-            whenever(it.paymentMethodTypes).thenReturn(listOf("card", "bancontact"))
-        }
-        createFragment(stripeIntent = paymentIntent) { fragment, viewBinding, _ ->
-            idleLooper()
-            fragment.sheetViewModel._processing.value = true
-            val adapter =
-                viewBinding.paymentMethodsRecycler.adapter as AddPaymentMethodsAdapter
-            assertThat(adapter.isEnabled).isFalse()
-        }
-    }
-
-    @Test
     @Config(qualifiers = "w320dp")
-    fun `when screen is 320dp wide, adapter should show 2 and a half items with 104dp width`() {
+    fun `when screen is 320dp wide, adapter should show 2 and a half items`() {
         val paymentIntent = mock<PaymentIntent>().also {
             whenever(it.paymentMethodTypes).thenReturn(listOf("card", "bancontact", "sofort", "ideal"))
         }
-        createFragment(stripeIntent = paymentIntent) { _, viewBinding, _ ->
-            val item = viewBinding.paymentMethodsRecycler.layoutManager!!.findViewByPosition(0)
-            assertThat(item!!.measuredWidth).isEqualTo(116)
+        createFragment(stripeIntent = paymentIntent) { fragment, viewBinding, _ ->
+            assertThat(116.dp)
+                .isEqualTo(
+                    calculateViewWidth(
+                        viewBinding.paymentMethodFragmentContainer.measuredWidth,
+                        fragment.resources.displayMetrics,
+                        paymentIntent.paymentMethodTypes.size
+                    )
+                )
         }
     }
 
@@ -106,9 +99,15 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
         val paymentIntent = mock<PaymentIntent>().also {
             whenever(it.paymentMethodTypes).thenReturn(listOf("card", "bancontact"))
         }
-        createFragment(stripeIntent = paymentIntent) { _, viewBinding, _ ->
-            val item = viewBinding.paymentMethodsRecycler.layoutManager!!.findViewByPosition(0)
-            assertThat(item!!.measuredWidth).isEqualTo(223)
+        createFragment(stripeIntent = paymentIntent) { fragment, viewBinding, _ ->
+            assertThat(223.dp)
+                .isEqualTo(
+                    calculateViewWidth(
+                        viewBinding.paymentMethodFragmentContainer.measuredWidth,
+                        fragment.resources.displayMetrics,
+                        paymentIntent.paymentMethodTypes.size
+                    )
+                )
         }
     }
 
@@ -567,11 +566,12 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
     }
 
     @Test
-    fun `Factory gets initialized with fallback when no Injector is available`() = runBlockingTest {
-        createFragment(registerInjector = false) { fragment, _, viewModel ->
-            assertThat(fragment.sheetViewModel).isNotEqualTo(viewModel)
+    fun `Factory gets initialized with fallback when no Injector is available`() =
+        kotlinx.coroutines.test.runTest(UnconfinedTestDispatcher()) {
+            createFragment(registerInjector = false) { fragment, _, viewModel ->
+                assertThat(fragment.sheetViewModel).isNotEqualTo(viewModel)
+            }
         }
-    }
 
     private fun createAmount(paymentIntent: PaymentIntent = PaymentIntentFixtures.PI_WITH_SHIPPING) =
         Amount(paymentIntent.amount!!, paymentIntent.currency!!)
@@ -600,7 +600,7 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
             ),
             R.style.StripePaymentSheetDefaultTheme,
             initialState = Lifecycle.State.INITIALIZED
-        ).moveToState(Lifecycle.State.CREATED).onFragment { fragment ->
+        ).moveToState(Lifecycle.State.CREATED).onFragment {
             viewModel.updatePaymentMethods(stripeIntent)
             viewModel.setStripeIntent(stripeIntent)
             idleLooper()
