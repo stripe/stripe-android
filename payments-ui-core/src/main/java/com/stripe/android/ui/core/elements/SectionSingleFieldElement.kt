@@ -34,6 +34,8 @@ sealed class SectionSingleFieldElement(
     }
 
     override fun getTextFieldIdentifiers(): Flow<List<IdentifierSpec>> =
-        MutableStateFlow(listOf(identifier).takeIf { controller is TextFieldController }
-            ?: emptyList())
+        MutableStateFlow(
+            listOf(identifier).takeIf { controller is TextFieldController }
+                ?: emptyList()
+        )
 }

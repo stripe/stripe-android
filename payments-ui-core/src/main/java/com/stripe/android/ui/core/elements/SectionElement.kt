@@ -33,5 +33,4 @@ data class SectionElement(
         ) {
             it.toList().flatten()
         }
-    
 }

@@ -64,7 +64,12 @@ internal fun FormInternal(
             it.forEachIndexed { index, element ->
                 if (!hiddenIdentifiers.contains(element.identifier)) {
                     when (element) {
-                        is SectionElement -> SectionElementUI(enabled, element, hiddenIdentifiers, lastTextFieldIdentifier)
+                        is SectionElement -> SectionElementUI(
+                            enabled,
+                            element,
+                            hiddenIdentifiers,
+                            lastTextFieldIdentifier
+                        )
                         is StaticTextElement -> StaticElementUI(element)
                         is SaveForFutureUseElement -> SaveForFutureUseElementUI(enabled, element)
                         is AfterpayClearpayHeaderElement -> AfterpayClearpayElementUI(

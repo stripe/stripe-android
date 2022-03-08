@@ -209,9 +209,7 @@ internal class FormViewModel @Inject internal constructor(
         ).filterFlow()
 
     private val textFieldControllerIdsFlow = elements.filterNotNull().map { elementsList ->
-        combine(elementsList.map { formElement ->
-            formElement.getTextFieldIdentifiers()
-        }) {
+        combine(elementsList.map { it.getTextFieldIdentifiers() }) {
             it.toList().flatten()
         }
     }.flattenConcat()
