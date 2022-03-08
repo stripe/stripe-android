@@ -30,7 +30,7 @@ class LinkActivityContract :
     data class Args internal constructor(
         internal val merchantName: String,
         internal val customerEmail: String? = null,
-        internal val injectionParams: InjectionParams? = null
+        internal val injectionParams: InjectionParams
     ) : ActivityStarter.Args {
 
         companion object {

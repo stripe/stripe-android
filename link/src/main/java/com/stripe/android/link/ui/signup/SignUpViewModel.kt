@@ -1,17 +1,14 @@
 package com.stripe.android.link.ui.signup
 
-import android.app.Application
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.Injectable
-import com.stripe.android.core.injection.injectWithFallback
+import com.stripe.android.core.injection.Injector
 import com.stripe.android.link.LinkActivityContract
 import com.stripe.android.link.LinkScreen
 import com.stripe.android.link.account.LinkAccountManager
-import com.stripe.android.link.injection.DaggerLinkViewModelFactoryComponent
 import com.stripe.android.link.injection.LinkViewModelSubcomponent
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.model.Navigator
@@ -134,16 +131,9 @@ internal class SignUpViewModel @Inject constructor(
     }
 
     internal class Factory(
-        private val application: Application,
-        private val starterArgsSupplier: () -> LinkActivityContract.Args
-    ) : ViewModelProvider.Factory, Injectable<Factory.FallbackInitializeParam> {
-        internal data class FallbackInitializeParam(
-            val application: Application,
-            val enableLogging: Boolean,
-            val publishableKey: String,
-            val stripeAccountId: String?,
-            val productUsage: Set<String>
-        )
+        private val starterArgs: LinkActivityContract.Args,
+        private val injector: Injector
+    ) : ViewModelProvider.Factory, Injectable<Unit> {
 
         @Inject
         lateinit var subComponentBuilderProvider:
@@ -151,36 +141,17 @@ internal class SignUpViewModel @Inject constructor(
 
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            val args = starterArgsSupplier()
-            injectWithFallback(
-                args.injectionParams?.injectorKey,
-                FallbackInitializeParam(
-                    application,
-                    args.injectionParams?.enableLogging ?: false,
-                    args.injectionParams?.publishableKey
-                        ?: PaymentConfiguration.getInstance(application).publishableKey,
-                    if (args.injectionParams != null) {
-                        args.injectionParams.stripeAccountId
-                    } else {
-                        PaymentConfiguration.getInstance(application).stripeAccountId
-                    },
-                    args.injectionParams?.productUsage ?: emptySet()
-                )
-            )
+            injector.inject(this)
             return subComponentBuilderProvider.get()
-                .args(args)
+                .args(starterArgs)
                 .build().signUpViewModel as T
         }
 
-        override fun fallbackInitialize(arg: FallbackInitializeParam) {
-            DaggerLinkViewModelFactoryComponent.builder()
-                .context(arg.application)
-                .enableLogging(arg.enableLogging)
-                .publishableKeyProvider { arg.publishableKey }
-                .stripeAccountIdProvider { arg.stripeAccountId }
-                .productUsage(arg.productUsage)
-                .build().inject(this)
-        }
+        /**
+         * There's no need to implement fallback because the ViewModel receives the injector
+         * directly as a parameter.
+         */
+        override fun fallbackInitialize(arg: Unit) {}
     }
 
     companion object {
