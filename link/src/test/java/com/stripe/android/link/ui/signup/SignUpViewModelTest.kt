@@ -1,10 +1,8 @@
 package com.stripe.android.link.ui.signup
 
-import android.app.Application
 import androidx.lifecycle.Lifecycle
 import androidx.savedstate.SavedStateRegistry
 import androidx.savedstate.SavedStateRegistryOwner
-import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.Injectable
@@ -30,7 +28,6 @@ import kotlinx.coroutines.test.setMain
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
-import org.mockito.kotlin.argWhere
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.doSuspendableAnswer
 import org.mockito.kotlin.mock
@@ -43,7 +40,6 @@ import org.robolectric.RobolectricTestRunner
 import javax.inject.Provider
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
-import kotlin.test.assertNotNull
 
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
@@ -203,8 +199,8 @@ class SignUpViewModelTest {
         }
         WeakMapInjectorRegistry.register(injector, INJECTOR_KEY)
         val factory = SignUpViewModel.Factory(
-            ApplicationProvider.getApplicationContext(),
-            { defaultArgs }
+            defaultArgs,
+            injector
         )
         val factorySpy = spy(factory)
         val createdViewModel = factorySpy.create(SignUpViewModel::class.java)
@@ -212,31 +208,6 @@ class SignUpViewModelTest {
         assertThat(createdViewModel).isEqualTo(vmToBeReturned)
 
         WeakMapInjectorRegistry.staticCacheMap.clear()
-    }
-
-    @Test
-    fun `Factory gets initialized with fallback when no Injector is available`() = runTest {
-        val mockSavedStateRegistryOwner = mock<SavedStateRegistryOwner>()
-        val mockSavedStateRegistry = mock<SavedStateRegistry>()
-        val mockLifeCycle = mock<Lifecycle>()
-
-        whenever(mockSavedStateRegistryOwner.savedStateRegistry).thenReturn(mockSavedStateRegistry)
-        whenever(mockSavedStateRegistryOwner.lifecycle).thenReturn(mockLifeCycle)
-        whenever(mockLifeCycle.currentState).thenReturn(Lifecycle.State.CREATED)
-
-        val context = ApplicationProvider.getApplicationContext<Application>()
-        val factory = SignUpViewModel.Factory(
-            ApplicationProvider.getApplicationContext(),
-            { defaultArgs }
-        )
-        val factorySpy = spy(factory)
-
-        assertNotNull(factorySpy.create(SignUpViewModel::class.java))
-        verify(factorySpy).fallbackInitialize(
-            argWhere {
-                it.application == context
-            }
-        )
     }
 
     private fun createViewModel(args: LinkActivityContract.Args = defaultArgs) = SignUpViewModel(
