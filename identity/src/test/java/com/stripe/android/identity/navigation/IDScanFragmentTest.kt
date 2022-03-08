@@ -15,6 +15,7 @@ import com.stripe.android.identity.R
 import com.stripe.android.identity.camera.IDDetectorAggregator
 import com.stripe.android.identity.camera.IdentityScanFlow
 import com.stripe.android.identity.databinding.IdScanFragmentBinding
+import com.stripe.android.identity.networking.Resource
 import com.stripe.android.identity.states.IdentityScanState
 import com.stripe.android.identity.viewModelFactoryFor
 import com.stripe.android.identity.viewmodel.CameraViewModel
@@ -48,10 +49,9 @@ internal class IDScanFragmentTest {
         whenever(it.finalResult).thenReturn(finalResultLiveData)
         whenever(it.displayStateChanged).thenReturn(displayStateChanged)
     }
-    private val idDetectorModelFile = MutableLiveData<File>()
+    private val idDetectorModelFile = MutableLiveData<Resource<File>>()
     private val mockIdentityViewModel = mock<IdentityViewModel>().also {
         whenever(it.idDetectorModelFile).thenReturn(idDetectorModelFile)
-        whenever(it.idDetectorModelError).thenReturn(mock())
     }
 
     private val testCameraPermissionEnsureable = object : CameraPermissionEnsureable {
@@ -69,7 +69,7 @@ internal class IDScanFragmentTest {
 
     @Before
     fun simulateModelDownloaded() {
-        idDetectorModelFile.postValue(mock())
+        idDetectorModelFile.postValue(Resource.success(mock()))
     }
 
     @Test

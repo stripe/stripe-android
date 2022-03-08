@@ -16,6 +16,7 @@ import com.stripe.android.camera.DefaultCameraErrorListener
 import com.stripe.android.camera.scanui.CameraView
 import com.stripe.android.camera.scanui.util.asRect
 import com.stripe.android.core.exception.InvalidResponseException
+import com.stripe.android.identity.networking.Status
 import com.stripe.android.identity.states.IdentityScanState
 import com.stripe.android.identity.viewmodel.CameraViewModel
 import com.stripe.android.identity.viewmodel.IdentityViewModel
@@ -80,18 +81,24 @@ internal abstract class IdentityCameraScanFragment(
         )
 
         identityViewModel.idDetectorModelFile.observe(viewLifecycleOwner) {
-            cameraViewModel.initializeScanFlow(it)
-            cameraPermissionEnsureable.ensureCameraPermission(
-                ::onCameraReady,
-                ::onUserDeniedCameraPermission
-            )
-        }
-
-        identityViewModel.idDetectorModelError.observe(viewLifecycleOwner) {
-            throw InvalidResponseException(
-                cause = it,
-                message = "Fail to download IDDetector model."
-            )
+            when (it.status) {
+                Status.SUCCESS -> {
+                    cameraViewModel.initializeScanFlow(requireNotNull(it.data))
+                    cameraPermissionEnsureable.ensureCameraPermission(
+                        ::onCameraReady,
+                        ::onUserDeniedCameraPermission
+                    )
+                }
+                Status.LOADING -> {
+                    // no-op
+                }
+                Status.ERROR -> {
+                    throw InvalidResponseException(
+                        cause = it.throwable,
+                        message = it.message
+                    )
+                }
+            }
         }
     }
 

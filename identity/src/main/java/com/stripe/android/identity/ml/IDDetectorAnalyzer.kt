@@ -21,20 +21,10 @@ internal class IDDetectorAnalyzer(modelFile: File) :
     Analyzer<AnalyzerInput, IdentityScanState, AnalyzerOutput> {
 
     private val tfliteInterpreter = Interpreter(modelFile)
-//        context.assets.openFd(modelName).use { fileDescriptor ->
-//            FileInputStream(fileDescriptor.fileDescriptor).use { input ->
-//                input.channel.map(
-//                    FileChannel.MapMode.READ_ONLY,
-//                    fileDescriptor.startOffset,
-//                    fileDescriptor.declaredLength
-//                )
-//            }
-//        }
-//    )
 
     override suspend fun analyze(
         data: AnalyzerInput,
-        identityState: IdentityScanState
+        state: IdentityScanState
     ): AnalyzerOutput {
         var tensorImage = TensorImage(INPUT_TENSOR_TYPE)
         val croppedImage = cropCameraPreviewToSquare(
