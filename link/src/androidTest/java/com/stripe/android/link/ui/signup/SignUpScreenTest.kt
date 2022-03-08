@@ -11,7 +11,6 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.link.LinkActivity
 import com.stripe.android.link.LinkActivityContract
-import com.stripe.android.link.R
 import com.stripe.android.link.createAndroidIntentComposeRule
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.ui.core.elements.EmailSpec
@@ -28,7 +27,16 @@ internal class SignUpScreenTest {
         Intent(it, LinkActivity::class.java).apply {
             putExtra(
                 LinkActivityContract.EXTRA_ARGS,
-                LinkActivityContract.Args("Merchant, Inc")
+                LinkActivityContract.Args(
+                    merchantName = MERCHANT_NAME,
+                    injectionParams = LinkActivityContract.Args.InjectionParams(
+                        INJECTOR_KEY,
+                        setOf(PRODUCT_USAGE),
+                        true,
+                        PUBLISHABLE_KEY,
+                        STRIPE_ACCOUNT_ID
+                    )
+                )
             )
         }
     }
@@ -97,7 +105,14 @@ internal class SignUpScreenTest {
     private fun onEmailField() = composeTestRule.onNodeWithText("Email")
     private fun onProgressIndicator() = composeTestRule.onNodeWithTag("CircularProgressIndicator")
     private fun onPhoneField() = composeTestRule.onNodeWithText("Mobile Number")
-    private fun onSignUpButton() = composeTestRule.onNodeWithText(getString(R.string.sign_up))
+    private fun onSignUpButton() = composeTestRule.onNodeWithText("Join Link")
 
-    private fun getString(resId: Int) = composeTestRule.activity.getString(resId)
+    private companion object {
+        const val INJECTOR_KEY = "injectorKey"
+        const val PRODUCT_USAGE = "productUsage"
+        const val PUBLISHABLE_KEY = "publishableKey"
+        const val STRIPE_ACCOUNT_ID = "stripeAccountId"
+
+        const val MERCHANT_NAME = "Merchant, Inc"
+    }
 }

@@ -203,8 +203,8 @@ class SignUpViewModelTest {
         }
         WeakMapInjectorRegistry.register(injector, INJECTOR_KEY)
         val factory = SignUpViewModel.Factory(
-            ApplicationProvider.getApplicationContext(),
-            { defaultArgs }
+            defaultArgs,
+            injector
         )
         val factorySpy = spy(factory)
         val createdViewModel = factorySpy.create(SignUpViewModel::class.java)
@@ -212,31 +212,6 @@ class SignUpViewModelTest {
         assertThat(createdViewModel).isEqualTo(vmToBeReturned)
 
         WeakMapInjectorRegistry.staticCacheMap.clear()
-    }
-
-    @Test
-    fun `Factory gets initialized with fallback when no Injector is available`() = runTest {
-        val mockSavedStateRegistryOwner = mock<SavedStateRegistryOwner>()
-        val mockSavedStateRegistry = mock<SavedStateRegistry>()
-        val mockLifeCycle = mock<Lifecycle>()
-
-        whenever(mockSavedStateRegistryOwner.savedStateRegistry).thenReturn(mockSavedStateRegistry)
-        whenever(mockSavedStateRegistryOwner.lifecycle).thenReturn(mockLifeCycle)
-        whenever(mockLifeCycle.currentState).thenReturn(Lifecycle.State.CREATED)
-
-        val context = ApplicationProvider.getApplicationContext<Application>()
-        val factory = SignUpViewModel.Factory(
-            ApplicationProvider.getApplicationContext(),
-            { defaultArgs }
-        )
-        val factorySpy = spy(factory)
-
-        assertNotNull(factorySpy.create(SignUpViewModel::class.java))
-        verify(factorySpy).fallbackInitialize(
-            argWhere {
-                it.application == context
-            }
-        )
     }
 
     private fun createViewModel(args: LinkActivityContract.Args = defaultArgs) = SignUpViewModel(
