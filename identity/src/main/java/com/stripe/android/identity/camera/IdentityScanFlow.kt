@@ -19,6 +19,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import java.io.File
 
 /**
  * Identity's [ScanFlow] implementation, uses a pool of [IDDetectorAnalyzer] to within a
@@ -29,7 +30,8 @@ import kotlinx.coroutines.launch
  */
 internal class IdentityScanFlow(
     private val analyzerLoopErrorListener: AnalyzerLoopErrorListener,
-    private val aggregateResultListener: AggregateResultListener<IDDetectorAggregator.InterimResult, IDDetectorAggregator.FinalResult>
+    private val aggregateResultListener: AggregateResultListener<IDDetectorAggregator.InterimResult, IDDetectorAggregator.FinalResult>,
+    private val idDetectorModelFile: File
 ) : ScanFlow<IdentityScanState.ScanType, CameraPreviewImage<Bitmap>> {
     private var aggregator: IDDetectorAggregator? = null
 
@@ -83,7 +85,7 @@ internal class IdentityScanFlow(
             requireNotNull(aggregator).bindToLifecycle(lifecycleOwner)
 
             analyzerPool = AnalyzerPool.of(
-                IDDetectorAnalyzer.Factory(context)
+                IDDetectorAnalyzer.Factory(idDetectorModelFile)
             )
 
             loop = ProcessBoundAnalyzerLoop(

@@ -6,6 +6,7 @@ import android.util.Size
 import android.view.View
 import androidx.annotation.VisibleForTesting
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
@@ -14,8 +15,10 @@ import com.stripe.android.camera.CameraPermissionEnsureable
 import com.stripe.android.camera.DefaultCameraErrorListener
 import com.stripe.android.camera.scanui.CameraView
 import com.stripe.android.camera.scanui.util.asRect
+import com.stripe.android.core.exception.InvalidResponseException
 import com.stripe.android.identity.states.IdentityScanState
 import com.stripe.android.identity.viewmodel.CameraViewModel
+import com.stripe.android.identity.viewmodel.IdentityViewModel
 
 /**
  * An abstract [Fragment] class to access camera scanning for Identity.
@@ -29,9 +32,11 @@ import com.stripe.android.identity.viewmodel.CameraViewModel
  */
 internal abstract class IdentityCameraScanFragment(
     private val cameraPermissionEnsureable: CameraPermissionEnsureable,
-    private val cameraViewModelFactory: ViewModelProvider.Factory
+    private val cameraViewModelFactory: ViewModelProvider.Factory,
+    private val identityViewModelFactory: ViewModelProvider.Factory
 ) : Fragment() {
     protected val cameraViewModel: CameraViewModel by viewModels { cameraViewModelFactory }
+    private val identityViewModel: IdentityViewModel by activityViewModels { identityViewModelFactory }
 
     @VisibleForTesting
     internal lateinit var cameraAdapter: Camera1Adapter
@@ -74,10 +79,20 @@ internal abstract class IdentityCameraScanFragment(
             }
         )
 
-        cameraPermissionEnsureable.ensureCameraPermission(
-            ::onCameraReady,
-            ::onUserDeniedCameraPermission
-        )
+        identityViewModel.idDetectorModelFile.observe(viewLifecycleOwner) {
+            cameraViewModel.initializeScanFlow(it)
+            cameraPermissionEnsureable.ensureCameraPermission(
+                ::onCameraReady,
+                ::onUserDeniedCameraPermission
+            )
+        }
+
+        identityViewModel.idDetectorModelError.observe(viewLifecycleOwner) {
+            throw InvalidResponseException(
+                cause = it,
+                message = "Fail to download IDDetector model."
+            )
+        }
     }
 
     /**

@@ -18,6 +18,8 @@ import com.stripe.android.identity.databinding.PassportScanFragmentBinding
 import com.stripe.android.identity.states.IdentityScanState
 import com.stripe.android.identity.viewModelFactoryFor
 import com.stripe.android.identity.viewmodel.CameraViewModel
+import com.stripe.android.identity.viewmodel.IdentityViewModel
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestRule
@@ -29,6 +31,7 @@ import org.mockito.kotlin.same
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
+import java.io.File
 
 @RunWith(RobolectricTestRunner::class)
 class PassportScanFragmentTest {
@@ -45,6 +48,11 @@ class PassportScanFragmentTest {
         whenever(it.finalResult).thenReturn(finalResultLiveData)
         whenever(it.displayStateChanged).thenReturn(displayStateChanged)
     }
+    private val idDetectorModelFile = MutableLiveData<File>()
+    private val mockIdentityViewModel = mock<IdentityViewModel>().also {
+        whenever(it.idDetectorModelFile).thenReturn(idDetectorModelFile)
+        whenever(it.idDetectorModelError).thenReturn(mock())
+    }
 
     private val testCameraPermissionEnsureable = object : CameraPermissionEnsureable {
         lateinit var onCameraReady: () -> Unit
@@ -57,6 +65,11 @@ class PassportScanFragmentTest {
             this.onCameraReady = onCameraReady
             this.onUserDeniedCameraPermission = onUserDeniedCameraPermission
         }
+    }
+
+    @Before
+    fun simulateModelDownloaded() {
+        idDetectorModelFile.postValue(mock())
     }
 
     @Test
@@ -227,7 +240,8 @@ class PassportScanFragmentTest {
     ) {
         PassportScanFragment(
             cameraPermissionEnsureable,
-            viewModelFactoryFor(mockCameraViewModel)
+            viewModelFactoryFor(mockCameraViewModel),
+            viewModelFactoryFor(mockIdentityViewModel)
         )
     }
 

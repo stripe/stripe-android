@@ -1,6 +1,5 @@
 package com.stripe.android.identity.ml
 
-import android.content.Context
 import com.stripe.android.camera.framework.Analyzer
 import com.stripe.android.camera.framework.AnalyzerFactory
 import com.stripe.android.camera.framework.image.cropCameraPreviewToSquare
@@ -11,30 +10,32 @@ import org.tensorflow.lite.support.common.ops.NormalizeOp
 import org.tensorflow.lite.support.image.ImageProcessor
 import org.tensorflow.lite.support.image.TensorImage
 import org.tensorflow.lite.support.image.ops.ResizeOp
-import java.io.FileInputStream
-import java.nio.channels.FileChannel
+import java.io.File
 
 /**
  * Analyzer to run a model input.
  *
  * TODO(ccen): reimplement with ImageClassifier
  */
-internal class IDDetectorAnalyzer(context: Context) :
+internal class IDDetectorAnalyzer(modelFile: File) :
     Analyzer<AnalyzerInput, IdentityScanState, AnalyzerOutput> {
 
-    private val tfliteInterpreter = Interpreter(
-        context.assets.openFd(modelName).use { fileDescriptor ->
-            FileInputStream(fileDescriptor.fileDescriptor).use { input ->
-                input.channel.map(
-                    FileChannel.MapMode.READ_ONLY,
-                    fileDescriptor.startOffset,
-                    fileDescriptor.declaredLength
-                )
-            }
-        }
-    )
+    private val tfliteInterpreter = Interpreter(modelFile)
+//        context.assets.openFd(modelName).use { fileDescriptor ->
+//            FileInputStream(fileDescriptor.fileDescriptor).use { input ->
+//                input.channel.map(
+//                    FileChannel.MapMode.READ_ONLY,
+//                    fileDescriptor.startOffset,
+//                    fileDescriptor.declaredLength
+//                )
+//            }
+//        }
+//    )
 
-    override suspend fun analyze(data: AnalyzerInput, identityState: IdentityScanState): AnalyzerOutput {
+    override suspend fun analyze(
+        data: AnalyzerInput,
+        identityState: IdentityScanState
+    ): AnalyzerOutput {
         var tensorImage = TensorImage(INPUT_TENSOR_TYPE)
         val croppedImage = cropCameraPreviewToSquare(
             data.cameraPreviewImage.image,
@@ -95,7 +96,7 @@ internal class IDDetectorAnalyzer(context: Context) :
     override val statsName: String? = null
 
     internal class Factory(
-        private val context: Context
+        private val modelFile: File
     ) : AnalyzerFactory<
             AnalyzerInput,
             IdentityScanState,
@@ -103,7 +104,7 @@ internal class IDDetectorAnalyzer(context: Context) :
             Analyzer<AnalyzerInput, IdentityScanState, AnalyzerOutput>
             > {
         override suspend fun newInstance(): Analyzer<AnalyzerInput, IdentityScanState, AnalyzerOutput> {
-            return IDDetectorAnalyzer(context)
+            return IDDetectorAnalyzer(modelFile)
         }
     }
 
@@ -112,7 +113,6 @@ internal class IDDetectorAnalyzer(context: Context) :
         const val INPUT_HEIGHT = 224
         const val NORMALIZE_MEAN = 127.5f
         const val NORMALIZE_STD = 127.5f
-        const val modelName = "2022IDDetectorWithoutMetadata.tflite"
         const val THRESHOLD = 0.4f
         const val OUTPUT_BOUNDING_BOX_TENSOR_INDEX = 0
         const val OUTPUT_CATEGORY_TENSOR_INDEX = 1

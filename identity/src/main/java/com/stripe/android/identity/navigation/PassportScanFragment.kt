@@ -21,8 +21,13 @@ import com.stripe.android.identity.states.IdentityScanState
  */
 internal class PassportScanFragment(
     cameraPermissionEnsureable: CameraPermissionEnsureable,
-    cameraViewModelFactory: ViewModelProvider.Factory
-) : IdentityCameraScanFragment(cameraPermissionEnsureable, cameraViewModelFactory) {
+    cameraViewModelFactory: ViewModelProvider.Factory,
+    identityViewModelFactory: ViewModelProvider.Factory
+) : IdentityCameraScanFragment(
+    cameraPermissionEnsureable,
+    cameraViewModelFactory,
+    identityViewModelFactory
+) {
     private lateinit var binding: PassportScanFragmentBinding
     private lateinit var headerTitle: TextView
     private lateinit var messageView: TextView

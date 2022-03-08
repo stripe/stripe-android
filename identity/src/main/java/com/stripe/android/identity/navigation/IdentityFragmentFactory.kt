@@ -43,15 +43,18 @@ internal class IdentityFragmentFactory(
         return when (className) {
             IDScanFragment::class.java.name -> IDScanFragment(
                 cameraPermissionEnsureable,
-                cameraViewModelFactory
+                cameraViewModelFactory,
+                identityViewModelFactory
             )
             DriverLicenseScanFragment::class.java.name -> DriverLicenseScanFragment(
                 cameraPermissionEnsureable,
-                cameraViewModelFactory
+                cameraViewModelFactory,
+                identityViewModelFactory
             )
             PassportScanFragment::class.java.name -> PassportScanFragment(
                 cameraPermissionEnsureable,
-                cameraViewModelFactory
+                cameraViewModelFactory,
+                identityViewModelFactory
             )
             CameraPermissionDeniedFragment::class.java.name -> CameraPermissionDeniedFragment(
                 appSettingsOpenable

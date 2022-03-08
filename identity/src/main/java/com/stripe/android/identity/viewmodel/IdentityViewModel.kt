@@ -13,6 +13,7 @@ import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.networking.models.VerificationPageData
 import kotlinx.coroutines.launch
+import java.io.File
 
 /**
  * ViewModel hosted by IdentityActivity, shared across fragments.
@@ -36,10 +37,23 @@ internal class IdentityViewModel(
     val verificationPageApiError: LiveData<Throwable> = _verificationPageApiError
 
     /**
+     * File for the IDDetector model.
+     */
+    private val _idDetectorModelFile = MutableLiveData<File>()
+    val idDetectorModelFile: LiveData<File> = _idDetectorModelFile
+
+    /**
+     * Model download fails, could be [APIException] if the request returns with an error response,
+     * or [APIConnectionException] if the request fails.
+     */
+    private val _idDetectorModelError = MutableLiveData<Throwable>()
+    val idDetectorModelError: LiveData<Throwable> = _idDetectorModelError
+
+    /**
      * Retrieve the VerificationPage data and post it as [verificationPage]
      * or error result as [verificationPageApiError].
      */
-    fun retrieveAndBufferVerificationPage() {
+    fun retrieveAndBufferVerificationPage(shouldRetrieveModel: Boolean = true) {
         viewModelScope.launch {
             runCatching {
                 identityRepository.retrieveVerificationPage(
@@ -47,8 +61,24 @@ internal class IdentityViewModel(
                     args.ephemeralKeySecret
                 )
             }.fold(
-                onSuccess = _verificationPage::postValue,
+                onSuccess = {
+                    _verificationPage.postValue(it)
+                    if (shouldRetrieveModel) {
+                        downloadModel(it.documentCapture.models.idDetectorUrl)
+                    }
+                },
                 onFailure = _verificationPageApiError::postValue
+            )
+        }
+    }
+
+    private fun downloadModel(modelUrl: String) {
+        viewModelScope.launch {
+            runCatching {
+                identityRepository.downloadModel(modelUrl)
+            }.fold(
+                onSuccess = _idDetectorModelFile::postValue,
+                onFailure = _idDetectorModelError::postValue
             )
         }
     }
