@@ -8,9 +8,9 @@ import androidx.compose.ui.text.input.ImeAction
 internal fun SectionFieldElementUI(
     enabled: Boolean,
     field: SectionFieldElement,
+    modifier: Modifier = Modifier,
     hiddenIdentifiers: List<IdentifierSpec>? = null,
     lastTextFieldIdentifier: IdentifierSpec?,
-    modifier: Modifier = Modifier,
 ) {
     if (hiddenIdentifiers?.contains(field.identifier) == false) {
         when (val controller = field.sectionFieldErrorController()) {
@@ -59,4 +59,3 @@ internal fun SectionFieldElementUI(
         }
     }
 }
-

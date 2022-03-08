@@ -16,7 +16,7 @@ internal fun RowElementUI(
     enabled: Boolean,
     controller: RowController,
     hiddenIdentifiers: List<IdentifierSpec>,
-    lastTetFieldIdentifier: IdentifierSpec?
+    lastTextFieldIdentifier: IdentifierSpec?
 ) {
     val fields = controller.fields
     val cardStyle = CardStyle(isSystemInDarkTheme())
@@ -38,8 +38,8 @@ internal fun RowElementUI(
                 SectionFieldElementUI(
                     enabled,
                     field,
-                    hiddenIdentifiers,
-                    lastTetFieldIdentifier,
+                    hiddenIdentifiers = hiddenIdentifiers,
+                    lastTextFieldIdentifier = lastTextFieldIdentifier,
                     modifier = Modifier
                         .constrainAs(fieldRefs[index]) {
                             if (index == 0) {

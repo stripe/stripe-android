@@ -14,7 +14,12 @@ internal fun CardDetailsElementUI(
     lastTextFieldIdentifier: IdentifierSpec?
 ) {
     controller.fields.forEachIndexed { index, field ->
-        SectionFieldElementUI(enabled, field, hiddenIdentifiers, lastTextFieldIdentifier)
+        SectionFieldElementUI(
+            enabled,
+            field,
+            hiddenIdentifiers = hiddenIdentifiers,
+            lastTextFieldIdentifier = lastTextFieldIdentifier
+        )
         val cardStyle = CardStyle(isSystemInDarkTheme())
         Divider(
             color = cardStyle.cardBorderColor,

@@ -20,7 +20,12 @@ internal fun AddressElementUI(
     fields?.let { fieldList ->
         Column {
             fieldList.forEachIndexed { index, field ->
-                SectionFieldElementUI(enabled, field, hiddenIdentifiers, lastTextFieldIdentifier)
+                SectionFieldElementUI(
+                    enabled,
+                    field,
+                    hiddenIdentifiers = hiddenIdentifiers,
+                    lastTextFieldIdentifier = lastTextFieldIdentifier
+                )
                 if ((hiddenIdentifiers?.contains(field.identifier) == false) &&
                     (index != fieldList.size - 1)
                 ) {

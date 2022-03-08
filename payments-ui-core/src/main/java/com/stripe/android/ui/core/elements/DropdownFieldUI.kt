@@ -81,8 +81,7 @@ internal fun DropDown(
                 }
         ) {
             Column(
-                modifier = Modifier
-                    .padding(
+                modifier = Modifier.padding(
                         start = 16.dp,
                         top = 4.dp,
                         bottom = 8.dp
@@ -110,7 +109,7 @@ internal fun DropDown(
 
         DropdownMenu(
             expanded = expanded,
-            onDismissRequest = { expanded = false },
+            onDismissRequest = { expanded = false }
         ) {
             items.forEachIndexed { index, displayValue ->
                 DropdownMenuItem(
@@ -145,8 +144,7 @@ internal fun DropdownLabel(
                     error = false,
                     interactionSource = interactionSource
                 ).value,
-            style = MaterialTheme.typography.caption,
-            modifier = Modifier.focusable(false)
+            style = MaterialTheme.typography.caption
         )
     }
 }

@@ -27,7 +27,6 @@ class CardBillingAddressElement(
     countryCodes,
     countryDropdownFieldController
 ) {
-
     // Save for future use puts this in the controller rather than element
     val hiddenIdentifiers: Flow<List<IdentifierSpec>> =
         countryDropdownFieldController.rawFieldValue.map { countryCode ->
