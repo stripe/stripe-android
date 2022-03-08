@@ -29,7 +29,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.InputMode
+import androidx.compose.ui.platform.LocalInputModeManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.stripe.android.ui.core.R
@@ -58,7 +61,7 @@ internal fun DropDown(
             .indicatorColor(enabled, false, interactionSource)
             .value
     }
-
+    val inputModeManager = LocalInputModeManager.current
     Box(
         modifier = Modifier
             .wrapContentSize(Alignment.TopStart)
@@ -67,7 +70,9 @@ internal fun DropDown(
         // Click handling happens on the box, so that it is a single accessible item
         Box(
             modifier = Modifier
-                .focusable(false)
+                .focusProperties {
+                    canFocus = inputModeManager.inputMode != InputMode.Touch
+                }
                 .clickable(
                     enabled = enabled,
                     onClickLabel = stringResource(R.string.change),
@@ -82,28 +87,21 @@ internal fun DropDown(
                         top = 4.dp,
                         bottom = 8.dp
                     )
-                    .focusable(false)
             ) {
                 DropdownLabel(label)
                 Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .focusable(false),
+                    modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.Bottom
                 ) {
                     Text(
                         items[selectedIndex],
-                        modifier = Modifier
-                            .fillMaxWidth(.9f)
-                            .focusable(false),
+                        modifier = Modifier.fillMaxWidth(.9f),
                         color = currentTextColor
                     )
                     Icon(
                         Icons.Filled.ArrowDropDown,
                         contentDescription = null,
-                        modifier = Modifier
-                            .height(24.dp)
-                            .focusable(false),
+                        modifier = Modifier.height(24.dp),
                         tint = currentTextColor
                     )
                 }
@@ -113,7 +111,6 @@ internal fun DropDown(
         DropdownMenu(
             expanded = expanded,
             onDismissRequest = { expanded = false },
-            modifier = Modifier.focusable(false)
         ) {
             items.forEachIndexed { index, displayValue ->
                 DropdownMenuItem(

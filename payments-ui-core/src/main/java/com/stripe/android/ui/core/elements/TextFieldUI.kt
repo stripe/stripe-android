@@ -16,6 +16,7 @@ import androidx.compose.material.Text
 import androidx.compose.material.TextField
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -61,7 +62,6 @@ internal data class TextFieldColors(
 internal fun TextField(
     textFieldController: TextFieldController,
     modifier: Modifier = Modifier,
-    onComplete: () -> Unit,
     imeAction: ImeAction,
     enabled: Boolean
 ) {
@@ -104,13 +104,15 @@ internal fun TextField(
      * to be entered, it just triggers next focus when the event happens.
      */
     @Suppress("UNUSED_VALUE")
-    processedIsFull = if (fieldState == TextFieldStateConstants.Valid.Full) {
-        if (!processedIsFull) {
-            onComplete()
+    LaunchedEffect(fieldState) {
+        processedIsFull = if (fieldState == TextFieldStateConstants.Valid.Full) {
+            if (!processedIsFull) {
+                focusManager.moveFocus(FocusDirection.Next)
+            }
+            true
+        } else {
+            false
         }
-        true
-    } else {
-        false
     }
 
     TextField(
@@ -151,10 +153,10 @@ internal fun TextField(
             },
         keyboardActions = KeyboardActions(
             onNext = {
-                onComplete()
+                focusManager.moveFocus(FocusDirection.Next)
             },
             onDone = {
-                onComplete()
+                focusManager.clearFocus(true)
             }
         ),
         visualTransformation = textFieldController.visualTransformation,

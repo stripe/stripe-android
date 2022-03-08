@@ -56,8 +56,6 @@ internal fun FormInternal(
     val elements by elementsFlow.collectAsState(null)
     val lastTextFieldIdentifier by lastTextFieldIdentifierFlow.collectAsState(null)
 
-    // Get the index of the last text field that is not hidden
-
     Column(
         modifier = Modifier.fillMaxWidth(1f)
 

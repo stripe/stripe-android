@@ -2,7 +2,6 @@ package com.stripe.android.paymentsheet.forms
 
 import android.content.Context
 import android.content.res.Resources
-import android.util.Log
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -209,7 +208,6 @@ internal class FormViewModel @Inject internal constructor(
             userRequestedReuse
         ).filterFlow()
 
-    // This needs to account for TextFieldController only
     private val textFieldControllerIdsFlow = elements.filterNotNull().map { elementsList ->
         combine(elementsList.map { formElement ->
             formElement.getTextFieldIdentifiers()
@@ -221,7 +219,6 @@ internal class FormViewModel @Inject internal constructor(
         hiddenIdentifiers,
         textFieldControllerIdsFlow
     ) { hiddenIds, textFieldControllerIds ->
-        Log.e("MLB", "${textFieldControllerIds}")
         textFieldControllerIds.last {
             !hiddenIds.contains(it)
         }
