@@ -29,7 +29,7 @@ internal data class CardStyle(
     val cardBorderColor: Color = if (isDarkTheme) {
         Color(0xFF787880)
     } else {
-        Color(0x14000000)
+        Color.LightGray
     },
     val cardBorderWidth: Dp = 1.dp,
     val cardElevation: Dp = 0.dp,

@@ -62,7 +62,7 @@ internal class CardNumberVisualTransformation(private val separator: Char) :
         var out = ""
         for (i in text.indices) {
             out += text[i]
-            if (i % 4 == 3 && i != 15) out += separator
+            if (i % 4 == 3 && i < 15) out += separator
         }
 
         /**
