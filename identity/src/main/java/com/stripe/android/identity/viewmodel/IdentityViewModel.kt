@@ -42,6 +42,7 @@ internal class IdentityViewModel(
     fun retrieveAndBufferVerificationPage(shouldRetrieveModel: Boolean = true) {
         viewModelScope.launch {
             runCatching {
+                _verificationPage.postValue(Resource.loading())
                 identityRepository.retrieveVerificationPage(
                     args.verificationSessionId,
                     args.ephemeralKeySecret
@@ -72,6 +73,7 @@ internal class IdentityViewModel(
     private fun downloadIDDetectorModel(modelUrl: String) {
         viewModelScope.launch {
             runCatching {
+                _idDetectorModelFile.postValue(Resource.loading())
                 identityRepository.downloadModel(modelUrl)
             }.fold(
                 onSuccess = {
