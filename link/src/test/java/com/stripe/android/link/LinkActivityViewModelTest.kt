@@ -87,6 +87,7 @@ class LinkActivityViewModelTest {
         val vmToBeReturned = mock<LinkActivityViewModel>()
 
         whenever(mockBuilder.args(any())).thenReturn(mockBuilder)
+        whenever(mockBuilder.injector(any())).thenReturn(mockBuilder)
         whenever(mockBuilder.build()).thenReturn(mockSubComponent)
         whenever((mockSubComponent.linkActivityViewModel)).thenReturn(vmToBeReturned)
 
@@ -145,7 +146,8 @@ class LinkActivityViewModelTest {
     private fun createViewModel() = LinkActivityViewModel(
         defaultArgs,
         linkAccountManager,
-        navigator
+        navigator,
+        mock()
     )
 
     private companion object {

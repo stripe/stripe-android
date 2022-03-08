@@ -1,5 +1,6 @@
 package com.stripe.android.link.injection
 
+import com.stripe.android.core.injection.Injector
 import com.stripe.android.link.LinkActivityContract
 import com.stripe.android.link.LinkActivityViewModel
 import com.stripe.android.link.ui.signup.SignUpViewModel
@@ -16,6 +17,9 @@ internal interface LinkViewModelSubcomponent {
 
         @BindsInstance
         fun args(args: LinkActivityContract.Args): Builder
+
+        @BindsInstance
+        fun injector(injector: Injector): Builder
 
         fun build(): LinkViewModelSubcomponent
     }

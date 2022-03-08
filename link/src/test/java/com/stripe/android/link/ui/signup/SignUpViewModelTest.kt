@@ -181,6 +181,7 @@ class SignUpViewModelTest {
 
         whenever(mockBuilder.args(any())).thenReturn(mockBuilder)
         whenever(mockBuilder.build()).thenReturn(mockSubComponent)
+        whenever(mockBuilder.injector(any())).thenReturn(mockBuilder)
         whenever((mockSubComponent.signUpViewModel)).thenReturn(vmToBeReturned)
 
         val mockSavedStateRegistryOwner = mock<SavedStateRegistryOwner>()

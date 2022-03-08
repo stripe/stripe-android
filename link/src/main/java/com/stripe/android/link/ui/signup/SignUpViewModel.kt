@@ -144,6 +144,7 @@ internal class SignUpViewModel @Inject constructor(
             injector.inject(this)
             return subComponentBuilderProvider.get()
                 .args(starterArgs)
+                .injector(injector)
                 .build().signUpViewModel as T
         }
 

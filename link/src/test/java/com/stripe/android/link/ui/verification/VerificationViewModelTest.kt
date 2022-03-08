@@ -30,18 +30,6 @@ import javax.inject.Provider
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
 class VerificationViewModelTest {
-    private val defaultArgs = LinkActivityContract.Args(
-        MERCHANT_NAME,
-        CUSTOMER_EMAIL,
-        LinkActivityContract.Args.InjectionParams(
-            INJECTOR_KEY,
-            setOf(PRODUCT_USAGE),
-            true,
-            PUBLISHABLE_KEY,
-            STRIPE_ACCOUNT_ID
-        )
-    )
-
     private val linkAccountManager = mock<LinkAccountManager>()
     private val navigator = mock<Navigator>()
     private val logger = Logger.noop()

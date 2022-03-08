@@ -6,7 +6,6 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.core.injection.Injectable
 import com.stripe.android.core.injection.Injector
-import com.stripe.android.core.injection.InjectorKey
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.core.injection.injectWithFallback
 import com.stripe.android.link.account.LinkAccountManager
@@ -25,17 +24,14 @@ import javax.inject.Provider
 internal class LinkActivityViewModel @Inject internal constructor(
     args: LinkActivityContract.Args,
     private val linkAccountManager: LinkAccountManager,
-    val navigator: Navigator
-) : ViewModel() {
-
+    val navigator: Navigator,
     /**
      * This ViewModel exists during the whole user flow, and needs to share the Dagger dependencies
-     * with the other, screen-specific ViewModels.
-     * Hold a reference to the injector which is passed as a parameter to the other ViewModel
-     * factories.
+     * with the other, screen-specific ViewModels. So it holds a reference to the injector which is
+     * passed as a parameter to the other ViewModel factories.
      */
-    val injector =
-        requireNotNull(WeakMapInjectorRegistry.retrieve(args.injectionParams.injectorKey))
+    val injector: Injector
+) : ViewModel() {
 
     val startDestination = args.customerEmail?.let {
         LinkScreen.Loading
@@ -84,12 +80,15 @@ internal class LinkActivityViewModel @Inject internal constructor(
         lateinit var subComponentBuilderProvider:
             Provider<LinkViewModelSubcomponent.Builder>
 
-        @InjectorKey
-        private var injectorKey = starterArgsSupplier().injectionParams.injectorKey
+        private lateinit var injector: Injector
 
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
             val args = starterArgsSupplier()
+            WeakMapInjectorRegistry.retrieve(args.injectionParams.injectorKey)?.let {
+                injector = it
+            }
+
             injectWithFallback(
                 args.injectionParams.injectorKey,
                 FallbackInitializeParam(
@@ -100,8 +99,10 @@ internal class LinkActivityViewModel @Inject internal constructor(
                     args.injectionParams.productUsage
                 )
             )
+
             return subComponentBuilderProvider.get()
-                .args(args.copy(injectionParams = args.injectionParams.copy(injectorKey = injectorKey)))
+                .args(args)
+                .injector(injector)
                 .build().linkActivityViewModel as T
         }
 
@@ -120,27 +121,18 @@ internal class LinkActivityViewModel @Inject internal constructor(
                 .productUsage(arg.productUsage)
                 .build()
 
-            val fallbackInjectorKey = WeakMapInjectorRegistry.nextKey(
-                requireNotNull(this::class.simpleName)
-            )
-
-            WeakMapInjectorRegistry.register(
-                object : Injector {
-                    override fun inject(injectable: Injectable<*>) {
-                        when (injectable) {
-                            is Factory -> viewModelComponent.inject(injectable)
-                            is SignUpViewModel.Factory -> viewModelComponent.inject(injectable)
-                            is VerificationViewModel.Factory -> viewModelComponent.inject(injectable)
-                            else -> {
-                                throw IllegalArgumentException("invalid Injectable $injectable requested in $this")
-                            }
+            injector = object : Injector {
+                override fun inject(injectable: Injectable<*>) {
+                    when (injectable) {
+                        is Factory -> viewModelComponent.inject(injectable)
+                        is SignUpViewModel.Factory -> viewModelComponent.inject(injectable)
+                        is VerificationViewModel.Factory -> viewModelComponent.inject(injectable)
+                        else -> {
+                            throw IllegalArgumentException("invalid Injectable $injectable requested in $this")
                         }
                     }
-                },
-                fallbackInjectorKey
-            )
-
-            injectorKey = fallbackInjectorKey
+                }
+            }
 
             viewModelComponent.inject(this)
         }
