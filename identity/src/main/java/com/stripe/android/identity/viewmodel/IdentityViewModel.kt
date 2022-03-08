@@ -9,10 +9,12 @@ import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.identity.IdentityVerificationSheetContract
 import com.stripe.android.identity.networking.IdentityRepository
+import com.stripe.android.identity.networking.Resource
 import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.networking.models.VerificationPageData
 import kotlinx.coroutines.launch
+import java.io.File
 
 /**
  * ViewModel hosted by IdentityActivity, shared across fragments.
@@ -25,30 +27,66 @@ internal class IdentityViewModel(
     /**
      * Response for initial VerificationPage, used for building UI.
      */
-    private val _verificationPage = MutableLiveData<VerificationPage>()
-    val verificationPage: LiveData<VerificationPage> = _verificationPage
+    private val _verificationPage = MutableLiveData<Resource<VerificationPage>>()
+    val verificationPage: LiveData<Resource<VerificationPage>> = _verificationPage
 
     /**
-     * API request fails, could be [APIException] if the request returns with an error response,
-     * or [APIConnectionException] if the request fails.
+     * Network response for the IDDetector model.
      */
-    private val _verificationPageApiError = MutableLiveData<Throwable>()
-    val verificationPageApiError: LiveData<Throwable> = _verificationPageApiError
+    private val _idDetectorModelFile = MutableLiveData<Resource<File>>()
+    val idDetectorModelFile: LiveData<Resource<File>> = _idDetectorModelFile
 
     /**
-     * Retrieve the VerificationPage data and post it as [verificationPage]
-     * or error result as [verificationPageApiError].
+     * Retrieve the VerificationPage data and post its value to [verificationPage]
      */
-    fun retrieveAndBufferVerificationPage() {
+    fun retrieveAndBufferVerificationPage(shouldRetrieveModel: Boolean = true) {
         viewModelScope.launch {
             runCatching {
+                _verificationPage.postValue(Resource.loading())
                 identityRepository.retrieveVerificationPage(
                     args.verificationSessionId,
                     args.ephemeralKeySecret
                 )
             }.fold(
-                onSuccess = _verificationPage::postValue,
-                onFailure = _verificationPageApiError::postValue
+                onSuccess = {
+                    _verificationPage.postValue(Resource.success(it))
+                    if (shouldRetrieveModel) {
+                        downloadIDDetectorModel(it.documentCapture.models.idDetectorUrl)
+                    }
+                },
+                onFailure = {
+                    _verificationPage.postValue(
+                        Resource.error(
+                            "Failed to retrieve verification page with " +
+                                "sessionID: ${args.verificationSessionId} and ephemeralKey: ${args.ephemeralKeySecret}",
+                            it
+                        ),
+                    )
+                }
+            )
+        }
+    }
+
+    /**
+     * Download the IDDetector model and post its value to [idDetectorModelFile].
+     */
+    private fun downloadIDDetectorModel(modelUrl: String) {
+        viewModelScope.launch {
+            runCatching {
+                _idDetectorModelFile.postValue(Resource.loading())
+                identityRepository.downloadModel(modelUrl)
+            }.fold(
+                onSuccess = {
+                    _idDetectorModelFile.postValue(Resource.success(it))
+                },
+                onFailure = {
+                    _idDetectorModelFile.postValue(
+                        Resource.error(
+                            "Failed to download model from $modelUrl",
+                            it
+                        )
+                    )
+                }
             )
         }
     }
