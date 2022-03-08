@@ -73,9 +73,9 @@ internal class ConsentFragmentTest {
         )
     }
 
-    private val verificationPageLiveData0 = MutableLiveData<Resource<VerificationPage>>()
+    private val verificationPageLiveData = MutableLiveData<Resource<VerificationPage>>()
     private val mockIdentityViewModel = mock<IdentityViewModel>().also {
-        whenever(it.verificationPage0).thenReturn(verificationPageLiveData0)
+        whenever(it.verificationPage).thenReturn(verificationPageLiveData)
         whenever(it.args).thenReturn(
             IdentityVerificationSheetContract.Args(
                 verificationSessionId = VERIFICATION_SESSION_ID,
@@ -97,7 +97,7 @@ internal class ConsentFragmentTest {
     @Test
     fun `when verificationPage is ready UI is bound correctly`() {
         launchConsentFragment { binding, _ ->
-            verificationPageLiveData0.postValue(Resource.success(verificationPage))
+            verificationPageLiveData.postValue(Resource.success(verificationPage))
 
             assertThat(binding.loadings.visibility).isEqualTo(View.GONE)
             assertThat(binding.texts.visibility).isEqualTo(View.VISIBLE)
@@ -115,7 +115,7 @@ internal class ConsentFragmentTest {
     @Test
     fun `when verificationApiErrorLiveData is ready transitions to errorFragment`() {
         launchConsentFragment { _, navController ->
-            verificationPageLiveData0.postValue(Resource.error(throwable = mock()))
+            verificationPageLiveData.postValue(Resource.error(throwable = mock()))
 
             assertThat(navController.currentDestination?.id)
                 .isEqualTo(R.id.errorFragment)
@@ -130,7 +130,7 @@ internal class ConsentFragmentTest {
             ).thenReturn(correctVerificationData)
 
             launchConsentFragment { binding, navController ->
-                verificationPageLiveData0.postValue(Resource.success(verificationPage))
+                verificationPageLiveData.postValue(Resource.success(verificationPage))
 
                 binding.agree.callOnClick()
 
@@ -148,7 +148,7 @@ internal class ConsentFragmentTest {
             ).thenThrow(APIException())
 
             launchConsentFragment { binding, navController ->
-                verificationPageLiveData0.postValue(Resource.success(verificationPage))
+                verificationPageLiveData.postValue(Resource.success(verificationPage))
                 binding.agree.callOnClick()
 
                 assertThat(navController.currentDestination?.id)
@@ -165,7 +165,7 @@ internal class ConsentFragmentTest {
             ).thenReturn(incorrectVerificationData)
 
             launchConsentFragment { binding, navController ->
-                verificationPageLiveData0.postValue(Resource.success(verificationPage))
+                verificationPageLiveData.postValue(Resource.success(verificationPage))
                 binding.decline.callOnClick()
 
                 requireNotNull(navController.backStack.last().arguments).let { arguments ->
@@ -193,7 +193,7 @@ internal class ConsentFragmentTest {
             ).thenThrow(APIException())
 
             launchConsentFragment { binding, navController ->
-                verificationPageLiveData0.postValue(Resource.success(verificationPage))
+                verificationPageLiveData.postValue(Resource.success(verificationPage))
                 binding.decline.callOnClick()
 
                 assertThat(navController.currentDestination?.id)

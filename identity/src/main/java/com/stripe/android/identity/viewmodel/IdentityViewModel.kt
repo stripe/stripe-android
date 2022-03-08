@@ -27,8 +27,8 @@ internal class IdentityViewModel(
     /**
      * Response for initial VerificationPage, used for building UI.
      */
-    private val _verificationPage0 = MutableLiveData<Resource<VerificationPage>>()
-    val verificationPage0: LiveData<Resource<VerificationPage>> = _verificationPage0
+    private val _verificationPage = MutableLiveData<Resource<VerificationPage>>()
+    val verificationPage: LiveData<Resource<VerificationPage>> = _verificationPage
 
     /**
      * Network response for the IDDetector model.
@@ -48,13 +48,13 @@ internal class IdentityViewModel(
                 )
             }.fold(
                 onSuccess = {
-                    _verificationPage0.postValue(Resource.success(it))
+                    _verificationPage.postValue(Resource.success(it))
                     if (shouldRetrieveModel) {
                         downloadIDDetectorModel(it.documentCapture.models.idDetectorUrl)
                     }
                 },
                 onFailure = {
-                    _verificationPage0.postValue(
+                    _verificationPage.postValue(
                         Resource.error(
                             "Failed to retrieve verification page with " +
                                 "sessionID: ${args.verificationSessionId} and ephemeralKey: ${args.ephemeralKeySecret}",

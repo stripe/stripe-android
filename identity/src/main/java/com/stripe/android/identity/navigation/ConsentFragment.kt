@@ -67,7 +67,7 @@ internal class ConsentFragment(
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        identityViewModel.verificationPage0.observe(viewLifecycleOwner) {
+        identityViewModel.verificationPage.observe(viewLifecycleOwner) {
             when (it.status) {
                 Status.SUCCESS -> {
                     setLoadingFinishedUI()
