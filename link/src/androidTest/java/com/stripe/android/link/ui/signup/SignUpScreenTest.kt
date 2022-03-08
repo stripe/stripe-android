@@ -27,16 +27,7 @@ internal class SignUpScreenTest {
         Intent(it, LinkActivity::class.java).apply {
             putExtra(
                 LinkActivityContract.EXTRA_ARGS,
-                LinkActivityContract.Args(
-                    merchantName = MERCHANT_NAME,
-                    injectionParams = LinkActivityContract.Args.InjectionParams(
-                        INJECTOR_KEY,
-                        setOf(PRODUCT_USAGE),
-                        true,
-                        PUBLISHABLE_KEY,
-                        STRIPE_ACCOUNT_ID
-                    )
-                )
+                LinkActivityContract.Args("Merchant, Inc")
             )
         }
     }
@@ -106,13 +97,4 @@ internal class SignUpScreenTest {
     private fun onProgressIndicator() = composeTestRule.onNodeWithTag("CircularProgressIndicator")
     private fun onPhoneField() = composeTestRule.onNodeWithText("Mobile Number")
     private fun onSignUpButton() = composeTestRule.onNodeWithText("Join Link")
-
-    private companion object {
-        const val INJECTOR_KEY = "injectorKey"
-        const val PRODUCT_USAGE = "productUsage"
-        const val PUBLISHABLE_KEY = "publishableKey"
-        const val STRIPE_ACCOUNT_ID = "stripeAccountId"
-
-        const val MERCHANT_NAME = "Merchant, Inc"
-    }
 }

@@ -16,16 +16,7 @@ class LinkActivityTest {
     private val context = ApplicationProvider.getApplicationContext<Context>()
     private val intent = LinkActivityContract().createIntent(
         context,
-        LinkActivityContract.Args(
-            merchantName = "Example, Inc.",
-            injectionParams = LinkActivityContract.Args.InjectionParams(
-                injectorKey = "dummy",
-                productUsage = emptySet(),
-                enableLogging = true,
-                publishableKey = "key",
-                stripeAccountId = null
-            )
-        )
+        LinkActivityContract.Args("Example, Inc.")
     )
 
     @Before

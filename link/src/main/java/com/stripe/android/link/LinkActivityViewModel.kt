@@ -4,10 +4,12 @@ import android.app.Application
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.stripe.android.PaymentConfiguration
+import com.stripe.android.core.BuildConfig
+import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.Injectable
 import com.stripe.android.core.injection.Injector
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
-import com.stripe.android.core.injection.injectWithFallback
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.injection.DaggerLinkViewModelFactoryComponent
 import com.stripe.android.link.injection.LinkViewModelSubcomponent
@@ -84,21 +86,38 @@ internal class LinkActivityViewModel @Inject internal constructor(
 
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
+            val logger = Logger.getInstance(BuildConfig.DEBUG)
             val args = starterArgsSupplier()
-            WeakMapInjectorRegistry.retrieve(args.injectionParams.injectorKey)?.let {
-                injector = it
-            }
 
-            injectWithFallback(
-                args.injectionParams.injectorKey,
-                FallbackInitializeParam(
-                    application,
-                    args.injectionParams.enableLogging,
-                    args.injectionParams.publishableKey,
-                    args.injectionParams.stripeAccountId,
-                    args.injectionParams.productUsage
+            args.injectionParams?.injectorKey?.let {
+                WeakMapInjectorRegistry.retrieve(it)
+            }?.let {
+                logger.info(
+                    "Injector available, " +
+                        "injecting dependencies into ${this::class.java.canonicalName}"
                 )
-            )
+                injector = it
+                it.inject(this)
+            } ?: run {
+                logger.info(
+                    "Injector unavailable, " +
+                        "initializing dependencies of ${this::class.java.canonicalName}"
+                )
+                fallbackInitialize(
+                    FallbackInitializeParam(
+                        application,
+                        args.injectionParams?.enableLogging ?: false,
+                        args.injectionParams?.publishableKey
+                            ?: PaymentConfiguration.getInstance(application).publishableKey,
+                        if (args.injectionParams != null) {
+                            args.injectionParams.stripeAccountId
+                        } else {
+                            PaymentConfiguration.getInstance(application).stripeAccountId
+                        },
+                        args.injectionParams?.productUsage ?: emptySet()
+                    )
+                )
+            }
 
             return subComponentBuilderProvider.get()
                 .args(args)
