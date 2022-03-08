@@ -82,10 +82,10 @@ internal fun DropDown(
         ) {
             Column(
                 modifier = Modifier.padding(
-                        start = 16.dp,
-                        top = 4.dp,
-                        bottom = 8.dp
-                    )
+                    start = 16.dp,
+                    top = 4.dp,
+                    bottom = 8.dp
+                )
             ) {
                 DropdownLabel(label)
                 Row(
@@ -144,6 +144,7 @@ internal fun DropdownLabel(
                     error = false,
                     interactionSource = interactionSource
                 ).value,
+            modifier = Modifier.focusable(false),
             style = MaterialTheme.typography.caption
         )
     }
