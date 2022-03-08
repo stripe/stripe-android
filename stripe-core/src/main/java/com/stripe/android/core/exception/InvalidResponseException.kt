@@ -4,7 +4,9 @@ import androidx.annotation.RestrictTo
 import com.stripe.android.core.StripeError
 
 /**
- * A [StripeException] indicating that invalid parameters were used in a response.
+ * A [StripeException] indicating that invalid parameters were used in a response. E.g when the
+ * response contains a null field that shouldn't be null, or contains an unknown Enum value that's
+ * not defined in the SDK.
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class InvalidResponseException(
