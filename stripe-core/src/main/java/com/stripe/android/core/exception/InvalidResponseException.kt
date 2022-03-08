@@ -1,11 +1,13 @@
 package com.stripe.android.core.exception
 
+import androidx.annotation.RestrictTo
 import com.stripe.android.core.StripeError
 
 /**
  * A [StripeException] indicating that invalid parameters were used in a response.
  */
-internal class InvalidResponseException(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+class InvalidResponseException(
     stripeError: StripeError? = null,
     requestId: String? = null,
     statusCode: Int = 0,
