@@ -26,7 +26,8 @@ val CardParamKey: MutableMap<String, Any?> = mutableMapOf(
 
 internal val creditDetailsSection = SectionSpec(
     IdentifierSpec.Generic("credit_details_section"),
-    CardDetailsSpec
+    CardDetailsSpec,
+    R.string.card_information
 )
 
 internal val creditBillingSection = SectionSpec(

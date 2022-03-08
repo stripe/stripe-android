@@ -3,4 +3,6 @@
     <!--
     Items here need to be entered in our translation tool
     -->
+    <!-- Card details section title for card form entry -->
+    <string name="card_information" tools:ignore="ExtraTranslation">Card information</string>
 </resources>
