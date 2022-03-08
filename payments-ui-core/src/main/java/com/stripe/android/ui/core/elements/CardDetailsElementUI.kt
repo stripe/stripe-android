@@ -14,15 +14,13 @@ internal fun CardDetailsElementUI(
 ) {
     controller.fields.forEachIndexed { index, field ->
         SectionFieldElementUI(enabled, field, hiddenIdentifiers = hiddenIdentifiers)
-        if (index != controller.fields.size - 1) {
-            val cardStyle = CardStyle(isSystemInDarkTheme())
-            Divider(
-                color = cardStyle.cardBorderColor,
-                thickness = cardStyle.cardBorderWidth,
-                modifier = Modifier.padding(
-                    horizontal = cardStyle.cardBorderWidth
-                )
+        val cardStyle = CardStyle(isSystemInDarkTheme())
+        Divider(
+            color = cardStyle.cardBorderColor,
+            thickness = cardStyle.cardBorderWidth,
+            modifier = Modifier.padding(
+                horizontal = cardStyle.cardBorderWidth
             )
-        }
+        )
     }
 }
