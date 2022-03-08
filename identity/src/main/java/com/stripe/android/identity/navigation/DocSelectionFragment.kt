@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.annotation.RestrictTo
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.stripe.android.identity.R
@@ -12,7 +13,8 @@ import com.stripe.android.identity.databinding.DocSelectionFragmentBinding
 /**
  * Screen to select type of ID to scan.
  */
-internal class DocSelectionFragment : Fragment() {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+class DocSelectionFragment : Fragment() {
 
     override fun onCreateView(
         inflater: LayoutInflater,
