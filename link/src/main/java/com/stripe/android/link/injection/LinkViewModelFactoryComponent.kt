@@ -6,6 +6,7 @@ import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.LoggingModule
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
+import com.stripe.android.link.LinkActivityContract
 import com.stripe.android.link.LinkActivityViewModel
 import com.stripe.android.link.ui.signup.SignUpViewModel
 import com.stripe.android.link.ui.verification.VerificationViewModel
@@ -51,6 +52,9 @@ internal interface LinkViewModelFactoryComponent {
 
         @BindsInstance
         fun productUsage(@Named(PRODUCT_USAGE) productUsage: Set<String>): Builder
+
+        @BindsInstance
+        fun starterArgs(starterArgs: LinkActivityContract.Args): Builder
 
         fun build(): LinkViewModelFactoryComponent
     }

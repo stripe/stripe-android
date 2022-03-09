@@ -7,6 +7,7 @@ import com.stripe.android.core.injection.LoggingModule
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
+import com.stripe.android.link.LinkActivityContract
 import com.stripe.android.link.LinkActivityViewModel
 import com.stripe.android.link.ui.signup.SignUpViewModel
 import com.stripe.android.link.ui.verification.VerificationViewModel
@@ -59,6 +60,9 @@ internal abstract class LinkPaymentLauncherComponent {
 
         @BindsInstance
         fun stripeAccountIdProvider(@Named(STRIPE_ACCOUNT_ID) stripeAccountIdProvider: () -> String?): Builder
+
+        @BindsInstance
+        fun starterArgs(starterArgs: LinkActivityContract.Args): Builder
 
         fun build(): LinkPaymentLauncherComponent
     }

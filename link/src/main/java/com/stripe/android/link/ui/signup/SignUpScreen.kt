@@ -58,12 +58,10 @@ private fun SignUpBodyPreview() {
 
 @Composable
 internal fun SignUpBody(
-    starterArgs: LinkActivityContract.Args,
     injector: Injector
 ) {
     val signUpViewModel: SignUpViewModel = viewModel(
         factory = SignUpViewModel.Factory(
-            starterArgs,
             injector
         )
     )

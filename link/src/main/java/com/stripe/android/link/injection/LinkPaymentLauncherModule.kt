@@ -10,7 +10,6 @@ import javax.inject.Singleton
 
 @Module(
     subcomponents = [
-        LinkViewModelSubcomponent::class,
         SignedInViewModelSubcomponent::class
     ]
 )

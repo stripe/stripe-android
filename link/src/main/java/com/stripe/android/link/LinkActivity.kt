@@ -43,7 +43,6 @@ internal class LinkActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val args = requireNotNull(starterArgs)
 
         setContent {
             navController = rememberNavController()
@@ -67,7 +66,7 @@ internal class LinkActivity : ComponentActivity() {
                                 }
                             }
                             composable(LinkScreen.SignUp.route) {
-                                SignUpBody(args, viewModel.injector)
+                                SignUpBody(viewModel.injector)
                             }
                             composable(LinkScreen.Verification.route) {
                                 VerificationBody(
