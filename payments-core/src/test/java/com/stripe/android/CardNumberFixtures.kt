@@ -1,13 +1,11 @@
 package com.stripe.android
 
-import androidx.annotation.RestrictTo
 import com.stripe.android.cards.CardNumber
 
 /**
  * See [Basic test card numbers](https://stripe.com/docs/testing#cards)
  */
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-object CardNumberFixtures {
+internal object CardNumberFixtures {
     const val AMEX_NO_SPACES = "378282246310005"
     const val AMEX_WITH_SPACES = "3782 822463 10005"
     val AMEX_BIN = AMEX_NO_SPACES.take(6)
@@ -51,9 +49,4 @@ object CardNumberFixtures {
     const val UNIONPAY_WITH_SPACES = "6200 0000 0000 0005"
     val UNIONPAY_BIN = UNIONPAY_NO_SPACES.take(6)
     val UNIONPAY = CardNumber.Unvalidated(UNIONPAY_NO_SPACES)
-
-    const val UNIONPAY_19_NO_SPACES = "6200000000000005"
-    const val UNIONPAY_19_WITH_SPACES = "6200 0000 0000 0005"
-    val UNIONPAY_19_BIN = UNIONPAY_19_NO_SPACES.take(6)
-    val UNIONPAY_19 = CardNumber.Unvalidated(UNIONPAY_19_NO_SPACES)
 }
