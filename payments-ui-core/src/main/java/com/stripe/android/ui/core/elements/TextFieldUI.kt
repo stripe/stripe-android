@@ -16,7 +16,6 @@ import androidx.compose.material.Text
 import androidx.compose.material.TextField
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -104,15 +103,13 @@ internal fun TextField(
      * to be entered, it just triggers next focus when the event happens.
      */
     @Suppress("UNUSED_VALUE")
-    LaunchedEffect(fieldState) {
-        processedIsFull = if (fieldState == TextFieldStateConstants.Valid.Full) {
-            if (!processedIsFull) {
-                focusManager.moveFocus(FocusDirection.Next)
-            }
-            true
-        } else {
-            false
+    processedIsFull = if (fieldState == TextFieldStateConstants.Valid.Full) {
+        if (!processedIsFull) {
+            focusManager.moveFocus(FocusDirection.Next)
         }
+        true
+    } else {
+        false
     }
 
     TextField(
