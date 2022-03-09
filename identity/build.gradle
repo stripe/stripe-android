@@ -129,3 +129,29 @@ task ktlintFormat(type: JavaExec, group: "formatting") {
     classpath = configurations.ktlint
     args "-F", "src/**/*.kt"
 }
+
+// DO NOT MERGE: Temporarily enable stripe identity release
+// to release identity to maven local, run
+// ./gradlew :identity:publishReleasePublicationToMavenLocal
+// verify ~/.m2/repository/com/stripe/stripe-identity is created
+
+// from the app, add mavenLocal() to settings.gradle:
+//dependencyResolutionManagement {
+//    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+//    repositories {
+//        google()
+//        mavenCentral()
+//        mavenLocal()
+//        jcenter() // Warning: this repository is going to shut down soon
+//    }
+//}
+//rootProject.name = "My Application"
+//include ':app'
+
+ext {
+    artifactId = "stripe-identity"
+    artifactName = "stripe-identity"
+    artifactDescrption = "Stripe Android SDK"
+}
+
+apply from: "${rootDir}/deploy/deploy.gradle"
