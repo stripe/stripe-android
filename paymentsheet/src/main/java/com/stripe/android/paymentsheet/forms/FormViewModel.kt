@@ -217,7 +217,7 @@ internal class FormViewModel @Inject internal constructor(
         hiddenIdentifiers,
         textFieldControllerIdsFlow
     ) { hiddenIds, textFieldControllerIds ->
-        textFieldControllerIds.last {
+        textFieldControllerIds.lastOrNull {
             !hiddenIds.contains(it)
         }
     }

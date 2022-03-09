@@ -218,6 +218,26 @@ internal class FormViewModelTest {
 
     @ExperimentalCoroutinesApi
     @Test
+    fun `Verify if there are no text fields nothing is hidden`() = runTest {
+        // Here we have just a country, no text fields.
+        val args = COMPOSE_FRAGMENT_ARGS
+        val formViewModel = FormViewModel(
+            LayoutSpec.create(
+                countrySection
+            ),
+            args,
+            resourceRepository = resourceRepository,
+            transformSpecToElement = TransformSpecToElement(resourceRepository, args, context)
+        )
+
+        // Verify formFieldValues does not contain email
+        assertThat(formViewModel.lastTextFieldIdentifier.first()?.value).isEqualTo(
+            null
+        )
+    }
+
+    @ExperimentalCoroutinesApi
+    @Test
     fun `Verify if the last text field is hidden the second to last text field is the last display text field`() = runTest {
         // Here we have one hidden and one required field, country will always be in the result,
         //  and name only if saveForFutureUse is true
@@ -240,7 +260,7 @@ internal class FormViewModelTest {
         saveForFutureUseController.onValueChange(false)
 
         // Verify formFieldValues does not contain email
-        assertThat(formViewModel.lastTextFieldIdentifier.first().value).isEqualTo(
+        assertThat(formViewModel.lastTextFieldIdentifier.first()?.value).isEqualTo(
             nameSection.fields.first().identifier.value
         )
     }
