@@ -22,7 +22,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.stripe.android.core.injection.Injector
 import com.stripe.android.link.R
 import com.stripe.android.link.injection.LinkInjector
 import com.stripe.android.link.model.LinkAccount
