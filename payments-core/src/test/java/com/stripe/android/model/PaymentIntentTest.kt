@@ -72,6 +72,13 @@ class PaymentIntentTest {
     }
 
     @Test
+    fun parsePaymentIntentWithUSBankAccountPaymentMethods() {
+        val paymentIntent = PaymentIntentFixtures.PI_WITH_US_BANK_ACCOUNT_IN_PAYMENT_METHODS
+        assertThat(paymentIntent.paymentMethodTypes)
+            .containsExactly("us_bank_account")
+    }
+
+    @Test
     fun getNextActionData_whenUseStripeSdkWith3ds2() {
         val paymentIntent = PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2
         assertThat(paymentIntent.nextActionData)
@@ -129,6 +136,22 @@ class PaymentIntentTest {
                 prepayId = "test_transaction",
                 timestamp = "1619638941",
                 sign = "8B26124BABC816D7140034DDDC7D3B2F1036CCB2D910E52592687F6A44790D5E",
+            )
+        )
+    }
+
+    @Test
+    fun getNextActionData_whenVerifyWithMicrodeposits() {
+        val paymentIntent = PaymentIntentFixtures.PI_WITH_US_BANK_ACCOUNT_IN_PAYMENT_METHODS
+        assertThat(paymentIntent.nextActionData)
+            .isInstanceOf(StripeIntent.NextActionData.VerifyWithMicrodeposits::class.java)
+        val verify =
+            (paymentIntent.nextActionData as StripeIntent.NextActionData.VerifyWithMicrodeposits)
+        assertThat(verify).isEqualTo(
+            StripeIntent.NextActionData.VerifyWithMicrodeposits(
+                arrivalDate = 1647241200,
+                hostedVerificationUrl = "https://payments.stripe.com/microdeposit/pacs_test_YWNjdF8xS2J1SjlGbmt1bWlGVUZ4LHBhX25vbmNlX0xJcFVEaERaU0JOVVR3akhxMXc5eklOQkl3UTlwNWo0000v3GS1Jej",
+                microdepositType = MicrodepositType.AMOUNTS
             )
         )
     }

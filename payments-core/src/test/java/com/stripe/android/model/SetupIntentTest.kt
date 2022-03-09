@@ -47,6 +47,46 @@ class SetupIntentTest {
     }
 
     @Test
+    fun fromJsonStringWithNextAction_createsSetupIntentWithNextActionVerifyWithMicrodeposits() {
+        val setupIntent = SetupIntentFixtures.SI_NEXT_ACTION_VERIFY_WITH_MICRODEPOSITS
+        assertEquals("seti_1Kd5ncLu5o3P18ZpOYpGt5BF", setupIntent.id)
+        assertEquals(
+            "seti_1Kd5ncLu5o3P18ZpOYpGt5BF_secret_LJjGof4HuzSfxwvNCYP5UhdSQKSC9kS",
+            setupIntent.clientSecret
+        )
+        assertEquals(1647233188, setupIntent.created)
+        assertEquals("Example SetupIntent", setupIntent.description)
+        assertEquals("pm_1Kd5ndLu5o3P18ZpLVuthxK2", setupIntent.paymentMethodId)
+        assertFalse(setupIntent.isLiveMode)
+        assertTrue(setupIntent.requiresAction())
+        assertEquals(StripeIntent.Status.RequiresAction, setupIntent.status)
+        assertEquals(StripeIntent.Usage.OffSession, setupIntent.usage)
+
+        assertEquals(
+            PaymentMethod.USBankAccount(
+                accountHolderType = PaymentMethod.USBankAccount.USBankAccountHolderType.INDIVIDUAL,
+                accountType = PaymentMethod.USBankAccount.USBankAccountType.CHECKING,
+                bankName = "STRIPE TEST BANK",
+                fingerprint = "FFDMA0xfhBjWSZLu",
+                last4 = "6789",
+                linkedAccount = null,
+                networks = PaymentMethod.USBankAccount.USBankNetworks("ach", listOf("ach")),
+                routingNumber = "110000000"
+            ),
+            setupIntent.paymentMethod?.usBankAccount
+        )
+
+        assertEquals(
+            StripeIntent.NextActionData.VerifyWithMicrodeposits(
+                arrivalDate = 1647327600,
+                hostedVerificationUrl = "https://payments.stripe.com/microdeposit/sacs_test_YWNjdF8xSHZUSTdMdTVvM1AxOFpwLHNhX25vbmNlX0xKakc4NzlEYjNZaWxQT09Ma0RaZDROTklPcUVHb2s0000d7kDmkhf",
+                microdepositType = MicrodepositType.AMOUNTS
+            ),
+            setupIntent.nextActionData
+        )
+    }
+
+    @Test
     fun getLastSetupError_parsesCorrectly() {
         val lastSetupError = SetupIntentFixtures.SI_WITH_LAST_PAYMENT_ERROR.lastSetupError
         assertNotNull(lastSetupError)

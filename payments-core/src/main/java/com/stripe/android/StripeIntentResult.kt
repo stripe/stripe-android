@@ -30,27 +30,51 @@ abstract class StripeIntentResult<out T : StripeIntent> internal constructor(
             return outcome
         }
 
-        when (stripeIntentStatus) {
-            StripeIntent.Status.RequiresAction, StripeIntent.Status.Canceled -> {
-                return Outcome.CANCELED
+        return when (stripeIntentStatus) {
+            StripeIntent.Status.RequiresAction -> {
+                if (isNextActionSuccessState(intent)) {
+                    Outcome.SUCCEEDED
+                } else {
+                    Outcome.CANCELED
+                }
+            }
+            StripeIntent.Status.Canceled -> {
+                Outcome.CANCELED
             }
             StripeIntent.Status.RequiresPaymentMethod -> {
-                return Outcome.FAILED
+                Outcome.FAILED
             }
             StripeIntent.Status.Succeeded,
             StripeIntent.Status.RequiresCapture,
             StripeIntent.Status.RequiresConfirmation -> {
-                return Outcome.SUCCEEDED
+                Outcome.SUCCEEDED
             }
             StripeIntent.Status.Processing -> {
-                return if (intent.paymentMethod?.type?.hasDelayedSettlement() == true) {
+                if (intent.paymentMethod?.type?.hasDelayedSettlement() == true) {
                     Outcome.SUCCEEDED
                 } else {
                     Outcome.UNKNOWN
                 }
             }
             else -> {
-                return Outcome.UNKNOWN
+                Outcome.UNKNOWN
+            }
+        }
+    }
+
+    private fun isNextActionSuccessState(nextAction: StripeIntent): Boolean {
+        return when (nextAction.nextActionType) {
+            StripeIntent.NextActionType.RedirectToUrl,
+            StripeIntent.NextActionType.UseStripeSdk,
+            StripeIntent.NextActionType.AlipayRedirect,
+            StripeIntent.NextActionType.BlikAuthorize,
+            StripeIntent.NextActionType.WeChatPayRedirect,
+            null -> {
+                false
+            }
+            StripeIntent.NextActionType.DisplayOxxoDetails,
+            StripeIntent.NextActionType.VerifyWithMicroDeposits -> {
+                true
             }
         }
     }

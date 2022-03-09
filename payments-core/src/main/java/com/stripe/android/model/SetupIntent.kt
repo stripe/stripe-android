@@ -99,6 +99,7 @@ data class SetupIntent internal constructor(
             is StripeIntent.NextActionData.SdkData -> StripeIntent.NextActionType.UseStripeSdk
             is StripeIntent.NextActionData.RedirectToUrl -> StripeIntent.NextActionType.RedirectToUrl
             is StripeIntent.NextActionData.DisplayOxxoDetails -> StripeIntent.NextActionType.DisplayOxxoDetails
+            is StripeIntent.NextActionData.VerifyWithMicrodeposits -> StripeIntent.NextActionType.VerifyWithMicroDeposits
             else -> null
         }
 

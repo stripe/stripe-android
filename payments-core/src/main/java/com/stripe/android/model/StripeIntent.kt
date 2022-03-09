@@ -77,7 +77,8 @@ sealed interface StripeIntent : StripeModel {
         DisplayOxxoDetails("oxxo_display_details"),
         AlipayRedirect("alipay_handle_redirect"),
         BlikAuthorize("blik_authorize"),
-        WeChatPayRedirect("wechat_pay_redirect_to_android_app");
+        WeChatPayRedirect("wechat_pay_redirect_to_android_app"),
+        VerifyWithMicroDeposits("verify_with_microdeposits");
 
         override fun toString(): String {
             return code
@@ -251,5 +252,12 @@ sealed interface StripeIntent : StripeModel {
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         @Parcelize
         data class WeChatPayRedirect(val weChat: WeChat) : NextActionData()
+
+        @Parcelize
+        data class VerifyWithMicrodeposits(
+            val arrivalDate: Long,
+            val hostedVerificationUrl: String,
+            val microdepositType: MicrodepositType
+        ) : NextActionData()
     }
 }

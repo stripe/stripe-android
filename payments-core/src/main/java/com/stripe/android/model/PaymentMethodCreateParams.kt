@@ -31,6 +31,7 @@ data class PaymentMethodCreateParams internal constructor(
     private val sofort: Sofort? = null,
     private val upi: Upi? = null,
     private val netbanking: Netbanking? = null,
+    private val usBankAccount: USBankAccount? = null,
     val billingDetails: PaymentMethod.BillingDetails? = null,
     private val metadata: Map<String, String>? = null,
     private val productUsage: Set<String> = emptySet(),
@@ -159,6 +160,17 @@ data class PaymentMethodCreateParams internal constructor(
         metadata = metadata
     )
 
+    private constructor(
+        usBankAccount: USBankAccount,
+        billingDetails: PaymentMethod.BillingDetails?,
+        metadata: Map<String, String>?
+    ) : this(
+        type = PaymentMethod.Type.USBankAccount,
+        usBankAccount = usBankAccount,
+        billingDetails = billingDetails,
+        metadata = metadata
+    )
+
     override fun toParamMap(): Map<String, Any> {
         return overrideParamMap
             ?: mapOf(
@@ -186,6 +198,7 @@ data class PaymentMethodCreateParams internal constructor(
                 PaymentMethod.Type.Sofort -> sofort?.toParamMap()
                 PaymentMethod.Type.Upi -> upi?.toParamMap()
                 PaymentMethod.Type.Netbanking -> netbanking?.toParamMap()
+                PaymentMethod.Type.USBankAccount -> usBankAccount?.toParamMap()
                 else -> null
             }.takeUnless { it.isNullOrEmpty() }?.let {
                 mapOf(type.code to it)
@@ -413,6 +426,30 @@ data class PaymentMethodCreateParams internal constructor(
         }
     }
 
+    @Parcelize
+    data class USBankAccount(
+        internal var accountNumber: String,
+        internal var routingNumber: String,
+        internal var accountType: PaymentMethod.USBankAccount.USBankAccountType,
+        internal var accountHolderType: PaymentMethod.USBankAccount.USBankAccountHolderType
+    ) : StripeParamsModel, Parcelable {
+        override fun toParamMap(): Map<String, Any> {
+            return mapOf(
+                PARAM_ACCOUNT_NUMBER to accountNumber,
+                PARAM_ROUTING_NUMBER to routingNumber,
+                PARAM_ACCOUNT_TYPE to accountType.value,
+                PARAM_ACCOUNT_HOLDER_TYPE to accountHolderType.value
+            )
+        }
+
+        private companion object {
+            private const val PARAM_ACCOUNT_NUMBER = "account_number"
+            private const val PARAM_ROUTING_NUMBER = "routing_number"
+            private const val PARAM_ACCOUNT_TYPE = "account_type"
+            private const val PARAM_ACCOUNT_HOLDER_TYPE = "account_holder_type"
+        }
+    }
+
     companion object {
         private const val PARAM_TYPE = "type"
         private const val PARAM_BILLING_DETAILS = "billing_details"
@@ -540,6 +577,16 @@ data class PaymentMethodCreateParams internal constructor(
             metadata: Map<String, String>? = null
         ): PaymentMethodCreateParams {
             return PaymentMethodCreateParams(upi, billingDetails, metadata)
+        }
+
+        @JvmStatic
+        @JvmOverloads
+        fun create(
+            usBankAccount: USBankAccount,
+            billingDetails: PaymentMethod.BillingDetails? = null,
+            metadata: Map<String, String>? = null
+        ): PaymentMethodCreateParams {
+            return PaymentMethodCreateParams(usBankAccount, billingDetails, metadata)
         }
 
         /**
@@ -757,6 +804,17 @@ data class PaymentMethodCreateParams internal constructor(
                 type = PaymentMethod.Type.Affirm,
                 billingDetails = billingDetails,
                 metadata = metadata
+            )
+        }
+
+        @JvmStatic
+        @JvmOverloads
+        fun createUSBankAccount(
+            usBankAccount: USBankAccount
+        ): PaymentMethodCreateParams {
+            return PaymentMethodCreateParams(
+                type = PaymentMethod.Type.USBankAccount,
+                usBankAccount = usBankAccount
             )
         }
 
