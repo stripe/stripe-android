@@ -246,6 +246,9 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
                 bottomSpacer.isVisible = state.visible
             }
         }
+        viewModel.primaryButtonState.observe(this) { state ->
+            primaryButton.updateState(state)
+        }
         viewModel.ctaEnabled.observe(this) { isEnabled ->
             primaryButton.isEnabled = isEnabled
         }

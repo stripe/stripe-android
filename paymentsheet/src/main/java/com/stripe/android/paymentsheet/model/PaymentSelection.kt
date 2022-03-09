@@ -69,7 +69,8 @@ internal sealed class PaymentSelection : Parcelable {
             @StringRes val labelResource: Int,
             @DrawableRes val iconResource: Int,
             override val paymentMethodCreateParams: PaymentMethodCreateParams,
-            override val customerRequestedSave: CustomerRequestedSave
+            override val customerRequestedSave: CustomerRequestedSave,
+            val label: String? = null,
         ) : New()
     }
 }

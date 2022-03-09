@@ -370,8 +370,7 @@ internal class PaymentOptionsAdapter(
                     isEditing = false,
                     isSelected = false,
                     isEnabled = isEnabled,
-                    labelText =
-                    itemView.resources.getString(
+                    labelText = itemView.resources.getString(
                         R.string.stripe_paymentsheet_add_payment_method_button_label
                     ),
                     iconRes = iconRes,

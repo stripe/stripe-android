@@ -417,8 +417,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             is LinkActivityResult.Failed -> PaymentResult.Failed(error)
         }
 
-    @VisibleForTesting
-    fun onPaymentResult(paymentResult: PaymentResult) {
+    override fun onPaymentResult(paymentResult: PaymentResult) {
         viewModelScope.launch {
             runCatching {
                 stripeIntentRepository.get(args.clientSecret)
@@ -433,7 +432,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
     private fun processPayment(stripeIntent: StripeIntent, paymentResult: PaymentResult) {
         when (paymentResult) {
-            PaymentResult.Completed -> {
+            is PaymentResult.Completed -> {
                 eventReporter.onPaymentSuccess(selection.value)
 
                 // SavedSelection needs to happen after new cards have been saved.
@@ -500,6 +499,14 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
     override fun onUserCancel() {
         _paymentSheetResult.value = PaymentSheetResult.Canceled
+    }
+
+    override fun onFinish() {
+        _paymentSheetResult.value = PaymentSheetResult.Completed
+    }
+
+    override fun onError(@IntegerRes error: Int?) {
+        resetViewState(error)
     }
 
     internal sealed class TransitionTarget {

@@ -4,7 +4,8 @@ import com.stripe.android.paymentsheet.R
 
 internal interface TransformToBankIcon {
     companion object {
-        operator fun invoke(bankName: String): Int {
+        operator fun invoke(bankName: String?): Int {
+            if (bankName == null) return R.drawable.stripe_ic_bank
             val bankNameRegexIconMap = mapOf(
                 Regex("Bank of America", RegexOption.IGNORE_CASE) to
                     R.drawable.stripe_ic_bank_boa,
