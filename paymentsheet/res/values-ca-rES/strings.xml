@@ -2,70 +2,14 @@
 <resources>
   <!-- Used for accessibility to describe the button on the payment sheet list of options to add a new payment method. -->
   <string name="add_new_payment_method">Afegir un mètode de pagament nou</string>
-  <!-- Label for input requesting address line 2, used for international addresses -->
-  <string name="address_label_address_line2">Línia de l\'adreça 2</string>
-  <!-- Used to describe address in United Arab Emirates -->
-  <string name="address_label_ae_emirate">Emirat</string>
-  <!-- Label of an address field -->
-  <string name="address_label_au_suburb_or_city">Suburbi o ciutat</string>
-  <!-- Label of an address field -->
-  <string name="address_label_bb_jm_parish">Parròquia</string>
-  <!-- Used to describe a field of an address -->
-  <string name="address_label_cedex">CEDEX</string>
-  <!-- Label of an address field -->
-  <string name="address_label_department">Departament</string>
-  <!-- Label for the district field on an address form -->
-  <string name="address_label_district">Districte</string>
-  <!-- Label of an address field in hk -->
-  <string name="address_label_hk_area">Àrea</string>
-  <!-- Label of an address field -->
-  <string name="address_label_ie_eircode">Eircode</string>
-  <!-- Used to describe an address field in Ireland -->
-  <string name="address_label_ie_townland">Townland</string>
-  <!-- Used to describe postal code in India -->
-  <string name="address_label_in_pin">PIN</string>
-  <!-- Used to describe part of an address -->
-  <string name="address_label_island">Illa</string>
-  <!-- Label of an address field -->
-  <string name="address_label_jp_prefecture">Prefectura</string>
-  <!-- Label of an address field -->
-  <string name="address_label_kr_do_si">Do Si</string>
-  <!-- Used to describe a field of an address -->
-  <string name="address_label_neighborhood">Barri</string>
-  <!-- Label of an address field -->
-  <string name="address_label_oblast">Óblast</string>
-  <!-- Used to describe a field of an address -->
-  <string name="address_label_post_town">Població</string>
-  <!-- Label of an address field -->
-  <string name="address_label_suburb">Suburbi</string>
-  <!-- Used to describe an address field. -->
-  <string name="address_label_village_township">Poble o municipi</string>
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
   <string name="bank_account_ending_in">Elimina el compte bancari que acaba en %s</string>
-  <!-- Billing address section title for card form entry. -->
-  <string name="billing_details">Adreça de facturació</string>
-  <!-- Used when a required field is blank and submit is clicked. -->
-  <string name="blank_and_required">Aquest camp no pot estar en blanc.</string>
   <!-- Button title to cancel action in an alert -->
   <string name="cancel">Cancel·lar</string>
-  <!-- Used for accessibility to indicate that when you press the dropdown arrow on a form (such as a country or bank), it will bring up a menu to allow you to change the value. -->
-  <string name="change">Canviar</string>
   <!-- Done button title -->
   <string name="done">Fet</string>
   <!-- Button title to enter editing mode -->
   <string name="edit">Editar</string>
-  <!-- Caption for Email field on address form -->
-  <string name="email">Correu electrònic</string>
-  <!-- Error message when email is invalid -->
-  <string name="email_is_invalid">L\'adreça electrònica no és vàlida.</string>
-  <!-- An error message displayed when the customer's IBAN is incomplete. -->
-  <string name="iban_incomplete">L\'BAN és incomplet.</string>
-  <!-- An error message displayed when the customer's iban is invalid. -->
-  <string name="iban_invalid">L\'IBAN és incorrecte.</string>
-  <!-- An error message displayed when the IBAN country code is not supported. -->
-  <string name="iban_invalid_country">L\'IBAN no és vàlid, %s no és un codi de país compatible.</string>
-  <!-- An error message displayed when the IBAN does not start with a two-letter country code. -->
-  <string name="iban_invalid_start">El teu IBAN ha de començar amb un codi de país de dues lletres.</string>
   <!-- Button title for confirmation alert to remove a saved payment method
    Text for remove button -->
   <string name="remove">Eliminar</string>
@@ -86,18 +30,10 @@
   <string name="stripe_paymentsheet_close">Tancar</string>
   <!-- Text for continue button -->
   <string name="stripe_paymentsheet_continue_button_label">Continuar</string>
-  <!-- Label for the field containing the dropdown of EPS Banks -->
-  <string name="stripe_paymentsheet_eps_bank">Banc EPS</string>
-  <!-- The label of a text field that is optional. For example, 'Email (optional)' or 'Name (optional) -->
-  <string name="stripe_paymentsheet_form_label_optional">%s (opcional)</string>
-  <!-- iDEAL bank section title for iDEAL form entry. -->
-  <string name="stripe_paymentsheet_ideal_bank">Bank iDeal</string>
   <!-- Title of a section containing multiple payment methods that can selected and will collect the payment information from the user. -->
   <string name="stripe_paymentsheet_or_pay_using">O pagar fent servir</string>
   <!-- Title of a section containing a card form that will collect the payment information from the user. -->
   <string name="stripe_paymentsheet_or_pay_with_card">O pagar amb una targeta</string>
-  <!-- Label on the dropdown to select the Przelewy24 Bank -->
-  <string name="stripe_paymentsheet_p24_bank">Banc Przelewy24</string>
   <!-- Label of a button that initiates payment when tapped -->
   <string name="stripe_paymentsheet_pay_button_amount">Pagar %s</string>
   <!-- Label for a button that starts processing the payment. -->
@@ -118,8 +54,6 @@
   <string name="stripe_paymentsheet_save_this_card_with_merchant_name">Desar aquesta tarjeta per futurs %s pagaments</string>
   <!-- Title shown above a carousel containing the customer&apos;s payment methods -->
   <string name="stripe_paymentsheet_select_payment_method">Selecciona el teu mètode de pagament</string>
-  <!-- SEPA mandate text -->
-  <string name="stripe_paymentsheet_sepa_mandate">Proporcionant la informació de pagament i confirmant aquest pagament, estàs autoritzant (A) %s i Stripe, el nostre proveïdor de serveis de pagament, a enviar ordres al teu banc per tal de carregar des del teu compte i (B) carregar el teu compte en conformitat amb aquestes ordres. Tens dret a un reembolsament per part del teu banc sota els termes i condicions que s\'hagin acordat amb aquest. El reembolsament s\'ha de sol·licitar en un termini de 8 setmanes des de la data en que es va carregar el compte. Els teus drets estan explicats en un extracte que pots demanar al teu banc. Estàs acceptant rebre notificacions per pròxims dèbits fins a dos dies abans de que es portin a terme.</string>
   <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->
   <string name="stripe_paymentsheet_setup_button_label">Configuració</string>
   <!-- Label indicating the total amount that the user is authorizing (e.g. "Total: $25.00") -->

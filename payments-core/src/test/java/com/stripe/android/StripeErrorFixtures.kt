@@ -1,7 +1,6 @@
 package com.stripe.android
 
-import com.stripe.android.model.StripeErrorJsonParser
-import org.json.JSONObject
+import com.stripe.android.core.StripeError
 
 internal object StripeErrorFixtures {
     @JvmField
@@ -12,21 +11,5 @@ internal object StripeErrorFixtures {
         "type",
         "",
         ""
-    )
-
-    val INVALID_CARD_NUMBER = StripeErrorJsonParser().parse(
-        JSONObject(
-            """
-        {
-            "error": {
-                "code": "incorrect_number",
-                "doc_url": "https:\/\/stripe.com\/docs\/error-codes\/incorrect-number",
-                "message": "Your card number is incorrect.",
-                "param": "number",
-                "type": "card_error"
-            }
-        }
-            """.trimIndent()
-        )
     )
 }

@@ -29,9 +29,13 @@ import com.stripe.android.view.CardInputWidget.Companion.LOGGING_TOKEN
 import com.stripe.android.view.CardInputWidget.Companion.shouldIconShowBrand
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.TestCoroutineDispatcher
+import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import org.junit.runner.RunWith
+import org.mockito.kotlin.any
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.times
+import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
 import java.util.Calendar
 import kotlin.test.AfterTest
@@ -41,7 +45,7 @@ import kotlin.test.Test
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
 internal class CardInputWidgetTest {
-    private val testDispatcher = TestCoroutineDispatcher()
+    private val testDispatcher = StandardTestDispatcher()
 
     private val context: Context = ApplicationProvider.getApplicationContext()
     private val activityScenarioFactory = ActivityScenarioFactory(context)
@@ -96,7 +100,6 @@ internal class CardInputWidgetTest {
     @AfterTest
     fun cleanup() {
         Dispatchers.resetMain()
-        testDispatcher.cleanupTestCoroutines()
     }
 
     private fun createCardInputWidget(activity: Activity): CardInputWidget {
@@ -1526,6 +1529,48 @@ internal class CardInputWidgetTest {
     }
 
     @Test
+    fun usZipCodeRequired_whenFalse_shouldNotCallOnPostalCodeComplete() {
+        cardInputWidget.usZipCodeRequired = false
+        postalCodeEditText.setText(POSTAL_CODE_VALUE)
+        assertThat(cardInputListener.onPostalCodeCompleteCalls).isEqualTo(0)
+    }
+
+    @Test
+    fun usZipCodeRequired_whenTrue_withValidZip_shouldCallOnPostalCodeComplete() {
+        cardInputWidget.usZipCodeRequired = true
+        postalCodeEditText.setText(POSTAL_CODE_VALUE)
+        assertThat(cardInputListener.onPostalCodeCompleteCalls).isEqualTo(1)
+    }
+
+    @Test
+    fun postalCodeEnabled_whenFalse_shouldNotCallOnPostalCodeComplete() {
+        cardInputWidget.postalCodeEnabled = false
+        postalCodeEditText.setText("123")
+        assertThat(cardInputListener.onPostalCodeCompleteCalls).isEqualTo(0)
+    }
+
+    @Test
+    fun usZipCodeRequired_whenTrue_withInvalidZip_shouldNotCallOnPostalCodeComplete() {
+        cardInputWidget.usZipCodeRequired = true
+        postalCodeEditText.setText("1234")
+        assertThat(cardInputListener.onPostalCodeCompleteCalls).isEqualTo(0)
+    }
+
+    @Test
+    fun postalCode_whenTrue_withNonEmptyZip_shouldCallOnPostalCodeComplete() {
+        cardInputWidget.postalCodeRequired = true
+        postalCodeEditText.setText("1234")
+        assertThat(cardInputListener.onPostalCodeCompleteCalls).isEqualTo(1)
+    }
+
+    @Test
+    fun postalCode_whenTrue_withEmptyZip_shouldNotCallOnPostalCodeComplete() {
+        cardInputWidget.postalCodeRequired = true
+        postalCodeEditText.setText("")
+        assertThat(cardInputListener.onPostalCodeCompleteCalls).isEqualTo(0)
+    }
+
+    @Test
     fun `setCvcLabel is not reset when card number entered`() {
         cardInputWidget.setCvcLabel("123")
         assertThat(cardInputWidget.cvcEditText.hint)
@@ -1568,6 +1613,46 @@ internal class CardInputWidgetTest {
             .contains(CardInputListener.FocusField.CardNumber)
     }
 
+    @Test
+    fun `Requiring postal code after setting CardValidCallback should still notify of change`() {
+        val callback = mock<CardValidCallback>()
+        cardInputWidget.setCardValidCallback(callback)
+
+        cardInputWidget.postalCodeRequired = true
+        postalCodeEditText.setText("54321")
+
+        verify(callback, times(2)).onInputChanged(any(), any())
+    }
+
+    @Test
+    fun `Removing postal code requirement removes CardValidCallback notifications for the field`() {
+        val callback = mock<CardValidCallback>()
+        cardInputWidget.postalCodeRequired = true
+        cardInputWidget.setCardValidCallback(callback)
+        cardInputWidget.postalCodeRequired = false
+
+        postalCodeEditText.setText("54321")
+
+        verify(callback, times(1)).onInputChanged(any(), any())
+    }
+
+    @Test
+    fun `Setting postal code requirements multiple times only sets callback once`() {
+        val callback = mock<CardValidCallback>()
+        cardInputWidget.setCardValidCallback(callback)
+
+        cardInputWidget.postalCodeRequired = true
+        cardInputWidget.postalCodeEnabled = true
+        cardInputWidget.postalCodeEnabled = false
+        cardInputWidget.postalCodeRequired = false
+        cardInputWidget.postalCodeRequired = true
+        cardInputWidget.postalCodeEnabled = true
+        postalCodeEditText.setText("54321")
+
+        // Called only when the callback is set and when the text is set.
+        verify(callback, times(2)).onInputChanged(any(), any())
+    }
+
     private fun updateCardNumberAndIdle(cardNumber: String) {
         cardNumberEditText.setText(cardNumber)
         idleLooper()
@@ -1578,6 +1663,7 @@ internal class CardInputWidgetTest {
         var cardCompleteCalls = 0
         var expirationCompleteCalls = 0
         var cvcCompleteCalls = 0
+        var onPostalCodeCompleteCalls = 0
 
         override fun onFocusChange(focusField: CardInputListener.FocusField) {
             focusedFields.add(focusField)
@@ -1593,6 +1679,10 @@ internal class CardInputWidgetTest {
 
         override fun onCvcComplete() {
             cvcCompleteCalls++
+        }
+
+        override fun onPostalCodeComplete() {
+            onPostalCodeCompleteCalls++
         }
     }
 

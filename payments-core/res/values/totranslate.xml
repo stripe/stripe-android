@@ -3,5 +3,15 @@
     <!--
     Items here need to be entered in our translation tool
     -->
+    <!-- Affirm buy now, pay later copy -->
+    <string name="affirm_buy_now_pay_later">Buy now, pay later with</string>
+    <!-- AU BECS mandate text pre link-->
+    <string name="au_becs_mandate_pre_link">By clicking Pay, you agree to this Direct Debit Request and the</string>
+    <!-- AU BECS mandate text link-->
+    <string name="au_becs_mandate_link">Direct Debit Request service agreement</string>
+    <!-- AU BECS mandate text post link-->
+    <string name="au_becs_mandate_post_link">, and authorise Stripe Payments Australia Pty Ltd ACN 160 180 343 Direct Debit User ID number 507156 (“Stripe”) to debit your account through the Bulk Electronic Clearing System (BECS) on behalf of %s (the “Merchant”) for any amounts separately communicated to you by the Merchant. You certify that you are either an account holder or an authorised signatory on the account listed above.</string>
+    <!-- An error message displayed when the customer's bank account number is invalid. -->
+    <string name="becs_widget_account_number_invalid">The account number you entered is invalid.</string>
 
 </resources>

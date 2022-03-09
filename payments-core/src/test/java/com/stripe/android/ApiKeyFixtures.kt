@@ -25,4 +25,5 @@ internal object ApiKeyFixtures {
     const val NETBANKING_PUBLISHABLE_KEY = "pk_test_51H7wmsBte6TMTRd4gph9Wm7gnQOKJwdVTCj30AhtB8MhWtlYj6v9xDn1vdCtKYGAE7cybr6fQdbQQtgvzBihE9cl00tOnrTpL9"
     const val BLIK_PUBLISHABLE_KEY = "pk_test_ErsyMEOTudSjQR8hh0VrQr5X008sBXGOu6"
     const val WECHAT_PAY_PUBLISHABLE_KEY = "pk_test_h0JFD5q63mLThM5JVSbrREmR"
+    const val AFFIRM_PUBLISHABLE_KEY = "pk_test_51HvTI7Lu5o3P18Zp6t5AgBSkMvWoTtA0nyA7pVYDqpfLkRtWun7qZTYCOHCReprfLM464yaBeF72UFfB7cY9WG4a00ZnDtiC2C"
 }

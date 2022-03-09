@@ -1,19 +1,19 @@
 package com.stripe.android
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.Customer
 import com.stripe.android.model.CustomerFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.Source
 import com.stripe.android.networking.AbsFakeStripeRepository
-import com.stripe.android.networking.ApiRequest
 import com.stripe.android.networking.StripeRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.TestCoroutineDispatcher
+import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.resetMain
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
@@ -23,7 +23,7 @@ import kotlin.test.Test
 
 @ExperimentalCoroutinesApi
 internal class CustomerSessionOperationExecutorTest {
-    private val testDispatcher = TestCoroutineDispatcher()
+    private val testDispatcher = StandardTestDispatcher()
 
     private val listeners = mutableMapOf<String, CustomerSession.RetrievalListener?>()
     private val customerCallbacks = mutableListOf<Customer>()
@@ -36,11 +36,10 @@ internal class CustomerSessionOperationExecutorTest {
     @AfterTest
     fun cleanup() {
         Dispatchers.resetMain()
-        testDispatcher.cleanupTestCoroutines()
     }
 
     @Test
-    fun `execute with AttachPaymentMethod operation when valid PaymentMethod returned should call listener with PaymentMethod`() = testDispatcher.runBlockingTest {
+    fun `execute with AttachPaymentMethod operation when valid PaymentMethod returned should call listener with PaymentMethod`() = runTest {
         val listener = mock<CustomerSession.PaymentMethodRetrievalListener>()
         listeners[OPERATION_ID] = listener
 
@@ -70,7 +69,7 @@ internal class CustomerSessionOperationExecutorTest {
     }
 
     @Test
-    fun `execute with AttachPaymentMethod operation when null PaymentMethod returned should call listener with error`() = testDispatcher.runBlockingTest {
+    fun `execute with AttachPaymentMethod operation when null PaymentMethod returned should call listener with error`() = runTest {
         val listener = mock<CustomerSession.PaymentMethodRetrievalListener>()
         listeners[OPERATION_ID] = listener
 
@@ -104,7 +103,7 @@ internal class CustomerSessionOperationExecutorTest {
     }
 
     @Test
-    fun `execute with UpdateDefaultSource operation when valid Customer returned should call listener with PaymentMethod and invoke customerCallback`() = testDispatcher.runBlockingTest {
+    fun `execute with UpdateDefaultSource operation when valid Customer returned should call listener with PaymentMethod and invoke customerCallback`() = runTest {
         val listener = mock<CustomerSession.CustomerRetrievalListener>()
         listeners[OPERATION_ID] = listener
 

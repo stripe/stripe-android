@@ -11,13 +11,17 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.savedstate.SavedStateRegistryOwner
 import com.stripe.android.StripeIntentResult
+import com.stripe.android.core.exception.APIException
+import com.stripe.android.core.injection.Injectable
+import com.stripe.android.core.injection.UIContext
+import com.stripe.android.core.injection.WeakMapInjectorRegistry
+import com.stripe.android.core.injection.injectWithFallback
+import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
-import com.stripe.android.exception.APIException
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.networking.ApiRequest
 import com.stripe.android.networking.PaymentAnalyticsEvent
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networking.StripeRepository
@@ -27,12 +31,9 @@ import com.stripe.android.payments.PaymentIntentFlowResultProcessor
 import com.stripe.android.payments.SetupIntentFlowResultProcessor
 import com.stripe.android.payments.core.authentication.PaymentAuthenticatorRegistry
 import com.stripe.android.payments.core.injection.DaggerPaymentLauncherViewModelFactoryComponent
+import com.stripe.android.payments.core.injection.IS_INSTANT_APP
 import com.stripe.android.payments.core.injection.IS_PAYMENT_INTENT
-import com.stripe.android.payments.core.injection.Injectable
 import com.stripe.android.payments.core.injection.PaymentLauncherViewModelSubcomponent
-import com.stripe.android.payments.core.injection.UIContext
-import com.stripe.android.payments.core.injection.WeakMapInjectorRegistry
-import com.stripe.android.payments.core.injection.injectWithFallback
 import com.stripe.android.view.AuthActivityStarterHost
 import dagger.Lazy
 import kotlinx.coroutines.launch
@@ -59,7 +60,8 @@ internal class PaymentLauncherViewModel @Inject constructor(
     @UIContext private val uiContext: CoroutineContext,
     private val authActivityStarterHost: AuthActivityStarterHost,
     activityResultCaller: ActivityResultCaller,
-    private val savedStateHandle: SavedStateHandle
+    private val savedStateHandle: SavedStateHandle,
+    @Named(IS_INSTANT_APP) private val isInstantApp: Boolean
 ) : ViewModel() {
     init {
         authenticatorRegistry.onNewActivityResultCaller(
@@ -89,8 +91,13 @@ internal class PaymentLauncherViewModel @Inject constructor(
     internal suspend fun confirmStripeIntent(confirmStripeIntentParams: ConfirmStripeIntentParams) {
         savedStateHandle.set(KEY_HAS_STARTED, true)
         logReturnUrl(confirmStripeIntentParams.returnUrl)
-        val returnUrl = confirmStripeIntentParams.returnUrl.takeUnless { it.isNullOrBlank() }
-            ?: defaultReturnUrl.value
+        val returnUrl =
+            if (isInstantApp) {
+                confirmStripeIntentParams.returnUrl
+            } else {
+                confirmStripeIntentParams.returnUrl.takeUnless { it.isNullOrBlank() }
+                    ?: defaultReturnUrl.value
+            }
         runCatching {
             confirmIntent(confirmStripeIntentParams, returnUrl)
         }.fold(
@@ -98,7 +105,7 @@ internal class PaymentLauncherViewModel @Inject constructor(
                 intent.nextActionData?.let {
                     if (it is StripeIntent.NextActionData.SdkData.Use3DS1) {
                         intent.id?.let { intentId ->
-                            threeDs1IntentReturnUrlMap[intentId] = returnUrl
+                            threeDs1IntentReturnUrlMap[intentId] = returnUrl.orEmpty()
                         }
                     }
                 }
@@ -116,7 +123,7 @@ internal class PaymentLauncherViewModel @Inject constructor(
 
     private suspend fun confirmIntent(
         confirmStripeIntentParams: ConfirmStripeIntentParams,
-        returnUrl: String
+        returnUrl: String?
     ): StripeIntent =
         confirmStripeIntentParams.also {
             it.returnUrl = returnUrl

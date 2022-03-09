@@ -2,28 +2,32 @@
   <head>
     <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
     <title>GooglePayJsonFactory</title>
-</head><body><link href="../../../images/logo-icon.svg" rel="icon" type="image/svg"><script>var pathToRoot = "../../../";</script><script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async></script><link href="../../../styles/style.css" rel="Stylesheet"><link href="../../../styles/logo-styles.css" rel="Stylesheet"><link href="../../../styles/jetbrains-mono.css" rel="Stylesheet"><link href="../../../styles/main.css" rel="Stylesheet"><script type="text/javascript" src="../../../scripts/clipboard.js" async></script><script type="text/javascript" src="../../../scripts/navigation-loader.js" async></script><script type="text/javascript" src="../../../scripts/platform-content-handler.js" async></script><script type="text/javascript" src="../../../scripts/main.js" async></script>
+</head><body><link href="../../../images/logo-icon.svg" rel="icon" type="image/svg"><script>var pathToRoot = "../../../";</script>
+    <script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async></script><link href="../../../styles/style.css" rel="Stylesheet"><link href="../../../styles/jetbrains-mono.css" rel="Stylesheet"><link href="../../../styles/main.css" rel="Stylesheet"><link href="../../../styles/prism.css" rel="Stylesheet"><link href="../../../styles/logo-styles.css" rel="Stylesheet"><script type="text/javascript" src="../../../scripts/clipboard.js" async></script><script type="text/javascript" src="../../../scripts/navigation-loader.js" async></script><script type="text/javascript" src="../../../scripts/platform-content-handler.js" async></script><script type="text/javascript" src="../../../scripts/main.js" defer></script><script type="text/javascript" src="../../../scripts/prism.js" async></script><script>const storage = localStorage.getItem("dokka-dark-mode")
+const savedDarkMode = storage ? JSON.parse(storage) : false
+if(savedDarkMode === true){
+    document.getElementsByTagName("html")[0].classList.add("theme-dark")
+}</script>
+
   
+    <div class="navigation-wrapper" id="navigation-wrapper">
+      <div id="leftToggler"><span class="icon-toggler"></span></div>
+      <div class="library-name"><a href="../../../index.html"><span>stripe-android</span></a></div>
+      <div></div>
+      <div class="pull-right d-flex"><button id="theme-toggle-button"><span id="theme-toggle"></span></button>
+        <div id="searchBar"></div>
+      </div>
+    </div>
     <div id="container">
-      <div id="leftColumn"><a href="../../../index.html">
-            <div id="logo"></div>
-          </a>
-        <div id="paneSearch"></div>
+      <div id="leftColumn">
         <div id="sideMenu"></div>
       </div>
       <div id="main">
-        <script type="text/javascript" src="../../../scripts/main.js"></script><div id="leftToggler"><span class="icon-toggler"></span></div>
-
         <div class="main-content" id="content" pageids="payments-core::com.stripe.android/GooglePayJsonFactory///PointingToDeclaration//-1622557690">
-          <div class="navigation-wrapper" id="navigation-wrapper">
-            <div class="breadcrumbs"><a href="../../index.html">payments-core</a>/<a href="../index.html">com.stripe.android</a>/<a href="index.html">GooglePayJsonFactory</a></div>
-            <div class="pull-right d-flex">
-              <div id="searchBar"></div>
-            </div>
-          </div>
+          <div class="breadcrumbs"><a href="../../index.html">payments-core</a>/<a href="../index.html">com.stripe.android</a>/<a href="index.html">GooglePayJsonFactory</a></div>
           <div class="cover ">
             <h1 class="cover"><span>Google</span><wbr><span>Pay</span><wbr><span>Json</span><wbr><span><span>Factory</span></span></h1>
-            <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":payments-core:dokkaHtmlPartial/release"><div class="symbol monospace"><div class="block"><div class="block">@<span data-unresolved-link="javax.inject/Singleton///PointingToDeclaration/">Singleton</span></div></div>class <a href="index.html">GooglePayJsonFactory</a>(googlePayConfig: <a href="../-google-pay-config/index.html">GooglePayConfig</a>, isJcbEnabled: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a>)<span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><p class="paragraph">A factory for generating <a href="https://developers.google.com/pay/api/android/reference/request-objects">Google Pay JSON request objects</a> for Google Pay API version 2.0.</p></div></div>
+            <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":payments-core:dokkaHtmlPartial/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation">@</span><span data-unresolved-link="javax.inject/Singleton///PointingToDeclaration/"><span class="token annotation">Singleton</span></span></div></div><span class="token keyword">class </span><a href="index.html">GooglePayJsonFactory</a><span class="token punctuation">(</span>googlePayConfig<span class="token operator">: </span><a href="../-google-pay-config/index.html">GooglePayConfig</a><span class="token punctuation">, </span>isJcbEnabled<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><p class="paragraph">A factory for generating <a href="https://developers.google.com/pay/api/android/reference/request-objects">Google Pay JSON request objects</a> for Google Pay API version 2.0.</p></div></div>
           </div>
           <div class="tabbedcontent">
             <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="Types">Types</button><button class="section-tab" data-togglable="Constructors">Constructors</button><button class="section-tab" data-togglable="Functions">Functions</button></div>
@@ -32,12 +36,14 @@
               <div class="table" data-togglable="Constructors"><a data-name="-1858187105%2FConstructors%2F-1622557690" anchor-label="GooglePayJsonFactory" id="-1858187105%2FConstructors%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a>
                 <div class="table-row" data-filterable-current=":payments-core:dokkaHtmlPartial/release" data-filterable-set=":payments-core:dokkaHtmlPartial/release">
                   <div class="main-subrow keyValue TabbedContent">
-                    <div class=""><span class="inline-flex"><a href="-google-pay-json-factory.html">GooglePayJsonFactory</a><span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1858187105%2FConstructors%2F-1622557690"></span>
+                    <div class=""><span class="inline-flex">
+                        <div><a href="-google-pay-json-factory.html"><span>Google</span><wbr><span>Pay</span><wbr><span>Json</span><wbr><span><span>Factory</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1858187105%2FConstructors%2F-1622557690"></span>
                           <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                         </span></span></div>
                     <div>
                       <div class="title">
-                        <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":payments-core:dokkaHtmlPartial/release"><div class="symbol monospace">fun <a href="-google-pay-json-factory.html">GooglePayJsonFactory</a>(context: <a href="https://developer.android.com/reference/kotlin/android/content/Context.html">Context</a>, isJcbEnabled: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a> = false)<span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph"><a href="../-payment-configuration/index.html">PaymentConfiguration</a> must be instantiated before calling this.</p></div></div></div>
+                        <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":payments-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="-google-pay-json-factory.html"><span class="token function">GooglePayJsonFactory</span></a><span class="token punctuation">(</span>context<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/content/Context.html">Context</a><span class="token punctuation">, </span>isJcbEnabled<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator"> = </span><span class="token boolean">false</span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph"><a href="../-payment-configuration/index.html">PaymentConfiguration</a> must be instantiated before calling this.</p></div></div></div>
                       </div>
                     </div>
                   </div>
@@ -45,12 +51,14 @@
 <a data-name="-1144415264%2FConstructors%2F-1622557690" anchor-label="GooglePayJsonFactory" id="-1144415264%2FConstructors%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a>
                 <div class="table-row" data-filterable-current=":payments-core:dokkaHtmlPartial/release" data-filterable-set=":payments-core:dokkaHtmlPartial/release">
                   <div class="main-subrow keyValue TabbedContent">
-                    <div class=""><span class="inline-flex"><a href="-google-pay-json-factory.html">GooglePayJsonFactory</a><span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1144415264%2FConstructors%2F-1622557690"></span>
+                    <div class=""><span class="inline-flex">
+                        <div><a href="-google-pay-json-factory.html"><span>Google</span><wbr><span>Pay</span><wbr><span>Json</span><wbr><span><span>Factory</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1144415264%2FConstructors%2F-1622557690"></span>
                           <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                         </span></span></div>
                     <div>
                       <div class="title">
-                        <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":payments-core:dokkaHtmlPartial/release"><div class="symbol monospace">fun <a href="-google-pay-json-factory.html">GooglePayJsonFactory</a>(googlePayConfig: <a href="../-google-pay-config/index.html">GooglePayConfig</a>, isJcbEnabled: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a> = false)<span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+                        <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":payments-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="-google-pay-json-factory.html"><span class="token function">GooglePayJsonFactory</span></a><span class="token punctuation">(</span>googlePayConfig<span class="token operator">: </span><a href="../-google-pay-config/index.html">GooglePayConfig</a><span class="token punctuation">, </span>isJcbEnabled<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator"> = </span><span class="token boolean">false</span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
                       </div>
                     </div>
                   </div>
@@ -60,68 +68,60 @@
               <div class="table" data-togglable="Types"><a data-name="-1515715289%2FClasslikes%2F-1622557690" anchor-label="BillingAddressParameters" id="-1515715289%2FClasslikes%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a>
                 <div class="table-row" data-filterable-current=":payments-core:dokkaHtmlPartial/release" data-filterable-set=":payments-core:dokkaHtmlPartial/release">
                   <div class="main-subrow keyValue ">
-                    <div class=""><span class="inline-flex"><a href="-billing-address-parameters/index.html"><span>Billing</span><wbr><span>Address</span><wbr><span><span>Parameters</span></span></a><span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1515715289%2FClasslikes%2F-1622557690"></span>
+                    <div class=""><span class="inline-flex">
+                        <div><a href="-billing-address-parameters/index.html"><span>Billing</span><wbr><span>Address</span><wbr><span><span>Parameters</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1515715289%2FClasslikes%2F-1622557690"></span>
                           <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                         </span></span></div>
                     <div>
-                      <div class="title"><div class="divergent-group" data-filterable-current=":payments-core:dokkaHtmlPartial/release" data-filterable-set=":payments-core:dokkaHtmlPartial/release"><div class="with-platform-tags"><span class="pull-right"></span></div>
-
-  <div>
-    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":payments-core:dokkaHtmlPartial/release"><div class="symbol monospace">data class <a href="-billing-address-parameters/index.html">BillingAddressParameters</a>&nbsp;<span>@<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.jvm/-jvm-overloads/index.html">JvmOverloads</a>&nbsp;</span>constructor(isRequired: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a>, format: <a href="-billing-address-parameters/-format/index.html">GooglePayJsonFactory.BillingAddressParameters.Format</a>, isPhoneNumberRequired: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a>) : <a href="https://developer.android.com/reference/kotlin/android/os/Parcelable.html">Parcelable</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
-  </div>
-<div class="brief "><p class="paragraph"><a href="https://developers.google.com/pay/api/android/reference/request-objects#BillingAddressParameters">BillingAddressParameters</a></p></div></div>
-</div>
+                      <div class="title">
+                        <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":payments-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">data </span><span class="token keyword">class </span><a href="-billing-address-parameters/index.html">BillingAddressParameters</a>&nbsp;<span><span class="token annotation">@</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.jvm/-jvm-overloads/index.html"><span class="token annotation">JvmOverloads</span></a>&nbsp;</span><span class="token keyword">constructor</span><span class="token punctuation">(</span>isRequired<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token punctuation">, </span>format<span class="token operator">: </span><a href="-billing-address-parameters/-format/index.html">GooglePayJsonFactory.BillingAddressParameters.Format</a><span class="token punctuation">, </span>isPhoneNumberRequired<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token punctuation">)</span> : <a href="https://developer.android.com/reference/kotlin/android/os/Parcelable.html">Parcelable</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph"><a href="https://developers.google.com/pay/api/android/reference/request-objects#BillingAddressParameters">BillingAddressParameters</a></p></div></div></div>
+                      </div>
                     </div>
                   </div>
                 </div>
 <a data-name="-1353866444%2FClasslikes%2F-1622557690" anchor-label="MerchantInfo" id="-1353866444%2FClasslikes%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a>
                 <div class="table-row" data-filterable-current=":payments-core:dokkaHtmlPartial/release" data-filterable-set=":payments-core:dokkaHtmlPartial/release">
                   <div class="main-subrow keyValue ">
-                    <div class=""><span class="inline-flex"><a href="-merchant-info/index.html"><span>Merchant</span><wbr><span><span>Info</span></span></a><span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1353866444%2FClasslikes%2F-1622557690"></span>
+                    <div class=""><span class="inline-flex">
+                        <div><a href="-merchant-info/index.html"><span>Merchant</span><wbr><span><span>Info</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1353866444%2FClasslikes%2F-1622557690"></span>
                           <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                         </span></span></div>
                     <div>
-                      <div class="title"><div class="divergent-group" data-filterable-current=":payments-core:dokkaHtmlPartial/release" data-filterable-set=":payments-core:dokkaHtmlPartial/release"><div class="with-platform-tags"><span class="pull-right"></span></div>
-
-  <div>
-    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":payments-core:dokkaHtmlPartial/release"><div class="symbol monospace">data class <a href="-merchant-info/index.html">MerchantInfo</a>(merchantName: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>?) : <a href="https://developer.android.com/reference/kotlin/android/os/Parcelable.html">Parcelable</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
-  </div>
-<div class="brief "><p class="paragraph"><a href="https://developers.google.com/pay/api/android/reference/request-objects#MerchantInfo">MerchantInfo</a></p></div></div>
-</div>
+                      <div class="title">
+                        <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":payments-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">data </span><span class="token keyword">class </span><a href="-merchant-info/index.html">MerchantInfo</a><span class="token punctuation">(</span>merchantName<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token punctuation">)</span> : <a href="https://developer.android.com/reference/kotlin/android/os/Parcelable.html">Parcelable</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph"><a href="https://developers.google.com/pay/api/android/reference/request-objects#MerchantInfo">MerchantInfo</a></p></div></div></div>
+                      </div>
                     </div>
                   </div>
                 </div>
 <a data-name="1413449992%2FClasslikes%2F-1622557690" anchor-label="ShippingAddressParameters" id="1413449992%2FClasslikes%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a>
                 <div class="table-row" data-filterable-current=":payments-core:dokkaHtmlPartial/release" data-filterable-set=":payments-core:dokkaHtmlPartial/release">
                   <div class="main-subrow keyValue ">
-                    <div class=""><span class="inline-flex"><a href="-shipping-address-parameters/index.html"><span>Shipping</span><wbr><span>Address</span><wbr><span><span>Parameters</span></span></a><span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1413449992%2FClasslikes%2F-1622557690"></span>
+                    <div class=""><span class="inline-flex">
+                        <div><a href="-shipping-address-parameters/index.html"><span>Shipping</span><wbr><span>Address</span><wbr><span><span>Parameters</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1413449992%2FClasslikes%2F-1622557690"></span>
                           <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                         </span></span></div>
                     <div>
-                      <div class="title"><div class="divergent-group" data-filterable-current=":payments-core:dokkaHtmlPartial/release" data-filterable-set=":payments-core:dokkaHtmlPartial/release"><div class="with-platform-tags"><span class="pull-right"></span></div>
-
-  <div>
-    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":payments-core:dokkaHtmlPartial/release"><div class="symbol monospace">data class <a href="-shipping-address-parameters/index.html">ShippingAddressParameters</a>&nbsp;<span>@<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.jvm/-jvm-overloads/index.html">JvmOverloads</a>&nbsp;</span>constructor(isRequired: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a>, allowedCountryCodes: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-set/index.html">Set</a>&lt;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>&gt;, phoneNumberRequired: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a>) : <a href="https://developer.android.com/reference/kotlin/android/os/Parcelable.html">Parcelable</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
-  </div>
-<div class="brief "><p class="paragraph"><a href="https://developers.google.com/pay/api/android/reference/request-objects#ShippingAddressParameters">ShippingAddressParameters</a></p></div></div>
-</div>
+                      <div class="title">
+                        <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":payments-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">data </span><span class="token keyword">class </span><a href="-shipping-address-parameters/index.html">ShippingAddressParameters</a>&nbsp;<span><span class="token annotation">@</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.jvm/-jvm-overloads/index.html"><span class="token annotation">JvmOverloads</span></a>&nbsp;</span><span class="token keyword">constructor</span><span class="token punctuation">(</span>isRequired<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token punctuation">, </span>allowedCountryCodes<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-set/index.html">Set</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">&gt;</span><span class="token punctuation">, </span>phoneNumberRequired<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token punctuation">)</span> : <a href="https://developer.android.com/reference/kotlin/android/os/Parcelable.html">Parcelable</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph"><a href="https://developers.google.com/pay/api/android/reference/request-objects#ShippingAddressParameters">ShippingAddressParameters</a></p></div></div></div>
+                      </div>
                     </div>
                   </div>
                 </div>
 <a data-name="728641932%2FClasslikes%2F-1622557690" anchor-label="TransactionInfo" id="728641932%2FClasslikes%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a>
                 <div class="table-row" data-filterable-current=":payments-core:dokkaHtmlPartial/release" data-filterable-set=":payments-core:dokkaHtmlPartial/release">
                   <div class="main-subrow keyValue ">
-                    <div class=""><span class="inline-flex"><a href="-transaction-info/index.html"><span>Transaction</span><wbr><span><span>Info</span></span></a><span class="anchor-wrapper"><span class="anchor-icon" pointing-to="728641932%2FClasslikes%2F-1622557690"></span>
+                    <div class=""><span class="inline-flex">
+                        <div><a href="-transaction-info/index.html"><span>Transaction</span><wbr><span><span>Info</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="728641932%2FClasslikes%2F-1622557690"></span>
                           <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                         </span></span></div>
                     <div>
-                      <div class="title"><div class="divergent-group" data-filterable-current=":payments-core:dokkaHtmlPartial/release" data-filterable-set=":payments-core:dokkaHtmlPartial/release"><div class="with-platform-tags"><span class="pull-right"></span></div>
-
-  <div>
-    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":payments-core:dokkaHtmlPartial/release"><div class="symbol monospace">data class <a href="-transaction-info/index.html">TransactionInfo</a>&nbsp;<span>@<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.jvm/-jvm-overloads/index.html">JvmOverloads</a>&nbsp;</span>constructor(currencyCode: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>, totalPriceStatus: <a href="-transaction-info/-total-price-status/index.html">GooglePayJsonFactory.TransactionInfo.TotalPriceStatus</a>, countryCode: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>?, transactionId: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>?, totalPrice: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a>?, totalPriceLabel: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>?, checkoutOption: <a href="-transaction-info/-checkout-option/index.html">GooglePayJsonFactory.TransactionInfo.CheckoutOption</a>?) : <a href="https://developer.android.com/reference/kotlin/android/os/Parcelable.html">Parcelable</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
-  </div>
-<div class="brief "><p class="paragraph"><a href="https://developers.google.com/pay/api/android/reference/request-objects#TransactionInfo">TransactionInfo</a></p></div></div>
-</div>
+                      <div class="title">
+                        <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":payments-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">data </span><span class="token keyword">class </span><a href="-transaction-info/index.html">TransactionInfo</a>&nbsp;<span><span class="token annotation">@</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.jvm/-jvm-overloads/index.html"><span class="token annotation">JvmOverloads</span></a>&nbsp;</span><span class="token keyword">constructor</span><span class="token punctuation">(</span>currencyCode<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span>totalPriceStatus<span class="token operator">: </span><a href="-transaction-info/-total-price-status/index.html">GooglePayJsonFactory.TransactionInfo.TotalPriceStatus</a><span class="token punctuation">, </span>countryCode<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token punctuation">, </span>transactionId<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token punctuation">, </span>totalPrice<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a><span class="token operator">?</span><span class="token punctuation">, </span>totalPriceLabel<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token punctuation">, </span>checkoutOption<span class="token operator">: </span><a href="-transaction-info/-checkout-option/index.html">GooglePayJsonFactory.TransactionInfo.CheckoutOption</a><span class="token operator">?</span><span class="token punctuation">)</span> : <a href="https://developer.android.com/reference/kotlin/android/os/Parcelable.html">Parcelable</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph"><a href="https://developers.google.com/pay/api/android/reference/request-objects#TransactionInfo">TransactionInfo</a></p></div></div></div>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -130,34 +130,30 @@
               <div class="table" data-togglable="Functions"><a data-name="-2142237337%2FFunctions%2F-1622557690" anchor-label="createIsReadyToPayRequest" id="-2142237337%2FFunctions%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a>
                 <div class="table-row" data-filterable-current=":payments-core:dokkaHtmlPartial/release" data-filterable-set=":payments-core:dokkaHtmlPartial/release">
                   <div class="main-subrow keyValue ">
-                    <div class=""><span class="inline-flex"><a href="create-is-ready-to-pay-request.html"><span>create</span><wbr><span>Is</span><wbr><span>Ready</span><wbr><span>To</span><wbr><span>Pay</span><wbr><span><span>Request</span></span></a><span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-2142237337%2FFunctions%2F-1622557690"></span>
+                    <div class=""><span class="inline-flex">
+                        <div><a href="create-is-ready-to-pay-request.html"><span>create</span><wbr><span>Is</span><wbr><span>Ready</span><wbr><span>To</span><wbr><span>Pay</span><wbr><span><span>Request</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-2142237337%2FFunctions%2F-1622557690"></span>
                           <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                         </span></span></div>
                     <div>
-                      <div class="title"><div class="divergent-group" data-filterable-current=":payments-core:dokkaHtmlPartial/release" data-filterable-set=":payments-core:dokkaHtmlPartial/release"><div class="with-platform-tags"><span class="pull-right"></span></div>
-
-  <div>
-    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":payments-core:dokkaHtmlPartial/release"><div class="symbol monospace"><div class="block"><div class="block">@<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.jvm/-jvm-overloads/index.html">JvmOverloads</a></div></div>fun <a href="create-is-ready-to-pay-request.html">createIsReadyToPayRequest</a>(billingAddressParameters: <a href="-billing-address-parameters/index.html">GooglePayJsonFactory.BillingAddressParameters</a>? = null, existingPaymentMethodRequired: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a>? = null): <a href="https://developer.android.com/reference/kotlin/org/json/JSONObject.html">JSONObject</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
-  </div>
-<div class="brief "><p class="paragraph"><a href="https://developers.google.com/pay/api/android/reference/request-objects#IsReadyToPayRequest">IsReadyToPayRequest</a></p></div></div>
-</div>
+                      <div class="title">
+                        <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":payments-core:dokkaHtmlPartial/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation">@</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.jvm/-jvm-overloads/index.html"><span class="token annotation">JvmOverloads</span></a></div></div><span class="token keyword"></span><span class="token keyword">fun </span><a href="create-is-ready-to-pay-request.html"><span class="token function">createIsReadyToPayRequest</span></a><span class="token punctuation">(</span>billingAddressParameters<span class="token operator">: </span><a href="-billing-address-parameters/index.html">GooglePayJsonFactory.BillingAddressParameters</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span>existingPaymentMethodRequired<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">)</span><span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/org/json/JSONObject.html">JSONObject</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph"><a href="https://developers.google.com/pay/api/android/reference/request-objects#IsReadyToPayRequest">IsReadyToPayRequest</a></p></div></div></div>
+                      </div>
                     </div>
                   </div>
                 </div>
 <a data-name="-1649587183%2FFunctions%2F-1622557690" anchor-label="createPaymentDataRequest" id="-1649587183%2FFunctions%2F-1622557690" data-filterable-set=":payments-core:dokkaHtmlPartial/release"></a>
                 <div class="table-row" data-filterable-current=":payments-core:dokkaHtmlPartial/release" data-filterable-set=":payments-core:dokkaHtmlPartial/release">
                   <div class="main-subrow keyValue ">
-                    <div class=""><span class="inline-flex"><a href="create-payment-data-request.html"><span>create</span><wbr><span>Payment</span><wbr><span>Data</span><wbr><span><span>Request</span></span></a><span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1649587183%2FFunctions%2F-1622557690"></span>
+                    <div class=""><span class="inline-flex">
+                        <div><a href="create-payment-data-request.html"><span>create</span><wbr><span>Payment</span><wbr><span>Data</span><wbr><span><span>Request</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1649587183%2FFunctions%2F-1622557690"></span>
                           <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                         </span></span></div>
                     <div>
-                      <div class="title"><div class="divergent-group" data-filterable-current=":payments-core:dokkaHtmlPartial/release" data-filterable-set=":payments-core:dokkaHtmlPartial/release"><div class="with-platform-tags"><span class="pull-right"></span></div>
-
-  <div>
-    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":payments-core:dokkaHtmlPartial/release"><div class="symbol monospace"><div class="block"><div class="block">@<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.jvm/-jvm-overloads/index.html">JvmOverloads</a></div></div>fun <a href="create-payment-data-request.html">createPaymentDataRequest</a>(transactionInfo: <a href="-transaction-info/index.html">GooglePayJsonFactory.TransactionInfo</a>, billingAddressParameters: <a href="-billing-address-parameters/index.html">GooglePayJsonFactory.BillingAddressParameters</a>? = null, shippingAddressParameters: <a href="-shipping-address-parameters/index.html">GooglePayJsonFactory.ShippingAddressParameters</a>? = null, isEmailRequired: <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a> = false, merchantInfo: <a href="-merchant-info/index.html">GooglePayJsonFactory.MerchantInfo</a>? = null): <a href="https://developer.android.com/reference/kotlin/org/json/JSONObject.html">JSONObject</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
-  </div>
-<div class="brief "><p class="paragraph"><a href="https://developers.google.com/pay/api/android/reference/request-objects#PaymentDataRequest">PaymentDataRequest</a></p></div></div>
-</div>
+                      <div class="title">
+                        <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":payments-core:dokkaHtmlPartial/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation">@</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.jvm/-jvm-overloads/index.html"><span class="token annotation">JvmOverloads</span></a></div></div><span class="token keyword"></span><span class="token keyword">fun </span><a href="create-payment-data-request.html"><span class="token function">createPaymentDataRequest</span></a><span class="token punctuation">(</span>transactionInfo<span class="token operator">: </span><a href="-transaction-info/index.html">GooglePayJsonFactory.TransactionInfo</a><span class="token punctuation">, </span>billingAddressParameters<span class="token operator">: </span><a href="-billing-address-parameters/index.html">GooglePayJsonFactory.BillingAddressParameters</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span>shippingAddressParameters<span class="token operator">: </span><a href="-shipping-address-parameters/index.html">GooglePayJsonFactory.ShippingAddressParameters</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span>isEmailRequired<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator"> = </span><span class="token boolean">false</span><span class="token punctuation">, </span>merchantInfo<span class="token operator">: </span><a href="-merchant-info/index.html">GooglePayJsonFactory.MerchantInfo</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">)</span><span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/org/json/JSONObject.html">JSONObject</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph"><a href="https://developers.google.com/pay/api/android/reference/request-objects#PaymentDataRequest">PaymentDataRequest</a></p></div></div></div>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -165,7 +161,7 @@
             </div>
           </div>
         </div>
-        <div class="footer"><span class="go-to-top-icon"><a href="#content"></a></span><span>© 2021 Copyright</span><span class="pull-right"><span>Generated by </span><a href="https://github.com/Kotlin/dokka"><span>dokka</span><span class="padded-icon"></span></a></span></div>
+        <div class="footer"><span class="go-to-top-icon"><a href="#content" id="go-to-top-link"></a></span><span>© 2022 Copyright</span><span class="pull-right"><span>Generated by </span><a href="https://github.com/Kotlin/dokka"><span>dokka</span><span class="padded-icon"></span></a></span></div>
       </div>
     </div>
   

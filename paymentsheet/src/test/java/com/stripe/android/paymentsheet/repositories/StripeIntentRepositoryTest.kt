@@ -8,8 +8,8 @@ import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.TestCoroutineDispatcher
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.runTest
 import org.junit.runner.RunWith
 import org.mockito.kotlin.KArgumentCaptor
 import org.mockito.kotlin.any
@@ -20,23 +20,17 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 import java.util.Locale
-import kotlin.test.AfterTest
 import kotlin.test.Test
 
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
 internal class StripeIntentRepositoryTest {
-    private val testDispatcher = TestCoroutineDispatcher()
+    private val testDispatcher = UnconfinedTestDispatcher()
     private val stripeRepository = mock<StripeRepository>()
-
-    @AfterTest
-    fun cleanup() {
-        testDispatcher.cleanupTestCoroutines()
-    }
 
     @Test
     fun `get with locale should retrieve with ordered payment methods`() =
-        testDispatcher.runBlockingTest {
+        runTest {
             whenever(
                 stripeRepository
                     .retrievePaymentIntentWithOrderedPaymentMethods(any(), any(), any())
@@ -59,7 +53,7 @@ internal class StripeIntentRepositoryTest {
 
     @Test
     fun `get with locale when ordered payment methods fails should fallback to retrievePaymentIntent()`() =
-        testDispatcher.runBlockingTest {
+        runTest {
             whenever(
                 stripeRepository
                     .retrievePaymentIntentWithOrderedPaymentMethods(any(), any(), any())
@@ -79,7 +73,7 @@ internal class StripeIntentRepositoryTest {
 
     @Test
     fun `get with null locale should call retrievePaymentIntent()`() =
-        testDispatcher.runBlockingTest {
+        runTest {
             whenever(stripeRepository.retrievePaymentIntent(any(), any(), any()))
                 .thenReturn(PaymentIntentFixtures.PI_WITH_SHIPPING)
 
@@ -92,7 +86,7 @@ internal class StripeIntentRepositoryTest {
 
     @Test
     fun `get without locale should retrieve ordered payment methods in default locale`() =
-        testDispatcher.runBlockingTest {
+        runTest {
             whenever(
                 stripeRepository
                     .retrievePaymentIntentWithOrderedPaymentMethods(any(), any(), any())
@@ -101,7 +95,8 @@ internal class StripeIntentRepositoryTest {
             val paymentIntent = StripeIntentRepository.Api(
                 stripeRepository,
                 { PaymentConfiguration(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY) },
-                testDispatcher
+                testDispatcher,
+                Locale.US
             ).get(PaymentIntentClientSecret("client_secret"))
 
             val localeArgumentCaptor: KArgumentCaptor<Locale> = argumentCaptor()

@@ -3,6 +3,7 @@ package com.stripe.android.model
 import android.os.Parcelable
 import androidx.annotation.RestrictTo
 import com.stripe.android.ObjectBuilder
+import com.stripe.android.core.model.StripeModel
 import com.stripe.android.model.parsers.PaymentMethodJsonParser
 import com.stripe.android.model.wallets.Wallet
 import kotlinx.parcelize.Parcelize
@@ -298,6 +299,13 @@ constructor(
         ),
         Klarna(
             "klarna",
+            isReusable = false,
+            isVoucher = false,
+            requiresMandate = false,
+            hasDelayedSettlement = false
+        ),
+        Affirm(
+            "affirm",
             isReusable = false,
             isVoucher = false,
             requiresMandate = false,
@@ -825,7 +833,7 @@ constructor(
         /**
          * The customer’s bank.
          *
-         * [netbanking.bank](https://stripe.com/docs/payments/netbanking/banks)
+         * [netbanking.bank](https://stripe.com/docs/js#stripe_create_payment_method-paymentMethodData-netbanking[bank])
          */
         @JvmField val bank: String?
     ) : TypeData() {

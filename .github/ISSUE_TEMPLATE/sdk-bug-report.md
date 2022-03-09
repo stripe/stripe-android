@@ -1,19 +1,11 @@
 ---
-name: "\U0001F41B SDK Bug report"
+name: "🐛 SDK Bug Report"
 about: Create a report to help us improve
 title: "[BUG] "
-labels: ''
+labels: 'bug'
 assignees: ''
 
 ---
-
-<!--
-Please only file issues here that you believe represent actual bugs for the Stripe Android SDK.
-
-If you're having general trouble with your Stripe integration, please reach out to support using the form at https://support.stripe.com/ (preferred) or via email to support@stripe.com.
-
-Otherwise, to make it easier to diagnose your issue, please fill out the following:
--->
 
 ## Summary
 <!-- A simple summary of the problems you're having. -->

@@ -1,5 +1,7 @@
 package com.stripe.android.model
 
+import com.stripe.android.core.model.InternalStripeFile
+import com.stripe.android.core.model.StripeModel
 import kotlinx.parcelize.Parcelize
 
 /**
@@ -64,4 +66,22 @@ data class StripeFile internal constructor(
      * [url](https://stripe.com/docs/api/files/object#file_object-url)
      */
     val url: String? = null
-) : StripeModel
+) : StripeModel {
+
+    /**
+     * Temporary method to convert [StripeFile] to [InternalStripeFile].
+     * TODO(ccen): Move StripeFile to stripe-core during the next major version bump.
+     */
+    internal companion object {
+        fun fromInternal(internalStripeFile: InternalStripeFile) = StripeFile(
+            internalStripeFile.id,
+            internalStripeFile.created,
+            internalStripeFile.filename,
+            StripeFilePurpose.fromCode(internalStripeFile.purpose?.code),
+            internalStripeFile.size,
+            internalStripeFile.title,
+            internalStripeFile.type,
+            internalStripeFile.url
+        )
+    }
+}

@@ -1,1 +1,25 @@
-*   @brnunes-stripe @ccen-stripe @michelleb-stripe @skyler-stripe 
+# global - fallback to this group if the following groups don't match
+*   @brnunes-stripe @michelleb-stripe @skyler-stripe @ccen-stripe @awush-stripe @jameswoo-stripe
+
+# payment sdk
+/payments/ @brnunes-stripe @michelleb-stripe @skyler-stripe @ccen-stripe @jameswoo-stripe
+/payments-core/ @brnunes-stripe @michelleb-stripe @skyler-stripe @ccen-stripe @jameswoo-stripe
+/paymentsheet/ @brnunes-stripe @michelleb-stripe @skyler-stripe @jameswoo-stripe
+/example/ @brnunes-stripe @michelleb-stripe @skyler-stripe @jameswoo-stripe
+/paymentsheet-example/ @brnunes-stripe @michelleb-stripe @skyler-stripe @jameswoo-stripe
+/wechatpay/ @brnunes-stripe @michelleb-stripe @skyler-stripe @ccen-stripe @jameswoo-stripe
+/stripe-test-e2e/ @brnunes-stripe @michelleb-stripe @skyler-stripe @jameswoo-stripe
+/link/ @brnunes-stripe @michelleb-stripe @skyler-stripe @jameswoo-stripe
+
+# stripecardscan sdk
+/stripecardscan/ @awush-stripe @ccen-stripe
+/stripecardscan-example/ @awush-stripe @ccen-stripe
+
+# identity sdk
+/identity/ @ccen-stripe @awush-stripe
+/identity-example/ @ccen-stripe @awush-stripe
+
+# shared modules
+/stripe-core/ @ccen-stripe
+/payments-ui-core/ @brnunes-stripe @michelleb-stripe @skyler-stripe @jameswoo-stripe
+/camera-core/ @ccen-stripe @awush-stripe

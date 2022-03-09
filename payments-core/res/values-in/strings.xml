@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+  <!-- Label for card number entry text field -->
+  <string name="acc_label_card_number">Nomor kartu</string>
+  <string name="acc_label_card_number_node">%s, Nomor kartu</string>
+  <string name="acc_label_cvc_node">%s, CVC</string>
+  <string name="acc_label_expiry_date">Tanggal kedaluwarsa</string>
+  <string name="acc_label_expiry_date_node">%s, Tanggal kedaluwarsa</string>
+  <!-- Caption for Zip Code field on address form (only shown when country is United States only) -->
+  <string name="acc_label_zip">Kode ZIP</string>
+  <!-- Short string for zip code (United States only) Please keep to 5 characters or less if possible. -->
+  <string name="acc_label_zip_short">ZIP</string>
+  <!-- Message displayed when a payment method is removed, stating its name. -->
+  <string name="added">%s Ditambahkan</string>
+  <!-- Error text indicating that city is required, used for all locations -->
+  <string name="address_city_required">Masukkan kota Anda</string>
+  <!-- Error text indicating country is invalid -->
+  <string name="address_country_invalid">Negara Anda tidak valid</string>
+  <!-- Error text indicating that county is required, used for UK addresses -->
+  <string name="address_county_required">Masukkan county Anda</string>
+  <!-- Caption for Address field on address form -->
+  <string name="address_label_address">Alamat</string>
+  <!-- Label for input requesting the first line of an address where , used for international addresses -->
+  <string name="address_label_address_line1_optional">Baris alamat ke-1 (opsional)</string>
+  <!-- Address line 2 placeholder for billing address form. -->
+  <string name="address_label_address_line2_optional">Baris alamat ke-2 (opsional)</string>
+  <!-- Label for input requesting the first line of an address where input is optional, used for US and Canada addresses -->
+  <string name="address_label_address_optional">Alamat (opsional)</string>
+  <!-- Label for input requesting apartment number (address line 2) where input is optional, used for US based addresses -->
+  <string name="address_label_apt_optional">Apt. (opsional)</string>
+  <!-- Label for input requesting city where input is optional, used for all locations -->
+  <string name="address_label_city_optional">Kota (opsional)</string>
+  <!-- Label for input requesting county where input is optional , used for UK based addresses -->
+  <string name="address_label_county_optional">County (opsional)</string>
+  <!-- Label for input requesting phone number, used for all locations -->
+  <string name="address_label_phone_number">Nomor telepon</string>
+  <!-- Label for input requesting phone number where input is optional, used for all locations -->
+  <string name="address_label_phone_number_optional">Nomor telepon (opsional)</string>
+  <!-- Label for input requesting postal code where input is optional, used for Canada based addresses -->
+  <string name="address_label_postal_code_optional">Kode pos (opsional)</string>
+  <!-- Label for input requesting postcode, used for UK based addresses -->
+  <string name="address_label_postcode">Kode pos</string>
+  <!-- Label for input requesting postcode where input is optional, used for UK based addresses -->
+  <string name="address_label_postcode_optional">Kode Pos (opsional)</string>
+  <!-- Label for input requesting province where province is optional, used for canadian addresses -->
+  <string name="address_label_province_optional">Provinsi (opsional)</string>
+  <!-- Label for input requesting the region, used for international addresses -->
+  <string name="address_label_region_generic">Negara Bagian / Provinsi / Wilayah</string>
+  <!-- Label for input requesting the region where input is optional, used for international addresses -->
+  <string name="address_label_region_generic_optional">Negara Bagian / Provinsi / Wilayah (opsional)</string>
+  <!-- Label for input requesting state where input is optional, used for US based addresses -->
+  <string name="address_label_state_optional">Negara Bagian (opsional)</string>
+  <!-- Label for input requesting zip code where input is optional, used for US based addresses -->
+  <string name="address_label_zip_code_optional">Kode ZIP (opsional)</string>
+  <!-- Label for input requesting postal code, used for international addresses -->
+  <string name="address_label_zip_postal_code">Kode Pos/ZIP</string>
+  <!-- Label for input requesting postal code where input is optional, used for international addresses -->
+  <string name="address_label_zip_postal_code_optional">Kode Pos / ZIP (opsional)</string>
+  <!-- Error text indicating name is required -->
+  <string name="address_name_required">Masukkan nama Anda</string>
+  <!-- Error text indicating that phone number is required, used for all addresses -->
+  <string name="address_phone_number_required">Masukkan nomor telepon Anda</string>
+  <!-- Error message for when postal code in form is invalid -->
+  <string name="address_postal_code_invalid">Kode pos Anda tidak valid.</string>
+  <!-- Error text indicating postcode is invalid, used for UK addresses -->
+  <string name="address_postcode_invalid">Kode pos Anda tidak valid</string>
+  <!-- Error text indicating that province is required, used for Canada addresses -->
+  <string name="address_province_required">Masukkan provinsi Anda</string>
+  <!-- Error text indicating that region is required, used for international addresses -->
+  <string name="address_region_generic_required">Masukkan Negara Bagian/Provinsi/Wilayah Anda</string>
+  <!-- Error text indicating that address is required, used for all locations -->
+  <string name="address_required">Masukkan alamat Anda</string>
+  <!-- Error text indicating that state is required, used for US addresses -->
+  <string name="address_state_required">Masukkan negara bagian Anda</string>
+  <!-- Error text indicating zip code is invalid, used for US addresses -->
+  <string name="address_zip_invalid">Kode ZIP Anda tidak valid.</string>
+  <!-- Error text indicating zip/ postal code is invalid, used for international addresses -->
+  <string name="address_zip_postal_invalid">Kode Pos/ZIP Anda tidak valid</string>
+  <!-- BECS Debit Widget - mandate acceptance -->
+  <string name="becs_mandate_acceptance">\n    Dengan memberikan detail rekening bank Anda dan mengonfirmasi pembayaran ini, berarti Anda setuju dengan\n    Permintaan Debit Langsung ini dan perjanjian layanan Permintaan Debit Langsung, serta mengotorisasi\n    Stripe Payments Australia Pty Ltd ACN 160 180 343 dengan nomor Identifikasi Pengguna Debit Langsung 507156\n    (“Stripe”) untuk mendebit rekening Anda melalui Bulk Electronic Clearing System (BECS) atas nama\n    %1$s (\"Merchant\") sejumlah yang dikomunikasikan secara terpisah kepada Anda\n    oleh Merchant. Anda menyatakan diri sebagai pemilik akun atau\n    penandatangan yang diotorisasi atas akun yang tercantum di atas.\n    </string>
+  <!-- Placeholder text for Account number entry field for BECS Debit. -->
+  <string name="becs_widget_account_number">Nomor rekening</string>
+  <!-- BECS Debit Widget - account number field - incomplete error message -->
+  <string name="becs_widget_account_number_incomplete">Nomor rekening Anda tidak lengkap.</string>
+  <!-- BECS Debit Widget - account number field - required error message -->
+  <string name="becs_widget_account_number_required">Nomor rekening Anda harus diisi.</string>
+  <!-- Placeholder text for BSB Number entry field for BECS Debit. -->
+  <string name="becs_widget_bsb">BSB</string>
+  <!-- Error string displayed to user when they have entered an incomplete BSB number. BSB refers to an Australian bank account number -->
+  <string name="becs_widget_bsb_incomplete">BSB yang Anda masukkan tidak lengkap.</string>
+  <!-- Error string displayed to user when they enter in an invalid BSB number. &quot;BSB&quot; refers to an Australian bank account. -->
+  <string name="becs_widget_bsb_invalid">BSB yang Anda masukkan tidak valid.</string>
+  <!-- BECS Debit Widget - email address field - label -->
+  <string name="becs_widget_email">Alamat Email</string>
+  <!-- BECS Debit Widget - email address field - invalid error message -->
+  <string name="becs_widget_email_invalid">Alamat email Anda tidak valid.</string>
+  <!-- BECS Debit Widget - email address field - required error message -->
+  <string name="becs_widget_email_required">Alamat email Anda harus diisi.</string>
+  <!-- BECS Debit Widget - name field - label -->
+  <string name="becs_widget_name">Nama</string>
+  <!-- BECS Debit Widget - name field - required error message -->
+  <string name="becs_widget_name_required">Nama Anda harus diisi.</string>
+  <!-- Details of a saved card. &apos;{card brand} ending in {last 4}&apos; e.g. &apos;VISA ending in 4242&apos; -->
+  <string name="card_ending_in">%1$s berakhiran %2$s</string>
+  <!-- Text for close button -->
+  <string name="close">Tutup</string>
+  <!-- Accessibility action for deleting a payment method -->
+  <string name="delete_payment_method">Hapus Metode Pembayaran</string>
+  <string name="delete_payment_method_prompt_title">Hapus metode pembayaran?</string>
+  <!-- label for text field to enter card expiry -->
+  <string name="expiry_date_hint">BB/TT</string>
+  <string name="expiry_label_short">Kedaluwarsa</string>
+  <!-- Label that will show that an FPX bank is offline. For example, &quot;AmBank - Offline&quot; -->
+  <string name="fpx_bank_offline">%s - Offline</string>
+  <!-- Error message for card details form when expiration date isn&apos;t entered completely -->
+  <string name="incomplete_expiry_date">Tanggal kedaluwarsa kartu Anda tidak lengkap.</string>
+  <string name="invalid_card_number">Nomor kartu Anda tidak valid.</string>
+  <!-- Error message for card entry form when CVC/CVV is invalid -->
+  <string name="invalid_cvc">Kode keamanan kartu Anda tidak valid.</string>
+  <!-- String to describe an invalid month in expiry date. -->
+  <string name="invalid_expiry_month">Bulan kedaluwarsa kartu Anda tidak valid.</string>
+  <!-- String to describe an invalid year in expiry date. -->
+  <string name="invalid_expiry_year">Tahun kedaluwarsa kartu Anda tidak valid.</string>
+  <!-- Shipping form error message -->
+  <string name="invalid_shipping_information">Alamat Pengiriman Tidak Valid</string>
+  <!-- Error message for when postal code in form is incomplete -->
+  <string name="invalid_zip">Kode pos Anda tidak lengkap.</string>
+  <string name="payment_method_add_new_card">Tambahkan kartu baru...</string>
+  <string name="payment_method_add_new_fpx">Pilih Rekening Bank (FPX)…</string>
+  <!-- Label for free shipping method -->
+  <string name="price_free">Gratis</string>
+  <!-- Message displayed when a payment method is removed, stating its name. -->
+  <string name="removed">%s Dihapus</string>
+  <string name="secure_checkout">Checkout Aman</string>
+  <!-- Error when 3DS2 authentication failed (e.g. customer entered the wrong code) -->
+  <string name="stripe_failure_reason_authentication">Kami tidak dapat mengautentikasi metode pembayaran Anda. Pilih metode pembayaran yang berbeda dan coba lagi.</string>
+  <!-- Error when 3DS2 authentication timed out. -->
+  <string name="stripe_failure_reason_timed_out">Waktu autentikasi metode pembayaran Anda habis -- coba lagi</string>
+  <!-- label for text field to enter card expiry -->
+  <string name="stripe_paymentsheet_expiration_date_hint">BB / TT</string>
+  <!-- When there are multiple browsers and web authentication is required, this will show in a window asking which browser they want to use to "Verify your payment" -->
+  <string name="stripe_verify_your_payment">Verifikasikan pembayaran Anda</string>
+  <string name="title_add_a_card">Tambahkan sebuah Kartu</string>
+  <!-- Screen title telling users they should add an address -->
+  <string name="title_add_an_address">Atur Alamat</string>
+  <!-- Label for Bank Account selection or detail entry form -->
+  <string name="title_bank_account">Rekening bank</string>
+  <!-- Title for Payment Method screen -->
+  <string name="title_payment_method">Metode Pembayaran</string>
+  <!-- Screen title telling users they should select a shipping address -->
+  <string name="title_select_shipping_method">Pilih Metode Pengiriman</string>
+</resources>

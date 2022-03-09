@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/identity_nav_graph"
+    app:startDestination="@id/consentFragment">
+
+    <action
+        android:id="@+id/action_camera_permission_denied"
+        app:destination="@id/cameraPermissionDeniedFragment" />
+
+    <action
+        android:id="@+id/action_camera_error"
+        app:destination="@id/cameraErrorFragment" />
+
+    <action
+        android:id="@+id/action_global_errorFragment"
+        app:destination="@id/errorFragment" />
+
+    <action
+        android:id="@+id/action_global_confirmationFragment"
+        app:destination="@id/confirmationFragment" />
+
+    <fragment
+        android:id="@+id/consentFragment"
+        android:name="com.stripe.android.identity.navigation.ConsentFragment"
+        android:label="consent_fragment"
+        tools:layout="@layout/consent_fragment">
+        <action
+            android:id="@+id/action_consentFragment_to_docSelectionFragment"
+            app:destination="@id/docSelectionFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/IDScanFragment"
+        android:name="com.stripe.android.identity.navigation.IDScanFragment"
+        android:label="id_scan_fragment"
+        tools:layout="@layout/id_scan_fragment">
+        <action
+            android:id="@+id/action_IDScanFragment_to_confirmationFragment"
+            app:destination="@id/confirmationFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/passportScanFragment"
+        android:name="com.stripe.android.identity.navigation.PassportScanFragment"
+        android:label="passport_scan_fragment"
+        tools:layout="@layout/passport_scan_fragment">
+        <action
+            android:id="@+id/action_passportScanFragment_to_confirmationFragment"
+            app:destination="@id/confirmationFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/driverLicenseScanFragment"
+        android:name="com.stripe.android.identity.navigation.DriverLicenseScanFragment"
+        android:label="driver_license_scan_fragment"
+        tools:layout="@layout/driver_license_scan_fragment">
+        <action
+            android:id="@+id/action_driverLicenseScanFragment_to_confirmationFragment"
+            app:destination="@id/confirmationFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/IDUploadFragment"
+        android:name="com.stripe.android.identity.navigation.IDUploadFragment"
+        android:label="id_upload_fragment"
+        tools:layout="@layout/id_upload_fragment">
+        <action
+            android:id="@+id/action_IDUploadFragment_to_confirmationFragment"
+            app:destination="@id/confirmationFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/passportUploadFragment"
+        android:name="com.stripe.android.identity.navigation.PassportUploadFragment"
+        android:label="passport_upload_fragment"
+        tools:layout="@layout/passport_upload_fragment">
+        <action
+            android:id="@+id/action_passportUploadFragment_to_confirmationFragment"
+            app:destination="@id/confirmationFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/driverLicenseUploadFragment"
+        android:name="com.stripe.android.identity.navigation.DriverLicenseUploadFragment"
+        android:label="driver_license_upload_fragment"
+        tools:layout="@layout/driver_license_upload_fragment">
+        <action
+            android:id="@+id/action_driverLicenseUploadFragment_to_confirmationFragment"
+            app:destination="@id/confirmationFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/cameraPermissionDeniedFragment"
+        android:name="com.stripe.android.identity.navigation.CameraPermissionDeniedFragment"
+        android:label="camera_permission_denied_fragment"
+        tools:layout="@layout/camera_permission_denied_fragment">
+        <argument
+            android:name="scanType"
+            app:argType="com.stripe.android.identity.states.IdentityScanState$ScanType" />
+        <action
+            android:id="@+id/action_cameraPermissionDeniedFragment_to_passportUploadFragment"
+            app:destination="@id/passportUploadFragment" />
+        <action
+            android:id="@+id/action_cameraPermissionDeniedFragment_to_IDUploadFragment"
+            app:destination="@id/IDUploadFragment" />
+        <action
+            android:id="@+id/action_cameraPermissionDeniedFragment_to_driverLicenseUploadFragment"
+            app:destination="@id/driverLicenseUploadFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/cameraErrorFragment"
+        android:name="com.stripe.android.identity.navigation.CameraErrorFragment"
+        android:label="camera_error_fragment"
+        tools:layout="@layout/camera_error_fragment" />
+    <fragment
+        android:id="@+id/confirmationFragment"
+        android:name="com.stripe.android.identity.navigation.ConfirmationFragment"
+        android:label="confirmation_fragment"
+        tools:layout="@layout/confirmation_fragment" />
+    <fragment
+        android:id="@+id/docSelectionFragment"
+        android:name="com.stripe.android.identity.navigation.DocSelectionFragment"
+        android:label="doc_selection_fragment"
+        tools:layout="@layout/doc_selection_fragment">
+        <action
+            android:id="@+id/action_docSelectionFragment_to_passportScanFragment"
+            app:destination="@id/passportScanFragment" />
+        <action
+            android:id="@+id/action_docSelectionFragment_to_IDScanFragment"
+            app:destination="@id/IDScanFragment" />
+        <action
+            android:id="@+id/action_docSelectionFragment_to_driverLicenseScanFragment"
+            app:destination="@id/driverLicenseScanFragment" />
+        <action
+            android:id="@+id/action_docSelectionFragment_to_passportUploadFragment"
+            app:destination="@id/passportUploadFragment" />
+        <action
+            android:id="@+id/action_docSelectionFragment_to_IDUploadFragment"
+            app:destination="@id/IDUploadFragment" />
+        <action
+            android:id="@+id/action_docSelectionFragment_to_driverLicenseUploadFragment"
+            app:destination="@id/driverLicenseUploadFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/errorFragment"
+        android:name="com.stripe.android.identity.navigation.ErrorFragment"
+        android:label="ErrorFragment">
+        <argument
+            android:name="errorTitle"
+            android:defaultValue=""
+            app:argType="string" />
+        <argument
+            android:name="errorContent"
+            android:defaultValue=""
+            app:argType="string" />
+        <argument
+            android:name="goBackButtonText"
+            android:defaultValue=""
+            app:argType="string" />
+        <argument
+            android:name="goBackButtonDestination"
+            android:defaultValue="0"
+            app:argType="integer" />
+        <action
+            android:id="@+id/action_errorFragment_to_consentFragment"
+            app:destination="@id/consentFragment" />
+    </fragment>
+</navigation>

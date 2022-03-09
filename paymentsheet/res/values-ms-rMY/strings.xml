@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+  <!-- Used for accessibility to describe the button on the payment sheet list of options to add a new payment method. -->
+  <string name="add_new_payment_method">Tambah kaedah pembayaran baharu</string>
+  <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
+  <string name="bank_account_ending_in">Alih keluar akaun bank yang berakhir dengan %s</string>
+  <!-- Button title to cancel action in an alert -->
+  <string name="cancel">Batalkan</string>
+  <!-- Done button title -->
+  <string name="done">Selesai</string>
+  <!-- Button title to enter editing mode -->
+  <string name="edit">Edit</string>
+  <!-- Button title for confirmation alert to remove a saved payment method
+   Text for remove button -->
+  <string name="remove">Alih Keluar</string>
+  <!-- Generic error message shown when payment cannot be processed. -->
+  <string name="stripe_failure_connection_error">Kami mengalami masalah untuk membuat sambungan ke penyedia pembayaran kami. Sila periksa sambungan Internet anda dan cuba lagi.</string>
+  <!-- When an internal error is reported when a google pay payment is started. -->
+  <string name="stripe_google_pay_error_internal">Ada ralat dalaman berlaku.</string>
+  <!-- Text for a button that, when tapped, displays another screen where the customer can add payment method details -->
+  <string name="stripe_paymentsheet_add_payment_method_button_label">+ Tambah</string>
+  <!-- Card details entry form header title -->
+  <string name="stripe_paymentsheet_add_payment_method_card_information">Maklumat kad</string>
+  <!-- Country selector and postal code entry form header title -->
+  <string name="stripe_paymentsheet_add_payment_method_country_or_region">Negara atau rantau</string>
+  <!-- Title shown above a form where the customer can enter payment information like credit card details, email, billing address, etc. -->
+  <string name="stripe_paymentsheet_add_payment_method_title">Tambah maklumat pembayaran anda</string>
+  <!-- Text for back button -->
+  <string name="stripe_paymentsheet_back">Undur</string>
+  <string name="stripe_paymentsheet_close">Tutup</string>
+  <!-- Text for continue button -->
+  <string name="stripe_paymentsheet_continue_button_label">Teruskan</string>
+  <!-- Title of a section containing multiple payment methods that can selected and will collect the payment information from the user. -->
+  <string name="stripe_paymentsheet_or_pay_using">Atau bayar menggunakan</string>
+  <!-- Title of a section containing a card form that will collect the payment information from the user. -->
+  <string name="stripe_paymentsheet_or_pay_with_card">Atau bayar dengan kad</string>
+  <!-- Label of a button that initiates payment when tapped -->
+  <string name="stripe_paymentsheet_pay_button_amount">Bayar %s</string>
+  <!-- Label for a button that starts processing the payment. -->
+  <string name="stripe_paymentsheet_pay_button_label">Bayar</string>
+  <!-- Payment Method type brand name  -->
+  <string name="stripe_paymentsheet_payment_method_afterpay_clearpay">Afterpay</string>
+  <!-- Title for credit card number entry field -->
+  <string name="stripe_paymentsheet_payment_method_card">Kad</string>
+  <!-- Payment method brand name -->
+  <string name="stripe_paymentsheet_payment_method_sepa_debit">Debit SEPA</string>
+  <!-- Label of a button that, when tapped, initiates payment, becomes disabled, and displays this text -->
+  <string name="stripe_paymentsheet_primary_button_processing">Sedang diproses...</string>
+  <!-- Content for alert popup prompting to confirm removing saved payment method. -->
+  <string name="stripe_paymentsheet_remove_pm">Alih keluar %s</string>
+  <!-- The label of a switch indicating whether to save the payment method for future payments. -->
+  <string name="stripe_paymentsheet_save_for_future_payments">Simpan untuk pembayaran masa hadapan</string>
+  <!-- The label of a switch indicating whether to save the user&apos;s card for future payments to this merchant -->
+  <string name="stripe_paymentsheet_save_this_card_with_merchant_name">Simpan kad ini untuk pembayaran %s masa hadapan</string>
+  <!-- Title shown above a carousel containing the customer&apos;s payment methods -->
+  <string name="stripe_paymentsheet_select_payment_method">Pilih kaedah pembayaran anda</string>
+  <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->
+  <string name="stripe_paymentsheet_setup_button_label">Sediakan</string>
+  <!-- Label indicating the total amount that the user is authorizing (e.g. "Total: $25.00") -->
+  <string name="stripe_paymentsheet_total_amount">Jumlah: %s</string>
+</resources>

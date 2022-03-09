@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+  <!-- Label for input requesting address line 2, used for international addresses -->
+  <string name="address_label_address_line2">Linia adresu 2</string>
+  <!-- Used to describe address in United Arab Emirates -->
+  <string name="address_label_ae_emirate">Emiraty</string>
+  <!-- Label of an address field -->
+  <string name="address_label_au_suburb_or_city">Przedmieścia lub miasto</string>
+  <!-- Label of an address field -->
+  <string name="address_label_bb_jm_parish">Parafia</string>
+  <!-- Used to describe a field of an address -->
+  <string name="address_label_cedex">Cedex</string>
+  <!-- Label of an address field -->
+  <string name="address_label_department">Departament</string>
+  <!-- Label for the district field on an address form -->
+  <string name="address_label_district">Dystrykt</string>
+  <!-- Label of an address field in hk -->
+  <string name="address_label_hk_area">Obszar</string>
+  <!-- Label of an address field -->
+  <string name="address_label_ie_eircode">Eircode</string>
+  <!-- Used to describe an address field in Ireland -->
+  <string name="address_label_ie_townland">Okręg administracyjny</string>
+  <!-- Used to describe postal code in India -->
+  <string name="address_label_in_pin">PIN</string>
+  <!-- Used to describe part of an address -->
+  <string name="address_label_island">Wyspa</string>
+  <!-- Label of an address field -->
+  <string name="address_label_jp_prefecture">Prefektura</string>
+  <!-- Label of an address field -->
+  <string name="address_label_kr_do_si">Do Si</string>
+  <!-- Used to describe a field of an address -->
+  <string name="address_label_neighborhood">Dzielnica</string>
+  <!-- Label of an address field -->
+  <string name="address_label_oblast">Obwód</string>
+  <!-- Used to describe a field of an address -->
+  <string name="address_label_post_town">Poczta lub miasto</string>
+  <!-- Label of an address field -->
+  <string name="address_label_suburb">Przedmieścia</string>
+  <!-- Used to describe an address field. -->
+  <string name="address_label_village_township">Wieś lub miasto</string>
+  <!-- Billing address section title for card form entry. -->
+  <string name="billing_details">Adres rozliczeniowy</string>
+  <!-- Used when a required field is blank and submit is clicked. -->
+  <string name="blank_and_required">To pole nie może być puste.</string>
+  <!-- Used for accessibility to indicate that when you press the dropdown arrow on a form (such as a country or bank), it will bring up a menu to allow you to change the value. -->
+  <string name="change">Zmień</string>
+  <!-- Caption for Email field on address form -->
+  <string name="email">Adres e-mail</string>
+  <!-- Error message when email is invalid -->
+  <string name="email_is_invalid">Adres e-mail jest nieprawidłowy.</string>
+  <!-- Label for the field containing the dropdown of EPS Banks -->
+  <string name="eps_bank">Bank EPS</string>
+  <!-- The label of a text field that is optional. For example, 'Email (optional)' or 'Name (optional) -->
+  <string name="form_label_optional">%s (opcjonalnie)</string>
+  <!-- An error message displayed when the customer's IBAN is incomplete. -->
+  <string name="iban_incomplete">Podany IBAN jest niepełny.</string>
+  <!-- An error message displayed when the customer's iban is invalid. -->
+  <string name="iban_invalid">Podany IBAN jest nieprawidłowy.</string>
+  <!-- An error message displayed when the IBAN country code is not supported. -->
+  <string name="iban_invalid_country">Podany IBAN jest nieprawidłowy. „%s” nie jest prawidłowym kodem kraju.</string>
+  <!-- An error message displayed when the IBAN does not start with a two-letter country code. -->
+  <string name="iban_invalid_start">IBAN powinien się zaczynać od dwuliterowego kodu kraju.</string>
+  <!-- iDEAL bank section title for iDEAL form entry. -->
+  <string name="ideal_bank">iDEAL Bank</string>
+  <!-- Klarna buy now or pay later copy -->
+  <string name="klarna_buy_now_pay_later">Kup teraz lub zapłać za pomocą Klarna później.</string>
+  <!-- Klarna pay later copy -->
+  <string name="klarna_pay_later">Zapłać później za pomocą Klarna.</string>
+  <!-- Label on the dropdown to select the Przelewy24 Bank -->
+  <string name="p24_bank">Bank - Przelewy24</string>
+  <!-- Next to the save payment method users will see the merchant name: "Save for future Example.inc Payments" -->
+  <string name="save_for_future_payments_with_merchant_name">Zapisz do przyszłych %s płatności</string>
+  <!-- SEPA mandate text -->
+  <string name="sepa_mandate">Podając dane płatności i potwierdzając tę płatność, upoważniasz (A) %s i Stripe, naszego dostawcę usług płatności, do wysłania instrukcji do Twojego banku w celu obciążenia Twojego konta oraz (B) Twój bank do obciążenia Twojego konta zgodnie z tymi instrukcjami. W ramach swoich praw jesteś uprawniony(-a) do otrzymania zwrotu od Twojego banku zgodnie z zasadami i warunkami umowy z bankiem. Zwrot należy odebrać w ciągu 8 tygodni, licząc od daty obciążenia konta. Twoje prawa są wyjaśnione w oświadczeniu, które możesz otrzymać z banku. Wyrażasz zgodę na otrzymywanie powiadomień w przypadku przyszłych obciążeń do 2 dni przed ich wystąpieniem.</string>
+</resources>

@@ -9,12 +9,11 @@ import com.stripe.android.ApiResultCallback
 import com.stripe.android.CustomerSession
 import com.stripe.android.PaymentSession
 import com.stripe.android.Stripe
-import com.stripe.android.StripeError
+import com.stripe.android.core.StripeError
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.view.i18n.ErrorMessageTranslator
 import com.stripe.android.view.i18n.TranslatorManager
-import java.lang.RuntimeException
 
 internal class AddPaymentMethodViewModel(
     private val stripe: Stripe,
@@ -90,7 +89,8 @@ internal class AddPaymentMethodViewModel(
         private val stripe: Stripe,
         private val args: AddPaymentMethodActivityStarter.Args
     ) : ViewModelProvider.Factory {
-        override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+        @Suppress("UNCHECKED_CAST")
+        override fun <T : ViewModel> create(modelClass: Class<T>): T {
             return AddPaymentMethodViewModel(stripe, args) as T
         }
     }

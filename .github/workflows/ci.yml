@@ -4,6 +4,10 @@ on:
     branches:
       - master
   pull_request:
+
+env:
+  STRIPE_END_TO_END_TESTS_BACKEND_URL: ${{ secrets.STRIPE_END_TO_END_TESTS_BACKEND_URL }}
+
 jobs:
   check:
     name: Check
@@ -26,6 +30,8 @@ jobs:
             ${{ runner.os }}-gradle-
       - name: Ktlint
         run: ./gradlew ktlint
+      - name: Detekt
+        run: ./gradlew detekt
       - name: Checkstyle
         run: ./gradlew checkstyle
       - name: Lint
@@ -56,7 +62,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-
       - name: Unit tests
-        run: ./gradlew :payments-core:testDebugUnitTest  :paymentsheet:testDebugUnitTest
+        run: bash scripts/execute_unittests_for_changed_modules.sh
       - uses: actions/upload-artifact@v2
         if: failure()
         with:
@@ -66,7 +72,7 @@ jobs:
   end-to-end-tests:
     name: End-to-end tests
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v2
       - uses: gradle/wrapper-validation-action@v1
@@ -83,8 +89,6 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-
       - name: End-to-end tests
-        env:
-          STRIPE_END_TO_END_TESTS_BACKEND_URL: ${{ secrets.STRIPE_END_TO_END_TESTS_BACKEND_URL }}
         run: ./gradlew :stripe-test-e2e:testDebugUnitTest
       - uses: actions/upload-artifact@v2
         if: failure()

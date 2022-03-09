@@ -4,14 +4,17 @@ import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.cards.Bin
 import com.stripe.android.core.exception.APIConnectionException
+import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.exception.InvalidRequestException
-import com.stripe.android.exception.APIException
+import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.exception.AuthenticationException
 import com.stripe.android.exception.CardException
 import com.stripe.android.model.BankStatuses
 import com.stripe.android.model.CardMetadata
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
+import com.stripe.android.model.ConsumerSession
+import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.Customer
 import com.stripe.android.model.ListPaymentMethodsParams
 import com.stripe.android.model.PaymentIntent
@@ -386,4 +389,37 @@ abstract class StripeRepository {
     internal abstract suspend fun createRadarSession(
         requestOptions: ApiRequest.Options
     ): RadarSession?
+
+    // Link endpoints
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    abstract suspend fun lookupConsumerSession(
+        email: String,
+        requestOptions: ApiRequest.Options
+    ): ConsumerSessionLookup?
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    abstract suspend fun consumerSignUp(
+        email: String,
+        phoneNumber: String,
+        country: String,
+        cookies: String?,
+        requestOptions: ApiRequest.Options
+    ): ConsumerSession?
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    abstract suspend fun startConsumerVerification(
+        consumerSessionClientSecret: String,
+        locale: Locale,
+        cookies: String?,
+        requestOptions: ApiRequest.Options
+    ): ConsumerSession?
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    abstract suspend fun confirmConsumerVerification(
+        consumerSessionClientSecret: String,
+        verificationCode: String,
+        cookies: String?,
+        requestOptions: ApiRequest.Options
+    ): ConsumerSession?
 }

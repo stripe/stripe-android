@@ -6,34 +6,38 @@ import androidx.annotation.StringRes
 import androidx.lifecycle.asLiveData
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.payments.core.injection.DUMMY_INJECTOR_KEY
-import com.stripe.android.payments.core.injection.Injectable
-import com.stripe.android.payments.core.injection.Injector
-import com.stripe.android.payments.core.injection.WeakMapInjectorRegistry
+import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
+import com.stripe.android.core.injection.Injectable
+import com.stripe.android.core.injection.Injector
+import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.COMPOSE_FRAGMENT_ARGS
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.address.AddressFieldElementRepository
-import com.stripe.android.paymentsheet.elements.AddressElement
-import com.stripe.android.paymentsheet.elements.BankRepository
-import com.stripe.android.paymentsheet.elements.CountrySpec
-import com.stripe.android.paymentsheet.elements.EmailSpec
-import com.stripe.android.paymentsheet.elements.IdentifierSpec
-import com.stripe.android.paymentsheet.elements.LayoutSpec
-import com.stripe.android.paymentsheet.elements.ResourceRepository
-import com.stripe.android.paymentsheet.elements.RowElement
-import com.stripe.android.paymentsheet.elements.SaveForFutureUseController
-import com.stripe.android.paymentsheet.elements.SaveForFutureUseSpec
-import com.stripe.android.paymentsheet.elements.SectionElement
-import com.stripe.android.paymentsheet.elements.SectionSingleFieldElement
-import com.stripe.android.paymentsheet.elements.SectionSpec
-import com.stripe.android.paymentsheet.elements.SimpleTextSpec.Companion.NAME
-import com.stripe.android.paymentsheet.elements.TextFieldController
 import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.ui.core.address.AddressFieldElementRepository
+import com.stripe.android.ui.core.elements.AddressElement
+import com.stripe.android.ui.core.elements.BankRepository
+import com.stripe.android.ui.core.elements.CountrySpec
+import com.stripe.android.ui.core.elements.EmailSpec
+import com.stripe.android.ui.core.elements.IdentifierSpec
+import com.stripe.android.ui.core.elements.LayoutSpec
+import com.stripe.android.ui.core.elements.RowElement
+import com.stripe.android.ui.core.elements.SaveForFutureUseController
+import com.stripe.android.ui.core.elements.SaveForFutureUseElement
+import com.stripe.android.ui.core.elements.SaveForFutureUseSpec
+import com.stripe.android.ui.core.elements.SectionElement
+import com.stripe.android.ui.core.elements.SectionSingleFieldElement
+import com.stripe.android.ui.core.elements.SectionSpec
+import com.stripe.android.ui.core.elements.SimpleTextSpec.Companion.NAME
+import com.stripe.android.ui.core.elements.TextFieldController
+import com.stripe.android.ui.core.forms.SepaDebitForm
+import com.stripe.android.ui.core.forms.SofortForm
+import com.stripe.android.ui.core.forms.resources.StaticResourceRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertNotNull
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -48,6 +52,8 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.shadows.ShadowLooper
 import javax.inject.Provider
 
+@ExperimentalCoroutinesApi
+@FlowPreview
 @RunWith(RobolectricTestRunner::class)
 internal class FormViewModelTest {
     private val emailSection =
@@ -58,7 +64,7 @@ internal class FormViewModelTest {
     )
 
     private val resourceRepository =
-        ResourceRepository(
+        StaticResourceRepository(
             BankRepository(
                 ApplicationProvider.getApplicationContext<Context>().resources
             ),
@@ -97,12 +103,12 @@ internal class FormViewModelTest {
         verify(factorySpy, times(0)).fallbackInitialize(any())
         assertThat(createdViewModel).isEqualTo(mockViewModel)
 
-        WeakMapInjectorRegistry.staticCacheMap.clear()
+        WeakMapInjectorRegistry.clear()
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
     @Test
-    fun `Factory gets initialized with fallback when no Injector is available`() = runBlockingTest {
+    fun `Factory gets initialized with fallback when no Injector is available`() = runTest {
         val config = COMPOSE_FRAGMENT_ARGS.copy(injectorKey = DUMMY_INJECTOR_KEY)
         val factory = FormViewModel.Factory(
             config,
@@ -119,7 +125,7 @@ internal class FormViewModelTest {
     }
 
     @Test
-    fun `Verify setting save for future use`() {
+    fun `Verify setting save for future use`() = runTest {
         val args = COMPOSE_FRAGMENT_ARGS
         val formViewModel = FormViewModel(
             LayoutSpec.create(
@@ -132,7 +138,7 @@ internal class FormViewModelTest {
             transformSpecToElement = TransformSpecToElement(resourceRepository, args)
         )
 
-        val values = mutableListOf<Boolean>()
+        val values = mutableListOf<Boolean?>()
         formViewModel.saveForFutureUse.asLiveData()
             .observeForever {
                 values.add(it)
@@ -165,7 +171,7 @@ internal class FormViewModelTest {
             }
         assertThat(values[0]).isEmpty()
 
-        formViewModel.setSaveForFutureUseVisibility(false)
+        formViewModel.saveForFutureUseVisible.value = false
 
         ShadowLooper.runUiThreadTasksIncludingDelayedTasks()
 
@@ -173,7 +179,7 @@ internal class FormViewModelTest {
     }
 
     @Test
-    fun `Verify setting section as hidden sets sub-fields as hidden as well`() {
+    fun `Verify setting section as hidden sets sub-fields as hidden as well`() = runTest {
         val args = COMPOSE_FRAGMENT_ARGS
         val formViewModel = FormViewModel(
             LayoutSpec.create(
@@ -203,89 +209,86 @@ internal class FormViewModelTest {
 
     @ExperimentalCoroutinesApi
     @Test
-    fun `Verify if a field is hidden and valid it is not in the completeFormValues`() =
-        runBlocking {
-            // Here we have one hidden and one required field, country will always be in the result,
-            //  and name only if saveForFutureUse is true
-            val args = COMPOSE_FRAGMENT_ARGS
-            val formViewModel = FormViewModel(
-                LayoutSpec.create(
-                    emailSection,
-                    countrySection,
-                    SaveForFutureUseSpec(listOf(emailSection))
-                ),
-                args,
-                resourceRepository = resourceRepository,
-                transformSpecToElement = TransformSpecToElement(resourceRepository, args)
-            )
+    fun `Verify if a field is hidden and valid it is not in the completeFormValues`() = runTest {
+        // Here we have one hidden and one required field, country will always be in the result,
+        //  and name only if saveForFutureUse is true
+        val args = COMPOSE_FRAGMENT_ARGS
+        val formViewModel = FormViewModel(
+            LayoutSpec.create(
+                emailSection,
+                countrySection,
+                SaveForFutureUseSpec(listOf(emailSection))
+            ),
+            args,
+            resourceRepository = resourceRepository,
+            transformSpecToElement = TransformSpecToElement(resourceRepository, args)
+        )
 
-            val saveForFutureUseController = formViewModel.elements.map { it.controller }
-                .filterIsInstance(SaveForFutureUseController::class.java).first()
-            val emailController =
-                getSectionFieldTextControllerWithLabel(formViewModel, R.string.email)
+        val saveForFutureUseController = formViewModel.elements.first()!!.map { it.controller }
+            .filterIsInstance(SaveForFutureUseController::class.java).first()
+        val emailController =
+            getSectionFieldTextControllerWithLabel(formViewModel, R.string.email)
 
-            // Add text to the name to make it valid
-            emailController?.onValueChange("email@valid.com")
+        // Add text to the name to make it valid
+        emailController?.onValueChange("email@valid.com")
 
-            // Verify formFieldValues contains email
-            assertThat(
-                formViewModel.completeFormValues.first()?.fieldValuePairs
-            ).containsKey(
-                emailSection.fields[0].identifier
-            )
+        // Verify formFieldValues contains email
+        assertThat(
+            formViewModel.completeFormValues.first()?.fieldValuePairs
+        ).containsKey(
+            emailSection.fields[0].identifier
+        )
 
-            saveForFutureUseController.onValueChange(false)
+        saveForFutureUseController.onValueChange(false)
 
-            // Verify formFieldValues does not contain email
-            assertThat(formViewModel.completeFormValues.first()?.fieldValuePairs).doesNotContainKey(
-                emailSection.identifier
-            )
-        }
+        // Verify formFieldValues does not contain email
+        assertThat(formViewModel.completeFormValues.first()?.fieldValuePairs).doesNotContainKey(
+            emailSection.identifier
+        )
+    }
 
     @ExperimentalCoroutinesApi
     @Test
-    fun `Hidden invalid fields arent in the formViewValue and has no effect on complete state`() {
-        runBlocking {
-            // Here we have one hidden and one required field, country will always be in the result,
-            //  and name only if saveForFutureUse is true
-            val args = COMPOSE_FRAGMENT_ARGS
-            val formViewModel = FormViewModel(
-                LayoutSpec.create(
-                    emailSection,
-                    countrySection,
-                    SaveForFutureUseSpec(listOf(emailSection))
-                ),
-                args,
-                resourceRepository = resourceRepository,
-                transformSpecToElement = TransformSpecToElement(resourceRepository, args)
-            )
+    fun `Hidden invalid fields arent in the formViewValue and has no effect on complete state`() = runTest {
+        // Here we have one hidden and one required field, country will always be in the result,
+        //  and name only if saveForFutureUse is true
+        val args = COMPOSE_FRAGMENT_ARGS
+        val formViewModel = FormViewModel(
+            LayoutSpec.create(
+                emailSection,
+                countrySection,
+                SaveForFutureUseSpec(listOf(emailSection))
+            ),
+            args,
+            resourceRepository = resourceRepository,
+            transformSpecToElement = TransformSpecToElement(resourceRepository, args)
+        )
 
-            val saveForFutureUseController = formViewModel.elements.map { it.controller }
-                .filterIsInstance(SaveForFutureUseController::class.java).first()
-            val emailController =
-                getSectionFieldTextControllerWithLabel(formViewModel, R.string.email)
+        val saveForFutureUseController = formViewModel.elements.first()!!.map { it.controller }
+            .filterIsInstance(SaveForFutureUseController::class.java).first()
+        val emailController =
+            getSectionFieldTextControllerWithLabel(formViewModel, R.string.email)
 
-            // Add text to the email to make it invalid
-            emailController?.onValueChange("email is invalid")
+        // Add text to the email to make it invalid
+        emailController?.onValueChange("email is invalid")
 
-            // Verify formFieldValues is null because the email is required and invalid
-            assertThat(formViewModel.completeFormValues.first()).isNull()
+        // Verify formFieldValues is null because the email is required and invalid
+        assertThat(formViewModel.completeFormValues.first()).isNull()
 
-            saveForFutureUseController.onValueChange(false)
+        saveForFutureUseController.onValueChange(false)
 
-            // Verify formFieldValues is not null even though the email is invalid
-            // (because it is not required)
-            val completeFormFieldValues = formViewModel.completeFormValues.first()
-            assertThat(
-                completeFormFieldValues
-            ).isNotNull()
-            assertThat(formViewModel.completeFormValues.first()?.fieldValuePairs).doesNotContainKey(
-                emailSection.identifier
-            )
-            assertThat(formViewModel.completeFormValues.first()?.userRequestedReuse).isEqualTo(
-                PaymentSelection.CustomerRequestedSave.RequestNoReuse
-            )
-        }
+        // Verify formFieldValues is not null even though the email is invalid
+        // (because it is not required)
+        val completeFormFieldValues = formViewModel.completeFormValues.first()
+        assertThat(
+            completeFormFieldValues
+        ).isNotNull()
+        assertThat(formViewModel.completeFormValues.first()?.fieldValuePairs).doesNotContainKey(
+            emailSection.identifier
+        )
+        assertThat(formViewModel.completeFormValues.first()?.userRequestedReuse).isEqualTo(
+            PaymentSelection.CustomerRequestedSave.RequestNoReuse
+        )
     }
 
     /**
@@ -294,104 +297,177 @@ internal class FormViewModelTest {
      */
     @ExperimentalCoroutinesApi
     @Test
-    fun `Verify params are set when element flows are complete`() {
-        runBlocking {
-            /**
-             * Using sofort as a complex enough example to test the form view model class.
-             */
-            val args = COMPOSE_FRAGMENT_ARGS.copy(
-                billingDetails = null,
-                showCheckbox = true,
-                showCheckboxControlledFields = true
-            )
-            val formViewModel = FormViewModel(
-                SofortForm,
-                args,
-                resourceRepository = resourceRepository,
-                transformSpecToElement = TransformSpecToElement(resourceRepository, args)
-            )
+    fun `Verify params are set when element flows are complete`() = runTest {
+        /**
+         * Using sofort as a complex enough example to test the form view model class.
+         */
+        val args = COMPOSE_FRAGMENT_ARGS.copy(
+            billingDetails = null,
+            showCheckbox = true,
+            showCheckboxControlledFields = true
+        )
+        val formViewModel = FormViewModel(
+            SofortForm,
+            args,
+            resourceRepository = resourceRepository,
+            transformSpecToElement = TransformSpecToElement(resourceRepository, args)
+        )
 
-            val nameElement =
-                getSectionFieldTextControllerWithLabel(formViewModel, R.string.address_label_name)
-            val emailElement =
-                getSectionFieldTextControllerWithLabel(formViewModel, R.string.email)
+        val nameElement =
+            getSectionFieldTextControllerWithLabel(formViewModel, R.string.address_label_name)
+        val emailElement =
+            getSectionFieldTextControllerWithLabel(formViewModel, R.string.email)
 
-            nameElement?.onValueChange("joe")
-            assertThat(
-                formViewModel.completeFormValues.first()?.fieldValuePairs?.get(IdentifierSpec.Name)
-            ).isNull()
+        nameElement?.onValueChange("joe")
+        assertThat(
+            formViewModel.completeFormValues.first()?.fieldValuePairs?.get(IdentifierSpec.Name)
+        ).isNull()
 
-            emailElement?.onValueChange("joe@gmail.com")
-            assertThat(
-                formViewModel.completeFormValues.first()?.fieldValuePairs?.get(IdentifierSpec.Email)
-                    ?.value
-            ).isEqualTo("joe@gmail.com")
-            assertThat(
-                formViewModel.completeFormValues.first()?.fieldValuePairs?.get(NAME.identifier)
-                    ?.value
-            ).isEqualTo("joe")
-            assertThat(formViewModel.completeFormValues.first()?.userRequestedReuse).isEqualTo(
-                PaymentSelection.CustomerRequestedSave.RequestReuse
-            )
+        emailElement?.onValueChange("joe@gmail.com")
+        assertThat(
+            formViewModel.completeFormValues.first()?.fieldValuePairs?.get(IdentifierSpec.Email)
+                ?.value
+        ).isEqualTo("joe@gmail.com")
+        assertThat(
+            formViewModel.completeFormValues.first()?.fieldValuePairs?.get(NAME.identifier)
+                ?.value
+        ).isEqualTo("joe")
+        assertThat(formViewModel.completeFormValues.first()?.userRequestedReuse).isEqualTo(
+            PaymentSelection.CustomerRequestedSave.RequestReuse
+        )
 
-            emailElement?.onValueChange("invalid.email@IncompleteDomain")
+        emailElement?.onValueChange("invalid.email@IncompleteDomain")
 
-            assertThat(
-                formViewModel.completeFormValues.first()?.fieldValuePairs?.get(NAME.identifier)
-            ).isNull()
-        }
+        assertThat(
+            formViewModel.completeFormValues.first()?.fieldValuePairs?.get(NAME.identifier)
+        ).isNull()
     }
 
     @ExperimentalCoroutinesApi
     @Test
-    fun `Verify params are set when element address fields are complete`() {
-        runBlocking {
-            /**
-             * Using sepa debit as a complex enough example to test the address portion.
-             */
-            val args = COMPOSE_FRAGMENT_ARGS.copy(
-                showCheckbox = false,
-                showCheckboxControlledFields = true,
-                billingDetails = null
-            )
-            val formViewModel = FormViewModel(
-                SepaDebitForm,
-                args,
-                resourceRepository = resourceRepository,
-                transformSpecToElement = TransformSpecToElement(resourceRepository, args)
-            )
+    fun `Verify params are set when element address fields are complete`() = runTest {
+        /**
+         * Using sepa debit as a complex enough example to test the address portion.
+         */
+        val args = COMPOSE_FRAGMENT_ARGS.copy(
+            showCheckbox = false,
+            showCheckboxControlledFields = true,
+            billingDetails = null
+        )
+        val formViewModel = FormViewModel(
+            SepaDebitForm,
+            args,
+            resourceRepository = resourceRepository,
+            transformSpecToElement = TransformSpecToElement(resourceRepository, args)
+        )
 
-            getSectionFieldTextControllerWithLabel(
-                formViewModel,
-                R.string.address_label_name
-            )?.onValueChange("joe")
-            assertThat(
-                formViewModel.completeFormValues.first()?.fieldValuePairs?.get(IdentifierSpec.Name)
-                    ?.value
-            ).isNull()
+        getSectionFieldTextControllerWithLabel(
+            formViewModel,
+            R.string.address_label_name
+        )?.onValueChange("joe")
+        assertThat(
+            formViewModel.completeFormValues.first()?.fieldValuePairs?.get(IdentifierSpec.Name)
+                ?.value
+        ).isNull()
 
-            getSectionFieldTextControllerWithLabel(
-                formViewModel,
-                R.string.email
-            )?.onValueChange("joe@gmail.com")
-            assertThat(
-                formViewModel.completeFormValues.first()?.fieldValuePairs?.get(IdentifierSpec.Email)
-                    ?.value
-            ).isNull()
+        getSectionFieldTextControllerWithLabel(
+            formViewModel,
+            R.string.email
+        )?.onValueChange("joe@gmail.com")
+        assertThat(
+            formViewModel.completeFormValues.first()?.fieldValuePairs?.get(IdentifierSpec.Email)
+                ?.value
+        ).isNull()
 
-            getSectionFieldTextControllerWithLabel(
-                formViewModel,
-                R.string.iban
-            )?.onValueChange("DE89370400440532013000")
-            assertThat(
-                formViewModel.completeFormValues.first()?.fieldValuePairs?.get(IdentifierSpec.Generic("iban"))
-                    ?.value
-            ).isNull()
+        getSectionFieldTextControllerWithLabel(
+            formViewModel,
+            R.string.iban
+        )?.onValueChange("DE89370400440532013000")
+        assertThat(
+            formViewModel.completeFormValues.first()?.fieldValuePairs?.get(IdentifierSpec.Generic("iban"))
+                ?.value
+        ).isNull()
 
-            val addressControllers = AddressControllers.create(formViewModel)
-            addressControllers.controllers.forEachIndexed { index, textFieldController ->
+        val addressControllers = AddressControllers.create(formViewModel)
+        addressControllers.controllers.forEachIndexed { index, textFieldController ->
+            textFieldController.onValueChange("1234")
+            if (index == addressControllers.controllers.size - 1) {
+                assertThat(
+                    formViewModel
+                        .completeFormValues
+                        .first()
+                        ?.fieldValuePairs
+                        ?.get(EmailSpec.identifier)
+                        ?.value
+                ).isNotNull()
+            } else {
+                assertThat(
+                    formViewModel
+                        .completeFormValues
+                        .first()
+                        ?.fieldValuePairs
+                        ?.get(EmailSpec.identifier)
+                        ?.value
+                ).isNull()
+            }
+        }
+        assertThat(formViewModel.completeFormValues.first()?.userRequestedReuse).isEqualTo(
+            PaymentSelection.CustomerRequestedSave.NoRequest
+        )
+    }
+
+    @ExperimentalCoroutinesApi
+    @Test
+    fun `Verify params are set when required address fields are complete`() = runTest {
+        /**
+         * Using sepa debit as a complex enough example to test the address portion.
+         */
+        val args = COMPOSE_FRAGMENT_ARGS.copy(
+            billingDetails = null
+        )
+        val formViewModel = FormViewModel(
+            SepaDebitForm,
+            args,
+            resourceRepository = resourceRepository,
+            transformSpecToElement = TransformSpecToElement(resourceRepository, args)
+        )
+
+        getSectionFieldTextControllerWithLabel(
+            formViewModel,
+            R.string.address_label_name
+        )?.onValueChange("joe")
+        assertThat(
+            formViewModel.completeFormValues.first()?.fieldValuePairs?.get(EmailSpec.identifier)
+                ?.value
+        ).isNull()
+
+        getSectionFieldTextControllerWithLabel(
+            formViewModel,
+            R.string.email
+        )?.onValueChange("joe@gmail.com")
+        assertThat(
+            formViewModel.completeFormValues.first()?.fieldValuePairs?.get(EmailSpec.identifier)
+                ?.value
+        ).isNull()
+
+        getSectionFieldTextControllerWithLabel(
+            formViewModel,
+            R.string.iban
+        )?.onValueChange("DE89370400440532013000")
+        assertThat(
+            formViewModel.completeFormValues.first()?.fieldValuePairs?.get(EmailSpec.identifier)
+                ?.value
+        ).isNull()
+
+        // Fill all address values except line2
+        val addressControllers = AddressControllers.create(formViewModel)
+        val populateAddressControllers = addressControllers.controllers
+            .filter { it.label != R.string.address_label_address_line2 }
+        populateAddressControllers
+            .forEachIndexed { index, textFieldController ->
                 textFieldController.onValueChange("1234")
-                if (index == addressControllers.controllers.size - 1) {
+
+                if (index == populateAddressControllers.size - 1) {
                     assertThat(
                         formViewModel
                             .completeFormValues
@@ -411,92 +487,13 @@ internal class FormViewModelTest {
                     ).isNull()
                 }
             }
-            assertThat(formViewModel.completeFormValues.first()?.userRequestedReuse).isEqualTo(
-                PaymentSelection.CustomerRequestedSave.NoRequest
-            )
-        }
     }
 
-    @ExperimentalCoroutinesApi
-    @Test
-    fun `Verify params are set when required address fields are complete`() {
-        runBlocking {
-            /**
-             * Using sepa debit as a complex enough example to test the address portion.
-             */
-            val args = COMPOSE_FRAGMENT_ARGS.copy(
-                billingDetails = null
-            )
-            val formViewModel = FormViewModel(
-                SepaDebitForm,
-                args,
-                resourceRepository = resourceRepository,
-                transformSpecToElement = TransformSpecToElement(resourceRepository, args)
-            )
-
-            getSectionFieldTextControllerWithLabel(
-                formViewModel,
-                R.string.address_label_name
-            )?.onValueChange("joe")
-            assertThat(
-                formViewModel.completeFormValues.first()?.fieldValuePairs?.get(EmailSpec.identifier)
-                    ?.value
-            ).isNull()
-
-            getSectionFieldTextControllerWithLabel(
-                formViewModel,
-                R.string.email
-            )?.onValueChange("joe@gmail.com")
-            assertThat(
-                formViewModel.completeFormValues.first()?.fieldValuePairs?.get(EmailSpec.identifier)
-                    ?.value
-            ).isNull()
-
-            getSectionFieldTextControllerWithLabel(
-                formViewModel,
-                R.string.iban
-            )?.onValueChange("DE89370400440532013000")
-            assertThat(
-                formViewModel.completeFormValues.first()?.fieldValuePairs?.get(EmailSpec.identifier)
-                    ?.value
-            ).isNull()
-
-            // Fill all address values except line2
-            val addressControllers = AddressControllers.create(formViewModel)
-            val populateAddressControllers = addressControllers.controllers
-                .filter { it.label != R.string.address_label_address_line2 }
-            populateAddressControllers
-                .forEachIndexed { index, textFieldController ->
-                    textFieldController.onValueChange("1234")
-
-                    if (index == populateAddressControllers.size - 1) {
-                        assertThat(
-                            formViewModel
-                                .completeFormValues
-                                .first()
-                                ?.fieldValuePairs
-                                ?.get(EmailSpec.identifier)
-                                ?.value
-                        ).isNotNull()
-                    } else {
-                        assertThat(
-                            formViewModel
-                                .completeFormValues
-                                .first()
-                                ?.fieldValuePairs
-                                ?.get(EmailSpec.identifier)
-                                ?.value
-                        ).isNull()
-                    }
-                }
-        }
-    }
-
-    private fun getSectionFieldTextControllerWithLabel(
+    private suspend fun getSectionFieldTextControllerWithLabel(
         formViewModel: FormViewModel,
         @StringRes label: Int
     ) =
-        formViewModel.elements
+        formViewModel.elements.first()!!
             .filterIsInstance<SectionElement>()
             .flatMap { it.fields }
             .filterIsInstance<SectionSingleFieldElement>()
@@ -541,7 +538,7 @@ internal class FormViewModelTest {
             formViewModel: FormViewModel,
             @StringRes label: Int
         ): TextFieldController? {
-            val addressElementFields = formViewModel.elements
+            val addressElementFields = formViewModel.elements.first()!!
                 .filterIsInstance<SectionElement>()
                 .flatMap { it.fields }
                 .filterIsInstance<AddressElement>()
@@ -561,4 +558,11 @@ internal class FormViewModelTest {
                     ?.firstOrNull { it?.label == label }
         }
     }
+}
+
+internal suspend fun FormViewModel.setSaveForFutureUse(value: Boolean) {
+    elements
+        .firstOrNull()
+        ?.filterIsInstance<SaveForFutureUseElement>()
+        ?.firstOrNull()?.controller?.onValueChange(value)
 }

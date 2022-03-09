@@ -44,10 +44,11 @@ internal abstract class BasePaymentSheetActivity : AppCompatActivity() {
         PaymentSheetViewModel(application)
     }
     
-    protected val snackbar = Snackbar.make(
-        findViewById(android.R.id.content),"", Snackbar.LENGTH_SHORT)
+    protected val snackbar by lazy {
+        Snackbar.make(findViewById(android.R.id.content), "", Snackbar.LENGTH_SHORT)
         .setBackgroundTint(resources.getColor(R.color.black))
         .setTextColor(resources.getColor(R.color.white))
+    }
 
     protected fun prepareCheckout(
         onSuccess: (PaymentSheet.CustomerConfiguration?, String) -> Unit

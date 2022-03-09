@@ -7,50 +7,37 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.annotation.VisibleForTesting
 import androidx.appcompat.view.ContextThemeWrapper
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.commit
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.asFlow
 import androidx.lifecycle.lifecycleScope
-import androidx.recyclerview.widget.LinearLayoutManager
+import com.stripe.android.core.injection.InjectorKey
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.payments.core.injection.InjectorKey
-import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.databinding.FragmentPaymentsheetAddPaymentMethodBinding
 import com.stripe.android.paymentsheet.forms.FormFieldValues
-import com.stripe.android.paymentsheet.model.Amount
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
 import com.stripe.android.paymentsheet.paymentdatacollection.CardDataCollectionFragment
 import com.stripe.android.paymentsheet.paymentdatacollection.ComposeFormDataCollectionFragment
 import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.TransformToPaymentMethodCreateParams
-import com.stripe.android.paymentsheet.ui.AddPaymentMethodsFragmentFactory
 import com.stripe.android.paymentsheet.ui.AnimationConstants
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
-import kotlinx.coroutines.flow.collect
+import com.stripe.android.ui.core.Amount
 import kotlinx.coroutines.launch
 
-internal abstract class BaseAddPaymentMethodFragment(
-    private val eventReporter: EventReporter
-) : Fragment() {
+internal abstract class BaseAddPaymentMethodFragment : Fragment() {
     abstract val viewModelFactory: ViewModelProvider.Factory
     abstract val sheetViewModel: BaseSheetViewModel<*>
 
     protected lateinit var addPaymentMethodHeader: TextView
-
-    private lateinit var selectedPaymentMethod: SupportedPaymentMethod
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        // When the fragment is destroyed and recreated, the child fragment is re-instantiated
-        // during onCreate, so the factory must be set before calling super.
-        childFragmentManager.fragmentFactory = AddPaymentMethodsFragmentFactory(
-            sheetViewModel::class.java, viewModelFactory
-        )
-        super.onCreate(savedInstanceState)
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -85,77 +72,84 @@ internal abstract class BaseAddPaymentMethodFragment(
         )
 
         val selectedPaymentMethodIndex = paymentMethods.indexOf(
-            SupportedPaymentMethod.fromCode(savedInstanceState?.getString(SELECTED_PAYMENT_METHOD))
+            sheetViewModel.getAddFragmentSelectedLpm().value
         ).takeUnless { it == -1 } ?: 0
 
         if (paymentMethods.size > 1) {
-            setupRecyclerView(viewBinding, paymentMethods, selectedPaymentMethodIndex)
+            setupRecyclerView(
+                viewBinding,
+                paymentMethods,
+                sheetViewModel.getAddFragmentSelectedLpmValue()
+            )
         }
 
         if (paymentMethods.isNotEmpty()) {
-            replacePaymentMethodFragment(paymentMethods[selectedPaymentMethodIndex])
+            // If the activity is destroyed and recreated, then the fragment is already present
+            // and doesn't need to be replaced, only the selected payment method needs to be set
+            if (savedInstanceState == null) {
+                replacePaymentMethodFragment(paymentMethods[selectedPaymentMethodIndex])
+            }
         }
 
         sheetViewModel.processing.observe(viewLifecycleOwner) { isProcessing ->
             (getFragment() as? ComposeFormDataCollectionFragment)?.setProcessing(isProcessing)
         }
 
+        // If the activity was destroyed and recreated then we need to re-attach the fragment,
+        // as attach will not be called again.
+        childFragmentManager.fragments.forEach { fragment ->
+            attachComposeFragmentViewModel(fragment)
+        }
+
         childFragmentManager.addFragmentOnAttachListener { _, fragment ->
-            (fragment as? ComposeFormDataCollectionFragment)?.let { formFragment ->
-                // Need to access the formViewModel so it is constructed.
-                val formViewModel = formFragment.formViewModel
-                viewLifecycleOwner.lifecycleScope.launch {
-                    formViewModel.completeFormValues.collect { formFieldValues ->
-                        sheetViewModel.updateSelection(
-                            transformToPaymentSelection(
-                                formFieldValues,
-                                formFragment.paramKeySpec,
-                                selectedPaymentMethod
-                            )
+            attachComposeFragmentViewModel(fragment)
+        }
+
+        sheetViewModel.eventReporter.onShowNewPaymentOptionForm()
+    }
+
+    private fun attachComposeFragmentViewModel(fragment: Fragment) {
+        (fragment as? ComposeFormDataCollectionFragment)?.let { formFragment ->
+            // Need to access the formViewModel so it is constructed.
+            val formViewModel = formFragment.formViewModel
+            viewLifecycleOwner.lifecycleScope.launch {
+                formViewModel.completeFormValues.collect { formFieldValues ->
+                    sheetViewModel.updateSelection(
+                        transformToPaymentSelection(
+                            formFieldValues,
+                            formFragment.paramKeySpec,
+                            sheetViewModel.getAddFragmentSelectedLpmValue()
                         )
-                    }
+                    )
                 }
             }
         }
-
-        eventReporter.onShowNewPaymentOptionForm()
     }
 
     private fun setupRecyclerView(
         viewBinding: FragmentPaymentsheetAddPaymentMethodBinding,
         paymentMethods: List<SupportedPaymentMethod>,
-        selectedItemPosition: Int
+        initialSelectedItem: SupportedPaymentMethod
     ) {
         viewBinding.paymentMethodsRecycler.isVisible = true
-        // The default item animator conflicts with `animateLayoutChanges`, causing a crash when
-        // quickly switching payment methods. Set to null since the items never change anyway.
-        viewBinding.paymentMethodsRecycler.itemAnimator = null
-
-        val layoutManager = object : LinearLayoutManager(
-            activity,
-            HORIZONTAL,
-            false
-        ) {
-            var canScroll = true
-
-            override fun canScrollHorizontally(): Boolean {
-                return canScroll && super.canScrollHorizontally()
+        viewBinding.paymentMethodsRecycler.apply {
+            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
+            setContent {
+                val processing by sheetViewModel.processing
+                    .asFlow()
+                    .collectAsState(initial = false)
+                val selectedItem by sheetViewModel.getAddFragmentSelectedLpm()
+                    .asFlow()
+                    .collectAsState(initial = initialSelectedItem)
+                PaymentMethodsUI(
+                    selectedIndex = paymentMethods.indexOf(selectedItem),
+                    isEnabled = !processing,
+                    paymentMethods = paymentMethods,
+                    onItemSelectedListener = { selectedLpm ->
+                        onPaymentMethodSelected(selectedLpm)
+                    }
+                )
             }
-        }.also {
-            viewBinding.paymentMethodsRecycler.layoutManager = it
-        }
-
-        val adapter = AddPaymentMethodsAdapter(
-            paymentMethods,
-            selectedItemPosition,
-            ::onPaymentMethodSelected
-        ).also {
-            viewBinding.paymentMethodsRecycler.adapter = it
-        }
-
-        sheetViewModel.processing.observe(viewLifecycleOwner) { isProcessing ->
-            adapter.isEnabled = !isProcessing
-            layoutManager.canScroll = !isProcessing
         }
     }
 
@@ -168,13 +162,8 @@ internal abstract class BaseAddPaymentMethodFragment(
         replacePaymentMethodFragment(paymentMethod)
     }
 
-    override fun onSaveInstanceState(outState: Bundle) {
-        outState.putString(SELECTED_PAYMENT_METHOD, selectedPaymentMethod.type.code)
-        super.onSaveInstanceState(outState)
-    }
-
     private fun replacePaymentMethodFragment(paymentMethod: SupportedPaymentMethod) {
-        selectedPaymentMethod = paymentMethod
+        sheetViewModel.setAddFragmentSelectedLPM(paymentMethod)
 
         val args = requireArguments()
         args.putParcelable(
@@ -208,12 +197,15 @@ internal abstract class BaseAddPaymentMethodFragment(
         childFragmentManager.findFragmentById(R.id.payment_method_fragment_container)
 
     companion object {
-        private const val SELECTED_PAYMENT_METHOD = "selected_pm"
 
         private fun fragmentForPaymentMethod(paymentMethod: SupportedPaymentMethod) =
             when (paymentMethod) {
-                SupportedPaymentMethod.Card -> CardDataCollectionFragment::class.java
-                else -> ComposeFormDataCollectionFragment::class.java
+                SupportedPaymentMethod.Card -> {
+                    CardDataCollectionFragment::class.java
+                }
+                else -> {
+                    ComposeFormDataCollectionFragment::class.java
+                }
             }
 
         private val transformToPaymentMethodCreateParams = TransformToPaymentMethodCreateParams()

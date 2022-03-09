@@ -1,6 +1,7 @@
 package com.stripe.android.view
 
 import android.widget.AutoCompleteTextView
+import com.stripe.android.core.model.Country
 
 internal class CountryAutoCompleteTextViewValidator(
     private val countryAdapter: CountryAdapter,

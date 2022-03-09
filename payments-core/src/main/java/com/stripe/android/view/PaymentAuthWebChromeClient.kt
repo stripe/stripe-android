@@ -6,8 +6,8 @@ import android.webkit.JsResult
 import android.webkit.WebChromeClient
 import android.webkit.WebView
 import androidx.appcompat.app.AlertDialog
-import com.stripe.android.Logger
 import com.stripe.android.R
+import com.stripe.android.core.Logger
 
 internal class PaymentAuthWebChromeClient(
     private val activity: Activity,

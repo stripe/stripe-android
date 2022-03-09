@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_marginStart="@dimen/page_horizontal_margin"
+    android:layout_marginEnd="@dimen/page_horizontal_margin"
+    android:layout_marginTop="@dimen/page_vertical_margin"
+    android:layout_marginBottom="@dimen/page_vertical_margin"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_margin="5dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/header_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textStyle="bold"
+            android:text="@string/front_of_dl"
+            android:textSize="@dimen/scan_title_text_size"
+            android:layout_marginBottom="20dp"
+            app:layout_constraintBottom_toTopOf="@id/message"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/message"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/page_vertical_margin"
+            android:text="@string/position_dl_front"
+            app:layout_constraintBottom_toTopOf="@id/camera_view_card"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/header_title" />
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/camera_view_card"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            app:cardCornerRadius="@dimen/view_finder_corner_radius"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintDimensionRatio="3:2"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/message">
+
+            <com.stripe.android.camera.scanui.CameraView
+                android:id="@+id/camera_view"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                app:borderDrawable="@drawable/id_border_initial"
+                app:viewFinderType="id" />
+
+            <ImageView
+                android:id="@+id/check_mark_view"
+                android:padding="60dp"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:src="@drawable/check_mark"
+                android:visibility="gone"
+                android:background="@color/check_mark_background"
+                android:contentDescription="@string/check_mark"
+                app:tint="?android:colorPrimary" />
+
+        </com.google.android.material.card.MaterialCardView>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+    <Button
+        android:id="@+id/kontinue"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:enabled="false"
+        android:text="@string/kontinue" />
+
+</FrameLayout>

@@ -5,26 +5,16 @@ import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 
 /**
- * Name for injected boolean to denote if logging is enabled.
- */
-const val ENABLE_LOGGING = "enableLogging"
-
-/**
  * Name for injected set if strings to represent product usage for analytics.
  */
 const val PRODUCT_USAGE = "productUsage"
 
 /**
- * Name for user's publishable key
- */
-const val PUBLISHABLE_KEY = "publishableKey"
-
-/**
- * Name for user's account id
- */
-const val STRIPE_ACCOUNT_ID = "stripeAccountId"
-
-/**
  * Name to indicate whether the current [StripeIntent] is a [PaymentIntent] or [SetupIntent].
  */
 const val IS_PAYMENT_INTENT = "isPaymentIntent"
+
+/**
+ * Name to indicate whether the current app is an instant app.
+ */
+const val IS_INSTANT_APP = "isInstantApp"

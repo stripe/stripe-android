@@ -19,20 +19,19 @@ import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.GooglePayConfig
 import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
+import com.stripe.android.core.injection.Injectable
+import com.stripe.android.core.injection.Injector
+import com.stripe.android.core.injection.WeakMapInjectorRegistry
+import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLauncherViewModelSubcomponent
 import com.stripe.android.model.GooglePayFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.networking.AbsFakeStripeRepository
-import com.stripe.android.networking.ApiRequest
-import com.stripe.android.payments.core.injection.DUMMY_INJECTOR_KEY
-import com.stripe.android.payments.core.injection.Injectable
-import com.stripe.android.payments.core.injection.Injector
-import com.stripe.android.payments.core.injection.WeakMapInjectorRegistry
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.TestCoroutineDispatcher
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.runTest
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argWhere
@@ -42,14 +41,12 @@ import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
-import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertNotNull
 
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
 class GooglePayPaymentMethodLauncherViewModelTest {
-    private val testDispatcher = TestCoroutineDispatcher()
 
     private val stripeRepository = FakeStripeRepository()
     private val googlePayJsonFactory = GooglePayJsonFactory(
@@ -81,13 +78,8 @@ class GooglePayPaymentMethodLauncherViewModelTest {
         SavedStateHandle()
     )
 
-    @AfterTest
-    fun cleanup() {
-        testDispatcher.cleanupTestCoroutines()
-    }
-
     @Test
-    fun `createPaymentMethod() should return expected result`() = testDispatcher.runBlockingTest {
+    fun `createPaymentMethod() should return expected result`() = runTest {
         val result = viewModel.createPaymentMethod(
             PaymentData.fromJson(
                 GooglePayFixtures.GOOGLE_PAY_RESULT_WITH_FULL_BILLING_ADDRESS.toString()
@@ -193,7 +185,7 @@ class GooglePayPaymentMethodLauncherViewModelTest {
             verify(factorySpy, times(0)).fallbackInitialize(any())
             assertThat(createdViewModel).isEqualTo(viewModel)
 
-            WeakMapInjectorRegistry.staticCacheMap.clear()
+            WeakMapInjectorRegistry.clear()
         }
     }
 

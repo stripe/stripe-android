@@ -9,7 +9,6 @@ import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.databinding.FragmentPaymentsheetPaymentMethodsListBinding
 import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -18,8 +17,7 @@ import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 
 internal abstract class BasePaymentMethodsListFragment(
-    private val canClickSelectedItem: Boolean,
-    private val eventReporter: EventReporter
+    private val canClickSelectedItem: Boolean
 ) : Fragment(
     R.layout.fragment_paymentsheet_payment_methods_list
 ) {
@@ -53,7 +51,7 @@ internal abstract class BasePaymentMethodsListFragment(
         this.config = nullableConfig
 
         setHasOptionsMenu(!sheetViewModel.paymentMethods.value.isNullOrEmpty())
-        eventReporter.onShowExistingPaymentOptions()
+        sheetViewModel.eventReporter.onShowExistingPaymentOptions()
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

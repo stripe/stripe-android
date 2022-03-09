@@ -102,6 +102,9 @@ class CardMultilineWidget @JvmOverloads constructor(
                 },
                 CardValidCallback.Fields.Cvc.takeIf {
                     cvcEditText.cvc == null
+                },
+                CardValidCallback.Fields.Postal.takeIf {
+                    isPostalRequired() && postalCodeEditText.postalCode.isNullOrBlank()
                 }
             ).toSet()
         }
@@ -145,6 +148,9 @@ class CardMultilineWidget @JvmOverloads constructor(
             postalCodeEditText.config = PostalCodeEditText.Config.Global
         }
     }
+
+    private fun isPostalRequired() =
+        (postalCodeRequired || usZipCodeRequired) && shouldShowPostalCode
 
     /**
      * A [PaymentMethodCreateParams.Card] representing the card details if all fields are valid;
@@ -240,7 +246,7 @@ class CardMultilineWidget @JvmOverloads constructor(
 
     private val allFields: Collection<StripeEditText>
         get() {
-            return listOf(
+            return setOf(
                 cardNumberEditText,
                 expiryDateEditText,
                 cvcEditText,
@@ -367,6 +373,12 @@ class CardMultilineWidget @JvmOverloads constructor(
             cvcEditText.shouldShowError = false
         }
 
+        postalCodeEditText.setAfterTextChangedListener {
+            if (isPostalRequired() && postalCodeEditText.hasValidPostal()) {
+                cardInputListener?.onPostalCodeComplete()
+            }
+        }
+
         adjustViewForPostalCodeAttribute(shouldShowPostalCode)
 
         cardNumberEditText.updateLengthFilter()
@@ -384,12 +396,13 @@ class CardMultilineWidget @JvmOverloads constructor(
             cardNumberTextInputLayout.isLoading = it
         }
 
+        postalCodeEditText.config = PostalCodeEditText.Config.Global
         isEnabled = true
     }
 
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
-        postalCodeEditText.config = PostalCodeEditText.Config.Global
+        // see https://github.com/stripe/stripe-android/pull/3154
         cvcEditText.hint = null
     }
 

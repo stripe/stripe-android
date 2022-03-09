@@ -2,16 +2,15 @@ package com.stripe.android.paymentsheet.forms
 
 import android.annotation.SuppressLint
 import androidx.compose.runtime.Composable
-import com.stripe.android.payments.core.injection.DUMMY_INJECTOR_KEY
+import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.address.AddressFieldElementRepository
-import com.stripe.android.paymentsheet.address.parseAddressesSchema
-import com.stripe.android.paymentsheet.elements.BankRepository
-import com.stripe.android.paymentsheet.elements.FormInternal
-import com.stripe.android.paymentsheet.elements.ResourceRepository
-import com.stripe.android.paymentsheet.elements.SupportedBankType
 import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
 import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
+import com.stripe.android.ui.core.address.AddressFieldElementRepository
+import com.stripe.android.ui.core.elements.BankRepository
+import com.stripe.android.ui.core.elements.SupportedBankType
+import com.stripe.android.ui.core.forms.SofortForm
+import com.stripe.android.ui.core.forms.resources.StaticResourceRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 
 /**
@@ -23,14 +22,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 @Composable
 internal fun FormInternalPreview() {
     val formElements = SofortForm.items
-    val addressFieldElementRepository = AddressFieldElementRepository()
-    val bankRepository = BankRepository()
+    val addressFieldElementRepository = AddressFieldElementRepository(null)
+    val bankRepository = BankRepository(null)
 
-    addressFieldElementRepository.initialize(
-        mapOf(
-            "ZZ" to parseAddressesSchema(ZZ_ADDRESS)!!
-        )
-    )
+    addressFieldElementRepository.initialize("ZZ", ZZ_ADDRESS)
 
     bankRepository.initialize(
         mapOf(
@@ -43,32 +38,34 @@ internal fun FormInternalPreview() {
     FormInternal(
         MutableStateFlow(emptyList()),
         MutableStateFlow(true),
-        TransformSpecToElement(
-            ResourceRepository(
-                bankRepository,
-                addressFieldElementRepository
-            ),
-            FormFragmentArguments(
-                SupportedPaymentMethod.Bancontact,
-                showCheckbox = false,
-                showCheckboxControlledFields = true,
-                merchantName = "Merchant, Inc.",
-                billingDetails = PaymentSheet.BillingDetails(
-                    address = PaymentSheet.Address(
-                        line1 = "123 Main Street",
-                        line2 = null,
-                        city = "San Francisco",
-                        state = "CA",
-                        postalCode = "94111",
-                        country = "DE",
-                    ),
-                    email = "email",
-                    name = "Jenny Rosen",
-                    phone = "+18008675309"
+        MutableStateFlow(
+            TransformSpecToElement(
+                StaticResourceRepository(
+                    bankRepository,
+                    addressFieldElementRepository
                 ),
-                injectorKey = DUMMY_INJECTOR_KEY
-            )
-        ).transform(formElements)
+                FormFragmentArguments(
+                    SupportedPaymentMethod.Bancontact,
+                    showCheckbox = false,
+                    showCheckboxControlledFields = true,
+                    merchantName = "Merchant, Inc.",
+                    billingDetails = PaymentSheet.BillingDetails(
+                        address = PaymentSheet.Address(
+                            line1 = "123 Main Street",
+                            line2 = null,
+                            city = "San Francisco",
+                            state = "CA",
+                            postalCode = "94111",
+                            country = "DE",
+                        ),
+                        email = "email",
+                        name = "Jenny Rosen",
+                        phone = "+18008675309"
+                    ),
+                    injectorKey = DUMMY_INJECTOR_KEY
+                )
+            ).transform(formElements)
+        )
     )
 }
 

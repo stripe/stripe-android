@@ -2,36 +2,48 @@ package com.stripe.android.networking
 
 import android.content.Context
 import androidx.annotation.VisibleForTesting
-import com.stripe.android.ApiVersion
 import com.stripe.android.AppInfo
 import com.stripe.android.DefaultFraudDetectionDataRepository
 import com.stripe.android.FraudDetectionDataRepository
-import com.stripe.android.Logger
 import com.stripe.android.Stripe
 import com.stripe.android.StripeApiBeta
 import com.stripe.android.cards.Bin
+import com.stripe.android.core.ApiVersion
+import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.APIConnectionException
+import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.exception.InvalidRequestException
+import com.stripe.android.core.exception.StripeException
+import com.stripe.android.core.injection.IOContext
+import com.stripe.android.core.injection.PUBLISHABLE_KEY
+import com.stripe.android.core.model.StripeModel
+import com.stripe.android.core.model.parsers.ModelJsonParser
+import com.stripe.android.core.model.parsers.StripeErrorJsonParser
+import com.stripe.android.core.model.parsers.StripeFileJsonParser
 import com.stripe.android.core.networking.AnalyticsRequest
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
+import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
+import com.stripe.android.core.networking.FileUploadRequest
 import com.stripe.android.core.networking.HTTP_TOO_MANY_REQUESTS
 import com.stripe.android.core.networking.RequestId
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.networking.StripeResponse
 import com.stripe.android.core.networking.responseJson
-import com.stripe.android.exception.APIException
+import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.exception.AuthenticationException
 import com.stripe.android.exception.CardException
 import com.stripe.android.exception.PermissionException
 import com.stripe.android.exception.RateLimitException
-import com.stripe.android.exception.StripeException
 import com.stripe.android.model.BankStatuses
 import com.stripe.android.model.CardMetadata
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
+import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_CLIENT_SECRET
+import com.stripe.android.model.ConsumerSession
+import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.Customer
 import com.stripe.android.model.ListPaymentMethodsParams
 import com.stripe.android.model.PaymentIntent
@@ -44,18 +56,18 @@ import com.stripe.android.model.Source
 import com.stripe.android.model.SourceParams
 import com.stripe.android.model.Stripe3ds2AuthParams
 import com.stripe.android.model.Stripe3ds2AuthResult
-import com.stripe.android.model.StripeErrorJsonParser
 import com.stripe.android.model.StripeFile
 import com.stripe.android.model.StripeFileParams
+import com.stripe.android.model.StripeFileParams.Companion.toInternal
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.model.StripeModel
 import com.stripe.android.model.Token
 import com.stripe.android.model.TokenParams
 import com.stripe.android.model.parsers.CardMetadataJsonParser
+import com.stripe.android.model.parsers.ConsumerSessionJsonParser
+import com.stripe.android.model.parsers.ConsumerSessionLookupJsonParser
 import com.stripe.android.model.parsers.CustomerJsonParser
 import com.stripe.android.model.parsers.FpxBankStatusesJsonParser
 import com.stripe.android.model.parsers.IssuingCardPinJsonParser
-import com.stripe.android.model.parsers.ModelJsonParser
 import com.stripe.android.model.parsers.PaymentIntentJsonParser
 import com.stripe.android.model.parsers.PaymentMethodJsonParser
 import com.stripe.android.model.parsers.PaymentMethodPreferenceForPaymentIntentJsonParser
@@ -66,11 +78,8 @@ import com.stripe.android.model.parsers.RadarSessionJsonParser
 import com.stripe.android.model.parsers.SetupIntentJsonParser
 import com.stripe.android.model.parsers.SourceJsonParser
 import com.stripe.android.model.parsers.Stripe3ds2AuthResultJsonParser
-import com.stripe.android.model.parsers.StripeFileJsonParser
 import com.stripe.android.model.parsers.TokenJsonParser
-import com.stripe.android.payments.core.injection.IOContext
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
-import com.stripe.android.payments.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.utils.StripeUrlUtils
 import kotlinx.coroutines.Dispatchers
 import org.json.JSONException
@@ -89,7 +98,7 @@ import kotlin.coroutines.CoroutineContext
 internal class StripeApiRepository @JvmOverloads internal constructor(
     context: Context,
     publishableKeyProvider: () -> String,
-    private val appInfo: AppInfo? = null,
+    private val appInfo: AppInfo? = Stripe.appInfo,
     private val logger: Logger = Logger.noop(),
     private val workContext: CoroutineContext = Dispatchers.IO,
     private val productUsageTokens: Set<String> = emptySet(),
@@ -105,8 +114,8 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         PaymentAnalyticsRequestFactory(context, publishableKeyProvider, productUsageTokens),
     private val fraudDetectionDataParamsUtils: FraudDetectionDataParamsUtils = FraudDetectionDataParamsUtils(),
     betas: Set<StripeApiBeta> = emptySet(),
-    apiVersion: String = ApiVersion(betas = betas).code,
-    sdkVersion: String = Stripe.VERSION
+    apiVersion: String = ApiVersion(betas = betas.map { it.code }.toSet()).code,
+    sdkVersion: String = StripeSdkVersion.VERSION
 ) : StripeRepository() {
 
     @Inject
@@ -129,7 +138,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
     )
 
     private val apiRequestFactory = ApiRequest.Factory(
-        appInfo = appInfo,
+        appInfo = appInfo?.toInternalAppInfo(),
         apiVersion = apiVersion,
         sdkVersion = sdkVersion
     )
@@ -187,10 +196,24 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         options: ApiRequest.Options,
         expandFields: List<String>
     ): PaymentIntent? {
+        return confirmPaymentIntentInternal(
+            confirmPaymentIntentParams = confirmPaymentIntentParams.maybeForDashboard(options),
+            options = options,
+            expandFields = expandFields
+        )
+    }
+
+    private suspend fun confirmPaymentIntentInternal(
+        confirmPaymentIntentParams: ConfirmPaymentIntentParams,
+        options: ApiRequest.Options,
+        expandFields: List<String>
+    ): PaymentIntent? {
         val params = fraudDetectionDataParamsUtils.addFraudDetectionData(
             // Add payment_user_agent if the Payment Method is being created on this call
             maybeAddPaymentUserAgent(
-                confirmPaymentIntentParams.toParamMap(),
+                confirmPaymentIntentParams.toParamMap()
+                    // Omit client_secret with user key auth.
+                    .let { if (options.apiKeyIsUserKey) it.minus(PARAM_CLIENT_SECRET) else it },
                 confirmPaymentIntentParams.paymentMethodCreateParams,
                 confirmPaymentIntentParams.sourceParams
             ).plus(createExpandParam(expandFields)),
@@ -236,6 +259,12 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         expandFields: List<String>
     ): PaymentIntent? {
         val paymentIntentId = PaymentIntent.ClientSecret(clientSecret).paymentIntentId
+        val params: Map<String, Any?> =
+            if (options.apiKeyIsUserKey) {
+                createExpandParam(expandFields)
+            } else {
+                createClientSecretParam(clientSecret, expandFields)
+            }
 
         fireFraudDetectionDataRequest()
 
@@ -243,7 +272,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
             apiRequestFactory.createGet(
                 getRetrievePaymentIntentUrl(paymentIntentId),
                 options,
-                createClientSecretParam(clientSecret, expandFields)
+                params
             ),
             PaymentIntentJsonParser()
         ) {
@@ -1055,11 +1084,11 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         requestOptions: ApiRequest.Options
     ): StripeFile {
         val response = makeFileUploadRequest(
-            FileUploadRequest(fileParams, requestOptions, appInfo)
+            FileUploadRequest(fileParams.toInternal(), requestOptions, appInfo?.toInternalAppInfo())
         ) {
             fireAnalyticsRequest(PaymentAnalyticsEvent.FileCreate)
         }
-        return StripeFileJsonParser().parse(response.responseJson())
+        return StripeFile.fromInternal(StripeFileJsonParser().parse(response.responseJson()))
     }
 
     @Throws(
@@ -1123,6 +1152,118 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
     }
 
     /**
+     * Retrieves the ConsumerSession if the given email is associated with a Link account.
+     */
+    override suspend fun lookupConsumerSession(
+        email: String,
+        requestOptions: ApiRequest.Options
+    ): ConsumerSessionLookup? {
+        return fetchStripeModel(
+            apiRequestFactory.createPost(
+                consumerSessionLookupUrl,
+                requestOptions,
+                mapOf("email_address" to email.lowercase())
+            ),
+            ConsumerSessionLookupJsonParser()
+        ) {
+            // no-op
+        }
+    }
+
+    /**
+     * Creates a new Link account for the credentials provided.
+     */
+    override suspend fun consumerSignUp(
+        email: String,
+        phoneNumber: String,
+        country: String,
+        cookies: String?,
+        requestOptions: ApiRequest.Options
+    ): ConsumerSession? {
+        return fetchStripeModel(
+            apiRequestFactory.createPost(
+                consumerSignUpUrl,
+                requestOptions,
+                mapOf(
+                    "email_address" to email.lowercase(),
+                    "phone_number" to phoneNumber,
+                    "country" to country
+                ).plus(
+                    cookies?.let {
+                        listOf("cookies" to it)
+                    } ?: emptyList()
+                )
+            ),
+            ConsumerSessionJsonParser()
+        ) {
+            // no-op
+        }
+    }
+
+    /**
+     * Triggers an SMS verification for the consumer corresponding to the given client secret.
+     */
+    override suspend fun startConsumerVerification(
+        consumerSessionClientSecret: String,
+        locale: Locale,
+        cookies: String?,
+        requestOptions: ApiRequest.Options
+    ): ConsumerSession? {
+        return fetchStripeModel(
+            apiRequestFactory.createPost(
+                startConsumerVerificationUrl,
+                requestOptions,
+                mapOf(
+                    "credentials" to mapOf(
+                        "consumer_session_client_secret" to consumerSessionClientSecret
+                    ),
+                    "type" to "SMS",
+                    "locale" to locale.toLanguageTag()
+                ).plus(
+                    cookies?.let {
+                        listOf("cookies" to it)
+                    } ?: emptyList()
+                )
+            ),
+            ConsumerSessionJsonParser()
+        ) {
+            // no-op
+        }
+    }
+
+    /**
+     * Confirms an SMS verification for the consumer corresponding to the given client secret.
+     */
+    override suspend fun confirmConsumerVerification(
+        consumerSessionClientSecret: String,
+        verificationCode: String,
+        cookies: String?,
+        requestOptions: ApiRequest.Options
+    ): ConsumerSession? {
+        return fetchStripeModel(
+            apiRequestFactory.createPost(
+                confirmConsumerVerificationUrl,
+                requestOptions,
+                mapOf(
+                    "credentials" to mapOf(
+                        "consumer_session_client_secret" to consumerSessionClientSecret
+                    ),
+                    "type" to "SMS",
+                    "code" to verificationCode,
+                    "client_type" to "MOBILE_SDK"
+                ).plus(
+                    cookies?.let {
+                        listOf("cookies" to it)
+                    } ?: emptyList()
+                )
+            ),
+            ConsumerSessionJsonParser()
+        ) {
+            // no-op
+        }
+    }
+
+    /**
      * @return `https://api.stripe.com/v1/payment_methods/:id/detach`
      */
     @VisibleForTesting
@@ -1137,6 +1278,9 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         parser: PaymentMethodPreferenceJsonParser<T>,
         analyticsEvent: PaymentAnalyticsEvent
     ): T? {
+        // Unsupported for user key sessions.
+        if (options.apiKeyIsUserKey) return null
+
         fireFraudDetectionDataRequest()
 
         val params = createClientSecretParam(
@@ -1324,7 +1468,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
 
     private fun buildPaymentUserAgentPair(attribution: Set<String> = emptySet()) =
         PAYMENT_USER_AGENT to
-            setOf("stripe-android/${Stripe.VERSION_NAME}")
+            setOf("stripe-android/${StripeSdkVersion.VERSION_NAME}")
                 .plus(productUsageTokens)
                 .plus(attribution)
                 .joinToString(";")
@@ -1351,6 +1495,23 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
                 )
             )
         } ?: params
+
+    private suspend fun ConfirmPaymentIntentParams.maybeForDashboard(
+        options: ApiRequest.Options,
+    ): ConfirmPaymentIntentParams {
+        if (!options.apiKeyIsUserKey || paymentMethodCreateParams == null) {
+            return this
+        }
+
+        // For user key auth, we must create the PM first.
+        val paymentMethodId = requireNotNull(
+            createPaymentMethod(paymentMethodCreateParams, options)?.id
+        )
+        return ConfirmPaymentIntentParams.createForDashboard(
+            clientSecret = clientSecret,
+            paymentMethodId = paymentMethodId
+        )
+    }
 
     private sealed class DnsCacheData {
         data class Success(
@@ -1394,6 +1555,34 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         internal val paymentMethodsUrl: String
             @JvmSynthetic
             get() = getApiUrl("payment_methods")
+
+        /**
+         * @return `https://api.stripe.com/v1/consumers/sessions/lookup`
+         */
+        internal val consumerSessionLookupUrl: String
+            @JvmSynthetic
+            get() = getApiUrl("consumers/sessions/lookup")
+
+        /**
+         * @return `https://api.stripe.com/v1/consumers/accounts/sign_up`
+         */
+        internal val consumerSignUpUrl: String
+            @JvmSynthetic
+            get() = getApiUrl("consumers/accounts/sign_up")
+
+        /**
+         * @return `https://api.stripe.com/v1/consumers/sessions/start_verification`
+         */
+        internal val startConsumerVerificationUrl: String
+            @JvmSynthetic
+            get() = getApiUrl("consumers/sessions/start_verification")
+
+        /**
+         * @return `https://api.stripe.com/v1/consumers/sessions/confirm_verification`
+         */
+        internal val confirmConsumerVerificationUrl: String
+            @JvmSynthetic
+            get() = getApiUrl("consumers/sessions/confirm_verification")
 
         /**
          * @return `https://api.stripe.com/v1/payment_intents/:id`

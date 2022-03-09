@@ -17,19 +17,18 @@ import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.TestCoroutineDispatcher
-import kotlinx.coroutines.test.TestCoroutineScope
+import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertFailsWith
 
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
 class GooglePayLauncherTest {
-    private val testDispatcher = TestCoroutineDispatcher()
-    private val testScope = TestCoroutineScope(testDispatcher)
+    private val testDispatcher = UnconfinedTestDispatcher()
+    private val testScope = TestScope(testDispatcher)
 
     private val scenario = launchFragmentInContainer(initialState = Lifecycle.State.CREATED) {
         TestFragment()
@@ -48,12 +47,6 @@ class GooglePayLauncherTest {
     private val firedEvents = mutableListOf<String>()
     private val analyticsRequestExecutor = AnalyticsRequestExecutor {
         firedEvents.add(it.params["event"].toString())
-    }
-
-    @AfterTest
-    fun cleanup() {
-        testDispatcher.cleanupTestCoroutines()
-        testScope.cleanupTestCoroutines()
     }
 
     @Test

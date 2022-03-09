@@ -98,6 +98,10 @@ class LauncherActivity : AppCompatActivity() {
                 KlarnaPaymentActivity::class.java
             ),
             Item(
+                activity.getString(R.string.confirm_with_affirm),
+                AffirmPaymentActivity::class.java
+            ),
+            Item(
                 activity.getString(R.string.becs_debit_example),
                 BecsDebitPaymentMethodActivity::class.java
             ),

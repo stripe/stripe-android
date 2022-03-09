@@ -3,16 +3,16 @@ package com.stripe.android.payments
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
-import com.stripe.android.Logger
 import com.stripe.android.PaymentIntentResult
 import com.stripe.android.StripeIntentResult
+import com.stripe.android.core.Logger
+import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.exception.MaxRetryReachedException
 import com.stripe.android.model.PaymentIntentFixtures
-import com.stripe.android.networking.ApiRequest
 import com.stripe.android.networking.StripeRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.TestCoroutineDispatcher
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
@@ -23,13 +23,12 @@ import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
-import kotlin.test.AfterTest
 import kotlin.test.assertFailsWith
 
 @RunWith(RobolectricTestRunner::class)
 @ExperimentalCoroutinesApi
 internal class PaymentIntentFlowResultProcessorTest {
-    private val testDispatcher = TestCoroutineDispatcher()
+    private val testDispatcher = UnconfinedTestDispatcher()
 
     private val mockStripeRepository: StripeRepository = mock()
 
@@ -42,14 +41,9 @@ internal class PaymentIntentFlowResultProcessorTest {
         mock()
     )
 
-    @AfterTest
-    fun after() {
-        testDispatcher.cleanupTestCoroutines()
-    }
-
     @Test
     fun `processPaymentIntent() when shouldCancelSource=true should return canceled PaymentIntent`() =
-        testDispatcher.runBlockingTest {
+        runTest {
             whenever(mockStripeRepository.retrievePaymentIntent(any(), any(), any())).thenReturn(
                 PaymentIntentFixtures.PI_REQUIRES_REDIRECT
             )
@@ -82,7 +76,7 @@ internal class PaymentIntentFlowResultProcessorTest {
 
     @Test
     fun `no refresh when user cancels the payment`() =
-        testDispatcher.runBlockingTest {
+        runTest {
             whenever(mockStripeRepository.retrievePaymentIntent(any(), any(), any())).thenReturn(
                 PaymentIntentFixtures.PI_REQUIRES_WECHAT_PAY_AUTHORIZE
             )
@@ -124,7 +118,7 @@ internal class PaymentIntentFlowResultProcessorTest {
 
     @Test
     fun `refresh succeeds when user confirms the payment`() =
-        testDispatcher.runBlockingTest {
+        runTest {
             whenever(mockStripeRepository.retrievePaymentIntent(any(), any(), any())).thenReturn(
                 PaymentIntentFixtures.PI_REQUIRES_WECHAT_PAY_AUTHORIZE
             )
@@ -164,7 +158,7 @@ internal class PaymentIntentFlowResultProcessorTest {
 
     @Test
     fun `refresh reaches max retry user confirms the payment`() =
-        testDispatcher.runBlockingTest {
+        runTest {
             whenever(mockStripeRepository.retrievePaymentIntent(any(), any(), any())).thenReturn(
                 PaymentIntentFixtures.PI_REQUIRES_WECHAT_PAY_AUTHORIZE
             )

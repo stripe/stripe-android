@@ -5,41 +5,32 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.CardNumberFixtures
+import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.AccountRange
 import com.stripe.android.model.BinFixtures
 import com.stripe.android.model.BinRange
-import com.stripe.android.networking.ApiRequest
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networking.StripeApiRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.test.TestCoroutineDispatcher
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.runTest
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
-import kotlin.test.AfterTest
 import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
 @ExperimentalCoroutinesApi
 internal class DefaultCardAccountRangeRepositoryTest {
-    private val testDispatcher = TestCoroutineDispatcher()
 
     private val application = ApplicationProvider.getApplicationContext<Application>()
 
     private val realStore = DefaultCardAccountRangeStore(application)
     private val realRepository = createRealRepository(realStore)
-
-    @AfterTest
-    fun cleanup() {
-        testDispatcher.cleanupTestCoroutines()
-    }
 
     @Test
     fun `repository with real sources returns expected results`() = runBlocking {
@@ -135,7 +126,7 @@ internal class DefaultCardAccountRangeRepositoryTest {
     }
 
     @Test
-    fun `getAccountRange() should return null`() = testDispatcher.runBlockingTest {
+    fun `getAccountRange() should return null`() = runTest {
         assertThat(
             DefaultCardAccountRangeRepository(
                 inMemorySource = FakeCardAccountRangeSource(),
@@ -147,7 +138,7 @@ internal class DefaultCardAccountRangeRepositoryTest {
     }
 
     @Test
-    fun `loading when no sources are loading should emit false`() = testDispatcher.runBlockingTest {
+    fun `loading when no sources are loading should emit false`() = runTest {
         val collected = mutableListOf<Boolean>()
         DefaultCardAccountRangeRepository(
             inMemorySource = FakeCardAccountRangeSource(),
@@ -163,7 +154,7 @@ internal class DefaultCardAccountRangeRepositoryTest {
     }
 
     @Test
-    fun `loading when one source is loading should emit true`() = testDispatcher.runBlockingTest {
+    fun `loading when one source is loading should emit true`() = runTest {
         val collected = mutableListOf<Boolean>()
         DefaultCardAccountRangeRepository(
             inMemorySource = FakeCardAccountRangeSource(),
@@ -179,7 +170,7 @@ internal class DefaultCardAccountRangeRepositoryTest {
     }
 
     @Test
-    fun `getAccountRange should not access remote source if BIN is in store`() = testDispatcher.runBlockingTest {
+    fun `getAccountRange should not access remote source if BIN is in store`() = runTest {
         val remoteSource = mock<CardAccountRangeSource>()
         val repository = DefaultCardAccountRangeRepository(
             inMemorySource = FakeCardAccountRangeSource(),

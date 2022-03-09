@@ -12,12 +12,12 @@ import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isGone
 import androidx.lifecycle.MutableLiveData
-import com.stripe.android.Logger
 import com.stripe.android.R
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.auth.PaymentBrowserAuthContract
+import com.stripe.android.core.Logger
+import com.stripe.android.core.exception.StripeException
 import com.stripe.android.databinding.PaymentAuthWebViewActivityBinding
-import com.stripe.android.exception.StripeException
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.stripe3ds2.utils.CustomizeUtils
 

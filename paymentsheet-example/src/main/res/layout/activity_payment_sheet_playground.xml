@@ -123,6 +123,14 @@
                 tools:ignore="HardcodedText" />
 
             <RadioButton
+                android:id="@+id/currency_aud_button"
+                android:text="AUD"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:checked="true"
+                tools:ignore="HardcodedText" />
+
+            <RadioButton
                 android:id="@+id/currency_eur_button"
                 android:text="EUR"
                 android:layout_width="match_parent"
@@ -305,14 +313,23 @@
         </RadioGroup>
 
         <Button
-            android:id="@+id/reload_button"
-            android:text="@string/reload_paymentsheet"
+            android:id="@+id/reset_defaults_button"
+            android:text="@string/reset_defaults"
             android:layout_width="wrap_content"
             android:layout_height="48dp"
             android:layout_marginTop="8dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/allowsDelayedPaymentMethods_radio_group" />
+
+        <Button
+            android:id="@+id/reload_button"
+            android:text="@string/reload_paymentsheet"
+            android:layout_width="wrap_content"
+            android:layout_height="48dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/reset_defaults_button" />
 
         <View
             android:id="@+id/divider"

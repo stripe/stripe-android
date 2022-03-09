@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+  <!-- Address line 1 placeholder for billing address form. -->
+  <string name="address_label_address_line1">Baris alamat ke-1</string>
+  <!-- Caption for City field on address form -->
+  <string name="address_label_city">Kota</string>
+  <!-- Caption for Country field on address form -->
+  <string name="address_label_country">Negara</string>
+  <!-- Caption for County field on address form (only countries that use county, like United Kingdom) -->
+  <string name="address_label_county">County</string>
+  <!-- Caption for Name field on address form -->
+  <string name="address_label_name">Nama</string>
+  <!-- Short string for postal code (text used in non-US countries) -->
+  <string name="address_label_postal_code">Kode pos</string>
+  <!-- Caption for Province field on address form (only countries that use province, like Canada) -->
+  <string name="address_label_province">Provinsi</string>
+  <!-- Caption for State field on address form (only countries that use state , like United States) -->
+  <string name="address_label_state">Negara Bagian</string>
+  <!-- Label for input requesting zip code, used for US based addreses -->
+  <string name="address_label_zip_code">Kode ZIP</string>
+</resources>

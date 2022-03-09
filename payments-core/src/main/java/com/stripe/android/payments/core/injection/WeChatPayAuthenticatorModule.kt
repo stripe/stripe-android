@@ -1,6 +1,5 @@
 package com.stripe.android.payments.core.injection
 
-import com.stripe.android.Stripe
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.StripeIntent.NextActionData
 import com.stripe.android.payments.core.authentication.PaymentAuthenticator
@@ -11,7 +10,7 @@ import dagger.multibindings.IntoMap
 
 /**
  * Provides [PaymentAuthenticator] for [NextActionData.WeChatPayRedirect] through reflection,
- * requires "com.stripe:stripe-wechatpay:[Stripe.VERSION_NAME]" dependency.
+ * requires "com.stripe:stripe-wechatpay:[StripeSdkVersion.VERSION_NAME]" dependency.
  * Will register a [UnsupportedAuthenticator] if the dependency is not added.
  */
 @Module

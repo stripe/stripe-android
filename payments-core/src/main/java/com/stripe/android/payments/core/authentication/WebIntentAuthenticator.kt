@@ -3,14 +3,15 @@ package com.stripe.android.payments.core.authentication
 import com.stripe.android.PaymentBrowserAuthStarter
 import com.stripe.android.StripePaymentController
 import com.stripe.android.auth.PaymentBrowserAuthContract
+import com.stripe.android.core.injection.ENABLE_LOGGING
+import com.stripe.android.core.injection.PUBLISHABLE_KEY
+import com.stripe.android.core.injection.UIContext
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
+import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.networking.ApiRequest
 import com.stripe.android.networking.PaymentAnalyticsEvent
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
-import com.stripe.android.payments.core.injection.ENABLE_LOGGING
-import com.stripe.android.payments.core.injection.PUBLISHABLE_KEY
-import com.stripe.android.payments.core.injection.UIContext
+import com.stripe.android.payments.core.injection.IS_INSTANT_APP
 import com.stripe.android.view.AuthActivityStarterHost
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -30,7 +31,8 @@ internal class WebIntentAuthenticator @Inject constructor(
     @Named(ENABLE_LOGGING) private val enableLogging: Boolean,
     @UIContext private val uiContext: CoroutineContext,
     private val threeDs1IntentReturnUrlMap: MutableMap<String, String>,
-    @Named(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String
+    @Named(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String,
+    @Named(IS_INSTANT_APP) private val isInstantApp: Boolean
 ) : PaymentAuthenticator<StripeIntent> {
 
     override suspend fun authenticate(
@@ -120,7 +122,8 @@ internal class WebIntentAuthenticator @Inject constructor(
                 stripeAccountId = stripeAccount,
                 shouldCancelSource = shouldCancelSource,
                 shouldCancelIntentOnUserNavigation = shouldCancelIntentOnUserNavigation,
-                publishableKey = publishableKeyProvider()
+                publishableKey = publishableKeyProvider(),
+                isInstantApp = isInstantApp
             )
         )
     }

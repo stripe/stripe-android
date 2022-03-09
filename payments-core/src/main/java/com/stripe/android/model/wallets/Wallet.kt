@@ -1,8 +1,8 @@
 package com.stripe.android.model.wallets
 
 import android.os.Parcelable
+import com.stripe.android.core.model.StripeModel
 import com.stripe.android.model.Address
-import com.stripe.android.model.StripeModel
 import kotlinx.parcelize.Parcelize
 
 /**

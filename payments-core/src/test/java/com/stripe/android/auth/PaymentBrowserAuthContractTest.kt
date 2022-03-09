@@ -2,6 +2,7 @@ package com.stripe.android.auth
 
 import android.app.Activity
 import android.content.Context
+import android.os.Parcel
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
@@ -77,6 +78,19 @@ class PaymentBrowserAuthContractTest {
     }
 
     @Test
+    fun `createIntent() when isInstantApp should use StripeBrowserLauncherActivity`() {
+        val intent = PaymentBrowserAuthContract().createIntent(
+            activity,
+            ARGS.copy(
+                isInstantApp = true
+            )
+        )
+
+        assertThat(intent.component?.className)
+            .isEqualTo(StripeBrowserLauncherActivity::class.java.name)
+    }
+
+    @Test
     fun `createIntent() should set statusBarColor from activity`() {
         val intent = PaymentBrowserAuthContract().createIntent(
             activity,
@@ -92,6 +106,16 @@ class PaymentBrowserAuthContractTest {
             .isEqualTo(activity.window.statusBarColor)
     }
 
+    @Test
+    fun `unparcel when no parameters as when started from StripeBrowserLauncherActivity`() {
+        val parcel = Parcel.obtain()
+
+        // An NullPointerException is thrown if a constructor doesn't exist that
+        // takes a parcel and created the object with empty strings if they
+        // don't exist.
+        PaymentBrowserAuthContract.Args(parcel)
+    }
+
     private companion object {
         private val ARGS = PaymentBrowserAuthContract.Args(
             clientSecret = "client_secret",
@@ -99,7 +123,8 @@ class PaymentBrowserAuthContractTest {
             requestCode = 5000,
             url = "https://mybank.com/auth",
             returnUrl = "myapp://custom",
-            publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
+            publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+            isInstantApp = false
         )
     }
 }

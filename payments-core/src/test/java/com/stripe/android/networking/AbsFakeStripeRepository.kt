@@ -1,12 +1,15 @@
 package com.stripe.android.networking
 
 import com.stripe.android.cards.Bin
-import com.stripe.android.exception.APIException
+import com.stripe.android.core.exception.APIException
+import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.BankStatuses
 import com.stripe.android.model.BinFixtures
 import com.stripe.android.model.CardMetadata
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
+import com.stripe.android.model.ConsumerSession
+import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.Customer
 import com.stripe.android.model.ListPaymentMethodsParams
 import com.stripe.android.model.PaymentIntent
@@ -274,4 +277,39 @@ internal abstract class AbsFakeStripeRepository : StripeRepository() {
     override suspend fun createRadarSession(
         requestOptions: ApiRequest.Options
     ) = RadarSession("rse_abc123")
+
+    override suspend fun lookupConsumerSession(
+        email: String,
+        requestOptions: ApiRequest.Options
+    ): ConsumerSessionLookup? {
+        return null
+    }
+
+    override suspend fun consumerSignUp(
+        email: String,
+        phoneNumber: String,
+        country: String,
+        cookies: String?,
+        requestOptions: ApiRequest.Options
+    ): ConsumerSession? {
+        return null
+    }
+
+    override suspend fun startConsumerVerification(
+        consumerSessionClientSecret: String,
+        locale: Locale,
+        cookies: String?,
+        requestOptions: ApiRequest.Options
+    ): ConsumerSession? {
+        return null
+    }
+
+    override suspend fun confirmConsumerVerification(
+        consumerSessionClientSecret: String,
+        verificationCode: String,
+        cookies: String?,
+        requestOptions: ApiRequest.Options
+    ): ConsumerSession? {
+        return null
+    }
 }

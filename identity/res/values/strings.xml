@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="kontinue">continue</string>
+    <string name="agree_and_continue">Agree and continue</string>
+    <string name="decline">Decline and use alternative method</string>
+    <string name="driver_license">Driver\'s license</string>
+    <string name="id_card">Identity card</string>
+    <string name="doc_select_title">Which form of identification do you want to use?</string>
+
+    <string name="front_of_id">Front of ID</string>
+    <string name="back_of_id">Back of ID</string>
+    <string name="position_id_front">Position your ID in the center of the frame</string>
+    <string name="position_id_back">Flip your ID over to the other side</string>
+
+    <string name="front_of_dl">Front of dirver\'s license</string>
+    <string name="back_of_dl">Back of dirver\'s license</string>
+    <string name="position_dl_front">Position your driver license in the center of the frame</string>
+    <string name="position_dl_back">Flip your driver license over to the other side</string>
+
+    <string name="passport">Passport</string>
+    <string name="position_passport">Position your Passport in the center of the frame</string>
+
+    <string name="hold_still">Hold still, scanning</string>
+    <string name="scanned">Scanned</string>
+    <string name="help">Help</string>
+    <string name="id_scan_complete">ID scan complete</string>
+
+    <string name="check_mark">Check mark to indicate document capture success</string>
+
+    <string name="file_upload">File Upload</string>
+    <string name="app_settings">App Settings</string>
+    <string name="camera_permission">Camera permission</string>
+    <string name="grant_camera_permission_text">We need permission to use your camera. Please allow camera access in app settings.</string>
+    <string name="upload_file_text">Alternatively, you may manually upload a photo of your %1$s</string>
+
+    <string name="displayname_id">ID</string>
+    <string name="displayname_dl">Driver\'s License</string>
+    <string name="displayname_passport">Passport</string>
+    <string name="displayname_selfie">Passport</string>
+
+    <string name="select">Select</string>
+
+    <string name="file_upload_content_id">Please upload images of the front and back of your ID</string>
+    <string name="file_upload_content_dl">Please upload images of the front and back of your driver\'s license</string>
+    <string name="file_upload_content_passport">Please upload images of your passport</string>
+
+    <string name="back_of_id_selected">Back of ID is selected</string>
+    <string name="front_of_id_selected">Front of ID is selected</string>
+    <string name="back_of_dl_selected">Back of driver license is selected</string>
+    <string name="front_of_dl_selected">Front of driver license is selected</string>
+    <string name="passport_selected">Front of driver license is selected</string>
+    <string name="choose_file">Choose File</string>
+    <string name="take_photo">Take Photo</string>
+    <string name="cancel">Cancel</string>
+    <string name="sample_title_text">Sample title text</string>
+    <string name="sample_content_text">Sample content text</string>
+
+    <string name="error">Error</string>
+    <string name="unexpected_error_try_again">There was an unexpected error — try again in a few seconds</string>
+    <string name="go_back">Go Back</string>
+    <string name="description_exclamation_mark">Exclamation point for error page</string>
+    <string name="loading">Loading</string>
+    <string name="sample_consent_body_response"><![CDATA[<p><strong>How Stripe will verify your identity</strong></p>\n\n<p>Stripe will use biometric technology (on images of you and your IDs) and other data sources to confirm your identity and for fraud and security purposes. Stripe will store these images and the results of this check and share them with mlgb.band.</p>\n\n<p><a href=\"https://stripe.com/about\">Learn about Stripe</a></p><p><a href=\"https://stripe.com/privacy-center/legal#stripe-identity\">Learn how Stripe Identity works</a></p>]]></string>
+    <string name="sample_privacy_policy"><![CDATA[Data will be stored and may be used according to the <a href=\"http://stripe.com/privacy\">Stripe Privacy Policy</a> and <a href=\"\">mlgb.band</a> Privacy Policy.]]></string>
+
+    <string name="single_selection_body_content_dl">You will need to take photos of the front and back in the following steps.</string>
+    <string name="single_selection_body_content_id">You will need to take photos of the front and back in the following steps.</string>
+    <string name="single_selection_body_content_passport">You will need to take a photo of the passport in the following steps.</string>
+</resources>

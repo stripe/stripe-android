@@ -1,0 +1,146 @@
+plugins {
+    id "com.android.library"
+    id "kotlin-android"
+    id 'kotlin-kapt'
+    id 'org.jetbrains.dokka'
+    id "org.jetbrains.kotlin.plugin.parcelize"
+    id 'org.jetbrains.kotlin.plugin.serialization'
+}
+
+assemble.dependsOn('lint')
+check.dependsOn('checkstyle')
+
+configurations {
+    ktlint
+}
+
+if (System.getenv("JITPACK")) {
+    group='com.github.stripe.stripe-android'
+}
+
+dependencies {
+    api project(":stripe-core")
+    implementation project(":camera-core")
+
+    implementation "org.tensorflow:tensorflow-lite:2.8.0"
+
+    implementation "androidx.appcompat:appcompat:$androidxAppcompatVersion"
+    implementation "androidx.constraintlayout:constraintlayout:$androidxConstraintlayoutVersion"
+    implementation "androidx.fragment:fragment-ktx:$androidxFragmentVersion"
+    implementation "androidx.core:core-ktx:$androidxCoreVersion"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinCoroutinesVersion"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$kotlinCoroutinesVersion"
+    implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:$kotlinSerializationVersion"
+
+    testImplementation "androidx.test:core:$androidTestVersion"
+    testImplementation "androidx.test:runner:$androidTestVersion"
+    testImplementation "junit:junit:$junitVersion"
+    testImplementation "org.jetbrains.kotlin:kotlin-test:$kotlinVersion"
+    testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$kotlinCoroutinesVersion"
+    testImplementation "org.mockito:mockito-core:$mockitoCoreVersion"
+    testImplementation "org.mockito.kotlin:mockito-kotlin:$mockitoKotlinVersion"
+    testImplementation "com.google.truth:truth:$truthVersion"
+    testImplementation "org.robolectric:robolectric:$robolectricVersion"
+
+    androidTestImplementation "androidx.test:rules:$androidTestVersion"
+    androidTestImplementation "androidx.test:runner:$androidTestVersion"
+    androidTestImplementation "org.jetbrains.kotlin:kotlin-test:$kotlinVersion"
+    androidTestImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$kotlinCoroutinesVersion"
+    androidTestUtil "androidx.test:orchestrator:$androidTestVersion"
+
+    implementation "androidx.compose.runtime:runtime-livedata:$androidxComposeVersion"
+
+    ktlint "com.pinterest:ktlint:$ktlintVersion"
+}
+
+android {
+    compileSdkVersion rootProject.ext.compileSdkVersion
+    buildToolsVersion rootProject.ext.buildToolsVersion
+
+    defaultConfig {
+        minSdkVersion 21
+        targetSdkVersion rootProject.ext.compileSdkVersion
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+
+        vectorDrawables.useSupportLibrary = true
+
+        // From https://developer.android.com/training/testing/junit-runner:
+        // > To remove all shared state from your device"s CPU and memory after each test,
+        // > use the clearPackageData flag.
+        testInstrumentationRunnerArguments clearPackageData: "true"
+    }
+
+    sourceSets {
+        main {
+            res.srcDirs = ['res']
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
+
+    buildFeatures {
+        compose = true
+        viewBinding true
+    }
+
+    testOptions {
+        unitTests {
+            // Note: without this, all Robolectric tests using assets will fail.
+            includeAndroidResources = true
+            all {
+                maxHeapSize = "1024m"
+            }
+        }
+    }
+
+    packagingOptions {
+        pickFirst 'META-INF/AL2.0'
+        pickFirst 'META-INF/LGPL2.1'
+    }
+
+    composeOptions {
+        kotlinCompilerExtensionVersion "$androidxComposeVersion"
+    }
+
+    lintOptions {
+        disable "UnrememberedMutableState"
+    }
+
+    dokkaHtml {
+        outputDirectory = new File("${project.rootDir}/docs/$project.name")
+    }
+}
+
+task ktlint(type: JavaExec, group: "verification") {
+    description = "Check Kotlin code style."
+    mainClass = "com.pinterest.ktlint.Main"
+    classpath = configurations.ktlint
+    args "src/**/*.kt"
+    // to generate report in checkstyle format prepend following args:
+    // "--reporter=plain", "--reporter=checkstyle,output=${buildDir}/ktlint.xml"
+    // see https://github.com/pinterest/ktlint#usage for more
+}
+check.dependsOn ktlint
+
+task ktlintFormat(type: JavaExec, group: "formatting") {
+    description = "Fix Kotlin code style deviations."
+    mainClass = "com.pinterest.ktlint.Main"
+    classpath = configurations.ktlint
+    args "-F", "src/**/*.kt"
+}
+
+ext {
+    artifactId = "stripecardscan"
+    artifactName = "stripecardscan"
+    artifactDescrption = "The stripecardscan module of Stripe Payment Android SDK"
+}
+
+apply from: "${rootDir}/deploy/deploy.gradle"

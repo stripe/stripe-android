@@ -2,70 +2,14 @@
 <resources>
   <!-- Used for accessibility to describe the button on the payment sheet list of options to add a new payment method. -->
   <string name="add_new_payment_method">Dodaj nov način plačila</string>
-  <!-- Label for input requesting address line 2, used for international addresses -->
-  <string name="address_label_address_line2">Vrstica naslova 2</string>
-  <!-- Used to describe address in United Arab Emirates -->
-  <string name="address_label_ae_emirate">Emirat</string>
-  <!-- Label of an address field -->
-  <string name="address_label_au_suburb_or_city">Predmestje ali mesto</string>
-  <!-- Label of an address field -->
-  <string name="address_label_bb_jm_parish">Župnija</string>
-  <!-- Used to describe a field of an address -->
-  <string name="address_label_cedex">Cedex</string>
-  <!-- Label of an address field -->
-  <string name="address_label_department">Oddelek</string>
-  <!-- Label for the district field on an address form -->
-  <string name="address_label_district">Okrožje</string>
-  <!-- Label of an address field in hk -->
-  <string name="address_label_hk_area">Območje</string>
-  <!-- Label of an address field -->
-  <string name="address_label_ie_eircode">Eircode</string>
-  <!-- Used to describe an address field in Ireland -->
-  <string name="address_label_ie_townland">Upravna enota</string>
-  <!-- Used to describe postal code in India -->
-  <string name="address_label_in_pin">Pin</string>
-  <!-- Used to describe part of an address -->
-  <string name="address_label_island">Otok</string>
-  <!-- Label of an address field -->
-  <string name="address_label_jp_prefecture">Prefektura</string>
-  <!-- Label of an address field -->
-  <string name="address_label_kr_do_si">Do Si</string>
-  <!-- Used to describe a field of an address -->
-  <string name="address_label_neighborhood">Mestna četrt</string>
-  <!-- Label of an address field -->
-  <string name="address_label_oblast">Oblast</string>
-  <!-- Used to describe a field of an address -->
-  <string name="address_label_post_town">Pošta ali mesto</string>
-  <!-- Label of an address field -->
-  <string name="address_label_suburb">Predmestje</string>
-  <!-- Used to describe an address field. -->
-  <string name="address_label_village_township">Vas ali občina</string>
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
   <string name="bank_account_ending_in">Odstranite bančni račun, ki se konča s števkami %s</string>
-  <!-- Billing address section title for card form entry. -->
-  <string name="billing_details">Naslov plačnika računa</string>
-  <!-- Used when a required field is blank and submit is clicked. -->
-  <string name="blank_and_required">To polje ne sme biti prazno.</string>
   <!-- Button title to cancel action in an alert -->
   <string name="cancel">Prekliči</string>
-  <!-- Used for accessibility to indicate that when you press the dropdown arrow on a form (such as a country or bank), it will bring up a menu to allow you to change the value. -->
-  <string name="change">Spremeni</string>
   <!-- Done button title -->
   <string name="done">Dokončano</string>
   <!-- Button title to enter editing mode -->
   <string name="edit">Uredi</string>
-  <!-- Caption for Email field on address form -->
-  <string name="email">E-poštni naslov</string>
-  <!-- Error message when email is invalid -->
-  <string name="email_is_invalid">Vaš e-poštni naslov ni veljaven.</string>
-  <!-- An error message displayed when the customer's IBAN is incomplete. -->
-  <string name="iban_incomplete">Vnesena koda IBAN ni popolna.</string>
-  <!-- An error message displayed when the customer's iban is invalid. -->
-  <string name="iban_invalid">Vnesena koda IBAN ni veljavna.</string>
-  <!-- An error message displayed when the IBAN country code is not supported. -->
-  <string name="iban_invalid_country">Vnesena koda IBAN ni veljavna. \"%s\" ni podprta koda države.</string>
-  <!-- An error message displayed when the IBAN does not start with a two-letter country code. -->
-  <string name="iban_invalid_start">Vaša koda IBAN se mora začeti z dvomestno kodo države.</string>
   <!-- Button title for confirmation alert to remove a saved payment method
    Text for remove button -->
   <string name="remove">Odstrani</string>
@@ -86,18 +30,10 @@
   <string name="stripe_paymentsheet_close">Zapri</string>
   <!-- Text for continue button -->
   <string name="stripe_paymentsheet_continue_button_label">Nadaljuj</string>
-  <!-- Label for the field containing the dropdown of EPS Banks -->
-  <string name="stripe_paymentsheet_eps_bank">EPS Bank</string>
-  <!-- The label of a text field that is optional. For example, 'Email (optional)' or 'Name (optional) -->
-  <string name="stripe_paymentsheet_form_label_optional">%s (izbirno)</string>
-  <!-- iDEAL bank section title for iDEAL form entry. -->
-  <string name="stripe_paymentsheet_ideal_bank">Banka iDEAL</string>
   <!-- Title of a section containing multiple payment methods that can selected and will collect the payment information from the user. -->
   <string name="stripe_paymentsheet_or_pay_using">Ali pa za plačilo uporabite</string>
   <!-- Title of a section containing a card form that will collect the payment information from the user. -->
   <string name="stripe_paymentsheet_or_pay_with_card">Ali pa plačajte s kartico</string>
-  <!-- Label on the dropdown to select the Przelewy24 Bank -->
-  <string name="stripe_paymentsheet_p24_bank">Przelewy24 Bank</string>
   <!-- Label of a button that initiates payment when tapped -->
   <string name="stripe_paymentsheet_pay_button_amount">Plačaj %s</string>
   <!-- Label for a button that starts processing the payment. -->
@@ -118,8 +54,6 @@
   <string name="stripe_paymentsheet_save_this_card_with_merchant_name">Shrani to kartico za prihodnja plačila trgovcu %s</string>
   <!-- Title shown above a carousel containing the customer&apos;s payment methods -->
   <string name="stripe_paymentsheet_select_payment_method">Izberite način plačila</string>
-  <!-- SEPA mandate text -->
-  <string name="stripe_paymentsheet_sepa_mandate">Z navedbo podatkov o plačilu in potrditvijo tega plačila pooblaščate (A) podjetje %s in družbo Stripe, našega ponudnika plačilnih storitev, da posreduje navodila vaši banki za bremenitev vašega računa, in (B) vašo banko, da bremeni vaš račun v skladu s temi navodili. Vaše pravice vključujejo tudi pravico do povračila denarnih sredstev s strani vaše banke v skladu s pogoji in določili vaše pogodbe z banko. Povračilo denarnih sredstev morate zahtevati v 8 tednih od dneva bremenitve vašega računa. Vaše pravice so podrobno opisane na izpisku, ki ga lahko pridobite v banki. Strinjate se s prejemom obvestil za prihodnje bremenitve največ 2 dni pred njihovo izvedbo.</string>
   <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->
   <string name="stripe_paymentsheet_setup_button_label">Nastavi</string>
   <!-- Label indicating the total amount that the user is authorizing (e.g. "Total: $25.00") -->

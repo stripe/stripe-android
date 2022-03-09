@@ -3,11 +3,13 @@ package com.stripe.android
 import android.content.Intent
 import androidx.annotation.Size
 import com.stripe.android.core.exception.APIConnectionException
+import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.exception.InvalidRequestException
-import com.stripe.android.exception.APIException
+import com.stripe.android.core.exception.StripeException
+import com.stripe.android.core.model.StripeModel
+import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.exception.AuthenticationException
 import com.stripe.android.exception.CardException
-import com.stripe.android.exception.StripeException
 import com.stripe.android.model.AccountParams
 import com.stripe.android.model.BankAccountTokenParams
 import com.stripe.android.model.CardParams
@@ -25,10 +27,8 @@ import com.stripe.android.model.Source
 import com.stripe.android.model.SourceParams
 import com.stripe.android.model.StripeFile
 import com.stripe.android.model.StripeFileParams
-import com.stripe.android.model.StripeModel
 import com.stripe.android.model.Token
 import com.stripe.android.model.WeChatPayNextAction
-import com.stripe.android.networking.ApiRequest
 
 /**
  * Confirm and authenticate a [PaymentIntent] using the Alipay SDK

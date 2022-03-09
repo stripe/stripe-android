@@ -1,17 +1,18 @@
 package com.stripe.android.paymentsheet.forms
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.paymentsheet.elements.EmailElement
-import com.stripe.android.paymentsheet.elements.EmailConfig
-import com.stripe.android.paymentsheet.elements.SectionController
-import com.stripe.android.paymentsheet.elements.SectionElement
-import com.stripe.android.paymentsheet.elements.TextFieldController
-import com.stripe.android.paymentsheet.elements.IdentifierSpec
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.ui.core.elements.EmailConfig
+import com.stripe.android.ui.core.elements.EmailElement
+import com.stripe.android.ui.core.elements.IdentifierSpec
+import com.stripe.android.ui.core.elements.SectionController
+import com.stripe.android.ui.core.elements.SectionElement
+import com.stripe.android.ui.core.elements.TextFieldController
+import com.stripe.android.ui.core.forms.FormFieldEntry
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.runTest
 import org.junit.Test
 
 @ExperimentalCoroutinesApi
@@ -45,14 +46,14 @@ class CompleteFormFieldValueFilterTest {
 
     @Test
     fun `With only some complete controllers and no hidden values the flow value is null`() {
-        runBlockingTest {
+        runTest {
             assertThat(transformElementToFormFieldValueFlow.filterFlow().first()).isNull()
         }
     }
 
     @Test
     fun `If all controllers are complete and no hidden values the flow value has all values`() {
-        runBlockingTest {
+        runTest {
             fieldFlow.value =
                 mapOf(
                     IdentifierSpec.Country to FormFieldEntry("US", true),
@@ -71,7 +72,7 @@ class CompleteFormFieldValueFilterTest {
 
     @Test
     fun `If an hidden field is incomplete field pairs have the non-hidden values`() {
-        runBlockingTest {
+        runTest {
             hiddenIdentifersFlow.value = listOf(IdentifierSpec.Email)
 
             val formFieldValues = transformElementToFormFieldValueFlow.filterFlow()
@@ -87,7 +88,7 @@ class CompleteFormFieldValueFilterTest {
 
     @Test
     fun `If an hidden field is complete field pairs contain only the non-hidden values`() {
-        runBlockingTest {
+        runTest {
             fieldFlow.value =
                 mapOf(
                     IdentifierSpec.Country to FormFieldEntry("US", true),

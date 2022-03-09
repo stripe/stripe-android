@@ -1,7 +1,9 @@
 package com.stripe.android
 
 import androidx.test.core.app.ApplicationProvider
-import com.stripe.android.exception.APIException
+import com.stripe.android.core.StripeError
+import com.stripe.android.core.exception.APIException
+import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.Customer
 import com.stripe.android.model.CustomerFixtures
 import com.stripe.android.model.ListPaymentMethodsParams
@@ -9,16 +11,17 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.Source
 import com.stripe.android.model.SourceFixtures
-import com.stripe.android.networking.ApiRequest
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.testharness.TestEphemeralKeyProvider
 import com.stripe.android.utils.TestUtils.idleLooper
 import com.stripe.android.view.AddPaymentMethodActivity
 import com.stripe.android.view.PaymentMethodsActivity
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.test.TestCoroutineDispatcher
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
 import org.junit.runner.RunWith
 import org.mockito.kotlin.KArgumentCaptor
 import org.mockito.kotlin.any
@@ -31,7 +34,6 @@ import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 import java.util.Calendar
 import java.util.concurrent.TimeUnit
-import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -41,7 +43,7 @@ import kotlin.test.assertNotNull
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
 internal class CustomerSessionTest {
-    private val testDispatcher = TestCoroutineDispatcher()
+    private val testDispatcher = UnconfinedTestDispatcher()
 
     private val stripeRepository: StripeRepository = mock()
 
@@ -61,6 +63,7 @@ internal class CustomerSessionTest {
 
     @BeforeTest
     fun setup() {
+        Dispatchers.setMain(testDispatcher)
         runBlocking {
             whenever(stripeRepository.retrieveCustomer(any(), any(), any()))
                 .thenReturn(FIRST_CUSTOMER, SECOND_CUSTOMER)
@@ -143,11 +146,6 @@ internal class CustomerSessionTest {
         }
     }
 
-    @AfterTest
-    fun cleanup() {
-        testDispatcher.cleanupTestCoroutines()
-    }
-
     @Test
     fun getInstance_withoutInitializing_throwsException() {
         CustomerSession.clearInstance()
@@ -156,7 +154,7 @@ internal class CustomerSessionTest {
     }
 
     @Test
-    fun addProductUsageTokenIfValid_whenValid_addsExpectedTokens() = testDispatcher.runBlockingTest {
+    fun addProductUsageTokenIfValid_whenValid_addsExpectedTokens() = runTest {
         val customerSession = createCustomerSession(
             ephemeralKeyManagerFactory = FakeEphemeralKeyManagerFactory(
                 ephemeralKeyProvider,
@@ -181,7 +179,7 @@ internal class CustomerSessionTest {
     }
 
     @Test
-    fun create_withoutInvokingFunctions_fetchesKeyAndCustomer() = testDispatcher.runBlockingTest {
+    fun create_withoutInvokingFunctions_fetchesKeyAndCustomer() = runTest {
         ephemeralKeyProvider.setNextRawEphemeralKey(EphemeralKeyFixtures.FIRST_JSON)
         val customerSession = createCustomerSession()
         idleLooper()
@@ -200,7 +198,7 @@ internal class CustomerSessionTest {
     }
 
     @Test
-    fun setCustomerShippingInfo_withValidInfo_callsWithExpectedArgs() = testDispatcher.runBlockingTest {
+    fun setCustomerShippingInfo_withValidInfo_callsWithExpectedArgs() = runTest {
         ephemeralKeyProvider.setNextRawEphemeralKey(EphemeralKeyFixtures.FIRST_JSON)
         val customerSession = createCustomerSession()
         val shippingInformation =
@@ -237,7 +235,7 @@ internal class CustomerSessionTest {
     }
 
     @Test
-    fun retrieveCustomer_withExpiredCache_updatesCustomer() = testDispatcher.runBlockingTest {
+    fun retrieveCustomer_withExpiredCache_updatesCustomer() = runTest {
         val firstKey = EphemeralKeyFixtures.FIRST
         val secondKey = EphemeralKeyFixtures.SECOND
 
@@ -296,7 +294,7 @@ internal class CustomerSessionTest {
     }
 
     @Test
-    fun retrieveCustomer_withUnExpiredCache_returnsCustomerWithoutHittingApi() = testDispatcher.runBlockingTest {
+    fun retrieveCustomer_withUnExpiredCache_returnsCustomerWithoutHittingApi() = runTest {
         val firstKey = EphemeralKeyFixtures.FIRST
 
         var currentTime = DEFAULT_CURRENT_TIME
@@ -338,7 +336,7 @@ internal class CustomerSessionTest {
     }
 
     @Test
-    fun addSourceToCustomer_withUnExpiredCustomer_returnsAddedSource() = testDispatcher.runBlockingTest {
+    fun addSourceToCustomer_withUnExpiredCustomer_returnsAddedSource() = runTest {
         val expectedProductUsage = setOf(
             AddPaymentMethodActivity.PRODUCT_TOKEN,
             PaymentMethodsActivity.PRODUCT_TOKEN
@@ -383,7 +381,7 @@ internal class CustomerSessionTest {
     }
 
     @Test
-    fun addSourceToCustomer_whenApiThrowsError_callsListener() = testDispatcher.runBlockingTest {
+    fun addSourceToCustomer_whenApiThrowsError_callsListener() = runTest {
         val expectedProductUsage = setOf(
             AddPaymentMethodActivity.PRODUCT_TOKEN,
             PaymentMethodsActivity.PRODUCT_TOKEN
@@ -413,7 +411,7 @@ internal class CustomerSessionTest {
     }
 
     @Test
-    fun removeSourceFromCustomer_withUnExpiredCustomer_returnsRemovedSource() = testDispatcher.runBlockingTest {
+    fun removeSourceFromCustomer_withUnExpiredCustomer_returnsRemovedSource() = runTest {
         val expectedProductUsage = setOf(
             AddPaymentMethodActivity.PRODUCT_TOKEN,
             PaymentMethodsActivity.PRODUCT_TOKEN
@@ -456,7 +454,7 @@ internal class CustomerSessionTest {
     }
 
     @Test
-    fun removeSourceFromCustomer_whenApiThrowsError_callsListener() = testDispatcher.runBlockingTest {
+    fun removeSourceFromCustomer_whenApiThrowsError_callsListener() = runTest {
         val expectedProductUsage = setOf(
             AddPaymentMethodActivity.PRODUCT_TOKEN,
             PaymentMethodsActivity.PRODUCT_TOKEN
@@ -485,7 +483,7 @@ internal class CustomerSessionTest {
     }
 
     @Test
-    fun setDefaultSourceForCustomer_withUnExpiredCustomer_returnsCustomerAndClearsLog() = testDispatcher.runBlockingTest {
+    fun setDefaultSourceForCustomer_withUnExpiredCustomer_returnsCustomerAndClearsLog() = runTest {
         var currentTime = DEFAULT_CURRENT_TIME
 
         ephemeralKeyProvider.setNextRawEphemeralKey(EphemeralKeyFixtures.FIRST_JSON)
@@ -526,7 +524,7 @@ internal class CustomerSessionTest {
     }
 
     @Test
-    fun setDefaultSourceForCustomer_whenApiThrows_callsListenerAndClearsLogs() = testDispatcher.runBlockingTest {
+    fun setDefaultSourceForCustomer_whenApiThrows_callsListenerAndClearsLogs() = runTest {
         var currentTime = DEFAULT_CURRENT_TIME
 
         ephemeralKeyProvider.setNextRawEphemeralKey(EphemeralKeyFixtures.FIRST_JSON)
@@ -551,7 +549,7 @@ internal class CustomerSessionTest {
     }
 
     @Test
-    fun attachPaymentMethodToCustomer_withUnExpiredCustomer_returnsAddedPaymentMethod() = testDispatcher.runBlockingTest {
+    fun attachPaymentMethodToCustomer_withUnExpiredCustomer_returnsAddedPaymentMethod() = runTest {
         val expectedProductUsage = setOf(
             AddPaymentMethodActivity.PRODUCT_TOKEN,
             PaymentMethodsActivity.PRODUCT_TOKEN
@@ -594,7 +592,7 @@ internal class CustomerSessionTest {
     }
 
     @Test
-    fun attachPaymentMethodToCustomer_whenApiThrowsError_callsListenerOnError() = testDispatcher.runBlockingTest {
+    fun attachPaymentMethodToCustomer_whenApiThrowsError_callsListenerOnError() = runTest {
         val expectedProductUsage = setOf(
             AddPaymentMethodActivity.PRODUCT_TOKEN,
             PaymentMethodsActivity.PRODUCT_TOKEN
@@ -622,7 +620,7 @@ internal class CustomerSessionTest {
     }
 
     @Test
-    fun detachPaymentMethodFromCustomer_withUnExpiredCustomer_returnsRemovedPaymentMethod() = testDispatcher.runBlockingTest {
+    fun detachPaymentMethodFromCustomer_withUnExpiredCustomer_returnsRemovedPaymentMethod() = runTest {
         val expectedProductUsage = setOf(
             AddPaymentMethodActivity.PRODUCT_TOKEN,
             PaymentMethodsActivity.PRODUCT_TOKEN
@@ -664,7 +662,7 @@ internal class CustomerSessionTest {
     }
 
     @Test
-    fun detachPaymentMethodFromCustomer_whenApiThrowsError_callsListenerOnError() = testDispatcher.runBlockingTest {
+    fun detachPaymentMethodFromCustomer_whenApiThrowsError_callsListenerOnError() = runTest {
         var currentTime = DEFAULT_CURRENT_TIME
 
         ephemeralKeyProvider.setNextRawEphemeralKey(EphemeralKeyFixtures.FIRST_JSON)
@@ -687,7 +685,7 @@ internal class CustomerSessionTest {
     }
 
     @Test
-    fun getPaymentMethods_withUnExpiredCustomer_returnsAddedPaymentMethod() = testDispatcher.runBlockingTest {
+    fun getPaymentMethods_withUnExpiredCustomer_returnsAddedPaymentMethod() = runTest {
         val expectedProductUsage = setOf(
             AddPaymentMethodActivity.PRODUCT_TOKEN,
             PaymentMethodsActivity.PRODUCT_TOKEN

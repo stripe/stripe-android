@@ -8,10 +8,11 @@ import androidx.test.core.app.ApplicationProvider;
 import com.stripe.android.core.networking.AnalyticsRequest;
 import com.stripe.android.core.networking.AnalyticsRequestExecutor;
 import com.stripe.android.core.networking.DefaultStripeNetworkClient;
+import com.stripe.android.core.version.StripeSdkVersion;
 import com.stripe.android.exception.AuthenticationException;
 import com.stripe.android.exception.CardException;
 import com.stripe.android.core.exception.InvalidRequestException;
-import com.stripe.android.exception.StripeException;
+import com.stripe.android.core.exception.StripeException;
 import com.stripe.android.model.AccountParams;
 import com.stripe.android.model.AddressFixtures;
 import com.stripe.android.model.BankAccount;
@@ -117,8 +118,8 @@ public class StripeTest {
     @Test
     public void testVersion() {
         assertEquals(
-                String.format(Locale.ROOT, "AndroidBindings/%s", Stripe.VERSION_NAME),
-                Stripe.VERSION
+                String.format(Locale.ROOT, "AndroidBindings/%s", StripeSdkVersion.VERSION_NAME),
+                StripeSdkVersion.VERSION
         );
     }
 

@@ -1,0 +1,52 @@
+apply from: configs.androidLibrary
+
+apply plugin: 'kotlin-kapt'
+apply plugin: 'checkstyle'
+apply plugin: 'org.jetbrains.kotlin.plugin.parcelize'
+apply plugin: 'kotlinx-serialization'
+
+ext {
+    artifactId = "stripe-core"
+    artifactName = "stripe-core"
+    artifactDescrption = "The core module of Stripe Android SDKs"
+}
+
+android {
+    buildFeatures {
+        compose = true
+        viewBinding true
+    }
+
+    composeOptions {
+        kotlinCompilerExtensionVersion "$androidxComposeVersion"
+    }
+}
+
+dependencies {
+    implementation "com.google.dagger:dagger:$daggerVersion"
+    kapt "com.google.dagger:dagger-compiler:$daggerVersion"
+
+    implementation "androidx.activity:activity-compose:$androidxActivityVersion"
+
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinCoroutinesVersion"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$kotlinCoroutinesVersion"
+    implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:$kotlinSerializationVersion"
+
+    testImplementation "junit:junit:$junitVersion"
+    testImplementation "org.mockito:mockito-core:$mockitoCoreVersion"
+    testImplementation "org.robolectric:robolectric:$robolectricVersion"
+    testImplementation "androidx.test:core:$androidTestVersion"
+    testImplementation "org.json:json:$jsonVersion"
+    testImplementation "org.mockito.kotlin:mockito-kotlin:$mockitoKotlinVersion"
+    testImplementation "org.jetbrains.kotlin:kotlin-test-junit:$kotlinVersion"
+    testImplementation "org.jetbrains.kotlin:kotlin-test-annotations-common:$kotlinVersion"
+    testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$kotlinCoroutinesVersion"
+    testImplementation "com.google.truth:truth:$truthVersion"
+    testImplementation "androidx.arch.core:core-testing:$androidxArchCoreVersion"
+    testImplementation "androidx.fragment:fragment-testing:$androidxFragmentVersion"
+    testImplementation "androidx.test:runner:$androidTestVersion"
+
+    ktlint "com.pinterest:ktlint:$ktlintVersion"
+}
+
+apply from: "${rootDir}/deploy/deploy.gradle"

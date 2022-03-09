@@ -1,0 +1,49 @@
+lpm, hasCustomer, allowsDelayedPayment, intentSetupFutureUsage, intentHasShipping, intentLpms, supportCustomerSavedCard, formExists, formType, supportsAdding
+affirm, true, true, off_session, false, card/affirm, false, false, not available, false
+affirm, true, true, off_session, false, card/eps/affirm, false, false, not available, false
+affirm, true, false, off_session, false, card/affirm, false, false, not available, false
+affirm, true, false, off_session, false, card/eps/affirm, false, false, not available, false
+affirm, true, true, on_session, false, card/affirm, false, false, not available, false
+affirm, true, true, on_session, false, card/eps/affirm, false, false, not available, false
+affirm, true, false, on_session, false, card/affirm, false, false, not available, false
+affirm, true, false, on_session, false, card/eps/affirm, false, false, not available, false
+affirm, true, true, null, false, card/affirm, false, false, not available, false
+affirm, true, true, null, false, card/eps/affirm, false, false, not available, false
+affirm, true, false, null, false, card/affirm, false, false, not available, false
+affirm, true, false, null, false, card/eps/affirm, false, false, not available, false
+affirm, false, true, off_session, false, card/affirm, false, false, not available, false
+affirm, false, true, off_session, false, card/eps/affirm, false, false, not available, false
+affirm, false, false, off_session, false, card/affirm, false, false, not available, false
+affirm, false, false, off_session, false, card/eps/affirm, false, false, not available, false
+affirm, false, true, on_session, false, card/affirm, false, false, not available, false
+affirm, false, true, on_session, false, card/eps/affirm, false, false, not available, false
+affirm, false, false, on_session, false, card/affirm, false, false, not available, false
+affirm, false, false, on_session, false, card/eps/affirm, false, false, not available, false
+affirm, false, true, null, false, card/affirm, false, false, not available, false
+affirm, false, true, null, false, card/eps/affirm, false, false, not available, false
+affirm, false, false, null, false, card/affirm, false, false, not available, false
+affirm, false, false, null, false, card/eps/affirm, false, false, not available, false
+affirm, true, true, off_session, true, card/affirm, false, false, not available, false
+affirm, true, true, off_session, true, card/eps/affirm, false, false, not available, false
+affirm, true, false, off_session, true, card/affirm, false, false, not available, false
+affirm, true, false, off_session, true, card/eps/affirm, false, false, not available, false
+affirm, true, true, on_session, true, card/affirm, false, false, not available, false
+affirm, true, true, on_session, true, card/eps/affirm, false, false, not available, false
+affirm, true, false, on_session, true, card/affirm, false, false, not available, false
+affirm, true, false, on_session, true, card/eps/affirm, false, false, not available, false
+affirm, true, true, null, true, card/affirm, false, true, oneTime, true
+affirm, true, true, null, true, card/eps/affirm, false, true, oneTime, true
+affirm, true, false, null, true, card/affirm, false, true, oneTime, true
+affirm, true, false, null, true, card/eps/affirm, false, true, oneTime, true
+affirm, false, true, off_session, true, card/affirm, false, false, not available, false
+affirm, false, true, off_session, true, card/eps/affirm, false, false, not available, false
+affirm, false, false, off_session, true, card/affirm, false, false, not available, false
+affirm, false, false, off_session, true, card/eps/affirm, false, false, not available, false
+affirm, false, true, on_session, true, card/affirm, false, false, not available, false
+affirm, false, true, on_session, true, card/eps/affirm, false, false, not available, false
+affirm, false, false, on_session, true, card/affirm, false, false, not available, false
+affirm, false, false, on_session, true, card/eps/affirm, false, false, not available, false
+affirm, false, true, null, true, card/affirm, false, true, oneTime, true
+affirm, false, true, null, true, card/eps/affirm, false, true, oneTime, true
+affirm, false, false, null, true, card/affirm, false, true, oneTime, true
+affirm, false, false, null, true, card/eps/affirm, false, true, oneTime, true
