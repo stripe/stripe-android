@@ -20,6 +20,13 @@ internal fun RowElementUI(
     val fields = controller.fields
     val cardStyle = CardStyle(isSystemInDarkTheme())
 
+    var numVisibleFields = fields.size
+    fields.forEach {
+        if (hiddenIdentifiers.contains(it.identifier)) {
+            numVisibleFields--
+        }
+    }
+
     // An attempt was made to do this with a row, and a vertical divider created with a box.
     // The row had a height of IntrinsicSize.Min, and the box/vertical divider filled the height
     // when adding in the trailing icon this broke and caused the overall height of the row to
@@ -44,7 +51,7 @@ internal fun RowElementUI(
                         top.linkTo(parent.top)
                     }
                     .fillMaxWidth(
-                        (1f / fields.size.toFloat())
+                        (1f / numVisibleFields.toFloat())
                     ),
                 hiddenIdentifiers
             )
