@@ -46,11 +46,11 @@ public final class com/stripe/android/link/LinkActivityResult$Success : com/stri
 }
 
 public final class com/stripe/android/link/LinkActivityViewModel_Factory : dagger/internal/Factory {
-	public fun <init> (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)V
-	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/link/LinkActivityViewModel_Factory;
+	public fun <init> (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)V
+	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/link/LinkActivityViewModel_Factory;
 	public fun get ()Lcom/stripe/android/link/LinkActivityViewModel;
 	public synthetic fun get ()Ljava/lang/Object;
-	public static fun newInstance (Lcom/stripe/android/link/LinkActivityContract$Args;Lcom/stripe/android/link/account/LinkAccountManager;Lcom/stripe/android/link/model/Navigator;Lcom/stripe/android/core/injection/Injector;)Lcom/stripe/android/link/LinkActivityViewModel;
+	public static fun newInstance (Lcom/stripe/android/link/LinkActivityContract$Args;Lcom/stripe/android/link/account/LinkAccountManager;Lcom/stripe/android/link/model/Navigator;)Lcom/stripe/android/link/LinkActivityViewModel;
 }
 
 public final class com/stripe/android/link/LinkActivityViewModel_Factory_MembersInjector : dagger/MembersInjector {
@@ -58,7 +58,7 @@ public final class com/stripe/android/link/LinkActivityViewModel_Factory_Members
 	public static fun create (Ljavax/inject/Provider;)Ldagger/MembersInjector;
 	public fun injectMembers (Lcom/stripe/android/link/LinkActivityViewModel$Factory;)V
 	public synthetic fun injectMembers (Ljava/lang/Object;)V
-	public static fun injectSubComponentBuilderProvider (Lcom/stripe/android/link/LinkActivityViewModel$Factory;Ljavax/inject/Provider;)V
+	public static fun injectViewModel (Lcom/stripe/android/link/LinkActivityViewModel$Factory;Lcom/stripe/android/link/LinkActivityViewModel;)V
 }
 
 public final class com/stripe/android/link/LinkPaymentLauncher_Factory {
@@ -157,7 +157,7 @@ public final class com/stripe/android/link/ui/signup/SignUpViewModel_Factory_Mem
 	public static fun create (Ljavax/inject/Provider;)Ldagger/MembersInjector;
 	public fun injectMembers (Lcom/stripe/android/link/ui/signup/SignUpViewModel$Factory;)V
 	public synthetic fun injectMembers (Ljava/lang/Object;)V
-	public static fun injectSubComponentBuilderProvider (Lcom/stripe/android/link/ui/signup/SignUpViewModel$Factory;Ljavax/inject/Provider;)V
+	public static fun injectViewModel (Lcom/stripe/android/link/ui/signup/SignUpViewModel$Factory;Lcom/stripe/android/link/ui/signup/SignUpViewModel;)V
 }
 
 public final class com/stripe/android/link/ui/verification/ComposableSingletons$VerificationScreenKt {
