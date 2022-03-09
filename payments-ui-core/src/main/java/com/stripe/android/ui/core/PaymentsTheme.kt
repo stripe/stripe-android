@@ -23,7 +23,7 @@ internal val LocalFieldTextStyle = TextStyle.Default.copy(
 )
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-data class PaymentSheetConfigColors(
+data class PaymentsColors(
     val primary: Color,
     val surface: Color,
     val componentBackground: Color,
@@ -38,12 +38,12 @@ data class PaymentSheetConfigColors(
 )
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-object PaymentSheetThemeConfig {
-    fun colors(isDark: Boolean): PaymentSheetConfigColors {
+object PaymentsThemeConfig {
+    fun colors(isDark: Boolean): PaymentsColors {
         return if (isDark) colorsDark else colorsLight
     }
 
-    private val colorsLight = PaymentSheetConfigColors(
+    private val colorsLight = PaymentsColors(
         primary = Color(0xFF007AFF),
         surface = Color.White,
         componentBackground = Color.White,
@@ -57,7 +57,7 @@ object PaymentSheetThemeConfig {
         error = Color.Red,
     )
 
-    private val colorsDark = PaymentSheetConfigColors(
+    private val colorsDark = PaymentsColors(
         primary = Color(0xFF0074D4),
         surface = Color(0xff2e2e2e),
         componentBackground = Color.DarkGray,
@@ -73,7 +73,7 @@ object PaymentSheetThemeConfig {
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-data class PaymentSheetComposeColors(
+data class PaymentsComposeColors(
     val colorComponentBackground: Color,
     val colorComponentBorder: Color,
     val colorComponentDivider: Color,
@@ -85,9 +85,9 @@ data class PaymentSheetComposeColors(
 @Composable
 @ReadOnlyComposable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-fun PaymentSheetThemeConfig.toComposeColors(): PaymentSheetComposeColors {
+fun PaymentsThemeConfig.toComposeColors(): PaymentsComposeColors {
     val colors = colors(isSystemInDarkTheme())
-    return PaymentSheetComposeColors(
+    return PaymentsComposeColors(
         colorComponentBackground = colors.componentBackground,
         colorComponentBorder = colors.componentBorder,
         colorComponentDivider = colors.componentDivider,
@@ -106,17 +106,17 @@ fun PaymentSheetThemeConfig.toComposeColors(): PaymentSheetComposeColors {
 
 @Composable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-fun StripeTheme(
+fun PaymentsTheme(
     content: @Composable () -> Unit
 ) {
-    val colors = PaymentSheetThemeConfig.toComposeColors()
+    val colors = PaymentsThemeConfig.toComposeColors()
     val localColors = staticCompositionLocalOf { colors }
 
     CompositionLocalProvider(
         localColors provides colors
     ) {
         MaterialTheme(
-            colors = StripeTheme.colors.material,
+            colors = PaymentsTheme.colors.material,
             typography = MaterialTheme.typography.copy(
                 body1 = LocalFieldTextStyle,
                 subtitle1 = LocalFieldTextStyle
@@ -130,11 +130,11 @@ fun StripeTheme(
 // StripeTheme.colors.primary etc
 // This mirrors an object that lives inside of MaterialTheme.
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-object StripeTheme {
-    val colors: PaymentSheetComposeColors
+object PaymentsTheme {
+    val colors: PaymentsComposeColors
         @Composable
         @ReadOnlyComposable
-        get() = PaymentSheetThemeConfig.toComposeColors()
+        get() = PaymentsThemeConfig.toComposeColors()
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

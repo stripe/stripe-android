@@ -12,8 +12,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.flowlayout.FlowCrossAxisAlignment
 import com.google.accompanist.flowlayout.FlowRow
+import com.stripe.android.ui.core.PaymentsTheme
 import com.stripe.android.ui.core.R
-import com.stripe.android.ui.core.StripeTheme
 
 @Composable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -27,7 +27,7 @@ fun AffirmElementUI() {
             Modifier
                 .padding(end = 4.dp)
                 .padding(top = 6.dp),
-            color = StripeTheme.colors.colorTextSecondary
+            color = PaymentsTheme.colors.colorTextSecondary
         )
         Image(
             painter = if (isSystemInDarkTheme()) {

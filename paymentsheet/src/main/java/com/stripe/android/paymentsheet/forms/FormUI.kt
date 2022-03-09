@@ -14,7 +14,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.dimensionResource
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.ui.core.StripeTheme
+import com.stripe.android.ui.core.PaymentsTheme
 import com.stripe.android.ui.core.elements.AffirmElementUI
 import com.stripe.android.ui.core.elements.AffirmHeaderElement
 import com.stripe.android.ui.core.elements.AfterpayClearpayElementUI
@@ -88,7 +88,7 @@ internal fun FormInternal(
                 modifier = Modifier.size(
                     dimensionResource(R.dimen.stripe_paymentsheet_loading_indicator_size)
                 ),
-                color = StripeTheme.colors.colorTextSecondary,
+                color = PaymentsTheme.colors.colorTextSecondary,
                 strokeWidth = dimensionResource(
                     R.dimen.stripe_paymentsheet_loading_indicator_stroke_width
                 )

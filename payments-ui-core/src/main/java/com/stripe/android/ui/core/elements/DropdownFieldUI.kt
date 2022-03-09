@@ -30,8 +30,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.stripe.android.ui.core.PaymentsTheme
 import com.stripe.android.ui.core.R
-import com.stripe.android.ui.core.StripeTheme
 
 @Composable
 internal fun DropDown(
@@ -44,7 +44,7 @@ internal fun DropDown(
     var expanded by remember { mutableStateOf(false) }
     val interactionSource = remember { MutableInteractionSource() }
     val currentTextColor = if (enabled) {
-        StripeTheme.colors.material.onBackground
+        PaymentsTheme.colors.material.onBackground
     } else {
         TextFieldDefaults
             .textFieldColors()
@@ -55,7 +55,7 @@ internal fun DropDown(
     Box(
         modifier = Modifier
             .wrapContentSize(Alignment.TopStart)
-            .background(StripeTheme.colors.colorComponentBackground)
+            .background(PaymentsTheme.colors.colorComponentBackground)
     ) {
         // Click handling happens on the box, so that it is a single accessible item
         Box(
@@ -97,7 +97,7 @@ internal fun DropDown(
         DropdownMenu(
             expanded = expanded,
             onDismissRequest = { expanded = false },
-            modifier = Modifier.background(color = StripeTheme.colors.colorComponentBackground)
+            modifier = Modifier.background(color = PaymentsTheme.colors.colorComponentBackground)
         ) {
             items.forEachIndexed { index, displayValue ->
                 DropdownMenuItem(
@@ -126,7 +126,7 @@ internal fun DropdownLabel(
     @StringRes label: Int,
     enabled: Boolean
 ) {
-    val color = StripeTheme.colors.placeholderText
+    val color = PaymentsTheme.colors.placeholderText
     Text(
         stringResource(label),
         color = if (enabled) color else color.copy(alpha = ContentAlpha.disabled),

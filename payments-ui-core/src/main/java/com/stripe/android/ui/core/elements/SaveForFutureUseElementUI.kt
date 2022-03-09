@@ -19,8 +19,8 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.unit.dp
+import com.stripe.android.ui.core.PaymentsTheme
 import com.stripe.android.ui.core.R
-import com.stripe.android.ui.core.StripeTheme
 
 @Composable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -68,7 +68,7 @@ fun SaveForFutureUseElementUI(
             Modifier
                 .padding(start = 4.dp)
                 .align(Alignment.CenterVertically),
-            color = StripeTheme.colors.colorTextSecondary
+            color = PaymentsTheme.colors.colorTextSecondary
         )
     }
 }

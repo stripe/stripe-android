@@ -21,8 +21,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
+import com.stripe.android.ui.core.PaymentsTheme
 import com.stripe.android.ui.core.R
-import com.stripe.android.ui.core.StripeTheme
 
 /** This is a helpful method for setting the next action based on the nextFocus Requester **/
 internal fun imeAction(nextFocusRequester: FocusRequester?): ImeAction = nextFocusRequester?.let {
@@ -50,14 +50,14 @@ internal fun TextField(
     var hasFocus by rememberSaveable { mutableStateOf(false) }
     val colors = TextFieldDefaults.textFieldColors(
         textColor = if (shouldShowError) {
-            StripeTheme.colors.material.error
+            PaymentsTheme.colors.material.error
         } else {
-            StripeTheme.colors.material.onBackground
+            PaymentsTheme.colors.material.onBackground
         },
-        unfocusedLabelColor = StripeTheme.colors.placeholderText,
-        focusedLabelColor = StripeTheme.colors.placeholderText,
-        placeholderColor = StripeTheme.colors.placeholderText,
-        backgroundColor = StripeTheme.colors.colorComponentBackground,
+        unfocusedLabelColor = PaymentsTheme.colors.placeholderText,
+        focusedLabelColor = PaymentsTheme.colors.placeholderText,
+        placeholderColor = PaymentsTheme.colors.placeholderText,
+        backgroundColor = PaymentsTheme.colors.colorComponentBackground,
         focusedIndicatorColor = Color.Transparent,
         disabledIndicatorColor = Color.Transparent,
         unfocusedIndicatorColor = Color.Transparent

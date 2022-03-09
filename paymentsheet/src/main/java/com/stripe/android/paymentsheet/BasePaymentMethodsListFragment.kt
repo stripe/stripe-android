@@ -18,7 +18,7 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
-import com.stripe.android.ui.core.PaymentSheetThemeConfig
+import com.stripe.android.ui.core.PaymentsThemeConfig
 import com.stripe.android.ui.core.isSystemDarkTheme
 
 internal abstract class BasePaymentMethodsListFragment(
@@ -79,7 +79,7 @@ internal abstract class BasePaymentMethodsListFragment(
             val editMenuText = getString(if (isEditing) R.string.done else R.string.edit)
             val editMenuTextSpan = SpannableString(editMenuText)
             editMenuTextSpan.setSpan(
-                ForegroundColorSpan(PaymentSheetThemeConfig.colors(isDark).appBarIcon.toArgb()),
+                ForegroundColorSpan(PaymentsThemeConfig.colors(isDark).appBarIcon.toArgb()),
                 0,
                 editMenuTextSpan.length,
                 0

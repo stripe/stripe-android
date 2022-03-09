@@ -9,7 +9,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.stripe.android.ui.core.StripeTheme
+import com.stripe.android.ui.core.PaymentsTheme
 
 @Composable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -23,6 +23,6 @@ fun StaticElementUI(
         modifier = Modifier
             .padding(vertical = 8.dp)
             .semantics(mergeDescendants = true) {}, // makes it a separate accessibile item
-        color = StripeTheme.colors.colorTextSecondary
+        color = PaymentsTheme.colors.colorTextSecondary
     )
 }

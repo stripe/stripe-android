@@ -29,7 +29,7 @@ import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.CurrencyFormatter
-import com.stripe.android.ui.core.PaymentSheetThemeConfig
+import com.stripe.android.ui.core.PaymentsThemeConfig
 import com.stripe.android.ui.core.isSystemDarkTheme
 import kotlinx.coroutines.launch
 import java.security.InvalidParameterException
@@ -299,7 +299,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
                 viewModel.config?.primaryButtonColor
             } else {
                 ColorStateList.valueOf(
-                    PaymentSheetThemeConfig.colors(isDark).primary.toArgb()
+                    PaymentsThemeConfig.colors(isDark).primary.toArgb()
                 )
             }
 
@@ -314,10 +314,10 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
         }
 
         viewBinding.bottomSheet.setBackgroundColor(
-            PaymentSheetThemeConfig.colors(isDark).surface.toArgb()
+            PaymentsThemeConfig.colors(isDark).surface.toArgb()
         )
         viewBinding.toolbar.setBackgroundColor(
-            PaymentSheetThemeConfig.colors(isDark).surface.toArgb()
+            PaymentsThemeConfig.colors(isDark).surface.toArgb()
         )
     }
 

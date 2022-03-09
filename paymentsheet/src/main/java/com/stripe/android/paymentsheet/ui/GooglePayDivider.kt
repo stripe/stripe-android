@@ -8,7 +8,7 @@ import androidx.annotation.StringRes
 import androidx.annotation.VisibleForTesting
 import androidx.compose.ui.graphics.toArgb
 import com.stripe.android.paymentsheet.databinding.StripeGooglePayDividerBinding
-import com.stripe.android.ui.core.PaymentSheetThemeConfig
+import com.stripe.android.ui.core.PaymentsThemeConfig
 import com.stripe.android.ui.core.isSystemDarkTheme
 
 internal class GooglePayDivider @JvmOverloads constructor(
@@ -23,10 +23,10 @@ internal class GooglePayDivider @JvmOverloads constructor(
     )
     init {
         viewBinding.dividerText.setBackgroundColor(
-            PaymentSheetThemeConfig.colors(context.isSystemDarkTheme()).surface.toArgb()
+            PaymentsThemeConfig.colors(context.isSystemDarkTheme()).surface.toArgb()
         )
         viewBinding.dividerText.setTextColor(
-            PaymentSheetThemeConfig.colors(context.isSystemDarkTheme()).textSecondary.toArgb()
+            PaymentsThemeConfig.colors(context.isSystemDarkTheme()).textSecondary.toArgb()
         )
     }
 

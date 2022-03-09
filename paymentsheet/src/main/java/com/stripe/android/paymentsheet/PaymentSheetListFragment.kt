@@ -9,7 +9,7 @@ import androidx.fragment.app.activityViewModels
 import com.stripe.android.paymentsheet.databinding.FragmentPaymentsheetPaymentMethodsListBinding
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.CurrencyFormatter
-import com.stripe.android.ui.core.PaymentSheetThemeConfig
+import com.stripe.android.ui.core.PaymentsThemeConfig
 import com.stripe.android.ui.core.isSystemDarkTheme
 
 internal class PaymentSheetListFragment() : BasePaymentMethodsListFragment(
@@ -41,9 +41,9 @@ internal class PaymentSheetListFragment() : BasePaymentMethodsListFragment(
 
         val viewBinding = FragmentPaymentsheetPaymentMethodsListBinding.bind(view)
         val isDark = context?.isSystemDarkTheme() ?: false
-        viewBinding.header.setTextColor(PaymentSheetThemeConfig.colors(isDark).onPrimary.toArgb())
+        viewBinding.header.setTextColor(PaymentsThemeConfig.colors(isDark).onPrimary.toArgb())
         viewBinding.total.setTextColor(
-            PaymentSheetThemeConfig.colors(isDark).textSecondary.toArgb()
+            PaymentsThemeConfig.colors(isDark).textSecondary.toArgb()
         )
         if (sheetViewModel.isProcessingPaymentIntent) {
             sheetViewModel.amount.observe(viewLifecycleOwner) {

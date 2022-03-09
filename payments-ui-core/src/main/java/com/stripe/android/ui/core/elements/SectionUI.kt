@@ -20,7 +20,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.stripe.android.ui.core.StripeTheme
+import com.stripe.android.ui.core.PaymentsTheme
 
 /**
  * This is the style for the section card
@@ -30,16 +30,15 @@ internal object CardStyle {
     val cardBorderColor: Color
         @Composable
         @ReadOnlyComposable
-        get() = StripeTheme.colors.colorComponentBorder
+        get() = PaymentsTheme.colors.colorComponentBorder
 
     val cardDividerColor: Color
         @Composable
         @ReadOnlyComposable
-        get() = StripeTheme.colors.colorComponentDivider
+        get() = PaymentsTheme.colors.colorComponentDivider
 
     val cardBorderWidth: Dp = 1.dp
     val cardElevation: Dp = 0.dp
-    val cardStyleBackground: Color = Color(0x20FFFFFF)
 }
 
 /**
@@ -51,10 +50,9 @@ internal object SectionTitle {
     val color: Color
         @Composable
         @ReadOnlyComposable
-        get() = StripeTheme.colors.colorTextSecondary
+        get() = PaymentsTheme.colors.colorTextSecondary
 
     val fontWeight: FontWeight = FontWeight.Bold
-    val paddingBottom: Dp = 4.dp
     val letterSpacing: TextUnit = (-0.01f).sp
     val fontSize: TextUnit = 13.sp
 }
@@ -112,7 +110,6 @@ fun SectionCard(
     Card(
         border = BorderStroke(CardStyle.cardBorderWidth, CardStyle.cardBorderColor),
         elevation = CardStyle.cardElevation,
-        backgroundColor = CardStyle.cardStyleBackground
     ) {
         Column {
             content()
@@ -127,7 +124,7 @@ fun SectionCard(
 internal fun SectionError(error: String) {
     Text(
         text = error,
-        color = StripeTheme.colors.material.error,
+        color = PaymentsTheme.colors.material.error,
         modifier = Modifier.semantics(mergeDescendants = true) { }
     )
 }

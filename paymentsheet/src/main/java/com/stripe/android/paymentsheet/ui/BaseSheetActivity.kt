@@ -25,7 +25,7 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.stripe.android.paymentsheet.BottomSheetController
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
-import com.stripe.android.ui.core.PaymentSheetThemeConfig
+import com.stripe.android.ui.core.PaymentsThemeConfig
 import com.stripe.android.ui.core.isSystemDarkTheme
 import com.stripe.android.view.KeyboardController
 import kotlin.math.roundToInt
@@ -156,7 +156,7 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
         val navigationIconDrawable = AppCompatResources.getDrawable(this, toolbarResources.icon)
         navigationIconDrawable?.setTintList(
             ColorStateList.valueOf(
-                PaymentSheetThemeConfig.colors(baseContext.isSystemDarkTheme()).appBarIcon.toArgb()
+                PaymentsThemeConfig.colors(baseContext.isSystemDarkTheme()).appBarIcon.toArgb()
             )
         )
 

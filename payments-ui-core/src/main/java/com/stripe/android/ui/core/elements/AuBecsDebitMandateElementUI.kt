@@ -17,8 +17,8 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.stripe.android.ui.core.PaymentsTheme
 import com.stripe.android.ui.core.R
-import com.stripe.android.ui.core.StripeTheme
 
 @Composable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -28,7 +28,7 @@ fun AuBecsDebitMandateElementUI(
 
     val annotatedText = buildAnnotatedString {
         val nonLinkTextStyle = SpanStyle(
-            color = StripeTheme.colors.colorTextSecondary,
+            color = PaymentsTheme.colors.colorTextSecondary,
             fontSize = element.fontSizeSp.sp,
             letterSpacing = element.letterSpacingSp.sp,
         )
@@ -45,7 +45,7 @@ fun AuBecsDebitMandateElementUI(
         )
         withStyle(
             style = SpanStyle(
-                color = StripeTheme.colors.colorTextSecondary,
+                color = PaymentsTheme.colors.colorTextSecondary,
                 fontWeight = FontWeight.Bold,
                 fontSize = element.fontSizeSp.sp,
                 letterSpacing = element.letterSpacingSp.sp,

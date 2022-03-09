@@ -42,7 +42,7 @@ import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.ui.LpmSelectorText
 import com.stripe.android.paymentsheet.ui.getLabel
 import com.stripe.android.paymentsheet.ui.getSavedPaymentMethodIcon
-import com.stripe.android.ui.core.StripeTheme
+import com.stripe.android.ui.core.PaymentsTheme
 import kotlin.properties.Delegates
 
 @SuppressLint("NotifyDataSetChanged")
@@ -492,9 +492,9 @@ internal fun PaymentOptionUi(
 ) {
     val strokeColor =
         if (isSelected) {
-            StripeTheme.colors.material.primary
+            PaymentsTheme.colors.material.primary
         } else {
-            StripeTheme.colors.colorComponentBorder
+            PaymentsTheme.colors.colorComponentBorder
         }
 
     // An attempt was made to not use constraint layout here but it was unsuccessful in
@@ -513,7 +513,7 @@ internal fun PaymentOptionUi(
             border = BorderStroke(if (isSelected) 2.dp else 1.dp, strokeColor),
             shape = RoundedCornerShape(6.dp),
             elevation = 2.dp,
-            backgroundColor = StripeTheme.colors.colorComponentBackground,
+            backgroundColor = PaymentsTheme.colors.colorComponentBackground,
             modifier = Modifier
                 .height(64.dp)
                 .padding(horizontal = PM_OPTIONS_DEFAULT_PADDING.dp)
@@ -546,7 +546,7 @@ internal fun PaymentOptionUi(
                 modifier = Modifier
                     .size(20.dp)
                     .clip(CircleShape)
-                    .background(color = StripeTheme.colors.material.primary)
+                    .background(color = PaymentsTheme.colors.material.primary)
                     .constrainAs(checkIcon) {
                         top.linkTo(card.bottom, (-12).dp)
                         end.linkTo(card.end)
@@ -564,7 +564,7 @@ internal fun PaymentOptionUi(
                     }
                     .size(20.dp)
                     .clip(CircleShape)
-                    .background(color = StripeTheme.colors.material.error)
+                    .background(color = PaymentsTheme.colors.material.error)
                     .clickable(
                         onClick = {
                             onRemoveListener()
@@ -575,7 +575,7 @@ internal fun PaymentOptionUi(
 
         LpmSelectorText(
             text = labelText,
-            textColor = StripeTheme.colors.material.onPrimary,
+            textColor = PaymentsTheme.colors.material.onPrimary,
             isEnabled = isEnabled,
             modifier = Modifier
                 .constrainAs(label) {
