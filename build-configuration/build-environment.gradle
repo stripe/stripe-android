@@ -1,0 +1,2 @@
+gradle.ext.isCi = System.getenv().containsKey("CI") && System.getenv("CI").contains("true")
+println "Running on CI: ${gradle.ext.isCi}"

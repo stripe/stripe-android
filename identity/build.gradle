@@ -3,7 +3,7 @@ plugins {
     id 'kotlin-android'
     id 'org.jetbrains.dokka'
     id 'org.jetbrains.kotlin.plugin.parcelize'
-    id 'org.jetbrains.kotlin.plugin.serialization' version '1.6.10'
+    id 'org.jetbrains.kotlin.plugin.serialization'
 }
 
 assemble.dependsOn('lint')

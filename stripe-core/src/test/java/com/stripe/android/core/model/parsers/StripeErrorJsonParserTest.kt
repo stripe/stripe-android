@@ -53,6 +53,7 @@ class StripeErrorJsonParserTest {
             .isEqualTo("https://stripe.com/docs/error-codes/incorrect-number")
     }
 
+    @Suppress("MaxLineLength")
     private companion object {
         private val RAW_INVALID_REQUEST_ERROR = JSONObject(
             """
