@@ -12,13 +12,11 @@ import com.stripe.android.core.injection.Injector
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.injection.DaggerLinkViewModelFactoryComponent
-import com.stripe.android.link.injection.LinkViewModelSubcomponent
 import com.stripe.android.link.model.Navigator
 import com.stripe.android.link.ui.signup.SignUpViewModel
 import com.stripe.android.link.ui.verification.VerificationViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import javax.inject.Provider
 
 /**
  * ViewModel that coordinates the user flow through the screens.
@@ -26,14 +24,14 @@ import javax.inject.Provider
 internal class LinkActivityViewModel @Inject internal constructor(
     args: LinkActivityContract.Args,
     private val linkAccountManager: LinkAccountManager,
-    val navigator: Navigator,
+    val navigator: Navigator
+) : ViewModel() {
     /**
      * This ViewModel exists during the whole user flow, and needs to share the Dagger dependencies
      * with the other, screen-specific ViewModels. So it holds a reference to the injector which is
      * passed as a parameter to the other ViewModel factories.
      */
-    val injector: Injector
-) : ViewModel() {
+    lateinit var injector: Injector
 
     val startDestination = args.customerEmail?.let {
         LinkScreen.Loading
@@ -72,6 +70,7 @@ internal class LinkActivityViewModel @Inject internal constructor(
     ) : ViewModelProvider.Factory, Injectable<Factory.FallbackInitializeParam> {
         internal data class FallbackInitializeParam(
             val application: Application,
+            val starterArgs: LinkActivityContract.Args,
             val enableLogging: Boolean,
             val publishableKey: String,
             val stripeAccountId: String?,
@@ -79,17 +78,16 @@ internal class LinkActivityViewModel @Inject internal constructor(
         )
 
         @Inject
-        lateinit var subComponentBuilderProvider:
-            Provider<LinkViewModelSubcomponent.Builder>
+        lateinit var viewModel: LinkActivityViewModel
 
         private lateinit var injector: Injector
 
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
             val logger = Logger.getInstance(BuildConfig.DEBUG)
-            val args = starterArgsSupplier()
+            val starterArgs = starterArgsSupplier()
 
-            args.injectionParams?.injectorKey?.let {
+            starterArgs.injectionParams?.injectorKey?.let {
                 WeakMapInjectorRegistry.retrieve(it)
             }?.let {
                 logger.info(
@@ -106,23 +104,22 @@ internal class LinkActivityViewModel @Inject internal constructor(
                 fallbackInitialize(
                     FallbackInitializeParam(
                         application,
-                        args.injectionParams?.enableLogging ?: false,
-                        args.injectionParams?.publishableKey
+                        starterArgs,
+                        starterArgs.injectionParams?.enableLogging ?: false,
+                        starterArgs.injectionParams?.publishableKey
                             ?: PaymentConfiguration.getInstance(application).publishableKey,
-                        if (args.injectionParams != null) {
-                            args.injectionParams.stripeAccountId
+                        if (starterArgs.injectionParams != null) {
+                            starterArgs.injectionParams.stripeAccountId
                         } else {
                             PaymentConfiguration.getInstance(application).stripeAccountId
                         },
-                        args.injectionParams?.productUsage ?: emptySet()
+                        starterArgs.injectionParams?.productUsage ?: emptySet()
                     )
                 )
             }
 
-            return subComponentBuilderProvider.get()
-                .args(args)
-                .injector(injector)
-                .build().linkActivityViewModel as T
+            viewModel.injector = injector
+            return viewModel as T
         }
 
         /**
@@ -138,6 +135,7 @@ internal class LinkActivityViewModel @Inject internal constructor(
                 .publishableKeyProvider { arg.publishableKey }
                 .stripeAccountIdProvider { arg.stripeAccountId }
                 .productUsage(arg.productUsage)
+                .starterArgs(arg.starterArgs)
                 .build()
 
             injector = object : Injector {
