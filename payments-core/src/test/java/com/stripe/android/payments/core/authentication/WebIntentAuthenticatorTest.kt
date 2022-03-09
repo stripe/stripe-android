@@ -8,12 +8,13 @@ import com.stripe.android.PaymentBrowserAuthStarter
 import com.stripe.android.StripePaymentController.Companion.PAYMENT_REQUEST_CODE
 import com.stripe.android.StripePaymentController.Companion.SETUP_REQUEST_CODE
 import com.stripe.android.auth.PaymentBrowserAuthContract
+import com.stripe.android.core.networking.AnalyticsFields
 import com.stripe.android.core.networking.AnalyticsRequest
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
+import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.networking.ApiRequest
 import com.stripe.android.networking.PaymentAnalyticsEvent
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.view.AuthActivityStarterHost
@@ -166,7 +167,7 @@ class WebIntentAuthenticatorTest {
             .executeAsync(analyticsRequestArgumentCaptor.capture())
         val analyticsRequest = analyticsRequestArgumentCaptor.firstValue
         assertThat(
-            analyticsRequest.params?.get(PaymentAnalyticsRequestFactory.FIELD_EVENT)
+            analyticsRequest.params.get(AnalyticsFields.EVENT)
         ).isEqualTo(event.toString())
     }
 

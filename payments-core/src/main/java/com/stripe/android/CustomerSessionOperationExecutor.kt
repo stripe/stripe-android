@@ -1,9 +1,9 @@
 package com.stripe.android
 
 import com.stripe.android.core.exception.StripeException
+import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.Customer
 import com.stripe.android.model.ListPaymentMethodsParams
-import com.stripe.android.networking.ApiRequest
 import com.stripe.android.networking.StripeRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext

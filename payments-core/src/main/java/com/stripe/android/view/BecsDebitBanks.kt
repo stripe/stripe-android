@@ -3,7 +3,7 @@ package com.stripe.android.view
 import android.content.Context
 import android.os.Parcelable
 import androidx.annotation.RestrictTo
-import com.stripe.android.model.StripeJsonUtils
+import com.stripe.android.core.model.StripeJsonUtils
 import kotlinx.parcelize.Parcelize
 import org.json.JSONObject
 import java.util.Scanner

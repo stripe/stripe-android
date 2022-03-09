@@ -1,9 +1,10 @@
 package com.stripe.android.model.parsers
 
 import androidx.annotation.RestrictTo
+import com.stripe.android.core.model.StripeJsonUtils
+import com.stripe.android.core.model.parsers.ModelJsonParser
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.model.StripeJsonUtils
 import org.json.JSONObject
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

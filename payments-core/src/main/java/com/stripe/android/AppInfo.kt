@@ -1,6 +1,7 @@
 package com.stripe.android
 
 import android.os.Parcelable
+import com.stripe.android.core.InternalAppInfo
 import kotlinx.parcelize.Parcelize
 
 /**
@@ -51,5 +52,13 @@ data class AppInfo internal constructor(
         ): AppInfo {
             return AppInfo(name, version, url, partnerId)
         }
+    }
+
+    /**
+     * Temporary method to convert [AppInfo] to [InternalAppInfo].
+     * TODO(ccen): Move AppInfo to stripe-core during the next major version bump.
+     */
+    internal fun toInternalAppInfo(): InternalAppInfo {
+        return InternalAppInfo.create(name, version, url, partnerId)
     }
 }

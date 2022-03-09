@@ -13,6 +13,7 @@ import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.exception.InvalidRequestException
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
+import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
 import com.stripe.android.core.networking.RetryDelaySupplier
 import com.stripe.android.exception.AuthenticationException
@@ -25,7 +26,6 @@ import com.stripe.android.model.Source
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.WeChatPayNextAction
 import com.stripe.android.networking.AlipayRepository
-import com.stripe.android.networking.ApiRequest
 import com.stripe.android.networking.DefaultAlipayRepository
 import com.stripe.android.networking.PaymentAnalyticsEvent
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory

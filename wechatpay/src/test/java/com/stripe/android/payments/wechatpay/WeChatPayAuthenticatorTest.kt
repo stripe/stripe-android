@@ -1,11 +1,12 @@
 package com.stripe.android.payments.wechatpay
 
+import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.WeChat
-import com.stripe.android.networking.ApiRequest
 import com.stripe.android.payments.wechatpay.reflection.WeChatPayReflectionHelper
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.argWhere
@@ -79,6 +80,7 @@ class WeChatPayAuthenticatorTest {
         }
 
     @Test
+    @Ignore("Flaky mockito behavior: https://github.com/mockito/mockito/issues/2026")
     fun `wechatPayAuthStarter should start when stripeIntent is WeChatPay`() =
         runTest {
             authenticator.authenticate(

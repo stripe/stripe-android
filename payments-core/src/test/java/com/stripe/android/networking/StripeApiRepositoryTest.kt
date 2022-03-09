@@ -13,7 +13,9 @@ import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.exception.InvalidRequestException
 import com.stripe.android.core.networking.AnalyticsRequest
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
+import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
+import com.stripe.android.core.networking.FileUploadRequest
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.networking.StripeRequest
 import com.stripe.android.core.networking.StripeResponse
@@ -1512,9 +1514,9 @@ internal class StripeApiRepositoryTest {
             val apiRequest = apiRequestArgumentCaptor.firstValue
             val paymentMethodDataParams = apiRequest.params?.get("expand") as Collection<*>
             assertTrue(paymentMethodDataParams.contains("payment_method_preference.payment_intent.payment_method"))
-            assertEquals(apiRequest.params["locale"], locale.toLanguageTag())
-            assertEquals(apiRequest.params["type"], "payment_intent")
-            assertEquals(apiRequest.params["client_secret"], clientSecret)
+            assertEquals(apiRequest.params!!["locale"], locale.toLanguageTag())
+            assertEquals(apiRequest.params!!["type"], "payment_intent")
+            assertEquals(apiRequest.params!!["client_secret"], clientSecret)
 
             verifyFraudDetectionDataAndAnalyticsRequests(PaymentAnalyticsEvent.PaymentIntentRetrieve)
         }
@@ -1542,9 +1544,9 @@ internal class StripeApiRepositoryTest {
             val apiRequest = apiRequestArgumentCaptor.firstValue
             val paymentMethodDataParams = apiRequest.params?.get("expand") as Collection<*>
             assertTrue(paymentMethodDataParams.contains("payment_method_preference.setup_intent.payment_method"))
-            assertEquals(apiRequest.params["locale"], locale.toLanguageTag())
-            assertEquals(apiRequest.params["type"], "setup_intent")
-            assertEquals(apiRequest.params["client_secret"], clientSecret)
+            assertEquals(apiRequest.params!!["locale"], locale.toLanguageTag())
+            assertEquals(apiRequest.params!!["type"], "setup_intent")
+            assertEquals(apiRequest.params!!["client_secret"], clientSecret)
 
             verifyFraudDetectionDataAndAnalyticsRequests(PaymentAnalyticsEvent.SetupIntentRetrieve)
         }

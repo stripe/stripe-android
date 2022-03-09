@@ -4,6 +4,8 @@ import android.content.Context
 import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.LoggingModule
+import com.stripe.android.core.injection.PUBLISHABLE_KEY
+import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.payments.paymentlauncher.PaymentLauncherViewModel
 import dagger.BindsInstance
 import dagger.Component

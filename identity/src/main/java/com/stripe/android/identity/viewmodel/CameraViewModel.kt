@@ -8,10 +8,10 @@ import com.stripe.android.camera.framework.AggregateResultListener
 import com.stripe.android.camera.framework.AnalyzerLoopErrorListener
 import com.stripe.android.camera.scanui.ScanErrorListener
 import com.stripe.android.camera.scanui.SimpleScanStateful
-import com.stripe.android.identity.IdentityViewModel
 import com.stripe.android.identity.camera.IDDetectorAggregator
 import com.stripe.android.identity.camera.IdentityScanFlow
 import com.stripe.android.identity.states.IdentityScanState
+import java.io.File
 
 /**
  * ViewModel hosted by Activities/Fragments that need to access live camera feed and callbacks.
@@ -37,7 +37,11 @@ internal class CameraViewModel :
      */
     internal var targetScanType: IdentityScanState.ScanType? = null
 
-    internal val identityScanFlow = IdentityScanFlow(this, this)
+    internal lateinit var identityScanFlow: IdentityScanFlow
+
+    internal fun initializeScanFlow(identityModelFile: File) {
+        identityScanFlow = IdentityScanFlow(this, this, identityModelFile)
+    }
 
     override var scanState: IdentityScanState? = null
 
@@ -85,6 +89,6 @@ internal class CameraViewModel :
     }
 
     private companion object {
-        val TAG: String = IdentityViewModel::class.java.simpleName
+        val TAG: String = CameraViewModel::class.java.simpleName
     }
 }
