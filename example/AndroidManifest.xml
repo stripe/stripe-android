@@ -70,6 +70,7 @@
         <activity android:name=".activity.KlarnaPaymentActivity"/>
         <activity android:name=".activity.AffirmPaymentActivity"/>
         <activity android:name=".activity.ConnectUSBankAccountActivity"/>
+        <activity android:name=".activity.USBankAccountPaymentMethodActivity"/>
     </application>
 
 </manifest>

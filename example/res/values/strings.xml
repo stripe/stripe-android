@@ -29,6 +29,7 @@
     <string name="sofort_example">SOFORT Confirmation Example</string>
     <string name="upi_example">UPI Confirmation Example</string>
     <string name="netbanking_example">Netbanking Confirmation Example</string>
+    <string name="us_bank_account_example">"US Bank Account Example"</string>
     <string name="card_brands">Card Brands</string>
 
     <string name="select_add_card">Select or add card</string>
