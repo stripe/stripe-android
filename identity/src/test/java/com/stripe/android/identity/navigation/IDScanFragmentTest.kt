@@ -15,9 +15,12 @@ import com.stripe.android.identity.R
 import com.stripe.android.identity.camera.IDDetectorAggregator
 import com.stripe.android.identity.camera.IdentityScanFlow
 import com.stripe.android.identity.databinding.IdScanFragmentBinding
+import com.stripe.android.identity.networking.Resource
 import com.stripe.android.identity.states.IdentityScanState
 import com.stripe.android.identity.viewModelFactoryFor
 import com.stripe.android.identity.viewmodel.CameraViewModel
+import com.stripe.android.identity.viewmodel.IdentityViewModel
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestRule
@@ -29,6 +32,7 @@ import org.mockito.kotlin.same
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
+import java.io.File
 
 @RunWith(RobolectricTestRunner::class)
 internal class IDScanFragmentTest {
@@ -45,6 +49,10 @@ internal class IDScanFragmentTest {
         whenever(it.finalResult).thenReturn(finalResultLiveData)
         whenever(it.displayStateChanged).thenReturn(displayStateChanged)
     }
+    private val idDetectorModelFile = MutableLiveData<Resource<File>>()
+    private val mockIdentityViewModel = mock<IdentityViewModel>().also {
+        whenever(it.idDetectorModelFile).thenReturn(idDetectorModelFile)
+    }
 
     private val testCameraPermissionEnsureable = object : CameraPermissionEnsureable {
         lateinit var onCameraReady: () -> Unit
@@ -57,6 +65,11 @@ internal class IDScanFragmentTest {
             this.onCameraReady = onCameraReady
             this.onUserDeniedCameraPermission = onUserDeniedCameraPermission
         }
+    }
+
+    @Before
+    fun simulateModelDownloaded() {
+        idDetectorModelFile.postValue(Resource.success(mock()))
     }
 
     @Test
@@ -309,7 +322,8 @@ internal class IDScanFragmentTest {
     ) {
         IDScanFragment(
             cameraPermissionEnsureable,
-            viewModelFactoryFor(mockCameraViewModel)
+            viewModelFactoryFor(mockCameraViewModel),
+            viewModelFactoryFor(mockIdentityViewModel)
         )
     }
 

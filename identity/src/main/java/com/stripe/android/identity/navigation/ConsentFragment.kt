@@ -14,6 +14,7 @@ import com.stripe.android.identity.R
 import com.stripe.android.identity.databinding.ConsentFragmentBinding
 import com.stripe.android.identity.navigation.ErrorFragment.Companion.navigateToErrorFragmentWithDefaultValues
 import com.stripe.android.identity.navigation.ErrorFragment.Companion.navigateToErrorFragmentWithRequirementErrorAndDestination
+import com.stripe.android.identity.networking.Status
 import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.networking.models.ConsentParam
 import com.stripe.android.identity.networking.models.VerificationPageData
@@ -67,14 +68,19 @@ internal class ConsentFragment(
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         identityViewModel.verificationPage.observe(viewLifecycleOwner) {
-            setLoadingFinishedUI()
-            bindViewData(it.biometricConsent)
+            when (it.status) {
+                Status.SUCCESS -> {
+                    setLoadingFinishedUI()
+                    bindViewData(requireNotNull(it.data).biometricConsent)
+                }
+                Status.LOADING -> {
+                    // no-op
+                }
+                Status.ERROR -> {
+                    navigateOnApiError(requireNotNull(it.throwable))
+                }
+            }
         }
-
-        identityViewModel.verificationPageApiError.observe(
-            viewLifecycleOwner,
-            ::navigateOnApiError
-        )
     }
 
     private fun postVerificationPageData(collectedDataParam: CollectedDataParam) {
