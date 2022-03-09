@@ -4,9 +4,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.core.Logger
-import com.stripe.android.core.injection.Injectable
-import com.stripe.android.core.injection.Injector
 import com.stripe.android.link.LinkScreen
+import com.stripe.android.link.injection.LinkInjectable
+import com.stripe.android.link.injection.LinkInjector
 import com.stripe.android.link.injection.SignedInViewModelSubcomponent
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.model.Navigator
@@ -65,8 +65,8 @@ internal class WalletViewModel @Inject constructor(
 
     internal class Factory(
         private val linkAccount: LinkAccount,
-        private val injector: Injector
-    ) : ViewModelProvider.Factory, Injectable<Unit> {
+        private val injector: LinkInjector
+    ) : ViewModelProvider.Factory, LinkInjectable {
 
         @Inject
         lateinit var subComponentBuilderProvider:
@@ -79,11 +79,5 @@ internal class WalletViewModel @Inject constructor(
                 .linkAccount(linkAccount)
                 .build().walletViewModel as T
         }
-
-        /**
-         * There's no need to implement fallback because the ViewModel receives the injector
-         * directly as a parameter.
-         */
-        override fun fallbackInitialize(arg: Unit) {}
     }
 }

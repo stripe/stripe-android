@@ -7,9 +7,9 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.core.injection.Injectable
-import com.stripe.android.core.injection.Injector
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.link.LinkScreen
+import com.stripe.android.link.injection.LinkInjector
 import com.stripe.android.link.injection.SignedInViewModelSubcomponent
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.model.Navigator
@@ -25,7 +25,6 @@ import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.spy
-import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
@@ -91,7 +90,7 @@ class WalletViewModelTest {
     }
 
     @Test
-    fun `Factory gets initialized by Injector when Injector is available`() {
+    fun `Factory gets initialized by Injector`() {
         val mockBuilder = mock<SignedInViewModelSubcomponent.Builder>()
         val mockSubComponent = mock<SignedInViewModelSubcomponent>()
         val vmToBeReturned = mock<WalletViewModel>()
@@ -108,7 +107,7 @@ class WalletViewModelTest {
         whenever(mockSavedStateRegistryOwner.lifecycle).thenReturn(mockLifeCycle)
         whenever(mockLifeCycle.currentState).thenReturn(Lifecycle.State.CREATED)
 
-        val injector = object : Injector {
+        val injector = object : LinkInjector {
             override fun inject(injectable: Injectable<*>) {
                 val factory = injectable as WalletViewModel.Factory
                 factory.subComponentBuilderProvider = Provider { mockBuilder }
@@ -121,7 +120,6 @@ class WalletViewModelTest {
         )
         val factorySpy = spy(factory)
         val createdViewModel = factorySpy.create(WalletViewModel::class.java)
-        verify(factorySpy, times(0)).fallbackInitialize(any())
         assertThat(createdViewModel).isEqualTo(vmToBeReturned)
 
         WeakMapInjectorRegistry.staticCacheMap.clear()

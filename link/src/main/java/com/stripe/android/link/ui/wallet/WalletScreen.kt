@@ -40,12 +40,14 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.stripe.android.core.injection.Injector
 import com.stripe.android.link.R
+import com.stripe.android.link.injection.LinkInjector
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
+
+private val horizontalPadding = 20.dp
 
 @Preview
 @Composable
@@ -83,7 +85,7 @@ private fun WalletBodyPreview() {
 @Composable
 internal fun WalletBody(
     linkAccount: LinkAccount,
-    injector: Injector
+    injector: LinkInjector
 ) {
     val viewModel: WalletViewModel = viewModel(
         factory = WalletViewModel.Factory(
@@ -188,7 +190,7 @@ internal fun CollapsedPaymentDetails(
     ) {
         Text(
             text = stringResource(id = R.string.wallet_pay_with),
-            modifier = Modifier.padding(horizontal = 20.dp),
+            modifier = Modifier.padding(horizontal = horizontalPadding),
             color = MaterialTheme.colors.onBackground
         )
         if (selectedPaymentMethod is ConsumerPaymentDetails.Card) {
@@ -198,7 +200,7 @@ internal fun CollapsedPaymentDetails(
         Icon(
             painter = painterResource(id = R.drawable.ic_link_chevron),
             contentDescription = stringResource(id = R.string.wallet_expand_accessibility),
-            modifier = Modifier.padding(horizontal = 20.dp),
+            modifier = Modifier.padding(horizontal = horizontalPadding),
             tint = MaterialTheme.colors.onBackground
         )
     }
@@ -224,7 +226,7 @@ internal fun ExpandedPaymentDetails(
         Row(
             modifier = Modifier
                 .height(44.dp)
-                .padding(start = 20.dp, top = 20.dp, end = 20.dp)
+                .padding(start = horizontalPadding, top = 20.dp, end = horizontalPadding)
                 .clickable(onClick = onCollapse),
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -244,7 +246,7 @@ internal fun ExpandedPaymentDetails(
         LazyColumn(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 20.dp)
+                .padding(horizontal = horizontalPadding)
         ) {
             itemsIndexed(paymentDetails) { index, item ->
                 when (item) {
@@ -263,7 +265,7 @@ internal fun ExpandedPaymentDetails(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(60.dp)
-                .padding(start = 20.dp, end = 20.dp, bottom = 4.dp)
+                .padding(start = horizontalPadding, end = horizontalPadding, bottom = 4.dp)
                 .clickable(onClick = onAddNewPaymentMethodClick),
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -360,8 +362,9 @@ internal fun PayButton(
             contentDescription = null,
             modifier = Modifier
                 .height(16.dp)
+                // width should be 13dp and must include the horizontal padding
                 .width(13.dp + 40.dp)
-                .padding(horizontal = 20.dp),
+                .padding(horizontal = horizontalPadding),
             tint = MaterialTheme.colors.onPrimary
         )
     }
