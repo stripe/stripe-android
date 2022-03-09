@@ -9,7 +9,7 @@ object TestUtils {
     fun idleLooper() = ShadowLooper.idleMainLooper()
 
     fun viewModelFactoryFor(viewModel: ViewModel) = object : ViewModelProvider.Factory {
-        override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+        override fun <T : ViewModel> create(modelClass: Class<T>): T {
             return viewModel as T
         }
     }

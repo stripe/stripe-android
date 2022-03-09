@@ -32,9 +32,6 @@ class CardNumberConfigTest {
 
         Truth.assertThat(cardNumberConfig.visualTransformation.filter(AnnotatedString(CardNumberFixtures.UNIONPAY_NO_SPACES)).text)
             .isEqualTo(AnnotatedString(CardNumberFixtures.UNIONPAY_WITH_SPACES))
-
-        Truth.assertThat(cardNumberConfig.visualTransformation.filter(AnnotatedString(CardNumberFixtures.UNIONPAY_19_NO_SPACES)).text)
-            .isEqualTo(AnnotatedString(CardNumberFixtures.UNIONPAY_19_WITH_SPACES))
     }
 
     @Test

@@ -67,7 +67,7 @@ class DateConfigTest {
             .isInstanceOf(TextFieldStateConstants.Error.Invalid::class.java)
         Truth.assertThat(
             state.getError()?.errorMessage
-        ).isEqualTo(R.string.incomplete_expiry_date)
+        ).isEqualTo(R.string.invalid_expiry_year)
     }
 
     @Test
@@ -123,10 +123,10 @@ class DateConfigTest {
             )
         )
         Truth.assertThat(state)
-            .isInstanceOf(TextFieldStateConstants.Error.Incomplete::class.java)
+            .isInstanceOf(TextFieldStateConstants.Error.Invalid::class.java)
         Truth.assertThat(
             state.getError()?.errorMessage
-        ).isEqualTo(R.string.incomplete_expiry_date)
+        ).isEqualTo(R.string.invalid_expiry_month)
     }
 
     @Test
@@ -142,7 +142,7 @@ class DateConfigTest {
             .isInstanceOf(TextFieldStateConstants.Error.Invalid::class.java)
         Truth.assertThat(
             state.getError()?.errorMessage
-        ).isEqualTo(R.string.incomplete_expiry_date)
+        ).isEqualTo(R.string.invalid_expiry_year)
     }
 
     @Test
@@ -209,7 +209,7 @@ class DateConfigTest {
 
     @Test
     fun `date is valid 2X month and 2 digit year`() {
-        val state = dateConfig.determineState("222")
+        val state = dateConfig.determineState("223")
         Truth.assertThat(state)
             .isInstanceOf(TextFieldStateConstants.Valid.Full::class.java)
     }
