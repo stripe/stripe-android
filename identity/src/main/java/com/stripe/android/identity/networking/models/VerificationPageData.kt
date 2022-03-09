@@ -42,4 +42,15 @@ internal data class VerificationPageData(
         @SerialName("verified")
         VERIFIED
     }
+
+    internal companion object {
+        fun VerificationPageData.isMissingDocumentType() =
+            requirements.missing.contains(VerificationPageDataRequirements.Missing.IDDOCUMENTTYPE)
+
+        fun VerificationPageData.isMissingBackOrFront() =
+            requirements.missing.contains(VerificationPageDataRequirements.Missing.IDDOCUMENTFRONT) ||
+                requirements.missing.contains(VerificationPageDataRequirements.Missing.IDDOCUMENTBACK)
+
+        fun VerificationPageData.hasError() = requirements.errors.isNotEmpty()
+    }
 }

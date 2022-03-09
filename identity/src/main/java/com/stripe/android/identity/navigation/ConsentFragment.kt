@@ -12,13 +12,14 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.stripe.android.identity.R
 import com.stripe.android.identity.databinding.ConsentFragmentBinding
-import com.stripe.android.identity.navigation.ErrorFragment.Companion.navigateToErrorFragmentWithDefaultValues
-import com.stripe.android.identity.navigation.ErrorFragment.Companion.navigateToErrorFragmentWithRequirementErrorAndDestination
 import com.stripe.android.identity.networking.Status
 import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.networking.models.ConsentParam
-import com.stripe.android.identity.networking.models.VerificationPageData
+import com.stripe.android.identity.networking.models.VerificationPage.Companion.isMissingBiometricConsent
+import com.stripe.android.identity.networking.models.VerificationPageData.Companion.isMissingDocumentType
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentConsentPage
+import com.stripe.android.identity.utils.navigateToDefaultErrorFragment
+import com.stripe.android.identity.utils.postVerificationPageDataAndMaybeSubmit
 import com.stripe.android.identity.utils.setHtmlString
 import com.stripe.android.identity.viewmodel.IdentityViewModel
 import kotlinx.coroutines.launch
@@ -46,14 +47,14 @@ internal class ConsentFragment(
         binding.merchantLogo.setImageResource(identityViewModel.args.merchantLogo)
 
         binding.agree.setOnClickListener {
-            postVerificationPageData(
+            postVerificationPageDataAndNavigate(
                 CollectedDataParam(
                     consent = ConsentParam(biometric = true)
                 )
             )
         }
         binding.decline.setOnClickListener {
-            postVerificationPageData(
+            postVerificationPageDataAndNavigate(
                 CollectedDataParam(
                     consent = ConsentParam(biometric = false)
                 )
@@ -70,30 +71,48 @@ internal class ConsentFragment(
         identityViewModel.verificationPage.observe(viewLifecycleOwner) {
             when (it.status) {
                 Status.SUCCESS -> {
-                    setLoadingFinishedUI()
-                    bindViewData(requireNotNull(it.data).biometricConsent)
+                    if (requireNotNull(it.data).isMissingBiometricConsent()) {
+                        setLoadingFinishedUI()
+                        bindViewData(requireNotNull(it.data).biometricConsent)
+                    } else {
+                        navigateToDocSelection()
+                    }
                 }
-                Status.LOADING -> {
-                    // no-op
-                }
+                Status.LOADING -> {} // no-op
                 Status.ERROR -> {
-                    navigateOnApiError(requireNotNull(it.throwable))
+                    Log.d(
+                        TAG,
+                        "API Error occurred: $it.throwable, navigate to general error fragment"
+                    )
+                    navigateToDefaultErrorFragment()
                 }
             }
         }
     }
 
-    private fun postVerificationPageData(collectedDataParam: CollectedDataParam) {
+    /**
+     * Post VerificationPageData with the type and navigate base on its result.
+     */
+    private fun postVerificationPageDataAndNavigate(collectedDataParam: CollectedDataParam) {
         lifecycleScope.launch {
-            runCatching {
-                identityViewModel.postVerificationPageData(
-                    collectedDataParam
-                )
-            }.fold(
-                onSuccess = ::navigateOnVerificationPageData,
-                onFailure = ::navigateOnApiError
+            postVerificationPageDataAndMaybeSubmit(
+                identityViewModel,
+                collectedDataParam,
+                shouldNotSubmit = { true },
+                notSubmitBlock = { verificationPageData ->
+                    if (verificationPageData.isMissingDocumentType()) {
+                        navigateToDocSelection()
+                    } else {
+                        // TODO(ccen) Determine the behavior when verificationPageData.isMissingDocumentType() is false
+                        // how to get the type that's already selected
+                    }
+                }
             )
         }
+    }
+
+    private fun navigateToDocSelection() {
+        findNavController().navigate(R.id.action_consentFragment_to_docSelectionFragment)
     }
 
     private fun bindViewData(consentPage: VerificationPageStaticContentConsentPage) {
@@ -109,22 +128,6 @@ internal class ConsentFragment(
         binding.loadings.visibility = View.GONE
         binding.texts.visibility = View.VISIBLE
         binding.buttons.visibility = View.VISIBLE
-    }
-
-    private fun navigateOnVerificationPageData(verificationPageData: VerificationPageData) {
-        if (verificationPageData.requirements.errors.isEmpty()) {
-            findNavController().navigate(R.id.action_consentFragment_to_docSelectionFragment)
-        } else {
-            findNavController().navigateToErrorFragmentWithRequirementErrorAndDestination(
-                verificationPageData.requirements.errors[0],
-                R.id.action_errorFragment_to_consentFragment
-            )
-        }
-    }
-
-    private fun navigateOnApiError(throwable: Throwable) {
-        Log.d(TAG, "API Error occurred: $throwable, navigate to general error fragment")
-        findNavController().navigateToErrorFragmentWithDefaultValues(requireContext())
     }
 
     private companion object {

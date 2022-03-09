@@ -71,6 +71,9 @@ internal class IdentityFragmentFactory(
             ConsentFragment::class.java.name -> ConsentFragment(
                 identityViewModelFactory
             )
+            DocSelectionFragment::class.java.name -> DocSelectionFragment(
+                identityViewModelFactory
+            )
             else -> super.instantiate(classLoader, className)
         }
     }
