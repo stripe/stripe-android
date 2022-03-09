@@ -17,6 +17,7 @@ import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.networking.models.VerificationPageData
 import com.stripe.android.identity.networking.models.VerificationPageDataRequirementError
 import com.stripe.android.identity.networking.models.VerificationPageDataRequirements
+import com.stripe.android.identity.networking.models.VerificationPageRequirements
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentConsentPage
 import com.stripe.android.identity.viewModelFactoryFor
 import com.stripe.android.identity.viewmodel.IdentityViewModel
@@ -46,13 +47,20 @@ internal class ConsentFragmentTest {
                 declineButtonText = CONSENT_DECLINE_TEXT
             )
         )
+        whenever(it.requirements).thenReturn(
+            VerificationPageRequirements(
+                missing = listOf(
+                    VerificationPageRequirements.Missing.BIOMETRICCONSENT
+                )
+            )
+        )
     }
 
     private val correctVerificationData = mock<VerificationPageData>().also {
         whenever(it.requirements).thenReturn(
             VerificationPageDataRequirements(
                 errors = emptyList(),
-                missing = emptyList()
+                missing = listOf(VerificationPageDataRequirements.Missing.IDDOCUMENTTYPE)
             )
         )
     }
@@ -91,6 +99,21 @@ internal class ConsentFragmentTest {
             assertThat(binding.loadings.visibility).isEqualTo(View.VISIBLE)
             assertThat(binding.texts.visibility).isEqualTo(View.GONE)
             assertThat(binding.buttons.visibility).isEqualTo(View.GONE)
+        }
+    }
+
+    @Test
+    fun `when not missing biometricConsent navigate to docSelectionFragment`() {
+        whenever(verificationPage.requirements).thenReturn(
+            VerificationPageRequirements(
+                missing = emptyList()
+            )
+        )
+        launchConsentFragment { _, navController ->
+            verificationPageLiveData.postValue(Resource.success(verificationPage))
+
+            assertThat(navController.currentDestination?.id)
+                .isEqualTo(R.id.docSelectionFragment)
         }
     }
 

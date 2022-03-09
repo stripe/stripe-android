@@ -110,8 +110,15 @@ public final class com/stripe/android/identity/databinding/ConsentFragmentBindin
 
 public final class com/stripe/android/identity/databinding/DocSelectionFragmentBinding : androidx/viewbinding/ViewBinding {
 	public final field dl Lcom/google/android/material/button/MaterialButton;
+	public final field dlSeparator Landroid/view/View;
 	public final field id Lcom/google/android/material/button/MaterialButton;
+	public final field idSeparator Landroid/view/View;
+	public final field multiSelectionContent Landroid/widget/LinearLayout;
 	public final field passport Lcom/google/android/material/button/MaterialButton;
+	public final field passportSeparator Landroid/view/View;
+	public final field singleSelectionBody Landroid/widget/TextView;
+	public final field singleSelectionContent Landroid/widget/LinearLayout;
+	public final field singleSelectionContinue Lcom/google/android/material/button/MaterialButton;
 	public final field title Landroid/widget/TextView;
 	public static fun bind (Landroid/view/View;)Lcom/stripe/android/identity/databinding/DocSelectionFragmentBinding;
 	public synthetic fun getRoot ()Landroid/view/View;

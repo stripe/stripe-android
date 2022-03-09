@@ -56,4 +56,9 @@ internal data class VerificationPage(
         @SerialName("verified")
         VERIFIED;
     }
+
+    internal companion object {
+        fun VerificationPage.isMissingBiometricConsent() =
+            requirements.missing.contains(VerificationPageRequirements.Missing.BIOMETRICCONSENT)
+    }
 }
