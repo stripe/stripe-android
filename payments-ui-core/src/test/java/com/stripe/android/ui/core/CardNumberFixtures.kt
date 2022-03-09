@@ -1,4 +1,4 @@
-package com.stripe.android
+package com.stripe.android.ui.core
 
 import com.stripe.android.cards.CardNumber
 
