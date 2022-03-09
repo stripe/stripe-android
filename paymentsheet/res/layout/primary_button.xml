@@ -19,7 +19,7 @@
         android:id="@+id/lock_icon"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:src="@drawable/stripe_ic_paymentsheet_primary_button_lock"
+        android:src="@drawable/stripe_ic_lock"
         android:layout_gravity="end|center_vertical"
         android:visibility="gone"
         android:layout_marginStart="@dimen/stripe_paymentsheet_primary_button_icon_padding"

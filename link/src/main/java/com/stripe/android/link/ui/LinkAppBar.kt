@@ -3,7 +3,6 @@ package com.stripe.android.link.ui
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.Icon
-import androidx.compose.material.LocalContentColor
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.TopAppBar
 import androidx.compose.runtime.Composable
@@ -26,8 +25,7 @@ internal fun LinkAppBar() {
         ) {
             Icon(
                 painter = painterResource(R.drawable.ic_link_logo),
-                contentDescription = stringResource(R.string.link),
-                tint = LocalContentColor.current.copy(alpha = 0.2f)
+                contentDescription = stringResource(R.string.link)
             )
         }
     }

@@ -1,5 +1,7 @@
 package com.stripe.android.link
 
+import android.app.Activity
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -25,6 +27,7 @@ import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.ui.LinkAppBar
 import com.stripe.android.link.ui.signup.SignUpBody
 import com.stripe.android.link.ui.verification.VerificationBody
+import com.stripe.android.link.ui.wallet.WalletBody
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 
@@ -75,13 +78,19 @@ internal class LinkActivity : ComponentActivity() {
                                 )
                             }
                             composable(LinkScreen.Wallet.route) {
+                                WalletBody(
+                                    requireNotNull(linkAccount),
+                                    viewModel.injector
+                                )
+                            }
+                            composable(LinkScreen.AddPaymentMethod.route) {
                                 Box(
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .fillMaxHeight(),
                                     contentAlignment = Alignment.Center
                                 ) {
-                                    Text(text = "Wallet Placeholder")
+                                    Text(text = "Add new payment method")
                                 }
                             }
                         }
@@ -94,5 +103,14 @@ internal class LinkActivity : ComponentActivity() {
             navController.popBackStack()
             navController.navigate(it.route)
         }.launchIn(viewModel.viewModelScope)
+
+        viewModel.navigator.onDismiss = ::dismiss
+    }
+
+    private fun dismiss() {
+        setResult(
+            Activity.RESULT_CANCELED,
+            Intent().putExtras(LinkActivityContract.Result(LinkActivityResult.Canceled).toBundle())
+        )
     }
 }

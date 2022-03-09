@@ -15,6 +15,7 @@ import com.stripe.android.link.injection.DaggerLinkViewModelFactoryComponent
 import com.stripe.android.link.model.Navigator
 import com.stripe.android.link.ui.signup.SignUpViewModel
 import com.stripe.android.link.ui.verification.VerificationViewModel
+import com.stripe.android.link.ui.wallet.WalletViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -144,7 +145,7 @@ internal class LinkActivityViewModel @Inject internal constructor(
                         is Factory -> viewModelComponent.inject(injectable)
                         is SignUpViewModel.Factory -> viewModelComponent.inject(injectable)
                         is VerificationViewModel.Factory -> viewModelComponent.inject(injectable)
-                        else -> {
+                        is WalletViewModel.Factory -> viewModelComponent.inject(injectable)else -> {
                             throw IllegalArgumentException("invalid Injectable $injectable requested in $this")
                         }
                     }
