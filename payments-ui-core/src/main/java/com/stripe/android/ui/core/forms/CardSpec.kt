@@ -9,6 +9,7 @@ import com.stripe.android.ui.core.elements.LayoutSpec
 import com.stripe.android.ui.core.elements.SaveForFutureUseSpec
 import com.stripe.android.ui.core.elements.SectionSpec
 import com.stripe.android.ui.core.elements.billingParams
+import com.stripe.android.ui.core.elements.supportedBillingCountries
 
 internal val cardParams: MutableMap<String, Any?> = mutableMapOf(
     "number" to null,
@@ -32,7 +33,9 @@ internal val creditDetailsSection = SectionSpec(
 
 internal val creditBillingSection = SectionSpec(
     IdentifierSpec.Generic("credit_billing_section"),
-    CardBillingSpec,
+    CardBillingSpec(
+        countryCodes = supportedBillingCountries
+    ),
     R.string.billing_details
 )
 
