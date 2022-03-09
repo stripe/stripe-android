@@ -58,8 +58,5 @@ class CountryConfigTest {
         assertThat(
             supportedCountries.size
         ).isEqualTo(233)
-
-
     }
-
 }
