@@ -65,7 +65,7 @@ object PaymentSheetThemeConfig {
         componentDivider = Color(0xFF787880),
         onPrimary = Color.White,
         textSecondary = Color(0x99FFFFFF),
-        placeholderText = Color.White,
+        placeholderText = Color(0x61FFFFFF),
         onBackground = Color.White,
         appBarIcon = Color.White,
         error = Color.Red,

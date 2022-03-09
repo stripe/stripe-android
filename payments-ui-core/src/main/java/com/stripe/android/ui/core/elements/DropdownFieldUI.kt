@@ -126,7 +126,7 @@ internal fun DropdownLabel(
     @StringRes label: Int,
     enabled: Boolean
 ) {
-    val color = StripeTheme.colors.material.onBackground
+    val color = StripeTheme.colors.placeholderText
     Text(
         stringResource(label),
         color = if (enabled) color else color.copy(alpha = ContentAlpha.disabled),
