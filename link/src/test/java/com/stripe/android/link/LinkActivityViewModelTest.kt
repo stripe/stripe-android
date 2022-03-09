@@ -7,9 +7,9 @@ import androidx.savedstate.SavedStateRegistryOwner
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth
 import com.stripe.android.core.injection.Injectable
-import com.stripe.android.core.injection.Injector
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.link.account.LinkAccountManager
+import com.stripe.android.link.injection.LinkInjector
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.model.Navigator
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -82,7 +82,7 @@ class LinkActivityViewModelTest {
     fun `Factory gets initialized by Injector when Injector is available`() {
         val vmToBeReturned = mock<LinkActivityViewModel>()
 
-        val injector = object : Injector {
+        val injector = object : LinkInjector {
             override fun inject(injectable: Injectable<*>) {
                 val factory = injectable as LinkActivityViewModel.Factory
                 factory.viewModel = vmToBeReturned

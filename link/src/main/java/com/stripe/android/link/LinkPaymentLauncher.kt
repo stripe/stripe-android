@@ -6,13 +6,13 @@ import androidx.annotation.RestrictTo
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.Injectable
-import com.stripe.android.core.injection.Injector
 import com.stripe.android.core.injection.InjectorKey
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.link.injection.DaggerLinkPaymentLauncherComponent
+import com.stripe.android.link.injection.LinkInjector
 import com.stripe.android.link.ui.signup.SignUpViewModel
 import com.stripe.android.link.ui.verification.VerificationViewModel
 import com.stripe.android.link.ui.wallet.WalletViewModel
@@ -81,7 +81,7 @@ class LinkPaymentLauncher @AssistedInject constructor(
             .starterArgs(args)
             .build()
 
-        val injector = object : Injector {
+        val injector = object : LinkInjector {
             override fun inject(injectable: Injectable<*>) {
                 when (injectable) {
                     is LinkActivityViewModel.Factory -> launcherComponent.inject(injectable)
