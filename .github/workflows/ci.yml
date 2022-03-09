@@ -4,6 +4,10 @@ on:
     branches:
       - master
   pull_request:
+
+env:
+  STRIPE_END_TO_END_TESTS_BACKEND_URL: ${{ secrets.STRIPE_END_TO_END_TESTS_BACKEND_URL }}
+
 jobs:
   check:
     name: Check
@@ -83,8 +87,6 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-
       - name: End-to-end tests
-        env:
-          STRIPE_END_TO_END_TESTS_BACKEND_URL: ${{ secrets.STRIPE_END_TO_END_TESTS_BACKEND_URL }}
         run: ./gradlew :stripe-test-e2e:testDebugUnitTest
       - uses: actions/upload-artifact@v2
         if: failure()
