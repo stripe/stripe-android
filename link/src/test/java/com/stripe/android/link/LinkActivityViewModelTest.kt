@@ -10,7 +10,6 @@ import com.stripe.android.core.injection.Injectable
 import com.stripe.android.core.injection.Injector
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.link.account.LinkAccountManager
-import com.stripe.android.link.injection.LinkViewModelSubcomponent
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.model.Navigator
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -25,7 +24,6 @@ import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
-import javax.inject.Provider
 import kotlin.test.assertNotNull
 
 @ExperimentalCoroutinesApi
@@ -82,30 +80,16 @@ class LinkActivityViewModelTest {
 
     @Test
     fun `Factory gets initialized by Injector when Injector is available`() {
-        val mockBuilder = mock<LinkViewModelSubcomponent.Builder>()
-        val mockSubComponent = mock<LinkViewModelSubcomponent>()
         val vmToBeReturned = mock<LinkActivityViewModel>()
-
-        whenever(mockBuilder.args(any())).thenReturn(mockBuilder)
-        whenever(mockBuilder.injector(any())).thenReturn(mockBuilder)
-        whenever(mockBuilder.build()).thenReturn(mockSubComponent)
-        whenever((mockSubComponent.linkActivityViewModel)).thenReturn(vmToBeReturned)
-
-        val mockSavedStateRegistryOwner = mock<SavedStateRegistryOwner>()
-        val mockSavedStateRegistry = mock<SavedStateRegistry>()
-        val mockLifeCycle = mock<Lifecycle>()
-
-        whenever(mockSavedStateRegistryOwner.savedStateRegistry).thenReturn(mockSavedStateRegistry)
-        whenever(mockSavedStateRegistryOwner.lifecycle).thenReturn(mockLifeCycle)
-        whenever(mockLifeCycle.currentState).thenReturn(Lifecycle.State.CREATED)
 
         val injector = object : Injector {
             override fun inject(injectable: Injectable<*>) {
                 val factory = injectable as LinkActivityViewModel.Factory
-                factory.subComponentBuilderProvider = Provider { mockBuilder }
+                factory.viewModel = vmToBeReturned
             }
         }
         WeakMapInjectorRegistry.register(injector, INJECTOR_KEY)
+
         val factory = LinkActivityViewModel.Factory(
             ApplicationProvider.getApplicationContext(),
             { defaultArgs }
@@ -146,8 +130,7 @@ class LinkActivityViewModelTest {
     private fun createViewModel() = LinkActivityViewModel(
         defaultArgs,
         linkAccountManager,
-        navigator,
-        mock()
+        navigator
     )
 
     private companion object {
