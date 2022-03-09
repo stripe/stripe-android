@@ -32,6 +32,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.stripe.android.core.injection.Injector
 import com.stripe.android.link.R
+import com.stripe.android.link.injection.LinkInjector
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.linkTextFieldColors
 import com.stripe.android.ui.core.elements.EmailSpec
@@ -57,7 +58,7 @@ private fun SignUpBodyPreview() {
 
 @Composable
 internal fun SignUpBody(
-    injector: Injector
+    injector: LinkInjector
 ) {
     val signUpViewModel: SignUpViewModel = viewModel(
         factory = SignUpViewModel.Factory(

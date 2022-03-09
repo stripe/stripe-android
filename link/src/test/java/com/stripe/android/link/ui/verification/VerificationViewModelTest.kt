@@ -3,13 +3,14 @@ package com.stripe.android.link.ui.verification
 import androidx.lifecycle.Lifecycle
 import androidx.savedstate.SavedStateRegistry
 import androidx.savedstate.SavedStateRegistryOwner
-import com.google.common.truth.Truth
+import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
+import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.core.injection.Injectable
-import com.stripe.android.core.injection.Injector
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.link.LinkScreen
 import com.stripe.android.link.account.LinkAccountManager
+import com.stripe.android.link.injection.LinkInjector
 import com.stripe.android.link.injection.SignedInViewModelSubcomponent
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.model.Navigator
@@ -20,7 +21,6 @@ import org.junit.runner.RunWith
 import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.spy
-import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
@@ -57,7 +57,7 @@ class VerificationViewModelTest {
     }
 
     @Test
-    fun `Factory gets initialized by Injector when Injector is available`() {
+    fun `Factory gets initialized by Injector`() {
         val mockBuilder = mock<SignedInViewModelSubcomponent.Builder>()
         val mockSubComponent = mock<SignedInViewModelSubcomponent>()
         val vmToBeReturned = mock<VerificationViewModel>()
@@ -74,21 +74,20 @@ class VerificationViewModelTest {
         whenever(mockSavedStateRegistryOwner.lifecycle).thenReturn(mockLifeCycle)
         whenever(mockLifeCycle.currentState).thenReturn(Lifecycle.State.CREATED)
 
-        val injector = object : Injector {
+        val injector = object : LinkInjector {
             override fun inject(injectable: Injectable<*>) {
                 val factory = injectable as VerificationViewModel.Factory
                 factory.subComponentBuilderProvider = Provider { mockBuilder }
             }
         }
-        WeakMapInjectorRegistry.register(injector, INJECTOR_KEY)
+        WeakMapInjectorRegistry.register(injector, DUMMY_INJECTOR_KEY)
         val factory = VerificationViewModel.Factory(
             mock(),
             injector
         )
         val factorySpy = spy(factory)
         val createdViewModel = factorySpy.create(VerificationViewModel::class.java)
-        verify(factorySpy, times(0)).fallbackInitialize(any())
-        Truth.assertThat(createdViewModel).isEqualTo(vmToBeReturned)
+        assertThat(createdViewModel).isEqualTo(vmToBeReturned)
 
         WeakMapInjectorRegistry.staticCacheMap.clear()
     }
@@ -96,14 +95,4 @@ class VerificationViewModelTest {
     private fun createViewModel() = VerificationViewModel(
         linkAccountManager, navigator, logger, linkAccount
     )
-
-    private companion object {
-        const val INJECTOR_KEY = "injectorKey"
-        const val PRODUCT_USAGE = "productUsage"
-        const val PUBLISHABLE_KEY = "publishableKey"
-        const val STRIPE_ACCOUNT_ID = "stripeAccountId"
-
-        const val MERCHANT_NAME = "merchantName"
-        const val CUSTOMER_EMAIL = "customer@email.com"
-    }
 }
