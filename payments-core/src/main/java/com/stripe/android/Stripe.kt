@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import androidx.activity.ComponentActivity
+import androidx.annotation.RestrictTo
 import androidx.annotation.Size
 import androidx.annotation.UiThread
 import androidx.annotation.WorkerThread
@@ -1637,6 +1638,138 @@ class Stripe internal constructor(
         executeAsync(callback) {
             stripeRepository.createRadarSession(
                 ApiRequest.Options(
+                    apiKey = publishableKey,
+                    stripeAccount = stripeAccountId
+                )
+            )
+        }
+    }
+
+    /**
+     * Verify a customer's bank account with micro-deposits
+     *
+     * This function should only be called when the PaymentIntent is in the `requires_action` state
+     * and `NextActionType` is VerifyWithMicrodeposits.
+     *
+     * See the [Verify bank account with micro-despoits](https://stripe.com/docs/payments/ach-debit/accept-a-payment#web-verify-with-microdeposits) docs for more details.
+     *
+     * @param clientSecret The client secret of the PaymentIntent
+     * @param firstAmount The amount, in cents of USD, equal to the value of the first micro-deposit
+     * sent to the bank account
+     * @param secondAmount The amount, in cents of USD, equal to the value of the second micro-deposit
+     * sent to the bank account
+     * @param callback a [ApiResultCallback] to receive the result or error
+     */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    fun verifyPaymentIntentWithMicrodeposits(
+        clientSecret: String,
+        firstAmount: Int,
+        secondAmount: Int,
+        callback: ApiResultCallback<PaymentIntent>
+    ) {
+        executeAsync(callback) {
+            stripeRepository.verifyPaymentIntentWithMicrodeposits(
+                clientSecret = clientSecret,
+                firstAmount = firstAmount,
+                secondAmount = secondAmount,
+                requestOptions = ApiRequest.Options(
+                    apiKey = publishableKey,
+                    stripeAccount = stripeAccountId
+                )
+            )
+        }
+    }
+
+    /**
+     * Verify a customer's bank account with micro-deposits
+     *
+     * This function should only be called when the PaymentIntent is in the `requires_action` state
+     * and `NextActionType` is VerifyWithMicrodeposits.
+     *
+     * See the [Verify bank account with micro-despoits](https://stripe.com/docs/payments/ach-debit/accept-a-payment#web-verify-with-microdeposits) docs for more details.
+     *
+     * @param clientSecret The client secret of the PaymentIntent
+     * @param descriptorCode A unique, 6-digit descriptor code that starts with SM that was sent as
+     * statement descriptor to the bank account
+     * @param callback a [ApiResultCallback] to receive the result or error
+     */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    fun verifyPaymentIntentWithMicrodeposits(
+        clientSecret: String,
+        descriptorCode: String,
+        callback: ApiResultCallback<PaymentIntent>
+    ) {
+        executeAsync(callback) {
+            stripeRepository.verifyPaymentIntentWithMicrodeposits(
+                clientSecret = clientSecret,
+                descriptorCode = descriptorCode,
+                requestOptions = ApiRequest.Options(
+                    apiKey = publishableKey,
+                    stripeAccount = stripeAccountId
+                )
+            )
+        }
+    }
+
+    /**
+     * Verify a customer's bank account with micro-deposits
+     *
+     * This function should only be called when the SetupIntent is in the `requires_action` state
+     * and `NextActionType` is VerifyWithMicrodeposits.
+     *
+     * See the [Verify bank account with micro-despoits](https://stripe.com/docs/payments/ach-debit/accept-a-payment#web-verify-with-microdeposits) docs for more details.
+     *
+     * @param clientSecret The client secret of the SetupIntent
+     * @param firstAmount The amount, in cents of USD, equal to the value of the first micro-deposit
+     * sent to the bank account
+     * @param secondAmount The amount, in cents of USD, equal to the value of the second micro-deposit
+     * sent to the bank account
+     * @param callback a [ApiResultCallback] to receive the result or error
+     */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    fun verifySetupIntentWithMicrodeposits(
+        clientSecret: String,
+        firstAmount: Int,
+        secondAmount: Int,
+        callback: ApiResultCallback<SetupIntent>
+    ) {
+        executeAsync(callback) {
+            stripeRepository.verifySetupIntentWithMicrodeposits(
+                clientSecret = clientSecret,
+                firstAmount = firstAmount,
+                secondAmount = secondAmount,
+                requestOptions = ApiRequest.Options(
+                    apiKey = publishableKey,
+                    stripeAccount = stripeAccountId
+                )
+            )
+        }
+    }
+
+    /**
+     * Verify a customer's bank account with micro-deposits
+     *
+     * This function should only be called when the SetupIntent is in the `requires_action` state
+     * and `NextActionType` is VerifyWithMicrodeposits.
+     *
+     * See the [Verify bank account with micro-despoits](https://stripe.com/docs/payments/ach-debit/accept-a-payment#web-verify-with-microdeposits) docs for more details.
+     *
+     * @param clientSecret The client secret of the SetupIntent
+     * @param descriptorCode A unique, 6-digit descriptor code that starts with SM that was sent as
+     * statement descriptor to the bank account
+     * @param callback a [ApiResultCallback] to receive the result or error
+     */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    fun verifySetupIntentWithMicrodeposits(
+        clientSecret: String,
+        descriptorCode: String,
+        callback: ApiResultCallback<SetupIntent>
+    ) {
+        executeAsync(callback) {
+            stripeRepository.verifySetupIntentWithMicrodeposits(
+                clientSecret = clientSecret,
+                descriptorCode = descriptorCode,
+                requestOptions = ApiRequest.Options(
                     apiKey = publishableKey,
                     stripeAccount = stripeAccountId
                 )

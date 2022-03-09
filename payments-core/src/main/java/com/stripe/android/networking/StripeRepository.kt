@@ -468,4 +468,34 @@ abstract class StripeRepository {
         linkAccountSessionId: String,
         requestOptions: ApiRequest.Options
     ): SetupIntent?
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    abstract suspend fun verifyPaymentIntentWithMicrodeposits(
+        clientSecret: String,
+        firstAmount: Int,
+        secondAmount: Int,
+        requestOptions: ApiRequest.Options
+    ): PaymentIntent?
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    abstract suspend fun verifyPaymentIntentWithMicrodeposits(
+        clientSecret: String,
+        descriptorCode: String,
+        requestOptions: ApiRequest.Options
+    ): PaymentIntent?
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    abstract suspend fun verifySetupIntentWithMicrodeposits(
+        clientSecret: String,
+        firstAmount: Int,
+        secondAmount: Int,
+        requestOptions: ApiRequest.Options
+    ): SetupIntent?
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    abstract suspend fun verifySetupIntentWithMicrodeposits(
+        clientSecret: String,
+        descriptorCode: String,
+        requestOptions: ApiRequest.Options
+    ): SetupIntent?
 }
