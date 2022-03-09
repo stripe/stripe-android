@@ -23,7 +23,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
-import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.key.KeyEventType
@@ -62,7 +61,8 @@ internal data class TextFieldColors(
 internal fun TextField(
     textFieldController: TextFieldController,
     modifier: Modifier = Modifier,
-    enabled: Boolean,
+    imeAction: ImeAction,
+    enabled: Boolean
 ) {
     Log.d("Construct", "SimpleTextFieldElement ${textFieldController.debugLabel}")
 
@@ -105,7 +105,7 @@ internal fun TextField(
     @Suppress("UNUSED_VALUE")
     processedIsFull = if (fieldState == TextFieldStateConstants.Valid.Full) {
         if (!processedIsFull) {
-            nextFocus(focusManager)
+            focusManager.moveFocus(FocusDirection.Next)
         }
         true
     } else {
@@ -150,14 +150,17 @@ internal fun TextField(
             },
         keyboardActions = KeyboardActions(
             onNext = {
-                nextFocus(focusManager)
+                focusManager.moveFocus(FocusDirection.Next)
+            },
+            onDone = {
+                focusManager.clearFocus(true)
             }
         ),
         visualTransformation = textFieldController.visualTransformation,
         keyboardOptions = KeyboardOptions(
             keyboardType = textFieldController.keyboardType,
             capitalization = textFieldController.capitalization,
-            imeAction = ImeAction.Next
+            imeAction = imeAction
         ),
         colors = colors,
         maxLines = 1,
@@ -167,12 +170,6 @@ internal fun TextField(
             { TrailingIcon(it, colors, loading) }
         }
     )
-}
-
-internal fun nextFocus(focusManager: FocusManager) {
-    if (!focusManager.moveFocus(FocusDirection.Next)) {
-        focusManager.clearFocus(true)
-    }
 }
 
 @Composable

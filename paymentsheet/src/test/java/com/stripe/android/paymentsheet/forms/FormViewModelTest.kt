@@ -60,6 +60,10 @@ import javax.inject.Provider
 internal class FormViewModelTest {
     private val emailSection =
         SectionSpec(IdentifierSpec.Generic("email_section"), EmailSpec)
+    private val nameSection = SectionSpec(
+        IdentifierSpec.Generic("name_section"),
+        NAME
+    )
     private val countrySection = SectionSpec(
         IdentifierSpec.Generic("country_section"),
         CountrySpec()
@@ -210,6 +214,55 @@ internal class FormViewModelTest {
 
         assertThat(values[1][0]).isEqualTo(IdentifierSpec.Generic("email_section"))
         assertThat(values[1][1]).isEqualTo(IdentifierSpec.Email)
+    }
+
+    @ExperimentalCoroutinesApi
+    @Test
+    fun `Verify if there are no text fields nothing is hidden`() = runTest {
+        // Here we have just a country, no text fields.
+        val args = COMPOSE_FRAGMENT_ARGS
+        val formViewModel = FormViewModel(
+            LayoutSpec.create(
+                countrySection
+            ),
+            args,
+            resourceRepository = resourceRepository,
+            transformSpecToElement = TransformSpecToElement(resourceRepository, args, context)
+        )
+
+        // Verify formFieldValues does not contain email
+        assertThat(formViewModel.lastTextFieldIdentifier.first()?.value).isEqualTo(
+            null
+        )
+    }
+
+    @ExperimentalCoroutinesApi
+    @Test
+    fun `Verify if the last text field is hidden the second to last text field is the last display text field`() = runTest {
+        // Here we have one hidden and one required field, country will always be in the result,
+        //  and name only if saveForFutureUse is true
+        val args = COMPOSE_FRAGMENT_ARGS
+        val formViewModel = FormViewModel(
+            LayoutSpec.create(
+                nameSection,
+                emailSection,
+                countrySection,
+                SaveForFutureUseSpec(listOf(emailSection))
+            ),
+            args,
+            resourceRepository = resourceRepository,
+            transformSpecToElement = TransformSpecToElement(resourceRepository, args, context)
+        )
+
+        val saveForFutureUseController = formViewModel.elements.first()!!.map { it.controller }
+            .filterIsInstance(SaveForFutureUseController::class.java).first()
+
+        saveForFutureUseController.onValueChange(false)
+
+        // Verify formFieldValues does not contain email
+        assertThat(formViewModel.lastTextFieldIdentifier.first()?.value).isEqualTo(
+            nameSection.fields.first().identifier.value
+        )
     }
 
     @ExperimentalCoroutinesApi

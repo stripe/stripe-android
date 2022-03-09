@@ -207,4 +207,18 @@ internal class FormViewModel @Inject internal constructor(
             showingMandate,
             userRequestedReuse
         ).filterFlow()
+
+    private val textFieldControllerIdsFlow = elements.filterNotNull().map { elementsList ->
+        combine(elementsList.map { it.getTextFieldIdentifiers() }) {
+            it.toList().flatten()
+        }
+    }.flattenConcat()
+    val lastTextFieldIdentifier = combine(
+        hiddenIdentifiers,
+        textFieldControllerIdsFlow
+    ) { hiddenIds, textFieldControllerIds ->
+        textFieldControllerIds.lastOrNull {
+            !hiddenIds.contains(it)
+        }
+    }
 }

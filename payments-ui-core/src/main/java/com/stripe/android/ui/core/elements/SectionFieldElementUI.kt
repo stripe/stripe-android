@@ -2,13 +2,15 @@ package com.stripe.android.ui.core.elements
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.ImeAction
 
 @Composable
 internal fun SectionFieldElementUI(
     enabled: Boolean,
     field: SectionFieldElement,
     modifier: Modifier = Modifier,
-    hiddenIdentifiers: List<IdentifierSpec>? = null
+    hiddenIdentifiers: List<IdentifierSpec>? = null,
+    lastTextFieldIdentifier: IdentifierSpec?,
 ) {
     if (hiddenIdentifiers?.contains(field.identifier) == false) {
         when (val controller = field.sectionFieldErrorController()) {
@@ -16,7 +18,12 @@ internal fun SectionFieldElementUI(
                 TextField(
                     textFieldController = controller,
                     enabled = enabled,
-                    modifier = modifier
+                    modifier = modifier,
+                    imeAction = if (lastTextFieldIdentifier == field.identifier) {
+                        ImeAction.Done
+                    } else {
+                        ImeAction.Next
+                    }
                 )
             }
             is DropdownFieldController -> {
@@ -29,21 +36,24 @@ internal fun SectionFieldElementUI(
                 AddressElementUI(
                     enabled,
                     controller,
-                    hiddenIdentifiers
+                    hiddenIdentifiers,
+                    lastTextFieldIdentifier
                 )
             }
             is RowController -> {
                 RowElementUI(
                     enabled,
                     controller,
-                    hiddenIdentifiers
+                    hiddenIdentifiers,
+                    lastTextFieldIdentifier
                 )
             }
             is CardDetailsController -> {
                 CardDetailsElementUI(
                     enabled,
                     controller,
-                    hiddenIdentifiers
+                    hiddenIdentifiers,
+                    lastTextFieldIdentifier
                 )
             }
         }

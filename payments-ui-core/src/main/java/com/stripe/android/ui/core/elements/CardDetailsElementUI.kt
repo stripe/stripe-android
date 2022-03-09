@@ -10,10 +10,16 @@ import androidx.compose.ui.Modifier
 internal fun CardDetailsElementUI(
     enabled: Boolean,
     controller: CardDetailsController,
-    hiddenIdentifiers: List<IdentifierSpec>?
+    hiddenIdentifiers: List<IdentifierSpec>?,
+    lastTextFieldIdentifier: IdentifierSpec?
 ) {
     controller.fields.forEachIndexed { index, field ->
-        SectionFieldElementUI(enabled, field, hiddenIdentifiers = hiddenIdentifiers)
+        SectionFieldElementUI(
+            enabled,
+            field,
+            hiddenIdentifiers = hiddenIdentifiers,
+            lastTextFieldIdentifier = lastTextFieldIdentifier
+        )
         val cardStyle = CardStyle(isSystemInDarkTheme())
         Divider(
             color = cardStyle.cardBorderColor,
