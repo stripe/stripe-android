@@ -4,11 +4,15 @@ import com.stripe.android.ui.core.address.AddressFieldElementRepository
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
-internal object CardBillingSpec : SectionFieldSpec(IdentifierSpec.Generic("card_billing")) {
+internal data class CardBillingSpec(
+    override val identifier: IdentifierSpec = IdentifierSpec.Generic("card_billing"),
+    val countryCodes: Set<String>
+) : SectionFieldSpec(identifier) {
     fun transform(
         addressRepository: AddressFieldElementRepository
     ) = CardBillingAddressElement(
         IdentifierSpec.Generic("credit_billing"),
-        addressRepository
+        addressRepository,
+        countryCodes = countryCodes
     )
 }
