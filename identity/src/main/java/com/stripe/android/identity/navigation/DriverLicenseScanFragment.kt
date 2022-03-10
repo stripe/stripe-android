@@ -22,8 +22,13 @@ import com.stripe.android.identity.states.IdentityScanState
  */
 internal class DriverLicenseScanFragment(
     cameraPermissionEnsureable: CameraPermissionEnsureable,
-    cameraViewModelFactory: ViewModelProvider.Factory
-) : IdentityCameraScanFragment(cameraPermissionEnsureable, cameraViewModelFactory) {
+    cameraViewModelFactory: ViewModelProvider.Factory,
+    identityViewModelFactory: ViewModelProvider.Factory
+) : IdentityCameraScanFragment(
+    cameraPermissionEnsureable,
+    cameraViewModelFactory,
+    identityViewModelFactory
+) {
     private lateinit var binding: DriverLicenseScanFragmentBinding
     private lateinit var headerTitle: TextView
     private lateinit var messageView: TextView

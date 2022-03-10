@@ -13,8 +13,7 @@ interface IdentityVerificationSheet {
      */
     data class Configuration(
         @DrawableRes
-        val merchantLogo: Int,
-        val stripePublishableKey: String
+        val merchantLogo: Int
     )
 
     /**

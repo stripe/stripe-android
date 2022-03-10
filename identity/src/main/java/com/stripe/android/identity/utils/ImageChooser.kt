@@ -16,13 +16,11 @@ internal class ImageChooser(
     private val chooseImageLauncher = activityResultCaller.registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) {
-        requireNotNull(onImageChosen) {
-            "onImageChosen callback is not set."
-        }(
-            requireNotNull(it?.data?.data) {
-                "Intent is null after a image is chosen."
-            }
-        )
+        it.data?.data?.let { uri ->
+            requireNotNull(onImageChosen) {
+                "onImageChosen callback is not set."
+            }(uri)
+        }
     }
 
     /**

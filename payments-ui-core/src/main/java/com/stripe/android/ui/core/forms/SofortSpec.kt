@@ -35,8 +35,7 @@ internal val sofortCountrySection =
     )
 internal val sofortMandate = StaticTextSpec(
     IdentifierSpec.Generic("mandate"),
-    R.string.sepa_mandate,
-    R.color.mandate_text_color
+    R.string.sepa_mandate
 )
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

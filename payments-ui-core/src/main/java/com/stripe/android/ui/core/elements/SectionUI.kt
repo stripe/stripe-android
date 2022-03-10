@@ -3,13 +3,13 @@ package com.stripe.android.ui.core.elements
 import androidx.annotation.RestrictTo
 import androidx.annotation.StringRes
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Card
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
@@ -20,35 +20,42 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.stripe.android.ui.core.PaymentsTheme
 
 /**
  * This is the style for the section card
  */
-internal data class CardStyle(
-    private val isDarkTheme: Boolean,
-    val cardBorderColor: Color = if (isDarkTheme) {
-        Color(0xFF787880)
-    } else {
-        Color(0x14000000)
-    },
-    val cardBorderWidth: Dp = 1.dp,
-    val cardElevation: Dp = 0.dp,
-    val cardStyleBackground: Color = Color(0x20FFFFFF)
-)
+
+internal object CardStyle {
+    val cardBorderColor: Color
+        @Composable
+        @ReadOnlyComposable
+        get() = PaymentsTheme.colors.colorComponentBorder
+
+    val cardDividerColor: Color
+        @Composable
+        @ReadOnlyComposable
+        get() = PaymentsTheme.colors.colorComponentDivider
+
+    val cardBorderWidth: Dp = 1.dp
+    val cardElevation: Dp = 0.dp
+}
 
 /**
  * This is the style for the section title.
  *
  * Once credit card is converted use one of the default material theme styles.
  */
-internal data class SectionTitle constructor(
-    val light: Color = Color.DarkGray,
-    val dark: Color = Color.White,
-    val fontWeight: FontWeight = FontWeight.Bold,
-    val paddingBottom: Dp = 4.dp,
-    val letterSpacing: TextUnit = (-0.01f).sp,
+internal object SectionTitle {
+    val color: Color
+        @Composable
+        @ReadOnlyComposable
+        get() = PaymentsTheme.colors.colorTextSecondary
+
+    val fontWeight: FontWeight = FontWeight.Bold
+    val letterSpacing: TextUnit = (-0.01f).sp
     val fontSize: TextUnit = 13.sp
-)
+}
 
 /**
  * This is a simple section that holds content in a card view.  It has a label, content specified
@@ -74,19 +81,14 @@ internal fun Section(
  */
 @Composable
 internal fun SectionTitle(@StringRes titleText: Int?) {
-    val sectionTitle = SectionTitle()
     titleText?.let {
         Text(
             text = stringResource(titleText),
-            color = if (isSystemInDarkTheme()) {
-                sectionTitle.dark
-            } else {
-                sectionTitle.light
-            },
+            color = SectionTitle.color,
             style = MaterialTheme.typography.h6.copy(
-                fontSize = sectionTitle.fontSize,
-                fontWeight = sectionTitle.fontWeight,
-                letterSpacing = sectionTitle.letterSpacing,
+                fontSize = SectionTitle.fontSize,
+                fontWeight = SectionTitle.fontWeight,
+                letterSpacing = SectionTitle.letterSpacing,
             ),
             modifier = Modifier
                 .padding(vertical = 4.dp)
@@ -105,11 +107,9 @@ internal fun SectionTitle(@StringRes titleText: Int?) {
 fun SectionCard(
     content: @Composable () -> Unit
 ) {
-    val cardStyle = CardStyle(isSystemInDarkTheme())
     Card(
-        border = BorderStroke(cardStyle.cardBorderWidth, cardStyle.cardBorderColor),
-        elevation = cardStyle.cardElevation,
-        backgroundColor = cardStyle.cardStyleBackground
+        border = BorderStroke(CardStyle.cardBorderWidth, CardStyle.cardBorderColor),
+        elevation = CardStyle.cardElevation,
     ) {
         Column {
             content()
@@ -124,7 +124,7 @@ fun SectionCard(
 internal fun SectionError(error: String) {
     Text(
         text = error,
-        color = MaterialTheme.colors.error,
+        color = PaymentsTheme.colors.material.error,
         modifier = Modifier.semantics(mergeDescendants = true) { }
     )
 }

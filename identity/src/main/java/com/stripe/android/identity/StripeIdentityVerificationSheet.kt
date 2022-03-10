@@ -27,8 +27,7 @@ internal class StripeIdentityVerificationSheet(
             IdentityVerificationSheetContract.Args(
                 verificationSessionId,
                 ephemeralKeySecret,
-                configuration.merchantLogo,
-                configuration.stripePublishableKey
+                configuration.merchantLogo
             )
         )
     }

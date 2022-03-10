@@ -11,7 +11,6 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.link.LinkActivity
 import com.stripe.android.link.LinkActivityContract
-import com.stripe.android.link.R
 import com.stripe.android.link.createAndroidIntentComposeRule
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.ui.core.elements.EmailSpec
@@ -97,7 +96,5 @@ internal class SignUpScreenTest {
     private fun onEmailField() = composeTestRule.onNodeWithText("Email")
     private fun onProgressIndicator() = composeTestRule.onNodeWithTag("CircularProgressIndicator")
     private fun onPhoneField() = composeTestRule.onNodeWithText("Mobile Number")
-    private fun onSignUpButton() = composeTestRule.onNodeWithText(getString(R.string.sign_up))
-
-    private fun getString(resId: Int) = composeTestRule.activity.getString(resId)
+    private fun onSignUpButton() = composeTestRule.onNodeWithText("Join Link")
 }

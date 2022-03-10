@@ -1,6 +1,8 @@
 package com.stripe.android.networking
 
-internal enum class PaymentAnalyticsEvent(internal val code: String) {
+import com.stripe.android.core.networking.AnalyticsEvent
+
+internal enum class PaymentAnalyticsEvent(val code: String) : AnalyticsEvent {
     // Token
     TokenCreate("token_creation"),
 
@@ -96,6 +98,9 @@ internal enum class PaymentAnalyticsEvent(internal val code: String) {
     override fun toString(): String {
         return "$PREFIX.$code"
     }
+
+    override val eventName: String
+        get() = toString()
 
     private companion object {
         private const val PREFIX = "stripe_android"

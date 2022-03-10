@@ -40,7 +40,7 @@ internal data class VerificationPage(
     @SerialName("unsupported_client")
     val unsupportedClient: Boolean,
     @SerialName("welcome")
-    val welcome: VerificationPageStaticContentTextPage
+    val welcome: VerificationPageStaticContentTextPage? = null
 ) {
     @Serializable
     internal enum class Status {
@@ -55,5 +55,10 @@ internal data class VerificationPage(
 
         @SerialName("verified")
         VERIFIED;
+    }
+
+    internal companion object {
+        fun VerificationPage.isMissingBiometricConsent() =
+            requirements.missing.contains(VerificationPageRequirements.Missing.BIOMETRICCONSENT)
     }
 }

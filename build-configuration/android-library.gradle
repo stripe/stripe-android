@@ -1,0 +1,67 @@
+/**
+ * Base build configuration for all android libraries (modules applying the android library plugin).
+ *
+ * Don't add any configuration here that is not common to *every* android library.
+ */
+apply plugin: "com.android.library"
+apply plugin: "kotlin-android"
+apply plugin: "org.jetbrains.dokka"
+
+apply from: rootProject.file('build-configuration/detekt.gradle')
+apply from: rootProject.file('build-configuration/ktlint.gradle')
+
+assemble.dependsOn('lint')
+check.dependsOn('checkstyle')
+check.dependsOn('ktlint')
+
+configurations {
+    javadocDeps
+}
+
+if (System.getenv("JITPACK")) {
+    group='com.github.stripe.stripe-android'
+}
+
+android {
+    compileSdkVersion rootProject.ext.compileSdkVersion
+    buildToolsVersion rootProject.ext.buildToolsVersion
+    defaultConfig {
+        minSdkVersion 21
+        targetSdkVersion rootProject.ext.compileSdkVersion
+        consumerProguardFiles 'proguard-rules.txt'
+
+        vectorDrawables.useSupportLibrary = true
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+
+        // From https://developer.android.com/training/testing/junit-runner:
+        // > To remove all shared state from your device's CPU and memory after each test,
+        // > use the clearPackageData flag.
+        testInstrumentationRunnerArguments clearPackageData: 'true'
+    }
+
+    sourceSets {
+        main {
+            res.srcDirs = ['res']
+        }
+    }
+
+    lintOptions {
+        enable "Interoperability"
+        disable "CoroutineCreationDuringComposition"
+        lintConfig file("../settings/lint.xml")
+    }
+
+    dokkaHtml {
+        outputDirectory = new File("${project.rootDir}/docs/$project.name")
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
+}

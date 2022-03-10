@@ -1,7 +1,6 @@
 package com.stripe.android.ui.core.forms
 
 import androidx.annotation.RestrictTo
-import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.AuBankAccountNumberSpec
 import com.stripe.android.ui.core.elements.AuBecsDebitMandateTextSpec
 import com.stripe.android.ui.core.elements.BsbSpec
@@ -45,8 +44,7 @@ internal val auBecsDebitAccountNumberSection = SectionSpec(
 )
 
 internal val auBecsDebitCustomMandate = AuBecsDebitMandateTextSpec(
-    IdentifierSpec.Generic("au_becs_mandate"),
-    R.color.mandate_text_color
+    IdentifierSpec.Generic("au_becs_mandate")
 )
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

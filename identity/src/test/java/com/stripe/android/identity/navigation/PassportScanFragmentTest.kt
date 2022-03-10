@@ -5,8 +5,6 @@ import android.view.View
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.Navigation
 import androidx.navigation.testing.TestNavHostController
@@ -17,8 +15,12 @@ import com.stripe.android.identity.R
 import com.stripe.android.identity.camera.IDDetectorAggregator
 import com.stripe.android.identity.camera.IdentityScanFlow
 import com.stripe.android.identity.databinding.PassportScanFragmentBinding
+import com.stripe.android.identity.networking.Resource
 import com.stripe.android.identity.states.IdentityScanState
+import com.stripe.android.identity.viewModelFactoryFor
 import com.stripe.android.identity.viewmodel.CameraViewModel
+import com.stripe.android.identity.viewmodel.IdentityViewModel
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestRule
@@ -30,6 +32,7 @@ import org.mockito.kotlin.same
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
+import java.io.File
 
 @RunWith(RobolectricTestRunner::class)
 class PassportScanFragmentTest {
@@ -46,6 +49,10 @@ class PassportScanFragmentTest {
         whenever(it.finalResult).thenReturn(finalResultLiveData)
         whenever(it.displayStateChanged).thenReturn(displayStateChanged)
     }
+    private val idDetectorModelFile = MutableLiveData<Resource<File>>()
+    private val mockIdentityViewModel = mock<IdentityViewModel>().also {
+        whenever(it.idDetectorModelFile).thenReturn(idDetectorModelFile)
+    }
 
     private val testCameraPermissionEnsureable = object : CameraPermissionEnsureable {
         lateinit var onCameraReady: () -> Unit
@@ -60,11 +67,9 @@ class PassportScanFragmentTest {
         }
     }
 
-    private val cameraViewModelFactory = object : ViewModelProvider.Factory {
-        @Suppress("UNCHECKED_CAST")
-        override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return mockCameraViewModel as T
-        }
+    @Before
+    fun simulateModelDownloaded() {
+        idDetectorModelFile.postValue(Resource.success(mock()))
     }
 
     @Test
@@ -235,7 +240,8 @@ class PassportScanFragmentTest {
     ) {
         PassportScanFragment(
             cameraPermissionEnsureable,
-            cameraViewModelFactory
+            viewModelFactoryFor(mockCameraViewModel),
+            viewModelFactoryFor(mockIdentityViewModel)
         )
     }
 

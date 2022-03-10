@@ -7,8 +7,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Button
 import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -34,10 +32,6 @@ private fun LinkButton(
 ) {
     DefaultLinkTheme {
         Button(onClick = onClick) {
-            Text(
-                text = stringResource(R.string.link_button_label),
-                style = MaterialTheme.typography.body1,
-            )
             Icon(
                 painter = painterResource(R.drawable.ic_link_logo),
                 contentDescription = stringResource(R.string.link),

@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_marginStart="@dimen/page_horizontal_margin"
+    android:layout_marginEnd="@dimen/page_horizontal_margin"
+    android:layout_marginTop="@dimen/page_vertical_margin"
+    android:layout_marginBottom="@dimen/page_vertical_margin"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginTop="180dp"
+            android:gravity="center">
+
+            <ImageView
+                android:layout_gravity="center_horizontal"
+                android:layout_width="92dp"
+                android:layout_height="92dp"
+                android:src="@drawable/ic_exclamation"
+                android:layout_marginBottom="26dp"
+                android:contentDescription="@string/description_exclamation_mark"
+                app:tint="@color/exclamation_mark" />
+
+            <TextView
+                android:id="@+id/error_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/item_vertical_margin"
+                android:textSize="@dimen/error_title_text_size"
+                android:textStyle="bold"
+                android:gravity="center"
+                android:text="@string/error"
+                android:layout_marginBottom="12dp" />
+
+            <TextView
+                android:id="@+id/error_content"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/unexpected_error_try_again"
+                android:gravity="center"
+                android:layout_marginBottom="@dimen/item_vertical_margin" />
+
+
+        </LinearLayout>
+    </ScrollView>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/go_back"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/go_back"
+        android:visibility="gone" />
+
+</LinearLayout>
+

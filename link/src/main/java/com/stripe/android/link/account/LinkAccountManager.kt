@@ -2,6 +2,8 @@ package com.stripe.android.link.account
 
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.repositories.LinkRepository
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -13,8 +15,9 @@ internal class LinkAccountManager @Inject constructor(
     private val linkRepository: LinkRepository
 ) {
     // TODO(brnunes-stripe): Persist the account.
-    var linkAccount: LinkAccount? = null
-        private set
+    private val _linkAccount =
+        MutableStateFlow<LinkAccount?>(null)
+    var linkAccount: StateFlow<LinkAccount?> = _linkAccount
 
     /**
      * Retrieves the Link account associated with the email and starts verification, if needed.
@@ -66,7 +69,7 @@ internal class LinkAccountManager @Inject constructor(
      * Triggers sending a verification code to the user.
      */
     suspend fun startVerification(): Result<LinkAccount> =
-        linkAccount?.let { account ->
+        linkAccount.value?.let { account ->
             linkRepository.startVerification(account.clientSecret).map { consumerSession ->
                 setAndReturn(LinkAccount(consumerSession))
             }
@@ -78,7 +81,7 @@ internal class LinkAccountManager @Inject constructor(
      * Confirms a verification code sent to the user.
      */
     suspend fun confirmVerification(code: String): Result<LinkAccount> =
-        linkAccount?.let { account ->
+        linkAccount.value?.let { account ->
             linkRepository.confirmVerification(account.clientSecret, code).map { consumerSession ->
                 setAndReturn(LinkAccount(consumerSession))
             }
@@ -87,12 +90,12 @@ internal class LinkAccountManager @Inject constructor(
         )
 
     private fun setAndReturn(linkAccount: LinkAccount): LinkAccount {
-        this.linkAccount = linkAccount
+        _linkAccount.value = linkAccount
         return linkAccount
     }
 
     private fun setAndReturnNullable(linkAccount: LinkAccount?): LinkAccount? {
-        this.linkAccount = linkAccount
+        _linkAccount.value = linkAccount
         return linkAccount
     }
 }

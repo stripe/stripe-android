@@ -3,6 +3,7 @@ package com.stripe.android.link.repositories
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.networking.StripeRepository
@@ -12,6 +13,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
+import org.mockito.kotlin.argThat
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.isNull
 import org.mockito.kotlin.mock
@@ -49,10 +51,10 @@ class LinkApiRepositoryTest {
         whenever(stripeRepository.lookupConsumerSession(any(), any()))
             .thenReturn(consumerSessionLookup)
 
-        val lookupResult = linkRepository.lookupConsumer("email")
+        val result = linkRepository.lookupConsumer("email")
 
-        assertThat(lookupResult.isSuccess).isTrue()
-        assertThat(lookupResult.getOrNull()).isEqualTo(consumerSessionLookup)
+        assertThat(result.isSuccess).isTrue()
+        assertThat(result.getOrNull()).isEqualTo(consumerSessionLookup)
     }
 
     @Test
@@ -60,9 +62,9 @@ class LinkApiRepositoryTest {
         whenever(stripeRepository.lookupConsumerSession(any(), any()))
             .thenThrow(RuntimeException("error"))
 
-        val lookupResult = linkRepository.lookupConsumer("email")
+        val result = linkRepository.lookupConsumer("email")
 
-        assertThat(lookupResult.isFailure).isTrue()
+        assertThat(result.isFailure).isTrue()
     }
 
     @Test
@@ -87,10 +89,10 @@ class LinkApiRepositoryTest {
         whenever(stripeRepository.consumerSignUp(any(), any(), any(), anyOrNull(), any()))
             .thenReturn(consumerSession)
 
-        val signUpResult = linkRepository.consumerSignUp("email", "phone", "country")
+        val result = linkRepository.consumerSignUp("email", "phone", "country")
 
-        assertThat(signUpResult.isSuccess).isTrue()
-        assertThat(signUpResult.getOrNull()).isEqualTo(consumerSession)
+        assertThat(result.isSuccess).isTrue()
+        assertThat(result.getOrNull()).isEqualTo(consumerSession)
     }
 
     @Test
@@ -98,9 +100,9 @@ class LinkApiRepositoryTest {
         whenever(stripeRepository.consumerSignUp(any(), any(), any(), anyOrNull(), any()))
             .thenThrow(RuntimeException("error"))
 
-        val signUpResult = linkRepository.consumerSignUp("email", "phone", "country")
+        val result = linkRepository.consumerSignUp("email", "phone", "country")
 
-        assertThat(signUpResult.isFailure).isTrue()
+        assertThat(result.isFailure).isTrue()
     }
 
     @Test
@@ -122,10 +124,10 @@ class LinkApiRepositoryTest {
         whenever(stripeRepository.startConsumerVerification(any(), any(), anyOrNull(), any()))
             .thenReturn(consumerSession)
 
-        val signUpResult = linkRepository.startVerification("secret")
+        val result = linkRepository.startVerification("secret")
 
-        assertThat(signUpResult.isSuccess).isTrue()
-        assertThat(signUpResult.getOrNull()).isEqualTo(consumerSession)
+        assertThat(result.isSuccess).isTrue()
+        assertThat(result.getOrNull()).isEqualTo(consumerSession)
     }
 
     @Test
@@ -133,9 +135,9 @@ class LinkApiRepositoryTest {
         whenever(stripeRepository.startConsumerVerification(any(), any(), anyOrNull(), any()))
             .thenThrow(RuntimeException("error"))
 
-        val signUpResult = linkRepository.startVerification("secret")
+        val result = linkRepository.startVerification("secret")
 
-        assertThat(signUpResult.isFailure).isTrue()
+        assertThat(result.isFailure).isTrue()
     }
 
     @Test
@@ -158,10 +160,10 @@ class LinkApiRepositoryTest {
         whenever(stripeRepository.confirmConsumerVerification(any(), any(), anyOrNull(), any()))
             .thenReturn(consumerSession)
 
-        val signUpResult = linkRepository.confirmVerification("secret", "code")
+        val result = linkRepository.confirmVerification("secret", "code")
 
-        assertThat(signUpResult.isSuccess).isTrue()
-        assertThat(signUpResult.getOrNull()).isEqualTo(consumerSession)
+        assertThat(result.isSuccess).isTrue()
+        assertThat(result.getOrNull()).isEqualTo(consumerSession)
     }
 
     @Test
@@ -169,9 +171,43 @@ class LinkApiRepositoryTest {
         whenever(stripeRepository.confirmConsumerVerification(any(), any(), anyOrNull(), any()))
             .thenThrow(RuntimeException("error"))
 
-        val signUpResult = linkRepository.confirmVerification("secret", "code")
+        val result = linkRepository.confirmVerification("secret", "code")
 
-        assertThat(signUpResult.isFailure).isTrue()
+        assertThat(result.isFailure).isTrue()
+    }
+
+    @Test
+    fun `listPaymentDetails sends correct parameters`() = runTest {
+        val secret = "secret"
+        linkRepository.listPaymentDetails(secret)
+
+        verify(stripeRepository).listPaymentDetails(
+            eq(secret),
+            argThat { contains("card") && size == 1 },
+            eq(ApiRequest.Options(PUBLISHABLE_KEY, STRIPE_ACCOUNT_ID))
+        )
+    }
+
+    @Test
+    fun `listPaymentDetails returns successful result`() = runTest {
+        val paymentDetails = mock<ConsumerPaymentDetails>()
+        whenever(stripeRepository.listPaymentDetails(any(), any(), any()))
+            .thenReturn(paymentDetails)
+
+        val result = linkRepository.listPaymentDetails("secret")
+
+        assertThat(result.isSuccess).isTrue()
+        assertThat(result.getOrNull()).isEqualTo(paymentDetails)
+    }
+
+    @Test
+    fun `listPaymentDetails catches exception and returns failure`() = runTest {
+        whenever(stripeRepository.listPaymentDetails(any(), any(), any()))
+            .thenThrow(RuntimeException("error"))
+
+        val result = linkRepository.listPaymentDetails("secret")
+
+        assertThat(result.isFailure).isTrue()
     }
 
     companion object {

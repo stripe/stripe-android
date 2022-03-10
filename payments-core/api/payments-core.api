@@ -2083,6 +2083,43 @@ public abstract interface class com/stripe/android/model/ConfirmStripeIntentPara
 public final class com/stripe/android/model/ConfirmStripeIntentParams$Companion {
 }
 
+public final class com/stripe/android/model/ConsumerPaymentDetails$Card : com/stripe/android/model/ConsumerPaymentDetails$PaymentDetails {
+	public static final field $stable I
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public static final field Companion Lcom/stripe/android/model/ConsumerPaymentDetails$Card$Companion;
+	public static final field type Ljava/lang/String;
+	public fun <init> (Ljava/lang/String;ZIILcom/stripe/android/model/CardBrand;Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Z
+	public final fun component3 ()I
+	public final fun component4 ()I
+	public final fun component5 ()Lcom/stripe/android/model/CardBrand;
+	public final fun component6 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;ZIILcom/stripe/android/model/CardBrand;Ljava/lang/String;)Lcom/stripe/android/model/ConsumerPaymentDetails$Card;
+	public static synthetic fun copy$default (Lcom/stripe/android/model/ConsumerPaymentDetails$Card;Ljava/lang/String;ZIILcom/stripe/android/model/CardBrand;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/model/ConsumerPaymentDetails$Card;
+	public fun describeContents ()I
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBrand ()Lcom/stripe/android/model/CardBrand;
+	public final fun getExpiryMonth ()I
+	public final fun getExpiryYear ()I
+	public fun getId ()Ljava/lang/String;
+	public final fun getLast4 ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun isDefault ()Z
+	public fun toString ()Ljava/lang/String;
+	public fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public final class com/stripe/android/model/ConsumerPaymentDetails$Card$Companion {
+}
+
+public abstract class com/stripe/android/model/ConsumerPaymentDetails$PaymentDetails : android/os/Parcelable {
+	public static final field $stable I
+	public synthetic fun <init> (Ljava/lang/String;ZLkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun getId ()Ljava/lang/String;
+	public fun isDefault ()Z
+}
+
 public final class com/stripe/android/model/ConsumerSession$VerificationSession : com/stripe/android/core/model/StripeModel {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;

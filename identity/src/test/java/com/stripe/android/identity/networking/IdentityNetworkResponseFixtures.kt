@@ -27,7 +27,9 @@ internal val VERIFICATION_PAGE_JSON_STRING = """
         "accept_button_text": "Accept and continue",
         "body": "Stripe will confirm your identity using biometric technology that uses images of you and your identification, and other data sources. The results will be shared with mlgb.band.",
         "decline_button_text": "No, don't verify",
-        "title": "How Stripe will verify your identity"
+        "title": "How Stripe will verify your identity",
+        "privacy_policy": "This is privacy policy",
+        "time_estimate": "Takes about 1-2 minutes"
       },
       "document_capture": {
         "autocapture_timeout": 8000,

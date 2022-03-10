@@ -7,23 +7,26 @@ import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusRequester.Companion.createRefs
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -40,6 +43,7 @@ import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.ui.LpmSelectorText
 import com.stripe.android.paymentsheet.ui.getLabel
 import com.stripe.android.paymentsheet.ui.getSavedPaymentMethodIcon
+import com.stripe.android.ui.core.PaymentsTheme
 import kotlin.properties.Delegates
 
 @SuppressLint("NotifyDataSetChanged")
@@ -487,19 +491,12 @@ internal fun PaymentOptionUi(
     onRemoveAccessibilityDescription: String = "",
     onItemSelectedListener: (() -> Unit)
 ) {
-    val strokeColor = colorResource(
+    val strokeColor =
         if (isSelected) {
-            R.color.stripe_paymentsheet_payment_option_selected_stroke
+            PaymentsTheme.colors.material.primary
         } else {
-            R.color.stripe_paymentsheet_payment_option_unselected_stroke
+            PaymentsTheme.colors.colorComponentBorder
         }
-    )
-
-    val cardBackgroundColor = if (isEnabled) {
-        colorResource(R.color.stripe_paymentsheet_elements_background_default)
-    } else {
-        colorResource(id = R.color.stripe_paymentsheet_elements_background_disabled)
-    }
 
     // An attempt was made to not use constraint layout here but it was unsuccessful in
     // precisely positioning the check and delete icons to match the mocks.
@@ -507,6 +504,7 @@ internal fun PaymentOptionUi(
         modifier = Modifier
             .padding(top = 12.dp)
             .width(viewWidth)
+            .alpha(alpha = if (isEnabled) 1.0F else 0.6F)
             .selectable(selected = isSelected, enabled = isEnabled, onClick = {
                 onItemSelectedListener()
             })
@@ -516,7 +514,7 @@ internal fun PaymentOptionUi(
             border = BorderStroke(if (isSelected) 2.dp else 1.dp, strokeColor),
             shape = RoundedCornerShape(6.dp),
             elevation = 2.dp,
-            backgroundColor = cardBackgroundColor,
+            backgroundColor = PaymentsTheme.colors.colorComponentBackground,
             modifier = Modifier
                 .height(64.dp)
                 .padding(horizontal = PM_OPTIONS_DEFAULT_PADDING.dp)
@@ -532,7 +530,6 @@ internal fun PaymentOptionUi(
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Image(
-                    alpha = if (isEnabled) 1.0F else 0.6F,
                     painter = painterResource(iconRes),
                     contentDescription = null,
                     modifier = Modifier
@@ -546,10 +543,14 @@ internal fun PaymentOptionUi(
             Image(
                 painter = painterResource(R.drawable.stripe_ic_check_circle),
                 contentDescription = null,
+
                 modifier = Modifier
+                    .size(20.dp)
+                    .clip(CircleShape)
+                    .background(color = PaymentsTheme.colors.material.primary)
                     .constrainAs(checkIcon) {
-                        top.linkTo(card.bottom, (-16).dp)
-                        end.linkTo(card.end, (-4).dp)
+                        top.linkTo(card.bottom, (-12).dp)
+                        end.linkTo(card.end)
                     }
             )
         }
@@ -562,6 +563,9 @@ internal fun PaymentOptionUi(
                         top.linkTo(card.top, margin = (-9).dp)
                         end.linkTo(card.end)
                     }
+                    .size(20.dp)
+                    .clip(CircleShape)
+                    .background(color = PaymentsTheme.colors.material.error)
                     .clickable(
                         onClick = {
                             onRemoveListener()
@@ -572,6 +576,7 @@ internal fun PaymentOptionUi(
 
         LpmSelectorText(
             text = labelText,
+            textColor = PaymentsTheme.colors.material.onPrimary,
             isEnabled = isEnabled,
             modifier = Modifier
                 .constrainAs(label) {

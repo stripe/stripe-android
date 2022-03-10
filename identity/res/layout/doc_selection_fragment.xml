@@ -6,6 +6,8 @@
     android:orientation="vertical"
     android:layout_marginStart="@dimen/page_horizontal_margin"
     android:layout_marginEnd="@dimen/page_horizontal_margin"
+    android:layout_marginTop="@dimen/page_vertical_margin"
+    android:layout_marginBottom="@dimen/page_vertical_margin"
     tools:context=".navigation.DocSelectionFragment">
 
     <TextView
@@ -18,54 +20,95 @@
         android:layout_marginBottom="32dp"
         android:text="@string/doc_select_title" />
 
-    <View
+    <LinearLayout
+        android:id="@+id/multi_selection_content"
         android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_marginBottom="@dimen/item_vertical_margin"
-        android:background="?android:attr/listDivider" />
-
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/dl"
-        android:textColor="?android:textColorPrimary"
-        android:background="@android:color/transparent"
-        android:text="@string/driver_license"
-        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="@dimen/item_vertical_margin" />
+        android:orientation="vertical">
 
-    <View
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginBottom="@dimen/item_vertical_margin"
+            android:background="?android:attr/listDivider" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/dl"
+            style="@style/Widget.MaterialComponents.Button.TextButton"
+            android:visibility="gone"
+            android:textColor="?android:textColorPrimary"
+            android:text="@string/driver_license"
+            android:gravity="center_vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/item_vertical_margin" />
+
+        <View
+            android:id="@+id/dl_separator"
+            android:visibility="gone"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginBottom="@dimen/item_vertical_margin"
+            android:background="?android:attr/listDivider" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/id"
+            style="@style/Widget.MaterialComponents.Button.TextButton"
+            android:visibility="gone"
+            android:textColor="?android:textColorPrimary"
+            android:text="@string/id_card"
+            android:layout_marginBottom="@dimen/item_vertical_margin"
+            android:gravity="center_vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <View
+            android:id="@+id/id_separator"
+            android:visibility="gone"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginBottom="@dimen/item_vertical_margin"
+            android:background="?android:attr/listDivider" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/passport"
+            style="@style/Widget.MaterialComponents.Button.TextButton"
+            android:visibility="gone"
+            android:textColor="?android:textColorPrimary"
+            android:text="@string/passport"
+            android:layout_marginBottom="@dimen/item_vertical_margin"
+            android:gravity="center_vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <View
+            android:id="@+id/passport_separator"
+            android:visibility="gone"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="?android:attr/listDivider" />
+    </LinearLayout>
+
+
+    <LinearLayout
+        android:id="@+id/single_selection_content"
         android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_marginBottom="@dimen/item_vertical_margin"
-        android:background="?android:attr/listDivider" />
+        android:layout_height="match_parent"
+        android:visibility="gone"
+        android:orientation="vertical">
 
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/id"
-        android:background="@android:color/transparent"
-        android:textColor="?android:textColorPrimary"
-        android:text="@string/id_card"
-        android:layout_marginBottom="@dimen/item_vertical_margin"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        <TextView
+            android:id="@+id/single_selection_body"
+            android:layout_weight="1"
+            android:layout_width="match_parent"
+            android:layout_height="0dp" />
 
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_marginBottom="@dimen/item_vertical_margin"
-        android:background="?android:attr/listDivider" />
-
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/passport"
-        android:background="@android:color/transparent"
-        android:textColor="?android:textColorPrimary"
-        android:text="@string/passport"
-        android:layout_marginBottom="@dimen/item_vertical_margin"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="?android:attr/listDivider" />
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/single_selection_continue"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/kontinue"
+            android:visibility="visible" />
+    </LinearLayout>
 
 </LinearLayout>

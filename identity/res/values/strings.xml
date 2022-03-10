@@ -55,5 +55,15 @@
     <string name="sample_title_text">Sample title text</string>
     <string name="sample_content_text">Sample content text</string>
 
+    <string name="error">Error</string>
+    <string name="unexpected_error_try_again">There was an unexpected error — try again in a few seconds</string>
+    <string name="go_back">Go Back</string>
+    <string name="description_exclamation_mark">Exclamation point for error page</string>
+    <string name="loading">Loading</string>
+    <string name="sample_consent_body_response"><![CDATA[<p><strong>How Stripe will verify your identity</strong></p>\n\n<p>Stripe will use biometric technology (on images of you and your IDs) and other data sources to confirm your identity and for fraud and security purposes. Stripe will store these images and the results of this check and share them with mlgb.band.</p>\n\n<p><a href=\"https://stripe.com/about\">Learn about Stripe</a></p><p><a href=\"https://stripe.com/privacy-center/legal#stripe-identity\">Learn how Stripe Identity works</a></p>]]></string>
+    <string name="sample_privacy_policy"><![CDATA[Data will be stored and may be used according to the <a href=\"http://stripe.com/privacy\">Stripe Privacy Policy</a> and <a href=\"\">mlgb.band</a> Privacy Policy.]]></string>
 
+    <string name="single_selection_body_content_dl">You will need to take photos of the front and back in the following steps.</string>
+    <string name="single_selection_body_content_id">You will need to take photos of the front and back in the following steps.</string>
+    <string name="single_selection_body_content_passport">You will need to take a photo of the passport in the following steps.</string>
 </resources>

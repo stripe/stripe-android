@@ -10,4 +10,5 @@ internal sealed class LinkScreen(
     object SignUp : LinkScreen("SignUp")
     object Verification : LinkScreen("Verification")
     object Wallet : LinkScreen("Wallet")
+    object AddPaymentMethod : LinkScreen("AddPaymentMethod")
 }

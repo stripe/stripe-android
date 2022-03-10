@@ -9,6 +9,7 @@ import com.stripe.android.identity.IdentityVerificationSheetContract
 import com.stripe.android.identity.networking.DefaultIdentityRepository
 import com.stripe.android.identity.viewmodel.CameraViewModel
 import com.stripe.android.identity.viewmodel.FrontBackUploadViewModel
+import com.stripe.android.identity.viewmodel.IdentityViewModel
 import com.stripe.android.identity.viewmodel.PassportUploadViewModel
 
 /**
@@ -33,19 +34,27 @@ internal class IdentityFragmentFactory(
             verificationArgs
         )
 
+    internal val identityViewModelFactory = IdentityViewModel.IdentityViewModelFactory(
+        verificationArgs,
+        identityRepository
+    )
+
     override fun instantiate(classLoader: ClassLoader, className: String): Fragment {
         return when (className) {
             IDScanFragment::class.java.name -> IDScanFragment(
                 cameraPermissionEnsureable,
-                cameraViewModelFactory
+                cameraViewModelFactory,
+                identityViewModelFactory
             )
             DriverLicenseScanFragment::class.java.name -> DriverLicenseScanFragment(
                 cameraPermissionEnsureable,
-                cameraViewModelFactory
+                cameraViewModelFactory,
+                identityViewModelFactory
             )
             PassportScanFragment::class.java.name -> PassportScanFragment(
                 cameraPermissionEnsureable,
-                cameraViewModelFactory
+                cameraViewModelFactory,
+                identityViewModelFactory
             )
             CameraPermissionDeniedFragment::class.java.name -> CameraPermissionDeniedFragment(
                 appSettingsOpenable
@@ -58,6 +67,12 @@ internal class IdentityFragmentFactory(
             )
             PassportUploadFragment::class.java.name -> PassportUploadFragment(
                 passportUploadViewModelFactory
+            )
+            ConsentFragment::class.java.name -> ConsentFragment(
+                identityViewModelFactory
+            )
+            DocSelectionFragment::class.java.name -> DocSelectionFragment(
+                identityViewModelFactory
             )
             else -> super.instantiate(classLoader, className)
         }

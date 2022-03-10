@@ -1,6 +1,5 @@
 package com.stripe.android.link.ui.signup
 
-import android.app.Application
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -31,8 +30,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.stripe.android.link.LinkActivityContract
 import com.stripe.android.link.R
+import com.stripe.android.link.injection.NonFallbackInjector
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.linkTextFieldColors
 import com.stripe.android.ui.core.elements.EmailSpec
@@ -58,13 +57,11 @@ private fun SignUpBodyPreview() {
 
 @Composable
 internal fun SignUpBody(
-    application: Application,
-    starterArgsSupplier: () -> LinkActivityContract.Args
+    injector: NonFallbackInjector
 ) {
     val signUpViewModel: SignUpViewModel = viewModel(
         factory = SignUpViewModel.Factory(
-            application,
-            starterArgsSupplier
+            injector
         )
     )
 
