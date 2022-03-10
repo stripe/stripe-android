@@ -14,7 +14,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 data class StaticTextElement(
     override val identifier: IdentifierSpec,
     val stringResId: Int,
-    val color: Int?,
     val merchantName: String?,
     val fontSizeSp: Int = 10,
     val letterSpacingSp: Double = .7,

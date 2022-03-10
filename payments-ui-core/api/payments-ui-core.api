@@ -5,7 +5,7 @@ public final class com/stripe/android/ui/core/BuildConfig {
 	public fun <init> ()V
 }
 
-public final class com/stripe/android/ui/core/StripeThemeKt {
+public final class com/stripe/android/ui/core/PaymentsThemeKt {
 }
 
 public final class com/stripe/android/ui/core/address/AddressFieldElementRepository$Companion {
