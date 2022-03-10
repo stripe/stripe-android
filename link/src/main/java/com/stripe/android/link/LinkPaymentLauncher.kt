@@ -12,7 +12,7 @@ import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.link.injection.DaggerLinkPaymentLauncherComponent
-import com.stripe.android.link.injection.LinkInjector
+import com.stripe.android.link.injection.NonFallbackInjector
 import com.stripe.android.link.ui.signup.SignUpViewModel
 import com.stripe.android.link.ui.verification.VerificationViewModel
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
@@ -80,7 +80,7 @@ class LinkPaymentLauncher @AssistedInject constructor(
             .starterArgs(args)
             .build()
 
-        val injector = object : LinkInjector {
+        val injector = object : NonFallbackInjector {
             override fun inject(injectable: Injectable<*>) {
                 when (injectable) {
                     is LinkActivityViewModel.Factory -> launcherComponent.inject(injectable)

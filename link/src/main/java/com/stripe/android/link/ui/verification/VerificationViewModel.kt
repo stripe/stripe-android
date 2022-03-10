@@ -6,8 +6,8 @@ import androidx.lifecycle.viewModelScope
 import com.stripe.android.core.Logger
 import com.stripe.android.link.LinkScreen
 import com.stripe.android.link.account.LinkAccountManager
-import com.stripe.android.link.injection.LinkInjectable
-import com.stripe.android.link.injection.LinkInjector
+import com.stripe.android.link.injection.NonFallbackInjectable
+import com.stripe.android.link.injection.NonFallbackInjector
 import com.stripe.android.link.injection.SignedInViewModelSubcomponent
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.model.Navigator
@@ -54,8 +54,8 @@ internal class VerificationViewModel @Inject constructor(
 
     internal class Factory(
         private val linkAccount: LinkAccount,
-        private val injector: LinkInjector
-    ) : ViewModelProvider.Factory, LinkInjectable {
+        private val injector: NonFallbackInjector
+    ) : ViewModelProvider.Factory, NonFallbackInjectable {
 
         @Inject
         lateinit var subComponentBuilderProvider:

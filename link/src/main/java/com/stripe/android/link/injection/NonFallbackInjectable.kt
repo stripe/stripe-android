@@ -11,7 +11,7 @@ import com.stripe.android.core.injection.Injector
  *
  * @see [Injectable]
  */
-internal interface LinkInjectable : Injectable<Unit> {
+internal interface NonFallbackInjectable : Injectable<Unit> {
 
     /**
      * LinkInjectable classes don't implement fallback because they receive the injector directly

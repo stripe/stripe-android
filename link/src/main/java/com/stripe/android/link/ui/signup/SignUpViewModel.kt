@@ -7,8 +7,8 @@ import com.stripe.android.core.Logger
 import com.stripe.android.link.LinkActivityContract
 import com.stripe.android.link.LinkScreen
 import com.stripe.android.link.account.LinkAccountManager
-import com.stripe.android.link.injection.LinkInjectable
-import com.stripe.android.link.injection.LinkInjector
+import com.stripe.android.link.injection.NonFallbackInjectable
+import com.stripe.android.link.injection.NonFallbackInjector
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.model.Navigator
 import com.stripe.android.ui.core.elements.EmailSpec
@@ -129,8 +129,8 @@ internal class SignUpViewModel @Inject constructor(
     }
 
     internal class Factory(
-        private val injector: LinkInjector
-    ) : ViewModelProvider.Factory, LinkInjectable {
+        private val injector: NonFallbackInjector
+    ) : ViewModelProvider.Factory, NonFallbackInjectable {
 
         @Inject
         lateinit var viewModel: SignUpViewModel
