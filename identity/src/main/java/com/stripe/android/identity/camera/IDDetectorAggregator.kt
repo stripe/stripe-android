@@ -20,6 +20,7 @@ internal class IDDetectorAggregator(
     IdentityScanState.Initial(identityScanType),
     statsName = null
 ) {
+    private var isFirstResultReceived = false
 
     internal data class InterimResult(
         val frame: AnalyzerInput,
@@ -36,13 +37,22 @@ internal class IDDetectorAggregator(
         frame: AnalyzerInput,
         result: AnalyzerOutput
     ): Pair<InterimResult, FinalResult?> {
-        val previousState = state
-        state = previousState.consumeTransition(result)
-        val interimResult = InterimResult(frame, result, state)
-        return if (state is IdentityScanState.Finished) {
-            interimResult to FinalResult(result, state)
+        if (isFirstResultReceived) {
+            val previousState = state
+            state = previousState.consumeTransition(result)
+            val interimResult = InterimResult(frame, result, state)
+            return if (state is IdentityScanState.Finished) {
+                interimResult to FinalResult(result, state)
+            } else {
+                interimResult to null
+            }
         } else {
-            interimResult to null
+            // If this is the very first result, don't transition state and post InterimResult with
+            // current state(IdentityScanState.Initial).
+            // This makes sure the receiver always receives IdentityScanState.Initial as the first
+            // callback.
+            isFirstResultReceived = true
+            return InterimResult(frame, result, state) to null
         }
     }
 }
