@@ -90,7 +90,7 @@ internal class LinkActivity : ComponentActivity() {
                                         .fillMaxHeight(),
                                     contentAlignment = Alignment.Center
                                 ) {
-                                    Text(text = "Add new payment method")
+                                    Text(text = "<Placholder>\nAdd new payment method")
                                 }
                             }
                         }

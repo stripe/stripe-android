@@ -9,7 +9,7 @@ import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.core.injection.Injectable
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.link.LinkScreen
-import com.stripe.android.link.injection.LinkInjector
+import com.stripe.android.link.injection.NonFallbackInjector
 import com.stripe.android.link.injection.SignedInViewModelSubcomponent
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.model.Navigator
@@ -107,7 +107,7 @@ class WalletViewModelTest {
         whenever(mockSavedStateRegistryOwner.lifecycle).thenReturn(mockLifeCycle)
         whenever(mockLifeCycle.currentState).thenReturn(Lifecycle.State.CREATED)
 
-        val injector = object : LinkInjector {
+        val injector = object : NonFallbackInjector {
             override fun inject(injectable: Injectable<*>) {
                 val factory = injectable as WalletViewModel.Factory
                 factory.subComponentBuilderProvider = Provider { mockBuilder }

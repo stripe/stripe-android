@@ -35,6 +35,8 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -200,7 +202,11 @@ internal fun CollapsedPaymentDetails(
         Icon(
             painter = painterResource(id = R.drawable.ic_link_chevron),
             contentDescription = stringResource(id = R.string.wallet_expand_accessibility),
-            modifier = Modifier.padding(horizontal = horizontalPadding),
+            modifier = Modifier
+                .padding(horizontal = horizontalPadding)
+                .semantics {
+                    testTag = "ChevronIcon"
+                },
             tint = MaterialTheme.colors.onBackground
         )
     }
@@ -239,7 +245,11 @@ internal fun ExpandedPaymentDetails(
             Icon(
                 painter = painterResource(id = R.drawable.ic_link_chevron),
                 contentDescription = stringResource(id = R.string.wallet_expand_accessibility),
-                modifier = Modifier.rotate(180f),
+                modifier = Modifier
+                    .rotate(180f)
+                    .semantics {
+                        testTag = "ChevronIcon"
+                    },
                 tint = MaterialTheme.colors.onPrimary
             )
         }
