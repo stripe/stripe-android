@@ -7,7 +7,7 @@ import com.stripe.android.identity.ml.AnalyzerOutput
 import com.stripe.android.identity.ml.BoundingBox
 import com.stripe.android.identity.ml.Category
 import com.stripe.android.identity.states.IdentityScanState.Found.Companion.FRAMES_REQUIRED
-import com.stripe.android.identity.states.IdentityScanState.Found.Companion.HIT_RATIO
+import com.stripe.android.identity.states.IdentityScanState.Found.Companion.HITS_REQUIRED
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
@@ -35,7 +35,7 @@ class IdentityScanStateTests {
 
     @Test
     fun `Found transitions to Unsatisfied with bad hit rate`() {
-        val badHitCount = (FRAMES_REQUIRED * HIT_RATIO).toInt() - 10
+        val badHitCount = HITS_REQUIRED - 10
 
         val initialState = IdentityScanState.Found(IdentityScanState.ScanType.ID_FRONT).also {
             // hits count below required
@@ -48,13 +48,13 @@ class IdentityScanStateTests {
 
         assertThat(resultState).isInstanceOf(IdentityScanState.Unsatisfied::class.java)
         assertThat((resultState as IdentityScanState.Unsatisfied).reason).isEqualTo(
-            "hit ratio below expected: ${badHitCount.toFloat().div(FRAMES_REQUIRED)}"
+            "hits count below expected: $badHitCount"
         )
     }
 
     @Test
     fun `Found transitions to Satisfied with good hit rate`() {
-        val goodHitCount = (FRAMES_REQUIRED * HIT_RATIO).toInt() + 10
+        val goodHitCount = HITS_REQUIRED + 10
 
         val initialState = IdentityScanState.Found(IdentityScanState.ScanType.ID_FRONT).also {
             // hits count below required
