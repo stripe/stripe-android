@@ -1,7 +1,6 @@
 package com.stripe.android.ui.core.forms
 
 import androidx.annotation.RestrictTo
-import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.EmailSpec
 import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.elements.KlarnaCountrySpec
@@ -21,8 +20,7 @@ internal val klarnaHeader = StaticTextSpec(
     identifier = IdentifierSpec.Generic("klarna_header"),
     stringResId = KlarnaHelper.getKlarnaHeader(),
     fontSizeSp = 13,
-    letterSpacingSp = -.15,
-    color = R.color.divider_text_color
+    letterSpacingSp = -.15
 )
 
 internal val klarnaEmailSection =

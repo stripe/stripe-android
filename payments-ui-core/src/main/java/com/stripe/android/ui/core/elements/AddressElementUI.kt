@@ -1,6 +1,5 @@
 package com.stripe.android.ui.core.elements
 
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Divider
@@ -20,12 +19,11 @@ internal fun AddressElementUI(
             fieldList.forEachIndexed { index, field ->
                 SectionFieldElementUI(enabled, field)
                 if (index != fieldList.size - 1) {
-                    val cardStyle = CardStyle(isSystemInDarkTheme())
                     Divider(
-                        color = cardStyle.cardBorderColor,
-                        thickness = cardStyle.cardBorderWidth,
+                        color = CardStyle.cardDividerColor,
+                        thickness = CardStyle.cardBorderWidth,
                         modifier = Modifier.padding(
-                            horizontal = cardStyle.cardBorderWidth
+                            horizontal = CardStyle.cardBorderWidth
                         )
                     )
                 }

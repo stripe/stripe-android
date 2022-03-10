@@ -16,7 +16,6 @@
         android:layout_height="wrap_content"
         android:paddingStart="8dp"
         android:paddingEnd="8dp"
-        android:background="@color/stripe_paymentsheet_googlepay_divider_background"
         android:textColor="@color/stripe_paymentsheet_googlepay_divider_text"
         android:layout_centerHorizontal="true"
         android:textSize="14sp"

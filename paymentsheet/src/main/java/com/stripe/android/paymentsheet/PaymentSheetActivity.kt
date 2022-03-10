@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet
 
 import android.app.Activity
 import android.content.Intent
+import android.content.res.ColorStateList
 import android.os.Bundle
 import android.view.ViewGroup
 import android.widget.ScrollView
@@ -9,6 +10,7 @@ import android.widget.TextView
 import androidx.activity.viewModels
 import androidx.annotation.IdRes
 import androidx.annotation.VisibleForTesting
+import androidx.compose.ui.graphics.toArgb
 import androidx.core.os.bundleOf
 import androidx.core.view.doOnNextLayout
 import androidx.core.view.isVisible
@@ -27,6 +29,8 @@ import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.CurrencyFormatter
+import com.stripe.android.ui.core.PaymentsThemeConfig
+import com.stripe.android.ui.core.isSystemDarkTheme
 import kotlinx.coroutines.launch
 import java.security.InvalidParameterException
 
@@ -289,9 +293,15 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
             viewModel.checkout(CheckoutIdentifier.SheetBottomGooglePay)
         }
 
-        viewModel.config?.primaryButtonColor?.let {
-            viewBinding.buyButton.backgroundTintList = it
-        }
+        val isDark = baseContext.isSystemDarkTheme()
+        viewBinding.buyButton.backgroundTintList =
+            if (viewModel.config?.primaryButtonColor != null) {
+                viewModel.config?.primaryButtonColor
+            } else {
+                ColorStateList.valueOf(
+                    PaymentsThemeConfig.colors(isDark).primary.toArgb()
+                )
+            }
 
         viewBinding.buyButton.setOnClickListener {
             updateErrorMessage()
@@ -302,6 +312,13 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
             viewBinding.buyButton.isEnabled = isEnabled
             viewBinding.googlePayButton.isEnabled = isEnabled
         }
+
+        viewBinding.bottomSheet.setBackgroundColor(
+            PaymentsThemeConfig.colors(isDark).surface.toArgb()
+        )
+        viewBinding.toolbar.setBackgroundColor(
+            PaymentsThemeConfig.colors(isDark).surface.toArgb()
+        )
     }
 
     private fun getLabelText(amount: Amount): String {

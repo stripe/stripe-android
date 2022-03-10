@@ -1,12 +1,15 @@
 package com.stripe.android.paymentsheet
 
 import android.os.Bundle
+import android.text.SpannableString
+import android.text.style.ForegroundColorSpan
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AlertDialog
+import androidx.compose.ui.graphics.toArgb
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.stripe.android.paymentsheet.databinding.FragmentPaymentsheetPaymentMethodsListBinding
@@ -15,6 +18,8 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
+import com.stripe.android.ui.core.PaymentsThemeConfig
+import com.stripe.android.ui.core.isSystemDarkTheme
 
 internal abstract class BasePaymentMethodsListFragment(
     private val canClickSelectedItem: Boolean
@@ -32,7 +37,7 @@ internal abstract class BasePaymentMethodsListFragment(
         set(value) {
             field = value
             adapter.setEditing(value)
-            editMenuItem?.setTitle(if (value) R.string.done else R.string.edit)
+            setEditMenuText()
             sheetViewModel.setEditing(value)
         }
 
@@ -63,10 +68,25 @@ internal abstract class BasePaymentMethodsListFragment(
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.paymentsheet_payment_methods_list, menu)
         // Menu is created after view state is restored, so we need to update the title here
-        editMenuItem = menu.findItem(R.id.edit).apply {
-            setTitle(if (isEditing) R.string.done else R.string.edit)
-        }
+        editMenuItem = menu.findItem(R.id.edit)
+        setEditMenuText()
         super.onCreateOptionsMenu(menu, inflater)
+    }
+
+    private fun setEditMenuText() {
+        val isDark = this.context?.isSystemDarkTheme() ?: false
+        editMenuItem?.apply {
+            val editMenuText = getString(if (isEditing) R.string.done else R.string.edit)
+            val editMenuTextSpan = SpannableString(editMenuText)
+            editMenuTextSpan.setSpan(
+                ForegroundColorSpan(PaymentsThemeConfig.colors(isDark).appBarIcon.toArgb()),
+                0,
+                editMenuTextSpan.length,
+                0
+            )
+
+            title = editMenuTextSpan
+        }
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {

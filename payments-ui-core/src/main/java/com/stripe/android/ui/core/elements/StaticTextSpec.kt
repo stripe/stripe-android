@@ -1,6 +1,5 @@
 package com.stripe.android.ui.core.elements
 
-import androidx.annotation.ColorRes
 import androidx.annotation.StringRes
 import kotlinx.parcelize.Parcelize
 
@@ -11,7 +10,6 @@ import kotlinx.parcelize.Parcelize
 internal data class StaticTextSpec(
     override val identifier: IdentifierSpec,
     @StringRes val stringResId: Int,
-    @ColorRes val color: Int? = null,
     val fontSizeSp: Int = 10,
     val letterSpacingSp: Double = .7
 ) : FormItemSpec(), RequiredItemSpec {
@@ -21,7 +19,6 @@ internal data class StaticTextSpec(
         StaticTextElement(
             this.identifier,
             this.stringResId,
-            this.color,
             merchantName,
             this.fontSizeSp,
             this.letterSpacingSp

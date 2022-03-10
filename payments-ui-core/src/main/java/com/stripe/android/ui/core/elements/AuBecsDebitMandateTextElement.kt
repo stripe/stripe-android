@@ -13,7 +13,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 data class AuBecsDebitMandateTextElement(
     override val identifier: IdentifierSpec,
-    val color: Int?,
     val merchantName: String?,
     val fontSizeSp: Int = 10,
     val letterSpacingSp: Double = .7,

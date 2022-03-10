@@ -13,7 +13,7 @@ import androidx.fragment.app.viewModels
 import com.stripe.android.paymentsheet.forms.Form
 import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
-import com.stripe.android.ui.core.StripeTheme
+import com.stripe.android.ui.core.PaymentsTheme
 import kotlinx.coroutines.FlowPreview
 
 /**
@@ -59,7 +59,7 @@ internal class ComposeFormDataCollectionFragment : Fragment() {
         )
 
         setContent {
-            StripeTheme {
+            PaymentsTheme {
                 Column(Modifier.fillMaxSize()) {
                     Form(formViewModel)
                 }

@@ -7,7 +7,6 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.Navigation
 import androidx.navigation.testing.TestNavHostController
@@ -17,6 +16,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.identity.R
 import com.stripe.android.identity.databinding.FrontBackUploadFragmentBinding
 import com.stripe.android.identity.states.IdentityScanState
+import com.stripe.android.identity.viewModelFactoryFor
 import com.stripe.android.identity.viewmodel.FrontBackUploadViewModel
 import org.junit.Rule
 import org.junit.Test
@@ -45,13 +45,6 @@ class FrontBackUploadFragmentTest {
         whenever(it.frontUploaded).thenReturn(frontUploaded)
         whenever(it.backUploaded).thenReturn(backUploaded)
         whenever(it.uploadFinished).thenReturn(uploadFinished)
-    }
-
-    private val idUploadFragmentViewModelFactory = object : ViewModelProvider.Factory {
-        @Suppress("UNCHECKED_CAST")
-        override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return mockFrontBackUploadViewModel as T
-        }
     }
 
     @Test
@@ -222,14 +215,16 @@ class FrontBackUploadFragmentTest {
             // viewmodel triggers and UI updates
             if (scanType == IdentityScanState.ScanType.ID_FRONT) {
                 verify(mockFrontBackUploadViewModel).uploadImageFront(
-                    same(mockUri)
+                    same(mockUri),
+                    same(it.requireContext())
                 )
                 assertThat(binding.selectFront.visibility).isEqualTo(View.GONE)
                 assertThat(binding.progressCircularFront.visibility).isEqualTo(View.VISIBLE)
                 assertThat(binding.finishedCheckMarkFront.visibility).isEqualTo(View.GONE)
             } else if (scanType == IdentityScanState.ScanType.ID_BACK) {
                 verify(mockFrontBackUploadViewModel).uploadImageBack(
-                    same(mockUri)
+                    same(mockUri),
+                    same(it.requireContext())
                 )
                 assertThat(binding.selectBack.visibility).isEqualTo(View.GONE)
                 assertThat(binding.progressCircularBack.visibility).isEqualTo(View.VISIBLE)
@@ -241,7 +236,7 @@ class FrontBackUploadFragmentTest {
     private fun launchFragment() = launchFragmentInContainer(
         themeResId = R.style.Theme_MaterialComponents
     ) {
-        TestFragment(idUploadFragmentViewModelFactory)
+        TestFragment(viewModelFactoryFor(mockFrontBackUploadViewModel))
     }
 
     internal class TestFragment(frontBackUploadViewModelFactory: ViewModelProvider.Factory) :

@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.ui
 
 import android.animation.LayoutTransition
 import android.content.pm.ActivityInfo
+import android.content.res.ColorStateList
 import android.graphics.Insets
 import android.os.Build
 import android.os.Bundle
@@ -16,13 +17,16 @@ import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
+import androidx.appcompat.content.res.AppCompatResources
+import androidx.compose.ui.graphics.toArgb
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.stripe.android.paymentsheet.BottomSheetController
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
+import com.stripe.android.ui.core.PaymentsThemeConfig
+import com.stripe.android.ui.core.isSystemDarkTheme
 import com.stripe.android.view.KeyboardController
 import kotlin.math.roundToInt
 
@@ -149,7 +153,14 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
             )
         }
 
-        toolbar.navigationIcon = ContextCompat.getDrawable(this, toolbarResources.icon)
+        val navigationIconDrawable = AppCompatResources.getDrawable(this, toolbarResources.icon)
+        navigationIconDrawable?.setTintList(
+            ColorStateList.valueOf(
+                PaymentsThemeConfig.colors(baseContext.isSystemDarkTheme()).appBarIcon.toArgb()
+            )
+        )
+
+        toolbar.navigationIcon = navigationIconDrawable
         toolbar.navigationContentDescription = resources.getString(toolbarResources.description)
     }
 

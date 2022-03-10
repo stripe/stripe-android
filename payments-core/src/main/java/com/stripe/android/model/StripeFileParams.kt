@@ -1,6 +1,8 @@
 package com.stripe.android.model
 
 import android.os.Parcelable
+import com.stripe.android.core.model.InternalStripeFileParams
+import com.stripe.android.model.StripeFilePurpose.Companion.toInternal
 import kotlinx.parcelize.Parcelize
 import java.io.File
 
@@ -70,4 +72,15 @@ data class StripeFileParams constructor(
          */
         private val metadata: Map<String, String>? = null
     ) : Parcelable
+
+    /**
+     * Temporary method to convert [StripeFileParams] to [InternalStripeFileParams].
+     * TODO(ccen): Move StripeFileParams to stripe-core during the next major version bump.
+     */
+    internal companion object {
+        fun StripeFileParams.toInternal() = InternalStripeFileParams(
+            this.file,
+            this.purpose.toInternal()
+        )
+    }
 }

@@ -74,7 +74,7 @@ internal class PassportUploadFragment(
 
     private fun upload(frontUri: Uri) {
         showFrontUploading()
-        passportUploadViewModel.uploadImage(frontUri)
+        passportUploadViewModel.uploadImage(frontUri, requireContext())
     }
 
     private fun showFrontUploading() {

@@ -5,13 +5,11 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.viewModels
 import androidx.annotation.VisibleForTesting
-import androidx.core.os.bundleOf
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.NavHostFragment
 import com.stripe.android.camera.CameraPermissionCheckingActivity
 import com.stripe.android.identity.IdentityVerificationSheet.VerificationResult
 import com.stripe.android.identity.databinding.IdentityActivityBinding
-import com.stripe.android.identity.navigation.ConsentFragment
 import com.stripe.android.identity.navigation.IdentityFragmentFactory
 import com.stripe.android.identity.viewmodel.IdentityViewModel
 
@@ -29,32 +27,34 @@ internal class IdentityActivity : CameraPermissionCheckingActivity() {
         }
     }
 
-    @VisibleForTesting
-    internal val viewModelFactory: ViewModelProvider.Factory by lazy {
-        IdentityViewModel.IdentityViewModelFactory(
+    private val identityFragmentFactory: IdentityFragmentFactory by lazy {
+        IdentityFragmentFactory(
+            this,
+            this,
+            this,
             starterArgs
         )
     }
 
     @VisibleForTesting
-    internal val viewModel: IdentityViewModel by viewModels { viewModelFactory }
+    internal val viewModelFactory: ViewModelProvider.Factory by lazy {
+        identityFragmentFactory.identityViewModelFactory
+    }
+
+    @VisibleForTesting
+    internal val identityViewModel: IdentityViewModel by viewModels { viewModelFactory }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
 
-        supportFragmentManager.fragmentFactory = IdentityFragmentFactory(this, this)
+        supportFragmentManager.fragmentFactory = identityFragmentFactory
 
         val navHostFragment =
             supportFragmentManager.findFragmentById(R.id.identity_nav_host) as NavHostFragment
-        navHostFragment.navController.setGraph(
-            R.navigation.identity_nav_graph,
-            bundleOf(
-                ConsentFragment.ARG_CONSENT_CONTEXT to "This is some context string that tells user how stripe will" +
-                    " verify their identity. It could be in html format. It's sent from server",
-                ConsentFragment.ARG_MERCHANT_LOGO to starterArgs.merchantLogo
-            )
-        )
+        navHostFragment.navController.setGraph(R.navigation.identity_nav_graph)
+
+        identityViewModel.retrieveAndBufferVerificationPage()
     }
 
     override fun onBackPressed() {
