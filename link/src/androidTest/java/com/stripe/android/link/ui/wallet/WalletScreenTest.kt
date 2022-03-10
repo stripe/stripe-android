@@ -1,8 +1,13 @@
 package com.stripe.android.link.ui.wallet
 
 import android.content.Intent
+import androidx.compose.ui.test.assertCountEquals
+import androidx.compose.ui.test.filter
+import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.onChildren
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.onParent
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
@@ -64,6 +69,20 @@ internal class WalletScreenTest {
     }
 
     @Test
+    fun selected_payment_method_is_shown_when_collapsed() {
+        setContent()
+
+        val secondPaymentMethod = paymentDetails[1]
+
+        toggleListExpanded()
+        select(secondPaymentMethod)
+        toggleListExpanded()
+
+        composeTestRule.onNodeWithText("Pay with").onParent().onChildren()
+            .filter(hasText(secondPaymentMethod.last4, substring = true)).assertCountEquals(1)
+    }
+
+    @Test
     fun selected_payment_method_is_used_for_payment() {
         var paymentMethod: ConsumerPaymentDetails.PaymentDetails? = null
         setContent(
@@ -74,8 +93,8 @@ internal class WalletScreenTest {
 
         val secondPaymentMethod = paymentDetails[1]
 
-        expandList()
-        composeTestRule.onNodeWithText(secondPaymentMethod.last4, substring = true).performClick()
+        toggleListExpanded()
+        select(secondPaymentMethod)
         onPayButton().performClick()
 
         assertThat(paymentMethod).isEqualTo(secondPaymentMethod)
@@ -90,7 +109,7 @@ internal class WalletScreenTest {
             }
         )
 
-        expandList()
+        toggleListExpanded()
         composeTestRule.onNodeWithText("Add a new payment method").performClick()
 
         assertThat(count).isEqualTo(1)
@@ -105,7 +124,7 @@ internal class WalletScreenTest {
             }
         )
 
-        expandList()
+        toggleListExpanded()
         composeTestRule.onNodeWithText("Pay another way").performClick()
 
         assertThat(count).isEqualTo(1)
@@ -127,8 +146,11 @@ internal class WalletScreenTest {
         }
     }
 
-    private fun expandList() =
+    private fun toggleListExpanded() =
         composeTestRule.onNodeWithTag("ChevronIcon", useUnmergedTree = true).performClick()
+
+    private fun select(paymentDetails: ConsumerPaymentDetails.Card) =
+        composeTestRule.onNodeWithText(paymentDetails.last4, substring = true).performClick()
 
     private fun onPayButton() = composeTestRule.onNodeWithText(payButtonLabel)
 }

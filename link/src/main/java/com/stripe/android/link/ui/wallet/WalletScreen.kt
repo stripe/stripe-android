@@ -245,7 +245,11 @@ internal fun ExpandedPaymentDetails(
             Icon(
                 painter = painterResource(id = R.drawable.ic_link_chevron),
                 contentDescription = stringResource(id = R.string.wallet_expand_accessibility),
-                modifier = Modifier.rotate(180f),
+                modifier = Modifier
+                    .rotate(180f)
+                    .semantics {
+                        testTag = "ChevronIcon"
+                    },
                 tint = MaterialTheme.colors.onPrimary
             )
         }
