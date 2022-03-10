@@ -1,5 +1,6 @@
 package com.stripe.android.link.repositories
 
+import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
 
@@ -24,12 +25,25 @@ internal interface LinkRepository {
         country: String
     ): Result<ConsumerSession>
 
+    /**
+     * Start an SMS verification.
+     */
     suspend fun startVerification(
         consumerSessionClientSecret: String
     ): Result<ConsumerSession>
 
+    /**
+     * Confirm an SMS verification code.
+     */
     suspend fun confirmVerification(
         consumerSessionClientSecret: String,
         verificationCode: String
     ): Result<ConsumerSession>
+
+    /**
+     * Fetch all saved payment methods for the consumer.
+     */
+    suspend fun listPaymentDetails(
+        consumerSessionClientSecret: String
+    ): Result<ConsumerPaymentDetails>
 }

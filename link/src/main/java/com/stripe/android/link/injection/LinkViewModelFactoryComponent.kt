@@ -10,6 +10,7 @@ import com.stripe.android.link.LinkActivityContract
 import com.stripe.android.link.LinkActivityViewModel
 import com.stripe.android.link.ui.signup.SignUpViewModel
 import com.stripe.android.link.ui.verification.VerificationViewModel
+import com.stripe.android.link.ui.wallet.WalletViewModel
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import dagger.BindsInstance
@@ -35,6 +36,7 @@ internal interface LinkViewModelFactoryComponent {
     fun inject(factory: LinkActivityViewModel.Factory)
     fun inject(factory: SignUpViewModel.Factory)
     fun inject(factory: VerificationViewModel.Factory)
+    fun inject(factory: WalletViewModel.Factory)
 
     @Component.Builder
     interface Builder {
