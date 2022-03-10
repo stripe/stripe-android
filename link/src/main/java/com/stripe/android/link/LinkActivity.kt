@@ -12,6 +12,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewModelScope
@@ -26,14 +28,10 @@ import com.stripe.android.link.ui.verification.VerificationBody
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 
-@Suppress("EXPERIMENTAL_ANNOTATION_ON_OVERRIDE_WARNING")
 internal class LinkActivity : ComponentActivity() {
 
     private val viewModel: LinkActivityViewModel by viewModels {
-        LinkActivityViewModel.Factory(
-            application,
-            { requireNotNull(starterArgs) }
-        )
+        LinkActivityViewModel.Factory(application) { requireNotNull(starterArgs) }
     }
 
     @VisibleForTesting
@@ -52,6 +50,8 @@ internal class LinkActivity : ComponentActivity() {
             DefaultLinkTheme {
                 Surface {
                     Column(Modifier.fillMaxWidth()) {
+                        val linkAccount by viewModel.linkAccount.collectAsState(initial = null)
+
                         LinkAppBar()
 
                         NavHost(navController, viewModel.startDestination.route) {
@@ -66,15 +66,12 @@ internal class LinkActivity : ComponentActivity() {
                                 }
                             }
                             composable(LinkScreen.SignUp.route) {
-                                SignUpBody(
-                                    application,
-                                    { requireNotNull(starterArgs) }
-                                )
+                                SignUpBody(viewModel.injector)
                             }
                             composable(LinkScreen.Verification.route) {
                                 VerificationBody(
-                                    application,
-                                    { requireNotNull(starterArgs) }
+                                    requireNotNull(linkAccount),
+                                    viewModel.injector
                                 )
                             }
                             composable(LinkScreen.Wallet.route) {

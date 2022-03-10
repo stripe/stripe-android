@@ -5,15 +5,18 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.core.BuildConfig
+import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.Injectable
-import com.stripe.android.core.injection.injectWithFallback
+import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.injection.DaggerLinkViewModelFactoryComponent
-import com.stripe.android.link.injection.LinkViewModelSubcomponent
+import com.stripe.android.link.injection.NonFallbackInjector
 import com.stripe.android.link.model.Navigator
+import com.stripe.android.link.ui.signup.SignUpViewModel
+import com.stripe.android.link.ui.verification.VerificationViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import javax.inject.Provider
 
 /**
  * ViewModel that coordinates the user flow through the screens.
@@ -23,10 +26,18 @@ internal class LinkActivityViewModel @Inject internal constructor(
     private val linkAccountManager: LinkAccountManager,
     val navigator: Navigator
 ) : ViewModel() {
+    /**
+     * This ViewModel exists during the whole user flow, and needs to share the Dagger dependencies
+     * with the other, screen-specific ViewModels. So it holds a reference to the injector which is
+     * passed as a parameter to the other ViewModel factories.
+     */
+    lateinit var injector: NonFallbackInjector
 
     val startDestination = args.customerEmail?.let {
         LinkScreen.Loading
     } ?: LinkScreen.SignUp
+
+    val linkAccount = linkAccountManager.linkAccount
 
     init {
         if (startDestination == LinkScreen.Loading) {
@@ -59,6 +70,7 @@ internal class LinkActivityViewModel @Inject internal constructor(
     ) : ViewModelProvider.Factory, Injectable<Factory.FallbackInitializeParam> {
         internal data class FallbackInitializeParam(
             val application: Application,
+            val starterArgs: LinkActivityContract.Args,
             val enableLogging: Boolean,
             val publishableKey: String,
             val stripeAccountId: String?,
@@ -66,40 +78,80 @@ internal class LinkActivityViewModel @Inject internal constructor(
         )
 
         @Inject
-        lateinit var subComponentBuilderProvider:
-            Provider<LinkViewModelSubcomponent.Builder>
+        lateinit var viewModel: LinkActivityViewModel
+
+        private lateinit var injector: NonFallbackInjector
 
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            val args = starterArgsSupplier()
-            injectWithFallback(
-                args.injectionParams?.injectorKey,
-                FallbackInitializeParam(
-                    application,
-                    args.injectionParams?.enableLogging ?: false,
-                    args.injectionParams?.publishableKey
-                        ?: PaymentConfiguration.getInstance(application).publishableKey,
-                    if (args.injectionParams != null) {
-                        args.injectionParams.stripeAccountId
-                    } else {
-                        PaymentConfiguration.getInstance(application).stripeAccountId
-                    },
-                    args.injectionParams?.productUsage ?: emptySet()
+            val logger = Logger.getInstance(BuildConfig.DEBUG)
+            val starterArgs = starterArgsSupplier()
+
+            starterArgs.injectionParams?.injectorKey?.let {
+                WeakMapInjectorRegistry.retrieve(it)
+            }?.let { it as? NonFallbackInjector }?.let {
+                logger.info(
+                    "Injector available, " +
+                        "injecting dependencies into ${this::class.java.canonicalName}"
                 )
-            )
-            return subComponentBuilderProvider.get()
-                .args(args)
-                .build().linkActivityViewModel as T
+                injector = it
+                it.inject(this)
+            } ?: run {
+                logger.info(
+                    "Injector unavailable, " +
+                        "initializing dependencies of ${this::class.java.canonicalName}"
+                )
+                fallbackInitialize(
+                    FallbackInitializeParam(
+                        application,
+                        starterArgs,
+                        starterArgs.injectionParams?.enableLogging ?: false,
+                        starterArgs.injectionParams?.publishableKey
+                            ?: PaymentConfiguration.getInstance(application).publishableKey,
+                        if (starterArgs.injectionParams != null) {
+                            starterArgs.injectionParams.stripeAccountId
+                        } else {
+                            PaymentConfiguration.getInstance(application).stripeAccountId
+                        },
+                        starterArgs.injectionParams?.productUsage ?: emptySet()
+                    )
+                )
+            }
+
+            viewModel.injector = injector
+            return viewModel as T
         }
 
+        /**
+         * This ViewModel is the first one that is created, and if the process was killed it will
+         * recreate the Dagger dependency graph. Because we want to share those dependencies, it is
+         * responsible for injecting them not only in itself, but also in the other ViewModel
+         * factories of the module.
+         */
         override fun fallbackInitialize(arg: FallbackInitializeParam) {
-            DaggerLinkViewModelFactoryComponent.builder()
+            val viewModelComponent = DaggerLinkViewModelFactoryComponent.builder()
                 .context(arg.application)
                 .enableLogging(arg.enableLogging)
                 .publishableKeyProvider { arg.publishableKey }
                 .stripeAccountIdProvider { arg.stripeAccountId }
                 .productUsage(arg.productUsage)
-                .build().inject(this)
+                .starterArgs(arg.starterArgs)
+                .build()
+
+            injector = object : NonFallbackInjector {
+                override fun inject(injectable: Injectable<*>) {
+                    when (injectable) {
+                        is Factory -> viewModelComponent.inject(injectable)
+                        is SignUpViewModel.Factory -> viewModelComponent.inject(injectable)
+                        is VerificationViewModel.Factory -> viewModelComponent.inject(injectable)
+                        else -> {
+                            throw IllegalArgumentException("invalid Injectable $injectable requested in $this")
+                        }
+                    }
+                }
+            }
+
+            viewModelComponent.inject(this)
         }
     }
 }
