@@ -24,10 +24,7 @@ class CvcConfigTest {
     fun `card brand is invalid`() {
         val state = cvcConfig.determineState(CardBrand.Unknown, "0", CardBrand.Unknown.maxCvcLength)
         Truth.assertThat(state)
-            .isInstanceOf(TextFieldStateConstants.Error.Invalid::class.java)
-        Truth.assertThat(
-            state.getError()?.errorMessage
-        ).isEqualTo(R.string.invalid_card_number)
+            .isInstanceOf(TextFieldStateConstants.Valid.Limitless::class.java)
     }
 
     @Test
