@@ -1,5 +1,6 @@
 package com.stripe.android.identity.utils
 
+import android.app.Activity.RESULT_OK
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
@@ -23,13 +24,15 @@ internal class PhotoTaker(
         activityResultCaller.registerForActivityResult(
             ActivityResultContracts.StartActivityForResult()
         ) {
-            requireNotNull(onPhotoTaken) {
-                "onPhotoTaken callback is not set."
-            }(
-                requireNotNull(newPhotoTakenUri) {
-                    "newPhotoTakeUri is still null after a photo is taken."
-                }
-            )
+            if (it.resultCode == RESULT_OK) {
+                requireNotNull(onPhotoTaken) {
+                    "onPhotoTaken callback is not set."
+                }(
+                    requireNotNull(newPhotoTakenUri) {
+                        "newPhotoTakeUri is still null after a photo is taken."
+                    }
+                )
+            }
         }
 
     /**
