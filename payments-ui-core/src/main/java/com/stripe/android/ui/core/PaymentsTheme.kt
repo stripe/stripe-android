@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.res.Configuration.UI_MODE_NIGHT_MASK
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import androidx.annotation.RestrictTo
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Colors
@@ -51,6 +52,7 @@ object PaymentsThemeConfig {
     object Shapes {
         val cornerRadius = 6.dp
         val borderStrokeWidth = 1.dp
+        val borderStrokeWidthSelected = 2.dp
     }
 
     private val colorsLight = PaymentsColors(
@@ -95,6 +97,7 @@ data class PaymentsComposeColors(
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 data class PaymentsComposeShapes(
     val borderStrokeWidth: Dp,
+    val borderStrokeWidthSelected: Dp,
     val material: Shapes
 )
 
@@ -126,6 +129,7 @@ fun PaymentsThemeConfig.toComposeColors(): PaymentsComposeColors {
 fun PaymentsThemeConfig.Shapes.toComposeShapes(): PaymentsComposeShapes {
     return PaymentsComposeShapes(
         borderStrokeWidth = borderStrokeWidth,
+        borderStrokeWidthSelected = borderStrokeWidthSelected,
         material = MaterialTheme.shapes.copy(
             small = RoundedCornerShape(cornerRadius),
             medium = RoundedCornerShape(cornerRadius)
@@ -174,6 +178,14 @@ object PaymentsTheme {
         @Composable
         @ReadOnlyComposable
         get() = PaymentsThemeConfig.Shapes.toComposeShapes()
+
+    @Composable
+    @ReadOnlyComposable
+    fun getBorderStroke(isSelected: Boolean): BorderStroke {
+        val width = if (isSelected) shapes.borderStrokeWidthSelected else shapes.borderStrokeWidth
+        val color = if (isSelected) colors.material.primary else colors.colorComponentBorder
+        return BorderStroke(width, color)
+    }
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

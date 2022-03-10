@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet
 
 import android.util.DisplayMetrics
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
@@ -125,15 +124,8 @@ internal fun PaymentMethodUI(
     modifier: Modifier = Modifier,
     onItemSelectedListener: (Int) -> Unit
 ) {
-    val strokeColor =
-        if (isSelected) {
-            PaymentsTheme.colors.material.primary
-        } else {
-            PaymentsTheme.colors.colorComponentBorder
-        }
-
     Card(
-        border = BorderStroke(PaymentsTheme.shapes.borderStrokeWidth, strokeColor),
+        border = PaymentsTheme.getBorderStroke(isSelected),
         elevation = if (isSelected) 1.5.dp else 0.dp,
         backgroundColor = PaymentsTheme.colors.colorComponentBackground,
         modifier = modifier
