@@ -5,8 +5,10 @@ import android.content.res.Configuration.UI_MODE_NIGHT_MASK
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import androidx.annotation.RestrictTo
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Colors
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Shapes
 import androidx.compose.material.lightColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -15,6 +17,8 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 internal val LocalFieldTextStyle = TextStyle.Default.copy(
@@ -41,6 +45,12 @@ data class PaymentsColors(
 object PaymentsThemeConfig {
     fun colors(isDark: Boolean): PaymentsColors {
         return if (isDark) colorsDark else colorsLight
+    }
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    object ShapeConfig {
+        val cornerRadius = 6.dp
+        val borderStrokeWidth = 1.dp
     }
 
     private val colorsLight = PaymentsColors(
@@ -82,6 +92,12 @@ data class PaymentsComposeColors(
     val material: Colors
 )
 
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+data class PaymentsComposeShapes(
+    val borderStrokeWidth: Dp,
+    val material: Shapes
+)
+
 @Composable
 @ReadOnlyComposable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -105,6 +121,20 @@ fun PaymentsThemeConfig.toComposeColors(): PaymentsComposeColors {
 }
 
 @Composable
+@ReadOnlyComposable
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+fun PaymentsThemeConfig.toComposeShapes(): PaymentsComposeShapes {
+    val shapes = PaymentsThemeConfig.ShapeConfig
+    return PaymentsComposeShapes(
+        borderStrokeWidth = shapes.borderStrokeWidth,
+        material = MaterialTheme.shapes.copy(
+            small = RoundedCornerShape(shapes.cornerRadius),
+            medium = RoundedCornerShape(shapes.cornerRadius)
+        )
+    )
+}
+
+@Composable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun PaymentsTheme(
     content: @Composable () -> Unit
@@ -112,8 +142,12 @@ fun PaymentsTheme(
     val colors = PaymentsThemeConfig.toComposeColors()
     val localColors = staticCompositionLocalOf { colors }
 
+    val shapes = PaymentsThemeConfig.toComposeShapes()
+    val localShapes = staticCompositionLocalOf { shapes }
+
     CompositionLocalProvider(
-        localColors provides colors
+        localColors provides colors,
+        localShapes provides shapes
     ) {
         MaterialTheme(
             colors = PaymentsTheme.colors.material,
@@ -121,6 +155,7 @@ fun PaymentsTheme(
                 body1 = LocalFieldTextStyle,
                 subtitle1 = LocalFieldTextStyle
             ),
+            shapes = PaymentsTheme.shapes.material,
             content = content
         )
     }
@@ -135,10 +170,19 @@ object PaymentsTheme {
         @Composable
         @ReadOnlyComposable
         get() = PaymentsThemeConfig.toComposeColors()
+
+    val shapes: PaymentsComposeShapes
+        @Composable
+        @ReadOnlyComposable
+        get() = PaymentsThemeConfig.toComposeShapes()
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun Context.isSystemDarkTheme(): Boolean {
     return resources.configuration.uiMode and
         UI_MODE_NIGHT_MASK == UI_MODE_NIGHT_YES
+}
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+fun Context.convertDpToPx(dp: Dp): Float {
+    return dp.value * resources.displayMetrics.density
 }

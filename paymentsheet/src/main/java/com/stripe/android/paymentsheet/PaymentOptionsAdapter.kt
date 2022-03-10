@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -510,8 +509,7 @@ internal fun PaymentOptionUi(
     ) {
         val (checkIcon, deleteIcon, label, card) = createRefs()
         Card(
-            border = BorderStroke(if (isSelected) 2.dp else 1.dp, strokeColor),
-            shape = RoundedCornerShape(6.dp),
+            border = BorderStroke(PaymentsTheme.shapes.borderStrokeWidth, strokeColor),
             elevation = 2.dp,
             backgroundColor = PaymentsTheme.colors.colorComponentBackground,
             modifier = Modifier

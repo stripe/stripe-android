@@ -294,7 +294,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
         }
 
         val isDark = baseContext.isSystemDarkTheme()
-        viewBinding.buyButton.backgroundTintList =
+        viewBinding.buyButton.setDefaultBackGroundColor(
             if (viewModel.config?.primaryButtonColor != null) {
                 viewModel.config?.primaryButtonColor
             } else {
@@ -302,6 +302,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
                     PaymentsThemeConfig.colors(isDark).primary.toArgb()
                 )
             }
+        )
 
         viewBinding.buyButton.setOnClickListener {
             updateErrorMessage()
