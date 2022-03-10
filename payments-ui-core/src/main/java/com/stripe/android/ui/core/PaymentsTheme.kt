@@ -48,7 +48,7 @@ object PaymentsThemeConfig {
     }
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    object ShapeConfig {
+    object Shapes {
         val cornerRadius = 6.dp
         val borderStrokeWidth = 1.dp
     }
@@ -123,13 +123,12 @@ fun PaymentsThemeConfig.toComposeColors(): PaymentsComposeColors {
 @Composable
 @ReadOnlyComposable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-fun PaymentsThemeConfig.toComposeShapes(): PaymentsComposeShapes {
-    val shapes = PaymentsThemeConfig.ShapeConfig
+fun PaymentsThemeConfig.Shapes.toComposeShapes(): PaymentsComposeShapes {
     return PaymentsComposeShapes(
-        borderStrokeWidth = shapes.borderStrokeWidth,
+        borderStrokeWidth = borderStrokeWidth,
         material = MaterialTheme.shapes.copy(
-            small = RoundedCornerShape(shapes.cornerRadius),
-            medium = RoundedCornerShape(shapes.cornerRadius)
+            small = RoundedCornerShape(cornerRadius),
+            medium = RoundedCornerShape(cornerRadius)
         )
     )
 }
@@ -142,7 +141,7 @@ fun PaymentsTheme(
     val colors = PaymentsThemeConfig.toComposeColors()
     val localColors = staticCompositionLocalOf { colors }
 
-    val shapes = PaymentsThemeConfig.toComposeShapes()
+    val shapes = PaymentsThemeConfig.Shapes.toComposeShapes()
     val localShapes = staticCompositionLocalOf { shapes }
 
     CompositionLocalProvider(
@@ -174,7 +173,7 @@ object PaymentsTheme {
     val shapes: PaymentsComposeShapes
         @Composable
         @ReadOnlyComposable
-        get() = PaymentsThemeConfig.toComposeShapes()
+        get() = PaymentsThemeConfig.Shapes.toComposeShapes()
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

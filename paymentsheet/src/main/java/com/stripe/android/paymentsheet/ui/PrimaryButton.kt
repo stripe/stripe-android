@@ -54,7 +54,7 @@ internal class PrimaryButton @JvmOverloads constructor(
     }
 
     override fun setBackgroundTintList(tintList: ColorStateList?) {
-        val cornerRadius = context.convertDpToPx(PaymentsThemeConfig.ShapeConfig.cornerRadius)
+        val cornerRadius = context.convertDpToPx(PaymentsThemeConfig.Shapes.cornerRadius)
 
         val shape = GradientDrawable()
         shape.shape = GradientDrawable.RECTANGLE
