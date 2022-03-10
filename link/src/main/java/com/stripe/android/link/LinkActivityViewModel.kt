@@ -145,7 +145,8 @@ internal class LinkActivityViewModel @Inject internal constructor(
                         is Factory -> viewModelComponent.inject(injectable)
                         is SignUpViewModel.Factory -> viewModelComponent.inject(injectable)
                         is VerificationViewModel.Factory -> viewModelComponent.inject(injectable)
-                        is WalletViewModel.Factory -> viewModelComponent.inject(injectable)else -> {
+                        is WalletViewModel.Factory -> viewModelComponent.inject(injectable)
+                        else -> {
                             throw IllegalArgumentException("invalid Injectable $injectable requested in $this")
                         }
                     }
