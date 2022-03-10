@@ -7,7 +7,7 @@ import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.link.LinkActivityContract
 import com.stripe.android.link.LinkScreen
 import com.stripe.android.link.account.LinkAccountManager
-import com.stripe.android.link.injection.LinkInjector
+import com.stripe.android.link.injection.NonFallbackInjector
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.model.Navigator
 import com.stripe.android.link.ui.signup.SignUpViewModel.Companion.LOOKUP_DEBOUNCE_MS
@@ -172,7 +172,7 @@ class SignUpViewModelTest {
     fun `Factory gets initialized by Injector when Injector is available`() {
         val vmToBeReturned = mock<SignUpViewModel>()
 
-        val injector = object : LinkInjector {
+        val injector = object : NonFallbackInjector {
             override fun inject(injectable: Injectable<*>) {
                 val factory = injectable as SignUpViewModel.Factory
                 factory.viewModel = vmToBeReturned

@@ -11,7 +11,7 @@ import com.stripe.android.core.injection.Injectable
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.injection.DaggerLinkViewModelFactoryComponent
-import com.stripe.android.link.injection.LinkInjector
+import com.stripe.android.link.injection.NonFallbackInjector
 import com.stripe.android.link.model.Navigator
 import com.stripe.android.link.ui.signup.SignUpViewModel
 import com.stripe.android.link.ui.verification.VerificationViewModel
@@ -32,7 +32,7 @@ internal class LinkActivityViewModel @Inject internal constructor(
      * with the other, screen-specific ViewModels. So it holds a reference to the injector which is
      * passed as a parameter to the other ViewModel factories.
      */
-    lateinit var injector: LinkInjector
+    lateinit var injector: NonFallbackInjector
 
     val startDestination = args.customerEmail?.let {
         LinkScreen.Loading
@@ -81,7 +81,7 @@ internal class LinkActivityViewModel @Inject internal constructor(
         @Inject
         lateinit var viewModel: LinkActivityViewModel
 
-        private lateinit var injector: LinkInjector
+        private lateinit var injector: NonFallbackInjector
 
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
@@ -90,7 +90,7 @@ internal class LinkActivityViewModel @Inject internal constructor(
 
             starterArgs.injectionParams?.injectorKey?.let {
                 WeakMapInjectorRegistry.retrieve(it)
-            }?.let { it as? LinkInjector }?.let {
+            }?.let { it as? NonFallbackInjector }?.let {
                 logger.info(
                     "Injector available, " +
                         "injecting dependencies into ${this::class.java.canonicalName}"
@@ -139,7 +139,7 @@ internal class LinkActivityViewModel @Inject internal constructor(
                 .starterArgs(arg.starterArgs)
                 .build()
 
-            injector = object : LinkInjector {
+            injector = object : NonFallbackInjector {
                 override fun inject(injectable: Injectable<*>) {
                     when (injectable) {
                         is Factory -> viewModelComponent.inject(injectable)
