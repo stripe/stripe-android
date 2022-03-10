@@ -41,7 +41,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.stripe.android.link.R
-import com.stripe.android.link.injection.LinkInjector
+import com.stripe.android.link.injection.NonFallbackInjector
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.model.CardBrand
@@ -85,7 +85,7 @@ private fun WalletBodyPreview() {
 @Composable
 internal fun WalletBody(
     linkAccount: LinkAccount,
-    injector: LinkInjector
+    injector: NonFallbackInjector
 ) {
     val viewModel: WalletViewModel = viewModel(
         factory = WalletViewModel.Factory(
