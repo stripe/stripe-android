@@ -3,7 +3,6 @@ package com.stripe.android.stripecardscan.framework.util
 import android.util.Base64
 import com.stripe.android.core.networking.QueryStringFactory
 import com.stripe.android.core.networking.toMap
-import com.stripe.android.stripecardscan.framework.NetworkConfig
 import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.SerializationStrategy
 import kotlinx.serialization.json.Json

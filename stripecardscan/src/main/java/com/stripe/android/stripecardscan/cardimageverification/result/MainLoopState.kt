@@ -63,53 +63,69 @@ internal sealed class MainLoopState(
     class Initial(
         override val requiredCardIssuer: CardIssuer?,
         override val requiredLastFour: String?,
-    ) : MainLoopState(runOcr = true, runCardDetect = false),
+        private val strictModeFrames: Int,
+        private var panCounter: ItemCounter<String>? = null,
+    ) : MainLoopState(runOcr = true, runCardDetect = true),
         RequiresMatchingCard {
+
+        private var visibleCardCount: Int = 0
+
+        val mostLikelyPan: String?
+            get() = panCounter?.getHighestCountItem()?.second
+
+        private val hasEnoughVisibleCards
+            get() = visibleCardCount >= strictModeFrames
+
         override suspend fun consumeTransition(
             transition: MainLoopAnalyzer.Prediction,
-        ): MainLoopState = when (compareToRequiredCard(transition.ocr?.pan)) {
-            is CardMatchResult.NoPan -> this
-            is CardMatchResult.Mismatch ->
-                WrongCard(
-                    pan = transition.ocr?.pan ?: "",
-                    requiredCardIssuer = requiredCardIssuer,
-                    requiredLastFour = requiredLastFour,
-                )
-            is CardMatchResult.Match ->
-                OcrFound(
-                    pan = transition.ocr?.pan ?: "",
-                    isCardVisible = transition.isCardVisible,
-                    requiredCardIssuer = requiredCardIssuer,
-                    requiredLastFour = requiredLastFour,
-                )
-            is CardMatchResult.NoRequiredCard ->
-                OcrFound(
-                    pan = transition.ocr?.pan ?: "",
-                    isCardVisible = transition.isCardVisible,
-                    requiredCardIssuer = requiredCardIssuer,
-                    requiredLastFour = requiredLastFour,
-                )
+        ): MainLoopState {
+            if (transition.isCardVisible == true) {
+                visibleCardCount++
+            }
+
+            transition.ocr?.pan?.let {
+                panCounter = panCounter?.apply { countItem(it) } ?: ItemCounter(it)
+            }
+            val comparisonResult = compareToRequiredCard(mostLikelyPan)
+
+            return when {
+                comparisonResult is CardMatchResult.Mismatch ->
+                    WrongCard(
+                        pan = transition.ocr?.pan ?: "",
+                        requiredCardIssuer = requiredCardIssuer,
+                        requiredLastFour = requiredLastFour,
+                        strictModeFrames = strictModeFrames,
+                    )
+                comparisonResult is CardMatchResult.Match && hasEnoughVisibleCards ->
+                    // Match result implies that `panCounter` is not null
+                    OcrFound(
+                        panCounter = requireNotNull(panCounter),
+                        visibleCardCount = visibleCardCount,
+                        requiredCardIssuer = requiredCardIssuer,
+                        requiredLastFour = requiredLastFour,
+                        strictModeFrames = strictModeFrames,
+                    )
+                comparisonResult is CardMatchResult.NoRequiredCard && hasEnoughVisibleCards ->
+                    // NoCardRequired result implies that `panCounter` is not null
+                    OcrFound(
+                        panCounter = requireNotNull(panCounter),
+                        visibleCardCount = visibleCardCount,
+                        requiredCardIssuer = requiredCardIssuer,
+                        requiredLastFour = requiredLastFour,
+                        strictModeFrames = strictModeFrames,
+                    )
+                else -> this // comparisonResult is CardMatchResult.NoPan or not enough visible cards
+            }
         }
     }
 
-    class OcrFound private constructor(
+    class OcrFound constructor(
         private val panCounter: ItemCounter<String>,
         private var visibleCardCount: Int,
         private val requiredCardIssuer: CardIssuer?,
         private val requiredLastFour: String?,
+        private val strictModeFrames: Int,
     ) : MainLoopState(runOcr = true, runCardDetect = true) {
-
-        internal constructor(
-            pan: String,
-            isCardVisible: Boolean?,
-            requiredCardIssuer: CardIssuer?,
-            requiredLastFour: String?,
-        ) : this(
-            ItemCounter(pan),
-            if (isCardVisible == true) 1 else 0,
-            requiredCardIssuer,
-            requiredLastFour,
-        )
 
         val mostLikelyPan: String
             get() = panCounter.getHighestCountItem().second
@@ -148,6 +164,7 @@ internal sealed class MainLoopState(
                         panCounter = panCounter,
                         requiredCardIssuer = requiredCardIssuer,
                         requiredLastFour = requiredLastFour,
+                        strictModeFrames = strictModeFrames,
                     )
                 isOcrSatisfied() ->
                     OcrSatisfied(
@@ -162,6 +179,7 @@ internal sealed class MainLoopState(
                     Initial(
                         requiredCardIssuer = requiredCardIssuer,
                         requiredLastFour = requiredLastFour,
+                        strictModeFrames = strictModeFrames,
                     )
                 else -> this
             }
@@ -193,6 +211,7 @@ internal sealed class MainLoopState(
         private val panCounter: ItemCounter<String>,
         private val requiredCardIssuer: CardIssuer?,
         private val requiredLastFour: String?,
+        private val strictModeFrames: Int,
     ) : MainLoopState(runOcr = true, runCardDetect = false) {
 
         private var lastCardVisible = Clock.markNow()
@@ -224,6 +243,7 @@ internal sealed class MainLoopState(
                     Initial(
                         requiredCardIssuer = requiredCardIssuer,
                         requiredLastFour = requiredLastFour,
+                        strictModeFrames = strictModeFrames,
                     )
                 else -> this
             }
@@ -234,6 +254,7 @@ internal sealed class MainLoopState(
         val pan: String,
         override val requiredCardIssuer: CardIssuer?,
         override val requiredLastFour: String?,
+        private val strictModeFrames: Int,
     ) : MainLoopState(runOcr = true, runCardDetect = false), RequiresMatchingCard {
         private fun isTimedOut() = reachedStateAt.elapsedSince() > WRONG_CARD_DURATION
 
@@ -249,25 +270,29 @@ internal sealed class MainLoopState(
                         pan = transition.ocr?.pan ?: "",
                         requiredCardIssuer = requiredCardIssuer,
                         requiredLastFour = requiredLastFour,
+                        strictModeFrames = strictModeFrames,
                     )
                 cardMatch is CardMatchResult.Match ->
                     OcrFound(
-                        pan = transition.ocr?.pan ?: "",
-                        isCardVisible = transition.isCardVisible,
+                        panCounter = ItemCounter(transition.ocr?.pan ?: ""),
+                        visibleCardCount = if (transition.isCardVisible == true) 1 else 0,
                         requiredCardIssuer = requiredCardIssuer,
                         requiredLastFour = requiredLastFour,
+                        strictModeFrames = strictModeFrames,
                     )
                 cardMatch is CardMatchResult.NoRequiredCard ->
                     OcrFound(
-                        pan = transition.ocr?.pan ?: "",
-                        isCardVisible = transition.isCardVisible,
+                        panCounter = ItemCounter(transition.ocr?.pan ?: ""),
+                        visibleCardCount = if (transition.isCardVisible == true) 1 else 0,
                         requiredCardIssuer = requiredCardIssuer,
                         requiredLastFour = requiredLastFour,
+                        strictModeFrames = strictModeFrames,
                     )
                 isTimedOut() ->
                     Initial(
                         requiredCardIssuer = requiredCardIssuer,
                         requiredLastFour = requiredLastFour,
+                        strictModeFrames = strictModeFrames,
                     )
                 else -> this
             }

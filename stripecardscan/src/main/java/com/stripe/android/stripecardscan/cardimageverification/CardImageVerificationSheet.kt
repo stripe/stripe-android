@@ -15,6 +15,7 @@ import kotlinx.parcelize.Parcelize
 
 @Parcelize
 internal data class CardImageVerificationSheetParams(
+    val stripePublishableKey: String,
     val configuration: CardImageVerificationSheet.Configuration,
     val cardImageVerificationIntentId: String,
     val cardImageVerificationIntentSecret: String,
@@ -36,16 +37,13 @@ sealed interface CardImageVerificationSheetResult : Parcelable {
     data class Failed(val error: Throwable) : CardImageVerificationSheetResult
 }
 
-class CardImageVerificationSheet private constructor(private val configuration: Configuration) {
+class CardImageVerificationSheet private constructor(
+    private val stripePublishableKey: String,
+    private val configuration: Configuration,
+) {
 
     @Parcelize
     data class Configuration(
-        val stripePublishableKey: String,
-        val verificationConfiguration: VerificationConfiguration = VerificationConfiguration(),
-    ) : Parcelable
-
-    @Parcelize
-    data class VerificationConfiguration(
         // The amount of frames that must have a centered, focused card before the scan
         // is allowed to terminate
         val strictModeFrames: StrictModeFrameCount = StrictModeFrameCount.None,
@@ -71,8 +69,12 @@ class CardImageVerificationSheet private constructor(private val configuration: 
          * is created (in the onCreate method).
          */
         @JvmStatic
-        fun create(from: ComponentActivity, config: Configuration) =
-            CardImageVerificationSheet(config).apply {
+        fun create(
+            from: ComponentActivity,
+            stripePublishableKey: String,
+            config: Configuration = Configuration(),
+        ) =
+            CardImageVerificationSheet(stripePublishableKey, config).apply {
                 launcher = from.registerForActivityResult(activityResultContract, ::onResult)
             }
 
@@ -83,8 +85,12 @@ class CardImageVerificationSheet private constructor(private val configuration: 
          * before the [Fragment] is created (in the onCreate method).
          */
         @JvmStatic
-        fun create(from: Fragment, config: Configuration) =
-            CardImageVerificationSheet(config).apply {
+        fun create(
+            from: Fragment,
+            stripePublishableKey: String,
+            config: Configuration = Configuration(),
+        ) =
+            CardImageVerificationSheet(stripePublishableKey, config).apply {
                 launcher = from.registerForActivityResult(activityResultContract, ::onResult)
             }
 
@@ -129,6 +135,7 @@ class CardImageVerificationSheet private constructor(private val configuration: 
         this.onFinished = onFinished
         launcher.launch(
             CardImageVerificationSheetParams(
+                stripePublishableKey = stripePublishableKey,
                 configuration = configuration,
                 cardImageVerificationIntentId = cardImageVerificationIntentId,
                 cardImageVerificationIntentSecret = cardImageVerificationIntentSecret,

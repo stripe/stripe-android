@@ -36,7 +36,7 @@ internal data class SavedFrameType(
 
 internal abstract class CardImageVerificationFlow(
     private val scanErrorListener: AnalyzerLoopErrorListener,
-) : ScanFlow<RequiredCardDetails?, CameraPreviewImage<Bitmap>>,
+) : ScanFlow<CardVerificationFlowParameters?, CameraPreviewImage<Bitmap>>,
     AggregateResultListener<MainLoopAggregator.InterimResult, MainLoopAggregator.FinalResult> {
 
     companion object {
@@ -69,7 +69,7 @@ internal abstract class CardImageVerificationFlow(
         viewFinder: Rect,
         lifecycleOwner: LifecycleOwner,
         coroutineScope: CoroutineScope,
-        parameters: RequiredCardDetails?,
+        parameters: CardVerificationFlowParameters?,
     ) = coroutineScope.launch(Dispatchers.Main) {
         if (canceled) {
             return@launch
@@ -79,6 +79,7 @@ internal abstract class CardImageVerificationFlow(
             listener = this@CardImageVerificationFlow,
             requiredCardIssuer = parameters?.cardIssuer,
             requiredLastFour = parameters?.lastFour,
+            strictModeFrames = parameters?.strictModeFrames ?: 0,
         ).also { mainLoopOcrAggregator ->
             // make this result aggregator pause and reset when the lifecycle pauses.
             mainLoopOcrAggregator.bindToLifecycle(lifecycleOwner)

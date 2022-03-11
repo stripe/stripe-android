@@ -25,6 +25,7 @@ internal class MainLoopAggregator(
     listener: AggregateResultListener<InterimResult, FinalResult>,
     override val requiredCardIssuer: CardIssuer?,
     override val requiredLastFour: String?,
+    strictModeFrames: Int,
 ) : RequiresMatchingCard,
     ResultAggregator<
         MainLoopAnalyzer.Input,
@@ -37,6 +38,7 @@ internal class MainLoopAggregator(
         initialState = MainLoopState.Initial(
             requiredCardIssuer = requiredCardIssuer,
             requiredLastFour = requiredLastFour,
+            strictModeFrames = strictModeFrames,
         ),
         statsName = null, // TODO: when we want to collect this in scan stats, give this a name
     ) {

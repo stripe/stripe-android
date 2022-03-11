@@ -66,9 +66,10 @@ internal interface CardImageVerificationResultListener : ScanResultListener {
     fun cardReadyForVerification(pan: String, frames: Collection<SavedFrame>)
 }
 
-internal data class RequiredCardDetails(
+internal data class CardVerificationFlowParameters(
     val cardIssuer: CardIssuer?,
     val lastFour: String?,
+    val strictModeFrames: Int,
 )
 
 private val MINIMUM_RESOLUTION = Size(1067, 600) // minimum size of OCR
@@ -82,7 +83,7 @@ internal sealed class CardVerificationScanState(isFinal: Boolean) : ScanState(is
 
 @Keep
 internal open class CardImageVerificationActivity :
-    SimpleScanActivity<RequiredCardDetails?>(), SimpleScanStateful<CardVerificationScanState> {
+    SimpleScanActivity<CardVerificationFlowParameters?>(), SimpleScanStateful<CardVerificationScanState> {
 
     override var scanState: CardVerificationScanState? = CardVerificationScanState.NotFound
 
@@ -117,7 +118,7 @@ internal open class CardImageVerificationActivity :
 
     private val params: CardImageVerificationSheetParams by lazy {
         intent.getParcelableExtra(INTENT_PARAM_REQUEST)
-            ?: CardImageVerificationSheetParams(CardImageVerificationSheet.Configuration(""), "", "")
+            ?: CardImageVerificationSheetParams("", CardImageVerificationSheet.Configuration(), "", "")
     }
 
     /**
@@ -153,7 +154,7 @@ internal open class CardImageVerificationActivity :
                 launch {
                     when (
                         val result = uploadSavedFrames(
-                            stripePublishableKey = params.configuration.stripePublishableKey,
+                            stripePublishableKey = params.stripePublishableKey,
                             civId = params.cardImageVerificationIntentId,
                             civSecret = params.cardImageVerificationIntentSecret,
                             savedFrames = frames,
@@ -299,7 +300,7 @@ internal open class CardImageVerificationActivity :
     }
 
     private fun ensureValidParams() = when {
-        params.configuration.stripePublishableKey.isEmpty() -> {
+        params.stripePublishableKey.isEmpty() -> {
             scanFailure(InvalidStripePublishableKeyException("Missing publishable key"))
             false
         }
@@ -314,9 +315,9 @@ internal open class CardImageVerificationActivity :
         else -> true
     }
 
-    private suspend fun getCivDetails(): RequiredCardDetails? = when (
+    private suspend fun getCivDetails(): CardVerificationFlowParameters? = when (
         val result = getCardImageVerificationIntentDetails(
-            stripePublishableKey = params.configuration.stripePublishableKey,
+            stripePublishableKey = params.stripePublishableKey,
             civId = params.cardImageVerificationIntentId,
             civSecret = params.cardImageVerificationIntentSecret,
         )
@@ -326,9 +327,10 @@ internal open class CardImageVerificationActivity :
                 if (expectedCard.lastFour.isNullOrEmpty() ||
                     isValidPanLastFour(expectedCard.lastFour)
                 ) {
-                    RequiredCardDetails(
-                        getIssuerByDisplayName(expectedCard.issuer),
-                        expectedCard.lastFour,
+                    CardVerificationFlowParameters(
+                        cardIssuer = getIssuerByDisplayName(expectedCard.issuer),
+                        lastFour = expectedCard.lastFour,
+                        strictModeFrames = params.configuration.strictModeFrames.count,
                     )
                 } else {
                     launch(Dispatchers.Main) {
@@ -352,11 +354,11 @@ internal open class CardImageVerificationActivity :
     }
 
     private fun onScanDetailsAvailable(
-        requiredCardDetails: RequiredCardDetails?,
+        cardVerificationFlowParameters: CardVerificationFlowParameters?,
     ) {
-        if (requiredCardDetails != null && !requiredCardDetails.lastFour.isNullOrEmpty()) {
-            this.requiredCardIssuer = requiredCardDetails.cardIssuer
-            this.requiredCardLastFour = requiredCardDetails.lastFour
+        if (cardVerificationFlowParameters != null && !cardVerificationFlowParameters.lastFour.isNullOrEmpty()) {
+            this.requiredCardIssuer = cardVerificationFlowParameters.cardIssuer
+            this.requiredCardLastFour = cardVerificationFlowParameters.lastFour
 
             cardDescriptionTextView.text = getString(
                 R.string.stripe_card_description,
@@ -581,7 +583,7 @@ internal open class CardImageVerificationActivity :
 
     override fun closeScanner() {
         uploadScanStatsCIV(
-            stripePublishableKey = params.configuration.stripePublishableKey,
+            stripePublishableKey = params.stripePublishableKey,
             civId = params.cardImageVerificationIntentId,
             civSecret = params.cardImageVerificationIntentSecret,
             instanceId = Stats.instanceId,
