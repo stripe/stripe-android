@@ -21,6 +21,8 @@ internal fun RowElementUI(
     val fields = controller.fields
     val cardStyle = CardStyle(isSystemInDarkTheme())
 
+    val numVisibleFields = fields.filter { !hiddenIdentifiers.contains(it.identifier) }.size
+  
     // Only draw the row if the items in the row are not hidden, otherwise the entire
     // section will fail to draw
     if (fields.map { it.identifier }.any { !hiddenIdentifiers.contains(it) }) {
@@ -50,7 +52,7 @@ internal fun RowElementUI(
                             top.linkTo(parent.top)
                         }
                         .fillMaxWidth(
-                            (1f / fields.size.toFloat())
+                            (1f / numVisibleFields.toFloat())
                         )
                 )
 
