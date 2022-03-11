@@ -8,6 +8,7 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
 
+@Suppress("MaxLineLength")
 @RunWith(RobolectricTestRunner::class)
 class Stripe3ds2AuthResultJsonParserTest {
 
@@ -151,7 +152,8 @@ class Stripe3ds2AuthResultJsonParserTest {
 
         assertThat(result.fallbackRedirectUrl)
             .isEqualTo(
-                "https://hooks.stripe.com/3d_secure_2_eap/begin_test/src_1Ecve7CRMbs6FrXfm8AxXMIh/src_client_secret_F79yszOBAiuaZTuIhbn3LPUW"
+                "https://hooks.stripe.com/3d_secure_2_eap/begin_test/" +
+                    "src_1Ecve7CRMbs6FrXfm8AxXMIh/src_client_secret_F79yszOBAiuaZTuIhbn3LPUW"
             )
     }
 
@@ -160,7 +162,9 @@ class Stripe3ds2AuthResultJsonParserTest {
         assertThat(
             parse(Stripe3ds2AuthResultFixtures.CHALLENGE_COMPLETION_JSON).creq
         ).isEqualTo(
-            "eyJ0aHJlZURTU2VydmVyVHJhbnNJRCI6IjA4NDAwMTRiLWY1YTgtNDA5My04MzdkLTgxOTA3YmJmMmU2MiIsImFjc1RyYW5zSUQiOiIwZjdkMTU0MC1mYTM2LTQ2OWYtYmQ5ZC03ZjIxYzkzMmU2MjEiLCJjaGFsbGVuZ2VXaW5kb3dTaXplIjoiMDUiLCJtZXNzYWdlVHlwZSI6IkNSZXEiLCJtZXNzYWdlVmVyc2lvbiI6IjIuMS4wIn0="
+            "eyJ0aHJlZURTU2VydmVyVHJhbnNJRCI6IjA4NDAwMTRiLWY1YTgtNDA5My04MzdkLTgxOTA3Ym" +
+                "JmMmU2MiIsImFjc1RyYW5zSUQiOiIwZjdkMTU0MC1mYTM2LTQ2OWYtYmQ5ZC03ZjIxYzkzMmU2MjEiLCJ" +
+                "jaGFsbGVuZ2VXaW5kb3dTaXplIjoiMDUiLCJtZXNzYWdlVHlwZSI6IkNSZXEiLCJtZXNzYWdlVmVyc2lvbiI6IjIuMS4wIn0="
         )
     }
 

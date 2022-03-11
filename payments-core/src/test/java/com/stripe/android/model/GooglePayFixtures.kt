@@ -2,6 +2,7 @@ package com.stripe.android.model
 
 import org.json.JSONObject
 
+@Suppress("MaxLineLength")
 internal object GooglePayFixtures {
     val GOOGLE_PAY_RESULT_WITH_FULL_BILLING_ADDRESS = JSONObject(
         """
