@@ -15,7 +15,7 @@ import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.model.InternalStripeFile
 import com.stripe.android.core.model.InternalStripeFilePurpose
-import com.stripe.android.identity.CORRECT_VERIFICATION_PAGE_DATA
+import com.stripe.android.identity.CORRECT_WITH_SUBMITTED_FAILURE_VERIFICATION_PAGE_DATA
 import com.stripe.android.identity.R
 import com.stripe.android.identity.databinding.FrontBackUploadFragmentBinding
 import com.stripe.android.identity.networking.Resource
@@ -200,10 +200,10 @@ class FrontBackUploadFragmentTest {
                 whenever(
                     mockIdentityViewModel.postVerificationPageData(collectedDataParamCaptor.capture())
                 ).thenReturn(
-                    CORRECT_VERIFICATION_PAGE_DATA
+                    CORRECT_WITH_SUBMITTED_FAILURE_VERIFICATION_PAGE_DATA
                 )
                 whenever(mockIdentityViewModel.postVerificationPageSubmit()).thenReturn(
-                    CORRECT_VERIFICATION_PAGE_DATA
+                    CORRECT_WITH_SUBMITTED_FAILURE_VERIFICATION_PAGE_DATA
                 )
 
                 binding.kontinue.callOnClick()
