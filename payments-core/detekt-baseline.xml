@@ -1,0 +1,437 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>ComplexCondition:AccountRangeJsonParser.kt$AccountRangeJsonParser$accountRangeHigh != null &amp;&amp; accountRangeLow != null &amp;&amp; panLength != null &amp;&amp; brandInfo != null</ID>
+    <ID>ComplexCondition:BecsDebitWidget.kt$BecsDebitWidget$name.isBlank() || email.isNullOrBlank() || bsbNumber.isNullOrBlank() || accountNumber.isNullOrBlank()</ID>
+    <ID>ComplexCondition:ExpiryDateEditText.kt$ExpiryDateEditText.&lt;no name provided>$expirationDate.month.length == 2 &amp;&amp; latestInsertionSize > 0 &amp;&amp; !inErrorState || rawNumericInput.length > 2</ID>
+    <ID>ComplexMethod:CardInputWidgetPlacement.kt$CardInputWidgetPlacement$ internal fun getFocusField( touchX: Int, frameStart: Int, isShowingFullCard: Boolean, postalCodeEnabled: Boolean )</ID>
+    <ID>ComplexMethod:PaymentMethodJsonParser.kt$PaymentMethodJsonParser$override fun parse(json: JSONObject): PaymentMethod</ID>
+    <ID>ComplexMethod:ShippingInfoWidget.kt$ShippingInfoWidget$ fun validateAllFields(): Boolean</ID>
+    <ID>ComplexMethod:Source.kt$Source.Companion$@SourceType @JvmStatic fun asSourceType(sourceType: String?): String</ID>
+    <ID>ComplexMethod:SourceJsonParser.kt$SourceJsonParser.Companion$@Source.SourceType private fun asSourceType(sourceType: String?): String</ID>
+    <ID>ComplexMethod:SourceJsonParser.kt$SourceJsonParser.Companion$private inline fun &lt;reified T : StripeModel> optStripeJsonModel( jsonObject: JSONObject, @Size(min = 1) key: String ): T?</ID>
+    <ID>ConstructorParameterNaming:Source.kt$Source$private val _klarna: Klarna? = null</ID>
+    <ID>ConstructorParameterNaming:Source.kt$Source$private val _weChat: WeChat? = null</ID>
+    <ID>EmptyFunctionBlock:AbsFakeStripeRepository.kt$AbsFakeStripeRepository${ }</ID>
+    <ID>EmptyFunctionBlock:AbsPaymentController.kt$AbsPaymentController${ }</ID>
+    <ID>EmptyFunctionBlock:BrowserCapabilitiesSupplier.kt$BrowserCapabilitiesSupplier.NoopCustomTabsServiceConnection${ }</ID>
+    <ID>EmptyFunctionBlock:BrowserCapabilitiesSupplier.kt$BrowserCapabilitiesSupplier.NoopCustomTabsServiceConnection${}</ID>
+    <ID>EmptyFunctionBlock:CardWidgetProgressView.kt$CardWidgetProgressView.&lt;no name provided>${ }</ID>
+    <ID>EmptyFunctionBlock:CustomerSessionTest.kt$CustomerSessionTest.&lt;no name provided>${ }</ID>
+    <ID>EmptyFunctionBlock:DeletePaymentMethodDialogFactory.kt$DeletePaymentMethodDialogFactory.PaymentMethodDeleteListener${ }</ID>
+    <ID>EmptyFunctionBlock:FakeFraudDetectionDataRepository.kt$FakeFraudDetectionDataRepository${ }</ID>
+    <ID>EmptyFunctionBlock:InMemoryCardAccountRangeSourceTest.kt$InMemoryCardAccountRangeSourceTest.FakeStore${ }</ID>
+    <ID>EmptyFunctionBlock:PaymentFlowActivity.kt$PaymentFlowActivity.&lt;no name provided>${ }</ID>
+    <ID>EmptyFunctionBlock:PaymentFlowActivity.kt$PaymentFlowActivity.&lt;no name provided>${}</ID>
+    <ID>EmptyFunctionBlock:PaymentSessionViewModel.kt$PaymentSessionViewModel${ }</ID>
+    <ID>EmptyFunctionBlock:StripeTextWatcher.kt$StripeTextWatcher${ }</ID>
+    <ID>ExplicitGarbageCollectionCall:WeakMapInjectorRegistryTest.kt$WeakMapInjectorRegistryTest$gc()</ID>
+    <ID>LargeClass:CardInputWidget.kt$CardInputWidget : LinearLayoutCardWidget</ID>
+    <ID>LargeClass:CardInputWidgetTest.kt$CardInputWidgetTest</ID>
+    <ID>LargeClass:CardMultilineWidgetTest.kt$CardMultilineWidgetTest</ID>
+    <ID>LargeClass:CardNumberEditTextTest.kt$CardNumberEditTextTest</ID>
+    <ID>LargeClass:CustomerSessionTest.kt$CustomerSessionTest</ID>
+    <ID>LargeClass:PaymentIntentFixtures.kt$PaymentIntentFixtures</ID>
+    <ID>LargeClass:SourceParamsTest.kt$SourceParamsTest</ID>
+    <ID>LargeClass:Stripe.kt$Stripe</ID>
+    <ID>LargeClass:StripeApiRepository.kt$StripeApiRepository : StripeRepository</ID>
+    <ID>LargeClass:StripeApiRepositoryTest.kt$StripeApiRepositoryTest</ID>
+    <ID>LargeClass:StripeKtxTest.kt$StripeKtxTest</ID>
+    <ID>LongMethod:CardFormView.kt$CardFormView$private fun setupCardWidget()</ID>
+    <ID>LongMethod:CardFormViewTest.kt$CardFormViewTest$@Test fun testCardValidCallback()</ID>
+    <ID>LongMethod:CardInputWidget.kt$CardInputWidget$private fun initView(attrs: AttributeSet?)</ID>
+    <ID>LongMethod:CustomerSessionOperationExecutor.kt$CustomerSessionOperationExecutor$@JvmSynthetic internal suspend fun execute( ephemeralKey: EphemeralKey, operation: EphemeralOperation )</ID>
+    <ID>LongMethod:CustomerSessionTest.kt$CustomerSessionTest$@BeforeTest fun setup()</ID>
+    <ID>LongMethod:CustomerSessionTest.kt$CustomerSessionTest$private suspend fun setupErrorProxy()</ID>
+    <ID>LongMethod:DefaultCardAccountRangeRepositoryTest.kt$DefaultCardAccountRangeRepositoryTest$@Test fun `repository with real sources returns expected results`()</ID>
+    <ID>LongMethod:GooglePayJsonFactoryTest.kt$GooglePayJsonFactoryTest$@Test fun testCreatePaymentMethodRequestJson()</ID>
+    <ID>LongMethod:PaymentAuthConfigTest.kt$PaymentAuthConfigTest$@Test fun testUiCustomizationWrapper()</ID>
+    <ID>LongMethod:PaymentIntentJsonParser.kt$PaymentIntentJsonParser$override fun parse(json: JSONObject): PaymentIntent?</ID>
+    <ID>LongMethod:PaymentMethodJsonParser.kt$PaymentMethodJsonParser$override fun parse(json: JSONObject): PaymentMethod</ID>
+    <ID>LongMethod:SourceParams.kt$SourceParams$ override fun toParamMap(): Map&lt;String, Any></ID>
+    <ID>LongMethod:SourceParamsTest.kt$SourceParamsTest$@Test fun `createKlarna() should create expected params`()</ID>
+    <ID>LongMethod:StaticCardAccountRangeSourceTest.kt$StaticCardAccountRangeSourceTest$@Test fun `getAccountRange() should return expected AccountRange`()</ID>
+    <ID>LongMethod:Stripe3ds2ChallengeResultProcessor.kt$DefaultStripe3ds2ChallengeResultProcessor$override suspend fun process( challengeResult: ChallengeResult ): PaymentFlowResult.Unvalidated</ID>
+    <ID>LongMethod:Stripe3ds2TransactionActivity.kt$Stripe3ds2TransactionActivity$public override fun onCreate(savedInstanceState: Bundle?)</ID>
+    <ID>LongMethod:StripeApiRepositoryTest.kt$StripeApiRepositoryTest$@Test fun getPaymentMethods_whenPopulated_returnsExpectedList()</ID>
+    <ID>LongParameterList:CardBrand.kt$CardBrand$( val code: String, val displayName: String, @DrawableRes val icon: Int, @DrawableRes val cvcIcon: Int = R.drawable.stripe_ic_cvc, @DrawableRes val errorIcon: Int = R.drawable.stripe_ic_error, /** * Accepted CVC lengths */ val cvcLength: Set&lt;Int> = setOf(3), /** * The default max length when the card number is formatted without spaces (e.g. "4242424242424242") * * Note that [CardBrand.DinersClub]'s max length depends on the BIN (e.g. card number prefix). * In the case of a [CardBrand.DinersClub] card, use [getMaxLengthForCardNumber]. */ private val defaultMaxLength: Int = 16, /** * Based on [Issuer identification number table](http://en.wikipedia.org/wiki/Bank_card_number#Issuer_identification_number_.28IIN.29) */ private val pattern: Pattern? = null, /** * Patterns for discrete lengths */ private val partialPatterns: Map&lt;Int, Pattern>, /** * By default, a [CardBrand] does not have variants. */ private val variantMaxLength: Map&lt;Pattern, Int> = emptyMap(), )</ID>
+    <ID>LongParameterList:CardNumberEditText.kt$CardNumberEditText$( context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = androidx.appcompat.R.attr.editTextStyle, // TODO(mshafrir-stripe): make immutable after `CardWidgetViewModel` is integrated in `CardWidget` subclasses internal var workContext: CoroutineContext, private val cardAccountRangeRepository: CardAccountRangeRepository, private val staticCardAccountRanges: StaticCardAccountRanges = DefaultStaticCardAccountRanges(), private val analyticsRequestExecutor: AnalyticsRequestExecutor, private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory )</ID>
+    <ID>LongParameterList:ConfirmPaymentIntentParams.kt$ConfirmPaymentIntentParams.Companion$( paymentMethodCreateParams: PaymentMethodCreateParams, clientSecret: String, savePaymentMethod: Boolean? = null, mandateId: String? = null, mandateData: MandateDataParams? = null, setupFutureUsage: SetupFutureUsage? = null, shipping: Shipping? = null, paymentMethodOptions: PaymentMethodOptionsParams? = null )</ID>
+    <ID>LongParameterList:ConfirmPaymentIntentParams.kt$ConfirmPaymentIntentParams.Companion$( paymentMethodId: String, clientSecret: String, savePaymentMethod: Boolean? = null, paymentMethodOptions: PaymentMethodOptionsParams? = null, mandateId: String? = null, mandateData: MandateDataParams? = null, setupFutureUsage: SetupFutureUsage? = null, shipping: Shipping? = null )</ID>
+    <ID>LongParameterList:CustomerSession.kt$CustomerSession$( context: Context, stripeRepository: StripeRepository, publishableKey: String, stripeAccountId: String?, private val workContext: CoroutineContext = createCoroutineDispatcher(), private val operationIdFactory: OperationIdFactory = StripeOperationIdFactory(), private val timeSupplier: TimeSupplier = { Calendar.getInstance().timeInMillis }, ephemeralKeyManagerFactory: EphemeralKeyManager.Factory )</ID>
+    <ID>LongParameterList:CustomerSession.kt$CustomerSession$( paymentMethodType: PaymentMethod.Type, @IntRange(from = 1, to = 100) limit: Int? = null, endingBefore: String? = null, startingAfter: String? = null, productUsage: Set&lt;String>, listener: PaymentMethodsRetrievalListener )</ID>
+    <ID>LongParameterList:DefaultPaymentAuthenticatorRegistry.kt$DefaultPaymentAuthenticatorRegistry.Companion$( context: Context, stripeRepository: StripeRepository, analyticsRequestExecutor: AnalyticsRequestExecutor, paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory, enableLogging: Boolean, workContext: CoroutineContext, uiContext: CoroutineContext, threeDs1IntentReturnUrlMap: MutableMap&lt;String, String>, publishableKeyProvider: () -> String, productUsage: Set&lt;String>, isInstantApp: Boolean )</ID>
+    <ID>LongParameterList:GooglePayLauncher.kt$GooglePayLauncher$( lifecycleScope: CoroutineScope, private val config: Config, private val readyCallback: ReadyCallback, private val activityResultLauncher: ActivityResultLauncher&lt;GooglePayLauncherContract.Args>, private val googlePayRepositoryFactory: (GooglePayEnvironment) -> GooglePayRepository, paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory, analyticsRequestExecutor: AnalyticsRequestExecutor )</ID>
+    <ID>LongParameterList:GooglePayLauncherViewModel.kt$GooglePayLauncherViewModel$( private val paymentsClient: PaymentsClient, private val requestOptions: ApiRequest.Options, private val args: GooglePayLauncherContract.Args, private val stripeRepository: StripeRepository, private val paymentController: PaymentController, private val googlePayJsonFactory: GooglePayJsonFactory, private val googlePayRepository: GooglePayRepository )</ID>
+    <ID>LongParameterList:GooglePayPaymentMethodLauncher.kt$GooglePayPaymentMethodLauncher$( @Assisted lifecycleScope: CoroutineScope, @Assisted private val config: Config, @Assisted private val readyCallback: ReadyCallback, @Assisted private val activityResultLauncher: ActivityResultLauncher&lt;GooglePayPaymentMethodLauncherContract.Args>, @Assisted private val skipReadyCheck: Boolean, context: Context, private val googlePayRepositoryFactory: (GooglePayEnvironment) -> GooglePayRepository, @Named(PRODUCT_USAGE) private val productUsage: Set&lt;String>, @Named(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String, @Named(STRIPE_ACCOUNT_ID) private val stripeAccountIdProvider: () -> String?, // Default value for the following parameters is used only when instantiating from the public // constructors instead of dependency injection. @Named(ENABLE_LOGGING) private val enableLogging: Boolean = BuildConfig.DEBUG, @IOContext private val ioContext: CoroutineContext = Dispatchers.IO, paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory( context, PaymentConfiguration.getInstance(context).publishableKey, setOf(PRODUCT_USAGE_TOKEN) ), analyticsRequestExecutor: AnalyticsRequestExecutor = DefaultAnalyticsRequestExecutor(), stripeRepository: StripeRepository = StripeApiRepository( context, publishableKeyProvider, logger = Logger.getInstance(enableLogging), workContext = ioContext, productUsageTokens = setOf(PRODUCT_USAGE_TOKEN), paymentAnalyticsRequestFactory = paymentAnalyticsRequestFactory ) )</ID>
+    <ID>LongParameterList:GooglePayPaymentMethodLauncherViewModel.kt$GooglePayPaymentMethodLauncherViewModel$( private val paymentsClient: PaymentsClient, private val requestOptions: ApiRequest.Options, private val args: GooglePayPaymentMethodLauncherContract.Args, private val stripeRepository: StripeRepository, private val googlePayJsonFactory: GooglePayJsonFactory, private val googlePayRepository: GooglePayRepository, private val savedStateHandle: SavedStateHandle )</ID>
+    <ID>LongParameterList:PaymentLauncherModule.kt$PaymentLauncherModule$( context: Context, stripeRepository: StripeRepository, @Named(ENABLE_LOGGING) enableLogging: Boolean, @IOContext workContext: CoroutineContext, @UIContext uiContext: CoroutineContext, threeDs1IntentReturnUrlMap: MutableMap&lt;String, String>, defaultAnalyticsRequestExecutor: DefaultAnalyticsRequestExecutor, paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory, @Named(PUBLISHABLE_KEY) publishableKeyProvider: () -> String, @Named(PRODUCT_USAGE) productUsage: Set&lt;String>, @Named(IS_INSTANT_APP) isInstantApp: Boolean )</ID>
+    <ID>LongParameterList:PaymentLauncherViewModel.kt$PaymentLauncherViewModel$( @Named(IS_PAYMENT_INTENT) private val isPaymentIntent: Boolean, private val stripeApiRepository: StripeRepository, private val authenticatorRegistry: PaymentAuthenticatorRegistry, private val defaultReturnUrl: DefaultReturnUrl, private val apiRequestOptionsProvider: Provider&lt;ApiRequest.Options>, private val threeDs1IntentReturnUrlMap: MutableMap&lt;String, String>, private val lazyPaymentIntentFlowResultProcessor: Lazy&lt;PaymentIntentFlowResultProcessor>, private val lazySetupIntentFlowResultProcessor: Lazy&lt;SetupIntentFlowResultProcessor>, private val analyticsRequestExecutor: DefaultAnalyticsRequestExecutor, private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory, @UIContext private val uiContext: CoroutineContext, private val authActivityStarterHost: AuthActivityStarterHost, activityResultCaller: ActivityResultCaller, private val savedStateHandle: SavedStateHandle, @Named(IS_INSTANT_APP) private val isInstantApp: Boolean )</ID>
+    <ID>LongParameterList:PaymentSession.kt$PaymentSession$( private val context: Context, application: Application, viewModelStoreOwner: ViewModelStoreOwner, private val lifecycleOwner: LifecycleOwner, savedStateRegistryOwner: SavedStateRegistryOwner, private val config: PaymentSessionConfig, customerSession: CustomerSession, private val paymentMethodsActivityStarter: ActivityStarter&lt;PaymentMethodsActivity, PaymentMethodsActivityStarter.Args>, private val paymentFlowActivityStarter: ActivityStarter&lt;PaymentFlowActivity, PaymentFlowActivityStarter.Args>, paymentSessionData: PaymentSessionData = PaymentSessionData(config) )</ID>
+    <ID>LongParameterList:SourceAuthenticator.kt$SourceAuthenticator$( private val paymentBrowserAuthStarterFactory: (AuthActivityStarterHost) -> PaymentBrowserAuthStarter, private val paymentRelayStarterFactory: (AuthActivityStarterHost) -> PaymentRelayStarter, private val analyticsRequestExecutor: AnalyticsRequestExecutor, private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory, @Named(ENABLE_LOGGING) private val enableLogging: Boolean, @UIContext private val uiContext: CoroutineContext, @Named(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String, @Named(IS_INSTANT_APP) private val isInstantApp: Boolean )</ID>
+    <ID>LongParameterList:SourceParams.kt$SourceParams.Companion$( name: String, iban: String, addressLine1: String?, city: String, postalCode: String, @Size(2) country: String )</ID>
+    <ID>LongParameterList:SourceParams.kt$SourceParams.Companion$( name: String, iban: String, email: String?, addressLine1: String?, city: String?, postalCode: String?, @Size(2) country: String? )</ID>
+    <ID>LongParameterList:Stripe3ds2TransactionViewModel.kt$Stripe3ds2TransactionViewModel$( private val args: Stripe3ds2TransactionContract.Args, private val stripeRepository: StripeRepository, private val analyticsRequestExecutor: AnalyticsRequestExecutor, private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory, private val threeDs2Service: StripeThreeDs2Service, private val messageVersionRegistry: MessageVersionRegistry, private val challengeResultProcessor: Stripe3ds2ChallengeResultProcessor, private val initChallengeRepository: InitChallengeRepository, @IOContext private val workContext: CoroutineContext, private val savedStateHandle: SavedStateHandle, @Named(IS_INSTANT_APP) private val isInstantApp: Boolean )</ID>
+    <ID>LongParameterList:StripeApiRepository.kt$StripeApiRepository$( appContext: Context, @Named(PUBLISHABLE_KEY) publishableKeyProvider: () -> String, @IOContext workContext: CoroutineContext, @Named(PRODUCT_USAGE) productUsageTokens: Set&lt;String>, paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory, analyticsRequestExecutor: AnalyticsRequestExecutor, logger: Logger )</ID>
+    <ID>LongParameterList:StripeApiRepository.kt$StripeApiRepository$( context: Context, publishableKeyProvider: () -> String, private val appInfo: AppInfo? = Stripe.appInfo, private val logger: Logger = Logger.noop(), private val workContext: CoroutineContext = Dispatchers.IO, private val productUsageTokens: Set&lt;String> = emptySet(), private val stripeNetworkClient: StripeNetworkClient = DefaultStripeNetworkClient( workContext = workContext, logger = logger ), private val analyticsRequestExecutor: AnalyticsRequestExecutor = DefaultAnalyticsRequestExecutor(logger, workContext), private val fraudDetectionDataRepository: FraudDetectionDataRepository = DefaultFraudDetectionDataRepository(context, workContext), private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(context, publishableKeyProvider, productUsageTokens), private val fraudDetectionDataParamsUtils: FraudDetectionDataParamsUtils = FraudDetectionDataParamsUtils(), betas: Set&lt;StripeApiBeta> = emptySet(), apiVersion: String = ApiVersion(betas = betas.map { it.code }.toSet()).code, sdkVersion: String = StripeSdkVersion.VERSION )</ID>
+    <ID>LongParameterList:StripeGooglePayViewModel.kt$StripeGooglePayViewModel$( application: Application, private val publishableKey: String, private val stripeAccountId: String? = null, private val args: StripeGooglePayContract.Args, private val stripeRepository: StripeRepository, private val appName: String, private val workContext: CoroutineContext )</ID>
+    <ID>LongParameterList:StripePaymentController.kt$StripePaymentController$( context: Context, private val publishableKeyProvider: () -> String, private val stripeRepository: StripeRepository, private val enableLogging: Boolean = false, workContext: CoroutineContext = Dispatchers.IO, private val analyticsRequestExecutor: AnalyticsRequestExecutor = DefaultAnalyticsRequestExecutor(Logger.getInstance(enableLogging), workContext), private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(context.applicationContext, publishableKeyProvider), private val alipayRepository: AlipayRepository = DefaultAlipayRepository(stripeRepository), private val uiContext: CoroutineContext = Dispatchers.Main )</ID>
+    <ID>LongParameterList:StripePaymentLauncher.kt$StripePaymentLauncher$( @Assisted(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String, @Assisted(STRIPE_ACCOUNT_ID) private val stripeAccountIdProvider: () -> String?, @Assisted private val hostActivityLauncher: ActivityResultLauncher&lt;PaymentLauncherContract.Args>, context: Context, @Named(ENABLE_LOGGING) private val enableLogging: Boolean, @IOContext ioContext: CoroutineContext, @UIContext uiContext: CoroutineContext, stripeRepository: StripeRepository, paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory, @Named(PRODUCT_USAGE) private val productUsage: Set&lt;String> )</ID>
+    <ID>LongParameterList:StripeRepository.kt$StripeRepository$( customerId: String, publishableKey: String, productUsageTokens: Set&lt;String>, sourceId: String, @Source.SourceType sourceType: String, requestOptions: ApiRequest.Options )</ID>
+    <ID>LongParameterList:WebIntentAuthenticator.kt$WebIntentAuthenticator$( host: AuthActivityStarterHost, stripeIntent: StripeIntent, requestCode: Int, clientSecret: String, authUrl: String, stripeAccount: String?, returnUrl: String? = null, shouldCancelSource: Boolean = false, shouldCancelIntentOnUserNavigation: Boolean = true )</ID>
+    <ID>LongParameterList:WebIntentAuthenticator.kt$WebIntentAuthenticator$( private val paymentBrowserAuthStarterFactory: (AuthActivityStarterHost) -> PaymentBrowserAuthStarter, private val analyticsRequestExecutor: AnalyticsRequestExecutor, private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory, @Named(ENABLE_LOGGING) private val enableLogging: Boolean, @UIContext private val uiContext: CoroutineContext, private val threeDs1IntentReturnUrlMap: MutableMap&lt;String, String>, @Named(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String, @Named(IS_INSTANT_APP) private val isInstantApp: Boolean )</ID>
+    <ID>LongParameterList:WebIntentAuthenticatorTest.kt$WebIntentAuthenticatorTest$( stripeIntent: StripeIntent, expectedUrl: String, expectedReturnUrl: String?, expectedRequestCode: Int, expectedShouldCancelIntentOnUserNavigation: Boolean = true, expectedAnalyticsEvent: PaymentAnalyticsEvent? )</ID>
+    <ID>MagicNumber:BankAccount.kt$BankAccount$3</ID>
+    <ID>MagicNumber:BecsDebitBsbEditText.kt$BecsDebitBsbEditText$3</ID>
+    <ID>MagicNumber:BecsDebitBsbEditText.kt$BecsDebitBsbEditText.&lt;no name provided>$4</ID>
+    <ID>MagicNumber:BecsDebitWidget.kt$BecsDebitWidget$4</ID>
+    <ID>MagicNumber:BecsDebitWidget.kt$BecsDebitWidget$6</ID>
+    <ID>MagicNumber:BecsDebitWidget.kt$BecsDebitWidget$8</ID>
+    <ID>MagicNumber:BecsDebitWidget.kt$BecsDebitWidget$9</ID>
+    <ID>MagicNumber:Card.kt$Card$4</ID>
+    <ID>MagicNumber:CardBrand.kt$CardBrand$3</ID>
+    <ID>MagicNumber:CardBrand.kt$CardBrand.AmericanExpress$3</ID>
+    <ID>MagicNumber:CardBrand.kt$CardBrand.AmericanExpress$4</ID>
+    <ID>MagicNumber:CardBrand.kt$CardBrand.DinersClub$14</ID>
+    <ID>MagicNumber:CardBrand.kt$CardBrand.JCB$3</ID>
+    <ID>MagicNumber:CardBrand.kt$CardBrand.Unknown$3</ID>
+    <ID>MagicNumber:CardBrand.kt$CardBrand.Unknown$4</ID>
+    <ID>MagicNumber:CardInputWidget.kt$CardInputWidget$14</ID>
+    <ID>MagicNumber:CardInputWidget.kt$CardInputWidget$15</ID>
+    <ID>MagicNumber:CardInputWidget.kt$CardInputWidget$19</ID>
+    <ID>MagicNumber:CardInputWidget.kt$CardInputWidget$3</ID>
+    <ID>MagicNumber:CardInputWidget.kt$CardInputWidget$4</ID>
+    <ID>MagicNumber:CardInputWidget.kt$CardInputWidget$5</ID>
+    <ID>MagicNumber:CardInputWidgetPlacement.kt$CardInputWidgetPlacement$10</ID>
+    <ID>MagicNumber:CardInputWidgetPlacement.kt$CardInputWidgetPlacement$3</ID>
+    <ID>MagicNumber:CardInputWidgetPlacement.kt$CardInputWidgetPlacement$4</ID>
+    <ID>MagicNumber:CardInputWidgetPlacement.kt$CardInputWidgetPlacement$5</ID>
+    <ID>MagicNumber:CardJsonParser.kt$CardJsonParser$12</ID>
+    <ID>MagicNumber:CardParams.kt$CardParams$4</ID>
+    <ID>MagicNumber:CardUtils.kt$CardUtils$10</ID>
+    <ID>MagicNumber:CardUtils.kt$CardUtils$9</ID>
+    <ID>MagicNumber:DateUtils.kt$DateUtils$100</ID>
+    <ID>MagicNumber:DateUtils.kt$DateUtils$12</ID>
+    <ID>MagicNumber:DateUtils.kt$DateUtils$20</ID>
+    <ID>MagicNumber:DateUtils.kt$DateUtils$80</ID>
+    <ID>MagicNumber:ExpirationDate.kt$ExpirationDate.Unvalidated$12</ID>
+    <ID>MagicNumber:ExpirationDate.kt$ExpirationDate.Unvalidated$3</ID>
+    <ID>MagicNumber:ExpirationDate.kt$ExpirationDate.Unvalidated$4</ID>
+    <ID>MagicNumber:FraudDetectionDataRequestParamsFactory.kt$FraudDetectionDataRequestParamsFactory.Companion$60</ID>
+    <ID>MagicNumber:PaymentAuthConfig.kt$PaymentAuthConfig.Stripe3ds2Config$5</ID>
+    <ID>MagicNumber:PaymentAuthConfig.kt$PaymentAuthConfig.Stripe3ds2Config$99</ID>
+    <ID>MagicNumber:PaymentFlowResultProcessor.kt$PaymentIntentFlowResultProcessor$3</ID>
+    <ID>MagicNumber:PaymentMethodCreateParams.kt$PaymentMethodCreateParams.Card$4</ID>
+    <ID>MagicNumber:StripeColorUtils.kt$StripeColorUtils.Companion$0.114</ID>
+    <ID>MagicNumber:StripeColorUtils.kt$StripeColorUtils.Companion$0.299</ID>
+    <ID>MagicNumber:StripeColorUtils.kt$StripeColorUtils.Companion$0.5</ID>
+    <ID>MagicNumber:StripeColorUtils.kt$StripeColorUtils.Companion$0.587</ID>
+    <ID>MagicNumber:StripeColorUtils.kt$StripeColorUtils.Companion$0x10</ID>
+    <ID>MagicNumber:StripeColorUtils.kt$StripeColorUtils.Companion$255</ID>
+    <ID>MaxLineLength:AccountParams.kt$AccountParams$*</ID>
+    <ID>MaxLineLength:AccountParams.kt$AccountParams.BusinessType$*</ID>
+    <ID>MaxLineLength:AccountParams.kt$AccountParams.BusinessTypeParams.Company$*</ID>
+    <ID>MaxLineLength:AccountParams.kt$AccountParams.BusinessTypeParams.Company.Builder$*</ID>
+    <ID>MaxLineLength:AccountParams.kt$AccountParams.BusinessTypeParams.Company.Document$*</ID>
+    <ID>MaxLineLength:AccountParams.kt$AccountParams.BusinessTypeParams.Individual$*</ID>
+    <ID>MaxLineLength:AccountParams.kt$AccountParams.BusinessTypeParams.Individual.Builder$*</ID>
+    <ID>MaxLineLength:AccountParams.kt$AccountParams.Companion$*</ID>
+    <ID>MaxLineLength:AddPaymentMethodActivityStarter.kt$AddPaymentMethodActivityStarter.Args.Builder$*</ID>
+    <ID>MaxLineLength:AddPaymentMethodViewModelTest.kt$AddPaymentMethodViewModelTest$private val paymentMethodRetrievalCaptor: KArgumentCaptor&lt;CustomerSession.PaymentMethodRetrievalListener> = argumentCaptor()</ID>
+    <ID>MaxLineLength:AlipayRedirectTest.kt$AlipayRedirectTest$"&amp;notify_url=https%3A%2F%2Fhooks.stripe.com%2Falipay%2Falipay%2Fhook%2F6255d30b067c8f7a162c79c654483646%2Fsrc_1Gt188KlwPmebFhp4SWhZwn1"</ID>
+    <ID>MaxLineLength:AlipayRedirectTest.kt$AlipayRedirectTest$"&amp;return_url=https%3A%2F%2Fhooks.stripe.com%2Fadapter%2Falipay%2Fredirect%2Fcomplete%2Fsrc_1Gt188KlwPmebFhp4SWhZwn1%2Fsrc_client_secret_RMaQKPfAmHOdUwcNhXEjolR4"</ID>
+    <ID>MaxLineLength:AlipayRedirectTest.kt$AlipayRedirectTest$"https://hooks.stripe.com/adapter/alipay/redirect/complete/src_1Gt188KlwPmebFhp4SWhZwn1/src_client_secret_RMaQKPfAmHOdUwcNhXEjolR4"</ID>
+    <ID>MaxLineLength:ApiKeyFixtures.kt$ApiKeyFixtures$const val AFFIRM_PUBLISHABLE_KEY = "pk_test_51HvTI7Lu5o3P18Zp6t5AgBSkMvWoTtA0nyA7pVYDqpfLkRtWun7qZTYCOHCReprfLM464yaBeF72UFfB7cY9WG4a00ZnDtiC2C"</ID>
+    <ID>MaxLineLength:ApiKeyFixtures.kt$ApiKeyFixtures$const val CB_PUBLISHABLE_KEY = "pk_test_51Gsr5VLtxFHECmaoeyWTxRKLZZiks5QKbg5H0IeGd8yt7OzQhA7807thLrHayMOeDRmJv3ara1VYy6AvBXAnUGcB00QAZheC0Z"</ID>
+    <ID>MaxLineLength:ApiKeyFixtures.kt$ApiKeyFixtures$const val NETBANKING_PUBLISHABLE_KEY = "pk_test_51H7wmsBte6TMTRd4gph9Wm7gnQOKJwdVTCj30AhtB8MhWtlYj6v9xDn1vdCtKYGAE7cybr6fQdbQQtgvzBihE9cl00tOnrTpL9"</ID>
+    <ID>MaxLineLength:ApiKeyFixtures.kt$ApiKeyFixtures$const val UPI_PUBLISHABLE_KEY = "pk_test_51H7wmsBte6TMTRd4gph9Wm7gnQOKJwdVTCj30AhtB8MhWtlYj6v9xDn1vdCtKYGAE7cybr6fQdbQQtgvzBihE9cl00tOnrTpL9"</ID>
+    <ID>MaxLineLength:AppInfo.kt$AppInfo$*</ID>
+    <ID>MaxLineLength:AuthenticationModule.kt$AuthenticationModule$abstract</ID>
+    <ID>MaxLineLength:BankAccount.kt$BankAccount$*</ID>
+    <ID>MaxLineLength:BankAccountTokenParams.kt$BankAccountTokenParams$*</ID>
+    <ID>MaxLineLength:BecsDebitMandateAcceptanceFactoryTest.kt$BecsDebitMandateAcceptanceFactoryTest$.</ID>
+    <ID>MaxLineLength:BecsDebitMandateAcceptanceTextViewTest.kt$BecsDebitMandateAcceptanceTextViewTest$.</ID>
+    <ID>MaxLineLength:BecsDebitWidgetTest.kt$BecsDebitWidgetTest$ By providing your bank account details and confirming this payment, you agree to this Direct Debit Request and the Direct Debit Request service agreement, and authorise Stripe Payments Australia Pty Ltd ACN 160 180 343 Direct Debit User ID number 507156 (“Stripe”) to debit your account through the Bulk Electronic Clearing System (BECS) on behalf of Rocketship Inc. (the </ID>
+    <ID>MaxLineLength:CardBrand.kt$CardBrand$* Based on [Issuer identification number table](http://en.wikipedia.org/wiki/Bank_card_number#Issuer_identification_number_.28IIN.29)</ID>
+    <ID>MaxLineLength:CardBrand.kt$CardBrand.MasterCard$pattern = Pattern.compile("^(2221|2222|2223|2224|2225|2226|2227|2228|2229|222|223|224|225|226|227|228|229|23|24|25|26|270|271|2720|50|51|52|53|54|55|56|57|58|59|67)[0-9]*$")</ID>
+    <ID>MaxLineLength:CardFormView.kt$CardFormView$*</ID>
+    <ID>MaxLineLength:CardFormView.kt$CardFormView$return (cardMultilineWidget.invalidFields.toList() + listOfNotNull(Fields.Postal.takeIf { !isPostalValid() })).toSet()</ID>
+    <ID>MaxLineLength:CardInputWidgetPlacement.kt$CardInputWidgetPlacement$frameWidth - peekCardWidth - cardDateSeparation - dateWidth - cvcWidth - dateCvcSeparation - postalCodeWidth</ID>
+    <ID>MaxLineLength:CardInputWidgetPlacement.kt$CardInputWidgetPlacement$touchX &lt; frameStart + peekCardWidth</ID>
+    <ID>MaxLineLength:CardNumberEditText.kt$CardNumberEditText.CardNumberTextWatcher$// TODO (michelleb-stripe) Should set error message to incomplete, then in focus change if it isn't complete it will update it.</ID>
+    <ID>MaxLineLength:CardNumberEditTextTest.kt$CardNumberEditTextTest$fun</ID>
+    <ID>MaxLineLength:CardUtils.kt$CardUtils$@Deprecated("CardInputWidget and CardMultilineWidget handle card brand lookup. This method should not be relied on for determining CardBrand.")</ID>
+    <ID>MaxLineLength:ConfirmPaymentIntentParams.kt$ConfirmPaymentIntentParams$*</ID>
+    <ID>MaxLineLength:ConfirmPaymentIntentParams.kt$ConfirmPaymentIntentParams.SetupFutureUsage$*</ID>
+    <ID>MaxLineLength:ConfirmPaymentIntentParams.kt$ConfirmPaymentIntentParams.Shipping$*</ID>
+    <ID>MaxLineLength:ConfirmSetupIntentParams.kt$ConfirmSetupIntentParams.Companion$*</ID>
+    <ID>MaxLineLength:CustomerSessionOperationExecutorTest.kt$CustomerSessionOperationExecutorTest$fun</ID>
+    <ID>MaxLineLength:DefaultAlipayRepositoryTest.kt$DefaultAlipayRepositoryTest$"https://hooks.stripe.com/adapter/alipay/redirect/complete/src_1HDEFWKlwPmebFhp6tcpln8T/src_client_secret_S6H9mVMKK6qxk9YxsUvbH55K"</ID>
+    <ID>MaxLineLength:EphemeralKey.kt$EphemeralKey$*</ID>
+    <ID>MaxLineLength:EphemeralKeyManager.kt$EphemeralKeyManager$ Received an ephemeral key that could not be parsed. See https://stripe.com/docs/mobile/android/basic for more details.</ID>
+    <ID>MaxLineLength:EphemeralKeyManager.kt$EphemeralKeyManager$ Received an invalid ephemeral key. See https://stripe.com/docs/mobile/android/basic for more details.</ID>
+    <ID>MaxLineLength:EphemeralKeyManagerTest.kt$EphemeralKeyManagerTest$"Received an ephemeral key that could not be parsed. See https://stripe.com/docs/mobile/android/basic for more details."</ID>
+    <ID>MaxLineLength:GooglePayConfig.kt$GooglePayConfig$*</ID>
+    <ID>MaxLineLength:GooglePayConfigConversionKtx.kt$GooglePayLauncher.BillingAddressConfig.Format.Full -> GooglePayJsonFactory.BillingAddressParameters.Format.Full</ID>
+    <ID>MaxLineLength:GooglePayConfigConversionKtx.kt$GooglePayLauncher.BillingAddressConfig.Format.Min -> GooglePayJsonFactory.BillingAddressParameters.Format.Min</ID>
+    <ID>MaxLineLength:GooglePayConfigConversionKtx.kt$GooglePayPaymentMethodLauncher.BillingAddressConfig.Format.Full -> GooglePayJsonFactory.BillingAddressParameters.Format.Full</ID>
+    <ID>MaxLineLength:GooglePayConfigConversionKtx.kt$GooglePayPaymentMethodLauncher.BillingAddressConfig.Format.Min -> GooglePayJsonFactory.BillingAddressParameters.Format.Min</ID>
+    <ID>MaxLineLength:GooglePayFixtures.kt$GooglePayFixtures$ </ID>
+    <ID>MaxLineLength:GooglePayJsonFactory.kt$GooglePayJsonFactory$*</ID>
+    <ID>MaxLineLength:GooglePayJsonFactory.kt$GooglePayJsonFactory$* [IsReadyToPayRequest](https://developers.google.com/pay/api/android/reference/request-objects#IsReadyToPayRequest)</ID>
+    <ID>MaxLineLength:GooglePayJsonFactory.kt$GooglePayJsonFactory.BillingAddressParameters$*</ID>
+    <ID>MaxLineLength:GooglePayJsonFactory.kt$GooglePayJsonFactory.ShippingAddressParameters$* [ShippingAddressParameters](https://developers.google.com/pay/api/android/reference/request-objects#ShippingAddressParameters)</ID>
+    <ID>MaxLineLength:GooglePayJsonFactory.kt$GooglePayJsonFactory.TransactionInfo$*</ID>
+    <ID>MaxLineLength:GooglePayLauncher.kt$GooglePayLauncher$*</ID>
+    <ID>MaxLineLength:GooglePayLauncherActivity.kt$GooglePayLauncherActivity$*</ID>
+    <ID>MaxLineLength:GooglePayPaymentMethodLauncherActivity.kt$GooglePayPaymentMethodLauncherActivity$*</ID>
+    <ID>MaxLineLength:GooglePayRepository.kt$DefaultGooglePayRepository$*</ID>
+    <ID>MaxLineLength:InjectableActivityScenario.kt$InjectableActivityScenario$delegate ?: throw IllegalStateException("Cannot move to state $newState since the activity hasn't been launched.")</ID>
+    <ID>MaxLineLength:InjectableActivityScenario.kt$InjectableActivityScenario$val d = delegate ?: throw IllegalStateException("Cannot run onActivity since the activity hasn't been launched.")</ID>
+    <ID>MaxLineLength:KlarnaSourceParams.kt$KlarnaSourceParams$*</ID>
+    <ID>MaxLineLength:KlarnaSourceParams.kt$KlarnaSourceParams.PaymentPageOptions$*</ID>
+    <ID>MaxLineLength:MandateDataParams.kt$MandateDataParams.Type.Online$*</ID>
+    <ID>MaxLineLength:PaymentAnalyticsRequestFactoryTest.kt$PaymentAnalyticsRequestFactoryTest$.</ID>
+    <ID>MaxLineLength:PaymentApiRequestTest.kt$PaymentApiRequestTest$.</ID>
+    <ID>MaxLineLength:PaymentAuthWebViewClientTest.kt$PaymentAuthWebViewClientTest$"https://hooks.stripe.com/three_d_secure/authenticate?amount=1250&amp;client_secret=src_client_secret_abc123&amp;return_url=&amp;source=src_X9Y8Z7&amp;usage=single_use"</ID>
+    <ID>MaxLineLength:PaymentAuthWebViewClientTest.kt$PaymentAuthWebViewClientTest$"https://hooks.stripe.com/three_d_secure/authenticate?amount=1250&amp;client_secret=src_client_secret_abc123&amp;return_url=https%3A%2F%2Fhooks.stripe.com%2Fredirect%2Fcomplete%2Fsrc_X9Y8Z7%3Fclient_secret%3Dsrc_client_secret_abc123&amp;source=src_X9Y8Z7&amp;usage=single_use"</ID>
+    <ID>MaxLineLength:PaymentAuthWebViewClientTest.kt$PaymentAuthWebViewClientTest$"mailto:patrick@example.com?payment_intent=pi_123&amp;payment_intent_client_secret=pi_123_secret_456&amp;source_type=card"</ID>
+    <ID>MaxLineLength:PaymentAuthWebViewClientTest.kt$PaymentAuthWebViewClientTest$"stripe://payment_auth?setup_intent=seti_1234&amp;setup_intent_client_secret=seti_1234_secret_5678&amp;source_type=card"</ID>
+    <ID>MaxLineLength:PaymentAuthWebViewClientTest.kt$PaymentAuthWebViewClientTest$"stripe://payment_intent_return?payment_intent=pi_123&amp;payment_intent_client_secret=pi_123_secret_456&amp;source_type=card"</ID>
+    <ID>MaxLineLength:PaymentFlowActivityStarter.kt$PaymentFlowActivityStarter.Args.Builder$*</ID>
+    <ID>MaxLineLength:PaymentFlowFailureMessageFactory.kt$PaymentFlowFailureMessageFactory$(paymentIntent.status == StripeIntent.Status.RequiresAction &amp;&amp; paymentIntent.paymentMethod?.type?.isVoucher != true)</ID>
+    <ID>MaxLineLength:PaymentFlowResult.kt$PaymentFlowResult$*</ID>
+    <ID>MaxLineLength:PaymentIntent.kt$PaymentIntent.Error$*</ID>
+    <ID>MaxLineLength:PaymentIntent.kt$PaymentIntent.Shipping$*</ID>
+    <ID>MaxLineLength:PaymentIntentFixtures.kt$PaymentIntentFixtures$ </ID>
+    <ID>MaxLineLength:PaymentIntentJsonParserTest.kt$PaymentIntentJsonParserTest$"-----BEGIN CERTIFICATE-----\nMIIFtTCCA52gAwIBAgIQJqSRaPua/6cpablmVDHWUDANBgkqhkiG9w0BAQsFADB6\nMQswCQYDVQQGEwJVUzETMBEGA1UEChMKTWFzdGVyQ2FyZDEoMCYGA1UECxMfTWFz\ndGVyQ2FyZCBJZGVudGl0eSBDaGVjayBHZW4gMzEsMCoGA1UEAxMjUFJEIE1hc3Rl\nckNhcmQgM0RTMiBBY3F1aXJlciBTdWIgQ0EwHhcNMTgxMTIwMTQ1MzIzWhcNMjEx\nMTIwMTQ1MzIzWjBxMQswCQYDVQQGEwJVUzEdMBsGA1UEChMUTWFzdGVyQ2FyZCBX\nb3JsZHdpZGUxGzAZBgNVBAsTEmdhdGV3YXktZW5jcnlwdGlvbjEmMCQGA1UEAxMd\nM2RzMi5kaXJlY3RvcnkubWFzdGVyY2FyZC5jb20wggEiMA0GCSqGSIb3DQEBAQUA\nA4IBDwAwggEKAoIBAQCFlZjqbbL9bDKOzZFawdbyfQcezVEUSDCWWsYKw/V6co9A\nGaPBUsGgzxF6+EDgVj3vYytgSl8xFvVPsb4ZJ6BJGvimda8QiIyrX7WUxQMB3hyS\nBOPf4OB72CP+UkaFNR6hdlO5ofzTmB2oj1FdLGZmTN/sj6ZoHkn2Zzums8QAHFjv\nFjspKUYCmms91gpNpJPUUztn0N1YMWVFpFMytahHIlpiGqTDt4314F7sFABLxzFr\nDmcqhf623SPV3kwQiLVWOvewO62ItYUFgHwle2dq76YiKrUv1C7vADSk2Am4gqwv\n7dcCnFeM2AHbBFBa1ZBRQXosuXVw8ZcQqfY8m4iNAgMBAAGjggE+MIIBOjAOBgNV\nHQ8BAf8EBAMCAygwCQYDVR0TBAIwADAfBgNVHSMEGDAWgBSakqJUx4CN/s5W4wMU\n/17uSLhFuzBIBggrBgEFBQcBAQQ8MDowOAYIKwYBBQUHMAGGLGh0dHA6Ly9vY3Nw\nLnBraS5pZGVudGl0eWNoZWNrLm1hc3RlcmNhcmQuY29tMCgGA1UdEQQhMB+CHTNk\nczIuZGlyZWN0b3J5Lm1hc3RlcmNhcmQuY29tMGkGA1UdHwRiMGAwXqBcoFqGWGh0\ndHA6Ly9jcmwucGtpLmlkZW50aXR5Y2hlY2subWFzdGVyY2FyZC5jb20vOWE5MmEy\nNTRjNzgwOGRmZWNlNTZlMzAzMTRmZjVlZWU0OGI4NDViYi5jcmwwHQYDVR0OBBYE\nFHxN6+P0r3+dFWmi/+pDQ8JWaCbuMA0GCSqGSIb3DQEBCwUAA4ICAQAtwW8siyCi\nmhon1WUAUmufZ7bbegf3cTOafQh77NvA0xgVeloELUNCwsSSZgcOIa4Zgpsa0xi5\nfYxXsPLgVPLM0mBhTOD1DnPu1AAm32QVelHe6oB98XxbkQlHGXeOLs62PLtDZd94\n7pm08QMVb+MoCnHLaBLV6eKhKK+SNrfcxr33m0h3v2EMoiJ6zCvp8HgIHEhVpleU\n8H2Uo5YObatb/KUHgtp2z0vEfyGhZR7hrr48vUQpfVGBABsCV0aqUkPxtAXWfQo9\n1N9B7H3EIcSjbiUz5vkj9YeDSyJIi0Y/IZbzuNMsz2cRi1CWLl37w2fe128qWxYq\nY/k+Y4HX7uYchB8xPaZR4JczCvg1FV2JrkOcFvElVXWSMpBbe2PS6OMr3XxrHjzp\nDyM9qvzge0Ai9+rq8AyGoG1dP2Ay83Ndlgi42X3yl1uEUW2feGojCQQCFFArazEj\nLUkSlrB2kA12SWAhsqqQwnBLGSTp7PqPZeWkluQVXS0sbj0878kTra6TjG3U+KqO\nJCj8v6G380qIkAXe1xMHHNQ6GS59HZMeBPYkK2y5hmh/JVo4bRfK7Ya3blBSBfB8\nAVWQ5GqVWklvXZsQLN7FH/fMIT3y8iE1W19Ua4whlhvn7o/aYWOkHr1G2xyh8BHj\n7H63A2hjcPlW/ZAJSTuBZUClAhsNohH2Jg==\n-----END CERTIFICATE-----\n"</ID>
+    <ID>MaxLineLength:PaymentIntentJsonParserTest.kt$PaymentIntentJsonParserTest$"-----BEGIN CERTIFICATE-----\nMIIFxzCCA6+gAwIBAgIQFsjyIuqhw80wNMjXU47lfjANBgkqhkiG9w0BAQsFADB8\nMQswCQYDVQQGEwJVUzETMBEGA1UEChMKTWFzdGVyQ2FyZDEoMCYGA1UECxMfTWFz\ndGVyQ2FyZCBJZGVudGl0eSBDaGVjayBHZW4gMzEuMCwGA1UEAxMlUFJEIE1hc3Rl\nckNhcmQgSWRlbnRpdHkgQ2hlY2sgUm9vdCBDQTAeFw0xNjA3MTQwNzI0MDBaFw0z\nMDA3MTUwODEwMDBaMHwxCzAJBgNVBAYTAlVTMRMwEQYDVQQKEwpNYXN0ZXJDYXJk\nMSgwJgYDVQQLEx9NYXN0ZXJDYXJkIElkZW50aXR5IENoZWNrIEdlbiAzMS4wLAYD\nVQQDEyVQUkQgTWFzdGVyQ2FyZCBJZGVudGl0eSBDaGVjayBSb290IENBMIICIjAN\nBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEAxZF3nCEiT8XFFaq+3BPT0cMDlWE7\n6IBsdx27w3hLxwVLog42UTasIgzmysTKpBc17HEZyNAqk9GrCHo0Oyk4JZuXHoW8\n0goZaR2sMnn49ytt7aGsE1PsfVup8gqAorfm3IFab2/CniJJNXaWPgn94+U/nsoa\nqTQ6j+6JBoIwnFklhbXHfKrqlkUZJCYaWbZRiQ7nkANYYM2Td3N87FmRanmDXj5B\nG6lc9o1clTC7UvRQmNIL9OdDDZ8qlqY2Fi0eztBnuo2DUS5tGdVy8SgqPM3E12ft\nk4EdlKyrWmBqFcYwGx4AcSJ88O3rQmRBMxtk0r5vhgr6hDCGq7FHK/hQFP9LhUO9\n1qxWEtMn76Sa7DPCLas+tfNRVwG12FBuEZFhdS/qKMdIYUE5Q6uwGTEvTzg2kmgJ\nT3sNa6dbhlYnYn9iIjTh0dPGgiXap1Bhi8B9aaPFcHEHSqW8nZUINcrwf5AUi+7D\n+q/AG5ItiBtQTCaaFm74gv51yutzwgKnH9Q+x3mtuK/uwlLCslj9DeXgOzMWFxFg\nuuwLGX39ktDnetxNw3PLabjHkDlGDIfx0MCQakM74sTcuW8ICiHvNA7fxXCnbtjs\ny7at/yXYwAd+IDS51MA/g3OYVN4M+0pG843Re6Z53oODp0Ymugx0FNO1NxT3HO1h\nd7dXyjAV/tN/GGcCAwEAAaNFMEMwDgYDVR0PAQH/BAQDAgGGMBIGA1UdEwEB/wQI\nMAYBAf8CAQEwHQYDVR0OBBYEFNSlUaqS2hGLFMT/EXrhHeEx+UqxMA0GCSqGSIb3\nDQEBCwUAA4ICAQBLqIYorrtVz56F6WOoLX9CcRjSFim7gO873a3p7+62I6joXMsM\nr0nd9nRPcEwduEloZXwFgErVUQWaUZWNpue0mGvU7BUAgV9Tu0J0yA+9srizVoMv\nx+o4zTJ3Vu5p5aTf1aYoH1xYVo5ooFgl/hI/EXD2lo/xOUfPKXBY7twfiqOziQmT\nGBuqPRq8h3dQRlXYxX/rzGf80SecIT6wo9KavDkjOmJWGzzHsn6Ryo6MEClMaPn0\nte87ukNN740AdPhTvNeZdWlwyqWAJpsv24caEckjSpgpoIZOjc7PAcEVQOWFSxUe\nsMk4Jz5bVZa/ABjzcp+rsq1QLSJ5quqHwWFTewChwpw5gpw+E5SpKY6FIHPlTdl+\nqHThvN8lsKNAQg0qTdEbIFZCUQC0Cl3Ti3q/cXv8tguLJNWvdGzB600Y32QHclMp\neyabT4/QeOesqpx6Da70J2KvLT1j6Ch2BsKSzeVLahrjnoPrdgiIYYBOgeA3T8SE\n1pgagt56R7nIkRQbtesoRKi+NfC7pPb/G1VUsj/cREAHH1i1UKa0aCsIiANfEdQN\n5Ok6wtFJJhp3apAvnVkrZDfOG5we9bYzvGoI7SUnleURBJ+N3ihjARfL4hDeeRHh\nYyLkM3kEyEkrJBL5r0GDjicxM+aFcR2fCBAkv3grT5kz4kLcvsmHX+9DBw==\n-----END CERTIFICATE-----\n\n"</ID>
+    <ID>MaxLineLength:PaymentIntentJsonParserTest.kt$PaymentIntentJsonParserTest$"_input_charset=utf-8&amp;app_pay=Y&amp;currency=USD&amp;forex_biz=FP&amp;notify_url=https%3A%2F%2Fhooks.stripe.com%2Falipay%2Falipay%2Fhook%2F6255d30b067c8f7a162c79c654483646%2Fsrc_1HDEFWKlwPmebFhp6tcpln8T&amp;out_trade_no=src_1HDEFWKlwPmebFhp6tcpln8T&amp;partner=2088621828244481&amp;payment_type=1&amp;product_code=NEW_WAP_OVERSEAS_SELLER&amp;return_url=https%3A%2F%2Fhooks.stripe.com%2Fadapter%2Falipay%2Fredirect%2Fcomplete%2Fsrc_1HDEFWKlwPmebFhp6tcpln8T%2Fsrc_client_secret_S6H9mVMKK6qxk9YxsUvbH55K&amp;secondary_merchant_id=acct_1EqOyCKlwPmebFhp&amp;secondary_merchant_industry=5734&amp;secondary_merchant_name=Yuki-Test&amp;sendFormat=normal&amp;service=create_forex_trade_wap&amp;sign=b691876a7f0bd889530f54a271d314d5&amp;sign_type=MD5&amp;subject=Yuki-Test&amp;supplier=Yuki-Test&amp;timeout_rule=20m&amp;total_fee=1.00"</ID>
+    <ID>MaxLineLength:PaymentIntentJsonParserTest.kt$PaymentIntentJsonParserTest$"https://hooks.stripe.com/3d_secure_2_eap/begin_test/src_1Ecve7CRMbs6FrXfm8AxXMIh/src_client_secret_F79yszOBAiuaZTuIhbn3LPUW"</ID>
+    <ID>MaxLineLength:PaymentIntentJsonParserTest.kt$PaymentIntentJsonParserTest$"https://hooks.stripe.com/redirect/authenticate/src_1HDEFWKlwPmebFhp6tcpln8T?client_secret=src_client_secret_S6H9mVMKK6qxk9YxsUvbH55K"</ID>
+    <ID>MaxLineLength:PaymentIntentJsonParserTest.kt$PaymentIntentJsonParserTest$Uri.parse("https://hooks.stripe.com/3d_secure_2_eap/begin_test/src_1Ecaz6CRMbs6FrXfuYKBRSUG/src_client_secret_F6octeOshkgxT47dr0ZxSZiv")</ID>
+    <ID>MaxLineLength:PaymentIntentJsonParserTest.kt$PaymentIntentJsonParserTest$hostedVoucherUrl = "https://payments.stripe.com/oxxo/voucher/test_YWNjdF8xSWN1c1VMMzJLbFJvdDAxLF9KRlBtckVBMERWM0lBZEUyb"</ID>
+    <ID>MaxLineLength:PaymentIntentTest.kt$PaymentIntentTest$"The provided PaymentMethod has failed authentication. You can provide payment_method_data or a new PaymentMethod to attempt to fulfill this PaymentIntent again."</ID>
+    <ID>MaxLineLength:PaymentIntentTest.kt$PaymentIntentTest$Uri.parse("https://hooks.stripe.com/3d_secure_2_eap/begin_test/src_1Ecaz6CRMbs6FrXfuYKBRSUG/src_client_secret_F6octeOshkgxT47dr0ZxSZiv")</ID>
+    <ID>MaxLineLength:PaymentMethod.kt$PaymentMethod$*</ID>
+    <ID>MaxLineLength:PaymentMethod.kt$PaymentMethod.BillingDetails$*</ID>
+    <ID>MaxLineLength:PaymentMethod.kt$PaymentMethod.Card$*</ID>
+    <ID>MaxLineLength:PaymentMethod.kt$PaymentMethod.Card.Checks$*</ID>
+    <ID>MaxLineLength:PaymentMethod.kt$PaymentMethod.Card.ThreeDSecureUsage$*</ID>
+    <ID>MaxLineLength:PaymentMethod.kt$PaymentMethod.SepaDebit$*</ID>
+    <ID>MaxLineLength:PaymentMethodCreateParams.kt$PaymentMethodCreateParams.BacsDebit$*</ID>
+    <ID>MaxLineLength:PaymentMethodsActivityStarter.kt$PaymentMethodsActivityStarter.Args.Builder$*</ID>
+    <ID>MaxLineLength:PaymentMethodsActivityTest.kt$PaymentMethodsActivityTest$private val listenerArgumentCaptor: KArgumentCaptor&lt;CustomerSession.PaymentMethodsRetrievalListener> = argumentCaptor()</ID>
+    <ID>MaxLineLength:PaymentMethodsViewModelTest.kt$PaymentMethodsViewModelTest$private val listenerArgumentCaptor: KArgumentCaptor&lt;CustomerSession.PaymentMethodsRetrievalListener> = argumentCaptor()</ID>
+    <ID>MaxLineLength:PaymentRelayContract.kt$PaymentRelayContract$internal</ID>
+    <ID>MaxLineLength:PaymentSessionConfig.kt$PaymentSessionConfig.Builder$*</ID>
+    <ID>MaxLineLength:PaymentSessionConfigTest.kt$PaymentSessionConfigTest$fun</ID>
+    <ID>MaxLineLength:PaymentSessionTest.kt$PaymentSessionTest$private val paymentMethodsActivityStarterArgsCaptor: KArgumentCaptor&lt;PaymentMethodsActivityStarter.Args> = argumentCaptor()</ID>
+    <ID>MaxLineLength:PaymentSessionViewModelTest.kt$PaymentSessionViewModelTest$fun</ID>
+    <ID>MaxLineLength:PersonTokenParams.kt$PersonTokenParams$*</ID>
+    <ID>MaxLineLength:PersonTokenParams.kt$PersonTokenParams.Document$*</ID>
+    <ID>MaxLineLength:PersonTokenParams.kt$PersonTokenParams.Relationship$*</ID>
+    <ID>MaxLineLength:PersonTokenParams.kt$PersonTokenParams.Verification$*</ID>
+    <ID>MaxLineLength:RemoteCardAccountRangeSourceTest.kt$RemoteCardAccountRangeSourceTest$fun</ID>
+    <ID>MaxLineLength:SetupIntentFixtures.kt$SetupIntentFixtures$ </ID>
+    <ID>MaxLineLength:SetupIntentTest.kt$SetupIntentTest$"The provided PaymentMethod has failed authentication. You can provide payment_method_data or a new PaymentMethod to attempt to fulfill this PaymentIntent again."</ID>
+    <ID>MaxLineLength:SetupIntentTest.kt$SetupIntentTest$Uri.parse("https://hooks.stripe.com/redirect/authenticate/src_1EqTStGMT9dGPIDGJGPkqE6B" + "?client_secret=src_client_secret_FL9m741mmxtHykDlRTC5aQ02")</ID>
+    <ID>MaxLineLength:SourceFixtures.kt$SourceFixtures$ </ID>
+    <ID>MaxLineLength:SourceJsonParserTest.kt$SourceJsonParserTest$payLaterAssetUrlsDescriptive = "https://x.klarnacdn.net/payment-method/assets/badges/generic/klarna.svg"</ID>
+    <ID>MaxLineLength:SourceJsonParserTest.kt$SourceJsonParserTest$payLaterAssetUrlsStandard = "https://x.klarnacdn.net/payment-method/assets/badges/generic/klarna.svg"</ID>
+    <ID>MaxLineLength:SourceJsonParserTest.kt$SourceJsonParserTest$payOverTimeAssetUrlsDescriptive = "https://x.klarnacdn.net/payment-method/assets/badges/generic/klarna.svg"</ID>
+    <ID>MaxLineLength:SourceJsonParserTest.kt$SourceJsonParserTest$payOverTimeAssetUrlsStandard = "https://x.klarnacdn.net/payment-method/assets/badges/generic/klarna.svg"</ID>
+    <ID>MaxLineLength:SourceParams.kt$SourceParams.Companion$*</ID>
+    <ID>MaxLineLength:SourceSepaDebitDataJsonParserTest.kt$SourceSepaDebitDataJsonParserTest.Companion$ </ID>
+    <ID>MaxLineLength:SourceSepaDebitDataJsonParserTest.kt$SourceSepaDebitDataJsonParserTest.Companion$"https://hooks.stripe.com/adapter/sepa_debit/file/src_1A0burBbvEcIpqUbyTfDmJPk/src_client_secret_5Dgw1AQGTABOh0vlnKyxgboh"</ID>
+    <ID>MaxLineLength:Stripe.kt$Stripe$*</ID>
+    <ID>MaxLineLength:Stripe.kt$Stripe.Companion$*</ID>
+    <ID>MaxLineLength:Stripe3ds2AuthParamsTest.kt$Stripe3ds2AuthParamsTest.Companion$private const val DEVICE_DATA = "eyJlbmMiOiJBMTI4Q0JDLUhTMjU2IiwiYWxnIjoiUlNBLU9BRVAtMjU2In0.nid2Q-Ii21cSPHBaszR5KSXz866yX9I7AthLKpfWZoc7RIfz11UJ1EHuvIRDIyqqJ8txNUKKoL4keqMTqK5Yc5TqsxMn0nML8pZaPn40nXsJm_HFv3zMeOtRR7UTewsDWIgf5J-A6bhowIOmvKPCJRxspn_Cmja-YpgFWTp08uoJvqgntgg1lHmI1kh1UV6DuseYFUfuQlICTqC3TspAzah2CALWZORF_QtSeHc_RuqK02wOQMs-7079jRuSdBXvI6dQnL5ESH25wHHosfjHMZ9vtdUFNJo9J35UI1sdWFDzzj8k7bt0BupZhyeU0PSM9EHP-yv01-MQ9eslPTVNbFJ9YOHtq8WamvlKDr1sKxz6Ac_gUM8NgEcPP9SafPVxDd4H1Fwb5-4NYu2AD4xoAgMWE-YtzvfIFXZcU46NDoi6Xum3cHJqTH0UaOhBoqJJft9XZXYW80fjts-v28TkA76-QPF7CTDM6KbupvBkSoRq218eJLEywySXgCwf-Q95fsBtnnyhKcvfRaByq5kT7PH3DYD1rCQLexJ76A79kurre9pDjTKAv85G9DNkOFuVUYnNB3QGFReCcF9wzkGnZXdfkgN2BkB6n94bbkEyjbRb5r37XH6oRagx2fWLVj7kC5baeIwUPVb5kV_x4Kle7C-FPY1Obz4U7s6SVRnLGXY.IP9OcQx5uZxBRluOpn1m6Q.w-Ko5Qg6r-KCmKnprXEbKA7wV-SdLNDAKqjtuku6hda_0crOPRCPU4nn26Yxj7EG.p01pl8CKukuXzjLeY3a_Ew"</ID>
+    <ID>MaxLineLength:Stripe3ds2AuthResultFixtures.kt$Stripe3ds2AuthResultFixtures$ </ID>
+    <ID>MaxLineLength:Stripe3ds2AuthResultFixtures.kt$Stripe3ds2AuthResultFixtures$fallbackRedirectUrl = "https://hooks.stripe.com/3d_secure_2_eap/begin_test/src_1Ecve7CRMbs6FrXfm8AxXMIh/src_client_secret_F79yszOBAiuaZTuIhbn3LPUW"</ID>
+    <ID>MaxLineLength:Stripe3ds2AuthResultJsonParserTest.kt$Stripe3ds2AuthResultJsonParserTest$"eyJ0aHJlZURTU2VydmVyVHJhbnNJRCI6IjA4NDAwMTRiLWY1YTgtNDA5My04MzdkLTgxOTA3YmJmMmU2MiIsImFjc1RyYW5zSUQiOiIwZjdkMTU0MC1mYTM2LTQ2OWYtYmQ5ZC03ZjIxYzkzMmU2MjEiLCJjaGFsbGVuZ2VXaW5kb3dTaXplIjoiMDUiLCJtZXNzYWdlVHlwZSI6IkNSZXEiLCJtZXNzYWdlVmVyc2lvbiI6IjIuMS4wIn0="</ID>
+    <ID>MaxLineLength:Stripe3ds2AuthResultJsonParserTest.kt$Stripe3ds2AuthResultJsonParserTest$"https://hooks.stripe.com/3d_secure_2_eap/begin_test/src_1Ecve7CRMbs6FrXfm8AxXMIh/src_client_secret_F79yszOBAiuaZTuIhbn3LPUW"</ID>
+    <ID>MaxLineLength:Stripe3ds2AuthResultJsonParserTest.kt$Stripe3ds2AuthResultJsonParserTest.Companion$ </ID>
+    <ID>MaxLineLength:Stripe3ds2Fixtures.kt$Stripe3ds2Fixtures$private const val DEVICE_DATA = "eyJlbmMiOiJBMTI4Q0JDLUhTMjU2IiwiYWxnIjoiUlNBLU9BRVAtMjU2In0.nid2Q-Ii21cSPHBaszR5KSXz866yX9I7AthLKpfWZoc7RIfz11UJ1EHuvIRDIyqqJ8txNUKKoL4keqMTqK5Yc5TqsxMn0nML8pZaPn40nXsJm_HFv3zMeOtRR7UTewsDWIgf5J-A6bhowIOmvKPCJRxspn_Cmja-YpgFWTp08uoJvqgntgg1lHmI1kh1UV6DuseYFUfuQlICTqC3TspAzah2CALWZORF_QtSeHc_RuqK02wOQMs-7079jRuSdBXvI6dQnL5ESH25wHHosfjHMZ9vtdUFNJo9J35UI1sdWFDzzj8k7bt0BupZhyeU0PSM9EHP-yv01-MQ9eslPTVNbFJ9YOHtq8WamvlKDr1sKxz6Ac_gUM8NgEcPP9SafPVxDd4H1Fwb5-4NYu2AD4xoAgMWE-YtzvfIFXZcU46NDoi6Xum3cHJqTH0UaOhBoqJJft9XZXYW80fjts-v28TkA76-QPF7CTDM6KbupvBkSoRq218eJLEywySXgCwf-Q95fsBtnnyhKcvfRaByq5kT7PH3DYD1rCQLexJ76A79kurre9pDjTKAv85G9DNkOFuVUYnNB3QGFReCcF9wzkGnZXdfkgN2BkB6n94bbkEyjbRb5r37XH6oRagx2fWLVj7kC5baeIwUPVb5kV_x4Kle7C-FPY1Obz4U7s6SVRnLGXY.IP9OcQx5uZxBRluOpn1m6Q.w-Ko5Qg6r-KCmKnprXEbKA7wV-SdLNDAKqjtuku6hda_0crOPRCPU4nn26Yxj7EG.p01pl8CKukuXzjLeY3a_Ew"</ID>
+    <ID>MaxLineLength:Stripe3ds2Fixtures.kt$Stripe3ds2Fixtures$private const val SDK_EPHEMERAL_PUBLIC_KEY = "{\"kty\":\"EC\",\"use\":\"sig\",\"crv\":\"P-256\",\"kid\":\"b23da28b-d611-46a8-93af-44ad57ce9c9d\",\"x\":\"hSwyaaAp3ppSGkpt7d9G8wnp3aIXelsZVo05EPpqetg\",\"y\":\"OUVOv9xPh5RYWapla0oz3vCJWRRXlDmppy5BGNeSl-A\"}"</ID>
+    <ID>MaxLineLength:StripeApiRepositoryTest.kt$StripeApiRepositoryTest$"This PaymentIntent could be not be fulfilled via this session because a different payment method was attached to it. Another session could be attempting to fulfill this PaymentIntent. Please complete that session or try again."</ID>
+    <ID>MaxLineLength:StripeApiRepositoryTest.kt$StripeApiRepositoryTest$"eyJlbmMiOiJBMTI4Q0JDLUhTMjU2IiwiYWxnIjoiUlNBLU9BRVAtMjU2In0.nid2Q-Ii21cSPHBaszR5KSXz866yX9I7AthLKpfWZoc7RIfz11UJ1EHuvIRDIyqqJ8txNUKKoL4keqMTqK5Yc5TqsxMn0nML8pZaPn40nXsJm_HFv3zMeOtRR7UTewsDWIgf5J-A6bhowIOmvKPCJRxspn_Cmja-YpgFWTp08uoJvqgntgg1lHmI1kh1UV6DuseYFUfuQlICTqC3TspAzah2CALWZORF_QtSeHc_RuqK02wOQMs-7079jRuSdBXvI6dQnL5ESH25wHHosfjHMZ9vtdUFNJo9J35UI1sdWFDzzj8k7bt0BupZhyeU0PSM9EHP-yv01-MQ9eslPTVNbFJ9YOHtq8WamvlKDr1sKxz6Ac_gUM8NgEcPP9SafPVxDd4H1Fwb5-4NYu2AD4xoAgMWE-YtzvfIFXZcU46NDoi6Xum3cHJqTH0UaOhBoqJJft9XZXYW80fjts-v28TkA76-QPF7CTDM6KbupvBkSoRq218eJLEywySXgCwf-Q95fsBtnnyhKcvfRaByq5kT7PH3DYD1rCQLexJ76A79kurre9pDjTKAv85G9DNkOFuVUYnNB3QGFReCcF9wzkGnZXdfkgN2BkB6n94bbkEyjbRb5r37XH6oRagx2fWLVj7kC5baeIwUPVb5kV_x4Kle7C-FPY1Obz4U7s6SVRnLGXY.IP9OcQx5uZxBRluOpn1m6Q.w-Ko5Qg6r-KCmKnprXEbKA7wV-SdLNDAKqjtuku6hda_0crOPRCPU4nn26Yxj7EG.p01pl8CKukuXzjLeY3a_Ew"</ID>
+    <ID>MaxLineLength:StripeColorUtils.kt$StripeColorUtils.Companion$*</ID>
+    <ID>MaxLineLength:StripeEditTextTest.kt$StripeEditTextTest$editText.defaultColorStateList = ColorStateList.valueOf(ContextCompat.getColor(context, android.R.color.primary_text_dark))</ID>
+    <ID>MaxLineLength:StripeIntent.kt$StripeIntent.Status$*</ID>
+    <ID>MaxLineLength:StripeKtx.kt$*</ID>
+    <ID>MaxLineLength:StripeKtxTest.kt$StripeKtxTest$`Given repository returns non-empty value when calling retrieveAPI with String param then returns correct result`</ID>
+    <ID>MaxLineLength:StripeKtxTest.kt$StripeKtxTest$assertFailsWith</ID>
+    <ID>MaxLineLength:StripeKtxTest.kt$StripeKtxTest$private inline</ID>
+    <ID>MaxLineLength:StripePaymentControllerTest.kt$StripePaymentControllerTest$"We are unable to authenticate your payment method. Please choose a different payment method and try again."</ID>
+    <ID>MaxLineLength:StripePaymentLauncherTest.kt$StripePaymentLauncherTest$arg.injectorKey == (PaymentLauncher::class.simpleName + WeakMapInjectorRegistry.CURRENT_REGISTER_KEY.get())</ID>
+    <ID>MaxLineLength:WeChat.kt$WeChat$*</ID>
+    <ID>MaxLineLength:WebIntentAuthenticatorTest.kt$WebIntentAuthenticatorTest$expectedUrl = "https://hooks.stripe.com/3d_secure_2_eap/begin_test/src_1Ecaz6CRMbs6FrXfuYKBRSUG/src_client_secret_F6octeOshkgxT47dr0ZxSZiv"</ID>
+    <ID>MaxLineLength:WebIntentAuthenticatorTest.kt$WebIntentAuthenticatorTest$expectedUrl = "https://hooks.stripe.com/3d_secure_2_eap/begin_test/src_1Ecve7CRMbs6FrXfm8AxXMIh/src_client_secret_F79yszOBAiuaZTuIhbn3LPUW"</ID>
+    <ID>MaxLineLength:WebIntentAuthenticatorTest.kt$WebIntentAuthenticatorTest$expectedUrl = "https://hooks.stripe.com/redirect/authenticate/src_1EqTStGMT9dGPIDGJGPkqE6B?client_secret=src_client_secret_FL9m741mmxtHykDlRTC5aQ02"</ID>
+    <ID>MaxLineLength:WebIntentAuthenticatorTest.kt$WebIntentAuthenticatorTest$expectedUrl = "https://payments.stripe.com/oxxo/voucher/test_YWNjdF8xSWN1c1VMMzJLbFJvdDAxLF9KRlBtckVBMERWM0lBZEUyb"</ID>
+    <ID>MaximumLineLength:com.stripe.android.ApiKeyFixtures.kt:20</ID>
+    <ID>MaximumLineLength:com.stripe.android.ApiKeyFixtures.kt:24</ID>
+    <ID>MaximumLineLength:com.stripe.android.ApiKeyFixtures.kt:25</ID>
+    <ID>MaximumLineLength:com.stripe.android.ApiKeyFixtures.kt:28</ID>
+    <ID>MaximumLineLength:com.stripe.android.CardUtils.kt:16</ID>
+    <ID>MaximumLineLength:com.stripe.android.CustomerSessionOperationExecutorTest.kt:106</ID>
+    <ID>MaximumLineLength:com.stripe.android.CustomerSessionOperationExecutorTest.kt:42</ID>
+    <ID>MaximumLineLength:com.stripe.android.CustomerSessionOperationExecutorTest.kt:72</ID>
+    <ID>MaximumLineLength:com.stripe.android.EphemeralKeyManagerTest.kt:199</ID>
+    <ID>MaximumLineLength:com.stripe.android.EphemeralKeyManagerTest.kt:223</ID>
+    <ID>MaximumLineLength:com.stripe.android.EphemeralKeyManagerTest.kt:247</ID>
+    <ID>MaximumLineLength:com.stripe.android.PaymentAnalyticsRequestFactoryTest.kt:296</ID>
+    <ID>MaximumLineLength:com.stripe.android.PaymentRelayContract.kt:9</ID>
+    <ID>MaximumLineLength:com.stripe.android.PaymentSessionConfigTest.kt:48</ID>
+    <ID>MaximumLineLength:com.stripe.android.PaymentSessionTest.kt:60</ID>
+    <ID>MaximumLineLength:com.stripe.android.PaymentSessionViewModelTest.kt:177</ID>
+    <ID>MaximumLineLength:com.stripe.android.PaymentSessionViewModelTest.kt:216</ID>
+    <ID>MaximumLineLength:com.stripe.android.StripeKtxTest.kt:252</ID>
+    <ID>MaximumLineLength:com.stripe.android.StripeKtxTest.kt:273</ID>
+    <ID>MaximumLineLength:com.stripe.android.StripeKtxTest.kt:563</ID>
+    <ID>MaximumLineLength:com.stripe.android.StripeKtxTest.kt:601</ID>
+    <ID>MaximumLineLength:com.stripe.android.StripeKtxTest.kt:783</ID>
+    <ID>MaximumLineLength:com.stripe.android.StripePaymentControllerTest.kt:149</ID>
+    <ID>MaximumLineLength:com.stripe.android.cards.RemoteCardAccountRangeSourceTest.kt:117</ID>
+    <ID>MaximumLineLength:com.stripe.android.googlepaylauncher.GooglePayConfigConversionKtx.kt:10</ID>
+    <ID>MaximumLineLength:com.stripe.android.googlepaylauncher.GooglePayConfigConversionKtx.kt:19</ID>
+    <ID>MaximumLineLength:com.stripe.android.googlepaylauncher.GooglePayConfigConversionKtx.kt:20</ID>
+    <ID>MaximumLineLength:com.stripe.android.googlepaylauncher.GooglePayConfigConversionKtx.kt:9</ID>
+    <ID>MaximumLineLength:com.stripe.android.model.AlipayRedirectTest.kt:15</ID>
+    <ID>MaximumLineLength:com.stripe.android.model.AlipayRedirectTest.kt:19</ID>
+    <ID>MaximumLineLength:com.stripe.android.model.AlipayRedirectTest.kt:34</ID>
+    <ID>MaximumLineLength:com.stripe.android.model.CardBrand.kt:120</ID>
+    <ID>MaximumLineLength:com.stripe.android.model.PaymentIntentTest.kt:103</ID>
+    <ID>MaximumLineLength:com.stripe.android.model.PaymentIntentTest.kt:150</ID>
+    <ID>MaximumLineLength:com.stripe.android.model.SetupIntentTest.kt:42</ID>
+    <ID>MaximumLineLength:com.stripe.android.model.SetupIntentTest.kt:62</ID>
+    <ID>MaximumLineLength:com.stripe.android.model.Stripe3ds2AuthParamsTest.kt:82</ID>
+    <ID>MaximumLineLength:com.stripe.android.model.Stripe3ds2AuthResultFixtures.kt:60</ID>
+    <ID>MaximumLineLength:com.stripe.android.model.Stripe3ds2Fixtures.kt:10</ID>
+    <ID>MaximumLineLength:com.stripe.android.model.Stripe3ds2Fixtures.kt:14</ID>
+    <ID>MaximumLineLength:com.stripe.android.model.parsers.PaymentIntentJsonParserTest.kt:102</ID>
+    <ID>MaximumLineLength:com.stripe.android.model.parsers.PaymentIntentJsonParserTest.kt:104</ID>
+    <ID>MaximumLineLength:com.stripe.android.model.parsers.PaymentIntentJsonParserTest.kt:121</ID>
+    <ID>MaximumLineLength:com.stripe.android.model.parsers.PaymentIntentJsonParserTest.kt:122</ID>
+    <ID>MaximumLineLength:com.stripe.android.model.parsers.PaymentIntentJsonParserTest.kt:63</ID>
+    <ID>MaximumLineLength:com.stripe.android.model.parsers.PaymentIntentJsonParserTest.kt:74</ID>
+    <ID>MaximumLineLength:com.stripe.android.model.parsers.PaymentIntentJsonParserTest.kt:86</ID>
+    <ID>MaximumLineLength:com.stripe.android.model.parsers.SourceJsonParserTest.kt:21</ID>
+    <ID>MaximumLineLength:com.stripe.android.model.parsers.SourceJsonParserTest.kt:22</ID>
+    <ID>MaximumLineLength:com.stripe.android.model.parsers.SourceJsonParserTest.kt:29</ID>
+    <ID>MaximumLineLength:com.stripe.android.model.parsers.SourceJsonParserTest.kt:30</ID>
+    <ID>MaximumLineLength:com.stripe.android.model.parsers.SourceSepaDebitDataJsonParserTest.kt:57</ID>
+    <ID>MaximumLineLength:com.stripe.android.model.parsers.Stripe3ds2AuthResultJsonParserTest.kt:154</ID>
+    <ID>MaximumLineLength:com.stripe.android.model.parsers.Stripe3ds2AuthResultJsonParserTest.kt:163</ID>
+    <ID>MaximumLineLength:com.stripe.android.networking.DefaultAlipayRepositoryTest.kt:36</ID>
+    <ID>MaximumLineLength:com.stripe.android.networking.PaymentApiRequestTest.kt:25</ID>
+    <ID>MaximumLineLength:com.stripe.android.networking.StripeApiRepositoryTest.kt:1090</ID>
+    <ID>MaximumLineLength:com.stripe.android.networking.StripeApiRepositoryTest.kt:394</ID>
+    <ID>MaximumLineLength:com.stripe.android.payments.PaymentFlowFailureMessageFactory.kt:39</ID>
+    <ID>MaximumLineLength:com.stripe.android.payments.core.authentication.WebIntentAuthenticatorTest.kt:103</ID>
+    <ID>MaximumLineLength:com.stripe.android.payments.core.authentication.WebIntentAuthenticatorTest.kt:114</ID>
+    <ID>MaximumLineLength:com.stripe.android.payments.core.authentication.WebIntentAuthenticatorTest.kt:125</ID>
+    <ID>MaximumLineLength:com.stripe.android.payments.core.authentication.WebIntentAuthenticatorTest.kt:80</ID>
+    <ID>MaximumLineLength:com.stripe.android.payments.core.authentication.WebIntentAuthenticatorTest.kt:91</ID>
+    <ID>MaximumLineLength:com.stripe.android.payments.core.injection.AuthenticationModule.kt:30</ID>
+    <ID>MaximumLineLength:com.stripe.android.payments.core.injection.AuthenticationModule.kt:36</ID>
+    <ID>MaximumLineLength:com.stripe.android.payments.core.injection.AuthenticationModule.kt:42</ID>
+    <ID>MaximumLineLength:com.stripe.android.payments.paymentlauncher.StripePaymentLauncherTest.kt:39</ID>
+    <ID>MaximumLineLength:com.stripe.android.payments.paymentlauncher.StripePaymentLauncherTest.kt:54</ID>
+    <ID>MaximumLineLength:com.stripe.android.payments.paymentlauncher.StripePaymentLauncherTest.kt:67</ID>
+    <ID>MaximumLineLength:com.stripe.android.payments.paymentlauncher.StripePaymentLauncherTest.kt:80</ID>
+    <ID>MaximumLineLength:com.stripe.android.utils.InjectableActivityScenario.kt:107</ID>
+    <ID>MaximumLineLength:com.stripe.android.utils.InjectableActivityScenario.kt:95</ID>
+    <ID>MaximumLineLength:com.stripe.android.view.AddPaymentMethodViewModelTest.kt:30</ID>
+    <ID>MaximumLineLength:com.stripe.android.view.BecsDebitMandateAcceptanceFactoryTest.kt:20</ID>
+    <ID>MaximumLineLength:com.stripe.android.view.BecsDebitMandateAcceptanceTextViewTest.kt:24</ID>
+    <ID>MaximumLineLength:com.stripe.android.view.CardFormView.kt:83</ID>
+    <ID>MaximumLineLength:com.stripe.android.view.CardInputWidgetPlacement.kt:101</ID>
+    <ID>MaximumLineLength:com.stripe.android.view.CardInputWidgetPlacement.kt:171</ID>
+    <ID>MaximumLineLength:com.stripe.android.view.CardInputWidgetPlacement.kt:196</ID>
+    <ID>MaximumLineLength:com.stripe.android.view.CardNumberEditTextTest.kt:354</ID>
+    <ID>MaximumLineLength:com.stripe.android.view.CardNumberEditTextTest.kt:652</ID>
+    <ID>MaximumLineLength:com.stripe.android.view.CardNumberEditTextTest.kt:877</ID>
+    <ID>MaximumLineLength:com.stripe.android.view.PaymentAuthWebViewClientTest.kt:172</ID>
+    <ID>MaximumLineLength:com.stripe.android.view.PaymentAuthWebViewClientTest.kt:259</ID>
+    <ID>MaximumLineLength:com.stripe.android.view.PaymentAuthWebViewClientTest.kt:278</ID>
+    <ID>MaximumLineLength:com.stripe.android.view.PaymentAuthWebViewClientTest.kt:29</ID>
+    <ID>MaximumLineLength:com.stripe.android.view.PaymentAuthWebViewClientTest.kt:51</ID>
+    <ID>MaximumLineLength:com.stripe.android.view.PaymentAuthWebViewClientTest.kt:73</ID>
+    <ID>MaximumLineLength:com.stripe.android.view.PaymentAuthWebViewClientTest.kt:92</ID>
+    <ID>MaximumLineLength:com.stripe.android.view.PaymentMethodsActivityTest.kt:36</ID>
+    <ID>MaximumLineLength:com.stripe.android.view.PaymentMethodsViewModelTest.kt:24</ID>
+    <ID>MaximumLineLength:com.stripe.android.view.StripeEditTextTest.kt:99</ID>
+    <ID>ReturnCount:CardUtils.kt$CardUtils$ internal fun isValidLuhnNumber(cardNumber: String?): Boolean</ID>
+    <ID>ReturnCount:DateUtils.kt$DateUtils$@VisibleForTesting @JvmStatic fun isExpiryDataValid(expiryMonth: Int, expiryYear: Int, calendar: Calendar): Boolean</ID>
+    <ID>ReturnCount:DefaultPaymentAuthenticatorRegistry.kt$DefaultPaymentAuthenticatorRegistry$@Suppress("UNCHECKED_CAST") override fun &lt;Authenticatable> getAuthenticator( authenticatable: Authenticatable ): PaymentAuthenticator&lt;Authenticatable></ID>
+    <ID>ReturnCount:FraudDetectionDataJsonParser.kt$FraudDetectionDataJsonParser$override fun parse(json: JSONObject): FraudDetectionData?</ID>
+    <ID>ReturnCount:PaymentAuthWebViewClient.kt$PaymentAuthWebViewClient$private fun isReturnUrl(uri: Uri): Boolean</ID>
+    <ID>ReturnCount:PaymentSession.kt$PaymentSession$ fun handlePaymentData( requestCode: Int, resultCode: Int, data: Intent? ): Boolean</ID>
+    <ID>ReturnCount:ShippingInfoWidget.kt$ShippingInfoWidget$ fun validateAllFields(): Boolean</ID>
+    <ID>ReturnCount:StripeIntentResult.kt$StripeIntentResult$@StripeIntentResult.Outcome private fun determineOutcome( stripeIntentStatus: StripeIntent.Status?, @StripeIntentResult.Outcome outcome: Int ): Int</ID>
+    <ID>ReturnCount:WalletJsonParser.kt$WalletJsonParser$override fun parse(json: JSONObject): Wallet?</ID>
+    <ID>SwallowedException:PaymentUtils.kt$PaymentUtils$e: ClassCastException</ID>
+    <ID>SwallowedException:Stripe.kt$Stripe$exception: CardException</ID>
+    <ID>ThrowsCount:StripeApiRepository.kt$StripeApiRepository$@Throws( InvalidRequestException::class, AuthenticationException::class, CardException::class, APIException::class ) private fun handleApiError(response: StripeResponse&lt;String>)</ID>
+    <ID>TooGenericExceptionThrown:DefaultAlipayRepository.kt$DefaultAlipayRepository$throw RuntimeException("Unable to authenticate Payment Intent with Alipay SDK")</ID>
+    <ID>TooGenericExceptionThrown:PaymentFlowViewModelTest.kt$PaymentFlowViewModelTest.ThrowingShippingMethodsFactory$throw RuntimeException("Always throws an exception")</ID>
+    <ID>TooManyFunctions:AccountParams.kt$AccountParams.BusinessTypeParams.Company$Builder : ObjectBuilder</ID>
+    <ID>TooManyFunctions:AccountParams.kt$AccountParams.BusinessTypeParams.Individual$Builder : ObjectBuilder</ID>
+    <ID>TooManyFunctions:AddPaymentMethodActivity.kt$AddPaymentMethodActivity : StripeActivity</ID>
+    <ID>TooManyFunctions:AuthenticationComponent.kt$AuthenticationComponent$Builder</ID>
+    <ID>TooManyFunctions:CardFormView.kt$CardFormView : LinearLayout</ID>
+    <ID>TooManyFunctions:CardInputWidget.kt$CardInputWidget : LinearLayoutCardWidget</ID>
+    <ID>TooManyFunctions:CardMultilineWidget.kt$CardMultilineWidget : LinearLayoutCardWidget</ID>
+    <ID>TooManyFunctions:CardWidget.kt$CardWidget</ID>
+    <ID>TooManyFunctions:CountryTextInputLayout.kt$CountryTextInputLayout : TextInputLayout</ID>
+    <ID>TooManyFunctions:CustomerSession.kt$CustomerSession</ID>
+    <ID>TooManyFunctions:PaymentAnalyticsRequestFactory.kt$PaymentAnalyticsRequestFactory : AnalyticsRequestFactory</ID>
+    <ID>TooManyFunctions:PaymentController.kt$PaymentController</ID>
+    <ID>TooManyFunctions:PaymentFlowActivity.kt$PaymentFlowActivity : StripeActivity</ID>
+    <ID>TooManyFunctions:PaymentMethod.kt$PaymentMethod$Builder : ObjectBuilder</ID>
+    <ID>TooManyFunctions:PaymentMethodCreateParams.kt$PaymentMethodCreateParams$Companion</ID>
+    <ID>TooManyFunctions:PaymentMethodsActivity.kt$PaymentMethodsActivity : AppCompatActivity</ID>
+    <ID>TooManyFunctions:PaymentMethodsActivityStarter.kt$PaymentMethodsActivityStarter.Args$Builder : ObjectBuilder</ID>
+    <ID>TooManyFunctions:PaymentMethodsAdapter.kt$PaymentMethodsAdapter : Adapter</ID>
+    <ID>TooManyFunctions:PaymentSessionConfig.kt$PaymentSessionConfig$Builder : ObjectBuilder</ID>
+    <ID>TooManyFunctions:PaymentSessionViewModel.kt$PaymentSessionViewModel : AndroidViewModel</ID>
+    <ID>TooManyFunctions:PersonTokenParams.kt$PersonTokenParams$Builder : ObjectBuilder</ID>
+    <ID>TooManyFunctions:ShippingInfoWidget.kt$ShippingInfoWidget : LinearLayout</ID>
+    <ID>TooManyFunctions:SourceParams.kt$SourceParams$Companion</ID>
+    <ID>TooManyFunctions:Stripe.kt$Stripe</ID>
+    <ID>TooManyFunctions:StripeApiRepository.kt$StripeApiRepository : StripeRepository</ID>
+    <ID>TooManyFunctions:StripeApiRepository.kt$StripeApiRepository$Companion</ID>
+    <ID>TooManyFunctions:StripeEditText.kt$StripeEditText : TextInputEditText</ID>
+    <ID>TooManyFunctions:StripeKtx.kt$com.stripe.android.StripeKtx.kt</ID>
+    <ID>TooManyFunctions:StripePaymentController.kt$StripePaymentController : PaymentController</ID>
+    <ID>TooManyFunctions:StripeRepository.kt$StripeRepository</ID>
+    <ID>UnnecessaryAbstractClass:ActivityStarter.kt$ActivityStarter&lt;TargetActivityType : Activity, ArgsType : ActivityStarter.Args></ID>
+    <ID>UnusedPrivateMember:CustomerSession.kt$CustomerSession$private fun &lt;L : RetrievalListener?> getListener(operationId: String): L?</ID>
+    <ID>UnusedPrivateMember:GooglePayLauncherActivityTest.kt$GooglePayLauncherActivityTest$private val context = ApplicationProvider.getApplicationContext&lt;Context>()</ID>
+    <ID>UnusedPrivateMember:GooglePayPaymentMethodLauncherModule.kt$GooglePayPaymentMethodLauncherModule.Companion$context: Context</ID>
+    <ID>UnusedPrivateMember:PayWithGoogleUtils.kt$PayWithGoogleUtils$i</ID>
+    <ID>UnusedPrivateMember:PaymentFlowActivityStarter.kt$PaymentFlowActivityStarter$config: PaymentSessionConfig</ID>
+    <ID>UnusedPrivateMember:PaymentMethod.kt$PaymentMethod.CardPresent$private val ignore: Boolean = true</ID>
+    <ID>UnusedPrivateMember:PersonTokenParams.kt$PersonTokenParams.Companion$// top level param private const val PARAM_PERSON = "person"</ID>
+    <ID>UnusedPrivateMember:Stripe3ds2AuthResult.kt$Stripe3ds2AuthResult$private val liveMode: Boolean = false</ID>
+    <ID>UnusedPrivateMember:Stripe3ds2AuthResult.kt$Stripe3ds2AuthResult.Ares$private val acsChallengeMandated: String?</ID>
+    <ID>UnusedPrivateMember:Stripe3ds2AuthResult.kt$Stripe3ds2AuthResult.Ares$private val acsUrl: String? = null</ID>
+    <ID>UnusedPrivateMember:Stripe3ds2AuthResult.kt$Stripe3ds2AuthResult.Ares$private val authenticationType: String? = null</ID>
+    <ID>UnusedPrivateMember:Stripe3ds2AuthResult.kt$Stripe3ds2AuthResult.Ares$private val cardholderInfo: String? = null</ID>
+    <ID>UnusedPrivateMember:Stripe3ds2AuthResult.kt$Stripe3ds2AuthResult.Ares$private val messageExtension: List&lt;MessageExtension>? = null</ID>
+    <ID>UnusedPrivateMember:Stripe3ds2AuthResult.kt$Stripe3ds2AuthResult.Ares$private val messageType: String?</ID>
+    <ID>UnusedPrivateMember:Stripe3ds2AuthResult.kt$Stripe3ds2AuthResult.Ares$private val messageVersion: String?</ID>
+    <ID>UnusedPrivateMember:Stripe3ds2AuthResult.kt$Stripe3ds2AuthResult.Ares$private val sdkTransId: String?</ID>
+    <ID>UnusedPrivateMember:Stripe3ds2AuthResult.kt$Stripe3ds2AuthResult.MessageExtension$private val criticalityIndicator: Boolean</ID>
+    <ID>UnusedPrivateMember:Stripe3ds2Fixtures.kt$Stripe3ds2Fixtures$private val SDK_TRANSACTION_ID = UUID.randomUUID().toString()</ID>
+    <ID>UnusedPrivateMember:StripeBrowserLauncherActivity.kt$StripeBrowserLauncherActivity$activityResult: ActivityResult</ID>
+    <ID>UnusedPrivateMember:StripeBrowserLauncherActivityTest.kt$StripeBrowserLauncherActivityTest$private val context = ApplicationProvider.getApplicationContext&lt;Context>()</ID>
+    <ID>UnusedPrivateMember:StripeFileParams.kt$StripeFileParams$/** * Optional parameters to automatically create a * [file link](https://stripe.com/docs/api/files/create#file_links) for the newly created file. * * [file_link_data]](https://stripe.com/docs/api/files/create#create_file-file_link_data) */ private val fileLink: FileLink? = null</ID>
+    <ID>UnusedPrivateMember:StripeFileParams.kt$StripeFileParams.FileLink$/** * A future timestamp after which the link will no longer be usable. * * [file_link_data.expires_at](https://stripe.com/docs/api/files/create#create_file-file_link_data-expires_at) */ private val expiresAt: Long? = null</ID>
+    <ID>UnusedPrivateMember:StripeFileParams.kt$StripeFileParams.FileLink$/** * Set of key-value pairs that you can attach to an object. This can be useful for storing * additional information about the object in a structured format. Individual keys can be * unset by posting an empty value to them. All keys can be unset by posting an empty value * to metadata. * * [file_link_data.metadata](https://stripe.com/docs/api/files/create#create_file-file_link_data-metadata) */ private val metadata: Map&lt;String, String>? = null</ID>
+    <ID>UnusedPrivateMember:StripeFileParams.kt$StripeFileParams.FileLink$/** * Set this to `true` to create a file link for the newly created file. Creating a link is * only possible when the file’s `purpose` is one of the following: `business_icon`, * `business_logo`, `customer_signature`, `dispute_evidence`, `pci_document`, or * `tax_document_user_upload`. * * [file_link_data.create](https://stripe.com/docs/api/files/create#create_file-file_link_data-create) */ private val create: Boolean = false</ID>
+  </CurrentIssues>
+</SmellBaseline>
