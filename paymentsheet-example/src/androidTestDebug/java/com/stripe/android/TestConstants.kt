@@ -1,0 +1,5 @@
+package com.stripe.android
+
+const val INDIVIDUAL_TEST_TIMEOUT_SECONDS = 70L
+const val HOOKS_PAGE_LOAD_TIMEOUT = 60L
+const val TEST_IBAN_NUMBER = "DE89370400440532013000"

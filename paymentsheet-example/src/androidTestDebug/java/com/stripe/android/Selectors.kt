@@ -76,22 +76,6 @@ object SaveForFutureCheckbox :
     EspressoLabelIdButton(R.string.stripe_paymentsheet_save_this_card_with_merchant_name)
 
 class PaymentSelection(@StringRes val label: Int) {
-    //: com.stripe.android.EspressoLabelIdButton(id) {
-
-    fun exists(): Boolean {
-        return try {
-            Espresso.onView(ViewMatchers.withId(com.stripe.android.paymentsheet.R.id.payment_methods_recycler))
-                .withFailureHandler { _, _ ->
-                    throw InvalidParameterException("No payment selector found")
-                }
-                .check(ViewAssertions.matches(ViewMatchers.isDisplayed()))
-            true
-
-        } catch (e: InvalidParameterException) {
-            false
-        }
-    }
-
     fun click(composeTestRule: ComposeTestRule, resource: Resources) {
         composeTestRule.onNodeWithTag(TEST_TAG_LIST, true)
             .performScrollToNode(hasText(resource.getString(label)))
@@ -120,6 +104,11 @@ sealed class Billing(@IntegerRes id: Int) : EspressoIdButton(id) {
     object Off : Billing(R.id.default_billing_off_button)
 }
 
+sealed class Shipping(@IntegerRes id: Int) : EspressoIdButton(id) {
+    object On : Shipping(R.id.shipping_on_button)
+    object Off : Shipping(R.id.shipping_off_button)
+}
+
 sealed class Checkout(@StringRes id: Int) : EspressoLabelIdButton(id) {
     object Pay : Checkout(R.string.payment)
     object PayWithSetup : Checkout(R.string.payment_with_setup)
@@ -141,13 +130,22 @@ sealed class Customer(@StringRes id: Int) : EspressoLabelIdButton(id) {
     object New : Customer(R.string.customer_new)
 }
 
+
 sealed class AuthorizeAction(
     name: String,
     className: String
 ) : UiAutomatorText(name, className) {
-    object Authorize : AuthorizeAction("AUTHORIZE TEST PAYMENT", "android.widget.Button")
+    data class Authorize(
+        val name: String = "AUTHORIZE TEST PAYMENT",
+        val className: String = "android.widget.Button"
+    ) : AuthorizeAction(name, className)
+
+    data class Fail(
+        val name: String = "FAIL TEST PAYMENT",
+        val className: String = "android.widget.Button"
+    ) : AuthorizeAction(name, className)
+
     object Cancel : AuthorizeAction("", "")
-    object Fail : AuthorizeAction("FAIL TEST PAYMENT", "android.widget.Button")
 }
 
 object SelectBrowserWindow : UiAutomatorText("Verify your payment")
@@ -166,7 +164,7 @@ object AuthorizePageLoaded {
             Until.findObject(
                 By.textContains("test payment page")
             ),
-            10000
+            HOOKS_PAGE_LOAD_TIMEOUT * 1000
         )
     }
 }
@@ -180,10 +178,25 @@ sealed class Browser(name: String, val packageName: String, val resourceID: Stri
         "com.android.chrome:id/coordinator"
     )
 
-    object Firefox :
-        Browser(
-            "Firefox",
-            "org.mozilla.firefox",
-            "org.mozilla.firefox:id/action_bar_root"
-        )
+    object Firefox : Browser(
+        "Firefox",
+        "org.mozilla.firefox",
+        "org.mozilla.firefox:id/action_bar_root"
+    )
+
+    // This is the default browser on Google API only API 21
+    object Android : Browser(
+        "Android",
+        "com.android.browser",
+        "com.opera.browser:id/chromium_container_view"
+    )
+
+    companion object {
+        fun to(name: String) = when (name) {
+            Firefox.packageName -> Firefox
+            Chrome.packageName -> Chrome
+            Android.packageName -> Android
+            else -> null
+        }
+    }
 }

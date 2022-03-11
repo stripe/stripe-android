@@ -9,6 +9,7 @@ data class TestParameters(
     val currency: Currency,
     val checkout: Checkout,
     val billing: Billing,
+    val shipping: Shipping,
     val delayed: DelayedPMs,
     val automatic: Automatic,
     val saveCheckboxValue: Boolean,

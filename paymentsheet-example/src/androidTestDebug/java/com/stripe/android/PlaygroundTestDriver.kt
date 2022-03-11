@@ -1,5 +1,6 @@
 package com.stripe.android
 
+import android.content.pm.PackageManager
 import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.test.core.app.ActivityScenario
 import androidx.test.espresso.IdlingRegistry
@@ -12,8 +13,10 @@ import com.stripe.android.paymentsheet.PaymentSheetResult
 import com.stripe.android.paymentsheet.example.R
 import com.stripe.android.paymentsheet.example.playground.activity.PaymentSheetPlaygroundActivity
 import com.stripe.android.paymentsheet.viewmodels.TransitionFragmentResource
+import org.junit.Assume.assumeTrue
 import java.util.concurrent.Semaphore
 import java.util.concurrent.TimeUnit
+
 
 class PlaygroundTestDriver(
     private val device: UiDevice,
@@ -24,12 +27,18 @@ class PlaygroundTestDriver(
         testParameters: TestParameters,
         populateCustomLpmFields: () -> Unit = {}
     ) {
+        testParameters.authorizationAction?.let {
+            testParameters.useBrowser?.let {
+                assumeTrue(getInstalledBrowser(testParameters.useBrowser) == it)
+            }
+        }
+
         var resultValue: String? = null
         val callbackLock = Semaphore(1)
 
         // Setup the playground for scenario, and launch it.  We use the playground
         // so we don't have to implement another route to create a payment intent,
-        // the challeng is that we don't have access to the activity or it's viewmodels
+        // the challenge is that we don't have access to the activity or it's viewmodels
         launchCompleteScenario(testParameters) { activity ->
             callbackLock.acquire()
 
@@ -86,22 +95,39 @@ class PlaygroundTestDriver(
         callbackLock.release()
     }
 
+    private fun getInstalledPackages() = InstrumentationRegistry
+        .getInstrumentation()
+        .targetContext
+        .packageManager
+        .getInstalledApplications(PackageManager.GET_META_DATA)
+
+    private fun getInstalledBrowser(requestedBrowser: Browser?): Browser {
+        val installedBrowsers = getInstalledPackages()
+            .mapNotNull { Browser.to(it.packageName) }
+
+        return requestedBrowser?.let {
+            // Assume true will mark the test as skipped if it can't be executed
+            assumeTrue(installedBrowsers.contains(it))
+            it
+        } ?: installedBrowsers.first()
+    }
+
     private fun doAuthorization(
         device: UiDevice,
         authorizationAction: AuthorizeAction,
         useBrowser: Browser?
     ) {
-        // Which browsers are available on device - chrome and or firefox
-        val browser = Browser.Chrome
+        val selectedBrowser = getInstalledBrowser(useBrowser)
+
         if (SelectBrowserWindow.exists(device)) {
-            // Prefer the browser selected in the parameters
-            useBrowser?.click(device)
+            selectedBrowser.click(device)
         }
 
-        if (AuthorizeWindow.exists(device, browser)) {
+        if (AuthorizeWindow.exists(device, selectedBrowser)) {
             AuthorizePageLoaded.blockUntilLoaded(device)
             when (authorizationAction) {
-                AuthorizeAction.Authorize, AuthorizeAction.Fail ->
+                is AuthorizeAction.Authorize,
+                is AuthorizeAction.Fail ->
                     authorizationAction.click(device)
                 AuthorizeAction.Cancel ->
                     device.pressBack()
@@ -137,11 +163,13 @@ class PlaygroundTestDriver(
         }
 
         testParameters.customer.click()
-        testParameters.googlePayState.click()
         testParameters.currency.click()
         testParameters.checkout.click()
         testParameters.billing.click()
         testParameters.delayed.click()
+
+        // Can't guarantee that google pay will be on the phone
+        testParameters.googlePayState.click()
 
         EspressoLabelIdButton(R.string.reload_paymentsheet).click()
         EspressoLabelIdButton(R.string.checkout_complete).click()

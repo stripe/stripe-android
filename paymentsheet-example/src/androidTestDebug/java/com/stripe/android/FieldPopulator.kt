@@ -4,6 +4,7 @@ import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performTextInput
 import androidx.test.espresso.Espresso
+import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ui.core.elements.AddressSpec
 import com.stripe.android.ui.core.elements.AuBankAccountNumberSpec
 import com.stripe.android.ui.core.elements.BankDropdownSpec
@@ -29,7 +30,8 @@ class FieldPopulator(
 
         Espresso.closeSoftKeyboard()
 
-        assert(testParameters.saveForFutureUseCheckboxVisible == SaveForFutureCheckbox.exists())
+        assertThat(testParameters.saveForFutureUseCheckboxVisible == SaveForFutureCheckbox.exists())
+            .isTrue()
         if (SaveForFutureCheckbox.exists()) {
             if (!testParameters.saveCheckboxValue) {
                 SaveForFutureCheckbox.click()
