@@ -5,7 +5,7 @@ import com.stripe.android.model.ConsumerSession
 /**
  * Immutable object representing a Link account.
  */
-internal class LinkAccount(consumerSession: ConsumerSession) {
+internal class LinkAccount(private val consumerSession: ConsumerSession) {
 
     val redactedPhoneNumber = consumerSession.redactedPhoneNumber
     val clientSecret = consumerSession.clientSecret
