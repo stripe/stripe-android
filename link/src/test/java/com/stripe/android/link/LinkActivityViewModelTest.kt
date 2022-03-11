@@ -5,6 +5,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.savedstate.SavedStateRegistry
 import androidx.savedstate.SavedStateRegistryOwner
 import androidx.test.core.app.ApplicationProvider
+import com.stripe.android.link.utils.FakeAndroidKeyStore
 import com.google.common.truth.Truth
 import com.stripe.android.core.injection.Injectable
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
@@ -43,6 +44,10 @@ class LinkActivityViewModelTest {
 
     private val linkAccountManager = mock<LinkAccountManager>()
     private val navigator = mock<Navigator>()
+
+    init {
+        FakeAndroidKeyStore.setup()
+    }
 
     @Test
     fun `When consumer is verified then it navigates to Wallet screen`() = runTest {
