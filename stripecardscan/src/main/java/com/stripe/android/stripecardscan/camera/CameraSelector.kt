@@ -10,7 +10,7 @@ import com.stripe.android.camera.Camera1Adapter
 import com.stripe.android.camera.CameraAdapter
 import com.stripe.android.camera.CameraErrorListener
 import com.stripe.android.camera.CameraPreviewImage
-import com.stripe.android.stripecardscan.framework.Config
+import com.stripe.android.stripecardscan.framework.LOG_TAG
 
 /**
  * Get the appropriate camera adapter. If the customer has provided an additional camera adapter,
@@ -26,14 +26,14 @@ internal fun getCameraAdapter(
         try {
             getAlternateCamera(activity, previewView, minimumResolution, cameraErrorListener)
         } catch (t: Throwable) {
-            Log.d(Config.logTag, "No alternative camera implementations, falling back to default")
+            Log.d(LOG_TAG, "No alternative camera implementations, falling back to default")
             Camera1Adapter(activity, previewView, minimumResolution, cameraErrorListener)
         }
     } else {
-        Log.d(Config.logTag, "YUV_420_888 is not supported, falling back to default camera")
+        Log.d(LOG_TAG, "YUV_420_888 is not supported, falling back to default camera")
         Camera1Adapter(activity, previewView, minimumResolution, cameraErrorListener)
     }.apply {
-        Log.d(Config.logTag, "Using camera implementation ${this.implementationName}")
+        Log.d(LOG_TAG, "Using camera implementation ${this.implementationName}")
     }
 
 @Suppress("UNCHECKED_CAST")
