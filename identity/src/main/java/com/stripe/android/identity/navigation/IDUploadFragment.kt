@@ -8,8 +8,9 @@ import com.stripe.android.identity.states.IdentityScanState
  * Fragment to upload ID.
  */
 internal class IDUploadFragment(
-    frontBackUploadViewModelFactory: ViewModelProvider.Factory
-) : FrontBackUploadFragment(frontBackUploadViewModelFactory) {
+    frontBackUploadViewModelFactory: ViewModelProvider.Factory,
+    identityViewModelFactory: ViewModelProvider.Factory
+) : FrontBackUploadFragment(frontBackUploadViewModelFactory, identityViewModelFactory) {
     override val titleRes = R.string.file_upload
     override val contextRes = R.string.file_upload_content_id
     override val frontTextRes = R.string.front_of_id

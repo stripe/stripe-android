@@ -1,5 +1,7 @@
 package com.stripe.android.identity.viewmodel
 
+import android.util.Log
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -10,6 +12,7 @@ import com.stripe.android.core.exception.APIException
 import com.stripe.android.identity.IdentityVerificationSheetContract
 import com.stripe.android.identity.networking.IdentityRepository
 import com.stripe.android.identity.networking.Resource
+import com.stripe.android.identity.networking.Status
 import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.networking.models.VerificationPageData
@@ -35,6 +38,28 @@ internal class IdentityViewModel(
      */
     private val _idDetectorModelFile = MutableLiveData<Resource<File>>()
     val idDetectorModelFile: LiveData<Resource<File>> = _idDetectorModelFile
+
+    /**
+     * Simple wrapper for observing [verificationPage].
+     */
+    fun observeForVerificationPage(
+        owner: LifecycleOwner,
+        onSuccess: (VerificationPage) -> Unit,
+        onFailure: (Throwable?) -> Unit,
+    ) {
+        verificationPage.observe(owner) { resource ->
+            when (resource.status) {
+                Status.SUCCESS -> {
+                    onSuccess(requireNotNull(resource.data))
+                }
+                Status.ERROR -> {
+                    Log.e(TAG, "Fail to get VerificationPage")
+                    onFailure(resource.throwable)
+                }
+                Status.LOADING -> {} // no-op
+            }
+        }
+    }
 
     /**
      * Retrieve the VerificationPage data and post its value to [verificationPage]
@@ -126,5 +151,9 @@ internal class IdentityViewModel(
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
             return IdentityViewModel(args, identityRepository) as T
         }
+    }
+
+    private companion object {
+        val TAG: String = IdentityViewModel::class.java.simpleName
     }
 }

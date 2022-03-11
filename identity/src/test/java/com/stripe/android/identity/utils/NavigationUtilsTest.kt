@@ -11,12 +11,14 @@ import androidx.navigation.testing.TestNavHostController
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.exception.APIException
+import com.stripe.android.identity.CORRECT_VERIFICATION_PAGE_DATA
+import com.stripe.android.identity.ERROR_BODY
+import com.stripe.android.identity.ERROR_BUTTON_TEXT
+import com.stripe.android.identity.ERROR_TITLE
+import com.stripe.android.identity.ERROR_VERIFICATION_PAGE_DATA
 import com.stripe.android.identity.R
 import com.stripe.android.identity.navigation.ErrorFragment
 import com.stripe.android.identity.networking.models.CollectedDataParam
-import com.stripe.android.identity.networking.models.VerificationPageData
-import com.stripe.android.identity.networking.models.VerificationPageDataRequirementError
-import com.stripe.android.identity.networking.models.VerificationPageDataRequirements
 import com.stripe.android.identity.viewmodel.IdentityViewModel
 import kotlinx.coroutines.runBlocking
 import org.junit.Test
@@ -252,40 +254,5 @@ internal class NavigationUtilsTest {
             container: ViewGroup?,
             savedInstanceState: Bundle?
         ) = View(context)
-    }
-
-    private companion object {
-        const val ERROR_BODY = "errorBody"
-        const val ERROR_BUTTON_TEXT = "error button text"
-        const val ERROR_TITLE = "errorTitle"
-
-        val CORRECT_VERIFICATION_PAGE_DATA = VerificationPageData(
-            id = "id",
-            objectType = "type",
-            requirements = VerificationPageDataRequirements(
-                errors = emptyList(),
-                missing = emptyList()
-            ),
-            status = VerificationPageData.Status.VERIFIED,
-            submitted = false
-        )
-
-        val ERROR_VERIFICATION_PAGE_DATA = VerificationPageData(
-            id = "id",
-            objectType = "type",
-            requirements = VerificationPageDataRequirements(
-                errors = listOf(
-                    VerificationPageDataRequirementError(
-                        body = ERROR_BODY,
-                        buttonText = ERROR_BUTTON_TEXT,
-                        requirement = VerificationPageDataRequirementError.Requirement.BIOMETRICCONSENT,
-                        title = ERROR_TITLE
-                    )
-                ),
-                missing = emptyList()
-            ),
-            status = VerificationPageData.Status.VERIFIED,
-            submitted = false
-        )
     }
 }

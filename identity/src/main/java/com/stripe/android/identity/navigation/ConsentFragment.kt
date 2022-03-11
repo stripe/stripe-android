@@ -1,7 +1,6 @@
 package com.stripe.android.identity.navigation
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -12,7 +11,6 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.stripe.android.identity.R
 import com.stripe.android.identity.databinding.ConsentFragmentBinding
-import com.stripe.android.identity.networking.Status
 import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.networking.models.ConsentParam
 import com.stripe.android.identity.networking.models.VerificationPage.Companion.isMissingBiometricConsent
@@ -68,26 +66,20 @@ internal class ConsentFragment(
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        identityViewModel.verificationPage.observe(viewLifecycleOwner) {
-            when (it.status) {
-                Status.SUCCESS -> {
-                    if (requireNotNull(it.data).isMissingBiometricConsent()) {
-                        setLoadingFinishedUI()
-                        bindViewData(requireNotNull(it.data).biometricConsent)
-                    } else {
-                        navigateToDocSelection()
-                    }
+        identityViewModel.observeForVerificationPage(
+            viewLifecycleOwner,
+            onSuccess = { verificationPage ->
+                if (verificationPage.isMissingBiometricConsent()) {
+                    setLoadingFinishedUI()
+                    bindViewData(verificationPage.biometricConsent)
+                } else {
+                    navigateToDocSelection()
                 }
-                Status.LOADING -> {} // no-op
-                Status.ERROR -> {
-                    Log.d(
-                        TAG,
-                        "API Error occurred: $it.throwable, navigate to general error fragment"
-                    )
-                    navigateToDefaultErrorFragment()
-                }
+            },
+            onFailure = {
+                navigateToDefaultErrorFragment()
             }
-        }
+        )
     }
 
     /**
@@ -128,9 +120,5 @@ internal class ConsentFragment(
         binding.loadings.visibility = View.GONE
         binding.texts.visibility = View.VISIBLE
         binding.buttons.visibility = View.VISIBLE
-    }
-
-    private companion object {
-        val TAG: String = ConsentFragment::class.java.simpleName
     }
 }
