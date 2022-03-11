@@ -25,7 +25,9 @@ import java.security.InvalidParameterException
 
 open class EspressoLabelIdButton(@StringRes val label: Int) {
     fun click() {
-        Espresso.onView(ViewMatchers.withText(label)).perform(ViewActions.click())
+        Espresso.onView(ViewMatchers.withText(label))
+            .perform(ViewActions.scrollTo())
+            .perform(ViewActions.click())
     }
 
     fun exists(): Boolean {
@@ -184,18 +186,10 @@ sealed class Browser(name: String, val packageName: String, val resourceID: Stri
         "org.mozilla.firefox:id/action_bar_root"
     )
 
-    // This is the default browser on Google API only API 21
-    object Android : Browser(
-        "Android",
-        "com.android.browser",
-        "com.opera.browser:id/chromium_container_view"
-    )
-
     companion object {
         fun to(name: String) = when (name) {
             Firefox.packageName -> Firefox
             Chrome.packageName -> Chrome
-            Android.packageName -> Android
             else -> null
         }
     }

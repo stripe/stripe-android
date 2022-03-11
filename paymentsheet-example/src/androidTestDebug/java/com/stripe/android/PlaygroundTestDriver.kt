@@ -27,12 +27,6 @@ class PlaygroundTestDriver(
         testParameters: TestParameters,
         populateCustomLpmFields: () -> Unit = {}
     ) {
-        testParameters.authorizationAction?.let {
-            testParameters.useBrowser?.let {
-                assumeTrue(getInstalledBrowser(testParameters.useBrowser) == it)
-            }
-        }
-
         var resultValue: String? = null
         val callbackLock = Semaphore(1)
 
@@ -76,6 +70,14 @@ class PlaygroundTestDriver(
                 getResourceString(testParameters.paymentSelection.label)
         )
 
+        // Verify device requirements are met prior to attempting confirmation.  Do this
+        // after we have had the chance to capture a screenshot.
+        testParameters.authorizationAction?.let {
+            testParameters.useBrowser?.let {
+                assumeTrue(getInstalledBrowser(testParameters.useBrowser) == it)
+            } ?: assumeTrue(getInstalledBrowsers().isNotEmpty())
+        }
+
         clickBuyButton()
 
         // TODO: Need to rid of this sleep before the browser selector comes up
@@ -102,8 +104,7 @@ class PlaygroundTestDriver(
         .getInstalledApplications(PackageManager.GET_META_DATA)
 
     private fun getInstalledBrowser(requestedBrowser: Browser?): Browser {
-        val installedBrowsers = getInstalledPackages()
-            .mapNotNull { Browser.to(it.packageName) }
+        val installedBrowsers = getInstalledBrowsers()
 
         return requestedBrowser?.let {
             // Assume true will mark the test as skipped if it can't be executed
@@ -111,6 +112,9 @@ class PlaygroundTestDriver(
             it
         } ?: installedBrowsers.first()
     }
+
+    private fun getInstalledBrowsers() = getInstalledPackages()
+        .mapNotNull { Browser.to(it.packageName) }
 
     private fun doAuthorization(
         device: UiDevice,

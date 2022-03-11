@@ -1,6 +1,5 @@
 package com.stripe.android
 
-import android.os.Environment
 import android.util.Log
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.runner.screenshot.BasicScreenCaptureProcessor
@@ -15,14 +14,10 @@ class MyScreenCaptureProcessor : BasicScreenCaptureProcessor() {
         val simpleDateFormat = SimpleDateFormat(pattern)
         val date: String = simpleDateFormat.format(Date())
 
+        // Path is /data/user/0/com.stripe.android.paymentsheet.example/files/screenshots-yyyy-MM-dd-HH-mm-ss/
         this.mDefaultScreenshotPath = File(
-            File(
-                InstrumentationRegistry.getInstrumentation().targetContext.getExternalFilesDir(
-                    Environment.DIRECTORY_PICTURES
-                ),
-                "payment_sheet_instrumentation_tests",
-            ).absolutePath,
-            "screenshots/$date/"
+            InstrumentationRegistry.getInstrumentation().targetContext.filesDir,
+            "screenshots-$date/"
         )
         Log.d("STRIPE", mDefaultScreenshotPath.absolutePath)
     }
