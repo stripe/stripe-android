@@ -19,11 +19,8 @@ import androidx.test.uiautomator.By
 import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.UiSelector
 import androidx.test.uiautomator.Until
-import com.stripe.android.paymentsheet.PaymentMethodListTestTag
+import com.stripe.android.paymentsheet.TEST_TAG_LIST
 import com.stripe.android.paymentsheet.example.R
-import com.stripe.android.paymentsheet.example.playground.model.CheckoutCurrency
-import com.stripe.android.paymentsheet.example.playground.model.CheckoutCustomer
-import com.stripe.android.paymentsheet.example.playground.model.CheckoutMode
 import java.security.InvalidParameterException
 
 open class EspressoLabelIdButton(@StringRes val label: Int) {
@@ -49,6 +46,10 @@ abstract class EspressoIdButton(@IntegerRes val id: Int) {
     fun click() {
         Espresso.onView(ViewMatchers.withId(id)).perform(ViewActions.click())
     }
+
+    fun scrollTo() {
+        Espresso.onView(ViewMatchers.withId(id)).perform(ViewActions.scrollTo())
+    }
 }
 
 open class UiAutomatorText(
@@ -68,6 +69,8 @@ open class UiAutomatorText(
     fun exists(device: UiDevice) =
         device.findObject(selector).exists()
 }
+
+object PlaygroundBuyButton : EspressoIdButton(R.id.buy_button)
 
 object SaveForFutureCheckbox :
     EspressoLabelIdButton(R.string.stripe_paymentsheet_save_this_card_with_merchant_name)
@@ -90,7 +93,7 @@ class PaymentSelection(@StringRes val label: Int) {
     }
 
     fun click(composeTestRule: ComposeTestRule, resource: Resources) {
-        composeTestRule.onNodeWithTag(PaymentMethodListTestTag, true)
+        composeTestRule.onNodeWithTag(TEST_TAG_LIST, true)
             .performScrollToNode(hasText(resource.getString(label)))
         composeTestRule
             .onNodeWithText(resource.getString(label))
@@ -123,20 +126,9 @@ sealed class Checkout(@StringRes id: Int) : EspressoLabelIdButton(id) {
     object Setup : Checkout(R.string.setup)
 }
 
-internal fun Checkout.toRepository() = when (this) {
-    Checkout.Pay -> CheckoutMode.Payment
-    Checkout.PayWithSetup -> CheckoutMode.PaymentWithSetup
-    Checkout.Setup -> CheckoutMode.Setup
-}
-
 sealed class Currency(@StringRes id: Int) : EspressoLabelIdButton(id) {
     object USD : Currency(R.string.currency_usd)
     object EUR : Currency(R.string.currency_eur)
-}
-
-internal fun Currency.toRepository() = when (this) {
-    Currency.USD -> CheckoutCurrency.USD
-    Currency.EUR -> CheckoutCurrency.EUR
 }
 
 sealed class GooglePayState(@IntegerRes id: Int) : EspressoIdButton(id) {
@@ -149,12 +141,6 @@ sealed class Customer(@StringRes id: Int) : EspressoLabelIdButton(id) {
     object New : Customer(R.string.customer_new)
 }
 
-internal fun Customer.toRepository() = when (this) {
-    Customer.Guest -> CheckoutCustomer.Guest
-    Customer.New -> CheckoutCustomer.New
-}
-
-// No 3DS2 support
 sealed class AuthorizeAction(
     name: String,
     className: String
