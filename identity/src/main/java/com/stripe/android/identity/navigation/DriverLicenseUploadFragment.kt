@@ -7,8 +7,10 @@ import com.stripe.android.identity.states.IdentityScanState
 /**
  * Fragment to upload Driver license.
  */
-internal class DriverLicenseUploadFragment(frontBackUploadViewModelFactory: ViewModelProvider.Factory) :
-    FrontBackUploadFragment(frontBackUploadViewModelFactory) {
+internal class DriverLicenseUploadFragment(
+    frontBackUploadViewModelFactory: ViewModelProvider.Factory,
+    identityViewModelFactory: ViewModelProvider.Factory
+) : FrontBackUploadFragment(frontBackUploadViewModelFactory, identityViewModelFactory) {
     override val titleRes = R.string.file_upload
     override val contextRes = R.string.file_upload_content_dl
     override val frontTextRes = R.string.front_of_dl

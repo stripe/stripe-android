@@ -28,14 +28,14 @@ import com.stripe.android.identity.viewmodel.IdentityViewModel
  * @param identityViewModel: [IdentityViewModel] to fire requests.
  * @param collectedDataParam: parameter collected from UI response, posted to [IdentityViewModel.postVerificationPageData].
  * @param shouldNotSubmit: A condition check block to decide when [VerificationPageData]
- * is returned, whether to continue submit by [IdentityViewModel.postVerificationPageSubmit].
+ * is returned without error, whether to continue submit by [IdentityViewModel.postVerificationPageSubmit].
  * @param notSubmitBlock: A block to execute when [shouldNotSubmit] returns true.
  */
 internal suspend fun Fragment.postVerificationPageDataAndMaybeSubmit(
     identityViewModel: IdentityViewModel,
     collectedDataParam: CollectedDataParam,
     shouldNotSubmit: (verificationPageData: VerificationPageData) -> Boolean = { true },
-    notSubmitBlock: (verificationPageData: VerificationPageData) -> Unit
+    notSubmitBlock: ((verificationPageData: VerificationPageData) -> Unit)? = null
 ) {
     runCatching {
         identityViewModel.postVerificationPageData(collectedDataParam)
@@ -45,7 +45,7 @@ internal suspend fun Fragment.postVerificationPageDataAndMaybeSubmit(
                 navigateToRequirementErrorFragment(postedVerificationPageData.requirements.errors[0])
             } else {
                 if (shouldNotSubmit(postedVerificationPageData)) {
-                    notSubmitBlock(postedVerificationPageData)
+                    notSubmitBlock?.invoke(postedVerificationPageData)
                 } else {
                     runCatching {
                         identityViewModel.postVerificationPageSubmit()

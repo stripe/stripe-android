@@ -1,9 +1,13 @@
 package com.stripe.android.identity.utils
 
 import android.content.Context
+import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Environment
+import android.util.Size
 import androidx.core.content.FileProvider
+import com.stripe.android.camera.framework.image.constrainToSize
+import com.stripe.android.camera.framework.image.toJpeg
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
@@ -32,40 +36,42 @@ internal fun createInternalFileUri(context: Context): ContentUriResult {
 /**
  * Read the image at uri, resize it with corresponding resolution and save it as a [File] with proper name.
  *
- * TODO(ccen) resize the image
  */
 internal fun resizeUriAndCreateFileToUpload(
     context: Context,
     originalUri: Uri,
     verificationId: String,
     isFullFrame: Boolean,
-    side: String? = null
+    side: String? = null,
+    maxDimension: Int,
+    compressionQuality: Float
 ): File {
     context.contentResolver.openInputStream(originalUri).use { inputStream ->
-        val nameBuilder = StringBuilder().also { nameBuilder ->
-            nameBuilder.append(verificationId)
-            side?.let {
-                nameBuilder.append("_$side")
-            }
-            if (isFullFrame) {
-                nameBuilder.append("_full_frame")
-            }
-            nameBuilder.append(".jpeg")
-        }
-
-        val fileToSave = File(
+        File(
             context.getExternalFilesDir(Environment.DIRECTORY_PICTURES),
-            nameBuilder.toString()
-        )
-
-        FileOutputStream(fileToSave, false).use { fileOutputStream ->
-            var read: Int
-            val bytes = ByteArray(DEFAULT_BUFFER_SIZE)
-            while (inputStream!!.read(bytes).also { read = it } != -1) {
-                fileOutputStream.write(bytes, 0, read)
+            StringBuilder().also { nameBuilder ->
+                nameBuilder.append(verificationId)
+                side?.let {
+                    nameBuilder.append("_$side")
+                }
+                if (isFullFrame) {
+                    nameBuilder.append("_full_frame")
+                }
+                nameBuilder.append(".jpeg")
+            }.toString()
+        ).let { fileToSave ->
+            FileOutputStream(fileToSave, false).use { fileOutputStream ->
+                fileOutputStream.write(
+                    BitmapFactory.decodeStream(inputStream).constrainToSize(
+                        Size(
+                            maxDimension,
+                            maxDimension
+                        )
+                    ).toJpeg(quality = (compressionQuality * 100).toInt())
+                )
             }
+            return fileToSave
         }
-        return fileToSave
     }
 }
 

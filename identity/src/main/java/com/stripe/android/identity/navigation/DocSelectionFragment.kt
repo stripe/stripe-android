@@ -48,33 +48,30 @@ internal class DocSelectionFragment(
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        identityViewModel.verificationPage.observe(viewLifecycleOwner) { verificationPage ->
-            when (verificationPage.status) {
-                Status.SUCCESS -> {
-                    binding.title.text = requireNotNull(verificationPage.data).documentSelect.title
-                    when (requireNotNull(verificationPage.data).documentSelect.idDocumentTypeAllowlist.count()) {
-                        0 -> {
-                            toggleMultiSelectionUI()
-                        }
-                        1 -> {
-                            requireNotNull(verificationPage.data).documentSelect.let { documentSelect ->
-                                toggleSingleSelectionUI(
-                                    documentSelect.idDocumentTypeAllowlist.entries.first().key,
-                                    documentSelect.buttonText
-                                )
-                            }
-                        }
-                        else -> {
-                            toggleMultiSelectionUI(requireNotNull(verificationPage.data).documentSelect.idDocumentTypeAllowlist)
+        identityViewModel.observeForVerificationPage(viewLifecycleOwner,
+            onSuccess = { verificationPage ->
+                binding.title.text = verificationPage.documentSelect.title
+                when (verificationPage.documentSelect.idDocumentTypeAllowlist.count()) {
+                    0 -> {
+                        toggleMultiSelectionUI()
+                    }
+                    1 -> {
+                        verificationPage.documentSelect.let { documentSelect ->
+                            toggleSingleSelectionUI(
+                                documentSelect.idDocumentTypeAllowlist.entries.first().key,
+                                documentSelect.buttonText
+                            )
                         }
                     }
+                    else -> {
+                        toggleMultiSelectionUI(verificationPage.documentSelect.idDocumentTypeAllowlist)
+                    }
                 }
-                Status.LOADING -> {} // no-np
-                Status.ERROR -> {
-                    navigateToDefaultErrorFragment()
-                }
+            },
+            onFailure = {
+                navigateToDefaultErrorFragment()
             }
-        }
+        )
     }
 
     /**
@@ -234,28 +231,20 @@ internal class DocSelectionFragment(
      * if required data is not available.
      */
     private fun tryNavigateToUploadFragment(type: Type) {
-        identityViewModel.verificationPage.observe(
-            viewLifecycleOwner
-        ) { verificationPageResource ->
-            when (verificationPageResource.status) {
-                Status.SUCCESS -> {
-                    if (requireNotNull(
-                            verificationPageResource.data
-                        ).documentCapture.requireLiveCapture
-                    ) {
-                        Log.e(TAG, "Can't access camera and client has required live capture.")
-                        navigateToDefaultErrorFragment()
-                    } else {
-                        navigateToUploadFragment(type)
-                    }
-                }
-                Status.ERROR -> {
-                    Log.e(TAG, "Failed to get VerificationPage.")
+        identityViewModel.observeForVerificationPage(viewLifecycleOwner,
+            onSuccess = { verificationPage ->
+                if (verificationPage.documentCapture.requireLiveCapture
+                ) {
+                    Log.e(TAG, "Can't access camera and client has required live capture.")
                     navigateToDefaultErrorFragment()
+                } else {
+                    navigateToUploadFragment(type)
                 }
-                Status.LOADING -> {} // no-op
+            },
+            onFailure = {
+                navigateToDefaultErrorFragment()
             }
-        }
+        )
     }
 
     internal companion object {

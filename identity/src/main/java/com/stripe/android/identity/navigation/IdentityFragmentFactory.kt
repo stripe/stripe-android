@@ -60,13 +60,16 @@ internal class IdentityFragmentFactory(
                 appSettingsOpenable
             )
             IDUploadFragment::class.java.name -> IDUploadFragment(
-                frontBackUploadViewModelFactory
+                frontBackUploadViewModelFactory,
+                identityViewModelFactory
             )
             DriverLicenseUploadFragment::class.java.name -> DriverLicenseUploadFragment(
-                frontBackUploadViewModelFactory
+                frontBackUploadViewModelFactory,
+                identityViewModelFactory
             )
             PassportUploadFragment::class.java.name -> PassportUploadFragment(
-                passportUploadViewModelFactory
+                passportUploadViewModelFactory,
+                identityViewModelFactory
             )
             ConsentFragment::class.java.name -> ConsentFragment(
                 identityViewModelFactory
