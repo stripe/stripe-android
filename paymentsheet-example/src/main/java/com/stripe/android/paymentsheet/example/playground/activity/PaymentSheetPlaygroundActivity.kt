@@ -1,10 +1,13 @@
 package com.stripe.android.paymentsheet.example.playground.activity
 
 import android.os.Bundle
+import androidx.annotation.NonNull
+import androidx.annotation.Nullable
 import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isInvisible
 import androidx.lifecycle.lifecycleScope
+import androidx.test.espresso.IdlingResource
 import androidx.test.espresso.idling.CountingIdlingResource
 import com.google.android.material.snackbar.Snackbar
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -76,6 +79,14 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
     private lateinit var paymentSheet: PaymentSheet
     private lateinit var flowController: PaymentSheet.FlowController
 
+    // This will be null in production
+    @Nullable
+    private var multiStepUIIdlingResource: CountingIdlingResource? = null
+
+    // This will be null in production
+    @Nullable
+    private var singleStepUIIdlingResource: CountingIdlingResource? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(viewBinding.root)
@@ -136,11 +147,11 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
         viewModel.inProgress.observe(this) {
             viewBinding.progressBar.isInvisible = !it
             if (it) {
-                singleStepUIIdlingResource.increment()
-                multiStepUIIdlingResource.increment()
+                singleStepUIIdlingResource?.increment()
+                multiStepUIIdlingResource?.increment()
             } else {
-                singleStepUIIdlingResource.decrement()
-                multiStepUIIdlingResource.decrement()
+                singleStepUIIdlingResource?.decrement()
+                multiStepUIIdlingResource?.decrement()
             }
         }
 
@@ -322,10 +333,30 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
         viewModel.status.value = paymentResult.toString()
     }
 
+    /**
+     * Only called from test, creates and returns a new [SimpleIdlingResource].
+     */
+
+    @VisibleForTesting
+    @NonNull
+    fun getMultiStepIdlingResource(): IdlingResource? {
+        if (multiStepUIIdlingResource == null) {
+            multiStepUIIdlingResource = CountingIdlingResource("multiStepUIIdlingResource")
+        }
+        return multiStepUIIdlingResource
+    }
+
+    @VisibleForTesting
+    @NonNull
+    fun getSingleStepIdlingResource(): IdlingResource? {
+        if (singleStepUIIdlingResource == null) {
+            singleStepUIIdlingResource = CountingIdlingResource("singleStepUIIdlingResource")
+        }
+        return singleStepUIIdlingResource
+    }
+
     companion object {
         private const val merchantName = "Example, Inc."
         private const val sharedPreferencesName = "playgroundToggles"
-        val multiStepUIIdlingResource = CountingIdlingResource("multiStepUIIdlingResource")
-        val singleStepUIIdlingResource = CountingIdlingResource("singleStepUIIdlingResource")
     }
 }

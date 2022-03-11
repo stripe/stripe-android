@@ -1,32 +1,17 @@
 package com.stripe.android
 
 import androidx.compose.ui.test.junit4.ComposeTestRule
-import androidx.compose.ui.test.onNodeWithText
-import androidx.compose.ui.test.performTextInput
 import androidx.test.core.app.ActivityScenario
-import androidx.test.espresso.Espresso
 import androidx.test.espresso.IdlingRegistry
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.runner.screenshot.BasicScreenCaptureProcessor
 import androidx.test.runner.screenshot.Screenshot
 import androidx.test.uiautomator.UiDevice
-import com.google.common.truth.Truth
+import com.google.common.truth.Truth.assertThat
 import com.stripe.android.paymentsheet.PaymentSheetResult
 import com.stripe.android.paymentsheet.example.R
 import com.stripe.android.paymentsheet.example.playground.activity.PaymentSheetPlaygroundActivity
-import com.stripe.android.paymentsheet.viewmodels.transitionFragmentResource
-import com.stripe.android.ui.core.elements.AddressSpec
-import com.stripe.android.ui.core.elements.AuBankAccountNumberSpec
-import com.stripe.android.ui.core.elements.BankDropdownSpec
-import com.stripe.android.ui.core.elements.BsbSpec
-import com.stripe.android.ui.core.elements.CountrySpec
-import com.stripe.android.ui.core.elements.EmailSpec
-import com.stripe.android.ui.core.elements.IbanSpec
-import com.stripe.android.ui.core.elements.KlarnaCountrySpec
-import com.stripe.android.ui.core.elements.LayoutSpec
-import com.stripe.android.ui.core.elements.SaveForFutureUseSpec
-import com.stripe.android.ui.core.elements.SectionSpec
-import com.stripe.android.ui.core.elements.SimpleTextSpec
+import com.stripe.android.paymentsheet.viewmodels.TransitionFragmentResource
 import java.util.concurrent.Semaphore
 import java.util.concurrent.TimeUnit
 
@@ -42,29 +27,39 @@ class PlaygroundTestDriver(
         var resultValue: String? = null
         val callbackLock = Semaphore(1)
 
-        // Setup the playground for scenario, and launch it
+        // Setup the playground for scenario, and launch it.  We use the playground
+        // so we don't have to implement another route to create a payment intent,
+        // the challeng is that we don't have access to the activity or it's viewmodels
         launchCompleteScenario(testParameters) { activity ->
             callbackLock.acquire()
+
+            IdlingRegistry.getInstance().register(
+                activity.getMultiStepIdlingResource(),
+                activity.getSingleStepIdlingResource(),
+                TransitionFragmentResource.getSingleStepIdlingResource()
+            )
 
             // Observe the result of the action
             activity.viewModel.status.observeForever {
                 resultValue = it
                 callbackLock.release()
+
+                IdlingRegistry.getInstance().unregister(
+                    activity.getMultiStepIdlingResource(),
+                    activity.getSingleStepIdlingResource(),
+                    TransitionFragmentResource.getSingleStepIdlingResource()
+                )
             }
         }
 
-        selectPaymentMethod(composeTestRule, testParameters.paymentSelection)
+        // PaymentSheetActivity is now on screen
 
-        populateFields(composeTestRule, testParameters, populateCustomLpmFields)
+        testParameters.paymentSelection.click(
+            composeTestRule,
+            InstrumentationRegistry.getInstrumentation().targetContext.resources
+        )
 
-        Espresso.closeSoftKeyboard()
-
-        assert(testParameters.saveForFutureUseCheckboxVisible == SaveForFutureCheckbox.exists())
-        if (SaveForFutureCheckbox.exists()) {
-            if (!testParameters.saveCheckboxValue) {
-                SaveForFutureCheckbox.click()
-            }
-        }
+        FieldPopulator(composeTestRule, testParameters, populateCustomLpmFields).populateFields()
 
         takeScreenShot(
             basicScreenCaptureProcessor,
@@ -86,26 +81,9 @@ class PlaygroundTestDriver(
             assert(!SelectBrowserWindow.exists(device))
         }
 
-        IdlingRegistry.getInstance()
-            .unregister(PaymentSheetPlaygroundActivity.singleStepUIIdlingResource)
-        IdlingRegistry.getInstance()
-            .unregister(PaymentSheetPlaygroundActivity.multiStepUIIdlingResource)
-        IdlingRegistry.getInstance().unregister(transitionFragmentResource)
-
         callbackLock.acquire()
-        Truth.assertThat(resultValue).isEqualTo(PaymentSheetResult.Completed.toString())
+        assertThat(resultValue).isEqualTo(PaymentSheetResult.Completed.toString())
         callbackLock.release()
-    }
-
-    private fun selectPaymentMethod(
-        composeTestRule: ComposeTestRule,
-        paymentSelection: PaymentSelection
-    ) {
-        assert(paymentSelection.exists())
-        paymentSelection.click(
-            composeTestRule,
-            InstrumentationRegistry.getInstrumentation().targetContext.resources
-        )
     }
 
     private fun doAuthorization(
@@ -165,101 +143,7 @@ class PlaygroundTestDriver(
         testParameters.billing.click()
         testParameters.delayed.click()
 
-        IdlingRegistry.getInstance()
-            .register(PaymentSheetPlaygroundActivity.singleStepUIIdlingResource)
-        IdlingRegistry.getInstance()
-            .register(PaymentSheetPlaygroundActivity.multiStepUIIdlingResource)
-        IdlingRegistry.getInstance().register(transitionFragmentResource)
-
         EspressoLabelIdButton(R.string.reload_paymentsheet).click()
         EspressoLabelIdButton(R.string.checkout_complete).click()
-    }
-
-    private fun populateFields(
-        composeTestRule: ComposeTestRule,
-        testParameters: TestParameters,
-        populateCustomLpmFields: () -> Unit
-    ) {
-        populatePlatformLpmFields(
-            composeTestRule,
-            testParameters.paymentMethod.formSpec,
-            testParameters.saveCheckboxValue,
-            testParameters.billing
-        )
-
-        populateCustomLpmFields()
-    }
-
-    private fun populatePlatformLpmFields(
-        composeTestRule: ComposeTestRule,
-        formSpec: LayoutSpec,
-        saveCheckboxValue: Boolean,
-        defaultBillingOn: Billing
-    ) {
-        formSpec.items.forEach {
-            when (it) {
-                is SectionSpec -> {
-                    if (!expectFieldToBeHidden(formSpec, saveCheckboxValue, it)) {
-                        it.fields.forEach { sectionField ->
-                            when (sectionField) {
-                                is EmailSpec -> {
-                                    if (defaultBillingOn == Billing.Off) {
-                                        composeTestRule.onNodeWithText("Email")
-                                            .performTextInput("jrosen@email.com")
-                                    }
-                                }
-                                SimpleTextSpec.NAME -> {
-                                    if (defaultBillingOn == Billing.Off) {
-                                        composeTestRule.onNodeWithText("Name")
-                                            .performTextInput("Jenny Rosen")
-                                    }
-                                }
-                                is AddressSpec -> {
-                                    if (defaultBillingOn == Billing.Off) {
-                                        // TODO: This will not work when other countries are selected or defaulted
-                                        composeTestRule.onNodeWithText("Address line 1")
-                                            .performTextInput("123 Main Street")
-                                        composeTestRule.onNodeWithText("City")
-                                            .performTextInput("123 Main Street")
-                                        composeTestRule.onNodeWithText("ZIP Code")
-                                            .performTextInput("12345")
-                                        composeTestRule.onNodeWithText("State")
-                                            .performTextInput("NY")
-                                    }
-                                }
-                                is CountrySpec -> {}
-                                is SimpleTextSpec -> {}
-                                AuBankAccountNumberSpec -> {}
-                                is BankDropdownSpec -> {}
-                                BsbSpec -> {}
-                                IbanSpec -> {}
-                                is KlarnaCountrySpec -> {}
-                            }
-                        }
-                    }
-                }
-                else -> {}
-            }
-        }
-    }
-
-
-    private fun expectFieldToBeHidden(
-        formSpec: LayoutSpec,
-        saveCheckboxValue: Boolean,
-        section: SectionSpec
-    ): Boolean {
-        val saveForFutureUseSpec = formSpec.items
-            .mapNotNull { it as? SaveForFutureUseSpec }
-            .firstOrNull()
-        return (!saveCheckboxValue
-            && saveForFutureUseSpec?.identifierRequiredForFutureUse
-            ?.map { saveForFutureUseHidesIdentifier ->
-                saveForFutureUseHidesIdentifier.identifier.value
-            }
-            ?.firstOrNull { saveForFutureUseHidesIdentifier ->
-                saveForFutureUseHidesIdentifier == section.identifier.value
-            } != null)
-
     }
 }

@@ -1,6 +1,8 @@
 package com.stripe.android.paymentsheet.viewmodels
 
 import android.app.Application
+import androidx.annotation.NonNull
+import androidx.annotation.Nullable
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
@@ -16,11 +18,9 @@ import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.InjectorKey
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.BaseAddPaymentMethodFragment
 import com.stripe.android.paymentsheet.BasePaymentMethodsListFragment
-import com.stripe.android.paymentsheet.BuildConfig
 import com.stripe.android.paymentsheet.PaymentOptionsActivity
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetActivity
@@ -42,8 +42,27 @@ import kotlinx.coroutines.withContext
 import org.jetbrains.annotations.TestOnly
 import kotlin.coroutines.CoroutineContext
 
-@VisibleForTesting
-val transitionFragmentResource = CountingIdlingResource("transition")
+class TransitionFragmentResource {
+    companion object {
+        @Nullable
+        var idlingResource: CountingIdlingResource? = null
+
+        // This will only be called from test code
+        @VisibleForTesting
+        @NonNull
+        fun getSingleStepIdlingResource(): androidx.test.espresso.IdlingResource? {
+            if (idlingResource == null) {
+                idlingResource = try {
+                    Class.forName("android.support.test.espresso.Espresso")
+                    CountingIdlingResource("transition")
+                } catch (e: ClassNotFoundException) {
+                    null
+                }
+            }
+            return idlingResource
+        }
+    }
+}
 
 /**
  * Base `ViewModel` for activities that use `BottomSheet`.
@@ -111,7 +130,8 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
      * Represents what the user last selects (add or buy) on the
      * [PaymentOptionsActivity]/[PaymentSheetActivity], and saved/restored from the preferences.
      */
-    private val _savedSelection = savedStateHandle.getLiveData<SavedSelection>(SAVE_SAVED_SELECTION)
+    private val _savedSelection =
+        savedStateHandle.getLiveData<SavedSelection>(SAVE_SAVED_SELECTION)
     private val savedSelection: LiveData<SavedSelection> = _savedSelection
 
     private val _transition = MutableLiveData<Event<TransitionTargetType?>>(Event(null))
@@ -163,7 +183,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     }.distinctUntilChanged()
 
     init {
-        transitionFragmentResource.increment()
+        TransitionFragmentResource.idlingResource?.increment()
         if (_savedSelection.value == null) {
             viewModelScope.launch {
                 val savedSelection = withContext(workContext) {
@@ -224,8 +244,8 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     }
 
     open fun transitionTo(target: TransitionTargetType) {
-        if(!transitionFragmentResource.isIdleNow){
-            transitionFragmentResource.decrement()
+        if (TransitionFragmentResource.idlingResource?.isIdleNow == false) {
+            TransitionFragmentResource.idlingResource?.decrement()
         }
         _transition.postValue(Event(target))
     }
@@ -283,12 +303,13 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
             return
         }
 
-        val message = "[Stripe SDK] Warning: Your Intent contains the following payment method " +
-            "types which are activated for test mode but not activated for " +
-            "live mode: $unactivatedPaymentMethodTypes. These payment method types will not be " +
-            "displayed in live mode until they are activated. To activate these payment method " +
-            "types visit your Stripe dashboard." +
-            "More information: https://support.stripe.com/questions/activate-a-new-payment-method"
+        val message =
+            "[Stripe SDK] Warning: Your Intent contains the following payment method " +
+                "types which are activated for test mode but not activated for " +
+                "live mode: $unactivatedPaymentMethodTypes. These payment method types will not be " +
+                "displayed in live mode until they are activated. To activate these payment method " +
+                "types visit your Stripe dashboard." +
+                "More information: https://support.stripe.com/questions/activate-a-new-payment-method"
 
         logger.warning(message)
     }
@@ -382,3 +403,4 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
         internal const val SAVE_RESOURCE_REPOSITORY_READY = "resource_repository_ready"
     }
 }
+
