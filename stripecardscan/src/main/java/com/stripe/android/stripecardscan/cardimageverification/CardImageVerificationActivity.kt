@@ -83,7 +83,8 @@ internal sealed class CardVerificationScanState(isFinal: Boolean) : ScanState(is
 
 @Keep
 internal open class CardImageVerificationActivity :
-    SimpleScanActivity<CardVerificationFlowParameters?>(), SimpleScanStateful<CardVerificationScanState> {
+    SimpleScanActivity<CardVerificationFlowParameters?>(),
+    SimpleScanStateful<CardVerificationScanState> {
 
     override var scanState: CardVerificationScanState? = CardVerificationScanState.NotFound
 
@@ -117,8 +118,12 @@ internal open class CardImageVerificationActivity :
     protected open val processingTextView by lazy { TextView(this) }
 
     private val params: CardImageVerificationSheetParams by lazy {
-        intent.getParcelableExtra(INTENT_PARAM_REQUEST)
-            ?: CardImageVerificationSheetParams("", CardImageVerificationSheet.Configuration(), "", "")
+        intent.getParcelableExtra(INTENT_PARAM_REQUEST) ?: CardImageVerificationSheetParams(
+            stripePublishableKey = "",
+            configuration = CardImageVerificationSheet.Configuration(),
+            cardImageVerificationIntentId = "",
+            cardImageVerificationIntentSecret = "",
+        )
     }
 
     /**
@@ -356,7 +361,9 @@ internal open class CardImageVerificationActivity :
     private fun onScanDetailsAvailable(
         cardVerificationFlowParameters: CardVerificationFlowParameters?,
     ) {
-        if (cardVerificationFlowParameters != null && !cardVerificationFlowParameters.lastFour.isNullOrEmpty()) {
+        if (cardVerificationFlowParameters != null &&
+            !cardVerificationFlowParameters.lastFour.isNullOrEmpty()
+        ) {
             this.requiredCardIssuer = cardVerificationFlowParameters.cardIssuer
             this.requiredCardLastFour = cardVerificationFlowParameters.lastFour
 

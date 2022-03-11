@@ -18,7 +18,7 @@ class RetryTest {
 
         assertEquals(
             1,
-            retry({ _, _-> 1.milliseconds }) {
+            retry({ _, _ -> 1.milliseconds }) {
                 executions++
                 1
             }
@@ -34,7 +34,7 @@ class RetryTest {
 
         assertEquals(
             1,
-            retry({ _, _-> 1.milliseconds }) {
+            retry({ _, _ -> 1.milliseconds }) {
                 executions++
                 if (executions == 2) {
                     1
@@ -53,7 +53,7 @@ class RetryTest {
         var executions = 0
 
         assertFailsWith<RuntimeException> {
-            retry<Int>({ _, _-> 1.milliseconds }) {
+            retry<Int>({ _, _ -> 1.milliseconds }) {
                 executions++
                 throw RuntimeException()
             }
@@ -68,7 +68,10 @@ class RetryTest {
         var executions = 0
 
         assertFailsWith<RuntimeException> {
-            retry<Int>({ _, _-> 1.milliseconds }, excluding = listOf(RuntimeException::class.java)) {
+            retry<Int>(
+                retryDelayFunction = { _, _ -> 1.milliseconds },
+                excluding = listOf(RuntimeException::class.java),
+            ) {
                 executions++
                 throw RuntimeException()
             }

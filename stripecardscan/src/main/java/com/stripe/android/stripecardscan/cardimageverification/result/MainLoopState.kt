@@ -114,7 +114,7 @@ internal sealed class MainLoopState(
                         requiredLastFour = requiredLastFour,
                         strictModeFrames = strictModeFrames,
                     )
-                else -> this // comparisonResult is CardMatchResult.NoPan or not enough visible cards
+                else -> this // comparisonResult is NoPan or not enough visible cards
             }
         }
     }

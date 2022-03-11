@@ -100,7 +100,7 @@ class MainLoopStateMachineTest {
 
     @Test
     @ExperimentalCoroutinesApi
-    fun `initial state does not transition when OCR is not found but a card is visible`() = runTest {
+    fun `initial state doesn't transition when OCR is not found but a card is visible`() = runTest {
         val state = MainLoopState.Initial(
             requiredCardIssuer = CardIssuer.Visa,
             requiredLastFour = "8770",
