@@ -2,7 +2,7 @@ package com.stripe.android.link.account
 
 import android.content.Context
 import androidx.security.crypto.EncryptedSharedPreferences
-import androidx.security.crypto.MasterKeys
+import androidx.security.crypto.MasterKey
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -10,15 +10,15 @@ import javax.inject.Singleton
  * Persistent key-value storage encrypted at rest, backed by [EncryptedSharedPreferences].
  */
 @Singleton
-internal class EncryptedStore @Inject constructor(
-    private val context: Context
-) {
-    private val keyGenParameterSpec = MasterKeys.AES256_GCM_SPEC
-    private val mainKeyAlias = MasterKeys.getOrCreate(keyGenParameterSpec)
+internal class EncryptedStore @Inject constructor(context: Context) {
+    private val masterKey = MasterKey.Builder(context)
+        .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+        .build()
+
     private val sharedPreferences = EncryptedSharedPreferences.create(
-        FILE_NAME,
-        mainKeyAlias,
         context.applicationContext,
+        FILE_NAME,
+        masterKey,
         EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
         EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
     )
