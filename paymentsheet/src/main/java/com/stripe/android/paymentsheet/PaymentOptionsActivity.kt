@@ -129,13 +129,9 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
         viewBinding.continueButton.updateState(PrimaryButton.State.Ready)
 
         viewBinding.continueButton.setDefaultBackGroundColor(
-            if (viewModel.config?.primaryButtonColor != null) {
-                viewModel.config?.primaryButtonColor
-            } else {
-                ColorStateList.valueOf(
-                    PaymentsThemeConfig.colors(baseContext.isSystemDarkTheme()).primary.toArgb()
-                )
-            }
+            viewModel.config?.primaryButtonColor ?: ColorStateList.valueOf(
+                PaymentsThemeConfig.colors(baseContext.isSystemDarkTheme()).primary.toArgb()
+            )
         )
 
         addButton.setOnClickListener {
