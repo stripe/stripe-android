@@ -3,6 +3,7 @@ package com.stripe.android.ui.core.elements
 import androidx.compose.ui.text.AnnotatedString
 import com.google.common.truth.Truth
 import com.stripe.android.model.CardBrand
+import com.stripe.android.ui.core.CardNumberFixtures
 import com.stripe.android.ui.core.R
 import org.junit.Test
 
@@ -11,8 +12,26 @@ class CardNumberConfigTest {
 
     @Test
     fun `visualTransformation formats entered value`() {
-        Truth.assertThat(cardNumberConfig.visualTransformation.filter(AnnotatedString("1234567890123456")).text)
-            .isEqualTo(AnnotatedString("1234 5678 9012 3456"))
+        Truth.assertThat(cardNumberConfig.visualTransformation.filter(AnnotatedString(CardNumberFixtures.VISA_NO_SPACES)).text)
+            .isEqualTo(AnnotatedString(CardNumberFixtures.VISA_WITH_SPACES))
+
+        Truth.assertThat(cardNumberConfig.visualTransformation.filter(AnnotatedString(CardNumberFixtures.AMEX_NO_SPACES)).text)
+            .isEqualTo(AnnotatedString(CardNumberFixtures.AMEX_WITH_SPACES))
+
+        Truth.assertThat(cardNumberConfig.visualTransformation.filter(AnnotatedString(CardNumberFixtures.DISCOVER_NO_SPACES)).text)
+            .isEqualTo(AnnotatedString(CardNumberFixtures.DISCOVER_WITH_SPACES))
+
+        Truth.assertThat(cardNumberConfig.visualTransformation.filter(AnnotatedString(CardNumberFixtures.DINERS_CLUB_14_NO_SPACES)).text)
+            .isEqualTo(AnnotatedString(CardNumberFixtures.DINERS_CLUB_14_WITH_SPACES))
+
+        Truth.assertThat(cardNumberConfig.visualTransformation.filter(AnnotatedString(CardNumberFixtures.DINERS_CLUB_16_NO_SPACES)).text)
+            .isEqualTo(AnnotatedString(CardNumberFixtures.DINERS_CLUB_16_WITH_SPACES))
+
+        Truth.assertThat(cardNumberConfig.visualTransformation.filter(AnnotatedString(CardNumberFixtures.JCB_NO_SPACES)).text)
+            .isEqualTo(AnnotatedString(CardNumberFixtures.JCB_WITH_SPACES))
+
+        Truth.assertThat(cardNumberConfig.visualTransformation.filter(AnnotatedString(CardNumberFixtures.UNIONPAY_NO_SPACES)).text)
+            .isEqualTo(AnnotatedString(CardNumberFixtures.UNIONPAY_WITH_SPACES))
     }
 
     @Test

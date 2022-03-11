@@ -29,7 +29,7 @@ internal class CardNumberVisualTransformation(private val separator: Char) :
         var out = ""
         for (i in text.indices) {
             out += text[i]
-            if (i == 3 || i == 10) out += separator
+            if (i == 3 || i == 9) out += separator
         }
 
         /**
@@ -44,7 +44,7 @@ internal class CardNumberVisualTransformation(private val separator: Char) :
         val creditCardOffsetTranslator = object : OffsetMapping {
             override fun originalToTransformed(offset: Int): Int {
                 if (offset <= 3) return offset
-                if (offset <= 10) return offset + 1
+                if (offset <= 9) return offset + 1
                 return offset + 2
             }
 
