@@ -16,7 +16,7 @@ import com.stripe.android.identity.viewmodel.IdentityViewModel
 /**
  * Host activity to perform Identity verification.
  */
-internal class IdentityActivity : CameraPermissionCheckingActivity() {
+internal class IdentityActivity : CameraPermissionCheckingActivity(), VerificationFlowFinishable {
     private val binding by lazy {
         IdentityActivityBinding.inflate(layoutInflater)
     }
@@ -32,7 +32,8 @@ internal class IdentityActivity : CameraPermissionCheckingActivity() {
             this,
             this,
             this,
-            starterArgs
+            starterArgs,
+            this
         )
     }
 
@@ -61,7 +62,7 @@ internal class IdentityActivity : CameraPermissionCheckingActivity() {
         finishWithResult(VerificationResult.Canceled)
     }
 
-    private fun finishWithResult(result: VerificationResult) {
+    override fun finishWithResult(result: VerificationResult) {
         setResult(
             Activity.RESULT_OK,
             Intent().putExtras(result.toBundle())

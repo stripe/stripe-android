@@ -1,5 +1,6 @@
 package com.stripe.android.identity.utils
 
+import android.util.Log
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.stripe.android.identity.R
@@ -51,11 +52,18 @@ internal suspend fun Fragment.postVerificationPageDataAndMaybeSubmit(
                         identityViewModel.postVerificationPageSubmit()
                     }.fold(
                         onSuccess = { submittedVerificationPageData ->
-                            if (submittedVerificationPageData.hasError()) {
-                                navigateToRequirementErrorFragment(submittedVerificationPageData.requirements.errors[0])
-                            } else {
-                                findNavController()
-                                    .navigate(R.id.action_global_confirmationFragment)
+                            when {
+                                submittedVerificationPageData.hasError() -> {
+                                    navigateToRequirementErrorFragment(submittedVerificationPageData.requirements.errors[0])
+                                }
+                                submittedVerificationPageData.submitted -> {
+                                    findNavController()
+                                        .navigate(R.id.action_global_confirmationFragment)
+                                }
+                                else -> {
+                                    Log.e(TAG, "VerificationPage submit failed")
+                                    navigateToDefaultErrorFragment()
+                                }
                             }
                         },
                         onFailure = {
@@ -91,3 +99,5 @@ private fun Fragment.navigateToRequirementErrorFragment(
 internal fun Fragment.navigateToDefaultErrorFragment() {
     findNavController().navigateToErrorFragmentWithDefaultValues(requireContext())
 }
+
+private const val TAG = "NAVIGATION_UTIL"

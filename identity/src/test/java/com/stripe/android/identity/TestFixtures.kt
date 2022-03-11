@@ -8,7 +8,7 @@ internal const val ERROR_BODY = "errorBody"
 internal const val ERROR_BUTTON_TEXT = "error button text"
 internal const val ERROR_TITLE = "errorTitle"
 
-internal val CORRECT_VERIFICATION_PAGE_DATA = VerificationPageData(
+internal val CORRECT_WITH_SUBMITTED_FAILURE_VERIFICATION_PAGE_DATA = VerificationPageData(
     id = "id",
     objectType = "type",
     requirements = VerificationPageDataRequirements(
@@ -17,6 +17,17 @@ internal val CORRECT_VERIFICATION_PAGE_DATA = VerificationPageData(
     ),
     status = VerificationPageData.Status.VERIFIED,
     submitted = false
+)
+
+internal val CORRECT_WITH_SUBMITTED_SUCCESS_VERIFICATION_PAGE_DATA = VerificationPageData(
+    id = "id",
+    objectType = "type",
+    requirements = VerificationPageDataRequirements(
+        errors = emptyList(),
+        missing = emptyList()
+    ),
+    status = VerificationPageData.Status.VERIFIED,
+    submitted = true
 )
 
 internal val ERROR_VERIFICATION_PAGE_DATA = VerificationPageData(

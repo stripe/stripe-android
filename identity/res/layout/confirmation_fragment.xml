@@ -30,7 +30,8 @@
                 android:background="?android:colorPrimary"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:tint="@android:color/white" />
+                app:tint="@android:color/white"
+                android:contentDescription="@string/description_clock"/>
 
             <TextView
                 android:id="@+id/title_text"
