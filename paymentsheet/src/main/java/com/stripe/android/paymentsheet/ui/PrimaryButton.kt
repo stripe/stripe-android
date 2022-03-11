@@ -2,14 +2,18 @@ package com.stripe.android.paymentsheet.ui
 
 import android.content.Context
 import android.content.res.ColorStateList
+import android.graphics.drawable.GradientDrawable
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.widget.FrameLayout
 import androidx.annotation.VisibleForTesting
 import androidx.core.content.withStyledAttributes
 import androidx.core.view.isVisible
+import androidx.core.view.setPadding
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.databinding.PrimaryButtonBinding
+import com.stripe.android.ui.core.PaymentsThemeConfig
+import com.stripe.android.ui.core.convertDpToPx
 
 /**
  * The primary call-to-action for a payment sheet screen.
@@ -38,17 +42,27 @@ internal class PrimaryButton @JvmOverloads constructor(
     private val confirmedIcon = viewBinding.confirmedIcon
 
     init {
-        setBackgroundResource(R.drawable.stripe_paymentsheet_primary_button_default_background)
-
         viewBinding.label.text = getTextAttributeValue(attrs)
 
         isClickable = true
         isEnabled = false
     }
 
-    override fun setBackgroundTintList(tintList: ColorStateList?) {
-        super.setBackgroundTintList(tintList)
+    fun setDefaultBackGroundColor(tintList: ColorStateList?) {
+        backgroundTintList = tintList
         defaultTintList = tintList
+    }
+
+    override fun setBackgroundTintList(tintList: ColorStateList?) {
+        val cornerRadius = context.convertDpToPx(PaymentsThemeConfig.Shapes.cornerRadius)
+
+        val shape = GradientDrawable()
+        shape.shape = GradientDrawable.RECTANGLE
+        shape.cornerRadius = cornerRadius
+        shape.color = tintList
+
+        background = shape
+        setPadding(cornerRadius.toInt())
     }
 
     private fun getTextAttributeValue(attrs: AttributeSet?): CharSequence? {
@@ -90,9 +104,8 @@ internal class PrimaryButton @JvmOverloads constructor(
     }
 
     private fun onFinishProcessing(onAnimationEnd: () -> Unit) {
-        super.setBackgroundTintList(null)
-        setBackgroundResource(
-            R.drawable.stripe_paymentsheet_primary_button_confirmed_background
+        backgroundTintList = ColorStateList.valueOf(
+            resources.getColor(R.color.stripe_paymentsheet_primary_button_success_background)
         )
 
         animator.fadeOut(viewBinding.label)
