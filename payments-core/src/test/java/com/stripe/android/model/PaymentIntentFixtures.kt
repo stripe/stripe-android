@@ -3,6 +3,7 @@ package com.stripe.android.model
 import com.stripe.android.model.parsers.PaymentIntentJsonParser
 import org.json.JSONObject
 
+@Suppress("MaxLineLength")
 internal object PaymentIntentFixtures {
     private val PARSER = PaymentIntentJsonParser()
 

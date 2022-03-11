@@ -3,6 +3,7 @@ package com.stripe.android.model
 import com.stripe.android.model.parsers.SetupIntentJsonParser
 import org.json.JSONObject
 
+@Suppress("MaxLineLength")
 internal object SetupIntentFixtures {
     private val PARSER = SetupIntentJsonParser()
 
