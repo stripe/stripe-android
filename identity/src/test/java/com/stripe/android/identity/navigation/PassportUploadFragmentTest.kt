@@ -14,6 +14,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.model.InternalStripeFile
 import com.stripe.android.core.model.InternalStripeFilePurpose
 import com.stripe.android.identity.CORRECT_WITH_SUBMITTED_FAILURE_VERIFICATION_PAGE_DATA
+import com.stripe.android.identity.CORRECT_WITH_SUBMITTED_SUCCESS_VERIFICATION_PAGE_DATA
 import com.stripe.android.identity.R
 import com.stripe.android.identity.databinding.PassportUploadFragmentBinding
 import com.stripe.android.identity.networking.Resource
@@ -116,7 +117,7 @@ class PassportUploadFragmentTest {
                     CORRECT_WITH_SUBMITTED_FAILURE_VERIFICATION_PAGE_DATA
                 )
                 whenever(mockIdentityViewModel.postVerificationPageSubmit()).thenReturn(
-                    CORRECT_WITH_SUBMITTED_FAILURE_VERIFICATION_PAGE_DATA
+                    CORRECT_WITH_SUBMITTED_SUCCESS_VERIFICATION_PAGE_DATA
                 )
 
                 binding.kontinue.callOnClick()
