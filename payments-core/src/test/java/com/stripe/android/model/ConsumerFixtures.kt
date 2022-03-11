@@ -22,6 +22,7 @@ object ConsumerFixtures {
     val EXISTING_CONSUMER_JSON = JSONObject(
         """
             {
+              "auth_session_client_secret": null,
               "consumer_session": {
                 "client_secret": "secret",
                 "email_address": "email@example.com",
@@ -44,6 +45,7 @@ object ConsumerFixtures {
     val CONSUMER_VERIFICATION_STARTED_JSON = JSONObject(
         """
             {
+              "auth_session_client_secret": "21yKkFYNnhMVTlXbXdBQUFJRmEaJDNmZDE1",
               "consumer_session": {
                 "client_secret": "12oBEhVjc21yKkFYNnhMVTlXbXdBQUFJRmEaJDNmZDE1MjA5LTM1YjctND",
                 "email_address": "test@stripe.com",
@@ -72,6 +74,7 @@ object ConsumerFixtures {
     val CONSUMER_VERIFIED_JSON = JSONObject(
         """
             {
+              "auth_session_client_secret": null,
               "consumer_session": {
                 "client_secret": "12oBEhVjc21yKkFYNnhMVTlXbXdBQUFJRmEaJDUzNTFkNjNhLTZkNGMtND",
                 "email_address": "test@stripe.com",
@@ -102,6 +105,7 @@ object ConsumerFixtures {
     val CONSUMER_SIGNUP_STARTED_JSON = JSONObject(
         """
             {
+              "auth_session_client_secret": null,
               "consumer_session": {
                 "client_secret": "12oBEhVjc21yKkFYNmNWT0JmaFFBQUFLUXcaJDk5OGFjYTFlLTkxMWYtND",
                 "email_address": "test@stripe.com",

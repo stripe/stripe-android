@@ -396,6 +396,7 @@ abstract class StripeRepository {
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     abstract suspend fun lookupConsumerSession(
         email: String,
+        authSessionCookie: String?,
         requestOptions: ApiRequest.Options
     ): ConsumerSessionLookup?
 
@@ -404,7 +405,7 @@ abstract class StripeRepository {
         email: String,
         phoneNumber: String,
         country: String,
-        cookies: String?,
+        authSessionCookie: String?,
         requestOptions: ApiRequest.Options
     ): ConsumerSession?
 
@@ -412,7 +413,7 @@ abstract class StripeRepository {
     abstract suspend fun startConsumerVerification(
         consumerSessionClientSecret: String,
         locale: Locale,
-        cookies: String?,
+        authSessionCookie: String?,
         requestOptions: ApiRequest.Options
     ): ConsumerSession?
 
@@ -420,7 +421,7 @@ abstract class StripeRepository {
     abstract suspend fun confirmConsumerVerification(
         consumerSessionClientSecret: String,
         verificationCode: String,
-        cookies: String?,
+        authSessionCookie: String?,
         requestOptions: ApiRequest.Options
     ): ConsumerSession?
 

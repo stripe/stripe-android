@@ -13,7 +13,8 @@ internal interface LinkRepository {
      * Check if the email already has a link account.
      */
     suspend fun lookupConsumer(
-        email: String
+        email: String,
+        authSessionCookie: String?
     ): Result<ConsumerSessionLookup>
 
     /**
@@ -22,14 +23,16 @@ internal interface LinkRepository {
     suspend fun consumerSignUp(
         email: String,
         phone: String,
-        country: String
+        country: String,
+        authSessionCookie: String?
     ): Result<ConsumerSession>
 
     /**
      * Start an SMS verification.
      */
     suspend fun startVerification(
-        consumerSessionClientSecret: String
+        consumerSessionClientSecret: String,
+        authSessionCookie: String?
     ): Result<ConsumerSession>
 
     /**
@@ -37,7 +40,8 @@ internal interface LinkRepository {
      */
     suspend fun confirmVerification(
         consumerSessionClientSecret: String,
-        verificationCode: String
+        verificationCode: String,
+        authSessionCookie: String?
     ): Result<ConsumerSession>
 
     /**

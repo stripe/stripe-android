@@ -13,6 +13,8 @@ internal class LinkAccount(consumerSession: ConsumerSession) {
     val isVerified: Boolean = consumerSession.containsVerifiedSMSSession() ||
         consumerSession.isVerifiedForSignup()
 
+    fun getAuthSessionCookie() = consumerSession.authSessionClientSecret
+
     private fun ConsumerSession.containsVerifiedSMSSession() = verificationSessions.find {
         it.type == ConsumerSession.VerificationSession.SessionType.Sms &&
             it.state == ConsumerSession.VerificationSession.SessionState.Verified

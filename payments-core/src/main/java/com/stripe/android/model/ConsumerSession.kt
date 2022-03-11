@@ -14,7 +14,8 @@ data class ConsumerSession internal constructor(
     val clientSecret: String,
     val emailAddress: String,
     val redactedPhoneNumber: String,
-    val verificationSessions: List<VerificationSession>
+    val verificationSessions: List<VerificationSession>,
+    val authSessionClientSecret: String?
 ) : StripeModel {
 
     @Parcelize
