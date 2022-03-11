@@ -7,6 +7,7 @@ import io.gitlab.arturbosch.detekt.api.Entity
 import io.gitlab.arturbosch.detekt.api.Issue
 import io.gitlab.arturbosch.detekt.api.Rule
 import io.gitlab.arturbosch.detekt.api.Severity
+import org.jetbrains.kotlin.psi.KtFile
 import org.jetbrains.kotlin.psi.KtImportDirective
 
 class ConnectionsCodeLeakRule(config: Config = Config.empty) : Rule(config) {
@@ -37,6 +38,11 @@ class ConnectionsCodeLeakRule(config: Config = Config.empty) : Rule(config) {
 
     private fun shouldReport(importDirective: KtImportDirective): Boolean {
         return importDirective.import.containsConnectionsPackagePath()
+            && importDirective.containingKtFile.isNotConnectionsFile()
+    }
+
+    private fun KtFile.isNotConnectionsFile(): Boolean {
+        return packageDirective?.text.containsConnectionsPackagePath().not()
     }
 
     private fun String?.containsConnectionsPackagePath() =
@@ -46,3 +52,4 @@ class ConnectionsCodeLeakRule(config: Config = Config.empty) : Rule(config) {
         const val CONNECTIONS_PACKAGE_PATH = "com.stripe.android.connections"
     }
 }
+
