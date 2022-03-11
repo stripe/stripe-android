@@ -808,5 +808,5 @@ style:
       - 'java.util.*'
 
 custom-detekt-rules:
-  ConnectionsCodeLeak:
+  CompileOnlyCodeLeak:
     active: true

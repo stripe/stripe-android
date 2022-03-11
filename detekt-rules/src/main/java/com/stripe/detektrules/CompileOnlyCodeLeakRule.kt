@@ -10,15 +10,15 @@ import io.gitlab.arturbosch.detekt.api.Severity
 import org.jetbrains.kotlin.psi.KtFile
 import org.jetbrains.kotlin.psi.KtImportDirective
 
-class ConnectionsCodeLeakRule(config: Config = Config.empty) : Rule(config) {
+class CompileOnlyCodeLeakRule(config: Config = Config.empty) : Rule(config) {
 
     private val KtImportDirective.import: String?
         get() = importPath?.pathStr
 
     override val issue = Issue(
-        id = "ConnectionsCodeLeak",
-        description = "Accessing :connections code, added as compileOnly." +
-            " Ensure it's safely accessed at runtime and annotate it with @SafeCompileOnlyAccess",
+        id = "CompileOnlyCodeLeak",
+        description = "Accessing compileOnly code" +
+            "Ensure it's safely accessed at runtime and suppress this warning",
         severity = Severity.Defect,
         debt = Debt.FIVE_MINS
     )
@@ -29,27 +29,29 @@ class ConnectionsCodeLeakRule(config: Config = Config.empty) : Rule(config) {
                 CodeSmell(
                     issue = issue,
                     entity = Entity.from(importDirective),
-                    message = "Importing '${importDirective.import}' from :connections." +
-                        "Ensure it's safely accessed at runtime and annotate it with @SafeCompileOnlyAccess"
+                    message = "Importing '${importDirective.import}' from a compileOnly dependency." +
+                        "Ensure it's safely accessed at runtime and suppress this warning"
                 )
             )
         }
     }
 
     private fun shouldReport(importDirective: KtImportDirective): Boolean {
-        return importDirective.import.containsConnectionsPackagePath()
-            && importDirective.containingKtFile.isNotConnectionsFile()
+        return importDirective.import.containsCompileOnlyPackagePath()
+            && importDirective.containingKtFile.isNotCompileOnlyFile()
     }
 
-    private fun KtFile.isNotConnectionsFile(): Boolean {
-        return packageDirective?.text.containsConnectionsPackagePath().not()
+    private fun KtFile.isNotCompileOnlyFile(): Boolean {
+        return packageDirective?.text.containsCompileOnlyPackagePath().not()
     }
 
-    private fun String?.containsConnectionsPackagePath() =
-        this?.contains(CONNECTIONS_PACKAGE_PATH) == true
+    private fun String?.containsCompileOnlyPackagePath() =
+        COMPILE_ONLY_PACKAGE_PATHS.any { this?.contains(it) == true }
 
     companion object {
-        const val CONNECTIONS_PACKAGE_PATH = "com.stripe.android.connections"
+        private val COMPILE_ONLY_PACKAGE_PATHS = listOf(
+            "com.stripe.android.compileonly"
+        )
     }
 }
 
