@@ -53,7 +53,7 @@ class TestBrowsers {
         delayed = DelayedPMs.Off,
         saveCheckboxValue = false,
         useBrowser = Browser.Chrome,
-        authorizationAction = AuthorizeAction.Authorize(),
+        authorizationAction = AuthorizeAction.Authorize,
         saveForFutureUseCheckboxVisible = false,
         shipping = Shipping.Off
     )

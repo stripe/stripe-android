@@ -51,7 +51,7 @@ class TestHardCodedLpms {
         delayed = DelayedPMs.Off,
         saveCheckboxValue = false,
         useBrowser = null,
-        authorizationAction = AuthorizeAction.Authorize(),
+        authorizationAction = AuthorizeAction.Authorize,
         saveForFutureUseCheckboxVisible = false,
         shipping = Shipping.Off
     )
@@ -61,7 +61,7 @@ class TestHardCodedLpms {
         testDriver.confirmNewOrGuestCompleteSuccess(
             newUser.copy(
                 paymentMethod = SupportedPaymentMethod.Bancontact,
-                authorizationAction = AuthorizeAction.Authorize(),
+                authorizationAction = AuthorizeAction.Authorize,
             )
         )
     }
@@ -71,7 +71,7 @@ class TestHardCodedLpms {
         testDriver.confirmNewOrGuestCompleteSuccess(
             newUser.copy(
                 paymentMethod = SupportedPaymentMethod.SepaDebit,
-                authorizationAction = AuthorizeAction.Authorize(),
+                authorizationAction = AuthorizeAction.Authorize,
                 automatic = Automatic.Off,
                 delayed = DelayedPMs.On,
             )
@@ -86,7 +86,7 @@ class TestHardCodedLpms {
         testDriver.confirmNewOrGuestCompleteSuccess(
             newUser.copy(
                 paymentMethod = SupportedPaymentMethod.Ideal,
-                authorizationAction = AuthorizeAction.Authorize(),
+                authorizationAction = AuthorizeAction.Authorize,
             )
         )
     }
@@ -96,7 +96,7 @@ class TestHardCodedLpms {
         testDriver.confirmNewOrGuestCompleteSuccess(
             newUser.copy(
                 paymentMethod = SupportedPaymentMethod.Eps,
-                authorizationAction = AuthorizeAction.Authorize(),
+                authorizationAction = AuthorizeAction.Authorize,
             )
         )
     }
@@ -106,9 +106,7 @@ class TestHardCodedLpms {
         testDriver.confirmNewOrGuestCompleteSuccess(
             newUser.copy(
                 paymentMethod = SupportedPaymentMethod.Giropay,
-                authorizationAction = AuthorizeAction.Authorize(
-                    className = "android.widget.TextView"
-                ),
+                authorizationAction = AuthorizeAction.Authorize,
             )
         )
     }
@@ -118,7 +116,7 @@ class TestHardCodedLpms {
         testDriver.confirmNewOrGuestCompleteSuccess(
             newUser.copy(
                 paymentMethod = SupportedPaymentMethod.P24,
-                authorizationAction = AuthorizeAction.Authorize(),
+                authorizationAction = AuthorizeAction.Authorize,
             )
         )
     }
@@ -128,9 +126,7 @@ class TestHardCodedLpms {
         testDriver.confirmNewOrGuestCompleteSuccess(
             newUser.copy(
                 paymentMethod = SupportedPaymentMethod.AfterpayClearpay,
-                authorizationAction = AuthorizeAction.Authorize(
-                    className = "android.widget.TextView"
-                ),
+                authorizationAction = AuthorizeAction.Authorize,
                 currency = Currency.USD,
                 shipping = Shipping.On
             )
@@ -142,7 +138,7 @@ class TestHardCodedLpms {
         testDriver.confirmNewOrGuestCompleteSuccess(
             newUser.copy(
                 paymentMethod = SupportedPaymentMethod.Klarna,
-                authorizationAction = AuthorizeAction.Authorize(),
+                authorizationAction = AuthorizeAction.Authorize,
                 currency = Currency.USD
             )
         )
@@ -152,8 +148,8 @@ class TestHardCodedLpms {
     fun testPayPal() = runBlocking {
         testDriver.confirmNewOrGuestCompleteSuccess(
             newUser.copy(
-                paymentMethod = SupportedPaymentMethod.Klarna,
-                authorizationAction = AuthorizeAction.Authorize(),
+                paymentMethod = SupportedPaymentMethod.PayPal,
+                authorizationAction = AuthorizeAction.Authorize,
                 currency = Currency.USD
             )
         )

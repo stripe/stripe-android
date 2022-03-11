@@ -129,13 +129,7 @@ class PlaygroundTestDriver(
 
         if (AuthorizeWindow.exists(device, selectedBrowser)) {
             AuthorizePageLoaded.blockUntilLoaded(device)
-            when (authorizationAction) {
-                is AuthorizeAction.Authorize,
-                is AuthorizeAction.Fail ->
-                    authorizationAction.click(device)
-                AuthorizeAction.Cancel ->
-                    device.pressBack()
-            }
+            authorizationAction.click(device)
         }
     }
 

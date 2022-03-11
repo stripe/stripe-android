@@ -56,12 +56,12 @@ abstract class EspressoIdButton(@IntegerRes val id: Int) {
 
 open class UiAutomatorText(
     private val label: String,
-    className: String = "android.widget.TextView"
+    var className: String = "android.widget.TextView"
 ) {
-    private val selector = UiSelector().textContains(label)
-        .className(className)
+    val selector: UiSelector
+        get() = UiSelector().textContains(label).className(className)
 
-    fun click(device: UiDevice) {
+    open fun click(device: UiDevice) {
         if (!exists(device)) {
             throw InvalidParameterException("Text button not found: $label")
         }
@@ -137,17 +137,30 @@ sealed class AuthorizeAction(
     name: String,
     className: String
 ) : UiAutomatorText(name, className) {
-    data class Authorize(
-        val name: String = "AUTHORIZE TEST PAYMENT",
-        val className: String = "android.widget.Button"
-    ) : AuthorizeAction(name, className)
+    object Authorize : AuthorizeAction(
+        "AUTHORIZE TEST PAYMENT",
+        "android.widget.Button"
+    )
 
-    data class Fail(
-        val name: String = "FAIL TEST PAYMENT",
-        val className: String = "android.widget.Button"
-    ) : AuthorizeAction(name, className)
+    object Fail : AuthorizeAction(
+        "FAIL TEST PAYMENT",
+        "android.widget.Button"
+    )
 
-    object Cancel : AuthorizeAction("", "")
+    override fun click(device: UiDevice) {
+        // Afterpay, giropay and some other authorization test pages
+        // have their authorization class name of TextView instead of button
+        if (!exists(device)) {
+            className = "android.widget.TextView"
+        }
+        super.click(device)
+    }
+
+    object Cancel : AuthorizeAction("", "") {
+        override fun click(device: UiDevice) {
+            device.pressBack()
+        }
+    }
 }
 
 object SelectBrowserWindow : UiAutomatorText("Verify your payment")

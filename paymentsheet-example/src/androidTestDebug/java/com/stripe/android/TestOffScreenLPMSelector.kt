@@ -53,7 +53,7 @@ class TestOffScreenLPMSelector {
                 delayed = DelayedPMs.On,
                 saveCheckboxValue = false,
                 useBrowser = Browser.Chrome,
-                authorizationAction = AuthorizeAction.Authorize(),
+                authorizationAction = AuthorizeAction.Authorize,
                 saveForFutureUseCheckboxVisible = false,
                 shipping = Shipping.Off
             )
