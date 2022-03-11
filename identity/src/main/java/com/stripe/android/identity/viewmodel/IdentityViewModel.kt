@@ -56,9 +56,8 @@ internal class IdentityViewModel(
                     Log.e(TAG, "Fail to get VerificationPage")
                     onFailure(resource.throwable)
                 }
-                Status.LOADING -> {}// no-op
+                Status.LOADING -> {} // no-op
             }
-
         }
     }
 

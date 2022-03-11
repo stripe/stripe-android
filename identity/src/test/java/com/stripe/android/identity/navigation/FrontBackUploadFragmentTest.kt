@@ -23,8 +23,6 @@ import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.networking.models.DocumentUploadParam
 import com.stripe.android.identity.networking.models.IdDocumentParam
 import com.stripe.android.identity.networking.models.VerificationPage
-import com.stripe.android.identity.networking.models.VerificationPageData
-import com.stripe.android.identity.networking.models.VerificationPageDataRequirements
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentDocumentCapturePage
 import com.stripe.android.identity.states.IdentityScanState
 import com.stripe.android.identity.viewModelFactoryFor
@@ -143,7 +141,6 @@ class FrontBackUploadFragmentTest {
                 .isEqualTo(R.id.errorFragment)
         }
     }
-
 
     @Test
     fun `verify uploadFinished updates UI`() {
@@ -389,7 +386,6 @@ class FrontBackUploadFragmentTest {
         override val frontScanType = IdentityScanState.ScanType.ID_FRONT
         override val backScanType = IdentityScanState.ScanType.ID_BACK
     }
-
 
     private companion object {
         val DOCUMENT_CAPTURE =

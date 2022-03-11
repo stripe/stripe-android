@@ -101,7 +101,8 @@ internal class PassportUploadFragment(
     }
 
     private fun upload(passport: Uri, uploadMethod: DocumentUploadParam.UploadMethod) {
-        identityViewModel.observeForVerificationPage(this,
+        identityViewModel.observeForVerificationPage(
+            this,
             onSuccess = { verificationPage ->
                 passportUploadViewModel.uploadImage(
                     passport,

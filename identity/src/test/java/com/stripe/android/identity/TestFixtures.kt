@@ -4,7 +4,6 @@ import com.stripe.android.identity.networking.models.VerificationPageData
 import com.stripe.android.identity.networking.models.VerificationPageDataRequirementError
 import com.stripe.android.identity.networking.models.VerificationPageDataRequirements
 
-
 internal const val ERROR_BODY = "errorBody"
 internal const val ERROR_BUTTON_TEXT = "error button text"
 internal const val ERROR_TITLE = "errorTitle"

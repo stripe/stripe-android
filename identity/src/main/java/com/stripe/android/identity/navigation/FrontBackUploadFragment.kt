@@ -9,13 +9,11 @@ import android.view.ViewGroup
 import android.widget.Button
 import androidx.annotation.IdRes
 import androidx.annotation.StringRes
-import androidx.annotation.VisibleForTesting
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
-import androidx.navigation.fragment.findNavController
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.stripe.android.identity.R
 import com.stripe.android.identity.databinding.FrontBackUploadFragmentBinding
@@ -112,8 +110,6 @@ internal abstract class FrontBackUploadFragment(
                 throw IllegalArgumentException("Unknown type: $this")
             }
         }
-
-
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -229,7 +225,8 @@ internal abstract class FrontBackUploadFragment(
     private fun observeForDocumentCaptureModels(
         onSuccess: (VerificationPageStaticContentDocumentCapturePage) -> Unit
     ) {
-        identityViewModel.observeForVerificationPage(viewLifecycleOwner,
+        identityViewModel.observeForVerificationPage(
+            viewLifecycleOwner,
             onSuccess = {
                 onSuccess(it.documentCapture)
             },
@@ -248,7 +245,6 @@ internal abstract class FrontBackUploadFragment(
                 uploadMethod
             )
         }
-
     }
 
     private fun uploadBack(backUri: Uri, uploadMethod: DocumentUploadParam.UploadMethod) {

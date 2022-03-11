@@ -40,7 +40,7 @@ internal class FrontBackUploadViewModel(
         MutableLiveData<Resource<Pair<InternalStripeFile, UploadMethod>>>()
     val frontUploaded:
         LiveData<Resource<Pair<InternalStripeFile, UploadMethod>>> =
-        _frontUploaded
+            _frontUploaded
 
     /**
      * The ID back image has been uploaded
@@ -218,7 +218,6 @@ internal class FrontBackUploadViewModel(
             )
         }
     }
-
 
     internal class FrontBackUploadViewModelFactory(
         private val identityRepository: IdentityRepository,

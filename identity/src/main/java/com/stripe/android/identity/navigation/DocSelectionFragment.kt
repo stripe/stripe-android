@@ -48,7 +48,8 @@ internal class DocSelectionFragment(
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        identityViewModel.observeForVerificationPage(viewLifecycleOwner,
+        identityViewModel.observeForVerificationPage(
+            viewLifecycleOwner,
             onSuccess = { verificationPage ->
                 binding.title.text = verificationPage.documentSelect.title
                 when (verificationPage.documentSelect.idDocumentTypeAllowlist.count()) {
@@ -231,7 +232,8 @@ internal class DocSelectionFragment(
      * if required data is not available.
      */
     private fun tryNavigateToUploadFragment(type: Type) {
-        identityViewModel.observeForVerificationPage(viewLifecycleOwner,
+        identityViewModel.observeForVerificationPage(
+            viewLifecycleOwner,
             onSuccess = { verificationPage ->
                 if (verificationPage.documentCapture.requireLiveCapture
                 ) {
