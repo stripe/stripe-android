@@ -13,12 +13,12 @@ class RetryTest {
     @Test
     @SmallTest
     @ExperimentalCoroutinesApi
-    fun retry_succeedsFirst() = runTest {
+    fun `Retry succeeds if the first attempt succeeds`() = runTest {
         var executions = 0
 
         assertEquals(
             1,
-            retry(1.milliseconds) {
+            retry({ _, _-> 1.milliseconds }) {
                 executions++
                 1
             }
@@ -29,12 +29,12 @@ class RetryTest {
     @Test
     @SmallTest
     @ExperimentalCoroutinesApi
-    fun retry_succeedsSecond() = runTest {
+    fun `Retry succeeds if the second execution succeeds`() = runTest {
         var executions = 0
 
         assertEquals(
             1,
-            retry(1.milliseconds) {
+            retry({ _, _-> 1.milliseconds }) {
                 executions++
                 if (executions == 2) {
                     1
@@ -49,11 +49,11 @@ class RetryTest {
     @Test
     @SmallTest
     @ExperimentalCoroutinesApi
-    fun retry_fails() = runTest {
+    fun `Retry fails if all attempts fail`() = runTest {
         var executions = 0
 
         assertFailsWith<RuntimeException> {
-            retry<Int>(1.milliseconds) {
+            retry<Int>({ _, _-> 1.milliseconds }) {
                 executions++
                 throw RuntimeException()
             }
@@ -64,11 +64,11 @@ class RetryTest {
     @Test
     @SmallTest
     @ExperimentalCoroutinesApi
-    fun retry_excluding() = runTest {
+    fun `Retry does not retry excluded exception types`() = runTest {
         var executions = 0
 
         assertFailsWith<RuntimeException> {
-            retry<Int>(1.milliseconds, excluding = listOf(RuntimeException::class.java)) {
+            retry<Int>({ _, _-> 1.milliseconds }, excluding = listOf(RuntimeException::class.java)) {
                 executions++
                 throw RuntimeException()
             }
