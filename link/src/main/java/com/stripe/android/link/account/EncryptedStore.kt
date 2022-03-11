@@ -11,7 +11,7 @@ import javax.inject.Singleton
  */
 @Singleton
 internal class EncryptedStore @Inject constructor(
-    val context: Context
+    private val context: Context
 ) {
     private val keyGenParameterSpec = MasterKeys.AES256_GCM_SPEC
     private val mainKeyAlias = MasterKeys.getOrCreate(keyGenParameterSpec)

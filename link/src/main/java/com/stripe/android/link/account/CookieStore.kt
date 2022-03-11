@@ -8,7 +8,7 @@ import javax.inject.Singleton
  */
 @Singleton
 internal class CookieStore @Inject constructor(
-    val store: EncryptedStore
+    private val store: EncryptedStore
 ) {
     /**
      * Update authentication session cookie according to the following rules:
@@ -36,7 +36,7 @@ internal class CookieStore @Inject constructor(
      */
     fun getAuthSessionCookie() = store.read(AUTH_SESSION_COOKIE)
 
-    companion object {
+    private companion object {
         const val AUTH_SESSION_COOKIE = "auth_session_cookie"
     }
 }
