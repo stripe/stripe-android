@@ -1,6 +1,9 @@
 # CHANGELOG
-### xx.x.x - YYYY-MM-DD
-[FIXED] [4646](https://github.com/stripe/stripe-android/pull/4646) Update 3ds2 to latest version 6.1.4, see PR for specific issues addressed. 
+## xx.x.x - YYYY-MM-DD
+[FIXED] [4646](https://github.com/stripe/stripe-android/pull/4646) Update 3ds2 to latest version 6.1.4, see PR for specific issues addressed.
+
+### PaymentSheet
+[FIXED] [4669](https://github.com/stripe/stripe-android/pull/4669) Restrict the list of SEPA debit supported countries.
 
 ## 19.2.2 - 2022-03-01
 [FIXED] [4606](https://github.com/stripe/stripe-android/pull/4606) Keep status bar color in PaymentLauncher

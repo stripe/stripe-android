@@ -1,6 +1,8 @@
 package com.stripe.android.ui.core.elements
 
 import android.content.Context
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 
 /**
@@ -18,6 +20,15 @@ internal class CardDetailsElement(
     override fun setRawValue(rawValuesMap: Map<IdentifierSpec, String?>) {
         // Nothing from formFragmentArguments to populate
     }
+
+    override fun getTextFieldIdentifiers(): Flow<List<IdentifierSpec>> =
+        MutableStateFlow(
+            listOf(
+                controller.numberElement.identifier,
+                controller.expirationDateElement.identifier,
+                controller.cvcElement.identifier
+            )
+        )
 
     override fun getFormFieldValueFlow() = combine(
         controller.numberElement.controller.formFieldValue,

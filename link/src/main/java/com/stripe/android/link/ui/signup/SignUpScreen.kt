@@ -139,7 +139,8 @@ private fun EmailCollectionSection(
                     listOf(emailElement.sectionFieldErrorController())
                 )
             ),
-            emptyList()
+            emptyList(),
+            emailElement.identifier
         )
         if (signUpState == SignUpState.VerifyingEmail) {
             CircularProgressIndicator(

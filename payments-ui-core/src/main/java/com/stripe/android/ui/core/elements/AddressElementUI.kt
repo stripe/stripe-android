@@ -13,13 +13,19 @@ import androidx.compose.ui.Modifier
 internal fun AddressElementUI(
     enabled: Boolean,
     controller: AddressController,
-    hiddenIdentifiers: List<IdentifierSpec>?
+    hiddenIdentifiers: List<IdentifierSpec>?,
+    lastTextFieldIdentifier: IdentifierSpec?
 ) {
     val fields by controller.fieldsFlowable.collectAsState(null)
     fields?.let { fieldList ->
         Column {
             fieldList.forEachIndexed { index, field ->
-                SectionFieldElementUI(enabled, field, hiddenIdentifiers = hiddenIdentifiers)
+                SectionFieldElementUI(
+                    enabled,
+                    field,
+                    hiddenIdentifiers = hiddenIdentifiers,
+                    lastTextFieldIdentifier = lastTextFieldIdentifier
+                )
                 if ((hiddenIdentifiers?.contains(field.identifier) == false) &&
                     (index != fieldList.size - 1)
                 ) {

@@ -11,4 +11,5 @@ sealed interface SectionFieldElement {
     fun getFormFieldValueFlow(): Flow<List<Pair<IdentifierSpec, FormFieldEntry>>>
     fun sectionFieldErrorController(): SectionFieldErrorController
     fun setRawValue(rawValuesMap: Map<IdentifierSpec, String?>)
+    fun getTextFieldIdentifiers(): Flow<List<IdentifierSpec>>
 }
