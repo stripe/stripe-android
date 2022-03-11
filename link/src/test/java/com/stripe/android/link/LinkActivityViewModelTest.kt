@@ -5,7 +5,6 @@ import androidx.lifecycle.Lifecycle
 import androidx.savedstate.SavedStateRegistry
 import androidx.savedstate.SavedStateRegistryOwner
 import androidx.test.core.app.ApplicationProvider
-import com.stripe.android.link.utils.FakeAndroidKeyStore
 import com.google.common.truth.Truth
 import com.stripe.android.core.injection.Injectable
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
@@ -13,6 +12,7 @@ import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.injection.NonFallbackInjector
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.model.Navigator
+import com.stripe.android.link.utils.FakeAndroidKeyStore
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
