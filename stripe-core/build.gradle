@@ -47,6 +47,7 @@ dependencies {
     testImplementation "androidx.test:runner:$androidTestVersion"
 
     ktlint "com.pinterest:ktlint:$ktlintVersion"
+    detekt project(":detekt-rules")
 }
 
 apply from: "${rootDir}/deploy/deploy.gradle"

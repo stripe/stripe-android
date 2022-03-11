@@ -806,3 +806,7 @@ style:
     excludes: ['**/test/**', '**/androidTest/**', '**/commonTest/**', '**/jvmTest/**', '**/jsTest/**', '**/iosTest/**']
     excludeImports:
       - 'java.util.*'
+
+custom-detekt-rules:
+  ConnectionsCodeLeak:
+    active: true

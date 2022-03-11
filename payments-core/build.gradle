@@ -55,6 +55,7 @@ dependencies {
     androidTestUtil "androidx.test:orchestrator:$androidTestVersion"
 
     ktlint "com.pinterest:ktlint:$ktlintVersion"
+    detekt project(":detekt-rules")
 }
 
 android {

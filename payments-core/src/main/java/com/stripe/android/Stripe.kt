@@ -9,6 +9,7 @@ import androidx.annotation.UiThread
 import androidx.annotation.WorkerThread
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import com.stripe.android.connections.RandomConnectionsClass
 import com.stripe.android.core.ApiKeyValidator
 import com.stripe.android.core.ApiVersion
 import com.stripe.android.core.Logger
@@ -73,6 +74,8 @@ class Stripe internal constructor(
     private val workContext: CoroutineContext = Dispatchers.IO
 ) {
     internal val publishableKey: String = ApiKeyValidator().requireValid(publishableKey)
+
+    val connectionsClass = RandomConnectionsClass()
 
     /**
      * Constructor with publishable key and Stripe Connect account id.

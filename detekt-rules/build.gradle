@@ -1,0 +1,13 @@
+plugins {
+    id 'kotlin'
+}
+
+dependencies {
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlinVersion"
+    compileOnly "io.gitlab.arturbosch.detekt:detekt-api:$versions.detekt"
+    implementation "io.gitlab.arturbosch.detekt:detekt-cli:$versions.detekt"
+
+    testImplementation 'junit:junit:4.13.2'
+    testImplementation "io.gitlab.arturbosch.detekt:detekt-test:$versions.detekt"
+    testImplementation "org.assertj:assertj-core:3.15.0"
+}
