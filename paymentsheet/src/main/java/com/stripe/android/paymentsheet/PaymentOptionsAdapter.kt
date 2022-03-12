@@ -314,7 +314,7 @@ internal class PaymentOptionsAdapter(
                     isEnabled = isEnabled,
                     iconRes = savedPaymentMethod.paymentMethod.getSavedPaymentMethodIcon() ?: 0,
                     labelText = labelText,
-                    onRemoveTitle = removeTitle,
+                    removePmDialogTitle = removeTitle,
                     description = item.getDescription(itemView.resources),
                     onRemoveListener = { onRemoveListener(position) },
                     onRemoveAccessibilityDescription =
@@ -498,7 +498,7 @@ internal fun PaymentOptionUi(
     isEnabled: Boolean,
     iconRes: Int,
     labelText: String = "",
-    onRemoveTitle: String = "",
+    removePmDialogTitle: String = "",
     description: String,
     onRemoveListener: (() -> Unit)? = null,
     onRemoveAccessibilityDescription: String = "",
@@ -561,7 +561,7 @@ internal fun PaymentOptionUi(
 
             SimpleDialogElementUI(
                 openDialog = openDialog,
-                titleText = onRemoveTitle,
+                titleText = removePmDialogTitle,
                 messageText = description,
                 confirmText = stringResource(R.string.remove),
                 dismissText = stringResource(R.string.cancel),
