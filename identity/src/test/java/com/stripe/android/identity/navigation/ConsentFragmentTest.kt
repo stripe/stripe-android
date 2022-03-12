@@ -174,7 +174,7 @@ internal class ConsentFragmentTest {
     fun `when accepted and postVerificationData success transitions to docSelectionFragment`() {
         runBlocking {
             whenever(
-                mockIdentityViewModel.postVerificationPageData(any())
+                mockIdentityViewModel.postVerificationPageData(any(), any())
             ).thenReturn(correctVerificationData)
 
             launchConsentFragment { binding, navController ->
@@ -192,7 +192,7 @@ internal class ConsentFragmentTest {
     fun `when accepted and postVerificationData fails transitions to errorFragment`() {
         runBlocking {
             whenever(
-                mockIdentityViewModel.postVerificationPageData(any())
+                mockIdentityViewModel.postVerificationPageData(any(), any())
             ).thenThrow(APIException())
 
             launchConsentFragment { binding, navController ->
@@ -209,7 +209,7 @@ internal class ConsentFragmentTest {
     fun `when declined and postVerificationData success transitions to errorFragment with returned value`() {
         runBlocking {
             whenever(
-                mockIdentityViewModel.postVerificationPageData(any())
+                mockIdentityViewModel.postVerificationPageData(any(), any())
             ).thenReturn(incorrectVerificationData)
 
             launchConsentFragment { binding, navController ->
@@ -237,7 +237,7 @@ internal class ConsentFragmentTest {
     fun `when declined and postVerificationData fails transitions to errorFragment`() {
         runBlocking {
             whenever(
-                mockIdentityViewModel.postVerificationPageData(any())
+                mockIdentityViewModel.postVerificationPageData(any(), any())
             ).thenThrow(APIException())
 
             launchConsentFragment { binding, navController ->

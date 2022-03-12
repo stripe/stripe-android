@@ -18,8 +18,11 @@ import com.stripe.android.identity.CORRECT_WITH_SUBMITTED_SUCCESS_VERIFICATION_P
 import com.stripe.android.identity.R
 import com.stripe.android.identity.databinding.PassportUploadFragmentBinding
 import com.stripe.android.identity.networking.Resource
+import com.stripe.android.identity.networking.models.ClearDataParam
 import com.stripe.android.identity.networking.models.CollectedDataParam
+import com.stripe.android.identity.networking.models.DocumentUploadParam
 import com.stripe.android.identity.networking.models.DocumentUploadParam.UploadMethod
+import com.stripe.android.identity.networking.models.IdDocumentParam
 import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentDocumentCapturePage
 import com.stripe.android.identity.viewModelFactoryFor
@@ -111,8 +114,13 @@ class PassportUploadFragmentTest {
                 )
 
                 val collectedDataParamCaptor: KArgumentCaptor<CollectedDataParam> = argumentCaptor()
+                val clearDataParamCaptor: KArgumentCaptor<ClearDataParam> = argumentCaptor()
+
                 whenever(
-                    mockIdentityViewModel.postVerificationPageData(collectedDataParamCaptor.capture())
+                    mockIdentityViewModel.postVerificationPageData(
+                        collectedDataParamCaptor.capture(),
+                        clearDataParamCaptor.capture()
+                    )
                 ).thenReturn(
                     CORRECT_WITH_SUBMITTED_FAILURE_VERIFICATION_PAGE_DATA
                 )
@@ -121,6 +129,21 @@ class PassportUploadFragmentTest {
                 )
 
                 binding.kontinue.callOnClick()
+
+                assertThat(collectedDataParamCaptor.firstValue).isEqualTo(
+                    CollectedDataParam(
+                        idDocument = IdDocumentParam(
+                            front = DocumentUploadParam(
+                                highResImage = FILE_ID,
+                                uploadMethod = UploadMethod.FILEUPLOAD
+                            ),
+                            type = IdDocumentParam.Type.PASSPORT
+                        )
+                    )
+                )
+                assertThat(clearDataParamCaptor.firstValue).isEqualTo(
+                    ClearDataParam.UPLOAD_TO_CONFIRM
+                )
 
                 assertThat(navController.currentDestination?.id)
                     .isEqualTo(R.id.confirmationFragment)

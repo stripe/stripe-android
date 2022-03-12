@@ -15,6 +15,7 @@ import com.stripe.android.core.exception.InvalidRequestException
 import com.stripe.android.identity.R
 import com.stripe.android.identity.databinding.DocSelectionFragmentBinding
 import com.stripe.android.identity.networking.Status
+import com.stripe.android.identity.networking.models.ClearDataParam
 import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.networking.models.IdDocumentParam
 import com.stripe.android.identity.networking.models.IdDocumentParam.Type
@@ -190,8 +191,9 @@ internal class DocSelectionFragment(
     private fun postVerificationPageDataAndNavigate(type: Type) {
         lifecycleScope.launch {
             postVerificationPageDataAndMaybeSubmit(
-                identityViewModel,
-                CollectedDataParam(idDocument = IdDocumentParam(type = type)),
+                identityViewModel = identityViewModel,
+                collectedDataParam = CollectedDataParam(idDocument = IdDocumentParam(type = type)),
+                clearDataParam = ClearDataParam.DOC_SELECT_TO_UPLOAD,
                 shouldNotSubmit = { verificationPageData ->
                     verificationPageData.isMissingBackOrFront()
                 },

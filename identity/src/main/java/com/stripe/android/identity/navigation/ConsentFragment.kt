@@ -11,6 +11,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.stripe.android.identity.R
 import com.stripe.android.identity.databinding.ConsentFragmentBinding
+import com.stripe.android.identity.networking.models.ClearDataParam
 import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.networking.models.ConsentParam
 import com.stripe.android.identity.networking.models.VerificationPage.Companion.isMissingBiometricConsent
@@ -90,6 +91,7 @@ internal class ConsentFragment(
             postVerificationPageDataAndMaybeSubmit(
                 identityViewModel,
                 collectedDataParam,
+                ClearDataParam.CONSENT_TO_DOC_SELECT,
                 shouldNotSubmit = { true },
                 notSubmitBlock = { verificationPageData ->
                     if (verificationPageData.isMissingDocumentType()) {

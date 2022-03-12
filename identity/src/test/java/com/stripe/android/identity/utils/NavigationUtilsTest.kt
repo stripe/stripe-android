@@ -19,7 +19,6 @@ import com.stripe.android.identity.ERROR_TITLE
 import com.stripe.android.identity.ERROR_VERIFICATION_PAGE_DATA
 import com.stripe.android.identity.R
 import com.stripe.android.identity.navigation.ErrorFragment
-import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.viewmodel.IdentityViewModel
 import kotlinx.coroutines.runBlocking
 import org.junit.Test
@@ -36,16 +35,16 @@ internal class NavigationUtilsTest {
     fun `postVerificationPageDataAndMaybeSubmit navigates to error fragment when has error`() {
         runBlocking {
             val mockIdentityViewModel = mock<IdentityViewModel>().also {
-                whenever(it.postVerificationPageData(any())).thenReturn(
+                whenever(it.postVerificationPageData(any(), any())).thenReturn(
                     ERROR_VERIFICATION_PAGE_DATA
                 )
             }
-            val mockCollectedDataParam = mock<CollectedDataParam>()
 
             launchFragment { navController, fragment ->
                 fragment.postVerificationPageDataAndMaybeSubmit(
                     mockIdentityViewModel,
-                    mockCollectedDataParam,
+                    mock(),
+                    mock(),
                     { true },
                     {}
                 )
@@ -70,16 +69,16 @@ internal class NavigationUtilsTest {
     fun `postVerificationPageDataAndMaybeSubmit navigates to general error fragment when fails`() {
         runBlocking {
             val mockIdentityViewModel = mock<IdentityViewModel>().also {
-                whenever(it.postVerificationPageData(any())).thenThrow(
+                whenever(it.postVerificationPageData(any(), any())).thenThrow(
                     APIException()
                 )
             }
-            val mockCollectedDataParam = mock<CollectedDataParam>()
 
             launchFragment { navController, fragment ->
                 fragment.postVerificationPageDataAndMaybeSubmit(
                     mockIdentityViewModel,
-                    mockCollectedDataParam,
+                    mock(),
+                    mock(),
                     { true },
                     {}
                 )
@@ -94,7 +93,7 @@ internal class NavigationUtilsTest {
     fun `postVerificationPageDataAndMaybeSubmit executes notSubmitBlock when shouldNotSubmit`() {
         runBlocking {
             val mockIdentityViewModel = mock<IdentityViewModel>().also {
-                whenever(it.postVerificationPageData(any())).thenReturn(
+                whenever(it.postVerificationPageData(any(), any())).thenReturn(
                     CORRECT_WITH_SUBMITTED_FAILURE_VERIFICATION_PAGE_DATA
                 )
             }
@@ -103,6 +102,7 @@ internal class NavigationUtilsTest {
             launchFragment { _, fragment ->
                 fragment.postVerificationPageDataAndMaybeSubmit(
                     mockIdentityViewModel,
+                    mock(),
                     mock(),
                     { true },
                     {
@@ -119,7 +119,7 @@ internal class NavigationUtilsTest {
     fun `postVerificationPageDataAndMaybeSubmit submits when shouldNotSubmit is false`() {
         runBlocking {
             val mockIdentityViewModel = mock<IdentityViewModel>().also {
-                whenever(it.postVerificationPageData(any())).thenReturn(
+                whenever(it.postVerificationPageData(any(), any())).thenReturn(
                     CORRECT_WITH_SUBMITTED_FAILURE_VERIFICATION_PAGE_DATA
                 )
                 whenever(it.postVerificationPageSubmit()).thenReturn(
@@ -130,6 +130,7 @@ internal class NavigationUtilsTest {
             launchFragment { _, fragment ->
                 fragment.postVerificationPageDataAndMaybeSubmit(
                     mockIdentityViewModel,
+                    mock(),
                     mock(),
                     { false },
                     {}
@@ -144,7 +145,7 @@ internal class NavigationUtilsTest {
     fun `postVerificationPageDataAndMaybeSubmit submits success with error then navigates to errorFragment with error data`() {
         runBlocking {
             val mockIdentityViewModel = mock<IdentityViewModel>().also {
-                whenever(it.postVerificationPageData(any())).thenReturn(
+                whenever(it.postVerificationPageData(any(), any())).thenReturn(
                     CORRECT_WITH_SUBMITTED_FAILURE_VERIFICATION_PAGE_DATA
                 )
 
@@ -156,6 +157,7 @@ internal class NavigationUtilsTest {
             launchFragment { navController, fragment ->
                 fragment.postVerificationPageDataAndMaybeSubmit(
                     mockIdentityViewModel,
+                    mock(),
                     mock(),
                     { false },
                     {}
@@ -181,7 +183,7 @@ internal class NavigationUtilsTest {
     fun `postVerificationPageDataAndMaybeSubmit submits success with submitted success then navigates to general ErrorFragment`() {
         runBlocking {
             val mockIdentityViewModel = mock<IdentityViewModel>().also {
-                whenever(it.postVerificationPageData(any())).thenReturn(
+                whenever(it.postVerificationPageData(any(), any())).thenReturn(
                     CORRECT_WITH_SUBMITTED_FAILURE_VERIFICATION_PAGE_DATA
                 )
 
@@ -193,6 +195,7 @@ internal class NavigationUtilsTest {
             launchFragment { navController, fragment ->
                 fragment.postVerificationPageDataAndMaybeSubmit(
                     mockIdentityViewModel,
+                    mock(),
                     mock(),
                     { false },
                     {}
@@ -208,7 +211,7 @@ internal class NavigationUtilsTest {
     fun `postVerificationPageDataAndMaybeSubmit submits success with submitted failure then navigates to ConfirmationFragment`() {
         runBlocking {
             val mockIdentityViewModel = mock<IdentityViewModel>().also {
-                whenever(it.postVerificationPageData(any())).thenReturn(
+                whenever(it.postVerificationPageData(any(), any())).thenReturn(
                     CORRECT_WITH_SUBMITTED_FAILURE_VERIFICATION_PAGE_DATA
                 )
 
@@ -220,6 +223,7 @@ internal class NavigationUtilsTest {
             launchFragment { navController, fragment ->
                 fragment.postVerificationPageDataAndMaybeSubmit(
                     mockIdentityViewModel,
+                    mock(),
                     mock(),
                     { false },
                     {}
@@ -235,7 +239,7 @@ internal class NavigationUtilsTest {
     fun `postVerificationPageDataAndMaybeSubmit submits fails then navigates to general ErrorFragment`() {
         runBlocking {
             val mockIdentityViewModel = mock<IdentityViewModel>().also {
-                whenever(it.postVerificationPageData(any())).thenReturn(
+                whenever(it.postVerificationPageData(any(), any())).thenReturn(
                     CORRECT_WITH_SUBMITTED_FAILURE_VERIFICATION_PAGE_DATA
                 )
 
@@ -247,6 +251,7 @@ internal class NavigationUtilsTest {
             launchFragment { navController, fragment ->
                 fragment.postVerificationPageDataAndMaybeSubmit(
                     mockIdentityViewModel,
+                    mock(),
                     mock(),
                     { false },
                     {}

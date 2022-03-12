@@ -4,6 +4,7 @@ import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.model.InternalStripeFile
 import com.stripe.android.core.model.InternalStripeFilePurpose
+import com.stripe.android.identity.networking.models.ClearDataParam
 import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.networking.models.VerificationPageData
@@ -29,7 +30,8 @@ internal interface IdentityRepository {
     suspend fun postVerificationPageData(
         id: String,
         ephemeralKey: String,
-        collectedDataParam: CollectedDataParam
+        collectedDataParam: CollectedDataParam,
+        clearDataParam: ClearDataParam
     ): VerificationPageData
 
     @Throws(
