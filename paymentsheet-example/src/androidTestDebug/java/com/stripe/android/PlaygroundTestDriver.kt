@@ -3,7 +3,10 @@ package com.stripe.android
 import android.content.pm.PackageManager
 import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.test.core.app.ActivityScenario
+import androidx.test.espresso.Espresso
 import androidx.test.espresso.IdlingRegistry
+import androidx.test.espresso.assertion.ViewAssertions
+import androidx.test.espresso.matcher.ViewMatchers
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.runner.screenshot.BasicScreenCaptureProcessor
 import androidx.test.runner.screenshot.Screenshot
@@ -23,13 +26,13 @@ class PlaygroundTestDriver(
     private val composeTestRule: ComposeTestRule,
     private val basicScreenCaptureProcessor: MyScreenCaptureProcessor
 ) {
-    fun confirmNewOrGuestCompleteSuccess(
+    private var resultValue: String? = null
+    private val callbackLock = Semaphore(1)
+
+    fun confirmNewOrGuestComplete(
         testParameters: TestParameters,
         populateCustomLpmFields: () -> Unit = {}
     ) {
-        var resultValue: String? = null
-        val callbackLock = Semaphore(1)
-
         // Setup the playground for scenario, and launch it.  We use the playground
         // so we don't have to implement another route to create a payment intent,
         // the challenge is that we don't have access to the activity or it's viewmodels
@@ -92,8 +95,13 @@ class PlaygroundTestDriver(
             assert(!SelectBrowserWindow.exists(device))
         }
 
-        callbackLock.acquire()
-        assertThat(resultValue).isEqualTo(PaymentSheetResult.Completed.toString())
+        if (testParameters.authorizationAction == AuthorizeAction.Authorize) {
+            callbackLock.acquire()
+            assertThat(resultValue).isEqualTo(
+                PaymentSheetResult.Completed.toString()
+            )
+        }
+
         callbackLock.release()
     }
 
@@ -129,7 +137,30 @@ class PlaygroundTestDriver(
 
         if (AuthorizeWindow.exists(device, selectedBrowser)) {
             AuthorizePageLoaded.blockUntilLoaded(device)
-            authorizationAction.click(device)
+            when (authorizationAction) {
+                AuthorizeAction.Authorize -> authorizationAction.click(device)
+                AuthorizeAction.Cancel -> {
+                    authorizationAction.click(device)
+
+                    PlaygroundBuyButton.waitProcessingComplete(device)
+                    PlaygroundBuyButton.isEnabled()
+                    PlaygroundBuyButton.isDisplayed()
+                }
+                AuthorizeAction.Fail -> {
+                    authorizationAction.click(device)
+
+                    PlaygroundBuyButton.waitProcessingComplete(device)
+                    PlaygroundBuyButton.isEnabled()
+                    PlaygroundBuyButton.isDisplayed()
+
+                    // The text comes after the buy button animation is complete
+                    Espresso.onView(
+                        ViewMatchers.withText(
+                            "We are unable to authenticate your payment method. Please choose a different payment method and try again."
+                        )
+                    ).check(ViewAssertions.matches(ViewMatchers.isDisplayed()))
+                }
+            }
         }
     }
 

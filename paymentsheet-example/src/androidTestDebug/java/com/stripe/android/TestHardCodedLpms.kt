@@ -58,7 +58,7 @@ class TestHardCodedLpms {
 
     @Test
     fun testBancontact() = runBlocking {
-        testDriver.confirmNewOrGuestCompleteSuccess(
+        testDriver.confirmNewOrGuestComplete(
             newUser.copy(
                 paymentMethod = SupportedPaymentMethod.Bancontact,
                 authorizationAction = AuthorizeAction.Authorize,
@@ -68,7 +68,7 @@ class TestHardCodedLpms {
 
     @Test
     fun testSepaDebit() = runBlocking {
-        testDriver.confirmNewOrGuestCompleteSuccess(
+        testDriver.confirmNewOrGuestComplete(
             newUser.copy(
                 paymentMethod = SupportedPaymentMethod.SepaDebit,
                 authorizationAction = AuthorizeAction.Authorize,
@@ -83,7 +83,7 @@ class TestHardCodedLpms {
 
     @Test
     fun testIdeal() = runBlocking {
-        testDriver.confirmNewOrGuestCompleteSuccess(
+        testDriver.confirmNewOrGuestComplete(
             newUser.copy(
                 paymentMethod = SupportedPaymentMethod.Ideal,
                 authorizationAction = AuthorizeAction.Authorize,
@@ -93,7 +93,7 @@ class TestHardCodedLpms {
 
     @Test
     fun testEps() = runBlocking {
-        testDriver.confirmNewOrGuestCompleteSuccess(
+        testDriver.confirmNewOrGuestComplete(
             newUser.copy(
                 paymentMethod = SupportedPaymentMethod.Eps,
                 authorizationAction = AuthorizeAction.Authorize,
@@ -103,7 +103,7 @@ class TestHardCodedLpms {
 
     @Test
     fun testGiropay() = runBlocking {
-        testDriver.confirmNewOrGuestCompleteSuccess(
+        testDriver.confirmNewOrGuestComplete(
             newUser.copy(
                 paymentMethod = SupportedPaymentMethod.Giropay,
                 authorizationAction = AuthorizeAction.Authorize,
@@ -113,7 +113,7 @@ class TestHardCodedLpms {
 
     @Test
     fun testP24() = runBlocking {
-        testDriver.confirmNewOrGuestCompleteSuccess(
+        testDriver.confirmNewOrGuestComplete(
             newUser.copy(
                 paymentMethod = SupportedPaymentMethod.P24,
                 authorizationAction = AuthorizeAction.Authorize,
@@ -123,7 +123,7 @@ class TestHardCodedLpms {
 
     @Test
     fun testAfterpay() = runBlocking {
-        testDriver.confirmNewOrGuestCompleteSuccess(
+        testDriver.confirmNewOrGuestComplete(
             newUser.copy(
                 paymentMethod = SupportedPaymentMethod.AfterpayClearpay,
                 authorizationAction = AuthorizeAction.Authorize,
@@ -135,7 +135,7 @@ class TestHardCodedLpms {
 
     @Ignore("Complex authorization handling required")
     fun testKlarna() = runBlocking {
-        testDriver.confirmNewOrGuestCompleteSuccess(
+        testDriver.confirmNewOrGuestComplete(
             newUser.copy(
                 paymentMethod = SupportedPaymentMethod.Klarna,
                 authorizationAction = AuthorizeAction.Authorize,
@@ -146,7 +146,7 @@ class TestHardCodedLpms {
 
     @Ignore("Cannot be tested requires EU-based merchant")
     fun testPayPal() = runBlocking {
-        testDriver.confirmNewOrGuestCompleteSuccess(
+        testDriver.confirmNewOrGuestComplete(
             newUser.copy(
                 paymentMethod = SupportedPaymentMethod.PayPal,
                 authorizationAction = AuthorizeAction.Authorize,

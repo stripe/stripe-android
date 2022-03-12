@@ -55,7 +55,7 @@ class TestCustomers {
 
     @Test
     fun testAuthorizeGuest() = runBlocking {
-        testDriver.confirmNewOrGuestCompleteSuccess(
+        testDriver.confirmNewOrGuestComplete(
             bancontactNewUser.copy(
                 customer = Customer.Guest,
             )
@@ -64,7 +64,7 @@ class TestCustomers {
 
     @Test
     fun testAuthorizeNew() = runBlocking {
-        testDriver.confirmNewOrGuestCompleteSuccess(
+        testDriver.confirmNewOrGuestComplete(
             bancontactNewUser.copy(
                 customer = Customer.New,
             )

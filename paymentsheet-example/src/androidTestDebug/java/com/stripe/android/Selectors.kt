@@ -13,8 +13,9 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToNode
 import androidx.test.espresso.Espresso
 import androidx.test.espresso.action.ViewActions
-import androidx.test.espresso.assertion.ViewAssertions
+import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.ViewMatchers
+import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.UiSelector
@@ -36,7 +37,7 @@ open class EspressoLabelIdButton(@StringRes val label: Int) {
                 .withFailureHandler { _, _ ->
                     throw InvalidParameterException("No payment selector found")
                 }
-                .check(ViewAssertions.matches(ViewMatchers.isDisplayed()))
+                .check(matches(ViewMatchers.isDisplayed()))
             true
         } catch (e: InvalidParameterException) {
             false
@@ -51,6 +52,21 @@ abstract class EspressoIdButton(@IntegerRes val id: Int) {
 
     fun scrollTo() {
         Espresso.onView(ViewMatchers.withId(id)).perform(ViewActions.scrollTo())
+    }
+
+    fun isEnabled() {
+        Espresso.onView(ViewMatchers.withId(id))
+            .check(matches(ViewMatchers.isEnabled()))
+    }
+
+    fun isDisplayed() {
+        Espresso.onView(ViewMatchers.withId(id))
+            .check(matches(ViewMatchers.isDisplayed()))
+    }
+
+    fun hasText(text: String) {
+        Espresso.onView(ViewMatchers.withId(id))
+            .check(matches(ViewMatchers.withText(text)))
     }
 }
 
@@ -72,7 +88,18 @@ open class UiAutomatorText(
         device.findObject(selector).exists()
 }
 
-object PlaygroundBuyButton : EspressoIdButton(R.id.buy_button)
+object PlaygroundBuyButton : EspressoIdButton(R.id.buy_button) {
+    fun waitProcessingComplete(device: UiDevice) {
+        device.wait(
+            Until.findObject(
+                By.res("com.stripe.android.paymentsheet:id/buy_button")
+            ),
+            InstrumentationRegistry.getInstrumentation().targetContext.resources
+                .getInteger(android.R.integer.config_shortAnimTime)
+                .toLong()
+        )
+    }
+}
 
 object SaveForFutureCheckbox :
     EspressoLabelIdButton(R.string.stripe_paymentsheet_save_this_card_with_merchant_name)

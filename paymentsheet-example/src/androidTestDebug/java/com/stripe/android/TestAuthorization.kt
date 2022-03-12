@@ -13,16 +13,11 @@ import org.junit.Test
 import org.junit.rules.Timeout
 import org.junit.runner.RunWith
 
-/**
- * This tests that authorization works with firefox and chrome browsers.  If a browser
- * is specified in the test parameters and it is not available the test will be skipped.
- * Note that if a webview is used because there is no browser or a returnURL is specified
- * this it cannot be actuated with UI Automator.
- */
 @RunWith(AndroidJUnit4::class)
-class TestBrowsers {
+class TestAuthorization {
     @get:Rule
     var globalTimeout: Timeout = Timeout.seconds(INDIVIDUAL_TEST_TIMEOUT_SECONDS)
+
     @get:Rule
     val composeTestRule = createEmptyComposeRule()
 
@@ -59,29 +54,29 @@ class TestBrowsers {
     )
 
     @Test
-    fun testAuthorizeChrome() = runBlocking {
+    fun testAuthorizeSuccess() = runBlocking {
         testDriver.confirmNewOrGuestComplete(
             bancontactNewUser.copy(
-                useBrowser = Browser.Chrome,
+                authorizationAction = AuthorizeAction.Authorize,
             )
         )
     }
 
     @Test
-    fun testAuthorizeFirefox() = runBlocking {
+    fun testAuthorizeFailure() = runBlocking {
         testDriver.confirmNewOrGuestComplete(
             bancontactNewUser.copy(
-                useBrowser = Browser.Firefox,
+                paymentMethod = SupportedPaymentMethod.Ideal,
+                authorizationAction = AuthorizeAction.Fail,
             )
         )
     }
 
     @Test
-    fun testAuthorizeAnyAvailableBrowser() = runBlocking {
-        // Does not work when default browser is android
+    fun testAuthorizeCancel() = runBlocking {
         testDriver.confirmNewOrGuestComplete(
             bancontactNewUser.copy(
-                useBrowser = null,
+                authorizationAction = AuthorizeAction.Cancel,
             )
         )
     }

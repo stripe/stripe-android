@@ -41,7 +41,7 @@ class TestOffScreenLPMSelector {
 
     @Test
     fun scrollToLpmAndCustomFields() = runBlocking {
-        testDriver.confirmNewOrGuestCompleteSuccess(
+        testDriver.confirmNewOrGuestComplete(
             TestParameters(
                 SupportedPaymentMethod.SepaDebit,
                 Customer.New,

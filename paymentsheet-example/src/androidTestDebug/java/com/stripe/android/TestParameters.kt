@@ -7,7 +7,7 @@ data class TestParameters(
     val customer: Customer,
     val googlePayState: GooglePayState,
     val currency: Currency,
-    val checkout: Checkout,
+    val checkout: Checkout,// TODO: Rename this enum not to confuse with checkout
     val billing: Billing,
     val shipping: Shipping,
     val delayed: DelayedPMs,
