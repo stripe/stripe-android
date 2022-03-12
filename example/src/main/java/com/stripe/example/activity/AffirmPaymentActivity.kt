@@ -10,12 +10,11 @@ import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.payments.bankaccount.BillingDetails
 import com.stripe.android.payments.bankaccount.CollectBankAccountForPaymentParams
 import com.stripe.android.payments.bankaccount.CollectBankAccountForPaymentResponse
-import com.stripe.android.payments.bankaccount.CollectBankAccountForSetupParams
-import com.stripe.android.payments.bankaccount.CollectBankAccountForSetupResponse
 import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher
 import com.stripe.example.R
 import com.stripe.example.databinding.PaymentExampleActivityBinding
 
+// TODO create dedicated activity for bank account flow.
 class AffirmPaymentActivity : StripeIntentActivity() {
 
     private val viewBinding: PaymentExampleActivityBinding by lazy {

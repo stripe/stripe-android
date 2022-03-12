@@ -150,16 +150,6 @@ internal class StripeCollectBankAccountForSetupLauncher constructor(
 interface CollectBankAccountParams
 
 @Parcelize
-data class CollectBankAccountForPaymentResponse(
-    val paymentIntent: PaymentIntent
-) : StripeModel
-
-@Parcelize
-data class CollectBankAccountForSetupResponse(
-    val setupIntent: SetupIntent
-) : StripeModel
-
-@Parcelize
 data class CollectBankAccountForPaymentParams(
     val paymentMethodType: String,
     val billingDetails: BillingDetails
@@ -170,6 +160,18 @@ data class CollectBankAccountForSetupParams(
     val paymentMethodType: String,
     val billingDetails: BillingDetails
 ) : Parcelable, CollectBankAccountParams
+
+@Parcelize
+data class CollectBankAccountForPaymentResponse(
+    val paymentIntent: PaymentIntent
+) : StripeModel
+
+@Parcelize
+data class CollectBankAccountForSetupResponse(
+    val setupIntent: SetupIntent
+) : StripeModel
+
+
 
 @Parcelize
 data class BillingDetails(
