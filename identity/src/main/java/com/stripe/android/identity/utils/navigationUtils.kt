@@ -7,6 +7,7 @@ import com.stripe.android.identity.R
 import com.stripe.android.identity.navigation.ErrorFragment
 import com.stripe.android.identity.navigation.ErrorFragment.Companion.navigateToErrorFragmentWithDefaultValues
 import com.stripe.android.identity.navigation.ErrorFragment.Companion.navigateToErrorFragmentWithRequirementErrorAndDestination
+import com.stripe.android.identity.networking.models.ClearDataParam
 import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.networking.models.VerificationPageData
 import com.stripe.android.identity.networking.models.VerificationPageData.Companion.hasError
@@ -35,11 +36,12 @@ import com.stripe.android.identity.viewmodel.IdentityViewModel
 internal suspend fun Fragment.postVerificationPageDataAndMaybeSubmit(
     identityViewModel: IdentityViewModel,
     collectedDataParam: CollectedDataParam,
+    clearDataParam: ClearDataParam,
     shouldNotSubmit: (verificationPageData: VerificationPageData) -> Boolean = { true },
     notSubmitBlock: ((verificationPageData: VerificationPageData) -> Unit)? = null
 ) {
     runCatching {
-        identityViewModel.postVerificationPageData(collectedDataParam)
+        identityViewModel.postVerificationPageData(collectedDataParam, clearDataParam)
     }.fold(
         onSuccess = { postedVerificationPageData ->
             if (postedVerificationPageData.hasError()) {

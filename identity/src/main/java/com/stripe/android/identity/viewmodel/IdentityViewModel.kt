@@ -13,6 +13,7 @@ import com.stripe.android.identity.IdentityVerificationSheetContract
 import com.stripe.android.identity.networking.IdentityRepository
 import com.stripe.android.identity.networking.Resource
 import com.stripe.android.identity.networking.Status
+import com.stripe.android.identity.networking.models.ClearDataParam
 import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.networking.models.VerificationPageData
@@ -123,11 +124,15 @@ internal class IdentityViewModel(
         APIConnectionException::class,
         APIException::class
     )
-    suspend fun postVerificationPageData(collectedDataParam: CollectedDataParam) =
+    suspend fun postVerificationPageData(
+        collectedDataParam: CollectedDataParam,
+        clearDataParam: ClearDataParam
+    ) =
         identityRepository.postVerificationPageData(
             args.verificationSessionId,
             args.ephemeralKeySecret,
-            collectedDataParam
+            collectedDataParam,
+            clearDataParam
         )
 
     /**

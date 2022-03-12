@@ -13,11 +13,14 @@ import com.stripe.android.core.model.parsers.StripeErrorJsonParser
 import com.stripe.android.core.model.parsers.StripeFileJsonParser
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
+import com.stripe.android.core.networking.QueryStringFactory
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.networking.StripeRequest
 import com.stripe.android.core.networking.responseJson
+import com.stripe.android.identity.networking.models.ClearDataParam
+import com.stripe.android.identity.networking.models.ClearDataParam.Companion.createCollectedDataParamEntry
 import com.stripe.android.identity.networking.models.CollectedDataParam
-import com.stripe.android.identity.networking.models.CollectedDataParam.Companion.createCollectedDataParam
+import com.stripe.android.identity.networking.models.CollectedDataParam.Companion.createCollectedDataParamEntry
 import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.networking.models.VerificationPageData
 import com.stripe.android.identity.utils.createTFLiteFile
@@ -51,12 +54,18 @@ internal class DefaultIdentityRepository(
     override suspend fun postVerificationPageData(
         id: String,
         ephemeralKey: String,
-        collectedDataParam: CollectedDataParam
+        collectedDataParam: CollectedDataParam,
+        clearDataParam: ClearDataParam
     ): VerificationPageData = executeRequestWithKSerializer(
         PostVerificationPageDataRequest(
             id,
             ephemeralKey,
-            collectedDataParam.createCollectedDataParam(json)
+            QueryStringFactory.createFromParamsWithEmptyValues(
+                mapOf(
+                    collectedDataParam.createCollectedDataParamEntry(json),
+                    clearDataParam.createCollectedDataParamEntry(json)
+                )
+            )
         ),
         VerificationPageData.serializer()
     )

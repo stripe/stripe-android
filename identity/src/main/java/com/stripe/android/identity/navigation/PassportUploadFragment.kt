@@ -17,6 +17,7 @@ import com.stripe.android.core.model.InternalStripeFile
 import com.stripe.android.identity.R
 import com.stripe.android.identity.databinding.PassportUploadFragmentBinding
 import com.stripe.android.identity.networking.Status
+import com.stripe.android.identity.networking.models.ClearDataParam
 import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.networking.models.DocumentUploadParam
 import com.stripe.android.identity.networking.models.IdDocumentParam
@@ -145,6 +146,7 @@ internal class PassportUploadFragment(
                                 type = IdDocumentParam.Type.PASSPORT
                             )
                         ),
+                        clearDataParam = ClearDataParam.UPLOAD_TO_CONFIRM,
                         shouldNotSubmit = { false }
                     )
                 }.onFailure {

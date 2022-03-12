@@ -18,6 +18,7 @@ import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.stripe.android.identity.R
 import com.stripe.android.identity.databinding.FrontBackUploadFragmentBinding
 import com.stripe.android.identity.networking.Status
+import com.stripe.android.identity.networking.models.ClearDataParam
 import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.networking.models.DocumentUploadParam
 import com.stripe.android.identity.networking.models.IdDocumentParam
@@ -176,6 +177,7 @@ internal abstract class FrontBackUploadFragment(
                                     type = frontScanType.toType()
                                 )
                             ),
+                            clearDataParam = ClearDataParam.UPLOAD_TO_CONFIRM,
                             shouldNotSubmit = { false }
                         )
                     }.onFailure {

@@ -168,7 +168,7 @@ internal class DocSelectionFragmentTest {
                 DOC_SELECT_SINGLE_CHOICE_DL
             )
             runBlocking {
-                whenever(mockIdentityViewModel.postVerificationPageData(any())).thenReturn(
+                whenever(mockIdentityViewModel.postVerificationPageData(any(), any())).thenReturn(
                     MISSING_BACK_VERIFICATION_PAGE_DATA
                 )
             }
@@ -203,7 +203,7 @@ internal class DocSelectionFragmentTest {
                 mockDocumentCapture
             )
             runBlocking {
-                whenever(mockIdentityViewModel.postVerificationPageData(any())).thenReturn(
+                whenever(mockIdentityViewModel.postVerificationPageData(any(), any())).thenReturn(
                     MISSING_BACK_VERIFICATION_PAGE_DATA
                 )
             }
@@ -235,7 +235,7 @@ internal class DocSelectionFragmentTest {
                 mockDocumentCapture
             )
             runBlocking {
-                whenever(mockIdentityViewModel.postVerificationPageData(any())).thenReturn(
+                whenever(mockIdentityViewModel.postVerificationPageData(any(), any())).thenReturn(
                     MISSING_BACK_VERIFICATION_PAGE_DATA
                 )
             }
