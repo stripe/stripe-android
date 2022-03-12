@@ -6,6 +6,7 @@ import android.os.Bundle
 import androidx.activity.viewModels
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.findNavController
 import androidx.navigation.fragment.NavHostFragment
 import com.stripe.android.camera.CameraPermissionCheckingActivity
 import com.stripe.android.identity.IdentityVerificationSheet.VerificationResult
@@ -59,7 +60,13 @@ internal class IdentityActivity : CameraPermissionCheckingActivity(), Verificati
     }
 
     override fun onBackPressed() {
-        finishWithResult(VerificationResult.Canceled)
+        findNavController(R.id.identity_nav_host).let { navController ->
+            if (navController.currentDestination?.id == R.id.consentFragment) {
+                finishWithResult(VerificationResult.Canceled)
+            } else {
+                navController.navigateUp()
+            }
+        }
     }
 
     override fun finishWithResult(result: VerificationResult) {
