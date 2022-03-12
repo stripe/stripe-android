@@ -1,4 +1,4 @@
-package com.stripe.android
+package com.stripe.android.test.core
 
 import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
 
@@ -15,7 +15,8 @@ data class TestParameters(
     val saveCheckboxValue: Boolean,
     val saveForFutureUseCheckboxVisible: Boolean,
     val useBrowser: Browser? = null,
-    val authorizationAction: AuthorizeAction? = null
+    val authorizationAction: AuthorizeAction? = null,
+    val takeScreenshotOnLpmLoad: Boolean = false
 ) {
     val paymentSelection = PaymentSelection(paymentMethod.displayNameResource)
 }

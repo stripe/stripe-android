@@ -1,6 +1,8 @@
 package com.stripe.android
 
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performTextInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.UiDevice
@@ -8,7 +10,6 @@ import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
 import com.stripe.android.test.core.AuthorizeAction
 import com.stripe.android.test.core.Automatic
 import com.stripe.android.test.core.Billing
-import com.stripe.android.test.core.Browser
 import com.stripe.android.test.core.Checkout
 import com.stripe.android.test.core.Currency
 import com.stripe.android.test.core.Customer
@@ -22,19 +23,14 @@ import com.stripe.android.test.core.TestParameters
 import com.stripe.android.test.core.TestWatcher
 import org.junit.After
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.Timeout
 import org.junit.runner.RunWith
 
-/**
- * This tests that authorization works with firefox and chrome browsers.  If a browser
- * is specified in the test parameters and it is not available the test will be skipped.
- * Note that if a webview is used because there is no browser or a returnURL is specified
- * this it cannot be actuated with UI Automator.
- */
 @RunWith(AndroidJUnit4::class)
-class TestBrowsers {
+class TestFieldPopulation {
     @get:Rule
     var globalTimeout: Timeout = Timeout.seconds(INDIVIDUAL_TEST_TIMEOUT_SECONDS)
 
@@ -60,47 +56,45 @@ class TestBrowsers {
         androidx.test.espresso.intent.Intents.release()
     }
 
-    private val bancontactNewUser = TestParameters(
-        SupportedPaymentMethod.Bancontact,
-        Customer.New,
-        GooglePayState.On,
-        Currency.EUR,
-        Checkout.Pay,
-        Billing.Off,
+    private val sepaDebit = TestParameters(
+        paymentMethod = SupportedPaymentMethod.SepaDebit,
+        customer = Customer.New,
+        googlePayState = GooglePayState.On,
+        currency = Currency.EUR,
+        checkout = Checkout.Pay,
+        billing = Billing.Off,
         shipping = Shipping.Off,
-        delayed = DelayedPMs.Off,
-        automatic = Automatic.On,
+        delayed = DelayedPMs.On,
+        automatic = Automatic.Off,
         saveCheckboxValue = false,
         saveForFutureUseCheckboxVisible = false,
-        useBrowser = Browser.Chrome,
+        useBrowser = null,
         authorizationAction = AuthorizeAction.Authorize,
     )
 
-    @Test
-    fun testAuthorizeChrome() {
-        testDriver.confirmNewOrGuestComplete(
-            bancontactNewUser.copy(
-                useBrowser = Browser.Chrome,
-            )
-        )
+    @Ignore("Testing of dropdowns is not yet supported")
+    fun testDropdowns() {
+
     }
 
     @Test
-    fun testAuthorizeFirefox() {
+    fun testPopulateCustomFields() {
+        // name, email, iban, line1, city, county, zip
         testDriver.confirmNewOrGuestComplete(
-            bancontactNewUser.copy(
-                useBrowser = Browser.Firefox,
-            )
-        )
+            sepaDebit.copy(billing = Billing.Off)
+        ) {
+            composeTestRule.onNodeWithText("IBAN")
+                .performTextInput("DE89370400440532013000")
+        }
     }
 
     @Test
-    fun testAuthorizeAnyAvailableBrowser() {
-        // Does not work when default browser is android
+    fun testDontPopulateWhenDefaultBillingAddress() {
         testDriver.confirmNewOrGuestComplete(
-            bancontactNewUser.copy(
-                useBrowser = null,
-            )
-        )
+            sepaDebit.copy(billing = Billing.On)
+        ) {
+            composeTestRule.onNodeWithText("IBAN")
+                .performTextInput("DE89370400440532013000")
+        }
     }
 }

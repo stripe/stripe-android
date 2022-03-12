@@ -289,7 +289,7 @@ public abstract interface class com/stripe/android/IssuingCardPinService$Listene
 public final class com/stripe/android/PayWithGoogleUtils {
 	public static final field $stable I
 	public static final field INSTANCE Lcom/stripe/android/PayWithGoogleUtils;
-	public static final fun getPriceString (ILjava/util/com.stripe.android.Currency;)Ljava/lang/String;
+	public static final fun getPriceString (ILjava/util/com.stripe.android.test.core.Currency;)Ljava/lang/String;
 }
 
 public final class com/stripe/android/PaymentAuthConfig {
@@ -3778,20 +3778,20 @@ public final class com/stripe/android/model/ShippingMethod : com/stripe/android/
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;JLjava/lang/String;)V
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;JLjava/lang/String;Ljava/lang/String;)V
 	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;JLjava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public fun <init> (Ljava/lang/String;Ljava/lang/String;JLjava/util/com.stripe.android.Currency;)V
-	public fun <init> (Ljava/lang/String;Ljava/lang/String;JLjava/util/com.stripe.android.Currency;Ljava/lang/String;)V
-	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;JLjava/util/com.stripe.android.Currency;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;JLjava/util/com.stripe.android.test.core.Currency;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;JLjava/util/com.stripe.android.test.core.Currency;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;JLjava/util/com.stripe.android.test.core.Currency;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Ljava/lang/String;
 	public final fun component3 ()J
-	public final fun component4 ()Ljava/util/com.stripe.android.Currency;
+	public final fun component4 ()Ljava/util/com.stripe.android.test.core.Currency;
 	public final fun component5 ()Ljava/lang/String;
-	public final fun copy (Ljava/lang/String;Ljava/lang/String;JLjava/util/com.stripe.android.Currency;Ljava/lang/String;)Lcom/stripe/android/model/ShippingMethod;
-	public static synthetic fun copy$default (Lcom/stripe/android/model/ShippingMethod;Ljava/lang/String;Ljava/lang/String;JLjava/util/com.stripe.android.Currency;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/model/ShippingMethod;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;JLjava/util/com.stripe.android.test.core.Currency;Ljava/lang/String;)Lcom/stripe/android/model/ShippingMethod;
+	public static synthetic fun copy$default (Lcom/stripe/android/model/ShippingMethod;Ljava/lang/String;Ljava/lang/String;JLjava/util/com.stripe.android.test.core.Currency;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/model/ShippingMethod;
 	public fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getAmount ()J
-	public final fun getCurrency ()Ljava/util/com.stripe.android.Currency;
+	public final fun getCurrency ()Ljava/util/com.stripe.android.test.core.Currency;
 	public final fun getDetail ()Ljava/lang/String;
 	public final fun getIdentifier ()Ljava/lang/String;
 	public final fun getLabel ()Ljava/lang/String;
@@ -5797,7 +5797,7 @@ public final class com/stripe/android/view/PaymentMethodsActivityStarter$Result$
 public final class com/stripe/android/view/PaymentUtils {
 	public static final field $stable I
 	public static final field INSTANCE Lcom/stripe/android/view/PaymentUtils;
-	public static final fun formatPriceStringUsingFree (JLjava/util/com.stripe.android.Currency;Ljava/lang/String;)Ljava/lang/String;
+	public static final fun formatPriceStringUsingFree (JLjava/util/com.stripe.android.test.core.Currency;Ljava/lang/String;)Ljava/lang/String;
 }
 
 public final class com/stripe/android/view/PostalCodeEditText : com/stripe/android/view/StripeEditText {

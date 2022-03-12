@@ -7,7 +7,21 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.UiDevice
 import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
-import kotlinx.coroutines.runBlocking
+import com.stripe.android.test.core.AuthorizeAction
+import com.stripe.android.test.core.Automatic
+import com.stripe.android.test.core.Billing
+import com.stripe.android.test.core.Browser
+import com.stripe.android.test.core.Checkout
+import com.stripe.android.test.core.Currency
+import com.stripe.android.test.core.Customer
+import com.stripe.android.test.core.DelayedPMs
+import com.stripe.android.test.core.GooglePayState
+import com.stripe.android.test.core.INDIVIDUAL_TEST_TIMEOUT_SECONDS
+import com.stripe.android.test.core.MyScreenCaptureProcessor
+import com.stripe.android.test.core.PlaygroundTestDriver
+import com.stripe.android.test.core.Shipping
+import com.stripe.android.test.core.TEST_IBAN_NUMBER
+import com.stripe.android.test.core.TestParameters
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
@@ -40,7 +54,7 @@ class TestOffScreenLPMSelector {
     }
 
     @Test
-    fun scrollToLpmAndCustomFields() = runBlocking {
+    fun scrollToLpmAndCustomFields()  {
         testDriver.confirmNewOrGuestComplete(
             TestParameters(
                 SupportedPaymentMethod.SepaDebit,
@@ -49,13 +63,13 @@ class TestOffScreenLPMSelector {
                 Currency.EUR,
                 Checkout.Pay,
                 Billing.Off,
-                automatic = Automatic.Off,
+                shipping = Shipping.Off,
                 delayed = DelayedPMs.On,
+                automatic = Automatic.Off,
                 saveCheckboxValue = false,
+                saveForFutureUseCheckboxVisible = false,
                 useBrowser = Browser.Chrome,
                 authorizationAction = AuthorizeAction.Authorize,
-                saveForFutureUseCheckboxVisible = false,
-                shipping = Shipping.Off
             )
         ) {
             composeTestRule.onNodeWithText("IBAN")
