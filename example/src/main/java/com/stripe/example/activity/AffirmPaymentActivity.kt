@@ -3,9 +3,16 @@ package com.stripe.example.activity
 import android.os.Bundle
 import android.view.View
 import androidx.lifecycle.Observer
+import com.stripe.android.ApiResultCallback
 import com.stripe.android.model.Address
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.payments.bankaccount.BillingDetails
+import com.stripe.android.payments.bankaccount.CollectBankAccountForPaymentParams
+import com.stripe.android.payments.bankaccount.CollectBankAccountForPaymentResponse
+import com.stripe.android.payments.bankaccount.CollectBankAccountForSetupParams
+import com.stripe.android.payments.bankaccount.CollectBankAccountForSetupResponse
+import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher
 import com.stripe.example.R
 import com.stripe.example.databinding.PaymentExampleActivityBinding
 
@@ -15,9 +22,25 @@ class AffirmPaymentActivity : StripeIntentActivity() {
         PaymentExampleActivityBinding.inflate(layoutInflater)
     }
 
+    lateinit var launcher: CollectBankAccountLauncher<CollectBankAccountForPaymentParams>
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(viewBinding.root)
+
+        launcher = CollectBankAccountLauncher.createForPayment(
+            this,
+            "key_goes_here",
+            object : ApiResultCallback<CollectBankAccountForPaymentResponse> {
+                override fun onSuccess(result: CollectBankAccountForPaymentResponse) {
+                    // do something with payment intent
+                }
+
+                override fun onError(e: Exception) {
+                    // handle error
+                }
+            }
+        )
 
         viewBinding.confirmWithPaymentButton.text =
             resources.getString(R.string.confirm_affirm_button)
@@ -43,6 +66,16 @@ class AffirmPaymentActivity : StripeIntentActivity() {
                     name = "Jane Doe",
                 ),
                 supportedPaymentMethods = "affirm"
+            )
+            launcher.launch(
+                "clientSecret_of_paymentIntent",
+                CollectBankAccountForPaymentParams(
+                    paymentMethodType = "bank_account",
+                    BillingDetails(
+                        "Jane Doe",
+                        "email@email.com"
+                    )
+                )
             )
         }
     }
