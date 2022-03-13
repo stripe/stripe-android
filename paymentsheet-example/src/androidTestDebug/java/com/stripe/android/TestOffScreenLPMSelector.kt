@@ -62,14 +62,14 @@ class TestOffScreenLPMSelector {
                 GooglePayState.On,
                 Currency.EUR,
                 Checkout.Pay,
-                Billing.Off,
+                Billing.On,
                 shipping = Shipping.Off,
                 delayed = DelayedPMs.On,
                 automatic = Automatic.Off,
                 saveCheckboxValue = false,
                 saveForFutureUseCheckboxVisible = false,
                 useBrowser = Browser.Chrome,
-                authorizationAction = AuthorizeAction.Authorize,
+                authorizationAction = null,
             )
         ) {
             composeTestRule.onNodeWithText("IBAN")

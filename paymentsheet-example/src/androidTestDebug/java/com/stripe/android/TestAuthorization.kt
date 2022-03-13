@@ -60,7 +60,7 @@ class TestAuthorization {
         GooglePayState.On,
         Currency.EUR,
         Checkout.Pay,
-        Billing.Off,
+        Billing.On,
         shipping = Shipping.Off,
         delayed = DelayedPMs.Off,
         automatic = Automatic.On,

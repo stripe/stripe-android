@@ -65,7 +65,7 @@ class TestHardCodedLpms {
         GooglePayState.On,
         Currency.EUR,
         Checkout.Pay,
-        Billing.Off,
+        Billing.On,
         shipping = Shipping.Off,
         delayed = DelayedPMs.Off,
         automatic = Automatic.On,
@@ -91,7 +91,7 @@ class TestHardCodedLpms {
         testDriver.confirmNewOrGuestComplete(
             newUser.copy(
                 paymentMethod = SupportedPaymentMethod.SepaDebit,
-                authorizationAction = AuthorizeAction.Authorize,
+                authorizationAction = null,
                 automatic = Automatic.Off,
                 delayed = DelayedPMs.On,
             )

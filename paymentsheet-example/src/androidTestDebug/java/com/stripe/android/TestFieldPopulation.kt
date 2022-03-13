@@ -62,14 +62,14 @@ class TestFieldPopulation {
         googlePayState = GooglePayState.On,
         currency = Currency.EUR,
         checkout = Checkout.Pay,
-        billing = Billing.Off,
+        billing = Billing.On,
         shipping = Shipping.Off,
         delayed = DelayedPMs.On,
         automatic = Automatic.Off,
         saveCheckboxValue = false,
         saveForFutureUseCheckboxVisible = false,
         useBrowser = null,
-        authorizationAction = AuthorizeAction.Authorize,
+        authorizationAction = null,
     )
 
     @Ignore("Testing of dropdowns is not yet supported")

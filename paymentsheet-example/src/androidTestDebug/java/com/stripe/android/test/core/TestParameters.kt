@@ -1,5 +1,6 @@
 package com.stripe.android.test.core
 
+import com.stripe.android.paymentsheet.example.R
 import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
 
 data class TestParameters(
@@ -18,5 +19,63 @@ data class TestParameters(
     val authorizationAction: AuthorizeAction? = null,
     val takeScreenshotOnLpmLoad: Boolean = false
 ) {
-    val paymentSelection = PaymentSelection(paymentMethod.displayNameResource)
+}
+
+object SaveForFutureCheckbox :
+    LabelIdButton(R.string.stripe_paymentsheet_save_this_card_with_merchant_name)
+
+
+enum class Automatic {
+    On,
+    Off
+}
+
+enum class DelayedPMs {
+    On,
+    Off
+}
+
+enum class Billing {
+    On,
+    Off
+}
+
+enum class Shipping {
+    On,
+    Off
+}
+
+enum class Browser {
+    Chrome,
+    Firefox
+}
+
+enum class AuthorizeAction(
+    val text: String,
+) {
+    // TODO: Do these get localized?
+    Authorize("AUTHORIZE TEST PAYMENT"),
+    Fail("FAIL TEST PAYMENT"),
+    Cancel("")
+}
+
+enum class Checkout {
+    Pay,
+    PayWithSetup,
+    Setup,
+}
+
+enum class Currency {
+    USD,
+    EUR
+}
+
+enum class GooglePayState {
+    On,
+    Off
+}
+
+enum class Customer {
+    Guest,
+    New
 }

@@ -1,7 +1,5 @@
 package com.stripe.android.test.core
 
-import androidx.compose.ui.test.junit4.ComposeTestRule
-import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performTextInput
 import androidx.test.espresso.Espresso
 import com.google.common.truth.Truth
@@ -18,7 +16,7 @@ import com.stripe.android.ui.core.elements.SectionSpec
 import com.stripe.android.ui.core.elements.SimpleTextSpec
 
 class FieldPopulator(
-    private val composeTestRule: ComposeTestRule,
+    private val selectors: Selectors,
     private val testParameters: TestParameters,
     private val populateCustomLpmFields: () -> Unit
 ) {
@@ -30,6 +28,7 @@ class FieldPopulator(
 
         Espresso.closeSoftKeyboard()
 
+        // TODO: This is not working as expected
         Truth.assertThat(testParameters.saveForFutureUseCheckboxVisible == SaveForFutureCheckbox.exists())
             .isTrue()
         if (SaveForFutureCheckbox.exists()) {
@@ -40,7 +39,6 @@ class FieldPopulator(
     }
 
     private fun populatePlatformLpmFields() {
-        // Note: Compose will take care of scrolling to the field if not in view.
         formSpec.items.forEach {
             when (it) {
                 is SectionSpec -> {
@@ -49,26 +47,26 @@ class FieldPopulator(
                             when (sectionField) {
                                 is EmailSpec -> {
                                     if (testParameters.billing == Billing.Off) {
-                                        composeTestRule.onNodeWithText("Email")
+                                        selectors.getEmail()
                                             .performTextInput("jrosen@email.com")
                                     }
                                 }
                                 SimpleTextSpec.NAME -> {
                                     if (testParameters.billing == Billing.Off) {
-                                        composeTestRule.onNodeWithText("Name")
+                                        selectors.getName()
                                             .performTextInput("Jenny Rosen")
                                     }
                                 }
                                 is AddressSpec -> {
                                     if (testParameters.billing == Billing.Off) {
                                         // TODO: This will not work when other countries are selected or defaulted
-                                        composeTestRule.onNodeWithText("Address line 1")
+                                        selectors.getLine1()
                                             .performTextInput("123 Main Street")
-                                        composeTestRule.onNodeWithText("City")
-                                            .performTextInput("123 Main Street")
-                                        composeTestRule.onNodeWithText("ZIP Code")
+                                        selectors.getCity()
+                                            .performTextInput("Albany")
+                                        selectors.getZip()
                                             .performTextInput("12345")
-                                        composeTestRule.onNodeWithText("State")
+                                        selectors.getState()
                                             .performTextInput("NY")
                                     }
                                 }

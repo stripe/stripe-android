@@ -13,18 +13,19 @@ class TestWatcher : org.junit.rules.TestWatcher() {
     private val processor = MyScreenCaptureProcessor()
 
     override fun finished(description: Description?) {
-        val filename = "error-${description?.testClass?.simpleName}-${description?.methodName}"
+        super.finished(description)
+        val filename = "info-${description?.testClass?.simpleName}-${description?.methodName}"
 
         // close out of any open browsers.
-        setOf(Browser.Chrome, Browser.Firefox).forEach {
-            while (AuthorizeWindow.exists(device, it)) {
+        BrowserUI.values().forEach {
+            var isFound = true
+            while (isFound) {
+                isFound = Selectors.browserWindow(device, it)?.exists() == true
                 device.pressBack()
             }
         }
 
         // Close paymentsheet if open
-        device.pressBack()
-        device.pressBack()
         device.pressBack()
 
         val capture2 = Screenshot.capture()
@@ -54,6 +55,5 @@ class TestWatcher : org.junit.rules.TestWatcher() {
         }
 
         device.dumpWindowHierarchy(File(testArtifactDirectoryOnDevice, "$filename-window"))
-
     }
 }

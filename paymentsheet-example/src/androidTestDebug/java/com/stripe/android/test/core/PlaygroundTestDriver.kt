@@ -1,11 +1,9 @@
 package com.stripe.android.test.core
 
-import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.test.core.app.ActivityScenario
 import androidx.test.espresso.IdlingRegistry
-import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.runner.screenshot.Screenshot
 import androidx.test.uiautomator.UiDevice
 import com.google.common.truth.Truth.assertThat
@@ -21,7 +19,6 @@ class PlaygroundTestDriver(
     private val composeTestRule: ComposeTestRule,
     private val basicScreenCaptureProcessor: MyScreenCaptureProcessor,
 ) {
-
     // TODO: Playground looks a little funny with the buttons we can scroll to the buy button now
     // TODO: Test with setup intents as well.
     // TODO: Need a card test when compose is in.
@@ -30,60 +27,77 @@ class PlaygroundTestDriver(
 
     private var resultValue: String? = null
     private val callbackLock = Semaphore(1)
+    private lateinit var testParameters: TestParameters
+    private lateinit var selectors: Selectors
 
     fun confirmNewOrGuestComplete(
         testParameters: TestParameters,
         populateCustomLpmFields: () -> Unit = {}
     ) {
-        val baseScreenshotFilenamePrefix = "info-" +
-            getResourceString(testParameters.paymentSelection.label) +
-            "-" +
-            testParameters.checkout.javaClass.name
+        this.selectors = Selectors(device, composeTestRule, testParameters)
+        this.testParameters = testParameters
 
         registerListeners()
-        launchComplete(testParameters)
+        launchComplete(selectors)
 
         // PaymentSheetActivity is now on screen
         callbackLock.acquire()
 
-        testParameters.paymentSelection.click(
-            composeTestRule,
-            InstrumentationRegistry.getInstrumentation().targetContext.resources
-        )
+        selectors.paymentSelection.click()
 
         takeScreenShot(
-            fileName = "$baseScreenshotFilenamePrefix-beforeText",
+            fileName = "${selectors.baseScreenshotFilenamePrefix}-beforeText",
             testParameters.takeScreenshotOnLpmLoad
         )
 
         FieldPopulator(
-            composeTestRule,
+            selectors,
             testParameters,
             populateCustomLpmFields
         ).populateFields()
 
         takeScreenShot(
-            fileName = "$baseScreenshotFilenamePrefix-afterText",
+            fileName = "${selectors.baseScreenshotFilenamePrefix}-afterText",
             testParameters.takeScreenshotOnLpmLoad
         )
 
         // Verify device requirements are met prior to attempting confirmation.  Do this
         // after we have had the chance to capture a screenshot.
-        verifyDeviceSupportsTestAuthorization(testParameters)
+        verifyDeviceSupportsTestAuthorization(
+            testParameters.authorizationAction,
+            testParameters.useBrowser
+        )
 
-        clickBuyButton()
+        selectors.buyButton.apply {
+            scrollTo()
+            click()
+        }
 
-        doAuthorization(testParameters.authorizationAction, testParameters.useBrowser)
+        doAuthorization()
 
         callbackLock.release()
     }
 
-    private fun verifyDeviceSupportsTestAuthorization(testParameters: TestParameters) {
-        testParameters.authorizationAction?.let {
-            testParameters.useBrowser?.let {
-                Assume.assumeTrue(getInstalledBrowser(testParameters.useBrowser) == it)
-            } ?: Assume.assumeTrue(getInstalledBrowsers().isNotEmpty())
+    private fun verifyDeviceSupportsTestAuthorization(
+        authorizeAction: AuthorizeAction?,
+        requestedBrowser: Browser?
+    ) {
+        authorizeAction?.let {
+            requestedBrowser?.let {
+                val browserUI = BrowserUI.convert(it)
+                Assume.assumeTrue(getBrowser(browserUI) == browserUI)
+            } ?: Assume.assumeTrue(selectors.getInstalledBrowsers().isNotEmpty())
         }
+    }
+
+    private fun getBrowser(requestedBrowser: BrowserUI?): BrowserUI {
+        val installedBrowsers = selectors.getInstalledBrowsers()
+
+        return requestedBrowser?.let {
+            // Assume true will mark the test as skipped if it can't be executed
+            Assume.assumeTrue(installedBrowsers.contains(it))
+            it
+        } ?: installedBrowsers.first()
     }
 
     private fun registerListeners() {
@@ -113,69 +127,58 @@ class PlaygroundTestDriver(
                 )
             }
         }
+
         launchPlayground.acquire()
         launchPlayground.release()
-
     }
 
-    private fun launchComplete(testParameters: TestParameters) {
-        testParameters.customer.click()
-        testParameters.currency.click()
-        testParameters.checkout.click()
-        testParameters.billing.click()
-        testParameters.delayed.click()
+    private fun launchComplete(selectors: Selectors) {
+        selectors.customer.click()
+        selectors.currency.click()
+        selectors.checkout.click()
+        selectors.billing.click()
+        selectors.delayed.click()
 
         // Can't guarantee that google pay will be on the phone
-        testParameters.googlePayState.click()
+        selectors.googlePayState.click()
 
         LabelIdButton(R.string.reload_paymentsheet).click()
         LabelIdButton(R.string.checkout_complete).click()
     }
 
-    private fun getInstalledPackages() = InstrumentationRegistry.getInstrumentation()
-        .targetContext
-        .packageManager
-        .getInstalledApplications(PackageManager.GET_META_DATA)
+    private fun doAuthorization() {
+        selectors.apply {
+            if (testParameters.authorizationAction != null
+                && this.authorizeAction != null
+            ) {
+                // If a specific browser is requested we will use it, otherwise, we will
+                // select the first browser found
+                val selectedBrowser = getBrowser(BrowserUI.convert(testParameters.useBrowser))
 
-    private fun getInstalledBrowser(requestedBrowser: Browser?): Browser {
-        val installedBrowsers = getInstalledBrowsers()
+                // If there are multiple browser there is a browser selector window
+                selectBrowserPrompt.wait(2000)
+                if (selectBrowserPrompt.exists()) {
+                    browserIconAtPrompt(selectedBrowser).click()
+                }
 
-        return requestedBrowser?.let {
-            // Assume true will mark the test as skipped if it can't be executed
-            Assume.assumeTrue(installedBrowsers.contains(it))
-            it
-        } ?: installedBrowsers.first()
-    }
+                assertThat(browserWindow(selectedBrowser)?.exists()).isTrue()
 
-    private fun getInstalledBrowsers() = getInstalledPackages()
-        .mapNotNull { Browser.to(it.packageName) }
+                blockUntilAuthorizationPageLoaded()
 
-    private fun doAuthorization(
-        authorizationAction: AuthorizeAction?,
-        useBrowser: Browser?
-    ) {
-        if (authorizationAction != null) {
-            val selectedBrowser = getInstalledBrowser(useBrowser)
+                authorizeAction.click()
 
-            SelectBrowserWindow.wait(device, 2000)
-            if (SelectBrowserWindow.exists(device)) {
-                selectedBrowser.click(device)
-            }
-            if (AuthorizeWindow.exists(device, selectedBrowser)) {
-                AuthorizePageLoaded.blockUntilLoaded(device)
-                authorizationAction.click(device)
-                when (authorizationAction) {
+                when (testParameters.authorizationAction) {
                     AuthorizeAction.Authorize -> {}
                     AuthorizeAction.Cancel -> {
-                        PlaygroundBuyButton.apply {
-                            waitProcessingComplete(device)
+                        buyButton.apply {
+                            waitProcessingComplete()
                             isEnabled()
                             isDisplayed()
                         }
                     }
                     AuthorizeAction.Fail -> {
-                        PlaygroundBuyButton.apply {
-                            waitProcessingComplete(device)
+                        buyButton.apply {
+                            waitProcessingComplete()
                             isEnabled()
                             isDisplayed()
                         }
@@ -186,25 +189,25 @@ class PlaygroundTestDriver(
                                 "choose a different payment method and try again."
                         ).isDisplayed()
                     }
+                    null -> {}
+                }
+            } else {
+                // Make sure there is no prompt and no browser window open
+                assertThat(selectBrowserPrompt.exists()).isFalse()
+                BrowserUI.values().forEach {
+                    assertThat(Selectors.browserWindow(device, it)?.exists() == true).isFalse()
                 }
             }
-        } else {
-            assert(!SelectBrowserWindow.exists(device))
+
         }
 
-
-        if (authorizationAction == AuthorizeAction.Authorize || authorizationAction == null) {
+        if (testParameters.authorizationAction == AuthorizeAction.Authorize
+            || testParameters.authorizationAction == null
+        ) {
             callbackLock.acquire()
             assertThat(resultValue).isEqualTo(
                 PaymentSheetResult.Completed.toString()
             )
-        }
-    }
-
-    private fun clickBuyButton() {
-        PlaygroundBuyButton.apply {
-            scrollTo()
-            click()
         }
     }
 
@@ -220,7 +223,4 @@ class PlaygroundTestDriver(
             capture.process(setOf(basicScreenCaptureProcessor))
         }
     }
-
-    private fun getResourceString(id: Int) =
-        InstrumentationRegistry.getInstrumentation().targetContext.resources.getString(id)
 }
