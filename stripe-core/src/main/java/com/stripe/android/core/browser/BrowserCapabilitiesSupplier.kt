@@ -2,6 +2,7 @@ package com.stripe.android.core.browser
 
 import android.content.ComponentName
 import android.content.Context
+import androidx.annotation.RestrictTo
 import androidx.browser.customtabs.CustomTabsClient
 import androidx.browser.customtabs.CustomTabsServiceConnection
 
@@ -11,7 +12,8 @@ import androidx.browser.customtabs.CustomTabsServiceConnection
  * See https://developer.chrome.com/docs/android/custom-tabs/integration-guide/ for more details
  * on Custom Tabs.
  */
-internal class BrowserCapabilitiesSupplier(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+class BrowserCapabilitiesSupplier(
     private val context: Context
 ) {
     fun get(): BrowserCapabilities {
