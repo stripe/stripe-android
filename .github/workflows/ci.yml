@@ -41,10 +41,13 @@ jobs:
 
       - uses: actions/upload-artifact@v2
         if: failure()
+        script: |
+          adb pull /data/data/com.stripe.android.paymentsheet.example.files paymentsheet-example
+          adb -s emulator-5558 logcat -e ".*com.stripe.android.paymentsheet.example.*" -t 1000 > paymentsheet-example/logcat.log
         with:
           name: instrumentation-test-report
           path: |
-            paymentsheet-example/build/reports/androidTests/connected/index.html
             paymentsheet-example/*.png
+            paymentsheet-example/build/reports/androidTests/connected/index.html
             paymentsheet-example/*.xml
             paymentsheet-example/logcat.log

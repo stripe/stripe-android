@@ -1,6 +1,7 @@
 package com.stripe.android
 
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
+import androidx.test.espresso.IdlingPolicies
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.UiDevice
@@ -26,6 +27,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.Timeout
 import org.junit.runner.RunWith
+import java.util.concurrent.TimeUnit
 
 /**
  * This tests that authorization works with firefox and chrome browsers.  If a browser
@@ -50,6 +52,8 @@ class TestBrowsers {
 
     @Before
     fun before() {
+        IdlingPolicies.setIdlingResourceTimeout(1, TimeUnit.MINUTES)
+        IdlingPolicies.setMasterPolicyTimeout(1, TimeUnit.MINUTES)
         androidx.test.espresso.intent.Intents.init()
         device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
         testDriver = PlaygroundTestDriver(device, composeTestRule, screenshotProcessor)

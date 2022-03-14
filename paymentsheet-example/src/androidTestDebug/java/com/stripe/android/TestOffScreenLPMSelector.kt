@@ -3,6 +3,7 @@ package com.stripe.android
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performTextInput
+import androidx.test.espresso.IdlingPolicies
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.UiDevice
@@ -10,12 +11,12 @@ import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
 import com.stripe.android.test.core.Automatic
 import com.stripe.android.test.core.Billing
 import com.stripe.android.test.core.Browser
-import com.stripe.android.test.core.IntentType
 import com.stripe.android.test.core.Currency
 import com.stripe.android.test.core.Customer
 import com.stripe.android.test.core.DelayedPMs
 import com.stripe.android.test.core.GooglePayState
 import com.stripe.android.test.core.INDIVIDUAL_TEST_TIMEOUT_SECONDS
+import com.stripe.android.test.core.IntentType
 import com.stripe.android.test.core.MyScreenCaptureProcessor
 import com.stripe.android.test.core.PlaygroundTestDriver
 import com.stripe.android.test.core.Shipping
@@ -27,6 +28,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.Timeout
 import org.junit.runner.RunWith
+import java.util.concurrent.TimeUnit
 
 @RunWith(AndroidJUnit4::class)
 class TestOffScreenLPMSelector {
@@ -42,6 +44,8 @@ class TestOffScreenLPMSelector {
 
     @Before
     fun before() {
+        IdlingPolicies.setIdlingResourceTimeout(1, TimeUnit.MINUTES)
+        IdlingPolicies.setMasterPolicyTimeout(1, TimeUnit.MINUTES)
         androidx.test.espresso.intent.Intents.init()
         device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
         testDriver = PlaygroundTestDriver(device, composeTestRule, screenshotProcessor)
@@ -53,7 +57,7 @@ class TestOffScreenLPMSelector {
     }
 
     @Test
-    fun scrollToLpmAndCustomFields()  {
+    fun scrollToLpmAndCustomFields() {
         testDriver.confirmNewOrGuestComplete(
             TestParameters(
                 SupportedPaymentMethod.SepaDebit,
