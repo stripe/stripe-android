@@ -14,7 +14,10 @@ object CardUtils {
      * @return the [CardBrand] that matches the card number based on prefixes,
      * or [CardBrand.Unknown] if it can't be determined
      */
-    @Deprecated("CardInputWidget and CardMultilineWidget handle card brand lookup. This method should not be relied on for determining CardBrand.")
+    @Deprecated(
+        "CardInputWidget and CardMultilineWidget handle card brand lookup. " +
+            "This method should not be relied on for determining CardBrand."
+    )
     @JvmStatic
     fun getPossibleCardBrand(cardNumber: String?): CardBrand {
         return if (cardNumber.isNullOrBlank()) {
@@ -31,6 +34,7 @@ object CardUtils {
      * @return `true` if and only if the input value is a valid Luhn number
      */
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @SuppressWarnings("ReturnCount")
     fun isValidLuhnNumber(cardNumber: String?): Boolean {
         if (cardNumber == null) {
             return false
