@@ -8,6 +8,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.navigation.Navigation
 import androidx.navigation.testing.TestNavHostController
 import androidx.test.core.app.ApplicationProvider
+import com.google.android.material.button.MaterialButton
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.identity.R
 import com.stripe.android.identity.databinding.DocSelectionFragmentBinding
@@ -92,48 +93,29 @@ internal class DocSelectionFragmentTest {
             assertThat(binding.singleSelectionContent.visibility).isEqualTo(View.GONE)
 
             assertThat(binding.passport.text).isEqualTo(PASSPORT_BUTTON_TEXT)
-            assertThat(binding.passport.visibility).isEqualTo(View.VISIBLE)
+            assertThat(binding.passportContainer.visibility).isEqualTo(View.VISIBLE)
             assertThat(binding.passportSeparator.visibility).isEqualTo(View.VISIBLE)
 
             assertThat(binding.dl.text).isEqualTo(DRIVING_LICENSE_BUTTON_TEXT)
-            assertThat(binding.dl.visibility).isEqualTo(View.VISIBLE)
+            assertThat(binding.dlContainer.visibility).isEqualTo(View.VISIBLE)
             assertThat(binding.dlSeparator.visibility).isEqualTo(View.VISIBLE)
 
             assertThat(binding.id.text).isEqualTo(ID_BUTTON_TEXT)
-            assertThat(binding.id.visibility).isEqualTo(View.VISIBLE)
+            assertThat(binding.idContainer.visibility).isEqualTo(View.VISIBLE)
             assertThat(binding.idSeparator.visibility).isEqualTo(View.VISIBLE)
         }
     }
 
     @Test
-    fun `zero choice UI is correctly bound with values locally`() {
-        launchDocSelectionFragment { binding, _, docSelectFragment ->
+    fun `zero choice navigates to error`() {
+        launchDocSelectionFragment { _, navController, _ ->
             whenever(verificationPage.documentSelect).thenReturn(
                 DOC_SELECT_ZERO_CHOICE
             )
             setUpSuccessVerificationPage()
 
-            assertThat(binding.title.text).isEqualTo(DOCUMENT_SELECT_TITLE)
-            assertThat(binding.multiSelectionContent.visibility).isEqualTo(View.VISIBLE)
-            assertThat(binding.singleSelectionContent.visibility).isEqualTo(View.GONE)
-
-            assertThat(binding.passport.text).isEqualTo(
-                docSelectFragment.getString(R.string.passport)
-            )
-            assertThat(binding.passport.visibility).isEqualTo(View.VISIBLE)
-            assertThat(binding.passportSeparator.visibility).isEqualTo(View.VISIBLE)
-
-            assertThat(binding.dl.text).isEqualTo(
-                docSelectFragment.getString(R.string.driver_license)
-            )
-            assertThat(binding.dl.visibility).isEqualTo(View.VISIBLE)
-            assertThat(binding.dlSeparator.visibility).isEqualTo(View.VISIBLE)
-
-            assertThat(binding.id.text).isEqualTo(
-                docSelectFragment.getString(R.string.id_card)
-            )
-            assertThat(binding.id.visibility).isEqualTo(View.VISIBLE)
-            assertThat(binding.idSeparator.visibility).isEqualTo(View.VISIBLE)
+            assertThat(navController.currentDestination?.id)
+                .isEqualTo(R.id.errorFragment)
         }
     }
 
@@ -182,7 +164,7 @@ internal class DocSelectionFragmentTest {
                 )
             )
             setUpSuccessVerificationPage()
-            binding.singleSelectionContinue.callOnClick()
+            binding.singleSelectionContinue.findViewById<MaterialButton>(R.id.button).callOnClick()
 
             assertThat(navController.currentDestination?.id)
                 .isEqualTo(R.id.driverLicenseScanFragment)
@@ -213,7 +195,7 @@ internal class DocSelectionFragmentTest {
                 MutableLiveData(Resource.error())
             )
             setUpSuccessVerificationPage()
-            binding.singleSelectionContinue.callOnClick()
+            binding.singleSelectionContinue.findViewById<MaterialButton>(R.id.button).callOnClick()
             setUpSuccessVerificationPage(2)
 
             assertThat(navController.currentDestination?.id)
@@ -245,7 +227,7 @@ internal class DocSelectionFragmentTest {
                 MutableLiveData(Resource.error())
             )
             setUpSuccessVerificationPage()
-            binding.singleSelectionContinue.callOnClick()
+            binding.singleSelectionContinue.findViewById<MaterialButton>(R.id.button).callOnClick()
             setUpSuccessVerificationPage(2)
 
             assertThat(navController.currentDestination?.id)
@@ -271,7 +253,11 @@ internal class DocSelectionFragmentTest {
                 docSelectionFragment.getString(expectedBodyStringRes)
             )
 
-            assertThat(binding.singleSelectionContinue.text).isEqualTo(DOCUMENT_SELECT_BUTTON_TEXT)
+            assertThat(
+                binding.singleSelectionContinue.findViewById<MaterialButton>(R.id.button).text
+            ).isEqualTo(
+                DOCUMENT_SELECT_BUTTON_TEXT
+            )
         }
     }
 

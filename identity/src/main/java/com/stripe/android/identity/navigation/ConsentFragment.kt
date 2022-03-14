@@ -46,6 +46,8 @@ internal class ConsentFragment(
         binding.merchantLogo.setImageResource(identityViewModel.args.merchantLogo)
 
         binding.agree.setOnClickListener {
+            binding.agree.toggleToLoading()
+            binding.decline.isClickable = false
             postVerificationPageDataAndNavigate(
                 CollectedDataParam(
                     consent = ConsentParam(biometric = true)
@@ -53,6 +55,8 @@ internal class ConsentFragment(
             )
         }
         binding.decline.setOnClickListener {
+            binding.decline.toggleToLoading()
+            binding.agree.isClickable = false
             postVerificationPageDataAndNavigate(
                 CollectedDataParam(
                     consent = ConsentParam(biometric = false)
@@ -114,8 +118,8 @@ internal class ConsentFragment(
         binding.privacyPolicy.setHtmlString(consentPage.privacyPolicy)
         binding.timeEstimate.text = consentPage.timeEstimate
         binding.body.setHtmlString(consentPage.body)
-        binding.agree.text = consentPage.acceptButtonText
-        binding.decline.text = consentPage.declineButtonText
+        binding.agree.setText(consentPage.acceptButtonText)
+        binding.decline.setText(consentPage.declineButtonText)
     }
 
     private fun setLoadingFinishedUI() {

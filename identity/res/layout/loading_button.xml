@@ -6,7 +6,6 @@
         android:id="@+id/button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/agree_and_continue"
         android:layout_centerVertical="true"
         android:layout_marginBottom="10dp" />
 
@@ -18,8 +17,9 @@
         android:visibility="gone"
         android:layout_alignParentEnd="true"
         android:layout_centerVertical="true"
+        android:paddingStart="0dp"
+        android:paddingEnd="4dp"
         android:elevation="2dp"
-        app:indicatorColor="@android:color/white"
-        app:indicatorSize="16dp" />
+        app:indicatorSize="14dp" />
 
 </merge>

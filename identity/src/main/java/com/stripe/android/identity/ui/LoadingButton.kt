@@ -24,7 +24,33 @@ internal class LoadingButton @JvmOverloads constructor(
         LoadingButtonBinding.inflate(LayoutInflater.from(context), this)
     }
 
-    internal val button: MaterialButton = findViewById(R.id.button)
+    private val button: MaterialButton = findViewById(R.id.button)
+
+    /**
+     * Set the [OnClickListener] to the button.
+     */
+    override fun setOnClickListener(l: OnClickListener?) {
+        button.setOnClickListener(l)
+    }
+
+    /**
+     * Thes the button's clickable state.
+     */
+    override fun setClickable(clickable: Boolean) {
+        button.isClickable = clickable
+    }
+
+    override fun setEnabled(enabled: Boolean) {
+        super.setEnabled(enabled)
+        button.isEnabled = enabled
+    }
+
+    /**
+     * Sets text to the button.
+     */
+    fun setText(text: CharSequence) {
+        button.text = text
+    }
 
     /**
      * Disable button and show loading indicator.
@@ -40,6 +66,5 @@ internal class LoadingButton @JvmOverloads constructor(
     fun toggleToButton() {
         findViewById<MaterialButton>(R.id.button).isEnabled = true
         findViewById<CircularProgressIndicator>(R.id.indicator).visibility = View.GONE
-
     }
 }

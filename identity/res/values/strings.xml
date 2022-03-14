@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="kontinue">continue</string>
-    <string name="agree_and_continue">Agree and continue</string>
     <string name="decline">Decline and use alternative method</string>
     <string name="driver_license">Driver\'s license</string>
     <string name="id_card">Identity card</string>
