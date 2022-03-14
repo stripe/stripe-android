@@ -134,11 +134,6 @@ android {
         kotlinCompilerExtensionVersion "$androidxComposeVersion"
     }
 
-    packagingOptions {
-        exclude 'META-INF/AL2.0'
-        exclude 'META-INF/LGPL2.1'
-    }
-
     testOptions {
         // Make sure animations are off when we run espresso tests
         animationsDisabled = true
