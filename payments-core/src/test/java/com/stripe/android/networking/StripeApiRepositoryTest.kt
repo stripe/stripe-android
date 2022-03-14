@@ -9,6 +9,7 @@ import com.stripe.android.FileFactory
 import com.stripe.android.FraudDetectionDataFixtures
 import com.stripe.android.FraudDetectionDataRepository
 import com.stripe.android.Stripe
+import com.stripe.android.StripeApiBeta
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.exception.InvalidRequestException
 import com.stripe.android.core.networking.AnalyticsRequest
@@ -391,7 +392,18 @@ internal class StripeApiRepositoryTest {
                 "1.0.0",
                 "3DS_LOA_SDK_STIN_12345",
                 UUID.randomUUID().toString(),
-                "eyJlbmMiOiJBMTI4Q0JDLUhTMjU2IiwiYWxnIjoiUlNBLU9BRVAtMjU2In0.nid2Q-Ii21cSPHBaszR5KSXz866yX9I7AthLKpfWZoc7RIfz11UJ1EHuvIRDIyqqJ8txNUKKoL4keqMTqK5Yc5TqsxMn0nML8pZaPn40nXsJm_HFv3zMeOtRR7UTewsDWIgf5J-A6bhowIOmvKPCJRxspn_Cmja-YpgFWTp08uoJvqgntgg1lHmI1kh1UV6DuseYFUfuQlICTqC3TspAzah2CALWZORF_QtSeHc_RuqK02wOQMs-7079jRuSdBXvI6dQnL5ESH25wHHosfjHMZ9vtdUFNJo9J35UI1sdWFDzzj8k7bt0BupZhyeU0PSM9EHP-yv01-MQ9eslPTVNbFJ9YOHtq8WamvlKDr1sKxz6Ac_gUM8NgEcPP9SafPVxDd4H1Fwb5-4NYu2AD4xoAgMWE-YtzvfIFXZcU46NDoi6Xum3cHJqTH0UaOhBoqJJft9XZXYW80fjts-v28TkA76-QPF7CTDM6KbupvBkSoRq218eJLEywySXgCwf-Q95fsBtnnyhKcvfRaByq5kT7PH3DYD1rCQLexJ76A79kurre9pDjTKAv85G9DNkOFuVUYnNB3QGFReCcF9wzkGnZXdfkgN2BkB6n94bbkEyjbRb5r37XH6oRagx2fWLVj7kC5baeIwUPVb5kV_x4Kle7C-FPY1Obz4U7s6SVRnLGXY.IP9OcQx5uZxBRluOpn1m6Q.w-Ko5Qg6r-KCmKnprXEbKA7wV-SdLNDAKqjtuku6hda_0crOPRCPU4nn26Yxj7EG.p01pl8CKukuXzjLeY3a_Ew",
+                "eyJlbmMiOiJBMTI4Q0JDLUhTMjU2IiwiYWxnIjoiUlNBLU9BRVAtMjU2In0.nid2Q-" +
+                    "Ii21cSPHBaszR5KSXz866yX9I7AthLKpfWZoc7RIfz11UJ1EHuvIRDIyqqJ8txNUKKoL4keqM" +
+                    "TqK5Yc5TqsxMn0nML8pZaPn40nXsJm_HFv3zMeOtRR7UTewsDWIgf5J-A6bhowIOmvKPCJRxs" +
+                    "pn_Cmja-YpgFWTp08uoJvqgntgg1lHmI1kh1UV6DuseYFUfuQlICTqC3TspAzah2CALWZORF_" +
+                    "QtSeHc_RuqK02wOQMs-7079jRuSdBXvI6dQnL5ESH25wHHosfjHMZ9vtdUFNJo9J35UI1sdWF" +
+                    "zzj8k7bt0BupZhyeU0PSM9EHP-yv01-MQ9eslPTVNbFJ9YOHtq8WamvlKDr1sKxz6Ac_gUM8N" +
+                    "gEcPP9SafPVxDd4H1Fwb5-4NYu2AD4xoAgMWE-YtzvfIFXZcU46NDoi6Xum3cHJqTH0UaOhBo" +
+                    "qJJft9XZXYW80fjts-v28TkA76-QPF7CTDM6KbupvBkSoRq218eJLEywySXgCwf-Q95fsBtnn" +
+                    "yhKcvfRaByq5kT7PH3DYD1rCQLexJ76A79kurre9pDjTKAv85G9DNkOFuVUYnNB3QGFReCcF9" +
+                    "wzkGnZXdfkgN2BkB6n94bbkEyjbRb5r37XH6oRagx2fWLVj7kC5baeIwUPVb5kV_x4Kle7C-F" +
+                    "PY1Obz4U7s6SVRnLGXY.IP9OcQx5uZxBRluOpn1m6Q.w-Ko5Qg6r-KCmKnprXEbKA7wV-SdLN" +
+                    "DAKqjtuku6hda_0crOPRCPU4nn26Yxj7EG.p01pl8CKukuXzjLeY3a_Ew",
                 """
             {
                 "kty": "EC",
@@ -1087,7 +1099,10 @@ internal class StripeApiRepositoryTest {
                 )
             }
             assertEquals(
-                "This PaymentIntent could be not be fulfilled via this session because a different payment method was attached to it. Another session could be attempting to fulfill this PaymentIntent. Please complete that session or try again.",
+                "This PaymentIntent could be not be fulfilled via this session because " +
+                    "a different payment method was attached to it. Another session could be " +
+                    "attempting to fulfill this PaymentIntent. Please complete that session or " +
+                    "try again.",
                 exception.message
             )
             assertEquals("payment_intent_unexpected_state", exception.stripeError?.code)
@@ -1721,6 +1736,35 @@ internal class StripeApiRepositoryTest {
             assertContentEquals(params["types"] as? List<*>, paymentMethodTypes.toList())
         }
 
+    @Test
+    fun `setting betas sets the Stripe-Version header correctly`() =
+        runTest {
+            val stripeResponse = StripeResponse(
+                200,
+                PaymentMethodFixtures.CARD_JSON.toString(),
+                emptyMap()
+            )
+            whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+                .thenReturn(stripeResponse)
+
+            create(
+                betas = setOf(StripeApiBeta.WeChatPayV1, StripeApiBeta.USBankAccount)
+            ).createPaymentMethod(
+                PaymentMethodCreateParams.create(
+                    PaymentMethodCreateParamsFixtures.CARD
+                ),
+                DEFAULT_OPTIONS
+            )
+
+            verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
+            val headers = requireNotNull(apiRequestArgumentCaptor.firstValue.headers)
+            val versions = headers
+                .getOrDefault("Stripe-Version", "")
+                .split(";")
+            assertTrue(versions.contains(StripeApiBeta.WeChatPayV1.code))
+            assertTrue(versions.contains(StripeApiBeta.USBankAccount.code))
+        }
+
     private fun verifyFraudDetectionDataAndAnalyticsRequests(
         event: PaymentAnalyticsEvent,
         productUsage: List<String>? = null
@@ -1751,7 +1795,10 @@ internal class StripeApiRepositoryTest {
         )
     }
 
-    private fun create(productUsage: Set<String> = emptySet()): StripeApiRepository {
+    private fun create(
+        productUsage: Set<String> = emptySet(),
+        betas: Set<StripeApiBeta> = emptySet()
+    ): StripeApiRepository {
         return StripeApiRepository(
             context,
             { DEFAULT_OPTIONS.apiKey },
@@ -1760,7 +1807,8 @@ internal class StripeApiRepositoryTest {
             stripeNetworkClient = stripeNetworkClient,
             analyticsRequestExecutor = analyticsRequestExecutor,
             fraudDetectionDataRepository = fraudDetectionDataRepository,
-            fraudDetectionDataParamsUtils = FraudDetectionDataParamsUtils()
+            fraudDetectionDataParamsUtils = FraudDetectionDataParamsUtils(),
+            betas = betas
         )
     }
 

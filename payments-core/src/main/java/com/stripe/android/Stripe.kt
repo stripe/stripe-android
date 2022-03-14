@@ -214,6 +214,8 @@ class Stripe internal constructor(
      *
      * WeChat Pay API is still in beta, create a [Stripe] instance with [StripeApiBeta.WeChatPayV1] to enable this API.
      *
+     * US Bank Account API is still in beta, create a [Stripe] instance with [StripeApiBeta.USBankAccount] to enable this API.
+     *
      * @param confirmPaymentIntentParams [ConfirmPaymentIntentParams] used to confirm the
      * [PaymentIntent]
      * @param stripeAccountId Optional, the Connect account to associate with this request.

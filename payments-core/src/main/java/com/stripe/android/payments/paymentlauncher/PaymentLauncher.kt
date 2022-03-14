@@ -6,6 +6,7 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import androidx.fragment.app.Fragment
+import com.stripe.android.StripeApiBeta
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.PaymentIntent
@@ -46,40 +47,45 @@ interface PaymentLauncher {
         /**
          * Create a [PaymentLauncher] instance with [ComponentActivity].
          *
-         * This API registers an [ActivityResultLauncher] into the [ComponentActivity],  it needs
-         * to be called before the [ComponentActivity] is created.
+         * This API registers an [ActivityResultLauncher] into the [ComponentActivity], it needs
+         * to be called before the [ComponentActivity] is created. Use this API to access specific
+         * beta features.
          */
         fun create(
             activity: ComponentActivity,
             publishableKey: String,
             stripeAccountId: String? = null,
-            callback: PaymentResultCallback
-        ) = PaymentLauncherFactory(activity, callback).create(publishableKey, stripeAccountId)
+            betas: Set<StripeApiBeta> = setOf(),
+            callback: PaymentResultCallback,
+        ) = PaymentLauncherFactory(activity, callback).create(publishableKey, stripeAccountId, betas)
 
         /**
          * Create a [PaymentLauncher] instance with [Fragment].
          *
          * This API registers an [ActivityResultLauncher] into the [Fragment]'s hosting Activity, it
-         * needs to be called before the [Fragment] is created.
+         * needs to be called before the [Fragment] is created. Use this API to access specific beta
+         * features.
          */
         fun create(
             fragment: Fragment,
             publishableKey: String,
             stripeAccountId: String? = null,
+            betas: Set<StripeApiBeta> = setOf(),
             callback: PaymentResultCallback
-        ) = PaymentLauncherFactory(fragment, callback).create(publishableKey, stripeAccountId)
+        ) = PaymentLauncherFactory(fragment, callback).create(publishableKey, stripeAccountId, betas)
 
         /**
          * Create a [PaymentLauncher] used for Jetpack Compose.
          *
          * This API uses Compose specific API [rememberLauncherForActivityResult] to register a
          * [ActivityResultLauncher] into current activity, it should be called as part of Compose
-         * initialization path.
+         * initialization path. Use this API to access specific beta features.
          */
         @Composable
         fun createForCompose(
             publishableKey: String,
             stripeAccountId: String? = null,
+            betas: Set<StripeApiBeta> = setOf(),
             callback: PaymentResultCallback
         ) = PaymentLauncherFactory(
             LocalContext.current,
@@ -87,6 +93,6 @@ interface PaymentLauncher {
                 PaymentLauncherContract(),
                 callback::onPaymentResult
             )
-        ).create(publishableKey, stripeAccountId)
+        ).create(publishableKey, stripeAccountId, betas)
     }
 }

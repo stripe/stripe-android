@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.StripeApiBeta
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.MandateDataParams
@@ -19,7 +20,9 @@ import org.json.JSONObject
  * Subclasses should observe on the [StripeIntentViewModel]'s LiveData properties
  * in order to display state of the interaction.
  */
-abstract class StripeIntentActivity : AppCompatActivity() {
+abstract class StripeIntentActivity(
+    private val betas: Set<StripeApiBeta> = setOf()
+) : AppCompatActivity() {
     internal val viewModel: StripeIntentViewModel by viewModels()
     private val stripeAccountId: String? by lazy {
         Settings(this).stripeAccountId
@@ -37,7 +40,8 @@ abstract class StripeIntentActivity : AppCompatActivity() {
             PaymentLauncher.create(
                 this,
                 PaymentConfiguration.getInstance(this).publishableKey,
-                stripeAccountId
+                stripeAccountId,
+                betas
             ) { paymentResult ->
                 if (viewModel.status.value.isNullOrEmpty()) {
                     viewModel.status.value =

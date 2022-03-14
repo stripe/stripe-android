@@ -6,6 +6,7 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.RestrictTo
 import androidx.fragment.app.Fragment
 import com.stripe.android.BuildConfig
+import com.stripe.android.StripeApiBeta
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networking.StripeApiRepository
 import kotlinx.coroutines.Dispatchers
@@ -45,7 +46,8 @@ class PaymentLauncherFactory(
 
     fun create(
         publishableKey: String,
-        stripeAccountId: String? = null
+        stripeAccountId: String? = null,
+        betas: Set<StripeApiBeta> = setOf()
     ): PaymentLauncher {
         val productUsage = setOf("PaymentLauncher")
         val analyticsRequestFactory = PaymentAnalyticsRequestFactory(
@@ -64,7 +66,8 @@ class PaymentLauncherFactory(
             StripeApiRepository(
                 context,
                 { publishableKey },
-                paymentAnalyticsRequestFactory = analyticsRequestFactory
+                paymentAnalyticsRequestFactory = analyticsRequestFactory,
+                betas = betas
             ),
             analyticsRequestFactory,
             productUsage = productUsage
