@@ -52,8 +52,6 @@ class TestBrowsers {
 
     @Before
     fun before() {
-        IdlingPolicies.setIdlingResourceTimeout(1, TimeUnit.MINUTES)
-        IdlingPolicies.setMasterPolicyTimeout(1, TimeUnit.MINUTES)
         androidx.test.espresso.intent.Intents.init()
         device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
         testDriver = PlaygroundTestDriver(device, composeTestRule, screenshotProcessor)

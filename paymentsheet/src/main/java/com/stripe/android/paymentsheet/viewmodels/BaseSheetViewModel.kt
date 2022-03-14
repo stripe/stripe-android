@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.viewmodels
 
 import android.app.Application
+import android.util.Log
 import androidx.annotation.NonNull
 import androidx.annotation.Nullable
 import androidx.annotation.VisibleForTesting
@@ -52,9 +53,12 @@ class TransitionFragmentResource {
         @NonNull
         fun getSingleStepIdlingResource(): androidx.test.espresso.IdlingResource? {
             if (idlingResource == null) {
+                Log.e("MLB", "Need to initialize transition")
                 idlingResource = try {
                     Class.forName("android.support.test.espresso.Espresso")
-                    CountingIdlingResource("transition")
+                    val countingIdlingResource = CountingIdlingResource("transition")
+                    Log.e("MLB", "transition initialized")
+                    countingIdlingResource
                 } catch (e: ClassNotFoundException) {
                     null
                 }
@@ -244,8 +248,12 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     }
 
     open fun transitionTo(target: TransitionTargetType) {
+        Log.e("MLB", "Transition idling resource decrementing")
         if (TransitionFragmentResource.idlingResource?.isIdleNow == false) {
+            Log.e("MLB", "Transition idling resource decrementing")
             TransitionFragmentResource.idlingResource?.decrement()
+        }else{
+            Log.e("MLB", "Transition idling resource was not idle so not decrementing")
         }
         _transition.postValue(Event(target))
     }

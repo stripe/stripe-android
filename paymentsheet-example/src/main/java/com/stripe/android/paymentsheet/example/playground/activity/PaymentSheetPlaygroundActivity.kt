@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.example.playground.activity
 
 import android.os.Bundle
+import android.util.Log
 import androidx.annotation.NonNull
 import androidx.annotation.Nullable
 import androidx.annotation.VisibleForTesting
@@ -165,6 +166,7 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
         }
 
         disableViews()
+        Log.e("MLB", "Payment Playground activity is loaded")
     }
 
     override fun onResume() {

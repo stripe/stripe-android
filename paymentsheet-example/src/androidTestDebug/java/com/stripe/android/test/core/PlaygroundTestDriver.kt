@@ -1,8 +1,10 @@
 package com.stripe.android.test.core
 
 import android.graphics.Bitmap
+import android.util.Log
 import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.test.core.app.ActivityScenario
+import androidx.test.espresso.IdlingPolicies
 import androidx.test.espresso.IdlingRegistry
 import androidx.test.runner.screenshot.Screenshot
 import androidx.test.uiautomator.UiDevice
@@ -17,6 +19,7 @@ import com.stripe.android.test.core.ui.EspressoText
 import com.stripe.android.test.core.ui.Selectors
 import org.junit.Assume
 import java.util.concurrent.Semaphore
+import java.util.concurrent.TimeUnit
 
 /**
  * This drives the end to end payment sheet flow for any set of
@@ -122,7 +125,10 @@ class PlaygroundTestDriver(
         // the challenge is that we don't have access to the activity or it's viewmodels
         val scenario = ActivityScenario.launch(PaymentSheetPlaygroundActivity::class.java)
         scenario.onActivity { activity ->
-            launchPlayground.release()
+
+            IdlingPolicies.setIdlingResourceTimeout(1, TimeUnit.MINUTES)
+            IdlingPolicies.setMasterPolicyTimeout(1, TimeUnit.MINUTES)
+
             IdlingRegistry.getInstance().register(
                 activity.getMultiStepIdlingResource(),
                 activity.getSingleStepIdlingResource(),
@@ -140,6 +146,8 @@ class PlaygroundTestDriver(
                     TransitionFragmentResource.getSingleStepIdlingResource()
                 )
             }
+            launchPlayground.release()
+            Log.e("MLB", "Playground launch is complete")
         }
 
         launchPlayground.acquire()
