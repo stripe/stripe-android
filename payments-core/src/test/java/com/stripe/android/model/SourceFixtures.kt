@@ -4,6 +4,7 @@ import com.stripe.android.model.SourceOrderFixtures.SOURCE_ORDER_JSON
 import com.stripe.android.model.parsers.SourceJsonParser
 import org.json.JSONObject
 
+@Suppress("MaxLineLength")
 internal object SourceFixtures {
     private val PARSER = SourceJsonParser()
 

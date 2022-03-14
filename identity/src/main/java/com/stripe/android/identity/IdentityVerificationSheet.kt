@@ -3,8 +3,10 @@ package com.stripe.android.identity
 import android.content.Intent
 import android.os.Parcelable
 import androidx.activity.ComponentActivity
+import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.DrawableRes
 import androidx.core.os.bundleOf
+import androidx.fragment.app.Fragment
 import kotlinx.parcelize.Parcelize
 
 interface IdentityVerificationSheet {
@@ -13,8 +15,7 @@ interface IdentityVerificationSheet {
      */
     data class Configuration(
         @DrawableRes
-        val merchantLogo: Int,
-        val stripePublishableKey: String
+        val merchantLogo: Int
     )
 
     /**
@@ -44,7 +45,7 @@ interface IdentityVerificationSheet {
     }
 
     /**
-     * Start the verification flow
+     * Starts the verification flow.
      */
     fun present(
         verificationSessionId: String,
@@ -54,10 +55,25 @@ interface IdentityVerificationSheet {
 
     companion object {
         /**
-         * Factory method to create a [IdentityVerificationSheet] instance.
+         * Creates a [IdentityVerificationSheet] instance with [ComponentActivity].
+         *
+         * This API registers an [ActivityResultLauncher] into the
+         * [ComponentActivity], it must be called before the [ComponentActivity]
+         * is created (in the onCreate method).
          */
         fun create(
             from: ComponentActivity,
+            configuration: Configuration,
+        ): IdentityVerificationSheet = StripeIdentityVerificationSheet(from, configuration)
+
+        /**
+         * Creates a [IdentityVerificationSheet] instance with [Fragment].
+         *
+         * This API registers an [ActivityResultLauncher] into the [Fragment], it must be called
+         * before the [Fragment] is created (in the onCreate method).
+         */
+        fun create(
+            from: Fragment,
             configuration: Configuration,
         ): IdentityVerificationSheet = StripeIdentityVerificationSheet(from, configuration)
     }

@@ -1,7 +1,6 @@
 package com.stripe.android.ui.core.elements
 
 import androidx.annotation.RestrictTo
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Divider
 import androidx.compose.runtime.Composable
@@ -40,12 +39,11 @@ fun SectionElementUI(
                     lastTextFieldIdentifier = lastTextFieldIdentifier
                 )
                 if (index != element.fields.size - 1) {
-                    val cardStyle = CardStyle(isSystemInDarkTheme())
                     Divider(
-                        color = cardStyle.cardBorderColor,
-                        thickness = cardStyle.cardBorderWidth,
+                        color = CardStyle.cardBorderColor,
+                        thickness = CardStyle.cardBorderWidth,
                         modifier = Modifier.padding(
-                            horizontal = cardStyle.cardBorderWidth
+                            horizontal = CardStyle.cardBorderWidth
                         )
                     )
                 }

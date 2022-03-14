@@ -5,7 +5,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -13,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.material.ContentAlpha
 import androidx.compose.material.DropdownMenu
 import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.Icon
@@ -35,6 +35,7 @@ import androidx.compose.ui.input.InputMode
 import androidx.compose.ui.platform.LocalInputModeManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.stripe.android.ui.core.PaymentsTheme
 import com.stripe.android.ui.core.R
 
 @Composable
@@ -50,11 +51,7 @@ internal fun DropDown(
     var expanded by remember { mutableStateOf(false) }
     val interactionSource = remember { MutableInteractionSource() }
     val currentTextColor = if (enabled) {
-        if (isSystemInDarkTheme()) {
-            Color.White
-        } else {
-            Color.Unspecified
-        }
+        PaymentsTheme.colors.material.onBackground
     } else {
         TextFieldDefaults
             .textFieldColors()
@@ -65,7 +62,7 @@ internal fun DropDown(
     Box(
         modifier = Modifier
             .wrapContentSize(Alignment.TopStart)
-            .background(Color.Transparent)
+            .background(PaymentsTheme.colors.colorComponentBackground)
     ) {
         // Click handling happens on the box, so that it is a single accessible item
         Box(
@@ -87,7 +84,7 @@ internal fun DropDown(
                     bottom = 8.dp
                 )
             ) {
-                DropdownLabel(label)
+                DropdownLabel(label, enabled)
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.Bottom
@@ -109,7 +106,8 @@ internal fun DropDown(
 
         DropdownMenu(
             expanded = expanded,
-            onDismissRequest = { expanded = false }
+            onDismissRequest = { expanded = false },
+            modifier = Modifier.background(color = PaymentsTheme.colors.colorComponentBackground)
         ) {
             items.forEachIndexed { index, displayValue ->
                 DropdownMenuItem(
@@ -118,7 +116,10 @@ internal fun DropDown(
                         expanded = false
                     }
                 ) {
-                    Text(text = displayValue)
+                    Text(
+                        text = displayValue,
+                        color = currentTextColor
+                    )
                 }
             }
         }
@@ -133,17 +134,14 @@ internal fun DropDown(
 @Composable
 internal fun DropdownLabel(
     @StringRes label: Int?,
+    enabled: Boolean
 ) {
+    val color = PaymentsTheme.colors.placeholderText
     val interactionSource = remember { MutableInteractionSource() }
     label?.let {
         Text(
             stringResource(label),
-            color = TextFieldDefaults.textFieldColors()
-                .labelColor(
-                    enabled = true,
-                    error = false,
-                    interactionSource = interactionSource
-                ).value,
+            color = if (enabled) color else color.copy(alpha = ContentAlpha.disabled),
             modifier = Modifier.focusable(false),
             style = MaterialTheme.typography.caption
         )

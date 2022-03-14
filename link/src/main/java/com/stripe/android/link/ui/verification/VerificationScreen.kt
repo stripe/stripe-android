@@ -1,6 +1,5 @@
 package com.stripe.android.link.ui.verification
 
-import android.app.Application
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -23,8 +22,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.stripe.android.link.LinkActivityContract
 import com.stripe.android.link.R
+import com.stripe.android.link.injection.NonFallbackInjector
+import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.linkTextFieldColors
 import com.stripe.android.ui.core.elements.SectionCard
@@ -43,13 +43,13 @@ private fun VerificationBodyPreview() {
 
 @Composable
 internal fun VerificationBody(
-    application: Application,
-    starterArgsSupplier: () -> LinkActivityContract.Args
+    linkAccount: LinkAccount,
+    injector: NonFallbackInjector
 ) {
     val viewModel: VerificationViewModel = viewModel(
         factory = VerificationViewModel.Factory(
-            application,
-            starterArgsSupplier
+            linkAccount,
+            injector
         )
     )
 

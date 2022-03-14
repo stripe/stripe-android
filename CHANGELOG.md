@@ -1,9 +1,13 @@
 # CHANGELOG
 ## xx.x.x - YYYY-MM-DD
-[FIXED] [4646](https://github.com/stripe/stripe-android/pull/4646) Update 3ds2 to latest version 6.1.4, see PR for specific issues addressed.
+This release enables a new configuration object to be defined for StripeCardScan.
 
 ### PaymentSheet
-[FIXED] [4669](https://github.com/stripe/stripe-android/pull/4669) Restrict the list of SEPA debit supported countries.
+* [FIXED] [4646](https://github.com/stripe/stripe-android/pull/4646) Update 3ds2 to latest version 6.1.4, see PR for specific issues addressed.
+* [FIXED] [4669](https://github.com/stripe/stripe-android/pull/4669) Restrict the list of SEPA debit supported countries.
+
+### CardScan
+* [ADDED] [4689](https://github.com/stripe/stripe-android/pull/4689) The `CardImageVerificationSheet` initializer can now take an additional `Configuration` object.
 
 ## 19.2.2 - 2022-03-01
 [FIXED] [4606](https://github.com/stripe/stripe-android/pull/4606) Keep status bar color in PaymentLauncher

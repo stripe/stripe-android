@@ -7,12 +7,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.flowlayout.FlowCrossAxisAlignment
 import com.google.accompanist.flowlayout.FlowRow
+import com.stripe.android.ui.core.PaymentsTheme
 import com.stripe.android.ui.core.R
 
 @Composable
@@ -27,11 +27,7 @@ fun AffirmElementUI() {
             Modifier
                 .padding(end = 4.dp)
                 .padding(top = 6.dp),
-            color = if (isSystemInDarkTheme()) {
-                Color.LightGray
-            } else {
-                Color.Black
-            }
+            color = PaymentsTheme.colors.colorTextSecondary
         )
         Image(
             painter = if (isSystemInDarkTheme()) {

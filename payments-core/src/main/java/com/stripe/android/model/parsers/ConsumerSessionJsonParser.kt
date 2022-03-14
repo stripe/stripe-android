@@ -1,5 +1,6 @@
 package com.stripe.android.model.parsers
 
+import com.stripe.android.core.model.StripeJsonUtils.optString
 import com.stripe.android.core.model.parsers.ModelJsonParser
 import com.stripe.android.model.ConsumerSession
 import org.json.JSONObject
@@ -20,7 +21,8 @@ internal class ConsumerSessionJsonParser : ModelJsonParser<ConsumerSession> {
             consumerSessionJson.getString(FIELD_CONSUMER_SESSION_SECRET),
             consumerSessionJson.getString(FIELD_CONSUMER_SESSION_EMAIL),
             consumerSessionJson.getString(FIELD_CONSUMER_SESSION_PHONE),
-            verificationSession
+            verificationSession,
+            optString(json, FIELD_CONSUMER_SESSION_AUTH_SESSION_SECRET)
         )
     }
 
@@ -41,6 +43,7 @@ internal class ConsumerSessionJsonParser : ModelJsonParser<ConsumerSession> {
         private const val FIELD_CONSUMER_SESSION_EMAIL = "email_address"
         private const val FIELD_CONSUMER_SESSION_PHONE = "redacted_phone_number"
         private const val FIELD_CONSUMER_SESSION_VERIFICATION_SESSIONS = "verification_sessions"
+        private const val FIELD_CONSUMER_SESSION_AUTH_SESSION_SECRET = "auth_session_client_secret"
 
         private const val FIELD_VERIFICATION_SESSION_TYPE = "type"
         private const val FIELD_VERIFICATION_SESSION_STATE = "state"

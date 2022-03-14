@@ -39,8 +39,7 @@ internal val sepaDebitIbanSection = SectionSpec(
 )
 internal val sepaDebitMandate = StaticTextSpec(
     IdentifierSpec.Generic("mandate"),
-    R.string.sepa_mandate,
-    R.color.mandate_text_color
+    R.string.sepa_mandate
 )
 internal val sepaBillingSection = SectionSpec(
     IdentifierSpec.Generic("billing_section"),

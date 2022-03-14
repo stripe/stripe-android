@@ -1,7 +1,6 @@
 package com.stripe.android.ui.core.elements
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -19,10 +18,9 @@ internal fun RowElementUI(
     lastTextFieldIdentifier: IdentifierSpec?
 ) {
     val fields = controller.fields
-    val cardStyle = CardStyle(isSystemInDarkTheme())
 
     val numVisibleFields = fields.filter { !hiddenIdentifiers.contains(it.identifier) }.size
-  
+
     // Only draw the row if the items in the row are not hidden, otherwise the entire
     // section will fail to draw
     if (fields.map { it.identifier }.any { !hiddenIdentifiers.contains(it) }) {
@@ -66,10 +64,10 @@ internal fun RowElementUI(
                                 height = (Dimension.fillToConstraints)
                             }
                             .padding(
-                                horizontal = cardStyle.cardBorderWidth
+                                horizontal = CardStyle.cardBorderWidth
                             )
-                            .width(cardStyle.cardBorderWidth)
-                            .background(cardStyle.cardBorderColor)
+                            .width(CardStyle.cardBorderWidth)
+                            .background(CardStyle.cardDividerColor)
                     )
                 }
             }

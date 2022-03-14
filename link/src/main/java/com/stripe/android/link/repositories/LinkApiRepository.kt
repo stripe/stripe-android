@@ -5,6 +5,7 @@ import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.networking.StripeRepository
@@ -28,11 +29,15 @@ internal class LinkApiRepository @Inject constructor(
     private val locale: Locale?
 ) : LinkRepository {
 
-    override suspend fun lookupConsumer(email: String): Result<ConsumerSessionLookup> =
+    override suspend fun lookupConsumer(
+        email: String,
+        authSessionCookie: String?
+    ): Result<ConsumerSessionLookup> =
         withContext(workContext) {
             runCatching {
                 stripeRepository.lookupConsumerSession(
                     email,
+                    authSessionCookie,
                     ApiRequest.Options(
                         publishableKeyProvider(),
                         stripeAccountIdProvider()
@@ -54,7 +59,8 @@ internal class LinkApiRepository @Inject constructor(
     override suspend fun consumerSignUp(
         email: String,
         phone: String,
-        country: String
+        country: String,
+        authSessionCookie: String?
     ): Result<ConsumerSession> =
         withContext(workContext) {
             runCatching {
@@ -62,7 +68,7 @@ internal class LinkApiRepository @Inject constructor(
                     email,
                     phone,
                     country,
-                    null,
+                    authSessionCookie,
                     ApiRequest.Options(
                         publishableKeyProvider(),
                         stripeAccountIdProvider()
@@ -72,7 +78,7 @@ internal class LinkApiRepository @Inject constructor(
                 onSuccess = {
                     it?.let {
                         Result.success(it)
-                    } ?: Result.failure(InternalError("Error looking up consumer"))
+                    } ?: Result.failure(InternalError("Error signing up consumer"))
                 },
                 onFailure = {
                     logger.error("Error signing up consumer", it)
@@ -82,13 +88,14 @@ internal class LinkApiRepository @Inject constructor(
         }
 
     override suspend fun startVerification(
-        consumerSessionClientSecret: String
+        consumerSessionClientSecret: String,
+        authSessionCookie: String?
     ): Result<ConsumerSession> = withContext(workContext) {
         runCatching {
             stripeRepository.startConsumerVerification(
                 consumerSessionClientSecret,
                 locale ?: Locale.US,
-                null,
+                authSessionCookie,
                 ApiRequest.Options(
                     publishableKeyProvider(),
                     stripeAccountIdProvider()
@@ -109,13 +116,14 @@ internal class LinkApiRepository @Inject constructor(
 
     override suspend fun confirmVerification(
         consumerSessionClientSecret: String,
-        verificationCode: String
+        verificationCode: String,
+        authSessionCookie: String?
     ): Result<ConsumerSession> = withContext(workContext) {
         runCatching {
             stripeRepository.confirmConsumerVerification(
                 consumerSessionClientSecret,
                 verificationCode,
-                null,
+                authSessionCookie,
                 ApiRequest.Options(
                     publishableKeyProvider(),
                     stripeAccountIdProvider()
@@ -129,6 +137,31 @@ internal class LinkApiRepository @Inject constructor(
             },
             onFailure = {
                 logger.error("Error confirming consumer verification", it)
+                Result.failure(it)
+            }
+        )
+    }
+
+    override suspend fun listPaymentDetails(
+        consumerSessionClientSecret: String
+    ): Result<ConsumerPaymentDetails> = withContext(workContext) {
+        kotlin.runCatching {
+            stripeRepository.listPaymentDetails(
+                consumerSessionClientSecret,
+                setOf("card"),
+                ApiRequest.Options(
+                    publishableKeyProvider(),
+                    stripeAccountIdProvider()
+                )
+            )
+        }.fold(
+            onSuccess = {
+                it?.let {
+                    Result.success(it)
+                } ?: Result.failure(InternalError("Error fetching consumer payment details"))
+            },
+            onFailure = {
+                logger.error("Error fetching consumer payment details", it)
                 Result.failure(it)
             }
         )

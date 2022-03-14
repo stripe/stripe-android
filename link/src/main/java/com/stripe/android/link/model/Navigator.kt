@@ -12,7 +12,13 @@ internal class Navigator @Inject constructor() {
         MutableSharedFlow<LinkScreen>(extraBufferCapacity = 1)
     val sharedFlow = _sharedFlow.asSharedFlow()
 
+    var onDismiss = {}
+
     fun navigateTo(target: LinkScreen) {
         _sharedFlow.tryEmit(target)
+    }
+
+    fun dismiss() {
+        onDismiss()
     }
 }

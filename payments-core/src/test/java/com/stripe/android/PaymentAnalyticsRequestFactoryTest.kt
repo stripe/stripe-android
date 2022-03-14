@@ -6,7 +6,8 @@ import android.content.pm.PackageManager
 import android.os.Build
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.networking.AnalyticsFields
+import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.Source
@@ -45,9 +46,9 @@ class PaymentAnalyticsRequestFactoryTest {
 
         // Size is SIZE-1 because tokens don't have a source_type field
         assertThat(params)
-            .hasSize(PaymentAnalyticsRequestFactory.VALID_PARAM_FIELDS.size - 1)
+            .hasSize(VALID_PARAM_FIELDS.size - 1)
 
-        assertThat(params[PaymentAnalyticsRequestFactory.FIELD_EVENT])
+        assertThat(params[AnalyticsFields.EVENT])
             .isEqualTo(expectedEvent)
         assertThat(params[PaymentAnalyticsRequestFactory.FIELD_TOKEN_TYPE])
             .isEqualTo(Token.Type.Pii.code)
@@ -65,8 +66,8 @@ class PaymentAnalyticsRequestFactoryTest {
 
         // Size is SIZE-1 because tokens don't have a source_type field
         assertThat(params)
-            .hasSize(PaymentAnalyticsRequestFactory.VALID_PARAM_FIELDS.size - 1)
-        assertEquals(expectedEventName, params[PaymentAnalyticsRequestFactory.FIELD_EVENT])
+            .hasSize(VALID_PARAM_FIELDS.size - 1)
+        assertEquals(expectedEventName, params[AnalyticsFields.EVENT])
         assertEquals(Token.Type.CvcUpdate.code, params[PaymentAnalyticsRequestFactory.FIELD_TOKEN_TYPE])
     }
 
@@ -79,20 +80,20 @@ class PaymentAnalyticsRequestFactoryTest {
 
         // Size is SIZE-1 because tokens don't have a token_type field
         assertThat(loggingParams)
-            .hasSize(PaymentAnalyticsRequestFactory.VALID_PARAM_FIELDS.size - 1)
+            .hasSize(VALID_PARAM_FIELDS.size - 1)
 
         assertEquals(
             Source.SourceType.SEPA_DEBIT,
             loggingParams[PaymentAnalyticsRequestFactory.FIELD_SOURCE_TYPE]
         )
-        assertEquals(API_KEY, loggingParams[PaymentAnalyticsRequestFactory.FIELD_PUBLISHABLE_KEY])
+        assertEquals(API_KEY, loggingParams[AnalyticsFields.PUBLISHABLE_KEY])
         assertEquals(
             PaymentAnalyticsEvent.SourceCreate.toString(),
-            loggingParams[PaymentAnalyticsRequestFactory.FIELD_EVENT]
+            loggingParams[AnalyticsFields.EVENT]
         )
         assertEquals(
-            PaymentAnalyticsRequestFactory.ANALYTICS_UA,
-            loggingParams[PaymentAnalyticsRequestFactory.FIELD_ANALYTICS_UA]
+            AnalyticsRequestFactory.ANALYTICS_UA,
+            loggingParams[AnalyticsFields.ANALYTICS_UA]
         )
     }
 
@@ -131,13 +132,13 @@ class PaymentAnalyticsRequestFactoryTest {
             ).params
 
         assertThat(loggingParams)
-            .hasSize(PaymentAnalyticsRequestFactory.VALID_PARAM_FIELDS.size - 2)
-        assertThat(loggingParams[PaymentAnalyticsRequestFactory.FIELD_PUBLISHABLE_KEY])
+            .hasSize(VALID_PARAM_FIELDS.size - 2)
+        assertThat(loggingParams[AnalyticsFields.PUBLISHABLE_KEY])
             .isEqualTo(API_KEY)
-        assertThat(loggingParams[PaymentAnalyticsRequestFactory.FIELD_EVENT])
+        assertThat(loggingParams[AnalyticsFields.EVENT])
             .isEqualTo(PaymentAnalyticsEvent.PaymentIntentConfirm.toString())
-        assertThat(loggingParams[PaymentAnalyticsRequestFactory.FIELD_ANALYTICS_UA])
-            .isEqualTo(PaymentAnalyticsRequestFactory.ANALYTICS_UA)
+        assertThat(loggingParams[AnalyticsFields.ANALYTICS_UA])
+            .isEqualTo(AnalyticsRequestFactory.ANALYTICS_UA)
     }
 
     @Test
@@ -147,15 +148,15 @@ class PaymentAnalyticsRequestFactoryTest {
         ).params
 
         assertThat(loggingParams)
-            .hasSize(PaymentAnalyticsRequestFactory.VALID_PARAM_FIELDS.size - 2)
-        assertEquals(API_KEY, loggingParams[PaymentAnalyticsRequestFactory.FIELD_PUBLISHABLE_KEY])
+            .hasSize(VALID_PARAM_FIELDS.size - 2)
+        assertEquals(API_KEY, loggingParams[AnalyticsFields.PUBLISHABLE_KEY])
         assertEquals(
             PaymentAnalyticsEvent.PaymentIntentRetrieve.toString(),
-            loggingParams[PaymentAnalyticsRequestFactory.FIELD_EVENT]
+            loggingParams[AnalyticsFields.EVENT]
         )
         assertEquals(
-            PaymentAnalyticsRequestFactory.ANALYTICS_UA,
-            loggingParams[PaymentAnalyticsRequestFactory.FIELD_ANALYTICS_UA]
+            AnalyticsRequestFactory.ANALYTICS_UA,
+            loggingParams[AnalyticsFields.ANALYTICS_UA]
         )
     }
 
@@ -173,7 +174,7 @@ class PaymentAnalyticsRequestFactoryTest {
     fun getEventLoggingParams_withProductUsage_createsAllFields() {
         // Correctness of these methods will be tested elsewhere. Assume validity for this test.
         val expectedEventName = PaymentAnalyticsEvent.TokenCreate.toString()
-        val expectedUaName = PaymentAnalyticsRequestFactory.ANALYTICS_UA
+        val expectedUaName = AnalyticsRequestFactory.ANALYTICS_UA
 
         val versionCode = 20
         val packageName = BuildConfig.LIBRARY_PACKAGE_NAME
@@ -194,24 +195,24 @@ class PaymentAnalyticsRequestFactoryTest {
         ).params
 
         assertThat(params)
-            .hasSize(PaymentAnalyticsRequestFactory.VALID_PARAM_FIELDS.size - 1)
-        assertEquals(API_KEY, params[PaymentAnalyticsRequestFactory.FIELD_PUBLISHABLE_KEY])
+            .hasSize(VALID_PARAM_FIELDS.size - 1)
+        assertEquals(API_KEY, params[AnalyticsFields.PUBLISHABLE_KEY])
         assertEquals(ATTRIBUTION.toList(), params[PaymentAnalyticsRequestFactory.FIELD_PRODUCT_USAGE])
         assertEquals(Token.Type.Card.code, params[PaymentAnalyticsRequestFactory.FIELD_TOKEN_TYPE])
-        assertEquals(Build.VERSION.SDK_INT, params[PaymentAnalyticsRequestFactory.FIELD_OS_VERSION])
-        assertNotNull(params[PaymentAnalyticsRequestFactory.FIELD_OS_RELEASE])
-        assertNotNull(params[PaymentAnalyticsRequestFactory.FIELD_OS_NAME])
-        assertEquals(versionCode, params[PaymentAnalyticsRequestFactory.FIELD_APP_VERSION])
-        assertThat(params[PaymentAnalyticsRequestFactory.FIELD_APP_NAME])
+        assertEquals(Build.VERSION.SDK_INT, params[AnalyticsFields.OS_VERSION])
+        assertNotNull(params[AnalyticsFields.OS_RELEASE])
+        assertNotNull(params[AnalyticsFields.OS_NAME])
+        assertEquals(versionCode, params[AnalyticsFields.APP_VERSION])
+        assertThat(params[AnalyticsFields.APP_NAME])
             .isEqualTo(BuildConfig.LIBRARY_PACKAGE_NAME)
 
-        assertEquals(StripeSdkVersion.VERSION_NAME, params[PaymentAnalyticsRequestFactory.FIELD_BINDINGS_VERSION])
-        assertEquals(expectedEventName, params[PaymentAnalyticsRequestFactory.FIELD_EVENT])
-        assertEquals(expectedUaName, params[PaymentAnalyticsRequestFactory.FIELD_ANALYTICS_UA])
+        assertEquals(StripeSdkVersion.VERSION_NAME, params[AnalyticsFields.BINDINGS_VERSION])
+        assertEquals(expectedEventName, params[AnalyticsFields.EVENT])
+        assertEquals(expectedUaName, params[AnalyticsFields.ANALYTICS_UA])
 
         assertEquals(
             "robolectric_robolectric_robolectric",
-            params[PaymentAnalyticsRequestFactory.FIELD_DEVICE_TYPE]
+            params[AnalyticsFields.DEVICE_TYPE]
         )
     }
 
@@ -219,57 +220,32 @@ class PaymentAnalyticsRequestFactoryTest {
     fun getEventLoggingParams_withoutProductUsage_createsOnlyNeededFields() {
         // Correctness of these methods will be tested elsewhere. Assume validity for this test.
         val expectedEventName = PaymentAnalyticsEvent.SourceCreate.toString()
-        val expectedUaName = PaymentAnalyticsRequestFactory.ANALYTICS_UA
+        val expectedUaName = AnalyticsRequestFactory.ANALYTICS_UA
 
         val params = analyticsRequestFactory.createSourceCreation(
             Source.SourceType.SEPA_DEBIT
         ).params
 
         assertThat(params)
-            .hasSize(PaymentAnalyticsRequestFactory.VALID_PARAM_FIELDS.size - 2)
-        assertEquals(API_KEY, params[PaymentAnalyticsRequestFactory.FIELD_PUBLISHABLE_KEY])
+            .hasSize(VALID_PARAM_FIELDS.size - 2)
+        assertEquals(API_KEY, params[AnalyticsFields.PUBLISHABLE_KEY])
         assertEquals(
             Source.SourceType.SEPA_DEBIT,
             params[PaymentAnalyticsRequestFactory.FIELD_SOURCE_TYPE]
         )
 
-        assertEquals(Build.VERSION.SDK_INT, params[PaymentAnalyticsRequestFactory.FIELD_OS_VERSION])
-        assertNotNull(params[PaymentAnalyticsRequestFactory.FIELD_OS_RELEASE])
-        assertNotNull(params[PaymentAnalyticsRequestFactory.FIELD_OS_NAME])
+        assertEquals(Build.VERSION.SDK_INT, params[AnalyticsFields.OS_VERSION])
+        assertNotNull(params[AnalyticsFields.OS_RELEASE])
+        assertNotNull(params[AnalyticsFields.OS_NAME])
 
-        assertEquals(StripeSdkVersion.VERSION_NAME, params[PaymentAnalyticsRequestFactory.FIELD_BINDINGS_VERSION])
-        assertEquals(expectedEventName, params[PaymentAnalyticsRequestFactory.FIELD_EVENT])
-        assertEquals(expectedUaName, params[PaymentAnalyticsRequestFactory.FIELD_ANALYTICS_UA])
+        assertEquals(StripeSdkVersion.VERSION_NAME, params[AnalyticsFields.BINDINGS_VERSION])
+        assertEquals(expectedEventName, params[AnalyticsFields.EVENT])
+        assertEquals(expectedUaName, params[AnalyticsFields.ANALYTICS_UA])
 
         assertEquals(
             "robolectric_robolectric_robolectric",
-            params[PaymentAnalyticsRequestFactory.FIELD_DEVICE_TYPE]
+            params[AnalyticsFields.DEVICE_TYPE]
         )
-    }
-
-    @Test
-    fun createAppDataParams_whenPackageNameIsEmpty_returnsEmptyMap() {
-        val factory = PaymentAnalyticsRequestFactory(
-            null,
-            null,
-            "",
-            { API_KEY }
-        )
-        assertThat(factory.createAppDataParams())
-            .isEmpty()
-    }
-
-    @Test
-    fun createAppDataParams_whenPackageInfoNotFound_returnsEmptyMap() {
-        val packageName = "fake_package"
-        val factory = PaymentAnalyticsRequestFactory(
-            packageManager,
-            null,
-            packageName,
-            { API_KEY }
-        )
-        assertThat(factory.createAppDataParams())
-            .isEmpty()
     }
 
     @Test
@@ -279,12 +255,6 @@ class PaymentAnalyticsRequestFactoryTest {
             expectedEventParam,
             PaymentAnalyticsEvent.TokenCreate.toString()
         )
-    }
-
-    @Test
-    fun getAnalyticsUa_returnsExpectedValue() {
-        assertThat(PaymentAnalyticsRequestFactory.ANALYTICS_UA)
-            .isEqualTo("analytics.stripe_android-1.0")
     }
 
     @Test
@@ -306,18 +276,6 @@ class PaymentAnalyticsRequestFactoryTest {
 
         assertThat(params)
             .containsEntry("3ds2_ui_type", "none")
-    }
-
-    @Test
-    fun `when publishable key is unavailable, create params with undefined key`() {
-        val factory = PaymentAnalyticsRequestFactory(
-            context,
-            publishableKeyProvider = { throw RuntimeException() }
-        )
-        val params = factory.createRequest(PaymentAnalyticsEvent.SourceRetrieve).params
-
-        assertThat(params["publishable_key"])
-            .isEqualTo(ApiRequest.Options.UNDEFINED_PUBLISHABLE_KEY)
     }
 
     @Test
@@ -393,5 +351,23 @@ class PaymentAnalyticsRequestFactoryTest {
     private companion object {
         private const val API_KEY = "pk_abc123"
         private val ATTRIBUTION = setOf("CardInputView")
+
+        @JvmSynthetic
+        private val VALID_PARAM_FIELDS: Set<String> = setOf(
+            AnalyticsFields.ANALYTICS_UA,
+            AnalyticsFields.APP_NAME,
+            AnalyticsFields.APP_VERSION,
+            AnalyticsFields.BINDINGS_VERSION,
+            AnalyticsFields.IS_DEVELOPMENT,
+            AnalyticsFields.DEVICE_TYPE,
+            AnalyticsFields.EVENT,
+            AnalyticsFields.OS_VERSION,
+            AnalyticsFields.OS_NAME,
+            AnalyticsFields.OS_RELEASE,
+            AnalyticsFields.PUBLISHABLE_KEY,
+            PaymentAnalyticsRequestFactory.FIELD_PRODUCT_USAGE,
+            PaymentAnalyticsRequestFactory.FIELD_SOURCE_TYPE,
+            PaymentAnalyticsRequestFactory.FIELD_TOKEN_TYPE
+        )
     }
 }

@@ -3,14 +3,11 @@ package com.stripe.android.ui.core.elements
 import android.content.Intent
 import android.net.Uri
 import androidx.annotation.RestrictTo
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.SpanStyle
@@ -20,6 +17,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.stripe.android.ui.core.PaymentsTheme
 import com.stripe.android.ui.core.R
 
 @Composable
@@ -29,19 +27,8 @@ fun AuBecsDebitMandateElementUI(
 ) {
 
     val annotatedText = buildAnnotatedString {
-        val textColor = when {
-            element.color != null -> {
-                colorResource(element.color)
-            }
-            isSystemInDarkTheme() -> {
-                Color.LightGray
-            }
-            else -> {
-                Color.Black
-            }
-        }
         val nonLinkTextStyle = SpanStyle(
-            color = textColor,
+            color = PaymentsTheme.colors.colorTextSecondary,
             fontSize = element.fontSizeSp.sp,
             letterSpacing = element.letterSpacingSp.sp,
         )
@@ -58,7 +45,7 @@ fun AuBecsDebitMandateElementUI(
         )
         withStyle(
             style = SpanStyle(
-                color = textColor,
+                color = PaymentsTheme.colors.colorTextSecondary,
                 fontWeight = FontWeight.Bold,
                 fontSize = element.fontSizeSp.sp,
                 letterSpacing = element.letterSpacingSp.sp,

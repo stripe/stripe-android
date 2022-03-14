@@ -1,15 +1,27 @@
 package com.stripe.android.identity
 
 import androidx.activity.ComponentActivity
+import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
+import androidx.fragment.app.Fragment
 
-internal class StripeIdentityVerificationSheet(
-    from: ComponentActivity,
+internal class StripeIdentityVerificationSheet private constructor(
+    activityResultCaller: ActivityResultCaller,
     private val configuration: IdentityVerificationSheet.Configuration
 ) : IdentityVerificationSheet {
 
+    constructor(
+        from: ComponentActivity,
+        configuration: IdentityVerificationSheet.Configuration
+    ) : this(from as ActivityResultCaller, configuration)
+
+    constructor(
+        from: Fragment,
+        configuration: IdentityVerificationSheet.Configuration
+    ) : this(from as ActivityResultCaller, configuration)
+
     private val activityResultLauncher: ActivityResultLauncher<IdentityVerificationSheetContract.Args> =
-        from.registerForActivityResult(
+        activityResultCaller.registerForActivityResult(
             IdentityVerificationSheetContract(),
             ::onResult
         )
@@ -27,8 +39,7 @@ internal class StripeIdentityVerificationSheet(
             IdentityVerificationSheetContract.Args(
                 verificationSessionId,
                 ephemeralKeySecret,
-                configuration.merchantLogo,
-                configuration.stripePublishableKey
+                configuration.merchantLogo
             )
         )
     }

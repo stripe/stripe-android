@@ -199,7 +199,6 @@ internal class TransformSpecToElementTest {
         val staticText = StaticTextSpec(
             IdentifierSpec.Generic("mandate"),
             stringResId = R.string.sepa_mandate,
-            color = R.color.mandate_text_color,
             fontSizeSp = 120,
             letterSpacingSp = 120.0
         )
@@ -210,7 +209,6 @@ internal class TransformSpecToElementTest {
         val staticTextElement = formElement.first() as StaticTextElement
 
         assertThat(staticTextElement.controller).isNull()
-        assertThat(staticTextElement.color).isEqualTo(staticText.color)
         assertThat(staticTextElement.stringResId).isEqualTo(staticText.stringResId)
         assertThat(staticTextElement.identifier).isEqualTo(staticText.identifier)
         assertThat(staticTextElement.fontSizeSp).isEqualTo(staticText.fontSizeSp)
@@ -222,7 +220,6 @@ internal class TransformSpecToElementTest {
         val mandate = StaticTextSpec(
             IdentifierSpec.Generic("mandate"),
             R.string.sepa_mandate,
-            color = R.color.mandate_text_color,
         )
         val hiddenIdentifiers = listOf(nameSection, mandate)
         val saveForFutureUseSpec = SaveForFutureUseSpec(hiddenIdentifiers)

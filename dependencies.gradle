@@ -1,0 +1,11 @@
+ext.versions = [
+        detekt: "1.19.0",
+]
+
+ext.buildLibs = [
+        detektGradlePlugin: "io.gitlab.arturbosch.detekt:detekt-gradle-plugin:$versions.detekt",
+]
+
+ext.configs = [
+        androidLibrary: "${project.rootDir}/build-configuration/android-library.gradle",
+]

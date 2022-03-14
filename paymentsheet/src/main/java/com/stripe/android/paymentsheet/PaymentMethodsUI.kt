@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet
 
 import android.util.DisplayMetrics
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
@@ -12,21 +11,21 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.selection.selectable
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
 import com.stripe.android.paymentsheet.ui.LpmSelectorText
+import com.stripe.android.ui.core.PaymentsTheme
 
 internal const val ADD_PM_DEFAULT_PADDING = 12.0f
 internal const val CARD_HORIZONTAL_PADDING = 6.0f
@@ -91,7 +90,6 @@ internal fun calculateViewWidth(
     displayMetrics: DisplayMetrics,
     numberOfPaymentMethods: Int
 ): Dp {
-//    val maxWidth = displayMetrics.widthPixels
     val screenDensity = displayMetrics.density
     val targetWidth = maxWidth - dpToPx(displayMetrics, PM_LIST_PADDING.dp * 2)
     val minItemWidth = 100 * screenDensity + (2 * CARD_HORIZONTAL_PADDING)
@@ -126,26 +124,12 @@ internal fun PaymentMethodUI(
     modifier: Modifier = Modifier,
     onItemSelectedListener: (Int) -> Unit
 ) {
-    val strokeColor = colorResource(
-        if (isSelected) {
-            R.color.stripe_paymentsheet_add_pm_card_selected_stroke
-        } else {
-            R.color.stripe_paymentsheet_add_pm_card_unselected_stroke
-        }
-    )
-
-    val cardBackgroundColor = if (isEnabled) {
-        colorResource(R.color.stripe_paymentsheet_elements_background_default)
-    } else {
-        colorResource(R.color.stripe_paymentsheet_elements_background_disabled)
-    }
-
     Card(
-        border = BorderStroke(if (isSelected) 2.dp else 1.5.dp, strokeColor),
-        shape = RoundedCornerShape(6.dp),
+        border = PaymentsTheme.getBorderStroke(isSelected),
         elevation = if (isSelected) 1.5.dp else 0.dp,
-        backgroundColor = cardBackgroundColor,
+        backgroundColor = PaymentsTheme.colors.colorComponentBackground,
         modifier = modifier
+            .alpha(alpha = if (isEnabled) 1.0F else 0.6F)
             .height(60.dp)
             .width(viewWidth)
             .padding(horizontal = CARD_HORIZONTAL_PADDING.dp)
@@ -167,6 +151,7 @@ internal fun PaymentMethodUI(
             LpmSelectorText(
                 text = title,
                 isEnabled = isEnabled,
+                textColor = PaymentsTheme.colors.material.onBackground,
                 modifier = Modifier.padding(top = 6.dp, start = ADD_PM_DEFAULT_PADDING.dp)
             )
         }

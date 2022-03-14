@@ -1,7 +1,6 @@
 package com.stripe.android.ui.core.elements
 
 import androidx.annotation.RestrictTo
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -15,13 +14,13 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.unit.dp
+import com.stripe.android.ui.core.PaymentsTheme
 import com.stripe.android.ui.core.R
 
 @Composable
@@ -61,14 +60,9 @@ fun SaveForFutureUseElementUI(
             .requiredHeight(48.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // This is hardcoded for now. Will look at theme object in the future to determine color.
-        val checkboxColor = CheckboxDefaults.colors(
-            checkedColor = Color(0xFF0074D4)
-        )
         Checkbox(
             checked = checked,
             onCheckedChange = null, // needs to be null for accessibility on row click to work
-            colors = checkboxColor,
             enabled = enabled
         )
         label?.let {
@@ -77,11 +71,7 @@ fun SaveForFutureUseElementUI(
                 Modifier
                     .padding(start = 4.dp)
                     .align(Alignment.CenterVertically),
-                color = if (isSystemInDarkTheme()) {
-                    Color.LightGray
-                } else {
-                    Color.Black
-                }
+                color = PaymentsTheme.colors.colorTextSecondary
             )
         }
     }

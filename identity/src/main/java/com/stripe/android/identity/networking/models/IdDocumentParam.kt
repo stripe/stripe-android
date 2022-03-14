@@ -5,12 +5,10 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 internal data class IdDocumentParam(
-
     @SerialName("back")
     val back: DocumentUploadParam? = null,
     @SerialName("front")
     val front: DocumentUploadParam? = null,
-
     @SerialName("type")
     val type: Type? = null
 ) {

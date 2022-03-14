@@ -16,8 +16,7 @@ internal class IdentityVerificationSheetContract :
         val verificationSessionId: String,
         val ephemeralKeySecret: String,
         @DrawableRes
-        val merchantLogo: Int,
-        val stripePublishableKey: String
+        val merchantLogo: Int
     ) : Parcelable {
         fun toBundle() = bundleOf(EXTRA_ARGS to this)
 

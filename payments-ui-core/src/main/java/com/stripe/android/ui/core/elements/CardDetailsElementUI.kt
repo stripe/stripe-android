@@ -1,6 +1,5 @@
 package com.stripe.android.ui.core.elements
 
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Divider
 import androidx.compose.runtime.Composable
@@ -20,12 +19,11 @@ internal fun CardDetailsElementUI(
             hiddenIdentifiers = hiddenIdentifiers,
             lastTextFieldIdentifier = lastTextFieldIdentifier
         )
-        val cardStyle = CardStyle(isSystemInDarkTheme())
         Divider(
-            color = cardStyle.cardBorderColor,
-            thickness = cardStyle.cardBorderWidth,
+            color = CardStyle.cardBorderColor,
+            thickness = CardStyle.cardBorderWidth,
             modifier = Modifier.padding(
-                horizontal = cardStyle.cardBorderWidth
+                horizontal = CardStyle.cardBorderWidth
             )
         )
     }

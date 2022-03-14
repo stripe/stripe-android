@@ -6,15 +6,16 @@ import androidx.annotation.RestrictTo
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.Injectable
-import com.stripe.android.core.injection.Injector
 import com.stripe.android.core.injection.InjectorKey
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.link.injection.DaggerLinkPaymentLauncherComponent
+import com.stripe.android.link.injection.NonFallbackInjector
 import com.stripe.android.link.ui.signup.SignUpViewModel
 import com.stripe.android.link.ui.verification.VerificationViewModel
+import com.stripe.android.link.ui.wallet.WalletViewModel
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
@@ -40,7 +41,7 @@ class LinkPaymentLauncher @AssistedInject constructor(
     stripeRepository: StripeRepository
 ) {
 
-    private val launcherComponent = DaggerLinkPaymentLauncherComponent.builder()
+    private val launcherComponentBuilder = DaggerLinkPaymentLauncherComponent.builder()
         .context(context)
         .ioContext(ioContext)
         .analyticsRequestFactory(paymentAnalyticsRequestFactory)
@@ -49,46 +50,51 @@ class LinkPaymentLauncher @AssistedInject constructor(
         .enableLogging(enableLogging)
         .publishableKeyProvider(publishableKeyProvider)
         .stripeAccountIdProvider(stripeAccountIdProvider)
-        .build()
 
     @InjectorKey
     private val injectorKey: String = WeakMapInjectorRegistry.nextKey(
         requireNotNull(LinkPaymentLauncher::class.simpleName)
     )
 
-    private val injector = object : Injector {
-        override fun inject(injectable: Injectable<*>) {
-            when (injectable) {
-                is LinkActivityViewModel.Factory -> launcherComponent.inject(injectable)
-                is SignUpViewModel.Factory -> launcherComponent.inject(injectable)
-                is VerificationViewModel.Factory -> launcherComponent.inject(injectable)
-                else -> {
-                    throw IllegalArgumentException("invalid Injectable $injectable requested in $this")
-                }
-            }
-        }
-    }
-
-    init {
-        WeakMapInjectorRegistry.register(injector, injectorKey)
-    }
-
     fun present(
         merchantName: String,
         customerEmail: String? = null
     ) {
-        activityResultLauncher.launch(
-            LinkActivityContract.Args(
-                merchantName,
-                customerEmail,
-                LinkActivityContract.Args.InjectionParams(
-                    injectorKey,
-                    productUsage,
-                    enableLogging,
-                    publishableKeyProvider(),
-                    stripeAccountIdProvider()
-                )
+        val args = LinkActivityContract.Args(
+            merchantName,
+            customerEmail,
+            LinkActivityContract.Args.InjectionParams(
+                injectorKey,
+                productUsage,
+                enableLogging,
+                publishableKeyProvider(),
+                stripeAccountIdProvider()
             )
         )
+
+        setupInjector(args)
+        activityResultLauncher.launch(args)
+    }
+
+    private fun setupInjector(args: LinkActivityContract.Args) {
+        val launcherComponent = launcherComponentBuilder
+            .starterArgs(args)
+            .build()
+
+        val injector = object : NonFallbackInjector {
+            override fun inject(injectable: Injectable<*>) {
+                when (injectable) {
+                    is LinkActivityViewModel.Factory -> launcherComponent.inject(injectable)
+                    is SignUpViewModel.Factory -> launcherComponent.inject(injectable)
+                    is VerificationViewModel.Factory -> launcherComponent.inject(injectable)
+                    is WalletViewModel.Factory -> launcherComponent.inject(injectable)
+                    else -> {
+                        throw IllegalArgumentException("invalid Injectable $injectable requested in $this")
+                    }
+                }
+            }
+        }
+
+        WeakMapInjectorRegistry.register(injector, injectorKey)
     }
 }

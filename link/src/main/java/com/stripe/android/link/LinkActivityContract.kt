@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Parcelable
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.annotation.RestrictTo
+import androidx.core.os.bundleOf
 import com.stripe.android.core.injection.InjectorKey
 import com.stripe.android.view.ActivityStarter
 import kotlinx.parcelize.Parcelize
@@ -17,7 +18,10 @@ class LinkActivityContract :
         Intent(context, LinkActivity::class.java)
             .putExtra(EXTRA_ARGS, input)
 
-    override fun parseResult(resultCode: Int, intent: Intent?) = LinkActivityResult.Success
+    override fun parseResult(resultCode: Int, intent: Intent?) =
+        intent?.getParcelableExtra<Result>(EXTRA_RESULT)?.linkResult ?: LinkActivityResult.Failed(
+            IllegalStateException("Failed to retrieve LinkActivityResult.")
+        )
 
     /**
      * Arguments for launching [LinkActivity] to confirm a payment with Link.
@@ -49,8 +53,17 @@ class LinkActivityContract :
         ) : Parcelable
     }
 
+    @Parcelize
+    data class Result(
+        val linkResult: LinkActivityResult
+    ) : ActivityStarter.Result {
+        override fun toBundle() = bundleOf(EXTRA_RESULT to this)
+    }
+
     companion object {
         const val EXTRA_ARGS =
             "com.stripe.android.link.LinkActivityContract.extra_args"
+        const val EXTRA_RESULT =
+            "com.stripe.android.link.LinkActivityContract.extra_result"
     }
 }

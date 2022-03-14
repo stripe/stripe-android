@@ -87,7 +87,7 @@ internal sealed class IdentityScanState(val type: ScanType, isFinal: Boolean) : 
             return when {
                 isUnsatisfied() -> {
                     val reason =
-                        "hit ratio below expected: ${hitsCount.toFloat().div(FRAMES_REQUIRED)}"
+                        "hits count below expected: $hitsCount"
                     Log.d(
                         TAG,
                         "Satisfaction check fails due to $reason, transition to Unsatisfied."
@@ -120,14 +120,11 @@ internal sealed class IdentityScanState(val type: ScanType, isFinal: Boolean) : 
         /**
          * Determine if satisfaction failed and should transition to [Unsatisfied].
          *
-         * Transfers to when the previous [FRAMES_REQUIRED] number of frames has a hit ratio
-         * below [HIT_RATIO].
+         * Transfers to when the previous [FRAMES_REQUIRED] number of frames has hits below
+         * [HITS_REQUIRED].
          */
         private fun isUnsatisfied(): Boolean {
-            return (results.size == FRAMES_REQUIRED) && (
-                hitsCount.toFloat()
-                    .div(FRAMES_REQUIRED) < HIT_RATIO
-                )
+            return (results.size == FRAMES_REQUIRED) && (hitsCount < HITS_REQUIRED)
         }
 
         @VisibleForTesting
@@ -136,8 +133,8 @@ internal sealed class IdentityScanState(val type: ScanType, isFinal: Boolean) : 
             // correct item.
             const val FRAMES_REQUIRED = 100
 
-            // The ratio to determine if the model has found the correct item.
-            const val HIT_RATIO = 0.5
+            // The number of hits to determine if the model has found the correct item.
+            const val HITS_REQUIRED = 50
         }
     }
 

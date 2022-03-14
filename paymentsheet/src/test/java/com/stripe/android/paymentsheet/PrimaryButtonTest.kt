@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet
 import android.content.Context
 import android.content.res.ColorStateList
 import android.graphics.Color
+import android.graphics.drawable.GradientDrawable
 import android.view.View.GONE
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
@@ -35,7 +36,7 @@ class PrimaryButtonTest {
 
     @Test
     fun `onFinishingState() should clear any tint and restore onReadyState()`() {
-        primaryButton.backgroundTintList = ColorStateList.valueOf(Color.BLACK)
+        primaryButton.setDefaultBackGroundColor(ColorStateList.valueOf(Color.BLACK))
 
         primaryButton.updateState(
             PrimaryButton.State.FinishProcessing({})
@@ -45,7 +46,7 @@ class PrimaryButtonTest {
         primaryButton.updateState(
             PrimaryButton.State.Ready
         )
-        assertThat(primaryButton.backgroundTintList).isEqualTo(ColorStateList.valueOf(Color.BLACK))
+        assertThat((primaryButton.background as GradientDrawable).color).isEqualTo(ColorStateList.valueOf(Color.BLACK))
     }
 
     @Test

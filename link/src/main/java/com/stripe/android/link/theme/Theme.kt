@@ -9,15 +9,21 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 
 private val DarkColorPalette = darkColors(
-    primary = Link900,
+    primary = LinkGreen,
+    secondary = LinkLightGray,
     background = Color.Black,
-    onPrimary = Color.White
+    onPrimary = Color.Black,
+    onSecondary = LinkDarkGray,
+    onBackground = LinkGray
 )
 
 private val LightColorPalette = lightColors(
-    primary = Link900,
+    primary = LinkGreen,
+    secondary = LinkLightGray,
     background = Color.White,
-    onPrimary = Color.White
+    onPrimary = Color.Black,
+    onSecondary = LinkDarkGray,
+    onBackground = LinkGray
 )
 
 @Composable

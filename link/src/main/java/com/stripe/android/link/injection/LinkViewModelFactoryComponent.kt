@@ -6,9 +6,11 @@ import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.LoggingModule
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
+import com.stripe.android.link.LinkActivityContract
 import com.stripe.android.link.LinkActivityViewModel
 import com.stripe.android.link.ui.signup.SignUpViewModel
 import com.stripe.android.link.ui.verification.VerificationViewModel
+import com.stripe.android.link.ui.wallet.WalletViewModel
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import dagger.BindsInstance
@@ -34,6 +36,7 @@ internal interface LinkViewModelFactoryComponent {
     fun inject(factory: LinkActivityViewModel.Factory)
     fun inject(factory: SignUpViewModel.Factory)
     fun inject(factory: VerificationViewModel.Factory)
+    fun inject(factory: WalletViewModel.Factory)
 
     @Component.Builder
     interface Builder {
@@ -51,6 +54,9 @@ internal interface LinkViewModelFactoryComponent {
 
         @BindsInstance
         fun productUsage(@Named(PRODUCT_USAGE) productUsage: Set<String>): Builder
+
+        @BindsInstance
+        fun starterArgs(starterArgs: LinkActivityContract.Args): Builder
 
         fun build(): LinkViewModelFactoryComponent
     }

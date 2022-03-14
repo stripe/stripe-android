@@ -8,6 +8,7 @@ import com.stripe.android.model.BinFixtures
 import com.stripe.android.model.CardMetadata
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
+import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.Customer
@@ -280,6 +281,7 @@ internal abstract class AbsFakeStripeRepository : StripeRepository() {
 
     override suspend fun lookupConsumerSession(
         email: String,
+        authSessionCookie: String?,
         requestOptions: ApiRequest.Options
     ): ConsumerSessionLookup? {
         return null
@@ -289,7 +291,7 @@ internal abstract class AbsFakeStripeRepository : StripeRepository() {
         email: String,
         phoneNumber: String,
         country: String,
-        cookies: String?,
+        authSessionCookie: String?,
         requestOptions: ApiRequest.Options
     ): ConsumerSession? {
         return null
@@ -298,7 +300,7 @@ internal abstract class AbsFakeStripeRepository : StripeRepository() {
     override suspend fun startConsumerVerification(
         consumerSessionClientSecret: String,
         locale: Locale,
-        cookies: String?,
+        authSessionCookie: String?,
         requestOptions: ApiRequest.Options
     ): ConsumerSession? {
         return null
@@ -307,9 +309,17 @@ internal abstract class AbsFakeStripeRepository : StripeRepository() {
     override suspend fun confirmConsumerVerification(
         consumerSessionClientSecret: String,
         verificationCode: String,
-        cookies: String?,
+        authSessionCookie: String?,
         requestOptions: ApiRequest.Options
     ): ConsumerSession? {
+        return null
+    }
+
+    override suspend fun listPaymentDetails(
+        consumerSessionClientSecret: String,
+        paymentMethodTypes: Set<String>,
+        requestOptions: ApiRequest.Options
+    ): ConsumerPaymentDetails? {
         return null
     }
 }

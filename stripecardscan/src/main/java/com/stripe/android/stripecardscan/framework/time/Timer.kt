@@ -2,7 +2,6 @@ package com.stripe.android.stripecardscan.framework.time
 
 import android.util.Log
 import com.stripe.android.camera.framework.time.Clock
-import com.stripe.android.stripecardscan.framework.Config
 import kotlinx.coroutines.runBlocking
 import com.stripe.android.camera.framework.time.Duration
 import com.stripe.android.camera.framework.time.seconds
@@ -14,8 +13,8 @@ internal sealed class Timer {
         fun newInstance(
             tag: String,
             name: String,
+            enabled: Boolean,
             updateInterval: Duration = 2.seconds,
-            enabled: Boolean = Config.isDebug
         ) = if (enabled) {
             LoggingTimer(
                 tag,

@@ -11,8 +11,6 @@ import com.stripe.android.camera.framework.image.size
 import com.stripe.android.camera.framework.image.toJpeg
 import com.stripe.android.camera.framework.util.move
 import com.stripe.android.stripecardscan.cardimageverification.SavedFrame
-import com.stripe.android.stripecardscan.framework.Config
-import com.stripe.android.stripecardscan.framework.NetworkConfig
 import com.stripe.android.stripecardscan.framework.api.dto.AppInfo
 import com.stripe.android.stripecardscan.framework.api.dto.CardImageVerificationDetailsRequest
 import com.stripe.android.stripecardscan.framework.api.dto.CardImageVerificationDetailsResult
@@ -30,12 +28,23 @@ import com.stripe.android.stripecardscan.framework.util.AppDetails
 import com.stripe.android.stripecardscan.framework.util.Device
 import com.stripe.android.stripecardscan.framework.util.b64Encode
 import com.stripe.android.camera.framework.util.scaleAndCenterWithin
+import com.stripe.android.stripecardscan.framework.LOG_TAG
 import com.stripe.android.stripecardscan.framework.api.dto.ScanStatsOCRRequest
+import com.stripe.android.stripecardscan.framework.util.encodeToJson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.builtins.ListSerializer
+
+private const val BASE_URL = "https://api.stripe.com/v1"
+internal val CARD_SCAN_RETRY_STATUS_CODES: Iterable<Int> = 500..599
+
+private val network: Network = StripeNetwork(
+    baseUrl = BASE_URL,
+    retryTotalAttempts = 3,
+    retryStatusCodes = CARD_SCAN_RETRY_STATUS_CODES,
+)
 
 /**
  * Upload stats data to stripe servers.
@@ -61,7 +70,7 @@ internal fun uploadScanStatsCIV(
     )
 
     when (
-        val result = NetworkConfig.network.postForResult(
+        val result = network.postForResult(
             stripePublishableKey = stripePublishableKey,
             path = "/card_image_verifications/$civId/scan_stats",
             data = ScanStatsCIVRequest(
@@ -73,15 +82,15 @@ internal fun uploadScanStatsCIV(
             errorSerializer = StripeServerErrorResponse.serializer(),
         )
     ) {
-        is NetworkResult.Success -> Log.v(Config.logTag, "Scan stats uploaded")
+        is NetworkResult.Success -> Log.v(LOG_TAG, "Scan stats uploaded")
         is NetworkResult.Error ->
             Log.e(
-                Config.logTag,
+                LOG_TAG,
                 "Unable to upload scan stats (${result.responseCode}): ${result.error}",
             )
         is NetworkResult.Exception ->
             Log.e(
-                Config.logTag,
+                LOG_TAG,
                 "Unable to upload scan stats (${result.responseCode})",
                 result.exception,
             )
@@ -107,7 +116,7 @@ internal fun uploadScanStatsOCR(
     )
 
     when (
-        val result = NetworkConfig.network.postForResult(
+        val result = network.postForResult(
             stripePublishableKey = stripePublishableKey,
             path = "/card_image_scans/scan_stats",
             data = ScanStatsOCRRequest(
@@ -118,15 +127,15 @@ internal fun uploadScanStatsOCR(
             errorSerializer = StripeServerErrorResponse.serializer(),
         )
     ) {
-        is NetworkResult.Success -> Log.v(Config.logTag, "Scan stats uploaded")
+        is NetworkResult.Success -> Log.v(LOG_TAG, "Scan stats uploaded")
         is NetworkResult.Error ->
             Log.e(
-                Config.logTag,
+                LOG_TAG,
                 "Unable to upload scan stats (${result.responseCode}): ${result.error}",
             )
         is NetworkResult.Exception ->
             Log.e(
-                Config.logTag,
+                LOG_TAG,
                 "Unable to upload scan stats (${result.responseCode})",
                 result.exception,
             )
@@ -139,7 +148,7 @@ internal suspend fun getCardImageVerificationIntentDetails(
     civId: String,
     civSecret: String,
 ) = withContext(Dispatchers.IO) {
-    NetworkConfig.network.postForResult(
+    network.postForResult(
         stripePublishableKey = stripePublishableKey,
         path = "/card_image_verifications/$civId/initialize_client",
         data = CardImageVerificationDetailsRequest(civSecret),
@@ -183,13 +192,13 @@ internal suspend fun uploadSavedFrames(
         )
     }
 
-    NetworkConfig.network.postForResult(
+    network.postForResult(
         stripePublishableKey = stripePublishableKey,
         path = "card_image_verifications/$civId/verify_frames",
         data = VerifyFramesRequest(
             clientSecret = civSecret,
             verificationFramesData = b64Encode(
-                NetworkConfig.json.encodeToString(
+                encodeToJson(
                     ListSerializer(VerificationFrameData.serializer()),
                     verificationFramesData,
                 ),

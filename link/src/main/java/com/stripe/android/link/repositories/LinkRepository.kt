@@ -1,5 +1,6 @@
 package com.stripe.android.link.repositories
 
+import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
 
@@ -12,7 +13,8 @@ internal interface LinkRepository {
      * Check if the email already has a link account.
      */
     suspend fun lookupConsumer(
-        email: String
+        email: String,
+        authSessionCookie: String?
     ): Result<ConsumerSessionLookup>
 
     /**
@@ -21,15 +23,31 @@ internal interface LinkRepository {
     suspend fun consumerSignUp(
         email: String,
         phone: String,
-        country: String
+        country: String,
+        authSessionCookie: String?
     ): Result<ConsumerSession>
 
+    /**
+     * Start an SMS verification.
+     */
     suspend fun startVerification(
-        consumerSessionClientSecret: String
+        consumerSessionClientSecret: String,
+        authSessionCookie: String?
     ): Result<ConsumerSession>
 
+    /**
+     * Confirm an SMS verification code.
+     */
     suspend fun confirmVerification(
         consumerSessionClientSecret: String,
-        verificationCode: String
+        verificationCode: String,
+        authSessionCookie: String?
     ): Result<ConsumerSession>
+
+    /**
+     * Fetch all saved payment methods for the consumer.
+     */
+    suspend fun listPaymentDetails(
+        consumerSessionClientSecret: String
+    ): Result<ConsumerPaymentDetails>
 }

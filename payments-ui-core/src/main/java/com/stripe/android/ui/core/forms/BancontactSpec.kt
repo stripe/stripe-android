@@ -25,8 +25,7 @@ internal val bancontactEmailSection =
     SectionSpec(IdentifierSpec.Generic("email_section"), EmailSpec)
 internal val bancontactMandate = StaticTextSpec(
     IdentifierSpec.Generic("mandate"),
-    R.string.sepa_mandate,
-    R.color.mandate_text_color
+    R.string.sepa_mandate
 )
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

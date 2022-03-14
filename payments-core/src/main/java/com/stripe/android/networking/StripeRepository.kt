@@ -13,6 +13,7 @@ import com.stripe.android.model.BankStatuses
 import com.stripe.android.model.CardMetadata
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
+import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.Customer
@@ -395,6 +396,7 @@ abstract class StripeRepository {
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     abstract suspend fun lookupConsumerSession(
         email: String,
+        authSessionCookie: String?,
         requestOptions: ApiRequest.Options
     ): ConsumerSessionLookup?
 
@@ -403,7 +405,7 @@ abstract class StripeRepository {
         email: String,
         phoneNumber: String,
         country: String,
-        cookies: String?,
+        authSessionCookie: String?,
         requestOptions: ApiRequest.Options
     ): ConsumerSession?
 
@@ -411,7 +413,7 @@ abstract class StripeRepository {
     abstract suspend fun startConsumerVerification(
         consumerSessionClientSecret: String,
         locale: Locale,
-        cookies: String?,
+        authSessionCookie: String?,
         requestOptions: ApiRequest.Options
     ): ConsumerSession?
 
@@ -419,7 +421,14 @@ abstract class StripeRepository {
     abstract suspend fun confirmConsumerVerification(
         consumerSessionClientSecret: String,
         verificationCode: String,
-        cookies: String?,
+        authSessionCookie: String?,
         requestOptions: ApiRequest.Options
     ): ConsumerSession?
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    abstract suspend fun listPaymentDetails(
+        consumerSessionClientSecret: String,
+        paymentMethodTypes: Set<String>,
+        requestOptions: ApiRequest.Options
+    ): ConsumerPaymentDetails?
 }
