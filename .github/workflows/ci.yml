@@ -112,9 +112,14 @@ jobs:
         with:
           api-level: 29
           arch: x86
+          profile: Galaxy Nexus
+          target: google_apis
+          force-avd-creation: false
+          cores: 3
+          ram-size: 8192M
           disable-animations: true
           script: |
-            adb logcat -c
+  BackendApiFactory          adb logcat -c
             adb logcat &
             ./gradlew :paymentsheet-example:connectedAndroidTest
         env:
