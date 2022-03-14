@@ -61,7 +61,7 @@ jobs:
           script: |
             adb logcat -c
             adb logcat &
-            ./gradlew :paymentsheet-example:connectedAndroidTest -Porg.gradle.jvmargs=-XX:MaxHeapSize=2048m -Xmx4608M
+            ./gradlew :paymentsheet-example:connectedAndroidTest -Dorg.gradle.jvmargs="-XX:MaxHeapSize=2048m -Xmx4608M"
         env:
           STRIPE_EXAMPLE_BACKEND_URL: ${{ secrets.STRIPE_EXAMPLE_BACKEND_URL }}
           STRIPE_EXAMPLE_PUBLISHABLE_KEY: ${{ secrets.STRIPE_EXAMPLE_PUBLISHABLE_KEY }}
