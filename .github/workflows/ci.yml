@@ -95,6 +95,7 @@ jobs:
         with:
           name: unit-test-report
           path: stripe-test-e2e/build/reports/tests/testDebugUnitTest/
+
   instrumentation-tests:
     name: Instrumentation tests
     runs-on: macos-latest
@@ -115,7 +116,7 @@ jobs:
           script: |
             adb logcat -c
             adb logcat &
-            ./gradlew connectedAndroidTest
+            ./gradlew :paymentsheet-example:connectedAndroidTest
         env:
           STRIPE_EXAMPLE_BACKEND_URL: ${{ secrets.STRIPE_EXAMPLE_BACKEND_URL }}
           STRIPE_EXAMPLE_PUBLISHABLE_KEY: ${{ secrets.STRIPE_EXAMPLE_PUBLISHABLE_KEY }}
