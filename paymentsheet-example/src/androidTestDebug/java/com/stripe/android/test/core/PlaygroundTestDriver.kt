@@ -11,15 +11,22 @@ import com.stripe.android.paymentsheet.PaymentSheetResult
 import com.stripe.android.paymentsheet.example.R
 import com.stripe.android.paymentsheet.example.playground.activity.PaymentSheetPlaygroundActivity
 import com.stripe.android.paymentsheet.viewmodels.TransitionFragmentResource
+import com.stripe.android.test.core.ui.BrowserUI
+import com.stripe.android.test.core.ui.EspressoLabelIdButton
+import com.stripe.android.test.core.ui.EspressoText
+import com.stripe.android.test.core.ui.Selectors
 import org.junit.Assume
 import java.util.concurrent.Semaphore
 
+/**
+ * This does not yet work when the locale is not english
+ */
 class PlaygroundTestDriver(
     private val device: UiDevice,
     private val composeTestRule: ComposeTestRule,
     private val basicScreenCaptureProcessor: MyScreenCaptureProcessor,
 ) {
-    // TODO: Playground looks a little funny with the buttons we can scroll to the buy button now
+    // TODO: Test with display size Large
     // TODO: Test with setup intents as well.
     // TODO: Need a card test when compose is in.
     // TODO: Dropdown
@@ -30,6 +37,12 @@ class PlaygroundTestDriver(
     private lateinit var testParameters: TestParameters
     private lateinit var selectors: Selectors
 
+    /**
+     * This will open the payment sheet complete flow from the playground with a new or
+     * guest user and complete the confirmation including any browser interactions.
+     *
+     * A test calling this takes about 25s on average to run.
+     */
     fun confirmNewOrGuestComplete(
         testParameters: TestParameters,
         populateCustomLpmFields: () -> Unit = {}
@@ -133,17 +146,21 @@ class PlaygroundTestDriver(
     }
 
     private fun launchComplete(selectors: Selectors) {
+        // Could consider setting these preferences instead of clicking
+        // if it is faster (possibly 1-2s)
         selectors.customer.click()
         selectors.currency.click()
         selectors.checkout.click()
-        selectors.billing.click()
         selectors.delayed.click()
+
+        // billing is not saved to preferences
+        selectors.billing.click()
 
         // Can't guarantee that google pay will be on the phone
         selectors.googlePayState.click()
 
-        LabelIdButton(R.string.reload_paymentsheet).click()
-        LabelIdButton(R.string.checkout_complete).click()
+        EspressoLabelIdButton(R.string.reload_paymentsheet).click()
+        EspressoLabelIdButton(R.string.checkout_complete).click()
     }
 
     private fun doAuthorization() {
@@ -184,6 +201,7 @@ class PlaygroundTestDriver(
                         }
 
                         // The text comes after the buy button animation is complete
+                        // TODO: This string gets localized.
                         EspressoText(
                             "We are unable to authenticate your payment method. Please " +
                                 "choose a different payment method and try again."

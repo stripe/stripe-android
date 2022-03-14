@@ -3,6 +3,7 @@ package com.stripe.android.test.core
 import androidx.compose.ui.test.performTextInput
 import androidx.test.espresso.Espresso
 import com.google.common.truth.Truth
+import com.stripe.android.test.core.ui.Selectors
 import com.stripe.android.ui.core.elements.AddressSpec
 import com.stripe.android.ui.core.elements.AuBankAccountNumberSpec
 import com.stripe.android.ui.core.elements.BankDropdownSpec
@@ -29,11 +30,11 @@ class FieldPopulator(
         Espresso.closeSoftKeyboard()
 
         // TODO: This is not working as expected
-        Truth.assertThat(testParameters.saveForFutureUseCheckboxVisible == SaveForFutureCheckbox.exists())
-            .isTrue()
-        if (SaveForFutureCheckbox.exists()) {
+        Truth.assertThat(testParameters.saveForFutureUseCheckboxVisible)
+            .isEqualTo(selectors.saveForFutureCheckbox.exists())
+        if (selectors.saveForFutureCheckbox.exists()) {
             if (!testParameters.saveCheckboxValue) {
-                SaveForFutureCheckbox.click()
+                selectors.saveForFutureCheckbox.click()
             }
         }
     }

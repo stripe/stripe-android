@@ -151,6 +151,14 @@ public final class com/stripe/android/ui/core/elements/IdentifierSpec$PostalCode
 	public fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
+public final class com/stripe/android/ui/core/elements/IdentifierSpec$PreFilledParameterMap : com/stripe/android/ui/core/elements/IdentifierSpec {
+	public static final field $stable I
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public static final field INSTANCE Lcom/stripe/android/ui/core/elements/IdentifierSpec$PreFilledParameterMap;
+	public fun describeContents ()I
+	public fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
 public final class com/stripe/android/ui/core/elements/IdentifierSpec$SaveForFutureUse : com/stripe/android/ui/core/elements/IdentifierSpec {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;

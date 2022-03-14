@@ -3,7 +3,6 @@ package com.stripe.android.paymentsheet
 import android.annotation.SuppressLint
 import android.content.res.Resources
 import android.view.ViewGroup
-import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image

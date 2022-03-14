@@ -4,6 +4,8 @@ import android.graphics.Bitmap
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.runner.screenshot.Screenshot
 import androidx.test.uiautomator.UiDevice
+import com.stripe.android.test.core.ui.BrowserUI
+import com.stripe.android.test.core.ui.Selectors
 import org.junit.runner.Description
 import java.io.File
 import java.io.IOException
@@ -28,12 +30,12 @@ class TestWatcher : org.junit.rules.TestWatcher() {
         // Close paymentsheet if open
         device.pressBack()
 
-        val capture2 = Screenshot.capture()
-        capture2.name = "$filename-verifyPaymentSheetClosed"
-        capture2.format = Bitmap.CompressFormat.PNG
+        val verifyFinalScreen = Screenshot.capture()
+        verifyFinalScreen.name = "$filename-verifyPaymentSheetClosed"
+        verifyFinalScreen.format = Bitmap.CompressFormat.PNG
 
         try {
-            capture2.process(setOf(processor))
+            verifyFinalScreen.process(setOf(processor))
         } catch (e: IOException) {
             e.printStackTrace()
         }

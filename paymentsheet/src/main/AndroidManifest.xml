@@ -4,16 +4,12 @@
 
     <application>
         <activity
-            android:name=".MainActivity"
-            android:exported="true" />
-        <activity
             android:name=".PaymentSheetActivity"
-            android:exported="false"
-            android:theme="@style/StripePaymentSheetDefaultTheme" />
+            android:theme="@style/StripePaymentSheetDefaultTheme"
+            android:exported="false" />
         <activity
             android:name=".PaymentOptionsActivity"
-            android:exported="false"
-            android:theme="@style/StripePaymentSheetDefaultTheme" />
+            android:theme="@style/StripePaymentSheetDefaultTheme"
+            android:exported="false" />
     </application>
-
 </manifest>

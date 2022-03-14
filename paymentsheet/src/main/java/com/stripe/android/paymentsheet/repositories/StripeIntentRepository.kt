@@ -1,10 +1,10 @@
 package com.stripe.android.paymentsheet.repositories
 
 import com.stripe.android.PaymentConfiguration
-import com.stripe.android.core.injection.IOContext
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.networking.StripeRepository
+import com.stripe.android.core.injection.IOContext
 import com.stripe.android.paymentsheet.model.ClientSecret
 import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.SetupIntentClientSecret
@@ -14,7 +14,7 @@ import java.util.Locale
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 
-sealed class StripeIntentRepository {
+internal sealed class StripeIntentRepository {
     abstract suspend fun get(
         clientSecret: ClientSecret
     ): StripeIntent

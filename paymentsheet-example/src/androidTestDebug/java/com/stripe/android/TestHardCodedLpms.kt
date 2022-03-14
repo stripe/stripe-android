@@ -10,7 +10,7 @@ import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
 import com.stripe.android.test.core.AuthorizeAction
 import com.stripe.android.test.core.Automatic
 import com.stripe.android.test.core.Billing
-import com.stripe.android.test.core.Checkout
+import com.stripe.android.test.core.IntentType
 import com.stripe.android.test.core.Currency
 import com.stripe.android.test.core.Customer
 import com.stripe.android.test.core.DelayedPMs
@@ -64,7 +64,7 @@ class TestHardCodedLpms {
         Customer.New,
         GooglePayState.On,
         Currency.EUR,
-        Checkout.Pay,
+        IntentType.Pay,
         Billing.On,
         shipping = Shipping.Off,
         delayed = DelayedPMs.Off,

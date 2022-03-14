@@ -313,21 +313,15 @@
                 android:checked="false" />
         </RadioGroup>
 
-        <LinearLayout
-            android:id="@+id/buttons"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/allowsDelayedPaymentMethods_radio_group">
-
             <Button
                 android:id="@+id/reset_defaults_button"
                 android:text="@string/reset_defaults"
                 android:layout_width="wrap_content"
                 android:layout_height="48dp"
-                android:layout_marginTop="8dp" />
+            android:layout_marginTop="8dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/allowsDelayedPaymentMethods_radio_group" />
 
             <Button
                 android:id="@+id/reload_button"
@@ -337,7 +331,6 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/reset_defaults_button" />
-        </LinearLayout>
 
         <View
             android:id="@+id/divider"
@@ -397,56 +390,10 @@
             android:layout_marginTop="16dp"
             android:enabled="false"
             android:layout_marginBottom="16dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/divider2" />
-
-        <View
-            android:id="@+id/divider3"
-            android:layout_width="409dp"
-            android:layout_height="1dp"
-            android:background="?android:attr/listDivider"
-            android:layout_marginTop="16dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/complete_checkout_button" />
-
-
-        <Spinner
-            android:id="@+id/confirm_lpm_selector"
-            android:text="@string/confirm"
-            android:layout_width="wrap_content"
-            android:layout_height="48dp"
-            android:layout_marginTop="16dp"
-            android:enabled="false"
-            android:layout_marginBottom="16dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/divider3" />
-
-        <Button
-            android:id="@+id/confirm_button"
-            android:text="@string/confirm"
-            android:layout_width="wrap_content"
-            android:layout_height="48dp"
-            android:layout_marginTop="16dp"
-            android:enabled="false"
-            android:layout_marginBottom="16dp"
-            app:layout_constraintBottom_toBottomOf="@+id/confirm_lpm_selector"
-            app:layout_constraintBottom_toTopOf="@+id/result"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/confirm_lpm_selector" />
-
-        <TextView
-            android:id="@+id/result"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="16dp"
-            android:layout_marginTop="16dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/confirm_lpm_selector" />
+            app:layout_constraintTop_toBottomOf="@+id/divider2" />
 
         <com.google.android.material.progressindicator.LinearProgressIndicator
             android:id="@+id/progress_bar"
@@ -457,6 +404,7 @@
             android:visibility="invisible"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/buttons" />
+            app:layout_constraintTop_toBottomOf="@+id/reload_button" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 </ScrollView>

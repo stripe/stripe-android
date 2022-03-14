@@ -303,13 +303,12 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
             return
         }
 
-        val message =
-            "[Stripe SDK] Warning: Your Intent contains the following payment method " +
-                "types which are activated for test mode but not activated for " +
-                "live mode: $unactivatedPaymentMethodTypes. These payment method types will not be " +
-                "displayed in live mode until they are activated. To activate these payment method " +
-                "types visit your Stripe dashboard." +
-                "More information: https://support.stripe.com/questions/activate-a-new-payment-method"
+        val message = "[Stripe SDK] Warning: Your Intent contains the following payment method " +
+            "types which are activated for test mode but not activated for " +
+            "live mode: $unactivatedPaymentMethodTypes. These payment method types will not be " +
+            "displayed in live mode until they are activated. To activate these payment method " +
+            "types visit your Stripe dashboard." +
+            "More information: https://support.stripe.com/questions/activate-a-new-payment-method"
 
         logger.warning(message)
     }
@@ -403,4 +402,3 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
         internal const val SAVE_RESOURCE_REPOSITORY_READY = "resource_repository_ready"
     }
 }
-

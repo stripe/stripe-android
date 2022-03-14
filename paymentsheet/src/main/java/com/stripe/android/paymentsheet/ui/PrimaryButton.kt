@@ -3,7 +3,6 @@ package com.stripe.android.paymentsheet.ui
 import android.content.Context
 import android.content.res.ColorStateList
 import android.util.AttributeSet
-import android.util.Log
 import android.view.LayoutInflater
 import android.widget.FrameLayout
 import androidx.annotation.VisibleForTesting
@@ -15,7 +14,7 @@ import com.stripe.android.paymentsheet.databinding.PrimaryButtonBinding
 /**
  * The primary call-to-action for a payment sheet screen.
  */
-class PrimaryButton @JvmOverloads constructor(
+internal class PrimaryButton @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0
@@ -107,24 +106,20 @@ class PrimaryButton @JvmOverloads constructor(
     override fun setEnabled(enabled: Boolean) {
         super.setEnabled(enabled)
         updateAlpha()
-
     }
 
-    internal fun updateState(state: State?) {
+    fun updateState(state: State?) {
         this.state = state
         updateAlpha()
 
         when (state) {
             is State.Ready -> {
-                Log.e("STRIPE", "Ready (processing)")
                 onReadyState()
             }
             State.StartProcessing -> {
-                Log.e("STRIPE", "Start processing")
                 onStartProcessing()
             }
             is State.FinishProcessing -> {
-                Log.e("STRIPE", "Finish processing")
                 onFinishProcessing(state.onComplete)
             }
         }
@@ -151,5 +146,4 @@ class PrimaryButton @JvmOverloads constructor(
         object StartProcessing : State()
         data class FinishProcessing(val onComplete: () -> Unit) : State()
     }
-
 }

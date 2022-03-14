@@ -29,9 +29,7 @@ internal class StripeIntentViewModel(
         R.string.payment_intent_status
     ) {
         backendApi.createPaymentIntent(
-            mapOf(
-                "country" to country,
-            )
+            mapOf("country" to country)
                 .plus(
                     customerId?.let {
                         mapOf("customer_id" to it)
