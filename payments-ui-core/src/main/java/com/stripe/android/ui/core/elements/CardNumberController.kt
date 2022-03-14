@@ -54,12 +54,14 @@ internal class CardNumberController constructor(
     override val contentDescription: Flow<String> = _fieldValue
 
     internal val cardBrandFlow = _fieldValue.map {
-        CardBrand.getCardBrands(it).firstOrNull() ?: CardBrand.Unknown
+        accountRangeService.accountRange?.brand ?: CardBrand.getCardBrands(it).firstOrNull() ?: CardBrand.Unknown
     }
 
     override val trailingIcon: Flow<TextFieldIcon?> = _fieldValue.map {
         val cardBrands = CardBrand.getCardBrands(it)
-        if (cardBrands.size == 1) {
+        if (accountRangeService.accountRange != null) {
+            TextFieldIcon(accountRangeService.accountRange!!.brand.icon, isIcon = false)
+        } else if (cardBrands.size == 1) {
             TextFieldIcon(cardBrands.first().icon, isIcon = false)
         } else {
             TextFieldIcon(CardBrand.Unknown.icon, isIcon = false)
