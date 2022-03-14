@@ -1,4 +1,4 @@
-package com.stripe.android.payments
+package com.stripe.android.core.browser
 
 import android.content.ComponentName
 import android.content.Context
@@ -35,10 +35,9 @@ internal class BrowserCapabilitiesSupplier(
         override fun onCustomTabsServiceConnected(
             componentName: ComponentName,
             customTabsClient: CustomTabsClient
-        ) {
-        }
+        ) = Unit
 
-        override fun onServiceDisconnected(name: ComponentName) {}
+        override fun onServiceDisconnected(name: ComponentName) = Unit
     }
 
     private companion object {

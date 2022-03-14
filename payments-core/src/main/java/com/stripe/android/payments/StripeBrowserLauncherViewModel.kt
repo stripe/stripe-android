@@ -12,6 +12,8 @@ import androidx.savedstate.SavedStateRegistryOwner
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.R
 import com.stripe.android.auth.PaymentBrowserAuthContract
+import com.stripe.android.core.browser.BrowserCapabilities
+import com.stripe.android.core.browser.BrowserCapabilitiesSupplier
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
 import com.stripe.android.networking.PaymentAnalyticsEvent
