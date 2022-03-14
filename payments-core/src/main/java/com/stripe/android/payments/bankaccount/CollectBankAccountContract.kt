@@ -30,7 +30,6 @@ internal class CollectBankAccountContract :
         )
     }
 
-
     sealed class Args(
         open val publishableKey: String,
     ) : Parcelable {
@@ -49,8 +48,13 @@ internal class CollectBankAccountContract :
             val clientSecret: String,
             val params: CollectBankAccountForSetupParams,
         ) : CollectBankAccountContract.Args(publishableKey)
-    }
 
+        companion object {
+            fun fromIntent(intent: Intent): Args? {
+                return intent.getParcelableExtra(EXTRA_ARGS)
+            }
+        }
+    }
 
     @Parcelize
     internal data class Result(
@@ -70,4 +74,3 @@ internal class CollectBankAccountContract :
             "com.stripe.android.payments.bankaccount.CollectBankAccountContract.extra_result"
     }
 }
-

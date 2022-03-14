@@ -10,99 +10,116 @@ import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
 import kotlinx.parcelize.Parcelize
 
-/**
- * API to confirm and handle next actions for [PaymentIntent] and [SetupIntent].
- *
- * use [CollectBankAccountLauncher.createForPayment], [CollectBankAccountLauncher.createForSetup]
- * to instantiate this object.
- */
-interface CollectBankAccountLauncher<T : CollectBankAccountParams> {
+interface CollectBankAccountLauncher {
 
-    fun launch(
-        clientSecret: String,
-        params: T
-    )
+    /**
+     * API to collect bank account information for [PaymentIntent].
+     *
+     * use [CollectBankAccountLauncher.ForPayment.create] to instantiate this object.
+     */
+    interface ForPayment {
 
-    companion object {
-        /**
-         * Create a [CollectBankAccountLauncher] instance with [ComponentActivity].
-         *
-         * This API registers an [ActivityResultLauncher] into the [ComponentActivity],  it needs
-         * to be called before the [ComponentActivity] is created.
-         */
-        fun createForPayment(
-            activity: ComponentActivity,
-            publishableKey: String,
-            callback: ApiResultCallback<CollectBankAccountForPaymentResponse>
-        ): CollectBankAccountLauncher<CollectBankAccountForPaymentParams> {
-            return StripeCollectBankAccountForPaymentLauncher(
-                activity.registerForActivityResult(CollectBankAccountContract()) {
-                    // convert result to CollectBankAccountForPaymentResponse
-                },
-                publishableKey = publishableKey,
-                callback = callback
-            )
+        fun launch(
+            clientSecret: String,
+            params: CollectBankAccountForPaymentParams
+        )
+
+        companion object {
+            /**
+             * Create a [CollectBankAccountLauncher] instance with [ComponentActivity].
+             *
+             * This API registers an [ActivityResultLauncher] into the [ComponentActivity],  it needs
+             * to be called before the [ComponentActivity] is created.
+             */
+            fun create(
+                activity: ComponentActivity,
+                publishableKey: String,
+                callback: ApiResultCallback<CollectBankAccountForPaymentResponse>
+            ): ForPayment {
+                return StripeCollectBankAccountForPaymentLauncher(
+                    activity.registerForActivityResult(CollectBankAccountContract()) {
+                        // convert result to CollectBankAccountForPaymentResponse
+                    },
+                    publishableKey = publishableKey,
+                    callback = callback
+                )
+            }
+
+            /**
+             * Create a [CollectBankAccountLauncher] instance with [Fragment].
+             *
+             * This API registers an [ActivityResultLauncher] into the [Fragment],  it needs
+             * to be called before the [Fragment] is created.
+             */
+            fun create(
+                fragment: Fragment,
+                publishableKey: String,
+                callback: ApiResultCallback<CollectBankAccountForPaymentResponse>
+            ): ForPayment {
+                return StripeCollectBankAccountForPaymentLauncher(
+                    fragment.registerForActivityResult(CollectBankAccountContract()) {
+                        // convert result to CollectBankAccountForPaymentResponse
+                    },
+                    publishableKey = publishableKey,
+                    callback = callback
+                )
+            }
         }
+    }
 
-        /**
-         * Create a [CollectBankAccountLauncher] instance with [Fragment].
-         *
-         * This API registers an [ActivityResultLauncher] into the [Fragment],  it needs
-         * to be called before the [Fragment] is created.
-         */
-        fun createForPayment(
-            fragment: Fragment,
-            publishableKey: String,
-            callback: ApiResultCallback<CollectBankAccountForPaymentResponse>
-        ): CollectBankAccountLauncher<CollectBankAccountForPaymentParams> {
-            return StripeCollectBankAccountForPaymentLauncher(
-                fragment.registerForActivityResult(CollectBankAccountContract()) {
-                    // convert result to CollectBankAccountForPaymentResponse
-                },
-                publishableKey = publishableKey,
-                callback = callback
-            )
-        }
+    /**
+     * API to collect bank account information for [SetupIntent].
+     *
+     * use [CollectBankAccountLauncher.ForSetup.create] to instantiate this object.
+     */
+    interface ForSetup {
 
-        /**
-         * Create a [CollectBankAccountLauncher] instance with [ComponentActivity].
-         *
-         * This API registers an [ActivityResultLauncher] into the [ComponentActivity],  it needs
-         * to be called before the [ComponentActivity] is created.
-         */
-        fun createForSetup(
-            activity: ComponentActivity,
-            publishableKey: String,
-            callback: ApiResultCallback<CollectBankAccountForSetupResponse>
-        ): CollectBankAccountLauncher<CollectBankAccountForSetupParams> {
-            return StripeCollectBankAccountForSetupLauncher(
-                activity.registerForActivityResult(CollectBankAccountContract()) {
-                    // convert result to CollectBankAccountForSetupResponse
+        fun launch(
+            clientSecret: String,
+            params: CollectBankAccountForSetupParams
+        )
 
-                },
-                publishableKey = publishableKey,
-                callback = callback
-            )
-        }
+        companion object {
 
-        /**
-         * Create a [CollectBankAccountLauncher] instance with [Fragment].
-         *
-         * This API registers an [ActivityResultLauncher] into the [Fragment],  it needs
-         * to be called before the [Fragment] is created.
-         */
-        fun createForSetup(
-            fragment: Fragment,
-            publishableKey: String,
-            callback: ApiResultCallback<CollectBankAccountForSetupResponse>
-        ): CollectBankAccountLauncher<CollectBankAccountForSetupParams> {
-            return StripeCollectBankAccountForSetupLauncher(
-                fragment.registerForActivityResult(CollectBankAccountContract()) {
-                    // convert result to CollectBankAccountForSetupResponse
-                },
-                publishableKey = publishableKey,
-                callback = callback
-            )
+            /**
+             * Create a [CollectBankAccountLauncher] instance with [ComponentActivity].
+             *
+             * This API registers an [ActivityResultLauncher] into the [ComponentActivity],  it needs
+             * to be called before the [ComponentActivity] is created.
+             */
+            fun create(
+                activity: ComponentActivity,
+                publishableKey: String,
+                callback: ApiResultCallback<CollectBankAccountForSetupResponse>
+            ): ForSetup {
+                return StripeCollectBankAccountForSetupLauncher(
+                    activity.registerForActivityResult(CollectBankAccountContract()) {
+                        // convert result to CollectBankAccountForSetupResponse
+                    },
+                    publishableKey = publishableKey,
+                    callback = callback
+                )
+            }
+
+            /**
+             * Create a [CollectBankAccountLauncher] instance with [Fragment].
+             *
+             * This API registers an [ActivityResultLauncher] into the [Fragment],  it needs
+             * to be called before the [Fragment] is created.
+             */
+            fun create(
+                fragment: Fragment,
+                publishableKey: String,
+                callback: ApiResultCallback<CollectBankAccountForSetupResponse>
+            ): ForSetup {
+                return StripeCollectBankAccountForSetupLauncher(
+                    fragment.registerForActivityResult(CollectBankAccountContract()) {
+                        // convert result to CollectBankAccountForSetupResponse
+                    },
+                    publishableKey = publishableKey,
+                    callback = callback
+                )
+            }
         }
     }
 }
@@ -111,7 +128,7 @@ internal class StripeCollectBankAccountForPaymentLauncher constructor(
     private val hostActivityLauncher: ActivityResultLauncher<CollectBankAccountContract.Args>,
     val publishableKey: String,
     val callback: ApiResultCallback<CollectBankAccountForPaymentResponse>
-) : CollectBankAccountLauncher<CollectBankAccountForPaymentParams> {
+) : CollectBankAccountLauncher.ForPayment {
 
     override fun launch(
         clientSecret: String,
@@ -131,7 +148,7 @@ internal class StripeCollectBankAccountForSetupLauncher constructor(
     private val hostActivityLauncher: ActivityResultLauncher<CollectBankAccountContract.Args>,
     val publishableKey: String,
     val callback: ApiResultCallback<CollectBankAccountForSetupResponse>
-) : CollectBankAccountLauncher<CollectBankAccountForSetupParams> {
+) : CollectBankAccountLauncher.ForSetup {
 
     override fun launch(
         clientSecret: String,
@@ -170,8 +187,6 @@ data class CollectBankAccountForPaymentResponse(
 data class CollectBankAccountForSetupResponse(
     val setupIntent: SetupIntent
 ) : StripeModel
-
-
 
 @Parcelize
 data class BillingDetails(
