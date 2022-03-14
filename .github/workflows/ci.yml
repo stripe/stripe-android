@@ -32,6 +32,8 @@ jobs:
           ram-size: 8192M
           disable-animations: true
           script: |
+            adb shell 'echo "chrome --disable-fre --no-default-browser-check --no-first-run" > /data/local/tmp/chrome-command-line'
+            adb shell am set-debug-app --persistent com.android.chrome
             adb logcat -c
             adb logcat &
             ./gradlew :paymentsheet-example:connectedAndroidTest -Dorg.gradle.jvmargs="-XX:MaxHeapSize=2048m -Xmx4608M"
