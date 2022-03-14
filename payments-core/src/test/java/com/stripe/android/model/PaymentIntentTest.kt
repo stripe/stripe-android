@@ -107,7 +107,10 @@ class PaymentIntentTest {
         val redirectData = paymentIntent.nextActionData as StripeIntent.NextActionData.RedirectToUrl
         assertThat(redirectData.url)
             .isEqualTo(
-                Uri.parse("https://hooks.stripe.com/3d_secure_2_eap/begin_test/src_1Ecaz6CRMbs6FrXfuYKBRSUG/src_client_secret_F6octeOshkgxT47dr0ZxSZiv")
+                Uri.parse(
+                    "https://hooks.stripe.com/3d_secure_2_eap/begin_test/src_1Ecaz6CR" +
+                        "Mbs6FrXfuYKBRSUG/src_client_secret_F6octeOshkgxT47dr0ZxSZiv"
+                )
             )
         assertThat(redirectData.returnUrl)
             .isEqualTo("stripe://deeplink")
@@ -150,7 +153,9 @@ class PaymentIntentTest {
         assertThat(verify).isEqualTo(
             StripeIntent.NextActionData.VerifyWithMicrodeposits(
                 arrivalDate = 1647241200,
-                hostedVerificationUrl = "https://payments.stripe.com/microdeposit/pacs_test_YWNjdF8xS2J1SjlGbmt1bWlGVUZ4LHBhX25vbmNlX0xJcFVEaERaU0JOVVR3akhxMXc5eklOQkl3UTlwNWo0000v3GS1Jej",
+                hostedVerificationUrl = "https://payments.stripe.com/microdeposit/pacs_test_YWNjdF8" +
+                    "xS2J1SjlGbmt1bWlGVUZ4LHBhX25vbmNlX0xJcFVEaERaU0JOVVR3akhxMXc5eklOQkl3UTlwNWo00" +
+                    "00v3GS1Jej",
                 microdepositType = MicrodepositType.AMOUNTS
             )
         )
@@ -170,7 +175,9 @@ class PaymentIntentTest {
             .isEqualTo("https://stripe.com/docs/error-codes/payment-intent-authentication-failure")
         assertThat(lastPaymentError.message)
             .isEqualTo(
-                "The provided PaymentMethod has failed authentication. You can provide payment_method_data or a new PaymentMethod to attempt to fulfill this PaymentIntent again."
+                "The provided PaymentMethod has failed authentication. You can provide " +
+                    "payment_method_data or a new PaymentMethod to attempt to fulfill this " +
+                    "PaymentIntent again."
             )
     }
 

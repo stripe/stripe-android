@@ -146,6 +146,7 @@
     <ID>MaxLineLength:ApiKeyFixtures.kt$ApiKeyFixtures$const val CB_PUBLISHABLE_KEY = "pk_test_51Gsr5VLtxFHECmaoeyWTxRKLZZiks5QKbg5H0IeGd8yt7OzQhA7807thLrHayMOeDRmJv3ara1VYy6AvBXAnUGcB00QAZheC0Z"</ID>
     <ID>MaxLineLength:ApiKeyFixtures.kt$ApiKeyFixtures$const val NETBANKING_PUBLISHABLE_KEY = "pk_test_51H7wmsBte6TMTRd4gph9Wm7gnQOKJwdVTCj30AhtB8MhWtlYj6v9xDn1vdCtKYGAE7cybr6fQdbQQtgvzBihE9cl00tOnrTpL9"</ID>
     <ID>MaxLineLength:ApiKeyFixtures.kt$ApiKeyFixtures$const val UPI_PUBLISHABLE_KEY = "pk_test_51H7wmsBte6TMTRd4gph9Wm7gnQOKJwdVTCj30AhtB8MhWtlYj6v9xDn1vdCtKYGAE7cybr6fQdbQQtgvzBihE9cl00tOnrTpL9"</ID>
+    <ID>MaxLineLength:ApiKeyFixtures.kt$ApiKeyFixtures$const val US_BANK_ACCOUNT_PUBLISHABLE_KEY = "pk_test_51HvTI7Lu5o3P18Zp6t5AgBSkMvWoTtA0nyA7pVYDqpfLkRtWun7qZTYCOHCReprfLM464yaBeF72UFfB7cY9WG4a00ZnDtiC2C"</ID>
     <ID>MaxLineLength:AppInfo.kt$AppInfo$*</ID>
     <ID>MaxLineLength:AuthenticationModule.kt$AuthenticationModule$abstract</ID>
     <ID>MaxLineLength:BankAccount.kt$BankAccount$*</ID>
@@ -207,16 +208,16 @@
     <ID>MaxLineLength:PaymentIntentJsonParserTest.kt$PaymentIntentJsonParserTest$"_input_charset=utf-8&amp;app_pay=Y&amp;currency=USD&amp;forex_biz=FP&amp;notify_url=https%3A%2F%2Fhooks.stripe.com%2Falipay%2Falipay%2Fhook%2F6255d30b067c8f7a162c79c654483646%2Fsrc_1HDEFWKlwPmebFhp6tcpln8T&amp;out_trade_no=src_1HDEFWKlwPmebFhp6tcpln8T&amp;partner=2088621828244481&amp;payment_type=1&amp;product_code=NEW_WAP_OVERSEAS_SELLER&amp;return_url=https%3A%2F%2Fhooks.stripe.com%2Fadapter%2Falipay%2Fredirect%2Fcomplete%2Fsrc_1HDEFWKlwPmebFhp6tcpln8T%2Fsrc_client_secret_S6H9mVMKK6qxk9YxsUvbH55K&amp;secondary_merchant_id=acct_1EqOyCKlwPmebFhp&amp;secondary_merchant_industry=5734&amp;secondary_merchant_name=Yuki-Test&amp;sendFormat=normal&amp;service=create_forex_trade_wap&amp;sign=b691876a7f0bd889530f54a271d314d5&amp;sign_type=MD5&amp;subject=Yuki-Test&amp;supplier=Yuki-Test&amp;timeout_rule=20m&amp;total_fee=1.00"</ID>
     <ID>MaxLineLength:PaymentIntentJsonParserTest.kt$PaymentIntentJsonParserTest$"https://hooks.stripe.com/3d_secure_2_eap/begin_test/src_1Ecve7CRMbs6FrXfm8AxXMIh/src_client_secret_F79yszOBAiuaZTuIhbn3LPUW"</ID>
     <ID>MaxLineLength:PaymentIntentJsonParserTest.kt$PaymentIntentJsonParserTest$"https://hooks.stripe.com/redirect/authenticate/src_1HDEFWKlwPmebFhp6tcpln8T?client_secret=src_client_secret_S6H9mVMKK6qxk9YxsUvbH55K"</ID>
+    <ID>MaxLineLength:PaymentIntentJsonParserTest.kt$PaymentIntentJsonParserTest$"https://payments.stripe.com/microdeposit/pacs_test_YWNjdF8xS2J1SjlGbmt1bWlGVUZ4LHBhX25vbmNlX0xJcFVEaERaU0JOVVR3akhxMXc5eklOQkl3UTlwNWo0000v3GS1Jej"</ID>
     <ID>MaxLineLength:PaymentIntentJsonParserTest.kt$PaymentIntentJsonParserTest$Uri.parse("https://hooks.stripe.com/3d_secure_2_eap/begin_test/src_1Ecaz6CRMbs6FrXfuYKBRSUG/src_client_secret_F6octeOshkgxT47dr0ZxSZiv")</ID>
     <ID>MaxLineLength:PaymentIntentJsonParserTest.kt$PaymentIntentJsonParserTest$hostedVoucherUrl = "https://payments.stripe.com/oxxo/voucher/test_YWNjdF8xSWN1c1VMMzJLbFJvdDAxLF9KRlBtckVBMERWM0lBZEUyb"</ID>
-    <ID>MaxLineLength:PaymentIntentTest.kt$PaymentIntentTest$"The provided PaymentMethod has failed authentication. You can provide payment_method_data or a new PaymentMethod to attempt to fulfill this PaymentIntent again."</ID>
-    <ID>MaxLineLength:PaymentIntentTest.kt$PaymentIntentTest$Uri.parse("https://hooks.stripe.com/3d_secure_2_eap/begin_test/src_1Ecaz6CRMbs6FrXfuYKBRSUG/src_client_secret_F6octeOshkgxT47dr0ZxSZiv")</ID>
     <ID>MaxLineLength:PaymentMethod.kt$PaymentMethod$*</ID>
     <ID>MaxLineLength:PaymentMethod.kt$PaymentMethod.BillingDetails$*</ID>
     <ID>MaxLineLength:PaymentMethod.kt$PaymentMethod.Card$*</ID>
     <ID>MaxLineLength:PaymentMethod.kt$PaymentMethod.Card.Checks$*</ID>
     <ID>MaxLineLength:PaymentMethod.kt$PaymentMethod.Card.ThreeDSecureUsage$*</ID>
     <ID>MaxLineLength:PaymentMethod.kt$PaymentMethod.SepaDebit$*</ID>
+    <ID>MaxLineLength:PaymentMethod.kt$PaymentMethod.USBankAccount$*</ID>
     <ID>MaxLineLength:PaymentMethodCreateParams.kt$PaymentMethodCreateParams.BacsDebit$*</ID>
     <ID>MaxLineLength:PaymentMethodsActivityStarter.kt$PaymentMethodsActivityStarter.Args.Builder$*</ID>
     <ID>MaxLineLength:PaymentMethodsActivityTest.kt$PaymentMethodsActivityTest$private val listenerArgumentCaptor: KArgumentCaptor&lt;CustomerSession.PaymentMethodsRetrievalListener> = argumentCaptor()</ID>
@@ -231,8 +232,11 @@
     <ID>MaxLineLength:PersonTokenParams.kt$PersonTokenParams.Relationship$*</ID>
     <ID>MaxLineLength:PersonTokenParams.kt$PersonTokenParams.Verification$*</ID>
     <ID>MaxLineLength:RemoteCardAccountRangeSourceTest.kt$RemoteCardAccountRangeSourceTest$fun</ID>
+<<<<<<< HEAD
     <ID>MaxLineLength:SetupIntentTest.kt$SetupIntentTest$"The provided PaymentMethod has failed authentication. You can provide payment_method_data or a new PaymentMethod to attempt to fulfill this PaymentIntent again."</ID>
     <ID>MaxLineLength:SetupIntentTest.kt$SetupIntentTest$Uri.parse("https://hooks.stripe.com/redirect/authenticate/src_1EqTStGMT9dGPIDGJGPkqE6B" + "?client_secret=src_client_secret_FL9m741mmxtHykDlRTC5aQ02")</ID>
+=======
+>>>>>>> 044965f6c (Resolve comments)
     <ID>MaxLineLength:SourceJsonParserTest.kt$SourceJsonParserTest$payLaterAssetUrlsDescriptive = "https://x.klarnacdn.net/payment-method/assets/badges/generic/klarna.svg"</ID>
     <ID>MaxLineLength:SourceJsonParserTest.kt$SourceJsonParserTest$payLaterAssetUrlsStandard = "https://x.klarnacdn.net/payment-method/assets/badges/generic/klarna.svg"</ID>
     <ID>MaxLineLength:SourceJsonParserTest.kt$SourceJsonParserTest$payOverTimeAssetUrlsDescriptive = "https://x.klarnacdn.net/payment-method/assets/badges/generic/klarna.svg"</ID>
@@ -265,6 +269,7 @@
     <ID>MaximumLineLength:com.stripe.android.ApiKeyFixtures.kt:24</ID>
     <ID>MaximumLineLength:com.stripe.android.ApiKeyFixtures.kt:25</ID>
     <ID>MaximumLineLength:com.stripe.android.ApiKeyFixtures.kt:28</ID>
+    <ID>MaximumLineLength:com.stripe.android.ApiKeyFixtures.kt:29</ID>
     <ID>MaximumLineLength:com.stripe.android.CardUtils.kt:16</ID>
     <ID>MaximumLineLength:com.stripe.android.CustomerSessionOperationExecutorTest.kt:106</ID>
     <ID>MaximumLineLength:com.stripe.android.CustomerSessionOperationExecutorTest.kt:42</ID>
@@ -293,20 +298,17 @@
     <ID>MaximumLineLength:com.stripe.android.model.AlipayRedirectTest.kt:19</ID>
     <ID>MaximumLineLength:com.stripe.android.model.AlipayRedirectTest.kt:34</ID>
     <ID>MaximumLineLength:com.stripe.android.model.CardBrand.kt:120</ID>
-    <ID>MaximumLineLength:com.stripe.android.model.PaymentIntentTest.kt:103</ID>
-    <ID>MaximumLineLength:com.stripe.android.model.PaymentIntentTest.kt:150</ID>
-    <ID>MaximumLineLength:com.stripe.android.model.SetupIntentTest.kt:42</ID>
-    <ID>MaximumLineLength:com.stripe.android.model.SetupIntentTest.kt:62</ID>
     <ID>MaximumLineLength:com.stripe.android.model.Stripe3ds2AuthParamsTest.kt:82</ID>
     <ID>MaximumLineLength:com.stripe.android.model.Stripe3ds2Fixtures.kt:10</ID>
     <ID>MaximumLineLength:com.stripe.android.model.Stripe3ds2Fixtures.kt:14</ID>
-    <ID>MaximumLineLength:com.stripe.android.model.parsers.PaymentIntentJsonParserTest.kt:102</ID>
-    <ID>MaximumLineLength:com.stripe.android.model.parsers.PaymentIntentJsonParserTest.kt:104</ID>
-    <ID>MaximumLineLength:com.stripe.android.model.parsers.PaymentIntentJsonParserTest.kt:121</ID>
+    <ID>MaximumLineLength:com.stripe.android.model.parsers.PaymentIntentJsonParserTest.kt:103</ID>
+    <ID>MaximumLineLength:com.stripe.android.model.parsers.PaymentIntentJsonParserTest.kt:105</ID>
     <ID>MaximumLineLength:com.stripe.android.model.parsers.PaymentIntentJsonParserTest.kt:122</ID>
-    <ID>MaximumLineLength:com.stripe.android.model.parsers.PaymentIntentJsonParserTest.kt:63</ID>
-    <ID>MaximumLineLength:com.stripe.android.model.parsers.PaymentIntentJsonParserTest.kt:74</ID>
-    <ID>MaximumLineLength:com.stripe.android.model.parsers.PaymentIntentJsonParserTest.kt:86</ID>
+    <ID>MaximumLineLength:com.stripe.android.model.parsers.PaymentIntentJsonParserTest.kt:123</ID>
+    <ID>MaximumLineLength:com.stripe.android.model.parsers.PaymentIntentJsonParserTest.kt:138</ID>
+    <ID>MaximumLineLength:com.stripe.android.model.parsers.PaymentIntentJsonParserTest.kt:64</ID>
+    <ID>MaximumLineLength:com.stripe.android.model.parsers.PaymentIntentJsonParserTest.kt:75</ID>
+    <ID>MaximumLineLength:com.stripe.android.model.parsers.PaymentIntentJsonParserTest.kt:87</ID>
     <ID>MaximumLineLength:com.stripe.android.model.parsers.SourceJsonParserTest.kt:21</ID>
     <ID>MaximumLineLength:com.stripe.android.model.parsers.SourceJsonParserTest.kt:22</ID>
     <ID>MaximumLineLength:com.stripe.android.model.parsers.SourceJsonParserTest.kt:29</ID>
@@ -357,7 +359,6 @@
     <ID>ReturnCount:PaymentAuthWebViewClient.kt$PaymentAuthWebViewClient$private fun isReturnUrl(uri: Uri): Boolean</ID>
     <ID>ReturnCount:PaymentSession.kt$PaymentSession$ fun handlePaymentData( requestCode: Int, resultCode: Int, data: Intent? ): Boolean</ID>
     <ID>ReturnCount:ShippingInfoWidget.kt$ShippingInfoWidget$ fun validateAllFields(): Boolean</ID>
-    <ID>ReturnCount:StripeIntentResult.kt$StripeIntentResult$@StripeIntentResult.Outcome private fun determineOutcome( stripeIntentStatus: StripeIntent.Status?, @StripeIntentResult.Outcome outcome: Int ): Int</ID>
     <ID>ReturnCount:WalletJsonParser.kt$WalletJsonParser$override fun parse(json: JSONObject): Wallet?</ID>
     <ID>SwallowedException:PaymentUtils.kt$PaymentUtils$e: ClassCastException</ID>
     <ID>SwallowedException:Stripe.kt$Stripe$exception: CardException</ID>

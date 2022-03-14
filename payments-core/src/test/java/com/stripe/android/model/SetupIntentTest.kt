@@ -39,7 +39,10 @@ class SetupIntentTest {
 
         assertEquals(
             StripeIntent.NextActionData.RedirectToUrl(
-                Uri.parse("https://hooks.stripe.com/redirect/authenticate/src_1EqTStGMT9dGPIDGJGPkqE6B" + "?client_secret=src_client_secret_FL9m741mmxtHykDlRTC5aQ02"),
+                Uri.parse(
+                    "https://hooks.stripe.com/redirect/authenticate/src_1EqTStGMT9dGP" +
+                        "IDGJGPkqE6B?client_secret=src_client_secret_FL9m741mmxtHykDlRTC5aQ02"
+                ),
                 returnUrl = "stripe://setup_intent_return"
             ),
             setupIntent.nextActionData
@@ -79,7 +82,9 @@ class SetupIntentTest {
         assertEquals(
             StripeIntent.NextActionData.VerifyWithMicrodeposits(
                 arrivalDate = 1647327600,
-                hostedVerificationUrl = "https://payments.stripe.com/microdeposit/sacs_test_YWNjdF8xSHZUSTdMdTVvM1AxOFpwLHNhX25vbmNlX0xKakc4NzlEYjNZaWxQT09Ma0RaZDROTklPcUVHb2s0000d7kDmkhf",
+                hostedVerificationUrl = "https://payments.stripe.com/microdeposit/sacs_test_YWNjdF8" +
+                    "xSHZUSTdMdTVvM1AxOFpwLHNhX25vbmNlX0xKakc4NzlEYjNZaWxQT09Ma0RaZDROTklPcUVHb2s00" +
+                    "00d7kDmkhf",
                 microdepositType = MicrodepositType.AMOUNTS
             ),
             setupIntent.nextActionData
@@ -99,7 +104,9 @@ class SetupIntentTest {
             lastSetupError.docUrl
         )
         assertEquals(
-            "The provided PaymentMethod has failed authentication. You can provide payment_method_data or a new PaymentMethod to attempt to fulfill this PaymentIntent again.",
+            "The provided PaymentMethod has failed authentication. You can provide " +
+                "payment_method_data or a new PaymentMethod to attempt to fulfill this " +
+                "PaymentIntent again.",
             lastSetupError.message
         )
     }

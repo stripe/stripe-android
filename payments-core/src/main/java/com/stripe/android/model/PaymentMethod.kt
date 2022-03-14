@@ -890,7 +890,7 @@ constructor(
         /**
          * Last four digits of the bank account number
          *
-         * [us_bank_account.fingerprint](https://stripe.com/docs/api/payment_methods/object#payment_method_object-us_bank_account-last4)
+         * [us_bank_account.last4](https://stripe.com/docs/api/payment_methods/object#payment_method_object-us_bank_account-last4)
          */
         @JvmField val last4: String?,
 

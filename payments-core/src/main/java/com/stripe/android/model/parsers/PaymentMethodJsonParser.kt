@@ -265,9 +265,9 @@ class PaymentMethodJsonParser : ModelJsonParser<PaymentMethod> {
                 linkedAccount = StripeJsonUtils.optString(json, FIELD_LINKED_ACCOUNT),
                 networks = PaymentMethod.USBankAccount.USBankNetworks(
                     StripeJsonUtils.optString(json.optJSONObject(FIELD_NETWORKS), FIELD_NETWORKS_PREFERRED),
-                    StripeJsonUtils.jsonArrayToList(json.optJSONObject(FIELD_NETWORKS)?.getJSONArray(FIELD_NETWORKS_SUPPORTED))
-                        .orEmpty()
-                        .map { it.toString() }
+                    StripeJsonUtils.jsonArrayToList(
+                        json.optJSONObject(FIELD_NETWORKS)?.getJSONArray(FIELD_NETWORKS_SUPPORTED)
+                    ).orEmpty().map { it.toString() }
                 ),
                 routingNumber = StripeJsonUtils.optString(json, FIELD_ROUTING_NUMBER),
             )
