@@ -119,7 +119,7 @@ jobs:
           ram-size: 8192M
           disable-animations: true
           script: |
-  BackendApiFactory          adb logcat -c
+            adb logcat -c
             adb logcat &
             ./gradlew :paymentsheet-example:connectedAndroidTest
         env:
