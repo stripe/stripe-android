@@ -15,7 +15,6 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.argThat
 import org.mockito.kotlin.eq
-import org.mockito.kotlin.isNull
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
@@ -37,10 +36,12 @@ class LinkApiRepositoryTest {
     @Test
     fun `lookupConsumer sends correct parameters`() = runTest {
         val email = "email@example.com"
-        linkRepository.lookupConsumer(email)
+        val cookie = "cookie1"
+        linkRepository.lookupConsumer(email, cookie)
 
         verify(stripeRepository).lookupConsumerSession(
             eq(email),
+            eq(cookie),
             eq(ApiRequest.Options(PUBLISHABLE_KEY, STRIPE_ACCOUNT_ID))
         )
     }
@@ -48,10 +49,10 @@ class LinkApiRepositoryTest {
     @Test
     fun `lookupConsumer returns successful result`() = runTest {
         val consumerSessionLookup = mock<ConsumerSessionLookup>()
-        whenever(stripeRepository.lookupConsumerSession(any(), any()))
+        whenever(stripeRepository.lookupConsumerSession(any(), any(), any()))
             .thenReturn(consumerSessionLookup)
 
-        val result = linkRepository.lookupConsumer("email")
+        val result = linkRepository.lookupConsumer("email", "cookie")
 
         assertThat(result.isSuccess).isTrue()
         assertThat(result.getOrNull()).isEqualTo(consumerSessionLookup)
@@ -59,10 +60,10 @@ class LinkApiRepositoryTest {
 
     @Test
     fun `lookupConsumer catches exception and returns failure`() = runTest {
-        whenever(stripeRepository.lookupConsumerSession(any(), any()))
+        whenever(stripeRepository.lookupConsumerSession(any(), any(), any()))
             .thenThrow(RuntimeException("error"))
 
-        val result = linkRepository.lookupConsumer("email")
+        val result = linkRepository.lookupConsumer("email", "cookie")
 
         assertThat(result.isFailure).isTrue()
     }
@@ -72,13 +73,14 @@ class LinkApiRepositoryTest {
         val email = "email@example.com"
         val phone = "phone"
         val country = "US"
-        linkRepository.consumerSignUp(email, phone, country)
+        val cookie = "cookie2"
+        linkRepository.consumerSignUp(email, phone, country, cookie)
 
         verify(stripeRepository).consumerSignUp(
             eq(email),
             eq(phone),
             eq(country),
-            isNull(),
+            eq(cookie),
             eq(ApiRequest.Options(PUBLISHABLE_KEY, STRIPE_ACCOUNT_ID))
         )
     }
@@ -89,7 +91,7 @@ class LinkApiRepositoryTest {
         whenever(stripeRepository.consumerSignUp(any(), any(), any(), anyOrNull(), any()))
             .thenReturn(consumerSession)
 
-        val result = linkRepository.consumerSignUp("email", "phone", "country")
+        val result = linkRepository.consumerSignUp("email", "phone", "country", "cookie")
 
         assertThat(result.isSuccess).isTrue()
         assertThat(result.getOrNull()).isEqualTo(consumerSession)
@@ -100,7 +102,7 @@ class LinkApiRepositoryTest {
         whenever(stripeRepository.consumerSignUp(any(), any(), any(), anyOrNull(), any()))
             .thenThrow(RuntimeException("error"))
 
-        val result = linkRepository.consumerSignUp("email", "phone", "country")
+        val result = linkRepository.consumerSignUp("email", "phone", "country", "cookie")
 
         assertThat(result.isFailure).isTrue()
     }
@@ -108,12 +110,13 @@ class LinkApiRepositoryTest {
     @Test
     fun `startVerification sends correct parameters`() = runTest {
         val secret = "secret"
-        linkRepository.startVerification(secret)
+        val cookie = "cookie1"
+        linkRepository.startVerification(secret, cookie)
 
         verify(stripeRepository).startConsumerVerification(
             eq(secret),
             eq(Locale.US),
-            isNull(),
+            eq(cookie),
             eq(ApiRequest.Options(PUBLISHABLE_KEY, STRIPE_ACCOUNT_ID))
         )
     }
@@ -124,7 +127,7 @@ class LinkApiRepositoryTest {
         whenever(stripeRepository.startConsumerVerification(any(), any(), anyOrNull(), any()))
             .thenReturn(consumerSession)
 
-        val result = linkRepository.startVerification("secret")
+        val result = linkRepository.startVerification("secret", "cookie")
 
         assertThat(result.isSuccess).isTrue()
         assertThat(result.getOrNull()).isEqualTo(consumerSession)
@@ -135,7 +138,7 @@ class LinkApiRepositoryTest {
         whenever(stripeRepository.startConsumerVerification(any(), any(), anyOrNull(), any()))
             .thenThrow(RuntimeException("error"))
 
-        val result = linkRepository.startVerification("secret")
+        val result = linkRepository.startVerification("secret", "cookie")
 
         assertThat(result.isFailure).isTrue()
     }
@@ -144,12 +147,13 @@ class LinkApiRepositoryTest {
     fun `confirmVerification sends correct parameters`() = runTest {
         val secret = "secret"
         val code = "code"
-        linkRepository.confirmVerification(secret, code)
+        val cookie = "cookie2"
+        linkRepository.confirmVerification(secret, code, cookie)
 
         verify(stripeRepository).confirmConsumerVerification(
             eq(secret),
             eq(code),
-            isNull(),
+            eq(cookie),
             eq(ApiRequest.Options(PUBLISHABLE_KEY, STRIPE_ACCOUNT_ID))
         )
     }
@@ -160,7 +164,7 @@ class LinkApiRepositoryTest {
         whenever(stripeRepository.confirmConsumerVerification(any(), any(), anyOrNull(), any()))
             .thenReturn(consumerSession)
 
-        val result = linkRepository.confirmVerification("secret", "code")
+        val result = linkRepository.confirmVerification("secret", "code", "cookie")
 
         assertThat(result.isSuccess).isTrue()
         assertThat(result.getOrNull()).isEqualTo(consumerSession)
@@ -171,7 +175,7 @@ class LinkApiRepositoryTest {
         whenever(stripeRepository.confirmConsumerVerification(any(), any(), anyOrNull(), any()))
             .thenThrow(RuntimeException("error"))
 
-        val result = linkRepository.confirmVerification("secret", "code")
+        val result = linkRepository.confirmVerification("secret", "code", "cookie")
 
         assertThat(result.isFailure).isTrue()
     }

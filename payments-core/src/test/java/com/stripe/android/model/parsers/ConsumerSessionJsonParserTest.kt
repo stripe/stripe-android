@@ -20,7 +20,8 @@ class ConsumerSessionJsonParserTest {
                         type = ConsumerSession.VerificationSession.SessionType.Sms,
                         state = ConsumerSession.VerificationSession.SessionState.Started
                     )
-                )
+                ),
+                authSessionClientSecret = "21yKkFYNnhMVTlXbXdBQUFJRmEaJDNmZDE1"
             )
         )
     }
@@ -38,7 +39,8 @@ class ConsumerSessionJsonParserTest {
                         type = ConsumerSession.VerificationSession.SessionType.Sms,
                         state = ConsumerSession.VerificationSession.SessionState.Verified
                     )
-                )
+                ),
+                authSessionClientSecret = null
             )
         )
     }
@@ -56,7 +58,8 @@ class ConsumerSessionJsonParserTest {
                         type = ConsumerSession.VerificationSession.SessionType.SignUp,
                         state = ConsumerSession.VerificationSession.SessionState.Started
                     )
-                )
+                ),
+                authSessionClientSecret = null
             )
         )
     }

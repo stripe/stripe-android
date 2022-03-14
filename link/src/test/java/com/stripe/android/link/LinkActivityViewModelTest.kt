@@ -12,6 +12,7 @@ import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.injection.NonFallbackInjector
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.model.Navigator
+import com.stripe.android.link.utils.FakeAndroidKeyStore
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -43,6 +44,10 @@ class LinkActivityViewModelTest {
 
     private val linkAccountManager = mock<LinkAccountManager>()
     private val navigator = mock<Navigator>()
+
+    init {
+        FakeAndroidKeyStore.setup()
+    }
 
     @Test
     fun `When consumer is verified then it navigates to Wallet screen`() = runTest {
