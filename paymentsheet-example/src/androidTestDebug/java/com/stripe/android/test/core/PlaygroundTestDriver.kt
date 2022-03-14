@@ -19,19 +19,20 @@ import org.junit.Assume
 import java.util.concurrent.Semaphore
 
 /**
- * This does not yet work when the locale is not english
+ * This drives the end to end payment sheet flow for any set of
+ * [TestParameters].  It handles any authorization that needs to happen
+ * It drives the test from the test playground so that a payment
+ * intent does not need to be created.
+ *
+ * This does not yet work when the locale is not english.
+ * It works for all screen sizes
+ * It does not test every possible drop down parameter
  */
 class PlaygroundTestDriver(
     private val device: UiDevice,
     private val composeTestRule: ComposeTestRule,
     private val basicScreenCaptureProcessor: MyScreenCaptureProcessor,
 ) {
-    // TODO: Test with display size Large
-    // TODO: Test with setup intents as well.
-    // TODO: Need a card test when compose is in.
-    // TODO: Dropdown
-    // TODO: Localize address fields
-
     private var resultValue: String? = null
     private val callbackLock = Semaphore(1)
     private lateinit var testParameters: TestParameters
