@@ -7,12 +7,14 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.savedstate.SavedStateRegistryOwner
 import com.stripe.android.core.Logger
+import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.bankaccount.CollectBankAccountContract.Args.ForPaymentIntent
 import com.stripe.android.payments.bankaccount.CollectBankAccountContract.Args.ForSetupIntent
 import javax.inject.Inject
 
 internal class CollectBankAccountViewModel @Inject constructor(
     val args: CollectBankAccountContract.Args,
+    val stripeRepository: StripeRepository,
     val logger: Logger
 ) : ViewModel() {
 
