@@ -187,7 +187,7 @@ internal abstract class WebFetcher : Fetcher {
                     FetchedData.fromFetchedModelMeta(modelClass, modelFrameworkVersion, this)
                 if (data.successfullyFetched) {
                     Log.d(
-                        Config.logTag,
+                        LOG_TAG,
                         "Fetcher: $modelClass is needed immediately and cached version " +
                             "${data.modelVersion} is available.",
                     )
@@ -201,7 +201,7 @@ internal abstract class WebFetcher : Fetcher {
         val downloadDetails =
             fetchDownloadDetails(cachedData.modelHash, cachedData.modelHashAlgorithm) ?: run {
                 Log.d(
-                    Config.logTag,
+                    LOG_TAG,
                     "Fetcher: using cached version ${cachedData.modelVersion} for $modelClass",
                 )
                 return@fetchData cachedData
@@ -211,7 +211,7 @@ internal abstract class WebFetcher : Fetcher {
         // download failure
         if (forImmediateUse && isOptional) {
             Log.d(
-                Config.logTag,
+                LOG_TAG,
                 "Fetcher: optional $modelClass needed for immediate use, but no cache available.",
             )
             return FetchedData.fromFetchedModelMeta(
@@ -232,7 +232,7 @@ internal abstract class WebFetcher : Fetcher {
                     FetchedData.fromFetchedModelMeta(modelClass, modelFrameworkVersion, this)
                 if (data.successfullyFetched) {
                     Log.d(
-                        Config.logTag,
+                        LOG_TAG,
                         "Fetcher: $modelClass already has latest version downloaded.",
                     )
                     return@fetchData data
@@ -242,12 +242,12 @@ internal abstract class WebFetcher : Fetcher {
             downloadData(downloadDetails).also {
                 if (it.successfullyFetched) {
                     Log.d(
-                        Config.logTag,
+                        LOG_TAG,
                         "Fetcher: $modelClass successfully downloaded.",
                     )
                 } else {
                     Log.d(
-                        Config.logTag,
+                        LOG_TAG,
                         "Fetcher: $modelClass failed to download from $downloadDetails.",
                     )
                 }
@@ -256,13 +256,13 @@ internal abstract class WebFetcher : Fetcher {
             fetchException = t
             if (cachedData.successfullyFetched) {
                 Log.w(
-                    Config.logTag,
+                    LOG_TAG,
                     "Fetcher: Failed to download model $modelClass, loaded from local cache",
                     t,
                 )
             } else {
                 Log.e(
-                    Config.logTag,
+                    LOG_TAG,
                     "Fetcher: Failed to download model $modelClass, no local cache available",
                     t,
                 )
@@ -293,7 +293,7 @@ internal abstract class WebFetcher : Fetcher {
         // if a previous exception was encountered, attempt to fetch cached data
         fetchException?.run {
             Log.d(
-                Config.logTag,
+                LOG_TAG,
                 "Fetcher: Previous exception encountered for $modelClass, rethrowing",
             )
             throw this
@@ -308,7 +308,7 @@ internal abstract class WebFetcher : Fetcher {
             )
 
             Log.d(
-                Config.logTag,
+                LOG_TAG,
                 "Fetcher: $modelClass downloaded version ${downloadDetails.modelVersion}",
             )
             return@memoizeSuspend FetchedFile(

@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet
 
 import android.content.Intent
+import android.content.res.ColorStateList
 import android.os.Bundle
 import android.view.ViewGroup
 import android.widget.ScrollView
@@ -8,6 +9,7 @@ import android.widget.TextView
 import androidx.activity.viewModels
 import androidx.annotation.IdRes
 import androidx.annotation.VisibleForTesting
+import androidx.compose.ui.graphics.toArgb
 import androidx.core.os.bundleOf
 import androidx.core.view.doOnNextLayout
 import androidx.core.view.isVisible
@@ -21,6 +23,8 @@ import com.stripe.android.paymentsheet.databinding.ActivityPaymentOptionsBinding
 import com.stripe.android.paymentsheet.ui.AnimationConstants
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.ui.PrimaryButton
+import com.stripe.android.ui.core.PaymentsThemeConfig
+import com.stripe.android.ui.core.isSystemDarkTheme
 
 /**
  * An `Activity` for selecting a payment option.
@@ -124,9 +128,11 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
         viewBinding.continueButton.lockVisible = false
         viewBinding.continueButton.updateState(PrimaryButton.State.Ready)
 
-        viewModel.config?.primaryButtonColor?.let {
-            viewBinding.continueButton.backgroundTintList = it
-        }
+        viewBinding.continueButton.setDefaultBackGroundColor(
+            viewModel.config?.primaryButtonColor ?: ColorStateList.valueOf(
+                PaymentsThemeConfig.colors(baseContext.isSystemDarkTheme()).primary.toArgb()
+            )
+        )
 
         addButton.setOnClickListener {
             viewModel.onUserSelection()

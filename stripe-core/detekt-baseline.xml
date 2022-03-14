@@ -13,7 +13,6 @@
     <ID>MaxLineLength:QueryStringFactoryTest.kt$QueryStringFactoryTest$"colors[]=blue&amp;colors[]=green&amp;empty_list=&amp;person[age]=45&amp;person[city]=San Francisco&amp;person[wishes]=&amp;person[friends][]=Alice&amp;person[friends][]=Bob"</ID>
     <ID>MaxLineLength:RequestHeadersFactoriesTest.kt$RequestHeadersFactoriesTest$.</ID>
     <ID>MaxLineLength:StripeErrorJsonParserTest.kt$StripeErrorJsonParserTest$message = "The Stripe API is only accessible over HTTPS. Please see &lt;https://stripe.com/docs> for more information."</ID>
-    <ID>MaxLineLength:StripeErrorJsonParserTest.kt$StripeErrorJsonParserTest.Companion$ </ID>
     <ID>MaximumLineLength:com.stripe.android.core.model.parsers.StripeErrorJsonParserTest.kt:18</ID>
     <ID>MaximumLineLength:com.stripe.android.core.networking.QueryStringFactoryTest.kt:38</ID>
     <ID>MaximumLineLength:com.stripe.android.core.networking.RequestHeadersFactoriesTest.kt:97</ID>

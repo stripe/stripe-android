@@ -1,12 +1,10 @@
 package com.stripe.android.stripecardscan.framework.api
 
 import android.util.Log
-import com.stripe.android.stripecardscan.framework.Config
-import com.stripe.android.stripecardscan.framework.NetworkConfig
 import com.stripe.android.stripecardscan.framework.api.StripeNetwork.Companion.RESPONSE_CODE_UNSET
 import com.stripe.android.camera.framework.time.Duration
-import com.stripe.android.stripecardscan.framework.time.Timer
-import com.stripe.android.camera.framework.time.milliseconds
+import com.stripe.android.camera.framework.time.seconds
+import com.stripe.android.stripecardscan.framework.LOG_TAG
 import com.stripe.android.stripecardscan.framework.util.decodeFromJson
 import com.stripe.android.stripecardscan.framework.util.encodeToXWWWFormUrl
 import com.stripe.android.stripecardscan.framework.util.retry
@@ -36,8 +34,6 @@ private const val CONTENT_ENCODING_GZIP = "gzip"
  * The size of a TCP network packet. If smaller than this, there is no benefit to GZIP.
  */
 private const val GZIP_MIN_SIZE_BYTES = 1500
-
-private val networkTimer by lazy { Timer.newInstance(Config.logTag, "network") }
 
 internal interface Network {
 
@@ -91,10 +87,14 @@ internal interface Network {
  */
 internal class LegacyStripeNetwork(
     baseUrl: String,
-    private val retryDelay: Duration,
+    private val retryDelayFunction: (attempt: Int, totalAttempts: Int) -> Duration,
     private val retryTotalAttempts: Int,
     private val retryStatusCodes: Iterable<Int>,
 ) : Network {
+
+    companion object {
+        const val useCompression: Boolean = false
+    }
 
     /**
      * Get the [baseUrl] with no trailing slashes.
@@ -171,7 +171,7 @@ internal class LegacyStripeNetwork(
     ): NetworkResult<out String, out String> =
         try {
             retry(
-                retryDelay = retryDelay,
+                retryDelayFunction = retryDelayFunction,
                 times = retryTotalAttempts
             ) {
                 val result = postData(stripePublishableKey, path, encodedData)
@@ -194,7 +194,7 @@ internal class LegacyStripeNetwork(
     ): NetworkResult<out String, out String> =
         try {
             retry(
-                retryDelay = retryDelay,
+                retryDelayFunction = retryDelayFunction,
                 times = retryTotalAttempts
             ) {
                 val result = get(stripePublishableKey, path)
@@ -215,12 +215,12 @@ internal class LegacyStripeNetwork(
         stripePublishableKey: String,
         path: String,
         encodedData: String
-    ): NetworkResult<out String, out String> = networkTimer.measure(path) {
+    ): NetworkResult<out String, out String> {
         val fullPath = if (path.startsWith("/")) path else "/$path"
         val url = URL("$baseUrl$fullPath")
         var responseCode = -1
 
-        try {
+        return try {
             with(url.openConnection() as HttpURLConnection) {
                 requestMethod = REQUEST_METHOD_POST
 
@@ -233,9 +233,7 @@ internal class LegacyStripeNetwork(
                 setRequestProperty(REQUEST_PROPERTY_CONTENT_TYPE, CONTENT_TYPE_FORM)
 
                 // Write the data
-                if (NetworkConfig.useCompression &&
-                    encodedData.toByteArray().size >= GZIP_MIN_SIZE_BYTES
-                ) {
+                if (useCompression && encodedData.toByteArray().size >= GZIP_MIN_SIZE_BYTES) {
                     setRequestProperty(REQUEST_PROPERTY_CONTENT_ENCODING, CONTENT_ENCODING_GZIP)
                     writeGzipData(
                         outputStream,
@@ -264,7 +262,7 @@ internal class LegacyStripeNetwork(
                 }
             }
         } catch (t: Throwable) {
-            Log.w(Config.logTag, "Failed network request to endpoint $url", t)
+            Log.w(LOG_TAG, "Failed network request to endpoint $url", t)
             NetworkResult.Exception(responseCode, t)
         }
     }
@@ -275,12 +273,12 @@ internal class LegacyStripeNetwork(
     private fun get(
         stripePublishableKey: String,
         path: String,
-    ): NetworkResult<out String, out String> = networkTimer.measure(path) {
+    ): NetworkResult<out String, out String> {
         val fullPath = if (path.startsWith("/")) path else "/$path"
         val url = URL("$baseUrl$fullPath")
         var responseCode = -1
 
-        try {
+        return try {
             with(url.openConnection() as HttpURLConnection) {
                 requestMethod = REQUEST_METHOD_GET
 
@@ -307,7 +305,7 @@ internal class LegacyStripeNetwork(
                 }
             }
         } catch (t: Throwable) {
-            Log.w(Config.logTag, "Failed network request to endpoint $url", t)
+            Log.w(LOG_TAG, "Failed network request to endpoint $url", t)
             NetworkResult.Exception(responseCode, t)
         }
     }
@@ -355,8 +353,12 @@ private fun <Response, Error> translateNetworkResult(
 
 // TODO(ccen): Replace its caller with [StripeNetwork#downloadFileWithRetries]
 @Throws(IOException::class)
-internal suspend fun downloadFileWithRetries(url: URL, outputFile: File) = retry(
-    NetworkConfig.retryDelayMillis.milliseconds,
+internal suspend fun downloadFileWithRetries(
+    url: URL,
+    outputFile: File,
+    retryDelayFunction: (attempt: Int, totalAttempts: Int) -> Duration = { _, _ -> 3.seconds },
+) = retry(
+    retryDelayFunction,
     excluding = listOf(FileNotFoundException::class.java)
 ) {
     downloadFile(url, outputFile)
@@ -369,28 +371,26 @@ internal suspend fun downloadFileWithRetries(url: URL, outputFile: File) = retry
 private fun downloadFile(
     url: URL,
     outputFile: File,
-) = networkTimer.measure(url.toString()) {
-    try {
-        with(url.openConnection() as HttpURLConnection) {
-            requestMethod = REQUEST_METHOD_GET
+) = try {
+    with(url.openConnection() as HttpURLConnection) {
+        requestMethod = REQUEST_METHOD_GET
 
-            // Set the connection to only receive data
-            doOutput = false
-            doInput = true
+        // Set the connection to only receive data
+        doOutput = false
+        doInput = true
 
-            // Read the response code. This will block until the response has been received.
-            val responseCode = this.responseCode
+        // Read the response code. This will block until the response has been received.
+        val responseCode = this.responseCode
 
-            inputStream.use { stream ->
-                FileOutputStream(outputFile).use { stream.copyTo(it) }
-            }
-
-            responseCode
+        inputStream.use { stream ->
+            FileOutputStream(outputFile).use { stream.copyTo(it) }
         }
-    } catch (t: Throwable) {
-        Log.w(Config.logTag, "Failed network request to endpoint $url", t)
-        throw t
+
+        responseCode
     }
+} catch (t: Throwable) {
+    Log.w(LOG_TAG, "Failed network request to endpoint $url", t)
+    throw t
 }
 
 /**

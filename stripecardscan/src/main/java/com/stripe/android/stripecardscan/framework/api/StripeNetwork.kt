@@ -4,10 +4,9 @@ import android.util.Log
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.networking.StripeRequest
-import com.stripe.android.stripecardscan.framework.Config
+import com.stripe.android.stripecardscan.framework.LOG_TAG
 import com.stripe.android.stripecardscan.framework.api.dto.CardScanFileDownloadRequest
 import com.stripe.android.stripecardscan.framework.api.dto.CardScanRequest
-import com.stripe.android.stripecardscan.framework.time.Timer
 import com.stripe.android.stripecardscan.framework.util.decodeFromJson
 import com.stripe.android.stripecardscan.framework.util.encodeToXWWWFormUrl
 import kotlinx.serialization.KSerializer
@@ -25,7 +24,7 @@ internal class StripeNetwork internal constructor(
     internal constructor(
         baseUrl: String,
         retryTotalAttempts: Int,
-        retryStatusCodes: Iterable<Int>
+        retryStatusCodes: Iterable<Int>,
     ) : this(
         baseUrl,
         retryStatusCodes,
@@ -33,8 +32,6 @@ internal class StripeNetwork internal constructor(
             maxRetries = retryTotalAttempts
         )
     )
-
-    private val networkTimer by lazy { Timer.newInstance(Config.logTag, "network") }
 
     override suspend fun <Request, Response, Error> postForResult(
         stripePublishableKey: String,
@@ -100,7 +97,7 @@ internal class StripeNetwork internal constructor(
                 ).code
             responseCode
         } catch (t: Throwable) {
-            Log.w(Config.logTag, "Failed network request to download file $url", t)
+            Log.w(LOG_TAG, "Failed network request to download file $url", t)
             responseCode
         }
     }
@@ -113,17 +110,15 @@ internal class StripeNetwork internal constructor(
         retryResponseCodes: Iterable<Int>,
         path: String,
         encodedData: String,
-    ): NetworkResult<out String, out String> = networkTimer.measureSuspend(path) {
-        executeAndConvertToNetworkResult(
-            CardScanRequest.createPost(
-                stripePublishableKey = stripePublishableKey,
-                baseUrl = baseUrl,
-                retryResponseCodes = retryResponseCodes,
-                path = path,
-                encodedPostData = encodedData
-            )
+    ): NetworkResult<out String, out String> = executeAndConvertToNetworkResult(
+        CardScanRequest.createPost(
+            stripePublishableKey = stripePublishableKey,
+            baseUrl = baseUrl,
+            retryResponseCodes = retryResponseCodes,
+            path = path,
+            encodedPostData = encodedData
         )
-    }
+    )
 
     /**
      * Send a get request to a Stripe endpoint with retries.
@@ -132,16 +127,14 @@ internal class StripeNetwork internal constructor(
         stripePublishableKey: String,
         path: String,
         retryResponseCodes: Iterable<Int>
-    ): NetworkResult<out String, out String> = networkTimer.measureSuspend(path) {
-        executeAndConvertToNetworkResult(
-            CardScanRequest.createGet(
-                stripePublishableKey = stripePublishableKey,
-                baseUrl = baseUrl,
-                path = path,
-                retryResponseCodes = retryResponseCodes,
-            )
+    ): NetworkResult<out String, out String> = executeAndConvertToNetworkResult(
+        CardScanRequest.createGet(
+            stripePublishableKey = stripePublishableKey,
+            baseUrl = baseUrl,
+            path = path,
+            retryResponseCodes = retryResponseCodes,
         )
-    }
+    )
 
     private suspend fun executeAndConvertToNetworkResult(request: StripeRequest):
         NetworkResult<out String, out String> {
@@ -161,7 +154,7 @@ internal class StripeNetwork internal constructor(
                 }
             }
         } catch (t: Throwable) {
-            Log.w(Config.logTag, "Failed network request to endpoint ${request.url}", t)
+            Log.w(LOG_TAG, "Failed network request to endpoint ${request.url}", t)
             NetworkResult.Exception(responseCode, t)
         }
     }

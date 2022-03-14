@@ -4,6 +4,7 @@ import com.stripe.android.model.parsers.Stripe3ds2AuthResultJsonParser
 import org.json.JSONObject
 import java.util.UUID
 
+@Suppress("MaxLineLength")
 internal object Stripe3ds2AuthResultFixtures {
     internal val ARES_CHALLENGE_FLOW = Stripe3ds2AuthResult(
         id = "threeds2_1FDy0vCRMbs6",
@@ -57,7 +58,8 @@ internal object Stripe3ds2AuthResultFixtures {
         id = "threeds2_1FDy0vCRMbs6",
         source = "src_1FDy0uCRMb",
         created = 1567363381,
-        fallbackRedirectUrl = "https://hooks.stripe.com/3d_secure_2_eap/begin_test/src_1Ecve7CRMbs6FrXfm8AxXMIh/src_client_secret_F79yszOBAiuaZTuIhbn3LPUW"
+        fallbackRedirectUrl = "https://hooks.stripe.com/3d_secure_2_eap/begin_test/" +
+            "src_1Ecve7CRMbs6FrXfm8AxXMIh/src_client_secret_F79yszOBAiuaZTuIhbn3LPUW"
     )
 
     internal val CHALLENGE_COMPLETION_JSON = JSONObject(

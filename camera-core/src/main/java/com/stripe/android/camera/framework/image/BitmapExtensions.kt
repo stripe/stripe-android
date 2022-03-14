@@ -35,9 +35,9 @@ fun Bitmap.toWebP(): ByteArray =
 
 @CheckResult
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-fun Bitmap.toJpeg(): ByteArray =
+fun Bitmap.toJpeg(quality: Int = 92): ByteArray =
     ByteArrayOutputStream().use {
-        this.compress(Bitmap.CompressFormat.JPEG, 92, it)
+        this.compress(Bitmap.CompressFormat.JPEG, quality, it)
         it.flush()
         it.toByteArray()
     }

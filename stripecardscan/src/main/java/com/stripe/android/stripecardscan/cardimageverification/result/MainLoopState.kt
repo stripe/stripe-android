@@ -1,10 +1,9 @@
 package com.stripe.android.stripecardscan.cardimageverification.result
 
-import com.stripe.android.stripecardscan.cardimageverification.CardImageVerificationConfig
 import com.stripe.android.stripecardscan.cardimageverification.analyzer.MainLoopAnalyzer
 import com.stripe.android.stripecardscan.framework.MachineState
 import com.stripe.android.camera.framework.time.Clock
-import com.stripe.android.camera.framework.time.milliseconds
+import com.stripe.android.camera.framework.time.seconds
 import com.stripe.android.stripecardscan.framework.util.ItemCounter
 import com.stripe.android.stripecardscan.payment.card.CardIssuer
 import com.stripe.android.stripecardscan.payment.card.CardMatchResult
@@ -15,6 +14,48 @@ internal sealed class MainLoopState(
     val runCardDetect: Boolean,
 ) : MachineState() {
 
+    companion object {
+
+        /**
+         * The duration after which the scan will reset if no card is visible.
+         */
+        val NO_CARD_VISIBLE_DURATION = 5.seconds
+
+        /**
+         * The maximum duration for which to search for both a card number and good verification images.
+         */
+        val OCR_AND_CARD_SEARCH_DURATION = 10.seconds
+
+        /**
+         * The maximum duration for which to search for a card number after the verification images
+         * have been satisfied.
+         */
+        val OCR_ONLY_SEARCH_DURATION = 10.seconds
+
+        /**
+         * The maximum duration for which to search for good verification images after the card number
+         * has been found.
+         */
+        val CARD_ONLY_SEARCH_DURATION = 5.seconds
+
+        /**
+         * Display the wrong card notification to the user for this duration.
+         */
+        val WRONG_CARD_DURATION = 2.seconds
+
+        /**
+         * Once this number of frames with matching card numbers are found, stop looking for card
+         * numbers.
+         */
+        const val DESIRED_OCR_AGREEMENT = 3
+
+        /**
+         * Once this number of frames with a clearly centered card are found, stop looking for images
+         * with clearly centered cards.
+         */
+        const val DESIRED_CARD_COUNT = 5
+    }
+
     internal abstract suspend fun consumeTransition(
         transition: MainLoopAnalyzer.Prediction,
     ): MainLoopState
@@ -22,53 +63,69 @@ internal sealed class MainLoopState(
     class Initial(
         override val requiredCardIssuer: CardIssuer?,
         override val requiredLastFour: String?,
-    ) : MainLoopState(runOcr = true, runCardDetect = false),
+        private val strictModeFrames: Int,
+        private var panCounter: ItemCounter<String>? = null,
+    ) : MainLoopState(runOcr = true, runCardDetect = true),
         RequiresMatchingCard {
+
+        private var visibleCardCount: Int = 0
+
+        val mostLikelyPan: String?
+            get() = panCounter?.getHighestCountItem()?.second
+
+        private val hasEnoughVisibleCards
+            get() = visibleCardCount >= strictModeFrames
+
         override suspend fun consumeTransition(
             transition: MainLoopAnalyzer.Prediction,
-        ): MainLoopState = when (compareToRequiredCard(transition.ocr?.pan)) {
-            is CardMatchResult.NoPan -> this
-            is CardMatchResult.Mismatch ->
-                WrongCard(
-                    pan = transition.ocr?.pan ?: "",
-                    requiredCardIssuer = requiredCardIssuer,
-                    requiredLastFour = requiredLastFour,
-                )
-            is CardMatchResult.Match ->
-                OcrFound(
-                    pan = transition.ocr?.pan ?: "",
-                    isCardVisible = transition.isCardVisible,
-                    requiredCardIssuer = requiredCardIssuer,
-                    requiredLastFour = requiredLastFour,
-                )
-            is CardMatchResult.NoRequiredCard ->
-                OcrFound(
-                    pan = transition.ocr?.pan ?: "",
-                    isCardVisible = transition.isCardVisible,
-                    requiredCardIssuer = requiredCardIssuer,
-                    requiredLastFour = requiredLastFour,
-                )
+        ): MainLoopState {
+            if (transition.isCardVisible == true) {
+                visibleCardCount++
+            }
+
+            transition.ocr?.pan?.let {
+                panCounter = panCounter?.apply { countItem(it) } ?: ItemCounter(it)
+            }
+            val comparisonResult = compareToRequiredCard(mostLikelyPan)
+
+            return when {
+                comparisonResult is CardMatchResult.Mismatch ->
+                    WrongCard(
+                        pan = transition.ocr?.pan ?: "",
+                        requiredCardIssuer = requiredCardIssuer,
+                        requiredLastFour = requiredLastFour,
+                        strictModeFrames = strictModeFrames,
+                    )
+                comparisonResult is CardMatchResult.Match && hasEnoughVisibleCards ->
+                    // Match result implies that `panCounter` is not null
+                    OcrFound(
+                        panCounter = requireNotNull(panCounter),
+                        visibleCardCount = visibleCardCount,
+                        requiredCardIssuer = requiredCardIssuer,
+                        requiredLastFour = requiredLastFour,
+                        strictModeFrames = strictModeFrames,
+                    )
+                comparisonResult is CardMatchResult.NoRequiredCard && hasEnoughVisibleCards ->
+                    // NoCardRequired result implies that `panCounter` is not null
+                    OcrFound(
+                        panCounter = requireNotNull(panCounter),
+                        visibleCardCount = visibleCardCount,
+                        requiredCardIssuer = requiredCardIssuer,
+                        requiredLastFour = requiredLastFour,
+                        strictModeFrames = strictModeFrames,
+                    )
+                else -> this // comparisonResult is NoPan or not enough visible cards
+            }
         }
     }
 
-    class OcrFound private constructor(
+    class OcrFound constructor(
         private val panCounter: ItemCounter<String>,
         private var visibleCardCount: Int,
         private val requiredCardIssuer: CardIssuer?,
         private val requiredLastFour: String?,
+        private val strictModeFrames: Int,
     ) : MainLoopState(runOcr = true, runCardDetect = true) {
-
-        internal constructor(
-            pan: String,
-            isCardVisible: Boolean?,
-            requiredCardIssuer: CardIssuer?,
-            requiredLastFour: String?,
-        ) : this(
-            ItemCounter(pan),
-            if (isCardVisible == true) 1 else 0,
-            requiredCardIssuer,
-            requiredLastFour,
-        )
 
         val mostLikelyPan: String
             get() = panCounter.getHighestCountItem().second
@@ -76,16 +133,10 @@ internal sealed class MainLoopState(
         private var lastCardVisible = Clock.markNow()
 
         private fun highestOcrCount() = panCounter.getHighestCountItem().first
-        private fun isCardSatisfied() =
-            visibleCardCount >= CardImageVerificationConfig.DESIRED_CARD_COUNT
-        private fun isOcrSatisfied() =
-            highestOcrCount() >= CardImageVerificationConfig.DESIRED_OCR_AGREEMENT
-        private fun isTimedOut() =
-            reachedStateAt.elapsedSince() >
-                CardImageVerificationConfig.OCR_AND_CARD_SEARCH_DURATION_MILLIS.milliseconds
-        private fun isNoCardVisible() =
-            lastCardVisible.elapsedSince() >
-                CardImageVerificationConfig.NO_CARD_VISIBLE_DURATION_MILLIS.milliseconds
+        private fun isCardSatisfied() = visibleCardCount >= DESIRED_CARD_COUNT
+        private fun isOcrSatisfied() = highestOcrCount() >= DESIRED_OCR_AGREEMENT
+        private fun isTimedOut() = reachedStateAt.elapsedSince() > OCR_AND_CARD_SEARCH_DURATION
+        private fun isNoCardVisible() = lastCardVisible.elapsedSince() > NO_CARD_VISIBLE_DURATION
 
         override suspend fun consumeTransition(
             transition: MainLoopAnalyzer.Prediction,
@@ -113,6 +164,7 @@ internal sealed class MainLoopState(
                         panCounter = panCounter,
                         requiredCardIssuer = requiredCardIssuer,
                         requiredLastFour = requiredLastFour,
+                        strictModeFrames = strictModeFrames,
                     )
                 isOcrSatisfied() ->
                     OcrSatisfied(
@@ -127,6 +179,7 @@ internal sealed class MainLoopState(
                     Initial(
                         requiredCardIssuer = requiredCardIssuer,
                         requiredLastFour = requiredLastFour,
+                        strictModeFrames = strictModeFrames,
                     )
                 else -> this
             }
@@ -137,11 +190,8 @@ internal sealed class MainLoopState(
         val pan: String,
         private var visibleCardCount: Int,
     ) : MainLoopState(runOcr = false, runCardDetect = true) {
-        private fun isCardSatisfied() =
-            visibleCardCount >= CardImageVerificationConfig.DESIRED_CARD_COUNT
-        private fun isTimedOut() =
-            reachedStateAt.elapsedSince() >
-                CardImageVerificationConfig.CARD_ONLY_SEARCH_DURATION_MILLIS.milliseconds
+        private fun isCardSatisfied() = visibleCardCount >= DESIRED_CARD_COUNT
+        private fun isTimedOut() = reachedStateAt.elapsedSince() > CARD_ONLY_SEARCH_DURATION
 
         override suspend fun consumeTransition(
             transition: MainLoopAnalyzer.Prediction,
@@ -161,6 +211,7 @@ internal sealed class MainLoopState(
         private val panCounter: ItemCounter<String>,
         private val requiredCardIssuer: CardIssuer?,
         private val requiredLastFour: String?,
+        private val strictModeFrames: Int,
     ) : MainLoopState(runOcr = true, runCardDetect = false) {
 
         private var lastCardVisible = Clock.markNow()
@@ -169,14 +220,9 @@ internal sealed class MainLoopState(
             get() = panCounter.getHighestCountItem().second
 
         private fun highestOcrCount() = panCounter.getHighestCountItem().first
-        private fun isOcrSatisfied() =
-            highestOcrCount() >= CardImageVerificationConfig.DESIRED_OCR_AGREEMENT
-        private fun isTimedOut() =
-            reachedStateAt.elapsedSince() >
-                CardImageVerificationConfig.OCR_ONLY_SEARCH_DURATION_MILLIS.milliseconds
-        private fun isNoCardVisible() =
-            lastCardVisible.elapsedSince() >
-                CardImageVerificationConfig.NO_CARD_VISIBLE_DURATION_MILLIS.milliseconds
+        private fun isOcrSatisfied() = highestOcrCount() >= DESIRED_OCR_AGREEMENT
+        private fun isTimedOut() = reachedStateAt.elapsedSince() > OCR_ONLY_SEARCH_DURATION
+        private fun isNoCardVisible() = lastCardVisible.elapsedSince() > NO_CARD_VISIBLE_DURATION
 
         override suspend fun consumeTransition(
             transition: MainLoopAnalyzer.Prediction,
@@ -197,6 +243,7 @@ internal sealed class MainLoopState(
                     Initial(
                         requiredCardIssuer = requiredCardIssuer,
                         requiredLastFour = requiredLastFour,
+                        strictModeFrames = strictModeFrames,
                     )
                 else -> this
             }
@@ -207,10 +254,9 @@ internal sealed class MainLoopState(
         val pan: String,
         override val requiredCardIssuer: CardIssuer?,
         override val requiredLastFour: String?,
+        private val strictModeFrames: Int,
     ) : MainLoopState(runOcr = true, runCardDetect = false), RequiresMatchingCard {
-        private fun isTimedOut() =
-            reachedStateAt.elapsedSince() >
-                CardImageVerificationConfig.WRONG_CARD_DURATION_MILLIS.milliseconds
+        private fun isTimedOut() = reachedStateAt.elapsedSince() > WRONG_CARD_DURATION
 
         override suspend fun consumeTransition(
             transition: MainLoopAnalyzer.Prediction,
@@ -224,25 +270,29 @@ internal sealed class MainLoopState(
                         pan = transition.ocr?.pan ?: "",
                         requiredCardIssuer = requiredCardIssuer,
                         requiredLastFour = requiredLastFour,
+                        strictModeFrames = strictModeFrames,
                     )
                 cardMatch is CardMatchResult.Match ->
                     OcrFound(
-                        pan = transition.ocr?.pan ?: "",
-                        isCardVisible = transition.isCardVisible,
+                        panCounter = ItemCounter(transition.ocr?.pan ?: ""),
+                        visibleCardCount = if (transition.isCardVisible == true) 1 else 0,
                         requiredCardIssuer = requiredCardIssuer,
                         requiredLastFour = requiredLastFour,
+                        strictModeFrames = strictModeFrames,
                     )
                 cardMatch is CardMatchResult.NoRequiredCard ->
                     OcrFound(
-                        pan = transition.ocr?.pan ?: "",
-                        isCardVisible = transition.isCardVisible,
+                        panCounter = ItemCounter(transition.ocr?.pan ?: ""),
+                        visibleCardCount = if (transition.isCardVisible == true) 1 else 0,
                         requiredCardIssuer = requiredCardIssuer,
                         requiredLastFour = requiredLastFour,
+                        strictModeFrames = strictModeFrames,
                     )
                 isTimedOut() ->
                     Initial(
                         requiredCardIssuer = requiredCardIssuer,
                         requiredLastFour = requiredLastFour,
+                        strictModeFrames = strictModeFrames,
                     )
                 else -> this
             }

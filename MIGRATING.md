@@ -1,4 +1,8 @@
 # Migration Guide
+## Migrating from versions < 19.3.0
+- Changes to `StripeCardScan.Configuration`
+    - Setting custom scan values in `Config` is no longer supported. Configuration values have been moved to the `StripeCardScan.Configuration` object. If a value was removed that you need access to, please file an issue against this repository.
+
 ## Migrating from versions < 19.0.0
 - The following list of classes' package names are changed from `com.stripe.android` to `com.stripe.android.core`
     - `StripeModel`

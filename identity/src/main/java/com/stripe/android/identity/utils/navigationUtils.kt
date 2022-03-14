@@ -1,11 +1,13 @@
 package com.stripe.android.identity.utils
 
+import android.util.Log
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.stripe.android.identity.R
 import com.stripe.android.identity.navigation.ErrorFragment
 import com.stripe.android.identity.navigation.ErrorFragment.Companion.navigateToErrorFragmentWithDefaultValues
 import com.stripe.android.identity.navigation.ErrorFragment.Companion.navigateToErrorFragmentWithRequirementErrorAndDestination
+import com.stripe.android.identity.networking.models.ClearDataParam
 import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.networking.models.VerificationPageData
 import com.stripe.android.identity.networking.models.VerificationPageData.Companion.hasError
@@ -28,34 +30,42 @@ import com.stripe.android.identity.viewmodel.IdentityViewModel
  * @param identityViewModel: [IdentityViewModel] to fire requests.
  * @param collectedDataParam: parameter collected from UI response, posted to [IdentityViewModel.postVerificationPageData].
  * @param shouldNotSubmit: A condition check block to decide when [VerificationPageData]
- * is returned, whether to continue submit by [IdentityViewModel.postVerificationPageSubmit].
+ * is returned without error, whether to continue submit by [IdentityViewModel.postVerificationPageSubmit].
  * @param notSubmitBlock: A block to execute when [shouldNotSubmit] returns true.
  */
 internal suspend fun Fragment.postVerificationPageDataAndMaybeSubmit(
     identityViewModel: IdentityViewModel,
     collectedDataParam: CollectedDataParam,
+    clearDataParam: ClearDataParam,
     shouldNotSubmit: (verificationPageData: VerificationPageData) -> Boolean = { true },
-    notSubmitBlock: (verificationPageData: VerificationPageData) -> Unit
+    notSubmitBlock: ((verificationPageData: VerificationPageData) -> Unit)? = null
 ) {
     runCatching {
-        identityViewModel.postVerificationPageData(collectedDataParam)
+        identityViewModel.postVerificationPageData(collectedDataParam, clearDataParam)
     }.fold(
         onSuccess = { postedVerificationPageData ->
             if (postedVerificationPageData.hasError()) {
                 navigateToRequirementErrorFragment(postedVerificationPageData.requirements.errors[0])
             } else {
                 if (shouldNotSubmit(postedVerificationPageData)) {
-                    notSubmitBlock(postedVerificationPageData)
+                    notSubmitBlock?.invoke(postedVerificationPageData)
                 } else {
                     runCatching {
                         identityViewModel.postVerificationPageSubmit()
                     }.fold(
                         onSuccess = { submittedVerificationPageData ->
-                            if (submittedVerificationPageData.hasError()) {
-                                navigateToRequirementErrorFragment(submittedVerificationPageData.requirements.errors[0])
-                            } else {
-                                findNavController()
-                                    .navigate(R.id.action_global_confirmationFragment)
+                            when {
+                                submittedVerificationPageData.hasError() -> {
+                                    navigateToRequirementErrorFragment(submittedVerificationPageData.requirements.errors[0])
+                                }
+                                submittedVerificationPageData.submitted -> {
+                                    findNavController()
+                                        .navigate(R.id.action_global_confirmationFragment)
+                                }
+                                else -> {
+                                    Log.e(TAG, "VerificationPage submit failed")
+                                    navigateToDefaultErrorFragment()
+                                }
                             }
                         },
                         onFailure = {
@@ -91,3 +101,5 @@ private fun Fragment.navigateToRequirementErrorFragment(
 internal fun Fragment.navigateToDefaultErrorFragment() {
     findNavController().navigateToErrorFragmentWithDefaultValues(requireContext())
 }
+
+private const val TAG = "NAVIGATION_UTIL"

@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.content.res.Resources
 import android.view.ViewGroup
 import androidx.annotation.VisibleForTesting
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -17,7 +16,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -490,13 +488,6 @@ internal fun PaymentOptionUi(
     onRemoveAccessibilityDescription: String = "",
     onItemSelectedListener: (() -> Unit)
 ) {
-    val strokeColor =
-        if (isSelected) {
-            PaymentsTheme.colors.material.primary
-        } else {
-            PaymentsTheme.colors.colorComponentBorder
-        }
-
     // An attempt was made to not use constraint layout here but it was unsuccessful in
     // precisely positioning the check and delete icons to match the mocks.
     ConstraintLayout(
@@ -510,8 +501,7 @@ internal fun PaymentOptionUi(
     ) {
         val (checkIcon, deleteIcon, label, card) = createRefs()
         Card(
-            border = BorderStroke(if (isSelected) 2.dp else 1.dp, strokeColor),
-            shape = RoundedCornerShape(6.dp),
+            border = PaymentsTheme.getBorderStroke(isSelected),
             elevation = 2.dp,
             backgroundColor = PaymentsTheme.colors.colorComponentBackground,
             modifier = Modifier

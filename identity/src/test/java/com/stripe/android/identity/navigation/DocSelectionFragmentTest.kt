@@ -27,8 +27,12 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestRule
 import org.junit.runner.RunWith
+import org.mockito.kotlin.KArgumentCaptor
 import org.mockito.kotlin.any
+import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.times
+import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 
@@ -38,17 +42,37 @@ internal class DocSelectionFragmentTest {
     var rule: TestRule = InstantTaskExecutorRule()
 
     private val verificationPage = mock<VerificationPage>()
-    private val verificationPageLiveData = MutableLiveData<Resource<VerificationPage>>()
-    private val mockIdentityViewModel = mock<IdentityViewModel>().also {
-        whenever(it.verificationPage).thenReturn(verificationPageLiveData)
+    private val mockIdentityViewModel = mock<IdentityViewModel>()
+
+    private fun setUpErrorVerificationPage() {
+        val failureCaptor: KArgumentCaptor<(Throwable?) -> Unit> = argumentCaptor()
+        verify(
+            mockIdentityViewModel
+        ).observeForVerificationPage(
+            any(),
+            any(),
+            failureCaptor.capture()
+        )
+        failureCaptor.firstValue(null)
+    }
+
+    private fun setUpSuccessVerificationPage(times: Int = 1) {
+        val successCaptor: KArgumentCaptor<(VerificationPage) -> Unit> = argumentCaptor()
+        verify(
+            mockIdentityViewModel,
+            times(times)
+        ).observeForVerificationPage(
+            any(),
+            successCaptor.capture(),
+            any()
+        )
+        successCaptor.lastValue(verificationPage)
     }
 
     @Test
     fun `errorVerificationPage navigates to errorFragment`() {
         launchDocSelectionFragment { _, navController, _ ->
-            verificationPageLiveData.postValue(
-                Resource.error()
-            )
+            setUpErrorVerificationPage()
 
             assertThat(navController.currentDestination?.id)
                 .isEqualTo(R.id.errorFragment)
@@ -61,9 +85,7 @@ internal class DocSelectionFragmentTest {
             whenever(verificationPage.documentSelect).thenReturn(
                 DOC_SELECT_MULTI_CHOICE
             )
-            verificationPageLiveData.postValue(
-                Resource.success(verificationPage)
-            )
+            setUpSuccessVerificationPage()
 
             assertThat(binding.title.text).isEqualTo(DOCUMENT_SELECT_TITLE)
             assertThat(binding.multiSelectionContent.visibility).isEqualTo(View.VISIBLE)
@@ -89,9 +111,7 @@ internal class DocSelectionFragmentTest {
             whenever(verificationPage.documentSelect).thenReturn(
                 DOC_SELECT_ZERO_CHOICE
             )
-            verificationPageLiveData.postValue(
-                Resource.success(verificationPage)
-            )
+            setUpSuccessVerificationPage()
 
             assertThat(binding.title.text).isEqualTo(DOCUMENT_SELECT_TITLE)
             assertThat(binding.multiSelectionContent.visibility).isEqualTo(View.VISIBLE)
@@ -148,7 +168,7 @@ internal class DocSelectionFragmentTest {
                 DOC_SELECT_SINGLE_CHOICE_DL
             )
             runBlocking {
-                whenever(mockIdentityViewModel.postVerificationPageData(any())).thenReturn(
+                whenever(mockIdentityViewModel.postVerificationPageData(any(), any())).thenReturn(
                     MISSING_BACK_VERIFICATION_PAGE_DATA
                 )
             }
@@ -161,9 +181,7 @@ internal class DocSelectionFragmentTest {
                     )
                 )
             )
-            verificationPageLiveData.postValue(
-                Resource.success(verificationPage)
-            )
+            setUpSuccessVerificationPage()
             binding.singleSelectionContinue.callOnClick()
 
             assertThat(navController.currentDestination?.id)
@@ -185,7 +203,7 @@ internal class DocSelectionFragmentTest {
                 mockDocumentCapture
             )
             runBlocking {
-                whenever(mockIdentityViewModel.postVerificationPageData(any())).thenReturn(
+                whenever(mockIdentityViewModel.postVerificationPageData(any(), any())).thenReturn(
                     MISSING_BACK_VERIFICATION_PAGE_DATA
                 )
             }
@@ -194,10 +212,9 @@ internal class DocSelectionFragmentTest {
             whenever(mockIdentityViewModel.idDetectorModelFile).thenReturn(
                 MutableLiveData(Resource.error())
             )
-            verificationPageLiveData.postValue(
-                Resource.success(verificationPage)
-            )
+            setUpSuccessVerificationPage()
             binding.singleSelectionContinue.callOnClick()
+            setUpSuccessVerificationPage(2)
 
             assertThat(navController.currentDestination?.id)
                 .isEqualTo(R.id.driverLicenseUploadFragment)
@@ -218,7 +235,7 @@ internal class DocSelectionFragmentTest {
                 mockDocumentCapture
             )
             runBlocking {
-                whenever(mockIdentityViewModel.postVerificationPageData(any())).thenReturn(
+                whenever(mockIdentityViewModel.postVerificationPageData(any(), any())).thenReturn(
                     MISSING_BACK_VERIFICATION_PAGE_DATA
                 )
             }
@@ -227,10 +244,9 @@ internal class DocSelectionFragmentTest {
             whenever(mockIdentityViewModel.idDetectorModelFile).thenReturn(
                 MutableLiveData(Resource.error())
             )
-            verificationPageLiveData.postValue(
-                Resource.success(verificationPage)
-            )
+            setUpSuccessVerificationPage()
             binding.singleSelectionContinue.callOnClick()
+            setUpSuccessVerificationPage(2)
 
             assertThat(navController.currentDestination?.id)
                 .isEqualTo(R.id.errorFragment)
@@ -245,9 +261,7 @@ internal class DocSelectionFragmentTest {
             whenever(verificationPage.documentSelect).thenReturn(
                 docSelect
             )
-            verificationPageLiveData.postValue(
-                Resource.success(verificationPage)
-            )
+            setUpSuccessVerificationPage()
 
             assertThat(binding.title.text).isEqualTo(DOCUMENT_SELECT_TITLE)
             assertThat(binding.multiSelectionContent.visibility).isEqualTo(View.GONE)

@@ -37,7 +37,11 @@ internal object CardStyle {
         @ReadOnlyComposable
         get() = PaymentsTheme.colors.colorComponentDivider
 
-    val cardBorderWidth: Dp = 1.dp
+    val cardBorderWidth: Dp
+        @Composable
+        @ReadOnlyComposable
+        get() = PaymentsTheme.shapes.borderStrokeWidth
+
     val cardElevation: Dp = 0.dp
 }
 

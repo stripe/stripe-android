@@ -13,6 +13,7 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertFailsWith
 
+@Suppress("MaxLineLength")
 @RunWith(RobolectricTestRunner::class)
 internal class BecsDebitWidgetTest {
     private val context: Context = ApplicationProvider.getApplicationContext()

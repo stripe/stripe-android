@@ -7,13 +7,16 @@ import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.model.InternalStripeFile
 import com.stripe.android.core.model.parsers.StripeErrorJsonParser
 import com.stripe.android.core.networking.HEADER_AUTHORIZATION
+import com.stripe.android.core.networking.QueryStringFactory
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.networking.StripeRequest
 import com.stripe.android.core.networking.StripeResponse
 import com.stripe.android.identity.networking.PostVerificationPageDataRequest.Companion.DATA
 import com.stripe.android.identity.networking.PostVerificationPageSubmitRequest.Companion.SUBMIT
+import com.stripe.android.identity.networking.models.ClearDataParam
+import com.stripe.android.identity.networking.models.ClearDataParam.Companion.createCollectedDataParamEntry
 import com.stripe.android.identity.networking.models.CollectedDataParam
-import com.stripe.android.identity.networking.models.CollectedDataParam.Companion.createCollectedDataParam
+import com.stripe.android.identity.networking.models.CollectedDataParam.Companion.createCollectedDataParamEntry
 import com.stripe.android.identity.networking.models.ConsentParam
 import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.networking.models.VerificationPageData
@@ -83,10 +86,14 @@ class DefaultIdentityRepositoryTest {
                     biometric = false
                 )
             )
+
+            val clearDataParam = ClearDataParam()
+
             val verificationPage = identityRepository.postVerificationPageData(
                 TEST_ID,
                 TEST_EPHEMERAL_KEY,
-                collectedDataParam
+                collectedDataParam,
+                clearDataParam
             )
 
             assertThat(verificationPage).isInstanceOf(VerificationPageData::class.java)
@@ -98,7 +105,12 @@ class DefaultIdentityRepositoryTest {
             assertThat(request.url).isEqualTo("$BASE_URL/$IDENTITY_VERIFICATION_PAGES/$TEST_ID/$DATA")
             assertThat(request.headers[HEADER_AUTHORIZATION]).isEqualTo("Bearer $TEST_EPHEMERAL_KEY")
             assertThat((request as PostVerificationPageDataRequest).encodedData).isEqualTo(
-                collectedDataParam.createCollectedDataParam(identityRepository.json)
+                QueryStringFactory.createFromParamsWithEmptyValues(
+                    mapOf(
+                        collectedDataParam.createCollectedDataParamEntry(identityRepository.json),
+                        clearDataParam.createCollectedDataParamEntry(identityRepository.json)
+                    )
+                )
             )
         }
     }
