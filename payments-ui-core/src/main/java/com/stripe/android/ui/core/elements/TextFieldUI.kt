@@ -35,6 +35,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.editableText
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.ImeAction
 import com.stripe.android.ui.core.PaymentsTheme
 import com.stripe.android.ui.core.R
@@ -133,6 +134,7 @@ internal fun TextField(
             }
             .semantics {
                 this.contentDescription = contentDescription
+                this.editableText = AnnotatedString("")
             },
         keyboardActions = KeyboardActions(
             onNext = {

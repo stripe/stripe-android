@@ -22,7 +22,10 @@ internal class CvcConfig : CardDetailsTextFieldConfig {
         return if (number.isEmpty()) {
             TextFieldStateConstants.Error.Blank
         } else if (brand == CardBrand.Unknown) {
-            TextFieldStateConstants.Error.Invalid(R.string.invalid_card_number)
+            when (number.length) {
+                numberAllowedDigits -> TextFieldStateConstants.Valid.Full
+                else -> TextFieldStateConstants.Valid.Limitless
+            }
         } else if (isDigitLimit && number.length < numberAllowedDigits) {
             TextFieldStateConstants.Error.Incomplete(R.string.invalid_cvc)
         } else if (isDigitLimit && number.length > numberAllowedDigits) {
