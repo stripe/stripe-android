@@ -45,6 +45,14 @@ internal interface LinkRepository {
     ): Result<ConsumerSession>
 
     /**
+     * Logs out the current consumer.
+     */
+    suspend fun logout(
+        consumerSessionClientSecret: String,
+        authSessionCookie: String?
+    ): Result<ConsumerSession>
+
+    /**
      * Fetch all saved payment methods for the consumer.
      */
     suspend fun listPaymentDetails(

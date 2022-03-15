@@ -181,6 +181,41 @@ class LinkApiRepositoryTest {
     }
 
     @Test
+    fun `logout sends correct parameters`() = runTest {
+        val secret = "secret"
+        val cookie = "cookie2"
+        linkRepository.logout(secret, cookie)
+
+        verify(stripeRepository).logoutConsumer(
+            eq(secret),
+            eq(cookie),
+            eq(ApiRequest.Options(PUBLISHABLE_KEY, STRIPE_ACCOUNT_ID))
+        )
+    }
+
+    @Test
+    fun `logout returns successful result`() = runTest {
+        val consumerSession = mock<ConsumerSession>()
+        whenever(stripeRepository.logoutConsumer(any(), any(), any()))
+            .thenReturn(consumerSession)
+
+        val result = linkRepository.logout("secret", "cookie")
+
+        assertThat(result.isSuccess).isTrue()
+        assertThat(result.getOrNull()).isEqualTo(consumerSession)
+    }
+
+    @Test
+    fun `logout catches exception and returns failure`() = runTest {
+        whenever(stripeRepository.logoutConsumer(any(), any(), any()))
+            .thenThrow(RuntimeException("error"))
+
+        val result = linkRepository.logout("secret", "cookie")
+
+        assertThat(result.isFailure).isTrue()
+    }
+
+    @Test
     fun `listPaymentDetails sends correct parameters`() = runTest {
         val secret = "secret"
         linkRepository.listPaymentDetails(secret)
