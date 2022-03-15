@@ -25,5 +25,11 @@ jobs:
         with:
           local-testing: start
           local-identifier: random
+          script: |
+            ./gradlew :paymentsheet-example:assembleDebugAndroidTest :paymentsheet-example:assemble
+            python scripts/browserstack.py                                                                                                                                \"bs://527636cd103e394cb10e57d3ef0d57bcd0e0f433\", \"deviceLogs\":
+                                                                                                                                                true, \"testSuite\":
+                                                                                                                                                  \"bs://52bce22d70c5ede86f250127238394af3cc76f25\"}" -H "Content-Type: application/json" -u "michelleb_0ydoxc:GKqKWysjVB7yVQpDwdJz"
+
 
 
