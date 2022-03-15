@@ -28,10 +28,8 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.sizeIn
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -52,6 +50,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.TransformOrigin
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.IntOffset
@@ -91,7 +90,7 @@ internal fun DropdownMenuContent(
                     delayMillis = OutTransitionDuration - 1
                 )
             }
-        }
+        }, label = "menu-scale"
     ) {
         if (it) {
             // Menu is expanded.
@@ -111,7 +110,7 @@ internal fun DropdownMenuContent(
                 // Expanded to dismissed.
                 tween(durationMillis = OutTransitionDuration)
             }
-        }
+        }, label = "menu-alpha"
     ) {
         if (it) {
             // Menu is expanded.
@@ -125,15 +124,12 @@ internal fun DropdownMenuContent(
     // TODO: Make sure this gets the rounded corner values
     Card(
         border = BorderStroke(CardStyle.cardBorderWidth, CardStyle.cardBorderColor),
-        modifier = Modifier,
-//            .graphicsLayer {
-//            scaleX = scale
-//            scaleY = scale
-//            this.alpha = alpha
-//            transformOrigin = transformOriginState.value
-//        }
-//            .requiredSizeIn(maxHeight = DropdownMenuItemDefaultMinHeight * 8.9f)
-//            .width(DropdownMenuItemDefaultMaxWidth),
+        modifier = Modifier.graphicsLayer {
+            scaleX = scale
+            scaleY = scale
+            this.alpha = alpha
+            transformOrigin = transformOriginState.value
+        },
         elevation = MenuElevation
     ) {
         val lazyListState = rememberLazyListState(
@@ -143,9 +139,6 @@ internal fun DropdownMenuContent(
         LazyColumn(
             modifier = modifier
                 .padding(vertical = DropdownMenuVerticalPadding),
-//                .width(DropdownMenuItemDefaultMaxWidth),
-//                .width(IntrinsicSize.Max)
-//                .verticalScroll(rememberScrollState()),
             state = lazyListState,
             content = content
         )
