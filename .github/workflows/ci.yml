@@ -32,6 +32,9 @@ jobs:
       - name: 'Build'
         run: ./gradlew :paymentsheet-example:assembleDebugAndroidTest :paymentsheet-example:assemble
 
-      - name: 'BrowserStack Env Setup'
+      - name: 'Install pip modules'
+        run: pip install requests_toolbelt requests
+
+      - name: 'Run BrowserStack tests'
         run: python scripts/browserstack.py
 
