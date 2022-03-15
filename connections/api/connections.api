@@ -123,11 +123,11 @@ public final class com/stripe/android/connections/di/ConnectionsSheetConfigurati
 }
 
 public final class com/stripe/android/connections/di/ConnectionsSheetConfigurationModule_ProvidesEnableLoggingFactory : dagger/internal/Factory {
-	public fun <init> (Ljavax/inject/Provider;)V
-	public static fun create (Ljavax/inject/Provider;)Lcom/stripe/android/connections/di/ConnectionsSheetConfigurationModule_ProvidesEnableLoggingFactory;
+	public fun <init> ()V
+	public static fun create ()Lcom/stripe/android/connections/di/ConnectionsSheetConfigurationModule_ProvidesEnableLoggingFactory;
 	public fun get ()Ljava/lang/Boolean;
 	public synthetic fun get ()Ljava/lang/Object;
-	public static fun providesEnableLogging (Lcom/stripe/android/connections/ConnectionsSheet$Configuration;)Z
+	public static fun providesEnableLogging ()Z
 }
 
 public final class com/stripe/android/connections/di/ConnectionsSheetConfigurationModule_ProvidesPublishableKeyFactory : dagger/internal/Factory {
