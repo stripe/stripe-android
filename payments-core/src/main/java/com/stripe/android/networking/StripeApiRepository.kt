@@ -1318,7 +1318,9 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         return fetchStripeModel(
             apiRequestFactory.createPost(
                 url = getPaymentIntentLinkAccountSessionUrl(
-                    paymentIntentLinkAccountSessionParams.clientSecret
+                    paymentIntentId = PaymentIntent.ClientSecret(
+                        paymentIntentLinkAccountSessionParams.clientSecret
+                    ).paymentIntentId
                 ),
                 options = requestOptions,
                 params = paymentIntentLinkAccountSessionParams.toMap()
