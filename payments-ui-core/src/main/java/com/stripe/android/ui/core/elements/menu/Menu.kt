@@ -1,5 +1,3 @@
-package com.stripe.android.ui.core.elements.menu
-
 /*
  * Copyright 2020 The Android Open Source Project
  *
@@ -16,41 +14,33 @@ package com.stripe.android.ui.core.elements.menu
  * limitations under the License.
  */
 
+package androidx.compose.material
+
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.MutableTransitionState
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.updateTransition
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.requiredSizeIn
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyListScope
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Card
-import androidx.compose.material.ContentAlpha
-import androidx.compose.material.DropdownMenu
-import androidx.compose.material.DropdownMenuItem
-import androidx.compose.material.LocalContentAlpha
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.ProvideTextStyle
 import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Immutable
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -64,7 +54,6 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.PopupPositionProvider
-import com.stripe.android.ui.core.elements.CardStyle
 import kotlin.math.max
 import kotlin.math.min
 
@@ -73,9 +62,8 @@ import kotlin.math.min
 internal fun DropdownMenuContent(
     expandedStates: MutableTransitionState<Boolean>,
     transformOriginState: MutableState<TransformOrigin>,
-    initialFirstVisibleItemIndex: Int,
     modifier: Modifier = Modifier,
-    content: LazyListScope.() -> Unit
+    content: @Composable ColumnScope.() -> Unit
 ) {
     // Menu open/close animation.
     val transition = updateTransition(expandedStates, "DropDownMenu")
@@ -125,32 +113,20 @@ internal fun DropdownMenuContent(
             0f
         }
     }
-
-    // TODO: Make sure this gets the rounded corner values
     Card(
-        border = BorderStroke(CardStyle.cardBorderWidth, CardStyle.cardBorderColor),
-        modifier = Modifier,
-//            .graphicsLayer {
-//            scaleX = scale
-//            scaleY = scale
-//            this.alpha = alpha
-//            transformOrigin = transformOriginState.value
-//        }
-//            .requiredSizeIn(maxHeight = DropdownMenuItemDefaultMinHeight * 8.9f)
-//            .width(DropdownMenuItemDefaultMaxWidth),
+        modifier = Modifier.graphicsLayer {
+            scaleX = scale
+            scaleY = scale
+            this.alpha = alpha
+            transformOrigin = transformOriginState.value
+        },
         elevation = MenuElevation
     ) {
-        val lazyListState = rememberLazyListState(
-            initialFirstVisibleItemIndex = initialFirstVisibleItemIndex
-        )
-
-        LazyColumn(
+        Column(
             modifier = modifier
-                .padding(vertical = DropdownMenuVerticalPadding),
-//                .width(DropdownMenuItemDefaultMaxWidth),
-//                .width(IntrinsicSize.Max)
-//                .verticalScroll(rememberScrollState()),
-            state = lazyListState,
+                .padding(vertical = DropdownMenuVerticalPadding)
+                .width(IntrinsicSize.Max)
+                .verticalScroll(rememberScrollState()),
             content = content
         )
     }
@@ -177,7 +153,7 @@ internal fun DropdownMenuItemContent(
             .fillMaxWidth()
             // Preferred min and max width used during the intrinsic measurement.
             .sizeIn(
-                minWidth = DropdownMenuItemDefaultMaxWidth,// use the max width for both
+                minWidth = DropdownMenuItemDefaultMinWidth,
                 maxWidth = DropdownMenuItemDefaultMaxWidth,
                 minHeight = DropdownMenuItemDefaultMinHeight
             )
@@ -210,11 +186,11 @@ object MenuDefaults {
 // Size defaults.
 private val MenuElevation = 8.dp
 internal val MenuVerticalMargin = 48.dp
-internal val DropdownMenuItemHorizontalPadding = 16.dp
+private val DropdownMenuItemHorizontalPadding = 16.dp
 internal val DropdownMenuVerticalPadding = 8.dp
-internal val DropdownMenuItemDefaultMinWidth = 112.dp
-internal val DropdownMenuItemDefaultMaxWidth = 280.dp
-internal val DropdownMenuItemDefaultMinHeight = 48.dp
+private val DropdownMenuItemDefaultMinWidth = 112.dp
+private val DropdownMenuItemDefaultMaxWidth = 280.dp
+private val DropdownMenuItemDefaultMinHeight = 48.dp
 
 // Menu open/close animation.
 internal const val InTransitionDuration = 120
