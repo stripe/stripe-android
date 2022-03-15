@@ -311,12 +311,12 @@ constructor(
             requiresMandate = false,
             hasDelayedSettlement = false
         ),
-        UsBankAccount(
+        USBankAccount(
             "us_bank_account",
-            isReusable = false,
+            isReusable = true,
             isVoucher = false,
-            requiresMandate = false,
-            hasDelayedSettlement = false
+            requiresMandate = true,
+            hasDelayedSettlement = true
         ),;
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet

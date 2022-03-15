@@ -399,21 +399,6 @@ data class PaymentMethodCreateParams internal constructor(
     }
 
     @Parcelize
-    data class UsBankAccount(
-        internal var country: String
-    ) : StripeParamsModel, Parcelable {
-        override fun toParamMap(): Map<String, Any> {
-            return mapOf(
-                PARAM_COUNTRY to country.uppercase()
-            )
-        }
-
-        private companion object {
-            private const val PARAM_COUNTRY = "country"
-        }
-    }
-
-    @Parcelize
     data class Netbanking(
         internal var bank: String
     ) : StripeParamsModel, Parcelable {
@@ -782,7 +767,7 @@ data class PaymentMethodCreateParams internal constructor(
             metadata: Map<String, String>? = null
         ): PaymentMethodCreateParams {
             return PaymentMethodCreateParams(
-                type = PaymentMethod.Type.UsBankAccount,
+                type = PaymentMethod.Type.USBankAccount,
                 billingDetails = billingDetails,
                 metadata = metadata
             )
