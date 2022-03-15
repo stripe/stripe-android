@@ -1309,6 +1309,52 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
     }
 
     /**
+     * Attaches the Link Account Session to the Payment Intent
+     */
+    override suspend fun attachLinkAccountSessionToPaymentIntent(
+        clientSecret: String,
+        paymentIntentId: String,
+        linkAccountSessionId: String,
+        requestOptions: ApiRequest.Options
+    ): PaymentIntent? {
+        return fetchStripeModel(
+            apiRequestFactory.createPost(
+                getAttachLinkAccountSessionToPaymentIntentUrl(paymentIntentId, linkAccountSessionId),
+                requestOptions,
+                mapOf(
+                    "client_secret" to clientSecret
+                )
+            ),
+            PaymentIntentJsonParser()
+        ) {
+            // no-op
+        }
+    }
+
+    /**
+     * Attaches the Link Account Session to the Setup Intent
+     */
+    override suspend fun attachLinkAccountSessionToSetupIntent(
+        clientSecret: String,
+        setupIntentId: String,
+        linkAccountSessionId: String,
+        requestOptions: ApiRequest.Options
+    ): SetupIntent? {
+        return fetchStripeModel(
+            apiRequestFactory.createPost(
+                getAttachLinkAccountSessionToSetupIntentUrl(setupIntentId, linkAccountSessionId),
+                requestOptions,
+                mapOf(
+                    "client_secret" to clientSecret
+                )
+            ),
+            SetupIntentJsonParser()
+        ) {
+            // no-op
+        }
+    }
+
+    /**
      * @return `https://api.stripe.com/v1/payment_methods/:id/detach`
      */
     @VisibleForTesting
@@ -1754,6 +1800,38 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         @JvmSynthetic
         internal fun getRetrieveTokenApiUrl(tokenId: String): String {
             return getApiUrl("tokens/%s", tokenId)
+        }
+
+        /**
+         * @return `https://api.stripe.com/v1/payment_intents/:paymentIntentId/link_account_session/:linkAccountSessionId/attach`
+         */
+        @VisibleForTesting
+        @JvmSynthetic
+        internal fun getAttachLinkAccountSessionToPaymentIntentUrl(
+            paymentIntentId: String,
+            linkAccountSessionId: String
+        ): String {
+            return getApiUrl(
+                "payment_intents/%s/link_account_session/%s/attach",
+                paymentIntentId,
+                linkAccountSessionId
+            )
+        }
+
+        /**
+         * @return `https://api.stripe.com/v1/setup_intents/:setupIntentId/link_account_session/:linkAccountSessionId/attach`
+         */
+        @VisibleForTesting
+        @JvmSynthetic
+        internal fun getAttachLinkAccountSessionToSetupIntentUrl(
+            setupIntentId: String,
+            linkAccountSessionId: String
+        ): String {
+            return getApiUrl(
+                "setup_intents/%s/link_account_session/%s/attach",
+                setupIntentId,
+                linkAccountSessionId
+            )
         }
 
         /**
