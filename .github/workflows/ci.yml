@@ -6,13 +6,16 @@ on:
   pull_request:
 
 env:
+  STRIPE_END_TO_END_TESTS_BACKEND_URL: ${{ secrets.STRIPE_END_TO_END_TESTS_BACKEND_URL }}
   BROWSERSTACK_USERNAME: ${{ secrets.BROWSERSTACK_USERNAME }}
   BROWSERSTACK_ACCESS_KEY: ${{ secrets.BROWSERSTACK_ACCESS_KEY }}
 
 jobs:
-  instrumentation-tests:
-    name: Instrumentation tests
+
+  check:
+    name: Check
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v2
       - uses: gradle/wrapper-validation-action@v1
@@ -28,13 +31,71 @@ jobs:
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
           restore-keys: |
             ${{ runner.os }}-gradle-
+      - name: Ktlint
+        run: ./gradlew ktlint
+      - name: Detekt
+        run: ./gradlew detekt
+      - name: Checkstyle
+        run: ./gradlew checkstyle
+      - name: Lint
+        run: ./gradlew lintRelease
 
-      - name: 'Build'
-        run: ./gradlew :paymentsheet-example:assembleDebugAndroidTest :paymentsheet-example:assemble
+      # Check if there has been a binary incompatible change to the API.
+      # If this change is intentional, run `./gradlew apiDump` and commit the new API files.
+      - name: Check binary compatibility
+        run: ./gradlew apiCheck
 
-      - name: 'Install pip modules'
-        run: pip install requests_toolbelt requests
+  unit-tests:
+    name: Unit tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v2
+      - uses: gradle/wrapper-validation-action@v1
+      - uses: actions/setup-java@v2
+        with:
+          distribution: 'zulu'
+          java-version: '11'
+      - uses: actions/cache@v2
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+      - name: Unit tests
+        run: bash scripts/execute_unittests_for_changed_modules.sh
+      - uses: actions/upload-artifact@v2
+        if: failure()
+        with:
+          name: unit-test-report
+          path: payments-core/build/reports/tests/testDebugUnitTest/
 
-      - name: 'Run BrowserStack tests'
-        run: python scripts/browserstack.py
+  end-to-end-tests:
+    name: End-to-end tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v2
+      - uses: gradle/wrapper-validation-action@v1
+      - uses: actions/setup-java@v2
+        with:
+          distribution: 'zulu'
+          java-version: '11'
+      - uses: actions/cache@v2
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+      - name: End-to-end tests
+        run: ./gradlew :stripe-test-e2e:testDebugUnitTest
+      - uses: actions/upload-artifact@v2
+        if: failure()
+        with:
+          name: unit-test-report
+          path: stripe-test-e2e/build/reports/tests/testDebugUnitTest/
 

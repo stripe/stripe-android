@@ -42,6 +42,7 @@ jsonResponse = response.json()
 print(jsonResponse)
 if(jsonResponse["message"] == "Success"):
    buildId = jsonResponse["build_id"]
+   print("build id: " + buildId)
    url="https://api-cloud.browserstack.com/app-automate/espresso/v2/builds/"+ buildId
    responseStatus="running"
    print("Waiting for tests to complete.")

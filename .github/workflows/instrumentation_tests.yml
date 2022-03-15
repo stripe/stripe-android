@@ -34,3 +34,36 @@ jobs:
         with:
           name: instrumentation-test-report
           path: example/build/reports/androidTests/connected/index.html
+
+
+  # This should be updated to use the browserstack github actions
+  browserstack-instrumentation-tests:
+    name: Browserstack Instrumentation tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: gradle/wrapper-validation-action@v1
+      - uses: actions/setup-java@v2
+        with:
+          distribution: 'zulu'
+          java-version: '11'
+      - uses: actions/cache@v2
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      - name: 'Build'
+        run: ./gradlew :paymentsheet-example:assembleDebugAndroidTest :paymentsheet-example:assemble
+
+      - name: 'Install pip modules'
+        run: pip install requests_toolbelt requests
+
+      - name: 'Run BrowserStack tests'
+        env:
+          BROWSERSTACK_USERNAME: ${{ secrets.BROWSERSTACK_USERNAME }}
+          BROWSERSTACK_ACCESS_KEY: ${{ secrets.BROWSERSTACK_ACCESS_KEY }}
+        run: python scripts/browserstack.py
