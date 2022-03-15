@@ -62,6 +62,12 @@ abstract class StripeIntentResult<out T : StripeIntent> internal constructor(
         }
     }
 
+    /**
+     * Check if the [nextAction] is expected state after a successful on-session transaction
+     * e.g. for voucher-based payment methods like OXXO that require out-of-band payment and
+     * ACHv2 payments which requires verification of the customers bank details before
+     * confirming payment.
+     */
     private fun isNextActionSuccessState(nextAction: StripeIntent): Boolean {
         return when (nextAction.nextActionType) {
             StripeIntent.NextActionType.RedirectToUrl,

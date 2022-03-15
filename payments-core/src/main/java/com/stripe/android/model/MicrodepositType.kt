@@ -1,6 +1,6 @@
 package com.stripe.android.model
 
-enum class MicrodepositType(val value: String) {
+internal enum class MicrodepositType(val value: String) {
     // Two non-unique micro-deposits to the customer's bank account
     AMOUNTS("amounts"),
     // A single micro-deposit sent to the customer's bank account with a unique descriptor code
