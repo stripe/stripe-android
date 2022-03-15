@@ -75,7 +75,7 @@ import com.stripe.android.ui.core.elements.menu.calculateTransformOrigin
  */
 @Suppress("ModifierParameter")
 @Composable
-fun DropdownMenu(
+internal fun DropdownMenu(
     expanded: Boolean,
     initialFirstVisibleItemIndex: Int,
     onDismissRequest: () -> Unit,
@@ -131,7 +131,7 @@ fun DropdownMenu(
  * appearance / behavior of this DropdownMenuItem in different [Interaction]s.
  */
 @Composable
-fun DropdownMenuItem(
+internal fun DropdownMenuItem(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,

@@ -30,14 +30,11 @@ import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.requiredSizeIn
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Card
 import androidx.compose.material.ContentAlpha
 import androidx.compose.material.DropdownMenu
@@ -55,7 +52,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.TransformOrigin
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.IntOffset
@@ -177,7 +173,7 @@ internal fun DropdownMenuItemContent(
             .fillMaxWidth()
             // Preferred min and max width used during the intrinsic measurement.
             .sizeIn(
-                minWidth = DropdownMenuItemDefaultMaxWidth,// use the max width for both
+                minWidth = DropdownMenuItemDefaultMaxWidth, // use the max width for both
                 maxWidth = DropdownMenuItemDefaultMaxWidth,
                 minHeight = DropdownMenuItemDefaultMinHeight
             )
@@ -197,7 +193,7 @@ internal fun DropdownMenuItemContent(
 /**
  * Contains default values used for [DropdownMenuItem].
  */
-object MenuDefaults {
+internal object MenuDefaults {
     /**
      * Default padding used for [DropdownMenuItem].
      */
