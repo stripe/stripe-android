@@ -8,14 +8,12 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import androidx.annotation.VisibleForTesting
-import androidx.appcompat.app.AlertDialog
 import androidx.compose.ui.graphics.toArgb
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.stripe.android.paymentsheet.databinding.FragmentPaymentsheetPaymentMethodsListBinding
 import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.PaymentsThemeConfig
@@ -151,30 +149,10 @@ internal abstract class BasePaymentMethodsListFragment(
         sheetViewModel.updateSelection(paymentSelection)
     }
 
-    private fun deletePaymentMethod(item: PaymentOptionsAdapter.Item.SavedPaymentMethod) =
-        AlertDialog.Builder(requireActivity())
-            .setTitle(
-                resources.getString(
-                    R.string.stripe_paymentsheet_remove_pm,
-                    SupportedPaymentMethod.fromCode(item.paymentMethod.type?.code)
-                        ?.run {
-                            resources.getString(
-                                displayNameResource
-                            )
-                        }
-                )
-            )
-            .setMessage(item.getDescription(resources))
-            .setCancelable(true)
-            .setNegativeButton(R.string.cancel) { dialog, _ ->
-                dialog.dismiss()
-            }
-            .setPositiveButton(R.string.remove) { _, _ ->
-                adapter.removeItem(item)
-                sheetViewModel.removePaymentMethod(item.paymentMethod)
-            }
-            .create()
-            .show()
+    private fun deletePaymentMethod(item: PaymentOptionsAdapter.Item.SavedPaymentMethod) {
+        adapter.removeItem(item)
+        sheetViewModel.removePaymentMethod(item.paymentMethod)
+    }
 
     private companion object {
         private const val IS_EDITING = "is_editing"

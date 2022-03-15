@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
@@ -18,6 +19,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -52,10 +54,17 @@ internal class LinkActivity : ComponentActivity() {
 
             DefaultLinkTheme {
                 Surface {
-                    Column(Modifier.fillMaxWidth()) {
+                    Column(
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 20.dp)
+                    ) {
                         val linkAccount by viewModel.linkAccount.collectAsState(initial = null)
 
-                        LinkAppBar()
+                        LinkAppBar(
+                            email = linkAccount?.email,
+                            onCloseButtonClick = ::dismiss
+                        )
 
                         NavHost(navController, viewModel.startDestination.route) {
                             composable(LinkScreen.Loading.route) {
@@ -112,5 +121,6 @@ internal class LinkActivity : ComponentActivity() {
             Activity.RESULT_CANCELED,
             Intent().putExtras(LinkActivityContract.Result(LinkActivityResult.Canceled).toBundle())
         )
+        finish()
     }
 }

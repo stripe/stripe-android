@@ -11,7 +11,6 @@ object ConsumerFixtures {
         """
             {
               "consumer_session": null,
-              "cookies_operations": null,
               "error_message": "No consumer found for the given email address.",
               "exists": false
             }
@@ -22,6 +21,7 @@ object ConsumerFixtures {
     val EXISTING_CONSUMER_JSON = JSONObject(
         """
             {
+              "auth_session_client_secret": null,
               "consumer_session": {
                 "client_secret": "secret",
                 "email_address": "email@example.com",
@@ -30,9 +30,6 @@ object ConsumerFixtures {
                   "CARD"
                 ],
                 "verification_sessions": []
-              },
-              "cookies_operations": {
-                "operations": []
               },
               "error_message": null,
               "exists": true
@@ -44,6 +41,7 @@ object ConsumerFixtures {
     val CONSUMER_VERIFICATION_STARTED_JSON = JSONObject(
         """
             {
+              "auth_session_client_secret": "21yKkFYNnhMVTlXbXdBQUFJRmEaJDNmZDE1",
               "consumer_session": {
                 "client_secret": "12oBEhVjc21yKkFYNnhMVTlXbXdBQUFJRmEaJDNmZDE1MjA5LTM1YjctND",
                 "email_address": "test@stripe.com",
@@ -57,11 +55,6 @@ object ConsumerFixtures {
                     "type": "SMS"
                   }
                 ]
-              },
-              "cookies_operations": {
-                "operations": [
-            
-                ]
               }
             }
         """.trimIndent()
@@ -72,6 +65,7 @@ object ConsumerFixtures {
     val CONSUMER_VERIFIED_JSON = JSONObject(
         """
             {
+              "auth_session_client_secret": null,
               "consumer_session": {
                 "client_secret": "12oBEhVjc21yKkFYNnhMVTlXbXdBQUFJRmEaJDUzNTFkNjNhLTZkNGMtND",
                 "email_address": "test@stripe.com",
@@ -85,14 +79,6 @@ object ConsumerFixtures {
                     "type": "SMS"
                   }
                 ]
-              },
-              "cookies_operations": {
-                "operations": [
-                  {
-                    "operation": "ADD",
-                    "verification_session_client_secret": "12oBEhVjc21yKkFYNnhMVTlXbXdBQUFJRmEaJGFkYmQ2YmQ3LWZiYmYtND"
-                  }
-                ]
               }
             }
         """.trimIndent()
@@ -102,6 +88,7 @@ object ConsumerFixtures {
     val CONSUMER_SIGNUP_STARTED_JSON = JSONObject(
         """
             {
+              "auth_session_client_secret": null,
               "consumer_session": {
                 "client_secret": "12oBEhVjc21yKkFYNmNWT0JmaFFBQUFLUXcaJDk5OGFjYTFlLTkxMWYtND",
                 "email_address": "test@stripe.com",
@@ -120,6 +107,29 @@ object ConsumerFixtures {
         """.trimIndent()
     )
     val CONSUMER_SIGNUP_STARTED = ConsumerSessionJsonParser().parse(CONSUMER_SIGNUP_STARTED_JSON)
+
+    val CONSUMER_LOGGED_OUT_JSON = JSONObject(
+        """
+            {
+              "auth_session_client_secret": null,
+              "consumer_session": {
+                "client_secret": "TA3ZTctNDJhYi1iODI3LWY0NTVlZTdkM2Q2MzIIQWJCWlFibkk",
+                "email_address": "test@stripe.com",
+                "redacted_phone_number": "+1********23",
+                "support_payment_details_types": [
+                  "CARD"
+                ],
+                "verification_sessions": [
+                  {
+                    "state": "CANCELED",
+                    "type": "SMS"
+                  }
+                ]
+              }
+            }
+        """.trimIndent()
+    )
+    val CONSUMER_LOGGED_OUT = ConsumerSessionJsonParser().parse(CONSUMER_LOGGED_OUT_JSON)
 
     val CONSUMER_PAYMENT_DETAILS_JSON = JSONObject(
         """

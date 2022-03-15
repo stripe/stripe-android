@@ -8,10 +8,11 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.Button
+import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
+import androidx.compose.material.TextButton
 import androidx.compose.material.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -85,7 +86,7 @@ internal fun SignUpBody(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 20.dp, vertical = 20.dp),
+            .padding(vertical = 20.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
@@ -93,7 +94,8 @@ internal fun SignUpBody(
             modifier = Modifier
                 .padding(vertical = 4.dp),
             textAlign = TextAlign.Center,
-            style = MaterialTheme.typography.h2
+            style = MaterialTheme.typography.h2,
+            color = MaterialTheme.colors.onPrimary
         )
         Text(
             text = stringResource(R.string.sign_up_message, merchantName),
@@ -101,7 +103,8 @@ internal fun SignUpBody(
                 .fillMaxWidth()
                 .padding(top = 4.dp, bottom = 30.dp),
             textAlign = TextAlign.Center,
-            style = MaterialTheme.typography.body1
+            style = MaterialTheme.typography.body1,
+            color = MaterialTheme.colors.onSecondary
         )
         EmailCollectionSection(
             emailElement = emailElement,
@@ -192,23 +195,27 @@ private fun PhoneCollectionSection(
             text = stringResource(R.string.sign_up_terms),
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
+                .padding(start = 16.dp, top = 16.dp, end = 16.dp, bottom = 24.dp),
             textAlign = TextAlign.Center,
             style = MaterialTheme.typography.caption
         )
-        Button(
+        TextButton(
             onClick = {
                 onSignUpClick(phone)
             },
             modifier = Modifier
                 .fillMaxWidth()
-                .height(56.dp)
-                .padding(vertical = 8.dp),
-            enabled = phone.length == 10
+                .height(56.dp),
+            enabled = phone.length == 10,
+            shape = MaterialTheme.shapes.medium,
+            colors = ButtonDefaults.buttonColors(
+                backgroundColor = MaterialTheme.colors.primary
+            )
         ) {
             Text(
                 text = stringResource(R.string.sign_up),
-                style = MaterialTheme.typography.button
+                style = MaterialTheme.typography.button,
+                color = MaterialTheme.colors.onPrimary
             )
         }
     }
