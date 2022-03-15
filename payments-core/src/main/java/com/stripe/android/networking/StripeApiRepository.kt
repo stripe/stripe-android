@@ -49,7 +49,7 @@ import com.stripe.android.model.Customer
 import com.stripe.android.model.LinkAccountSession
 import com.stripe.android.model.ListPaymentMethodsParams
 import com.stripe.android.model.PaymentIntent
-import com.stripe.android.model.PaymentIntentLinkAccountSessionParams
+import com.stripe.android.model.CreateLinkAccountSessionParams
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.RadarSession
@@ -1312,18 +1312,38 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
     }
 
     override suspend fun createPaymentIntentLinkAccountSession(
-        paymentIntentLinkAccountSessionParams: PaymentIntentLinkAccountSessionParams,
+        createLinkAccountSessionParams: CreateLinkAccountSessionParams,
         requestOptions: ApiRequest.Options
     ): LinkAccountSession? {
         return fetchStripeModel(
             apiRequestFactory.createPost(
                 url = getPaymentIntentLinkAccountSessionUrl(
                     paymentIntentId = PaymentIntent.ClientSecret(
-                        paymentIntentLinkAccountSessionParams.clientSecret
+                        createLinkAccountSessionParams.clientSecret
                     ).paymentIntentId
                 ),
                 options = requestOptions,
-                params = paymentIntentLinkAccountSessionParams.toMap()
+                params = createLinkAccountSessionParams.toMap()
+            ),
+            BankConnectionsResourceLinkAccountSessionJsonParser(),
+        ) {
+            // no-op
+        }
+    }
+
+    override suspend fun createSetupIntentLinkAccountSession(
+        createLinkAccountSessionParams: CreateLinkAccountSessionParams,
+        requestOptions: ApiRequest.Options
+    ): LinkAccountSession? {
+        return fetchStripeModel(
+            apiRequestFactory.createPost(
+                url = getSetupIntentLinkAccountSessionUrl(
+                    setupIntentId = SetupIntent.ClientSecret(
+                        createLinkAccountSessionParams.clientSecret
+                    ).setupIntentId
+                ),
+                options = requestOptions,
+                params = createLinkAccountSessionParams.toMap()
             ),
             BankConnectionsResourceLinkAccountSessionJsonParser(),
         ) {
@@ -1338,6 +1358,15 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
     @JvmSynthetic
     internal fun getPaymentIntentLinkAccountSessionUrl(paymentIntentId: String): String {
         return getApiUrl("payment_intents/%s/link_account_session", paymentIntentId)
+    }
+
+    /**
+     * @return `https://api.stripe.com/v1/setup_intents/:id/link_account_session`
+     */
+    @VisibleForTesting
+    @JvmSynthetic
+    internal fun getSetupIntentLinkAccountSessionUrl(setupIntentId: String): String {
+        return getApiUrl("setup_intents/%s/link_account_session", setupIntentId)
     }
 
     /**

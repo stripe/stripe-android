@@ -1316,7 +1316,7 @@ internal object PaymentIntentFixtures {
     val PI_WITH_AFFIRM_IN_PAYMENT_METHODS =
         PARSER.parse(PI_WITH_AFFIRM_IN_PAYMENT_METHODS_JSON)!!
 
-    val PAYMENT_INTENT_LINK_ACCOUNT_SESSION_JSON = JSONObject(
+    val PI_LINK_ACCOUNT_SESSION_JSON = JSONObject(
         """
             {
               "client_secret": "test_client_secret",
@@ -1324,8 +1324,13 @@ internal object PaymentIntentFixtures {
             }
         """.trimIndent()
     )
-    val PAYMENT_INTENT_LINK_ACCOUNT_SESSION: LinkAccountSession =
-        BankConnectionsResourceLinkAccountSessionJsonParser().parse(
-            PAYMENT_INTENT_LINK_ACCOUNT_SESSION_JSON
-        )
+
+    val SI_LINK_ACCOUNT_SESSION_JSON = JSONObject(
+        """
+            {
+              "client_secret": "test_client_secret",
+              "id": "random_id"
+            }
+        """.trimIndent()
+    )
 }

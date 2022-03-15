@@ -1,6 +1,9 @@
 package com.stripe.android.model
 
-data class PaymentIntentLinkAccountSessionParams(
+internal data class CreateLinkAccountSessionParams(
+    /**
+     * client secret of a PaymentIntent / SetupIntent.
+     */
     val clientSecret: String,
     val customerName: String,
     val customerEmailAddress: String?,

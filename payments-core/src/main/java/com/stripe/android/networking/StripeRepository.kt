@@ -20,7 +20,7 @@ import com.stripe.android.model.Customer
 import com.stripe.android.model.LinkAccountSession
 import com.stripe.android.model.ListPaymentMethodsParams
 import com.stripe.android.model.PaymentIntent
-import com.stripe.android.model.PaymentIntentLinkAccountSessionParams
+import com.stripe.android.model.CreateLinkAccountSessionParams
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.RadarSession
@@ -434,9 +434,13 @@ abstract class StripeRepository {
         requestOptions: ApiRequest.Options
     ): ConsumerPaymentDetails?
 
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    abstract suspend fun createPaymentIntentLinkAccountSession(
-        paymentIntentLinkAccountSessionParams: PaymentIntentLinkAccountSessionParams,
+    internal abstract suspend fun createPaymentIntentLinkAccountSession(
+        createLinkAccountSessionParams: CreateLinkAccountSessionParams,
+        requestOptions: ApiRequest.Options
+    ): LinkAccountSession?
+
+    internal abstract suspend fun createSetupIntentLinkAccountSession(
+        createLinkAccountSessionParams: CreateLinkAccountSessionParams,
         requestOptions: ApiRequest.Options
     ): LinkAccountSession?
 }

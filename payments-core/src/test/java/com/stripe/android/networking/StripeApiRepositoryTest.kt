@@ -30,7 +30,7 @@ import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.ConsumerFixtures
 import com.stripe.android.model.ListPaymentMethodsParams
 import com.stripe.android.model.PaymentIntentFixtures
-import com.stripe.android.model.PaymentIntentLinkAccountSessionParams
+import com.stripe.android.model.CreateLinkAccountSessionParams
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
@@ -1750,41 +1750,89 @@ internal class StripeApiRepositoryTest {
         }
 
     @Test
-    fun `paymentIntentsLinkAccountSession() sends all parameters`() =
-        runTest {
-            val stripeResponse = StripeResponse(
-                200,
-                PaymentIntentFixtures.PAYMENT_INTENT_LINK_ACCOUNT_SESSION_JSON.toString(),
-                emptyMap()
-            )
-            whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
-                .thenReturn(stripeResponse)
+    fun `paymentIntentsLinkAccountSession() sends all parameters`() = runTest {
+        val stripeResponse = StripeResponse(
+            200,
+            PaymentIntentFixtures.PI_LINK_ACCOUNT_SESSION_JSON.toString(),
+            emptyMap()
+        )
+        whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+            .thenReturn(stripeResponse)
 
-            val clientSecret = "secret"
-            val customerName = "John Doe"
-            val customerEmailAddress = "johndoe@gmail.com"
-            create().createPaymentIntentLinkAccountSession(
-                PaymentIntentLinkAccountSessionParams(
-                    clientSecret = clientSecret,
-                    customerName = customerName,
-                    customerEmailAddress = customerEmailAddress
-                ),
-                DEFAULT_OPTIONS
-            )
+        val clientSecret = "pi_1234_secret_5678"
+        val customerName = "John Doe"
+        val customerEmailAddress = "johndoe@gmail.com"
+        create().createPaymentIntentLinkAccountSession(
+            CreateLinkAccountSessionParams(
+                clientSecret = clientSecret,
+                customerName = customerName,
+                customerEmailAddress = customerEmailAddress
+            ),
+            DEFAULT_OPTIONS
+        )
 
-            verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
-            val params = requireNotNull(apiRequestArgumentCaptor.firstValue.params)
+        verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
+        val request = apiRequestArgumentCaptor.firstValue
+        val params = requireNotNull(request.params)
 
-            with(params) {
-                assertEquals(clientSecret, this["client_secret"])
-                withNestedParams("payment_method_data") {
-                    assertEquals("us_bank_account", this["type"])
-                    withNestedParams("billing_details") {
-                        assertEquals(customerName, this["name"])
-                    }
+        assertEquals(
+            "https://api.stripe.com/v1/payment_intents/pi_1234/link_account_session",
+            request.baseUrl
+        )
+        with(params) {
+            assertEquals(clientSecret, this["client_secret"])
+            withNestedParams("payment_method_data") {
+                assertEquals("us_bank_account", this["type"])
+                withNestedParams("billing_details") {
+                    assertEquals(customerName, this["name"])
                 }
             }
         }
+    }
+
+    @Test
+    fun `setupIntentsLinkAccountSession() sends all parameters`() = runTest {
+        val stripeResponse = StripeResponse(
+            200,
+            PaymentIntentFixtures.SI_LINK_ACCOUNT_SESSION_JSON.toString(),
+            emptyMap()
+        )
+        whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+            .thenReturn(stripeResponse)
+
+        val clientSecret = "seti_1234_secret_5678"
+        val customerName = "John Doe"
+        val customerEmailAddress = "johndoe@gmail.com"
+        create().createSetupIntentLinkAccountSession(
+            CreateLinkAccountSessionParams(
+                clientSecret = clientSecret,
+                customerName = customerName,
+                customerEmailAddress = customerEmailAddress
+            ),
+            DEFAULT_OPTIONS
+        )
+
+        verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
+
+        val request = apiRequestArgumentCaptor.firstValue
+        val params = requireNotNull(request.params)
+
+        assertEquals(
+            "https://api.stripe.com/v1/setup_intents/seti_1234/link_account_session",
+            request.baseUrl
+        )
+
+        with(params) {
+            assertEquals(clientSecret, this["client_secret"])
+            withNestedParams("payment_method_data") {
+                assertEquals("us_bank_account", this["type"])
+                withNestedParams("billing_details") {
+                    assertEquals(customerName, this["name"])
+                }
+            }
+        }
+    }
+
 
     /**
      * Helper DSL to validate nested params.

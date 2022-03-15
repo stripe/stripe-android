@@ -15,7 +15,7 @@ import com.stripe.android.model.Customer
 import com.stripe.android.model.LinkAccountSession
 import com.stripe.android.model.ListPaymentMethodsParams
 import com.stripe.android.model.PaymentIntent
-import com.stripe.android.model.PaymentIntentLinkAccountSessionParams
+import com.stripe.android.model.CreateLinkAccountSessionParams
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.RadarSession
@@ -326,7 +326,14 @@ internal abstract class AbsFakeStripeRepository : StripeRepository() {
     }
 
     override suspend fun createPaymentIntentLinkAccountSession(
-        paymentIntentLinkAccountSessionParams: PaymentIntentLinkAccountSessionParams,
+        createLinkAccountSessionParams: CreateLinkAccountSessionParams,
+        requestOptions: ApiRequest.Options
+    ): LinkAccountSession? {
+        return null
+    }
+
+    override suspend fun createSetupIntentLinkAccountSession(
+        createLinkAccountSessionParams: CreateLinkAccountSessionParams,
         requestOptions: ApiRequest.Options
     ): LinkAccountSession? {
         return null
