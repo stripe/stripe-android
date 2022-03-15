@@ -1,25 +1,61 @@
-package com.stripe.android.ui.core.elements
+package com.stripe.android.ui.core.elements.menu
+
+/*
+ * Copyright 2020 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.MutableTransitionState
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.updateTransition
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredSizeIn
+import androidx.compose.foundation.layout.sizeIn
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Card
+import androidx.compose.material.ContentAlpha
+import androidx.compose.material.DropdownMenu
+import androidx.compose.material.DropdownMenuItem
+import androidx.compose.material.LocalContentAlpha
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.ProvideTextStyle
+import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.IntOffset
@@ -27,70 +63,17 @@ import androidx.compose.ui.unit.IntRect
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupPositionProvider
-import androidx.compose.ui.window.PopupProperties
+import com.stripe.android.ui.core.elements.CardStyle
 import kotlin.math.max
 import kotlin.math.min
-
-
-@Suppress("ModifierParameter")
-@Composable
-fun MyDropdownMenu(
-    expanded: Boolean,
-    onDismissRequest: () -> Unit,
-    modifier: Modifier = Modifier,
-    offset: DpOffset = DpOffset(0.dp, 0.dp),
-    properties: PopupProperties = PopupProperties(focusable = true),
-    content: LazyListScope.() -> Unit
-) {
-    val expandedStates = remember { MutableTransitionState(false) }
-    expandedStates.targetState = expanded
-
-    if (expandedStates.currentState || expandedStates.targetState) {
-        val transformOriginState = remember { mutableStateOf(TransformOrigin.Center) }
-        val density = LocalDensity.current
-        val popupPositionProvider = DropdownMenuPositionProvider(
-            offset,
-            density
-        ) { parentBounds, menuBounds ->
-            transformOriginState.value =
-                calculateTransformOrigin(parentBounds, menuBounds)
-        }
-
-        Popup(
-            onDismissRequest = onDismissRequest,
-            popupPositionProvider = popupPositionProvider,
-            properties = properties
-        ) {
-            DropdownMenuContent(
-                expandedStates = expandedStates,
-                transformOriginState = transformOriginState,
-                modifier = modifier,
-                content = content
-            )
-        }
-    }
-}
-
-// Size defaults.
-private val MenuElevation = 8.dp
-internal val MenuVerticalMargin = 48.dp
-internal val DropdownMenuItemHorizontalPadding = 16.dp
-internal val DropdownMenuVerticalPadding = 8.dp
-internal val DropdownMenuItemDefaultMinWidth = 112.dp
-internal val DropdownMenuItemDefaultMaxWidth = 280.dp
-internal val DropdownMenuItemDefaultMinHeight = 48.dp
-
-// Menu open/close animation.
-internal const val InTransitionDuration = 120
-internal const val OutTransitionDuration = 75
 
 @Suppress("ModifierParameter")
 @Composable
 internal fun DropdownMenuContent(
     expandedStates: MutableTransitionState<Boolean>,
     transformOriginState: MutableState<TransformOrigin>,
+    initialFirstVisibleItemIndex: Int,
     modifier: Modifier = Modifier,
     content: LazyListScope.() -> Unit
 ) {
@@ -142,25 +125,100 @@ internal fun DropdownMenuContent(
             0f
         }
     }
+
+    // TODO: Make sure this gets the rounded corner values
     Card(
-        modifier = Modifier.graphicsLayer {
-            scaleX = scale
-            scaleY = scale
-            this.alpha = alpha
-            transformOrigin = transformOriginState.value
-        },
+        border = BorderStroke(CardStyle.cardBorderWidth, CardStyle.cardBorderColor),
+        modifier = Modifier,
+//            .graphicsLayer {
+//            scaleX = scale
+//            scaleY = scale
+//            this.alpha = alpha
+//            transformOrigin = transformOriginState.value
+//        }
+//            .requiredSizeIn(maxHeight = DropdownMenuItemDefaultMinHeight * 8.9f)
+//            .width(DropdownMenuItemDefaultMaxWidth),
         elevation = MenuElevation
     ) {
+        val lazyListState = rememberLazyListState(
+            initialFirstVisibleItemIndex = initialFirstVisibleItemIndex
+        )
+
         LazyColumn(
-//        Column(
             modifier = modifier
                 .padding(vertical = DropdownMenuVerticalPadding),
+//                .width(DropdownMenuItemDefaultMaxWidth),
 //                .width(IntrinsicSize.Max)
 //                .verticalScroll(rememberScrollState()),
+            state = lazyListState,
             content = content
         )
     }
 }
+
+@Composable
+internal fun DropdownMenuItemContent(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    contentPadding: PaddingValues = MenuDefaults.DropdownMenuItemContentPadding,
+    interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
+    content: @Composable RowScope.() -> Unit
+) {
+    // TODO(popam, b/156911853): investigate replacing this Row with ListItem
+    Row(
+        modifier = modifier
+            .clickable(
+                enabled = enabled,
+                onClick = onClick,
+                interactionSource = interactionSource,
+                indication = rememberRipple(true)
+            )
+            .fillMaxWidth()
+            // Preferred min and max width used during the intrinsic measurement.
+            .sizeIn(
+                minWidth = DropdownMenuItemDefaultMaxWidth,// use the max width for both
+                maxWidth = DropdownMenuItemDefaultMaxWidth,
+                minHeight = DropdownMenuItemDefaultMinHeight
+            )
+            .padding(contentPadding),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        val typography = MaterialTheme.typography
+        ProvideTextStyle(typography.subtitle1) {
+            val contentAlpha = if (enabled) ContentAlpha.high else ContentAlpha.disabled
+            CompositionLocalProvider(LocalContentAlpha provides contentAlpha) {
+                content()
+            }
+        }
+    }
+}
+
+/**
+ * Contains default values used for [DropdownMenuItem].
+ */
+object MenuDefaults {
+    /**
+     * Default padding used for [DropdownMenuItem].
+     */
+    val DropdownMenuItemContentPadding = PaddingValues(
+        horizontal = DropdownMenuItemHorizontalPadding,
+        vertical = 0.dp
+    )
+}
+
+// Size defaults.
+private val MenuElevation = 8.dp
+internal val MenuVerticalMargin = 48.dp
+internal val DropdownMenuItemHorizontalPadding = 16.dp
+internal val DropdownMenuVerticalPadding = 8.dp
+internal val DropdownMenuItemDefaultMinWidth = 112.dp
+internal val DropdownMenuItemDefaultMaxWidth = 280.dp
+internal val DropdownMenuItemDefaultMinHeight = 48.dp
+
+// Menu open/close animation.
+internal const val InTransitionDuration = 120
+internal const val OutTransitionDuration = 75
 
 internal fun calculateTransformOrigin(
     parentBounds: IntRect,
@@ -195,53 +253,12 @@ internal fun calculateTransformOrigin(
     return TransformOrigin(pivotX, pivotY)
 }
 
+// Menu positioning.
 
-class AlignmentOffsetPositionProvider(
-    val alignment: Alignment,
-    val offset: IntOffset
-) : PopupPositionProvider {
-    override fun calculatePosition(
-        anchorBounds: IntRect,
-        windowSize: IntSize,
-        layoutDirection: LayoutDirection,
-        popupContentSize: IntSize
-    ): IntOffset {
-        // TODO: Decide which is the best way to round to result without reimplementing Alignment.align
-        var popupPosition = IntOffset(0, 0)
-
-        // Get the aligned point inside the parent
-        val parentAlignmentPoint = alignment.align(
-            IntSize.Zero,
-            IntSize(anchorBounds.width, anchorBounds.height),
-            layoutDirection
-        )
-        // Get the aligned point inside the child
-        val relativePopupPos = alignment.align(
-            IntSize.Zero,
-            IntSize(popupContentSize.width, popupContentSize.height),
-            layoutDirection
-        )
-
-        // Add the position of the parent
-        popupPosition += IntOffset(anchorBounds.left, anchorBounds.top)
-
-        // Add the distance between the parent's top left corner and the alignment point
-        popupPosition += parentAlignmentPoint
-
-        // Subtract the distance between the children's top left corner and the alignment point
-        popupPosition -= IntOffset(relativePopupPos.x, relativePopupPos.y)
-
-        // Add the user offset
-        val resolvedOffset = IntOffset(
-            offset.x * (if (layoutDirection == LayoutDirection.Ltr) 1 else -1),
-            offset.y
-        )
-        popupPosition += resolvedOffset
-
-        return popupPosition
-    }
-}
-
+/**
+ * Calculates the position of a Material [DropdownMenu].
+ */
+// TODO(popam): Investigate if this can/should consider the app window size rather than screen size
 @Immutable
 internal data class DropdownMenuPositionProvider(
     val contentOffset: DpOffset,

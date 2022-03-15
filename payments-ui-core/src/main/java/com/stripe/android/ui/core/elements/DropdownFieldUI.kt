@@ -1,5 +1,6 @@
 package com.stripe.android.ui.core.elements
 
+import DropdownMenu
 import androidx.annotation.StringRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -12,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSizeIn
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.ContentAlpha
 import androidx.compose.material.Icon
@@ -38,6 +40,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.stripe.android.ui.core.PaymentsTheme
 import com.stripe.android.ui.core.R
+import com.stripe.android.ui.core.elements.menu.DropdownMenuItemDefaultMaxWidth
+import com.stripe.android.ui.core.elements.menu.DropdownMenuItemDefaultMinHeight
+import com.stripe.android.ui.core.elements.menu.DropdownMenuItemDefaultMinWidth
+import com.stripe.android.ui.core.elements.menu.DropdownMenuItemHorizontalPadding
+import kotlin.math.max
+import kotlin.math.min
 
 
 @Composable
@@ -60,6 +68,7 @@ internal fun DropDown(
             .indicatorColor(enabled, false, interactionSource)
             .value
     }
+
     val inputModeManager = LocalInputModeManager.current
     Box {
         Box(
@@ -101,11 +110,22 @@ internal fun DropDown(
             }
         }
 
-        MyDropdownMenu(
+        DropdownMenu(
             expanded = expanded,
+
+            // We will show up to two items before
+            initialFirstVisibleItemIndex = if (selectedIndex >= 1) {
+                min(
+                    max(selectedIndex - 2, 0),
+                    max(selectedIndex - 1, 0)
+                )
+            } else {
+                selectedIndex
+            },
             onDismissRequest = { expanded = false },
             modifier = Modifier
                 .background(color = PaymentsTheme.colors.colorComponentBackground)
+                .width(DropdownMenuItemDefaultMaxWidth)
                 .requiredSizeIn(maxHeight = DropdownMenuItemDefaultMinHeight * 8.9f)
         ) {
             itemsIndexed(items) { index, displayValue ->
@@ -114,8 +134,8 @@ internal fun DropDown(
                     isSelected = index == selectedIndex,
                     currentTextColor,
                     onClick = {
-                        controller.onValueChange(index)
                         expanded = false
+                        controller.onValueChange(index)
                     }
                 )
             }
