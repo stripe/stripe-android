@@ -1,6 +1,5 @@
 package com.stripe.android.model
 
-import com.stripe.android.model.parsers.BankConnectionsResourceLinkAccountSessionJsonParser
 import com.stripe.android.model.parsers.PaymentIntentJsonParser
 import org.json.JSONObject
 
