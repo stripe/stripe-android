@@ -6,30 +6,17 @@ on:
   pull_request:
 
 env:
-  STRIPE_END_TO_END_TESTS_BACKEND_URL: ${{ secrets.STRIPE_END_TO_END_TESTS_BACKEND_URL }}
+  BROWSERSTACK_USERNAME: ${{ secrets.BROWSERSTACK_USERNAME }}
+  BROWSERSTACK_ACCESS_KEY: ${{ secrets.BROWSERSTACK_ACCESS_KEY }}
 
 jobs:
   instrumentation-tests:
     name: Instrumentation tests
     runs-on: ubuntu-latest
     steps:
+      - name: 'Build'
+        run: ./gradlew :paymentsheet-example:assembleDebugAndroidTest :paymentsheet-example:assemble
+
       - name: 'BrowserStack Env Setup'
-        uses: 'browserstack/github-actions/setup-env@master'
-        with:
-          username: ${{ secrets.BROWSERSTACK_USERNAME }}
-          access-key: ${{ secrets.BROWSERSTACK_ACCESS_KEY }}
-          build-name: BUILD_INFO
-          project-name: REPO_NAME
-      - name: 'BrowserStackLocal Setup'
-        uses: 'browserstack/github-actions/setup-local@master'
-        with:
-          local-testing: start
-          local-identifier: random
-          script: |
-            ./gradlew :paymentsheet-example:assembleDebugAndroidTest :paymentsheet-example:assemble
-            python scripts/browserstack.py                                                                                                                                \"bs://527636cd103e394cb10e57d3ef0d57bcd0e0f433\", \"deviceLogs\":
-                                                                                                                                                true, \"testSuite\":
-                                                                                                                                                  \"bs://52bce22d70c5ede86f250127238394af3cc76f25\"}" -H "Content-Type: application/json" -u "michelleb_0ydoxc:GKqKWysjVB7yVQpDwdJz"
-
-
+        run: python scripts/browserstack.py
 
