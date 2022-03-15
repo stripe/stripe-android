@@ -8,8 +8,8 @@ import org.json.JSONObject
 internal class BankConnectionsResourceLinkAccountSessionJsonParser : ModelJsonParser<LinkAccountSession> {
     override fun parse(json: JSONObject): LinkAccountSession {
         return LinkAccountSession(
-            clientSecret = StripeJsonUtils.optString(json, FIELD_CLIENT_SECRET)!!,
-            id = StripeJsonUtils.optString(json, FIELD_ID)!!
+            clientSecret = StripeJsonUtils.optString(json, FIELD_CLIENT_SECRET),
+            id = StripeJsonUtils.optString(json, FIELD_ID)
         )
     }
 
