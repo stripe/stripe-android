@@ -123,7 +123,7 @@ internal fun WalletBody(
         modifier = Modifier
             .fillMaxWidth()
             .fillMaxHeight()
-            .padding(20.dp),
+            .padding(vertical = 20.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = if (paymentDetails.isEmpty()) {
             Arrangement.Center
