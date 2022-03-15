@@ -325,7 +325,7 @@ internal abstract class AbsFakeStripeRepository : StripeRepository() {
         return null
     }
 
-    override suspend fun paymentIntentLinkAccountSession(
+    override suspend fun createPaymentIntentLinkAccountSession(
         paymentIntentLinkAccountSessionParams: PaymentIntentLinkAccountSessionParams,
         requestOptions: ApiRequest.Options
     ): LinkAccountSession? {

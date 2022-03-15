@@ -1311,7 +1311,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         }
     }
 
-    override suspend fun paymentIntentLinkAccountSession(
+    override suspend fun createPaymentIntentLinkAccountSession(
         paymentIntentLinkAccountSessionParams: PaymentIntentLinkAccountSessionParams,
         requestOptions: ApiRequest.Options
     ): LinkAccountSession? {
@@ -1327,6 +1327,15 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         ) {
             // no-op
         }
+    }
+
+    /**
+     * @return `https://api.stripe.com/v1/payment_intents/:id/link_account_session`
+     */
+    @VisibleForTesting
+    @JvmSynthetic
+    internal fun getPaymentIntentLinkAccountSessionUrl(paymentIntentId: String): String {
+        return getApiUrl("payment_intents/%s/link_account_session", paymentIntentId)
     }
 
     /**
@@ -1656,15 +1665,6 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         internal val consumerPaymentDetailsUrl: String
             @JvmSynthetic
             get() = getApiUrl("consumers/payment_details")
-
-        /**
-         * @return `https://api.stripe.com/v1/payment_intents/:id/link_account_session`
-         */
-        @VisibleForTesting
-        @JvmSynthetic
-        internal fun getPaymentIntentLinkAccountSessionUrl(paymentIntentId: String): String {
-            return getApiUrl("payment_intents/%s/link_account_session", paymentIntentId)
-        }
 
         /**
          * @return `https://api.stripe.com/v1/payment_intents/:id`

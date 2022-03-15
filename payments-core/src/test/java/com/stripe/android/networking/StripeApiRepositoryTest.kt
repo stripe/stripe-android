@@ -1763,7 +1763,7 @@ internal class StripeApiRepositoryTest {
             val clientSecret = "secret"
             val customerName = "John Doe"
             val customerEmailAddress = "johndoe@gmail.com"
-            create().paymentIntentLinkAccountSession(
+            create().createPaymentIntentLinkAccountSession(
                 PaymentIntentLinkAccountSessionParams(
                     clientSecret = clientSecret,
                     customerName = customerName,

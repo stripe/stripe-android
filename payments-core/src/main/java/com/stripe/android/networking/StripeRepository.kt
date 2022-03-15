@@ -435,7 +435,7 @@ abstract class StripeRepository {
     ): ConsumerPaymentDetails?
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    abstract suspend fun paymentIntentLinkAccountSession(
+    abstract suspend fun createPaymentIntentLinkAccountSession(
         paymentIntentLinkAccountSessionParams: PaymentIntentLinkAccountSessionParams,
         requestOptions: ApiRequest.Options
     ): LinkAccountSession?
