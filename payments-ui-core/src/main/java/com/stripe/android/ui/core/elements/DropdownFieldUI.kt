@@ -47,7 +47,18 @@ import com.stripe.android.ui.core.elements.menu.DropdownMenuItemHorizontalPaddin
 import kotlin.math.max
 import kotlin.math.min
 
-
+/**
+ * This composable will handle the display of dropdown items
+ * in a lazy column.
+ *
+ * Here are some relevant manual tests:
+ *   - Short list of dropdown items
+ *   - long list of dropdown items
+ *   - Varying width of dropdown item
+ *   - Display setting very large
+ *   - Whole row is clickable, not just text
+ *   - Scrolls to the selected item in the list
+ */
 @Composable
 internal fun DropDown(
     controller: DropdownFieldController,
