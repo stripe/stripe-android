@@ -44,17 +44,17 @@ internal class IdentityFragmentFactory(
     override fun instantiate(classLoader: ClassLoader, className: String): Fragment {
         return when (className) {
             IDScanFragment::class.java.name -> IDScanFragment(
-                cameraPermissionEnsureable,
+//                cameraPermissionEnsureable,
                 cameraViewModelFactory,
                 identityViewModelFactory
             )
             DriverLicenseScanFragment::class.java.name -> DriverLicenseScanFragment(
-                cameraPermissionEnsureable,
+//                cameraPermissionEnsureable,
                 cameraViewModelFactory,
                 identityViewModelFactory
             )
             PassportScanFragment::class.java.name -> PassportScanFragment(
-                cameraPermissionEnsureable,
+//                cameraPermissionEnsureable,
                 cameraViewModelFactory,
                 identityViewModelFactory
             )
@@ -77,7 +77,8 @@ internal class IdentityFragmentFactory(
                 identityViewModelFactory
             )
             DocSelectionFragment::class.java.name -> DocSelectionFragment(
-                identityViewModelFactory
+                identityViewModelFactory,
+                cameraPermissionEnsureable
             )
             ConfirmationFragment::class.java.name -> ConfirmationFragment(
                 identityViewModelFactory,

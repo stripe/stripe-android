@@ -10,7 +10,6 @@ import androidx.navigation.Navigation
 import androidx.navigation.testing.TestNavHostController
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.camera.CameraPermissionEnsureable
 import com.stripe.android.identity.R
 import com.stripe.android.identity.camera.IDDetectorAggregator
 import com.stripe.android.identity.camera.IdentityScanFlow
@@ -36,14 +35,13 @@ import java.io.File
 
 @RunWith(RobolectricTestRunner::class)
 internal class IDScanFragmentTest {
-    // Ensure livedata works properly
+    // Ensure livedatas and posted runnables work properly
     @get:Rule
     var rule: TestRule = InstantTaskExecutorRule()
 
     private val finalResultLiveData = MutableLiveData<IDDetectorAggregator.FinalResult>()
     private val displayStateChanged = MutableLiveData<Pair<IdentityScanState, IdentityScanState?>>()
     private val mockScanFlow = mock<IdentityScanFlow>()
-    private val mockCameraPermissionEnsurable = mock<CameraPermissionEnsureable>()
     private val mockCameraViewModel = mock<CameraViewModel>().also {
         whenever(it.identityScanFlow).thenReturn(mockScanFlow)
         whenever(it.finalResult).thenReturn(finalResultLiveData)
@@ -54,51 +52,14 @@ internal class IDScanFragmentTest {
         whenever(it.idDetectorModelFile).thenReturn(idDetectorModelFile)
     }
 
-    private val testCameraPermissionEnsureable = object : CameraPermissionEnsureable {
-        lateinit var onCameraReady: () -> Unit
-        lateinit var onUserDeniedCameraPermission: () -> Unit
-
-        override fun ensureCameraPermission(
-            onCameraReady: () -> Unit,
-            onUserDeniedCameraPermission: () -> Unit
-        ) {
-            this.onCameraReady = onCameraReady
-            this.onUserDeniedCameraPermission = onUserDeniedCameraPermission
-        }
-    }
-
     @Before
     fun simulateModelDownloaded() {
         idDetectorModelFile.postValue(Resource.success(mock()))
     }
 
     @Test
-    fun `when created camera permission is requested`() {
-        launchIDScanFragment(mockCameraPermissionEnsurable)
-
-        verify(mockCameraPermissionEnsurable).ensureCameraPermission(any(), any())
-    }
-
-    @Test
-    fun `when camera permission granted cameraAdapter is bound and identityScanFlow is started`() {
-        launchIDScanFragment(testCameraPermissionEnsureable).onFragment {
-            testCameraPermissionEnsureable.onCameraReady()
-            assertThat(it.cameraAdapter.isBoundToLifecycle()).isTrue()
-            verify(mockScanFlow).startFlow(
-                same(it.requireContext()),
-                any(),
-                any(),
-                same(it.viewLifecycleOwner),
-                same(it.lifecycleScope),
-                eq(IdentityScanState.ScanType.ID_FRONT)
-            )
-        }
-    }
-
-    @Test
     fun `when front is scanned clicking button triggers back scan`() {
-        launchIDScanFragment(testCameraPermissionEnsureable).onFragment {
-            testCameraPermissionEnsureable.onCameraReady()
+        launchIDScanFragment().onFragment {
             // mock success of front scan
             finalResultLiveData.postValue(mock())
 
@@ -128,7 +89,7 @@ internal class IDScanFragmentTest {
 
     @Test
     fun `when both sides are scanned clicking button triggers navigation`() {
-        launchIDScanFragment(testCameraPermissionEnsureable).onFragment {
+        launchIDScanFragment().onFragment {
             val navController = TestNavHostController(
                 ApplicationProvider.getApplicationContext()
             )
@@ -142,8 +103,6 @@ internal class IDScanFragmentTest {
             )
 
             // scan front
-            testCameraPermissionEnsureable.onCameraReady()
-
             // mock success of front scan
             finalResultLiveData.postValue(mock())
 
@@ -169,35 +128,8 @@ internal class IDScanFragmentTest {
     }
 
     @Test
-    fun `when camera permission denied navigates to permission denied`() {
-        launchIDScanFragment(testCameraPermissionEnsureable).onFragment {
-            val navController = TestNavHostController(
-                ApplicationProvider.getApplicationContext()
-            )
-            navController.setGraph(R.navigation.identity_nav_graph)
-
-            Navigation.setViewNavController(
-                it.requireView(),
-                navController
-            )
-
-            testCameraPermissionEnsureable.onUserDeniedCameraPermission()
-
-            assertThat(it.cameraAdapter.isBoundToLifecycle()).isFalse()
-            assertThat(navController.currentDestination?.id).isEqualTo(R.id.cameraPermissionDeniedFragment)
-            assertThat(
-                navController.backStack.last()
-                    .arguments!![CameraPermissionDeniedFragment.ARG_SCAN_TYPE]
-            ).isEqualTo(
-                IdentityScanState.ScanType.ID_FRONT
-            )
-        }
-    }
-
-    @Test
     fun `when final result is received scanFlow is reset and cameraAdapter is unbound`() {
-        launchIDScanFragment(testCameraPermissionEnsureable).onFragment {
-            testCameraPermissionEnsureable.onCameraReady()
+        launchIDScanFragment().onFragment {
             assertThat(it.cameraAdapter.isBoundToLifecycle()).isTrue()
 
             finalResultLiveData.postValue(mock())
@@ -315,13 +247,10 @@ internal class IDScanFragmentTest {
         }
     }
 
-    private fun launchIDScanFragment(
-        cameraPermissionEnsureable: CameraPermissionEnsureable
-    ) = launchFragmentInContainer(
+    private fun launchIDScanFragment() = launchFragmentInContainer(
         themeResId = R.style.Theme_MaterialComponents
     ) {
         IDScanFragment(
-            cameraPermissionEnsureable,
             viewModelFactoryFor(mockCameraViewModel),
             viewModelFactoryFor(mockIdentityViewModel)
         )
@@ -331,9 +260,7 @@ internal class IDScanFragmentTest {
         newScanState: IdentityScanState,
         check: (binding: IdScanFragmentBinding, context: Context) -> Unit
     ) {
-        launchIDScanFragment(
-            mockCameraPermissionEnsurable
-        ).onFragment {
+        launchIDScanFragment().onFragment {
             displayStateChanged.postValue((newScanState to mock()))
             check(IdScanFragmentBinding.bind(it.requireView()), it.requireContext())
         }

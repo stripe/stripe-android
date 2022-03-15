@@ -30,6 +30,7 @@
     <string name="app_settings">App Settings</string>
     <string name="camera_permission">Camera permission</string>
     <string name="grant_camera_permission_text">We need permission to use your camera. Please allow camera access in app settings.</string>
+    <string name="ok">OK</string>
     <string name="upload_file_text">Alternatively, you may manually upload a photo of your %1$s</string>
 
     <string name="displayname_id">ID</string>
