@@ -15,7 +15,6 @@ import androidx.compose.material.ContentAlpha
 import androidx.compose.material.DropdownMenu
 import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
@@ -108,7 +107,8 @@ internal fun DropDown(
                 ) {
                     Text(
                         text = displayValue,
-                        color = currentTextColor
+                        color = currentTextColor,
+                        style = PaymentsTheme.typography.body1
                     )
                 }
             }
@@ -129,7 +129,6 @@ internal fun DropdownLabel(
     val color = PaymentsTheme.colors.placeholderText
     Text(
         stringResource(label),
-        color = if (enabled) color else color.copy(alpha = ContentAlpha.disabled),
-        style = MaterialTheme.typography.caption
+        color = if (enabled) color else color.copy(alpha = ContentAlpha.disabled)
     )
 }

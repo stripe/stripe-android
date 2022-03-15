@@ -10,6 +10,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Colors
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Shapes
+import androidx.compose.material.Typography
 import androidx.compose.material.lightColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -17,15 +18,12 @@ import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-
-internal val LocalFieldTextStyle = TextStyle.Default.copy(
-    fontFamily = FontFamily.SansSerif,
-    fontSize = 14.sp
-)
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 data class PaymentsColors(
@@ -53,6 +51,61 @@ object PaymentsThemeConfig {
         val cornerRadius = 6.dp
         val borderStrokeWidth = 1.dp
         val borderStrokeWidthSelected = 2.dp
+    }
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    object Typography {
+        private val fontWeightBold: Int = FontWeight.Bold.weight
+        private val fontWeightMedium: Int = FontWeight.Medium.weight
+        private val fontWeightNormal: Int = FontWeight.Normal.weight
+        private val fontSizeMultiplier: Float = 1.0F
+        val fontFamily: Int = R.font.roboto
+
+        val h4 = TextStyle.Default.copy(
+            fontFamily = FontFamily(Font(fontFamily)),
+            fontSize = (20.0 * fontSizeMultiplier).sp,
+            fontWeight = FontWeight(fontWeightBold),
+        )
+
+        val h5 = TextStyle.Default.copy(
+            fontFamily = FontFamily(Font(fontFamily)),
+            fontSize = (16.0 * fontSizeMultiplier).sp,
+            fontWeight = FontWeight(fontWeightMedium),
+            letterSpacing = (-0.32).sp
+        )
+
+        val h6 = TextStyle.Default.copy(
+            fontFamily = FontFamily(Font(fontFamily)),
+            fontSize = (13.0 * fontSizeMultiplier).sp,
+            fontWeight = FontWeight(fontWeightMedium),
+            letterSpacing = (-0.15).sp
+        )
+
+        val body1 = TextStyle.Default.copy(
+            fontFamily = FontFamily(Font(fontFamily)),
+            fontSize = (14.0 * fontSizeMultiplier).sp,
+            fontWeight = FontWeight(fontWeightNormal),
+        )
+
+        val subtitle1 = TextStyle.Default.copy(
+            fontFamily = FontFamily(Font(fontFamily)),
+            fontSize = (14.0 * fontSizeMultiplier).sp,
+            fontWeight = FontWeight(fontWeightNormal),
+            letterSpacing = (-0.15).sp
+        )
+
+        val caption = TextStyle.Default.copy(
+            fontFamily = FontFamily(Font(fontFamily)),
+            fontSize = (12.0 * fontSizeMultiplier).sp,
+            fontWeight = FontWeight(fontWeightMedium)
+        )
+
+        val body2 = TextStyle.Default.copy(
+            fontFamily = FontFamily(Font(fontFamily)),
+            fontSize = (9.0 * fontSizeMultiplier).sp,
+            fontWeight = FontWeight(fontWeightNormal),
+            letterSpacing = (-0.15).sp
+        )
     }
 
     private val colorsLight = PaymentsColors(
@@ -138,6 +191,21 @@ fun PaymentsThemeConfig.Shapes.toComposeShapes(): PaymentsComposeShapes {
 }
 
 @Composable
+@ReadOnlyComposable
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+fun PaymentsThemeConfig.Typography.toComposeTypography(): Typography {
+    return MaterialTheme.typography.copy(
+        body1 = body1,
+        body2 = body2,
+        h4 = h4,
+        h5 = h5,
+        h6 = h6,
+        subtitle1 = subtitle1,
+        caption = caption
+    )
+}
+
+@Composable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun PaymentsTheme(
     content: @Composable () -> Unit
@@ -154,10 +222,7 @@ fun PaymentsTheme(
     ) {
         MaterialTheme(
             colors = PaymentsTheme.colors.material,
-            typography = MaterialTheme.typography.copy(
-                body1 = LocalFieldTextStyle,
-                subtitle1 = LocalFieldTextStyle
-            ),
+            typography = PaymentsThemeConfig.Typography.toComposeTypography(),
             shapes = PaymentsTheme.shapes.material,
             content = content
         )
@@ -178,6 +243,11 @@ object PaymentsTheme {
         @Composable
         @ReadOnlyComposable
         get() = PaymentsThemeConfig.Shapes.toComposeShapes()
+
+    val typography: Typography
+        @Composable
+        @ReadOnlyComposable
+        get() = PaymentsThemeConfig.Typography.toComposeTypography()
 
     @Composable
     @ReadOnlyComposable

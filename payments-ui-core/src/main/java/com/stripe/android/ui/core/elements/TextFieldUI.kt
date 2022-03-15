@@ -76,7 +76,8 @@ internal fun TextField(
                     )
                 } else {
                     stringResource(textFieldController.label)
-                }
+                },
+                style = PaymentsTheme.typography.subtitle1
             )
         },
         modifier = modifier

@@ -1,6 +1,7 @@
 package com.stripe.android.ui.core.forms
 
 import androidx.annotation.RestrictTo
+import com.stripe.android.ui.core.PaymentsThemeConfig
 import com.stripe.android.ui.core.elements.EmailSpec
 import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.elements.KlarnaCountrySpec
@@ -19,8 +20,8 @@ val KlarnaParamKey: MutableMap<String, Any?> = mutableMapOf(
 internal val klarnaHeader = StaticTextSpec(
     identifier = IdentifierSpec.Generic("klarna_header"),
     stringResId = KlarnaHelper.getKlarnaHeader(),
-    fontSizeSp = 13,
-    letterSpacingSp = -.15
+    fontSize = PaymentsThemeConfig.Typography.h6.fontSize.value,
+    letterSpacing = PaymentsThemeConfig.Typography.h6.letterSpacing.value
 )
 
 internal val klarnaEmailSection =

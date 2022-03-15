@@ -18,8 +18,8 @@ fun StaticElementUI(
 ) {
     Text(
         stringResource(element.stringResId, element.merchantName ?: ""),
-        fontSize = element.fontSizeSp.sp,
-        letterSpacing = element.letterSpacingSp.sp,
+        fontSize = element.fontSize.sp,
+        letterSpacing = element.letterSpacing.sp,
         modifier = Modifier
             .padding(vertical = 8.dp)
             .semantics(mergeDescendants = true) {}, // makes it a separate accessibile item

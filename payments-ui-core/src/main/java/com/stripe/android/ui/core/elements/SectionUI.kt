@@ -5,30 +5,14 @@ import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Card
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.stripe.android.ui.core.PaymentsTheme
-
-/**
- * This is the style for the section title.
- *
- * Once credit card is converted use one of the default material theme styles.
- * TODO(skyler-stripe): remove this once we centralize fonts.
- */
-internal object SectionTitle {
-    val fontWeight: FontWeight = FontWeight.Bold
-    val letterSpacing: TextUnit = (-0.01f).sp
-    val fontSize: TextUnit = 13.sp
-}
 
 /**
  * This is a simple section that holds content in a card view.  It has a label, content specified
@@ -58,11 +42,7 @@ internal fun SectionTitle(@StringRes titleText: Int?) {
         Text(
             text = stringResource(titleText),
             color = PaymentsTheme.colors.colorTextSecondary,
-            style = MaterialTheme.typography.h6.copy(
-                fontSize = SectionTitle.fontSize,
-                fontWeight = SectionTitle.fontWeight,
-                letterSpacing = SectionTitle.letterSpacing,
-            ),
+            style = PaymentsTheme.typography.h6,
             modifier = Modifier
                 .padding(vertical = 4.dp)
                 .semantics(mergeDescendants = true) { // Need to prevent form as focusable accessibility

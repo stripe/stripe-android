@@ -4,12 +4,14 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
 import androidx.annotation.VisibleForTesting
 import androidx.appcompat.view.ContextThemeWrapper
+import androidx.compose.material.Text
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.res.stringResource
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
@@ -31,13 +33,14 @@ import com.stripe.android.paymentsheet.paymentdatacollection.TransformToPaymentM
 import com.stripe.android.paymentsheet.ui.AnimationConstants
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.Amount
+import com.stripe.android.ui.core.PaymentsTheme
 import kotlinx.coroutines.launch
 
 internal abstract class BaseAddPaymentMethodFragment : Fragment() {
     abstract val viewModelFactory: ViewModelProvider.Factory
     abstract val sheetViewModel: BaseSheetViewModel<*>
 
-    protected lateinit var addPaymentMethodHeader: TextView
+    protected var addPaymentMethodHeaderVisibility = true
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -58,7 +61,6 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         val viewBinding = FragmentPaymentsheetAddPaymentMethodBinding.bind(view)
-        addPaymentMethodHeader = viewBinding.addPaymentMethodHeader
 
         val paymentMethods = sheetViewModel.supportedPaymentMethods
         viewBinding.googlePayDivider.setText(
@@ -70,6 +72,22 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
                 R.string.stripe_paymentsheet_or_pay_using
             }
         )
+
+        viewBinding.addPaymentMethodHeader.apply {
+            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
+            setContent {
+                val headerVisiblity = remember { addPaymentMethodHeaderVisibility }
+                if (headerVisiblity) {
+                    Text(
+                        text = stringResource(
+                            R.string.stripe_paymentsheet_add_payment_method_title
+                        ),
+                        style = PaymentsTheme.typography.h4,
+                        color = PaymentsTheme.colors.material.onPrimary,
+                    )
+                }
+            }
+        }
 
         val selectedPaymentMethodIndex = paymentMethods.indexOf(
             sheetViewModel.getAddFragmentSelectedLpm().value

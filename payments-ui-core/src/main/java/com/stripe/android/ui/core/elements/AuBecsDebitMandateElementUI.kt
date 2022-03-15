@@ -29,8 +29,8 @@ fun AuBecsDebitMandateElementUI(
     val annotatedText = buildAnnotatedString {
         val nonLinkTextStyle = SpanStyle(
             color = PaymentsTheme.colors.colorTextSecondary,
-            fontSize = element.fontSizeSp.sp,
-            letterSpacing = element.letterSpacingSp.sp,
+            fontSize = element.fontSize.sp,
+            letterSpacing = element.letterSpacing.sp,
         )
 
         withStyle(style = nonLinkTextStyle) {
@@ -47,8 +47,8 @@ fun AuBecsDebitMandateElementUI(
             style = SpanStyle(
                 color = PaymentsTheme.colors.colorTextSecondary,
                 fontWeight = FontWeight.Bold,
-                fontSize = element.fontSizeSp.sp,
-                letterSpacing = element.letterSpacingSp.sp,
+                fontSize = element.fontSize.sp,
+                letterSpacing = element.letterSpacing.sp,
                 textDecoration = TextDecoration.Underline
             )
         ) {

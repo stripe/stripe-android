@@ -6,7 +6,6 @@ import androidx.compose.material.Text
 import androidx.compose.material.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
-import androidx.compose.ui.unit.sp
 import com.stripe.android.ui.core.PaymentsTheme
 
 @Composable
@@ -30,14 +29,14 @@ fun SimpleDialogElementUI(
                 title = {
                     Text(
                         text = titleText,
-                        fontSize = 20.sp,
+                        style = PaymentsTheme.typography.h4,
                         color = PaymentsTheme.colors.material.onPrimary
                     )
                 },
                 text = {
                     Text(
                         text = messageText,
-                        fontSize = 13.sp,
+                        style = PaymentsTheme.typography.h6,
                         color = PaymentsTheme.colors.colorTextSecondary
                     )
                 },

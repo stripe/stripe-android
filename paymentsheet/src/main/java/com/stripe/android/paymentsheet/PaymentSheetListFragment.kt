@@ -2,20 +2,29 @@ package com.stripe.android.paymentsheet
 
 import android.os.Bundle
 import android.view.View
+import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.ui.graphics.toArgb
-import androidx.core.view.isVisible
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.fragment.app.activityViewModels
 import com.stripe.android.paymentsheet.databinding.FragmentPaymentsheetPaymentMethodsListBinding
-import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.CurrencyFormatter
-import com.stripe.android.ui.core.PaymentsThemeConfig
-import com.stripe.android.ui.core.isSystemDarkTheme
+import com.stripe.android.ui.core.PaymentsTheme
 
 internal class PaymentSheetListFragment() : BasePaymentMethodsListFragment(
     canClickSelectedItem = false
 ) {
-    private val currencyFormatter = CurrencyFormatter()
+    @VisibleForTesting
+    var showingTotal = false
+
     private val activityViewModel by activityViewModels<PaymentSheetViewModel> {
         PaymentSheetViewModel.Factory(
             { requireActivity().application },
@@ -38,26 +47,44 @@ internal class PaymentSheetListFragment() : BasePaymentMethodsListFragment(
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
+        showingTotal = sheetViewModel.isProcessingPaymentIntent
         val viewBinding = FragmentPaymentsheetPaymentMethodsListBinding.bind(view)
-        val isDark = context?.isSystemDarkTheme() ?: false
-        viewBinding.header.setTextColor(PaymentsThemeConfig.colors(isDark).onPrimary.toArgb())
-        viewBinding.total.setTextColor(
-            PaymentsThemeConfig.colors(isDark).textSecondary.toArgb()
-        )
-        if (sheetViewModel.isProcessingPaymentIntent) {
-            sheetViewModel.amount.observe(viewLifecycleOwner) {
-                viewBinding.total.text = getTotalText(requireNotNull(it))
+        viewBinding.header.apply {
+            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
+            setContent {
+                HeaderUI(
+                    viewModel = activityViewModel,
+                    totalVisible = sheetViewModel.isProcessingPaymentIntent
+                )
             }
-        } else {
-            viewBinding.total.isVisible = false
         }
     }
+}
 
-    private fun getTotalText(amount: Amount): String {
-        return resources.getString(
-            R.string.stripe_paymentsheet_total_amount,
-            currencyFormatter.format(amount.value, amount.currencyCode)
+@Composable
+private fun HeaderUI(
+    viewModel: PaymentSheetViewModel,
+    totalVisible: Boolean
+) {
+    val amount = remember { viewModel.amount }
+    Column {
+        Text(
+            text = stringResource(R.string.stripe_paymentsheet_select_payment_method),
+            style = PaymentsTheme.typography.h4,
+            color = PaymentsTheme.colors.material.onPrimary,
+            modifier = Modifier.padding(bottom = 2.dp)
         )
+        if (totalVisible) {
+            amount.value?.let {
+                Text(
+                    text = stringResource(
+                        R.string.stripe_paymentsheet_total_amount,
+                        CurrencyFormatter().format(it.value, it.currencyCode)
+                    ),
+                    style = PaymentsTheme.typography.h6,
+                    color = PaymentsTheme.colors.colorTextSecondary
+                )
+            }
+        }
     }
 }

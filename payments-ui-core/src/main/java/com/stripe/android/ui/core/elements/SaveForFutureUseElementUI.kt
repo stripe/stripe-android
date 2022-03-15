@@ -68,7 +68,8 @@ fun SaveForFutureUseElementUI(
             Modifier
                 .padding(start = 4.dp)
                 .align(Alignment.CenterVertically),
-            color = PaymentsTheme.colors.colorTextSecondary
+            color = PaymentsTheme.colors.colorTextSecondary,
+            style = PaymentsTheme.typography.h6
         )
     }
 }

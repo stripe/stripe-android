@@ -1,6 +1,7 @@
 package com.stripe.android.ui.core.elements
 
 import androidx.annotation.StringRes
+import com.stripe.android.ui.core.PaymentsThemeConfig
 import kotlinx.parcelize.Parcelize
 
 /**
@@ -10,8 +11,8 @@ import kotlinx.parcelize.Parcelize
 internal data class StaticTextSpec(
     override val identifier: IdentifierSpec,
     @StringRes val stringResId: Int,
-    val fontSizeSp: Int = 10,
-    val letterSpacingSp: Double = .7
+    val fontSize: Float = PaymentsThemeConfig.Typography.body2.fontSize.value,
+    val letterSpacing: Float = PaymentsThemeConfig.Typography.body2.letterSpacing.value
 ) : FormItemSpec(), RequiredItemSpec {
     fun transform(merchantName: String): FormElement =
         // It could be argued that the static text should have a controller, but
@@ -20,7 +21,7 @@ internal data class StaticTextSpec(
             this.identifier,
             this.stringResId,
             merchantName,
-            this.fontSizeSp,
-            this.letterSpacingSp
+            this.fontSize,
+            this.letterSpacing
         )
 }
