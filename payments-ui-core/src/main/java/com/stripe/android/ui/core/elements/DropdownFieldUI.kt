@@ -11,16 +11,16 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.layout.requiredSizeIn
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.ContentAlpha
-import androidx.compose.material.DropdownMenu
-import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -30,12 +30,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.focusProperties
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.InputMode
 import androidx.compose.ui.platform.LocalInputModeManager
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.stripe.android.ui.core.PaymentsTheme
 import com.stripe.android.ui.core.R
+
 
 @Composable
 internal fun DropDown(
@@ -58,12 +61,7 @@ internal fun DropDown(
             .value
     }
     val inputModeManager = LocalInputModeManager.current
-    Box(
-        modifier = Modifier
-            .wrapContentSize(Alignment.TopStart)
-            .background(PaymentsTheme.colors.colorComponentBackground)
-    ) {
-        // Click handling happens on the box, so that it is a single accessible item
+    Box {
         Box(
             modifier = Modifier
                 .focusProperties {
@@ -103,23 +101,23 @@ internal fun DropDown(
             }
         }
 
-        DropdownMenu(
+        MyDropdownMenu(
             expanded = expanded,
             onDismissRequest = { expanded = false },
-            modifier = Modifier.background(color = PaymentsTheme.colors.colorComponentBackground)
+            modifier = Modifier
+                .background(color = PaymentsTheme.colors.colorComponentBackground)
+                .requiredSizeIn(maxHeight = DropdownMenuItemDefaultMinHeight * 8.9f)
         ) {
-            items.forEachIndexed { index, displayValue ->
+            itemsIndexed(items) { index, displayValue ->
                 DropdownMenuItem(
+                    displayValue,
+                    isSelected = index == selectedIndex,
+                    currentTextColor,
                     onClick = {
                         controller.onValueChange(index)
                         expanded = false
                     }
-                ) {
-                    Text(
-                        text = displayValue,
-                        color = currentTextColor
-                    )
-                }
+                )
             }
         }
     }
@@ -136,13 +134,59 @@ internal fun DropdownLabel(
     enabled: Boolean
 ) {
     val color = PaymentsTheme.colors.placeholderText
-    val interactionSource = remember { MutableInteractionSource() }
     label?.let {
         Text(
             stringResource(label),
             color = if (enabled) color else color.copy(alpha = ContentAlpha.disabled),
             modifier = Modifier.focusable(false),
             style = MaterialTheme.typography.caption
+        )
+    }
+}
+
+@Composable
+internal fun DropdownMenuItem(
+    displayValue: String,
+    isSelected: Boolean,
+    currentTextColor: Color,
+    onClick: () -> Unit
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .padding(
+                horizontal = DropdownMenuItemHorizontalPadding,
+            )
+            .requiredSizeIn(
+                minWidth = DropdownMenuItemDefaultMinWidth,
+                minHeight = DropdownMenuItemDefaultMinHeight
+            )
+            .clickable {
+                onClick()
+            }
+    ) {
+        if (isSelected) {
+            Icon(
+                Icons.Filled.Check,
+                contentDescription = null,
+                modifier = Modifier
+                    .height(24.dp)
+                    .padding(end = 4.dp),
+                tint = PaymentsTheme.colors.material.primary
+            )
+        }
+        Text(
+            text = displayValue,
+            color = if (isSelected) {
+                PaymentsTheme.colors.material.primary
+            } else {
+                currentTextColor
+            },
+            fontWeight = if (isSelected) {
+                FontWeight.Bold
+            } else {
+                FontWeight.Normal
+            }
         )
     }
 }
