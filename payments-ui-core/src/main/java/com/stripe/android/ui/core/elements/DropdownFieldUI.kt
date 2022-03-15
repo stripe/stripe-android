@@ -31,6 +31,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.InputMode
@@ -180,35 +181,27 @@ internal fun DropdownMenuItem(
     displayValue: String,
     isSelected: Boolean,
     currentTextColor: Color,
-    onClick: () -> Unit
+    onClick: () -> Unit = {}
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
+            .fillMaxWidth()
             .padding(
-                horizontal = DropdownMenuItemHorizontalPadding,
+                start = DropdownMenuItemHorizontalPadding,
+                end = 0.dp,
             )
             .requiredSizeIn(
                 minWidth = DropdownMenuItemDefaultMinWidth,
                 minHeight = DropdownMenuItemDefaultMinHeight
             )
-            .fillMaxWidth()
             .clickable {
                 onClick()
             }
     ) {
-        if (isSelected) {
-            Icon(
-                Icons.Filled.Check,
-                contentDescription = null,
-                modifier = Modifier
-                    .height(24.dp)
-                    .padding(end = 4.dp),
-                tint = PaymentsTheme.colors.material.primary
-            )
-        }
         Text(
             text = displayValue,
+            modifier = Modifier.fillMaxWidth(.8f),
             color = if (isSelected) {
                 PaymentsTheme.colors.material.primary
             } else {
@@ -219,6 +212,21 @@ internal fun DropdownMenuItem(
             } else {
                 FontWeight.Normal
             }
+        )
+
+        Icon(
+            Icons.Filled.Check,
+            contentDescription = null,
+            modifier = Modifier
+                .height(24.dp)
+                .alpha(
+                    if (isSelected) {
+                        1f
+                    } else {
+                        0f
+                    }
+                ),
+            tint = PaymentsTheme.colors.material.primary
         )
     }
 }
