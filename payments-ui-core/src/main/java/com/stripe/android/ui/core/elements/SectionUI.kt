@@ -22,7 +22,7 @@ import com.stripe.android.ui.core.PaymentsTheme
  * This is the style for the section title.
  *
  * Once credit card is converted use one of the default material theme styles.
- * todo skyler: remove this once we centralize fonts.
+ * TODO(skyler-stripe): remove this once we centralize fonts.
  */
 internal object SectionTitle {
     val fontWeight: FontWeight = FontWeight.Bold
@@ -84,7 +84,7 @@ fun SectionCard(
 ) {
     Card(
         border = PaymentsTheme.getBorderStroke(isSelected),
-        // todo skyler: this will change when we add shadow configurations.
+        // TODO(skyler-stripe): this will change when we add shadow configurations.
         elevation = if (isSelected) 1.5.dp else 0.dp,
         backgroundColor = PaymentsTheme.colors.colorComponentBackground,
         modifier = modifier
