@@ -1284,6 +1284,37 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
     }
 
     /**
+     * Logs out the consumer and invalidates the cookie.
+     */
+    override suspend fun logoutConsumer(
+        consumerSessionClientSecret: String,
+        authSessionCookie: String?,
+        requestOptions: ApiRequest.Options
+    ): ConsumerSession? {
+        return fetchStripeModel(
+            apiRequestFactory.createPost(
+                logoutConsumerUrl,
+                requestOptions,
+                mapOf(
+                    "credentials" to mapOf(
+                        "consumer_session_client_secret" to consumerSessionClientSecret
+                    ),
+                ).plus(
+                    authSessionCookie?.let {
+                        mapOf(
+                            "cookies" to
+                                mapOf("verification_session_client_secrets" to listOf(it))
+                        )
+                    } ?: emptyMap()
+                )
+            ),
+            ConsumerSessionJsonParser()
+        ) {
+            // no-op
+        }
+    }
+
+    /**
      * Fetches the saved payment methods for the given customer.
      */
     override suspend fun listPaymentDetails(
@@ -1628,6 +1659,13 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         internal val confirmConsumerVerificationUrl: String
             @JvmSynthetic
             get() = getApiUrl("consumers/sessions/confirm_verification")
+
+        /**
+         * @return `https://api.stripe.com/v1/consumers/sessions/log_out`
+         */
+        internal val logoutConsumerUrl: String
+            @JvmSynthetic
+            get() = getApiUrl("consumers/sessions/log_out")
 
         /**
          * @return `https://api.stripe.com/v1/consumers/payment_details`

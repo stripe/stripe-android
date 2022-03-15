@@ -426,6 +426,13 @@ abstract class StripeRepository {
     ): ConsumerSession?
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    abstract suspend fun logoutConsumer(
+        consumerSessionClientSecret: String,
+        authSessionCookie: String?,
+        requestOptions: ApiRequest.Options
+    ): ConsumerSession?
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     abstract suspend fun listPaymentDetails(
         consumerSessionClientSecret: String,
         paymentMethodTypes: Set<String>,
