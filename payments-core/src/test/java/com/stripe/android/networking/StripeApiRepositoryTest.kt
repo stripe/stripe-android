@@ -30,6 +30,7 @@ import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.ConsumerFixtures
 import com.stripe.android.model.ListPaymentMethodsParams
 import com.stripe.android.model.PaymentIntentFixtures
+import com.stripe.android.model.PaymentIntentLinkAccountSessionParams
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
@@ -44,6 +45,7 @@ import com.stripe.android.model.StripeFileFixtures
 import com.stripe.android.model.StripeFileParams
 import com.stripe.android.model.StripeFilePurpose
 import com.stripe.android.model.TokenFixtures
+import com.stripe.android.model.parsers.BankConnectionsResourceLinkAccountSession
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -1731,6 +1733,50 @@ internal class StripeApiRepositoryTest {
             assertEquals(credentials["consumer_session_client_secret"], clientSecret)
             assertContentEquals(params["types"] as? List<*>, paymentMethodTypes.toList())
         }
+
+    @Test
+    fun `paymentIntentsLinkAccountSession() sends all parameters`() =
+        runTest {
+            val stripeResponse = StripeResponse(
+                200,
+                PaymentIntentFixtures.PAYMENT_INTENT_LINK_ACCOUNT_SESSION_JSON.toString(),
+                emptyMap()
+            )
+            whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+                .thenReturn(stripeResponse)
+
+            val clientSecret = "secret"
+            val customerName = "John Doe"
+            val customerEmailAddress = "johndoe@gmail.com"
+            create().paymentIntentLinkAccountSession(
+                PaymentIntentLinkAccountSessionParams(
+                    clientSecret = clientSecret,
+                    customerName = customerName,
+                    customerEmailAddress = customerEmailAddress
+                ),
+                DEFAULT_OPTIONS
+            )
+
+            verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
+            val params = requireNotNull(apiRequestArgumentCaptor.firstValue.params)
+
+            with(params) {
+                assertEquals(clientSecret, this["client_secret"])
+                withNestedParams("payment_method_data") {
+                    assertEquals("us_bank_account", this["type"])
+                    withNestedParams("billing_details") {
+                        assertEquals(customerName, this["name"])
+                    }
+                }
+            }
+        }
+
+    /**
+     * Helper DSL to validate nested params.
+     */
+    private fun Map<*, *>.withNestedParams(key: String, nestedParams: Map<*, *>.() -> Unit) {
+        nestedParams(this[key] as Map<*, *>)
+    }
 
     private fun verifyFraudDetectionDataAndAnalyticsRequests(
         event: PaymentAnalyticsEvent,

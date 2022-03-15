@@ -310,7 +310,14 @@ constructor(
             isVoucher = false,
             requiresMandate = false,
             hasDelayedSettlement = false
-        );
+        ),
+        UsBankAccount(
+            "us_bank_account",
+            isReusable = false,
+            isVoucher = false,
+            requiresMandate = false,
+            hasDelayedSettlement = false
+        ),;
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
         fun hasDelayedSettlement(): Boolean = hasDelayedSettlement

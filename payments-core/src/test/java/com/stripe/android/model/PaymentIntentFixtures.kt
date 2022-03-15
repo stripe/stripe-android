@@ -1,5 +1,8 @@
 package com.stripe.android.model
 
+import com.stripe.android.model.parsers.BankConnectionsResourceLinkAccountSession
+import com.stripe.android.model.parsers.BankConnectionsResourceLinkAccountSessionJsonParser
+import com.stripe.android.model.parsers.ConsumerPaymentDetailsJsonParser
 import com.stripe.android.model.parsers.PaymentIntentJsonParser
 import org.json.JSONObject
 
@@ -1314,4 +1317,17 @@ internal object PaymentIntentFixtures {
 
     val PI_WITH_AFFIRM_IN_PAYMENT_METHODS =
         PARSER.parse(PI_WITH_AFFIRM_IN_PAYMENT_METHODS_JSON)!!
+
+    val PAYMENT_INTENT_LINK_ACCOUNT_SESSION_JSON = JSONObject(
+        """
+            {
+              "client_secret": "test_client_secret",
+              "id": "random_id"
+            }
+        """.trimIndent()
+    )
+    val PAYMENT_INTENT_LINK_ACCOUNT_SESSION: BankConnectionsResourceLinkAccountSession =
+        BankConnectionsResourceLinkAccountSessionJsonParser().parse(
+            PAYMENT_INTENT_LINK_ACCOUNT_SESSION_JSON
+        )
 }

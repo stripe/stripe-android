@@ -19,6 +19,7 @@ import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.Customer
 import com.stripe.android.model.ListPaymentMethodsParams
 import com.stripe.android.model.PaymentIntent
+import com.stripe.android.model.PaymentIntentLinkAccountSessionParams
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.RadarSession
@@ -33,6 +34,7 @@ import com.stripe.android.model.StripeFileParams
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.Token
 import com.stripe.android.model.TokenParams
+import com.stripe.android.model.parsers.BankConnectionsResourceLinkAccountSession
 import org.json.JSONException
 import org.json.JSONObject
 import java.util.Locale
@@ -431,4 +433,10 @@ abstract class StripeRepository {
         paymentMethodTypes: Set<String>,
         requestOptions: ApiRequest.Options
     ): ConsumerPaymentDetails?
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    abstract suspend fun paymentIntentLinkAccountSession(
+        paymentIntentLinkAccountSessionParams: PaymentIntentLinkAccountSessionParams,
+        requestOptions: ApiRequest.Options
+    ): BankConnectionsResourceLinkAccountSession?
 }

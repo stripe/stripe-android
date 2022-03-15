@@ -48,6 +48,7 @@ import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.Customer
 import com.stripe.android.model.ListPaymentMethodsParams
 import com.stripe.android.model.PaymentIntent
+import com.stripe.android.model.PaymentIntentLinkAccountSessionParams
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.RadarSession
@@ -63,6 +64,7 @@ import com.stripe.android.model.StripeFileParams.Companion.toInternal
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.Token
 import com.stripe.android.model.TokenParams
+import com.stripe.android.model.parsers.BankConnectionsResourceLinkAccountSession
 import com.stripe.android.model.parsers.CardMetadataJsonParser
 import com.stripe.android.model.parsers.ConsumerPaymentDetailsJsonParser
 import com.stripe.android.model.parsers.ConsumerSessionJsonParser
@@ -71,6 +73,7 @@ import com.stripe.android.model.parsers.CustomerJsonParser
 import com.stripe.android.model.parsers.FpxBankStatusesJsonParser
 import com.stripe.android.model.parsers.IssuingCardPinJsonParser
 import com.stripe.android.model.parsers.PaymentIntentJsonParser
+import com.stripe.android.model.parsers.BankConnectionsResourceLinkAccountSessionJsonParser
 import com.stripe.android.model.parsers.PaymentMethodJsonParser
 import com.stripe.android.model.parsers.PaymentMethodPreferenceForPaymentIntentJsonParser
 import com.stripe.android.model.parsers.PaymentMethodPreferenceForSetupIntentJsonParser
@@ -1308,6 +1311,24 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         }
     }
 
+    override suspend fun paymentIntentLinkAccountSession(
+        paymentIntentLinkAccountSessionParams: PaymentIntentLinkAccountSessionParams,
+        requestOptions: ApiRequest.Options
+    ): BankConnectionsResourceLinkAccountSession? {
+        return fetchStripeModel(
+            apiRequestFactory.createPost(
+                url = getPaymentIntentLinkAccountSessionUrl(
+                    paymentIntentLinkAccountSessionParams.clientSecret
+                ),
+                options = requestOptions,
+                params = paymentIntentLinkAccountSessionParams.toMap()
+            ),
+            BankConnectionsResourceLinkAccountSessionJsonParser(),
+        ) {
+            // no-op
+        }
+    }
+
     /**
      * @return `https://api.stripe.com/v1/payment_methods/:id/detach`
      */
@@ -1635,6 +1656,16 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         internal val consumerPaymentDetailsUrl: String
             @JvmSynthetic
             get() = getApiUrl("consumers/payment_details")
+
+
+        /**
+         * @return `https://api.stripe.com/v1/payment_intents/:id/link_account_session`
+         */
+        @VisibleForTesting
+        @JvmSynthetic
+        internal fun getPaymentIntentLinkAccountSessionUrl(paymentIntentId: String): String {
+            return getApiUrl("payment_intents/%s/link_account_session", paymentIntentId)
+        }
 
         /**
          * @return `https://api.stripe.com/v1/payment_intents/:id`
