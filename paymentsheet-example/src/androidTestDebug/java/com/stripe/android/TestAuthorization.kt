@@ -47,7 +47,6 @@ class TestAuthorization {
 
     @Before
     fun before() {
-        androidx.test.espresso.intent.Intents.init()
         device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
         testDriver = PlaygroundTestDriver(device, composeTestRule, screenshotProcessor)
     }

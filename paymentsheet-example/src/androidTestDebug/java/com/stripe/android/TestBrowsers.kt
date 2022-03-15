@@ -52,14 +52,12 @@ class TestBrowsers {
 
     @Before
     fun before() {
-        androidx.test.espresso.intent.Intents.init()
         device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
         testDriver = PlaygroundTestDriver(device, composeTestRule, screenshotProcessor)
     }
 
     @After
     fun after() {
-        androidx.test.espresso.intent.Intents.release()
     }
 
     private val bancontactNewUser = TestParameters(
