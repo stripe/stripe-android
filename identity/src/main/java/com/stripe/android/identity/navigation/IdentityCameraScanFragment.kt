@@ -24,14 +24,8 @@ import com.stripe.android.identity.viewmodel.IdentityViewModel
  * An abstract [Fragment] class to access camera scanning for Identity.
  *
  * Subclasses are responsible for populating [cameraView] in its [Fragment.onCreateView] method.
- *
- * When the fragment's view is created, [cameraPermissionEnsureable] is used to check camera
- * permission. Subclasses are responsible for implementing [onCameraReady] and
- * [onUserDeniedCameraPermission] to handle the permission callbacks.
- *
  */
 internal abstract class IdentityCameraScanFragment(
-//    private val cameraPermissionEnsureable: CameraPermissionEnsureable,
     private val cameraViewModelFactory: ViewModelProvider.Factory,
     private val identityViewModelFactory: ViewModelProvider.Factory
 ) : Fragment() {
