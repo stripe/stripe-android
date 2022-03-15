@@ -64,7 +64,7 @@ import com.stripe.android.model.StripeFileParams.Companion.toInternal
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.Token
 import com.stripe.android.model.TokenParams
-import com.stripe.android.model.parsers.BankConnectionsResourceLinkAccountSession
+import com.stripe.android.model.LinkAccountSession
 import com.stripe.android.model.parsers.CardMetadataJsonParser
 import com.stripe.android.model.parsers.ConsumerPaymentDetailsJsonParser
 import com.stripe.android.model.parsers.ConsumerSessionJsonParser
@@ -1314,7 +1314,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
     override suspend fun paymentIntentLinkAccountSession(
         paymentIntentLinkAccountSessionParams: PaymentIntentLinkAccountSessionParams,
         requestOptions: ApiRequest.Options
-    ): BankConnectionsResourceLinkAccountSession? {
+    ): LinkAccountSession? {
         return fetchStripeModel(
             apiRequestFactory.createPost(
                 url = getPaymentIntentLinkAccountSessionUrl(

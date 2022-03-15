@@ -45,7 +45,6 @@ import com.stripe.android.model.StripeFileFixtures
 import com.stripe.android.model.StripeFileParams
 import com.stripe.android.model.StripeFilePurpose
 import com.stripe.android.model.TokenFixtures
-import com.stripe.android.model.parsers.BankConnectionsResourceLinkAccountSession
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest

@@ -29,7 +29,7 @@ import com.stripe.android.model.StripeFileParams
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.Token
 import com.stripe.android.model.TokenParams
-import com.stripe.android.model.parsers.BankConnectionsResourceLinkAccountSession
+import com.stripe.android.model.LinkAccountSession
 import org.json.JSONObject
 import java.util.Locale
 
@@ -328,7 +328,7 @@ internal abstract class AbsFakeStripeRepository : StripeRepository() {
     override suspend fun paymentIntentLinkAccountSession(
         paymentIntentLinkAccountSessionParams: PaymentIntentLinkAccountSessionParams,
         requestOptions: ApiRequest.Options
-    ): BankConnectionsResourceLinkAccountSession? {
+    ): LinkAccountSession? {
         return null
     }
 }

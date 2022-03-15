@@ -1,8 +1,6 @@
 package com.stripe.android.model
 
-import com.stripe.android.model.parsers.BankConnectionsResourceLinkAccountSession
 import com.stripe.android.model.parsers.BankConnectionsResourceLinkAccountSessionJsonParser
-import com.stripe.android.model.parsers.ConsumerPaymentDetailsJsonParser
 import com.stripe.android.model.parsers.PaymentIntentJsonParser
 import org.json.JSONObject
 
@@ -1326,7 +1324,7 @@ internal object PaymentIntentFixtures {
             }
         """.trimIndent()
     )
-    val PAYMENT_INTENT_LINK_ACCOUNT_SESSION: BankConnectionsResourceLinkAccountSession =
+    val PAYMENT_INTENT_LINK_ACCOUNT_SESSION: LinkAccountSession =
         BankConnectionsResourceLinkAccountSessionJsonParser().parse(
             PAYMENT_INTENT_LINK_ACCOUNT_SESSION_JSON
         )

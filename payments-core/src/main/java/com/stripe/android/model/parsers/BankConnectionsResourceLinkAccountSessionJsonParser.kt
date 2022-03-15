@@ -1,14 +1,13 @@
 package com.stripe.android.model.parsers
 
 import com.stripe.android.core.model.StripeJsonUtils
-import com.stripe.android.core.model.StripeModel
 import com.stripe.android.core.model.parsers.ModelJsonParser
-import kotlinx.parcelize.Parcelize
+import com.stripe.android.model.LinkAccountSession
 import org.json.JSONObject
 
-internal class BankConnectionsResourceLinkAccountSessionJsonParser : ModelJsonParser<BankConnectionsResourceLinkAccountSession> {
-    override fun parse(json: JSONObject): BankConnectionsResourceLinkAccountSession {
-        return BankConnectionsResourceLinkAccountSession(
+internal class BankConnectionsResourceLinkAccountSessionJsonParser : ModelJsonParser<LinkAccountSession> {
+    override fun parse(json: JSONObject): LinkAccountSession {
+        return LinkAccountSession(
             clientSecret = StripeJsonUtils.optString(json, FIELD_CLIENT_SECRET)!!,
             id = StripeJsonUtils.optString(json, FIELD_ID)!!
         )
@@ -19,9 +18,3 @@ internal class BankConnectionsResourceLinkAccountSessionJsonParser : ModelJsonPa
         private const val FIELD_ID = "id"
     }
 }
-
-@Parcelize
-data class BankConnectionsResourceLinkAccountSession(
-    val clientSecret: String,
-    val id: String,
-) : StripeModel
