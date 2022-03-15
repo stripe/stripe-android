@@ -46,6 +46,7 @@ import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.Customer
+import com.stripe.android.model.LinkAccountSession
 import com.stripe.android.model.ListPaymentMethodsParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentLinkAccountSessionParams
@@ -64,7 +65,7 @@ import com.stripe.android.model.StripeFileParams.Companion.toInternal
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.Token
 import com.stripe.android.model.TokenParams
-import com.stripe.android.model.LinkAccountSession
+import com.stripe.android.model.parsers.BankConnectionsResourceLinkAccountSessionJsonParser
 import com.stripe.android.model.parsers.CardMetadataJsonParser
 import com.stripe.android.model.parsers.ConsumerPaymentDetailsJsonParser
 import com.stripe.android.model.parsers.ConsumerSessionJsonParser
@@ -73,7 +74,6 @@ import com.stripe.android.model.parsers.CustomerJsonParser
 import com.stripe.android.model.parsers.FpxBankStatusesJsonParser
 import com.stripe.android.model.parsers.IssuingCardPinJsonParser
 import com.stripe.android.model.parsers.PaymentIntentJsonParser
-import com.stripe.android.model.parsers.BankConnectionsResourceLinkAccountSessionJsonParser
 import com.stripe.android.model.parsers.PaymentMethodJsonParser
 import com.stripe.android.model.parsers.PaymentMethodPreferenceForPaymentIntentJsonParser
 import com.stripe.android.model.parsers.PaymentMethodPreferenceForSetupIntentJsonParser
@@ -1656,7 +1656,6 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         internal val consumerPaymentDetailsUrl: String
             @JvmSynthetic
             get() = getApiUrl("consumers/payment_details")
-
 
         /**
          * @return `https://api.stripe.com/v1/payment_intents/:id/link_account_session`

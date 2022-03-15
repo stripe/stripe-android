@@ -317,7 +317,7 @@ constructor(
             isVoucher = false,
             requiresMandate = true,
             hasDelayedSettlement = true
-        ),;
+        );
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
         fun hasDelayedSettlement(): Boolean = hasDelayedSettlement
