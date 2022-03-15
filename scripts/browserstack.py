@@ -7,8 +7,8 @@ from requests_toolbelt.multipart import encoder
 
 user=os.getenv('BROWSERSTACK_USERNAME')
 authKey=os.getenv('BROWSERSTACK_ACCESS_KEY')
-apk="../paymentsheet-example/build/outputs/apk/debug/paymentsheet-example-debug.apk"
-espressoApk="../paymentsheet-example/build/outputs/apk/androidTest/debug/paymentsheet-example-debug-androidTest.apk"
+apk="paymentsheet-example/build/outputs/apk/debug/paymentsheet-example-debug.apk"
+espressoApk="paymentsheet-example/build/outputs/apk/androidTest/debug/paymentsheet-example-debug-androidTest.apk"
 
 # curl -u "user:authKey" -X POST "https://api-cloud.browserstack.com/app-automate/upload" -F "file=@apk"
 # RETURN: {"app_url":"bs://527636cd103e394cb10e57d3ef0d57bcd0e0f433"}
