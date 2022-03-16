@@ -9,6 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
+import com.stripe.android.ui.core.PaymentsTheme
 
 @Composable
 internal fun RowElementUI(
@@ -64,10 +65,10 @@ internal fun RowElementUI(
                                 height = (Dimension.fillToConstraints)
                             }
                             .padding(
-                                horizontal = CardStyle.cardBorderWidth
+                                horizontal = PaymentsTheme.shapes.borderStrokeWidth
                             )
-                            .width(CardStyle.cardBorderWidth)
-                            .background(CardStyle.cardDividerColor)
+                            .width(PaymentsTheme.shapes.borderStrokeWidth)
+                            .background(PaymentsTheme.colors.colorComponentBorder)
                     )
                 }
             }

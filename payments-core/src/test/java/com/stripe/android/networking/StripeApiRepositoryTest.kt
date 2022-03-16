@@ -1707,6 +1707,34 @@ internal class StripeApiRepositoryTest {
         }
 
     @Test
+    fun `logoutConsumer() sends all parameters`() =
+        runTest {
+            val stripeResponse = StripeResponse(
+                200,
+                ConsumerFixtures.CONSUMER_LOGGED_OUT_JSON.toString(),
+                emptyMap()
+            )
+            whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+                .thenReturn(stripeResponse)
+
+            val clientSecret = "secret"
+            val cookie = "cookie1"
+            create().logoutConsumer(
+                clientSecret,
+                cookie,
+                DEFAULT_OPTIONS
+            )
+
+            verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
+            val params = requireNotNull(apiRequestArgumentCaptor.firstValue.params)
+            val credentials = params["credentials"] as Map<*, *>
+            assertEquals(credentials["consumer_session_client_secret"], clientSecret)
+            val cookies = params["cookies"] as Map<*, *>
+            val secret = cookies["verification_session_client_secrets"] as Collection<*>
+            assertThat(secret).containsExactly(cookie)
+        }
+
+    @Test
     fun `listPaymentDetails() sends all parameters`() =
         runTest {
             val stripeResponse = StripeResponse(
