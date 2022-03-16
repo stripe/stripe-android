@@ -97,6 +97,8 @@ internal abstract class FrontBackUploadFragment(
         binding.selectFront.setOnClickListener {
             buildBottomSheetDialog(frontScanType).show()
         }
+        binding.kontinue.isEnabled = false
+        binding.kontinue.setText(getString(R.string.kontinue))
         return binding.root
     }
 
@@ -148,6 +150,7 @@ internal abstract class FrontBackUploadFragment(
         frontBackUploadViewModel.uploadFinished.observe(viewLifecycleOwner) {
             binding.kontinue.isEnabled = true
             binding.kontinue.setOnClickListener {
+                binding.kontinue.toggleToLoading()
                 lifecycleScope.launch {
                     runCatching {
                         val front =

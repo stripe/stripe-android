@@ -12,6 +12,7 @@ import androidx.navigation.Navigation
 import androidx.navigation.testing.TestNavHostController
 import androidx.test.core.app.ApplicationProvider
 import com.google.android.material.bottomsheet.BottomSheetDialog
+import com.google.android.material.button.MaterialButton
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.model.InternalStripeFile
 import com.stripe.android.core.model.InternalStripeFilePurpose
@@ -212,7 +213,7 @@ class FrontBackUploadFragmentTest {
                     CORRECT_WITH_SUBMITTED_SUCCESS_VERIFICATION_PAGE_DATA
                 )
 
-                binding.kontinue.callOnClick()
+                binding.kontinue.findViewById<MaterialButton>(R.id.button).callOnClick()
 
                 assertThat(collectedDataParamCaptor.firstValue).isEqualTo(
                     CollectedDataParam(
@@ -245,7 +246,7 @@ class FrontBackUploadFragmentTest {
             // leave frontUploaded and backUploaded null
             uploadFinished.postValue(Unit)
 
-            binding.kontinue.callOnClick()
+            binding.kontinue.findViewById<MaterialButton>(R.id.button).callOnClick()
 
             assertThat(navController.currentDestination?.id)
                 .isEqualTo(R.id.errorFragment)

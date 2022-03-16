@@ -6,6 +6,7 @@ import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.navigation.Navigation
 import androidx.navigation.testing.TestNavHostController
 import androidx.test.core.app.ApplicationProvider
+import com.google.android.material.button.MaterialButton
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.identity.IdentityVerificationSheetContract
@@ -155,8 +156,12 @@ internal class ConsentFragmentTest {
             assertThat(binding.privacyPolicy.text.toString()).isEqualTo(CONSENT_PRIVACY_POLICY)
             assertThat(binding.timeEstimate.text).isEqualTo(CONSENT_TIME_ESTIMATE)
             assertThat(binding.body.text.toString()).isEqualTo(CONSENT_BODY)
-            assertThat(binding.agree.text).isEqualTo(CONSENT_ACCEPT_TEXT)
-            assertThat(binding.decline.text).isEqualTo(CONSENT_DECLINE_TEXT)
+            assertThat(binding.agree.findViewById<MaterialButton>(R.id.button).text).isEqualTo(
+                CONSENT_ACCEPT_TEXT
+            )
+            assertThat(binding.decline.findViewById<MaterialButton>(R.id.button).text).isEqualTo(
+                CONSENT_DECLINE_TEXT
+            )
         }
     }
 
@@ -180,7 +185,7 @@ internal class ConsentFragmentTest {
             launchConsentFragment { binding, navController ->
                 setUpSuccessVerificationPage()
 
-                binding.agree.callOnClick()
+                binding.agree.findViewById<MaterialButton>(R.id.button).callOnClick()
 
                 assertThat(navController.currentDestination?.id)
                     .isEqualTo(R.id.docSelectionFragment)
@@ -197,7 +202,7 @@ internal class ConsentFragmentTest {
 
             launchConsentFragment { binding, navController ->
                 setUpSuccessVerificationPage()
-                binding.agree.callOnClick()
+                binding.agree.findViewById<MaterialButton>(R.id.button).callOnClick()
 
                 assertThat(navController.currentDestination?.id)
                     .isEqualTo(R.id.errorFragment)
@@ -214,7 +219,7 @@ internal class ConsentFragmentTest {
 
             launchConsentFragment { binding, navController ->
                 setUpSuccessVerificationPage()
-                binding.decline.callOnClick()
+                binding.decline.findViewById<MaterialButton>(R.id.button).callOnClick()
 
                 requireNotNull(navController.backStack.last().arguments).let { arguments ->
                     assertThat(arguments[ErrorFragment.ARG_ERROR_TITLE])
@@ -242,7 +247,7 @@ internal class ConsentFragmentTest {
 
             launchConsentFragment { binding, navController ->
                 setUpSuccessVerificationPage()
-                binding.decline.callOnClick()
+                binding.decline.findViewById<MaterialButton>(R.id.button).callOnClick()
 
                 assertThat(navController.currentDestination?.id)
                     .isEqualTo(R.id.errorFragment)

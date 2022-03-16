@@ -61,6 +61,8 @@ internal class PassportUploadFragment(
             buildBottomSheetDialog().show()
         }
 
+        binding.kontinue.isEnabled = false
+        binding.kontinue.setText(getString(R.string.kontinue))
         return binding.root
     }
 
@@ -130,6 +132,7 @@ internal class PassportUploadFragment(
         binding.finishedCheckMark.visibility = View.VISIBLE
         binding.kontinue.isEnabled = true
         binding.kontinue.setOnClickListener {
+            binding.kontinue.toggleToLoading()
             lifecycleScope.launch {
                 runCatching {
                     requireNotNull(passportImage)

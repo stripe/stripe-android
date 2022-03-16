@@ -88,25 +88,37 @@ internal class DocSelectionFragment(
                 when (allowedType) {
                     PASSPORT_KEY -> {
                         binding.passport.text = allowedTypeValue
-                        binding.passport.visibility = View.VISIBLE
+                        binding.passportContainer.visibility = View.VISIBLE
                         binding.passport.setOnClickListener {
-                            disableButtonAndNavigate(it, Type.PASSPORT)
+                            binding.passport.isEnabled = false
+                            binding.dl.isClickable = false
+                            binding.id.isClickable = false
+                            binding.passportIndicator.visibility = View.VISIBLE
+                            postVerificationPageDataAndNavigate(Type.PASSPORT)
                         }
                         binding.passportSeparator.visibility = View.VISIBLE
                     }
                     DRIVING_LICENSE_KEY -> {
                         binding.dl.text = allowedTypeValue
-                        binding.dl.visibility = View.VISIBLE
+                        binding.dlContainer.visibility = View.VISIBLE
                         binding.dl.setOnClickListener {
-                            disableButtonAndNavigate(it, Type.DRIVINGLICENSE)
+                            binding.dl.isEnabled = false
+                            binding.passport.isClickable = false
+                            binding.id.isClickable = false
+                            binding.dlIndicator.visibility = View.VISIBLE
+                            postVerificationPageDataAndNavigate(Type.DRIVINGLICENSE)
                         }
                         binding.dlSeparator.visibility = View.VISIBLE
                     }
                     ID_CARD_KEY -> {
                         binding.id.text = allowedTypeValue
-                        binding.id.visibility = View.VISIBLE
+                        binding.idContainer.visibility = View.VISIBLE
                         binding.id.setOnClickListener {
-                            disableButtonAndNavigate(it, Type.IDCARD)
+                            binding.id.isEnabled = false
+                            binding.passport.isClickable = false
+                            binding.dl.isClickable = false
+                            binding.idIndicator.visibility = View.VISIBLE
+                            postVerificationPageDataAndNavigate(Type.IDCARD)
                         }
                         binding.idSeparator.visibility = View.VISIBLE
                     }
@@ -116,25 +128,9 @@ internal class DocSelectionFragment(
                 }
             }
         } ?: run {
-            listOf(
-                binding.dl,
-                binding.dlSeparator,
-                binding.id,
-                binding.idSeparator,
-                binding.passport,
-                binding.passportSeparator
-            ).forEach {
-                it.visibility = View.VISIBLE
-            }
-            binding.passport.setOnClickListener {
-                disableButtonAndNavigate(it, Type.PASSPORT)
-            }
-            binding.dl.setOnClickListener {
-                disableButtonAndNavigate(it, Type.DRIVINGLICENSE)
-            }
-            binding.id.setOnClickListener {
-                disableButtonAndNavigate(it, Type.IDCARD)
-            }
+            // Not possible for backend to send an empty list of allowed types.
+            Log.e(TAG, "Received an empty idDocumentTypeAllowlist.")
+            navigateToDefaultErrorFragment()
         }
     }
 
@@ -144,45 +140,37 @@ internal class DocSelectionFragment(
     private fun toggleSingleSelectionUI(allowedType: String, buttonText: String) {
         binding.multiSelectionContent.visibility = View.GONE
         binding.singleSelectionContent.visibility = View.VISIBLE
-        binding.singleSelectionContinue.text = buttonText
+        binding.singleSelectionContinue.setText(buttonText)
 
         when (allowedType) {
             PASSPORT_KEY -> {
                 binding.singleSelectionBody.text =
                     getString(R.string.single_selection_body_content_passport)
                 binding.singleSelectionContinue.setOnClickListener {
-                    disableButtonAndNavigate(it, Type.PASSPORT)
+                    binding.singleSelectionContinue.toggleToLoading()
+                    postVerificationPageDataAndNavigate(Type.PASSPORT)
                 }
             }
             DRIVING_LICENSE_KEY -> {
                 binding.singleSelectionBody.text =
                     getString(R.string.single_selection_body_content_dl)
                 binding.singleSelectionContinue.setOnClickListener {
-                    disableButtonAndNavigate(it, Type.DRIVINGLICENSE)
+                    binding.singleSelectionContinue.toggleToLoading()
+                    postVerificationPageDataAndNavigate(Type.DRIVINGLICENSE)
                 }
             }
             ID_CARD_KEY -> {
                 binding.singleSelectionBody.text =
                     getString(R.string.single_selection_body_content_id)
                 binding.singleSelectionContinue.setOnClickListener {
-                    disableButtonAndNavigate(it, Type.IDCARD)
+                    binding.singleSelectionContinue.toggleToLoading()
+                    postVerificationPageDataAndNavigate(Type.IDCARD)
                 }
             }
             else -> {
                 throw InvalidRequestException(message = "Unknown allow type: $allowedType")
             }
         }
-    }
-
-    /**
-     * Disable the button view and try navigate to this type.
-     *
-     * TODO(ccen): add CircularProgressIndicator to button
-     * Note: no need to it back to enabled, as it will navigate to another Fragment.
-     */
-    private fun disableButtonAndNavigate(view: View, type: Type) {
-        view.isEnabled = false
-        postVerificationPageDataAndNavigate(type)
     }
 
     /**

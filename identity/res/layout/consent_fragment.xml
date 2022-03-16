@@ -136,18 +136,15 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom">
 
-        <Button
+        <com.stripe.android.identity.ui.LoadingButton
             android:id="@+id/agree"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/agree_and_continue"
-            android:layout_marginBottom="10dp" />
+            android:layout_height="wrap_content" />
 
-        <Button
+        <com.stripe.android.identity.ui.LoadingButton
             android:id="@+id/decline"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/decline" />
+            android:layout_height="wrap_content" />
     </LinearLayout>
 
 </LinearLayout>
