@@ -6,6 +6,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -31,7 +32,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.InputMode
@@ -44,7 +44,6 @@ import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.menu.DropdownMenuItemDefaultMaxWidth
 import com.stripe.android.ui.core.elements.menu.DropdownMenuItemDefaultMinHeight
 import com.stripe.android.ui.core.elements.menu.DropdownMenuItemDefaultMinWidth
-import com.stripe.android.ui.core.elements.menu.DropdownMenuItemHorizontalPadding
 import kotlin.math.max
 import kotlin.math.min
 
@@ -185,12 +184,9 @@ internal fun DropdownMenuItem(
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Start,
         modifier = Modifier
             .fillMaxWidth()
-            .padding(
-                start = DropdownMenuItemHorizontalPadding,
-                end = 0.dp,
-            )
             .requiredSizeIn(
                 minWidth = DropdownMenuItemDefaultMinWidth,
                 minHeight = DropdownMenuItemDefaultMinHeight
@@ -201,7 +197,16 @@ internal fun DropdownMenuItem(
     ) {
         Text(
             text = displayValue,
-            modifier = Modifier.fillMaxWidth(.8f),
+            modifier = Modifier
+                // This padding makes up for the checkmark at the end.
+                .padding(
+                    end = if (isSelected) {
+                        13.dp
+                    } else {
+                        0.dp
+                    }
+                )
+                .fillMaxWidth(.8f),
             color = if (isSelected) {
                 PaymentsTheme.colors.material.primary
             } else {
@@ -214,19 +219,14 @@ internal fun DropdownMenuItem(
             }
         )
 
-        Icon(
-            Icons.Filled.Check,
-            contentDescription = null,
-            modifier = Modifier
-                .height(24.dp)
-                .alpha(
-                    if (isSelected) {
-                        1f
-                    } else {
-                        0f
-                    }
-                ),
-            tint = PaymentsTheme.colors.material.primary
-        )
+        if (isSelected) {
+            Icon(
+                Icons.Filled.Check,
+                contentDescription = null,
+                modifier = Modifier
+                    .height(24.dp),
+                tint = PaymentsTheme.colors.material.primary
+            )
+        }
     }
 }
