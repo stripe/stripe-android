@@ -59,7 +59,7 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.PopupPositionProvider
-import com.stripe.android.ui.core.elements.CardStyle
+import com.stripe.android.ui.core.PaymentsTheme
 import kotlin.math.max
 import kotlin.math.min
 
@@ -123,7 +123,10 @@ internal fun DropdownMenuContent(
 
     // TODO: Make sure this gets the rounded corner values
     Card(
-        border = BorderStroke(CardStyle.cardBorderWidth, CardStyle.cardBorderColor),
+        border = BorderStroke(
+            PaymentsTheme.shapes.borderStrokeWidth,
+            PaymentsTheme.colors.colorComponentBorder
+        ),
         modifier = Modifier.graphicsLayer {
             scaleX = scale
             scaleY = scale
