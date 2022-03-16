@@ -15,9 +15,9 @@ interface CollectBankAccountLauncher {
     /**
      * API to collect bank account information for [PaymentIntent].
      *
-     * use [CollectBankAccountLauncher.ForPayment.create] to instantiate this object.
+     * use [CollectBankAccountLauncher.ForPaymentIntent.create] to instantiate this object.
      */
-    interface ForPayment {
+    interface ForPaymentIntent {
 
         fun launch(
             clientSecret: String,
@@ -35,8 +35,8 @@ interface CollectBankAccountLauncher {
                 activity: ComponentActivity,
                 publishableKey: String,
                 callback: ApiResultCallback<CollectBankAccountForPaymentResponse>
-            ): ForPayment {
-                return StripeCollectBankAccountForPaymentLauncher(
+            ): ForPaymentIntent {
+                return StripeCollectBankAccountForPaymentIntentLauncher(
                     activity.registerForActivityResult(CollectBankAccountContract()) {
                         // convert result to CollectBankAccountForPaymentResponse
                     },
@@ -55,8 +55,8 @@ interface CollectBankAccountLauncher {
                 fragment: Fragment,
                 publishableKey: String,
                 callback: ApiResultCallback<CollectBankAccountForPaymentResponse>
-            ): ForPayment {
-                return StripeCollectBankAccountForPaymentLauncher(
+            ): ForPaymentIntent {
+                return StripeCollectBankAccountForPaymentIntentLauncher(
                     fragment.registerForActivityResult(CollectBankAccountContract()) {
                         // convert result to CollectBankAccountForPaymentResponse
                     },
@@ -70,9 +70,9 @@ interface CollectBankAccountLauncher {
     /**
      * API to collect bank account information for [SetupIntent].
      *
-     * use [CollectBankAccountLauncher.ForSetup.create] to instantiate this object.
+     * use [CollectBankAccountLauncher.ForSetupIntent.create] to instantiate this object.
      */
-    interface ForSetup {
+    interface ForSetupIntent {
 
         fun launch(
             clientSecret: String,
@@ -91,8 +91,8 @@ interface CollectBankAccountLauncher {
                 activity: ComponentActivity,
                 publishableKey: String,
                 callback: ApiResultCallback<CollectBankAccountForSetupResponse>
-            ): ForSetup {
-                return StripeCollectBankAccountForSetupLauncher(
+            ): ForSetupIntent {
+                return StripeCollectBankAccountForSetupIntentLauncher(
                     activity.registerForActivityResult(CollectBankAccountContract()) {
                         // convert result to CollectBankAccountForSetupResponse
                     },
@@ -111,8 +111,8 @@ interface CollectBankAccountLauncher {
                 fragment: Fragment,
                 publishableKey: String,
                 callback: ApiResultCallback<CollectBankAccountForSetupResponse>
-            ): ForSetup {
-                return StripeCollectBankAccountForSetupLauncher(
+            ): ForSetupIntent {
+                return StripeCollectBankAccountForSetupIntentLauncher(
                     fragment.registerForActivityResult(CollectBankAccountContract()) {
                         // convert result to CollectBankAccountForSetupResponse
                     },
@@ -124,11 +124,11 @@ interface CollectBankAccountLauncher {
     }
 }
 
-internal class StripeCollectBankAccountForPaymentLauncher constructor(
+internal class StripeCollectBankAccountForPaymentIntentLauncher constructor(
     private val hostActivityLauncher: ActivityResultLauncher<CollectBankAccountContract.Args>,
     val publishableKey: String,
     val callback: ApiResultCallback<CollectBankAccountForPaymentResponse>
-) : CollectBankAccountLauncher.ForPayment {
+) : CollectBankAccountLauncher.ForPaymentIntent {
 
     override fun launch(
         clientSecret: String,
@@ -144,11 +144,11 @@ internal class StripeCollectBankAccountForPaymentLauncher constructor(
     }
 }
 
-internal class StripeCollectBankAccountForSetupLauncher constructor(
+internal class StripeCollectBankAccountForSetupIntentLauncher constructor(
     private val hostActivityLauncher: ActivityResultLauncher<CollectBankAccountContract.Args>,
     val publishableKey: String,
     val callback: ApiResultCallback<CollectBankAccountForSetupResponse>
-) : CollectBankAccountLauncher.ForSetup {
+) : CollectBankAccountLauncher.ForSetupIntent {
 
     override fun launch(
         clientSecret: String,

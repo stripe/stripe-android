@@ -21,13 +21,13 @@ class AffirmPaymentActivity : StripeIntentActivity() {
         PaymentExampleActivityBinding.inflate(layoutInflater)
     }
 
-    lateinit var launcher: CollectBankAccountLauncher.ForPayment
+    lateinit var launcher: CollectBankAccountLauncher.ForPaymentIntent
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(viewBinding.root)
 
-        launcher = CollectBankAccountLauncher.ForPayment.create(
+        launcher = CollectBankAccountLauncher.ForPaymentIntent.create(
             this,
             "key_goes_here",
             object : ApiResultCallback<CollectBankAccountForPaymentResponse> {
