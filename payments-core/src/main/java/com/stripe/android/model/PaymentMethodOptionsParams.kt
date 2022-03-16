@@ -89,4 +89,53 @@ sealed class PaymentMethodOptionsParams(
             const val PARAM_APP_ID = "app_id"
         }
     }
+
+    @Parcelize
+    internal data class USBankAccount(
+        var linkedAccount: LinkedAccount? = null,
+        var networks: Networks? = null,
+        var setupFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage? = null,
+        var verificationMethod: VerificationMethod? = null
+    ) : PaymentMethodOptionsParams(PaymentMethod.Type.USBankAccount) {
+        override fun createTypeParams(): List<Pair<String, Any?>> {
+            return listOf(
+                PARAM_LINKED_ACCOUNT to linkedAccount,
+                PARAM_NETWORKS to networks,
+                PARAM_SETUP_FUTURE_USAGE to setupFutureUsage?.code,
+                PARAM_VERIFICATION_METHOD to verificationMethod
+            )
+        }
+
+        @Parcelize
+        data class LinkedAccount(
+            val permissions: List<Permission>? = null,
+            val returnUrl: String? = null
+        ) : Parcelable {
+            enum class Permission(val value: String) {
+                BALANCES("balances"),
+                IDENTITY("identity"),
+                PAYMENT_METHOD("payment_method"),
+                TRANSACTIONS("transactions")
+            }
+        }
+
+        enum class VerificationMethod(val value: String) {
+            SKIP("skip"),
+            AUTOMATIC("automatic"),
+            INSTANT("instant"),
+            MICRODEPOSITS("microdeposits"),
+            INSTANT_OR_SKIP("instant_or_skip")
+        }
+
+
+        @Parcelize
+        data class Networks(val requested: String? = null): Parcelable
+
+        internal companion object {
+            const val PARAM_LINKED_ACCOUNT = "linked_account"
+            const val PARAM_NETWORKS = "networks"
+            const val PARAM_SETUP_FUTURE_USAGE = "setup_future_usage"
+            const val PARAM_VERIFICATION_METHOD = "verification_method"
+        }
+    }
 }
