@@ -22,7 +22,7 @@ import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.key.KeyEventType
-import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
@@ -112,14 +112,16 @@ internal fun TextField(
         },
         modifier = modifier
             .fillMaxWidth()
-            .onKeyEvent { event ->
-                if (event.type == KeyEventType.KeyUp &&
+            .onPreviewKeyEvent { event ->
+                if (event.type == KeyEventType.KeyDown &&
                     event.nativeKeyEvent.keyCode == KeyEvent.KEYCODE_DEL &&
                     value.isEmpty()
                 ) {
                     focusManager.moveFocus(FocusDirection.Previous)
+                    true
+                } else {
+                    false
                 }
-                false
             }
             .onFocusChanged {
                 if (hasFocus != it.isFocused) {

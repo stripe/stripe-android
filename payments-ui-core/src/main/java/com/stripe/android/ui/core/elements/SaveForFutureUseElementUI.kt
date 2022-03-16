@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material.Checkbox
+import androidx.compose.material.CheckboxDefaults
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -59,10 +60,15 @@ fun SaveForFutureUseElementUI(
             .requiredHeight(48.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
+        val checkBoxColor = CheckboxDefaults.colors(
+            checkedColor = PaymentsTheme.colors.material.primary,
+            uncheckedColor = PaymentsTheme.colors.colorTextSecondary
+        )
         Checkbox(
             checked = checked,
             onCheckedChange = null, // needs to be null for accessibility on row click to work
-            enabled = enabled
+            enabled = enabled,
+            colors = checkBoxColor
         )
         label?.let {
             Text(
