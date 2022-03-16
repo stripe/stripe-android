@@ -13,18 +13,18 @@ import java.lang.Exception
 
 interface CollectBankAccountLauncher {
 
+    fun launch(
+        publishableKey: String,
+        clientSecret: String,
+        params: CollectBankAccountParams
+    )
+
     /**
      * API to collect bank account information for [PaymentIntent].
      *
      * use [CollectBankAccountLauncher.ForPaymentIntent.create] to instantiate this object.
      */
-    interface ForPaymentIntent {
-
-        fun launch(
-            publishableKey: String,
-            clientSecret: String,
-            params: CollectBankAccountForPaymentParams
-        )
+    interface ForPaymentIntent : CollectBankAccountLauncher {
 
         companion object {
             /**
@@ -83,13 +83,7 @@ interface CollectBankAccountLauncher {
      *
      * use [CollectBankAccountLauncher.ForSetupIntent.create] to instantiate this object.
      */
-    interface ForSetupIntent {
-
-        fun launch(
-            publishableKey: String,
-            clientSecret: String,
-            params: CollectBankAccountForSetupParams
-        )
+    interface ForSetupIntent : CollectBankAccountLauncher {
 
         companion object {
 
@@ -149,7 +143,7 @@ internal class StripeCollectBankAccountForPaymentIntentLauncher constructor(
     override fun launch(
         publishableKey: String,
         clientSecret: String,
-        params: CollectBankAccountForPaymentParams
+        params: CollectBankAccountParams
     ) {
         hostActivityLauncher.launch(
             CollectBankAccountContract.Args.ForPaymentIntent(
@@ -169,7 +163,7 @@ internal class StripeCollectBankAccountForSetupIntentLauncher constructor(
     override fun launch(
         publishableKey: String,
         clientSecret: String,
-        params: CollectBankAccountForSetupParams
+        params: CollectBankAccountParams
     ) {
         hostActivityLauncher.launch(
             CollectBankAccountContract.Args.ForSetupIntent(
@@ -181,19 +175,11 @@ internal class StripeCollectBankAccountForSetupIntentLauncher constructor(
     }
 }
 
-interface CollectBankAccountParams
-
 @Parcelize
-data class CollectBankAccountForPaymentParams(
-    val paymentMethodType: String,
-    val billingDetails: BillingDetails
-) : Parcelable, CollectBankAccountParams
-
-@Parcelize
-data class CollectBankAccountForSetupParams(
-    val paymentMethodType: String,
-    val billingDetails: BillingDetails
-) : Parcelable, CollectBankAccountParams
+data class CollectBankAccountParams(
+    val name: String,
+    val email: String?
+) : Parcelable
 
 @Parcelize
 data class CollectBankAccountForPaymentResponse(
@@ -205,8 +191,3 @@ data class CollectBankAccountForSetupResponse(
     val setupIntent: SetupIntent
 ) : StripeModel
 
-@Parcelize
-data class BillingDetails(
-    val name: String,
-    val email: String?
-) : Parcelable

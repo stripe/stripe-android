@@ -39,14 +39,14 @@ internal class CollectBankAccountContract :
         data class ForPaymentIntent internal constructor(
             override val publishableKey: String,
             val clientSecret: String,
-            val params: CollectBankAccountForPaymentParams,
+            val params: CollectBankAccountParams,
         ) : CollectBankAccountContract.Args(publishableKey)
 
         @Parcelize
         data class ForSetupIntent internal constructor(
             override val publishableKey: String,
             val clientSecret: String,
-            val params: CollectBankAccountForSetupParams,
+            val params: CollectBankAccountParams,
         ) : CollectBankAccountContract.Args(publishableKey)
 
         companion object {

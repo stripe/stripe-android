@@ -8,7 +8,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.R
-import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.bankaccount.CollectBankAccountResult.Completed
 import com.stripe.android.payments.bankaccount.CollectBankAccountResult.Failed
 import com.stripe.android.payments.bankaccount.CollectBankAccountViewEffect.FinishWithError
