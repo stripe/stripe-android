@@ -14,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.stripe.android.ui.core.PaymentsTheme
 
 @Composable
 internal fun RowElementUI(
@@ -38,8 +39,8 @@ internal fun RowElementUI(
             )
             if (!lastItem) {
                 VeriticalDivider(
-                    color = CardStyle.cardDividerColor,
-                    thickness = CardStyle.cardBorderWidth
+                    color = PaymentsTheme.colors.colorComponentBorder,
+                    thickness = PaymentsTheme.shapes.borderStrokeWidth
                 )
             }
         }

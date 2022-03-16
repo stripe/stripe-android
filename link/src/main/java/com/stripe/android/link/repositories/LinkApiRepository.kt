@@ -29,11 +29,15 @@ internal class LinkApiRepository @Inject constructor(
     private val locale: Locale?
 ) : LinkRepository {
 
-    override suspend fun lookupConsumer(email: String): Result<ConsumerSessionLookup> =
+    override suspend fun lookupConsumer(
+        email: String,
+        authSessionCookie: String?
+    ): Result<ConsumerSessionLookup> =
         withContext(workContext) {
             runCatching {
                 stripeRepository.lookupConsumerSession(
                     email,
+                    authSessionCookie,
                     ApiRequest.Options(
                         publishableKeyProvider(),
                         stripeAccountIdProvider()
@@ -55,7 +59,8 @@ internal class LinkApiRepository @Inject constructor(
     override suspend fun consumerSignUp(
         email: String,
         phone: String,
-        country: String
+        country: String,
+        authSessionCookie: String?
     ): Result<ConsumerSession> =
         withContext(workContext) {
             runCatching {
@@ -63,7 +68,7 @@ internal class LinkApiRepository @Inject constructor(
                     email,
                     phone,
                     country,
-                    null,
+                    authSessionCookie,
                     ApiRequest.Options(
                         publishableKeyProvider(),
                         stripeAccountIdProvider()
@@ -83,13 +88,14 @@ internal class LinkApiRepository @Inject constructor(
         }
 
     override suspend fun startVerification(
-        consumerSessionClientSecret: String
+        consumerSessionClientSecret: String,
+        authSessionCookie: String?
     ): Result<ConsumerSession> = withContext(workContext) {
         runCatching {
             stripeRepository.startConsumerVerification(
                 consumerSessionClientSecret,
                 locale ?: Locale.US,
-                null,
+                authSessionCookie,
                 ApiRequest.Options(
                     publishableKeyProvider(),
                     stripeAccountIdProvider()
@@ -110,13 +116,14 @@ internal class LinkApiRepository @Inject constructor(
 
     override suspend fun confirmVerification(
         consumerSessionClientSecret: String,
-        verificationCode: String
+        verificationCode: String,
+        authSessionCookie: String?
     ): Result<ConsumerSession> = withContext(workContext) {
         runCatching {
             stripeRepository.confirmConsumerVerification(
                 consumerSessionClientSecret,
                 verificationCode,
-                null,
+                authSessionCookie,
                 ApiRequest.Options(
                     publishableKeyProvider(),
                     stripeAccountIdProvider()
@@ -130,6 +137,32 @@ internal class LinkApiRepository @Inject constructor(
             },
             onFailure = {
                 logger.error("Error confirming consumer verification", it)
+                Result.failure(it)
+            }
+        )
+    }
+
+    override suspend fun logout(
+        consumerSessionClientSecret: String,
+        authSessionCookie: String?
+    ): Result<ConsumerSession> = withContext(workContext) {
+        runCatching {
+            stripeRepository.logoutConsumer(
+                consumerSessionClientSecret,
+                authSessionCookie,
+                ApiRequest.Options(
+                    publishableKeyProvider(),
+                    stripeAccountIdProvider()
+                )
+            )
+        }.fold(
+            onSuccess = {
+                it?.let {
+                    Result.success(it)
+                } ?: Result.failure(InternalError("Error logging out"))
+            },
+            onFailure = {
+                logger.error("Error logging out", it)
                 Result.failure(it)
             }
         )

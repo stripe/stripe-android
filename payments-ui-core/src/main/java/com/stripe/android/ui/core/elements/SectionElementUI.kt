@@ -8,6 +8,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import com.stripe.android.ui.core.PaymentsTheme
 
 @Composable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -34,10 +35,10 @@ fun SectionElementUI(
                 SectionFieldElementUI(enabled, field)
                 if (index != element.fields.size - 1) {
                     Divider(
-                        color = CardStyle.cardBorderColor,
-                        thickness = CardStyle.cardBorderWidth,
+                        color = PaymentsTheme.colors.colorComponentBorder,
+                        thickness = PaymentsTheme.shapes.borderStrokeWidth,
                         modifier = Modifier.padding(
-                            horizontal = CardStyle.cardBorderWidth
+                            horizontal = PaymentsTheme.shapes.borderStrokeWidth
                         )
                     )
                 }

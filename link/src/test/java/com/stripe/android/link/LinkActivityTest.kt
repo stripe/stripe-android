@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.link.utils.FakeAndroidKeyStore
 import com.stripe.android.link.utils.InjectableActivityScenario
 import com.stripe.android.link.utils.injectableActivityScenario
 import org.junit.Before
@@ -18,6 +19,10 @@ class LinkActivityTest {
         context,
         LinkActivityContract.Args("Example, Inc.")
     )
+
+    init {
+        FakeAndroidKeyStore.setup()
+    }
 
     @Before
     fun before() {

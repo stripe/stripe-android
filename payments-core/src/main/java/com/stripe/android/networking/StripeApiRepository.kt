@@ -1158,6 +1158,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
      */
     override suspend fun lookupConsumerSession(
         email: String,
+        authSessionCookie: String?,
         requestOptions: ApiRequest.Options
     ): ConsumerSessionLookup? {
         return fetchStripeModel(
@@ -1165,6 +1166,14 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
                 consumerSessionLookupUrl,
                 requestOptions,
                 mapOf("email_address" to email.lowercase())
+                    .plus(
+                        authSessionCookie?.let {
+                            mapOf(
+                                "cookies" to
+                                    mapOf("verification_session_client_secrets" to listOf(it))
+                            )
+                        } ?: emptyMap()
+                    )
             ),
             ConsumerSessionLookupJsonParser()
         ) {
@@ -1179,7 +1188,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         email: String,
         phoneNumber: String,
         country: String,
-        cookies: String?,
+        authSessionCookie: String?,
         requestOptions: ApiRequest.Options
     ): ConsumerSession? {
         return fetchStripeModel(
@@ -1191,9 +1200,12 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
                     "phone_number" to phoneNumber,
                     "country" to country
                 ).plus(
-                    cookies?.let {
-                        listOf("cookies" to it)
-                    } ?: emptyList()
+                    authSessionCookie?.let {
+                        mapOf(
+                            "cookies" to
+                                mapOf("verification_session_client_secrets" to listOf(it))
+                        )
+                    } ?: emptyMap()
                 )
             ),
             ConsumerSessionJsonParser()
@@ -1208,7 +1220,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
     override suspend fun startConsumerVerification(
         consumerSessionClientSecret: String,
         locale: Locale,
-        cookies: String?,
+        authSessionCookie: String?,
         requestOptions: ApiRequest.Options
     ): ConsumerSession? {
         return fetchStripeModel(
@@ -1222,9 +1234,12 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
                     "type" to "SMS",
                     "locale" to locale.toLanguageTag()
                 ).plus(
-                    cookies?.let {
-                        listOf("cookies" to it)
-                    } ?: emptyList()
+                    authSessionCookie?.let {
+                        mapOf(
+                            "cookies" to
+                                mapOf("verification_session_client_secrets" to listOf(it))
+                        )
+                    } ?: emptyMap()
                 )
             ),
             ConsumerSessionJsonParser()
@@ -1239,7 +1254,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
     override suspend fun confirmConsumerVerification(
         consumerSessionClientSecret: String,
         verificationCode: String,
-        cookies: String?,
+        authSessionCookie: String?,
         requestOptions: ApiRequest.Options
     ): ConsumerSession? {
         return fetchStripeModel(
@@ -1254,9 +1269,43 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
                     "code" to verificationCode,
                     "client_type" to "MOBILE_SDK"
                 ).plus(
-                    cookies?.let {
-                        listOf("cookies" to it)
-                    } ?: emptyList()
+                    authSessionCookie?.let {
+                        mapOf(
+                            "cookies" to
+                                mapOf("verification_session_client_secrets" to listOf(it))
+                        )
+                    } ?: emptyMap()
+                )
+            ),
+            ConsumerSessionJsonParser()
+        ) {
+            // no-op
+        }
+    }
+
+    /**
+     * Logs out the consumer and invalidates the cookie.
+     */
+    override suspend fun logoutConsumer(
+        consumerSessionClientSecret: String,
+        authSessionCookie: String?,
+        requestOptions: ApiRequest.Options
+    ): ConsumerSession? {
+        return fetchStripeModel(
+            apiRequestFactory.createPost(
+                logoutConsumerUrl,
+                requestOptions,
+                mapOf(
+                    "credentials" to mapOf(
+                        "consumer_session_client_secret" to consumerSessionClientSecret
+                    ),
+                ).plus(
+                    authSessionCookie?.let {
+                        mapOf(
+                            "cookies" to
+                                mapOf("verification_session_client_secrets" to listOf(it))
+                        )
+                    } ?: emptyMap()
                 )
             ),
             ConsumerSessionJsonParser()
@@ -1610,6 +1659,13 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         internal val confirmConsumerVerificationUrl: String
             @JvmSynthetic
             get() = getApiUrl("consumers/sessions/confirm_verification")
+
+        /**
+         * @return `https://api.stripe.com/v1/consumers/sessions/log_out`
+         */
+        internal val logoutConsumerUrl: String
+            @JvmSynthetic
+            get() = getApiUrl("consumers/sessions/log_out")
 
         /**
          * @return `https://api.stripe.com/v1/consumers/payment_details`

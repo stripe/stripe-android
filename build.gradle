@@ -71,6 +71,7 @@ ext {
     androidxNavigationVersion = '2.4.1'
     androidxPreferenceVersion = '1.2.0'
     androidxRecyclerviewVersion = '1.2.1'
+    androidxSecurityVersion = '1.1.0-alpha03'
 
     kotlinCoroutinesVersion = '1.6.0'
     kotlinSerializationVersion = '1.3.2'
@@ -85,7 +86,7 @@ ext {
     truthVersion = '1.1.3'
     junitVersion = '4.13.2'
     robolectricVersion = '4.7.3'
-    mockitoCoreVersion = '4.3.1'
+    mockitoCoreVersion = '4.4.0'
     mockitoKotlinVersion = '4.0.0'
     espressoVersion = '3.4.0'
     jsonVersion = '20211205'

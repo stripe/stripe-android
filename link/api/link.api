@@ -107,12 +107,28 @@ public final class com/stripe/android/link/LinkPaymentLauncher_Factory {
 	public static fun newInstance (Landroidx/activity/result/ActivityResultLauncher;Landroid/content/Context;Ljava/util/Set;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;ZLkotlin/coroutines/CoroutineContext;Lcom/stripe/android/networking/PaymentAnalyticsRequestFactory;Lcom/stripe/android/core/networking/AnalyticsRequestExecutor;Lcom/stripe/android/networking/StripeRepository;)Lcom/stripe/android/link/LinkPaymentLauncher;
 }
 
-public final class com/stripe/android/link/account/LinkAccountManager_Factory : dagger/internal/Factory {
+public final class com/stripe/android/link/account/CookieStore_Factory : dagger/internal/Factory {
 	public fun <init> (Ljavax/inject/Provider;)V
-	public static fun create (Ljavax/inject/Provider;)Lcom/stripe/android/link/account/LinkAccountManager_Factory;
+	public static fun create (Ljavax/inject/Provider;)Lcom/stripe/android/link/account/CookieStore_Factory;
+	public fun get ()Lcom/stripe/android/link/account/CookieStore;
+	public synthetic fun get ()Ljava/lang/Object;
+	public static fun newInstance (Lcom/stripe/android/link/account/EncryptedStore;)Lcom/stripe/android/link/account/CookieStore;
+}
+
+public final class com/stripe/android/link/account/EncryptedStore_Factory : dagger/internal/Factory {
+	public fun <init> (Ljavax/inject/Provider;)V
+	public static fun create (Ljavax/inject/Provider;)Lcom/stripe/android/link/account/EncryptedStore_Factory;
+	public fun get ()Lcom/stripe/android/link/account/EncryptedStore;
+	public synthetic fun get ()Ljava/lang/Object;
+	public static fun newInstance (Landroid/content/Context;)Lcom/stripe/android/link/account/EncryptedStore;
+}
+
+public final class com/stripe/android/link/account/LinkAccountManager_Factory : dagger/internal/Factory {
+	public fun <init> (Ljavax/inject/Provider;Ljavax/inject/Provider;)V
+	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/link/account/LinkAccountManager_Factory;
 	public fun get ()Lcom/stripe/android/link/account/LinkAccountManager;
 	public synthetic fun get ()Ljava/lang/Object;
-	public static fun newInstance (Lcom/stripe/android/link/repositories/LinkRepository;)Lcom/stripe/android/link/account/LinkAccountManager;
+	public static fun newInstance (Lcom/stripe/android/link/repositories/LinkRepository;Lcom/stripe/android/link/account/CookieStore;)Lcom/stripe/android/link/account/LinkAccountManager;
 }
 
 public final class com/stripe/android/link/injection/DaggerLinkPaymentLauncherComponent {
@@ -162,9 +178,9 @@ public final class com/stripe/android/link/repositories/LinkApiRepository_Factor
 
 public final class com/stripe/android/link/ui/ComposableSingletons$LinkAppBarKt {
 	public static final field INSTANCE Lcom/stripe/android/link/ui/ComposableSingletons$LinkAppBarKt;
-	public static field lambda-1 Lkotlin/jvm/functions/Function3;
+	public static field lambda-1 Lkotlin/jvm/functions/Function2;
 	public fun <init> ()V
-	public final fun getLambda-1$link_release ()Lkotlin/jvm/functions/Function3;
+	public final fun getLambda-1$link_release ()Lkotlin/jvm/functions/Function2;
 }
 
 public final class com/stripe/android/link/ui/ComposableSingletons$LinkButtonKt {
