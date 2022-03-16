@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet
 
 import android.os.Looper.getMainLooper
-import androidx.appcompat.app.AlertDialog
 import androidx.core.os.bundleOf
 import androidx.core.view.children
 import androidx.core.view.isVisible
@@ -35,7 +34,6 @@ import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config
-import org.robolectric.shadows.ShadowAlertDialog
 
 @RunWith(RobolectricTestRunner::class)
 internal class PaymentSheetListFragmentTest : PaymentSheetViewModelTestInjection() {
@@ -292,11 +290,6 @@ internal class PaymentSheetListFragmentTest : PaymentSheetViewModelTestInjection
             adapter.paymentMethodDeleteListener(
                 adapter.items[3] as PaymentOptionsAdapter.Item.SavedPaymentMethod
             )
-
-            val dialog = ShadowAlertDialog.getShownDialogs().first() as AlertDialog
-            dialog.getButton(AlertDialog.BUTTON_POSITIVE).performClick()
-
-            idleLooper()
 
             assertThat(adapter.itemCount).isEqualTo(3)
         }

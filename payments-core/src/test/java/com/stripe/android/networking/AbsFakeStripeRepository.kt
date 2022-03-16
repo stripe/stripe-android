@@ -281,6 +281,7 @@ internal abstract class AbsFakeStripeRepository : StripeRepository() {
 
     override suspend fun lookupConsumerSession(
         email: String,
+        authSessionCookie: String?,
         requestOptions: ApiRequest.Options
     ): ConsumerSessionLookup? {
         return null
@@ -290,7 +291,7 @@ internal abstract class AbsFakeStripeRepository : StripeRepository() {
         email: String,
         phoneNumber: String,
         country: String,
-        cookies: String?,
+        authSessionCookie: String?,
         requestOptions: ApiRequest.Options
     ): ConsumerSession? {
         return null
@@ -299,7 +300,7 @@ internal abstract class AbsFakeStripeRepository : StripeRepository() {
     override suspend fun startConsumerVerification(
         consumerSessionClientSecret: String,
         locale: Locale,
-        cookies: String?,
+        authSessionCookie: String?,
         requestOptions: ApiRequest.Options
     ): ConsumerSession? {
         return null
@@ -308,7 +309,15 @@ internal abstract class AbsFakeStripeRepository : StripeRepository() {
     override suspend fun confirmConsumerVerification(
         consumerSessionClientSecret: String,
         verificationCode: String,
-        cookies: String?,
+        authSessionCookie: String?,
+        requestOptions: ApiRequest.Options
+    ): ConsumerSession? {
+        return null
+    }
+
+    override suspend fun logoutConsumer(
+        consumerSessionClientSecret: String,
+        authSessionCookie: String?,
         requestOptions: ApiRequest.Options
     ): ConsumerSession? {
         return null
@@ -319,6 +328,24 @@ internal abstract class AbsFakeStripeRepository : StripeRepository() {
         paymentMethodTypes: Set<String>,
         requestOptions: ApiRequest.Options
     ): ConsumerPaymentDetails? {
+        return null
+    }
+
+    override suspend fun attachLinkAccountSessionToPaymentIntent(
+        clientSecret: String,
+        paymentIntentId: String,
+        linkAccountSessionId: String,
+        requestOptions: ApiRequest.Options
+    ): PaymentIntent? {
+        return null
+    }
+
+    override suspend fun attachLinkAccountSessionToSetupIntent(
+        clientSecret: String,
+        setupIntentId: String,
+        linkAccountSessionId: String,
+        requestOptions: ApiRequest.Options
+    ): SetupIntent? {
         return null
     }
 }

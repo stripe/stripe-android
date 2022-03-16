@@ -12,6 +12,7 @@ public abstract interface class com/stripe/android/identity/IdentityVerification
 
 public final class com/stripe/android/identity/IdentityVerificationSheet$Companion {
 	public final fun create (Landroidx/activity/ComponentActivity;Lcom/stripe/android/identity/IdentityVerificationSheet$Configuration;)Lcom/stripe/android/identity/IdentityVerificationSheet;
+	public final fun create (Landroidx/fragment/app/Fragment;Lcom/stripe/android/identity/IdentityVerificationSheet$Configuration;)Lcom/stripe/android/identity/IdentityVerificationSheet;
 }
 
 public final class com/stripe/android/identity/IdentityVerificationSheet$Configuration {
@@ -86,10 +87,10 @@ public final class com/stripe/android/identity/databinding/ConfirmationFragmentB
 }
 
 public final class com/stripe/android/identity/databinding/ConsentFragmentBinding : androidx/viewbinding/ViewBinding {
-	public final field agree Landroid/widget/Button;
+	public final field agree Lcom/stripe/android/identity/ui/LoadingButton;
 	public final field body Landroid/widget/TextView;
 	public final field buttons Landroid/widget/LinearLayout;
-	public final field decline Landroid/widget/Button;
+	public final field decline Lcom/stripe/android/identity/ui/LoadingButton;
 	public final field divider Landroid/view/View;
 	public final field loadings Landroid/widget/LinearLayout;
 	public final field merchantLogo Landroid/widget/ImageView;
@@ -110,15 +111,21 @@ public final class com/stripe/android/identity/databinding/ConsentFragmentBindin
 
 public final class com/stripe/android/identity/databinding/DocSelectionFragmentBinding : androidx/viewbinding/ViewBinding {
 	public final field dl Lcom/google/android/material/button/MaterialButton;
+	public final field dlContainer Landroid/widget/RelativeLayout;
+	public final field dlIndicator Lcom/google/android/material/progressindicator/CircularProgressIndicator;
 	public final field dlSeparator Landroid/view/View;
 	public final field id Lcom/google/android/material/button/MaterialButton;
+	public final field idContainer Landroid/widget/RelativeLayout;
+	public final field idIndicator Lcom/google/android/material/progressindicator/CircularProgressIndicator;
 	public final field idSeparator Landroid/view/View;
 	public final field multiSelectionContent Landroid/widget/LinearLayout;
 	public final field passport Lcom/google/android/material/button/MaterialButton;
+	public final field passportContainer Landroid/widget/RelativeLayout;
+	public final field passportIndicator Lcom/google/android/material/progressindicator/CircularProgressIndicator;
 	public final field passportSeparator Landroid/view/View;
 	public final field singleSelectionBody Landroid/widget/TextView;
 	public final field singleSelectionContent Landroid/widget/LinearLayout;
-	public final field singleSelectionContinue Lcom/google/android/material/button/MaterialButton;
+	public final field singleSelectionContinue Lcom/stripe/android/identity/ui/LoadingButton;
 	public final field title Landroid/widget/TextView;
 	public static fun bind (Landroid/view/View;)Lcom/stripe/android/identity/databinding/DocSelectionFragmentBinding;
 	public synthetic fun getRoot ()Landroid/view/View;
@@ -164,7 +171,7 @@ public final class com/stripe/android/identity/databinding/FrontBackUploadFragme
 	public final field contentText Landroid/widget/TextView;
 	public final field finishedCheckMarkBack Landroid/widget/ImageView;
 	public final field finishedCheckMarkFront Landroid/widget/ImageView;
-	public final field kontinue Lcom/google/android/material/button/MaterialButton;
+	public final field kontinue Lcom/stripe/android/identity/ui/LoadingButton;
 	public final field labelBack Landroid/widget/TextView;
 	public final field labelFront Landroid/widget/TextView;
 	public final field progressCircularBack Lcom/google/android/material/progressindicator/CircularProgressIndicator;
@@ -212,6 +219,14 @@ public final class com/stripe/android/identity/databinding/IdentityActivityBindi
 	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Z)Lcom/stripe/android/identity/databinding/IdentityActivityBinding;
 }
 
+public final class com/stripe/android/identity/databinding/LoadingButtonBinding : androidx/viewbinding/ViewBinding {
+	public final field button Lcom/google/android/material/button/MaterialButton;
+	public final field indicator Lcom/google/android/material/progressindicator/CircularProgressIndicator;
+	public static fun bind (Landroid/view/View;)Lcom/stripe/android/identity/databinding/LoadingButtonBinding;
+	public fun getRoot ()Landroid/view/View;
+	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;)Lcom/stripe/android/identity/databinding/LoadingButtonBinding;
+}
+
 public final class com/stripe/android/identity/databinding/PassportScanFragmentBinding : androidx/viewbinding/ViewBinding {
 	public final field cameraView Lcom/stripe/android/camera/scanui/CameraView;
 	public final field cameraViewCard Lcom/google/android/material/card/MaterialCardView;
@@ -229,7 +244,7 @@ public final class com/stripe/android/identity/databinding/PassportScanFragmentB
 public final class com/stripe/android/identity/databinding/PassportUploadFragmentBinding : androidx/viewbinding/ViewBinding {
 	public final field contentText Landroid/widget/TextView;
 	public final field finishedCheckMark Landroid/widget/ImageView;
-	public final field kontinue Lcom/google/android/material/button/MaterialButton;
+	public final field kontinue Lcom/stripe/android/identity/ui/LoadingButton;
 	public final field label Landroid/widget/TextView;
 	public final field progressCircular Lcom/google/android/material/progressindicator/CircularProgressIndicator;
 	public final field select Lcom/google/android/material/button/MaterialButton;

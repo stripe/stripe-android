@@ -48,7 +48,7 @@ internal class Loader(private val context: Context) {
             )
             loadedData
         } catch (t: Throwable) {
-            Log.e(Config.logTag, "Failed to load resource", t)
+            Log.e(LOG_TAG, "Failed to load resource", t)
             trackModelLoaded(
                 fetchedData.modelClass,
                 fetchedData.modelVersion,

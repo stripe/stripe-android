@@ -101,6 +101,9 @@
         <action
             android:id="@+id/action_cameraPermissionDeniedFragment_to_driverLicenseUploadFragment"
             app:destination="@id/driverLicenseUploadFragment" />
+        <action
+            android:id="@+id/action_cameraPermissionDeniedFragment_to_docSelectionFragment"
+            app:destination="@id/docSelectionFragment" />
     </fragment>
     <fragment
         android:id="@+id/cameraErrorFragment"

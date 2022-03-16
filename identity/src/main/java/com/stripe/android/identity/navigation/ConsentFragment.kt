@@ -1,7 +1,6 @@
 package com.stripe.android.identity.navigation
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -12,7 +11,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.stripe.android.identity.R
 import com.stripe.android.identity.databinding.ConsentFragmentBinding
-import com.stripe.android.identity.networking.Status
+import com.stripe.android.identity.networking.models.ClearDataParam
 import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.networking.models.ConsentParam
 import com.stripe.android.identity.networking.models.VerificationPage.Companion.isMissingBiometricConsent
@@ -47,6 +46,8 @@ internal class ConsentFragment(
         binding.merchantLogo.setImageResource(identityViewModel.args.merchantLogo)
 
         binding.agree.setOnClickListener {
+            binding.agree.toggleToLoading()
+            binding.decline.isClickable = false
             postVerificationPageDataAndNavigate(
                 CollectedDataParam(
                     consent = ConsentParam(biometric = true)
@@ -54,6 +55,8 @@ internal class ConsentFragment(
             )
         }
         binding.decline.setOnClickListener {
+            binding.decline.toggleToLoading()
+            binding.agree.isClickable = false
             postVerificationPageDataAndNavigate(
                 CollectedDataParam(
                     consent = ConsentParam(biometric = false)
@@ -68,26 +71,20 @@ internal class ConsentFragment(
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        identityViewModel.verificationPage.observe(viewLifecycleOwner) {
-            when (it.status) {
-                Status.SUCCESS -> {
-                    if (requireNotNull(it.data).isMissingBiometricConsent()) {
-                        setLoadingFinishedUI()
-                        bindViewData(requireNotNull(it.data).biometricConsent)
-                    } else {
-                        navigateToDocSelection()
-                    }
+        identityViewModel.observeForVerificationPage(
+            viewLifecycleOwner,
+            onSuccess = { verificationPage ->
+                if (verificationPage.isMissingBiometricConsent()) {
+                    setLoadingFinishedUI()
+                    bindViewData(verificationPage.biometricConsent)
+                } else {
+                    navigateToDocSelection()
                 }
-                Status.LOADING -> {} // no-op
-                Status.ERROR -> {
-                    Log.d(
-                        TAG,
-                        "API Error occurred: $it.throwable, navigate to general error fragment"
-                    )
-                    navigateToDefaultErrorFragment()
-                }
+            },
+            onFailure = {
+                navigateToDefaultErrorFragment()
             }
-        }
+        )
     }
 
     /**
@@ -98,6 +95,7 @@ internal class ConsentFragment(
             postVerificationPageDataAndMaybeSubmit(
                 identityViewModel,
                 collectedDataParam,
+                ClearDataParam.CONSENT_TO_DOC_SELECT,
                 shouldNotSubmit = { true },
                 notSubmitBlock = { verificationPageData ->
                     if (verificationPageData.isMissingDocumentType()) {
@@ -120,17 +118,13 @@ internal class ConsentFragment(
         binding.privacyPolicy.setHtmlString(consentPage.privacyPolicy)
         binding.timeEstimate.text = consentPage.timeEstimate
         binding.body.setHtmlString(consentPage.body)
-        binding.agree.text = consentPage.acceptButtonText
-        binding.decline.text = consentPage.declineButtonText
+        binding.agree.setText(consentPage.acceptButtonText)
+        binding.decline.setText(consentPage.declineButtonText)
     }
 
     private fun setLoadingFinishedUI() {
         binding.loadings.visibility = View.GONE
         binding.texts.visibility = View.VISIBLE
         binding.buttons.visibility = View.VISIBLE
-    }
-
-    private companion object {
-        val TAG: String = ConsentFragment::class.java.simpleName
     }
 }

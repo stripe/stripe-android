@@ -10,13 +10,19 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.stripe.android.core.model.InternalStripeFile
 import com.stripe.android.core.model.InternalStripeFilePurpose
 import com.stripe.android.identity.IdentityVerificationSheetContract
 import com.stripe.android.identity.networking.IdentityRepository
+import com.stripe.android.identity.networking.Resource
+import com.stripe.android.identity.networking.Status
+import com.stripe.android.identity.networking.models.DocumentUploadParam.UploadMethod
+import com.stripe.android.identity.networking.models.VerificationPageStaticContentDocumentCapturePage
 import com.stripe.android.identity.utils.ImageChooser
 import com.stripe.android.identity.utils.PhotoTaker
 import com.stripe.android.identity.utils.resizeUriAndCreateFileToUpload
 import kotlinx.coroutines.launch
+import java.io.File
 
 /**
  * ViewModel to upload front and back image of a document either through camera or from local
@@ -30,14 +36,19 @@ internal class FrontBackUploadViewModel(
     /**
      * The ID front image has been uploaded
      */
-    private val _frontUploaded = MutableLiveData<Unit>()
-    val frontUploaded: LiveData<Unit> = _frontUploaded
+    private val _frontUploaded =
+        MutableLiveData<Resource<Pair<InternalStripeFile, UploadMethod>>>()
+    val frontUploaded:
+        LiveData<Resource<Pair<InternalStripeFile, UploadMethod>>> =
+            _frontUploaded
 
     /**
      * The ID back image has been uploaded
      */
-    private val _backUploaded = MutableLiveData<Unit>()
-    val backUploaded: LiveData<Unit> = _backUploaded
+    private val _backUploaded =
+        MutableLiveData<Resource<Pair<InternalStripeFile, UploadMethod>>>()
+    val backUploaded: LiveData<Resource<Pair<InternalStripeFile, UploadMethod>>> =
+        _backUploaded
 
     /**
      * Both front and back of ID are uploaded
@@ -48,12 +59,16 @@ internal class FrontBackUploadViewModel(
 
         init {
             addSource(this@FrontBackUploadViewModel.frontUploaded) {
-                frontUploaded = true
-                postValueWhenBothUploaded()
+                if (it.status == Status.SUCCESS) {
+                    frontUploaded = true
+                    postValueWhenBothUploaded()
+                }
             }
             addSource(this@FrontBackUploadViewModel.backUploaded) {
-                backUploaded = true
-                postValueWhenBothUploaded()
+                if (it.status == Status.SUCCESS) {
+                    backUploaded = true
+                    postValueWhenBothUploaded()
+                }
             }
         }
 
@@ -124,26 +139,25 @@ internal class FrontBackUploadViewModel(
      */
     fun uploadImageFront(
         uri: Uri,
-        context: Context
+        context: Context,
+        documentCaptureModels: VerificationPageStaticContentDocumentCapturePage,
+        uploadMethod: UploadMethod
     ) {
-        viewModelScope.launch {
-            identityRepository.uploadImage(
-                verificationId = verificationArgs.verificationSessionId,
-                ephemeralKey = verificationArgs.ephemeralKeySecret,
-                imageFile = resizeUriAndCreateFileToUpload(
-                    context,
-                    uri,
-                    verificationArgs.verificationSessionId,
-                    // TODO(ccen) upload both full frame and non full frame
-                    true,
-                    FRONT
-                ),
-                // TODO(ccen) pass it over from VerificationPage response
-                filePurpose = InternalStripeFilePurpose.IdentityPrivate
-            )
-
-            _frontUploaded.postValue(Unit)
-        }
+        _frontUploaded.postValue(Resource.loading())
+        uploadImage(
+            imageFile = resizeUriAndCreateFileToUpload(
+                context,
+                uri,
+                verificationArgs.verificationSessionId,
+                true,
+                FRONT,
+                maxDimension = documentCaptureModels.highResImageMaxDimension,
+                compressionQuality = documentCaptureModels.highResImageCompressionQuality
+            ),
+            filePurpose = documentCaptureModels.filePurpose,
+            resultLiveData = _frontUploaded,
+            uploadMethod = uploadMethod
+        )
     }
 
     /**
@@ -152,25 +166,56 @@ internal class FrontBackUploadViewModel(
      */
     fun uploadImageBack(
         uri: Uri,
-        context: Context
+        context: Context,
+        documentCaptureModels: VerificationPageStaticContentDocumentCapturePage,
+        uploadMethod: UploadMethod
+    ) {
+        _backUploaded.postValue(Resource.loading())
+        uploadImage(
+            imageFile = resizeUriAndCreateFileToUpload(
+                context,
+                uri,
+                verificationArgs.verificationSessionId,
+                true,
+                BACK,
+                maxDimension = documentCaptureModels.highResImageMaxDimension,
+                compressionQuality = documentCaptureModels.highResImageCompressionQuality
+            ),
+            filePurpose = documentCaptureModels.filePurpose,
+            resultLiveData = _backUploaded,
+            uploadMethod = uploadMethod
+        )
+    }
+
+    private fun uploadImage(
+        imageFile: File,
+        filePurpose: String,
+        resultLiveData: MutableLiveData<Resource<Pair<InternalStripeFile, UploadMethod>>>,
+        uploadMethod: UploadMethod
     ) {
         viewModelScope.launch {
-            identityRepository.uploadImage(
-                verificationId = verificationArgs.verificationSessionId,
-                ephemeralKey = verificationArgs.ephemeralKeySecret,
-                imageFile = resizeUriAndCreateFileToUpload(
-                    context,
-                    uri,
-                    verificationArgs.verificationSessionId,
-                    // TODO(ccen) upload both full frame and non full frame
-                    true,
-                    BACK
-                ),
-                // TODO(ccen) pass it over from VerificationPage response
-                filePurpose = InternalStripeFilePurpose.IdentityPrivate
+            runCatching {
+                identityRepository.uploadImage(
+                    verificationId = verificationArgs.verificationSessionId,
+                    ephemeralKey = verificationArgs.ephemeralKeySecret,
+                    imageFile = imageFile,
+                    filePurpose = requireNotNull(
+                        InternalStripeFilePurpose.fromCode(filePurpose)
+                    )
+                )
+            }.fold(
+                onSuccess = {
+                    resultLiveData.postValue(Resource.success(Pair(it, uploadMethod)))
+                },
+                onFailure = {
+                    resultLiveData.postValue(
+                        Resource.error(
+                            "Failed to upload file : ${imageFile.name}",
+                            throwable = it
+                        )
+                    )
+                }
             )
-
-            _backUploaded.postValue(Unit)
         }
     }
 

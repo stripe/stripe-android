@@ -6,20 +6,24 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.IdRes
+import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import com.stripe.android.camera.CameraPermissionEnsureable
 import com.stripe.android.core.exception.InvalidRequestException
 import com.stripe.android.identity.R
 import com.stripe.android.identity.databinding.DocSelectionFragmentBinding
 import com.stripe.android.identity.networking.Status
+import com.stripe.android.identity.networking.models.ClearDataParam
 import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.networking.models.IdDocumentParam
 import com.stripe.android.identity.networking.models.IdDocumentParam.Type
 import com.stripe.android.identity.networking.models.VerificationPageData.Companion.isMissingBackOrFront
 import com.stripe.android.identity.utils.navigateToDefaultErrorFragment
+import com.stripe.android.identity.utils.navigateToUploadFragment
 import com.stripe.android.identity.utils.postVerificationPageDataAndMaybeSubmit
 import com.stripe.android.identity.viewmodel.IdentityViewModel
 import kotlinx.coroutines.launch
@@ -28,7 +32,8 @@ import kotlinx.coroutines.launch
  * Screen to select type of ID to scan.
  */
 internal class DocSelectionFragment(
-    private val identityViewModelFactory: ViewModelProvider.Factory
+    private val identityViewModelFactory: ViewModelProvider.Factory,
+    private val cameraPermissionEnsureable: CameraPermissionEnsureable
 ) : Fragment() {
 
     private val identityViewModel: IdentityViewModel by activityViewModels {
@@ -48,33 +53,31 @@ internal class DocSelectionFragment(
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        identityViewModel.verificationPage.observe(viewLifecycleOwner) { verificationPage ->
-            when (verificationPage.status) {
-                Status.SUCCESS -> {
-                    binding.title.text = requireNotNull(verificationPage.data).documentSelect.title
-                    when (requireNotNull(verificationPage.data).documentSelect.idDocumentTypeAllowlist.count()) {
-                        0 -> {
-                            toggleMultiSelectionUI()
-                        }
-                        1 -> {
-                            requireNotNull(verificationPage.data).documentSelect.let { documentSelect ->
-                                toggleSingleSelectionUI(
-                                    documentSelect.idDocumentTypeAllowlist.entries.first().key,
-                                    documentSelect.buttonText
-                                )
-                            }
-                        }
-                        else -> {
-                            toggleMultiSelectionUI(requireNotNull(verificationPage.data).documentSelect.idDocumentTypeAllowlist)
+        identityViewModel.observeForVerificationPage(
+            viewLifecycleOwner,
+            onSuccess = { verificationPage ->
+                binding.title.text = verificationPage.documentSelect.title
+                when (verificationPage.documentSelect.idDocumentTypeAllowlist.count()) {
+                    0 -> {
+                        toggleMultiSelectionUI()
+                    }
+                    1 -> {
+                        verificationPage.documentSelect.let { documentSelect ->
+                            toggleSingleSelectionUI(
+                                documentSelect.idDocumentTypeAllowlist.entries.first().key,
+                                documentSelect.buttonText
+                            )
                         }
                     }
+                    else -> {
+                        toggleMultiSelectionUI(verificationPage.documentSelect.idDocumentTypeAllowlist)
+                    }
                 }
-                Status.LOADING -> {} // no-np
-                Status.ERROR -> {
-                    navigateToDefaultErrorFragment()
-                }
+            },
+            onFailure = {
+                navigateToDefaultErrorFragment()
             }
-        }
+        )
     }
 
     /**
@@ -89,25 +92,37 @@ internal class DocSelectionFragment(
                 when (allowedType) {
                     PASSPORT_KEY -> {
                         binding.passport.text = allowedTypeValue
-                        binding.passport.visibility = View.VISIBLE
+                        binding.passportContainer.visibility = View.VISIBLE
                         binding.passport.setOnClickListener {
-                            disableButtonAndNavigate(it, Type.PASSPORT)
+                            binding.passport.isEnabled = false
+                            binding.dl.isClickable = false
+                            binding.id.isClickable = false
+                            binding.passportIndicator.visibility = View.VISIBLE
+                            postVerificationPageDataAndNavigate(Type.PASSPORT)
                         }
                         binding.passportSeparator.visibility = View.VISIBLE
                     }
                     DRIVING_LICENSE_KEY -> {
                         binding.dl.text = allowedTypeValue
-                        binding.dl.visibility = View.VISIBLE
+                        binding.dlContainer.visibility = View.VISIBLE
                         binding.dl.setOnClickListener {
-                            disableButtonAndNavigate(it, Type.DRIVINGLICENSE)
+                            binding.dl.isEnabled = false
+                            binding.passport.isClickable = false
+                            binding.id.isClickable = false
+                            binding.dlIndicator.visibility = View.VISIBLE
+                            postVerificationPageDataAndNavigate(Type.DRIVINGLICENSE)
                         }
                         binding.dlSeparator.visibility = View.VISIBLE
                     }
                     ID_CARD_KEY -> {
                         binding.id.text = allowedTypeValue
-                        binding.id.visibility = View.VISIBLE
+                        binding.idContainer.visibility = View.VISIBLE
                         binding.id.setOnClickListener {
-                            disableButtonAndNavigate(it, Type.IDCARD)
+                            binding.id.isEnabled = false
+                            binding.passport.isClickable = false
+                            binding.dl.isClickable = false
+                            binding.idIndicator.visibility = View.VISIBLE
+                            postVerificationPageDataAndNavigate(Type.IDCARD)
                         }
                         binding.idSeparator.visibility = View.VISIBLE
                     }
@@ -117,25 +132,9 @@ internal class DocSelectionFragment(
                 }
             }
         } ?: run {
-            listOf(
-                binding.dl,
-                binding.dlSeparator,
-                binding.id,
-                binding.idSeparator,
-                binding.passport,
-                binding.passportSeparator
-            ).forEach {
-                it.visibility = View.VISIBLE
-            }
-            binding.passport.setOnClickListener {
-                disableButtonAndNavigate(it, Type.PASSPORT)
-            }
-            binding.dl.setOnClickListener {
-                disableButtonAndNavigate(it, Type.DRIVINGLICENSE)
-            }
-            binding.id.setOnClickListener {
-                disableButtonAndNavigate(it, Type.IDCARD)
-            }
+            // Not possible for backend to send an empty list of allowed types.
+            Log.e(TAG, "Received an empty idDocumentTypeAllowlist.")
+            navigateToDefaultErrorFragment()
         }
     }
 
@@ -145,28 +144,31 @@ internal class DocSelectionFragment(
     private fun toggleSingleSelectionUI(allowedType: String, buttonText: String) {
         binding.multiSelectionContent.visibility = View.GONE
         binding.singleSelectionContent.visibility = View.VISIBLE
-        binding.singleSelectionContinue.text = buttonText
+        binding.singleSelectionContinue.setText(buttonText)
 
         when (allowedType) {
             PASSPORT_KEY -> {
                 binding.singleSelectionBody.text =
                     getString(R.string.single_selection_body_content_passport)
                 binding.singleSelectionContinue.setOnClickListener {
-                    disableButtonAndNavigate(it, Type.PASSPORT)
+                    binding.singleSelectionContinue.toggleToLoading()
+                    postVerificationPageDataAndNavigate(Type.PASSPORT)
                 }
             }
             DRIVING_LICENSE_KEY -> {
                 binding.singleSelectionBody.text =
                     getString(R.string.single_selection_body_content_dl)
                 binding.singleSelectionContinue.setOnClickListener {
-                    disableButtonAndNavigate(it, Type.DRIVINGLICENSE)
+                    binding.singleSelectionContinue.toggleToLoading()
+                    postVerificationPageDataAndNavigate(Type.DRIVINGLICENSE)
                 }
             }
             ID_CARD_KEY -> {
                 binding.singleSelectionBody.text =
                     getString(R.string.single_selection_body_content_id)
                 binding.singleSelectionContinue.setOnClickListener {
-                    disableButtonAndNavigate(it, Type.IDCARD)
+                    binding.singleSelectionContinue.toggleToLoading()
+                    postVerificationPageDataAndNavigate(Type.IDCARD)
                 }
             }
             else -> {
@@ -176,57 +178,41 @@ internal class DocSelectionFragment(
     }
 
     /**
-     * Disable the button view and try navigate to this type.
-     *
-     * TODO(ccen): add CircularProgressIndicator to button
-     * Note: no need to it back to enabled, as it will navigate to another Fragment.
-     */
-    private fun disableButtonAndNavigate(view: View, type: Type) {
-        view.isEnabled = false
-        postVerificationPageDataAndNavigate(type)
-    }
-
-    /**
      * Post VerificationPageData with the type and navigate base on its result.
      */
     private fun postVerificationPageDataAndNavigate(type: Type) {
         lifecycleScope.launch {
             postVerificationPageDataAndMaybeSubmit(
-                identityViewModel,
-                CollectedDataParam(idDocument = IdDocumentParam(type = type)),
+                identityViewModel = identityViewModel,
+                collectedDataParam = CollectedDataParam(idDocument = IdDocumentParam(type = type)),
+                clearDataParam = ClearDataParam.DOC_SELECT_TO_UPLOAD,
                 shouldNotSubmit = { verificationPageData ->
                     verificationPageData.isMissingBackOrFront()
                 },
                 notSubmitBlock = {
-                    // TODO(ccen) Also check camera permission here
-                    identityViewModel.idDetectorModelFile.observe(viewLifecycleOwner) { modelResource ->
-                        when (modelResource.status) {
-                            Status.SUCCESS -> {
-                                navigateToScanFragment(type)
+                    cameraPermissionEnsureable.ensureCameraPermission(
+                        onCameraReady = {
+                            identityViewModel.idDetectorModelFile.observe(viewLifecycleOwner) { modelResource ->
+                                when (modelResource.status) {
+                                    // model ready, camera permission is granted -> navigate to scan
+                                    Status.SUCCESS -> {
+                                        findNavController().navigate(type.toScanDestinationId())
+                                    }
+                                    // model not ready, camera permission is granted -> navigate to manual capture
+                                    Status.ERROR -> {
+                                        tryNavigateToUploadFragment(type)
+                                    }
+                                    Status.LOADING -> {} // no-op
+                                }
                             }
-                            Status.ERROR -> {
-                                tryNavigateToUploadFragment(type)
-                            }
-                            Status.LOADING -> {} // no-op
+                        },
+                        onUserDeniedCameraPermission = {
+                            tryNavigateToCameraPermissionDeniedFragment(type)
                         }
-                    }
+                    )
                 }
             )
         }
-    }
-
-    /**
-     * Navigate to the corresponding type's scan fragment.
-     */
-    private fun navigateToScanFragment(type: Type) {
-        findNavController().navigate(type.toScanDestinationId())
-    }
-
-    /**
-     * Navigate to the corresponding type's upload fragment.
-     */
-    private fun navigateToUploadFragment(type: Type) {
-        findNavController().navigate(type.toUploadDestinationId())
     }
 
     /**
@@ -234,28 +220,46 @@ internal class DocSelectionFragment(
      * if required data is not available.
      */
     private fun tryNavigateToUploadFragment(type: Type) {
-        identityViewModel.verificationPage.observe(
-            viewLifecycleOwner
-        ) { verificationPageResource ->
-            when (verificationPageResource.status) {
-                Status.SUCCESS -> {
-                    if (requireNotNull(
-                            verificationPageResource.data
-                        ).documentCapture.requireLiveCapture
-                    ) {
-                        Log.e(TAG, "Can't access camera and client has required live capture.")
-                        navigateToDefaultErrorFragment()
-                    } else {
-                        navigateToUploadFragment(type)
-                    }
-                }
-                Status.ERROR -> {
-                    Log.e(TAG, "Failed to get VerificationPage.")
+        identityViewModel.observeForVerificationPage(
+            viewLifecycleOwner,
+            onSuccess = { verificationPage ->
+                if (verificationPage.documentCapture.requireLiveCapture) {
+                    Log.e(TAG, "Can't access camera and client has required live capture.")
                     navigateToDefaultErrorFragment()
+                } else {
+                    navigateToUploadFragment(type.toUploadDestinationId(), true)
                 }
-                Status.LOADING -> {} // no-op
+            },
+            onFailure = {
+                navigateToDefaultErrorFragment()
             }
-        }
+        )
+    }
+
+    /**
+     * Navigate to [CameraPermissionDeniedFragment], or to [ErrorFragment]
+     * if requireLiveCapture is true.
+     */
+    private fun tryNavigateToCameraPermissionDeniedFragment(type: Type) {
+        identityViewModel.observeForVerificationPage(
+            viewLifecycleOwner,
+            onSuccess = { verificationPage ->
+                if (verificationPage.documentCapture.requireLiveCapture) {
+                    Log.e(TAG, "Can't access camera and client has required live capture.")
+                    navigateToDefaultErrorFragment()
+                } else {
+                    findNavController().navigate(
+                        R.id.action_camera_permission_denied,
+                        bundleOf(
+                            CameraPermissionDeniedFragment.ARG_SCAN_TYPE to type
+                        )
+                    )
+                }
+            },
+            onFailure = {
+                navigateToDefaultErrorFragment()
+            }
+        )
     }
 
     internal companion object {
@@ -265,7 +269,7 @@ internal class DocSelectionFragment(
         val TAG: String = DocSelectionFragment::class.java.simpleName
 
         @IdRes
-        fun Type.toScanDestinationId() =
+        private fun Type.toScanDestinationId() =
             when (this) {
                 Type.IDCARD -> R.id.action_docSelectionFragment_to_IDScanFragment
                 Type.PASSPORT -> R.id.action_docSelectionFragment_to_passportScanFragment
@@ -273,7 +277,7 @@ internal class DocSelectionFragment(
             }
 
         @IdRes
-        fun Type.toUploadDestinationId() =
+        private fun Type.toUploadDestinationId() =
             when (this) {
                 Type.IDCARD -> R.id.action_docSelectionFragment_to_IDUploadFragment
                 Type.PASSPORT -> R.id.action_docSelectionFragment_to_passportUploadFragment

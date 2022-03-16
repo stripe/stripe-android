@@ -14,7 +14,6 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
-import androidx.core.content.ContextCompat
 import com.stripe.android.camera.CameraPreviewImage
 import com.stripe.android.camera.scanui.CameraView
 import com.stripe.android.camera.scanui.ScanFlow
@@ -22,9 +21,6 @@ import com.stripe.android.camera.scanui.ViewFinderBackground
 import com.stripe.android.camera.scanui.util.asRect
 import com.stripe.android.camera.scanui.util.setDrawable
 import com.stripe.android.stripecardscan.R
-import com.stripe.android.stripecardscan.framework.Config
-import com.stripe.android.stripecardscan.framework.util.getSdkVersion
-import com.stripe.android.stripecardscan.scanui.util.dpToPixels
 import com.stripe.android.stripecardscan.scanui.util.getColorByRes
 import com.stripe.android.stripecardscan.scanui.util.getDrawableByRes
 import com.stripe.android.stripecardscan.scanui.util.getFloatResource
@@ -36,10 +32,6 @@ import kotlin.math.min
 import kotlin.math.roundToInt
 
 internal abstract class SimpleScanActivity<ScanFlowParameters> : ScanActivity() {
-
-    companion object {
-        private const val LOGO_WIDTH_DP = 100
-    }
 
     /**
      * The main layout used to render the scan view.
@@ -107,10 +99,6 @@ internal abstract class SimpleScanActivity<ScanFlowParameters> : ScanActivity() 
      */
     protected open val viewFinderBorderView: ImageView by lazy { layout.viewFinderBorderView }
 
-    private val logoView: ImageView by lazy { ImageView(this) }
-
-    protected open val versionTextView: TextView by lazy { TextView(this) }
-
     /**
      * The aspect ratio of the view finder.
      */
@@ -150,12 +138,6 @@ internal abstract class SimpleScanActivity<ScanFlowParameters> : ScanActivity() 
         addUiComponents()
         setupUiComponents()
         setupUiConstraints()
-
-        setupLogoUi()
-        setupLogoConstraints()
-
-        setupVersionUi()
-        setupVersionConstraints()
 
         closeButtonView.setOnClickListener { userClosedScanner() }
         torchButtonView.setOnClickListener { toggleFlashlight() }
@@ -199,8 +181,6 @@ internal abstract class SimpleScanActivity<ScanFlowParameters> : ScanActivity() 
             swapCameraButtonView,
             cardNameTextView,
             cardNumberTextView,
-            logoView,
-            versionTextView,
         )
     }
 
@@ -349,31 +329,6 @@ internal abstract class SimpleScanActivity<ScanFlowParameters> : ScanActivity() 
             0F,
             getColorByRes(R.color.stripeCardNameOutlineColor),
         )
-    }
-
-    private fun setupLogoUi() {
-        if (isBackgroundDark()) {
-            logoView.setImageDrawable(
-                ContextCompat.getDrawable(this, R.drawable.stripe_logo_dark_background)
-            )
-        } else {
-            logoView.setImageDrawable(
-                ContextCompat.getDrawable(this, R.drawable.stripe_logo_light_background)
-            )
-        }
-
-        logoView.contentDescription = getString(R.string.stripe_logo)
-        logoView.setVisible(Config.displayLogo)
-    }
-
-    private fun setupVersionUi() {
-        versionTextView.text = getSdkVersion()
-        versionTextView.setTextSizeByRes(R.dimen.stripeSecurityTextSize)
-        versionTextView.setVisible(Config.isDebug)
-
-        if (isBackgroundDark()) {
-            versionTextView.setTextColor(getColorByRes(R.color.stripeSecurityColorDark))
-        }
     }
 
     protected open fun setupUiConstraints() {
@@ -560,36 +515,6 @@ internal abstract class SimpleScanActivity<ScanFlowParameters> : ScanActivity() 
             connect(it.id, ConstraintSet.BOTTOM, viewFinderWindowView.id, ConstraintSet.BOTTOM)
             connect(it.id, ConstraintSet.START, viewFinderWindowView.id, ConstraintSet.START)
             connect(it.id, ConstraintSet.END, viewFinderWindowView.id, ConstraintSet.END)
-        }
-    }
-
-    private fun setupLogoConstraints() {
-        logoView.layoutParams = ConstraintLayout.LayoutParams(
-            dpToPixels(LOGO_WIDTH_DP), // width
-            ViewGroup.LayoutParams.WRAP_CONTENT, // height
-        ).apply {
-            topMargin = resources.getDimensionPixelSize(R.dimen.stripeLogoMargin)
-        }
-
-        logoView.addConstraints {
-            connect(it.id, ConstraintSet.TOP, ConstraintSet.PARENT_ID, ConstraintSet.TOP)
-            connect(it.id, ConstraintSet.START, ConstraintSet.PARENT_ID, ConstraintSet.START)
-            connect(it.id, ConstraintSet.END, ConstraintSet.PARENT_ID, ConstraintSet.END)
-        }
-    }
-
-    private fun setupVersionConstraints() {
-        versionTextView.layoutParams = ConstraintLayout.LayoutParams(
-            ViewGroup.LayoutParams.WRAP_CONTENT, // width
-            ViewGroup.LayoutParams.WRAP_CONTENT, // height
-        ).apply {
-            bottomMargin = resources.getDimensionPixelSize(R.dimen.stripeLogoMargin)
-        }
-
-        versionTextView.addConstraints {
-            connect(it.id, ConstraintSet.BOTTOM, ConstraintSet.PARENT_ID, ConstraintSet.BOTTOM)
-            connect(it.id, ConstraintSet.START, ConstraintSet.PARENT_ID, ConstraintSet.START)
-            connect(it.id, ConstraintSet.END, ConstraintSet.PARENT_ID, ConstraintSet.END)
         }
     }
 

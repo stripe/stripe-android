@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="kontinue">continue</string>
-    <string name="agree_and_continue">Agree and continue</string>
     <string name="decline">Decline and use alternative method</string>
     <string name="driver_license">Driver\'s license</string>
     <string name="id_card">Identity card</string>
@@ -31,6 +30,7 @@
     <string name="app_settings">App Settings</string>
     <string name="camera_permission">Camera permission</string>
     <string name="grant_camera_permission_text">We need permission to use your camera. Please allow camera access in app settings.</string>
+    <string name="ok">OK</string>
     <string name="upload_file_text">Alternatively, you may manually upload a photo of your %1$s</string>
 
     <string name="displayname_id">ID</string>
@@ -59,6 +59,7 @@
     <string name="unexpected_error_try_again">There was an unexpected error — try again in a few seconds</string>
     <string name="go_back">Go Back</string>
     <string name="description_exclamation_mark">Exclamation point for error page</string>
+    <string name="description_clock">Clock icon</string>
     <string name="loading">Loading</string>
     <string name="sample_consent_body_response"><![CDATA[<p><strong>How Stripe will verify your identity</strong></p>\n\n<p>Stripe will use biometric technology (on images of you and your IDs) and other data sources to confirm your identity and for fraud and security purposes. Stripe will store these images and the results of this check and share them with mlgb.band.</p>\n\n<p><a href=\"https://stripe.com/about\">Learn about Stripe</a></p><p><a href=\"https://stripe.com/privacy-center/legal#stripe-identity\">Learn how Stripe Identity works</a></p>]]></string>
     <string name="sample_privacy_policy"><![CDATA[Data will be stored and may be used according to the <a href=\"http://stripe.com/privacy\">Stripe Privacy Policy</a> and <a href=\"\">mlgb.band</a> Privacy Policy.]]></string>

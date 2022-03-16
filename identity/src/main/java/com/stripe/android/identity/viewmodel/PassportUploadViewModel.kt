@@ -9,9 +9,13 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.stripe.android.core.model.InternalStripeFile
 import com.stripe.android.core.model.InternalStripeFilePurpose
 import com.stripe.android.identity.IdentityVerificationSheetContract
 import com.stripe.android.identity.networking.IdentityRepository
+import com.stripe.android.identity.networking.Resource
+import com.stripe.android.identity.networking.models.DocumentUploadParam.UploadMethod
+import com.stripe.android.identity.networking.models.VerificationPageStaticContentDocumentCapturePage
 import com.stripe.android.identity.utils.ImageChooser
 import com.stripe.android.identity.utils.PhotoTaker
 import com.stripe.android.identity.utils.resizeUriAndCreateFileToUpload
@@ -28,8 +32,10 @@ internal class PassportUploadViewModel(
     /**
      * The passport image is uploaded.
      */
-    private val _uploaded = MutableLiveData<Unit>()
-    val uploaded: LiveData<Unit> = _uploaded
+    private val _uploaded =
+        MutableLiveData<Resource<Pair<InternalStripeFile, UploadMethod>>>()
+    val uploaded: LiveData<Resource<Pair<InternalStripeFile, UploadMethod>>> =
+        _uploaded
 
     private lateinit var photoTaker: PhotoTaker
     private lateinit var imageChooser: ImageChooser
@@ -67,23 +73,43 @@ internal class PassportUploadViewModel(
      */
     fun uploadImage(
         uri: Uri,
-        context: Context
+        context: Context,
+        documentCaptureModels: VerificationPageStaticContentDocumentCapturePage,
+        uploadMethod: UploadMethod
     ) {
+        _uploaded.postValue(Resource.loading())
         viewModelScope.launch {
-            identityRepository.uploadImage(
-                verificationId = verificationArgs.verificationSessionId,
-                ephemeralKey = verificationArgs.ephemeralKeySecret,
-                imageFile = resizeUriAndCreateFileToUpload(
-                    context,
-                    uri,
-                    verificationArgs.verificationSessionId,
-                    // TODO(ccen) upload both full frame and non full frame
-                    true,
-                ),
-                // TODO(ccen) pass it over from VerificationPage response
-                filePurpose = InternalStripeFilePurpose.IdentityPrivate
+            runCatching {
+                identityRepository.uploadImage(
+                    verificationId = verificationArgs.verificationSessionId,
+                    ephemeralKey = verificationArgs.ephemeralKeySecret,
+                    imageFile = resizeUriAndCreateFileToUpload(
+                        context,
+                        uri,
+                        verificationArgs.verificationSessionId,
+                        true,
+                        maxDimension = documentCaptureModels.highResImageMaxDimension,
+                        compressionQuality = documentCaptureModels.highResImageCompressionQuality
+                    ),
+                    filePurpose = requireNotNull(
+                        InternalStripeFilePurpose.fromCode(
+                            documentCaptureModels.filePurpose
+                        )
+                    ),
+                )
+            }.fold(
+                onSuccess = {
+                    _uploaded.postValue(Resource.success(Pair(it, uploadMethod)))
+                },
+                onFailure = {
+                    _uploaded.postValue(
+                        Resource.error(
+                            "Failed to upload file : $uri",
+                            throwable = it
+                        )
+                    )
+                }
             )
-            _uploaded.postValue(Unit)
         }
     }
 

@@ -8,10 +8,8 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
-import androidx.core.os.bundleOf
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
-import com.stripe.android.camera.CameraPermissionEnsureable
 import com.stripe.android.camera.scanui.util.startAnimation
 import com.stripe.android.identity.R
 import com.stripe.android.identity.databinding.DriverLicenseScanFragmentBinding
@@ -21,11 +19,9 @@ import com.stripe.android.identity.states.IdentityScanState
  * Fragment to scan the Driver's license.
  */
 internal class DriverLicenseScanFragment(
-    cameraPermissionEnsureable: CameraPermissionEnsureable,
     cameraViewModelFactory: ViewModelProvider.Factory,
     identityViewModelFactory: ViewModelProvider.Factory
 ) : IdentityCameraScanFragment(
-    cameraPermissionEnsureable,
     cameraViewModelFactory,
     identityViewModelFactory
 ) {
@@ -72,15 +68,6 @@ internal class DriverLicenseScanFragment(
     override fun onCameraReady() {
         cameraViewModel.targetScanType = IdentityScanState.ScanType.DL_FRONT
         startScanning(IdentityScanState.ScanType.DL_FRONT)
-    }
-
-    override fun onUserDeniedCameraPermission() {
-        findNavController().navigate(
-            R.id.action_camera_permission_denied,
-            bundleOf(
-                CameraPermissionDeniedFragment.ARG_SCAN_TYPE to IdentityScanState.ScanType.DL_FRONT
-            )
-        )
     }
 
     override fun updateUI(identityScanState: IdentityScanState) {

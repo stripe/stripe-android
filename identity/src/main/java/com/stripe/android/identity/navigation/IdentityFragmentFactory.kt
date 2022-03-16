@@ -6,6 +6,7 @@ import androidx.fragment.app.FragmentFactory
 import com.stripe.android.camera.AppSettingsOpenable
 import com.stripe.android.camera.CameraPermissionEnsureable
 import com.stripe.android.identity.IdentityVerificationSheetContract
+import com.stripe.android.identity.VerificationFlowFinishable
 import com.stripe.android.identity.networking.DefaultIdentityRepository
 import com.stripe.android.identity.viewmodel.CameraViewModel
 import com.stripe.android.identity.viewmodel.FrontBackUploadViewModel
@@ -19,7 +20,8 @@ internal class IdentityFragmentFactory(
     context: Context,
     private val cameraPermissionEnsureable: CameraPermissionEnsureable,
     private val appSettingsOpenable: AppSettingsOpenable,
-    verificationArgs: IdentityVerificationSheetContract.Args
+    verificationArgs: IdentityVerificationSheetContract.Args,
+    private val verificationFlowFinishable: VerificationFlowFinishable
 ) : FragmentFactory() {
     private val identityRepository = DefaultIdentityRepository(context)
     private val cameraViewModelFactory = CameraViewModel.CameraViewModelFactory()
@@ -42,17 +44,17 @@ internal class IdentityFragmentFactory(
     override fun instantiate(classLoader: ClassLoader, className: String): Fragment {
         return when (className) {
             IDScanFragment::class.java.name -> IDScanFragment(
-                cameraPermissionEnsureable,
+//                cameraPermissionEnsureable,
                 cameraViewModelFactory,
                 identityViewModelFactory
             )
             DriverLicenseScanFragment::class.java.name -> DriverLicenseScanFragment(
-                cameraPermissionEnsureable,
+//                cameraPermissionEnsureable,
                 cameraViewModelFactory,
                 identityViewModelFactory
             )
             PassportScanFragment::class.java.name -> PassportScanFragment(
-                cameraPermissionEnsureable,
+//                cameraPermissionEnsureable,
                 cameraViewModelFactory,
                 identityViewModelFactory
             )
@@ -60,19 +62,27 @@ internal class IdentityFragmentFactory(
                 appSettingsOpenable
             )
             IDUploadFragment::class.java.name -> IDUploadFragment(
-                frontBackUploadViewModelFactory
+                frontBackUploadViewModelFactory,
+                identityViewModelFactory
             )
             DriverLicenseUploadFragment::class.java.name -> DriverLicenseUploadFragment(
-                frontBackUploadViewModelFactory
+                frontBackUploadViewModelFactory,
+                identityViewModelFactory
             )
             PassportUploadFragment::class.java.name -> PassportUploadFragment(
-                passportUploadViewModelFactory
+                passportUploadViewModelFactory,
+                identityViewModelFactory
             )
             ConsentFragment::class.java.name -> ConsentFragment(
                 identityViewModelFactory
             )
             DocSelectionFragment::class.java.name -> DocSelectionFragment(
-                identityViewModelFactory
+                identityViewModelFactory,
+                cameraPermissionEnsureable
+            )
+            ConfirmationFragment::class.java.name -> ConfirmationFragment(
+                identityViewModelFactory,
+                verificationFlowFinishable
             )
             else -> super.instantiate(classLoader, className)
         }

@@ -4,10 +4,9 @@ import android.content.Context
 import android.util.Log
 import com.stripe.android.camera.framework.Analyzer
 import com.stripe.android.camera.framework.AnalyzerFactory
-import com.stripe.android.stripecardscan.framework.Config
 import com.stripe.android.stripecardscan.framework.FetchedData
+import com.stripe.android.stripecardscan.framework.LOG_TAG
 import com.stripe.android.stripecardscan.framework.Loader
-import com.stripe.android.stripecardscan.framework.time.Timer
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import org.tensorflow.lite.Interpreter
@@ -32,22 +31,12 @@ internal abstract class TensorFlowLiteAnalyzer<Input, MLInput, Output, MLOutput>
         data: MLInput,
     ): MLOutput
 
-    private val loggingTimer by lazy {
-        Timer.newInstance(Config.logTag, this::class.java.simpleName)
-    }
-
     override suspend fun analyze(data: Input, state: Any): Output {
-        val mlInput = loggingTimer.measureSuspend("transform") {
-            transformData(data)
-        }
+        val mlInput = transformData(data)
 
-        val mlOutput = loggingTimer.measureSuspend("infer") {
-            executeInference(tfInterpreter, mlInput)
-        }
+        val mlOutput = executeInference(tfInterpreter, mlInput)
 
-        return loggingTimer.measureSuspend("interpret") {
-            interpretMLOutput(data, mlOutput)
-        }
+        return interpretMLOutput(data, mlOutput)
     }
 
     override fun close() {
@@ -82,7 +71,7 @@ internal abstract class TFLAnalyzerFactory<
         loadModel(fetchedModel)?.let { Interpreter(it, tfOptions) }
     } catch (t: Throwable) {
         Log.e(
-            Config.logTag,
+            LOG_TAG,
             "Error loading ${fetchedModel.modelClass} version ${fetchedModel.modelVersion}",
             t,
         )
@@ -90,7 +79,7 @@ internal abstract class TFLAnalyzerFactory<
     }.apply {
         if (this == null) {
             Log.w(
-                Config.logTag,
+                LOG_TAG,
                 "Unable to load ${fetchedModel.modelClass} version ${fetchedModel.modelVersion}",
             )
         }
