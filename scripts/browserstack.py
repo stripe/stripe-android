@@ -67,10 +67,10 @@ def deleteTestSuite(testSuiteID):
      print("DELETING test app: {id} ...".format(id = testSuiteID), end='')
      url = "https://api-cloud.browserstack.com/app-automate/espresso/v2/test-suites/" + testSuiteID
      response = requests.delete(url,auth=(user, authKey))
-    if(response.status_code == 200):
+     if(response.status_code == 200):
          # print result
          print("DONE\nResult: \n" + str(response.json()))
-    else:
+     else:
         print("DONE\nRESULT: " + response.status_code + "\n" + response.json())
 
 # https://www.browserstack.com/docs/app-automate/api-reference/espresso/apps#upload-an-app
