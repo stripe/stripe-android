@@ -35,7 +35,7 @@ def listApps():
         else:
             print("NONE\n\n")
     else:
-        print("DONE\nRESULT: " + str(response.status_code) + "\n" + response.json())
+        print("DONE\nRESULT: " + str(response.status_code) + "\n" + str(response.json()))
 
 # https://www.browserstack.com/docs/app-automate/api-reference/espresso/tests#list-uploaded-test-suites
 def listEspressoApps():
@@ -59,7 +59,7 @@ def listEspressoApps():
                 )
             print("\n\n")
     else:
-        print("DONE\nRESULT: " + str(response.status_code) + "\n" + response.json())
+        print("DONE\nRESULT: " + str(response.status_code) + "\n" + str(response.json()))
 
 # https://www.browserstack.com/docs/app-automate/api-reference/espresso/tests#delete-a-test-suite
 def deleteTestSuite(testSuiteID):
@@ -71,7 +71,7 @@ def deleteTestSuite(testSuiteID):
          # print result
          print("DONE\nResult: \n" + str(response.json()))
      else:
-        print("DONE\nRESULT: " + str(response.status_code) + "\n" + response.json())
+        print("DONE\nRESULT: " + str(response.status_code) + "\n" + str(response.json()))
 
 # https://www.browserstack.com/docs/app-automate/api-reference/espresso/apps#upload-an-app
 def uploadApk(name, apkFile):
@@ -87,7 +87,7 @@ def uploadApk(name, apkFile):
         print("DONE\nRESULT app url: " + appUrl)
         return appUrl
     else:
-        print("DONE\nRESULT: " + str(response.status_code) + "\n" + response.json())
+        print("DONE\nRESULT: " + str(response.status_code) + "\n" + str(response.json()))
         return None
 
 # https://www.browserstack.com/docs/app-automate/api-reference/espresso/tests#upload-a-test-suite
@@ -106,7 +106,7 @@ def uploadEspressoApk(espressoApkFile):
         print("DONE\nRESULT test url: " + testUrl)
         return testUrl
     else:
-        print("DONE\nRESULT: " + str(response.status_code) + "\n" + response.json())
+        print("DONE\nRESULT: " + str(response.status_code) + "\n" + str(response.json()))
         return None
 
 # https://www.browserstack.com/docs/app-automate/api-reference/espresso/builds#execute-a-build
@@ -141,7 +141,7 @@ def executeTests(appUrl, testUrl):
         else:
             return None
     else:
-        print("DONE\nRESULT: " + str(response.status_code) + "\n" + response.json())
+        print("DONE\nRESULT: " + str(response.status_code) + "\n" + str(response.json()))
         return None
 
 # https://www.browserstack.com/docs/app-automate/api-reference/espresso/builds#get-build-status
