@@ -20,6 +20,7 @@ interface CollectBankAccountLauncher {
     interface ForPaymentIntent {
 
         fun launch(
+            publishableKey: String,
             clientSecret: String,
             params: CollectBankAccountForPaymentParams
         )
@@ -33,14 +34,12 @@ interface CollectBankAccountLauncher {
              */
             fun create(
                 activity: ComponentActivity,
-                publishableKey: String,
                 callback: ApiResultCallback<CollectBankAccountForPaymentResponse>
             ): ForPaymentIntent {
                 return StripeCollectBankAccountForPaymentIntentLauncher(
                     activity.registerForActivityResult(CollectBankAccountContract()) {
                         // convert result to CollectBankAccountForPaymentResponse
                     },
-                    publishableKey = publishableKey,
                     callback = callback
                 )
             }
@@ -53,14 +52,12 @@ interface CollectBankAccountLauncher {
              */
             fun create(
                 fragment: Fragment,
-                publishableKey: String,
                 callback: ApiResultCallback<CollectBankAccountForPaymentResponse>
             ): ForPaymentIntent {
                 return StripeCollectBankAccountForPaymentIntentLauncher(
                     fragment.registerForActivityResult(CollectBankAccountContract()) {
                         // convert result to CollectBankAccountForPaymentResponse
                     },
-                    publishableKey = publishableKey,
                     callback = callback
                 )
             }
@@ -75,6 +72,7 @@ interface CollectBankAccountLauncher {
     interface ForSetupIntent {
 
         fun launch(
+            publishableKey: String,
             clientSecret: String,
             params: CollectBankAccountForSetupParams
         )
@@ -89,14 +87,12 @@ interface CollectBankAccountLauncher {
              */
             fun create(
                 activity: ComponentActivity,
-                publishableKey: String,
                 callback: ApiResultCallback<CollectBankAccountForSetupResponse>
             ): ForSetupIntent {
                 return StripeCollectBankAccountForSetupIntentLauncher(
                     activity.registerForActivityResult(CollectBankAccountContract()) {
                         // convert result to CollectBankAccountForSetupResponse
                     },
-                    publishableKey = publishableKey,
                     callback = callback
                 )
             }
@@ -109,14 +105,12 @@ interface CollectBankAccountLauncher {
              */
             fun create(
                 fragment: Fragment,
-                publishableKey: String,
                 callback: ApiResultCallback<CollectBankAccountForSetupResponse>
             ): ForSetupIntent {
                 return StripeCollectBankAccountForSetupIntentLauncher(
                     fragment.registerForActivityResult(CollectBankAccountContract()) {
                         // convert result to CollectBankAccountForSetupResponse
                     },
-                    publishableKey = publishableKey,
                     callback = callback
                 )
             }
@@ -126,11 +120,11 @@ interface CollectBankAccountLauncher {
 
 internal class StripeCollectBankAccountForPaymentIntentLauncher constructor(
     private val hostActivityLauncher: ActivityResultLauncher<CollectBankAccountContract.Args>,
-    val publishableKey: String,
     val callback: ApiResultCallback<CollectBankAccountForPaymentResponse>
 ) : CollectBankAccountLauncher.ForPaymentIntent {
 
     override fun launch(
+        publishableKey: String,
         clientSecret: String,
         params: CollectBankAccountForPaymentParams
     ) {
@@ -146,11 +140,11 @@ internal class StripeCollectBankAccountForPaymentIntentLauncher constructor(
 
 internal class StripeCollectBankAccountForSetupIntentLauncher constructor(
     private val hostActivityLauncher: ActivityResultLauncher<CollectBankAccountContract.Args>,
-    val publishableKey: String,
     val callback: ApiResultCallback<CollectBankAccountForSetupResponse>
 ) : CollectBankAccountLauncher.ForSetupIntent {
 
     override fun launch(
+        publishableKey: String,
         clientSecret: String,
         params: CollectBankAccountForSetupParams
     ) {
