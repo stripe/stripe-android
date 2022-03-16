@@ -2,6 +2,7 @@ package com.stripe.android.payments.bankaccount
 
 import android.app.Application
 import android.os.Bundle
+import android.util.Log
 import androidx.lifecycle.AbstractSavedStateViewModelFactory
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
@@ -17,6 +18,7 @@ import com.stripe.android.payments.bankaccount.CollectBankAccountContract.Args.F
 import com.stripe.android.payments.bankaccount.CollectBankAccountViewEffect.FinishWithPaymentIntent
 import com.stripe.android.payments.bankaccount.CollectBankAccountViewEffect.FinishWithSetupIntent
 import com.stripe.android.payments.bankaccount.CollectBankAccountViewEffect.OpenConnectionsFlow
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
@@ -29,7 +31,6 @@ internal class CollectBankAccountViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val _viewEffect = MutableSharedFlow<CollectBankAccountViewEffect>()
-
     val viewEffect: SharedFlow<CollectBankAccountViewEffect> = _viewEffect
 
     private val apiRequestOptions = ApiRequest.Options(
@@ -38,6 +39,7 @@ internal class CollectBankAccountViewModel @Inject constructor(
     )
 
     init {
+        logger.debug(args.params.toString())
         viewModelScope.launch {
             val linkedSessionId = when (args) {
                 // TODO stripeRepository.createLinkAccountSessionForPaymentIntent
@@ -45,7 +47,8 @@ internal class CollectBankAccountViewModel @Inject constructor(
                 // TODO stripeRepository.createLinkAccountSessionForSetupIntent
                 is ForSetupIntent -> "testSessionId"
             }
-            // open connections flow
+            // simulates API call.
+            delay(500)
             _viewEffect.emit(OpenConnectionsFlow(linkedSessionId))
         }
     }
@@ -72,25 +75,24 @@ internal class CollectBankAccountViewModel @Inject constructor(
         _viewEffect.emit(CollectBankAccountViewEffect.FinishWithError(throwable))
     }
 
-    private suspend fun attachToSetupIntent(
-        linkedAccountSessionId: String,
-        args: ForSetupIntent,
-    ) = stripeRepository.attachLinkAccountSessionToSetupIntent(
-        linkAccountSessionId = linkedAccountSessionId,
-        clientSecret = args.clientSecret,
-        setupIntentId = args.clientSecret, // TODO change by intent id from params
-        requestOptions = apiRequestOptions
-    )
-
     private suspend fun attachToPaymentIntent(
         linkedAccountSessionId: String,
         args: ForPaymentIntent
     ) = stripeRepository.attachLinkAccountSessionToPaymentIntent(
         linkAccountSessionId = linkedAccountSessionId,
         clientSecret = args.clientSecret,
-        paymentIntentId = args.clientSecret, // TODO change by intent id from params
+        paymentIntentId = PaymentIntent.ClientSecret(args.clientSecret).paymentIntentId,
         requestOptions = apiRequestOptions
+    )
 
+    private suspend fun attachToSetupIntent(
+        linkedAccountSessionId: String,
+        args: ForSetupIntent,
+    ) = stripeRepository.attachLinkAccountSessionToSetupIntent(
+        linkAccountSessionId = linkedAccountSessionId,
+        clientSecret = args.clientSecret,
+        setupIntentId = SetupIntent.ClientSecret(args.clientSecret).setupIntentId,
+        requestOptions = apiRequestOptions
     )
 
     class Factory(

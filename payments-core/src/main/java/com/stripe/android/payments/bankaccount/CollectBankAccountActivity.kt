@@ -7,7 +7,6 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
-import com.stripe.android.R
 import com.stripe.android.payments.bankaccount.CollectBankAccountResult.Completed
 import com.stripe.android.payments.bankaccount.CollectBankAccountResult.Failed
 import com.stripe.android.payments.bankaccount.CollectBankAccountViewEffect.FinishWithError
@@ -36,7 +35,6 @@ internal class CollectBankAccountActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_collect_bank_account)
         lifecycleScope.launchWhenStarted {
             viewModel.viewEffect.collect {
                 when (it) {

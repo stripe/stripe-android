@@ -1,16 +1,15 @@
 package com.stripe.example.activity
 
 import android.os.Bundle
+import android.util.Log
 import android.view.View
+import android.widget.Toast
 import androidx.lifecycle.Observer
 import com.stripe.android.ApiResultCallback
-import com.stripe.android.model.Address
-import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentMethodCreateParams
-import com.stripe.android.payments.bankaccount.BillingDetails
-import com.stripe.android.payments.bankaccount.CollectBankAccountForPaymentParams
 import com.stripe.android.payments.bankaccount.CollectBankAccountForPaymentResponse
 import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher
+import com.stripe.android.payments.bankaccount.CollectBankAccountParams
 import com.stripe.example.R
 import com.stripe.example.databinding.PaymentExampleActivityBinding
 
@@ -31,11 +30,12 @@ class AffirmPaymentActivity : StripeIntentActivity() {
             this,
             object : ApiResultCallback<CollectBankAccountForPaymentResponse> {
                 override fun onSuccess(result: CollectBankAccountForPaymentResponse) {
-                    // do something with payment intent
+                    Toast.makeText(this@AffirmPaymentActivity, result.toString(), Toast.LENGTH_SHORT).show()
                 }
 
                 override fun onError(e: Exception) {
-                    // handle error
+                    Log.e("error", "error", e)
+                    Toast.makeText(this@AffirmPaymentActivity, e.toString(), Toast.LENGTH_SHORT).show()
                 }
             }
         )
@@ -49,31 +49,28 @@ class AffirmPaymentActivity : StripeIntentActivity() {
         viewModel.status.observe(this, Observer(viewBinding.status::setText))
 
         viewBinding.confirmWithPaymentButton.setOnClickListener {
-            createAndConfirmPaymentIntent(
-                country = "US",
-                paymentMethodCreateParams = confirmParams,
-                shippingDetails = ConfirmPaymentIntentParams.Shipping(
-                    Address.Builder()
-                        .setCity("San Francisco")
-                        .setCountry("US")
-                        .setLine1("123 Market St")
-                        .setLine2("#345")
-                        .setPostalCode("94107")
-                        .setState("CA")
-                        .build(),
-                    name = "Jane Doe",
-                ),
-                supportedPaymentMethods = "affirm"
-            )
+//            createAndConfirmPaymentIntent(
+//                country = "US",
+//                paymentMethodCreateParams = confirmParams,
+//                shippingDetails = ConfirmPaymentIntentParams.Shipping(
+//                    Address.Builder()
+//                        .setCity("San Francisco")
+//                        .setCountry("US")
+//                        .setLine1("123 Market St")
+//                        .setLine2("#345")
+//                        .setPostalCode("94107")
+//                        .setState("CA")
+//                        .build(),
+//                    name = "Jane Doe",
+//                ),
+//                supportedPaymentMethods = "affirm"
+//            )
             launcher.launch(
                 "key_goes_here",
-                "clientSecret_of_paymentIntent",
-                CollectBankAccountForPaymentParams(
-                    paymentMethodType = "bank_account",
-                    BillingDetails(
-                        "Jane Doe",
-                        "email@email.com"
-                    )
+                "pi_1234_secret_5678",
+                CollectBankAccountParams.USBankAccount(
+                    name = "Jane Doe",
+                    email = "email@email.com"
                 )
             )
         }

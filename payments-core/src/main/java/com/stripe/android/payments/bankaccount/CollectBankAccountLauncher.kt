@@ -175,11 +175,13 @@ internal class StripeCollectBankAccountForSetupIntentLauncher constructor(
     }
 }
 
-@Parcelize
-data class CollectBankAccountParams(
-    val name: String,
-    val email: String?
-) : Parcelable
+sealed class CollectBankAccountParams : Parcelable {
+    @Parcelize
+    data class USBankAccount(
+        val name: String,
+        val email: String?
+    ) : Parcelable, CollectBankAccountParams()
+}
 
 @Parcelize
 data class CollectBankAccountForPaymentResponse(

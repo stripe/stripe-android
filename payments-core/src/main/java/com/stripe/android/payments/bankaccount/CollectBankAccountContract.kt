@@ -32,22 +32,24 @@ internal class CollectBankAccountContract :
 
     sealed class Args(
         open val publishableKey: String,
+        open val clientSecret: String,
+        open val params: CollectBankAccountParams,
     ) : Parcelable {
         fun toBundle() = bundleOf(EXTRA_ARGS to this)
 
         @Parcelize
         data class ForPaymentIntent internal constructor(
             override val publishableKey: String,
-            val clientSecret: String,
-            val params: CollectBankAccountParams,
-        ) : CollectBankAccountContract.Args(publishableKey)
+            override val clientSecret: String,
+            override val params: CollectBankAccountParams,
+        ) : CollectBankAccountContract.Args(publishableKey, clientSecret, params)
 
         @Parcelize
         data class ForSetupIntent internal constructor(
             override val publishableKey: String,
-            val clientSecret: String,
-            val params: CollectBankAccountParams,
-        ) : CollectBankAccountContract.Args(publishableKey)
+            override val clientSecret: String,
+            override val params: CollectBankAccountParams,
+        ) : CollectBankAccountContract.Args(publishableKey, clientSecret, params)
 
         companion object {
             fun fromIntent(intent: Intent): Args? {
