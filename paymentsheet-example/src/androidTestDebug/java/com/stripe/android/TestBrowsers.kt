@@ -1,7 +1,6 @@
 package com.stripe.android
 
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
-import androidx.test.espresso.IdlingPolicies
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.UiDevice
@@ -10,12 +9,12 @@ import com.stripe.android.test.core.AuthorizeAction
 import com.stripe.android.test.core.Automatic
 import com.stripe.android.test.core.Billing
 import com.stripe.android.test.core.Browser
-import com.stripe.android.test.core.IntentType
 import com.stripe.android.test.core.Currency
 import com.stripe.android.test.core.Customer
 import com.stripe.android.test.core.DelayedPMs
 import com.stripe.android.test.core.GooglePayState
 import com.stripe.android.test.core.INDIVIDUAL_TEST_TIMEOUT_SECONDS
+import com.stripe.android.test.core.IntentType
 import com.stripe.android.test.core.MyScreenCaptureProcessor
 import com.stripe.android.test.core.PlaygroundTestDriver
 import com.stripe.android.test.core.Shipping
@@ -23,11 +22,11 @@ import com.stripe.android.test.core.TestParameters
 import com.stripe.android.test.core.TestWatcher
 import org.junit.After
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.Timeout
 import org.junit.runner.RunWith
-import java.util.concurrent.TimeUnit
 
 /**
  * This tests that authorization works with firefox and chrome browsers.  If a browser
@@ -85,7 +84,7 @@ class TestBrowsers {
         )
     }
 
-    @Test
+    @Ignore("On browserstack's Google Pixel, the connection to stripe.com is deemed insecure and the page does not load.")
     fun testAuthorizeFirefox() {
         testDriver.confirmNewOrGuestComplete(
             bancontactNewUser.copy(

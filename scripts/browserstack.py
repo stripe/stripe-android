@@ -72,11 +72,11 @@ def deleteTestSuite(testSuiteID):
      print("DONE\nResult: \n" + str(response.json()))
 
 # https://www.browserstack.com/docs/app-automate/api-reference/espresso/apps#upload-an-app
-def uploadApk(apkFile):
+def uploadApk(name, apkFile):
     # print step description
     print("UPLOADING the file: {file}...".format(file=apkFile), end='')
     url = "https://api-cloud.browserstack.com/app-automate/upload"
-    files = { 'file': ('paymentSheet.apk', open(apkFile, 'rb')), }
+    files = { 'file': (name, open(apkFile, 'rb')), }
     response = requests.post(url, files=files, auth=(user, authKey))
     appUrl = response.json()["app_url"]
 
@@ -106,7 +106,17 @@ def executeTests(appUrl, testUrl):
     )
     url="https://api-cloud.browserstack.com/app-automate/espresso/v2/build"
     # firefox doesn't work on this samsung: Samsung Galaxy S9 Plus-9.0"]
-    response = requests.post(url, json={"app": appUrl, "devices": ["Google Pixel 3-9.0"], "testSuite": testUrl}, auth=(user, authKey))
+    response = requests.post(url, json={
+         "app": appUrl,
+         "devices": ["Google Pixel 3-10.0"],
+         "testSuite": testUrl,
+         "networkLogs": True,
+         "deviceLogs": True,
+         "video": True,
+#          "language": "en_us",
+#          "locale": "en_us",
+         "enableSpoonFramework": False
+      }, auth=(user, authKey))
     jsonResponse = response.json()
 
     # print result
@@ -147,9 +157,12 @@ if __name__ == "__main__":
     # Parse arguments
     parser = argparse.ArgumentParser(description='Interact with browserstack.')
     parser.add_argument("-t", "--test", help="Runs the espresso test.  Requires -a and -e", action="store_true")
+    parser.add_argument("-n", "--name", help="The name to use for the build")
     parser.add_argument("-a", "--apk", help="The app under test resulting from ./gradlew assemble")
     parser.add_argument("-e", "--espresso", help="The espresso test suite resulting from ./gradlew assembleDebugAndroidTest")
+
     parser.add_argument("-l", "--list", help="List apps and test apps", action="store_true")
+
     parser.add_argument("-d", "--delete", help="Delete a test suite id.  Pass in the test suite id (no bs://)")
     parser.add_argument("-f", "--force", help="Force delete with no prompt", action="store_true")
 
@@ -173,7 +186,7 @@ if __name__ == "__main__":
        sys.exit(0)
 
     elif(args.test):
-       if(args.espresso == None or args.apk == None):
+       if(args.espresso == None or args.apk == None):# or args.name == None):
            parser.print_help()
            sys.exit(2)
        else:
@@ -184,7 +197,7 @@ if __name__ == "__main__":
               )
            )
            print("-----------------")
-           appUrl = uploadApk(args.apk)
+           appUrl = uploadApk(args.name, args.apk)
            print("-----------------")
            testUrl = uploadEspressoApk(args.espresso)
            print("-----------------")
