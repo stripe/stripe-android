@@ -82,15 +82,4 @@
             android:theme="@style/PayLauncherDefaultTheme"
             android:exported="false" />
     </application>
-
-    <!--
-    See https://developer.android.com/training/package-visibility/declaring for more details.
-    -->
-    <queries>
-        <!--
-        Added to check if Chrome is installed for browser-based payment authentication (e.g. 3DS1).
-        -->
-        <package android:name="com.android.chrome" />
-    </queries>
-
 </manifest>
