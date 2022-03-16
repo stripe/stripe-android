@@ -89,7 +89,9 @@ fun SectionCard(
         backgroundColor = PaymentsTheme.colors.colorComponentBackground,
         modifier = modifier
     ) {
-        content()
+        Column {
+            content()
+        }
     }
 }
 
