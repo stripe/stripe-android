@@ -898,21 +898,21 @@ constructor(
         /**
          * The token of the Linked Account used to create the payment method
          *
-         * [us_bank_account.fingerprint](https://stripe.com/docs/api/payment_methods/object#payment_method_object-us_bank_account-linked_account)
+         * [us_bank_account.linkedAccount](https://stripe.com/docs/api/payment_methods/object#payment_method_object-us_bank_account-linked_account)
          */
         @JvmField val linkedAccount: String?,
 
         /**
          * Contains information about US bank account networks that can be used
          *
-         * [us_bank_account.fingerprint](https://stripe.com/docs/api/payment_methods/object#payment_method_object-us_bank_account-networks)
+         * [us_bank_account.networks](https://stripe.com/docs/api/payment_methods/object#payment_method_object-us_bank_account-networks)
          */
         @JvmField val networks: USBankNetworks?,
 
         /**
          * Routing number of the bank account
          *
-         * [us_bank_account.fingerprint](https://stripe.com/docs/api/payment_methods/object#payment_method_object-us_bank_account-routing_number)
+         * [us_bank_account.routingNumber](https://stripe.com/docs/api/payment_methods/object#payment_method_object-us_bank_account-routing_number)
          */
         @JvmField val routingNumber: String?,
     ) : TypeData() {
