@@ -68,7 +68,7 @@ internal class ConnectionsSheetActivity : AppCompatActivity() {
         lifecycleScope.launchWhenStarted {
             viewModel.viewEffect.collect { viewEffect ->
                 when (viewEffect) {
-                    is OpenAuthFlowWithIntent -> startActivity(intent)
+                    is OpenAuthFlowWithIntent -> startActivity(viewEffect.intent)
                     is FinishWithResult -> finishWithResult(viewEffect.result)
                 }
             }
