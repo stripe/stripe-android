@@ -404,15 +404,7 @@ class ConfirmPaymentIntentParamsTest {
             ConfirmPaymentIntentParams(
                 paymentMethodId = "pm_123",
                 paymentMethodOptions = PaymentMethodOptionsParams.USBankAccount(
-                    linkedAccount = PaymentMethodOptionsParams.USBankAccount.LinkedAccount(
-                        listOf(PaymentMethodOptionsParams.USBankAccount.LinkedAccount.Permission.PAYMENT_METHOD),
-                        "some_return_url"
-                    ),
-                    networks = PaymentMethodOptionsParams.USBankAccount.Networks(
-                        requested = "some_network"
-                    ),
-                    setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession,
-                    verificationMethod = PaymentMethodOptionsParams.USBankAccount.VerificationMethod.AUTOMATIC
+                    setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
                 ),
                 clientSecret = CLIENT_SECRET
             ).toParamMap()
@@ -421,15 +413,7 @@ class ConfirmPaymentIntentParamsTest {
                 "payment_method" to "pm_123",
                 "payment_method_options" to mapOf(
                     "us_bank_account" to mapOf(
-                        "linked_account" to mapOf(
-                            "permissions" to listOf("payment_method"),
-                            "return_url" to "some_return_url"
-                        ),
-                        "networks" to mapOf(
-                            "requested" to "some_network"
-                        ),
                         "setup_future_usage" to "off_session",
-                        "verification_method" to "automatic"
                     )
                 ),
                 "client_secret" to CLIENT_SECRET,

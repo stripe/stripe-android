@@ -15,8 +15,6 @@
     <ID>ConstructorParameterNaming:Source.kt$Source$private val _weChat: WeChat? = null</ID>
     <ID>EmptyFunctionBlock:AbsFakeStripeRepository.kt$AbsFakeStripeRepository${ }</ID>
     <ID>EmptyFunctionBlock:AbsPaymentController.kt$AbsPaymentController${ }</ID>
-    <ID>EmptyFunctionBlock:BrowserCapabilitiesSupplier.kt$BrowserCapabilitiesSupplier.NoopCustomTabsServiceConnection${ }</ID>
-    <ID>EmptyFunctionBlock:BrowserCapabilitiesSupplier.kt$BrowserCapabilitiesSupplier.NoopCustomTabsServiceConnection${}</ID>
     <ID>EmptyFunctionBlock:CardWidgetProgressView.kt$CardWidgetProgressView.&lt;no name provided>${ }</ID>
     <ID>EmptyFunctionBlock:CustomerSessionTest.kt$CustomerSessionTest.&lt;no name provided>${ }</ID>
     <ID>EmptyFunctionBlock:DeletePaymentMethodDialogFactory.kt$DeletePaymentMethodDialogFactory.PaymentMethodDeleteListener${ }</ID>
@@ -232,11 +230,6 @@
     <ID>MaxLineLength:PersonTokenParams.kt$PersonTokenParams.Relationship$*</ID>
     <ID>MaxLineLength:PersonTokenParams.kt$PersonTokenParams.Verification$*</ID>
     <ID>MaxLineLength:RemoteCardAccountRangeSourceTest.kt$RemoteCardAccountRangeSourceTest$fun</ID>
-<<<<<<< HEAD
-    <ID>MaxLineLength:SetupIntentTest.kt$SetupIntentTest$"The provided PaymentMethod has failed authentication. You can provide payment_method_data or a new PaymentMethod to attempt to fulfill this PaymentIntent again."</ID>
-    <ID>MaxLineLength:SetupIntentTest.kt$SetupIntentTest$Uri.parse("https://hooks.stripe.com/redirect/authenticate/src_1EqTStGMT9dGPIDGJGPkqE6B" + "?client_secret=src_client_secret_FL9m741mmxtHykDlRTC5aQ02")</ID>
-=======
->>>>>>> 044965f6c (Resolve comments)
     <ID>MaxLineLength:SourceJsonParserTest.kt$SourceJsonParserTest$payLaterAssetUrlsDescriptive = "https://x.klarnacdn.net/payment-method/assets/badges/generic/klarna.svg"</ID>
     <ID>MaxLineLength:SourceJsonParserTest.kt$SourceJsonParserTest$payLaterAssetUrlsStandard = "https://x.klarnacdn.net/payment-method/assets/badges/generic/klarna.svg"</ID>
     <ID>MaxLineLength:SourceJsonParserTest.kt$SourceJsonParserTest$payOverTimeAssetUrlsDescriptive = "https://x.klarnacdn.net/payment-method/assets/badges/generic/klarna.svg"</ID>
