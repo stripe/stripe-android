@@ -4,6 +4,9 @@ import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.activity.viewModels
 import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AppCompatActivity
@@ -16,6 +19,10 @@ import com.stripe.android.connections.databinding.ActivityConnectionsSheetBindin
 import java.security.InvalidParameterException
 
 internal class ConnectionsSheetActivity : AppCompatActivity() {
+
+    private val startForResult = registerForActivityResult(StartActivityForResult()) {
+        viewModel.onActivityResult()
+    }
 
     @VisibleForTesting
     internal val viewBinding by lazy {
@@ -59,6 +66,7 @@ internal class ConnectionsSheetActivity : AppCompatActivity() {
         }
 
         setupObservers()
+        if (savedInstanceState != null) viewModel.onActivityRecreated()
     }
 
     private fun setupObservers() {
@@ -78,7 +86,7 @@ internal class ConnectionsSheetActivity : AppCompatActivity() {
     }
 
     private fun OpenAuthFlowWithUrl.launch() {
-        startActivity(
+        startForResult.launch(
             CustomTabsIntent.Builder()
                 .setShareState(CustomTabsIntent.SHARE_STATE_OFF)
                 .build()
