@@ -17,25 +17,25 @@ def listApps():
     print("LISTING apps...", end='')
     url = "https://api-cloud.browserstack.com/app-automate/espresso/v2/apps"
     response = requests.get(url,auth=(user, authKey))
-
-    # print result
-    print("DONE")
-    print("Result:")
-    print("| Uploaded at |    App id     | Expire at |")
-    print("| ----------- | ------------- | --------- |")
-    if(0 < len(response.json()["apps"])):
-        for fileDescription in response.json()["apps"]:
-            print("| {uploadDate} | {id} | {expireDate} |".format(
-                  uploadDate=fileDescription["uploaded_at"],
-                  id=fileDescription["app_id"],
-                  expireDate=fileDescription["expiry"]
-              )
-            )
-        print("\n\n")
+    if(response.status_code == 200):
+        # print result
+        print("DONE")
+        print("Result:")
+        print("| Uploaded at |    App id     | Expire at |")
+        print("| ----------- | ------------- | --------- |")
+        if(0 < len(response.json()["apps"])):
+            for fileDescription in response.json()["apps"]:
+                print("| {uploadDate} | {id} | {expireDate} |".format(
+                      uploadDate=fileDescription["uploaded_at"],
+                      id=fileDescription["app_id"],
+                      expireDate=fileDescription["expiry"]
+                  )
+                )
+            print("\n\n")
+        else:
+            print("NONE\n\n")
     else:
-        print("NONE\n\n")
-
-
+        print("DONE\nRESULT: " + response.status_code + "\n" + response.json())
 
 # https://www.browserstack.com/docs/app-automate/api-reference/espresso/tests#list-uploaded-test-suites
 def listEspressoApps():
@@ -43,23 +43,23 @@ def listEspressoApps():
     print("LISTING test apps...", end='')
     url = "https://api-cloud.browserstack.com/app-automate/espresso/v2/test-suites"
     response = requests.get(url,auth=(user, authKey))
-
-    # print result
-    print("DONE")
-    print("Result:")
-    print("| Uploaded at | Test Suite id | Expire at |")
-    print("| ----------- | ------------- | --------- |")
-    if(0 < len(response.json()["test_suites"])):
-        for fileDescription in response.json()["test_suites"]:
-            print("| {uploadDate} | {id} | {expireDate} |".format(
-                  uploadDate=fileDescription["uploaded_at"],
-                  id=fileDescription["test_suite_id"],
-                  expireDate=fileDescription["expiry"]
-              )
-            )
-        print("\n\n")
+    if(response.status_code == 200):
+        # print result
+        print("DONE")
+        print("Result:")
+        print("| Uploaded at | Test Suite id | Expire at |")
+        print("| ----------- | ------------- | --------- |")
+        if(0 < len(response.json()["test_suites"])):
+            for fileDescription in response.json()["test_suites"]:
+                print("| {uploadDate} | {id} | {expireDate} |".format(
+                      uploadDate=fileDescription["uploaded_at"],
+                      id=fileDescription["test_suite_id"],
+                      expireDate=fileDescription["expiry"]
+                  )
+                )
+            print("\n\n")
     else:
-        print("NONE\n\n")
+        print("DONE\nRESULT: " + response.status_code + "\n" + response.json())
 
 # https://www.browserstack.com/docs/app-automate/api-reference/espresso/tests#delete-a-test-suite
 def deleteTestSuite(testSuiteID):
@@ -67,9 +67,11 @@ def deleteTestSuite(testSuiteID):
      print("DELETING test app: {id} ...".format(id = testSuiteID), end='')
      url = "https://api-cloud.browserstack.com/app-automate/espresso/v2/test-suites/" + testSuiteID
      response = requests.delete(url,auth=(user, authKey))
-
-     # print result
-     print("DONE\nResult: \n" + str(response.json()))
+    if(response.status_code == 200):
+         # print result
+         print("DONE\nResult: \n" + str(response.json()))
+    else:
+        print("DONE\nRESULT: " + response.status_code + "\n" + response.json())
 
 # https://www.browserstack.com/docs/app-automate/api-reference/espresso/apps#upload-an-app
 def uploadApk(name, apkFile):
@@ -78,11 +80,15 @@ def uploadApk(name, apkFile):
     url = "https://api-cloud.browserstack.com/app-automate/upload"
     files = { 'file': (name, open(apkFile, 'rb')), }
     response = requests.post(url, files=files, auth=(user, authKey))
-    appUrl = response.json()["app_url"]
+    if(response.status_code == 200):
+        appUrl = response.json()["app_url"]
 
-    # print result
-    print("DONE\nRESULT app url: " + appUrl)
-    return appUrl
+        # print result
+        print("DONE\nRESULT app url: " + appUrl)
+        return appUrl
+    else:
+        print("DONE\nRESULT: " + response.status_code + "\n" + response.json())
+        return None
 
 # https://www.browserstack.com/docs/app-automate/api-reference/espresso/tests#upload-a-test-suite
 def uploadEspressoApk(espressoApkFile):
@@ -92,11 +98,16 @@ def uploadEspressoApk(espressoApkFile):
     url = "https://api-cloud.browserstack.com/app-automate/espresso/test-suite"
     files = { 'file': ('paymentSheet-espresso.apk', open(espressoApkFile, 'rb')), }
     response = requests.post(url, files=files, auth=(user, authKey))
-    testUrl = response.json()["test_url"]
 
-    # print result
-    print("DONE\nRESULT test url: " + testUrl)
-    return testUrl
+    if(response.status_code == 200):
+        testUrl = response.json()["test_url"]
+
+        # print result
+        print("DONE\nRESULT test url: " + testUrl)
+        return testUrl
+    else:
+        print("DONE\nRESULT: " + response.status_code + "\n" + response.json())
+        return None
 
 # https://www.browserstack.com/docs/app-automate/api-reference/espresso/builds#execute-a-build
 def executeTests(appUrl, testUrl):
@@ -119,14 +130,18 @@ def executeTests(appUrl, testUrl):
       }, auth=(user, authKey))
     jsonResponse = response.json()
 
-    # print result
-    print("DONE\nRESULT build Started: " + jsonResponse["message"])
-    if(jsonResponse["message"] == "Success"):
-        print("RESULT build id: " + jsonResponse["build_id"])
-        print("RESULT see build here: " +
-             "https://app-automate.browserstack.com/dashboard/v2/builds/{buildId}?buildUserIds=5559286".format(buildId=jsonResponse["build_id"]))
-        return jsonResponse["build_id"]
+    if(response.status_code == 200):
+        # print result
+        print("DONE\nRESULT build Started: " + jsonResponse["message"])
+        if(jsonResponse["message"] == "Success"):
+            print("RESULT build id: " + jsonResponse["build_id"])
+            print("RESULT see build here: " +
+                 "https://app-automate.browserstack.com/dashboard/v2/builds/{buildId}?buildUserIds=5559286".format(buildId=jsonResponse["build_id"]))
+            return jsonResponse["build_id"]
+        else:
+            return None
     else:
+        print("DONE\nRESULT: " + response.status_code + "\n" + response.json())
         return None
 
 # https://www.browserstack.com/docs/app-automate/api-reference/espresso/builds#get-build-status
