@@ -1,8 +1,10 @@
 package com.stripe.android.identity.ml
 
+import android.util.Size
 import com.stripe.android.camera.framework.Analyzer
 import com.stripe.android.camera.framework.AnalyzerFactory
-import com.stripe.android.camera.framework.image.cropCameraPreviewToSquare
+import com.stripe.android.camera.framework.image.cropCenter
+import com.stripe.android.camera.framework.image.shorterEdge
 import com.stripe.android.identity.states.IdentityScanState
 import org.tensorflow.lite.DataType
 import org.tensorflow.lite.Interpreter
@@ -27,10 +29,12 @@ internal class IDDetectorAnalyzer(modelFile: File) :
         state: IdentityScanState
     ): AnalyzerOutput {
         var tensorImage = TensorImage(INPUT_TENSOR_TYPE)
-        val croppedImage = cropCameraPreviewToSquare(
-            data.cameraPreviewImage.image,
-            data.cameraPreviewImage.viewBounds,
-            data.viewFinderBounds
+
+        val croppedImage = data.cameraPreviewImage.image.cropCenter(
+            Size(
+                data.cameraPreviewImage.image.shorterEdge(),
+                data.cameraPreviewImage.image.shorterEdge()
+            )
         )
 
         tensorImage.load(croppedImage)
@@ -88,11 +92,11 @@ internal class IDDetectorAnalyzer(modelFile: File) :
     internal class Factory(
         private val modelFile: File
     ) : AnalyzerFactory<
-            AnalyzerInput,
-            IdentityScanState,
-            AnalyzerOutput,
-            Analyzer<AnalyzerInput, IdentityScanState, AnalyzerOutput>
-            > {
+        AnalyzerInput,
+        IdentityScanState,
+        AnalyzerOutput,
+        Analyzer<AnalyzerInput, IdentityScanState, AnalyzerOutput>
+        > {
         override suspend fun newInstance(): Analyzer<AnalyzerInput, IdentityScanState, AnalyzerOutput> {
             return IDDetectorAnalyzer(modelFile)
         }

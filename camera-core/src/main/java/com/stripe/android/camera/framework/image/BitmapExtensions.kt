@@ -212,3 +212,10 @@ fun Bitmap.constrainToSize(size: Size, filter: Boolean = false): Bitmap =
         val newSize = this.size().scaleAndCenterWithin(size).size()
         Bitmap.createScaledBitmap(this, newSize.width, newSize.height, filter)
     }
+
+fun Bitmap.shorterEdge(): Int =
+    if (width < height) width else height
+
+fun Bitmap.longerEdge(): Int =
+    if (width > height) width else height
+
