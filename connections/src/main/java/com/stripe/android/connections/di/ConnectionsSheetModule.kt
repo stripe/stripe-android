@@ -1,11 +1,13 @@
 package com.stripe.android.connections.di
 
+import android.content.Context
 import androidx.core.os.LocaleListCompat
 import com.stripe.android.connections.analytics.ConnectionsEventReporter
 import com.stripe.android.connections.analytics.DefaultConnectionsEventReporter
 import com.stripe.android.connections.repository.ConnectionsApiRepository
 import com.stripe.android.connections.repository.ConnectionsRepository
 import com.stripe.android.core.Logger
+import com.stripe.android.core.browser.BrowserCapabilitiesSupplier
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
@@ -21,6 +23,12 @@ import kotlin.coroutines.CoroutineContext
     includes = [ConnectionsSheetConfigurationModule::class]
 )
 internal object ConnectionsSheetModule {
+
+    @Provides
+    @Singleton
+    fun provideBrowserCapabilitiesSupplier(context: Context): BrowserCapabilitiesSupplier {
+        return BrowserCapabilitiesSupplier(context)
+    }
 
     @Provides
     @Singleton

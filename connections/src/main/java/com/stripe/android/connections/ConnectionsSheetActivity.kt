@@ -2,16 +2,14 @@ package com.stripe.android.connections
 
 import android.app.Activity
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import androidx.activity.viewModels
 import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AppCompatActivity
-import androidx.browser.customtabs.CustomTabsIntent
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.connections.ConnectionsSheetViewEffect.FinishWithResult
-import com.stripe.android.connections.ConnectionsSheetViewEffect.OpenAuthFlowWithUrl
+import com.stripe.android.connections.ConnectionsSheetViewEffect.OpenAuthFlowWithIntent
 import com.stripe.android.connections.databinding.ActivityConnectionsSheetBinding
 import java.security.InvalidParameterException
 
@@ -70,21 +68,11 @@ internal class ConnectionsSheetActivity : AppCompatActivity() {
         lifecycleScope.launchWhenStarted {
             viewModel.viewEffect.collect { viewEffect ->
                 when (viewEffect) {
-                    is OpenAuthFlowWithUrl -> viewEffect.launch()
+                    is OpenAuthFlowWithIntent -> startActivity(intent)
                     is FinishWithResult -> finishWithResult(viewEffect.result)
                 }
             }
         }
-    }
-
-    private fun OpenAuthFlowWithUrl.launch() {
-        startActivity(
-            CustomTabsIntent.Builder()
-                .setShareState(CustomTabsIntent.SHARE_STATE_OFF)
-                .build()
-                .also { it.intent.data = Uri.parse(this.url) }
-                .intent
-        )
     }
 
     override fun onResume() {

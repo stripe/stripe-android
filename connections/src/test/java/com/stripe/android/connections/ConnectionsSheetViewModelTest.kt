@@ -14,6 +14,7 @@ import com.stripe.android.connections.model.LinkAccountSession
 import com.stripe.android.connections.model.LinkAccountSessionManifest
 import com.stripe.android.connections.model.LinkedAccountFixtures
 import com.stripe.android.connections.model.LinkedAccountList
+import com.stripe.android.connections.view.BuildAuthFlowIntent
 import com.stripe.android.core.exception.APIException
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
@@ -41,6 +42,7 @@ class ConnectionsSheetViewModelTest {
     )
     private val fetchLinkAccountSession = mock<FetchLinkAccountSession>()
     private val generateLinkAccountSessionManifest = mock<GenerateLinkAccountSessionManifest>()
+    private val buildAuthFlowIntent = mock<BuildAuthFlowIntent>()
 
     @Test
     fun `init - eventReporter fires onPresented`() {
@@ -246,7 +248,8 @@ class ConnectionsSheetViewModelTest {
             starterArgs = args,
             generateLinkAccountSessionManifest = generateLinkAccountSessionManifest,
             fetchLinkAccountSession = fetchLinkAccountSession,
-            eventReporter = eventReporter
+            eventReporter = eventReporter,
+            buildAuthFlowIntent = buildAuthFlowIntent
         )
     }
 }

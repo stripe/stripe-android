@@ -1,5 +1,6 @@
 package com.stripe.android.connections
 
+import android.content.Intent
 import com.stripe.android.connections.model.LinkAccountSessionManifest
 
 /**
@@ -20,8 +21,8 @@ internal sealed class ConnectionsSheetViewEffect {
     /**
      * Open the AuthFlow.
      */
-    data class OpenAuthFlowWithUrl(
-        val url: String
+    data class OpenAuthFlowWithIntent(
+        val intent: Intent,
     ) : ConnectionsSheetViewEffect()
 
     /**

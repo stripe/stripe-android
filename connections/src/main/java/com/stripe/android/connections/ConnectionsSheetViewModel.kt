@@ -9,7 +9,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.savedstate.SavedStateRegistryOwner
 import com.stripe.android.connections.ConnectionsSheetViewEffect.FinishWithResult
-import com.stripe.android.connections.ConnectionsSheetViewEffect.OpenAuthFlowWithUrl
+import com.stripe.android.connections.ConnectionsSheetViewEffect.OpenAuthFlowWithIntent
 import com.stripe.android.connections.analytics.ConnectionsEventReporter
 import com.stripe.android.connections.di.APPLICATION_ID
 import com.stripe.android.connections.di.DaggerConnectionsSheetComponent
@@ -17,6 +17,7 @@ import com.stripe.android.connections.domain.FetchLinkAccountSession
 import com.stripe.android.connections.domain.GenerateLinkAccountSessionManifest
 import com.stripe.android.connections.model.LinkAccountSession
 import com.stripe.android.connections.model.LinkAccountSessionManifest
+import com.stripe.android.connections.view.BuildAuthFlowIntent
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -28,6 +29,7 @@ import javax.inject.Named
 internal class ConnectionsSheetViewModel @Inject constructor(
     @Named(APPLICATION_ID) private val applicationId: String,
     private val starterArgs: ConnectionsSheetContract.Args,
+    private val buildAuthFlowIntent: BuildAuthFlowIntent,
     private val generateLinkAccountSessionManifest: GenerateLinkAccountSessionManifest,
     private val fetchLinkAccountSession: FetchLinkAccountSession,
     private val eventReporter: ConnectionsEventReporter
@@ -76,7 +78,11 @@ internal class ConnectionsSheetViewModel @Inject constructor(
                 authFlowActive = true
             )
         )
-        _viewEffect.emit(OpenAuthFlowWithUrl(manifest.hostedAuthUrl))
+        _viewEffect.emit(
+            OpenAuthFlowWithIntent(
+                intent = buildAuthFlowIntent(manifest.hostedAuthUrl)
+            )
+        )
     }
 
     // If activity resumes and we did not receive a callback from the custom tabs,

@@ -3,8 +3,6 @@ package com.stripe.android.connections
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import androidx.browser.customtabs.CustomTabsIntent
-import androidx.browser.customtabs.CustomTabsIntent.SHARE_STATE_OFF
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.connections.utils.InjectableActivityScenario
@@ -13,7 +11,6 @@ import com.stripe.android.connections.utils.injectableActivityScenario
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -37,20 +34,17 @@ class ConnectionsSheetActivityTest {
     )
     private val args = ConnectionsSheetContract.Args(configuration)
     private val intent = contract.createIntent(context, args)
-    private val viewModel = createViewModel()
 
-    private fun createViewModel(): ConnectionsSheetViewModel = runBlocking {
-        ConnectionsSheetViewModel(
-            applicationId = "com.example.test",
-            starterArgs = args,
-            generateLinkAccountSessionManifest = mock(),
-            fetchLinkAccountSession = mock(),
-            eventReporter = mock()
-        )
+    private val viewEffects = MutableSharedFlow<ConnectionsSheetViewEffect>()
+    private val states = MutableStateFlow(ConnectionsSheetState())
+
+    private val mockViewModel = mock<ConnectionsSheetViewModel> {
+        on { state } doReturn states
+        on { viewEffect } doReturn viewEffects
     }
 
     private fun activityScenario(
-        viewModel: ConnectionsSheetViewModel = this.viewModel
+        viewModel: ConnectionsSheetViewModel
     ): InjectableActivityScenario<ConnectionsSheetActivity> {
         return injectableActivityScenario {
             injectActivity {
@@ -61,7 +55,7 @@ class ConnectionsSheetActivityTest {
 
     @Test
     fun `onCreate() with no args returns Failed result`() {
-        val scenario = activityScenario()
+        val scenario = activityScenario(mockViewModel)
         val intent = Intent(context, ConnectionsSheetActivity::class.java)
         scenario.launch(intent)
         assertThat(
@@ -76,7 +70,7 @@ class ConnectionsSheetActivityTest {
 
     @Test
     fun `onCreate() with invalid args returns Failed result`() {
-        val scenario = activityScenario()
+        val scenario = activityScenario(mockViewModel)
         val configuration = ConnectionsSheet.Configuration("", "")
         val args = ConnectionsSheetContract.Args(configuration)
         val intent = contract.createIntent(context, args)
@@ -92,27 +86,22 @@ class ConnectionsSheetActivityTest {
     }
 
     @Test
-    fun `viewEffect - OpenAuthFlowWithUrl opens Chrome Custom Tab intent`() {
-        val chromeCustomTabUrl = "www.authflow.com"
-        val viewEffects = MutableSharedFlow<ConnectionsSheetViewEffect>()
-        val mockViewModel = mock<ConnectionsSheetViewModel> {
-            on { viewEffect } doReturn viewEffects
-        }
-        activityScenario(mockViewModel).launch(intent).suspendOnActivity {
-            viewEffects.emit(ConnectionsSheetViewEffect.OpenAuthFlowWithUrl(chromeCustomTabUrl))
-            val intent: Intent = shadowOf(it).nextStartedActivity
-            assertThat(intent.getIntExtra(CustomTabsIntent.EXTRA_SHARE_STATE, 0)).isEqualTo(SHARE_STATE_OFF)
+    fun `viewEffect - OpenAuthFlowWithUrl starts activity with intent`() {
+        activityScenario(mockViewModel).launch(intent).suspendOnActivity { activity, _ ->
+            val mockDestinationActivity = ConnectionsSheetRedirectActivity::class.java
+            val mockIntent = Intent(activity, mockDestinationActivity)
+            viewEffects.emit(ConnectionsSheetViewEffect.OpenAuthFlowWithIntent(mockIntent))
+            val intent: Intent = shadowOf(activity).nextStartedActivity
+            assertThat(shadowOf(intent).intentClass).isEqualTo(mockDestinationActivity)
         }
     }
 
     @Test
     fun `onNewIntent() calls view model handleOnNewIntent()`() {
-        val mockViewModel = mock<ConnectionsSheetViewModel>()
-        val scenario = activityScenario(mockViewModel)
-        scenario.launch(intent).suspendOnActivity {
+        activityScenario(mockViewModel).launch(intent).suspendOnActivity { activity, _ ->
             val newIntent = Intent(Intent.ACTION_VIEW)
             newIntent.data = Uri.parse(ApiKeyFixtures.SUCCESS_URL)
-            it.onNewIntent(newIntent)
+            activity.onNewIntent(newIntent)
             val argument: ArgumentCaptor<Intent> = ArgumentCaptor.forClass(Intent::class.java)
             verify(mockViewModel).handleOnNewIntent(argument.capture())
             assertThat(argument.value.data.toString()).isEqualTo(ApiKeyFixtures.SUCCESS_URL)
@@ -121,21 +110,17 @@ class ConnectionsSheetActivityTest {
 
     @Test
     fun `onBackPressed() cancels connection sheet`() {
-        val mockViewModel = mock<ConnectionsSheetViewModel> {
-            on { state } doReturn MutableStateFlow(ConnectionsSheetState(authFlowActive = true))
-        }
-        val scenario = activityScenario(mockViewModel)
-        scenario.launch(intent).suspendOnActivity {
-            it.onBackPressed()
-        }
-        assertThat(
-            contract.parseResult(
-                scenario.getResult().resultCode,
-                scenario.getResult().resultData
+        activityScenario(mockViewModel).launch(intent).suspendOnActivity { activity, scenario ->
+            activity.onBackPressed()
+            assertThat(
+                contract.parseResult(
+                    scenario.getResult().resultCode,
+                    scenario.getResult().resultData
+                )
+            ).isInstanceOf(
+                ConnectionsSheetResult.Canceled::class.java
             )
-        ).isInstanceOf(
-            ConnectionsSheetResult.Canceled::class.java
-        )
+        }
     }
 
     /**
@@ -143,11 +128,14 @@ class ConnectionsSheetActivityTest {
      * runs the given block within the provided [TestScope].
      */
     private fun InjectableActivityScenario<ConnectionsSheetActivity>.suspendOnActivity(
-        block: suspend TestScope.(ConnectionsSheetActivity) -> Unit
+        block: suspend TestScope.(
+            ConnectionsSheetActivity,
+            InjectableActivityScenario<ConnectionsSheetActivity>
+        ) -> Unit
     ) {
-        this.onActivity {
+        onActivity {
             runTest {
-                block(this, it)
+                block(this, it, this@suspendOnActivity)
             }
         }
     }
