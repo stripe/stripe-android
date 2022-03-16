@@ -99,10 +99,15 @@ sealed class PaymentMethodOptionsParams(
     ) : PaymentMethodOptionsParams(PaymentMethod.Type.USBankAccount) {
         override fun createTypeParams(): List<Pair<String, Any?>> {
             return listOf(
-                PARAM_LINKED_ACCOUNT to linkedAccount,
-                PARAM_NETWORKS to networks,
+                PARAM_LINKED_ACCOUNT to if (linkedAccount != null) mapOf(
+                    PARAM_LINKED_ACCOUNT_PERMISSIONS to linkedAccount?.permissions?.map { it.code },
+                    PARAM_LINKED_ACCOUNT_RETURN_URL to linkedAccount?.returnUrl
+                ) else null,
+                PARAM_NETWORKS to if (networks != null) mapOf(
+                    PARAM_NETWORKS_REQUESTED to networks?.requested
+                ) else null,
                 PARAM_SETUP_FUTURE_USAGE to setupFutureUsage?.code,
-                PARAM_VERIFICATION_METHOD to verificationMethod
+                PARAM_VERIFICATION_METHOD to verificationMethod?.code
             )
         }
 
@@ -111,7 +116,7 @@ sealed class PaymentMethodOptionsParams(
             val permissions: List<Permission>? = null,
             val returnUrl: String? = null
         ) : Parcelable {
-            enum class Permission(val value: String) {
+            enum class Permission(val code: String) {
                 BALANCES("balances"),
                 IDENTITY("identity"),
                 PAYMENT_METHOD("payment_method"),
@@ -119,7 +124,7 @@ sealed class PaymentMethodOptionsParams(
             }
         }
 
-        enum class VerificationMethod(val value: String) {
+        enum class VerificationMethod(val code: String) {
             SKIP("skip"),
             AUTOMATIC("automatic"),
             INSTANT("instant"),
@@ -127,13 +132,15 @@ sealed class PaymentMethodOptionsParams(
             INSTANT_OR_SKIP("instant_or_skip")
         }
 
-
         @Parcelize
-        data class Networks(val requested: String? = null): Parcelable
+        data class Networks(val requested: String? = null) : Parcelable
 
         internal companion object {
             const val PARAM_LINKED_ACCOUNT = "linked_account"
+            const val PARAM_LINKED_ACCOUNT_PERMISSIONS = "permissions"
+            const val PARAM_LINKED_ACCOUNT_RETURN_URL = "return_url"
             const val PARAM_NETWORKS = "networks"
+            const val PARAM_NETWORKS_REQUESTED = "requested"
             const val PARAM_SETUP_FUTURE_USAGE = "setup_future_usage"
             const val PARAM_VERIFICATION_METHOD = "verification_method"
         }
