@@ -24,6 +24,7 @@ import com.stripe.android.identity.networking.models.DocumentUploadParam
 import com.stripe.android.identity.networking.models.IdDocumentParam
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentDocumentCapturePage
 import com.stripe.android.identity.states.IdentityScanState
+import com.stripe.android.identity.utils.ARG_SHOULD_SHOW_CAMERA
 import com.stripe.android.identity.utils.navigateToDefaultErrorFragment
 import com.stripe.android.identity.utils.postVerificationPageDataAndMaybeSubmit
 import com.stripe.android.identity.viewmodel.FrontBackUploadViewModel
@@ -67,6 +68,8 @@ internal abstract class FrontBackUploadFragment(
 
     lateinit var binding: FrontBackUploadFragmentBinding
 
+    private var shouldShowCamera: Boolean = false
+
     private val frontBackUploadViewModel: FrontBackUploadViewModel by viewModels { frontBackUploadViewModelFactory }
 
     private val identityViewModel: IdentityViewModel by activityViewModels { identityViewModelFactory }
@@ -81,6 +84,11 @@ internal abstract class FrontBackUploadFragment(
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+        val args = requireNotNull(arguments) {
+            "Argument to FrontBackUploadFragment is null"
+        }
+        shouldShowCamera = args[ARG_SHOULD_SHOW_CAMERA] as Boolean
+
         binding = FrontBackUploadFragmentBinding.inflate(layoutInflater, container, false)
         binding.titleText.text = getString(titleRes)
         binding.contentText.text = getString(contextRes)
@@ -199,19 +207,24 @@ internal abstract class FrontBackUploadFragment(
         dialog.setOnCancelListener {
             Log.d(TAG, "dialog cancelled")
         }
-        dialog.findViewById<Button>(R.id.take_photo)?.setOnClickListener {
-            Log.d(TAG, "Take photo")
-            dialog.dismiss()
-            if (scanType == frontScanType) {
-                frontBackUploadViewModel.takePhotoFront(requireContext()) {
-                    uploadFront(it, DocumentUploadParam.UploadMethod.MANUALCAPTURE)
-                }
-            } else if (scanType == backScanType) {
-                frontBackUploadViewModel.takePhotoBack(requireContext()) {
-                    uploadBack(it, DocumentUploadParam.UploadMethod.MANUALCAPTURE)
+        if (shouldShowCamera) {
+            dialog.findViewById<Button>(R.id.take_photo)?.setOnClickListener {
+                Log.d(TAG, "Take photo")
+                dialog.dismiss()
+                if (scanType == frontScanType) {
+                    frontBackUploadViewModel.takePhotoFront(requireContext()) {
+                        uploadFront(it, DocumentUploadParam.UploadMethod.MANUALCAPTURE)
+                    }
+                } else if (scanType == backScanType) {
+                    frontBackUploadViewModel.takePhotoBack(requireContext()) {
+                        uploadBack(it, DocumentUploadParam.UploadMethod.MANUALCAPTURE)
+                    }
                 }
             }
+        } else {
+            requireNotNull(dialog.findViewById(R.id.take_photo)).visibility = View.GONE
         }
+
         dialog.findViewById<Button>(R.id.choose_file)?.setOnClickListener {
             Log.d(TAG, "Choose a file")
             dialog.dismiss()

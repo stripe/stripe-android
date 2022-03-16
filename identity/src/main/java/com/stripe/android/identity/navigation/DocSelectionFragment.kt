@@ -6,11 +6,13 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.IdRes
+import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import com.stripe.android.camera.CameraPermissionEnsureable
 import com.stripe.android.core.exception.InvalidRequestException
 import com.stripe.android.identity.R
 import com.stripe.android.identity.databinding.DocSelectionFragmentBinding
@@ -21,6 +23,7 @@ import com.stripe.android.identity.networking.models.IdDocumentParam
 import com.stripe.android.identity.networking.models.IdDocumentParam.Type
 import com.stripe.android.identity.networking.models.VerificationPageData.Companion.isMissingBackOrFront
 import com.stripe.android.identity.utils.navigateToDefaultErrorFragment
+import com.stripe.android.identity.utils.navigateToUploadFragment
 import com.stripe.android.identity.utils.postVerificationPageDataAndMaybeSubmit
 import com.stripe.android.identity.viewmodel.IdentityViewModel
 import kotlinx.coroutines.launch
@@ -29,7 +32,8 @@ import kotlinx.coroutines.launch
  * Screen to select type of ID to scan.
  */
 internal class DocSelectionFragment(
-    private val identityViewModelFactory: ViewModelProvider.Factory
+    private val identityViewModelFactory: ViewModelProvider.Factory,
+    private val cameraPermissionEnsureable: CameraPermissionEnsureable
 ) : Fragment() {
 
     private val identityViewModel: IdentityViewModel by activityViewModels {
@@ -186,35 +190,29 @@ internal class DocSelectionFragment(
                     verificationPageData.isMissingBackOrFront()
                 },
                 notSubmitBlock = {
-                    // TODO(ccen) Also check camera permission here
-                    identityViewModel.idDetectorModelFile.observe(viewLifecycleOwner) { modelResource ->
-                        when (modelResource.status) {
-                            Status.SUCCESS -> {
-                                navigateToScanFragment(type)
+                    cameraPermissionEnsureable.ensureCameraPermission(
+                        onCameraReady = {
+                            identityViewModel.idDetectorModelFile.observe(viewLifecycleOwner) { modelResource ->
+                                when (modelResource.status) {
+                                    // model ready, camera permission is granted -> navigate to scan
+                                    Status.SUCCESS -> {
+                                        findNavController().navigate(type.toScanDestinationId())
+                                    }
+                                    // model not ready, camera permission is granted -> navigate to manual capture
+                                    Status.ERROR -> {
+                                        tryNavigateToUploadFragment(type)
+                                    }
+                                    Status.LOADING -> {} // no-op
+                                }
                             }
-                            Status.ERROR -> {
-                                tryNavigateToUploadFragment(type)
-                            }
-                            Status.LOADING -> {} // no-op
+                        },
+                        onUserDeniedCameraPermission = {
+                            tryNavigateToCameraPermissionDeniedFragment(type)
                         }
-                    }
+                    )
                 }
             )
         }
-    }
-
-    /**
-     * Navigate to the corresponding type's scan fragment.
-     */
-    private fun navigateToScanFragment(type: Type) {
-        findNavController().navigate(type.toScanDestinationId())
-    }
-
-    /**
-     * Navigate to the corresponding type's upload fragment.
-     */
-    private fun navigateToUploadFragment(type: Type) {
-        findNavController().navigate(type.toUploadDestinationId())
     }
 
     /**
@@ -225,12 +223,37 @@ internal class DocSelectionFragment(
         identityViewModel.observeForVerificationPage(
             viewLifecycleOwner,
             onSuccess = { verificationPage ->
-                if (verificationPage.documentCapture.requireLiveCapture
-                ) {
+                if (verificationPage.documentCapture.requireLiveCapture) {
                     Log.e(TAG, "Can't access camera and client has required live capture.")
                     navigateToDefaultErrorFragment()
                 } else {
-                    navigateToUploadFragment(type)
+                    navigateToUploadFragment(type.toUploadDestinationId(), true)
+                }
+            },
+            onFailure = {
+                navigateToDefaultErrorFragment()
+            }
+        )
+    }
+
+    /**
+     * Navigate to [CameraPermissionDeniedFragment], or to [ErrorFragment]
+     * if requireLiveCapture is true.
+     */
+    private fun tryNavigateToCameraPermissionDeniedFragment(type: Type) {
+        identityViewModel.observeForVerificationPage(
+            viewLifecycleOwner,
+            onSuccess = { verificationPage ->
+                if (verificationPage.documentCapture.requireLiveCapture) {
+                    Log.e(TAG, "Can't access camera and client has required live capture.")
+                    navigateToDefaultErrorFragment()
+                } else {
+                    findNavController().navigate(
+                        R.id.action_camera_permission_denied,
+                        bundleOf(
+                            CameraPermissionDeniedFragment.ARG_SCAN_TYPE to type
+                        )
+                    )
                 }
             },
             onFailure = {
@@ -246,7 +269,7 @@ internal class DocSelectionFragment(
         val TAG: String = DocSelectionFragment::class.java.simpleName
 
         @IdRes
-        fun Type.toScanDestinationId() =
+        private fun Type.toScanDestinationId() =
             when (this) {
                 Type.IDCARD -> R.id.action_docSelectionFragment_to_IDScanFragment
                 Type.PASSPORT -> R.id.action_docSelectionFragment_to_passportScanFragment
@@ -254,7 +277,7 @@ internal class DocSelectionFragment(
             }
 
         @IdRes
-        fun Type.toUploadDestinationId() =
+        private fun Type.toUploadDestinationId() =
             when (this) {
                 Type.IDCARD -> R.id.action_docSelectionFragment_to_IDUploadFragment
                 Type.PASSPORT -> R.id.action_docSelectionFragment_to_passportUploadFragment

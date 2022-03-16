@@ -11,7 +11,6 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.camera.Camera1Adapter
-import com.stripe.android.camera.CameraPermissionEnsureable
 import com.stripe.android.camera.DefaultCameraErrorListener
 import com.stripe.android.camera.scanui.CameraView
 import com.stripe.android.camera.scanui.util.asRect
@@ -25,14 +24,8 @@ import com.stripe.android.identity.viewmodel.IdentityViewModel
  * An abstract [Fragment] class to access camera scanning for Identity.
  *
  * Subclasses are responsible for populating [cameraView] in its [Fragment.onCreateView] method.
- *
- * When the fragment's view is created, [cameraPermissionEnsureable] is used to check camera
- * permission. Subclasses are responsible for implementing [onCameraReady] and
- * [onUserDeniedCameraPermission] to handle the permission callbacks.
- *
  */
 internal abstract class IdentityCameraScanFragment(
-    private val cameraPermissionEnsureable: CameraPermissionEnsureable,
     private val cameraViewModelFactory: ViewModelProvider.Factory,
     private val identityViewModelFactory: ViewModelProvider.Factory
 ) : Fragment() {
@@ -52,11 +45,6 @@ internal abstract class IdentityCameraScanFragment(
      * Called back once after at end of [onViewCreated] when permission is granted.
      */
     protected abstract fun onCameraReady()
-
-    /**
-     * Called back once after at end of [onViewCreated] when permission is denied.
-     */
-    protected abstract fun onUserDeniedCameraPermission()
 
     /**
      * Called back each time when [CameraViewModel.displayStateChanged] is changed.
@@ -84,14 +72,11 @@ internal abstract class IdentityCameraScanFragment(
             when (it.status) {
                 Status.SUCCESS -> {
                     cameraViewModel.initializeScanFlow(requireNotNull(it.data))
-                    cameraPermissionEnsureable.ensureCameraPermission(
-                        ::onCameraReady,
-                        ::onUserDeniedCameraPermission
-                    )
+                    cameraView.post {
+                        onCameraReady()
+                    }
                 }
-                Status.LOADING -> {
-                    // no-op
-                }
+                Status.LOADING -> {} // no-op
                 Status.ERROR -> {
                     throw InvalidResponseException(
                         cause = it.throwable,

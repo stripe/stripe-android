@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.viewModels
 import androidx.annotation.VisibleForTesting
+import androidx.appcompat.app.AlertDialog
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.findNavController
 import androidx.navigation.fragment.NavHostFragment
@@ -75,6 +76,26 @@ internal class IdentityActivity : CameraPermissionCheckingActivity(), Verificati
             Intent().putExtras(result.toBundle())
         )
         finish()
+    }
+
+    /**
+     * Display the permission rational dialog without writing PERMISSION_RATIONALE_SHOWN, this would
+     * prevent [showPermissionDeniedDialog] from being called and always trigger
+     * [CameraPermissionCheckingActivity.requestCameraPermission].
+     */
+    override fun showPermissionRationaleDialog() {
+        val builder = AlertDialog.Builder(this)
+        builder.setMessage(R.string.grant_camera_permission_text)
+            .setPositiveButton(R.string.ok) { _, _ ->
+                requestCameraPermission()
+            }
+        builder.show()
+    }
+
+    // This should have neve been invoked as PERMISSION_RATIONALE_SHOWN is never written.
+    // Identity has its own CameraPermissionDeniedFragment to handle this case.
+    override fun showPermissionDeniedDialog() {
+        // no-op
     }
 
     private companion object {
