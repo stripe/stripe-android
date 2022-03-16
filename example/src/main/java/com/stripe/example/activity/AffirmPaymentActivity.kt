@@ -29,7 +29,6 @@ class AffirmPaymentActivity : StripeIntentActivity() {
 
         launcher = CollectBankAccountLauncher.ForPaymentIntent.create(
             this,
-            "key_goes_here",
             object : ApiResultCallback<CollectBankAccountForPaymentResponse> {
                 override fun onSuccess(result: CollectBankAccountForPaymentResponse) {
                     // do something with payment intent
@@ -67,6 +66,7 @@ class AffirmPaymentActivity : StripeIntentActivity() {
                 supportedPaymentMethods = "affirm"
             )
             launcher.launch(
+                "key_goes_here",
                 "clientSecret_of_paymentIntent",
                 CollectBankAccountForPaymentParams(
                     paymentMethodType = "bank_account",
