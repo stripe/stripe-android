@@ -91,11 +91,11 @@ internal class IDDetectorAnalyzer(modelFile: File) :
     internal class Factory(
         private val modelFile: File
     ) : AnalyzerFactory<
-            AnalyzerInput,
-            IdentityScanState,
-            AnalyzerOutput,
-            Analyzer<AnalyzerInput, IdentityScanState, AnalyzerOutput>
-            > {
+        AnalyzerInput,
+        IdentityScanState,
+        AnalyzerOutput,
+        Analyzer<AnalyzerInput, IdentityScanState, AnalyzerOutput>
+        > {
         override suspend fun newInstance(): Analyzer<AnalyzerInput, IdentityScanState, AnalyzerOutput> {
             return IDDetectorAnalyzer(modelFile)
         }
