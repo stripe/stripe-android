@@ -39,8 +39,53 @@ class SetupIntentTest {
 
         assertEquals(
             StripeIntent.NextActionData.RedirectToUrl(
-                Uri.parse("https://hooks.stripe.com/redirect/authenticate/src_1EqTStGMT9dGPIDGJGPkqE6B" + "?client_secret=src_client_secret_FL9m741mmxtHykDlRTC5aQ02"),
+                Uri.parse(
+                    "https://hooks.stripe.com/redirect/authenticate/src_1EqTStGMT9dGP" +
+                        "IDGJGPkqE6B?client_secret=src_client_secret_FL9m741mmxtHykDlRTC5aQ02"
+                ),
                 returnUrl = "stripe://setup_intent_return"
+            ),
+            setupIntent.nextActionData
+        )
+    }
+
+    @Test
+    fun fromJsonStringWithNextAction_createsSetupIntentWithNextActionVerifyWithMicrodeposits() {
+        val setupIntent = SetupIntentFixtures.SI_NEXT_ACTION_VERIFY_WITH_MICRODEPOSITS
+        assertEquals("seti_1Kd5ncLu5o3P18ZpOYpGt5BF", setupIntent.id)
+        assertEquals(
+            "seti_1Kd5ncLu5o3P18ZpOYpGt5BF_secret_LJjGof4HuzSfxwvNCYP5UhdSQKSC9kS",
+            setupIntent.clientSecret
+        )
+        assertEquals(1647233188, setupIntent.created)
+        assertEquals("Example SetupIntent", setupIntent.description)
+        assertEquals("pm_1Kd5ndLu5o3P18ZpLVuthxK2", setupIntent.paymentMethodId)
+        assertFalse(setupIntent.isLiveMode)
+        assertTrue(setupIntent.requiresAction())
+        assertEquals(StripeIntent.Status.RequiresAction, setupIntent.status)
+        assertEquals(StripeIntent.Usage.OffSession, setupIntent.usage)
+
+        assertEquals(
+            PaymentMethod.USBankAccount(
+                accountHolderType = PaymentMethod.USBankAccount.USBankAccountHolderType.INDIVIDUAL,
+                accountType = PaymentMethod.USBankAccount.USBankAccountType.CHECKING,
+                bankName = "STRIPE TEST BANK",
+                fingerprint = "FFDMA0xfhBjWSZLu",
+                last4 = "6789",
+                linkedAccount = null,
+                networks = PaymentMethod.USBankAccount.USBankNetworks("ach", listOf("ach")),
+                routingNumber = "110000000"
+            ),
+            setupIntent.paymentMethod?.usBankAccount
+        )
+
+        assertEquals(
+            StripeIntent.NextActionData.VerifyWithMicrodeposits(
+                arrivalDate = 1647327600,
+                hostedVerificationUrl = "https://payments.stripe.com/microdeposit/sacs_test_YWNjdF8" +
+                    "xSHZUSTdMdTVvM1AxOFpwLHNhX25vbmNlX0xKakc4NzlEYjNZaWxQT09Ma0RaZDROTklPcUVHb2s00" +
+                    "00d7kDmkhf",
+                microdepositType = MicrodepositType.AMOUNTS
             ),
             setupIntent.nextActionData
         )
@@ -59,7 +104,9 @@ class SetupIntentTest {
             lastSetupError.docUrl
         )
         assertEquals(
-            "The provided PaymentMethod has failed authentication. You can provide payment_method_data or a new PaymentMethod to attempt to fulfill this PaymentIntent again.",
+            "The provided PaymentMethod has failed authentication. You can provide " +
+                "payment_method_data or a new PaymentMethod to attempt to fulfill this " +
+                "PaymentIntent again.",
             lastSetupError.message
         )
     }

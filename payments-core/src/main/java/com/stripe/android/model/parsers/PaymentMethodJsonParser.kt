@@ -81,6 +81,12 @@ class PaymentMethodJsonParser : ModelJsonParser<PaymentMethod> {
                         NetbankingJsonParser().parse(it)
                     }
                 )
+            PaymentMethod.Type.USBankAccount ->
+                builder.setUSBankAccount(
+                    json.optJSONObject(type.code)?.let {
+                        USBankAccountJsonParser().parse(it)
+                    }
+                )
             else -> {
                 // no-op
             }
@@ -241,6 +247,43 @@ class PaymentMethodJsonParser : ModelJsonParser<PaymentMethod> {
 
         private companion object {
             private const val FIELD_BANK = "bank"
+        }
+    }
+
+    internal class USBankAccountJsonParser : ModelJsonParser<PaymentMethod.USBankAccount> {
+        override fun parse(json: JSONObject): PaymentMethod.USBankAccount {
+            return PaymentMethod.USBankAccount(
+                accountHolderType = PaymentMethod.USBankAccount.USBankAccountHolderType.values().find {
+                    StripeJsonUtils.optString(json, FIELD_ACCOUNT_HOLDER_TYPE) == it.value
+                } ?: PaymentMethod.USBankAccount.USBankAccountHolderType.UNKNOWN,
+                accountType = PaymentMethod.USBankAccount.USBankAccountType.values().find {
+                    StripeJsonUtils.optString(json, FIELD_ACCOUNT_TYPE) == it.value
+                } ?: PaymentMethod.USBankAccount.USBankAccountType.UNKNOWN,
+                bankName = StripeJsonUtils.optString(json, FIELD_BANK_NAME),
+                fingerprint = StripeJsonUtils.optString(json, FIELD_FINGERPRINT),
+                last4 = StripeJsonUtils.optString(json, FIELD_LAST4),
+                linkedAccount = StripeJsonUtils.optString(json, FIELD_LINKED_ACCOUNT),
+                networks = PaymentMethod.USBankAccount.USBankNetworks(
+                    StripeJsonUtils.optString(json.optJSONObject(FIELD_NETWORKS), FIELD_NETWORKS_PREFERRED),
+                    StripeJsonUtils.jsonArrayToList(
+                        json.optJSONObject(FIELD_NETWORKS)?.getJSONArray(FIELD_NETWORKS_SUPPORTED)
+                    ).orEmpty().map { it.toString() }
+                ),
+                routingNumber = StripeJsonUtils.optString(json, FIELD_ROUTING_NUMBER),
+            )
+        }
+
+        private companion object {
+            private const val FIELD_ACCOUNT_HOLDER_TYPE = "account_holder_type"
+            private const val FIELD_ACCOUNT_TYPE = "account_type"
+            private const val FIELD_BANK_NAME = "bank_name"
+            private const val FIELD_FINGERPRINT = "fingerprint"
+            private const val FIELD_LAST4 = "last4"
+            private const val FIELD_LINKED_ACCOUNT = "linked_account"
+            private const val FIELD_NETWORKS = "networks"
+            private const val FIELD_NETWORKS_PREFERRED = "preferred"
+            private const val FIELD_NETWORKS_SUPPORTED = "supported"
+            private const val FIELD_ROUTING_NUMBER = "routing_number"
         }
     }
 
