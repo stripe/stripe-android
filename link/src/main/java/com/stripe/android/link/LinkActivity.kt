@@ -20,18 +20,17 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.ui.LinkAppBar
 import com.stripe.android.link.ui.signup.SignUpBody
 import com.stripe.android.link.ui.verification.VerificationBody
 import com.stripe.android.link.ui.wallet.WalletBody
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
 
 internal class LinkActivity : ComponentActivity() {
 
@@ -52,6 +51,8 @@ internal class LinkActivity : ComponentActivity() {
         setContent {
             navController = rememberNavController()
 
+            viewModel.navigator.navigationController = navController
+
             DefaultLinkTheme {
                 Surface {
                     Column(
@@ -66,7 +67,7 @@ internal class LinkActivity : ComponentActivity() {
                             onCloseButtonClick = ::dismiss
                         )
 
-                        NavHost(navController, viewModel.startDestination.route) {
+                        NavHost(navController, viewModel.startDestination) {
                             composable(LinkScreen.Loading.route) {
                                 Box(
                                     modifier = Modifier
@@ -77,22 +78,36 @@ internal class LinkActivity : ComponentActivity() {
                                     CircularProgressIndicator()
                                 }
                             }
-                            composable(LinkScreen.SignUp.route) {
-                                SignUpBody(viewModel.injector)
+                            composable(
+                                LinkScreen.SignUp.route,
+                                arguments = listOf(
+                                    navArgument(LinkScreen.SignUp.emailArg) {
+                                        type = NavType.StringType
+                                        nullable = true
+                                    }
+                                )
+                            ) { backStackEntry ->
+                                val email =
+                                    backStackEntry.arguments?.getString(LinkScreen.SignUp.emailArg)
+                                SignUpBody(viewModel.injector, email)
                             }
                             composable(LinkScreen.Verification.route) {
-                                VerificationBody(
-                                    requireNotNull(linkAccount),
-                                    viewModel.injector
-                                )
+                                linkAccount?.let { account ->
+                                    VerificationBody(
+                                        account,
+                                        viewModel.injector
+                                    )
+                                }
                             }
                             composable(LinkScreen.Wallet.route) {
-                                WalletBody(
-                                    requireNotNull(linkAccount),
-                                    viewModel.injector
-                                )
+                                linkAccount?.let { account ->
+                                    WalletBody(
+                                        account,
+                                        viewModel.injector
+                                    )
+                                }
                             }
-                            composable(LinkScreen.AddPaymentMethod.route) {
+                            composable(LinkScreen.PaymentMethod.route) {
                                 Box(
                                     modifier = Modifier
                                         .fillMaxWidth()
@@ -107,11 +122,6 @@ internal class LinkActivity : ComponentActivity() {
                 }
             }
         }
-
-        viewModel.navigator.sharedFlow.onEach {
-            navController.popBackStack()
-            navController.navigate(it.route)
-        }.launchIn(viewModel.viewModelScope)
 
         viewModel.navigator.onDismiss = ::dismiss
     }

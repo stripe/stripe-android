@@ -1,12 +1,15 @@
 package com.stripe.android.link.account
 
+import com.google.common.truth.Truth.assertThat
+import com.stripe.android.link.account.CookieStore.Companion.AUTH_SESSION_COOKIE
+import com.stripe.android.link.account.CookieStore.Companion.LOGGED_OUT_EMAIL_HASH
 import org.junit.Test
-import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 
 class CookieStoreTest {
     private val store = mock<EncryptedStore>()
@@ -16,8 +19,8 @@ class CookieStoreTest {
         val cookieStore = createCookieStore()
         cookieStore.updateAuthSessionCookie(null)
 
-        verify(store, never()).write(any(), anyOrNull())
-        verify(store, never()).delete(any())
+        verify(store, never()).write(eq(AUTH_SESSION_COOKIE), anyOrNull())
+        verify(store, never()).delete(eq(AUTH_SESSION_COOKIE))
     }
 
     @Test
@@ -26,7 +29,7 @@ class CookieStoreTest {
         val cookie = ""
         cookieStore.updateAuthSessionCookie(cookie)
 
-        verify(store).delete(any())
+        verify(store).delete(eq(AUTH_SESSION_COOKIE))
     }
 
     @Test
@@ -35,7 +38,30 @@ class CookieStoreTest {
         val cookie = "cookie"
         cookieStore.updateAuthSessionCookie(cookie)
 
-        verify(store).write(any(), eq(cookie))
+        verify(store).write(eq(AUTH_SESSION_COOKIE), eq(cookie))
+    }
+
+    @Test
+    fun `logout stores hashed email and clears cookie`() {
+        val cookieStore = createCookieStore()
+        val email = "test@stripe.com"
+        cookieStore.logout(email)
+
+        verify(store).write(
+            eq(LOGGED_OUT_EMAIL_HASH),
+            eq("49644df5404ea8ee8f0ec46cdb1dd7756c5661d6387fd1705a072f2fbf020f48")
+        )
+        verify(store).delete(eq(AUTH_SESSION_COOKIE))
+    }
+
+    @Test
+    fun `isEmailLoggedOut checks for hashed email`() {
+        val cookieStore = createCookieStore()
+        val email = "test@stripe.com"
+
+        whenever(store.read(eq(LOGGED_OUT_EMAIL_HASH)))
+            .thenReturn("49644df5404ea8ee8f0ec46cdb1dd7756c5661d6387fd1705a072f2fbf020f48")
+        assertThat(cookieStore.isEmailLoggedOut(email)).isTrue()
     }
 
     private fun createCookieStore() = CookieStore(store)
