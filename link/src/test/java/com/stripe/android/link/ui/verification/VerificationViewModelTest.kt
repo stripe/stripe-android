@@ -60,7 +60,6 @@ class VerificationViewModelTest {
     fun `onChangeEmailClicked triggers logout`() = runTest {
         createViewModel().onChangeEmailClicked()
         verify(linkAccountManager).logout()
-
     }
 
     @Test

@@ -95,7 +95,8 @@ class LinkActivityViewModelTest {
         verify(navigator).navigateTo(
             argWhere {
                 it.route == LinkScreen.SignUp(CUSTOMER_EMAIL).route
-            }, eq(true)
+            },
+            eq(true)
         )
     }
 
