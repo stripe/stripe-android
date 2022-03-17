@@ -1,10 +1,10 @@
 package com.stripe.android.identity.ml
 
-import android.util.Size
 import com.stripe.android.camera.framework.Analyzer
 import com.stripe.android.camera.framework.AnalyzerFactory
 import com.stripe.android.camera.framework.image.cropCenter
-import com.stripe.android.camera.framework.image.shorterEdge
+import com.stripe.android.camera.framework.image.size
+import com.stripe.android.camera.framework.util.maxAspectRatioInSize
 import com.stripe.android.identity.states.IdentityScanState
 import org.tensorflow.lite.DataType
 import org.tensorflow.lite.Interpreter
@@ -31,9 +31,9 @@ internal class IDDetectorAnalyzer(modelFile: File) :
         var tensorImage = TensorImage(INPUT_TENSOR_TYPE)
 
         val croppedImage = data.cameraPreviewImage.image.cropCenter(
-            Size(
-                data.cameraPreviewImage.image.shorterEdge(),
-                data.cameraPreviewImage.image.shorterEdge()
+            maxAspectRatioInSize(
+                data.cameraPreviewImage.image.size(),
+                1f
             )
         )
 
@@ -45,8 +45,7 @@ internal class IDDetectorAnalyzer(modelFile: File) :
                 ResizeOp(INPUT_HEIGHT, INPUT_WIDTH, ResizeOp.ResizeMethod.BILINEAR)
             ).add(
                 NormalizeOp(NORMALIZE_MEAN, NORMALIZE_STD) // normalize to (-1, 1)
-            )
-                .build() // add nomalization
+            ).build() // add normalization
         tensorImage = imageProcessor.process(tensorImage)
 
         // inference - input: (1, 224, 224, 3), output: (1, 4), (1, 5)
@@ -92,11 +91,11 @@ internal class IDDetectorAnalyzer(modelFile: File) :
     internal class Factory(
         private val modelFile: File
     ) : AnalyzerFactory<
-            AnalyzerInput,
-            IdentityScanState,
-            AnalyzerOutput,
-            Analyzer<AnalyzerInput, IdentityScanState, AnalyzerOutput>
-            > {
+        AnalyzerInput,
+        IdentityScanState,
+        AnalyzerOutput,
+        Analyzer<AnalyzerInput, IdentityScanState, AnalyzerOutput>
+        > {
         override suspend fun newInstance(): Analyzer<AnalyzerInput, IdentityScanState, AnalyzerOutput> {
             return IDDetectorAnalyzer(modelFile)
         }
