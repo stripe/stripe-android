@@ -252,7 +252,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
         if (TransitionFragmentResource.idlingResource?.isIdleNow == false) {
             Log.e("MLB", "Transition idling resource decrementing")
             TransitionFragmentResource.idlingResource?.decrement()
-        }else{
+        } else {
             Log.e("MLB", "Transition idling resource was not idle so not decrementing")
         }
         _transition.postValue(Event(target))
