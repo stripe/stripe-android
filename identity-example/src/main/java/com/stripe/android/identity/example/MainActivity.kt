@@ -1,5 +1,6 @@
 package com.stripe.android.identity.example
 
+import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
@@ -36,7 +37,9 @@ class MainActivity : AppCompatActivity() {
             IdentityVerificationSheet.create(
                 this,
                 IdentityVerificationSheet.Configuration(
-                    merchantLogo = R.drawable.merchant_logo
+                    // Or use webImage by
+                    // brandLogo = Uri.parse("https://path/to/a/logo.jpg")
+                    brandLogo = Uri.parse("android.resource://com.stripe.android.identity.example/drawable/merchant_logo")
                 )
             )
 
