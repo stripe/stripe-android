@@ -254,7 +254,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
             }
         } else {
             viewBinding.buyButton.setLabel(
-                resources.getString(R.string.stripe_paymentsheet_setup_button_label)
+                resources.getString(R.string.stripe_setup_button_label)
             )
         }
 
