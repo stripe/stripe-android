@@ -11,7 +11,6 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModelProvider
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.camera.CameraPermissionEnsureable
 import com.stripe.android.camera.scanui.CameraView
 import com.stripe.android.core.exception.InvalidResponseException
 import com.stripe.android.identity.R
@@ -28,7 +27,6 @@ import org.junit.rules.TestRule
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
-import org.mockito.kotlin.same
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
@@ -59,31 +57,13 @@ class IdentityCameraScanFragmentTest {
         whenever(it.idDetectorModelFile).thenReturn(idDetectorModelFile)
     }
 
-    private val mockCameraPermissionEnsureable = mock<CameraPermissionEnsureable>()
-
-    private val testCameraPermissionEnsureable = object : CameraPermissionEnsureable {
-        lateinit var onCameraReady: () -> Unit
-        lateinit var onUserDeniedCameraPermission: () -> Unit
-
-        override fun ensureCameraPermission(
-            onCameraReady: () -> Unit,
-            onUserDeniedCameraPermission: () -> Unit
-        ) {
-            this.onCameraReady = onCameraReady
-            this.onUserDeniedCameraPermission = onUserDeniedCameraPermission
-        }
-    }
-
     internal class TestFragment(
-        cameraPermissionEnsureable: CameraPermissionEnsureable,
         cameraViewModelFactory: ViewModelProvider.Factory,
         identityViewModelFactory: ViewModelProvider.Factory,
         private val cameraViewParam: CameraView
     ) : IdentityCameraScanFragment(
-        cameraPermissionEnsureable, cameraViewModelFactory, identityViewModelFactory
+        cameraViewModelFactory, identityViewModelFactory
     ) {
-        var onCameraReadyCalled = false
-        var onUserDeniedCameraPermissionCalled = false
         var currentState: IdentityScanState? = null
 
         override fun onCreateView(
@@ -95,13 +75,7 @@ class IdentityCameraScanFragmentTest {
             return View(context)
         }
 
-        override fun onCameraReady() {
-            onCameraReadyCalled = true
-        }
-
-        override fun onUserDeniedCameraPermission() {
-            onUserDeniedCameraPermissionCalled = true
-        }
+        override fun onCameraReady() {} // no-op
 
         override fun updateUI(identityScanState: IdentityScanState) {
             currentState = identityScanState
@@ -109,19 +83,8 @@ class IdentityCameraScanFragmentTest {
     }
 
     @Test
-    fun `when model file is ready scanflow is initialized and camera permission is requested`() {
-        launchIDScanFragment(mockCameraPermissionEnsureable).onFragment {
-            val mockFile = mock<File>()
-            idDetectorModelFile.postValue(Resource.success(mockFile))
-
-            verify(mockCameraViewModel).initializeScanFlow(same(mockFile))
-            verify(mockCameraPermissionEnsureable).ensureCameraPermission(any(), any())
-        }
-    }
-
-    @Test
     fun `when model file is not ready exception is thrown`() {
-        launchIDScanFragment(testCameraPermissionEnsureable).onFragment {
+        launchIDScanFragment().onFragment {
             assertFailsWith<InvalidResponseException> {
                 idDetectorModelFile.postValue(Resource.error())
             }
@@ -129,30 +92,18 @@ class IdentityCameraScanFragmentTest {
     }
 
     @Test
-    fun `when camera permission granted onCameraReady is called`() {
-        launchIDScanFragment(testCameraPermissionEnsureable).onFragment {
+    fun `when model file is ready onCameraReady is called`() {
+        launchIDScanFragment().onFragment {
             idDetectorModelFile.postValue(Resource.success(mock()))
-            testCameraPermissionEnsureable.onCameraReady()
-
             assertThat(it.cameraAdapter).isNotNull()
-            assertThat(it.onCameraReadyCalled).isTrue()
-        }
-    }
-
-    @Test
-    fun `when camera permission denied onUserDeniedCameraPermissionCalled is called`() {
-        launchIDScanFragment(testCameraPermissionEnsureable).onFragment {
-            idDetectorModelFile.postValue(Resource.success(mock()))
-            testCameraPermissionEnsureable.onUserDeniedCameraPermission()
-
-            assertThat(it.cameraAdapter).isNotNull()
-            assertThat(it.onUserDeniedCameraPermissionCalled).isTrue()
+            // onCameraReady call is posted
+            verify(mockCameraView).post(any())
         }
     }
 
     @Test
     fun `when displayStateChanged updateUI is called`() {
-        launchIDScanFragment(testCameraPermissionEnsureable).onFragment {
+        launchIDScanFragment().onFragment {
             val newState = mock<IdentityScanState.Initial>()
             displayStateChanged.postValue((newState to mock()))
 
@@ -162,7 +113,7 @@ class IdentityCameraScanFragmentTest {
 
     @Test
     fun `when finalResult is posted scan is stopped`() {
-        launchIDScanFragment(testCameraPermissionEnsureable).onFragment {
+        launchIDScanFragment().onFragment {
             finalResultLiveData.postValue(mock())
 
             verify(mockScanFlow).resetFlow()
@@ -172,17 +123,14 @@ class IdentityCameraScanFragmentTest {
 
     @Test
     fun `when destroyed scanFlow is cancelled`() {
-        launchIDScanFragment(testCameraPermissionEnsureable).moveToState(Lifecycle.State.DESTROYED)
+        launchIDScanFragment().moveToState(Lifecycle.State.DESTROYED)
         verify(mockScanFlow).cancelFlow()
     }
 
-    private fun launchIDScanFragment(
-        cameraPermissionEnsureable: CameraPermissionEnsureable
-    ) = launchFragmentInContainer(
+    private fun launchIDScanFragment() = launchFragmentInContainer(
         themeResId = R.style.Theme_MaterialComponents
     ) {
         TestFragment(
-            cameraPermissionEnsureable,
             viewModelFactoryFor(mockCameraViewModel),
             viewModelFactoryFor(mockIdentityViewModel),
             mockCameraView

@@ -8,10 +8,8 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
-import androidx.core.os.bundleOf
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
-import com.stripe.android.camera.CameraPermissionEnsureable
 import com.stripe.android.camera.scanui.util.startAnimation
 import com.stripe.android.identity.R
 import com.stripe.android.identity.databinding.IdScanFragmentBinding
@@ -23,11 +21,9 @@ import com.stripe.android.identity.states.IdentityScanState.ScanType.ID_FRONT
  * Fragment to scan the ID.
  */
 internal class IDScanFragment(
-    cameraPermissionEnsureable: CameraPermissionEnsureable,
     cameraViewModelFactory: ViewModelProvider.Factory,
     identityViewModelFactory: ViewModelProvider.Factory
 ) : IdentityCameraScanFragment(
-    cameraPermissionEnsureable,
     cameraViewModelFactory,
     identityViewModelFactory
 ) {
@@ -73,15 +69,6 @@ internal class IDScanFragment(
     override fun onCameraReady() {
         cameraViewModel.targetScanType = ID_FRONT
         startScanning(ID_FRONT)
-    }
-
-    override fun onUserDeniedCameraPermission() {
-        findNavController().navigate(
-            R.id.action_camera_permission_denied,
-            bundleOf(
-                CameraPermissionDeniedFragment.ARG_SCAN_TYPE to ID_FRONT
-            )
-        )
     }
 
     override fun updateUI(identityScanState: IdentityScanState) {

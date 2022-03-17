@@ -25,13 +25,15 @@ public final class com/stripe/android/stripecardscan/cardimageverification/CardI
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public fun <init> ()V
-	public fun <init> (Lcom/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheet$Configuration$StrictModeFrameCount;)V
-	public synthetic fun <init> (Lcom/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheet$Configuration$StrictModeFrameCount;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Lcom/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheet$Configuration$StrictModeFrameCount;Z)V
+	public synthetic fun <init> (Lcom/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheet$Configuration$StrictModeFrameCount;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Lcom/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheet$Configuration$StrictModeFrameCount;
-	public final fun copy (Lcom/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheet$Configuration$StrictModeFrameCount;)Lcom/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheet$Configuration;
-	public static synthetic fun copy$default (Lcom/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheet$Configuration;Lcom/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheet$Configuration$StrictModeFrameCount;ILjava/lang/Object;)Lcom/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheet$Configuration;
+	public final fun component2 ()Z
+	public final fun copy (Lcom/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheet$Configuration$StrictModeFrameCount;Z)Lcom/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheet$Configuration;
+	public static synthetic fun copy$default (Lcom/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheet$Configuration;Lcom/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheet$Configuration$StrictModeFrameCount;ZILjava/lang/Object;)Lcom/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheet$Configuration;
 	public fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
+	public final fun getEnableCannotScanButton ()Z
 	public final fun getStrictModeFrames ()Lcom/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheet$Configuration$StrictModeFrameCount;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;

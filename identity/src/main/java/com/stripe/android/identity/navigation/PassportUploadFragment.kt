@@ -21,6 +21,7 @@ import com.stripe.android.identity.networking.models.ClearDataParam
 import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.networking.models.DocumentUploadParam
 import com.stripe.android.identity.networking.models.IdDocumentParam
+import com.stripe.android.identity.utils.ARG_SHOULD_SHOW_CAMERA
 import com.stripe.android.identity.utils.navigateToDefaultErrorFragment
 import com.stripe.android.identity.utils.postVerificationPageDataAndMaybeSubmit
 import com.stripe.android.identity.viewmodel.IdentityViewModel
@@ -45,6 +46,8 @@ internal class PassportUploadFragment(
         identityViewModelFactory
     }
 
+    private var shouldShowCamera: Boolean = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         passportUploadViewModel.registerActivityResultCaller(this)
@@ -55,12 +58,19 @@ internal class PassportUploadFragment(
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+        val args = requireNotNull(arguments) {
+            "Argument to PassportUploadFragment is null"
+        }
+        shouldShowCamera = args[ARG_SHOULD_SHOW_CAMERA] as Boolean
+
         binding = PassportUploadFragmentBinding.inflate(layoutInflater, container, false)
 
         binding.select.setOnClickListener {
             buildBottomSheetDialog().show()
         }
 
+        binding.kontinue.isEnabled = false
+        binding.kontinue.setText(getString(R.string.kontinue))
         return binding.root
     }
 
@@ -86,12 +96,17 @@ internal class PassportUploadFragment(
     private fun buildBottomSheetDialog() = BottomSheetDialog(requireContext()).also { dialog ->
         dialog.setContentView(R.layout.get_local_image_fragment)
         dialog.setOnCancelListener {
+            Log.d(TAG, "dialog cancelled")
         }
-        dialog.findViewById<Button>(R.id.take_photo)?.setOnClickListener {
-            dialog.dismiss()
-            passportUploadViewModel.takePhoto(requireContext()) {
-                upload(it, DocumentUploadParam.UploadMethod.MANUALCAPTURE)
+        if (shouldShowCamera) {
+            dialog.findViewById<Button>(R.id.take_photo)?.setOnClickListener {
+                dialog.dismiss()
+                passportUploadViewModel.takePhoto(requireContext()) {
+                    upload(it, DocumentUploadParam.UploadMethod.MANUALCAPTURE)
+                }
             }
+        } else {
+            requireNotNull(dialog.findViewById(R.id.take_photo)).visibility = View.GONE
         }
         dialog.findViewById<Button>(R.id.choose_file)?.setOnClickListener {
             dialog.dismiss()
@@ -130,6 +145,7 @@ internal class PassportUploadFragment(
         binding.finishedCheckMark.visibility = View.VISIBLE
         binding.kontinue.isEnabled = true
         binding.kontinue.setOnClickListener {
+            binding.kontinue.toggleToLoading()
             lifecycleScope.launch {
                 runCatching {
                     requireNotNull(passportImage)
