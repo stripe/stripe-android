@@ -16,12 +16,12 @@ public final class com/stripe/android/identity/IdentityVerificationSheet$Compani
 }
 
 public final class com/stripe/android/identity/IdentityVerificationSheet$Configuration {
-	public fun <init> (I)V
-	public final fun component1 ()I
-	public final fun copy (I)Lcom/stripe/android/identity/IdentityVerificationSheet$Configuration;
-	public static synthetic fun copy$default (Lcom/stripe/android/identity/IdentityVerificationSheet$Configuration;IILjava/lang/Object;)Lcom/stripe/android/identity/IdentityVerificationSheet$Configuration;
+	public fun <init> (Landroid/net/Uri;)V
+	public final fun component1 ()Landroid/net/Uri;
+	public final fun copy (Landroid/net/Uri;)Lcom/stripe/android/identity/IdentityVerificationSheet$Configuration;
+	public static synthetic fun copy$default (Lcom/stripe/android/identity/IdentityVerificationSheet$Configuration;Landroid/net/Uri;ILjava/lang/Object;)Lcom/stripe/android/identity/IdentityVerificationSheet$Configuration;
 	public fun equals (Ljava/lang/Object;)Z
-	public final fun getMerchantLogo ()I
+	public final fun getBrandLogo ()Landroid/net/Uri;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
