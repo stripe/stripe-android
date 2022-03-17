@@ -29,10 +29,11 @@ private fun toMap(
     customerName: String,
     customerEmailAddress: String?,
 ): Map<String, Any> {
-    val paymentMethod = PaymentMethodCreateParams.createUsBankAccount(
-        PaymentMethod.BillingDetails(
-            email = customerEmailAddress,
-            name = customerName
+    val paymentMethod = PaymentMethodCreateParams(
+        type = PaymentMethod.Type.USBankAccount,
+        billingDetails = PaymentMethod.BillingDetails(
+            name = customerName,
+            email = customerEmailAddress
         )
     )
     return mapOf(
