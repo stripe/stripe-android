@@ -29,8 +29,7 @@ private fun toMap(
     customerName: String,
     customerEmailAddress: String?,
 ): Map<String, Any> {
-    val paymentMethod = PaymentMethodCreateParams(
-        type = PaymentMethod.Type.USBankAccount,
+    val paymentMethod = PaymentMethodCreateParams.createUSBankAccount(
         billingDetails = PaymentMethod.BillingDetails(
             name = customerName,
             email = customerEmailAddress

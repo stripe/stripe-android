@@ -806,11 +806,13 @@ data class PaymentMethodCreateParams internal constructor(
         }
 
         internal fun createUSBankAccount(
-            usBankAccount: USBankAccount
+            billingDetails: PaymentMethod.BillingDetails? = null,
+            metadata: Map<String, String>? = null
         ): PaymentMethodCreateParams {
             return PaymentMethodCreateParams(
                 type = PaymentMethod.Type.USBankAccount,
-                usBankAccount = usBankAccount
+                billingDetails = billingDetails,
+                metadata = metadata
             )
         }
 
