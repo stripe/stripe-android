@@ -2,7 +2,9 @@ package com.stripe.android.identity.ml
 
 import com.stripe.android.camera.framework.Analyzer
 import com.stripe.android.camera.framework.AnalyzerFactory
-import com.stripe.android.camera.framework.image.cropCameraPreviewToSquare
+import com.stripe.android.camera.framework.image.cropCenter
+import com.stripe.android.camera.framework.image.size
+import com.stripe.android.camera.framework.util.maxAspectRatioInSize
 import com.stripe.android.identity.states.IdentityScanState
 import org.tensorflow.lite.DataType
 import org.tensorflow.lite.Interpreter
@@ -27,10 +29,12 @@ internal class IDDetectorAnalyzer(modelFile: File) :
         state: IdentityScanState
     ): AnalyzerOutput {
         var tensorImage = TensorImage(INPUT_TENSOR_TYPE)
-        val croppedImage = cropCameraPreviewToSquare(
-            data.cameraPreviewImage.image,
-            data.cameraPreviewImage.viewBounds,
-            data.viewFinderBounds
+
+        val croppedImage = data.cameraPreviewImage.image.cropCenter(
+            maxAspectRatioInSize(
+                data.cameraPreviewImage.image.size(),
+                1f
+            )
         )
 
         tensorImage.load(croppedImage)
@@ -41,8 +45,7 @@ internal class IDDetectorAnalyzer(modelFile: File) :
                 ResizeOp(INPUT_HEIGHT, INPUT_WIDTH, ResizeOp.ResizeMethod.BILINEAR)
             ).add(
                 NormalizeOp(NORMALIZE_MEAN, NORMALIZE_STD) // normalize to (-1, 1)
-            )
-                .build() // add nomalization
+            ).build() // add normalization
         tensorImage = imageProcessor.process(tensorImage)
 
         // inference - input: (1, 224, 224, 3), output: (1, 4), (1, 5)
