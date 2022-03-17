@@ -3,6 +3,7 @@ package com.stripe.android.networking
 import com.stripe.android.cards.Bin
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.model.BankConnectionsLinkedAccountSession
 import com.stripe.android.model.BankStatuses
 import com.stripe.android.model.BinFixtures
 import com.stripe.android.model.CardMetadata
@@ -11,16 +12,14 @@ import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
+import com.stripe.android.model.CreateLinkAccountSessionParams
 import com.stripe.android.model.Customer
-import com.stripe.android.model.BankConnectionsLinkedAccountSession
 import com.stripe.android.model.ListPaymentMethodsParams
 import com.stripe.android.model.PaymentIntent
-import com.stripe.android.model.PaymentIntentLinkAccountSessionParams
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.RadarSession
 import com.stripe.android.model.SetupIntent
-import com.stripe.android.model.SetupIntentLinkAccountSessionParams
 import com.stripe.android.model.ShippingInformation
 import com.stripe.android.model.Source
 import com.stripe.android.model.SourceParams
@@ -354,7 +353,7 @@ internal abstract class AbsFakeStripeRepository : StripeRepository() {
 
     override suspend fun createPaymentIntentLinkAccountSession(
         paymentIntentId: String,
-        params: PaymentIntentLinkAccountSessionParams,
+        params: CreateLinkAccountSessionParams,
         requestOptions: ApiRequest.Options
     ): BankConnectionsLinkedAccountSession? {
         return null
@@ -362,7 +361,7 @@ internal abstract class AbsFakeStripeRepository : StripeRepository() {
 
     override suspend fun createSetupIntentLinkAccountSession(
         setupIntentId: String,
-        params: SetupIntentLinkAccountSessionParams,
+        params: CreateLinkAccountSessionParams,
         requestOptions: ApiRequest.Options
     ): BankConnectionsLinkedAccountSession? {
         return null

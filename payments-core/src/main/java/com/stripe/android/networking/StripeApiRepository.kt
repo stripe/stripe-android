@@ -36,6 +36,7 @@ import com.stripe.android.exception.AuthenticationException
 import com.stripe.android.exception.CardException
 import com.stripe.android.exception.PermissionException
 import com.stripe.android.exception.RateLimitException
+import com.stripe.android.model.BankConnectionsLinkedAccountSession
 import com.stripe.android.model.BankStatuses
 import com.stripe.android.model.CardMetadata
 import com.stripe.android.model.ConfirmPaymentIntentParams
@@ -45,16 +46,14 @@ import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_CLIENT
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
+import com.stripe.android.model.CreateLinkAccountSessionParams
 import com.stripe.android.model.Customer
-import com.stripe.android.model.BankConnectionsLinkedAccountSession
 import com.stripe.android.model.ListPaymentMethodsParams
 import com.stripe.android.model.PaymentIntent
-import com.stripe.android.model.PaymentIntentLinkAccountSessionParams
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.RadarSession
 import com.stripe.android.model.SetupIntent
-import com.stripe.android.model.SetupIntentLinkAccountSessionParams
 import com.stripe.android.model.ShippingInformation
 import com.stripe.android.model.Source
 import com.stripe.android.model.SourceParams
@@ -1345,7 +1344,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
 
     override suspend fun createPaymentIntentLinkAccountSession(
         paymentIntentId: String,
-        params: PaymentIntentLinkAccountSessionParams,
+        params: CreateLinkAccountSessionParams,
         requestOptions: ApiRequest.Options
     ): BankConnectionsLinkedAccountSession? {
         return fetchStripeModel(
@@ -1362,7 +1361,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
 
     override suspend fun createSetupIntentLinkAccountSession(
         setupIntentId: String,
-        params: SetupIntentLinkAccountSessionParams,
+        params: CreateLinkAccountSessionParams,
         requestOptions: ApiRequest.Options
     ): BankConnectionsLinkedAccountSession? {
         return fetchStripeModel(

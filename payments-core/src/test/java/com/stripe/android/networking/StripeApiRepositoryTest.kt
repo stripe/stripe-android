@@ -28,16 +28,15 @@ import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.ConsumerFixtures
+import com.stripe.android.model.CreateLinkAccountSessionParams
 import com.stripe.android.model.ListPaymentMethodsParams
 import com.stripe.android.model.PaymentIntentFixtures
-import com.stripe.android.model.PaymentIntentLinkAccountSessionParams
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodPreferenceFixtures
 import com.stripe.android.model.SetupIntentFixtures
-import com.stripe.android.model.SetupIntentLinkAccountSessionParams
 import com.stripe.android.model.SourceFixtures
 import com.stripe.android.model.SourceParams
 import com.stripe.android.model.Stripe3ds2AuthParams
@@ -1897,8 +1896,8 @@ internal class StripeApiRepositoryTest {
         val customerEmailAddress = "johndoe@gmail.com"
         create().createPaymentIntentLinkAccountSession(
             paymentIntentId = id,
-            params = PaymentIntentLinkAccountSessionParams(
-                paymentIntentClientSecret = clientSecret,
+            params = CreateLinkAccountSessionParams(
+                clientSecret = clientSecret,
                 customerName = customerName,
                 customerEmailAddress = customerEmailAddress
             ),
@@ -1940,8 +1939,8 @@ internal class StripeApiRepositoryTest {
         val customerEmailAddress = "johndoe@gmail.com"
         create().createSetupIntentLinkAccountSession(
             setupIntentId = id,
-            params = SetupIntentLinkAccountSessionParams(
-                setupIntentClientSecret = clientSecret,
+            params = CreateLinkAccountSessionParams(
+                clientSecret = clientSecret,
                 customerName = customerName,
                 customerEmailAddress = customerEmailAddress
             ),
