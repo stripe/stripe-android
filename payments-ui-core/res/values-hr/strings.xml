@@ -72,4 +72,6 @@
   <string name="save_for_future_payments_with_merchant_name">Spremi za buduća plaćanja %s</string>
   <!-- SEPA mandate text -->
   <string name="sepa_mandate">Unošenjem vaših podataka o plaćanju, ovlašćujete (A) %s i Stripe, našeg davatelja usluga platnog prometa, da vašoj banci pošalje upute za terećenje vašeg računa, i (B) vašu banku za terećenje vašeg računa u skladu s tim uputama. U sklopu vaših prava, imate pravo na povrat novca od svoje banke prema uvjetima i odredbama ugovora s bankom. Povrat novca mora se zatražiti u roku od 8 tjedana počevši od datuma terećenja vašeg računa. Vaša prava objašnjena su u izjavi koju možete dobiti od svoje banke. Slažete se s primanjem obavijesti o budućim terećenjima do 2 dana prije njihova izvršenja.</string>
+  <!-- Label of a button that initiates payment when tapped -->
+  <string name="stripe_pay_button_amount">Plati %s</string>
 </resources>

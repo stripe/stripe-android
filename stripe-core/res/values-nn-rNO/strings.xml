@@ -15,7 +15,7 @@
   <!-- Caption for Province field on address form (only countries that use province, like Canada) -->
   <string name="address_label_province">Område</string>
   <!-- Caption for State field on address form (only countries that use state , like United States) -->
-  <string name="address_label_state">Fylke</string>
+  <string name="address_label_state">Stat</string>
   <!-- Label for input requesting zip code, used for US based addreses -->
   <string name="address_label_zip_code">Postnummer</string>
 </resources>

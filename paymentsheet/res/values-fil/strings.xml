@@ -34,8 +34,6 @@
   <string name="stripe_paymentsheet_or_pay_using">O magbayad gamit ang</string>
   <!-- Title of a section containing a card form that will collect the payment information from the user. -->
   <string name="stripe_paymentsheet_or_pay_with_card">O magbayad gamit ang kard</string>
-  <!-- Label of a button that initiates payment when tapped -->
-  <string name="stripe_paymentsheet_pay_button_amount">Magbayad ng %s</string>
   <!-- Label for a button that starts processing the payment. -->
   <string name="stripe_paymentsheet_pay_button_label">Magbayad</string>
   <!-- Payment Method type brand name  -->

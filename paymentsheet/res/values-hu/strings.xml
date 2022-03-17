@@ -34,8 +34,6 @@
   <string name="stripe_paymentsheet_or_pay_using">Vagy fizetés a következővel:</string>
   <!-- Title of a section containing a card form that will collect the payment information from the user. -->
   <string name="stripe_paymentsheet_or_pay_with_card">Vagy fizetés kártyával</string>
-  <!-- Label of a button that initiates payment when tapped -->
-  <string name="stripe_paymentsheet_pay_button_amount">%s kifizetése</string>
   <!-- Label for a button that starts processing the payment. -->
   <string name="stripe_paymentsheet_pay_button_label">Fizetés:</string>
   <!-- Payment Method type brand name  -->

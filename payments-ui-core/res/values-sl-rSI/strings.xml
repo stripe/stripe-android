@@ -72,4 +72,6 @@
   <string name="save_for_future_payments_with_merchant_name">Shrani za prihodnja plačila trgovcu %s</string>
   <!-- SEPA mandate text -->
   <string name="sepa_mandate">Z navedbo podatkov o plačilu in potrditvijo tega plačila pooblaščate (A) podjetje %s in družbo Stripe, našega ponudnika plačilnih storitev, da posreduje navodila vaši banki za bremenitev vašega računa, in (B) vašo banko, da bremeni vaš račun v skladu s temi navodili. Vaše pravice vključujejo tudi pravico do povračila denarnih sredstev s strani vaše banke v skladu s pogoji in določili vaše pogodbe z banko. Povračilo denarnih sredstev morate zahtevati v 8 tednih od dneva bremenitve vašega računa. Vaše pravice so podrobno opisane na izpisku, ki ga lahko pridobite v banki. Strinjate se s prejemom obvestil za prihodnje bremenitve največ 2 dni pred njihovo izvedbo.</string>
+  <!-- Label of a button that initiates payment when tapped -->
+  <string name="stripe_pay_button_amount">Plačaj %s</string>
 </resources>

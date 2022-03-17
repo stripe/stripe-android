@@ -34,8 +34,6 @@
   <string name="stripe_paymentsheet_or_pay_using">Of betalen met</string>
   <!-- Title of a section containing a card form that will collect the payment information from the user. -->
   <string name="stripe_paymentsheet_or_pay_with_card">Of met een kaart betalen</string>
-  <!-- Label of a button that initiates payment when tapped -->
-  <string name="stripe_paymentsheet_pay_button_amount">%s betalen</string>
   <!-- Label for a button that starts processing the payment. -->
   <string name="stripe_paymentsheet_pay_button_label">Betaal</string>
   <!-- Payment Method type brand name  -->
