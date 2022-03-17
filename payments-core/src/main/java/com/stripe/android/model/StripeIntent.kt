@@ -78,7 +78,7 @@ sealed interface StripeIntent : StripeModel {
         AlipayRedirect("alipay_handle_redirect"),
         BlikAuthorize("blik_authorize"),
         WeChatPayRedirect("wechat_pay_redirect_to_android_app"),
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) VerifyWithMicroDeposits("verify_with_microdeposits");
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) VerifyWithMicrodeposits("verify_with_microdeposits");
 
         override fun toString(): String {
             return code

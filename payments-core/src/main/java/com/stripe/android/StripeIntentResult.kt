@@ -79,7 +79,7 @@ abstract class StripeIntentResult<out T : StripeIntent> internal constructor(
                 false
             }
             StripeIntent.NextActionType.DisplayOxxoDetails,
-            StripeIntent.NextActionType.VerifyWithMicroDeposits -> {
+            StripeIntent.NextActionType.VerifyWithMicrodeposits -> {
                 true
             }
         }

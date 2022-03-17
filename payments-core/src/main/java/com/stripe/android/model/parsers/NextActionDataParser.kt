@@ -23,7 +23,7 @@ internal class NextActionDataParser : ModelJsonParser<StripeIntent.NextActionDat
             StripeIntent.NextActionType.AlipayRedirect -> AlipayRedirectParser()
             StripeIntent.NextActionType.BlikAuthorize -> BlikAuthorizeParser()
             StripeIntent.NextActionType.WeChatPayRedirect -> WeChatPayRedirectParser()
-            StripeIntent.NextActionType.VerifyWithMicroDeposits -> VerifyWithMicrodepositsParser()
+            StripeIntent.NextActionType.VerifyWithMicrodeposits -> VerifyWithMicrodepositsParser()
             else -> return null
         }
         return parser.parse(json.optJSONObject(nextActionType.code) ?: JSONObject())
@@ -192,11 +192,11 @@ internal class NextActionDataParser : ModelJsonParser<StripeIntent.NextActionDat
             return StripeIntent.NextActionData.VerifyWithMicrodeposits(
                 arrivalDate = json.optLong(ARRIVAL_DATE),
                 hostedVerificationUrl = json.optString(HOSTED_VERIFICATION_URL),
-                microdepositType = parseMicroDepositType(json)
+                microdepositType = parseMicrodepositType(json)
             )
         }
 
-        private fun parseMicroDepositType(json: JSONObject): MicrodepositType {
+        private fun parseMicrodepositType(json: JSONObject): MicrodepositType {
             return MicrodepositType.values().find {
                 it.value == json.optString(MICRODEPOSIT_TYPE)
             } ?: MicrodepositType.UNKNOWN
