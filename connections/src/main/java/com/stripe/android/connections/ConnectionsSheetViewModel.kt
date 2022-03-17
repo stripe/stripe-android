@@ -96,13 +96,9 @@ internal class ConnectionsSheetViewModel @Inject constructor(
      * @see onResume (we rely on this on regular flows)
      * @see onActivityResult (we rely on this on config changes)
      */
-    fun onActivityRecreated() {
+    internal fun onActivityRecreated() {
         _state.update { it.copy(activityRecreated = true) }
     }
-
-    // If activity resumes and we did not receive a callback from the custom tabs,
-    // then the user hit the back button or closed the custom tabs UI, so return result as
-    // canceled.
 
     /**
      *  If activity resumes and we did not receive a callback from the custom tabs,
@@ -122,7 +118,7 @@ internal class ConnectionsSheetViewModel @Inject constructor(
      * if activity got recreated and the auth flow is still active then the user hit
      * the back button or closed the custom tabs UI, so return result as canceled.
      */
-    fun onActivityResult() {
+    internal fun onActivityResult() {
         if (_state.value.authFlowActive && _state.value.activityRecreated) {
             viewModelScope.launch {
                 _viewEffect.emit(FinishWithResult(ConnectionsSheetResult.Canceled))
