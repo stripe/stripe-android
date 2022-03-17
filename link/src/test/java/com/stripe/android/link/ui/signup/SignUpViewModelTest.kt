@@ -47,7 +47,7 @@ import kotlin.test.BeforeTest
 class SignUpViewModelTest {
     private val defaultArgs = LinkActivityContract.Args(
         MERCHANT_NAME,
-        LinkScreen.SignUp.route,
+        CUSTOMER_EMAIL,
         LinkActivityContract.Args.InjectionParams(
             INJECTOR_KEY,
             setOf(PRODUCT_USAGE),

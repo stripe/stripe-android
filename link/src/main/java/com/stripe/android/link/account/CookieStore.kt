@@ -47,7 +47,7 @@ internal class CookieStore @Inject constructor(
     }
 
     /**
-     * Check whether this is the most recent logged out email.
+     * Check whether this is the most recently logged out email.
      */
     fun isEmailLoggedOut(email: String) =
         store.read(LOGGED_OUT_EMAIL_HASH) == email.sha256()
