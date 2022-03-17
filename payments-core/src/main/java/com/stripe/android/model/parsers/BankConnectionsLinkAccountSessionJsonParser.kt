@@ -2,12 +2,13 @@ package com.stripe.android.model.parsers
 
 import com.stripe.android.core.model.StripeJsonUtils
 import com.stripe.android.core.model.parsers.ModelJsonParser
-import com.stripe.android.model.LinkAccountSession
+import com.stripe.android.model.BankConnectionsLinkedAccountSession
 import org.json.JSONObject
 
-internal class BankConnectionsResourceLinkAccountSessionJsonParser : ModelJsonParser<LinkAccountSession> {
-    override fun parse(json: JSONObject): LinkAccountSession {
-        return LinkAccountSession(
+internal class BankConnectionsLinkAccountSessionJsonParser :
+    ModelJsonParser<BankConnectionsLinkedAccountSession> {
+    override fun parse(json: JSONObject): BankConnectionsLinkedAccountSession {
+        return BankConnectionsLinkedAccountSession(
             clientSecret = StripeJsonUtils.optString(json, FIELD_CLIENT_SECRET),
             id = StripeJsonUtils.optString(json, FIELD_ID)
         )

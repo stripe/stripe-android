@@ -46,7 +46,7 @@ import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.Customer
-import com.stripe.android.model.LinkAccountSession
+import com.stripe.android.model.BankConnectionsLinkedAccountSession
 import com.stripe.android.model.ListPaymentMethodsParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentLinkAccountSessionParams
@@ -66,7 +66,7 @@ import com.stripe.android.model.StripeFileParams.Companion.toInternal
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.Token
 import com.stripe.android.model.TokenParams
-import com.stripe.android.model.parsers.BankConnectionsResourceLinkAccountSessionJsonParser
+import com.stripe.android.model.parsers.BankConnectionsLinkAccountSessionJsonParser
 import com.stripe.android.model.parsers.CardMetadataJsonParser
 import com.stripe.android.model.parsers.ConsumerPaymentDetailsJsonParser
 import com.stripe.android.model.parsers.ConsumerSessionJsonParser
@@ -1347,14 +1347,14 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         paymentIntentId: String,
         params: PaymentIntentLinkAccountSessionParams,
         requestOptions: ApiRequest.Options
-    ): LinkAccountSession? {
+    ): BankConnectionsLinkedAccountSession? {
         return fetchStripeModel(
             apiRequestFactory.createPost(
                 url = getPaymentIntentLinkAccountSessionUrl(paymentIntentId),
                 options = requestOptions,
                 params = params.toMap()
             ),
-            BankConnectionsResourceLinkAccountSessionJsonParser(),
+            BankConnectionsLinkAccountSessionJsonParser(),
         ) {
             // no-op
         }
@@ -1364,14 +1364,14 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         setupIntentId: String,
         params: SetupIntentLinkAccountSessionParams,
         requestOptions: ApiRequest.Options
-    ): LinkAccountSession? {
+    ): BankConnectionsLinkedAccountSession? {
         return fetchStripeModel(
             apiRequestFactory.createPost(
                 url = getSetupIntentLinkAccountSessionUrl(setupIntentId),
                 options = requestOptions,
                 params = params.toMap()
             ),
-            BankConnectionsResourceLinkAccountSessionJsonParser(),
+            BankConnectionsLinkAccountSessionJsonParser(),
         ) {
             // no-op
         }

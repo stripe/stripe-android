@@ -12,7 +12,7 @@ import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.Customer
-import com.stripe.android.model.LinkAccountSession
+import com.stripe.android.model.BankConnectionsLinkedAccountSession
 import com.stripe.android.model.ListPaymentMethodsParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentLinkAccountSessionParams
@@ -356,7 +356,7 @@ internal abstract class AbsFakeStripeRepository : StripeRepository() {
         paymentIntentId: String,
         params: PaymentIntentLinkAccountSessionParams,
         requestOptions: ApiRequest.Options
-    ): LinkAccountSession? {
+    ): BankConnectionsLinkedAccountSession? {
         return null
     }
 
@@ -364,7 +364,7 @@ internal abstract class AbsFakeStripeRepository : StripeRepository() {
         setupIntentId: String,
         params: SetupIntentLinkAccountSessionParams,
         requestOptions: ApiRequest.Options
-    ): LinkAccountSession? {
+    ): BankConnectionsLinkedAccountSession? {
         return null
     }
 }
