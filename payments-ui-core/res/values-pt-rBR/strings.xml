@@ -72,4 +72,6 @@
   <string name="save_for_future_payments_with_merchant_name">Salvar para pagamentos futuros a %s</string>
   <!-- SEPA mandate text -->
   <string name="sepa_mandate">Ao fornecer seus dados de pagamento e confirmar este pagamento, você autoriza (A) %s e a Stripe, o nosso provedor de serviços de pagamento, a enviar instruções ao seu banco para debitar sua conta e (B) seu banco a debitar sua conta, de acordo com as referidas instruções. Os seus direitos incluem a possibilidade de exigir do banco o reembolso do valor debitado, nos termos e condições acordados com a instituição. O reembolso deve ser solicitado dentro de um prazo de 8 semanas a partir da data do débito na conta. Você concorda em receber notificações de débitos futuros em até 2 dias antes do débito.</string>
+  <!-- Label of a button that initiates payment when tapped -->
+  <string name="stripe_pay_button_amount">Pagar %s</string>
 </resources>

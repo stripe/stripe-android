@@ -69,8 +69,6 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
     override val testModeIndicator: TextView by lazy { viewBinding.testmode }
     private val buttonContainer: ViewGroup by lazy { viewBinding.buttonContainer }
 
-    private val currencyFormatter = CurrencyFormatter()
-
     private val buyButtonStateObserver = { viewState: PaymentSheetViewState? ->
         updateErrorMessage(viewState?.errorMessage)
         viewBinding.buyButton.updateState(viewState?.convert())
@@ -254,7 +252,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
     private fun setupBuyButton() {
         if (viewModel.isProcessingPaymentIntent) {
             viewModel.amount.observe(this) {
-                viewBinding.buyButton.setLabel(getLabelText(requireNotNull(it)))
+                viewBinding.buyButton.setLabel(requireNotNull(it).buildPayButtonLabel(resources))
             }
         } else {
             viewBinding.buyButton.setLabel(
@@ -315,13 +313,6 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
         )
         viewBinding.toolbar.setBackgroundColor(
             PaymentsThemeConfig.colors(isDark).surface.toArgb()
-        )
-    }
-
-    private fun getLabelText(amount: Amount): String {
-        return resources.getString(
-            R.string.stripe_paymentsheet_pay_button_amount,
-            currencyFormatter.format(amount.value, amount.currencyCode)
         )
     }
 

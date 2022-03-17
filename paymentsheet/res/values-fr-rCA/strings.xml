@@ -34,8 +34,6 @@
   <string name="stripe_paymentsheet_or_pay_using">Ou payer avec</string>
   <!-- Title of a section containing a card form that will collect the payment information from the user. -->
   <string name="stripe_paymentsheet_or_pay_with_card">Ou payez par carte</string>
-  <!-- Label of a button that initiates payment when tapped -->
-  <string name="stripe_paymentsheet_pay_button_amount">Payer %s</string>
   <!-- Label for a button that starts processing the payment. -->
   <string name="stripe_paymentsheet_pay_button_label">Payer</string>
   <!-- Payment Method type brand name  -->

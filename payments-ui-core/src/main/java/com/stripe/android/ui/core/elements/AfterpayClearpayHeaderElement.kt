@@ -24,7 +24,7 @@ data class AfterpayClearpayHeaderElement(
     fun getLabel(resources: Resources) =
         resources.getString(
             R.string.afterpay_clearpay_message,
-            CurrencyFormatter().format(
+            CurrencyFormatter.format(
                 amount.value / 4,
                 amount.currencyCode
             )

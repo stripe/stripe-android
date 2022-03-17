@@ -5,13 +5,13 @@
   <!-- Used to describe address in United Arab Emirates -->
   <string name="address_label_ae_emirate">Emirat</string>
   <!-- Label of an address field -->
-  <string name="address_label_au_suburb_or_city">Bydel eller stad</string>
+  <string name="address_label_au_suburb_or_city">Forstad eller stad</string>
   <!-- Label of an address field -->
-  <string name="address_label_bb_jm_parish">Prestegjeld</string>
+  <string name="address_label_bb_jm_parish">Sogn</string>
   <!-- Used to describe a field of an address -->
   <string name="address_label_cedex">Cedex</string>
   <!-- Label of an address field -->
-  <string name="address_label_department">Avdeling</string>
+  <string name="address_label_department">Område</string>
   <!-- Label for the district field on an address form -->
   <string name="address_label_district">Distrikt</string>
   <!-- Label of an address field in hk -->
@@ -23,7 +23,7 @@
   <!-- Used to describe postal code in India -->
   <string name="address_label_in_pin">PIN</string>
   <!-- Used to describe part of an address -->
-  <string name="address_label_island">Island</string>
+  <string name="address_label_island">Øy</string>
   <!-- Label of an address field -->
   <string name="address_label_jp_prefecture">Prefektur</string>
   <!-- Label of an address field -->
@@ -35,7 +35,7 @@
   <!-- Used to describe a field of an address -->
   <string name="address_label_post_town">Post eller sted</string>
   <!-- Label of an address field -->
-  <string name="address_label_suburb">Bydel</string>
+  <string name="address_label_suburb">Forstad</string>
   <!-- Used to describe an address field. -->
   <string name="address_label_village_township">Landsby eller township</string>
   <!-- Billing address section title for card form entry. -->
@@ -71,5 +71,7 @@
   <!-- Next to the save payment method users will see the merchant name: "Save for future Example.inc Payments" -->
   <string name="save_for_future_payments_with_merchant_name">Lagre for framtidige %s betalingar</string>
   <!-- SEPA mandate text -->
-  <string name="sepa_mandate">Ved å oppgje betalingsopplysningane dine og bekrefte denne betalinga, autoriserer du (A) %s og Stripe, betalingstenesteleverandøren vår, til å sende instruksjonar til banken din om å debitere kontoen din og (B) banken din om å debitere kontoen din i medhald av dei instruksjonane. Som ein del av rettane dine, har du krav på ein refusjon frå banken din under vilkåra i avtalen din med banken. Ein refusjon må hevdast innan 8 veker frå datoen da kontoen din vart debitert. Rettane dine vert forklart i ei erklæring som du kan få frå banken. Du godtek å take imot varsel for framtidige debetar opptil 2 dagar før dei oppstår.</string>
+  <string name="sepa_mandate">Ved å oppgje betalingsopplysningane dine og bekrefte denne betalinga, autoriserer du (A) %s og Stripe, betalingstenesteleverandøren vår, til å sende instruksjonar til banken din om å debitere kontoen din og (B) banken din om å debitere kontoen din i samsvar med dei instruksjonane. Som ein del av rettane dine har du krav på ein refusjon frå banken din under vilkåra i avtalen din med banken. Ein refusjon må hevdast innan 8 veker frå datoen da kontoen din vart debitert. Rettane dine vert forklart i ei erklæring som du kan få frå banken. Du godtek å take imot varsel for framtidige debetar opptil 2 dagar før dei oppstår.</string>
+  <!-- Label of a button that initiates payment when tapped -->
+  <string name="stripe_pay_button_amount">Betal %s</string>
 </resources>

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
   <!-- Address line 1 placeholder for billing address form. -->
-  <string name="address_label_address_line1">地址行 1</string>
+  <string name="address_label_address_line1">地址第 1 行</string>
   <!-- Caption for City field on address form -->
   <string name="address_label_city">城市</string>
   <!-- Caption for Country field on address form -->

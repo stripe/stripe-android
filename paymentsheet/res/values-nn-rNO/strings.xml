@@ -14,7 +14,7 @@
    Text for remove button -->
   <string name="remove">Fjern</string>
   <!-- Generic error message shown when payment cannot be processed. -->
-  <string name="stripe_failure_connection_error">Vi har problem med å kople til betalingsleverandøren vår. Sjekk tilkoplinga til internett og prøv på nytt.</string>
+  <string name="stripe_failure_connection_error">Vi har problem med å kople til betalingsleverandøren vår. Sjekk tilkoplinga til internett og prøv igjen.</string>
   <!-- When an internal error is reported when a google pay payment is started. -->
   <string name="stripe_google_pay_error_internal">Ein intern feil oppstod.</string>
   <!-- Text for a button that, when tapped, displays another screen where the customer can add payment method details -->
@@ -34,8 +34,6 @@
   <string name="stripe_paymentsheet_or_pay_using">Eller betal ved å bruke</string>
   <!-- Title of a section containing a card form that will collect the payment information from the user. -->
   <string name="stripe_paymentsheet_or_pay_with_card">Eller betal med eit kort</string>
-  <!-- Label of a button that initiates payment when tapped -->
-  <string name="stripe_paymentsheet_pay_button_amount">Betal %s</string>
   <!-- Label for a button that starts processing the payment. -->
   <string name="stripe_paymentsheet_pay_button_label">Betal</string>
   <!-- Payment Method type brand name  -->

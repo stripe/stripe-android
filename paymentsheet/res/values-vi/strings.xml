@@ -34,8 +34,6 @@
   <string name="stripe_paymentsheet_or_pay_using">Hoặc thanh toán bằng</string>
   <!-- Title of a section containing a card form that will collect the payment information from the user. -->
   <string name="stripe_paymentsheet_or_pay_with_card">Hoặc thanh toán bằng thẻ</string>
-  <!-- Label of a button that initiates payment when tapped -->
-  <string name="stripe_paymentsheet_pay_button_amount">Thanh toán %s</string>
   <!-- Label for a button that starts processing the payment. -->
   <string name="stripe_paymentsheet_pay_button_label">Thanh toán</string>
   <!-- Payment Method type brand name  -->

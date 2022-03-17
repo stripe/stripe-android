@@ -15,7 +15,6 @@ import com.stripe.android.ui.core.isSystemDarkTheme
 internal class PaymentSheetListFragment() : BasePaymentMethodsListFragment(
     canClickSelectedItem = false
 ) {
-    private val currencyFormatter = CurrencyFormatter()
     private val activityViewModel by activityViewModels<PaymentSheetViewModel> {
         PaymentSheetViewModel.Factory(
             { requireActivity().application },
@@ -57,7 +56,7 @@ internal class PaymentSheetListFragment() : BasePaymentMethodsListFragment(
     private fun getTotalText(amount: Amount): String {
         return resources.getString(
             R.string.stripe_paymentsheet_total_amount,
-            currencyFormatter.format(amount.value, amount.currencyCode)
+            CurrencyFormatter.format(amount.value, amount.currencyCode)
         )
     }
 }
