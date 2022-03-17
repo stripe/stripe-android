@@ -126,7 +126,8 @@ def executeTests(appUrl, testUrl):
          "video": True,
 #          "language": "en_us",
 #          "locale": "en_us",
-         "enableSpoonFramework": False
+         "enableSpoonFramework": False,
+         "project": "Mobile Payments"
       }, auth=(user, authKey))
     jsonResponse = response.json()
 
@@ -136,7 +137,7 @@ def executeTests(appUrl, testUrl):
         if(jsonResponse["message"] == "Success"):
             print("RESULT build id: " + jsonResponse["build_id"])
             print("RESULT see build here: " +
-                 "https://app-automate.browserstack.com/dashboard/v2/builds/{buildId}?buildUserIds=5559286".format(buildId=jsonResponse["build_id"]))
+                 "https://app-automate.browserstack.com/dashboard/v2/builds/{buildId}".format(buildId=jsonResponse["build_id"]))
             return jsonResponse["build_id"]
         else:
             return None
