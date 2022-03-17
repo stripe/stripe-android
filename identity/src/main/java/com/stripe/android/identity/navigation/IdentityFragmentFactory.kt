@@ -8,8 +8,8 @@ import com.stripe.android.camera.CameraPermissionEnsureable
 import com.stripe.android.identity.IdentityVerificationSheetContract
 import com.stripe.android.identity.VerificationFlowFinishable
 import com.stripe.android.identity.networking.DefaultIdentityRepository
-import com.stripe.android.identity.viewmodel.CameraViewModel
 import com.stripe.android.identity.viewmodel.FrontBackUploadViewModel
+import com.stripe.android.identity.viewmodel.IdentityScanViewModel
 import com.stripe.android.identity.viewmodel.IdentityViewModel
 import com.stripe.android.identity.viewmodel.PassportUploadViewModel
 
@@ -24,7 +24,11 @@ internal class IdentityFragmentFactory(
     private val verificationFlowFinishable: VerificationFlowFinishable
 ) : FragmentFactory() {
     private val identityRepository = DefaultIdentityRepository(context)
-    private val cameraViewModelFactory = CameraViewModel.CameraViewModelFactory()
+    private val identityScanViewModelFactory =
+        IdentityScanViewModel.IdentityScanViewModelFactory(
+            identityRepository,
+            verificationArgs
+        )
     private val frontBackUploadViewModelFactory =
         FrontBackUploadViewModel.FrontBackUploadViewModelFactory(
             identityRepository,
@@ -44,18 +48,15 @@ internal class IdentityFragmentFactory(
     override fun instantiate(classLoader: ClassLoader, className: String): Fragment {
         return when (className) {
             IDScanFragment::class.java.name -> IDScanFragment(
-//                cameraPermissionEnsureable,
-                cameraViewModelFactory,
+                identityScanViewModelFactory,
                 identityViewModelFactory
             )
             DriverLicenseScanFragment::class.java.name -> DriverLicenseScanFragment(
-//                cameraPermissionEnsureable,
-                cameraViewModelFactory,
+                identityScanViewModelFactory,
                 identityViewModelFactory
             )
             PassportScanFragment::class.java.name -> PassportScanFragment(
-//                cameraPermissionEnsureable,
-                cameraViewModelFactory,
+                identityScanViewModelFactory,
                 identityViewModelFactory
             )
             CameraPermissionDeniedFragment::class.java.name -> CameraPermissionDeniedFragment(

@@ -19,17 +19,17 @@ import com.stripe.android.identity.camera.IdentityScanFlow
 import com.stripe.android.identity.networking.Resource
 import com.stripe.android.identity.states.IdentityScanState
 import com.stripe.android.identity.viewModelFactoryFor
-import com.stripe.android.identity.viewmodel.CameraViewModel
+import com.stripe.android.identity.viewmodel.IdentityScanViewModel
 import com.stripe.android.identity.viewmodel.IdentityViewModel
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestRule
 import org.junit.runner.RunWith
-import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.shadows.ShadowLooper.idleMainLooper
 import java.io.File
 import kotlin.test.assertFailsWith
 
@@ -46,7 +46,7 @@ class IdentityCameraScanFragmentTest {
     private val finalResultLiveData = MutableLiveData<IDDetectorAggregator.FinalResult>()
     private val displayStateChanged = MutableLiveData<Pair<IdentityScanState, IdentityScanState?>>()
     private val mockScanFlow = mock<IdentityScanFlow>()
-    private val mockCameraViewModel = mock<CameraViewModel>().also {
+    private val mockIdentityScanViewModel = mock<IdentityScanViewModel>().also {
         whenever(it.identityScanFlow).thenReturn(mockScanFlow)
         whenever(it.finalResult).thenReturn(finalResultLiveData)
         whenever(it.displayStateChanged).thenReturn(displayStateChanged)
@@ -58,13 +58,14 @@ class IdentityCameraScanFragmentTest {
     }
 
     internal class TestFragment(
-        cameraViewModelFactory: ViewModelProvider.Factory,
+        identityScanViewModelFactory: ViewModelProvider.Factory,
         identityViewModelFactory: ViewModelProvider.Factory,
         private val cameraViewParam: CameraView
     ) : IdentityCameraScanFragment(
-        cameraViewModelFactory, identityViewModelFactory
+        identityScanViewModelFactory, identityViewModelFactory
     ) {
         var currentState: IdentityScanState? = null
+        var onCameraReadyIsCalled = false
 
         override fun onCreateView(
             inflater: LayoutInflater,
@@ -75,7 +76,12 @@ class IdentityCameraScanFragmentTest {
             return View(context)
         }
 
-        override fun onCameraReady() {} // no-op
+        override val headerTitleRes = R.string.front_of_dl
+        override val messageRes = R.string.position_dl_front
+
+        override fun onCameraReady() {
+            onCameraReadyIsCalled = true
+        }
 
         override fun updateUI(identityScanState: IdentityScanState) {
             currentState = identityScanState
@@ -95,9 +101,10 @@ class IdentityCameraScanFragmentTest {
     fun `when model file is ready onCameraReady is called`() {
         launchIDScanFragment().onFragment {
             idDetectorModelFile.postValue(Resource.success(mock()))
+            idleMainLooper()
+
             assertThat(it.cameraAdapter).isNotNull()
-            // onCameraReady call is posted
-            verify(mockCameraView).post(any())
+            assertThat(it.onCameraReadyIsCalled).isTrue()
         }
     }
 
@@ -131,7 +138,7 @@ class IdentityCameraScanFragmentTest {
         themeResId = R.style.Theme_MaterialComponents
     ) {
         TestFragment(
-            viewModelFactoryFor(mockCameraViewModel),
+            viewModelFactoryFor(mockIdentityScanViewModel),
             viewModelFactoryFor(mockIdentityViewModel),
             mockCameraView
         )

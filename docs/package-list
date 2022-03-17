@@ -46,6 +46,7 @@ com.stripe.android.paymentsheet
 com.stripe.android.paymentsheet.model
 module:stripe-core
 com.stripe.android.core
+com.stripe.android.core.browser
 com.stripe.android.core.exception
 com.stripe.android.core.injection
 com.stripe.android.core.model
@@ -58,6 +59,5 @@ com.stripe.android.stripecardscan.cardimageverification
 com.stripe.android.stripecardscan.cardimageverification.exception
 com.stripe.android.stripecardscan.cardscan
 com.stripe.android.stripecardscan.cardscan.exception
-com.stripe.android.stripecardscan.framework
 com.stripe.android.stripecardscan.payment.card
 com.stripe.android.stripecardscan.scanui

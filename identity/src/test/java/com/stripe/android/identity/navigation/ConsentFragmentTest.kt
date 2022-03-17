@@ -1,5 +1,6 @@
 package com.stripe.android.identity.navigation
 
+import android.net.Uri
 import android.view.View
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.fragment.app.testing.launchFragmentInContainer
@@ -89,7 +90,7 @@ internal class ConsentFragmentTest {
             IdentityVerificationSheetContract.Args(
                 verificationSessionId = VERIFICATION_SESSION_ID,
                 ephemeralKeySecret = EPHEMERAL_KEY,
-                merchantLogo = MERCHANT_LOGO
+                brandLogo = BRAND_LOGO
             )
         )
     }
@@ -291,6 +292,6 @@ internal class ConsentFragmentTest {
 
         const val VERIFICATION_SESSION_ID = "id_5678"
         const val EPHEMERAL_KEY = "eak_5678"
-        val MERCHANT_LOGO = R.drawable.check_mark
+        val BRAND_LOGO = mock<Uri>()
     }
 }

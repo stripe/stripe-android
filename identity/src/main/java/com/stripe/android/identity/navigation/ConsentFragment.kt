@@ -9,6 +9,7 @@ import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import com.bumptech.glide.Glide
 import com.stripe.android.identity.R
 import com.stripe.android.identity.databinding.ConsentFragmentBinding
 import com.stripe.android.identity.networking.models.ClearDataParam
@@ -43,7 +44,8 @@ internal class ConsentFragment(
     ): View {
         binding = ConsentFragmentBinding.inflate(inflater, container, false)
 
-        binding.merchantLogo.setImageResource(identityViewModel.args.merchantLogo)
+        Glide.with(requireContext()).load(identityViewModel.args.brandLogo)
+            .into(binding.merchantLogo)
 
         binding.agree.setOnClickListener {
             binding.agree.toggleToLoading()

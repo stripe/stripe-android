@@ -149,7 +149,7 @@ internal class FrontBackUploadViewModel(
                 context,
                 uri,
                 verificationArgs.verificationSessionId,
-                true,
+                false,
                 FRONT,
                 maxDimension = documentCaptureModels.highResImageMaxDimension,
                 compressionQuality = documentCaptureModels.highResImageCompressionQuality
@@ -176,7 +176,7 @@ internal class FrontBackUploadViewModel(
                 context,
                 uri,
                 verificationArgs.verificationSessionId,
-                true,
+                false,
                 BACK,
                 maxDimension = documentCaptureModels.highResImageMaxDimension,
                 compressionQuality = documentCaptureModels.highResImageCompressionQuality

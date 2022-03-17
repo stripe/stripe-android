@@ -139,12 +139,14 @@ class IdentityScanStateTests {
         val ID_FRONT_OUTPUT = AnalyzerOutput(
             BoundingBox(0f, 0f, 0f, 0f),
             Category.ID_FRONT,
-            0f
+            0f,
+            listOf()
         )
         val ID_BACK_OUTPUT = AnalyzerOutput(
             BoundingBox(0f, 0f, 0f, 0f),
             Category.ID_BACK,
-            0f
+            0f,
+            listOf()
         )
         val DURATION_BEFORE_TIMEOUT = 499.milliseconds
         val DURATION_AFTER_TIMEOUT = 501.milliseconds
