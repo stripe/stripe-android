@@ -35,27 +35,18 @@
         android:name="com.stripe.android.identity.navigation.IDScanFragment"
         android:label="id_scan_fragment"
         tools:layout="@layout/id_scan_fragment">
-        <action
-            android:id="@+id/action_IDScanFragment_to_confirmationFragment"
-            app:destination="@id/confirmationFragment" />
     </fragment>
     <fragment
         android:id="@+id/passportScanFragment"
         android:name="com.stripe.android.identity.navigation.PassportScanFragment"
         android:label="passport_scan_fragment"
         tools:layout="@layout/passport_scan_fragment">
-        <action
-            android:id="@+id/action_passportScanFragment_to_confirmationFragment"
-            app:destination="@id/confirmationFragment" />
     </fragment>
     <fragment
         android:id="@+id/driverLicenseScanFragment"
         android:name="com.stripe.android.identity.navigation.DriverLicenseScanFragment"
         android:label="driver_license_scan_fragment"
         tools:layout="@layout/driver_license_scan_fragment">
-        <action
-            android:id="@+id/action_driverLicenseScanFragment_to_confirmationFragment"
-            app:destination="@id/confirmationFragment" />
     </fragment>
     <fragment
         android:id="@+id/IDUploadFragment"

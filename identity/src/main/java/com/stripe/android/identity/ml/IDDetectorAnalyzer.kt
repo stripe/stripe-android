@@ -13,6 +13,7 @@ import org.tensorflow.lite.support.image.ImageProcessor
 import org.tensorflow.lite.support.image.TensorImage
 import org.tensorflow.lite.support.image.ops.ResizeOp
 import java.io.File
+import kotlin.math.roundToInt
 
 /**
  * Analyzer to run a model input.
@@ -75,14 +76,28 @@ internal class IDDetectorAnalyzer(modelFile: File) :
 
         return AnalyzerOutput(
             BoundingBox(
-                boundingBoxes[0][0],
-                boundingBoxes[0][1],
-                boundingBoxes[0][2],
-                boundingBoxes[0][3],
+                left = boundingBoxes[0][0],
+                top = boundingBoxes[0][1],
+                width = boundingBoxes[0][2],
+                height = boundingBoxes[0][3],
             ),
             resultCategory,
-            resultScore
+            resultScore,
+            categories[0].map { it.roundToMaxDecimals(2) }
         )
+    }
+
+    /**
+     * Round a float to max decimals. Backend requires scores uploaded with max 2 decimals.
+     *
+     * e.g -
+     * 3.123f.roundToMaxDecimals(2) = 3.12
+     * 3.499f.roundToMaxDecimals(2) = 3.5
+     */
+    private fun Float.roundToMaxDecimals(decimals: Int): Float {
+        var multiplier = 1.0f
+        repeat(decimals) { multiplier *= 10 }
+        return (this * multiplier).roundToInt() / multiplier
     }
 
     // TODO(ccen): check if we should enable this to track stats
@@ -101,7 +116,7 @@ internal class IDDetectorAnalyzer(modelFile: File) :
         }
     }
 
-    private companion object {
+    internal companion object {
         const val INPUT_WIDTH = 224
         const val INPUT_HEIGHT = 224
         const val NORMALIZE_MEAN = 127.5f
@@ -110,14 +125,19 @@ internal class IDDetectorAnalyzer(modelFile: File) :
         const val OUTPUT_BOUNDING_BOX_TENSOR_INDEX = 0
         const val OUTPUT_CATEGORY_TENSOR_INDEX = 1
         const val OUTPUT_BOUNDING_BOX_TENSOR_SIZE = 4
+        const val INDEX_NO_ID = 0
+        const val INDEX_PASSPORT = 1
+        const val INDEX_ID_FRONT = 2
+        const val INDEX_ID_BACK = 3
+        const val INDEX_INVALID = 4
         val INPUT_TENSOR_TYPE: DataType = DataType.FLOAT32
         val OUTPUT_CATEGORY_TENSOR_SIZE = Category.values().size
         val INDEX_CATEGORY_MAP = mapOf(
-            0 to Category.NO_ID,
-            1 to Category.PASSPORT,
-            2 to Category.ID_FRONT,
-            3 to Category.ID_BACK,
-            4 to Category.INVALID,
+            INDEX_NO_ID to Category.NO_ID,
+            INDEX_PASSPORT to Category.PASSPORT,
+            INDEX_ID_FRONT to Category.ID_FRONT,
+            INDEX_ID_BACK to Category.ID_BACK,
+            INDEX_INVALID to Category.INVALID,
         )
         val TAG: String = IDDetectorAnalyzer::class.java.simpleName
     }
