@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="kontinue">continue</string>
-    <string name="agree_and_continue">Agree and continue</string>
     <string name="decline">Decline and use alternative method</string>
     <string name="driver_license">Driver\'s license</string>
     <string name="id_card">Identity card</string>
@@ -31,6 +30,7 @@
     <string name="app_settings">App Settings</string>
     <string name="camera_permission">Camera permission</string>
     <string name="grant_camera_permission_text">We need permission to use your camera. Please allow camera access in app settings.</string>
+    <string name="ok">OK</string>
     <string name="upload_file_text">Alternatively, you may manually upload a photo of your %1$s</string>
 
     <string name="displayname_id">ID</string>

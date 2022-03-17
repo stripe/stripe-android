@@ -43,4 +43,12 @@ class PaymentMethodOptionsParamsTest {
                 .toParamMap()
         ).isEmpty()
     }
+
+    @Test
+    fun usBankAccountToParamMap_withNoData_shouldHaveEmptyParams() {
+        assertThat(
+            PaymentMethodOptionsParams.USBankAccount()
+                .toParamMap()
+        ).isEmpty()
+    }
 }

@@ -1725,6 +1725,34 @@ internal class StripeApiRepositoryTest {
         }
 
     @Test
+    fun `logoutConsumer() sends all parameters`() =
+        runTest {
+            val stripeResponse = StripeResponse(
+                200,
+                ConsumerFixtures.CONSUMER_LOGGED_OUT_JSON.toString(),
+                emptyMap()
+            )
+            whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+                .thenReturn(stripeResponse)
+
+            val clientSecret = "secret"
+            val cookie = "cookie1"
+            create().logoutConsumer(
+                clientSecret,
+                cookie,
+                DEFAULT_OPTIONS
+            )
+
+            verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
+            val params = requireNotNull(apiRequestArgumentCaptor.firstValue.params)
+            val credentials = params["credentials"] as Map<*, *>
+            assertEquals(credentials["consumer_session_client_secret"], clientSecret)
+            val cookies = params["cookies"] as Map<*, *>
+            val secret = cookies["verification_session_client_secrets"] as Collection<*>
+            assertThat(secret).containsExactly(cookie)
+        }
+
+    @Test
     fun `listPaymentDetails() sends all parameters`() =
         runTest {
             val stripeResponse = StripeResponse(
@@ -1748,6 +1776,109 @@ internal class StripeApiRepositoryTest {
             val credentials = params["credentials"] as Map<*, *>
             assertEquals(credentials["consumer_session_client_secret"], clientSecret)
             assertContentEquals(params["types"] as? List<*>, paymentMethodTypes.toList())
+        }
+
+    @Test
+    fun `attachLinkAccountSessionToPaymentIntent attaches LAS to PI`() =
+        runTest {
+            val stripeResponse = StripeResponse(
+                200,
+                """
+                    {
+                        "id": "pi_12345",
+                        "object": "payment_intent",
+                        "amount": 100,
+                        "currency": "usd",
+                        "cancellation_reason": null,
+                        "client_secret": "pi_abc_secret_def",
+                        "created": 1647000000,
+                        "description": null,
+                        "last_setup_error": null,
+                        "livemode": false,
+                        "next_action": null,
+                        "payment_method": "pm_abcdefg",
+                        "payment_method_options": {
+                            "us_bank_account": {
+                                "verification_method": "instant"
+                            }
+                        },
+                        "payment_method_types": [
+                            "us_bank_account"
+                        ],
+                        "status": "requires_payment_method"
+                    }
+                """.trimIndent(),
+                emptyMap()
+            )
+            whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+                .thenReturn(stripeResponse)
+
+            val clientSecret = "pi_client_secret_123"
+            val response = create().attachLinkAccountSessionToPaymentIntent(
+                clientSecret,
+                "pi_12345",
+                "las_123456",
+                DEFAULT_OPTIONS
+            )
+
+            verify(stripeNetworkClient).executeRequest(
+                argWhere<ApiRequest> {
+                    it.params?.get("client_secret") == clientSecret
+                }
+            )
+
+            assertEquals("pm_abcdefg", response?.paymentMethodId)
+        }
+
+    @Test
+    fun `attachLinkAccountSessionToSetupIntent attaches LAS to SI`() =
+        runTest {
+            val stripeResponse = StripeResponse(
+                200,
+                """
+                    {
+                        "id": "seti_12345",
+                        "object": "setup_intent",
+                        "cancellation_reason": null,
+                        "client_secret": "seti_abc_secret_def",
+                        "created": 1647000000,
+                        "description": null,
+                        "last_setup_error": null,
+                        "livemode": false,
+                        "next_action": null,
+                        "payment_method": "pm_abcdefg",
+                        "payment_method_options": {
+                            "us_bank_account": {
+                                "verification_method": "instant"
+                            }
+                        },
+                        "payment_method_types": [
+                            "us_bank_account"
+                        ],
+                        "status": "requires_confirmation",
+                        "usage": "off_session"
+                    }
+                """.trimIndent(),
+                emptyMap()
+            )
+            whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+                .thenReturn(stripeResponse)
+
+            val clientSecret = "si_client_secret_123"
+            val response = create().attachLinkAccountSessionToSetupIntent(
+                clientSecret,
+                "si_12345",
+                "las_123456",
+                DEFAULT_OPTIONS
+            )
+
+            verify(stripeNetworkClient).executeRequest(
+                argWhere<ApiRequest> {
+                    it.params?.get("client_secret") == clientSecret
+                }
+            )
+
+            assertEquals("pm_abcdefg", response?.paymentMethodId)
         }
 
     @Test

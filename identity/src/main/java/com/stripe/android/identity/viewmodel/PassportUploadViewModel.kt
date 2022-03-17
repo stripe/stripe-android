@@ -87,7 +87,7 @@ internal class PassportUploadViewModel(
                         context,
                         uri,
                         verificationArgs.verificationSessionId,
-                        true,
+                        false,
                         maxDimension = documentCaptureModels.highResImageMaxDimension,
                         compressionQuality = documentCaptureModels.highResImageCompressionQuality
                     ),

@@ -125,7 +125,9 @@ constructor(
 
     @JvmField val upi: Upi? = null,
 
-    @JvmField val netbanking: Netbanking? = null
+    @JvmField val netbanking: Netbanking? = null,
+
+    internal val usBankAccount: USBankAccount? = null
 ) : StripeModel {
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
@@ -139,6 +141,7 @@ constructor(
             Type.AuBecsDebit -> auBecsDebit != null
             Type.BacsDebit -> bacsDebit != null
             Type.Sofort -> sofort != null
+            Type.USBankAccount -> usBankAccount != null
             else -> true
         }
 
@@ -312,7 +315,7 @@ constructor(
             hasDelayedSettlement = false
         ),
         USBankAccount(
-            "us_bank_account",
+            code = "us_bank_account",
             isReusable = true,
             isVoucher = false,
             requiresMandate = true,
@@ -352,6 +355,7 @@ constructor(
         private var bacsDebit: BacsDebit? = null
         private var sofort: Sofort? = null
         private var netbanking: Netbanking? = null
+        internal var usBankAccount: USBankAccount? = null
         private var upi: Upi? = null
 
         fun setId(id: String?): Builder = apply {
@@ -418,6 +422,10 @@ constructor(
             this.netbanking = netbanking
         }
 
+        internal fun setUSBankAccount(usBankAccount: USBankAccount?): Builder = apply {
+            this.usBankAccount = usBankAccount
+        }
+
         fun setUpi(upi: Upi?): Builder = apply {
             this.upi = upi
         }
@@ -438,7 +446,8 @@ constructor(
                 auBecsDebit = auBecsDebit,
                 bacsDebit = bacsDebit,
                 sofort = sofort,
-                netbanking = netbanking
+                netbanking = netbanking,
+                usBankAccount = usBankAccount
             )
         }
     }
@@ -845,6 +854,96 @@ constructor(
         @JvmField val bank: String?
     ) : TypeData() {
         override val type: Type get() = Type.Netbanking
+    }
+
+    @Parcelize
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    data class USBankAccount internal constructor(
+        /**
+         * Account holder type
+         *
+         * [us_bank_account.account_holder_type](https://stripe.com/docs/api/payment_methods/object#payment_method_object-us_bank_account-account_holder_type)
+         */
+        @JvmField val accountHolderType: USBankAccountHolderType,
+
+        /**
+         * Account type
+         *
+         * [us_bank_account.account_type](https://stripe.com/docs/api/payment_methods/object#payment_method_object-us_bank_account-account_number)
+         */
+        @JvmField val accountType: USBankAccountType,
+
+        /**
+         * The name of the bank
+         *
+         * [us_bank_account.bank_name](https://stripe.com/docs/api/payment_methods/object#payment_method_object-us_bank_account-bank_name)
+         */
+        @JvmField val bankName: String?,
+
+        /**
+         * Uniquely identifies this particular bank account. You can use this attribute to check
+         * whether two bank accounts are the same
+         *
+         * [us_bank_account.fingerprint](https://stripe.com/docs/api/payment_methods/object#payment_method_object-us_bank_account-fingerprint)
+         */
+        @JvmField val fingerprint: String?,
+
+        /**
+         * Last four digits of the bank account number
+         *
+         * [us_bank_account.last4](https://stripe.com/docs/api/payment_methods/object#payment_method_object-us_bank_account-last4)
+         */
+        @JvmField val last4: String?,
+
+        /**
+         * The token of the Linked Account used to create the payment method
+         *
+         * [us_bank_account.linkedAccount](https://stripe.com/docs/api/payment_methods/object#payment_method_object-us_bank_account-linked_account)
+         */
+        @JvmField val linkedAccount: String?,
+
+        /**
+         * Contains information about US bank account networks that can be used
+         *
+         * [us_bank_account.networks](https://stripe.com/docs/api/payment_methods/object#payment_method_object-us_bank_account-networks)
+         */
+        @JvmField val networks: USBankNetworks?,
+
+        /**
+         * Routing number of the bank account
+         *
+         * [us_bank_account.routingNumber](https://stripe.com/docs/api/payment_methods/object#payment_method_object-us_bank_account-routing_number)
+         */
+        @JvmField val routingNumber: String?,
+    ) : TypeData() {
+        override val type: Type get() = Type.USBankAccount
+
+        @Parcelize
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        enum class USBankAccountHolderType(val value: String) : StripeModel {
+            UNKNOWN("unknown"),
+            // Account belongs to an individual
+            INDIVIDUAL("individual"),
+            // Account belongs to a company
+            COMPANY("company")
+        }
+
+        @Parcelize
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        enum class USBankAccountType(val value: String) : StripeModel {
+            UNKNOWN("unknown"),
+            // Bank account type is checking
+            CHECKING("checking"),
+            // Bank account type is savings
+            SAVINGS("savings")
+        }
+
+        @Parcelize
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        data class USBankNetworks(
+            val preferred: String?,
+            val supported: List<String>
+        ) : StripeModel
     }
 
     companion object {

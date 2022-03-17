@@ -318,11 +318,37 @@ internal abstract class AbsFakeStripeRepository : StripeRepository() {
         return null
     }
 
+    override suspend fun logoutConsumer(
+        consumerSessionClientSecret: String,
+        authSessionCookie: String?,
+        requestOptions: ApiRequest.Options
+    ): ConsumerSession? {
+        return null
+    }
+
     override suspend fun listPaymentDetails(
         consumerSessionClientSecret: String,
         paymentMethodTypes: Set<String>,
         requestOptions: ApiRequest.Options
     ): ConsumerPaymentDetails? {
+        return null
+    }
+
+    override suspend fun attachLinkAccountSessionToPaymentIntent(
+        clientSecret: String,
+        paymentIntentId: String,
+        linkAccountSessionId: String,
+        requestOptions: ApiRequest.Options
+    ): PaymentIntent? {
+        return null
+    }
+
+    override suspend fun attachLinkAccountSessionToSetupIntent(
+        clientSecret: String,
+        setupIntentId: String,
+        linkAccountSessionId: String,
+        requestOptions: ApiRequest.Options
+    ): SetupIntent? {
         return null
     }
 

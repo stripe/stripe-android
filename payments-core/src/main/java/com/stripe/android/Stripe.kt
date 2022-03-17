@@ -213,6 +213,7 @@ class Stripe internal constructor(
      * @see <a href="https://pay.weixin.qq.com/index.php/public/wechatpay">WeChat Pay Documentation</a>
      *
      * WeChat Pay API is still in beta, create a [Stripe] instance with [StripeApiBeta.WeChatPayV1] to enable this API.
+     * US Bank Account API is still in beta, create a [Stripe] instance with [StripeApiBeta.USBankAccount] to enable this API.
      *
      * @param confirmPaymentIntentParams [ConfirmPaymentIntentParams] used to confirm the
      * [PaymentIntent]

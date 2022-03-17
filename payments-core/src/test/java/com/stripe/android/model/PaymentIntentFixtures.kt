@@ -1315,6 +1315,86 @@ internal object PaymentIntentFixtures {
     val PI_WITH_AFFIRM_IN_PAYMENT_METHODS =
         PARSER.parse(PI_WITH_AFFIRM_IN_PAYMENT_METHODS_JSON)!!
 
+    val PI_WITH_US_BANK_ACCOUNT_IN_PAYMENT_METHODS_JSON = JSONObject(
+        """
+            {
+              "id": "pi_3KcDp1FnkumiFUFx1d5DwGIq",
+              "object": "payment_intent",
+              "client_secret": "pi_3KcDp1FnkumiFUFx1d5DwGIq_secret_hdutSWBUMuc8ON6jXPgyCsPba",
+              "last_payment_error": null,
+              "livemode": false,
+              "next_action": {
+                "type": "verify_with_microdeposits",
+                "verify_with_microdeposits": {
+                  "arrival_date": 1647241200,
+                  "hosted_verification_url": "https://payments.stripe.com/microdeposit/pacs_test_YWNjdF8xS2J1SjlGbmt1bWlGVUZ4LHBhX25vbmNlX0xJcFVEaERaU0JOVVR3akhxMXc5eklOQkl3UTlwNWo0000v3GS1Jej",
+                  "microdeposit_type": "amounts"
+                }
+              },
+              "status": "requires_action",
+              "amount": 6099,
+              "automatic_payment_methods": null,
+              "canceled_at": null,
+              "cancellation_reason": null,
+              "capture_method": "automatic",
+              "confirmation_method": "automatic",
+              "created": 1647025699,
+              "currency": "usd",
+              "description": "Example PaymentIntent",
+              "payment_method": {
+                "id": "pm_1KcDp2FnkumiFUFxkQjAzVS8",
+                "object": "payment_method",
+                "billing_details": {
+                  "address": {
+                    "city": null,
+                    "country": null,
+                    "line1": null,
+                    "line2": null,
+                    "postal_code": null,
+                    "state": null
+                  },
+                  "email": "johnny@lawrence.com",
+                  "name": "Johnny Lawrence",
+                  "phone": null
+                },
+                "created": 1647025700,
+                "customer": null,
+                "livemode": false,
+                "type": "us_bank_account",
+                "us_bank_account": {
+                  "account_holder_type": "individual",
+                  "account_type": "checking",
+                  "bank_name": "STRIPE TEST BANK",
+                  "fingerprint": "8Rm3lfhEbg8vMEmj",
+                  "last4": "6789",
+                  "networks": {
+                    "preferred": "ach",
+                    "supported": [
+                      "ach"
+                    ]
+                  },
+                  "routing_number": "110000000"
+                }
+              },
+              "payment_method_options": {
+                "us_bank_account": {
+                  "verification_method": "automatic"
+                }
+              },
+              "payment_method_types": [
+                "us_bank_account"
+              ],
+              "processing": null,
+              "receipt_email": null,
+              "setup_future_usage": null,
+              "shipping": null,
+              "source": null
+            }
+        """.trimIndent()
+    )
+
+    val PI_WITH_US_BANK_ACCOUNT_IN_PAYMENT_METHODS = PARSER.parse(PI_WITH_US_BANK_ACCOUNT_IN_PAYMENT_METHODS_JSON)!!
+
     val PI_LINK_ACCOUNT_SESSION_JSON = JSONObject(
         """
             {

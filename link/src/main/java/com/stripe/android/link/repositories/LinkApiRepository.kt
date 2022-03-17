@@ -142,6 +142,32 @@ internal class LinkApiRepository @Inject constructor(
         )
     }
 
+    override suspend fun logout(
+        consumerSessionClientSecret: String,
+        authSessionCookie: String?
+    ): Result<ConsumerSession> = withContext(workContext) {
+        runCatching {
+            stripeRepository.logoutConsumer(
+                consumerSessionClientSecret,
+                authSessionCookie,
+                ApiRequest.Options(
+                    publishableKeyProvider(),
+                    stripeAccountIdProvider()
+                )
+            )
+        }.fold(
+            onSuccess = {
+                it?.let {
+                    Result.success(it)
+                } ?: Result.failure(InternalError("Error logging out"))
+            },
+            onFailure = {
+                logger.error("Error logging out", it)
+                Result.failure(it)
+            }
+        )
+    }
+
     override suspend fun listPaymentDetails(
         consumerSessionClientSecret: String
     ): Result<ConsumerPaymentDetails> = withContext(workContext) {
