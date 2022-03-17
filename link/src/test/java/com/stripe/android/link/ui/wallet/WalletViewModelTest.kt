@@ -23,7 +23,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
-import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.spy
 import org.mockito.kotlin.verify
@@ -70,7 +69,7 @@ class WalletViewModelTest {
 
         createViewModel()
 
-        verify(navigator).navigateTo(eq(LinkScreen.PaymentMethod))
+        verify(navigator).navigateTo(LinkScreen.PaymentMethod, false)
     }
 
     @Test
@@ -88,7 +87,7 @@ class WalletViewModelTest {
 
         viewModel.addNewPaymentMethod()
 
-        verify(navigator).navigateTo(eq(LinkScreen.PaymentMethod))
+        verify(navigator).navigateTo(LinkScreen.PaymentMethod, false)
     }
 
     @Test
