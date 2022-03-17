@@ -1,22 +1,42 @@
 package com.stripe.android.link.model
 
+import androidx.navigation.NavHostController
 import com.stripe.android.link.LinkScreen
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import javax.inject.Inject
 import javax.inject.Singleton
 
+/**
+ * Coordinates the navigation between screens.
+ */
 @Singleton
 internal class Navigator @Inject constructor() {
-    private val _sharedFlow =
-        MutableSharedFlow<LinkScreen>(extraBufferCapacity = 1)
-    val sharedFlow = _sharedFlow.asSharedFlow()
-
+    var navigationController: NavHostController? = null
     var onDismiss = {}
 
-    fun navigateTo(target: LinkScreen) {
-        _sharedFlow.tryEmit(target)
+    /**
+     * Navigates to the given [LinkScreen], optionally clearing the back stack.
+     */
+    fun navigateTo(
+        target: LinkScreen,
+        clearBackStack: Boolean = false
+    ) = navigationController?.let { navController ->
+        navController.navigate(target.route) {
+            if (clearBackStack) {
+                popUpTo(navController.backQueue.first().destination.id)
+            }
+        }
     }
+
+    /**
+     * Behaves like a back button, popping the back stack and dismissing the Activity if this was
+     * the last screen.
+     */
+    fun onBack() =
+        navigationController?.let { navController ->
+            if (!navController.popBackStack()) {
+                onDismiss()
+            }
+        }
 
     fun dismiss() {
         onDismiss()

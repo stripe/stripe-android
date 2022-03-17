@@ -9,6 +9,7 @@ import com.stripe.android.core.BuildConfig
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.Injectable
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
+import com.stripe.android.link.account.CookieStore
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.injection.DaggerLinkViewModelFactoryComponent
 import com.stripe.android.link.injection.NonFallbackInjector
@@ -25,6 +26,7 @@ import javax.inject.Inject
 internal class LinkActivityViewModel @Inject internal constructor(
     args: LinkActivityContract.Args,
     private val linkAccountManager: LinkAccountManager,
+    private val cookieStore: CookieStore,
     val navigator: Navigator
 ) : ViewModel() {
     /**
@@ -34,14 +36,16 @@ internal class LinkActivityViewModel @Inject internal constructor(
      */
     lateinit var injector: NonFallbackInjector
 
-    val startDestination = args.customerEmail?.let {
-        LinkScreen.Loading
-    } ?: LinkScreen.SignUp
+    val startDestination = args.customerEmail?.let { email ->
+        if (cookieStore.isEmailLoggedOut(email)) null else email
+    }?.let {
+        LinkScreen.Loading.route
+    } ?: LinkScreen.SignUp.route
 
     val linkAccount = linkAccountManager.linkAccount
 
     init {
-        if (startDestination == LinkScreen.Loading) {
+        if (startDestination == LinkScreen.Loading.route) {
             // Loading screen is shown only when customer email is not null
             val consumerEmail = requireNotNull(args.customerEmail)
             viewModelScope.launch {
@@ -54,12 +58,13 @@ internal class LinkActivityViewModel @Inject internal constructor(
                                 } else {
                                     LinkScreen.Verification
                                 }
-                            } ?: LinkScreen.SignUp
+                            } ?: LinkScreen.SignUp(consumerEmail)
                         },
                         onFailure = {
-                            LinkScreen.SignUp
+                            LinkScreen.SignUp(consumerEmail)
                         }
-                    )
+                    ),
+                    clearBackStack = true
                 )
             }
         }

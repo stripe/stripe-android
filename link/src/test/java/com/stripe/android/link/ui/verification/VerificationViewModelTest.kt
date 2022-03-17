@@ -46,14 +46,27 @@ class VerificationViewModelTest {
     }
 
     @Test
-    fun `onVerificationCodeEntered succeeds then it navigates to Wallet`() = runTest {
+    fun `When onVerificationCodeEntered succeeds then it navigates to Wallet`() = runTest {
         whenever(linkAccountManager.confirmVerification(any()))
             .thenReturn(Result.success(mock()))
 
         val viewModel = createViewModel()
         viewModel.onVerificationCodeEntered("code")
 
-        verify(navigator).navigateTo(LinkScreen.Wallet)
+        verify(navigator).navigateTo(LinkScreen.Wallet, true)
+    }
+
+    @Test
+    fun `onChangeEmailClicked triggers logout`() = runTest {
+        createViewModel().onChangeEmailClicked()
+        verify(linkAccountManager).logout()
+
+    }
+
+    @Test
+    fun `onBack triggers logout`() = runTest {
+        createViewModel().onBack()
+        verify(linkAccountManager).logout()
     }
 
     @Test

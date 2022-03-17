@@ -1,5 +1,6 @@
 package com.stripe.android.link.account
 
+import java.security.MessageDigest
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -36,7 +37,30 @@ internal class CookieStore @Inject constructor(
      */
     fun getAuthSessionCookie() = store.read(AUTH_SESSION_COOKIE)
 
-    private companion object {
-        const val AUTH_SESSION_COOKIE = "auth_session_cookie"
+    /**
+     * Delete the current authentication session cookie and store the hash of the email so that the
+     * user won't be automatically redirected to the verification screen next time.
+     */
+    fun logout(email: String) {
+        storeLoggedOutEmail(email)
+        store.delete(AUTH_SESSION_COOKIE)
     }
+
+    /**
+     * Check whether this is the most recent logged out email.
+     */
+    fun isEmailLoggedOut(email: String) =
+        store.read(LOGGED_OUT_EMAIL_HASH) == email.sha256()
+
+    private fun storeLoggedOutEmail(email: String) =
+        store.write(LOGGED_OUT_EMAIL_HASH, email.sha256())
+
+    companion object {
+        const val AUTH_SESSION_COOKIE = "auth_session_cookie"
+        const val LOGGED_OUT_EMAIL_HASH = "logged_out_email_hash"
+    }
+
+    private fun String.sha256(): String =
+        MessageDigest.getInstance("SHA-256").digest(toByteArray(Charsets.UTF_8))
+            .joinToString(separator = "") { eachByte -> "%02x".format(eachByte) }
 }

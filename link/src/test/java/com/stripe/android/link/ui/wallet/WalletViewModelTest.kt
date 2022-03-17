@@ -9,6 +9,7 @@ import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.core.injection.Injectable
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.link.LinkScreen
+import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.injection.NonFallbackInjector
 import com.stripe.android.link.injection.SignedInViewModelSubcomponent
 import com.stripe.android.link.model.LinkAccount
@@ -34,6 +35,7 @@ import javax.inject.Provider
 @RunWith(RobolectricTestRunner::class)
 class WalletViewModelTest {
     private lateinit var linkRepository: LinkRepository
+    private val linkAccountManager = mock<LinkAccountManager>()
     private val navigator = mock<Navigator>()
     private val logger = Logger.noop()
     private val linkAccount = mock<LinkAccount>()
@@ -68,7 +70,7 @@ class WalletViewModelTest {
 
         createViewModel()
 
-        verify(navigator).navigateTo(eq(LinkScreen.AddPaymentMethod))
+        verify(navigator).navigateTo(eq(LinkScreen.PaymentMethod))
     }
 
     @Test
@@ -86,7 +88,7 @@ class WalletViewModelTest {
 
         viewModel.addNewPaymentMethod()
 
-        verify(navigator).navigateTo(eq(LinkScreen.AddPaymentMethod))
+        verify(navigator).navigateTo(eq(LinkScreen.PaymentMethod))
     }
 
     @Test
@@ -125,5 +127,6 @@ class WalletViewModelTest {
         WeakMapInjectorRegistry.staticCacheMap.clear()
     }
 
-    private fun createViewModel() = WalletViewModel(linkRepository, navigator, logger, linkAccount)
+    private fun createViewModel() =
+        WalletViewModel(linkRepository, linkAccountManager, navigator, logger, linkAccount)
 }

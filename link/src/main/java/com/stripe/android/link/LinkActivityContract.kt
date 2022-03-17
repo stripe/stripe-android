@@ -29,6 +29,7 @@ class LinkActivityContract :
      * @param merchantName The customer-facing business name.
      * @param customerEmail Email of the customer used to pre-fill the form.
      * @param injectionParams Parameters needed to perform dependency injection.
+     *                        If null, a new dependency graph will be created.
      */
     @Parcelize
     data class Args internal constructor(
