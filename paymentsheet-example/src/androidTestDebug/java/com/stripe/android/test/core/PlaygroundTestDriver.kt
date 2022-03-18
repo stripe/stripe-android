@@ -1,7 +1,6 @@
 package com.stripe.android.test.core
 
 import android.graphics.Bitmap
-import android.util.Log
 import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.test.core.app.ActivityScenario
 import androidx.test.espresso.IdlingPolicies
@@ -147,7 +146,6 @@ class PlaygroundTestDriver(
                 )
             }
             launchPlayground.release()
-            Log.e("MLB", "Playground launch is complete")
         }
 
         launchPlayground.acquire()

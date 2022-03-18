@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet.example.playground.activity
 
 import android.os.Bundle
-import android.util.Log
 import androidx.annotation.NonNull
 import androidx.annotation.Nullable
 import androidx.annotation.VisibleForTesting
@@ -80,11 +79,9 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
     private lateinit var paymentSheet: PaymentSheet
     private lateinit var flowController: PaymentSheet.FlowController
 
-    // This will be null in production
     @Nullable
     private var multiStepUIIdlingResource: CountingIdlingResource? = null
 
-    // This will be null in production
     @Nullable
     private var singleStepUIIdlingResource: CountingIdlingResource? = null
 
@@ -166,7 +163,6 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
         }
 
         disableViews()
-        Log.e("MLB", "Payment Playground activity is loaded")
     }
 
     override fun onResume() {
