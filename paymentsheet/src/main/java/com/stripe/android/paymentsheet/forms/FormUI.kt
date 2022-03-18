@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.forms
 
+import android.content.Context
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -21,6 +22,8 @@ import com.stripe.android.ui.core.elements.AfterpayClearpayElementUI
 import com.stripe.android.ui.core.elements.AfterpayClearpayHeaderElement
 import com.stripe.android.ui.core.elements.AuBecsDebitMandateElementUI
 import com.stripe.android.ui.core.elements.AuBecsDebitMandateTextElement
+import com.stripe.android.ui.core.elements.CardDetailsSectionElement
+import com.stripe.android.ui.core.elements.CardDetailsSectionElementUI
 import com.stripe.android.ui.core.elements.FormElement
 import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
@@ -34,12 +37,13 @@ import kotlinx.coroutines.flow.Flow
 
 @FlowPreview
 @Composable
-internal fun Form(formViewModel: FormViewModel) {
+internal fun Form(formViewModel: FormViewModel, context: Context) {
     FormInternal(
         formViewModel.hiddenIdentifiers,
         formViewModel.enabled,
         formViewModel.elements,
-        formViewModel.lastTextFieldIdentifier
+        formViewModel.lastTextFieldIdentifier,
+        context
     )
 }
 
@@ -48,7 +52,8 @@ internal fun FormInternal(
     hiddenIdentifiersFlow: Flow<List<IdentifierSpec>>,
     enabledFlow: Flow<Boolean>,
     elementsFlow: Flow<List<FormElement>?>,
-    lastTextFieldIdentifierFlow: Flow<IdentifierSpec?>
+    lastTextFieldIdentifierFlow: Flow<IdentifierSpec?>,
+    context: Context
 ) {
     val hiddenIdentifiers by hiddenIdentifiersFlow.collectAsState(emptyList())
     val enabled by enabledFlow.collectAsState(true)
@@ -77,6 +82,9 @@ internal fun FormInternal(
                         )
                         is AuBecsDebitMandateTextElement -> AuBecsDebitMandateElementUI(element)
                         is AffirmHeaderElement -> AffirmElementUI()
+                        is CardDetailsSectionElement -> CardDetailsSectionElementUI(
+                            enabled, hiddenIdentifiers, context
+                        )
                     }
                 }
             }

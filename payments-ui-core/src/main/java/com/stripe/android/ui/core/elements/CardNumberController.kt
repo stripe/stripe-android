@@ -12,6 +12,7 @@ import com.stripe.android.cards.DefaultStaticCardAccountRanges
 import com.stripe.android.cards.StaticCardAccountRanges
 import com.stripe.android.model.AccountRange
 import com.stripe.android.model.CardBrand
+import com.stripe.android.stripecardscan.cardscan.CardScanSheetResult
 import com.stripe.android.ui.core.forms.FormFieldEntry
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -130,5 +131,11 @@ internal class CardNumberController constructor(
 
     override fun onFocusChange(newHasFocus: Boolean) {
         _hasFocus.value = newHasFocus
+    }
+
+    internal fun onCardScanResult(cardScanSheetResult: CardScanSheetResult) {
+        if (cardScanSheetResult is CardScanSheetResult.Completed) {
+            onRawValueChange(cardScanSheetResult.scannedCard.pan)
+        }
     }
 }

@@ -49,12 +49,28 @@
         android:src="@drawable/stripe_paymentsheet_close_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="16dp"
         android:layout_marginStart="8dp"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/view_finder_window"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toStartOf="@id/view_finder_window"/>
+
+    <TextView
+        android:id="@+id/title"
+        android:text="@string/stripe_card_scan_title"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:textSize="14sp"
+        android:typeface="normal"
+        android:gravity="center"
+        android:textColor="@color/stripeInstructionsColorDark"
+        android:layout_marginBottom="16dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        app:layout_constraintBottom_toTopOf="@id/view_finder_window"
+        app:layout_constraintStart_toStartOf="@id/view_finder_window"
+        app:layout_constraintEnd_toEndOf="@id/view_finder_window" />
 
     <TextView
         android:id="@+id/instructions"
