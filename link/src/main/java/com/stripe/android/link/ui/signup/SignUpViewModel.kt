@@ -9,6 +9,7 @@ import com.stripe.android.link.LinkScreen
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.injection.NonFallbackInjectable
 import com.stripe.android.link.injection.NonFallbackInjector
+import com.stripe.android.link.injection.SignUpViewModelSubcomponent
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.model.Navigator
 import com.stripe.android.ui.core.elements.EmailSpec
@@ -23,19 +24,22 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import javax.inject.Named
+import javax.inject.Provider
 
 /**
  * ViewModel that handles user sign up logic.
  */
 internal class SignUpViewModel @Inject constructor(
     args: LinkActivityContract.Args,
+    @Named(PREFILLED_EMAIL) private val prefilledEmail: String?,
     private val linkAccountManager: LinkAccountManager,
     private val navigator: Navigator,
     private val logger: Logger
 ) : ViewModel() {
     val merchantName: String = args.merchantName
 
-    val emailElement: SectionFieldElement = EmailSpec.transform(args.customerEmail)
+    val emailElement: SectionFieldElement = EmailSpec.transform(prefilledEmail)
 
     /**
      * Emits the email entered in the form if valid, null otherwise.
@@ -45,23 +49,23 @@ internal class SignUpViewModel @Inject constructor(
             // formFieldsList contains only one element, for the email. Take the second value of
             // the pair, which is the FormFieldEntry containing the value entered by the user.
             formFieldsList.firstOrNull()?.second?.takeIf { it.isComplete }?.value
-        }.stateIn(viewModelScope, SharingStarted.Lazily, args.customerEmail)
+        }.stateIn(viewModelScope, SharingStarted.Lazily, prefilledEmail)
 
     private val _signUpStatus = MutableStateFlow(SignUpState.InputtingEmail)
     val signUpState: StateFlow<SignUpState> = _signUpStatus
 
     /**
-     * Holds a Job that looks up the email after a delay, so that we can cancel it if the user is
-     * still typing.
+     * Holds a Job that looks up the email after a delay, so that we can cancel it if the user
+     * continues typing.
      */
     private var lookupJob: Job? = null
 
     init {
         viewModelScope.launch {
             consumerEmail.collect { email ->
-                // The first emitted value is the one provided in the arguments, and shouldn't
-                // trigger a lookup because it was already done on the loading screen.
-                if (email == args.customerEmail && lookupJob == null) {
+                // The first emitted value is the one provided in the constructor arguments, and
+                // shouldn't trigger a lookup.
+                if (email == prefilledEmail && lookupJob == null) {
                     // If it's a valid email, collect phone number
                     if (email != null) {
                         _signUpStatus.value = SignUpState.InputtingPhone
@@ -114,13 +118,14 @@ internal class SignUpViewModel @Inject constructor(
     }
 
     private fun onAccountFetched(linkAccount: LinkAccount) {
-        navigator.navigateTo(
-            if (linkAccount.isVerified) {
-                LinkScreen.Wallet
-            } else {
-                LinkScreen.Verification
-            }
-        )
+        if (linkAccount.isVerified) {
+            navigator.navigateTo(LinkScreen.Wallet, clearBackStack = true)
+        } else {
+            navigator.navigateTo(LinkScreen.Verification)
+            // The sign up screen stays in the back stack.
+            // Clean up the state in case the user comes back.
+            emailElement.setRawValue(mapOf(EmailSpec.identifier to ""))
+        }
     }
 
     private fun onError(error: Throwable) {
@@ -129,21 +134,27 @@ internal class SignUpViewModel @Inject constructor(
     }
 
     internal class Factory(
-        private val injector: NonFallbackInjector
+        private val injector: NonFallbackInjector,
+        private val email: String?
     ) : ViewModelProvider.Factory, NonFallbackInjectable {
 
         @Inject
-        lateinit var viewModel: SignUpViewModel
+        lateinit var subComponentBuilderProvider:
+            Provider<SignUpViewModelSubcomponent.Builder>
 
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
             injector.inject(this)
-            return viewModel as T
+            return subComponentBuilderProvider.get()
+                .prefilledEmail(email)
+                .build().signUpViewModel as T
         }
     }
 
     companion object {
         // How long to wait (in milliseconds) before triggering a call to lookup the email
         const val LOOKUP_DEBOUNCE_MS = 700L
+
+        const val PREFILLED_EMAIL = "prefilled_email"
     }
 }

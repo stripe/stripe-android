@@ -10,7 +10,9 @@
     <string name="sign_up">Join Link</string>
 
     <string name="verification_header">Enter your verification code</string>
-    <string name="verification_message">Enter the code sent to %1$s to securely use your saved information.</string>
+    <string name="verification_message">Enter the code sent to %1$s to use Link to pay by default.</string>
+    <string name="verification_not_email">Not %1$s?</string>
+    <string name="verification_change_email">Change email</string>
     <string name="verification_resend">Resend code</string>
 
     <string name="wallet_pay_with">Pay with</string>
