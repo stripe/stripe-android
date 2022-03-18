@@ -27,15 +27,29 @@ class BsbConfig(private val Banks: List<BecsDebitBanks.Bank>) : TextFieldConfig 
     // Displays the BSB number in 2 groups of 3 characters with a dash added between them
     override val visualTransformation: VisualTransformation = VisualTransformation { text ->
         val output = StringBuilder()
+        val separator = " - "
         text.text.forEachIndexed { i, char ->
             output.append(char)
-            if (i == 2) output.append("-")
+            if (i == 2) output.append(separator)
         }
         TransformedText(
             AnnotatedString(output.toString()),
             object : OffsetMapping {
-                override fun originalToTransformed(offset: Int) = offset + offset / 4
-                override fun transformedToOriginal(offset: Int) = offset - offset / 5
+                override fun originalToTransformed(offset: Int): Int {
+                    return if (offset <= 2) {
+                        offset
+                    } else {
+                        offset + separator.length
+                    }
+                }
+
+                override fun transformedToOriginal(offset: Int): Int {
+                    return if (offset <= 3) {
+                        offset
+                    } else {
+                        offset - separator.length
+                    }
+                }
             }
         )
     }

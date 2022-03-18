@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.paymentdatacollection
 
 import android.os.Bundle
+import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -57,6 +58,8 @@ internal class ComposeFormDataCollectionFragment : Fragment() {
             ViewGroup.LayoutParams.MATCH_PARENT,
             ViewGroup.LayoutParams.MATCH_PARENT
         )
+
+        setPadding(0, 18, 0, 0)
 
         setContent {
             PaymentsTheme {
