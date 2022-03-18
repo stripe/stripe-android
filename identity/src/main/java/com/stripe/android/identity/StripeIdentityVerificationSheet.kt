@@ -39,7 +39,7 @@ internal class StripeIdentityVerificationSheet private constructor(
             IdentityVerificationSheetContract.Args(
                 verificationSessionId,
                 ephemeralKeySecret,
-                configuration.merchantLogo
+                configuration.brandLogo
             )
         )
     }

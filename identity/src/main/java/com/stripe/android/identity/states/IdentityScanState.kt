@@ -43,7 +43,7 @@ internal sealed class IdentityScanState(val type: ScanType, isFinal: Boolean) : 
             if (analyzerOutput.category.matchesScanType(type)) {
                 Log.d(
                     TAG,
-                    "Matching model output detected with score ${analyzerOutput.score}, " +
+                    "Matching model output detected with score ${analyzerOutput.resultScore}, " +
                         "transition to Found."
                 )
                 Found(type)

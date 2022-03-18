@@ -2,33 +2,47 @@ package com.stripe.android.identity.navigation
 
 import android.content.Context
 import android.view.View
+import android.widget.Button
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.Navigation
 import androidx.navigation.testing.TestNavHostController
 import androidx.test.core.app.ApplicationProvider
+import com.google.android.material.button.MaterialButton
+import com.google.android.material.progressindicator.CircularProgressIndicator
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.camera.CameraPermissionEnsureable
+import com.stripe.android.core.model.InternalStripeFile
 import com.stripe.android.identity.R
 import com.stripe.android.identity.camera.IDDetectorAggregator
 import com.stripe.android.identity.camera.IdentityScanFlow
-import com.stripe.android.identity.databinding.DriverLicenseScanFragmentBinding
+import com.stripe.android.identity.databinding.IdentityCameraScanFragmentBinding
 import com.stripe.android.identity.networking.Resource
+import com.stripe.android.identity.networking.models.ClearDataParam
+import com.stripe.android.identity.networking.models.CollectedDataParam
+import com.stripe.android.identity.networking.models.IdDocumentParam
+import com.stripe.android.identity.networking.models.VerificationPage
+import com.stripe.android.identity.networking.models.VerificationPageStaticContentDocumentCapturePage
 import com.stripe.android.identity.states.IdentityScanState
+import com.stripe.android.identity.utils.PairMediatorLiveData
 import com.stripe.android.identity.viewModelFactoryFor
-import com.stripe.android.identity.viewmodel.CameraViewModel
+import com.stripe.android.identity.viewmodel.IdentityScanViewModel
+import com.stripe.android.identity.viewmodel.IdentityScanViewModel.UploadedResult
 import com.stripe.android.identity.viewmodel.IdentityViewModel
+import kotlinx.coroutines.runBlocking
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestRule
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
+import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.same
+import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
@@ -36,35 +50,28 @@ import java.io.File
 
 @RunWith(RobolectricTestRunner::class)
 internal class DriverLicenseScanFragmentTest {
-    // Ensure livedata works properly
     @get:Rule
     var rule: TestRule = InstantTaskExecutorRule()
 
     private val finalResultLiveData = MutableLiveData<IDDetectorAggregator.FinalResult>()
     private val displayStateChanged = MutableLiveData<Pair<IdentityScanState, IdentityScanState?>>()
+    private val mockBothUploaded: PairMediatorLiveData<Pair<UploadedResult, UploadedResult>> =
+        mock()
+    private val bothUploadedObserverCaptor =
+        argumentCaptor<Observer<Resource<Pair<
+                        Pair<UploadedResult, UploadedResult>, Pair<UploadedResult, UploadedResult>
+                        >>>>()
+
     private val mockScanFlow = mock<IdentityScanFlow>()
-    private val mockCameraPermissionEnsurable = mock<CameraPermissionEnsureable>()
-    private val mockCameraViewModel = mock<CameraViewModel>().also {
+    private val mockIdentityScanViewModel = mock<IdentityScanViewModel>().also {
         whenever(it.identityScanFlow).thenReturn(mockScanFlow)
         whenever(it.finalResult).thenReturn(finalResultLiveData)
         whenever(it.displayStateChanged).thenReturn(displayStateChanged)
+        whenever(it.bothUploaded).thenReturn(mockBothUploaded)
     }
     private val idDetectorModelFile = MutableLiveData<Resource<File>>()
     private val mockIdentityViewModel = mock<IdentityViewModel>().also {
         whenever(it.idDetectorModelFile).thenReturn(idDetectorModelFile)
-    }
-
-    private val testCameraPermissionEnsureable = object : CameraPermissionEnsureable {
-        lateinit var onCameraReady: () -> Unit
-        lateinit var onUserDeniedCameraPermission: () -> Unit
-
-        override fun ensureCameraPermission(
-            onCameraReady: () -> Unit,
-            onUserDeniedCameraPermission: () -> Unit
-        ) {
-            this.onCameraReady = onCameraReady
-            this.onUserDeniedCameraPermission = onUserDeniedCameraPermission
-        }
     }
 
     @Before
@@ -73,45 +80,24 @@ internal class DriverLicenseScanFragmentTest {
     }
 
     @Test
-    fun `when created camera permission is requested`() {
-        launchDriverLicenseFragment(mockCameraPermissionEnsurable)
-
-        verify(mockCameraPermissionEnsurable).ensureCameraPermission(any(), any())
-    }
-
-    @Test
-    fun `when camera permission granted cameraAdapter is bound and identityScanFlow is started`() {
-        launchDriverLicenseFragment(testCameraPermissionEnsureable).onFragment {
-            testCameraPermissionEnsureable.onCameraReady()
-            assertThat(it.cameraAdapter.isBoundToLifecycle()).isTrue()
-            verify(mockScanFlow).startFlow(
-                same(it.requireContext()),
-                any(),
-                any(),
-                same(it.viewLifecycleOwner),
-                same(it.lifecycleScope),
-                eq(IdentityScanState.ScanType.DL_FRONT)
-            )
-        }
-    }
-
-    @Test
-    fun `when front is scanned clicking button triggers back scan`() {
-        launchDriverLicenseFragment(testCameraPermissionEnsureable).onFragment {
-            testCameraPermissionEnsureable.onCameraReady()
+    fun `when front is scanned file is uploaded and clicking button triggers back scan`() {
+        launchDriverLicenseFragment().onFragment {
             // mock success of front scan
-            finalResultLiveData.postValue(mock())
+            val mockFrontFinalResult = mock<IDDetectorAggregator.FinalResult>()
+            finalResultLiveData.postValue(mockFrontFinalResult)
+            verifyUploadedWithFinalResult(mockFrontFinalResult, it.requireContext())
 
             // stopScanning() is called
             verify(mockScanFlow).resetFlow()
             assertThat(it.cameraAdapter.isBoundToLifecycle()).isFalse()
 
             // mock viewModel target change
-            whenever(mockCameraViewModel.targetScanType)
+            whenever(mockIdentityScanViewModel.targetScanType)
                 .thenReturn(IdentityScanState.ScanType.DL_FRONT)
 
             // button clicked
-            DriverLicenseScanFragmentBinding.bind(it.requireView()).kontinue.callOnClick()
+            IdentityCameraScanFragmentBinding.bind(it.requireView()).kontinue
+                .findViewById<Button>(R.id.button).callOnClick()
 
             // verify start to scan back
             assertThat(it.cameraAdapter.isBoundToLifecycle()).isTrue()
@@ -127,80 +113,73 @@ internal class DriverLicenseScanFragmentTest {
     }
 
     @Test
-    fun `when both sides are scanned clicking button triggers navigation`() {
-        launchDriverLicenseFragment(testCameraPermissionEnsureable).onFragment {
-            val navController = TestNavHostController(
-                ApplicationProvider.getApplicationContext()
-            )
-            navController.setGraph(
-                R.navigation.identity_nav_graph
-            )
-            navController.setCurrentDestination(R.id.driverLicenseScanFragment)
-            Navigation.setViewNavController(
-                it.requireView(),
-                navController
-            )
+    fun `when both sides are scanned and files uploaded succeeded, clicking button triggers navigation`() {
+        simulateBothSidesScanned { _, _ ->
+            runBlocking {
+                // mock bothUploaded success
+                bothUploadedObserverCaptor.firstValue.onChanged(
+                    Resource.success(
+                        Pair(
+                            Pair(FRONT_HIGH_RES_RESULT, FRONT_LOW_RES_RESULT),
+                            Pair(BACK_HIGH_RES_RESULT, BACK_LOW_RES_RESULT),
+                        )
+                    )
+                )
 
-            // scan front
-            testCameraPermissionEnsureable.onCameraReady()
-
-            // mock success of front scan
-            finalResultLiveData.postValue(mock())
-
-            // mock viewModel target change
-            whenever(mockCameraViewModel.targetScanType)
-                .thenReturn(IdentityScanState.ScanType.DL_FRONT)
-
-            // click continue, scan back
-            val binding = DriverLicenseScanFragmentBinding.bind(it.requireView())
-            binding.kontinue.callOnClick()
-
-            // mock success of back scan
-            finalResultLiveData.postValue(mock())
-
-            // mock viewModel target change
-            whenever(mockCameraViewModel.targetScanType)
-                .thenReturn(IdentityScanState.ScanType.DL_BACK)
-
-            // click continue, navigates
-            binding.kontinue.callOnClick()
-            assertThat(navController.currentDestination?.id)
-                .isEqualTo(R.id.confirmationFragment)
+                // verify navigation attempts
+                verify(mockIdentityViewModel).postVerificationPageData(
+                    eq(
+                        CollectedDataParam.createFromUploadedResultsForAutoCapture(
+                            type = IdDocumentParam.Type.DRIVINGLICENSE,
+                            frontHighResResult = FRONT_HIGH_RES_RESULT,
+                            frontLowResResult = FRONT_LOW_RES_RESULT,
+                            backHighResResult = BACK_HIGH_RES_RESULT,
+                            backLowResResult = BACK_LOW_RES_RESULT,
+                        )
+                    ),
+                    eq(
+                        ClearDataParam.UPLOAD_TO_CONFIRM
+                    )
+                )
+            }
         }
     }
 
     @Test
-    fun `when camera permission denied navigates to permission denied`() {
-        launchDriverLicenseFragment(testCameraPermissionEnsureable).onFragment {
-            val navController = TestNavHostController(
-                ApplicationProvider.getApplicationContext()
-            )
-            navController.setGraph(R.navigation.identity_nav_graph)
-
-            Navigation.setViewNavController(
-                it.requireView(),
-                navController
+    fun `when both sides are scanned but files uploaded failed, clicking button navigate to error`() {
+        simulateBothSidesScanned { navController, _ ->
+            // mock bothUploaded error
+            bothUploadedObserverCaptor.firstValue.onChanged(
+                Resource.error()
             )
 
-            testCameraPermissionEnsureable.onUserDeniedCameraPermission()
-
-            assertThat(it.cameraAdapter.isBoundToLifecycle()).isFalse()
             assertThat(navController.currentDestination?.id)
-                .isEqualTo(R.id.cameraPermissionDeniedFragment)
+                .isEqualTo(R.id.errorFragment)
+        }
+    }
+
+    @Test
+    fun `when both sides are scanned and files are being uploaded, clicking button toggles loading state`() {
+        simulateBothSidesScanned { _, binding ->
+            // mock bothUploaded loading
+            bothUploadedObserverCaptor.firstValue.onChanged(
+                Resource.loading()
+            )
 
             assertThat(
-                navController.backStack.last()
-                    .arguments!![CameraPermissionDeniedFragment.ARG_SCAN_TYPE]
+                binding.kontinue.findViewById<MaterialButton>(R.id.button).isEnabled
+            ).isFalse()
+            assertThat(
+                binding.kontinue.findViewById<CircularProgressIndicator>(R.id.indicator).visibility
             ).isEqualTo(
-                IdentityScanState.ScanType.DL_FRONT
+                View.VISIBLE
             )
         }
     }
 
     @Test
     fun `when final result is received scanFlow is reset and cameraAdapter is unbound`() {
-        launchDriverLicenseFragment(testCameraPermissionEnsureable).onFragment {
-            testCameraPermissionEnsureable.onCameraReady()
+        launchDriverLicenseFragment().onFragment {
             assertThat(it.cameraAdapter.isBoundToLifecycle()).isTrue()
 
             finalResultLiveData.postValue(mock())
@@ -212,7 +191,7 @@ internal class DriverLicenseScanFragmentTest {
 
     @Test
     fun `when displayStateChanged to Initial UI is properly updated for DL_FRONT`() {
-        whenever(mockCameraViewModel.targetScanType).thenReturn(IdentityScanState.ScanType.DL_FRONT)
+        whenever(mockIdentityScanViewModel.targetScanType).thenReturn(IdentityScanState.ScanType.DL_FRONT)
         postDisplayStateChangedDataAndVerifyUI(mock<IdentityScanState.Initial>()) { binding, context ->
             assertThat(binding.cameraView.viewFinderBackgroundView.visibility)
                 .isEqualTo(View.VISIBLE)
@@ -233,7 +212,7 @@ internal class DriverLicenseScanFragmentTest {
 
     @Test
     fun `when displayStateChanged to Initial UI is properly updated for DL_BACK`() {
-        whenever(mockCameraViewModel.targetScanType).thenReturn(IdentityScanState.ScanType.DL_BACK)
+        whenever(mockIdentityScanViewModel.targetScanType).thenReturn(IdentityScanState.ScanType.DL_BACK)
         postDisplayStateChangedDataAndVerifyUI(mock<IdentityScanState.Initial>()) { binding, context ->
             assertThat(binding.cameraView.viewFinderBackgroundView.visibility)
                 .isEqualTo(View.VISIBLE)
@@ -271,7 +250,7 @@ internal class DriverLicenseScanFragmentTest {
 
     @Test
     fun `when displayStateChanged to Unsatisfied UI is properly updated for DL_FRONT`() {
-        whenever(mockCameraViewModel.targetScanType).thenReturn(IdentityScanState.ScanType.DL_FRONT)
+        whenever(mockIdentityScanViewModel.targetScanType).thenReturn(IdentityScanState.ScanType.DL_FRONT)
         postDisplayStateChangedDataAndVerifyUI(mock<IdentityScanState.Unsatisfied>()) { binding, context ->
             assertThat(binding.cameraView.viewFinderBackgroundView.visibility)
                 .isEqualTo(View.VISIBLE)
@@ -289,7 +268,7 @@ internal class DriverLicenseScanFragmentTest {
 
     @Test
     fun `when displayStateChanged to Unsatisfied UI is properly updated for DL_BACK`() {
-        whenever(mockCameraViewModel.targetScanType).thenReturn(IdentityScanState.ScanType.DL_BACK)
+        whenever(mockIdentityScanViewModel.targetScanType).thenReturn(IdentityScanState.ScanType.DL_BACK)
         postDisplayStateChangedDataAndVerifyUI(mock<IdentityScanState.Unsatisfied>()) { binding, context ->
             assertThat(binding.cameraView.viewFinderBackgroundView.visibility)
                 .isEqualTo(View.VISIBLE)
@@ -339,27 +318,118 @@ internal class DriverLicenseScanFragmentTest {
         }
     }
 
-    private fun launchDriverLicenseFragment(
-        cameraPermissionEnsureable: CameraPermissionEnsureable
-    ) = launchFragmentInContainer(
+    private fun verifyUploadedWithFinalResult(
+        finalResult: IDDetectorAggregator.FinalResult,
+        context: Context,
+        time: Int = 1
+    ) {
+        val successCaptor = argumentCaptor<(VerificationPage) -> Unit>()
+        verify(mockIdentityViewModel, times(time)).observeForVerificationPage(
+            any(),
+            successCaptor.capture(),
+            any()
+        )
+
+        val mockDocumentCapturePage = mock<VerificationPageStaticContentDocumentCapturePage>()
+        val mockVerificationPage = mock<VerificationPage>().also { verificationPage ->
+            whenever(verificationPage.documentCapture).thenReturn(mockDocumentCapturePage)
+        }
+        successCaptor.lastValue.invoke(mockVerificationPage)
+        verify(mockIdentityScanViewModel).uploadResult(
+            same(finalResult),
+            eq(context),
+            same(mockDocumentCapturePage)
+        )
+    }
+
+    private fun simulateBothSidesScanned(afterScannedBlock: (TestNavHostController, IdentityCameraScanFragmentBinding) -> Unit) {
+        launchDriverLicenseFragment().onFragment {
+            val navController = TestNavHostController(
+                ApplicationProvider.getApplicationContext()
+            )
+            navController.setGraph(
+                R.navigation.identity_nav_graph
+            )
+            navController.setCurrentDestination(R.id.driverLicenseScanFragment)
+            Navigation.setViewNavController(
+                it.requireView(),
+                navController
+            )
+            // scan front
+            // mock success of front scan
+            val mockFrontFinalResult = mock<IDDetectorAggregator.FinalResult>()
+            finalResultLiveData.postValue(mockFrontFinalResult)
+            verifyUploadedWithFinalResult(mockFrontFinalResult, it.requireContext())
+
+            // mock viewModel target change
+            whenever(mockIdentityScanViewModel.targetScanType)
+                .thenReturn(IdentityScanState.ScanType.DL_FRONT)
+
+            // click continue, scan back
+            val binding = IdentityCameraScanFragmentBinding.bind(it.requireView())
+            binding.kontinue.findViewById<Button>(R.id.button).callOnClick()
+
+            // mock success of back scan
+            val mockBackFinalResult = mock<IDDetectorAggregator.FinalResult>()
+            finalResultLiveData.postValue(mockBackFinalResult)
+            verifyUploadedWithFinalResult(mockBackFinalResult, it.requireContext(), 2)
+
+            // mock viewModel target change
+            whenever(mockIdentityScanViewModel.targetScanType)
+                .thenReturn(IdentityScanState.ScanType.DL_BACK)
+
+            // click continue, navigates
+            binding.kontinue.findViewById<Button>(R.id.button).callOnClick()
+
+            verify(mockBothUploaded).observe(any(), bothUploadedObserverCaptor.capture())
+
+            afterScannedBlock(navController, binding)
+        }
+    }
+
+    private fun launchDriverLicenseFragment() = launchFragmentInContainer(
         themeResId = R.style.Theme_MaterialComponents
     ) {
         DriverLicenseScanFragment(
-            cameraPermissionEnsureable,
-            viewModelFactoryFor(mockCameraViewModel),
+            viewModelFactoryFor(mockIdentityScanViewModel),
             viewModelFactoryFor(mockIdentityViewModel)
         )
     }
 
     private fun postDisplayStateChangedDataAndVerifyUI(
         newScanState: IdentityScanState,
-        check: (binding: DriverLicenseScanFragmentBinding, context: Context) -> Unit
+        check: (binding: IdentityCameraScanFragmentBinding, context: Context) -> Unit
     ) {
-        launchDriverLicenseFragment(
-            mockCameraPermissionEnsurable
-        ).onFragment {
+        launchDriverLicenseFragment().onFragment {
             displayStateChanged.postValue((newScanState to mock()))
-            check(DriverLicenseScanFragmentBinding.bind(it.requireView()), it.requireContext())
+            check(IdentityCameraScanFragmentBinding.bind(it.requireView()), it.requireContext())
         }
+    }
+
+    private companion object {
+        val FRONT_HIGH_RES_RESULT = UploadedResult(
+            uploadedStripeFile = InternalStripeFile(
+                id = "frontHighResResult"
+            ),
+            scores = listOf(0.1f, 0.2f, 0.3f, 0.4f, 0.5f)
+        )
+        val FRONT_LOW_RES_RESULT = UploadedResult(
+            uploadedStripeFile = InternalStripeFile(
+                id = "frontLowResResult"
+            ),
+            scores = listOf(0.1f, 0.2f, 0.3f, 0.4f, 0.5f)
+        )
+        val BACK_HIGH_RES_RESULT = UploadedResult(
+            uploadedStripeFile = InternalStripeFile(
+                id = "backHighResResult"
+            ),
+            scores = listOf(0.1f, 0.2f, 0.3f, 0.4f, 0.5f)
+        )
+        val BACK_LOW_RES_RESULT = UploadedResult(
+            uploadedStripeFile = InternalStripeFile(
+                id = "frontHighResResult"
+            ),
+            scores = listOf(0.1f, 0.2f, 0.3f, 0.4f, 0.5f)
+        )
     }
 }
