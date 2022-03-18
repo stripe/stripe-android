@@ -5,6 +5,13 @@ public final class com/stripe/android/ui/core/BuildConfig {
 	public fun <init> ()V
 }
 
+public final class com/stripe/android/ui/core/CurrencyFormatter$Companion {
+	public final fun format (JLjava/lang/String;Ljava/util/Locale;)Ljava/lang/String;
+	public final fun format (JLjava/util/Currency;Ljava/util/Locale;)Ljava/lang/String;
+	public static synthetic fun format$default (Lcom/stripe/android/ui/core/CurrencyFormatter$Companion;JLjava/lang/String;Ljava/util/Locale;ILjava/lang/Object;)Ljava/lang/String;
+	public static synthetic fun format$default (Lcom/stripe/android/ui/core/CurrencyFormatter$Companion;JLjava/util/Currency;Ljava/util/Locale;ILjava/lang/Object;)Ljava/lang/String;
+}
+
 public final class com/stripe/android/ui/core/PaymentsThemeKt {
 }
 
