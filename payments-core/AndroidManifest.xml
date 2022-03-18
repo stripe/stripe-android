@@ -82,7 +82,7 @@
             android:theme="@style/PayLauncherDefaultTheme"
             android:exported="false" />
         <activity
-            android:name=".payments.bankaccount.CollectBankAccountActivity"
+            android:name=".payments.bankaccount.ui.CollectBankAccountActivity"
             android:theme="@style/StripeTransparentTheme"
             android:exported="false" />
     </application>

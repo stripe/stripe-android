@@ -1,4 +1,4 @@
-package com.stripe.android.payments.bankaccount
+package com.stripe.android.payments.bankaccount.ui
 
 import android.app.Activity
 import android.content.Intent
@@ -7,12 +7,14 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
-import com.stripe.android.payments.bankaccount.CollectBankAccountResult.Completed
-import com.stripe.android.payments.bankaccount.CollectBankAccountResult.Failed
-import com.stripe.android.payments.bankaccount.CollectBankAccountViewEffect.FinishWithError
-import com.stripe.android.payments.bankaccount.CollectBankAccountViewEffect.FinishWithPaymentIntent
-import com.stripe.android.payments.bankaccount.CollectBankAccountViewEffect.FinishWithSetupIntent
-import com.stripe.android.payments.bankaccount.CollectBankAccountViewEffect.OpenConnectionsFlow
+import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountContract
+import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResult
+import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResult.Completed
+import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResult.Failed
+import com.stripe.android.payments.bankaccount.ui.CollectBankAccountViewEffect.FinishWithError
+import com.stripe.android.payments.bankaccount.ui.CollectBankAccountViewEffect.FinishWithPaymentIntent
+import com.stripe.android.payments.bankaccount.ui.CollectBankAccountViewEffect.FinishWithSetupIntent
+import com.stripe.android.payments.bankaccount.ui.CollectBankAccountViewEffect.OpenConnectionsFlow
 
 /**
  * No-UI activity that will handle collect bank account logic.

@@ -30,12 +30,20 @@ class AffirmPaymentActivity : StripeIntentActivity() {
             this,
             object : ApiResultCallback<CollectBankAccountForPaymentResponse> {
                 override fun onSuccess(result: CollectBankAccountForPaymentResponse) {
-                    Toast.makeText(this@AffirmPaymentActivity, result.toString(), Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        this@AffirmPaymentActivity,
+                        result.toString(),
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
 
                 override fun onError(e: Exception) {
                     Log.e("error", "error", e)
-                    Toast.makeText(this@AffirmPaymentActivity, e.toString(), Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        this@AffirmPaymentActivity,
+                        e.toString(),
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
             }
         )

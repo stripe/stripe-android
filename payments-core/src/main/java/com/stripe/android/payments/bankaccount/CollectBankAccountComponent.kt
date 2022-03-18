@@ -4,6 +4,8 @@ import android.app.Application
 import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.core.injection.LoggingModule
 import com.stripe.android.payments.CollectBankAccountModule
+import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountContract
+import com.stripe.android.payments.bankaccount.ui.CollectBankAccountViewModel
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import dagger.BindsInstance
 import dagger.Component

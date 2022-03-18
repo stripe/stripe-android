@@ -5,7 +5,7 @@ import android.content.Context
 import com.stripe.android.BuildConfig
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
-import com.stripe.android.payments.bankaccount.CollectBankAccountContract
+import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountContract
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import dagger.Module
 import dagger.Provides

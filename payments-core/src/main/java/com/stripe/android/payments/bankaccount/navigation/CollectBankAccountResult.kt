@@ -1,4 +1,4 @@
-package com.stripe.android.payments.bankaccount
+package com.stripe.android.payments.bankaccount.navigation
 
 import android.os.Parcelable
 import com.stripe.android.model.StripeIntent
