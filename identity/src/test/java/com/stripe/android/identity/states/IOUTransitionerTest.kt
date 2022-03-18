@@ -17,10 +17,12 @@ internal class IOUTransitionerTest {
     fun `transitions to Unsatisfied when no match`() {
         val transitioner = IOUTransitioner()
 
-        val resultState = transitioner.transition(mock<IdentityScanState.Found>().also {
-            whenever(it.type).thenReturn(ScanType.ID_BACK)
-        }, INITIAL_ID_FRONT_OUTPUT)
-
+        val resultState = transitioner.transition(
+            mock<IdentityScanState.Found>().also {
+                whenever(it.type).thenReturn(ScanType.ID_BACK)
+            },
+            INITIAL_ID_FRONT_OUTPUT
+        )
 
         assertThat(resultState).isInstanceOf(IdentityScanState.Unsatisfied::class.java)
         assertThat((resultState as IdentityScanState.Unsatisfied).reason).isEqualTo(
@@ -93,13 +95,11 @@ internal class IOUTransitionerTest {
             createAnalyzerOutputWithHighIOU(result)
         )
 
-
         assertThat(resultState).isInstanceOf(IdentityScanState.Satisfied::class.java)
         assertThat((resultState as IdentityScanState.Satisfied).type).isEqualTo(
             ScanType.ID_FRONT
         )
     }
-
 
     @Test
     fun `transitions to Found when moreResultsRequired and Unsatisfied when IOU check fails before hitsRequired is met`() {
@@ -127,7 +127,6 @@ internal class IOUTransitionerTest {
             mockFoundState,
             createAnalyzerOutputWithLowIOU(result)
         )
-
 
         assertThat(resultState).isInstanceOf(IdentityScanState.Unsatisfied::class.java)
         assertThat((resultState as IdentityScanState.Unsatisfied).reason).isEqualTo(

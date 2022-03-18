@@ -22,10 +22,12 @@ internal class LookBackWindowTransitionerTest {
             transitioner.results.addLast(true)
         }
 
-        val resultState = transitioner.transition(mock<IdentityScanState.Found>().also {
-            whenever(it.type).thenReturn(IdentityScanState.ScanType.ID_FRONT)
-        }, ID_FRONT_OUTPUT)
-
+        val resultState = transitioner.transition(
+            mock<IdentityScanState.Found>().also {
+                whenever(it.type).thenReturn(IdentityScanState.ScanType.ID_FRONT)
+            },
+            ID_FRONT_OUTPUT
+        )
 
         assertThat(resultState).isInstanceOf(IdentityScanState.Unsatisfied::class.java)
         assertThat((resultState as IdentityScanState.Unsatisfied).reason).isEqualTo(
@@ -43,9 +45,12 @@ internal class LookBackWindowTransitionerTest {
             transitioner.results.addLast(true)
         }
 
-        val resultState = transitioner.transition(mock<IdentityScanState.Found>().also {
-            whenever(it.type).thenReturn(IdentityScanState.ScanType.ID_FRONT)
-        }, ID_FRONT_OUTPUT)
+        val resultState = transitioner.transition(
+            mock<IdentityScanState.Found>().also {
+                whenever(it.type).thenReturn(IdentityScanState.ScanType.ID_FRONT)
+            },
+            ID_FRONT_OUTPUT
+        )
 
         assertThat(resultState).isInstanceOf(IdentityScanState.Satisfied::class.java)
     }

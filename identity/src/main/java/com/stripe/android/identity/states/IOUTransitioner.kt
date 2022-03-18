@@ -61,7 +61,6 @@ internal class IOUTransitioner(
         return (consecutiveHitCount++) < hitsRequired
     }
 
-
     /**
      * Calculate IoU of two boxes, see https://stackoverflow.com/a/41660682/802372
      */

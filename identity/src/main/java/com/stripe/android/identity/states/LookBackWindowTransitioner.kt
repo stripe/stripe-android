@@ -26,7 +26,6 @@ internal class LookBackWindowTransitioner(
     @VisibleForTesting
     internal val results = ArrayDeque<Boolean>()
 
-
     override fun transition(
         foundState: Found,
         analyzerOutput: AnalyzerOutput
