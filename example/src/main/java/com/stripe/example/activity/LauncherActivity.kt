@@ -139,7 +139,7 @@ class LauncherActivity : AppCompatActivity() {
             ),
             Item(
                 activity.getString(R.string.confirm_with_us_bank_account_entry_point),
-                InstantUSBankAccountActivity::class.java
+                ConnectUSBankAccountActivity::class.java
             ),
         )
 
