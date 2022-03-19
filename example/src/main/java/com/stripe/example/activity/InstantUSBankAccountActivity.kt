@@ -26,7 +26,6 @@ class InstantUSBankAccountActivity : StripeIntentActivity() {
 
         viewBinding.confirmWithPaymentButton.setOnClickListener {
             viewModel.createPaymentIntent(
-                endpoint = "create_pi",
                 country = "us",
                 supportedPaymentMethods = "us_bank_account"
             ).observe(this) { result ->

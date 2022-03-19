@@ -7,7 +7,6 @@ import androidx.lifecycle.liveData
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.example.R
 import com.stripe.example.activity.BaseViewModel
-import com.stripe.example.service.BackendApi
 import kotlinx.coroutines.withContext
 import okhttp3.ResponseBody
 import org.json.JSONObject
@@ -24,15 +23,13 @@ internal class StripeIntentViewModel(
     fun createPaymentIntent(
         country: String,
         customerId: String? = null,
-        supportedPaymentMethods: String? = null,
-        endpoint: String = BackendApi.DEFAULT_CREATE_PI_ENDPOINT
+        supportedPaymentMethods: String? = null
     ) = makeBackendRequest(
         R.string.creating_payment_intent,
         R.string.payment_intent_status
     ) {
         backendApi.createPaymentIntent(
-            createPaymentIntentEndpoint = endpoint,
-            params = mapOf("country" to country)
+            mapOf("country" to country)
                 .plus(
                     customerId?.let {
                         mapOf("customer_id" to it)
@@ -48,15 +45,13 @@ internal class StripeIntentViewModel(
 
     fun createSetupIntent(
         country: String,
-        customerId: String? = null,
-        endpoint: String = BackendApi.DEFAULT_CREATE_SI_ENDPOINT
+        customerId: String? = null
     ) = makeBackendRequest(
         R.string.creating_setup_intent,
         R.string.setup_intent_status
     ) {
         backendApi.createSetupIntent(
-            createSetupIntentEndpoint = endpoint,
-            params = mutableMapOf("country" to country)
+            mutableMapOf("country" to country)
                 .plus(
                     customerId?.let {
                         mapOf("customer_id" to it)
