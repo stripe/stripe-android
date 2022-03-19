@@ -17,7 +17,7 @@ data class ContentUriResult(val contentUri: Uri, val absolutePath: String)
  */
 internal interface IdentityIO {
     /**
-     * Create a file in app's external files Dir and return the uri
+     * Create a file in app's internal files dir and return the uri
      */
     @Throws(IOException::class)
     fun createInternalFileUri(): ContentUriResult

@@ -5,7 +5,6 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Rect
 import android.net.Uri
-import android.os.Environment
 import android.util.Size
 import androidx.core.content.FileProvider
 import com.stripe.android.camera.framework.image.constrainToSize
@@ -51,7 +50,7 @@ internal class DefaultIdentityIO(private val context: Context) : IdentityIO {
     ): File {
         context.contentResolver.openInputStream(originalUri).use { inputStream ->
             File(
-                context.getExternalFilesDir(Environment.DIRECTORY_PICTURES),
+                context.filesDir,
                 StringBuilder().also { nameBuilder ->
                     nameBuilder.append(verificationId)
                     side?.let {
@@ -87,7 +86,7 @@ internal class DefaultIdentityIO(private val context: Context) : IdentityIO {
         compressionQuality: Float,
     ): File {
         File(
-            context.getExternalFilesDir(Environment.DIRECTORY_PICTURES),
+            context.filesDir,
             StringBuilder().also { nameBuilder ->
                 nameBuilder.append(verificationId)
                 side?.let {
@@ -148,7 +147,7 @@ internal class DefaultIdentityIO(private val context: Context) : IdentityIO {
         return File.createTempFile(
             "${generateJpgFileName()}_", /* prefix */
             ".jpg", /* suffix */
-            context.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
+            context.filesDir
         )
     }
 
