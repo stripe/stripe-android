@@ -157,14 +157,11 @@
         </LinearLayout>
     </ScrollView>
 
-
-    <com.google.android.material.button.MaterialButton
+    <com.stripe.android.identity.ui.LoadingButton
         android:id="@+id/kontinue"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/kontinue"
         android:layout_marginBottom="10dp"
-        android:enabled="false"
         android:layout_gravity="bottom" />
 
 </LinearLayout>

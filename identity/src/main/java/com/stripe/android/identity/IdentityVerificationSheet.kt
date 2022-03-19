@@ -1,10 +1,10 @@
 package com.stripe.android.identity
 
 import android.content.Intent
+import android.net.Uri
 import android.os.Parcelable
 import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultLauncher
-import androidx.annotation.DrawableRes
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import kotlinx.parcelize.Parcelize
@@ -14,8 +14,12 @@ interface IdentityVerificationSheet {
      * Data to configure the verification flow.
      */
     data class Configuration(
-        @DrawableRes
-        val merchantLogo: Int
+        /**
+         * Brand logo to display on the consent page of verification flow.
+         * The Uri could be a local drawable resource file or a web image.
+         * The logo will be displayed in a 32x32 dp ImageView.
+         */
+        val brandLogo: Uri
     )
 
     /**

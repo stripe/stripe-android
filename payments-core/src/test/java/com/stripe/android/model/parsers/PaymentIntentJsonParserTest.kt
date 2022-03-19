@@ -3,6 +3,7 @@ package com.stripe.android.model.parsers
 import android.net.Uri
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.Address
+import com.stripe.android.model.MicrodepositType
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.StripeIntent
@@ -121,6 +122,21 @@ class PaymentIntentJsonParserTest {
                     "_input_charset=utf-8&app_pay=Y&currency=USD&forex_biz=FP&notify_url=https%3A%2F%2Fhooks.stripe.com%2Falipay%2Falipay%2Fhook%2F6255d30b067c8f7a162c79c654483646%2Fsrc_1HDEFWKlwPmebFhp6tcpln8T&out_trade_no=src_1HDEFWKlwPmebFhp6tcpln8T&partner=2088621828244481&payment_type=1&product_code=NEW_WAP_OVERSEAS_SELLER&return_url=https%3A%2F%2Fhooks.stripe.com%2Fadapter%2Falipay%2Fredirect%2Fcomplete%2Fsrc_1HDEFWKlwPmebFhp6tcpln8T%2Fsrc_client_secret_S6H9mVMKK6qxk9YxsUvbH55K&secondary_merchant_id=acct_1EqOyCKlwPmebFhp&secondary_merchant_industry=5734&secondary_merchant_name=Yuki-Test&sendFormat=normal&service=create_forex_trade_wap&sign=b691876a7f0bd889530f54a271d314d5&sign_type=MD5&subject=Yuki-Test&supplier=Yuki-Test&timeout_rule=20m&total_fee=1.00",
                     "https://hooks.stripe.com/redirect/authenticate/src_1HDEFWKlwPmebFhp6tcpln8T?client_secret=src_client_secret_S6H9mVMKK6qxk9YxsUvbH55K",
                     "example://return_url"
+                )
+            )
+    }
+
+    @Test
+    fun parse_withVerifyWithMicrodepositsAction_shoulddCreateExpectedNextActionData() {
+        val paymentIntent = PaymentIntentJsonParser().parse(
+            PaymentIntentFixtures.PI_WITH_US_BANK_ACCOUNT_IN_PAYMENT_METHODS_JSON
+        )
+        assertThat(paymentIntent?.nextActionData)
+            .isEqualTo(
+                StripeIntent.NextActionData.VerifyWithMicrodeposits(
+                    1647241200,
+                    "https://payments.stripe.com/microdeposit/pacs_test_YWNjdF8xS2J1SjlGbmt1bWlGVUZ4LHBhX25vbmNlX0xJcFVEaERaU0JOVVR3akhxMXc5eklOQkl3UTlwNWo0000v3GS1Jej",
+                    MicrodepositType.AMOUNTS
                 )
             )
     }
