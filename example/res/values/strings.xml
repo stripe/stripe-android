@@ -125,4 +125,8 @@
     <string name="google_pay_merchant_country_code">Merchant Country Code</string>
     <string name="google_pay_merchant_country_code_default">US</string>
 
+    <!--  US Bank Account  -->
+    <string name="confirm_with_us_bank_account_entry_point">US Bank Account Example</string>
+    <string name="confirm_with_us_bank_account">Confirm with US Bank Account</string>
+    <string name="confirm_with_us_bank_account_intro">Click below to create payment intent and attach a bank account to payment method.</string>
 </resources>

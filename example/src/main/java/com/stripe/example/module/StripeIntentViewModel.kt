@@ -23,13 +23,15 @@ internal class StripeIntentViewModel(
     fun createPaymentIntent(
         country: String,
         customerId: String? = null,
-        supportedPaymentMethods: String? = null
+        supportedPaymentMethods: String? = null,
+        endpoint: String = "create_payment_intent"
     ) = makeBackendRequest(
         R.string.creating_payment_intent,
         R.string.payment_intent_status
     ) {
         backendApi.createPaymentIntent(
-            mapOf("country" to country)
+            createPaymentIntentEndpoint = endpoint,
+            params = mapOf("country" to country)
                 .plus(
                     customerId?.let {
                         mapOf("customer_id" to it)
@@ -45,13 +47,15 @@ internal class StripeIntentViewModel(
 
     fun createSetupIntent(
         country: String,
-        customerId: String? = null
+        customerId: String? = null,
+        endpoint: String = "create_setup_intent"
     ) = makeBackendRequest(
         R.string.creating_setup_intent,
         R.string.setup_intent_status
     ) {
         backendApi.createSetupIntent(
-            mutableMapOf("country" to country)
+            createSetupIntentEndpoint = endpoint,
+            params = mutableMapOf("country" to country)
                 .plus(
                     customerId?.let {
                         mapOf("customer_id" to it)
