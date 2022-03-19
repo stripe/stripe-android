@@ -1,14 +1,16 @@
-package com.stripe.android.payments
+package com.stripe.android.payments.bankaccount.di
 
 import android.app.Application
 import android.content.Context
 import com.stripe.android.BuildConfig
+import com.stripe.android.StripeApiBeta
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountContract
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import dagger.Module
 import dagger.Provides
+import dagger.multibindings.IntoSet
 import javax.inject.Named
 
 @Module

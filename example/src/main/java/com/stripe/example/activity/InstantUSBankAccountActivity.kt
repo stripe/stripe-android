@@ -18,6 +18,8 @@ class InstantUSBankAccountActivity : StripeIntentActivity() {
         PaymentExampleActivityBinding.inflate(layoutInflater)
     }
 
+    private val settings by lazy { Settings(this) }
+
     lateinit var launcher: CollectBankAccountLauncher.ForPaymentIntent
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -49,7 +51,7 @@ class InstantUSBankAccountActivity : StripeIntentActivity() {
         viewBinding.confirmWithPaymentButton.text =
             "Confirm with Bank Account"
         viewBinding.paymentExampleIntro.text =
-            "TODO"
+            "Click below to create payment intent and attach a bank account to payment method."
 
         viewModel.inProgress.observe(this, { enableUi(!it) })
         viewModel.status.observe(this, Observer(viewBinding.status::setText))
@@ -60,10 +62,11 @@ class InstantUSBankAccountActivity : StripeIntentActivity() {
                 supportedPaymentMethods = "us_bank_account"
             ).observe(this) { result ->
                 result.onSuccess {
-                    val settings = Settings(this)
+                    viewModel.status
+                        .postValue("Collecting bank account information for payment")
                     launcher.launch(
                         publishableKey = settings.publishableKey,
-                        clientSecret = it.getString("secret"),
+                        clientSecret = it.getString("client_secret"),
                         params = CollectBankAccountParams.USBankAccount(
                             name = "Jane Doe",
                             email = "email@email.com"

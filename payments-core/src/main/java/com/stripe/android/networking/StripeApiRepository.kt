@@ -7,6 +7,7 @@ import com.stripe.android.DefaultFraudDetectionDataRepository
 import com.stripe.android.FraudDetectionDataRepository
 import com.stripe.android.Stripe
 import com.stripe.android.StripeApiBeta
+import com.stripe.android.StripeApiBeta.USBankAccount
 import com.stripe.android.cards.Bin
 import com.stripe.android.core.ApiVersion
 import com.stripe.android.core.Logger
@@ -118,7 +119,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
     private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory =
         PaymentAnalyticsRequestFactory(context, publishableKeyProvider, productUsageTokens),
     private val fraudDetectionDataParamsUtils: FraudDetectionDataParamsUtils = FraudDetectionDataParamsUtils(),
-    betas: Set<StripeApiBeta> = emptySet(),
+    betas: Set<StripeApiBeta> = setOf(USBankAccount), //TODO revert
     apiVersion: String = ApiVersion(betas = betas.map { it.code }.toSet()).code,
     sdkVersion: String = StripeSdkVersion.VERSION
 ) : StripeRepository() {
@@ -1382,7 +1383,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
     @VisibleForTesting
     @JvmSynthetic
     internal fun getPaymentIntentLinkAccountSessionUrl(paymentIntentId: String): String {
-        return getApiUrl("payment_intents/%s/link_account_session", paymentIntentId)
+        return getApiUrl("payment_intents/%s/link_account_sessions", paymentIntentId)
     }
 
     /**
@@ -1391,7 +1392,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
     @VisibleForTesting
     @JvmSynthetic
     internal fun getSetupIntentLinkAccountSessionUrl(setupIntentId: String): String {
-        return getApiUrl("setup_intents/%s/link_account_session", setupIntentId)
+        return getApiUrl("setup_intents/%s/link_account_sessions", setupIntentId)
     }
 
     /**

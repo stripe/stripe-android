@@ -56,7 +56,7 @@ internal class CollectBankAccountViewModel @Inject constructor(
                 )
             }
                 .onSuccess {
-                    logger.debug("Bank account session created!")
+                    logger.debug("Bank account session created! $it.")
                     _viewEffect.emit(OpenConnectionsFlow(it.clientSecret!!))
                 }
                 .onFailure { finishWithError(it) }
