@@ -26,29 +26,17 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.lifecycleScope
-import com.stripe.android.StripeApiBeta
-import com.stripe.android.confirmPaymentIntent
-import com.stripe.android.confirmSetupIntent
-import com.stripe.android.model.ConfirmPaymentIntentParams
-import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
-import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.paymentlauncher.PaymentResult
-import com.stripe.example.StripeFactory
-import com.stripe.example.module.StripeIntentViewModel
-import kotlinx.coroutines.launch
 
 class USBankAccountPaymentMethodActivity : AppCompatActivity() {
-    private val viewModel: StripeIntentViewModel by viewModels()
-
-    private val stripe by lazy {
-        StripeFactory(this, betas = setOf(StripeApiBeta.USBankAccount)).create()
-    }
+    private val viewModel: USBankAccountPaymentMethodViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        observePaymentResults()
 
         setContent {
             USBankAccountScreen()
@@ -265,35 +253,10 @@ class USBankAccountPaymentMethodActivity : AppCompatActivity() {
             this
         ) {
             it.onSuccess { responseData ->
-                viewModel.status.postValue(
-                    viewModel.status.value +
-                        "\n\nStarting SetupIntent confirmation"
+                viewModel.confirmSetupIntent(
+                    params,
+                    responseData.getString("secret")
                 )
-                lifecycleScope.launch {
-                    val result = runCatching {
-                        stripe.confirmSetupIntent(
-                            ConfirmSetupIntentParams.create(
-                                paymentMethodCreateParams = params,
-                                clientSecret = responseData.getString("secret")
-                            )
-                        )
-                    }
-                    result.fold(
-                        onSuccess = { setupIntent ->
-                            if (setupIntent.requiresAction() &&
-                                setupIntent.nextActionType ==
-                                StripeIntent.NextActionType.VerifyWithMicrodeposits
-                            ) {
-                                postResults(PaymentResult.Completed)
-                            } else {
-                                postResults(PaymentResult.Canceled)
-                            }
-                        },
-                        onFailure = {
-                            postResults(PaymentResult.Failed(it))
-                        }
-                    )
-                }
             }
         }
     }
@@ -308,54 +271,31 @@ class USBankAccountPaymentMethodActivity : AppCompatActivity() {
             this
         ) {
             it.onSuccess { responseData ->
-                viewModel.status.postValue(
-                    viewModel.status.value +
-                        "\n\nStarting PaymentIntent confirmation"
+                viewModel.confirmPaymentIntent(
+                    params,
+                    responseData.getString("secret")
                 )
-                lifecycleScope.launch {
-                    val result = runCatching {
-                        stripe.confirmPaymentIntent(
-                            ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
-                                paymentMethodCreateParams = params,
-                                clientSecret = responseData.getString("secret")
-                            )
-                        )
-                    }
-                    result.fold(
-                        onSuccess = { paymentIntent ->
-                            if (paymentIntent.requiresAction() &&
-                                paymentIntent.nextActionType ==
-                                StripeIntent.NextActionType.VerifyWithMicrodeposits
-                            ) {
-                                postResults(PaymentResult.Completed)
-                            } else {
-                                postResults(PaymentResult.Canceled)
-                            }
-                        },
-                        onFailure = {
-                            postResults(PaymentResult.Failed(it))
-                        }
-                    )
-                }
             }
         }
     }
 
-    private fun postResults(paymentResult: PaymentResult) {
-        when (paymentResult) {
-            is PaymentResult.Completed -> {
-                viewModel.status.value += "\n\nPayment successfully initiated. Will fulfill " +
-                    "after microdeposit verification\n\n"
-                viewModel.inProgress.value = false
-            }
-            is PaymentResult.Canceled -> {
-                viewModel.status.value += "\n\nPaymentIntent confirmation cancelled\n\n"
-                viewModel.inProgress.value = false
-            }
-            is PaymentResult.Failed -> {
-                viewModel.status.value += "\n\nPaymentIntent confirmation failed with " +
-                    "throwable ${paymentResult.throwable} \n\n"
-                viewModel.inProgress.value = false
+    private fun observePaymentResults() {
+        viewModel.paymentResultLiveData.observe(this) { paymentResult ->
+            when (paymentResult) {
+                is PaymentResult.Completed -> {
+                    viewModel.status.value += "\n\nPayment successfully initiated. Will fulfill " +
+                        "after microdeposit verification\n\n"
+                    viewModel.inProgress.value = false
+                }
+                is PaymentResult.Canceled -> {
+                    viewModel.status.value += "\n\nPaymentIntent confirmation cancelled\n\n"
+                    viewModel.inProgress.value = false
+                }
+                is PaymentResult.Failed -> {
+                    viewModel.status.value += "\n\nPaymentIntent confirmation failed with " +
+                        "throwable ${paymentResult.throwable} \n\n"
+                    viewModel.inProgress.value = false
+                }
             }
         }
     }
