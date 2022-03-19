@@ -7,6 +7,7 @@ import androidx.lifecycle.liveData
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.example.R
 import com.stripe.example.activity.BaseViewModel
+import com.stripe.example.service.BackendApi
 import kotlinx.coroutines.withContext
 import okhttp3.ResponseBody
 import org.json.JSONObject
@@ -24,7 +25,7 @@ internal class StripeIntentViewModel(
         country: String,
         customerId: String? = null,
         supportedPaymentMethods: String? = null,
-        endpoint: String = "create_payment_intent"
+        endpoint: String = BackendApi.DEFAULT_CREATE_PI_ENDPOINT
     ) = makeBackendRequest(
         R.string.creating_payment_intent,
         R.string.payment_intent_status
@@ -48,7 +49,7 @@ internal class StripeIntentViewModel(
     fun createSetupIntent(
         country: String,
         customerId: String? = null,
-        endpoint: String = "create_setup_intent"
+        endpoint: String = BackendApi.DEFAULT_CREATE_SI_ENDPOINT
     ) = makeBackendRequest(
         R.string.creating_setup_intent,
         R.string.setup_intent_status
