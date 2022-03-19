@@ -345,7 +345,6 @@ class FrontBackUploadFragmentTest {
             if (scanType == IdentityScanState.ScanType.ID_FRONT) {
                 verify(mockFrontBackUploadViewModel).uploadImageFront(
                     same(mockUri),
-                    same(fragment.requireContext()),
                     same(DOCUMENT_CAPTURE),
                     if (isTakePhoto)
                         eq(DocumentUploadParam.UploadMethod.MANUALCAPTURE)
@@ -358,7 +357,6 @@ class FrontBackUploadFragmentTest {
             } else if (scanType == IdentityScanState.ScanType.ID_BACK) {
                 verify(mockFrontBackUploadViewModel).uploadImageBack(
                     same(mockUri),
-                    same(fragment.requireContext()),
                     same(DOCUMENT_CAPTURE),
                     if (isTakePhoto)
                         eq(DocumentUploadParam.UploadMethod.MANUALCAPTURE)

@@ -122,7 +122,6 @@ internal class PassportUploadFragment(
             onSuccess = { verificationPage ->
                 passportUploadViewModel.uploadImage(
                     passport,
-                    requireContext(),
                     verificationPage.documentCapture,
                     uploadMethod
                 )

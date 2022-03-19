@@ -225,7 +225,6 @@ class PassportUploadFragmentTest {
             // viewmodel triggers and UI updates
             verify(mockPassportUploadViewModel).uploadImage(
                 same(mockUri),
-                same(fragment.requireContext()),
                 same(DOCUMENT_CAPTURE),
                 if (isTakePhoto)
                     eq(UploadMethod.MANUALCAPTURE)
