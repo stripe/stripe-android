@@ -96,6 +96,7 @@ sealed class SupportedPaymentMethod(
      */
     val formSpec: LayoutSpec,
 ) : Parcelable {
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
     @Parcelize
     object Card : SupportedPaymentMethod(
         PaymentMethod.Type.Card,
@@ -108,6 +109,8 @@ sealed class SupportedPaymentMethod(
         )
     )
 
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
     @Parcelize
     object Bancontact : SupportedPaymentMethod(
         PaymentMethod.Type.Bancontact,
@@ -118,6 +121,8 @@ sealed class SupportedPaymentMethod(
         BancontactForm
     )
 
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
     @Parcelize
     object Sofort : SupportedPaymentMethod(
         PaymentMethod.Type.Sofort,
@@ -128,6 +133,8 @@ sealed class SupportedPaymentMethod(
         SofortForm
     )
 
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
     @Parcelize
     object Ideal : SupportedPaymentMethod(
         PaymentMethod.Type.Ideal,
@@ -138,6 +145,7 @@ sealed class SupportedPaymentMethod(
         IdealForm
     )
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
     @Parcelize
     object SepaDebit : SupportedPaymentMethod(
         PaymentMethod.Type.SepaDebit,
@@ -148,6 +156,7 @@ sealed class SupportedPaymentMethod(
         SepaDebitForm
     )
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
     @Parcelize
     object Eps : SupportedPaymentMethod(
         PaymentMethod.Type.Eps,
@@ -158,6 +167,7 @@ sealed class SupportedPaymentMethod(
         EpsForm
     )
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
     @Parcelize
     object P24 : SupportedPaymentMethod(
         PaymentMethod.Type.P24,
@@ -168,6 +178,7 @@ sealed class SupportedPaymentMethod(
         P24Form
     )
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
     @Parcelize
     object Giropay : SupportedPaymentMethod(
         PaymentMethod.Type.Giropay,
@@ -178,6 +189,7 @@ sealed class SupportedPaymentMethod(
         GiropayForm
     )
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
     @Parcelize
     object AfterpayClearpay : SupportedPaymentMethod(
         PaymentMethod.Type.AfterpayClearpay,
@@ -188,6 +200,7 @@ sealed class SupportedPaymentMethod(
         AfterpayClearpayForm
     )
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
     @Parcelize
     object Klarna : SupportedPaymentMethod(
         PaymentMethod.Type.Klarna,
@@ -198,6 +211,7 @@ sealed class SupportedPaymentMethod(
         KlarnaForm
     )
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
     @Parcelize
     object PayPal : SupportedPaymentMethod(
         PaymentMethod.Type.PayPal,
@@ -208,6 +222,7 @@ sealed class SupportedPaymentMethod(
         PaypalForm
     )
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
     @Parcelize
     object Affirm : SupportedPaymentMethod(
         PaymentMethod.Type.Affirm,
@@ -218,6 +233,7 @@ sealed class SupportedPaymentMethod(
         AffirmForm
     )
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
     @Parcelize
     object AuBecsDebit : SupportedPaymentMethod(
         PaymentMethod.Type.AuBecsDebit,

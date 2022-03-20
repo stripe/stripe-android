@@ -70,9 +70,13 @@ dependencies {
     // Espresso dependencies
     androidTestImplementation "com.android.support.test.espresso:espresso-intents:3.0.2"
     androidTestImplementation "androidx.test.espresso:espresso-core:$espressoVersion"
-    androidTestImplementation "androidx.test.espresso:espresso-contrib:$espressoVersion"
-    implementation "androidx.test.espresso:espresso-intents:$espressoVersion"
-    implementation "androidx.test.espresso:espresso-accessibility:$espressoVersion"
+    androidTestImplementation ("androidx.test.espresso:espresso-contrib:$espressoVersion") {
+        exclude group: 'org.checkerframework', module: 'checker'
+    }
+    debugImplementation "androidx.test.espresso:espresso-intents:$espressoVersion"
+    androidTestImplementation ("androidx.test.espresso:espresso-accessibility:$espressoVersion") {
+        exclude group: 'org.checkerframework', module: 'checker'
+    }
     androidTestImplementation "androidx.test.espresso:espresso-web:$espressoVersion"
     androidTestImplementation "androidx.test.espresso.idling:idling-concurrent:$espressoVersion"
     // The following Espresso dependency can be either "implementation"

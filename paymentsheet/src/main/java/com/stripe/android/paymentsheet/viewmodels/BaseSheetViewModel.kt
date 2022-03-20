@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.viewmodels
 import android.app.Application
 import androidx.annotation.NonNull
 import androidx.annotation.Nullable
+import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
@@ -42,8 +43,10 @@ import kotlinx.coroutines.withContext
 import org.jetbrains.annotations.TestOnly
 import kotlin.coroutines.CoroutineContext
 
+@VisibleForTesting
 class TransitionFragmentResource {
     companion object {
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
         @Nullable
         var idlingResource: CountingIdlingResource? = null
 

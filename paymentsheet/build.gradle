@@ -92,8 +92,6 @@ dependencies {
 
     // Test rules and transitive dependencies:
     androidTestImplementation("androidx.compose.ui:ui-test-junit4:$androidxComposeVersion")
-    // Needed for createComposeRule, but not createAndroidComposeRule:
-    debugImplementation("androidx.compose.ui:ui-test-manifest:$androidxComposeVersion")
 
     ktlint "com.pinterest:ktlint:$ktlintVersion"
 }
