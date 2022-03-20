@@ -262,7 +262,9 @@ class CreateLinkAccountSessionTest {
         }
     }
 
-    private suspend fun givenCreateSessionWithPaymentIntentReturns(session: () -> BankConnectionsLinkedAccountSession?) {
+    private suspend fun givenCreateSessionWithPaymentIntentReturns(
+        session: () -> BankConnectionsLinkedAccountSession?
+    ) {
         whenever(
             stripeRepository.createPaymentIntentLinkAccountSession(
                 any(),
@@ -272,7 +274,9 @@ class CreateLinkAccountSessionTest {
         ).thenAnswer { session() }
     }
 
-    private suspend fun givenCreateSessionWithSetupIntentReturns(session: () -> BankConnectionsLinkedAccountSession?) {
+    private suspend fun givenCreateSessionWithSetupIntentReturns(
+        session: () -> BankConnectionsLinkedAccountSession?
+    ) {
         whenever(
             stripeRepository.createSetupIntentLinkAccountSession(
                 any(),
