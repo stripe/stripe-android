@@ -30,8 +30,8 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 
-class USBankAccountPaymentMethodActivity : AppCompatActivity() {
-    private val viewModel: USBankAccountPaymentMethodViewModel by viewModels()
+class ManualUSBankAccountPaymentMethodActivity : AppCompatActivity() {
+    private val viewModel: ManualUSBankAccountPaymentMethodViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -212,9 +212,9 @@ class USBankAccountPaymentMethodActivity : AppCompatActivity() {
                             )
                         )
                         if (isSaveForFutureUsage.value) {
-                            createAndConfirmSetupIntent(params)
+                            viewModel.createAndConfirmSetupIntent(params)
                         } else {
-                            createAndConfirmPaymentIntent(params)
+                            viewModel.createAndConfirmPaymentIntent(params)
                         }
                     }
                 ) {
@@ -239,41 +239,6 @@ class USBankAccountPaymentMethodActivity : AppCompatActivity() {
                         "obtained.",
                     color = Color.Gray,
                     fontSize = 8.sp
-                )
-            }
-        }
-    }
-
-    private fun createAndConfirmSetupIntent(
-        params: PaymentMethodCreateParams
-    ) {
-        viewModel.createSetupIntent(
-            country = "us"
-        ).observe(
-            this
-        ) {
-            it.onSuccess { responseData ->
-                viewModel.confirmSetupIntent(
-                    params,
-                    responseData.getString("secret")
-                )
-            }
-        }
-    }
-
-    private fun createAndConfirmPaymentIntent(
-        params: PaymentMethodCreateParams
-    ) {
-        viewModel.createPaymentIntent(
-            country = "us",
-            supportedPaymentMethods = "us_bank_account"
-        ).observe(
-            this
-        ) {
-            it.onSuccess { responseData ->
-                viewModel.confirmPaymentIntent(
-                    params,
-                    responseData.getString("secret")
                 )
             }
         }

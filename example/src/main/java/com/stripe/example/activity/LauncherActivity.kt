@@ -122,8 +122,8 @@ class LauncherActivity : AppCompatActivity() {
                 NetbankingPaymentActivity::class.java
             ),
             Item(
-                activity.getString(R.string.us_bank_account_example),
-                USBankAccountPaymentMethodActivity::class.java
+                activity.getString(R.string.manual_us_bank_account_example),
+                ManualUSBankAccountPaymentMethodActivity::class.java
             ),
             Item(
                 activity.getString(R.string.card_brands),
