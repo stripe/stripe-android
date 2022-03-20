@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.core.Logger
 import com.stripe.android.link.LinkScreen
+import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.injection.NonFallbackInjectable
 import com.stripe.android.link.injection.NonFallbackInjector
 import com.stripe.android.link.injection.SignedInViewModelSubcomponent
@@ -20,6 +21,7 @@ import javax.inject.Provider
 
 internal class WalletViewModel @Inject constructor(
     private val linkRepository: LinkRepository,
+    private val linkAccountManager: LinkAccountManager,
     private val navigator: Navigator,
     private val logger: Logger,
     val linkAccount: LinkAccount
@@ -52,10 +54,11 @@ internal class WalletViewModel @Inject constructor(
 
     fun payAnotherWay() {
         navigator.dismiss()
+        linkAccountManager.logout()
     }
 
     fun addNewPaymentMethod() {
-        navigator.navigateTo(LinkScreen.AddPaymentMethod)
+        navigator.navigateTo(LinkScreen.PaymentMethod)
     }
 
     private fun onError(error: Throwable) {

@@ -71,6 +71,7 @@ internal suspend fun Fragment.postVerificationPageDataAndMaybeSubmit(
                             }
                         },
                         onFailure = {
+                            Log.e(TAG, "Failed to postVerificationPageSubmit: $it")
                             navigateToDefaultErrorFragment()
                         }
                     )
@@ -78,6 +79,7 @@ internal suspend fun Fragment.postVerificationPageDataAndMaybeSubmit(
             }
         },
         onFailure = {
+            Log.e(TAG, "Failed to postVerificationPageData: $it")
             navigateToDefaultErrorFragment()
         }
     )

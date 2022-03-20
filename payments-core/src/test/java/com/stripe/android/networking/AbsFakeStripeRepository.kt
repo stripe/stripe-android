@@ -3,6 +3,7 @@ package com.stripe.android.networking
 import com.stripe.android.cards.Bin
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.model.BankConnectionsLinkedAccountSession
 import com.stripe.android.model.BankStatuses
 import com.stripe.android.model.BinFixtures
 import com.stripe.android.model.CardMetadata
@@ -11,6 +12,7 @@ import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
+import com.stripe.android.model.CreateLinkAccountSessionParams
 import com.stripe.android.model.Customer
 import com.stripe.android.model.ListPaymentMethodsParams
 import com.stripe.android.model.PaymentIntent
@@ -346,6 +348,22 @@ internal abstract class AbsFakeStripeRepository : StripeRepository() {
         linkAccountSessionId: String,
         requestOptions: ApiRequest.Options
     ): SetupIntent? {
+        return null
+    }
+
+    override suspend fun createPaymentIntentLinkAccountSession(
+        paymentIntentId: String,
+        params: CreateLinkAccountSessionParams,
+        requestOptions: ApiRequest.Options
+    ): BankConnectionsLinkedAccountSession? {
+        return null
+    }
+
+    override suspend fun createSetupIntentLinkAccountSession(
+        setupIntentId: String,
+        params: CreateLinkAccountSessionParams,
+        requestOptions: ApiRequest.Options
+    ): BankConnectionsLinkedAccountSession? {
         return null
     }
 }
