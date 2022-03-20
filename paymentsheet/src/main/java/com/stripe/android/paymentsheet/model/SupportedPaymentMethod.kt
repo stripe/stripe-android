@@ -35,6 +35,8 @@ import com.stripe.android.ui.core.forms.AffirmForm
 import com.stripe.android.ui.core.forms.AffirmParamKey
 import com.stripe.android.ui.core.forms.AfterpayClearpayForm
 import com.stripe.android.ui.core.forms.AfterpayClearpayParamKey
+import com.stripe.android.ui.core.forms.AuBecsDebitForm
+import com.stripe.android.ui.core.forms.AuBecsDebitParamKey
 import com.stripe.android.ui.core.forms.BancontactForm
 import com.stripe.android.ui.core.forms.BancontactParamKey
 import com.stripe.android.ui.core.forms.EpsForm
@@ -53,8 +55,6 @@ import com.stripe.android.ui.core.forms.SepaDebitForm
 import com.stripe.android.ui.core.forms.SepaDebitParamKey
 import com.stripe.android.ui.core.forms.SofortForm
 import com.stripe.android.ui.core.forms.SofortParamKey
-import com.stripe.android.ui.core.forms.AuBecsDebitForm
-import com.stripe.android.ui.core.forms.AuBecsDebitParamKey
 import kotlinx.parcelize.Parcelize
 
 /**
@@ -410,7 +410,7 @@ internal sealed class SupportedPaymentMethod(
             Klarna,
             PayPal,
             AfterpayClearpay,
-            // Affirm // TODO: uncomment once we are ready to go live
+            Affirm // TODO: uncomment once we are ready to go live
             // AuBecsDebit // TODO: uncomment once we are ready to go live
         )
 
