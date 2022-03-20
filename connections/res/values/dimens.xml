@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="stripe_connectionssheet_loading_indicator_size">24dp</dimen>
+    <dimen name="stripe_connectionssheet_loading_indicator_stroke_width">2dp</dimen>
+</resources>
