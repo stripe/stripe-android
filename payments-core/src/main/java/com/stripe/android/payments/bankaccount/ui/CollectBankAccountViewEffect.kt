@@ -5,6 +5,7 @@ import com.stripe.android.model.SetupIntent
 
 internal sealed class CollectBankAccountViewEffect {
     data class OpenConnectionsFlow(
+        val publishableKey: String,
         val linkedAccountSessionClientSecret: String
     ) : CollectBankAccountViewEffect()
 

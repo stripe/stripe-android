@@ -7,6 +7,10 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.savedstate.SavedStateRegistryOwner
+import com.stripe.android.connections.ConnectionsSheetResult
+import com.stripe.android.connections.ConnectionsSheetResult.Canceled
+import com.stripe.android.connections.ConnectionsSheetResult.Completed
+import com.stripe.android.connections.ConnectionsSheetResult.Failed
 import com.stripe.android.core.Logger
 import com.stripe.android.payments.bankaccount.CollectBankAccountParams.USBankAccount
 import com.stripe.android.payments.bankaccount.DaggerCollectBankAccountComponent
@@ -15,6 +19,7 @@ import com.stripe.android.payments.bankaccount.domain.CreateLinkAccountSession
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountContract
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountContract.Args.ForPaymentIntent
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountContract.Args.ForSetupIntent
+import com.stripe.android.payments.bankaccount.ui.CollectBankAccountViewEffect.FinishWithError
 import com.stripe.android.payments.bankaccount.ui.CollectBankAccountViewEffect.FinishWithPaymentIntent
 import com.stripe.android.payments.bankaccount.ui.CollectBankAccountViewEffect.FinishWithSetupIntent
 import com.stripe.android.payments.bankaccount.ui.CollectBankAccountViewEffect.OpenConnectionsFlow
@@ -55,16 +60,29 @@ internal class CollectBankAccountViewModel @Inject constructor(
                     customerEmail = params.email
                 )
             }
-                .onSuccess {
-                    logger.debug("Bank account session created! $it.")
-                    _viewEffect.emit(OpenConnectionsFlow(it.clientSecret!!))
+                .onSuccess { linkedAccountSession ->
+                    logger.debug("Bank account session created! $linkedAccountSession.")
+                    _viewEffect.emit(
+                        OpenConnectionsFlow(
+                            linkedAccountSessionClientSecret = linkedAccountSession,
+                            publishableKey = args.publishableKey
+                        )
+                    )
                 }
                 .onFailure { finishWithError(it) }
         }
     }
 
-    fun onConnectionsResult(linkedAccountSessionId: String) {
-        attachLinkAccountSessionToIntent(linkedAccountSessionId)
+    fun onConnectionsResult(result: ConnectionsSheetResult) {
+        viewModelScope.launch {
+            when (result) {
+                Canceled -> finishWithError(Exception("Cancelled!"))
+                is Failed -> finishWithError(result.error)
+                is Completed -> {
+                    attachLinkAccountSessionToIntent(result.linkAccountSession.id)
+                }
+            }
+        }
     }
 
     private fun attachLinkAccountSessionToIntent(linkedAccountSessionId: String) {
@@ -91,7 +109,7 @@ internal class CollectBankAccountViewModel @Inject constructor(
 
     private suspend fun finishWithError(throwable: Throwable) {
         logger.error("Error", Exception(throwable))
-        _viewEffect.emit(CollectBankAccountViewEffect.FinishWithError(throwable))
+        _viewEffect.emit(FinishWithError(throwable))
     }
 
     class Factory(

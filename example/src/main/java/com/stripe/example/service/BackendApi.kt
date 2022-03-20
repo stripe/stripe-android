@@ -15,10 +15,10 @@ interface BackendApi {
     suspend fun createEphemeralKey(@FieldMap apiVersionMap: HashMap<String, String>): ResponseBody
 
     @FormUrlEncoded
-    @POST("create_payment_intent")
+    @POST("create_pi") //TODO revert
     suspend fun createPaymentIntent(@FieldMap params: MutableMap<String, String>): ResponseBody
 
     @FormUrlEncoded
-    @POST("create_setup_intent")
+    @POST("create_si") //TODO revert
     suspend fun createSetupIntent(@FieldMap params: MutableMap<String, String>): ResponseBody
 }

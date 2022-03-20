@@ -15,6 +15,7 @@ import com.stripe.android.payments.bankaccount.ui.CollectBankAccountViewEffect.F
 import com.stripe.android.payments.bankaccount.ui.CollectBankAccountViewEffect.FinishWithPaymentIntent
 import com.stripe.android.payments.bankaccount.ui.CollectBankAccountViewEffect.FinishWithSetupIntent
 import com.stripe.android.payments.bankaccount.ui.CollectBankAccountViewEffect.OpenConnectionsFlow
+import com.stripe.android.payments.connections.ConnectionsPaymentsProxy
 
 /**
  * No-UI activity that will handle collect bank account logic.
@@ -24,6 +25,8 @@ internal class CollectBankAccountActivity : AppCompatActivity() {
     private val starterArgs: CollectBankAccountContract.Args? by lazy {
         CollectBankAccountContract.Args.fromIntent(intent)
     }
+
+    private lateinit var connectionsPaymentsProxy: ConnectionsPaymentsProxy
 
     internal var viewModelFactory: ViewModelProvider.Factory =
         CollectBankAccountViewModel.Factory(
@@ -37,19 +40,31 @@ internal class CollectBankAccountActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        initConnectionsPaymentsProxy()
         lifecycleScope.launchWhenStarted {
-            viewModel.viewEffect.collect {
-                when (it) {
-                    is OpenConnectionsFlow -> {
-                        // TODO launch connections flow and wait for result.
-                        viewModel.onConnectionsResult("account_session_id")
-                    }
-                    is FinishWithError -> finishWithResult(Failed(Exception(it.exception)))
-                    is FinishWithPaymentIntent -> finishWithResult(Completed(it.paymentIntent))
-                    is FinishWithSetupIntent -> finishWithResult(Completed(it.setupIntent))
+            viewModel.viewEffect.collect { viewEffect ->
+                when (viewEffect) {
+                    is OpenConnectionsFlow -> viewEffect.launch()
+                    is FinishWithError -> finishWithResult(Failed(Exception(viewEffect.exception)))
+                    is FinishWithPaymentIntent -> finishWithResult(Completed(viewEffect.paymentIntent))
+                    is FinishWithSetupIntent -> finishWithResult(Completed(viewEffect.setupIntent))
                 }
             }
         }
+    }
+
+    private fun initConnectionsPaymentsProxy() {
+        connectionsPaymentsProxy = ConnectionsPaymentsProxy.create(
+            activity = this,
+            onComplete = viewModel::onConnectionsResult
+        )
+    }
+
+    private fun OpenConnectionsFlow.launch() {
+        connectionsPaymentsProxy.present(
+            linkedAccountSessionClientSecret,
+            publishableKey
+        )
     }
 
     private fun finishWithResult(result: CollectBankAccountResult) {

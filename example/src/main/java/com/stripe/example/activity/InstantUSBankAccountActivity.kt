@@ -1,11 +1,10 @@
 package com.stripe.example.activity
 
 import android.os.Bundle
-import android.util.Log
 import android.view.View
-import android.widget.Toast
 import androidx.lifecycle.Observer
 import com.stripe.android.ApiResultCallback
+import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.payments.bankaccount.CollectBankAccountForPaymentResponse
 import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher
 import com.stripe.android.payments.bankaccount.CollectBankAccountParams
@@ -30,20 +29,20 @@ class InstantUSBankAccountActivity : StripeIntentActivity() {
             this,
             object : ApiResultCallback<CollectBankAccountForPaymentResponse> {
                 override fun onSuccess(result: CollectBankAccountForPaymentResponse) {
-                    Toast.makeText(
-                        this@InstantUSBankAccountActivity,
-                        result.toString(),
-                        Toast.LENGTH_SHORT
-                    ).show()
+                    viewModel.status
+                        .postValue("Attached bank account to paymentIntent." +
+                            " status: ${result.paymentIntent.status}. Confirming...")
+                    confirmPaymentIntent(
+                        ConfirmPaymentIntentParams.createWithPaymentMethodId(
+                            paymentMethodId = result.paymentIntent.paymentMethodId!!,
+                            clientSecret = result.paymentIntent.clientSecret!!
+                        )
+                    )
                 }
 
                 override fun onError(e: Exception) {
-                    Log.e("error", "error", e)
-                    Toast.makeText(
-                        this@InstantUSBankAccountActivity,
-                        e.toString(),
-                        Toast.LENGTH_SHORT
-                    ).show()
+                    viewModel.status
+                        .postValue("Error attaching bank account to paymentIntent. ${e.message}")
                 }
             }
         )

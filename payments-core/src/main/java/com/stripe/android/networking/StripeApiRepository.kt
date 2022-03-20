@@ -1897,7 +1897,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         }
 
         /**
-         * @return `https://api.stripe.com/v1/payment_intents/:paymentIntentId/link_account_session/:linkAccountSessionId/attach`
+         * @return `https://api.stripe.com/v1/payment_intents/:paymentIntentId/link_account_sessions/:linkAccountSessionId/attach`
          */
         @VisibleForTesting
         @JvmSynthetic
@@ -1906,14 +1906,14 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
             linkAccountSessionId: String
         ): String {
             return getApiUrl(
-                "payment_intents/%s/link_account_session/%s/attach",
+                "payment_intents/%s/link_account_sessions/%s/attach",
                 paymentIntentId,
                 linkAccountSessionId
             )
         }
 
         /**
-         * @return `https://api.stripe.com/v1/setup_intents/:setupIntentId/link_account_session/:linkAccountSessionId/attach`
+         * @return `https://api.stripe.com/v1/setup_intents/:setupIntentId/link_account_sessions/:linkAccountSessionId/attach`
          */
         @VisibleForTesting
         @JvmSynthetic
@@ -1922,7 +1922,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
             linkAccountSessionId: String
         ): String {
             return getApiUrl(
-                "setup_intents/%s/link_account_session/%s/attach",
+                "setup_intents/%s/link_account_sessions/%s/attach",
                 setupIntentId,
                 linkAccountSessionId
             )

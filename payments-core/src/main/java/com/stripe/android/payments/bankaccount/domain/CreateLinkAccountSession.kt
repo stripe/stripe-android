@@ -1,7 +1,6 @@
 package com.stripe.android.payments.bankaccount.domain
 
 import com.stripe.android.core.networking.ApiRequest
-import com.stripe.android.model.BankConnectionsLinkedAccountSession
 import com.stripe.android.model.CreateLinkAccountSessionParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
@@ -17,7 +16,7 @@ internal class CreateLinkAccountSession @Inject constructor(
         clientSecret: String,
         customerName: String,
         customerEmail: String?,
-    ): Result<BankConnectionsLinkedAccountSession> = kotlin.runCatching {
+    ): Result<String> = kotlin.runCatching {
         stripeRepository.createPaymentIntentLinkAccountSession(
             paymentIntentId = PaymentIntent.ClientSecret(clientSecret).paymentIntentId,
             params = CreateLinkAccountSessionParams(
@@ -25,16 +24,18 @@ internal class CreateLinkAccountSession @Inject constructor(
                 customerName = customerName,
                 customerEmailAddress = customerEmail
             ),
-            requestOptions = requestOptions(publishableKey)
+            requestOptions = ApiRequest.Options(publishableKey)
         )
-    }.mapCatching { requireNotNull(it) }
+    }.mapCatching { session ->
+        requireNotNull(session!!.clientSecret)
+    }
 
     suspend fun forSetupIntent(
         publishableKey: String,
         clientSecret: String,
         customerName: String,
         customerEmail: String?,
-    ): Result<BankConnectionsLinkedAccountSession> = kotlin.runCatching {
+    ): Result<String> = kotlin.runCatching {
         stripeRepository.createSetupIntentLinkAccountSession(
             setupIntentId = SetupIntent.ClientSecret(clientSecret).setupIntentId,
             params = CreateLinkAccountSessionParams(
@@ -42,12 +43,9 @@ internal class CreateLinkAccountSession @Inject constructor(
                 customerName = customerName,
                 customerEmailAddress = customerEmail
             ),
-            requestOptions = requestOptions(publishableKey)
+            requestOptions = ApiRequest.Options(publishableKey)
         )
-    }.mapCatching { requireNotNull(it) }
-
-    private fun requestOptions(publishableKey: String) = ApiRequest.Options(
-        publishableKeyProvider = { publishableKey },
-        stripeAccountIdProvider = { null }, // provide account id?
-    )
+    }.mapCatching { session ->
+        requireNotNull(session!!.clientSecret)
+    }
 }
