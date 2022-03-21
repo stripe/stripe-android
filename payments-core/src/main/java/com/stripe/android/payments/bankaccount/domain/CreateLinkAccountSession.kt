@@ -8,13 +8,14 @@ import com.stripe.android.model.SetupIntent
 import com.stripe.android.networking.StripeRepository
 import javax.inject.Inject
 
-/**
- * Creates a LinkAccountSession for the given [PaymentIntent] or [SetupIntent].
- */
+
 internal class CreateLinkAccountSession @Inject constructor(
     private val stripeRepository: StripeRepository
 ) {
 
+    /**
+     * Creates a LinkAccountSession for the given [PaymentIntent] secret.
+     */
     suspend fun forPaymentIntent(
         publishableKey: String,
         clientSecret: String,
@@ -32,6 +33,9 @@ internal class CreateLinkAccountSession @Inject constructor(
         )
     }.mapCatching { it ?: throw InternalError("Error creating session for PaymentIntent") }
 
+    /**
+     * Creates a LinkAccountSession for the given [SetupIntent] secret.
+     */
     suspend fun forSetupIntent(
         publishableKey: String,
         clientSecret: String,
