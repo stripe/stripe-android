@@ -9,8 +9,8 @@ internal class BankConnectionsLinkAccountSessionJsonParser :
     ModelJsonParser<BankConnectionsLinkedAccountSession> {
     override fun parse(json: JSONObject): BankConnectionsLinkedAccountSession {
         return BankConnectionsLinkedAccountSession(
-            clientSecret = StripeJsonUtils.optString(json, FIELD_CLIENT_SECRET),
-            id = StripeJsonUtils.optString(json, FIELD_ID)
+            clientSecret = json.getString(FIELD_CLIENT_SECRET),
+            id = json.getString(FIELD_ID)
         )
     }
 

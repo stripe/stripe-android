@@ -5,6 +5,6 @@ import kotlinx.parcelize.Parcelize
 
 @Parcelize
 internal data class BankConnectionsLinkedAccountSession(
-    val clientSecret: String?,
-    val id: String?,
+    val clientSecret: String,
+    val id: String,
 ) : StripeModel

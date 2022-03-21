@@ -12,6 +12,7 @@ import com.stripe.android.connections.ConnectionsSheetResult.Canceled
 import com.stripe.android.connections.ConnectionsSheetResult.Completed
 import com.stripe.android.connections.ConnectionsSheetResult.Failed
 import com.stripe.android.core.Logger
+import com.stripe.android.model.BankConnectionsLinkedAccountSession
 import com.stripe.android.payments.bankaccount.CollectBankAccountConfiguration.USBankAccount
 import com.stripe.android.payments.bankaccount.CollectBankAccountResponse
 import com.stripe.android.payments.bankaccount.di.DaggerCollectBankAccountComponent
@@ -59,11 +60,11 @@ internal class CollectBankAccountViewModel @Inject constructor(
                     customerEmail = params.email
                 )
             }
-                .onSuccess { linkedAccountSession ->
+                .onSuccess { linkedAccountSession: BankConnectionsLinkedAccountSession ->
                     logger.debug("Bank account session created! $linkedAccountSession.")
                     _viewEffect.emit(
                         OpenConnectionsFlow(
-                            linkedAccountSessionClientSecret = linkedAccountSession,
+                            linkedAccountSessionClientSecret = linkedAccountSession.clientSecret,
                             publishableKey = args.publishableKey
                         )
                     )
@@ -75,7 +76,7 @@ internal class CollectBankAccountViewModel @Inject constructor(
     fun onConnectionsResult(result: ConnectionsSheetResult) {
         viewModelScope.launch {
             when (result) {
-                Canceled -> finishWithResult(CollectBankAccountResult.Cancelled)
+                is Canceled -> finishWithResult(CollectBankAccountResult.Cancelled)
                 is Failed -> finishWithError(result.error)
                 is Completed -> attachLinkAccountSessionToIntent(result.linkAccountSession.id)
             }
@@ -94,14 +95,14 @@ internal class CollectBankAccountViewModel @Inject constructor(
                     clientSecret = args.clientSecret,
                     linkedAccountSessionId = linkedAccountSessionId
                 ).mapCatching {
-                    CollectBankAccountResult.Completed(CollectBankAccountResponse(it.value))
+                    CollectBankAccountResult.Completed(CollectBankAccountResponse(args.clientSecret))
                 }
                 is ForSetupIntent -> attachLinkAccountSession.forSetupIntent(
                     publishableKey = args.publishableKey,
                     clientSecret = args.clientSecret,
                     linkedAccountSessionId = linkedAccountSessionId
                 ).mapCatching {
-                    CollectBankAccountResult.Completed(CollectBankAccountResponse(it.value))
+                    CollectBankAccountResult.Completed(CollectBankAccountResponse(args.clientSecret))
                 }
             }
                 .onSuccess { result: CollectBankAccountResult.Completed ->

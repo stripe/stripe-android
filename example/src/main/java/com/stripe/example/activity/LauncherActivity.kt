@@ -102,10 +102,6 @@ class LauncherActivity : AppCompatActivity() {
                 AffirmPaymentActivity::class.java
             ),
             Item(
-                activity.getString(R.string.confirm_with_instant_us_bank_account),
-                InstantUSBankAccountActivity::class.java
-            ),
-            Item(
                 activity.getString(R.string.becs_debit_example),
                 BecsDebitPaymentMethodActivity::class.java
             ),
