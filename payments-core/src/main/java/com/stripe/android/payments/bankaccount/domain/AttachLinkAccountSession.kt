@@ -6,7 +6,6 @@ import com.stripe.android.model.SetupIntent
 import com.stripe.android.networking.StripeRepository
 import javax.inject.Inject
 
-
 internal class AttachLinkAccountSession @Inject constructor(
     private val stripeRepository: StripeRepository
 ) {
