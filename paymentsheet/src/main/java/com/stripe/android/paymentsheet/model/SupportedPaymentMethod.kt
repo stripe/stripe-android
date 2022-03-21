@@ -109,7 +109,6 @@ sealed class SupportedPaymentMethod(
         )
     )
 
-
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
     @Parcelize
     object Bancontact : SupportedPaymentMethod(
@@ -121,7 +120,6 @@ sealed class SupportedPaymentMethod(
         BancontactForm
     )
 
-
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
     @Parcelize
     object Sofort : SupportedPaymentMethod(
@@ -132,7 +130,6 @@ sealed class SupportedPaymentMethod(
         SofortParamKey,
         SofortForm
     )
-
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
     @Parcelize
