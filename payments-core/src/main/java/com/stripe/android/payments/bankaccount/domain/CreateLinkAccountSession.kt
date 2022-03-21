@@ -1,6 +1,7 @@
 package com.stripe.android.payments.bankaccount.domain
 
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.model.BankConnectionsLinkedAccountSession
 import com.stripe.android.model.CreateLinkAccountSessionParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
@@ -11,12 +12,15 @@ internal class CreateLinkAccountSession @Inject constructor(
     private val stripeRepository: StripeRepository
 ) {
 
+    /**
+     * Creates a LinkAccountSession for the given [PaymentIntent] secret.
+     */
     suspend fun forPaymentIntent(
         publishableKey: String,
         clientSecret: String,
         customerName: String,
         customerEmail: String?,
-    ): Result<String> = kotlin.runCatching {
+    ): Result<BankConnectionsLinkedAccountSession> = kotlin.runCatching {
         stripeRepository.createPaymentIntentLinkAccountSession(
             paymentIntentId = PaymentIntent.ClientSecret(clientSecret).paymentIntentId,
             params = CreateLinkAccountSessionParams(
@@ -26,16 +30,17 @@ internal class CreateLinkAccountSession @Inject constructor(
             ),
             requestOptions = ApiRequest.Options(publishableKey)
         )
-    }.mapCatching { session ->
-        requireNotNull(session!!.clientSecret)
-    }
+    }.mapCatching { it ?: throw InternalError("Error creating session for PaymentIntent") }
 
+    /**
+     * Creates a LinkAccountSession for the given [SetupIntent] secret.
+     */
     suspend fun forSetupIntent(
         publishableKey: String,
         clientSecret: String,
         customerName: String,
         customerEmail: String?,
-    ): Result<String> = kotlin.runCatching {
+    ): Result<BankConnectionsLinkedAccountSession> = kotlin.runCatching {
         stripeRepository.createSetupIntentLinkAccountSession(
             setupIntentId = SetupIntent.ClientSecret(clientSecret).setupIntentId,
             params = CreateLinkAccountSessionParams(
@@ -45,7 +50,5 @@ internal class CreateLinkAccountSession @Inject constructor(
             ),
             requestOptions = ApiRequest.Options(publishableKey)
         )
-    }.mapCatching { session ->
-        requireNotNull(session!!.clientSecret)
-    }
+    }.mapCatching { it ?: throw InternalError("Error creating session for SetupIntent") }
 }

@@ -10,37 +10,41 @@ internal class AttachLinkAccountSession @Inject constructor(
     private val stripeRepository: StripeRepository
 ) {
 
+    /**
+     * Attaches a LinkedAccountSession to a given PaymentIntent,
+     * using the [linkedAccountSessionId] and the intent [clientSecret].
+     *
+     * @return whether the operation succeeded or not.
+     */
     suspend fun forPaymentIntent(
         publishableKey: String,
         linkedAccountSessionId: String,
         clientSecret: String,
-    ): Result<ClientSecret> = kotlin.runCatching {
+    ): Result<Unit> = kotlin.runCatching {
         stripeRepository.attachLinkAccountSessionToPaymentIntent(
             linkAccountSessionId = linkedAccountSessionId,
             clientSecret = clientSecret,
             paymentIntentId = PaymentIntent.ClientSecret(clientSecret).paymentIntentId,
-            requestOptions = buildRequestOptions(publishableKey)
+            requestOptions = ApiRequest.Options(publishableKey)
         )
-    }.mapCatching { ClientSecret(requireNotNull(it!!.clientSecret)) }
+    }.mapCatching { it ?: throw InternalError("Error attaching session to PaymentIntent") }
 
+    /**
+     * Attaches a LinkedAccountSession to a given PaymentIntent,
+     * using the [linkedAccountSessionId] and the intent [clientSecret].
+     *
+     * @return whether the operation succeeded or not.
+     */
     suspend fun forSetupIntent(
         publishableKey: String,
         linkedAccountSessionId: String,
         clientSecret: String,
-    ): Result<ClientSecret> = kotlin.runCatching {
+    ): Result<Unit> = kotlin.runCatching {
         stripeRepository.attachLinkAccountSessionToSetupIntent(
             linkAccountSessionId = linkedAccountSessionId,
             clientSecret = clientSecret,
             setupIntentId = SetupIntent.ClientSecret(clientSecret).setupIntentId,
-            requestOptions = buildRequestOptions(publishableKey)
+            requestOptions = ApiRequest.Options(publishableKey)
         )
-    }.mapCatching { ClientSecret(requireNotNull(it!!.clientSecret)) }
-
-    private fun buildRequestOptions(publishableKey: String) = ApiRequest.Options(
-        publishableKeyProvider = { publishableKey },
-        stripeAccountIdProvider = { null }, // provide account id?
-    )
-
-    @JvmInline
-    value class ClientSecret(val value: String)
+    }.mapCatching { it ?: throw InternalError("Error attaching session to SetupIntent") }
 }
