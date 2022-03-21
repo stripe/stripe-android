@@ -1909,7 +1909,7 @@ internal class StripeApiRepositoryTest {
         val params = requireNotNull(request.params)
 
         assertEquals(
-            "https://api.stripe.com/v1/payment_intents/pi_1234/link_account_session",
+            "https://api.stripe.com/v1/payment_intents/pi_1234/link_account_sessions",
             request.baseUrl
         )
         with(params) {
@@ -1953,7 +1953,7 @@ internal class StripeApiRepositoryTest {
         val params = requireNotNull(request.params)
 
         assertEquals(
-            "https://api.stripe.com/v1/setup_intents/seti_1234/link_account_session",
+            "https://api.stripe.com/v1/setup_intents/seti_1234/link_account_sessions",
             request.baseUrl
         )
 
