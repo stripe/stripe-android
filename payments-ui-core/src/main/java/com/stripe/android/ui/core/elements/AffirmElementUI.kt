@@ -16,6 +16,6 @@ fun AffirmElementUI() {
         imageGetter = mapOf(
             "affirm" to R.drawable.stripe_ic_affirm_logo
         ),
-        modifier = Modifier.padding(bottom = 12.dp)
+        modifier = Modifier.padding(bottom = 4.dp)
     )
 }
