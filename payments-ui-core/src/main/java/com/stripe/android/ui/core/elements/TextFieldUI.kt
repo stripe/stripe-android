@@ -60,7 +60,8 @@ internal fun TextField(
         backgroundColor = PaymentsTheme.colors.colorComponentBackground,
         focusedIndicatorColor = Color.Transparent,
         disabledIndicatorColor = Color.Transparent,
-        unfocusedIndicatorColor = Color.Transparent
+        unfocusedIndicatorColor = Color.Transparent,
+        cursorColor = PaymentsTheme.colors.colorTextCursor
     )
 
     TextField(
