@@ -89,7 +89,7 @@ ext {
     mockitoCoreVersion = '4.4.0'
     mockitoKotlinVersion = '4.0.0'
     espressoVersion = '3.4.0'
-    jsonVersion = '20211205'
+    jsonVersion = '20220320'
 
     group_name = GROUP
     version_name = VERSION_NAME
