@@ -20,14 +20,10 @@ class BsbElement(
     )
 
     val bankName = textElement.controller.fieldValue.map { textFieldValue ->
-        if (textFieldValue.length >= 2) {
-            banks
-                .filter { it.prefix == textFieldValue.substring(0, 2) }
-                .map { it.name }
-                .firstOrNull()
-        } else {
-            null
-        }
+        banks
+            .filter { textFieldValue.startsWith(it.prefix) }
+            .map { it.name }
+            .firstOrNull()
     }
 
     override fun getFormFieldValueFlow() = combine(
