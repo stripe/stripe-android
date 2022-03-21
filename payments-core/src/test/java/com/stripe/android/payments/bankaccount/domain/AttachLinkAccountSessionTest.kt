@@ -10,6 +10,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.mockito.kotlin.any
+import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
@@ -28,11 +29,13 @@ class AttachLinkAccountSessionTest {
             val publishableKey = "publishable_key"
             val linkedAccountSessionId = "session_id"
             val clientSecret = "pi_1234_secret_5678"
-            val resultPaymentIntent = mock<PaymentIntent>()
-            givenAttachPaymentIntentReturns { resultPaymentIntent }
+            val paymentIntent = mock<PaymentIntent> {
+                on { this.clientSecret } doReturn clientSecret
+            }
+            givenAttachPaymentIntentReturns { paymentIntent }
 
             // When
-            val paymentIntent: Result<PaymentIntent> = attachLinkAccountSession.forPaymentIntent(
+            val result: Result<Unit> = attachLinkAccountSession.forPaymentIntent(
                 publishableKey,
                 linkedAccountSessionId,
                 clientSecret
@@ -45,7 +48,7 @@ class AttachLinkAccountSessionTest {
                 linkAccountSessionId = linkedAccountSessionId,
                 requestOptions = ApiRequest.Options(publishableKey)
             )
-            assertThat((paymentIntent)).isEqualTo(Result.success(resultPaymentIntent))
+            assertThat((result)).isEqualTo(Result.success(Unit))
         }
     }
 
@@ -59,7 +62,7 @@ class AttachLinkAccountSessionTest {
             givenAttachPaymentIntentReturns { null }
 
             // When
-            val paymentIntent: Result<PaymentIntent> = attachLinkAccountSession.forPaymentIntent(
+            val result: Result<Unit> = attachLinkAccountSession.forPaymentIntent(
                 publishableKey,
                 linkedAccountSessionId,
                 clientSecret
@@ -72,7 +75,7 @@ class AttachLinkAccountSessionTest {
                 linkAccountSessionId = linkedAccountSessionId,
                 requestOptions = ApiRequest.Options(publishableKey)
             )
-            assertThat(paymentIntent.exceptionOrNull()!!).isInstanceOf(InternalError::class.java)
+            assertThat(result.exceptionOrNull()!!).isInstanceOf(InternalError::class.java)
         }
     }
 
@@ -87,7 +90,7 @@ class AttachLinkAccountSessionTest {
             givenAttachPaymentIntentReturns { throw expectedException }
 
             // When
-            val paymentIntent: Result<PaymentIntent> = attachLinkAccountSession.forPaymentIntent(
+            val result: Result<Unit> = attachLinkAccountSession.forPaymentIntent(
                 publishableKey,
                 linkedAccountSessionId,
                 clientSecret
@@ -100,7 +103,7 @@ class AttachLinkAccountSessionTest {
                 linkAccountSessionId = linkedAccountSessionId,
                 requestOptions = ApiRequest.Options(publishableKey)
             )
-            assertThat(paymentIntent.exceptionOrNull()!!).isEqualTo(expectedException)
+            assertThat(result.exceptionOrNull()!!).isEqualTo(expectedException)
         }
     }
 
@@ -111,18 +114,18 @@ class AttachLinkAccountSessionTest {
             val publishableKey = "publishable_key"
             val linkedAccountSessionId = "session_id"
             val clientSecret = "wrong_secret"
-            val resultPaymentIntent = mock<PaymentIntent>()
-            givenAttachPaymentIntentReturns { resultPaymentIntent }
+            val paymentIntent = mock<PaymentIntent>()
+            givenAttachPaymentIntentReturns { paymentIntent }
 
             // When
-            val paymentIntent: Result<PaymentIntent> = attachLinkAccountSession.forPaymentIntent(
+            val result: Result<Unit> = attachLinkAccountSession.forPaymentIntent(
                 publishableKey,
                 linkedAccountSessionId,
                 clientSecret
             )
 
             // Then
-            assertTrue(paymentIntent.isFailure)
+            assertTrue(result.isFailure)
         }
     }
 
@@ -133,11 +136,13 @@ class AttachLinkAccountSessionTest {
             val publishableKey = "publishable_key"
             val linkedAccountSessionId = "session_id"
             val clientSecret = "seti_1234_secret_5678"
-            val resultSetupIntent = mock<SetupIntent>()
+            val resultSetupIntent = mock<SetupIntent> {
+                on { this.clientSecret } doReturn clientSecret
+            }
             givenAttachSetupIntentReturns { resultSetupIntent }
 
             // When
-            val setupIntent: Result<SetupIntent> = attachLinkAccountSession.forSetupIntent(
+            val result: Result<Unit> = attachLinkAccountSession.forSetupIntent(
                 publishableKey,
                 linkedAccountSessionId,
                 clientSecret
@@ -150,7 +155,7 @@ class AttachLinkAccountSessionTest {
                 linkAccountSessionId = linkedAccountSessionId,
                 requestOptions = ApiRequest.Options(publishableKey)
             )
-            assertThat((setupIntent)).isEqualTo(Result.success(resultSetupIntent))
+            assertThat((result)).isEqualTo(Result.success(Unit))
         }
     }
 
@@ -164,7 +169,7 @@ class AttachLinkAccountSessionTest {
             givenAttachSetupIntentReturns { null }
 
             // When
-            val setupIntent: Result<SetupIntent> = attachLinkAccountSession.forSetupIntent(
+            val setupIntent: Result<Unit> = attachLinkAccountSession.forSetupIntent(
                 publishableKey,
                 linkedAccountSessionId,
                 clientSecret
@@ -192,7 +197,7 @@ class AttachLinkAccountSessionTest {
             givenAttachSetupIntentReturns { throw expectedException }
 
             // When
-            val setupIntent: Result<SetupIntent> = attachLinkAccountSession.forSetupIntent(
+            val setupIntent: Result<Unit> = attachLinkAccountSession.forSetupIntent(
                 publishableKey,
                 linkedAccountSessionId,
                 clientSecret
@@ -220,7 +225,7 @@ class AttachLinkAccountSessionTest {
             givenAttachSetupIntentReturns { resultSetupIntent }
 
             // When
-            val setupIntent: Result<SetupIntent> = attachLinkAccountSession.forSetupIntent(
+            val setupIntent: Result<Unit> = attachLinkAccountSession.forSetupIntent(
                 publishableKey,
                 linkedAccountSessionId,
                 clientSecret
