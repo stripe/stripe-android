@@ -38,14 +38,16 @@ internal object SectionTitle {
 internal fun Section(
     @StringRes title: Int?,
     error: String?,
-    content: @Composable () -> Unit
+    contentOutsideCard: @Composable () -> Unit = {},
+    contentInCard: @Composable () -> Unit
 ) {
     Column(modifier = Modifier.padding(vertical = 8.dp)) {
         SectionTitle(title)
-        SectionCard(content = content)
+        SectionCard(content = contentInCard)
         if (error != null) {
             SectionError(error)
         }
+        contentOutsideCard()
     }
 }
 

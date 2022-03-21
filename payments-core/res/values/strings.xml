@@ -85,7 +85,7 @@
   <!-- BECS Debit Widget - account number field - required error message -->
   <string name="becs_widget_account_number_required">Your account number is required.</string>
   <!-- Placeholder text for BSB Number entry field for BECS Debit. -->
-  <string name="becs_widget_bsb">BSB</string>
+  <string name="becs_widget_bsb">BSB number</string>
   <!-- Error string displayed to user when they have entered an incomplete BSB number. BSB refers to an Australian bank account number -->
   <string name="becs_widget_bsb_incomplete">The BSB you entered is incomplete.</string>
   <!-- Error string displayed to user when they enter in an invalid BSB number. &quot;BSB&quot; refers to an Australian bank account. -->

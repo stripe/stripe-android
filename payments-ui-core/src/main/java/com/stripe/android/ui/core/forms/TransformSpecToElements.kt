@@ -65,6 +65,7 @@ class TransformSpecToElements(
                     it.transform()
                 is EmptyFormSpec -> EmptyFormElement()
                 is AuBecsDebitMandateTextSpec -> it.transform(merchantName)
+                is BsbSpec -> it.transform()
             }
         }
 
@@ -123,7 +124,6 @@ class TransformSpecToElements(
                     country
                 )
                 is AuBankAccountNumberSpec -> it.transform()
-                is BsbSpec -> it.transform()
             }
         }
 }

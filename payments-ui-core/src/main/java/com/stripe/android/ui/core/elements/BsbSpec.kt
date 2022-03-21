@@ -1,18 +1,21 @@
 package com.stripe.android.ui.core.elements
 
+import android.os.Parcelable
 import com.stripe.android.view.BecsDebitBanks
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
-internal object BsbSpec : SectionFieldSpec(IdentifierSpec.Generic("bsb_number")) {
-    fun transform(): SectionFieldElement =
-        SimpleTextElement(
+internal data class BsbSpec(
+    override val identifier: IdentifierSpec = IdentifierSpec.Generic("bsb_number")
+) : FormItemSpec(), RequiredItemSpec, Parcelable {
+    fun transform(): BsbElement =
+        BsbElement(
             this.identifier,
-            TextFieldController(BsbConfig(banks))
+            banks
         )
 }
 
-internal val banks: List<BecsDebitBanks.Bank> = listOf(
+private val banks: List<BecsDebitBanks.Bank> = listOf(
     BecsDebitBanks.Bank("00", "Stripe Test Bank"),
     BecsDebitBanks.Bank("10", "BankSA (division of Westpac Bank)"),
     BecsDebitBanks.Bank("11", "St George Bank (division of Westpac Bank)"),
@@ -74,7 +77,10 @@ internal val banks: List<BecsDebitBanks.Bank> = listOf(
     BecsDebitBanks.Bank("646", "Maitland Mutual Building Society"),
     BecsDebitBanks.Bank("647", "IMB"),
     BecsDebitBanks.Bank("650", "Newcastle Permanent Building Society"),
-    BecsDebitBanks.Bank("653", "Pioneer Permanent Building Society (division of Bank of Queensland)"),
+    BecsDebitBanks.Bank(
+        "653",
+        "Pioneer Permanent Building Society (division of Bank of Queensland)"
+    ),
     BecsDebitBanks.Bank("654", "ECU Australia"),
     BecsDebitBanks.Bank("655", "The Rock Building Society"),
     BecsDebitBanks.Bank("656", "Wide Bay Australia"),

@@ -16,7 +16,7 @@ import com.stripe.android.view.BecsDebitBanks
  * a six-digit number used to identify the individual branch of an Australian financial institution
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class BsbConfig(private val Banks: List<BecsDebitBanks.Bank>) : TextFieldConfig {
+class BsbConfig(private val banks: List<BecsDebitBanks.Bank>) : TextFieldConfig {
     override val capitalization: KeyboardCapitalization = KeyboardCapitalization.None
     override val debugLabel = "bsb"
 

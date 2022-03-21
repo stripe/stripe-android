@@ -266,6 +266,6 @@ internal val AffirmRequirement = PaymentMethodRequirements(
  */
 internal val AuBecsDebitRequirement = PaymentMethodRequirements(
     piRequirements = emptySet(),
-    siRequirements = emptySet(),
+    siRequirements = null,
     confirmPMFromCustomer = null
 )
