@@ -15,7 +15,7 @@ class BsbConfigTest {
         Truth.assertThat(bsbConfig.visualTransformation.filter(AnnotatedString("000000")).text)
             .isEqualTo(AnnotatedString("000 - 000"))
     }
-    
+
     @Test
     fun `verify visualTransformation formats entered value`() {
         Truth.assertThat(bsbConfig.visualTransformation.filter(AnnotatedString("123456")).text)

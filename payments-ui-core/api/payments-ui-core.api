@@ -39,6 +39,19 @@ public final class com/stripe/android/ui/core/elements/BankRepository_Factory : 
 	public static fun newInstance (Landroid/content/res/Resources;)Lcom/stripe/android/ui/core/elements/BankRepository;
 }
 
+public final class com/stripe/android/ui/core/elements/BsbElement : com/stripe/android/ui/core/elements/FormElement {
+	public static final field $stable I
+	public fun <init> (Lcom/stripe/android/ui/core/elements/IdentifierSpec;Ljava/util/List;)V
+	public final fun getBankName ()Lkotlinx/coroutines/flow/Flow;
+	public fun getController ()Lcom/stripe/android/ui/core/elements/Controller;
+	public fun getFormFieldValueFlow ()Lkotlinx/coroutines/flow/Flow;
+	public fun getIdentifier ()Lcom/stripe/android/ui/core/elements/IdentifierSpec;
+	public final fun getTextElement ()Lcom/stripe/android/ui/core/elements/SimpleTextElement;
+}
+
+public final class com/stripe/android/ui/core/elements/BsbElementUIKt {
+}
+
 public final class com/stripe/android/ui/core/elements/ComposableSingletons$AffirmElementUIKt {
 	public static final field INSTANCE Lcom/stripe/android/ui/core/elements/ComposableSingletons$AffirmElementUIKt;
 	public static field lambda-1 Lkotlin/jvm/functions/Function2;
@@ -51,6 +64,13 @@ public final class com/stripe/android/ui/core/elements/ComposableSingletons$Afte
 	public static field lambda-1 Lkotlin/jvm/functions/Function3;
 	public fun <init> ()V
 	public final fun getLambda-1$payments_ui_core_release ()Lkotlin/jvm/functions/Function3;
+}
+
+public final class com/stripe/android/ui/core/elements/ComposableSingletons$SectionUIKt {
+	public static final field INSTANCE Lcom/stripe/android/ui/core/elements/ComposableSingletons$SectionUIKt;
+	public static field lambda-1 Lkotlin/jvm/functions/Function2;
+	public fun <init> ()V
+	public final fun getLambda-1$payments_ui_core_release ()Lkotlin/jvm/functions/Function2;
 }
 
 public final class com/stripe/android/ui/core/elements/DropdownItemSpec$$serializer : kotlinx/serialization/internal/GeneratedSerializer {

@@ -9,7 +9,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.res.stringResource
 import com.stripe.android.ui.core.PaymentsTheme
 
-
 @Composable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun BsbElementUI(
@@ -43,5 +42,4 @@ fun BsbElementUI(
             }
         )
     }
-
 }
