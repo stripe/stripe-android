@@ -4,15 +4,15 @@ import android.os.Bundle
 import android.view.View
 import androidx.lifecycle.Observer
 import com.stripe.example.R
-import com.stripe.example.databinding.PaymentExampleActivityBinding
+import com.stripe.example.databinding.ConnectBankAccountExampleActivityBinding
 
 /**
  * This example is currently work in progress. Do not use it as a reference.
  */
 class ConnectUSBankAccountActivity : StripeIntentActivity() {
 
-    private val viewBinding: PaymentExampleActivityBinding by lazy {
-        PaymentExampleActivityBinding.inflate(layoutInflater)
+    private val viewBinding: ConnectBankAccountExampleActivityBinding by lazy {
+        ConnectBankAccountExampleActivityBinding.inflate(layoutInflater)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
