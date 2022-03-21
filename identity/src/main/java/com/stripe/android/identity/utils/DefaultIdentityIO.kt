@@ -135,10 +135,10 @@ internal class DefaultIdentityIO(private val context: Context) : IdentityIO {
         )
     }
 
-    override fun createTFLiteFile(): File {
+    override fun createTFLiteFile(modelUrl: String): File {
         return File(
-            context.filesDir,
-            generateTFLiteFileName()
+            context.cacheDir,
+            generateTFLiteFileNameWithGitHash(modelUrl)
         )
     }
 
@@ -154,6 +154,10 @@ internal class DefaultIdentityIO(private val context: Context) : IdentityIO {
     private fun generateJpgFileName() =
         "JPEG_" + SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
 
-    private fun generateTFLiteFileName() =
-        "TFLITE_${(SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date()))}.tflite"
+    // Find the githash part of the model URL and general a tflite file name.
+    // Example of modelUrl: https://b.stripecdn.com/gelato/assets/50e98374a70b71b2ee7ec8c3060f187ee1d833bd/assets/id_detectors/tflite/2022-02-23/model.tflite
+    // TODO(ccen): Add name and versioning of the model, calculate MD5 and build a more descriptive caching machanism.
+    private fun generateTFLiteFileNameWithGitHash(modelUrl: String): String {
+        return "${modelUrl.split('/')[5]}.tflite"
+    }
 }

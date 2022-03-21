@@ -1,6 +1,5 @@
 package com.stripe.android.identity.networking
 
-import android.content.Context
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.exception.APIException
@@ -29,7 +28,6 @@ import kotlinx.serialization.json.Json
 import java.io.File
 
 internal class DefaultIdentityRepository(
-    private val context: Context,
     private val stripeNetworkClient: StripeNetworkClient = DefaultStripeNetworkClient(),
     private val identityIO: IdentityIO
 ) : IdentityRepository {
@@ -101,7 +99,7 @@ internal class DefaultIdentityRepository(
     override suspend fun downloadModel(modelUrl: String) = runCatching {
         stripeNetworkClient.executeRequestForFile(
             IdentityModelDownloadRequest(modelUrl),
-            identityIO.createTFLiteFile()
+            identityIO.createTFLiteFile(modelUrl)
         )
     }.fold(
         onSuccess = { response ->

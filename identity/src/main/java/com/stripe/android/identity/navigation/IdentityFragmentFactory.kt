@@ -7,6 +7,7 @@ import com.stripe.android.camera.AppSettingsOpenable
 import com.stripe.android.camera.CameraPermissionEnsureable
 import com.stripe.android.identity.IdentityVerificationSheetContract
 import com.stripe.android.identity.VerificationFlowFinishable
+import com.stripe.android.identity.networking.DefaultIDDetectorFetcher
 import com.stripe.android.identity.networking.DefaultIdentityRepository
 import com.stripe.android.identity.utils.DefaultIdentityIO
 import com.stripe.android.identity.utils.IdentityIO
@@ -29,7 +30,7 @@ internal class IdentityFragmentFactory(
 ) : FragmentFactory() {
     private val identityIO: IdentityIO = DefaultIdentityIO(context)
     private val identityRepository =
-        DefaultIdentityRepository(context = context, identityIO = identityIO)
+        DefaultIdentityRepository(identityIO = identityIO)
     private val identityScanViewModelFactory =
         IdentityScanViewModel.IdentityScanViewModelFactory(
             identityRepository,
@@ -51,7 +52,8 @@ internal class IdentityFragmentFactory(
 
     internal val identityViewModelFactory = IdentityViewModel.IdentityViewModelFactory(
         verificationArgs,
-        identityRepository
+        identityRepository,
+        DefaultIDDetectorFetcher(identityRepository, identityIO)
     )
 
     override fun instantiate(classLoader: ClassLoader, className: String): Fragment {
