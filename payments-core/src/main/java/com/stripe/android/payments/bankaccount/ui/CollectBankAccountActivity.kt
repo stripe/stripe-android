@@ -8,12 +8,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountContract
-import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResult
-import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResult.Completed
-import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResult.Failed
-import com.stripe.android.payments.bankaccount.ui.CollectBankAccountViewEffect.FinishWithError
-import com.stripe.android.payments.bankaccount.ui.CollectBankAccountViewEffect.FinishWithPaymentIntent
-import com.stripe.android.payments.bankaccount.ui.CollectBankAccountViewEffect.FinishWithSetupIntent
 import com.stripe.android.payments.bankaccount.ui.CollectBankAccountViewEffect.OpenConnectionsFlow
 import com.stripe.android.payments.connections.ConnectionsPaymentsProxy
 
@@ -45,9 +39,7 @@ internal class CollectBankAccountActivity : AppCompatActivity() {
             viewModel.viewEffect.collect { viewEffect ->
                 when (viewEffect) {
                     is OpenConnectionsFlow -> viewEffect.launch()
-                    is FinishWithError -> finishWithResult(Failed(Exception(viewEffect.exception)))
-                    is FinishWithPaymentIntent -> finishWithResult(Completed(viewEffect.paymentIntent))
-                    is FinishWithSetupIntent -> finishWithResult(Completed(viewEffect.setupIntent))
+                    is CollectBankAccountViewEffect.FinishWithResult -> viewEffect.launch()
                 }
             }
         }
@@ -67,7 +59,7 @@ internal class CollectBankAccountActivity : AppCompatActivity() {
         )
     }
 
-    private fun finishWithResult(result: CollectBankAccountResult) {
+    private fun CollectBankAccountViewEffect.FinishWithResult.launch() {
         setResult(
             Activity.RESULT_OK,
             Intent().putExtras(

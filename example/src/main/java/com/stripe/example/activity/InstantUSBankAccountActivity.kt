@@ -3,11 +3,10 @@ package com.stripe.example.activity
 import android.os.Bundle
 import android.view.View
 import androidx.lifecycle.Observer
-import com.stripe.android.ApiResultCallback
-import com.stripe.android.model.ConfirmPaymentIntentParams
-import com.stripe.android.payments.bankaccount.CollectBankAccountForPaymentResponse
+
 import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher
-import com.stripe.android.payments.bankaccount.CollectBankAccountParams
+import com.stripe.android.payments.bankaccount.CollectBankAccountConfiguration
+import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResult
 import com.stripe.example.Settings
 import com.stripe.example.databinding.PaymentExampleActivityBinding
 
@@ -19,33 +18,39 @@ class InstantUSBankAccountActivity : StripeIntentActivity() {
 
     private val settings by lazy { Settings(this) }
 
-    lateinit var launcher: CollectBankAccountLauncher.ForPaymentIntent
+    lateinit var launcher: CollectBankAccountLauncher
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(viewBinding.root)
 
-        launcher = CollectBankAccountLauncher.ForPaymentIntent.create(
-            this,
-            object : ApiResultCallback<CollectBankAccountForPaymentResponse> {
-                override fun onSuccess(result: CollectBankAccountForPaymentResponse) {
+        launcher = CollectBankAccountLauncher.create(
+            this
+        ) { result: CollectBankAccountResult ->
+            when (result) {
+                is CollectBankAccountResult.Completed -> {
                     viewModel.status
-                        .postValue("Attached bank account to paymentIntent." +
-                            " status: ${result.paymentIntent.status}. Confirming...")
-                    confirmPaymentIntent(
-                        ConfirmPaymentIntentParams.createWithPaymentMethodId(
-                            paymentMethodId = result.paymentIntent.paymentMethodId!!,
-                            clientSecret = result.paymentIntent.clientSecret!!
+                        .postValue(
+                            "Attached bank account to paymentIntent." +
+                                " secret: ${result.response.clientSecret}. Confirming..."
                         )
+//                    confirmPaymentIntent(
+//                        ConfirmPaymentIntentParams.createWithPaymentMethodId(
+//                            paymentMethodId = result.response.intent.paymentMethodId!!,
+//                            clientSecret = result.response.intent.clientSecret!!
+//                        )
+//                    )
+                }
+                is CollectBankAccountResult.Cancelled ->
+                    viewModel.status.postValue(
+                        "User cancelled flow."
                     )
-                }
-
-                override fun onError(e: Exception) {
-                    viewModel.status
-                        .postValue("Error attaching bank account to paymentIntent. ${e.message}")
-                }
+                is CollectBankAccountResult.Failed ->
+                    viewModel.status.postValue(
+                        "Error attaching bank account to intent. ${result.error.message}"
+                    )
             }
-        )
+        }
 
         viewBinding.confirmWithPaymentButton.text =
             "Confirm with Bank Account"
@@ -63,10 +68,10 @@ class InstantUSBankAccountActivity : StripeIntentActivity() {
                 result.onSuccess {
                     viewModel.status
                         .postValue("Collecting bank account information for payment")
-                    launcher.launch(
+                    launcher.presentWithPaymentIntent(
                         publishableKey = settings.publishableKey,
                         clientSecret = it.getString("client_secret"),
-                        params = CollectBankAccountParams.USBankAccount(
+                        params = CollectBankAccountConfiguration.USBankAccount(
                             name = "Jane Doe",
                             email = "email@email.com"
                         )

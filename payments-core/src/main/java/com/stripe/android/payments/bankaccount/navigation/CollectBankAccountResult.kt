@@ -1,22 +1,24 @@
 package com.stripe.android.payments.bankaccount.navigation
 
 import android.os.Parcelable
-import com.stripe.android.model.StripeIntent
+import com.stripe.android.payments.bankaccount.CollectBankAccountResponse
 import kotlinx.parcelize.Parcelize
 
 /**
  * The result of an attempt to collect a bank account
  */
-internal sealed class CollectBankAccountResult : Parcelable {
+sealed class CollectBankAccountResult : Parcelable {
 
-    // TODO manage setup and payment intents.
     @Parcelize
     data class Completed(
-        val intent: StripeIntent
+        val response: CollectBankAccountResponse
     ) : CollectBankAccountResult()
 
     @Parcelize
     data class Failed(
         val error: Throwable
     ) : CollectBankAccountResult()
+
+    @Parcelize
+    object Cancelled : CollectBankAccountResult()
 }

@@ -1,7 +1,6 @@
 package com.stripe.android.payments.bankaccount.ui
 
-import com.stripe.android.model.PaymentIntent
-import com.stripe.android.model.SetupIntent
+import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResult
 
 internal sealed class CollectBankAccountViewEffect {
     data class OpenConnectionsFlow(
@@ -9,15 +8,7 @@ internal sealed class CollectBankAccountViewEffect {
         val linkedAccountSessionClientSecret: String
     ) : CollectBankAccountViewEffect()
 
-    data class FinishWithPaymentIntent(
-        val paymentIntent: PaymentIntent
-    ) : CollectBankAccountViewEffect()
-
-    data class FinishWithSetupIntent(
-        val setupIntent: SetupIntent
-    ) : CollectBankAccountViewEffect()
-
-    data class FinishWithError(
-        val exception: Throwable
+    data class FinishWithResult(
+        val result: CollectBankAccountResult
     ) : CollectBankAccountViewEffect()
 }

@@ -119,7 +119,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
     private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory =
         PaymentAnalyticsRequestFactory(context, publishableKeyProvider, productUsageTokens),
     private val fraudDetectionDataParamsUtils: FraudDetectionDataParamsUtils = FraudDetectionDataParamsUtils(),
-    betas: Set<StripeApiBeta> = setOf(USBankAccount), //TODO revert
+    betas: Set<StripeApiBeta> = setOf(USBankAccount), // TODO revert
     apiVersion: String = ApiVersion(betas = betas.map { it.code }.toSet()).code,
     sdkVersion: String = StripeSdkVersion.VERSION
 ) : StripeRepository() {
@@ -1897,7 +1897,8 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         }
 
         /**
-         * @return `https://api.stripe.com/v1/payment_intents/:paymentIntentId/link_account_sessions/:linkAccountSessionId/attach`
+         * @return `https://api.stripe.com/v1/payment_intents/:paymentIntentId/
+         * link_account_sessions/:linkAccountSessionId/attach`
          */
         @VisibleForTesting
         @JvmSynthetic
@@ -1913,7 +1914,8 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         }
 
         /**
-         * @return `https://api.stripe.com/v1/setup_intents/:setupIntentId/link_account_sessions/:linkAccountSessionId/attach`
+         * @return `https://api.stripe.com/v1/setup_intents/:setupIntentId/
+         * link_account_sessions/:linkAccountSessionId/attach`
          */
         @VisibleForTesting
         @JvmSynthetic
