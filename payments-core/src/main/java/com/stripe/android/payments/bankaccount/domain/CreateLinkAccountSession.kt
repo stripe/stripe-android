@@ -8,7 +8,6 @@ import com.stripe.android.model.SetupIntent
 import com.stripe.android.networking.StripeRepository
 import javax.inject.Inject
 
-
 internal class CreateLinkAccountSession @Inject constructor(
     private val stripeRepository: StripeRepository
 ) {
