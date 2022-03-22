@@ -122,10 +122,6 @@ class LauncherActivity : AppCompatActivity() {
                 NetbankingPaymentActivity::class.java
             ),
             Item(
-                activity.getString(R.string.manual_us_bank_account_example),
-                ManualUSBankAccountPaymentMethodActivity::class.java
-            ),
-            Item(
                 activity.getString(R.string.card_brands),
                 CardBrandsActivity::class.java
             ),
@@ -144,6 +140,10 @@ class LauncherActivity : AppCompatActivity() {
             Item(
                 activity.getString(R.string.confirm_with_us_bank_account_entry_point),
                 ConnectUSBankAccountActivity::class.java
+            ),
+            Item(
+                activity.getString(R.string.manual_us_bank_account_example),
+                ManualUSBankAccountPaymentMethodActivity::class.java
             ),
         )
 
