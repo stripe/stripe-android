@@ -87,7 +87,11 @@ class CardImageVerificationSheet private constructor(
             registry: ActivityResultRegistry = from.activityResultRegistry,
         ) =
             CardImageVerificationSheet(stripePublishableKey, config).apply {
-                launcher = from.registerForActivityResult(activityResultContract, registry, ::onResult)
+                launcher = from.registerForActivityResult(
+                    activityResultContract,
+                    registry,
+                    ::onResult,
+                )
             }
 
         /**
