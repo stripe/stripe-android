@@ -39,13 +39,6 @@ public final class com/stripe/android/ui/core/elements/BankRepository_Factory : 
 	public static fun newInstance (Landroid/content/res/Resources;)Lcom/stripe/android/ui/core/elements/BankRepository;
 }
 
-public final class com/stripe/android/ui/core/elements/ComposableSingletons$AffirmElementUIKt {
-	public static final field INSTANCE Lcom/stripe/android/ui/core/elements/ComposableSingletons$AffirmElementUIKt;
-	public static field lambda-1 Lkotlin/jvm/functions/Function2;
-	public fun <init> ()V
-	public final fun getLambda-1$payments_ui_core_release ()Lkotlin/jvm/functions/Function2;
-}
-
 public final class com/stripe/android/ui/core/elements/ComposableSingletons$AfterpayClearpayElementUIKt {
 	public static final field INSTANCE Lcom/stripe/android/ui/core/elements/ComposableSingletons$AfterpayClearpayElementUIKt;
 	public static field lambda-1 Lkotlin/jvm/functions/Function3;
