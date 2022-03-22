@@ -16,7 +16,7 @@ fun MandateTextUI(
     element: MandateTextElement
 ) {
     Text(
-        stringResource(element.stringResId, element.merchantName ?: ""),
+        text = stringResource(element.stringResId, element.merchantName ?: ""),
         style = PaymentsTheme.typography.body2,
         color = PaymentsTheme.colors.colorTextSecondary,
         modifier = Modifier
