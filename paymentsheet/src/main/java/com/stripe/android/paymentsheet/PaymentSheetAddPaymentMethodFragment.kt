@@ -53,7 +53,7 @@ internal class PaymentSheetAddPaymentMethodFragment() : BaseAddPaymentMethodFrag
 
         googlePayButton.isVisible = shouldShowGooglePayButton
         googlePayDivider.isVisible = shouldShowGooglePayButton
-        addPaymentMethodHeaderVisibility = !shouldShowGooglePayButton
+        sheetViewModel.headerVisibilility.postValue(!shouldShowGooglePayButton)
 
         sheetViewModel.selection.observe(viewLifecycleOwner) { paymentSelection ->
             updateErrorMessage(null)

@@ -61,12 +61,16 @@ object PaymentsThemeConfig {
         private val fontSizeMultiplier: Float = 1.0F
         val fontFamily: Int = R.font.roboto
 
+        // h4 is our largest headline. It is used for the most important labels in our UI
+        // ex: "Select your payment method" in Payment Sheet.
         val h4 = TextStyle.Default.copy(
             fontFamily = FontFamily(Font(fontFamily)),
             fontSize = (20.0 * fontSizeMultiplier).sp,
             fontWeight = FontWeight(fontWeightBold),
         )
 
+        // h5 is our medium headline label.
+        // ex: "Pay $50.99" in Payment Sheet's buy button.
         val h5 = TextStyle.Default.copy(
             fontFamily = FontFamily(Font(fontFamily)),
             fontSize = (16.0 * fontSizeMultiplier).sp,
@@ -74,6 +78,8 @@ object PaymentsThemeConfig {
             letterSpacing = (-0.32).sp
         )
 
+        // h6 is our smallest headline label.
+        // ex: Section labels in Payment Sheet
         val h6 = TextStyle.Default.copy(
             fontFamily = FontFamily(Font(fontFamily)),
             fontSize = (13.0 * fontSizeMultiplier).sp,
@@ -81,12 +87,16 @@ object PaymentsThemeConfig {
             letterSpacing = (-0.15).sp
         )
 
+        // body1 is our larger body text. Used for the bulk of our elements and forms.
+        // ex: the text used in Payment Sheet's text form elements.
         val body1 = TextStyle.Default.copy(
             fontFamily = FontFamily(Font(fontFamily)),
             fontSize = (14.0 * fontSizeMultiplier).sp,
             fontWeight = FontWeight(fontWeightNormal),
         )
 
+        // subtitle1 is our only subtitle size. Used for labeling fields.
+        // ex: the placeholder texts that appear when you type in Payment Sheet's forms.
         val subtitle1 = TextStyle.Default.copy(
             fontFamily = FontFamily(Font(fontFamily)),
             fontSize = (14.0 * fontSizeMultiplier).sp,
@@ -94,12 +104,16 @@ object PaymentsThemeConfig {
             letterSpacing = (-0.15).sp
         )
 
+        // caption is used to label images in payment sheet.
+        // ex: the labels under our payment method selectors in Payment Sheet.
         val caption = TextStyle.Default.copy(
             fontFamily = FontFamily(Font(fontFamily)),
             fontSize = (12.0 * fontSizeMultiplier).sp,
             fontWeight = FontWeight(fontWeightMedium)
         )
 
+        // body2 is our smaller body text. Used for less important fields that are not required to
+        // read. Ex: our mandate texts in Payment Sheet.
         val body2 = TextStyle.Default.copy(
             fontFamily = FontFamily(Font(fontFamily)),
             fontSize = (9.0 * fontSizeMultiplier).sp,

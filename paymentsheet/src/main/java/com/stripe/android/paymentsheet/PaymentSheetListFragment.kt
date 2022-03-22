@@ -2,11 +2,9 @@ package com.stripe.android.paymentsheet
 
 import android.os.Bundle
 import android.view.View
-import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -17,14 +15,12 @@ import androidx.compose.ui.unit.dp
 import androidx.fragment.app.activityViewModels
 import com.stripe.android.paymentsheet.databinding.FragmentPaymentsheetPaymentMethodsListBinding
 import com.stripe.android.ui.core.CurrencyFormatter
-import com.stripe.android.ui.core.PaymentsTheme
+import com.stripe.android.ui.core.elements.H4Text
+import com.stripe.android.ui.core.elements.H6Text
 
 internal class PaymentSheetListFragment() : BasePaymentMethodsListFragment(
     canClickSelectedItem = false
 ) {
-    @VisibleForTesting
-    var showingTotal = false
-
     private val activityViewModel by activityViewModels<PaymentSheetViewModel> {
         PaymentSheetViewModel.Factory(
             { requireActivity().application },
@@ -47,7 +43,6 @@ internal class PaymentSheetListFragment() : BasePaymentMethodsListFragment(
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        showingTotal = sheetViewModel.isProcessingPaymentIntent
         val viewBinding = FragmentPaymentsheetPaymentMethodsListBinding.bind(view)
         viewBinding.header.apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
@@ -68,21 +63,17 @@ private fun HeaderUI(
 ) {
     val amount = remember { viewModel.amount }
     Column {
-        Text(
+        H4Text(
             text = stringResource(R.string.stripe_paymentsheet_select_payment_method),
-            style = PaymentsTheme.typography.h4,
-            color = PaymentsTheme.colors.material.onPrimary,
             modifier = Modifier.padding(bottom = 2.dp)
         )
         if (totalVisible) {
             amount.value?.let {
-                Text(
+                H6Text(
                     text = stringResource(
                         R.string.stripe_paymentsheet_total_amount,
                         CurrencyFormatter().format(it.value, it.currencyCode)
-                    ),
-                    style = PaymentsTheme.typography.h6,
-                    color = PaymentsTheme.colors.colorTextSecondary
+                    )
                 )
             }
         }

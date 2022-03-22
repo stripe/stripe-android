@@ -232,7 +232,7 @@ internal class PaymentSheetListFragmentTest : PaymentSheetViewModelTestInjection
                 )
             )
 
-            assertThat(fragment.showingTotal).isTrue()
+            assertThat(fragment.sheetViewModel.isProcessingPaymentIntent).isTrue()
         }
     }
 
@@ -244,8 +244,7 @@ internal class PaymentSheetListFragmentTest : PaymentSheetViewModelTestInjection
         ).onFragment { fragment ->
             shadowOf(getMainLooper()).idle()
 
-            assertThat(fragment.showingTotal)
-                .isFalse()
+            assertThat(fragment.sheetViewModel.isProcessingPaymentIntent).isFalse()
         }
     }
 

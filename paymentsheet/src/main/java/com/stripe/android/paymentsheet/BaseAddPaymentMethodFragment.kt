@@ -6,10 +6,9 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.VisibleForTesting
 import androidx.appcompat.view.ContextThemeWrapper
-import androidx.compose.material.Text
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.stringResource
 import androidx.core.view.ViewCompat
@@ -33,14 +32,12 @@ import com.stripe.android.paymentsheet.paymentdatacollection.TransformToPaymentM
 import com.stripe.android.paymentsheet.ui.AnimationConstants
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.Amount
-import com.stripe.android.ui.core.PaymentsTheme
+import com.stripe.android.ui.core.elements.H4Text
 import kotlinx.coroutines.launch
 
 internal abstract class BaseAddPaymentMethodFragment : Fragment() {
     abstract val viewModelFactory: ViewModelProvider.Factory
     abstract val sheetViewModel: BaseSheetViewModel<*>
-
-    protected var addPaymentMethodHeaderVisibility = true
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -76,14 +73,12 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
         viewBinding.addPaymentMethodHeader.apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
             setContent {
-                val headerVisiblity = remember { addPaymentMethodHeaderVisibility }
-                if (headerVisiblity) {
-                    Text(
+                val headerVisibility = sheetViewModel.headerVisibilility.observeAsState(true)
+                if (headerVisibility.value) {
+                    H4Text(
                         text = stringResource(
                             R.string.stripe_paymentsheet_add_payment_method_title
-                        ),
-                        style = PaymentsTheme.typography.h4,
-                        color = PaymentsTheme.colors.material.onPrimary,
+                        )
                     )
                 }
             }

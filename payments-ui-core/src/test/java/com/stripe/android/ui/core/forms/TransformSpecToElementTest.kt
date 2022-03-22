@@ -193,9 +193,7 @@ internal class TransformSpecToElementTest {
     fun `Add a static text section spec setup of the static element correctly`() {
         val staticText = StaticTextSpec(
             IdentifierSpec.Generic("mandate"),
-            stringResId = R.string.sepa_mandate,
-            fontSize = 120f,
-            letterSpacing = 120.0f
+            stringResId = R.string.sepa_mandate
         )
         val formElement = transformSpecToElements.transform(
             listOf(staticText)
@@ -206,8 +204,6 @@ internal class TransformSpecToElementTest {
         assertThat(staticTextElement.controller).isNull()
         assertThat(staticTextElement.stringResId).isEqualTo(staticText.stringResId)
         assertThat(staticTextElement.identifier).isEqualTo(staticText.identifier)
-        assertThat(staticTextElement.fontSize).isEqualTo(staticText.fontSize)
-        assertThat(staticTextElement.letterSpacing).isEqualTo(staticText.letterSpacing)
     }
 
     @Test

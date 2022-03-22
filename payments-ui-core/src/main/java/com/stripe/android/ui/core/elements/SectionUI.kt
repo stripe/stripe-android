@@ -39,10 +39,8 @@ internal fun Section(
 @Composable
 internal fun SectionTitle(@StringRes titleText: Int?) {
     titleText?.let {
-        Text(
+        H6Text(
             text = stringResource(titleText),
-            color = PaymentsTheme.colors.colorTextSecondary,
-            style = PaymentsTheme.typography.h6,
             modifier = Modifier
                 .padding(vertical = 4.dp)
                 .semantics(mergeDescendants = true) { // Need to prevent form as focusable accessibility

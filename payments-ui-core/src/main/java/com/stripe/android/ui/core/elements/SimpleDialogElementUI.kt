@@ -27,18 +27,10 @@ fun SimpleDialogElementUI(
                     openDialog.value = false
                 },
                 title = {
-                    Text(
-                        text = titleText,
-                        style = PaymentsTheme.typography.h4,
-                        color = PaymentsTheme.colors.material.onPrimary
-                    )
+                    H4Text(text = titleText)
                 },
                 text = {
-                    Text(
-                        text = messageText,
-                        style = PaymentsTheme.typography.h6,
-                        color = PaymentsTheme.colors.colorTextSecondary
-                    )
+                    H6Text(text = messageText)
                 },
                 confirmButton = {
                     TextButton(

@@ -41,7 +41,7 @@ internal class PrimaryButton @JvmOverloads constructor(
     private var originalLabel: String? = null
 
     @VisibleForTesting
-    var externalLabel: String? = null
+    internal var externalLabel: String? = null
 
     @VisibleForTesting
     internal val viewBinding = PrimaryButtonBinding.inflate(
