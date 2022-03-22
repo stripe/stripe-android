@@ -345,7 +345,6 @@ class FrontBackUploadFragmentTest {
             if (scanType == IdentityScanState.ScanType.ID_FRONT) {
                 verify(mockFrontBackUploadViewModel).uploadImageFront(
                     same(mockUri),
-                    same(fragment.requireContext()),
                     same(DOCUMENT_CAPTURE),
                     if (isTakePhoto)
                         eq(DocumentUploadParam.UploadMethod.MANUALCAPTURE)
@@ -358,7 +357,6 @@ class FrontBackUploadFragmentTest {
             } else if (scanType == IdentityScanState.ScanType.ID_BACK) {
                 verify(mockFrontBackUploadViewModel).uploadImageBack(
                     same(mockUri),
-                    same(fragment.requireContext()),
                     same(DOCUMENT_CAPTURE),
                     if (isTakePhoto)
                         eq(DocumentUploadParam.UploadMethod.MANUALCAPTURE)
@@ -430,8 +428,6 @@ class FrontBackUploadFragmentTest {
         override val backTextRes = R.string.back_of_id
         override val frontCheckMarkContentDescription = R.string.front_of_id_selected
         override val backCheckMarkContentDescription = R.string.back_of_id_selected
-        override val continueButtonNavigationId =
-            R.id.action_IDUploadFragment_to_confirmationFragment
         override val frontScanType = IdentityScanState.ScanType.ID_FRONT
         override val backScanType = IdentityScanState.ScanType.ID_BACK
     }

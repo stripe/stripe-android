@@ -315,7 +315,6 @@ internal class IDScanFragmentTest {
         successCaptor.lastValue.invoke(mockVerificationPage)
         verify(mockIdentityScanViewModel).uploadResult(
             same(finalResult),
-            eq(context),
             same(mockDocumentCapturePage)
         )
     }

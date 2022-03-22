@@ -256,7 +256,6 @@ class PassportScanFragmentTest {
             successCaptor.lastValue.invoke(mockVerificationPage)
             verify(mockIdentityScanViewModel).uploadResult(
                 same(mockFrontFinalResult),
-                eq(it.requireContext()),
                 same(mockDocumentCapturePage)
             )
 

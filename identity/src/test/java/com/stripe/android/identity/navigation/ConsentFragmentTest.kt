@@ -8,6 +8,7 @@ import androidx.navigation.Navigation
 import androidx.navigation.testing.TestNavHostController
 import androidx.test.core.app.ApplicationProvider
 import com.google.android.material.button.MaterialButton
+import com.google.android.material.progressindicator.CircularProgressIndicator
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.identity.IdentityVerificationSheetContract
@@ -188,6 +189,11 @@ internal class ConsentFragmentTest {
 
                 binding.agree.findViewById<MaterialButton>(R.id.button).callOnClick()
 
+                assertThat(binding.agree.findViewById<MaterialButton>(R.id.button).isEnabled).isFalse()
+                assertThat(binding.agree.findViewById<CircularProgressIndicator>(R.id.indicator).visibility).isEqualTo(
+                    View.VISIBLE
+                )
+                assertThat(binding.decline.isEnabled).isFalse()
                 assertThat(navController.currentDestination?.id)
                     .isEqualTo(R.id.docSelectionFragment)
             }
@@ -222,6 +228,11 @@ internal class ConsentFragmentTest {
                 setUpSuccessVerificationPage()
                 binding.decline.findViewById<MaterialButton>(R.id.button).callOnClick()
 
+                assertThat(binding.decline.findViewById<MaterialButton>(R.id.button).isEnabled).isFalse()
+                assertThat(binding.decline.findViewById<CircularProgressIndicator>(R.id.indicator).visibility).isEqualTo(
+                    View.VISIBLE
+                )
+                assertThat(binding.agree.isEnabled).isFalse()
                 requireNotNull(navController.backStack.last().arguments).let { arguments ->
                     assertThat(arguments[ErrorFragment.ARG_ERROR_TITLE])
                         .isEqualTo(ERROR_TITLE)

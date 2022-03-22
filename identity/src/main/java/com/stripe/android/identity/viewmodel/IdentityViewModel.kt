@@ -10,6 +10,7 @@ import androidx.lifecycle.viewModelScope
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.identity.IdentityVerificationSheetContract
+import com.stripe.android.identity.networking.IDDetectorFetcher
 import com.stripe.android.identity.networking.IdentityRepository
 import com.stripe.android.identity.networking.Resource
 import com.stripe.android.identity.networking.Status
@@ -25,7 +26,8 @@ import java.io.File
  */
 internal class IdentityViewModel(
     internal val args: IdentityVerificationSheetContract.Args,
-    private val identityRepository: IdentityRepository
+    private val identityRepository: IdentityRepository,
+    private val idDetectorFetcher: IDDetectorFetcher
 ) : ViewModel() {
 
     /**
@@ -100,7 +102,7 @@ internal class IdentityViewModel(
         viewModelScope.launch {
             runCatching {
                 _idDetectorModelFile.postValue(Resource.loading())
-                identityRepository.downloadModel(modelUrl)
+                idDetectorFetcher.fetchIDDetector(modelUrl)
             }.fold(
                 onSuccess = {
                     _idDetectorModelFile.postValue(Resource.success(it))
@@ -151,10 +153,11 @@ internal class IdentityViewModel(
     internal class IdentityViewModelFactory(
         private val args: IdentityVerificationSheetContract.Args,
         private val identityRepository: IdentityRepository,
+        private val idDetectorFetcher: IDDetectorFetcher
     ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return IdentityViewModel(args, identityRepository) as T
+            return IdentityViewModel(args, identityRepository, idDetectorFetcher) as T
         }
     }
 

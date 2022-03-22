@@ -10,6 +10,7 @@ import kotlin.math.pow
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class CurrencyFormatter {
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
         private const val MAJOR_UNIT_BASE = 10.0
         private val SERVER_DECIMAL_DIGITS =

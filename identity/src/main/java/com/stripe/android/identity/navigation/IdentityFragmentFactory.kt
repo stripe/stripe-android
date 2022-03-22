@@ -7,7 +7,10 @@ import com.stripe.android.camera.AppSettingsOpenable
 import com.stripe.android.camera.CameraPermissionEnsureable
 import com.stripe.android.identity.IdentityVerificationSheetContract
 import com.stripe.android.identity.VerificationFlowFinishable
+import com.stripe.android.identity.networking.DefaultIDDetectorFetcher
 import com.stripe.android.identity.networking.DefaultIdentityRepository
+import com.stripe.android.identity.utils.DefaultIdentityIO
+import com.stripe.android.identity.utils.IdentityIO
 import com.stripe.android.identity.viewmodel.FrontBackUploadViewModel
 import com.stripe.android.identity.viewmodel.IdentityScanViewModel
 import com.stripe.android.identity.viewmodel.IdentityViewModel
@@ -15,6 +18,8 @@ import com.stripe.android.identity.viewmodel.PassportUploadViewModel
 
 /**
  * Factory for creating Identity fragments.
+ *
+ * TODO(ccen) Daggerize the dependencies
  */
 internal class IdentityFragmentFactory(
     context: Context,
@@ -23,26 +28,32 @@ internal class IdentityFragmentFactory(
     verificationArgs: IdentityVerificationSheetContract.Args,
     private val verificationFlowFinishable: VerificationFlowFinishable
 ) : FragmentFactory() {
-    private val identityRepository = DefaultIdentityRepository(context)
+    private val identityIO: IdentityIO = DefaultIdentityIO(context)
+    private val identityRepository =
+        DefaultIdentityRepository(identityIO = identityIO)
     private val identityScanViewModelFactory =
         IdentityScanViewModel.IdentityScanViewModelFactory(
             identityRepository,
-            verificationArgs
+            verificationArgs,
+            identityIO
         )
     private val frontBackUploadViewModelFactory =
         FrontBackUploadViewModel.FrontBackUploadViewModelFactory(
             identityRepository,
-            verificationArgs
+            verificationArgs,
+            identityIO
         )
     private val passportUploadViewModelFactory =
         PassportUploadViewModel.PassportUploadViewModelFactory(
             identityRepository,
-            verificationArgs
+            verificationArgs,
+            identityIO
         )
 
     internal val identityViewModelFactory = IdentityViewModel.IdentityViewModelFactory(
         verificationArgs,
-        identityRepository
+        identityRepository,
+        DefaultIDDetectorFetcher(identityRepository, identityIO)
     )
 
     override fun instantiate(classLoader: ClassLoader, className: String): Fragment {
