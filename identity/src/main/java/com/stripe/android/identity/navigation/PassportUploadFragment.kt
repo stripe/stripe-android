@@ -7,12 +7,13 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.TextView
+import androidx.appcompat.app.AppCompatDialog
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
-import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.stripe.android.core.model.InternalStripeFile
 import com.stripe.android.identity.R
 import com.stripe.android.identity.databinding.PassportUploadFragmentBinding
@@ -66,7 +67,7 @@ internal class PassportUploadFragment(
         binding = PassportUploadFragmentBinding.inflate(layoutInflater, container, false)
 
         binding.select.setOnClickListener {
-            buildBottomSheetDialog().show()
+            buildDialog().show()
         }
 
         binding.kontinue.isEnabled = false
@@ -93,11 +94,11 @@ internal class PassportUploadFragment(
         }
     }
 
-    private fun buildBottomSheetDialog() = BottomSheetDialog(requireContext()).also { dialog ->
-        dialog.setContentView(R.layout.get_local_image_fragment)
-        dialog.setOnCancelListener {
-            Log.d(TAG, "dialog cancelled")
-        }
+    private fun buildDialog() = AppCompatDialog(requireContext()).also { dialog ->
+        dialog.setContentView(R.layout.get_local_image_dialog)
+        dialog.findViewById<TextView>(R.id.title)?.text =
+            getString(R.string.upload_dialog_title_passport)
+
         if (shouldShowCamera) {
             dialog.findViewById<Button>(R.id.take_photo)?.setOnClickListener {
                 dialog.dismiss()
