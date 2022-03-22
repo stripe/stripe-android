@@ -21,9 +21,9 @@
   <!-- Caption for Address field on address form -->
   <string name="address_label_address">地址</string>
   <!-- Label for input requesting the first line of an address where , used for international addresses -->
-  <string name="address_label_address_line1_optional">第 1 行地址 (可选)</string>
+  <string name="address_label_address_line1_optional">地址第 1 行 (可选)</string>
   <!-- Address line 2 placeholder for billing address form. -->
-  <string name="address_label_address_line2_optional">地址行 2（可选）</string>
+  <string name="address_label_address_line2_optional">地址第 2 行（可选）</string>
   <!-- Label for input requesting the first line of an address where input is optional, used for US and Canada addresses -->
   <string name="address_label_address_optional">地址 (可选)</string>
   <!-- Label for input requesting apartment number (address line 2) where input is optional, used for US based addresses -->

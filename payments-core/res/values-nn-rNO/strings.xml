@@ -23,7 +23,7 @@
   <!-- Label for input requesting the first line of an address where , used for international addresses -->
   <string name="address_label_address_line1_optional">Adresselinje 1 (valfri)</string>
   <!-- Address line 2 placeholder for billing address form. -->
-  <string name="address_label_address_line2_optional">Adresselinje 2 (valfritt)</string>
+  <string name="address_label_address_line2_optional">Adresselinje 2 (valfri)</string>
   <!-- Label for input requesting the first line of an address where input is optional, used for US and Canada addresses -->
   <string name="address_label_address_optional">Adresse (valfri)</string>
   <!-- Label for input requesting apartment number (address line 2) where input is optional, used for US based addresses -->
@@ -61,7 +61,7 @@
   <!-- Error text indicating that phone number is required, used for all addresses -->
   <string name="address_phone_number_required">Skriv inn telefonnummeret ditt</string>
   <!-- Error message for when postal code in form is invalid -->
-  <string name="address_postal_code_invalid">Postnummeret er ugyldig.</string>
+  <string name="address_postal_code_invalid">Postnummeret ditt er ugyldig.</string>
   <!-- Error text indicating postcode is invalid, used for UK addresses -->
   <string name="address_postcode_invalid">Postnummeret ditt er ugyldig</string>
   <!-- Error text indicating that province is required, used for Canada addresses -->
@@ -69,9 +69,9 @@
   <!-- Error text indicating that region is required, used for international addresses -->
   <string name="address_region_generic_required">Skriv inn stat/område/region</string>
   <!-- Error text indicating that address is required, used for all locations -->
-  <string name="address_required">Skriv inn adressen din</string>
+  <string name="address_required">Skriv inn adressa di</string>
   <!-- Error text indicating that state is required, used for US addresses -->
-  <string name="address_state_required">Skriv inn staten</string>
+  <string name="address_state_required">Skriv inn staten din</string>
   <!-- Error text indicating zip code is invalid, used for US addresses -->
   <string name="address_zip_invalid">Postnummeret ditt er ugyldig.</string>
   <!-- Error text indicating zip/ postal code is invalid, used for international addresses -->
@@ -93,7 +93,7 @@
   <!-- BECS Debit Widget - email address field - label -->
   <string name="becs_widget_email">E-postadresse</string>
   <!-- BECS Debit Widget - email address field - invalid error message -->
-  <string name="becs_widget_email_invalid">E-postadressen din er ugyldig</string>
+  <string name="becs_widget_email_invalid">E-postadressa di er ugyldig.</string>
   <!-- BECS Debit Widget - email address field - required error message -->
   <string name="becs_widget_email_required">E-postadresse er påkravd.</string>
   <!-- BECS Debit Widget - name field - label -->
@@ -118,7 +118,7 @@
   <!-- Error message for card entry form when CVC/CVV is invalid -->
   <string name="invalid_cvc">Sikkerheitskoden til kortet er ugyldig.</string>
   <!-- String to describe an invalid month in expiry date. -->
-  <string name="invalid_expiry_month">Utløpsdatoen på kortet ditt er ugyldig.</string>
+  <string name="invalid_expiry_month">Utløpsmånaden på kortet er ugyldig.</string>
   <!-- String to describe an invalid year in expiry date. -->
   <string name="invalid_expiry_year">Utløpsåret på kortet ditt er ugyldig.</string>
   <!-- Shipping form error message -->
@@ -133,9 +133,9 @@
   <string name="removed">Fjerna %s</string>
   <string name="secure_checkout">Sikker utsjekking</string>
   <!-- Error when 3DS2 authentication failed (e.g. customer entered the wrong code) -->
-  <string name="stripe_failure_reason_authentication">Vi kan ikkje godkjenne betalingsmåten. Ver vennleg å velje ein annan betalingsmetode og prøv på nytt.</string>
+  <string name="stripe_failure_reason_authentication">Vi kan ikkje godkjenne betalingsmåten. Ver vennleg å velje ein annan betalingsmetode og prøv igjen.</string>
   <!-- Error when 3DS2 authentication timed out. -->
-  <string name="stripe_failure_reason_timed_out">Tidsavbrot ved godkjenning av betalingsmåten - prøv på nytt</string>
+  <string name="stripe_failure_reason_timed_out">Tidsavbrot ved godkjenning av betalingsmåten - prøv igjen</string>
   <!-- label for text field to enter card expiry -->
   <string name="stripe_paymentsheet_expiration_date_hint">MM / ÅÅ</string>
   <!-- When there are multiple browsers and web authentication is required, this will show in a window asking which browser they want to use to "Verify your payment" -->
