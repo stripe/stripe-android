@@ -81,8 +81,8 @@ class ConnectUSBankAccountActivity : StripeIntentActivity() {
                         publishableKey = settings.publishableKey,
                         clientSecret = it.getString("client_secret"),
                         params = CollectBankAccountConfiguration.USBankAccount(
-                            name = "Jane Doe",
-                            email = "email@email.com"
+                            name = viewBinding.name.text?.toString() ?: "",
+                            email = viewBinding.email.text?.toString()
                         )
                     )
                 }
