@@ -12,8 +12,7 @@
         android:layout_height="wrap_content"
         android:textSize="16sp"
         android:textColor="?android:textColorPrimary"
-        android:layout_marginBottom="12dp"
-        android:text="Upload front of ID" />
+        android:layout_marginBottom="12dp" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/take_photo"
