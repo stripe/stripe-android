@@ -54,13 +54,13 @@ internal class CameraPermissionDeniedFragment(
     private fun IdDocumentParam.Type.getDisplayName() =
         when (this) {
             IdDocumentParam.Type.IDCARD -> {
-                getString(R.string.displayname_id)
+                getString(R.string.id_card)
             }
             IdDocumentParam.Type.DRIVINGLICENSE -> {
-                getString(R.string.displayname_dl)
+                getString(R.string.driver_license)
             }
             IdDocumentParam.Type.PASSPORT -> {
-                getString(R.string.displayname_passport)
+                getString(R.string.passport)
             }
         }
 
