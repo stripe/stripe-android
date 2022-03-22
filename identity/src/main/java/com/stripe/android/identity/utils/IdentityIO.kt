@@ -64,5 +64,5 @@ internal interface IdentityIO {
     /**
      * Create a file for tflite model.
      */
-    fun createTFLiteFile(): File
+    fun createTFLiteFile(modelUrl: String): File
 }
