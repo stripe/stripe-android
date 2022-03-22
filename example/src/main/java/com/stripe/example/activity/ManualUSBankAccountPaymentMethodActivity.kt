@@ -2,8 +2,6 @@ package com.stripe.example.activity
 
 import android.os.Bundle
 import androidx.activity.compose.setContent
-import androidx.activity.viewModels
-import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -30,9 +28,15 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 
-class ManualUSBankAccountPaymentMethodActivity : AppCompatActivity() {
-    private val viewModel: ManualUSBankAccountPaymentMethodViewModel by viewModels()
-
+/**
+ * This example is currently work in progress. Do not use it as a reference.
+ *
+ * In order for this example to work, perform the following:
+ * 1. Update ApiVersion.kt manually:
+ *    const val API_VERSION_CODE: String = "2020-08-27;us_bank_account_beta=v2"
+ * 2. Uncomment ManualUSBankAccountPaymentMethodActivity in LauncherActivity.kt
+ */
+class ManualUSBankAccountPaymentMethodActivity : StripeIntentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -212,9 +216,9 @@ class ManualUSBankAccountPaymentMethodActivity : AppCompatActivity() {
                             )
                         )
                         if (isSaveForFutureUsage.value) {
-                            viewModel.createAndConfirmSetupIntent(params)
+                            createAndConfirmSetupIntent("us", params)
                         } else {
-                            viewModel.createAndConfirmPaymentIntent(params)
+                            createAndConfirmPaymentIntent("us", params)
                         }
                     }
                 ) {
@@ -248,17 +252,17 @@ class ManualUSBankAccountPaymentMethodActivity : AppCompatActivity() {
         viewModel.paymentResultLiveData.observe(this) { paymentResult ->
             when (paymentResult) {
                 is PaymentResult.Completed -> {
-                    viewModel.status.value += "\n\nPayment successfully initiated. Will fulfill " +
-                        "after microdeposit verification\n\n"
+                    viewModel.status.value += "Payment successfully initiated. Will fulfill " +
+                        "after microdeposit verification"
                     viewModel.inProgress.value = false
                 }
                 is PaymentResult.Canceled -> {
-                    viewModel.status.value += "\n\nPaymentIntent confirmation cancelled\n\n"
+                    viewModel.status.value += "PaymentIntent confirmation cancelled"
                     viewModel.inProgress.value = false
                 }
                 is PaymentResult.Failed -> {
-                    viewModel.status.value += "\n\nPaymentIntent confirmation failed with " +
-                        "throwable ${paymentResult.throwable} \n\n"
+                    viewModel.status.value += "PaymentIntent confirmation failed with " +
+                        "throwable ${paymentResult.throwable}"
                     viewModel.inProgress.value = false
                 }
             }
