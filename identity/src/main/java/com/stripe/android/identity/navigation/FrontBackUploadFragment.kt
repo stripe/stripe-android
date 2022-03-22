@@ -7,13 +7,14 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.TextView
 import androidx.annotation.StringRes
+import androidx.appcompat.app.AppCompatDialog
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
-import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.stripe.android.identity.R
 import com.stripe.android.identity.databinding.FrontBackUploadFragmentBinding
 import com.stripe.android.identity.networking.Status
@@ -33,7 +34,6 @@ import kotlinx.coroutines.launch
 /**
  * Fragment to upload front and back of a document.
  *
- * TODO(ccen): check camera permission and enable camera only when permission is granted.
  */
 internal abstract class FrontBackUploadFragment(
     private val frontBackUploadViewModelFactory: ViewModelProvider.Factory,
@@ -96,10 +96,10 @@ internal abstract class FrontBackUploadFragment(
             getString(backCheckMarkContentDescription)
 
         binding.selectBack.setOnClickListener {
-            buildBottomSheetDialog(backScanType).show()
+            buildDialog(backScanType).show()
         }
         binding.selectFront.setOnClickListener {
-            buildBottomSheetDialog(frontScanType).show()
+            buildDialog(frontScanType).show()
         }
         binding.kontinue.isEnabled = false
         binding.kontinue.setText(getString(R.string.kontinue))
@@ -196,17 +196,37 @@ internal abstract class FrontBackUploadFragment(
         }
     }
 
-    private fun buildBottomSheetDialog(
-        scanType: IdentityScanState.ScanType
-    ) = BottomSheetDialog(requireContext()).also { dialog ->
-        dialog.setContentView(R.layout.get_local_image_fragment)
-        dialog.setOnCancelListener {
-            Log.d(TAG, "dialog cancelled")
+    private fun getTitleFromScanType(scanType: IdentityScanState.ScanType): String {
+        return when (scanType) {
+            IdentityScanState.ScanType.ID_FRONT -> {
+                getString(R.string.upload_dialog_title_id_front)
+            }
+            IdentityScanState.ScanType.ID_BACK -> {
+                getString(R.string.upload_dialog_title_id_back)
+            }
+            IdentityScanState.ScanType.DL_FRONT -> {
+                getString(R.string.upload_dialog_title_dl_front)
+            }
+            IdentityScanState.ScanType.DL_BACK -> {
+                getString(R.string.upload_dialog_title_dl_back)
+            }
+            IdentityScanState.ScanType.PASSPORT -> {
+                getString(R.string.upload_dialog_title_passport)
+            }
+            else -> {
+                throw java.lang.IllegalArgumentException("invalid scan type: $scanType")
+            }
         }
+    }
+
+    private fun buildDialog(
+        scanType: IdentityScanState.ScanType
+    ) = AppCompatDialog(requireContext()).also { dialog ->
+        dialog.setContentView(R.layout.get_local_image_dialog)
+        dialog.findViewById<TextView>(R.id.title)?.text = getTitleFromScanType(scanType)
+
         if (shouldShowCamera) {
             dialog.findViewById<Button>(R.id.take_photo)?.setOnClickListener {
-                Log.d(TAG, "Take photo")
-                dialog.dismiss()
                 if (scanType == frontScanType) {
                     frontBackUploadViewModel.takePhotoFront(requireContext()) {
                         uploadFront(it, DocumentUploadParam.UploadMethod.MANUALCAPTURE)
@@ -216,23 +236,23 @@ internal abstract class FrontBackUploadFragment(
                         uploadBack(it, DocumentUploadParam.UploadMethod.MANUALCAPTURE)
                     }
                 }
+                dialog.dismiss()
             }
         } else {
             requireNotNull(dialog.findViewById(R.id.take_photo)).visibility = View.GONE
         }
 
         dialog.findViewById<Button>(R.id.choose_file)?.setOnClickListener {
-            Log.d(TAG, "Choose a file")
-            dialog.dismiss()
             if (scanType == frontScanType) {
                 frontBackUploadViewModel.chooseImageFront {
                     uploadFront(it, DocumentUploadParam.UploadMethod.FILEUPLOAD)
                 }
             } else if (scanType == backScanType) {
-                frontBackUploadViewModel.chooseImageBack() {
+                frontBackUploadViewModel.chooseImageBack {
                     uploadBack(it, DocumentUploadParam.UploadMethod.FILEUPLOAD)
                 }
             }
+            dialog.dismiss()
         }
     }
 
