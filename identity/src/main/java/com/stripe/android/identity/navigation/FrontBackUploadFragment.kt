@@ -7,7 +7,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
-import androidx.annotation.IdRes
 import androidx.annotation.StringRes
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -58,9 +57,6 @@ internal abstract class FrontBackUploadFragment(
 
     @get:StringRes
     abstract val backCheckMarkContentDescription: Int
-
-    @get:IdRes
-    abstract val continueButtonNavigationId: Int
 
     abstract val frontScanType: IdentityScanState.ScanType
 

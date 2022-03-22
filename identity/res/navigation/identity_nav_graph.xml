@@ -52,29 +52,17 @@
         android:id="@+id/IDUploadFragment"
         android:name="com.stripe.android.identity.navigation.IDUploadFragment"
         android:label="id_upload_fragment"
-        tools:layout="@layout/id_upload_fragment">
-        <action
-            android:id="@+id/action_IDUploadFragment_to_confirmationFragment"
-            app:destination="@id/confirmationFragment" />
-    </fragment>
+        tools:layout="@layout/id_upload_fragment"/>
     <fragment
         android:id="@+id/passportUploadFragment"
         android:name="com.stripe.android.identity.navigation.PassportUploadFragment"
         android:label="passport_upload_fragment"
-        tools:layout="@layout/passport_upload_fragment">
-        <action
-            android:id="@+id/action_passportUploadFragment_to_confirmationFragment"
-            app:destination="@id/confirmationFragment" />
-    </fragment>
+        tools:layout="@layout/passport_upload_fragment"/>
     <fragment
         android:id="@+id/driverLicenseUploadFragment"
         android:name="com.stripe.android.identity.navigation.DriverLicenseUploadFragment"
         android:label="driver_license_upload_fragment"
-        tools:layout="@layout/driver_license_upload_fragment">
-        <action
-            android:id="@+id/action_driverLicenseUploadFragment_to_confirmationFragment"
-            app:destination="@id/confirmationFragment" />
-    </fragment>
+        tools:layout="@layout/driver_license_upload_fragment"/>
     <fragment
         android:id="@+id/cameraPermissionDeniedFragment"
         android:name="com.stripe.android.identity.navigation.CameraPermissionDeniedFragment"
