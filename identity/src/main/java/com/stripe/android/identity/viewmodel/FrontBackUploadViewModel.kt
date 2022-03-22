@@ -18,9 +18,9 @@ import com.stripe.android.identity.networking.Resource
 import com.stripe.android.identity.networking.Status
 import com.stripe.android.identity.networking.models.DocumentUploadParam.UploadMethod
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentDocumentCapturePage
+import com.stripe.android.identity.utils.IdentityIO
 import com.stripe.android.identity.utils.ImageChooser
 import com.stripe.android.identity.utils.PhotoTaker
-import com.stripe.android.identity.utils.resizeUriAndCreateFileToUpload
 import kotlinx.coroutines.launch
 import java.io.File
 
@@ -30,7 +30,8 @@ import java.io.File
  */
 internal class FrontBackUploadViewModel(
     private val identityRepository: IdentityRepository,
-    private val verificationArgs: IdentityVerificationSheetContract.Args
+    private val verificationArgs: IdentityVerificationSheetContract.Args,
+    private val identityIO: IdentityIO
 ) : ViewModel() {
 
     /**
@@ -89,8 +90,8 @@ internal class FrontBackUploadViewModel(
      * during initialization of an Activity or Fragment.
      */
     internal fun registerActivityResultCaller(activityResultCaller: ActivityResultCaller) {
-        frontPhotoTaker = PhotoTaker(activityResultCaller)
-        backPhotoTaker = PhotoTaker(activityResultCaller)
+        frontPhotoTaker = PhotoTaker(activityResultCaller, identityIO)
+        backPhotoTaker = PhotoTaker(activityResultCaller, identityIO)
         frontImageChooser = ImageChooser(activityResultCaller)
         backImageChooser = ImageChooser(activityResultCaller)
     }
@@ -139,17 +140,15 @@ internal class FrontBackUploadViewModel(
      */
     fun uploadImageFront(
         uri: Uri,
-        context: Context,
         documentCaptureModels: VerificationPageStaticContentDocumentCapturePage,
         uploadMethod: UploadMethod
     ) {
         _frontUploaded.postValue(Resource.loading())
         uploadImage(
-            imageFile = resizeUriAndCreateFileToUpload(
-                context,
+            imageFile = identityIO.resizeUriAndCreateFileToUpload(
                 uri,
                 verificationArgs.verificationSessionId,
-                true,
+                false,
                 FRONT,
                 maxDimension = documentCaptureModels.highResImageMaxDimension,
                 compressionQuality = documentCaptureModels.highResImageCompressionQuality
@@ -166,17 +165,15 @@ internal class FrontBackUploadViewModel(
      */
     fun uploadImageBack(
         uri: Uri,
-        context: Context,
         documentCaptureModels: VerificationPageStaticContentDocumentCapturePage,
         uploadMethod: UploadMethod
     ) {
         _backUploaded.postValue(Resource.loading())
         uploadImage(
-            imageFile = resizeUriAndCreateFileToUpload(
-                context,
+            imageFile = identityIO.resizeUriAndCreateFileToUpload(
                 uri,
                 verificationArgs.verificationSessionId,
-                true,
+                false,
                 BACK,
                 maxDimension = documentCaptureModels.highResImageMaxDimension,
                 compressionQuality = documentCaptureModels.highResImageCompressionQuality
@@ -221,12 +218,13 @@ internal class FrontBackUploadViewModel(
 
     internal class FrontBackUploadViewModelFactory(
         private val identityRepository: IdentityRepository,
-        private val verificationArgs: IdentityVerificationSheetContract.Args
+        private val verificationArgs: IdentityVerificationSheetContract.Args,
+        private val identityIO: IdentityIO
     ) :
         ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return FrontBackUploadViewModel(identityRepository, verificationArgs) as T
+            return FrontBackUploadViewModel(identityRepository, verificationArgs, identityIO) as T
         }
     }
 

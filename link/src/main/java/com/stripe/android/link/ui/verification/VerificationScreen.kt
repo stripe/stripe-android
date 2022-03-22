@@ -1,9 +1,15 @@
 package com.stripe.android.link.ui.verification
 
+import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
@@ -16,9 +22,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -35,7 +43,10 @@ private fun VerificationBodyPreview() {
     DefaultLinkTheme {
         VerificationBody(
             redactedPhoneNumber = "+1********23",
+            email = "test@stripe.com",
             onCodeEntered = { },
+            onBack = { },
+            onChangeEmailClick = { },
             onResendCodeClick = { }
         )
     }
@@ -55,7 +66,10 @@ internal fun VerificationBody(
 
     VerificationBody(
         redactedPhoneNumber = viewModel.linkAccount.redactedPhoneNumber,
+        email = viewModel.linkAccount.email,
         onCodeEntered = viewModel::onVerificationCodeEntered,
+        onBack = viewModel::onBack,
+        onChangeEmailClick = viewModel::onChangeEmailClicked,
         onResendCodeClick = viewModel::onResendCodeClicked
     )
 }
@@ -63,13 +77,17 @@ internal fun VerificationBody(
 @Composable
 internal fun VerificationBody(
     redactedPhoneNumber: String,
+    email: String,
     onCodeEntered: (String) -> Unit,
+    onBack: () -> Unit,
+    onChangeEmailClick: () -> Unit,
     onResendCodeClick: () -> Unit
 ) {
+    BackHandler(onBack = onBack)
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 20.dp, vertical = 20.dp),
+            .padding(vertical = 20.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
@@ -77,7 +95,8 @@ internal fun VerificationBody(
             modifier = Modifier
                 .padding(vertical = 4.dp),
             textAlign = TextAlign.Center,
-            style = MaterialTheme.typography.h2
+            style = MaterialTheme.typography.h2,
+            color = MaterialTheme.colors.onPrimary
         )
         Text(
             text = stringResource(R.string.verification_message, redactedPhoneNumber),
@@ -85,16 +104,47 @@ internal fun VerificationBody(
                 .fillMaxWidth()
                 .padding(top = 4.dp, bottom = 30.dp),
             textAlign = TextAlign.Center,
-            style = MaterialTheme.typography.body1
+            style = MaterialTheme.typography.body1,
+            color = MaterialTheme.colors.onSecondary
         )
         VerificationCodeInput(onCodeEntered)
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 22.dp, bottom = 30.dp),
+            horizontalArrangement = Arrangement.Center
+        ) {
+            Text(
+                text = stringResource(id = R.string.verification_not_email, email),
+                style = MaterialTheme.typography.body2,
+                color = MaterialTheme.colors.onSecondary
+            )
+            Text(
+                text = stringResource(id = R.string.verification_change_email),
+                modifier = Modifier
+                    .padding(start = 4.dp)
+                    .clickable(onClick = onChangeEmailClick),
+                style = MaterialTheme.typography.body2
+                    .merge(TextStyle(textDecoration = TextDecoration.Underline)),
+                color = MaterialTheme.colors.onSecondary
+            )
+        }
         TextButton(
             onClick = onResendCodeClick,
-            modifier = Modifier.padding(top = 30.dp)
+            modifier = Modifier
+                .border(
+                    width = 1.dp,
+                    color = MaterialTheme.colors.onBackground,
+                    shape = MaterialTheme.shapes.medium
+                ),
+            colors = ButtonDefaults.buttonColors(
+                backgroundColor = MaterialTheme.colors.background
+            )
         ) {
             Text(
                 text = stringResource(id = R.string.verification_resend),
-                style = MaterialTheme.typography.button
+                style = MaterialTheme.typography.button,
+                color = MaterialTheme.colors.onPrimary
             )
         }
     }

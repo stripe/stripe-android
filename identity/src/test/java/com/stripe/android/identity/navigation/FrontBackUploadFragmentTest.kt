@@ -4,6 +4,7 @@ import android.net.Uri
 import android.view.View
 import android.widget.Button
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
+import androidx.core.os.bundleOf
 import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
@@ -12,6 +13,7 @@ import androidx.navigation.Navigation
 import androidx.navigation.testing.TestNavHostController
 import androidx.test.core.app.ApplicationProvider
 import com.google.android.material.bottomsheet.BottomSheetDialog
+import com.google.android.material.button.MaterialButton
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.model.InternalStripeFile
 import com.stripe.android.core.model.InternalStripeFilePurpose
@@ -27,6 +29,7 @@ import com.stripe.android.identity.networking.models.IdDocumentParam
 import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentDocumentCapturePage
 import com.stripe.android.identity.states.IdentityScanState
+import com.stripe.android.identity.utils.ARG_SHOULD_SHOW_CAMERA
 import com.stripe.android.identity.viewModelFactoryFor
 import com.stripe.android.identity.viewmodel.FrontBackUploadViewModel
 import com.stripe.android.identity.viewmodel.IdentityViewModel
@@ -101,6 +104,38 @@ class FrontBackUploadFragmentTest {
                     R.string.back_of_id_selected
                 )
             )
+        }
+    }
+
+    @Test
+    fun `when shouldShowCamera is true UI is correct`() {
+        launchFragment(shouldShowCamera = true) { binding, _, _ ->
+            binding.selectFront.callOnClick()
+            val dialog = ShadowDialog.getLatestDialog()
+
+            // dialog shows up
+            assertThat(dialog.isShowing).isTrue()
+            assertThat(dialog).isInstanceOf(BottomSheetDialog::class.java)
+
+            // assert dialog content
+            assertThat(dialog.findViewById<Button>(R.id.choose_file).visibility).isEqualTo(View.VISIBLE)
+            assertThat(dialog.findViewById<Button>(R.id.take_photo).visibility).isEqualTo(View.VISIBLE)
+        }
+    }
+
+    @Test
+    fun `when shouldShowCamera is false UI is correct`() {
+        launchFragment(shouldShowCamera = false) { binding, _, _ ->
+            binding.selectFront.callOnClick()
+            val dialog = ShadowDialog.getLatestDialog()
+
+            // dialog shows up
+            assertThat(dialog.isShowing).isTrue()
+            assertThat(dialog).isInstanceOf(BottomSheetDialog::class.java)
+
+            // assert dialog content
+            assertThat(dialog.findViewById<Button>(R.id.choose_file).visibility).isEqualTo(View.VISIBLE)
+            assertThat(dialog.findViewById<Button>(R.id.take_photo).visibility).isEqualTo(View.GONE)
         }
     }
 
@@ -212,7 +247,7 @@ class FrontBackUploadFragmentTest {
                     CORRECT_WITH_SUBMITTED_SUCCESS_VERIFICATION_PAGE_DATA
                 )
 
-                binding.kontinue.callOnClick()
+                binding.kontinue.findViewById<MaterialButton>(R.id.button).callOnClick()
 
                 assertThat(collectedDataParamCaptor.firstValue).isEqualTo(
                     CollectedDataParam(
@@ -245,7 +280,7 @@ class FrontBackUploadFragmentTest {
             // leave frontUploaded and backUploaded null
             uploadFinished.postValue(Unit)
 
-            binding.kontinue.callOnClick()
+            binding.kontinue.findViewById<MaterialButton>(R.id.button).callOnClick()
 
             assertThat(navController.currentDestination?.id)
                 .isEqualTo(R.id.errorFragment)
@@ -310,7 +345,6 @@ class FrontBackUploadFragmentTest {
             if (scanType == IdentityScanState.ScanType.ID_FRONT) {
                 verify(mockFrontBackUploadViewModel).uploadImageFront(
                     same(mockUri),
-                    same(fragment.requireContext()),
                     same(DOCUMENT_CAPTURE),
                     if (isTakePhoto)
                         eq(DocumentUploadParam.UploadMethod.MANUALCAPTURE)
@@ -323,7 +357,6 @@ class FrontBackUploadFragmentTest {
             } else if (scanType == IdentityScanState.ScanType.ID_BACK) {
                 verify(mockFrontBackUploadViewModel).uploadImageBack(
                     same(mockUri),
-                    same(fragment.requireContext()),
                     same(DOCUMENT_CAPTURE),
                     if (isTakePhoto)
                         eq(DocumentUploadParam.UploadMethod.MANUALCAPTURE)
@@ -353,12 +386,16 @@ class FrontBackUploadFragmentTest {
     }
 
     private fun launchFragment(
+        shouldShowCamera: Boolean = true,
         testBlock: (
             binding: FrontBackUploadFragmentBinding,
             navController: TestNavHostController,
             fragment: FrontBackUploadFragment
         ) -> Unit
     ) = launchFragmentInContainer(
+        fragmentArgs = bundleOf(
+            ARG_SHOULD_SHOW_CAMERA to shouldShowCamera
+        ),
         themeResId = R.style.Theme_MaterialComponents
     ) {
         TestFragment(
@@ -391,8 +428,6 @@ class FrontBackUploadFragmentTest {
         override val backTextRes = R.string.back_of_id
         override val frontCheckMarkContentDescription = R.string.front_of_id_selected
         override val backCheckMarkContentDescription = R.string.back_of_id_selected
-        override val continueButtonNavigationId =
-            R.id.action_IDUploadFragment_to_confirmationFragment
         override val frontScanType = IdentityScanState.ScanType.ID_FRONT
         override val backScanType = IdentityScanState.ScanType.ID_BACK
     }

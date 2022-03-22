@@ -89,4 +89,19 @@ sealed class PaymentMethodOptionsParams(
             const val PARAM_APP_ID = "app_id"
         }
     }
+
+    @Parcelize
+    internal data class USBankAccount(
+        var setupFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage? = null
+    ) : PaymentMethodOptionsParams(PaymentMethod.Type.USBankAccount) {
+        override fun createTypeParams(): List<Pair<String, Any?>> {
+            return listOf(
+                PARAM_SETUP_FUTURE_USAGE to setupFutureUsage?.code,
+            )
+        }
+
+        internal companion object {
+            const val PARAM_SETUP_FUTURE_USAGE = "setup_future_usage"
+        }
+    }
 }

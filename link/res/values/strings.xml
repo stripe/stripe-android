@@ -2,13 +2,17 @@
 <resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
     <string name="link">Link</string>
 
+    <string name="accessibility_close">Close</string>
+
     <string name="sign_up_header">Save your info for secure 1-click checkout</string>
     <string name="sign_up_message">Pay faster at %1$s and thousands of merchants.</string>
     <string name="sign_up_terms">You agree to Link terms of service and to create a Link with Stripe account.</string>
     <string name="sign_up">Join Link</string>
 
     <string name="verification_header">Enter your verification code</string>
-    <string name="verification_message">Enter the code sent to %1$s to securely use your saved information.</string>
+    <string name="verification_message">Enter the code sent to %1$s to use Link to pay by default.</string>
+    <string name="verification_not_email">Not %1$s?</string>
+    <string name="verification_change_email">Change email</string>
     <string name="verification_resend">Resend code</string>
 
     <string name="wallet_pay_with">Pay with</string>

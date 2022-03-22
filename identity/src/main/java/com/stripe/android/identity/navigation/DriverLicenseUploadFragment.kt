@@ -17,8 +17,6 @@ internal class DriverLicenseUploadFragment(
     override val backTextRes = R.string.back_of_dl
     override val frontCheckMarkContentDescription = R.string.front_of_dl_selected
     override val backCheckMarkContentDescription = R.string.back_of_dl_selected
-    override val continueButtonNavigationId =
-        R.id.action_driverLicenseUploadFragment_to_confirmationFragment
     override val frontScanType = IdentityScanState.ScanType.DL_FRONT
     override val backScanType = IdentityScanState.ScanType.DL_BACK
 }

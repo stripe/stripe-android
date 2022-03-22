@@ -4,6 +4,7 @@ import android.net.Uri
 import com.stripe.android.core.model.StripeJsonUtils
 import com.stripe.android.core.model.StripeJsonUtils.optString
 import com.stripe.android.core.model.parsers.ModelJsonParser
+import com.stripe.android.model.MicrodepositType
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.WeChat
 import org.json.JSONObject
@@ -22,6 +23,7 @@ internal class NextActionDataParser : ModelJsonParser<StripeIntent.NextActionDat
             StripeIntent.NextActionType.AlipayRedirect -> AlipayRedirectParser()
             StripeIntent.NextActionType.BlikAuthorize -> BlikAuthorizeParser()
             StripeIntent.NextActionType.WeChatPayRedirect -> WeChatPayRedirectParser()
+            StripeIntent.NextActionType.VerifyWithMicrodeposits -> VerifyWithMicrodepositsParser()
             else -> return null
         }
         return parser.parse(json.optJSONObject(nextActionType.code) ?: JSONObject())
@@ -181,6 +183,29 @@ internal class NextActionDataParser : ModelJsonParser<StripeIntent.NextActionDat
             private const val PREPAY_ID = "prepay_id"
             private const val TIMESTAMP = "timestamp"
             private const val SIGN = "sign"
+        }
+    }
+
+    internal class VerifyWithMicrodepositsParser :
+        ModelJsonParser<StripeIntent.NextActionData.VerifyWithMicrodeposits> {
+        override fun parse(json: JSONObject): StripeIntent.NextActionData.VerifyWithMicrodeposits {
+            return StripeIntent.NextActionData.VerifyWithMicrodeposits(
+                arrivalDate = json.optLong(ARRIVAL_DATE),
+                hostedVerificationUrl = json.optString(HOSTED_VERIFICATION_URL),
+                microdepositType = parseMicrodepositType(json)
+            )
+        }
+
+        private fun parseMicrodepositType(json: JSONObject): MicrodepositType {
+            return MicrodepositType.values().find {
+                it.value == json.optString(MICRODEPOSIT_TYPE)
+            } ?: MicrodepositType.UNKNOWN
+        }
+
+        private companion object {
+            private const val ARRIVAL_DATE = "arrival_date"
+            private const val HOSTED_VERIFICATION_URL = "hosted_verification_url"
+            private const val MICRODEPOSIT_TYPE = "microdeposit_type"
         }
     }
 

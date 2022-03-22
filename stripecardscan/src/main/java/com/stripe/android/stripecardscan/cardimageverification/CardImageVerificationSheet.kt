@@ -44,9 +44,18 @@ class CardImageVerificationSheet private constructor(
 
     @Parcelize
     data class Configuration(
-        // The amount of frames that must have a centered, focused card before the scan
-        // is allowed to terminate
+        /**
+         * The amount of frames that must have a centered, focused card before the scan
+         * is allowed to terminate. This is an experimental feature that should only be
+         * used with guidance from Stripe support.
+         */
         val strictModeFrames: StrictModeFrameCount = StrictModeFrameCount.None,
+        /**
+         * Determine if the "I can't scan this card" button should be included in the scan window.
+         * This is an experimental feature that should only be used with guidance from Stripe
+         * support.
+         */
+        val enableCannotScanButton: Boolean = true,
     ) : Parcelable {
         sealed class StrictModeFrameCount(val count: Int) : Parcelable {
             @Parcelize object None : StrictModeFrameCount(0)

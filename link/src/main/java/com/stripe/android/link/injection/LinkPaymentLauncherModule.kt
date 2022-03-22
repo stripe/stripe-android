@@ -10,7 +10,8 @@ import javax.inject.Singleton
 
 @Module(
     subcomponents = [
-        SignedInViewModelSubcomponent::class
+        SignedInViewModelSubcomponent::class,
+        SignUpViewModelSubcomponent::class
     ]
 )
 internal interface LinkPaymentLauncherModule {

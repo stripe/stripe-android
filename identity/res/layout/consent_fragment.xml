@@ -109,8 +109,7 @@
                 android:textStyle="bold"
                 android:layout_marginBottom="@dimen/item_vertical_margin"
                 android:drawablePadding="6dp"
-                app:drawableStartCompat="@drawable/ic_exclamation_square_16"
-                tools:text="@string/sample_privacy_policy" />
+                app:drawableStartCompat="@drawable/ic_exclamation_square_16" />
 
             <View
                 android:id="@+id/divider"
@@ -123,8 +122,7 @@
                 android:id="@+id/body"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="@dimen/item_vertical_margin"
-                tools:text="@string/sample_consent_body_response" />
+                android:layout_marginBottom="@dimen/item_vertical_margin" />
         </LinearLayout>
     </ScrollView>
 
@@ -136,18 +134,15 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom">
 
-        <Button
+        <com.stripe.android.identity.ui.LoadingButton
             android:id="@+id/agree"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/agree_and_continue"
-            android:layout_marginBottom="10dp" />
+            android:layout_height="wrap_content" />
 
-        <Button
+        <com.stripe.android.identity.ui.LoadingButton
             android:id="@+id/decline"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/decline" />
+            android:layout_height="wrap_content" />
     </LinearLayout>
 
 </LinearLayout>

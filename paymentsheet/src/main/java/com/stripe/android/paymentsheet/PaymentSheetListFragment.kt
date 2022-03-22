@@ -6,7 +6,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ViewCompositionStrategy
@@ -72,7 +71,7 @@ private fun HeaderUI(
                 H6Text(
                     text = stringResource(
                         R.string.stripe_paymentsheet_total_amount,
-                        CurrencyFormatter().format(it.value, it.currencyCode)
+                        CurrencyFormatter.format(it.value, it.currencyCode)
                     )
                 )
             }
