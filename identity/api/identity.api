@@ -172,14 +172,15 @@ public final class com/stripe/android/identity/databinding/FrontBackUploadFragme
 	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Z)Lcom/stripe/android/identity/databinding/FrontBackUploadFragmentBinding;
 }
 
-public final class com/stripe/android/identity/databinding/GetLocalImageFragmentBinding : androidx/viewbinding/ViewBinding {
+public final class com/stripe/android/identity/databinding/GetLocalImageDialogBinding : androidx/viewbinding/ViewBinding {
 	public final field chooseFile Lcom/google/android/material/button/MaterialButton;
 	public final field takePhoto Lcom/google/android/material/button/MaterialButton;
-	public static fun bind (Landroid/view/View;)Lcom/stripe/android/identity/databinding/GetLocalImageFragmentBinding;
+	public final field title Lcom/google/android/material/textview/MaterialTextView;
+	public static fun bind (Landroid/view/View;)Lcom/stripe/android/identity/databinding/GetLocalImageDialogBinding;
 	public synthetic fun getRoot ()Landroid/view/View;
 	public fun getRoot ()Landroid/widget/LinearLayout;
-	public static fun inflate (Landroid/view/LayoutInflater;)Lcom/stripe/android/identity/databinding/GetLocalImageFragmentBinding;
-	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Z)Lcom/stripe/android/identity/databinding/GetLocalImageFragmentBinding;
+	public static fun inflate (Landroid/view/LayoutInflater;)Lcom/stripe/android/identity/databinding/GetLocalImageDialogBinding;
+	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Z)Lcom/stripe/android/identity/databinding/GetLocalImageDialogBinding;
 }
 
 public final class com/stripe/android/identity/databinding/IdentityActivityBinding : androidx/viewbinding/ViewBinding {
