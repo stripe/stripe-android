@@ -1,6 +1,5 @@
 package com.stripe.android.identity.viewmodel
 
-import android.content.Context
 import android.graphics.Bitmap
 import android.util.Log
 import androidx.annotation.VisibleForTesting
@@ -23,14 +22,14 @@ import com.stripe.android.identity.states.IdentityScanState.ScanType.DL_FRONT
 import com.stripe.android.identity.states.IdentityScanState.ScanType.ID_BACK
 import com.stripe.android.identity.states.IdentityScanState.ScanType.ID_FRONT
 import com.stripe.android.identity.states.IdentityScanState.ScanType.PASSPORT
+import com.stripe.android.identity.utils.IdentityIO
 import com.stripe.android.identity.utils.PairMediatorLiveData
-import com.stripe.android.identity.utils.cropAndPadBitmap
-import com.stripe.android.identity.utils.resizeBitmapAndCreateFileToUpload
 import kotlinx.coroutines.launch
 
 internal class IdentityScanViewModel(
     private val identityRepository: IdentityRepository,
-    private val verificationArgs: IdentityVerificationSheetContract.Args
+    private val verificationArgs: IdentityVerificationSheetContract.Args,
+    private val identityIO: IdentityIO
 ) : CameraViewModel() {
 
     /**
@@ -71,7 +70,6 @@ internal class IdentityScanViewModel(
      */
     internal fun uploadResult(
         result: IDDetectorAggregator.FinalResult,
-        context: Context,
         docCapturePage: VerificationPageStaticContentDocumentCapturePage,
     ) {
         val originalBitmap = result.frame.cameraPreviewImage.image
@@ -92,7 +90,6 @@ internal class IdentityScanViewModel(
         }
         // upload high res
         uploadImageAndNotify(
-            context,
             originalBitmap,
             boundingBox,
             docCapturePage,
@@ -103,7 +100,6 @@ internal class IdentityScanViewModel(
 
         // upload low res
         uploadImageAndNotify(
-            context,
             originalBitmap,
             boundingBox,
             docCapturePage,
@@ -120,7 +116,6 @@ internal class IdentityScanViewModel(
      */
     @VisibleForTesting
     internal fun uploadImageAndNotify(
-        context: Context,
         originalBitmap: Bitmap,
         boundingBox: BoundingBox,
         docCapturePage: VerificationPageStaticContentDocumentCapturePage,
@@ -128,11 +123,10 @@ internal class IdentityScanViewModel(
         isFront: Boolean,
         scores: List<Float>
     ) {
-        resizeBitmapAndCreateFileToUpload(
-            context = context,
+        identityIO.resizeBitmapAndCreateFileToUpload(
             bitmap =
             if (isHighRes)
-                cropAndPadBitmap(originalBitmap, boundingBox, docCapturePage)
+                identityIO.cropAndPadBitmap(originalBitmap, boundingBox, docCapturePage)
             else
                 originalBitmap,
             verificationId = verificationArgs.verificationSessionId,
@@ -196,11 +190,12 @@ internal class IdentityScanViewModel(
 
     internal class IdentityScanViewModelFactory(
         private val identityRepository: IdentityRepository,
-        private val verificationArgs: IdentityVerificationSheetContract.Args
+        private val verificationArgs: IdentityVerificationSheetContract.Args,
+        private val identityIO: IdentityIO
     ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return IdentityScanViewModel(identityRepository, verificationArgs) as T
+            return IdentityScanViewModel(identityRepository, verificationArgs, identityIO) as T
         }
     }
 

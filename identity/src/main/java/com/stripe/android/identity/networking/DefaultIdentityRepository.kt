@@ -23,14 +23,15 @@ import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.networking.models.CollectedDataParam.Companion.createCollectedDataParamEntry
 import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.networking.models.VerificationPageData
-import com.stripe.android.identity.utils.createTFLiteFile
+import com.stripe.android.identity.utils.IdentityIO
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.json.Json
 import java.io.File
 
 internal class DefaultIdentityRepository(
     private val context: Context,
-    private val stripeNetworkClient: StripeNetworkClient = DefaultStripeNetworkClient()
+    private val stripeNetworkClient: StripeNetworkClient = DefaultStripeNetworkClient(),
+    private val identityIO: IdentityIO
 ) : IdentityRepository {
 
     @VisibleForTesting
@@ -100,7 +101,7 @@ internal class DefaultIdentityRepository(
     override suspend fun downloadModel(modelUrl: String) = runCatching {
         stripeNetworkClient.executeRequestForFile(
             IdentityModelDownloadRequest(modelUrl),
-            createTFLiteFile(context)
+            identityIO.createTFLiteFile()
         )
     }.fold(
         onSuccess = { response ->

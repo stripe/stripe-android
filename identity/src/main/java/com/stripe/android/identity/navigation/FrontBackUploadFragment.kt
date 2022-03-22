@@ -258,7 +258,6 @@ internal abstract class FrontBackUploadFragment(
         observeForDocumentCaptureModels { documentCaptureModels ->
             frontBackUploadViewModel.uploadImageFront(
                 frontUri,
-                requireContext(),
                 documentCaptureModels,
                 uploadMethod
             )
@@ -269,7 +268,6 @@ internal abstract class FrontBackUploadFragment(
         observeForDocumentCaptureModels { documentCaptureModels ->
             frontBackUploadViewModel.uploadImageBack(
                 backUri,
-                requireContext(),
                 documentCaptureModels,
                 uploadMethod
             )
