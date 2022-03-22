@@ -7,10 +7,10 @@
     <application>
         <activity
             android:name=".IdentityActivity"
+            android:theme="@style/Theme.MaterialComponents.DayNight.NoActionBar"
             android:screenOrientation="portrait"
             android:configChanges="orientation|keyboardHidden"
             android:exported="false" />
-
 
         <provider
             android:name="androidx.core.content.FileProvider"

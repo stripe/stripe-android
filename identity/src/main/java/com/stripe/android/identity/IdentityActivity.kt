@@ -7,8 +7,10 @@ import androidx.activity.viewModels
 import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AlertDialog
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.NavController
 import androidx.navigation.findNavController
 import androidx.navigation.fragment.NavHostFragment
+import androidx.navigation.ui.setupActionBarWithNavController
 import com.stripe.android.camera.CameraPermissionCheckingActivity
 import com.stripe.android.identity.IdentityVerificationSheet.VerificationResult
 import com.stripe.android.identity.databinding.IdentityActivityBinding
@@ -39,6 +41,8 @@ internal class IdentityActivity : CameraPermissionCheckingActivity(), Verificati
         )
     }
 
+    private lateinit var navController: NavController
+
     @VisibleForTesting
     internal val viewModelFactory: ViewModelProvider.Factory by lazy {
         identityFragmentFactory.identityViewModelFactory
@@ -51,11 +55,17 @@ internal class IdentityActivity : CameraPermissionCheckingActivity(), Verificati
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
 
+        setSupportActionBar(binding.topAppBar)
+
         supportFragmentManager.fragmentFactory = identityFragmentFactory
 
-        val navHostFragment =
-            supportFragmentManager.findFragmentById(R.id.identity_nav_host) as NavHostFragment
-        navHostFragment.navController.setGraph(R.navigation.identity_nav_graph)
+        navController =
+            (supportFragmentManager.findFragmentById(R.id.identity_nav_host) as NavHostFragment).navController
+        navController.setGraph(R.navigation.identity_nav_graph)
+        navController.addOnDestinationChangedListener { _, _, _ ->
+            title = "" // clear title on each screen
+        }
+        setupActionBarWithNavController(navController)
 
         identityViewModel.retrieveAndBufferVerificationPage()
     }
@@ -68,6 +78,10 @@ internal class IdentityActivity : CameraPermissionCheckingActivity(), Verificati
                 navController.navigateUp()
             }
         }
+    }
+
+    override fun onSupportNavigateUp(): Boolean {
+        return navController.navigateUp() || super.onSupportNavigateUp()
     }
 
     override fun finishWithResult(result: VerificationResult) {
