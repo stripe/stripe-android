@@ -79,6 +79,7 @@ class CardImageVerificationSheet private constructor(
          * is created (in the onCreate method).
          */
         @JvmStatic
+        @JvmOverloads
         fun create(
             from: ComponentActivity,
             stripePublishableKey: String,
@@ -96,6 +97,7 @@ class CardImageVerificationSheet private constructor(
          * before the [Fragment] is created (in the onCreate method).
          */
         @JvmStatic
+        @JvmOverloads
         fun create(
             from: Fragment,
             stripePublishableKey: String,
