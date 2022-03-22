@@ -49,7 +49,7 @@ internal class ConsentFragment(
 
         binding.agree.setOnClickListener {
             binding.agree.toggleToLoading()
-            binding.decline.isClickable = false
+            binding.decline.isEnabled = false
             postVerificationPageDataAndNavigate(
                 CollectedDataParam(
                     consent = ConsentParam(biometric = true)
@@ -58,7 +58,7 @@ internal class ConsentFragment(
         }
         binding.decline.setOnClickListener {
             binding.decline.toggleToLoading()
-            binding.agree.isClickable = false
+            binding.agree.isEnabled = false
             postVerificationPageDataAndNavigate(
                 CollectedDataParam(
                     consent = ConsentParam(biometric = false)
