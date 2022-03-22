@@ -328,12 +328,14 @@ data class ConfirmPaymentIntentParams internal constructor(
         fun create(
             clientSecret: String,
             shipping: Shipping? = null,
-            setupFutureUsage: SetupFutureUsage? = null
+            setupFutureUsage: SetupFutureUsage? = null,
+            mandateData: MandateDataParams? = null,
         ): ConfirmPaymentIntentParams {
             return ConfirmPaymentIntentParams(
                 clientSecret = clientSecret,
                 setupFutureUsage = setupFutureUsage,
-                shipping = shipping
+                shipping = shipping,
+                mandateData = mandateData
             )
         }
 

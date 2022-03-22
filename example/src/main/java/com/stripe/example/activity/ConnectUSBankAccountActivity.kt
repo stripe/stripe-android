@@ -3,6 +3,8 @@ package com.stripe.example.activity
 import android.os.Bundle
 import android.view.View
 import androidx.lifecycle.Observer
+import com.stripe.android.model.ConfirmPaymentIntentParams
+import com.stripe.android.model.MandateDataParams
 import com.stripe.android.payments.bankaccount.CollectBankAccountConfiguration
 import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResult
@@ -37,12 +39,17 @@ class ConnectUSBankAccountActivity : StripeIntentActivity() {
                             "Attached bank account to paymentIntent." +
                                 " secret: ${result.response.clientSecret}. Confirming..."
                         )
-//                    confirmPaymentIntent(
-//                        ConfirmPaymentIntentParams.createWithPaymentMethodId(
-//                            paymentMethodId = result.response.intent.paymentMethodId!!,
-//                            clientSecret = result.response.intent.clientSecret!!
-//                        )
-//                    )
+                    confirmPaymentIntent(
+                        ConfirmPaymentIntentParams.create(
+                            clientSecret = result.response.clientSecret,
+                            mandateData = MandateDataParams(
+                                MandateDataParams.Type.Online(
+                                    ipAddress = "127.0.0.1",
+                                    userAgent = "agent"
+                                )
+                            )
+                        )
+                    )
                 }
                 is CollectBankAccountResult.Cancelled ->
                     viewModel.status.postValue(
