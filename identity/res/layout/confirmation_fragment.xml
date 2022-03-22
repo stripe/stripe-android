@@ -28,10 +28,10 @@
                 android:layout_height="32dp"
                 android:padding="5dp"
                 android:background="?android:colorPrimary"
+                android:contentDescription="@string/description_clock"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:tint="@android:color/white"
-                android:contentDescription="@string/description_clock"/>
+                app:tint="@android:color/white" />
 
             <TextView
                 android:id="@+id/title_text"
@@ -40,25 +40,21 @@
                 android:layout_marginTop="@dimen/item_vertical_margin"
                 android:textSize="@dimen/consent_title_text_size"
                 android:textStyle="bold"
-                android:text="@string/sample_title_text"
                 android:layout_marginBottom="42dp"
                 app:layout_constraintBottom_toTopOf="@id/content_text"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/clock_logo"
-                tools:text="@string/sample_title_text" />
+                app:layout_constraintTop_toBottomOf="@+id/clock_logo" />
 
             <TextView
                 android:id="@+id/content_text"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:text="@string/sample_content_text"
                 android:layout_marginBottom="@dimen/item_vertical_margin"
                 android:lineSpacingExtra="2sp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/title_text"
-                tools:text="@string/sample_content_text" />
+                app:layout_constraintTop_toBottomOf="@+id/title_text" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </ScrollView>
