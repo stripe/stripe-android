@@ -10,6 +10,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Colors
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Shapes
+import androidx.compose.material.Typography
 import androidx.compose.material.lightColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -17,15 +18,12 @@ import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-
-internal val LocalFieldTextStyle = TextStyle.Default.copy(
-    fontFamily = FontFamily.SansSerif,
-    fontSize = 14.sp
-)
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 data class PaymentsColors(
@@ -54,6 +52,75 @@ object PaymentsThemeConfig {
         val cornerRadius = 6.dp
         val borderStrokeWidth = 1.dp
         val borderStrokeWidthSelected = 2.dp
+    }
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    object Typography {
+        private val fontWeightBold: Int = FontWeight.Bold.weight
+        private val fontWeightMedium: Int = FontWeight.Medium.weight
+        private val fontWeightNormal: Int = FontWeight.Normal.weight
+        private val fontSizeMultiplier: Float = 1.0F
+        val fontFamily: Int = R.font.roboto
+
+        // h4 is our largest headline. It is used for the most important labels in our UI
+        // ex: "Select your payment method" in Payment Sheet.
+        val h4 = TextStyle.Default.copy(
+            fontFamily = FontFamily(Font(fontFamily)),
+            fontSize = (20.0 * fontSizeMultiplier).sp,
+            fontWeight = FontWeight(fontWeightBold),
+        )
+
+        // h5 is our medium headline label.
+        // ex: "Pay $50.99" in Payment Sheet's buy button.
+        val h5 = TextStyle.Default.copy(
+            fontFamily = FontFamily(Font(fontFamily)),
+            fontSize = (16.0 * fontSizeMultiplier).sp,
+            fontWeight = FontWeight(fontWeightMedium),
+            letterSpacing = (-0.32).sp
+        )
+
+        // h6 is our smallest headline label.
+        // ex: Section labels in Payment Sheet
+        val h6 = TextStyle.Default.copy(
+            fontFamily = FontFamily(Font(fontFamily)),
+            fontSize = (13.0 * fontSizeMultiplier).sp,
+            fontWeight = FontWeight(fontWeightMedium),
+            letterSpacing = (-0.15).sp
+        )
+
+        // body1 is our larger body text. Used for the bulk of our elements and forms.
+        // ex: the text used in Payment Sheet's text form elements.
+        val body1 = TextStyle.Default.copy(
+            fontFamily = FontFamily(Font(fontFamily)),
+            fontSize = (14.0 * fontSizeMultiplier).sp,
+            fontWeight = FontWeight(fontWeightNormal),
+        )
+
+        // subtitle1 is our only subtitle size. Used for labeling fields.
+        // ex: the placeholder texts that appear when you type in Payment Sheet's forms.
+        val subtitle1 = TextStyle.Default.copy(
+            fontFamily = FontFamily(Font(fontFamily)),
+            fontSize = (14.0 * fontSizeMultiplier).sp,
+            fontWeight = FontWeight(fontWeightNormal),
+            letterSpacing = (-0.15).sp
+        )
+
+        // caption is used to label images in payment sheet.
+        // ex: the labels under our payment method selectors in Payment Sheet.
+        val caption = TextStyle.Default.copy(
+            fontFamily = FontFamily(Font(fontFamily)),
+            fontSize = (12.0 * fontSizeMultiplier).sp,
+            fontWeight = FontWeight(fontWeightMedium)
+        )
+
+        // body2 is our smaller body text. Used for less important fields that are not required to
+        // read. Ex: our mandate texts in Payment Sheet.
+        val body2 = TextStyle.Default.copy(
+            fontFamily = FontFamily(Font(fontFamily)),
+            fontSize = (9.0 * fontSizeMultiplier).sp,
+            fontWeight = FontWeight(fontWeightNormal),
+            letterSpacing = (-0.15).sp
+        )
     }
 
     private val colorsLight = PaymentsColors(
@@ -143,6 +210,21 @@ fun PaymentsThemeConfig.Shapes.toComposeShapes(): PaymentsComposeShapes {
 }
 
 @Composable
+@ReadOnlyComposable
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+fun PaymentsThemeConfig.Typography.toComposeTypography(): Typography {
+    return MaterialTheme.typography.copy(
+        body1 = body1,
+        body2 = body2,
+        h4 = h4,
+        h5 = h5,
+        h6 = h6,
+        subtitle1 = subtitle1,
+        caption = caption
+    )
+}
+
+@Composable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun PaymentsTheme(
     content: @Composable () -> Unit
@@ -159,10 +241,7 @@ fun PaymentsTheme(
     ) {
         MaterialTheme(
             colors = PaymentsTheme.colors.material,
-            typography = MaterialTheme.typography.copy(
-                body1 = LocalFieldTextStyle,
-                subtitle1 = LocalFieldTextStyle
-            ),
+            typography = PaymentsThemeConfig.Typography.toComposeTypography(),
             shapes = PaymentsTheme.shapes.material,
             content = content
         )
@@ -183,6 +262,11 @@ object PaymentsTheme {
         @Composable
         @ReadOnlyComposable
         get() = PaymentsThemeConfig.Shapes.toComposeShapes()
+
+    val typography: Typography
+        @Composable
+        @ReadOnlyComposable
+        get() = PaymentsThemeConfig.Typography.toComposeTypography()
 
     @Composable
     @ReadOnlyComposable
