@@ -11,8 +11,10 @@ import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.link.account.CookieStore
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.injection.NonFallbackInjector
+import com.stripe.android.link.model.ConfirmationManager
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.model.Navigator
+import com.stripe.android.link.model.StripeIntentFixtures
 import com.stripe.android.link.utils.FakeAndroidKeyStore
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
@@ -22,6 +24,7 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.argWhere
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.reset
 import org.mockito.kotlin.spy
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
@@ -33,6 +36,7 @@ import kotlin.test.assertNotNull
 @RunWith(RobolectricTestRunner::class)
 class LinkActivityViewModelTest {
     private val defaultArgs = LinkActivityContract.Args(
+        StripeIntentFixtures.PI_SUCCEEDED,
         MERCHANT_NAME,
         CUSTOMER_EMAIL,
         LinkActivityContract.Args.InjectionParams(
@@ -45,6 +49,7 @@ class LinkActivityViewModelTest {
     )
 
     private val linkAccountManager = mock<LinkAccountManager>()
+    private val confirmationManager = mock<ConfirmationManager>()
     private val cookieStore = mock<CookieStore>()
     private val navigator = mock<Navigator>()
 
@@ -101,6 +106,29 @@ class LinkActivityViewModelTest {
     }
 
     @Test
+    fun `When StripeIntent is missing required fields then it dismisses with error`() = runTest {
+        createViewModel(
+            defaultArgs.copy(StripeIntentFixtures.PI_SUCCEEDED.copy(clientSecret = null)))
+        verify(navigator).dismiss(argWhere { it is LinkActivityResult.Failed })
+
+        reset(navigator)
+        createViewModel(
+            defaultArgs.copy(StripeIntentFixtures.PI_SUCCEEDED.copy(id = null)))
+        verify(navigator).dismiss(argWhere { it is LinkActivityResult.Failed })
+        reset(navigator)
+
+        reset(navigator)
+        createViewModel(
+            defaultArgs.copy(StripeIntentFixtures.PI_SUCCEEDED.copy(amount = null)))
+        verify(navigator).dismiss(argWhere { it is LinkActivityResult.Failed })
+
+        reset(navigator)
+        createViewModel(
+            defaultArgs.copy(StripeIntentFixtures.PI_SUCCEEDED.copy(currency = null)))
+        verify(navigator).dismiss(argWhere { it is LinkActivityResult.Failed })
+    }
+
+    @Test
     fun `Factory gets initialized by Injector when Injector is available`() {
         val vmToBeReturned = mock<LinkActivityViewModel>()
 
@@ -149,12 +177,14 @@ class LinkActivityViewModelTest {
         )
     }
 
-    private fun createViewModel() = LinkActivityViewModel(
-        defaultArgs,
-        linkAccountManager,
-        cookieStore,
-        navigator
-    )
+    private fun createViewModel(args: LinkActivityContract.Args = defaultArgs) =
+        LinkActivityViewModel(
+            args,
+            linkAccountManager,
+            cookieStore,
+            navigator,
+            confirmationManager
+        )
 
     private companion object {
         const val INJECTOR_KEY = "injectorKey"

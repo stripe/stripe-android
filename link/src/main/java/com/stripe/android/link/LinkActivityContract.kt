@@ -7,6 +7,7 @@ import androidx.activity.result.contract.ActivityResultContract
 import androidx.annotation.RestrictTo
 import androidx.core.os.bundleOf
 import com.stripe.android.core.injection.InjectorKey
+import com.stripe.android.model.StripeIntent
 import com.stripe.android.view.ActivityStarter
 import kotlinx.parcelize.Parcelize
 
@@ -19,9 +20,7 @@ class LinkActivityContract :
             .putExtra(EXTRA_ARGS, input)
 
     override fun parseResult(resultCode: Int, intent: Intent?) =
-        intent?.getParcelableExtra<Result>(EXTRA_RESULT)?.linkResult ?: LinkActivityResult.Failed(
-            IllegalStateException("Failed to retrieve LinkActivityResult.")
-        )
+        intent?.getParcelableExtra<Result>(EXTRA_RESULT)?.linkResult ?: LinkActivityResult.Canceled
 
     /**
      * Arguments for launching [LinkActivity] to confirm a payment with Link.
@@ -33,6 +32,7 @@ class LinkActivityContract :
      */
     @Parcelize
     data class Args internal constructor(
+        internal val stripeIntent: StripeIntent,
         internal val merchantName: String,
         internal val customerEmail: String? = null,
         internal val injectionParams: InjectionParams? = null
