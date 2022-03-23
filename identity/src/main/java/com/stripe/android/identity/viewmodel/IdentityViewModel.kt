@@ -3,6 +3,7 @@ package com.stripe.android.identity.viewmodel
 import android.util.Log
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -41,6 +42,50 @@ internal class IdentityViewModel(
      */
     private val _idDetectorModelFile = MutableLiveData<Resource<File>>()
     val idDetectorModelFile: LiveData<Resource<File>> = _idDetectorModelFile
+
+    /**
+     * Wrapper for both page and model
+     */
+    val pageAndModel = object : MediatorLiveData<Resource<Pair<VerificationPage, File>>>() {
+        private var page: VerificationPage? = null
+        private var model: File? = null
+
+        init {
+            postValue(Resource.loading())
+            addSource(verificationPage) {
+                when (it.status) {
+                    Status.SUCCESS -> {
+                        page = it.data
+                        maybePostSuccess()
+                    }
+                    Status.ERROR -> {
+                        postValue(Resource.error("$verificationPage posts error"))
+                    }
+                    Status.LOADING -> {} // no-op
+                }
+            }
+            addSource(idDetectorModelFile) {
+                when (it.status) {
+                    Status.SUCCESS -> {
+                        model = it.data
+                        maybePostSuccess()
+                    }
+                    Status.ERROR -> {
+                        postValue(Resource.error("$idDetectorModelFile posts error"))
+                    }
+                    Status.LOADING -> {} // no-op
+                }
+            }
+        }
+
+        private fun maybePostSuccess() {
+            page?.let { page ->
+                model?.let { model ->
+                    postValue(Resource.success(Pair(page, model)))
+                }
+            }
+        }
+    }
 
     /**
      * Simple wrapper for observing [verificationPage].

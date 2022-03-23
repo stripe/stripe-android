@@ -10,11 +10,13 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.annotation.StringRes
 import androidx.annotation.VisibleForTesting
+import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import com.stripe.android.camera.Camera1Adapter
 import com.stripe.android.camera.DefaultCameraErrorListener
 import com.stripe.android.camera.scanui.CameraView
@@ -23,6 +25,7 @@ import com.stripe.android.camera.scanui.util.startAnimation
 import com.stripe.android.core.exception.InvalidResponseException
 import com.stripe.android.identity.R
 import com.stripe.android.identity.databinding.IdentityCameraScanFragmentBinding
+import com.stripe.android.identity.navigation.CouldNotCaptureFragment.Companion.ARG_COULD_NOT_CAPTURE_SCAN_TYPE
 import com.stripe.android.identity.networking.Status
 import com.stripe.android.identity.networking.models.ClearDataParam
 import com.stripe.android.identity.networking.models.CollectedDataParam
@@ -102,18 +105,27 @@ internal abstract class IdentityCameraScanFragment(
             updateUI(newState)
         }
         identityScanViewModel.finalResult.observe(viewLifecycleOwner) { finalResult ->
-            identityViewModel.observeForVerificationPage(
-                viewLifecycleOwner,
-                onSuccess = {
-                    identityScanViewModel.uploadResult(
-                        finalResult,
-                        it.documentCapture
+            if (finalResult.identityState is IdentityScanState.Finished) {
+                identityViewModel.observeForVerificationPage(
+                    viewLifecycleOwner,
+                    onSuccess = {
+                        identityScanViewModel.uploadResult(
+                            finalResult,
+                            it.documentCapture
+                        )
+                    },
+                    onFailure = {
+                        navigateToDefaultErrorFragment()
+                    }
+                )
+            } else if (finalResult.identityState is IdentityScanState.TimeOut) {
+                findNavController().navigate(
+                    R.id.action_global_couldNotCaptureFragment,
+                    bundleOf(
+                        ARG_COULD_NOT_CAPTURE_SCAN_TYPE to identityScanViewModel.targetScanType
                     )
-                },
-                onFailure = {
-                    navigateToDefaultErrorFragment()
-                }
-            )
+                )
+            }
             stopScanning()
         }
         cameraAdapter = Camera1Adapter(
@@ -125,12 +137,17 @@ internal abstract class IdentityCameraScanFragment(
             }
         )
 
-        identityViewModel.idDetectorModelFile.observe(viewLifecycleOwner) {
+        identityViewModel.pageAndModel.observe(viewLifecycleOwner) {
             when (it.status) {
                 Status.SUCCESS -> {
-                    identityScanViewModel.initializeScanFlow(requireNotNull(it.data))
-                    lifecycleScope.launch(Dispatchers.Main) {
-                        onCameraReady()
+                    requireNotNull(it.data).let { pageFilePair ->
+                        identityScanViewModel.initializeScanFlow(
+                            pageFilePair.first.documentCapture.autocaptureTimeout,
+                            pageFilePair.second
+                        )
+                        lifecycleScope.launch(Dispatchers.Main) {
+                            onCameraReady()
+                        }
                     }
                 }
                 Status.LOADING -> {} // no-op
@@ -179,6 +196,9 @@ internal abstract class IdentityCameraScanFragment(
                 checkMarkView.visibility = View.VISIBLE
                 continueButton.isEnabled = true
                 messageView.text = requireContext().getText(R.string.scanned)
+            }
+            is IdentityScanState.TimeOut -> {
+                // no-op, transitions to CouldNotCaptureFragment
             }
         }
     }
