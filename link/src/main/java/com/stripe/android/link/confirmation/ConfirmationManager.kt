@@ -1,4 +1,4 @@
-package com.stripe.android.link.model
+package com.stripe.android.link.confirmation
 
 import androidx.activity.result.ActivityResultCaller
 import com.stripe.android.core.injection.PUBLISHABLE_KEY

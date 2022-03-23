@@ -12,9 +12,9 @@ import com.stripe.android.core.injection.Injectable
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.link.account.CookieStore
 import com.stripe.android.link.account.LinkAccountManager
+import com.stripe.android.link.confirmation.ConfirmationManager
 import com.stripe.android.link.injection.DaggerLinkViewModelFactoryComponent
 import com.stripe.android.link.injection.NonFallbackInjector
-import com.stripe.android.link.model.ConfirmationManager
 import com.stripe.android.link.model.Navigator
 import com.stripe.android.link.ui.signup.SignUpViewModel
 import com.stripe.android.link.ui.verification.VerificationViewModel
