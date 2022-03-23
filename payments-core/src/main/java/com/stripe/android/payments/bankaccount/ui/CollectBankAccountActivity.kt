@@ -29,6 +29,7 @@ internal class CollectBankAccountActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         lifecycleScope.launchWhenStarted {
+            // TODO(carlosmuvi) observe and handle view effects.
             viewModel.viewEffect.collect {}
         }
     }
