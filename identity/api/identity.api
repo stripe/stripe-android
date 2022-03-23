@@ -66,14 +66,6 @@ public final class com/stripe/android/identity/databinding/BaseErrorFragmentBind
 	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Z)Lcom/stripe/android/identity/databinding/BaseErrorFragmentBinding;
 }
 
-public final class com/stripe/android/identity/databinding/CameraErrorFragmentBinding : androidx/viewbinding/ViewBinding {
-	public static fun bind (Landroid/view/View;)Lcom/stripe/android/identity/databinding/CameraErrorFragmentBinding;
-	public synthetic fun getRoot ()Landroid/view/View;
-	public fun getRoot ()Landroid/widget/FrameLayout;
-	public static fun inflate (Landroid/view/LayoutInflater;)Lcom/stripe/android/identity/databinding/CameraErrorFragmentBinding;
-	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Z)Lcom/stripe/android/identity/databinding/CameraErrorFragmentBinding;
-}
-
 public final class com/stripe/android/identity/databinding/ConfirmationFragmentBinding : androidx/viewbinding/ViewBinding {
 	public final field clockLogo Landroid/widget/ImageView;
 	public final field contentText Landroid/widget/TextView;
@@ -217,17 +209,6 @@ public final class com/stripe/android/identity/databinding/PassportUploadFragmen
 	public fun getRoot ()Landroid/widget/LinearLayout;
 	public static fun inflate (Landroid/view/LayoutInflater;)Lcom/stripe/android/identity/databinding/PassportUploadFragmentBinding;
 	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Z)Lcom/stripe/android/identity/databinding/PassportUploadFragmentBinding;
-}
-
-public final class com/stripe/android/identity/navigation/CameraErrorFragment : androidx/fragment/app/Fragment {
-	public static final field Companion Lcom/stripe/android/identity/navigation/CameraErrorFragment$Companion;
-	public fun <init> ()V
-	public fun onActivityCreated (Landroid/os/Bundle;)V
-	public fun onCreateView (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Landroid/os/Bundle;)Landroid/view/View;
-}
-
-public final class com/stripe/android/identity/navigation/CameraErrorFragment$Companion {
-	public final fun newInstance ()Lcom/stripe/android/identity/navigation/CameraErrorFragment;
 }
 
 public final class com/stripe/android/identity/utils/ContentUriResult {

@@ -65,4 +65,10 @@
     <string name="single_selection_body_content_dl" description="Message when the only allowed type of confirmation is driver licence">You will need to take photos of the front and back in the following steps.</string>
     <string name="single_selection_body_content_id" description="Message when the only allowed type of confirmation is ID">You will need to take photos of the front and back in the following steps.</string>
     <string name="single_selection_body_content_passport" description="Message when the only allowed type of confirmation is passport">You will need to take a photo of the passport in the following steps.</string>
+
+    <string name="could_not_capture_title" description="Title of the error screen when live capture fails">Could not capture image</string>
+    <string name="could_not_capture_body1" description="Line1 body text of error screen when live capture fails">We could not capture a high-quality image.</string>
+    <string name="could_not_capture_body2" description="Line2 body text of error screen when live capture fails">You can either try again or upload an image from your device.</string>
+    <string name="try_again" description="Button text for trying again">Try Again</string>
+
 </resources>

@@ -96,6 +96,8 @@ internal abstract class IdentityCameraScanFragment(
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        val shouldStartFromBack = arguments?.get(ARG_SHOULD_START_FROM_BACK) as? Boolean ?: false
+        // TODO(ccen) when shouldStartFromBack is true, start scanning from back
         identityScanViewModel.displayStateChanged.observe(viewLifecycleOwner) { (newState, _) ->
             updateUI(newState)
         }
@@ -301,8 +303,9 @@ internal abstract class IdentityCameraScanFragment(
         identityScanViewModel.identityScanFlow.cancelFlow()
     }
 
-    private companion object {
-        val TAG: String = IdentityCameraScanFragment::class.java.simpleName
-        val MINIMUM_RESOLUTION = Size(1067, 600) // TODO: decide what to use
+    internal companion object {
+        const val ARG_SHOULD_START_FROM_BACK = "startFromBack"
+        private val TAG: String = IdentityCameraScanFragment::class.java.simpleName
+        private val MINIMUM_RESOLUTION = Size(1067, 600) // TODO: decide what to use
     }
 }
