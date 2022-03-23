@@ -155,7 +155,12 @@ abstract class StripeIntentActivity : AppCompatActivity() {
                 mandateData = mandateDataParams
             )
         }
+        confirmPaymentIntent(confirmPaymentIntentParams)
         paymentLauncher.confirm(confirmPaymentIntentParams)
+    }
+
+    protected fun confirmPaymentIntent(params: ConfirmPaymentIntentParams) {
+        paymentLauncher.confirm(params)
     }
 
     private fun handleCreateSetupIntentResponse(

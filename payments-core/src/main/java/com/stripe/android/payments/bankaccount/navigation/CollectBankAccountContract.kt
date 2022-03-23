@@ -7,6 +7,7 @@ import android.os.Parcelable
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.annotation.VisibleForTesting
 import androidx.core.os.bundleOf
+import com.stripe.android.payments.bankaccount.CollectBankAccountConfiguration
 import com.stripe.android.payments.bankaccount.ui.CollectBankAccountActivity
 import kotlinx.parcelize.Parcelize
 
@@ -34,6 +35,7 @@ internal class CollectBankAccountContract :
     sealed class Args(
         open val publishableKey: String,
         open val clientSecret: String,
+        open val params: CollectBankAccountConfiguration,
     ) : Parcelable {
         fun toBundle() = bundleOf(EXTRA_ARGS to this)
 
@@ -41,13 +43,15 @@ internal class CollectBankAccountContract :
         data class ForPaymentIntent internal constructor(
             override val publishableKey: String,
             override val clientSecret: String,
-        ) : Args(publishableKey, clientSecret)
+            override val params: CollectBankAccountConfiguration,
+        ) : Args(publishableKey, clientSecret, params)
 
         @Parcelize
         data class ForSetupIntent internal constructor(
             override val publishableKey: String,
             override val clientSecret: String,
-        ) : Args(publishableKey, clientSecret)
+            override val params: CollectBankAccountConfiguration,
+        ) : Args(publishableKey, clientSecret, params)
 
         companion object {
             fun fromIntent(intent: Intent): Args? {
