@@ -183,7 +183,7 @@ class ConnectionsSheetViewModelTest {
         }
 
     @Test
-    fun `onResume - when flow is still active, finish with Result#Cancelled`() {
+    fun `onResume - when flow is still active and no config changes, finish with Result#Cancelled`() {
         runTest {
             // Given
             val viewModel = createViewModel(configuration)
@@ -191,6 +191,25 @@ class ConnectionsSheetViewModelTest {
                 // When
                 // end auth flow (activity resumed without new intent received)
                 viewModel.onResume()
+
+                // Then
+                assertThat(viewModel.state.value.authFlowActive).isTrue()
+                assertThat(awaitItem()).isEqualTo(FinishWithResult(ConnectionsSheetResult.Canceled))
+            }
+        }
+    }
+
+    @Test
+    fun `onActivityResult - when flow is still active and config changed, finish with Result#Cancelled`() {
+        runTest {
+            // Given
+            val viewModel = createViewModel(configuration)
+            viewModel.viewEffect.test {
+                // When
+                // configuration changes, changing lifecycle flow.
+                viewModel.onActivityRecreated()
+                // auth flow ends (activity received result without new intent received)
+                viewModel.onActivityResult()
 
                 // Then
                 assertThat(viewModel.state.value.authFlowActive).isTrue()

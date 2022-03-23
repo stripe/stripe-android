@@ -21,6 +21,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Named
@@ -79,11 +80,46 @@ internal class ConnectionsSheetViewModel @Inject constructor(
         _viewEffect.emit(OpenAuthFlowWithUrl(manifest.hostedAuthUrl))
     }
 
-    // If activity resumes and we did not receive a callback from the custom tabs,
-    // then the user hit the back button or closed the custom tabs UI, so return result as
-    // canceled.
+    /**
+     * Activity recreation changes the lifecycle order:
+     *
+     * - If config change happens while in web flow: onResume -> onNewIntent -> activityResult
+     * - If no config change happens: onActivityResult -> onNewIntent -> onResume
+     *
+     * (note [handleOnNewIntent] will just get called if user completed the web flow and clicked
+     * the deeplink that redirects back to the app)
+     *
+     * We need to rely on a post-onNewIntent lifecycle callback to figure if the user completed
+     * or cancelled the web flow. [ConnectionsSheetState.activityRecreated] will be used to
+     * figure which lifecycle callback happens after onNewIntent.
+     *
+     * @see onResume (we rely on this on regular flows)
+     * @see onActivityResult (we rely on this on config changes)
+     */
+    internal fun onActivityRecreated() {
+        _state.update { it.copy(activityRecreated = true) }
+    }
+
+    /**
+     *  If activity resumes and we did not receive a callback from the custom tabs,
+     *  then the user hit the back button or closed the custom tabs UI, so return result as
+     *  canceled.
+     */
     internal fun onResume() {
-        if (_state.value.authFlowActive) {
+        if (_state.value.authFlowActive && _state.value.activityRecreated.not()) {
+            viewModelScope.launch {
+                _viewEffect.emit(FinishWithResult(ConnectionsSheetResult.Canceled))
+            }
+        }
+    }
+
+    /**
+     * If activity receives result and we did not receive a callback from the custom tabs,
+     * if activity got recreated and the auth flow is still active then the user hit
+     * the back button or closed the custom tabs UI, so return result as canceled.
+     */
+    internal fun onActivityResult() {
+        if (_state.value.authFlowActive && _state.value.activityRecreated) {
             viewModelScope.launch {
                 _viewEffect.emit(FinishWithResult(ConnectionsSheetResult.Canceled))
             }
@@ -141,7 +177,7 @@ internal class ConnectionsSheetViewModel @Inject constructor(
      * @param intent the new intent with the redirect URL in the intent data
      */
     internal fun handleOnNewIntent(intent: Intent?) {
-        updateState { copy(authFlowActive = false) }
+        _state.update { it.copy(authFlowActive = false) }
         viewModelScope.launch {
             val manifest = _state.value.manifest
             when (intent?.data.toString()) {
@@ -149,12 +185,6 @@ internal class ConnectionsSheetViewModel @Inject constructor(
                 manifest?.cancelUrl -> onUserCancel()
                 else -> onFatal(Exception("Error processing ConnectionsSheet intent"))
             }
-        }
-    }
-
-    private fun updateState(block: ConnectionsSheetState.() -> ConnectionsSheetState) {
-        viewModelScope.launch {
-            _state.emit(block(_state.value))
         }
     }
 
