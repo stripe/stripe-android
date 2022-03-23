@@ -23,7 +23,7 @@ internal class ConfirmationManager @Inject constructor(
     @Named(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String,
     @Named(STRIPE_ACCOUNT_ID) private val stripeAccountIdProvider: () -> String?
 ) {
-    var paymentLauncher: PaymentLauncher? = null
+    private var paymentLauncher: PaymentLauncher? = null
     private var completionCallback: PaymentConfirmationCallback? = null
 
     /**
@@ -40,6 +40,10 @@ internal class ConfirmationManager @Inject constructor(
                 ::onPaymentResult
             )
         )
+    }
+
+    fun invalidatePaymentLauncher() {
+        paymentLauncher = null
     }
 
     /**

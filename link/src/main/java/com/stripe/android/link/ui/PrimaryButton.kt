@@ -69,7 +69,6 @@ internal fun PrimaryButton(
                 } else {
                     Text(
                         text = label,
-                        modifier = Modifier.padding(),
                         color = MaterialTheme.colors.onPrimary
                             .copy(alpha = LocalContentAlpha.current)
                     )
