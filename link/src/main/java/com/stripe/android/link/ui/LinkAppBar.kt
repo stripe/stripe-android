@@ -25,6 +25,7 @@ import com.stripe.android.link.R
 import com.stripe.android.link.theme.AppBarHeight
 import com.stripe.android.link.theme.CloseIconWidth
 import com.stripe.android.link.theme.DefaultLinkTheme
+import com.stripe.android.link.theme.linkColors
 
 @Preview
 @Composable
@@ -59,7 +60,7 @@ internal fun LinkAppBar(
                 Icon(
                     painter = painterResource(R.drawable.ic_link_logo),
                     contentDescription = stringResource(R.string.link),
-                    tint = MaterialTheme.colors.onBackground
+                    tint = MaterialTheme.linkColors.disabledText
                 )
             }
 
@@ -85,7 +86,7 @@ internal fun LinkAppBar(
             ) {
                 Text(
                     text = email.orEmpty(),
-                    color = MaterialTheme.colors.onBackground
+                    color = MaterialTheme.linkColors.disabledText
                 )
             }
         }
