@@ -33,26 +33,15 @@
             android:name="startFromBack"
             android:defaultValue="false"
             app:argType="boolean" />
-        <action
-            android:id="@+id/action_IDScanFragment_to_couldNotCaptureFragment"
-            app:destination="@id/couldNotCaptureFragment" />
     </fragment>
     <fragment
         android:id="@+id/passportScanFragment"
         android:name="com.stripe.android.identity.navigation.PassportScanFragment"
-        tools:layout="@layout/passport_scan_fragment">
-        <action
-            android:id="@+id/action_passportScanFragment_to_couldNotCaptureFragment"
-            app:destination="@id/couldNotCaptureFragment" />
-    </fragment>
+        tools:layout="@layout/passport_scan_fragment"/>
     <fragment
         android:id="@+id/driverLicenseScanFragment"
         android:name="com.stripe.android.identity.navigation.DriverLicenseScanFragment"
-        tools:layout="@layout/driver_license_scan_fragment">
-        <action
-            android:id="@+id/action_driverLicenseScanFragment_to_couldNotCaptureFragment"
-            app:destination="@id/couldNotCaptureFragment" />
-    </fragment>
+        tools:layout="@layout/driver_license_scan_fragment"/>
     <fragment
         android:id="@+id/IDUploadFragment"
         android:name="com.stripe.android.identity.navigation.IDUploadFragment"
@@ -160,5 +149,5 @@
         <action
             android:id="@+id/action_couldNotCaptureFragment_to_driverLicenseScanFragment"
             app:destination="@id/driverLicenseScanFragment" />
-    </fragment>
+    </fragment><action android:id="@+id/action_global_couldNotCaptureFragment" app:destination="@id/couldNotCaptureFragment"/>
 </navigation>
