@@ -8,12 +8,18 @@ import androidx.compose.ui.graphics.Color
 private val LinkGreen = Color(0xFF33DDB3)
 private val ButtonLabel = Color(0xFF1D3944)
 
+private val LightComponentBackground = Color.White
+private val LightComponentBorder = Color(0xFFE0E6EB)
+private val LightComponentDivider = Color(0xFFEFF2F4)
 private val LightTextPrimary = Color(0xFF30313D)
 private val LightTextSecondary = Color(0xFF6A7383)
 private val LightTextDisabled = Color(0xFFA3ACBA)
 private val LightBackground = Color.White
 private val LightFill = Color(0xFFF6F8FA)
 
+private val DarkComponentBackground = Color(0x2E747480)
+private val DarkComponentBorder = Color(0x5C787880)
+private val DarkComponentDivider = Color(0x33787880)
 private val DarkTextPrimary = Color.White
 private val DarkTextSecondary = Color(0x99EBEBF5)
 private val DarkTextDisabled = Color(0x61FFFFFF)
@@ -35,9 +41,9 @@ internal object LinkThemeConfig {
     }
 
     private val colorsLight = LinkColors(
-        componentBackground = Color.White,
-        componentBorder = Color(0xFFE0E6EB),
-        componentDivider = Color(0xFFEFF2F4),
+        componentBackground = LightComponentBackground,
+        componentBorder = LightComponentBorder,
+        componentDivider = LightComponentDivider,
         buttonLabel = ButtonLabel,
         disabledText = LightTextDisabled,
         materialColors = lightColors(
@@ -51,9 +57,9 @@ internal object LinkThemeConfig {
     )
 
     private val colorsDark = LinkColors(
-        componentBackground = Color(0x2E747480),
-        componentBorder = Color(0x5C787880),
-        componentDivider = Color(0x33787880),
+        componentBackground = DarkComponentBackground,
+        componentBorder = DarkComponentBorder,
+        componentDivider = DarkComponentDivider,
         buttonLabel = ButtonLabel,
         disabledText = DarkTextDisabled,
         materialColors = darkColors(
