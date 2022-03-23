@@ -108,23 +108,27 @@ class LinkActivityViewModelTest {
     @Test
     fun `When StripeIntent is missing required fields then it dismisses with error`() = runTest {
         createViewModel(
-            defaultArgs.copy(StripeIntentFixtures.PI_SUCCEEDED.copy(clientSecret = null)))
+            defaultArgs.copy(StripeIntentFixtures.PI_SUCCEEDED.copy(clientSecret = null))
+        )
         verify(navigator).dismiss(argWhere { it is LinkActivityResult.Failed })
 
         reset(navigator)
         createViewModel(
-            defaultArgs.copy(StripeIntentFixtures.PI_SUCCEEDED.copy(id = null)))
+            defaultArgs.copy(StripeIntentFixtures.PI_SUCCEEDED.copy(id = null))
+        )
         verify(navigator).dismiss(argWhere { it is LinkActivityResult.Failed })
         reset(navigator)
 
         reset(navigator)
         createViewModel(
-            defaultArgs.copy(StripeIntentFixtures.PI_SUCCEEDED.copy(amount = null)))
+            defaultArgs.copy(StripeIntentFixtures.PI_SUCCEEDED.copy(amount = null))
+        )
         verify(navigator).dismiss(argWhere { it is LinkActivityResult.Failed })
 
         reset(navigator)
         createViewModel(
-            defaultArgs.copy(StripeIntentFixtures.PI_SUCCEEDED.copy(currency = null)))
+            defaultArgs.copy(StripeIntentFixtures.PI_SUCCEEDED.copy(currency = null))
+        )
         verify(navigator).dismiss(argWhere { it is LinkActivityResult.Failed })
     }
 

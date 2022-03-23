@@ -37,7 +37,6 @@ internal object StripeIntentFixtures {
     )
     val PI_SUCCEEDED = requireNotNull(PI_PARSER.parse(PI_SUCCEEDED_JSON))
 
-
     internal val SI_NEXT_ACTION_REDIRECT_JSON = JSONObject(
         """
         {
