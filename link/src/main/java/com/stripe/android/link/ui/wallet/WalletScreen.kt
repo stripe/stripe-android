@@ -143,9 +143,8 @@ internal fun WalletBody(
         } else {
             var selectedIndex by rememberSaveable {
                 mutableStateOf(
-                    paymentDetails.indexOfFirst { it.isDefault }
-                        .takeUnless { it == -1 }
-                        ?: 0)
+                    paymentDetails.indexOfFirst { it.isDefault }.takeUnless { it == -1 } ?: 0
+                )
             }
 
             if (isWalletExpanded) {
