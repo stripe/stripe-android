@@ -14,6 +14,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.link.LinkActivity
 import com.stripe.android.link.LinkActivityContract
+import com.stripe.android.link.StripeIntentFixtures
 import com.stripe.android.link.createAndroidIntentComposeRule
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.model.CardBrand
@@ -30,7 +31,10 @@ internal class WalletScreenTest {
         Intent(it, LinkActivity::class.java).apply {
             putExtra(
                 LinkActivityContract.EXTRA_ARGS,
-                LinkActivityContract.Args("Merchant, Inc")
+                LinkActivityContract.Args(
+                    StripeIntentFixtures.PI_SUCCEEDED,
+                    "Merchant, Inc"
+                )
             )
         }
     }
@@ -137,6 +141,7 @@ internal class WalletScreenTest {
     ) = composeTestRule.setContent {
         DefaultLinkTheme {
             WalletBody(
+                isProcessing = false,
                 paymentDetails = paymentDetails,
                 payButtonLabel = payButtonLabel,
                 onAddNewPaymentMethodClick = onAddNewPaymentMethodClick,

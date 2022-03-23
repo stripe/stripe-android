@@ -7,6 +7,7 @@ import androidx.compose.material.darkColors
 import androidx.compose.material.lightColors
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
 
 private val DarkColorPalette = darkColors(
     primary = LinkGreen,
@@ -25,6 +26,10 @@ private val LightColorPalette = lightColors(
     onSecondary = LinkDarkGray,
     onBackground = LinkGray
 )
+
+internal val CloseIconWidth = 24.dp
+internal val AppBarHeight = 56.dp
+internal val HorizontalPadding = 20.dp
 
 @Composable
 internal fun linkTextFieldColors() =

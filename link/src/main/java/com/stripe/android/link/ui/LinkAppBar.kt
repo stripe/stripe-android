@@ -22,10 +22,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.stripe.android.link.R
+import com.stripe.android.link.theme.AppBarHeight
+import com.stripe.android.link.theme.CloseIconWidth
 import com.stripe.android.link.theme.DefaultLinkTheme
-
-private val CloseIconWidth = 24.dp
-private val AppBarHeight = 56.dp
 
 @Preview
 @Composable
@@ -77,9 +76,7 @@ internal fun LinkAppBar(
                 )
             }
         }
-        AnimatedVisibility(
-            visible = !email.isNullOrEmpty()
-        ) {
+        AnimatedVisibility(visible = !email.isNullOrEmpty()) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()

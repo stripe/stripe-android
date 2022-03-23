@@ -4,15 +4,12 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
-import androidx.compose.material.TextButton
 import androidx.compose.material.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -22,6 +19,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
@@ -35,6 +34,8 @@ import com.stripe.android.link.R
 import com.stripe.android.link.injection.NonFallbackInjector
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.linkTextFieldColors
+import com.stripe.android.link.ui.PrimaryButton
+import com.stripe.android.link.ui.PrimaryButtonState
 import com.stripe.android.ui.core.elements.EmailSpec
 import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.elements.SectionCard
@@ -85,6 +86,10 @@ internal fun SignUpBody(
     signUpState: SignUpState,
     onSignUpClick: (String) -> Unit
 ) {
+    if (signUpState == SignUpState.VerifyingEmail) {
+        LocalFocusManager.current.clearFocus()
+    }
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -168,6 +173,7 @@ private fun PhoneCollectionSection(
 ) {
     // TODO(brnunes-stripe): Migrate to phone number collection element
     var phone by remember { mutableStateOf("") }
+    val keyboardController = LocalSoftwareKeyboardController.current
 
     Column(
         modifier = Modifier.fillMaxWidth(),
@@ -201,24 +207,16 @@ private fun PhoneCollectionSection(
             textAlign = TextAlign.Center,
             style = MaterialTheme.typography.caption
         )
-        TextButton(
-            onClick = {
-                onSignUpClick(phone)
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(56.dp),
-            enabled = phone.length == 10,
-            shape = MaterialTheme.shapes.medium,
-            colors = ButtonDefaults.buttonColors(
-                backgroundColor = MaterialTheme.colors.primary
-            )
+        PrimaryButton(
+            label = stringResource(R.string.sign_up),
+            state = if (phone.length == 10) {
+                PrimaryButtonState.Enabled
+            } else {
+                PrimaryButtonState.Disabled
+            }
         ) {
-            Text(
-                text = stringResource(R.string.sign_up),
-                style = MaterialTheme.typography.button,
-                color = MaterialTheme.colors.onPrimary
-            )
+            onSignUpClick(phone)
+            keyboardController?.hide()
         }
     }
 }
