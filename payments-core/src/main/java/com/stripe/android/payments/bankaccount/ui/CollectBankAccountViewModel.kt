@@ -45,19 +45,19 @@ internal class CollectBankAccountViewModel @Inject constructor(
     }
 
     private suspend fun createLinkAccountSession() {
-        when (val params = args.params) {
+        when (val configuration = args.configuration) {
             is USBankAccount -> when (args) {
                 is ForPaymentIntent -> createLinkAccountSession.forPaymentIntent(
                     publishableKey = args.publishableKey,
                     clientSecret = args.clientSecret,
-                    customerName = params.name,
-                    customerEmail = params.email
+                    customerName = configuration.name,
+                    customerEmail = configuration.email
                 )
                 is ForSetupIntent -> createLinkAccountSession.forSetupIntent(
                     publishableKey = args.publishableKey,
                     clientSecret = args.clientSecret,
-                    customerName = params.name,
-                    customerEmail = params.email
+                    customerName = configuration.name,
+                    customerEmail = configuration.email
                 )
             }
                 .onSuccess { linkedAccountSession: BankConnectionsLinkedAccountSession ->

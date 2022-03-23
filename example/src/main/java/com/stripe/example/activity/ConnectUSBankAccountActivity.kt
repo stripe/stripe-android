@@ -80,7 +80,7 @@ class ConnectUSBankAccountActivity : StripeIntentActivity() {
                     launcher.presentWithPaymentIntent(
                         publishableKey = settings.publishableKey,
                         clientSecret = it.getString("client_secret"),
-                        params = CollectBankAccountConfiguration.USBankAccount(
+                        configuration = CollectBankAccountConfiguration.USBankAccount(
                             name = viewBinding.name.text?.toString() ?: "",
                             email = viewBinding.email.text?.toString()
                         )
