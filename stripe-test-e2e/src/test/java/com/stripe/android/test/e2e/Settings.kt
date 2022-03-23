@@ -14,7 +14,9 @@ internal data class Settings(
         getMetadata(context, METADATA_KEY_BACKEND_URL_KEY)
     )
 
-    private companion object {
+    companion object {
+        const val PUBLISHABLE_KEY = "pk_test_ErsyMEOTudSjQR8hh0VrQr5X008sBXGOu6"
+
         /**
          * Return the manifest metadata value for the given key.
          */

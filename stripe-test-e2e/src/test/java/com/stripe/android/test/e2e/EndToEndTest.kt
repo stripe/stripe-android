@@ -7,10 +7,11 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.Stripe
 import com.stripe.android.model.CardParams
 import com.stripe.android.model.ConfirmPaymentIntentParams
+import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.StripeIntent
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.runTest
 import org.junit.runner.RunWith
 import kotlin.test.Test
 
@@ -34,9 +35,9 @@ internal class EndToEndTest {
      * currency, and merchant are the same as the original inputs.
      */
     @Test
-    fun testRigCon() = runBlocking {
+    fun testRigCon() = runTest {
         // Create a PaymentIntent on the backend
-        val newPaymentIntent = service.createPaymentIntent()
+        val newPaymentIntent = service.createCardPaymentIntent()
 
         val stripe = Stripe(context, newPaymentIntent.publishableKey)
 
@@ -52,7 +53,7 @@ internal class EndToEndTest {
             )
         )
 
-        val expectedPaymentIntentData = service.fetchPaymentIntent(
+        val expectedPaymentIntentData = service.fetchCardPaymentIntent(
             id = requireNotNull(confirmedPaymentIntent.id)
         )
         // Check the PI information using the backend
@@ -72,6 +73,68 @@ internal class EndToEndTest {
         assertThat(retrievedPaymentIntent.currency)
             .isEqualTo(expectedPaymentIntentData.currency)
         assertThat(requireNotNull(retrievedPaymentIntent.status))
+            .isEqualTo(StripeIntent.Status.Succeeded)
+    }
+
+    @Test
+    fun testCreateAndConfirmPaymentIntent() = runTest {
+        // Create a PaymentIntent on the backend
+        val newPaymentIntent = service.createPaymentIntent(
+            Request.CreatePaymentIntentParams(
+                createParams = Request.CreateParams(
+                    paymentMethodTypes = listOf("card")
+                )
+            )
+        )
+
+        val stripe = Stripe(context, Settings.PUBLISHABLE_KEY)
+
+        // Confirm the PaymentIntent using a test card
+        val confirmedPaymentIntent = requireNotNull(
+            stripe.confirmPaymentIntentSynchronous(
+                ConfirmPaymentIntentParams
+                    .createWithPaymentMethodCreateParams(
+                        clientSecret = newPaymentIntent.secret,
+                        paymentMethodCreateParams = PAYMENT_METHOD_CREATE_PARAMS
+                    )
+                    .withShouldUseStripeSdk(true)
+            )
+        )
+
+        assertThat(confirmedPaymentIntent.amount)
+            .isEqualTo(100)
+        assertThat(confirmedPaymentIntent.currency)
+            .isEqualTo("usd")
+        assertThat(requireNotNull(confirmedPaymentIntent.status))
+            .isEqualTo(StripeIntent.Status.Succeeded)
+    }
+
+    @Test
+    fun testCreateAndConfirmSetupIntent() = runTest {
+        // Create a SetupIntent on the backend
+        val newPaymentIntent = service.createSetupIntent(
+            Request.CreateSetupIntentParams(
+                createParams = Request.CreateParams(
+                    paymentMethodTypes = listOf("card")
+                )
+            )
+        )
+
+        val stripe = Stripe(context, Settings.PUBLISHABLE_KEY)
+
+        // Confirm the SetupIntent using a test card
+        val confirmedSetupIntent = requireNotNull(
+            stripe.confirmSetupIntentSynchronous(
+                ConfirmSetupIntentParams
+                    .create(
+                        clientSecret = newPaymentIntent.secret,
+                        paymentMethodCreateParams = PAYMENT_METHOD_CREATE_PARAMS
+                    )
+                    .withShouldUseStripeSdk(true)
+            )
+        )
+
+        assertThat(requireNotNull(confirmedSetupIntent.status))
             .isEqualTo(StripeIntent.Status.Succeeded)
     }
 
