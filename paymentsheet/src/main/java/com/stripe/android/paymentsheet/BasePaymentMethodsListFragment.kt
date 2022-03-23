@@ -13,6 +13,7 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import androidx.annotation.VisibleForTesting
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.dp
 import androidx.core.content.res.ResourcesCompat
@@ -23,7 +24,7 @@ import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
-import com.stripe.android.ui.core.PaymentsThemeConfig
+import com.stripe.android.ui.core.PaymentsTheme
 import com.stripe.android.ui.core.convertDpToPx
 import com.stripe.android.ui.core.isSystemDarkTheme
 
@@ -84,37 +85,41 @@ internal abstract class BasePaymentMethodsListFragment(
         editMenuItem?.apply {
             val editMenuText = getString(if (isEditing) R.string.done else R.string.edit)
             val editMenuTextSpan = SpannableString(editMenuText)
-            editMenuTextSpan.setSpan(
-                ForegroundColorSpan(PaymentsThemeConfig.colors(isDark).appBarIcon.toArgb()),
-                0,
-                editMenuTextSpan.length,
-                0
-            )
 
-            val fontSize = context?.convertDpToPx(
-                PaymentsThemeConfig.Typography.h6.fontSize.value.dp
-            ) ?: 0
-            editMenuTextSpan.setSpan(
-                AbsoluteSizeSpan(fontSize.toInt()),
-                0,
-                editMenuTextSpan.length,
-                0
-            )
-            context?.let {
-                val typeFace = ResourcesCompat.getFont(
-                    it,
-                    PaymentsThemeConfig.Typography.fontFamily
+            sheetViewModel.config?.appearance?.let { appearance ->
+                val color = Color(appearance.getColors(isDark).appBarIcon).toArgb()
+                editMenuTextSpan.setSpan(
+                    ForegroundColorSpan(color),
+                    0,
+                    editMenuTextSpan.length,
+                    0
                 )
-                typeFace?.let {
+
+                context?.let {
+                    val typeFace = ResourcesCompat.getFont(
+                        it,
+                        appearance.typography.fontResId
+                    )
+                    typeFace?.let {
+                        editMenuTextSpan.setSpan(
+                            CustomTypefaceSpan(typeFace),
+                            0,
+                            editMenuTextSpan.length,
+                            0
+                        )
+                    }
+
+                    val fontSize = it.convertDpToPx(
+                        (PaymentsTheme.smallFont * appearance.typography.sizeScaleFactor).dp
+                    )
                     editMenuTextSpan.setSpan(
-                        CustomTypefaceSpan(typeFace),
+                        AbsoluteSizeSpan(fontSize.toInt()),
                         0,
                         editMenuTextSpan.length,
                         0
                     )
                 }
             }
-
             title = editMenuTextSpan
         }
     }

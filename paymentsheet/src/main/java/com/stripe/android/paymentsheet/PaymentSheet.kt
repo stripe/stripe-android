@@ -3,6 +3,10 @@ package com.stripe.android.paymentsheet
 import android.content.res.ColorStateList
 import android.os.Parcelable
 import androidx.activity.ComponentActivity
+import androidx.annotation.ColorRes
+import androidx.annotation.FontRes
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.fragment.app.Fragment
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
@@ -122,7 +126,12 @@ class PaymentSheet internal constructor(
          *
          * See [payment-notification](https://stripe.com/docs/payments/payment-methods#payment-notification).
          */
-        val allowsDelayedPaymentMethods: Boolean = false
+        val allowsDelayedPaymentMethods: Boolean = false,
+
+        /**
+         * Describes the appearance of Payment Sheet
+         */
+        val appearance: Appearance = Appearance()
     ) : Parcelable {
         /**
          * [Configuration] builder for cleaner object creation from Java.
@@ -135,6 +144,7 @@ class PaymentSheet internal constructor(
             private var primaryButtonColor: ColorStateList? = null
             private var defaultBillingDetails: BillingDetails? = null
             private var allowsDelayedPaymentMethods: Boolean = false
+            private var appearance: Appearance = Appearance()
 
             fun merchantDisplayName(merchantDisplayName: String) =
                 apply { this.merchantDisplayName = merchantDisplayName }
@@ -154,13 +164,175 @@ class PaymentSheet internal constructor(
             fun allowsDelayedPaymentMethods(allowsDelayedPaymentMethods: Boolean) =
                 apply { this.allowsDelayedPaymentMethods = allowsDelayedPaymentMethods }
 
+            fun appearance(appearance: Appearance) =
+                apply { this.appearance = appearance }
+
             fun build() = Configuration(
                 merchantDisplayName,
                 customer,
                 googlePay,
                 primaryButtonColor,
                 defaultBillingDetails,
-                allowsDelayedPaymentMethods
+                allowsDelayedPaymentMethods,
+                appearance
+            )
+        }
+    }
+
+    @Parcelize
+    data class Appearance(
+        // Describes the colors used while the system is in light mode
+        val colorsLight: Colors = Colors.defaultLight,
+
+        // Describes the colors used while the system is in dark mode
+        val colorsDark: Colors = Colors.defaultDark,
+
+        // Describes the appearance of shapes
+        val shapes: Shapes = Shapes.default,
+
+        // Describes the typography used for text.
+        val typography: Typography = Typography.default,
+    ) : Parcelable {
+        fun getColors(isDark: Boolean): Colors {
+            return if (isDark) colorsDark else colorsLight
+        }
+
+        class Builder {
+            private var colorsLight = Colors.defaultLight
+            private var colorsDark = Colors.defaultDark
+            private var shapes = Shapes.default
+            private var typography = Typography.default
+
+            fun colorsLight(colors: Colors) = apply { this.colorsLight = colors }
+            fun colorsDark(colors: Colors) = apply { this.colorsDark = colors }
+            fun shapes(shapes: Shapes) = apply { this.shapes = shapes }
+            fun typography(typography: Typography) = apply { this.typography = typography }
+        }
+    }
+
+    @Parcelize
+    data class Colors(
+        // A primary color used throughout PaymentSheet
+        @ColorRes
+        val primary: Int,
+
+        // The color used for the surfaces (backgrounds) of PaymentSheet
+        @ColorRes
+        val surface: Int,
+
+        // The color used for the background of inputs, tabs, and other components
+        @ColorRes
+        val componentBackground: Int,
+
+        // The color used for borders of inputs, tabs, and other components
+        @ColorRes
+        val componentBorder: Int,
+
+        // The color of the divider lines used inside inputs, tabs, and other components
+        @ColorRes
+        val componentDivider: Int,
+
+        // The default color used for text and on other primary elements in Payment Sheet
+        @ColorRes
+        val onPrimary: Int,
+
+        // The color used for text of secondary importance. For example, this color is used for the label above input fields
+        @ColorRes
+        val textSecondary: Int,
+
+        // The color used for input placeholder text
+        @ColorRes
+        val placeholderText: Int,
+
+        // The color used for items appearing over the background in Payment Sheet
+        @ColorRes
+        val onBackground: Int,
+
+        // / The color used for icons in PaymentSheet, such as the close or back icons
+        @ColorRes
+        val appBarIcon: Int,
+
+        // A color used to indicate errors or destructive actions in PaymentSheet
+        @ColorRes
+        val error: Int,
+    ) : Parcelable {
+        companion object {
+            val defaultLight = Colors(
+                primary = Color(0xFF007AFF).toArgb(),
+                surface = Color.White.toArgb(),
+                componentBackground = Color.White.toArgb(),
+                componentBorder = Color(0x33787880).toArgb(),
+                componentDivider = Color(0x33787880).toArgb(),
+                onPrimary = Color.Black.toArgb(),
+                textSecondary = Color(0x99000000).toArgb(),
+                placeholderText = Color(0x993C3C43).toArgb(),
+                onBackground = Color.Black.toArgb(),
+                appBarIcon = Color(0x99000000).toArgb(),
+                error = Color.Red.toArgb(),
+            )
+
+            val defaultDark = Colors(
+                primary = Color(0xFF0074D4).toArgb(),
+                surface = Color(0xff2e2e2e).toArgb(),
+                componentBackground = Color.DarkGray.toArgb(),
+                componentBorder = Color(0xFF787880).toArgb(),
+                componentDivider = Color(0xFF787880).toArgb(),
+                onPrimary = Color.White.toArgb(),
+                textSecondary = Color(0x99FFFFFF).toArgb(),
+                placeholderText = Color(0x61FFFFFF).toArgb(),
+                onBackground = Color.White.toArgb(),
+                appBarIcon = Color.White.toArgb(),
+                error = Color.Red.toArgb(),
+            )
+        }
+    }
+
+    @Parcelize
+    data class Shapes(
+        // The corner radius used for tabs, inputs, buttons, and other components in PaymentSheet
+        val cornerRadiusDp: Float,
+
+        // The border used for inputs, tabs, and other components in PaymentSheet
+        val borderStrokeWidthDp: Float,
+
+        // The border used for selected inputs, tabs in PaymentSheet
+        val borderStrokeWidthSelected: Float
+    ) : Parcelable {
+        companion object {
+            val default = Shapes(
+                cornerRadiusDp = 6.0f,
+                borderStrokeWidthDp = 1.0f,
+                borderStrokeWidthSelected = 2.0f
+            )
+        }
+    }
+
+    @Parcelize
+    data class Typography(
+        // The scale factor for all fonts in PaymentSheet, the default value is 1.0.
+        // When this value increases fonts will increase in size and decrease when this value is lowered
+        val sizeScaleFactor: Float,
+
+        // Base weight for text
+        val normalWeight: Int,
+
+        // Medium weight for text
+        val mediumWeight: Int,
+
+        // Bold weight for text
+        val boldWeight: Int,
+
+        // The font used in text. This should be a resource ID value.
+        @FontRes
+        val fontResId: Int,
+    ) : Parcelable {
+        companion object {
+            val default = Typography(
+                sizeScaleFactor = 1.0f,
+                normalWeight = 400,
+                mediumWeight = 500,
+                boldWeight = 700,
+                fontResId = R.font.roboto
             )
         }
     }
