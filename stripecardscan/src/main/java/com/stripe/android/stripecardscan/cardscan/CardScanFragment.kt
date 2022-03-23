@@ -121,8 +121,6 @@ class CardScanFragment : ScanFragment(), SimpleScanStateful<CardScanState> {
             override suspend fun onResult(
                 result: MainLoopAggregator.FinalResult,
             ) {
-                super.onResult(result)
-
                 launch(Dispatchers.Main) {
                     changeScanState(CardScanState.Correct)
                     cameraAdapter.unbindFromLifecycle(requireActivity())
@@ -161,7 +159,7 @@ class CardScanFragment : ScanFragment(), SimpleScanStateful<CardScanState> {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         viewBinding = FragmentCardscanBinding.inflate(inflater, container, false)
 
         setupViewFinderConstraints()
@@ -298,7 +296,6 @@ class CardScanFragment : ScanFragment(), SimpleScanStateful<CardScanState> {
             appDetails = AppDetails.fromContext(requireActivity()),
             scanStatistics = ScanStatistics.fromStats()
         )
-        scanFlow.cancelFlow()
         super.closeScanner()
     }
 }
