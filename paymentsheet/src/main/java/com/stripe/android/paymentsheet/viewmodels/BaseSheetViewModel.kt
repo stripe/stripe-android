@@ -96,6 +96,8 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     internal val _amount = savedStateHandle.getLiveData<Amount>(SAVE_AMOUNT)
     internal val amount: LiveData<Amount> = _amount
 
+    internal val headerVisibilility: MutableLiveData<Boolean> = MutableLiveData(true)
+
     private var addFragmentSelectedLPM =
         savedStateHandle.get<SupportedPaymentMethod>(SAVE_SELECTED_ADD_LPM)
 

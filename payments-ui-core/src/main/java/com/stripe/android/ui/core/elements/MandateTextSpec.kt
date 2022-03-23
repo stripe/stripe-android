@@ -1,21 +1,25 @@
 package com.stripe.android.ui.core.elements
 
+import androidx.annotation.RestrictTo
 import androidx.annotation.StringRes
 import kotlinx.parcelize.Parcelize
 
 /**
- * This is for elements that do not receive user input
+ * Mandate text element spec.
  */
 @Parcelize
-internal data class StaticTextSpec(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+internal data class MandateTextSpec(
     override val identifier: IdentifierSpec,
-    @StringRes val stringResId: Int
+    @StringRes
+    val stringResId: Int,
 ) : FormItemSpec(), RequiredItemSpec {
-    fun transform(): FormElement =
+    fun transform(merchantName: String): FormElement =
         // It could be argued that the static text should have a controller, but
         // since it doesn't provide a form field we leave it out for now
-        StaticTextElement(
+        MandateTextElement(
             this.identifier,
-            this.stringResId
+            this.stringResId,
+            merchantName
         )
 }

@@ -19,8 +19,6 @@ val KlarnaParamKey: MutableMap<String, Any?> = mutableMapOf(
 internal val klarnaHeader = StaticTextSpec(
     identifier = IdentifierSpec.Generic("klarna_header"),
     stringResId = KlarnaHelper.getKlarnaHeader(),
-    fontSizeSp = 13,
-    letterSpacingSp = -.15
 )
 
 internal val klarnaEmailSection =

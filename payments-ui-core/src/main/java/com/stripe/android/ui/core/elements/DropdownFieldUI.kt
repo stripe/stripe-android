@@ -11,11 +11,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.material.ContentAlpha
 import androidx.compose.material.DropdownMenu
 import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
@@ -74,7 +72,7 @@ internal fun DropDown(
                     bottom = 8.dp
                 )
             ) {
-                DropdownLabel(label, enabled)
+                FormLabel(stringResource(label), enabled)
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.Bottom
@@ -108,28 +106,11 @@ internal fun DropDown(
                 ) {
                     Text(
                         text = displayValue,
-                        color = currentTextColor
+                        color = currentTextColor,
+                        style = PaymentsTheme.typography.body1
                     )
                 }
             }
         }
     }
-}
-
-/**
- * This will create the label for the DropdownTextField.
- *
- * Copied logic from androidx.compose.material.TextFieldImpl
- */
-@Composable
-internal fun DropdownLabel(
-    @StringRes label: Int,
-    enabled: Boolean
-) {
-    val color = PaymentsTheme.colors.placeholderText
-    Text(
-        stringResource(label),
-        color = if (enabled) color else color.copy(alpha = ContentAlpha.disabled),
-        style = MaterialTheme.typography.caption
-    )
 }
