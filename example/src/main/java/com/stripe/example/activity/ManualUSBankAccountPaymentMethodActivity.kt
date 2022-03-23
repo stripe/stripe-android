@@ -6,7 +6,9 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Button
 import androidx.compose.material.LinearProgressIndicator
 import androidx.compose.material.OutlinedTextField
@@ -26,7 +28,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
-import com.stripe.android.payments.paymentlauncher.PaymentResult
 
 /**
  * This example is currently work in progress. Do not use it as a reference.
@@ -39,9 +40,6 @@ import com.stripe.android.payments.paymentlauncher.PaymentResult
 class ManualUSBankAccountPaymentMethodActivity : StripeIntentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        observePaymentResults()
-
         setContent {
             USBankAccountScreen()
         }
@@ -51,6 +49,7 @@ class ManualUSBankAccountPaymentMethodActivity : StripeIntentActivity() {
     private fun USBankAccountScreen() {
         val inProgress by viewModel.inProgress.observeAsState(false)
         val status by viewModel.status.observeAsState("")
+        val scrollState = rememberScrollState()
         val name = remember { mutableStateOf("Johnny Lawrence") }
         val email = remember { mutableStateOf("johnny@lawrence.com") }
         val accountNumber = remember { mutableStateOf("000123456789") }
@@ -73,6 +72,7 @@ class ManualUSBankAccountPaymentMethodActivity : StripeIntentActivity() {
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(10.dp)
+                    .verticalScroll(scrollState)
             ) {
                 OutlinedTextField(
                     modifier = Modifier.fillMaxWidth(),
@@ -248,24 +248,9 @@ class ManualUSBankAccountPaymentMethodActivity : StripeIntentActivity() {
         }
     }
 
-    private fun observePaymentResults() {
-        viewModel.paymentResultLiveData.observe(this) { paymentResult ->
-            when (paymentResult) {
-                is PaymentResult.Completed -> {
-                    viewModel.status.value += "Payment successfully initiated. Will fulfill " +
-                        "after microdeposit verification"
-                    viewModel.inProgress.value = false
-                }
-                is PaymentResult.Canceled -> {
-                    viewModel.status.value += "PaymentIntent confirmation cancelled"
-                    viewModel.inProgress.value = false
-                }
-                is PaymentResult.Failed -> {
-                    viewModel.status.value += "PaymentIntent confirmation failed with " +
-                        "throwable ${paymentResult.throwable}"
-                    viewModel.inProgress.value = false
-                }
-            }
-        }
+    override fun onConfirmSuccess() {
+        super.onConfirmSuccess()
+        viewModel.status.value += "Payment successfully initiated. Will fulfill " +
+            "after microdeposit verification"
     }
 }
