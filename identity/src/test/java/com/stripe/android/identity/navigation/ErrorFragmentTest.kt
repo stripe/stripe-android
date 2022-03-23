@@ -8,7 +8,7 @@ import androidx.navigation.testing.TestNavHostController
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.identity.R
-import com.stripe.android.identity.databinding.ErrorFragmentBinding
+import com.stripe.android.identity.databinding.BaseErrorFragmentBinding
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -19,17 +19,20 @@ class ErrorFragmentTest {
     @Test
     fun `title and content are set correctly`() {
         launchErrorFragment().onFragment {
-            val binding = ErrorFragmentBinding.bind(it.requireView())
+            val binding = BaseErrorFragmentBinding.bind(it.requireView())
 
-            assertThat(binding.errorTitle.text).isEqualTo(TEST_ERROR_TITLE)
-            assertThat(binding.errorContent.text).isEqualTo(TEST_ERROR_CONTENT)
+            assertThat(binding.titleText.text).isEqualTo(TEST_ERROR_TITLE)
+            assertThat(binding.message1.text).isEqualTo(TEST_ERROR_CONTENT)
         }
     }
 
     @Test
     fun `go back button is hidden correctly when not set`() {
         launchErrorFragment().onFragment {
-            assertThat(ErrorFragmentBinding.bind(it.requireView()).goBack.visibility).isEqualTo(View.GONE)
+            val binding = BaseErrorFragmentBinding.bind(it.requireView())
+
+            assertThat(binding.topButton.visibility).isEqualTo(View.GONE)
+            assertThat(binding.bottomButton.visibility).isEqualTo(View.GONE)
         }
     }
 
@@ -47,12 +50,13 @@ class ErrorFragmentTest {
                 it.requireView(),
                 navController
             )
-            val binding = ErrorFragmentBinding.bind(it.requireView())
+            val binding = BaseErrorFragmentBinding.bind(it.requireView())
 
-            assertThat(binding.goBack.visibility).isEqualTo(View.VISIBLE)
-            assertThat(binding.goBack.text).isEqualTo(TEST_GO_BACK_BUTTON_TEXT)
+            assertThat(binding.topButton.visibility).isEqualTo(View.GONE)
+            assertThat(binding.bottomButton.visibility).isEqualTo(View.VISIBLE)
+            assertThat(binding.bottomButton.text).isEqualTo(TEST_GO_BACK_BUTTON_TEXT)
 
-            binding.goBack.callOnClick()
+            binding.bottomButton.callOnClick()
 
             assertThat(navController.currentDestination?.id)
                 .isEqualTo(R.id.consentFragment)

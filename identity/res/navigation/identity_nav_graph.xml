@@ -56,7 +56,7 @@
     <fragment
         android:id="@+id/cameraPermissionDeniedFragment"
         android:name="com.stripe.android.identity.navigation.CameraPermissionDeniedFragment"
-        tools:layout="@layout/camera_permission_denied_fragment">
+        tools:layout="@layout/base_error_fragment">
         <argument
             android:name="scanType"
             app:argType="com.stripe.android.identity.states.IdentityScanState$ScanType" />
