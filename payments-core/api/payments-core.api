@@ -4971,6 +4971,53 @@ public final class com/stripe/android/payments/SetupIntentFlowResultProcessor_Fa
 	public static fun newInstance (Landroid/content/Context;Lkotlin/jvm/functions/Function0;Lcom/stripe/android/networking/StripeRepository;Lcom/stripe/android/core/Logger;Lkotlin/coroutines/CoroutineContext;)Lcom/stripe/android/payments/SetupIntentFlowResultProcessor;
 }
 
+public abstract class com/stripe/android/payments/bankaccount/CollectBankAccountConfiguration : android/os/Parcelable {
+	public static final field $stable I
+}
+
+public final class com/stripe/android/payments/bankaccount/CollectBankAccountConfiguration$USBankAccount : com/stripe/android/payments/bankaccount/CollectBankAccountConfiguration, android/os/Parcelable {
+	public static final field $stable I
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/payments/bankaccount/CollectBankAccountConfiguration$USBankAccount;
+	public static synthetic fun copy$default (Lcom/stripe/android/payments/bankaccount/CollectBankAccountConfiguration$USBankAccount;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/payments/bankaccount/CollectBankAccountConfiguration$USBankAccount;
+	public fun describeContents ()I
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getEmail ()Ljava/lang/String;
+	public final fun getName ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+	public fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public abstract interface class com/stripe/android/payments/bankaccount/CollectBankAccountLauncher {
+	public static final field Companion Lcom/stripe/android/payments/bankaccount/CollectBankAccountLauncher$Companion;
+	public abstract fun presentWithPaymentIntent (Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/payments/bankaccount/CollectBankAccountConfiguration;)V
+	public abstract fun presentWithSetupIntent (Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/payments/bankaccount/CollectBankAccountConfiguration;)V
+}
+
+public final class com/stripe/android/payments/bankaccount/CollectBankAccountLauncher$Companion {
+	public final fun create (Landroidx/activity/ComponentActivity;Lkotlin/jvm/functions/Function1;)Lcom/stripe/android/payments/bankaccount/CollectBankAccountLauncher;
+	public final fun create (Landroidx/fragment/app/Fragment;Lkotlin/jvm/functions/Function1;)Lcom/stripe/android/payments/bankaccount/CollectBankAccountLauncher;
+}
+
+public final class com/stripe/android/payments/bankaccount/CollectBankAccountResponse : com/stripe/android/core/model/StripeModel {
+	public static final field $stable I
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lcom/stripe/android/payments/bankaccount/CollectBankAccountResponse;
+	public static synthetic fun copy$default (Lcom/stripe/android/payments/bankaccount/CollectBankAccountResponse;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/payments/bankaccount/CollectBankAccountResponse;
+	public fun describeContents ()I
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getClientSecret ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+	public fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
 public final class com/stripe/android/payments/bankaccount/di/CollectBankAccountModule_ProvidePublishableKeyFactory : dagger/internal/Factory {
 	public fun <init> (Ljavax/inject/Provider;)V
 	public static fun create (Ljavax/inject/Provider;)Lcom/stripe/android/payments/bankaccount/di/CollectBankAccountModule_ProvidePublishableKeyFactory;
