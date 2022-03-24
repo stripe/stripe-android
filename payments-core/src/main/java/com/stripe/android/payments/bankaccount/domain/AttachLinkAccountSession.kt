@@ -25,7 +25,8 @@ internal class AttachLinkAccountSession @Inject constructor(
             linkAccountSessionId = linkedAccountSessionId,
             clientSecret = clientSecret,
             paymentIntentId = PaymentIntent.ClientSecret(clientSecret).paymentIntentId,
-            requestOptions = ApiRequest.Options(publishableKey)
+            requestOptions = ApiRequest.Options(publishableKey),
+            expandFields = EXPAND_PAYMENT_METHOD
         )
     }.mapCatching { it ?: throw InternalError("Error attaching session to PaymentIntent") }
 
@@ -44,7 +45,12 @@ internal class AttachLinkAccountSession @Inject constructor(
             linkAccountSessionId = linkedAccountSessionId,
             clientSecret = clientSecret,
             setupIntentId = SetupIntent.ClientSecret(clientSecret).setupIntentId,
-            requestOptions = ApiRequest.Options(publishableKey)
+            requestOptions = ApiRequest.Options(publishableKey),
+            expandFields = EXPAND_PAYMENT_METHOD
         )
     }.mapCatching { it ?: throw InternalError("Error attaching session to SetupIntent") }
+
+    companion object {
+        private val EXPAND_PAYMENT_METHOD = listOf("payment_method")
+    }
 }

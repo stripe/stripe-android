@@ -101,6 +101,7 @@ import kotlin.coroutines.CoroutineContext
 /**
  * An implementation of [StripeRepository] that makes network requests to the Stripe API.
  */
+@Suppress("LongParameterList")
 internal class StripeApiRepository @JvmOverloads internal constructor(
     context: Context,
     publishableKeyProvider: () -> String,
@@ -1402,7 +1403,8 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         clientSecret: String,
         paymentIntentId: String,
         linkAccountSessionId: String,
-        requestOptions: ApiRequest.Options
+        requestOptions: ApiRequest.Options,
+        expandFields: List<String>
     ): PaymentIntent? {
         return fetchStripeModel(
             apiRequestFactory.createPost(
@@ -1410,7 +1412,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
                 requestOptions,
                 mapOf(
                     "client_secret" to clientSecret
-                )
+                ) + createExpandParam(expandFields)
             ),
             PaymentIntentJsonParser()
         ) {
@@ -1425,7 +1427,8 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         clientSecret: String,
         setupIntentId: String,
         linkAccountSessionId: String,
-        requestOptions: ApiRequest.Options
+        requestOptions: ApiRequest.Options,
+        expandFields: List<String>
     ): SetupIntent? {
         return fetchStripeModel(
             apiRequestFactory.createPost(
@@ -1433,7 +1436,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
                 requestOptions,
                 mapOf(
                     "client_secret" to clientSecret
-                )
+                ) + createExpandParam(expandFields)
             ),
             SetupIntentJsonParser()
         ) {

@@ -458,7 +458,8 @@ abstract class StripeRepository {
         clientSecret: String,
         paymentIntentId: String,
         linkAccountSessionId: String,
-        requestOptions: ApiRequest.Options
+        requestOptions: ApiRequest.Options,
+        expandFields: List<String> = emptyList()
     ): PaymentIntent?
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -466,6 +467,7 @@ abstract class StripeRepository {
         clientSecret: String,
         setupIntentId: String,
         linkAccountSessionId: String,
-        requestOptions: ApiRequest.Options
+        requestOptions: ApiRequest.Options,
+        expandFields: List<String> = emptyList()
     ): SetupIntent?
 }

@@ -36,8 +36,9 @@ class ConnectUSBankAccountActivity : StripeIntentActivity() {
                 is CollectBankAccountResult.Completed -> {
                     viewModel.status
                         .postValue(
-                            "Attached bank account to paymentIntent." +
-                                " bank account: ${result.response.intent.clientSecret}. Confirming..."
+                            "Attached bank account ending in" +
+                                " ${result.response.intent.paymentMethod?.usBankAccount?.last4 ?: "UNKNOWN"}" +
+                                " as Payment method. Confirming..."
                         )
                     confirmPaymentIntent(
                         ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
