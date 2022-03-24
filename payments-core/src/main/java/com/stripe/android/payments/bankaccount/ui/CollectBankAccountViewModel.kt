@@ -126,7 +126,7 @@ internal class CollectBankAccountViewModel @Inject constructor(
     ) : AbstractSavedStateViewModelFactory(owner, defaultArgs) {
 
         @Suppress("UNCHECKED_CAST")
-        override fun <T : ViewModel?> create(
+        override fun <T : ViewModel> create(
             key: String,
             modelClass: Class<T>,
             savedStateHandle: SavedStateHandle
