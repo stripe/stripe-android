@@ -5,6 +5,7 @@ import android.view.View
 import android.widget.Button
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.fragment.app.testing.launchFragmentInContainer
+import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
@@ -16,6 +17,7 @@ import com.google.android.material.progressindicator.CircularProgressIndicator
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.model.InternalStripeFile
 import com.stripe.android.identity.R
+import com.stripe.android.identity.SUCCESS_VERIFICATION_PAGE
 import com.stripe.android.identity.camera.IDDetectorAggregator
 import com.stripe.android.identity.camera.IdentityScanFlow
 import com.stripe.android.identity.databinding.IdentityCameraScanFragmentBinding
@@ -69,44 +71,47 @@ internal class DriverLicenseScanFragmentTest {
         whenever(it.displayStateChanged).thenReturn(displayStateChanged)
         whenever(it.bothUploaded).thenReturn(mockBothUploaded)
     }
-    private val idDetectorModelFile = MutableLiveData<Resource<File>>()
+
+    private val mockPageAndModel = MediatorLiveData<Resource<Pair<VerificationPage, File>>>()
     private val mockIdentityViewModel = mock<IdentityViewModel>().also {
-        whenever(it.idDetectorModelFile).thenReturn(idDetectorModelFile)
+        whenever(it.pageAndModel).thenReturn(mockPageAndModel)
     }
 
     @Before
     fun simulateModelDownloaded() {
-        idDetectorModelFile.postValue(Resource.success(mock()))
+        mockPageAndModel.postValue(Resource.success(Pair(SUCCESS_VERIFICATION_PAGE, mock())))
     }
 
     @Test
     fun `when front is scanned file is uploaded and clicking button triggers back scan`() {
-        launchDriverLicenseFragment().onFragment {
+        launchDriverLicenseFragment().onFragment { driverLicenseScanFragment ->
             // mock success of front scan
-            val mockFrontFinalResult = mock<IDDetectorAggregator.FinalResult>()
+            val mockFrontFinalResult = mock<IDDetectorAggregator.FinalResult>().also {
+                whenever(it.identityState).thenReturn(mock<IdentityScanState.Finished>())
+            }
             finalResultLiveData.postValue(mockFrontFinalResult)
-            verifyUploadedWithFinalResult(mockFrontFinalResult, it.requireContext())
+            verifyUploadedWithFinalResult(mockFrontFinalResult)
 
             // stopScanning() is called
             verify(mockScanFlow).resetFlow()
-            assertThat(it.cameraAdapter.isBoundToLifecycle()).isFalse()
+            assertThat(driverLicenseScanFragment.cameraAdapter.isBoundToLifecycle()).isFalse()
 
             // mock viewModel target change
             whenever(mockIdentityScanViewModel.targetScanType)
                 .thenReturn(IdentityScanState.ScanType.DL_FRONT)
 
             // button clicked
-            IdentityCameraScanFragmentBinding.bind(it.requireView()).kontinue
+            IdentityCameraScanFragmentBinding.bind(driverLicenseScanFragment.requireView()).kontinue
                 .findViewById<Button>(R.id.button).callOnClick()
 
             // verify start to scan back
-            assertThat(it.cameraAdapter.isBoundToLifecycle()).isTrue()
+            assertThat(driverLicenseScanFragment.cameraAdapter.isBoundToLifecycle()).isTrue()
             verify(mockScanFlow).startFlow(
-                same(it.requireContext()),
+                same(driverLicenseScanFragment.requireContext()),
                 any(),
                 any(),
-                same(it.viewLifecycleOwner),
-                same(it.lifecycleScope),
+                same(driverLicenseScanFragment.viewLifecycleOwner),
+                same(driverLicenseScanFragment.lifecycleScope),
                 eq(IdentityScanState.ScanType.DL_BACK)
             )
         }
@@ -179,13 +184,17 @@ internal class DriverLicenseScanFragmentTest {
 
     @Test
     fun `when final result is received scanFlow is reset and cameraAdapter is unbound`() {
-        launchDriverLicenseFragment().onFragment {
-            assertThat(it.cameraAdapter.isBoundToLifecycle()).isTrue()
+        launchDriverLicenseFragment().onFragment { driverLicenseScanFragment ->
+            assertThat(driverLicenseScanFragment.cameraAdapter.isBoundToLifecycle()).isTrue()
 
-            finalResultLiveData.postValue(mock())
+            finalResultLiveData.postValue(
+                mock<IDDetectorAggregator.FinalResult>().also {
+                    whenever(it.identityState).thenReturn(mock<IdentityScanState.Finished>())
+                }
+            )
 
             verify(mockScanFlow).resetFlow()
-            assertThat(it.cameraAdapter.isBoundToLifecycle()).isFalse()
+            assertThat(driverLicenseScanFragment.cameraAdapter.isBoundToLifecycle()).isFalse()
         }
     }
 
@@ -320,7 +329,6 @@ internal class DriverLicenseScanFragmentTest {
 
     private fun verifyUploadedWithFinalResult(
         finalResult: IDDetectorAggregator.FinalResult,
-        context: Context,
         time: Int = 1
     ) {
         val successCaptor = argumentCaptor<(VerificationPage) -> Unit>()
@@ -342,7 +350,7 @@ internal class DriverLicenseScanFragmentTest {
     }
 
     private fun simulateBothSidesScanned(afterScannedBlock: (TestNavHostController, IdentityCameraScanFragmentBinding) -> Unit) {
-        launchDriverLicenseFragment().onFragment {
+        launchDriverLicenseFragment().onFragment { driverLicenseScanFragment ->
             val navController = TestNavHostController(
                 ApplicationProvider.getApplicationContext()
             )
@@ -351,27 +359,32 @@ internal class DriverLicenseScanFragmentTest {
             )
             navController.setCurrentDestination(R.id.driverLicenseScanFragment)
             Navigation.setViewNavController(
-                it.requireView(),
+                driverLicenseScanFragment.requireView(),
                 navController
             )
             // scan front
             // mock success of front scan
-            val mockFrontFinalResult = mock<IDDetectorAggregator.FinalResult>()
+            val mockFrontFinalResult = mock<IDDetectorAggregator.FinalResult>().also {
+                whenever(it.identityState).thenReturn(mock<IdentityScanState.Finished>())
+            }
             finalResultLiveData.postValue(mockFrontFinalResult)
-            verifyUploadedWithFinalResult(mockFrontFinalResult, it.requireContext())
+            verifyUploadedWithFinalResult(mockFrontFinalResult)
 
             // mock viewModel target change
             whenever(mockIdentityScanViewModel.targetScanType)
                 .thenReturn(IdentityScanState.ScanType.DL_FRONT)
 
             // click continue, scan back
-            val binding = IdentityCameraScanFragmentBinding.bind(it.requireView())
+            val binding =
+                IdentityCameraScanFragmentBinding.bind(driverLicenseScanFragment.requireView())
             binding.kontinue.findViewById<Button>(R.id.button).callOnClick()
 
             // mock success of back scan
-            val mockBackFinalResult = mock<IDDetectorAggregator.FinalResult>()
+            val mockBackFinalResult = mock<IDDetectorAggregator.FinalResult>().also {
+                whenever(it.identityState).thenReturn(mock<IdentityScanState.Finished>())
+            }
             finalResultLiveData.postValue(mockBackFinalResult)
-            verifyUploadedWithFinalResult(mockBackFinalResult, it.requireContext(), 2)
+            verifyUploadedWithFinalResult(mockBackFinalResult, 2)
 
             // mock viewModel target change
             whenever(mockIdentityScanViewModel.targetScanType)

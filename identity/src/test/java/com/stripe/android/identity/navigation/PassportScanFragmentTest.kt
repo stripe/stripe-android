@@ -5,6 +5,7 @@ import android.view.View
 import android.widget.Button
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.fragment.app.testing.launchFragmentInContainer
+import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import androidx.navigation.Navigation
@@ -15,6 +16,7 @@ import com.google.android.material.progressindicator.CircularProgressIndicator
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.model.InternalStripeFile
 import com.stripe.android.identity.R
+import com.stripe.android.identity.SUCCESS_VERIFICATION_PAGE
 import com.stripe.android.identity.camera.IDDetectorAggregator
 import com.stripe.android.identity.camera.IdentityScanFlow
 import com.stripe.android.identity.databinding.IdentityCameraScanFragmentBinding
@@ -66,14 +68,15 @@ class PassportScanFragmentTest {
         whenever(it.displayStateChanged).thenReturn(displayStateChanged)
         whenever(it.frontUploaded).thenReturn(mockFrontUploaded)
     }
-    private val idDetectorModelFile = MutableLiveData<Resource<File>>()
+
+    private val mockPageAndModel = MediatorLiveData<Resource<Pair<VerificationPage, File>>>()
     private val mockIdentityViewModel = mock<IdentityViewModel>().also {
-        whenever(it.idDetectorModelFile).thenReturn(idDetectorModelFile)
+        whenever(it.pageAndModel).thenReturn(mockPageAndModel)
     }
 
     @Before
     fun simulateModelDownloaded() {
-        idDetectorModelFile.postValue(Resource.success(mock()))
+        mockPageAndModel.postValue(Resource.success(Pair(SUCCESS_VERIFICATION_PAGE, mock())))
     }
 
     @Test
@@ -141,13 +144,17 @@ class PassportScanFragmentTest {
 
     @Test
     fun `when final result is received scanFlow is reset and cameraAdapter is unbound`() {
-        launchPassportScanFragment().onFragment {
-            assertThat(it.cameraAdapter.isBoundToLifecycle()).isTrue()
+        launchPassportScanFragment().onFragment { passportScanFragment ->
+            assertThat(passportScanFragment.cameraAdapter.isBoundToLifecycle()).isTrue()
 
-            finalResultLiveData.postValue(mock())
+            finalResultLiveData.postValue(
+                mock<IDDetectorAggregator.FinalResult>().also {
+                    whenever(it.identityState).thenReturn(mock<IdentityScanState.Finished>())
+                }
+            )
 
             verify(mockScanFlow).resetFlow()
-            assertThat(it.cameraAdapter.isBoundToLifecycle()).isFalse()
+            assertThat(passportScanFragment.cameraAdapter.isBoundToLifecycle()).isFalse()
         }
     }
 
@@ -225,7 +232,7 @@ class PassportScanFragmentTest {
     }
 
     private fun simulateFrontScanned(afterScannedBlock: (TestNavHostController, IdentityCameraScanFragmentBinding) -> Unit) {
-        launchPassportScanFragment().onFragment {
+        launchPassportScanFragment().onFragment { passportScanFragment ->
             val navController = TestNavHostController(
                 ApplicationProvider.getApplicationContext()
             )
@@ -234,12 +241,14 @@ class PassportScanFragmentTest {
             )
             navController.setCurrentDestination(R.id.passportScanFragment)
             Navigation.setViewNavController(
-                it.requireView(),
+                passportScanFragment.requireView(),
                 navController
             )
             // start scan
             // mock success of scan
-            val mockFrontFinalResult = mock<IDDetectorAggregator.FinalResult>()
+            val mockFrontFinalResult = mock<IDDetectorAggregator.FinalResult>().also {
+                whenever(it.identityState).thenReturn(mock<IdentityScanState.Finished>())
+            }
             finalResultLiveData.postValue(mockFrontFinalResult)
 
             val successCaptor = argumentCaptor<(VerificationPage) -> Unit>()
@@ -260,7 +269,7 @@ class PassportScanFragmentTest {
             )
 
             // click continue, trigger navigation
-            val binding = IdentityCameraScanFragmentBinding.bind(it.requireView())
+            val binding = IdentityCameraScanFragmentBinding.bind(passportScanFragment.requireView())
             binding.kontinue.findViewById<Button>(R.id.button).callOnClick()
 
             verify(mockFrontUploaded).observe(any(), frontUploadedObserverCaptor.capture())
