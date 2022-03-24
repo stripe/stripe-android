@@ -406,8 +406,7 @@ internal class PaymentSheetActivityTest {
 
             idleLooper()
 
-            val buyBinding = PrimaryButtonBinding.bind(activity.viewBinding.buyButton)
-            assertThat(buyBinding.label.text)
+            assertThat(activity.viewBinding.buyButton.externalLabel)
                 .isEqualTo(activity.getString(R.string.stripe_paymentsheet_primary_button_processing))
         }
     }
@@ -452,7 +451,7 @@ internal class PaymentSheetActivityTest {
 
             val googlePayButton =
                 StripeGooglePayButtonBinding.bind(activity.viewBinding.googlePayButton)
-            assertThat(googlePayButton.primaryButton.viewBinding.label.text)
+            assertThat(googlePayButton.primaryButton.externalLabel)
                 .isEqualTo(activity.getString(R.string.stripe_paymentsheet_primary_button_processing))
         }
     }

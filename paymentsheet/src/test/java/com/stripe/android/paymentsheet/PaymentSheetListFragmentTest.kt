@@ -3,7 +3,6 @@ package com.stripe.android.paymentsheet
 import android.os.Looper.getMainLooper
 import androidx.core.os.bundleOf
 import androidx.core.view.children
-import androidx.core.view.isVisible
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.testing.FragmentScenario
 import androidx.fragment.app.testing.launchFragmentInContainer
@@ -19,7 +18,6 @@ import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.SetupIntentFixtures
-import com.stripe.android.paymentsheet.databinding.FragmentPaymentsheetPaymentMethodsListBinding
 import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.FragmentConfigFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -233,10 +231,8 @@ internal class PaymentSheetListFragmentTest : PaymentSheetViewModelTestInjection
                     amount = 399
                 )
             )
-            val viewBinding = FragmentPaymentsheetPaymentMethodsListBinding.bind(fragment.view!!)
 
-            assertThat(viewBinding.total.text)
-                .isEqualTo("Total: $3.99")
+            assertThat(fragment.sheetViewModel.isProcessingPaymentIntent).isTrue()
         }
     }
 
@@ -247,10 +243,8 @@ internal class PaymentSheetListFragmentTest : PaymentSheetViewModelTestInjection
             PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP,
         ).onFragment { fragment ->
             shadowOf(getMainLooper()).idle()
-            val viewBinding = FragmentPaymentsheetPaymentMethodsListBinding.bind(fragment.view!!)
 
-            assertThat(viewBinding.total.isVisible)
-                .isFalse()
+            assertThat(fragment.sheetViewModel.isProcessingPaymentIntent).isFalse()
         }
     }
 
