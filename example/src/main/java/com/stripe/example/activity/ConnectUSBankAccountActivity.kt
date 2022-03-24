@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.view.View
 import androidx.lifecycle.Observer
 import com.stripe.android.model.ConfirmPaymentIntentParams
-import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.payments.bankaccount.CollectBankAccountConfiguration
 import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResult
@@ -34,16 +33,18 @@ class ConnectUSBankAccountActivity : StripeIntentActivity() {
         ) { result: CollectBankAccountResult ->
             when (result) {
                 is CollectBankAccountResult.Completed -> {
+                    val intent = result.response.intent
+                    val paymentMethod = intent.paymentMethod!!
                     viewModel.status
                         .postValue(
                             "Attached bank account ending in" +
-                                " ${result.response.intent.paymentMethod?.usBankAccount?.last4 ?: "UNKNOWN"}" +
+                                " ${paymentMethod.usBankAccount?.last4 ?: "UNKNOWN"}" +
                                 " as Payment method. Confirming..."
                         )
                     confirmPaymentIntent(
-                        ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
-                            paymentMethodCreateParams = PaymentMethodCreateParams.createUSBankAccount(),
-                            clientSecret = requireNotNull(result.response.intent.clientSecret),
+                        ConfirmPaymentIntentParams.create(
+                            clientSecret = intent.clientSecret!!,
+                            paymentMethodType = paymentMethod.type!!
                         )
                     )
                 }
