@@ -21,7 +21,7 @@ internal class IDDetectorAggregator(
     IDDetectorAggregator.FinalResult
     >(
     aggregateResultListener,
-    IdentityScanState.Initial(identityScanType, Clock.markNow().plus(timeoutInMillis.milliseconds)),
+    IdentityScanState.Initial(identityScanType, Clock.markNow() + timeoutInMillis.milliseconds),
     statsName = null
 ) {
     private var isFirstResultReceived = false
