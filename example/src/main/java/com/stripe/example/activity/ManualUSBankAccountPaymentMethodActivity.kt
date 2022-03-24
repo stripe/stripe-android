@@ -28,6 +28,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.example.theme.DefaultExampleTheme
 
 /**
  * This example is currently work in progress. Do not use it as a reference.
@@ -41,7 +42,9 @@ class ManualUSBankAccountPaymentMethodActivity : StripeIntentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            USBankAccountScreen()
+            DefaultExampleTheme {
+                USBankAccountScreen()
+            }
         }
     }
 
