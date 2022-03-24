@@ -1,43 +1,36 @@
 package com.stripe.android.identity.navigation
 
 import android.content.Context
-import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import androidx.annotation.IdRes
 import androidx.core.os.bundleOf
-import androidx.fragment.app.Fragment
 import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
 import com.stripe.android.identity.R
-import com.stripe.android.identity.databinding.ErrorFragmentBinding
 import com.stripe.android.identity.networking.models.VerificationPageDataRequirementError
 
 /**
  * Fragment to show generic error.
  */
-internal class ErrorFragment : Fragment() {
+internal class ErrorFragment : BaseErrorFragment() {
 
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        val binding = ErrorFragmentBinding.inflate(inflater, container, false)
+    override fun onCustomizingViews() {
         val args = requireNotNull(arguments)
-        binding.errorTitle.text = args[ARG_ERROR_TITLE] as String
-        binding.errorContent.text = args[ARG_ERROR_CONTENT] as String
-        if (args.getInt(ARG_GO_BACK_BUTTON_DESTINATION) != UNSET_DESTINATION) {
-            binding.goBack.text = args[ARG_GO_BACK_BUTTON_TEXT] as String
-            binding.goBack.visibility = View.VISIBLE
-            binding.goBack.setOnClickListener {
+        title.text = args[ARG_ERROR_TITLE] as String
+        message1.text = args[ARG_ERROR_CONTENT] as String
+        message2.visibility = View.GONE
+
+        topButton.visibility = View.GONE
+        if (args.getInt(ARG_GO_BACK_BUTTON_DESTINATION) == UNSET_DESTINATION) {
+            bottomButton.visibility = View.GONE
+        } else {
+            bottomButton.text = args[ARG_GO_BACK_BUTTON_TEXT] as String
+            bottomButton.visibility = View.VISIBLE
+            bottomButton.setOnClickListener {
                 // Can only go back to consent page at the moment
                 findNavController().navigate(args[ARG_GO_BACK_BUTTON_DESTINATION] as Int)
             }
         }
-
-        return binding.root
     }
 
     internal companion object {
