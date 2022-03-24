@@ -20,9 +20,6 @@ internal class DriverLicenseScanFragment(
     identityCameraScanViewModelFactory,
     identityViewModelFactory
 ) {
-    override val headerTitleRes = R.string.front_of_dl
-    override val messageRes = R.string.position_dl_front
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         continueButton.setOnClickListener {
@@ -44,7 +41,11 @@ internal class DriverLicenseScanFragment(
     }
 
     override fun onCameraReady() {
-        startScanning(DL_FRONT)
+        if (shouldStartFromBack()) {
+            startScanning(DL_BACK)
+        } else {
+            startScanning(DL_FRONT)
+        }
     }
 
     override fun updateUI(identityScanState: IdentityScanState) {

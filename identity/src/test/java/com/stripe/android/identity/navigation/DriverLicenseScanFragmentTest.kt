@@ -4,6 +4,7 @@ import android.content.Context
 import android.view.View
 import android.widget.Button
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
+import androidx.core.os.bundleOf
 import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
@@ -86,6 +87,17 @@ internal class DriverLicenseScanFragmentTest {
     @Test
     fun `when front is scanned file is uploaded and clicking button triggers back scan`() {
         launchDriverLicenseFragment().onFragment { driverLicenseScanFragment ->
+            // verify start to scan front
+            assertThat(driverLicenseScanFragment.cameraAdapter.isBoundToLifecycle()).isTrue()
+            verify(mockScanFlow).startFlow(
+                same(driverLicenseScanFragment.requireContext()),
+                any(),
+                any(),
+                same(driverLicenseScanFragment.viewLifecycleOwner),
+                same(driverLicenseScanFragment.lifecycleScope),
+                eq(IdentityScanState.ScanType.DL_FRONT)
+            )
+
             // mock success of front scan
             val mockFrontFinalResult = mock<IDDetectorAggregator.FinalResult>().also {
                 whenever(it.identityState).thenReturn(mock<IdentityScanState.Finished>())
@@ -109,6 +121,22 @@ internal class DriverLicenseScanFragmentTest {
             IdentityCameraScanFragmentBinding.bind(driverLicenseScanFragment.requireView()).kontinue
                 .findViewById<Button>(R.id.button).callOnClick()
 
+            // verify start to scan back
+            assertThat(driverLicenseScanFragment.cameraAdapter.isBoundToLifecycle()).isTrue()
+            verify(mockScanFlow).startFlow(
+                same(driverLicenseScanFragment.requireContext()),
+                any(),
+                any(),
+                same(driverLicenseScanFragment.viewLifecycleOwner),
+                same(driverLicenseScanFragment.lifecycleScope),
+                eq(IdentityScanState.ScanType.DL_BACK)
+            )
+        }
+    }
+
+    @Test
+    fun `when started with startFromBack with true, scanning with ID_BACK`() {
+        launchDriverLicenseFragment(shouldStartFromBack = true).onFragment { driverLicenseScanFragment ->
             // verify start to scan back
             assertThat(driverLicenseScanFragment.cameraAdapter.isBoundToLifecycle()).isTrue()
             verify(mockScanFlow).startFlow(
@@ -411,14 +439,16 @@ internal class DriverLicenseScanFragmentTest {
         }
     }
 
-    private fun launchDriverLicenseFragment() = launchFragmentInContainer(
-        themeResId = R.style.Theme_MaterialComponents
-    ) {
-        DriverLicenseScanFragment(
-            viewModelFactoryFor(mockIdentityScanViewModel),
-            viewModelFactoryFor(mockIdentityViewModel)
-        )
-    }
+    private fun launchDriverLicenseFragment(shouldStartFromBack: Boolean = false) =
+        launchFragmentInContainer(
+            bundleOf(IdentityCameraScanFragment.ARG_SHOULD_START_FROM_BACK to shouldStartFromBack),
+            themeResId = R.style.Theme_MaterialComponents
+        ) {
+            DriverLicenseScanFragment(
+                viewModelFactoryFor(mockIdentityScanViewModel),
+                viewModelFactoryFor(mockIdentityViewModel)
+            )
+        }
 
     private fun postDisplayStateChangedDataAndVerifyUI(
         newScanState: IdentityScanState,

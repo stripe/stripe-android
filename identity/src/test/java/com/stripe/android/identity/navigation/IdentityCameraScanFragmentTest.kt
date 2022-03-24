@@ -84,9 +84,6 @@ class IdentityCameraScanFragmentTest {
             return View(context)
         }
 
-        override val headerTitleRes = R.string.front_of_dl
-        override val messageRes = R.string.position_dl_front
-
         override fun onCameraReady() {
             onCameraReadyIsCalled = true
         }

@@ -8,7 +8,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
-import androidx.annotation.StringRes
 import androidx.annotation.VisibleForTesting
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
@@ -66,12 +65,6 @@ internal abstract class IdentityCameraScanFragment(
     protected lateinit var continueButton: LoadingButton
     private lateinit var checkMarkView: ImageView
 
-    @get:StringRes
-    abstract val headerTitleRes: Int
-
-    @get:StringRes
-    abstract val messageRes: Int
-
     /**
      * Called back at end of [onViewCreated] when permission is granted.
      */
@@ -86,9 +79,7 @@ internal abstract class IdentityCameraScanFragment(
         cameraView = binding.cameraView
 
         headerTitle = binding.headerTitle
-        headerTitle.text = getString(headerTitleRes)
         messageView = binding.message
-        messageView.text = getString(messageRes)
 
         checkMarkView = binding.checkMarkView
         continueButton = binding.kontinue
@@ -99,8 +90,6 @@ internal abstract class IdentityCameraScanFragment(
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val shouldStartFromBack = arguments?.get(ARG_SHOULD_START_FROM_BACK) as? Boolean ?: false
-        // TODO(ccen) when shouldStartFromBack is true, start scanning from back
         identityScanViewModel.displayStateChanged.observe(viewLifecycleOwner) { (newState, _) ->
             updateUI(newState)
         }
@@ -161,6 +150,12 @@ internal abstract class IdentityCameraScanFragment(
             }
         }
     }
+
+    /**
+     * Check if should start scanning from back.
+     */
+    protected fun shouldStartFromBack(): Boolean =
+        arguments?.get(ARG_SHOULD_START_FROM_BACK) as? Boolean == true
 
     /**
      * Called back each time when [CameraViewModel.displayStateChanged] is changed.

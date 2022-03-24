@@ -4,6 +4,7 @@ import android.content.Context
 import android.view.View
 import android.widget.Button
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
+import androidx.core.os.bundleOf
 import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
@@ -21,6 +22,7 @@ import com.stripe.android.identity.SUCCESS_VERIFICATION_PAGE
 import com.stripe.android.identity.camera.IDDetectorAggregator
 import com.stripe.android.identity.camera.IdentityScanFlow
 import com.stripe.android.identity.databinding.IdentityCameraScanFragmentBinding
+import com.stripe.android.identity.navigation.IdentityCameraScanFragment.Companion.ARG_SHOULD_START_FROM_BACK
 import com.stripe.android.identity.networking.Resource
 import com.stripe.android.identity.networking.models.ClearDataParam
 import com.stripe.android.identity.networking.models.CollectedDataParam
@@ -86,6 +88,17 @@ internal class IDScanFragmentTest {
     @Test
     fun `when front is scanned clicking button triggers back scan`() {
         launchIDScanFragment().onFragment { idScanFragment ->
+            // verify start to scan front
+            assertThat(idScanFragment.cameraAdapter.isBoundToLifecycle()).isTrue()
+            verify(mockScanFlow).startFlow(
+                same(idScanFragment.requireContext()),
+                any(),
+                any(),
+                same(idScanFragment.viewLifecycleOwner),
+                same(idScanFragment.lifecycleScope),
+                eq(IdentityScanState.ScanType.ID_FRONT)
+            )
+
             // mock success of front scan
             val mockFrontFinalResult = mock<IDDetectorAggregator.FinalResult>().also {
                 whenever(it.identityState).thenReturn(mock<IdentityScanState.Finished>())
@@ -109,6 +122,22 @@ internal class IDScanFragmentTest {
             IdentityCameraScanFragmentBinding.bind(idScanFragment.requireView()).kontinue
                 .findViewById<Button>(R.id.button).callOnClick()
 
+            // verify start to scan back
+            assertThat(idScanFragment.cameraAdapter.isBoundToLifecycle()).isTrue()
+            verify(mockScanFlow).startFlow(
+                same(idScanFragment.requireContext()),
+                any(),
+                any(),
+                same(idScanFragment.viewLifecycleOwner),
+                same(idScanFragment.lifecycleScope),
+                eq(IdentityScanState.ScanType.ID_BACK)
+            )
+        }
+    }
+
+    @Test
+    fun `when started with startFromBack with true, scanning with ID_BACK`() {
+        launchIDScanFragment(shouldStartFromBack = true).onFragment { idScanFragment ->
             // verify start to scan back
             assertThat(idScanFragment.cameraAdapter.isBoundToLifecycle()).isTrue()
             verify(mockScanFlow).startFlow(
@@ -389,14 +418,16 @@ internal class IDScanFragmentTest {
         }
     }
 
-    private fun launchIDScanFragment() = launchFragmentInContainer(
-        themeResId = R.style.Theme_MaterialComponents
-    ) {
-        IDScanFragment(
-            viewModelFactoryFor(mockIdentityScanViewModel),
-            viewModelFactoryFor(mockIdentityViewModel)
-        )
-    }
+    private fun launchIDScanFragment(shouldStartFromBack: Boolean = false) =
+        launchFragmentInContainer(
+            bundleOf(ARG_SHOULD_START_FROM_BACK to shouldStartFromBack),
+            themeResId = R.style.Theme_MaterialComponents
+        ) {
+            IDScanFragment(
+                viewModelFactoryFor(mockIdentityScanViewModel),
+                viewModelFactoryFor(mockIdentityViewModel)
+            )
+        }
 
     private fun postDisplayStateChangedDataAndVerifyUI(
         newScanState: IdentityScanState,
