@@ -90,8 +90,6 @@ internal abstract class IdentityCameraScanFragment(
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val shouldStartFromBack = arguments?.get(ARG_SHOULD_START_FROM_BACK) as? Boolean ?: false
-        // TODO(ccen) when shouldStartFromBack is true, start scanning from back
         identityScanViewModel.displayStateChanged.observe(viewLifecycleOwner) { (newState, _) ->
             updateUI(newState)
         }
