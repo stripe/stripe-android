@@ -29,7 +29,7 @@ class CameraPermissionDeniedFragmentTest {
         verifyFragmentWithScanType(
             IdDocumentParam.Type.IDCARD,
             R.id.IDUploadFragment,
-            R.string.displayname_id
+            R.string.id_card
         )
     }
 
@@ -38,7 +38,7 @@ class CameraPermissionDeniedFragmentTest {
         verifyFragmentWithScanType(
             IdDocumentParam.Type.DRIVINGLICENSE,
             R.id.driverLicenseUploadFragment,
-            R.string.displayname_dl
+            R.string.driver_license
         )
     }
 
@@ -47,7 +47,7 @@ class CameraPermissionDeniedFragmentTest {
         verifyFragmentWithScanType(
             IdDocumentParam.Type.PASSPORT,
             R.id.passportUploadFragment,
-            R.string.displayname_passport
+            R.string.passport
         )
     }
 

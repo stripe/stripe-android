@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material.Checkbox
 import androidx.compose.material.CheckboxDefaults
-import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -68,15 +67,14 @@ fun SaveForFutureUseElementUI(
             checked = checked,
             onCheckedChange = null, // needs to be null for accessibility on row click to work
             enabled = enabled,
-            colors = checkBoxColor
+            colors = checkBoxColor,
         )
         label?.let {
-            Text(
-                resources.getString(it, element.merchantName),
-                Modifier
+            H6Text(
+                text = resources.getString(it, element.merchantName),
+                modifier = Modifier
                     .padding(start = 4.dp)
-                    .align(Alignment.CenterVertically),
-                color = PaymentsTheme.colors.colorTextSecondary
+                    .align(Alignment.CenterVertically)
             )
         }
     }

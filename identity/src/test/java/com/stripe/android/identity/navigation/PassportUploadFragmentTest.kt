@@ -3,6 +3,8 @@ package com.stripe.android.identity.navigation
 import android.net.Uri
 import android.view.View
 import android.widget.Button
+import android.widget.TextView
+import androidx.appcompat.app.AppCompatDialog
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.core.os.bundleOf
 import androidx.fragment.app.testing.launchFragmentInContainer
@@ -10,7 +12,6 @@ import androidx.lifecycle.MutableLiveData
 import androidx.navigation.Navigation
 import androidx.navigation.testing.TestNavHostController
 import androidx.test.core.app.ApplicationProvider
-import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.button.MaterialButton
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.model.InternalStripeFile
@@ -91,7 +92,7 @@ class PassportUploadFragmentTest {
 
             // dialog shows up
             assertThat(dialog.isShowing).isTrue()
-            assertThat(dialog).isInstanceOf(BottomSheetDialog::class.java)
+            assertThat(dialog).isInstanceOf(AppCompatDialog::class.java)
 
             // assert dialog content
             assertThat(dialog.findViewById<Button>(R.id.choose_file).visibility).isEqualTo(View.VISIBLE)
@@ -107,7 +108,7 @@ class PassportUploadFragmentTest {
 
             // dialog shows up
             assertThat(dialog.isShowing).isTrue()
-            assertThat(dialog).isInstanceOf(BottomSheetDialog::class.java)
+            assertThat(dialog).isInstanceOf(AppCompatDialog::class.java)
 
             // assert dialog content
             assertThat(dialog.findViewById<Button>(R.id.choose_file).visibility).isEqualTo(View.VISIBLE)
@@ -194,8 +195,13 @@ class PassportUploadFragmentTest {
 
             // dialog shows up
             assertThat(dialog.isShowing).isTrue()
-            assertThat(dialog).isInstanceOf(BottomSheetDialog::class.java)
+            assertThat(dialog).isInstanceOf(AppCompatDialog::class.java)
 
+            assertThat(dialog.findViewById<TextView>(R.id.title).text).isEqualTo(
+                fragment.getString(
+                    R.string.upload_dialog_title_passport
+                )
+            )
             // click take photo button
             if (isTakePhoto) {
                 dialog.findViewById<Button>(R.id.take_photo).callOnClick()
@@ -225,7 +231,6 @@ class PassportUploadFragmentTest {
             // viewmodel triggers and UI updates
             verify(mockPassportUploadViewModel).uploadImage(
                 same(mockUri),
-                same(fragment.requireContext()),
                 same(DOCUMENT_CAPTURE),
                 if (isTakePhoto)
                     eq(UploadMethod.MANUALCAPTURE)

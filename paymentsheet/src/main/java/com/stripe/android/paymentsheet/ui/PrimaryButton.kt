@@ -7,11 +7,20 @@ import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.widget.FrameLayout
 import androidx.annotation.VisibleForTesting
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
 import androidx.core.content.withStyledAttributes
 import androidx.core.view.isVisible
 import androidx.core.view.setPadding
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.databinding.PrimaryButtonBinding
+import com.stripe.android.ui.core.PaymentsTheme
 import com.stripe.android.ui.core.PaymentsThemeConfig
 import com.stripe.android.ui.core.convertDpToPx
 
@@ -29,7 +38,10 @@ internal class PrimaryButton @JvmOverloads constructor(
 
     // This is the text set by the client.  The internal label text is set to this value
     // in the on ready state and it is temporarily replaced during the processing and finishing states.
-    private var externalLabel: String? = null
+    private var originalLabel: String? = null
+
+    @VisibleForTesting
+    internal var externalLabel: String? = null
 
     @VisibleForTesting
     internal val viewBinding = PrimaryButtonBinding.inflate(
@@ -42,7 +54,12 @@ internal class PrimaryButton @JvmOverloads constructor(
     private val confirmedIcon = viewBinding.confirmedIcon
 
     init {
-        viewBinding.label.text = getTextAttributeValue(attrs)
+        viewBinding.label.setViewCompositionStrategy(
+            ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed
+        )
+        getTextAttributeValue(attrs)?.let {
+            setLabel(it.toString())
+        }
 
         isClickable = true
         isEnabled = false
@@ -78,14 +95,19 @@ internal class PrimaryButton @JvmOverloads constructor(
 
     fun setLabel(text: String?) {
         externalLabel = text
-        externalLabel?.let {
-            viewBinding.label.text = text
+        if (state !is State.StartProcessing) {
+            originalLabel = text
+        }
+        text?.let {
+            viewBinding.label.setContent {
+                LabelUI(label = text)
+            }
         }
     }
 
     private fun onReadyState() {
-        externalLabel?.let {
-            viewBinding.label.text = it
+        originalLabel?.let {
+            setLabel(it)
         }
         defaultTintList?.let {
             backgroundTintList = it
@@ -98,8 +120,8 @@ internal class PrimaryButton @JvmOverloads constructor(
         viewBinding.lockIcon.isVisible = false
         viewBinding.confirmingIcon.isVisible = true
 
-        viewBinding.label.text = resources.getString(
-            R.string.stripe_paymentsheet_primary_button_processing
+        setLabel(
+            resources.getString(R.string.stripe_paymentsheet_primary_button_processing)
         )
     }
 
@@ -159,4 +181,15 @@ internal class PrimaryButton @JvmOverloads constructor(
         object StartProcessing : State()
         data class FinishProcessing(val onComplete: () -> Unit) : State()
     }
+}
+
+@Composable
+private fun LabelUI(label: String) {
+    Text(
+        text = label,
+        textAlign = TextAlign.Center,
+        color = colorResource(R.color.stripe_paymentsheet_primary_button_text),
+        style = PaymentsTheme.typography.h5,
+        modifier = Modifier.padding(start = 4.dp, end = 4.dp, top = 4.dp, bottom = 5.dp)
+    )
 }

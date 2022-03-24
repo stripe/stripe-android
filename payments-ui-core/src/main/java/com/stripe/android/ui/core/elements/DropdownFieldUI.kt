@@ -1,10 +1,8 @@
 package com.stripe.android.ui.core.elements
 
 import DropdownMenu
-import androidx.annotation.StringRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.focusable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -16,9 +14,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSizeIn
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.material.ContentAlpha
 import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
@@ -101,7 +97,9 @@ internal fun DropDown(
                     bottom = 8.dp
                 )
             ) {
-                DropdownLabel(label, enabled)
+                label?.let {
+                    FormLabel(stringResource(it), enabled)
+                }
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.Bottom
@@ -141,9 +139,9 @@ internal fun DropDown(
         ) {
             itemsIndexed(items) { index, displayValue ->
                 DropdownMenuItem(
-                    displayValue,
+                    displayValue = displayValue,
                     isSelected = index == selectedIndex,
-                    currentTextColor,
+                    currentTextColor = currentTextColor,
                     onClick = {
                         expanded = false
                         controller.onValueChange(index)
@@ -151,27 +149,6 @@ internal fun DropDown(
                 )
             }
         }
-    }
-}
-
-/**
- * This will create the label for the DropdownTextField.
- *
- * Copied logic from androidx.compose.material.TextFieldImpl
- */
-@Composable
-internal fun DropdownLabel(
-    @StringRes label: Int?,
-    enabled: Boolean
-) {
-    val color = PaymentsTheme.colors.placeholderText
-    label?.let {
-        Text(
-            stringResource(label),
-            color = if (enabled) color else color.copy(alpha = ContentAlpha.disabled),
-            modifier = Modifier.focusable(false),
-            style = MaterialTheme.typography.caption
-        )
     }
 }
 
@@ -200,7 +177,7 @@ internal fun DropdownMenuItem(
             modifier = Modifier
                 // This padding makes up for the checkmark at the end.
                 .padding(
-                    end = if (isSelected) {
+                    horizontal = if (isSelected) {
                         13.dp
                     } else {
                         0.dp

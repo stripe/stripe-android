@@ -17,12 +17,10 @@
         app:layout_constraintVertical_bias="0"
         app:layout_constraintVertical_chainStyle="spread_inside">
 
-        <TextView
+        <androidx.compose.ui.platform.ComposeView
             android:id="@+id/add_payment_method_header"
-            style="@style/StripePaymentSheetTitle"
-            android:layout_width="wrap_content"
-            android:singleLine="false"
-            android:text="@string/stripe_paymentsheet_add_payment_method_title" />
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
 
         <com.stripe.android.paymentsheet.ui.GooglePayButton
             android:id="@+id/google_pay_button"

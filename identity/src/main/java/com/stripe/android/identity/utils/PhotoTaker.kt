@@ -13,7 +13,8 @@ import androidx.activity.result.contract.ActivityResultContracts
  * A class to take a photo through camera.
  */
 internal class PhotoTaker(
-    activityResultCaller: ActivityResultCaller
+    activityResultCaller: ActivityResultCaller,
+    private val identityIO: IdentityIO
 ) {
 
     private var newPhotoTakenUri: Uri? = null
@@ -47,7 +48,7 @@ internal class PhotoTaker(
             Intent(MediaStore.ACTION_IMAGE_CAPTURE).also { takePictureIntent ->
                 // Ensure that there's a camera activity to handle the intent
                 takePictureIntent.resolveActivity(context.packageManager).also {
-                    createInternalFileUri(context).also {
+                    identityIO.createInternalFileUri().also {
                         newPhotoTakenUri = it.contentUri
                         takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, newPhotoTakenUri)
                     }

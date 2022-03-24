@@ -3,6 +3,8 @@ package com.stripe.android.identity.navigation
 import android.net.Uri
 import android.view.View
 import android.widget.Button
+import android.widget.TextView
+import androidx.appcompat.app.AppCompatDialog
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.core.os.bundleOf
 import androidx.fragment.app.testing.launchFragmentInContainer
@@ -12,7 +14,6 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.Navigation
 import androidx.navigation.testing.TestNavHostController
 import androidx.test.core.app.ApplicationProvider
-import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.button.MaterialButton
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.model.InternalStripeFile
@@ -115,7 +116,7 @@ class FrontBackUploadFragmentTest {
 
             // dialog shows up
             assertThat(dialog.isShowing).isTrue()
-            assertThat(dialog).isInstanceOf(BottomSheetDialog::class.java)
+            assertThat(dialog).isInstanceOf(AppCompatDialog::class.java)
 
             // assert dialog content
             assertThat(dialog.findViewById<Button>(R.id.choose_file).visibility).isEqualTo(View.VISIBLE)
@@ -131,7 +132,7 @@ class FrontBackUploadFragmentTest {
 
             // dialog shows up
             assertThat(dialog.isShowing).isTrue()
-            assertThat(dialog).isInstanceOf(BottomSheetDialog::class.java)
+            assertThat(dialog).isInstanceOf(AppCompatDialog::class.java)
 
             // assert dialog content
             assertThat(dialog.findViewById<Button>(R.id.choose_file).visibility).isEqualTo(View.VISIBLE)
@@ -299,7 +300,46 @@ class FrontBackUploadFragmentTest {
 
             // dialog shows up
             assertThat(dialog.isShowing).isTrue()
-            assertThat(dialog).isInstanceOf(BottomSheetDialog::class.java)
+            assertThat(dialog).isInstanceOf(AppCompatDialog::class.java)
+
+            when (scanType) {
+                IdentityScanState.ScanType.ID_FRONT -> {
+                    assertThat(dialog.findViewById<TextView>(R.id.title).text).isEqualTo(
+                        fragment.getString(
+                            R.string.upload_dialog_title_id_front
+                        )
+                    )
+                }
+                IdentityScanState.ScanType.ID_BACK -> {
+                    assertThat(dialog.findViewById<TextView>(R.id.title).text).isEqualTo(
+                        fragment.getString(
+                            R.string.upload_dialog_title_id_back
+                        )
+                    )
+                }
+                IdentityScanState.ScanType.DL_FRONT -> {
+                    assertThat(dialog.findViewById<TextView>(R.id.title).text).isEqualTo(
+                        fragment.getString(
+                            R.string.upload_dialog_title_dl_front
+                        )
+                    )
+                }
+                IdentityScanState.ScanType.DL_BACK -> {
+                    assertThat(dialog.findViewById<TextView>(R.id.title).text).isEqualTo(
+                        fragment.getString(
+                            R.string.upload_dialog_title_dl_back
+                        )
+                    )
+                }
+                IdentityScanState.ScanType.PASSPORT -> {
+                    assertThat(dialog.findViewById<TextView>(R.id.title).text).isEqualTo(
+                        fragment.getString(
+                            R.string.upload_dialog_title_passport
+                        )
+                    )
+                }
+                else -> {} // no-op
+            }
 
             // click take photo button
             if (isTakePhoto) {
@@ -345,7 +385,6 @@ class FrontBackUploadFragmentTest {
             if (scanType == IdentityScanState.ScanType.ID_FRONT) {
                 verify(mockFrontBackUploadViewModel).uploadImageFront(
                     same(mockUri),
-                    same(fragment.requireContext()),
                     same(DOCUMENT_CAPTURE),
                     if (isTakePhoto)
                         eq(DocumentUploadParam.UploadMethod.MANUALCAPTURE)
@@ -358,7 +397,6 @@ class FrontBackUploadFragmentTest {
             } else if (scanType == IdentityScanState.ScanType.ID_BACK) {
                 verify(mockFrontBackUploadViewModel).uploadImageBack(
                     same(mockUri),
-                    same(fragment.requireContext()),
                     same(DOCUMENT_CAPTURE),
                     if (isTakePhoto)
                         eq(DocumentUploadParam.UploadMethod.MANUALCAPTURE)
@@ -430,8 +468,6 @@ class FrontBackUploadFragmentTest {
         override val backTextRes = R.string.back_of_id
         override val frontCheckMarkContentDescription = R.string.front_of_id_selected
         override val backCheckMarkContentDescription = R.string.back_of_id_selected
-        override val continueButtonNavigationId =
-            R.id.action_IDUploadFragment_to_confirmationFragment
         override val frontScanType = IdentityScanState.ScanType.ID_FRONT
         override val backScanType = IdentityScanState.ScanType.ID_BACK
     }

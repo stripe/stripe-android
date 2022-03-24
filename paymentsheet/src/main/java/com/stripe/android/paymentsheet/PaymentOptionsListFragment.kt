@@ -3,9 +3,7 @@ package com.stripe.android.paymentsheet
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.isVisible
 import androidx.fragment.app.activityViewModels
-import com.stripe.android.paymentsheet.databinding.FragmentPaymentsheetPaymentMethodsListBinding
 import com.stripe.android.paymentsheet.model.PaymentSelection
 
 internal class PaymentOptionsListFragment() : BasePaymentMethodsListFragment(
@@ -31,7 +29,6 @@ internal class PaymentOptionsListFragment() : BasePaymentMethodsListFragment(
         // We need to make sure the list fragment is attached before jumping, so the
         // list is properly added to the backstack.
         sheetViewModel.resolveTransitionTarget(config)
-        FragmentPaymentsheetPaymentMethodsListBinding.bind(view).total.isVisible = false
     }
 
     override fun transitionToAddPaymentMethod() {

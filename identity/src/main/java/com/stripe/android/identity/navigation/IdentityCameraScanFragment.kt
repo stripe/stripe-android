@@ -105,7 +105,6 @@ internal abstract class IdentityCameraScanFragment(
                 onSuccess = {
                     identityScanViewModel.uploadResult(
                         finalResult,
-                        requireContext(),
                         it.documentCapture
                     )
                 },
