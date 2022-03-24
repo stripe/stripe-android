@@ -12,8 +12,8 @@ class BuyButton(private val device: UiDevice) : EspressoIdButton(R.id.buy_button
             Until.findObject(
                 By.textContains(
                     InstrumentationRegistry.getInstrumentation().targetContext.resources.getString(
-                        com.stripe.android.paymentsheet.R.string.stripe_paymentsheet_pay_button_amount
-                    )
+                        R.string.stripe_pay_button_amount
+                    ).replace("%s", "")
                 )
             ),
             InstrumentationRegistry.getInstrumentation().targetContext.resources

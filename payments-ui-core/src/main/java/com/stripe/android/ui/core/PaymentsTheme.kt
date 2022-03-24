@@ -36,6 +36,7 @@ data class PaymentsColors(
     val componentDivider: Color,
     val onPrimary: Color,
     val textSecondary: Color,
+    val textCursor: Color,
     val placeholderText: Color,
     val onBackground: Color,
     val appBarIcon: Color,
@@ -63,6 +64,7 @@ object PaymentsThemeConfig {
         componentDivider = Color(0x33787880),
         onPrimary = Color.Black,
         textSecondary = Color(0x99000000),
+        textCursor = Color.Black,
         placeholderText = Color(0x993C3C43),
         onBackground = Color.Black,
         appBarIcon = Color(0x99000000),
@@ -77,6 +79,7 @@ object PaymentsThemeConfig {
         componentDivider = Color(0xFF787880),
         onPrimary = Color.White,
         textSecondary = Color(0x99FFFFFF),
+        textCursor = Color.White,
         placeholderText = Color(0x61FFFFFF),
         onBackground = Color.White,
         appBarIcon = Color.White,
@@ -90,6 +93,7 @@ data class PaymentsComposeColors(
     val colorComponentBorder: Color,
     val colorComponentDivider: Color,
     val colorTextSecondary: Color,
+    val colorTextCursor: Color,
     val placeholderText: Color,
     val material: Colors
 )
@@ -111,6 +115,7 @@ fun PaymentsThemeConfig.toComposeColors(): PaymentsComposeColors {
         colorComponentBorder = colors.componentBorder,
         colorComponentDivider = colors.componentDivider,
         colorTextSecondary = colors.textSecondary,
+        colorTextCursor = colors.textCursor,
         placeholderText = colors.placeholderText,
 
         material = lightColors(
