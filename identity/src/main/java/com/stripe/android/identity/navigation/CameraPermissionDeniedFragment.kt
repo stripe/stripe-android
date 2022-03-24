@@ -4,12 +4,14 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.annotation.IdRes
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.stripe.android.camera.AppSettingsOpenable
 import com.stripe.android.identity.R
 import com.stripe.android.identity.databinding.CameraPermissionDeniedFragmentBinding
-import com.stripe.android.identity.states.IdentityScanState
+import com.stripe.android.identity.networking.models.IdDocumentParam
+import com.stripe.android.identity.utils.navigateToUploadFragment
 
 /**
  * Fragment to show user denies camera permission.
@@ -25,7 +27,7 @@ internal class CameraPermissionDeniedFragment(
     ): View {
         val args = requireNotNull(arguments)
 
-        val identityScanType = args[ARG_SCAN_TYPE] as IdentityScanState.ScanType
+        val identityScanType = args[ARG_SCAN_TYPE] as IdDocumentParam.Type
 
         val binding = CameraPermissionDeniedFragmentBinding.inflate(inflater, container, false)
 
@@ -34,47 +36,43 @@ internal class CameraPermissionDeniedFragment(
 
         binding.appSettings.setOnClickListener {
             appSettingsOpenable.openAppSettings()
+            // navigate back to DocSelectFragment, so that when user is back to the app from settings
+            // the camera permission check can be triggered again from there.
+            findNavController().navigate(R.id.action_cameraPermissionDeniedFragment_to_docSelectionFragment)
         }
 
         binding.fileUpload.setOnClickListener {
-            findNavController().navigate(
-                when (identityScanType) {
-                    IdentityScanState.ScanType.ID_FRONT -> R.id.action_cameraPermissionDeniedFragment_to_IDUploadFragment
-                    IdentityScanState.ScanType.DL_FRONT -> R.id.action_cameraPermissionDeniedFragment_to_driverLicenseUploadFragment
-                    IdentityScanState.ScanType.PASSPORT -> R.id.action_cameraPermissionDeniedFragment_to_passportUploadFragment
-                    else -> {
-                        throw IllegalArgumentException("CameraPermissionDeniedFragment receives incorrect ScanType: $identityScanType")
-                    }
-                }
+            navigateToUploadFragment(
+                identityScanType.toUploadDestinationId(),
+                false
             )
         }
 
         return binding.root
     }
 
-    private fun IdentityScanState.ScanType.getDisplayName() =
+    private fun IdDocumentParam.Type.getDisplayName() =
         when (this) {
-            IdentityScanState.ScanType.ID_FRONT -> {
-                getString(R.string.displayname_id)
+            IdDocumentParam.Type.IDCARD -> {
+                getString(R.string.id_card)
             }
-            IdentityScanState.ScanType.ID_BACK -> {
-                getString(R.string.displayname_id)
+            IdDocumentParam.Type.DRIVINGLICENSE -> {
+                getString(R.string.driver_license)
             }
-            IdentityScanState.ScanType.DL_FRONT -> {
-                getString(R.string.displayname_dl)
-            }
-            IdentityScanState.ScanType.DL_BACK -> {
-                getString(R.string.displayname_dl)
-            }
-            IdentityScanState.ScanType.PASSPORT -> {
-                getString(R.string.displayname_passport)
-            }
-            IdentityScanState.ScanType.SELFIE -> {
-                getString(R.string.displayname_selfie)
+            IdDocumentParam.Type.PASSPORT -> {
+                getString(R.string.passport)
             }
         }
 
-    companion object {
+    internal companion object {
         const val ARG_SCAN_TYPE = "scanType"
+
+        @IdRes
+        private fun IdDocumentParam.Type.toUploadDestinationId() =
+            when (this) {
+                IdDocumentParam.Type.IDCARD -> R.id.action_cameraPermissionDeniedFragment_to_IDUploadFragment
+                IdDocumentParam.Type.DRIVINGLICENSE -> R.id.action_cameraPermissionDeniedFragment_to_driverLicenseUploadFragment
+                IdDocumentParam.Type.PASSPORT -> R.id.action_cameraPermissionDeniedFragment_to_passportUploadFragment
+            }
     }
 }

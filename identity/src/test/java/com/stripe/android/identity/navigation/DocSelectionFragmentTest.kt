@@ -8,13 +8,17 @@ import androidx.lifecycle.MutableLiveData
 import androidx.navigation.Navigation
 import androidx.navigation.testing.TestNavHostController
 import androidx.test.core.app.ApplicationProvider
+import com.google.android.material.button.MaterialButton
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.camera.CameraPermissionEnsureable
 import com.stripe.android.identity.R
 import com.stripe.android.identity.databinding.DocSelectionFragmentBinding
+import com.stripe.android.identity.navigation.CameraPermissionDeniedFragment.Companion.ARG_SCAN_TYPE
 import com.stripe.android.identity.navigation.DocSelectionFragment.Companion.DRIVING_LICENSE_KEY
 import com.stripe.android.identity.navigation.DocSelectionFragment.Companion.ID_CARD_KEY
 import com.stripe.android.identity.navigation.DocSelectionFragment.Companion.PASSPORT_KEY
 import com.stripe.android.identity.networking.Resource
+import com.stripe.android.identity.networking.models.IdDocumentParam
 import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.networking.models.VerificationPageData
 import com.stripe.android.identity.networking.models.VerificationPageDataRequirements
@@ -43,6 +47,9 @@ internal class DocSelectionFragmentTest {
 
     private val verificationPage = mock<VerificationPage>()
     private val mockIdentityViewModel = mock<IdentityViewModel>()
+    private val mockCameraPermissionEnsureable = mock<CameraPermissionEnsureable>()
+    private val onCameraReadyCaptor = argumentCaptor<() -> Unit>()
+    private val onUserDeniedCameraPermissionCaptor = argumentCaptor<() -> Unit>()
 
     private fun setUpErrorVerificationPage() {
         val failureCaptor: KArgumentCaptor<(Throwable?) -> Unit> = argumentCaptor()
@@ -92,48 +99,29 @@ internal class DocSelectionFragmentTest {
             assertThat(binding.singleSelectionContent.visibility).isEqualTo(View.GONE)
 
             assertThat(binding.passport.text).isEqualTo(PASSPORT_BUTTON_TEXT)
-            assertThat(binding.passport.visibility).isEqualTo(View.VISIBLE)
+            assertThat(binding.passportContainer.visibility).isEqualTo(View.VISIBLE)
             assertThat(binding.passportSeparator.visibility).isEqualTo(View.VISIBLE)
 
             assertThat(binding.dl.text).isEqualTo(DRIVING_LICENSE_BUTTON_TEXT)
-            assertThat(binding.dl.visibility).isEqualTo(View.VISIBLE)
+            assertThat(binding.dlContainer.visibility).isEqualTo(View.VISIBLE)
             assertThat(binding.dlSeparator.visibility).isEqualTo(View.VISIBLE)
 
             assertThat(binding.id.text).isEqualTo(ID_BUTTON_TEXT)
-            assertThat(binding.id.visibility).isEqualTo(View.VISIBLE)
+            assertThat(binding.idContainer.visibility).isEqualTo(View.VISIBLE)
             assertThat(binding.idSeparator.visibility).isEqualTo(View.VISIBLE)
         }
     }
 
     @Test
-    fun `zero choice UI is correctly bound with values locally`() {
-        launchDocSelectionFragment { binding, _, docSelectFragment ->
+    fun `zero choice navigates to error`() {
+        launchDocSelectionFragment { _, navController, _ ->
             whenever(verificationPage.documentSelect).thenReturn(
                 DOC_SELECT_ZERO_CHOICE
             )
             setUpSuccessVerificationPage()
 
-            assertThat(binding.title.text).isEqualTo(DOCUMENT_SELECT_TITLE)
-            assertThat(binding.multiSelectionContent.visibility).isEqualTo(View.VISIBLE)
-            assertThat(binding.singleSelectionContent.visibility).isEqualTo(View.GONE)
-
-            assertThat(binding.passport.text).isEqualTo(
-                docSelectFragment.getString(R.string.passport)
-            )
-            assertThat(binding.passport.visibility).isEqualTo(View.VISIBLE)
-            assertThat(binding.passportSeparator.visibility).isEqualTo(View.VISIBLE)
-
-            assertThat(binding.dl.text).isEqualTo(
-                docSelectFragment.getString(R.string.driver_license)
-            )
-            assertThat(binding.dl.visibility).isEqualTo(View.VISIBLE)
-            assertThat(binding.dlSeparator.visibility).isEqualTo(View.VISIBLE)
-
-            assertThat(binding.id.text).isEqualTo(
-                docSelectFragment.getString(R.string.id_card)
-            )
-            assertThat(binding.id.visibility).isEqualTo(View.VISIBLE)
-            assertThat(binding.idSeparator.visibility).isEqualTo(View.VISIBLE)
+            assertThat(navController.currentDestination?.id)
+                .isEqualTo(R.id.errorFragment)
         }
     }
 
@@ -172,8 +160,7 @@ internal class DocSelectionFragmentTest {
                     MISSING_BACK_VERIFICATION_PAGE_DATA
                 )
             }
-            // mock scan is available
-            // TODO(ccen) add camera permission check later
+            // mock file is available
             whenever(mockIdentityViewModel.idDetectorModelFile).thenReturn(
                 MutableLiveData(
                     Resource.success(
@@ -182,7 +169,15 @@ internal class DocSelectionFragmentTest {
                 )
             )
             setUpSuccessVerificationPage()
-            binding.singleSelectionContinue.callOnClick()
+            binding.singleSelectionContinue.findViewById<MaterialButton>(R.id.button).callOnClick()
+
+            verify(mockCameraPermissionEnsureable).ensureCameraPermission(
+                onCameraReadyCaptor.capture(),
+                onUserDeniedCameraPermissionCaptor.capture()
+            )
+
+            // trigger permission granted
+            onCameraReadyCaptor.firstValue()
 
             assertThat(navController.currentDestination?.id)
                 .isEqualTo(R.id.driverLicenseScanFragment)
@@ -190,7 +185,7 @@ internal class DocSelectionFragmentTest {
     }
 
     @Test
-    fun `when scan is unavailable, clicking continue navigates to upload when requireLiveCapture is false`() {
+    fun `when modelFile is unavailable and camera permission granted, clicking continue navigates to upload when requireLiveCapture is false`() {
         launchDocSelectionFragment { binding, navController, _ ->
             whenever(verificationPage.documentSelect).thenReturn(
                 DOC_SELECT_SINGLE_CHOICE_DL
@@ -207,13 +202,21 @@ internal class DocSelectionFragmentTest {
                     MISSING_BACK_VERIFICATION_PAGE_DATA
                 )
             }
-            // mock scan is not available
-            // TODO(ccen) add camera permission check later
+            // mock file is not available
             whenever(mockIdentityViewModel.idDetectorModelFile).thenReturn(
                 MutableLiveData(Resource.error())
             )
             setUpSuccessVerificationPage()
-            binding.singleSelectionContinue.callOnClick()
+            binding.singleSelectionContinue.findViewById<MaterialButton>(R.id.button).callOnClick()
+
+            verify(mockCameraPermissionEnsureable).ensureCameraPermission(
+                onCameraReadyCaptor.capture(),
+                onUserDeniedCameraPermissionCaptor.capture()
+            )
+
+            // trigger permission granted
+            onCameraReadyCaptor.firstValue()
+
             setUpSuccessVerificationPage(2)
 
             assertThat(navController.currentDestination?.id)
@@ -222,7 +225,7 @@ internal class DocSelectionFragmentTest {
     }
 
     @Test
-    fun `when scan is unavailable, clicking continue navigates to error when requireLiveCapture is true`() {
+    fun `when modelFile is unavailable and camera permission granted, clicking continue navigates to error when requireLiveCapture is true`() {
         launchDocSelectionFragment { binding, navController, _ ->
             whenever(verificationPage.documentSelect).thenReturn(
                 DOC_SELECT_SINGLE_CHOICE_DL
@@ -240,12 +243,105 @@ internal class DocSelectionFragmentTest {
                 )
             }
             // mock scan is not available
-            // TODO(ccen) add camera permission check later
             whenever(mockIdentityViewModel.idDetectorModelFile).thenReturn(
                 MutableLiveData(Resource.error())
             )
             setUpSuccessVerificationPage()
-            binding.singleSelectionContinue.callOnClick()
+            binding.singleSelectionContinue.findViewById<MaterialButton>(R.id.button).callOnClick()
+
+            verify(mockCameraPermissionEnsureable).ensureCameraPermission(
+                onCameraReadyCaptor.capture(),
+                onUserDeniedCameraPermissionCaptor.capture()
+            )
+
+            // trigger permission granted
+            onCameraReadyCaptor.firstValue()
+
+            setUpSuccessVerificationPage(2)
+
+            assertThat(navController.currentDestination?.id)
+                .isEqualTo(R.id.errorFragment)
+        }
+    }
+
+    @Test
+    fun `when camera permission is denied, clicking continue navigates to CameraPermissionDeniedFragment when requireLiveCapture is false`() {
+        launchDocSelectionFragment { binding, navController, _ ->
+            whenever(verificationPage.documentSelect).thenReturn(
+                DOC_SELECT_SINGLE_CHOICE_DL
+            )
+            val mockDocumentCapture =
+                mock<VerificationPageStaticContentDocumentCapturePage>().also {
+                    whenever(it.requireLiveCapture).thenReturn(false)
+                }
+            whenever(verificationPage.documentCapture).thenReturn(
+                mockDocumentCapture
+            )
+            runBlocking {
+                whenever(mockIdentityViewModel.postVerificationPageData(any(), any())).thenReturn(
+                    MISSING_BACK_VERIFICATION_PAGE_DATA
+                )
+            }
+            // mock file is available
+            whenever(mockIdentityViewModel.idDetectorModelFile).thenReturn(
+                MutableLiveData(Resource.success(mock()))
+            )
+            setUpSuccessVerificationPage()
+            binding.singleSelectionContinue.findViewById<MaterialButton>(R.id.button).callOnClick()
+
+            verify(mockCameraPermissionEnsureable).ensureCameraPermission(
+                onCameraReadyCaptor.capture(),
+                onUserDeniedCameraPermissionCaptor.capture()
+            )
+
+            // trigger permission denied
+            onUserDeniedCameraPermissionCaptor.firstValue()
+
+            setUpSuccessVerificationPage(2)
+
+            assertThat(
+                requireNotNull(navController.backStack.last().arguments)
+                [ARG_SCAN_TYPE]
+            ).isEqualTo(IdDocumentParam.Type.DRIVINGLICENSE)
+
+            assertThat(navController.currentDestination?.id)
+                .isEqualTo(R.id.cameraPermissionDeniedFragment)
+        }
+    }
+
+    @Test
+    fun `when camera permission is denied, clicking continue navigates to ErrorFragment when requireLiveCapture is true`() {
+        launchDocSelectionFragment { binding, navController, _ ->
+            whenever(verificationPage.documentSelect).thenReturn(
+                DOC_SELECT_SINGLE_CHOICE_DL
+            )
+            val mockDocumentCapture =
+                mock<VerificationPageStaticContentDocumentCapturePage>().also {
+                    whenever(it.requireLiveCapture).thenReturn(true)
+                }
+            whenever(verificationPage.documentCapture).thenReturn(
+                mockDocumentCapture
+            )
+            runBlocking {
+                whenever(mockIdentityViewModel.postVerificationPageData(any(), any())).thenReturn(
+                    MISSING_BACK_VERIFICATION_PAGE_DATA
+                )
+            }
+            // mock file is available
+            whenever(mockIdentityViewModel.idDetectorModelFile).thenReturn(
+                MutableLiveData(Resource.success(mock()))
+            )
+            setUpSuccessVerificationPage()
+            binding.singleSelectionContinue.findViewById<MaterialButton>(R.id.button).callOnClick()
+
+            verify(mockCameraPermissionEnsureable).ensureCameraPermission(
+                onCameraReadyCaptor.capture(),
+                onUserDeniedCameraPermissionCaptor.capture()
+            )
+
+            // trigger permission denied
+            onUserDeniedCameraPermissionCaptor.firstValue()
+
             setUpSuccessVerificationPage(2)
 
             assertThat(navController.currentDestination?.id)
@@ -271,7 +367,11 @@ internal class DocSelectionFragmentTest {
                 docSelectionFragment.getString(expectedBodyStringRes)
             )
 
-            assertThat(binding.singleSelectionContinue.text).isEqualTo(DOCUMENT_SELECT_BUTTON_TEXT)
+            assertThat(
+                binding.singleSelectionContinue.findViewById<MaterialButton>(R.id.button).text
+            ).isEqualTo(
+                DOCUMENT_SELECT_BUTTON_TEXT
+            )
         }
     }
 
@@ -284,7 +384,10 @@ internal class DocSelectionFragmentTest {
     ) = launchFragmentInContainer(
         themeResId = R.style.Theme_MaterialComponents
     ) {
-        DocSelectionFragment(viewModelFactoryFor(mockIdentityViewModel))
+        DocSelectionFragment(
+            viewModelFactoryFor(mockIdentityViewModel),
+            mockCameraPermissionEnsureable
+        )
     }.onFragment {
         val navController = TestNavHostController(
             ApplicationProvider.getApplicationContext()

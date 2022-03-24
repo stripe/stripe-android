@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -32,16 +33,36 @@
             android:layout_marginBottom="@dimen/item_vertical_margin"
             android:background="?android:attr/listDivider" />
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/dl"
-            style="@style/Widget.MaterialComponents.Button.TextButton"
+        <RelativeLayout
+            android:id="@+id/dl_container"
             android:visibility="gone"
-            android:textColor="?android:textColorPrimary"
-            android:text="@string/driver_license"
-            android:gravity="center_vertical"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="@dimen/item_vertical_margin" />
+            android:layout_height="wrap_content">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/dl"
+                style="@style/Widget.MaterialComponents.Button.TextButton"
+                android:textColor="?android:textColorPrimary"
+                android:text="@string/driver_license"
+                android:gravity="center_vertical"
+                android:layout_centerVertical="true"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/item_vertical_margin" />
+
+            <com.google.android.material.progressindicator.CircularProgressIndicator
+                android:id="@+id/dl_indicator"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:indeterminate="true"
+                android:visibility="gone"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:paddingStart="0dp"
+                android:paddingEnd="4dp"
+                android:elevation="2dp"
+                app:indicatorSize="14dp" />
+        </RelativeLayout>
 
         <View
             android:id="@+id/dl_separator"
@@ -51,16 +72,36 @@
             android:layout_marginBottom="@dimen/item_vertical_margin"
             android:background="?android:attr/listDivider" />
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/id"
-            style="@style/Widget.MaterialComponents.Button.TextButton"
+        <RelativeLayout
+            android:id="@+id/id_container"
             android:visibility="gone"
-            android:textColor="?android:textColorPrimary"
-            android:text="@string/id_card"
-            android:layout_marginBottom="@dimen/item_vertical_margin"
-            android:gravity="center_vertical"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/id"
+                style="@style/Widget.MaterialComponents.Button.TextButton"
+                android:textColor="?android:textColorPrimary"
+                android:text="@string/id_card"
+                android:layout_marginBottom="@dimen/item_vertical_margin"
+                android:gravity="center_vertical"
+                android:layout_centerVertical="true"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+            <com.google.android.material.progressindicator.CircularProgressIndicator
+                android:id="@+id/id_indicator"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:indeterminate="true"
+                android:visibility="gone"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:paddingStart="0dp"
+                android:paddingEnd="4dp"
+                android:elevation="2dp"
+                app:indicatorSize="14dp" />
+        </RelativeLayout>
 
         <View
             android:id="@+id/id_separator"
@@ -70,16 +111,36 @@
             android:layout_marginBottom="@dimen/item_vertical_margin"
             android:background="?android:attr/listDivider" />
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/passport"
-            style="@style/Widget.MaterialComponents.Button.TextButton"
-            android:visibility="gone"
-            android:textColor="?android:textColorPrimary"
-            android:text="@string/passport"
-            android:layout_marginBottom="@dimen/item_vertical_margin"
-            android:gravity="center_vertical"
+        <RelativeLayout
+            android:id="@+id/passport_container"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:visibility="gone">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/passport"
+                style="@style/Widget.MaterialComponents.Button.TextButton"
+                android:textColor="?android:textColorPrimary"
+                android:text="@string/passport"
+                android:layout_marginBottom="@dimen/item_vertical_margin"
+                android:gravity="center_vertical"
+                android:layout_centerVertical="true"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+            <com.google.android.material.progressindicator.CircularProgressIndicator
+                android:id="@+id/passport__indicator"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:indeterminate="true"
+                android:visibility="gone"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:paddingStart="0dp"
+                android:paddingEnd="4dp"
+                android:elevation="2dp"
+                app:indicatorSize="14dp" />
+        </RelativeLayout>
 
         <View
             android:id="@+id/passport_separator"
@@ -103,11 +164,10 @@
             android:layout_width="match_parent"
             android:layout_height="0dp" />
 
-        <com.google.android.material.button.MaterialButton
+        <com.stripe.android.identity.ui.LoadingButton
             android:id="@+id/single_selection_continue"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/kontinue"
             android:visibility="visible" />
     </LinearLayout>
 

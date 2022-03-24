@@ -17,7 +17,6 @@ internal class IDUploadFragment(
     override val backTextRes = R.string.back_of_id
     override val frontCheckMarkContentDescription = R.string.front_of_id_selected
     override val backCheckMarkContentDescription = R.string.back_of_id_selected
-    override val continueButtonNavigationId = R.id.action_IDUploadFragment_to_confirmationFragment
     override val frontScanType = IdentityScanState.ScanType.ID_FRONT
     override val backScanType = IdentityScanState.ScanType.ID_BACK
 }

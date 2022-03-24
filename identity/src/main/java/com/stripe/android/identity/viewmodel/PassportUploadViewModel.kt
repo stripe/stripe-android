@@ -16,9 +16,9 @@ import com.stripe.android.identity.networking.IdentityRepository
 import com.stripe.android.identity.networking.Resource
 import com.stripe.android.identity.networking.models.DocumentUploadParam.UploadMethod
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentDocumentCapturePage
+import com.stripe.android.identity.utils.IdentityIO
 import com.stripe.android.identity.utils.ImageChooser
 import com.stripe.android.identity.utils.PhotoTaker
-import com.stripe.android.identity.utils.resizeUriAndCreateFileToUpload
 import kotlinx.coroutines.launch
 
 /**
@@ -26,7 +26,8 @@ import kotlinx.coroutines.launch
  */
 internal class PassportUploadViewModel(
     private val identityRepository: IdentityRepository,
-    private val verificationArgs: IdentityVerificationSheetContract.Args
+    private val verificationArgs: IdentityVerificationSheetContract.Args,
+    private val identityIO: IdentityIO
 ) : ViewModel() {
 
     /**
@@ -45,7 +46,7 @@ internal class PassportUploadViewModel(
      * during initialization of an Activity or Fragment.
      */
     internal fun registerActivityResultCaller(activityResultCaller: ActivityResultCaller) {
-        photoTaker = PhotoTaker(activityResultCaller)
+        photoTaker = PhotoTaker(activityResultCaller, identityIO)
         imageChooser = ImageChooser(activityResultCaller)
     }
 
@@ -73,7 +74,6 @@ internal class PassportUploadViewModel(
      */
     fun uploadImage(
         uri: Uri,
-        context: Context,
         documentCaptureModels: VerificationPageStaticContentDocumentCapturePage,
         uploadMethod: UploadMethod
     ) {
@@ -83,11 +83,10 @@ internal class PassportUploadViewModel(
                 identityRepository.uploadImage(
                     verificationId = verificationArgs.verificationSessionId,
                     ephemeralKey = verificationArgs.ephemeralKeySecret,
-                    imageFile = resizeUriAndCreateFileToUpload(
-                        context,
+                    imageFile = identityIO.resizeUriAndCreateFileToUpload(
                         uri,
                         verificationArgs.verificationSessionId,
-                        true,
+                        false,
                         maxDimension = documentCaptureModels.highResImageMaxDimension,
                         compressionQuality = documentCaptureModels.highResImageCompressionQuality
                     ),
@@ -115,11 +114,12 @@ internal class PassportUploadViewModel(
 
     internal class PassportUploadViewModelFactory(
         private val identityRepository: IdentityRepository,
-        private val verificationArgs: IdentityVerificationSheetContract.Args
+        private val verificationArgs: IdentityVerificationSheetContract.Args,
+        private val identityIO: IdentityIO
     ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return PassportUploadViewModel(identityRepository, verificationArgs) as T
+            return PassportUploadViewModel(identityRepository, verificationArgs, identityIO) as T
         }
     }
 }

@@ -29,7 +29,7 @@ internal class VerificationViewModel @Inject constructor(
         viewModelScope.launch {
             linkAccountManager.confirmVerification(code).fold(
                 onSuccess = {
-                    navigator.navigateTo(LinkScreen.Wallet)
+                    navigator.navigateTo(LinkScreen.Wallet, clearBackStack = true)
                 },
                 onFailure = ::onError
             )
@@ -45,6 +45,16 @@ internal class VerificationViewModel @Inject constructor(
                 onFailure = ::onError
             )
         }
+    }
+
+    fun onBack() {
+        navigator.onBack()
+        linkAccountManager.logout()
+    }
+
+    fun onChangeEmailClicked() {
+        navigator.navigateTo(LinkScreen.SignUp(), clearBackStack = true)
+        linkAccountManager.logout()
     }
 
     private fun onError(error: Throwable) {
