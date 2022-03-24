@@ -94,7 +94,7 @@ internal class IdentityViewModel(
      */
     internal val frontUploaded =
         PairMediatorLiveData(frontHighResUploaded, frontLowResUploaded)
-    internal val backUploaded =
+    private val backUploaded =
         PairMediatorLiveData(backHighResUploaded, backLowResUploaded)
     internal val bothUploaded = PairMediatorLiveData(frontUploaded, backUploaded)
     internal val highResUploaded = PairMediatorLiveData(frontHighResUploaded, backHighResUploaded)

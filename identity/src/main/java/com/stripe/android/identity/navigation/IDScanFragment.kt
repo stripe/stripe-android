@@ -20,9 +20,6 @@ internal class IDScanFragment(
     identityCameraScanViewModelFactory,
     identityViewModelFactory
 ) {
-    override val headerTitleRes = R.string.front_of_id
-    override val messageRes = R.string.position_id_front
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         continueButton.setOnClickListener {
@@ -44,7 +41,11 @@ internal class IDScanFragment(
     }
 
     override fun onCameraReady() {
-        startScanning(ID_FRONT)
+        if (shouldStartFromBack()) {
+            startScanning(ID_BACK)
+        } else {
+            startScanning(ID_FRONT)
+        }
     }
 
     override fun updateUI(identityScanState: IdentityScanState) {
