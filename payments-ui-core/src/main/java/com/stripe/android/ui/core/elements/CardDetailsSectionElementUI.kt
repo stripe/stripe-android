@@ -78,6 +78,7 @@ fun CardDetailsSectionElementUI(
                     }
                 }
             Row(
+                verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.clickable(
                     indication = null,
                     interactionSource = remember { MutableInteractionSource() },
