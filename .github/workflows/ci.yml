@@ -29,13 +29,13 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-
       - name: Ktlint
-        run: ./gradlew ktlint
+        run: bash scripts/execute_ktlint_for_changed_modules.sh
       - name: Detekt
         run: ./gradlew detekt
       - name: Checkstyle
         run: ./gradlew checkstyle
       - name: Lint
-        run: ./gradlew lintRelease
+        run: bash scripts/execute_lintrelease_for_changed_modules.sh
 
       # Check if there has been a binary incompatible change to the API.
       # If this change is intentional, run `./gradlew apiDump` and commit the new API files.
