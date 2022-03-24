@@ -19,10 +19,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.stripe.android.link.theme.HorizontalPadding
+import com.stripe.android.link.theme.linkColors
 
 internal enum class PrimaryButtonState {
     Enabled,
@@ -63,13 +63,13 @@ internal fun PrimaryButton(
                 if (state == PrimaryButtonState.Processing) {
                     CircularProgressIndicator(
                         modifier = Modifier.size(18.dp),
-                        color = Color.White,
+                        color = MaterialTheme.linkColors.buttonLabel,
                         strokeWidth = 2.dp
                     )
                 } else {
                     Text(
                         text = label,
-                        color = MaterialTheme.colors.onPrimary
+                        color = MaterialTheme.linkColors.buttonLabel
                             .copy(alpha = LocalContentAlpha.current)
                     )
                 }
@@ -83,7 +83,7 @@ internal fun PrimaryButton(
                         // width should be 13dp and must include the horizontal padding
                         .width(13.dp + 40.dp)
                         .padding(horizontal = HorizontalPadding),
-                    tint = MaterialTheme.colors.onPrimary.copy(alpha = LocalContentAlpha.current)
+                    tint = MaterialTheme.linkColors.buttonLabel.copy(alpha = LocalContentAlpha.current)
                 )
             }
         }
