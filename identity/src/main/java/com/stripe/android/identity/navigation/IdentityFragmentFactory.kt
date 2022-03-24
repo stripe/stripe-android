@@ -32,28 +32,18 @@ internal class IdentityFragmentFactory(
     private val identityRepository =
         DefaultIdentityRepository(identityIO = identityIO)
     private val identityScanViewModelFactory =
-        IdentityScanViewModel.IdentityScanViewModelFactory(
-            identityRepository,
-            verificationArgs,
-            identityIO
-        )
+        IdentityScanViewModel.IdentityScanViewModelFactory()
     private val frontBackUploadViewModelFactory =
-        FrontBackUploadViewModel.FrontBackUploadViewModelFactory(
-            identityRepository,
-            verificationArgs,
-            identityIO
-        )
+        FrontBackUploadViewModel.FrontBackUploadViewModelFactory(identityIO)
     private val passportUploadViewModelFactory =
-        PassportUploadViewModel.PassportUploadViewModelFactory(
-            identityRepository,
-            verificationArgs,
-            identityIO
-        )
+        PassportUploadViewModel.PassportUploadViewModelFactory(identityIO)
 
     internal val identityViewModelFactory = IdentityViewModel.IdentityViewModelFactory(
         verificationArgs,
         identityRepository,
-        DefaultIDDetectorFetcher(identityRepository, identityIO)
+        DefaultIDDetectorFetcher(identityRepository, identityIO),
+        verificationArgs,
+        identityIO
     )
 
     override fun instantiate(classLoader: ClassLoader, className: String): Fragment {

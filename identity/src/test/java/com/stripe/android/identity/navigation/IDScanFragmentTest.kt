@@ -24,6 +24,7 @@ import com.stripe.android.identity.databinding.IdentityCameraScanFragmentBinding
 import com.stripe.android.identity.networking.Resource
 import com.stripe.android.identity.networking.models.ClearDataParam
 import com.stripe.android.identity.networking.models.CollectedDataParam
+import com.stripe.android.identity.networking.models.DocumentUploadParam
 import com.stripe.android.identity.networking.models.IdDocumentParam
 import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentDocumentCapturePage
@@ -32,6 +33,7 @@ import com.stripe.android.identity.utils.PairMediatorLiveData
 import com.stripe.android.identity.viewModelFactoryFor
 import com.stripe.android.identity.viewmodel.IdentityScanViewModel
 import com.stripe.android.identity.viewmodel.IdentityViewModel
+import com.stripe.android.identity.viewmodel.IdentityViewModel.UploadedResult
 import kotlinx.coroutines.runBlocking
 import org.junit.Before
 import org.junit.Rule
@@ -56,11 +58,11 @@ internal class IDScanFragmentTest {
 
     private val finalResultLiveData = MutableLiveData<IDDetectorAggregator.FinalResult>()
     private val displayStateChanged = MutableLiveData<Pair<IdentityScanState, IdentityScanState?>>()
-    private val mockBothUploaded: PairMediatorLiveData<Pair<IdentityScanViewModel.UploadedResult, IdentityScanViewModel.UploadedResult>> =
+    private val mockBothUploaded: PairMediatorLiveData<Pair<UploadedResult, UploadedResult>> =
         mock()
     private val bothUploadedObserverCaptor =
         argumentCaptor<Observer<Resource<Pair<
-                        Pair<IdentityScanViewModel.UploadedResult, IdentityScanViewModel.UploadedResult>, Pair<IdentityScanViewModel.UploadedResult, IdentityScanViewModel.UploadedResult>
+                        Pair<UploadedResult, UploadedResult>, Pair<UploadedResult, UploadedResult>
                         >>>>()
 
     private val mockScanFlow = mock<IdentityScanFlow>()
@@ -68,12 +70,12 @@ internal class IDScanFragmentTest {
         whenever(it.identityScanFlow).thenReturn(mockScanFlow)
         whenever(it.finalResult).thenReturn(finalResultLiveData)
         whenever(it.displayStateChanged).thenReturn(displayStateChanged)
-        whenever(it.bothUploaded).thenReturn(mockBothUploaded)
     }
 
     private val mockPageAndModel = MediatorLiveData<Resource<Pair<VerificationPage, File>>>()
     private val mockIdentityViewModel = mock<IdentityViewModel>().also {
         whenever(it.pageAndModel).thenReturn(mockPageAndModel)
+        whenever(it.bothUploaded).thenReturn(mockBothUploaded)
     }
 
     @Before
@@ -89,7 +91,11 @@ internal class IDScanFragmentTest {
                 whenever(it.identityState).thenReturn(mock<IdentityScanState.Finished>())
             }
             finalResultLiveData.postValue(mockFrontFinalResult)
-            verifyUploadedWithFinalResult(mockFrontFinalResult)
+            whenever(mockIdentityScanViewModel.targetScanType).thenReturn(IdentityScanState.ScanType.ID_FRONT)
+            verifyUploadedWithFinalResult(
+                mockFrontFinalResult,
+                targetType = IdentityScanState.ScanType.ID_FRONT
+            )
 
             // stopScanning() is called
             verify(mockScanFlow).resetFlow()
@@ -307,7 +313,8 @@ internal class IDScanFragmentTest {
 
     private fun verifyUploadedWithFinalResult(
         finalResult: IDDetectorAggregator.FinalResult,
-        time: Int = 1
+        time: Int = 1,
+        targetType: IdentityScanState.ScanType
     ) {
         val successCaptor = argumentCaptor<(VerificationPage) -> Unit>()
         verify(mockIdentityViewModel, times(time)).observeForVerificationPage(
@@ -321,9 +328,10 @@ internal class IDScanFragmentTest {
             whenever(verificationPage.documentCapture).thenReturn(mockDocumentCapturePage)
         }
         successCaptor.lastValue.invoke(mockVerificationPage)
-        verify(mockIdentityScanViewModel).uploadResult(
+        verify(mockIdentityViewModel).uploadScanResult(
             same(finalResult),
-            same(mockDocumentCapturePage)
+            same(mockDocumentCapturePage),
+            eq(targetType)
         )
     }
 
@@ -345,12 +353,14 @@ internal class IDScanFragmentTest {
             val mockFrontFinalResult = mock<IDDetectorAggregator.FinalResult>().also {
                 whenever(it.identityState).thenReturn(mock<IdentityScanState.Finished>())
             }
-            finalResultLiveData.postValue(mockFrontFinalResult)
-            verifyUploadedWithFinalResult(mockFrontFinalResult)
-
             // mock viewModel target change
             whenever(mockIdentityScanViewModel.targetScanType)
                 .thenReturn(IdentityScanState.ScanType.ID_FRONT)
+            finalResultLiveData.postValue(mockFrontFinalResult)
+            verifyUploadedWithFinalResult(
+                mockFrontFinalResult,
+                targetType = IdentityScanState.ScanType.ID_FRONT
+            )
 
             // click continue, scan back
             val binding = IdentityCameraScanFragmentBinding.bind(idScanFragment.requireView())
@@ -360,12 +370,15 @@ internal class IDScanFragmentTest {
             val mockBackFinalResult = mock<IDDetectorAggregator.FinalResult>().also {
                 whenever(it.identityState).thenReturn(mock<IdentityScanState.Finished>())
             }
-            finalResultLiveData.postValue(mockBackFinalResult)
-            verifyUploadedWithFinalResult(mockBackFinalResult, 2)
-
             // mock viewModel target change
             whenever(mockIdentityScanViewModel.targetScanType)
                 .thenReturn(IdentityScanState.ScanType.ID_BACK)
+            finalResultLiveData.postValue(mockBackFinalResult)
+            verifyUploadedWithFinalResult(
+                mockBackFinalResult,
+                2,
+                targetType = IdentityScanState.ScanType.ID_BACK
+            )
 
             // click continue, navigates
             binding.kontinue.findViewById<Button>(R.id.button).callOnClick()
@@ -396,29 +409,33 @@ internal class IDScanFragmentTest {
     }
 
     private companion object {
-        val FRONT_HIGH_RES_RESULT = IdentityScanViewModel.UploadedResult(
+        val FRONT_HIGH_RES_RESULT = UploadedResult(
             uploadedStripeFile = InternalStripeFile(
                 id = "frontHighResResult"
             ),
-            scores = listOf(0.1f, 0.2f, 0.3f, 0.4f, 0.5f)
+            scores = listOf(0.1f, 0.2f, 0.3f, 0.4f, 0.5f),
+            uploadMethod = DocumentUploadParam.UploadMethod.AUTOCAPTURE
         )
-        val FRONT_LOW_RES_RESULT = IdentityScanViewModel.UploadedResult(
+        val FRONT_LOW_RES_RESULT = UploadedResult(
             uploadedStripeFile = InternalStripeFile(
                 id = "frontLowResResult"
             ),
-            scores = listOf(0.1f, 0.2f, 0.3f, 0.4f, 0.5f)
+            scores = listOf(0.1f, 0.2f, 0.3f, 0.4f, 0.5f),
+            uploadMethod = DocumentUploadParam.UploadMethod.AUTOCAPTURE
         )
-        val BACK_HIGH_RES_RESULT = IdentityScanViewModel.UploadedResult(
+        val BACK_HIGH_RES_RESULT = UploadedResult(
             uploadedStripeFile = InternalStripeFile(
                 id = "backHighResResult"
             ),
-            scores = listOf(0.1f, 0.2f, 0.3f, 0.4f, 0.5f)
+            scores = listOf(0.1f, 0.2f, 0.3f, 0.4f, 0.5f),
+            uploadMethod = DocumentUploadParam.UploadMethod.AUTOCAPTURE
         )
-        val BACK_LOW_RES_RESULT = IdentityScanViewModel.UploadedResult(
+        val BACK_LOW_RES_RESULT = UploadedResult(
             uploadedStripeFile = InternalStripeFile(
                 id = "frontHighResResult"
             ),
-            scores = listOf(0.1f, 0.2f, 0.3f, 0.4f, 0.5f)
+            scores = listOf(0.1f, 0.2f, 0.3f, 0.4f, 0.5f),
+            uploadMethod = DocumentUploadParam.UploadMethod.AUTOCAPTURE
         )
     }
 }

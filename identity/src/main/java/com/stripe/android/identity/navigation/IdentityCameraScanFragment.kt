@@ -109,9 +109,10 @@ internal abstract class IdentityCameraScanFragment(
                 identityViewModel.observeForVerificationPage(
                     viewLifecycleOwner,
                     onSuccess = {
-                        identityScanViewModel.uploadResult(
+                        identityViewModel.uploadScanResult(
                             finalResult,
-                            it.documentCapture
+                            it.documentCapture,
+                            identityScanViewModel.targetScanType
                         )
                     },
                     onFailure = {
@@ -234,7 +235,7 @@ internal abstract class IdentityCameraScanFragment(
      * try to [postVerificationPageDataAndMaybeSubmit] when success and navigates to error when fails.
      */
     protected fun observeAndUploadForBothSides(type: IdDocumentParam.Type) =
-        identityScanViewModel.bothUploaded.observe(viewLifecycleOwner) {
+        identityViewModel.bothUploaded.observe(viewLifecycleOwner) {
             when (it.status) {
                 Status.SUCCESS -> {
                     it.data?.let { uploadedFiles ->
@@ -278,7 +279,7 @@ internal abstract class IdentityCameraScanFragment(
      * try to [postVerificationPageDataAndMaybeSubmit] when success and navigates to error when fails.
      */
     protected fun observeAndUploadForFrontSide(type: IdDocumentParam.Type) =
-        identityScanViewModel.frontUploaded.observe(viewLifecycleOwner) {
+        identityViewModel.frontUploaded.observe(viewLifecycleOwner) {
             when (it.status) {
                 Status.SUCCESS -> {
                     it.data?.let { uploadedFiles ->
