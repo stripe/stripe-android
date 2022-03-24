@@ -23,6 +23,7 @@ import com.stripe.android.identity.databinding.IdentityCameraScanFragmentBinding
 import com.stripe.android.identity.networking.Resource
 import com.stripe.android.identity.networking.models.ClearDataParam
 import com.stripe.android.identity.networking.models.CollectedDataParam
+import com.stripe.android.identity.networking.models.DocumentUploadParam
 import com.stripe.android.identity.networking.models.IdDocumentParam
 import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentDocumentCapturePage
@@ -31,6 +32,7 @@ import com.stripe.android.identity.utils.PairMediatorLiveData
 import com.stripe.android.identity.viewModelFactoryFor
 import com.stripe.android.identity.viewmodel.IdentityScanViewModel
 import com.stripe.android.identity.viewmodel.IdentityViewModel
+import com.stripe.android.identity.viewmodel.IdentityViewModel.UploadedResult
 import kotlinx.coroutines.runBlocking
 import org.junit.Before
 import org.junit.Rule
@@ -54,11 +56,11 @@ class PassportScanFragmentTest {
 
     private val finalResultLiveData = MutableLiveData<IDDetectorAggregator.FinalResult>()
     private val displayStateChanged = MutableLiveData<Pair<IdentityScanState, IdentityScanState?>>()
-    private val mockFrontUploaded: PairMediatorLiveData<IdentityScanViewModel.UploadedResult> =
+    private val mockFrontUploaded: PairMediatorLiveData<UploadedResult> =
         mock()
     private val frontUploadedObserverCaptor =
         argumentCaptor<Observer<Resource<
-                    Pair<IdentityScanViewModel.UploadedResult, IdentityScanViewModel.UploadedResult>
+                    Pair<UploadedResult, UploadedResult>
                     >>>()
 
     private val mockScanFlow = mock<IdentityScanFlow>()
@@ -66,12 +68,12 @@ class PassportScanFragmentTest {
         whenever(it.identityScanFlow).thenReturn(mockScanFlow)
         whenever(it.finalResult).thenReturn(finalResultLiveData)
         whenever(it.displayStateChanged).thenReturn(displayStateChanged)
-        whenever(it.frontUploaded).thenReturn(mockFrontUploaded)
     }
 
     private val mockPageAndModel = MediatorLiveData<Resource<Pair<VerificationPage, File>>>()
     private val mockIdentityViewModel = mock<IdentityViewModel>().also {
         whenever(it.pageAndModel).thenReturn(mockPageAndModel)
+        whenever(it.frontUploaded).thenReturn(mockFrontUploaded)
     }
 
     @Before
@@ -262,10 +264,12 @@ class PassportScanFragmentTest {
             val mockVerificationPage = mock<VerificationPage>().also { verificationPage ->
                 whenever(verificationPage.documentCapture).thenReturn(mockDocumentCapturePage)
             }
+            whenever(mockIdentityScanViewModel.targetScanType).thenReturn(IdentityScanState.ScanType.PASSPORT)
             successCaptor.lastValue.invoke(mockVerificationPage)
-            verify(mockIdentityScanViewModel).uploadResult(
+            verify(mockIdentityViewModel).uploadScanResult(
                 same(mockFrontFinalResult),
-                same(mockDocumentCapturePage)
+                same(mockDocumentCapturePage),
+                eq(IdentityScanState.ScanType.PASSPORT)
             )
 
             // click continue, trigger navigation
@@ -298,17 +302,19 @@ class PassportScanFragmentTest {
     }
 
     private companion object {
-        val FRONT_HIGH_RES_RESULT = IdentityScanViewModel.UploadedResult(
+        val FRONT_HIGH_RES_RESULT = UploadedResult(
             uploadedStripeFile = InternalStripeFile(
                 id = "frontHighResResult"
             ),
-            scores = listOf(0.1f, 0.2f, 0.3f, 0.4f, 0.5f)
+            scores = listOf(0.1f, 0.2f, 0.3f, 0.4f, 0.5f),
+            uploadMethod = DocumentUploadParam.UploadMethod.AUTOCAPTURE
         )
-        val FRONT_LOW_RES_RESULT = IdentityScanViewModel.UploadedResult(
+        val FRONT_LOW_RES_RESULT = UploadedResult(
             uploadedStripeFile = InternalStripeFile(
                 id = "frontLowResResult"
             ),
-            scores = listOf(0.1f, 0.2f, 0.3f, 0.4f, 0.5f)
+            scores = listOf(0.1f, 0.2f, 0.3f, 0.4f, 0.5f),
+            uploadMethod = DocumentUploadParam.UploadMethod.AUTOCAPTURE
         )
     }
 }
