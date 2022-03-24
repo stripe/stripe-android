@@ -15,6 +15,7 @@ if (System.getenv("JITPACK")) {
     group='com.github.stripe.stripe-android'
 }
 
+
 dependencies {
     implementation project(":stripe-core")
     implementation "androidx.constraintlayout:constraintlayout:$androidxConstraintlayoutVersion"
