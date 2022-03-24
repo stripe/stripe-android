@@ -6,6 +6,7 @@
 
     <string name="stripe_card_description">%1$s \u2022\u2022\u2022\u2022 %2$s</string>
 
+    <string name="stripe_card_scan_title" description="Text displayed above the scan window for paymentsheet, instructing the user how to scan card">Position your card in the rectangle to scan</string>
     <string name="stripe_card_scan_instructions" description="Text displayed above the scan window, instructing the user how to scan card">Scan Your Card</string>
     <string name="stripe_card_scan_security" description="Security notification displayed below the scan window">Your card info is secure</string>
     <string name="stripe_scanned_wrong_card" description="Text displayed above the scan window when the wrong card is scanned">Card doesn\'t match</string>
