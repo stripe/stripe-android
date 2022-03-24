@@ -13,14 +13,9 @@ internal fun DefaultExampleTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit
 ) {
-    val colors = if (darkTheme) {
-        darkColors()
-    } else {
-        lightColors()
-    }
 
     MaterialTheme(
-        colors = colors,
+        colors = if (darkTheme) darkColors() else lightColors(),
         typography = MaterialTheme.typography,
         shapes = MaterialTheme.shapes,
         content = {
