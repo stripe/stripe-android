@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="kontinue">continue</string>
-    <string name="decline">Decline and use alternative method</string>
     <string name="driver_license" description="display name for driver's license">Driver\'s license</string>
     <string name="id_card" description="display name for ID">ID</string>
     <string name="passport" description="display name for driver's license">Passport</string>
@@ -58,7 +57,6 @@
     <string name="error" description="Title of general error screen">Error</string>
     <string name="unexpected_error_try_again" description="Message when an unexpected error happens">There was an unexpected error — try again in a few seconds</string>
     <string name="go_back" description="Text to return to previous page">Go Back</string>
-    <string name="description_exclamation_mark">Exclamation point for error page</string>
     <string name="description_clock" description="Description of the clock icon, used for A11Y">Clock icon</string>
     <string name="loading" description="Message on initial loading page">Loading</string>
 
