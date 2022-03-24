@@ -95,14 +95,14 @@ internal class CollectBankAccountViewModel @Inject constructor(
                     clientSecret = args.clientSecret,
                     linkedAccountSessionId = linkedAccountSessionId
                 ).mapCatching {
-                    CollectBankAccountResult.Completed(CollectBankAccountResponse(args.clientSecret))
+                    CollectBankAccountResult.Completed(CollectBankAccountResponse(it))
                 }
                 is ForSetupIntent -> attachLinkAccountSession.forSetupIntent(
                     publishableKey = args.publishableKey,
                     clientSecret = args.clientSecret,
                     linkedAccountSessionId = linkedAccountSessionId
                 ).mapCatching {
-                    CollectBankAccountResult.Completed(CollectBankAccountResponse(args.clientSecret))
+                    CollectBankAccountResult.Completed(CollectBankAccountResponse(it))
                 }
             }
                 .onSuccess { result: CollectBankAccountResult.Completed ->

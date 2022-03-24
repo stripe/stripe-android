@@ -20,7 +20,7 @@ internal class AttachLinkAccountSession @Inject constructor(
         publishableKey: String,
         linkedAccountSessionId: String,
         clientSecret: String,
-    ): Result<Unit> = kotlin.runCatching {
+    ): Result<PaymentIntent> = kotlin.runCatching {
         stripeRepository.attachLinkAccountSessionToPaymentIntent(
             linkAccountSessionId = linkedAccountSessionId,
             clientSecret = clientSecret,
@@ -39,7 +39,7 @@ internal class AttachLinkAccountSession @Inject constructor(
         publishableKey: String,
         linkedAccountSessionId: String,
         clientSecret: String,
-    ): Result<Unit> = kotlin.runCatching {
+    ): Result<SetupIntent> = kotlin.runCatching {
         stripeRepository.attachLinkAccountSessionToSetupIntent(
             linkAccountSessionId = linkedAccountSessionId,
             clientSecret = clientSecret,

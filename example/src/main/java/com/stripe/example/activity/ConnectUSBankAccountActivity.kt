@@ -5,6 +5,7 @@ import android.view.View
 import androidx.lifecycle.Observer
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.MandateDataParams
+import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.payments.bankaccount.CollectBankAccountConfiguration
 import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResult
@@ -37,17 +38,15 @@ class ConnectUSBankAccountActivity : StripeIntentActivity() {
                     viewModel.status
                         .postValue(
                             "Attached bank account to paymentIntent." +
-                                " secret: ${result.response.clientSecret}. Confirming..."
+                                " bank account: ${
+                                    result.response.intent.paymentMethod
+                                    !!.usBankAccount!!.routingNumber!!
+                                }. Confirming..."
                         )
                     confirmPaymentIntent(
-                        ConfirmPaymentIntentParams.create(
-                            clientSecret = result.response.clientSecret,
-                            mandateData = MandateDataParams(
-                                MandateDataParams.Type.Online(
-                                    ipAddress = "127.0.0.1",
-                                    userAgent = "agent"
-                                )
-                            )
+                        ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
+                            paymentMethodCreateParams = PaymentMethodCreateParams.createUSBankAccount(),
+                            clientSecret = requireNotNull(result.response.intent.clientSecret),
                         )
                     )
                 }

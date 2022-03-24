@@ -805,7 +805,9 @@ data class PaymentMethodCreateParams internal constructor(
             )
         }
 
-        internal fun createUSBankAccount(
+        @JvmStatic
+        @JvmOverloads
+        fun createUSBankAccount(
             billingDetails: PaymentMethod.BillingDetails? = null,
             metadata: Map<String, String>? = null
         ): PaymentMethodCreateParams {
