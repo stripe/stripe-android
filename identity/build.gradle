@@ -18,6 +18,7 @@ if (System.getenv("JITPACK")) {
     group='com.github.stripe.stripe-android'
 }
 
+
 dependencies {
     implementation project(":camera-core")
     implementation project(":stripe-core")

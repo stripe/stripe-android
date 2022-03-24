@@ -30,6 +30,7 @@ android {
     }
 }
 
+
 ext {
     artifactId = "stripe-android"
     artifactName = "stripe-android"
