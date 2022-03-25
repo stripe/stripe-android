@@ -5,8 +5,6 @@
     <string name="id_card" description="display name for ID">ID</string>
     <string name="passport" description="display name for driver's license">Passport</string>
 
-    <string name="doc_select_title">Which form of identification do you want to use?</string>
-
     <string name="front_of_id" description="Title for the screen to scan back of ID">Front of ID</string>
     <string name="back_of_id" description="Title for the screen to scan front of ID">Back of ID</string>
     <string name="front_of_dl" description="Title for the screen to scan front of driver's license">Front of dirver\'s license</string>
