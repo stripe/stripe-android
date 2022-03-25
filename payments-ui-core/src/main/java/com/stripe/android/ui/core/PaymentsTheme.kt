@@ -23,6 +23,7 @@ import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
@@ -55,12 +56,12 @@ data class PaymentsTypography(
     val fontWeightMedium: Int,
     val fontWeightBold: Int,
     val fontSizeMultiplier: Float,
-    val xxSmallFont: Float,
-    val xSmallFont: Float,
-    val smallFont: Float,
-    val mediumFont: Float,
-    val largeFont: Float,
-    val xLargeFont: Float,
+    val xxSmallFontSize: TextUnit,
+    val xSmallFontSize: TextUnit,
+    val smallFontSize: TextUnit,
+    val mediumFontSize: TextUnit,
+    val largeFontSize: TextUnit,
+    val xLargeFontSize: TextUnit,
     @FontRes
     val fontFamily: Int
 )
@@ -112,12 +113,12 @@ object PaymentsThemeDefaults {
         fontWeightMedium = FontWeight.Medium.weight,
         fontWeightBold = FontWeight.Bold.weight,
         fontSizeMultiplier = 1.0F,
-        xxSmallFont = 9.0F,
-        xSmallFont = 12.0F,
-        smallFont = 13.0F,
-        mediumFont = 14.0F,
-        largeFont = 16.0F,
-        xLargeFont = 20.0F,
+        xxSmallFontSize = 9.sp,
+        xSmallFontSize = 12.sp,
+        smallFontSize = 13.sp,
+        mediumFontSize = 14.sp,
+        largeFontSize = 16.sp,
+        xLargeFontSize = 20.sp,
         fontFamily = R.font.roboto
     )
 }
@@ -184,7 +185,7 @@ fun PaymentsTypography.toComposeTypography(): Typography {
     // ex: "Select your payment method" in Payment Sheet.
     val h4 = TextStyle.Default.copy(
         fontFamily = FontFamily(Font(fontFamily)),
-        fontSize = (xLargeFont * fontSizeMultiplier).sp,
+        fontSize = (xLargeFontSize * fontSizeMultiplier),
         fontWeight = FontWeight(fontWeightBold),
     )
 
@@ -192,7 +193,7 @@ fun PaymentsTypography.toComposeTypography(): Typography {
     // ex: "Pay $50.99" in Payment Sheet's buy button.
     val h5 = TextStyle.Default.copy(
         fontFamily = FontFamily(Font(fontFamily)),
-        fontSize = (largeFont * fontSizeMultiplier).sp,
+        fontSize = (largeFontSize * fontSizeMultiplier),
         fontWeight = FontWeight(fontWeightMedium),
         letterSpacing = (-0.32).sp
     )
@@ -201,7 +202,7 @@ fun PaymentsTypography.toComposeTypography(): Typography {
     // ex: Section labels in Payment Sheet
     val h6 = TextStyle.Default.copy(
         fontFamily = FontFamily(Font(fontFamily)),
-        fontSize = (smallFont * fontSizeMultiplier).sp,
+        fontSize = (smallFontSize * fontSizeMultiplier),
         fontWeight = FontWeight(fontWeightMedium),
         letterSpacing = (-0.15).sp
     )
@@ -210,7 +211,7 @@ fun PaymentsTypography.toComposeTypography(): Typography {
     // ex: the text used in Payment Sheet's text form elements.
     val body1 = TextStyle.Default.copy(
         fontFamily = FontFamily(Font(fontFamily)),
-        fontSize = (mediumFont * fontSizeMultiplier).sp,
+        fontSize = (mediumFontSize * fontSizeMultiplier),
         fontWeight = FontWeight(fontWeightNormal),
     )
 
@@ -218,7 +219,7 @@ fun PaymentsTypography.toComposeTypography(): Typography {
     // ex: the placeholder texts that appear when you type in Payment Sheet's forms.
     val subtitle1 = TextStyle.Default.copy(
         fontFamily = FontFamily(Font(fontFamily)),
-        fontSize = (mediumFont * fontSizeMultiplier).sp,
+        fontSize = (mediumFontSize * fontSizeMultiplier),
         fontWeight = FontWeight(fontWeightNormal),
         letterSpacing = (-0.15).sp
     )
@@ -227,7 +228,7 @@ fun PaymentsTypography.toComposeTypography(): Typography {
     // ex: the labels under our payment method selectors in Payment Sheet.
     val caption = TextStyle.Default.copy(
         fontFamily = FontFamily(Font(fontFamily)),
-        fontSize = (xSmallFont * fontSizeMultiplier).sp,
+        fontSize = (xSmallFontSize * fontSizeMultiplier),
         fontWeight = FontWeight(fontWeightMedium)
     )
 
@@ -235,7 +236,7 @@ fun PaymentsTypography.toComposeTypography(): Typography {
     // read. Ex: our mandate texts in Payment Sheet.
     val body2 = TextStyle.Default.copy(
         fontFamily = FontFamily(Font(fontFamily)),
-        fontSize = (xxSmallFont * fontSizeMultiplier).sp,
+        fontSize = (xxSmallFontSize * fontSizeMultiplier),
         fontWeight = FontWeight(fontWeightNormal),
         letterSpacing = (-0.15).sp
     )

@@ -108,12 +108,9 @@ internal abstract class BasePaymentMethodsListFragment(
                             0
                         )
                     }
-
                     val fontSize = it.convertDpToPx(
-                        (
-                            PaymentsThemeDefaults.typography.smallFont
-                                * appearance.typography.sizeScaleFactor
-                            ).dp
+                        PaymentsThemeDefaults.typography.smallFontSize.value.dp
+                            * appearance.typography.sizeScaleFactor
                     )
                     editMenuTextSpan.setSpan(
                         AbsoluteSizeSpan(fontSize.toInt()),
