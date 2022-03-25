@@ -52,7 +52,9 @@ internal class ErrorFragment : BaseErrorFragment() {
                     ARG_ERROR_TITLE to requirementError.title,
                     ARG_ERROR_CONTENT to requirementError.body,
                     ARG_GO_BACK_BUTTON_DESTINATION to backButtonDestination,
-                    ARG_GO_BACK_BUTTON_TEXT to requirementError.buttonText,
+                    ARG_GO_BACK_BUTTON_TEXT to requirementError.backButtonText,
+                    // TODO(ccen) build continue button after backend behavior is finalized
+                    // ARG_CONTINUE_BUTTON_TEXT to requirementError.continueButtonText,
                 )
             )
         }
