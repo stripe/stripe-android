@@ -80,7 +80,8 @@ internal sealed class IdentityScanState(
         type: ScanType,
         timeoutAt: ClockMark,
         @VisibleForTesting
-        internal val transitioner: IdentityFoundStateTransitioner
+        internal val transitioner: IdentityFoundStateTransitioner,
+        internal var reachedStateAt: ClockMark = Clock.markNow()
     ) : IdentityScanState(type, timeoutAt, false) {
         override fun consumeTransition(analyzerOutput: AnalyzerOutput) =
             if (timeoutAt.hasPassed()) {
@@ -106,13 +107,12 @@ internal sealed class IdentityScanState(
                 Log.d(TAG, "Scan for $type Satisfied, transition to Finished.")
                 Finished(type, timeoutAt)
             } else {
-                Log.d(TAG, "Displaying satisfied state, waiting for timeout")
                 this
             }
         }
 
         private companion object {
-            val DISPLAY_SATISFIED_DURATION = 500.milliseconds
+            val DISPLAY_SATISFIED_DURATION = 0.milliseconds
         }
     }
 
@@ -135,13 +135,12 @@ internal sealed class IdentityScanState(
                 Initial(type, timeoutAt)
             }
             else -> {
-                Log.d(TAG, "Displaying unsatisfied state, waiting for timeout")
                 this
             }
         }
 
         private companion object {
-            val DISPLAY_UNSATISFIED_DURATION = 500.milliseconds
+            val DISPLAY_UNSATISFIED_DURATION = 0.milliseconds
         }
     }
 

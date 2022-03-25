@@ -170,7 +170,7 @@ internal abstract class IdentityCameraScanFragment(
                 continueButton.isEnabled = false
                 checkMarkView.visibility = View.GONE
                 cameraView.viewFinderWindowView.setBackgroundResource(R.drawable.viewfinder_background)
-
+                cameraView.viewFinderBorderView.startAnimation(R.drawable.viewfinder_border_initial)
             }
             is IdentityScanState.Found -> {
                 messageView.text = requireContext().getText(R.string.hold_still)
