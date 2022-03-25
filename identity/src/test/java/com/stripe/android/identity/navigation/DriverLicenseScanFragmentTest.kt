@@ -63,8 +63,8 @@ internal class DriverLicenseScanFragmentTest {
         mock()
     private val bothUploadedObserverCaptor =
         argumentCaptor<Observer<Resource<Pair<
-                        Pair<UploadedResult, UploadedResult>, Pair<UploadedResult, UploadedResult>
-                        >>>>()
+            Pair<UploadedResult, UploadedResult>, Pair<UploadedResult, UploadedResult>
+            >>>>()
 
     private val mockScanFlow = mock<IdentityScanFlow>()
     private val mockIdentityScanViewModel = mock<IdentityScanViewModel>().also {
@@ -255,7 +255,10 @@ internal class DriverLicenseScanFragmentTest {
     @Test
     fun `when displayStateChanged to Initial UI is properly updated for DL_BACK`() {
         whenever(mockIdentityScanViewModel.targetScanType).thenReturn(IdentityScanState.ScanType.DL_BACK)
-        postDisplayStateChangedDataAndVerifyUI(mock<IdentityScanState.Initial>()) { binding, context ->
+        postDisplayStateChangedDataAndVerifyUI(
+            mock<IdentityScanState.Initial>(),
+            shouldStartFromBack = true
+        ) { binding, context ->
             assertThat(binding.cameraView.viewFinderBackgroundView.visibility)
                 .isEqualTo(View.VISIBLE)
             assertThat(binding.cameraView.viewFinderWindowView.visibility)
@@ -452,9 +455,10 @@ internal class DriverLicenseScanFragmentTest {
 
     private fun postDisplayStateChangedDataAndVerifyUI(
         newScanState: IdentityScanState,
+        shouldStartFromBack: Boolean = false,
         check: (binding: IdentityCameraScanFragmentBinding, context: Context) -> Unit
     ) {
-        launchDriverLicenseFragment().onFragment {
+        launchDriverLicenseFragment(shouldStartFromBack).onFragment {
             displayStateChanged.postValue((newScanState to mock()))
             check(IdentityCameraScanFragmentBinding.bind(it.requireView()), it.requireContext())
         }

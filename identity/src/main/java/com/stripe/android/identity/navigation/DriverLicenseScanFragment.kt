@@ -22,6 +22,14 @@ internal class DriverLicenseScanFragment(
 ) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        if (shouldStartFromBack()) {
+            headerTitle.text = requireContext().getText(R.string.back_of_dl)
+            messageView.text = requireContext().getText(R.string.position_dl_back)
+        } else {
+            headerTitle.text = requireContext().getText(R.string.front_of_dl)
+            messageView.text = requireContext().getText(R.string.position_dl_front)
+        }
+
         continueButton.setOnClickListener {
             when (identityScanViewModel.targetScanType) {
                 DL_FRONT -> {
@@ -54,11 +62,9 @@ internal class DriverLicenseScanFragment(
             is IdentityScanState.Initial -> {
                 when (identityScanViewModel.targetScanType) {
                     DL_FRONT -> {
-                        headerTitle.text = requireContext().getText(R.string.front_of_dl)
                         messageView.text = requireContext().getText(R.string.position_dl_front)
                     }
                     DL_BACK -> {
-                        headerTitle.text = requireContext().getText(R.string.back_of_dl)
                         messageView.text = requireContext().getText(R.string.position_dl_back)
                     }
                     else -> {
