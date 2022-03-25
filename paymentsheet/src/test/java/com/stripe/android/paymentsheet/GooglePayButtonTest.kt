@@ -36,7 +36,6 @@ class GooglePayButtonTest {
             context,
             ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
         )
-        PaymentSheetFixtures.CONFIG_MINIMUM.parseAppearance()
     }
 
     @Test

@@ -24,7 +24,7 @@ import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
-import com.stripe.android.ui.core.PaymentsTheme
+import com.stripe.android.ui.core.PaymentsThemeDefaults
 import com.stripe.android.ui.core.convertDpToPx
 import com.stripe.android.ui.core.isSystemDarkTheme
 
@@ -110,7 +110,10 @@ internal abstract class BasePaymentMethodsListFragment(
                     }
 
                     val fontSize = it.convertDpToPx(
-                        (PaymentsTheme.smallFont * appearance.typography.sizeScaleFactor).dp
+                        (
+                            PaymentsThemeDefaults.typography.smallFont
+                                * appearance.typography.sizeScaleFactor
+                            ).dp
                     )
                     editMenuTextSpan.setSpan(
                         AbsoluteSizeSpan(fontSize.toInt()),

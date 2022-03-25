@@ -5,13 +5,13 @@ import android.os.Parcelable
 import androidx.activity.ComponentActivity
 import androidx.annotation.ColorRes
 import androidx.annotation.FontRes
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.fragment.app.Fragment
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.paymentsheet.flowcontroller.FlowControllerFactory
 import com.stripe.android.paymentsheet.model.PaymentOption
+import com.stripe.android.ui.core.PaymentsThemeDefaults
 import kotlinx.parcelize.Parcelize
 
 /**
@@ -258,31 +258,32 @@ class PaymentSheet internal constructor(
     ) : Parcelable {
         companion object {
             val defaultLight = Colors(
-                primary = Color(0xFF007AFF).toArgb(),
-                surface = Color.White.toArgb(),
-                componentBackground = Color.White.toArgb(),
-                componentBorder = Color(0x33787880).toArgb(),
-                componentDivider = Color(0x33787880).toArgb(),
-                onPrimary = Color.Black.toArgb(),
-                textSecondary = Color(0x99000000).toArgb(),
-                placeholderText = Color(0x993C3C43).toArgb(),
-                onBackground = Color.Black.toArgb(),
-                appBarIcon = Color(0x99000000).toArgb(),
-                error = Color.Red.toArgb(),
+                primary = PaymentsThemeDefaults.colorsLight.primary.toArgb(),
+                surface = PaymentsThemeDefaults.colorsLight.surface.toArgb(),
+                componentBackground = PaymentsThemeDefaults
+                    .colorsLight.componentBackground.toArgb(),
+                componentBorder = PaymentsThemeDefaults.colorsLight.componentBorder.toArgb(),
+                componentDivider = PaymentsThemeDefaults.colorsLight.componentDivider.toArgb(),
+                onPrimary = PaymentsThemeDefaults.colorsLight.onPrimary.toArgb(),
+                textSecondary = PaymentsThemeDefaults.colorsLight.textSecondary.toArgb(),
+                placeholderText = PaymentsThemeDefaults.colorsLight.placeholderText.toArgb(),
+                onBackground = PaymentsThemeDefaults.colorsLight.onBackground.toArgb(),
+                appBarIcon = PaymentsThemeDefaults.colorsLight.appBarIcon.toArgb(),
+                error = PaymentsThemeDefaults.colorsLight.error.toArgb(),
             )
 
             val defaultDark = Colors(
-                primary = Color(0xFF0074D4).toArgb(),
-                surface = Color(0xff2e2e2e).toArgb(),
-                componentBackground = Color.DarkGray.toArgb(),
-                componentBorder = Color(0xFF787880).toArgb(),
-                componentDivider = Color(0xFF787880).toArgb(),
-                onPrimary = Color.White.toArgb(),
-                textSecondary = Color(0x99FFFFFF).toArgb(),
-                placeholderText = Color(0x61FFFFFF).toArgb(),
-                onBackground = Color.White.toArgb(),
-                appBarIcon = Color.White.toArgb(),
-                error = Color.Red.toArgb(),
+                primary = PaymentsThemeDefaults.colorsDark.primary.toArgb(),
+                surface = PaymentsThemeDefaults.colorsDark.surface.toArgb(),
+                componentBackground = PaymentsThemeDefaults.colorsDark.componentBackground.toArgb(),
+                componentBorder = PaymentsThemeDefaults.colorsDark.componentBorder.toArgb(),
+                componentDivider = PaymentsThemeDefaults.colorsDark.componentDivider.toArgb(),
+                onPrimary = PaymentsThemeDefaults.colorsDark.onPrimary.toArgb(),
+                textSecondary = PaymentsThemeDefaults.colorsDark.textSecondary.toArgb(),
+                placeholderText = PaymentsThemeDefaults.colorsDark.placeholderText.toArgb(),
+                onBackground = PaymentsThemeDefaults.colorsDark.onBackground.toArgb(),
+                appBarIcon = PaymentsThemeDefaults.colorsDark.appBarIcon.toArgb(),
+                error = PaymentsThemeDefaults.colorsDark.error.toArgb(),
             )
         }
     }
@@ -294,15 +295,11 @@ class PaymentSheet internal constructor(
 
         // The border used for inputs, tabs, and other components in PaymentSheet
         val borderStrokeWidthDp: Float,
-
-        // The border used for selected inputs, tabs in PaymentSheet
-        val borderStrokeWidthSelected: Float
     ) : Parcelable {
         companion object {
             val default = Shapes(
-                cornerRadiusDp = 6.0f,
-                borderStrokeWidthDp = 1.0f,
-                borderStrokeWidthSelected = 2.0f
+                cornerRadiusDp = PaymentsThemeDefaults.shapes.cornerRadius,
+                borderStrokeWidthDp = PaymentsThemeDefaults.shapes.borderStrokeWidth,
             )
         }
     }
@@ -328,11 +325,11 @@ class PaymentSheet internal constructor(
     ) : Parcelable {
         companion object {
             val default = Typography(
-                sizeScaleFactor = 1.0f,
-                normalWeight = 400,
-                mediumWeight = 500,
-                boldWeight = 700,
-                fontResId = R.font.roboto
+                sizeScaleFactor = PaymentsThemeDefaults.typography.fontSizeMultiplier,
+                normalWeight = PaymentsThemeDefaults.typography.fontWeightNormal,
+                mediumWeight = PaymentsThemeDefaults.typography.fontWeightMedium,
+                boldWeight = PaymentsThemeDefaults.typography.fontWeightBold,
+                fontResId = PaymentsThemeDefaults.typography.fontFamily
             )
         }
     }

@@ -35,7 +35,6 @@ internal class PaymentOptionsAddPaymentMethodFragmentTest : PaymentOptionsViewMo
             ApplicationProvider.getApplicationContext(),
             ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
         )
-        PaymentSheetFixtures.CONFIG_MINIMUM.parseAppearance()
     }
 
     @After

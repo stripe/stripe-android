@@ -93,7 +93,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
             try {
                 starterArgs.config?.validate()
                 starterArgs.clientSecret.validate()
-                starterArgs.config?.parseAppearance()
+                starterArgs.config?.appearance?.parseAppearance()
             } catch (e: InvalidParameterException) {
                 setActivityResult(PaymentSheetResult.Failed(e))
                 finish()

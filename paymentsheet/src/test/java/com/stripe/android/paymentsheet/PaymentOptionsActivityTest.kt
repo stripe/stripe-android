@@ -56,7 +56,6 @@ class PaymentOptionsActivityTest {
             ApplicationProvider.getApplicationContext(),
             ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
         )
-        PaymentSheetFixtures.CONFIG_MINIMUM.parseAppearance()
     }
 
     @Test

@@ -18,10 +18,10 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.withStyledAttributes
 import androidx.core.view.isVisible
 import androidx.core.view.setPadding
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.databinding.PrimaryButtonBinding
 import com.stripe.android.ui.core.PaymentsTheme
+import com.stripe.android.ui.core.PaymentsThemeDefaults
 import com.stripe.android.ui.core.convertDpToPx
 
 /**
@@ -53,7 +53,7 @@ internal class PrimaryButton @JvmOverloads constructor(
 
     private val confirmedIcon = viewBinding.confirmedIcon
 
-    private var cornerRadius = context.convertDpToPx(PaymentSheet.Shapes.default.cornerRadiusDp.dp)
+    private var cornerRadius = context.convertDpToPx(PaymentsThemeDefaults.shapes.cornerRadius.dp)
 
     init {
         viewBinding.label.setViewCompositionStrategy(
