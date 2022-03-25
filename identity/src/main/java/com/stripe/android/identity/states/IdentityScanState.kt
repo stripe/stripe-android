@@ -99,11 +99,11 @@ internal sealed class IdentityScanState(
     internal class Satisfied(
         type: ScanType,
         timeoutAt: ClockMark,
-        private val reachedStateAt: ClockMark = Clock.markNow()
+        private val reachedStateAt: ClockMark = Clock.markNow(),
+        private val displaySatisfiedDuration: Int = DEFAULT_DISPLAY_SATISFIED_DURATION
     ) : IdentityScanState(type, timeoutAt, false) {
-
         override fun consumeTransition(analyzerOutput: AnalyzerOutput): IdentityScanState {
-            return if (reachedStateAt.elapsedSince() > DISPLAY_SATISFIED_DURATION) {
+            return if (reachedStateAt.elapsedSince() > displaySatisfiedDuration.milliseconds) {
                 Log.d(TAG, "Scan for $type Satisfied, transition to Finished.")
                 Finished(type, timeoutAt)
             } else {
@@ -112,7 +112,7 @@ internal sealed class IdentityScanState(
         }
 
         private companion object {
-            val DISPLAY_SATISFIED_DURATION = 0.milliseconds
+            const val DEFAULT_DISPLAY_SATISFIED_DURATION = 0
         }
     }
 
@@ -123,14 +123,15 @@ internal sealed class IdentityScanState(
         internal val reason: String,
         type: ScanType,
         timeoutAt: ClockMark,
-        private val reachedStateAt: ClockMark = Clock.markNow()
+        private val reachedStateAt: ClockMark = Clock.markNow(),
+        private val displayUnsatisfiedDuration: Int = DEFAULT_DISPLAY_UNSATISFIED_DURATION
     ) : IdentityScanState(type, timeoutAt, false) {
 
         override fun consumeTransition(analyzerOutput: AnalyzerOutput) = when {
             timeoutAt.hasPassed() -> {
                 TimeOut(type, timeoutAt)
             }
-            reachedStateAt.elapsedSince() > DISPLAY_UNSATISFIED_DURATION -> {
+            reachedStateAt.elapsedSince() > displayUnsatisfiedDuration.milliseconds -> {
                 Log.d(TAG, "Scan for $type Unsatisfied with reason $reason, transition to Initial.")
                 Initial(type, timeoutAt)
             }
@@ -140,7 +141,7 @@ internal sealed class IdentityScanState(
         }
 
         private companion object {
-            val DISPLAY_UNSATISFIED_DURATION = 0.milliseconds
+            const val DEFAULT_DISPLAY_UNSATISFIED_DURATION = 0
         }
     }
 
