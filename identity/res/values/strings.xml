@@ -25,8 +25,7 @@
     <string name="app_settings" description="Button text for app settings">App Settings</string>
     <string name="camera_permission" description="Camera permission denied screen title">Camera permission</string>
 
-    <!--TODO: This string is not yet finalized-->
-    <string name="camera_permission_rationale" description="Message for camera permission rationale before requesting permission" translatable="false">We need to use your camera for capture ID images.</string>
+    <string name="camera_permission_rationale" description="Message for camera permission rationale before requesting permission">This app uses the camera to scan your identification documents and takes photos to verify your identity.</string>
 
     <string name="grant_camera_permission_text" description="Message for camera permission denied screen">We need permission to use your camera. Please allow camera access in app settings.</string>
     <string name="ok" description="OK button text">OK</string>
