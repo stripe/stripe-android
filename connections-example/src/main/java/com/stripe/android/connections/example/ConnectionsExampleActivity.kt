@@ -2,23 +2,21 @@ package com.stripe.android.connections.example
 
 import android.os.Bundle
 import androidx.activity.viewModels
-import androidx.annotation.NonNull
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.connections.ConnectionsSheet
-import com.stripe.android.connections.ConnectionsSheetResult
-import com.stripe.android.connections.example.ConnectionsViewEffect.OpenConnectionsSheet
-import com.stripe.android.connections.example.databinding.ActivityMainBinding
+import com.stripe.android.connections.example.ConnectionsExampleViewEffect.OpenConnectionsSheetExample
+import com.stripe.android.connections.example.databinding.ActivityConnectionsExampleBinding
 
-class MainActivity : AppCompatActivity() {
+class ConnectionsExampleActivity : AppCompatActivity() {
 
-    private val viewModel by viewModels<ConnectionsViewModel>()
+    private val viewModel by viewModels<ConnectionsExampleViewModel>()
 
     private lateinit var connectionsSheet: ConnectionsSheet
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        with(ActivityMainBinding.inflate(layoutInflater)) {
+        with(ActivityConnectionsExampleBinding.inflate(layoutInflater)) {
             setContentView(root)
             setupViews()
             observeViews()
@@ -26,19 +24,19 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun ActivityMainBinding.setupViews() {
+    private fun ActivityConnectionsExampleBinding.setupViews() {
         setSupportActionBar(toolbar)
         connectionsSheet = ConnectionsSheet(
-            activity = this@MainActivity,
+            activity = this@ConnectionsExampleActivity,
             callback = viewModel::onConnectionsSheetResult
         )
     }
 
-    private fun ActivityMainBinding.observeViews() {
+    private fun ActivityConnectionsExampleBinding.observeViews() {
         launchConnectionsSheet.setOnClickListener { viewModel.startLinkAccountSession() }
     }
 
-    private fun ActivityMainBinding.observeState() {
+    private fun ActivityConnectionsExampleBinding.observeState() {
         lifecycleScope.launchWhenStarted {
             viewModel.state.collect {
                 bindState(it, this@observeState)
@@ -47,18 +45,17 @@ class MainActivity : AppCompatActivity() {
         lifecycleScope.launchWhenStarted {
             viewModel.viewEffect.collect {
                 when (it) {
-                    is OpenConnectionsSheet -> connectionsSheet.present(it.configuration)
+                    is OpenConnectionsSheetExample -> connectionsSheet.present(it.configuration)
                 }
             }
         }
     }
 
     private fun bindState(
-        connectionsState: ConnectionsState,
-        viewBinding: ActivityMainBinding
+        connectionsExampleState: ConnectionsExampleState,
+        viewBinding: ActivityConnectionsExampleBinding
     ) {
-
-        viewBinding.status.text = connectionsState.status
-        viewBinding.launchConnectionsSheet.isEnabled = connectionsState.loading.not()
+        viewBinding.status.text = connectionsExampleState.status
+        viewBinding.launchConnectionsSheet.isEnabled = connectionsExampleState.loading.not()
     }
 }

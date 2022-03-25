@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.connections.ConnectionsSheet
 import com.stripe.android.connections.ConnectionsSheetResult
-import com.stripe.android.connections.example.ConnectionsViewEffect.OpenConnectionsSheet
+import com.stripe.android.connections.example.ConnectionsExampleViewEffect.OpenConnectionsSheetExample
 import com.stripe.android.connections.example.data.BackendRepository
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -12,15 +12,15 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
-class ConnectionsViewModel : ViewModel() {
+class ConnectionsExampleViewModel : ViewModel() {
 
     private val repository = BackendRepository()
 
-    private val _state = MutableStateFlow(ConnectionsState())
-    val state: StateFlow<ConnectionsState> = _state
+    private val _state = MutableStateFlow(ConnectionsExampleState())
+    val state: StateFlow<ConnectionsExampleState> = _state
 
-    private val _viewEffect = MutableSharedFlow<ConnectionsViewEffect>()
-    val viewEffect: SharedFlow<ConnectionsViewEffect> = _viewEffect
+    private val _viewEffect = MutableSharedFlow<ConnectionsExampleViewEffect>()
+    val viewEffect: SharedFlow<ConnectionsExampleViewEffect> = _viewEffect
 
     fun startLinkAccountSession() {
         viewModelScope.launch {
@@ -40,7 +40,7 @@ class ConnectionsViewModel : ViewModel() {
                         )
                     }
                     _viewEffect.emit(
-                        OpenConnectionsSheet(
+                        OpenConnectionsSheetExample(
                             configuration = ConnectionsSheet.Configuration(
                                 it.clientSecret,
                                 "pk_live_Uxk6GdfUJzeCePW1FdQmeOFM"
@@ -80,7 +80,7 @@ class ConnectionsViewModel : ViewModel() {
     /**
      * Helper function to mutate state.
      */
-    private suspend fun setState(block: ConnectionsState.() -> ConnectionsState) {
+    private suspend fun setState(block: ConnectionsExampleState.() -> ConnectionsExampleState) {
         val newState = block(state.value)
         _state.emit(newState)
     }
