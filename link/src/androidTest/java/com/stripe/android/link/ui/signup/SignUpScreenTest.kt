@@ -11,6 +11,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.link.LinkActivity
 import com.stripe.android.link.LinkActivityContract
+import com.stripe.android.link.StripeIntentFixtures
 import com.stripe.android.link.createAndroidIntentComposeRule
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.ui.core.elements.EmailSpec
@@ -27,7 +28,10 @@ internal class SignUpScreenTest {
         Intent(it, LinkActivity::class.java).apply {
             putExtra(
                 LinkActivityContract.EXTRA_ARGS,
-                LinkActivityContract.Args("Merchant, Inc")
+                LinkActivityContract.Args(
+                    StripeIntentFixtures.PI_SUCCEEDED,
+                    "Merchant, Inc"
+                )
             )
         }
     }

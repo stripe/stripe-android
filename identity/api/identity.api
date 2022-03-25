@@ -52,26 +52,18 @@ public final class com/stripe/android/identity/IdentityVerificationSheet$Verific
 	public fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
-public final class com/stripe/android/identity/databinding/CameraErrorFragmentBinding : androidx/viewbinding/ViewBinding {
-	public static fun bind (Landroid/view/View;)Lcom/stripe/android/identity/databinding/CameraErrorFragmentBinding;
-	public synthetic fun getRoot ()Landroid/view/View;
-	public fun getRoot ()Landroid/widget/FrameLayout;
-	public static fun inflate (Landroid/view/LayoutInflater;)Lcom/stripe/android/identity/databinding/CameraErrorFragmentBinding;
-	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Z)Lcom/stripe/android/identity/databinding/CameraErrorFragmentBinding;
-}
-
-public final class com/stripe/android/identity/databinding/CameraPermissionDeniedFragmentBinding : androidx/viewbinding/ViewBinding {
-	public final field appSettings Lcom/google/android/material/button/MaterialButton;
+public final class com/stripe/android/identity/databinding/BaseErrorFragmentBinding : androidx/viewbinding/ViewBinding {
+	public final field bottomButton Lcom/google/android/material/button/MaterialButton;
 	public final field buttons Landroid/widget/LinearLayout;
-	public final field fileUpload Lcom/google/android/material/button/MaterialButton;
-	public final field grantPermissionText Landroid/widget/TextView;
+	public final field message1 Landroid/widget/TextView;
+	public final field message2 Landroid/widget/TextView;
 	public final field titleText Landroid/widget/TextView;
-	public final field uploadFileText Landroid/widget/TextView;
-	public static fun bind (Landroid/view/View;)Lcom/stripe/android/identity/databinding/CameraPermissionDeniedFragmentBinding;
+	public final field topButton Lcom/google/android/material/button/MaterialButton;
+	public static fun bind (Landroid/view/View;)Lcom/stripe/android/identity/databinding/BaseErrorFragmentBinding;
 	public synthetic fun getRoot ()Landroid/view/View;
 	public fun getRoot ()Landroid/widget/LinearLayout;
-	public static fun inflate (Landroid/view/LayoutInflater;)Lcom/stripe/android/identity/databinding/CameraPermissionDeniedFragmentBinding;
-	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Z)Lcom/stripe/android/identity/databinding/CameraPermissionDeniedFragmentBinding;
+	public static fun inflate (Landroid/view/LayoutInflater;)Lcom/stripe/android/identity/databinding/BaseErrorFragmentBinding;
+	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Z)Lcom/stripe/android/identity/databinding/BaseErrorFragmentBinding;
 }
 
 public final class com/stripe/android/identity/databinding/ConfirmationFragmentBinding : androidx/viewbinding/ViewBinding {
@@ -140,17 +132,6 @@ public final class com/stripe/android/identity/databinding/DriverLicenseUploadFr
 	public fun getRoot ()Landroid/widget/FrameLayout;
 	public static fun inflate (Landroid/view/LayoutInflater;)Lcom/stripe/android/identity/databinding/DriverLicenseUploadFragmentBinding;
 	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Z)Lcom/stripe/android/identity/databinding/DriverLicenseUploadFragmentBinding;
-}
-
-public final class com/stripe/android/identity/databinding/ErrorFragmentBinding : androidx/viewbinding/ViewBinding {
-	public final field errorContent Landroid/widget/TextView;
-	public final field errorTitle Landroid/widget/TextView;
-	public final field goBack Lcom/google/android/material/button/MaterialButton;
-	public static fun bind (Landroid/view/View;)Lcom/stripe/android/identity/databinding/ErrorFragmentBinding;
-	public synthetic fun getRoot ()Landroid/view/View;
-	public fun getRoot ()Landroid/widget/LinearLayout;
-	public static fun inflate (Landroid/view/LayoutInflater;)Lcom/stripe/android/identity/databinding/ErrorFragmentBinding;
-	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Z)Lcom/stripe/android/identity/databinding/ErrorFragmentBinding;
 }
 
 public final class com/stripe/android/identity/databinding/FrontBackUploadFragmentBinding : androidx/viewbinding/ViewBinding {
@@ -228,17 +209,6 @@ public final class com/stripe/android/identity/databinding/PassportUploadFragmen
 	public fun getRoot ()Landroid/widget/LinearLayout;
 	public static fun inflate (Landroid/view/LayoutInflater;)Lcom/stripe/android/identity/databinding/PassportUploadFragmentBinding;
 	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Z)Lcom/stripe/android/identity/databinding/PassportUploadFragmentBinding;
-}
-
-public final class com/stripe/android/identity/navigation/CameraErrorFragment : androidx/fragment/app/Fragment {
-	public static final field Companion Lcom/stripe/android/identity/navigation/CameraErrorFragment$Companion;
-	public fun <init> ()V
-	public fun onActivityCreated (Landroid/os/Bundle;)V
-	public fun onCreateView (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Landroid/os/Bundle;)Landroid/view/View;
-}
-
-public final class com/stripe/android/identity/navigation/CameraErrorFragment$Companion {
-	public final fun newInstance ()Lcom/stripe/android/identity/navigation/CameraErrorFragment;
 }
 
 public final class com/stripe/android/identity/utils/ContentUriResult {
