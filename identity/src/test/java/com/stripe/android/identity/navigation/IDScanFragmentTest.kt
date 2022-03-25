@@ -64,8 +64,8 @@ internal class IDScanFragmentTest {
         mock()
     private val bothUploadedObserverCaptor =
         argumentCaptor<Observer<Resource<Pair<
-            Pair<UploadedResult, UploadedResult>, Pair<UploadedResult, UploadedResult>
-            >>>>()
+                        Pair<UploadedResult, UploadedResult>, Pair<UploadedResult, UploadedResult>
+                        >>>>()
 
     private val mockScanFlow = mock<IdentityScanFlow>()
     private val mockIdentityScanViewModel = mock<IdentityScanViewModel>().also {
