@@ -97,6 +97,21 @@ class RequestHeadersFactoriesTest {
             .isEqualTo("{name=MyAwesomePlugin, version=1.2.34, url=https://myawesomeplugin.info, partner_id=pp_partner_1234}")
     }
 
+    @Test
+    fun headers_withChineseSimplified_hasProperLanguageTag() {
+        val stripeAccount = "acct_123abc"
+        val headers = createBasePaymentApiHeaders(
+            locale = Locale.SIMPLIFIED_CHINESE,
+            options = ApiRequest.Options(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, stripeAccount)
+        )
+
+        assertThat(headers[HEADER_AUTHORIZATION])
+            .isEqualTo("Bearer ${ApiKeyFixtures.FAKE_PUBLISHABLE_KEY}")
+        assertThat(headers[HEADER_STRIPE_VERSION]).isEqualTo(ApiVersion.get().code)
+        assertThat(headers[HEADER_STRIPE_ACCOUNT]).isEqualTo(stripeAccount)
+        assertThat(headers[HEADER_ACCEPT_LANGUAGE]).isEqualTo("zh-CN")
+    }
+
     private fun createBasePaymentApiHeaders(
         locale: Locale = Locale.getDefault(),
         options: ApiRequest.Options = OPTIONS,

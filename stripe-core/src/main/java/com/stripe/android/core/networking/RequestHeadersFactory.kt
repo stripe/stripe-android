@@ -47,8 +47,8 @@ sealed class RequestHeadersFactory {
 
         private val languageTag: String?
             get() {
-                return locale.toString().replace("_", "-")
-                    .takeIf { it.isNotBlank() }
+                return locale.toLanguageTag()
+                    .takeIf { it.isNotBlank() && it != UNDETERMINED_LANGUAGE }
             }
 
         override val userAgent: String
@@ -164,5 +164,7 @@ sealed class RequestHeadersFactory {
         ) = "Stripe/v1 $sdkVersion"
 
         val CHARSET: String = Charsets.UTF_8.name()
+
+        const val UNDETERMINED_LANGUAGE = "und"
     }
 }
