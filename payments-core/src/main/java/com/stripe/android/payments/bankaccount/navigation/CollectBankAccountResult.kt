@@ -1,7 +1,7 @@
 package com.stripe.android.payments.bankaccount.navigation
 
 import android.os.Parcelable
-import com.stripe.android.payments.bankaccount.CollectBankAccountResponse
+import com.stripe.android.core.model.StripeModel
 import kotlinx.parcelize.Parcelize
 
 /**
@@ -22,3 +22,8 @@ sealed class CollectBankAccountResult : Parcelable {
     @Parcelize
     object Cancelled : CollectBankAccountResult()
 }
+
+@Parcelize
+data class CollectBankAccountResponse(
+    val clientSecret: String
+) : StripeModel

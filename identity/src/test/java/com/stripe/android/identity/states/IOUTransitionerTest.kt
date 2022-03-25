@@ -1,6 +1,7 @@
 package com.stripe.android.identity.states
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.camera.framework.time.ClockMark
 import com.stripe.android.identity.ml.AnalyzerOutput
 import com.stripe.android.identity.ml.BoundingBox
 import com.stripe.android.identity.ml.Category
@@ -13,6 +14,10 @@ import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
 internal class IOUTransitionerTest {
+    private val mockNeverTimeoutClockMark = mock<ClockMark>().also {
+        whenever(it.hasPassed()).thenReturn(false)
+    }
+
     @Test
     fun `transitions to Unsatisfied when no match`() {
         val transitioner = IOUTransitioner()
@@ -20,6 +25,7 @@ internal class IOUTransitionerTest {
         val resultState = transitioner.transition(
             mock<IdentityScanState.Found>().also {
                 whenever(it.type).thenReturn(ScanType.ID_BACK)
+                whenever(it.timeoutAt).thenReturn(mockNeverTimeoutClockMark)
             },
             INITIAL_ID_FRONT_OUTPUT
         )
@@ -50,6 +56,7 @@ internal class IOUTransitionerTest {
 
         val mockFoundState = mock<IdentityScanState.Found>().also {
             whenever(it.type).thenReturn(ScanType.ID_FRONT)
+            whenever(it.timeoutAt).thenReturn(mockNeverTimeoutClockMark)
         }
 
         // initialize previousBoundingBox
@@ -75,6 +82,7 @@ internal class IOUTransitionerTest {
 
         val mockFoundState = mock<IdentityScanState.Found>().also {
             whenever(it.type).thenReturn(ScanType.ID_FRONT)
+            whenever(it.timeoutAt).thenReturn(mockNeverTimeoutClockMark)
         }
 
         var result = createAnalyzerOutputWithHighIOU(INITIAL_ID_FRONT_OUTPUT)
@@ -108,6 +116,7 @@ internal class IOUTransitionerTest {
 
         val mockFoundState = mock<IdentityScanState.Found>().also {
             whenever(it.type).thenReturn(ScanType.ID_FRONT)
+            whenever(it.timeoutAt).thenReturn(mockNeverTimeoutClockMark)
         }
 
         var result = createAnalyzerOutputWithHighIOU(INITIAL_ID_FRONT_OUTPUT)

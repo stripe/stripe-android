@@ -4,38 +4,18 @@ import android.content.Context
 import android.net.Uri
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.viewModelScope
-import com.stripe.android.core.model.InternalStripeFile
-import com.stripe.android.core.model.InternalStripeFilePurpose
-import com.stripe.android.identity.IdentityVerificationSheetContract
-import com.stripe.android.identity.networking.IdentityRepository
-import com.stripe.android.identity.networking.Resource
-import com.stripe.android.identity.networking.models.DocumentUploadParam.UploadMethod
-import com.stripe.android.identity.networking.models.VerificationPageStaticContentDocumentCapturePage
+import com.stripe.android.identity.utils.IdentityIO
 import com.stripe.android.identity.utils.ImageChooser
 import com.stripe.android.identity.utils.PhotoTaker
-import com.stripe.android.identity.utils.resizeUriAndCreateFileToUpload
-import kotlinx.coroutines.launch
 
 /**
  * Fragment to upload passport image.
  */
 internal class PassportUploadViewModel(
-    private val identityRepository: IdentityRepository,
-    private val verificationArgs: IdentityVerificationSheetContract.Args
+    private val identityIO: IdentityIO
 ) : ViewModel() {
-
-    /**
-     * The passport image is uploaded.
-     */
-    private val _uploaded =
-        MutableLiveData<Resource<Pair<InternalStripeFile, UploadMethod>>>()
-    val uploaded: LiveData<Resource<Pair<InternalStripeFile, UploadMethod>>> =
-        _uploaded
 
     private lateinit var photoTaker: PhotoTaker
     private lateinit var imageChooser: ImageChooser
@@ -45,7 +25,7 @@ internal class PassportUploadViewModel(
      * during initialization of an Activity or Fragment.
      */
     internal fun registerActivityResultCaller(activityResultCaller: ActivityResultCaller) {
-        photoTaker = PhotoTaker(activityResultCaller)
+        photoTaker = PhotoTaker(activityResultCaller, identityIO)
         imageChooser = ImageChooser(activityResultCaller)
     }
 
@@ -68,58 +48,12 @@ internal class PassportUploadViewModel(
         imageChooser.chooseImage(onImageChosen)
     }
 
-    /**
-     * Upload the chosen image, notifies [uploaded] when finished.
-     */
-    fun uploadImage(
-        uri: Uri,
-        context: Context,
-        documentCaptureModels: VerificationPageStaticContentDocumentCapturePage,
-        uploadMethod: UploadMethod
-    ) {
-        _uploaded.postValue(Resource.loading())
-        viewModelScope.launch {
-            runCatching {
-                identityRepository.uploadImage(
-                    verificationId = verificationArgs.verificationSessionId,
-                    ephemeralKey = verificationArgs.ephemeralKeySecret,
-                    imageFile = resizeUriAndCreateFileToUpload(
-                        context,
-                        uri,
-                        verificationArgs.verificationSessionId,
-                        false,
-                        maxDimension = documentCaptureModels.highResImageMaxDimension,
-                        compressionQuality = documentCaptureModels.highResImageCompressionQuality
-                    ),
-                    filePurpose = requireNotNull(
-                        InternalStripeFilePurpose.fromCode(
-                            documentCaptureModels.filePurpose
-                        )
-                    ),
-                )
-            }.fold(
-                onSuccess = {
-                    _uploaded.postValue(Resource.success(Pair(it, uploadMethod)))
-                },
-                onFailure = {
-                    _uploaded.postValue(
-                        Resource.error(
-                            "Failed to upload file : $uri",
-                            throwable = it
-                        )
-                    )
-                }
-            )
-        }
-    }
-
     internal class PassportUploadViewModelFactory(
-        private val identityRepository: IdentityRepository,
-        private val verificationArgs: IdentityVerificationSheetContract.Args
+        private val identityIO: IdentityIO
     ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return PassportUploadViewModel(identityRepository, verificationArgs) as T
+            return PassportUploadViewModel(identityIO) as T
         }
     }
 }

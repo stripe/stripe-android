@@ -1,21 +1,33 @@
 package com.stripe.android.link.ui.wallet
 
+import android.content.Context
 import androidx.lifecycle.Lifecycle
 import androidx.savedstate.SavedStateRegistry
 import androidx.savedstate.SavedStateRegistryOwner
+import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.core.injection.Injectable
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
+import com.stripe.android.link.LinkActivityContract
+import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkScreen
 import com.stripe.android.link.account.LinkAccountManager
+import com.stripe.android.link.confirmation.ConfirmationManager
+import com.stripe.android.link.confirmation.PaymentConfirmationCallback
 import com.stripe.android.link.injection.NonFallbackInjector
 import com.stripe.android.link.injection.SignedInViewModelSubcomponent
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.model.Navigator
+import com.stripe.android.link.model.PaymentDetailsFixtures
+import com.stripe.android.link.model.StripeIntentFixtures
 import com.stripe.android.link.repositories.LinkRepository
+import com.stripe.android.model.ConfirmPaymentIntentParams
+import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.ConsumerPaymentDetails
+import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.payments.paymentlauncher.PaymentResult
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -23,6 +35,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
+import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.spy
 import org.mockito.kotlin.verify
@@ -33,15 +46,18 @@ import javax.inject.Provider
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
 class WalletViewModelTest {
+    private val linkAccount = mock<LinkAccount>()
+    private val args = mock<LinkActivityContract.Args>()
     private lateinit var linkRepository: LinkRepository
     private val linkAccountManager = mock<LinkAccountManager>()
     private val navigator = mock<Navigator>()
+    private val confirmationManager = mock<ConfirmationManager>()
     private val logger = Logger.noop()
-    private val linkAccount = mock<LinkAccount>()
 
     @Before
     fun before() {
         linkRepository = mock()
+        whenever(args.stripeIntent).thenReturn(StripeIntentFixtures.PI_SUCCEEDED)
     }
 
     @Test
@@ -70,6 +86,61 @@ class WalletViewModelTest {
         createViewModel()
 
         verify(navigator).navigateTo(LinkScreen.PaymentMethod, false)
+    }
+
+    @Test
+    fun `When PaymentIntent then button label displays amount`() {
+        val label = createViewModel().payButtonLabel(getContext().resources)
+
+        assertThat(label).isEqualTo("Pay $10.99")
+    }
+
+    @Test
+    fun `When SetupIntent then button label displays set up`() {
+        whenever(args.stripeIntent).thenReturn(StripeIntentFixtures.SI_NEXT_ACTION_REDIRECT)
+
+        val label = createViewModel().payButtonLabel(getContext().resources)
+
+        assertThat(label).isEqualTo("Set up")
+    }
+
+    @Test
+    fun `completePayment starts payment confirmation`() {
+        val clientSecret = "client_secret"
+        whenever(linkAccount.clientSecret).thenReturn(clientSecret)
+        val paymentDetails = PaymentDetailsFixtures.CONSUMER_PAYMENT_DETAILS.paymentDetails.first()
+
+        createViewModel().completePayment(paymentDetails)
+
+        val paramsCaptor = argumentCaptor<ConfirmStripeIntentParams>()
+        verify(confirmationManager).confirmStripeIntent(paramsCaptor.capture(), any())
+
+        assertThat(paramsCaptor.firstValue).isEqualTo(
+            ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
+                PaymentMethodCreateParams.createLink(
+                    paymentDetails.id,
+                    clientSecret
+                ),
+                StripeIntentFixtures.PI_SUCCEEDED.clientSecret!!
+            )
+        )
+    }
+
+    @Test
+    fun `completePayment dismisses on success`() = runTest {
+        whenever(confirmationManager.confirmStripeIntent(any(), any())).thenAnswer { invocation ->
+            (invocation.getArgument(1) as? PaymentConfirmationCallback)?.let {
+                it(Result.success(PaymentResult.Completed))
+            }
+        }
+        whenever(linkAccount.clientSecret).thenReturn("secret")
+        whenever(linkRepository.listPaymentDetails(anyOrNull()))
+            .thenReturn(Result.success(PaymentDetailsFixtures.CONSUMER_PAYMENT_DETAILS))
+
+        val paymentDetails = PaymentDetailsFixtures.CONSUMER_PAYMENT_DETAILS.paymentDetails.first()
+        createViewModel().completePayment(paymentDetails)
+
+        verify(navigator).dismiss(LinkActivityResult.Success)
     }
 
     @Test
@@ -127,5 +198,15 @@ class WalletViewModelTest {
     }
 
     private fun createViewModel() =
-        WalletViewModel(linkRepository, linkAccountManager, navigator, logger, linkAccount)
+        WalletViewModel(
+            args,
+            linkAccount,
+            linkRepository,
+            linkAccountManager,
+            navigator,
+            confirmationManager,
+            logger
+        )
+
+    private fun getContext() = ApplicationProvider.getApplicationContext<Context>()
 }

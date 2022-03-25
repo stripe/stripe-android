@@ -34,8 +34,6 @@
   <string name="stripe_paymentsheet_or_pay_using">หรือชำระเงินด้วย</string>
   <!-- Title of a section containing a card form that will collect the payment information from the user. -->
   <string name="stripe_paymentsheet_or_pay_with_card">หรือชำระเงินด้วยบัตร</string>
-  <!-- Label of a button that initiates payment when tapped -->
-  <string name="stripe_paymentsheet_pay_button_amount">ชำระ %s</string>
   <!-- Label for a button that starts processing the payment. -->
   <string name="stripe_paymentsheet_pay_button_label">ชำระเงิน</string>
   <!-- Payment Method type brand name  -->
@@ -54,8 +52,6 @@
   <string name="stripe_paymentsheet_save_this_card_with_merchant_name">บันทึกบัตรนี้เพื่อชำระเงินให้ %s ในอนาคต</string>
   <!-- Title shown above a carousel containing the customer&apos;s payment methods -->
   <string name="stripe_paymentsheet_select_payment_method">เลือกวิธีการชำระเงิน</string>
-  <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->
-  <string name="stripe_paymentsheet_setup_button_label">ตั้งค่า</string>
   <!-- Label indicating the total amount that the user is authorizing (e.g. "Total: $25.00") -->
   <string name="stripe_paymentsheet_total_amount">รวม: %s</string>
 </resources>

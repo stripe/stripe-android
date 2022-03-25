@@ -1,6 +1,5 @@
 package com.stripe.android.link
 
-import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -64,7 +63,7 @@ internal class LinkActivity : ComponentActivity() {
 
                         LinkAppBar(
                             email = linkAccount?.email,
-                            onCloseButtonClick = ::dismiss
+                            onCloseButtonClick = { dismiss() }
                         )
 
                         NavHost(navController, viewModel.startDestination) {
@@ -124,12 +123,18 @@ internal class LinkActivity : ComponentActivity() {
         }
 
         viewModel.navigator.onDismiss = ::dismiss
+        viewModel.setupPaymentLauncher(this)
     }
 
-    private fun dismiss() {
+    override fun onDestroy() {
+        super.onDestroy()
+        viewModel.unregisterFromActivity()
+    }
+
+    private fun dismiss(result: LinkActivityResult = LinkActivityResult.Canceled) {
         setResult(
-            Activity.RESULT_CANCELED,
-            Intent().putExtras(LinkActivityContract.Result(LinkActivityResult.Canceled).toBundle())
+            result.resultCode,
+            Intent().putExtras(LinkActivityContract.Result(result).toBundle())
         )
         finish()
     }

@@ -1,6 +1,7 @@
 package com.stripe.android.link.model
 
 import androidx.navigation.NavHostController
+import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkScreen
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -11,7 +12,7 @@ import javax.inject.Singleton
 @Singleton
 internal class Navigator @Inject constructor() {
     var navigationController: NavHostController? = null
-    var onDismiss = {}
+    var onDismiss: ((LinkActivityResult) -> Unit)? = null
 
     /**
      * Navigates to the given [LinkScreen], optionally clearing the back stack.
@@ -34,11 +35,15 @@ internal class Navigator @Inject constructor() {
     fun onBack() =
         navigationController?.let { navController ->
             if (!navController.popBackStack()) {
-                onDismiss()
+                dismiss()
             }
         }
 
-    fun dismiss() {
-        onDismiss()
-    }
+    /**
+     * Dismisses the Link Activity with the given [result].
+     */
+    fun dismiss(result: LinkActivityResult = LinkActivityResult.Canceled) =
+        onDismiss?.let {
+            it(result)
+        }
 }

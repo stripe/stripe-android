@@ -178,7 +178,7 @@ class PaymentOptionsActivityTest {
                 assertThat(addBinding.confirmedIcon.isVisible)
                     .isFalse()
 
-                assertThat(addBinding.label.text)
+                assertThat(activity.viewBinding.continueButton.externalLabel)
                     .isEqualTo("Continue")
 
                 activity.finish()

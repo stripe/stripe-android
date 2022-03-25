@@ -13,9 +13,9 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
 import com.stripe.android.ui.core.elements.FormElement
 import com.stripe.android.ui.core.elements.LayoutSpec
+import com.stripe.android.ui.core.elements.MandateTextElement
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
 import com.stripe.android.ui.core.elements.SectionSpec
-import com.stripe.android.ui.core.elements.StaticTextElement
 import com.stripe.android.ui.core.forms.resources.ResourceRepository
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -152,7 +152,7 @@ internal class FormViewModel @Inject internal constructor(
                 it ?: emptyList()
             }
         ) { hiddenIdentifiers, formElements ->
-            formElements.filterIsInstance<StaticTextElement>().firstOrNull()?.let { mandate ->
+            formElements.filterIsInstance<MandateTextElement>().firstOrNull()?.let { mandate ->
                 !hiddenIdentifiers.contains(mandate.identifier)
             } ?: false
         }

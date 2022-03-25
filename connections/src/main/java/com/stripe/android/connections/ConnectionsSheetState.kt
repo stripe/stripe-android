@@ -6,6 +6,7 @@ import com.stripe.android.connections.model.LinkAccountSessionManifest
  *  Class containing all of the data needed to represent the screen.
  */
 internal data class ConnectionsSheetState(
+    val activityRecreated: Boolean = false,
     val manifest: LinkAccountSessionManifest? = null,
     val authFlowActive: Boolean = false
 )

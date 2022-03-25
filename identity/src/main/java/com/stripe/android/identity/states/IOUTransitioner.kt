@@ -27,15 +27,17 @@ internal class IOUTransitioner(
         return when {
             !analyzerOutput.category.matchesScanType(foundState.type) -> Unsatisfied(
                 "Type ${analyzerOutput.category} doesn't match ${foundState.type}",
-                foundState.type
+                foundState.type,
+                foundState.timeoutAt
             )
             !iOUCheckPass(analyzerOutput.boundingBox) -> Unsatisfied(
                 "IoU below threshold",
-                foundState.type
+                foundState.type,
+                foundState.timeoutAt
             )
             moreResultsRequired() -> foundState
             else -> {
-                Satisfied(foundState.type)
+                Satisfied(foundState.type, foundState.timeoutAt)
             }
         }
     }

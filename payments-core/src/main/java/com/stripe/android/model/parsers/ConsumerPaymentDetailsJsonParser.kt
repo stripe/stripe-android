@@ -1,12 +1,14 @@
 package com.stripe.android.model.parsers
 
+import androidx.annotation.RestrictTo
 import com.stripe.android.core.model.StripeJsonUtils.optString
 import com.stripe.android.core.model.parsers.ModelJsonParser
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
 import org.json.JSONObject
 
-internal class ConsumerPaymentDetailsJsonParser : ModelJsonParser<ConsumerPaymentDetails> {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+class ConsumerPaymentDetailsJsonParser : ModelJsonParser<ConsumerPaymentDetails> {
     override fun parse(json: JSONObject): ConsumerPaymentDetails {
         val paymentDetails = json.optJSONArray(FIELD_PAYMENT_DETAILS)
             ?.let { paymentDetailsArray ->

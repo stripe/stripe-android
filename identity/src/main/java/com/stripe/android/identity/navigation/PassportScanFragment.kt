@@ -17,9 +17,6 @@ internal class PassportScanFragment(
     identityCameraScanViewModelFactory,
     identityViewModelFactory
 ) {
-    override val headerTitleRes = R.string.passport
-    override val messageRes = R.string.position_passport
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         continueButton.setOnClickListener {
@@ -36,6 +33,7 @@ internal class PassportScanFragment(
         when (identityScanState) {
             is IdentityScanState.Initial -> {
                 headerTitle.text = requireContext().getText(R.string.passport)
+                messageView.text = requireContext().getText(R.string.position_passport)
             }
             is IdentityScanState.Unsatisfied -> {
                 messageView.text = requireContext().getText(R.string.position_passport)

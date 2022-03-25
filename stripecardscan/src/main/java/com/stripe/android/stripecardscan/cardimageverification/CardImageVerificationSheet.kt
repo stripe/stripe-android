@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Parcelable
 import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.ActivityResultRegistry
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.fragment.app.Fragment
 import com.stripe.android.stripecardscan.cardimageverification.CardImageVerificationFlow.Companion.MAX_COMPLETION_LOOP_FRAMES
@@ -78,13 +79,19 @@ class CardImageVerificationSheet private constructor(
          * is created (in the onCreate method).
          */
         @JvmStatic
+        @JvmOverloads
         fun create(
             from: ComponentActivity,
             stripePublishableKey: String,
             config: Configuration = Configuration(),
+            registry: ActivityResultRegistry = from.activityResultRegistry,
         ) =
             CardImageVerificationSheet(stripePublishableKey, config).apply {
-                launcher = from.registerForActivityResult(activityResultContract, ::onResult)
+                launcher = from.registerForActivityResult(
+                    activityResultContract,
+                    registry,
+                    ::onResult,
+                )
             }
 
         /**
@@ -94,13 +101,19 @@ class CardImageVerificationSheet private constructor(
          * before the [Fragment] is created (in the onCreate method).
          */
         @JvmStatic
+        @JvmOverloads
         fun create(
             from: Fragment,
             stripePublishableKey: String,
             config: Configuration = Configuration(),
+            registry: ActivityResultRegistry? = null,
         ) =
             CardImageVerificationSheet(stripePublishableKey, config).apply {
-                launcher = from.registerForActivityResult(activityResultContract, ::onResult)
+                launcher = if (registry != null) {
+                    from.registerForActivityResult(activityResultContract, registry, ::onResult)
+                } else {
+                    from.registerForActivityResult(activityResultContract, ::onResult)
+                }
             }
 
         private fun createIntent(context: Context, input: CardImageVerificationSheetParams) =
