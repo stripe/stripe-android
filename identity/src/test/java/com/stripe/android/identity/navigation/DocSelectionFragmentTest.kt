@@ -1,7 +1,6 @@
 package com.stripe.android.identity.navigation
 
 import android.view.View
-import androidx.annotation.StringRes
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.lifecycle.MutableLiveData
@@ -129,7 +128,7 @@ internal class DocSelectionFragmentTest {
     fun `Passport single choice UI is correctly bound`() {
         verifySingleChoiceUI(
             DOC_SELECT_SINGLE_CHOICE_PASSPORT,
-            R.string.single_selection_body_content_passport
+            PASSPORT_BODY_TEXT
         )
     }
 
@@ -137,7 +136,7 @@ internal class DocSelectionFragmentTest {
     fun `ID single choice UI is correctly bound`() {
         verifySingleChoiceUI(
             DOC_SELECT_SINGLE_CHOICE_ID,
-            R.string.single_selection_body_content_id
+            ID_BODY_TEXT
         )
     }
 
@@ -145,7 +144,7 @@ internal class DocSelectionFragmentTest {
     fun `Driver license single choice UI is correctly bound`() {
         verifySingleChoiceUI(
             DOC_SELECT_SINGLE_CHOICE_DL,
-            R.string.single_selection_body_content_dl
+            DRIVING_LICENSE_BODY_TEXT
         )
     }
 
@@ -301,7 +300,7 @@ internal class DocSelectionFragmentTest {
 
             assertThat(
                 requireNotNull(navController.backStack.last().arguments)
-                [ARG_SCAN_TYPE]
+                    [ARG_SCAN_TYPE]
             ).isEqualTo(IdDocumentParam.Type.DRIVINGLICENSE)
 
             assertThat(navController.currentDestination?.id)
@@ -351,9 +350,9 @@ internal class DocSelectionFragmentTest {
 
     private fun verifySingleChoiceUI(
         docSelect: VerificationPageStaticContentDocumentSelectPage,
-        @StringRes expectedBodyStringRes: Int
+        expectedBodyString: String
     ) {
-        launchDocSelectionFragment { binding, _, docSelectionFragment ->
+        launchDocSelectionFragment { binding, _, _ ->
             whenever(verificationPage.documentSelect).thenReturn(
                 docSelect
             )
@@ -364,7 +363,7 @@ internal class DocSelectionFragmentTest {
             assertThat(binding.singleSelectionContent.visibility).isEqualTo(View.VISIBLE)
 
             assertThat(binding.singleSelectionBody.text).isEqualTo(
-                docSelectionFragment.getString(expectedBodyStringRes)
+                expectedBodyString
             )
 
             assertThat(
@@ -409,6 +408,9 @@ internal class DocSelectionFragmentTest {
         const val PASSPORT_BUTTON_TEXT = "Passport"
         const val ID_BUTTON_TEXT = "ID"
         const val DRIVING_LICENSE_BUTTON_TEXT = "Driver's license"
+        const val PASSPORT_BODY_TEXT = "Passport body"
+        const val ID_BODY_TEXT = "ID body"
+        const val DRIVING_LICENSE_BODY_TEXT = "Driver's license body"
 
         val DOC_SELECT_MULTI_CHOICE = VerificationPageStaticContentDocumentSelectPage(
             title = DOCUMENT_SELECT_TITLE,
@@ -423,7 +425,7 @@ internal class DocSelectionFragmentTest {
         val DOC_SELECT_SINGLE_CHOICE_PASSPORT = VerificationPageStaticContentDocumentSelectPage(
             title = DOCUMENT_SELECT_TITLE,
             idDocumentTypeAllowlist = mapOf(
-                PASSPORT_KEY to PASSPORT_BUTTON_TEXT,
+                PASSPORT_KEY to PASSPORT_BODY_TEXT,
             ),
             buttonText = DOCUMENT_SELECT_BUTTON_TEXT
         )
@@ -431,7 +433,7 @@ internal class DocSelectionFragmentTest {
         val DOC_SELECT_SINGLE_CHOICE_ID = VerificationPageStaticContentDocumentSelectPage(
             title = DOCUMENT_SELECT_TITLE,
             idDocumentTypeAllowlist = mapOf(
-                ID_CARD_KEY to ID_BUTTON_TEXT,
+                ID_CARD_KEY to ID_BODY_TEXT,
             ),
             buttonText = DOCUMENT_SELECT_BUTTON_TEXT
         )
@@ -439,7 +441,7 @@ internal class DocSelectionFragmentTest {
         val DOC_SELECT_SINGLE_CHOICE_DL = VerificationPageStaticContentDocumentSelectPage(
             title = DOCUMENT_SELECT_TITLE,
             idDocumentTypeAllowlist = mapOf(
-                DRIVING_LICENSE_KEY to DRIVING_LICENSE_BUTTON_TEXT
+                DRIVING_LICENSE_KEY to DRIVING_LICENSE_BODY_TEXT
             ),
             buttonText = DOCUMENT_SELECT_BUTTON_TEXT
         )
