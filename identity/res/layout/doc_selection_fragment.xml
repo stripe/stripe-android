@@ -18,8 +18,7 @@
         android:textSize="@dimen/doc_selection_title_text_size"
         android:textStyle="bold"
         android:layout_marginTop="58dp"
-        android:layout_marginBottom="32dp"
-        android:text="@string/doc_select_title" />
+        android:layout_marginBottom="32dp" />
 
     <LinearLayout
         android:id="@+id/multi_selection_content"

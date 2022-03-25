@@ -5,8 +5,6 @@
     <string name="id_card" description="display name for ID">ID</string>
     <string name="passport" description="display name for driver's license">Passport</string>
 
-    <string name="doc_select_title">Which form of identification do you want to use?</string>
-
     <string name="front_of_id" description="Title for the screen to scan back of ID">Front of ID</string>
     <string name="back_of_id" description="Title for the screen to scan front of ID">Back of ID</string>
     <string name="front_of_dl" description="Title for the screen to scan front of driver's license">Front of dirver\'s license</string>
@@ -59,10 +57,6 @@
     <string name="go_back" description="Text to return to previous page">Go Back</string>
     <string name="description_clock" description="Description of the clock icon, used for A11Y">Clock icon</string>
     <string name="loading" description="Message on initial loading page">Loading</string>
-
-    <string name="single_selection_body_content_dl" description="Message when the only allowed type of confirmation is driver licence">You will need to take photos of the front and back in the following steps.</string>
-    <string name="single_selection_body_content_id" description="Message when the only allowed type of confirmation is ID">You will need to take photos of the front and back in the following steps.</string>
-    <string name="single_selection_body_content_passport" description="Message when the only allowed type of confirmation is passport">You will need to take a photo of the passport in the following steps.</string>
 
     <string name="could_not_capture_title" description="Title of the error screen when live capture fails">Could not capture image</string>
     <string name="could_not_capture_body1" description="Line1 body text of error screen when live capture fails">We could not capture a high-quality image.</string>
