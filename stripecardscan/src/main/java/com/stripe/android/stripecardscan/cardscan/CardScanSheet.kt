@@ -45,6 +45,9 @@ class CardScanSheet private constructor(private val stripePublishableKey: String
 
     private lateinit var launcher: ActivityResultLauncher<CardScanSheetParams>
 
+    /**
+     * Callback to notify when scanning finishes and a result is available.
+     */
     fun interface CardScanResultCallback {
         fun onCardScanSheetResult(cardScanSheetResult: CardScanSheetResult)
     }

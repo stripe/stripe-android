@@ -56,6 +56,9 @@ interface IdentityVerificationSheet {
         ephemeralKeySecret: String
     )
 
+    /**
+     * Callback to notify when identity verification finishes and a result is available.
+     */
     fun interface IdentityVerificationCallback {
         fun onVerificationResult(result: VerificationResult)
     }
