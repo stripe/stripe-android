@@ -7,34 +7,32 @@ import androidx.fragment.app.Fragment
 
 internal class StripeIdentityVerificationSheet private constructor(
     activityResultCaller: ActivityResultCaller,
-    private val configuration: IdentityVerificationSheet.Configuration
+    private val configuration: IdentityVerificationSheet.Configuration,
+    onFinished: (verificationResult: IdentityVerificationSheet.VerificationResult) -> Unit
 ) : IdentityVerificationSheet {
 
     constructor(
         from: ComponentActivity,
-        configuration: IdentityVerificationSheet.Configuration
-    ) : this(from as ActivityResultCaller, configuration)
+        configuration: IdentityVerificationSheet.Configuration,
+        onFinished: (verificationResult: IdentityVerificationSheet.VerificationResult) -> Unit
+    ) : this(from as ActivityResultCaller, configuration, onFinished)
 
     constructor(
         from: Fragment,
-        configuration: IdentityVerificationSheet.Configuration
-    ) : this(from as ActivityResultCaller, configuration)
+        configuration: IdentityVerificationSheet.Configuration,
+        onFinished: (verificationResult: IdentityVerificationSheet.VerificationResult) -> Unit
+    ) : this(from as ActivityResultCaller, configuration, onFinished)
 
     private val activityResultLauncher: ActivityResultLauncher<IdentityVerificationSheetContract.Args> =
         activityResultCaller.registerForActivityResult(
             IdentityVerificationSheetContract(),
-            ::onResult
+            onFinished
         )
-
-    private var onFinished: ((verificationResult: IdentityVerificationSheet.VerificationResult) -> Unit)? =
-        null
 
     override fun present(
         verificationSessionId: String,
         ephemeralKeySecret: String,
-        onFinished: (verificationResult: IdentityVerificationSheet.VerificationResult) -> Unit
     ) {
-        this.onFinished = onFinished
         activityResultLauncher.launch(
             IdentityVerificationSheetContract.Args(
                 verificationSessionId,
@@ -42,11 +40,5 @@ internal class StripeIdentityVerificationSheet private constructor(
                 configuration.brandLogo
             )
         )
-    }
-
-    private fun onResult(verificationResult: IdentityVerificationSheet.VerificationResult) {
-        onFinished?.let {
-            it(verificationResult)
-        }
     }
 }

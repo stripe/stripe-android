@@ -51,7 +51,13 @@ abstract class MainActivity : AppCompatActivity() {
                     // brandLogo = Uri.parse("https://path/to/a/logo.jpg")
                     brandLogo = logoUri
                 )
-            )
+            ) {
+                Snackbar.make(
+                    binding.root,
+                    "Verification result: $it",
+                    Snackbar.LENGTH_SHORT
+                ).show()
+            }
 
         binding.startVerification.setOnClickListener {
             binding.startVerification.isEnabled = false
@@ -100,9 +106,7 @@ abstract class MainActivity : AppCompatActivity() {
                                     identityVerificationSheet.present(
                                         verificationSessionId = it.verificationSessionId,
                                         ephemeralKeySecret = it.ephemeralKeySecret
-                                    ) { verificationResult ->
-                                        showSnackBar("Verification result: $verificationResult")
-                                    }
+                                    )
                                 }
                             } catch (t: Throwable) {
                                 showSnackBar("Fail to decode")
