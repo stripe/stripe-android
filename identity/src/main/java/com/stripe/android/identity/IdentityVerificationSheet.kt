@@ -25,15 +25,15 @@ interface IdentityVerificationSheet {
     /**
      * Result of verification.
      */
-    sealed class VerificationResult : Parcelable {
+    sealed class VerificationFlowResult : Parcelable {
         @Parcelize
-        object Completed : VerificationResult()
+        object Completed : VerificationFlowResult()
 
         @Parcelize
-        object Canceled : VerificationResult()
+        object Canceled : VerificationFlowResult()
 
         @Parcelize
-        class Failed(val throwable: Throwable) : VerificationResult()
+        class Failed(val throwable: Throwable) : VerificationFlowResult()
 
         @JvmSynthetic
         fun toBundle() = bundleOf(EXTRA to this)
@@ -41,7 +41,7 @@ interface IdentityVerificationSheet {
         internal companion object {
             private const val EXTRA = "extra_args"
 
-            fun fromIntent(intent: Intent?): VerificationResult {
+            fun fromIntent(intent: Intent?): VerificationFlowResult {
                 return intent?.getParcelableExtra(EXTRA)
                     ?: Failed(IllegalStateException("Failed to get VerificationResult from Intent"))
             }
@@ -60,7 +60,7 @@ interface IdentityVerificationSheet {
      * Callback to notify when identity verification finishes and a result is available.
      */
     fun interface IdentityVerificationCallback {
-        fun onVerificationResult(result: VerificationResult)
+        fun onVerificationResult(result: VerificationFlowResult)
     }
 
     companion object {

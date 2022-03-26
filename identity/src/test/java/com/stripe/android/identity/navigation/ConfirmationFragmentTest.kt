@@ -85,7 +85,7 @@ class ConfirmationFragmentTest {
             binding.kontinue.callOnClick()
 
             verify(mockVerificationFlowFinishable).finishWithResult(
-                eq(IdentityVerificationSheet.VerificationResult.Completed)
+                eq(IdentityVerificationSheet.VerificationFlowResult.Completed)
             )
         }
     }
