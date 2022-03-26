@@ -190,14 +190,18 @@ public final class com/stripe/android/stripecardscan/cardscan/CardScanSheet {
 	public static final field Companion Lcom/stripe/android/stripecardscan/cardscan/CardScanSheet$Companion;
 	public synthetic fun <init> (Ljava/lang/String;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun attachCardScanFragment (Landroidx/lifecycle/LifecycleOwner;Landroidx/fragment/app/FragmentManager;ILkotlin/jvm/functions/Function1;)V
-	public static final fun create (Landroidx/activity/ComponentActivity;Ljava/lang/String;)Lcom/stripe/android/stripecardscan/cardscan/CardScanSheet;
-	public static final fun create (Landroidx/fragment/app/Fragment;Ljava/lang/String;)Lcom/stripe/android/stripecardscan/cardscan/CardScanSheet;
-	public final fun present (Lkotlin/jvm/functions/Function1;)V
+	public static final fun create (Landroidx/activity/ComponentActivity;Ljava/lang/String;Lcom/stripe/android/stripecardscan/cardscan/CardScanSheet$CardScanResultCallback;)Lcom/stripe/android/stripecardscan/cardscan/CardScanSheet;
+	public static final fun create (Landroidx/fragment/app/Fragment;Ljava/lang/String;Lcom/stripe/android/stripecardscan/cardscan/CardScanSheet$CardScanResultCallback;)Lcom/stripe/android/stripecardscan/cardscan/CardScanSheet;
+	public final fun present ()V
+}
+
+public abstract interface class com/stripe/android/stripecardscan/cardscan/CardScanSheet$CardScanResultCallback {
+	public abstract fun onCardScanSheetResult (Lcom/stripe/android/stripecardscan/cardscan/CardScanSheetResult;)V
 }
 
 public final class com/stripe/android/stripecardscan/cardscan/CardScanSheet$Companion {
-	public final fun create (Landroidx/activity/ComponentActivity;Ljava/lang/String;)Lcom/stripe/android/stripecardscan/cardscan/CardScanSheet;
-	public final fun create (Landroidx/fragment/app/Fragment;Ljava/lang/String;)Lcom/stripe/android/stripecardscan/cardscan/CardScanSheet;
+	public final fun create (Landroidx/activity/ComponentActivity;Ljava/lang/String;Lcom/stripe/android/stripecardscan/cardscan/CardScanSheet$CardScanResultCallback;)Lcom/stripe/android/stripecardscan/cardscan/CardScanSheet;
+	public final fun create (Landroidx/fragment/app/Fragment;Ljava/lang/String;Lcom/stripe/android/stripecardscan/cardscan/CardScanSheet$CardScanResultCallback;)Lcom/stripe/android/stripecardscan/cardscan/CardScanSheet;
 	public final fun removeCardScanFragment (Landroidx/fragment/app/FragmentManager;)V
 }
 

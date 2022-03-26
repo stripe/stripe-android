@@ -8,25 +8,25 @@ import androidx.fragment.app.Fragment
 internal class StripeIdentityVerificationSheet private constructor(
     activityResultCaller: ActivityResultCaller,
     private val configuration: IdentityVerificationSheet.Configuration,
-    onFinished: (verificationResult: IdentityVerificationSheet.VerificationResult) -> Unit
+    identityVerificationCallback: IdentityVerificationSheet.IdentityVerificationCallback
 ) : IdentityVerificationSheet {
 
     constructor(
         from: ComponentActivity,
         configuration: IdentityVerificationSheet.Configuration,
-        onFinished: (verificationResult: IdentityVerificationSheet.VerificationResult) -> Unit
-    ) : this(from as ActivityResultCaller, configuration, onFinished)
+        identityVerificationCallback: IdentityVerificationSheet.IdentityVerificationCallback
+    ) : this(from as ActivityResultCaller, configuration, identityVerificationCallback)
 
     constructor(
         from: Fragment,
         configuration: IdentityVerificationSheet.Configuration,
-        onFinished: (verificationResult: IdentityVerificationSheet.VerificationResult) -> Unit
-    ) : this(from as ActivityResultCaller, configuration, onFinished)
+        identityVerificationCallback: IdentityVerificationSheet.IdentityVerificationCallback
+    ) : this(from as ActivityResultCaller, configuration, identityVerificationCallback)
 
     private val activityResultLauncher: ActivityResultLauncher<IdentityVerificationSheetContract.Args> =
         activityResultCaller.registerForActivityResult(
             IdentityVerificationSheetContract(),
-            onFinished
+            identityVerificationCallback::onVerificationResult
         )
 
     override fun present(

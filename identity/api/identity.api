@@ -15,12 +15,12 @@ public final class com/stripe/android/identity/IdentityActivity$inlined$sam$i$an
 
 public abstract interface class com/stripe/android/identity/IdentityVerificationSheet {
 	public static final field Companion Lcom/stripe/android/identity/IdentityVerificationSheet$Companion;
-	public abstract fun present (Ljava/lang/String;Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
+	public abstract fun present (Ljava/lang/String;Ljava/lang/String;)V
 }
 
 public final class com/stripe/android/identity/IdentityVerificationSheet$Companion {
-	public final fun create (Landroidx/activity/ComponentActivity;Lcom/stripe/android/identity/IdentityVerificationSheet$Configuration;)Lcom/stripe/android/identity/IdentityVerificationSheet;
-	public final fun create (Landroidx/fragment/app/Fragment;Lcom/stripe/android/identity/IdentityVerificationSheet$Configuration;)Lcom/stripe/android/identity/IdentityVerificationSheet;
+	public final fun create (Landroidx/activity/ComponentActivity;Lcom/stripe/android/identity/IdentityVerificationSheet$Configuration;Lcom/stripe/android/identity/IdentityVerificationSheet$IdentityVerificationCallback;)Lcom/stripe/android/identity/IdentityVerificationSheet;
+	public final fun create (Landroidx/fragment/app/Fragment;Lcom/stripe/android/identity/IdentityVerificationSheet$Configuration;Lcom/stripe/android/identity/IdentityVerificationSheet$IdentityVerificationCallback;)Lcom/stripe/android/identity/IdentityVerificationSheet;
 }
 
 public final class com/stripe/android/identity/IdentityVerificationSheet$Configuration {
@@ -32,6 +32,10 @@ public final class com/stripe/android/identity/IdentityVerificationSheet$Configu
 	public final fun getBrandLogo ()Landroid/net/Uri;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface class com/stripe/android/identity/IdentityVerificationSheet$IdentityVerificationCallback {
+	public abstract fun onVerificationResult (Lcom/stripe/android/identity/IdentityVerificationSheet$VerificationResult;)V
 }
 
 public abstract class com/stripe/android/identity/IdentityVerificationSheet$VerificationResult : android/os/Parcelable {

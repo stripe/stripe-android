@@ -56,6 +56,10 @@ interface IdentityVerificationSheet {
         ephemeralKeySecret: String
     )
 
+    fun interface IdentityVerificationCallback {
+        fun onVerificationResult(result: VerificationResult)
+    }
+
     companion object {
         /**
          * Creates a [IdentityVerificationSheet] instance with [ComponentActivity].
@@ -67,9 +71,9 @@ interface IdentityVerificationSheet {
         fun create(
             from: ComponentActivity,
             configuration: Configuration,
-            onFinished: (verificationResult: VerificationResult) -> Unit
+            identityVerificationCallback: IdentityVerificationCallback
         ): IdentityVerificationSheet =
-            StripeIdentityVerificationSheet(from, configuration, onFinished)
+            StripeIdentityVerificationSheet(from, configuration, identityVerificationCallback)
 
         /**
          * Creates a [IdentityVerificationSheet] instance with [Fragment].
@@ -80,8 +84,8 @@ interface IdentityVerificationSheet {
         fun create(
             from: Fragment,
             configuration: Configuration,
-            onFinished: (verificationResult: VerificationResult) -> Unit
+            identityVerificationCallback: IdentityVerificationCallback
         ): IdentityVerificationSheet =
-            StripeIdentityVerificationSheet(from, configuration, onFinished)
+            StripeIdentityVerificationSheet(from, configuration, identityVerificationCallback)
     }
 }
