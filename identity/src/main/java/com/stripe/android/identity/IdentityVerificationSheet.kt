@@ -65,7 +65,8 @@ interface IdentityVerificationSheet {
          * Creates a [IdentityVerificationSheet] instance with [ComponentActivity].
          *
          * This API registers an [ActivityResultLauncher] into the
-         * [ComponentActivity], it must be called before the [ComponentActivity]
+         * [ComponentActivity] and notifies its result to [identityVerificationCallback], it must
+         * be called before the [ComponentActivity]
          * is created (in the onCreate method).
          */
         fun create(
@@ -78,8 +79,9 @@ interface IdentityVerificationSheet {
         /**
          * Creates a [IdentityVerificationSheet] instance with [Fragment].
          *
-         * This API registers an [ActivityResultLauncher] into the [Fragment], it must be called
-         * before the [Fragment] is created (in the onCreate method).
+         * This API registers an [ActivityResultLauncher] into the [Fragment] and notifies its
+         * result to [identityVerificationCallback], it must be called before the [Fragment] is
+         * created (in the onCreate method).
          */
         fun create(
             from: Fragment,

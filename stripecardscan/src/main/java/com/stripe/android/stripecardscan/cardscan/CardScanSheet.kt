@@ -54,8 +54,8 @@ class CardScanSheet private constructor(private val stripePublishableKey: String
          * Create a [CardScanSheet] instance with [ComponentActivity].
          *
          * This API registers an [ActivityResultLauncher] into the
-         * [ComponentActivity], it must be called before the [ComponentActivity]
-         * is created (in the onCreate method).
+         * [ComponentActivity] and notifies its result to [cardScanSheetResultCallback], it must be
+         * called before the [ComponentActivity] is created (in the onCreate method).
          */
         @JvmStatic
         fun create(
@@ -73,8 +73,9 @@ class CardScanSheet private constructor(private val stripePublishableKey: String
         /**
          * Create a [CardScanSheet] instance with [Fragment].
          *
-         * This API registers an [ActivityResultLauncher] into the [Fragment], it must be called
-         * before the [Fragment] is created (in the onCreate method).
+         * This API registers an [ActivityResultLauncher] into the [Fragment] and notifies its
+         * result to [cardScanSheetResultCallback], it must be called before the [Fragment] is
+         * created (in the onCreate method).
          */
         @JvmStatic
         fun create(
