@@ -64,7 +64,6 @@ class CollectBankAccountViewModelTest {
         }
     }
 
-
     @Test
     fun `init - when createLinkAccountSession succeeds for SI, opens connection flow`() = runTest {
         val viewEffect = MutableSharedFlow<CollectBankAccountViewEffect>()
