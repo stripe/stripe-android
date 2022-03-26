@@ -4,12 +4,16 @@ import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.model.BankConnectionsLinkedAccountSession
+import com.stripe.android.model.PaymentIntent
+import com.stripe.android.model.SetupIntent
 import com.stripe.android.payments.bankaccount.CollectBankAccountConfiguration
 import com.stripe.android.payments.bankaccount.domain.AttachLinkAccountSession
 import com.stripe.android.payments.bankaccount.domain.CreateLinkAccountSession
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountContract
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountContract.Args.ForPaymentIntent
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountContract.Args.ForSetupIntent
+import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResponse
+import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResult
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResult.Failed
 import com.stripe.android.payments.bankaccount.ui.CollectBankAccountViewEffect.FinishWithResult
 import com.stripe.android.payments.bankaccount.ui.CollectBankAccountViewEffect.OpenConnectionsFlow
@@ -34,9 +38,10 @@ class CollectBankAccountViewModelTest {
     private val clientSecret = "client_secret"
     private val name = "name"
     private val email = "email"
+    private val linkedAccountSessionId = "las_id"
     private val linkedAccountSession = BankConnectionsLinkedAccountSession(
         clientSecret = "las_client_secret",
-        id = "las_id"
+        id = linkedAccountSessionId
     )
 
     @Test
@@ -100,6 +105,48 @@ class CollectBankAccountViewModelTest {
         }
     }
 
+    @Test
+    fun `connectionsResult - when attach succeeds for PI, finish with success`() = runTest {
+        val viewEffect = MutableSharedFlow<CollectBankAccountViewEffect>()
+        viewEffect.test {
+            // Given
+            val paymentIntent = mock<PaymentIntent>()
+            givenCreateAccountSessionForPaymentIntentReturns(Result.success(linkedAccountSession))
+            givenAttachAccountSessionForPaymentIntentReturns(Result.success(paymentIntent))
+
+            // When
+            val viewModel = buildViewModel(viewEffect, paymentIntentConfiguration())
+            viewModel.onConnectionsResult(linkedAccountSessionId)
+            // Then
+            assertThat(expectMostRecentItem()).isEqualTo(
+                FinishWithResult(
+                    CollectBankAccountResult.Completed(CollectBankAccountResponse(paymentIntent))
+                )
+            )
+        }
+    }
+
+    @Test
+    fun `connectionsResult - when attach succeeds for SI, finish with success`() = runTest {
+        val viewEffect = MutableSharedFlow<CollectBankAccountViewEffect>()
+        viewEffect.test {
+            // Given
+            val setupIntent = mock<SetupIntent>()
+            givenCreateAccountSessionForSetupIntentReturns(Result.success(linkedAccountSession))
+            givenAttachAccountSessionForSetupIntentReturns(Result.success(setupIntent))
+
+            // When
+            val viewModel = buildViewModel(viewEffect, setupIntentConfiguration())
+            viewModel.onConnectionsResult(linkedAccountSessionId)
+            // Then
+            assertThat(expectMostRecentItem()).isEqualTo(
+                FinishWithResult(
+                    CollectBankAccountResult.Completed(CollectBankAccountResponse(setupIntent))
+                )
+            )
+        }
+    }
+
     private fun givenCreateAccountSessionForPaymentIntentReturns(
         result: Result<BankConnectionsLinkedAccountSession>
     ) {
@@ -110,6 +157,34 @@ class CollectBankAccountViewModelTest {
                     clientSecret = clientSecret,
                     customerName = name,
                     customerEmail = email
+                )
+            }.doReturn(result)
+        }
+    }
+
+    private fun givenAttachAccountSessionForPaymentIntentReturns(
+        result: Result<PaymentIntent>
+    ) {
+        attachLinkAccountSession.stub {
+            onBlocking {
+                forPaymentIntent(
+                    publishableKey = publishableKey,
+                    clientSecret = clientSecret,
+                    linkedAccountSessionId = linkedAccountSessionId,
+                )
+            }.doReturn(result)
+        }
+    }
+
+    private fun givenAttachAccountSessionForSetupIntentReturns(
+        result: Result<SetupIntent>
+    ) {
+        attachLinkAccountSession.stub {
+            onBlocking {
+                forSetupIntent(
+                    publishableKey = publishableKey,
+                    clientSecret = clientSecret,
+                    linkedAccountSessionId = linkedAccountSessionId,
                 )
             }.doReturn(result)
         }

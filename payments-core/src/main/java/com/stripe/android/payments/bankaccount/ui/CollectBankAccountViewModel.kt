@@ -96,17 +96,14 @@ internal class CollectBankAccountViewModel @Inject constructor(
                     publishableKey = args.publishableKey,
                     clientSecret = args.clientSecret,
                     linkedAccountSessionId = linkedAccountSessionId
-                ).mapCatching {
-                    Completed(CollectBankAccountResponse(it))
-                }
+                )
                 is ForSetupIntent -> attachLinkAccountSession.forSetupIntent(
                     publishableKey = args.publishableKey,
                     clientSecret = args.clientSecret,
                     linkedAccountSessionId = linkedAccountSessionId
-                ).mapCatching {
-                    Completed(CollectBankAccountResponse(it))
-                }
+                )
             }
+                .mapCatching { Completed(CollectBankAccountResponse(it)) }
                 .onSuccess { result: Completed ->
                     logger.debug("Bank account session attached to  intent!!")
                     finishWithResult(result)
