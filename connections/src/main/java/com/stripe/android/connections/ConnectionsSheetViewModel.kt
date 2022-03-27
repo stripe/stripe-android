@@ -1,6 +1,5 @@
 package com.stripe.android.connections
 
-import android.app.Application
 import android.content.Intent
 import android.os.Bundle
 import androidx.lifecycle.AbstractSavedStateViewModelFactory
@@ -9,10 +8,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.savedstate.SavedStateRegistryOwner
 import com.stripe.android.connections.ConnectionsSheetViewEffect.FinishWithResult
-import com.stripe.android.connections.ConnectionsSheetViewEffect.OpenAuthFlowWithUrl
 import com.stripe.android.connections.analytics.ConnectionsEventReporter
 import com.stripe.android.connections.di.APPLICATION_ID
-import com.stripe.android.connections.di.DaggerConnectionsSheetComponent
+import com.stripe.android.connections.di.ComponentHolder
+import com.stripe.android.connections.di.ConnectionsAppComponent
 import com.stripe.android.connections.domain.FetchLinkAccountSession
 import com.stripe.android.connections.domain.GenerateLinkAccountSessionManifest
 import com.stripe.android.connections.model.LinkAccountSession
@@ -77,7 +76,7 @@ internal class ConnectionsSheetViewModel @Inject constructor(
                 authFlowActive = true
             )
         )
-        _viewEffect.emit(OpenAuthFlowWithUrl(manifest.hostedAuthUrl))
+        //_viewEffect.emit(OpenAuthFlowWithUrl(manifest.hostedAuthUrl))
     }
 
     /**
@@ -189,7 +188,6 @@ internal class ConnectionsSheetViewModel @Inject constructor(
     }
 
     class Factory(
-        private val applicationSupplier: () -> Application,
         private val starterArgsSupplier: () -> ConnectionsSheetContract.Args,
         owner: SavedStateRegistryOwner,
         defaultArgs: Bundle? = null
@@ -201,9 +199,8 @@ internal class ConnectionsSheetViewModel @Inject constructor(
             modelClass: Class<T>,
             savedStateHandle: SavedStateHandle
         ): T {
-            return DaggerConnectionsSheetComponent
-                .builder()
-                .application(applicationSupplier())
+            return ComponentHolder.component<ConnectionsAppComponent>()
+                .connectionsSheetComponent()
                 .configuration(starterArgsSupplier())
                 .build().viewModel as T
         }

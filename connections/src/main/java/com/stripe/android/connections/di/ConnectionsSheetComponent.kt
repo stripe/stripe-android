@@ -1,16 +1,15 @@
 package com.stripe.android.connections.di
 
-import android.app.Application
 import com.stripe.android.connections.ConnectionsSheetContract
 import com.stripe.android.connections.ConnectionsSheetViewModel
 import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.core.injection.LoggingModule
 import dagger.BindsInstance
-import dagger.Component
+import dagger.Subcomponent
 import javax.inject.Singleton
 
 @Singleton
-@Component(
+@Subcomponent(
     modules = [
         ConnectionsSheetModule::class,
         CoroutineContextModule::class,
@@ -22,11 +21,8 @@ internal interface ConnectionsSheetComponent {
 
     fun inject(factory: ConnectionsSheetViewModel.Factory)
 
-    @Component.Builder
+    @Subcomponent.Builder
     interface Builder {
-        @BindsInstance
-        fun application(application: Application): Builder
-
         @BindsInstance
         fun configuration(configuration: ConnectionsSheetContract.Args): Builder
 

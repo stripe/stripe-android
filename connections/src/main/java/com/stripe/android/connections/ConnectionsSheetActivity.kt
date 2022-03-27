@@ -30,7 +30,6 @@ internal class ConnectionsSheetActivity : AppCompatActivity() {
     @VisibleForTesting
     internal var viewModelFactory: ViewModelProvider.Factory =
         ConnectionsSheetViewModel.Factory(
-            { application },
             { requireNotNull(starterArgs) },
             this,
             intent?.extras

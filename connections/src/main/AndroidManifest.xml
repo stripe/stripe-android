@@ -29,6 +29,11 @@
             android:name=".ConnectionsSheetActivity"
             android:exported="false"
             android:theme="@style/StripeDefaultTheme" />
+
+        <provider
+            android:authorities="${applicationId}.appinitprovider"
+            android:name=".ConnectionsInitProvider"
+            android:exported="false" />
     </application>
 
 </manifest>
