@@ -54,9 +54,6 @@ internal class IdentityActivity : CameraPermissionCheckingActivity(), Verificati
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
-
-        setSupportActionBar(binding.topAppBar)
-
         supportFragmentManager.fragmentFactory = identityFragmentFactory
 
         navController =
