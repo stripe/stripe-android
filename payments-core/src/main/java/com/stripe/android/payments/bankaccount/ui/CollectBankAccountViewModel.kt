@@ -14,13 +14,13 @@ import com.stripe.android.connections.ConnectionsSheetResult.Failed
 import com.stripe.android.core.Logger
 import com.stripe.android.model.BankConnectionsLinkedAccountSession
 import com.stripe.android.payments.bankaccount.CollectBankAccountConfiguration.USBankAccount
-import com.stripe.android.payments.bankaccount.CollectBankAccountResponse
 import com.stripe.android.payments.bankaccount.di.DaggerCollectBankAccountComponent
 import com.stripe.android.payments.bankaccount.domain.AttachLinkAccountSession
 import com.stripe.android.payments.bankaccount.domain.CreateLinkAccountSession
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountContract
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountContract.Args.ForPaymentIntent
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountContract.Args.ForSetupIntent
+import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResponse
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResult
 import com.stripe.android.payments.bankaccount.ui.CollectBankAccountViewEffect.OpenConnectionsFlow
 import kotlinx.coroutines.flow.MutableSharedFlow
