@@ -62,4 +62,12 @@ internal fun PaymentSheet.Appearance.parseAppearance() {
         cornerRadius = shapes.cornerRadiusDp,
         borderStrokeWidth = shapes.borderStrokeWidthDp
     )
+
+    PaymentsTheme.typographyMutable = PaymentsThemeDefaults.typography.copy(
+        fontFamily = typography.fontResId,
+        fontWeightNormal = typography.normalWeight,
+        fontWeightMedium = typography.mediumWeight,
+        fontWeightBold = typography.boldWeight,
+        fontSizeMultiplier = typography.sizeScaleFactor
+    )
 }

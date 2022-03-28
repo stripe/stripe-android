@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.example.playground.activity
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.ui.graphics.toArgb
 import androidx.core.view.isInvisible
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.snackbar.Snackbar
@@ -245,13 +246,33 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
             name = "Jenny Rosen",
             phone = "+18008675309"
         ).takeIf { viewBinding.defaultBillingOnButton.isChecked }
+        val appearance = PaymentSheet.Appearance(
+            colorsLight = PaymentSheet.Colors.defaultLight.copy(
+                // use a color resource
+                primary = resources.getColor(R.color.purple_700)
+            ),
+            colorsDark = PaymentSheet.Colors.defaultDark.copy(
+                // use a compose color
+                primary = androidx.compose.ui.graphics.Color.Red.toArgb(),
+                surface = androidx.compose.ui.graphics.Color(0xFFCCCCCC).toArgb()
+            ),
+            shapes = PaymentSheet.Shapes.default.copy(
+                cornerRadiusDp = 0.0f,
+                borderStrokeWidthDp = 3.0f
+            ),
+            typography = PaymentSheet.Typography.default.copy(
+                sizeScaleFactor = 1.1f,
+                fontResId = R.font.comicsans
+            )
+        )
 
         return PaymentSheet.Configuration(
             merchantDisplayName = merchantName,
             customer = viewModel.customerConfig.value,
             googlePay = googlePayConfig,
             defaultBillingDetails = defaultBilling,
-            allowsDelayedPaymentMethods = viewBinding.allowsDelayedPaymentMethodsOnButton.isChecked
+            allowsDelayedPaymentMethods = viewBinding.allowsDelayedPaymentMethodsOnButton.isChecked,
+            appearance = appearance
         )
     }
 
