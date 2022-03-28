@@ -12,19 +12,11 @@ import com.stripe.android.connections.ConnectionsSheetResult.Canceled
 import com.stripe.android.connections.ConnectionsSheetResult.Completed
 import com.stripe.android.connections.ConnectionsSheetResult.Failed
 import com.stripe.android.core.Logger
-import com.stripe.android.payments.bankaccount.CollectBankAccountConfiguration
-import com.stripe.android.model.BankConnectionsLinkedAccountSession
 import com.stripe.android.payments.bankaccount.CollectBankAccountConfiguration.USBankAccount
 import com.stripe.android.payments.bankaccount.di.DaggerCollectBankAccountComponent
 import com.stripe.android.payments.bankaccount.domain.AttachLinkAccountSession
 import com.stripe.android.payments.bankaccount.domain.CreateLinkAccountSession
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountContract
-import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountContract.Args.ForPaymentIntent
-import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountContract.Args.ForSetupIntent
-import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResponse
-import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResult
-import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResult.Completed
-import com.stripe.android.payments.bankaccount.ui.CollectBankAccountViewEffect.OpenConnectionsFlow
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountContract.Args.ForPaymentIntent
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountContract.Args.ForSetupIntent
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResponse
@@ -112,8 +104,8 @@ internal class CollectBankAccountViewModel @Inject constructor(
                     linkedAccountSessionId = linkedAccountSessionId
                 )
             }
-                .mapCatching { Completed(CollectBankAccountResponse(it)) }
-                .onSuccess { result: Completed ->
+                .mapCatching { CollectBankAccountResult.Completed(CollectBankAccountResponse(it)) }
+                .onSuccess { result: CollectBankAccountResult.Completed ->
                     logger.debug("Bank account session attached to  intent!!")
                     finishWithResult(result)
                 }
