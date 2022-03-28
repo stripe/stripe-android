@@ -13,7 +13,7 @@ import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountCont
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountContract.Args.ForPaymentIntent
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountContract.Args.ForSetupIntent
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResponse
-import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResult
+import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResult.Completed
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResult.Failed
 import com.stripe.android.payments.bankaccount.ui.CollectBankAccountViewEffect.FinishWithResult
 import com.stripe.android.payments.bankaccount.ui.CollectBankAccountViewEffect.OpenConnectionsFlow
@@ -85,7 +85,7 @@ class CollectBankAccountViewModelTest {
     }
 
     @Test
-    fun `init - when createLinkAccountSession fails, opens connection flow`() = runTest {
+    fun `init - when createLinkAccountSession fails, finish with error`() = runTest {
         val viewEffect = MutableSharedFlow<CollectBankAccountViewEffect>()
         viewEffect.test {
             // Given
@@ -119,7 +119,7 @@ class CollectBankAccountViewModelTest {
             // Then
             assertThat(expectMostRecentItem()).isEqualTo(
                 FinishWithResult(
-                    CollectBankAccountResult.Completed(CollectBankAccountResponse(paymentIntent))
+                    Completed(CollectBankAccountResponse(paymentIntent))
                 )
             )
         }
@@ -140,7 +140,28 @@ class CollectBankAccountViewModelTest {
             // Then
             assertThat(expectMostRecentItem()).isEqualTo(
                 FinishWithResult(
-                    CollectBankAccountResult.Completed(CollectBankAccountResponse(setupIntent))
+                    Completed(CollectBankAccountResponse(setupIntent))
+                )
+            )
+        }
+    }
+
+    @Test
+    fun `connectionsResult - when attach fails, finish with error`() = runTest {
+        val viewEffect = MutableSharedFlow<CollectBankAccountViewEffect>()
+        viewEffect.test {
+            // Given
+            val expectedException = Exception("Random error")
+            givenCreateAccountSessionForSetupIntentReturns(Result.success(linkedAccountSession))
+            givenAttachAccountSessionForSetupIntentReturns(Result.failure(expectedException))
+
+            // When
+            val viewModel = buildViewModel(viewEffect, setupIntentConfiguration())
+            viewModel.onConnectionsResult(linkedAccountSessionId)
+            // Then
+            assertThat(expectMostRecentItem()).isEqualTo(
+                FinishWithResult(
+                    Failed(expectedException)
                 )
             )
         }
