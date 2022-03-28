@@ -87,7 +87,7 @@ internal class EndToEndTest {
             )
         )
 
-        val stripe = Stripe(context, Settings.PUBLISHABLE_KEY)
+        val stripe = Stripe(context, settings.publishableKey)
 
         // Confirm the PaymentIntent using a test card
         val confirmedPaymentIntent = requireNotNull(
@@ -120,7 +120,7 @@ internal class EndToEndTest {
             )
         )
 
-        val stripe = Stripe(context, Settings.PUBLISHABLE_KEY)
+        val stripe = Stripe(context, settings.publishableKey)
 
         // Confirm the SetupIntent using a test card
         val confirmedSetupIntent = requireNotNull(
