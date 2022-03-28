@@ -487,7 +487,9 @@ class FrontBackUploadFragmentTest {
                 lowResImageCompressionQuality = 0f,
                 lowResImageMaxDimension = 0,
                 models = mock(),
-                requireLiveCapture = false
+                requireLiveCapture = false,
+                motionBlurMinDuration = 500,
+                motionBlurMinIou = 0.95f
             )
 
         const val FRONT_UPLOADED_ID = "id_front"

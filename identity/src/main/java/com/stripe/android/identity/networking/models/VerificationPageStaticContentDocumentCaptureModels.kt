@@ -6,5 +6,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 internal data class VerificationPageStaticContentDocumentCaptureModels(
     @SerialName("id_detector_url")
-    val idDetectorUrl: String
+    val idDetectorUrl: String,
+    @SerialName("id_detector_min_score")
+    val idDetectorMinScore: Float,
 )

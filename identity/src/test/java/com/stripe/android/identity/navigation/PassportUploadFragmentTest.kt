@@ -296,7 +296,9 @@ class PassportUploadFragmentTest {
                 lowResImageCompressionQuality = 0f,
                 lowResImageMaxDimension = 0,
                 models = mock(),
-                requireLiveCapture = false
+                requireLiveCapture = false,
+                motionBlurMinDuration = 500,
+                motionBlurMinIou = 0.95f
             )
 
         val FILE_ID = "file_id"

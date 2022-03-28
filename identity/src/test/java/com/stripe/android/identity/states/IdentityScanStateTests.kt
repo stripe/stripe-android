@@ -25,11 +25,14 @@ class IdentityScanStateTests {
         whenever(it.hasPassed()).thenReturn(true)
     }
 
+    private val mockTransitioner = mock<IdentityFoundStateTransitioner>()
+
     @Test
     fun `Initial can't transition with unmatched AnalyzerOutput`() {
         val initialState = IdentityScanState.Initial(
             IdentityScanState.ScanType.ID_FRONT,
-            mockNeverTimeoutClockMark
+            mockNeverTimeoutClockMark,
+            mockTransitioner
         )
         val resultState = initialState.consumeTransition(ID_BACK_OUTPUT)
 
@@ -40,7 +43,8 @@ class IdentityScanStateTests {
     fun `Initial transitions to Found with matched AnalyzerOutput`() {
         val initialState = IdentityScanState.Initial(
             IdentityScanState.ScanType.ID_FRONT,
-            mockNeverTimeoutClockMark
+            mockNeverTimeoutClockMark,
+            mockTransitioner
         )
         val resultState = initialState.consumeTransition(ID_FRONT_OUTPUT)
 
@@ -72,6 +76,7 @@ class IdentityScanStateTests {
             IdentityScanState.Satisfied(
                 IdentityScanState.ScanType.ID_FRONT,
                 mockNeverTimeoutClockMark,
+                mockTransitioner,
                 mockReachAtClockMark,
                 displaySatisfiedDuration = TIME_OUT_IN_MILLIS
             )
@@ -89,6 +94,7 @@ class IdentityScanStateTests {
         val initialState = IdentityScanState.Satisfied(
             initialScanType,
             mockNeverTimeoutClockMark,
+            mockTransitioner,
             mockReachAtClockMark,
             displaySatisfiedDuration = TIME_OUT_IN_MILLIS
         )
@@ -107,6 +113,7 @@ class IdentityScanStateTests {
                 "reason",
                 IdentityScanState.ScanType.ID_FRONT,
                 mockNeverTimeoutClockMark,
+                mockTransitioner,
                 mockReachAtClockMark,
                 displayUnsatisfiedDuration = TIME_OUT_IN_MILLIS
             )
@@ -125,6 +132,7 @@ class IdentityScanStateTests {
             "reason",
             initialScanType,
             mockNeverTimeoutClockMark,
+            mockTransitioner,
             mockReachAtClockMark,
             displayUnsatisfiedDuration = TIME_OUT_IN_MILLIS
         )
@@ -138,7 +146,8 @@ class IdentityScanStateTests {
     fun `Initial times out`() {
         val initialState = IdentityScanState.Initial(
             IdentityScanState.ScanType.ID_FRONT,
-            mockAlwaysTimeoutClockMark
+            mockAlwaysTimeoutClockMark,
+            mockTransitioner
         )
         val resultState = initialState.consumeTransition(ID_FRONT_OUTPUT)
 

@@ -20,7 +20,7 @@ import kotlin.math.roundToInt
  *
  * TODO(ccen): reimplement with ImageClassifier
  */
-internal class IDDetectorAnalyzer(modelFile: File) :
+internal class IDDetectorAnalyzer(modelFile: File, private val idDetectorMinScore: Float) :
     Analyzer<AnalyzerInput, IdentityScanState, AnalyzerOutput> {
 
     private val tfliteInterpreter = Interpreter(modelFile)
@@ -66,6 +66,7 @@ internal class IDDetectorAnalyzer(modelFile: File) :
         val resultCategory: Category
         val resultScore: Float
 
+        // TODO(ccen) use idDetectorMinScore when server updates the value
         if (categories[0][resultIndex] > THRESHOLD) {
             resultCategory = requireNotNull(INDEX_CATEGORY_MAP[resultIndex])
             resultScore = categories[0][resultIndex]
@@ -104,7 +105,8 @@ internal class IDDetectorAnalyzer(modelFile: File) :
     override val statsName: String? = null
 
     internal class Factory(
-        private val modelFile: File
+        private val modelFile: File,
+        private val idDetectorMinScore: Float
     ) : AnalyzerFactory<
             AnalyzerInput,
             IdentityScanState,
@@ -112,7 +114,7 @@ internal class IDDetectorAnalyzer(modelFile: File) :
             Analyzer<AnalyzerInput, IdentityScanState, AnalyzerOutput>
             > {
         override suspend fun newInstance(): Analyzer<AnalyzerInput, IdentityScanState, AnalyzerOutput> {
-            return IDDetectorAnalyzer(modelFile)
+            return IDDetectorAnalyzer(modelFile, idDetectorMinScore)
         }
     }
 
@@ -125,7 +127,7 @@ internal class IDDetectorAnalyzer(modelFile: File) :
         const val OUTPUT_BOUNDING_BOX_TENSOR_INDEX = 0
         const val OUTPUT_CATEGORY_TENSOR_INDEX = 1
         const val OUTPUT_BOUNDING_BOX_TENSOR_SIZE = 4
-        const val INDEX_NO_ID = 0
+        private const val INDEX_NO_ID = 0
         const val INDEX_PASSPORT = 1
         const val INDEX_ID_FRONT = 2
         const val INDEX_ID_BACK = 3
