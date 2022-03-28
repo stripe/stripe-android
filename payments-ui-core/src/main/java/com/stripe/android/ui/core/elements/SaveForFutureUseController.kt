@@ -13,8 +13,9 @@ class SaveForFutureUseController(
     identifiersRequiredForFutureUse: List<IdentifierSpec> = emptyList(),
     saveForFutureUseInitialValue: Boolean
 ) : InputController {
-    override val label: Int =
+    override val label: Flow<Int> = MutableStateFlow(
         R.string.save_for_future_payments_with_merchant_name
+    )
     private val _saveForFutureUse = MutableStateFlow(saveForFutureUseInitialValue)
     val saveForFutureUse: Flow<Boolean> = _saveForFutureUse
     override val fieldValue: Flow<String> = saveForFutureUse.map { it.toString() }

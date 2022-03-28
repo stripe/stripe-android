@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material.Checkbox
+import androidx.compose.material.CheckboxDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -18,6 +19,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.unit.dp
+import com.stripe.android.ui.core.PaymentsTheme
 import com.stripe.android.ui.core.R
 
 @Composable
@@ -28,6 +30,7 @@ fun SaveForFutureUseElementUI(
 ) {
     val controller = element.controller
     val checked by controller.saveForFutureUse.collectAsState(true)
+    val label by controller.label.collectAsState(null)
     val resources = LocalContext.current.resources
 
     val description = stringResource(
@@ -56,16 +59,23 @@ fun SaveForFutureUseElementUI(
             .requiredHeight(48.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
+        val checkBoxColor = CheckboxDefaults.colors(
+            checkedColor = PaymentsTheme.colors.material.primary,
+            uncheckedColor = PaymentsTheme.colors.colorTextSecondary
+        )
         Checkbox(
             checked = checked,
             onCheckedChange = null, // needs to be null for accessibility on row click to work
-            enabled = enabled
+            enabled = enabled,
+            colors = checkBoxColor,
         )
-        H6Text(
-            text = resources.getString(controller.label, element.merchantName),
-            modifier = Modifier
-                .padding(start = 4.dp)
-                .align(Alignment.CenterVertically)
-        )
+        label?.let {
+            H6Text(
+                text = resources.getString(it, element.merchantName),
+                modifier = Modifier
+                    .padding(start = 4.dp)
+                    .align(Alignment.CenterVertically)
+            )
+        }
     }
 }

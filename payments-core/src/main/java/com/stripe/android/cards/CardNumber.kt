@@ -1,14 +1,16 @@
 package com.stripe.android.cards
 
+import androidx.annotation.RestrictTo
 import com.stripe.android.CardUtils
 import com.stripe.android.model.CardBrand
 
-internal sealed class CardNumber {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+sealed class CardNumber {
 
     /**
      * A representation of a partial or full card number that hasn't been validated.
      */
-    internal data class Unvalidated internal constructor(
+    data class Unvalidated constructor(
         private val denormalized: String
     ) : CardNumber() {
         val normalized = denormalized.filterNot { REJECT_CHARS.contains(it) }
@@ -21,7 +23,7 @@ internal sealed class CardNumber {
 
         val isValidLuhn = CardUtils.isValidLuhnNumber(normalized)
 
-        fun validate(panLength: Int): Validated? {
+        internal fun validate(panLength: Int): Validated? {
             return if (panLength >= MIN_PAN_LENGTH &&
                 normalized.length == panLength &&
                 isValidLuhn
@@ -41,7 +43,7 @@ internal sealed class CardNumber {
          * `"424242"` with pan length `16` will return `"4242 42"`;
          * `"4242424242424242"` with pan length `14` will return `"4242 424242 4242"`
          */
-        fun getFormatted(
+        internal fun getFormatted(
             panLength: Int = DEFAULT_PAN_LENGTH
         ) = formatNumber(panLength)
 
@@ -96,17 +98,17 @@ internal sealed class CardNumber {
     /**
      * A representation of a client-side validated card number.
      */
-    internal data class Validated internal constructor(
+    internal data class Validated constructor(
         internal val value: String
     ) : CardNumber()
 
-    internal companion object {
+    companion object {
         internal fun getSpacePositions(panLength: Int) = SPACE_POSITIONS[panLength]
             ?: DEFAULT_SPACE_POSITIONS
 
         internal const val MIN_PAN_LENGTH = 14
         internal const val MAX_PAN_LENGTH = 19
-        internal const val DEFAULT_PAN_LENGTH = 16
+        const val DEFAULT_PAN_LENGTH = 16
         private val DEFAULT_SPACE_POSITIONS = setOf(4, 9, 14)
 
         private val SPACE_POSITIONS = mapOf(

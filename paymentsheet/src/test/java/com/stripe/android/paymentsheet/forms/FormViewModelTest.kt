@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.forms
 import android.app.Application
 import android.content.Context
 import androidx.annotation.StringRes
+import androidx.appcompat.view.ContextThemeWrapper
 import androidx.lifecycle.asLiveData
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
@@ -28,6 +29,7 @@ import com.stripe.android.ui.core.elements.SaveForFutureUseSpec
 import com.stripe.android.ui.core.elements.SectionElement
 import com.stripe.android.ui.core.elements.SectionSingleFieldElement
 import com.stripe.android.ui.core.elements.SectionSpec
+import com.stripe.android.ui.core.elements.SimpleTextFieldController
 import com.stripe.android.ui.core.elements.SimpleTextSpec.Companion.NAME
 import com.stripe.android.ui.core.elements.TextFieldController
 import com.stripe.android.ui.core.forms.SepaDebitForm
@@ -58,9 +60,16 @@ import javax.inject.Provider
 internal class FormViewModelTest {
     private val emailSection =
         SectionSpec(IdentifierSpec.Generic("email_section"), EmailSpec)
+    private val nameSection = SectionSpec(
+        IdentifierSpec.Generic("name_section"),
+        NAME
+    )
     private val countrySection = SectionSpec(
         IdentifierSpec.Generic("country_section"),
         CountrySpec()
+    )
+    private val context = ContextThemeWrapper(
+        ApplicationProvider.getApplicationContext(), com.stripe.android.ui.core.R.style.StripeDefaultTheme
     )
 
     private val resourceRepository =
@@ -96,8 +105,8 @@ internal class FormViewModelTest {
         val factory = FormViewModel.Factory(
             config,
             ApplicationProvider.getApplicationContext<Application>().resources,
-            SofortForm,
-        )
+            SofortForm
+        ) { ApplicationProvider.getApplicationContext<Application>() }
         val factorySpy = spy(factory)
         val createdViewModel = factorySpy.create(FormViewModel::class.java)
         verify(factorySpy, times(0)).fallbackInitialize(any())
@@ -114,7 +123,7 @@ internal class FormViewModelTest {
             config,
             ApplicationProvider.getApplicationContext<Application>().resources,
             SofortForm
-        )
+        ) { ApplicationProvider.getApplicationContext<Application>() }
         val factorySpy = spy(factory)
         assertNotNull(factorySpy.create(FormViewModel::class.java))
         verify(factorySpy).fallbackInitialize(
@@ -135,7 +144,7 @@ internal class FormViewModelTest {
             ),
             args,
             resourceRepository = resourceRepository,
-            transformSpecToElement = TransformSpecToElement(resourceRepository, args)
+            transformSpecToElement = TransformSpecToElement(resourceRepository, args, context)
         )
 
         val values = mutableListOf<Boolean?>()
@@ -161,7 +170,7 @@ internal class FormViewModelTest {
             ),
             args,
             resourceRepository = resourceRepository,
-            transformSpecToElement = TransformSpecToElement(resourceRepository, args)
+            transformSpecToElement = TransformSpecToElement(resourceRepository, args, context)
         )
 
         val values = mutableListOf<List<IdentifierSpec>>()
@@ -189,7 +198,7 @@ internal class FormViewModelTest {
             ),
             args,
             resourceRepository = resourceRepository,
-            transformSpecToElement = TransformSpecToElement(resourceRepository, args)
+            transformSpecToElement = TransformSpecToElement(resourceRepository, args, context)
         )
 
         val values = mutableListOf<List<IdentifierSpec>>()
@@ -209,6 +218,55 @@ internal class FormViewModelTest {
 
     @ExperimentalCoroutinesApi
     @Test
+    fun `Verify if there are no text fields nothing is hidden`() = runTest {
+        // Here we have just a country, no text fields.
+        val args = COMPOSE_FRAGMENT_ARGS
+        val formViewModel = FormViewModel(
+            LayoutSpec.create(
+                countrySection
+            ),
+            args,
+            resourceRepository = resourceRepository,
+            transformSpecToElement = TransformSpecToElement(resourceRepository, args, context)
+        )
+
+        // Verify formFieldValues does not contain email
+        assertThat(formViewModel.lastTextFieldIdentifier.first()?.value).isEqualTo(
+            null
+        )
+    }
+
+    @ExperimentalCoroutinesApi
+    @Test
+    fun `Verify if the last text field is hidden the second to last text field is the last display text field`() = runTest {
+        // Here we have one hidden and one required field, country will always be in the result,
+        //  and name only if saveForFutureUse is true
+        val args = COMPOSE_FRAGMENT_ARGS
+        val formViewModel = FormViewModel(
+            LayoutSpec.create(
+                nameSection,
+                emailSection,
+                countrySection,
+                SaveForFutureUseSpec(listOf(emailSection))
+            ),
+            args,
+            resourceRepository = resourceRepository,
+            transformSpecToElement = TransformSpecToElement(resourceRepository, args, context)
+        )
+
+        val saveForFutureUseController = formViewModel.elements.first()!!.map { it.controller }
+            .filterIsInstance(SaveForFutureUseController::class.java).first()
+
+        saveForFutureUseController.onValueChange(false)
+
+        // Verify formFieldValues does not contain email
+        assertThat(formViewModel.lastTextFieldIdentifier.first()?.value).isEqualTo(
+            nameSection.fields.first().identifier.value
+        )
+    }
+
+    @ExperimentalCoroutinesApi
+    @Test
     fun `Verify if a field is hidden and valid it is not in the completeFormValues`() = runTest {
         // Here we have one hidden and one required field, country will always be in the result,
         //  and name only if saveForFutureUse is true
@@ -221,7 +279,7 @@ internal class FormViewModelTest {
             ),
             args,
             resourceRepository = resourceRepository,
-            transformSpecToElement = TransformSpecToElement(resourceRepository, args)
+            transformSpecToElement = TransformSpecToElement(resourceRepository, args, context)
         )
 
         val saveForFutureUseController = formViewModel.elements.first()!!.map { it.controller }
@@ -261,7 +319,7 @@ internal class FormViewModelTest {
             ),
             args,
             resourceRepository = resourceRepository,
-            transformSpecToElement = TransformSpecToElement(resourceRepository, args)
+            transformSpecToElement = TransformSpecToElement(resourceRepository, args, context)
         )
 
         val saveForFutureUseController = formViewModel.elements.first()!!.map { it.controller }
@@ -310,7 +368,7 @@ internal class FormViewModelTest {
             SofortForm,
             args,
             resourceRepository = resourceRepository,
-            transformSpecToElement = TransformSpecToElement(resourceRepository, args)
+            transformSpecToElement = TransformSpecToElement(resourceRepository, args, context)
         )
 
         val nameElement =
@@ -358,7 +416,7 @@ internal class FormViewModelTest {
             SepaDebitForm,
             args,
             resourceRepository = resourceRepository,
-            transformSpecToElement = TransformSpecToElement(resourceRepository, args)
+            transformSpecToElement = TransformSpecToElement(resourceRepository, args, context)
         )
 
         getSectionFieldTextControllerWithLabel(
@@ -429,7 +487,7 @@ internal class FormViewModelTest {
             SepaDebitForm,
             args,
             resourceRepository = resourceRepository,
-            transformSpecToElement = TransformSpecToElement(resourceRepository, args)
+            transformSpecToElement = TransformSpecToElement(resourceRepository, args, context)
         )
 
         getSectionFieldTextControllerWithLabel(
@@ -462,7 +520,7 @@ internal class FormViewModelTest {
         // Fill all address values except line2
         val addressControllers = AddressControllers.create(formViewModel)
         val populateAddressControllers = addressControllers.controllers
-            .filter { it.label != R.string.address_label_address_line2 }
+            .filter { it.label.first() != R.string.address_label_address_line2 }
         populateAddressControllers
             .forEachIndexed { index, textFieldController ->
                 textFieldController.onValueChange("1234")
@@ -499,7 +557,7 @@ internal class FormViewModelTest {
             .filterIsInstance<SectionSingleFieldElement>()
             .map { it.controller }
             .filterIsInstance<TextFieldController>()
-            .firstOrNull { it.label == label }
+            .firstOrNull { it.label.first() == label }
 
     private data class AddressControllers(
         val controllers: List<TextFieldController>
@@ -547,15 +605,15 @@ internal class FormViewModelTest {
                 ?.first()
             return addressElementFields
                 ?.filterIsInstance<SectionSingleFieldElement>()
-                ?.map { (it.controller as? TextFieldController) }
-                ?.firstOrNull { it?.label == label }
+                ?.map { (it.controller as? SimpleTextFieldController) }
+                ?.firstOrNull { it?.label?.first() == label }
                 ?: addressElementFields
                     ?.asSequence()
                     ?.filterIsInstance<RowElement>()
                     ?.map { it.fields }
                     ?.flatten()
-                    ?.map { (it.controller as? TextFieldController) }
-                    ?.firstOrNull { it?.label == label }
+                    ?.map { (it.controller as? SimpleTextFieldController) }
+                    ?.firstOrNull { it?.label?.first() == label }
         }
     }
 }
