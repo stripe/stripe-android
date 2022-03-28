@@ -272,7 +272,7 @@ internal class ConsentFragmentTest {
     ) = launchFragmentInContainer(
         themeResId = R.style.Theme_MaterialComponents
     ) {
-        ConsentFragment(viewModelFactoryFor(mockIdentityViewModel))
+        ConsentFragment(viewModelFactoryFor(mockIdentityViewModel), mock())
     }.onFragment {
         val navController = TestNavHostController(
             ApplicationProvider.getApplicationContext()
