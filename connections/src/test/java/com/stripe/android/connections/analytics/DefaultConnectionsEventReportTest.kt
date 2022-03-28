@@ -1,5 +1,6 @@
 package com.stripe.android.connections.analytics
 
+import android.app.Application
 import androidx.test.core.app.ApplicationProvider
 import com.stripe.android.connections.ApiKeyFixtures
 import com.stripe.android.connections.ConnectionsSheet
@@ -7,6 +8,7 @@ import com.stripe.android.connections.ConnectionsSheetResult
 import com.stripe.android.connections.model.LinkAccountSession
 import com.stripe.android.connections.model.LinkedAccountList
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
+import com.stripe.android.core.networking.AnalyticsRequestFactory
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.Test
@@ -21,10 +23,13 @@ import org.robolectric.RobolectricTestRunner
 class DefaultConnectionsEventReportTest {
     private val testDispatcher = UnconfinedTestDispatcher()
 
+    private val application = ApplicationProvider.getApplicationContext<Application>()
     private val analyticsRequestExecutor = mock<AnalyticsRequestExecutor>()
-    private val analyticsRequestFactory = ConnectionsAnalyticsRequestFactory(
-        ApplicationProvider.getApplicationContext(),
-        ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY
+    private val analyticsRequestFactory = AnalyticsRequestFactory(
+        packageManager = application.packageManager,
+        packageName = application.packageName.orEmpty(),
+        packageInfo = application.packageManager.getPackageInfo(application.packageName, 0),
+        publishableKeyProvider = { ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY }
     )
 
     private val eventReporter = DefaultConnectionsEventReporter(

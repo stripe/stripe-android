@@ -1,9 +1,14 @@
 package com.stripe.android.connections.analytics
 
+import com.stripe.android.core.networking.AnalyticsEvent
+
 internal data class ConnectionsAnalyticsEvent(
     val eventCode: Code,
     val additionalParams: Map<String, String> = emptyMap()
-) {
+) : AnalyticsEvent {
+
+    override val eventName: String = eventCode.toString()
+
     enum class Code(internal val code: String) {
 
         // Connections Sheet Events
