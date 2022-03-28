@@ -4,7 +4,6 @@ import android.os.Parcelable
 import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultLauncher
 import androidx.fragment.app.Fragment
-import com.stripe.android.core.model.StripeModel
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountContract
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResult
 import kotlinx.parcelize.Parcelize
@@ -105,8 +104,3 @@ sealed class CollectBankAccountConfiguration : Parcelable {
         val email: String?
     ) : Parcelable, CollectBankAccountConfiguration()
 }
-
-@Parcelize
-data class CollectBankAccountResponse(
-    val clientSecret: String
-) : StripeModel
