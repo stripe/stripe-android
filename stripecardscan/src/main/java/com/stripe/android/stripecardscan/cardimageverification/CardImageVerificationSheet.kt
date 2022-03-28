@@ -123,11 +123,12 @@ class CardImageVerificationSheet private constructor(
                     from.registerForActivityResult(
                         activityResultContract,
                         registry,
-                        cardImageVerificationResultCallback::onCardImageVerificationSheetResult)
+                        cardImageVerificationResultCallback::onCardImageVerificationSheetResult,
+                    )
                 } else {
                     from.registerForActivityResult(
                         activityResultContract,
-                        cardImageVerificationResultCallback::onCardImageVerificationSheetResult
+                        cardImageVerificationResultCallback::onCardImageVerificationSheetResult,
                     )
                 }
             }

@@ -95,12 +95,12 @@ class CardScanSheet private constructor(private val stripePublishableKey: String
                     from.registerForActivityResult(
                         activityResultContract,
                         registry,
-                        cardScanSheetResultCallback::onCardScanSheetResult
+                        cardScanSheetResultCallback::onCardScanSheetResult,
                     )
                 } else {
                     from.registerForActivityResult(
                         activityResultContract,
-                        cardScanSheetResultCallback::onCardScanSheetResult
+                        cardScanSheetResultCallback::onCardScanSheetResult,
                     )
                 }
             }
