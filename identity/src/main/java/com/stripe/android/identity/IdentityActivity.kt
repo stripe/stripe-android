@@ -63,7 +63,7 @@ internal class IdentityActivity : CameraPermissionCheckingActivity(), Verificati
     private fun isConsentFragment(destination: NavDestination) =
         destination.id == R.id.consentFragment
 
-    private fun isErrorFragmentWithFinalDestination(
+    private fun isErrorFragmentWithFailedReason(
         destination: NavDestination,
         args: Bundle?
     ) = destination.id == R.id.errorFragment &&
@@ -94,7 +94,7 @@ internal class IdentityActivity : CameraPermissionCheckingActivity(), Verificati
             // behavior will be handled in the Fragment itself.
             onBackPressedCallback.isEnabled =
                 !isConsentFragment(destination) &&
-                !isErrorFragmentWithFinalDestination(destination, args)
+                !isErrorFragmentWithFailedReason(destination, args)
         }
         binding.topAppBar.setupWithNavController(
             navController,
