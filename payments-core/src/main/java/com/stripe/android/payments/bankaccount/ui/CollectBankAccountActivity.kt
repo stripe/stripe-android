@@ -8,6 +8,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountContract
+import com.stripe.android.payments.bankaccount.ui.CollectBankAccountViewEffect.FinishWithResult
 import com.stripe.android.payments.bankaccount.ui.CollectBankAccountViewEffect.OpenConnectionsFlow
 import com.stripe.android.payments.connections.ConnectionsPaymentsProxy
 
@@ -32,6 +33,7 @@ internal class CollectBankAccountActivity : AppCompatActivity() {
 
     private val viewModel: CollectBankAccountViewModel by viewModels { viewModelFactory }
 
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         initConnectionsPaymentsProxy()
@@ -39,7 +41,7 @@ internal class CollectBankAccountActivity : AppCompatActivity() {
             viewModel.viewEffect.collect { viewEffect ->
                 when (viewEffect) {
                     is OpenConnectionsFlow -> viewEffect.launch()
-                    is CollectBankAccountViewEffect.FinishWithResult -> viewEffect.launch()
+                    is FinishWithResult -> viewEffect.launch()
                 }
             }
         }
@@ -59,7 +61,7 @@ internal class CollectBankAccountActivity : AppCompatActivity() {
         )
     }
 
-    private fun CollectBankAccountViewEffect.FinishWithResult.launch() {
+    private fun FinishWithResult.launch() {
         setResult(
             Activity.RESULT_OK,
             Intent().putExtras(

@@ -14,7 +14,7 @@ internal class AttachLinkAccountSession @Inject constructor(
      * Attaches a LinkedAccountSession to a given PaymentIntent,
      * using the [linkedAccountSessionId] and the intent [clientSecret].
      *
-     * @return whether the operation succeeded or not.
+     * @return [PaymentIntent] with attached linkedAccount.
      */
     suspend fun forPaymentIntent(
         publishableKey: String,
@@ -34,7 +34,7 @@ internal class AttachLinkAccountSession @Inject constructor(
      * Attaches a LinkedAccountSession to a given PaymentIntent,
      * using the [linkedAccountSessionId] and the intent [clientSecret].
      *
-     * @return whether the operation succeeded or not.
+     * @return [SetupIntent] with attached linkedAccount.
      */
     suspend fun forSetupIntent(
         publishableKey: String,

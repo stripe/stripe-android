@@ -76,7 +76,8 @@ internal class IdentityFragmentFactory(
                 identityViewModelFactory
             )
             ConsentFragment::class.java.name -> ConsentFragment(
-                identityViewModelFactory
+                identityViewModelFactory,
+                verificationFlowFinishable
             )
             DocSelectionFragment::class.java.name -> DocSelectionFragment(
                 identityViewModelFactory,
@@ -84,6 +85,9 @@ internal class IdentityFragmentFactory(
             )
             ConfirmationFragment::class.java.name -> ConfirmationFragment(
                 identityViewModelFactory,
+                verificationFlowFinishable
+            )
+            ErrorFragment::class.java.name -> ErrorFragment(
                 verificationFlowFinishable
             )
             else -> super.instantiate(classLoader, className)

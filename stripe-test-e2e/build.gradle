@@ -12,6 +12,10 @@ def getBackendUrl() {
     return readProperty('STRIPE_END_TO_END_TESTS_BACKEND_URL')
 }
 
+def getPublishableKey() {
+    return readProperty('STRIPE_END_TO_END_TESTS_PUBLISHABLE_KEY')
+}
+
 private def readProperty(name) {
     final String propValue = findProperty(name) ?: System.getenv(name)
     return propValue?.trim() ? propValue : ""
@@ -33,7 +37,8 @@ android {
         testInstrumentationRunnerArguments clearPackageData: 'true'
 
         manifestPlaceholders = [
-                BACKEND_URL: getBackendUrl()
+                BACKEND_URL: getBackendUrl(),
+                PUBLISHABLE_KEY: getPublishableKey()
         ]
     }
 

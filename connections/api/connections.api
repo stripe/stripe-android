@@ -81,20 +81,12 @@ public final class com/stripe/android/connections/ConnectionsSheetViewModel_Fact
 	public static fun newInstance (Ljava/lang/String;Lcom/stripe/android/connections/ConnectionsSheetContract$Args;Lcom/stripe/android/connections/domain/GenerateLinkAccountSessionManifest;Lcom/stripe/android/connections/domain/FetchLinkAccountSession;Lcom/stripe/android/connections/analytics/ConnectionsEventReporter;)Lcom/stripe/android/connections/ConnectionsSheetViewModel;
 }
 
-public final class com/stripe/android/connections/analytics/ConnectionsAnalyticsRequestFactory_Factory : dagger/internal/Factory {
-	public fun <init> (Ljavax/inject/Provider;Ljavax/inject/Provider;)V
-	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/connections/analytics/ConnectionsAnalyticsRequestFactory_Factory;
-	public fun get ()Lcom/stripe/android/connections/analytics/ConnectionsAnalyticsRequestFactory;
-	public synthetic fun get ()Ljava/lang/Object;
-	public static fun newInstance (Landroid/app/Application;Ljava/lang/String;)Lcom/stripe/android/connections/analytics/ConnectionsAnalyticsRequestFactory;
-}
-
 public final class com/stripe/android/connections/analytics/DefaultConnectionsEventReporter_Factory : dagger/internal/Factory {
 	public fun <init> (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)V
 	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/connections/analytics/DefaultConnectionsEventReporter_Factory;
 	public fun get ()Lcom/stripe/android/connections/analytics/DefaultConnectionsEventReporter;
 	public synthetic fun get ()Ljava/lang/Object;
-	public static fun newInstance (Lcom/stripe/android/core/networking/AnalyticsRequestExecutor;Lcom/stripe/android/connections/analytics/ConnectionsAnalyticsRequestFactory;Lkotlin/coroutines/CoroutineContext;)Lcom/stripe/android/connections/analytics/DefaultConnectionsEventReporter;
+	public static fun newInstance (Lcom/stripe/android/core/networking/AnalyticsRequestExecutor;Lcom/stripe/android/core/networking/AnalyticsRequestFactory;Lkotlin/coroutines/CoroutineContext;)Lcom/stripe/android/connections/analytics/DefaultConnectionsEventReporter;
 }
 
 public final class com/stripe/android/connections/databinding/ActivityConnectionsSheetBinding : androidx/viewbinding/ViewBinding {
@@ -136,6 +128,14 @@ public final class com/stripe/android/connections/di/ConnectionsSheetConfigurati
 	public synthetic fun get ()Ljava/lang/Object;
 	public fun get ()Ljava/lang/String;
 	public static fun providesPublishableKey (Lcom/stripe/android/connections/ConnectionsSheet$Configuration;)Ljava/lang/String;
+}
+
+public final class com/stripe/android/connections/di/ConnectionsSheetModule_ProvideAnalyticsRequestFactory$connections_releaseFactory : dagger/internal/Factory {
+	public fun <init> (Ljavax/inject/Provider;Ljavax/inject/Provider;)V
+	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/connections/di/ConnectionsSheetModule_ProvideAnalyticsRequestFactory$connections_releaseFactory;
+	public fun get ()Lcom/stripe/android/core/networking/AnalyticsRequestFactory;
+	public synthetic fun get ()Ljava/lang/Object;
+	public static fun provideAnalyticsRequestFactory$connections_release (Landroid/app/Application;Ljava/lang/String;)Lcom/stripe/android/core/networking/AnalyticsRequestFactory;
 }
 
 public final class com/stripe/android/connections/di/ConnectionsSheetModule_ProvideConnectionsRepositoryFactory : dagger/internal/Factory {

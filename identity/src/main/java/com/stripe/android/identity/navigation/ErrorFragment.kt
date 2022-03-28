@@ -2,18 +2,23 @@ package com.stripe.android.identity.navigation
 
 import android.content.Context
 import android.view.View
+import androidx.activity.OnBackPressedCallback
 import androidx.annotation.IdRes
 import androidx.core.os.bundleOf
 import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
+import com.stripe.android.identity.IdentityVerificationSheet
+import com.stripe.android.identity.IdentityVerificationSheet.VerificationResult.Failed
 import com.stripe.android.identity.R
+import com.stripe.android.identity.VerificationFlowFinishable
 import com.stripe.android.identity.networking.models.VerificationPageDataRequirementError
 
 /**
  * Fragment to show generic error.
  */
-internal class ErrorFragment : BaseErrorFragment() {
-
+internal class ErrorFragment(
+    private val verificationFlowFinishable: VerificationFlowFinishable
+) : BaseErrorFragment() {
     override fun onCustomizingViews() {
         val args = requireNotNull(arguments)
         title.text = args[ARG_ERROR_TITLE] as String
@@ -21,14 +26,36 @@ internal class ErrorFragment : BaseErrorFragment() {
         message2.visibility = View.GONE
 
         topButton.visibility = View.GONE
-        if (args.getInt(ARG_GO_BACK_BUTTON_DESTINATION) == UNSET_DESTINATION) {
+
+        if (args.getInt(ARG_GO_BACK_BUTTON_DESTINATION) == UNSET_DESTINATION &&
+            !args.containsKey(ARG_FAILED_REASON)
+        ) {
             bottomButton.visibility = View.GONE
         } else {
             bottomButton.text = args[ARG_GO_BACK_BUTTON_TEXT] as String
             bottomButton.visibility = View.VISIBLE
-            bottomButton.setOnClickListener {
-                // Can only go back to consent page at the moment
-                findNavController().navigate(args[ARG_GO_BACK_BUTTON_DESTINATION] as Int)
+
+            // If this is final destination, clicking bottom button and pressBack would end flow
+            (args.getSerializable(ARG_FAILED_REASON) as? Throwable)?.let { failedReason ->
+                bottomButton.setOnClickListener {
+                    verificationFlowFinishable.finishWithResult(
+                        Failed(failedReason)
+                    )
+                }
+                requireActivity().onBackPressedDispatcher.addCallback(
+                    this,
+                    object : OnBackPressedCallback(true) {
+                        override fun handleOnBackPressed() {
+                            verificationFlowFinishable.finishWithResult(
+                                Failed(failedReason)
+                            )
+                        }
+                    }
+                )
+            } ?: run {
+                bottomButton.setOnClickListener {
+                    findNavController().navigate(args[ARG_GO_BACK_BUTTON_DESTINATION] as Int)
+                }
             }
         }
     }
@@ -40,6 +67,7 @@ internal class ErrorFragment : BaseErrorFragment() {
         // if set, shows go_back button, clicking it would navigate to the destination.
         const val ARG_GO_BACK_BUTTON_TEXT = "goBackButtonText"
         const val ARG_GO_BACK_BUTTON_DESTINATION = "goBackButtonDestination"
+        const val ARG_FAILED_REASON = "failedReason"
         private const val UNSET_DESTINATION = 0
 
         fun NavController.navigateToErrorFragmentWithRequirementErrorAndDestination(
@@ -52,7 +80,9 @@ internal class ErrorFragment : BaseErrorFragment() {
                     ARG_ERROR_TITLE to requirementError.title,
                     ARG_ERROR_CONTENT to requirementError.body,
                     ARG_GO_BACK_BUTTON_DESTINATION to backButtonDestination,
-                    ARG_GO_BACK_BUTTON_TEXT to requirementError.buttonText,
+                    ARG_GO_BACK_BUTTON_TEXT to requirementError.backButtonText,
+                    // TODO(ccen) build continue button after backend behavior is finalized
+                    // ARG_CONTINUE_BUTTON_TEXT to requirementError.continueButtonText,
                 )
             )
         }
@@ -64,7 +94,27 @@ internal class ErrorFragment : BaseErrorFragment() {
                     ARG_ERROR_TITLE to context.getString(R.string.error),
                     ARG_ERROR_CONTENT to context.getString(R.string.unexpected_error_try_again),
                     ARG_GO_BACK_BUTTON_DESTINATION to R.id.action_errorFragment_to_consentFragment,
+                    ARG_GO_BACK_BUTTON_TEXT to context.getString(R.string.go_back)
+                )
+            )
+        }
+
+        /**
+         * Navigate to error fragment with failed reason. This would be the final destination of
+         * verification flow, clicking back button would end the follow with
+         * [IdentityVerificationSheet.VerificationResult.Failed] with [failedReason].
+         */
+        fun NavController.navigateToErrorFragmentWithFailedReason(
+            context: Context,
+            failedReason: Throwable
+        ) {
+            navigate(
+                R.id.action_global_errorFragment,
+                bundleOf(
+                    ARG_ERROR_TITLE to context.getString(R.string.error),
+                    ARG_ERROR_CONTENT to context.getString(R.string.unexpected_error_try_again),
                     ARG_GO_BACK_BUTTON_TEXT to context.getString(R.string.go_back),
+                    ARG_FAILED_REASON to failedReason
                 )
             )
         }

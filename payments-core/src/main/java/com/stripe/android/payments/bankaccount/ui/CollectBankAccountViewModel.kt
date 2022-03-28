@@ -12,6 +12,7 @@ import com.stripe.android.connections.ConnectionsSheetResult.Canceled
 import com.stripe.android.connections.ConnectionsSheetResult.Completed
 import com.stripe.android.connections.ConnectionsSheetResult.Failed
 import com.stripe.android.core.Logger
+import com.stripe.android.payments.bankaccount.CollectBankAccountConfiguration
 import com.stripe.android.model.BankConnectionsLinkedAccountSession
 import com.stripe.android.payments.bankaccount.CollectBankAccountConfiguration.USBankAccount
 import com.stripe.android.payments.bankaccount.di.DaggerCollectBankAccountComponent
@@ -22,20 +23,29 @@ import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountCont
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountContract.Args.ForSetupIntent
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResponse
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResult
+import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResult.Completed
+import com.stripe.android.payments.bankaccount.ui.CollectBankAccountViewEffect.OpenConnectionsFlow
+import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountContract.Args.ForPaymentIntent
+import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountContract.Args.ForSetupIntent
+import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResponse
+import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResult
 import com.stripe.android.payments.bankaccount.ui.CollectBankAccountViewEffect.OpenConnectionsFlow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+@Suppress("ConstructorParameterNaming")
 internal class CollectBankAccountViewModel @Inject constructor(
+    // bound instances
     private val args: CollectBankAccountContract.Args,
+    private val _viewEffect: MutableSharedFlow<CollectBankAccountViewEffect>,
+    // injected instances
     private val createLinkAccountSession: CreateLinkAccountSession,
     private val attachLinkAccountSession: AttachLinkAccountSession,
     private val logger: Logger
 ) : ViewModel() {
 
-    private val _viewEffect = MutableSharedFlow<CollectBankAccountViewEffect>()
     val viewEffect: SharedFlow<CollectBankAccountViewEffect> = _viewEffect
 
     init {
@@ -60,11 +70,12 @@ internal class CollectBankAccountViewModel @Inject constructor(
                     customerEmail = configuration.email
                 )
             }
-                .onSuccess { linkedAccountSession: BankConnectionsLinkedAccountSession ->
-                    logger.debug("Bank account session created! $linkedAccountSession.")
+                .mapCatching { requireNotNull(it.clientSecret) }
+                .onSuccess { linkedAccountSessionSecret: String ->
+                    logger.debug("Bank account session created! $linkedAccountSessionSecret.")
                     _viewEffect.emit(
                         OpenConnectionsFlow(
-                            linkedAccountSessionClientSecret = linkedAccountSession.clientSecret,
+                            linkedAccountSessionClientSecret = linkedAccountSessionSecret,
                             publishableKey = args.publishableKey
                         )
                     )
@@ -94,18 +105,15 @@ internal class CollectBankAccountViewModel @Inject constructor(
                     publishableKey = args.publishableKey,
                     clientSecret = args.clientSecret,
                     linkedAccountSessionId = linkedAccountSessionId
-                ).mapCatching {
-                    CollectBankAccountResult.Completed(CollectBankAccountResponse(it))
-                }
+                )
                 is ForSetupIntent -> attachLinkAccountSession.forSetupIntent(
                     publishableKey = args.publishableKey,
                     clientSecret = args.clientSecret,
                     linkedAccountSessionId = linkedAccountSessionId
-                ).mapCatching {
-                    CollectBankAccountResult.Completed(CollectBankAccountResponse(it))
-                }
+                )
             }
-                .onSuccess { result: CollectBankAccountResult.Completed ->
+                .mapCatching { Completed(CollectBankAccountResponse(it)) }
+                .onSuccess { result: Completed ->
                     logger.debug("Bank account session attached to  intent!!")
                     finishWithResult(result)
                 }
@@ -133,6 +141,7 @@ internal class CollectBankAccountViewModel @Inject constructor(
         ): T {
             return DaggerCollectBankAccountComponent.builder()
                 .application(applicationSupplier())
+                .viewEffect(MutableSharedFlow())
                 .configuration(argsSupplier()).build()
                 .viewModel as T
         }
