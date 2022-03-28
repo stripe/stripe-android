@@ -10,6 +10,7 @@ import android.widget.TextView
 import androidx.activity.viewModels
 import androidx.annotation.IdRes
 import androidx.annotation.VisibleForTesting
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.core.os.bundleOf
 import androidx.core.view.doOnNextLayout
@@ -27,7 +28,6 @@ import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.ui.AnimationConstants
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
-import com.stripe.android.ui.core.PaymentsThemeConfig
 import com.stripe.android.ui.core.isSystemDarkTheme
 import kotlinx.coroutines.launch
 import java.security.InvalidParameterException
@@ -93,13 +93,13 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
             try {
                 starterArgs.config?.validate()
                 starterArgs.clientSecret.validate()
+                starterArgs.config?.appearance?.parseAppearance()
             } catch (e: InvalidParameterException) {
                 setActivityResult(PaymentSheetResult.Failed(e))
                 finish()
                 return
             }
         }
-
         viewModel.registerFromActivity(this)
         viewModel.setupGooglePay(
             lifecycleScope,
@@ -290,11 +290,21 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
         }
 
         val isDark = baseContext.isSystemDarkTheme()
-        viewBinding.buyButton.setDefaultBackGroundColor(
-            viewModel.config?.primaryButtonColor ?: ColorStateList.valueOf(
-                PaymentsThemeConfig.colors(isDark).primary.toArgb()
+        viewModel.config?.let {
+            viewBinding.buyButton.setDefaultBackGroundColor(
+                it.primaryButtonColor ?: ColorStateList.valueOf(
+                    Color(it.appearance.getColors(isDark).primary).toArgb()
+                )
             )
-        )
+            viewBinding.buyButton.setCornerRadius(it.appearance.shapes.cornerRadiusDp)
+
+            viewBinding.bottomSheet.setBackgroundColor(
+                Color(it.appearance.getColors(isDark).surface).toArgb()
+            )
+            viewBinding.toolbar.setBackgroundColor(
+                Color(it.appearance.getColors(isDark).surface).toArgb()
+            )
+        }
 
         viewBinding.buyButton.setOnClickListener {
             updateErrorMessage()
@@ -305,13 +315,6 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
             viewBinding.buyButton.isEnabled = isEnabled
             viewBinding.googlePayButton.isEnabled = isEnabled
         }
-
-        viewBinding.bottomSheet.setBackgroundColor(
-            PaymentsThemeConfig.colors(isDark).surface.toArgb()
-        )
-        viewBinding.toolbar.setBackgroundColor(
-            PaymentsThemeConfig.colors(isDark).surface.toArgb()
-        )
     }
 
     override fun setActivityResult(result: PaymentSheetResult) {
