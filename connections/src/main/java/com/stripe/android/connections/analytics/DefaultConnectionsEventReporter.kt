@@ -4,6 +4,7 @@ import com.stripe.android.connections.ConnectionsSheet
 import com.stripe.android.connections.ConnectionsSheetResult
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
+import com.stripe.android.core.networking.AnalyticsRequestFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -11,7 +12,7 @@ import kotlin.coroutines.CoroutineContext
 
 internal class DefaultConnectionsEventReporter @Inject constructor(
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
-    private val connectionsAnalyticsRequestFactory: ConnectionsAnalyticsRequestFactory,
+    private val analyticsRequestFactory: AnalyticsRequestFactory,
     @IOContext private val workContext: CoroutineContext
 ) : ConnectionsEventReporter {
 
@@ -61,7 +62,10 @@ internal class DefaultConnectionsEventReporter @Inject constructor(
     private fun fireEvent(event: ConnectionsAnalyticsEvent) {
         CoroutineScope(workContext).launch {
             analyticsRequestExecutor.executeAsync(
-                connectionsAnalyticsRequestFactory.createRequest(event)
+                analyticsRequestFactory.createRequest(
+                    event = event,
+                    additionalParams = event.additionalParams
+                )
             )
         }
     }
