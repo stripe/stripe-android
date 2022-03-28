@@ -176,6 +176,44 @@ class ConfirmSetupIntentParamsTest {
         )
     }
 
+    @Test
+    fun create_withAttachedPaymentMethodRequiringMandate_shouldIncludeDefaultMandateParams() {
+        val params = ConfirmSetupIntentParams
+            .create(CLIENT_SECRET, PaymentMethod.Type.USBankAccount)
+            .toParamMap()
+
+        assertThat(params)
+            .isEqualTo(
+                mapOf(
+                    "client_secret" to CLIENT_SECRET,
+                    "use_stripe_sdk" to false,
+                    "mandate_data" to mapOf(
+                        "customer_acceptance" to mapOf(
+                            "type" to "online",
+                            "online" to mapOf(
+                                "infer_from_client" to true
+                            )
+                        )
+                    ),
+                )
+            )
+    }
+
+    @Test
+    fun create_withAttachedPaymentMethodNotRequiringMandate_shouldNotIncludeMandateParams() {
+        val params = ConfirmSetupIntentParams
+            .create(CLIENT_SECRET, PaymentMethod.Type.Affirm)
+            .toParamMap()
+
+        assertThat(params)
+            .isEqualTo(
+                mapOf(
+                    "client_secret" to CLIENT_SECRET,
+                    "use_stripe_sdk" to false,
+                )
+            )
+    }
+
     private companion object {
         private const val CLIENT_SECRET = "seti_1CkiBMLENEVhOs7YMtUehLau_secret_sw1VaYPGZA"
     }
