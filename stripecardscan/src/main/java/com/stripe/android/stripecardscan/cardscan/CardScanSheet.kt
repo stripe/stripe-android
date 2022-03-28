@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Parcelable
 import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.ActivityResultRegistry
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.annotation.IdRes
 import androidx.core.os.bundleOf
@@ -64,12 +65,14 @@ class CardScanSheet private constructor(private val stripePublishableKey: String
         fun create(
             from: ComponentActivity,
             stripePublishableKey: String,
-            cardScanSheetResultCallback: CardScanResultCallback
+            cardScanSheetResultCallback: CardScanResultCallback,
+            registry: ActivityResultRegistry = from.activityResultRegistry,
         ) =
             CardScanSheet(stripePublishableKey).apply {
                 launcher = from.registerForActivityResult(
                     activityResultContract,
-                    cardScanSheetResultCallback::onCardScanSheetResult
+                    registry,
+                    cardScanSheetResultCallback::onCardScanSheetResult,
                 )
             }
 
@@ -84,13 +87,22 @@ class CardScanSheet private constructor(private val stripePublishableKey: String
         fun create(
             from: Fragment,
             stripePublishableKey: String,
-            cardScanSheetResultCallback: CardScanResultCallback
+            cardScanSheetResultCallback: CardScanResultCallback,
+            registry: ActivityResultRegistry? = null,
         ) =
             CardScanSheet(stripePublishableKey).apply {
-                launcher = from.registerForActivityResult(
-                    activityResultContract,
-                    cardScanSheetResultCallback::onCardScanSheetResult
-                )
+                launcher = if (registry != null) {
+                    from.registerForActivityResult(
+                        activityResultContract,
+                        registry,
+                        cardScanSheetResultCallback::onCardScanSheetResult
+                    )
+                } else {
+                    from.registerForActivityResult(
+                        activityResultContract,
+                        cardScanSheetResultCallback::onCardScanSheetResult
+                    )
+                }
             }
 
         private fun createIntent(context: Context, input: CardScanSheetParams) =
