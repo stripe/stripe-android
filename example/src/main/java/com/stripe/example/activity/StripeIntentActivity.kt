@@ -156,7 +156,6 @@ abstract class StripeIntentActivity : AppCompatActivity() {
             )
         }
         confirmPaymentIntent(confirmPaymentIntentParams)
-        paymentLauncher.confirm(confirmPaymentIntentParams)
     }
 
     protected fun confirmPaymentIntent(params: ConfirmPaymentIntentParams) {
@@ -177,12 +176,18 @@ abstract class StripeIntentActivity : AppCompatActivity() {
                 } ?: ""
                 )
         )
-        paymentLauncher.confirm(
+        confirmSetupIntent(
             ConfirmSetupIntentParams.create(
                 paymentMethodCreateParams = params,
                 clientSecret = secret
             )
         )
+    }
+
+    private fun confirmSetupIntent(
+        params: ConfirmSetupIntentParams,
+    ) {
+        paymentLauncher.confirm(params)
     }
 
     protected open fun onConfirmSuccess() {
