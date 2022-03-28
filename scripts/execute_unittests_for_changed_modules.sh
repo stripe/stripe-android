@@ -30,7 +30,6 @@ changed_dirs=""
 while read line; do
   module_name=${line%%/*} # This gets the first word before '/'
   # add this dir if we haven't add it yet
-#  if [[ !($changed_dirs =~ (^| )"$module_name"($| )) ]]; then
   if ! listContainsElement "${changed_dirs[@]}" $module_name; then
     changed_dirs="$changed_dirs $module_name" # string concat
   fi

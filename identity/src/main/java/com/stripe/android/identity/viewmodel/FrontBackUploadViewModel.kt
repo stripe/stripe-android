@@ -4,81 +4,19 @@ import android.content.Context
 import android.net.Uri
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MediatorLiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.viewModelScope
-import com.stripe.android.core.model.InternalStripeFile
-import com.stripe.android.core.model.InternalStripeFilePurpose
-import com.stripe.android.identity.IdentityVerificationSheetContract
-import com.stripe.android.identity.networking.IdentityRepository
-import com.stripe.android.identity.networking.Resource
-import com.stripe.android.identity.networking.Status
-import com.stripe.android.identity.networking.models.DocumentUploadParam.UploadMethod
-import com.stripe.android.identity.networking.models.VerificationPageStaticContentDocumentCapturePage
 import com.stripe.android.identity.utils.IdentityIO
 import com.stripe.android.identity.utils.ImageChooser
 import com.stripe.android.identity.utils.PhotoTaker
-import kotlinx.coroutines.launch
-import java.io.File
 
 /**
  * ViewModel to upload front and back image of a document either through camera or from local
  * file storage.
  */
 internal class FrontBackUploadViewModel(
-    private val identityRepository: IdentityRepository,
-    private val verificationArgs: IdentityVerificationSheetContract.Args,
     private val identityIO: IdentityIO
 ) : ViewModel() {
-
-    /**
-     * The ID front image has been uploaded
-     */
-    private val _frontUploaded =
-        MutableLiveData<Resource<Pair<InternalStripeFile, UploadMethod>>>()
-    val frontUploaded:
-        LiveData<Resource<Pair<InternalStripeFile, UploadMethod>>> =
-            _frontUploaded
-
-    /**
-     * The ID back image has been uploaded
-     */
-    private val _backUploaded =
-        MutableLiveData<Resource<Pair<InternalStripeFile, UploadMethod>>>()
-    val backUploaded: LiveData<Resource<Pair<InternalStripeFile, UploadMethod>>> =
-        _backUploaded
-
-    /**
-     * Both front and back of ID are uploaded
-     */
-    val uploadFinished = object : MediatorLiveData<Unit>() {
-        private var frontUploaded = false
-        private var backUploaded = false
-
-        init {
-            addSource(this@FrontBackUploadViewModel.frontUploaded) {
-                if (it.status == Status.SUCCESS) {
-                    frontUploaded = true
-                    postValueWhenBothUploaded()
-                }
-            }
-            addSource(this@FrontBackUploadViewModel.backUploaded) {
-                if (it.status == Status.SUCCESS) {
-                    backUploaded = true
-                    postValueWhenBothUploaded()
-                }
-            }
-        }
-
-        private fun postValueWhenBothUploaded() {
-            if (frontUploaded && backUploaded) {
-                postValue(Unit)
-            }
-        }
-    }
 
     private lateinit var frontPhotoTaker: PhotoTaker
     private lateinit var backPhotoTaker: PhotoTaker
@@ -134,102 +72,13 @@ internal class FrontBackUploadViewModel(
         backImageChooser.chooseImage(onImageChosen)
     }
 
-    /**
-     * Upload the chosen image for front, notifies its corresponding live data when
-     * finished.
-     */
-    fun uploadImageFront(
-        uri: Uri,
-        documentCaptureModels: VerificationPageStaticContentDocumentCapturePage,
-        uploadMethod: UploadMethod
-    ) {
-        _frontUploaded.postValue(Resource.loading())
-        uploadImage(
-            imageFile = identityIO.resizeUriAndCreateFileToUpload(
-                uri,
-                verificationArgs.verificationSessionId,
-                false,
-                FRONT,
-                maxDimension = documentCaptureModels.highResImageMaxDimension,
-                compressionQuality = documentCaptureModels.highResImageCompressionQuality
-            ),
-            filePurpose = documentCaptureModels.filePurpose,
-            resultLiveData = _frontUploaded,
-            uploadMethod = uploadMethod
-        )
-    }
-
-    /**
-     * Upload the chosen image for back, notifies its corresponding live data when
-     * finished.
-     */
-    fun uploadImageBack(
-        uri: Uri,
-        documentCaptureModels: VerificationPageStaticContentDocumentCapturePage,
-        uploadMethod: UploadMethod
-    ) {
-        _backUploaded.postValue(Resource.loading())
-        uploadImage(
-            imageFile = identityIO.resizeUriAndCreateFileToUpload(
-                uri,
-                verificationArgs.verificationSessionId,
-                false,
-                BACK,
-                maxDimension = documentCaptureModels.highResImageMaxDimension,
-                compressionQuality = documentCaptureModels.highResImageCompressionQuality
-            ),
-            filePurpose = documentCaptureModels.filePurpose,
-            resultLiveData = _backUploaded,
-            uploadMethod = uploadMethod
-        )
-    }
-
-    private fun uploadImage(
-        imageFile: File,
-        filePurpose: String,
-        resultLiveData: MutableLiveData<Resource<Pair<InternalStripeFile, UploadMethod>>>,
-        uploadMethod: UploadMethod
-    ) {
-        viewModelScope.launch {
-            runCatching {
-                identityRepository.uploadImage(
-                    verificationId = verificationArgs.verificationSessionId,
-                    ephemeralKey = verificationArgs.ephemeralKeySecret,
-                    imageFile = imageFile,
-                    filePurpose = requireNotNull(
-                        InternalStripeFilePurpose.fromCode(filePurpose)
-                    )
-                )
-            }.fold(
-                onSuccess = {
-                    resultLiveData.postValue(Resource.success(Pair(it, uploadMethod)))
-                },
-                onFailure = {
-                    resultLiveData.postValue(
-                        Resource.error(
-                            "Failed to upload file : ${imageFile.name}",
-                            throwable = it
-                        )
-                    )
-                }
-            )
-        }
-    }
-
     internal class FrontBackUploadViewModelFactory(
-        private val identityRepository: IdentityRepository,
-        private val verificationArgs: IdentityVerificationSheetContract.Args,
         private val identityIO: IdentityIO
     ) :
         ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return FrontBackUploadViewModel(identityRepository, verificationArgs, identityIO) as T
+            return FrontBackUploadViewModel(identityIO) as T
         }
-    }
-
-    private companion object {
-        const val FRONT = "front"
-        const val BACK = "back"
     }
 }

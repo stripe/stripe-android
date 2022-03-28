@@ -31,7 +31,8 @@ import java.io.File
 internal class IdentityScanFlow(
     private val analyzerLoopErrorListener: AnalyzerLoopErrorListener,
     private val aggregateResultListener: AggregateResultListener<IDDetectorAggregator.InterimResult, IDDetectorAggregator.FinalResult>,
-    private val idDetectorModelFile: File
+    private val idDetectorModelFile: File,
+    private val autoCaptureTimeout: Int
 ) : ScanFlow<IdentityScanState.ScanType, CameraPreviewImage<Bitmap>> {
     private var aggregator: IDDetectorAggregator? = null
 
@@ -79,7 +80,8 @@ internal class IdentityScanFlow(
             }
             aggregator = IDDetectorAggregator(
                 parameters,
-                aggregateResultListener
+                aggregateResultListener,
+                autoCaptureTimeout
             )
 
             requireNotNull(aggregator).bindToLifecycle(lifecycleOwner)

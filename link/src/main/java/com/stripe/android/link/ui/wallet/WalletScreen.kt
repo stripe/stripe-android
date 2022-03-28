@@ -50,6 +50,7 @@ import com.stripe.android.link.injection.NonFallbackInjector
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.HorizontalPadding
+import com.stripe.android.link.theme.linkColors
 import com.stripe.android.link.ui.PrimaryButton
 import com.stripe.android.link.ui.PrimaryButtonState
 import com.stripe.android.model.CardBrand
@@ -129,7 +130,7 @@ internal fun WalletBody(
         modifier = Modifier
             .fillMaxWidth()
             .fillMaxHeight()
-            .padding(vertical = 20.dp),
+            .padding(vertical = 32.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = if (paymentDetails.isEmpty()) {
             Arrangement.Center
@@ -141,7 +142,9 @@ internal fun WalletBody(
             CircularProgressIndicator()
         } else {
             var selectedIndex by rememberSaveable {
-                mutableStateOf(paymentDetails.indexOfFirst { it.isDefault })
+                mutableStateOf(
+                    paymentDetails.indexOfFirst { it.isDefault }.takeUnless { it == -1 } ?: 0
+                )
             }
 
             if (isWalletExpanded) {
@@ -210,7 +213,11 @@ internal fun CollapsedPaymentDetails(
             .height(64.dp)
             .border(
                 width = 1.dp,
-                color = MaterialTheme.colors.onBackground,
+                color = MaterialTheme.linkColors.componentBorder,
+                shape = MaterialTheme.shapes.large
+            )
+            .background(
+                color = MaterialTheme.linkColors.componentBackground,
                 shape = MaterialTheme.shapes.large
             )
             .clickable(
@@ -221,7 +228,7 @@ internal fun CollapsedPaymentDetails(
         Text(
             text = stringResource(id = R.string.wallet_pay_with),
             modifier = Modifier.padding(horizontal = HorizontalPadding),
-            color = MaterialTheme.colors.onBackground
+            color = MaterialTheme.linkColors.disabledText
         )
         if (selectedPaymentMethod is ConsumerPaymentDetails.Card) {
             CardDetails(card = selectedPaymentMethod)
@@ -235,7 +242,7 @@ internal fun CollapsedPaymentDetails(
                 .semantics {
                     testTag = "ChevronIcon"
                 },
-            tint = MaterialTheme.colors.onBackground
+            tint = MaterialTheme.linkColors.disabledText
         )
     }
 }
@@ -254,7 +261,11 @@ internal fun ExpandedPaymentDetails(
             .fillMaxWidth()
             .border(
                 width = 1.dp,
-                color = MaterialTheme.colors.onBackground,
+                color = MaterialTheme.linkColors.componentBorder,
+                shape = MaterialTheme.shapes.large
+            )
+            .background(
+                color = MaterialTheme.linkColors.componentBackground,
                 shape = MaterialTheme.shapes.large
             )
     ) {
@@ -342,7 +353,7 @@ internal fun CardPaymentMethodItem(
             modifier = Modifier.padding(end = 6.dp),
             colors = RadioButtonDefaults.colors(
                 selectedColor = MaterialTheme.colors.primary,
-                unselectedColor = MaterialTheme.colors.onBackground
+                unselectedColor = MaterialTheme.linkColors.disabledText
             )
         )
         CardDetails(card = cardDetails)
@@ -360,14 +371,14 @@ internal fun CardPaymentMethodItem(
                 Text(
                     text = stringResource(id = R.string.wallet_default),
                     modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp),
-                    color = MaterialTheme.colors.onBackground,
+                    color = MaterialTheme.linkColors.disabledText,
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Medium
                 )
             }
         }
     }
-    Divider(color = MaterialTheme.colors.onBackground, thickness = 1.dp)
+    Divider(color = MaterialTheme.linkColors.componentDivider, thickness = 1.dp)
 }
 
 @Composable

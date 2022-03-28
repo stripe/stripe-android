@@ -76,7 +76,7 @@ internal class ConsentFragmentTest {
                 errors = listOf(
                     VerificationPageDataRequirementError(
                         body = ERROR_BODY,
-                        buttonText = ERROR_BUTTON_TEXT,
+                        backButtonText = ERROR_BUTTON_TEXT,
                         requirement = VerificationPageDataRequirementError.Requirement.BIOMETRICCONSENT,
                         title = ERROR_TITLE
                     )

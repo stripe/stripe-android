@@ -52,7 +52,7 @@ internal class LookBackWindowTransitioner(
                     TAG,
                     "Satisfaction check fails due to $reason, transition to Unsatisfied."
                 )
-                Unsatisfied(reason, foundState.type)
+                Unsatisfied(reason, foundState.type, foundState.timeoutAt)
             }
             moreResultsRequired() -> {
                 Log.d(
@@ -66,7 +66,7 @@ internal class LookBackWindowTransitioner(
                     TAG,
                     "Satisfaction check succeeds, transition to Satisfied."
                 )
-                Satisfied(foundState.type)
+                Satisfied(foundState.type, foundState.timeoutAt)
             }
         }
     }

@@ -97,17 +97,9 @@ internal abstract class CardScanFlow(
         }
     }.let { }
 
-    override suspend fun onResult(result: MainLoopAggregator.FinalResult) {
-        stopFlow()
-    }
-
     override fun cancelFlow() {
         canceled = true
         mainLoopAggregator?.run { cancel() }
-        stopFlow()
-    }
-
-    private fun stopFlow() {
         mainLoopAggregator = null
 
         mainLoop?.unsubscribe()
