@@ -4,7 +4,6 @@ import android.content.ContentResolver
 import android.net.Uri
 import android.os.Bundle
 import android.view.View
-import android.widget.CheckBox
 import androidx.appcompat.app.AppCompatActivity
 import com.github.kittinunf.fuel.Fuel
 import com.github.kittinunf.result.Result
@@ -31,13 +30,6 @@ abstract class MainActivity : AppCompatActivity() {
         }
     }
 
-    private lateinit var allowDL: CheckBox
-    private lateinit var allowPassport: CheckBox
-    private lateinit var allowID: CheckBox
-    private lateinit var requireIdNumber: CheckBox
-    private lateinit var requireMatchingSelfie: CheckBox
-    private lateinit var requireLiveCapture: CheckBox
-
     protected abstract val getBrandLogoResId: Int
 
     private val logoUri: Uri
@@ -51,13 +43,6 @@ abstract class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
-        allowDL = binding.allowedTypeDl
-        allowPassport = binding.allowedTypePassport
-        allowID = binding.allowedTypeId
-        requireIdNumber = binding.requireIdNumber
-        requireMatchingSelfie = binding.requireMatchingSelfie
-        requireLiveCapture = binding.requireLiveCapture
-
         identityVerificationSheet =
             IdentityVerificationSheet.create(
                 this,
@@ -84,13 +69,13 @@ abstract class MainActivity : AppCompatActivity() {
                         VerificationSessionCreationRequest(
                             options = VerificationSessionCreationRequest.Options(
                                 document = VerificationSessionCreationRequest.Document(
-                                    requireIdNumber = requireIdNumber.isChecked,
-                                    requireMatchingSelfie = requireMatchingSelfie.isChecked,
-                                    requireLiveCapture = requireLiveCapture.isChecked,
+                                    requireIdNumber = binding.requireIdNumber.isChecked,
+                                    requireMatchingSelfie = binding.requireMatchingSelfie.isChecked,
+                                    requireLiveCapture = binding.requireLiveCapture.isChecked,
                                     allowedTypes = mutableListOf<String>().also {
-                                        if (allowDL.isChecked) it.add(DRIVING_LICENSE)
-                                        if (allowPassport.isChecked) it.add(PASSPORT)
-                                        if (allowID.isChecked) it.add(ID_CARD)
+                                        if (binding.allowedTypeDl.isChecked) it.add(DRIVING_LICENSE)
+                                        if (binding.allowedTypePassport.isChecked) it.add(PASSPORT)
+                                        if (binding.allowedTypeId.isChecked) it.add(ID_CARD)
                                     }
                                 )
                             )
