@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.View
 import androidx.lifecycle.Observer
 import com.stripe.android.model.ConfirmPaymentIntentParams
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.payments.bankaccount.CollectBankAccountConfiguration
 import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResult
@@ -36,11 +37,12 @@ class ConnectUSBankAccountActivity : StripeIntentActivity() {
                     viewModel.status
                         .postValue(
                             "Attached bank account to paymentIntent." +
-                                " secret: ${result.response.clientSecret}. Confirming..."
+                                " secret: ${result.response.intent.clientSecret}. Confirming..."
                         )
                     confirmPaymentIntent(
                         ConfirmPaymentIntentParams.create(
-                            clientSecret = result.response.clientSecret,
+                            clientSecret = requireNotNull(result.response.intent.clientSecret),
+                            paymentMethodType = PaymentMethod.Type.USBankAccount
                         )
                     )
                 }
