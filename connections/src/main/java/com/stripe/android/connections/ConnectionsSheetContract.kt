@@ -5,7 +5,6 @@ import android.content.Intent
 import android.os.Bundle
 import android.os.Parcelable
 import androidx.activity.result.contract.ActivityResultContract
-import androidx.annotation.VisibleForTesting
 import androidx.core.os.bundleOf
 import kotlinx.parcelize.Parcelize
 import java.security.InvalidParameterException
@@ -32,8 +31,8 @@ internal class ConnectionsSheetContract :
     }
 
     @Parcelize
-    data class Args @VisibleForTesting internal constructor(
-        internal val configuration: ConnectionsSheet.Configuration,
+    data class Args constructor(
+        val configuration: ConnectionsSheet.Configuration,
     ) : Parcelable {
 
         fun validate() {
@@ -53,15 +52,11 @@ internal class ConnectionsSheetContract :
             internal fun fromIntent(intent: Intent): Args? {
                 return intent.getParcelableExtra(EXTRA_ARGS)
             }
-
-            fun create(configuration: ConnectionsSheet.Configuration): Args {
-                return Args(configuration)
-            }
         }
     }
 
     @Parcelize
-    internal data class Result(
+    data class Result(
         val connectionsSheetResult: ConnectionsSheetResult
     ) : Parcelable {
         fun toBundle(): Bundle {
@@ -69,9 +64,7 @@ internal class ConnectionsSheetContract :
         }
     }
 
-    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
-    internal companion object {
-        @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+    companion object {
         const val EXTRA_ARGS =
             "com.stripe.android.connections.ConnectionsSheetContract.extra_args"
         private const val EXTRA_RESULT =

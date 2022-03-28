@@ -32,7 +32,7 @@ internal class DefaultConnectionsSheetLauncher(
 
     override fun present(configuration: ConnectionsSheet.Configuration) {
         activityResultLauncher.launch(
-            ConnectionsSheetContract.Args.create(
+            ConnectionsSheetContract.Args(
                 configuration,
             )
         )
