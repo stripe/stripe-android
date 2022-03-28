@@ -82,7 +82,8 @@ class CardScanSheet private constructor(private val stripePublishableKey: String
          */
         @JvmStatic
         fun create(
-            from: Fragment, stripePublishableKey: String,
+            from: Fragment,
+            stripePublishableKey: String,
             cardScanSheetResultCallback: CardScanResultCallback
         ) =
             CardScanSheet(stripePublishableKey).apply {
