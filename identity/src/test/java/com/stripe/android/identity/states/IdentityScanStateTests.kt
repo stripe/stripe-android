@@ -72,7 +72,8 @@ class IdentityScanStateTests {
             IdentityScanState.Satisfied(
                 IdentityScanState.ScanType.ID_FRONT,
                 mockNeverTimeoutClockMark,
-                mockReachAtClockMark
+                mockReachAtClockMark,
+                displaySatisfiedDuration = TIME_OUT_IN_MILLIS
             )
         val resultState = initialState.consumeTransition(ID_FRONT_OUTPUT)
 
@@ -88,7 +89,8 @@ class IdentityScanStateTests {
         val initialState = IdentityScanState.Satisfied(
             initialScanType,
             mockNeverTimeoutClockMark,
-            mockReachAtClockMark
+            mockReachAtClockMark,
+            displaySatisfiedDuration = TIME_OUT_IN_MILLIS
         )
         val resultState = initialState.consumeTransition(ID_FRONT_OUTPUT)
 
@@ -100,13 +102,13 @@ class IdentityScanStateTests {
     fun `Unsatisfied transitions to Unsatisfied before timeout`() {
         val mockReachAtClockMark: ClockMark = mock()
         whenever(mockReachAtClockMark.elapsedSince()).thenReturn(DURATION_BEFORE_TIMEOUT)
-
         val initialState =
             IdentityScanState.Unsatisfied(
                 "reason",
                 IdentityScanState.ScanType.ID_FRONT,
                 mockNeverTimeoutClockMark,
-                mockReachAtClockMark
+                mockReachAtClockMark,
+                displayUnsatisfiedDuration = TIME_OUT_IN_MILLIS
             )
         val resultState = initialState.consumeTransition(ID_FRONT_OUTPUT)
 
@@ -123,7 +125,8 @@ class IdentityScanStateTests {
             "reason",
             initialScanType,
             mockNeverTimeoutClockMark,
-            mockReachAtClockMark
+            mockReachAtClockMark,
+            displayUnsatisfiedDuration = TIME_OUT_IN_MILLIS
         )
         val resultState = initialState.consumeTransition(ID_FRONT_OUTPUT)
 
@@ -182,7 +185,8 @@ class IdentityScanStateTests {
             0f,
             listOf()
         )
-        val DURATION_BEFORE_TIMEOUT = 499.milliseconds
-        val DURATION_AFTER_TIMEOUT = 501.milliseconds
+        const val TIME_OUT_IN_MILLIS = 500
+        val DURATION_BEFORE_TIMEOUT = (TIME_OUT_IN_MILLIS - 1).milliseconds
+        val DURATION_AFTER_TIMEOUT = (TIME_OUT_IN_MILLIS + 1).milliseconds
     }
 }

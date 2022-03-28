@@ -21,6 +21,7 @@ import com.stripe.android.camera.DefaultCameraErrorListener
 import com.stripe.android.camera.scanui.CameraView
 import com.stripe.android.camera.scanui.util.asRect
 import com.stripe.android.camera.scanui.util.startAnimation
+import com.stripe.android.camera.scanui.util.startAnimationIfNotRunning
 import com.stripe.android.core.exception.InvalidResponseException
 import com.stripe.android.identity.R
 import com.stripe.android.identity.databinding.IdentityCameraScanFragmentBinding
@@ -168,22 +169,20 @@ internal abstract class IdentityCameraScanFragment(
                 cameraView.viewFinderBorderView.visibility = View.VISIBLE
                 continueButton.isEnabled = false
                 checkMarkView.visibility = View.GONE
-                cameraView.viewFinderWindowView.setBackgroundResource(R.drawable.id_viewfinder_background)
-                cameraView.viewFinderBorderView.startAnimation(R.drawable.id_border_initial)
+                cameraView.viewFinderWindowView.setBackgroundResource(R.drawable.viewfinder_background)
+                cameraView.viewFinderBorderView.startAnimation(R.drawable.viewfinder_border_initial)
             }
             is IdentityScanState.Found -> {
                 messageView.text = requireContext().getText(R.string.hold_still)
-                cameraView.viewFinderWindowView.setBackgroundResource(R.drawable.id_viewfinder_background)
-                cameraView.viewFinderBorderView.startAnimation(R.drawable.id_border_found)
+                cameraView.viewFinderWindowView.setBackgroundResource(R.drawable.viewfinder_background)
+                cameraView.viewFinderBorderView.startAnimationIfNotRunning(R.drawable.viewfinder_border_found)
             }
             is IdentityScanState.Unsatisfied -> {
-                cameraView.viewFinderWindowView.setBackgroundResource(R.drawable.id_viewfinder_background)
-                cameraView.viewFinderBorderView.startAnimation(R.drawable.id_border_unsatisfied)
+                cameraView.viewFinderWindowView.setBackgroundResource(R.drawable.viewfinder_background)
             }
             is IdentityScanState.Satisfied -> {
                 messageView.text = requireContext().getText(R.string.scanned)
-                cameraView.viewFinderWindowView.setBackgroundResource(R.drawable.id_viewfinder_background)
-                cameraView.viewFinderBorderView.startAnimation(R.drawable.id_border_satisfied)
+                cameraView.viewFinderWindowView.setBackgroundResource(R.drawable.viewfinder_background)
             }
             is IdentityScanState.Finished -> {
                 cameraView.viewFinderBackgroundView.visibility = View.INVISIBLE
@@ -192,6 +191,7 @@ internal abstract class IdentityCameraScanFragment(
                 checkMarkView.visibility = View.VISIBLE
                 continueButton.isEnabled = true
                 messageView.text = requireContext().getText(R.string.scanned)
+                cameraView.viewFinderBorderView.startAnimation(R.drawable.viewfinder_border_initial)
             }
             is IdentityScanState.TimeOut -> {
                 // no-op, transitions to CouldNotCaptureFragment

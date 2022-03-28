@@ -10,4 +10,7 @@
 
     <color name="choose_file_tint">#88919E</color>
     <color name="take_photo_tint">#88919E</color>
+
+    <color name="viewfinder_border_center">#5469D4</color>
+
 </resources>
