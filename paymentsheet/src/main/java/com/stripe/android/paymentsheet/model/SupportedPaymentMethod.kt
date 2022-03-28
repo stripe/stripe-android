@@ -419,7 +419,7 @@ internal sealed class SupportedPaymentMethod(
          * when they are selected in UI.
          */
         internal fun SupportedPaymentMethod.shouldTintOnSelection(): Boolean {
-            return listOf(
+            return setOf(
                 Card,
                 AuBecsDebit
             ).contains(this)
