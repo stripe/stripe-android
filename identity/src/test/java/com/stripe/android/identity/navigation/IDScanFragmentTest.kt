@@ -253,7 +253,10 @@ internal class IDScanFragmentTest {
     @Test
     fun `when displayStateChanged to Initial UI is properly updated for ID_BACK`() {
         whenever(mockIdentityScanViewModel.targetScanType).thenReturn(IdentityScanState.ScanType.ID_BACK)
-        postDisplayStateChangedDataAndVerifyUI(mock<IdentityScanState.Initial>()) { binding, context ->
+        postDisplayStateChangedDataAndVerifyUI(
+            mock<IdentityScanState.Initial>(),
+            shouldStartFromBack = true
+        ) { binding, context ->
             assertThat(binding.cameraView.viewFinderBackgroundView.visibility).isEqualTo(View.VISIBLE)
             assertThat(binding.cameraView.viewFinderWindowView.visibility).isEqualTo(View.VISIBLE)
             assertThat(binding.cameraView.viewFinderBorderView.visibility).isEqualTo(View.VISIBLE)
@@ -431,9 +434,10 @@ internal class IDScanFragmentTest {
 
     private fun postDisplayStateChangedDataAndVerifyUI(
         newScanState: IdentityScanState,
+        shouldStartFromBack: Boolean = false,
         check: (binding: IdentityCameraScanFragmentBinding, context: Context) -> Unit
     ) {
-        launchIDScanFragment().onFragment {
+        launchIDScanFragment(shouldStartFromBack).onFragment {
             displayStateChanged.postValue((newScanState to mock()))
             check(IdentityCameraScanFragmentBinding.bind(it.requireView()), it.requireContext())
         }

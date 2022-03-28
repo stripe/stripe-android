@@ -16,6 +16,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
@@ -23,6 +24,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
+import com.stripe.android.paymentsheet.model.SupportedPaymentMethod.Companion.shouldTintOnSelection
 import com.stripe.android.paymentsheet.ui.LpmSelectorText
 import com.stripe.android.ui.core.PaymentsTheme
 import com.stripe.android.ui.core.elements.SectionCard
@@ -75,6 +77,7 @@ internal fun PaymentMethodsUI(
                     title = stringResource(item.displayNameResource),
                     isSelected = index == selectedIndex,
                     isEnabled = isEnabled,
+                    tintOnSelected = item.shouldTintOnSelection(),
                     itemIndex = index,
                     onItemSelectedListener = {
                         onItemSelectedListener(paymentMethods[it])
@@ -120,6 +123,7 @@ internal fun PaymentMethodUI(
     title: String,
     isSelected: Boolean,
     isEnabled: Boolean,
+    tintOnSelected: Boolean,
     itemIndex: Int,
     modifier: Modifier = Modifier,
     onItemSelectedListener: (Int) -> Unit
@@ -140,16 +144,21 @@ internal fun PaymentMethodUI(
             )
     ) {
         Column {
+            val color = if (isSelected) PaymentsTheme.colors.material.primary
+            else PaymentsTheme.colors.material.onBackground
+
+            val colorFilter = if (tintOnSelected) ColorFilter.tint(color) else null
             Image(
                 painter = painterResource(iconRes),
                 contentDescription = null,
+                colorFilter = colorFilter,
                 modifier = Modifier
                     .padding(top = ADD_PM_DEFAULT_PADDING.dp, start = ADD_PM_DEFAULT_PADDING.dp)
             )
             LpmSelectorText(
                 text = title,
                 isEnabled = isEnabled,
-                textColor = PaymentsTheme.colors.material.onBackground,
+                textColor = color,
                 modifier = Modifier.padding(top = 6.dp, start = ADD_PM_DEFAULT_PADDING.dp)
             )
         }
