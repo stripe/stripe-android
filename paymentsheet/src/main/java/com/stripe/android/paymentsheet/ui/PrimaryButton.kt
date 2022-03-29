@@ -58,9 +58,6 @@ internal class PrimaryButton @JvmOverloads constructor(
         viewBinding.label.setViewCompositionStrategy(
             ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed
         )
-        getTextAttributeValue(attrs)?.let {
-            setLabel(it.toString())
-        }
 
         isClickable = true
         isEnabled = false

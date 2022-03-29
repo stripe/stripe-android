@@ -56,7 +56,7 @@ class TransitionFragmentResource {
         fun getSingleStepIdlingResource(): androidx.test.espresso.IdlingResource? {
             if (idlingResource == null) {
                 idlingResource = try {
-                    Class.forName("android.support.test.espresso.Espresso")
+                    Class.forName("androidx.test.espresso.Espresso")
                     val countingIdlingResource = CountingIdlingResource("transition")
                     countingIdlingResource
                 } catch (e: ClassNotFoundException) {

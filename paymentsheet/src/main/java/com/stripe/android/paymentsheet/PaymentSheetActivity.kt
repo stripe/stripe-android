@@ -275,12 +275,12 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
 
             if (shouldShowGooglePay) {
                 viewBinding.googlePayButton.bringToFront()
-                viewBinding.googlePayButton.isInvisible = false
+                viewBinding.googlePayButton.isVisible = true
                 viewBinding.buyButton.isVisible = false
             } else {
                 viewBinding.buyButton.bringToFront()
                 viewBinding.buyButton.isVisible = true
-                viewBinding.googlePayButton.isInvisible = true
+                viewBinding.googlePayButton.isVisible = false
             }
         }
 

@@ -100,7 +100,7 @@
                         android:id="@+id/google_pay_button"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:visibility="invisible" />
+                        android:visibility="gone" />
                 </FrameLayout>
             </LinearLayout>
         </ScrollView>
