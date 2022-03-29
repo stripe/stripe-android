@@ -28,6 +28,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.stripe.android.stripecardscan.cardscan.CardScanSheetResult
 import com.stripe.android.stripecardscan.cardscan.exception.UnknownScanException
+import com.stripe.android.ui.core.CARD_SCAN_PARCELABLE_NAME
 import com.stripe.android.ui.core.CardScanActivity
 import com.stripe.android.ui.core.DefaultIsStripeCardScanAvailable
 import com.stripe.android.ui.core.R
@@ -70,7 +71,7 @@ fun CardDetailsSectionElementUI(
                 rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
                     if (it.data != null) {
                         cardDetailsElement.controller.numberElement.controller.onCardScanResult(
-                            it.data!!.getParcelableExtra("test")
+                            it.data!!.getParcelableExtra(CARD_SCAN_PARCELABLE_NAME)
                                 ?: CardScanSheetResult.Failed(
                                     UnknownScanException("No data in the result intent")
                                 )
@@ -95,7 +96,7 @@ fun CardDetailsSectionElementUI(
                 Image(
                     painter = painterResource(R.drawable.stripe_ic_camera),
                     contentDescription = stringResource(
-                        R.string.invalid_expiry_month // Update later
+                        R.string.scan_card
                     ),
                     colorFilter = if (isSystemInDarkTheme()) {
                         ColorFilter.tint(Color.White)
@@ -104,7 +105,7 @@ fun CardDetailsSectionElementUI(
                     }
                 )
                 Text(
-                    "Scan card",
+                    stringResource(R.string.scan_card),
                     Modifier
                         .padding(start = 4.dp),
                     color = if (isSystemInDarkTheme()) {

@@ -6,6 +6,8 @@ import androidx.appcompat.app.AppCompatActivity
 import com.stripe.android.stripecardscan.cardscan.CardScanSheetResult
 import com.stripe.android.ui.core.databinding.ActivityCardScanBinding
 
+const val CARD_SCAN_PARCELABLE_NAME = "CardScanActivityResult"
+
 class CardScanActivity : AppCompatActivity() {
     private val viewBinding by lazy {
         ActivityCardScanBinding.inflate(layoutInflater)
@@ -24,7 +26,7 @@ class CardScanActivity : AppCompatActivity() {
     private fun onScanFinished(result: CardScanSheetResult) {
         val intent = Intent()
             .putExtra(
-                "test",
+                CARD_SCAN_PARCELABLE_NAME,
                 result
             )
         setResult(RESULT_OK, intent)
