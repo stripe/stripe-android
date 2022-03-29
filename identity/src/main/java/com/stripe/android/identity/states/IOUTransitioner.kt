@@ -1,8 +1,13 @@
 package com.stripe.android.identity.states
 
+import com.stripe.android.camera.framework.time.Clock
+import com.stripe.android.camera.framework.time.milliseconds
 import com.stripe.android.identity.ml.AnalyzerOutput
 import com.stripe.android.identity.ml.BoundingBox
+import com.stripe.android.identity.ml.Category
+import com.stripe.android.identity.states.IdentityScanState.Found
 import com.stripe.android.identity.states.IdentityScanState.Satisfied
+import com.stripe.android.identity.states.IdentityScanState.ScanType
 import com.stripe.android.identity.states.IdentityScanState.Unsatisfied
 import kotlin.math.max
 import kotlin.math.min
@@ -10,33 +15,65 @@ import kotlin.math.min
 /**
  * Decide transition based on the Intersection Over Union(IoU) score of bounding boxes.
  *
- * If over [hitsRequired] consecutive hits with IoU over [iouThreshold], then transitions to [Satisfied].
- * Otherwise transition to [Unsatisfied].
+ * * The transitioner first checks if the ML output [Category] matches desired [ScanType], a mismatch
+ * would not necessarily break the check, but will accumulate the [unmatchedFrame] streak,
+ * see [outputMatchesTargetType] for details.
+ * * Then it checks the IoU score, if the score is below threshold, then stays at Found state and
+ * reset the [Found.reachedStateAt] timer.
+ * * Finally it checks since the time elapsed since [Found] is reached, if it passed
+ * [timeRequired], then transitions to [Satisfied], otherwise stays in [Found].
  */
 internal class IOUTransitioner(
-    private val hitsRequired: Int = DEFAULT_HITS_REQUIRED,
-    private val iouThreshold: Float = DEFAULT_IOU_THRESHOLD
+    private val iouThreshold: Float = DEFAULT_IOU_THRESHOLD,
+    private val timeRequired: Int = DEFAULT_TIME_REQUIRED,
+    private val allowedUnmatchedFrames: Int = DEFAULT_ALLOWED_UNMATCHED_FRAME
 ) : IdentityFoundStateTransitioner {
     private var previousBoundingBox: BoundingBox? = null
-    private var consecutiveHitCount = 0
+    private var unmatchedFrame = 0
 
     override fun transition(
-        foundState: IdentityScanState.Found,
+        foundState: Found,
         analyzerOutput: AnalyzerOutput
     ): IdentityScanState {
         return when {
-            !analyzerOutput.category.matchesScanType(foundState.type) -> Unsatisfied(
+            !outputMatchesTargetType(analyzerOutput.category, foundState.type) -> Unsatisfied(
                 "Type ${analyzerOutput.category} doesn't match ${foundState.type}",
-                foundState.type
+                foundState.type,
+                foundState.timeoutAt
             )
-            !iOUCheckPass(analyzerOutput.boundingBox) -> Unsatisfied(
-                "IoU below threshold",
-                foundState.type
-            )
-            moreResultsRequired() -> foundState
-            else -> {
-                Satisfied(foundState.type)
+            !iOUCheckPass(analyzerOutput.boundingBox) -> {
+                // reset timer of the foundState
+                foundState.reachedStateAt = Clock.markNow()
+                foundState
             }
+            moreResultsRequired(foundState) -> foundState
+            else -> {
+                Satisfied(foundState.type, foundState.timeoutAt)
+            }
+        }
+    }
+
+    /**
+     * Compare the ML output [Category] and the target [ScanType].
+     *
+     * If it's a match, then return true and reset the [unmatchedFrame] streak count.
+     * If it's a unmatch, increase [unmatchedFrame] by one,
+     * * If it's still within [allowedUnmatchedFrames], return true
+     * * Otherwise return false
+     *
+     */
+    private fun outputMatchesTargetType(
+        outputCategory: Category,
+        targetScanType: ScanType
+    ): Boolean {
+        return if (outputCategory.matchesScanType(targetScanType)) {
+            // if it's a match, clear the unmatched frame streak count
+            unmatchedFrame = 0
+            true
+        } else {
+            // if it's an unmatch, check if it's still within allowedUnmatchedFrames
+            unmatchedFrame++
+            unmatchedFrame <= allowedUnmatchedFrames
         }
     }
 
@@ -50,15 +87,15 @@ internal class IOUTransitioner(
         return previousBoundingBox?.let { previousBox ->
             val iou = intersectionOverUnion(newBoundingBox, previousBox)
             previousBoundingBox = newBoundingBox
-            iou >= iouThreshold
+            return iou >= iouThreshold
         } ?: run {
             previousBoundingBox = newBoundingBox
             true
         }
     }
 
-    private fun moreResultsRequired(): Boolean {
-        return (consecutiveHitCount++) < hitsRequired
+    private fun moreResultsRequired(foundState: Found): Boolean {
+        return foundState.reachedStateAt.elapsedSince() < timeRequired.milliseconds
     }
 
     /**
@@ -96,7 +133,8 @@ internal class IOUTransitioner(
     }
 
     private companion object {
-        const val DEFAULT_HITS_REQUIRED = 5
+        const val DEFAULT_TIME_REQUIRED = 500
         const val DEFAULT_IOU_THRESHOLD = 0.95f
+        const val DEFAULT_ALLOWED_UNMATCHED_FRAME = 1
     }
 }

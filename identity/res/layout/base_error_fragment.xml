@@ -38,26 +38,23 @@
                 android:textSize="@dimen/camera_permission_title_text_size"
                 android:textStyle="bold"
                 android:gravity="center"
-                android:text="@string/camera_permission"
                 android:layout_marginBottom="12dp"
-                tools:text="@string/camera_permission" />
+                tools:text="Error title" />
 
             <TextView
-                android:id="@+id/grant_permission_text"
+                android:id="@+id/message_1"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/grant_camera_permission_text"
                 android:gravity="center"
                 android:layout_marginBottom="@dimen/item_vertical_margin"
-                tools:text="@string/grant_camera_permission_text" />
+                tools:text="error message first paragraph\nsecond line\nthird line" />
 
             <TextView
-                android:id="@+id/upload_file_text"
+                android:id="@+id/message_2"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/upload_file_text"
                 android:gravity="center"
-                tools:text="@string/upload_file_text" />
+                tools:text="error message second paragraph\nsecond line\nthird line" />
 
         </LinearLayout>
     </ScrollView>
@@ -70,18 +67,19 @@
         android:layout_gravity="bottom">
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/file_upload"
+            android:id="@+id/top_button"
             style="@style/Widget.MaterialComponents.Button.OutlinedButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/file_upload"
+            tools:text="top button"
             android:layout_marginBottom="10dp" />
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/app_settings"
+            android:id="@+id/bottom_button"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/app_settings" />
+            tools:text="bottom button" />
     </LinearLayout>
 
 </LinearLayout>

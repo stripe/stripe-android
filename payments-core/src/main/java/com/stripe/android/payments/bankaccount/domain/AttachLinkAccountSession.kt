@@ -14,13 +14,13 @@ internal class AttachLinkAccountSession @Inject constructor(
      * Attaches a LinkedAccountSession to a given PaymentIntent,
      * using the [linkedAccountSessionId] and the intent [clientSecret].
      *
-     * @return whether the operation succeeded or not.
+     * @return [PaymentIntent] with attached linkedAccount.
      */
     suspend fun forPaymentIntent(
         publishableKey: String,
         linkedAccountSessionId: String,
         clientSecret: String,
-    ): Result<Unit> = kotlin.runCatching {
+    ): Result<PaymentIntent> = kotlin.runCatching {
         stripeRepository.attachLinkAccountSessionToPaymentIntent(
             linkAccountSessionId = linkedAccountSessionId,
             clientSecret = clientSecret,
@@ -33,13 +33,13 @@ internal class AttachLinkAccountSession @Inject constructor(
      * Attaches a LinkedAccountSession to a given PaymentIntent,
      * using the [linkedAccountSessionId] and the intent [clientSecret].
      *
-     * @return whether the operation succeeded or not.
+     * @return [SetupIntent] with attached linkedAccount.
      */
     suspend fun forSetupIntent(
         publishableKey: String,
         linkedAccountSessionId: String,
         clientSecret: String,
-    ): Result<Unit> = kotlin.runCatching {
+    ): Result<SetupIntent> = kotlin.runCatching {
         stripeRepository.attachLinkAccountSessionToSetupIntent(
             linkAccountSessionId = linkedAccountSessionId,
             clientSecret = clientSecret,

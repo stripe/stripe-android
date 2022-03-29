@@ -30,8 +30,8 @@ internal open class CameraViewModel :
 
     internal lateinit var identityScanFlow: IdentityScanFlow
 
-    internal fun initializeScanFlow(identityModelFile: File) {
-        identityScanFlow = IdentityScanFlow(this, this, identityModelFile)
+    internal fun initializeScanFlow(autoCaptureTimeout: Int, identityModelFile: File) {
+        identityScanFlow = IdentityScanFlow(this, this, identityModelFile, autoCaptureTimeout)
     }
 
     override var scanState: IdentityScanState? = null

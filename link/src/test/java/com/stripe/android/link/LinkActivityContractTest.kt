@@ -2,6 +2,7 @@ package com.stripe.android.link
 
 import android.os.Bundle
 import android.os.Parcel
+import com.stripe.android.link.model.StripeIntentFixtures
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -21,6 +22,7 @@ class LinkActivityContractTest {
         )
 
         val args = LinkActivityContract.Args(
+            StripeIntentFixtures.PI_SUCCEEDED,
             "Merchant, Inc",
             "customer@email.com",
             injectionParams

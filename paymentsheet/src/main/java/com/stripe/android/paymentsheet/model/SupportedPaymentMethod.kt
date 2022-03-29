@@ -432,6 +432,17 @@ sealed class SupportedPaymentMethod(
         }
 
         /**
+         * This is a list of payment methods that we should tint their icons
+         * when they are selected in UI.
+         */
+        internal fun SupportedPaymentMethod.shouldTintOnSelection(): Boolean {
+            return setOf(
+                Card,
+                AuBecsDebit
+            ).contains(this)
+        }
+
+        /**
          * This will use only those payment methods that are allowed in the release
          */
         fun fromCode(code: String?) =

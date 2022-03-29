@@ -20,11 +20,16 @@ internal class DriverLicenseScanFragment(
     identityCameraScanViewModelFactory,
     identityViewModelFactory
 ) {
-    override val headerTitleRes = R.string.front_of_dl
-    override val messageRes = R.string.position_dl_front
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        if (shouldStartFromBack()) {
+            headerTitle.text = requireContext().getText(R.string.back_of_dl)
+            messageView.text = requireContext().getText(R.string.position_dl_back)
+        } else {
+            headerTitle.text = requireContext().getText(R.string.front_of_dl)
+            messageView.text = requireContext().getText(R.string.position_dl_front)
+        }
+
         continueButton.setOnClickListener {
             when (identityScanViewModel.targetScanType) {
                 DL_FRONT -> {
@@ -44,7 +49,11 @@ internal class DriverLicenseScanFragment(
     }
 
     override fun onCameraReady() {
-        startScanning(DL_FRONT)
+        if (shouldStartFromBack()) {
+            startScanning(DL_BACK)
+        } else {
+            startScanning(DL_FRONT)
+        }
     }
 
     override fun updateUI(identityScanState: IdentityScanState) {
@@ -53,11 +62,9 @@ internal class DriverLicenseScanFragment(
             is IdentityScanState.Initial -> {
                 when (identityScanViewModel.targetScanType) {
                     DL_FRONT -> {
-                        headerTitle.text = requireContext().getText(R.string.front_of_dl)
                         messageView.text = requireContext().getText(R.string.position_dl_front)
                     }
                     DL_BACK -> {
-                        headerTitle.text = requireContext().getText(R.string.back_of_dl)
                         messageView.text = requireContext().getText(R.string.position_dl_back)
                     }
                     else -> {

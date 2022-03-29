@@ -14,7 +14,6 @@ import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
-import com.stripe.android.core.model.InternalStripeFile
 import com.stripe.android.identity.R
 import com.stripe.android.identity.databinding.PassportUploadFragmentBinding
 import com.stripe.android.identity.networking.Status
@@ -78,7 +77,7 @@ internal class PassportUploadFragment(
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        passportUploadViewModel.uploaded.observe(viewLifecycleOwner) {
+        identityViewModel.frontHighResUploaded.observe(viewLifecycleOwner) {
             when (it.status) {
                 Status.SUCCESS -> {
                     showUploadDone(it.data)
@@ -121,10 +120,11 @@ internal class PassportUploadFragment(
         identityViewModel.observeForVerificationPage(
             this,
             onSuccess = { verificationPage ->
-                passportUploadViewModel.uploadImage(
-                    passport,
-                    verificationPage.documentCapture,
-                    uploadMethod
+                identityViewModel.uploadManualResult(
+                    uri = passport,
+                    isFront = true, // passport is uploaded as front
+                    docCapturePage = verificationPage.documentCapture,
+                    uploadMethod = uploadMethod
                 )
             },
             onFailure = {
@@ -139,7 +139,7 @@ internal class PassportUploadFragment(
         binding.finishedCheckMark.visibility = View.GONE
     }
 
-    private fun showUploadDone(passportImage: Pair<InternalStripeFile, DocumentUploadParam.UploadMethod>?) {
+    private fun showUploadDone(passportUploadResult: IdentityViewModel.UploadedResult?) {
         binding.select.visibility = View.GONE
         binding.progressCircular.visibility = View.GONE
         binding.finishedCheckMark.visibility = View.VISIBLE
@@ -148,16 +148,16 @@ internal class PassportUploadFragment(
             binding.kontinue.toggleToLoading()
             lifecycleScope.launch {
                 runCatching {
-                    requireNotNull(passportImage)
+                    requireNotNull(passportUploadResult)
                     postVerificationPageDataAndMaybeSubmit(
                         identityViewModel = identityViewModel,
                         collectedDataParam = CollectedDataParam(
                             idDocument = IdDocumentParam(
                                 front = DocumentUploadParam(
-                                    highResImage = requireNotNull(passportImage.first.id) {
+                                    highResImage = requireNotNull(passportUploadResult.uploadedStripeFile.id) {
                                         "front uploaded file id is null"
                                     },
-                                    uploadMethod = passportImage.second
+                                    uploadMethod = passportUploadResult.uploadMethod
                                 ),
                                 type = IdDocumentParam.Type.PASSPORT
                             )

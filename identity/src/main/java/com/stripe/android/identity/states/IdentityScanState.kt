@@ -12,7 +12,12 @@ import com.stripe.android.identity.ml.Category
 /**
  * States during scanning a document.
  */
-internal sealed class IdentityScanState(val type: ScanType, isFinal: Boolean) : ScanState(isFinal) {
+internal sealed class IdentityScanState(
+    val type: ScanType,
+    val timeoutAt: ClockMark,
+    isFinal: Boolean
+) : ScanState(isFinal) {
+
     /**
      * Type of documents being scanned
      */
@@ -37,27 +42,33 @@ internal sealed class IdentityScanState(val type: ScanType, isFinal: Boolean) : 
      */
     internal class Initial(
         type: ScanType,
+        timeoutAt: ClockMark,
         private val transitioner: IdentityFoundStateTransitioner = IOUTransitioner()
-    ) :
-        IdentityScanState(type, false) {
+    ) : IdentityScanState(type, timeoutAt, false) {
         /**
          * Only transitions to [Found] when ML output type matches scan type
          */
         override fun consumeTransition(analyzerOutput: AnalyzerOutput) =
-            if (analyzerOutput.category.matchesScanType(type)) {
-                Log.d(
-                    TAG,
-                    "Matching model output detected with score ${analyzerOutput.resultScore}, " +
-                        "transition to Found."
-                )
-                Found(type, transitioner)
-            } else {
-                Log.d(
-                    TAG,
-                    "Model outputs ${analyzerOutput.category}, which doesn't match with " +
-                        "scanType $type, stay in Initial"
-                )
-                this
+            when {
+                timeoutAt.hasPassed() -> {
+                    TimeOut(type, timeoutAt)
+                }
+                analyzerOutput.category.matchesScanType(type) -> {
+                    Log.d(
+                        TAG,
+                        "Matching model output detected with score ${analyzerOutput.resultScore}, " +
+                            "transition to Found."
+                    )
+                    Found(type, timeoutAt, transitioner)
+                }
+                else -> {
+                    Log.d(
+                        TAG,
+                        "Model outputs ${analyzerOutput.category}, which doesn't match with " +
+                            "scanType $type, stay in Initial"
+                    )
+                    this
+                }
             }
     }
 
@@ -67,34 +78,41 @@ internal sealed class IdentityScanState(val type: ScanType, isFinal: Boolean) : 
      */
     internal class Found(
         type: ScanType,
+        timeoutAt: ClockMark,
         @VisibleForTesting
-        internal val transitioner: IdentityFoundStateTransitioner
-    ) : IdentityScanState(type, false) {
-        override fun consumeTransition(analyzerOutput: AnalyzerOutput): IdentityScanState {
-            return transitioner.transition(this, analyzerOutput)
-        }
+        internal val transitioner: IdentityFoundStateTransitioner,
+        internal var reachedStateAt: ClockMark = Clock.markNow()
+    ) : IdentityScanState(type, timeoutAt, false) {
+        override fun consumeTransition(analyzerOutput: AnalyzerOutput) =
+            if (timeoutAt.hasPassed()) {
+                TimeOut(type, timeoutAt)
+            } else {
+                transitioner.transition(this, analyzerOutput)
+            }
     }
 
     /**
      * State when satisfaction checking passed.
+     *
+     * Note when Satisfied is reached, [timeoutAt] won't be checked.
      */
     internal class Satisfied(
         type: ScanType,
-        private val reachedStateAt: ClockMark = Clock.markNow()
-    ) : IdentityScanState(type, false) {
-
+        timeoutAt: ClockMark,
+        private val reachedStateAt: ClockMark = Clock.markNow(),
+        private val displaySatisfiedDuration: Int = DEFAULT_DISPLAY_SATISFIED_DURATION
+    ) : IdentityScanState(type, timeoutAt, false) {
         override fun consumeTransition(analyzerOutput: AnalyzerOutput): IdentityScanState {
-            return if (reachedStateAt.elapsedSince() > DISPLAY_SATISFIED_DURATION) {
+            return if (reachedStateAt.elapsedSince() > displaySatisfiedDuration.milliseconds) {
                 Log.d(TAG, "Scan for $type Satisfied, transition to Finished.")
-                Finished(type)
+                Finished(type, timeoutAt)
             } else {
-                Log.d(TAG, "Displaying satisfied state, waiting for timeout")
                 this
             }
         }
 
         private companion object {
-            val DISPLAY_SATISFIED_DURATION = 500.milliseconds
+            const val DEFAULT_DISPLAY_SATISFIED_DURATION = 0
         }
     }
 
@@ -104,29 +122,47 @@ internal sealed class IdentityScanState(val type: ScanType, isFinal: Boolean) : 
     internal class Unsatisfied(
         internal val reason: String,
         type: ScanType,
-        private val reachedStateAt: ClockMark = Clock.markNow()
-    ) : IdentityScanState(type, false) {
+        timeoutAt: ClockMark,
+        private val reachedStateAt: ClockMark = Clock.markNow(),
+        private val displayUnsatisfiedDuration: Int = DEFAULT_DISPLAY_UNSATISFIED_DURATION
+    ) : IdentityScanState(type, timeoutAt, false) {
 
-        override fun consumeTransition(analyzerOutput: AnalyzerOutput): IdentityScanState {
-            return if (reachedStateAt.elapsedSince() > DISPLAY_UNSATISFIED_DURATION) {
+        override fun consumeTransition(analyzerOutput: AnalyzerOutput) = when {
+            timeoutAt.hasPassed() -> {
+                TimeOut(type, timeoutAt)
+            }
+            reachedStateAt.elapsedSince() > displayUnsatisfiedDuration.milliseconds -> {
                 Log.d(TAG, "Scan for $type Unsatisfied with reason $reason, transition to Initial.")
-                Initial(type)
-            } else {
-                Log.d(TAG, "Displaying unsatisfied state, waiting for timeout")
+                Initial(type, timeoutAt)
+            }
+            else -> {
                 this
             }
         }
 
         private companion object {
-            val DISPLAY_UNSATISFIED_DURATION = 500.milliseconds
+            const val DEFAULT_DISPLAY_UNSATISFIED_DURATION = 0
         }
     }
 
     /**
      * Terminal state, indicting the scan is finished.
      */
-    internal class Finished(type: ScanType) : IdentityScanState(type, true) {
+    internal class Finished(type: ScanType, timeoutAt: ClockMark) :
+        IdentityScanState(type, timeoutAt, true) {
         override fun consumeTransition(analyzerOutput: AnalyzerOutput) = this
+    }
+
+    /**
+     * Terminal state, indicating the scan times out.
+     */
+    internal class TimeOut(type: ScanType, timeoutAt: ClockMark) :
+        IdentityScanState(type, timeoutAt, true) {
+        override fun consumeTransition(analyzerOutput: AnalyzerOutput) = this
+
+        internal companion object {
+            const val DEFAULT_TIME_OUT_MILLIS = 8000
+        }
     }
 
     private companion object {

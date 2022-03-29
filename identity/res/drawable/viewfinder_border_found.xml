@@ -20,19 +20,25 @@
                     L 7.5,197.5
                     a 5,5,0,0,1,-5,-5
                     Z"
-                android:strokeColor="#5469D4"
+                android:trimPathStart="0"
+                android:trimPathEnd="0.5"
+                android:strokeColor="@color/viewfinder_border_center"
                 android:strokeWidth="5" />
         </vector>
     </aapt:attr>
     <target android:name="card_border">
         <aapt:attr name="android:animation">
             <objectAnimator
-                android:propertyName="trimPathEnd"
-                android:duration="10000"
-                android:valueFrom="0"
-                android:valueTo="1"
-                android:valueType="floatType"
-                android:interpolator="@android:interpolator/fast_out_slow_in" />
+                android:duration="1500"
+                android:interpolator="@android:interpolator/linear"
+                android:repeatCount="infinite"
+                android:repeatMode="restart">
+                <propertyValuesHolder
+                    android:propertyName="trimPathOffset"
+                    android:valueFrom="0"
+                    android:valueTo="1"
+                    android:valueType="floatType" />
+            </objectAnimator>
         </aapt:attr>
     </target>
 </animated-vector>
