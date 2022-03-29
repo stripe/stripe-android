@@ -50,8 +50,9 @@ inline fun <reified T : Activity> injectableActivityScenario(injector: Injectabl
  * }
  * ```
  */
-class InjectableActivityScenario<T : Activity>(private val activityClass: Class<T>) : AutoCloseable,
-    Closeable {
+class InjectableActivityScenario<T : Activity>(
+    private val activityClass: Class<T>
+) : AutoCloseable, Closeable {
 
     private var delegate: ActivityScenario<T>? = null
 
