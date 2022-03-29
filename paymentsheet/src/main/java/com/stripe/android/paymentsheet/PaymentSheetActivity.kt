@@ -13,6 +13,7 @@ import androidx.annotation.VisibleForTesting
 import androidx.compose.ui.graphics.toArgb
 import androidx.core.os.bundleOf
 import androidx.core.view.doOnNextLayout
+import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import androidx.fragment.app.commit
 import androidx.lifecycle.ViewModelProvider
@@ -274,12 +275,12 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
 
             if (shouldShowGooglePay) {
                 viewBinding.googlePayButton.bringToFront()
-                viewBinding.googlePayButton.isVisible = true
+                viewBinding.googlePayButton.isInvisible = false
                 viewBinding.buyButton.isVisible = false
             } else {
                 viewBinding.buyButton.bringToFront()
                 viewBinding.buyButton.isVisible = true
-                viewBinding.googlePayButton.isVisible = false
+                viewBinding.googlePayButton.isInvisible = true
             }
         }
 

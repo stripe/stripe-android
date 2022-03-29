@@ -125,8 +125,8 @@ class PlaygroundTestDriver(
         val scenario = ActivityScenario.launch(PaymentSheetPlaygroundActivity::class.java)
         scenario.onActivity { activity ->
 
-            IdlingPolicies.setIdlingResourceTimeout(1, TimeUnit.MINUTES)
-            IdlingPolicies.setMasterPolicyTimeout(1, TimeUnit.MINUTES)
+            IdlingPolicies.setIdlingResourceTimeout(45, TimeUnit.SECONDS)
+            IdlingPolicies.setMasterPolicyTimeout(45, TimeUnit.SECONDS)
 
             IdlingRegistry.getInstance().register(
                 activity.getMultiStepIdlingResource(),
