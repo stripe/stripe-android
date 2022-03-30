@@ -9,7 +9,7 @@ import androidx.core.os.bundleOf
 import kotlinx.parcelize.Parcelize
 
 internal class IdentityVerificationSheetContract :
-    ActivityResultContract<IdentityVerificationSheetContract.Args, IdentityVerificationSheet.VerificationResult>() {
+    ActivityResultContract<IdentityVerificationSheetContract.Args, IdentityVerificationSheet.VerificationFlowResult>() {
 
     @Parcelize
     internal data class Args(
@@ -38,7 +38,7 @@ internal class IdentityVerificationSheetContract :
     override fun parseResult(
         resultCode: Int,
         intent: Intent?
-    ): IdentityVerificationSheet.VerificationResult {
-        return IdentityVerificationSheet.VerificationResult.fromIntent(intent)
+    ): IdentityVerificationSheet.VerificationFlowResult {
+        return IdentityVerificationSheet.VerificationFlowResult.fromIntent(intent)
     }
 }

@@ -49,7 +49,7 @@ internal class ConsentFragment(
             object : OnBackPressedCallback(true) {
                 override fun handleOnBackPressed() {
                     verificationFlowFinishable.finishWithResult(
-                        IdentityVerificationSheet.VerificationResult.Canceled
+                        IdentityVerificationSheet.VerificationFlowResult.Canceled
                     )
                 }
             }
