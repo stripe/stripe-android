@@ -265,7 +265,7 @@ internal val AffirmRequirement = PaymentMethodRequirements(
  * This defines the requirements for usage as a Payment Method.
  */
 internal val AuBecsDebitRequirement = PaymentMethodRequirements(
-    piRequirements = emptySet(),
+    piRequirements = setOf(Delayed),
     siRequirements = null,
     confirmPMFromCustomer = null
 )
