@@ -305,13 +305,6 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
             viewBinding.buyButton.isEnabled = isEnabled
             viewBinding.googlePayButton.isEnabled = isEnabled
         }
-
-        viewBinding.bottomSheet.setBackgroundColor(
-            PaymentsThemeConfig.colors(isDark).surface.toArgb()
-        )
-        viewBinding.toolbar.setBackgroundColor(
-            PaymentsThemeConfig.colors(isDark).surface.toArgb()
-        )
     }
 
     override fun setActivityResult(result: PaymentSheetResult) {
