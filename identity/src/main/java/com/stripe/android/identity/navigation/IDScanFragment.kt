@@ -62,9 +62,11 @@ internal class IDScanFragment(
             is IdentityScanState.Initial -> {
                 when (identityScanViewModel.targetScanType) {
                     ID_FRONT -> {
+                        headerTitle.text = requireContext().getText(R.string.front_of_id)
                         messageView.text = requireContext().getText(R.string.position_id_front)
                     }
                     ID_BACK -> {
+                        headerTitle.text = requireContext().getText(R.string.back_of_id)
                         messageView.text = requireContext().getText(R.string.position_id_back)
                     }
                     else -> {
@@ -78,9 +80,11 @@ internal class IDScanFragment(
             is IdentityScanState.Unsatisfied -> {
                 when (identityScanViewModel.targetScanType) {
                     ID_FRONT -> {
+                        headerTitle.text = requireContext().getText(R.string.front_of_id)
                         messageView.text = requireContext().getText(R.string.position_id_front)
                     }
                     ID_BACK -> {
+                        headerTitle.text = requireContext().getText(R.string.back_of_id)
                         messageView.text = requireContext().getText(R.string.position_id_back)
                     }
                     else -> {

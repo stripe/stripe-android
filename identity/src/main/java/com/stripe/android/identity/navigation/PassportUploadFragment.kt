@@ -7,7 +7,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
-import android.widget.TextView
 import androidx.appcompat.app.AppCompatDialog
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -95,8 +94,7 @@ internal class PassportUploadFragment(
 
     private fun buildDialog() = AppCompatDialog(requireContext()).also { dialog ->
         dialog.setContentView(R.layout.get_local_image_dialog)
-        dialog.findViewById<TextView>(R.id.title)?.text =
-            getString(R.string.upload_dialog_title_passport)
+        dialog.setTitle(getString(R.string.upload_dialog_title_passport))
 
         if (shouldShowCamera) {
             dialog.findViewById<Button>(R.id.take_photo)?.setOnClickListener {

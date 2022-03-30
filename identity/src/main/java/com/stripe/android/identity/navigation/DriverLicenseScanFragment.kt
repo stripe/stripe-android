@@ -62,9 +62,11 @@ internal class DriverLicenseScanFragment(
             is IdentityScanState.Initial -> {
                 when (identityScanViewModel.targetScanType) {
                     DL_FRONT -> {
+                        headerTitle.text = requireContext().getText(R.string.front_of_dl)
                         messageView.text = requireContext().getText(R.string.position_dl_front)
                     }
                     DL_BACK -> {
+                        headerTitle.text = requireContext().getText(R.string.back_of_dl)
                         messageView.text = requireContext().getText(R.string.position_dl_back)
                     }
                     else -> {
@@ -78,9 +80,11 @@ internal class DriverLicenseScanFragment(
             is IdentityScanState.Unsatisfied -> {
                 when (identityScanViewModel.targetScanType) {
                     DL_FRONT -> {
+                        headerTitle.text = requireContext().getText(R.string.front_of_dl)
                         messageView.text = requireContext().getText(R.string.position_dl_front)
                     }
                     DL_BACK -> {
+                        headerTitle.text = requireContext().getText(R.string.back_of_dl)
                         messageView.text = requireContext().getText(R.string.position_dl_back)
                     }
                     else -> {
