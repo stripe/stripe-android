@@ -37,7 +37,6 @@ class ConnectionsApiRepositoryTest {
             assertThat(result.paymentAccount).isInstanceOf(LinkedAccount::class.java)
         }
 
-
     @Test
     fun `getLinkAccountSession - when paymentAccount is BankAccount, deserializes correct type`() =
         runTest {
@@ -84,7 +83,6 @@ class ConnectionsApiRepositoryTest {
             }
         """.trimIndent()
 
-
         private val LINKED_ACCOUNT_SESSION_WITH_LINKED_ACCOUNT = """ 
             {
               "id": "las_dhgfsklhgfkdsjhgk",
@@ -111,5 +109,4 @@ class ConnectionsApiRepositoryTest {
             }
         """.trimIndent()
     }
-
 }

@@ -1,6 +1,7 @@
 package com.stripe.android.connections.model
 
 import android.os.Parcelable
+import com.stripe.android.connections.model.serializer.PaymentAccountSerializer
 import com.stripe.android.core.model.StripeModel
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.SerialName
