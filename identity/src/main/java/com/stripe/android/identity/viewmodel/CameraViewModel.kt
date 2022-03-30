@@ -11,6 +11,7 @@ import com.stripe.android.identity.camera.IDDetectorAggregator
 import com.stripe.android.identity.camera.IdentityScanFlow
 import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.states.IdentityScanState
+import com.stripe.android.identity.utils.SingleLiveEvent
 import java.io.File
 
 /**
@@ -24,10 +25,10 @@ internal open class CameraViewModel :
     AggregateResultListener<IDDetectorAggregator.InterimResult, IDDetectorAggregator.FinalResult>,
     SimpleScanStateful<IdentityScanState> {
     private val interimResults = MutableLiveData<IDDetectorAggregator.InterimResult>()
-    internal val finalResult = MutableLiveData<IDDetectorAggregator.FinalResult>()
+    internal val finalResult = SingleLiveEvent<IDDetectorAggregator.FinalResult>()
     private val reset = MutableLiveData<Unit>()
     internal val displayStateChanged =
-        MutableLiveData<Pair<IdentityScanState, IdentityScanState?>>()
+        SingleLiveEvent<Pair<IdentityScanState, IdentityScanState?>>()
 
     internal lateinit var identityScanFlow: IdentityScanFlow
 

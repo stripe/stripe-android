@@ -7,7 +7,6 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.core.os.bundleOf
 import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.lifecycle.MediatorLiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.Navigation
@@ -32,6 +31,7 @@ import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentDocumentCapturePage
 import com.stripe.android.identity.states.IdentityScanState
 import com.stripe.android.identity.utils.PairMediatorLiveData
+import com.stripe.android.identity.utils.SingleLiveEvent
 import com.stripe.android.identity.viewModelFactoryFor
 import com.stripe.android.identity.viewmodel.IdentityScanViewModel
 import com.stripe.android.identity.viewmodel.IdentityViewModel
@@ -58,8 +58,8 @@ internal class IDScanFragmentTest {
     @get:Rule
     var rule: TestRule = InstantTaskExecutorRule()
 
-    private val finalResultLiveData = MutableLiveData<IDDetectorAggregator.FinalResult>()
-    private val displayStateChanged = MutableLiveData<Pair<IdentityScanState, IdentityScanState?>>()
+    private val finalResultLiveData = SingleLiveEvent<IDDetectorAggregator.FinalResult>()
+    private val displayStateChanged = SingleLiveEvent<Pair<IdentityScanState, IdentityScanState?>>()
     private val mockBothUploaded: PairMediatorLiveData<Pair<UploadedResult, UploadedResult>> =
         mock()
     private val bothUploadedObserverCaptor =
