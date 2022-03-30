@@ -106,8 +106,7 @@ class ConnectionsApiRepositoryTest {
                 "institution_name": "JPMORGAN CHASE BANK, NA",
                 "livemode": true,
                 "supported_payment_method_types": ["link"],
-                "last4": "3211",
-                "routing_number": "12341234"
+                "last4": "3211"
               }
             }
         """.trimIndent()
