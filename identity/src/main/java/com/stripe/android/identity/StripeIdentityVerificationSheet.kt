@@ -26,7 +26,7 @@ internal class StripeIdentityVerificationSheet private constructor(
     private val activityResultLauncher: ActivityResultLauncher<IdentityVerificationSheetContract.Args> =
         activityResultCaller.registerForActivityResult(
             IdentityVerificationSheetContract(),
-            identityVerificationCallback::onVerificationResult
+            identityVerificationCallback::onVerificationFlowResult
         )
 
     override fun present(

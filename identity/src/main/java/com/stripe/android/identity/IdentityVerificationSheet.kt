@@ -43,7 +43,7 @@ interface IdentityVerificationSheet {
 
             fun fromIntent(intent: Intent?): VerificationFlowResult {
                 return intent?.getParcelableExtra(EXTRA)
-                    ?: Failed(IllegalStateException("Failed to get VerificationResult from Intent"))
+                    ?: Failed(IllegalStateException("Failed to get VerificationFlowResult from Intent"))
             }
         }
     }
@@ -60,7 +60,7 @@ interface IdentityVerificationSheet {
      * Callback to notify when identity verification finishes and a result is available.
      */
     fun interface IdentityVerificationCallback {
-        fun onVerificationResult(result: VerificationFlowResult)
+        fun onVerificationFlowResult(result: VerificationFlowResult)
     }
 
     companion object {

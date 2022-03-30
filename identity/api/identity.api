@@ -35,7 +35,7 @@ public final class com/stripe/android/identity/IdentityVerificationSheet$Configu
 }
 
 public abstract interface class com/stripe/android/identity/IdentityVerificationSheet$IdentityVerificationCallback {
-	public abstract fun onVerificationResult (Lcom/stripe/android/identity/IdentityVerificationSheet$VerificationFlowResult;)V
+	public abstract fun onVerificationFlowResult (Lcom/stripe/android/identity/IdentityVerificationSheet$VerificationFlowResult;)V
 }
 
 public abstract class com/stripe/android/identity/IdentityVerificationSheet$VerificationFlowResult : android/os/Parcelable {
