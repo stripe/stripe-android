@@ -80,17 +80,6 @@ internal class PrimaryButton @JvmOverloads constructor(
         setPadding(cornerRadius.toInt())
     }
 
-    private fun getTextAttributeValue(attrs: AttributeSet?): CharSequence? {
-        var text: CharSequence? = null
-        context.withStyledAttributes(
-            attrs,
-            listOf(android.R.attr.text).toIntArray()
-        ) {
-            text = getText(0)
-        }
-        return text
-    }
-
     fun setLabel(text: String?) {
         externalLabel = text
         if (state !is State.StartProcessing) {

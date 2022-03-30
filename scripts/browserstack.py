@@ -124,8 +124,8 @@ def executeTests(appUrl, testUrl):
          "networkLogs": True,
          "deviceLogs": True,
          "video": True,
-#          "language": "en_us",
-#          "locale": "en_us",
+#          "language": "en_US",
+         "locale": "en_US",
          "enableSpoonFramework": False,
          "project": "Mobile Payments"
       }, auth=(user, authKey))

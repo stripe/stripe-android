@@ -42,7 +42,6 @@ internal class PaymentSheetAddPaymentMethodFragment() : BaseAddPaymentMethodFrag
 
         viewBinding = FragmentPaymentsheetAddPaymentMethodBinding.bind(view)
         val googlePayButton = viewBinding.googlePayButton
-        val googlePayDivider = viewBinding.googlePayDivider
 
         googlePayButton.setOnClickListener {
             // The scroll will be made visible onResume of the activity
@@ -52,7 +51,6 @@ internal class PaymentSheetAddPaymentMethodFragment() : BaseAddPaymentMethodFrag
         }
 
         googlePayButton.isVisible = shouldShowGooglePayButton
-        googlePayDivider.isVisible = shouldShowGooglePayButton
         sheetViewModel.headerVisibilility.postValue(!shouldShowGooglePayButton)
 
         sheetViewModel.selection.observe(viewLifecycleOwner) { paymentSelection ->

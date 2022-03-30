@@ -126,6 +126,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     internal val amount: LiveData<Amount> = _amount
 
     internal val headerVisibilility: MutableLiveData<Boolean> = MutableLiveData(true)
+    internal val googlePayDividerVisibilility: MutableLiveData<Boolean> = MutableLiveData(false)
 
     private var addFragmentSelectedLPM =
         savedStateHandle.get<SupportedPaymentMethod>(SAVE_SELECTED_ADD_LPM)
