@@ -10,9 +10,7 @@ import androidx.activity.viewModels
 import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
 import com.stripe.android.view.AuthActivityStarterHost
-import kotlinx.coroutines.launch
 
 /**
  * Host activity to perform actions for [PaymentLauncher].
@@ -29,8 +27,6 @@ internal class PaymentLauncherConfirmationActivity : AppCompatActivity() {
         PaymentLauncherViewModel.Factory(
             { requireNotNull(starterArgs) },
             { application },
-            { AuthActivityStarterHost.create(this) },
-            this,
             this
         )
 
@@ -62,25 +58,17 @@ internal class PaymentLauncherConfirmationActivity : AppCompatActivity() {
         }
 
         viewModel.paymentLauncherResult.observe(this, ::finishWithResult)
-
-        // [viewModel.hasStarted] could be true if the app process is killed by system, then
-        // PaymentLauncherConfirmationActivity gets recreated.
-        // In this case we don't need to invoke the viewModel method again because it's already
-        // called before the process is killed, now PaymentLauncherConfirmationActivity just needs
-        // to wait for ::finishWithResult to be called.
-        if (!viewModel.hasStarted) {
-            lifecycleScope.launch {
-                when (args) {
-                    is PaymentLauncherContract.Args.IntentConfirmationArgs -> {
-                        viewModel.confirmStripeIntent(args.confirmStripeIntentParams)
-                    }
-                    is PaymentLauncherContract.Args.PaymentIntentNextActionArgs -> {
-                        viewModel.handleNextActionForStripeIntent(args.paymentIntentClientSecret)
-                    }
-                    is PaymentLauncherContract.Args.SetupIntentNextActionArgs -> {
-                        viewModel.handleNextActionForStripeIntent(args.setupIntentClientSecret)
-                    }
-                }
+        viewModel.register(this)
+        val host = AuthActivityStarterHost.create(this)
+        when (args) {
+            is PaymentLauncherContract.Args.IntentConfirmationArgs -> {
+                viewModel.confirmStripeIntent(args.confirmStripeIntentParams, host)
+            }
+            is PaymentLauncherContract.Args.PaymentIntentNextActionArgs -> {
+                viewModel.handleNextActionForStripeIntent(args.paymentIntentClientSecret, host)
+            }
+            is PaymentLauncherContract.Args.SetupIntentNextActionArgs -> {
+                viewModel.handleNextActionForStripeIntent(args.setupIntentClientSecret, host)
             }
         }
     }

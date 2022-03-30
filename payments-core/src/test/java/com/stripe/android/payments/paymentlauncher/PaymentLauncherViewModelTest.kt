@@ -105,7 +105,10 @@ class PaymentLauncherViewModelTest {
     private val succeededSetupResult =
         SetupIntentResult(setupIntent, StripeIntentResult.Outcome.SUCCEEDED)
 
-    private fun createViewModel(isPaymentIntent: Boolean = true, isInstantApp: Boolean = false) =
+    private fun createViewModel(
+        isPaymentIntent: Boolean = true,
+        isInstantApp: Boolean = false
+    ) =
         PaymentLauncherViewModel(
             isPaymentIntent,
             stripeApiRepository,
@@ -118,11 +121,13 @@ class PaymentLauncherViewModelTest {
             analyticsRequestExecutor,
             analyticsRequestFactory,
             uiContext,
-            authHost,
-            activityResultCaller,
             savedStateHandle,
             isInstantApp
-        )
+        ).apply {
+            register(
+                caller = activityResultCaller
+            )
+        }
 
     @Before
     fun setUpMocks() = runTest {
@@ -152,11 +157,10 @@ class PaymentLauncherViewModelTest {
         whenever(authenticatorRegistry.getAuthenticator(eq(stripeIntent)))
             .thenReturn(stripeIntentAuthenticator)
     }
-
     @Test
     fun `verify confirm PaymentIntent without returnUrl invokes StripeRepository and calls correct authenticator`() =
         runTest {
-            createViewModel().confirmStripeIntent(confirmPaymentIntentParams)
+            createViewModel().confirmStripeIntent(confirmPaymentIntentParams, authHost)
 
             verify(analyticsRequestFactory).createRequest(
                 PaymentAnalyticsEvent.ConfirmReturnUrlNull
@@ -184,7 +188,8 @@ class PaymentLauncherViewModelTest {
             createViewModel().confirmStripeIntent(
                 confirmPaymentIntentParams.also {
                     it.returnUrl = RETURN_URL
-                }
+                },
+                authHost
             )
 
             verify(savedStateHandle).set(PaymentLauncherViewModel.KEY_HAS_STARTED, true)
@@ -211,7 +216,7 @@ class PaymentLauncherViewModelTest {
     @Test
     fun `verify confirm SetupIntent without returnUrl invokes StripeRepository and calls correct authenticator`() =
         runTest {
-            createViewModel().confirmStripeIntent(confirmSetupIntentParams)
+            createViewModel().confirmStripeIntent(confirmSetupIntentParams, authHost)
 
             verify(savedStateHandle).set(PaymentLauncherViewModel.KEY_HAS_STARTED, true)
             verify(analyticsRequestFactory).createRequest(
@@ -240,7 +245,8 @@ class PaymentLauncherViewModelTest {
             createViewModel().confirmStripeIntent(
                 confirmSetupIntentParams.also {
                     it.returnUrl = RETURN_URL
-                }
+                },
+                authHost
             )
 
             verify(savedStateHandle).set(PaymentLauncherViewModel.KEY_HAS_STARTED, true)
@@ -267,7 +273,7 @@ class PaymentLauncherViewModelTest {
     @Test
     fun `verify instantApp confirm PaymentIntent without returnUrl gets null returnUrl`() =
         runTest {
-            createViewModel(isInstantApp = true).confirmStripeIntent(confirmPaymentIntentParams)
+            createViewModel(isInstantApp = true).confirmStripeIntent(confirmPaymentIntentParams, authHost)
 
             verify(analyticsRequestFactory).createRequest(
                 PaymentAnalyticsEvent.ConfirmReturnUrlNull
@@ -287,7 +293,7 @@ class PaymentLauncherViewModelTest {
             whenever(stripeApiRepository.confirmPaymentIntent(any(), any(), any()))
                 .thenReturn(null)
             val viewModel = createViewModel()
-            viewModel.confirmStripeIntent(confirmPaymentIntentParams)
+            viewModel.confirmStripeIntent(confirmPaymentIntentParams, authHost)
 
             assertThat(viewModel.paymentLauncherResult.value)
                 .isInstanceOf(PaymentResult.Failed::class.java)
@@ -300,7 +306,7 @@ class PaymentLauncherViewModelTest {
                 .thenReturn(null)
 
             val viewModel = createViewModel()
-            viewModel.confirmStripeIntent(confirmSetupIntentParams)
+            viewModel.confirmStripeIntent(confirmSetupIntentParams, authHost)
 
             assertThat(viewModel.paymentLauncherResult.value)
                 .isInstanceOf(PaymentResult.Failed::class.java)
@@ -309,7 +315,7 @@ class PaymentLauncherViewModelTest {
     @Test
     fun `verify next action is handled correctly`() =
         runTest {
-            createViewModel().handleNextActionForStripeIntent(CLIENT_SECRET)
+            createViewModel().handleNextActionForStripeIntent(CLIENT_SECRET, authHost)
 
             verify(savedStateHandle).set(PaymentLauncherViewModel.KEY_HAS_STARTED, true)
             verify(stripeIntentAuthenticator).authenticate(
@@ -331,7 +337,7 @@ class PaymentLauncherViewModelTest {
             ).thenReturn(null)
 
             val viewModel = createViewModel()
-            viewModel.handleNextActionForStripeIntent(CLIENT_SECRET)
+            viewModel.handleNextActionForStripeIntent(CLIENT_SECRET, authHost)
 
             assertThat(viewModel.paymentLauncherResult.value)
                 .isInstanceOf(PaymentResult.Failed::class.java)
@@ -340,7 +346,7 @@ class PaymentLauncherViewModelTest {
     @Test
     fun `verify paymentIntentProcessor is chosen correctly`() =
         runTest {
-            val viewModel = createViewModel(true)
+            val viewModel = createViewModel(isPaymentIntent = true)
             val paymentFlowResult = mock<PaymentFlowResult.Unvalidated>()
             whenever(paymentIntentFlowResultProcessor.processResult(eq(paymentFlowResult)))
                 .thenReturn(succeededPaymentResult)
@@ -353,7 +359,7 @@ class PaymentLauncherViewModelTest {
     @Test
     fun `verify setupIntentProcessor is chosen correctly`() =
         runTest {
-            val viewModel = createViewModel(false)
+            val viewModel = createViewModel(isPaymentIntent = false)
             val paymentFlowResult = mock<PaymentFlowResult.Unvalidated>()
             whenever(setupIntentFlowResultProcessor.processResult(eq(paymentFlowResult)))
                 .thenReturn(succeededSetupResult)
@@ -441,13 +447,11 @@ class PaymentLauncherViewModelTest {
         // AbstractSavedStateViewModelFactory will call viewmodel.setTagIfAbsent, which accesses
         // ViewModel.mBagOfTags that's initialized in base class.
         // Mocking it would leave this field null, causing an NPE.
-        val vmToBeReturned = createViewModel(true)
+        val vmToBeReturned = createViewModel(isPaymentIntent = true)
 
         whenever(mockBuilder.build()).thenReturn(mockSubComponent)
         whenever(mockBuilder.isPaymentIntent(any())).thenReturn(mockBuilder)
         whenever(mockBuilder.savedStateHandle(any())).thenReturn(mockBuilder)
-        whenever(mockBuilder.authActivityStarterHost(any())).thenReturn(mockBuilder)
-        whenever(mockBuilder.activityResultCaller(any())).thenReturn(mockBuilder)
         whenever((mockSubComponent.viewModel)).thenReturn(vmToBeReturned)
 
         val mockSavedStateRegistryOwner = mock<SavedStateRegistryOwner>()
@@ -478,8 +482,6 @@ class PaymentLauncherViewModelTest {
                 )
             },
             { ApplicationProvider.getApplicationContext() },
-            { mock() },
-            mock(),
             mockSavedStateRegistryOwner
         )
         val factorySpy = spy(factory)
@@ -513,8 +515,6 @@ class PaymentLauncherViewModelTest {
                 )
             },
             { ApplicationProvider.getApplicationContext() },
-            { mock() },
-            mock(),
             mockSavedStateRegistryOwner
         )
         val factorySpy = spy(factory)
