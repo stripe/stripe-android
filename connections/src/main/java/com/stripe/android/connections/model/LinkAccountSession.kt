@@ -32,8 +32,12 @@ data class LinkAccountSession internal constructor(
     val livemode: Boolean,
 
     @SerialName("payment_account")
-    val paymentAccount: LinkedAccount? = null,
+    val paymentAccount: PaymentAccount? = null,
 
     @SerialName("return_url")
     val returnUrl: String? = null
 ) : StripeModel, Parcelable
+
+@Serializable
+@Parcelize
+sealed class PaymentAccount : Parcelable
