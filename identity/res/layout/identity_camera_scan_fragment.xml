@@ -18,7 +18,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textStyle="bold"
-            android:text="@string/front_of_dl"
             android:textSize="@dimen/scan_title_text_size"
             android:layout_marginBottom="20dp"
             app:layout_constraintBottom_toTopOf="@id/message"
@@ -31,7 +30,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="@dimen/page_vertical_margin"
-            android:text="@string/position_dl_front"
             app:layout_constraintBottom_toTopOf="@id/camera_view_card"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -52,7 +50,7 @@
                 android:id="@+id/camera_view"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                app:borderDrawable="@drawable/id_border_initial"
+                app:borderDrawable="@drawable/viewfinder_border_initial"
                 app:viewFinderType="id" />
 
             <ImageView

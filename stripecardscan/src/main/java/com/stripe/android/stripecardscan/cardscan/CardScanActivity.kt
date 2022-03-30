@@ -140,8 +140,6 @@ internal class CardScanActivity : ScanActivity(), SimpleScanStateful<CardScanSta
             override suspend fun onResult(
                 result: MainLoopAggregator.FinalResult,
             ) {
-                super.onResult(result)
-
                 launch(Dispatchers.Main) {
                     changeScanState(CardScanState.Correct)
                     cameraAdapter.unbindFromLifecycle(this@CardScanActivity)

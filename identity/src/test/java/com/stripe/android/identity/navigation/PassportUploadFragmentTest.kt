@@ -53,13 +53,11 @@ class PassportUploadFragmentTest {
     @get:Rule
     var rule: TestRule = InstantTaskExecutorRule()
 
-    private val uploaded =
-        MutableLiveData<Resource<Pair<InternalStripeFile, UploadMethod>>>()
+    private val frontHighResUploaded =
+        MutableLiveData<Resource<IdentityViewModel.UploadedResult>>()
     private val mockUri = mock<Uri>()
 
-    private val mockPassportUploadViewModel = mock<PassportUploadViewModel>().also {
-        whenever(it.uploaded).thenReturn(uploaded)
-    }
+    private val mockPassportUploadViewModel = mock<PassportUploadViewModel>()
 
     private val verificationPage = mock<VerificationPage>().also {
         whenever(it.documentCapture).thenReturn(DOCUMENT_CAPTURE)
@@ -70,6 +68,7 @@ class PassportUploadFragmentTest {
         whenever(it.observeForVerificationPage(any(), successCaptor.capture(), any())).then {
             successCaptor.firstValue(verificationPage)
         }
+        whenever(it.frontHighResUploaded).thenReturn(frontHighResUploaded)
     }
 
     @Test
@@ -129,7 +128,7 @@ class PassportUploadFragmentTest {
     @Test
     fun `verify upload failure navigates to error fragment `() {
         launchFragment { _, navController, _ ->
-            uploaded.postValue(Resource.error())
+            frontHighResUploaded.postValue(Resource.error())
 
             assertThat(navController.currentDestination?.id)
                 .isEqualTo(R.id.errorFragment)
@@ -140,11 +139,12 @@ class PassportUploadFragmentTest {
     fun `verify when kontinue is clicked navigates to confirmation`() {
         launchFragment { binding, navController, _ ->
             runBlocking {
-                uploaded.postValue(
+                frontHighResUploaded.postValue(
                     Resource.success(
-                        Pair(
-                            InternalStripeFile(id = FILE_ID),
-                            UploadMethod.FILEUPLOAD
+                        IdentityViewModel.UploadedResult(
+                            uploadedStripeFile = InternalStripeFile(id = FILE_ID),
+                            scores = null,
+                            uploadMethod = UploadMethod.FILEUPLOAD
                         )
                     )
                 )
@@ -223,15 +223,17 @@ class PassportUploadFragmentTest {
             } else {
                 verify(mockPassportUploadViewModel).chooseImage(callbackCaptor.capture())
             }
-            uploaded.postValue(Resource.loading())
+            frontHighResUploaded.postValue(Resource.loading())
 
             // mock photo taken/image chosen
             callbackCaptor.firstValue(mockUri)
 
             // viewmodel triggers and UI updates
-            verify(mockPassportUploadViewModel).uploadImage(
-                same(mockUri),
-                same(DOCUMENT_CAPTURE),
+            verify(mockIdentityViewModel).uploadManualResult(
+                uri = same(mockUri),
+                isFront = eq(true),
+                docCapturePage = same(DOCUMENT_CAPTURE),
+                uploadMethod =
                 if (isTakePhoto)
                     eq(UploadMethod.MANUALCAPTURE)
                 else
@@ -242,7 +244,7 @@ class PassportUploadFragmentTest {
             assertThat(binding.finishedCheckMark.visibility).isEqualTo(View.GONE)
 
             // mock file uploaded
-            uploaded.postValue(Resource.success(mock()))
+            frontHighResUploaded.postValue(Resource.success(mock()))
 
             assertThat(binding.select.visibility).isEqualTo(View.GONE)
             assertThat(binding.progressCircular.visibility).isEqualTo(View.GONE)
@@ -294,7 +296,9 @@ class PassportUploadFragmentTest {
                 lowResImageCompressionQuality = 0f,
                 lowResImageMaxDimension = 0,
                 models = mock(),
-                requireLiveCapture = false
+                requireLiveCapture = false,
+                motionBlurMinDuration = 500,
+                motionBlurMinIou = 0.95f
             )
 
         val FILE_ID = "file_id"

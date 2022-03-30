@@ -9,3 +9,7 @@ ext.buildLibs = [
 ext.configs = [
         androidLibrary: "${project.rootDir}/build-configuration/android-library.gradle",
 ]
+
+ext.testLibs = [
+        turbine: "app.cash.turbine:turbine:0.7.0"
+]

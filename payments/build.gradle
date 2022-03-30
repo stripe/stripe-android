@@ -1,14 +1,15 @@
-plugins {
-    id 'com.android.library'
-    id 'kotlin-android'
+apply from: configs.androidLibrary
 
-    id 'signing'
-    id 'maven-publish'
-}
+apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+apply plugin: 'signing'
+apply plugin: 'maven-publish'
 
 dependencies {
     api project(':payments-core')
     api project(':paymentsheet')
+
+    ktlint "com.pinterest:ktlint:$ktlintVersion"
 }
 
 android {

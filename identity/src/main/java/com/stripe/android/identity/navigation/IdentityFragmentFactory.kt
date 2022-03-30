@@ -32,28 +32,18 @@ internal class IdentityFragmentFactory(
     private val identityRepository =
         DefaultIdentityRepository(identityIO = identityIO)
     private val identityScanViewModelFactory =
-        IdentityScanViewModel.IdentityScanViewModelFactory(
-            identityRepository,
-            verificationArgs,
-            identityIO
-        )
+        IdentityScanViewModel.IdentityScanViewModelFactory()
     private val frontBackUploadViewModelFactory =
-        FrontBackUploadViewModel.FrontBackUploadViewModelFactory(
-            identityRepository,
-            verificationArgs,
-            identityIO
-        )
+        FrontBackUploadViewModel.FrontBackUploadViewModelFactory(identityIO)
     private val passportUploadViewModelFactory =
-        PassportUploadViewModel.PassportUploadViewModelFactory(
-            identityRepository,
-            verificationArgs,
-            identityIO
-        )
+        PassportUploadViewModel.PassportUploadViewModelFactory(identityIO)
 
     internal val identityViewModelFactory = IdentityViewModel.IdentityViewModelFactory(
         verificationArgs,
         identityRepository,
-        DefaultIDDetectorFetcher(identityRepository, identityIO)
+        DefaultIDDetectorFetcher(identityRepository, identityIO),
+        verificationArgs,
+        identityIO
     )
 
     override fun instantiate(classLoader: ClassLoader, className: String): Fragment {
@@ -86,7 +76,8 @@ internal class IdentityFragmentFactory(
                 identityViewModelFactory
             )
             ConsentFragment::class.java.name -> ConsentFragment(
-                identityViewModelFactory
+                identityViewModelFactory,
+                verificationFlowFinishable
             )
             DocSelectionFragment::class.java.name -> DocSelectionFragment(
                 identityViewModelFactory,
@@ -94,6 +85,9 @@ internal class IdentityFragmentFactory(
             )
             ConfirmationFragment::class.java.name -> ConfirmationFragment(
                 identityViewModelFactory,
+                verificationFlowFinishable
+            )
+            ErrorFragment::class.java.name -> ErrorFragment(
                 verificationFlowFinishable
             )
             else -> super.instantiate(classLoader, className)

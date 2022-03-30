@@ -65,6 +65,7 @@ fun SectionCard(
         // TODO(skyler-stripe): this will change when we add shadow configurations.
         elevation = if (isSelected) 1.5.dp else 0.dp,
         backgroundColor = PaymentsTheme.colors.colorComponentBackground,
+        shape = PaymentsTheme.shapes.material.medium,
         modifier = modifier
     ) {
         Column {

@@ -147,6 +147,7 @@ internal open class CardImageVerificationActivity :
                     .putExtra(
                         INTENT_PARAM_RESULT,
                         CardImageVerificationSheetResult.Completed(
+                            params.cardImageVerificationIntentId,
                             ScannedCard(
                                 pan = pan
                             )
