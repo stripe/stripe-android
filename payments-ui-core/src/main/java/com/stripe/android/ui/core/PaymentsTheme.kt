@@ -29,11 +29,11 @@ import androidx.compose.ui.unit.sp
 data class PaymentsColors(
     val primary: Color,
     val surface: Color,
-    val componentBackground: Color,
+    val component: Color,
     val componentBorder: Color,
     val componentDivider: Color,
     val onComponent: Color,
-    val textSecondary: Color,
+    val subtitle: Color,
     val textCursor: Color,
     val placeholderText: Color,
     val onSurface: Color,
@@ -126,11 +126,11 @@ object PaymentsThemeConfig {
     private val colorsLight = PaymentsColors(
         primary = Color(0xFF007AFF),
         surface = Color.White,
-        componentBackground = Color.White,
+        component = Color.White,
         componentBorder = Color(0x33787880),
         componentDivider = Color(0x33787880),
         onComponent = Color.Black,
-        textSecondary = Color(0x99000000),
+        subtitle = Color(0x99000000),
         textCursor = Color.Black,
         placeholderText = Color(0x993C3C43),
         onSurface = Color.Black,
@@ -141,11 +141,11 @@ object PaymentsThemeConfig {
     private val colorsDark = PaymentsColors(
         primary = Color(0xFF0074D4),
         surface = Color(0xff2e2e2e),
-        componentBackground = Color.DarkGray,
+        component = Color.DarkGray,
         componentBorder = Color(0xFF787880),
         componentDivider = Color(0xFF787880),
         onComponent = Color.White,
-        textSecondary = Color(0x99FFFFFF),
+        subtitle = Color(0x99FFFFFF),
         textCursor = Color.White,
         placeholderText = Color(0x61FFFFFF),
         onSurface = Color.White,
@@ -156,10 +156,10 @@ object PaymentsThemeConfig {
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 data class PaymentsComposeColors(
-    val colorComponentBackground: Color,
+    val component: Color,
     val colorComponentBorder: Color,
     val colorComponentDivider: Color,
-    val colorTextSecondary: Color,
+    val subtitle: Color,
     val colorTextCursor: Color,
     val placeholderText: Color,
     val onComponent: Color,
@@ -179,11 +179,11 @@ data class PaymentsComposeShapes(
 fun PaymentsThemeConfig.toComposeColors(): PaymentsComposeColors {
     val colors = colors(isSystemInDarkTheme())
     return PaymentsComposeColors(
-        colorComponentBackground = colors.componentBackground,
+        component = colors.component,
         colorComponentBorder = colors.componentBorder,
         colorComponentDivider = colors.componentDivider,
         onComponent = colors.onComponent,
-        colorTextSecondary = colors.textSecondary,
+        subtitle = colors.subtitle,
         colorTextCursor = colors.textCursor,
         placeholderText = colors.placeholderText,
 

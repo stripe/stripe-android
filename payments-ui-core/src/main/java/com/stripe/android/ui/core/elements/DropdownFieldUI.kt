@@ -53,7 +53,7 @@ internal fun DropDown(
     Box(
         modifier = Modifier
             .wrapContentSize(Alignment.TopStart)
-            .background(PaymentsTheme.colors.colorComponentBackground)
+            .background(PaymentsTheme.colors.component)
     ) {
         // Click handling happens on the box, so that it is a single accessible item
         Box(
@@ -95,7 +95,7 @@ internal fun DropDown(
         DropdownMenu(
             expanded = expanded,
             onDismissRequest = { expanded = false },
-            modifier = Modifier.background(color = PaymentsTheme.colors.colorComponentBackground)
+            modifier = Modifier.background(color = PaymentsTheme.colors.component)
         ) {
             items.forEachIndexed { index, displayValue ->
                 DropdownMenuItem(

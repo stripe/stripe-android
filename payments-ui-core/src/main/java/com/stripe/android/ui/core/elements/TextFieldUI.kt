@@ -56,7 +56,7 @@ internal fun TextField(
         unfocusedLabelColor = PaymentsTheme.colors.placeholderText,
         focusedLabelColor = PaymentsTheme.colors.placeholderText,
         placeholderColor = PaymentsTheme.colors.placeholderText,
-        backgroundColor = PaymentsTheme.colors.colorComponentBackground,
+        backgroundColor = PaymentsTheme.colors.component,
         focusedIndicatorColor = Color.Transparent,
         disabledIndicatorColor = Color.Transparent,
         unfocusedIndicatorColor = Color.Transparent,

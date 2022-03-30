@@ -54,7 +54,7 @@ internal class GooglePayDivider @JvmOverloads constructor(
             Text(
                 text = text,
                 style = PaymentsTheme.typography.body1,
-                color = PaymentsTheme.colors.colorTextSecondary
+                color = PaymentsTheme.colors.subtitle
             )
         }
     }
