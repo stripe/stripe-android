@@ -38,6 +38,5 @@ data class LinkAccountSession internal constructor(
     val returnUrl: String? = null
 ) : StripeModel, Parcelable
 
-@Serializable
-@Parcelize
+@Serializable(with = PaymentAccountSerializer::class)
 sealed class PaymentAccount : Parcelable

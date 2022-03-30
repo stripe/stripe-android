@@ -21,7 +21,6 @@ import com.stripe.android.core.networking.StripeResponse
 import com.stripe.android.core.networking.responseJson
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.json.Json
-import java.lang.Exception
 import java.net.HttpURLConnection
 import javax.inject.Inject
 import javax.inject.Named
@@ -29,6 +28,7 @@ import javax.inject.Named
 internal class ConnectionsApiRepository @Inject constructor(
     @Named(PUBLISHABLE_KEY) publishableKey: String,
     private val stripeNetworkClient: StripeNetworkClient,
+    private val apiRequestFactory: ApiRequest.Factory
 ) : ConnectionsRepository {
 
     @VisibleForTesting
@@ -39,7 +39,6 @@ internal class ConnectionsApiRepository @Inject constructor(
         encodeDefaults = true
     }
 
-    private val apiRequestFactory = ApiRequest.Factory()
     private val options = ApiRequest.Options(
         apiKey = publishableKey
     )
