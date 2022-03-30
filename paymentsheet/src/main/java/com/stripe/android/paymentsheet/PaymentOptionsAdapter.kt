@@ -589,7 +589,7 @@ internal fun PaymentOptionUi(
 
         LpmSelectorText(
             text = labelText,
-            textColor = PaymentsTheme.colors.material.onPrimary,
+            textColor = PaymentsTheme.colors.material.onSurface,
             isEnabled = isEnabled,
             modifier = Modifier
                 .constrainAs(label) {

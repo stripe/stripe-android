@@ -86,7 +86,7 @@ internal fun HtmlText(
         modifier = modifier
             .padding(vertical = 8.dp)
             .semantics(mergeDescendants = true) {}, // makes it a separate accessibile item,
-        color = PaymentsTheme.colors.colorTextSecondary,
+        color = PaymentsTheme.colors.subtitle,
         onClick = {
             annotatedText
                 .getStringAnnotations(LINK_TAG, it, it)

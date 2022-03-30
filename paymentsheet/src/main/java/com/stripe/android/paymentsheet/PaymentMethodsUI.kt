@@ -145,7 +145,7 @@ internal fun PaymentMethodUI(
     ) {
         Column {
             val color = if (isSelected) PaymentsTheme.colors.material.primary
-            else PaymentsTheme.colors.material.onBackground
+            else PaymentsTheme.colors.onComponent
 
             val colorFilter = if (tintOnSelected) ColorFilter.tint(color) else null
             Image(
