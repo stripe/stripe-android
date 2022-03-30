@@ -133,7 +133,7 @@ internal abstract class IdentityCameraScanFragment(
                 Status.SUCCESS -> {
                     requireNotNull(it.data).let { pageFilePair ->
                         identityScanViewModel.initializeScanFlow(
-                            pageFilePair.first.documentCapture.autocaptureTimeout,
+                            pageFilePair.first,
                             pageFilePair.second
                         )
                         lifecycleScope.launch(Dispatchers.Main) {

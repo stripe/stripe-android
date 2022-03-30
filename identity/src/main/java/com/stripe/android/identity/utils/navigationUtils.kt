@@ -8,6 +8,7 @@ import androidx.navigation.fragment.findNavController
 import com.stripe.android.identity.R
 import com.stripe.android.identity.navigation.ErrorFragment
 import com.stripe.android.identity.navigation.ErrorFragment.Companion.navigateToErrorFragmentWithDefaultValues
+import com.stripe.android.identity.navigation.ErrorFragment.Companion.navigateToErrorFragmentWithFailedReason
 import com.stripe.android.identity.navigation.ErrorFragment.Companion.navigateToErrorFragmentWithRequirementErrorAndDestination
 import com.stripe.android.identity.networking.models.ClearDataParam
 import com.stripe.android.identity.networking.models.CollectedDataParam
@@ -104,6 +105,13 @@ private fun Fragment.navigateToRequirementErrorFragment(
  */
 internal fun Fragment.navigateToDefaultErrorFragment() {
     findNavController().navigateToErrorFragmentWithDefaultValues(requireContext())
+}
+
+/**
+ * Navigate to [ErrorFragment] as final destination.
+ */
+internal fun Fragment.navigateToErrorFragmentWithFailedReason(failedReason: Throwable) {
+    findNavController().navigateToErrorFragmentWithFailedReason(requireContext(), failedReason)
 }
 
 /**

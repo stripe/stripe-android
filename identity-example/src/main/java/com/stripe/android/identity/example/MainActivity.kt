@@ -1,5 +1,6 @@
 package com.stripe.android.identity.example
 
+import android.content.ContentResolver
 import android.net.Uri
 import android.os.Bundle
 import android.view.View
@@ -13,7 +14,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 
-class MainActivity : AppCompatActivity() {
+abstract class MainActivity : AppCompatActivity() {
 
     private val binding by lazy {
         ActivityMainBinding.inflate(layoutInflater)
@@ -25,23 +26,38 @@ class MainActivity : AppCompatActivity() {
         Json {
             ignoreUnknownKeys = true
             isLenient = true
-            encodeDefaults = true
+            encodeDefaults = false
         }
     }
+
+    protected abstract val getBrandLogoResId: Int
+
+    private val logoUri: Uri
+        get() = Uri.Builder()
+            .scheme(ContentResolver.SCHEME_ANDROID_RESOURCE)
+            .authority(resources.getResourcePackageName(getBrandLogoResId))
+            .appendPath(resources.getResourceTypeName(getBrandLogoResId))
+            .appendPath(resources.getResourceEntryName(getBrandLogoResId))
+            .build()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
-
         identityVerificationSheet =
             IdentityVerificationSheet.create(
                 this,
                 IdentityVerificationSheet.Configuration(
                     // Or use webImage by
                     // brandLogo = Uri.parse("https://path/to/a/logo.jpg")
-                    brandLogo = Uri.parse("android.resource://com.stripe.android.identity.example/drawable/merchant_logo")
+                    brandLogo = logoUri
                 )
-            )
+            ) {
+                Snackbar.make(
+                    binding.root,
+                    "Verification result: $it",
+                    Snackbar.LENGTH_SHORT
+                ).show()
+            }
 
         binding.startVerification.setOnClickListener {
             binding.startVerification.isEnabled = false
@@ -52,6 +68,26 @@ class MainActivity : AppCompatActivity() {
             )
 
             Fuel.post(EXAMPLE_BACKEND_URL)
+                .header("content-type", "application/json")
+                .body(
+                    json.encodeToString(
+                        VerificationSessionCreationRequest.serializer(),
+                        VerificationSessionCreationRequest(
+                            options = VerificationSessionCreationRequest.Options(
+                                document = VerificationSessionCreationRequest.Document(
+                                    requireIdNumber = binding.requireIdNumber.isChecked,
+                                    requireMatchingSelfie = binding.requireMatchingSelfie.isChecked,
+                                    requireLiveCapture = binding.requireLiveCapture.isChecked,
+                                    allowedTypes = mutableListOf<String>().also {
+                                        if (binding.allowedTypeDl.isChecked) it.add(DRIVING_LICENSE)
+                                        if (binding.allowedTypePassport.isChecked) it.add(PASSPORT)
+                                        if (binding.allowedTypeId.isChecked) it.add(ID_CARD)
+                                    }
+                                )
+                            )
+                        )
+                    )
+                )
                 .responseString { _, _, result ->
                     when (result) {
                         is Result.Failure -> {
@@ -70,13 +106,7 @@ class MainActivity : AppCompatActivity() {
                                     identityVerificationSheet.present(
                                         verificationSessionId = it.verificationSessionId,
                                         ephemeralKeySecret = it.ephemeralKeySecret
-                                    ) {
-                                        Snackbar.make(
-                                            binding.root,
-                                            "Verification result: $it",
-                                            Snackbar.LENGTH_SHORT
-                                        ).show()
-                                    }
+                                    )
                                 }
                             } catch (t: Throwable) {
                                 showSnackBar("Fail to decode")
@@ -99,7 +129,29 @@ class MainActivity : AppCompatActivity() {
         @SerialName("id") val verificationSessionId: String,
     )
 
+    @Serializable
+    data class VerificationSessionCreationRequest(
+        @SerialName("options") val options: Options? = null,
+        @SerialName("type") val type: String = "document",
+    ) {
+        @Serializable
+        data class Options(
+            @SerialName("document") val document: Document? = null
+        )
+
+        @Serializable
+        data class Document(
+            @SerialName("allowed_types") val allowedTypes: List<String>? = null,
+            @SerialName("require_id_number") val requireIdNumber: Boolean? = null,
+            @SerialName("require_live_capture") val requireLiveCapture: Boolean? = null,
+            @SerialName("require_matching_selfie") val requireMatchingSelfie: Boolean? = null
+        )
+    }
+
     private companion object {
+        const val DRIVING_LICENSE = "driving_license"
+        const val PASSPORT = "passport"
+        const val ID_CARD = "id_card"
         const val EXAMPLE_BACKEND_URL =
             "https://reflective-fossil-rib.glitch.me/create-verification-session"
     }

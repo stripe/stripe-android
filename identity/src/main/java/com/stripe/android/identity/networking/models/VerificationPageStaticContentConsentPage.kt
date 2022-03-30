@@ -14,7 +14,7 @@ internal data class VerificationPageStaticContentConsentPage(
     @SerialName("title")
     val title: String,
     @SerialName("privacy_policy")
-    val privacyPolicy: String,
+    val privacyPolicy: String?,
     @SerialName("time_estimate")
-    val timeEstimate: String,
+    val timeEstimate: String?,
 )
