@@ -42,7 +42,7 @@ internal fun DropDown(
     var expanded by remember { mutableStateOf(false) }
     val interactionSource = remember { MutableInteractionSource() }
     val currentTextColor = if (enabled) {
-        PaymentsTheme.colors.material.onBackground
+        PaymentsTheme.colors.onComponent
     } else {
         TextFieldDefaults
             .textFieldColors()

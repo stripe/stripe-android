@@ -51,7 +51,7 @@ internal fun TextField(
         textColor = if (shouldShowError) {
             PaymentsTheme.colors.material.error
         } else {
-            PaymentsTheme.colors.material.onBackground
+            PaymentsTheme.colors.onComponent
         },
         unfocusedLabelColor = PaymentsTheme.colors.placeholderText,
         focusedLabelColor = PaymentsTheme.colors.placeholderText,

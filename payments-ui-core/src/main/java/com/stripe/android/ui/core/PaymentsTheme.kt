@@ -32,11 +32,11 @@ data class PaymentsColors(
     val componentBackground: Color,
     val componentBorder: Color,
     val componentDivider: Color,
-    val onPrimary: Color,
+    val onComponent: Color,
     val textSecondary: Color,
     val textCursor: Color,
     val placeholderText: Color,
-    val onBackground: Color,
+    val onSurface: Color,
     val appBarIcon: Color,
     val error: Color,
 )
@@ -129,11 +129,11 @@ object PaymentsThemeConfig {
         componentBackground = Color.White,
         componentBorder = Color(0x33787880),
         componentDivider = Color(0x33787880),
-        onPrimary = Color.Black,
+        onComponent = Color.Black,
         textSecondary = Color(0x99000000),
         textCursor = Color.Black,
         placeholderText = Color(0x993C3C43),
-        onBackground = Color.Black,
+        onSurface = Color.Black,
         appBarIcon = Color(0x99000000),
         error = Color.Red,
     )
@@ -144,11 +144,11 @@ object PaymentsThemeConfig {
         componentBackground = Color.DarkGray,
         componentBorder = Color(0xFF787880),
         componentDivider = Color(0xFF787880),
-        onPrimary = Color.White,
+        onComponent = Color.White,
         textSecondary = Color(0x99FFFFFF),
         textCursor = Color.White,
         placeholderText = Color(0x61FFFFFF),
-        onBackground = Color.White,
+        onSurface = Color.White,
         appBarIcon = Color.White,
         error = Color.Red,
     )
@@ -162,6 +162,7 @@ data class PaymentsComposeColors(
     val colorTextSecondary: Color,
     val colorTextCursor: Color,
     val placeholderText: Color,
+    val onComponent: Color,
     val material: Colors
 )
 
@@ -181,15 +182,15 @@ fun PaymentsThemeConfig.toComposeColors(): PaymentsComposeColors {
         colorComponentBackground = colors.componentBackground,
         colorComponentBorder = colors.componentBorder,
         colorComponentDivider = colors.componentDivider,
+        onComponent = colors.onComponent,
         colorTextSecondary = colors.textSecondary,
         colorTextCursor = colors.textCursor,
         placeholderText = colors.placeholderText,
 
         material = lightColors(
             primary = colors.primary,
-            onPrimary = colors.onPrimary,
             surface = colors.surface,
-            onBackground = colors.onBackground,
+            onSurface = colors.onSurface,
             error = colors.error,
         )
     )
