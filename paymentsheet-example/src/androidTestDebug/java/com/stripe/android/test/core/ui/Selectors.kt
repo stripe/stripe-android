@@ -100,7 +100,7 @@ class Selectors(
                 HOOKS_PAGE_LOAD_TIMEOUT * 1000
             )
         ).isNotNull()
-        device.waitForIdle()// TODO: Is this needed?
+        device.waitForIdle()
     }
 
     fun getInstalledBrowsers() = getInstalledPackages()

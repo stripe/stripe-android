@@ -29,7 +29,6 @@ class FieldPopulator(
 
         Espresso.closeSoftKeyboard()
 
-        // TODO: This is not working as expected
         Truth.assertThat(testParameters.saveForFutureUseCheckboxVisible)
             .isEqualTo(selectors.saveForFutureCheckbox.exists())
         if (selectors.saveForFutureCheckbox.exists()) {
