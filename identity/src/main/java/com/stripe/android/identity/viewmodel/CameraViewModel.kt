@@ -9,6 +9,7 @@ import com.stripe.android.camera.scanui.ScanErrorListener
 import com.stripe.android.camera.scanui.SimpleScanStateful
 import com.stripe.android.identity.camera.IDDetectorAggregator
 import com.stripe.android.identity.camera.IdentityScanFlow
+import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.states.IdentityScanState
 import java.io.File
 
@@ -30,8 +31,8 @@ internal open class CameraViewModel :
 
     internal lateinit var identityScanFlow: IdentityScanFlow
 
-    internal fun initializeScanFlow(autoCaptureTimeout: Int, identityModelFile: File) {
-        identityScanFlow = IdentityScanFlow(this, this, identityModelFile, autoCaptureTimeout)
+    internal fun initializeScanFlow(verificationPage: VerificationPage, identityModelFile: File) {
+        identityScanFlow = IdentityScanFlow(this, this, identityModelFile, verificationPage)
     }
 
     override var scanState: IdentityScanState? = null

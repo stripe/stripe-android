@@ -56,6 +56,7 @@ internal class IOUTransitionerTest {
             whenever(it.type).thenReturn(ScanType.ID_FRONT)
             whenever(it.timeoutAt).thenReturn(mockNeverTimeoutClockMark)
             whenever(it.reachedStateAt).thenReturn(mockReachedStateAt)
+            whenever(it.transitioner).thenReturn(transitioner)
         }
 
         val result = createAnalyzerOutputWithHighIOU(INITIAL_ID_FRONT_OUTPUT)
@@ -137,6 +138,7 @@ internal class IOUTransitionerTest {
             whenever(it.type).thenReturn(ScanType.ID_FRONT)
             whenever(it.timeoutAt).thenReturn(mockNeverTimeoutClockMark)
             whenever(it.reachedStateAt).thenReturn(mockReachedStateAt)
+            whenever(it.transitioner).thenReturn(transitioner)
         }
 
         // 1st frame - a match, stays in Found
@@ -187,6 +189,7 @@ internal class IOUTransitionerTest {
             whenever(it.type).thenReturn(ScanType.ID_FRONT)
             whenever(it.timeoutAt).thenReturn(mockNeverTimeoutClockMark)
             whenever(it.reachedStateAt).thenReturn(mockReachedStateAt)
+            whenever(it.transitioner).thenReturn(transitioner)
         }
 
         // 1st frame - a match, stays in Found

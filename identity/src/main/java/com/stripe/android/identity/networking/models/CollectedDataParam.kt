@@ -41,7 +41,6 @@ internal data class CollectedDataParam(
                             backScore = requireNotNull(frontHighResResult.scores)[IDDetectorAnalyzer.INDEX_ID_BACK],
                             frontCardScore = frontHighResResult.scores[IDDetectorAnalyzer.INDEX_ID_FRONT],
                             invalidScore = frontHighResResult.scores[IDDetectorAnalyzer.INDEX_INVALID],
-                            noDocumentScore = frontHighResResult.scores[IDDetectorAnalyzer.INDEX_NO_ID],
                             passportScore = frontHighResResult.scores[IDDetectorAnalyzer.INDEX_PASSPORT],
                             highResImage = requireNotNull(
                                 frontHighResResult.uploadedStripeFile.id
@@ -59,7 +58,6 @@ internal data class CollectedDataParam(
                             backScore = requireNotNull(backHighResResult.scores)[IDDetectorAnalyzer.INDEX_ID_BACK],
                             frontCardScore = backHighResResult.scores[IDDetectorAnalyzer.INDEX_ID_FRONT],
                             invalidScore = backHighResResult.scores[IDDetectorAnalyzer.INDEX_INVALID],
-                            noDocumentScore = backHighResResult.scores[IDDetectorAnalyzer.INDEX_NO_ID],
                             passportScore = backHighResResult.scores[IDDetectorAnalyzer.INDEX_PASSPORT],
                             highResImage = requireNotNull(
                                 backHighResResult.uploadedStripeFile.id
@@ -83,7 +81,6 @@ internal data class CollectedDataParam(
                             backScore = requireNotNull(frontHighResResult.scores)[IDDetectorAnalyzer.INDEX_ID_BACK],
                             frontCardScore = frontHighResResult.scores[IDDetectorAnalyzer.INDEX_ID_FRONT],
                             invalidScore = frontHighResResult.scores[IDDetectorAnalyzer.INDEX_INVALID],
-                            noDocumentScore = frontHighResResult.scores[IDDetectorAnalyzer.INDEX_NO_ID],
                             passportScore = frontHighResResult.scores[IDDetectorAnalyzer.INDEX_PASSPORT],
                             highResImage = requireNotNull(
                                 frontHighResResult.uploadedStripeFile.id
