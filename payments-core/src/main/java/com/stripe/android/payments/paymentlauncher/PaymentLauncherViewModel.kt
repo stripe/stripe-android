@@ -47,7 +47,6 @@ import kotlin.coroutines.CoroutineContext
  * [ViewModel] for [PaymentLauncherConfirmationActivity].
  */
 internal class PaymentLauncherViewModel @Inject constructor(
-    args: PaymentLauncherContract.Args,
     @Named(IS_PAYMENT_INTENT) private val isPaymentIntent: Boolean,
     private val stripeApiRepository: StripeRepository,
     private val authenticatorRegistry: PaymentAuthenticatorRegistry,
@@ -62,21 +61,6 @@ internal class PaymentLauncherViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     @Named(IS_INSTANT_APP) private val isInstantApp: Boolean
 ) : ViewModel() {
-    init {
-        if (!hasStarted) {
-            when (args) {
-                is PaymentLauncherContract.Args.IntentConfirmationArgs -> {
-                    confirmStripeIntent(args.confirmStripeIntentParams)
-                }
-                is PaymentLauncherContract.Args.PaymentIntentNextActionArgs -> {
-                    handleNextActionForStripeIntent(args.paymentIntentClientSecret)
-                }
-                is PaymentLauncherContract.Args.SetupIntentNextActionArgs -> {
-                    handleNextActionForStripeIntent(args.setupIntentClientSecret)
-                }
-            }
-        }
-    }
 
     /**
      * Indicates if the [ViewModel] has complete handling a [StripeIntent].
@@ -89,11 +73,6 @@ internal class PaymentLauncherViewModel @Inject constructor(
         get() = savedStateHandle.get(KEY_HAS_STARTED) ?: false
 
     /**
-     * Set when activity calls [register]. Used to redirect back to calling activity.
-     */
-    private var authActivityStarterHost: AuthActivityStarterHost? = null
-
-    /**
      * [PaymentResult] live data to be observed.
      */
     internal val paymentLauncherResult = MutableLiveData<PaymentResult>()
@@ -102,8 +81,7 @@ internal class PaymentLauncherViewModel @Inject constructor(
      * Registers the calling activity to listen to payment flow results. Should be called in the
      * activity onCreate.
      */
-    internal fun register(caller: ActivityResultCaller, host: AuthActivityStarterHost) {
-        authActivityStarterHost = host
+    internal fun register(caller: ActivityResultCaller) {
         authenticatorRegistry.onNewActivityResultCaller(
             caller,
             ::onPaymentFlowResult
@@ -113,8 +91,11 @@ internal class PaymentLauncherViewModel @Inject constructor(
     /**
      * Confirms a payment intent or setup intent
      */
-    @VisibleForTesting
-    internal fun confirmStripeIntent(confirmStripeIntentParams: ConfirmStripeIntentParams) {
+    internal fun confirmStripeIntent(
+        confirmStripeIntentParams: ConfirmStripeIntentParams,
+        host: AuthActivityStarterHost
+    ) {
+        if (hasStarted) return
         viewModelScope.launch {
             savedStateHandle.set(KEY_HAS_STARTED, true)
             logReturnUrl(confirmStripeIntentParams.returnUrl)
@@ -136,13 +117,11 @@ internal class PaymentLauncherViewModel @Inject constructor(
                             }
                         }
                     }
-                    authActivityStarterHost?.let {
-                        authenticatorRegistry.getAuthenticator(intent).authenticate(
-                            it,
-                            intent,
-                            apiRequestOptionsProvider.get()
-                        )
-                    }
+                    authenticatorRegistry.getAuthenticator(intent).authenticate(
+                        host,
+                        intent,
+                        apiRequestOptionsProvider.get()
+                    )
                 },
                 onFailure = {
                     paymentLauncherResult.postValue(PaymentResult.Failed(it))
@@ -183,7 +162,8 @@ internal class PaymentLauncherViewModel @Inject constructor(
     /**
      * Fetches a [StripeIntent] and handles its next action.
      */
-    internal fun handleNextActionForStripeIntent(clientSecret: String) {
+    internal fun handleNextActionForStripeIntent(clientSecret: String, host: AuthActivityStarterHost) {
+        if (hasStarted) return
         viewModelScope.launch {
             savedStateHandle.set(KEY_HAS_STARTED, true)
             runCatching {
@@ -195,15 +175,13 @@ internal class PaymentLauncherViewModel @Inject constructor(
                 )
             }.fold(
                 onSuccess = { intent ->
-                    authActivityStarterHost?.let {
-                        authenticatorRegistry
-                            .getAuthenticator(intent)
-                            .authenticate(
-                                it,
-                                intent,
-                                apiRequestOptionsProvider.get()
-                            )
-                    }
+                    authenticatorRegistry
+                        .getAuthenticator(intent)
+                        .authenticate(
+                            host,
+                            intent,
+                            apiRequestOptionsProvider.get()
+                        )
                 },
                 onFailure = {
                     paymentLauncherResult.postValue(PaymentResult.Failed(it))
@@ -328,7 +306,6 @@ internal class PaymentLauncherViewModel @Inject constructor(
             )
 
             return subComponentBuilderProvider.get()
-                .configuration(argsSupplier())
                 .isPaymentIntent(
                     when (arg) {
                         is PaymentLauncherContract.Args.IntentConfirmationArgs -> {

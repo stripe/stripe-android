@@ -1,7 +1,6 @@
 package com.stripe.android.payments.core.injection
 
 import androidx.lifecycle.SavedStateHandle
-import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
 import com.stripe.android.payments.paymentlauncher.PaymentLauncherViewModel
 import dagger.BindsInstance
 import dagger.Subcomponent
@@ -13,8 +12,6 @@ internal interface PaymentLauncherViewModelSubcomponent {
 
     @Subcomponent.Builder
     interface Builder {
-        @BindsInstance
-        fun configuration(configuration: PaymentLauncherContract.Args): Builder
 
         @BindsInstance
         fun isPaymentIntent(@Named(IS_PAYMENT_INTENT) isPaymentIntent: Boolean): Builder

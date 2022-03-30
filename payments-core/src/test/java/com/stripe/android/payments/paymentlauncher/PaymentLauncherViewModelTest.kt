@@ -1,7 +1,6 @@
 package com.stripe.android.payments.paymentlauncher
 
 import android.app.Application
-import android.graphics.Color
 import androidx.activity.result.ActivityResultCaller
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.Lifecycle
@@ -107,12 +106,10 @@ class PaymentLauncherViewModelTest {
         SetupIntentResult(setupIntent, StripeIntentResult.Outcome.SUCCEEDED)
 
     private fun createViewModel(
-        args: PaymentLauncherContract.Args = mock(),
         isPaymentIntent: Boolean = true,
         isInstantApp: Boolean = false
     ) =
         PaymentLauncherViewModel(
-            args,
             isPaymentIntent,
             stripeApiRepository,
             authenticatorRegistry,
@@ -128,8 +125,7 @@ class PaymentLauncherViewModelTest {
             isInstantApp
         ).apply {
             register(
-                caller = activityResultCaller,
-                host = authHost
+                caller = activityResultCaller
             )
         }
 
@@ -161,60 +157,10 @@ class PaymentLauncherViewModelTest {
         whenever(authenticatorRegistry.getAuthenticator(eq(stripeIntent)))
             .thenReturn(stripeIntentAuthenticator)
     }
-
-    @Test
-    fun `init with intent confirmation args should call confirm`() =
-        runTest {
-            createViewModel(
-                args = PaymentLauncherContract.Args.IntentConfirmationArgs(
-                    INJECTOR_KEY,
-                    ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
-                    TEST_STRIPE_ACCOUNT_ID,
-                    false,
-                    PRODUCT_USAGE,
-                    confirmPaymentIntentParams,
-                    Color.CYAN
-                )
-            )
-            verify(stripeApiRepository).confirmPaymentIntent(any(), any(), any())
-        }
-
-    @Test
-    fun `init with payment intent next action args should call retrieve`() =
-        runTest {
-            createViewModel(
-                args = PaymentLauncherContract.Args.PaymentIntentNextActionArgs(
-                    INJECTOR_KEY,
-                    ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
-                    TEST_STRIPE_ACCOUNT_ID,
-                    false,
-                    PRODUCT_USAGE,
-                    CLIENT_SECRET
-                )
-            )
-            verify(stripeApiRepository).retrieveStripeIntent(any(), any(), any())
-        }
-
-    @Test
-    fun `init with setup intent next action args should call retrieve`() =
-        runTest {
-            createViewModel(
-                args = PaymentLauncherContract.Args.SetupIntentNextActionArgs(
-                    INJECTOR_KEY,
-                    ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
-                    TEST_STRIPE_ACCOUNT_ID,
-                    false,
-                    PRODUCT_USAGE,
-                    CLIENT_SECRET
-                )
-            )
-            verify(stripeApiRepository).retrieveStripeIntent(any(), any(), any())
-        }
-
     @Test
     fun `verify confirm PaymentIntent without returnUrl invokes StripeRepository and calls correct authenticator`() =
         runTest {
-            createViewModel().confirmStripeIntent(confirmPaymentIntentParams)
+            createViewModel().confirmStripeIntent(confirmPaymentIntentParams, authHost)
 
             verify(analyticsRequestFactory).createRequest(
                 PaymentAnalyticsEvent.ConfirmReturnUrlNull
@@ -242,7 +188,8 @@ class PaymentLauncherViewModelTest {
             createViewModel().confirmStripeIntent(
                 confirmPaymentIntentParams.also {
                     it.returnUrl = RETURN_URL
-                }
+                },
+                authHost
             )
 
             verify(savedStateHandle).set(PaymentLauncherViewModel.KEY_HAS_STARTED, true)
@@ -269,7 +216,7 @@ class PaymentLauncherViewModelTest {
     @Test
     fun `verify confirm SetupIntent without returnUrl invokes StripeRepository and calls correct authenticator`() =
         runTest {
-            createViewModel().confirmStripeIntent(confirmSetupIntentParams)
+            createViewModel().confirmStripeIntent(confirmSetupIntentParams, authHost)
 
             verify(savedStateHandle).set(PaymentLauncherViewModel.KEY_HAS_STARTED, true)
             verify(analyticsRequestFactory).createRequest(
@@ -298,7 +245,8 @@ class PaymentLauncherViewModelTest {
             createViewModel().confirmStripeIntent(
                 confirmSetupIntentParams.also {
                     it.returnUrl = RETURN_URL
-                }
+                },
+                authHost
             )
 
             verify(savedStateHandle).set(PaymentLauncherViewModel.KEY_HAS_STARTED, true)
@@ -325,7 +273,7 @@ class PaymentLauncherViewModelTest {
     @Test
     fun `verify instantApp confirm PaymentIntent without returnUrl gets null returnUrl`() =
         runTest {
-            createViewModel(isInstantApp = true).confirmStripeIntent(confirmPaymentIntentParams)
+            createViewModel(isInstantApp = true).confirmStripeIntent(confirmPaymentIntentParams, authHost)
 
             verify(analyticsRequestFactory).createRequest(
                 PaymentAnalyticsEvent.ConfirmReturnUrlNull
@@ -345,7 +293,7 @@ class PaymentLauncherViewModelTest {
             whenever(stripeApiRepository.confirmPaymentIntent(any(), any(), any()))
                 .thenReturn(null)
             val viewModel = createViewModel()
-            viewModel.confirmStripeIntent(confirmPaymentIntentParams)
+            viewModel.confirmStripeIntent(confirmPaymentIntentParams, authHost)
 
             assertThat(viewModel.paymentLauncherResult.value)
                 .isInstanceOf(PaymentResult.Failed::class.java)
@@ -358,7 +306,7 @@ class PaymentLauncherViewModelTest {
                 .thenReturn(null)
 
             val viewModel = createViewModel()
-            viewModel.confirmStripeIntent(confirmSetupIntentParams)
+            viewModel.confirmStripeIntent(confirmSetupIntentParams, authHost)
 
             assertThat(viewModel.paymentLauncherResult.value)
                 .isInstanceOf(PaymentResult.Failed::class.java)
@@ -367,7 +315,7 @@ class PaymentLauncherViewModelTest {
     @Test
     fun `verify next action is handled correctly`() =
         runTest {
-            createViewModel().handleNextActionForStripeIntent(CLIENT_SECRET)
+            createViewModel().handleNextActionForStripeIntent(CLIENT_SECRET, authHost)
 
             verify(savedStateHandle).set(PaymentLauncherViewModel.KEY_HAS_STARTED, true)
             verify(stripeIntentAuthenticator).authenticate(
@@ -389,7 +337,7 @@ class PaymentLauncherViewModelTest {
             ).thenReturn(null)
 
             val viewModel = createViewModel()
-            viewModel.handleNextActionForStripeIntent(CLIENT_SECRET)
+            viewModel.handleNextActionForStripeIntent(CLIENT_SECRET, authHost)
 
             assertThat(viewModel.paymentLauncherResult.value)
                 .isInstanceOf(PaymentResult.Failed::class.java)
@@ -502,7 +450,6 @@ class PaymentLauncherViewModelTest {
         val vmToBeReturned = createViewModel(isPaymentIntent = true)
 
         whenever(mockBuilder.build()).thenReturn(mockSubComponent)
-        whenever(mockBuilder.configuration(any())).thenReturn(mockBuilder)
         whenever(mockBuilder.isPaymentIntent(any())).thenReturn(mockBuilder)
         whenever(mockBuilder.savedStateHandle(any())).thenReturn(mockBuilder)
         whenever((mockSubComponent.viewModel)).thenReturn(vmToBeReturned)
@@ -586,6 +533,5 @@ class PaymentLauncherViewModelTest {
         const val RETURN_URL = "return://to.me"
         const val TEST_STRIPE_ACCOUNT_ID = "accountId"
         val PRODUCT_USAGE = setOf("TestProductUsage")
-        val INJECTOR_KEY = WeakMapInjectorRegistry.nextKey("testKey")
     }
 }

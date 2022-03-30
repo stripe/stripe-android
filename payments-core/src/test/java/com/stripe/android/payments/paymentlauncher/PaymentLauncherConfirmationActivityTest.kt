@@ -16,6 +16,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
@@ -74,7 +75,80 @@ class PaymentLauncherConfirmationActivityTest {
         ).use {
             it.onActivity {
                 runTest {
-                    verify(viewModel).register(any(), any())
+                    verify(viewModel).register(any())
+                }
+            }
+        }
+    }
+
+    @ExperimentalCoroutinesApi
+    @Test
+    fun `start with IntentConfirmationArgs should confirmStripeIntent`() {
+        val confirmStripeIntentParams = mock<ConfirmStripeIntentParams>()
+        mockViewModelActivityScenario().launch(
+            Intent(
+                ApplicationProvider.getApplicationContext(),
+                PaymentLauncherConfirmationActivity::class.java
+            ).putExtras(
+                PaymentLauncherContract.Args.IntentConfirmationArgs(
+                    INJECTOR_KEY,
+                    ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+                    TEST_STRIPE_ACCOUNT_ID,
+                    false,
+                    PRODUCT_USAGE,
+                    confirmStripeIntentParams
+                ).toBundle()
+            )
+        ).use {
+            it.onActivity {
+                runTest {
+                    verify(viewModel).confirmStripeIntent(eq(confirmStripeIntentParams), any())
+                }
+            }
+        }
+    }
+
+    @ExperimentalCoroutinesApi
+    @Test
+    fun `start with PaymentIntentNextActionArgs should handleNextActionForStripeIntent`() {
+        mockViewModelActivityScenario().launch(
+            Intent(
+                ApplicationProvider.getApplicationContext(),
+                PaymentLauncherConfirmationActivity::class.java
+            ).putExtras(
+                PAYMENT_INTENT_NEXT_ACTION_ARGS.toBundle()
+            )
+        ).use {
+            it.onActivity {
+                runTest {
+                    verify(viewModel).handleNextActionForStripeIntent(eq(CLIENT_SECRET), any())
+                }
+            }
+        }
+    }
+
+    @ExperimentalCoroutinesApi
+    @Test
+    fun `start with SetupIntentNextActionArgs should handleNextActionForStripeIntent`() {
+        mockViewModelActivityScenario().launch(
+            Intent(
+                ApplicationProvider.getApplicationContext(),
+                PaymentLauncherConfirmationActivity::class.java
+            ).putExtras(
+                PaymentLauncherContract.Args.SetupIntentNextActionArgs(
+                    INJECTOR_KEY,
+                    ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+                    TEST_STRIPE_ACCOUNT_ID,
+                    false,
+                    PRODUCT_USAGE,
+                    CLIENT_SECRET
+                ).toBundle()
+            )
+        ).use {
+            it.onActivity {
+                runTest {
+                    verify(viewModel).handleNextActionForStripeIntent(eq(CLIENT_SECRET), any())
+                    verify(viewModel).register(any())
                 }
             }
         }
@@ -110,7 +184,17 @@ class PaymentLauncherConfirmationActivityTest {
 
     private companion object {
         val INJECTOR_KEY = WeakMapInjectorRegistry.nextKey("testKey")
+        const val CLIENT_SECRET = "clientSecret"
         const val TEST_STRIPE_ACCOUNT_ID = "accountId"
         val PRODUCT_USAGE = setOf("TestProductUsage")
+        val PAYMENT_INTENT_NEXT_ACTION_ARGS =
+            PaymentLauncherContract.Args.PaymentIntentNextActionArgs(
+                INJECTOR_KEY,
+                ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+                TEST_STRIPE_ACCOUNT_ID,
+                false,
+                PRODUCT_USAGE,
+                CLIENT_SECRET
+            )
     }
 }
