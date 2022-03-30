@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.link.model.StripeIntentFixtures
 import com.stripe.android.link.utils.FakeAndroidKeyStore
 import com.stripe.android.link.utils.InjectableActivityScenario
 import com.stripe.android.link.utils.injectableActivityScenario
@@ -17,7 +18,10 @@ class LinkActivityTest {
     private val context = ApplicationProvider.getApplicationContext<Context>()
     private val intent = LinkActivityContract().createIntent(
         context,
-        LinkActivityContract.Args("Example, Inc.")
+        LinkActivityContract.Args(
+            StripeIntentFixtures.PI_SUCCEEDED,
+            "Example, Inc."
+        )
     )
 
     init {

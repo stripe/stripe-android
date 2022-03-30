@@ -9,18 +9,13 @@ import kotlinx.parcelize.Parcelize
 @Parcelize
 internal data class StaticTextSpec(
     override val identifier: IdentifierSpec,
-    @StringRes val stringResId: Int,
-    val fontSizeSp: Int = 10,
-    val letterSpacingSp: Double = .7
+    @StringRes val stringResId: Int
 ) : FormItemSpec(), RequiredItemSpec {
-    fun transform(merchantName: String): FormElement =
+    fun transform(): FormElement =
         // It could be argued that the static text should have a controller, but
         // since it doesn't provide a form field we leave it out for now
         StaticTextElement(
             this.identifier,
-            this.stringResId,
-            merchantName,
-            this.fontSizeSp,
-            this.letterSpacingSp
+            this.stringResId
         )
 }

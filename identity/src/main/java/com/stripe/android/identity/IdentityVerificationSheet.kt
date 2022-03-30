@@ -25,15 +25,15 @@ interface IdentityVerificationSheet {
     /**
      * Result of verification.
      */
-    sealed class VerificationResult : Parcelable {
+    sealed class VerificationFlowResult : Parcelable {
         @Parcelize
-        object Completed : VerificationResult()
+        object Completed : VerificationFlowResult()
 
         @Parcelize
-        object Canceled : VerificationResult()
+        object Canceled : VerificationFlowResult()
 
         @Parcelize
-        class Failed(val throwable: Throwable) : VerificationResult()
+        class Failed(val throwable: Throwable) : VerificationFlowResult()
 
         @JvmSynthetic
         fun toBundle() = bundleOf(EXTRA to this)
@@ -41,9 +41,9 @@ interface IdentityVerificationSheet {
         internal companion object {
             private const val EXTRA = "extra_args"
 
-            fun fromIntent(intent: Intent?): VerificationResult {
+            fun fromIntent(intent: Intent?): VerificationFlowResult {
                 return intent?.getParcelableExtra(EXTRA)
-                    ?: Failed(IllegalStateException("Failed to get VerificationResult from Intent"))
+                    ?: Failed(IllegalStateException("Failed to get VerificationFlowResult from Intent"))
             }
         }
     }
@@ -53,32 +53,44 @@ interface IdentityVerificationSheet {
      */
     fun present(
         verificationSessionId: String,
-        ephemeralKeySecret: String,
-        onFinished: (verificationResult: VerificationResult) -> Unit
+        ephemeralKeySecret: String
     )
+
+    /**
+     * Callback to notify when identity verification finishes and a result is available.
+     */
+    fun interface IdentityVerificationCallback {
+        fun onVerificationFlowResult(result: VerificationFlowResult)
+    }
 
     companion object {
         /**
          * Creates a [IdentityVerificationSheet] instance with [ComponentActivity].
          *
          * This API registers an [ActivityResultLauncher] into the
-         * [ComponentActivity], it must be called before the [ComponentActivity]
+         * [ComponentActivity] and notifies its result to [identityVerificationCallback], it must
+         * be called before the [ComponentActivity]
          * is created (in the onCreate method).
          */
         fun create(
             from: ComponentActivity,
             configuration: Configuration,
-        ): IdentityVerificationSheet = StripeIdentityVerificationSheet(from, configuration)
+            identityVerificationCallback: IdentityVerificationCallback
+        ): IdentityVerificationSheet =
+            StripeIdentityVerificationSheet(from, configuration, identityVerificationCallback)
 
         /**
          * Creates a [IdentityVerificationSheet] instance with [Fragment].
          *
-         * This API registers an [ActivityResultLauncher] into the [Fragment], it must be called
-         * before the [Fragment] is created (in the onCreate method).
+         * This API registers an [ActivityResultLauncher] into the [Fragment] and notifies its
+         * result to [identityVerificationCallback], it must be called before the [Fragment] is
+         * created (in the onCreate method).
          */
         fun create(
             from: Fragment,
             configuration: Configuration,
-        ): IdentityVerificationSheet = StripeIdentityVerificationSheet(from, configuration)
+            identityVerificationCallback: IdentityVerificationCallback
+        ): IdentityVerificationSheet =
+            StripeIdentityVerificationSheet(from, configuration, identityVerificationCallback)
     }
 }

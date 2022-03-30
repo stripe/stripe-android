@@ -13,6 +13,7 @@ import com.stripe.android.camera.scanui.ScanFlow
 import com.stripe.android.identity.ml.AnalyzerInput
 import com.stripe.android.identity.ml.AnalyzerOutput
 import com.stripe.android.identity.ml.IDDetectorAnalyzer
+import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.states.IdentityScanState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -31,7 +32,8 @@ import java.io.File
 internal class IdentityScanFlow(
     private val analyzerLoopErrorListener: AnalyzerLoopErrorListener,
     private val aggregateResultListener: AggregateResultListener<IDDetectorAggregator.InterimResult, IDDetectorAggregator.FinalResult>,
-    private val idDetectorModelFile: File
+    private val idDetectorModelFile: File,
+    private val verificationPage: VerificationPage
 ) : ScanFlow<IdentityScanState.ScanType, CameraPreviewImage<Bitmap>> {
     private var aggregator: IDDetectorAggregator? = null
 
@@ -79,13 +81,17 @@ internal class IdentityScanFlow(
             }
             aggregator = IDDetectorAggregator(
                 parameters,
-                aggregateResultListener
+                aggregateResultListener,
+                verificationPage
             )
 
             requireNotNull(aggregator).bindToLifecycle(lifecycleOwner)
 
             analyzerPool = AnalyzerPool.of(
-                IDDetectorAnalyzer.Factory(idDetectorModelFile)
+                IDDetectorAnalyzer.Factory(
+                    idDetectorModelFile,
+                    verificationPage.documentCapture.models.idDetectorMinScore
+                )
             )
 
             loop = ProcessBoundAnalyzerLoop(

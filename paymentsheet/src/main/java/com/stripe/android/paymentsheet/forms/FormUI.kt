@@ -26,6 +26,8 @@ import com.stripe.android.ui.core.elements.BsbElementUI
 import com.stripe.android.ui.core.elements.EmptyFormElement
 import com.stripe.android.ui.core.elements.FormElement
 import com.stripe.android.ui.core.elements.IdentifierSpec
+import com.stripe.android.ui.core.elements.MandateTextElement
+import com.stripe.android.ui.core.elements.MandateTextUI
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
 import com.stripe.android.ui.core.elements.SaveForFutureUseElementUI
 import com.stripe.android.ui.core.elements.SectionElement
@@ -75,6 +77,7 @@ internal fun FormInternal(
                         )
                         is AuBecsDebitMandateTextElement -> AuBecsDebitMandateElementUI(element)
                         is AffirmHeaderElement -> AffirmElementUI()
+                        is MandateTextElement -> MandateTextUI(element)
                         is BsbElement -> BsbElementUI(enabled, element)
                         is EmptyFormElement -> {}
                     }

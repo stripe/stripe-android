@@ -7,13 +7,13 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.TextView
+import androidx.appcompat.app.AppCompatDialog
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
-import com.google.android.material.bottomsheet.BottomSheetDialog
-import com.stripe.android.core.model.InternalStripeFile
 import com.stripe.android.identity.R
 import com.stripe.android.identity.databinding.PassportUploadFragmentBinding
 import com.stripe.android.identity.networking.Status
@@ -66,7 +66,7 @@ internal class PassportUploadFragment(
         binding = PassportUploadFragmentBinding.inflate(layoutInflater, container, false)
 
         binding.select.setOnClickListener {
-            buildBottomSheetDialog().show()
+            buildDialog().show()
         }
 
         binding.kontinue.isEnabled = false
@@ -77,7 +77,7 @@ internal class PassportUploadFragment(
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        passportUploadViewModel.uploaded.observe(viewLifecycleOwner) {
+        identityViewModel.frontHighResUploaded.observe(viewLifecycleOwner) {
             when (it.status) {
                 Status.SUCCESS -> {
                     showUploadDone(it.data)
@@ -93,11 +93,11 @@ internal class PassportUploadFragment(
         }
     }
 
-    private fun buildBottomSheetDialog() = BottomSheetDialog(requireContext()).also { dialog ->
-        dialog.setContentView(R.layout.get_local_image_fragment)
-        dialog.setOnCancelListener {
-            Log.d(TAG, "dialog cancelled")
-        }
+    private fun buildDialog() = AppCompatDialog(requireContext()).also { dialog ->
+        dialog.setContentView(R.layout.get_local_image_dialog)
+        dialog.findViewById<TextView>(R.id.title)?.text =
+            getString(R.string.upload_dialog_title_passport)
+
         if (shouldShowCamera) {
             dialog.findViewById<Button>(R.id.take_photo)?.setOnClickListener {
                 dialog.dismiss()
@@ -120,11 +120,11 @@ internal class PassportUploadFragment(
         identityViewModel.observeForVerificationPage(
             this,
             onSuccess = { verificationPage ->
-                passportUploadViewModel.uploadImage(
-                    passport,
-                    requireContext(),
-                    verificationPage.documentCapture,
-                    uploadMethod
+                identityViewModel.uploadManualResult(
+                    uri = passport,
+                    isFront = true, // passport is uploaded as front
+                    docCapturePage = verificationPage.documentCapture,
+                    uploadMethod = uploadMethod
                 )
             },
             onFailure = {
@@ -139,7 +139,7 @@ internal class PassportUploadFragment(
         binding.finishedCheckMark.visibility = View.GONE
     }
 
-    private fun showUploadDone(passportImage: Pair<InternalStripeFile, DocumentUploadParam.UploadMethod>?) {
+    private fun showUploadDone(passportUploadResult: IdentityViewModel.UploadedResult?) {
         binding.select.visibility = View.GONE
         binding.progressCircular.visibility = View.GONE
         binding.finishedCheckMark.visibility = View.VISIBLE
@@ -148,16 +148,16 @@ internal class PassportUploadFragment(
             binding.kontinue.toggleToLoading()
             lifecycleScope.launch {
                 runCatching {
-                    requireNotNull(passportImage)
+                    requireNotNull(passportUploadResult)
                     postVerificationPageDataAndMaybeSubmit(
                         identityViewModel = identityViewModel,
                         collectedDataParam = CollectedDataParam(
                             idDocument = IdDocumentParam(
                                 front = DocumentUploadParam(
-                                    highResImage = requireNotNull(passportImage.first.id) {
+                                    highResImage = requireNotNull(passportUploadResult.uploadedStripeFile.id) {
                                         "front uploaded file id is null"
                                     },
-                                    uploadMethod = passportImage.second
+                                    uploadMethod = passportUploadResult.uploadMethod
                                 ),
                                 type = IdDocumentParam.Type.PASSPORT
                             )

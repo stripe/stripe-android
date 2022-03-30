@@ -22,5 +22,9 @@ internal data class VerificationPageStaticContentDocumentCapturePage(
     @SerialName("models")
     val models: VerificationPageStaticContentDocumentCaptureModels,
     @SerialName("require_live_capture")
-    val requireLiveCapture: Boolean
+    val requireLiveCapture: Boolean,
+    @SerialName("motion_blur_min_duration")
+    val motionBlurMinDuration: Int,
+    @SerialName("motion_blur_min_iou")
+    val motionBlurMinIou: Float
 )

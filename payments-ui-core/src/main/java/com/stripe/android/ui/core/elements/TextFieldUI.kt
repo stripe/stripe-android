@@ -4,7 +4,6 @@ import android.util.Log
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.Text
 import androidx.compose.material.TextField
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.runtime.Composable
@@ -60,7 +59,8 @@ internal fun TextField(
         backgroundColor = PaymentsTheme.colors.colorComponentBackground,
         focusedIndicatorColor = Color.Transparent,
         disabledIndicatorColor = Color.Transparent,
-        unfocusedIndicatorColor = Color.Transparent
+        unfocusedIndicatorColor = Color.Transparent,
+        cursorColor = PaymentsTheme.colors.colorTextCursor
     )
 
     TextField(
@@ -68,7 +68,7 @@ internal fun TextField(
         onValueChange = { textFieldController.onValueChange(it) },
         isError = shouldShowError,
         label = {
-            Text(
+            FormLabel(
                 text = if (textFieldController.showOptionalLabel) {
                     stringResource(
                         R.string.form_label_optional,
@@ -76,7 +76,7 @@ internal fun TextField(
                     )
                 } else {
                     stringResource(textFieldController.label)
-                }
+                },
             )
         },
         modifier = modifier

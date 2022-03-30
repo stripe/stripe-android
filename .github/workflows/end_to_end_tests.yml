@@ -26,6 +26,7 @@ jobs:
       - name: End-to-end tests
         env:
           STRIPE_END_TO_END_TESTS_BACKEND_URL: ${{ secrets.STRIPE_END_TO_END_TESTS_BACKEND_URL }}
+          STRIPE_END_TO_END_TESTS_PUBLISHABLE_KEY: ${{ secrets.STRIPE_END_TO_END_TESTS_PUBLISHABLE_KEY }}
         run: ./gradlew :stripe-test-e2e:testDebugUnitTest
       - uses: actions/upload-artifact@v2
         if: failure()

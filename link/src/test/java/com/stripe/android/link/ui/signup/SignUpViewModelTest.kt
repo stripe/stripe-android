@@ -14,6 +14,7 @@ import com.stripe.android.link.injection.NonFallbackInjector
 import com.stripe.android.link.injection.SignUpViewModelSubcomponent
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.model.Navigator
+import com.stripe.android.link.model.StripeIntentFixtures
 import com.stripe.android.link.ui.signup.SignUpViewModel.Companion.LOOKUP_DEBOUNCE_MS
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.ui.core.elements.IdentifierSpec
@@ -46,6 +47,7 @@ import kotlin.test.BeforeTest
 @RunWith(RobolectricTestRunner::class)
 class SignUpViewModelTest {
     private val defaultArgs = LinkActivityContract.Args(
+        StripeIntentFixtures.PI_SUCCEEDED,
         MERCHANT_NAME,
         CUSTOMER_EMAIL,
         LinkActivityContract.Args.InjectionParams(

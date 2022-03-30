@@ -153,6 +153,13 @@ constructor(
         @JvmField val requiresMandate: Boolean,
         private val hasDelayedSettlement: Boolean
     ) : Parcelable {
+        Link(
+            "link",
+            isReusable = false,
+            isVoucher = false,
+            requiresMandate = true,
+            hasDelayedSettlement = false
+        ),
         Card(
             "card",
             isReusable = true,

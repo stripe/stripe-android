@@ -101,7 +101,10 @@ android {
     }
 
     kotlinOptions {
-        freeCompilerArgs = ["-Xjvm-default=enable"]
+        freeCompilerArgs = [
+                "-Xjvm-default=enable",
+                "-Xuse-experimental=androidx.compose.ui.ExperimentalComposeUiApi"
+        ]
         jvmTarget = "1.8"
     }
 

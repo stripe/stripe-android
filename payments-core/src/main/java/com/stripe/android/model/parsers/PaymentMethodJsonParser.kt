@@ -263,12 +263,12 @@ class PaymentMethodJsonParser : ModelJsonParser<PaymentMethod> {
                 fingerprint = StripeJsonUtils.optString(json, FIELD_FINGERPRINT),
                 last4 = StripeJsonUtils.optString(json, FIELD_LAST4),
                 linkedAccount = StripeJsonUtils.optString(json, FIELD_LINKED_ACCOUNT),
-                networks = PaymentMethod.USBankAccount.USBankNetworks(
+                networks = if (json.has(FIELD_NETWORKS)) PaymentMethod.USBankAccount.USBankNetworks(
                     StripeJsonUtils.optString(json.optJSONObject(FIELD_NETWORKS), FIELD_NETWORKS_PREFERRED),
                     StripeJsonUtils.jsonArrayToList(
                         json.optJSONObject(FIELD_NETWORKS)?.getJSONArray(FIELD_NETWORKS_SUPPORTED)
                     ).orEmpty().map { it.toString() }
-                ),
+                ) else null,
                 routingNumber = StripeJsonUtils.optString(json, FIELD_ROUTING_NUMBER),
             )
         }

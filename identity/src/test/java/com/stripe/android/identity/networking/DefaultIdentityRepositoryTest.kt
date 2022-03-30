@@ -1,6 +1,5 @@
 package com.stripe.android.identity.networking
 
-import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.exception.APIException
@@ -20,6 +19,7 @@ import com.stripe.android.identity.networking.models.CollectedDataParam.Companio
 import com.stripe.android.identity.networking.models.ConsentParam
 import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.networking.models.VerificationPageData
+import com.stripe.android.identity.utils.IdentityIO
 import kotlinx.coroutines.runBlocking
 import org.json.JSONObject
 import org.junit.Test
@@ -38,11 +38,13 @@ import kotlin.test.assertFailsWith
 
 @RunWith(RobolectricTestRunner::class)
 class DefaultIdentityRepositoryTest {
-
+    private val mockIO = mock<IdentityIO>().also {
+        whenever(it.createTFLiteFile(any())).thenReturn(mock())
+    }
     private val mockStripeNetworkClient: StripeNetworkClient = mock()
     private val identityRepository = DefaultIdentityRepository(
-        ApplicationProvider.getApplicationContext(),
-        mockStripeNetworkClient
+        mockStripeNetworkClient,
+        mockIO
     )
 
     private val requestCaptor: KArgumentCaptor<StripeRequest> = argumentCaptor()

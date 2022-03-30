@@ -2,6 +2,7 @@ package com.stripe.android.link
 
 import androidx.activity.result.ActivityResultLauncher
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
+import com.stripe.android.link.model.StripeIntentFixtures
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.argWhere
@@ -22,6 +23,7 @@ class LinkPaymentLauncherTest {
         { STRIPE_ACCOUNT_ID },
         enableLogging = true,
         ioContext = mock(),
+        uiContext = mock(),
         paymentAnalyticsRequestFactory = mock(),
         analyticsRequestExecutor = mock(),
         stripeRepository = mock()
@@ -29,16 +31,21 @@ class LinkPaymentLauncherTest {
 
     @Test
     fun `verify present() launches LinkActivity with correct arguments`() {
-        linkPaymentLauncher.present(MERCHANT_NAME)
+        val stripeIntent = StripeIntentFixtures.PI_SUCCEEDED
+        linkPaymentLauncher.present(
+            stripeIntent,
+            MERCHANT_NAME
+        )
 
         verify(mockHostActivityLauncher).launch(
             argWhere { arg ->
-                arg.merchantName.equals(MERCHANT_NAME) &&
+                arg.stripeIntent == stripeIntent &&
+                    arg.merchantName == MERCHANT_NAME &&
                     arg.injectionParams != null &&
-                    arg.injectionParams.productUsage.equals(setOf(PRODUCT_USAGE)) &&
+                    arg.injectionParams.productUsage == setOf(PRODUCT_USAGE) &&
                     arg.injectionParams.injectorKey == LinkPaymentLauncher::class.simpleName + WeakMapInjectorRegistry.CURRENT_REGISTER_KEY.get() &&
                     arg.injectionParams.enableLogging &&
-                    arg.injectionParams.publishableKey.equals(PUBLISHABLE_KEY) &&
+                    arg.injectionParams.publishableKey == PUBLISHABLE_KEY &&
                     arg.injectionParams.stripeAccountId.equals(STRIPE_ACCOUNT_ID)
             }
         )

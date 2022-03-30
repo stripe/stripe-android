@@ -1,4 +1,16 @@
 # CHANGELOG
+## xx.x.x - YYYY-MM-DD
+This release patches a crash with payment launcher when there is a configuration change
+
+### Payments
+* [FIXED] [4776](https://github.com/stripe/stripe-android/pull/4776) fix issue with PaymentLauncher configuration change
+
+## 19.3.1 - 2022-03-22
+This release patches an issue with 3ds2 confirmation
+
+### Payments
+* [FIXED] [4747](https://github.com/stripe/stripe-android/pull/4747) update 3ds2 to v6.1.5, see PR for specific issues addressed.
+
 ## 19.3.0 - 2022-03-16
 This release enables a new configuration object to be defined for StripeCardScan and updates our 3ds2 SDK.
 

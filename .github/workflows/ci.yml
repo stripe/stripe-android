@@ -7,6 +7,7 @@ on:
 
 env:
   STRIPE_END_TO_END_TESTS_BACKEND_URL: ${{ secrets.STRIPE_END_TO_END_TESTS_BACKEND_URL }}
+  STRIPE_END_TO_END_TESTS_PUBLISHABLE_KEY: ${{ secrets.STRIPE_END_TO_END_TESTS_PUBLISHABLE_KEY }}
 
 jobs:
   check:
@@ -29,13 +30,13 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-
       - name: Ktlint
-        run: ./gradlew ktlint
+        run: bash scripts/execute_task_for_changed_modules.sh ktlint
       - name: Detekt
         run: ./gradlew detekt
       - name: Checkstyle
         run: ./gradlew checkstyle
       - name: Lint
-        run: ./gradlew lintRelease
+        run: bash scripts/execute_task_for_changed_modules.sh lintRelease
 
       # Check if there has been a binary incompatible change to the API.
       # If this change is intentional, run `./gradlew apiDump` and commit the new API files.
