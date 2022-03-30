@@ -32,7 +32,7 @@ internal class DefaultIdentityIO(private val context: Context) : IdentityIO {
             return ContentUriResult(
                 FileProvider.getUriForFile(
                     context,
-                    "com.stripe.android.identity.fileprovider",
+                    "${context.packageName}.fileprovider",
                     file
                 ),
                 file.absolutePath
