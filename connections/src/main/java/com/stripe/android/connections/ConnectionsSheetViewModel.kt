@@ -21,6 +21,8 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -36,10 +38,13 @@ internal class ConnectionsSheetViewModel @Inject constructor(
 
     private val _state = MutableStateFlow(ConnectionsSheetState())
     internal val state: StateFlow<ConnectionsSheetState> = _state
-    private val _viewEffect = MutableSharedFlow<ConnectionsSheetViewEffect>()
-    internal val viewEffect: SharedFlow<ConnectionsSheetViewEffect> = _viewEffect
 
     init {
+        viewModelScope.launch {
+            _state.collect() {
+                println(it);
+            }
+        }
         eventReporter.onPresented(starterArgs.configuration)
         fetchManifest()
     }
@@ -69,15 +74,15 @@ internal class ConnectionsSheetViewModel @Inject constructor(
      * @param manifest the manifest containing the hosted auth flow URL to launch
      *
      */
-    private suspend fun openAuthFlow(manifest: LinkAccountSessionManifest) {
+    private fun openAuthFlow(manifest: LinkAccountSessionManifest) {
         // stores manifest in state for future references.
-        _state.emit(
-            state.value.copy(
+        _state.update {
+            it.copy(
                 manifest = manifest,
-                authFlowActive = true
+                authFlowActive = true,
+                viewEffects = it.viewEffects + OpenAuthFlowWithUrl(manifest.hostedAuthUrl)
             )
-        )
-        _viewEffect.emit(OpenAuthFlowWithUrl(manifest.hostedAuthUrl))
+        }
     }
 
     /**
@@ -107,9 +112,7 @@ internal class ConnectionsSheetViewModel @Inject constructor(
      */
     internal fun onResume() {
         if (_state.value.authFlowActive && _state.value.activityRecreated.not()) {
-            viewModelScope.launch {
-                _viewEffect.emit(FinishWithResult(ConnectionsSheetResult.Canceled))
-            }
+            _state.update { it + FinishWithResult(ConnectionsSheetResult.Canceled) }
         }
     }
 
@@ -120,10 +123,16 @@ internal class ConnectionsSheetViewModel @Inject constructor(
      */
     internal fun onActivityResult() {
         if (_state.value.authFlowActive && _state.value.activityRecreated) {
-            viewModelScope.launch {
-                _viewEffect.emit(FinishWithResult(ConnectionsSheetResult.Canceled))
-            }
+            _state.update { it + FinishWithResult(ConnectionsSheetResult.Canceled) }
         }
+    }
+
+    /**
+     * Called after a [ConnectionsSheetViewEffect] is triggered, to remove it from
+     * the pending view effects list.
+     */
+    internal fun markAsLaunched(launchedEffect: ConnectionsSheetViewEffect) {
+        _state.update { currentState -> currentState - launchedEffect }
     }
 
     /**
@@ -135,10 +144,10 @@ internal class ConnectionsSheetViewModel @Inject constructor(
         viewModelScope.launch {
             kotlin.runCatching {
                 fetchLinkAccountSession(starterArgs.configuration.linkAccountSessionClientSecret)
-            }.onSuccess {
-                val result = ConnectionsSheetResult.Completed(it)
+            }.onSuccess { linkedAccountSession ->
+                val result = ConnectionsSheetResult.Completed(linkedAccountSession)
                 eventReporter.onResult(starterArgs.configuration, result)
-                _viewEffect.emit(FinishWithResult(result))
+                _state.update { currentState -> currentState + FinishWithResult(result) }
             }.onFailure {
                 onFatal(it)
             }
@@ -154,7 +163,7 @@ internal class ConnectionsSheetViewModel @Inject constructor(
     private suspend fun onFatal(throwable: Throwable) {
         val result = ConnectionsSheetResult.Failed(throwable)
         eventReporter.onResult(starterArgs.configuration, result)
-        _viewEffect.emit(FinishWithResult(result))
+        _state.update { it + FinishWithResult(result) }
     }
 
     /**
@@ -165,7 +174,7 @@ internal class ConnectionsSheetViewModel @Inject constructor(
     private suspend fun onUserCancel() {
         val result = ConnectionsSheetResult.Canceled
         eventReporter.onResult(starterArgs.configuration, result)
-        _viewEffect.emit(FinishWithResult(result))
+        _state.update { it + FinishWithResult(result) }
     }
 
     /**

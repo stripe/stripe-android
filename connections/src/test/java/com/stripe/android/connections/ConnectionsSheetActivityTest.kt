@@ -7,11 +7,11 @@ import androidx.browser.customtabs.CustomTabsIntent
 import androidx.browser.customtabs.CustomTabsIntent.SHARE_STATE_OFF
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.connections.ConnectionsSheetViewEffect.OpenAuthFlowWithUrl
 import com.stripe.android.connections.utils.InjectableActivityScenario
 import com.stripe.android.connections.utils.TestUtils.viewModelFactoryFor
 import com.stripe.android.connections.utils.injectableActivityScenario
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.TestScope
@@ -94,12 +94,12 @@ class ConnectionsSheetActivityTest {
     @Test
     fun `viewEffect - OpenAuthFlowWithUrl opens Chrome Custom Tab intent`() {
         val chromeCustomTabUrl = "www.authflow.com"
-        val viewEffects = MutableSharedFlow<ConnectionsSheetViewEffect>()
+        val states = MutableStateFlow<ConnectionsSheetState>(ConnectionsSheetState())
         val mockViewModel = mock<ConnectionsSheetViewModel> {
-            on { viewEffect } doReturn viewEffects
+            on { state } doReturn states
         }
         activityScenario(mockViewModel).launch(intent).suspendOnActivity {
-            viewEffects.emit(ConnectionsSheetViewEffect.OpenAuthFlowWithUrl(chromeCustomTabUrl))
+            states.emit(states.value + OpenAuthFlowWithUrl(chromeCustomTabUrl))
             val intent: Intent = shadowOf(it).nextStartedActivity
             assertThat(intent.getIntExtra(CustomTabsIntent.EXTRA_SHARE_STATE, 0)).isEqualTo(
                 SHARE_STATE_OFF

@@ -88,14 +88,15 @@ class ConnectionsSheetViewModelTest {
             // Given
             whenever(generateLinkAccountSessionManifest(any(), any())).thenReturn(manifest)
             val viewModel = createViewModel(configuration)
-            viewModel.viewEffect.test {
+            viewModel.state.test {
                 // When
                 // end auth flow
                 viewModel.handleOnNewIntent(cancelIntent())
 
                 // Then
                 assertThat(viewModel.state.value.authFlowActive).isFalse()
-                assertThat(FinishWithResult(ConnectionsSheetResult.Canceled)).isEqualTo(awaitItem())
+                assertThat(expectMostRecentItem().viewEffects.last())
+                    .isEqualTo(FinishWithResult(ConnectionsSheetResult.Canceled))
             }
         }
 
@@ -103,7 +104,7 @@ class ConnectionsSheetViewModelTest {
     fun `handleOnNewIntent - when intent with unknown received, then finish with Result#Failed`() =
         runTest {
             val viewModel = createViewModel(configuration)
-            viewModel.viewEffect.test {
+            viewModel.state.test {
                 // Given
                 val errorIntent = Intent()
 
@@ -113,7 +114,7 @@ class ConnectionsSheetViewModelTest {
 
                 // Then
                 assertThat(viewModel.state.value.authFlowActive).isFalse()
-                val viewEffect = awaitItem() as FinishWithResult
+                val viewEffect = expectMostRecentItem().viewEffects.first() as FinishWithResult
                 assertThat(viewEffect.result).isInstanceOf(ConnectionsSheetResult.Failed::class.java)
             }
         }
@@ -127,7 +128,7 @@ class ConnectionsSheetViewModelTest {
             whenever(fetchLinkAccountSession(any())).thenReturn(expectedLinkAccountSession)
 
             val viewModel = createViewModel(configuration)
-            viewModel.viewEffect.test {
+            viewModel.state.test {
 
                 // When
                 // end auth flow
@@ -135,7 +136,7 @@ class ConnectionsSheetViewModelTest {
 
                 // Then
                 assertThat(viewModel.state.value.authFlowActive).isFalse()
-                assertThat(awaitItem()).isEqualTo(
+                assertThat(expectMostRecentItem().viewEffects).contains(
                     FinishWithResult(result = Completed(expectedLinkAccountSession))
                 )
             }
@@ -149,14 +150,14 @@ class ConnectionsSheetViewModelTest {
             whenever(generateLinkAccountSessionManifest(any(), any())).thenReturn(manifest)
             whenever(fetchLinkAccountSession.invoke(any())).thenAnswer { throw apiException }
             val viewModel = createViewModel(configuration)
-            viewModel.viewEffect.test {
+            viewModel.state.test {
                 // When
                 // end auth flow
                 viewModel.handleOnNewIntent(successIntent())
 
                 // Then
                 assertThat(viewModel.state.value.authFlowActive).isFalse()
-                assertThat(awaitItem()).isEqualTo(
+                assertThat(expectMostRecentItem().viewEffects.last()).isEqualTo(
                     FinishWithResult(ConnectionsSheetResult.Failed(apiException))
                 )
             }
@@ -169,14 +170,14 @@ class ConnectionsSheetViewModelTest {
             whenever(generateLinkAccountSessionManifest(any(), any())).thenReturn(manifest)
             whenever(fetchLinkAccountSession(any())).thenAnswer { throw APIException() }
             val viewModel = createViewModel(configuration)
-            viewModel.viewEffect.test {
+            viewModel.state.test {
                 // When
                 // end auth flow
                 viewModel.handleOnNewIntent(successIntent())
 
                 // Then
                 assertThat(viewModel.state.value.authFlowActive).isFalse()
-                assertThat(awaitItem()).isEqualTo(
+                assertThat(expectMostRecentItem().viewEffects.last()).isEqualTo(
                     FinishWithResult(ConnectionsSheetResult.Failed(APIException()))
                 )
             }
@@ -186,15 +187,18 @@ class ConnectionsSheetViewModelTest {
     fun `onResume - when flow is still active and no config changes, finish with Result#Cancelled`() {
         runTest {
             // Given
+            whenever(generateLinkAccountSessionManifest(any(), any())).thenReturn(manifest)
             val viewModel = createViewModel(configuration)
-            viewModel.viewEffect.test {
+            viewModel.state.test {
                 // When
                 // end auth flow (activity resumed without new intent received)
                 viewModel.onResume()
 
                 // Then
-                assertThat(viewModel.state.value.authFlowActive).isTrue()
-                assertThat(awaitItem()).isEqualTo(FinishWithResult(ConnectionsSheetResult.Canceled))
+                val lastState = expectMostRecentItem()
+                assertThat(lastState.authFlowActive).isTrue()
+                assertThat(lastState.viewEffects.last())
+                    .isEqualTo(FinishWithResult(ConnectionsSheetResult.Canceled))
             }
         }
     }
@@ -203,8 +207,9 @@ class ConnectionsSheetViewModelTest {
     fun `onActivityResult - when flow is still active and config changed, finish with Result#Cancelled`() {
         runTest {
             // Given
+            whenever(generateLinkAccountSessionManifest(any(), any())).thenReturn(manifest)
             val viewModel = createViewModel(configuration)
-            viewModel.viewEffect.test {
+            viewModel.state.test {
                 // When
                 // configuration changes, changing lifecycle flow.
                 viewModel.onActivityRecreated()
@@ -213,7 +218,8 @@ class ConnectionsSheetViewModelTest {
 
                 // Then
                 assertThat(viewModel.state.value.authFlowActive).isTrue()
-                assertThat(awaitItem()).isEqualTo(FinishWithResult(ConnectionsSheetResult.Canceled))
+                assertThat(expectMostRecentItem().viewEffects.last())
+                    .isEqualTo(FinishWithResult(ConnectionsSheetResult.Canceled))
             }
         }
     }

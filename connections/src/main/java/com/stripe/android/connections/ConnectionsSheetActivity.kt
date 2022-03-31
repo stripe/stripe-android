@@ -69,18 +69,18 @@ internal class ConnectionsSheetActivity : AppCompatActivity() {
 
     private fun setupObservers() {
         lifecycleScope.launchWhenStarted {
-            viewModel.state.collect {
-                // process state updates here.
+            viewModel.state.collect { state ->
+                state.viewEffects.firstOrNull()?.launch()
             }
         }
-        lifecycleScope.launchWhenStarted {
-            viewModel.viewEffect.collect { viewEffect ->
-                when (viewEffect) {
-                    is OpenAuthFlowWithUrl -> viewEffect.launch()
-                    is FinishWithResult -> finishWithResult(viewEffect.result)
-                }
-            }
+    }
+
+    private fun ConnectionsSheetViewEffect.launch() {
+        when (this) {
+            is OpenAuthFlowWithUrl -> launch()
+            is FinishWithResult -> finishWithResult(result)
         }
+        viewModel.markAsLaunched(this)
     }
 
     private fun OpenAuthFlowWithUrl.launch() {
