@@ -13,7 +13,7 @@ class DefaultStaticCardAccountRangesTest {
             DefaultStaticCardAccountRanges().filter(
                 CardNumber.Unvalidated("6")
             )
-        ).hasSize(4)
+        ).hasSize(6)
     }
 
     @Test

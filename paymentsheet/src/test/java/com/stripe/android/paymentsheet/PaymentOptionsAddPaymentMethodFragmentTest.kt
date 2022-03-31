@@ -22,7 +22,6 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
-import org.mockito.kotlin.times
 import org.robolectric.RobolectricTestRunner
 
 @ExperimentalCoroutinesApi
@@ -128,7 +127,7 @@ internal class PaymentOptionsAddPaymentMethodFragmentTest : PaymentOptionsViewMo
         viewModel.setStripeIntent(args.stripeIntent)
         TestUtils.idleLooper()
         if (registerInjector) {
-            registerViewModel(args.injectorKey, viewModel)
+            registerViewModel(args.injectorKey, viewModel, createFormViewModel())
         }
         launchFragmentInContainer<PaymentOptionsAddPaymentMethodFragment>(
             bundleOf(

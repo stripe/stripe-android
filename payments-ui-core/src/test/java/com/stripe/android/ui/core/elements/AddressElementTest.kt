@@ -31,7 +31,7 @@ class AddressElementTest {
             listOf(
                 EmailElement(
                     IdentifierSpec.Email,
-                    TextFieldController(EmailConfig())
+                    SimpleTextFieldController(EmailConfig())
                 )
             )
         )
@@ -40,7 +40,7 @@ class AddressElementTest {
             listOf(
                 IbanElement(
                     IdentifierSpec.Generic("iban"),
-                    TextFieldController(IbanConfig())
+                    SimpleTextFieldController(IbanConfig())
                 )
             )
         )
@@ -79,7 +79,7 @@ class AddressElementTest {
             emailController =
                 (
                     (addressElement.fields.first()[1] as SectionSingleFieldElement)
-                        .controller as TextFieldController
+                        .controller as SimpleTextFieldController
                     )
             emailController.onValueChange("12invalidiban")
             ShadowLooper.runUiThreadTasksIncludingDelayedTasks()

@@ -11,8 +11,9 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
-import com.stripe.android.core.Logger
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.core.Logger
+import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContract
 import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLauncherFactory
@@ -23,7 +24,6 @@ import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
-import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
@@ -89,8 +89,6 @@ internal class PaymentSheetActivityTest {
 
     @BeforeTest
     fun before() {
-        Dispatchers.setMain(testDispatcher)
-
         PaymentConfiguration.init(
             context,
             ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
@@ -178,6 +176,9 @@ internal class PaymentSheetActivityTest {
     fun `updates buy button state on add payment`() {
         val scenario = activityScenario()
         scenario.launch(intent).onActivity { activity ->
+            // Based on previously run tests the viewModel might have a different selection state saved
+            viewModel.updateSelection(null)
+
             viewModel.transitionTo(
                 PaymentSheetViewModel.TransitionTarget.AddPaymentMethodFull(
                     FragmentConfigFixtures.DEFAULT
@@ -186,9 +187,9 @@ internal class PaymentSheetActivityTest {
             idleLooper()
 
             // Initially empty card
+            assertThat(activity.viewBinding.googlePayButton.isVisible).isFalse()
             assertThat(activity.viewBinding.buyButton.isVisible).isTrue()
             assertThat(activity.viewBinding.buyButton.isEnabled).isFalse()
-            assertThat(activity.viewBinding.googlePayButton.isVisible).isFalse()
 
             // Update to Google Pay
             viewModel.updateSelection(PaymentSelection.GooglePay)
@@ -413,6 +414,7 @@ internal class PaymentSheetActivityTest {
 
     @Test
     fun `Verify FinishProcessing state calls the callback`() {
+        Dispatchers.setMain(testDispatcher)
         val scenario = activityScenario()
         scenario.launch(intent).onActivity {
             // wait for bottom sheet to animate in
@@ -458,6 +460,7 @@ internal class PaymentSheetActivityTest {
 
     @Test
     fun `Verify FinishProcessing state calls the callback on google pay view state observer`() {
+        Dispatchers.setMain(testDispatcher)
         val scenario = activityScenario()
         scenario.launch(intent).onActivity {
             viewModel.checkoutIdentifier = CheckoutIdentifier.SheetBottomGooglePay
@@ -498,6 +501,7 @@ internal class PaymentSheetActivityTest {
 
     @Test
     fun `Verify ProcessResult state closes the sheet`() {
+        Dispatchers.setMain(testDispatcher)
         val scenario = activityScenario()
         scenario.launch(intent).onActivity { activity ->
             // wait for bottom sheet to animate in
@@ -520,6 +524,7 @@ internal class PaymentSheetActivityTest {
 
     @Test
     fun `successful payment should dismiss bottom sheet`() {
+        Dispatchers.setMain(testDispatcher)
         val scenario = activityScenario(viewModel)
         scenario.launch(intent).onActivity { activity ->
             // wait for bottom sheet to animate in

@@ -23,4 +23,14 @@ data class SectionElement(
         combine(fields.map { it.getFormFieldValueFlow() }) {
             it.toList().flatten()
         }
+
+    override fun getTextFieldIdentifiers(): Flow<List<IdentifierSpec>> =
+        combine(
+            fields
+                .map {
+                    it.getTextFieldIdentifiers()
+                }
+        ) {
+            it.toList().flatten()
+        }
 }

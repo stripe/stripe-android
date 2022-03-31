@@ -8,6 +8,8 @@ import androidx.compose.ui.text.input.VisualTransformation
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.TextFieldStateConstants.Error
 import com.stripe.android.ui.core.elements.TextFieldStateConstants.Valid
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class NameConfig : TextFieldConfig {
@@ -17,6 +19,8 @@ class NameConfig : TextFieldConfig {
     override val debugLabel = "name"
     override val keyboard = KeyboardType.Text
     override val visualTransformation: VisualTransformation? = null
+    override val trailingIcon: MutableStateFlow<TextFieldIcon?> = MutableStateFlow(null)
+    override val loading: StateFlow<Boolean> = MutableStateFlow(false)
 
     override fun determineState(input: String): TextFieldState {
         return when {

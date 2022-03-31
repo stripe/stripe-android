@@ -49,4 +49,9 @@ internal object CardNumberFixtures {
     const val UNIONPAY_WITH_SPACES = "6200 0000 0000 0005"
     val UNIONPAY_BIN = UNIONPAY_NO_SPACES.take(6)
     val UNIONPAY = CardNumber.Unvalidated(UNIONPAY_NO_SPACES)
+
+    const val UNIONPAY_19_NO_SPACES = "6200500000000000004"
+    const val UNIONPAY_19_WITH_SPACES = "6200 5000 0000 0000 004"
+    val UNIONPAY_19_BIN = UNIONPAY_19_NO_SPACES.take(6)
+    val UNIONPAY_19 = CardNumber.Unvalidated(UNIONPAY_19_NO_SPACES)
 }

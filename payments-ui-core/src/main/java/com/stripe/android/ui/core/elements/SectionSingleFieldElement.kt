@@ -3,6 +3,7 @@ package com.stripe.android.ui.core.elements
 import androidx.annotation.RestrictTo
 import com.stripe.android.ui.core.forms.FormFieldEntry
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.map
 
 /**
@@ -31,4 +32,10 @@ sealed class SectionSingleFieldElement(
     override fun setRawValue(rawValuesMap: Map<IdentifierSpec, String?>) {
         rawValuesMap[identifier]?.let { controller.onRawValueChange(it) }
     }
+
+    override fun getTextFieldIdentifiers(): Flow<List<IdentifierSpec>> =
+        MutableStateFlow(
+            listOf(identifier).takeIf { controller is TextFieldController }
+                ?: emptyList()
+        )
 }
