@@ -2,16 +2,16 @@ package com.stripe.android.connections.repository
 
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.connections.di.PUBLISHABLE_KEY
-import com.stripe.android.connections.exception.AuthenticationException
-import com.stripe.android.connections.exception.PermissionException
-import com.stripe.android.connections.exception.RateLimitException
 import com.stripe.android.connections.model.LinkAccountSession
 import com.stripe.android.connections.model.LinkAccountSessionManifest
 import com.stripe.android.connections.model.LinkedAccountList
 import com.stripe.android.connections.model.ListLinkedAccountParams
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.exception.APIException
+import com.stripe.android.core.exception.AuthenticationException
 import com.stripe.android.core.exception.InvalidRequestException
+import com.stripe.android.core.exception.PermissionException
+import com.stripe.android.core.exception.RateLimitException
 import com.stripe.android.core.model.parsers.StripeErrorJsonParser
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.HTTP_TOO_MANY_REQUESTS
