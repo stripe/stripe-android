@@ -293,6 +293,7 @@ fun Context.convertDpToPx(dp: Dp): Float {
 }
 
 // This method calculates if black or white offers a better contrast compared to a given color.
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun Color.shouldUseDarkDynamicColor(): Boolean {
     val contrastRatioToBlack = ColorUtils.calculateContrast(this.toArgb(), Color.Black.toArgb())
     val contrastRatioToWhite = ColorUtils.calculateContrast(this.toArgb(), Color.White.toArgb())
