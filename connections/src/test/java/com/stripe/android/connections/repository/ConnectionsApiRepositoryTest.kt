@@ -13,6 +13,7 @@ import org.junit.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
+import java.io.BufferedReader
 import java.net.HttpURLConnection
 
 @ExperimentalCoroutinesApi
@@ -30,7 +31,11 @@ class ConnectionsApiRepositoryTest {
     @Test
     fun `getLinkAccountSession - when paymentAccount is LinkedAccount, deserializes correct type`() =
         runTest {
-            givenGetRequestReturns(LINKED_ACCOUNT_SESSION_WITH_LINKED_ACCOUNT)
+            givenGetRequestReturns(
+                readResourceAsString(
+                    "json/linked_account_session_payment_account_as_linked_account.json"
+                )
+            )
 
             val result = connectionsApiRepository.getLinkAccountSession("client_secret")
 
@@ -40,12 +45,22 @@ class ConnectionsApiRepositoryTest {
     @Test
     fun `getLinkAccountSession - when paymentAccount is BankAccount, deserializes correct type`() =
         runTest {
-            givenGetRequestReturns(LINKED_ACCOUNT_SESSION_WITH_BANK_ACCOUNT)
+            givenGetRequestReturns(
+                readResourceAsString(
+                    "json/linked_account_session_payment_account_as_bank_account.json"
+                )
+            )
 
             val result = connectionsApiRepository.getLinkAccountSession("client_secret")
 
             assertThat(result.paymentAccount).isInstanceOf(BankAccount::class.java)
         }
+
+    private fun readResourceAsString(resourcePath: String): String = javaClass
+        .classLoader!!
+        .getResourceAsStream(resourcePath)!!
+        .bufferedReader()
+        .use(BufferedReader::readText)
 
     private suspend fun givenGetRequestReturns(successBody: String) {
         val mock = mock<ApiRequest>()
@@ -56,57 +71,5 @@ class ConnectionsApiRepositoryTest {
                 body = successBody
             )
         )
-    }
-
-    companion object {
-        private val LINKED_ACCOUNT_SESSION_WITH_BANK_ACCOUNT = """ 
-            {
-              "id": "las_dhgfsklhgfkdsjhgk",
-              "object": "link_account_session",
-              "client_secret": "las_client_secret_ldafjlfkjlsfadkjk",
-              "linked_accounts": {
-                "object": "list",
-                "data": [
-            
-                ],
-                "has_more": false,
-                "total_count": 0,
-                "url": "/v1/linked_accounts"
-              },
-              "livemode": true,
-              "payment_account": {
-                "id": "ba_1Kj6xvClCIKljWvs6z6QBHpN",
-                "bank_name": "JPMORGAN CHASE BANK, NA",
-                "last4": "3211",
-                "routing_number": "12341234"
-              }
-            }
-        """.trimIndent()
-
-        private val LINKED_ACCOUNT_SESSION_WITH_LINKED_ACCOUNT = """ 
-            {
-              "id": "las_dhgfsklhgfkdsjhgk",
-              "object": "link_account_session",
-              "client_secret": "las_client_secret_ldafjlfkjlsfadkjk",
-              "linked_accounts": {
-                "object": "list",
-                "data": [
-            
-                ],
-                "has_more": false,
-                "total_count": 0,
-                "url": "/v1/linked_accounts"
-              },
-              "livemode": true,
-              "payment_account": {
-                "id": "ba_1Kj6xvClCIKljWvs6z6QBHpN",
-                "created": "233",
-                "institution_name": "JPMORGAN CHASE BANK, NA",
-                "livemode": true,
-                "supported_payment_method_types": ["link"],
-                "last4": "3211"
-              }
-            }
-        """.trimIndent()
     }
 }

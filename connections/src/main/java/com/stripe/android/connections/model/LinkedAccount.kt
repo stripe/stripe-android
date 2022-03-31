@@ -219,4 +219,8 @@ data class LinkedAccount(
 
         UNKNOWN("unknown");
     }
+
+    companion object {
+        const val OBJECT = "linked_account"
+    }
 }
