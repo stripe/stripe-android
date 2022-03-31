@@ -3,41 +3,54 @@ package com.stripe.android.identity.navigation
 import android.os.Bundle
 import android.util.Log
 import android.util.Size
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
+import android.widget.ImageView
+import android.widget.TextView
 import androidx.annotation.VisibleForTesting
+import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import com.stripe.android.camera.Camera1Adapter
-import com.stripe.android.camera.CameraPermissionEnsureable
 import com.stripe.android.camera.DefaultCameraErrorListener
 import com.stripe.android.camera.scanui.CameraView
 import com.stripe.android.camera.scanui.util.asRect
+import com.stripe.android.camera.scanui.util.startAnimation
+import com.stripe.android.camera.scanui.util.startAnimationIfNotRunning
 import com.stripe.android.core.exception.InvalidResponseException
+import com.stripe.android.identity.R
+import com.stripe.android.identity.databinding.IdentityCameraScanFragmentBinding
+import com.stripe.android.identity.navigation.CouldNotCaptureFragment.Companion.ARG_COULD_NOT_CAPTURE_SCAN_TYPE
 import com.stripe.android.identity.networking.Status
+import com.stripe.android.identity.networking.models.ClearDataParam
+import com.stripe.android.identity.networking.models.CollectedDataParam
+import com.stripe.android.identity.networking.models.IdDocumentParam
 import com.stripe.android.identity.states.IdentityScanState
+import com.stripe.android.identity.ui.LoadingButton
+import com.stripe.android.identity.utils.navigateToDefaultErrorFragment
+import com.stripe.android.identity.utils.postVerificationPageDataAndMaybeSubmit
 import com.stripe.android.identity.viewmodel.CameraViewModel
+import com.stripe.android.identity.viewmodel.IdentityScanViewModel
 import com.stripe.android.identity.viewmodel.IdentityViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 /**
  * An abstract [Fragment] class to access camera scanning for Identity.
  *
  * Subclasses are responsible for populating [cameraView] in its [Fragment.onCreateView] method.
- *
- * When the fragment's view is created, [cameraPermissionEnsureable] is used to check camera
- * permission. Subclasses are responsible for implementing [onCameraReady] and
- * [onUserDeniedCameraPermission] to handle the permission callbacks.
- *
  */
 internal abstract class IdentityCameraScanFragment(
-    private val cameraPermissionEnsureable: CameraPermissionEnsureable,
-    private val cameraViewModelFactory: ViewModelProvider.Factory,
+    private val identityCameraScanViewModelFactory: ViewModelProvider.Factory,
     private val identityViewModelFactory: ViewModelProvider.Factory
 ) : Fragment() {
-    protected val cameraViewModel: CameraViewModel by viewModels { cameraViewModelFactory }
-    private val identityViewModel: IdentityViewModel by activityViewModels { identityViewModelFactory }
+    protected val identityScanViewModel: IdentityScanViewModel by viewModels { identityCameraScanViewModelFactory }
+    protected val identityViewModel: IdentityViewModel by activityViewModels { identityViewModelFactory }
 
     @VisibleForTesting
     internal lateinit var cameraAdapter: Camera1Adapter
@@ -47,28 +60,63 @@ internal abstract class IdentityCameraScanFragment(
      * [Fragment.onCreateView].
      */
     protected lateinit var cameraView: CameraView
+    protected lateinit var binding: IdentityCameraScanFragmentBinding
+    protected lateinit var headerTitle: TextView
+    protected lateinit var messageView: TextView
+    protected lateinit var continueButton: LoadingButton
+    private lateinit var checkMarkView: ImageView
 
     /**
-     * Called back once after at end of [onViewCreated] when permission is granted.
+     * Called back at end of [onViewCreated] when permission is granted.
      */
     protected abstract fun onCameraReady()
 
-    /**
-     * Called back once after at end of [onViewCreated] when permission is denied.
-     */
-    protected abstract fun onUserDeniedCameraPermission()
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        binding = IdentityCameraScanFragmentBinding.inflate(inflater, container, false)
+        cameraView = binding.cameraView
 
-    /**
-     * Called back each time when [CameraViewModel.displayStateChanged] is changed.
-     */
-    protected abstract fun updateUI(identityScanState: IdentityScanState)
+        headerTitle = binding.headerTitle
+        messageView = binding.message
+
+        checkMarkView = binding.checkMarkView
+        continueButton = binding.kontinue
+        continueButton.setText(getString(R.string.kontinue))
+        continueButton.isEnabled = false
+        return binding.root
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        cameraViewModel.displayStateChanged.observe(viewLifecycleOwner) { (newState, _) ->
+        identityScanViewModel.displayStateChanged.observe(viewLifecycleOwner) { (newState, _) ->
             updateUI(newState)
         }
-        cameraViewModel.finalResult.observe(viewLifecycleOwner) {
+        identityScanViewModel.finalResult.observe(viewLifecycleOwner) { finalResult ->
+            if (finalResult.identityState is IdentityScanState.Finished) {
+                identityViewModel.observeForVerificationPage(
+                    viewLifecycleOwner,
+                    onSuccess = {
+                        identityViewModel.uploadScanResult(
+                            finalResult,
+                            it.documentCapture,
+                            identityScanViewModel.targetScanType
+                        )
+                    },
+                    onFailure = {
+                        navigateToDefaultErrorFragment()
+                    }
+                )
+            } else if (finalResult.identityState is IdentityScanState.TimeOut) {
+                findNavController().navigate(
+                    R.id.action_global_couldNotCaptureFragment,
+                    bundleOf(
+                        ARG_COULD_NOT_CAPTURE_SCAN_TYPE to identityScanViewModel.targetScanType
+                    )
+                )
+            }
             stopScanning()
         }
         cameraAdapter = Camera1Adapter(
@@ -80,18 +128,20 @@ internal abstract class IdentityCameraScanFragment(
             }
         )
 
-        identityViewModel.idDetectorModelFile.observe(viewLifecycleOwner) {
+        identityViewModel.pageAndModel.observe(viewLifecycleOwner) {
             when (it.status) {
                 Status.SUCCESS -> {
-                    cameraViewModel.initializeScanFlow(requireNotNull(it.data))
-                    cameraPermissionEnsureable.ensureCameraPermission(
-                        ::onCameraReady,
-                        ::onUserDeniedCameraPermission
-                    )
+                    requireNotNull(it.data).let { pageFilePair ->
+                        identityScanViewModel.initializeScanFlow(
+                            pageFilePair.first,
+                            pageFilePair.second
+                        )
+                        lifecycleScope.launch(Dispatchers.Main) {
+                            onCameraReady()
+                        }
+                    }
                 }
-                Status.LOADING -> {
-                    // no-op
-                }
+                Status.LOADING -> {} // no-op
                 Status.ERROR -> {
                     throw InvalidResponseException(
                         cause = it.throwable,
@@ -103,14 +153,61 @@ internal abstract class IdentityCameraScanFragment(
     }
 
     /**
+     * Check if should start scanning from back.
+     */
+    protected fun shouldStartFromBack(): Boolean =
+        arguments?.get(ARG_SHOULD_START_FROM_BACK) as? Boolean == true
+
+    /**
+     * Called back each time when [CameraViewModel.displayStateChanged] is changed.
+     */
+    protected open fun updateUI(identityScanState: IdentityScanState) {
+        when (identityScanState) {
+            is IdentityScanState.Initial -> {
+                cameraView.viewFinderBackgroundView.visibility = View.VISIBLE
+                cameraView.viewFinderWindowView.visibility = View.VISIBLE
+                cameraView.viewFinderBorderView.visibility = View.VISIBLE
+                continueButton.isEnabled = false
+                checkMarkView.visibility = View.GONE
+                cameraView.viewFinderWindowView.setBackgroundResource(R.drawable.viewfinder_background)
+                cameraView.viewFinderBorderView.startAnimation(R.drawable.viewfinder_border_initial)
+            }
+            is IdentityScanState.Found -> {
+                messageView.text = requireContext().getText(R.string.hold_still)
+                cameraView.viewFinderWindowView.setBackgroundResource(R.drawable.viewfinder_background)
+                cameraView.viewFinderBorderView.startAnimationIfNotRunning(R.drawable.viewfinder_border_found)
+            }
+            is IdentityScanState.Unsatisfied -> {
+                cameraView.viewFinderWindowView.setBackgroundResource(R.drawable.viewfinder_background)
+            }
+            is IdentityScanState.Satisfied -> {
+                messageView.text = requireContext().getText(R.string.scanned)
+                cameraView.viewFinderWindowView.setBackgroundResource(R.drawable.viewfinder_background)
+            }
+            is IdentityScanState.Finished -> {
+                cameraView.viewFinderBackgroundView.visibility = View.INVISIBLE
+                cameraView.viewFinderWindowView.visibility = View.INVISIBLE
+                cameraView.viewFinderBorderView.visibility = View.INVISIBLE
+                checkMarkView.visibility = View.VISIBLE
+                continueButton.isEnabled = true
+                messageView.text = requireContext().getText(R.string.scanned)
+                cameraView.viewFinderBorderView.startAnimation(R.drawable.viewfinder_border_initial)
+            }
+            is IdentityScanState.TimeOut -> {
+                // no-op, transitions to CouldNotCaptureFragment
+            }
+        }
+    }
+
+    /**
      * Start scanning for the required scan type.
      */
     protected fun startScanning(scanType: IdentityScanState.ScanType) {
+        identityScanViewModel.targetScanType = scanType
         cameraAdapter.bindToLifecycle(this)
-        // TODO(ccen): pack this logic into a IdentitySpecific CameraViewModel
-        cameraViewModel.scanState = null
-        cameraViewModel.scanStatePrevious = null
-        cameraViewModel.identityScanFlow.startFlow(
+        identityScanViewModel.scanState = null
+        identityScanViewModel.scanStatePrevious = null
+        identityScanViewModel.identityScanFlow.startFlow(
             context = requireContext(),
             imageStream = cameraAdapter.getImageStream(),
             viewFinder = cameraView.viewFinderWindowView.asRect(),
@@ -124,18 +221,107 @@ internal abstract class IdentityCameraScanFragment(
      * Stop scanning, may start again later.
      */
     private fun stopScanning() {
-        cameraViewModel.identityScanFlow.resetFlow()
+        identityScanViewModel.identityScanFlow.resetFlow()
         cameraAdapter.unbindFromLifecycle(this)
     }
+
+    /**
+     * Observe for [IdentityScanViewModel.bothUploaded],
+     * try to [postVerificationPageDataAndMaybeSubmit] when success and navigates to error when fails.
+     */
+    protected fun observeAndUploadForBothSides(type: IdDocumentParam.Type) =
+        identityViewModel.bothUploaded.observe(viewLifecycleOwner) {
+            when (it.status) {
+                Status.SUCCESS -> {
+                    it.data?.let { uploadedFiles ->
+                        lifecycleScope.launch {
+                            runCatching {
+                                postVerificationPageDataAndMaybeSubmit(
+                                    identityViewModel = identityViewModel,
+                                    collectedDataParam =
+                                    CollectedDataParam.createFromUploadedResultsForAutoCapture(
+                                        type = type,
+                                        frontHighResResult = uploadedFiles.first.first,
+                                        frontLowResResult = uploadedFiles.first.second,
+                                        backHighResResult = uploadedFiles.second.first,
+                                        backLowResResult = uploadedFiles.second.second,
+                                    ),
+                                    clearDataParam = ClearDataParam.UPLOAD_TO_CONFIRM,
+                                    shouldNotSubmit = { false }
+                                )
+                            }.onFailure { throwable ->
+                                Log.d(
+                                    TAG,
+                                    "fail to submit uploaded files: $throwable"
+                                )
+                                navigateToDefaultErrorFragment()
+                            }
+                        }
+                    }
+                }
+                Status.ERROR -> {
+                    Log.e(TAG, "Fail to upload files: ${it.throwable}")
+                    navigateToDefaultErrorFragment()
+                }
+                Status.LOADING -> {
+                    continueButton.toggleToLoading()
+                }
+            }
+        }
+
+    /**
+     * Observe for [IdentityScanViewModel.frontUploaded],
+     * try to [postVerificationPageDataAndMaybeSubmit] when success and navigates to error when fails.
+     */
+    protected fun observeAndUploadForFrontSide(type: IdDocumentParam.Type) =
+        identityViewModel.frontUploaded.observe(viewLifecycleOwner) {
+            when (it.status) {
+                Status.SUCCESS -> {
+                    it.data?.let { uploadedFiles ->
+                        val frontHighResResult = uploadedFiles.first
+                        val frontLowResResult = uploadedFiles.second
+                        lifecycleScope.launch {
+                            runCatching {
+                                postVerificationPageDataAndMaybeSubmit(
+                                    identityViewModel = identityViewModel,
+                                    collectedDataParam =
+                                    CollectedDataParam.createFromUploadedResultsForAutoCapture(
+                                        type,
+                                        frontHighResResult,
+                                        frontLowResResult
+                                    ),
+                                    clearDataParam = ClearDataParam.UPLOAD_TO_CONFIRM,
+                                    shouldNotSubmit = { false }
+                                )
+                            }.onFailure { throwable ->
+                                Log.d(
+                                    PassportScanFragment.TAG,
+                                    "fail to submit uploaded files: $throwable"
+                                )
+                                navigateToDefaultErrorFragment()
+                            }
+                        }
+                    }
+                }
+                Status.ERROR -> {
+                    Log.e(PassportScanFragment.TAG, "Fail to upload files: ${it.throwable}")
+                    navigateToDefaultErrorFragment()
+                }
+                Status.LOADING -> {
+                    continueButton.toggleToLoading()
+                }
+            }
+        }
 
     override fun onDestroy() {
         super.onDestroy()
         Log.d(TAG, "Cancelling IdentityScanFlow")
-        cameraViewModel.identityScanFlow.cancelFlow()
+        identityScanViewModel.identityScanFlow.cancelFlow()
     }
 
-    private companion object {
-        val TAG: String = IdentityCameraScanFragment::class.java.simpleName
-        val MINIMUM_RESOLUTION = Size(1067, 600) // TODO: decide what to use
+    internal companion object {
+        const val ARG_SHOULD_START_FROM_BACK = "startFromBack"
+        private val TAG: String = IdentityCameraScanFragment::class.java.simpleName
+        private val MINIMUM_RESOLUTION = Size(1067, 600) // TODO: decide what to use
     }
 }

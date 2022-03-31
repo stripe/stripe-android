@@ -1,11 +1,14 @@
 package com.stripe.android.identity.utils
 
 import android.util.Log
+import androidx.annotation.IdRes
+import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.stripe.android.identity.R
 import com.stripe.android.identity.navigation.ErrorFragment
 import com.stripe.android.identity.navigation.ErrorFragment.Companion.navigateToErrorFragmentWithDefaultValues
+import com.stripe.android.identity.navigation.ErrorFragment.Companion.navigateToErrorFragmentWithFailedReason
 import com.stripe.android.identity.navigation.ErrorFragment.Companion.navigateToErrorFragmentWithRequirementErrorAndDestination
 import com.stripe.android.identity.networking.models.ClearDataParam
 import com.stripe.android.identity.networking.models.CollectedDataParam
@@ -69,6 +72,7 @@ internal suspend fun Fragment.postVerificationPageDataAndMaybeSubmit(
                             }
                         },
                         onFailure = {
+                            Log.e(TAG, "Failed to postVerificationPageSubmit: $it")
                             navigateToDefaultErrorFragment()
                         }
                     )
@@ -76,6 +80,7 @@ internal suspend fun Fragment.postVerificationPageDataAndMaybeSubmit(
             }
         },
         onFailure = {
+            Log.e(TAG, "Failed to postVerificationPageData: $it")
             navigateToDefaultErrorFragment()
         }
     )
@@ -101,5 +106,32 @@ private fun Fragment.navigateToRequirementErrorFragment(
 internal fun Fragment.navigateToDefaultErrorFragment() {
     findNavController().navigateToErrorFragmentWithDefaultValues(requireContext())
 }
+
+/**
+ * Navigate to [ErrorFragment] as final destination.
+ */
+internal fun Fragment.navigateToErrorFragmentWithFailedReason(failedReason: Throwable) {
+    findNavController().navigateToErrorFragmentWithFailedReason(requireContext(), failedReason)
+}
+
+/**
+ * Navigate to upload fragment with shouldShowCamera argument.
+ */
+internal fun Fragment.navigateToUploadFragment(
+    @IdRes destinationId: Int,
+    shouldShowCamera: Boolean
+) {
+    findNavController().navigate(
+        destinationId,
+        bundleOf(
+            ARG_SHOULD_SHOW_CAMERA to shouldShowCamera
+        )
+    )
+}
+
+/**
+ * Argument to indicate if camera option should be shown when picking an image.
+ */
+internal const val ARG_SHOULD_SHOW_CAMERA = "shouldShowCamera"
 
 private const val TAG = "NAVIGATION_UTIL"

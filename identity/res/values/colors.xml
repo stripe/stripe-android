@@ -4,8 +4,13 @@
 
     <color name="check_mark_background">#80FFFFFF</color>
 
+    <color name="loading_button_progress_indicator_color">#80FFFFFF</color>
+
     <color name="exclamation_mark">#88919E</color>
 
     <color name="choose_file_tint">#88919E</color>
     <color name="take_photo_tint">#88919E</color>
+
+    <color name="viewfinder_border_center">#5469D4</color>
+
 </resources>

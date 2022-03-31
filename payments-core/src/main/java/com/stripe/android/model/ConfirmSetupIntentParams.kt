@@ -105,6 +105,29 @@ data class ConfirmSetupIntentParams internal constructor(
         }
 
     companion object {
+
+        /**
+         * Create the parameters necessary for confirming a [SetupIntent] based on its [clientSecret]
+         * and [paymentMethodType]
+         *
+         * Use this initializer for SetupIntents that already have a PaymentMethod attached.
+         *
+         * @param clientSecret client secret from the PaymentIntent that is to be confirmed
+         * @param paymentMethodType the known type of the SetupIntent's attached PaymentMethod
+         */
+        @JvmStatic
+        fun create(
+            clientSecret: String,
+            paymentMethodType: PaymentMethod.Type
+        ): ConfirmSetupIntentParams {
+            return ConfirmSetupIntentParams(
+                clientSecret = clientSecret,
+                // infers default [MandateDataParams] based on the attached [paymentMethodType]
+                mandateData = MandateDataParams(MandateDataParams.Type.Online.DEFAULT)
+                    .takeIf { paymentMethodType.requiresMandate }
+            )
+        }
+
         /**
          * Create the parameters necessary for confirming a SetupIntent, without specifying a payment method
          * to attach to the SetupIntent. Only use this if a payment method has already been attached

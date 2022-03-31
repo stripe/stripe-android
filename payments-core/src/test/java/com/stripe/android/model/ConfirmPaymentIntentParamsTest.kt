@@ -399,6 +399,30 @@ class ConfirmPaymentIntentParamsTest {
     }
 
     @Test
+    fun toParamMap_withUSBankAccountPaymentMethodOptions_shouldCreateExpectedMap() {
+        assertThat(
+            ConfirmPaymentIntentParams(
+                paymentMethodId = "pm_123",
+                paymentMethodOptions = PaymentMethodOptionsParams.USBankAccount(
+                    setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
+                ),
+                clientSecret = CLIENT_SECRET
+            ).toParamMap()
+        ).isEqualTo(
+            mapOf(
+                "payment_method" to "pm_123",
+                "payment_method_options" to mapOf(
+                    "us_bank_account" to mapOf(
+                        "setup_future_usage" to "off_session",
+                    )
+                ),
+                "client_secret" to CLIENT_SECRET,
+                "use_stripe_sdk" to false
+            )
+        )
+    }
+
+    @Test
     fun toParamMap_withReceiptEmail_shouldCreateExpectedMap() {
         assertThat(
             ConfirmPaymentIntentParams(
@@ -464,6 +488,44 @@ class ConfirmPaymentIntentParamsTest {
                     "payment_method_data" to mapOf(
                         "type" to "alipay"
                     )
+                )
+            )
+    }
+
+    @Test
+    fun create_withAttachedPaymentMethodRequiringMandate_shouldIncludeDefaultMandateParams() {
+        val params = ConfirmPaymentIntentParams
+            .create(CLIENT_SECRET, PaymentMethod.Type.USBankAccount)
+            .toParamMap()
+
+        assertThat(params)
+            .isEqualTo(
+                mapOf(
+                    "client_secret" to CLIENT_SECRET,
+                    "use_stripe_sdk" to false,
+                    "mandate_data" to mapOf(
+                        "customer_acceptance" to mapOf(
+                            "type" to "online",
+                            "online" to mapOf(
+                                "infer_from_client" to true
+                            )
+                        )
+                    ),
+                )
+            )
+    }
+
+    @Test
+    fun create_withAttachedPaymentMethodNotRequiringMandate_shouldNotIncludeMandateParams() {
+        val params = ConfirmPaymentIntentParams
+            .create(CLIENT_SECRET, PaymentMethod.Type.Affirm)
+            .toParamMap()
+
+        assertThat(params)
+            .isEqualTo(
+                mapOf(
+                    "client_secret" to CLIENT_SECRET,
+                    "use_stripe_sdk" to false,
                 )
             )
     }

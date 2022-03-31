@@ -3,13 +3,16 @@ package com.stripe.android.identity.navigation
 import android.net.Uri
 import android.view.View
 import android.widget.Button
+import android.widget.TextView
+import androidx.appcompat.app.AppCompatDialog
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
+import androidx.core.os.bundleOf
 import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.lifecycle.MutableLiveData
 import androidx.navigation.Navigation
 import androidx.navigation.testing.TestNavHostController
 import androidx.test.core.app.ApplicationProvider
-import com.google.android.material.bottomsheet.BottomSheetDialog
+import com.google.android.material.button.MaterialButton
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.model.InternalStripeFile
 import com.stripe.android.core.model.InternalStripeFilePurpose
@@ -25,6 +28,7 @@ import com.stripe.android.identity.networking.models.DocumentUploadParam.UploadM
 import com.stripe.android.identity.networking.models.IdDocumentParam
 import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentDocumentCapturePage
+import com.stripe.android.identity.utils.ARG_SHOULD_SHOW_CAMERA
 import com.stripe.android.identity.viewModelFactoryFor
 import com.stripe.android.identity.viewmodel.IdentityViewModel
 import com.stripe.android.identity.viewmodel.PassportUploadViewModel
@@ -49,13 +53,11 @@ class PassportUploadFragmentTest {
     @get:Rule
     var rule: TestRule = InstantTaskExecutorRule()
 
-    private val uploaded =
-        MutableLiveData<Resource<Pair<InternalStripeFile, UploadMethod>>>()
+    private val frontHighResUploaded =
+        MutableLiveData<Resource<IdentityViewModel.UploadedResult>>()
     private val mockUri = mock<Uri>()
 
-    private val mockPassportUploadViewModel = mock<PassportUploadViewModel>().also {
-        whenever(it.uploaded).thenReturn(uploaded)
-    }
+    private val mockPassportUploadViewModel = mock<PassportUploadViewModel>()
 
     private val verificationPage = mock<VerificationPage>().also {
         whenever(it.documentCapture).thenReturn(DOCUMENT_CAPTURE)
@@ -66,6 +68,7 @@ class PassportUploadFragmentTest {
         whenever(it.observeForVerificationPage(any(), successCaptor.capture(), any())).then {
             successCaptor.firstValue(verificationPage)
         }
+        whenever(it.frontHighResUploaded).thenReturn(frontHighResUploaded)
     }
 
     @Test
@@ -77,6 +80,38 @@ class PassportUploadFragmentTest {
             assertThat(binding.progressCircular.visibility).isEqualTo(View.GONE)
             assertThat(binding.finishedCheckMark.visibility).isEqualTo(View.GONE)
             assertThat(binding.kontinue.isEnabled).isEqualTo(false)
+        }
+    }
+
+    @Test
+    fun `when shouldShowCamera is true UI is correct`() {
+        launchFragment(shouldShowCamera = true) { binding, _, _ ->
+            binding.select.callOnClick()
+            val dialog = ShadowDialog.getLatestDialog()
+
+            // dialog shows up
+            assertThat(dialog.isShowing).isTrue()
+            assertThat(dialog).isInstanceOf(AppCompatDialog::class.java)
+
+            // assert dialog content
+            assertThat(dialog.findViewById<Button>(R.id.choose_file).visibility).isEqualTo(View.VISIBLE)
+            assertThat(dialog.findViewById<Button>(R.id.take_photo).visibility).isEqualTo(View.VISIBLE)
+        }
+    }
+
+    @Test
+    fun `when shouldShowCamera is false UI is correct`() {
+        launchFragment(shouldShowCamera = false) { binding, _, _ ->
+            binding.select.callOnClick()
+            val dialog = ShadowDialog.getLatestDialog()
+
+            // dialog shows up
+            assertThat(dialog.isShowing).isTrue()
+            assertThat(dialog).isInstanceOf(AppCompatDialog::class.java)
+
+            // assert dialog content
+            assertThat(dialog.findViewById<Button>(R.id.choose_file).visibility).isEqualTo(View.VISIBLE)
+            assertThat(dialog.findViewById<Button>(R.id.take_photo).visibility).isEqualTo(View.GONE)
         }
     }
 
@@ -93,7 +128,7 @@ class PassportUploadFragmentTest {
     @Test
     fun `verify upload failure navigates to error fragment `() {
         launchFragment { _, navController, _ ->
-            uploaded.postValue(Resource.error())
+            frontHighResUploaded.postValue(Resource.error())
 
             assertThat(navController.currentDestination?.id)
                 .isEqualTo(R.id.errorFragment)
@@ -104,11 +139,12 @@ class PassportUploadFragmentTest {
     fun `verify when kontinue is clicked navigates to confirmation`() {
         launchFragment { binding, navController, _ ->
             runBlocking {
-                uploaded.postValue(
+                frontHighResUploaded.postValue(
                     Resource.success(
-                        Pair(
-                            InternalStripeFile(id = FILE_ID),
-                            UploadMethod.FILEUPLOAD
+                        IdentityViewModel.UploadedResult(
+                            uploadedStripeFile = InternalStripeFile(id = FILE_ID),
+                            scores = null,
+                            uploadMethod = UploadMethod.FILEUPLOAD
                         )
                     )
                 )
@@ -128,7 +164,7 @@ class PassportUploadFragmentTest {
                     CORRECT_WITH_SUBMITTED_SUCCESS_VERIFICATION_PAGE_DATA
                 )
 
-                binding.kontinue.callOnClick()
+                binding.kontinue.findViewById<MaterialButton>(R.id.button).callOnClick()
 
                 assertThat(collectedDataParamCaptor.firstValue).isEqualTo(
                     CollectedDataParam(
@@ -159,8 +195,13 @@ class PassportUploadFragmentTest {
 
             // dialog shows up
             assertThat(dialog.isShowing).isTrue()
-            assertThat(dialog).isInstanceOf(BottomSheetDialog::class.java)
+            assertThat(dialog).isInstanceOf(AppCompatDialog::class.java)
 
+            assertThat(dialog.findViewById<TextView>(R.id.title).text).isEqualTo(
+                fragment.getString(
+                    R.string.upload_dialog_title_passport
+                )
+            )
             // click take photo button
             if (isTakePhoto) {
                 dialog.findViewById<Button>(R.id.take_photo).callOnClick()
@@ -182,16 +223,17 @@ class PassportUploadFragmentTest {
             } else {
                 verify(mockPassportUploadViewModel).chooseImage(callbackCaptor.capture())
             }
-            uploaded.postValue(Resource.loading())
+            frontHighResUploaded.postValue(Resource.loading())
 
             // mock photo taken/image chosen
             callbackCaptor.firstValue(mockUri)
 
             // viewmodel triggers and UI updates
-            verify(mockPassportUploadViewModel).uploadImage(
-                same(mockUri),
-                same(fragment.requireContext()),
-                same(DOCUMENT_CAPTURE),
+            verify(mockIdentityViewModel).uploadManualResult(
+                uri = same(mockUri),
+                isFront = eq(true),
+                docCapturePage = same(DOCUMENT_CAPTURE),
+                uploadMethod =
                 if (isTakePhoto)
                     eq(UploadMethod.MANUALCAPTURE)
                 else
@@ -202,7 +244,7 @@ class PassportUploadFragmentTest {
             assertThat(binding.finishedCheckMark.visibility).isEqualTo(View.GONE)
 
             // mock file uploaded
-            uploaded.postValue(Resource.success(mock()))
+            frontHighResUploaded.postValue(Resource.success(mock()))
 
             assertThat(binding.select.visibility).isEqualTo(View.GONE)
             assertThat(binding.progressCircular.visibility).isEqualTo(View.GONE)
@@ -212,12 +254,16 @@ class PassportUploadFragmentTest {
     }
 
     private fun launchFragment(
+        shouldShowCamera: Boolean = true,
         testBlock: (
             binding: PassportUploadFragmentBinding,
             navController: TestNavHostController,
             fragment: PassportUploadFragment
         ) -> Unit
     ) = launchFragmentInContainer(
+        fragmentArgs = bundleOf(
+            ARG_SHOULD_SHOW_CAMERA to shouldShowCamera
+        ),
         themeResId = R.style.Theme_MaterialComponents
     ) {
         PassportUploadFragment(
@@ -250,7 +296,9 @@ class PassportUploadFragmentTest {
                 lowResImageCompressionQuality = 0f,
                 lowResImageMaxDimension = 0,
                 models = mock(),
-                requireLiveCapture = false
+                requireLiveCapture = false,
+                motionBlurMinDuration = 500,
+                motionBlurMinIou = 0.95f
             )
 
         val FILE_ID = "file_id"

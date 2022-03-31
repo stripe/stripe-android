@@ -29,6 +29,7 @@
     <string name="sofort_example">SOFORT Confirmation Example</string>
     <string name="upi_example">UPI Confirmation Example</string>
     <string name="netbanking_example">Netbanking Confirmation Example</string>
+    <string name="manual_us_bank_account_example">"Manual US Bank Account Example"</string>
     <string name="card_brands">Card Brands</string>
 
     <string name="select_add_card">Select or add card</string>
@@ -125,4 +126,8 @@
     <string name="google_pay_merchant_country_code">Merchant Country Code</string>
     <string name="google_pay_merchant_country_code_default">US</string>
 
+    <!--  US Bank Account  -->
+    <string name="confirm_with_us_bank_account_entry_point">Connect US Bank Account Example</string>
+    <string name="confirm_with_us_bank_account">Confirm with Bank Account</string>
+    <string name="confirm_with_us_bank_account_intro">Click below to create payment intent and attach a bank account to payment method. Once a payment intent is created you will be redirected to enter your bank details.</string>
 </resources>

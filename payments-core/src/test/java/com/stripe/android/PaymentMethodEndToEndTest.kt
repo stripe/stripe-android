@@ -106,6 +106,63 @@ internal class PaymentMethodEndToEndTest {
     }
 
     @Test
+    fun createPaymentMethod_withUSBankAccount_shouldCreateObject() {
+        val params = PaymentMethodCreateParamsFixtures.US_BANK_ACCOUNT
+        val paymentMethod =
+            Stripe(
+                context,
+                ApiKeyFixtures.US_BANK_ACCOUNT_PUBLISHABLE_KEY,
+                betas = setOf(StripeApiBeta.USBankAccount)
+            ).createPaymentMethodSynchronous(params)
+        assertThat(paymentMethod?.type).isEqualTo(PaymentMethod.Type.USBankAccount)
+        assertThat(paymentMethod?.usBankAccount).isEqualTo(
+            PaymentMethod.USBankAccount(
+                accountHolderType = PaymentMethod.USBankAccount.USBankAccountHolderType.INDIVIDUAL,
+                accountType = PaymentMethod.USBankAccount.USBankAccountType.CHECKING,
+                bankName = "STRIPE TEST BANK",
+                fingerprint = "FFDMA0xfhBjWSZLu",
+                last4 = "6789",
+                linkedAccount = null,
+                networks = null,
+                routingNumber = "110000000"
+            )
+        )
+    }
+
+    @Test
+    fun createPaymentMethod_withUSBankAccount_missingEmail_shouldCreateObject() {
+        val params = PaymentMethodCreateParamsFixtures.US_BANK_ACCOUNT.copy(
+            billingDetails = PaymentMethodCreateParamsFixtures.BILLING_DETAILS.copy(email = null)
+        )
+        val paymentMethod =
+            Stripe(
+                context,
+                ApiKeyFixtures.US_BANK_ACCOUNT_PUBLISHABLE_KEY,
+                betas = setOf(StripeApiBeta.USBankAccount)
+            ).createPaymentMethodSynchronous(params)
+        assertThat(paymentMethod?.type)
+            .isEqualTo(PaymentMethod.Type.USBankAccount)
+    }
+
+    @Test
+    fun createPaymentMethod_withUSBankAccount_missingName_shouldFail() {
+        val params = PaymentMethodCreateParamsFixtures.US_BANK_ACCOUNT.copy(
+            billingDetails = PaymentMethodCreateParamsFixtures.BILLING_DETAILS.copy(name = null)
+        )
+        val exception = assertFailsWith<InvalidRequestException>(
+            "A name is required to create a US Bank Account payment method"
+        ) {
+            Stripe(
+                context,
+                ApiKeyFixtures.US_BANK_ACCOUNT_PUBLISHABLE_KEY,
+                betas = setOf(StripeApiBeta.USBankAccount)
+            ).createPaymentMethodSynchronous(params)
+        }
+        assertThat(exception.message)
+            .isEqualTo("Missing required param: billing_details[name].")
+    }
+
+    @Test
     fun createPaymentMethod_withGiropay_shouldCreateObject() {
         val params = PaymentMethodCreateParamsFixtures.GIROPAY
         val paymentMethod =

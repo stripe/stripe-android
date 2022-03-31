@@ -22,7 +22,6 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.COMPOSE_FRAGMENT_ARGS
 import com.stripe.android.paymentsheet.PaymentSheetViewModel.CheckoutIdentifier
 import com.stripe.android.paymentsheet.databinding.FragmentPaymentsheetAddPaymentMethodBinding
-import com.stripe.android.paymentsheet.databinding.PrimaryButtonBinding
 import com.stripe.android.paymentsheet.databinding.StripeGooglePayButtonBinding
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.FragmentConfig
@@ -190,12 +189,10 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
 
             val googlePayButton =
                 StripeGooglePayButtonBinding.bind(viewBinding.googlePayButton)
-            val googlePayPrimaryComponent =
-                PrimaryButtonBinding.bind(googlePayButton.primaryButton)
             val googlePayIconComponent = googlePayButton.googlePayButtonIcon
             assertThat(googlePayButton.primaryButton.isVisible).isTrue()
             assertThat(googlePayIconComponent.isVisible).isFalse()
-            assertThat(googlePayPrimaryComponent.label.text).isEqualTo(
+            assertThat(googlePayButton.primaryButton.externalLabel).isEqualTo(
                 fragment.getString(R.string.stripe_paymentsheet_primary_button_processing)
             )
         }
@@ -313,7 +310,7 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
         )
         createFragment(stripeIntent = paymentIntent) { _, viewBinding, _ ->
             assertThat(viewBinding.paymentMethodsRecycler.isVisible).isFalse()
-            assertThat(viewBinding.googlePayDivider.viewBinding.dividerText.text)
+            assertThat(viewBinding.googlePayDivider.text)
                 .isEqualTo("Or pay with a card")
         }
     }
@@ -387,7 +384,7 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
         )
         createFragment(stripeIntent = paymentIntent) { _, viewBinding, _ ->
             assertThat(viewBinding.paymentMethodsRecycler.isVisible).isTrue()
-            assertThat(viewBinding.googlePayDivider.viewBinding.dividerText.text)
+            assertThat(viewBinding.googlePayDivider.text)
                 .isEqualTo("Or pay using")
         }
     }

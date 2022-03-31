@@ -1,7 +1,7 @@
 package com.stripe.android.stripecardscan.example
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import androidx.appcompat.app.AppCompatActivity
 import com.stripe.android.stripecardscan.cardscan.CardScanSheet
 import com.stripe.android.stripecardscan.cardscan.CardScanSheetResult
 import com.stripe.android.stripecardscan.example.databinding.ActivityCardScanDemoBinding
@@ -17,10 +17,10 @@ class CardScanDemoActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(viewBinding.root)
 
-        val cardScanSheet = CardScanSheet.create(this, settings.publishableKey)
+        val cardScanSheet = CardScanSheet.create(this, settings.publishableKey, ::onScanFinished)
 
         viewBinding.launchScanButton.setOnClickListener {
-            cardScanSheet.present(this::onScanFinished)
+            cardScanSheet.present()
         }
     }
 

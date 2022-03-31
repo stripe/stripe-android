@@ -2,7 +2,9 @@ package com.stripe.android.identity.ml
 
 import com.stripe.android.camera.framework.Analyzer
 import com.stripe.android.camera.framework.AnalyzerFactory
-import com.stripe.android.camera.framework.image.cropCameraPreviewToSquare
+import com.stripe.android.camera.framework.image.cropCenter
+import com.stripe.android.camera.framework.image.size
+import com.stripe.android.camera.framework.util.maxAspectRatioInSize
 import com.stripe.android.identity.states.IdentityScanState
 import org.tensorflow.lite.DataType
 import org.tensorflow.lite.Interpreter
@@ -11,13 +13,14 @@ import org.tensorflow.lite.support.image.ImageProcessor
 import org.tensorflow.lite.support.image.TensorImage
 import org.tensorflow.lite.support.image.ops.ResizeOp
 import java.io.File
+import kotlin.math.roundToInt
 
 /**
  * Analyzer to run a model input.
  *
  * TODO(ccen): reimplement with ImageClassifier
  */
-internal class IDDetectorAnalyzer(modelFile: File) :
+internal class IDDetectorAnalyzer(modelFile: File, private val idDetectorMinScore: Float) :
     Analyzer<AnalyzerInput, IdentityScanState, AnalyzerOutput> {
 
     private val tfliteInterpreter = Interpreter(modelFile)
@@ -27,10 +30,12 @@ internal class IDDetectorAnalyzer(modelFile: File) :
         state: IdentityScanState
     ): AnalyzerOutput {
         var tensorImage = TensorImage(INPUT_TENSOR_TYPE)
-        val croppedImage = cropCameraPreviewToSquare(
-            data.cameraPreviewImage.image,
-            data.cameraPreviewImage.viewBounds,
-            data.viewFinderBounds
+
+        val croppedImage = data.cameraPreviewImage.image.cropCenter(
+            maxAspectRatioInSize(
+                data.cameraPreviewImage.image.size(),
+                1f
+            )
         )
 
         tensorImage.load(croppedImage)
@@ -41,8 +46,7 @@ internal class IDDetectorAnalyzer(modelFile: File) :
                 ResizeOp(INPUT_HEIGHT, INPUT_WIDTH, ResizeOp.ResizeMethod.BILINEAR)
             ).add(
                 NormalizeOp(NORMALIZE_MEAN, NORMALIZE_STD) // normalize to (-1, 1)
-            )
-                .build() // add nomalization
+            ).build() // add normalization
         tensorImage = imageProcessor.process(tensorImage)
 
         // inference - input: (1, 224, 224, 3), output: (1, 4), (1, 5)
@@ -62,6 +66,7 @@ internal class IDDetectorAnalyzer(modelFile: File) :
         val resultCategory: Category
         val resultScore: Float
 
+        // TODO(ccen) use idDetectorMinScore when server updates the value
         if (categories[0][resultIndex] > THRESHOLD) {
             resultCategory = requireNotNull(INDEX_CATEGORY_MAP[resultIndex])
             resultScore = categories[0][resultIndex]
@@ -72,21 +77,36 @@ internal class IDDetectorAnalyzer(modelFile: File) :
 
         return AnalyzerOutput(
             BoundingBox(
-                boundingBoxes[0][0],
-                boundingBoxes[0][1],
-                boundingBoxes[0][2],
-                boundingBoxes[0][3],
+                left = boundingBoxes[0][0],
+                top = boundingBoxes[0][1],
+                width = boundingBoxes[0][2],
+                height = boundingBoxes[0][3],
             ),
             resultCategory,
-            resultScore
+            resultScore,
+            categories[0].map { it.roundToMaxDecimals(2) }
         )
+    }
+
+    /**
+     * Round a float to max decimals. Backend requires scores uploaded with max 2 decimals.
+     *
+     * e.g -
+     * 3.123f.roundToMaxDecimals(2) = 3.12
+     * 3.499f.roundToMaxDecimals(2) = 3.5
+     */
+    private fun Float.roundToMaxDecimals(decimals: Int): Float {
+        var multiplier = 1.0f
+        repeat(decimals) { multiplier *= 10 }
+        return (this * multiplier).roundToInt() / multiplier
     }
 
     // TODO(ccen): check if we should enable this to track stats
     override val statsName: String? = null
 
     internal class Factory(
-        private val modelFile: File
+        private val modelFile: File,
+        private val idDetectorMinScore: Float
     ) : AnalyzerFactory<
             AnalyzerInput,
             IdentityScanState,
@@ -94,11 +114,11 @@ internal class IDDetectorAnalyzer(modelFile: File) :
             Analyzer<AnalyzerInput, IdentityScanState, AnalyzerOutput>
             > {
         override suspend fun newInstance(): Analyzer<AnalyzerInput, IdentityScanState, AnalyzerOutput> {
-            return IDDetectorAnalyzer(modelFile)
+            return IDDetectorAnalyzer(modelFile, idDetectorMinScore)
         }
     }
 
-    private companion object {
+    internal companion object {
         const val INPUT_WIDTH = 224
         const val INPUT_HEIGHT = 224
         const val NORMALIZE_MEAN = 127.5f
@@ -107,14 +127,19 @@ internal class IDDetectorAnalyzer(modelFile: File) :
         const val OUTPUT_BOUNDING_BOX_TENSOR_INDEX = 0
         const val OUTPUT_CATEGORY_TENSOR_INDEX = 1
         const val OUTPUT_BOUNDING_BOX_TENSOR_SIZE = 4
+        private const val INDEX_NO_ID = 0
+        const val INDEX_PASSPORT = 1
+        const val INDEX_ID_FRONT = 2
+        const val INDEX_ID_BACK = 3
+        const val INDEX_INVALID = 4
         val INPUT_TENSOR_TYPE: DataType = DataType.FLOAT32
         val OUTPUT_CATEGORY_TENSOR_SIZE = Category.values().size
         val INDEX_CATEGORY_MAP = mapOf(
-            0 to Category.NO_ID,
-            1 to Category.PASSPORT,
-            2 to Category.ID_FRONT,
-            3 to Category.ID_BACK,
-            4 to Category.INVALID,
+            INDEX_NO_ID to Category.NO_ID,
+            INDEX_PASSPORT to Category.PASSPORT,
+            INDEX_ID_FRONT to Category.ID_FRONT,
+            INDEX_ID_BACK to Category.ID_BACK,
+            INDEX_INVALID to Category.INVALID,
         )
         val TAG: String = IDDetectorAnalyzer::class.java.simpleName
     }

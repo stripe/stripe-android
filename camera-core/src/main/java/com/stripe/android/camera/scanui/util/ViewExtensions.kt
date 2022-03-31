@@ -35,13 +35,22 @@ fun ImageView.setDrawable(@DrawableRes drawableRes: Int) {
 /**
  * Set the image of an [ImageView] using a [DrawableRes] and start the animation.
  */
-
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun ImageView.startAnimation(@DrawableRes drawableRes: Int) {
     val d = this.context.getDrawableByRes(drawableRes)
     setImageDrawable(d)
     if (d is Animatable) {
         d.start()
+    }
+}
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+fun ImageView.startAnimationIfNotRunning(@DrawableRes drawableRes: Int) {
+    drawable.let { currentDrawable ->
+        // if is not Animatable, it's possible that the ImageView is just initialized from XML
+        if (currentDrawable !is Animatable || !currentDrawable.isRunning) {
+            startAnimation(drawableRes)
+        }
     }
 }
 

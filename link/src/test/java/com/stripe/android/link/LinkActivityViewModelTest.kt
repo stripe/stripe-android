@@ -5,13 +5,16 @@ import androidx.lifecycle.Lifecycle
 import androidx.savedstate.SavedStateRegistry
 import androidx.savedstate.SavedStateRegistryOwner
 import androidx.test.core.app.ApplicationProvider
-import com.google.common.truth.Truth
+import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.injection.Injectable
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
+import com.stripe.android.link.account.CookieStore
 import com.stripe.android.link.account.LinkAccountManager
+import com.stripe.android.link.confirmation.ConfirmationManager
 import com.stripe.android.link.injection.NonFallbackInjector
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.model.Navigator
+import com.stripe.android.link.model.StripeIntentFixtures
 import com.stripe.android.link.utils.FakeAndroidKeyStore
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
@@ -19,7 +22,9 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argWhere
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.reset
 import org.mockito.kotlin.spy
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
@@ -31,6 +36,7 @@ import kotlin.test.assertNotNull
 @RunWith(RobolectricTestRunner::class)
 class LinkActivityViewModelTest {
     private val defaultArgs = LinkActivityContract.Args(
+        StripeIntentFixtures.PI_SUCCEEDED,
         MERCHANT_NAME,
         CUSTOMER_EMAIL,
         LinkActivityContract.Args.InjectionParams(
@@ -43,10 +49,21 @@ class LinkActivityViewModelTest {
     )
 
     private val linkAccountManager = mock<LinkAccountManager>()
+    private val confirmationManager = mock<ConfirmationManager>()
+    private val cookieStore = mock<CookieStore>()
     private val navigator = mock<Navigator>()
 
     init {
         FakeAndroidKeyStore.setup()
+    }
+
+    @Test
+    fun `When consumer is logged out then start destination is SignUp screen`() = runTest {
+        whenever(cookieStore.isEmailLoggedOut(CUSTOMER_EMAIL)).thenReturn(true)
+
+        val viewModel = createViewModel()
+
+        assertThat(viewModel.startDestination).isEqualTo(LinkScreen.SignUp.route)
     }
 
     @Test
@@ -58,7 +75,7 @@ class LinkActivityViewModelTest {
 
         createViewModel()
 
-        verify(navigator).navigateTo(LinkScreen.Wallet)
+        verify(navigator).navigateTo(LinkScreen.Wallet, true)
     }
 
     @Test
@@ -70,7 +87,7 @@ class LinkActivityViewModelTest {
 
         createViewModel()
 
-        verify(navigator).navigateTo(LinkScreen.Verification)
+        verify(navigator).navigateTo(LinkScreen.Verification, true)
     }
 
     @Test
@@ -80,7 +97,39 @@ class LinkActivityViewModelTest {
 
         createViewModel()
 
-        verify(navigator).navigateTo(LinkScreen.SignUp)
+        verify(navigator).navigateTo(
+            argWhere {
+                it.route == LinkScreen.SignUp(CUSTOMER_EMAIL).route
+            },
+            eq(true)
+        )
+    }
+
+    @Test
+    fun `When StripeIntent is missing required fields then it dismisses with error`() = runTest {
+        createViewModel(
+            defaultArgs.copy(StripeIntentFixtures.PI_SUCCEEDED.copy(clientSecret = null))
+        )
+        verify(navigator).dismiss(argWhere { it is LinkActivityResult.Failed })
+
+        reset(navigator)
+        createViewModel(
+            defaultArgs.copy(StripeIntentFixtures.PI_SUCCEEDED.copy(id = null))
+        )
+        verify(navigator).dismiss(argWhere { it is LinkActivityResult.Failed })
+        reset(navigator)
+
+        reset(navigator)
+        createViewModel(
+            defaultArgs.copy(StripeIntentFixtures.PI_SUCCEEDED.copy(amount = null))
+        )
+        verify(navigator).dismiss(argWhere { it is LinkActivityResult.Failed })
+
+        reset(navigator)
+        createViewModel(
+            defaultArgs.copy(StripeIntentFixtures.PI_SUCCEEDED.copy(currency = null))
+        )
+        verify(navigator).dismiss(argWhere { it is LinkActivityResult.Failed })
     }
 
     @Test
@@ -102,7 +151,7 @@ class LinkActivityViewModelTest {
         val factorySpy = spy(factory)
         val createdViewModel = factorySpy.create(LinkActivityViewModel::class.java)
         verify(factorySpy, times(0)).fallbackInitialize(any())
-        Truth.assertThat(createdViewModel).isEqualTo(vmToBeReturned)
+        assertThat(createdViewModel).isEqualTo(vmToBeReturned)
 
         WeakMapInjectorRegistry.staticCacheMap.clear()
     }
@@ -132,11 +181,14 @@ class LinkActivityViewModelTest {
         )
     }
 
-    private fun createViewModel() = LinkActivityViewModel(
-        defaultArgs,
-        linkAccountManager,
-        navigator
-    )
+    private fun createViewModel(args: LinkActivityContract.Args = defaultArgs) =
+        LinkActivityViewModel(
+            args,
+            linkAccountManager,
+            cookieStore,
+            navigator,
+            confirmationManager
+        )
 
     private companion object {
         const val INJECTOR_KEY = "injectorKey"

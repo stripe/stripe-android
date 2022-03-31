@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="600dp"
+    android:layout_height="wrap_content"
+    android:layout_margin="16dp"
+    android:orientation="vertical">
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/title"
+        android:textStyle="bold"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="16sp"
+        android:textColor="?android:textColorPrimary"
+        android:layout_marginBottom="12dp" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/take_photo"
+        style="@style/Widget.MaterialComponents.Button.TextButton"
+        android:padding="0dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/take_photo"
+        android:textAllCaps="false"
+        android:textColor="?android:textColorSecondary"
+        android:gravity="center_vertical"
+        android:layout_gravity="center_vertical" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/choose_file"
+        style="@style/Widget.MaterialComponents.Button.TextButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="0dp"
+        android:textAllCaps="false"
+        android:textColor="?android:textColorSecondary"
+        android:text="@string/choose_file"
+        android:gravity="center_vertical" />
+
+</LinearLayout>

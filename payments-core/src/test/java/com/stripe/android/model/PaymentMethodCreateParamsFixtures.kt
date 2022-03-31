@@ -103,6 +103,16 @@ internal object PaymentMethodCreateParamsFixtures {
         billingDetails = BILLING_DETAILS
     )
 
+    internal val US_BANK_ACCOUNT = PaymentMethodCreateParams.create(
+        usBankAccount = PaymentMethodCreateParams.USBankAccount(
+            accountNumber = "000123456789",
+            routingNumber = "110000000",
+            accountType = PaymentMethod.USBankAccount.USBankAccountType.CHECKING,
+            accountHolderType = PaymentMethod.USBankAccount.USBankAccountHolderType.INDIVIDUAL,
+        ),
+        billingDetails = BILLING_DETAILS
+    )
+
     @JvmStatic
     fun createWith(metadata: Map<String, String>): PaymentMethodCreateParams {
         return PaymentMethodCreateParams.create(

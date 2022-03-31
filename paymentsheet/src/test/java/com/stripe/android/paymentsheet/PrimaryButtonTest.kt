@@ -58,7 +58,7 @@ class PrimaryButtonTest {
             PrimaryButton.State.StartProcessing
         )
         assertThat(
-            primaryButton.viewBinding.label.text.toString()
+            primaryButton.externalLabel
         ).isEqualTo(
             "Processing…"
         )
@@ -68,7 +68,7 @@ class PrimaryButtonTest {
         )
 
         assertThat(
-            primaryButton.viewBinding.label.text.toString()
+            primaryButton.externalLabel
         ).isEqualTo(
             "Pay $10.99"
         )
@@ -80,7 +80,7 @@ class PrimaryButtonTest {
             PrimaryButton.State.StartProcessing,
         )
         assertThat(
-            primaryButton.viewBinding.label.text.toString()
+            primaryButton.externalLabel
         ).isEqualTo(
             "Processing…"
         )

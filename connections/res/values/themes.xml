@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="StripeBaseTheme" parent="@style/Theme.AppCompat.DayNight.NoActionBar">
+        <item name="colorAccent">@color/stripe_accent_color_default</item>
+        <item name="colorControlNormal">@color/stripe_control_normal_color_default</item>
+        <item name="colorPrimary">@color/stripe_toolbar_color_default</item>
+        <item name="colorPrimaryDark">@color/stripe_toolbar_color_default_dark</item>
+        <item name="titleTextColor">@color/stripe_title_text_color</item>
+        <item name="android:textColorSecondary">@color/stripe_text_color_secondary</item>
+    </style>
+
+    <style name="StripeDefaultTheme" parent="StripeBaseTheme" />
+</resources>

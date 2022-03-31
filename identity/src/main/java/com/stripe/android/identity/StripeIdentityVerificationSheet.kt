@@ -7,46 +7,38 @@ import androidx.fragment.app.Fragment
 
 internal class StripeIdentityVerificationSheet private constructor(
     activityResultCaller: ActivityResultCaller,
-    private val configuration: IdentityVerificationSheet.Configuration
+    private val configuration: IdentityVerificationSheet.Configuration,
+    identityVerificationCallback: IdentityVerificationSheet.IdentityVerificationCallback
 ) : IdentityVerificationSheet {
 
     constructor(
         from: ComponentActivity,
-        configuration: IdentityVerificationSheet.Configuration
-    ) : this(from as ActivityResultCaller, configuration)
+        configuration: IdentityVerificationSheet.Configuration,
+        identityVerificationCallback: IdentityVerificationSheet.IdentityVerificationCallback
+    ) : this(from as ActivityResultCaller, configuration, identityVerificationCallback)
 
     constructor(
         from: Fragment,
-        configuration: IdentityVerificationSheet.Configuration
-    ) : this(from as ActivityResultCaller, configuration)
+        configuration: IdentityVerificationSheet.Configuration,
+        identityVerificationCallback: IdentityVerificationSheet.IdentityVerificationCallback
+    ) : this(from as ActivityResultCaller, configuration, identityVerificationCallback)
 
     private val activityResultLauncher: ActivityResultLauncher<IdentityVerificationSheetContract.Args> =
         activityResultCaller.registerForActivityResult(
             IdentityVerificationSheetContract(),
-            ::onResult
+            identityVerificationCallback::onVerificationFlowResult
         )
-
-    private var onFinished: ((verificationResult: IdentityVerificationSheet.VerificationResult) -> Unit)? =
-        null
 
     override fun present(
         verificationSessionId: String,
         ephemeralKeySecret: String,
-        onFinished: (verificationResult: IdentityVerificationSheet.VerificationResult) -> Unit
     ) {
-        this.onFinished = onFinished
         activityResultLauncher.launch(
             IdentityVerificationSheetContract.Args(
                 verificationSessionId,
                 ephemeralKeySecret,
-                configuration.merchantLogo
+                configuration.brandLogo
             )
         )
-    }
-
-    private fun onResult(verificationResult: IdentityVerificationSheet.VerificationResult) {
-        onFinished?.let {
-            it(verificationResult)
-        }
     }
 }

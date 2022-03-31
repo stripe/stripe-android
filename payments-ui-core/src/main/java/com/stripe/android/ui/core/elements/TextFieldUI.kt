@@ -8,7 +8,6 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Icon
-import androidx.compose.material.Text
 import androidx.compose.material.TextField
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.runtime.Composable
@@ -22,7 +21,7 @@ import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.key.KeyEventType
-import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
@@ -62,15 +61,16 @@ internal fun TextField(
         textColor = if (shouldShowError) {
             PaymentsTheme.colors.material.error
         } else {
-            PaymentsTheme.colors.material.onBackground
+            PaymentsTheme.colors.onComponent
         },
         unfocusedLabelColor = PaymentsTheme.colors.placeholderText,
         focusedLabelColor = PaymentsTheme.colors.placeholderText,
         placeholderColor = PaymentsTheme.colors.placeholderText,
-        backgroundColor = PaymentsTheme.colors.colorComponentBackground,
+        backgroundColor = PaymentsTheme.colors.component,
         focusedIndicatorColor = Color.Transparent,
         disabledIndicatorColor = Color.Transparent,
-        unfocusedIndicatorColor = Color.Transparent
+        unfocusedIndicatorColor = Color.Transparent,
+        cursorColor = PaymentsTheme.colors.colorTextCursor
     )
     val fieldState by textFieldController.fieldState.collectAsState(
         TextFieldStateConstants.Error.Blank
@@ -99,7 +99,7 @@ internal fun TextField(
         onValueChange = { textFieldController.onValueChange(it) },
         isError = shouldShowError,
         label = {
-            Text(
+            FormLabel(
                 text = if (textFieldController.showOptionalLabel) {
                     stringResource(
                         R.string.form_label_optional,
@@ -112,14 +112,16 @@ internal fun TextField(
         },
         modifier = modifier
             .fillMaxWidth()
-            .onKeyEvent { event ->
-                if (event.type == KeyEventType.KeyUp &&
+            .onPreviewKeyEvent { event ->
+                if (event.type == KeyEventType.KeyDown &&
                     event.nativeKeyEvent.keyCode == KeyEvent.KEYCODE_DEL &&
                     value.isEmpty()
                 ) {
                     focusManager.moveFocus(FocusDirection.Previous)
+                    true
+                } else {
+                    false
                 }
-                false
             }
             .onFocusChanged {
                 if (hasFocus != it.isFocused) {

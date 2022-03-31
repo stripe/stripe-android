@@ -1,11 +1,14 @@
 package com.stripe.android.identity.navigation
 
+import android.net.Uri
 import android.view.View
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.navigation.Navigation
 import androidx.navigation.testing.TestNavHostController
 import androidx.test.core.app.ApplicationProvider
+import com.google.android.material.button.MaterialButton
+import com.google.android.material.progressindicator.CircularProgressIndicator
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.identity.IdentityVerificationSheetContract
@@ -38,13 +41,33 @@ internal class ConsentFragmentTest {
     @get:Rule
     var rule: TestRule = InstantTaskExecutorRule()
 
-    private val verificationPage = mock<VerificationPage>().also {
+    private val verificationPageWithTimeAndPolicy = mock<VerificationPage>().also {
         whenever(it.biometricConsent).thenReturn(
             VerificationPageStaticContentConsentPage(
                 acceptButtonText = CONSENT_ACCEPT_TEXT,
                 title = CONSENT_TITLE,
                 privacyPolicy = CONSENT_PRIVACY_POLICY,
                 timeEstimate = CONSENT_TIME_ESTIMATE,
+                body = CONSENT_BODY,
+                declineButtonText = CONSENT_DECLINE_TEXT
+            )
+        )
+        whenever(it.requirements).thenReturn(
+            VerificationPageRequirements(
+                missing = listOf(
+                    VerificationPageRequirements.Missing.BIOMETRICCONSENT
+                )
+            )
+        )
+    }
+
+    private val verificationPageWithOutTimeAndPolicy = mock<VerificationPage>().also {
+        whenever(it.biometricConsent).thenReturn(
+            VerificationPageStaticContentConsentPage(
+                acceptButtonText = CONSENT_ACCEPT_TEXT,
+                title = CONSENT_TITLE,
+                privacyPolicy = null,
+                timeEstimate = null,
                 body = CONSENT_BODY,
                 declineButtonText = CONSENT_DECLINE_TEXT
             )
@@ -73,7 +96,7 @@ internal class ConsentFragmentTest {
                 errors = listOf(
                     VerificationPageDataRequirementError(
                         body = ERROR_BODY,
-                        buttonText = ERROR_BUTTON_TEXT,
+                        backButtonText = ERROR_BUTTON_TEXT,
                         requirement = VerificationPageDataRequirementError.Requirement.BIOMETRICCONSENT,
                         title = ERROR_TITLE
                     )
@@ -88,7 +111,7 @@ internal class ConsentFragmentTest {
             IdentityVerificationSheetContract.Args(
                 verificationSessionId = VERIFICATION_SESSION_ID,
                 ephemeralKeySecret = EPHEMERAL_KEY,
-                merchantLogo = MERCHANT_LOGO
+                brandLogo = BRAND_LOGO
             )
         )
     }
@@ -105,7 +128,10 @@ internal class ConsentFragmentTest {
         failureCaptor.firstValue(null)
     }
 
-    private fun setUpSuccessVerificationPage() {
+    private fun setUpSuccessVerificationPage(
+        verificationPage: VerificationPage =
+            verificationPageWithTimeAndPolicy
+    ) {
         val successCaptor: KArgumentCaptor<(VerificationPage) -> Unit> = argumentCaptor()
         verify(
             mockIdentityViewModel,
@@ -129,7 +155,7 @@ internal class ConsentFragmentTest {
 
     @Test
     fun `when not missing biometricConsent navigate to docSelectionFragment`() {
-        whenever(verificationPage.requirements).thenReturn(
+        whenever(verificationPageWithTimeAndPolicy.requirements).thenReturn(
             VerificationPageRequirements(
                 missing = emptyList()
             )
@@ -155,8 +181,37 @@ internal class ConsentFragmentTest {
             assertThat(binding.privacyPolicy.text.toString()).isEqualTo(CONSENT_PRIVACY_POLICY)
             assertThat(binding.timeEstimate.text).isEqualTo(CONSENT_TIME_ESTIMATE)
             assertThat(binding.body.text.toString()).isEqualTo(CONSENT_BODY)
-            assertThat(binding.agree.text).isEqualTo(CONSENT_ACCEPT_TEXT)
-            assertThat(binding.decline.text).isEqualTo(CONSENT_DECLINE_TEXT)
+            assertThat(binding.agree.findViewById<MaterialButton>(R.id.button).text).isEqualTo(
+                CONSENT_ACCEPT_TEXT
+            )
+            assertThat(binding.decline.findViewById<MaterialButton>(R.id.button).text).isEqualTo(
+                CONSENT_DECLINE_TEXT
+            )
+        }
+    }
+
+    @Test
+    fun `when verificationPage without time and policy is ready UI is bound correctly`() {
+        launchConsentFragment { binding, _ ->
+            setUpSuccessVerificationPage(verificationPageWithOutTimeAndPolicy)
+
+            assertThat(binding.loadings.visibility).isEqualTo(View.GONE)
+            assertThat(binding.texts.visibility).isEqualTo(View.VISIBLE)
+            assertThat(binding.buttons.visibility).isEqualTo(View.VISIBLE)
+
+            assertThat(binding.titleText.text).isEqualTo(CONSENT_TITLE)
+
+            assertThat(binding.privacyPolicy.visibility).isEqualTo(View.GONE)
+            assertThat(binding.timeEstimate.visibility).isEqualTo(View.GONE)
+            assertThat(binding.divider.visibility).isEqualTo(View.GONE)
+
+            assertThat(binding.body.text.toString()).isEqualTo(CONSENT_BODY)
+            assertThat(binding.agree.findViewById<MaterialButton>(R.id.button).text).isEqualTo(
+                CONSENT_ACCEPT_TEXT
+            )
+            assertThat(binding.decline.findViewById<MaterialButton>(R.id.button).text).isEqualTo(
+                CONSENT_DECLINE_TEXT
+            )
         }
     }
 
@@ -180,8 +235,13 @@ internal class ConsentFragmentTest {
             launchConsentFragment { binding, navController ->
                 setUpSuccessVerificationPage()
 
-                binding.agree.callOnClick()
+                binding.agree.findViewById<MaterialButton>(R.id.button).callOnClick()
 
+                assertThat(binding.agree.findViewById<MaterialButton>(R.id.button).isEnabled).isFalse()
+                assertThat(binding.agree.findViewById<CircularProgressIndicator>(R.id.indicator).visibility).isEqualTo(
+                    View.VISIBLE
+                )
+                assertThat(binding.decline.isEnabled).isFalse()
                 assertThat(navController.currentDestination?.id)
                     .isEqualTo(R.id.docSelectionFragment)
             }
@@ -197,7 +257,7 @@ internal class ConsentFragmentTest {
 
             launchConsentFragment { binding, navController ->
                 setUpSuccessVerificationPage()
-                binding.agree.callOnClick()
+                binding.agree.findViewById<MaterialButton>(R.id.button).callOnClick()
 
                 assertThat(navController.currentDestination?.id)
                     .isEqualTo(R.id.errorFragment)
@@ -214,8 +274,13 @@ internal class ConsentFragmentTest {
 
             launchConsentFragment { binding, navController ->
                 setUpSuccessVerificationPage()
-                binding.decline.callOnClick()
+                binding.decline.findViewById<MaterialButton>(R.id.button).callOnClick()
 
+                assertThat(binding.decline.findViewById<MaterialButton>(R.id.button).isEnabled).isFalse()
+                assertThat(binding.decline.findViewById<CircularProgressIndicator>(R.id.indicator).visibility).isEqualTo(
+                    View.VISIBLE
+                )
+                assertThat(binding.agree.isEnabled).isFalse()
                 requireNotNull(navController.backStack.last().arguments).let { arguments ->
                     assertThat(arguments[ErrorFragment.ARG_ERROR_TITLE])
                         .isEqualTo(ERROR_TITLE)
@@ -242,7 +307,7 @@ internal class ConsentFragmentTest {
 
             launchConsentFragment { binding, navController ->
                 setUpSuccessVerificationPage()
-                binding.decline.callOnClick()
+                binding.decline.findViewById<MaterialButton>(R.id.button).callOnClick()
 
                 assertThat(navController.currentDestination?.id)
                     .isEqualTo(R.id.errorFragment)
@@ -255,7 +320,7 @@ internal class ConsentFragmentTest {
     ) = launchFragmentInContainer(
         themeResId = R.style.Theme_MaterialComponents
     ) {
-        ConsentFragment(viewModelFactoryFor(mockIdentityViewModel))
+        ConsentFragment(viewModelFactoryFor(mockIdentityViewModel), mock())
     }.onFragment {
         val navController = TestNavHostController(
             ApplicationProvider.getApplicationContext()
@@ -286,6 +351,6 @@ internal class ConsentFragmentTest {
 
         const val VERIFICATION_SESSION_ID = "id_5678"
         const val EPHEMERAL_KEY = "eak_5678"
-        val MERCHANT_LOGO = R.drawable.check_mark
+        val BRAND_LOGO = mock<Uri>()
     }
 }

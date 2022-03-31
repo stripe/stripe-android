@@ -122,17 +122,17 @@ fun Receipt(
                 Column(
                     Modifier.fillMaxWidth(1f)
                 ) {
-                    ProductRow(HOT_DOG_EMOJI, R.string.hot_dog, "$0.99")
-                    ProductRow(SALAD_EMOJI, R.string.salad, "$8.00")
+                    ProductRow(HOT_DOG_EMOJI, R.string.hot_dog, "€0.99")
+                    ProductRow(SALAD_EMOJI, R.string.salad, "€8.00")
                 }
             }
             Column(
                 Modifier.fillMaxWidth(1f).padding(vertical = PADDING)
             ) {
-                ReceiptRow(stringResource(R.string.subtotal), "$8.99")
-                ReceiptRow(stringResource(R.string.sales_tax), "$0.74")
+                ReceiptRow(stringResource(R.string.subtotal), "€8.99")
+                ReceiptRow(stringResource(R.string.sales_tax), "€0.74")
                 TotalLine(Modifier.align(Alignment.CenterHorizontally))
-                ReceiptRow(stringResource(R.string.total), "$9.73")
+                ReceiptRow(stringResource(R.string.total), "€9.73")
                 bottomContent()
             }
         }

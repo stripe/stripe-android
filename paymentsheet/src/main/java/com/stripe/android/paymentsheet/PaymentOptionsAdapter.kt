@@ -9,6 +9,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -16,8 +17,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.Card
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -25,6 +27,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
@@ -37,10 +40,13 @@ import com.stripe.android.paymentsheet.PaymentOptionsAdapter.Companion.PM_OPTION
 import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
+import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
 import com.stripe.android.paymentsheet.ui.LpmSelectorText
 import com.stripe.android.paymentsheet.ui.getLabel
 import com.stripe.android.paymentsheet.ui.getSavedPaymentMethodIcon
 import com.stripe.android.ui.core.PaymentsTheme
+import com.stripe.android.ui.core.elements.SectionCard
+import com.stripe.android.ui.core.elements.SimpleDialogElementUI
 import kotlin.properties.Delegates
 
 @SuppressLint("NotifyDataSetChanged")
@@ -291,6 +297,15 @@ internal class PaymentOptionsAdapter(
         ) {
             val savedPaymentMethod = item as Item.SavedPaymentMethod
             val labelText = savedPaymentMethod.paymentMethod.getLabel(itemView.resources) ?: return
+            val removeTitle = itemView.resources.getString(
+                R.string.stripe_paymentsheet_remove_pm,
+                SupportedPaymentMethod.fromCode(item.paymentMethod.type?.code)
+                    ?.run {
+                        itemView.resources.getString(
+                            displayNameResource
+                        )
+                    }
+            )
 
             composeView.setContent {
                 PaymentOptionUi(
@@ -300,7 +315,8 @@ internal class PaymentOptionsAdapter(
                     isEnabled = isEnabled,
                     iconRes = savedPaymentMethod.paymentMethod.getSavedPaymentMethodIcon() ?: 0,
                     labelText = labelText,
-                    accessibilityDescription = item.getDescription(itemView.resources),
+                    removePmDialogTitle = removeTitle,
+                    description = item.getDescription(itemView.resources),
                     onRemoveListener = { onRemoveListener(position) },
                     onRemoveAccessibilityDescription =
                     savedPaymentMethod.getRemoveDescription(itemView.resources),
@@ -343,7 +359,7 @@ internal class PaymentOptionsAdapter(
                     ),
                     iconRes = R.drawable.stripe_ic_paymentsheet_add,
                     onItemSelectedListener = { onItemSelectedListener() },
-                    accessibilityDescription =
+                    description =
                     itemView.resources.getString(R.string.add_new_payment_method),
                 )
             }
@@ -383,7 +399,7 @@ internal class PaymentOptionsAdapter(
                     isEnabled = isEnabled,
                     iconRes = R.drawable.stripe_google_pay_mark,
                     labelText = itemView.resources.getString(R.string.google_pay),
-                    accessibilityDescription = itemView.resources.getString(R.string.google_pay),
+                    description = itemView.resources.getString(R.string.google_pay),
                     onItemSelectedListener = { onItemSelectedListener(position, true) },
                 )
             }
@@ -482,8 +498,9 @@ internal fun PaymentOptionUi(
     isEditing: Boolean,
     isEnabled: Boolean,
     iconRes: Int,
-    accessibilityDescription: String,
     labelText: String = "",
+    removePmDialogTitle: String = "",
+    description: String,
     onRemoveListener: (() -> Unit)? = null,
     onRemoveAccessibilityDescription: String = "",
     onItemSelectedListener: (() -> Unit)
@@ -500,10 +517,8 @@ internal fun PaymentOptionUi(
             })
     ) {
         val (checkIcon, deleteIcon, label, card) = createRefs()
-        Card(
-            border = PaymentsTheme.getBorderStroke(isSelected),
-            elevation = 2.dp,
-            backgroundColor = PaymentsTheme.colors.colorComponentBackground,
+        SectionCard(
+            isSelected = isSelected,
             modifier = Modifier
                 .height(64.dp)
                 .padding(horizontal = PM_OPTIONS_DEFAULT_PADDING.dp)
@@ -517,6 +532,7 @@ internal fun PaymentOptionUi(
             Column(
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.fillMaxSize()
             ) {
                 Image(
                     painter = painterResource(iconRes),
@@ -527,7 +543,6 @@ internal fun PaymentOptionUi(
                 )
             }
         }
-
         if (isSelected) {
             Image(
                 painter = painterResource(R.drawable.stripe_ic_check_circle),
@@ -544,6 +559,17 @@ internal fun PaymentOptionUi(
             )
         }
         if (isEditing && onRemoveListener != null) {
+            val openDialog = remember { mutableStateOf(false) }
+
+            SimpleDialogElementUI(
+                openDialog = openDialog,
+                titleText = removePmDialogTitle,
+                messageText = description,
+                confirmText = stringResource(R.string.remove),
+                dismissText = stringResource(R.string.cancel),
+                onConfirmListener = onRemoveListener
+            )
+
             Image(
                 painter = painterResource(R.drawable.stripe_ic_delete_symbol),
                 contentDescription = onRemoveAccessibilityDescription,
@@ -557,7 +583,7 @@ internal fun PaymentOptionUi(
                     .background(color = PaymentsTheme.colors.material.error)
                     .clickable(
                         onClick = {
-                            onRemoveListener()
+                            openDialog.value = true
                         }
                     )
             )
@@ -565,7 +591,7 @@ internal fun PaymentOptionUi(
 
         LpmSelectorText(
             text = labelText,
-            textColor = PaymentsTheme.colors.material.onPrimary,
+            textColor = PaymentsTheme.colors.material.onSurface,
             isEnabled = isEnabled,
             modifier = Modifier
                 .constrainAs(label) {
@@ -581,7 +607,7 @@ internal fun PaymentOptionUi(
                     // This makes the screen reader read out numbers digit by digit
                     // one one one one vs one thousand one hundred eleven
                     this.contentDescription =
-                        accessibilityDescription.replace("\\d".toRegex(), "$0 ")
+                        description.replace("\\d".toRegex(), "$0 ")
                 },
         )
     }
