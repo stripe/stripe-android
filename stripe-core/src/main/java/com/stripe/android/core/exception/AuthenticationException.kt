@@ -1,7 +1,7 @@
-package com.stripe.android.exception
+package com.stripe.android.core.exception
 
+import androidx.annotation.RestrictTo
 import com.stripe.android.core.StripeError
-import com.stripe.android.core.exception.StripeException
 import java.net.HttpURLConnection
 
 /**
@@ -9,7 +9,7 @@ import java.net.HttpURLConnection
  *
  * [Errors](https://stripe.com/docs/api/errors)
  */
-class AuthenticationException internal constructor(
+class AuthenticationException @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) constructor(
     stripeError: StripeError,
     requestId: String? = null
 ) : StripeException(

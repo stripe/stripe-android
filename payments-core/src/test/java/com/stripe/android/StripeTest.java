@@ -9,7 +9,7 @@ import com.stripe.android.core.networking.AnalyticsRequest;
 import com.stripe.android.core.networking.AnalyticsRequestExecutor;
 import com.stripe.android.core.networking.DefaultStripeNetworkClient;
 import com.stripe.android.core.version.StripeSdkVersion;
-import com.stripe.android.exception.AuthenticationException;
+import com.stripe.android.core.exception.AuthenticationException;
 import com.stripe.android.exception.CardException;
 import com.stripe.android.core.exception.InvalidRequestException;
 import com.stripe.android.core.exception.StripeException;

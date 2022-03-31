@@ -60,11 +60,29 @@ public final class com/stripe/android/core/exception/APIException : com/stripe/a
 	public synthetic fun <init> (Lcom/stripe/android/core/StripeError;Ljava/lang/String;ILjava/lang/String;Ljava/lang/Throwable;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 }
 
+public final class com/stripe/android/core/exception/AuthenticationException : com/stripe/android/core/exception/StripeException {
+	public static final field $stable I
+	public synthetic fun <init> (Lcom/stripe/android/core/StripeError;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+}
+
 public final class com/stripe/android/core/exception/InvalidRequestException : com/stripe/android/core/exception/StripeException {
 	public static final field $stable I
 	public fun <init> ()V
 	public fun <init> (Lcom/stripe/android/core/StripeError;Ljava/lang/String;ILjava/lang/String;Ljava/lang/Throwable;)V
 	public synthetic fun <init> (Lcom/stripe/android/core/StripeError;Ljava/lang/String;ILjava/lang/String;Ljava/lang/Throwable;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+}
+
+public final class com/stripe/android/core/exception/PermissionException : com/stripe/android/core/exception/StripeException {
+	public static final field $stable I
+	public fun <init> (Lcom/stripe/android/core/StripeError;Ljava/lang/String;)V
+	public synthetic fun <init> (Lcom/stripe/android/core/StripeError;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+}
+
+public final class com/stripe/android/core/exception/RateLimitException : com/stripe/android/core/exception/StripeException {
+	public static final field $stable I
+	public fun <init> ()V
+	public fun <init> (Lcom/stripe/android/core/StripeError;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Throwable;)V
+	public synthetic fun <init> (Lcom/stripe/android/core/StripeError;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Throwable;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 }
 
 public abstract class com/stripe/android/core/exception/StripeException : java/lang/Exception {

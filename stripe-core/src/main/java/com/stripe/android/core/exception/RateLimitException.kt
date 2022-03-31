@@ -1,7 +1,6 @@
-package com.stripe.android.exception
+package com.stripe.android.core.exception
 
 import com.stripe.android.core.StripeError
-import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.networking.HTTP_TOO_MANY_REQUESTS
 
 /**
