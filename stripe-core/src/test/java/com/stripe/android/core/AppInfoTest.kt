@@ -1,4 +1,4 @@
-package com.stripe.android
+package com.stripe.android.core
 
 import kotlin.test.Test
 import kotlin.test.assertEquals

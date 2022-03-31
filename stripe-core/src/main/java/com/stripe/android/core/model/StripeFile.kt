@@ -4,13 +4,10 @@ import androidx.annotation.RestrictTo
 import kotlinx.parcelize.Parcelize
 
 /**
- * Internal copy of [com.stripe.android.model.StripeFile]. It's a public API object and can't be changed
- * without introducing backward incompatibility.
- * TODO(ccen): Move StripeFile to stripe-core and delete this copy during the next major version bump.
+ * [The file object](https://stripe.com/docs/api/files/object)
  */
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Parcelize
-data class InternalStripeFile constructor(
+data class StripeFile @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) constructor(
     /**
      * Unique identifier for the object.
      *
@@ -39,7 +36,7 @@ data class InternalStripeFile constructor(
      *
      * [purpose](https://stripe.com/docs/api/files/object#file_object-purpose)
      */
-    val purpose: InternalStripeFilePurpose? = null,
+    val purpose: StripeFilePurpose? = null,
 
     /**
      * The size in bytes of the file object.

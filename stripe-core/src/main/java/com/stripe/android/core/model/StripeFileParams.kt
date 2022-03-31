@@ -1,22 +1,22 @@
 package com.stripe.android.core.model
 
 import android.os.Parcelable
-import androidx.annotation.RestrictTo
 import kotlinx.parcelize.Parcelize
 import java.io.File
 
 /**
- * Internal copy of [com.stripe.android.model.StripeFileParams]. It's a public API object and can't be changed
- * without introducing backward incompatibility.
- * TODO(ccen): Move StripeFileParams to stripe-core and delete this copy during the next major version bump.
+ * [Create a file](https://stripe.com/docs/api/files/create)
+ *
+ * To upload a file to Stripe, you’ll need to send a request of type `multipart/form-data`.
+ * The request should contain the file you would like to upload, as well as the parameters for
+ * creating a file.
  */
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-data class InternalStripeFileParams constructor(
+data class StripeFileParams constructor(
     /**
      * A file to upload. The file should follow the specifications of RFC 2388 (which defines file
      * transfers for the `multipart/form-data` protocol).
      */
-    val file: File,
+    internal val file: File,
 
     /**
      * The purpose of the uploaded file. Possible values are `business_icon`, `business_logo`,
@@ -25,7 +25,7 @@ data class InternalStripeFileParams constructor(
      *
      * [purpose](https://stripe.com/docs/api/files/create#create_file-purpose)
      */
-    val purpose: InternalStripeFilePurpose
+    internal val purpose: StripeFilePurpose
 ) {
     /**
      * Optional parameters to automatically create a
@@ -42,7 +42,7 @@ data class InternalStripeFileParams constructor(
      * [file_link_data]](https://stripe.com/docs/api/files/create#create_file-file_link_data)
      */
     @Parcelize
-    internal data class FileLink @JvmOverloads constructor(
+    data class FileLink @JvmOverloads constructor(
         /**
          * Set this to `true` to create a file link for the newly created file. Creating a link is
          * only possible when the file’s `purpose` is one of the following: `business_icon`,

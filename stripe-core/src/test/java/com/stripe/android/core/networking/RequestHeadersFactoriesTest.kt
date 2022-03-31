@@ -4,8 +4,8 @@ import android.os.Build
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.ApiKeyFixtures
 import com.stripe.android.core.ApiVersion
-import com.stripe.android.core.InternalAppInfo
-import com.stripe.android.core.InternalAppInfoFixtures
+import com.stripe.android.core.AppInfo
+import com.stripe.android.core.AppInfoFixtures
 import com.stripe.android.core.networking.RequestHeadersFactory.FraudDetection.Companion.HEADER_COOKIE
 import com.stripe.android.core.networking.StripeClientUserAgentHeaderFactory.Companion.HEADER_STRIPE_CLIENT_USER_AGENT
 import com.stripe.android.core.version.StripeSdkVersion
@@ -86,7 +86,7 @@ class RequestHeadersFactoriesTest {
 
     @Test
     fun headers_withInternalAppInfo() {
-        val headers = createBasePaymentApiHeaders(appInfo = InternalAppInfoFixtures.DEFAULT)
+        val headers = createBasePaymentApiHeaders(appInfo = AppInfoFixtures.DEFAULT)
         assertThat(headers[HEADER_USER_AGENT])
             .isEqualTo("${RequestHeadersFactory.getUserAgent()} MyAwesomePlugin/1.2.34 (https://myawesomeplugin.info)")
 
@@ -115,7 +115,7 @@ class RequestHeadersFactoriesTest {
     private fun createBasePaymentApiHeaders(
         locale: Locale = Locale.getDefault(),
         options: ApiRequest.Options = OPTIONS,
-        appInfo: InternalAppInfo? = null
+        appInfo: AppInfo? = null
     ): Map<String, String> {
         return RequestHeadersFactory.BaseApiHeadersFactory(
             optionsProvider = { options },
@@ -129,7 +129,7 @@ class RequestHeadersFactoriesTest {
     fun api_post_headers() {
         val postHeaders = RequestHeadersFactory.Api(
             options = OPTIONS,
-            appInfo = InternalAppInfoFixtures.DEFAULT
+            appInfo = AppInfoFixtures.DEFAULT
         ).createPostHeader()
         assertThat(postHeaders[HEADER_CONTENT_TYPE])
             .isEqualTo("${StripeRequest.MimeType.Form}; charset=${RequestHeadersFactory.CHARSET}")
