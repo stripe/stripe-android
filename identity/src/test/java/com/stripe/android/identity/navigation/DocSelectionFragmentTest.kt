@@ -300,7 +300,7 @@ internal class DocSelectionFragmentTest {
 
             assertThat(
                 requireNotNull(navController.backStack.last().arguments)
-                [ARG_SCAN_TYPE]
+                    [ARG_SCAN_TYPE]
             ).isEqualTo(IdDocumentParam.Type.DRIVINGLICENSE)
 
             assertThat(navController.currentDestination?.id)
