@@ -4,6 +4,7 @@ This release patches a crash with payment launcher when there is a configuration
 
 ### Payments
 * [FIXED] [4776](https://github.com/stripe/stripe-android/pull/4776) fix issue with PaymentLauncher configuration change
+* [CHANGED] [4358](https://github.com/stripe/stripe-android/pull/4358) Updated the card element on PaymentSheet to use Compose.
 
 ## 19.3.1 - 2022-03-22
 This release patches an issue with 3ds2 confirmation
