@@ -2,13 +2,13 @@ package com.stripe.android.networking
 
 import android.content.Context
 import androidx.annotation.VisibleForTesting
-import com.stripe.android.AppInfo
 import com.stripe.android.DefaultFraudDetectionDataRepository
 import com.stripe.android.FraudDetectionDataRepository
 import com.stripe.android.Stripe
 import com.stripe.android.StripeApiBeta
 import com.stripe.android.cards.Bin
 import com.stripe.android.core.ApiVersion
+import com.stripe.android.core.AppInfo
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.exception.APIException
@@ -19,6 +19,8 @@ import com.stripe.android.core.exception.RateLimitException
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
+import com.stripe.android.core.model.StripeFile
+import com.stripe.android.core.model.StripeFileParams
 import com.stripe.android.core.model.StripeModel
 import com.stripe.android.core.model.parsers.ModelJsonParser
 import com.stripe.android.core.model.parsers.StripeErrorJsonParser
@@ -59,9 +61,6 @@ import com.stripe.android.model.Source
 import com.stripe.android.model.SourceParams
 import com.stripe.android.model.Stripe3ds2AuthParams
 import com.stripe.android.model.Stripe3ds2AuthResult
-import com.stripe.android.model.StripeFile
-import com.stripe.android.model.StripeFileParams
-import com.stripe.android.model.StripeFileParams.Companion.toInternal
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.Token
 import com.stripe.android.model.TokenParams
@@ -143,7 +142,7 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
     )
 
     private val apiRequestFactory = ApiRequest.Factory(
-        appInfo = appInfo?.toInternalAppInfo(),
+        appInfo = appInfo,
         apiVersion = apiVersion,
         sdkVersion = sdkVersion
     )
@@ -1089,11 +1088,11 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
         requestOptions: ApiRequest.Options
     ): StripeFile {
         val response = makeFileUploadRequest(
-            FileUploadRequest(fileParams.toInternal(), requestOptions, appInfo?.toInternalAppInfo())
+            FileUploadRequest(fileParams, requestOptions, appInfo)
         ) {
             fireAnalyticsRequest(PaymentAnalyticsEvent.FileCreate)
         }
-        return StripeFile.fromInternal(StripeFileJsonParser().parse(response.responseJson()))
+        return StripeFileJsonParser().parse(response.responseJson())
     }
 
     @Throws(
@@ -1405,7 +1404,10 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
     ): PaymentIntent? {
         return fetchStripeModel(
             apiRequestFactory.createPost(
-                getAttachLinkAccountSessionToPaymentIntentUrl(paymentIntentId, linkAccountSessionId),
+                getAttachLinkAccountSessionToPaymentIntentUrl(
+                    paymentIntentId,
+                    linkAccountSessionId
+                ),
                 requestOptions,
                 mapOf(
                     "client_secret" to clientSecret

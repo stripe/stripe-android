@@ -5,8 +5,8 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.ApiKeyFixtures
 import com.stripe.android.core.FileFactory
-import com.stripe.android.core.model.InternalStripeFileParams
-import com.stripe.android.core.model.InternalStripeFilePurpose
+import com.stripe.android.core.model.StripeFileParams
+import com.stripe.android.core.model.StripeFilePurpose
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import java.io.ByteArrayOutputStream
@@ -20,9 +20,9 @@ class FileUploadRequestTest {
     @Test
     fun writeBody_shouldWriteExpectedNumberOfBytes() {
         val request = FileUploadRequest(
-            InternalStripeFileParams(
+            StripeFileParams(
                 file = fileFactory.create(),
-                purpose = InternalStripeFilePurpose.IdentityDocument
+                purpose = StripeFilePurpose.IdentityDocument
             ),
             OPTIONS,
             boundary = "5955816017232305695"
@@ -38,9 +38,9 @@ class FileUploadRequestTest {
     @Test
     fun purposeContents_shouldReturnExpectedValue() {
         val request = FileUploadRequest(
-            InternalStripeFileParams(
+            StripeFileParams(
                 file = fileFactory.create(),
-                purpose = InternalStripeFilePurpose.IdentityDocument
+                purpose = StripeFilePurpose.IdentityDocument
             ),
             OPTIONS,
             boundary = "5955816017232305695"
@@ -60,9 +60,9 @@ class FileUploadRequestTest {
     @Test
     fun fileMetadata_shouldReturnExpectedValue() {
         val request = FileUploadRequest(
-            InternalStripeFileParams(
+            StripeFileParams(
                 file = fileFactory.create(),
-                purpose = InternalStripeFilePurpose.IdentityDocument
+                purpose = StripeFilePurpose.IdentityDocument
             ),
             OPTIONS,
             boundary = "5955816017232305695"
