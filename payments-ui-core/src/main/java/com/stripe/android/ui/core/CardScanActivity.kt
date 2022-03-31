@@ -21,7 +21,7 @@ class CardScanActivity : AppCompatActivity() {
         setContentView(viewBinding.root)
 
         stripeCardScanProxy = StripeCardScanProxy.create(
-            this, PaymentConfiguration.getInstance(this).publishableKey
+            this, PaymentConfiguration.getInstance(this).publishableKey, this::onScanFinished
         )
     }
 

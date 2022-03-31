@@ -14,9 +14,7 @@ import com.stripe.android.stripecardscan.cardscan.CardScanSheetResult
  *
  */
 internal interface StripeCardScanProxy {
-    fun present(
-        onFinished: (cardScanSheetResult: CardScanSheetResult) -> Unit
-    )
+    fun present()
 
     fun attachCardScanFragment(
         lifecycleOwner: LifecycleOwner,
@@ -29,8 +27,9 @@ internal interface StripeCardScanProxy {
         fun create(
             fragment: Fragment,
             stripePublishableKey: String,
+            onFinished: (cardScanSheetResult: CardScanSheetResult) -> Unit,
             provider: () -> StripeCardScanProxy = {
-                DefaultStripeCardScanProxy(CardScanSheet.create(fragment, stripePublishableKey))
+                DefaultStripeCardScanProxy(CardScanSheet.create(fragment, stripePublishableKey, onFinished))
             },
             isStripeCardScanAvailable: IsStripeCardScanAvailable = DefaultIsStripeCardScanAvailable()
         ): StripeCardScanProxy {
@@ -44,8 +43,9 @@ internal interface StripeCardScanProxy {
         fun create(
             activity: AppCompatActivity,
             stripePublishableKey: String,
+            onFinished: (cardScanSheetResult: CardScanSheetResult) -> Unit,
             provider: () -> StripeCardScanProxy = {
-                DefaultStripeCardScanProxy(CardScanSheet.create(activity, stripePublishableKey))
+                DefaultStripeCardScanProxy(CardScanSheet.create(activity, stripePublishableKey, onFinished))
             },
             isStripeCardScanAvailable: IsStripeCardScanAvailable = DefaultIsStripeCardScanAvailable()
         ): StripeCardScanProxy {
@@ -70,10 +70,8 @@ internal interface StripeCardScanProxy {
 internal class DefaultStripeCardScanProxy(
     private val cardScanSheet: CardScanSheet
 ) : StripeCardScanProxy {
-    override fun present(
-        onFinished: (cardScanSheetResult: CardScanSheetResult) -> Unit
-    ) {
-        cardScanSheet.present(onFinished)
+    override fun present() {
+        cardScanSheet.present()
     }
 
     override fun attachCardScanFragment(
@@ -87,9 +85,7 @@ internal class DefaultStripeCardScanProxy(
 }
 
 internal class UnsupportedStripeCardScanProxy : StripeCardScanProxy {
-    override fun present(
-        onFinished: (cardScanSheetResult: CardScanSheetResult) -> Unit
-    ) {
+    override fun present() {
         if (BuildConfig.DEBUG) {
             throw IllegalStateException(
                 "Missing stripecardscan dependency, please add it to your apps build.gradle"

@@ -53,14 +53,8 @@ fun CardDetailsSectionElementUI(
             .fillMaxWidth()
             .padding(top = 9.dp),
     ) {
-        Text(
+        H6Text(
             text = stringResource(R.string.card_information),
-            color = SectionTitle.color,
-            style = MaterialTheme.typography.h6.copy(
-                fontSize = SectionTitle.fontSize,
-                fontWeight = SectionTitle.fontWeight,
-                letterSpacing = SectionTitle.letterSpacing,
-            ),
             modifier = Modifier
                 .semantics(mergeDescendants = true) { // Need to prevent form as focusable accessibility
                     heading()
@@ -104,20 +98,10 @@ fun CardDetailsSectionElementUI(
                         null
                     }
                 )
-                Text(
+                H6Text(
                     stringResource(R.string.scan_card),
                     Modifier
                         .padding(start = 4.dp),
-                    color = if (isSystemInDarkTheme()) {
-                        Color.LightGray
-                    } else {
-                        Color.Black
-                    },
-                    style = MaterialTheme.typography.h6.copy(
-                        fontSize = SectionTitle.fontSize,
-                        fontWeight = SectionTitle.fontWeight,
-                        letterSpacing = SectionTitle.letterSpacing,
-                    )
                 )
             }
         }
