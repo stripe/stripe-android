@@ -32,10 +32,10 @@ import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.networking.StripeResponse
 import com.stripe.android.core.networking.responseJson
 import com.stripe.android.core.version.StripeSdkVersion
-import com.stripe.android.exception.AuthenticationException
+import com.stripe.android.core.exception.AuthenticationException
 import com.stripe.android.exception.CardException
-import com.stripe.android.exception.PermissionException
-import com.stripe.android.exception.RateLimitException
+import com.stripe.android.core.exception.PermissionException
+import com.stripe.android.core.exception.RateLimitException
 import com.stripe.android.model.BankConnectionsLinkedAccountSession
 import com.stripe.android.model.BankStatuses
 import com.stripe.android.model.CardMetadata

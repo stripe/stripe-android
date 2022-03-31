@@ -7,7 +7,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.PaymentRelayContract
 import com.stripe.android.PaymentRelayStarter
 import com.stripe.android.StripeErrorFixtures
-import com.stripe.android.exception.PermissionException
+import com.stripe.android.core.exception.PermissionException
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.payments.PaymentFlowResult
 import org.junit.Test

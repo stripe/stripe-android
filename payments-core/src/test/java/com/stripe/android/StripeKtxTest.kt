@@ -5,7 +5,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.exception.InvalidRequestException
 import com.stripe.android.core.model.StripeModel
 import com.stripe.android.core.networking.ApiRequest
-import com.stripe.android.exception.AuthenticationException
+import com.stripe.android.core.exception.AuthenticationException
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.Source

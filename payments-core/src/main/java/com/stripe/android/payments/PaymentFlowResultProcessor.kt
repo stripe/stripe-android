@@ -12,7 +12,7 @@ import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.RetryDelaySupplier
-import com.stripe.android.exception.MaxRetryReachedException
+import com.stripe.android.core.exception.MaxRetryReachedException
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
