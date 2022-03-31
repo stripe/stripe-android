@@ -8,6 +8,8 @@ import androidx.compose.ui.text.input.VisualTransformation
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.TextFieldStateConstants.Error
 import com.stripe.android.ui.core.elements.TextFieldStateConstants.Valid
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import java.util.regex.Pattern
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -19,6 +21,8 @@ class EmailConfig : TextFieldConfig {
     override val label = R.string.email
     override val keyboard = KeyboardType.Email
     override val visualTransformation: VisualTransformation? = null
+    override val trailingIcon: MutableStateFlow<TextFieldIcon?> = MutableStateFlow(null)
+    override val loading: StateFlow<Boolean> = MutableStateFlow(false)
 
     /**
      * This will allow all characters, but will show as invalid if it doesn't match

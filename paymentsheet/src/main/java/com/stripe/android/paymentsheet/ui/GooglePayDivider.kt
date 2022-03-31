@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet.ui
 
 import android.content.Context
-import android.graphics.Color
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.widget.RelativeLayout
@@ -13,6 +12,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -47,9 +48,12 @@ internal class GooglePayDivider @JvmOverloads constructor(
         val surfaceColor = PaymentsThemeConfig.colors(
             context.isSystemDarkTheme()
         ).surface
-        viewBinding.dividerLine.setBackgroundColor(
-            if (surfaceColor.shouldUseDarkDynamicColor()) Color.BLACK else Color.WHITE
-        )
+        val dividerLineColor = if (surfaceColor.shouldUseDarkDynamicColor()) {
+            Color.Black.copy(alpha = .20f)
+        } else {
+            Color.White.copy(alpha = .20f)
+        }
+        viewBinding.dividerLine.setBackgroundColor(dividerLineColor.toArgb())
     }
 
     @Composable

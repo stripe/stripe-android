@@ -28,6 +28,7 @@ fun SaveForFutureUseElementUI(
 ) {
     val controller = element.controller
     val checked by controller.saveForFutureUse.collectAsState(true)
+    val label by controller.label.collectAsState(null)
     val resources = LocalContext.current.resources
 
     val description = stringResource(
@@ -61,11 +62,13 @@ fun SaveForFutureUseElementUI(
             onCheckedChange = null, // needs to be null for accessibility on row click to work
             enabled = enabled
         )
-        H6Text(
-            text = resources.getString(controller.label, element.merchantName),
-            modifier = Modifier
-                .padding(start = 4.dp)
-                .align(Alignment.CenterVertically)
-        )
+        label?.let {
+            H6Text(
+                text = resources.getString(it, element.merchantName),
+                modifier = Modifier
+                    .padding(start = 4.dp)
+                    .align(Alignment.CenterVertically)
+            )
+        }
     }
 }

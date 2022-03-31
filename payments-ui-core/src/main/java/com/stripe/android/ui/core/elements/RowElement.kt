@@ -23,4 +23,7 @@ class RowElement constructor(
             it.setRawValue(rawValuesMap)
         }
     }
+
+    override fun getTextFieldIdentifiers(): Flow<List<IdentifierSpec>> =
+        fields.map { it.getTextFieldIdentifiers() }.last()
 }

@@ -59,9 +59,9 @@ internal class TextFieldControllerTest {
         val controller = createControllerWithState()
 
         var isFull = false
-        controller.isFull.asLiveData()
+        controller.fieldState.asLiveData()
             .observeForever {
-                isFull = it
+                isFull = it.isFull()
             }
 
         controller.onValueChange("full")
@@ -73,9 +73,9 @@ internal class TextFieldControllerTest {
         val controller = createControllerWithState()
 
         var isFull = false
-        controller.isFull.asLiveData()
+        controller.fieldState.asLiveData()
             .observeForever {
-                isFull = it
+                isFull = it.isFull()
             }
 
         controller.onValueChange("limitless")
@@ -214,7 +214,7 @@ internal class TextFieldControllerTest {
             on { filter("1a2b3c4d") } doReturn "1234"
         }
 
-        val controller = TextFieldController(config)
+        val controller = SimpleTextFieldController(config)
 
         controller.onValueChange("1a2b3c4d")
 
@@ -223,7 +223,7 @@ internal class TextFieldControllerTest {
 
     private fun createControllerWithState(
         showOptionalLabel: Boolean = false
-    ): TextFieldController {
+    ): SimpleTextFieldController {
         val config: TextFieldConfig = mock {
             on { determineState("full") } doReturn Full
             on { filter("full") } doReturn "full"
@@ -247,7 +247,7 @@ internal class TextFieldControllerTest {
             on { label } doReturn R.string.address_label_name
         }
 
-        return TextFieldController(config, showOptionalLabel)
+        return SimpleTextFieldController(config, showOptionalLabel)
     }
 
     companion object {

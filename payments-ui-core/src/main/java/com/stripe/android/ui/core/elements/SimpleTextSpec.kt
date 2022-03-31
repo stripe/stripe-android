@@ -31,7 +31,7 @@ data class SimpleTextSpec(
     ): SectionSingleFieldElement =
         SimpleTextElement(
             this.identifier,
-            TextFieldController(
+            SimpleTextFieldController(
                 SimpleTextFieldConfig(
                     label = this.label,
                     capitalization = this.capitalization,

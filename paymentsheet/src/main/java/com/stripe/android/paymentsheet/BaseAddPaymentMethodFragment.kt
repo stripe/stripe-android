@@ -25,7 +25,6 @@ import com.stripe.android.paymentsheet.databinding.FragmentPaymentsheetAddPaymen
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
-import com.stripe.android.paymentsheet.paymentdatacollection.CardDataCollectionFragment
 import com.stripe.android.paymentsheet.paymentdatacollection.ComposeFormDataCollectionFragment
 import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.TransformToPaymentMethodCreateParams
@@ -219,14 +218,7 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
     companion object {
 
         private fun fragmentForPaymentMethod(paymentMethod: SupportedPaymentMethod) =
-            when (paymentMethod) {
-                SupportedPaymentMethod.Card -> {
-                    CardDataCollectionFragment::class.java
-                }
-                else -> {
-                    ComposeFormDataCollectionFragment::class.java
-                }
-            }
+            ComposeFormDataCollectionFragment::class.java
 
         private val transformToPaymentMethodCreateParams = TransformToPaymentMethodCreateParams()
 

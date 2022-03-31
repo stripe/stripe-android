@@ -1,61 +1,77 @@
 package com.stripe.android.ui.core.elements
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.IntrinsicSize
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.material.Divider
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
+import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.constraintlayout.compose.Dimension
 import com.stripe.android.ui.core.PaymentsTheme
 
 @Composable
 internal fun RowElementUI(
     enabled: Boolean,
-    controller: RowController
+    controller: RowController,
+    hiddenIdentifiers: List<IdentifierSpec>,
+    lastTextFieldIdentifier: IdentifierSpec?
 ) {
     val fields = controller.fields
-    Row(
-        Modifier
-            .height(IntrinsicSize.Min)
-            .fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        fields.forEachIndexed { index, field ->
-            val lastItem = index != fields.size - 1
-            SectionFieldElementUI(
-                enabled,
-                field,
-                Modifier.fillMaxWidth(
-                    (1f / fields.size.toFloat()).takeIf { lastItem } ?: 1f
+
+    val numVisibleFields = fields.filter { !hiddenIdentifiers.contains(it.identifier) }.size
+
+    // Only draw the row if the items in the row are not hidden, otherwise the entire
+    // section will fail to draw
+    if (fields.map { it.identifier }.any { !hiddenIdentifiers.contains(it) }) {
+        // An attempt was made to do this with a row, and a vertical divider created with a box.
+        // The row had a height of IntrinsicSize.Min, and the box/vertical divider filled the height
+        // when adding in the trailing icon this broke and caused the overall height of the row to
+        // increase.  By using the constraint layout the vertical divider does not negatively effect
+        // the size of the row.
+        ConstraintLayout {
+            // Create references for the composables to constrain
+            val fieldRefs = fields.map { createRef() }
+            val dividerRefs = fields.map { createRef() }
+
+            fields.forEachIndexed { index, field ->
+                SectionFieldElementUI(
+                    enabled,
+                    field,
+                    hiddenIdentifiers = hiddenIdentifiers,
+                    lastTextFieldIdentifier = lastTextFieldIdentifier,
+                    modifier = Modifier
+                        .constrainAs(fieldRefs[index]) {
+                            if (index == 0) {
+                                start.linkTo(parent.start)
+                            } else {
+                                start.linkTo(dividerRefs[index - 1].end)
+                            }
+                            top.linkTo(parent.top)
+                        }
+                        .fillMaxWidth(
+                            (1f / numVisibleFields.toFloat())
+                        )
                 )
-            )
-            if (!lastItem) {
-                VeriticalDivider(
-                    color = PaymentsTheme.colors.colorComponentBorder,
-                    thickness = PaymentsTheme.shapes.borderStrokeWidth
-                )
+
+                if (!hiddenIdentifiers.contains(field.identifier) && index != (fields.size - 1)) {
+                    Divider(
+                        modifier = Modifier
+                            .constrainAs(dividerRefs[index]) {
+                                start.linkTo(fieldRefs[index].end)
+                                top.linkTo(parent.top)
+                                bottom.linkTo(parent.bottom)
+                                height = (Dimension.fillToConstraints)
+                            }
+                            .padding(
+                                horizontal = PaymentsTheme.shapes.borderStrokeWidth
+                            )
+                            .width(PaymentsTheme.shapes.borderStrokeWidth)
+                            .background(PaymentsTheme.colors.colorComponentBorder)
+                    )
+                }
             }
         }
     }
-}
-
-@Composable
-internal fun VeriticalDivider(
-    color: Color,
-    thickness: Dp = 1.dp,
-) {
-    Box(
-        modifier = Modifier
-            .fillMaxHeight()
-            .width(thickness)
-            .background(color)
-    )
 }

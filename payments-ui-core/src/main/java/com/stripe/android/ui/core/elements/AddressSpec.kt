@@ -6,6 +6,7 @@ import kotlinx.parcelize.Parcelize
 @Parcelize
 internal data class AddressSpec(
     override val identifier: IdentifierSpec,
+    val countryCodes: Set<String>
 ) : SectionFieldSpec(identifier) {
     fun transform(
         initialValues: Map<IdentifierSpec, String?>,
@@ -14,6 +15,7 @@ internal data class AddressSpec(
         AddressElement(
             IdentifierSpec.Generic("billing"),
             addressRepository,
-            initialValues
+            initialValues,
+            countryCodes = countryCodes
         )
 }
