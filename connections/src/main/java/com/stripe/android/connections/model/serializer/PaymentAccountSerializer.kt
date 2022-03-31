@@ -9,7 +9,7 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonContentPolymorphicSerializer
 import kotlinx.serialization.json.JsonElement
 
-object PaymentAccountSerializer :
+internal object PaymentAccountSerializer :
     JsonContentPolymorphicSerializer<PaymentAccount>(PaymentAccount::class) {
 
     @Suppress("SwallowedException")
