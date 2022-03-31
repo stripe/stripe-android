@@ -8,6 +8,7 @@ This release patches a crash with payment launcher when there is a configuration
   PaymentSheet to use Compose.
 * [CHANGED] [4800](https://github.com/stripe/stripe-android/pull/4800) Relocated network exceptions
   to :stripe-core.
+* [CHANGED] [4803](https://github.com/stripe/stripe-android/pull/4803) Remove network related internal files.
 
 ## 19.3.1 - 2022-03-22
 This release patches an issue with 3ds2 confirmation
