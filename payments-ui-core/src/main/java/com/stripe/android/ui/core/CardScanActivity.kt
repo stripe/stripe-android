@@ -14,13 +14,19 @@ class CardScanActivity : AppCompatActivity() {
         ActivityCardScanBinding.inflate(layoutInflater)
     }
 
+    private lateinit var stripeCardScanProxy: StripeCardScanProxy
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(viewBinding.root)
 
-        val stripeCardScanProxy = StripeCardScanProxy.create(
+        stripeCardScanProxy = StripeCardScanProxy.create(
             this, PaymentConfiguration.getInstance(this).publishableKey
         )
+    }
+
+    override fun onStart() {
+        super.onStart()
         stripeCardScanProxy.attachCardScanFragment(
             this, supportFragmentManager, R.id.fragment_container, this::onScanFinished
         )
@@ -34,5 +40,10 @@ class CardScanActivity : AppCompatActivity() {
             )
         setResult(RESULT_OK, intent)
         finish()
+    }
+
+    override fun onStop() {
+        StripeCardScanProxy.removeCardScanFragment(supportFragmentManager)
+        super.onStop()
     }
 }
