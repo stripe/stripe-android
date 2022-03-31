@@ -8,6 +8,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.savedstate.SavedStateRegistryOwner
+import com.stripe.android.connections.ConnectionsSheetResult.Canceled
 import com.stripe.android.connections.ConnectionsSheetViewEffect.FinishWithResult
 import com.stripe.android.connections.ConnectionsSheetViewEffect.OpenAuthFlowWithUrl
 import com.stripe.android.connections.analytics.ConnectionsEventReporter
@@ -17,12 +18,8 @@ import com.stripe.android.connections.domain.FetchLinkAccountSession
 import com.stripe.android.connections.domain.GenerateLinkAccountSessionManifest
 import com.stripe.android.connections.model.LinkAccountSession
 import com.stripe.android.connections.model.LinkAccountSessionManifest
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -40,11 +37,6 @@ internal class ConnectionsSheetViewModel @Inject constructor(
     internal val state: StateFlow<ConnectionsSheetState> = _state
 
     init {
-        viewModelScope.launch {
-            _state.collect() {
-                println(it);
-            }
-        }
         eventReporter.onPresented(starterArgs.configuration)
         fetchManifest()
     }
@@ -76,12 +68,11 @@ internal class ConnectionsSheetViewModel @Inject constructor(
      */
     private fun openAuthFlow(manifest: LinkAccountSessionManifest) {
         // stores manifest in state for future references.
-        _state.update {
-            it.copy(
+        _state.update { currentState ->
+            currentState.copy(
                 manifest = manifest,
-                authFlowActive = true,
-                viewEffects = it.viewEffects + OpenAuthFlowWithUrl(manifest.hostedAuthUrl)
-            )
+                authFlowActive = true
+            ) + OpenAuthFlowWithUrl(manifest.hostedAuthUrl)
         }
     }
 
@@ -112,7 +103,7 @@ internal class ConnectionsSheetViewModel @Inject constructor(
      */
     internal fun onResume() {
         if (_state.value.authFlowActive && _state.value.activityRecreated.not()) {
-            _state.update { it + FinishWithResult(ConnectionsSheetResult.Canceled) }
+            _state.update { it + FinishWithResult(Canceled) }
         }
     }
 
@@ -123,7 +114,7 @@ internal class ConnectionsSheetViewModel @Inject constructor(
      */
     internal fun onActivityResult() {
         if (_state.value.authFlowActive && _state.value.activityRecreated) {
-            _state.update { it + FinishWithResult(ConnectionsSheetResult.Canceled) }
+            _state.update { it + FinishWithResult(Canceled) }
         }
     }
 
@@ -160,7 +151,7 @@ internal class ConnectionsSheetViewModel @Inject constructor(
      *
      * @param throwable the error encountered during the connections sheet auth flow
      */
-    private suspend fun onFatal(throwable: Throwable) {
+    private fun onFatal(throwable: Throwable) {
         val result = ConnectionsSheetResult.Failed(throwable)
         eventReporter.onResult(starterArgs.configuration, result)
         _state.update { it + FinishWithResult(result) }
@@ -171,8 +162,8 @@ internal class ConnectionsSheetViewModel @Inject constructor(
      * or clicking a cancel link within the hosted auth flow and the activity received the canceled
      * URL callback, notify the [ConnectionsSheetResultCallback] of [ConnectionsSheetResult.Canceled]
      */
-    private suspend fun onUserCancel() {
-        val result = ConnectionsSheetResult.Canceled
+    private fun onUserCancel() {
+        val result = Canceled
         eventReporter.onResult(starterArgs.configuration, result)
         _state.update { it + FinishWithResult(result) }
     }
