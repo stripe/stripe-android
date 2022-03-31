@@ -47,6 +47,7 @@ dependencies {
     implementation "androidx.lifecycle:lifecycle-viewmodel-compose:$androidxLifecycleVersion"
     // Integration with observables
     implementation "androidx.compose.runtime:runtime-livedata:$androidxComposeVersion"
+    androidTestImplementation 'com.google.android.gms:play-services-wallet:19.1.0'
     androidTestImplementation "androidx.test.uiautomator:uiautomator:$uiautomator"
 
     testImplementation "junit:junit:$junitVersion"

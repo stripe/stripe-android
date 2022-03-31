@@ -46,10 +46,6 @@ class TestOffScreenLPMSelector {
         testDriver = PlaygroundTestDriver(device, composeTestRule, screenshotProcessor)
     }
 
-    @After
-    fun after() {
-    }
-
     @Test
     fun scrollToLpmAndCustomFields() {
         testDriver.confirmNewOrGuestComplete(

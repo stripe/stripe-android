@@ -116,7 +116,7 @@ class PlaygroundTestDriver(
         } ?: installedBrowsers.first()
     }
 
-    private fun registerListeners() {
+    internal fun registerListeners() {
         val launchPlayground = Semaphore(1)
         launchPlayground.acquire()
         // Setup the playground for scenario, and launch it.  We use the playground
@@ -152,7 +152,7 @@ class PlaygroundTestDriver(
         launchPlayground.release()
     }
 
-    private fun launchComplete(selectors: Selectors) {
+    internal fun launchComplete(selectors: Selectors) {
         // Could consider setting these preferences instead of clicking
         // if it is faster (possibly 1-2s)
         selectors.customer.click()

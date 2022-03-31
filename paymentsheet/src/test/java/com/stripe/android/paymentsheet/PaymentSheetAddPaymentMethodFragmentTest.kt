@@ -309,18 +309,6 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
     }
 
     @Test
-    fun `when PaymentIntent only supports card it should not show payment method selector`() {
-        val paymentIntent = PaymentIntentFixtures.PI_SUCCEEDED.copy(
-            paymentMethodTypes = listOf("card")
-        )
-        createFragment(stripeIntent = paymentIntent) { _, viewBinding, _ ->
-            assertThat(viewBinding.paymentMethodsRecycler.isVisible).isFalse()
-            assertThat(viewBinding.googlePayDivider.text)
-                .isEqualTo("Or pay with a card")
-        }
-    }
-
-    @Test
     fun `when multiple supported payment methods and configuration changes it should restore selected payment method`() {
         val paymentIntent = PaymentIntentFixtures.PI_SUCCEEDED.copy(
             paymentMethodTypes = listOf("card", "bancontact")
@@ -379,18 +367,6 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
                         injectorKey = "testInjectorKeyAddFragmentTest"
                     )
                 )
-        }
-    }
-
-    @Test
-    fun `when PaymentIntent allows multiple supported payment methods it should show payment method selector`() {
-        val paymentIntent = PaymentIntentFixtures.PI_SUCCEEDED.copy(
-            paymentMethodTypes = listOf("card", "bancontact")
-        )
-        createFragment(stripeIntent = paymentIntent) { _, viewBinding, _ ->
-            assertThat(viewBinding.paymentMethodsRecycler.isVisible).isTrue()
-            assertThat(viewBinding.googlePayDivider.text)
-                .isEqualTo("Or pay using")
         }
     }
 

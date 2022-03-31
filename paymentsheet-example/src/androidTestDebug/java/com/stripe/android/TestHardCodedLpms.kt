@@ -55,10 +55,6 @@ class TestHardCodedLpms {
         testDriver = PlaygroundTestDriver(device, composeTestRule, screenshotProcessor)
     }
 
-    @After
-    fun after() {
-    }
-
     private val newUser = TestParameters(
         SupportedPaymentMethod.Bancontact,
         Customer.New,

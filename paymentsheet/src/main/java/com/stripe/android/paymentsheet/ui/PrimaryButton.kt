@@ -15,7 +15,6 @@ import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.core.content.withStyledAttributes
 import androidx.core.view.isVisible
 import androidx.core.view.setPadding
 import com.stripe.android.paymentsheet.R

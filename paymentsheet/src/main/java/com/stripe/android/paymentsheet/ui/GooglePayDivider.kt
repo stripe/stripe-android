@@ -12,7 +12,7 @@ import com.stripe.android.paymentsheet.R
 import com.stripe.android.ui.core.PaymentsTheme
 
 @Composable
-fun GooglePayDividerUi(
+internal fun GooglePayDividerUi(
     text: String = stringResource(R.string.stripe_paymentsheet_or_pay_with_card)
 ) {
     Box(

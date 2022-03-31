@@ -402,7 +402,7 @@ public final class com/stripe/android/paymentsheet/databinding/FragmentPaymentsh
 public final class com/stripe/android/paymentsheet/databinding/FragmentPaymentsheetAddPaymentMethodBinding : androidx/viewbinding/ViewBinding {
 	public final field addPaymentMethodHeader Landroidx/compose/ui/platform/ComposeView;
 	public final field googlePayButton Lcom/stripe/android/paymentsheet/ui/GooglePayButton;
-	public final field googlePayDivider Lcom/stripe/android/paymentsheet/ui/GooglePayDivider;
+	public final field googlePayDivider Landroidx/compose/ui/platform/ComposeView;
 	public final field message Landroid/widget/TextView;
 	public final field paymentMethodFragmentContainer Landroidx/fragment/app/FragmentContainerView;
 	public final field paymentMethodsRecycler Landroidx/compose/ui/platform/ComposeView;

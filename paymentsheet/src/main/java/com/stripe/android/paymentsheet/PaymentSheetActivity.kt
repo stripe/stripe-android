@@ -13,7 +13,6 @@ import androidx.annotation.VisibleForTesting
 import androidx.compose.ui.graphics.toArgb
 import androidx.core.os.bundleOf
 import androidx.core.view.doOnNextLayout
-import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import androidx.fragment.app.commit
 import androidx.lifecycle.ViewModelProvider
