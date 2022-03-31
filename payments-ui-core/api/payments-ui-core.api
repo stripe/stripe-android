@@ -39,13 +39,6 @@ public final class com/stripe/android/ui/core/elements/BankRepository_Factory : 
 	public static fun newInstance (Landroid/content/res/Resources;)Lcom/stripe/android/ui/core/elements/BankRepository;
 }
 
-public final class com/stripe/android/ui/core/elements/ComposableSingletons$AffirmElementUIKt {
-	public static final field INSTANCE Lcom/stripe/android/ui/core/elements/ComposableSingletons$AffirmElementUIKt;
-	public static field lambda-1 Lkotlin/jvm/functions/Function2;
-	public fun <init> ()V
-	public final fun getLambda-1$payments_ui_core_release ()Lkotlin/jvm/functions/Function2;
-}
-
 public final class com/stripe/android/ui/core/elements/ComposableSingletons$AfterpayClearpayElementUIKt {
 	public static final field INSTANCE Lcom/stripe/android/ui/core/elements/ComposableSingletons$AfterpayClearpayElementUIKt;
 	public static field lambda-1 Lkotlin/jvm/functions/Function3;
@@ -72,6 +65,12 @@ public final class com/stripe/android/ui/core/elements/DropdownItemSpec$Companio
 
 public final class com/stripe/android/ui/core/elements/EmailConfig$Companion {
 	public final fun getPATTERN ()Ljava/util/regex/Pattern;
+}
+
+public final class com/stripe/android/ui/core/elements/H4TextKt {
+}
+
+public final class com/stripe/android/ui/core/elements/H6TextKt {
 }
 
 public final class com/stripe/android/ui/core/elements/IdentifierSpec$City : com/stripe/android/ui/core/elements/IdentifierSpec {
@@ -172,6 +171,9 @@ public final class com/stripe/android/ui/core/elements/LayoutSpec$Companion {
 	public final fun create ([Lcom/stripe/android/ui/core/elements/FormItemSpec;)Lcom/stripe/android/ui/core/elements/LayoutSpec;
 }
 
+public final class com/stripe/android/ui/core/elements/MandateTextUIKt {
+}
+
 public final class com/stripe/android/ui/core/elements/SaveForFutureUseElementUIKt {
 }
 
@@ -179,6 +181,9 @@ public final class com/stripe/android/ui/core/elements/SectionElementUIKt {
 }
 
 public final class com/stripe/android/ui/core/elements/SectionUIKt {
+}
+
+public final class com/stripe/android/ui/core/elements/SimpleDialogElementUIKt {
 }
 
 public final class com/stripe/android/ui/core/elements/SimpleTextSpec$Companion {

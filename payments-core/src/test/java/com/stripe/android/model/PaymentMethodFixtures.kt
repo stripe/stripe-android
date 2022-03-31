@@ -91,6 +91,24 @@ internal object PaymentMethodFixtures {
         )
     )
 
+    val US_BANK_ACCOUNT_PAYMENT_METHOD = PaymentMethod(
+        id = "pm_1GSREqL6pqDH",
+        created = 1585588648L,
+        liveMode = false,
+        type = PaymentMethod.Type.USBankAccount,
+        billingDetails = BILLING_DETAILS,
+        usBankAccount = PaymentMethod.USBankAccount(
+            accountHolderType = PaymentMethod.USBankAccount.USBankAccountHolderType.INDIVIDUAL,
+            accountType = PaymentMethod.USBankAccount.USBankAccountType.CHECKING,
+            bankName = "Stripe Bank",
+            fingerprint = "UkSG0Hf",
+            last4 = "2345",
+            linkedAccount = null,
+            networks = null,
+            routingNumber = "110000000"
+        )
+    )
+
     val SEPA_DEBIT_JSON = JSONObject(
         """
         {

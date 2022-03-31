@@ -32,8 +32,6 @@
   <string name="stripe_paymentsheet_or_pay_using">Veya şununla ödeyin:</string>
   <!-- Title of a section containing a card form that will collect the payment information from the user. -->
   <string name="stripe_paymentsheet_or_pay_with_card">Ya da kartla ödeyin</string>
-  <!-- Label of a button that initiates payment when tapped -->
-  <string name="stripe_paymentsheet_pay_button_amount">%s öde</string>
   <!-- Label for a button that starts processing the payment. -->
   <string name="stripe_paymentsheet_pay_button_label">Öde</string>
   <!-- Payment Method type brand name  -->
@@ -52,8 +50,6 @@
   <string name="stripe_paymentsheet_save_this_card_with_merchant_name">Bu kartı gelecekteki %s ödemeleri için kaydedin</string>
   <!-- Title shown above a carousel containing the customer&apos;s payment methods -->
   <string name="stripe_paymentsheet_select_payment_method">Ödeme yönteminizi seçin</string>
-  <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->
-  <string name="stripe_paymentsheet_setup_button_label">Ayarla</string>
   <!-- Label indicating the total amount that the user is authorizing (e.g. "Total: $25.00") -->
   <string name="stripe_paymentsheet_total_amount">Toplam: %s</string>
 </resources>

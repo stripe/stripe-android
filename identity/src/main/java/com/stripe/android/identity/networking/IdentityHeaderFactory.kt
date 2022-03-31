@@ -25,7 +25,7 @@ internal object IdentityHeaderFactory {
 
     private val baseApiHeaderFactory = object : RequestHeadersFactory.BaseApiHeadersFactory(
         optionsProvider = { requireNotNull(apiOptions) },
-        apiVersion = IDENTITY_STRIPE_API_VERSION
+        apiVersion = IDENTITY_STRIPE_API_VERSION_WITH_BETA_HEADER
     ) {
         override var postHeaders = mapOf(
             HEADER_CONTENT_TYPE to StripeRequest.MimeType.Form.toString()

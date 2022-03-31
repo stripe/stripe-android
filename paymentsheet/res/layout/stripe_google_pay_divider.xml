@@ -10,14 +10,12 @@
         android:layout_marginHorizontal="3dp"
         android:background="@color/stripe_paymentsheet_googlepay_divider_line" />
 
-    <TextView
+    <androidx.compose.ui.platform.ComposeView
         android:id="@+id/divider_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:paddingStart="8dp"
         android:paddingEnd="8dp"
-        android:textColor="@color/stripe_paymentsheet_googlepay_divider_text"
-        android:layout_centerHorizontal="true"
-        android:textSize="14sp"
-        android:text="@string/stripe_paymentsheet_or_pay_with_card" />
+        android:layout_centerHorizontal="true"/>
+
 </merge>

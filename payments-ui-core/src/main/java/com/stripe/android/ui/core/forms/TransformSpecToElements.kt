@@ -23,6 +23,8 @@ import com.stripe.android.ui.core.elements.FormItemSpec
 import com.stripe.android.ui.core.elements.IbanSpec
 import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.elements.KlarnaCountrySpec
+import com.stripe.android.ui.core.elements.LayoutSpec
+import com.stripe.android.ui.core.elements.MandateTextSpec
 import com.stripe.android.ui.core.elements.SaveForFutureUseSpec
 import com.stripe.android.ui.core.elements.SectionController
 import com.stripe.android.ui.core.elements.SectionElement
@@ -62,7 +64,8 @@ class TransformSpecToElements(
                     resourceRepository.getBankRepository(),
                     resourceRepository.getAddressRepository()
                 )
-                is StaticTextSpec -> it.transform(merchantName)
+                is StaticTextSpec -> it.transform()
+                is MandateTextSpec -> it.transform(merchantName)
                 is AfterpayClearpayTextSpec ->
                     it.transform(requireNotNull(amount))
                 is AffirmTextSpec ->

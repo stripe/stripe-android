@@ -26,6 +26,8 @@ import com.stripe.android.ui.core.elements.CardDetailsSectionElement
 import com.stripe.android.ui.core.elements.CardDetailsSectionElementUI
 import com.stripe.android.ui.core.elements.FormElement
 import com.stripe.android.ui.core.elements.IdentifierSpec
+import com.stripe.android.ui.core.elements.MandateTextElement
+import com.stripe.android.ui.core.elements.MandateTextUI
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
 import com.stripe.android.ui.core.elements.SaveForFutureUseElementUI
 import com.stripe.android.ui.core.elements.SectionElement
@@ -82,6 +84,7 @@ internal fun FormInternal(
                         )
                         is AuBecsDebitMandateTextElement -> AuBecsDebitMandateElementUI(element)
                         is AffirmHeaderElement -> AffirmElementUI()
+                        is MandateTextElement -> MandateTextUI(element)
                         is CardDetailsSectionElement -> CardDetailsSectionElementUI(
                             enabled, hiddenIdentifiers, context
                         )
@@ -101,7 +104,7 @@ internal fun FormInternal(
                 modifier = Modifier.size(
                     dimensionResource(R.dimen.stripe_paymentsheet_loading_indicator_size)
                 ),
-                color = PaymentsTheme.colors.colorTextSecondary,
+                color = PaymentsTheme.colors.subtitle,
                 strokeWidth = dimensionResource(
                     R.dimen.stripe_paymentsheet_loading_indicator_stroke_width
                 )

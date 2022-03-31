@@ -1,6 +1,19 @@
 # CHANGELOG
 ## xx.x.x - YYYY-MM-DD
-This release enables a new configuration object to be defined for StripeCardScan.
+This release patches a crash with payment launcher when there is a configuration change
+
+### Payments
+* [FIXED] [4776](https://github.com/stripe/stripe-android/pull/4776) fix issue with PaymentLauncher configuration change
+* [CHANGED] [4358](https://github.com/stripe/stripe-android/pull/4358) Updated the card element on PaymentSheet to use Compose.
+
+## 19.3.1 - 2022-03-22
+This release patches an issue with 3ds2 confirmation
+
+### Payments
+* [FIXED] [4747](https://github.com/stripe/stripe-android/pull/4747) update 3ds2 to v6.1.5, see PR for specific issues addressed.
+
+## 19.3.0 - 2022-03-16
+This release enables a new configuration object to be defined for StripeCardScan and updates our 3ds2 SDK.
 
 ### PaymentSheet
 * [FIXED] [4646](https://github.com/stripe/stripe-android/pull/4646) Update 3ds2 to latest version 6.1.4, see PR for specific issues addressed.
@@ -10,10 +23,10 @@ This release enables a new configuration object to be defined for StripeCardScan
 * [ADDED] [4689](https://github.com/stripe/stripe-android/pull/4689) The `CardImageVerificationSheet` initializer can now take an additional `Configuration` object.
 
 ## 19.2.2 - 2022-03-01
-[FIXED] [4606](https://github.com/stripe/stripe-android/pull/4606) Keep status bar color in PaymentLauncher
+* [FIXED] [4606](https://github.com/stripe/stripe-android/pull/4606) Keep status bar color in PaymentLauncher
 
 ### Card scanning
-[ADDED] [4592](https://github.com/stripe/stripe-android/pull/4592) Add support for launching card scan from fragments.
+* [ADDED] [4592](https://github.com/stripe/stripe-android/pull/4592) Add support for launching card scan from fragments.
 
 ## 19.2.0 - 2022-02-14
 This release includes several bug fixes and upgrades Kotlin to 1.6.

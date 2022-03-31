@@ -44,6 +44,7 @@ import com.stripe.android.stripecardscan.scanui.util.getColorByRes
 import com.stripe.android.stripecardscan.scanui.util.getDrawableByRes
 import com.stripe.android.stripecardscan.scanui.util.hide
 import com.stripe.android.stripecardscan.scanui.util.setTextSizeByRes
+import com.stripe.android.stripecardscan.scanui.util.setVisible
 import com.stripe.android.stripecardscan.scanui.util.show
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -146,6 +147,7 @@ internal open class CardImageVerificationActivity :
                     .putExtra(
                         INTENT_PARAM_RESULT,
                         CardImageVerificationSheetResult.Completed(
+                            params.cardImageVerificationIntentId,
                             ScannedCard(
                                 pan = pan
                             )
@@ -406,6 +408,8 @@ internal open class CardImageVerificationActivity :
             resources.getDimensionPixelSize(R.dimen.stripeButtonPadding),
             resources.getDimensionPixelSize(R.dimen.stripeButtonPadding),
         )
+
+        cannotScanTextView.setVisible(params.configuration.enableCannotScanButton)
 
         if (isBackgroundDark()) {
             cannotScanTextView.setTextColor(getColorByRes(R.color.stripeButtonDarkText))

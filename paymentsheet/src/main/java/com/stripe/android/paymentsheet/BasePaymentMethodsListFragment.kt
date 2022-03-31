@@ -1,24 +1,30 @@
 package com.stripe.android.paymentsheet
 
+import android.graphics.Paint
+import android.graphics.Typeface
 import android.os.Bundle
 import android.text.SpannableString
+import android.text.TextPaint
+import android.text.style.AbsoluteSizeSpan
 import android.text.style.ForegroundColorSpan
+import android.text.style.MetricAffectingSpan
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import androidx.annotation.VisibleForTesting
-import androidx.appcompat.app.AlertDialog
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.unit.dp
+import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.stripe.android.paymentsheet.databinding.FragmentPaymentsheetPaymentMethodsListBinding
 import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.PaymentsThemeConfig
+import com.stripe.android.ui.core.convertDpToPx
 import com.stripe.android.ui.core.isSystemDarkTheme
 
 internal abstract class BasePaymentMethodsListFragment(
@@ -84,6 +90,30 @@ internal abstract class BasePaymentMethodsListFragment(
                 editMenuTextSpan.length,
                 0
             )
+
+            val fontSize = context?.convertDpToPx(
+                PaymentsThemeConfig.Typography.h6.fontSize.value.dp
+            ) ?: 0
+            editMenuTextSpan.setSpan(
+                AbsoluteSizeSpan(fontSize.toInt()),
+                0,
+                editMenuTextSpan.length,
+                0
+            )
+            context?.let {
+                val typeFace = ResourcesCompat.getFont(
+                    it,
+                    PaymentsThemeConfig.Typography.fontFamily
+                )
+                typeFace?.let {
+                    editMenuTextSpan.setSpan(
+                        CustomTypefaceSpan(typeFace),
+                        0,
+                        editMenuTextSpan.length,
+                        0
+                    )
+                }
+            }
 
             title = editMenuTextSpan
         }
@@ -151,30 +181,27 @@ internal abstract class BasePaymentMethodsListFragment(
         sheetViewModel.updateSelection(paymentSelection)
     }
 
-    private fun deletePaymentMethod(item: PaymentOptionsAdapter.Item.SavedPaymentMethod) =
-        AlertDialog.Builder(requireActivity())
-            .setTitle(
-                resources.getString(
-                    R.string.stripe_paymentsheet_remove_pm,
-                    SupportedPaymentMethod.fromCode(item.paymentMethod.type?.code)
-                        ?.run {
-                            resources.getString(
-                                displayNameResource
-                            )
-                        }
-                )
-            )
-            .setMessage(item.getDescription(resources))
-            .setCancelable(true)
-            .setNegativeButton(R.string.cancel) { dialog, _ ->
-                dialog.dismiss()
+    private fun deletePaymentMethod(item: PaymentOptionsAdapter.Item.SavedPaymentMethod) {
+        adapter.removeItem(item)
+        sheetViewModel.removePaymentMethod(item.paymentMethod)
+    }
+
+    class CustomTypefaceSpan(typeface: Typeface) : MetricAffectingSpan() {
+        private val typeface: Typeface = typeface
+        override fun updateDrawState(ds: TextPaint) {
+            applyCustomTypeFace(ds, typeface)
+        }
+
+        override fun updateMeasureState(paint: TextPaint) {
+            applyCustomTypeFace(paint, typeface)
+        }
+
+        companion object {
+            private fun applyCustomTypeFace(paint: Paint, tf: Typeface) {
+                paint.typeface = tf
             }
-            .setPositiveButton(R.string.remove) { _, _ ->
-                adapter.removeItem(item)
-                sheetViewModel.removePaymentMethod(item.paymentMethod)
-            }
-            .create()
-            .show()
+        }
+    }
 
     private companion object {
         private const val IS_EDITING = "is_editing"

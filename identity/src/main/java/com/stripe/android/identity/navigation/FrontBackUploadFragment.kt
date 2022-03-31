@@ -7,14 +7,14 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
-import androidx.annotation.IdRes
+import android.widget.TextView
 import androidx.annotation.StringRes
+import androidx.appcompat.app.AppCompatDialog
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
-import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.stripe.android.identity.R
 import com.stripe.android.identity.databinding.FrontBackUploadFragmentBinding
 import com.stripe.android.identity.networking.Status
@@ -24,6 +24,7 @@ import com.stripe.android.identity.networking.models.DocumentUploadParam
 import com.stripe.android.identity.networking.models.IdDocumentParam
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentDocumentCapturePage
 import com.stripe.android.identity.states.IdentityScanState
+import com.stripe.android.identity.utils.ARG_SHOULD_SHOW_CAMERA
 import com.stripe.android.identity.utils.navigateToDefaultErrorFragment
 import com.stripe.android.identity.utils.postVerificationPageDataAndMaybeSubmit
 import com.stripe.android.identity.viewmodel.FrontBackUploadViewModel
@@ -33,7 +34,6 @@ import kotlinx.coroutines.launch
 /**
  * Fragment to upload front and back of a document.
  *
- * TODO(ccen): check camera permission and enable camera only when permission is granted.
  */
 internal abstract class FrontBackUploadFragment(
     private val frontBackUploadViewModelFactory: ViewModelProvider.Factory,
@@ -58,14 +58,13 @@ internal abstract class FrontBackUploadFragment(
     @get:StringRes
     abstract val backCheckMarkContentDescription: Int
 
-    @get:IdRes
-    abstract val continueButtonNavigationId: Int
-
     abstract val frontScanType: IdentityScanState.ScanType
 
     abstract val backScanType: IdentityScanState.ScanType
 
     lateinit var binding: FrontBackUploadFragmentBinding
+
+    private var shouldShowCamera: Boolean = false
 
     private val frontBackUploadViewModel: FrontBackUploadViewModel by viewModels { frontBackUploadViewModelFactory }
 
@@ -81,6 +80,11 @@ internal abstract class FrontBackUploadFragment(
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+        val args = requireNotNull(arguments) {
+            "Argument to FrontBackUploadFragment is null"
+        }
+        shouldShowCamera = args[ARG_SHOULD_SHOW_CAMERA] as Boolean
+
         binding = FrontBackUploadFragmentBinding.inflate(layoutInflater, container, false)
         binding.titleText.text = getString(titleRes)
         binding.contentText.text = getString(contextRes)
@@ -92,11 +96,13 @@ internal abstract class FrontBackUploadFragment(
             getString(backCheckMarkContentDescription)
 
         binding.selectBack.setOnClickListener {
-            buildBottomSheetDialog(backScanType).show()
+            buildDialog(backScanType).show()
         }
         binding.selectFront.setOnClickListener {
-            buildBottomSheetDialog(frontScanType).show()
+            buildDialog(frontScanType).show()
         }
+        binding.kontinue.isEnabled = false
+        binding.kontinue.setText(getString(R.string.kontinue))
         return binding.root
     }
 
@@ -114,8 +120,7 @@ internal abstract class FrontBackUploadFragment(
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        frontBackUploadViewModel.frontUploaded.observe(viewLifecycleOwner) {
+        identityViewModel.frontHighResUploaded.observe(viewLifecycleOwner) {
             when (it.status) {
                 Status.SUCCESS -> {
                     showFrontDone()
@@ -129,8 +134,7 @@ internal abstract class FrontBackUploadFragment(
                 }
             }
         }
-
-        frontBackUploadViewModel.backUploaded.observe(viewLifecycleOwner) {
+        identityViewModel.backHighResUploaded.observe(viewLifecycleOwner) {
             when (it.status) {
                 Status.SUCCESS -> {
                     showBackDone()
@@ -145,86 +149,133 @@ internal abstract class FrontBackUploadFragment(
             }
         }
 
-        frontBackUploadViewModel.uploadFinished.observe(viewLifecycleOwner) {
-            binding.kontinue.isEnabled = true
-            binding.kontinue.setOnClickListener {
-                lifecycleScope.launch {
-                    runCatching {
-                        val front =
-                            requireNotNull(frontBackUploadViewModel.frontUploaded.value?.data) {
-                                "frontUploaded value is still null"
-                            }
-                        val back =
-                            requireNotNull(frontBackUploadViewModel.backUploaded.value?.data) {
-                                "backUploaded value is still null"
-                            }
-                        postVerificationPageDataAndMaybeSubmit(
-                            identityViewModel = identityViewModel,
-                            collectedDataParam = CollectedDataParam(
-                                idDocument = IdDocumentParam(
-                                    front = DocumentUploadParam(
-                                        highResImage = requireNotNull(front.first.id) {
-                                            "front uploaded file id is null"
-                                        },
-                                        uploadMethod = front.second
+        identityViewModel.highResUploaded.observe(viewLifecycleOwner) { frontBackPair ->
+            when (frontBackPair.status) {
+                Status.SUCCESS -> {
+                    binding.kontinue.isEnabled = true
+                    binding.kontinue.setOnClickListener {
+                        binding.kontinue.toggleToLoading()
+                        lifecycleScope.launch {
+                            runCatching {
+                                requireNotNull(frontBackPair.data)
+                                val front = frontBackPair.data.first
+                                val back = frontBackPair.data.second
+
+                                postVerificationPageDataAndMaybeSubmit(
+                                    identityViewModel = identityViewModel,
+                                    collectedDataParam = CollectedDataParam(
+                                        idDocument = IdDocumentParam(
+                                            front = DocumentUploadParam(
+                                                highResImage = requireNotNull(front.uploadedStripeFile.id) {
+                                                    "front uploaded file id is null"
+                                                },
+                                                uploadMethod = front.uploadMethod
+                                            ),
+                                            back = DocumentUploadParam(
+                                                highResImage = requireNotNull(back.uploadedStripeFile.id) {
+                                                    "back uploaded file id is null"
+                                                },
+                                                uploadMethod = back.uploadMethod
+                                            ),
+                                            type = frontScanType.toType()
+                                        )
                                     ),
-                                    back = DocumentUploadParam(
-                                        highResImage = requireNotNull(back.first.id) {
-                                            "back uploaded file id is null"
-                                        },
-                                        uploadMethod = back.second
-                                    ),
-                                    type = frontScanType.toType()
+                                    clearDataParam = ClearDataParam.UPLOAD_TO_CONFIRM,
+                                    shouldNotSubmit = { false }
                                 )
-                            ),
-                            clearDataParam = ClearDataParam.UPLOAD_TO_CONFIRM,
-                            shouldNotSubmit = { false }
-                        )
-                    }.onFailure {
-                        Log.d(TAG, "fail to submit uploaded files: $it")
-                        navigateToDefaultErrorFragment()
+                            }.onFailure {
+                                Log.d(TAG, "fail to submit uploaded files: $it")
+                                navigateToDefaultErrorFragment()
+                            }
+                        }
                     }
                 }
+                Status.ERROR -> {
+                    Log.d(TAG, "highResUploaded posts an Error: $frontBackPair")
+                    navigateToDefaultErrorFragment()
+                }
+                Status.LOADING -> {} // no-op
             }
         }
     }
 
-    private fun buildBottomSheetDialog(
-        scanType: IdentityScanState.ScanType
-    ) = BottomSheetDialog(requireContext()).also { dialog ->
-        dialog.setContentView(R.layout.get_local_image_fragment)
-        dialog.setOnCancelListener {
-            Log.d(TAG, "dialog cancelled")
-        }
-        dialog.findViewById<Button>(R.id.take_photo)?.setOnClickListener {
-            Log.d(TAG, "Take photo")
-            dialog.dismiss()
-            if (scanType == frontScanType) {
-                frontBackUploadViewModel.takePhotoFront(requireContext()) {
-                    uploadFront(it, DocumentUploadParam.UploadMethod.MANUALCAPTURE)
-                }
-            } else if (scanType == backScanType) {
-                frontBackUploadViewModel.takePhotoBack(requireContext()) {
-                    uploadBack(it, DocumentUploadParam.UploadMethod.MANUALCAPTURE)
-                }
+    private fun getTitleFromScanType(scanType: IdentityScanState.ScanType): String {
+        return when (scanType) {
+            IdentityScanState.ScanType.ID_FRONT -> {
+                getString(R.string.upload_dialog_title_id_front)
+            }
+            IdentityScanState.ScanType.ID_BACK -> {
+                getString(R.string.upload_dialog_title_id_back)
+            }
+            IdentityScanState.ScanType.DL_FRONT -> {
+                getString(R.string.upload_dialog_title_dl_front)
+            }
+            IdentityScanState.ScanType.DL_BACK -> {
+                getString(R.string.upload_dialog_title_dl_back)
+            }
+            IdentityScanState.ScanType.PASSPORT -> {
+                getString(R.string.upload_dialog_title_passport)
+            }
+            else -> {
+                throw java.lang.IllegalArgumentException("invalid scan type: $scanType")
             }
         }
+    }
+
+    private fun buildDialog(
+        scanType: IdentityScanState.ScanType
+    ) = AppCompatDialog(requireContext()).also { dialog ->
+        dialog.setContentView(R.layout.get_local_image_dialog)
+        dialog.findViewById<TextView>(R.id.title)?.text = getTitleFromScanType(scanType)
+
+        if (shouldShowCamera) {
+            dialog.findViewById<Button>(R.id.take_photo)?.setOnClickListener {
+                if (scanType == frontScanType) {
+                    frontBackUploadViewModel.takePhotoFront(requireContext()) {
+                        uploadResult(
+                            uri = it,
+                            uploadMethod = DocumentUploadParam.UploadMethod.MANUALCAPTURE,
+                            isFront = true
+                        )
+                    }
+                } else if (scanType == backScanType) {
+                    frontBackUploadViewModel.takePhotoBack(requireContext()) {
+                        uploadResult(
+                            uri = it,
+                            uploadMethod = DocumentUploadParam.UploadMethod.MANUALCAPTURE,
+                            isFront = false
+                        )
+                    }
+                }
+                dialog.dismiss()
+            }
+        } else {
+            requireNotNull(dialog.findViewById(R.id.take_photo)).visibility = View.GONE
+        }
+
         dialog.findViewById<Button>(R.id.choose_file)?.setOnClickListener {
-            Log.d(TAG, "Choose a file")
-            dialog.dismiss()
             if (scanType == frontScanType) {
                 frontBackUploadViewModel.chooseImageFront {
-                    uploadFront(it, DocumentUploadParam.UploadMethod.FILEUPLOAD)
+                    uploadResult(
+                        uri = it,
+                        uploadMethod = DocumentUploadParam.UploadMethod.FILEUPLOAD,
+                        isFront = true
+                    )
                 }
             } else if (scanType == backScanType) {
-                frontBackUploadViewModel.chooseImageBack() {
-                    uploadBack(it, DocumentUploadParam.UploadMethod.FILEUPLOAD)
+                frontBackUploadViewModel.chooseImageBack {
+                    uploadResult(
+                        uri = it,
+                        uploadMethod = DocumentUploadParam.UploadMethod.FILEUPLOAD,
+                        isFront = false
+                    )
                 }
             }
+            dialog.dismiss()
         }
     }
 
-    private fun observeForDocumentCaptureModels(
+    private fun observeForDocCapturePage(
         onSuccess: (VerificationPageStaticContentDocumentCapturePage) -> Unit
     ) {
         identityViewModel.observeForVerificationPage(
@@ -238,24 +289,17 @@ internal abstract class FrontBackUploadFragment(
         )
     }
 
-    private fun uploadFront(frontUri: Uri, uploadMethod: DocumentUploadParam.UploadMethod) {
-        observeForDocumentCaptureModels { documentCaptureModels ->
-            frontBackUploadViewModel.uploadImageFront(
-                frontUri,
-                requireContext(),
-                documentCaptureModels,
-                uploadMethod
-            )
-        }
-    }
-
-    private fun uploadBack(backUri: Uri, uploadMethod: DocumentUploadParam.UploadMethod) {
-        observeForDocumentCaptureModels { documentCaptureModels ->
-            frontBackUploadViewModel.uploadImageBack(
-                backUri,
-                requireContext(),
-                documentCaptureModels,
-                uploadMethod
+    private fun uploadResult(
+        uri: Uri,
+        uploadMethod: DocumentUploadParam.UploadMethod,
+        isFront: Boolean
+    ) {
+        observeForDocCapturePage { docCapturePage ->
+            identityViewModel.uploadManualResult(
+                uri = uri,
+                isFront = isFront,
+                docCapturePage = docCapturePage,
+                uploadMethod = uploadMethod
             )
         }
     }

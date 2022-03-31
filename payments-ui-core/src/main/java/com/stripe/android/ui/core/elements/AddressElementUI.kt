@@ -7,6 +7,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import com.stripe.android.ui.core.PaymentsTheme
 
 @Composable
 internal fun AddressElementUI(
@@ -29,10 +30,10 @@ internal fun AddressElementUI(
                     (index != fieldList.size - 1)
                 ) {
                     Divider(
-                        color = CardStyle.cardDividerColor,
-                        thickness = CardStyle.cardBorderWidth,
+                        color = PaymentsTheme.colors.colorComponentBorder,
+                        thickness = PaymentsTheme.shapes.borderStrokeWidth,
                         modifier = Modifier.padding(
-                            horizontal = CardStyle.cardBorderWidth
+                            horizontal = PaymentsTheme.shapes.borderStrokeWidth
                         )
                     )
                 }

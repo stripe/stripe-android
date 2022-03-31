@@ -63,7 +63,7 @@ class GooglePayButtonTest {
             PrimaryButton.State.StartProcessing,
         )
         assertThat(
-            primaryButton.viewBinding.label.text.toString()
+            primaryButton.externalLabel
         ).isEqualTo(
             "Processing…"
         )

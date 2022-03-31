@@ -2,21 +2,20 @@ package com.stripe.android.identity
 
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.os.Parcelable
 import androidx.activity.result.contract.ActivityResultContract
-import androidx.annotation.DrawableRes
 import androidx.core.os.bundleOf
 import kotlinx.parcelize.Parcelize
 
 internal class IdentityVerificationSheetContract :
-    ActivityResultContract<IdentityVerificationSheetContract.Args, IdentityVerificationSheet.VerificationResult>() {
+    ActivityResultContract<IdentityVerificationSheetContract.Args, IdentityVerificationSheet.VerificationFlowResult>() {
 
     @Parcelize
     internal data class Args(
         val verificationSessionId: String,
         val ephemeralKeySecret: String,
-        @DrawableRes
-        val merchantLogo: Int
+        val brandLogo: Uri
     ) : Parcelable {
         fun toBundle() = bundleOf(EXTRA_ARGS to this)
 
@@ -39,7 +38,7 @@ internal class IdentityVerificationSheetContract :
     override fun parseResult(
         resultCode: Int,
         intent: Intent?
-    ): IdentityVerificationSheet.VerificationResult {
-        return IdentityVerificationSheet.VerificationResult.fromIntent(intent)
+    ): IdentityVerificationSheet.VerificationFlowResult {
+        return IdentityVerificationSheet.VerificationFlowResult.fromIntent(intent)
     }
 }

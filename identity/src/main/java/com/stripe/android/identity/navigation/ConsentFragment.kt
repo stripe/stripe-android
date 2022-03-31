@@ -1,15 +1,20 @@
 package com.stripe.android.identity.navigation
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import com.bumptech.glide.Glide
+import com.stripe.android.identity.IdentityVerificationSheet
 import com.stripe.android.identity.R
+import com.stripe.android.identity.VerificationFlowFinishable
 import com.stripe.android.identity.databinding.ConsentFragmentBinding
 import com.stripe.android.identity.networking.models.ClearDataParam
 import com.stripe.android.identity.networking.models.CollectedDataParam
@@ -17,7 +22,7 @@ import com.stripe.android.identity.networking.models.ConsentParam
 import com.stripe.android.identity.networking.models.VerificationPage.Companion.isMissingBiometricConsent
 import com.stripe.android.identity.networking.models.VerificationPageData.Companion.isMissingDocumentType
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentConsentPage
-import com.stripe.android.identity.utils.navigateToDefaultErrorFragment
+import com.stripe.android.identity.utils.navigateToErrorFragmentWithFailedReason
 import com.stripe.android.identity.utils.postVerificationPageDataAndMaybeSubmit
 import com.stripe.android.identity.utils.setHtmlString
 import com.stripe.android.identity.viewmodel.IdentityViewModel
@@ -28,12 +33,27 @@ import kotlinx.coroutines.launch
  *
  */
 internal class ConsentFragment(
-    private val identityViewModelFactory: ViewModelProvider.Factory
+    private val identityViewModelFactory: ViewModelProvider.Factory,
+    private val verificationFlowFinishable: VerificationFlowFinishable,
 ) : Fragment() {
     private lateinit var binding: ConsentFragmentBinding
 
     private val identityViewModel: IdentityViewModel by activityViewModels {
         identityViewModelFactory
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        requireActivity().onBackPressedDispatcher.addCallback(
+            this,
+            object : OnBackPressedCallback(true) {
+                override fun handleOnBackPressed() {
+                    verificationFlowFinishable.finishWithResult(
+                        IdentityVerificationSheet.VerificationFlowResult.Canceled
+                    )
+                }
+            }
+        )
     }
 
     override fun onCreateView(
@@ -43,9 +63,12 @@ internal class ConsentFragment(
     ): View {
         binding = ConsentFragmentBinding.inflate(inflater, container, false)
 
-        binding.merchantLogo.setImageResource(identityViewModel.args.merchantLogo)
+        Glide.with(requireContext()).load(identityViewModel.args.brandLogo)
+            .into(binding.merchantLogo)
 
         binding.agree.setOnClickListener {
+            binding.agree.toggleToLoading()
+            binding.decline.isEnabled = false
             postVerificationPageDataAndNavigate(
                 CollectedDataParam(
                     consent = ConsentParam(biometric = true)
@@ -53,6 +76,8 @@ internal class ConsentFragment(
             )
         }
         binding.decline.setOnClickListener {
+            binding.decline.toggleToLoading()
+            binding.agree.isEnabled = false
             postVerificationPageDataAndNavigate(
                 CollectedDataParam(
                     consent = ConsentParam(biometric = false)
@@ -78,7 +103,11 @@ internal class ConsentFragment(
                 }
             },
             onFailure = {
-                navigateToDefaultErrorFragment()
+                Log.e(TAG, "Failed to get verificationPage: $it")
+                // TODO(ccen) parse the error message from Status.ERROR
+                navigateToErrorFragmentWithFailedReason(
+                    it ?: IllegalStateException("Failed to get verificationPage")
+                )
             }
         )
     }
@@ -111,16 +140,37 @@ internal class ConsentFragment(
 
     private fun bindViewData(consentPage: VerificationPageStaticContentConsentPage) {
         binding.titleText.text = consentPage.title
-        binding.privacyPolicy.setHtmlString(consentPage.privacyPolicy)
-        binding.timeEstimate.text = consentPage.timeEstimate
+
+        consentPage.privacyPolicy?.let {
+            binding.privacyPolicy.setHtmlString(it)
+        } ?: run {
+            binding.privacyPolicy.visibility = View.GONE
+        }
+
+        consentPage.timeEstimate?.let {
+            binding.timeEstimate.text = it
+        } ?: run {
+            binding.timeEstimate.visibility = View.GONE
+        }
+
+        if (binding.privacyPolicy.visibility == View.GONE &&
+            binding.timeEstimate.visibility == View.GONE
+        ) {
+            binding.divider.visibility = View.GONE
+        }
+
         binding.body.setHtmlString(consentPage.body)
-        binding.agree.text = consentPage.acceptButtonText
-        binding.decline.text = consentPage.declineButtonText
+        binding.agree.setText(consentPage.acceptButtonText)
+        binding.decline.setText(consentPage.declineButtonText)
     }
 
     private fun setLoadingFinishedUI() {
         binding.loadings.visibility = View.GONE
         binding.texts.visibility = View.VISIBLE
         binding.buttons.visibility = View.VISIBLE
+    }
+
+    private companion object {
+        val TAG: String = ConsentFragment::class.java.simpleName
     }
 }
