@@ -3,6 +3,7 @@
 This release patches a crash with payment launcher when there is a configuration change
 
 ### Payments
+* [ADDED] [4804](https://github.com/stripe/stripe-android/pull/4804) Added card-scanning feature to PaymentSheet
 * [FIXED] [4776](https://github.com/stripe/stripe-android/pull/4776) fix issue with PaymentLauncher configuration change
 * [CHANGED] [4358](https://github.com/stripe/stripe-android/pull/4358) Updated the card element on PaymentSheet to use Compose.
 
