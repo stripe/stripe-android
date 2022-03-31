@@ -6,7 +6,7 @@ import kotlinx.parcelize.Parcelize
 /**
  * Data for identifying your plug-in or library.
  *
- * See [Building Stripe Plug-ins and Libraries - Setting the API version](https://stripe.com/docs/building-plugins#setappinfo).
+ * See [Setting the API version](https://stripe.com/docs/building-plugins#setappinfo).
  *
  * @param name Name of your application (e.g. "MyAwesomeApp")
  * @param version Version of your application (e.g. "1.2.34")

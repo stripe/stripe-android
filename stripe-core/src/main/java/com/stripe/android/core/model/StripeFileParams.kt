@@ -33,7 +33,7 @@ data class StripeFileParams constructor(
      *
      * [file_link_data]](https://stripe.com/docs/api/files/create#create_file-file_link_data)
      */
-    private val fileLink: FileLink? = null
+    internal val fileLink: FileLink? = null
 
     /**
      * Optional parameters to automatically create a
@@ -51,14 +51,14 @@ data class StripeFileParams constructor(
          *
          * [file_link_data.create](https://stripe.com/docs/api/files/create#create_file-file_link_data-create)
          */
-        private val create: Boolean = false,
+        internal val create: Boolean = false,
 
         /**
          * A future timestamp after which the link will no longer be usable.
          *
          * [file_link_data.expires_at](https://stripe.com/docs/api/files/create#create_file-file_link_data-expires_at)
          */
-        private val expiresAt: Long? = null,
+        internal val expiresAt: Long? = null,
 
         /**
          * Set of key-value pairs that you can attach to an object. This can be useful for storing
@@ -68,6 +68,6 @@ data class StripeFileParams constructor(
          *
          * [file_link_data.metadata](https://stripe.com/docs/api/files/create#create_file-file_link_data-metadata)
          */
-        private val metadata: Map<String, String>? = null
+        internal val metadata: Map<String, String>? = null
     ) : Parcelable
 }
