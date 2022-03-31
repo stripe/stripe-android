@@ -8,9 +8,9 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.fragment.app.Fragment
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.exception.APIException
+import com.stripe.android.core.exception.AuthenticationException
 import com.stripe.android.core.exception.InvalidRequestException
 import com.stripe.android.core.networking.ApiRequest
-import com.stripe.android.core.exception.AuthenticationException
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.PaymentIntent

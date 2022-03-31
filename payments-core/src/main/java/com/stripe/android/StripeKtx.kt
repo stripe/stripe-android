@@ -4,11 +4,11 @@ import android.content.Intent
 import androidx.annotation.Size
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.exception.APIException
+import com.stripe.android.core.exception.AuthenticationException
 import com.stripe.android.core.exception.InvalidRequestException
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.model.StripeModel
 import com.stripe.android.core.networking.ApiRequest
-import com.stripe.android.core.exception.AuthenticationException
 import com.stripe.android.exception.CardException
 import com.stripe.android.model.AccountParams
 import com.stripe.android.model.BankAccountTokenParams

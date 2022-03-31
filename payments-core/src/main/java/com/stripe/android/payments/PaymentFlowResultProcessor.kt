@@ -8,11 +8,11 @@ import com.stripe.android.StripeIntentResult
 import com.stripe.android.StripeIntentResult.Outcome.Companion.SUCCEEDED
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.InvalidRequestException
+import com.stripe.android.core.exception.MaxRetryReachedException
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.RetryDelaySupplier
-import com.stripe.android.core.exception.MaxRetryReachedException
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent

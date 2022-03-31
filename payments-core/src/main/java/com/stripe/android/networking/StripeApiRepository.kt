@@ -12,7 +12,10 @@ import com.stripe.android.core.ApiVersion
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.exception.APIException
+import com.stripe.android.core.exception.AuthenticationException
 import com.stripe.android.core.exception.InvalidRequestException
+import com.stripe.android.core.exception.PermissionException
+import com.stripe.android.core.exception.RateLimitException
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
@@ -32,10 +35,7 @@ import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.networking.StripeResponse
 import com.stripe.android.core.networking.responseJson
 import com.stripe.android.core.version.StripeSdkVersion
-import com.stripe.android.core.exception.AuthenticationException
 import com.stripe.android.exception.CardException
-import com.stripe.android.core.exception.PermissionException
-import com.stripe.android.core.exception.RateLimitException
 import com.stripe.android.model.BankConnectionsLinkedAccountSession
 import com.stripe.android.model.BankStatuses
 import com.stripe.android.model.CardMetadata

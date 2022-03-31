@@ -14,12 +14,12 @@ import com.stripe.android.core.ApiVersion
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.exception.APIException
+import com.stripe.android.core.exception.AuthenticationException
 import com.stripe.android.core.exception.InvalidRequestException
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.model.StripeModel
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.version.StripeSdkVersion
-import com.stripe.android.core.exception.AuthenticationException
 import com.stripe.android.exception.CardException
 import com.stripe.android.model.AccountParams
 import com.stripe.android.model.BankAccount
