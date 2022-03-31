@@ -1,13 +1,9 @@
 package com.stripe.android.paymentsheet
 
-import android.graphics.Paint
-import android.graphics.Typeface
 import android.os.Bundle
 import android.text.SpannableString
-import android.text.TextPaint
 import android.text.style.AbsoluteSizeSpan
 import android.text.style.ForegroundColorSpan
-import android.text.style.MetricAffectingSpan
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
@@ -23,6 +19,7 @@ import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
+import com.stripe.android.ui.core.CustomTypefaceSpan
 import com.stripe.android.ui.core.PaymentsThemeConfig
 import com.stripe.android.ui.core.convertDpToPx
 import com.stripe.android.ui.core.isSystemDarkTheme
@@ -184,23 +181,6 @@ internal abstract class BasePaymentMethodsListFragment(
     private fun deletePaymentMethod(item: PaymentOptionsAdapter.Item.SavedPaymentMethod) {
         adapter.removeItem(item)
         sheetViewModel.removePaymentMethod(item.paymentMethod)
-    }
-
-    class CustomTypefaceSpan(typeface: Typeface) : MetricAffectingSpan() {
-        private val typeface: Typeface = typeface
-        override fun updateDrawState(ds: TextPaint) {
-            applyCustomTypeFace(ds, typeface)
-        }
-
-        override fun updateMeasureState(paint: TextPaint) {
-            applyCustomTypeFace(paint, typeface)
-        }
-
-        companion object {
-            private fun applyCustomTypeFace(paint: Paint, tf: Typeface) {
-                paint.typeface = tf
-            }
-        }
     }
 
     private companion object {
