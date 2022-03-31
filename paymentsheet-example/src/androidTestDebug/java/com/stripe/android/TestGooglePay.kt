@@ -86,7 +86,7 @@ class TestGooglePay {
     fun testGooglePayWithOnlyCards() {
         verifyGooglePayDividerText(
             testParameters.copy(
-                paymentMethod = SupportedPaymentMethod.Card, // This means only card w
+                intentType = IntentType.Setup, // This means only card will show
             ),
             R.string.stripe_paymentsheet_or_pay_with_card
         )
@@ -103,13 +103,6 @@ class TestGooglePay {
         callbackLock.acquire()
         selectors.onGooglePayAvailable(
             availableCallable = {
-
-                testDriver.registerListeners()
-                testDriver.launchComplete(selectors)
-
-                selectors.getGoogleDividerText().assertTextEquals(
-                    selectors.getResourceString(expectedText)
-                )
                 googlePayAvailable = true
                 callbackLock.release()
             },
@@ -119,6 +112,17 @@ class TestGooglePay {
         )
         callbackLock.acquire()
         callbackLock.release()
+
         Assume.assumeTrue("Google pay is available", googlePayAvailable)
+        if (googlePayAvailable) {
+            testDriver.registerListeners()
+            testDriver.launchComplete(selectors)
+
+            selectors.getGoogleDividerText()
+                .assertTextEquals(
+                selectors.getResourceString(expectedText),
+                    includeEditableText = false
+            )
+        }
     }
 }

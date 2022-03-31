@@ -231,7 +231,9 @@ class Selectors(
     )
 
     fun getGoogleDividerText() = composeTestRule.onNodeWithText(
-        "Or pay"
+        "Or pay",
+        substring = true,
+        useUnmergedTree = true
     )
 
     companion object {
