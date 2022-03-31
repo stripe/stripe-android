@@ -96,7 +96,7 @@ internal fun FormInternal(
                 modifier = Modifier.size(
                     dimensionResource(R.dimen.stripe_paymentsheet_loading_indicator_size)
                 ),
-                color = PaymentsTheme.colors.colorTextSecondary,
+                color = PaymentsTheme.colors.subtitle,
                 strokeWidth = dimensionResource(
                     R.dimen.stripe_paymentsheet_loading_indicator_stroke_width
                 )

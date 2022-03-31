@@ -68,7 +68,7 @@ internal fun DropDown(
     var expanded by remember { mutableStateOf(false) }
     val interactionSource = remember { MutableInteractionSource() }
     val currentTextColor = if (enabled) {
-        PaymentsTheme.colors.material.onBackground
+        PaymentsTheme.colors.onComponent
     } else {
         TextFieldDefaults
             .textFieldColors()
@@ -77,7 +77,12 @@ internal fun DropDown(
     }
 
     val inputModeManager = LocalInputModeManager.current
-    Box {
+    Box(
+        modifier = Modifier
+            .wrapContentSize(Alignment.TopStart)
+            .background(PaymentsTheme.colors.component)
+    ) {
+        // Click handling happens on the box, so that it is a single accessible item
         Box(
             modifier = Modifier
                 .focusProperties {
@@ -133,7 +138,7 @@ internal fun DropDown(
             },
             onDismissRequest = { expanded = false },
             modifier = Modifier
-                .background(color = PaymentsTheme.colors.colorComponentBackground)
+                .background(color = PaymentsTheme.colors.component)
                 .width(DropdownMenuItemDefaultMaxWidth)
                 .requiredSizeIn(maxHeight = DropdownMenuItemDefaultMinHeight * 8.9f)
         ) {

@@ -14,7 +14,7 @@ fun H6Text(
 ) {
     Text(
         text = text,
-        color = PaymentsTheme.colors.colorTextSecondary,
+        color = PaymentsTheme.colors.subtitle,
         style = PaymentsTheme.typography.h6,
         modifier = modifier
     )
