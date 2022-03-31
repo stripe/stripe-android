@@ -4,7 +4,6 @@ import android.content.Intent
 import android.net.Uri
 import androidx.annotation.RestrictTo
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -24,6 +23,7 @@ import com.google.accompanist.flowlayout.FlowCrossAxisAlignment
 import com.google.accompanist.flowlayout.FlowRow
 import com.stripe.android.ui.core.PaymentsTheme
 import com.stripe.android.ui.core.R
+import com.stripe.android.ui.core.shouldUseDarkDynamicColor
 
 @Composable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -48,10 +48,10 @@ fun AfterpayClearpayElementUI(
             contentDescription = stringResource(
                 R.string.afterpay_clearpay_message
             ),
-            colorFilter = if (isSystemInDarkTheme()) {
-                ColorFilter.tint(Color.White)
-            } else {
+            colorFilter = if (PaymentsTheme.colors.material.surface.shouldUseDarkDynamicColor()) {
                 null
+            } else {
+                ColorFilter.tint(Color.White)
             }
         )
         TextButton(

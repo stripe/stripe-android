@@ -4,11 +4,11 @@
     android:layout_height="wrap_content">
 
     <View
+        android:id="@+id/divider_line"
         android:layout_width="match_parent"
         android:layout_height="1dp"
         android:layout_marginVertical="12dp"
-        android:layout_marginHorizontal="3dp"
-        android:background="@color/stripe_paymentsheet_googlepay_divider_line" />
+        android:layout_marginHorizontal="3dp" />
 
     <androidx.compose.ui.platform.ComposeView
         android:id="@+id/divider_text"

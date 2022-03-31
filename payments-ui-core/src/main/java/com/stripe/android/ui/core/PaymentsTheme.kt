@@ -17,6 +17,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
@@ -24,6 +25,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.graphics.ColorUtils
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 data class PaymentsColors(
@@ -254,6 +256,8 @@ fun PaymentsTheme(
 // This mirrors an object that lives inside of MaterialTheme.
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 object PaymentsTheme {
+    const val minContrastForWhite = 2.2
+
     val colors: PaymentsComposeColors
         @Composable
         @ReadOnlyComposable
@@ -286,4 +290,17 @@ fun Context.isSystemDarkTheme(): Boolean {
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun Context.convertDpToPx(dp: Dp): Float {
     return dp.value * resources.displayMetrics.density
+}
+
+// This method calculates if black or white offers a better contrast compared to a given color.
+fun Color.shouldUseDarkDynamicColor(): Boolean {
+    val contrastRatioToBlack = ColorUtils.calculateContrast(this.toArgb(), Color.Black.toArgb())
+    val contrastRatioToWhite = ColorUtils.calculateContrast(this.toArgb(), Color.White.toArgb())
+
+    // Prefer white as long as the min contrast has been met.
+    return if (contrastRatioToWhite > PaymentsTheme.minContrastForWhite) {
+        false
+    } else {
+        contrastRatioToBlack > contrastRatioToWhite
+    }
 }

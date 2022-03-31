@@ -15,6 +15,7 @@
     <dimen name="stripe_paymentsheet_max_primary_button_height">54dp</dimen>
     <dimen name="stripe_paymentsheet_primary_button_height">48dp</dimen>
     <dimen name="stripe_paymentsheet_googlepay_button_height">53dp</dimen>
+    <dimen name="stripe_paymentsheet_googlepay_button_corner_radius">4dp</dimen>
     <dimen name="stripe_paymentsheet_primary_button_margin">3dp</dimen>
     <dimen name="stripe_paymentsheet_card_elevation">2dp</dimen>
     <dimen name="stripe_paymentsheet_paymentoption_card_height">25dp</dimen>
