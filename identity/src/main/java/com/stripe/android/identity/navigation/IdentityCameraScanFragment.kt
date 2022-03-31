@@ -79,6 +79,8 @@ internal abstract class IdentityCameraScanFragment(
         binding = IdentityCameraScanFragmentBinding.inflate(inflater, container, false)
         cameraView = binding.cameraView
 
+        cameraView.viewFinderWindowView.setBackgroundResource(R.drawable.viewfinder_background)
+
         headerTitle = binding.headerTitle
         messageView = binding.message
 
@@ -164,25 +166,15 @@ internal abstract class IdentityCameraScanFragment(
     protected open fun updateUI(identityScanState: IdentityScanState) {
         when (identityScanState) {
             is IdentityScanState.Initial -> {
-                cameraView.viewFinderBackgroundView.visibility = View.VISIBLE
-                cameraView.viewFinderWindowView.visibility = View.VISIBLE
-                cameraView.viewFinderBorderView.visibility = View.VISIBLE
-                continueButton.isEnabled = false
-                checkMarkView.visibility = View.GONE
-                cameraView.viewFinderWindowView.setBackgroundResource(R.drawable.viewfinder_background)
-                cameraView.viewFinderBorderView.startAnimation(R.drawable.viewfinder_border_initial)
+                resetUI()
             }
             is IdentityScanState.Found -> {
                 messageView.text = requireContext().getText(R.string.hold_still)
-                cameraView.viewFinderWindowView.setBackgroundResource(R.drawable.viewfinder_background)
                 cameraView.viewFinderBorderView.startAnimationIfNotRunning(R.drawable.viewfinder_border_found)
             }
-            is IdentityScanState.Unsatisfied -> {
-                cameraView.viewFinderWindowView.setBackgroundResource(R.drawable.viewfinder_background)
-            }
+            is IdentityScanState.Unsatisfied -> {} // no-op
             is IdentityScanState.Satisfied -> {
                 messageView.text = requireContext().getText(R.string.scanned)
-                cameraView.viewFinderWindowView.setBackgroundResource(R.drawable.viewfinder_background)
             }
             is IdentityScanState.Finished -> {
                 cameraView.viewFinderBackgroundView.visibility = View.INVISIBLE
@@ -199,11 +191,21 @@ internal abstract class IdentityCameraScanFragment(
         }
     }
 
+    protected open fun resetUI() {
+        cameraView.viewFinderBackgroundView.visibility = View.VISIBLE
+        cameraView.viewFinderWindowView.visibility = View.VISIBLE
+        cameraView.viewFinderBorderView.visibility = View.VISIBLE
+        continueButton.isEnabled = false
+        checkMarkView.visibility = View.GONE
+        cameraView.viewFinderBorderView.startAnimation(R.drawable.viewfinder_border_initial)
+    }
+
     /**
      * Start scanning for the required scan type.
      */
     protected fun startScanning(scanType: IdentityScanState.ScanType) {
         identityScanViewModel.targetScanType = scanType
+        resetUI()
         cameraAdapter.bindToLifecycle(this)
         identityScanViewModel.scanState = null
         identityScanViewModel.scanStatePrevious = null

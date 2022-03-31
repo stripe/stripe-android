@@ -30,17 +30,10 @@ internal class PassportScanFragment(
         startScanning(IdentityScanState.ScanType.PASSPORT)
     }
 
-    override fun updateUI(identityScanState: IdentityScanState) {
-        super.updateUI(identityScanState)
-        when (identityScanState) {
-            is IdentityScanState.Initial -> {
-                messageView.text = requireContext().getText(R.string.position_passport)
-            }
-            is IdentityScanState.Unsatisfied -> {
-                messageView.text = requireContext().getText(R.string.position_passport)
-            }
-            else -> {} // no-op
-        }
+    override fun resetUI() {
+        super.resetUI()
+        headerTitle.text = requireContext().getText(R.string.passport)
+        messageView.text = requireContext().getText(R.string.position_passport)
     }
 
     internal companion object {
