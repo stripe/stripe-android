@@ -3,15 +3,14 @@ package com.stripe.android.ui.core.elements
 import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.ui.core.address.AddressFieldElementRepository
-import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-@ExperimentalCoroutinesApi
-class AddressElement constructor(
+open class AddressElement constructor(
     _identifier: IdentifierSpec,
     private val addressFieldRepository: AddressFieldElementRepository,
     private var rawValuesMap: Map<IdentifierSpec, String?> = emptyMap(),
@@ -56,6 +55,17 @@ class AddressElement constructor(
             fieldElements
                 .map {
                     it.getFormFieldValueFlow()
+                }
+        ) {
+            it.toList().flatten()
+        }
+    }
+
+    override fun getTextFieldIdentifiers(): Flow<List<IdentifierSpec>> = fields.flatMapLatest {
+        combine(
+            it
+                .map {
+                    it.getTextFieldIdentifiers()
                 }
         ) {
             it.toList().flatten()

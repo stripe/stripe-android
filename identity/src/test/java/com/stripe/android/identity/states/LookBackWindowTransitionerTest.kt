@@ -32,6 +32,7 @@ internal class LookBackWindowTransitionerTest {
             mock<IdentityScanState.Found>().also {
                 whenever(it.type).thenReturn(IdentityScanState.ScanType.ID_FRONT)
                 whenever(it.timeoutAt).thenReturn(mockNeverTimeOutClockMark)
+                whenever(it.transitioner).thenReturn(transitioner)
             },
             ID_FRONT_OUTPUT
         )
@@ -56,6 +57,7 @@ internal class LookBackWindowTransitionerTest {
             mock<IdentityScanState.Found>().also {
                 whenever(it.type).thenReturn(IdentityScanState.ScanType.ID_FRONT)
                 whenever(it.timeoutAt).thenReturn(mockNeverTimeOutClockMark)
+                whenever(it.transitioner).thenReturn(transitioner)
             },
             ID_FRONT_OUTPUT
         )

@@ -201,7 +201,7 @@ private fun isCityOrPostal(identifierSpec: IdentifierSpec) =
         identifierSpec == IdentifierSpec.City
 
 private fun getKeyboard(fieldSchema: FieldSchema?) = if (fieldSchema?.isNumeric == true) {
-    KeyboardType.Number
+    KeyboardType.NumberPassword
 } else {
     KeyboardType.Text
 }

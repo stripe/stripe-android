@@ -14,7 +14,7 @@ import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupWithNavController
 import com.stripe.android.camera.CameraPermissionCheckingActivity
-import com.stripe.android.identity.IdentityVerificationSheet.VerificationResult
+import com.stripe.android.identity.IdentityVerificationSheet.VerificationFlowResult
 import com.stripe.android.identity.databinding.IdentityActivityBinding
 import com.stripe.android.identity.navigation.ErrorFragment
 import com.stripe.android.identity.navigation.IdentityFragmentFactory
@@ -120,7 +120,7 @@ internal class IdentityActivity : CameraPermissionCheckingActivity(), Verificati
         )
     }
 
-    override fun finishWithResult(result: VerificationResult) {
+    override fun finishWithResult(result: VerificationFlowResult) {
         setResult(
             Activity.RESULT_OK,
             Intent().putExtras(result.toBundle())

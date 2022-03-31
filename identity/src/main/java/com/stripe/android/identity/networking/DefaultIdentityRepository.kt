@@ -3,9 +3,9 @@ package com.stripe.android.identity.networking
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.exception.APIException
-import com.stripe.android.core.model.InternalStripeFile
-import com.stripe.android.core.model.InternalStripeFileParams
-import com.stripe.android.core.model.InternalStripeFilePurpose
+import com.stripe.android.core.model.StripeFile
+import com.stripe.android.core.model.StripeFileParams
+import com.stripe.android.core.model.StripeFilePurpose
 import com.stripe.android.core.model.StripeModel
 import com.stripe.android.core.model.parsers.ModelJsonParser
 import com.stripe.android.core.model.parsers.StripeErrorJsonParser
@@ -81,10 +81,10 @@ internal class DefaultIdentityRepository(
         verificationId: String,
         ephemeralKey: String,
         imageFile: File,
-        filePurpose: InternalStripeFilePurpose
-    ): InternalStripeFile = executeRequestWithModelJsonParser(
+        filePurpose: StripeFilePurpose
+    ): StripeFile = executeRequestWithModelJsonParser(
         request = IdentityFileUploadRequest(
-            fileParams = InternalStripeFileParams(
+            fileParams = StripeFileParams(
                 file = imageFile,
                 purpose = filePurpose
             ),

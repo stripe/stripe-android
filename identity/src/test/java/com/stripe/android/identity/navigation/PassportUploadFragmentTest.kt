@@ -14,8 +14,8 @@ import androidx.navigation.testing.TestNavHostController
 import androidx.test.core.app.ApplicationProvider
 import com.google.android.material.button.MaterialButton
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.core.model.InternalStripeFile
-import com.stripe.android.core.model.InternalStripeFilePurpose
+import com.stripe.android.core.model.StripeFile
+import com.stripe.android.core.model.StripeFilePurpose
 import com.stripe.android.identity.CORRECT_WITH_SUBMITTED_FAILURE_VERIFICATION_PAGE_DATA
 import com.stripe.android.identity.CORRECT_WITH_SUBMITTED_SUCCESS_VERIFICATION_PAGE_DATA
 import com.stripe.android.identity.R
@@ -142,7 +142,7 @@ class PassportUploadFragmentTest {
                 frontHighResUploaded.postValue(
                     Resource.success(
                         IdentityViewModel.UploadedResult(
-                            uploadedStripeFile = InternalStripeFile(id = FILE_ID),
+                            uploadedStripeFile = StripeFile(id = FILE_ID),
                             scores = null,
                             uploadMethod = UploadMethod.FILEUPLOAD
                         )
@@ -289,14 +289,16 @@ class PassportUploadFragmentTest {
         val DOCUMENT_CAPTURE =
             VerificationPageStaticContentDocumentCapturePage(
                 autocaptureTimeout = 0,
-                filePurpose = InternalStripeFilePurpose.IdentityPrivate.code,
+                filePurpose = StripeFilePurpose.IdentityPrivate.code,
                 highResImageCompressionQuality = 0.9f,
                 highResImageCropPadding = 0f,
                 highResImageMaxDimension = 512,
                 lowResImageCompressionQuality = 0f,
                 lowResImageMaxDimension = 0,
                 models = mock(),
-                requireLiveCapture = false
+                requireLiveCapture = false,
+                motionBlurMinDuration = 500,
+                motionBlurMinIou = 0.95f
             )
 
         val FILE_ID = "file_id"

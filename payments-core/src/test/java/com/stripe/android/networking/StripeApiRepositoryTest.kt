@@ -11,6 +11,8 @@ import com.stripe.android.FraudDetectionDataRepository
 import com.stripe.android.Stripe
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.exception.InvalidRequestException
+import com.stripe.android.core.model.StripeFileParams
+import com.stripe.android.core.model.StripeFilePurpose
 import com.stripe.android.core.networking.AnalyticsRequest
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.ApiRequest
@@ -42,8 +44,6 @@ import com.stripe.android.model.SourceParams
 import com.stripe.android.model.Stripe3ds2AuthParams
 import com.stripe.android.model.Stripe3ds2Fixtures
 import com.stripe.android.model.StripeFileFixtures
-import com.stripe.android.model.StripeFileParams
-import com.stripe.android.model.StripeFilePurpose
 import com.stripe.android.model.TokenFixtures
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher

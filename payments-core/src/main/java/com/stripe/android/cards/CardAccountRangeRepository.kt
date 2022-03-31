@@ -1,9 +1,11 @@
 package com.stripe.android.cards
 
+import androidx.annotation.RestrictTo
 import com.stripe.android.model.AccountRange
 import kotlinx.coroutines.flow.Flow
 
-internal interface CardAccountRangeRepository {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+interface CardAccountRangeRepository {
     suspend fun getAccountRange(
         cardNumber: CardNumber.Unvalidated
     ): AccountRange?

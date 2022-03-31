@@ -16,6 +16,8 @@ import com.stripe.android.paymentsheet.forms.AfterpayClearpayRequirement
 import com.stripe.android.paymentsheet.forms.AuBecsDebitRequirement
 import com.stripe.android.paymentsheet.forms.BancontactRequirement
 import com.stripe.android.paymentsheet.forms.CardRequirement
+import com.stripe.android.ui.core.forms.CardForm
+import com.stripe.android.ui.core.forms.CardParamKey
 import com.stripe.android.paymentsheet.forms.Delayed
 import com.stripe.android.paymentsheet.forms.EpsRequirement
 import com.stripe.android.paymentsheet.forms.GiropayRequirement
@@ -31,7 +33,6 @@ import com.stripe.android.paymentsheet.forms.ShippingAddress
 import com.stripe.android.paymentsheet.forms.SofortRequirement
 import com.stripe.android.ui.core.elements.LayoutFormDescriptor
 import com.stripe.android.ui.core.elements.LayoutSpec
-import com.stripe.android.ui.core.elements.SaveForFutureUseSpec
 import com.stripe.android.ui.core.forms.AffirmForm
 import com.stripe.android.ui.core.forms.AffirmParamKey
 import com.stripe.android.ui.core.forms.AfterpayClearpayForm
@@ -103,10 +104,8 @@ sealed class SupportedPaymentMethod(
         R.string.stripe_paymentsheet_payment_method_card,
         R.drawable.stripe_ic_paymentsheet_pm_card,
         CardRequirement,
-        mutableMapOf(),
-        LayoutSpec.create(
-            SaveForFutureUseSpec(emptyList())
-        )
+        CardParamKey,
+        CardForm
     )
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)

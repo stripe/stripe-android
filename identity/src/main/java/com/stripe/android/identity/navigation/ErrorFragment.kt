@@ -8,7 +8,7 @@ import androidx.core.os.bundleOf
 import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
 import com.stripe.android.identity.IdentityVerificationSheet
-import com.stripe.android.identity.IdentityVerificationSheet.VerificationResult.Failed
+import com.stripe.android.identity.IdentityVerificationSheet.VerificationFlowResult.Failed
 import com.stripe.android.identity.R
 import com.stripe.android.identity.VerificationFlowFinishable
 import com.stripe.android.identity.networking.models.VerificationPageDataRequirementError
@@ -102,7 +102,7 @@ internal class ErrorFragment(
         /**
          * Navigate to error fragment with failed reason. This would be the final destination of
          * verification flow, clicking back button would end the follow with
-         * [IdentityVerificationSheet.VerificationResult.Failed] with [failedReason].
+         * [IdentityVerificationSheet.VerificationFlowResult.Failed] with [failedReason].
          */
         fun NavController.navigateToErrorFragmentWithFailedReason(
             context: Context,

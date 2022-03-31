@@ -39,7 +39,8 @@ internal class IOUTransitioner(
             !outputMatchesTargetType(analyzerOutput.category, foundState.type) -> Unsatisfied(
                 "Type ${analyzerOutput.category} doesn't match ${foundState.type}",
                 foundState.type,
-                foundState.timeoutAt
+                foundState.timeoutAt,
+                foundState.transitioner
             )
             !iOUCheckPass(analyzerOutput.boundingBox) -> {
                 // reset timer of the foundState
@@ -48,7 +49,7 @@ internal class IOUTransitioner(
             }
             moreResultsRequired(foundState) -> foundState
             else -> {
-                Satisfied(foundState.type, foundState.timeoutAt)
+                Satisfied(foundState.type, foundState.timeoutAt, foundState.transitioner)
             }
         }
     }

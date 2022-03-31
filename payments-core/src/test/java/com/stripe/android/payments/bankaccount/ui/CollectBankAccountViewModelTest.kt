@@ -2,6 +2,8 @@ package com.stripe.android.payments.bankaccount.ui
 
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.connections.ConnectionsSheetResult
+import com.stripe.android.connections.model.LinkAccountSession
 import com.stripe.android.core.Logger
 import com.stripe.android.model.BankConnectionsLinkedAccountSession
 import com.stripe.android.model.PaymentIntent
@@ -39,10 +41,16 @@ class CollectBankAccountViewModelTest {
     private val name = "name"
     private val email = "email"
     private val linkedAccountSessionId = "las_id"
+    private val linkedAccountSessionClientSecret = "las_client_secret"
     private val linkedAccountSession = BankConnectionsLinkedAccountSession(
-        clientSecret = "las_client_secret",
+        clientSecret = linkedAccountSessionClientSecret,
         id = linkedAccountSessionId
     )
+
+    private val connectionsLinkAccountSession = mock<LinkAccountSession> {
+        on { this.clientSecret } doReturn "client_secret"
+        on { this.id } doReturn linkedAccountSessionId
+    }
 
     @Test
     fun `init - when createLinkAccountSession succeeds for PI, opens connection flow`() = runTest {
@@ -115,7 +123,10 @@ class CollectBankAccountViewModelTest {
 
             // When
             val viewModel = buildViewModel(viewEffect, paymentIntentConfiguration())
-            viewModel.onConnectionsResult(linkedAccountSessionId)
+
+            viewModel.onConnectionsResult(
+                ConnectionsSheetResult.Completed(connectionsLinkAccountSession)
+            )
 
             // Then
             assertThat(expectMostRecentItem()).isEqualTo(
@@ -137,7 +148,9 @@ class CollectBankAccountViewModelTest {
 
             // When
             val viewModel = buildViewModel(viewEffect, setupIntentConfiguration())
-            viewModel.onConnectionsResult(linkedAccountSessionId)
+            viewModel.onConnectionsResult(
+                ConnectionsSheetResult.Completed(connectionsLinkAccountSession)
+            )
 
             // Then
             assertThat(expectMostRecentItem()).isEqualTo(
@@ -159,7 +172,9 @@ class CollectBankAccountViewModelTest {
 
             // When
             val viewModel = buildViewModel(viewEffect, setupIntentConfiguration())
-            viewModel.onConnectionsResult(linkedAccountSessionId)
+            viewModel.onConnectionsResult(
+                ConnectionsSheetResult.Completed(connectionsLinkAccountSession)
+            )
 
             // Then
             assertThat(expectMostRecentItem()).isEqualTo(

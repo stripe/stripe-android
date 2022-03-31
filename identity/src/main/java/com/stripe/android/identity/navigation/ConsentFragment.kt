@@ -49,7 +49,7 @@ internal class ConsentFragment(
             object : OnBackPressedCallback(true) {
                 override fun handleOnBackPressed() {
                     verificationFlowFinishable.finishWithResult(
-                        IdentityVerificationSheet.VerificationResult.Canceled
+                        IdentityVerificationSheet.VerificationFlowResult.Canceled
                     )
                 }
             }
@@ -140,8 +140,25 @@ internal class ConsentFragment(
 
     private fun bindViewData(consentPage: VerificationPageStaticContentConsentPage) {
         binding.titleText.text = consentPage.title
-        binding.privacyPolicy.setHtmlString(consentPage.privacyPolicy)
-        binding.timeEstimate.text = consentPage.timeEstimate
+
+        consentPage.privacyPolicy?.let {
+            binding.privacyPolicy.setHtmlString(it)
+        } ?: run {
+            binding.privacyPolicy.visibility = View.GONE
+        }
+
+        consentPage.timeEstimate?.let {
+            binding.timeEstimate.text = it
+        } ?: run {
+            binding.timeEstimate.visibility = View.GONE
+        }
+
+        if (binding.privacyPolicy.visibility == View.GONE &&
+            binding.timeEstimate.visibility == View.GONE
+        ) {
+            binding.divider.visibility = View.GONE
+        }
+
         binding.body.setHtmlString(consentPage.body)
         binding.agree.setText(consentPage.acceptButtonText)
         binding.decline.setText(consentPage.declineButtonText)

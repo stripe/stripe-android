@@ -7,7 +7,6 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.core.os.bundleOf
 import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.lifecycle.MediatorLiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.Navigation
@@ -16,7 +15,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.progressindicator.CircularProgressIndicator
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.core.model.InternalStripeFile
+import com.stripe.android.core.model.StripeFile
 import com.stripe.android.identity.R
 import com.stripe.android.identity.SUCCESS_VERIFICATION_PAGE
 import com.stripe.android.identity.camera.IDDetectorAggregator
@@ -31,6 +30,7 @@ import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentDocumentCapturePage
 import com.stripe.android.identity.states.IdentityScanState
 import com.stripe.android.identity.utils.PairMediatorLiveData
+import com.stripe.android.identity.utils.SingleLiveEvent
 import com.stripe.android.identity.viewModelFactoryFor
 import com.stripe.android.identity.viewmodel.IdentityScanViewModel
 import com.stripe.android.identity.viewmodel.IdentityViewModel
@@ -57,8 +57,8 @@ internal class DriverLicenseScanFragmentTest {
     @get:Rule
     var rule: TestRule = InstantTaskExecutorRule()
 
-    private val finalResultLiveData = MutableLiveData<IDDetectorAggregator.FinalResult>()
-    private val displayStateChanged = MutableLiveData<Pair<IdentityScanState, IdentityScanState?>>()
+    private val finalResultLiveData = SingleLiveEvent<IDDetectorAggregator.FinalResult>()
+    private val displayStateChanged = SingleLiveEvent<Pair<IdentityScanState, IdentityScanState?>>()
     private val mockBothUploaded: PairMediatorLiveData<Pair<UploadedResult, UploadedResult>> =
         mock()
     private val bothUploadedObserverCaptor =
@@ -466,28 +466,28 @@ internal class DriverLicenseScanFragmentTest {
 
     private companion object {
         val FRONT_HIGH_RES_RESULT = UploadedResult(
-            uploadedStripeFile = InternalStripeFile(
+            uploadedStripeFile = StripeFile(
                 id = "frontHighResResult"
             ),
             scores = listOf(0.1f, 0.2f, 0.3f, 0.4f, 0.5f),
             uploadMethod = DocumentUploadParam.UploadMethod.AUTOCAPTURE
         )
         val FRONT_LOW_RES_RESULT = UploadedResult(
-            uploadedStripeFile = InternalStripeFile(
+            uploadedStripeFile = StripeFile(
                 id = "frontLowResResult"
             ),
             scores = listOf(0.1f, 0.2f, 0.3f, 0.4f, 0.5f),
             uploadMethod = DocumentUploadParam.UploadMethod.AUTOCAPTURE
         )
         val BACK_HIGH_RES_RESULT = UploadedResult(
-            uploadedStripeFile = InternalStripeFile(
+            uploadedStripeFile = StripeFile(
                 id = "backHighResResult"
             ),
             scores = listOf(0.1f, 0.2f, 0.3f, 0.4f, 0.5f),
             uploadMethod = DocumentUploadParam.UploadMethod.AUTOCAPTURE
         )
         val BACK_LOW_RES_RESULT = UploadedResult(
-            uploadedStripeFile = InternalStripeFile(
+            uploadedStripeFile = StripeFile(
                 id = "frontHighResResult"
             ),
             scores = listOf(0.1f, 0.2f, 0.3f, 0.4f, 0.5f),

@@ -15,6 +15,8 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.any
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
@@ -54,6 +56,33 @@ class PaymentLauncherConfirmationActivityTest {
 
     @ExperimentalCoroutinesApi
     @Test
+    fun `start should call register`() {
+        val confirmStripeIntentParams = mock<ConfirmStripeIntentParams>()
+        mockViewModelActivityScenario().launch(
+            Intent(
+                ApplicationProvider.getApplicationContext(),
+                PaymentLauncherConfirmationActivity::class.java
+            ).putExtras(
+                PaymentLauncherContract.Args.IntentConfirmationArgs(
+                    INJECTOR_KEY,
+                    ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+                    TEST_STRIPE_ACCOUNT_ID,
+                    false,
+                    PRODUCT_USAGE,
+                    confirmStripeIntentParams
+                ).toBundle()
+            )
+        ).use {
+            it.onActivity {
+                runTest {
+                    verify(viewModel).register(any())
+                }
+            }
+        }
+    }
+
+    @ExperimentalCoroutinesApi
+    @Test
     fun `start with IntentConfirmationArgs should confirmStripeIntent`() {
         val confirmStripeIntentParams = mock<ConfirmStripeIntentParams>()
         mockViewModelActivityScenario().launch(
@@ -73,7 +102,7 @@ class PaymentLauncherConfirmationActivityTest {
         ).use {
             it.onActivity {
                 runTest {
-                    verify(viewModel).confirmStripeIntent(confirmStripeIntentParams)
+                    verify(viewModel).confirmStripeIntent(eq(confirmStripeIntentParams), any())
                 }
             }
         }
@@ -92,7 +121,7 @@ class PaymentLauncherConfirmationActivityTest {
         ).use {
             it.onActivity {
                 runTest {
-                    verify(viewModel).handleNextActionForStripeIntent(CLIENT_SECRET)
+                    verify(viewModel).handleNextActionForStripeIntent(eq(CLIENT_SECRET), any())
                 }
             }
         }
@@ -118,7 +147,8 @@ class PaymentLauncherConfirmationActivityTest {
         ).use {
             it.onActivity {
                 runTest {
-                    verify(viewModel).handleNextActionForStripeIntent(CLIENT_SECRET)
+                    verify(viewModel).handleNextActionForStripeIntent(eq(CLIENT_SECRET), any())
+                    verify(viewModel).register(any())
                 }
             }
         }

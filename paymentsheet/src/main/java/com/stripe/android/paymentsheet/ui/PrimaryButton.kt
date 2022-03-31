@@ -76,7 +76,11 @@ internal class PrimaryButton @JvmOverloads constructor(
         shape.color = tintList
 
         background = shape
-        setPadding(cornerRadius.toInt())
+        setPadding(
+            resources.getDimensionPixelSize(
+                R.dimen.stripe_paymentsheet_primary_button_padding
+            )
+        )
     }
 
     fun setLabel(text: String?) {

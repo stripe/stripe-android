@@ -7,7 +7,7 @@ import androidx.navigation.Navigation
 import androidx.navigation.testing.TestNavHostController
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.identity.IdentityVerificationSheet.VerificationResult
+import com.stripe.android.identity.IdentityVerificationSheet.VerificationFlowResult
 import com.stripe.android.identity.R
 import com.stripe.android.identity.VerificationFlowFinishable
 import com.stripe.android.identity.databinding.BaseErrorFragmentBinding
@@ -92,7 +92,7 @@ class ErrorFragmentTest {
             assertThat(binding.bottomButton.text).isEqualTo(TEST_GO_BACK_BUTTON_TEXT)
 
             binding.bottomButton.callOnClick()
-            val resultCaptor = argumentCaptor<VerificationResult.Failed>()
+            val resultCaptor = argumentCaptor<VerificationFlowResult.Failed>()
             verify(mockVerificationFlowFinishable).finishWithResult(
                 resultCaptor.capture()
             )

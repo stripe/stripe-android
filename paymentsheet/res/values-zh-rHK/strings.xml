@@ -19,8 +19,6 @@
   <string name="stripe_google_pay_error_internal">發生了內部錯誤。</string>
   <!-- Text for a button that, when tapped, displays another screen where the customer can add payment method details -->
   <string name="stripe_paymentsheet_add_payment_method_button_label">+ 添加</string>
-  <!-- Card details entry form header title -->
-  <string name="stripe_paymentsheet_add_payment_method_card_information">銀行卡資訊</string>
   <!-- Country selector and postal code entry form header title -->
   <string name="stripe_paymentsheet_add_payment_method_country_or_region">國家或地區</string>
   <!-- Title shown above a form where the customer can enter payment information like credit card details, email, billing address, etc. -->

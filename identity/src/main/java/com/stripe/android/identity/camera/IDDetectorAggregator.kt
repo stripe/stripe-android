@@ -6,13 +6,14 @@ import com.stripe.android.camera.framework.time.Clock
 import com.stripe.android.camera.framework.time.milliseconds
 import com.stripe.android.identity.ml.AnalyzerInput
 import com.stripe.android.identity.ml.AnalyzerOutput
+import com.stripe.android.identity.networking.models.VerificationPage
+import com.stripe.android.identity.states.IOUTransitioner
 import com.stripe.android.identity.states.IdentityScanState
-import com.stripe.android.identity.states.IdentityScanState.TimeOut.Companion.DEFAULT_TIME_OUT_MILLIS
 
 internal class IDDetectorAggregator(
     identityScanType: IdentityScanState.ScanType,
     aggregateResultListener: AggregateResultListener<InterimResult, FinalResult>,
-    timeoutInMillis: Int = DEFAULT_TIME_OUT_MILLIS
+    verificationPage: VerificationPage
 ) : ResultAggregator<
     AnalyzerInput,
     IdentityScanState,
@@ -21,7 +22,14 @@ internal class IDDetectorAggregator(
     IDDetectorAggregator.FinalResult
     >(
     aggregateResultListener,
-    IdentityScanState.Initial(identityScanType, Clock.markNow() + timeoutInMillis.milliseconds),
+    IdentityScanState.Initial(
+        type = identityScanType,
+        timeoutAt = Clock.markNow() + verificationPage.documentCapture.autocaptureTimeout.milliseconds,
+        transitioner = IOUTransitioner(
+            iouThreshold = verificationPage.documentCapture.motionBlurMinIou,
+            timeRequired = verificationPage.documentCapture.motionBlurMinDuration
+        )
+    ),
     statsName = null
 ) {
     private var isFirstResultReceived = false
