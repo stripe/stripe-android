@@ -15,6 +15,7 @@ import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.core.content.withStyledAttributes
 import androidx.core.view.isVisible
 import androidx.core.view.setPadding
 import com.stripe.android.paymentsheet.R
@@ -57,6 +58,9 @@ internal class PrimaryButton @JvmOverloads constructor(
         viewBinding.label.setViewCompositionStrategy(
             ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed
         )
+        getTextAttributeValue(attrs)?.let {
+            setLabel(it.toString())
+        }
 
         isClickable = true
         isEnabled = false
@@ -81,6 +85,17 @@ internal class PrimaryButton @JvmOverloads constructor(
                 R.dimen.stripe_paymentsheet_primary_button_padding
             )
         )
+    }
+
+    private fun getTextAttributeValue(attrs: AttributeSet?): CharSequence? {
+        var text: CharSequence? = null
+        context.withStyledAttributes(
+            attrs,
+            listOf(android.R.attr.text).toIntArray()
+        ) {
+            text = getText(0)
+        }
+        return text
     }
 
     fun setLabel(text: String?) {
