@@ -294,6 +294,9 @@ internal class IDScanFragmentTest {
             assertThat(binding.cameraView.viewFinderBorderView.visibility).isEqualTo(View.VISIBLE)
             assertThat(binding.checkMarkView.visibility).isEqualTo(View.GONE)
             assertThat(binding.kontinue.isEnabled).isFalse()
+            assertThat(binding.headerTitle.text).isEqualTo(
+                context.getText(R.string.front_of_id)
+            )
             assertThat(binding.message.text).isEqualTo(
                 context.getText(R.string.position_id_front)
             )
@@ -309,6 +312,9 @@ internal class IDScanFragmentTest {
             assertThat(binding.cameraView.viewFinderBorderView.visibility).isEqualTo(View.VISIBLE)
             assertThat(binding.checkMarkView.visibility).isEqualTo(View.GONE)
             assertThat(binding.kontinue.isEnabled).isFalse()
+            assertThat(binding.headerTitle.text).isEqualTo(
+                context.getText(R.string.back_of_id)
+            )
             assertThat(binding.message.text).isEqualTo(
                 context.getText(R.string.position_id_back)
             )

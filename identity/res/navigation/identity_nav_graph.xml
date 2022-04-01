@@ -20,7 +20,7 @@
     <action
         android:id="@+id/action_global_couldNotCaptureFragment"
         app:destination="@id/couldNotCaptureFragment" />
-    
+
     <fragment
         android:id="@+id/consentFragment"
         android:name="com.stripe.android.identity.navigation.ConsentFragment"
@@ -130,8 +130,7 @@
     </fragment>
     <fragment
         android:id="@+id/couldNotCaptureFragment"
-        android:name="com.stripe.android.identity.navigation.CouldNotCaptureFragment"
-        android:label="CouldNotCaptureFragment">
+        android:name="com.stripe.android.identity.navigation.CouldNotCaptureFragment">
         <argument
             android:name="scanType"
             app:argType="com.stripe.android.identity.states.IdentityScanState$ScanType" />

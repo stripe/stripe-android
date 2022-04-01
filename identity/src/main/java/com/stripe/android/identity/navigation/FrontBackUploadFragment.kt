@@ -7,7 +7,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
-import android.widget.TextView
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatDialog
 import androidx.fragment.app.Fragment
@@ -226,8 +225,7 @@ internal abstract class FrontBackUploadFragment(
         scanType: IdentityScanState.ScanType
     ) = AppCompatDialog(requireContext()).also { dialog ->
         dialog.setContentView(R.layout.get_local_image_dialog)
-        dialog.findViewById<TextView>(R.id.title)?.text = getTitleFromScanType(scanType)
-
+        dialog.setTitle(getTitleFromScanType(scanType))
         if (shouldShowCamera) {
             dialog.findViewById<Button>(R.id.take_photo)?.setOnClickListener {
                 if (scanType == frontScanType) {

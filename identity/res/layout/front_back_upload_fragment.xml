@@ -25,7 +25,7 @@
                 android:id="@+id/title_text"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:gravity="center_horizontal"
+                android:gravity="start"
                 android:layout_marginTop="@dimen/item_vertical_margin"
                 android:textSize="@dimen/upload_title_text_size"
                 android:text="@string/file_upload"
@@ -37,23 +37,15 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/file_upload_content_id"
-                android:gravity="center"
-                android:layout_marginBottom="@dimen/item_vertical_margin"
+                android:gravity="start"
+                android:layout_marginBottom="32dp"
                 tools:text="@string/file_upload_content_id" />
 
-
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:layout_marginBottom="@dimen/item_vertical_margin"
-                android:background="?android:attr/listDivider" />
 
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="48dp"
-                android:layout_marginBottom="@dimen/item_vertical_margin"
-                android:layout_marginStart="@dimen/item_horizontal_margin"
-                android:layout_marginEnd="@dimen/item_horizontal_margin">
+                android:layout_marginBottom="@dimen/item_vertical_margin">
 
                 <TextView
                     android:id="@+id/label_front"
@@ -104,9 +96,7 @@
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="48dp"
-                android:layout_marginBottom="@dimen/item_vertical_margin"
-                android:layout_marginStart="@dimen/item_horizontal_margin"
-                android:layout_marginEnd="@dimen/item_horizontal_margin">
+                android:layout_marginBottom="@dimen/item_vertical_margin">
 
                 <TextView
                     android:id="@+id/label_back"
@@ -147,12 +137,6 @@
                     android:contentDescription="@string/back_of_id_selected"
                     app:tint="?android:colorPrimary" />
             </RelativeLayout>
-
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:layout_marginBottom="@dimen/item_vertical_margin"
-                android:background="?android:attr/listDivider" />
 
         </LinearLayout>
     </ScrollView>
