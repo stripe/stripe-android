@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet.forms
 
-import android.content.Context
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -39,13 +38,12 @@ import kotlinx.coroutines.flow.Flow
 
 @FlowPreview
 @Composable
-internal fun Form(formViewModel: FormViewModel, context: Context) {
+internal fun Form(formViewModel: FormViewModel) {
     FormInternal(
         formViewModel.hiddenIdentifiers,
         formViewModel.enabled,
         formViewModel.elements,
-        formViewModel.lastTextFieldIdentifier,
-        context
+        formViewModel.lastTextFieldIdentifier
     )
 }
 
@@ -54,8 +52,7 @@ internal fun FormInternal(
     hiddenIdentifiersFlow: Flow<List<IdentifierSpec>>,
     enabledFlow: Flow<Boolean>,
     elementsFlow: Flow<List<FormElement>?>,
-    lastTextFieldIdentifierFlow: Flow<IdentifierSpec?>,
-    context: Context
+    lastTextFieldIdentifierFlow: Flow<IdentifierSpec?>
 ) {
     val hiddenIdentifiers by hiddenIdentifiersFlow.collectAsState(emptyList())
     val enabled by enabledFlow.collectAsState(true)
@@ -86,7 +83,7 @@ internal fun FormInternal(
                         is AffirmHeaderElement -> AffirmElementUI()
                         is MandateTextElement -> MandateTextUI(element)
                         is CardDetailsSectionElement -> CardDetailsSectionElementUI(
-                            enabled, hiddenIdentifiers, context
+                            enabled, hiddenIdentifiers
                         )
                     }
                 }

@@ -13,8 +13,7 @@ import javax.inject.Inject
  */
 internal class TransformSpecToElement @Inject constructor(
     resourceRepository: ResourceRepository,
-    formFragmentArguments: FormFragmentArguments,
-    context: Context
+    formFragmentArguments: FormFragmentArguments
 ) {
     private val transformSpecToElements =
         TransformSpecToElements(
@@ -23,8 +22,7 @@ internal class TransformSpecToElement @Inject constructor(
             amount = formFragmentArguments.amount,
             country = formFragmentArguments.billingDetails?.address?.country,
             saveForFutureUseInitialValue = formFragmentArguments.showCheckboxControlledFields,
-            merchantName = formFragmentArguments.merchantName,
-            context = context
+            merchantName = formFragmentArguments.merchantName
         )
 
     internal fun transform(list: List<FormItemSpec>) = transformSpecToElements.transform(list)

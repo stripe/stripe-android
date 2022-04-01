@@ -1,6 +1,5 @@
 package com.stripe.android.ui.core.elements
 
-import android.content.Context
 import android.content.Intent
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -18,6 +17,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.heading
@@ -35,9 +35,9 @@ import com.stripe.android.ui.core.R
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun CardDetailsSectionElementUI(
     enabled: Boolean,
-    hiddenIdentifiers: List<IdentifierSpec>?,
-    context: Context
+    hiddenIdentifiers: List<IdentifierSpec>?
 ) {
+    val context = LocalContext.current
     val cardDetailsElement = CardDetailsElement(
         IdentifierSpec.Generic("credit_detail"), context
     )

@@ -1,6 +1,5 @@
 package com.stripe.android.ui.core.forms
 
-import android.content.Context
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.address.AddressFieldElementRepository
 import com.stripe.android.ui.core.elements.AddressSpec
@@ -13,7 +12,6 @@ import com.stripe.android.ui.core.elements.BankRepository
 import com.stripe.android.ui.core.elements.BsbSpec
 import com.stripe.android.ui.core.elements.CardBillingSpec
 import com.stripe.android.ui.core.elements.CardDetailsSectionSpec
-import com.stripe.android.ui.core.elements.CardDetailsSpec
 import com.stripe.android.ui.core.elements.CountrySpec
 import com.stripe.android.ui.core.elements.EmailSpec
 import com.stripe.android.ui.core.elements.EmptyFormElement
@@ -45,8 +43,7 @@ class TransformSpecToElements(
     private val amount: Amount?,
     private val country: String?,
     private val saveForFutureUseInitialValue: Boolean,
-    private val merchantName: String,
-    private val context: Context
+    private val merchantName: String
 ) {
     fun transform(
         list: List<FormItemSpec>
@@ -130,7 +127,6 @@ class TransformSpecToElements(
                     currencyCode,
                     country
                 )
-                is CardDetailsSpec -> it.transform(context)
                 is CardBillingSpec -> it.transform(addressRepository)
                 is AuBankAccountNumberSpec -> it.transform()
                 is BsbSpec -> it.transform()
