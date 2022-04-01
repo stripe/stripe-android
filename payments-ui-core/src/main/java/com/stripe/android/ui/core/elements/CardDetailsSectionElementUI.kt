@@ -61,9 +61,9 @@ fun CardDetailsSectionElementUI(
         if (isStripeCardScanAvailable()) {
             val cardScanLauncher =
                 rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-                    if (it.data != null) {
+                    it.data?.let {
                         cardDetailsElement.controller.numberElement.controller.onCardScanResult(
-                            it.data!!.getParcelableExtra(CardScanActivity.CARD_SCAN_PARCELABLE_NAME)
+                            it.getParcelableExtra(CardScanActivity.CARD_SCAN_PARCELABLE_NAME)
                                 ?: CardScanSheetResult.Failed(
                                     UnknownScanException("No data in the result intent")
                                 )
