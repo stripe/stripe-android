@@ -23,6 +23,7 @@ import com.stripe.android.identity.networking.models.DocumentUploadParam
 import com.stripe.android.identity.networking.models.IdDocumentParam
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentDocumentCapturePage
 import com.stripe.android.identity.states.IdentityScanState
+import com.stripe.android.identity.utils.ARG_SHOULD_SHOW_CHOOSE_PHOTO
 import com.stripe.android.identity.utils.ARG_SHOULD_SHOW_TAKE_PHOTO
 import com.stripe.android.identity.utils.navigateToDefaultErrorFragment
 import com.stripe.android.identity.utils.postVerificationPageDataAndMaybeSubmit
@@ -65,6 +66,8 @@ internal abstract class IdentityUploadFragment(
 
     private var shouldShowTakePhoto: Boolean = false
 
+    private var shouldShowChoosePhoto: Boolean = false
+
     private val identityUploadViewModel: IdentityUploadViewModel by viewModels { identityUploadViewModelFactory }
 
     protected val identityViewModel: IdentityViewModel by activityViewModels { identityViewModelFactory }
@@ -83,6 +86,7 @@ internal abstract class IdentityUploadFragment(
             "Argument to FrontBackUploadFragment is null"
         }
         shouldShowTakePhoto = args[ARG_SHOULD_SHOW_TAKE_PHOTO] as Boolean
+        shouldShowChoosePhoto = args[ARG_SHOULD_SHOW_CHOOSE_PHOTO] as Boolean
 
         binding = IdentityUploadFragmentBinding.inflate(layoutInflater, container, false)
         binding.titleText.text = getString(titleRes)
@@ -280,25 +284,29 @@ internal abstract class IdentityUploadFragment(
             requireNotNull(dialog.findViewById(R.id.take_photo)).visibility = View.GONE
         }
 
-        dialog.findViewById<Button>(R.id.choose_file)?.setOnClickListener {
-            if (scanType == frontScanType) {
-                identityUploadViewModel.chooseImageFront {
-                    uploadResult(
-                        uri = it,
-                        uploadMethod = DocumentUploadParam.UploadMethod.FILEUPLOAD,
-                        isFront = true
-                    )
+        if (shouldShowChoosePhoto) {
+            dialog.findViewById<Button>(R.id.choose_file)?.setOnClickListener {
+                if (scanType == frontScanType) {
+                    identityUploadViewModel.chooseImageFront {
+                        uploadResult(
+                            uri = it,
+                            uploadMethod = DocumentUploadParam.UploadMethod.FILEUPLOAD,
+                            isFront = true
+                        )
+                    }
+                } else if (scanType == backScanType) {
+                    identityUploadViewModel.chooseImageBack {
+                        uploadResult(
+                            uri = it,
+                            uploadMethod = DocumentUploadParam.UploadMethod.FILEUPLOAD,
+                            isFront = false
+                        )
+                    }
                 }
-            } else if (scanType == backScanType) {
-                identityUploadViewModel.chooseImageBack {
-                    uploadResult(
-                        uri = it,
-                        uploadMethod = DocumentUploadParam.UploadMethod.FILEUPLOAD,
-                        isFront = false
-                    )
-                }
+                dialog.dismiss()
             }
-            dialog.dismiss()
+        } else {
+            requireNotNull(dialog.findViewById(R.id.choose_file)).visibility = View.GONE
         }
     }
 

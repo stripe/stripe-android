@@ -229,7 +229,11 @@ internal class DocSelectionFragment(
                     Log.e(TAG, "Can't access camera and client has required live capture.")
                     navigateToDefaultErrorFragment()
                 } else {
-                    navigateToUploadFragment(type.toUploadDestinationId(), true)
+                    navigateToUploadFragment(
+                        type.toUploadDestinationId(),
+                        shouldShowTakePhoto = true,
+                        shouldShowChoosePhoto = true
+                    )
                 }
             },
             onFailure = {

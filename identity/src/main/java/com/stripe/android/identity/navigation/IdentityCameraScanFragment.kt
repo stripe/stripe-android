@@ -26,6 +26,7 @@ import com.stripe.android.core.exception.InvalidResponseException
 import com.stripe.android.identity.R
 import com.stripe.android.identity.databinding.IdentityCameraScanFragmentBinding
 import com.stripe.android.identity.navigation.CouldNotCaptureFragment.Companion.ARG_COULD_NOT_CAPTURE_SCAN_TYPE
+import com.stripe.android.identity.navigation.CouldNotCaptureFragment.Companion.ARG_REQUIRE_LIVE_CAPTURE
 import com.stripe.android.identity.networking.Status
 import com.stripe.android.identity.networking.models.ClearDataParam
 import com.stripe.android.identity.networking.models.CollectedDataParam
@@ -97,28 +98,30 @@ internal abstract class IdentityCameraScanFragment(
             updateUI(newState)
         }
         identityScanViewModel.finalResult.observe(viewLifecycleOwner) { finalResult ->
-            if (finalResult.identityState is IdentityScanState.Finished) {
-                identityViewModel.observeForVerificationPage(
-                    viewLifecycleOwner,
-                    onSuccess = {
+            identityViewModel.observeForVerificationPage(
+                viewLifecycleOwner,
+                onSuccess = { verificationPage ->
+                    if (finalResult.identityState is IdentityScanState.Finished) {
                         identityViewModel.uploadScanResult(
                             finalResult,
-                            it.documentCapture,
+                            verificationPage.documentCapture,
                             identityScanViewModel.targetScanType
                         )
-                    },
-                    onFailure = {
-                        navigateToDefaultErrorFragment()
+                    } else if (finalResult.identityState is IdentityScanState.TimeOut) {
+                        findNavController().navigate(
+                            R.id.action_global_couldNotCaptureFragment,
+                            bundleOf(
+                                ARG_COULD_NOT_CAPTURE_SCAN_TYPE to identityScanViewModel.targetScanType,
+                                ARG_REQUIRE_LIVE_CAPTURE to verificationPage.documentCapture.requireLiveCapture
+                            )
+                        )
                     }
-                )
-            } else if (finalResult.identityState is IdentityScanState.TimeOut) {
-                findNavController().navigate(
-                    R.id.action_global_couldNotCaptureFragment,
-                    bundleOf(
-                        ARG_COULD_NOT_CAPTURE_SCAN_TYPE to identityScanViewModel.targetScanType
-                    )
-                )
-            }
+                },
+                onFailure = {
+                    Log.e(TAG, "Fail to observeForVerificationPage: $it")
+                    navigateToDefaultErrorFragment()
+                }
+            )
             stopScanning()
         }
         cameraAdapter = Camera1Adapter(
@@ -228,7 +231,7 @@ internal abstract class IdentityCameraScanFragment(
     }
 
     /**
-     * Observe for [IdentityScanViewModel.bothUploaded],
+     * Observe for [IdentityViewModel.bothUploaded],
      * try to [postVerificationPageDataAndMaybeSubmit] when success and navigates to error when fails.
      */
     protected fun observeAndUploadForBothSides(type: IdDocumentParam.Type) =
@@ -272,7 +275,7 @@ internal abstract class IdentityCameraScanFragment(
         }
 
     /**
-     * Observe for [IdentityScanViewModel.frontUploaded],
+     * Observe for [IdentityViewModel.frontUploaded],
      * try to [postVerificationPageDataAndMaybeSubmit] when success and navigates to error when fails.
      */
     protected fun observeAndUploadForFrontSide(type: IdDocumentParam.Type) =
