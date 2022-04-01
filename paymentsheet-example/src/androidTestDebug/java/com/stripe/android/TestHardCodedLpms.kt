@@ -46,6 +46,8 @@ class TestHardCodedLpms {
     private lateinit var testDriver: PlaygroundTestDriver
 
     companion object {
+        // There exists only one screenshot processor so that all tests put
+        // their files in the same directory.
         private val screenshotProcessor = MyScreenCaptureProcessor()
     }
 
