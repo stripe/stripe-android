@@ -3,7 +3,7 @@ package com.stripe.android.ui.core.elements
 import kotlinx.parcelize.Parcelize
 
 /**
- * Header that displays promo information about Affirm
+ * Section containing card details form
  */
 @Parcelize
 internal data class CardDetailsSectionSpec(
