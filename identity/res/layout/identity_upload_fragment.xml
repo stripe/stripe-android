@@ -88,12 +88,14 @@
             </RelativeLayout>
 
             <View
+                android:id="@+id/separator"
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
                 android:layout_marginBottom="@dimen/item_vertical_margin"
                 android:background="?android:attr/listDivider" />
 
             <RelativeLayout
+                android:id="@+id/back_upload"
                 android:layout_width="match_parent"
                 android:layout_height="48dp"
                 android:layout_marginBottom="@dimen/item_vertical_margin">

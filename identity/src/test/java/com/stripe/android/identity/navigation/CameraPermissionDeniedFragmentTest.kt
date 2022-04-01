@@ -13,7 +13,7 @@ import com.stripe.android.identity.R
 import com.stripe.android.identity.databinding.BaseErrorFragmentBinding
 import com.stripe.android.identity.navigation.CameraPermissionDeniedFragment.Companion.ARG_SCAN_TYPE
 import com.stripe.android.identity.networking.models.IdDocumentParam
-import com.stripe.android.identity.utils.ARG_SHOULD_SHOW_CAMERA
+import com.stripe.android.identity.utils.ARG_SHOULD_SHOW_TAKE_PHOTO
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
@@ -101,7 +101,7 @@ class CameraPermissionDeniedFragmentTest {
             )
             assertThat(
                 requireNotNull(navController.backStack.last().arguments)
-                [ARG_SHOULD_SHOW_CAMERA]
+                [ARG_SHOULD_SHOW_TAKE_PHOTO]
             ).isEqualTo(false)
             assertThat(binding.message2.text).isEqualTo(
                 it.getString(

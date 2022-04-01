@@ -15,7 +15,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.identity.R
-import com.stripe.android.identity.databinding.FrontBackUploadFragmentBinding
+import com.stripe.android.identity.databinding.IdentityUploadFragmentBinding
 import com.stripe.android.identity.networking.Status
 import com.stripe.android.identity.networking.models.ClearDataParam
 import com.stripe.android.identity.networking.models.CollectedDataParam
@@ -23,10 +23,10 @@ import com.stripe.android.identity.networking.models.DocumentUploadParam
 import com.stripe.android.identity.networking.models.IdDocumentParam
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentDocumentCapturePage
 import com.stripe.android.identity.states.IdentityScanState
-import com.stripe.android.identity.utils.ARG_SHOULD_SHOW_CAMERA
+import com.stripe.android.identity.utils.ARG_SHOULD_SHOW_TAKE_PHOTO
 import com.stripe.android.identity.utils.navigateToDefaultErrorFragment
 import com.stripe.android.identity.utils.postVerificationPageDataAndMaybeSubmit
-import com.stripe.android.identity.viewmodel.FrontBackUploadViewModel
+import com.stripe.android.identity.viewmodel.IdentityUploadViewModel
 import com.stripe.android.identity.viewmodel.IdentityViewModel
 import kotlinx.coroutines.launch
 
@@ -34,8 +34,8 @@ import kotlinx.coroutines.launch
  * Fragment to upload front and back of a document.
  *
  */
-internal abstract class FrontBackUploadFragment(
-    private val frontBackUploadViewModelFactory: ViewModelProvider.Factory,
+internal abstract class IdentityUploadFragment(
+    private val identityUploadViewModelFactory: ViewModelProvider.Factory,
     private val identityViewModelFactory: ViewModelProvider.Factory
 ) : Fragment() {
 
@@ -49,29 +49,29 @@ internal abstract class FrontBackUploadFragment(
     abstract val frontTextRes: Int
 
     @get:StringRes
-    abstract val backTextRes: Int
+    open var backTextRes: Int? = null
 
     @get:StringRes
     abstract val frontCheckMarkContentDescription: Int
 
     @get:StringRes
-    abstract val backCheckMarkContentDescription: Int
+    open var backCheckMarkContentDescription: Int? = null
 
     abstract val frontScanType: IdentityScanState.ScanType
 
-    abstract val backScanType: IdentityScanState.ScanType
+    open var backScanType: IdentityScanState.ScanType? = null
 
-    lateinit var binding: FrontBackUploadFragmentBinding
+    lateinit var binding: IdentityUploadFragmentBinding
 
-    private var shouldShowCamera: Boolean = false
+    private var shouldShowTakePhoto: Boolean = false
 
-    private val frontBackUploadViewModel: FrontBackUploadViewModel by viewModels { frontBackUploadViewModelFactory }
+    private val identityUploadViewModel: IdentityUploadViewModel by viewModels { identityUploadViewModelFactory }
 
-    private val identityViewModel: IdentityViewModel by activityViewModels { identityViewModelFactory }
+    protected val identityViewModel: IdentityViewModel by activityViewModels { identityViewModelFactory }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        frontBackUploadViewModel.registerActivityResultCaller(this)
+        identityUploadViewModel.registerActivityResultCaller(this)
     }
 
     override fun onCreateView(
@@ -82,27 +82,52 @@ internal abstract class FrontBackUploadFragment(
         val args = requireNotNull(arguments) {
             "Argument to FrontBackUploadFragment is null"
         }
-        shouldShowCamera = args[ARG_SHOULD_SHOW_CAMERA] as Boolean
+        shouldShowTakePhoto = args[ARG_SHOULD_SHOW_TAKE_PHOTO] as Boolean
 
-        binding = FrontBackUploadFragmentBinding.inflate(layoutInflater, container, false)
+        binding = IdentityUploadFragmentBinding.inflate(layoutInflater, container, false)
         binding.titleText.text = getString(titleRes)
         binding.contentText.text = getString(contextRes)
+
         binding.labelFront.text = getString(frontTextRes)
-        binding.labelBack.text = getString(backTextRes)
         binding.finishedCheckMarkFront.contentDescription =
             getString(frontCheckMarkContentDescription)
-        binding.finishedCheckMarkBack.contentDescription =
-            getString(backCheckMarkContentDescription)
-
-        binding.selectBack.setOnClickListener {
-            buildDialog(backScanType).show()
-        }
         binding.selectFront.setOnClickListener {
             buildDialog(frontScanType).show()
         }
+
+        checkBackFields(
+            nonNullBlock = { backText, backCheckMarkContentDescriptionText, backScanType ->
+                binding.labelBack.text = backText
+                binding.finishedCheckMarkBack.contentDescription =
+                    backCheckMarkContentDescriptionText
+                binding.selectBack.setOnClickListener {
+                    buildDialog(backScanType).show()
+                }
+            },
+            nullBlock = {
+                binding.separator.visibility = View.GONE
+                binding.backUpload.visibility = View.GONE
+            }
+        )
+
         binding.kontinue.isEnabled = false
         binding.kontinue.setText(getString(R.string.kontinue))
         return binding.root
+    }
+
+    private fun checkBackFields(
+        nonNullBlock: (String, String, IdentityScanState.ScanType) -> Unit,
+        nullBlock: () -> Unit
+    ) {
+        runCatching {
+            nonNullBlock(
+                getString(requireNotNull(backTextRes)),
+                getString(requireNotNull(backCheckMarkContentDescription)),
+                requireNotNull(backScanType)
+            )
+        }.onFailure {
+            nullBlock()
+        }
     }
 
     private fun IdentityScanState.ScanType.toType(): IdDocumentParam.Type =
@@ -117,12 +142,11 @@ internal abstract class FrontBackUploadFragment(
             }
         }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
+    protected fun observeForFrontUploaded() {
         identityViewModel.frontHighResUploaded.observe(viewLifecycleOwner) {
             when (it.status) {
                 Status.SUCCESS -> {
-                    showFrontDone()
+                    showFrontDone(it.data)
                 }
                 Status.ERROR -> {
                     Log.e(TAG, "error uploading front image: $it")
@@ -133,6 +157,9 @@ internal abstract class FrontBackUploadFragment(
                 }
             }
         }
+    }
+
+    protected fun observeForBackUploaded() {
         identityViewModel.backHighResUploaded.observe(viewLifecycleOwner) {
             when (it.status) {
                 Status.SUCCESS -> {
@@ -147,7 +174,9 @@ internal abstract class FrontBackUploadFragment(
                 }
             }
         }
+    }
 
+    protected fun enableKontinueWhenBothUploaded() {
         identityViewModel.highResUploaded.observe(viewLifecycleOwner) { frontBackPair ->
             when (frontBackPair.status) {
                 Status.SUCCESS -> {
@@ -226,10 +255,10 @@ internal abstract class FrontBackUploadFragment(
     ) = AppCompatDialog(requireContext()).also { dialog ->
         dialog.setContentView(R.layout.get_local_image_dialog)
         dialog.setTitle(getTitleFromScanType(scanType))
-        if (shouldShowCamera) {
+        if (shouldShowTakePhoto) {
             dialog.findViewById<Button>(R.id.take_photo)?.setOnClickListener {
                 if (scanType == frontScanType) {
-                    frontBackUploadViewModel.takePhotoFront(requireContext()) {
+                    identityUploadViewModel.takePhotoFront(requireContext()) {
                         uploadResult(
                             uri = it,
                             uploadMethod = DocumentUploadParam.UploadMethod.MANUALCAPTURE,
@@ -237,7 +266,7 @@ internal abstract class FrontBackUploadFragment(
                         )
                     }
                 } else if (scanType == backScanType) {
-                    frontBackUploadViewModel.takePhotoBack(requireContext()) {
+                    identityUploadViewModel.takePhotoBack(requireContext()) {
                         uploadResult(
                             uri = it,
                             uploadMethod = DocumentUploadParam.UploadMethod.MANUALCAPTURE,
@@ -253,7 +282,7 @@ internal abstract class FrontBackUploadFragment(
 
         dialog.findViewById<Button>(R.id.choose_file)?.setOnClickListener {
             if (scanType == frontScanType) {
-                frontBackUploadViewModel.chooseImageFront {
+                identityUploadViewModel.chooseImageFront {
                     uploadResult(
                         uri = it,
                         uploadMethod = DocumentUploadParam.UploadMethod.FILEUPLOAD,
@@ -261,7 +290,7 @@ internal abstract class FrontBackUploadFragment(
                     )
                 }
             } else if (scanType == backScanType) {
-                frontBackUploadViewModel.chooseImageBack {
+                identityUploadViewModel.chooseImageBack {
                     uploadResult(
                         uri = it,
                         uploadMethod = DocumentUploadParam.UploadMethod.FILEUPLOAD,
@@ -308,7 +337,7 @@ internal abstract class FrontBackUploadFragment(
         binding.finishedCheckMarkFront.visibility = View.GONE
     }
 
-    private fun showFrontDone() {
+    protected open fun showFrontDone(frontResult: IdentityViewModel.UploadedResult?) {
         binding.selectFront.visibility = View.GONE
         binding.progressCircularFront.visibility = View.GONE
         binding.finishedCheckMarkFront.visibility = View.VISIBLE
@@ -327,6 +356,6 @@ internal abstract class FrontBackUploadFragment(
     }
 
     companion object {
-        val TAG: String = this::class.java.simpleName
+        val TAG: String = IdentityUploadFragment::class.java.simpleName
     }
 }

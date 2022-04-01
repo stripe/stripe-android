@@ -14,7 +14,7 @@ import com.stripe.android.identity.utils.PhotoTaker
  * ViewModel to upload front and back image of a document either through camera or from local
  * file storage.
  */
-internal class FrontBackUploadViewModel(
+internal class IdentityUploadViewModel(
     private val identityIO: IdentityIO
 ) : ViewModel() {
 
@@ -78,7 +78,7 @@ internal class FrontBackUploadViewModel(
         ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return FrontBackUploadViewModel(identityIO) as T
+            return IdentityUploadViewModel(identityIO) as T
         }
     }
 }

@@ -115,23 +115,23 @@ internal fun Fragment.navigateToErrorFragmentWithFailedReason(failedReason: Thro
 }
 
 /**
- * Navigate to upload fragment with shouldShowCamera argument.
+ * Navigate to upload fragment with shouldShowTakePhoto argument.
  */
 internal fun Fragment.navigateToUploadFragment(
     @IdRes destinationId: Int,
-    shouldShowCamera: Boolean
+    shouldShowTakePhoto: Boolean
 ) {
     findNavController().navigate(
         destinationId,
         bundleOf(
-            ARG_SHOULD_SHOW_CAMERA to shouldShowCamera
+            ARG_SHOULD_SHOW_TAKE_PHOTO to shouldShowTakePhoto
         )
     )
 }
 
 /**
- * Argument to indicate if camera option should be shown when picking an image.
+ * Argument to indicate if take photo option should be shown when picking an image.
  */
-internal const val ARG_SHOULD_SHOW_CAMERA = "shouldShowCamera"
+internal const val ARG_SHOULD_SHOW_TAKE_PHOTO = "shouldShowTakePhoto"
 
 private const val TAG = "NAVIGATION_UTIL"
