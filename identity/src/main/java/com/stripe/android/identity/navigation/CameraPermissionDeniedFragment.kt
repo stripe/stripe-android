@@ -27,7 +27,8 @@ internal class CameraPermissionDeniedFragment(
         topButton.setOnClickListener {
             navigateToUploadFragment(
                 identityScanType.toUploadDestinationId(),
-                false
+                shouldShowTakePhoto = false,
+                shouldShowChoosePhoto = true
             )
         }
 

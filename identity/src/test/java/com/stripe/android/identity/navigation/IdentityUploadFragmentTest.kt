@@ -30,6 +30,7 @@ import com.stripe.android.identity.networking.models.IdDocumentParam
 import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentDocumentCapturePage
 import com.stripe.android.identity.states.IdentityScanState
+import com.stripe.android.identity.utils.ARG_SHOULD_SHOW_CHOOSE_PHOTO
 import com.stripe.android.identity.utils.ARG_SHOULD_SHOW_TAKE_PHOTO
 import com.stripe.android.identity.utils.PairMediatorLiveData
 import com.stripe.android.identity.viewModelFactoryFor
@@ -108,7 +109,7 @@ class IdentityUploadFragmentTest {
     }
 
     @Test
-    fun `when shouldShowCamera is true UI is correct`() {
+    fun `when shouldShowTakePhoto is true UI is correct`() {
         launchFragment(shouldShowTakePhoto = true) { binding, _, _ ->
             binding.selectFront.callOnClick()
             val dialog = ShadowDialog.getLatestDialog()
@@ -124,7 +125,7 @@ class IdentityUploadFragmentTest {
     }
 
     @Test
-    fun `when shouldShowCamera is false UI is correct`() {
+    fun `when shouldShowTakePhoto is false UI is correct`() {
         launchFragment(shouldShowTakePhoto = false) { binding, _, _ ->
             binding.selectFront.callOnClick()
             val dialog = ShadowDialog.getLatestDialog()
@@ -136,6 +137,38 @@ class IdentityUploadFragmentTest {
             // assert dialog content
             assertThat(dialog.findViewById<Button>(R.id.choose_file).visibility).isEqualTo(View.VISIBLE)
             assertThat(dialog.findViewById<Button>(R.id.take_photo).visibility).isEqualTo(View.GONE)
+        }
+    }
+
+    @Test
+    fun `when shouldShowChoosePhoto is true UI is correct`() {
+        launchFragment(shouldShowChoosePhoto = true) { binding, _, _ ->
+            binding.selectFront.callOnClick()
+            val dialog = ShadowDialog.getLatestDialog()
+
+            // dialog shows up
+            assertThat(dialog.isShowing).isTrue()
+            assertThat(dialog).isInstanceOf(AppCompatDialog::class.java)
+
+            // assert dialog content
+            assertThat(dialog.findViewById<Button>(R.id.choose_file).visibility).isEqualTo(View.VISIBLE)
+            assertThat(dialog.findViewById<Button>(R.id.take_photo).visibility).isEqualTo(View.VISIBLE)
+        }
+    }
+
+    @Test
+    fun `when shouldShowChoosePhoto is false UI is correct`() {
+        launchFragment(shouldShowChoosePhoto = false) { binding, _, _ ->
+            binding.selectFront.callOnClick()
+            val dialog = ShadowDialog.getLatestDialog()
+
+            // dialog shows up
+            assertThat(dialog.isShowing).isTrue()
+            assertThat(dialog).isInstanceOf(AppCompatDialog::class.java)
+
+            // assert dialog content
+            assertThat(dialog.findViewById<Button>(R.id.choose_file).visibility).isEqualTo(View.GONE)
+            assertThat(dialog.findViewById<Button>(R.id.take_photo).visibility).isEqualTo(View.VISIBLE)
         }
     }
 
@@ -432,6 +465,7 @@ class IdentityUploadFragmentTest {
 
     private fun launchFragment(
         shouldShowTakePhoto: Boolean = true,
+        shouldShowChoosePhoto: Boolean = true,
         testBlock: (
             binding: IdentityUploadFragmentBinding,
             navController: TestNavHostController,
@@ -439,7 +473,8 @@ class IdentityUploadFragmentTest {
         ) -> Unit
     ) = launchFragmentInContainer(
         fragmentArgs = bundleOf(
-            ARG_SHOULD_SHOW_TAKE_PHOTO to shouldShowTakePhoto
+            ARG_SHOULD_SHOW_TAKE_PHOTO to shouldShowTakePhoto,
+            ARG_SHOULD_SHOW_CHOOSE_PHOTO to shouldShowChoosePhoto
         ),
         themeResId = R.style.Theme_MaterialComponents
     ) {

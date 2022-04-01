@@ -28,6 +28,7 @@ import com.stripe.android.identity.networking.models.DocumentUploadParam.UploadM
 import com.stripe.android.identity.networking.models.IdDocumentParam
 import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentDocumentCapturePage
+import com.stripe.android.identity.utils.ARG_SHOULD_SHOW_CHOOSE_PHOTO
 import com.stripe.android.identity.utils.ARG_SHOULD_SHOW_TAKE_PHOTO
 import com.stripe.android.identity.viewModelFactoryFor
 import com.stripe.android.identity.viewmodel.IdentityUploadViewModel
@@ -264,7 +265,8 @@ class PassportUploadFragmentTest {
         ) -> Unit
     ) = launchFragmentInContainer(
         fragmentArgs = bundleOf(
-            ARG_SHOULD_SHOW_TAKE_PHOTO to shouldShowTakePhoto
+            ARG_SHOULD_SHOW_TAKE_PHOTO to shouldShowTakePhoto,
+            ARG_SHOULD_SHOW_CHOOSE_PHOTO to true
         ),
         themeResId = R.style.Theme_MaterialComponents
     ) {
