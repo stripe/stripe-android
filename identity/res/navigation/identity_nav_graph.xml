@@ -31,8 +31,7 @@
     </fragment>
     <fragment
         android:id="@+id/IDScanFragment"
-        android:name="com.stripe.android.identity.navigation.IDScanFragment"
-        tools:layout="@layout/id_scan_fragment">
+        android:name="com.stripe.android.identity.navigation.IDScanFragment">
         <argument
             android:name="startFromBack"
             android:defaultValue="false"
