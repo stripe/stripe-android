@@ -7,7 +7,7 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.stripecardscan.cardscan.CardScanSheetResult
 import com.stripe.android.ui.core.databinding.ActivityCardScanBinding
 
-class CardScanActivity : AppCompatActivity() {
+internal class CardScanActivity : AppCompatActivity() {
     private val viewBinding by lazy {
         ActivityCardScanBinding.inflate(layoutInflater)
     }
