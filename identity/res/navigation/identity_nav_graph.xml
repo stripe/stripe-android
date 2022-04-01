@@ -42,7 +42,12 @@
         android:name="com.stripe.android.identity.navigation.PassportScanFragment" />
     <fragment
         android:id="@+id/driverLicenseScanFragment"
-        android:name="com.stripe.android.identity.navigation.DriverLicenseScanFragment" />
+        android:name="com.stripe.android.identity.navigation.DriverLicenseScanFragment">
+        <argument
+            android:name="startFromBack"
+            android:defaultValue="false"
+            app:argType="boolean" />
+    </fragment>
     <fragment
         android:id="@+id/IDUploadFragment"
         android:name="com.stripe.android.identity.navigation.IDUploadFragment" />
