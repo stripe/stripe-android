@@ -44,7 +44,8 @@ internal class ComposeFormDataCollectionFragment : Fragment() {
                 requireArguments().getParcelable(
                     EXTRA_CONFIG
                 )
-            )
+            ),
+            contextSupplier = { requireContext() }
         )
     }
 

@@ -7,13 +7,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.ImeAction
 import com.stripe.android.ui.core.PaymentsTheme
 
 @Composable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun BsbElementUI(
     enabled: Boolean,
-    element: BsbElement
+    element: BsbElement,
+    lastTextFieldIdentifier: IdentifierSpec?
 ) {
     val error by element.textElement.controller.error.collectAsState(null)
     val bankName by element.bankName.collectAsState(null)
@@ -30,13 +32,21 @@ fun BsbElementUI(
             null,
             sectionErrorString,
             contentInCard = {
-                TextField(element.textElement.controller, enabled = enabled)
+                TextField(
+                    element.textElement.controller,
+                    enabled = enabled,
+                    imeAction = if (lastTextFieldIdentifier == element.identifier) {
+                        ImeAction.Done
+                    } else {
+                        ImeAction.Next
+                    }
+                )
             },
             contentOutsideCard = {
                 bankName?.let {
                     Text(
                         it,
-                        color = PaymentsTheme.colors.colorTextSecondary
+                        color = PaymentsTheme.colors.subtitle
                     )
                 }
             }

@@ -9,6 +9,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -531,6 +532,7 @@ internal fun PaymentOptionUi(
             Column(
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.fillMaxSize()
             ) {
                 Image(
                     painter = painterResource(iconRes),
@@ -589,7 +591,7 @@ internal fun PaymentOptionUi(
 
         LpmSelectorText(
             text = labelText,
-            textColor = PaymentsTheme.colors.material.onPrimary,
+            textColor = PaymentsTheme.colors.material.onSurface,
             isEnabled = isEnabled,
             modifier = Modifier
                 .constrainAs(label) {

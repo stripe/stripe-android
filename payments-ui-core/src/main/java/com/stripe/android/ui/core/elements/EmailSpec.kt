@@ -9,6 +9,6 @@ object EmailSpec : SectionFieldSpec(IdentifierSpec.Email) {
     fun transform(email: String?): SectionFieldElement =
         EmailElement(
             this.identifier,
-            TextFieldController(EmailConfig(), initialValue = email),
+            SimpleTextFieldController(EmailConfig(), initialValue = email),
         )
 }

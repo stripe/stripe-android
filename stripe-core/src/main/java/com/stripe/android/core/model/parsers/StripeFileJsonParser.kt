@@ -1,21 +1,21 @@
 package com.stripe.android.core.model.parsers
 
 import androidx.annotation.RestrictTo
-import com.stripe.android.core.model.InternalStripeFile
-import com.stripe.android.core.model.InternalStripeFilePurpose
+import com.stripe.android.core.model.StripeFile
+import com.stripe.android.core.model.StripeFilePurpose
 import com.stripe.android.core.model.StripeJsonUtils.optInteger
 import com.stripe.android.core.model.StripeJsonUtils.optLong
 import com.stripe.android.core.model.StripeJsonUtils.optString
 import org.json.JSONObject
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class StripeFileJsonParser : ModelJsonParser<InternalStripeFile> {
-    override fun parse(json: JSONObject): InternalStripeFile {
-        return InternalStripeFile(
+class StripeFileJsonParser : ModelJsonParser<StripeFile> {
+    override fun parse(json: JSONObject): StripeFile {
+        return StripeFile(
             id = optString(json, FIELD_ID),
             created = optLong(json, FIELD_CREATED),
             filename = optString(json, FIELD_FILENAME),
-            purpose = InternalStripeFilePurpose.fromCode(optString(json, FIELD_PURPOSE)),
+            purpose = StripeFilePurpose.fromCode(optString(json, FIELD_PURPOSE)),
             size = optInteger(json, FIELD_SIZE),
             title = optString(json, FIELD_TITLE),
             type = optString(json, FIELD_TYPE),

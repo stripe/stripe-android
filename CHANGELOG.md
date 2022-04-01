@@ -4,6 +4,11 @@ This release patches a crash with payment launcher when there is a configuration
 
 ### Payments
 * [FIXED] [4776](https://github.com/stripe/stripe-android/pull/4776) fix issue with PaymentLauncher configuration change
+* [CHANGED] [4358](https://github.com/stripe/stripe-android/pull/4358) Updated the card element on
+  PaymentSheet to use Compose.
+* [CHANGED] [4800](https://github.com/stripe/stripe-android/pull/4800) Relocated network exceptions
+  to :stripe-core.
+* [CHANGED] [4803](https://github.com/stripe/stripe-android/pull/4803) Remove network related internal files.
 
 ## 19.3.1 - 2022-03-22
 This release patches an issue with 3ds2 confirmation
@@ -16,6 +21,7 @@ This release enables a new configuration object to be defined for StripeCardScan
 
 ### PaymentSheet
 * [FIXED] [4646](https://github.com/stripe/stripe-android/pull/4646) Update 3ds2 to latest version 6.1.4, see PR for specific issues addressed.
+* [FIXED] [4669](https://github.com/stripe/stripe-android/pull/4669) Restrict the list of SEPA debit supported countries.
 
 ### CardScan
 * [ADDED] [4689](https://github.com/stripe/stripe-android/pull/4689) The `CardImageVerificationSheet` initializer can now take an additional `Configuration` object.

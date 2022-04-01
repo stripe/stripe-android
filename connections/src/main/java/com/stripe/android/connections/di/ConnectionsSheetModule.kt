@@ -10,6 +10,7 @@ import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.AnalyticsRequestFactory
+import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
 import com.stripe.android.core.networking.StripeNetworkClient
@@ -34,6 +35,10 @@ internal object ConnectionsSheetModule {
         workContext = context,
         logger = logger
     )
+
+    @Provides
+    @Singleton
+    fun providesApiRequestFactory(): ApiRequest.Factory = ApiRequest.Factory()
 
     @Provides
     @Singleton

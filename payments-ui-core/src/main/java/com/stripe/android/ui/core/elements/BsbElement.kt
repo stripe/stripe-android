@@ -1,10 +1,12 @@
 package com.stripe.android.ui.core.elements
 
+import androidx.annotation.RestrictTo
 import com.stripe.android.ui.core.forms.FormFieldEntry
 import com.stripe.android.view.BecsDebitBanks
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class BsbElement(
     private val identifierSpec: IdentifierSpec,
     private val banks: List<BecsDebitBanks.Bank>
@@ -14,9 +16,9 @@ class BsbElement(
     override val identifier: IdentifierSpec
         get() = identifierSpec
 
-    val textElement: SimpleTextElement = SimpleTextElement(
+    internal val textElement: SimpleTextElement = SimpleTextElement(
         identifier = IdentifierSpec.Generic("bsb_number"),
-        TextFieldController(BsbConfig(banks))
+        SimpleTextFieldController(BsbConfig(banks))
     )
 
     val bankName = textElement.controller.fieldValue.map { textFieldValue ->

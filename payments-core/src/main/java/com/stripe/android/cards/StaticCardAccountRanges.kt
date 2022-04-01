@@ -1,8 +1,10 @@
 package com.stripe.android.cards
 
+import androidx.annotation.RestrictTo
 import com.stripe.android.model.AccountRange
 
-internal interface StaticCardAccountRanges {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+interface StaticCardAccountRanges {
     /**
      * Return the first [AccountRange] that contains the given [cardNumber], or `null`.
      */

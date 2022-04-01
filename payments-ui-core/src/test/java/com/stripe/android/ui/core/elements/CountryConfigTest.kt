@@ -28,4 +28,35 @@ class CountryConfigTest {
             ).getDisplayItems()[0]
         ).isEqualTo("Austria")
     }
+
+    @Test
+    fun `test country list `() {
+        val defaultCountries = CountryConfig(
+            onlyShowCountryCodes = emptySet(),
+            locale = Locale.US
+        ).getDisplayItems()
+        val supportedCountries = CountryConfig(
+            onlyShowCountryCodes = supportedBillingCountries,
+            locale = Locale.US
+        ).getDisplayItems()
+
+        val excludedCountries = setOf(
+            "American Samoa", "Christmas Island", "Cocos (Keeling) Islands", "Cuba",
+            "Heard & McDonald Islands", "Iran", "Marshall Islands", "Micronesia",
+            "Norfolk Island", "North Korea", "Northern Mariana Islands", "Palau", "Sudan", "Syria",
+            "U.S. Outlying Islands", "U.S. Virgin Islands"
+        )
+
+        excludedCountries.forEach {
+            assertThat(supportedCountries.contains(it)).isFalse()
+        }
+
+        assertThat(
+            defaultCountries.size
+        ).isEqualTo(249)
+
+        assertThat(
+            supportedCountries.size
+        ).isEqualTo(233)
+    }
 }

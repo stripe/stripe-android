@@ -29,7 +29,6 @@ import com.stripe.android.paymentsheet.model.FragmentConfigFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.model.SupportedPaymentMethod
-import com.stripe.android.paymentsheet.paymentdatacollection.CardDataCollectionFragment
 import com.stripe.android.paymentsheet.paymentdatacollection.ComposeFormDataCollectionFragment
 import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
@@ -132,6 +131,7 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
     }
 
     @Test
+    // TODO: Intermittent failure
     fun `when back to Ready state should update PaymentSelection`() {
         createFragment(
             paymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
@@ -149,25 +149,26 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
 
             idleLooper()
             // Start with null PaymentSelection because the card entered is invalid
+            paymentSelections.forEach {
+                println(it?.toString())
+            }
             assertThat(paymentSelections.size)
-                .isEqualTo(1)
-            assertThat(paymentSelections[0])
-                .isNull()
+                .isEqualTo(0)
 
             viewBinding.googlePayButton.performClick()
 
             // Updates PaymentSelection to Google Pay
             assertThat(paymentSelections.size)
-                .isEqualTo(2)
-            assertThat(paymentSelections[1])
+                .isEqualTo(1)
+            assertThat(paymentSelections[0])
                 .isEqualTo(PaymentSelection.GooglePay)
 
             fragment.sheetViewModel._viewState.value = PaymentSheetViewState.Reset(null)
 
             // Back to Ready state, should return to null PaymentSelection
             assertThat(paymentSelections.size)
-                .isEqualTo(3)
-            assertThat(paymentSelections[2])
+                .isEqualTo(2)
+            assertThat(paymentSelections[1])
                 .isNull()
         }
     }
@@ -258,8 +259,6 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
 
             fragment.sheetViewModel._viewState.value = PaymentSheetViewState.Reset()
 
-            idleLooper()
-
             assertThat(fragment.sheetViewModel.selection.value).isEqualTo(lastPaymentMethod)
         }
     }
@@ -272,8 +271,6 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
             val errorMessage = "Error message"
             fragment.sheetViewModel._viewState.value =
                 PaymentSheetViewState.Reset(BaseSheetViewModel.UserErrorMessage(errorMessage))
-
-            idleLooper()
 
             assertThat(viewBinding.message.isVisible).isTrue()
             assertThat(viewBinding.message.text).isEqualTo(errorMessage)
@@ -295,8 +292,6 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
             val errorMessage = "Error message"
             fragment.sheetViewModel._viewState.value =
                 PaymentSheetViewState.Reset(BaseSheetViewModel.UserErrorMessage(errorMessage))
-
-            idleLooper()
 
             assertThat(viewBinding.message.isVisible).isTrue()
             assertThat(viewBinding.message.text).isEqualTo(errorMessage)
@@ -331,7 +326,7 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
                 fragment.childFragmentManager.findFragmentById(
                     viewBinding.paymentMethodFragmentContainer.id
                 )
-            ).isInstanceOf(CardDataCollectionFragment::class.java)
+            ).isInstanceOf(ComposeFormDataCollectionFragment::class.java)
 
             fragment.onPaymentMethodSelected(SupportedPaymentMethod.Bancontact)
             idleLooper()
@@ -406,7 +401,7 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
                 fragment.childFragmentManager.findFragmentById(
                     viewBinding.paymentMethodFragmentContainer.id
                 )
-            ).isInstanceOf(CardDataCollectionFragment::class.java)
+            ).isInstanceOf(ComposeFormDataCollectionFragment::class.java)
 
             fragment.onPaymentMethodSelected(SupportedPaymentMethod.Card)
 
@@ -416,7 +411,7 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
                 viewBinding.paymentMethodFragmentContainer.id
             )
 
-            assertThat(addedFragment).isInstanceOf(CardDataCollectionFragment::class.java)
+            assertThat(addedFragment).isInstanceOf(ComposeFormDataCollectionFragment::class.java)
             assertThat(
                 addedFragment?.arguments?.getParcelable<FormFragmentArguments>(
                     ComposeFormDataCollectionFragment.EXTRA_CONFIG
@@ -450,7 +445,7 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
                 viewBinding.paymentMethodFragmentContainer.id
             )
 
-            assertThat(addedFragment).isInstanceOf(CardDataCollectionFragment::class.java)
+            assertThat(addedFragment).isInstanceOf(ComposeFormDataCollectionFragment::class.java)
 
             assertThat(
                 addedFragment?.arguments?.getParcelable<FormFragmentArguments>(
@@ -476,7 +471,7 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
                 fragment.childFragmentManager.findFragmentById(
                     viewBinding.paymentMethodFragmentContainer.id
                 )
-            ).isInstanceOf(CardDataCollectionFragment::class.java)
+            ).isInstanceOf(ComposeFormDataCollectionFragment::class.java)
 
             var paymentSelection: PaymentSelection? = null
             fragment.sheetViewModel.selection.observeForever {
@@ -490,7 +485,7 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
 
             fragment.onPaymentMethodSelected(SupportedPaymentMethod.Card)
             idleLooper()
-            assertThat(paymentSelection).isNull()
+            assertThat(paymentSelection).isInstanceOf(PaymentSelection.Saved::class.java)
         }
     }
 
@@ -504,7 +499,7 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
                 fragment.childFragmentManager.findFragmentById(
                     viewBinding.paymentMethodFragmentContainer.id
                 )
-            ).isInstanceOf(CardDataCollectionFragment::class.java)
+            ).isInstanceOf(ComposeFormDataCollectionFragment::class.java)
 
             fragment.onPaymentMethodSelected(SupportedPaymentMethod.Card)
 
@@ -514,7 +509,7 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
                 viewBinding.paymentMethodFragmentContainer.id
             )
 
-            assertThat(addedFragment).isInstanceOf(CardDataCollectionFragment::class.java)
+            assertThat(addedFragment).isInstanceOf(ComposeFormDataCollectionFragment::class.java)
             assertThat(
                 addedFragment?.arguments?.getParcelable<FormFragmentArguments>(
                     ComposeFormDataCollectionFragment.EXTRA_CONFIG

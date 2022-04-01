@@ -105,7 +105,7 @@ data class LinkedAccount(
     @SerialName("permissions")
     val permissions: List<Permissions>? = null
 
-) : StripeModel, Parcelable {
+) : StripeModel, Parcelable, PaymentAccount() {
 
     /**
      *
@@ -218,5 +218,9 @@ data class LinkedAccount(
         TRANSACTIONS("transactions"),
 
         UNKNOWN("unknown");
+    }
+
+    companion object {
+        const val OBJECT = "linked_account"
     }
 }

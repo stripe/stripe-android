@@ -15,4 +15,7 @@
 
     <!-- Label indicating the payment intent is in testmode -->
     <string name="stripe_paymentsheet_test_mode_indicator">TEST MODE</string>
+
+    <!-- Card details entry form header title -->
+    <string name="stripe_paymentsheet_add_payment_method_card_information">Card information</string>
 </resources>

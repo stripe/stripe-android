@@ -10,6 +10,8 @@ import androidx.compose.ui.text.input.TransformedText
 import androidx.compose.ui.text.input.VisualTransformation
 import com.stripe.android.ui.core.R
 import com.stripe.android.view.BecsDebitBanks
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 
 /**
  * A text field configuration for a BSB number, or Bank State Branch Number,
@@ -19,6 +21,9 @@ import com.stripe.android.view.BecsDebitBanks
 class BsbConfig(private val banks: List<BecsDebitBanks.Bank>) : TextFieldConfig {
     override val capitalization: KeyboardCapitalization = KeyboardCapitalization.None
     override val debugLabel = "bsb"
+
+    override val trailingIcon: StateFlow<TextFieldIcon?> = MutableStateFlow(null)
+    override val loading: StateFlow<Boolean> = MutableStateFlow(false)
 
     @StringRes
     override val label = R.string.becs_widget_bsb

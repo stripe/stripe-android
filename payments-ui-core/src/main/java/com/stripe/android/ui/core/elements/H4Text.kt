@@ -14,7 +14,7 @@ fun H4Text(
 ) {
     Text(
         text = text,
-        color = PaymentsTheme.colors.material.onPrimary,
+        color = PaymentsTheme.colors.material.onSurface,
         style = PaymentsTheme.typography.h4,
         modifier = modifier
     )
