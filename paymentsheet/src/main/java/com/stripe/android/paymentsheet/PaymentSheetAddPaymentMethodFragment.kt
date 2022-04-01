@@ -82,7 +82,7 @@ internal class PaymentSheetAddPaymentMethodFragment() : BaseAddPaymentMethodFrag
     }
 
     private fun updateErrorMessage(userMessage: BaseSheetViewModel.UserErrorMessage?) {
-        userMessage?.message?.let { message ->
+        userMessage?.message.let { message ->
             context?.let {
                 viewBinding.message.text = createTextSpanFromTextStyle(
                     text = message,

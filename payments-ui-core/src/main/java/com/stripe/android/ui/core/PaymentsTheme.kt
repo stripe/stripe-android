@@ -300,14 +300,14 @@ fun Context.convertDpToPx(dp: Dp): Float {
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun createTextSpanFromTextStyle(
-    text: String,
+    text: String?,
     context: Context,
     textStyle: TextStyle,
     color: Color,
     @FontRes
     fontFamily: Int
 ): SpannableString {
-    val span = SpannableString(text)
+    val span = SpannableString(text ?: "")
 
     val fontSize = context.convertDpToPx(textStyle.fontSize.value.dp)
     span.setSpan(AbsoluteSizeSpan(fontSize.toInt()), 0, span.length, 0)

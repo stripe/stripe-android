@@ -192,7 +192,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
     }
 
     private fun updateErrorMessage(userMessage: BaseSheetViewModel.UserErrorMessage? = null) {
-        userMessage?.message?.let { message ->
+        userMessage?.message.let { message ->
             messageView.text = createTextSpanFromTextStyle(
                 text = message,
                 context = this,
