@@ -4,9 +4,6 @@ import android.app.Activity
 import android.content.Intent
 import android.content.res.ColorStateList
 import android.os.Bundle
-import android.text.SpannableString
-import android.text.style.AbsoluteSizeSpan
-import android.text.style.ForegroundColorSpan
 import android.view.ViewGroup
 import android.widget.ScrollView
 import android.widget.TextView
@@ -14,8 +11,6 @@ import androidx.activity.viewModels
 import androidx.annotation.IdRes
 import androidx.annotation.VisibleForTesting
 import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.unit.dp
-import androidx.core.content.res.ResourcesCompat
 import androidx.core.os.bundleOf
 import androidx.core.view.doOnNextLayout
 import androidx.core.view.isVisible
@@ -32,9 +27,8 @@ import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.ui.AnimationConstants
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
-import com.stripe.android.ui.core.CustomTypefaceSpan
 import com.stripe.android.ui.core.PaymentsThemeConfig
-import com.stripe.android.ui.core.convertDpToPx
+import com.stripe.android.ui.core.createTextSpanFromTextStyle
 import com.stripe.android.ui.core.isSystemDarkTheme
 import kotlinx.coroutines.launch
 import java.security.InvalidParameterException
@@ -199,24 +193,13 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
 
     private fun updateErrorMessage(userMessage: BaseSheetViewModel.UserErrorMessage? = null) {
         userMessage?.message?.let { message ->
-            val span = SpannableString(message)
-
-            val fontSize = this.convertDpToPx(
-                PaymentsThemeConfig.Typography.h6.fontSize.value.dp
+            messageView.text = createTextSpanFromTextStyle(
+                text = message,
+                context = this,
+                textStyle = PaymentsThemeConfig.Typography.h6,
+                color = PaymentsThemeConfig.colors(baseContext.isSystemDarkTheme()).error,
+                fontFamily = PaymentsThemeConfig.Typography.fontFamily
             )
-            span.setSpan(AbsoluteSizeSpan(fontSize.toInt()), 0, span.length, 0)
-
-            val color = PaymentsThemeConfig.colors(baseContext.isSystemDarkTheme()).error.toArgb()
-            span.setSpan(ForegroundColorSpan(color), 0, span.length, 0)
-
-            ResourcesCompat.getFont(
-                this,
-                PaymentsThemeConfig.Typography.fontFamily
-            )?.let {
-                span.setSpan(CustomTypefaceSpan(it), 0, span.length, 0)
-            }
-
-            messageView.text = span
         }
 
         messageView.isVisible = userMessage != null

@@ -3,6 +3,14 @@ package com.stripe.android.ui.core
 import android.content.Context
 import android.content.res.Configuration.UI_MODE_NIGHT_MASK
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
+import android.graphics.Paint
+import android.graphics.Typeface
+import android.text.SpannableString
+import android.text.TextPaint
+import android.text.style.AbsoluteSizeSpan
+import android.text.style.ForegroundColorSpan
+import android.text.style.MetricAffectingSpan
+import androidx.annotation.FontRes
 import androidx.annotation.RestrictTo
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -17,6 +25,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
@@ -24,6 +33,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.res.ResourcesCompat
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 data class PaymentsColors(
@@ -286,4 +296,47 @@ fun Context.isSystemDarkTheme(): Boolean {
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun Context.convertDpToPx(dp: Dp): Float {
     return dp.value * resources.displayMetrics.density
+}
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+fun createTextSpanFromTextStyle(
+    text: String,
+    context: Context,
+    textStyle: TextStyle,
+    color: Color,
+    @FontRes
+    fontFamily: Int
+): SpannableString {
+    val span = SpannableString(text)
+
+    val fontSize = context.convertDpToPx(textStyle.fontSize.value.dp)
+    span.setSpan(AbsoluteSizeSpan(fontSize.toInt()), 0, span.length, 0)
+
+    span.setSpan(ForegroundColorSpan(color.toArgb()), 0, span.length, 0)
+
+    ResourcesCompat.getFont(
+        context,
+        fontFamily
+    )?.let {
+        span.setSpan(CustomTypefaceSpan(it), 0, span.length, 0)
+    }
+
+    return span
+}
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+internal class CustomTypefaceSpan(private val typeface: Typeface) : MetricAffectingSpan() {
+    override fun updateDrawState(ds: TextPaint) {
+        applyCustomTypeFace(ds, typeface)
+    }
+
+    override fun updateMeasureState(paint: TextPaint) {
+        applyCustomTypeFace(paint, typeface)
+    }
+
+    companion object {
+        private fun applyCustomTypeFace(paint: Paint, tf: Typeface) {
+            paint.typeface = tf
+        }
+    }
 }
