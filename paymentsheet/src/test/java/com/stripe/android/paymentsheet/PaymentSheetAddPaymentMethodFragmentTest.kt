@@ -273,7 +273,7 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
                 PaymentSheetViewState.Reset(BaseSheetViewModel.UserErrorMessage(errorMessage))
 
             assertThat(viewBinding.message.isVisible).isTrue()
-            assertThat(viewBinding.message.text).isEqualTo(errorMessage)
+            assertThat(viewBinding.message.text.toString()).isEqualTo(errorMessage)
 
             fragment.sheetViewModel.updateSelection(
                 PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
@@ -294,7 +294,7 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
                 PaymentSheetViewState.Reset(BaseSheetViewModel.UserErrorMessage(errorMessage))
 
             assertThat(viewBinding.message.isVisible).isTrue()
-            assertThat(viewBinding.message.text).isEqualTo(errorMessage)
+            assertThat(viewBinding.message.text.toString()).isEqualTo(errorMessage)
 
             viewBinding.googlePayButton.performClick()
 
