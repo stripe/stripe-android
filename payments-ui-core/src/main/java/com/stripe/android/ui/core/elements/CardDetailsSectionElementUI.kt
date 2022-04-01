@@ -26,7 +26,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.stripe.android.stripecardscan.cardscan.CardScanSheetResult
 import com.stripe.android.stripecardscan.cardscan.exception.UnknownScanException
-import com.stripe.android.ui.core.CARD_SCAN_PARCELABLE_NAME
 import com.stripe.android.ui.core.CardScanActivity
 import com.stripe.android.ui.core.DefaultIsStripeCardScanAvailable
 import com.stripe.android.ui.core.PaymentsTheme
@@ -64,7 +63,7 @@ fun CardDetailsSectionElementUI(
                 rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
                     if (it.data != null) {
                         cardDetailsElement.controller.numberElement.controller.onCardScanResult(
-                            it.data!!.getParcelableExtra(CARD_SCAN_PARCELABLE_NAME)
+                            it.data!!.getParcelableExtra(CardScanActivity.CARD_SCAN_PARCELABLE_NAME)
                                 ?: CardScanSheetResult.Failed(
                                     UnknownScanException("No data in the result intent")
                                 )

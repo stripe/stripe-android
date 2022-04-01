@@ -7,8 +7,6 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.stripecardscan.cardscan.CardScanSheetResult
 import com.stripe.android.ui.core.databinding.ActivityCardScanBinding
 
-const val CARD_SCAN_PARCELABLE_NAME = "CardScanActivityResult"
-
 class CardScanActivity : AppCompatActivity() {
     private val viewBinding by lazy {
         ActivityCardScanBinding.inflate(layoutInflater)
@@ -45,5 +43,9 @@ class CardScanActivity : AppCompatActivity() {
     override fun onStop() {
         StripeCardScanProxy.removeCardScanFragment(supportFragmentManager)
         super.onStop()
+    }
+
+    companion object {
+        const val CARD_SCAN_PARCELABLE_NAME = "CardScanActivityResult"
     }
 }
