@@ -7,6 +7,7 @@ import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.connections.ConnectionsSheetResult.Completed
 import com.stripe.android.connections.ConnectionsSheetViewEffect.FinishWithResult
+import com.stripe.android.connections.ConnectionsSheetViewEffect.OpenAuthFlowWithUrl
 import com.stripe.android.connections.analytics.ConnectionsEventReporter
 import com.stripe.android.connections.domain.FetchLinkAccountSession
 import com.stripe.android.connections.domain.GenerateLinkAccountSessionManifest
@@ -41,6 +42,22 @@ class ConnectionsSheetViewModelTest {
     )
     private val fetchLinkAccountSession = mock<FetchLinkAccountSession>()
     private val generateLinkAccountSessionManifest = mock<GenerateLinkAccountSessionManifest>()
+
+    @Test
+    fun `init - when fetch manifest succeeds, emits OpenAuthFlow with retrieved url`() = runTest {
+        // Given
+        val expectedLinkAccountSession = linkAccountSession()
+        whenever(generateLinkAccountSessionManifest(any(), any())).thenReturn(manifest)
+        whenever(fetchLinkAccountSession(any())).thenReturn(expectedLinkAccountSession)
+
+        // When
+        createViewModel(configuration).state.test {
+
+            // Then
+            assertThat(expectMostRecentItem().viewEffects.last())
+                .isEqualTo(OpenAuthFlowWithUrl(manifest.hostedAuthUrl))
+        }
+    }
 
     @Test
     fun `init - eventReporter fires onPresented`() {
