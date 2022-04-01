@@ -482,14 +482,6 @@ public final class com/stripe/android/paymentsheet/databinding/StripeGooglePayBu
 	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;)Lcom/stripe/android/paymentsheet/databinding/StripeGooglePayButtonBinding;
 }
 
-public final class com/stripe/android/paymentsheet/databinding/StripeGooglePayDividerBinding : androidx/viewbinding/ViewBinding {
-	public final field dividerLine Landroid/view/View;
-	public final field dividerText Landroidx/compose/ui/platform/ComposeView;
-	public static fun bind (Landroid/view/View;)Lcom/stripe/android/paymentsheet/databinding/StripeGooglePayDividerBinding;
-	public fun getRoot ()Landroid/view/View;
-	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;)Lcom/stripe/android/paymentsheet/databinding/StripeGooglePayDividerBinding;
-}
-
 public final class com/stripe/android/paymentsheet/databinding/StripeHorizontalDividerBinding : androidx/viewbinding/ViewBinding {
 	public static fun bind (Landroid/view/View;)Lcom/stripe/android/paymentsheet/databinding/StripeHorizontalDividerBinding;
 	public fun getRoot ()Landroid/view/View;

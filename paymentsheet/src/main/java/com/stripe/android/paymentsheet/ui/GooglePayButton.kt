@@ -3,7 +3,6 @@ package com.stripe.android.paymentsheet.ui
 import android.content.Context
 import android.content.res.ColorStateList
 import android.graphics.Color
-import android.graphics.drawable.GradientDrawable
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.widget.FrameLayout
@@ -31,14 +30,16 @@ internal class GooglePayButton @JvmOverloads constructor(
     }
 
     fun setBackgroundColor(useDarkResources: Boolean) {
-        val shape = GradientDrawable()
-        shape.shape = GradientDrawable.RECTANGLE
-        shape.cornerRadius = resources.getDimensionPixelSize(
-            R.dimen.stripe_paymentsheet_googlepay_button_corner_radius
-        ).toFloat()
-        shape.color = ColorStateList.valueOf(if (useDarkResources) Color.BLACK else Color.WHITE)
-
-        viewBinding.googlePayButtonIcon.background = shape
+        val backgroundDrawable = if (useDarkResources) {
+            R.drawable.stripe_googlepay_button_no_shadow_background_dark
+        } else {
+            R.drawable.stripe_googlepay_button_no_shadow_background_light
+        }
+        viewBinding.googlePayButtonIcon.background = ResourcesCompat.getDrawable(
+            resources,
+            backgroundDrawable,
+            null
+        )
 
         val contentDrawable = if (useDarkResources) R.drawable.stripe_googlepay_button_content_dark
         else R.drawable.stripe_googlepay_button_content_light
@@ -49,7 +50,8 @@ internal class GooglePayButton @JvmOverloads constructor(
             )
         )
 
-        viewBinding.primaryButton.background = shape
+        val primaryButtonColor = if (useDarkResources) Color.BLACK else Color.WHITE
+        viewBinding.primaryButton.backgroundTintList = (ColorStateList.valueOf(primaryButtonColor))
     }
 
     private fun onReadyState() {
