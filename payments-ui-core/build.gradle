@@ -64,6 +64,7 @@ dependencies {
     testImplementation "androidx.test.ext:junit-ktx:$androidTestJunitVersion"
     testImplementation "androidx.arch.core:core-testing:$androidxArchCoreVersion"
     testImplementation "androidx.fragment:fragment-testing:$androidxFragmentVersion"
+    testImplementation project(':stripecardscan')
 
     ktlint "com.pinterest:ktlint:$ktlintVersion"
 }

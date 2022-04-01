@@ -1,9 +1,7 @@
 package com.stripe.android.ui.core.forms
 
-import androidx.appcompat.view.ContextThemeWrapper
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.BankDropdownSpec
@@ -36,8 +34,6 @@ import java.io.File
 
 internal class TransformSpecToElementTest {
 
-    private val context = ContextThemeWrapper(ApplicationProvider.getApplicationContext(), R.style.StripeDefaultTheme)
-
     private val nameSection = SectionSpec(
         IdentifierSpec.Generic("name_section"),
         SimpleTextSpec.NAME
@@ -67,8 +63,7 @@ internal class TransformSpecToElementTest {
                 amount = null,
                 country = "DE",
                 saveForFutureUseInitialValue = true,
-                merchantName = "Merchant, Inc.",
-                context
+                merchantName = "Merchant, Inc."
             )
     }
 
