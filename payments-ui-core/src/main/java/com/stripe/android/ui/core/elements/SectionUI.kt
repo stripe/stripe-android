@@ -2,6 +2,7 @@ package com.stripe.android.ui.core.elements
 
 import androidx.annotation.RestrictTo
 import androidx.annotation.StringRes
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Card
@@ -44,7 +45,7 @@ internal fun SectionTitle(@StringRes titleText: Int?) {
         H6Text(
             text = stringResource(titleText),
             modifier = Modifier
-                .padding(vertical = 4.dp)
+                .padding(bottom = 4.dp)
                 .semantics(mergeDescendants = true) { // Need to prevent form as focusable accessibility
                     heading()
                 }
