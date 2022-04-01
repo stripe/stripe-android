@@ -63,7 +63,7 @@
 
                 <ImageView
                     android:id="@+id/plus"
-                    android:src="@drawable/ic_baseline_add_16"
+                    android:src="@drawable/plus_icon"
                     android:layout_width="16dp"
                     android:layout_height="16dp" />
 
@@ -95,7 +95,7 @@
                 android:textStyle="bold"
                 android:layout_marginBottom="12dp"
                 android:drawablePadding="6dp"
-                app:drawableStartCompat="@drawable/ic_clock_16"
+                app:drawableStartCompat="@drawable/time_estimate_icon"
                 app:layout_constraintBottom_toTopOf="@id/divider"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -109,7 +109,7 @@
                 android:textStyle="bold"
                 android:layout_marginBottom="@dimen/item_vertical_margin"
                 android:drawablePadding="6dp"
-                app:drawableStartCompat="@drawable/ic_exclamation_square_16" />
+                app:drawableStartCompat="@drawable/privacy_policy_icon" />
 
             <View
                 android:id="@+id/divider"

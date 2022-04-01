@@ -12,6 +12,9 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
+import com.stripe.android.ui.core.PaymentsThemeConfig
+import com.stripe.android.ui.core.createTextSpanFromTextStyle
+import com.stripe.android.ui.core.isSystemDarkTheme
 
 internal class PaymentSheetAddPaymentMethodFragment() : BaseAddPaymentMethodFragment() {
     override val viewModelFactory: ViewModelProvider.Factory = PaymentSheetViewModel.Factory(
@@ -42,7 +45,6 @@ internal class PaymentSheetAddPaymentMethodFragment() : BaseAddPaymentMethodFrag
 
         viewBinding = FragmentPaymentsheetAddPaymentMethodBinding.bind(view)
         val googlePayButton = viewBinding.googlePayButton
-        val googlePayDivider = viewBinding.googlePayDivider
 
         googlePayButton.setOnClickListener {
             // The scroll will be made visible onResume of the activity
@@ -52,7 +54,7 @@ internal class PaymentSheetAddPaymentMethodFragment() : BaseAddPaymentMethodFrag
         }
 
         googlePayButton.isVisible = shouldShowGooglePayButton
-        googlePayDivider.isVisible = shouldShowGooglePayButton
+        sheetViewModel.googlePayDividerVisibilility.postValue(shouldShowGooglePayButton)
         sheetViewModel.headerVisibilility.postValue(!shouldShowGooglePayButton)
 
         sheetViewModel.selection.observe(viewLifecycleOwner) { paymentSelection ->
@@ -79,7 +81,17 @@ internal class PaymentSheetAddPaymentMethodFragment() : BaseAddPaymentMethodFrag
     }
 
     private fun updateErrorMessage(userMessage: BaseSheetViewModel.UserErrorMessage?) {
+        userMessage?.message.let { message ->
+            context?.let {
+                viewBinding.message.text = createTextSpanFromTextStyle(
+                    text = message,
+                    context = it,
+                    textStyle = PaymentsThemeConfig.Typography.h6,
+                    color = PaymentsThemeConfig.colors(it.isSystemDarkTheme()).error,
+                    fontFamily = PaymentsThemeConfig.Typography.fontFamily
+                )
+            }
+        }
         viewBinding.message.isVisible = userMessage != null
-        viewBinding.message.text = userMessage?.message
     }
 }

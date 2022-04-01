@@ -13,7 +13,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.progressindicator.CircularProgressIndicator
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.core.model.InternalStripeFile
+import com.stripe.android.core.model.StripeFile
 import com.stripe.android.identity.R
 import com.stripe.android.identity.SUCCESS_VERIFICATION_PAGE
 import com.stripe.android.identity.camera.IDDetectorAggregator
@@ -303,14 +303,14 @@ class PassportScanFragmentTest {
 
     private companion object {
         val FRONT_HIGH_RES_RESULT = UploadedResult(
-            uploadedStripeFile = InternalStripeFile(
+            uploadedStripeFile = StripeFile(
                 id = "frontHighResResult"
             ),
             scores = listOf(0.1f, 0.2f, 0.3f, 0.4f, 0.5f),
             uploadMethod = DocumentUploadParam.UploadMethod.AUTOCAPTURE
         )
         val FRONT_LOW_RES_RESULT = UploadedResult(
-            uploadedStripeFile = InternalStripeFile(
+            uploadedStripeFile = StripeFile(
                 id = "frontLowResResult"
             ),
             scores = listOf(0.1f, 0.2f, 0.3f, 0.4f, 0.5f),

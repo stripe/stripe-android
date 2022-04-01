@@ -11,5 +11,8 @@ internal data class VerificationPageStaticContentDocumentSelectPage(
     @SerialName("id_document_type_allowlist")
     val idDocumentTypeAllowlist: Map<String, String>,
     @SerialName("title")
-    val title: String
+    val title: String,
+    @SerialName("body")
+    val body: String?
+
 )

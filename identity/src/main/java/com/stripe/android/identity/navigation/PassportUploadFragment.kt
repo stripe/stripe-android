@@ -1,163 +1,60 @@
 package com.stripe.android.identity.navigation
 
-import android.net.Uri
 import android.os.Bundle
 import android.util.Log
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
-import android.widget.Button
-import android.widget.TextView
-import androidx.appcompat.app.AppCompatDialog
-import androidx.fragment.app.Fragment
-import androidx.fragment.app.activityViewModels
-import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.identity.R
-import com.stripe.android.identity.databinding.PassportUploadFragmentBinding
-import com.stripe.android.identity.networking.Status
 import com.stripe.android.identity.networking.models.ClearDataParam
 import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.networking.models.DocumentUploadParam
 import com.stripe.android.identity.networking.models.IdDocumentParam
-import com.stripe.android.identity.utils.ARG_SHOULD_SHOW_CAMERA
+import com.stripe.android.identity.states.IdentityScanState
 import com.stripe.android.identity.utils.navigateToDefaultErrorFragment
 import com.stripe.android.identity.utils.postVerificationPageDataAndMaybeSubmit
 import com.stripe.android.identity.viewmodel.IdentityViewModel
-import com.stripe.android.identity.viewmodel.PassportUploadViewModel
 import kotlinx.coroutines.launch
 
 /**
  * Fragment to upload passport.
  */
 internal class PassportUploadFragment(
-    private val passportUploadViewModelFactory: ViewModelProvider.Factory,
-    private val identityViewModelFactory: ViewModelProvider.Factory
-) : Fragment() {
-
-    lateinit var binding: PassportUploadFragmentBinding
-
-    private val passportUploadViewModel: PassportUploadViewModel by viewModels {
-        passportUploadViewModelFactory
-    }
-
-    private val identityViewModel: IdentityViewModel by activityViewModels {
-        identityViewModelFactory
-    }
-
-    private var shouldShowCamera: Boolean = false
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        passportUploadViewModel.registerActivityResultCaller(this)
-    }
-
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        val args = requireNotNull(arguments) {
-            "Argument to PassportUploadFragment is null"
-        }
-        shouldShowCamera = args[ARG_SHOULD_SHOW_CAMERA] as Boolean
-
-        binding = PassportUploadFragmentBinding.inflate(layoutInflater, container, false)
-
-        binding.select.setOnClickListener {
-            buildDialog().show()
-        }
-
-        binding.kontinue.isEnabled = false
-        binding.kontinue.setText(getString(R.string.kontinue))
-        return binding.root
-    }
+    identityUploadViewModelFactory: ViewModelProvider.Factory,
+    identityViewModelFactory: ViewModelProvider.Factory
+) : IdentityUploadFragment(identityUploadViewModelFactory, identityViewModelFactory) {
+    override val titleRes = R.string.file_upload
+    override val contextRes = R.string.file_upload_content_passport
+    override val frontTextRes = R.string.passport
+    override val frontCheckMarkContentDescription = R.string.passport_selected
+    override val frontScanType = IdentityScanState.ScanType.PASSPORT
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        identityViewModel.frontHighResUploaded.observe(viewLifecycleOwner) {
-            when (it.status) {
-                Status.SUCCESS -> {
-                    showUploadDone(it.data)
-                }
-                Status.ERROR -> {
-                    Log.e(TAG, "error uploading passport image: $it")
-                    navigateToDefaultErrorFragment()
-                }
-                Status.LOADING -> {
-                    showUploading()
-                }
-            }
-        }
+        observeForFrontUploaded()
     }
 
-    private fun buildDialog() = AppCompatDialog(requireContext()).also { dialog ->
-        dialog.setContentView(R.layout.get_local_image_dialog)
-        dialog.findViewById<TextView>(R.id.title)?.text =
-            getString(R.string.upload_dialog_title_passport)
-
-        if (shouldShowCamera) {
-            dialog.findViewById<Button>(R.id.take_photo)?.setOnClickListener {
-                dialog.dismiss()
-                passportUploadViewModel.takePhoto(requireContext()) {
-                    upload(it, DocumentUploadParam.UploadMethod.MANUALCAPTURE)
-                }
-            }
-        } else {
-            requireNotNull(dialog.findViewById(R.id.take_photo)).visibility = View.GONE
-        }
-        dialog.findViewById<Button>(R.id.choose_file)?.setOnClickListener {
-            dialog.dismiss()
-            passportUploadViewModel.chooseImage {
-                upload(it, DocumentUploadParam.UploadMethod.FILEUPLOAD)
-            }
-        }
+    override fun showFrontDone(frontResult: IdentityViewModel.UploadedResult?) {
+        super.showFrontDone(frontResult)
+        enableKontinueWhenFrontUploaded(frontResult)
     }
 
-    private fun upload(passport: Uri, uploadMethod: DocumentUploadParam.UploadMethod) {
-        identityViewModel.observeForVerificationPage(
-            this,
-            onSuccess = { verificationPage ->
-                identityViewModel.uploadManualResult(
-                    uri = passport,
-                    isFront = true, // passport is uploaded as front
-                    docCapturePage = verificationPage.documentCapture,
-                    uploadMethod = uploadMethod
-                )
-            },
-            onFailure = {
-                navigateToDefaultErrorFragment()
-            }
-        )
-    }
-
-    private fun showUploading() {
-        binding.select.visibility = View.GONE
-        binding.progressCircular.visibility = View.VISIBLE
-        binding.finishedCheckMark.visibility = View.GONE
-    }
-
-    private fun showUploadDone(passportUploadResult: IdentityViewModel.UploadedResult?) {
-        binding.select.visibility = View.GONE
-        binding.progressCircular.visibility = View.GONE
-        binding.finishedCheckMark.visibility = View.VISIBLE
+    private fun enableKontinueWhenFrontUploaded(frontResult: IdentityViewModel.UploadedResult?) {
         binding.kontinue.isEnabled = true
         binding.kontinue.setOnClickListener {
             binding.kontinue.toggleToLoading()
             lifecycleScope.launch {
                 runCatching {
-                    requireNotNull(passportUploadResult)
+                    requireNotNull(frontResult)
                     postVerificationPageDataAndMaybeSubmit(
                         identityViewModel = identityViewModel,
                         collectedDataParam = CollectedDataParam(
                             idDocument = IdDocumentParam(
                                 front = DocumentUploadParam(
-                                    highResImage = requireNotNull(passportUploadResult.uploadedStripeFile.id) {
+                                    highResImage = requireNotNull(frontResult.uploadedStripeFile.id) {
                                         "front uploaded file id is null"
                                     },
-                                    uploadMethod = passportUploadResult.uploadMethod
+                                    uploadMethod = frontResult.uploadMethod
                                 ),
                                 type = IdDocumentParam.Type.PASSPORT
                             )
@@ -173,7 +70,7 @@ internal class PassportUploadFragment(
         }
     }
 
-    private companion object {
+    companion object {
         val TAG: String = PassportUploadFragment::class.java.simpleName
     }
 }

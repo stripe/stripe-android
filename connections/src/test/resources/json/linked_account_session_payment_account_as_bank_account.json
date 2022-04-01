@@ -1,0 +1,20 @@
+{
+  "id": "las_dhgfsklhgfkdsjhgk",
+  "object": "link_account_session",
+  "client_secret": "las_client_secret_ldafjlfkjlsfadkjk",
+  "linked_accounts": {
+    "object": "list",
+    "data": [
+    ],
+    "has_more": false,
+    "total_count": 0,
+    "url": "/v1/linked_accounts"
+  },
+  "livemode": true,
+  "payment_account": {
+    "id": "ba_1Kj6xvClCIKljWvs6z6QBHpN",
+    "bank_name": "JPMORGAN CHASE BANK, NA",
+    "last4": "3211",
+    "routing_number": "322271627"
+  }
+}

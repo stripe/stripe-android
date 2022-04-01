@@ -29,6 +29,7 @@ import com.stripe.android.paymentsheet.paymentdatacollection.ComposeFormDataColl
 import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.TransformToPaymentMethodCreateParams
 import com.stripe.android.paymentsheet.ui.AnimationConstants
+import com.stripe.android.paymentsheet.ui.GooglePayDividerUi
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.PaymentsThemeConfig
@@ -62,15 +63,25 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
         val viewBinding = FragmentPaymentsheetAddPaymentMethodBinding.bind(view)
 
         val paymentMethods = sheetViewModel.supportedPaymentMethods
-        viewBinding.googlePayDivider.setText(
-            if (paymentMethods.contains(SupportedPaymentMethod.Card) &&
-                paymentMethods.size == 1
-            ) {
-                R.string.stripe_paymentsheet_or_pay_with_card
-            } else {
-                R.string.stripe_paymentsheet_or_pay_using
+        viewBinding.googlePayDivider.apply {
+            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
+            setContent {
+                val visibility by sheetViewModel.googlePayDividerVisibilility.observeAsState(false)
+                if (visibility) {
+                    GooglePayDividerUi(
+                        context.resources.getString(
+                            if (paymentMethods.contains(SupportedPaymentMethod.Card) &&
+                                paymentMethods.size == 1
+                            ) {
+                                R.string.stripe_paymentsheet_or_pay_with_card
+                            } else {
+                                R.string.stripe_paymentsheet_or_pay_using
+                            }
+                        )
+                    )
+                }
             }
-        )
+        }
 
         viewBinding.addPaymentMethodHeader.apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)

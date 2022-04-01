@@ -839,7 +839,8 @@ data class PaymentMethodCreateParams internal constructor(
             )
         }
 
-        internal fun createUSBankAccount(
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        fun createUSBankAccount(
             billingDetails: PaymentMethod.BillingDetails? = null,
             metadata: Map<String, String>? = null
         ): PaymentMethodCreateParams {
