@@ -5,6 +5,10 @@ public final class com/stripe/android/paymentsheet/BuildConfig {
 	public fun <init> ()V
 }
 
+public final class com/stripe/android/paymentsheet/PaymentMethodsUIKt {
+	public static final field TEST_TAG_LIST Ljava/lang/String;
+}
+
 public abstract interface class com/stripe/android/paymentsheet/PaymentOptionCallback {
 	public abstract fun onPaymentOption (Lcom/stripe/android/paymentsheet/model/PaymentOption;)V
 }
@@ -398,7 +402,7 @@ public final class com/stripe/android/paymentsheet/databinding/FragmentPaymentsh
 public final class com/stripe/android/paymentsheet/databinding/FragmentPaymentsheetAddPaymentMethodBinding : androidx/viewbinding/ViewBinding {
 	public final field addPaymentMethodHeader Landroidx/compose/ui/platform/ComposeView;
 	public final field googlePayButton Lcom/stripe/android/paymentsheet/ui/GooglePayButton;
-	public final field googlePayDivider Lcom/stripe/android/paymentsheet/ui/GooglePayDivider;
+	public final field googlePayDivider Landroidx/compose/ui/platform/ComposeView;
 	public final field message Landroid/widget/TextView;
 	public final field paymentMethodFragmentContainer Landroidx/fragment/app/FragmentContainerView;
 	public final field paymentMethodsRecycler Landroidx/compose/ui/platform/ComposeView;
@@ -735,6 +739,11 @@ public final class com/stripe/android/paymentsheet/model/StripeIntentValidator_F
 	public static fun newInstance ()Lcom/stripe/android/paymentsheet/model/StripeIntentValidator;
 }
 
+public final class com/stripe/android/paymentsheet/model/SupportedPaymentMethod$Companion {
+	public final fun fromCode (Ljava/lang/String;)Lcom/stripe/android/paymentsheet/model/SupportedPaymentMethod;
+	public final fun values ()Ljava/util/List;
+}
+
 public final class com/stripe/android/paymentsheet/repositories/CustomerApiRepository_Factory : dagger/internal/Factory {
 	public fun <init> (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)V
 	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/paymentsheet/repositories/CustomerApiRepository_Factory;
@@ -749,5 +758,17 @@ public final class com/stripe/android/paymentsheet/repositories/StripeIntentRepo
 	public fun get ()Lcom/stripe/android/paymentsheet/repositories/StripeIntentRepository$Api;
 	public synthetic fun get ()Ljava/lang/Object;
 	public static fun newInstance (Lcom/stripe/android/networking/StripeRepository;Ldagger/Lazy;Lkotlin/coroutines/CoroutineContext;Ljava/util/Locale;)Lcom/stripe/android/paymentsheet/repositories/StripeIntentRepository$Api;
+}
+
+public final class com/stripe/android/paymentsheet/viewmodels/TransitionFragmentResource {
+	public static final field $stable I
+	public static final field Companion Lcom/stripe/android/paymentsheet/viewmodels/TransitionFragmentResource$Companion;
+	public fun <init> ()V
+}
+
+public final class com/stripe/android/paymentsheet/viewmodels/TransitionFragmentResource$Companion {
+	public final fun getIdlingResource ()Landroidx/test/espresso/idling/CountingIdlingResource;
+	public final fun getSingleStepIdlingResource ()Landroidx/test/espresso/IdlingResource;
+	public final fun setIdlingResource (Landroidx/test/espresso/idling/CountingIdlingResource;)V
 }
 
