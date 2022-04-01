@@ -366,4 +366,38 @@ internal abstract class AbsFakeStripeRepository : StripeRepository() {
     ): BankConnectionsLinkedAccountSession? {
         return null
     }
+
+    override suspend fun verifyPaymentIntentWithMicrodeposits(
+        clientSecret: String,
+        firstAmount: Int,
+        secondAmount: Int,
+        requestOptions: ApiRequest.Options
+    ): PaymentIntent? {
+        return null
+    }
+
+    override suspend fun verifyPaymentIntentWithMicrodeposits(
+        clientSecret: String,
+        descriptorCode: String,
+        requestOptions: ApiRequest.Options
+    ): PaymentIntent? {
+        return null
+    }
+
+    override suspend fun verifySetupIntentWithMicrodeposits(
+        clientSecret: String,
+        firstAmount: Int,
+        secondAmount: Int,
+        requestOptions: ApiRequest.Options
+    ): SetupIntent? {
+        return null
+    }
+
+    override suspend fun verifySetupIntentWithMicrodeposits(
+        clientSecret: String,
+        descriptorCode: String,
+        requestOptions: ApiRequest.Options
+    ): SetupIntent? {
+        return null
+    }
 }

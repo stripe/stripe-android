@@ -1,6 +1,7 @@
 package com.stripe.android.model
 
 import android.os.Parcelable
+import androidx.annotation.RestrictTo
 import kotlinx.parcelize.Parcelize
 
 sealed class PaymentMethodOptionsParams(
@@ -90,8 +91,9 @@ sealed class PaymentMethodOptionsParams(
         }
     }
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Parcelize
-    internal data class USBankAccount(
+    data class USBankAccount(
         var setupFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage? = null
     ) : PaymentMethodOptionsParams(PaymentMethod.Type.USBankAccount) {
         override fun createTypeParams(): List<Pair<String, Any?>> {
