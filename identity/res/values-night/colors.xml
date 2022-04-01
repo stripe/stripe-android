@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="plus_icon_tint">#F7FAFC</color>
+    <color name="privacy_policy_icon_tint">#F7FAFC</color>
+    <color name="time_estimate_icon_tint">#F7FAFC</color>
+</resources>

@@ -28,7 +28,7 @@
                 android:layout_height="92dp"
                 android:src="@drawable/ic_exclamation"
                 android:layout_marginBottom="26dp"
-                app:tint="@color/exclamation_mark" />
+                app:tint="@color/error_exclamation_color" />
 
             <TextView
                 android:id="@+id/title_text"
