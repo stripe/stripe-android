@@ -1,6 +1,7 @@
 package com.stripe.android.identity.navigation
 
 import android.net.Uri
+import android.os.Bundle
 import android.view.View
 import android.widget.Button
 import android.widget.TextView
@@ -20,7 +21,7 @@ import com.stripe.android.core.model.StripeFilePurpose
 import com.stripe.android.identity.CORRECT_WITH_SUBMITTED_FAILURE_VERIFICATION_PAGE_DATA
 import com.stripe.android.identity.CORRECT_WITH_SUBMITTED_SUCCESS_VERIFICATION_PAGE_DATA
 import com.stripe.android.identity.R
-import com.stripe.android.identity.databinding.FrontBackUploadFragmentBinding
+import com.stripe.android.identity.databinding.IdentityUploadFragmentBinding
 import com.stripe.android.identity.networking.Resource
 import com.stripe.android.identity.networking.models.ClearDataParam
 import com.stripe.android.identity.networking.models.CollectedDataParam
@@ -29,10 +30,10 @@ import com.stripe.android.identity.networking.models.IdDocumentParam
 import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentDocumentCapturePage
 import com.stripe.android.identity.states.IdentityScanState
-import com.stripe.android.identity.utils.ARG_SHOULD_SHOW_CAMERA
+import com.stripe.android.identity.utils.ARG_SHOULD_SHOW_TAKE_PHOTO
 import com.stripe.android.identity.utils.PairMediatorLiveData
 import com.stripe.android.identity.viewModelFactoryFor
-import com.stripe.android.identity.viewmodel.FrontBackUploadViewModel
+import com.stripe.android.identity.viewmodel.IdentityUploadViewModel
 import com.stripe.android.identity.viewmodel.IdentityViewModel
 import com.stripe.android.identity.viewmodel.IdentityViewModel.UploadedResult
 import kotlinx.coroutines.runBlocking
@@ -52,7 +53,7 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.shadows.ShadowDialog
 
 @RunWith(RobolectricTestRunner::class)
-class FrontBackUploadFragmentTest {
+class IdentityUploadFragmentTest {
     @get:Rule
     var rule: TestRule = InstantTaskExecutorRule()
 
@@ -74,7 +75,7 @@ class FrontBackUploadFragmentTest {
         whenever(it.highResUploaded).thenReturn(highResUploaded)
     }
 
-    private val mockFrontBackUploadViewModel = mock<FrontBackUploadViewModel>()
+    private val mockFrontBackUploadViewModel = mock<IdentityUploadViewModel>()
 
     @Test
     fun `when initialized viewmodel registers activityResultCaller and UI is correct`() {
@@ -108,7 +109,7 @@ class FrontBackUploadFragmentTest {
 
     @Test
     fun `when shouldShowCamera is true UI is correct`() {
-        launchFragment(shouldShowCamera = true) { binding, _, _ ->
+        launchFragment(shouldShowTakePhoto = true) { binding, _, _ ->
             binding.selectFront.callOnClick()
             val dialog = ShadowDialog.getLatestDialog()
 
@@ -124,7 +125,7 @@ class FrontBackUploadFragmentTest {
 
     @Test
     fun `when shouldShowCamera is false UI is correct`() {
-        launchFragment(shouldShowCamera = false) { binding, _, _ ->
+        launchFragment(shouldShowTakePhoto = false) { binding, _, _ ->
             binding.selectFront.callOnClick()
             val dialog = ShadowDialog.getLatestDialog()
 
@@ -430,15 +431,15 @@ class FrontBackUploadFragmentTest {
     }
 
     private fun launchFragment(
-        shouldShowCamera: Boolean = true,
+        shouldShowTakePhoto: Boolean = true,
         testBlock: (
-            binding: FrontBackUploadFragmentBinding,
+            binding: IdentityUploadFragmentBinding,
             navController: TestNavHostController,
-            fragment: FrontBackUploadFragment
+            fragment: IdentityUploadFragment
         ) -> Unit
     ) = launchFragmentInContainer(
         fragmentArgs = bundleOf(
-            ARG_SHOULD_SHOW_CAMERA to shouldShowCamera
+            ARG_SHOULD_SHOW_TAKE_PHOTO to shouldShowTakePhoto
         ),
         themeResId = R.style.Theme_MaterialComponents
     ) {
@@ -458,22 +459,29 @@ class FrontBackUploadFragmentTest {
             it.requireView(),
             navController
         )
-        testBlock(FrontBackUploadFragmentBinding.bind(it.requireView()), navController, it)
+        testBlock(IdentityUploadFragmentBinding.bind(it.requireView()), navController, it)
     }
 
     internal class TestFragment(
-        frontBackUploadViewModelFactory: ViewModelProvider.Factory,
+        identityUploadViewModelFactory: ViewModelProvider.Factory,
         identityViewModelFactory: ViewModelProvider.Factory
     ) :
-        FrontBackUploadFragment(frontBackUploadViewModelFactory, identityViewModelFactory) {
+        IdentityUploadFragment(identityUploadViewModelFactory, identityViewModelFactory) {
         override val titleRes = R.string.file_upload
         override val contextRes = R.string.file_upload_content_id
         override val frontTextRes = R.string.front_of_id
-        override val backTextRes = R.string.back_of_id
+        override var backTextRes: Int? = R.string.back_of_id
         override val frontCheckMarkContentDescription = R.string.front_of_id_selected
-        override val backCheckMarkContentDescription = R.string.back_of_id_selected
+        override var backCheckMarkContentDescription: Int? = R.string.back_of_id_selected
         override val frontScanType = IdentityScanState.ScanType.ID_FRONT
-        override val backScanType = IdentityScanState.ScanType.ID_BACK
+        override var backScanType: IdentityScanState.ScanType? = IdentityScanState.ScanType.ID_BACK
+
+        override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+            super.onViewCreated(view, savedInstanceState)
+            observeForFrontUploaded()
+            observeForBackUploaded()
+            enableKontinueWhenBothUploaded()
+        }
     }
 
     private companion object {

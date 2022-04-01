@@ -142,7 +142,11 @@ internal class DocSelectionFragment(
     /**
      * Toggle UI to show single selection type.
      */
-    private fun toggleSingleSelectionUI(allowedType: String, buttonText: String, bodyText: String?) {
+    private fun toggleSingleSelectionUI(
+        allowedType: String,
+        buttonText: String,
+        bodyText: String?
+    ) {
         binding.multiSelectionContent.visibility = View.GONE
         binding.singleSelectionContent.visibility = View.VISIBLE
         binding.singleSelectionContinue.setText(buttonText)
