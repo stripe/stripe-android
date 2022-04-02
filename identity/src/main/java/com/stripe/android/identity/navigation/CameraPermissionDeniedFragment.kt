@@ -1,5 +1,6 @@
 package com.stripe.android.identity.navigation
 
+import android.view.View
 import androidx.annotation.IdRes
 import androidx.navigation.fragment.findNavController
 import com.stripe.android.camera.AppSettingsOpenable
@@ -14,22 +15,24 @@ internal class CameraPermissionDeniedFragment(
     private val appSettingsOpenable: AppSettingsOpenable
 ) : BaseErrorFragment() {
     override fun onCustomizingViews() {
-        val args = requireNotNull(arguments)
-
-        val identityScanType = args[ARG_SCAN_TYPE] as CollectedDataParam.Type
 
         title.text = getString(R.string.camera_permission)
         message1.text = getString(R.string.grant_camera_permission_text)
-        message2.text =
-            getString(R.string.upload_file_text, identityScanType.getDisplayName())
 
-        topButton.text = getString(R.string.file_upload)
-        topButton.setOnClickListener {
-            navigateToUploadFragment(
-                identityScanType.toUploadDestinationId(),
-                shouldShowTakePhoto = false,
-                shouldShowChoosePhoto = true
-            )
+        (arguments?.get(ARG_SCAN_TYPE) as? CollectedDataParam.Type)?.let { identityScanType ->
+            message2.text =
+                getString(R.string.upload_file_text, identityScanType.getDisplayName())
+            topButton.text = getString(R.string.file_upload)
+            topButton.setOnClickListener {
+                navigateToUploadFragment(
+                    identityScanType.toUploadDestinationId(),
+                    shouldShowTakePhoto = false,
+                    shouldShowChoosePhoto = true
+                )
+            }
+        } ?: run {
+            message2.visibility = View.GONE
+            topButton.visibility = View.GONE
         }
 
         bottomButton.text = getString(R.string.app_settings)

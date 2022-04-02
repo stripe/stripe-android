@@ -1,5 +1,6 @@
 package com.stripe.android.identity.navigation
 
+import android.view.View
 import androidx.annotation.IdRes
 import androidx.annotation.StringRes
 import androidx.core.os.bundleOf
@@ -49,6 +50,15 @@ class CameraPermissionDeniedFragmentTest {
             R.id.passportUploadFragment,
             R.string.passport
         )
+    }
+
+    @Test
+    fun `when scan type is not set message2 is hidden and top button is hidden`() {
+        launchCameraPermissionDeniedFragment().onFragment {
+            val binding = BaseErrorFragmentBinding.bind(it.requireView())
+            assertThat(binding.message2.visibility).isEqualTo(View.GONE)
+            assertThat(binding.topButton.visibility).isEqualTo(View.GONE)
+        }
     }
 
     @Test
@@ -113,11 +123,13 @@ class CameraPermissionDeniedFragmentTest {
     }
 
     private fun launchCameraPermissionDeniedFragment(
-        type: CollectedDataParam.Type
+        type: CollectedDataParam.Type? = null
     ) = launchFragmentInContainer(
-        bundleOf(
-            ARG_SCAN_TYPE to type
-        ),
+        type?.let {
+            bundleOf(
+                ARG_SCAN_TYPE to type
+            )
+        },
         themeResId = R.style.Theme_MaterialComponents
     ) {
         CameraPermissionDeniedFragment(mockAppSettingsOpenable)
