@@ -20,7 +20,6 @@ import com.stripe.android.identity.networking.Status
 import com.stripe.android.identity.networking.models.ClearDataParam
 import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.networking.models.DocumentUploadParam
-import com.stripe.android.identity.networking.models.IdDocumentParam
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentDocumentCapturePage
 import com.stripe.android.identity.states.IdentityScanState
 import com.stripe.android.identity.utils.ARG_SHOULD_SHOW_CHOOSE_PHOTO
@@ -134,13 +133,13 @@ internal abstract class IdentityUploadFragment(
         }
     }
 
-    private fun IdentityScanState.ScanType.toType(): IdDocumentParam.Type =
+    private fun IdentityScanState.ScanType.toType(): CollectedDataParam.Type =
         when (this) {
-            IdentityScanState.ScanType.ID_FRONT -> IdDocumentParam.Type.IDCARD
-            IdentityScanState.ScanType.ID_BACK -> IdDocumentParam.Type.IDCARD
-            IdentityScanState.ScanType.PASSPORT -> IdDocumentParam.Type.PASSPORT
-            IdentityScanState.ScanType.DL_FRONT -> IdDocumentParam.Type.DRIVINGLICENSE
-            IdentityScanState.ScanType.DL_BACK -> IdDocumentParam.Type.DRIVINGLICENSE
+            IdentityScanState.ScanType.ID_FRONT -> CollectedDataParam.Type.IDCARD
+            IdentityScanState.ScanType.ID_BACK -> CollectedDataParam.Type.IDCARD
+            IdentityScanState.ScanType.PASSPORT -> CollectedDataParam.Type.PASSPORT
+            IdentityScanState.ScanType.DL_FRONT -> CollectedDataParam.Type.DRIVINGLICENSE
+            IdentityScanState.ScanType.DL_BACK -> CollectedDataParam.Type.DRIVINGLICENSE
             else -> {
                 throw IllegalArgumentException("Unknown type: $this")
             }
@@ -196,21 +195,19 @@ internal abstract class IdentityUploadFragment(
                                 postVerificationPageDataAndMaybeSubmit(
                                     identityViewModel = identityViewModel,
                                     collectedDataParam = CollectedDataParam(
-                                        idDocument = IdDocumentParam(
-                                            front = DocumentUploadParam(
-                                                highResImage = requireNotNull(front.uploadedStripeFile.id) {
-                                                    "front uploaded file id is null"
-                                                },
-                                                uploadMethod = front.uploadMethod
-                                            ),
-                                            back = DocumentUploadParam(
-                                                highResImage = requireNotNull(back.uploadedStripeFile.id) {
-                                                    "back uploaded file id is null"
-                                                },
-                                                uploadMethod = back.uploadMethod
-                                            ),
-                                            type = frontScanType.toType()
-                                        )
+                                        idDocumentFront = DocumentUploadParam(
+                                            highResImage = requireNotNull(front.uploadedStripeFile.id) {
+                                                "front uploaded file id is null"
+                                            },
+                                            uploadMethod = front.uploadMethod
+                                        ),
+                                        idDocumentBack = DocumentUploadParam(
+                                            highResImage = requireNotNull(back.uploadedStripeFile.id) {
+                                                "back uploaded file id is null"
+                                            },
+                                            uploadMethod = back.uploadMethod
+                                        ),
+                                        idDocumentType = frontScanType.toType()
                                     ),
                                     clearDataParam = ClearDataParam.UPLOAD_TO_CONFIRM,
                                     shouldNotSubmit = { false }

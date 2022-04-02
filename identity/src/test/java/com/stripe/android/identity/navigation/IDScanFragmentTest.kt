@@ -26,7 +26,6 @@ import com.stripe.android.identity.networking.Resource
 import com.stripe.android.identity.networking.models.ClearDataParam
 import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.networking.models.DocumentUploadParam
-import com.stripe.android.identity.networking.models.IdDocumentParam
 import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentDocumentCapturePage
 import com.stripe.android.identity.states.IdentityScanState
@@ -169,7 +168,7 @@ internal class IDScanFragmentTest {
                 verify(mockIdentityViewModel).postVerificationPageData(
                     eq(
                         CollectedDataParam.createFromUploadedResultsForAutoCapture(
-                            type = IdDocumentParam.Type.IDCARD,
+                            type = CollectedDataParam.Type.IDCARD,
                             frontHighResResult = FRONT_HIGH_RES_RESULT,
                             frontLowResResult = FRONT_LOW_RES_RESULT,
                             backHighResResult = BACK_HIGH_RES_RESULT,

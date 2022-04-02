@@ -25,7 +25,6 @@ import com.stripe.android.identity.networking.models.ClearDataParam
 import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.networking.models.DocumentUploadParam
 import com.stripe.android.identity.networking.models.DocumentUploadParam.UploadMethod
-import com.stripe.android.identity.networking.models.IdDocumentParam
 import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentDocumentCapturePage
 import com.stripe.android.identity.utils.ARG_SHOULD_SHOW_CHOOSE_PHOTO
@@ -171,13 +170,11 @@ class PassportUploadFragmentTest {
 
                 assertThat(collectedDataParamCaptor.firstValue).isEqualTo(
                     CollectedDataParam(
-                        idDocument = IdDocumentParam(
-                            front = DocumentUploadParam(
-                                highResImage = FILE_ID,
-                                uploadMethod = UploadMethod.FILEUPLOAD
-                            ),
-                            type = IdDocumentParam.Type.PASSPORT
-                        )
+                        idDocumentFront = DocumentUploadParam(
+                            highResImage = FILE_ID,
+                            uploadMethod = UploadMethod.FILEUPLOAD
+                        ),
+                        idDocumentType = CollectedDataParam.Type.PASSPORT
                     )
                 )
                 assertThat(clearDataParamCaptor.firstValue).isEqualTo(
@@ -305,6 +302,6 @@ class PassportUploadFragmentTest {
                 motionBlurMinIou = 0.95f
             )
 
-        private val FILE_ID = "file_id"
+        private const val FILE_ID = "file_id"
     }
 }

@@ -12,7 +12,7 @@ import com.stripe.android.camera.AppSettingsOpenable
 import com.stripe.android.identity.R
 import com.stripe.android.identity.databinding.BaseErrorFragmentBinding
 import com.stripe.android.identity.navigation.CameraPermissionDeniedFragment.Companion.ARG_SCAN_TYPE
-import com.stripe.android.identity.networking.models.IdDocumentParam
+import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.utils.ARG_SHOULD_SHOW_TAKE_PHOTO
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -27,7 +27,7 @@ class CameraPermissionDeniedFragmentTest {
     @Test
     fun `when scan type is ID_FRONT title is set and clicking upload navigates to id upload fragment`() {
         verifyFragmentWithScanType(
-            IdDocumentParam.Type.IDCARD,
+            CollectedDataParam.Type.IDCARD,
             R.id.IDUploadFragment,
             R.string.id_card
         )
@@ -36,7 +36,7 @@ class CameraPermissionDeniedFragmentTest {
     @Test
     fun `when scan type is DL_FRONT title is set and clicking upload navigates to driver license upload fragment`() {
         verifyFragmentWithScanType(
-            IdDocumentParam.Type.DRIVINGLICENSE,
+            CollectedDataParam.Type.DRIVINGLICENSE,
             R.id.driverLicenseUploadFragment,
             R.string.driver_license
         )
@@ -45,7 +45,7 @@ class CameraPermissionDeniedFragmentTest {
     @Test
     fun `when scan type is PASSPORT title is set and clicking upload navigates to passport upload fragment`() {
         verifyFragmentWithScanType(
-            IdDocumentParam.Type.PASSPORT,
+            CollectedDataParam.Type.PASSPORT,
             R.id.passportUploadFragment,
             R.string.passport
         )
@@ -53,7 +53,7 @@ class CameraPermissionDeniedFragmentTest {
 
     @Test
     fun `when app setting button is clicked app setting is opened and returns to DocSelectionFragment`() {
-        launchCameraPermissionDeniedFragment(IdDocumentParam.Type.IDCARD).onFragment {
+        launchCameraPermissionDeniedFragment(CollectedDataParam.Type.IDCARD).onFragment {
             val navController = TestNavHostController(
                 ApplicationProvider.getApplicationContext()
             )
@@ -74,7 +74,7 @@ class CameraPermissionDeniedFragmentTest {
     }
 
     private fun verifyFragmentWithScanType(
-        type: IdDocumentParam.Type,
+        type: CollectedDataParam.Type,
         @IdRes
         expectedDestination: Int = 0,
         @StringRes
@@ -113,7 +113,7 @@ class CameraPermissionDeniedFragmentTest {
     }
 
     private fun launchCameraPermissionDeniedFragment(
-        type: IdDocumentParam.Type
+        type: CollectedDataParam.Type
     ) = launchFragmentInContainer(
         bundleOf(
             ARG_SCAN_TYPE to type

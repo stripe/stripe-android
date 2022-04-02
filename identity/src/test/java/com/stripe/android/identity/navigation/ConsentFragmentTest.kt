@@ -84,8 +84,7 @@ internal class ConsentFragmentTest {
     private val correctVerificationData = mock<VerificationPageData>().also {
         whenever(it.requirements).thenReturn(
             VerificationPageDataRequirements(
-                errors = emptyList(),
-                missing = listOf(VerificationPageDataRequirements.Missing.IDDOCUMENTTYPE)
+                errors = emptyList()
             )
         )
     }
@@ -100,8 +99,7 @@ internal class ConsentFragmentTest {
                         requirement = VerificationPageDataRequirementError.Requirement.BIOMETRICCONSENT,
                         title = ERROR_TITLE
                     )
-                ),
-                missing = emptyList()
+                )
             )
         )
     }

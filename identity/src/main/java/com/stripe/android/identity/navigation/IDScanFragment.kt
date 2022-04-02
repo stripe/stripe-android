@@ -5,7 +5,7 @@ import android.util.Log
 import android.view.View
 import androidx.lifecycle.ViewModelProvider
 import com.stripe.android.identity.R
-import com.stripe.android.identity.networking.models.IdDocumentParam
+import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.states.IdentityScanState.ScanType.ID_BACK
 import com.stripe.android.identity.states.IdentityScanState.ScanType.ID_FRONT
 
@@ -35,7 +35,7 @@ internal class IDScanFragment(
                     startScanning(ID_BACK)
                 }
                 ID_BACK -> {
-                    observeAndUploadForBothSides(IdDocumentParam.Type.IDCARD)
+                    observeAndUploadForBothSides(CollectedDataParam.Type.IDCARD)
                 }
                 else -> {
                     Log.e(

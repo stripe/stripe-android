@@ -64,7 +64,7 @@
         tools:layout="@layout/base_error_fragment">
         <argument
             android:name="scanType"
-            app:argType="com.stripe.android.identity.networking.models.IdDocumentParam$Type" />
+            app:argType="com.stripe.android.identity.networking.models.CollectedDataParam$Type" />
         <action
             android:id="@+id/action_cameraPermissionDeniedFragment_to_passportUploadFragment"
             app:destination="@id/passportUploadFragment" />

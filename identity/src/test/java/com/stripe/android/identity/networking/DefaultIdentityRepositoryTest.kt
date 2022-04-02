@@ -16,7 +16,6 @@ import com.stripe.android.identity.networking.models.ClearDataParam
 import com.stripe.android.identity.networking.models.ClearDataParam.Companion.createCollectedDataParamEntry
 import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.networking.models.CollectedDataParam.Companion.createCollectedDataParamEntry
-import com.stripe.android.identity.networking.models.ConsentParam
 import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.networking.models.VerificationPageData
 import com.stripe.android.identity.utils.IdentityIO
@@ -84,9 +83,7 @@ class DefaultIdentityRepositoryTest {
                 )
             )
             val collectedDataParam = CollectedDataParam(
-                consent = ConsentParam(
-                    biometric = false
-                )
+                biometricConsent = false
             )
 
             val clearDataParam = ClearDataParam()

@@ -10,17 +10,5 @@ internal data class IdDocumentParam(
     @SerialName("front")
     val front: DocumentUploadParam? = null,
     @SerialName("type")
-    val type: Type? = null
-) {
-    @Serializable
-    internal enum class Type {
-        @SerialName("driving_license")
-        DRIVINGLICENSE,
-
-        @SerialName("id_card")
-        IDCARD,
-
-        @SerialName("passport")
-        PASSPORT
-    }
-}
+    val type: CollectedDataParam.Type? = null
+)

@@ -4,7 +4,7 @@ import android.os.Bundle
 import android.view.View
 import androidx.lifecycle.ViewModelProvider
 import com.stripe.android.identity.R
-import com.stripe.android.identity.networking.models.IdDocumentParam
+import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.states.IdentityScanState
 
 /**
@@ -22,7 +22,7 @@ internal class PassportScanFragment(
         headerTitle.text = requireContext().getText(R.string.passport)
         messageView.text = requireContext().getText(R.string.position_passport)
         continueButton.setOnClickListener {
-            observeAndUploadForFrontSide(IdDocumentParam.Type.PASSPORT)
+            observeAndUploadForFrontSide(CollectedDataParam.Type.PASSPORT)
         }
     }
 
