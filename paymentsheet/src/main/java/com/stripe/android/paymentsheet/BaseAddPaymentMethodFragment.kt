@@ -32,7 +32,10 @@ import com.stripe.android.paymentsheet.ui.AnimationConstants
 import com.stripe.android.paymentsheet.ui.GooglePayDividerUi
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.Amount
+import com.stripe.android.ui.core.PaymentsThemeConfig
 import com.stripe.android.ui.core.elements.H4Text
+import com.stripe.android.ui.core.isSystemDarkTheme
+import com.stripe.android.ui.core.shouldUseDarkDynamicColor
 import kotlinx.coroutines.launch
 
 internal abstract class BaseAddPaymentMethodFragment : Fragment() {
@@ -129,6 +132,10 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
         }
 
         sheetViewModel.eventReporter.onShowNewPaymentOptionForm()
+
+        val isSystemDarkMode = context?.isSystemDarkTheme() ?: false
+        val surfaceColor = PaymentsThemeConfig.colors(isSystemDarkMode).surface
+        viewBinding.googlePayButton.setBackgroundColor(surfaceColor.shouldUseDarkDynamicColor())
     }
 
     private fun attachComposeFragmentViewModel(fragment: Fragment) {

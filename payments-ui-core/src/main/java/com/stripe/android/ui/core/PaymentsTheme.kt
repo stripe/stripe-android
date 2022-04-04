@@ -34,6 +34,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.res.ResourcesCompat
+import androidx.core.graphics.ColorUtils
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 data class PaymentsColors(
@@ -264,6 +265,8 @@ fun PaymentsTheme(
 // This mirrors an object that lives inside of MaterialTheme.
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 object PaymentsTheme {
+    const val minContrastForWhite = 2.2
+
     val colors: PaymentsComposeColors
         @Composable
         @ReadOnlyComposable
@@ -338,5 +341,19 @@ internal class CustomTypefaceSpan(private val typeface: Typeface) : MetricAffect
         private fun applyCustomTypeFace(paint: Paint, tf: Typeface) {
             paint.typeface = tf
         }
+    }
+}
+
+// This method calculates if black or white offers a better contrast compared to a given color.
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+fun Color.shouldUseDarkDynamicColor(): Boolean {
+    val contrastRatioToBlack = ColorUtils.calculateContrast(this.toArgb(), Color.Black.toArgb())
+    val contrastRatioToWhite = ColorUtils.calculateContrast(this.toArgb(), Color.White.toArgb())
+
+    // Prefer white as long as the min contrast has been met.
+    return if (contrastRatioToWhite > PaymentsTheme.minContrastForWhite) {
+        false
+    } else {
+        contrastRatioToBlack > contrastRatioToWhite
     }
 }

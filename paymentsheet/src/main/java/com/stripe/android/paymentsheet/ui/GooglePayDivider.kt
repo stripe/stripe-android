@@ -9,10 +9,12 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.ui.core.PaymentsTheme
+import com.stripe.android.ui.core.shouldUseDarkDynamicColor
 
 @Composable
 internal fun GooglePayDividerUi(
@@ -38,9 +40,14 @@ internal fun GooglePayDividerUi(
 
 @Composable
 internal fun GooglePayDividerLine() {
+    val color = if (PaymentsTheme.colors.material.surface.shouldUseDarkDynamicColor()) {
+        Color.Black.copy(alpha = .20f)
+    } else {
+        Color.White.copy(alpha = .20f)
+    }
     Box(
         Modifier
-            .background(PaymentsTheme.colors.colorComponentBorder)
+            .background(color)
             .height(PaymentsTheme.shapes.borderStrokeWidth)
             .fillMaxWidth()
     )
