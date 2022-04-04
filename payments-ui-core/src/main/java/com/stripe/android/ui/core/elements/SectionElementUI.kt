@@ -39,9 +39,9 @@ fun SectionElementUI(
                     hiddenIdentifiers = hiddenIdentifiers,
                     lastTextFieldIdentifier = lastTextFieldIdentifier
                 )
-                if (index != element.fields.size - 1) {
+                if (index != element.fields.lastIndex) {
                     Divider(
-                        color = PaymentsTheme.colors.colorComponentBorder,
+                        color = PaymentsTheme.colors.colorComponentDivider,
                         thickness = PaymentsTheme.shapes.borderStrokeWidth,
                         modifier = Modifier.padding(
                             horizontal = PaymentsTheme.shapes.borderStrokeWidth
