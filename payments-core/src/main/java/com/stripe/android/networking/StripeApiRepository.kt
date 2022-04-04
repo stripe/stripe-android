@@ -1443,6 +1443,100 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
     }
 
     /**
+     * Verifies the PaymentIntent with microdeposits amounts
+     */
+    override suspend fun verifyPaymentIntentWithMicrodeposits(
+        clientSecret: String,
+        firstAmount: Int,
+        secondAmount: Int,
+        requestOptions: ApiRequest.Options
+    ): PaymentIntent? {
+        return fetchStripeModel(
+            apiRequestFactory.createPost(
+                getVerifyMicrodepositsOnPaymentIntentUrl(PaymentIntent.ClientSecret(clientSecret).paymentIntentId),
+                requestOptions,
+                mapOf(
+                    "client_secret" to clientSecret,
+                    "amounts" to listOf(firstAmount, secondAmount)
+                )
+            ),
+            PaymentIntentJsonParser()
+        ) {
+            // no-op
+        }
+    }
+
+    /**
+     * Verifies the PaymentIntent with microdeposits descriptor code
+     */
+    override suspend fun verifyPaymentIntentWithMicrodeposits(
+        clientSecret: String,
+        descriptorCode: String,
+        requestOptions: ApiRequest.Options
+    ): PaymentIntent? {
+        return fetchStripeModel(
+            apiRequestFactory.createPost(
+                getVerifyMicrodepositsOnPaymentIntentUrl(PaymentIntent.ClientSecret(clientSecret).paymentIntentId),
+                requestOptions,
+                mapOf(
+                    "client_secret" to clientSecret,
+                    "descriptor_code" to descriptorCode
+                )
+            ),
+            PaymentIntentJsonParser()
+        ) {
+            // no-op
+        }
+    }
+
+    /**
+     * Verifies the SetupIntent with microdeposits amounts
+     */
+    override suspend fun verifySetupIntentWithMicrodeposits(
+        clientSecret: String,
+        firstAmount: Int,
+        secondAmount: Int,
+        requestOptions: ApiRequest.Options
+    ): SetupIntent? {
+        return fetchStripeModel(
+            apiRequestFactory.createPost(
+                getVerifyMicrodepositsOnSetupIntentUrl(SetupIntent.ClientSecret(clientSecret).setupIntentId),
+                requestOptions,
+                mapOf(
+                    "client_secret" to clientSecret,
+                    "amounts" to listOf(firstAmount, secondAmount)
+                )
+            ),
+            SetupIntentJsonParser()
+        ) {
+            // no-op
+        }
+    }
+
+    /**
+     * Verifies the SetupIntent with microdeposits descriptor code
+     */
+    override suspend fun verifySetupIntentWithMicrodeposits(
+        clientSecret: String,
+        descriptorCode: String,
+        requestOptions: ApiRequest.Options
+    ): SetupIntent? {
+        return fetchStripeModel(
+            apiRequestFactory.createPost(
+                getVerifyMicrodepositsOnSetupIntentUrl(SetupIntent.ClientSecret(clientSecret).setupIntentId),
+                requestOptions,
+                mapOf(
+                    "client_secret" to clientSecret,
+                    "descriptor_code" to descriptorCode
+                )
+            ),
+            SetupIntentJsonParser()
+        ) {
+            // no-op
+        }
+    }
+
+    /**
      * @return `https://api.stripe.com/v1/payment_methods/:id/detach`
      */
     @VisibleForTesting
@@ -1928,6 +2022,34 @@ internal class StripeApiRepository @JvmOverloads internal constructor(
                 "setup_intents/%s/link_account_sessions/%s/attach",
                 setupIntentId,
                 linkAccountSessionId
+            )
+        }
+
+        /**
+         * @return `https://api.stripe.com/v1/payment_intents/:clientSecret/verify_microdeposits`
+         */
+        @VisibleForTesting
+        @JvmSynthetic
+        internal fun getVerifyMicrodepositsOnPaymentIntentUrl(
+            clientSecret: String
+        ): String {
+            return getApiUrl(
+                "payment_intents/%s/verify_microdeposits",
+                clientSecret
+            )
+        }
+
+        /**
+         * @return `https://api.stripe.com/v1/setup_intents/:clientSecret/verify_microdeposits`
+         */
+        @VisibleForTesting
+        @JvmSynthetic
+        internal fun getVerifyMicrodepositsOnSetupIntentUrl(
+            clientSecret: String
+        ): String {
+            return getApiUrl(
+                "setup_intents/%s/verify_microdeposits",
+                clientSecret
             )
         }
 

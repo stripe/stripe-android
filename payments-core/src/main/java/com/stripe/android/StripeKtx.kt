@@ -1,6 +1,7 @@
 package com.stripe.android
 
 import android.content.Intent
+import androidx.annotation.RestrictTo
 import androidx.annotation.Size
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.exception.APIException
@@ -793,3 +794,175 @@ internal inline fun <reified ApiObject : StripeModel> runApiRequest(
         }
         block()
     }.getOrElse { throw StripeException.create(it) }
+
+/**
+ * Suspend function to verify a customer's bank account with micro-deposits
+ *
+ * This function should only be called when the PaymentIntent is in the `requires_action` state
+ * and `NextActionType` is VerifyWithMicrodeposits.
+ *
+ * See the [Verify bank account with micro-despoits](https://stripe.com/docs/payments/ach-debit/accept-a-payment#web-verify-with-microdeposits) docs for more details.
+ *
+ * @param clientSecret The client secret of the PaymentIntent
+ * @param firstAmount The amount, in cents of USD, equal to the value of the first micro-deposit
+ * sent to the bank account
+ * @param secondAmount The amount, in cents of USD, equal to the value of the second micro-deposit
+ * sent to the bank account
+ * @param callback a [ApiResultCallback] to receive the result or error
+ *
+ * @return a [PaymentIntent] object
+ *
+ * @throws AuthenticationException failure to properly authenticate yourself (check your key)
+ * @throws InvalidRequestException your request has invalid parameters
+ * @throws APIConnectionException failure to connect to Stripe's API
+ * @throws APIException any other type of problem (for instance, a temporary issue with Stripe's servers)
+ */
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+@Throws(
+    AuthenticationException::class,
+    InvalidRequestException::class,
+    APIConnectionException::class,
+    APIException::class
+)
+suspend fun Stripe.verifyPaymentIntentWithMicrodeposits(
+    clientSecret: String,
+    firstAmount: Int,
+    secondAmount: Int
+): PaymentIntent = runApiRequest {
+    stripeRepository.verifyPaymentIntentWithMicrodeposits(
+        clientSecret = clientSecret,
+        firstAmount = firstAmount,
+        secondAmount = secondAmount,
+        requestOptions = ApiRequest.Options(
+            apiKey = publishableKey,
+            stripeAccount = stripeAccountId,
+        )
+    )
+}
+
+/**
+ * Suspend function to verify a customer's bank account with micro-deposits
+ *
+ * This function should only be called when the PaymentIntent is in the `requires_action` state
+ * and `NextActionType` is VerifyWithMicrodeposits.
+ *
+ * See the [Verify bank account with micro-despoits](https://stripe.com/docs/payments/ach-debit/accept-a-payment#web-verify-with-microdeposits) docs for more details.
+ *
+ * @param clientSecret The client secret of the PaymentIntent
+ * @param descriptorCode A unique, 6-digit descriptor code that starts with SM that was sent as
+ * statement descriptor to the bank account
+ * @param callback a [ApiResultCallback] to receive the result or error
+ *
+ * @return a [PaymentIntent] object
+ *
+ * @throws AuthenticationException failure to properly authenticate yourself (check your key)
+ * @throws InvalidRequestException your request has invalid parameters
+ * @throws APIConnectionException failure to connect to Stripe's API
+ * @throws APIException any other type of problem (for instance, a temporary issue with Stripe's servers)
+ */
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+@Throws(
+    AuthenticationException::class,
+    InvalidRequestException::class,
+    APIConnectionException::class,
+    APIException::class
+)
+suspend fun Stripe.verifyPaymentIntentWithMicrodeposits(
+    clientSecret: String,
+    descriptorCode: String
+): PaymentIntent = runApiRequest {
+    stripeRepository.verifyPaymentIntentWithMicrodeposits(
+        clientSecret = clientSecret,
+        descriptorCode = descriptorCode,
+        requestOptions = ApiRequest.Options(
+            apiKey = publishableKey,
+            stripeAccount = stripeAccountId
+        )
+    )
+}
+
+/**
+ * Suspend function to verify a customer's bank account with micro-deposits
+ *
+ * This function should only be called when the SetupIntent is in the `requires_action` state
+ * and `NextActionType` is VerifyWithMicrodeposits.
+ *
+ * See the [Verify bank account with micro-despoits](https://stripe.com/docs/payments/ach-debit/accept-a-payment#web-verify-with-microdeposits) docs for more details.
+ *
+ * @param clientSecret The client secret of the SetupIntent
+ * @param firstAmount The amount, in cents of USD, equal to the value of the first micro-deposit
+ * sent to the bank account
+ * @param secondAmount The amount, in cents of USD, equal to the value of the second micro-deposit
+ * sent to the bank account
+ * @param callback a [ApiResultCallback] to receive the result or error
+ *
+ * @return a [SetupIntent] object
+ *
+ * @throws AuthenticationException failure to properly authenticate yourself (check your key)
+ * @throws InvalidRequestException your request has invalid parameters
+ * @throws APIConnectionException failure to connect to Stripe's API
+ * @throws APIException any other type of problem (for instance, a temporary issue with Stripe's servers)
+ */
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+@Throws(
+    AuthenticationException::class,
+    InvalidRequestException::class,
+    APIConnectionException::class,
+    APIException::class
+)
+suspend fun Stripe.verifySetupIntentWithMicrodeposits(
+    clientSecret: String,
+    firstAmount: Int,
+    secondAmount: Int
+): SetupIntent = runApiRequest {
+    stripeRepository.verifySetupIntentWithMicrodeposits(
+        clientSecret = clientSecret,
+        firstAmount = firstAmount,
+        secondAmount = secondAmount,
+        requestOptions = ApiRequest.Options(
+            apiKey = publishableKey,
+            stripeAccount = stripeAccountId
+        )
+    )
+}
+
+/**
+ * Suspend function to verify a customer's bank account with micro-deposits
+ *
+ * This function should only be called when the SetupIntent is in the `requires_action` state
+ * and `NextActionType` is VerifyWithMicrodeposits.
+ *
+ * See the [Verify bank account with micro-despoits](https://stripe.com/docs/payments/ach-debit/accept-a-payment#web-verify-with-microdeposits) docs for more details.
+ *
+ * @param clientSecret The client secret of the SetupIntent
+ * @param descriptorCode A unique, 6-digit descriptor code that starts with SM that was sent as
+ * statement descriptor to the bank account
+ * @param callback a [ApiResultCallback] to receive the result or error
+ *
+ * @return a [SetupIntent] object
+ *
+ * @throws AuthenticationException failure to properly authenticate yourself (check your key)
+ * @throws InvalidRequestException your request has invalid parameters
+ * @throws APIConnectionException failure to connect to Stripe's API
+ * @throws APIException any other type of problem (for instance, a temporary issue with Stripe's servers)
+ */
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+@Throws(
+    AuthenticationException::class,
+    InvalidRequestException::class,
+    APIConnectionException::class,
+    APIException::class
+)
+suspend fun Stripe.verifySetupIntentWithMicrodeposits(
+    clientSecret: String,
+    descriptorCode: String
+): SetupIntent = runApiRequest {
+    stripeRepository.verifySetupIntentWithMicrodeposits(
+        clientSecret = clientSecret,
+        descriptorCode = descriptorCode,
+        requestOptions = ApiRequest.Options(
+            apiKey = publishableKey,
+            stripeAccount = stripeAccountId
+        )
+    )
+}

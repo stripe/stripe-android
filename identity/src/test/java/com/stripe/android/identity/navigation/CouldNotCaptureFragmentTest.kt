@@ -11,7 +11,9 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.identity.R
 import com.stripe.android.identity.databinding.BaseErrorFragmentBinding
 import com.stripe.android.identity.navigation.CouldNotCaptureFragment.Companion.ARG_COULD_NOT_CAPTURE_SCAN_TYPE
+import com.stripe.android.identity.navigation.CouldNotCaptureFragment.Companion.ARG_REQUIRE_LIVE_CAPTURE
 import com.stripe.android.identity.states.IdentityScanState.ScanType
+import com.stripe.android.identity.utils.ARG_SHOULD_SHOW_CHOOSE_PHOTO
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -19,28 +21,53 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 internal class CouldNotCaptureFragmentTest {
     @Test
-    fun `ID_FRONT navigates to IDUploadFragment`() {
-        testClickingFileUpload(ScanType.ID_FRONT, R.id.IDUploadFragment)
+    fun `ID_FRONT navigates to IDUploadFragment when requireLiveCapture true`() {
+        testClickingFileUpload(ScanType.ID_FRONT, true, R.id.IDUploadFragment)
     }
 
     @Test
-    fun `ID_BACK navigates to IDUploadFragment`() {
-        testClickingFileUpload(ScanType.ID_BACK, R.id.IDUploadFragment)
+    fun `ID_FRONT navigates to IDUploadFragment when requireLiveCapture false`() {
+        testClickingFileUpload(ScanType.ID_FRONT, false, R.id.IDUploadFragment)
     }
 
     @Test
-    fun `DL_FRONT navigates to DriverLicenseUploadFragment`() {
-        testClickingFileUpload(ScanType.DL_FRONT, R.id.driverLicenseUploadFragment)
+    fun `ID_BACK navigates to IDUploadFragment when requireLiveCapture true`() {
+        testClickingFileUpload(ScanType.ID_BACK, true, R.id.IDUploadFragment)
     }
 
     @Test
-    fun `DL_BACK navigates to DriverLicenseUploadFragment`() {
-        testClickingFileUpload(ScanType.DL_BACK, R.id.driverLicenseUploadFragment)
+    fun `ID_BACK navigates to IDUploadFragment when requireLiveCapture false`() {
+        testClickingFileUpload(ScanType.ID_BACK, false, R.id.IDUploadFragment)
     }
 
     @Test
-    fun `PASSPORT navigates to PassportUploadFragment`() {
-        testClickingFileUpload(ScanType.PASSPORT, R.id.passportUploadFragment)
+    fun `DL_FRONT navigates to DriverLicenseUploadFragment when requireLiveCapture true`() {
+        testClickingFileUpload(ScanType.DL_FRONT, true, R.id.driverLicenseUploadFragment)
+    }
+
+    @Test
+    fun `DL_FRONT navigates to DriverLicenseUploadFragment when requireLiveCapture false`() {
+        testClickingFileUpload(ScanType.DL_FRONT, false, R.id.driverLicenseUploadFragment)
+    }
+
+    @Test
+    fun `DL_BACK navigates to DriverLicenseUploadFragment when requireLiveCapture true`() {
+        testClickingFileUpload(ScanType.DL_BACK, true, R.id.driverLicenseUploadFragment)
+    }
+
+    @Test
+    fun `DL_BACK navigates to DriverLicenseUploadFragment when requireLiveCapture false`() {
+        testClickingFileUpload(ScanType.DL_BACK, false, R.id.driverLicenseUploadFragment)
+    }
+
+    @Test
+    fun `PASSPORT navigates to PassportUploadFragment when requireLiveCapture true`() {
+        testClickingFileUpload(ScanType.PASSPORT, true, R.id.passportUploadFragment)
+    }
+
+    @Test
+    fun `PASSPORT navigates to PassportUploadFragment when requireLiveCapture false`() {
+        testClickingFileUpload(ScanType.PASSPORT, false, R.id.passportUploadFragment)
     }
 
     @Test
@@ -68,9 +95,21 @@ internal class CouldNotCaptureFragmentTest {
         testClickingRetry(ScanType.PASSPORT, R.id.passportScanFragment, false)
     }
 
-    private fun testClickingFileUpload(scanType: ScanType, @IdRes destination: Int) {
-        launchCameraPermissionDeniedFragment(scanType) { fileUpload, _, navController ->
+    private fun testClickingFileUpload(
+        scanType: ScanType,
+        requireLiveCapture: Boolean,
+        @IdRes destination: Int
+    ) {
+        launchCameraPermissionDeniedFragment(
+            scanType,
+            requireLiveCapture
+        ) { fileUpload, _, navController ->
             fileUpload.callOnClick()
+            assertThat(
+                requireNotNull(navController.backStack.last().arguments)
+                [ARG_SHOULD_SHOW_CHOOSE_PHOTO]
+            ).isEqualTo(!requireLiveCapture)
+
             assertThat(navController.currentDestination?.id)
                 .isEqualTo(destination)
         }
@@ -81,7 +120,7 @@ internal class CouldNotCaptureFragmentTest {
         @IdRes destination: Int,
         shouldStartFromBack: Boolean
     ) {
-        launchCameraPermissionDeniedFragment(scanType) { _, retry, navController ->
+        launchCameraPermissionDeniedFragment(scanType, true) { _, retry, navController ->
             retry.callOnClick()
             assertThat(navController.currentDestination?.id)
                 .isEqualTo(destination)
@@ -95,10 +134,12 @@ internal class CouldNotCaptureFragmentTest {
 
     private fun launchCameraPermissionDeniedFragment(
         type: ScanType,
+        requireLiveCapture: Boolean,
         testBlock: (Button, Button, TestNavHostController) -> Unit
     ) = launchFragmentInContainer(
         bundleOf(
-            ARG_COULD_NOT_CAPTURE_SCAN_TYPE to type
+            ARG_COULD_NOT_CAPTURE_SCAN_TYPE to type,
+            ARG_REQUIRE_LIVE_CAPTURE to requireLiveCapture
         ),
         themeResId = R.style.Theme_MaterialComponents
     ) {

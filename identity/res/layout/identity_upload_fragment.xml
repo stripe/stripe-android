@@ -25,7 +25,7 @@
                 android:id="@+id/title_text"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:gravity="center_horizontal"
+                android:gravity="start"
                 android:layout_marginTop="@dimen/item_vertical_margin"
                 android:textSize="@dimen/upload_title_text_size"
                 android:text="@string/file_upload"
@@ -36,36 +36,28 @@
                 android:id="@+id/content_text"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/file_upload_content_passport"
-                android:gravity="center"
-                android:layout_marginBottom="@dimen/item_vertical_margin"
-                tools:text="@string/file_upload_content_passport" />
+                android:text="@string/file_upload_content_id"
+                android:gravity="start"
+                android:layout_marginBottom="32dp"
+                tools:text="@string/file_upload_content_id" />
 
-
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:layout_marginBottom="@dimen/item_vertical_margin"
-                android:background="?android:attr/listDivider" />
 
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="48dp"
-                android:layout_marginBottom="@dimen/item_vertical_margin"
-                android:layout_marginStart="@dimen/item_horizontal_margin"
-                android:layout_marginEnd="@dimen/item_horizontal_margin">
+                android:layout_marginBottom="@dimen/item_vertical_margin">
 
                 <TextView
-                    android:id="@+id/label"
+                    android:id="@+id/label_front"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
                     android:gravity="center_vertical"
                     android:background="@android:color/transparent"
-                    android:text="@string/passport"
+                    android:text="@string/front_of_id"
                     android:layout_alignParentStart="true" />
 
                 <com.google.android.material.button.MaterialButton
-                    android:id="@+id/select"
+                    android:id="@+id/select_front"
                     style="@style/Widget.MaterialComponents.Button.TextButton"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
@@ -73,7 +65,7 @@
                     android:layout_alignParentEnd="true" />
 
                 <com.google.android.material.progressindicator.CircularProgressIndicator
-                    android:id="@+id/progress_circular"
+                    android:id="@+id/progress_circular_front"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:visibility="gone"
@@ -83,7 +75,7 @@
                     app:indicatorSize="18dp" />
 
                 <ImageView
-                    android:id="@+id/finished_check_mark"
+                    android:id="@+id/finished_check_mark_front"
                     android:src="@drawable/check_mark"
                     android:layout_width="18dp"
                     android:layout_height="18dp"
@@ -91,16 +83,62 @@
                     android:layout_centerVertical="true"
                     android:layout_alignParentEnd="true"
                     android:visibility="gone"
-                    android:contentDescription="@string/passport_selected"
+                    android:contentDescription="@string/front_of_id_selected"
                     app:tint="?android:colorPrimary" />
             </RelativeLayout>
 
-
             <View
+                android:id="@+id/separator"
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
                 android:layout_marginBottom="@dimen/item_vertical_margin"
                 android:background="?android:attr/listDivider" />
+
+            <RelativeLayout
+                android:id="@+id/back_upload"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginBottom="@dimen/item_vertical_margin">
+
+                <TextView
+                    android:id="@+id/label_back"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:gravity="center_vertical"
+                    android:background="@android:color/transparent"
+                    android:text="@string/back_of_id"
+                    android:layout_alignParentStart="true" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/select_back"
+                    style="@style/Widget.MaterialComponents.Button.TextButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:text="@string/select"
+                    android:layout_alignParentEnd="true" />
+
+                <com.google.android.material.progressindicator.CircularProgressIndicator
+                    android:id="@+id/progress_circular_back"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:visibility="gone"
+                    android:indeterminate="true"
+                    android:layout_centerVertical="true"
+                    android:layout_alignParentEnd="true"
+                    app:indicatorSize="18dp" />
+
+                <ImageView
+                    android:id="@+id/finished_check_mark_back"
+                    android:src="@drawable/check_mark"
+                    android:layout_width="18dp"
+                    android:layout_height="18dp"
+                    android:layout_margin="4dp"
+                    android:layout_centerVertical="true"
+                    android:layout_alignParentEnd="true"
+                    android:visibility="gone"
+                    android:contentDescription="@string/back_of_id_selected"
+                    app:tint="?android:colorPrimary" />
+            </RelativeLayout>
 
         </LinearLayout>
     </ScrollView>
@@ -109,10 +147,8 @@
         android:id="@+id/kontinue"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/kontinue"
         android:layout_marginBottom="10dp"
         android:layout_gravity="bottom" />
-
 
 </LinearLayout>
 

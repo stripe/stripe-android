@@ -1,11 +1,13 @@
 package com.stripe.android.ui.core.elements
 
 import android.os.Parcelable
+import androidx.annotation.RestrictTo
 import com.stripe.android.view.BecsDebitBanks
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
-internal data class BsbSpec(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
+data class BsbSpec(
     override val identifier: IdentifierSpec = IdentifierSpec.Generic("bsb_number")
 ) : FormItemSpec(), RequiredItemSpec, Parcelable {
     fun transform(): BsbElement =

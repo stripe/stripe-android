@@ -20,7 +20,7 @@
     <action
         android:id="@+id/action_global_couldNotCaptureFragment"
         app:destination="@id/couldNotCaptureFragment" />
-    
+
     <fragment
         android:id="@+id/consentFragment"
         android:name="com.stripe.android.identity.navigation.ConsentFragment"
@@ -31,8 +31,7 @@
     </fragment>
     <fragment
         android:id="@+id/IDScanFragment"
-        android:name="com.stripe.android.identity.navigation.IDScanFragment"
-        tools:layout="@layout/id_scan_fragment">
+        android:name="com.stripe.android.identity.navigation.IDScanFragment">
         <argument
             android:name="startFromBack"
             android:defaultValue="false"
@@ -40,20 +39,21 @@
     </fragment>
     <fragment
         android:id="@+id/passportScanFragment"
-        android:name="com.stripe.android.identity.navigation.PassportScanFragment"
-        tools:layout="@layout/passport_scan_fragment" />
+        android:name="com.stripe.android.identity.navigation.PassportScanFragment" />
     <fragment
         android:id="@+id/driverLicenseScanFragment"
-        android:name="com.stripe.android.identity.navigation.DriverLicenseScanFragment"
-        tools:layout="@layout/driver_license_scan_fragment" />
+        android:name="com.stripe.android.identity.navigation.DriverLicenseScanFragment">
+        <argument
+            android:name="startFromBack"
+            android:defaultValue="false"
+            app:argType="boolean" />
+    </fragment>
     <fragment
         android:id="@+id/IDUploadFragment"
-        android:name="com.stripe.android.identity.navigation.IDUploadFragment"
-        tools:layout="@layout/id_upload_fragment" />
+        android:name="com.stripe.android.identity.navigation.IDUploadFragment" />
     <fragment
         android:id="@+id/passportUploadFragment"
-        android:name="com.stripe.android.identity.navigation.PassportUploadFragment"
-        tools:layout="@layout/passport_upload_fragment" />
+        android:name="com.stripe.android.identity.navigation.PassportUploadFragment" />
     <fragment
         android:id="@+id/driverLicenseUploadFragment"
         android:name="com.stripe.android.identity.navigation.DriverLicenseUploadFragment"
@@ -130,8 +130,7 @@
     </fragment>
     <fragment
         android:id="@+id/couldNotCaptureFragment"
-        android:name="com.stripe.android.identity.navigation.CouldNotCaptureFragment"
-        android:label="CouldNotCaptureFragment">
+        android:name="com.stripe.android.identity.navigation.CouldNotCaptureFragment">
         <argument
             android:name="scanType"
             app:argType="com.stripe.android.identity.states.IdentityScanState$ScanType" />

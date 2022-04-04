@@ -85,6 +85,7 @@ internal fun SectionError(error: String) {
     Text(
         text = error,
         color = PaymentsTheme.colors.material.error,
+        style = PaymentsTheme.typography.h6,
         modifier = Modifier.semantics(mergeDescendants = true) { }
     )
 }

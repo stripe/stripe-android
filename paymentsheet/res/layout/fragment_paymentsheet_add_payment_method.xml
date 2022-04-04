@@ -31,17 +31,15 @@
 
         <TextView
             android:id="@+id/message"
-            style="@style/StripePaymentSheetErrorMessage"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:visibility="gone"
             android:padding="1dp"
             android:layout_marginVertical="2dp" />
 
-        <com.stripe.android.paymentsheet.ui.GooglePayDivider
+        <androidx.compose.ui.platform.ComposeView
             android:id="@+id/google_pay_divider"
-            android:visibility="gone"
-            android:layout_marginTop="16dp"
+            android:visibility="visible"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
     </LinearLayout>

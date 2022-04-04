@@ -1,6 +1,9 @@
 package com.stripe.android.paymentsheet.viewmodels
 
 import android.app.Application
+import androidx.annotation.NonNull
+import androidx.annotation.Nullable
+import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
@@ -11,6 +14,7 @@ import androidx.lifecycle.asFlow
 import androidx.lifecycle.distinctUntilChanged
 import androidx.lifecycle.map
 import androidx.lifecycle.viewModelScope
+import androidx.test.espresso.idling.CountingIdlingResource
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.InjectorKey
 import com.stripe.android.model.PaymentIntent
@@ -37,6 +41,31 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import org.jetbrains.annotations.TestOnly
 import kotlin.coroutines.CoroutineContext
+
+@VisibleForTesting
+class TransitionFragmentResource {
+    companion object {
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
+        @Nullable
+        var idlingResource: CountingIdlingResource? = null
+
+        // This will only be called from test code
+        @VisibleForTesting
+        @NonNull
+        fun getSingleStepIdlingResource(): androidx.test.espresso.IdlingResource? {
+            if (idlingResource == null) {
+                idlingResource = try {
+                    Class.forName("androidx.test.espresso.Espresso")
+                    val countingIdlingResource = CountingIdlingResource("transition")
+                    countingIdlingResource
+                } catch (e: ClassNotFoundException) {
+                    null
+                }
+            }
+            return idlingResource
+        }
+    }
+}
 
 /**
  * Base `ViewModel` for activities that use `BottomSheet`.
@@ -96,6 +125,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     internal val amount: LiveData<Amount> = _amount
 
     internal val headerVisibilility: MutableLiveData<Boolean> = MutableLiveData(true)
+    internal val googlePayDividerVisibilility: MutableLiveData<Boolean> = MutableLiveData(false)
 
     private var addFragmentSelectedLPM =
         savedStateHandle.get<SupportedPaymentMethod>(SAVE_SELECTED_ADD_LPM)
@@ -106,7 +136,8 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
      * Represents what the user last selects (add or buy) on the
      * [PaymentOptionsActivity]/[PaymentSheetActivity], and saved/restored from the preferences.
      */
-    private val _savedSelection = savedStateHandle.getLiveData<SavedSelection>(SAVE_SAVED_SELECTION)
+    private val _savedSelection =
+        savedStateHandle.getLiveData<SavedSelection>(SAVE_SAVED_SELECTION)
     private val savedSelection: LiveData<SavedSelection> = _savedSelection
 
     private val _transition = MutableLiveData<Event<TransitionTargetType?>>(Event(null))
@@ -158,6 +189,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     }.distinctUntilChanged()
 
     init {
+        TransitionFragmentResource.idlingResource?.increment()
         if (_savedSelection.value == null) {
             viewModelScope.launch {
                 val savedSelection = withContext(workContext) {
@@ -218,6 +250,9 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     }
 
     open fun transitionTo(target: TransitionTargetType) {
+        if (TransitionFragmentResource.idlingResource?.isIdleNow == false) {
+            TransitionFragmentResource.idlingResource?.decrement()
+        }
         _transition.postValue(Event(target))
     }
 

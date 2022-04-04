@@ -24,6 +24,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.painterResource
@@ -47,6 +49,7 @@ import com.stripe.android.paymentsheet.ui.getSavedPaymentMethodIcon
 import com.stripe.android.ui.core.PaymentsTheme
 import com.stripe.android.ui.core.elements.SectionCard
 import com.stripe.android.ui.core.elements.SimpleDialogElementUI
+import com.stripe.android.ui.core.shouldUseDarkDynamicColor
 import kotlin.properties.Delegates
 
 @SuppressLint("NotifyDataSetChanged")
@@ -570,9 +573,17 @@ internal fun PaymentOptionUi(
                 onConfirmListener = onRemoveListener
             )
 
+            // tint the delete symbol so it contrasts well with the error color around it.
+            val iconColor = PaymentsTheme.colors.material.error
+            val deleteIconColor = if (iconColor.shouldUseDarkDynamicColor()) {
+                Color.Black
+            } else {
+                Color.White
+            }
             Image(
                 painter = painterResource(R.drawable.stripe_ic_delete_symbol),
                 contentDescription = onRemoveAccessibilityDescription,
+                colorFilter = ColorFilter.tint(deleteIconColor),
                 modifier = Modifier
                     .constrainAs(deleteIcon) {
                         top.linkTo(card.top, margin = (-9).dp)
@@ -580,7 +591,7 @@ internal fun PaymentOptionUi(
                     }
                     .size(20.dp)
                     .clip(CircleShape)
-                    .background(color = PaymentsTheme.colors.material.error)
+                    .background(color = iconColor)
                     .clickable(
                         onClick = {
                             openDialog.value = true

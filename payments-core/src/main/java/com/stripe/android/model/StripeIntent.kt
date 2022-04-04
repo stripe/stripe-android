@@ -253,8 +253,9 @@ sealed interface StripeIntent : StripeModel {
         @Parcelize
         data class WeChatPayRedirect(val weChat: WeChat) : NextActionData()
 
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         @Parcelize
-        internal data class VerifyWithMicrodeposits(
+        data class VerifyWithMicrodeposits(
             val arrivalDate: Long,
             val hostedVerificationUrl: String,
             val microdepositType: MicrodepositType

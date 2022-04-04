@@ -690,7 +690,7 @@ internal class PaymentSheetActivityTest {
                 PaymentSheetViewState.Reset(BaseSheetViewModel.UserErrorMessage(errorMessage))
 
             assertThat(activity.viewBinding.message.isVisible).isTrue()
-            assertThat(activity.viewBinding.message.text).isEqualTo(errorMessage)
+            assertThat(activity.viewBinding.message.text.toString()).isEqualTo(errorMessage)
 
             viewModel.updateSelection(PaymentSelection.GooglePay)
 
@@ -714,7 +714,7 @@ internal class PaymentSheetActivityTest {
                 PaymentSheetViewState.Reset(BaseSheetViewModel.UserErrorMessage(errorMessage))
 
             assertThat(activity.viewBinding.message.isVisible).isTrue()
-            assertThat(activity.viewBinding.message.text).isEqualTo(errorMessage)
+            assertThat(activity.viewBinding.message.text.toString()).isEqualTo(errorMessage)
 
             viewModel.checkout(CheckoutIdentifier.SheetBottomBuy)
 

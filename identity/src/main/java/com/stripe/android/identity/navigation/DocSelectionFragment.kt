@@ -66,7 +66,7 @@ internal class DocSelectionFragment(
                             toggleSingleSelectionUI(
                                 documentSelect.idDocumentTypeAllowlist.entries.first().key,
                                 documentSelect.buttonText,
-                                documentSelect.idDocumentTypeAllowlist.entries.first().value,
+                                documentSelect.body,
                             )
                         }
                     }
@@ -142,7 +142,11 @@ internal class DocSelectionFragment(
     /**
      * Toggle UI to show single selection type.
      */
-    private fun toggleSingleSelectionUI(allowedType: String, buttonText: String, bodyText: String) {
+    private fun toggleSingleSelectionUI(
+        allowedType: String,
+        buttonText: String,
+        bodyText: String?
+    ) {
         binding.multiSelectionContent.visibility = View.GONE
         binding.singleSelectionContent.visibility = View.VISIBLE
         binding.singleSelectionContinue.setText(buttonText)
@@ -225,7 +229,11 @@ internal class DocSelectionFragment(
                     Log.e(TAG, "Can't access camera and client has required live capture.")
                     navigateToDefaultErrorFragment()
                 } else {
-                    navigateToUploadFragment(type.toUploadDestinationId(), true)
+                    navigateToUploadFragment(
+                        type.toUploadDestinationId(),
+                        shouldShowTakePhoto = true,
+                        shouldShowChoosePhoto = true
+                    )
                 }
             },
             onFailure = {

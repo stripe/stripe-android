@@ -273,7 +273,7 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
                 PaymentSheetViewState.Reset(BaseSheetViewModel.UserErrorMessage(errorMessage))
 
             assertThat(viewBinding.message.isVisible).isTrue()
-            assertThat(viewBinding.message.text).isEqualTo(errorMessage)
+            assertThat(viewBinding.message.text.toString()).isEqualTo(errorMessage)
 
             fragment.sheetViewModel.updateSelection(
                 PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
@@ -294,24 +294,12 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
                 PaymentSheetViewState.Reset(BaseSheetViewModel.UserErrorMessage(errorMessage))
 
             assertThat(viewBinding.message.isVisible).isTrue()
-            assertThat(viewBinding.message.text).isEqualTo(errorMessage)
+            assertThat(viewBinding.message.text.toString()).isEqualTo(errorMessage)
 
             viewBinding.googlePayButton.performClick()
 
             assertThat(viewBinding.message.isVisible).isFalse()
             assertThat(viewBinding.message.text.isNullOrEmpty()).isTrue()
-        }
-    }
-
-    @Test
-    fun `when PaymentIntent only supports card it should not show payment method selector`() {
-        val paymentIntent = PaymentIntentFixtures.PI_SUCCEEDED.copy(
-            paymentMethodTypes = listOf("card")
-        )
-        createFragment(stripeIntent = paymentIntent) { _, viewBinding, _ ->
-            assertThat(viewBinding.paymentMethodsRecycler.isVisible).isFalse()
-            assertThat(viewBinding.googlePayDivider.text)
-                .isEqualTo("Or pay with a card")
         }
     }
 
@@ -374,18 +362,6 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
                         injectorKey = "testInjectorKeyAddFragmentTest"
                     )
                 )
-        }
-    }
-
-    @Test
-    fun `when PaymentIntent allows multiple supported payment methods it should show payment method selector`() {
-        val paymentIntent = PaymentIntentFixtures.PI_SUCCEEDED.copy(
-            paymentMethodTypes = listOf("card", "bancontact")
-        )
-        createFragment(stripeIntent = paymentIntent) { _, viewBinding, _ ->
-            assertThat(viewBinding.paymentMethodsRecycler.isVisible).isTrue()
-            assertThat(viewBinding.googlePayDivider.text)
-                .isEqualTo("Or pay using")
         }
     }
 

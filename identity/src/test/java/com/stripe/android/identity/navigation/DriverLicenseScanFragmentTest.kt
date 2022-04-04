@@ -305,6 +305,9 @@ internal class DriverLicenseScanFragmentTest {
                 .isEqualTo(View.VISIBLE)
             assertThat(binding.checkMarkView.visibility).isEqualTo(View.GONE)
             assertThat(binding.kontinue.isEnabled).isFalse()
+            assertThat(binding.headerTitle.text).isEqualTo(
+                context.getText(R.string.front_of_dl)
+            )
             assertThat(binding.message.text).isEqualTo(
                 context.getText(R.string.position_dl_front)
             )
@@ -323,6 +326,9 @@ internal class DriverLicenseScanFragmentTest {
                 .isEqualTo(View.VISIBLE)
             assertThat(binding.checkMarkView.visibility).isEqualTo(View.GONE)
             assertThat(binding.kontinue.isEnabled).isFalse()
+            assertThat(binding.headerTitle.text).isEqualTo(
+                context.getText(R.string.back_of_dl)
+            )
             assertThat(binding.message.text).isEqualTo(
                 context.getText(R.string.position_dl_back)
             )
