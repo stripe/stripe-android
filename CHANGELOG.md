@@ -9,6 +9,7 @@ This release patches a crash with payment launcher when there is a configuration
 * [CHANGED] [4800](https://github.com/stripe/stripe-android/pull/4800) Relocated network exceptions
   to :stripe-core.
 * [CHANGED] [4803](https://github.com/stripe/stripe-android/pull/4803) Remove network related internal files.
+* [ADDED] [4820](https://github.com/stripe/stripe-android/pull/4820) Release Stripe's Identity SDK.
 
 ## 19.3.1 - 2022-03-22
 This release patches an issue with 3ds2 confirmation
