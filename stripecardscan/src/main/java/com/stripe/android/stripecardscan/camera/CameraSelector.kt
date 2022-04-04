@@ -10,7 +10,8 @@ import com.stripe.android.camera.Camera1Adapter
 import com.stripe.android.camera.CameraAdapter
 import com.stripe.android.camera.CameraErrorListener
 import com.stripe.android.camera.CameraPreviewImage
-import com.stripe.android.stripecardscan.framework.LOG_TAG
+
+private const val LOG_TAG = "CameraSelector"
 
 /**
  * Get the appropriate camera adapter. If the customer has provided an additional camera adapter,
