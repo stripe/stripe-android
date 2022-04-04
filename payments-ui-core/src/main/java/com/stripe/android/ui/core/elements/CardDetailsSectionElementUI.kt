@@ -22,7 +22,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.stripe.android.stripecardscan.cardscan.CardScanSheetResult
 import com.stripe.android.stripecardscan.cardscan.exception.UnknownScanException
@@ -98,7 +97,6 @@ fun CardDetailsSectionElementUI(
                         .padding(start = 4.dp),
                     color = PaymentsTheme.colors.material.primary,
                     style = PaymentsTheme.typography.h6,
-                    fontWeight = FontWeight.Bold
                 )
             }
         }
