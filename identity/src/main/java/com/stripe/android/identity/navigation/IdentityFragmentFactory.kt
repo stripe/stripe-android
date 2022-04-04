@@ -11,6 +11,7 @@ import com.stripe.android.identity.networking.DefaultIDDetectorFetcher
 import com.stripe.android.identity.networking.DefaultIdentityRepository
 import com.stripe.android.identity.utils.DefaultIdentityIO
 import com.stripe.android.identity.utils.IdentityIO
+import com.stripe.android.identity.viewmodel.ConsentFragmentViewModel
 import com.stripe.android.identity.viewmodel.IdentityScanViewModel
 import com.stripe.android.identity.viewmodel.IdentityUploadViewModel
 import com.stripe.android.identity.viewmodel.IdentityViewModel
@@ -34,6 +35,12 @@ internal class IdentityFragmentFactory(
         IdentityScanViewModel.IdentityScanViewModelFactory()
     private val identityUploadViewModelFactory =
         IdentityUploadViewModel.FrontBackUploadViewModelFactory(identityIO)
+    private val consentFragmentViewModelFactory =
+        ConsentFragmentViewModel.ConsentFragmentViewModelFactory(
+            identityIO,
+            identityRepository
+        )
+
     internal val identityViewModelFactory = IdentityViewModel.IdentityViewModelFactory(
         verificationArgs,
         identityRepository,
@@ -73,6 +80,7 @@ internal class IdentityFragmentFactory(
             )
             ConsentFragment::class.java.name -> ConsentFragment(
                 identityViewModelFactory,
+                consentFragmentViewModelFactory,
                 verificationFlowFinishable
             )
             DocSelectionFragment::class.java.name -> DocSelectionFragment(

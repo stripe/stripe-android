@@ -21,6 +21,7 @@ import com.stripe.android.identity.networking.models.VerificationPageDataRequire
 import com.stripe.android.identity.networking.models.VerificationPageRequirements
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentConsentPage
 import com.stripe.android.identity.viewModelFactoryFor
+import com.stripe.android.identity.viewmodel.ConsentFragmentViewModel
 import com.stripe.android.identity.viewmodel.IdentityViewModel
 import kotlinx.coroutines.runBlocking
 import org.junit.Rule
@@ -31,6 +32,7 @@ import org.mockito.kotlin.KArgumentCaptor
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.same
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
@@ -114,6 +116,8 @@ internal class ConsentFragmentTest {
         )
     }
 
+    private val mockConsentFragmentViewModel = mock<ConsentFragmentViewModel>()
+
     private fun setUpErrorVerificationPage() {
         val failureCaptor: KArgumentCaptor<(Throwable?) -> Unit> = argumentCaptor()
         verify(
@@ -171,6 +175,12 @@ internal class ConsentFragmentTest {
         launchConsentFragment { binding, _ ->
             setUpSuccessVerificationPage()
 
+            verify(
+                mockConsentFragmentViewModel
+            ).loadUriIntoImageView(
+                same(BRAND_LOGO),
+                same(binding.merchantLogo)
+            )
             assertThat(binding.loadings.visibility).isEqualTo(View.GONE)
             assertThat(binding.texts.visibility).isEqualTo(View.VISIBLE)
             assertThat(binding.buttons.visibility).isEqualTo(View.VISIBLE)
@@ -318,7 +328,11 @@ internal class ConsentFragmentTest {
     ) = launchFragmentInContainer(
         themeResId = R.style.Theme_MaterialComponents
     ) {
-        ConsentFragment(viewModelFactoryFor(mockIdentityViewModel), mock())
+        ConsentFragment(
+            viewModelFactoryFor(mockIdentityViewModel),
+            viewModelFactoryFor(mockConsentFragmentViewModel),
+            mock()
+        )
     }.onFragment {
         val navController = TestNavHostController(
             ApplicationProvider.getApplicationContext()

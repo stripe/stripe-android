@@ -59,4 +59,10 @@ internal interface IdentityRepository {
         APIException::class
     )
     suspend fun downloadModel(modelUrl: String): File
+
+    @Throws(
+        APIConnectionException::class,
+        APIException::class
+    )
+    suspend fun downloadFile(fileUrl: String): File
 }
