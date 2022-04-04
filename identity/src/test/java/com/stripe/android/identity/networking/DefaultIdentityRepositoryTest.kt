@@ -269,8 +269,8 @@ class DefaultIdentityRepositoryTest {
 
             val request = requestCaptor.firstValue
 
-            assertThat(request).isInstanceOf(IdentityModelDownloadRequest::class.java)
-            assertThat((request as IdentityModelDownloadRequest).url).isEqualTo(TEST_URL)
+            assertThat(request).isInstanceOf(IdentityFileDownloadRequest::class.java)
+            assertThat((request as IdentityFileDownloadRequest).url).isEqualTo(TEST_URL)
         }
     }
 

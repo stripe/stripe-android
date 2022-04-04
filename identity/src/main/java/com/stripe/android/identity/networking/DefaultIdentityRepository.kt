@@ -98,7 +98,7 @@ internal class DefaultIdentityRepository(
 
     override suspend fun downloadModel(modelUrl: String) = runCatching {
         stripeNetworkClient.executeRequestForFile(
-            IdentityModelDownloadRequest(modelUrl),
+            IdentityFileDownloadRequest(modelUrl),
             identityIO.createTFLiteFile(modelUrl)
         )
     }.fold(
@@ -120,6 +120,35 @@ internal class DefaultIdentityRepository(
         onFailure = {
             throw APIConnectionException(
                 "Fail to download file at $modelUrl",
+                cause = it
+            )
+        }
+    )
+
+    override suspend fun downloadFile(fileUrl: String) = runCatching {
+        stripeNetworkClient.executeRequestForFile(
+            IdentityFileDownloadRequest(fileUrl),
+            identityIO.createCacheFile()
+        )
+    }.fold(
+        onSuccess = { response ->
+            if (response.isError) {
+                throw APIException(
+                    requestId = response.requestId?.value,
+                    statusCode = response.code,
+                    message = "Downloading from $fileUrl returns error response"
+                )
+            } else {
+                response.body ?: run {
+                    throw APIException(
+                        message = "Downloading from $fileUrl returns a null body"
+                    )
+                }
+            }
+        },
+        onFailure = {
+            throw APIConnectionException(
+                "Fail to download file at $fileUrl",
                 cause = it
             )
         }

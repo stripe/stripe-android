@@ -30,15 +30,17 @@ internal class DefaultIdentityIO(private val context: Context) : IdentityIO {
     override fun createInternalFileUri(): ContentUriResult {
         createImageFile().also { file ->
             return ContentUriResult(
-                FileProvider.getUriForFile(
-                    context,
-                    "${context.packageName}.fileprovider",
-                    file
-                ),
+                createUriForFile(file),
                 file.absolutePath
             )
         }
     }
+
+    override fun createUriForFile(file: File): Uri = FileProvider.getUriForFile(
+        context,
+        "${context.packageName}.fileprovider",
+        file
+    )
 
     override fun resizeUriAndCreateFileToUpload(
         originalUri: Uri,
@@ -142,17 +144,25 @@ internal class DefaultIdentityIO(private val context: Context) : IdentityIO {
         )
     }
 
+    override fun createCacheFile(): File {
+        return File.createTempFile(
+            generalCacheFileName(),
+            ".tmp",
+            context.filesDir
+        )
+    }
+
     @Throws(IOException::class)
     private fun createImageFile(): File {
         return File.createTempFile(
-            "${generateJpgFileName()}_", /* prefix */
+            "JPEG_${generalCacheFileName()}_", /* prefix */
             ".jpg", /* suffix */
             context.filesDir
         )
     }
 
-    private fun generateJpgFileName() =
-        "JPEG_" + SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
+    private fun generalCacheFileName() =
+        SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
 
     // Find the githash part of the model URL and general a tflite file name.
     // Example of modelUrl: https://b.stripecdn.com/gelato/assets/50e98374a70b71b2ee7ec8c3060f187ee1d833bd/assets/id_detectors/tflite/2022-02-23/model.tflite

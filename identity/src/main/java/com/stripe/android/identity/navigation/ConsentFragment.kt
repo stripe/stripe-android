@@ -8,10 +8,10 @@ import android.view.ViewGroup
 import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
-import com.bumptech.glide.Glide
 import com.stripe.android.identity.IdentityVerificationSheet
 import com.stripe.android.identity.R
 import com.stripe.android.identity.VerificationFlowFinishable
@@ -23,6 +23,7 @@ import com.stripe.android.identity.networking.models.VerificationPageStaticConte
 import com.stripe.android.identity.utils.navigateToErrorFragmentWithFailedReason
 import com.stripe.android.identity.utils.postVerificationPageDataAndMaybeSubmit
 import com.stripe.android.identity.utils.setHtmlString
+import com.stripe.android.identity.viewmodel.ConsentFragmentViewModel
 import com.stripe.android.identity.viewmodel.IdentityViewModel
 import kotlinx.coroutines.launch
 
@@ -32,12 +33,17 @@ import kotlinx.coroutines.launch
  */
 internal class ConsentFragment(
     private val identityViewModelFactory: ViewModelProvider.Factory,
+    private val consentViewModelFactory: ViewModelProvider.Factory,
     private val verificationFlowFinishable: VerificationFlowFinishable,
 ) : Fragment() {
     private lateinit var binding: ConsentFragmentBinding
 
     private val identityViewModel: IdentityViewModel by activityViewModels {
         identityViewModelFactory
+    }
+
+    private val consentViewModel: ConsentFragmentViewModel by viewModels {
+        consentViewModelFactory
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -61,8 +67,10 @@ internal class ConsentFragment(
     ): View {
         binding = ConsentFragmentBinding.inflate(inflater, container, false)
 
-        Glide.with(requireContext()).load(identityViewModel.args.brandLogo)
-            .into(binding.merchantLogo)
+        consentViewModel.loadUriIntoImageView(
+            identityViewModel.args.brandLogo,
+            binding.merchantLogo
+        )
 
         binding.agree.setOnClickListener {
             binding.agree.toggleToLoading()

@@ -4,9 +4,9 @@ import com.stripe.android.core.networking.DEFAULT_RETRY_CODES
 import com.stripe.android.core.networking.StripeRequest
 
 /**
- * A request to download ML models.
+ * A request to download files.
  */
-internal class IdentityModelDownloadRequest(
+internal class IdentityFileDownloadRequest(
     override val url: String
 ) : StripeRequest() {
     override val method: Method = Method.GET
