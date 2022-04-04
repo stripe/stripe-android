@@ -4,7 +4,7 @@ import java.time.Duration
 buildscript {
     apply from: 'dependencies.gradle'
     apply from: './build-configuration/build-environment.gradle'
-    ext.kotlinVersion = '1.6.10'
+    ext.kotlinVersion = '1.6.20'
     ext.dokkaVersion = '1.6.10'
 
     repositories {
