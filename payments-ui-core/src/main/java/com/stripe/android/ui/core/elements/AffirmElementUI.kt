@@ -11,10 +11,13 @@ import com.stripe.android.ui.core.R
 @Composable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun AffirmElementUI() {
-    HtmlText(
+    Html(
         html = stringResource(id = R.string.affirm_buy_now_pay_later),
         imageGetter = mapOf(
-            "affirm" to R.drawable.stripe_ic_affirm_logo
+            "affirm" to EmbeddableImage(
+                R.drawable.stripe_ic_affirm_logo,
+                R.string.affirm
+            )
         ),
         modifier = Modifier.padding(bottom = 4.dp)
     )
