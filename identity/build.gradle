@@ -130,3 +130,11 @@ task ktlintFormat(type: JavaExec, group: "formatting") {
     classpath = configurations.ktlint
     args "-F", "src/**/*.kt"
 }
+
+ext {
+    artifactId = "identity"
+    artifactName = "identity"
+    artifactDescrption = "Stripe Identity Android SDK"
+}
+
+apply from: "${rootDir}/deploy/deploy.gradle"
