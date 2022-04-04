@@ -1,6 +1,7 @@
 # CHANGELOG
-## xx.x.x - YYYY-MM-DD
-This release patches a crash with payment launcher when there is a configuration change
+## 20.0.0 - 2022-04-04
+This release patches on a crash on PaymentLauncher, updates the package name of some public classes,
+changes the public API for CardImageVerificationSheet and releases Identity SDK.
 
 ### Payments (`com.stripe:stripe-android`)
 * [FIXED] [4776](https://github.com/stripe/stripe-android/pull/4776) fix issue with PaymentLauncher configuration change
