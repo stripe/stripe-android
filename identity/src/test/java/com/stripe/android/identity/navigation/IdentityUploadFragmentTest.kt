@@ -26,7 +26,6 @@ import com.stripe.android.identity.networking.Resource
 import com.stripe.android.identity.networking.models.ClearDataParam
 import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.networking.models.DocumentUploadParam
-import com.stripe.android.identity.networking.models.IdDocumentParam
 import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentDocumentCapturePage
 import com.stripe.android.identity.states.IdentityScanState
@@ -286,17 +285,15 @@ class IdentityUploadFragmentTest {
 
                 assertThat(collectedDataParamCaptor.firstValue).isEqualTo(
                     CollectedDataParam(
-                        idDocument = IdDocumentParam(
-                            front = DocumentUploadParam(
-                                highResImage = FRONT_UPLOADED_ID,
-                                uploadMethod = DocumentUploadParam.UploadMethod.FILEUPLOAD
-                            ),
-                            back = DocumentUploadParam(
-                                highResImage = BACK_UPLOADED_ID,
-                                uploadMethod = DocumentUploadParam.UploadMethod.FILEUPLOAD
-                            ),
-                            type = IdDocumentParam.Type.IDCARD
-                        )
+                        idDocumentFront = DocumentUploadParam(
+                            highResImage = FRONT_UPLOADED_ID,
+                            uploadMethod = DocumentUploadParam.UploadMethod.FILEUPLOAD
+                        ),
+                        idDocumentBack = DocumentUploadParam(
+                            highResImage = BACK_UPLOADED_ID,
+                            uploadMethod = DocumentUploadParam.UploadMethod.FILEUPLOAD
+                        ),
+                        idDocumentType = CollectedDataParam.Type.IDCARD
                     )
                 )
                 assertThat(clearDataParamCaptor.firstValue).isEqualTo(

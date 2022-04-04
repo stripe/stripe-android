@@ -19,9 +19,7 @@ import com.stripe.android.identity.databinding.DocSelectionFragmentBinding
 import com.stripe.android.identity.networking.Status
 import com.stripe.android.identity.networking.models.ClearDataParam
 import com.stripe.android.identity.networking.models.CollectedDataParam
-import com.stripe.android.identity.networking.models.IdDocumentParam
-import com.stripe.android.identity.networking.models.IdDocumentParam.Type
-import com.stripe.android.identity.networking.models.VerificationPageData.Companion.isMissingBackOrFront
+import com.stripe.android.identity.networking.models.CollectedDataParam.Type
 import com.stripe.android.identity.utils.navigateToDefaultErrorFragment
 import com.stripe.android.identity.utils.navigateToUploadFragment
 import com.stripe.android.identity.utils.postVerificationPageDataAndMaybeSubmit
@@ -186,11 +184,9 @@ internal class DocSelectionFragment(
         lifecycleScope.launch {
             postVerificationPageDataAndMaybeSubmit(
                 identityViewModel = identityViewModel,
-                collectedDataParam = CollectedDataParam(idDocument = IdDocumentParam(type = type)),
+                collectedDataParam = CollectedDataParam(idDocumentType = type),
                 clearDataParam = ClearDataParam.DOC_SELECT_TO_UPLOAD,
-                shouldNotSubmit = { verificationPageData ->
-                    verificationPageData.isMissingBackOrFront()
-                },
+                shouldNotSubmit = { true },
                 notSubmitBlock = {
                     cameraPermissionEnsureable.ensureCameraPermission(
                         onCameraReady = {

@@ -5,7 +5,7 @@ import android.util.Log
 import android.view.View
 import androidx.lifecycle.ViewModelProvider
 import com.stripe.android.identity.R
-import com.stripe.android.identity.networking.models.IdDocumentParam
+import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.states.IdentityScanState.ScanType.DL_BACK
 import com.stripe.android.identity.states.IdentityScanState.ScanType.DL_FRONT
 
@@ -35,7 +35,7 @@ internal class DriverLicenseScanFragment(
                     startScanning(DL_BACK)
                 }
                 DL_BACK -> {
-                    observeAndUploadForBothSides(IdDocumentParam.Type.DRIVINGLICENSE)
+                    observeAndUploadForBothSides(CollectedDataParam.Type.DRIVINGLICENSE)
                 }
                 else -> {
                     Log.e(

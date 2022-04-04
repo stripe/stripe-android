@@ -9,7 +9,6 @@ import com.stripe.android.identity.R
 import com.stripe.android.identity.networking.models.ClearDataParam
 import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.networking.models.DocumentUploadParam
-import com.stripe.android.identity.networking.models.IdDocumentParam
 import com.stripe.android.identity.states.IdentityScanState
 import com.stripe.android.identity.utils.navigateToDefaultErrorFragment
 import com.stripe.android.identity.utils.postVerificationPageDataAndMaybeSubmit
@@ -49,15 +48,13 @@ internal class PassportUploadFragment(
                     postVerificationPageDataAndMaybeSubmit(
                         identityViewModel = identityViewModel,
                         collectedDataParam = CollectedDataParam(
-                            idDocument = IdDocumentParam(
-                                front = DocumentUploadParam(
-                                    highResImage = requireNotNull(frontResult.uploadedStripeFile.id) {
-                                        "front uploaded file id is null"
-                                    },
-                                    uploadMethod = frontResult.uploadMethod
-                                ),
-                                type = IdDocumentParam.Type.PASSPORT
-                            )
+                            idDocumentFront = DocumentUploadParam(
+                                highResImage = requireNotNull(frontResult.uploadedStripeFile.id) {
+                                    "front uploaded file id is null"
+                                },
+                                uploadMethod = frontResult.uploadMethod
+                            ),
+                            idDocumentType = CollectedDataParam.Type.PASSPORT
                         ),
                         clearDataParam = ClearDataParam.UPLOAD_TO_CONFIRM,
                         shouldNotSubmit = { false }

@@ -23,7 +23,6 @@ import com.stripe.android.identity.networking.Resource
 import com.stripe.android.identity.networking.models.ClearDataParam
 import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.networking.models.DocumentUploadParam
-import com.stripe.android.identity.networking.models.IdDocumentParam
 import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentDocumentCapturePage
 import com.stripe.android.identity.states.IdentityScanState
@@ -99,7 +98,7 @@ class PassportScanFragmentTest {
                 verify(mockIdentityViewModel).postVerificationPageData(
                     eq(
                         CollectedDataParam.createFromUploadedResultsForAutoCapture(
-                            type = IdDocumentParam.Type.PASSPORT,
+                            type = CollectedDataParam.Type.PASSPORT,
                             frontHighResResult = FRONT_HIGH_RES_RESULT,
                             frontLowResResult = FRONT_LOW_RES_RESULT
                         )

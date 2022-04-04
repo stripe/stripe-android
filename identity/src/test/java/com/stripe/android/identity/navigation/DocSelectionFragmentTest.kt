@@ -17,7 +17,7 @@ import com.stripe.android.identity.navigation.DocSelectionFragment.Companion.DRI
 import com.stripe.android.identity.navigation.DocSelectionFragment.Companion.ID_CARD_KEY
 import com.stripe.android.identity.navigation.DocSelectionFragment.Companion.PASSPORT_KEY
 import com.stripe.android.identity.networking.Resource
-import com.stripe.android.identity.networking.models.IdDocumentParam
+import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.networking.models.VerificationPageData
 import com.stripe.android.identity.networking.models.VerificationPageDataRequirements
@@ -301,7 +301,7 @@ internal class DocSelectionFragmentTest {
             assertThat(
                 requireNotNull(navController.backStack.last().arguments)
                 [ARG_SCAN_TYPE]
-            ).isEqualTo(IdDocumentParam.Type.DRIVINGLICENSE)
+            ).isEqualTo(CollectedDataParam.Type.DRIVINGLICENSE)
 
             assertThat(navController.currentDestination?.id)
                 .isEqualTo(R.id.cameraPermissionDeniedFragment)
@@ -465,7 +465,7 @@ internal class DocSelectionFragmentTest {
             objectType = "type",
             requirements = VerificationPageDataRequirements(
                 errors = emptyList(),
-                missing = listOf(VerificationPageDataRequirements.Missing.IDDOCUMENTBACK)
+//                missing = listOf(VerificationPageDataRequirements.Missing.IDDOCUMENTBACK)
             ),
             status = VerificationPageData.Status.VERIFIED,
             submitted = false

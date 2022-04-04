@@ -18,9 +18,7 @@ import com.stripe.android.identity.VerificationFlowFinishable
 import com.stripe.android.identity.databinding.ConsentFragmentBinding
 import com.stripe.android.identity.networking.models.ClearDataParam
 import com.stripe.android.identity.networking.models.CollectedDataParam
-import com.stripe.android.identity.networking.models.ConsentParam
 import com.stripe.android.identity.networking.models.VerificationPage.Companion.isMissingBiometricConsent
-import com.stripe.android.identity.networking.models.VerificationPageData.Companion.isMissingDocumentType
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentConsentPage
 import com.stripe.android.identity.utils.navigateToErrorFragmentWithFailedReason
 import com.stripe.android.identity.utils.postVerificationPageDataAndMaybeSubmit
@@ -71,7 +69,7 @@ internal class ConsentFragment(
             binding.decline.isEnabled = false
             postVerificationPageDataAndNavigate(
                 CollectedDataParam(
-                    consent = ConsentParam(biometric = true)
+                    biometricConsent = true
                 )
             )
         }
@@ -80,7 +78,7 @@ internal class ConsentFragment(
             binding.agree.isEnabled = false
             postVerificationPageDataAndNavigate(
                 CollectedDataParam(
-                    consent = ConsentParam(biometric = false)
+                    biometricConsent = false
                 )
             )
         }
@@ -122,13 +120,8 @@ internal class ConsentFragment(
                 collectedDataParam,
                 ClearDataParam.CONSENT_TO_DOC_SELECT,
                 shouldNotSubmit = { true },
-                notSubmitBlock = { verificationPageData ->
-                    if (verificationPageData.isMissingDocumentType()) {
-                        navigateToDocSelection()
-                    } else {
-                        // TODO(ccen) Determine the behavior when verificationPageData.isMissingDocumentType() is false
-                        // how to get the type that's already selected
-                    }
+                notSubmitBlock = {
+                    navigateToDocSelection()
                 }
             )
         }

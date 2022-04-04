@@ -30,7 +30,6 @@ import com.stripe.android.identity.navigation.CouldNotCaptureFragment.Companion.
 import com.stripe.android.identity.networking.Status
 import com.stripe.android.identity.networking.models.ClearDataParam
 import com.stripe.android.identity.networking.models.CollectedDataParam
-import com.stripe.android.identity.networking.models.IdDocumentParam
 import com.stripe.android.identity.states.IdentityScanState
 import com.stripe.android.identity.ui.LoadingButton
 import com.stripe.android.identity.utils.navigateToDefaultErrorFragment
@@ -234,7 +233,7 @@ internal abstract class IdentityCameraScanFragment(
      * Observe for [IdentityViewModel.bothUploaded],
      * try to [postVerificationPageDataAndMaybeSubmit] when success and navigates to error when fails.
      */
-    protected fun observeAndUploadForBothSides(type: IdDocumentParam.Type) =
+    protected fun observeAndUploadForBothSides(type: CollectedDataParam.Type) =
         identityViewModel.bothUploaded.observe(viewLifecycleOwner) {
             when (it.status) {
                 Status.SUCCESS -> {
@@ -278,7 +277,7 @@ internal abstract class IdentityCameraScanFragment(
      * Observe for [IdentityViewModel.frontUploaded],
      * try to [postVerificationPageDataAndMaybeSubmit] when success and navigates to error when fails.
      */
-    protected fun observeAndUploadForFrontSide(type: IdDocumentParam.Type) =
+    protected fun observeAndUploadForFrontSide(type: CollectedDataParam.Type) =
         identityViewModel.frontUploaded.observe(viewLifecycleOwner) {
             when (it.status) {
                 Status.SUCCESS -> {

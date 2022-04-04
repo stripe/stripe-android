@@ -15,8 +15,7 @@ internal val CORRECT_WITH_SUBMITTED_FAILURE_VERIFICATION_PAGE_DATA = Verificatio
     id = "id",
     objectType = "type",
     requirements = VerificationPageDataRequirements(
-        errors = emptyList(),
-        missing = emptyList()
+        errors = emptyList()
     ),
     status = VerificationPageData.Status.VERIFIED,
     submitted = false
@@ -26,8 +25,7 @@ internal val CORRECT_WITH_SUBMITTED_SUCCESS_VERIFICATION_PAGE_DATA = Verificatio
     id = "id",
     objectType = "type",
     requirements = VerificationPageDataRequirements(
-        errors = emptyList(),
-        missing = emptyList()
+        errors = emptyList()
     ),
     status = VerificationPageData.Status.VERIFIED,
     submitted = true
@@ -44,8 +42,7 @@ internal val ERROR_VERIFICATION_PAGE_DATA = VerificationPageData(
                 requirement = VerificationPageDataRequirementError.Requirement.BIOMETRICCONSENT,
                 title = ERROR_TITLE
             )
-        ),
-        missing = emptyList()
+        )
     ),
     status = VerificationPageData.Status.VERIFIED,
     submitted = false
